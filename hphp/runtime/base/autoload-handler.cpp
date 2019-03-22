@@ -37,12 +37,6 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_class("class"),
-  s_function("function"),
-  s_constant("constant"),
-  s_type("type"),
-  s_record("record"),
-  s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
   s_error("Error"),
@@ -114,8 +108,7 @@ bool vm_decode_handler(const Variant& function, DecodedHandlerPtr& handler) {
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
 void AutoloadHandler::requestInit() {
-  assertx(m_map.get() == nullptr);
-  assertx(m_map_root.get() == nullptr);
+  assertx(!m_map);
   assertx(m_loading.get() == nullptr);
   m_spl_stack_inited = false;
   new (&m_handlers) req::deque<HandlerBundle>();
@@ -123,17 +116,16 @@ void AutoloadHandler::requestInit() {
 }
 
 void AutoloadHandler::requestShutdown() {
-  m_map.reset();
-  m_map_root.reset();
+  m_map = nullptr;
   m_loading.reset();
   m_handlers_valid = false;
   // m_spl_stack_inited will be re-initialized by the next requestInit
   // m_handlers will be re-initialized by the next requestInit
 }
 
-bool AutoloadHandler::setMap(const Array& map, const String& root) {
-  this->m_map = map;
-  this->m_map_root = root;
+bool AutoloadHandler::setMap(const Array& map, String root) {
+  m_map = req::make_unique<UserAutoloadMap>(
+      UserAutoloadMap::fromFullMap(map, std::move(root)));
   return true;
 }
 
@@ -232,129 +224,109 @@ const StaticString
   s_line("line");
 
 template <class T>
-AutoloadHandler::Result
+AutoloadMap::Result
 AutoloadHandler::loadFromMapImpl(const String& clsName,
-                                 const String& kind,
+                                 AutoloadMap::KindOf kind,
                                  bool toLower,
                                  const T &checkExists,
                                  Variant& err) {
-  assertx(!m_map.isNull());
+  assertx(m_map);
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);
-  auto const type_map = m_map.get()->get(kind).unboxed();
-  if (!isArrayType(type_map.type()) && !isDictType(type_map.type())) {
-    return Failure;
-  }
   String canonicalName = toLower ? HHVM_FN(strtolower)(name) : name;
-  auto const file = type_map.val().parr->get(canonicalName).unboxed();
+  auto file = m_map->getFile(kind, canonicalName);
+  if (!file) {
+    return AutoloadMap::Result::Failure;
+  }
   bool ok = false;
-  if (isStringType(file.type())) {
-    String fName{file.val().pstr};
-    if (fName.get()->data()[0] != '/') {
-      if (!m_map_root.empty()) {
-        fName = m_map_root + fName;
-      }
-    }
-    try {
-      VMRegAnchor _;
-      bool initial;
-      auto const ec = g_context.getNoCheck();
-      auto const unit = lookupUnit(fName.get(), "", &initial,
-                                   Native::s_noNativeFuncs);
-      if (unit) {
-        if (initial) {
-          tvDecRefGen(
+  String fName = *file;
+  try {
+    VMRegAnchor _;
+    bool initial;
+    auto const ec = g_context.getNoCheck();
+    auto const unit = lookupUnit(fName.get(), "", &initial,
+                                 Native::s_noNativeFuncs);
+    if (unit) {
+      if (initial) {
+        tvDecRefGen(
             ec->invokeFunc(unit->getMain(nullptr), init_null_variant,
                            nullptr, nullptr, nullptr, nullptr,
                            ExecutionContext::InvokePseudoMain)
-          );
-        }
-        ok = true;
+        );
       }
-    } catch (ExitException&) {
-      throw;
-    } catch (ResourceExceededException&) {
-      throw;
-    } catch (PhpNotSupportedException&) {
-      throw;
-    } catch (ExtendedException& ee) {
-      auto fileAndLine = ee.getFileAndLine();
-      err = (fileAndLine.first.empty())
-        ? ee.getMessage()
-        : folly::format("{} in {} on line {}",
-                        ee.getMessage(), fileAndLine.first,
-                        fileAndLine.second).str();
-    } catch (Exception& e) {
-      err = e.getMessage();
-    } catch (Object& e) {
-      err = e;
-    } catch (...) {
-      err = String("Unknown Exception");
+      ok = true;
     }
+  } catch (ExitException&) {
+    throw;
+  } catch (ResourceExceededException&) {
+    throw;
+  } catch (PhpNotSupportedException&) {
+    throw;
+  } catch (ExtendedException& ee) {
+    auto fileAndLine = ee.getFileAndLine();
+    err = (fileAndLine.first.empty())
+      ? ee.getMessage()
+      : folly::format("{} in {} on line {}",
+                      ee.getMessage(), fileAndLine.first,
+                      fileAndLine.second).str();
+  } catch (Exception& e) {
+    err = e.getMessage();
+  } catch (Object& e) {
+    err = e;
+  } catch (...) {
+    err = String("Unknown Exception");
   }
   if (ok && checkExists()) {
-    return Success;
+    return AutoloadMap::Result::Success;
   }
-  return Failure;
+  return AutoloadMap::Result::Failure;
 }
 
 template <class T>
-AutoloadHandler::Result
+AutoloadMap::Result
 AutoloadHandler::loadFromMap(const String& clsName,
-                             const String& kind,
+                             AutoloadMap::KindOf kind,
                              bool toLower,
                              const T &checkExists) {
   while (true) {
     Variant err{Variant::NullInit()};
-    Result res = loadFromMapImpl(clsName, kind, toLower, checkExists, err);
-    if (res == Success) return Success;
-    auto const func = m_map.get()->get(s_failure);
-    if (isNullType(func.unboxed().type())) return Failure;
-    res = invokeFailureCallback(const_variant_ref{func}, kind, clsName, err);
-    if (checkExists()) return Success;
-    if (res == RetryAutoloading) {
+    AutoloadMap::Result res = loadFromMapImpl(clsName, kind, toLower,
+                                              checkExists, err);
+    if (res == AutoloadMap::Result::Success) {
+      return AutoloadMap::Result::Success;
+    }
+    if (!m_map->canHandleFailure()) {
+      return AutoloadMap::Result::Failure;
+    }
+    res = m_map->handleFailure(kind, clsName, err);
+    if (checkExists()) return AutoloadMap::Result::Success;
+    if (res == AutoloadMap::Result::RetryAutoloading) {
       continue;
     }
     return res;
   }
 }
 
-AutoloadHandler::Result
-AutoloadHandler::invokeFailureCallback(
-    const_variant_ref func, const String& kind,
-    const String& name, const Variant& err
-) {
-  // can throw, otherwise
-  //  - true means the map was updated. try again
-  //  - false means we should stop applying autoloaders (only affects classes)
-  //  - anything else means keep going
-  Variant action = vm_call_user_func(func, make_vec_array(kind, name, err));
-  auto const actionCell = action.toCell();
-  if (actionCell->m_type == KindOfBoolean) {
-    return actionCell->m_data.num ? RetryAutoloading : StopAutoloading;
-  }
-  return ContinueAutoloading;
-}
-
 bool AutoloadHandler::autoloadFunc(StringData* name) {
-  return !m_map.isNull() &&
+  return m_map &&
     loadFromMap(String{stripInOutSuffix(name)},
-                s_function,
+                AutoloadMap::KindOf::Function,
                 true,
-                FuncExistsChecker(name)) != Failure;
+                FuncExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
 bool AutoloadHandler::autoloadConstant(StringData* name) {
-  return !m_map.isNull() &&
+  return m_map &&
     loadFromMap(String{name},
-                s_constant,
+                AutoloadMap::KindOf::Constant,
                 false,
-                ConstExistsChecker(name)) != Failure;
+                ConstExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
 bool AutoloadHandler::autoloadType(const String& name) {
-  return !m_map.isNull() &&
-    loadFromMap(name, s_type, true, TypeExistsChecker(name)) != Failure;
+  return m_map &&
+    loadFromMap(name, AutoloadMap::KindOf::TypeAlias, true,
+                TypeExistsChecker(name)) != AutoloadMap::Result::Failure;
 }
 
 /**
@@ -384,20 +356,24 @@ bool AutoloadHandler::autoloadClass(const String& clsName,
   if (!is_valid_class_name(className.slice())) {
     return false;
   }
-  if (!m_map.isNull()) {
+  if (m_map) {
     ClassExistsChecker ce(className);
-    Result res = loadFromMap(className, s_class, true, ce);
-    if (res == Success || ce()) return true;
-    if (res == StopAutoloading) return false;
+    AutoloadMap::Result res = loadFromMap(className,
+                                          AutoloadMap::KindOf::Type, true, ce);
+    if (res == AutoloadMap::Result::Success || ce()) return true;
+    if (res == AutoloadMap::Result::StopAutoloading) return false;
   }
   return autoloadClassPHP5Impl(className, forceSplStack);
 }
 
 bool AutoloadHandler::autoloadRecord(const String& recName) {
   if (recName.empty()) return false;
-  return !m_map.isNull() &&
-         loadFromMap(recName, s_record,
-                     true, RecordExistsChecker(recName)) != Failure;
+  return m_map &&
+    loadFromMap(
+        recName,
+        AutoloadMap::KindOf::Record,
+        true,
+        RecordExistsChecker(recName)) != AutoloadMap::Result::Failure;
 }
 
 template<>
@@ -477,26 +453,24 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
 }
 
 template <class T>
-AutoloadHandler::Result
+AutoloadMap::Result
 AutoloadHandler::loadFromMapPartial(const String& className,
-                                    const String& kind,
+                                    AutoloadMap::KindOf kind,
                                     bool toLower,
                                     const T &checkExists,
                                     Variant& err) {
-  Result res = loadFromMapImpl(className, kind, toLower, checkExists, err);
-  if (res == Success) {
-    return Success;
+  AutoloadMap::Result res = loadFromMapImpl(className, kind, toLower,
+                                            checkExists, err);
+  if (res == AutoloadMap::Result::Success) {
+    return AutoloadMap::Result::Success;
   }
-  assertx(res == Failure);
+  assertx(res == AutoloadMap::Result::Failure);
   if (!err.isNull()) {
-    auto const func = m_map.get()->get(s_failure);
-    if (!isNullType(func.unboxed().type())) {
-      res = invokeFailureCallback(
-        const_variant_ref{func}, kind, className, err
-      );
-      assertx(res != Failure);
+    if (m_map->canHandleFailure()) {
+      res = m_map->handleFailure(kind, className, err);
+      assertx(res != AutoloadMap::Result::Failure);
       if (checkExists()) {
-        return Success;
+        return AutoloadMap::Result::Success;
       }
     }
   }
@@ -506,58 +480,63 @@ AutoloadHandler::loadFromMapPartial(const String& className,
 bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
   if (clsName.empty()) return false;
   const String& className = normalizeNS(clsName);
-  if (!m_map.isNull()) {
+  if (m_map) {
     ClassOrTypeExistsChecker cte(className);
     bool tryClass = true, tryType = true;
-    Result classRes = RetryAutoloading, typeRes = RetryAutoloading;
+    AutoloadMap::Result classRes = AutoloadMap::Result::RetryAutoloading;
+    AutoloadMap::Result typeRes = AutoloadMap::Result::RetryAutoloading;
     while (true) {
       Variant classErr{Variant::NullInit()};
       if (tryClass) {
         // Try consulting the 'class' map first, but don't call the failure
         // callback unless there was an uncaught exception or a fatal error
         // during the include operation.
-        classRes = loadFromMapPartial(className, s_class, true, cte, classErr);
-        if (classRes == Success) return true;
+        classRes = loadFromMapPartial(className, AutoloadMap::KindOf::Type,
+                                      true, cte, classErr);
+        if (classRes == AutoloadMap::Result::Success) return true;
       }
       Variant typeErr{Variant::NullInit()};
       if (tryType) {
         // Next, try consulting the 'type' map. Again, don't call the failure
         // callback unless there was an uncaught exception or fatal error.
-        typeRes = loadFromMapPartial(className, s_type, true, cte, typeErr);
-        if (typeRes == Success) return true;
+        typeRes = loadFromMapPartial(className, AutoloadMap::KindOf::TypeAlias,
+                                     true, cte, typeErr);
+        if (typeRes == AutoloadMap::Result::Success) return true;
       }
-      auto const func = Variant::wrap(m_map.get()->get(s_failure).tv());
       // If we reach this point, then for each map either nothing was found
       // or the file we included didn't define a class or type alias with the
       // specified name, and the failure callback (if one exists) did not throw
       // or raise a fatal error.
-      if (!func.isNull()) {
+      if (m_map->canHandleFailure()) {
         // First, call the failure callback for 'class' if we didn't do so
         // above
-        if (classRes == Failure) {
+        if (classRes == AutoloadMap::Result::Failure) {
           assertx(tryClass);
-          classRes = invokeFailureCallback(func, s_class, className, classErr);
+          classRes = m_map->handleFailure(AutoloadMap::KindOf::Type,
+                                          className, classErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
           if (cte()) return true;
         }
         // Next, call the failure callback for 'type' if we didn't do so above
-        if (typeRes == Failure) {
+        if (typeRes == AutoloadMap::Result::Failure) {
           assertx(tryType);
-          typeRes = invokeFailureCallback(func, s_type, className, typeErr);
+          typeRes = m_map->handleFailure(AutoloadMap::KindOf::TypeAlias,
+                                         className, typeErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
           if (cte()) return true;
         }
-        assertx(classRes != Failure && typeRes != Failure);
-        tryClass = (classRes == RetryAutoloading);
-        tryType = (typeRes == RetryAutoloading);
+        assertx(classRes != AutoloadMap::Result::Failure &&
+                typeRes != AutoloadMap::Result::Failure);
+        tryClass = (classRes == AutoloadMap::Result::RetryAutoloading);
+        tryType = (typeRes == AutoloadMap::Result::RetryAutoloading);
         // If the failure callback requested a retry for 'class' or 'type'
         // or both, jump back to the top to try again.
         if (tryClass || tryType) {
           continue;
         }
-        if (classRes == StopAutoloading) {
+        if (classRes == AutoloadMap::Result::StopAutoloading) {
           // If the failure callback requested that we stop autoloading for
           // 'class', then return false here so we don't fall through to the
           // PHP5 autoload impl below.

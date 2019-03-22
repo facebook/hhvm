@@ -16,13 +16,16 @@
 #ifndef incl_HPHP_AUTOLOAD_HANDLER_H_
 #define incl_HPHP_AUTOLOAD_HANDLER_H_
 
+#include <memory>
 #include <utility>
 
+#include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-deque.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/user-autoload-map.h"
 #include "hphp/runtime/base/rds-local.h"
 
 namespace HPHP {
@@ -47,13 +50,6 @@ struct AutoloadHandler final : RequestEventHandler {
   };
 
 private:
-  enum Result {
-    Failure,
-    Success,
-    StopAutoloading,
-    ContinueAutoloading,
-    RetryAutoloading
-  };
 
   struct HandlerBundle {
     HandlerBundle() = delete;
@@ -77,8 +73,6 @@ public:
   AutoloadHandler() { }
 
   ~AutoloadHandler() {
-    m_map.detach();
-    m_map_root.detach();
     // m_handlers won't run a destructor so nothing to do here
     m_loading.detach();
   }
@@ -113,23 +107,52 @@ public:
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
   bool autoloadRecord(const String& name);
-  bool setMap(const Array& map, const String& root);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
+
+  /**
+   * Initialize the AutoloadHandler with a given root directory and map of
+   * symbols to files.
+   *
+   * The map has the form:
+   *
+   * ```
+   *  shape('class'    => dict['cls' => 'cls_file.php', ...],
+   *        'function' => dict['fun' => 'fun_file.php', ...],
+   *        'constant' => dict['con' => 'con_file.php', ...],
+   *        'type'     => dict['type' => 'type_file.php', ...],
+   *        'failure'  => (string $type, string $name, mixed $err): ?bool ==> {
+   *          return null;  // KEEP_GOING We don't know where this symbol is,
+   *                                      but it isn't important. Ignore the
+   *                                      failure.
+   *          return true;  // RETRY We require_once'd the correct file and the
+   *                                 symbol should now be loaded. Try again.
+   *          return false; // STOP We don't know where this symbol is and we
+   *                                need to know where it is to correctly
+   *                                continue the request. Abort the request.
+   *        });
+   * ```
+   */
+  bool setMap(const Array& map, String root);
 
 private:
   /**
    * This method may return Success or Failure.
    */
   template <class T>
-  Result loadFromMapImpl(const String& name, const String& kind, bool toLower,
-                         const T &checkExists, Variant& err);
+  AutoloadMap::Result loadFromMapImpl(const String& name,
+                                      AutoloadMap::KindOf kind,
+                                      bool toLower,
+                                      const T &checkExists,
+                                      Variant& err);
 
   /**
    * This method may return ContinueAutoloading, StopAutoloading, or
    * RetryAutoloading.
    */
-  Result invokeFailureCallback(const_variant_ref func, const String& kind,
-                               const String& name, const Variant& err);
+  AutoloadMap::Result invokeFailureCallback(const_variant_ref func,
+                                            AutoloadMap::KindOf kind,
+                                            const String& name,
+                                            const Variant& err);
 
   /**
    * loadFromMap() will call the failure callback if the specified name is not
@@ -144,8 +167,8 @@ private:
    * return Failure.
    */
   template <class T>
-  Result loadFromMap(const String& name, const String& kind, bool toLower,
-                     const T &checkExists);
+  AutoloadMap::Result loadFromMap(const String& name, AutoloadMap::KindOf kind,
+                                  bool toLower, const T &checkExists);
 
   /**
    * loadFromMapPartial() will call the failure callback if there is an error
@@ -157,14 +180,14 @@ private:
    * this method will not return Failure.
    */
   template <class T>
-  Result loadFromMapPartial(const String& className, const String& kind,
-                            bool toLower, const T &checkExists, Variant& err);
+  AutoloadMap::Result loadFromMapPartial(const String& className,
+                                         AutoloadMap::KindOf kind, bool toLower,
+                                         const T &checkExists, Variant& err);
 
   static String getSignature(const Variant& handler);
 
 private:
-  Array m_map;
-  String m_map_root;
+  req::unique_ptr<UserAutoloadMap> m_map;
   bool m_spl_stack_inited{false};
   union {
     req::deque<HandlerBundle> m_handlers;

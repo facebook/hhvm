@@ -1387,19 +1387,6 @@ and try_inline_genva_call env e inline_context =
     try_inline_genva_call_ env pos args uargs inline_context
   | _ -> None
 
-and try_fault b f =
-  let label = Label.next_fault () in
-  let body = b () in
-  let fault = f () in
-  instr_try_fault label body fault
-
-and unset_in_fault temps b =
-  try_fault b @@ fun () ->
-    gather [
-      gather @@ List.map temps ~f:instr_unsetl;
-      instr_unwind
-    ]
-
 (* emits iteration over the ~collection where loop body is
    produced by ~f *)
 and emit_iter ~collection f =

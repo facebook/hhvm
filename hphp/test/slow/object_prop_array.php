@@ -24,6 +24,7 @@ class D extends C {
 
 <<__EntryPoint>>
 function main_object_prop_array() {
-var_dump(HH\object_prop_array(new C));
-var_dump(HH\object_prop_array(new D));
+var_dump(HH\object_prop_array(new C()));
+var_dump(HH\object_prop_array(new D()));
+var_dump(is_darray(HH\object_prop_array(new D())));
 }

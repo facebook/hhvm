@@ -244,7 +244,7 @@ namespace HH {
    * as casting the object to an array.
    */
   <<__Native>>
-  function object_prop_array(object $obj): array;
+  function object_prop_array(object $obj): darray;
 
   /*
    * Return true if the <<__LateInit>> property (with name $prop) on the given

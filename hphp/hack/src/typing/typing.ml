@@ -517,9 +517,9 @@ and fun_def tcopt f : Tast.fun_def option =
         | FVnonVariadic -> env, T.FVnonVariadic in
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
-      let env = Env.check_todo env in
       let env = SubType.solve_all_unsolved_tyvars env in
       Typing_subtype.log_prop env;
+      let env = Env.check_todo env in
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
       begin match f.f_ret with
@@ -5016,12 +5016,8 @@ and inout_write_back env { fp_type; _ } (_, e) =
 and call ~expected ?method_call_info pos env fty el uel =
   let env, tel, tuel, ty =
     call_ ~expected ~method_call_info pos env fty el uel in
-  (* We need to solve the constraints after every single function call.
-   * The type-checker is control-flow sensitive, the same value could
-   * have different type depending on the branch that we are in.
-   * When this is the case, a call could violate one of the constraints
-   * in a branch. *)
-  let env = Env.check_todo env in
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  let env = if not new_inference then Env.check_todo env else env in
   env, tel, tuel, ty
 
 and call_ ~expected ~method_call_info pos env fty el uel =
@@ -6657,9 +6653,9 @@ and method_def env m =
   let local_tpenv = env.Env.lenv.Env.tpenv in
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
-  let env = Env.check_todo env in
   let env = SubType.solve_all_unsolved_tyvars env in
   Typing_subtype.log_prop env;
+  let env = Env.check_todo env in
   (* restore original method reactivity  *)
   let env = Env.set_env_reactive env reactive in
   let m_ret =

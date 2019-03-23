@@ -407,6 +407,11 @@ SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   auto const ty  = val->type();
   if (ty <= TDbl) return gen(env, Sqrt, val);
+
+  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) {
+    return nullptr;
+  }
+
   if (ty <= TInt) {
     auto const conv = gen(env, ConvIntToDbl, val);
     return gen(env, Sqrt, conv);

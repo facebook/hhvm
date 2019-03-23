@@ -16,7 +16,7 @@ string(5) "Hello"
 int(5)
 int(6)
 int(9223372036854775807)
-float(9.2233720368548E+18)
+int(-9223372036854775808)
 inside f(6)
 inside f(2)
 $v = 10, int(100)

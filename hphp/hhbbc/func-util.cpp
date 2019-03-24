@@ -29,9 +29,8 @@ const StaticString s_86metadata("86metadata");
 //////////////////////////////////////////////////////////////////////
 
 uint32_t closure_num_use_vars(const php::Func* f) {
-  // Properties on the closure object are either use vars, or storage
-  // for static locals.  The first N are the use vars.
-  return f->cls->properties.size() - f->staticLocals.size();
+  // Properties on the closure object are use vars.
+  return f->cls->properties.size();
 }
 
 bool is_pseudomain(const php::Func* f) {

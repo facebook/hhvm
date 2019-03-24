@@ -3,6 +3,7 @@
 
 namespace Foo {
   trait TN {
-    <<__Memoize>>public function test() {static $i = 1000; return $i++;}
+    static $i = 1000;
+    <<__Memoize>>public function test() {return self::$i++;}
   }
 }

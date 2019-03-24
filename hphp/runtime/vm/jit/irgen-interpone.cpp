@@ -235,15 +235,6 @@ interpOutputLocals(IRGS& env,
       break;
     }
 
-    case OpStaticLocInit:
-    case OpStaticLocDef:
-      setImmLocType(0, TBoxedInitCell);
-      break;
-
-    case OpStaticLocCheck:
-      setImmLocType(0, TGen);
-      break;
-
     case OpInitThisLoc:
       setImmLocType(0, TCell);
       break;

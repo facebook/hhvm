@@ -274,15 +274,13 @@ bool conjureEndInlining(IRGS& env,
                         bool builtin);
 
 /*
- * We do two special-case optimizations to partially inline 'singleton'
- * accessor functions (functions that just return a static local or static
- * property if it's not null).
+ * We do a special-case optimization to partially inline 'singleton' accessor
+ * functions (functions that just return a static property if it's not null).
  *
  * This is exposed publically because the region translator drives inlining
  * decisions.
  */
 void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);
-void inlSingletonSLoc(IRGS&, const Func*, PC op);
 
 /*
  * In PGO mode, we use profiling to try to determine the most likely target

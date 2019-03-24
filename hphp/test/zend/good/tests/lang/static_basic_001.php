@@ -1,13 +1,18 @@
 <?php
 
+class State {
+	static $a0=10;
+	static $counter=0;
+	static $a, $b=10, $c=20, $d, $e=30;
+	static $s, $k=10;
+}
 echo "\nSame variable used as static and non static.\n";
 function staticNonStatic() {
-	echo "---------\n";	
+	echo "---------\n";
 	$a=0;
-	echo "$a\n";	
-	static $a=10;
 	echo "$a\n";
-	$a++;	
+	echo State::$a0."\n";
+	State::$a0++;
 }
 staticNonStatic();
 staticNonStatic();
@@ -15,20 +20,18 @@ staticNonStatic();
 
 echo "\nLots of initialisations in the same statement.\n";
 function manyInits() {
-	static $counter=0;
-	echo "------------- Call $counter --------------\n";
-	static $a, $b=10, $c=20, $d, $e=30;
-	echo "Unitialised      : $a\n";
-	echo "Initialised to 10: $b\n";
-	echo "Initialised to 20: $c\n";
-	echo "Unitialised      : $d\n";
-	echo "Initialised to 30: $e\n";
-	$a++;
-	$b++;
-	$c++;
-	$d++;
-	$e++;
-	$counter++;
+	echo "------------- Call ".State::$counter." --------------\n";
+	echo "Unitialised      : ".State::$a."\n";
+	echo "Initialised to 10: ".State::$b."\n";
+	echo "Initialised to 20: ".State::$c."\n";
+	echo "Unitialised      : ".State::$d."\n";
+	echo "Initialised to 30: ".State::$e."\n";
+	State::$a++;
+	State::$b++;
+	State::$c++;
+	State::$d++;
+	State::$e++;
+	State::$counter++;
 }
 manyInits();
 manyInits();
@@ -36,8 +39,7 @@ manyInits();
 
 echo "\nUsing static keyword at global scope\n";
 for ($i=0; $i<3; $i++) {
-   static $s, $k=10;
-   echo "$s $k\n";
-   $s++;
-   $k++;
+   echo State::$s." ".State::$k."\n";
+   State::$s++;
+   State::$k++;
 }

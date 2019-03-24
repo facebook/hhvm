@@ -269,7 +269,6 @@ public:
   Attr attrs;
 
   ParamInfoVec params;
-  SVInfoVec staticVars;
   int maxStackCells;
 
   MaybeDataType hniReturnType;

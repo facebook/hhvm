@@ -157,7 +157,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.PipeVariableExpression _
   | Syntax.PropertyDeclarator _
   | Syntax.ConstantDeclarator _
-  | Syntax.StaticDeclarator _
   | Syntax.ScopeResolutionExpression _
   | Syntax.EmbeddedMemberSelectionExpression _
   | Syntax.EmbeddedSubscriptExpression _
@@ -1271,11 +1270,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       continue_level = level;
       continue_semicolon = semi; } ->
     transform_keyword_expression_statement env kw level semi
-  | Syntax.FunctionStaticStatement {
-      static_static_keyword = static_kw;
-      static_declarations = declarators;
-      static_semicolon = semi; } ->
-    transform_keyword_expr_list_statement env static_kw declarators semi
   | Syntax.EchoStatement {
       echo_keyword = kw;
       echo_expressions = expr_list;

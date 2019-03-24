@@ -5,7 +5,7 @@ string(35) "/**
  */"
 
 --- getStartLine("f") ---
-int(13)
+int(15)
 
 --- getEndLine("f") ---
 int(20)
@@ -195,14 +195,6 @@ array(4) {
   }
 }
 
---- getStaticVariables("f") ---
-array(2) {
-  ["staticX"]=>
-  NULL
-  ["staticY"]=>
-  NULL
-}
-
 --- isInternal("f") ---
 bool(false)
 
@@ -214,7 +206,7 @@ string(%d) "/**
  * This is f's doc comment.
  */
 Function [ <user> function f ] {
-  @@ %s/test/slow/lang/reflection.php 13 - 20
+  @@ %s/test/slow/lang/reflection.php 15 - 20
 
   - Parameters [4] {
     Parameter #0 [ <required> $a ]
@@ -234,14 +226,6 @@ In f()
 int(5)
 In f()
 int(6)
-
---- getStaticVariables("f") ---
-array(2) {
-  ["staticX"]=>
-  int(6)
-  ["staticY"]=>
-  NULL
-}
 
 --- invoke("g") ---
 In g(a, b, some string)

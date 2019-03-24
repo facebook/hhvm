@@ -101,7 +101,7 @@ struct c_Closure final : ObjectData {
   Class* getScope() { return getInvokeFunc()->cls(); }
 
   /*
-   * Use and static local variables.
+   * Use variables.
    *
    * Returns obj->propVecForWrite()
    * but with runtime generalized checks replaced with assertions
@@ -117,8 +117,7 @@ struct c_Closure final : ObjectData {
   }
 
   int32_t getNumUseVars() const {
-    return getVMClass()->numDeclProperties() -
-           getInvokeFunc()->numStaticLocals();
+    return getVMClass()->numDeclProperties();
   }
 
   /*
@@ -166,10 +165,6 @@ private:
   static Class* cls_Closure;
   static void setAllocators(Class* cls);
 };
-
-TypedValue* lookupStaticTvFromClosure(ObjectData* closure,
-                                      const StringData* name);
-Slot lookupStaticSlotFromClosure(const Class* cls, const StringData* name);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

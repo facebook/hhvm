@@ -22,14 +22,6 @@ namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
 
-Link<StaticLocalData, Mode::Normal>
-bindStaticLocal(const Func* func, const StringData* name) {
-  auto ret = bind<StaticLocalData,Mode::Normal>(
-    StaticLocal { func->getFuncId(), name }
-  );
-  return ret;
-}
-
 Link<TypedValue, Mode::Normal>
 bindClassConstant(const StringData* clsName, const StringData* cnsName) {
   auto ret = bind<TypedValue,Mode::Normal,kTVSimdAlign>(

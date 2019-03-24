@@ -442,9 +442,6 @@ void print_func_directives(Output& out, const FuncInfo& finfo) {
     }
     out.fmtln(".declvars {};", folly::join(" ", locals));
   }
-  for (auto& info : func->staticVars()) {
-    out.fmtln(".static ${};", info.name);
-  }
 }
 
 void print_srcloc(Output& out, SourceLoc loc) {
@@ -914,8 +911,6 @@ void print_unit(Output& out, const Unit* unit) {
  * conjunction with as.cpp):
  *
  * - .line/.srcpos directives
- *
- * - Static locals.
  */
 
 std::string disassemble(const Unit* unit) {

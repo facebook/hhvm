@@ -645,16 +645,6 @@ bool setLocCouldHaveSideEffects(Env& env, LocalId loc, bool forExit = false) {
     }
   }
 
-  // If this local is bound to a static, its type will be TRef, but we
-  // may know the type of the static - but statics *are* live out of
-  // the function, so don't do this when forExit is set.
-  if (!forExit &&
-      env.stateBefore.localStaticBindings.size() > loc &&
-      env.stateBefore.localStaticBindings[loc] == LocalStaticBinding::Bound &&
-      !setCouldHaveSideEffects(env.dceState.ainfo.localStaticTypes[loc])) {
-    return false;
-  }
-
   return setCouldHaveSideEffects(locRaw(env, loc));
 }
 
@@ -1478,9 +1468,7 @@ void dce(Env& env, const bc::ColFromArray& op)    { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::PopL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {
-    assert(!locRaw(env, op.loc1).couldBe(BRef) ||
-           env.stateBefore.localStaticBindings[op.loc1] ==
-           LocalStaticBinding::Bound);
+    assert(!locRaw(env, op.loc1).couldBe(BRef));
     discard(env);
     env.dceState.actionMap[env.id] = DceAction::PopInputs;
     return;
@@ -1502,9 +1490,7 @@ void dce(Env& env, const bc::InitThisLoc& op) {
 void dce(Env& env, const bc::SetL& op) {
   auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
   if (!isLocLive(env, op.loc1) && !effects) {
-    assert(!locRaw(env, op.loc1).couldBe(BRef) ||
-           env.stateBefore.localStaticBindings[op.loc1] ==
-           LocalStaticBinding::Bound);
+    assert(!locRaw(env, op.loc1).couldBe(BRef));
     return markDead(env);
   }
   stack_ops(env, [&] (UseInfo& ui) {
@@ -1529,10 +1515,7 @@ void dce(Env& env, const bc::UnsetL& op) {
 
   // Unsetting a local bound to a static never has side effects
   // because the static itself has a reference to the value.
-  auto const effects =
-    setLocCouldHaveSideEffects(env, op.loc1) &&
-    (env.stateBefore.localStaticBindings.size() <= op.loc1 ||
-     env.stateBefore.localStaticBindings[op.loc1] != LocalStaticBinding::Bound);
+  auto const effects = setLocCouldHaveSideEffects(env, op.loc1);
 
   if (!isLocLive(env, op.loc1) && !effects) return markDead(env);
   if (effects) {
@@ -1831,9 +1814,6 @@ void dce(Env& env, const bc::Shl& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Shr& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Silence& op) { dce_default(env, op); }
 void dce(Env& env, const bc::SSwitch& op) { dce_default(env, op); }
-void dce(Env& env, const bc::StaticLocCheck& op) { dce_default(env, op); }
-void dce(Env& env, const bc::StaticLocDef& op) { dce_default(env, op); }
-void dce(Env& env, const bc::StaticLocInit& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Sub& op) { dce_default(env, op); }
 void dce(Env& env, const bc::SubO& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Switch& op) { dce_default(env, op); }

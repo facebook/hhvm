@@ -138,11 +138,11 @@
 
 	function handle_catchable_fatal($errno, $error, $file, $line) {
 		$errcodes = array();
-    $constants = get_defined_constants();
-    foreach ($constants as $name => $value) {
-      if (substr($name, 0, 2) == "E_")
-        $errcodes[$value] = $name;
-    }
+			$constants = get_defined_constants();
+			foreach ($constants as $name => $value) {
+				if (substr($name, 0, 2) == "E_")
+					$errcodes[$value] = $name;
+			}
 		printf("[%s] %s in %s on line %s\n",
 			(isset($errcodes[$errno])) ? $errcodes[$errno] : $errno,
 			 $error, $file, $line);

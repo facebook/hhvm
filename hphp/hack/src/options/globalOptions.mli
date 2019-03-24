@@ -78,9 +78,6 @@ type t = {
  (* Flag to disable PHP's static closures *)
  po_disable_static_closures : bool;
 
- (* Flag to disable PHP's static local variables *)
- po_disable_static_local_variables : bool;
-
  (* Flag to enable PHP's `goto` operator *)
  po_allow_goto: bool;
 
@@ -229,7 +226,6 @@ val make :
   ?po_disallow_execution_operator: bool ->
   ?po_disable_nontoplevel_declarations: bool ->
   ?po_disable_static_closures: bool ->
-  ?po_disable_static_local_variables: bool ->
   ?po_allow_goto: bool ->
   ?po_enable_concurrent: bool ->
   ?po_enable_await_as_an_expression: bool ->
@@ -280,7 +276,6 @@ val po_deregister_php_stdlib : t -> bool
 val po_disallow_execution_operator : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
 val po_disable_static_closures : t -> bool
-val po_disable_static_local_variables : t -> bool
 val po_allow_goto : t -> bool
 val po_enable_concurrent : t -> bool
 val po_enable_await_as_an_expression : t -> bool

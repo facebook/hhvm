@@ -1217,25 +1217,6 @@ void isTypeHelper(ISS& env,
   refineLocation(env, location, pre, jmp.target1, post);
 }
 
-folly::Optional<Cell> staticLocHelper(ISS& env, LocalId l, Type init) {
-  if (is_volatile_local(env.ctx.func, l)) return folly::none;
-  unbindLocalStatic(env, l);
-  setLocRaw(env, l, TRef);
-  bindLocalStatic(env, l, std::move(init));
-  if (!env.ctx.func->isMemoizeWrapper &&
-      !env.ctx.func->isClosureBody &&
-      env.collect.localStaticTypes.size() > l) {
-    auto t = env.collect.localStaticTypes[l];
-    if (auto v = tv(t)) {
-      useLocalStatic(env, l);
-      setLocRaw(env, l, t);
-      return v;
-    }
-  }
-  useLocalStatic(env, l);
-  return folly::none;
-}
-
 // If the current function is a memoize wrapper, return the inferred return type
 // of the function being wrapped along with if the wrapped function is effect
 // free.
@@ -1296,49 +1277,6 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   return { retTy, effectFree };
 }
 
-// After a StaticLocCheck, we know the local is bound on the true path,
-// and not changed on the false path.
-template<class JmpOp>
-void staticLocCheckJmpImpl(ISS& env,
-                           const bc::StaticLocCheck& slc,
-                           const JmpOp& jmp) {
-  auto const takenOnInit = jmp.op == Op::JmpNZ;
-  auto save = env.state;
-
-  if (auto const v = staticLocHelper(env, slc.loc1, TBottom)) {
-    return impl(env, slc, jmp);
-  }
-
-  if (env.collect.localStaticTypes.size() > slc.loc1 &&
-      env.collect.localStaticTypes[slc.loc1].subtypeOf(BBottom)) {
-    env.state = std::move(save);
-    if (takenOnInit) {
-      jmp_nevertaken(env);
-    } else {
-      jmp_setdest(env, jmp.target1);
-    }
-    return;
-  }
-
-  if (takenOnInit) {
-    env.propagate(jmp.target1, &env.state);
-    env.state = std::move(save);
-  } else {
-    env.propagate(jmp.target1, &save);
-  }
-}
-
-}
-
-template<class JmpOp>
-void group(ISS& env, const bc::StaticLocCheck& slc, const JmpOp& jmp) {
-  staticLocCheckJmpImpl(env, slc, jmp);
-}
-
-template<class JmpOp>
-void group(ISS& env, const bc::StaticLocCheck& slc,
-           const bc::Not&, const JmpOp& jmp) {
-  staticLocCheckJmpImpl(env, slc, invertJmp(jmp));
 }
 
 template<class JmpOp>
@@ -2923,12 +2861,6 @@ void in(ISS& env, const bc::IncDecS& op) {
 }
 
 void in(ISS& env, const bc::BindL& op) {
-  // If the op.loc1 was bound to a local static, its going to be
-  // unbound from it. If the thing its being bound /to/ is a local
-  // static, we've already marked it as modified via the VGetL, so
-  // there's nothing more to track.
-  // Unbind it before any updates.
-  modifyLocalStatic(env, op.loc1, TUninit);
   nothrow(env);
   auto t1 = popV(env);
   setLocRaw(env, op.loc1, t1);
@@ -4035,40 +3967,6 @@ void in(ISS& env, const bc::FuncNumArgs& op) {
   push(env, TInt);
 }
 
-void in(ISS& env, const bc::StaticLocDef& op) {
-  if (staticLocHelper(env, op.loc1, topC(env))) {
-    return reduce(env, bc::SetL { op.loc1 }, bc::PopC {});
-  }
-  popC(env);
-}
-
-void in(ISS& env, const bc::StaticLocCheck& op) {
-  auto const l = op.loc1;
-  if (!env.ctx.func->isMemoizeWrapper &&
-      !env.ctx.func->isClosureBody &&
-      env.collect.localStaticTypes.size() > l) {
-    auto t = env.collect.localStaticTypes[l];
-    if (auto v = tv(t)) {
-      useLocalStatic(env, l);
-      setLocRaw(env, l, t);
-      return reduce(env,
-                    gen_constant(*v),
-                    bc::SetL { op.loc1 }, bc::PopC {},
-                    bc::True {});
-    }
-  }
-  setLocRaw(env, l, TGen);
-  maybeBindLocalStatic(env, l);
-  push(env, TBool);
-}
-
-void in(ISS& env, const bc::StaticLocInit& op) {
-  if (staticLocHelper(env, op.loc1, topC(env))) {
-    return reduce(env, bc::SetL { op.loc1 }, bc::PopC {});
-  }
-  popC(env);
-}
-
 /*
  * Amongst other things, we use this to mark units non-persistent.
  */
@@ -4823,7 +4721,6 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   X(IsTypeStructC)
   X(IsTypeL)
   X(IsTypeC)
-  X(StaticLocCheck)
   X(Same)
   X(NSame)
   default: break;
@@ -4924,11 +4821,6 @@ BlockId speculate(Interp& interp) {
       return NoBlockId;
     }
 
-    if (flags.usedLocalStatics) {
-      FTRACE(3, "  Bailing from speculate because local statics were used\n");
-      return NoBlockId;
-    }
-
     assertx(!flags.returned);
     assertx(!interp.state.unreachable);
 
@@ -5013,16 +4905,6 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
       if (any(interp.collect.opts & CollectionOpts::EffectFreeOnly)) {
         FTRACE(2, "  Bailing because not effect free\n");
         return ret;
-      }
-    }
-
-    if (flags.usedLocalStatics) {
-      if (!ret.usedLocalStatics) {
-        ret.usedLocalStatics = std::move(flags.usedLocalStatics);
-      } else {
-        for (auto& elm : *flags.usedLocalStatics) {
-          ret.usedLocalStatics->insert(std::move(elm));
-        }
       }
     }
 

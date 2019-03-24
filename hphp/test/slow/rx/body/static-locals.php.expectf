@@ -1,7 +1,0 @@
-Verification Error (unit %s/test/slow/rx/body/static-locals.php func test): static locals are forbidden in Rx functions: StaticLocInit
-
-Verification Error (unit %s/test/slow/rx/body/static-locals.php func test): static locals are forbidden in Rx functions: StaticLocCheck
-
-Verification Error (unit %s/test/slow/rx/body/static-locals.php func test): static locals are forbidden in Rx functions: StaticLocDef
-
-Done

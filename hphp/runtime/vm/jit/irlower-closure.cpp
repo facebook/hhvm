@@ -50,19 +50,6 @@ void cgLdClosureCtx(IRLS& env, const IRInstruction* inst) {
   vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};
 }
 
-void cgLdClosureStaticLoc(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdClosureStaticLoc>();
-  auto const func = extra->func;
-  auto const cls = func->implCls();
-  auto const slot = lookupStaticSlotFromClosure(cls, extra->name);
-  auto const offset = cls->declPropOffset(slot);
-
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const obj = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << lea{obj[offset], dst};
-}
-
 void cgStClosureCtx(IRLS& env, const IRInstruction* inst) {
   auto const obj = srcLoc(env, inst, 0).reg();
   auto& v = vmain(env);

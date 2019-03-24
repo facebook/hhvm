@@ -83,7 +83,6 @@ let stk_data : instruct -> stack_sig = function
   | IContFlow Switch _
   | IContFlow SSwitch _
   | IContFlow RetC
-  | IMisc StaticLocDef _
   | IContFlow Throw
   | IGet ClsRefGetC _
   | IGet ClsRefGetTS _
@@ -94,7 +93,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall FPushObjMethodD _
   | IIterator IterInit _
   | IIterator IterInitK _
-  | IMisc StaticLocInit _
   | IMisc CheckReifiedGenericMismatch
   | IBasic PopC                            -> ["C"], []
   | IBasic PopU                            -> ["U"], []
@@ -137,7 +135,6 @@ let stk_data : instruct -> stack_sig = function
   | IMutator CheckProp _
   | IMisc This
   | IMisc BareThis _
-  | IMisc StaticLocCheck _
   | IMisc Catch
   | IMisc GetMemoKeyL _
   | IGenerator CreateCont

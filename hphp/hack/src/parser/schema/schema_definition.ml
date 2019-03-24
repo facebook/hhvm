@@ -1082,29 +1082,6 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
-  ; { kind_name   = "FunctionStaticStatement"
-    ; type_name   = "function_static_statement"
-    ; func_name   = "function_static_statement"
-    ; description = "function_static_statement"
-    ; prefix      = "static"
-    ; aggregates  = [ TopLevelDeclaration; Statement ]
-    ; fields =
-      [ "static_keyword", Token
-      ; "declarations", ZeroOrMore (Just "StaticDeclarator")
-      ; "semicolon", Token
-      ]
-    }
-  ; { kind_name   = "StaticDeclarator"
-    ; type_name   = "static_declarator"
-    ; func_name   = "static_declarator"
-    ; description = "static_declarator"
-    ; prefix      = "static"
-    ; aggregates  = []
-    ; fields =
-      [ "name", Token
-      ; "initializer", ZeroOrOne (Just "SimpleInitializer")
-      ]
-    }
   ; { kind_name   = "EchoStatement"
     ; type_name   = "echo_statement"
     ; func_name   = "echo_statement"

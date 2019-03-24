@@ -615,7 +615,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckRDSInitialized:
   case CheckRefInner:
   case CheckRefs:
-  case CheckStaticLoc:
   case CheckStk:
   case CheckSubClsCns:
   case CheckSurpriseFlags:
@@ -772,7 +771,6 @@ bool opcodeMayRaise(Opcode opc) {
   case InitObjMemoSlots:
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:
-  case InitStaticLoc:
   case InitThrowableFileAndLine:
   case InlineReturn:
   case InlineReturnNoFrame:
@@ -827,7 +825,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdCctx:
   case LdClosure:
   case LdClosureCtx:
-  case LdClosureStaticLoc:
   case LdClsCachedSafe:
   case LdClsCctx:
   case LdClsCns:
@@ -879,7 +876,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdRef:
   case LdRetVal:
   case LdSSwitchDestFast:
-  case LdStaticLoc:
   case LdStk:
   case LdStkAddr:
   case LdStrLen:

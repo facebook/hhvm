@@ -1,9 +1,9 @@
 <?hh //partial
 
 class C {
-  private function ref_test_1 ($x) {  // Should not match
+  private function ref_test_1 ($x) {  // Should match
     $y = $x;           // Should not match
-    static $x = 123;   // Should match
+    //static $x = 123;
     $z = $x;           // Request ID 11: Looking for this $x // Should match
   }
 

@@ -489,9 +489,7 @@ bool Func::isImmutableFrom(const Class* cls) const {
   if (!RuntimeOption::RepoAuthoritative) return false;
   assertx(cls && cls->lookupMethod(name()) == this);
   if (attrs() & AttrNoOverride) {
-    // Even if the func isn't overridden, we clone it into
-    // any derived classes if it has static locals
-    if (!hasStaticLocals()) return true;
+    return true;
   }
   if (cls->preClass()->attrs() & AttrNoOverride) {
     return true;
@@ -1081,7 +1079,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   if (func->isClosureBody()) attrSet.emplace("closure_body");
   if (func->isPairGenerator()) attrSet.emplace("pair_generator");
   if (func->hasVariadicCaptureParam()) attrSet.emplace("variadic_param");
-  if (func->hasStaticLocals()) attrSet.emplace("has_statics");
   if (func->isHot()) attrSet.emplace("hot");
   if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
   if (func->attrs() & AttrRequiresThis) attrSet.emplace("must_have_this");
@@ -1097,7 +1094,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   ent.setInt("num_iterators", func->numIterators());
   ent.setInt("frame_cells", func->numSlotsInFrame());
   ent.setInt("max_stack_cells", func->maxStackCells());
-  ent.setInt("num_static_locals", func->numStaticLocals());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

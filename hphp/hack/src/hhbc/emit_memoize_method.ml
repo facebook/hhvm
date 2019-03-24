@@ -288,7 +288,6 @@ let make_wrapper env return_type params instrs with_lsb =
     with_lsb (* is_memoize_wrapper_lsb *)
     params
     (Some return_type)
-    [] (* static_inits *)
     None (* doc *)
     (Some env)
 

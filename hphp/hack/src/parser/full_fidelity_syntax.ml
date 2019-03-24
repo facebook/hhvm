@@ -140,8 +140,6 @@ module WithToken(Token: TokenType) = struct
       | ThrowStatement                          _ -> SyntaxKind.ThrowStatement
       | BreakStatement                          _ -> SyntaxKind.BreakStatement
       | ContinueStatement                       _ -> SyntaxKind.ContinueStatement
-      | FunctionStaticStatement                 _ -> SyntaxKind.FunctionStaticStatement
-      | StaticDeclarator                        _ -> SyntaxKind.StaticDeclarator
       | EchoStatement                           _ -> SyntaxKind.EchoStatement
       | GlobalStatement                         _ -> SyntaxKind.GlobalStatement
       | ConcurrentStatement                     _ -> SyntaxKind.ConcurrentStatement
@@ -336,8 +334,6 @@ module WithToken(Token: TokenType) = struct
     let is_throw_statement                              = has_kind SyntaxKind.ThrowStatement
     let is_break_statement                              = has_kind SyntaxKind.BreakStatement
     let is_continue_statement                           = has_kind SyntaxKind.ContinueStatement
-    let is_function_static_statement                    = has_kind SyntaxKind.FunctionStaticStatement
-    let is_static_declarator                            = has_kind SyntaxKind.StaticDeclarator
     let is_echo_statement                               = has_kind SyntaxKind.EchoStatement
     let is_global_statement                             = has_kind SyntaxKind.GlobalStatement
     let is_concurrent_statement                         = has_kind SyntaxKind.ConcurrentStatement
@@ -1423,22 +1419,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc continue_keyword in
          let acc = f acc continue_level in
          let acc = f acc continue_semicolon in
-         acc
-      | FunctionStaticStatement {
-        static_static_keyword;
-        static_declarations;
-        static_semicolon;
-      } ->
-         let acc = f acc static_static_keyword in
-         let acc = f acc static_declarations in
-         let acc = f acc static_semicolon in
-         acc
-      | StaticDeclarator {
-        static_name;
-        static_initializer;
-      } ->
-         let acc = f acc static_name in
-         let acc = f acc static_initializer in
          acc
       | EchoStatement {
         echo_keyword;
@@ -3429,22 +3409,6 @@ module WithToken(Token: TokenType) = struct
         continue_level;
         continue_semicolon;
       ]
-      | FunctionStaticStatement {
-        static_static_keyword;
-        static_declarations;
-        static_semicolon;
-      } -> [
-        static_static_keyword;
-        static_declarations;
-        static_semicolon;
-      ]
-      | StaticDeclarator {
-        static_name;
-        static_initializer;
-      } -> [
-        static_name;
-        static_initializer;
-      ]
       | EchoStatement {
         echo_keyword;
         echo_expressions;
@@ -5434,22 +5398,6 @@ module WithToken(Token: TokenType) = struct
         "continue_keyword";
         "continue_level";
         "continue_semicolon";
-      ]
-      | FunctionStaticStatement {
-        static_static_keyword;
-        static_declarations;
-        static_semicolon;
-      } -> [
-        "static_static_keyword";
-        "static_declarations";
-        "static_semicolon";
-      ]
-      | StaticDeclarator {
-        static_name;
-        static_initializer;
-      } -> [
-        "static_name";
-        "static_initializer";
       ]
       | EchoStatement {
         echo_keyword;
@@ -7575,24 +7523,6 @@ module WithToken(Token: TokenType) = struct
           continue_keyword;
           continue_level;
           continue_semicolon;
-        }
-      | (SyntaxKind.FunctionStaticStatement, [
-          static_static_keyword;
-          static_declarations;
-          static_semicolon;
-        ]) ->
-        FunctionStaticStatement {
-          static_static_keyword;
-          static_declarations;
-          static_semicolon;
-        }
-      | (SyntaxKind.StaticDeclarator, [
-          static_name;
-          static_initializer;
-        ]) ->
-        StaticDeclarator {
-          static_name;
-          static_initializer;
         }
       | (SyntaxKind.EchoStatement, [
           echo_keyword;
@@ -10039,30 +9969,6 @@ module WithToken(Token: TokenType) = struct
           continue_keyword;
           continue_level;
           continue_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_function_static_statement
-        static_static_keyword
-        static_declarations
-        static_semicolon
-      =
-        let syntax = FunctionStaticStatement {
-          static_static_keyword;
-          static_declarations;
-          static_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_static_declarator
-        static_name
-        static_initializer
-      =
-        let syntax = StaticDeclarator {
-          static_name;
-          static_initializer;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

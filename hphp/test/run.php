@@ -957,7 +957,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
 
   if (isset($options['cli-server'])) {
     $config = find_file_for_dir(dirname($test), 'config.ini');
-    $socket = $options['servers']['configs'][$config]['cli-socket'];
+    $socket = $options['servers']['configs'][$config]->server['cli-socket'];
     $cmd .= ' -vEval.UseRemoteUnixServer=only';
     $cmd .= ' -vEval.UnixServerPath='.$socket;
     $cmd .= ' --count=3';
@@ -1970,7 +1970,7 @@ function run_config_server($options, $test) {
   }
 
   $config = find_file_for_dir(dirname($test), 'config.ini');
-  $port = $options['servers']['configs'][$config]['port'];
+  $port = $options['servers']['configs'][$config]->server['port'];
   $ch = curl_init("localhost:$port/$test");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt($ch, CURLOPT_TIMEOUT, SERVER_TIMEOUT);
@@ -2831,6 +2831,11 @@ function start_server_proc($options, $config, $port) {
   return $status;
 }
 
+final class ServerRef {
+  public function __construct(public $server) {
+  }
+}
+
 /*
  * For each config file in $configs, start up a server on a randomly-determined
  * port. Return value is an array mapping pids and config files to arrays of
@@ -2866,9 +2871,9 @@ function start_servers($options, $configs) {
       } else if (!port_is_listening($server['port'])) {
         $still_starting[] = $server;
       } else {
-        $servers['pids'][$server['pid']] =& $server;
-        $servers['configs'][$server['config']] =& $server;
-        unset($server);
+        $ref = new ServerRef($server);
+        $servers['pids'][$server['pid']] = $ref;
+        $servers['configs'][$server['config']] = $ref;
       }
     }
 
@@ -3160,13 +3165,13 @@ function main($argv) {
           echo "\nServer $pid crashed. Restarting.\n";
         }
         Status::serverRestarted();
-        $server =& $servers['pids'][$pid];
-        $server = start_server_proc($options, $server['config'], $server['port']);
+        $ref = $servers['pids'][$pid];
+        $ref->server =
+          start_server_proc($options, $ref->server['config'], $ref->server['port']);
 
         // Unset the old $pid entry and insert the new one.
         unset($servers['pids'][$pid]);
-        $servers['pids'][$server['pid']] =& $server;
-        unset($server);
+        $servers['pids'][$ref->server['pid']] = $ref;
       } elseif (isset($children[$pid])) {
         unset($children[$pid]);
         $return_value |= pcntl_wexitstatus($status);
@@ -3178,9 +3183,9 @@ function main($argv) {
 
   // Kill the server.
   if ($servers) {
-    foreach ($servers['pids'] as $server) {
-      proc_terminate($server['proc']);
-      proc_close($server['proc']);
+    foreach ($servers['pids'] as $ref) {
+      proc_terminate($ref->server['proc']);
+      proc_close($ref->server['proc']);
     }
   }
 

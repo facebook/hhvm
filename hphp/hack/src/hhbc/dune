@@ -7,6 +7,5 @@
     core_kernel
     mutable_accumulator
     parser_heap
-    typing
-    typing_defs
+    tast
     utils_php_escape))

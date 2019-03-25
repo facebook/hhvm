@@ -20,7 +20,6 @@
   (wrapped false)
   (modules
     ide_tast_cache
-    tast
     tast_env
     tast_expand
     tast_utils
@@ -28,7 +27,6 @@
     nast_visitor
     nast_check_env
     type_mapper
-    type_parameter_env
     type_visitor
     typing_arrays
     typing_async
@@ -52,12 +50,10 @@
     typing_logic
     typing_make_type
     typing_mutability
-    typing_mutability_env
     typing_ops
     typing_phase
     typing_print
     typing_reactivity
-    typing_set
     typing_subtype
     typing_subtype_tconst
     typing_taccess
@@ -81,6 +77,7 @@
     naming
     symbol
     typechecker_options
+    typing_ast
     typing_defs)
   (preprocess (pps ppx_deriving.std)))
 
@@ -147,6 +144,24 @@
     tast_check
     nast_check
     typing_naming_body))
+
+(library
+  (name typing_ast)
+  (wrapped false)
+  (modules
+    tast
+    type_parameter_env
+    typing_mutability_env
+    typing_set)
+  (libraries
+    annotated_ast
+    ast
+    core_kernel
+    errors
+    naming
+    parser
+    typing_defs)
+  (preprocess (pps ppx_deriving.std)))
 
 (library
   (name coverage_level)

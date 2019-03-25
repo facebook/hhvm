@@ -3281,11 +3281,6 @@ let superglobal_in_reactive_context pos name =
     "Superglobal "^  name ^ " cannot be used in a reactive context."
   )
 
-let global_in_reactive_context pos name =
-  add (Typing.err_code Typing.GlobalInReactiveContext) pos (
-    "Global " ^ name ^ " cannot be used in a reactive context."
-  )
-
 let static_property_in_reactive_context pos =
   add (Typing.err_code Typing.StaticPropertyInReactiveContext) pos (
     "Static property cannot be used in a reactive context."

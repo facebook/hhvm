@@ -242,7 +242,6 @@ struct
     | S.GotoLabel label -> T.GotoLabel label
     | S.Goto label -> T.Goto label
     | S.Static_var el -> T.Static_var (map_exprl menv el)
-    | S.Global_var el -> T.Global_var (map_exprl menv el)
     | S.Awaitall el ->
       let el = List.map el (fun (lid, expr) -> (lid, map_expr menv expr)) in
       T.Awaitall el

@@ -48,7 +48,6 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
   | A.Return _
   | A.Goto _
   | A.Static_var _
-  | A.Global_var _
   | A.Awaitall _
   | A.Markup _
   | A.Noop
@@ -97,8 +96,6 @@ and collect_valid_target_labels_aux_tast is_hh_file acc s =
   | T.Return _
   | T.Goto _
   | T.Static_var _
-  | T.Global_var _
-  | T.Awaitall _
   | T.Markup _
   | T.Noop
   | T.Foreach _

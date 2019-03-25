@@ -180,7 +180,6 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
   | Def_inline _
   | Let _
   | Static_var _
-  | Global_var _
   | Awaitall _ ->
     raise Not_implemented
   | Goto _

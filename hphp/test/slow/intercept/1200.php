@@ -1,9 +1,9 @@
 <?php
 
 class X {
-  static function foo() {
- global$g;
- return $g;
+ public static $g;
+ public static function foo() {
+ return self::$g;
  }
 }
 function bar() {

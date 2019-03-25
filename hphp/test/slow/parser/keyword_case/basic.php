@@ -16,8 +16,8 @@ FUNction test_empty_isset_unset() {
 }
 
 fUNCTION test_global() {
-  GLOBAL $counter;
-  var_dump($counter++);
+  var_dump($GLOBALS['counter']);
+  $GLOBALS['counter']++;
 }
 
 test_echo_print();

@@ -281,7 +281,6 @@ and stmt env acc st =
       then acc
       else raise (InitReturn acc)
     | Static_var el
-    | Global_var el
        -> List.fold_left ~f:expr ~init:acc el
     | Awaitall el ->
       List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->

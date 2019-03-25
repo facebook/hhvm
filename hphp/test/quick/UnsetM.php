@@ -1,7 +1,7 @@
 <?hh
 
+<<__EntryPoint>>
 function main() {
-  global $a;
 
   $a = array();
   $a[0] = 10;
@@ -11,15 +11,15 @@ function main() {
   unset($a[1]);
   unset($a["hi"]);
   var_dump($a);
-
-  // Try out G bases as well.
+  $GLOBALS['a'] = $a;
+  // Try out G bases
   $idxDefined = "foo";
   $idxNotDefined = "-- )) \\";
-  $a[$idxDefined] = 071177;
-  var_dump($a);
+  $GLOBALS['a'][$idxDefined] = 071177;
+  var_dump($GLOBALS['a']);
   unset($GLOBALS['a'][$idxDefined]);
   unset($GLOBALS['a'][$idxNotDefined]);
-  var_dump($a);
+  var_dump($GLOBALS['a']);
 
   // Regression test for a translator bug
   $k = strtolower('blah');  // make it a dynamic string
@@ -28,5 +28,3 @@ function main() {
   unset($s[$k]);  // should have no effect
   var_dump($s);
 }
-
-main();

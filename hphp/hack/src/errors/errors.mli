@@ -485,7 +485,6 @@ val inout_params_special : Pos.t -> unit
 val inout_params_mix_byref : Pos.t -> Pos.t -> unit
 val inout_params_memoize : Pos.t -> Pos.t -> unit
 val obj_set_reactive : Pos.t -> unit
-val global_in_reactive_context : Pos.t -> string -> unit
 val static_property_in_reactive_context : Pos.t -> unit
 val inout_annotation_missing : Pos.t -> Pos.t -> unit
 val inout_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit

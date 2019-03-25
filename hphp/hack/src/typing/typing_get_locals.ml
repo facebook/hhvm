@@ -74,7 +74,6 @@ and terminal_ nsenv ~in_try (_, st_) =
   | GotoLabel _
   | Goto _
   | Static_var _
-  | Global_var _
   | Awaitall _
     -> ()
 
@@ -157,7 +156,7 @@ let rec stmt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
     end (* match *)
   | Declare _
   | Return _ | GotoLabel _ | Goto _ | Static_var _
-  | Global_var _ | Def_inline _ | Noop -> acc
+  | Def_inline _ | Noop -> acc
   | Awaitall el ->
     List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
       expr acc e2
@@ -365,8 +364,11 @@ and aast_terminal_ nsenv ~in_try st =
   | Aast.Fallthrough
   | Aast.GotoLabel _
   | Aast.Goto _
+<<<<<<< HEAD
   | Aast.Static_var _
   | Aast.Global_var _
+=======
+>>>>>>> turn GlobalStatement into a parse error at FFP-AST edge
   | Aast.Awaitall _
   | Aast.Unsafe_block _
     -> ()
@@ -561,8 +563,11 @@ let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Aast.Return _
   | Aast.Goto _
   | Aast.GotoLabel _
+<<<<<<< HEAD
   | Aast.Static_var _
   | Aast.Global_var _
+=======
+>>>>>>> turn GlobalStatement into a parse error at FFP-AST edge
   | Aast.Def_inline _
   | Aast.Noop -> acc
   | Aast.Awaitall el ->

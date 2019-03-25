@@ -49,6 +49,7 @@ type t = {
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
   option_hhjs_repo_root                   : string;
+  option_hhjs_node_modules                : SSet.t;
   option_enable_concurrent                : bool;
   option_enable_await_as_an_expression    : bool;
   option_phpism_undefined_function_fallback : bool;
@@ -106,6 +107,7 @@ let default = {
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
   option_hhjs_repo_root = "";
+  option_hhjs_node_modules = SSet.empty;
   option_enable_concurrent = false;
   option_enable_await_as_an_expression = false;
   option_phpism_undefined_function_fallback = true;
@@ -159,6 +161,7 @@ let dump_hhjs o = o.option_dump_hhjs
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let hhjs_repo_root o = o.option_hhjs_repo_root
+let hhjs_node_modules o = o.option_hhjs_node_modules
 let enable_concurrent o = o.option_enable_concurrent
 let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_undefined_function_fallback o = o.option_phpism_undefined_function_fallback
@@ -248,6 +251,20 @@ let as_bool s =
   | "1" | "true"  -> true
   | _             -> raise (Arg.Bad (s ^ " can't be cast to bool"))
 
+let get_hhjs_node_modules_from_string = function
+  | Some "" -> Some SSet.empty
+  | Some v ->
+    let v_set = SSet.of_list @@ String.split v ~on:(Char.of_string ",") in
+    let all_have_trailing_slash = SSet.for_all (fun s ->
+      String_utils.string_ends_with s Filename.dir_sep
+    ) v_set in
+    if not all_have_trailing_slash then
+      raise (Arg.Bad ("Expected all paths of HHJSNodeModules to end in " ^
+        Filename.dir_sep ^ ", however, at least one path did not."))
+    else
+      Some v_set
+  | None -> None
+
 let set_option options name value =
   match String.lowercase name with
   | "eval.enablehiphopsyntax" ->
@@ -313,6 +330,12 @@ let set_option options name value =
     { options with option_hhjs_babel_transform = value }
   | "eval.hhjsreporoot" ->
     { options with option_hhjs_repo_root = value }
+  | "eval.hhjsnodemodules" ->
+    let hhjs_node_modules = match get_hhjs_node_modules_from_string @@ Some value with
+    | Some s -> s
+    | None -> SSet.empty
+    in
+    { options with option_hhjs_node_modules = hhjs_node_modules }
   | "hack.lang.phpism.undefinedfunctionfallback" ->
     { options with option_phpism_undefined_function_fallback = int_of_string value < 2 }
   | "hack.lang.phpism.disallowexecutionoperator" ->
@@ -392,6 +415,9 @@ let get_value_from_config_string_to_string_map config key =
           | (root, J.JSON_String path) -> SMap.add root path acc
           | _ -> raise (Arg.Bad ("Expected {root:path} pair"))))
     | _ -> raise (Arg.Bad ("Expected string-to-string map strings at " ^ key))
+
+let get_hhjs_node_modules_from_config_string config key =
+  get_hhjs_node_modules_from_string @@ get_value_from_config_string config key
 
 let set_value name get set config opts =
   try
@@ -482,6 +508,8 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_babel_transform = v });
   (set_value "hhvm.hhjs_repo_root" get_value_from_config_string @@
      fun opts v -> { opts with option_hhjs_repo_root = v });
+  (set_value "hhvm.hhjs_node_modules" get_hhjs_node_modules_from_config_string @@
+    fun opts v -> { opts with option_hhjs_node_modules = v });
   (set_value "hhvm.hack.lang.phpism.undefined_function_fallback" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_function_fallback = (v < 2) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@

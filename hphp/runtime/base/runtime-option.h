@@ -94,6 +94,7 @@ struct RepoOptions {
   E(std::string,    HHJSBabelTransform,                               \
                                          hhjsBabelTransformDefault()) \
   E(std::string,    HHJSRepoRoot,                   "")               \
+  E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitClsMethPointers,            EmitFuncPointers) \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \

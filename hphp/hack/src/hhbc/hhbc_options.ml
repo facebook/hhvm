@@ -48,6 +48,7 @@ type t = {
   option_dump_hhjs                        : bool;
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
+  option_hhjs_repo_root                   : string;
   option_enable_concurrent                : bool;
   option_enable_await_as_an_expression    : bool;
   option_phpism_undefined_function_fallback : bool;
@@ -104,6 +105,7 @@ let default = {
   option_dump_hhjs = false;
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
+  option_hhjs_repo_root = "";
   option_enable_concurrent = false;
   option_enable_await_as_an_expression = false;
   option_phpism_undefined_function_fallback = true;
@@ -156,6 +158,7 @@ let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
+let hhjs_repo_root o = o.option_hhjs_repo_root
 let enable_concurrent o = o.option_enable_concurrent
 let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_undefined_function_fallback o = o.option_phpism_undefined_function_fallback
@@ -308,6 +311,8 @@ let set_option options name value =
     { options with option_hhjs_unique_filenames = as_bool value }
   | "eval.hhjsbabeltransform" ->
     { options with option_hhjs_babel_transform = value }
+  | "eval.hhjsreporoot" ->
+    { options with option_hhjs_repo_root = value }
   | "hack.lang.phpism.undefinedfunctionfallback" ->
     { options with option_phpism_undefined_function_fallback = int_of_string value < 2 }
   | "hack.lang.phpism.disallowexecutionoperator" ->
@@ -475,6 +480,8 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_unique_filenames = (v = 1) });
   (set_value "hhvm.hhjs_babel_transform" get_value_from_config_string @@
      fun opts v -> { opts with option_hhjs_babel_transform = v });
+  (set_value "hhvm.hhjs_repo_root" get_value_from_config_string @@
+     fun opts v -> { opts with option_hhjs_repo_root = v });
   (set_value "hhvm.hack.lang.phpism.undefined_function_fallback" get_value_from_config_int @@
      fun opts v -> { opts with option_phpism_undefined_function_fallback = (v < 2) });
   (set_value "hhvm.hack.lang.phpism.disallow_execution_operator" get_value_from_config_int @@

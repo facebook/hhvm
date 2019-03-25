@@ -3,8 +3,22 @@ array(1) {
   int(3126049297)
 }
 int(3735928559)
+string(5) "byRef"
+string(5) "byRef"
+array(1) {
+  ["bar"]=>
+  int(12211130)
+}
+int(14593470)
+string(5) "byRef"
+string(5) "byRef"
 array(1) {
   ["bar"]=>
   int(47699)
 }
 int(57005)
+int(57005)
+int(1985229328)
+string(11) "insideByRef"
+int(4207849484)
+int(42)

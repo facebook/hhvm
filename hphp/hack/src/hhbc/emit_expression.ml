@@ -484,12 +484,15 @@ and get_local env (pos, str) =
     else Local.Named str)
 
 and emit_local ~notice ~need_ref env ((pos, str) as id) =
-  if SN.Superglobals.is_superglobal str
-  then gather [
-    instr_string (SU.Locals.strip_dollar str);
-    emit_pos pos;
-    instr (IGet (if need_ref then VGetG else CGetG))
-  ]
+  if SN.Superglobals.is_superglobal str then
+    if need_ref then
+      Emit_fatal.raise_fatal_parse pos
+        "Superglobals may not be taken by reference."
+    else gather [
+      instr_string (SU.Locals.strip_dollar str);
+      emit_pos pos;
+      instr (IGet CGetG)
+    ]
   else
   let local = get_local env id in
   if is_local_this env str && not (Emit_env.get_needs_local_this env) then

@@ -1,6 +1,18 @@
 Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: VGetG
 
+Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: BindL
+
+Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: PopV
+
+Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: VGetL
+
 Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: BindG
+
+Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: PopV
+
+Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: VGetG
+
+Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: BindL
 
 Verification Error (unit %s/test/slow/rx/body/ref-non-local.php func test): references are forbidden in Rx functions: PopV
 

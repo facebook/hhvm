@@ -4,7 +4,16 @@ class C { public static $p; public static $q; }
 
 <<__Rx>>
 function test() {
-  $_GET =& $_POST; // VGetG, BindG (superglobals)
+  global $a; // VGetG (global statement)
+
+  $y = 42;
+  $_GET =& $y;           // VGetL, BindG (superglobals)
+  $b = &$GLOBALS['foo']; // VGetG (globals array)
+
+  // the following VGetG are covered by
+  // Fatal error: Superglobals may not be taken by reference
+  // $z = &$_POST;
+  // f(&$_POST);
 
   C::$p =& C::$q; // VGetS, BindS
 

@@ -1378,9 +1378,9 @@ let coroutine_in_constructor pos =
   add (NastCheck.err_code NastCheck.CoroutineInConstructor) pos
     "A class constructor may not be a coroutine"
 
-let illegal_by_ref_expr pos str =
+let illegal_by_ref_expr pos str verb =
   add (NastCheck.err_code NastCheck.IllegalByRefExpr) pos
-  (str ^ " cannot be passed by reference")
+  (str ^ " cannot be " ^ verb ^ " by reference")
 
 let variadic_byref_param pos =
   add (NastCheck.err_code NastCheck.VariadicByRefParam) pos

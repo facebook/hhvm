@@ -44,7 +44,7 @@ let () =
   (* Remove the duplicate *)
   let env, _ = Test.(run_loop_once env { default_loop_input with
     disk_changes = [
-      f1, "<?hh";
+      f1, "";
     ]
   }) in
   Test.assert_env_errors env errors

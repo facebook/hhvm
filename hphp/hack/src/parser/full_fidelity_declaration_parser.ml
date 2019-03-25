@@ -2061,9 +2061,10 @@ module WithExpressionAndStatementAndTypeParser
     if has_suffix then
       parser1, Some markup_section
     else
-      let suffix = (pos parser) |> fst |> SourceText.file_path |> Relative_path.suffix in
+      let text = (pos parser) |> fst in
+      let suffix = text |> SourceText.file_path |> Relative_path.suffix in
       let parser =
-        if String_utils.string_ends_with suffix ".php"
+        if (SourceText.length text) > 0 && String_utils.string_ends_with suffix ".php"
         then with_error parser SyntaxError.error1001
         else parser
       in

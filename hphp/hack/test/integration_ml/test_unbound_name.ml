@@ -30,7 +30,7 @@ let () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
     a_file_name, a_contents;
-    b_file_name, "<?hh";
+    b_file_name, "";
   ] in
 
   Test.assert_env_errors env errors;

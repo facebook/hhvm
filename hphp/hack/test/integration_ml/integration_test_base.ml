@@ -322,8 +322,10 @@ let status ?(ignore_ide=false) env =
   }
 
 let full_check env =
+  (* the empty string isn't just a test placeholder - when a file is deleted
+     or renamed, the content is set to the empty string internally *)
   run_loop_once env { default_loop_input with
-    disk_changes = ["__dummy_file_to_trigger_full_check.php", "<?hh"]
+    disk_changes = ["__dummy_file_to_trigger_full_check.php", ""]
   }
 
 let start_initial_full_check env =

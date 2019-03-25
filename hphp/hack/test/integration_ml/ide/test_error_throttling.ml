@@ -111,7 +111,7 @@ let () =
 
   (* Fix one of the remaining errors *)
   let bar_10_name = bar_name 10 in
-  let env, _ = Test.edit_file env bar_10_name "<?hh" in
+  let env, _ = Test.edit_file env bar_10_name "" in
   let env = Test.wait env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
 

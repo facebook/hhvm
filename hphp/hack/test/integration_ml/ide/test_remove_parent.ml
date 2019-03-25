@@ -60,7 +60,7 @@ let () =
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_no_diagnostics loop_output;
 
-  let env, _ = Test.edit_file env foo_parent_name "<?hh" in
+  let env, _ = Test.edit_file env foo_parent_name "" in
   let env = Test.wait env in
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output foo_parent_missing_diagnostics;
@@ -70,7 +70,7 @@ let () =
   let env, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output clear_foo_diagnostics;
 
-  let env, _ = Test.edit_file env foo_parent_name "<?hh" in
+  let env, _ = Test.edit_file env foo_parent_name "" in
   let env = Test.wait env in
   let _, loop_output = Test.(run_loop_once env default_loop_input) in
   Test.assert_diagnostics loop_output foo_parent_missing_diagnostics

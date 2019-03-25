@@ -57,7 +57,7 @@ It is incompatible with a string
 let () =
   let env = Test.setup_server () in
   let env = Test.setup_disk env [
-    foo_name, "<?hh";
+    foo_name, "";
     foo_child_name, foo_child_contents;
     bar_name, bar_contents;
   ] in

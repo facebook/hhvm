@@ -1674,10 +1674,13 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
       emit_conditional_expression env pos etest etrue efalse
   | A.Expr_list es -> gather @@ List.map es ~f:(emit_expr ~need_ref:false env)
   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
-    gather [
+    if need_ref then
+      Emit_fatal.raise_fatal_runtime pos
+      "$GLOBALS elements may not be taken by reference"
+    else gather [
       emit_expr ~need_ref:false env e;
       emit_pos pos;
-      instr (IGet (if need_ref then VGetG else CGetG))
+      instr (IGet CGetG)
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in

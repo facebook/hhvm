@@ -8,7 +8,10 @@ function test() {
 
   $y = 42;
   $_GET =& $y;           // VGetL, BindG (superglobals)
-  $b = &$GLOBALS['foo']; // VGetG (globals array)
+
+  // the following VGetG is covered by
+  // $GLOBALS elements may not be taken by reference
+  // $b = &$GLOBALS['foo']; // VGetG (globals array)
 
   // the following VGetG are covered by
   // Fatal error: Superglobals may not be taken by reference

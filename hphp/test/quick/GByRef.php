@@ -19,10 +19,12 @@ function insideByRef($a) {
   $a['baz'] = &$zz;
 }
 
+
+$shadow = $GLOBALS;
 var_dump($GLOBALS['foo']);
 var_dump($GLOBALS['bar']);
-byRef(&$GLOBALS['foo']['bar']);
-byRef(&$GLOBALS['bar']);
+byRef(&$shadow['foo']['bar']);
+byRef(&$shadow['bar']);
 var_dump($GLOBALS['foo']);
 var_dump($GLOBALS['bar']);
 

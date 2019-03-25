@@ -365,7 +365,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
 
   SSATmp** args = (SSATmp**)alloca(sizeof(SSATmp*) * numParams);
   for (int32_t i = 0; i < numParams; ++i) {
-    args[numParams - i - 1] = popF(env);
+    args[numParams - i - 1] = popCU(env);
   }
 
   int32_t propId = 0;

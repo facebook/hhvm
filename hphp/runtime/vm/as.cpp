@@ -1519,6 +1519,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_MFINAL immIVA[0]
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
 #define NUM_POP_V_MFINAL NUM_POP_C_MFINAL(1)
+#define NUM_POP_CUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_FPUSH(nin, nobj) (nin + nobj)
 #define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack() ? 1 : 0) + \
@@ -1660,6 +1661,7 @@ OPCODES
 #undef NUM_POP_MFINAL
 #undef NUM_POP_C_MFINAL
 #undef NUM_POP_V_MFINAL
+#undef NUM_POP_CUMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_FPUSH
 #undef NUM_POP_FCALL

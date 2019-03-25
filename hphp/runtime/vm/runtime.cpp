@@ -201,10 +201,10 @@ int init_closure(ActRec* ar, TypedValue* sp) {
   firstLocal->m_data.pobj = closure;
 
   // Copy in all the use vars
-  TypedValue* prop = closure->getUseVars();
+  Cell* prop = closure->getUseVars();
   int n = closure->getNumUseVars();
-  for (int i=0; i < n; i++) {
-    tvDup(*prop++, *--sp);
+  for (int i = 0; i < n; i++) {
+    cellDup(*prop++, *--sp);
   }
 
   return n + 1;

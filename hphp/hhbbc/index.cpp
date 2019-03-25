@@ -4992,7 +4992,7 @@ Index::lookup_closure_use_vars(const php::Func* func,
   if (!numUseVars) return {};
   auto const it = m_data->closureUseVars.find(func->cls);
   if (it == end(m_data->closureUseVars)) {
-    return CompactVector<Type>(numUseVars, TGen);
+    return CompactVector<Type>(numUseVars, TCell);
   }
   if (move) return std::move(it->second);
   return it->second;

@@ -3784,7 +3784,7 @@ AKExists    [C C] -> [C:Bool]
   key. Throws a fatal error if $1 is not an array or object, and raises a
   warning if $2 is not a string, integer, or null.
 
-CreateCl <num args> <class id>  [C|V|U..C|V|U]  ->  [C]
+CreateCl <num args> <class id>  [C|U..C|U]  ->  [C]
 
   Creates an instance of the class specified by <class id> and pushes it on the
   stack.

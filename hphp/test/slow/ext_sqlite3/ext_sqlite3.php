@@ -47,6 +47,7 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
   VS($res->columntype(0), SQLITE3_TEXT);
 
   VS($res->fetcharray(SQLITE3_NUM), array("DEF"));
+  $res->finalize();
 }
 
 // testing prepare() and sqlite3stmt
@@ -60,6 +61,7 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
   {
     $res = $stmt->execute();
     VS($res->fetcharray(SQLITE3_NUM), array("DEF"));
+    $res->finalize();
   }
 
   VERIFY($stmt->clear());
@@ -70,6 +72,7 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
   {
     $res = $stmt->execute();
     VS($res->fetcharray(SQLITE3_NUM), array("ABC"));
+    $res->finalize();
   }
 }
 
@@ -78,12 +81,16 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
   VERIFY($db->createfunction("tolower", "lower", 1));
   $res = $db->query("SELECT tolower(bar) FROM foo");
   VS($res->fetcharray(SQLITE3_NUM), array("abc"));
+  $res->finalize();
 }
 {
   VERIFY($db->createaggregate("sumlen", "sumlen_step", "sumlen_fini", 1));
   $res = $db->query("SELECT sumlen(bar) FROM foo");
   VS($res->fetcharray(SQLITE3_NUM), array(6));
+  $res->finalize();
 }
+
+$stmt->close();
 
 // Since minor version can change frequently, just test the major version
 VS($db->version()['versionString'][0], "3");

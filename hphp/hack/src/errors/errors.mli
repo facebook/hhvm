@@ -520,7 +520,7 @@ val let_var_immutability_violation : Pos.t -> string -> unit
 val atmost_rx_as_rxfunc_invalid_location : Pos.t -> unit
 val no_atmost_rx_as_rxfunc_for_rx_if_args : Pos.t -> unit
 val coroutine_in_constructor : Pos.t -> unit
-val illegal_by_ref_expr : Pos.t -> string -> unit
+val illegal_by_ref_expr : Pos.t -> string -> string -> unit
 val variadic_byref_param : Pos.t -> unit
 val classname_const_instanceof : string -> Pos.t -> unit
 val byref_on_construct : Pos.t -> unit

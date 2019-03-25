@@ -26,14 +26,22 @@ let handler = object
 
   method! at_expr env (pos, e) =
     match e with
+    | Binop ((Ast.Eq None), e1, e2) ->
+      begin match e1, e2 with
+      | (_, (Lvar (_, x))), (_, Unop (Ast.Uref, _))
+       when Local_id.to_string x |> SN.Superglobals.is_superglobal ->
+        Errors.illegal_by_ref_expr pos ("Superglobal " ^ Local_id.to_string x) "bound"
+      | _ -> ()
+      end;
     | Unop (Ast.Uref, e) ->
+      let ref_expr ident = Errors.illegal_by_ref_expr pos ident "passed" in
       begin match snd e with
       | Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.this ->
-        Errors.illegal_by_ref_expr pos SN.SpecialIdents.this
+        ref_expr SN.SpecialIdents.this
       | Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.dollardollar ->
-        Errors.illegal_by_ref_expr pos SN.SpecialIdents.dollardollar
+        ref_expr SN.SpecialIdents.dollardollar
       | Lvar (_, x) when Local_id.to_string x |> SN.Superglobals.is_superglobal ->
-        Errors.illegal_by_ref_expr pos @@ "Superglobal " ^ Local_id.to_string x
+        ref_expr @@ "Superglobal " ^ Local_id.to_string x
       | _ -> ()
       end
     | Id (pos, const) ->

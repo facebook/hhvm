@@ -1,0 +1,2 @@
+File "binding_superglobals.php", line 5, characters 3-13:
+Superglobal $_GET cannot be bound by reference (NastCheck[3067])

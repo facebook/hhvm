@@ -680,6 +680,9 @@ let concurrent_is_disabled =
 let static_closures_are_disabled =
   "Static closures are not supported in Hack"
 
+let static_locals_variables_are_disabled =
+  "Static local variables are not supported in Hack"
+
 let invalid_await_position = "Await cannot be used as an expression in this " ^
   "location because it's conditionally executed."
 

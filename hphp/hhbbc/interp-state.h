@@ -220,6 +220,19 @@ struct StackElem {
 };
 
 /*
+ * Used to track the state of the binding between locals, and their
+ * corresponding static (if any).
+ */
+enum class LocalStaticBinding {
+  // This local is not bound to a local static
+  None,
+  // This local might be bound to its local static
+  Maybe,
+  // This local is known to be bound to its local static
+  Bound
+};
+
+/*
  * A program state at a position in a php::Block.
  *
  * The `initialized' flag indicates whether the state knows anything.  All
@@ -303,6 +316,11 @@ struct State {
    * compare types if they care.
    */
   CompactVector<LocalId> equivLocals;
+
+  /*
+   * LocalStaticBindings. Only allocated on demand.
+   */
+  CompactVector<LocalStaticBinding> localStaticBindings;
 };
 
 /*
@@ -419,6 +437,7 @@ struct CollectedInfo {
   CollectionOpts opts{CollectionOpts::TrackConstantArrays};
   bool (*propagate_constants)(const Bytecode& bc, State& state,
                               BytecodeVec& out) = nullptr;
+  CompactVector<Type> localStaticTypes;
   /*
    * See FuncAnalysisResult for details.
    */

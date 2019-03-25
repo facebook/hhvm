@@ -4043,6 +4043,7 @@ let find_syntax_errors env =
         let errors = check_constant_expression errors init in
         trait_require_clauses, names, errors
 
+      | StaticDeclarator { static_initializer = init; _ }
       | XHPClassAttribute { xhp_attribute_decl_initializer = init; _ } ->
         let errors = check_constant_expression errors init in
         trait_require_clauses, names, errors

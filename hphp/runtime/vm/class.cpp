@@ -68,6 +68,34 @@ const StaticString s___Reified("__Reified");
 Mutex g_classesMutex;
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * We clone methods with static locals into derived classes, but the clone
+ * still points to the class the method was defined in (because it needs to
+ * have the right context class).  For data profiling, we need to find the
+ * actual class that a Func belongs to so we put such Funcs into this map.
+ */
+typedef tbb::concurrent_hash_map<uint64_t, const Class*> FuncIdToClassMap;
+static FuncIdToClassMap* s_funcIdToClassMap;
+
+const Class* getOwningClassForFunc(const Func* f) {
+  // We only populate s_funcIdToClassMap when the following conditions
+  // are true.
+  assertx(RuntimeOption::EvalPerfDataMap ||
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit);
+
+  if (s_funcIdToClassMap) {
+    FuncIdToClassMap::const_accessor acc;
+    if (s_funcIdToClassMap->find(acc, f->getFuncId())) {
+      return acc->second;
+    }
+  }
+  return f->cls();
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 // Class::PropInitVec.
 
 Class::PropInitVec::~PropInitVec() {
@@ -494,7 +522,8 @@ void Class::releaseRefs() {
   for (auto i = 0; i < num; i++) {
     Func* meth = getMethod(i);
     if (meth /* releaseRefs can be called more than once */ &&
-        meth->cls() != this) {
+        meth->cls() != this &&
+        ((meth->attrs() & AttrPrivate) || !meth->hasStaticLocals())) {
       setMethod(i, nullptr);
       okToReleaseParent = false;
     }
@@ -1987,6 +2016,7 @@ void Class::methodOverrideCheck(const Func* parentMethod, const Func* method) {
 }
 
 void Class::setMethods() {
+  std::vector<Slot> parentMethodsWithStaticLocals;
   MethodMapBuilder builder;
 
   ITRACE(5, "----------\nsetMethods() for {}:\n", this->name()->data());
@@ -1996,6 +2026,14 @@ void Class::setMethods() {
       Func* f = m_parent->getMethod(i);
       assertx(f);
       ITRACE(5, "  - adding parent method {}\n", f->name()->data());
+      if (!(f->attrs() & AttrPrivate) && f->hasStaticLocals()) {
+        // When copying down an entry for a non-private method that has
+        // static locals, we want to make a copy of the Func so that it
+        // gets a distinct set of static locals variables. We defer making
+        // a copy of the parent method until the end because it might get
+        // overridden below.
+        parentMethodsWithStaticLocals.push_back(i);
+      }
       assertx(builder.size() == i);
       builder.add(f->name(), f);
     }
@@ -2067,6 +2105,38 @@ void Class::setMethods() {
     importTraitMethods(builder);
   }
   auto const traitsEndIdx = builder.size();
+
+  // Make copies of Funcs inherited from the parent class that have
+  // static locals
+  std::vector<Slot>::const_iterator it;
+  for (it = parentMethodsWithStaticLocals.begin();
+       it != parentMethodsWithStaticLocals.end(); ++it) {
+    Func*& f = builder[*it];
+    if (f->cls() != this) {
+      // Don't update f's m_cls.  We're cloning it so that we get a
+      // distinct set of static locals and a separate translation, not
+      // a different context class.
+      f = f->clone(f->cls());
+      f->setNewFuncId();
+      if (RuntimeOption::EvalPerfDataMap ||
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::Serialize ||
+          RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+        if (!s_funcIdToClassMap) {
+          Lock l(g_classesMutex);
+          if (!s_funcIdToClassMap) {
+            s_funcIdToClassMap = new FuncIdToClassMap;
+          }
+        }
+        FuncIdToClassMap::accessor acc;
+        if (!s_funcIdToClassMap->insert(
+              acc, FuncIdToClassMap::value_type(f->getFuncId(), this))) {
+          // we only just allocated this id, which is supposedly
+          // process unique
+          assertx(false);
+        }
+      }
+    }
+  }
 
   if (m_extra) {
     m_extra.raw()->m_traitsBeginIdx = traitsBeginIdx;

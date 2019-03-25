@@ -16,8 +16,16 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/ref-data.h"
+
 #include "hphp/runtime/vm/jit/types.h"
+#include "hphp/runtime/vm/jit/abi.h"
+#include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -25,8 +33,7 @@
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
-
-#include "hphp/runtime/ext/std/ext_std_closure.h"
+#include "hphp/runtime/vm/runtime.h"
 
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/trace.h"
@@ -37,48 +44,40 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgLdClosure(IRLS& env, const IRInstruction* inst) {
-  assertx(!inst->func() || inst->func()->isClosureBody());
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_thisUnsafe)], dst};
-}
-
-void cgLdClosureCtx(IRLS& env, const IRInstruction* inst) {
-  auto const ctx = dstLoc(env, inst, 0).reg();
-  auto const obj = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{obj[c_Closure::ctxOffset()], ctx};
-}
-
-void cgLdClosureStaticLoc(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdClosureStaticLoc>();
-  auto const func = extra->func;
-  auto const cls = func->implCls();
-  auto const slot = lookupStaticSlotFromClosure(cls, extra->name);
-  auto const offset = cls->declPropOffset(slot);
-
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const obj = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-  v << lea{obj[offset], dst};
-}
-
-void cgStClosureCtx(IRLS& env, const IRInstruction* inst) {
-  auto const obj = srcLoc(env, inst, 0).reg();
+void cgCheckStaticLoc(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<CheckStaticLoc>();
+  auto const link = rds::bindStaticLocal(extra->func, extra->name);
   auto& v = vmain(env);
 
-  if (inst->src(1)->isA(TNullptr)) {
-    v << storeqi{0, obj[c_Closure::ctxOffset()]};
-  } else {
-    auto const ctx = srcLoc(env, inst, 1).reg();
-    v << store{ctx, obj[c_Closure::ctxOffset()]};
-  }
+  auto const sf = checkRDSHandleInitialized(v, link.handle());
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
 }
 
-void cgStClosureArg(IRLS& env, const IRInstruction* inst) {
-  auto const obj = srcLoc(env, inst, 0).reg();
-  auto const off = inst->extra<StClosureArg>()->offsetBytes;
-  storeTV(vmain(env), obj[off], srcLoc(env, inst, 1), inst->src(1));
+void cgLdStaticLoc(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdStaticLoc>();
+  auto const link = rds::bindStaticLocal(extra->func, extra->name);
+  assertx(link.isNormal());
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  v << lea{rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()], dst};
+}
+
+void cgInitStaticLoc(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<InitStaticLoc>();
+  auto const link = rds::bindStaticLocal(extra->func, extra->name);
+  assertx(link.isNormal());
+  auto& v = vmain(env);
+
+  // Initialize the RefData by storing the new value into it's TypedValue and
+  // incrementing the RefData reference count (which will set it to 1).
+  auto mem = rvmtl()[link.handle() + rds::StaticLocalData::ref_offset()];
+  storeTV(v, mem + RefData::cellOffset(), srcLoc(env, inst, 0), inst->src(0));
+  emitStoreRefCount(v, OneReference, mem);
+  v << storebi{uint8_t(HeaderKind::Ref), mem + (int)HeaderKindOffset};
+  markRDSHandleInitialized(v, link.handle());
+
+  static_assert(sizeof(HeaderKind) == 1, "");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

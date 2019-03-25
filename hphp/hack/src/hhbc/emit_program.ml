@@ -49,6 +49,7 @@ let emit_fatal_program ~ignore_message op pos message =
     false (*is_memoize_wrapper_lsb*)
     [] (* params *)
     None (* return_type_info *)
+    [] (* static_inits static_inits  *)
     None (* doc *)
     None (* env *)
   in

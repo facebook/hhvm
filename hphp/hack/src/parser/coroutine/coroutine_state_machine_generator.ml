@@ -73,6 +73,7 @@ let rec has_reachable_endpoint body =
   | WhileStatement _
   | DoStatement _
   | ForStatement _
+  | FunctionStaticStatement _
   | EchoStatement _
   | GlobalStatement _
   | _ -> true

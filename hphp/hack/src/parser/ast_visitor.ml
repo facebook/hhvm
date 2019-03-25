@@ -378,6 +378,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       this#on_def_inline acc d
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
+    | Static_var el           -> this#on_static_var acc el
     | Global_var el           -> this#on_global_var acc el
     | Awaitall el             -> this#on_awaitall acc el
     | Markup (s, e)           -> this#on_markup acc s e

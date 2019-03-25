@@ -534,6 +534,12 @@ let string_of_misc instruction =
     | CheckThis -> "CheckThis"
     | CGetCUNop -> "CGetCUNop"
     | UGetCUNop -> "UGetCUNop"
+    | StaticLocCheck (local, text) ->
+      sep ["StaticLocCheck"; string_of_local_id local; "\"" ^ text ^ "\""]
+    | StaticLocDef (local, text) ->
+      sep ["StaticLocDef"; string_of_local_id local; "\"" ^ text ^ "\""]
+    | StaticLocInit (local, text) ->
+      sep ["StaticLocInit"; string_of_local_id local; "\"" ^ text ^ "\""]
     | MemoGet (label, Some (Local.Unnamed first, local_count)) ->
       Printf.sprintf "MemoGet %s L:%d+%d"
                      (string_of_label label) first local_count
@@ -1360,6 +1366,13 @@ let add_num_iters buf indent num_iters =
   then add_indented_line buf indent
     (Printf.sprintf ".numiters %d;" num_iters)
 
+let add_static_default_value_option buf indent label =
+  add_indented_line buf indent (".static " ^ label ^ ";")
+
+let add_static_values buf indent lst =
+  Hh_core.List.iter lst
+    (fun label -> add_static_default_value_option buf indent label)
+
 let add_doc buf indent doc_comment =
   match doc_comment with
   | Some cmt ->
@@ -1376,6 +1389,7 @@ let add_body buf indent body =
   add_num_iters buf indent (Hhas_body.num_iters body);
   add_num_cls_ref_slots buf indent (Hhas_body.num_cls_ref_slots body);
   add_decl_vars buf indent (Hhas_body.decl_vars body);
+  add_static_values buf indent (Hhas_body.static_inits body);
   Acc.add buf "\n";
   add_instruction_list buf indent
     (Instruction_sequence.instr_seq_to_list (Hhas_body.instrs body))

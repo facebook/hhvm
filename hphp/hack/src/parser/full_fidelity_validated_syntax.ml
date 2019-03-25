@@ -146,6 +146,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ThrowStatement _ -> tag validate_throw_statement (fun x -> TLDThrow x) x
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> TLDBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> TLDContinue x) x
+    | Syntax.FunctionStaticStatement _ -> tag validate_function_static_statement (fun x -> TLDFunctionStatic x) x
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> TLDEcho x) x
     | Syntax.GlobalStatement _ -> tag validate_global_statement (fun x -> TLDGlobal x) x
     | s -> aggregation_fail Def.TopLevelDeclaration s
@@ -187,6 +188,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDThrow                        thing -> invalidate_throw_statement                (value, thing)
     | TLDBreak                        thing -> invalidate_break_statement                (value, thing)
     | TLDContinue                     thing -> invalidate_continue_statement             (value, thing)
+    | TLDFunctionStatic               thing -> invalidate_function_static_statement      (value, thing)
     | TLDEcho                         thing -> invalidate_echo_statement                 (value, thing)
     | TLDGlobal                       thing -> invalidate_global_statement               (value, thing)
   and validate_expression : expression validator = fun x ->
@@ -413,6 +415,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ThrowStatement _ -> tag validate_throw_statement (fun x -> StmtThrow x) x
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> StmtBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> StmtContinue x) x
+    | Syntax.FunctionStaticStatement _ -> tag validate_function_static_statement (fun x -> StmtFunctionStatic x) x
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> StmtEcho x) x
     | Syntax.GlobalStatement _ -> tag validate_global_statement (fun x -> StmtGlobal x) x
     | Syntax.ConcurrentStatement _ -> tag validate_concurrent_statement (fun x -> StmtConcurrent x) x
@@ -448,6 +451,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtThrow                        thing -> invalidate_throw_statement                (value, thing)
     | StmtBreak                        thing -> invalidate_break_statement                (value, thing)
     | StmtContinue                     thing -> invalidate_continue_statement             (value, thing)
+    | StmtFunctionStatic               thing -> invalidate_function_static_statement      (value, thing)
     | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
     | StmtGlobal                       thing -> invalidate_global_statement               (value, thing)
     | StmtConcurrent                   thing -> invalidate_concurrent_statement           (value, thing)
@@ -2214,6 +2218,36 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { continue_keyword = invalidate_token x.continue_keyword
       ; continue_level = invalidate_option_with (invalidate_literal_expression) x.continue_level
       ; continue_semicolon = invalidate_token x.continue_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_function_static_statement : function_static_statement validator = function
+  | { Syntax.syntax = Syntax.FunctionStaticStatement x; value = v } -> v,
+    { static_semicolon = validate_token x.static_semicolon
+    ; static_declarations = validate_list_with (validate_static_declarator) x.static_declarations
+    ; static_static_keyword = validate_token x.static_static_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.FunctionStaticStatement) s
+  and invalidate_function_static_statement : function_static_statement invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.FunctionStaticStatement
+      { static_static_keyword = invalidate_token x.static_static_keyword
+      ; static_declarations = invalidate_list_with (invalidate_static_declarator) x.static_declarations
+      ; static_semicolon = invalidate_token x.static_semicolon
+      }
+    ; Syntax.value = v
+    }
+  and validate_static_declarator : static_declarator validator = function
+  | { Syntax.syntax = Syntax.StaticDeclarator x; value = v } -> v,
+    { static_initializer = validate_option_with (validate_simple_initializer) x.static_initializer
+    ; static_name = validate_token x.static_name
+    }
+  | s -> validation_fail (Some SyntaxKind.StaticDeclarator) s
+  and invalidate_static_declarator : static_declarator invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.StaticDeclarator
+      { static_name = invalidate_token x.static_name
+      ; static_initializer = invalidate_option_with (invalidate_simple_initializer) x.static_initializer
       }
     ; Syntax.value = v
     }

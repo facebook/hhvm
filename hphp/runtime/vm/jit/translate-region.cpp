@@ -328,8 +328,55 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
     return false;
   }
 
-  // Check for the static property pattern.
+  // First, check for the static local singleton pattern...
+
+  // Lambda to check if CGetL and StaticLocInit refer to the same local.
+  auto has_same_local = [] (PC pc, const Captures& captures) {
+    if (captures.size() == 0) return false;
+
+    auto cgetl = pc;
+    auto sli = captures[0];
+
+    assertx(peek_op(cgetl) == Op::CGetL);
+    assertx(peek_op(sli) == Op::StaticLocInit);
+
+    return (getImm(sli, 0).u_IVA == getImm(cgetl, 0).u_IVA);
+  };
+
+  auto cgetl = Atom(Op::CGetL).onlyif(has_same_local);
   auto retc  = Atom(Op::RetC);
+
+  // Look for a static local singleton pattern.
+  auto result = BCPattern {
+    Atom(Op::Null),
+    Atom(Op::StaticLocInit).capture(),
+    Atom(Op::IsTypeL),
+    Atom::alt(
+      Atom(Op::JmpZ).taken({cgetl, retc}),
+      Atom::seq(Atom(Op::JmpNZ), cgetl, retc)
+    )
+  }.ignore(
+    {Op::AssertRATL, Op::AssertRATStk}
+  ).matchAnchored(funcd);
+
+  if (result.found()) {
+    try {
+      irgen::prepareForNextHHBC(irgs, nullptr, ninst.source, false);
+      irgen::inlSingletonSLoc(
+        irgs,
+        funcd,
+        result.getCapture(0)
+      );
+    } catch (const FailedIRGen& e) {
+      return false;
+    }
+    TRACE(1, "[singleton-sloc] %s <- %s\n",
+        funcd->fullName()->data(),
+        fcall.func()->fullName()->data());
+    return true;
+  }
+
+  // Not found; check for the static property pattern.
 
   // Factory for String atoms that are required to match another captured
   // String opcode.
@@ -354,7 +401,7 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
   auto cgets = Atom(Op::CGetS);
 
   // Look for a class static singleton pattern.
-  auto result = BCPattern {
+  result = BCPattern {
     Atom(Op::String).capture(),
     Atom(Op::String).capture(),
     Atom(Op::ClsRefGetC),

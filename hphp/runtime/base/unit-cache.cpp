@@ -801,6 +801,7 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
     + (RuntimeOption::DisableStaticClosures ? '1' : '0')
+    + (RuntimeOption::DisableStaticLocalVariables ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
     + (RuntimeOption::EvalHackRecords ? '1' : '0')

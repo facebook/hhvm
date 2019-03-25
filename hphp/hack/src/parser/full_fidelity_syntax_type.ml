@@ -638,6 +638,15 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; continue_level                                     : t
     ; continue_semicolon                                 : t
     }
+  | FunctionStaticStatement                 of
+    { static_static_keyword                              : t
+    ; static_declarations                                : t
+    ; static_semicolon                                   : t
+    }
+  | StaticDeclarator                        of
+    { static_name                                        : t
+    ; static_initializer                                 : t
+    }
   | EchoStatement                           of
     { echo_keyword                                       : t
     ; echo_expressions                                   : t
@@ -1274,6 +1283,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDThrow                        of throw_statement
   | TLDBreak                        of break_statement
   | TLDContinue                     of continue_statement
+  | TLDFunctionStatic               of function_static_statement
   | TLDEcho                         of echo_statement
   | TLDGlobal                       of global_statement
   and expression =
@@ -1396,6 +1406,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtThrow                        of throw_statement
   | StmtBreak                        of break_statement
   | StmtContinue                     of continue_statement
+  | StmtFunctionStatic               of function_static_statement
   | StmtEcho                         of echo_statement
   | StmtGlobal                       of global_statement
   | StmtConcurrent                   of concurrent_statement
@@ -2026,6 +2037,15 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { continue_keyword: Token.t value
     ; continue_level: literal_expression option value
     ; continue_semicolon: Token.t value
+    }
+  and function_static_statement =
+    { static_static_keyword: Token.t value
+    ; static_declarations: static_declarator listesque value
+    ; static_semicolon: Token.t value
+    }
+  and static_declarator =
+    { static_name: Token.t value
+    ; static_initializer: simple_initializer option value
     }
   and echo_statement =
     { echo_keyword: Token.t value

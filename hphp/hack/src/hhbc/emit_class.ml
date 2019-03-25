@@ -59,6 +59,7 @@ let make_86method
   let method_is_memoize_wrapper_lsb = false in
   let method_no_injection = true in
   let method_inout_wrapper = false in
+  let method_static_inits = [] in
   let method_doc_comment = None in
   let method_is_interceptable = false in
   let method_is_memoize_impl = false in
@@ -70,6 +71,7 @@ let make_86method
     method_is_memoize_wrapper_lsb
     params
     method_return_type
+    method_static_inits
     method_doc_comment
     method_env in
   Hhas_method.make

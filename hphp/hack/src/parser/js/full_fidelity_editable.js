@@ -244,6 +244,10 @@ class EditableSyntax
       return BreakStatement.from_json(json, position, source);
     case 'continue_statement':
       return ContinueStatement.from_json(json, position, source);
+    case 'function_static_statement':
+      return FunctionStaticStatement.from_json(json, position, source);
+    case 'static_declarator':
+      return StaticDeclarator.from_json(json, position, source);
     case 'echo_statement':
       return EchoStatement.from_json(json, position, source);
     case 'global_statement':
@@ -12149,6 +12153,153 @@ class ContinueStatement extends EditableSyntax
     return ContinueStatement._children_keys;
   }
 }
+class FunctionStaticStatement extends EditableSyntax
+{
+  constructor(
+    static_keyword,
+    declarations,
+    semicolon)
+  {
+    super('function_static_statement', {
+      static_keyword: static_keyword,
+      declarations: declarations,
+      semicolon: semicolon });
+  }
+  get static_keyword() { return this.children.static_keyword; }
+  get declarations() { return this.children.declarations; }
+  get semicolon() { return this.children.semicolon; }
+  with_static_keyword(static_keyword){
+    return new FunctionStaticStatement(
+      static_keyword,
+      this.declarations,
+      this.semicolon);
+  }
+  with_declarations(declarations){
+    return new FunctionStaticStatement(
+      this.static_keyword,
+      declarations,
+      this.semicolon);
+  }
+  with_semicolon(semicolon){
+    return new FunctionStaticStatement(
+      this.static_keyword,
+      this.declarations,
+      semicolon);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var static_keyword = this.static_keyword.rewrite(rewriter, new_parents);
+    var declarations = this.declarations.rewrite(rewriter, new_parents);
+    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
+    if (
+      static_keyword === this.static_keyword &&
+      declarations === this.declarations &&
+      semicolon === this.semicolon)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new FunctionStaticStatement(
+        static_keyword,
+        declarations,
+        semicolon), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let static_keyword = EditableSyntax.from_json(
+      json.static_static_keyword, position, source);
+    position += static_keyword.width;
+    let declarations = EditableSyntax.from_json(
+      json.static_declarations, position, source);
+    position += declarations.width;
+    let semicolon = EditableSyntax.from_json(
+      json.static_semicolon, position, source);
+    position += semicolon.width;
+    return new FunctionStaticStatement(
+        static_keyword,
+        declarations,
+        semicolon);
+  }
+  get children_keys()
+  {
+    if (FunctionStaticStatement._children_keys == null)
+      FunctionStaticStatement._children_keys = [
+        'static_keyword',
+        'declarations',
+        'semicolon'];
+    return FunctionStaticStatement._children_keys;
+  }
+}
+class StaticDeclarator extends EditableSyntax
+{
+  constructor(
+    name,
+    initializer)
+  {
+    super('static_declarator', {
+      name: name,
+      initializer: initializer });
+  }
+  get name() { return this.children.name; }
+  get initializer() { return this.children.initializer; }
+  with_name(name){
+    return new StaticDeclarator(
+      name,
+      this.initializer);
+  }
+  with_initializer(initializer){
+    return new StaticDeclarator(
+      this.name,
+      initializer);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var name = this.name.rewrite(rewriter, new_parents);
+    var initializer = this.initializer.rewrite(rewriter, new_parents);
+    if (
+      name === this.name &&
+      initializer === this.initializer)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new StaticDeclarator(
+        name,
+        initializer), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let name = EditableSyntax.from_json(
+      json.static_name, position, source);
+    position += name.width;
+    let initializer = EditableSyntax.from_json(
+      json.static_initializer, position, source);
+    position += initializer.width;
+    return new StaticDeclarator(
+        name,
+        initializer);
+  }
+  get children_keys()
+  {
+    if (StaticDeclarator._children_keys == null)
+      StaticDeclarator._children_keys = [
+        'name',
+        'initializer'];
+    return StaticDeclarator._children_keys;
+  }
+}
 class EchoStatement extends EditableSyntax
 {
   constructor(
@@ -22894,6 +23045,8 @@ exports.GotoStatement = GotoStatement;
 exports.ThrowStatement = ThrowStatement;
 exports.BreakStatement = BreakStatement;
 exports.ContinueStatement = ContinueStatement;
+exports.FunctionStaticStatement = FunctionStaticStatement;
+exports.StaticDeclarator = StaticDeclarator;
 exports.EchoStatement = EchoStatement;
 exports.GlobalStatement = GlobalStatement;
 exports.ConcurrentStatement = ConcurrentStatement;

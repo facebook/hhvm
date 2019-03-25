@@ -423,6 +423,9 @@ let mut_imms (is : IS.t) : IS.t =
     match s with
     | BareThis        b       -> BareThis        (mutate_bare            b)
     | InitThisLoc    id       -> InitThisLoc     (mutate_local_id id  !mag)
+    | StaticLocCheck (id, str) -> StaticLocCheck (mutate_local_id id  !mag, str)
+    | StaticLocInit  (id, str) -> StaticLocInit  (mutate_local_id id  !mag, str)
+    | StaticLocDef  (id, str)  -> StaticLocDef   (mutate_local_id id  !mag, str)
     | OODeclExists    k       -> OODeclExists    (mutate_kind            k)
     | VerifyParamType p       -> VerifyParamType (mutate_param_id p   !mag)
     | VerifyOutType p         -> VerifyOutType   (mutate_param_id p   !mag)
@@ -633,6 +636,7 @@ let mutate_metadata (input : HP.t)  =
       (param |> Hhas_param.type_info    |> option_lift mutate_type_info)
       (param |> Hhas_param.default_value) in
   let mutate_body_data (body : Hhas_body.t) : Hhas_body.t =
+    let mutate_static_init s = s in
     Hhas_body.make
       (body |> Hhas_body.instrs)
       (body |> Hhas_body.decl_vars)
@@ -642,6 +646,7 @@ let mutate_metadata (input : HP.t)  =
       (body |> Hhas_body.is_memoize_wrapper_lsb |> mutate_bool)
       (body |> Hhas_body.params                 |> delete_map mutate_param)
       (body |> Hhas_body.return_type            |> option_lift mutate_type_info)
+      (body |> Hhas_body.static_inits           |> delete_map mutate_static_init)
       (body |> Hhas_body.doc_comment)
       (body |> Hhas_body.env) in
   let mutate_class_data (ids : Hhbc_id.Class.t list) (cls : Hhas_class.t) =

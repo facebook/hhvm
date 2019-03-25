@@ -221,6 +221,19 @@ abstract class ReflectionFunctionAbstract implements Reflector {
 
   /**
    * ( excerpt from
+   * http://php.net/manual/en/reflectionfunctionabstract.getstaticvariables.php
+   * )
+   *
+   * Get the static variables. Warning: This function is currently not
+   * documented; only its argument list is available.
+   *
+   * @return     array<string, mixed>   An array of static variables.
+   */
+  <<__Native>>
+  public function getStaticVariables(): darray<string, mixed>;
+
+  /**
+   * ( excerpt from
    * http://php.net/manual/en/reflectionfunctionabstract.returnsreference.php
    * )
    *
@@ -604,6 +617,29 @@ class ReflectionFunction extends ReflectionFunctionAbstract {
     }
     print $str;
   }
+
+  /**
+   * ( excerpt from
+   * http://php.net/manual/en/reflectionfunctionabstract.getstaticvariables.php
+   * )
+   *
+   * Get the static variables. Warning: This function is currently not
+   * documented; only its argument list is available.
+   *
+   * @return     mixed   An array of static variables.
+   */
+  public function getStaticVariables() {
+    $static_vars = parent::getStaticVariables();
+    return !$this->closure
+      ? $static_vars
+      : array_merge( // XXX: which should win in key collision case?
+        $static_vars,
+        $this->getClosureUseVariables($this->closure),
+      );
+  }
+
+  <<__Native, __Rx, __MaybeMutable>>
+  private function getClosureUseVariables(object $closure): array;
 
   /**
    * ( excerpt from http://php.net/manual/en/reflectionfunction.invoke.php )

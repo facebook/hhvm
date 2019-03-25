@@ -210,6 +210,53 @@ void readAllLocals(ISS& env) {
   if (env.recordUsedParams) env.collect.usedParams.set();
 }
 
+void modifyLocalStatic(ISS& env, LocalId id, const Type& t) {
+  auto modifyOne = [&] (LocalId lid) {
+    if (is_volatile_local(env.ctx.func, lid)) return;
+    if (env.state.localStaticBindings.size() <= lid) return;
+    if (env.state.localStaticBindings[lid] == LocalStaticBinding::None) return;
+    if (t.subtypeOf(BUninit) && !t.subtypeOf(BBottom)) {
+      // Uninit means we are unbinding.
+      env.state.localStaticBindings[lid] = id == NoLocalId ?
+        LocalStaticBinding::None : LocalStaticBinding::Maybe;
+      return;
+    }
+    if (lid >= env.collect.localStaticTypes.size()) {
+      env.collect.localStaticTypes.resize(lid + 1, TBottom);
+    }
+    env.collect.localStaticTypes[lid] = t.subtypeOf(BCell) ?
+      union_of(std::move(env.collect.localStaticTypes[lid]), t) :
+      TGen;
+  };
+  if (id != NoLocalId) {
+    return modifyOne(id);
+  }
+  for (LocalId i = 0; i < env.state.localStaticBindings.size(); i++) {
+    modifyOne(i);
+  }
+}
+
+void maybeBindLocalStatic(ISS& env, LocalId id) {
+  if (is_volatile_local(env.ctx.func, id)) return;
+  if (env.state.localStaticBindings.size() <= id) return;
+  if (env.state.localStaticBindings[id] != LocalStaticBinding::None) return;
+  env.state.localStaticBindings[id] = LocalStaticBinding::Maybe;
+  return;
+}
+
+void unbindLocalStatic(ISS& env, LocalId id) {
+  modifyLocalStatic(env, id, TUninit);
+}
+
+void bindLocalStatic(ISS& env, LocalId id, const Type& t) {
+  if (is_volatile_local(env.ctx.func, id)) return;
+  if (env.state.localStaticBindings.size() <= id) {
+    env.state.localStaticBindings.resize(id + 1);
+  }
+  env.state.localStaticBindings[id] = LocalStaticBinding::Bound;
+  modifyLocalStatic(env, id, t);
+}
+
 void doRet(ISS& env, Type t, bool hasEffects) {
   IgnoreUsedParams _{env};
 
@@ -498,6 +545,17 @@ void fpiNotFoldable(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // locals
 
+void useLocalStatic(ISS& env, LocalId l) {
+  assert(env.collect.localStaticTypes.size() > l);
+  if (!env.flags.usedLocalStatics) {
+    env.flags.usedLocalStatics =
+      std::make_shared<hphp_fast_map<LocalId,Type>>();
+  }
+  // Ignore the return value, since we only want the first type used,
+  // as that will be the narrowest.
+  env.flags.usedLocalStatics->emplace(l, env.collect.localStaticTypes[l]);
+}
+
 void mayReadLocal(ISS& env, uint32_t id) {
   if (id < env.flags.mayReadLocalSet.size()) {
     env.flags.mayReadLocalSet.set(id);
@@ -722,19 +780,41 @@ void setLocRaw(ISS& env, LocalId l, Type t) {
     always_assert_flog(current == TGen, "volatile local was not TGen");
     return;
   }
+  modifyLocalStatic(env, l, t);
   env.state.locals[l] = std::move(t);
+}
+
+folly::Optional<Type> staticLocType(ISS& env, LocalId l, const Type& super) {
+  mayReadLocal(env, l);
+  if (env.state.localStaticBindings.size() > l &&
+      env.state.localStaticBindings[l] == LocalStaticBinding::Bound) {
+    assert(env.collect.localStaticTypes.size() > l);
+    auto t = env.collect.localStaticTypes[l];
+    if (t.subtypeOf(super)) {
+      useLocalStatic(env, l);
+      if (t.subtypeOf(BBottom)) t = TInitNull;
+      return std::move(t);
+    }
+  }
+  return folly::none;
 }
 
 // Read a local type in the sense of CGetL.  (TUninits turn into
 // TInitNull, and potentially reffy types return the "inner" type,
 // which is always a subtype of InitCell.)
 Type locAsCell(ISS& env, LocalId l) {
+  if (auto s = staticLocType(env, l, TInitCell)) {
+    return std::move(*s);
+  }
   return to_cell(locRaw(env, l));
 }
 
 // Read a local type, dereferencing refs, but without converting
 // potential TUninits to TInitNull.
 Type derefLoc(ISS& env, LocalId l) {
+  if (auto s = staticLocType(env, l, TCell)) {
+    return std::move(*s);
+  }
   auto v = locRaw(env, l);
   if (v.subtypeOf(BCell)) return v;
   return v.couldBe(BUninit) ? TCell : TInitCell;
@@ -832,6 +912,7 @@ void setLoc(ISS& env, LocalId l, Type t, LocalId key = NoLocalId) {
   killLocEquiv(env, l);
   killIterEquivs(env, l, key);
   killThisLoc(env, l);
+  modifyLocalStatic(env, l, t);
   mayReadLocal(env, l);
   refineLocHelper(env, l, std::move(t));
 }
@@ -858,11 +939,13 @@ void loseNonRefLocalTypes(ISS& env) {
   killAllStkEquiv(env);
   killAllIterEquivs(env);
   killThisLoc(env, NoLocalId);
+  modifyLocalStatic(env, NoLocalId, TCell);
 }
 
 void killLocals(ISS& env) {
   FTRACE(2, "    killLocals\n");
   readUnknownLocals(env);
+  modifyLocalStatic(env, NoLocalId, TGen);
   for (auto& l : env.state.locals) l = TGen;
   killAllLocEquiv(env);
   killAllStkEquiv(env);

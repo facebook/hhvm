@@ -1355,10 +1355,23 @@ bool irrelevant_inst(const IRInstruction& inst) {
 
 //////////////////////////////////////////////////////////////////////
 
+struct LdStaticLocHashEqual {
+  size_t operator()(const IRInstruction* inst) const {
+    return inst->extra<LdStaticLoc>()->hash();
+  }
+  bool operator()(const IRInstruction* i1, const IRInstruction* i2) const {
+    return i1->extra<LdStaticLoc>()->equals(*i2->extra<LdStaticLoc>());
+  }
+};
+
 void find_alias_sets(Env& env) {
   FTRACE(2, "find_alias_sets --------------------------------------\n");
 
   auto frame_to_ctx = sparse_idptr_map<SSATmp,ASetID>(env.unit.numTmps());
+
+  jit::fast_set<IRInstruction*,
+                LdStaticLocHashEqual,
+                LdStaticLocHashEqual> ldStaticLocs;
 
   auto add = [&] (SSATmp* tmp) {
     if (!tmp->type().maybe(TCounted)) return;
@@ -1391,6 +1404,11 @@ void find_alias_sets(Env& env) {
     }
 
     auto canon = canonical(tmp);
+    if (canon->inst()->is(LdStaticLoc)) {
+      auto const res = ldStaticLocs.insert(canon->inst());
+      if (!res.second) canon = (*res.first)->dst();
+    }
+
     if (env.asetMap[canon] != -1) {
       id = env.asetMap[canon];
     } else {

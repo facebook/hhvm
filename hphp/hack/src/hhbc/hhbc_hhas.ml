@@ -1392,8 +1392,6 @@ let function_attributes f =
     then "dyn_callable" :: attrs else attrs
   in
   let attrs =
-    if Hhas_attribute.is_reads_caller_frame user_attrs && not (Hhas_function.inout_wrapper f) then "reads_frame" :: attrs else attrs in
-  let attrs =
     if not (Hhas_function.is_top f) then "nontop" :: attrs else attrs in
   let attrs =
     if Hhas_function.inout_wrapper f then "inout_wrapper" :: attrs else attrs in
@@ -1458,8 +1456,6 @@ let method_attributes m =
   let attrs = if is_systemlib && is_native then "persistent" :: attrs else attrs in
   let attrs = if is_systemlib then "builtin" :: attrs else attrs in
   let attrs = if is_systemlib && is_native then "unique" :: attrs else attrs in
-  let attrs =
-    if Hhas_attribute.is_reads_caller_frame user_attrs && not (Hhas_method.inout_wrapper m) then "reads_frame" :: attrs else attrs in
   let attrs = if Hhas_method.inout_wrapper m then "inout_wrapper" :: attrs else attrs in
   let attrs = if Hhas_method.no_injection m then "no_injection" :: attrs else attrs in
   let attrs = if is_systemlib && is_native then "skip_frame" :: attrs else attrs in

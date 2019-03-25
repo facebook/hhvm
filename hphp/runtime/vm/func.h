@@ -744,13 +744,6 @@ struct Func final {
   bool isCPPBuiltin() const;
 
   /*
-   * Can this function potentially read from the caller's frame?
-   *
-   * @implies: isBuiltin() && !isMethod()
-   */
-  bool readsCallerFrame() const;
-
-  /*
    * This HNI method takes an additional "func_num_args()" value at the
    * beginning of its signature (after Class* / ObjectData* for methods)
    */

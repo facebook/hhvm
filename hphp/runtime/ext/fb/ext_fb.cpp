@@ -1068,12 +1068,6 @@ bool HHVM_FUNCTION(fb_intercept, const String& name, const Variant& handler,
   return register_intercept(name, handler, data, true);
 }
 
-bool is_dangerous_varenv_function(const StringData* name) {
-  auto const f = Unit::lookupBuiltin(name);
-  // Functions can which can access the caller's frame are always builtin.
-  return f && f->readsCallerFrame();
-}
-
 bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
                                        const String& new_func_name) {
   if (orig_func_name.empty() || new_func_name.empty() ||
@@ -1086,14 +1080,6 @@ bool HHVM_FUNCTION(fb_rename_function, const String& orig_func_name,
     raise_warning("fb_rename_function(%s, %s) failed: %s does not exist!",
                   orig_func_name.data(), new_func_name.data(),
                   orig_func_name.data());
-    return false;
-  }
-
-  if (is_dangerous_varenv_function(orig_func_name.get())) {
-    raise_warning(
-      "fb_rename_function(%s, %s) failed: rename of functions that "
-      "affect variable environments is not allowed",
-      orig_func_name.data(), new_func_name.data());
     return false;
   }
 

@@ -248,7 +248,7 @@ let from_ast_wrapper : bool -> _ ->
     original_method_id else renamed_method_id in
   let method_is_interceptable =
     Interceptable.is_method_interceptable
-      namespace ast_class original_method_id method_attributes in
+      namespace ast_class original_method_id in
   let method_span =
     if is_native_opcode_impl then (0, 0)
     else Hhas_pos.pos_to_span ast_method.Ast.m_span in

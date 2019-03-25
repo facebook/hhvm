@@ -484,7 +484,6 @@ void FuncEmitter::setEHTabIsSorted() {
  *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
- *  "ReadsCallerFrame": Function might read from the caller's frame
  *
  *  e.g.   <<__Native("ActRec")>> function foo():mixed;
  */
@@ -495,8 +494,7 @@ static const StaticString
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
   s_numargs("NumArgs"),
-  s_opcodeimpl("OpCodeImpl"),
-  s_readsCallerFrame("ReadsCallerFrame");
+  s_opcodeimpl("OpCodeImpl");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
   int ret = Native::AttrNone;
@@ -522,8 +520,6 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         ret |= Native::AttrTakesNumArgs;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
         ret |= Native::AttrOpCodeImpl;
-      } else if (userAttrStrVal.get()->isame(s_readsCallerFrame.get())) {
-        attrs_ |= AttrReadsCallerFrame;
       }
     }
   }
@@ -534,10 +530,6 @@ Attr FuncEmitter::fix_attrs(Attr a) const {
   if (RuntimeOption::RepoAuthoritative) return a;
 
   a = Attr(a & ~AttrInterceptable);
-
-  if (a & AttrReadsCallerFrame) {
-    return a;
-  }
 
   if (RuntimeOption::EvalJitEnableRenameFunction) {
     return a | AttrInterceptable;

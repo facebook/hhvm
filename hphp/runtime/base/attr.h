@@ -182,10 +182,6 @@ enum Attr {
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
                                          //       |          |         //
-  // Indicates that the function might read from the caller's frame. Only
-  // allowed for builtins.
-  AttrReadsCallerFrame     = (1u << 23), //       |          |    X    //
-                                         //       |          |         //
   // Is this a (non-static) method that *must* have a non-null this?   //
   AttrRequiresThis         = (1u << 25), //       |          |    X    //
                                          //       |          |         //

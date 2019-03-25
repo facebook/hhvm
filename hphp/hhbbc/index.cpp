@@ -843,26 +843,6 @@ bool Func::cantBeMagicCall() const {
   );
 }
 
-bool Func::mightReadCallerFrame() const {
-  return match<bool>(
-    val,
-    // Only non-method builtins can read the caller's frame and
-    // builtins are always uniquely resolvable (renaming is not
-    // allowed for functions that can access the caller's frame).
-    [&](FuncName)   { return false; },
-    [&](MethodName) { return false; },
-    [&](FuncInfo* fi) {
-      return fi->func->attrs & AttrReadsCallerFrame;
-    },
-    [&](const MethTabEntryPair*) { return false; },
-    [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs()) {
-        if (pf->second.func->attrs & AttrReadsCallerFrame) return true;
-      }
-      return false;
-    });
-}
-
 bool Func::isFoldable() const {
   return match<bool>(val,
                      [&](FuncName)   { return false; },
@@ -915,7 +895,6 @@ bool Func::couldHaveReifiedGenerics() const {
 }
 
 bool Func::mightCareAboutDynCalls() const {
-  if (mightReadCallerFrame()) return true;
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && mightBeBuiltin()) {
     return true;
   }

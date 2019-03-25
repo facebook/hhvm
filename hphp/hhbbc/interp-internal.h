@@ -883,11 +883,6 @@ void specialFunctionEffects(ISS& env, const res::Func& func) {
        func.mightBeSkipFrame())) {
     readUnknownLocals(env);
   }
-
-  if (func.mightReadCallerFrame()) {
-    readUnknownLocals(env);
-    mayUseVV(env);
-  }
 }
 
 void specialFunctionEffects(ISS& env, ActRec ar) {

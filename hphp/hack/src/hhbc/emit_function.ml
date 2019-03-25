@@ -77,7 +77,7 @@ let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list 
     if wrapper_type_opt = Some Emit_inout_helpers.RefWrapper
     then original_id else renamed_id in
   let is_interceptable =
-    Interceptable.is_function_interceptable namespace ast_fun function_attributes in
+    Interceptable.is_function_interceptable namespace ast_fun in
   let normal_function =
     Hhas_function.make
       function_attributes

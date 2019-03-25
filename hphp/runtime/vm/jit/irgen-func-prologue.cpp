@@ -592,8 +592,7 @@ void emitFuncBodyDispatch(IRGS& env, const DVFuncletsVec& dvs) {
 void emitCalleeDynamicCallCheck(IRGS& env) {
   auto const func = curFunc(env);
 
-  if (!(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) &&
-      !func->readsCallerFrame()) {
+  if (!(RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin())) {
     return;
   }
 
@@ -609,10 +608,6 @@ void emitCalleeDynamicCallCheck(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-
-      if (func->readsCallerFrame()) {
-        gen(env, RaiseVarEnvDynCall, cns(env, func));
-      }
 
       std::string str;
       string_printf(

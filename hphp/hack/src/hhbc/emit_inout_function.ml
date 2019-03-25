@@ -151,7 +151,7 @@ let emit_wrapper_function
     make_wrapper_body env doc decl_vars return_type_info modified_params body_instrs
   in
   let is_interceptable =
-    Interceptable.is_function_interceptable namespace ast_fun function_attributes in
+    Interceptable.is_function_interceptable namespace ast_fun in
   Hhas_function.make
     function_attributes
     name
@@ -237,7 +237,7 @@ let emit_wrapper_method
     make_wrapper_body env doc decl_vars return_type_info params body_instrs
   in
   let method_is_interceptable =
-    Interceptable.is_method_interceptable namespace ast_class original_id method_attributes in
+    Interceptable.is_method_interceptable namespace ast_class original_id in
   Hhas_method.make
     method_attributes
     method_is_protected

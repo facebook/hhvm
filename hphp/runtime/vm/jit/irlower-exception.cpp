@@ -74,16 +74,6 @@ IMPL_OPCODE_CALL(DebugBacktraceFast)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static void raiseVarEnvDynCall(const Func* func) {
-  assertx(func->readsCallerFrame());
-  raise_disallowed_dynamic_call(func);
-}
-
-void cgRaiseVarEnvDynCall(IRLS& env, const IRInstruction* inst) {
-  cgCallHelper(vmain(env), env, CallSpec::direct(raiseVarEnvDynCall),
-               kVoidDest, SyncOptions::Sync, argGroup(env, inst).ssa(0));
-}
-
 static void raiseHackArrCompatNotice(const StringData* msg) {
   raise_hackarr_compat_notice(msg->toCppString());
 }

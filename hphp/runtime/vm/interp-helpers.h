@@ -86,10 +86,6 @@ inline void calleeDynamicCallChecks(const ActRec* ar) {
   if (!ar->isDynamicCall()) return;
   auto const func = ar->func();
 
-  if (func->readsCallerFrame()) {
-    raise_disallowed_dynamic_call(func);
-  }
-
   if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
     raise_notice(
       Strings::FUNCTION_CALLED_DYNAMICALLY,

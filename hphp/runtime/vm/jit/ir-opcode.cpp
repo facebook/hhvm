@@ -516,7 +516,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseTooManyArg:
   case RaiseUndefProp:
   case RaiseUninitLoc:
-  case RaiseVarEnvDynCall:
   case RaiseWarning:
   case RecordReifiedGenericsAndGetName:
   case RecordReifiedGenericsAndGetTSList:

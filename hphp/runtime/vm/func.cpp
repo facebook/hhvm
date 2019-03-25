@@ -107,7 +107,6 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   , m_shared(nullptr)
   , m_attrs(attrs)
 {
-  assertx(IMPLIES(readsCallerFrame(), isBuiltin() && !isMethod()));
 }
 
 Func::~Func() {
@@ -582,7 +581,6 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrMayUseVV) { out << " (mayusevv)"; }
   if (attrs & AttrRequiresThis) { out << " (requiresthis)"; }
   if (attrs & AttrBuiltin) { out << " (builtin)"; }
-  if (attrs & AttrReadsCallerFrame) { out << " (reads_caller_frame)"; }
   if (attrs & AttrSkipFrame) { out << " (skip_frame)"; }
   if (attrs & AttrIsFoldable) { out << " (foldable)"; }
   if (attrs & AttrNoInjection) { out << " (no_injection)"; }
@@ -1051,11 +1049,7 @@ bool funcReadsLocals(const Func* callee) {
   // A skip-frame function can dynamically call a function which reads from the
   // caller's frame. If we don't forbid such dynamic calls, we have to be
   // pessimistic.
-  if (callee->isSkipFrame() && !disallowDynamicVarEnvFuncs()) {
-    return true;
-  }
-
-  return callee->readsCallerFrame();
+  return callee->isSkipFrame() && !disallowDynamicVarEnvFuncs();
 }
 
 bool funcNeedsCallerFrame(const Func* callee) {

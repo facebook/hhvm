@@ -328,8 +328,6 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract in
   let method_is_final = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Final in
   let method_is_static = List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Static in
-  let method_attributes =
-    Emit_attribute.from_asts (Emit_env.get_namespace env) ast_method.Ast.m_user_attributes in
   let method_is_private =
     List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Private in
   let method_is_protected =
@@ -349,7 +347,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
      Ast_scope.ScopeItem.Class ast_class] in
   let namespace = ast_class.Ast.c_namespace in
   let method_is_interceptable =
-    Interceptable.is_method_interceptable namespace ast_class method_id method_attributes in
+    Interceptable.is_method_interceptable namespace ast_class method_id in
   let method_attributes =
     Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
   let method_is_async = ast_method.Ast.m_fun_kind = Ast_defs.FAsync in

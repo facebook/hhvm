@@ -231,6 +231,10 @@ SSATmp* opt_ord(IRGS& env, const ParamPrep& params) {
     return gen(env, OrdStr, arg);
   }
 
+  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) {
+    return nullptr;
+  }
+
   if (params.forNativeImpl) return nullptr;
 
   // In strict mode type mismatches won't be coerced (for legacy reasons in HH

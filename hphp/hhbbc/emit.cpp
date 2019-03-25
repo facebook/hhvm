@@ -717,6 +717,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_V_MFINAL   POP_C_MFINAL(1)
 #define POP_CMANY      pop(data.arg##1);
 #define POP_SMANY      pop(data.keys.size());
+#define POP_CUMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
 #define POP_FPUSH(nin, nobj) \
                        pop(nin + nobj);
@@ -822,6 +823,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
 #undef POP_CMANY
 #undef POP_SMANY
+#undef POP_CUMANY
 #undef POP_CVUMANY
 #undef POP_FPUSH
 #undef POP_FCALL

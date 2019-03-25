@@ -707,7 +707,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ReifiedName,     TWO(IVA,SA),      CMANY,           ONE(CV),    NF) \
   O(CheckReifiedGenericMismatch, NA,   ONE(CV),         NOV,        NF) \
   O(NativeImpl,      NA,               NOV,             NOV,        CF_TF) \
-  O(CreateCl,        TWO(IVA,IVA),     CVUMANY,         ONE(CV),    NF) \
+  O(CreateCl,        TWO(IVA,IVA),     CUMANY,          ONE(CV),    NF) \
   O(CreateCont,      NA,               NOV,             ONE(CV),    CF) \
   O(ContEnter,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \

@@ -109,12 +109,7 @@ struct c_Closure final : ObjectData {
    * NB: Closure properties can't have type-hints, so no checking is necessary
    * for writes.
    */
-  TypedValue* getUseVars() { return propVecForWrite(); }
-
-  TypedValue* getStaticVar(Slot s) {
-    assertx(getVMClass()->numDeclProperties() > s);
-    return getUseVars() + s;
-  }
+  Cell* getUseVars() { return propVecForWrite(); }
 
   int32_t getNumUseVars() const {
     return getVMClass()->numDeclProperties() -

@@ -4370,7 +4370,7 @@ void in(ISS& env, const bc::CreateCl& op) {
   if (nargs) {
     CompactVector<Type> usedVars(nargs);
     for (auto i = uint32_t{0}; i < nargs; ++i) {
-      usedVars[nargs - i - 1] = unctx(popT(env));
+      usedVars[nargs - i - 1] = unctx(popCU(env));
     }
     merge_closure_use_vars_into(
       env.collect.closureUseTypes,

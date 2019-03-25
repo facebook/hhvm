@@ -2528,7 +2528,7 @@ To string conversions:
   Nullptr when there is no context (i.e. the closure is being used in a
   non-method).
 
-| StClosureArg<offsetBytes>, ND, S(Obj) S(Gen), CRc
+| StClosureArg<offsetBytes>, ND, S(Obj) S(Cell), CRc
 
   Store one of the closure environment arguments (i.e. from the closure's use
   clause) from S1 into the closure object S0.

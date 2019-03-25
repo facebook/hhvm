@@ -129,7 +129,6 @@ struct StatCache {
 
   SimpleMutex m_lock;       // Protects the following fields.
   int m_ifd;
-  bool m_shouldClear;      // True if we should clear the cache on the next request
 #ifdef __linux__
   static const size_t kReadBufSize = 10 * (sizeof(struct inotify_event)
                                            + NAME_MAX + 1);

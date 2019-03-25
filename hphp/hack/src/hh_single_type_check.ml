@@ -638,8 +638,25 @@ let parse_name_and_decl popt files_contents =
   end
 
 let add_newline contents =
-  let x = String.index_exn contents '\n' in
-  String.((sub contents 0 x) ^ "\n" ^ (sub contents x ((length contents) - x)))
+  (* this is used for incremental mode to change all the positions, so we
+     basically want a prepend; there's a few cases we need to handle:
+     - empty file
+     - header line: apppend after header
+     - shebang and header: append after header
+     - shebang only, no header (e.g. .hack file): append after shebang
+     - no header or shebang (e.g. .hack file): prepend
+  *)
+  let after_shebang = if string_starts_with contents "#!"
+    then String.index_exn contents '\n' + 1
+    else 0
+  in
+  let after_header =
+    if String.length contents > (after_shebang + 2) && String.sub contents after_shebang 2 = "<?"
+    then (String.index_from_exn contents after_shebang '\n') + 1
+    else after_shebang
+  in
+  (String.sub contents 0 after_header) ^ "\n" ^ (String.sub contents after_header
+    (String.length contents - after_header))
 
 let get_decls defs =
   SSet.fold (fun x acc -> (Decl_heap.Typedefs.find_unsafe x)::acc)

@@ -115,7 +115,6 @@ class type ['a] ast_visitor_type = object
   method on_shape : 'a -> (shape_field_name * expr) list -> 'a
   method on_shape_field_name: 'a -> shape_field_name -> 'a
   method on_static_var : 'a -> expr list -> 'a
-  method on_global_var : 'a -> expr list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
   method on_string2 : 'a -> expr list -> 'a
@@ -254,8 +253,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
 
   method on_static_var acc el = List.fold_left this#on_expr acc el
 
-  method on_global_var acc el = List.fold_left this#on_expr acc el
-
   method on_awaitall acc el =
     List.fold_left (fun acc (e1, e2) ->
       let acc = (match e1 with
@@ -378,7 +375,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       this#on_def_inline acc d
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
-    | Global_var el           -> this#on_global_var acc el
     | Awaitall el             -> this#on_awaitall acc el
     | Markup (s, e)           -> this#on_markup acc s e
     | Using s                 -> this#on_using acc s

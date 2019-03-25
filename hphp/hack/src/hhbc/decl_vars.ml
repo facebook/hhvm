@@ -81,13 +81,6 @@ class declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body
   = object(this)
   inherit [decl_vars_state] Ast_visitor.ast_visitor as super
 
-  method! on_global_var acc exprs =
-    let add_local_from_expr acc e =
-      match snd e with
-      | (Ast.Id id | Ast.Lvar id) -> add_local ~barethis:Bare_this acc id
-      | _ -> this#on_expr acc e in
-    List.fold_left exprs ~init:acc ~f:add_local_from_expr
-
   method! on_obj_get acc e prop =
     let acc = match snd e with
     | Ast.Lvar (_, ("$this" as id)) ->

@@ -1826,7 +1826,6 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Return e -> N.Return (Option.map e (aast_expr env))
     | Aast.GotoLabel label -> name_goto_label env label
     | Aast.Goto label -> name_goto env label
-    | Aast.Global_var el -> N.Global_var (aast_global_varl env el)
     | Aast.Awaitall el -> aast_awaitall_stmt env el
     | Aast.If (e, b1, b2) -> aast_if_stmt env st e b1 b2
     | Aast.Do (b, e) -> aast_do_stmt env b e
@@ -2080,14 +2079,6 @@ module Make (GetLocals : GetLocals) = struct
     Env.new_goto_target env label;
     if in_finally then Errors.goto_invoked_in_finally label_pos;
     N.Goto label
-
-  and aast_static_varl env l = List.map l (aast_static_var env)
-  and aast_static_var env = function
-    | p, Aast.Lvar _ as lv ->
-      aast_expr env (p, Aast.Binop (Ast.Eq None, lv, (p, Aast.Null)))
-    | e -> aast_expr env e
-
-  and aast_global_varl env l = aast_static_varl env l
 
   and aast_awaitall_stmt env el =
     let el =

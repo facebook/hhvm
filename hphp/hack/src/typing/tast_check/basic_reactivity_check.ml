@@ -368,19 +368,6 @@ let check_conditional_operator
       (get_position when_false)
       (get_position when_true)
 
-let disallow_static_or_global ~is_static el =
-  let rec get_name = function
-  (* name *)
-  | _, Lvar (_, id) -> Local_id.to_string id
-  (* name = initializer *)
-  | _, Binop (_, lhs, _) -> get_name lhs
-  | _ -> "_" in
-  (List.hd el) |> Option.iter ~f:(fun n ->
-    let p = get_position n in
-    let name = get_name n in
-    if is_static then Errors.static_in_reactive_context p name
-    else Errors.global_in_reactive_context p name)
-
 type ctx = {
   reactivity: reactivity;
   allow_awaitable: bool;
@@ -458,10 +445,6 @@ let check = object(self)
 
   method! on_Expr (env, ctx) e =
     self#on_expr (env, set_expr_statement ctx) e
-
-  method! on_Global_var s el =
-    disallow_static_or_global ~is_static:false el;
-    super#on_Global_var s el
 
   method! on_Awaitall (env, ctx) els =
     let allow_awaitable_s = (env, allow_awaitable ctx) in

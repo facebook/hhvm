@@ -30,7 +30,6 @@ module Async        = Typing_async
 module SubType      = Typing_subtype
 module Unify        = Typing_unify
 module Union        = Typing_union
-module TGen         = Typing_generic
 module SN           = Naming_special_names
 module TVis         = Typing_visibility
 module TNBody       = Typing_naming_body
@@ -923,15 +922,6 @@ and stmt_ env pos st =
   | Def_inline _ ->
      (* Do nothing, this doesn't occur in Hack code. *)
      failwith "Should never typecheck nested definitions"
-  | Global_var el ->
-    let env = List.fold_left el ~f:begin fun env e ->
-      match e with
-        | _, Binop (Ast.Eq _, (_, Lvar (p, x)), _) ->
-          Env.add_todo env (TGen.no_generic p x)
-        | _ -> env
-    end ~init:env in
-    let env, tel, _ = exprs env el in
-    env, T.Global_var tel
   | Awaitall el ->
     let env, el = List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
       let env, te2, ty2 = expr env e2 in

@@ -358,7 +358,6 @@ and on_stmt_ p st :  Aast.stmt_ =
   | Return e                  -> Aast.Return (optional on_expr e)
   | GotoLabel label           -> Aast.GotoLabel label
   | Goto label                -> Aast.Goto label
-  | Global_var el             -> Aast.Global_var (on_list on_expr el)
   | Awaitall el               -> Aast.Awaitall (on_list on_awaitall_expr el)
   | If (e, b1, b2)            -> Aast.If (on_expr e, on_block b1, on_block b2)
   | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)

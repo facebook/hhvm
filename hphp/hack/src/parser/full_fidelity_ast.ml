@@ -405,7 +405,6 @@ type expr_location =
   | MemberSelect
   | InDoubleQuotedString
   | InBacktickedString
-  | InGlobalVar
   | AsStatement
   | RightOfAssignment
   | RightOfReturn
@@ -1496,7 +1495,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           (match expr with
           | p, String s
           | p, Int s
-          | p, Float s when location <> InGlobalVar ->
+          | p, Float s ->
             if not env.codegen
             then raise_parsing_error env (`Node operator) SyntaxError.invalid_variable_name;
             Lvar (p, "$" ^ s)
@@ -1535,7 +1534,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | InDoubleQuotedString, _ -> String (unesc_dbl (text node))
       | InBacktickedString, _ -> String (Php_escaping.unescape_backtick (text node))
       | MemberSelect, _
-      | InGlobalVar, _
       | TopLevel, _
       | AsStatement, _
       | RightOfAssignment, _
@@ -2242,8 +2240,9 @@ and pStmt : stmt parser = fun node env ->
     pos, Break (pBreak_or_continue_level env level)
   | ContinueStatement { continue_level=level; _ } ->
     pos, Continue (pBreak_or_continue_level env level)
-  | GlobalStatement { global_variables; _ } ->
-    pos, Global_var (couldMap ~f:(pExpr ~location:InGlobalVar) global_variables env)
+  | GlobalStatement _ ->
+    raise_parsing_error env (`Node node) "Global statements have been removed";
+    Pos.none, Noop
   | ConcurrentStatement { concurrent_statement=concurrent_stmt; _ } ->
     if not (ParserOptions.enable_concurrent env.parser_options) then
       raise_parsing_error env (`Node node) SyntaxError.concurrent_is_disabled;

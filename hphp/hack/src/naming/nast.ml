@@ -213,7 +213,6 @@ class type ['a] visitor_type = object
   method on_goto_label : 'a -> pstring -> 'a
   method on_goto : 'a -> pstring -> 'a
   method on_static_var : 'a -> expr list -> 'a
-  method on_global_var : 'a -> expr list -> 'a
   method on_awaitall : 'a -> (id option * expr) list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
@@ -339,8 +338,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_static_var acc el = List.fold_left el ~f:this#on_expr ~init:acc
 
-  method on_global_var acc el = List.fold_left el ~f:this#on_expr ~init:acc
-
   method on_awaitall acc el = List.fold_left ~f:(fun acc (x, y) ->
     let acc = match x with
     | Some x -> this#on_lvar acc x
@@ -452,7 +449,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Noop                    -> this#on_noop acc
     | Unsafe_block b          -> this#on_unsafe_block acc b
     | Fallthrough             -> this#on_fallthrough acc
-    | Global_var el           -> this#on_global_var acc el
     | Awaitall el             -> this#on_awaitall acc el
     | Def_inline d            -> this#on_def_inline acc d
     | Let     (x, h, e)       -> this#on_let acc x h e

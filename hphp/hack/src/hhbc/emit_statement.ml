@@ -291,8 +291,6 @@ let rec emit_stmt env (pos, st_) =
     emit_foreach env pos collection await_pos iterator (pos, A.Block block)
   | A.Def_inline def ->
     emit_def_inline def
-  | A.Global_var es ->
-    emit_global_vars pos es
   | A.Awaitall el ->
     emit_awaitall env pos el
   | A.Markup ((_, s), echo_expr_opt) ->
@@ -335,34 +333,6 @@ and emit_if env pos condition consequence alternative =
       instr_label done_label;
     ]
 
-and emit_global_vars p es =
-  let emit_global_var (_, e) =
-    match e with
-    | A.Id (_, name) when name.[0] = '$' ->
-      if SN.Superglobals.is_superglobal name
-      then empty
-      else
-        gather [
-          instr_string (SU.Locals.strip_dollar name);
-          instr_vgetg;
-          instr_bindl @@ Local.Named name;
-          instr_popv;
-        ]
-    | _ ->
-      failwith "Global var - impossible"
-  in
-  (* Deduplicate global variable declarations *)
-  let _, instrs = List.fold es ~init:([], [])
-    ~f:begin fun (seen, instrs)  e ->
-      match snd e with
-      | A.Id (_, name) when List.mem ~equal:(=) seen name ->
-        seen, instrs
-      | A.Id (_, name) ->
-        name::seen, (emit_global_var e)::instrs
-      | _ ->
-        seen, (emit_global_var e)::instrs
-      end in
-  Emit_pos.emit_pos_then p @@ gather (List.rev instrs)
 
 and emit_awaitall env pos el =
   match el with

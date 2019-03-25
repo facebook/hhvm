@@ -72,7 +72,6 @@ and stmt_ =
   | Return of expr option
   | GotoLabel of pstring
   | Goto of pstring
-  | Global_var of expr list
   | Awaitall of (lid option * expr) list
   | If of expr * block * block
   | Do of block * expr

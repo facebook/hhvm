@@ -82,22 +82,10 @@ var_dump(isset($x2->m));
 unset($x2->m);
 var_dump(isset($x2->m));
 
-echo "---------- unsetting inside a function (global) ------------\n";
+echo "---------- unsetting inside a function (\$GLOBALS) ------------\n";
 
 $gl = 100;
-
-function g1()
-{
-    global $gl;
-    var_dump(isset($gl));
-    unset($gl);             // unsets local "version" in current scope
-    var_dump(isset($gl));
-}
-
-g1();
 var_dump(isset($gl));       // still set
-
-echo "---------- unsetting inside a function (\$GLOBALS) ------------\n";
 
 function g2()
 {

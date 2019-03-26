@@ -110,6 +110,10 @@ struct c_Closure final : ObjectData {
    * for writes.
    */
   Cell* getUseVars() { return propVecForWrite(); }
+  TypedValue* getStaticVar(Slot s) {
+    assertx(getVMClass()->numDeclProperties() > s);
+    return getUseVars() + s;
+  }
 
   int32_t getNumUseVars() const {
     return getVMClass()->numDeclProperties() -

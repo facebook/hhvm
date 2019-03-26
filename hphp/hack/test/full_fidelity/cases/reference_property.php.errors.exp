@@ -1,0 +1,4 @@
+(9,8)-(9,23) Only variables, and the results of function calls can be used as references
+(10,8)-(10,24) ?-> operator is not allowed in write context
+(10,8)-(10,24) Only variables, and the results of function calls can be used as references
+(11,8)-(11,24) Only variables, and the results of function calls can be used as references

@@ -2154,7 +2154,7 @@ let class_type_designator_errors node =
     []
   | _ -> new_variable_errors node
 
-let rec check_reference node errors =
+let rec check_reference node errors env =
   match syntax node with
   | ScopeResolutionExpression { scope_resolution_name; _}
     when token_kind scope_resolution_name = Some TokenKind.Name ->
@@ -2166,13 +2166,14 @@ let rec check_reference node errors =
   | FunctionCallExpression _
   | FunctionCallWithTypeArgumentsExpression _
   | ListExpression _
-  | MemberSelectionExpression _
   | ObjectCreationExpression _
   | PipeVariableExpression _
-  | SafeMemberSelectionExpression _
-  | ScopeResolutionExpression _
   | SubscriptExpression _
   | VariableExpression _ -> errors
+  | ScopeResolutionExpression _
+  | SafeMemberSelectionExpression _
+  | MemberSelectionExpression _
+    when not (ParserOptions.disallow_byref_prop_args env.parser_options) -> errors
   | Token token when Token.kind token = TokenKind.Variable -> errors
   | PrefixUnaryExpression {
     prefix_unary_operator = { syntax = Token token; _ };
@@ -2187,8 +2188,10 @@ let rec check_reference node errors =
     prefix_unary_operand = { syntax = BracedExpression _ | VariableExpression _; _ }
   } when Token.kind token = TokenKind.Dollar -> errors
   | ParenthesizedExpression { parenthesized_expression_expression; _ } ->
-    check_reference parenthesized_expression_expression errors
-  | _ -> make_error_from_node node SyntaxError.invalid_reference :: errors
+    check_reference parenthesized_expression_expression errors env
+  | _ -> make_error_from_node node (SyntaxError.invalid_reference
+    ~disallow_members:(ParserOptions.disallow_byref_prop_args env.parser_options))
+    :: errors
 
 let rec_walk ~init ~f node =
   let rec rec_walk_impl parents init node =
@@ -2675,7 +2678,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       errors
   | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
     when token_kind prefix_unary_operator = Some TokenKind.Ampersand ->
-    check_reference prefix_unary_operand errors
+    check_reference prefix_unary_operand errors env
   | PrefixUnaryExpression { prefix_unary_operator; prefix_unary_operand }
     when token_kind prefix_unary_operator = Some TokenKind.Dollar ->
     let original_node = node in

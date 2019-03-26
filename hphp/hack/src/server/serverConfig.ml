@@ -289,6 +289,7 @@ let load config_filename options =
     ~tco_experimental_features:(config_experimental_tc_features config)
     ~tco_log_inference_constraints:(ServerArgs.log_inference_constraints options)
     ~tco_migration_flags:(config_tc_migration_flags config)
+    ?po_disallow_byref_prop_args:(bool_opt "disallow_byref_prop_args" config)
     ()
   in
   Errors.ignored_fixme_codes :=

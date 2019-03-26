@@ -304,7 +304,7 @@ val non_re_prefix : string
 val collection_intrinsic_generic: string
 val collection_intrinsic_many_typeargs: string
 val invalid_shape_field_name : string
-val invalid_reference : string
+val invalid_reference : disallow_members:bool -> string
 val invalid_hack_mode : string
 val empty_method_name : string
 val pair_initializer_needed : string

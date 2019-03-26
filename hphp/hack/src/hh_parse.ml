@@ -70,6 +70,7 @@ module FullFidelityParseArgs = struct
     pocket_universes : bool;
     disable_unsafe_expr : bool;
     disable_unsafe_block : bool;
+    disallow_byref_prop_args: bool;
   }
 
   let make
@@ -102,7 +103,8 @@ module FullFidelityParseArgs = struct
     disable_lval_as_an_expression
     pocket_universes
     disable_unsafe_expr
-    disable_unsafe_block = {
+    disable_unsafe_block
+    disallow_byref_prop_args = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -133,6 +135,7 @@ module FullFidelityParseArgs = struct
     pocket_universes;
     disable_unsafe_expr;
     disable_unsafe_block;
+    disallow_byref_prop_args;
   }
 
   let parse_args () =
@@ -181,6 +184,7 @@ module FullFidelityParseArgs = struct
     let push_file file = files := file :: !files in
     let disable_unsafe_expr = ref false in
     let disable_unsafe_block = ref false in
+    let disallow_byref_prop_args = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -299,6 +303,9 @@ No errors are filtered out.";
       "--disable-unsafe-block",
         Arg.Set disable_unsafe_block,
         "Treat UNSAFE block comments as just comments, the typechecker will ignore them";
+      "--disallow-byref-prop-args",
+        Arg.Set disallow_byref_prop_args,
+        "Disallow passing properties by reference to functions";
       ] in
     Arg.parse options push_file usage;
     make
@@ -332,6 +339,7 @@ No errors are filtered out.";
       !pocket_universes
       !disable_unsafe_expr
       !disable_unsafe_block
+      !disallow_byref_prop_args
 end
 
 open FullFidelityParseArgs
@@ -352,7 +360,8 @@ let handle_existing_file args filename =
     (args.disable_lval_as_an_expression) in
   let popt = ParserOptions.setup_pocket_universes popt
     (args.pocket_universes) in
-
+  let popt = ParserOptions.with_disallow_byref_prop_args popt
+    (args.disallow_byref_prop_args) in
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in

@@ -28,7 +28,9 @@ let with_disable_lval_as_an_expression po b =
 let enable_stronger_await_binding = GlobalOptions.po_enable_stronger_await_binding
 let disable_lval_as_an_expression = GlobalOptions.po_disable_lval_as_an_expression
 let setup_pocket_universes = GlobalOptions.setup_pocket_universes
-
+let disallow_byref_prop_args = GlobalOptions.po_disallow_byref_prop_args
+let with_disallow_byref_prop_args po b =
+  { po with GlobalOptions.po_disallow_byref_prop_args = b }
 let make
   ~auto_namespace_map
   ~enable_hh_syntax_for_hhvm

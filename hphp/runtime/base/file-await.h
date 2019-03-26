@@ -28,7 +28,7 @@ struct FileEventHandler : AsioEventHandler {
  friend struct FileAwait;
 
   FileEventHandler(AsioEventBase* base, int fd, FileAwait& fa):
-    AsioEventHandler(base, fd), m_fileAwait(fa) {}
+    AsioEventHandler(base, folly::NetworkSocket::fromFd(fd)), m_fileAwait(fa) {}
 
   void handlerReady(uint16_t events) noexcept override;
 

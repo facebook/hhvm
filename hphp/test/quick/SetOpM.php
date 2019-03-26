@@ -36,13 +36,5 @@ $zero = 0;
 $a[$zero] += 1;
 var_dump($a);
 
-
-$x = 40;
-$arr = array();
-$arr[0] =& $x;
-$arr[0] += 4;
-var_dump($x);
-
-
 print "Test end\n";
 

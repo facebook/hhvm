@@ -18,12 +18,7 @@ function add($d, $v) {
   return $d;
 }
 
-function main() {
-  $foo = 12;
-  $ref =& $foo;
-  $bar = array();
-  $badref =& $bar;
-
+function run(&$ref, &$badref) {
   $dyn = 42;
   add(keyset[$dyn], 1)
     |> add($$, "1")
@@ -46,4 +41,9 @@ function main() {
     |> var_dump($$);
 }
 
-main();
+<<__EntryPoint>>
+function main() {
+  $foo = 12;
+  $bar = array();
+  run(&$foo, &$bar);
+}

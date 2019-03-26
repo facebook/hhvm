@@ -1,16 +1,6 @@
 Test begin
 
-Warning: Cannot use a scalar value as an array in %s on line 8
-array(1) {
-  [0]=>
-  int(0)
-}
-int(1)
-
-Warning: Cannot use a scalar value as an array in %s on line 16
+Warning: Cannot use a scalar value as an array in %s on line 10
 NULL
 int(1)
-
-Warning: Cannot use a scalar value as an array in %s on line 21
-NULL
 Test end

@@ -2,7 +2,3 @@ start iter loop
 
 Warning: Invalid argument supplied for foreach() in %s on line 6
 end iter loop
-start witer loop
-
-Warning: Invalid argument supplied for foreach() in %s on line 12
-end witer loop

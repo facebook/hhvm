@@ -44,42 +44,6 @@ vec(3) {
   }
   string(0) ""
 }
-======= base_define_reffy ==========================
-vec(3) {
-  NULL
-  array(1) {
-    ["a"]=>
-    &string(3) "abc"
-  }
-  string(0) ""
-}
-Exception: "Out of bounds vec access: invalid index 3"
-vec(3) {
-  NULL
-  array(1) {
-    ["a"]=>
-    int(100)
-  }
-  string(0) ""
-}
-Exception: "Invalid vec key: expected a key of type int, string given"
-vec(3) {
-  NULL
-  array(1) {
-    ["a"]=>
-    int(100)
-  }
-  string(0) ""
-}
-Exception: "Invalid vec key: expected a key of type int, bool given"
-vec(3) {
-  NULL
-  array(1) {
-    ["a"]=>
-    int(100)
-  }
-  string(0) ""
-}
 ======= base_unset =================================
 vec(3) {
   NULL
@@ -159,62 +123,6 @@ array(2) {
     array(1) {
       ["a"]=>
       int(200)
-    }
-    string(0) ""
-  }
-}
-Exception: "Out of bounds vec access: invalid index 3"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    array(1) {
-      ["a"]=>
-      int(100)
-    }
-    string(0) ""
-  }
-}
-Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    array(1) {
-      ["a"]=>
-      int(100)
-    }
-    string(0) ""
-  }
-}
-Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    array(1) {
-      ["a"]=>
-      int(100)
-    }
-    string(0) ""
-  }
-}
-======= dim_define_reffy ===========================
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    array(1) {
-      ["a"]=>
-      &string(3) "abc"
     }
     string(0) ""
   }
@@ -610,53 +518,6 @@ array(2) {
     string(0) ""
   }
 }
-======= fini_bind ==================================
-Exception: "Vecs cannot contain references"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-Exception: "Vecs cannot contain references"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-======= fini_bind_new_elem =========================
-Exception: "Vecs cannot contain references"
 ======= fini_str_to_arr ============================
 array(2) {
   [0]=>

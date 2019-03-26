@@ -18,12 +18,7 @@ function set(dict $d, mixed $k, mixed $v): dict {
   return $d;
 }
 
-function main() {
-  $foo = 12;
-  $ref =& $foo;
-  $bar = array();
-  $badref =& $bar;
-
+function run(&$ref, &$badref) {
   set(dict[], "1", "hello")
     |> set($$, 1, "goodbye")
     |> set($$, null, "null")
@@ -45,4 +40,9 @@ function main() {
     |> var_dump($$);
 }
 
-main();
+<<__EntryPoint>>
+function main() {
+  $foo = 12;
+  $bar = array();
+  run(&$foo, &$bar);
+}

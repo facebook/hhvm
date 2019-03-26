@@ -1,8 +1,6 @@
 <?hh
 
-function main() {
-  $a = array(1);
-  $b =& $a[0];
+function main(&$b, $a) {
   var_dump(call_user_func_array('foo', $a));
   var_dump(call_user_func('foo', $a));
   var_dump($a);
@@ -18,4 +16,5 @@ function foo($x) {
   return 1;
 }
 
-main();
+$a = array(1);
+main(&$a[0], $a);

@@ -1,6 +1,6 @@
 object(x) (2) {
   ["x0"]=>
-  &object(x) (2) {
+  object(x) (2) {
     ["x0"]=>
     NULL
     ["y1"]=>
@@ -16,7 +16,7 @@ object(x) (3) {
   ["y1"]=>
   NULL
   ["q0"]=>
-  &object(x) (5) {
+  object(x) (5) {
     ["x0"]=>
     NULL
     ["y1"]=>
@@ -29,5 +29,4 @@ object(x) (3) {
     *RECURSION*
   }
 }
-string(7) "it's ok"
 string(7) "it's ok"

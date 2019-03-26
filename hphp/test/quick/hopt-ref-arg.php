@@ -1,9 +1,11 @@
 <?hh
 
-function run(&$a) {
-  $b =& $a;
-
+function set(&$b) {
   $b = 3;
+}
+
+function run(&$a) {
+  set(&$a);
   return $a;
 }
 

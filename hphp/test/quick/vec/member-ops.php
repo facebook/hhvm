@@ -26,16 +26,6 @@ function base_define($v, $k) {
   var_dump($v);
 }
 
-function base_define_reffy($v, $k) {
-  $str = 'abc';
-  try {
-    $v[$k]['a'] = &$str;
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($v);
-}
-
 function base_unset($v, $k) {
   try {
     unset($v[$k]['a']);
@@ -63,12 +53,6 @@ function base($v) {
   base_define($v, 3);
   base_define($v, '1');
   base_define($v, true);
-
-  echo "======= base_define_reffy ==========================\n";
-  base_define_reffy($v, 1);
-  base_define_reffy($v, 3);
-  base_define_reffy($v, '1');
-  base_define_reffy($v, true);
 
   echo "======= base_unset =================================\n";
   base_unset($v, 1);
@@ -136,16 +120,6 @@ function dim_define($a, $k) {
   var_dump($a);
 }
 
-function dim_define_reffy($a, $k) {
-  $str = 'abc';
-  try {
-    $a[1][$k]['a'] = &$str;
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($a);
-}
-
 function dim_unset($a, $k) {
   try {
     unset($a[1][$k]['a']);
@@ -173,12 +147,6 @@ function dim($a) {
   dim_define($a, 3);
   dim_define($a, '1');
   dim_define($a, true);
-
-  echo "======= dim_define_reffy ===========================\n";
-  dim_define_reffy($a, 1);
-  dim_define_reffy($a, 3);
-  dim_define_reffy($a, '1');
-  dim_define_reffy($a, true);
 
   echo "======= dim_unset ==================================\n";
   dim_unset($a, 1);
@@ -254,9 +222,9 @@ function fini_isset($a, $k) {
 }
 
 function fini_vget($a, $k) {
+  $print = (&$what) ==> { var_dump($what); };
   try {
-    $v = &$a[1][$k];
-    var_dump($v);
+    $print(&$a[1][$k]);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
@@ -299,16 +267,6 @@ function fini_unset($a, $k) {
   var_dump($a);
 }
 
-function fini_bind($a, $k) {
-  $str = "some-str";
-  try {
-    $a[1][$k] = &$str;
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($a);
-}
-
 function fini($a) {
   echo "======= fini_cget_warn =============================\n";
   fini_cget_warn($a, 1);
@@ -341,10 +299,10 @@ function fini($a) {
   fini_vget($a, true);
 
   echo "======= fini_vget_new_elem =========================\n";
+  $print = (&$what) ==> { var_dump($what); };
   try {
     $copy = $a;
-    $v = &$copy[1][];
-    var_dump($v);
+    $print(&$copy[1][]);
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -400,22 +358,6 @@ function fini($a) {
   fini_unset($a, 3);
   fini_unset($a, '1');
   fini_unset($a, true);
-
-  echo "======= fini_bind ==================================\n";
-  fini_bind($a, 1);
-  fini_bind($a, 3);
-  fini_bind($a, '1');
-  fini_bind($a, true);
-
-  echo "======= fini_bind_new_elem =========================\n";
-  try {
-    $copy = $a;
-    $str = "some-str";
-    $copy[1][] = &$str;
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
 
   echo "======= fini_str_to_arr ============================\n";
   try {

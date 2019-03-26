@@ -2,5 +2,5 @@
 class Foo {
   public $x;
 }
-$this =& new Foo();
+$this = new Foo();
 echo $this->x;

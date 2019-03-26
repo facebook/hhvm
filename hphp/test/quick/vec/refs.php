@@ -28,72 +28,8 @@ function ref_param($v) {
   var_dump($v);
 }
 
-function elem_ref($v) {
-  echo "========== elem_ref ================================\n";
-  try {
-    $elem = &$v[1];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$v[10];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$v["key"];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$v[false];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($v);
-}
-
-function append_ref($v) {
-  echo "========== append_ref ==============================\n";
-  $value = "some-value";
-  try {
-    $v[] = &$value;
-  } catch (Exception $e) {
-    echo "append_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($v);
-}
-
-function set_ref($v) {
-  echo "========== set_ref =================================\n";
-  $value = "some-value";
-  try {
-    $v[1] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $v[10] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $v["key"] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $v[false] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($v);
-}
-
-function convert_with_ref() {
+function convert_with_ref(&$ref, $arr) {
   echo "========== convert_with_ref ========================\n";
-  $arr = ['a', 'b', 'c', 'd', 'e'];
-  $ref = &$arr[3];
   try {
     $v = vec($arr);
     var_dump($v);
@@ -109,29 +45,22 @@ function ref_unserialize() {
 }
 
 // Its fine to have subelements with refs in them
-function nested_refs($v) {
+function nested_refs($v, &$ref, $arr) {
   echo "========== nested_refs =============================\n";
   pass_by_ref(&$v[4][0]);
-  $elem = &$v[4][1];
-  $value = 100;
-  $v[4][2] = &$value;
-  $v[4][] = &$value;
   var_dump($v);
 
-  $arr = ['a', 'b', ['c', 'd', 'e']];
-  $ref = &$arr[2][0];
   $converted = vec($arr);
   var_dump($converted);
 }
 
 function main() {
+  $arr1 = ['a', 'b', 'c', 'd', 'e'];
+  $arr2 = ['a', 'b', ['c', 'd', 'e']];
   $v = vec[1, 2, 3, 4, [5, 6, 7]];
   ref_param($v);
-  elem_ref($v);
-  append_ref($v);
-  set_ref($v);
-  convert_with_ref();
+  convert_with_ref(&$arr1[3], $arr1);
   ref_unserialize();
-  nested_refs($v);
+  nested_refs($v, &$arr2[2][0], $arr2);
 }
 main();

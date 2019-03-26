@@ -33,82 +33,8 @@ function ref_param($ks) {
   var_dump($ks);
 }
 
-function elem_ref($ks) {
-  echo "========== elem_ref ================================\n";
-  try {
-    $elem = &$ks[1];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$ks[10];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$ks["key1"];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$ks["key2"];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $elem = &$ks[false];
-  } catch (Exception $e) {
-    echo "elem_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($ks);
-}
-
-function append_ref($ks) {
-  echo "========== append_ref ==============================\n";
-  $ksalue = "some-value";
-  try {
-    $ks[] = &$value;
-  } catch (Exception $e) {
-    echo "append_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($ks);
-}
-
-function set_ref($ks) {
-  echo "========== set_ref =================================\n";
-  $value = "some-value";
-  try {
-    $ks[1] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $ks[10] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $ks["key1"] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $ks["key2"] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  try {
-    $ks[false] = &$value;
-  } catch (Exception $e) {
-    echo "set_ref exception: \"", $e->getMessage(), "\"\n";
-  }
-  var_dump($ks);
-}
-
-function convert_with_ref() {
+function convert_with_ref(&$ref, $arr) {
   echo "========== convert_with_ref ========================\n";
-  $arr = ['a', 'b', 'c', 'd', 'e'];
-  $ref = &$arr[3];
   try {
     $ks = keyset($arr);
     var_dump($ks);
@@ -124,12 +50,10 @@ function ref_unserialize() {
 }
 
 function main() {
+  $arr1 = ['a', 'b', 'c', 'd', 'e'];
   $ks = keyset["key1", 1, "abc", 123];
   ref_param($ks);
-  elem_ref($ks);
-  append_ref($ks);
-  set_ref($ks);
-  convert_with_ref();
+  convert_with_ref(&$arr1[3], $arr1);
   ref_unserialize();
 }
 main();

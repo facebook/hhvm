@@ -4,7 +4,7 @@ class foo {
 	private $test = 3;
 
 	public function x() {
-		$a = &$this;
+		$a = $this;
 		$this->a = function() use ($a) { return $a; };
 		var_dump($this->a->__invoke());
 		var_dump(is_a($this->a, 'closure'));

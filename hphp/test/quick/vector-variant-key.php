@@ -2,19 +2,25 @@
 
 class asshat {
   private $prop;
-  public function __construct(&$v) {
-    $this->prop =& $v;
-  }
+
   public function __get($k) {
     $this->prop = 'foo';
     return array('foo' => 'gotcha', 1 => 'whoops');
   }
-}
-function main($cond) {
-  $x = 1;
-  $o = new asshat(&$x);
-  if ($cond) {
-    var_dump($o->blah[$x]);
+
+  private function with(&$x, $cond) {
+    $x = 1;
+    if ($cond) {
+      var_dump($this->blah[$x]);
+    }
+  }
+  public function run($cond) {
+    $this->with(&$this->prop, $cond);
   }
 }
-main(true);
+
+<<__EntryPoint>>
+function main() {
+  $o = new asshat();
+  $o->run(true);
+}

@@ -28,10 +28,6 @@ function f() {
   $a = array();
   $a["foo"] = null;
   var_dump(isset($a["foo"]));
-  $q =& $a["foo"];
-  var_dump(isset($a["foo"]));
-  unset($q);
-  var_dump(isset($a["foo"]));
 }
 
 f();

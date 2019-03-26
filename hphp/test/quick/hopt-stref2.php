@@ -1,15 +1,12 @@
 <?hh
 
-  function run() {
-    $a = 5;
-    $b =& $a;
-    $c =& $b;
+function run(&$a, &$b, &$c) {
+  $a = "hello";
+  $b = 2;
+  $c = array();
 
-    $a = "hello";
-    $b = 2;
-    $c = array();
+  return $a;
+}
 
-    return $a;
-  }
-
-var_dump(run());
+$a = 5;
+var_dump(run(&$a, &$a, &$a));

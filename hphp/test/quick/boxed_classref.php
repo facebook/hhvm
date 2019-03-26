@@ -2,9 +2,8 @@
 
 class Hey { public static $x = "yup\n"; }
 
-function foo() {
+function foo(&$cls) {
   $cls = "Hey";
-  $boxer =& $cls;
   echo $cls::$x;
 }
-foo();
+foo(&$boxer);

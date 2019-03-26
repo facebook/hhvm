@@ -5,38 +5,27 @@ print "Test begin\n";
 
 class A {
   static public $a = 1;
-  static public function setA($val) {
-    self::$a =& $val;
-  }
 }
 
-function main(){
+function main(&$x){
   echo "main\n";
   A::$a = 30;
-  $x =& A::$a;
   print($x.A::$a."\n");
   $x = 5;
   print($x.A::$a."\n");
 }
 
-function main2($name){
+function main2($name, &$x){
   echo "main2\n";
   $name::$a = 30;
-  $x =& $name::$a;
   print($x.$name::$a."\n");
   $x = 5;
   print($x.$name::$a."\n");
 }
 
-function main3() {
-  A::setA(5);
-}
+main(&A::$a);
+main(&A::$a);
 
-main();
-main();
-
-main2("A");
-main2("A");
-
-main3();
-main3();
+$name = "A";
+main2("A", &$name::$a);
+main2("A", &$name::$a);

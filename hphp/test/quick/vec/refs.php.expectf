@@ -17,60 +17,6 @@ vec(5) {
     int(7)
   }
 }
-========== elem_ref ================================
-elem_ref exception: "Vecs cannot contain references"
-elem_ref exception: "Vecs cannot contain references"
-elem_ref exception: "Invalid vec key: expected a key of type int, string given"
-elem_ref exception: "Invalid vec key: expected a key of type int, bool given"
-vec(5) {
-  int(1)
-  int(2)
-  int(3)
-  int(4)
-  array(3) {
-    [0]=>
-    int(5)
-    [1]=>
-    int(6)
-    [2]=>
-    int(7)
-  }
-}
-========== append_ref ==============================
-append_ref exception: "Vecs cannot contain references"
-vec(5) {
-  int(1)
-  int(2)
-  int(3)
-  int(4)
-  array(3) {
-    [0]=>
-    int(5)
-    [1]=>
-    int(6)
-    [2]=>
-    int(7)
-  }
-}
-========== set_ref =================================
-set_ref exception: "Vecs cannot contain references"
-set_ref exception: "Vecs cannot contain references"
-set_ref exception: "Invalid vec key: expected a key of type int, string given"
-set_ref exception: "Invalid vec key: expected a key of type int, bool given"
-vec(5) {
-  int(1)
-  int(2)
-  int(3)
-  int(4)
-  array(3) {
-    [0]=>
-    int(5)
-    [1]=>
-    int(6)
-    [2]=>
-    int(7)
-  }
-}
 ========== convert_with_ref ========================
 convert_with_ref exception: "Vecs cannot contain references"
 ========== ref_unserialize =========================
@@ -83,15 +29,13 @@ vec(5) {
   int(2)
   int(3)
   int(4)
-  array(4) {
+  array(3) {
     [0]=>
     int(5)
     [1]=>
-    &int(6)
+    int(6)
     [2]=>
-    &int(100)
-    [3]=>
-    &int(100)
+    int(7)
   }
 }
 vec(3) {

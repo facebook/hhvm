@@ -26,11 +26,3 @@ $s = 'MyClass';
 foreach($refs as $r) {
   $r::foo();
 }
-
-$refs2[] = &$s;
-$obj = clsFact();
-$refs2[] = &$obj;
-
-foreach($refs2 as $r) {
-  $r::foo();
-}

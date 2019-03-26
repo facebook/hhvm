@@ -55,19 +55,21 @@ var_dump($x);
 echo "**************************\n";
 
 $abc = array('foo' => array('bar' => 'baz'));
-$abc2 =& $abc;
-var_dump(isset($abc['foo']));
-var_dump(empty($abc['foo']));
-var_dump(isset($abc->foo));
-var_dump(empty($abc->foo));
-var_dump(isset($abc['foo']['bar']));
-var_dump(empty($abc['foo']['bar']));
-var_dump(isset($abc['foo']->bar));
-var_dump(empty($abc['foo']->bar));
-var_dump(isset($abc->foo['bar']));
-var_dump(empty($abc->foo['bar']));
-var_dump(isset($abc->foo->bar));
-var_dump(empty($abc->foo->bar));
+function tst1(&$abc) {
+  var_dump(isset($abc['foo']));
+  var_dump(empty($abc['foo']));
+  var_dump(isset($abc->foo));
+  var_dump(empty($abc->foo));
+  var_dump(isset($abc['foo']['bar']));
+  var_dump(empty($abc['foo']['bar']));
+  var_dump(isset($abc['foo']->bar));
+  var_dump(empty($abc['foo']->bar));
+  var_dump(isset($abc->foo['bar']));
+  var_dump(empty($abc->foo['bar']));
+  var_dump(isset($abc->foo->bar));
+  var_dump(empty($abc->foo->bar));
+}
+tst1(&$abc);  // make $abc a Var
 
 echo "**************************\n";
 
@@ -84,16 +86,17 @@ unset($abc);
 echo "**************************\n";
 
 $abc = new stdclass;
-$abc2 =& $abc; // make $abc a Var
-$abc->foo = array('bar' => 'baz');
-var_dump(isset($abc->foo));
-var_dump(empty($abc->foo));
-var_dump(isset($abc->foo['bar']));
-var_dump(empty($abc->foo['bar']));
-var_dump(isset($abc->foo->bar));
-var_dump(empty($abc->foo->bar));
+function tst2(&$abc) {
+  $abc->foo = array('bar' => 'baz');
+  var_dump(isset($abc->foo));
+  var_dump(empty($abc->foo));
+  var_dump(isset($abc->foo['bar']));
+  var_dump(empty($abc->foo['bar']));
+  var_dump(isset($abc->foo->bar));
+  var_dump(empty($abc->foo->bar));
+}
+tst2(&$abc);  // make $abc a Var
 unset($abc);
-unset($abc2);
 
 echo "**************************\n";
 
@@ -114,20 +117,22 @@ unset($abc);
 echo "**************************\n";
 
 $abc = array('foo' => new stdclass);
-$abc2 =& $abc; // make $abc a Var
-$abc['foo']->bar = 'baz';
-var_dump(isset($abc['foo']));
-var_dump(empty($abc['foo']));
-var_dump(isset($abc->foo));
-var_dump(empty($abc->foo));
-var_dump(isset($abc['foo']->bar));
-var_dump(empty($abc['foo']->bar));
-var_dump(isset($abc->foo['bar']));
-var_dump(empty($abc->foo['bar']));
-var_dump(isset($abc->foo->bar));
-var_dump(empty($abc->foo->bar));
+function tst3(&$abc) {
+  $abc['foo']->bar = 'baz';
+  var_dump(isset($abc['foo']));
+  var_dump(empty($abc['foo']));
+  var_dump(isset($abc->foo));
+  var_dump(empty($abc->foo));
+  var_dump(isset($abc['foo']->bar));
+  var_dump(empty($abc['foo']->bar));
+  var_dump(isset($abc->foo['bar']));
+  var_dump(empty($abc->foo['bar']));
+  var_dump(isset($abc->foo->bar));
+  var_dump(empty($abc->foo->bar));
+}
+
+tst3(&$abc);  // make $abc a Var
 unset($abc);
-unset($abc2);
 
 echo "**************************\n";
 

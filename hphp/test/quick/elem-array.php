@@ -1,8 +1,7 @@
 <?hh
 
 
-function go($a, $r) {
-  if ($r) $a =& $a;
+function go($a) {
   if ($a) $x = 5;
 
   $a[1]['hello'] = 5;
@@ -11,5 +10,4 @@ function go($a, $r) {
 }
 
 $a = array();
-var_dump(go($a, false));
-var_dump(go($a, true));
+var_dump(go($a));

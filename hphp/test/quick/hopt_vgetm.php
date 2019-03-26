@@ -20,12 +20,13 @@ class C {
     echo $this->x;
     echo "\n";
   }
+  public function test2(&$var, $val) {
+    $var = $val;
+    $this->printX();
+  }
   public function test() {
-    $var = 4;
-    $this->x =& $var;
-    $this->printX();
-    $var = 5;
-    $this->printX();
+    $this->test2(&$this->x, 4);
+    $this->test2(&$this->x, 5);
   }
 }
 

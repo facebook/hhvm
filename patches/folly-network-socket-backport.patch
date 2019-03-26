@@ -1,0 +1,127 @@
+diff --git a/third-party/folly/src/folly/io/async/AsyncServerSocket.h b/third-party/folly/src/folly/io/async/AsyncServerSocket.h
+index 0edbcafa..eb161224 100644
+--- a/third-party/folly/src/folly/io/async/AsyncServerSocket.h
++++ b/third-party/folly/src/folly/io/async/AsyncServerSocket.h
+@@ -25,6 +25,7 @@
+ #include <folly/io/async/EventBase.h>
+ #include <folly/io/async/EventHandler.h>
+ #include <folly/io/async/NotificationQueue.h>
++#include <folly/net/NetworkSocket.h>
+ #include <folly/portability/Sockets.h>
+
+ #include <limits.h>
+@@ -293,6 +294,9 @@ class AsyncServerSocket : public DelayedDestruction, public AsyncSocketBase {
+    * ownership of the file descriptor.
+    */
+   void useExistingSocket(int fd);
++  void useExistingSocket(NetworkSocket fd) {
++    useExistingSocket(fd.toFd());
++  }
+   void useExistingSockets(const std::vector<int>& fds);
+
+   /**
+@@ -321,6 +325,10 @@ class AsyncServerSocket : public DelayedDestruction, public AsyncSocketBase {
+     }
+   }
+
++  NetworkSocket getNetworkSocket() const {
++    return NetworkSocket::fromFd(getSocket());
++  }
++
+   /* enable zerocopy support for the server sockets - the s = accept sockets
+    * inherit it
+    */
+diff --git a/third-party/folly/src/folly/io/async/EventHandler.h b/third-party/folly/src/folly/io/async/EventHandler.h
+index 2669a3e8..e8e43b8b 100644
+--- a/third-party/folly/src/folly/io/async/EventHandler.h
++++ b/third-party/folly/src/folly/io/async/EventHandler.h
+@@ -22,6 +22,7 @@
+ #include <glog/logging.h>
+
+ #include <folly/io/async/EventUtil.h>
++#include <folly/net/NetworkSocket.h>
+ #include <folly/portability/Event.h>
+
+ namespace folly {
+@@ -62,6 +63,9 @@ class EventHandler : private boost::noncopyable {
+    *                   changeHandlerFD() before the handler can be registered.
+    */
+   explicit EventHandler(EventBase* eventBase = nullptr, int fd = -1);
++  explicit EventHandler(EventBase* eventBase, NetworkSocket fd) : EventHandler(eventBase, fd.toFd()) {
++
++  }
+
+   /**
+    * EventHandler destructor.
+diff --git a/third-party/folly/src/folly/net/NetworkSocket.h b/third-party/folly/src/folly/net/NetworkSocket.h
+new file mode 100644
+index 00000000..51d5c571
+--- /dev/null
++++ b/third-party/folly/src/folly/net/NetworkSocket.h
+@@ -0,0 +1,66 @@
++/*
++ * Copyright 2013-present Facebook, Inc.
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *   http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++#pragma once
++
++#include <ostream>
++
++namespace folly {
++/**
++ * This is just a very thin wrapper around either a file descriptor or
++ * a SOCKET depending on platform, along with a couple of helper methods
++ * for explicitly converting to/from file descriptors, even on Windows.
++ */
++struct NetworkSocket {
++  using native_handle_type = int;
++  static constexpr native_handle_type invalid_handle_value = -1;
++
++  native_handle_type data;
++
++  constexpr NetworkSocket() : data(invalid_handle_value) {}
++  constexpr explicit NetworkSocket(native_handle_type d) : data(d) {}
++
++  template <typename T>
++  static NetworkSocket fromFd(T) = delete;
++  static NetworkSocket fromFd(int fd) {
++    return NetworkSocket(fd);
++  }
++
++  int toFd() const {
++    return data;
++  }
++
++  friend constexpr bool operator==(
++      const NetworkSocket& a,
++      const NetworkSocket& b) noexcept {
++    return a.data == b.data;
++  }
++
++  friend constexpr bool operator!=(
++      const NetworkSocket& a,
++      const NetworkSocket& b) noexcept {
++    return !(a == b);
++  }
++};
++
++template <class CharT, class Traits>
++inline std::basic_ostream<CharT, Traits>& operator<<(
++    std::basic_ostream<CharT, Traits>& os,
++    const NetworkSocket& addr) {
++  os << "folly::NetworkSocket(" << addr.data << ")";
++  return os;
++}
++} // namespace folly

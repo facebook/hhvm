@@ -185,7 +185,7 @@ bool PageletTransport::isPipelineEmpty() {
 }
 
 Array PageletTransport::getAsyncResults(bool allow_empty) {
-  auto results = Array::Create();
+  auto results = Array::CreateVArray();
   PageletServerTaskEvent* next_event = nullptr;
   int code = 0;
 
@@ -211,7 +211,7 @@ Array PageletTransport::getAsyncResults(bool allow_empty) {
     }
   }
 
-  return PackedArrayInit(3)
+  return VArrayInit(3)
     .append(results)
     .append(next_event
       ? make_tv<KindOfObject>(next_event->getWaitHandle())

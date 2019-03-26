@@ -547,7 +547,7 @@ TypedValue HHVM_FUNCTION(array_map,
     Array params = params_ai.toArray();
     if (ctx.func) {
       auto result = Variant::attach(
-        g_context->invokeFunc(ctx, params, nullptr)
+        g_context->invokeFunc(ctx, params)
       );
       ret_ai.append(result);
     } else {

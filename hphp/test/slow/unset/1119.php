@@ -1,12 +1,13 @@
 <?php
 
+function run(&$a, &$c) {
+  $b = array(0, 1);
+  $a = array(&$b, 1);
+  unset($a[0][0]);
+  var_dump($a);
+}
 
 <<__EntryPoint>>
-function main_1119() {
-$a = array(0, 1);
-$b = array(0, 1);
-$a[0] =& $b;
-$c =& $a;
-unset($a[0][0]);
-var_dump($a);
+function main() {
+  run(&$a, &$a);
 }

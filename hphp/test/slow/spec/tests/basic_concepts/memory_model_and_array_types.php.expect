@@ -144,32 +144,6 @@ After '$a = array(...)', $a is array(3) {
     int(3)
   }
 }
-After '$c =& $a', $a is array(3) {
-  [0]=>
-  int(10)
-  [1]=>
-  &int(123)
-  ["B"]=>
-  object(Point) (2) {
-    ["x":"Point":private]=>
-    int(1)
-    ["y":"Point":private]=>
-    int(3)
-  }
-}
-$c is array(3) {
-  [0]=>
-  int(10)
-  [1]=>
-  &int(123)
-  ["B"]=>
-  object(Point) (2) {
-    ["x":"Point":private]=>
-    int(1)
-    ["y":"Point":private]=>
-    int(3)
-  }
-}
 After '++$c[0]', $a is array(3) {
   [0]=>
   int(11)

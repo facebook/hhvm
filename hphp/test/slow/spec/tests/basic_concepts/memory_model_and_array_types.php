@@ -79,35 +79,32 @@ echo "After 'unset(\$b)', \$b is undefined\n";
 ///*
 echo "----------------- byRef assignment of array types ----------------------\n";
 
-$x = 123;
-$a = array(10, &$x, 'B' => new Point(1, 3));
+function byRefAssignmentArray(&$a, &$c) {
+  $x = 123;
+  $a = array(10, &$x, 'B' => new Point(1, 3));
 
-echo "After '\$a = array(...)', \$a is "; var_dump($a);
+  echo "After '\$a = array(...)', \$a is "; var_dump($a);
 
-$c =& $a;
+  ++$c[0];
 
-echo "After '\$c =& \$a', \$a is "; var_dump($a);
-echo "\$c is "; var_dump($c);
+  echo "After '++\$c[0]', \$a is "; var_dump($a);
+  echo "\$c is "; var_dump($c);
 
-++$c[0];
+  $a[0] = 99;
 
-echo "After '++\$c[0]', \$a is "; var_dump($a);
-echo "\$c is "; var_dump($c);
+  echo "After '\$a[0] = 99', \$a is "; var_dump($a);
+  echo "\$c is "; var_dump($c);
 
-$a[0] = 99;
+  --$x;
 
-echo "After '\$a[0] = 99', \$a is "; var_dump($a);
-echo "\$c is "; var_dump($c);
+  echo "After '--\$x', \$a is "; var_dump($a);
+  echo "\$c is "; var_dump($c);
 
---$x;
-
-echo "After '--\$x', \$a is "; var_dump($a);
-echo "\$c is "; var_dump($c);
-
+  unset($a);
+  echo "After 'unset(\$a)', \$a is undefined, \$c is "; var_dump($c);
+}
+byRefAssignmentArray(&$a, &$a);
 unset($a);
-echo "After 'unset(\$a)', \$a is undefined, \$c is "; var_dump($c);
-
-unset($c);
 echo "End\n";
 //*/
 

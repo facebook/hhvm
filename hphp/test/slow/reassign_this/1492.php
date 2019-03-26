@@ -1,5 +1,5 @@
 <?php
 
 $x = 5;
- $this =& $x;
+ $this = $x;
  echo "You should not see this";

@@ -1,13 +1,12 @@
 <?hh
 
 <<__Rx>>
-function test() {
-  // box, bindl, popv
-  $x =& new stdClass();
+function by_ref(&$x) {}
 
-  // vgetl, bindl, unbox
-  $z = $y =& $x;
-  return tuple($x, $y, $z);
+<<__Rx>>
+function test() {
+  // vgetl
+  by_ref(&$x);
 }
 
 <<__EntryPoint>>

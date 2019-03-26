@@ -1,7 +1,6 @@
 <?php
 
-function test() {
-  $x =& $y;
+function test(&$x, &$y) {
   $x = false;
   $y .= 'hello';
   echo $x;
@@ -9,5 +8,5 @@ function test() {
 
 <<__EntryPoint>>
 function main_1105() {
-test();
+  test(&$x, &$x);
 }

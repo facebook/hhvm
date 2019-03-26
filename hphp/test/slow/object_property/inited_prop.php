@@ -16,8 +16,7 @@ class Thing {
       return;
     }
     self::$thingsArray = array();
-    $box = &self::$thingsArray;
-    $box[3] = 4;
+    self::$thingsArray[3] = 4;
   }
 }
 

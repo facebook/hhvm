@@ -3,5 +3,5 @@
 class Foo {
   public $x;
  }
- $this =& new Foo();
+ $this = new Foo();
  echo "You should not see this";

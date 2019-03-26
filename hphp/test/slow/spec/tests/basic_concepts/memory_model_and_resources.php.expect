@@ -5,7 +5,6 @@ After '$a = STDOUT', $b is Resource id #1, and $a is Resource id #2
 Done
 ----------------- resource byRef assignment ----------------------
 After '$a = STDIN', $a is Resource id #1
-After '$c =& $a', $c is Resource id #1, and $a is Resource id #1
 After '$a = STDOUT', $c is Resource id #2, and $a is Resource id #2
 After 'unset($a)', $c is Resource id #2, and $a is undefined
 Done

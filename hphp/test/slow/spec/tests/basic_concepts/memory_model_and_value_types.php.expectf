@@ -6,7 +6,6 @@ After '$a = 99', $b is 124, and $a is 99
 Done
 ----------------- byRef assignment of value types ----------------------
 After '$a = 123', $a is 123
-After '$c =& $a', $c is 123, and $a is 123
 After '++$c', $c is 124, and $a is 124
 After '$a = 99', $c is 99, and $a is 99
 After 'unset($a)', $c is 99, and $a is undefined
@@ -38,7 +37,5 @@ After '$b = "abc"', $b is abc
 After '$a = f2()', $a is abc
 Done
 ----- test using literals, constants, and arbitrary-complex expressions ----
-After '=&', $a is 10, $b is 10
-After '=&', $a is 10, $b is 10
 h1() is 15%A
 Done

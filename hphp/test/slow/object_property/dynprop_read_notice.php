@@ -77,13 +77,7 @@ function test($thing) {
   $thing->dynprop = 3; // set prop back to an int
 
   echo "== vget ==\n";
-  $discard =& $thing->dynprop;
-  unset($discard); // unbind it
-
-  echo "== bind ==\n";
-  $local = 3;
-  $thing->dynprop =& $local;
-  unset($local); // unbind it
+  by_ref(&$thing->dynprop);
 
   echo "== clone ==\n";
   $discard = clone $thing;
@@ -91,6 +85,8 @@ function test($thing) {
   echo "== unset ==\n";
   unset($thing->dynprop);
 }
+
+function by_ref(&$ref) {}
 
 class C {}
 class D { public $x = 1; }

@@ -46,16 +46,13 @@ var_dump($a);
 //*/
 ///*
 
-// take an undefined parameter passed byRef and assign it byRef. This
-// causes the previously undefined variable to now be defined with a value of NULL.
+// take an undefined parameter passed byRef. This causes the previously
+// undefined variable to now be defined with a value of NULL.
 
 function h(&$p)
 {
    echo '$p '.(isset($p) ? "is set\n" : "is not set\n");
-   $b = &$p;
-   echo '$p '.(isset($p) ? "is set\n" : "is not set\n");
    var_dump($p);
-   var_dump($b);
 }
 
 var_dump($x);

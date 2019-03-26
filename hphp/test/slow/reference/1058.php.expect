@@ -6,7 +6,7 @@ array(2) {
 }
 array(2) {
   [0]=>
-  &int(10)
+  int(10)
   [1]=>
   string(4) "test"
 }

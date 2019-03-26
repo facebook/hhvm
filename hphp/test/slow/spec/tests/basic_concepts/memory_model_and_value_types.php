@@ -34,25 +34,25 @@ echo "Done\n";
 ///*
 echo "----------------- byRef assignment of value types ----------------------\n";
 
-$a = 123;
+function byRefAssignmentValue(&$a, &$c) {
+  $a = 123;
 
-echo "After '\$a = 123', \$a is $a\n";
+  echo "After '\$a = 123', \$a is $a\n";
 
-$c =& $a;
+  ++$c;
 
-echo "After '\$c =& \$a', \$c is $c, and \$a is $a\n";
+  echo "After '++\$c', \$c is $c, and \$a is $a\n";
 
-++$c;
+  $a = 99;
 
-echo "After '++\$c', \$c is $c, and \$a is $a\n";
+  echo "After '\$a = 99', \$c is $c, and \$a is $a\n";
 
-$a = 99;
+  unset($a);
 
-echo "After '\$a = 99', \$c is $c, and \$a is $a\n";
-
+  echo "After 'unset(\$a)', \$c is $c, and \$a is undefined\n";
+}
+byRefAssignmentValue(&$a, &$a);
 unset($a);
-
-echo "After 'unset(\$a)', \$c is $c, and \$a is undefined\n";
 echo "Done\n";
 //*/
 
@@ -149,12 +149,8 @@ echo "----- test using literals, constants, and arbitrary-complex expressions --
 
 //$a =& 12;     // literals are disallowed
 //$a =& CON;    // constants are disallowed
-
-$b = 10;
-$a =& $b;
-echo "After '=&', \$a is $a, \$b is $b\n";
+//$a =& $b;     // by-ref assignments are disallowed
 //$a =& 5 + $b; // arbitrary-complex expressions are disallowed
-echo "After '=&', \$a is $a, \$b is $b\n";
 
 function h1()
 {

@@ -2,8 +2,8 @@
 
 function test_read() {
   echo "---- read ----\n";
-  $x = array('a' => 'b', 'c' => 'd');
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => 'd');
   $z = (object)$x;
   var_dump($z->c);
   unset($y);
@@ -12,8 +12,8 @@ function test_read() {
 
 function test_dim_read() {
   echo "---- dim read ----\n";
-  $x = array('a' => 'b', 'c' => array('d'));
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => array('d'));
   $z = (object)$x;
   var_dump($z->c[0]);
   unset($y);
@@ -22,8 +22,8 @@ function test_dim_read() {
 
 function test_read_quiet() {
   echo "---- read quiet ----\n";
-  $x = array('a' => 'b', 'c' => 'd');
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => 'd');
   $z = (object)$x;
   var_dump($z?->c);
   unset($y);
@@ -32,8 +32,8 @@ function test_read_quiet() {
 
 function test_dim_read_quiet() {
   echo "---- dim read quiet----\n";
-  $x = array('a' => 'b', 'c' => array('d'));
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => array('d'));
   $z = (object)$x;
   var_dump($z?->c[0]);
   unset($y);
@@ -42,8 +42,8 @@ function test_dim_read_quiet() {
 
 function test_set() {
   echo "---- set ----\n";
-  $x = array('a' => 'b', 'c' => 'd');
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => 'd');
   $z = (object)$x;
   $z->c = 'e';
   unset($y);
@@ -52,8 +52,8 @@ function test_set() {
 
 function test_dim_set() {
   echo "---- dim set ----\n";
-  $x = array('a' => 'b', 'c' => array('d'));
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => array('d'));
   $z = (object)$x;
   $z->c[0] = 'e';
   unset($y);
@@ -62,8 +62,8 @@ function test_dim_set() {
 
 function test_unset() {
   echo "---- unset ----\n";
-  $x = array('a' => 'b', 'c' => 'd');
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => 'd');
   $z = (object)$x;
   unset($z->c);
   unset($y);
@@ -72,8 +72,8 @@ function test_unset() {
 
 function test_dim_unset() {
   echo "---- dim unset ----\n";
-  $x = array('a' => 'b', 'c' => array('d'));
-  $y =& $x['a'];
+  $y = 'b';
+  $x = array('a' => &$y, 'c' => array('d'));
   $z = (object)$x;
   unset($z->c[0]);
   unset($y);

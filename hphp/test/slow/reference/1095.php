@@ -1,8 +1,7 @@
 <?php
 
-function foo() {
+function foo(&$perms, &$t) {
   $perms = array('x' => 1);
-  $t = &$perms;
   $t = $t['x'];
   unset($t);
   return $perms;
@@ -10,5 +9,5 @@ function foo() {
 
 <<__EntryPoint>>
 function main_1095() {
-var_dump(foo());
+  var_dump(foo(&$a, &$a));
 }

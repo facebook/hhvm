@@ -5,6 +5,8 @@ type FakeType1<T> = string;
 type FakeType2<T> = mixed;
 type FakeType3<T> = T;
 
+function by_ref(&$ref) {}
+
 class C {
   public $x;
 }
@@ -22,25 +24,14 @@ class A {
 
 class B extends A {
   public function __construct() { $this->y = new C(); }
-  public function test($p) {
-    $this->y->x =& $p;
-    $y =& $this->y->x;
-
-    $this->x =& $p;
-    $y =& $this->x;
-
-    $this->z1 =& $p;
-    $y =& $this->z1;
-
-    $this->z2 =& $p;
-    $y =& $this->z2;
-
-    $this->z3 =& $p;
-    $y =& $this->z3;
-
-    self::$s =& $p;
-    $y =& self::$s;
+  public function test() {
+    by_ref(&$this->y->x);
+    by_ref(&$this->x);
+    by_ref(&$this->z1);
+    by_ref(&$this->z2);
+    by_ref(&$this->z3);
+    by_ref(&self::$s);
   }
 }
 
-(new B())->test(123);
+(new B())->test();

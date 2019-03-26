@@ -6,8 +6,7 @@ function f(&$a) {
 
  <<__EntryPoint>>
 function main_1077() {
-$a = array();
- $c = &$a['b'];
- f(&$c);
- var_dump($a);
+  $a = array('b' => &$c);
+  f(&$c);
+  var_dump($a);
 }

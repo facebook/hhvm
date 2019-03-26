@@ -1,11 +1,6 @@
+
 Warning: Property 'A::x' with type annotation binding to ref in %s/binding.php on line 29
 
-Warning: Property 'A::x' with type annotation binding to ref in %s/binding.php on line 30
+Warning: Property 'A::z1' with type annotation binding to ref in %s/binding.php on line 30
 
-Warning: Property 'A::z1' with type annotation binding to ref in %s/binding.php on line 32
-
-Warning: Property 'A::z1' with type annotation binding to ref in %s/binding.php on line 33
-
-Warning: Static property 'A::s' with type annotation binding to ref in %s/binding.php on line 41
-
-Warning: Static property 'A::s' with type annotation binding to ref in %s/binding.php on line 42
+Warning: Static property 'A::s' with type annotation binding to ref in %s/binding.php on line 33

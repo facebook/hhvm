@@ -1,9 +1,8 @@
 <?php
 
-function f() {
+function f(&$b, &$c) {
   $a = array(123);
   $b = $a;
-  $c = &$b;
   $d = new stdClass();
   $v = array(&$a, &$b, &$c, $d, $d);
   $s = serialize($v);
@@ -12,5 +11,5 @@ function f() {
 
 <<__EntryPoint>>
 function main_1864() {
-f();
+  f(&$b, &$b);
 }

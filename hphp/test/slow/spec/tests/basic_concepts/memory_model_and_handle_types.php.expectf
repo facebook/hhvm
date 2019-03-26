@@ -7,7 +7,6 @@ After '$a = new Point(2, 1)', $d is (1,3), $b is (4,6), and $a is (2,1)
 Done
 ----------------- byRef assignment of handle types ----------------------
 After '$a = new Point(1, 3)', $a is (1,3)
-After '$c =& $a', $c is (1,3), and $a is (1,3)
 After '$a->move(4, 6)', $c is (4,6), and $a is (4,6)
 After '$a = new Point(2, 1)', $c is (2,1), and $a is (2,1)
 After 'unset($a)', $c is (2,1)

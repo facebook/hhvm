@@ -1,8 +1,7 @@
 <?php
 
-function foo($a, &$b) {
+function foo($a, &$b, &$y) {
   $x = $a;
-  $y =& $b;
   unset($a);
   unset($b);
   $x += 10;
@@ -20,7 +19,7 @@ function foo($a, &$b) {
 function main_g12() {
 $a1 = 1;
 $a2 = -999999999;
-$x = foo($a1, &$a2);
+$x = foo($a1, &$a2, &$a2);
 $a2 = 2;
 $x->rewind();
 $y1 = clone $x;

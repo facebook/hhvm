@@ -58,8 +58,6 @@ array(5) {
 }
 int(-10)
 $p is set
-$p is set
-int(-10)
 int(-10)
 int(-10)
 array(3) {
@@ -71,8 +69,6 @@ array(3) {
   int(30)
 }
 $p is set
-$p is set
-int(10)
 int(10)
 array(3) {
   [0]=>
@@ -83,8 +79,6 @@ array(3) {
   int(30)
 }
 $p is not set
-$p is not set
-NULL
 NULL
 array(4) {
   [0]=>
@@ -97,8 +91,6 @@ array(4) {
   NULL
 }
 $p is not set
-$p is not set
-NULL
 NULL
 array(5) {
   [0]=>

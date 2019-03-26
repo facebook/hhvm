@@ -1,13 +1,3 @@
-Verification Error (unit %s/test/slow/rx/body/ref-basic.php func test): references are forbidden in Rx functions: Box
-
-Verification Error (unit %s/test/slow/rx/body/ref-basic.php func test): references are forbidden in Rx functions: BindL
-
-Verification Error (unit %s/test/slow/rx/body/ref-basic.php func test): references are forbidden in Rx functions: PopV
-
 Verification Error (unit %s/test/slow/rx/body/ref-basic.php func test): references are forbidden in Rx functions: VGetL
-
-Verification Error (unit %s/test/slow/rx/body/ref-basic.php func test): references are forbidden in Rx functions: BindL
-
-Verification Error (unit %s/test/slow/rx/body/ref-basic.php func test): references are forbidden in Rx functions: Unbox
 
 Done

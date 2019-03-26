@@ -4,7 +4,7 @@ class X {
   public $x;
 }
 
-function test($x) {
+function test($x, &$ref) {
   $p = (new ReflectionProperty('X', 'x'))->getValue($x);
   ++$p;
   var_dump($x->x);
@@ -13,9 +13,8 @@ function test($x) {
 function main() {
   $x = new X;
   $x->x = 42;
-  $y = &$x->x;
 
-  test($x);
+  test($x, &$x->x);
 }
 
 

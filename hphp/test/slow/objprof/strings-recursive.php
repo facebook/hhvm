@@ -30,12 +30,10 @@ function test(string $name, mixed $recursive_thing): void {
 function main(): void {
   test("GLOBALS", $GLOBALS);
 
-  $r = array();
-  $r[] = &$r;
+  $r = array(&$r);
   test("shallow array", $r);
 
-  $r = array(array());
-  $r[0][] =& $r;
+  $r = array(array(&$r));
   test("deep array", $r);
 
   echo "---- the end ----\n";

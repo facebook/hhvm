@@ -28,21 +28,21 @@ echo "Done\n";
 ///*
 echo "----------------- resource byRef assignment ----------------------\n";
 
-$a = STDIN;
+function byRefAssignmentResource(&$a, &$c) {
+  $a = STDIN;
 
-echo "After '\$a = STDIN', \$a is $a\n";
+  echo "After '\$a = STDIN', \$a is $a\n";
 
-$c =& $a;
+  $a = STDOUT;    // this causes $c to also alias 99
 
-echo "After '\$c =& \$a', \$c is $c, and \$a is $a\n";
+  echo "After '\$a = STDOUT', \$c is $c, and \$a is $a\n";
 
-$a = STDOUT;    // this causes $c to also alias 99
+  unset($a);
 
-echo "After '\$a = STDOUT', \$c is $c, and \$a is $a\n";
-
+  echo "After 'unset(\$a)', \$c is $c, and \$a is undefined\n";
+}
+byRefAssignmentResource(&$a, &$a);
 unset($a);
-
-echo "After 'unset(\$a)', \$c is $c, and \$a is undefined\n";
 echo "Done\n";
 //*/
 

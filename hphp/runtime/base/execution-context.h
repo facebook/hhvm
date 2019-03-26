@@ -468,8 +468,7 @@ public:
                         bool checkRefAnnot = false);
 
   TypedValue invokeFunc(const CallCtx& ctx,
-                        const Variant& args_,
-                        VarEnv* varEnv = nullptr);
+                        const Variant& args_);
 
   TypedValue invokeFuncFew(const Func* f,
                            void* thisOrCls,

@@ -217,10 +217,9 @@ inline const Func* ExecutionContext::getPrevFunc(const ActRec* fp) {
 
 inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
-  const Variant& args_,
-  VarEnv* varEnv
+  const Variant& args_
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, varEnv,
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, nullptr,
                     ctx.invName, InvokeNormal, ctx.dynamic);
 }
 

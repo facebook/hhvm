@@ -441,8 +441,10 @@ struct CLIServer final : folly::AsyncServerSocket::AcceptCallback {
   void start();
   void stop();
 
-  void connectionAccepted(int fd,
+  void connectionAccepted(folly::NetworkSocket fdNetworkSocket,
                           const folly::SocketAddress&) noexcept override {
+int fd = fdNetworkSocket.toFd();
+
     if (RuntimeOption::EvalUnixServerFailWhenBusy) {
       if (m_dispatcher->getActiveWorker() >=
           m_dispatcher->getTargetNumWorkers()) {

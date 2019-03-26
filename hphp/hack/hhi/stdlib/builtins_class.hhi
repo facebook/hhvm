@@ -28,7 +28,7 @@ function get_class_methods($class_or_object): ?array<string>;
 <<__PHPStdLib>>
 function get_class_vars(string $class_name);
 <<__Rx>>
-function get_class(<<__MaybeMutable>> $object = null);
+function get_class(<<__MaybeMutable>> $object);
 <<__Rx>>
 function get_parent_class(<<__MaybeMutable>> $object = null);
 <<__PHPStdLib, __Rx>>

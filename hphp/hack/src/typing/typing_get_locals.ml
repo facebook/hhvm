@@ -364,11 +364,7 @@ and aast_terminal_ nsenv ~in_try st =
   | Aast.Fallthrough
   | Aast.GotoLabel _
   | Aast.Goto _
-<<<<<<< HEAD
   | Aast.Static_var _
-  | Aast.Global_var _
-=======
->>>>>>> turn GlobalStatement into a parse error at FFP-AST edge
   | Aast.Awaitall _
   | Aast.Unsafe_block _
     -> ()
@@ -563,11 +559,7 @@ let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Aast.Return _
   | Aast.Goto _
   | Aast.GotoLabel _
-<<<<<<< HEAD
   | Aast.Static_var _
-  | Aast.Global_var _
-=======
->>>>>>> turn GlobalStatement into a parse error at FFP-AST edge
   | Aast.Def_inline _
   | Aast.Noop -> acc
   | Aast.Awaitall el ->

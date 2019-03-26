@@ -30,6 +30,7 @@ module Async        = Typing_async
 module SubType      = Typing_subtype
 module Unify        = Typing_unify
 module Union        = Typing_union
+module TGen         = Typing_generic
 module SN           = Naming_special_names
 module TVis         = Typing_visibility
 module TNBody       = Typing_naming_body

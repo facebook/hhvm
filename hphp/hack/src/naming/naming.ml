@@ -2081,6 +2081,12 @@ module Make (GetLocals : GetLocals) = struct
     if in_finally then Errors.goto_invoked_in_finally label_pos;
     N.Goto label
 
+  and aast_static_varl env l = List.map l (aast_static_var env)
+  and aast_static_var env = function
+    | p, Aast.Lvar _ as lv ->
+      aast_expr env (p, Aast.Binop (Ast.Eq None, lv, (p, Aast.Null)))
+    | e -> aast_expr env e
+
   and aast_awaitall_stmt env el =
     let el =
       List.map

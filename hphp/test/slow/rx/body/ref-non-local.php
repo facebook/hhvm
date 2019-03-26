@@ -4,7 +4,7 @@ class C { public static $p; public static $q; }
 
 <<__Rx>>
 function test() {
-  global $a; // VGetG (global statement)
+  // global $a; // VGetG (global statement)
 
   $y = 42;
   $_GET =& $y;           // VGetL, BindG (superglobals)

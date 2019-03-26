@@ -1,5 +1,10 @@
 <?hh
 
+function update(&$ref, $val) {
+  var_dump($ref); // 100
+  $ref = $val;
+}
+
 function test() {
   $foo = new stdClass;
   $bar = new stdClass;
@@ -7,9 +12,7 @@ function test() {
   $foo->bar = array($bar);
   $k = new stdClass;
   $k->key = 0;
-  $x =& $foo->bar[$k?->key]->baz;
-  var_dump($x); // 100
-  $x = 200;
+  update(&$foo->bar[$k?->key]->baz, 200);
   var_dump($foo->bar[$k?->key]->baz); // 200
 }
 

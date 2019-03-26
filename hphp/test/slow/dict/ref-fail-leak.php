@@ -13,11 +13,11 @@ function convert_alot($a) {
 
 function main() {
   $value = 0;
-  $arr = [];
+  $arr = [&$value];
 
   // Packed array
   for ($i = 0; $i < 5000; $i++) {
-    $arr[] = &$value;
+    $arr[] = $value;
   }
   convert_alot($arr);
 

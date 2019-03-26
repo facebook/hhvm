@@ -2,8 +2,7 @@
 function a() { return 1; }
 function foo() {
 
-  $a = array('x' => a());
-  $a['b'] =& HhbbcArrayRef001::$y;
+  $a = array('x' => a(), 'b' => &HhbbcArrayRef001::$y);
   return $a;
 }
 

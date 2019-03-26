@@ -24,19 +24,5 @@ array(1) {
 }
 array(1) {
   [0]=>
-  &array(1) {
-    [1]=>
-    int(1)
-  }
-}
-array(1) {
-  [0]=>
-  &array(1) {
-    [1]=>
-    int(1)
-  }
-}
-array(1) {
-  [0]=>
   bool(false)
 }

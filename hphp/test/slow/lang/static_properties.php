@@ -139,14 +139,6 @@ function main() {
   print "C::\$h: ".C::$h--."\n";
   print "C::\$h: ".--C::$h."\n";
 
-  $x = 1234;
-  C::$h =& $x;
-  print "C::\$h: ".C::$h."\n";
-  $x++;
-  print "C::\$h: ".C::$h."\n";
-  C::$h = 5678;
-  print "x: ".$x."\n";
-
   C::$h = array(0, 1, 2);
   $y = C::$h[1];
   print "\$y: $y\n";
@@ -191,25 +183,12 @@ class D {
     print "C::\$h: ".C::$h--."\n";
     print "C::\$h: ".--C::$h."\n";
 
-    $x = 1234;
-    C::$h =& $x;
-    print "C::\$h: ".C::$h."\n";
-    $x++;
-    print "C::\$h: ".C::$h."\n";
-    C::$h = 5678;
-    print "x: ".$x."\n";
-
     C::$h = array(0, 1, 2);
     $y = C::$h[1];
     print "\$y: $y\n";
     C::$h[2] = 42;
     $y = C::$h[2];
     print "\$y: $y\n";
-
-    C::$h = 20;
-    $w =& C::$h;
-    $w = 5;
-    print "C::\$h: ".C::$h."\n";
 
     print "Test end\n";
   }

@@ -9,7 +9,6 @@ class MVecFinalOps {
   private $o = null;
   private $igen = 42.0;
   private $icell = 2;
-  private $igen2 = array();
 
   public function __construct() {
     $this->o = new Other;
@@ -22,8 +21,6 @@ class MVecFinalOps {
     reffy(&$this->igen);
     $this->icell += 2;
     $this->icell++;
-    $x = array();
-    $this->igen2 =& $x;
   }
 
   public function printer() {

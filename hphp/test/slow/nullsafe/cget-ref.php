@@ -2,20 +2,18 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class thing {
-  public $a, $b = 'hi';
-  public function __construct() {
-    $this->a =& $this->b;
-  }
+  public $a;
 }
 
-function main() {
-  $o = new thing;
+function run($o, &$ref) {
+  $ref = 'hi';
   $local = $o?->a;
   $local = 5;
-  var_dump($o->b);
+  var_dump($ref);
 }
 
 <<__EntryPoint>>
-function main_cget_ref() {
-main();
+function main() {
+  $o = new thing();
+  run($o, &$o->a);
 }

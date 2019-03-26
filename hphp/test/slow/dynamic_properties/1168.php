@@ -1,23 +1,23 @@
 <?php
 
 class A {
- public $a = 1;
+  public $a = 1;
 }
- class B extends A {
-   public $m = 10;
+
+class B extends A {
+  public $m = 10;
   public function test() {
-     $b = 'a';
+    $b = 'a';
     $this->$b = 'test';
- var_dump($this->$b);
- var_dump($this->a);
-    $c = &$this->$b;
- $c = array(1);
- var_dump($this->a);
+    var_dump($this->$b);
+    var_dump($this->a);
+    $this->$b = array(1);
+    var_dump($this->a);
   }
 }
 
  <<__EntryPoint>>
-function main_1168() {
-$obj = new B();
- $obj->test();
+function main() {
+  $obj = new B();
+  $obj->test();
 }

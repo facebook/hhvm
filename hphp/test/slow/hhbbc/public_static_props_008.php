@@ -4,9 +4,13 @@ class Asd {
   static $y;
 }
 
+function bar(&$ref) {
+  $ref = 2;
+}
+
+
 function foo() {
-  $y =& Asd::$y;
-  $y = 2;
+  bar(&Asd::$y);
 }
 
 

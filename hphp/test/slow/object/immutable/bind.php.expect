@@ -4,22 +4,6 @@ object(C) (2) {
   ["i"]=>
   int(1)
 }
-int(2)
-Cannot bind immutable property ci of class C
-object(C) (2) {
-  ["ci"]=>
-  int(0)
-  ["i"]=>
-  &int(1)
-}
-int(1)
-object(C) (2) {
-  ["ci"]=>
-  int(0)
-  ["i"]=>
-  int(1)
-}
-int(2)
 Cannot bind immutable property ci of class C
 object(C) (2) {
   ["ci"]=>
@@ -27,4 +11,3 @@ object(C) (2) {
   ["i"]=>
   &int(2)
 }
-int(2)

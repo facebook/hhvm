@@ -4,9 +4,13 @@ class Foob {
   private static $heh = 0;
   private static $ok = "string";
 
-  public static function asd(string $x) {
-    self::$heh =& $x;
+  public static function fgh(&$ref, string $x) {
+    $ref = $x;
     return self::$heh;
+  }
+
+  public static function asd(string $x) {
+    return self::fgh(&self::$heh, $x);
   }
   public static function ok() { return self::$ok; }
 }

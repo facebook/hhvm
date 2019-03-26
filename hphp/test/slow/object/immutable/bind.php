@@ -6,39 +6,24 @@ class C {
   public int $i = 1;
 }
 
+function inc_ref(&$ref) { $ref++; }
+function print_with_ref($what, &$ref) { var_dump($what); }
+
 function test_vget() {
   $c = new C();
-  $li = 2;
-  var_dump($c, $li);
+  var_dump($c);
 
   try {
-    $li =& $c->ci;
+    inc_ref(&$c->ci);
   } catch (Exception $e) {
     echo $e->getMessage() . "\n";
   }
-  $li =& $c->i;
-
-  var_dump($c, $li);
-}
-
-function test_bind() {
-  $c = new C();
-  $li = 2;
-  var_dump($c, $li);
-
-  try {
-    $c->ci =& $li;
-  } catch (Exception $e) {
-    echo $e->getMessage() . "\n";
-  }
-  $c->i =& $li;
-
-  var_dump($c, $li);
+  inc_ref(&$c->i);
+  print_with_ref($c, &$c->i);
 }
 
 
 <<__EntryPoint>>
 function main_bind() {
-test_vget();
-test_bind();
+  test_vget();
 }

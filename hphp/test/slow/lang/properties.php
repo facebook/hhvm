@@ -143,15 +143,6 @@ class J extends I {
   const J = null;
   public $p = J::J;
 }
-class ThingerMaker {
-  private $refs;
-  public function __construct(&$refs) {
-    $this->refs =& $refs;
-  }
-  public function doAssignment() {
-    $this->refs = 'it worked';
-  }
-}
 
 class dumper {
 }
@@ -246,12 +237,6 @@ obj_dump($o);
 print "=== J ===\n";
 $j = new J;
 obj_dump($j);
-
-print "=== Var properties ===\n";
-$str = "it didn't work";
-$d = new ThingerMaker(&$str);
-$d->doAssignment();
-echo $str . "\n";
 
 print "=== Foreach ===\n";
 foreach ($o as $k => $v) {

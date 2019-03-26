@@ -266,8 +266,6 @@ object(J) (1) {
 }
 Properties:
   "p" => 
-=== Var properties ===
-it worked
 === Foreach ===
   "np" => H::I
   "nq" => H::I

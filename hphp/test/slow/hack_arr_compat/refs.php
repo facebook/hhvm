@@ -17,41 +17,6 @@ function ref_param($name, $orig) {
   pass_by_ref(&$a["key2"]);
 }
 
-function elem_ref($name, $orig) {
-  echo "========== elem_ref ($name) ================================\n";
-  $a = $orig;
-  $elem = &$a[3];
-  $a = $orig;
-  $elem = &$a[4];
-  $a = $orig;
-  $elem = &$a[10];
-  $a = $orig;
-  $elem = &$a["key1"];
-  $a = $orig;
-  $elem = &$a["key2"];
-}
-
-function append_ref($name, $a) {
-  echo "========== append_ref ($name) ==============================\n";
-  $value = "some-value";
-  $a[] = &$value;
-}
-
-function set_ref($name, $orig) {
-  echo "========== set_ref ($name) =================================\n";
-  $value = "some-value";
-  $a = $orig;
-  $a[3] = &$value;
-  $a = $orig;
-  $a[4] = &$value;
-  $a = $orig;
-  $a[10] = &$value;
-  $a = $orig;
-  $a["key1"] = &$value;
-  $a = $orig;
-  $a["key2"] = &$value;
-}
-
 function ref_unserialize() {
   echo "========== ref_unserialize =================================\n";
   $ref_str = "a:2:{s:3:\"foo\";D:1:{s:1:\"a\";s:1:\"b\";}s:3:\"bar\";R:2;}";
@@ -60,9 +25,6 @@ function ref_unserialize() {
 
 function run($name, $a) {
   ref_param($name, $a);
-  elem_ref($name, $a);
-  append_ref($name, $a);
-  set_ref($name, $a);
 }
 
 function main() {

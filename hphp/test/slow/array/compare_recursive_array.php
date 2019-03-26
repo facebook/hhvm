@@ -1,11 +1,8 @@
-<?php /* ref in array */
+<?hh
 
-
-function main() {
-  $recur = array();
-  $recur[] = &$recur;
-  $recur2 = array();
-  $recur2[] = &$recur2;
+function run(&$ref, &$ref2, $recur, $recur2) {
+  $ref = $recur;
+  $ref2 = $recur2;
   var_dump($recur);
   var_dump($recur2);
   var_dump($recur2 == $recur);
@@ -15,6 +12,8 @@ function main() {
 }
 
 <<__EntryPoint>>
-function main_compare_recursive_array() {
-main();
+function main() {
+  $recur = array();
+  $recur2 = array();
+  run(&$recur[], &$recur2[], $recur, $recur2);
 }

@@ -9,11 +9,6 @@ function test($x) {
   $b = $a;
   $a[0][1] = 1;
   var_dump($a, $b);
-  $a = $x;
-  $c = &$a[0];
-  $b = $a;
-  $a[0][1] = 1;
-  var_dump($a, $b);
   }
 
 <<__EntryPoint>>

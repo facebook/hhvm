@@ -13,4 +13,4 @@ array(1) {
   }
 }
 
-Fatal error: infinite recursion detected in %s/array/compare_recursive_array.php on line 11
+Fatal error: infinite recursion detected in %s/array/compare_recursive_array.php on line 8

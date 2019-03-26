@@ -1,7 +1,6 @@
 <?php
 
-function foo() {
-  $a = &$b;
+function foo(&$a, &$b) {
   $b = 1;
   yield $a;
   $a = 3;
@@ -11,5 +10,5 @@ function foo() {
 
 <<__EntryPoint>>
 function main_1848() {
-foreach (foo() as $x) var_dump($x);
+  foreach (foo(&$a, &$a) as $x) var_dump($x);
 }

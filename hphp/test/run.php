@@ -3046,6 +3046,9 @@ function main($argv) {
 
   foreach ($tests as $test) {
     if (!in_array($test, $serial_tests)) {
+      if (!array_key_exists($i, $test_buckets)) {
+       $test_buckets[$i] = array();
+      }
       $test_buckets[$i][] = $test;
       $i = ($i + 1) % $parallel_threads;
     }
@@ -3069,7 +3072,10 @@ function main($argv) {
        ? $i // we didn't fill all the parallel buckets, so use next one in line
        : $options['threads'] - 1; // all parallel filled; last thread; 0 indexed
     foreach ($serial_tests as $test) {
-        $test_buckets[$i][] = $test;
+      if (!array_key_exists($i, $test_buckets)) {
+        $test_buckets[$i] = array();
+      }
+      $test_buckets[$i][] = $test;
     }
   }
 
@@ -3159,7 +3165,7 @@ function main($argv) {
       if ($pid == $printer_pid) {
         // We should be finishing up soon.
         $printer_pid = 0;
-      } else if (isset($servers['pids'][$pid])) {
+      } else if ($servers && isset($servers['pids'][$pid])) {
         // A server crashed. Restart it.
         if (getenv('HHVM_TEST_SERVER_LOG')) {
           echo "\nServer $pid crashed. Restarting.\n";

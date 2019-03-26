@@ -2000,8 +2000,10 @@ and pFunctionBody : block parser = fun node env ->
     then [ Pos.none, Noop ]
     else block
   | _ ->
-    let p, r = with_new_nonconcurrent_scope env (fun () -> pExpr node env) in
-    [p, Return (Some (p, r))]
+    [lift_awaits_in_statement env Pos.none (fun () ->
+      let p, r = pExpr node env in
+      p, Return (Some (p, r))
+    )]
 and pStmtUnsafe : stmt list parser = fun node env ->
   let stmt = pStmt node env in
   match leading_token node with

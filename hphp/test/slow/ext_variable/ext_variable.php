@@ -110,17 +110,6 @@ VS(boolval(array(1, 2)), true);
 VS(boolval(array()), false);
 VS(boolval(new stdClass), true);
 
-{
-  $v = "5bar";
-  VERIFY(settype(&$v, "integer"));
-  VS($v, 5);
-}
-{
-  $v = true;
-  VERIFY(settype(&$v, "string"));
-  VS($v, "1");
-}
-
 $obj = new stdclass;
 $obj->name = "value";
 VS(serialize($obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
@@ -145,19 +134,4 @@ VS(serialize($v),
   VS($v1, $v2);
 }
 
-$typesTest = array(
-    'boolean' => array(0, 1, 2, true, false),
-    'integer' => array(1.0, 1, -1),
-    'int' => array(1.0, 1, -1),
-    'double' => array(1.0, 1, -1),
-    'float' => array(1.0, 1, -1),
-);
-
-
-foreach ($typesTest as $testedType => $values) {
-    foreach ($values as $value) {
-        settype(&$value, $testedType);
-        var_dump(gettype($value));
-    }
-}
 }

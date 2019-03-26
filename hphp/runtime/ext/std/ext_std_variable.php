@@ -111,12 +111,6 @@ function doubleval(mixed $var): float;
 <<__IsFoldable, __Native, __Rx>>
 function strval(mixed $var): string;
 
-/* Set the type of variable var to type.
- */
-<<__Native>>
-function settype(mixed &$var,
-                 string $type): bool;
-
 /* print_r() displays information about a variable in a way that's readable by
  * humans.  print_r(), var_dump() and var_export() will also show protected
  * and private properties of objects with PHP 5. Static class members will not

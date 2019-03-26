@@ -81,23 +81,6 @@ String HHVM_FUNCTION(strval, const Variant& v) {
   return v.toString();
 }
 
-bool HHVM_FUNCTION(settype, VRefParam var, const String& type) {
-  Variant val;
-  if      (type == s_boolean) val = var.toBoolean();
-  else if (type == s_bool   ) val = var.toBoolean();
-  else if (type == s_integer) val = var.toInt64();
-  else if (type == s_int    ) val = var.toInt64();
-  else if (type == s_float  ) val = var.toDouble();
-  else if (type == s_double ) val = var.toDouble();
-  else if (type == s_string ) val = var.toString();
-  else if (type == s_array  ) val = var.toArray();
-  else if (type == s_object ) val = var.toObject();
-  else if (type == s_null   ) val = uninit_null();
-  else return false;
-  var.assignIfRef(val);
-  return true;
-}
-
 bool HHVM_FUNCTION(is_null, const Variant& v) {
   return is_null(v.asTypedValue());
 }
@@ -718,7 +701,6 @@ void StandardExtension::initVariable() {
   HHVM_FE(strval);
   HHVM_FE(gettype);
   HHVM_FE(get_resource_type);
-  HHVM_FE(settype);
   HHVM_FE(print_r);
   HHVM_FE(var_export);
   HHVM_FE(debug_zval_dump);

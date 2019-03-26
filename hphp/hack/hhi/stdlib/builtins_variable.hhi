@@ -40,8 +40,6 @@ function gettype($v);
 <<__PHPStdLib, __Rx>>
 function get_resource_type(resource $handle);
 <<__PHPStdLib>>
-function settype(&$var, string $type);
-<<__PHPStdLib>>
 function print_r($expression, bool $ret = false);
 <<__PHPStdLib>>
 function var_export($expression, bool $ret = false);

@@ -40,11 +40,6 @@ String HHVM_FUNCTION(gettype, const Variant& v);
 String HHVM_FUNCTION(get_resource_type, const Resource& handle);
 
 ///////////////////////////////////////////////////////////////////////////////
-// type conversion
-
-bool HHVM_FUNCTION(settype, VRefParam var, const String& type);
-
-///////////////////////////////////////////////////////////////////////////////
 // input/output
 
 Variant HHVM_FUNCTION(print_r, const Variant& expression, bool ret = false);

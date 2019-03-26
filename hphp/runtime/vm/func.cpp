@@ -930,7 +930,6 @@ FuncSet s_ignores_frame = {
   "strval",
   "gettype",
   "get_resource_type",
-  "settype",
   "serialize",
   "unserialize",
   "addcslashes",

@@ -1,6 +1,6 @@
-File "shape30.php", line 12, characters 10-14:
-Invalid return type (Typing[4057])
+File "shape30.php", line 11, characters 3-20:
+Invalid assignment (Typing[4166])
 File "shape30.php", line 10, characters 17-31:
-The field 'y' is missing
-File "shape30.php", line 9, characters 18-24:
-The field 'y' is defined
+The field 'y' is not defined in this shape type, and this shape type does not allow unknown fields.
+File "shape30.php", line 10, characters 17-31:
+The field 'y' is set in the shape.

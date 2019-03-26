@@ -10,7 +10,7 @@ import difflib
 import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
 
@@ -297,6 +297,7 @@ def report_failures(total: int,
                     failures: List[Result],
                     out_extension: str,
                     expect_extension: str,
+                    fallback_expect_extension: Optional[str],
                     no_copy: bool = False,
                     only_compare_error_lines: bool = False) -> None:
     if only_compare_error_lines:
@@ -308,9 +309,13 @@ def report_failures(total: int,
         record_results(failures, out_extension)
         fnames = [failure.test_case.file_path for failure in failures]
         print("To review the failures, use the following command: ")
-        print("OUT_EXT=%s EXP_EXT=%s NO_COPY=%s ./hphp/hack/test/review.sh %s" %
+        fallback_expect_ext_var = ''
+        if fallback_expect_extension is not None:
+            fallback_expect_ext_var = "FALLBACK_EXP_EXT=%s " % fallback_expect_extension
+        print("OUT_EXT=%s EXP_EXT=%s %sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
                 (out_extension,
                 expect_extension,
+                fallback_expect_ext_var,
                 "true" if no_copy else "false",
                 " ".join(fnames)))
         if dump_on_failure:
@@ -384,20 +389,35 @@ def list_test_files(root: str, disabled_ext: str, test_ext: str) -> List[str]:
             args.test_path)
 
 
-def get_content(file_path: str, ext: str = '') -> str:
+def get_content_(file_path: str, ext: str) -> str:
+    with open(file_path + ext, 'r') as fexp:
+        return fexp.read()
+
+
+def get_content(
+    file_path: str,
+    ext: str = '',
+    fallback_ext: Optional[str] = None,
+) -> str:
     try:
-        with open(file_path + ext, 'r') as fexp:
-            return fexp.read()
+        return get_content_(file_path, ext)
     except FileNotFoundError:
-        return ''
+        if fallback_ext is not None:
+            try:
+                return get_content_(file_path, fallback_ext)
+            except FileNotFoundError:
+                return ''
+        else:
+            return ''
 
 
 def run_tests(files: List[str],
               expected_extension: str,
+              fallback_expect_extension: Optional[str],
               out_extension: str,
               use_stdin: str,
               program: str,
-              default_expect_regex,
+              default_expect_regex: Optional[str],
               batch_mode: str,
               ignore_error_text: str,
               get_flags: Callable[[str], List[str]],
@@ -409,7 +429,7 @@ def run_tests(files: List[str],
     test_cases = [
         TestCase(
             file_path=file,
-            expected=get_content(file, expected_extension),
+            expected=get_content(file, expected_extension, fallback_expect_extension),
             input=get_content(file) if use_stdin else None)
         for file in files]
     if batch_mode:
@@ -433,6 +453,7 @@ def run_tests(files: List[str],
             failures,
             args.out_extension,
             args.expect_extension,
+            args.fallback_expect_extension,
             only_compare_error_lines=only_compare_error_lines)
         sys.exit(1)  # this exit code fails the suite and lets Buck know
 
@@ -441,6 +462,7 @@ def run_tests(files: List[str],
 
 def run_idempotence_tests(results: List[Result],
                           expected_extension: str,
+                          fallback_expect_extension: Optional[str],
                           out_extension: str,
                           program: str,
                           default_expect_regex,
@@ -471,6 +493,7 @@ def run_idempotence_tests(results: List[Result],
             idempotence_failures,
             out_extension + out_extension,  # e.g., *.out.out
             expected_extension,
+            fallback_expect_extension,
             no_copy=True)
         sys.exit(1)  # this exit code fails the suite and lets Buck know
 
@@ -501,6 +524,7 @@ if __name__ == '__main__':
     parser.add_argument('--program', type=abspath)
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
+    parser.add_argument('--fallback-expect-extension', type=str)
     parser.add_argument('--default-expect-regex', type=str)
     parser.add_argument('--in-extension', type=str, default='.php')
     parser.add_argument('--disabled-extension', type=str,
@@ -556,6 +580,7 @@ if __name__ == '__main__':
     results = run_tests(
         files,
         args.expect_extension,
+        args.fallback_expect_extension,
         args.out_extension,
         args.stdin,
         args.program,
@@ -573,6 +598,7 @@ if __name__ == '__main__':
         run_idempotence_tests(
             successes,
             args.expect_extension,
+            args.fallback_expect_extension,
             args.out_extension,
             args.program,
             args.default_expect_regex,

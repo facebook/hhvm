@@ -1,0 +1,6 @@
+File "meth_caller4.php", line 23, characters 10-16:
+Invalid return type (Typing[4110])
+File "meth_caller4.php", line 18, characters 42-44:
+This is an int
+File "meth_caller4.php", line 20, characters 30-33:
+It is incompatible with a bool

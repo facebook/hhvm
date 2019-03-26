@@ -1,0 +1,8 @@
+File "sort_by.php", line 20, characters 70-76:
+Invalid return type (Typing[4110])
+File "sort_by.php", line 13, characters 23-25:
+This is an int
+File "sort_by.php", line 20, characters 70-76:
+It is incompatible with a float because this is the result of an arithmetic operation with a float as the first argument.
+File "sort_by.php", line 5, characters 31-35:
+Here is why I think the argument is a float: this is a float

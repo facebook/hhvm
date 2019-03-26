@@ -1,1 +1,4 @@
-No errors
+File "anon4.php", line 16, characters 12-13:
+Was expecting a function value but type is unknown (Typing[4297])
+File "anon4.php", line 13, characters 8-16:
+It is unknown because a type could not be determined here

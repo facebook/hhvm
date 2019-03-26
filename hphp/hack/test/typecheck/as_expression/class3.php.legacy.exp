@@ -1,0 +1,46 @@
+File "class3.php", line 15, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class3.php", line 26, characters 22-26:
+  This is a mixed value
+  File "class3.php", line 26, characters 22-26:
+  Considering that this type argument is invariant with respect to B
+  File "class3.php", line 15, characters 13-23:
+  It is incompatible with a value of generic type T#1 from this "as" assertion
+File "class3.php", line 16, characters 13-28:
+Invalid argument (Typing[4110])
+  File "class3.php", line 27, characters 22-27:
+  This is a string
+  File "class3.php", line 27, characters 22-27:
+  Considering that this type argument is invariant with respect to B
+  File "class3.php", line 16, characters 13-23:
+  It is incompatible with a value of generic type T#2 from this "as" assertion
+File "class3.php", line 18, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class3.php", line 26, characters 22-26:
+  This is a mixed value
+  File "class3.php", line 26, characters 22-26:
+  Considering that this type argument is invariant with respect to B
+  File "class3.php", line 18, characters 13-23:
+  It is incompatible with a value of generic type T#3 from this "as" assertion
+File "class3.php", line 19, characters 13-31:
+Invalid argument (Typing[4110])
+  File "class3.php", line 27, characters 22-27:
+  This is a string
+  File "class3.php", line 27, characters 22-27:
+  Considering that this type argument is invariant with respect to B
+  File "class3.php", line 19, characters 13-23:
+  It is incompatible with a value of generic type T#4 from this "as" assertion
+File "class3.php", line 21, characters 13-27:
+Invalid argument (Typing[4110])
+  File "class3.php", line 26, characters 22-26:
+  This is a mixed value
+  File "class3.php", line 26, characters 22-26:
+  Considering that this type argument is invariant with respect to B
+  File "class3.php", line 10, characters 21-26:
+  It is incompatible with a string
+  File "class3.php", line 10, characters 21-26:
+  Considering that this type argument is invariant with respect to A
+File "class3.php", line 15, characters 28-28:
+The type B expects 1 type parameter(s) (Typing[4101])
+File "class3.php", line 16, characters 28-28:
+The type B expects 1 type parameter(s) (Typing[4101])

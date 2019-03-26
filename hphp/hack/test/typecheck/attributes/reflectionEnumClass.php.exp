@@ -1,7 +1,9 @@
-File "reflectionEnumClass.php", line 18, characters 8-24:
-Some type constraint(s) here are violated (Typing[4110])
+File "reflectionEnumClass.php", line 18, characters 26-37:
+Invalid argument (Typing[4110])
+File "hhi_lib__srcs/reflection.hhi", line 77, characters 48-68:
+Some type constraint(s) are violated here
 File "hhi_lib__srcs/reflection.hhi", line 77, characters 43-43:
-'T' is a constrained type parameter
+T is a constrained type parameter
 File "hhi_lib__srcs/reflection.hhi", line 77, characters 48-68:
 This is an object of type HH\ClassLikeAttribute
 File "reflectionEnumClass.php", line 18, characters 26-30:

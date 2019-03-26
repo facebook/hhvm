@@ -1,0 +1,6 @@
+File "return_with_and_without_expr.php", line 9, characters 7-13:
+Invalid return type (Typing[4110])
+File "return_with_and_without_expr.php", line 9, characters 7-13:
+This is void
+File "return_with_and_without_expr.php", line 12, characters 6-7:
+It is incompatible with an int

@@ -1,0 +1,6 @@
+File "void_usage_2.php", line 10, characters 7-13:
+Invalid return type (Typing[4110])
+File "void_usage_2.php", line 10, characters 7-13:
+This is void
+File "void_usage_2.php", line 12, characters 18-18:
+It is incompatible with an object of exactly the class C

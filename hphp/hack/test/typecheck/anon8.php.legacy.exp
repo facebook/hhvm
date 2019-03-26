@@ -1,0 +1,6 @@
+File "anon8.php", line 16, characters 10-11:
+Invalid return type (Typing[4039])
+File "anon8.php", line 12, characters 18-37:
+Number of arguments doesn't match
+File "anon8.php", line 13, characters 8-43:
+Because of this definition

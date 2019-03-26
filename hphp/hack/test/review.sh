@@ -26,6 +26,8 @@ for f in "$@"; do
   echo
   if [ -e "$f$EXP_EXT" ]; then
     EXP="$f$EXP_EXT"
+  elif [ -n "${FALLBACK_EXP_EXT+x}" ] && [ -e "$f$FALLBACK_EXP_EXT" ]; then
+    EXP="$f$FALLBACK_EXP_EXT"
   else
     EXP=/dev/null
   fi

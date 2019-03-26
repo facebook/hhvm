@@ -1,0 +1,8 @@
+File "lambda_as_param.php", line 12, characters 8-32:
+Lambda has parameter types that could not be determined at definition site. (Typing[4222])
+  File "lambda_as_param.php", line 12, characters 8-32:
+  2 distinct use types were determined: please add type hints to lambda parameters.
+  File "lambda_as_param.php", line 7, characters 25-57:
+  This use has type (function(string, int, int): int)
+  File "lambda_as_param.php", line 9, characters 28-63:
+  This use has type (function(string, string, int): int)

@@ -75,7 +75,7 @@ File "arrays.php", line 168, characters 3-13:
 File "arrays.php", line 169, characters 3-16:
   bool
 File "arrays.php", line 172, characters 3-13:
-  array<int, bool>
+  darray<int, bool>
 File "arrays.php", line 173, characters 3-16:
   bool
 File "arrays.php", line 176, characters 3-13:

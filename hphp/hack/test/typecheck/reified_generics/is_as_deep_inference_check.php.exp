@@ -4,5 +4,7 @@ File "is_as_deep_inference_check.php", line 15, characters 5-6:
 Invalid argument (Typing[4110])
   File "is_as_deep_inference_check.php", line 7, characters 3-14:
   This is an object of type Reified
+  File "is_as_deep_inference_check.php", line 7, characters 3-14:
+  Considering that this type argument is invariant with respect to Reified
   File "is_as_deep_inference_check.php", line 12, characters 5-7:
   It is incompatible with an int

@@ -1,0 +1,10 @@
+File "map_from_keys.php--file2.php", line 5, characters 43-44:
+Invalid return type (Typing[4110])
+File "map_from_keys.php--file2.php", line 5, characters 12-22:
+This is a classname string
+File "map_from_keys.php--file2.php", line 5, characters 12-45:
+It was implicitly typed as a classname string during this operation
+File "map_from_keys.php--file2.php", line 5, characters 12-22:
+It is incompatible with a string
+File "map_from_keys.php--file2.php", line 5, characters 12-45:
+It was implicitly typed as a string during this operation

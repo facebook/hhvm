@@ -1,0 +1,10 @@
+File "contravariance_constraint_bad.php", line 30, characters 16-27:
+Some type constraint(s) here are violated (Typing[4110])
+  File "contravariance_constraint_bad.php", line 22, characters 26-26:
+  'T' is a constrained type parameter
+  File "contravariance_constraint_bad.php", line 22, characters 31-37:
+  This is an object of type IHasFoo
+  File "contravariance_constraint_bad.php", line 29, characters 60-66:
+  It is incompatible with an object of type IHasBar
+  File "contravariance_constraint_bad.php", line 29, characters 60-66:
+  Considering that this type argument is contravariant with respect to ICanCallFoo

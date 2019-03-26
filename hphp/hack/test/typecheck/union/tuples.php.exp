@@ -3,7 +3,7 @@ File "tuples.php", line 23, characters 3-13:
 File "tuples.php", line 31, characters 3-13:
   (mixed, (int | string), bool)
 File "tuples.php", line 39, characters 3-13:
-  ((int, int, bool, bool) | (mixed, string, bool))
+  ((mixed, string, bool) | (int, int, bool, bool))
 File "tuples.php", line 47, characters 3-13:
   (int, A)
 File "tuples.php", line 55, characters 3-13:

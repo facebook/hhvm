@@ -1,0 +1,13 @@
+File "vec.php", line 4, characters 3-26:
+  vec<int>
+File "vec.php", line 5, characters 3-29:
+  vec<[unresolved]>
+File "vec.php", line 6, characters 3-30:
+  vec<int>
+File "vec.php", line 7, characters 3-24:
+  vec<(int | string)>
+File "vec.php", line 8, characters 3-32:
+  vec<(int | string)>
+File "vec.php", line 9, characters 3-28:
+  vec<(int | string)>
+No errors

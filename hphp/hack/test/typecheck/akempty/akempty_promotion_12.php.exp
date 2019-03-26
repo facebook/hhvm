@@ -1,6 +1,6 @@
-File "akempty_promotion_12.php", line 12, characters 10-12:
-Invalid return type (Typing[4110])
-File "akempty_promotion_12.php", line 6, characters 56-61:
-This is a string
-File "akempty_promotion_12.php", line 9, characters 19-19:
-It is incompatible with an int
+File "akempty_promotion_12.php", line 9, characters 3-19:
+Invalid assignment (Typing[4110])
+File "akempty_promotion_12.php", line 7, characters 27-33:
+This is an empty array
+File "akempty_promotion_12.php", line 7, characters 27-33:
+It is incompatible with a varray_or_darray

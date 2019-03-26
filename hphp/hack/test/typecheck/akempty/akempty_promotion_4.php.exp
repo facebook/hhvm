@@ -2,5 +2,5 @@ File "akempty_promotion_4.php", line 9, characters 5-6:
 Invalid argument (Typing[4110])
 File "akempty_promotion_4.php", line 12, characters 24-26:
 This is an int
-File "akempty_promotion_4.php", line 8, characters 3-9:
-It is incompatible with an array (used like a vector) because a value is appended to it
+File "akempty_promotion_4.php", line 7, characters 17-23:
+It is incompatible with an empty array

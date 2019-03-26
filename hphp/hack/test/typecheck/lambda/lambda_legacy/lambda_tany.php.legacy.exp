@@ -1,0 +1,8 @@
+File "lambda_tany.php", line 12, characters 8-23:
+Lambda has parameter types that could not be determined at definition site. (Typing[4222])
+  File "lambda_tany.php", line 12, characters 8-23:
+  2 distinct use types were determined: please add type hints to lambda parameters.
+  File "lambda_tany.php", line 13, characters 3-8:
+  This use has type (function(_): _)
+  File "lambda_tany.php", line 14, characters 3-13:
+  This use has type (function(C): void)

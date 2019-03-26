@@ -1,1 +1,4 @@
-No errors
+File "let_lambda_hof.php", line 5, characters 38-39:
+Was expecting a function value but type is unknown (Typing[4297])
+File "let_lambda_hof.php", line 5, characters 21-22:
+It is unknown because a type could not be determined here

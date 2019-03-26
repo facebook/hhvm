@@ -1,11 +1,70 @@
 File "map_corner_case.php", line 26, characters 5-15:
-  Map<string, Map<string, Map<string, int>>>
+  (Map<#_, #_> | Map<#_, #_>)
 File "map_corner_case.php", line 26, characters 5-15:[2]
-  Map<string, Map<string, Map<string, int>>>
+  (Map<#_, #_> | Map<#_, #_>)
 File "map_corner_case.php", line 26, characters 5-15:[3]
-  Map<string, Map<string, Map<string, int>>>
+  (Map<#_, #_> | Map<#_, #_>)
 File "map_corner_case.php", line 26, characters 5-15:[4]
-  Map<string, Map<string, Map<string, int>>>
+  (Map<#_, #_> | Map<#_, #_>)
 File "map_corner_case.php", line 26, characters 5-15:[5]
-  Map<string, Map<string, Map<string, int>>>
-No errors
+  (Map<#_, #_> | Map<#_, #_>)
+File "map_corner_case.php", line 24, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 14, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 14, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 25, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 13, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 13, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 24, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 14, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 14, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 25, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 13, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 13, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 24, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 14, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 14, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 25, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 13, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 13, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 24, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 14, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 14, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 25, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 13, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 13, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 24, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 14, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 14, characters 27-32:
+  It is incompatible with an object of type Map
+File "map_corner_case.php", line 25, characters 5-17:
+Invalid assignment (Typing[4110])
+  File "map_corner_case.php", line 13, characters 10-22:
+  This is an undefined value because a type could not be determined here
+  File "map_corner_case.php", line 13, characters 27-32:
+  It is incompatible with an object of type Map

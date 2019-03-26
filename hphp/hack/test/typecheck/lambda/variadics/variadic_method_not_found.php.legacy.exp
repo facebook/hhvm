@@ -1,0 +1,52 @@
+File "variadic_method_not_found.php", line 19, characters 21-23:
+Could not find method foo in an object of type D (Typing[4053])
+  File "variadic_method_not_found.php", line 10, characters 36-36:
+  This is why I think it is an object of type D
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 25, characters 21-23:
+Could not find method foo in an object of type D (Typing[4053])
+  File "variadic_method_not_found.php", line 24, characters 19-20:
+  This is why I think it is an object of type D (variadic argument)
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 29, characters 38-40:
+Could not find method foo in an object of type D (Typing[4053])
+  File "variadic_method_not_found.php", line 10, characters 36-36:
+  This is why I think it is an object of type D
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 31, characters 40-42:
+Could not find method foo in an object of type D (Typing[4053])
+  File "variadic_method_not_found.php", line 31, characters 25-26:
+  This is why I think it is an object of type D (variadic argument)
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 34, characters 19-25:
+Invalid argument (Typing[4053])
+  File "variadic_method_not_found.php", line 33, characters 32-34:
+  Could not find method foo in an object of type D
+  File "variadic_method_not_found.php", line 10, characters 36-36:
+  This is why I think it is an object of type D
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 36, characters 35-37:
+Could not find method foo in an object of type D (Typing[4053])
+  File "variadic_method_not_found.php", line 36, characters 20-21:
+  This is why I think it is an object of type D (variadic argument)
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 41, characters 19-27:
+Invalid argument (Typing[4053])
+  File "variadic_method_not_found.php", line 39, characters 19-21:
+  Could not find method foo in an object of type D
+  File "variadic_method_not_found.php", line 10, characters 36-36:
+  This is why I think it is an object of type D
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here
+File "variadic_method_not_found.php", line 44, characters 19-21:
+Could not find method foo in an object of type D (Typing[4053])
+  File "variadic_method_not_found.php", line 43, characters 29-30:
+  This is why I think it is an object of type D (variadic argument)
+  File "variadic_method_not_found.php", line 3, characters 7-7:
+  Declaration of D is here

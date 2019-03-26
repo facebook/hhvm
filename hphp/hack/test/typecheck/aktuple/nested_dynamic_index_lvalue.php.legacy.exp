@@ -1,0 +1,8 @@
+File "nested_dynamic_index_lvalue.php", line 11, characters 3-16:
+  array<(int | string)>
+File "nested_dynamic_index_lvalue.php", line 12, characters 15-22:
+Invalid argument (Typing[4110])
+File "nested_dynamic_index_lvalue.php", line 15, characters 22-27:
+This is a string
+File "nested_dynamic_index_lvalue.php", line 9, characters 23-23:
+It is incompatible with an int

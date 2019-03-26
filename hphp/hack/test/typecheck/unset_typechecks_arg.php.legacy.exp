@@ -1,0 +1,6 @@
+File "unset_typechecks_arg.php", line 4, characters 9-13:
+Invalid index type for this array (Typing[4110])
+File "unset_typechecks_arg.php", line 3, characters 18-23:
+This is a string
+File "unset_typechecks_arg.php", line 4, characters 12-12:
+It is incompatible with an int

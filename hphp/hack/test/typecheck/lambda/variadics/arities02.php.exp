@@ -11,16 +11,12 @@ Typing error (Typing[4110])
   File "arities02.php", line 3, characters 35-40:
   It is incompatible with a string
 File "arities02.php", line 34, characters 17-19:
-You are trying to access the member bar but this is not an object, it is an int (Typing[4062])
-  File "arities02.php", line 3, characters 51-53:
-  Definition is here
-File "arities02.php", line 34, characters 17-19:
 You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
   File "arities02.php", line 3, characters 35-40:
   Definition is here
 File "arities02.php", line 34, characters 17-19:
-You are trying to access the member bar but this is not an object, it is a string (Typing[4062])
-  File "arities02.php", line 3, characters 43-48:
+You are trying to access the member bar but this is not an object, it is an int (Typing[4062])
+  File "arities02.php", line 3, characters 51-53:
   Definition is here
 File "arities02.php", line 40, characters 17-19:
 You are trying to access the member bar but this is not an object, it is a string (Typing[4062])

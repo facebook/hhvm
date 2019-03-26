@@ -1,0 +1,11 @@
+File "map_corner_case.php", line 26, characters 5-15:
+  Map<string, Map<string, Map<string, int>>>
+File "map_corner_case.php", line 26, characters 5-15:[2]
+  Map<string, Map<string, Map<string, int>>>
+File "map_corner_case.php", line 26, characters 5-15:[3]
+  Map<string, Map<string, Map<string, int>>>
+File "map_corner_case.php", line 26, characters 5-15:[4]
+  Map<string, Map<string, Map<string, int>>>
+File "map_corner_case.php", line 26, characters 5-15:[5]
+  Map<string, Map<string, Map<string, int>>>
+No errors

@@ -4813,19 +4813,6 @@ OPTBLD_INLINE void iopBindL(local_var to) {
   tvBind(*fr, *to.ptr);
 }
 
-OPTBLD_INLINE void iopBindG() {
-  StringData* name;
-  TypedValue* fr = vmStack().topTV();
-  TypedValue* nameTV = vmStack().indTV(1);
-  TypedValue* to = nullptr;
-  lookupd_gbl(vmfp(), name, nameTV, to);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(to != nullptr);
-  tvBind(*fr, *to);
-  memcpy((void*)nameTV, (void*)fr, sizeof(TypedValue));
-  vmStack().discard();
-}
-
 OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
   TypedValue* fr = vmStack().topTV();
   Class* cls = cslot.take().second;

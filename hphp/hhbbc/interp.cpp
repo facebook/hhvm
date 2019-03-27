@@ -2873,12 +2873,6 @@ void in(ISS& env, const bc::BindL& op) {
   push(env, std::move(t1));
 }
 
-void in(ISS& env, const bc::BindG&) {
-  auto t1 = popV(env);
-  popC(env);
-  push(env, std::move(t1));
-}
-
 void in(ISS& env, const bc::BindS& op) {
   popV(env);
   auto const tcls  = takeClsRefSlot(env, op.slot);

@@ -357,15 +357,6 @@ void emitVGetG(IRGS& env) {
   );
 }
 
-void emitBindG(IRGS& env) {
-  auto const name = topC(env, BCSPRelOffset{1});
-  if (!name->isA(TStr)) PUNT(BindG-NameNotStr);
-  auto const box = popV(env);
-  auto const ptr = gen(env, LdGblAddrDef, name);
-  destroyName(env, name);
-  bindMem(env, ptr, box);
-}
-
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);

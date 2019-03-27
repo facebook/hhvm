@@ -1954,11 +1954,6 @@ BindL <local variable id>    [V]  ->  [V]
   Bind local. This instruction marks the local variable given by %1 as defined,
   binds the local variable to $1, and pushes $1 onto the stack.
 
-BindG    [C V]  ->  [V]
-
-  Bind global. This instruction marks the global variable named (string)$2 as
-  defined, binds the global variable to $1, and pushes $1 onto the stack.
-
 BindS <class-ref slot>    [C V]  ->  [V]
 
   Bind static property. This instruction first checks if class %1 has an

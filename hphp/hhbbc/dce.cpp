@@ -1668,7 +1668,6 @@ void dce(Env& env, const bc::AwaitAll& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BaseGL& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BaseH& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BaseL& op) { dce_default(env, op); }
-void dce(Env& env, const bc::BindG& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BindL& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BindS& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitAnd& op) { dce_default(env, op); }

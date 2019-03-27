@@ -627,7 +627,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(IncDecS,         TWO(OA(IncDecOp),CAR),                             \
                                        ONE(CV),         ONE(CV),    NF) \
   O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
-  O(BindG,           NA,               TWO(VV,CV),      ONE(VV),    NF) \
   O(BindS,           ONE(CAR),         TWO(VV,CV),      ONE(VV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \

@@ -277,7 +277,6 @@ static const struct {
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
   { OpIncDecS,     {Stack1,           Stack1,       OutUnknown      }},
   { OpBindL,       {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
-  { OpBindG,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpBindS,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
   { OpUnsetG,      {Stack1,           None,         OutNone         }},
@@ -888,7 +887,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Vec:
   case Op::ArrayIdx:
   case Op::BareThis:
-  case Op::BindG:
   case Op::BindS:
   case Op::BitNot:
   case Op::CGetG:

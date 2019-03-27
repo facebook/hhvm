@@ -115,7 +115,7 @@ struct InliningDecider {
    * It is up to the client to ensure that this is not the case.
    */
   bool canInlineAt(SrcKey callSK, const Func* callee,
-                  Annotations& annotations) const;
+                  Annotations* annotations) const;
 
   /*
    * Check that `region' of `callee' can be inlined (possibly via other inlined

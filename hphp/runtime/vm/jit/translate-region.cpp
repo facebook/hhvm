@@ -449,8 +449,10 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   if (psk.srcKey.op() != Op::FCall) {
     return nullptr;
   }
-
-  if (!inl.canInlineAt(psk.srcKey, callee, annotations)) return nullptr;
+  auto caller = psk.srcKey.func();
+  auto annotationsPtr = mcgen::dumpTCAnnotation(*caller, irgs.context.kind) ?
+                        &annotations : nullptr;
+  if (!inl.canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
 
   auto const& fpiStack = irgs.irb->fs().fpiStack();
   // Make sure the FPushOp was in the region

@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/jit/irgen.h"
 #include "hphp/runtime/vm/jit/location.h"
 #include "hphp/runtime/vm/jit/irlower.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
@@ -58,13 +59,13 @@ std::string nameAndReason(int bcOff, std::string caller, std::string callee,
 }
 
 bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
-                  Annotations& annotations) {
+                  Annotations* annotations) {
   // This is not under Trace::enabled so that we can collect the data in prod.
   const Func* caller = callerSk.func();
   int bcOff = callerSk.offset();
   auto calleeName = callee ? callee->fullName()->data() : "(unknown)";
-  if (RuntimeOption::EvalDumpInlDecision > 0) {
-    annotations.emplace_back("NoInline",
+  if (annotations && RuntimeOption::EvalDumpInlDecision > 0) {
+    annotations->emplace_back("NoInline",
       nameAndReason(bcOff, caller->fullName()->data(), calleeName, why));
   }
   if (Trace::enabled) {
@@ -102,7 +103,7 @@ const StaticString
  * without peeking into its bytecode or regions.
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
-                      Annotations& annotations) {
+                       Annotations* annotations) {
   assertx(callSK.op() == Op::FCall);
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
@@ -149,7 +150,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
 /*
  * Check that we don't have any missing or extra arguments.
  */
-bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
+bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
   assertx(callSK.op() == Op::FCall);
   assertx(callee);
 
@@ -198,7 +199,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations& annotations) {
 }
 
 bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
-                                  Annotations& annotations) const {
+                                  Annotations* annotations) const {
   assertx(callSK.op() == Op::FCall);
 
   if (m_disabled) {
@@ -383,7 +384,8 @@ using InlineCostCache = jit::fast_map<
 >;
 
 Vcost computeTranslationCostSlow(SrcKey at, Op callerFPushOp,
-                         const RegionDesc& region, Annotations& annotations) {
+                                 const RegionDesc& region,
+                                 Annotations& annotations) {
   TransContext ctx {
     kInvalidTransID,
     TransKind::Optimize,
@@ -532,19 +534,22 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
   assertx(callee);
   assertx(sk.func() == callee);
 
+  auto annotationsPtr =
+    mcgen::dumpTCAnnotation(*callerSk.func(), irgs.context.kind) ? &annotations
+                                                                 : nullptr;
   // Tracing return lambdas.
   auto refuse = [&] (const std::string& why) {
     FTRACE(2, "shouldInline: rejecting callee region: {}", show(region));
-    return traceRefusal(callerSk, callee, why, annotations);
+    return traceRefusal(callerSk, callee, why, annotationsPtr);
   };
 
   auto accept = [&, this] (std::string why) {
-    if (RuntimeOption::EvalDumpInlDecision >= 2) {
+    if (annotationsPtr && RuntimeOption::EvalDumpInlDecision >= 2) {
       auto str = nameAndReason(callerSk.offset(),
                                callerSk.func()->fullName()->data(),
                                callee->fullName()->data(),
                                why);
-      annotations.emplace_back("DoInline", str);
+      annotationsPtr->emplace_back("DoInline", str);
     }
 
     FTRACE(2, "InliningDecider: inlining {}() <- {}()\t<reason: {}>\n",
@@ -771,7 +776,7 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
                               const int numArgs,
                               Type ctxType, std::vector<Type>& argTypes,
                               int32_t maxBCInstrs,
-                              Annotations& annotations) {
+                              Annotations* annotations) {
   auto const profData = jit::profData();
   if (!profData) {
     traceRefusal(callerSk, callee, "no profData", annotations);
@@ -835,8 +840,13 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   auto const& fpiInfo = fpiStack.back();
   auto ctx = fpiInfo.ctxType;
 
+  auto caller = sk.func();
+  auto kind = irgs.context.kind;
+  auto annotationsPtr = mcgen::dumpTCAnnotation(*caller, kind) ? &annotations
+                                                               : nullptr;
+
   if (ctx == TBottom) {
-    traceRefusal(sk, callee, "ctx is TBottom", annotations);
+    traceRefusal(sk, callee, "ctx is TBottom", annotationsPtr);
     return nullptr;
   }
   if (callee->isClosureBody()) {
@@ -853,7 +863,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
         (callee->isStaticInPrologue() ||
          (!sk.hasThis() && isFPushClsMethod(fpiInfo.fpushOpc)))) {
       traceRefusal(sk, callee, "calling static method with an object",
-                   annotations);
+                   annotationsPtr);
       return nullptr;
     }
   }
@@ -870,7 +880,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     if (type == TBottom) return nullptr;
     if (!(type <= TCell) && !(type <= TBoxedCell)) {
       traceRefusal(sk, callee, folly::sformat("maybe boxed arg num: {}", i),
-                   annotations);
+                   annotationsPtr);
       return nullptr;
     }
     argTypes.push_back(type);
@@ -881,7 +891,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   if (mode == "cfg" || mode == "both") {
     if (profData()) {
       auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
-                                    maxBCInstrs, annotations);
+                                    maxBCInstrs, annotationsPtr);
       if (region &&
           inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
                            adjustedMaxVasmCost(irgs, *region), annotations)) {

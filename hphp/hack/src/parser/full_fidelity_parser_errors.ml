@@ -3764,13 +3764,9 @@ let assignment_errors _env node errors =
   in
   let check_rvalue roperand errors : SyntaxError.t list =
     match syntax roperand with
-    | PrefixUnaryExpression { prefix_unary_operator = op; prefix_unary_operand = operand }
+    | PrefixUnaryExpression { prefix_unary_operator = op; _ }
         when token_kind op = Some TokenKind.Ampersand ->
-      begin match syntax operand with
-      | SafeMemberSelectionExpression _ ->
-        append_errors roperand errors (SyntaxError.not_allowed_in_write "?->")
-      | _ -> errors
-      end
+      append_errors roperand errors (SyntaxError.references_not_allowed)
     | _ -> errors
   in
   match syntax node with

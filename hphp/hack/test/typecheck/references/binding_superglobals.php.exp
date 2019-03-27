@@ -1,2 +1,2 @@
-File "binding_superglobals.php", line 5, characters 3-13:
-Superglobal $_GET cannot be bound by reference (NastCheck[3067])
+File "binding_superglobals.php", line 5, characters 11-12:
+References are only permitted as function call arguments. (Parsing[1002])

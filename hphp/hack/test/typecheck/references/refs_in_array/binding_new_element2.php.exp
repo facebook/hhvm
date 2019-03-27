@@ -1,2 +1,2 @@
-File "binding_new_element2.php", line 6, characters 11-13:
-Arrays cannot contain references. (Typing[4225])
+File "binding_new_element2.php", line 6, characters 11-12:
+References are only permitted as function call arguments. (Parsing[1002])

@@ -345,6 +345,8 @@ let expected_dotdotdot =
   "'...' is expected here."
 let not_allowed_in_write what =
   what ^ " is not allowed in write context"
+let references_not_allowed =
+  "References are only permitted as function call arguments."
 let reassign_this =
   "Cannot re-assign $this"
 let this_in_static =

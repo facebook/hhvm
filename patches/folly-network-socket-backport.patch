@@ -10,15 +10,6 @@ index 0edbcafa..eb161224 100644
  #include <folly/portability/Sockets.h>
 
  #include <limits.h>
-@@ -157,7 +157,7 @@ class AsyncServerSocket : public DelayedDestruction, public AsyncSocketBase {
-      *                    remain valid until connectionAccepted() returns.
-      */
-     virtual void connectionAccepted(
--        int fd,
-+        NetworkSocket fd,
-         const SocketAddress& clientAddr) noexcept = 0;
-
-     /**
 @@ -293,6 +294,9 @@ class AsyncServerSocket : public DelayedDestruction, public AsyncSocketBase {
     * ownership of the file descriptor.
     */

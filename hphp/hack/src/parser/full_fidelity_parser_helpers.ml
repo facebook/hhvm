@@ -916,8 +916,9 @@ module WithParser(Parser : Parser_S) = struct
       | _ -> true) in
     if SC.is_missing block
     then
-      let parser, empty = Make.missing parser (pos parser) in
-      let parser, es = Make.expression_statement parser empty empty in
+      let parser, empty1 = Make.missing parser (pos parser) in
+      let parser, empty2 = Make.missing parser (pos parser) in
+      let parser, es = Make.expression_statement parser empty1 empty2 in
       make_list parser [es]
     else
       parser1, block

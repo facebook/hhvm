@@ -125,3 +125,17 @@ Caught exception: Cannot modify immutable object of type HH\Pair
 Caught exception: Cannot use [] with collections for reading in an lvalue context
 Caught exception: Cannot use [] with collections for reading in an lvalue context
 Caught exception: Cannot use [] with collections for reading in an lvalue context
+
+Caught exception: Cannot modify immutable object of type HH\Pair
+object(HH\Pair) (2) {
+  [0]=>
+  array(1) {
+    [0]=>
+    int(1)
+  }
+  [1]=>
+  array(1) {
+    [0]=>
+    int(2)
+  }
+}

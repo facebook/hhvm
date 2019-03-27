@@ -1,6 +1,5 @@
 <?hh
 function test(Vector $vec, &$val) {
-  $a = 0;
   foreach ($vec as $val) {
     var_dump($val);
   }

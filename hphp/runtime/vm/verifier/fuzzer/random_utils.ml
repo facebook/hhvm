@@ -176,7 +176,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMutator (SetOpG (random_eq_op ())));
     (fun () -> IBasic Box);
     (fun () -> IGet VGetG);
-    (fun () -> IBasic Unbox);
     (fun () -> IMisc UGetCUNop);
     (fun () -> IMisc CGetCUNop);
     (fun () -> IBasic Dup);
@@ -215,8 +214,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> ILitConst AddElemV);
     (fun () -> IMutator (IncDecL (random_local (), random_incdec_op ())));
     (fun () -> IMutator (IncDecG (random_incdec_op ())));
-    (fun () -> IMutator (BindL (random_local ())));
-    (fun () -> IMutator BindG);
     (fun () -> IMutator (UnsetL (random_local ())));
     (fun () -> IMutator UnsetG);
     (fun () -> IMutator (CheckProp (Prop.from_raw_string "")));
@@ -268,8 +265,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
        (fun () -> IMisc (ClsRefName (Random.int cls_ref_slts)));
        (fun () -> IMutator (IncDecS (random_incdec_op (),
                                      Random.int cls_ref_slts)));
-       (fun () -> IGet (ClsRefGetC (Random.int cls_ref_slts)));
-       (fun () -> IMutator (BindS (Random.int cls_ref_slts)))]
+       (fun () -> IGet (ClsRefGetC (Random.int cls_ref_slts)))]
     end
 
 (* Generators for base instructions *)
@@ -296,7 +292,6 @@ let final_instrs (_ : IS.t) : lazy_instruct list =
      random_incdec_op (), random_key ())));
    (fun () -> IFinal (SetOpM (Random.int 10,
      random_eq_op (), random_key ())));
-   (fun () -> IFinal (BindM (Random.int 10, random_key ())));
    (fun () -> IFinal (UnsetM (Random.int 10, random_key ())))]
 
 (* An association list of stack signatures to random generators for

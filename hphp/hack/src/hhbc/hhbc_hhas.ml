@@ -59,7 +59,6 @@ let string_of_basic instruction =
     | PopU        -> "PopU"
     | Dup         -> "Dup"
     | Box         -> "Box"
-    | Unbox       -> "Unbox"
 
 let string_of_list_of_shape_fields sl =
   String.concat ~sep:" " @@ List.map ~f:SU.quote_string sl
@@ -303,9 +302,6 @@ let string_of_mutator x =
   | IncDecG op -> sep ["IncDecG"; string_of_incdec_op op]
   | IncDecS (op, id) ->
     sep ["IncDecS"; string_of_incdec_op op; string_of_classref id]
-  | BindL id -> sep ["BindL"; string_of_local_id id]
-  | BindG -> "BindG"
-  | BindS id -> sep ["BindS"; string_of_classref id]
   | UnsetL id -> sep ["UnsetL"; string_of_local_id id]
   | UnsetG -> "UnsetG"
   | CheckProp id -> sep ["CheckProp"; string_of_prop_id id]
@@ -432,9 +428,6 @@ let string_of_final instruction =
       string_of_int n; string_of_member_key mk]
   | UnsetM (n, mk) ->
     sep ["UnsetM";
-      string_of_int n; string_of_member_key mk]
-  | BindM (n, mk) ->
-    sep ["BindM";
       string_of_int n; string_of_member_key mk]
   | SetM (i, mk) ->
     sep ["SetM";

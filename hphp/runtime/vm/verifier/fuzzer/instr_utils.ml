@@ -102,8 +102,6 @@ let stk_data : instruct -> stack_sig = function
   | IGet VGetS _
   | IGet VGetG
   | IBasic Box                             -> ["C"], ["V"]
-  | IBasic Unbox                           -> ["V"], ["C"]
-  | IMutator BindL _                       -> ["V"], ["V"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]
   | IGet VGetL _                           -> [], ["V"]
@@ -119,7 +117,6 @@ let stk_data : instruct -> stack_sig = function
   | IFinal SetM (n, _)                     -> produce "C" (n + 1), ["C"]
   | IFinal VGetM (n, _)                    -> produce "C" n, ["V"]
   | IFinal UnsetM (n, _)                   -> produce "C" n, []
-  | IFinal BindM (n, _)                    -> produce "V" (n + 1), ["V"]
   | ILitConst NewStructArray v             -> produce "C" (List.length v), ["C"]
   | IMisc Idx
   | IMisc ArrayIdx
@@ -150,8 +147,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc OODeclExists _
   | IMisc AKExists
   | IGenerator YieldK                      -> ["C"; "C"], ["C"]
-  | IMutator BindG
-  | IMutator BindS _
   | ILitConst AddNewElemV                  -> ["C"; "V"], ["V"]
   | IOp Abs
   | IOp Not

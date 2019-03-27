@@ -50,7 +50,6 @@ type emit_jmp_result = {
 module LValOp = struct
   type t =
   | Set
-  | SetRef
   | SetOp of eq_op
   | IncDec of incdec_op
   | Unset
@@ -545,55 +544,51 @@ and emit_is_null env e =
       instr_istypec OpNull
     ]
 
-and emit_binop ~need_ref env pos op e1 e2 =
-  let default () =
-    emit_box_if_necessary pos need_ref @@ gather [
-      emit_two_exprs env pos e1 e2;
-      from_binop op
-    ] in
+and emit_binop env pos op e1 e2 =
+  let default () = gather [
+    emit_two_exprs env pos e1 e2;
+    from_binop op
+  ] in
   match op with
   | A.Ampamp | A.Barbar ->
-    emit_box_if_necessary pos need_ref @@
-      emit_short_circuit_op env pos (A.Binop (op, e1, e2))
+    emit_short_circuit_op env pos (A.Binop (op, e1, e2))
   | A.Eq None ->
-    emit_lval_op ~need_ref env pos LValOp.Set e1 (Some e2)
+    emit_lval_op env pos LValOp.Set e1 (Some e2)
   | A.Eq (Some A.QuestionQuestion) ->
-    emit_box_if_necessary pos need_ref @@
-      emit_null_coalesce_assignment ~need_ref env pos e1 e2
+    emit_null_coalesce_assignment env pos e1 e2
   | A.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> failwith "illegal eq op"
-    | Some op -> emit_lval_op ~need_ref env pos (LValOp.SetOp op) e1 (Some e2)
+    | Some op -> emit_lval_op env pos (LValOp.SetOp op) e1 (Some e2)
     end
   | A.QuestionQuestion ->
-    emit_box_if_necessary pos need_ref @@
-      let end_label = Label.next_regular () in
-      gather [
-        fst (emit_quiet_expr env pos e1);
-        instr_dup;
-        instr_istypec OpNull;
-        instr_not;
-        instr_jmpnz end_label;
-        instr_popc;
-        emit_expr ~need_ref:false env e2;
-        instr_label end_label;
-      ]
+    let end_label = Label.next_regular () in
+    gather [
+      fst (emit_quiet_expr env pos e1);
+      instr_dup;
+      instr_istypec OpNull;
+      instr_not;
+      instr_jmpnz end_label;
+      instr_popc;
+      emit_expr ~need_ref:false env e2;
+      instr_label end_label;
+    ]
   | _ ->
     if not (optimize_null_check ())
     then default ()
     else
     match op with
     | A.Eqeqeq when snd e2 = A.Null ->
-      emit_box_if_necessary pos need_ref @@ emit_is_null env e1
+      emit_is_null env e1
     | A.Eqeqeq when snd e1 = A.Null ->
-      emit_box_if_necessary pos need_ref @@ emit_is_null env e2
+      emit_is_null env e2
     | A.Diff2 when snd e2 = A.Null ->
-      emit_box_if_necessary pos need_ref @@ gather [
+      gather [
         emit_is_null env e1;
         instr_not
       ]
     | A.Diff2 when snd e1 = A.Null ->
-      emit_box_if_necessary pos need_ref @@ gather [
+      gather [
         emit_is_null env e2;
         instr_not
       ]
@@ -1655,7 +1650,7 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
   | A.Unop (op, e) ->
     emit_unop ~need_ref env pos op e
   | A.Binop (op, e1, e2) ->
-    emit_binop ~need_ref env pos op e1 e2
+    emit_box_if_necessary pos need_ref @@ emit_binop env pos op e1 e2
   | A.Pipe (e1, e2) ->
     emit_box_if_necessary pos need_ref @@ emit_pipe env pos e1 e2
   | A.InstanceOf (e1, e2) ->
@@ -2199,7 +2194,7 @@ and emit_short_circuit_op env pos expr =
     r1.instrs;
     if_true; ]
 
-and emit_null_coalesce_assignment ~need_ref env pos e1 e2 =
+and emit_null_coalesce_assignment env pos e1 e2 =
   let end_label = Label.next_regular () in
   let do_set_label = Label.next_regular () in
   let l_nonnull = Local.get_unnamed_local () in
@@ -2221,7 +2216,7 @@ and emit_null_coalesce_assignment ~need_ref env pos e1 e2 =
     instr_jmp end_label;
     instr_label do_set_label;
     instr_popc;
-    emit_lval_op ~null_coalesce_assignment:true ~need_ref env pos LValOp.Set e1 (Some e2);
+    emit_lval_op ~null_coalesce_assignment:true env pos LValOp.Set e1 (Some e2);
     instr_label end_label;
   ]
 
@@ -2832,11 +2827,6 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
 and emit_ignored_expr env ?(pop_pos = Pos.none) e =
   match snd e with
   | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
-  | A.Binop (A.Eq None, _, rhs) when expr_starts_with_ref rhs ->
-    gather [
-      emit_expr ~need_ref:true env e;
-      emit_pos_then pop_pos @@ instr_popv
-    ]
   | _ ->
     gather [
       emit_expr ~need_ref:false env e;
@@ -2974,7 +2964,6 @@ and emit_args_and_inout_setters env args =
       begin match snd expr with
       (* passed by reference *)
       | A.Array_get _
-      | A.Binop (A.Eq None, (_, A.List _), (_, A.Lvar _))
       | A.Class_get _
       | A.Lvar _
       | A.Obj_get _ ->
@@ -3475,7 +3464,6 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
 and emit_final_member_op stack_index op mk =
   match op with
   | LValOp.Set -> instr (IFinal (SetM (stack_index, mk)))
-  | LValOp.SetRef -> instr (IFinal (BindM (stack_index, mk)))
   | LValOp.SetOp op -> instr (IFinal (SetOpM (stack_index, op, mk)))
   | LValOp.IncDec op -> instr (IFinal (IncDecM (stack_index, op, mk)))
   | LValOp.Unset -> instr (IFinal (UnsetM (stack_index, mk)))
@@ -3484,7 +3472,6 @@ and emit_final_local_op pos op lid =
   emit_pos_then pos @@
   match op with
   | LValOp.Set -> instr (IMutator (SetL lid))
-  | LValOp.SetRef -> instr (IMutator (BindL lid))
   | LValOp.SetOp op -> instr (IMutator (SetOpL (lid, op)))
   | LValOp.IncDec op -> instr (IMutator (IncDecL (lid, op)))
   | LValOp.Unset -> instr (IMutator (UnsetL lid))
@@ -3492,7 +3479,6 @@ and emit_final_local_op pos op lid =
 and emit_final_global_op pos op =
   match op with
   | LValOp.Set -> emit_pos_then pos @@ instr (IMutator SetG)
-  | LValOp.SetRef -> instr (IMutator BindG)
   | LValOp.SetOp op -> instr (IMutator (SetOpG op))
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
   | LValOp.Unset -> emit_pos_then pos @@ instr (IMutator UnsetG)
@@ -3500,7 +3486,6 @@ and emit_final_global_op pos op =
 and emit_final_static_op cid prop op =
   match op with
   | LValOp.Set -> instr (IMutator (SetS 0))
-  | LValOp.SetRef -> instr (IMutator (BindS 0))
   | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
   | LValOp.Unset ->
@@ -3633,61 +3618,52 @@ and expr_starts_with_ref = function
   | _ -> false
 
 (* Emit code for an l-value operation *)
-and emit_lval_op ?(null_coalesce_assignment=false) ~need_ref env pos op expr1 opt_expr2 =
-  let op, make_ref =
-    match op, opt_expr2 with
-    | LValOp.Set, Some e when expr_starts_with_ref e -> LValOp.SetRef, true
-    | _ -> op, false
-  in
+and emit_lval_op ?(null_coalesce_assignment=false) env pos op expr1 opt_expr2 =
   match op, expr1, opt_expr2 with
-    (* Special case for list destructuring, only on assignment *)
-    | LValOp.Set, (_, A.List l), Some expr2 ->
-      let has_elements =
-        List.exists l ~f: (function
-          | _, A.Omitted -> false
-          | _ -> true)
-      in
-      if has_elements then
-        stash_in_local_with_prefix ~need_ref ~always_stash:(php7_ltr_assign ())
-          ~leave_on_stack:true env pos expr2
-        begin fun local _break_label ->
-          let local =
-            if can_use_as_rhs_in_list_assignment (snd expr2) then
-              Some local
-            else
-              None
-          in
-            emit_lval_op_list env pos local [] expr1
-        end
-      else
-        emit_expr ~need_ref env expr2
-    | _ ->
-      Local.scope @@ fun () ->
-        let rhs_instrs, rhs_stack_size =
-          match opt_expr2 with
-          | None -> empty, 0
-          | Some (_, A.Yield af) ->
-            let temp = Local.get_unnamed_local () in
-            gather [
-              emit_yield env pos af;
-              instr_setl temp;
-              instr_popc;
-              instr_pushl temp;
-            ], 1
-          | Some (pos, A.Unop (A.Uref, (_, A.Obj_get (_, _, A.OG_nullsafe)
-                                    | _, A.Array_get ((_,
-                                      A.Obj_get (_, _, A.OG_nullsafe)), _)))) ->
-            Emit_fatal.raise_fatal_runtime
-              pos "?-> is not allowed in write context"
-          | Some e -> emit_expr ~need_ref:make_ref env e, 1
+  | LValOp.Set, _, Some e when expr_starts_with_ref e ->
+    failwith "parser should not allow by-ref assignments"
+  (* Special case for list destructuring, only on assignment *)
+  | LValOp.Set, (_, A.List l), Some expr2 ->
+    let has_elements =
+      List.exists l ~f: (function
+        | _, A.Omitted -> false
+        | _ -> true)
+    in
+    if has_elements then
+      stash_in_local_with_prefix ~always_stash:(php7_ltr_assign ())
+        ~leave_on_stack:true env pos expr2
+      begin fun local _break_label ->
+        let local =
+          if can_use_as_rhs_in_list_assignment (snd expr2) then
+            Some local
+          else
+            None
         in
+          emit_lval_op_list env pos local [] expr1
+      end
+    else
+      emit_expr ~need_ref:false env expr2
+  | _ ->
+    Local.scope @@ fun () ->
+    let rhs_instrs, rhs_stack_size =
+      match opt_expr2 with
+      | None -> empty, 0
+      | Some (_, A.Yield af) ->
+        let temp = Local.get_unnamed_local () in
         gather [
-          emit_lval_op_nonlist ~null_coalesce_assignment env pos op expr1 rhs_instrs rhs_stack_size;
-          match need_ref, make_ref with
-            | false, true -> emit_pos_then pos instr_unbox
-            | true, false -> emit_pos_then pos instr_box
-            | _ -> empty
-        ]
+          emit_yield env pos af;
+          instr_setl temp;
+          instr_popc;
+          instr_pushl temp;
+        ], 1
+      | Some (pos, A.Unop (A.Uref, (_, A.Obj_get (_, _, A.OG_nullsafe)
+                                | _, A.Array_get ((_,
+                                  A.Obj_get (_, _, A.OG_nullsafe)), _)))) ->
+        Emit_fatal.raise_fatal_runtime
+          pos "?-> is not allowed in write context"
+      | Some e -> emit_expr ~need_ref:false env e, 1
+    in
+    emit_lval_op_nonlist ~null_coalesce_assignment env pos op expr1 rhs_instrs rhs_stack_size;
 
 and emit_lval_op_nonlist ?(null_coalesce_assignment=false) env pos op e rhs_instrs rhs_stack_size =
   let (lhs, rhs, setop) =
@@ -3704,7 +3680,6 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
   let env =
   match op with
   (* Unbelieveably, $test[] += 5; is legal in PHP, but $test[] = $test[] + 5 is not *)
-  | LValOp.SetRef
   | LValOp.Set
   | LValOp.SetOp _
   | LValOp.IncDec _ -> { env with Emit_env.env_allows_array_append = true }
@@ -3880,7 +3855,8 @@ and emit_unop ~need_ref env pos op e =
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
-    emit_lval_op ~need_ref env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
+    emit_box_if_necessary pos need_ref @@
+    emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
   | A.Uref -> emit_expr_as_ref env e
   | A.Usilence ->
     Local.scope @@ fun () ->
@@ -3939,7 +3915,7 @@ and with_temp_local_with_prefix temp f =
 (* Similar to stash_in_local with addition that function that
    creates a block of code can yield a prefix instrution
   that will be executed as the first instruction in the result instruction set *)
-and stash_in_local_with_prefix ~need_ref ?(always_stash=false)
+and stash_in_local_with_prefix ?(always_stash=false)
                    ?(leave_on_stack=false)
                    ?(always_stash_this=false) env pos e f =
   match e with
@@ -3954,13 +3930,13 @@ and stash_in_local_with_prefix ~need_ref ?(always_stash=false)
       result_instr;
       instr_label break_label;
       if leave_on_stack then
-        (if need_ref then instr_vgetl else instr_cgetl) (get_local env id)
+        instr_cgetl (get_local env id)
       else
         empty;
     ]
   | _ ->
     let generate_value =
-      Local.scope @@ fun () -> emit_expr ~need_ref env e in
+      Local.scope @@ fun () -> emit_expr ~need_ref:false env e in
     Local.scope @@ fun () ->
       let temp = Local.get_unnamed_local () in
       let prefix_instr, result_instr =
@@ -3968,20 +3944,11 @@ and stash_in_local_with_prefix ~need_ref ?(always_stash=false)
       gather [
         prefix_instr;
         generate_value;
-        if need_ref then gather [
-          instr_bindl temp;
-          instr_popv;
-          result_instr;
-          emit_pos pos;
-          if leave_on_stack then instr_vgetl temp else empty;
-          instr_unsetl temp
-        ] else gather [
-          instr_setl temp;
-          instr_popc;
-          result_instr;
-          emit_pos pos;
-          if leave_on_stack then instr_pushl temp else instr_unsetl temp
-        ]
+        instr_setl temp;
+        instr_popc;
+        result_instr;
+        emit_pos pos;
+        if leave_on_stack then instr_pushl temp else instr_unsetl temp
       ]
 (* Generate code to evaluate `e`, and, if necessary, store its value in a
  * temporary local `temp` (unless it is itself a local). Then use `f` to
@@ -3994,5 +3961,5 @@ and stash_in_local_with_prefix ~need_ref ?(always_stash=false)
  *)
 and stash_in_local ?(always_stash=false) ?(leave_on_stack=false)
                    ?(always_stash_this=false) env pos e f =
-  stash_in_local_with_prefix ~need_ref:false ~always_stash ~leave_on_stack
-    ~always_stash_this env pos e (fun temp label -> empty, f temp label)
+  stash_in_local_with_prefix ~always_stash ~leave_on_stack ~always_stash_this
+    env pos e (fun temp label -> empty, f temp label)

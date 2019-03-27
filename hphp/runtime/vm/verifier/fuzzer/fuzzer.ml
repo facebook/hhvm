@@ -317,8 +317,6 @@ let mut_imms (is : IS.t) : IS.t =
     | IncDecL  (id, op)  -> IncDecL (mutate_local_id id !mag, mutate_inc_op op)
     | IncDecG   op       -> IncDecG (mutate_inc_op op)
     | IncDecS  (op, i )  -> IncDecS (mutate_inc_op op,        mutate_int i !mag)
-    | BindL     id       -> BindL   (mutate_local_id id !mag)
-    | BindS     i        -> BindS   (mutate_int      i  !mag)
     | UnsetL    id       -> UnsetL  (mutate_local_id id !mag)
     | CheckProp p        -> CheckProp p
     | InitProp (p, Static) ->
@@ -388,7 +386,6 @@ let mut_imms (is : IS.t) : IS.t =
     | SetM    (i,     k) -> SetM    (mutate_int i  !mag,     mutate_key k !mag)
     | IncDecM (i, op, k) -> IncDecM (mutate_int i  !mag, op, mutate_key k !mag)
     | SetOpM  (i, op, k) -> SetOpM  (mutate_int i  !mag, op, mutate_key k !mag)
-    | BindM   (i,     k) -> BindM   (mutate_int i  !mag,     mutate_key k !mag)
     | UnsetM  (i,     k) -> UnsetM  (mutate_int i  !mag,     mutate_key k !mag)
     | SetRangeM (i, op, s) ->
         SetRangeM (mutate_int i !mag, op, mutate_int s !mag)

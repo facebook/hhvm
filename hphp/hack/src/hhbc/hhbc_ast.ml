@@ -150,7 +150,6 @@ type instruct_basic =
   | PopU
   | Dup
   | Box
-  | Unbox
 
 type typestruct_resolve_op =
   | Resolve
@@ -376,9 +375,6 @@ type instruct_mutator =
   | IncDecL of local_id * incdec_op
   | IncDecG of incdec_op
   | IncDecS of incdec_op * classref_id
-  | BindL of local_id
-  | BindG
-  | BindS of classref_id
   | UnsetL of local_id
   | UnsetG
   | CheckProp of prop_id
@@ -416,7 +412,6 @@ type instruct_final =
   | SetM of num_params * MemberKey.t
   | IncDecM of num_params * incdec_op * MemberKey.t
   | SetOpM of num_params  * eq_op * MemberKey.t
-  | BindM of num_params * MemberKey.t
   | UnsetM of num_params * MemberKey.t
   | SetRangeM of num_params * setrange_op * int
 

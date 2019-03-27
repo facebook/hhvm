@@ -141,7 +141,6 @@ let instr_cugetl local = instr (IGet (CUGetL local))
 let instr_vgetl local = instr (IGet (VGetL local))
 let instr_cgetl2 local = instr (IGet (CGetL2 local))
 let instr_cgetquietl local = instr (IGet (CGetQuietL local))
-let instr_bindl local = instr (IMutator (BindL local))
 let instr_clsrefgetc =
   instr (IGet (ClsRefGetC class_ref_rewrite_sentinel))
 let instr_clsrefgetts =
@@ -157,7 +156,6 @@ let instr_parent =
 
 let instr_popu = instr (IBasic PopU)
 let instr_popc = instr (IBasic PopC)
-let instr_popv = instr (IBasic PopV)
 let instr_popl l = instr (IMutator (PopL l))
 
 let instr_pushl local = instr (IGet (PushL local))
@@ -181,7 +179,6 @@ let instr_newstructdict keys = instr (ILitConst (NewStructDict keys))
 let instr_newcol collection_type = instr (ILitConst (NewCol collection_type))
 let instr_colfromarray collection_type =
   instr (ILitConst (ColFromArray collection_type))
-let instr_unbox = instr (IBasic Unbox)
 let instr_box = instr (IBasic Box)
 let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
@@ -514,7 +511,6 @@ let rewrite_class_refs_instr num = function
 | IMutator (SetS _) -> (num - 1, IMutator (SetS num))
 | IMutator (SetOpS (o, _)) -> (num - 1, IMutator (SetOpS (o, num)))
 | IMutator (IncDecS (o, _)) -> (num - 1, IMutator (IncDecS (o, num)))
-| IMutator (BindS _) -> (num - 1, IMutator (BindS num))
 | IBase (BaseSC (si, _, m)) -> (num - 1, IBase (BaseSC (si, num, m)))
 | ICall (NewObj (_, op)) -> (num - 1, ICall (NewObj (num, op)))
 | ICall (FPushClsMethod (np, _, pl)) ->

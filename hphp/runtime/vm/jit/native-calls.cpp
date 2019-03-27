@@ -345,6 +345,8 @@ static CallMap s_callMap {
                           DNone, SSync, {{SSA, 0}}},
     {ThrowDivisionByZeroError, throw_division_by_zero_error,
                           DNone, SSync, {{SSA, 0}}},
+    {ThrowDivisionByZeroException, throw_division_by_zero_exception,
+                          DNone, SSync, {}},
     {HasToString,        &ObjectData::hasToString, DSSA, SSync,
                           {{SSA, 0}}},
 

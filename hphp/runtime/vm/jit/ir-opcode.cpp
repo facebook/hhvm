@@ -541,6 +541,7 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookYield:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
+  case ThrowDivisionByZeroException:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:

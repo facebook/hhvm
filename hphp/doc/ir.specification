@@ -3349,6 +3349,10 @@ fields of that struct for holding intermediate values.
 
   Throws a DivisionByZeroError with a message indicating S0.
 
+| ThrowDivisionByZeroException, ND, NA, T
+
+  Throws a DivisionByZeroException.
+
 | ThrowLateInitPropError, ND, S(Cls) S(Str) S(Bool), T
 
   Throws an InvalidOperationException indicating an access of a unset LateInit

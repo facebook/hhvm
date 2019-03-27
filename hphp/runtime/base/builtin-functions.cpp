@@ -815,6 +815,10 @@ void throw_division_by_zero_error(StringData *str) {
   SystemLib::throwDivisionByZeroErrorObject(Variant{str});
 }
 
+void throw_division_by_zero_exception() {
+  SystemLib::throwDivisionByZeroExceptionObject();
+}
+
 void throw_collection_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithCollection);
 }

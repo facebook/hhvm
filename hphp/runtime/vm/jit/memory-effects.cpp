@@ -2174,6 +2174,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
+  case ThrowDivisionByZeroException:
   case ThrowLateInitPropError:
   case SetOpCell:
   case SetOpCellVerify:

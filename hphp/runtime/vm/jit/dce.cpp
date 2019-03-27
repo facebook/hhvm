@@ -714,6 +714,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowInvalidOperation:
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
+  case ThrowDivisionByZeroException:
   case ThrowLateInitPropError:
   case StMBase:
   case StMIPropState:

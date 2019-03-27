@@ -1674,21 +1674,25 @@ void emitDiv(IRGS& env) {
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
-      gen(env, RaiseWarning, msg);
 
       // PHP5 results in false; we side exit since the type of the result
       // has now dramatically changed. PHP7 falls through to the IEEE
       // division semantics below (and doesn't side exit since the type is
       // still a double).
-      if (!RuntimeOption::PHP7_IntSemantics) {
-        push(env, cns(env, false));
-        gen(env, Jmp, makeExit(env, nextBcOff(env)));
-      } else if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
-        // We don't need to side exit here, but it's cleaner, and we assume
-        // that division by zero is unikely
-        push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
-        gen(env, Jmp, makeExit(env, nextBcOff(env)));
+      if (RuntimeOption::EvalForbidDivisionByZero) {
+        gen(env, ThrowDivisionByZeroException);
+      } else {
+        auto const msg = cns(env, s_DIVISION_BY_ZERO.get());
+        gen(env, RaiseWarning, msg);
+        if (!RuntimeOption::PHP7_IntSemantics) {
+          push(env, cns(env, false));
+          gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        } else if (!divisor->isA(TDbl) && !dividend->isA(TDbl)) {
+          // We don't need to side exit here, but it's cleaner, and we assume
+          // that division by zero is unikely
+          push(env, gen(env, DivDbl, toDbl(dividend), toDbl(divisor)));
+          gen(env, Jmp, makeExit(env, nextBcOff(env)));
+        }
       }
     }
   );
@@ -1757,6 +1761,8 @@ void emitMod(IRGS& env) {
       if (RuntimeOption::PHP7_IntSemantics) {
         auto const msg = cns(env, s_MODULO_BY_ZERO.get());
         gen(env, ThrowDivisionByZeroError, msg);
+      } else if (RuntimeOption::EvalForbidDivisionByZero) {
+        gen(env, ThrowDivisionByZeroException);
       } else {
         // Make progress before side-exiting to the next instruction: raise a
         // warning and push false.

@@ -246,6 +246,9 @@ struct Mul {
 struct Div {
   Cell operator()(int64_t t, int64_t u) const {
     if (UNLIKELY(u == 0)) {
+      if (RuntimeOption::EvalForbidDivisionByZero) {
+        SystemLib::throwDivisionByZeroExceptionObject();
+      }
       raise_warning(Strings::DIVISION_BY_ZERO);
       if (RuntimeOption::PHP7_IntSemantics) {
         // PHP 7 requires IEEE compliance (+/- INF and NAN) with the result
@@ -288,6 +291,9 @@ struct Div {
     Cell
   >::type operator()(T t, U u) const {
     if (UNLIKELY(u == 0)) {
+      if (RuntimeOption::EvalForbidDivisionByZero) {
+        SystemLib::throwDivisionByZeroExceptionObject();
+      }
       raise_warning(Strings::DIVISION_BY_ZERO);
       if (RuntimeOption::PHP7_IntSemantics) {
         // PHP7 uses the IEEE definition (+/- INF and NAN).
@@ -662,6 +668,8 @@ Cell cellMod(Cell c1, Cell c2) {
   if (UNLIKELY(i2 == 0)) {
     if (RuntimeOption::PHP7_IntSemantics) {
       SystemLib::throwDivisionByZeroErrorObject(Strings::MODULO_BY_ZERO);
+    } else if (RuntimeOption::EvalForbidDivisionByZero) {
+      SystemLib::throwDivisionByZeroExceptionObject();
     } else {
       raise_warning(Strings::DIVISION_BY_ZERO);
       return make_tv<KindOfBoolean>(false);

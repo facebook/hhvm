@@ -180,6 +180,11 @@ Object AllocDOMExceptionObject(const Variant& message) {
   return createAndConstructThrowable(s_DOMExceptionClass, message);
 }
 
+Object AllocDivisionByZeroExceptionObject() {
+  return createAndConstructThrowable(s_DivisionByZeroExceptionClass,
+                                     Strings::DIVISION_BY_ZERO);
+}
+
 Object AllocSoapFaultObject(const Variant& code,
                                  const Variant& message,
                                  const Variant& actor /* = uninit_variant */,
@@ -267,6 +272,10 @@ void throwInvalidOperationExceptionObject(const Variant& message) {
 
 void throwDOMExceptionObject(const Variant& message) {
   throw_object(AllocDOMExceptionObject(message));
+}
+
+void throwDivisionByZeroExceptionObject() {
+  throw_object(AllocDivisionByZeroExceptionObject());
 }
 
 void throwSoapFaultObject(const Variant& code,

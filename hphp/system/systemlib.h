@@ -64,7 +64,8 @@ namespace HPHP { namespace SystemLib {
   x(LazyKeyedIterableView)                      \
   x(CURLFile)                                   \
   x(__PHP_Incomplete_Class)                     \
-  x(APCIterator)
+  x(APCIterator)                                \
+  x(DivisionByZeroException)
 
 extern bool s_inited;
 extern bool s_anyNonPersistentBuiltins;
@@ -105,6 +106,7 @@ Object AllocRuntimeExceptionObject(const Variant& message);
 Object AllocOutOfBoundsExceptionObject(const Variant& message);
 Object AllocInvalidOperationExceptionObject(const Variant& message);
 Object AllocDOMExceptionObject(const Variant& message);
+Object AllocDivisionByZeroExceptionObject();
 Object AllocDirectoryObject();
 Object AllocPDOExceptionObject();
 Object AllocSoapFaultObject(const Variant& code,
@@ -136,6 +138,7 @@ void throwInvalidArgumentExceptionObject(const Variant& message);
 void throwInvalidOperationExceptionObject(const Variant& message);
 [[noreturn]]
 void throwDOMExceptionObject(const Variant& message);
+[[noreturn]] void throwDivisionByZeroExceptionObject();
 [[noreturn]]
 void throwSoapFaultObject(const Variant& code,
                           const Variant& message,

@@ -130,3 +130,4 @@ class UnexpectedValueException extends RuntimeException {}
 
 class InvariantException extends Exception {}
 final class TypeAssertionException extends Exception {}
+class DivisionByZeroException extends Exception {}

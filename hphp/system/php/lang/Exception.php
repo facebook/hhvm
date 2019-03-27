@@ -46,4 +46,6 @@ class Exception implements Throwable {
   }
 }
 
+class DivisionByZeroException extends Exception {}
+
 }

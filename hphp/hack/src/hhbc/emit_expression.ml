@@ -1652,7 +1652,7 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
   | A.Binop (op, e1, e2) ->
     emit_box_if_necessary pos need_ref @@ emit_binop env pos op e1 e2
   | A.Pipe (e1, e2) ->
-    emit_box_if_necessary pos need_ref @@ emit_pipe env pos e1 e2
+    emit_box_if_necessary pos need_ref @@ emit_pipe env e1 e2
   | A.InstanceOf (e1, e2) ->
     emit_box_if_necessary pos need_ref @@ emit_instanceof env pos e1 e2
   | A.Is (e, h) ->
@@ -2004,12 +2004,12 @@ and emit_collection ?(transform_to_collection) env expr es =
   | None ->
     emit_dynamic_collection env expr es
 
-and emit_pipe env pos e1 e2 =
-  stash_in_local ~always_stash:true env pos e1
-  begin fun temp _break_label ->
+and emit_pipe env e1 e2 =
+  let lhs_instrs = emit_expr ~need_ref:false env e1 in
+  Scope.with_unnamed_local @@ fun temp ->
   let env = Emit_env.with_pipe_var temp env in
-  emit_expr ~need_ref:false env e2
-  end
+  let rhs_instrs = emit_expr ~need_ref:false env e2 in
+  gather [ lhs_instrs; instr_popl temp ], rhs_instrs, instr_unsetl temp
 
 (* Emit code that is equivalent to
  *   <code for expr>

@@ -785,6 +785,12 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
     loosen_dvarrayness(ty0),
     loosen_dvarrayness(ty1)
   );
+  // Unfortunately, floating point negative zero and positive zero are
+  // different, but are identical using as far as Same is concerened. We should
+  // avoid refining a value to 0.0 because it compares identically to 0.0
+  if (isect.couldBe(dval(0.0)) || isect.couldBe(dval(-0.0))) {
+    isect = union_of(isect, TDbl);
+  }
   discard(env, 2);
 
   auto handle_same = [&] {

@@ -2,9 +2,12 @@
 
 import os
 
+from typing import Optional
+
+
 class HierarchyTests(object):
 
-    template_repo = 'hphp/hack/test/integration/data/hierarchy'
+    template_repo: Optional[str] = 'hphp/hack/test/integration/data/hierarchy'
 
     def test_inheritance(self):
         """

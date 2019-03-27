@@ -12,12 +12,13 @@ import subprocess
 import sys
 import tempfile
 import time
+import unittest
 
 from hh_paths import hh_server, hh_client
-from typing import Union
+from typing import Optional, Union
 
 
-class CommonTestDriver(object):
+class CommonTestDriver(unittest.TestCase):
 
     # This needs to be overridden in child classes. The files in this
     # directory will be used to set up the initial environment for each
@@ -291,7 +292,7 @@ class DebugSubscription(object):
 # Exercises server responsiveness, and updating errors after changing files
 class BarebonesTests(object):
 
-    template_repo = 'hphp/hack/test/integration/data/simple_repo'
+    template_repo: Union[str, None] = 'hphp/hack/test/integration/data/simple_repo'
 
     # hh should should work with 0 retries.
     def test_responsiveness(self):
@@ -370,6 +371,8 @@ class BarebonesTests(object):
 
 # Common tests, includes the Barebones Tests above
 class CommonTests(BarebonesTests):
+
+    maxDiff: Optional[int]
 
     def test_json_errors(self):
         """
@@ -766,6 +769,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
             monitor_logs
         )
         self.assertIsNotNone(m)
+        assert m is not None, "for mypy"
         pid = m.group(1)
         self.assertIsNotNone(pid)
         os.kill(int(pid), signal.SIGTERM)

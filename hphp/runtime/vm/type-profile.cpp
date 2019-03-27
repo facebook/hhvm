@@ -63,9 +63,6 @@ namespace {
 
 bool warmingUp;
 std::atomic<int64_t> numRequests;
-std::atomic<bool> singleJitLock;
-std::atomic<int> singleJitConcurrentCount;
-std::atomic<int> singleJitRequests;
 std::atomic<int> relocateRequests;
 
 /*
@@ -191,10 +188,6 @@ int64_t requestCount() {
   return numRequests.load(std::memory_order_relaxed);
 }
 
-int singleJitRequestCount() {
-  return singleJitRequests.load(std::memory_order_relaxed);
-}
-
 static inline bool doneProfiling() {
   return requestCount() >= RuntimeOption::EvalJitProfileInterpRequests ||
     (!RuntimeOption::ServerExecutionMode() &&
@@ -231,32 +224,6 @@ void profileRequestStart() {
   }
   jit::setMayAcquireLease(okToJit);
   jit::setMayAcquireConcurrentLease(okToJit);
-  assertx(!rl_typeProfileLocals->acquiredSingleJit);
-  assertx(!rl_typeProfileLocals->acquiredSingleJitConcurrent);
-  if (okToJit) {
-    if (singleJitRequestCount() < RuntimeOption::EvalNumSingleJitRequests) {
-      if (!singleJitLock.exchange(true, std::memory_order_relaxed)) {
-        rl_typeProfileLocals->acquiredSingleJit = true;
-      } else {
-        jit::setMayAcquireLease(false);
-      }
-
-      if (RuntimeOption::EvalJitConcurrently > 0) {
-        // The single jit lock is treated separately for translations that
-        // happen concurrently: we still give threads permission to jit one
-        // request at a time, but we allow up to Eval.JitThreads to have this
-        // permission at once.
-        auto threads = singleJitConcurrentCount.load(std::memory_order_relaxed);
-        if (threads < RuntimeOption::EvalJitThreads &&
-            singleJitConcurrentCount.compare_exchange_strong(
-              threads, threads + 1, std::memory_order_relaxed)) {
-          rl_typeProfileLocals->acquiredSingleJitConcurrent = true;
-        } else {
-          jit::setMayAcquireConcurrentLease(false);
-        }
-      }
-    }
-  }
 
   // Force interpretation if needed.
   if (rl_typeProfileLocals->forceInterpret != forceInterp) {
@@ -314,32 +281,6 @@ void profileRequestEnd() {
   );
   requestSeries->addValue(1);
   checkRFH(finished);
-
-  if (rl_typeProfileLocals->acquiredSingleJit ||
-      rl_typeProfileLocals->acquiredSingleJitConcurrent) {
-    auto const singleJitCount = 1 +
-      singleJitRequests.fetch_add(1, std::memory_order_relaxed);
-
-    if (rl_typeProfileLocals->acquiredSingleJit) {
-      singleJitLock = false;
-      rl_typeProfileLocals->acquiredSingleJit = false;
-    }
-    if (rl_typeProfileLocals->acquiredSingleJitConcurrent) {
-      singleJitConcurrentCount.fetch_sub(1, std::memory_order_relaxed);
-      rl_typeProfileLocals->acquiredSingleJitConcurrent = false;
-    }
-
-    if (RuntimeOption::ServerExecutionMode()) {
-      if (auto transport = g_context->getTransport()) {
-        auto const& endpoint = transport->getCommand();
-        Logger::Info("Finished singleJitRequest %d : %s",
-                     singleJitCount, endpoint.c_str());
-      } else {
-        Logger::Warning("Finished singleJitRequest %d : unknown endpoint",
-                        singleJitCount);
-      }
-    }
-  }
 }
 
 }

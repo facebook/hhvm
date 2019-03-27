@@ -1090,7 +1090,6 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
     }
     appendStat("static-strings", makeStaticStringCount());
     appendStat("request-count", requestCount());
-    appendStat("single-jit-requests", singleJitRequestCount());
     appendStat("jit-des", jit::ProfData::triedDeserialization());
     appendStat("jit-des-succ", jit::ProfData::wasDeserialized());
 

@@ -791,7 +791,6 @@ struct RuntimeOption {
   F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
   F(bool, JitProfileWarmupRequests,    false)                           \
-  F(uint32_t, NumSingleJitRequests,    nsjrDefault())                   \
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
   F(uint32_t, JitProfileBCSize,        profileBCSizeDefault())          \
   F(uint32_t, JitResetProfCountersRequest, resetProfCountersDefault())  \

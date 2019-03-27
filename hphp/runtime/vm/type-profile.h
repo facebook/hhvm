@@ -53,7 +53,6 @@ void profileRequestEnd();
 void profileSetHotFunc();
 
 int64_t requestCount();
-int singleJitRequestCount();
 
 /*
  * Profiling for func hotness goes through this module.
@@ -63,8 +62,6 @@ void profileIncrementFuncCounter(const Func*);
 struct TypeProfileLocals {
   RequestKind requestKind = RequestKind::Warmup;
   bool forceInterpret = false;
-  bool acquiredSingleJit = false;
-  bool acquiredSingleJitConcurrent = false;
   bool nonVMThread = false;
 };
 

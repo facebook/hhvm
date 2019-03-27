@@ -846,6 +846,7 @@ struct RuntimeOption {
   F(bool, HHIRPredictionOpts,          true)                            \
   F(bool, HHIRMemoryOpts,              true)                            \
   F(bool, AssemblerFoldDefaultValues,  true)                            \
+  F(uint64_t, AssemblerMaxScalarSize,  1073741824) /* 1GB */            \
   F(uint32_t, HHIRLoadElimMaxIters,    10)                              \
   F(bool, HHIRStorePRE,                true)                            \
   F(bool, HHIROutlineGenericIncDecRef, true)                            \

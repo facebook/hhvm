@@ -890,6 +890,12 @@ void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
   setBase(as, stackDepth - currentOffset);
 }
 
+template<class F>
+void suppressOOM(F func) {
+  MemoryManager::SuppressOOM so(*tl_heap);
+  func();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1726,6 +1732,34 @@ String parse_maybe_long_string(AsmState& as) {
   return String(&buffer[0], buffer.size() - 1, CopyString);
 }
 
+void checkSize(TypedValue tv, size_t& available) {
+  auto const update = [&] (size_t sz) {
+    if (sz > available) {
+      throw AssemblerFatal("Maximum allowable size of scalar exceeded");
+    }
+    available -= sz;
+  };
+
+  if (isArrayLikeType(type(tv))) {
+    auto const scale = MixedArray::computeScaleFromSize(val(tv).parr->size());
+    update(MixedArray::computeAllocBytes(scale));
+
+    IterateVNoInc(val(tv).parr, [&] (TypedValue v) {
+      checkSize(v, available);
+    });
+  }
+
+  if (isStringType(type(tv))) {
+    update(val(tv).pstr->heapSize());
+  }
+}
+
+Variant checkSize(Variant val) {
+  size_t avail = RuntimeOption::EvalAssemblerMaxScalarSize;
+  checkSize(*val.asTypedValue(), avail);
+  return val;
+}
+
 /*
  * php-serialized : long-string-literal
  *                ;
@@ -1749,8 +1783,10 @@ Variant parse_php_serialized(
   );
   if (overrides) vu.setDVOverrides(overrides);
   try {
-    return vu.unserialize();
+    return checkSize(vu.unserialize());
   } catch (const FatalErrorException&) {
+    throw;
+  } catch (const AssemblerFatal&) {
     throw;
   } catch (const std::exception& e) {
     auto const msg =
@@ -1769,6 +1805,8 @@ Variant parse_maybe_php_serialized(AsmState& as) {
     try {
       return unserialize_from_string(s, VariableUnserializer::Type::Internal);
     } catch (const FatalErrorException&) {
+      throw;
+    } catch (const AssemblerFatal&) {
       throw;
     } catch (const std::exception& e) {
       auto const msg =
@@ -2181,21 +2219,23 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
 
 void parse_user_attribute(AsmState& as,
                           UserAttributeMap& userAttrs) {
-  auto name = read_litstr(as);
-  as.in.expectWs('(');
+  suppressOOM([&] {
+    auto name = read_litstr(as);
+    as.in.expectWs('(');
 
-  auto var = parse_php_serialized(as);
+    auto var = parse_php_serialized(as);
 
-  as.in.expectWs(')');
+    as.in.expectWs(')');
 
-  if (!var.isArray()) {
-    as.error("user attribute values must be arrays");
-  }
+    if (!var.isArray()) {
+      as.error("user attribute values must be arrays");
+    }
 
-  userAttrs[name] =
-    RuntimeOption::EvalHackArrDVArrs
-      ? make_tv<KindOfVec>(ArrayData::GetScalarArray(std::move(var)))
-      : make_tv<KindOfArray>(ArrayData::GetScalarArray(std::move(var)));
+    userAttrs[name] =
+      RuntimeOption::EvalHackArrDVArrs
+        ? make_tv<KindOfVec>(ArrayData::GetScalarArray(std::move(var)))
+        : make_tv<KindOfArray>(ArrayData::GetScalarArray(std::move(var)));
+  });
 }
 
 /*
@@ -2732,14 +2772,16 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
       return tvInit;
     }
 
-    tvAsVariant(&tvInit) = parse_php_serialized(as);
-    if (tvInit.m_type == KindOfObject) {
-      as.error("property initializer can't be an object");
-    } else if (tvInit.m_type == KindOfResource) {
-      as.error("property initializer can't be a resource");
-    } else {
-      tvAsVariant(&tvInit).setEvalScalar();
-    }
+    suppressOOM([&] {
+      tvAsVariant(&tvInit) = parse_php_serialized(as);
+      if (tvInit.m_type == KindOfObject) {
+        as.error("property initializer can't be an object");
+      } else if (tvInit.m_type == KindOfResource) {
+        as.error("property initializer can't be a resource");
+      } else {
+        tvAsVariant(&tvInit).setEvalScalar();
+      }
+    });
     as.in.expectWs(';');
   } else if (what == ';') {
     // already null
@@ -3266,17 +3308,20 @@ void parse_adata(AsmState& as) {
   }
 
   as.in.expectWs('=');
-  VariableSerializer::DVOverrides overrides;
-  auto var = parse_php_serialized(
-    as,
-    RuntimeOption::EvalHackArrDVArrs ? &overrides : nullptr
-  );
-  if (!var.isArray()) {
-    as.error(".adata only supports serialized arrays");
-  }
-  auto const data = ArrayData::GetScalarArray(std::move(var));
-  as.ue->mergeArray(data);
-  as.adataMap[dataLabel] = std::make_pair(data, std::move(overrides));
+
+  suppressOOM([&] {
+    VariableSerializer::DVOverrides overrides;
+    auto var = parse_php_serialized(
+      as,
+      RuntimeOption::EvalHackArrDVArrs ? &overrides : nullptr
+    );
+    if (!var.isArray()) {
+      as.error(".adata only supports serialized arrays");
+    }
+    auto const data = ArrayData::GetScalarArray(std::move(var));
+    as.ue->mergeArray(data);
+    as.adataMap[dataLabel] = std::make_pair(data, std::move(overrides));
+  });
 
   as.in.expectWs(';');
 }
@@ -3576,6 +3621,9 @@ std::unique_ptr<UnitEmitter> assemble_string(
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const AssemblerError& e) {
+    if (!swallowErrors) throw;
+    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
+  } catch (const AssemblerFatal& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const std::exception& e) {

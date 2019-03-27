@@ -301,6 +301,8 @@ bool isChanged(
 
 folly::Optional<String> readFileAsString(Stream::Wrapper* w,
                                          const StringData* path) {
+  // If the file is too large it may OOM the request
+  MemoryManager::SuppressOOM so(*tl_heap);
   if (w) {
     // Stream wrappers can reenter PHP via user defined callbacks. Roll this
     // operation into a single event
@@ -804,6 +806,7 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
     + (RuntimeOption::EvalHackRecords ? '1' : '0')
+    + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()
     + hackc_version();

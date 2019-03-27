@@ -299,6 +299,9 @@ struct ExternCompiler {
     } catch (CompilerFatal& ex) {
       // this catch is here so we don't fall into the std::runtime_error one
       throw;
+    } catch (AssemblerFatal& ex) {
+      // this catch is here so we don't fall into the std::runtime_error one
+      throw;
     } catch (FatalErrorException&) {
       // we want these to propagate out of the compiler
       throw;
@@ -508,6 +511,9 @@ auto run_compiler(
       return ex.what();
     } catch (CompilerFatal& ex) {
       // ExternCompiler returned an error when building this unit
+      return ex.what();
+    } catch (AssemblerFatal& ex) {
+      // Assembler returned an error when building this unit
       return ex.what();
     } catch (CompileException& ex) {
       internal_error = true;

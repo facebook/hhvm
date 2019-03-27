@@ -477,6 +477,10 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       urp.insertUnitLitstr[repoId].insert(txn, usn, i, m_litstrs[i]);
     }
     for (unsigned i = 0; i < m_arrays.size(); ++i) {
+      // We check that arrays do not exceed a configurable maximum size in the
+      // assembler, so just assume that they're okay here.
+      MemoryManager::SuppressOOM so(*tl_heap);
+
       urp.insertUnitArray[repoId].insert(
         txn, usn, i,
         internal_serialize(
@@ -1152,6 +1156,10 @@ void UnitRepoProxy::GetUnitArraysStmt
   do {
     query.step();
     if (query.row()) {
+      // We check that arrays do not exceed a configurable maximum size in the
+      // assembler, so just assume that they're okay here.
+      MemoryManager::SuppressOOM so(*tl_heap);
+
       Id arrayId;        /**/ query.getId(0, arrayId);
       std::string key;   /**/ query.getStdString(1, key);
       Variant v = unserialize_from_buffer(
@@ -1372,6 +1380,7 @@ createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
                 StringData* err) {
   auto ue = std::make_unique<UnitEmitter>(md5, Native::s_noNativeFuncs);
   ue->m_filepath = filename;
+  ue->m_isHHFile = true;
   ue->initMain(1, 1);
   ue->emitOp(OpString);
   ue->emitInt32(ue->mergeLitstr(err));

@@ -415,6 +415,10 @@ void RepoQuery::getTypedValue(int iCol, TypedValue& tv) {
   getBlob(iCol, blob, size);
   tvWriteUninit(tv);
   if (size > 0) {
+    // We check that arrays do not exceed a configurable maximum size in the
+    // assembler, so just assume that they're okay here.
+    MemoryManager::SuppressOOM so(*tl_heap);
+
     String s = String((const char*)blob, size, CopyString);
     Variant v =
       unserialize_from_string(s, VariableUnserializer::Type::Internal);

@@ -1,2 +1,2 @@
 File "element_assign1.php", line 5, characters 8-9:
-References are only permitted as function call arguments. (Parsing[1002])
+References are only allowed as function call arguments (Parsing[1002])

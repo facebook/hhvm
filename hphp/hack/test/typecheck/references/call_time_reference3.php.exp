@@ -1,2 +1,2 @@
 File "call_time_reference3.php", line 4, characters 9-11:
-References are only permitted as function call arguments. (Typing[4299])
+References are only allowed as function call arguments (Typing[4299])

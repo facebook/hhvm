@@ -3096,7 +3096,7 @@ let class_property_only_static_literal pos =
   add (Typing.err_code Typing.ClassPropertyOnlyStaticLiteralDEPRECATED) pos msg
 
 let reference_expr pos =
-  let msg = "References are only permitted as function call arguments." in
+  let msg = "References are only allowed as function call arguments" in
   add (Typing.err_code Typing.ReferenceExprNotFunctionArg) pos msg
 
 let pass_by_ref_annotation_missing pos1 pos2 =

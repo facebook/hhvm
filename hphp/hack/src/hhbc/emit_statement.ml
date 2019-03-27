@@ -322,21 +322,25 @@ and emit_awaitall env pos el =
   | _ -> emit_awaitall_ env pos el
 
 and emit_awaitall_single env pos lval e =
-  let result = Local.scope @@ fun () -> emit_await env pos e in
-  Local.scope @@ fun () ->
-    let temp = Local.get_unnamed_local () in
+  let awaited_instrs = emit_await env pos e in
+  match snd lval with
+  | A.Lvar id when not (is_local_this env (snd id)) ->
+    gather [
+      awaited_instrs;
+      emit_pos pos;
+      instr_popl (get_local env id)
+    ]
+  | _ ->
+    Scope.with_unnamed_local @@ fun temp ->
     let rhs_instrs = instr_pushl temp in
     let lhs, rhs, setop =
       emit_lval_op_nonlist_steps env pos LValOp.Set lval rhs_instrs 1 in
-    gather [
-      result;
-      instr_setl temp;
-      instr_popc;
-      with_temp_local temp (fun _ _ -> lhs);
-      rhs;
-      setop;
-      instr_popc;
-    ]
+    (* before *)
+    gather [ awaited_instrs; instr_popl temp ],
+    (* inner *)
+    lhs,
+    (* after *)
+    gather [ rhs; setop; instr_popc ]
 
 and emit_awaitall_single_no_assign env pos e =
   gather [

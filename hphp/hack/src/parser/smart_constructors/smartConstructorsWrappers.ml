@@ -44,8 +44,6 @@ module type SyntaxKind_S = sig
   val is_file_attribute_specification : r -> bool
   val is_enum_declaration : r -> bool
   val is_enumerator : r -> bool
-  val is_record_declaration : r -> bool
-  val is_record_field : r -> bool
   val is_alias_declaration : r -> bool
   val is_property_declaration : r -> bool
   val is_property_declarator : r -> bool
@@ -152,7 +150,6 @@ module type SyntaxKind_S = sig
   val is_collection_literal_expression : r -> bool
   val is_object_creation_expression : r -> bool
   val is_constructor_call : r -> bool
-  val is_record_creation_expression : r -> bool
   val is_array_creation_expression : r -> bool
   val is_array_intrinsic_expression : r -> bool
   val is_darray_intrinsic_expression : r -> bool
@@ -249,8 +246,6 @@ module SyntaxKind(SC : SC_S)
   let make_file_attribute_specification arg0 arg1 arg2 arg3 arg4 state = compose SK.FileAttributeSpecification (SC.make_file_attribute_specification (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_enum_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.EnumDeclaration (SC.make_enum_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
   let make_enumerator arg0 arg1 arg2 arg3 state = compose SK.Enumerator (SC.make_enumerator (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
-  let make_record_declaration arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.RecordDeclaration (SC.make_record_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
-  let make_record_field arg0 arg1 arg2 arg3 arg4 state = compose SK.RecordField (SC.make_record_field (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_alias_declaration arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 state = compose SK.AliasDeclaration (SC.make_alias_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) state)
   let make_property_declaration arg0 arg1 arg2 arg3 arg4 state = compose SK.PropertyDeclaration (SC.make_property_declaration (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_property_declarator arg0 arg1 state = compose SK.PropertyDeclarator (SC.make_property_declarator (snd arg0) (snd arg1) state)
@@ -357,7 +352,6 @@ module SyntaxKind(SC : SC_S)
   let make_collection_literal_expression arg0 arg1 arg2 arg3 state = compose SK.CollectionLiteralExpression (SC.make_collection_literal_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_object_creation_expression arg0 arg1 state = compose SK.ObjectCreationExpression (SC.make_object_creation_expression (snd arg0) (snd arg1) state)
   let make_constructor_call arg0 arg1 arg2 arg3 state = compose SK.ConstructorCall (SC.make_constructor_call (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
-  let make_record_creation_expression arg0 arg1 arg2 arg3 state = compose SK.RecordCreationExpression (SC.make_record_creation_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_array_creation_expression arg0 arg1 arg2 state = compose SK.ArrayCreationExpression (SC.make_array_creation_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_array_intrinsic_expression arg0 arg1 arg2 arg3 state = compose SK.ArrayIntrinsicExpression (SC.make_array_intrinsic_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state = compose SK.DarrayIntrinsicExpression (SC.make_darray_intrinsic_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
@@ -436,8 +430,6 @@ module SyntaxKind(SC : SC_S)
   let is_file_attribute_specification                 = has_kind SK.FileAttributeSpecification
   let is_enum_declaration                             = has_kind SK.EnumDeclaration
   let is_enumerator                                   = has_kind SK.Enumerator
-  let is_record_declaration                           = has_kind SK.RecordDeclaration
-  let is_record_field                                 = has_kind SK.RecordField
   let is_alias_declaration                            = has_kind SK.AliasDeclaration
   let is_property_declaration                         = has_kind SK.PropertyDeclaration
   let is_property_declarator                          = has_kind SK.PropertyDeclarator
@@ -544,7 +536,6 @@ module SyntaxKind(SC : SC_S)
   let is_collection_literal_expression                = has_kind SK.CollectionLiteralExpression
   let is_object_creation_expression                   = has_kind SK.ObjectCreationExpression
   let is_constructor_call                             = has_kind SK.ConstructorCall
-  let is_record_creation_expression                   = has_kind SK.RecordCreationExpression
   let is_array_creation_expression                    = has_kind SK.ArrayCreationExpression
   let is_array_intrinsic_expression                   = has_kind SK.ArrayIntrinsicExpression
   let is_darray_intrinsic_expression                  = has_kind SK.DarrayIntrinsicExpression

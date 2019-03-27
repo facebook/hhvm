@@ -174,7 +174,6 @@ void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 void raise_intish_index_cast();
 
 void raise_convert_object_to_string(const char* cls_name);
-void raise_convert_record_to_type(const char* typeName);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

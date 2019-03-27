@@ -443,7 +443,6 @@ static Variant HHVM_METHOD(mysqli, options, int64_t option,
         case KindOfFunc:
         case KindOfClass:
         case KindOfClsMeth:
-        case KindOfRecord:
           // Impossible.
           break;
       }

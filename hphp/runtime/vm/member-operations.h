@@ -589,18 +589,6 @@ inline tv_rval ElemObject(TypedValue& tvRef,
 }
 
 /**
- * Elem when base is a Record
- */
-// TODO (T41029813): Handle different modes
-template <KeyType keyType>
-inline tv_rval ElemRecord(RecordData* base, key_type<keyType> key) {
-  auto const keyStr = tvCastToStringData(initScratchKey(key));
-  auto const ret =  base->getFieldRval(keyStr);
-  decRefStr(keyStr);
-  return ret;
-}
-
-/**
  * $result = $base[$key];
  */
 template<MOpMode mode, KeyType keyType, ICMode intishCast>
@@ -655,9 +643,6 @@ NEVER_INLINE tv_rval ElemSlow(TypedValue& tvRef,
       raiseClsMethToVecWarningHelper();
       return ElemClsMeth<mode, keyType>(tvRef, base.val().pclsmeth, key);
     }
-
-    case KindOfRecord:
-      return ElemRecord<keyType>(base.val().prec, key);
 
     case KindOfRef:
       break;
@@ -1092,10 +1077,6 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
 
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -1371,8 +1352,6 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
       return ElemUArray<intishCast, keyType>(base, key);
     case KindOfObject:
       return ElemUObject<keyType>(tvRef, base, key);
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfRef:
       break;
   }
@@ -1490,8 +1469,6 @@ inline tv_lval NewElem(TypedValue& tvRef,
       return NewElemObject(tvRef, base);
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfRef:
       break;
   }
@@ -1647,18 +1624,6 @@ inline void SetElemObject(tv_lval base, key_type<keyType> key,
   } else {
     objOffsetSet(instanceFromTv(base), scratchKey, value);
   }
-}
-
-/**
- * SetElem where base is a record
- */
-template <KeyType keyType>
-inline void SetElemRecord(tv_lval base, key_type<keyType> key,
-                          Cell* value) {
-  auto const keyStr = tvCastToStringData(initScratchKey(key));
-  auto const tv = val(base).prec->getFieldLval(keyStr);
-  tvSet(*value, tv);
-  decRefStr(keyStr);
 }
 
 /*
@@ -1928,9 +1893,6 @@ StringData* SetElemSlow(tv_lval base,
       return nullptr;
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-    case KindOfRecord:
-      SetElemRecord<keyType>(base, key, value);
-      return nullptr;
     case KindOfRef:
       break;
   }
@@ -2142,10 +2104,7 @@ inline void SetNewElem(tv_lval base,
       return SetNewElemObject(base, value);
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfRef:
-
       break;
   }
   unknownBaseType(type(base));
@@ -2280,10 +2239,6 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -2380,10 +2335,6 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef,
 
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-
-    case KindOfRecord: // TODO (T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -2539,10 +2490,6 @@ inline Cell IncDecElem(
 
     case KindOfClsMeth:
       throw_cannot_write_for_clsmeth();
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -2641,10 +2588,6 @@ inline Cell IncDecNewElem(
 
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -2889,10 +2832,6 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
 
     case KindOfClsMeth:
       throw_cannot_unset_for_clsmeth();
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -3116,9 +3055,6 @@ NEVER_INLINE bool IssetEmptyElemSlow(tv_rval base, key_type<keyType> key) {
       return IssetEmptyElemClsMeth<useEmpty, keyType>(val(base).pclsmeth, key);
     }
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -3299,9 +3235,6 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base, MInstrPropState* pState) {
     case KindOfObject:
       return base;
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -3337,7 +3270,6 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
-    case KindOfRecord:
       tvWriteNull(tvRef);
       raise_notice("Cannot access property on non-object");
       return &tvRef;
@@ -3496,9 +3428,6 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfObject:
       return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val);
 
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
-
     case KindOfRef:
       break;
   }
@@ -3582,9 +3511,6 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
 
     case KindOfObject:
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;
@@ -3673,9 +3599,6 @@ inline Cell IncDecProp(
 
     case KindOfObject:
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);
-
-    case KindOfRecord: // TODO(T41029813)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;

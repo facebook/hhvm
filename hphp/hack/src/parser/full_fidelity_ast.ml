@@ -1646,16 +1646,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           raise_parsing_error env (`Node generic_argument_list) SyntaxError.targs_not_allowed;
         let name = pos_name generic_class_type env in
         Id name
-    | RecordCreationExpression
-      { record_creation_type = rec_type
-      ; record_creation_members = members
-      ; _ } ->
-      let e = match syntax rec_type with
-      | SimpleTypeSpecifier _ ->
-        let name = pos_name rec_type env in
-        (fst name, Id name)
-      | _ -> pExpr rec_type env in
-      Record (e, couldMap ~f:pMember members env)
     | LiteralExpression { literal_expression = expr } ->
       (match syntax expr with
       | Token _ ->
@@ -3151,47 +3141,6 @@ and pDef : def list parser = fun node env ->
         { e_base       = pHint base env
         ; e_constraint = mpOptional pTConstraintTy constr env
         }
-      ; c_doc_comment = doc_comment_opt
-      }]
-  | RecordDeclaration
-    { record_attribute_spec = attrs
-    ; record_name           = name
-    ; record_fields         = fields
-    ; _ } ->
-      let pFields node =
-        match syntax node with
-        | RecordField {
-          record_field_name = name;
-          record_field_type = ftype;
-          record_field_init = init; _ } ->
-            fun env -> ClassVars
-            { cv_kinds = []
-            ; cv_hint = Some (pHint ftype env)
-            ; cv_is_promoted_variadic = false
-            ; cv_names = [
-              (pPos node env,
-              pos_name name env,
-              mpOptional pSimpleInitializer init env)]
-            ; cv_doc_comment = None
-            ; cv_user_attributes = []
-            }
-        | _ -> missing_syntax "record_field" node env
-      in
-      [ Class
-      { c_mode            = mode_annotation env.fi_mode
-      ; c_user_attributes = pUserAttributes env attrs
-      ; c_file_attributes = []
-      ; c_final           = false
-      ; c_kind            = Crecord
-      ; c_is_xhp          = false
-      ; c_name            = pos_name name env
-      ; c_tparams         = []
-      ; c_extends         = []
-      ; c_implements      = []
-      ; c_body            = couldMap fields env ~f:pFields
-      ; c_namespace       = Namespace_env.empty env.parser_options
-      ; c_span            = pPos node env
-      ; c_enum            = None
       ; c_doc_comment = doc_comment_opt
       }]
   | InclusionDirective

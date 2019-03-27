@@ -112,8 +112,6 @@ let string_of_lit_const instruction =
     | NewStructDict l  ->
       sep ["NewStructDict"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewPair -> "NewPair"
-    | NewRecord (cid, l) ->
-      sep ["NewRecord"; string_of_class_id cid; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | ClsCns (cnsid, cr) ->
       sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]
     | ClsCnsD (cnsid, cid) ->
@@ -697,7 +695,6 @@ let string_of_include_eval_define = function
     sep ["AliasCls"; SU.quote_string c1; SU.quote_string c2]
   | DefCls id -> sep ["DefCls"; string_of_class_num id]
   | DefClsNop id -> sep ["DefClsNop"; string_of_class_num id]
-  | DefRecord id -> sep ["DefRecord"; string_of_class_num id]
   | DefCns id -> sep ["DefCns"; string_of_const_id id]
   | DefTypeAlias id -> sep ["DefTypeAlias"; string_of_typedef_num id]
 
@@ -1168,10 +1165,6 @@ and string_of_param_default_value ~env expr =
     ^ "("
     ^ String.concat ~sep:", " es
     ^ ")"
-  | A.Record (e, es) ->
-    let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
-    e ^ (string_of_afield_list ~env es)
   | A.Class_get (e1, e2) ->
     let s1 = match snd e1 with
       | A.Id (_, s1) ->
@@ -1718,8 +1711,7 @@ let add_uses buf c =
 let add_class_def buf class_def =
   let class_name = Hhas_class.name class_def in
   (* TODO: user attributes *)
-  Acc.add buf
-    (if Hhas_class.is_record class_def then "\n.record " else "\n.class ");
+  Acc.add buf "\n.class ";
   Acc.add buf (class_special_attributes class_def);
   Acc.add buf (Hhbc_id.Class.to_raw_string class_name);
   if Hhbc_options.source_mapping !Hhbc_options.compiler_options

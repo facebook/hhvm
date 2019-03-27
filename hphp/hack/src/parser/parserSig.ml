@@ -60,8 +60,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val file_attribute_specification : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val enum_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val enumerator : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val record_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val record_field : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val alias_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val property_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val property_declarator : t -> SC.r -> SC.r -> t * SC.r
@@ -168,7 +166,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val collection_literal_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val object_creation_expression : t -> SC.r -> SC.r -> t * SC.r
         val constructor_call : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val record_creation_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val array_creation_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val array_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val darray_intrinsic_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

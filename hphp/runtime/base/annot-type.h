@@ -359,7 +359,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfNull:
       case KindOfBoolean:
       case KindOfResource:
-      case KindOfRecord:
         return AnnotAction::Fail;
       case KindOfObject:
       case KindOfRef:

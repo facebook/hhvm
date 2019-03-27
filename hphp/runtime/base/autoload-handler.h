@@ -86,9 +86,6 @@ public:
   void removeAllHandlers();
   bool isRunning();
 
-  template<class T>
-  bool autoloadType(const String& name);
-
   bool autoloadClass(const String& className, bool forceSplStack = false);
   bool autoloadClassPHP5Impl(const String& className, bool forceSplStack);
 
@@ -106,7 +103,6 @@ public:
   bool autoloadFunc(StringData* name);
   bool autoloadConstant(StringData* name);
   bool autoloadType(const String& name);
-  bool autoloadRecord(const String& name);
   DECLARE_STATIC_REQUEST_LOCAL(AutoloadHandler, s_instance);
 
   /**

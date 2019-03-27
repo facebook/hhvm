@@ -29,7 +29,6 @@ inline NamedEntity::NamedEntity(NamedEntity&& ne) noexcept
   , m_cachedTypeAlias(ne.m_cachedTypeAlias)
 {
   m_clsList = ne.m_clsList;
-  m_recordList = ne.m_recordList;
 }
 
 inline Func* NamedEntity::getCachedFunc() const {
@@ -51,18 +50,8 @@ inline ArrayData* NamedEntity::getCachedReifiedGenerics() const {
     : nullptr;
 }
 
-inline Record* NamedEntity::getCachedRecord() const {
-  return LIKELY(m_cachedRecord.bound() && m_cachedRecord.isInit())
-    ? *m_cachedRecord
-    : nullptr;
-}
-
 inline Class* NamedEntity::clsList() const {
   return m_clsList;
-}
-
-inline Record* NamedEntity::recordList() const {
-  return m_recordList;
 }
 
 inline Func* NamedEntity::uniqueFunc() const {

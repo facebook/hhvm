@@ -260,43 +260,6 @@ module WithExpressionAndStatementAndTypeParser
     Make.enum_declaration parser attrs enum name colon base enum_type left_brace
       enumerators right_brace
 
-  and parse_record_field parser =
-    (* SPEC
-      record_field:
-        record-constant : type field-initializer-opt,
-      record-constant:
-        name
-      field-initializer:
-        = expression
-    *)
-    let (parser, name) = require_name_allow_non_reserved parser in
-    let (parser, colon) = require_colon parser in
-    let (parser, field_type) = parse_type_specifier parser in
-    let (parser, init) = parse_simple_initializer_opt parser in
-    let (parser, comma) = require_comma parser in
-    Make.record_field parser name colon field_type init comma
-
-  and parse_record_fields parser =
-    (* SPEC
-      record-list:
-        record-field
-        record-list record-field
-    *)
-    parse_terminated_list parser parse_record_field RightBrace
-
-  and parse_record_declaration parser attrs =
-    (*
-    record-declaration:
-      record name { record-list }
-    *)
-  let (parser, record) = assert_token parser RecordDec in
-  let (parser, name) = require_name parser in
-  let (parser, left_brace, record_fields, right_brace) =
-    parse_braced_list parser parse_record_fields
-  in
-  Make.record_declaration parser attrs record name left_brace record_fields
-    right_brace
-
   and parse_namespace_declaration parser =
     (* SPEC
       namespace-definition:
@@ -574,7 +537,6 @@ module WithExpressionAndStatementAndTypeParser
       (parser, list_item, comma)
     | Parent
     | Enum
-    | RecordDec
     | Shape
     | Self when Env.hhvm_compat_mode (env parser) ->
       (* HHVM allows these keywords here for some reason *)
@@ -1851,7 +1813,6 @@ module WithExpressionAndStatementAndTypeParser
     let parser2, token = next_token parser1 in
     match Token.kind token with
     | Enum -> parse_enum_declaration parser1 attribute_specification
-    | RecordDec -> parse_record_declaration parser1 attribute_specification
     | Type | Newtype -> parse_alias_declaration parser1 attribute_specification
     | Async | Coroutine | Function ->
       if SC.is_missing attribute_specification then
@@ -1898,9 +1859,6 @@ module WithExpressionAndStatementAndTypeParser
       | Enum ->
         let (parser, missing) = Make.missing parser (pos parser) in
         parse_enum_declaration parser missing
-      | RecordDec ->
-        let (parser, missing) = Make.missing parser (pos parser) in
-        parse_record_declaration parser missing
       (* The keyword namespace before a name should be parsed as
         "the current namespace we are in", essentially a no op.
         example:

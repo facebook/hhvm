@@ -171,7 +171,6 @@ let instr_newobjd id = instr (ICall (NewObjD id))
 let instr_newobjs scref = instr (ICall (NewObjS scref))
 let instr_fpushctor nargs = instr (ICall (FPushCtor nargs))
 let instr_clone = instr (IOp Clone)
-let instr_new_record id keys = instr (ILitConst (NewRecord (id, keys)))
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
 let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
 let instr_newstructdict keys = instr (ILitConst (NewStructDict keys))
@@ -251,8 +250,6 @@ let instr_defcls n =
   instr (IIncludeEvalDefine (DefCls n))
 let instr_defclsnop n =
   instr (IIncludeEvalDefine (DefClsNop n))
-let instr_defrecord n =
-  instr (IIncludeEvalDefine (DefRecord n))
 let instr_deftypealias n =
   instr (IIncludeEvalDefine (DefTypeAlias n))
 let instr_defcns s =

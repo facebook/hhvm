@@ -27,7 +27,6 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-pair-table.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/record.h"
 #include "hphp/runtime/vm/type-alias.h"
 
 #include "hphp/util/compact-vector.h"
@@ -471,23 +470,20 @@ public:
    const RepoAuthType::Array* lookupArrayTypeId(Id id) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Funcs, PreClasses, and Records.                                    [const]
+  // Funcs and PreClasses.                                              [const]
 
   /*
-   * Look up a Func or PreClass or Record by ID.
+   * Look up a Func or PreClass by ID.
    */
   Func* lookupFuncId(Id id) const;
   PreClass* lookupPreClassId(Id id) const;
-  Record* lookupRecordId(Id id) const;
 
   /*
-   * Range over all Funcs or PreClasses or Records in the Unit.
+   * Range over all Funcs or PreClasses in the Unit.
    */
   FuncRange funcs() const;
   folly::Range<PreClassPtr*> preclasses();
   folly::Range<const PreClassPtr*> preclasses() const;
-  folly::Range<RecordPtr*> records();
-  folly::Range<const RecordPtr*> records() const;
 
   /*
    * Get a pseudomain for the Unit with the context class `cls'.
@@ -627,37 +623,6 @@ public:
    */
   static bool classExists(const StringData* name,
                           bool autoload, ClassKind kind);
-
-  /////////////////////////////////////////////////////////////////////////////
-  // Record lookup.                                                    [static]
-
-  /*
-   * Define a new Record from `record' for this request.
-   *
-   * Raises a fatal error in various conditions (e.g., Record already defined,
-   * etc.) if `failIsFatal' is set).
-   *
-   * Also always fatals if a type alias already exists in this request with the
-   * same name as that of `record', regardless of the value of `failIsFatal'.
-   */
-  static Record* defRecord(Record* record, bool failIsFatal = true);
-
-  /*
-   * Look up the Record in this request with name `name', or with the name
-   * mapped to the NamedEntity `ne'.
-   *
-   * Return nullptr if the record is not yet defined in this request.
-   */
-  static Record* lookupRecord(const NamedEntity* ne);
-  static Record* lookupRecord(const StringData* name);
-
-  /*
-   * Look up, or autoload and define, the Record in this request with name
-   * `name', or with the name mapped to the NamedEntity `ne'.
-   *
-   * @requires: NamedEntity::get(name) == ne
-   */
-  static Record* loadRecord(const StringData* name);
 
   /////////////////////////////////////////////////////////////////////////////
   // Constant lookup.                                                  [static]
@@ -940,7 +905,6 @@ private:
   TypedValue m_mainReturn;
   PreClassPtrVec m_preClasses;
   TypeAliasVec m_typeAliases;
-  CompactVector<RecordPtr> m_records;
   /*
    * Cached the EntryPoint for an unit, since compactMergeInfo() inside of
    * mergeImpl will drop the original EP.

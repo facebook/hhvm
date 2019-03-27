@@ -99,7 +99,6 @@
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
-#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/rx.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-emitter.h"
@@ -674,16 +673,10 @@ struct AsmState {
   }
 
   void finishClass() {
-    assertx(!fe && !re);
+    assertx(!fe);
     ue->addPreClassEmitter(pce);
     pce = 0;
     enumTySet = false;
-  }
-
-  void finishRecord() {
-    assertx(!fe && !pce);
-    ue->addRecordEmitter(re);
-    re = nullptr;
   }
 
   void patchLabelOffsets(const Label& label) {
@@ -805,10 +798,7 @@ struct AsmState {
   std::unordered_map<Id, const StringData*> litstrMap;
 
   // When inside a class, this state is active.
-  PreClassEmitter* pce{nullptr};
-
-  // When inside a record, this state is active.
-  RecordEmitter* re{nullptr};
+  PreClassEmitter* pce;
 
   // When we're doing a function or method body, this state is active.
   FuncEmitter* fe{nullptr};
@@ -2792,10 +2782,14 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
   return tvInit;
 }
 
-template<class EmitterType, class AdderType>
-void parse_prop_or_field_impl(AsmState& as,
-                              EmitterType* AsmState::* em,
-                              AdderType EmitterType::* add) {
+/*
+ * directive-property : attribute-list maybe-long-string-literal type-info
+ *                      identifier member-tv-initializer
+ *                    ;
+ *
+ * Define a property with an associated type and heredoc.
+ */
+void parse_property(AsmState& as) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttributes;
@@ -2813,11 +2807,11 @@ void parse_prop_or_field_impl(AsmState& as,
   as.in.consumePred(!boost::is_any_of(" \t\r\n#;="),
                     std::back_inserter(name));
   if (name.empty()) {
-    as.error("expected name for property or field");
+    as.error("expected name for property");
   }
 
   TypedValue tvInit = parse_member_tv_initializer(as);
-  ((as.*em)->*add)(makeStaticString(name),
+  as.pce->addProperty(makeStaticString(name),
                       attrs,
                       userTyStr,
                       typeConstraint,
@@ -2826,22 +2820,6 @@ void parse_prop_or_field_impl(AsmState& as,
                       RepoAuthType{},
                       userAttributes);
 }
-
-/*
- * directive-property : attribute-list maybe-long-string-literal type-info
- *                      identifier member-tv-initializer
- *                    ;
- *
- * Define a property with an associated type and heredoc.
- */
-void parse_property(AsmState& as) {
-  parse_prop_or_field_impl(as, &AsmState::pce, &PreClassEmitter::addProperty);
-}
-
-void parse_record_field(AsmState& as) {
-  parse_prop_or_field_impl(as, &AsmState::re, &RecordEmitter::addField);
-}
-
 
 /*
  * const-flags     : isType
@@ -3083,28 +3061,6 @@ void parse_class_body(AsmState& as) {
   as.in.expect('}');
 }
 
-/*
- * record-body : record-body-line* '}'
- *             ;
- *
- * record-body-line : ".property"  directive-property
- *                  ;
- */
-void parse_record_body(AsmState& as) {
-  if (!ensure_pseudomain(as)) {
-    as.error(".record blocks must all follow the .main block");
-  }
-
-  std::string directive;
-  while (as.in.readword(directive)) {
-    if (directive == ".property") { parse_record_field(as); continue; }
-
-    as.error(folly::to<std::string>("unrecognized directive `",
-                                    directive, "` in record"));
-  }
-  as.in.expect('}');
-}
-
 PreClass::Hoistable compute_hoistable(AsmState& as,
                                       const std::string &name,
                                       const std::string &parentName) {
@@ -3214,47 +3170,6 @@ void parse_class(AsmState& as) {
   );
 
   as.finishClass();
-}
-
-/*
- * directive-record : identifier ?line-range
- *                    '{' record-body
- *                  ;
- */
-void parse_record(AsmState& as) {
-  if (!RuntimeOption::EvalHackRecords) {
-    as.error("Records not supported");
-  }
-
-  as.in.skipWhitespace();
-
-  bool isTop = true;
-
-  UserAttributeMap userAttrs;
-  Attr attrs = parse_attribute_list(as, AttrContext::Class, &userAttrs, &isTop);
-  if (!SystemLib::s_inited) {
-    attrs |= AttrUnique | AttrPersistent | AttrBuiltin;
-  }
-
-  std::string name;
-  if (!as.in.readname(name)) {
-    as.error(".record must have a name");
-  }
-
-  int line0;
-  int line1;
-  parse_line_range(as, line0, line1);
-
-  as.re = as.ue->newBareRecordEmitter(name);
-  as.re->init(line0,
-              line1,
-              attrs,
-              staticEmptyString());
-
-  as.in.expectWs('{');
-  parse_record_body(as);
-
-  as.finishRecord();
 }
 
 /*
@@ -3555,20 +3470,19 @@ void parse(AsmState& as) {
   std::string directive;
 
   while (as.in.readword(directive)) {
-    if (directive == ".filepath")      { parse_filepath(as)      ; continue; }
-    if (directive == ".main")          { parse_main(as)          ; continue; }
-    if (directive == ".function")      { parse_function(as)      ; continue; }
-    if (directive == ".adata")         { parse_adata(as)         ; continue; }
-    if (directive == ".class")         { parse_class(as)         ; continue; }
-    if (directive == ".record")        { parse_record(as)        ; continue; }
-    if (directive == ".alias")         { parse_alias(as)         ; continue; }
-    if (directive == ".strict")        { parse_strict(as)        ; continue; }
-    if (directive == ".hh_file")       { parse_hh_file(as)       ; continue; }
-    if (directive == ".includes")      { parse_includes(as)      ; continue; }
-    if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }
-    if (directive == ".function_refs") { parse_function_refs(as) ; continue; }
-    if (directive == ".class_refs")    { parse_class_refs(as)    ; continue; }
-    if (directive == ".metadata")      { parse_metadata(as)      ; continue; }
+    if (directive == ".filepath")        { parse_filepath(as)       ; continue;}
+    if (directive == ".main")            { parse_main(as)           ; continue;}
+    if (directive == ".function")        { parse_function(as)       ; continue;}
+    if (directive == ".adata")           { parse_adata(as)          ; continue;}
+    if (directive == ".class")           { parse_class(as)          ; continue;}
+    if (directive == ".alias")           { parse_alias(as)          ; continue;}
+    if (directive == ".strict")          { parse_strict(as)         ; continue;}
+    if (directive == ".hh_file")         { parse_hh_file(as)        ; continue;}
+    if (directive == ".includes")        { parse_includes(as)       ; continue;}
+    if (directive == ".constant_refs")   { parse_constant_refs(as)  ; continue;}
+    if (directive == ".function_refs")   { parse_function_refs(as)  ; continue;}
+    if (directive == ".class_refs")      { parse_class_refs(as)     ; continue;}
+    if (directive == ".metadata")        { parse_metadata(as)       ; continue;}
     if (directive == ".file_attributes") { parse_file_attributes(as); continue;}
 
     as.error("unrecognized top-level directive `" + directive + "'");

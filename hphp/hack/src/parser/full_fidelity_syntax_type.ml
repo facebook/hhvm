@@ -193,21 +193,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enumerator_value                                   : t
     ; enumerator_semicolon                               : t
     }
-  | RecordDeclaration                       of
-    { record_attribute_spec                              : t
-    ; record_keyword                                     : t
-    ; record_name                                        : t
-    ; record_left_brace                                  : t
-    ; record_fields                                      : t
-    ; record_right_brace                                 : t
-    }
-  | RecordField                             of
-    { record_field_name                                  : t
-    ; record_field_colon                                 : t
-    ; record_field_type                                  : t
-    ; record_field_init                                  : t
-    ; record_field_comma                                 : t
-    }
   | AliasDeclaration                        of
     { alias_attribute_spec                               : t
     ; alias_keyword                                      : t
@@ -871,12 +856,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constructor_call_argument_list                     : t
     ; constructor_call_right_paren                       : t
     }
-  | RecordCreationExpression                of
-    { record_creation_type                               : t
-    ; record_creation_left_bracket                       : t
-    ; record_creation_members                            : t
-    ; record_creation_right_bracket                      : t
-    }
   | ArrayCreationExpression                 of
     { array_creation_left_bracket                        : t
     ; array_creation_members                             : t
@@ -1241,7 +1220,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDEndOfFile                    of end_of_file
   | TLDFileAttributeSpecification   of file_attribute_specification
   | TLDEnum                         of enum_declaration
-  | TLDRecord                       of record_declaration
   | TLDAlias                        of alias_declaration
   | TLDNamespace                    of namespace_declaration
   | TLDNamespaceUse                 of namespace_use_declaration
@@ -1314,7 +1292,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprList                          of list_expression
   | ExprCollectionLiteral             of collection_literal_expression
   | ExprObjectCreation                of object_creation_expression
-  | ExprRecordCreation                of record_creation_expression
   | ExprArrayCreation                 of array_creation_expression
   | ExprArrayIntrinsic                of array_intrinsic_expression
   | ExprDarrayIntrinsic               of darray_intrinsic_expression
@@ -1442,7 +1419,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaList                          of list_expression
   | LambdaCollectionLiteral             of collection_literal_expression
   | LambdaObjectCreation                of object_creation_expression
-  | LambdaRecordCreation                of record_creation_expression
   | LambdaArrayCreation                 of array_creation_expression
   | LambdaArrayIntrinsic                of array_intrinsic_expression
   | LambdaDarrayIntrinsic               of darray_intrinsic_expression
@@ -1496,7 +1472,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprList                          of list_expression
   | CExprCollectionLiteral             of collection_literal_expression
   | CExprObjectCreation                of object_creation_expression
-  | CExprRecordCreation                of record_creation_expression
   | CExprArrayCreation                 of array_creation_expression
   | CExprArrayIntrinsic                of array_intrinsic_expression
   | CExprDarrayIntrinsic               of darray_intrinsic_expression
@@ -1581,21 +1556,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enumerator_equal: Token.t value
     ; enumerator_value: expression value
     ; enumerator_semicolon: Token.t value
-    }
-  and record_declaration =
-    { record_attribute_spec: attribute_specification option value
-    ; record_keyword: Token.t value
-    ; record_name: Token.t value
-    ; record_left_brace: Token.t value
-    ; record_fields: record_field listesque value
-    ; record_right_brace: Token.t value
-    }
-  and record_field =
-    { record_field_name: Token.t value
-    ; record_field_colon: Token.t value
-    ; record_field_type: type_constraint value
-    ; record_field_init: simple_initializer option value
-    ; record_field_comma: Token.t value
     }
   and alias_declaration =
     { alias_attribute_spec: attribute_specification option value
@@ -2259,12 +2219,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; constructor_call_left_paren: Token.t option value
     ; constructor_call_argument_list: expression listesque value
     ; constructor_call_right_paren: Token.t option value
-    }
-  and record_creation_expression =
-    { record_creation_type: todo_aggregate value
-    ; record_creation_left_bracket: Token.t value
-    ; record_creation_members: element_initializer listesque value
-    ; record_creation_right_bracket: Token.t value
     }
   and array_creation_expression =
     { array_creation_left_bracket: Token.t value

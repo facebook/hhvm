@@ -32,8 +32,6 @@ type t =
   | FileAttributeSpecification
   | EnumDeclaration
   | Enumerator
-  | RecordDeclaration
-  | RecordField
   | AliasDeclaration
   | PropertyDeclaration
   | PropertyDeclarator
@@ -140,7 +138,6 @@ type t =
   | CollectionLiteralExpression
   | ObjectCreationExpression
   | ConstructorCall
-  | RecordCreationExpression
   | ArrayCreationExpression
   | ArrayIntrinsicExpression
   | DarrayIntrinsicExpression
@@ -220,8 +217,6 @@ let to_string kind =
   | FileAttributeSpecification              -> "file_attribute_specification"
   | EnumDeclaration                         -> "enum_declaration"
   | Enumerator                              -> "enumerator"
-  | RecordDeclaration                       -> "record_declaration"
-  | RecordField                             -> "record_field"
   | AliasDeclaration                        -> "alias_declaration"
   | PropertyDeclaration                     -> "property_declaration"
   | PropertyDeclarator                      -> "property_declarator"
@@ -328,7 +323,6 @@ let to_string kind =
   | CollectionLiteralExpression             -> "collection_literal_expression"
   | ObjectCreationExpression                -> "object_creation_expression"
   | ConstructorCall                         -> "constructor_call"
-  | RecordCreationExpression                -> "record_creation_expression"
   | ArrayCreationExpression                 -> "array_creation_expression"
   | ArrayIntrinsicExpression                -> "array_intrinsic_expression"
   | DarrayIntrinsicExpression               -> "darray_intrinsic_expression"

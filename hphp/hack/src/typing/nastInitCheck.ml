@@ -450,7 +450,6 @@ and expr_ env acc p e =
       exprl acc el
   | New (_, _, el, uel, _) ->
       exprl acc (el @ uel)
-  | Record (_, fdl) -> List.fold_left ~f:field ~init:acc fdl
   | Pair (e1, e2) ->
     let acc = expr acc e1 in
     expr acc e2

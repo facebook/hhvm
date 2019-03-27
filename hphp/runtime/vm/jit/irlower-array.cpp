@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-array.h"
@@ -344,26 +343,6 @@ void newStructImpl(IRLS& env,
                SyncOptions::None, args);
 }
 
-}
-
-void cgNewRecord(IRLS& env, const IRInstruction* inst) {
-  auto const rec = srcLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<NewStructData>();
-  auto& v = vmain(env);
-
-  auto table = v.allocData<const StringData*>(extra->numKeys);
-  memcpy(table, extra->keys, extra->numKeys * sizeof(*extra->keys));
-
-  auto const args = argGroup(env, inst)
-    .reg(rec)
-    .imm(extra->numKeys)
-    .dataPtr(table)
-    .addr(sp, cellsToBytes(extra->offset.offset));
-
-  cgCallHelper(v, env, CallSpec::direct(RecordData::newRecord),
-               callDest(env, inst),
-               SyncOptions::Sync, args);
 }
 
 void cgNewStructArray(IRLS& env, const IRInstruction* inst) {

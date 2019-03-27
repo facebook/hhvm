@@ -435,7 +435,6 @@ bool canDCE(IRInstruction* inst) {
   case LdClsCached:
   case LdClsCachedSafe:
   case LdClsTypeCns:
-  case LdRecCached:
   case LdCns:
   case LookupCnsE:
   case LdClsCns:
@@ -478,7 +477,6 @@ bool canDCE(IRInstruction* inst) {
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:
   case NewKeysetArray:
-  case NewRecord:
   case NewStructArray:
   case NewStructDArray:
   case NewStructDict:

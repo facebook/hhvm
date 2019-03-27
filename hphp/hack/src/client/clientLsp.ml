@@ -1127,8 +1127,6 @@ let do_workspaceSymbol
     | HackSearchService.Class (Some Ast.Ctrait) -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
     | HackSearchService.Class (Some Ast.Cenum) -> SymbolInformation.Enum
-    (* TODO(T36697624): Add SymbolInformation.Record *)
-    | HackSearchService.Class (Some Ast.Crecord) -> SymbolInformation.Enum
     | HackSearchService.Class (None) -> assert false (* should never happen *)
     | HackSearchService.Method _ -> SymbolInformation.Method
     | HackSearchService.ClassVar _ -> SymbolInformation.Property

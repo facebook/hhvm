@@ -74,7 +74,6 @@
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/preclass.h"
-#include "hphp/runtime/vm/record.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/treadmill.h"
@@ -231,19 +230,8 @@ Unit::~Unit() {
     Class* cls = pcls->namedEntity()->clsList();
     while (cls) {
       Class* cur = cls;
-      cls = cls->m_next;
+      cls = cls->m_nextClass;
       if (cur->preClass() == pcls.get()) {
-        cur->destroy();
-      }
-    }
-  }
-
-  for (auto const& rec : m_records) {
-    Record* recList = rec->namedEntity()->recordList();
-    while (recList) {
-      Record* cur = recList;
-      recList = recList->m_next;
-      if (cur == rec.get()) {
         cur->destroy();
       }
     }
@@ -895,7 +883,7 @@ Class* Unit::defClass(const PreClass* preClass,
     // In addition, its the only simple way to make this work lock free...
     for (Class* class_ = top; class_ != nullptr; ) {
       Class* cur = class_;
-      class_ = class_->m_next;
+      class_ = class_->m_nextClass;
       if (cur->preClass() != preClass) continue;
       Class::Avail avail = cur->avail(parent, failIsFatal /*tryAutoload*/);
       if (LIKELY(avail == Class::Avail::True)) {
@@ -1049,64 +1037,6 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
     (cls->attrs() & (AttrInterface | AttrTrait)) == classKindAsAttr(kind);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Record lookup.
-
-Record* Unit::defRecord(Record* record,
-                     bool failIsFatal /* = true */) {
-  auto const nameList = record->namedEntity();
-  if (auto const current = nameList->getCachedTypeAlias()) {
-    FrameRestore fr(record->unit(), Op::DefRecord, record->id());
-    raise_error("Cannot declare record with the same (%s) as an "
-                "existing type", current->name->data());
-    return nullptr;
-  }
-
-  // If there was already a record declared with DefRecord, check if it's
-  // compatible.
-  if (auto cachedRec = nameList->getCachedRecord()) {
-    if (cachedRec != record) {
-      if (failIsFatal) {
-        FrameRestore fr(record->unit(), Op::DefRecord, record->id());
-        raise_error("Record already declared: %s", record->name()->data());
-      }
-      return nullptr;
-    }
-    return cachedRec;
-  }
-
-  // Get a compatible predefined record, if one exists. Otherwise, add the
-  // current one to the list of defined records.
-  // Set the cached record in either case.
-  auto top = nameList->recordList();
-  for (;;) {
-    for (auto rec = top; rec != nullptr; rec = rec->m_next) {
-      if (rec != record) continue;
-      rec->setCached();
-      return rec;
-    }
-    Lock l(g_recordsMutex);
-
-    if (UNLIKELY(top != nameList->recordList())) {
-      top = nameList->recordList();
-      continue;
-    }
-    nameList->m_cachedRecord.bind(rds::Mode::Normal);
-    record->setRecordHandle(nameList->m_cachedRecord);
-    record->incAtomicCount();
-    nameList->pushRecord(record);
-    record->setCached();
-    return record;
-  }
-}
-
-Record* Unit::loadRecord(const StringData* name) {
-  auto const rec = lookupRecord(name);
-  if (LIKELY(rec != nullptr)) return rec;
-  VMRegAnchor _;
-  AutoloadHandler::s_instance->autoloadRecord(StrNR(name));
-  return lookupRecord(name);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constant lookup.
@@ -1593,10 +1523,6 @@ void Unit::merge() {
   } else {
     mergeImpl<false>(mergeInfo());
   }
-
-  for (auto& r : records()) {
-    defRecord(r.get());
-  }
 }
 
 void* Unit::replaceUnit() const {
@@ -1656,7 +1582,7 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
     PreClass* pre = (PreClass*)obj;
     if (pre->attrs() & AttrUnique) {
       Class* cls = pre->namedEntity()->clsList();
-      assertx(cls && !cls->m_next);
+      assertx(cls && !cls->m_nextClass);
       assertx(cls->preClass() == pre);
       if (rds::isPersistentHandle(cls->classHandle())) {
         delta++;
@@ -1681,7 +1607,7 @@ static size_t compactMergeInfo(Unit::MergeInfo* in, Unit::MergeInfo* out,
         PreClass* pre = (PreClass*)obj;
         if (pre->attrs() & AttrUnique) {
           Class* cls = pre->namedEntity()->clsList();
-          assertx(cls && !cls->m_next);
+          assertx(cls && !cls->m_nextClass);
           assertx(cls->preClass() == pre);
           if (rds::isPersistentHandle(cls->classHandle())) {
             delta++;

@@ -131,8 +131,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Object:
       // NativeObject should hit the NativeData case below.
       return static_cast<const ObjectData*>(h)->scan(scanner);
-    case HeaderKind::Record:
-      return static_cast<const RecordData*>(h)->scan(scanner);
     case HeaderKind::WaitHandle:
       // scan C++ properties after [ObjectData] header. should pick up
       // unioned and bit-packed fields
@@ -218,11 +216,6 @@ inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
               asio_object_size(this);
   scanner.scanByIndex(m_tyindex, this, size);
   ObjectData::scan(scanner);
-}
-
-inline void RecordData::scan(type_scan::Scanner& scanner) const {
-  auto fields = fieldVec();
-  scanner.scan(*fields, m_record->numFields() * sizeof(*fields));
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

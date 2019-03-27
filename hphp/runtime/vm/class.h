@@ -1383,7 +1383,7 @@ public:
   // The ordering is reverse order of hotness because m_classVec is relatively
   // hot, and must be the last member.
 
-  LowPtr<Class> m_next{nullptr}; // used by NamedEntity
+  LowPtr<Class> m_nextClass{nullptr}; // used by NamedEntity
 
 private:
   static constexpr uint32_t kMagic = 0xce7adb33;

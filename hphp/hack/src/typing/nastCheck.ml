@@ -290,9 +290,6 @@ module CheckFunctionBody = struct
       List.iter el (expr f_type env);
       List.iter uel (expr f_type env);
       ()
-    | _, Record (_, afl) ->
-      List.iter afl (expr2 f_type env);
-      ()
     | _, InstanceOf (e, _)
     | _, Is (e, _)
     | _, As (e, _, _)
@@ -807,9 +804,6 @@ and expr_ env _p = function
   | New (_, _, el, uel, _) ->
       List.iter el (expr env);
       List.iter uel (expr env);
-      ()
-  | Record (_, fdl) ->
-      List.iter fdl (field env);
       ()
   | Efun (f, _) ->
       let body = Nast.assert_named_body f.f_body in

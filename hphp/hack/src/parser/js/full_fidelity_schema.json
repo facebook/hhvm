@@ -201,10 +201,6 @@
       "token_text" : "real" },
     { "token_kind" : "Reify",
       "token_text" : "reify" },
-    { "token_kind" : "Record",
-      "token_text" : "recordname" },
-    { "token_kind" : "RecordDec",
-      "token_text" : "record" },
     { "token_kind" : "Require",
       "token_text" : "require" },
     { "token_kind" : "Require_once",
@@ -552,29 +548,6 @@
         { "field_name" : "equal" },
         { "field_name" : "value" },
         { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "RecordDeclaration",
-      "type_name" : "record_declaration",
-      "description" : "record_declaration",
-      "prefix" : "record",
-      "fields" : [
-        { "field_name" : "attribute_spec" },
-        { "field_name" : "keyword" },
-        { "field_name" : "name" },
-        { "field_name" : "left_brace" },
-        { "field_name" : "fields" },
-        { "field_name" : "right_brace" }
-      ] },
-    { "kind_name" : "RecordField",
-      "type_name" : "record_field",
-      "description" : "record_field",
-      "prefix" : "record_field",
-      "fields" : [
-        { "field_name" : "name" },
-        { "field_name" : "colon" },
-        { "field_name" : "type" },
-        { "field_name" : "init" },
-        { "field_name" : "comma" }
       ] },
     { "kind_name" : "AliasDeclaration",
       "type_name" : "alias_declaration",
@@ -1662,16 +1635,6 @@
         { "field_name" : "left_paren" },
         { "field_name" : "argument_list" },
         { "field_name" : "right_paren" }
-      ] },
-    { "kind_name" : "RecordCreationExpression",
-      "type_name" : "record_creation_expression",
-      "description" : "record_creation_expression",
-      "prefix" : "record_creation",
-      "fields" : [
-        { "field_name" : "type" },
-        { "field_name" : "left_bracket" },
-        { "field_name" : "members" },
-        { "field_name" : "right_bracket" }
       ] },
     { "kind_name" : "ArrayCreationExpression",
       "type_name" : "array_creation_expression",

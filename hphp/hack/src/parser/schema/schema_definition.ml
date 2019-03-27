@@ -156,35 +156,6 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
-  ; { kind_name   = "RecordDeclaration"
-    ; type_name   = "record_declaration"
-    ; func_name   = "record_declaration"
-    ; description = "record_declaration"
-    ; prefix      = "record"
-    ; aggregates  = [ TopLevelDeclaration ]
-    ; fields =
-      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
-      ; "keyword", Token
-      ; "name", Token
-      ; "left_brace", Token
-      ; "fields", ZeroOrMore (Just "RecordField")
-      ; "right_brace", Token
-      ]
-    }
-  ; { kind_name   = "RecordField"
-    ; type_name   = "record_field"
-    ; func_name   = "record_field"
-    ; description = "record_field"
-    ; prefix      = "record_field"
-    ; aggregates  = []
-    ; fields =
-      [ "name", Token
-      ; "colon", Token
-      ; "type", Just "TypeConstraint"
-      ; "init", ZeroOrOne (Just "SimpleInitializer")
-      ; "comma", Token
-      ]
-    }
   ; { kind_name   = "AliasDeclaration"
     ; type_name   = "alias_declaration"
     ; func_name   = "alias_declaration"
@@ -1588,19 +1559,6 @@ let schema : schema_node list =
       ; "right_paren", ZeroOrOne Token
       ]
     }
-  ; { kind_name   = "RecordCreationExpression"
-    ; type_name   = "record_creation_expression"
-    ; func_name   = "record_creation_expression"
-    ; description = "record_creation_expression"
-    ; prefix      = "record_creation"
-    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
-    ; fields =
-      [ "type", Aggregate TODO
-      ; "left_bracket", Token
-      ; "members", ZeroOrMore (Just "ElementInitializer")
-      ; "right_bracket", Token
-    ]
-  }
   ; { kind_name   = "ArrayCreationExpression"
     ; type_name   = "array_creation_expression"
     ; func_name   = "array_creation_expression"

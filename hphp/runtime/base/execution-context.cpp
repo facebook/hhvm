@@ -1371,7 +1371,6 @@ bool sideEffect(Op op) {
     case Op::NewVArray:
     case Op::NewDArray:
     case Op::NewDictArray:
-    case Op::NewRecord:
     case Op::Nop:
     case Op::EntryNop:
     case Op::AssertRATL:

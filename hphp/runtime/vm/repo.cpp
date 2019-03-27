@@ -112,7 +112,7 @@ Repo::Repo()
     m_dbc(nullptr), m_localReadable(false), m_localWritable(false),
     m_evalRepoId(-1), m_txDepth(0), m_rollback(false), m_beginStmt(*this),
     m_rollbackStmt(*this), m_commitStmt(*this), m_urp(*this), m_pcrp(*this),
-    m_rrp(*this), m_frp(*this), m_lsrp(*this) {
+    m_frp(*this), m_lsrp(*this) {
 
   ++s_nRepos;
   connect();
@@ -1094,7 +1094,6 @@ RepoStatus Repo::createSchema(int repoId, std::string& errorMsg) {
                            table(repoId, "GlobalData")));
     m_urp.createSchema(repoId, txn);
     m_pcrp.createSchema(repoId, txn);
-    m_rrp.createSchema(repoId, txn);
     m_frp.createSchema(repoId, txn);
     m_lsrp.createSchema(repoId, txn);
 

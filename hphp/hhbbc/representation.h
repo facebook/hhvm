@@ -590,32 +590,7 @@ struct Class : ClassBase {
 using TypeAlias = ::HPHP::TypeAlias;
 
 //////////////////////////////////////////////////////////////////////
-/*
- * A record field
- */
-struct RecordField {
-  LSString name;
-  Attr attrs;
-  LSString userType;
-  LSString docComment;
-  Cell val;
-  TypeConstraint typeConstraint;
-  UserAttributeMap userAttributes;
-};
-/*
- * Representation of a Hack record
- */
-struct Record {
-  Unit* unit;
-  SrcInfo srcInfo;
-  LSString name;
-  Attr attrs;
-  int32_t id;
-  UserAttributeMap userAttributes;
-  CompactVector<RecordField> fields;
-};
 
-//////////////////////////////////////////////////////////////////////
 /*
  * Representation of a php file (normal compilation unit).
  */
@@ -630,7 +605,6 @@ struct Unit {
   std::unique_ptr<Func> pseudomain;
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;
-  CompactVector<std::unique_ptr<Record>> records;
   CompactVector<std::unique_ptr<TypeAlias>> typeAliases;
   CompactVector<std::pair<SString,SString>> classAliases;
   CompactVector<SrcLoc> srcLocs;

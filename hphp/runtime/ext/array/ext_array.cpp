@@ -367,7 +367,6 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
-    case KindOfRecord:
       if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
       if (checkHACArrayKeyCast()) {
         raiseHackArrCompatImplicitArrayKey(cell);
@@ -816,7 +815,6 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
-      case KindOfRecord:
         continue;
     }
     not_reached();
@@ -841,7 +839,6 @@ DOUBLE:
       case KindOfClsMeth:
       case KindOfObject:
       case KindOfResource:
-      case KindOfRecord:
         continue;
     }
     not_reached();
@@ -1111,7 +1108,6 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
-      case KindOfRecord:
         continue;
     }
     not_reached();
@@ -1136,7 +1132,6 @@ DOUBLE:
       case KindOfClsMeth:
       case KindOfObject:
       case KindOfResource:
-      case KindOfRecord:
         continue;
     }
     not_reached();
@@ -1372,9 +1367,6 @@ int64_t HHVM_FUNCTION(count,
         }
       }
       return 1;
-
-    case KindOfRecord: // TODO (T41258617)
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfRef:
       break;
@@ -3017,10 +3009,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfObject:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Objects cannot be cast to an array-key"
-      );
-    case KindOfRecord:
-      SystemLib::throwInvalidArgumentExceptionObject(
-        "Records cannot be cast to an array-key"
       );
     case KindOfRef:
       break;

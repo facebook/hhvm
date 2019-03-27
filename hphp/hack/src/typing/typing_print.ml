@@ -169,7 +169,6 @@ module ErrorString = struct
     | Ast.Cinterface -> "an interface"
     | Ast.Ctrait -> "a trait"
     | Ast.Cenum -> "an enum"
-    | Ast.Crecord -> "a record"
 
   and to_string env ty =
     let _, ety = Env.expand_type env ty in
@@ -1357,7 +1356,6 @@ module PrintClass = struct
     | Ast.Cinterface -> "Cinterface"
     | Ast.Ctrait -> "Ctrait"
     | Ast.Cenum -> "Cenum"
-    | Ast.Crecord -> "Crecord"
 
   let constraint_ty tcopt = function
     | (Ast.Constraint_as, ty) -> "as " ^ (Full.to_string_decl tcopt ty)

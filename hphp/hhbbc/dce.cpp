@@ -1721,7 +1721,6 @@ void dce(Env& env, const bc::DblAsBits& op) { dce_default(env, op); }
 void dce(Env& env, const bc::DefCls& op) { dce_default(env, op); }
 void dce(Env& env, const bc::DefClsNop& op) { dce_default(env, op); }
 void dce(Env& env, const bc::DefCns& op) { dce_default(env, op); }
-void dce(Env& env, const bc::DefRecord& op) { dce_default(env, op); }
 void dce(Env& env, const bc::DefTypeAlias& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Div& op) { dce_default(env, op); }
 void dce(Env& env, const bc::EmptyG& op) { dce_default(env, op); }
@@ -1787,7 +1786,6 @@ void dce(Env& env, const bc::NewLikeArrayL& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewObj& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewObjD& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { dce_default(env, op); }
-void dce(Env& env, const bc::NewRecord& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Nop& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Not& op) { dce_default(env, op); }
 void dce(Env& env, const bc::NSame& op) { dce_default(env, op); }

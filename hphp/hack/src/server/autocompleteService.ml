@@ -348,7 +348,6 @@ let compute_complete_global
               | Ast.Cinterface -> Interface_kind
               | Ast.Ctrait -> Trait_kind
               | Ast.Cenum -> Enum_kind
-              | Ast.Crecord -> Enum_kind (* TODO(T36697624): Add Record_kind *)
             in
             let ty =
               Typing_reason.Rwitness (Cls.pos c),

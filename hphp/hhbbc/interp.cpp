@@ -369,11 +369,6 @@ void in(ISS& env, const bc::NewDArray& op) {
        effect_free(env), aempty_darray() : some_aempty_darray());
 }
 
-void in(ISS& env, const bc::NewRecord& op) {
-  discard(env, op.keys.size());
-  push(env, TInitCell);
-}
-
 void in(ISS& env, const bc::NewStructArray& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {
@@ -3881,7 +3876,6 @@ void in(ISS& env, const bc::ReqDoc&)    { inclOpImpl(env); }
 void in(ISS& env, const bc::Eval&)      { inclOpImpl(env); }
 
 void in(ISS& /*env*/, const bc::DefCls&) {}
-void in(ISS& /*env*/, const bc::DefRecord&) {}
 void in(ISS& /*env*/, const bc::DefClsNop&) {}
 void in(ISS& env, const bc::AliasCls&) {
   popC(env);

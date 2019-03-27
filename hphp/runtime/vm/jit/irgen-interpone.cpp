@@ -132,7 +132,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutKeysetImm:   return TKeyset;
     case OutObject:
     case OutThisObject:  return TObj;
-    case OutRecord:      return TRecord;
     case OutResource:    return TRes;
 
     case OutFDesc:       return folly::none;
@@ -439,7 +438,6 @@ void emitEval(IRGS& env)                      { INTERP }
 void emitDefTypeAlias(IRGS& env, uint32_t)    { INTERP }
 void emitDefCns(IRGS& env, const StringData*) { INTERP }
 void emitDefCls(IRGS& env, uint32_t)          { INTERP }
-void emitDefRecord(IRGS& env, uint32_t)       { INTERP }
 void emitAliasCls(IRGS& env,
                   const StringData*,
                   const StringData*)          { INTERP }

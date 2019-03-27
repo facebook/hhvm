@@ -511,7 +511,6 @@ double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
-    case KindOfRecord:
       coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
       break;
 
@@ -581,7 +580,6 @@ int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
-    case KindOfRecord:
       coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
       break;
 
@@ -911,7 +909,6 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
-      case KindOfRecord:
         break;
     }
     not_reached();

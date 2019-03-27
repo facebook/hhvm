@@ -23,7 +23,6 @@ type param_num = int
 type stack_index = int
 type class_id = Hhbc_id.Class.t
 type class_num = int
-type record_num = int
 type typedef_num = int
 type function_id = Hhbc_id.Function.t
 type method_id = Hhbc_id.Method.t
@@ -188,7 +187,6 @@ type instruct_lit_const =
   | NewVecArray of int
   | NewKeysetArray of int
   | NewPair
-  | NewRecord of class_id * string list
   | AddElemC
   | AddElemV
   | AddNewElemC
@@ -441,7 +439,6 @@ type instruct_include_eval_define =
   | AliasCls of string * string
   | DefCls of class_num
   | DefClsNop of class_num
-  | DefRecord of record_num
   | DefCns of const_id
   | DefTypeAlias of typedef_num
 

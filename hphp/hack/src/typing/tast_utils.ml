@@ -95,7 +95,7 @@ let rec truthiness env ty =
     | None -> Unknown
     | Some cls ->
       match Cls.kind cls with
-      | Cnormal | Cabstract | Crecord -> Always_truthy
+      | Cnormal | Cabstract -> Always_truthy
       | Cinterface | Cenum -> Possibly_falsy
       | Ctrait -> Unknown
     end
@@ -163,7 +163,7 @@ let rec find_sketchy_types env acc ty =
       | Some cls ->
         match Cls.kind cls with
         | Cinterface -> Traversable_interface (env, ty) :: acc
-        | Cnormal | Cabstract | Ctrait | Cenum | Crecord -> acc
+        | Cnormal | Cabstract | Ctrait | Cenum -> acc
     end
 
   | Tunresolved tyl ->

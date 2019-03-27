@@ -296,7 +296,7 @@ let inherit_hack_class env c p class_name class_type argl =
         chown_privates (snd c.sc_name) class_type
     | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface ->
         filter_privates class_type
-    | Ast.Cenum | Ast.Crecord -> class_type
+    | Ast.Cenum -> class_type
   in
   let typeconsts = SMap.map (Inst.instantiate_typeconst subst)
     class_type.dc_typeconsts in

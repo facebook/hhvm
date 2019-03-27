@@ -156,9 +156,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, int64_t val) {
         return op(true, false);
       }
 
-    case KindOfRecord:
-      throw_record_compare_exception();
-
     case KindOfRef:
       break;
   }
@@ -237,9 +234,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, double val) {
         }
         return op(true, false);
       }
-
-    case KindOfRecord:
-      throw_record_compare_exception();
 
     case KindOfRef:
       break;
@@ -334,9 +328,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const StringData* val) {
         }
         return op(true, false);
       }
-
-    case KindOfRecord:
-      throw_record_compare_exception();
 
     case KindOfRef:
       break;
@@ -434,9 +425,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ArrayData* ad) {
         return op(clsMethToVecHelper(cell.m_data.pclsmeth).get(), ad);
       }
 
-    case KindOfRecord:
-      throw_record_compare_exception();
-
     case KindOfRef:
       break;
   }
@@ -526,9 +514,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ObjectData* od) {
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
       }
 
-    case KindOfRecord:
-      throw_record_compare_exception();
-
     case KindOfRef:
       break;
   }
@@ -611,9 +596,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, const ResourceData* rd) {
         }
         return op(true, false);
       }
-
-    case KindOfRecord:
-      throw_record_compare_exception();
 
     case KindOfRef:
       break;
@@ -699,7 +681,6 @@ typename Op::RetType cellRelOp(Op op, Cell cell, ClsMethDataRef clsMeth) {
     case KindOfString:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfRecord:
     case KindOfResource: return op(false, true);
     case KindOfBoolean:  return op(cell.m_data.num, true);
     case KindOfClsMeth:  return op(cell.m_data.pclsmeth, clsMeth);
@@ -778,8 +759,7 @@ typename Op::RetType cellRelOp(Op op, Cell c1, Cell c2) {
   case KindOfClass:
     return cellRelOp(op, c1, classToStringHelper(c2.m_data.pclass));
   case KindOfClsMeth:      return cellRelOp(op, c1, c2.m_data.pclsmeth);
-  case KindOfRecord:
-    throw_record_compare_exception();
+
   case KindOfRef:
     break;
   }
@@ -1189,6 +1169,7 @@ bool cellSame(Cell c1, Cell c2) {
       return c2.m_type == KindOfResource &&
         c1.m_data.pres == c2.m_data.pres;
 
+
     case KindOfClsMeth:
       if (RuntimeOption::EvalHackArrDVArrs) {
         if (isVecType(c2.m_type)) {
@@ -1207,9 +1188,6 @@ bool cellSame(Cell c1, Cell c2) {
         return false;
       }
       return c1.m_data.pclsmeth == c2.m_data.pclsmeth;
-
-    case KindOfRecord:
-      raise_error(Strings::RECORD_NOT_SUPPORTED);
 
     case KindOfUninit:
     case KindOfNull:

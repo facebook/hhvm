@@ -236,40 +236,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env semi;
       Newline;
     ]
-  | Syntax.RecordDeclaration {
-      record_attribute_spec = attr;
-      record_keyword = kw;
-      record_name = name;
-      record_left_brace = left_b;
-      record_fields = fields;
-      record_right_brace = right_b } ->
-    Concat [
-      t env attr;
-      when_present attr newline;
-      t env kw;
-      Space;
-      t env name;
-      Space;
-      braced_block_nest env left_b right_b [
-        handle_possible_list env fields
-      ];
-      Newline;
-    ]
-  | Syntax.RecordField {
-      record_field_name = name;
-      record_field_colon = colon_kw;
-      record_field_type = record_field_type;
-      record_field_init = record_field_init;
-      record_field_comma = comma_kw } ->
-    Concat [
-      t env name;
-      t env colon_kw;
-      Space;
-      t env record_field_type;
-      t env record_field_init;
-      t env comma_kw;
-      Newline;
-    ]
   | Syntax.AliasDeclaration {
       alias_attribute_spec = attr;
       alias_keyword = kw;
@@ -1695,12 +1661,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env obj_type;
       transform_argish env left_p arg_list right_p;
     ]
-  | Syntax.RecordCreationExpression {
-      record_creation_type = rec_type;
-      record_creation_left_bracket = left_b;
-      record_creation_members = members;
-      record_creation_right_bracket = right_b; } ->
-    transform_container_literal env rec_type left_b members right_b
   | Syntax.AnonymousClass {
       anonymous_class_class_keyword = classkw;
       anonymous_class_left_paren = left_p;

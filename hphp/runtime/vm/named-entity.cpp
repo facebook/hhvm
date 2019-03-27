@@ -52,22 +52,10 @@ rds::Handle NamedEntity::getClassHandle() const {
   return m_cachedClass.handle();
 }
 
-rds::Handle NamedEntity::getRecordHandle() const {
-  m_cachedRecord.bind(rds::Mode::Normal);
-  return m_cachedRecord.handle();
-}
-
 void NamedEntity::setCachedClass(Class* f) {
   *m_cachedClass = f;
   if (m_cachedClass.isNormal()) {
     f ? m_cachedClass.markInit() : m_cachedClass.markUninit();
-  }
-}
-
-void NamedEntity::setCachedRecord(Record* r) {
-  *m_cachedRecord = r;
-  if (m_cachedRecord.isNormal()) {
-    r ? m_cachedRecord.markInit() : m_cachedRecord.markUninit();
   }
 }
 
@@ -99,60 +87,31 @@ void NamedEntity::setCachedReifiedGenerics(ArrayData* a) {
   }
 }
 
-namespace {
-template<typename T>
-typename std::enable_if<std::is_same<T, Class>::value, void>::type
-deregister(T* goner) {
+void NamedEntity::pushClass(Class* cls) {
+  assertx(!cls->m_nextClass);
+  cls->m_nextClass = m_clsList;
+  m_clsList = cls;
+}
+
+void NamedEntity::removeClass(Class* goner) {
+  Class* head = m_clsList;
+  if (!head) return;
+
   if (RuntimeOption::EvalEnableReverseDataMap) {
     // This deregisters Classes registered to data_map in Unit::defClass().
     data_map::deregister(goner);
   }
-}
-template<typename T>
-typename std::enable_if<!std::is_same<T, Class>::value, void>::type
-deregister(T* goner) {}
-
-template<class T>
-void pushImpl(T* type, NamedEntity::ListType<T>& list) {
-  assertx(type->m_next == nullptr);
-  type->m_next = list;
-  list = type;
-}
-
-template<class T>
-void removeImpl(T* goner, NamedEntity::ListType<T>& list) {
-  T* head = list;
-  if (!head) return;
-
-  deregister(goner);
 
   if (head == goner) {
-    list = head->m_next;
+    m_clsList = head->m_nextClass;
     return;
   }
-  auto t = &(head->m_next);
-  while (t->get() != goner) {
-    assertx(*t);
-    t = &((*t)->m_next);
+  LowPtr<Class>* cls = &head->m_nextClass;
+  while (cls->get() != goner) {
+    assertx(*cls);
+    cls = &(*cls)->m_nextClass;
   }
-  *t = goner->m_next;
-}
-}
-
-void NamedEntity::pushRecord(Record* rec) {
-  pushImpl(rec, m_recordList);
-}
-
-void NamedEntity::removeRecord(Record* goner) {
-  removeImpl(goner, m_recordList);
-}
-
-void NamedEntity::pushClass(Class* cls) {
-  pushImpl(cls, m_clsList);
-}
-
-void NamedEntity::removeClass(Class* goner) {
-  removeImpl(goner, m_clsList);
+  *cls = goner->m_nextClass;
 }
 
 void NamedEntity::setUniqueFunc(Func* func) {

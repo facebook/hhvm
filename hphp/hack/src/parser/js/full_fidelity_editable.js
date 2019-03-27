@@ -106,10 +106,6 @@ class EditableSyntax
       return EnumDeclaration.from_json(json, position, source);
     case 'enumerator':
       return Enumerator.from_json(json, position, source);
-    case 'record_declaration':
-      return RecordDeclaration.from_json(json, position, source);
-    case 'record_field':
-      return RecordField.from_json(json, position, source);
     case 'alias_declaration':
       return AliasDeclaration.from_json(json, position, source);
     case 'property_declaration':
@@ -322,8 +318,6 @@ class EditableSyntax
       return ObjectCreationExpression.from_json(json, position, source);
     case 'constructor_call':
       return ConstructorCall.from_json(json, position, source);
-    case 'record_creation_expression':
-      return RecordCreationExpression.from_json(json, position, source);
     case 'array_creation_expression':
       return ArrayCreationExpression.from_json(json, position, source);
     case 'array_intrinsic_expression':
@@ -909,10 +903,6 @@ class EditableToken extends EditableSyntax
        return new RealToken(leading, trailing);
     case 'reify':
        return new ReifyToken(leading, trailing);
-    case 'recordname':
-       return new RecordToken(leading, trailing);
-    case 'record':
-       return new RecordDecToken(leading, trailing);
     case 'require':
        return new RequireToken(leading, trailing);
     case 'require_once':
@@ -1842,20 +1832,6 @@ class ReifyToken extends EditableToken
   constructor(leading, trailing)
   {
     super('reify', leading, trailing, 'reify');
-  }
-}
-class RecordToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('recordname', leading, trailing, 'recordname');
-  }
-}
-class RecordDecToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('record', leading, trailing, 'record');
   }
 }
 class RequireToken extends EditableToken
@@ -3900,285 +3876,6 @@ class Enumerator extends EditableSyntax
         'value',
         'semicolon'];
     return Enumerator._children_keys;
-  }
-}
-class RecordDeclaration extends EditableSyntax
-{
-  constructor(
-    attribute_spec,
-    keyword,
-    name,
-    left_brace,
-    fields,
-    right_brace)
-  {
-    super('record_declaration', {
-      attribute_spec: attribute_spec,
-      keyword: keyword,
-      name: name,
-      left_brace: left_brace,
-      fields: fields,
-      right_brace: right_brace });
-  }
-  get attribute_spec() { return this.children.attribute_spec; }
-  get keyword() { return this.children.keyword; }
-  get name() { return this.children.name; }
-  get left_brace() { return this.children.left_brace; }
-  get fields() { return this.children.fields; }
-  get right_brace() { return this.children.right_brace; }
-  with_attribute_spec(attribute_spec){
-    return new RecordDeclaration(
-      attribute_spec,
-      this.keyword,
-      this.name,
-      this.left_brace,
-      this.fields,
-      this.right_brace);
-  }
-  with_keyword(keyword){
-    return new RecordDeclaration(
-      this.attribute_spec,
-      keyword,
-      this.name,
-      this.left_brace,
-      this.fields,
-      this.right_brace);
-  }
-  with_name(name){
-    return new RecordDeclaration(
-      this.attribute_spec,
-      this.keyword,
-      name,
-      this.left_brace,
-      this.fields,
-      this.right_brace);
-  }
-  with_left_brace(left_brace){
-    return new RecordDeclaration(
-      this.attribute_spec,
-      this.keyword,
-      this.name,
-      left_brace,
-      this.fields,
-      this.right_brace);
-  }
-  with_fields(fields){
-    return new RecordDeclaration(
-      this.attribute_spec,
-      this.keyword,
-      this.name,
-      this.left_brace,
-      fields,
-      this.right_brace);
-  }
-  with_right_brace(right_brace){
-    return new RecordDeclaration(
-      this.attribute_spec,
-      this.keyword,
-      this.name,
-      this.left_brace,
-      this.fields,
-      right_brace);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var attribute_spec = this.attribute_spec.rewrite(rewriter, new_parents);
-    var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var name = this.name.rewrite(rewriter, new_parents);
-    var left_brace = this.left_brace.rewrite(rewriter, new_parents);
-    var fields = this.fields.rewrite(rewriter, new_parents);
-    var right_brace = this.right_brace.rewrite(rewriter, new_parents);
-    if (
-      attribute_spec === this.attribute_spec &&
-      keyword === this.keyword &&
-      name === this.name &&
-      left_brace === this.left_brace &&
-      fields === this.fields &&
-      right_brace === this.right_brace)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new RecordDeclaration(
-        attribute_spec,
-        keyword,
-        name,
-        left_brace,
-        fields,
-        right_brace), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let attribute_spec = EditableSyntax.from_json(
-      json.record_attribute_spec, position, source);
-    position += attribute_spec.width;
-    let keyword = EditableSyntax.from_json(
-      json.record_keyword, position, source);
-    position += keyword.width;
-    let name = EditableSyntax.from_json(
-      json.record_name, position, source);
-    position += name.width;
-    let left_brace = EditableSyntax.from_json(
-      json.record_left_brace, position, source);
-    position += left_brace.width;
-    let fields = EditableSyntax.from_json(
-      json.record_fields, position, source);
-    position += fields.width;
-    let right_brace = EditableSyntax.from_json(
-      json.record_right_brace, position, source);
-    position += right_brace.width;
-    return new RecordDeclaration(
-        attribute_spec,
-        keyword,
-        name,
-        left_brace,
-        fields,
-        right_brace);
-  }
-  get children_keys()
-  {
-    if (RecordDeclaration._children_keys == null)
-      RecordDeclaration._children_keys = [
-        'attribute_spec',
-        'keyword',
-        'name',
-        'left_brace',
-        'fields',
-        'right_brace'];
-    return RecordDeclaration._children_keys;
-  }
-}
-class RecordField extends EditableSyntax
-{
-  constructor(
-    name,
-    colon,
-    type,
-    init,
-    comma)
-  {
-    super('record_field', {
-      name: name,
-      colon: colon,
-      type: type,
-      init: init,
-      comma: comma });
-  }
-  get name() { return this.children.name; }
-  get colon() { return this.children.colon; }
-  get type() { return this.children.type; }
-  get init() { return this.children.init; }
-  get comma() { return this.children.comma; }
-  with_name(name){
-    return new RecordField(
-      name,
-      this.colon,
-      this.type,
-      this.init,
-      this.comma);
-  }
-  with_colon(colon){
-    return new RecordField(
-      this.name,
-      colon,
-      this.type,
-      this.init,
-      this.comma);
-  }
-  with_type(type){
-    return new RecordField(
-      this.name,
-      this.colon,
-      type,
-      this.init,
-      this.comma);
-  }
-  with_init(init){
-    return new RecordField(
-      this.name,
-      this.colon,
-      this.type,
-      init,
-      this.comma);
-  }
-  with_comma(comma){
-    return new RecordField(
-      this.name,
-      this.colon,
-      this.type,
-      this.init,
-      comma);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var name = this.name.rewrite(rewriter, new_parents);
-    var colon = this.colon.rewrite(rewriter, new_parents);
-    var type = this.type.rewrite(rewriter, new_parents);
-    var init = this.init.rewrite(rewriter, new_parents);
-    var comma = this.comma.rewrite(rewriter, new_parents);
-    if (
-      name === this.name &&
-      colon === this.colon &&
-      type === this.type &&
-      init === this.init &&
-      comma === this.comma)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new RecordField(
-        name,
-        colon,
-        type,
-        init,
-        comma), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let name = EditableSyntax.from_json(
-      json.record_field_name, position, source);
-    position += name.width;
-    let colon = EditableSyntax.from_json(
-      json.record_field_colon, position, source);
-    position += colon.width;
-    let type = EditableSyntax.from_json(
-      json.record_field_type, position, source);
-    position += type.width;
-    let init = EditableSyntax.from_json(
-      json.record_field_init, position, source);
-    position += init.width;
-    let comma = EditableSyntax.from_json(
-      json.record_field_comma, position, source);
-    position += comma.width;
-    return new RecordField(
-        name,
-        colon,
-        type,
-        init,
-        comma);
-  }
-  get children_keys()
-  {
-    if (RecordField._children_keys == null)
-      RecordField._children_keys = [
-        'name',
-        'colon',
-        'type',
-        'init',
-        'comma'];
-    return RecordField._children_keys;
   }
 }
 class AliasDeclaration extends EditableSyntax
@@ -16382,110 +16079,6 @@ class ConstructorCall extends EditableSyntax
     return ConstructorCall._children_keys;
   }
 }
-class RecordCreationExpression extends EditableSyntax
-{
-  constructor(
-    type,
-    left_bracket,
-    members,
-    right_bracket)
-  {
-    super('record_creation_expression', {
-      type: type,
-      left_bracket: left_bracket,
-      members: members,
-      right_bracket: right_bracket });
-  }
-  get type() { return this.children.type; }
-  get left_bracket() { return this.children.left_bracket; }
-  get members() { return this.children.members; }
-  get right_bracket() { return this.children.right_bracket; }
-  with_type(type){
-    return new RecordCreationExpression(
-      type,
-      this.left_bracket,
-      this.members,
-      this.right_bracket);
-  }
-  with_left_bracket(left_bracket){
-    return new RecordCreationExpression(
-      this.type,
-      left_bracket,
-      this.members,
-      this.right_bracket);
-  }
-  with_members(members){
-    return new RecordCreationExpression(
-      this.type,
-      this.left_bracket,
-      members,
-      this.right_bracket);
-  }
-  with_right_bracket(right_bracket){
-    return new RecordCreationExpression(
-      this.type,
-      this.left_bracket,
-      this.members,
-      right_bracket);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var type = this.type.rewrite(rewriter, new_parents);
-    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
-    var members = this.members.rewrite(rewriter, new_parents);
-    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
-    if (
-      type === this.type &&
-      left_bracket === this.left_bracket &&
-      members === this.members &&
-      right_bracket === this.right_bracket)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new RecordCreationExpression(
-        type,
-        left_bracket,
-        members,
-        right_bracket), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let type = EditableSyntax.from_json(
-      json.record_creation_type, position, source);
-    position += type.width;
-    let left_bracket = EditableSyntax.from_json(
-      json.record_creation_left_bracket, position, source);
-    position += left_bracket.width;
-    let members = EditableSyntax.from_json(
-      json.record_creation_members, position, source);
-    position += members.width;
-    let right_bracket = EditableSyntax.from_json(
-      json.record_creation_right_bracket, position, source);
-    position += right_bracket.width;
-    return new RecordCreationExpression(
-        type,
-        left_bracket,
-        members,
-        right_bracket);
-  }
-  get children_keys()
-  {
-    if (RecordCreationExpression._children_keys == null)
-      RecordCreationExpression._children_keys = [
-        'type',
-        'left_bracket',
-        'members',
-        'right_bracket'];
-    return RecordCreationExpression._children_keys;
-  }
-}
 class ArrayCreationExpression extends EditableSyntax
 {
   constructor(
@@ -22672,8 +22265,6 @@ exports.ProtectedToken = ProtectedToken;
 exports.PublicToken = PublicToken;
 exports.RealToken = RealToken;
 exports.ReifyToken = ReifyToken;
-exports.RecordToken = RecordToken;
-exports.RecordDecToken = RecordDecToken;
 exports.RequireToken = RequireToken;
 exports.Require_onceToken = Require_onceToken;
 exports.RequiredToken = RequiredToken;
@@ -22825,8 +22416,6 @@ exports.PipeVariableExpression = PipeVariableExpression;
 exports.FileAttributeSpecification = FileAttributeSpecification;
 exports.EnumDeclaration = EnumDeclaration;
 exports.Enumerator = Enumerator;
-exports.RecordDeclaration = RecordDeclaration;
-exports.RecordField = RecordField;
 exports.AliasDeclaration = AliasDeclaration;
 exports.PropertyDeclaration = PropertyDeclaration;
 exports.PropertyDeclarator = PropertyDeclarator;
@@ -22933,7 +22522,6 @@ exports.ListExpression = ListExpression;
 exports.CollectionLiteralExpression = CollectionLiteralExpression;
 exports.ObjectCreationExpression = ObjectCreationExpression;
 exports.ConstructorCall = ConstructorCall;
-exports.RecordCreationExpression = RecordCreationExpression;
 exports.ArrayCreationExpression = ArrayCreationExpression;
 exports.ArrayIntrinsicExpression = ArrayIntrinsicExpression;
 exports.DarrayIntrinsicExpression = DarrayIntrinsicExpression;

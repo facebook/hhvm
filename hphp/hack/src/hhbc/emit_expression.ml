@@ -871,19 +871,6 @@ and emit_new env pos expr targs args uargs =
   ],
   empty
 
-(* TODO(T36697624) more efficient bytecode for static records *)
-and emit_record env pos expr es =
-  let rexpr = expr_to_class_expr ~resolve_self:true
-    (Emit_env.get_scope env) expr in
-  match rexpr with
-  | Class_id id ->
-    let fq_id, _id_opt =
-      Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
-    Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-    emit_struct_array env pos es (instr_new_record fq_id)
-  | _ ->
-    failwith "No record with specified name found"
-
 and emit_clone env expr =
   gather [
     emit_expr ~need_ref:false env expr;
@@ -1689,9 +1676,6 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
   | A.New (typeexpr, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
       emit_new env pos typeexpr targs args uargs
-  | A.Record (typeexpr, es) ->
-    let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    emit_box_if_necessary pos need_ref @@ emit_record env pos typeexpr es2
   | A.Array es ->
     emit_pos_then pos @@
     emit_box_if_necessary pos need_ref @@ emit_collection env expr es
@@ -1816,7 +1800,7 @@ and emit_struct_array env pos es ctor =
             (* TODO: Consider reusing folded keys from is_struct_init *)
             begin match snd @@ Ast_constant_folder.fold_expr ns k with
             | A.String s -> s, emit_expr ~need_ref:false env v
-            | _ -> failwith "Key must be a string"
+            | _ -> failwith "impossible"
             end
           | _ -> failwith "impossible")
   in
@@ -3526,7 +3510,7 @@ and can_use_as_rhs_in_list_assignment expr =
   | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
   | A.Lvar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _
-  | A.Call _ | A.New _ | A.Record _ | A.Expr_list _ | A.Yield _ | A.Cast _ | A.Eif _
+  | A.Call _ | A.New _ | A.Expr_list _ | A.Yield _ | A.Cast _ | A.Eif _
   | A.Array _ | A.Varray _ | A.Darray _ | A.Collection _ | A.Clone _ | A.Unop _
   | A.As _ | A.Await _ -> true
   | A.Pipe (_, (_, r))

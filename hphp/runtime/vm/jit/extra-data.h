@@ -1668,7 +1668,6 @@ X(OODeclExists,                 ClassKindData);
 X(NewStructArray,               NewStructData);
 X(NewStructDArray,              NewStructData);
 X(NewStructDict,                NewStructData);
-X(NewRecord,                    NewStructData);
 X(AllocPackedArray,             PackedArrayData);
 X(AllocVArray,                  PackedArrayData);
 X(AllocVecArray,                PackedArrayData);

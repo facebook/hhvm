@@ -37,7 +37,7 @@ module WithParser(Parser : Parser_S) = struct
     val next_token : ?tokenizer:(Lexer.t ->Lexer.t * Syntax.Token.t) -> t -> t * Syntax.Token.t
     val fetch_token : t -> t * Parser.SC.r
   end = struct
-    let next_token_impl ~tokenizer parser =
+    let next_token ?(tokenizer=Lexer.next_token) parser =
       let lexer = lexer parser in
       let (lexer, token) = tokenizer lexer in
       let parser = with_lexer parser lexer in
@@ -67,8 +67,6 @@ module WithParser(Parser : Parser_S) = struct
          in
       (parser, token)
 
-    let magic_cache = Little_magic_cache.make ()
-    let next_token ?(tokenizer=Lexer.next_token) = Little_magic_cache.memoize magic_cache (next_token_impl ~tokenizer)
     let fetch_token parser =
       let (parser, token) = next_token parser in
       Make.token parser token

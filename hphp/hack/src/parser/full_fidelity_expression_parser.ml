@@ -271,7 +271,7 @@ module WithStatementAndDeclAndTypeParser
     | Print
     | At -> parse_prefix_unary_expression parser
     | LeftParen -> parse_cast_or_parenthesized_or_lambda_expression parser
-    | LessThan -> parse_possible_xhp_expression ~consume_trailing_trivia:true parser
+    | LessThan -> parse_possible_xhp_expression ~consume_trailing_trivia:true token parser1
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
@@ -2466,7 +2466,7 @@ module WithStatementAndDeclAndTypeParser
       (parser, Some token)
     | LessThan ->
       let (parser, expr) =
-        parse_possible_xhp_expression ~consume_trailing_trivia:false parser in
+        parse_possible_xhp_expression ~consume_trailing_trivia:false token parser1 in
       (parser, Some expr)
     | _ -> (parser, None)
 
@@ -2566,9 +2566,9 @@ module WithStatementAndDeclAndTypeParser
       let parser = with_error parser SyntaxError.error1013 in
       Make.xhp_expression parser xhp_open missing1 missing2
 
-  and parse_possible_xhp_expression ~consume_trailing_trivia parser =
+  and parse_possible_xhp_expression ~consume_trailing_trivia less_than parser =
+    let parser, less_than = Make.token parser less_than in
     (* We got a < token where an expression was expected. *)
-    let (parser, less_than) = assert_xhp_body_token parser LessThan in
     let (parser1, name, text) = next_xhp_element_token parser in
     if (Token.kind name) = XHPElementName then
       let (parser, token) = Make.token parser1 name in

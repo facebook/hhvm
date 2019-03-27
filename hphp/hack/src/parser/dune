@@ -190,7 +190,6 @@
     full_fidelity_type_lexer
     full_fidelity_type_parser
     full_fidelity_type_parser_type
-    little_magic_cache
     parserSig)
   (libraries
     parser_env

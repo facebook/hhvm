@@ -1514,7 +1514,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_THREE(a,b,c) 3
 #define NUM_POP_MFINAL immIVA[0]
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
-#define NUM_POP_V_MFINAL NUM_POP_C_MFINAL(1)
 #define NUM_POP_CUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_FPUSH(nin, nobj) (nin + nobj)
@@ -1656,7 +1655,6 @@ OPCODES
 #undef NUM_POP_POS_N
 #undef NUM_POP_MFINAL
 #undef NUM_POP_C_MFINAL
-#undef NUM_POP_V_MFINAL
 #undef NUM_POP_CUMANY
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_FPUSH

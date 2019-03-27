@@ -334,9 +334,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ArraySetRef:
   case AsTypeStruct:
   case BaseG:
-  case BindElem:
-  case BindNewElem:
-  case BindProp:
   case Call:
   case CallBuiltin:
   case CallUnpack:

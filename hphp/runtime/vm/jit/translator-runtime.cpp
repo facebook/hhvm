@@ -1179,31 +1179,6 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
 }
 
 template <ICMode intishCast>
-void bindElemC(tv_lval base, TypedValue key, RefData* val,
-               const MInstrPropState* pState) {
-  TypedValue localTvRef;
-  auto elem = HPHP::ElemD<MOpMode::Define, true, intishCast>(
-    localTvRef, base, key, pState
-  );
-
-  if (UNLIKELY(elem == &localTvRef)) {
-    // Skip binding a TypedValue that's about to be destroyed and just destroy
-    // it now.
-    tvDecRefGen(localTvRef);
-    return;
-  }
-
-  tvBindRef(val, elem);
-}
-
-template void bindElemC<ICMode::Warn>(tv_lval, TypedValue,
-                                      RefData*, const MInstrPropState*);
-template void bindElemC<ICMode::Cast>(tv_lval, TypedValue,
-                                      RefData*, const MInstrPropState*);
-template void bindElemC<ICMode::Ignore>(tv_lval, TypedValue,
-                                        RefData*, const MInstrPropState*);
-
-template <ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key,
                       IncDecOp op, const MInstrPropState* pState) {
   auto const result = HPHP::IncDecElem<intishCast>(op, base, key, pState);
@@ -1220,26 +1195,6 @@ TypedValue incDecElem<ICMode::Cast>(tv_lval, TypedValue, IncDecOp,
 template
 TypedValue incDecElem<ICMode::Ignore>(tv_lval, TypedValue, IncDecOp,
                                       const MInstrPropState*);
-
-void bindNewElem(tv_lval base,
-                 RefData* val,
-                 const MInstrPropState* pState) {
-  if (UNLIKELY(tvIsHackArray(base))) {
-    throwRefInvalidArrayValueException(HPHP::val(base).parr);
-  }
-
-  TypedValue localTvRef;
-  auto elem = HPHP::NewElem<true>(localTvRef, base, pState);
-
-  if (UNLIKELY(elem == &localTvRef)) {
-    // Skip binding a TypedValue that's about to be destroyed and just destroy
-    // it now.
-    tvDecRefGen(localTvRef);
-    return;
-  }
-
-  tvBindRef(val, elem);
-}
 
 tv_lval elemVecID(tv_lval base, int64_t key) {
   auto cbase = tvToCell(base);

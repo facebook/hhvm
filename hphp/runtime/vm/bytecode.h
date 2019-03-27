@@ -540,12 +540,6 @@ public:
   }
 
   ALWAYS_INLINE
-  void unbox() {
-    assertx(m_top != m_base);
-    tvUnbox(*m_top);
-  }
-
-  ALWAYS_INLINE
   void pushUninit() {
     assertx(m_top != m_elms);
     m_top--;

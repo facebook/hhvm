@@ -573,8 +573,6 @@ namespace imm {
 #define POP_C_MFINAL(n) uint32_t numPop() const { return arg1 + n; } \
                      Flavor popFlavor(uint32_t) const { not_reached(); }
 
-#define POP_V_MFINAL POP_C_MFINAL(1)
-
 #define POP_CMANY   uint32_t numPop() const { return arg1; }  \
                     Flavor popFlavor(uint32_t i) const {      \
                       assert(i < numPop());                   \
@@ -744,7 +742,6 @@ OPCODES
 #undef POP_THREE
 #undef POP_MFINAL
 #undef POP_C_MFINAL
-#undef POP_V_MFINAL
 #undef POP_CMANY
 #undef POP_SMANY
 #undef POP_CUMANY

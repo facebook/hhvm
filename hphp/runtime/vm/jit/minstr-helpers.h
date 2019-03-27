@@ -267,39 +267,6 @@ VGET_OBJ_PROP_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<class PropImpl>
-void bindPropImpl(RefData* val, PropImpl prop_impl) {
-  TypedValue localTvRef;
-  auto prop = prop_impl(localTvRef);
-  if (UNLIKELY(prop == &localTvRef)) {
-    // Skip binding a TypedValue that's about to be destroyed and just destroy
-    // it now.
-    tvDecRefGen(localTvRef);
-  } else {
-    tvBindRef(val, prop);
-  }
-}
-
-inline void bindPropC(Class* ctx, tv_lval base, TypedValue key,
-                      RefData* val, MInstrPropState* pState) {
-  bindPropImpl(val, [&](TypedValue& tvref) {
-    return Prop<MOpMode::Define,KeyType::Any,true>(
-      tvref, ctx, base, key, pState
-    );
-  });
-}
-
-inline void bindPropCO(Class* ctx, ObjectData* base, TypedValue key,
-                       RefData* val, MInstrPropState* pState) {
-  bindPropImpl(val, [&](TypedValue& tvref) {
-    return PropObj<MOpMode::Define,KeyType::Any,true>(
-      tvref, ctx, base, key, pState
-    );
-  });
-}
-
-//////////////////////////////////////////////////////////////////////
-
 #define SETPROP_HELPER_TABLE(m)          \
   /* name        keyType      */         \
   m(setPropC,    KeyType::Any)           \

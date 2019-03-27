@@ -1668,8 +1668,6 @@ void dce(Env& env, const bc::AwaitAll& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BaseGL& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BaseH& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BaseL& op) { dce_default(env, op); }
-void dce(Env& env, const bc::BindL& op) { dce_default(env, op); }
-void dce(Env& env, const bc::BindS& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitAnd& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitNot& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitOr& op) { dce_default(env, op); }
@@ -1816,7 +1814,6 @@ void dce(Env& env, const bc::SubO& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Switch& op) { dce_default(env, op); }
 void dce(Env& env, const bc::This& op) { dce_default(env, op); }
 void dce(Env& env, const bc::UGetCUNop& op) { dce_default(env, op); }
-void dce(Env& env, const bc::Unbox& op) { dce_default(env, op); }
 void dce(Env& env, const bc::UnsetG& op) { dce_default(env, op); }
 void dce(Env& env, const bc::Unwind& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { dce_default(env, op); }
@@ -1930,7 +1927,6 @@ void dce(Env& env, const bc::VGetM& op)      { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::SetM& op)       { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::IncDecM& op)    { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::SetOpM& op)     { minstr_final(env, op, op.arg1); }
-void dce(Env& env, const bc::BindM& op)      { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::UnsetM& op)     { minstr_final(env, op, op.arg1); }
 
 void dispatch_dce(Env& env, const Bytecode& op) {
@@ -1983,7 +1979,6 @@ void adjustMinstr(bc::VGetM& op, MaskType m)   { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::SetM& op, MaskType m)    { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::IncDecM& op, MaskType m) { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::SetOpM& op, MaskType m)  { m_adj(op.arg1, op, m); }
-void adjustMinstr(bc::BindM& op, MaskType m)   { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::UnsetM& op, MaskType m)  { m_adj(op.arg1, op, m); }
 
 void adjustMinstr(Bytecode& op, MaskType m) {

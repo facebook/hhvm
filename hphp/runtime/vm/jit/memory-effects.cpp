@@ -569,7 +569,7 @@ MemEffects minstr_final_with_prop_state(const IRInstruction& inst) {
     if (RuntimeOption::EvalCheckPropTypeHints <= 0) return AEmpty;
     if (propPtr->isA(TNullptr)) return AEmpty;
     if (!RuntimeOption::EvalPromoteEmptyObject &&
-        inst.is(BindProp, IncDecProp, SetOpProp, SetProp, VGetProp)) {
+        inst.is(IncDecProp, SetOpProp, SetProp, VGetProp)) {
       return AEmpty;
     }
     return AMIStatePropS;
@@ -1435,9 +1435,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AMIStatePropS
     );
 
-  case BindElem:
-  case BindNewElem:
-  case BindProp:
   case IncDecElem:
   case IncDecProp:
   case SetElem:

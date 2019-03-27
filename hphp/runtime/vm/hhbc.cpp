@@ -409,7 +409,6 @@ int instrNumPops(PC pc) {
 #define FIVE(...) 5
 #define MFINAL -3
 #define C_MFINAL(n) -10 - n
-#define V_MFINAL C_MFINAL(1)
 #define CUMANY -3
 #define CVUMANY -3
 #define FPUSH(nin, nobj) (nin + nobj)
@@ -426,7 +425,6 @@ int instrNumPops(PC pc) {
 #undef FIVE
 #undef MFINAL
 #undef C_MFINAL
-#undef V_MFINAL
 #undef CUMANY
 #undef CVUMANY
 #undef FPUSH
@@ -532,7 +530,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define FIVE(f1, f2, f3, f4, f5) return doFlavor(idx, f1, f2, f3, f4, f5);
 #define MFINAL return manyFlavor(op, idx, CV);
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
-#define V_MFINAL return idx == 0 ? VV : CV;
 #define CUMANY return manyFlavor(op, idx, CUV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define FPUSH(nin, nobj) return CV;
@@ -552,7 +549,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef FIVE
 #undef MFINAL
 #undef C_MFINAL
-#undef V_MFINAL
 #undef CUMANY
 #undef CVUMANY
 #undef FPUSH

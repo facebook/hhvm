@@ -1967,10 +1967,6 @@ OPTBLD_INLINE void iopBox() {
   vmStack().box();
 }
 
-OPTBLD_INLINE void iopUnbox() {
-  vmStack().unbox();
-}
-
 OPTBLD_INLINE void iopCGetCUNop() {
 }
 
@@ -4007,17 +4003,6 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   mFinal(mstate, nDiscard, *result);
 }
 
-OPTBLD_INLINE void iopBindM(uint32_t nDiscard, MemberKey mk) {
-  auto& mstate = vmMInstrState();
-  auto const rhs = *vmStack().topV();
-
-  dimDispatch(MOpMode::Define, mk, true);
-  tvBind(rhs, mstate.base);
-
-  vmStack().discard();
-  mFinal(mstate, nDiscard, rhs);
-}
-
 OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
   auto const key = key_tv(mk);
 
@@ -4761,47 +4746,6 @@ OPTBLD_INLINE void iopIncDecS(IncDecOp op, clsref_slot slot) {
   } else {
     cellCopy(IncDecBody(op, val), *ss.output);
   }
-}
-
-OPTBLD_INLINE void iopBindL(local_var to) {
-  Ref* fr = vmStack().topV();
-  tvBind(*fr, *to.ptr);
-}
-
-OPTBLD_INLINE void iopBindS(clsref_slot cslot) {
-  TypedValue* fr = vmStack().topTV();
-  Class* cls = cslot.take().second;
-  TypedValue* propn = vmStack().indTV(1);
-  TypedValue* output = propn;
-  StringData* name;
-  TypedValue* val;
-  bool visible, accessible;
-  Slot slot;
-  lookup_sprop(vmfp(), cls, name, propn, val, slot, visible, accessible, false);
-  SCOPE_EXIT { decRefStr(name); };
-  if (!(visible && accessible)) {
-    raise_error("Invalid static property access: %s::%s",
-                cls->name()->data(),
-                name->data());
-  }
-
-  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-    auto const& sprop = cls->staticProperties()[slot];
-    auto const& tc = sprop.typeConstraint;
-    if (!tc.isMixedResolved()) {
-      raise_property_typehint_binding_error(
-        sprop.cls,
-        sprop.name,
-        true,
-        tc.isSoft()
-      );
-    }
-  }
-
-  tvBind(*fr, *val);
-  tvDecRefGen(propn);
-  memcpy(output, fr, sizeof(TypedValue));
-  vmStack().ndiscard(1);
 }
 
 OPTBLD_INLINE void iopUnsetL(local_var loc) {

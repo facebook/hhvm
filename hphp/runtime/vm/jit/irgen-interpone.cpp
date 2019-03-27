@@ -246,8 +246,7 @@ interpOutputLocals(IRGS& env,
       setImmLocType(0, handleBoxiness(locType, stackType));
       break;
     }
-    case OpVGetL:
-    case OpBindL: {
+    case OpVGetL: {
       assertx(pushedType.hasValue());
       assertx(*pushedType <= TBoxedCell);
       setImmLocType(0, pushedType.value());
@@ -273,7 +272,6 @@ interpOutputLocals(IRGS& env,
     case OpSetM:
     case OpIncDecM:
     case OpSetOpM:
-    case OpBindM:
     case OpUnsetM:
       smashesAllLocals = true;
       break;
@@ -426,7 +424,6 @@ void emitUnwind(IRGS& env)                    { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }
-void emitBindS(IRGS& env, uint32_t)           { INTERP }
 void emitUnsetG(IRGS& env)                    { INTERP }
 void emitVGetS(IRGS& env, uint32_t)           { INTERP }
 void emitIncl(IRGS& env)                      { INTERP }

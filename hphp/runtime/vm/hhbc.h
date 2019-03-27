@@ -478,7 +478,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(PopL,            ONE(LA),          ONE(CV),         NOV,        NF) \
   O(Dup,             NA,               ONE(CV),         TWO(CV,CV), NF) \
   O(Box,             NA,               ONE(CV),         ONE(VV),    NF) \
-  O(Unbox,           NA,               ONE(VV),         ONE(CV),    NF) \
   O(CGetCUNop,       NA,               ONE(CUV),        ONE(CV),    NF) \
   O(UGetCUNop,       NA,               ONE(CUV),        ONE(UV),    NF) \
   O(Null,            NA,               NOV,             ONE(CV),    NF) \
@@ -624,8 +623,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(IncDecG,         ONE(OA(IncDecOp)),ONE(CV),         ONE(CV),    NF) \
   O(IncDecS,         TWO(OA(IncDecOp),CAR),                             \
                                        ONE(CV),         ONE(CV),    NF) \
-  O(BindL,           ONE(LA),          ONE(VV),         ONE(VV),    NF) \
-  O(BindS,           ONE(CAR),         TWO(VV,CV),      ONE(VV),    NF) \
   O(UnsetL,          ONE(LA),          NOV,             NOV,        NF) \
   O(UnsetG,          NA,               ONE(CV),         NOV,        NF) \
                                                                         \
@@ -751,7 +748,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        MFINAL,          ONE(CV),    NF) \
   O(SetOpM,          THREE(IVA, OA(SetOpOp), KA),                       \
                                        C_MFINAL(1),     ONE(CV),    NF) \
-  O(BindM,           TWO(IVA, KA),     V_MFINAL,        ONE(VV),    NF) \
   O(UnsetM,          TWO(IVA, KA),     MFINAL,          NOV,        NF) \
   O(MemoGet,         TWO(BA, LAR),     NOV,             ONE(CV),    CF) \
   O(MemoGetEager,    THREE(BA, BA, LAR),                                \
@@ -1095,7 +1091,6 @@ inline bool isMemberFinalOp(Op op) {
     case Op::SetRangeM:
     case Op::IncDecM:
     case Op::SetOpM:
-    case Op::BindM:
     case Op::UnsetM:
       return true;
 
@@ -1115,7 +1110,6 @@ inline MOpMode finalMemberOpMode(Op op) {
     case Op::VGetM:
     case Op::IncDecM:
     case Op::SetOpM:
-    case Op::BindM:
       return MOpMode::Define;
     case Op::UnsetM:
       return MOpMode::Unset;

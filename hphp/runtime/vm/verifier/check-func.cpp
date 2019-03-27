@@ -800,16 +800,12 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define FOUR(a,b,c,d) { d, c, b, a },
   #define FIVE(a,b,c,d,e) { e, d, c, b, a },
   #define MFINAL { },
-  #define F_MFINAL { },
   #define C_MFINAL(n) { },
-  #define V_MFINAL { },
   #define O(name, imm, pop, push, flags) pop
     OPCODES
   #undef O
   #undef MFINAL
-  #undef F_MFINAL
   #undef C_MFINAL
-  #undef V_MFINAL
   #undef CUMANY
   #undef CVUMANY
   #undef FPUSH
@@ -833,11 +829,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::SetRangeM:
     for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
       m_tmp_sig[i] = CV;
-    }
-    return m_tmp_sig;
-  case Op::BindM:
-    for (int i = 0, n = instrNumPops(pc); i < n; ++i) {
-      m_tmp_sig[i] = i == n - 1 ? VV : CV;
     }
     return m_tmp_sig;
   case Op::FPushFunc:
@@ -909,7 +900,6 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       decode_byte(pc);
       mcode = static_cast<MemberCode>(decode_byte(pc));
       break;
-    case Op::BindM:
     case Op::UnsetM:
     case Op::SetM:
     case Op::VGetM:   //TWO(IVA, KA)
@@ -1993,15 +1983,11 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // unsafe: operations definitely involving boxes
     case Op::PopV:
     case Op::Box:
-    case Op::Unbox:
     case Op::AddElemV:
     case Op::AddNewElemV:
     case Op::VGetL:
     case Op::VGetS:
-    case Op::BindL:
-    case Op::BindS:
     case Op::VGetM:
-    case Op::BindM:
       ferror("references are forbidden in Rx functions: {}\n",
              opcodeToName(op));
       return RuntimeOption::EvalRxVerifyBody < 2;

@@ -2445,25 +2445,6 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
   finish(result);
 }
 
-void emitBindM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
-  auto key = memberKey(env, mk);
-  auto rhs = topV(env);
-
-  if (mcodeIsProp(mk.mcode)) {
-    auto const base = extractBaseIfObj(env);
-    gen(env, BindProp, base, key, rhs, propStatePtrFinalProp(env, base));
-  } else if (mcodeIsElem(mk.mcode)) {
-    auto const base = ldMBase(env);
-    gen(env, BindElem, base, key, rhs, propStatePtrElem(env, base));
-  } else {
-    auto const base = ldMBase(env);
-    gen(env, BindNewElem, base, rhs, propStatePtrElem(env, base));
-  }
-
-  popV(env);
-  mFinalImpl(env, nDiscard, rhs);
-}
-
 void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto key = memberKey(env, mk);
 

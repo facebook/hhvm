@@ -194,19 +194,6 @@ void cgVGetProp(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
-void cgBindProp(IRLS& env, const IRInstruction* inst) {
-  auto const base = inst->src(0);
-
-  auto helper = base->isA(TObj)
-    ? CallSpec::direct(MInstrHelpers::bindPropCO)
-    : CallSpec::direct(MInstrHelpers::bindPropC);
-
-  auto const args = propArgs(env, inst).typedValue(1).ssa(2).ssa(3);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, helper, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 void cgSetProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const key = inst->src(1);
@@ -393,7 +380,6 @@ void cgSetRangeRev(IRLS& env, const IRInstruction* inst) {
 }
 
 IMPL_OPCODE_CALL(SetNewElem);
-IMPL_OPCODE_CALL(BindNewElem);
 
 #define ICMODE_DISPATCH(fn) \
   ([] {                                                                \
@@ -407,20 +393,6 @@ IMPL_OPCODE_CALL(BindNewElem);
     }                                                                  \
     not_reached();                                                     \
   }())
-
-void cgBindElem(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-
-  auto const target = ICMODE_DISPATCH(MInstrHelpers::bindElemC);
-
-  auto const args = argGroup(env, inst)
-    .ssa(0)
-    .typedValue(1)
-    .ssa(2)
-    .ssa(3);
-
-  cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
-}
 
 void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);

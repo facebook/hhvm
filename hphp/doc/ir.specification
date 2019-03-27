@@ -2888,12 +2888,6 @@ fields of that struct for holding intermediate values.
 
   Get property with key S1 from base S0 as a reference.
 
-| BindProp, ND,
-|           S(Obj,LvalToGen) S(Cell) S(BoxedCell) S(MIPropSPtr,Nullptr),
-|           MProp
-
-  Bind property with key S1 in base S0 to the reference in S2.
-
 | SetProp, ND, S(Obj,LvalToGen) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MProp
 
   Set property with key S1 in S0 to S2.
@@ -3169,10 +3163,6 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| BindElem, ND, S(LvalToGen) S(Cell) S(BoxedCell) S(MIPropSPtr,Nullptr), MElem
-
-  Bind element with key S1 in base S0 to the reference S2.
-
 | ArraySet, D(Arr), S(Arr) S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Array that should
@@ -3261,10 +3251,6 @@ fields of that struct for holding intermediate values.
 | SetNewElemKeyset, ND, S(LvalToGen) S(Int,Str), MElem
 
   Append the value in S1 to S0, where S0 must be a pointer to a keyset.
-
-| BindNewElem, ND, S(LvalToGen) S(BoxedCell) S(MIPropSPtr,Nullptr), MElem
-
-  Append the reference in S1 to S0.
 
 | ArrayIsset, D(Bool), S(Arr) S(Int,Str), NF
 

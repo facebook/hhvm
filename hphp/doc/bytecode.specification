@@ -984,11 +984,6 @@ Box    [C:<T>]  ->  [V:<T>]
   Box. Creates a new ref, sets the new ref to point at a copy of cell $1, and
   pushes the ref onto the stack.
 
-Unbox    [V:<T>]  ->  [C:<T>]
-
-  Unbox. Creates a copy of the cell that ref $1 points to, and pushes the cell
-  onto the stack.
-
 CGetCUNop   [C|U:<T>]  ->  [C:<T>]
 
   Convert a cell or uninit value to a cell, no op. This is a flavor-safety only
@@ -1940,18 +1935,6 @@ IncDecS <op> <class-ref slot>    [C]  ->  [C]
   If op is PostDec, this instruction pushes s onto the stack and then it
   executes --s.
 
-BindL <local variable id>    [V]  ->  [V]
-
-  Bind local. This instruction marks the local variable given by %1 as defined,
-  binds the local variable to $1, and pushes $1 onto the stack.
-
-BindS <class-ref slot>    [C V]  ->  [V]
-
-  Bind static property. This instruction first checks if class %1 has an
-  accessible static property named (string)$2. If it doesn't, this instruction
-  throws a fatal error. Otherwise, this instruction binds the static property
-  to $1, and pushes $1 onto the stack.
-
 UnsetL <local variable id>    []  ->  []
 
   Unset local. Breaks any bindings the local variable given by %1 may have and
@@ -2814,26 +2797,6 @@ IncDecElemL <op> <local variable id>    [B]  ->  [C]
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
 
-BindElemC                        [C V B]  ->  [V]
-BindElemL <local variable id>    [V B]  ->  [V]
-
-  Bind element.
-
-  This instruction first loads a value into x, from $3 or the local referred to
-  by %1.
-
-  If $1 is an array, this operation executes $1[x] =& $2 and pushes $2 onto the
-  stack as a ref.
-
-  If $1 is an object, this operation throws a fatal error.
-
-  If $1 is null, false, or the empty string, this operation sets $1 to a new
-  empty array, executes $1[x] =& $2, and pushes $2 onto the stack as a ref.
-
-  If $1 is a non-empty string, this operation throws a fatal error.
-
-  If $1 is true, integer, or double, this operation raises a warning.
-
 UnsetElemC                        [C B]  ->  []
 UnsetElemL <local variable id>    [B]  ->  []
 
@@ -2935,20 +2898,6 @@ IncDecNewElem <op>    [B]  ->  [C]
   $1->offsetGet(null), y = x, and either ++y (if op is PreInc or PostInc) or
   --y (if op is PreDec or PostDec). Then it pushes either y (if op is PreInc or
   PreDec) or x (if op is PostInc or PostDec) onto the stack.
-
-  If $1 is true, integer, or double, this operation raises a warning and pushes
-  null onto the stack.
-
-BindNewElem    [V B]  ->  [V]
-
-  Bind new element. If $1 is an array, this operation executes $1[] =& $2 and
-  then it pushes $2 onto the stack.
-
-  If $1 is null, false, or empty string, this operation sets $1 to a new empty
-  array, executes $1[] =& $2, and pushes $2 onto the stack.
-
-  If $1 is a non-empty string or an object, this operation throws a fatal
-  error.
 
   If $1 is true, integer, or double, this operation raises a warning and pushes
   null onto the stack.
@@ -3185,36 +3134,6 @@ IncDecPropL <op> <local variable id>    [B]  ->  [C]
     1011111 | b = y->__get(x); a = b; <op>a; y->__set(x, a);
             |   push a (Pre*) or b (Post*)
 
-BindPropC                        [C V B]  ->  [V]
-BindPropL <local variable id>    [V B]  ->  [V]
-
-  Bind property.
-
-  First, these operations load values into k and x, and a base into y, as given
-  by the following table:
-
-        operation |  k    x    y
-       -----------+----+----+----
-        BindPropC | $3 | $2 | $1
-        BindPropL | %1 | $2 | $1
-
-  Next, perform one of the following actions:
-
-    y is an object
-     y is null/false/""
-      y->k is visible
-       y->k is accessible
-        y has eligible __set method
-         y->k has been unset previously
-    -------+--------------------------------------------------------------------
-    00XXXX | raise warning; push null
-    01XXXX | y = new stdclass; y->k =& x; push x
-    1X0X0X | create property y->k; y->k =& x; push x
-    1X0X1X | throw fatal error
-    1X10XX | throw fatal error
-    1X11X0 | y->k =& x; push x
-    1X11X1 | re-create property y->k; y->k =& x; push x
-
 UnsetPropC                        [C B]  ->  []
 UnsetPropL <local variable id>    [B]  ->  []
 
@@ -3365,10 +3284,6 @@ IncDecM <stack count> <op> <member key>    [...]  ->  [C]
 SetOpM <stack count> <op> <member key>    [... C]  ->  [C]
 
   SetOp{Prop,Elem} or SetOpNewElem member operation.
-
-BindM <stack count> <member key>    [... V]  ->  [V]
-
-  Bind{Prop,Elem} or BindNewElem member operation.
 
 UnsetM <stack count> <member key>    [...]  ->  []
 

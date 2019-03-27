@@ -249,12 +249,9 @@ TypedValue setOpElem(tv_lval base, TypedValue key, Cell val, SetOpOp op,
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-template <ICMode intishCast>
-void bindElemC(tv_lval, TypedValue, RefData*, const MInstrPropState*);
 template<ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
                       const MInstrPropState*);
-void bindNewElem(tv_lval base, RefData* val, const MInstrPropState*);
 tv_lval elemVecID(tv_lval base, int64_t key);
 tv_lval elemVecIU(tv_lval base, int64_t key);
 }

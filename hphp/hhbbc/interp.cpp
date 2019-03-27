@@ -247,12 +247,6 @@ void in(ISS& env, const bc::Box&) {
   push(env, TRef);
 }
 
-void in(ISS& env, const bc::Unbox&) {
-  effect_free(env);
-  popV(env);
-  push(env, TInitCell);
-}
-
 void in(ISS& env, const bc::CGetCUNop&) {
   effect_free(env);
   auto const t = popCU(env);
@@ -2857,35 +2851,6 @@ void in(ISS& env, const bc::IncDecS& op) {
   );
 
   push(env, TInitCell);
-}
-
-void in(ISS& env, const bc::BindL& op) {
-  nothrow(env);
-  auto t1 = popV(env);
-  setLocRaw(env, op.loc1, t1);
-  push(env, std::move(t1));
-}
-
-void in(ISS& env, const bc::BindS& op) {
-  popV(env);
-  auto const tcls  = takeClsRefSlot(env, op.slot);
-  auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
-
-  if (!self || tcls.couldBe(*self)) {
-    if (vname && vname->m_type == KindOfPersistentString) {
-      boxSelfProp(env, vname->m_data.pstr);
-    } else {
-      killSelfProps(env);
-    }
-  }
-
-  env.collect.publicSPropMutations.merge(
-    env.index, env.ctx, tcls, tname, TRef
-  );
-
-  push(env, TRef);
 }
 
 void in(ISS& env, const bc::UnsetL& op) {

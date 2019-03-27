@@ -618,7 +618,6 @@ bool canDCE(IRInstruction* inst) {
   case CGetProp:
   case CGetPropQ:
   case VGetProp:
-  case BindProp:
   case SetProp:
   case UnsetProp:
   case SetOpProp:
@@ -657,7 +656,6 @@ bool canDCE(IRInstruction* inst) {
   case MapGet:
   case CGetElem:
   case VGetElem:
-  case BindElem:
   case ArraySet:
   case ArraySetRef:
   case VecSet:
@@ -677,7 +675,6 @@ bool canDCE(IRInstruction* inst) {
   case SetNewElemVec:
   case SetNewElemKeyset:
   case ReservePackedArrayDataNewElem:
-  case BindNewElem:
   case VectorIsset:
   case PairIsset:
   case MapIsset:

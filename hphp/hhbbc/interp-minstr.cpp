@@ -1122,24 +1122,6 @@ void miFinalIncDecProp(ISS& env, int32_t nDiscard,
   push(env, isPre(subop) ? prePropTy : postPropTy);
 }
 
-void miFinalBindProp(ISS& env, int32_t nDiscard, const Type& key) {
-  auto const name = mStringKey(key);
-  popV(env);
-  handleInThisPropD(env, false);
-  handleInPublicStaticPropD(env, false);
-  promoteBasePropD(env, false);
-  if (couldBeThisObj(env, env.state.mInstrState.base)) {
-    if (name) {
-      boxThisProp(env, name);
-    } else {
-      killThisProps(env);
-    }
-  }
-  endBase(env);
-  discard(env, nDiscard);
-  push(env, TRef);
-}
-
 void miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
 
@@ -1322,29 +1304,6 @@ void miFinalIncDecElem(ISS& env, int32_t nDiscard,
   push(env, isPre(subop) ? preTy : postTy);
 }
 
-void miFinalBindElem(ISS& env, int32_t nDiscard, const Type& key) {
-  popV(env);
-  handleInThisElemD(env);
-  handleInPublicStaticElemD(env);
-  promoteBaseElemD(env);
-  pessimisticFinalElemD(env, key, TInitGen);
-
-  auto const finish = [&](Type ty) {
-    endBase(env);
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-  };
-
-  auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(BVec) ||
-      baseTy.subtypeOf(BDict) ||
-      baseTy.subtypeOf(BKeyset)) {
-    unreachable(env);
-    return finish(TBottom);
-  }
-  finish(TRef);
-}
-
 void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type&) {
   handleInPublicStaticElemU(env);
   promoteBaseElemU(env);
@@ -1434,29 +1393,6 @@ void miFinalIncDecNewElem(ISS& env, int32_t nDiscard) {
   endBase(env);
   discard(env, nDiscard);
   push(env, TInitCell);
-}
-
-void miFinalBindNewElem(ISS& env, int32_t nDiscard) {
-  popV(env);
-  handleInThisNewElem(env);
-  handleInPublicStaticNewElem(env);
-  promoteBaseNewElem(env);
-  pessimisticFinalNewElem(env, TInitGen);
-
-  auto const finish = [&](Type ty) {
-    endBase(env);
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-  };
-
-  auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(BVec)||
-      baseTy.subtypeOf(BDict) ||
-      baseTy.subtypeOf(BKeyset)) {
-    unreachable(env);
-    return finish(TBottom);
-  }
-  finish(TRef);
 }
 
 }
@@ -1648,18 +1584,6 @@ void in(ISS& env, const bc::SetOpM& op) {
     miFinalSetOpElem(env, op.arg1, op.subop2, *key, keyLoc);
   } else {
     miFinalSetOpNewElem(env, op.arg1);
-  }
-}
-
-void in(ISS& env, const bc::BindM& op) {
-  auto const key = key_type_or_fixup(env, op);
-  if (!key) return;
-  if (mcodeIsProp(op.mkey.mcode)) {
-    miFinalBindProp(env, op.arg1, *key);
-  } else if (mcodeIsElem(op.mkey.mcode)) {
-    miFinalBindElem(env, op.arg1, *key);
-  } else {
-    miFinalBindNewElem(env, op.arg1);
   }
 }
 

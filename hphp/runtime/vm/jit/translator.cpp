@@ -100,7 +100,6 @@ static const struct {
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
   { OpBox,         {Stack1,           Stack1,       OutVInput       }},
-  { OpUnbox,       {Stack1,           Stack1,       OutCInput       }},
 
   /*** 2. Literal and constant instructions ***/
 
@@ -270,8 +269,6 @@ static const struct {
   { OpIncDecL,     {Local,            Stack1|Local, OutIncDec       }},
   { OpIncDecG,     {Stack1,           Stack1,       OutUnknown      }},
   { OpIncDecS,     {Stack1,           Stack1,       OutUnknown      }},
-  { OpBindL,       {Stack1|Local,     Stack1|Local, OutSameAsInput1  }},
-  { OpBindS,       {StackTop2,        Stack1,       OutSameAsInput1  }},
   { OpUnsetL,      {Local,            Local,        OutNone         }},
   { OpUnsetG,      {Stack1,           None,         OutNone         }},
 
@@ -429,8 +426,6 @@ static const struct {
                                       Stack1,       OutUnknown      }},
   { OpSetOpM,      {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpBindM,       {Stack1|BStackN|MBase|MKey,
-                                      Stack1,       OutSameAsInput1  }},
   { OpUnsetM,      {BStackN|MBase|MKey,
                                       None,         OutNone         }},
   { OpMemoGet,     {LocalRange,       None,         OutUnknown      }},
@@ -524,7 +519,6 @@ int64_t getStackPopped(PC pc) {
 
     case Op::SetM:
     case Op::SetOpM:
-    case Op::BindM:
       return getImm(pc, 0).u_IVA + 1;
 
     case Op::NewStructArray:
@@ -846,7 +840,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::AssertRATL:
   case Op::AssertRATStk:
   case Op::SetL:
-  case Op::BindL:
   case Op::EmptyL:
   case Op::CastBool:
   case Op::Same:
@@ -878,7 +871,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Vec:
   case Op::ArrayIdx:
   case Op::BareThis:
-  case Op::BindS:
   case Op::BitNot:
   case Op::CGetG:
   case Op::CGetQuietG:
@@ -996,7 +988,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::This:
   case Op::Throw:
   case Op::True:
-  case Op::Unbox:
   case Op::UnsetL:
   case Op::VGetL:
   case Op::VGetS:
@@ -1020,7 +1011,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::SetM:
   case Op::IncDecM:
   case Op::SetOpM:
-  case Op::BindM:
   case Op::UnsetM:
   case Op::SetRangeM:
   case Op::MemoGet:

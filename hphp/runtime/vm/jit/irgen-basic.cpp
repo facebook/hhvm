@@ -223,23 +223,6 @@ void emitUnsetL(IRGS& env, int32_t id) {
   decRef(env, prev);
 }
 
-void emitBindL(IRGS& env, int32_t id) {
-  if (curFunc(env)->isPseudoMain()) {
-    interpOne(env, TBoxedInitCell, 1);
-    return;
-  }
-
-  auto const ldPMExit = makePseudoMainExit(env);
-  auto const newValue = popV(env);
-  // Note that the IncRef must happen first, for correctness in a
-  // pseudo-main: the destructor could decref the value again after
-  // we've stored it into the local.
-  pushIncRef(env, newValue);
-  auto const oldValue = ldLoc(env, id, ldPMExit, DataTypeSpecific);
-  stLocRaw(env, id, fp(env), newValue);
-  decRef(env, oldValue);
-}
-
 void emitSetL(IRGS& env, int32_t id) {
   auto const ldrefExit = makeExit(env);
   auto const ldPMExit = makePseudoMainExit(env);

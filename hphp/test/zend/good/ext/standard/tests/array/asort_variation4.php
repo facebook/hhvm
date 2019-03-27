@@ -27,12 +27,11 @@ var_dump( asort(&$temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing asort() by supplying reference variable array, 'flag' = SORT_REGULAR --\n";
-$temp_array = &$unsorted_numerics;
+$temp_array = $unsorted_numerics;
 var_dump( asort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing asort() by supplying reference variable array, 'flag' = SORT_NUMERIC --\n";
-$temp_array = &$unsorted_numerics;
 var_dump( asort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 

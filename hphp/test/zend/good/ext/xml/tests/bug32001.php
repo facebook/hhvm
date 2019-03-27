@@ -90,7 +90,7 @@ HERE;
 		$parser = xml_parser_create(NULL);
 		xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
     xml_set_element_handler($parser, "start_element", "end_element");
-    $thiz = &$this;
+    $thiz = $this;
 		xml_set_object($parser, &$thiz);
 
 		if ($this->chunk_size == 0) {

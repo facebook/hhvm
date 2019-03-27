@@ -6,14 +6,14 @@
           $values[0][0] = 'changed';
       }
   }
-  
+
   $a = array('original');
-  
-  $b = array('original');
-  $hack =& $b[0];
-  
+
+  $hack = 'original';
+  $b = array(&$hack);
+
   $c = new C;
   $c->f($a);
   $c->f($b);
-  
+
   var_dump($a, $b);

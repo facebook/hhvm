@@ -10,8 +10,7 @@
 
 echo "*** Testing natcasesort() : usage variations ***\n";
 
-$array = array (1, 3.00, 'zero', '2');
-$array[] = &$array;
+$array = array (1, 3.00, 'zero', '2', &$array);
 var_dump($array);
 
 var_dump(@natcasesort(&$array));

@@ -12,9 +12,8 @@ class  foo {
 	public function b() {
 		return array(1.2, array(new self));
 	}
-	public function c() {
+	public function c(&$a, &$b) {
 		$a = array();
-		$b = &$a;
 		$b[] = true;
 		return $a;
 	}
@@ -28,6 +27,6 @@ $foo = new foo;
 var_dump($foo->a()[0]->x);
 var_dump($foo->a()[0]);
 var_dump($foo->b()[1][0]->a()[0]->x);
-var_dump($foo->c()[0]);
+var_dump($foo->c(&$a, &$a)[0]);
 var_dump($foo->d()[0]);
 

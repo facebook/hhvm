@@ -26,14 +26,4 @@ array(4) {
   ["key"]=>
   string(1) "a"
 }
-array(4) {
-  [1]=>
-  int(1)
-  ["value"]=>
-  int(1)
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
 Done

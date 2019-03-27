@@ -23,10 +23,7 @@ $a[0] = "value0";
 $a[1] = "value1";
 $a[2] = "value2";
 $a[3] = "value3";
-$ref = "value4";
-$ref2 =&$ref;
-$a[4] = $ref;
-$ref = "value5";
+$a[4] = "value4";
 
 unset($a[1]);
 

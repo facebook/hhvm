@@ -7,8 +7,8 @@
 
 echo "test behaviour when input array is in a reference set\n";
 
-$input_array=array (array(1,2));
-$input_array[]=&$input_array[0];
+$inner_array = array(1, 2);
+$input_array= array(&$inner_array, &$inner_array);
 var_dump (array_splice (&$input_array[0],1,1));
 var_dump ($input_array);
 
@@ -36,8 +36,7 @@ echo "Test behaviour of replacement which is part of reference set \n";
 
 $int=3;
 $input_array=array (1,2);
-$b=&$int;
 
-array_splice (&$input_array,-1,1,$b);
+array_splice (&$input_array,-1,1,$int);
 var_dump ($input_array);
 echo "Done\n";

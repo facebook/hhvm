@@ -33,14 +33,4 @@ array(3) {
   [2]=>
   int(3)
 }
--- Arrays referenced to each other --
-array(0) {
-}
-array(0) {
-}
--- $arr1 changed --
-array(0) {
-}
-array(0) {
-}
 Done

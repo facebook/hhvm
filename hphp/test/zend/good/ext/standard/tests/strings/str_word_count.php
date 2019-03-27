@@ -2,7 +2,7 @@
 error_reporting(E_ALL);
 $str = "Hello friend, you're  
     looking          good today!";
-$b =& $str;       
+$b = $str;       
 var_dump(str_word_count($str, 1));
 var_dump(str_word_count($str, 2));
 var_dump(str_word_count($str));

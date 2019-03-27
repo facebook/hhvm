@@ -98,8 +98,8 @@ $arr_resource = array("a" => $resource1, "b" => $resource2);
 var_dump(count($arr_resource));
 
 echo "\n-- Testing count() on arrays containing references --\n";
-$arr = array(1, array("a", "b", "c"));
-$arr[2] = &$arr[1];
+$inner = array("a", "b", "c");
+$arr = array(1, &$inner, &$inner);
 
 $mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE,
                    FALSE, NULL);

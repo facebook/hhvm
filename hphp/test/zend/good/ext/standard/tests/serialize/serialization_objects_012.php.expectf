@@ -115,42 +115,4 @@ object(stdClass) (2) {
     string(7) "newProp"
   }
 }
-
-
-Object containing object and reference to that object:
-object(stdClass) (2) {
-  ["a"]=>
-  &object(stdClass) (0) {
-  }
-  ["b"]=>
-  &object(stdClass) (0) {
-  }
-}
-string(58) "O:8:"stdClass":2:{s:1:"a";O:8:"stdClass":0:{}s:1:"b";R:2;}"
-object(stdClass) (2) {
-  ["a"]=>
-  &object(stdClass) (0) {
-  }
-  ["b"]=>
-  &object(stdClass) (0) {
-  }
-}
-object(stdClass) (2) {
-  ["a"]=>
-  &object(stdClass) (1) {
-    ["a"]=>
-    string(7) "newProp"
-  }
-  ["b"]=>
-  &object(stdClass) (1) {
-    ["a"]=>
-    string(7) "newProp"
-  }
-}
-object(stdClass) (2) {
-  ["a"]=>
-  &string(20) "container->a.changed"
-  ["b"]=>
-  &string(20) "container->a.changed"
-}
 Done

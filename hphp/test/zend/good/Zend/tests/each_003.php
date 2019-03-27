@@ -1,7 +1,6 @@
 <?php
 
-$a = array(array());
-$a[] =& $a;
+$a = array(array(), &$a);
 
 var_dump(each(&$a[1]));
 

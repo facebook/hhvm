@@ -10,13 +10,13 @@ class a {
 
 class b {
     public $a;
-    function b(&$a) {
-        $this->a = &$a;
+    function b($a) {
+        $this->a = $a;
     }
 }
 
 $a = new a();
-$b = new b(&$a);
+$b = new b($a);
 
 echo "original values:\n";
 var_dump($a,$b);

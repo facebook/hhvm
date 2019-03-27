@@ -1,7 +1,7 @@
 <?php
 class foo {
 	function foo($name) {
-     	$GLOBALS['List']= &$this;
+     	$GLOBALS['List']= $this;
      	$this->Name = $name;
 		$GLOBALS['List']->echoName();
 	}

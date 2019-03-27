@@ -730,25 +730,4 @@ array(4) {
   [3]=>
   int(2)
 }
--- Iteration 32 --
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  string(5) "hello"
-  [3]=>
-  string(5) "hello"
-}
-array(4) {
-  [0]=>
-  string(5) "hello"
-  [1]=>
-  string(5) "hello"
-  [2]=>
-  int(1)
-  [3]=>
-  int(2)
-}
 Done

@@ -14,9 +14,4 @@ End Position:     string(3) "two"
 
 -- Access an Array Within an Array --
 Initial Position: int(1)
-
--- Recursive, Multidimensional Array --
-Current Position: string(3) "two"
-string(3) "two"
-int(1)
 ===DONE===

@@ -28,16 +28,4 @@ echo "\n-- Access an Array Within an Array --\n";
 echo "Initial Position: ";
 var_dump(key(&$multi_array[1]));
 
-echo "\n-- Recursive, Multidimensional Array --\n";
-//create a recursive array
-$multi_array[] = &$multi_array;
-
-//See where internal pointer is after adding more elements
-echo "Current Position: ";
-var_dump(key(&$multi_array));
-
-//see if internal pointer is in same position as referenced array
-var_dump(key(&$multi_array[3][3][3]));
-// see if internal pointer is in the same position from when accessing this inner array
-var_dump(key(&$multi_array[3][3][3][1]));
 echo "===DONE===\n";

@@ -2,8 +2,10 @@
 
 $a = new SplFixedArray(100);
 
+function by_ref(&$ref) {}
+
 try {
-	$b = &$a[];
+	by_ref(&$a[]);
 } catch (Exception $e) {
 	echo $e->getMessage(), "\n";
 }

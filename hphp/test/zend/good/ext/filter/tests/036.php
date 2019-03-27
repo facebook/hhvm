@@ -2,9 +2,7 @@
 
 $var = "1";
 
-$data = array();
-$data["test1"] = 1;
-$data["test2"] = &$var;
+$data = array('test1' => 1, 'test2' => &$var);
 
 $args = array();
 $args["test1"] = FILTER_VALIDATE_INT;

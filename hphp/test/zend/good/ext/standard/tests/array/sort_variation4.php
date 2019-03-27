@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -18,7 +18,7 @@ $value1 = 100;
 $value2 = 33;
 $value3 = 555;
 
-// an array containing integer references 
+// an array containing integer references
 $unsorted_numerics =  array( &$value1 , &$value2, &$value3);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' value is defualt --\n";
@@ -27,12 +27,11 @@ var_dump( sort(&$temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' = SORT_REGULAR --\n";
-$temp_array = &$unsorted_numerics;
+$temp_array = $unsorted_numerics;
 var_dump( sort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' = SORT_NUMERIC --\n";
-$temp_array = &$unsorted_numerics;
 var_dump( sort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 

@@ -35,12 +35,11 @@ echo "*** Testing uasort() : 'array_arg' with elements as reference ***\n";
 $value1 = -5;
 $value2 = 100;
 $value3 = 0;
-$value4 = &$value1;
 
 // array_args an array containing elements with reference variables
 $array_arg = array(
   0 => 10,
-  1 => &$value4,
+  1 => &$value1,
   2 => &$value2,
   3 => 200,
   4 => &$value3,

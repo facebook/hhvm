@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : proto string serialize(mixed variable)
- * Description: Returns a string representation of variable (which can later be unserialized) 
+ * Description: Returns a string representation of variable (which can later be unserialized)
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 /* Prototype  : proto mixed unserialize(string variable_representation)
- * Description: Takes a string representation of variable and recreates it 
+ * Description: Takes a string representation of variable and recreates it
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "\n\nArray containing same object twice:\n";
@@ -17,7 +17,7 @@ $a[1] = $a[0];
 var_dump($a);
 
 $ser = serialize($a);
-var_dump($ser); 
+var_dump($ser);
 
 $ua = unserialize($ser);
 var_dump($ua);
@@ -29,12 +29,11 @@ var_dump($ua);
 
 echo "\n\nArray containing object and reference to that object:\n";
 $obj = new stdclass;
-$a[0] = $obj;
-$a[1] = &$a[0];
+$a = array(&$obj, &$obj);
 var_dump($a);
 
 $ser = serialize($a);
-var_dump($ser); 
+var_dump($ser);
 
 $ua = unserialize($ser);
 var_dump($ua);
@@ -47,35 +46,17 @@ echo "\n\nObject containing same object twice:";
 $obj = new stdclass;
 $contaner = new stdclass;
 $contaner->a = $obj;
-$contaner->b = $contaner->a; 
+$contaner->b = $contaner->a;
 var_dump($contaner);
 
 $ser = serialize($contaner);
-var_dump($ser); 
+var_dump($ser);
 
 $ucontainer = unserialize($ser);
 var_dump($ucontainer);
 $ucontainer->a->a = "newProp";
 var_dump($ucontainer);
 $ucontainer->a = "container->a.changed";
-var_dump($ucontainer);
-
-
-echo "\n\nObject containing object and reference to that object:\n";
-$obj = new stdclass;
-$contaner = new stdclass;
-$contaner->a = $obj;
-$contaner->b = &$contaner->a; 
-var_dump($contaner);
-
-$ser = serialize($contaner);
-var_dump($ser); 
-
-$ucontainer = unserialize($ser);
-var_dump($ucontainer);
-$ucontainer->a->a = "newProp";
-var_dump($ucontainer);
-$ucontainer->b = "container->a.changed";
 var_dump($ucontainer);
 
 echo "Done";

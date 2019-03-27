@@ -5,7 +5,7 @@ object(a) (1) {
 }
 object(b) (1) {
   ["a"]=>
-  &object(a) (1) {
+  object(a) (1) {
     ["test"]=>
     string(5) "hallo"
   }
@@ -17,7 +17,7 @@ object(a) (1) {
 }
 object(b) (1) {
   ["a"]=>
-  &object(a) (1) {
+  object(a) (1) {
     ["test"]=>
     string(5) "hallo"
   }

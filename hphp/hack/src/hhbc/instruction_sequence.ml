@@ -134,7 +134,6 @@ let instr_cgets =
   instr (IGet (CGetS class_ref_rewrite_sentinel))
 let instr_vgets =
   instr (IGet (VGetS class_ref_rewrite_sentinel))
-let instr_vgetg = instr (IGet VGetG)
 let instr_cgetg = instr (IGet CGetG)
 let instr_cgetl local = instr (IGet (CGetL local))
 let instr_cugetl local = instr (IGet (CUGetL local))

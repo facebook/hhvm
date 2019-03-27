@@ -211,7 +211,6 @@ let string_of_get x =
   | CGetG -> "CGetG"
   | CGetQuietG -> "CGetQuietG"
   | CGetS id -> sep ["CGetS"; string_of_classref id]
-  | VGetG -> "VGetG"
   | VGetS id -> sep ["VGetS"; string_of_classref id]
   | VGetL id -> sep ["VGetL"; string_of_local_id id]
   | ClsRefGetC cr -> sep ["ClsRefGetC"; string_of_int cr]

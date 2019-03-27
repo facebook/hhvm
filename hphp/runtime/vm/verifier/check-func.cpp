@@ -2007,7 +2007,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::AddElemV:
     case Op::AddNewElemV:
     case Op::VGetL:
-    case Op::VGetG:
     case Op::VGetS:
     case Op::BindL:
     case Op::BindS:

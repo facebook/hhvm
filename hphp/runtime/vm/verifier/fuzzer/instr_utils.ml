@@ -100,7 +100,6 @@ let stk_data : instruct -> stack_sig = function
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]
   | IGet VGetS _
-  | IGet VGetG
   | IBasic Box                             -> ["C"], ["V"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]

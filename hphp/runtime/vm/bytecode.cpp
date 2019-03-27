@@ -4339,17 +4339,6 @@ OPTBLD_INLINE void iopVGetL(local_var fr) {
   vgetl_body(fr.ptr, to);
 }
 
-OPTBLD_INLINE void iopVGetG() {
-  StringData* name;
-  TypedValue* to = vmStack().topTV();
-  TypedValue* fr = nullptr;
-  lookupd_gbl(vmfp(), name, to, fr);
-  SCOPE_EXIT { decRefStr(name); };
-  assertx(fr != nullptr);
-  tvDecRefGen(to);
-  vgetl_body(fr, to);
-}
-
 OPTBLD_INLINE void iopVGetS(clsref_slot slot) {
   getS<true>(slot);
 }

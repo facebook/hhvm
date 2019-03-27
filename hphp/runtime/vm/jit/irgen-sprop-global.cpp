@@ -346,17 +346,6 @@ void emitCGetQuietG(IRGS& env) {
   push(env, ret);
 }
 
-void emitVGetG(IRGS& env) {
-  auto const name = topC(env);
-  if (!name->isA(TStr)) PUNT(VGetG-NonStrName);
-  auto const ptr = gen(env, LdGblAddrDef, name);
-  destroyName(env, name);
-  pushIncRef(
-    env,
-    gen(env, LdMem, TBoxedInitCell, gen(env, BoxPtr, ptr))
-  );
-}
-
 void emitSetG(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset{1});
   if (!name->isA(TStr)) PUNT(SetG-NameNotStr);

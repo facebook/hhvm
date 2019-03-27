@@ -1696,8 +1696,6 @@ void in(ISS& env, const bc::VGetL& op) {
   push(env, TRef);
 }
 
-void in(ISS& env, const bc::VGetG&) { popC(env); push(env, TRef); }
-
 void in(ISS& env, const bc::VGetS& op) {
   auto const tcls  = takeClsRefSlot(env, op.slot);
   auto const tname = popC(env);

@@ -1827,7 +1827,6 @@ void dce(Env& env, const bc::VerifyParamTypeTS& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyRetNonNullC& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyRetTypeC& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyRetTypeTS& op) { dce_default(env, op); }
-void dce(Env& env, const bc::VGetG& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VGetL& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VGetS& op) { dce_default(env, op); }
 void dce(Env& env, const bc::WHResult& op) { dce_default(env, op); }

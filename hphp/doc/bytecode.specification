@@ -1682,15 +1682,6 @@ VGetL <local variable id>    []  ->  [V]
   is not defined, this instruction defines it, sets it to null, boxes it, and
   pushes a the value of the local variable onto the stack as a ref.
 
-VGetG    [C]  ->  [V]
-
-  Get global as ref. This instruction first computes x = (string)$1. Next, this
-  instruction boxes the global variable named x (if the local is a cell) and
-  pushes its value onto the stack as a ref. If there is no global variable
-  defined named x, this instruction defines a global variable named x, sets it
-  to null, boxes it, and pushes the value of the global variable onto the stack
-  as a ref.
-
 VGetS <class-ref slot>    [C]  ->  [V]
 
   Get static property as ref. This instruction first checks if class %1 has a

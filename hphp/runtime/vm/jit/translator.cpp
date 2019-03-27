@@ -243,11 +243,6 @@ static const struct {
   { OpCGetQuietG,  {Stack1,           Stack1,       OutUnknown      }},
   { OpCGetS,       {Stack1,           Stack1,       OutUnknown      }},
   { OpVGetL,       {Local,            Stack1|Local, OutVInputL      }},
-  // TODO: In pseudo-main, the VGetG instruction invalidates what we know
-  // about the types of the locals because it could cause any one of the
-  // local variables to become "boxed". We need to add logic to tracelet
-  // analysis to deal with this properly.
-  { OpVGetG,       {Stack1,           Stack1,       OutVUnknown     }},
   { OpVGetS,       {Stack1,           Stack1,       OutVUnknown     }},
   { OpClsRefGetC,  {Stack1,           None,         OutNone         }},
   { OpClsRefGetTS, {Stack1,           None,         OutNone         }},
@@ -1008,7 +1003,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::True:
   case Op::Unbox:
   case Op::UnsetL:
-  case Op::VGetG:
   case Op::VGetL:
   case Op::VGetS:
   case Op::VerifyParamType:

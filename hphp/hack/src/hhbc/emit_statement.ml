@@ -175,41 +175,21 @@ let rec emit_stmt env (pos, st_) =
     begin match try_inline_genva_call env e_await (GI_list_assignment l) with
     | Some r -> r
     | None ->
-    let has_elements =
-      List.exists l ~f: (function
-        | _, A.Omitted -> false
-        | _ -> true)
+    let awaited_instrs = emit_await env await_pos e_await in
+    let has_elements = List.exists l ~f: (function
+      | _, A.Omitted -> false
+      | _ -> true)
     in
     if has_elements then
-      Local.scope @@ fun () ->
-        let awaited = emit_await env await_pos e_await in
-        let temp = Local.get_unnamed_local () in
-        gather [
-          awaited;
-          instr_setl temp;
-          instr_popc;
-          with_temp_local temp
-          begin fun temp _ ->
-            let prefix, block =
-              emit_lval_op_list env pos (Some temp) [] e1 in
-              gather [
-                prefix;
-                block
-              ]
-          end;
-          instr_pushl temp;
-          instr_popc;
-        ]
+      Scope.with_unnamed_local @@ fun temp ->
+      (* before *)
+      gather [ awaited_instrs; instr_popl temp ],
+      (* inner *)
+      of_pair @@ emit_lval_op_list env pos (Some temp) [] e1,
+      (* after *)
+      instr_unsetl temp
     else
-      Local.scope @@ fun () ->
-        let temp = Local.get_unnamed_local () in
-        gather [
-          emit_await env await_pos e_await;
-          instr_setl temp;
-          instr_popc;
-          instr_pushl temp;
-          instr_popc;
-        ]
+      gather [ awaited_instrs; instr_popc ]
     end
   | A.Expr (_, A.Binop (A.Eq None, e_lhs, (await_pos, A.Await e_await))) ->
     emit_awaitall_single env await_pos e_lhs e_await

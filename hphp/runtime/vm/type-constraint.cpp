@@ -1082,16 +1082,21 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     }
   }
 
-  raise_return_typehint_error(
-    folly::sformat(
+  std::string msg = folly::sformat(
       "Argument {} returned from {}() as an inout parameter must be of type "
       "{}, {} given",
       paramNum + 1,
       func->fullDisplayName(),
       displayName(func->cls()),
       describe_actual_type(tv, isHHType())
-    )
   );
+
+  if (RuntimeOption::EvalCheckReturnTypeHints >= 2 && !isSoft()
+      && (!isThis() || RuntimeOption::EvalThisTypeHintLevel != 2)) {
+    raise_return_typehint_error(msg);
+  } else {
+    raise_warning_unsampled(msg);
+  }
 }
 
 void TypeConstraint::verifyPropFail(const Class* thisCls,

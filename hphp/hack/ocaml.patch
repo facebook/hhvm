@@ -1,0 +1,32 @@
+diff --git asmcomp/arm64/emit.mlp asmcomp/arm64/emit.mlp
+index f75646e..075d408 100644
+--- a/asmcomp/arm64/emit.mlp
++++ b/asmcomp/arm64/emit.mlp
+@@ -439,8 +439,10 @@ module BR = Branch_relaxation.Make (struct
+     | Lop (Iload (size, addr)) | Lop (Istore (size, addr, _)) ->
+       let based = match addr with Iindexed _ -> 0 | Ibased _ -> 1 in
+       based + begin match size with Single -> 2 | _ -> 1 end
+-    | Lop (Ialloc _) when !fastcode_flag -> 4
+-    | Lop (Ispecific (Ifar_alloc _)) when !fastcode_flag -> 5
++    | Lop (Ialloc {words = num_words}) when !fastcode_flag ->
++      if num_words <= 0xFFF then 4 else 5
++    | Lop (Ispecific (Ifar_alloc {words = num_words})) when !fastcode_flag ->
++      if num_words <= 0xFFF then 5 else 6
+     | Lop (Ialloc { words = num_words; _ })
+     | Lop (Ispecific (Ifar_alloc { words = num_words; _ })) ->
+       begin match num_words with
+@@ -518,8 +520,13 @@ let assembly_code_for_allocation ?label_after_call_gc i ~n ~far =
+   if !fastcode_flag then begin
+     let lbl_redo = new_label() in
+     let lbl_call_gc = new_label() in
++    assert (n < 0x1_000_000);
++    let nl = n land 0xFFF and nh = n land 0xFFF_000 in
+     `{emit_label lbl_redo}:`;
+-    `	sub	{emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_ptr}, #{emit_int n}\n`;
++    if nh <> 0 then
++      `	sub	{emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_ptr}, #{emit_int nh}\n`;
++    if nl <> 0 then
++      `	sub	{emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_ptr}, #{emit_int nl}\n`;
+     `	cmp	{emit_reg reg_alloc_ptr}, {emit_reg reg_alloc_limit}\n`;
+     `	add	{emit_reg i.res.(0)}, {emit_reg reg_alloc_ptr}, #8\n`;
+     if not far then begin

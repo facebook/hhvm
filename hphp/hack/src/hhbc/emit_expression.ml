@@ -683,6 +683,7 @@ and emit_as env pos e h is_nullable = Local.scope @@ fun () ->
     instr_jmp done_label;
     instr_label then_label;
     instr_pushl arg_local;
+    instr_unsetl type_struct_local;
     instr_label done_label;
   ]
 

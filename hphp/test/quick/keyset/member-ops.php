@@ -92,7 +92,7 @@ function base($ks) {
   echo "======= base_prop_set ==============================\n";
   try {
     $copy = $ks;
-    $copy->foobaz[0] = 123;
+    $copy->foobaz = [123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -190,7 +190,7 @@ function dim($a) {
   echo "======= dim_prop_set ===============================\n";
   try {
     $copy = $a;
-    $copy[1]->foobaz[0] = 123;
+    $copy[1]->foobaz = [123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";

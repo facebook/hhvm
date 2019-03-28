@@ -73,15 +73,6 @@ function base($d) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 
-  echo "======= base_str_to_arr ============================\n";
-  try {
-    $copy = $d;
-    $copy[2][10] = 123;
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-
   echo "======= base_prop_get ==============================\n";
   try {
     var_dump($d->foobaz[0]);
@@ -92,7 +83,7 @@ function base($d) {
   echo "======= base_prop_set ==============================\n";
   try {
     $copy = $d;
-    $copy->foobaz[0] = 123;
+    $copy->foobaz = [123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -171,15 +162,6 @@ function dim($a) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 
-  echo "======= dim_str_to_arr =============================\n";
-  try {
-    $copy = $a;
-    $copy[1][2][10] = 123;
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-
   echo "======= dim_prop_get ===============================\n";
   try {
     var_dump($a[1]->foobaz[0]);
@@ -190,7 +172,7 @@ function dim($a) {
   echo "======= dim_prop_set ===============================\n";
   try {
     $copy = $a;
-    $copy[1]->foobaz[0] = 123;
+    $copy[1]->foobaz = [123];
     var_dump($copy);
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
@@ -375,15 +357,6 @@ function fini($a) {
   fini_unset($a, '1');
   fini_unset($a, 'foo');
   fini_unset($a, true);
-
-  echo "======= fini_str_to_arr ============================\n";
-  try {
-    $copy = $a;
-    $copy[1][2][10] = 123;
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
 
   echo "======= fini_prop_get ===============================\n";
   try {

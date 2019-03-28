@@ -11,6 +11,7 @@ function dynString() {
 }
 
 function dynArray($n) {
+  $a = array();
   foreach (range(0, $n) as $i) {
     $a[] = dynString();
   }
@@ -18,4 +19,3 @@ function dynArray($n) {
 }
 
 var_dump(dynArray(2)[1]);
-

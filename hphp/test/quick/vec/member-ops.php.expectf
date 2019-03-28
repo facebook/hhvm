@@ -78,23 +78,13 @@ vec(3) {
 }
 ======= base_new_elem_set ==========================
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
-======= base_str_to_arr ============================
-vec(3) {
-  NULL
-  array(1) {
-    ["a"]=>
-    int(100)
-  }
-  array(1) {
-    [10]=>
-    int(123)
-  }
-}
 ======= base_prop_get ==============================
 
 Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
 NULL
 ======= base_prop_set ==============================
+
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 vec(3) {
   NULL
   array(1) {
@@ -223,28 +213,13 @@ array(2) {
 }
 ======= dim_new_elem_set ===========================
 Exception: "Cannot use [] with vecs for reading in an lvalue context"
-======= dim_str_to_arr =============================
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    array(1) {
-      ["a"]=>
-      int(100)
-    }
-    array(1) {
-      [10]=>
-      int(123)
-    }
-  }
-}
 ======= dim_prop_get ===============================
 
 Notice: Cannot access property on non-object in %s/test/quick/vec/member-ops.php on line %d
 NULL
 ======= dim_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL
@@ -516,20 +491,6 @@ array(2) {
     NULL
     string(3) "abc"
     string(0) ""
-  }
-}
-======= fini_str_to_arr ============================
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    array(1) {
-      [10]=>
-      int(123)
-    }
   }
 }
 ======= fini_prop_get ===============================

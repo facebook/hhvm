@@ -154,29 +154,13 @@ dict(3) {
 }
 ======= base_new_elem_set ==========================
 Exception: "Cannot use [] with dicts for reading in an lvalue context"
-======= base_str_to_arr ============================
-dict(3) {
-  [1]=>
-  array(1) {
-    ["a"]=>
-    int(100)
-  }
-  [2]=>
-  array(1) {
-    [10]=>
-    int(123)
-  }
-  ["1"]=>
-  array(1) {
-    ["a"]=>
-    int(500)
-  }
-}
 ======= base_prop_get ==============================
 
 Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
 NULL
 ======= base_prop_set ==============================
+
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 dict(3) {
   [1]=>
   array(1) {
@@ -397,34 +381,13 @@ array(2) {
 }
 ======= dim_new_elem_set ===========================
 Exception: "Cannot use [] with dicts for reading in an lvalue context"
-======= dim_str_to_arr =============================
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  dict(3) {
-    [1]=>
-    array(1) {
-      ["a"]=>
-      int(100)
-    }
-    [2]=>
-    array(1) {
-      [10]=>
-      int(123)
-    }
-    ["1"]=>
-    array(1) {
-      ["a"]=>
-      int(500)
-    }
-  }
-}
 ======= dim_prop_get ===============================
 
 Notice: Cannot access property on non-object in %s/test/quick/dict/member-ops.php on line %d
 NULL
 ======= dim_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL
@@ -833,23 +796,6 @@ array(2) {
     string(3) "abc"
     [2]=>
     string(0) ""
-    ["1"]=>
-    string(3) "def"
-  }
-}
-======= fini_str_to_arr ============================
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  dict(3) {
-    [1]=>
-    string(3) "abc"
-    [2]=>
-    array(1) {
-      [10]=>
-      int(123)
-    }
     ["1"]=>
     string(3) "def"
   }

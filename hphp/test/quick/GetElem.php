@@ -12,7 +12,3 @@ print "\n";
 
 $a[3]++;
 print_r($a);
-
-$b = null;
-print $b[0]++;
-print "\n";

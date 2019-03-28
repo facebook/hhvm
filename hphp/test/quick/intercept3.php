@@ -9,7 +9,7 @@ function test($f, $x) {
 }
 
 function main() {
-  $x[] = 1;
+  $x = array(1);
   fb_intercept('bar', 'baz', 'fiz');
   for ($i = 0; $i < 10000; $i++) {
     test('bar', $x);
@@ -18,4 +18,3 @@ function main() {
 }
 
 main();
-

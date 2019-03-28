@@ -1,7 +1,7 @@
 <?hh
 
 abstract final class ZendBug54265 {
-  public static $my_var;
+  public static $my_var = array();
 }
 function my_errorhandler($errno,$errormsg) {
   ZendBug54265::$my_var = 0;

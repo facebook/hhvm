@@ -85,6 +85,8 @@ Exception: "Invalid operation on keyset"
 Notice: Cannot access property on non-object in %s on line %d
 NULL
 ======= base_prop_set ==============================
+
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 keyset(3) {
   int(1)
   int(2)
@@ -237,6 +239,8 @@ Exception: "Invalid operation on keyset"
 Notice: Cannot access property on non-object in %s on line %d
 NULL
 ======= dim_prop_set ===============================
+
+Warning: Cannot access property on non-object in %s/member-ops.php on line %d
 array(2) {
   [0]=>
   NULL

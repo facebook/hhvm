@@ -21,7 +21,6 @@ string(7) "A value"
 In cls::offsetSet(, Append 1)
 In cls::offsetSet(, Append 2)
 In cls::offsetSet(, Append 3)
-In cls::offsetGet()
 In cls::offsetGet(x)
 In cls::offsetSet(x, 1)
 In cls::offsetGet(x)

@@ -22,7 +22,7 @@ function manipulate($arr) {
     echo "Caught ".$ex->getMessage()."\n";
   }
   $arr['foo'][3][] = 5;
-  $arr['foo'][3]['bar'][] = 12;
+  $arr['foo'][3]['bar'] = [12];
   var_dump($arr['foo'][3]['bar'][256]);
   var_dump($arr);
 }

@@ -1,10 +1,9 @@
 <?hh
 
 $n = 10;
-$vals = array();
-$a = array();
 
 function main() {
+  $vals = array();
   for ($i = 0; $i < 10; $i++) {
     $vals[] = $GLOBALS['n'];
   }
@@ -21,6 +20,7 @@ function main() {
   printf("%016x\n", 1 << $GLOBALS['a3']);
 
   $GLOBALS[42] = "---42---";
+  $a = array();
   $a[] = $GLOBALS[42];
   $a[] = $GLOBALS["42"];
   var_dump($a);

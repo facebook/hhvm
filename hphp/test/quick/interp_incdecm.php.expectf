@@ -3,20 +3,8 @@ array(1) {
   [0]=>
   int(1)
 }
-array(1) {
-  [0]=>
-  int(1)
-}
-array(1) {
-  [0]=>
-  int(1)
-}
 
-Warning: Cannot use a scalar value as an array in %s/quick/interp_incdecm.php on line 17
+Warning: Cannot use a scalar value as an array in %s/quick/interp_incdecm.php on line 11
 bool(true)
-array(1) {
-  [0]=>
-  int(1)
-}
 
-Fatal error: [] operator not supported for strings in %s/quick/interp_incdecm.php on line 17
+Fatal error: [] operator not supported for strings in %s/quick/interp_incdecm.php on line 11

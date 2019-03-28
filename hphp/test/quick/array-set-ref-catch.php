@@ -14,5 +14,5 @@ function test(&$a, $b) {
   var_dump($a);
 }
 
-$y = null;
+$y = array();
 test(&$y, 5);

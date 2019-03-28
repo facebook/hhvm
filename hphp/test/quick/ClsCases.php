@@ -19,6 +19,7 @@ $foo = new MyClass();
 $foo::$x = 1;
 
 // ClsH
+$refs = array();
 $refs[] = clsFact();
 $refs[] = 'MyClass';
 $s = 'MyClass';

@@ -103,8 +103,6 @@ function main2() {
   $obj[] = 'Append 1';
   $obj[] = 'Append 2';
   $obj[] = 'Append 3';
-  $obj[][0] = "lost"; # offsetGet() returns null by value, so array("lost") is
-  # lost.
 
   # SetOpElem.
   $obj["x"] += 1;

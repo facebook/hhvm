@@ -1253,11 +1253,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
     | _ ->
       transform_keyword_expr_list_statement env kw expr_list semi
     )
-  | Syntax.GlobalStatement {
-      global_keyword = kw;
-      global_variables = var_list;
-      global_semicolon = semi; } ->
-    transform_keyword_expr_list_statement env kw var_list semi
   | Syntax.ConcurrentStatement {
       concurrent_keyword = kw;
       concurrent_statement = statement; } ->

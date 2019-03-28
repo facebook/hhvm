@@ -112,7 +112,6 @@ module type SyntaxKind_S = sig
   val is_break_statement : r -> bool
   val is_continue_statement : r -> bool
   val is_echo_statement : r -> bool
-  val is_global_statement : r -> bool
   val is_concurrent_statement : r -> bool
   val is_simple_initializer : r -> bool
   val is_anonymous_class : r -> bool
@@ -314,7 +313,6 @@ module SyntaxKind(SC : SC_S)
   let make_break_statement arg0 arg1 arg2 state = compose SK.BreakStatement (SC.make_break_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_continue_statement arg0 arg1 arg2 state = compose SK.ContinueStatement (SC.make_continue_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_echo_statement arg0 arg1 arg2 state = compose SK.EchoStatement (SC.make_echo_statement (snd arg0) (snd arg1) (snd arg2) state)
-  let make_global_statement arg0 arg1 arg2 state = compose SK.GlobalStatement (SC.make_global_statement (snd arg0) (snd arg1) (snd arg2) state)
   let make_concurrent_statement arg0 arg1 state = compose SK.ConcurrentStatement (SC.make_concurrent_statement (snd arg0) (snd arg1) state)
   let make_simple_initializer arg0 arg1 state = compose SK.SimpleInitializer (SC.make_simple_initializer (snd arg0) (snd arg1) state)
   let make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = compose SK.AnonymousClass (SC.make_anonymous_class (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) (snd arg7) (snd arg8) state)
@@ -498,7 +496,6 @@ module SyntaxKind(SC : SC_S)
   let is_break_statement                              = has_kind SK.BreakStatement
   let is_continue_statement                           = has_kind SK.ContinueStatement
   let is_echo_statement                               = has_kind SK.EchoStatement
-  let is_global_statement                             = has_kind SK.GlobalStatement
   let is_concurrent_statement                         = has_kind SK.ConcurrentStatement
   let is_simple_initializer                           = has_kind SK.SimpleInitializer
   let is_anonymous_class                              = has_kind SK.AnonymousClass

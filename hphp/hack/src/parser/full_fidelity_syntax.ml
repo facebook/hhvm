@@ -139,7 +139,6 @@ module WithToken(Token: TokenType) = struct
       | BreakStatement                          _ -> SyntaxKind.BreakStatement
       | ContinueStatement                       _ -> SyntaxKind.ContinueStatement
       | EchoStatement                           _ -> SyntaxKind.EchoStatement
-      | GlobalStatement                         _ -> SyntaxKind.GlobalStatement
       | ConcurrentStatement                     _ -> SyntaxKind.ConcurrentStatement
       | SimpleInitializer                       _ -> SyntaxKind.SimpleInitializer
       | AnonymousClass                          _ -> SyntaxKind.AnonymousClass
@@ -330,7 +329,6 @@ module WithToken(Token: TokenType) = struct
     let is_break_statement                              = has_kind SyntaxKind.BreakStatement
     let is_continue_statement                           = has_kind SyntaxKind.ContinueStatement
     let is_echo_statement                               = has_kind SyntaxKind.EchoStatement
-    let is_global_statement                             = has_kind SyntaxKind.GlobalStatement
     let is_concurrent_statement                         = has_kind SyntaxKind.ConcurrentStatement
     let is_simple_initializer                           = has_kind SyntaxKind.SimpleInitializer
     let is_anonymous_class                              = has_kind SyntaxKind.AnonymousClass
@@ -1394,15 +1392,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc echo_keyword in
          let acc = f acc echo_expressions in
          let acc = f acc echo_semicolon in
-         acc
-      | GlobalStatement {
-        global_keyword;
-        global_variables;
-        global_semicolon;
-      } ->
-         let acc = f acc global_keyword in
-         let acc = f acc global_variables in
-         let acc = f acc global_semicolon in
          acc
       | ConcurrentStatement {
         concurrent_keyword;
@@ -3345,15 +3334,6 @@ module WithToken(Token: TokenType) = struct
         echo_expressions;
         echo_semicolon;
       ]
-      | GlobalStatement {
-        global_keyword;
-        global_variables;
-        global_semicolon;
-      } -> [
-        global_keyword;
-        global_variables;
-        global_semicolon;
-      ]
       | ConcurrentStatement {
         concurrent_keyword;
         concurrent_statement;
@@ -5295,15 +5275,6 @@ module WithToken(Token: TokenType) = struct
         "echo_keyword";
         "echo_expressions";
         "echo_semicolon";
-      ]
-      | GlobalStatement {
-        global_keyword;
-        global_variables;
-        global_semicolon;
-      } -> [
-        "global_keyword";
-        "global_variables";
-        "global_semicolon";
       ]
       | ConcurrentStatement {
         concurrent_keyword;
@@ -7380,16 +7351,6 @@ module WithToken(Token: TokenType) = struct
           echo_keyword;
           echo_expressions;
           echo_semicolon;
-        }
-      | (SyntaxKind.GlobalStatement, [
-          global_keyword;
-          global_variables;
-          global_semicolon;
-        ]) ->
-        GlobalStatement {
-          global_keyword;
-          global_variables;
-          global_semicolon;
         }
       | (SyntaxKind.ConcurrentStatement, [
           concurrent_keyword;
@@ -9781,19 +9742,6 @@ module WithToken(Token: TokenType) = struct
           echo_keyword;
           echo_expressions;
           echo_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_global_statement
-        global_keyword
-        global_variables
-        global_semicolon
-      =
-        let syntax = GlobalStatement {
-          global_keyword;
-          global_variables;
-          global_semicolon;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

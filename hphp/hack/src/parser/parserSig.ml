@@ -128,7 +128,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val break_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val continue_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val echo_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val global_statement : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val concurrent_statement : t -> SC.r -> SC.r -> t * SC.r
         val simple_initializer : t -> SC.r -> SC.r -> t * SC.r
         val anonymous_class : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

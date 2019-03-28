@@ -1065,18 +1065,6 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
-  ; { kind_name   = "GlobalStatement"
-    ; type_name   = "global_statement"
-    ; func_name   = "global_statement"
-    ; description = "global_statement"
-    ; prefix      = "global"
-    ; aggregates  = [ TopLevelDeclaration; Statement ]
-    ; fields =
-      [ "keyword", Token
-      ; "variables", ZeroOrMore Token
-      ; "semicolon", Token
-      ]
-    }
   ; { kind_name   = "ConcurrentStatement"
     ; type_name   = "concurrent_statement"
     ; func_name   = "concurrent_statement"

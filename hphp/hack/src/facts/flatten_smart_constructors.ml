@@ -270,9 +270,6 @@ module WithOp(Op : Op_S) = struct
   let make_echo_statement arg0 arg1 arg2 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2]
-  let make_global_statement arg0 arg1 arg2 state =
-    if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 then state, Op.zero
-    else state, Op.flatten [arg0; arg1; arg2]
   let make_concurrent_statement arg0 arg1 state =
     if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
     else state, Op.flatten [arg0; arg1]

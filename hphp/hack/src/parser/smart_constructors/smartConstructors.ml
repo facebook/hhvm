@@ -110,7 +110,6 @@ module type SmartConstructors_S = sig
   val make_break_statement : r -> r -> r -> t -> t * r
   val make_continue_statement : r -> r -> r -> t -> t * r
   val make_echo_statement : r -> r -> r -> t -> t * r
-  val make_global_statement : r -> r -> r -> t -> t * r
   val make_concurrent_statement : r -> r -> t -> t * r
   val make_simple_initializer : r -> r -> t -> t * r
   val make_anonymous_class : r -> r -> r -> r -> r -> r -> r -> r -> r -> t -> t * r
@@ -302,7 +301,6 @@ end) = struct
     let break_statement parser arg0 arg1 arg2 = call parser (SCI.make_break_statement arg0 arg1 arg2)
     let continue_statement parser arg0 arg1 arg2 = call parser (SCI.make_continue_statement arg0 arg1 arg2)
     let echo_statement parser arg0 arg1 arg2 = call parser (SCI.make_echo_statement arg0 arg1 arg2)
-    let global_statement parser arg0 arg1 arg2 = call parser (SCI.make_global_statement arg0 arg1 arg2)
     let concurrent_statement parser arg0 arg1 = call parser (SCI.make_concurrent_statement arg0 arg1)
     let simple_initializer parser arg0 arg1 = call parser (SCI.make_simple_initializer arg0 arg1)
     let anonymous_class parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 = call parser (SCI.make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8)

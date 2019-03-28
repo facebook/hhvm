@@ -146,7 +146,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> TLDBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> TLDContinue x) x
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> TLDEcho x) x
-    | Syntax.GlobalStatement _ -> tag validate_global_statement (fun x -> TLDGlobal x) x
     | s -> aggregation_fail Def.TopLevelDeclaration s
   and invalidate_top_level_declaration : top_level_declaration invalidator = fun (value, thing) ->
     match thing with
@@ -186,7 +185,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDBreak                        thing -> invalidate_break_statement                (value, thing)
     | TLDContinue                     thing -> invalidate_continue_statement             (value, thing)
     | TLDEcho                         thing -> invalidate_echo_statement                 (value, thing)
-    | TLDGlobal                       thing -> invalidate_global_statement               (value, thing)
   and validate_expression : expression validator = fun x ->
     match Syntax.syntax x with
     | Syntax.LiteralExpression _ -> tag validate_literal_expression (fun x -> ExprLiteral x) x
@@ -410,7 +408,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.BreakStatement _ -> tag validate_break_statement (fun x -> StmtBreak x) x
     | Syntax.ContinueStatement _ -> tag validate_continue_statement (fun x -> StmtContinue x) x
     | Syntax.EchoStatement _ -> tag validate_echo_statement (fun x -> StmtEcho x) x
-    | Syntax.GlobalStatement _ -> tag validate_global_statement (fun x -> StmtGlobal x) x
     | Syntax.ConcurrentStatement _ -> tag validate_concurrent_statement (fun x -> StmtConcurrent x) x
     | Syntax.TypeConstant _ -> tag validate_type_constant (fun x -> StmtTypeConstant x) x
     | s -> aggregation_fail Def.Statement s
@@ -445,7 +442,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | StmtBreak                        thing -> invalidate_break_statement                (value, thing)
     | StmtContinue                     thing -> invalidate_continue_statement             (value, thing)
     | StmtEcho                         thing -> invalidate_echo_statement                 (value, thing)
-    | StmtGlobal                       thing -> invalidate_global_statement               (value, thing)
     | StmtConcurrent                   thing -> invalidate_concurrent_statement           (value, thing)
     | StmtTypeConstant                 thing -> invalidate_type_constant                  (value, thing)
   and validate_switch_label : switch_label validator = fun x ->
@@ -2180,22 +2176,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       { echo_keyword = invalidate_token x.echo_keyword
       ; echo_expressions = invalidate_list_with (invalidate_expression) x.echo_expressions
       ; echo_semicolon = invalidate_token x.echo_semicolon
-      }
-    ; Syntax.value = v
-    }
-  and validate_global_statement : global_statement validator = function
-  | { Syntax.syntax = Syntax.GlobalStatement x; value = v } -> v,
-    { global_semicolon = validate_token x.global_semicolon
-    ; global_variables = validate_list_with (validate_token) x.global_variables
-    ; global_keyword = validate_token x.global_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.GlobalStatement) s
-  and invalidate_global_statement : global_statement invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.GlobalStatement
-      { global_keyword = invalidate_token x.global_keyword
-      ; global_variables = invalidate_list_with (invalidate_token) x.global_variables
-      ; global_semicolon = invalidate_token x.global_semicolon
       }
     ; Syntax.value = v
     }

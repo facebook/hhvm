@@ -124,7 +124,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_break_statement arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_break_statement arg0 arg1 arg2
     let make_continue_statement arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_continue_statement arg0 arg1 arg2
     let make_echo_statement arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_echo_statement arg0 arg1 arg2
-    let make_global_statement arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_global_statement arg0 arg1 arg2
     let make_concurrent_statement arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_concurrent_statement arg0 arg1
     let make_simple_initializer arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_simple_initializer arg0 arg1
     let make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8 state = State.next state [arg0; arg1; arg2; arg3; arg4; arg5; arg6; arg7; arg8], Syntax.make_anonymous_class arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 arg8

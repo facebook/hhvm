@@ -74,7 +74,6 @@ let rec has_reachable_endpoint body =
   | DoStatement _
   | ForStatement _
   | EchoStatement _
-  | GlobalStatement _
   | _ -> true
 
 let add_missing_return body =

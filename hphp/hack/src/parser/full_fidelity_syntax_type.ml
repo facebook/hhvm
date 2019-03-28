@@ -628,11 +628,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; echo_expressions                                   : t
     ; echo_semicolon                                     : t
     }
-  | GlobalStatement                         of
-    { global_keyword                                     : t
-    ; global_variables                                   : t
-    ; global_semicolon                                   : t
-    }
   | ConcurrentStatement                     of
     { concurrent_keyword                                 : t
     ; concurrent_statement                               : t
@@ -1253,7 +1248,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDBreak                        of break_statement
   | TLDContinue                     of continue_statement
   | TLDEcho                         of echo_statement
-  | TLDGlobal                       of global_statement
   and expression =
   | ExprLiteral                       of literal_expression
   | ExprPrefixedString                of prefixed_string_expression
@@ -1374,7 +1368,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtBreak                        of break_statement
   | StmtContinue                     of continue_statement
   | StmtEcho                         of echo_statement
-  | StmtGlobal                       of global_statement
   | StmtConcurrent                   of concurrent_statement
   | StmtTypeConstant                 of type_constant
   and switch_label =
@@ -1991,11 +1984,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { echo_keyword: Token.t value
     ; echo_expressions: expression listesque value
     ; echo_semicolon: Token.t value
-    }
-  and global_statement =
-    { global_keyword: Token.t value
-    ; global_variables: Token.t listesque value
-    ; global_semicolon: Token.t value
     }
   and concurrent_statement =
     { concurrent_keyword: Token.t value

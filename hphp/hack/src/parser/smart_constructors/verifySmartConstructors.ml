@@ -703,14 +703,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_global_statement p0 p1 p2 stack =
-    match stack with
-    | a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2] [a0; a1; a2] "global_statement" in
-      let node = Syntax.make_global_statement p0 p1 p2 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-    
   let make_concurrent_statement p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->

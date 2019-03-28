@@ -2232,9 +2232,6 @@ and pStmt : stmt parser = fun node env ->
     pos, Break (pBreak_or_continue_level env level)
   | ContinueStatement { continue_level=level; _ } ->
     pos, Continue (pBreak_or_continue_level env level)
-  | GlobalStatement _ ->
-    raise_parsing_error env (`Node node) "Global statements have been removed";
-    Pos.none, Noop
   | ConcurrentStatement { concurrent_statement=concurrent_stmt; _ } ->
     if not (ParserOptions.enable_concurrent env.parser_options) then
       raise_parsing_error env (`Node node) SyntaxError.concurrent_is_disabled;

@@ -1256,15 +1256,6 @@
         { "field_name" : "expressions" },
         { "field_name" : "semicolon" }
       ] },
-    { "kind_name" : "GlobalStatement",
-      "type_name" : "global_statement",
-      "description" : "global_statement",
-      "prefix" : "global",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "variables" },
-        { "field_name" : "semicolon" }
-      ] },
     { "kind_name" : "ConcurrentStatement",
       "type_name" : "concurrent_statement",
       "description" : "concurrent_statement",

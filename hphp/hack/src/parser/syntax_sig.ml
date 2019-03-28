@@ -515,11 +515,6 @@ module type Syntax_S = sig
     ; echo_expressions                                   : t
     ; echo_semicolon                                     : t
     }
-  | GlobalStatement                         of
-    { global_keyword                                     : t
-    ; global_variables                                   : t
-    ; global_semicolon                                   : t
-    }
   | ConcurrentStatement                     of
     { concurrent_keyword                                 : t
     ; concurrent_statement                               : t
@@ -1192,7 +1187,6 @@ module type Syntax_S = sig
   val make_break_statement : t -> t -> t -> t
   val make_continue_statement : t -> t -> t -> t
   val make_echo_statement : t -> t -> t -> t
-  val make_global_statement : t -> t -> t -> t
   val make_concurrent_statement : t -> t -> t
   val make_simple_initializer : t -> t -> t
   val make_anonymous_class : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
@@ -1375,7 +1369,6 @@ module type Syntax_S = sig
   val is_break_statement : t -> bool
   val is_continue_statement : t -> bool
   val is_echo_statement : t -> bool
-  val is_global_statement : t -> bool
   val is_concurrent_statement : t -> bool
   val is_simple_initializer : t -> bool
   val is_anonymous_class : t -> bool

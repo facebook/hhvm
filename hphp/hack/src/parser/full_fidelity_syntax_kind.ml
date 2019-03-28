@@ -100,7 +100,6 @@ type t =
   | BreakStatement
   | ContinueStatement
   | EchoStatement
-  | GlobalStatement
   | ConcurrentStatement
   | SimpleInitializer
   | AnonymousClass
@@ -285,7 +284,6 @@ let to_string kind =
   | BreakStatement                          -> "break_statement"
   | ContinueStatement                       -> "continue_statement"
   | EchoStatement                           -> "echo_statement"
-  | GlobalStatement                         -> "global_statement"
   | ConcurrentStatement                     -> "concurrent_statement"
   | SimpleInitializer                       -> "simple_initializer"
   | AnonymousClass                          -> "anonymous_class"

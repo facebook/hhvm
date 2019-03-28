@@ -985,7 +985,6 @@ let scan_xhp_body lexer =
     match (ch1, ch2, ch3) with
     | ('!', '-', '-') -> (scan_xhp_comment lexer, TokenKind.XHPComment)
     | ('/', _, _) -> (advance lexer 2, TokenKind.LessThanSlash)
-    | ('<', '<', _) -> scan_docstring_literal lexer
     | _ -> (advance lexer 1, TokenKind.LessThan)
     end
   | _ -> ((aux lexer 0), TokenKind.XHPBody)

@@ -271,7 +271,7 @@ module WithStatementAndDeclAndTypeParser
     | Print
     | At -> parse_prefix_unary_expression parser
     | LeftParen -> parse_cast_or_parenthesized_or_lambda_expression parser
-    | LessThan -> parse_possible_xhp_expression ~consume_trailing_trivia:true token parser1
+    | LessThan -> parse_possible_xhp_expression ~in_xhp_body:false token parser1
     | List  -> parse_list_expression parser
     | New -> parse_object_creation_expression parser
     | Array -> parse_array_intrinsic_expression parser
@@ -2435,7 +2435,7 @@ module WithStatementAndDeclAndTypeParser
       (parser, Some token)
     | LessThan ->
       let (parser, expr) =
-        parse_possible_xhp_expression ~consume_trailing_trivia:false token parser1 in
+        parse_possible_xhp_expression ~in_xhp_body:true token parser1 in
       (parser, Some expr)
     | _ -> (parser, None)
 
@@ -2535,22 +2535,27 @@ module WithStatementAndDeclAndTypeParser
       let parser = with_error parser SyntaxError.error1013 in
       Make.xhp_expression parser xhp_open missing1 missing2
 
-  and parse_possible_xhp_expression ~consume_trailing_trivia less_than parser =
+  and parse_possible_xhp_expression ~in_xhp_body less_than parser =
     let parser, less_than = Make.token parser less_than in
     (* We got a < token where an expression was expected. *)
     let (parser1, name, text) = next_xhp_element_token parser in
     if (Token.kind name) = XHPElementName then
       let (parser, token) = Make.token parser1 name in
-      parse_xhp_expression ~consume_trailing_trivia
+      parse_xhp_expression ~consume_trailing_trivia:(not in_xhp_body)
         parser less_than token text
     else
       (* ERROR RECOVERY
-      Hard to say what to do here. We are expecting an expression;
-      we could simply produce an error for the < and call that the
-      expression. Or we could assume the the left side of an inequality is
-      missing, give a missing node for the left side, and parse the
-      remainder as the right side. We'll go for the former for now. *)
-      (with_error parser SyntaxError.error1015, less_than)
+      In an expression context, it's hard to say what to do here. We are
+      expecting an expression, so we could simply produce an error for the < and
+      call that the expression. Or we could assume the the left side of an
+      inequality is missing, give a missing node for the left side, and parse
+      the remainder as the right side. We'll go for the former for now.
+
+      In an XHP body context, we certainly expect a name here, because the <
+      could only legally be the first token in another XHPExpression. *)
+      let error =
+        if in_xhp_body then SyntaxError.error1004 else SyntaxError.error1015 in
+      (with_error parser error, less_than)
 
   and parse_anon_or_awaitable_or_scope_resolution_or_name parser =
     (* static is a legal identifier, if next token is scope resolution operatpr

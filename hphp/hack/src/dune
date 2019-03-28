@@ -5,6 +5,7 @@
   (name hh_single_type_check)
   (modules
     hh_single_type_check)
+  (ocamlc_flags (:standard -custom))
   (libraries
     ai
     client
@@ -27,6 +28,7 @@
   (name hh_server)
   (modules
     hh_server)
+  (ocamlc_flags (:standard -custom))
   (libraries
     ai
     client
@@ -48,6 +50,7 @@
   (name hh_client)
   (modules
     hh_client)
+  (ocamlc_flags (:standard -custom))
   (libraries
     ai
     client
@@ -83,12 +86,14 @@
     parser_syntax_tree
     pocket_universes
     typing)
+  (ocamlc_flags (:standard -custom))
   (flags (:standard -unsafe-string)))
 
 (executable
   (name hh_parse)
   (modules
     hh_parse)
+  (ocamlc_flags (:standard -custom))
   (libraries
     debug
     global_config
@@ -97,12 +102,14 @@
     parser_heap
     parser_syntax
     parser_syntax_transforms
-    parser_syntax_tree))
+    parser_syntax_tree
+    utils_core))
 
 (executable
   (name hackfmt)
   (modules
     hackfmt)
+  (ocamlc_flags (:standard -custom))
   (libraries
     hackfmt
     hackfmt_debug
@@ -113,6 +120,7 @@
   (name hh_single_parse)
   (modules
     hh_single_parse)
+  (ocamlc_flags (:standard -custom))
   (libraries
     debug
     global_config
@@ -127,6 +135,7 @@
   (name generate_full_fidelity)
   (modules
     generate_full_fidelity)
+  (ocamlc_flags (:standard -custom))
   (libraries
     procs_procs_lwt
     core_kernel

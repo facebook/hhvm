@@ -118,42 +118,51 @@ add_custom_target(
 )
 add_dependencies(opam.stamp ocaml)
 
-add_custom_target(
-  hack
-  ALL
-  COMMAND
-        export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam &&
-        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
-        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
-        opam config exec --
-        $(MAKE) --makefile=Makefile.ocamlbuild
-        EXTRA_INCLUDE_PATHS="${extra_include_paths}"
-        EXTRA_LIB_PATHS="${extra_lib_paths}"
-        EXTRA_LINK_OPTS="${extra_link_opts}"
-        EXTRA_CC_FLAGS="${extra_cc_flags}"
-        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
-        BYTECODE="${EMIT_OCAML_BYTECODE}"
-        OCAML="${OCAML_EXECUTABLE}"
-        OCAMLC="${OCAMLC_EXECUTABLE}"
-        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-add_dependencies(hack ocaml opam.stamp)
-
 if (SKIP_OPAM)
   set(OPAMROOT "~/.opam")
 else ()
   set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam")
 endif()
 
-add_custom_target(
-  hack_dune
-  COMMAND
+# ARGV2 (optional unnamed argument) is expected to only be set to ALL
+# if one wants the target to be run with the default rule of Makefile
+function(invoke_ocamlbuild name target)
+  add_custom_target(
+    ${name}
+    ${ARGV2}
+    COMMAND
         export OPAMROOT=${OPAMROOT} &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
-        $(MAKE) --makefile=Makefile.dune
+        $(MAKE) --makefile=Makefile.ocamlbuild ${target}
+        EXTRA_INCLUDE_PATHS="${extra_include_paths}"
+        EXTRA_LIB_PATHS="${extra_lib_paths}"
+        EXTRA_LINK_OPTS="${extra_link_opts}"
+        EXTRA_CC_FLAGS="${extra_cc_flags}"
+        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
+        BYTECODE="${EMIT_OCAML_BYTECODE}"
+        OCAML="${OCAML_EXECUTABLE}"
+        OCAMLC="${OCAMLC_EXECUTABLE}"
+        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  )
+  add_dependencies(${name} ocaml opam.stamp)
+endfunction()
+
+invoke_ocamlbuild(hack all ALL)
+invoke_ocamlbuild(hack_test test)
+
+function(invoke_dune name target)
+  add_custom_target(
+      ${name}
+      ${ARGV2}
+      COMMAND
+        export OPAMROOT=${OPAMROOT} &&
+        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
+        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
+        opam config exec --
+        $(MAKE) --makefile=Makefile.dune ${target}
         EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
         EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
@@ -161,55 +170,19 @@ add_custom_target(
         OCAML="${OCAML_EXECUTABLE}"
         OCAMLC="${OCAMLC_EXECUTABLE}"
         OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-add_dependencies(hack_dune ocaml)
-if (NOT SKIP_OPAM)
-  add_dependencies(hack_dune opam.stamp)
-endif()
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
 
-add_custom_target(
-  hack_test
-  COMMAND
-        export OPAMROOT=${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam &&
-        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
-        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
-        opam config exec --
-        $(MAKE) test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
-        EXTRA_LIB_PATHS="${extra_lib_paths}"
-        EXTRA_LINK_OPTS="${extra_link_opts}"
-        EXTRA_CC_FLAGS="${extra_cc_flags}"
-        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
-        BYTECODE="${EMIT_OCAML_BYTECODE}"
-        OCAML="${OCAML_EXECUTABLE}"
-        OCAMLC="${OCAMLC_EXECUTABLE}"
-        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-add_dependencies(hack_test ocaml opam.stamp)
+  add_dependencies(${name} ocaml)
+  if (NOT SKIP_OPAM)
+    add_dependencies(${name} opam.stamp)
+  endif()
+endfunction()
 
-add_custom_target(
-  hack_dune_test
-  COMMAND
-        export OPAMROOT=${OPAMROOT} &&
-        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
-        PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
-        opam config exec --
-        $(MAKE) --makefile=Makefile.dune test EXTRA_INCLUDE_PATHS="${extra_include_paths}"
-        EXTRA_LIB_PATHS="${extra_lib_paths}"
-        EXTRA_LINK_OPTS="${extra_link_opts}"
-        EXTRA_CC_FLAGS="${extra_cc_flags}"
-        EXTRA_NATIVE_LIBRARIES="${extra_native_libraries}"
-        BYTECODE="${EMIT_OCAML_BYTECODE}"
-        OCAML="${OCAML_EXECUTABLE}"
-        OCAMLC="${OCAMLC_EXECUTABLE}"
-        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-add_dependencies(hack_dune_test ocaml)
-if (NOT SKIP_OPAM)
-  add_dependencies(hack_dune opam.stamp)
-endif()
+invoke_dune(hack_dune_debug debug)
+invoke_dune(hack_dune_test test)
+# TODO: when ocamlbuild is removed, add ALL to hack_dune
+invoke_dune(hack_dune all)
 
 if(NOT LZ4_FOUND)
   # if the system does not have lz4, make sure that the one in public_tl

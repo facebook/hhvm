@@ -557,64 +557,59 @@ and emit_for env p e1 e2 e3 b =
   ]
 
 and emit_switch env pos scrutinee_expr cl =
-  if List.is_empty cl
-  then emit_ignored_expr env scrutinee_expr
-  else
-  stash_in_local env pos scrutinee_expr
-  begin fun local break_label ->
-  (* If there is no default clause, add an empty one at the end *)
-  let is_default c = match c with A.Default _ -> true | _ -> false in
-  let cl, has_default =
-    match List.count cl is_default with
-    | 0 -> cl @ [A.Default []], false
-    | 1 -> cl, true
-    | _ -> Emit_fatal.raise_fatal_runtime
-      pos "Switch statements may only contain one 'default' clause." in
+  if List.is_empty cl then emit_ignored_expr env scrutinee_expr else
+  let instr_init, instr_free, emit_check_case = match snd scrutinee_expr with
+    | A.Lvar _ ->
+      (* Special case for simple scrutinee *)
+      empty, empty,
+      fun case_expr case_handler_label -> gather [
+        emit_two_exprs env (fst case_expr) scrutinee_expr case_expr;
+        instr_eq;
+        instr_jmpnz case_handler_label
+      ]
+    | _ ->
+      emit_expr ~need_ref:false env scrutinee_expr, instr_popc,
+      fun case_expr case_handler_label ->
+      let next_case_label = Label.next_regular () in
+      gather [
+        instr_dup;
+        emit_expr ~need_ref:false env case_expr;
+        emit_pos (fst case_expr);
+        instr_eq;
+        instr_jmpz next_case_label;
+        instr_popc;
+        instr_jmp case_handler_label;
+        instr_label next_case_label
+      ]
+  in
   (* "continue" in a switch in PHP has the same semantics as break! *)
-  let cl =
-    Emit_env.do_in_switch_body break_label env cl @@
-      fun env _ -> List.map cl ~f:(emit_case env)
+  let break_label = Label.next_regular () in
+  let cl = Emit_env.do_in_switch_body break_label env cl @@
+    fun env _ -> List.map cl ~f:(emit_case env)
   in
-  let bodies = gather @@ List.map cl ~f:snd in
-  let default_label_to_shift =
-    if has_default
-    then List.find_map cl ~f: (fun ((e, l), _) ->
-      if Option.is_none e then Some l else None)
-    else None in
-  let init = gather @@ List.map cl
-    ~f: begin fun x ->
-          let (e_opt, l) = fst x in
-          match e_opt with
-          | None ->
-            (* jmp to default case should be emitted as the
-            very last 'else' case so do not emit it if it appear in the
-            middle of emitted if/elseif clauses *)
-            if Option.is_none default_label_to_shift
-            then instr_jmp l
-            else empty
-          | Some e ->
-            (* Special case for simple scrutinee *)
-            match scrutinee_expr with
-            | _, A.Lvar _ ->
-              let eq_expr = pos, A.Binop (A.Eqeq, scrutinee_expr, e) in
-              gather [
-                emit_expr ~need_ref:false env eq_expr;
-                instr_jmpnz l
-              ]
-            | _ ->
-              gather [
-                instr_cgetl local;
-                emit_expr ~need_ref:false env e;
-                instr_eq;
-                instr_jmpnz l]
-        end
+  let instr_bodies = gather @@ List.map cl ~f:snd in
+  let default_label =
+    let default_labels = List.filter_map cl
+      ~f:(fun ((e, l), _) -> if Option.is_none e then Some l else None) in
+    match default_labels with
+    | [] -> break_label
+    | l :: [] -> l
+    | _ -> Emit_fatal.raise_fatal_runtime
+      pos "Switch statements may only contain one 'default' clause."
   in
+  let instr_check_cases = gather @@ List.map cl ~f:begin function
+    (* jmp to default case should be emitted as the very last 'else' case *)
+    | (None, _), _ -> empty
+    | (Some e, l), _ -> emit_check_case e l
+  end in
   gather [
-    init;
-    Option.value_map default_label_to_shift ~default:empty ~f:instr_jmp;
-    bodies;
+    instr_init;
+    instr_check_cases;
+    instr_free;
+    instr_jmp default_label;
+    instr_bodies;
+    instr_label break_label
   ]
-  end
 
 and block_pos b =
   let bpos = List.map b fst in
@@ -1080,15 +1075,11 @@ and emit_stmts env stl =
 
 and emit_case env c =
   let l = Label.next_regular () in
-  let b = match c with
-    | A.Default b
-    | A.Case (_, b) ->
-        emit_stmt env (Pos.none, A.Block b)
+  let b, e = match c with
+    | A.Default b -> b, None
+    | A.Case (e, b) -> b, Some e
   in
-  let e = match c with
-    | A.Case (e, _) -> Some e
-    | _ -> None
-  in
+  let b = emit_stmt env (Pos.none, A.Block b) in
   (e, l), gather [instr_label l; b]
 
 let emit_dropthrough_return env =

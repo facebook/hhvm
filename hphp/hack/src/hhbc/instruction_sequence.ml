@@ -493,91 +493,76 @@ let rewrite_user_labels instrseq =
       Instr_list (List.rev l), name_label_map in
   fst @@ aux instrseq SMap.empty
 
-(* TODO: What other instructions manipulate the class ref stack *)
-let rewrite_class_refs_instr num = function
-| IGet (ClsRefGetC _) -> (num + 1, IGet (ClsRefGetC (num + 1)))
-| IGet (ClsRefGetTS _) -> (num + 1, IGet (ClsRefGetTS (num + 1)))
-| IMisc (Parent _) -> (num + 1, IMisc (Parent (num + 1)))
-| IMisc (LateBoundCls _) -> (num + 1, IMisc (LateBoundCls (num + 1)))
-| IMisc (Self _) -> (num + 1, IMisc (Self (num + 1)))
-| IMisc (ClsRefName _) -> (num - 1, IMisc (ClsRefName num))
-| ILitConst (ClsCns (id, _)) -> (num - 1, ILitConst (ClsCns (id, num)))
-| IGet (CGetS _) -> (num - 1, IGet (CGetS num))
-| IGet (VGetS _) -> (num - 1, IGet (VGetS num))
-| IMutator (SetS _) -> (num - 1, IMutator (SetS num))
-| IMutator (SetOpS (o, _)) -> (num - 1, IMutator (SetOpS (o, num)))
-| IMutator (IncDecS (o, _)) -> (num - 1, IMutator (IncDecS (o, num)))
-| IBase (BaseSC (si, _, m)) -> (num - 1, IBase (BaseSC (si, num, m)))
-| ICall (NewObj (_, op)) -> (num - 1, ICall (NewObj (num, op)))
+(* TODO: This function lacks any awareness of control flow and will produce
+ * garbage when control flow is present. However, instead of implementing
+ * control flow, we should just kill class ref slots in favor of class pointers.
+ *)
+let rewrite_class_refs_instr num stack = function
+| IGet (ClsRefGetC _) -> (num + 1, stack, IGet (ClsRefGetC (num + 1)))
+| IGet (ClsRefGetTS _) -> (num + 1, stack, IGet (ClsRefGetTS (num + 1)))
+| IMisc (Parent _) -> (num + 1, stack, IMisc (Parent (num + 1)))
+| IMisc (LateBoundCls _) -> (num + 1, stack, IMisc (LateBoundCls (num + 1)))
+| IMisc (Self _) -> (num + 1, stack, IMisc (Self (num + 1)))
+| IMisc (ClsRefName _) -> (num - 1, stack, IMisc (ClsRefName num))
+| ILitConst (ClsCns (id, _)) -> (num - 1, stack, ILitConst (ClsCns (id, num)))
+| IGet (CGetS _) -> (num - 1, stack, IGet (CGetS num))
+| IGet (VGetS _) -> (num - 1, stack, IGet (VGetS num))
+| IMutator (SetS _) -> (num - 1, stack, IMutator (SetS num))
+| IMutator (SetOpS (o, _)) -> (num - 1, stack, IMutator (SetOpS (o, num)))
+| IMutator (IncDecS (o, _)) -> (num - 1, stack, IMutator (IncDecS (o, num)))
+| IBase (BaseSC (si, _, m)) -> (num - 1, stack, IBase (BaseSC (si, num, m)))
+| ICall (NewObj (_, op)) -> (num - 1, stack, ICall (NewObj (num, op)))
 | ICall (FPushClsMethod (np, _, pl)) ->
-  (num - 1, ICall (FPushClsMethod (np, num, pl)))
-| IIsset (IssetS _) -> (num - 1, IIsset (IssetS num))
-| IIsset (EmptyS _) -> (num - 1, IIsset (EmptyS num))
-| ILitConst (TypedValue tv) -> (num, Emit_adata.rewrite_typed_value tv)
-(* all class ref slots at every catch clause must be uninitialized
-   Technically we can reset the counter at ICatchMiddle however this won't work
-   in following case:
-   try {
-
-   }
-   catch (A $e) { unset(AA::$x); }
-   catch (B $e) { unset(AA::$x); }
-
-   During codegen all catch clauses are flattened to something like:
-   try {
-     ...
-   }
-   catch ($e) {
-     if (!($e instanceof A)) goto L1;
-     load_class_ref(AA);
-     raise_fatal "cannot unset static property"
-
-     goto AfterCatch:
-     if (!($e instanceof B)) throw $e; // (**)
-     load_class_ref(AA);
-     raise_fatal "cannot unset static property"
-
-     goto AfterCatch
-   }
-   AfterCatch:
-
-   Resetting counter at the beginning of catch clause will not help
-   to reset it at line (**). What we do instead - reset counter
-   at instructions that raise errors
-
-   *)
-| (IOp (Fatal _) | IContFlow Throw) as i -> (-1, i)
-| i -> (num, i)
+  (num - 1, stack, ICall (FPushClsMethod (np, num, pl)))
+| IIsset (IssetS _) -> (num - 1, stack, IIsset (IssetS num))
+| IIsset (EmptyS _) -> (num - 1, stack, IIsset (EmptyS num))
+| ILitConst (TypedValue tv) -> (num, stack, Emit_adata.rewrite_typed_value tv)
+(* Limited support for try/catch while class ref slot is active. Propagate the
+ * number of active class ref slots from the end of the try block to the code
+ * after try/catch.
+ *)
+| ITry TryCatchMiddle -> (num, num :: stack, ITry TryCatchMiddle)
+| ITry TryCatchEnd ->
+  begin match stack with
+  | [] -> failwith "mismatched TryCatchEnd"
+  | top :: stack -> (top, stack, ITry TryCatchEnd)
+  end
+(* Fatal and Throw enter unwinder, so we don't know anything about the number of
+ * active class ref slots after it.
+ *)
+| (IOp (Fatal _) | IContFlow Throw) as i -> (-1, stack, i)
+| i -> (num, stack, i)
 
 (* Cannot use InstrSeq.fold_left since we want to maintain the exact
  * placement of try blocks *)
 let rewrite_class_refs instrseq =
-  let rec aux instrseq num =
+  let rec aux instrseq num stack =
     match instrseq with
     | Instr_empty ->
-      Instr_empty, num
+      Instr_empty, num, stack
     | Instr_one i ->
-      let n, i = rewrite_class_refs_instr num i in
-      Instr_one i, n
+      let n, s, i = rewrite_class_refs_instr num stack i in
+      Instr_one i, n, s
     | Instr_try_fault (try_body, fault_body) ->
-      let try_body, num = aux try_body num in
-      let fault_body, num = aux fault_body num in
-      Instr_try_fault (try_body, fault_body), num
+      let try_body, num, stack = aux try_body num stack in
+      let fault_body, num, stack = aux fault_body num stack in
+      Instr_try_fault (try_body, fault_body), num, stack
     | Instr_concat l ->
-      let l, num = List.fold_left l
-        ~f:(fun (acc, n) s -> let l, n = aux s n in l :: acc, n)
-        ~init:([], num)
+      let l, num, stack = List.fold_left l
+        ~f:(fun (acc, n, s) is -> let l, n, s = aux is n s in l :: acc, n, s)
+        ~init:([], num, stack)
       in
-      Instr_concat (List.rev l), num
+      Instr_concat (List.rev l), num, stack
     | Instr_list l ->
-      let l, num = List.fold_left l
-        ~f:(fun (acc, n) i ->
-            let n, i = rewrite_class_refs_instr n i in i :: acc, n)
-        ~init:([], num)
+      let l, num, stack = List.fold_left l
+        ~f:(fun (acc, n, s) i ->
+            let n, s, i = rewrite_class_refs_instr n s i in i :: acc, n, s)
+        ~init:([], num, stack)
       in
-      Instr_list (List.rev l), num
+      Instr_list (List.rev l), num, stack
   in
-  fst @@ aux instrseq (-1)
+  let is, _, _ = aux instrseq (-1) [] in
+  is
 
 let rec can_initialize_static_var e =
   match snd e with

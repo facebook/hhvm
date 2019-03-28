@@ -38,7 +38,7 @@ array(1) {
     }
   }
 }
-array(1) {
+array(2) {
   [0]=>
   object(ReflectionParameter) (3) {
     ["info"]=>
@@ -71,6 +71,44 @@ array(1) {
     }
     ["name"]=>
     string(1) "a"
+    ["paramTypeInfo"]=>
+    array(3) {
+      ["name"]=>
+      string(7) "HH\bool"
+      ["nullable"]=>
+      bool(true)
+      ["builtin"]=>
+      bool(false)
+    }
+  }
+  [1]=>
+  object(ReflectionParameter) (3) {
+    ["info"]=>
+    array(10) {
+      ["index"]=>
+      int(1)
+      ["name"]=>
+      string(9) "not_inout"
+      ["type"]=>
+      string(0) ""
+      ["type_hint"]=>
+      string(7) "HH\bool"
+      ["type_hint_builtin"]=>
+      bool(false)
+      ["function"]=>
+      string(1) "g"
+      ["nullable"]=>
+      bool(true)
+      ["type_hint_nullable"]=>
+      bool(true)
+      ["attributes"]=>
+      array(0) {
+      }
+      ["is_optional"]=>
+      bool(false)
+    }
+    ["name"]=>
+    string(9) "not_inout"
     ["paramTypeInfo"]=>
     array(3) {
       ["name"]=>
@@ -124,9 +162,11 @@ array(1) {
   [0]=>
   bool(false)
 }
-array(1) {
+array(2) {
   [0]=>
   bool(true)
+  [1]=>
+  bool(false)
 }
 array(1) {
   [0]=>
@@ -143,8 +183,9 @@ string(%d) "Function [ <user> function f ] {
 string(%d) "Function [ <user> function g ] {
   @@ %s/ReflectionFunction_getParamInfo_ref.php %d - %d
 
-  - Parameters [1] {
+  - Parameters [2] {
     Parameter #0 [ <required> inout HH\bool $a ]
+    Parameter #1 [ <required> HH\bool $not_inout ]
   }
 }
 "

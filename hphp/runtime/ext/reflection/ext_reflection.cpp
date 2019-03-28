@@ -770,7 +770,7 @@ static Array get_function_param_info(const Func* func) {
     if (func->byRef(i)) {
       param.set(s_ref, true_varNR.tv());
     }
-    if (func->isInOutWrapper() || fpi.inout) {
+    if ((func->isInOutWrapper() && func->byRef(i)) || fpi.inout) {
       param.set(s_inout, true_varNR.tv());
     }
     if (fpi.isVariadic()) {

@@ -1,7 +1,7 @@
 <?hh
 
 function f(bool &$a) {}
-function g(inout bool $a) {}
+function g(inout bool $a, bool $not_inout) {}
 function h(bool $a) {}
 
 <<__EntryPoint>>

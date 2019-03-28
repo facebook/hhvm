@@ -174,7 +174,8 @@ class ReflectionParameter implements Reflector {
       $type .= ' ';
     }
     $out = 'Parameter #'.$this->getPosition().' [ ';
-    $inout = $reference = '';
+    $inout = '';
+    $reference = '';
     if ($this->isInOut()) {
       $inout = 'inout ';
     } else if ($this->isPassedByReference()) {

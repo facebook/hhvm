@@ -58,7 +58,6 @@ bool Pipe::open(const String& filename, const String& mode) {
 }
 
 bool Pipe::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 

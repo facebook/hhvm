@@ -179,18 +179,6 @@ Array HHVM_FUNCTION(stream_get_transports);
 Array HHVM_FUNCTION(stream_get_wrappers);
 bool HHVM_FUNCTION(stream_is_local,
                    const Variant& stream_or_url);
-bool HHVM_FUNCTION(stream_register_wrapper,
-                   const String& protocol,
-                   const String& classname,
-                   int flags);
-bool HHVM_FUNCTION(stream_wrapper_register,
-                   const String& protocol,
-                   const String& classname,
-                   int flags);
-bool HHVM_FUNCTION(stream_wrapper_restore,
-                   const String& protocol);
-bool HHVM_FUNCTION(stream_wrapper_unregister,
-                   const String& protocol);
 
 Variant HHVM_FUNCTION(stream_resolve_include_path,
                       const String& filename,

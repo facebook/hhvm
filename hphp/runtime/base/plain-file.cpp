@@ -140,7 +140,6 @@ bool PlainFile::open(const String& filename, const String& mode) {
 }
 
 bool PlainFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 
@@ -295,7 +294,6 @@ BuiltinFile::~BuiltinFile() {
 }
 
 bool BuiltinFile::close() {
-  invokeFiltersOnClose();
   if (m_stream == rl_stdfiles->stdin)  rl_stdfiles->stdin = nullptr;
   if (m_stream == rl_stdfiles->stdout) rl_stdfiles->stdout = nullptr;
   if (m_stream == rl_stdfiles->stderr) rl_stdfiles->stderr = nullptr;
@@ -308,7 +306,6 @@ bool BuiltinFile::close() {
 }
 
 void BuiltinFile::sweep() {
-  invokeFiltersOnClose();
   // This object was just a wrapper around a FILE* or fd owned by someone else,
   // so don't close it except in explicit calls to close(). Beware this doesn't
   // call PlainFile::sweep().

@@ -90,7 +90,6 @@ bool MemFile::open(const String& filename, const String& mode) {
 }
 
 bool MemFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 

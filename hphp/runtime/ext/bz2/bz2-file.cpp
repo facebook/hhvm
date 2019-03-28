@@ -48,7 +48,6 @@ bool BZ2File::open(const String& filename, const String& mode) {
 }
 
 bool BZ2File::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 

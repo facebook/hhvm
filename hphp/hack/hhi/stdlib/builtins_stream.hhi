@@ -109,14 +109,6 @@ function stream_bucket_make_writeable(resource $brigade);
 <<__PHPStdLib>>
 function stream_bucket_new(resource $stream, string $buffer);
 <<__PHPStdLib>>
-function stream_filter_register(string $filtername, string $classname);
-<<__PHPStdLib>>
-function stream_filter_remove(resource $stream_filter);
-<<__PHPStdLib>>
-function stream_filter_append(resource $stream, string $filtername, $read_write = 0, $params = null);
-<<__PHPStdLib>>
-function stream_filter_prepend(resource $stream, string $filtername, $read_write = 0, $params = null);
-<<__PHPStdLib>>
 function stream_get_contents(resource $handle, int $maxlen = 0, int $offset = 0);
 <<__PHPStdLib>>
 function stream_get_filters();
@@ -128,14 +120,6 @@ function stream_get_meta_data(resource $stream);
 function stream_get_transports();
 <<__PHPStdLib>>
 function stream_get_wrappers();
-<<__PHPStdLib>>
-function stream_register_wrapper(string $protocol, string $classname);
-<<__PHPStdLib>>
-function stream_wrapper_register(string $protocol, string $classname);
-<<__PHPStdLib>>
-function stream_wrapper_restore(string $protocol);
-<<__PHPStdLib>>
-function stream_wrapper_unregister(string $protocol);
 <<__PHPStdLib>>
 function stream_resolve_include_path(string $filename, $context = null);
 <<__PHPStdLib>>

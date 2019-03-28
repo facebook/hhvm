@@ -179,12 +179,12 @@ function stream_get_meta_data(resource $stream): mixed;
 function stream_get_transports(): vec<string>;
 
 /**
- * Retrieve list of registered streams available on the running system.
- *
- * @return array - Returns an indexed array containing the name of all stream
- *   wrappers available on the running system.
- *
- */
+* Retrieve list of registered streams available on the running system.
+*
+* @return array - Returns an indexed array containing the name of all stream
+*   wrappers available on the running system.
+*
+*/
 <<__Native>>
 function stream_get_wrappers(): varray<string>;
 
@@ -198,60 +198,6 @@ function stream_get_wrappers(): varray<string>;
  */
 <<__Native>>
 function stream_is_local(mixed $stream_or_url): bool;
-
-/**
- * This function is an alias of: stream_wrapper_register().
- *
- */
-<<__Native>>
-function stream_register_wrapper(string $protocol,
-                                 string $classname,
-                                 int $flags = 0): bool;
-
-/**
- * Allows you to implement your own protocol handlers and streams for use with
- *   all the other filesystem functions (such as fopen(), fread() etc.).
- *
- * @param string $protocol - The wrapper name to be registered.
- * @param string $classname - The classname which implements the protocol.
- * @param int $flags - Should be set to STREAM_IS_URL if protocol is a URL
- *   protocol. Default is 0, local stream.
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *   stream_wrapper_register() will return FALSE if the protocol already has a
- *   handler.
- *
- */
-<<__Native>>
-function stream_wrapper_register(string $protocol,
-                                 string $classname,
-                                 int $flags = 0): bool;
-
-/**
- * Restores a built-in wrapper previously unregistered with
- *   stream_wrapper_unregister().
- *
- * @param string $protocol
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Native>>
-function stream_wrapper_restore(string $protocol): bool;
-
-/**
- * Allows you to disable an already defined stream wrapper. Once the wrapper
- *   has been disabled you may override it with a user-defined wrapper using
- *   stream_wrapper_register() or re-enable it later on with
- *   stream_wrapper_restore().
- *
- * @param string $protocol
- *
- * @return bool - Returns TRUE on success or FALSE on failure.
- *
- */
-<<__Native>>
-function stream_wrapper_unregister(string $protocol): bool;
 
 /**
  * Resolve filename against the include path according to the same rules as

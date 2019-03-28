@@ -33,7 +33,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 struct StreamContext;
-struct StreamFilter;
 
 extern RDS_LOCAL(int, s_pcloseRet);
 
@@ -146,13 +145,6 @@ struct File : SweepableResourceData {
    */
   virtual bool open(const String& filename, const String& mode) = 0;
 
-  /**
-   * How to close this type of file.
-   *
-   * Your implementaitn should call invokeFiltersOnClose() before anything else
-   * to make sure that any user-provided php_user_filter instances get to flush
-   * and clean up.
-   */
   virtual bool close() = 0;
   virtual bool isClosed() const { return !m_data || m_data->m_closed; }
 
@@ -160,13 +152,7 @@ struct File : SweepableResourceData {
    * - read() when fetching data to return to PHP
    * - readImpl() when you want raw unbuffered data; for example, if you use
    *   the Socket class to implement a network-based extension, use readImpl
-   *   to avoid the internal buffer, stream filters, and so on
-   * - filteredRead() (wrapper around readImpl()) to call user-supplied stream
-   *   filters if you reimplement read()
-   *
-   * Stream filters are only supported for read() - the fgetc() and seek()
-   * behavior in Zend is undocumented, surprising, and not supported
-   * in HHVM.
+   *   to avoid the internal buffer, and so on
    */
 
   /**
@@ -182,12 +168,6 @@ struct File : SweepableResourceData {
    *   stream
    * - writeImpl() if you want C-like behavior, instead of PHP-like behavior;
    *   for example, if you write a network-based extension using Socket
-   * - filteredWrite() if you re-implement write() to provide support for PHP
-   *   user filters
-   *
-   * Stream filters are only supported for write() - the fputc() and seek()
-   * behavior in Zend is undocumented, surprising, and not supported
-   * in HHVM.
    */
 
   /**
@@ -221,12 +201,6 @@ struct File : SweepableResourceData {
   void setStreamContext(const req::ptr<StreamContext>& context) {
     m_streamContext = context;
   }
-  void appendReadFilter(const req::ptr<StreamFilter>& filter);
-  void appendWriteFilter(const req::ptr<StreamFilter>& filter);
-  void prependReadFilter(const req::ptr<StreamFilter>& filter);
-  void prependWriteFilter(const req::ptr<StreamFilter>& filter);
-  bool removeFilter(const req::ptr<StreamFilter>& filter);
-
   int64_t bufferedLen() { return m_data->m_writepos - m_data->m_readpos; }
 
   std::string getMode() { return m_data->m_mode; }
@@ -283,7 +257,6 @@ struct File : SweepableResourceData {
   std::shared_ptr<FileData> getData() const { return m_data; }
 
 protected:
-  void invokeFiltersOnClose();
   bool closeImpl();
   void sweep() override;
 
@@ -311,16 +284,6 @@ protected:
     m_streamType = streamType.get();
   }
 
-  /**
-   * call readImpl(m_buffer, CHUNK_SIZE), passing through stream filters if any.
-   */
-  int64_t filteredReadToBuffer();
-
-  /**
-   * call writeImpl, passing through stream filters if any.
-   */
-  int64_t filteredWrite(const char* buffer, int64_t length);
-
   FileData* getFileData() { return m_data.get(); }
   const FileData* getFileData() const { return m_data.get(); }
 
@@ -330,17 +293,10 @@ protected:
                 const String& stream_type = empty_string_ref);
 
 private:
-  template<class ResourceList>
-  String applyFilters(const String& buffer,
-                      ResourceList& filters,
-                      bool closing);
-
   std::shared_ptr<FileData> m_data;
   StringData* m_wrapperType;
   StringData* m_streamType;
   req::ptr<StreamContext> m_streamContext;
-  req::list<req::ptr<StreamFilter>> m_readFilters;
-  req::list<req::ptr<StreamFilter>> m_writeFilters;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

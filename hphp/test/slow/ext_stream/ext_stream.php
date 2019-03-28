@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -131,16 +131,6 @@ function test_stream_misc() {
   VS(in_array("http", $w), true);
 }
 
-function test_stream_wrapper_restore() {
-  $count = count(stream_get_wrappers());
-
-  VS(stream_wrapper_unregister("http"), true);
-  VS(count(stream_get_wrappers()), $count - 1);
-
-  VS(stream_wrapper_restore("http"), true);
-  VS(count(stream_get_wrappers()), $count);
-}
-
 function test_stream_select() {
   $f = fopen(__DIR__."/../ext_file/test_ext_file.txt", "r");
   $reads = array($f);
@@ -249,7 +239,6 @@ test_stream_get_contents();
 test_stream_get_line();
 test_stream_get_meta_data();
 test_stream_misc();
-test_stream_wrapper_restore();
 test_stream_select();
 test_stream_socket_recvfrom_tcp();
 test_stream_socket_recvfrom_tcp6();

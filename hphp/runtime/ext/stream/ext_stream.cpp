@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
 #include "hphp/runtime/ext/sockets/ext_sockets.h"
-#include "hphp/runtime/ext/stream/ext_stream-user-filters.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -35,7 +34,6 @@
 #include "hphp/runtime/base/ssl-socket.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
-#include "hphp/runtime/base/user-stream-wrapper.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
 #include <memory>
@@ -166,10 +164,6 @@ static struct StreamExtension final : Extension {
     HHVM_FE(stream_get_transports);
     HHVM_FE(stream_get_wrappers);
     HHVM_FE(stream_is_local);
-    HHVM_FE(stream_register_wrapper);
-    HHVM_FE(stream_wrapper_register);
-    HHVM_FE(stream_wrapper_restore);
-    HHVM_FE(stream_wrapper_unregister);
     HHVM_FE(stream_resolve_include_path);
     HHVM_FE(stream_select);
     HHVM_FE(stream_await);
@@ -560,44 +554,6 @@ bool HHVM_FUNCTION(stream_is_local,
   }
   // Zend returns true for random data types...
   return true;
-}
-
-
-bool HHVM_FUNCTION(stream_register_wrapper,
-                   const String& protocol,
-                   const String& classname,
-                   int flags) {
-  return HHVM_FN(stream_wrapper_register)(protocol, classname, flags);
-}
-
-bool HHVM_FUNCTION(stream_wrapper_register,
-                   const String& protocol,
-                   const String& classname,
-                   int flags) {
-  auto const cls = Unit::loadClass(classname.get());
-  if (!cls) {
-    raise_warning("Undefined class: '%s'", classname.data());
-    return false;
-  }
-
-  auto wrapper = req::unique_ptr<Stream::Wrapper>(
-      req::make_raw<UserStreamWrapper>(protocol, cls, flags)
-  );
-  if (!Stream::registerRequestWrapper(protocol, std::move(wrapper))) {
-    raise_warning("Unable to register protocol: %s\n", protocol.data());
-    return false;
-  }
-  return true;
-}
-
-bool HHVM_FUNCTION(stream_wrapper_restore,
-                   const String& protocol) {
-  return Stream::restoreWrapper(protocol);
-}
-
-bool HHVM_FUNCTION(stream_wrapper_unregister,
-                   const String& protocol) {
-  return Stream::disableWrapper(protocol);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

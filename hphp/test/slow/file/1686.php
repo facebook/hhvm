@@ -1,5 +1,4 @@
-<?php
-
+<?hh
 
 <<__EntryPoint>>
 function main_1686() {

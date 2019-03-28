@@ -62,7 +62,6 @@ bool TempFile::open(const String& /*filename*/, const String& /*mode*/) {
 }
 
 bool TempFile::close() {
-  invokeFiltersOnClose();
   return closeImpl();
 }
 

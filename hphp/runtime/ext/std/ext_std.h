@@ -28,7 +28,6 @@ struct StandardExtension final : Extension {
     initVariable();
     initFunction();
     initMisc();
-    initStreamUserFilters();
     initFile();
     initIntrinsics();
     initMath();
@@ -58,7 +57,6 @@ struct StandardExtension final : Extension {
   void initVariable();
   void initFunction();
   void initMisc();
-  void initStreamUserFilters();
   void initFile();
   void initIntrinsics();
   void initMath();

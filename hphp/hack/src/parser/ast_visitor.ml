@@ -113,7 +113,6 @@ class type ['a] ast_visitor_type = object
   method on_sflit: 'a -> pstring -> 'a
   method on_shape : 'a -> (shape_field_name * expr) list -> 'a
   method on_shape_field_name: 'a -> shape_field_name -> 'a
-  method on_static_var : 'a -> expr list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
   method on_string2 : 'a -> expr list -> 'a
@@ -249,8 +248,6 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     match eopt with
     | None -> acc
     | Some e -> this#on_expr acc e
-
-  method on_static_var acc el = List.fold_left this#on_expr acc el
 
   method on_awaitall acc el =
     List.fold_left (fun acc (e1, e2) ->

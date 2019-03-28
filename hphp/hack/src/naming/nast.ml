@@ -212,7 +212,6 @@ class type ['a] visitor_type = object
   method on_return : 'a -> expr option -> 'a
   method on_goto_label : 'a -> pstring -> 'a
   method on_goto : 'a -> pstring -> 'a
-  method on_static_var : 'a -> expr list -> 'a
   method on_awaitall : 'a -> (id option * expr) list -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
@@ -334,8 +333,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     match eopt with
     | None -> acc
     | Some e -> this#on_expr acc e
-
-  method on_static_var acc el = List.fold_left el ~f:this#on_expr ~init:acc
 
   method on_awaitall acc el = List.fold_left ~f:(fun acc (x, y) ->
     let acc = match x with

@@ -57,7 +57,7 @@ ALWAYS_INLINE bool isPrologueStub(TCA addr) {
 
 void emitFuncGuard(const Func* func, CodeBlock& cb, CGMeta& fixups) {
   using namespace reg;
-  X64Assembler a { cb };
+  NEW_X64_ASM(a, cb);
 
   assertx(x64::abi(CodeKind::Prologue).gpUnreserved.contains(rax));
 

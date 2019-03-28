@@ -185,16 +185,15 @@ inline VscaledDisp operator+(Vscaled vs, int32_t disp) {
 
 inline MemoryRef Vptr::mr() const {
   if (index.isValid()) {
-    return base.isValid() ? r64(base)[r64(index) * scale + disp] :
-           *(IndexedDispReg{r64(index) * scale + disp});
+    return base.isValid() ? SegReg(seg)[r64(base) + r64(index) * scale + disp] :
+           SegReg(seg)[r64(index) * scale + disp];
   } else {
-    return base.isValid() ? r64(base)[disp] :
-           *(DispReg{disp});
+    return base.isValid() ? SegReg(seg)[r64(base) + disp] :
+           SegReg(seg)[disp];
   }
 }
 
 inline Vptr::operator MemoryRef() const {
-  assertx(seg == DS);
   return mr();
 }
 

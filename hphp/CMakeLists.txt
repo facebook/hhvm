@@ -91,10 +91,16 @@ if (ENABLE_COTIRE)
       "${CMAKE_BINARY_DIR}")
 
   # XED headers need to be wrapped in extern "C"
-  if (LibXed_INCLUDE_DIR)
-    set_property(DIRECTORY
-      APPEND PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
-        "${LibXed_INCLUDE_DIR}")
+  if (ENABLE_XED)
+    if (LibXed_INCLUDE_DIR)
+      set_property(DIRECTORY
+          APPEND PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
+            "${LibXed_INCLUDE_DIR}")
+    else()
+      set_property(DIRECTORY
+          APPEND PROPERTY COTIRE_PREFIX_HEADER_IGNORE_PATH
+            "${TP_DIR}/xed/xed/build/include/xed")
+    endif()
   endif()
 endif()
 

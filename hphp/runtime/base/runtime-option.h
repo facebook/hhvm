@@ -1134,6 +1134,7 @@ struct RuntimeOption {
   F(uint32_t, ProfBranchSampleFreq, 0)                                  \
   /* Sampling frequency for profiling packed array accesses. */         \
   F(uint32_t, ProfPackedArraySampleFreq, 0)                             \
+  F(bool, UseXedAssembler, false)                                       \
   /* */
 
 private:

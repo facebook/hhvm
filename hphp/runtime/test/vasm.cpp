@@ -118,7 +118,7 @@ TEST(Vasm, PrintVptr) {
   p.disp = -16;
   p.index = Vreg{};
   EXPECT_EQ("[%128 - 0x10]", show(p));
-  p.seg = Vptr::FS;
+  p.seg = Segment::FS;
   EXPECT_EQ("[%fs + %128 - 0x10]", show(p));
   p.base = Vreg{};
   EXPECT_EQ("[%fs - 0x10]", show(p));

@@ -39,7 +39,7 @@ bool is_nop(const lea& i) {
   return
     (i.s.base == i.d && !i.s.index.isValid()) ||
     (!i.s.base.isValid() && i.s.index == i.d && i.s.scale == 1 &&
-      i.s.seg == Vptr::DS);
+      i.s.seg == Segment::DS);
 }
 
 //////////////////////////////////////////////////////////////////////

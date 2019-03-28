@@ -233,6 +233,10 @@ struct DataBlock {
     m_frontier = addr;
   }
 
+  void moveFrontier(int64_t offset) {
+    setFrontier(m_frontier + offset);
+  }
+
   size_t capacity() const {
     return m_size;
   }

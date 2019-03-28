@@ -81,10 +81,14 @@ endif()
 set(CMAKE_REQUIRED_LIBRARIES)
 
 # libXed
-find_package(LibXed)
-if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
-  include_directories(${LibXed_INCLUDE_DIR})
+if (ENABLE_XED)
+  find_package(LibXed)
+  if (LibXed_FOUND)
+    include_directories(${LibXed_INCLUDE_DIR})
+  endif()
   add_definitions("-DHAVE_LIBXED")
+else()
+  message(STATUS "XED is disabled")
 endif()
 
 # CURL checks
@@ -446,10 +450,6 @@ macro(hphp_link target)
     target_link_libraries(${target} ${LIBJSONC_LIBRARY})
   endif()
 
-  if (LibXed_LIBRARY)
-    target_link_libraries(${target} ${LibXed_LIBRARY})
-  endif()
-
   if (LIBINOTIFY_LIBRARY)
     target_link_libraries(${target} ${LIBINOTIFY_LIBRARY})
   endif()
@@ -595,4 +595,12 @@ int main() {
       target_link_libraries(${target} ${ATOMIC_LIBRARY})
   endif()
   set(CMAKE_REQUIRED_FLAGS ${OLD_CMAKE_REQUIRED_FLAGS})
+
+  if (ENABLE_XED)
+    if (LibXed_FOUND)
+        target_link_libraries(${target} ${LibXed_LIBRARY})
+    else()
+        target_link_libraries(${target} xed)
+    endif()
+  endif()
 endmacro()

@@ -1,7 +1,9 @@
 if(IS_X64)
-  find_package(LibXed REQUIRED)
-  if (LibXed_INCLUDE_DIR AND LibXed_LIBRARY)
-    include_directories(${LibXed_INCLUDE_DIR})
+  if (ENABLE_XED)
+    find_package(LibXed)
+    if (LibXed_FOUND)
+      include_directories(${LibXed_INCLUDE_DIR})
+    endif()
     add_definitions("-DHAVE_LIBXED")
     add_executable(tc-print "mappers.cpp" "offline-trans-data.cpp"
                             "offline-code.cpp"
@@ -12,9 +14,10 @@ if(IS_X64)
     target_link_libraries(tc-print ${HHVM_LINK_LIBRARIES})
     embed_all_systemlibs(tc-print "${CMAKE_CURRENT_BINARY_DIR}/../.."
                                   "${CMAKE_CURRENT_BINARY_DIR}/tc-print")
+  else()
+    message(STATUS "XED disabled, tc-print will not be built")
   endif()
-endif()
-if(NOT IS_X64)
+else()
   add_executable(tc-print "mappers.cpp" "offline-trans-data.cpp"
                           "offline-code.cpp"  "perf-events.cpp"
                           "offline-arm-code.cpp" "offline-ppc64-code.cpp"

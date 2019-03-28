@@ -43,3 +43,5 @@ IF (NOT DEFAULT_CONFIG_DIR)
   set(DEFAULT_CONFIG_DIR "/etc/hhvm/" CACHE STRING
     "Default directory to find php.ini")
 ENDIF()
+
+option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)

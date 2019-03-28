@@ -564,8 +564,6 @@ VscaledDisp operator+(Vscaled, int32_t);
  *    - index is optional
  */
 struct Vptr {
-  enum Segment : uint8_t { DS, FS, GS };
-
   Vptr(Width w = Width::None)
     : base(Vreg{})
     , index(Vreg{})

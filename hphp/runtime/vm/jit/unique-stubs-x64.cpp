@@ -209,7 +209,7 @@ void assert_tc_saved_rip(void* sp) {
 }
 
 TCA emitCallToExit(CodeBlock& cb, DataBlock& /*data*/, const UniqueStubs& us) {
-  X64Assembler a { cb };
+  NEW_X64_ASM(a, cb);
 
   // Emit a byte of padding. This is a kind of hacky way to avoid
   // hitting an assert in recordGdbStub when we call it with stub - 1

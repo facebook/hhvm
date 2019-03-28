@@ -56,6 +56,7 @@ namespace {
 static_assert(folly::kIsLittleEndian,
   "Code contains little-endian specific optimizations.");
 
+template<class X64Asm>
 struct Vgen {
   explicit Vgen(Venv& env)
     : env(env)
@@ -171,7 +172,7 @@ struct Vgen {
   void emit(const declm& i) { a.decl(i.m); }
   void emit(decq i) { unary(i); a.decq(i.d); }
   void emit(const decqm& i) { a.decq(i.m); }
-  void emit(const decqmlock& i) { a.lock(); a.decq(i.m); }
+  void emit(const decqmlock& i) { a.decqlock(i.m); }
   void emit(divsd i) { noncommute(i); a.divsd(i.s0, i.d); }
   void emit(imul i) { commuteSF(i); a.imul(i.s0, i.d); }
   void emit(const idiv& i) { a.idiv(i.s); }
@@ -296,6 +297,7 @@ private:
 
   template<class Inst> void unary(Inst& i) { prep(i.s, i.d); }
   template<class Inst> void binary(Inst& i) { prep(i.s1, i.d); }
+
   template<class Inst> void commuteSF(Inst&);
   template<class Inst> void commute(Inst&);
   template<class Inst> void noncommute(Inst&);
@@ -304,7 +306,7 @@ private:
 
 private:
   Venv& env;
-  X64Assembler a;
+  X64Asm a;
 
   const Vlabel current;
   const Vlabel next;
@@ -314,13 +316,13 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-
 /*
  * Prepare a binary op that is not commutative.
  *
  * s0 must be a different register than s1 so we don't clobber it.
  */
-template<class Inst> void Vgen::noncommute(Inst& i) {
+template<class X64Asm>
+template<class Inst> void Vgen<X64Asm>::noncommute(Inst& i) {
   assertx(i.s1 == i.d || i.s0 != i.d); // do not clobber s0
   binary(i);
 }
@@ -330,7 +332,8 @@ template<class Inst> void Vgen::noncommute(Inst& i) {
  *
  * Swap operands if the dest is s0.
  */
-template<class Inst> void Vgen::commuteSF(Inst& i) {
+template<class X64Asm>
+template<class Inst> void Vgen<X64Asm>::commuteSF(Inst& i) {
   if (i.s1 != i.d && i.s0 == i.d) {
     i = Inst{i.s1, i.s0, i.d, i.sf};
   } else {
@@ -338,24 +341,13 @@ template<class Inst> void Vgen::commuteSF(Inst& i) {
   }
 }
 
-template<class Inst> void Vgen::commute(Inst& i) {
+template<class X64Asm>
+template<class Inst> void Vgen<X64Asm>::commute(Inst& i) {
   if (i.s1 != i.d && i.s0 == i.d) {
     i = Inst{i.s1, i.s0, i.d};
   } else {
     binary(i);
   }
-}
-
-/*
- * Helper for emitting instructions whose Vptr operand specifies a segment.
- */
-X64Assembler& prefix(X64Assembler& a, const Vptr& ptr) {
-  if (ptr.seg == Vptr::Segment::FS) {
-    a.fs();
-  } else if (ptr.seg == Vptr::Segment::GS) {
-    a.gs();
-  }
-  return a;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -468,17 +460,18 @@ void retargetJumps(Venv& env,
   }
 }
 
-void Vgen::patch(Venv& env) {
+template<class X64Asm>
+void Vgen<X64Asm>::patch(Venv& env) {
   for (auto& p : env.jmps) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    X64Asm::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
   }
 
   auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
   for (auto& p : env.jccs) {
     assertx(env.addrs[p.target]);
-    X64Assembler::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
+    X64Asm::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
     if (optLevel >= 2 ||
         (optLevel == 1 && p.target >= env.unit.blocks.size())) {
       jccs[env.addrs[p.target]].emplace_back(p.instr);
@@ -488,16 +481,16 @@ void Vgen::patch(Venv& env) {
   if (!jccs.empty()) retargetJumps(env, jccs);
 }
 
-void Vgen::pad(CodeBlock& cb) {
-  X64Assembler a { cb };
-  while (a.available() >= 2) a.ud2();
-  if (a.available() > 0) a.int3();
-  assertx(a.available() == 0);
+template<class X64Asm>
+void Vgen<X64Asm>::pad(CodeBlock& cb) {
+  X64Asm a { cb };
+  a.pad();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const copy& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const copy& i) {
   if (i.s == i.d) return;
   if (i.s.isGP()) {
     if (i.d.isGP()) {                 // GP => GP
@@ -520,7 +513,8 @@ void Vgen::emit(const copy& i) {
   }
 }
 
-void Vgen::emit(const copy2& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const copy2& i) {
   assertx(i.s0.isValid() && i.s1.isValid() && i.d0.isValid() && i.d1.isValid());
   auto s0 = i.s0, s1 = i.s1, d0 = i.d0, d1 = i.d1;
   assertx(d0 != d1);
@@ -539,7 +533,8 @@ void Vgen::emit(const copy2& i) {
   }
 }
 
-void Vgen::emit_simd_imm(int64_t val, Vreg d) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit_simd_imm(int64_t val, Vreg d) {
   if (val == 0) {
     a.pxor(d, d); // does not modify flags
   } else {
@@ -548,7 +543,8 @@ void Vgen::emit_simd_imm(int64_t val, Vreg d) {
   }
 }
 
-void Vgen::emit(const ldimmb& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldimmb& i) {
   // ldimmb is for Vconst::Byte, which is treated as unsigned uint8_t
   auto val = i.s.ub();
   if (i.d.isGP()) {
@@ -559,7 +555,8 @@ void Vgen::emit(const ldimmb& i) {
   }
 }
 
-void Vgen::emit(const ldimml& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldimml& i) {
   // ldimml is for Vconst::Long, which is treated as unsigned uint32_t
   auto val = i.s.l();
   if (i.d.isGP()) {
@@ -570,7 +567,8 @@ void Vgen::emit(const ldimml& i) {
   }
 }
 
-void Vgen::emit(const ldimmq& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const ldimmq& i) {
   auto val = i.s.q();
   if (i.d.isGP()) {
     if (val == 0) {
@@ -584,9 +582,10 @@ void Vgen::emit(const ldimmq& i) {
   }
 }
 
-void Vgen::emit(const load& i) {
-  prefix(a, i.s);
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const load& i) {
   auto mref = i.s.mr();
+  a.prefix(mref);
   if (i.d.isGP()) {
     a.loadq(mref, i.d);
   } else {
@@ -595,7 +594,8 @@ void Vgen::emit(const load& i) {
   }
 }
 
-void Vgen::emit(const store& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const store& i) {
   if (i.s.isGP()) {
     a.storeq(i.s, i.d);
   } else {
@@ -606,7 +606,8 @@ void Vgen::emit(const store& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const mcprep& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const mcprep& i) {
   /*
    * Initially, we set the cache to hold (addr << 1) | 1 (where `addr' is the
    * address of the movq) so that we can find the movq from the handler.
@@ -624,7 +625,8 @@ void Vgen::emit(const mcprep& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const call& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const call& i) {
   if (a.jmpDeltaFits(i.target)) {
     a.call(i.target);
   } else {
@@ -642,13 +644,15 @@ void Vgen::emit(const call& i) {
   }
 }
 
-void Vgen::emit(const calls& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const calls& i) {
   emitSmashableCall(a.code(), env.meta, i.target);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const stubret& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const stubret& i) {
   if (i.saveframe) {
     a.pop(rvmfp());
   } else {
@@ -657,23 +661,27 @@ void Vgen::emit(const stubret& i) {
   a.ret();
 }
 
-void Vgen::emit(const callstub& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const callstub& i) {
   emit(call{i.target, i.args});
 }
 
-void Vgen::emit(const callfaststub& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const callfaststub& i) {
   emit(call{i.target, i.args});
   emit(syncpoint{i.fix});
 }
 
-void Vgen::emit(const tailcallstub& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const tailcallstub& i) {
   a.addq(8, reg::rsp);
   emit(jmpi{i.target, i.args});
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const phpret& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const phpret& i) {
   a.push(i.fp[AROFF(m_savedRip)]);
   if (!i.noframe) {
     a.loadq(i.fp[AROFF(m_sfp)], i.d);
@@ -681,16 +689,19 @@ void Vgen::emit(const phpret& i) {
   a.ret();
 }
 
-void Vgen::emit(const tailcallphp& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const tailcallphp& i) {
   emit(pushm{i.fp[AROFF(m_savedRip)]});
   emit(jmpr{i.target, i.args});
 }
 
-void Vgen::emit(const callunpack& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const callunpack& i) {
   emit(call{i.target, i.args});
 }
 
-void Vgen::emit(const contenter& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const contenter& i) {
   Label Stub, End;
   Reg64 fp = i.fp, target = i.target;
   a.jmp8(End);
@@ -706,8 +717,8 @@ void Vgen::emit(const contenter& i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const calltc& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const calltc& i) {
   a.push(i.exittc);
   a.push(i.fp[AROFF(m_savedRip)]);
 
@@ -722,19 +733,22 @@ void Vgen::emit(const calltc& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(const nothrow& /*i*/) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const nothrow& /*i*/) {
   env.meta.catches.emplace_back(a.frontier(), nullptr);
   env.record_inline_stack(a.frontier());
 }
 
-void Vgen::emit(const syncpoint& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const syncpoint& i) {
   FTRACE(5, "IR recordSyncPoint: {} {} {}\n", a.frontier(),
          i.fix.pcOffset, i.fix.spOffset);
   env.meta.fixups.emplace_back(a.frontier(), i.fix);
   env.record_inline_stack(a.frontier());
 }
 
-void Vgen::emit(const unwind& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const unwind& i) {
   catches.push_back({a.frontier(), i.targets[1]});
   env.record_inline_stack(a.frontier());
   emit(jmp{i.targets[0]});
@@ -742,7 +756,8 @@ void Vgen::emit(const unwind& i) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vgen::emit(andqi i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(andqi i) {
   if (magFits(i.s0.q(), sz::dword)) {
     emit(andli{int32_t(i.s0.q()), Reg32(i.s1), Reg32(i.d), i.sf});
     return;
@@ -752,15 +767,20 @@ void Vgen::emit(andqi i) {
   a.andq(i.s0, i.d);
 }
 
-void Vgen::emit(const addlim& i) {
-  prefix(a, i.m).addl(i.s0, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const addlim& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).addl(i.s0, mref);
 }
 
-void Vgen::emit(const addqim& i) {
-  prefix(a, i.m).addq(i.s0, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const addqim& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).addq(i.s0, mref);
 }
 
-void Vgen::emit(const cloadq& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const cloadq& i) {
   auto m = i.t;
   always_assert(!m.index.isValid()); // not supported, but could be later.
   if (i.f != i.d) {
@@ -779,8 +799,9 @@ void Vgen::emit(const cloadq& i) {
 
 // add s0 s1 d => mov s1->d; d += s0
 // cmov cc s d => if cc { mov s->d }
+template<class X64Asm>
 template<class cmov>
-void Vgen::emit_cmov(const cmov& i) {
+void Vgen<X64Asm>::emit_cmov(const cmov& i) {
   if (i.f != i.d && i.t == i.d) {
     // negate the condition and swap t/f operands so we dont clobber i.t
     return emit(cmov{ccNegate(i.cc), i.sf, i.t, i.f, i.d});
@@ -790,17 +811,20 @@ void Vgen::emit_cmov(const cmov& i) {
   a.cmov_reg64_reg64(i.cc, r64(i.t), r64(i.d));
 }
 
-void Vgen::emit(const cvtsi2sd& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const cvtsi2sd& i) {
   a.pxor(i.d, i.d);
   a.cvtsi2sd(i.s, i.d);
 }
 
-void Vgen::emit(const cvtsi2sdm& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const cvtsi2sdm& i) {
   a.pxor(i.d, i.d);
   a.cvtsi2sd(i.s, i.d);
 }
 
-void Vgen::emit(const jcc& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jcc& i) {
   if (i.targets[1] != i.targets[0]) {
     if (next == i.targets[1]) {
       return emit(jcc{ccNegate(i.cc), i.sf, {i.targets[1], i.targets[0]}});
@@ -812,18 +836,21 @@ void Vgen::emit(const jcc& i) {
   emit(jmp{i.targets[0]});
 }
 
-void Vgen::emit(const jcci& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jcci& i) {
   a.jcc(i.cc, i.taken);
   emit(jmp{i.target});
 }
 
-void Vgen::emit(const jmp& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jmp& i) {
   if (next == i.target) return;
   jmps.push_back({a.frontier(), i.target});
   a.jmp(a.frontier());
 }
 
-void Vgen::emit(const jmpi& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const jmpi& i) {
   if (a.jmpDeltaFits(i.target)) {
     a.jmp(i.target);
   } else {
@@ -833,7 +860,8 @@ void Vgen::emit(const jmpi& i) {
   }
 }
 
-void Vgen::emit(const lea& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const lea& i) {
   // could do this in a simplify pass
   if (i.s.disp == 0 && i.s.base.isValid() && !i.s.index.isValid()) {
     emit(copy{i.s.base, i.d});
@@ -842,16 +870,20 @@ void Vgen::emit(const lea& i) {
   }
 }
 
-void Vgen::emit(const storebi& i) {
-  prefix(a, i.m).storeb(i.s, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const storebi& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).storeb(i.s, mref);
 }
 
-void Vgen::emit(const storeqi& i) {
-  prefix(a, i.m).storeq(i.s, i.m.mr());
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const storeqi& i) {
+  auto mref = i.m.mr();
+  a.prefix(mref).storeq(i.s, mref);
 }
 
-template<typename Inst>
-bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
+template<class VgenImpl, typename Inst>
+bool testimHelper(VgenImpl& env, const Inst& i, uint64_t mask) {
   // If there's only 1 byte of meaningful bits in the mask, we can adjust the
   // pointer offset and use testbim instead.
   int off = 0;
@@ -866,31 +898,36 @@ bool testimHelper(Vgen& env, const Inst& i, uint64_t mask) {
   return true;
 }
 
-void Vgen::emit(const testwi& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const testwi& i) {
   if (i.s0.w() == -1) {
     return emit(testw{i.s1, i.s1, i.sf});
   }
   a.testw(i.s0, i.s1);
 }
 
-void Vgen::emit(const testwim& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::Vgen::emit(const testwim& i) {
   if (testimHelper(*this, i, i.s0.w())) return;
   a.testw(i.s0, i.s1);
 }
 
-void Vgen::emit(const testlim& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::Vgen::emit(const testlim& i) {
   if (testimHelper(*this, i, i.s0.l())) return;
   a.testl(i.s0, i.s1);
 }
 
-void Vgen::emit(const testli& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::Vgen::emit(const testli& i) {
   if (i.s0.l() == -1) {
     return emit(testl{i.s1, i.s1, i.sf});
   }
   a.testl(i.s0, i.s1);
 }
 
-void Vgen::emit(const testqi& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const testqi& i) {
   auto const imm = i.s0.q();
   if (magFits(imm, sz::byte)) {
     a.testb(int8_t(imm), rbyte(i.s1));
@@ -903,7 +940,8 @@ void Vgen::emit(const testqi& i) {
   }
 }
 
-void Vgen::emit(const testqim& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const testqim& i) {
   if (testimHelper(*this, i, i.s0.q())) return;
   if (magFits(i.s0.q(), sz::dword)) {
     // For an unsigned 32 bit immediate, we can get the same results
@@ -914,12 +952,14 @@ void Vgen::emit(const testqim& i) {
   }
 }
 
-void Vgen::emit(const trap& i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const trap& i) {
   env.meta.trapReasons.emplace_back(a.frontier(), i.reason);
   a.ud2();
 }
 
-void Vgen::emit(xorq i) {
+template<class X64Asm>
+void Vgen<X64Asm>::emit(xorq i) {
   if (i.s0 == i.s1) {
     // 32-bit xor{s, s, d} zeroes the upper bits of `d'.
     return emit(xorl{r32(i.s0), r32(i.s1), r32(i.d), i.sf});
@@ -1146,7 +1186,12 @@ void optimizeX64(Vunit& unit, const Abi& abi, bool regalloc) {
 
 void emitX64(Vunit& unit, Vtext& text, CGMeta& fixups,
              AsmInfo* asmInfo) {
-  vasm_emit<Vgen>(unit, text, fixups, asmInfo);
+#ifdef HAVE_LIBXED
+  if (RuntimeOption::EvalUseXedAssembler) {
+    return vasm_emit<Vgen<XedAssembler>>(unit, text, fixups, asmInfo);
+  }
+#endif
+  vasm_emit<Vgen<X64Assembler>>(unit, text, fixups, asmInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

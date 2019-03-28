@@ -473,7 +473,7 @@ void analyze_inst_virtual(Env& env, RegState& state, const Vinstr& inst) {
     case Vinstr::lea:
     {
       auto const& i = inst.lea_;
-      if (i.s.seg == Vptr::DS && i.s.index == InvalidReg) {
+      if (i.s.seg == Segment::DS && i.s.index == InvalidReg) {
         analyze_virt_disp(env, state, i.d, i.s.base, i.s.disp);
       }
       return;
@@ -522,7 +522,7 @@ void analyze_inst_physical(Env& env, RegState& state,
       case Vinstr::lea:
       {
         auto const& i = inst.lea_;
-        return i.s.seg == Vptr::DS &&
+        return i.s.seg == Segment::DS &&
                i.s.index == InvalidReg &&
                analyze_phys_disp(env, state, i.d, i.s.base, i.s.disp);
       }
@@ -733,7 +733,7 @@ struct OptVisit {
   void use(Vptr& ptr) {
     // Rewrite memory operands that are based on registers we've copied or
     // lea'd off of other registers.
-    if (ptr.seg != Vptr::DS) return;
+    if (ptr.seg != Segment::DS) return;
     if_rewritable(env, state, ptr.base, [&] (const DefInfo& def) {
       if (arch() == Arch::ARM) {
         // After lowering, only [base, index lsl #scale] and [base, #imm]

@@ -70,8 +70,9 @@ let check_param : Env.env -> Nast.fun_param -> unit =
         check_memoizable env sft_ty
       end fdm
     | r, Tclass _ ->
-      let env = Env.open_tyvars env in
-      let env, type_param = Env.fresh_unresolved_type env (Reason.to_pos r) in
+      let p = Reason.to_pos r in
+      let env = Env.open_tyvars env p in
+      let env, type_param = Env.fresh_unresolved_type env p in
       let container_type = MakeType.container Reason.none type_param in
       let env, is_container =
         Errors.try_

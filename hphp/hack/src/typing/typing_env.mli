@@ -19,7 +19,7 @@ val fresh : unit -> int
 val fresh_type : env -> Pos.t -> env *  locl ty
 val fresh_unresolved_type : env -> Pos.t -> env * locl ty
 val fresh_invariant_type_var : env -> Pos.t -> env * locl ty
-val open_tyvars : env -> env
+val open_tyvars : env -> Pos.t -> env
 val get_current_tyvars : env -> Ident.t list
 val add_current_tyvar : env -> Pos.t -> Ident.t -> env
 val close_tyvars : env -> env
@@ -64,6 +64,8 @@ val get_params : env -> (locl ty * param_mode) Local_id.Map.t
 val set_param : env -> Local_id.t -> locl ty * param_mode -> env
 val set_log_level : env -> string -> int -> env
 val get_log_level : env -> string -> int
+val set_env_log_function : (Pos.t -> string -> env -> env -> unit) -> unit
+val log_env_change : string -> env -> env -> env
 val clear_params : env -> env
 val with_env : env -> (env -> env * 'a) -> env * 'a
 val is_static : env -> bool

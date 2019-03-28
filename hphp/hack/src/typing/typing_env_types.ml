@@ -145,7 +145,7 @@ type env = {
   subtype_prop : Typing_logic.subtype_prop;
   log_levels : int SMap.t ;
   tvenv : tvenv;
-  tyvars_stack : Ident.t list list;
+  tyvars_stack : (Pos.t * Ident.t list) list;
 }
 and genv = {
   tcopt   : TypecheckerOptions.t;

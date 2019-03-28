@@ -31,6 +31,28 @@ let pp_env _ _ = Printf.printf "%s\n" "<env>"
 let ( ++ ) x y = Typing_set.add x y
 
 let get_tcopt env = env.genv.tcopt
+
+let set_log_level env key log_level =
+  {env with log_levels = SMap.add key log_level env.log_levels }
+
+let get_log_level env key =
+  Option.value (SMap.get key env.log_levels) ~default:0
+
+let env_log_function = ref (fun _pos _name _old_env _new_env -> ())
+
+let set_env_log_function f = env_log_function := f
+
+let log_env_change name old_env new_env =
+  if get_log_level new_env name >= 1 || get_log_level new_env "env" >= 1
+  then begin
+    let pos =
+      match old_env.tyvars_stack with
+      | (p,_)::_ -> p
+      | _ -> old_env.pos in
+    !env_log_function pos name old_env new_env
+  end;
+  new_env
+
 let fresh () =
   Ident.tmp()
 
@@ -86,10 +108,10 @@ let add_current_tyvar env p v =
   if TypecheckerOptions.new_inference env.genv.tcopt
   then
     match env.tyvars_stack with
-    | tyvars::rest ->
+    | (expr_pos, tyvars) :: rest ->
       let env = env_with_tvenv env
         (IMap.add v { empty_tyvar_info with tyvar_pos = p } env.tvenv) in
-      { env with tyvars_stack = (v :: tyvars) :: rest }
+      { env with tyvars_stack = (expr_pos, (v :: tyvars)) :: rest }
     | _ -> env
   else env
 
@@ -97,12 +119,14 @@ let fresh_unresolved_type env p =
   let v = Ident.tmp () in
   let env =
     if TypecheckerOptions.new_inference env.genv.tcopt
-    then add_current_tyvar env p v
+    then
+      log_env_change "fresh_unresolved_type" env @@
+      add_current_tyvar env p v
     else add env v (Reason.Rnone, Tunresolved []) in
   env, (Reason.Rtype_variable p, Tvar v)
 
-let open_tyvars env =
-  { env with tyvars_stack = [] :: env.tyvars_stack }
+let open_tyvars env p =
+  { env with tyvars_stack = (p,[]) :: env.tyvars_stack }
 
 let close_tyvars env =
   match env.tyvars_stack with
@@ -112,11 +136,13 @@ let close_tyvars env =
 let get_current_tyvars env =
   match env.tyvars_stack with
   | [] -> []
-  | tyvars::_ -> tyvars
+  | (_,tyvars)::_ -> tyvars
 
 let fresh_type env p =
   let v = Ident.tmp () in
-  let env = add_current_tyvar env p v in
+  let env =
+    log_env_change "fresh_type" env @@
+    add_current_tyvar env p v in
   env, (Reason.Rtype_variable p, Tvar v)
 
 let get_type env x_reason x =
@@ -508,6 +534,7 @@ let set_tyvar_info env var tvinfo =
 
 let remove_tyvar env var =
   (* Don't remove it entirely if we have marked it as eager_solve_fail *)
+  log_env_change "remove_tyvar" env @@
   let tvinfo = get_tyvar_info env var in
   if tvinfo.eager_solve_fail
   then set_tyvar_info env var { empty_tyvar_info with eager_solve_fail = true }
@@ -542,6 +569,7 @@ let set_tyvar_type_const env var (_, tyconstid_ as tyconstid) ty =
 
 (* Conjoin a subtype proposition onto the subtype_prop in the environment *)
 let add_subtype_prop env prop =
+  log_env_change "add_subtype_prop" env @@
   {env with subtype_prop = TL.conj env.subtype_prop prop}
 
 (* Generate a fresh generic parameter with a specified prefix but distinct
@@ -590,12 +618,6 @@ let get_tpenv_tparams env =
     TySet.fold folder upper_bounds acc
     end
   env.lenv.tpenv SSet.empty
-
-let set_log_level env key log_level =
-  {env with log_levels = SMap.add key log_level env.log_levels }
-
-let get_log_level env key =
-  Option.value (SMap.get key env.log_levels) ~default:0
 
 (* Replace types for locals with empty environment *)
 let env_with_locals env locals =
@@ -1453,6 +1475,7 @@ and update_variance_after_bind env var ty =
   env
 
 let set_tyvar_variance env ?(flip = false) ty =
+  log_env_change "set_tyvar_variance" env @@
   let tyvars = get_current_tyvars env in
   let env, positive, negative = get_tyvars env ty in
   let (positive, negative) = if flip then (negative, positive) else (positive, negative) in
@@ -1463,9 +1486,12 @@ let set_tyvar_variance env ?(flip = false) ty =
 
 let fresh_invariant_type_var env p =
   let v = Ident.tmp () in
-  let env = add_current_tyvar env p v in
-  let env = set_tyvar_appears_covariantly env v in
-  let env = set_tyvar_appears_contravariantly env v in
+  let env =
+    log_env_change "fresh_invariant_type_var" env @@
+    let env = add_current_tyvar env p v in
+    let env = set_tyvar_appears_covariantly env v in
+    let env = set_tyvar_appears_contravariantly env v in
+    env in
   env, (Reason.Rtype_variable p, Tvar v)
 
  (* Add a single new upper bound [ty] to type variable [var] in [env.tvenv].
@@ -1477,6 +1503,7 @@ let fresh_invariant_type_var env p =
   *   v <: (t1 & ... & tn)
   *)
  let add_tyvar_upper_bound ?intersect env var ty =
+   log_env_change "add_tyvar_upper_bound" env @@
   (* Don't add superfluous v <: v or v <: ?v to environment *)
   if is_tvar ~elide_nullable:true ty var then env else
   let tvinfo = get_tyvar_info env var in
@@ -1493,6 +1520,7 @@ let fresh_invariant_type_var env p =
 (* Remove type variable `upper_var` from the upper bounds on `var`, if it exists
  *)
 let remove_tyvar_upper_bound env var upper_var =
+  log_env_change "remove_tyvar_upper_bound" env @@
   let tvinfo = get_tyvar_info env var in
   let upper_bounds = TySet.filter
     (fun ty -> match expand_type env ty with _, (_, Tvar v) -> v <> upper_var | _ -> true)
@@ -1503,6 +1531,7 @@ let remove_tyvar_upper_bound env var upper_var =
 (* Remove type variable `lower_var` from the lower bounds on `var`, if it exists
  *)
 let remove_tyvar_lower_bound env var lower_var =
+  log_env_change "remove_tyvar_lower_bound var" env @@
   let tvinfo = get_tyvar_info env var in
   let lower_bounds = TySet.filter
     (fun ty -> match expand_type env ty with _, (_, Tvar v) -> v <> lower_var | _ -> true)
@@ -1519,6 +1548,7 @@ let remove_tyvar_lower_bound env var lower_var =
  *   (t1 | ... | tn) <: v
  *)
 let add_tyvar_lower_bound ?union env var ty =
+  log_env_change "add_tyvar_lower_bound" env @@
   (* Don't add superfluous v <: v to environment *)
   if is_tvar ~elide_nullable:false ty var then env else
   let tvinfo = get_tyvar_info env var in

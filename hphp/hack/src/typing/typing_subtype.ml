@@ -171,7 +171,7 @@ let check_mutability
 
 let empty_seen = Some SSet.empty
 
-let log_subtype ~this_ty function_name env ty_sub ty_super =
+let log_subtype ~this_ty ~function_name env ty_sub ty_super =
   Typing_log.(log_with_level env "sub" 2 begin fun () ->
     let types =
       [Log_type ("ty_sub", ty_sub);
@@ -179,7 +179,7 @@ let log_subtype ~this_ty function_name env ty_sub ty_super =
     let types = Option.value_map this_ty ~default:types
       ~f:(fun ty -> Log_type ("this_ty", ty) :: types) in
     log_types (Reason.to_pos (fst ty_sub)) env
-      [Log_head ("Typing_subtype." ^ function_name, types)]
+      [Log_head (function_name, types)]
   end)
 
 let is_final_and_not_contravariant env id =
@@ -242,7 +242,7 @@ and simplify_subtype
   (ty_sub : locl ty)
   (ty_super : locl ty)
   env : Env.env * TL.subtype_prop =
-  log_subtype ~this_ty "simplify_subtype" env ty_sub ty_super;
+  log_subtype ~this_ty ~function_name:"simplify_subtype" env ty_sub ty_super;
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, ety_super = Env.expand_type env ty_super in
   let env, ety_sub = Env.expand_type env ty_sub in
@@ -1660,17 +1660,15 @@ and sub_type
   (env : Env.env)
   (ty_sub : locl ty)
   (ty_super : locl ty) : Env.env =
+    Env.log_env_change "sub_type" env @@
     sub_type_inner env ~error ~this_ty:None ty_sub ty_super
 
 (* Add a new upper bound ty on var.  Apply transitivity of sutyping,
  * so if we already have tyl <: var, then check that for each ty_sub
  * in tyl we have ty_sub <: ty.
  *)
-and add_tyvar_upper_bound env r var ty =
-  Typing_log.(log_with_level env "prop" 2 (fun () ->
-  log_types (Reason.to_pos r) env
-    [Log_head ("Typing_subtype.props_to_env/add_tyvar_upper_bound",
-    [Log_type ("var", (r, Tvar var)); Log_type ("ty", ty)])]));
+and add_tyvar_upper_bound_and_close env var ty =
+  Env.log_env_change "add_tyvar_upper_bound_and_close" env @@
   let upper_bounds_before = Env.get_tyvar_upper_bounds env var in
   let env = Env.add_tyvar_upper_bound ~intersect:(try_intersect env) env var ty in
   let upper_bounds_after = Env.get_tyvar_upper_bounds env var in
@@ -1690,11 +1688,8 @@ and add_tyvar_upper_bound env r var ty =
  * so if we already have var <: tyl, then check that for each ty_super
  * in tyl we have ty <: ty_super.
  *)
-and add_tyvar_lower_bound env r var ty =
-  Typing_log.(log_with_level env "prop" 2 (fun () ->
-  log_types (Reason.to_pos r) env
-    [Log_head ("Typing_subtype.props_to_env/add_tyvar_lower_bound",
-    [Log_type ("var", (r, Tvar var)); Log_type ("ty", ty)])]));
+and add_tyvar_lower_bound_and_close env var ty =
+  Env.log_env_change "add_tyvar_lower_bound_and_close" env @@
   let lower_bounds_before = Env.get_tyvar_lower_bounds env var in
   let env = Env.add_tyvar_lower_bound ~union:(try_union env) env var ty in
   let lower_bounds_after = Env.get_tyvar_lower_bounds env var in
@@ -1714,15 +1709,15 @@ and props_to_env env remain props =
   match props with
   | [] ->
     env, List.rev remain
-  | TL.IsSubtype (((r_sub, Tvar var_sub) as ty_sub), ((r_super, Tvar var_super) as ty_super)) :: props ->
-    let env = add_tyvar_upper_bound env r_sub var_sub ty_super in
-    let env = add_tyvar_lower_bound env r_super var_super ty_sub in
+  | TL.IsSubtype (((_, Tvar var_sub) as ty_sub), ((_, Tvar var_super) as ty_super)) :: props ->
+    let env = add_tyvar_upper_bound_and_close env var_sub ty_super in
+    let env = add_tyvar_lower_bound_and_close env var_super ty_sub in
     props_to_env env remain props
-  | TL.IsSubtype ((r, Tvar var), ty) :: props ->
-    let env = add_tyvar_upper_bound env r var ty in
+  | TL.IsSubtype ((_, Tvar var), ty) :: props ->
+    let env = add_tyvar_upper_bound_and_close env var ty in
     props_to_env env remain props
-  | TL.IsSubtype (ty, (r, Tvar var)) :: props ->
-    let env = add_tyvar_lower_bound env r var ty in
+  | TL.IsSubtype (ty, (_, Tvar var)) :: props ->
+    let env = add_tyvar_lower_bound_and_close env var ty in
     props_to_env env remain props
   | TL.Conj props' :: props ->
     props_to_env env remain (props' @ props)
@@ -1787,7 +1782,7 @@ and sub_type_inner
   ~(this_ty : locl ty option)
   (ty_sub: locl ty)
   (ty_super: locl ty) : Env.env =
-  log_subtype ~this_ty "sub_type_inner" env ty_sub ty_super;
+  log_subtype ~this_ty ~function_name:"sub_type_inner" env ty_sub ty_super;
   let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let env, prop = simplify_subtype
     ~seen_generic_params:empty_seen
@@ -1800,10 +1795,7 @@ and sub_type_inner
     if new_inference || TypecheckerOptions.experimental_feature_enabled
          (Env.get_tcopt env)
          TypecheckerOptions.experimental_track_subtype_prop
-    then begin
-      Typing_log.log_prop 2 env.Env.pos "sub_type_inner: add_subtype_prop" env prop;
-      Env.add_subtype_prop env prop
-    end
+    then Env.add_subtype_prop env prop
     else env in
   let fail () = TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
   process_simplify_subtype_result ~this_ty ~fail env prop
@@ -1821,8 +1813,7 @@ and sub_type_inner_helper env ~this_ty
     TUtils.uerror env (fst ety_super) (snd ety_super) (fst ety_sub) (snd ety_sub);
     env in
 
-  log_subtype ~this_ty "sub_type_inner_helper" env ty_sub ty_super;
-
+  log_subtype ~this_ty ~function_name:"sub_type_inner_helper" env ty_sub ty_super;
   match ety_sub, ety_super with
 
   | (_, Tunresolved _), _
@@ -1880,7 +1871,6 @@ and sub_type_inner_helper env ~this_ty
       else
         let outer_pos = env.Env.outer_pos in
         let outer_reason = env.Env.outer_reason in
-        log_subtype ~this_ty:None "add_todo" env ty_sub ty_super;
         Env.add_todo env begin fun env' ->
           Errors.try_add_err outer_pos (Reason.string_of_ureason outer_reason)
           (fun () ->
@@ -2233,7 +2223,7 @@ let decompose_subtype_add_bound
   match ty_sub, ty_super with
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (_, Tabstract (AKgeneric name_sub, _)), _ when not (phys_equal ty_sub ty_super) ->
-    log_subtype ~this_ty:None "decompose_subtype_add_bound" env ty_sub ty_super;
+    log_subtype ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;
     let tys = Env.get_upper_bounds env name_sub in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_super tys then env
@@ -2241,7 +2231,7 @@ let decompose_subtype_add_bound
 
   (* ty_sub <: name_super so add a lower bound on name_super *)
   | _, (_, Tabstract (AKgeneric name_super, _)) when not (phys_equal ty_sub ty_super) ->
-    log_subtype ~this_ty:None "decompose_subtype_add_bound" env ty_sub ty_super;
+    log_subtype ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;
     let tys = Env.get_lower_bounds env name_super in
     (* Don't add the same type twice! *)
     if Typing_set.mem ty_sub tys then env
@@ -2274,7 +2264,7 @@ let rec decompose_subtype
   (ty_sub : locl ty)
   (ty_super : locl ty)
   : Env.env =
-  log_subtype ~this_ty:None "decompose_subtype" env ty_sub ty_super;
+  log_subtype ~this_ty:None ~function_name:"decompose_subtype" env ty_sub ty_super;
   let env, prop =
     simplify_subtype ~seen_generic_params:None
       ~deep:true ~no_top_bottom:false ~this_ty:None ty_sub ty_super env in
@@ -2340,7 +2330,7 @@ let add_constraint
   (ck : Ast.constraint_kind)
   (ty_sub : locl ty)
   (ty_super : locl ty): Env.env =
-  log_subtype ~this_ty:None "add_constraint" env ty_sub ty_super;
+  log_subtype ~this_ty:None ~function_name:"add_constraint" env ty_sub ty_super;
   let oldsize = Env.get_tpenv_size env in
   let env' = decompose_constraint p env ck ty_sub ty_super in
   if Env.get_tpenv_size env' = oldsize
@@ -2489,11 +2479,8 @@ and freshen_tparams_wrt_variance env variancel tyl =
    | _ ->
      env, tyl
 
-let bind env r var ty =
-  Typing_log.(log_with_level env "prop" 2 (fun () ->
-  log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.bind #%d" var,
-    [Log_type ("ty", ty)])]));
+let bind env var ty =
+  Env.log_env_change "bind" env @@
 
   (* If there has been a use of this type variable that led to an "unknown type"
    * error (e.g. method invocation), then record this in the reason info. We
@@ -2509,7 +2496,8 @@ let bind env r var ty =
   (* Unify the variable *)
   let env = Typing_unify_recursive.add env var ty in
   (* Remove the variable from the environment *)
-  Env.remove_tyvar env var
+  let env = Env.remove_tyvar env var in
+  env
 
 let var_as_ty var = (Reason.Rnone, Tvar var)
 
@@ -2524,6 +2512,7 @@ let lower_bounds_as_union env r var lower_bounds =
  * the bounds.
  *)
 let bind_to_lower_bound ~freshen env r var lower_bounds =
+  Env.log_env_change "bind_to_lower_bound" env @@
   let env, ty = lower_bounds_as_union env r var lower_bounds in
   (* Freshen components of the types in the union wrt their variance.
    * For example, if we have
@@ -2550,15 +2539,16 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
         Env.remove_tyvar_upper_bound env v var
       | env, _ -> env) lower_bounds env in
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
-  bind env r var ty
+  bind env var ty
 
 let bind_to_upper_bound env r var upper_bounds =
+  Env.log_env_change "bind_to_upper_bound" env @@
   (* Remove bounds which are the union of var and something else *)
   let upper_bounds = TySet.filter (fun bound ->
     is_sub_type_alt env (var_as_ty var) bound ~no_top_bottom:true <> Some true)
     upper_bounds in
   match Typing_set.elements upper_bounds with
-  | [] -> bind env r var (MakeType.mixed r)
+  | [] -> bind env var (MakeType.mixed r)
   | [ty] ->
     (* If ty is a variable (in future, if any of the types in the list are variables),
       * then remove var from their lower bounds. Why? Because if we construct
@@ -2573,11 +2563,11 @@ let bind_to_upper_bound env r var upper_bounds =
       | env, (_, Tvar v) ->
         Env.remove_tyvar_lower_bound env v var
       | env, _ -> env) in
-    bind env r var ty
+    bind env var ty
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env
 
-let bind_to_equal_bound env r var =
+let bind_to_equal_bound env var =
   let expand_all tyset = Typing_set.map
     (fun ty -> let _, ty = Env.expand_type env ty in ty) tyset in
   let tyvar_info = Env.get_tyvar_info env var in
@@ -2586,7 +2576,7 @@ let bind_to_equal_bound env r var =
   let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
   let equal_bounds = Typing_set.remove (var_as_ty var) equal_bounds in
   match Typing_set.choose_opt equal_bounds with
-  | Some ty -> bind env r var ty
+  | Some ty -> bind env var ty
   | None -> env
 
 let tyvar_is_solved env var =
@@ -2638,7 +2628,7 @@ let solve_tyvar ~freshen ~force_solve env r var =
      * appears both covariantly and contravariantly and there is a type that
      * is both a lower and upper bound, force to that type
      *)
-    let env = bind_to_equal_bound env r var in
+    let env = bind_to_equal_bound env var in
     if not (tyvar_is_solved env var) && force_solve
     then bind_to_lower_bound ~freshen env r var lower_bounds
     else env
@@ -2656,6 +2646,7 @@ let solve_tyvar ~freshen ~force_solve env r var =
 let solve_all_unsolved_tyvars env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env)
   then
+    Env.log_env_change "solve_all_unsolved_tyvars" env @@
     IMap.fold
     (fun tyvar _ env ->
       solve_tyvar ~freshen:false ~force_solve:true
@@ -2728,13 +2719,13 @@ let rec widen env widen_concrete_type ty =
 let expand_type_and_try_solve env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | (r, Tvar var) ->
+  | _, Tvar var ->
     let tyvar_info = Env.get_tyvar_info env var in
     let lower_bounds = tyvar_info.Env.lower_bounds in
     let upper_bounds = tyvar_info.Env.upper_bounds in
     begin match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
     | Some ty ->
-      let env = bind env r var ty in
+      let env = bind env var ty in
       env, ty
     | None -> env, ety
     end

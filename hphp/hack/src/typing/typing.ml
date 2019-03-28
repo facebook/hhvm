@@ -695,7 +695,7 @@ and stmt env (pos, st) =
   env, (pos, st)
 
 and stmt_ env pos st =
-  let env = Env.open_tyvars env in
+  let env = Env.open_tyvars env pos in
   (fun (env, tb) -> SubType.close_tyvars_and_solve env, tb) @@
   match st with
   | Unsafe_block b ->
@@ -1093,7 +1093,7 @@ and catch catchctx env (sid, exn, b) =
   env, (env.Env.lenv, (sid, exn, tb))
 
 and as_expr env ty1 pe e =
-  let env = Env.open_tyvars env in
+  let env = Env.open_tyvars env pe in
   (fun (env, ty, tk, tv) ->
     let env =
       if TUtils.is_dynamic env ty1
@@ -1323,7 +1323,7 @@ and expr_
   ~(valkind: [> `lvalue | `lvalue_subexpr | `other ])
   ~check_defined
   env (p, e) =
-  let env = Env.open_tyvars env in
+  let env = Env.open_tyvars env p in
   (fun (env, te, ty) -> SubType.close_tyvars_and_solve env, te, ty) @@
   let expr = expr ~check_defined in
   let exprs = exprs ~check_defined in
@@ -2215,7 +2215,7 @@ and expr_
       let env, te, ty =
         match e with
         | _, Call (call_type, e, hl, el, uel) ->
-          let env = Env.open_tyvars env in
+          let env = Env.open_tyvars env p in
           (fun (env, te, ty) -> SubType.close_tyvars_and_solve env, te, ty) @@
           check_call ~is_using_clause ~expected
             env p call_type e hl el uel ~in_suspend:true
@@ -3187,7 +3187,7 @@ and assign_ p ur env e1 ty2 =
          * side and attempt subtype against it. In particular this deals with
          * types such as (string,int) | (int,bool) *)
         | (r, _) ->
-          let env = Env.open_tyvars env in
+          let env = Env.open_tyvars env p in
           let env, tyl = List.map_env env el
              ~f:(fun env _ -> Env.fresh_unresolved_type env (Reason.to_pos r)) in
           let tuple_ty = (Reason.Rwitness (fst e1), Ttuple tyl) in

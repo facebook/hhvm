@@ -77,9 +77,16 @@ type value =
 let make_map l =
   Map (SMap.of_list l)
 
+let filter_missing l =
+  List.filter_map l
+    (fun (k,v) -> match v with None -> None | Some v -> Some(k,v))
+
 let bool_as_value v = Bool v
 let string_as_value s = Atom s
 let smap_as_value f m = Map (SMap.map f m)
+
+let pos_as_value p = string_as_value (Pos.string (Pos.to_absolute p))
+
 (* Universal representation of a delta between values
  *)
 type delta =
@@ -253,7 +260,7 @@ let local_as_value env (ty, _expr_id) =
 let local_types_as_value env (local_types: local_types) =
   continuations_map_as_value (local_id_map_as_value (local_as_value env)) local_types
 
-let log_position p f =
+let log_position p ?function_name f =
   let n =
     match Pos.Map.get p !iterations with
     | None -> iterations := Pos.Map.add p 1 !iterations; 1
@@ -263,7 +270,8 @@ let log_position p f =
   if n > 10000 then ()
   else
     indentEnv ~color:(Bold Yellow) (Pos.string (Pos.to_absolute p)
-      ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")) f
+      ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")
+      ^ (match function_name with None -> "" | Some n -> " {" ^ n ^ "}")) f
 
 let log_subtype_prop ?(do_normalize = false) env message prop =
   lprintf (Tty.Bold Tty.Green) "%s: " message;
@@ -283,7 +291,7 @@ let tyset_as_value env tys =
   Set (TySet.fold (fun t s -> SSet.add (Typing_print.full env t) s) tys SSet.empty)
 let tyvar_info_as_value env tvinfo =
   let {
-    tyvar_pos = _;
+    tyvar_pos;
     eager_solve_fail;
     appears_covariantly;
     appears_contravariantly;
@@ -291,6 +299,7 @@ let tyvar_info_as_value env tvinfo =
     lower_bounds;
     upper_bounds } = tvinfo in
   make_map [
+    "tyvar_pos", pos_as_value tyvar_pos;
     "eager_solve_fail", bool_as_value eager_solve_fail;
     "appears_covariantly", bool_as_value appears_covariantly;
     "appears_contravariantly", bool_as_value appears_contravariantly;
@@ -302,18 +311,21 @@ let tvenv_as_value env tvenv =
   Map (IMap.fold (fun i x m ->
     SMap.add (Printf.sprintf "#%d" i) (tyvar_info_as_value env x) m) tvenv SMap.empty)
 let tyvars_stack_as_value tyvars_stack =
-  List (List.map tyvars_stack (fun l -> List (List.map l (fun i -> Atom (Printf.sprintf "#%d" i)))))
+  List (List.map tyvars_stack (fun (_, l) ->
+  List (List.map l (fun i -> Atom (Printf.sprintf "#%d" i)))))
 
 let fake_members_as_value fake_members =
   let {
-    last_call = _;
+    last_call;
     invalid;
     valid
     } = fake_members in
-  make_map [
+  make_map ([
     "invalid", Set invalid;
     "valid", Set valid;
-  ]
+  ] @ filter_missing [
+    "last_call", Option.map last_call pos_as_value
+  ])
 
 let reify_kind_as_value k =
   string_as_value (
@@ -434,9 +446,9 @@ let genv_as_value env genv =
   )
 let env_as_value env =
   let {
-    function_pos = _;
-    pos = _;
-    outer_pos = _;
+    function_pos;
+    pos;
+    outer_pos;
     outer_reason = _;
     tenv;
     subst;
@@ -456,6 +468,9 @@ let env_as_value env =
     tvenv;
     tyvars_stack } = env in
   make_map [
+    "pos", pos_as_value pos;
+    "outer_pos", pos_as_value outer_pos;
+    "function_pos", pos_as_value function_pos;
     "tvenv", tvenv_as_value env tvenv;
     "tenv", tenv_as_value env tenv;
     "subst", subst_as_value subst;
@@ -473,18 +488,24 @@ let env_as_value env =
     "todo", todo_as_value todo;
   ]
 
-(* Log the environment: local_types, subst, tenv and tpenv *)
-let hh_show_env p env =
-  let old_env = !lastenv in
-  lastenv := env;
-  let value = env_as_value env in
+let log_env_diff p ?function_name old_env new_env =
+  let value = env_as_value new_env in
   let old_value = env_as_value old_env in
   let d = compute_value_delta old_value value in
   match d with
   | Unchanged -> ()
   | _ ->
-    log_position p (fun () -> log_delta d)
+    log_position p ?function_name (fun () -> log_delta d)
 
+(* Log the environment: local_types, subst, tenv and tpenv *)
+let hh_show_env p env =
+  let old_env = !lastenv in
+  lastenv := env;
+  log_env_diff p old_env env
+
+let _ =
+  Env.set_env_log_function (fun pos name old_env env ->
+    log_env_diff pos ~function_name:name old_env env)
 
 (* Log the type of an expression *)
 let hh_show p env ty =

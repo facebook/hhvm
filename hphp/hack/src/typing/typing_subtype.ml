@@ -841,6 +841,12 @@ and simplify_subtype
         simplify_subtype ~seen_generic_params ~deep ~this_ty tk tk_super &&&
         simplify_subtype ~seen_generic_params ~deep ~this_ty tv tv_super
       )
+  | Tarraykind _, Tclass ((_, coll), Nonexact, [])
+    when (coll = SN.Collections.cKeyedTraversable ||
+          coll = SN.Rx.cKeyedTraversable ||
+          coll = SN.Collections.cKeyedContainer) ->
+    (* All arrays are subtypes of the untyped KeyedContainer / Traversables *)
+    valid ()
   | Tarraykind _, Tclass _ -> invalid ()
   | Tabstract (AKdependent _, Some ty), Tclass _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in

@@ -21,7 +21,7 @@
 namespace HPHP {
 
 struct Unit;
-struct MD5;
+struct SHA1;
 struct RepoOptions;
 
 namespace Native {
@@ -33,9 +33,9 @@ void hphp_compiler_init();
 
 // If set, releaseUnit will contain a pointer to any extraneous unit created due
 // to race-conditions while compiling
-Unit* compile_file(const char* s, size_t sz, const MD5& md5, const char* fname,
-                   const Native::FuncTable& nativeFuncs, const RepoOptions&,
-                   Unit** releaseUnit = nullptr);
+Unit* compile_file(const char* s, size_t sz, const SHA1& sha1,
+                   const char* fname, const Native::FuncTable& nativeFuncs,
+                   const RepoOptions&, Unit** releaseUnit = nullptr);
 
 // If forDebuggerEval is true, and the unit contains a single expression
 // statement, then we will turn the statement into a return statement while
@@ -60,7 +60,7 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
  * be set up before you use those parts of the runtime.
  */
 
-using CompileStringFn = Unit* (*)(const char*, int, const MD5&, const char*,
+using CompileStringFn = Unit* (*)(const char*, int, const SHA1&, const char*,
                                   const Native::FuncTable&, Unit**, bool,
                                   const RepoOptions&);
 

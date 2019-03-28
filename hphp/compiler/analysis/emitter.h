@@ -23,7 +23,7 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
 struct AnalysisResult;
-struct MD5;
+struct SHA1;
 struct Unit;
 struct RepoOptions;
 
@@ -37,7 +37,7 @@ namespace Compiler {
 void emitAllHHBC(std::shared_ptr<AnalysisResult>&&);
 
 extern "C" {
-  Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
+  Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
                             const char* filename,
                             const Native::FuncTable& nativeFuncs,
                             Unit** releaseUnit,

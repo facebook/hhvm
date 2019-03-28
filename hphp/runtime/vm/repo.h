@@ -65,7 +65,7 @@ struct Repo : RepoProxy {
   static void shutdown();
 
   Repo();
-  ~Repo();
+  ~Repo() noexcept;
 
   const char* dbName(int repoId) const {
     assertx(repoId < RepoIdCount);
@@ -98,11 +98,11 @@ struct Repo : RepoProxy {
 
   static void setCliFile(const std::string& cliFile);
 
-  std::unique_ptr<Unit> loadUnit(const std::string& name, const MD5& md5,
+  std::unique_ptr<Unit> loadUnit(const std::string& name, const SHA1& sha1,
                                  const Native::FuncTable&);
-  RepoStatus findFile(const char* path, const std::string& root, MD5& md5);
-  RepoStatus insertMd5(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
-  void commitMd5(UnitOrigin unitOrigin, UnitEmitter* ue);
+  RepoStatus findFile(const char* path, const std::string& root, SHA1& sha1);
+  RepoStatus insertSha1(UnitOrigin unitOrigin, UnitEmitter* ue, RepoTxn& txn);
+  void commitSha1(UnitOrigin unitOrigin, UnitEmitter* ue);
 
   /*
    * Return the largest size for a static string that can be inserted into the
@@ -111,10 +111,10 @@ struct Repo : RepoProxy {
   size_t stringLengthLimit() const;
 
   /*
-   * Return a vector of (filepath, MD5) for every unit in central
+   * Return a vector of (filepath, SHA1) for every unit in central
    * repo.
    */
-  std::vector<std::pair<std::string,MD5>> enumerateUnits(
+  std::vector<std::pair<std::string,SHA1>> enumerateUnits(
     int repoId, bool preloadOnly, bool warn);
 
   /*
@@ -156,13 +156,13 @@ struct Repo : RepoProxy {
    */
   struct InsertFileHashStmt : public RepoProxy::Stmt {
     InsertFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    void insert(RepoTxn& txn, const StringData* path, const MD5& md5);
+    void insert(RepoTxn& txn, const StringData* path, const SHA1& sha1);
     // throws(RepoExc)
   };
 
   struct GetFileHashStmt : public RepoProxy::Stmt {
     GetFileHashStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(const char* path, MD5& md5);
+    RepoStatus get(const char* path, SHA1& sha1);
   };
 
   InsertFileHashStmt m_insertFileHash[RepoIdCount];
@@ -183,13 +183,14 @@ struct Repo : RepoProxy {
                         RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
 
-  // All database table names use the schema ID (md5 checksum based on the
+  // All database table names use the schema ID (sha1 checksum based on the
   // source code) as a suffix.  For example, if the schema ID is
-  // "b02c58478ce89719782fea89f3009295", the file magic is stored in the
-  // magic_b02c58478ce89719782fea89f3009295 table:
+  // "b02c58478ce89719782fea89f3009295faceb00c", the file magic is stored in the
+  // magic_b02c58478ce89719782fea89f3009295faceb00c table:
   //
-  //   CREATE TABLE magic_b02c58478ce89719782fea89f3009295(product[TEXT]);
-  //   INSERT INTO magic_b02c58478ce89719782fea89f3009295 VALUES(
+  //   CREATE TABLE magic_b02c58478ce89719782fea89f3009295faceb00c(
+  //     product[TEXT]);
+  //   INSERT INTO magic_b02c58478ce89719782fea89f3009295faceb00c VALUES(
   //     'facebook.com HipHop Virtual Machine bytecode repository');
   //
   // This allows multiple schemas to coexist in the same database, which is
@@ -201,7 +202,7 @@ struct Repo : RepoProxy {
   static const char* kDbs[RepoIdCount];
 
   void connect();
-  void disconnect();
+  void disconnect() noexcept;
   void initCentral();
   RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
   void initLocal();

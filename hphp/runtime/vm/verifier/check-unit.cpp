@@ -101,12 +101,12 @@ bool UnitChecker::checkLiteral(size_t id,
   bool ok = true;
   if (!lt) {
     error("null %s id %zu in unit %s\n", what, id,
-                 m_unit->md5().toString().c_str());
+                 m_unit->sha1().toString().c_str());
     ok = false;
   }
   if (!lt->isStatic()) {
     error("non-static %s id %zu in unit %s\n", what, id,
-                 m_unit->md5().toString().c_str());
+                 m_unit->sha1().toString().c_str());
     ok = false;
   }
   return ok;
@@ -328,21 +328,21 @@ bool UnitChecker::checkBytecode() {
     if (f->past <= f->base) {
       if (!(f->attrs & AttrAbstract) || f->past < f->base) {
         error("func size <= 0 [%d:%d] in unit %s\n",
-             f->base, f->past, m_unit->md5().toString().c_str());
+             f->base, f->past, m_unit->sha1().toString().c_str());
         ok = false;
         return;
       }
     }
     if (f->base < 0 || f->past > m_unit->bcPos()) {
       error("function region [%d:%d] out of unit %s bounds [%d:%d]\n",
-             f->base, f->past, m_unit->md5().toString().c_str(),
+             f->base, f->past, m_unit->sha1().toString().c_str(),
              0, m_unit->bcPos());
       ok = false;
       return;
     }
     if (funcs.find(f->base) != funcs.end()) {
       error("duplicate function-base at %d in unit %s\n",
-             f->base, m_unit->md5().toString().c_str());
+             f->base, m_unit->sha1().toString().c_str());
       ok = false;
       return;
     }
@@ -355,7 +355,7 @@ bool UnitChecker::checkBytecode() {
   // iterate funcs in offset order, checking for holes and overlap
   if (funcs.empty()) {
     error("unit %s must have at least one func\n",
-           m_unit->md5().toString().c_str());
+           m_unit->sha1().toString().c_str());
     return false;
   }
   Offset last_past = 0;
@@ -363,17 +363,17 @@ bool UnitChecker::checkBytecode() {
     auto const f = (*i++).second;
     if (f->base < last_past) {
       error("function overlap [%d:%d] in unit %s\n",
-             f->base, last_past, m_unit->md5().toString().c_str());
+             f->base, last_past, m_unit->sha1().toString().c_str());
       ok = false;
     } else if (f->base > last_past) {
       error("dead bytecode space [%d:%d] in unit %s\n",
-             last_past, f->base, m_unit->md5().toString().c_str());
+             last_past, f->base, m_unit->sha1().toString().c_str());
       ok = false;
     }
     last_past = f->past;
     if (i == e && last_past != m_unit->bcPos()) {
       error("dead bytecode [%d:%d] at end of unit %s\n",
-             last_past, m_unit->bcPos(), m_unit->md5().toString().c_str());
+             last_past, m_unit->bcPos(), m_unit->sha1().toString().c_str());
       ok = false;
     }
   }

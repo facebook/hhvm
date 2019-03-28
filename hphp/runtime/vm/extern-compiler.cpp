@@ -40,7 +40,7 @@
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
-#include "hphp/util/md5.h"
+#include "hphp/util/sha1.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
 
@@ -255,7 +255,7 @@ struct ExternCompiler {
 
   std::unique_ptr<UnitEmitter> compile(
     const char* filename,
-    const MD5& md5,
+    const SHA1& sha1,
     folly::StringPiece code,
     const Native::FuncTable& nativeFuncs,
     bool forDebuggerEval,
@@ -273,14 +273,14 @@ struct ExternCompiler {
       StructuredLogEntry log;
       log.setStr("filename", filename);
       int64_t t = logTime(log, 0, nullptr, true);
-      writeProgram(filename, md5, code, forDebuggerEval, options);
+      writeProgram(filename, sha1, code, forDebuggerEval, options);
       t = logTime(log, t, "send_source");
       prog = readResult(&log);
       t = logTime(log, t, "receive_hhas");
       auto ue = assemble_string(prog.data(),
                                 prog.length(),
                                 filename,
-                                md5,
+                                sha1,
                                 nativeFuncs,
                                 false /* swallow errors */,
                                 callbacks
@@ -348,7 +348,7 @@ private:
 
   void writeMessage(folly::dynamic& header, folly::StringPiece body);
   void writeConfigs();
-  void writeProgram(const char* filename, MD5 md5, folly::StringPiece code,
+  void writeProgram(const char* filename, SHA1 sha1, folly::StringPiece code,
                     bool forDebuggerEval, const RepoOptions& options);
   void writeExtractFacts(const std::string& filename, folly::StringPiece code);
   void writeParseFile(const std::string& filename, folly::StringPiece code);
@@ -383,7 +383,7 @@ struct CompilerPool {
   CompilerResult compile(const char* code,
                          int len,
                          const char* filename,
-                         const MD5& md5,
+                         const SHA1& sha1,
                          const Native::FuncTable& nativeFuncs,
                          bool forDebuggerEval,
                          AsmCallbacks* callbacks,
@@ -559,7 +559,7 @@ ParseFactsResult extract_facts_worker(const CompilerGuard& compiler,
 CompilerResult CompilerPool::compile(const char* code,
                                      int len,
                                      const char* filename,
-                                     const MD5& md5,
+                                     const SHA1& sha1,
                                      const Native::FuncTable& nativeFuncs,
                                      bool forDebuggerEval,
                                      AsmCallbacks* callbacks,
@@ -568,7 +568,7 @@ CompilerResult CompilerPool::compile(const char* code,
 ) {
   auto compile = [&](const CompilerGuard& c) {
     return c->compile(filename,
-                      md5,
+                      sha1,
                       folly::StringPiece(code, len),
                       nativeFuncs,
                       forDebuggerEval,
@@ -750,14 +750,14 @@ void ExternCompiler::writeConfigs() {
 
 void ExternCompiler::writeProgram(
   const char* filename,
-  MD5 md5,
+  SHA1 sha1,
   folly::StringPiece code,
   bool forDebuggerEval,
   const RepoOptions& options
 ) {
   folly::dynamic header = folly::dynamic::object
     ("type", "code")
-    ("md5", md5.toString())
+    ("sha1", sha1.toString())
     ("file", filename)
     ("is_systemlib", !SystemLib::s_inited)
     ("for_debugger_eval", forDebuggerEval)
@@ -993,7 +993,7 @@ CompilerResult hackc_compile(
   const char* code,
   int len,
   const char* filename,
-  const MD5& md5,
+  const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
   bool forDebuggerEval,
   AsmCallbacks* callbacks,
@@ -1004,7 +1004,7 @@ CompilerResult hackc_compile(
     code,
     len,
     filename,
-    md5,
+    sha1,
     nativeFuncs,
     forDebuggerEval,
     callbacks,
@@ -1158,7 +1158,7 @@ std::unique_ptr<UnitCompiler>
 UnitCompiler::create(const char* code,
                      int codeLen,
                      const char* filename,
-                     const MD5& md5,
+                     const SHA1& sha1,
                      const Native::FuncTable& nativeFuncs,
                      bool forDebuggerEval,
                      const RepoOptions& options
@@ -1168,7 +1168,7 @@ UnitCompiler::create(const char* code,
     code,
     codeLen,
     filename,
-    md5,
+    sha1,
     nativeFuncs,
     forDebuggerEval,
     options
@@ -1181,7 +1181,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
   auto res = hackc_compile(m_code,
                            m_codeLen,
                            m_filename,
-                           m_md5,
+                           m_sha1,
                            m_nativeFuncs,
                            m_forDebuggerEval,
                            callbacks,
@@ -1196,7 +1196,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
     [&] (std::string& err) {
       unitEmitter = createFatalUnit(
         makeStaticString(m_filename),
-        m_md5,
+        m_sha1,
         FatalOp::Runtime,
         makeStaticString(err));
     }

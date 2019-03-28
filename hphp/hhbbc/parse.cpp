@@ -1495,7 +1495,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   auto const& ue = *uep;
 
   auto ret      = std::make_unique<php::Unit>();
-  ret->md5      = ue.md5();
+  ret->sha1     = ue.sha1();
   ret->filename = ue.m_filepath;
   ret->preloadPriority = ue.m_preloadPriority;
   ret->isHHFile = ue.m_isHHFile;

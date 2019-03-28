@@ -25,8 +25,6 @@
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
-#include "hphp/util/md5.h"
-
 #include <folly/Likely.h>
 
 #include <climits>

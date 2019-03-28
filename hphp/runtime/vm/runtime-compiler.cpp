@@ -21,7 +21,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/zend/zend-string.h"
 #include "hphp/util/assertions.h"
-#include "hphp/util/md5.h"
+#include "hphp/util/sha1.h"
 #include <folly/Range.h>
 
 namespace HPHP {
@@ -31,14 +31,14 @@ TRACE_SET_MOD(runtime);
 CompileStringFn g_hphp_compiler_parse;
 
 void hphp_compiler_init() {
-  g_hphp_compiler_parse(nullptr, 0, MD5(), nullptr, Native::s_noNativeFuncs,
+  g_hphp_compiler_parse(nullptr, 0, SHA1(), nullptr, Native::s_noNativeFuncs,
                         nullptr, false, RepoOptions::defaults());
 }
 
-Unit* compile_file(const char* s, size_t sz, const MD5& md5,
+Unit* compile_file(const char* s, size_t sz, const SHA1& sha1,
                    const char* fname, const Native::FuncTable& nativeFuncs,
                    const RepoOptions& options, Unit** releaseUnit) {
-  return g_hphp_compiler_parse(s, sz, md5, fname, nativeFuncs, releaseUnit,
+  return g_hphp_compiler_parse(s, sz, sha1, fname, nativeFuncs, releaseUnit,
                                false, options);
 }
 
@@ -48,17 +48,17 @@ Unit* compile_string(const char* s,
                      const Native::FuncTable& nativeFuncs,
                      const RepoOptions& options,
                      bool forDebuggerEval) {
-  auto const md5 = MD5{
-    mangleUnitMd5(string_md5(folly::StringPiece{s, sz}), options)};
+  auto const sha1 = SHA1{
+    mangleUnitSha1(string_sha1(folly::StringPiece{s, sz}), options)};
   if (auto u = Repo::get().loadUnit(
         fname ? fname : "",
-        md5, nativeFuncs).release()) {
+        sha1, nativeFuncs).release()) {
     return u;
   }
   // NB: fname needs to be long-lived if generating a bytecode repo because it
   // can be cached via a Location ultimately contained by ErrorInfo for printing
   // code errors.
-  return g_hphp_compiler_parse(s, sz, md5, fname, nativeFuncs, nullptr,
+  return g_hphp_compiler_parse(s, sz, sha1, fname, nativeFuncs, nullptr,
                                forDebuggerEval, options);
 }
 

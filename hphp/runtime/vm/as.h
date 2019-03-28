@@ -24,7 +24,7 @@ namespace HPHP {
 
 struct UnitEmitter;
 struct FuncEmitter;
-struct MD5;
+struct SHA1;
 
 namespace Native {
 struct FuncTable;
@@ -59,7 +59,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* code,
   int codeLen,
   const char* filename,
-  const MD5&,
+  const SHA1&,
   const Native::FuncTable&,
   bool swallowErrors = true,
   AsmCallbacks* callbacks = nullptr

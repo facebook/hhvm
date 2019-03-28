@@ -48,8 +48,8 @@
 #include "hphp/runtime/vm/verifier/check.h"
 
 #include "hphp/util/logger.h"
-#include "hphp/util/md5.h"
 #include "hphp/util/read-only-arena.h"
+#include "hphp/util/sha1.h"
 #include "hphp/util/trace.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -88,10 +88,10 @@ size_t hhbc_arena_capacity() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UnitEmitter::UnitEmitter(const MD5& md5, const Native::FuncTable& nativeFuncs)
+UnitEmitter::UnitEmitter(const SHA1& sha1, const Native::FuncTable& nativeFuncs)
   : m_mainReturn(make_tv<KindOfUninit>())
   , m_nativeFuncs(nativeFuncs)
-  , m_md5(md5)
+  , m_sha1(sha1)
   , m_bc((unsigned char*)malloc(BCMaxInit))
   , m_bclen(0)
   , m_bcmax(BCMaxInit)
@@ -427,8 +427,8 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   } catch (RepoExc& re) {
     int repoId = repo.repoIdForNewUnit(unitOrigin);
     if (repoId != RepoIdInvalid) {
-      TRACE(3, "Failed to commit '%s' (0x%016" PRIx64 "%016" PRIx64 ") to '%s': %s\n",
-               m_filepath->data(), m_md5.q[0], m_md5.q[1],
+      TRACE(3, "Failed to commit '%s' (%s) to '%s': %s\n",
+               m_filepath->data(), m_sha1.toString().c_str(),
                repo.repoName(repoId).c_str(), re.msg().c_str());
     }
   }
@@ -448,7 +448,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       if (!m_sourceLocTab.empty()) {
         m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
       }
-      urp.insertUnit[repoId].insert(*this, txn, m_sn, m_md5, m_bc,
+      urp.insertUnit[repoId].insert(*this, txn, m_sn, m_sha1, m_bc,
                                     m_bclen);
     }
     int64_t usn = m_sn;
@@ -514,8 +514,8 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
     }
     return RepoStatus::success;
   } catch (RepoExc& re) {
-    TRACE(3, "Failed to commit '%s' (0x%016" PRIx64 "%016" PRIx64 ") to '%s': %s\n",
-             m_filepath->data(), m_md5.q[0], m_md5.q[1],
+    TRACE(3, "Failed to commit '%s' (%s) to '%s': %s\n",
+             m_filepath->data(), m_sha1.toString().c_str(),
              repo.repoName(repoId).c_str(), re.msg().c_str());
     return RepoStatus::error;
   }
@@ -578,7 +578,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           RuntimeOption::EvalFatalOnVerifyError) {
         return createFatalUnit(
           const_cast<StringData*>(m_filepath),
-          m_md5,
+          m_sha1,
           FatalOp::Parse,
           makeStaticString("A bytecode verification error was detected")
         )->create(saveLineTable);
@@ -607,7 +607,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_useStrictTypes = m_useStrictTypes;
   u->m_useStrictTypesForBuiltins = m_useStrictTypesForBuiltins;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
-  u->m_md5 = m_md5;
+  u->m_sha1 = m_sha1;
   u->m_arrays = m_arrays;
   for (auto const& pce : m_pceVec) {
     u->m_preClasses.push_back(PreClassPtr(pce->create(*u)));
@@ -815,8 +815,8 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
-      "(unitSn INTEGER PRIMARY KEY, md5 BLOB UNIQUE, preload INTEGER, bc BLOB, "
-      " data BLOB);",
+      "(unitSn INTEGER PRIMARY KEY, sha1 BLOB UNIQUE, preload INTEGER, "
+      "bc BLOB, data BLOB);",
       m_repo.table(repoId, "Unit"));
     txn.exec(createQuery);
   }
@@ -871,20 +871,20 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
 
 RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
                                      const std::string& name,
-                                     const MD5& md5) {
+                                     const SHA1& sha1) {
   if (!RuntimeOption::EvalLoadFilepathFromUnitCache) {
     ue.m_filepath = makeStaticString(name);
   }
-  // Look for a repo that contains a unit with matching MD5.
+  // Look for a repo that contains a unit with matching SHA1.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (getUnit[repoId].get(ue, md5) == RepoStatus::success) {
+    if (getUnit[repoId].get(ue, sha1) == RepoStatus::success) {
       break;
     }
   }
   if (repoId < 0) {
-    TRACE(3, "No repo contains '%s' (0x%016" PRIx64  "%016" PRIx64 ")\n",
-             name.c_str(), md5.q[0], md5.q[1]);
+    TRACE(3, "No repo contains '%s' (0x%s)\n",
+             name.c_str(), sha1.toString().c_str());
     return RepoStatus::error;
   }
   try {
@@ -897,30 +897,30 @@ RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
     m_repo.frp().getFuncs[repoId].get(ue);
   } catch (RepoExc& re) {
     TRACE(0,
-          "Repo error loading '%s' (0x%016" PRIx64 "%016"
-          PRIx64 ") from '%s': %s\n",
-          name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str(),
-          re.msg().c_str());
+          "Repo error loading '%s' (0x%s) from '%s': %s\n",
+          name.c_str(), sha1.toString().c_str(),
+          m_repo.repoName(repoId).c_str(), re.msg().c_str());
     return RepoStatus::error;
   }
-  TRACE(3, "Repo loaded '%s' (0x%016" PRIx64 "%016" PRIx64 ") from '%s'\n",
-           name.c_str(), md5.q[0], md5.q[1], m_repo.repoName(repoId).c_str());
+  TRACE(3, "Repo loaded '%s' (0x%s) from '%s'\n",
+           name.c_str(), sha1.toString().c_str(),
+           m_repo.repoName(repoId).c_str());
   return RepoStatus::success;
 }
 
 std::unique_ptr<UnitEmitter>
-UnitRepoProxy::loadEmitter(const std::string& name, const MD5& md5,
+UnitRepoProxy::loadEmitter(const std::string& name, const SHA1& sha1,
                            const Native::FuncTable& nativeFuncs) {
-  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
-  if (loadHelper(*ue, name, md5) == RepoStatus::error) ue.reset();
+  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
+  if (loadHelper(*ue, name, sha1) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
-UnitRepoProxy::load(const std::string& name, const MD5& md5,
+UnitRepoProxy::load(const std::string& name, const SHA1& sha1,
                     const Native::FuncTable& nativeFuncs) {
-  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
-  if (loadHelper(*ue, name, md5) == RepoStatus::error) return nullptr;
+  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
+  if (loadHelper(*ue, name, sha1) == RepoStatus::error) return nullptr;
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {
@@ -960,7 +960,7 @@ UnitRepoProxy::load(const std::string& name, const MD5& md5,
 
 void UnitRepoProxy::InsertUnitStmt
                   ::insert(const UnitEmitter& ue,
-                           RepoTxn& txn, int64_t& unitSn, const MD5& md5,
+                           RepoTxn& txn, int64_t& unitSn, const SHA1& sha1,
                            const unsigned char* bc, size_t bclen) {
   BlobEncoder dataBlob;
 
@@ -970,12 +970,12 @@ void UnitRepoProxy::InsertUnitStmt
      * units in preloadRepo.
      */
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(NULL, @md5, @preload, @bc, @data);",
+      "INSERT INTO {} VALUES(NULL, @sha1, @preload, @bc, @data);",
       m_repo.table(m_repoId, "Unit"));
     txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
-  query.bindMd5("@md5", md5);
+  query.bindSha1("@sha1", sha1);
   query.bindInt("@preload", ue.m_preloadPriority);
   query.bindBlob("@bc", (const void*)bc, bclen);
   const_cast<UnitEmitter&>(ue).serdeMetaData(dataBlob);
@@ -984,17 +984,17 @@ void UnitRepoProxy::InsertUnitStmt
   unitSn = query.getInsertedRowid();
 }
 
-RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const MD5& md5) {
+RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const SHA1& sha1) {
   try {
     auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
-        "SELECT unitSn, preload, bc, data FROM {} WHERE md5 == @md5;",
+        "SELECT unitSn, preload, bc, data FROM {} WHERE sha1 == @sha1;",
         m_repo.table(m_repoId, "Unit"));
       txn.prepare(*this, selectQuery);
     }
     RepoTxnQuery query(txn, *this);
-    query.bindMd5("@md5", md5);
+    query.bindSha1("@sha1", sha1);
     query.step();
     if (!query.row()) {
       return RepoStatus::error;
@@ -1349,9 +1349,9 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
 }
 
 std::unique_ptr<UnitEmitter>
-createFatalUnit(StringData* filename, const MD5& md5, FatalOp /*op*/,
+createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp /*op*/,
                 StringData* err) {
-  auto ue = std::make_unique<UnitEmitter>(md5, Native::s_noNativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, Native::s_noNativeFuncs);
   ue->m_filepath = filename;
   ue->m_isHHFile = true;
   ue->initMain(1, 1);

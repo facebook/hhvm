@@ -767,7 +767,7 @@ void relocateTranslation(
     TRACE(1, "bcmaps before relocation\n");
     for (UNUSED auto const& map : bc_map) {
       TRACE(1, "%s %-6d %p %p %p\n",
-            map.md5.toString().c_str(),
+            map.sha1.toString().c_str(),
             map.bcStart,
             map.aStart,
             map.acoldStart,

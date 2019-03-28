@@ -27,7 +27,7 @@ namespace Native {
 struct FuncTable;
 }
 
-struct MD5;
+struct SHA1;
 
 struct BadCompilerException : Exception {
   explicit BadCompilerException(const std::string& what) : Exception(what) {}
@@ -78,14 +78,14 @@ struct UnitCompiler {
   UnitCompiler(const char* code,
                int codeLen,
                const char* filename,
-               const MD5& md5,
+               const SHA1& sha1,
                const Native::FuncTable& nativeFuncs,
                bool forDebuggerEval,
                const RepoOptions& options)
       : m_code(code),
         m_codeLen(codeLen),
         m_filename(filename),
-        m_md5(md5),
+        m_sha1(sha1),
         m_nativeFuncs(nativeFuncs),
         m_forDebuggerEval(forDebuggerEval),
         m_options(options)
@@ -96,7 +96,7 @@ struct UnitCompiler {
     const char* code,
     int codeLen,
     const char* filename,
-    const MD5& md5,
+    const SHA1& sha1,
     const Native::FuncTable& nativeFuncs,
     bool forDebuggerEval,
     const RepoOptions& options);
@@ -110,7 +110,7 @@ struct UnitCompiler {
   const char* m_code;
   int m_codeLen;
   const char* m_filename;
-  const MD5& m_md5;
+  const SHA1& m_sha1;
   const Native::FuncTable& m_nativeFuncs;
   bool m_forDebuggerEval;
   const RepoOptions& m_options;

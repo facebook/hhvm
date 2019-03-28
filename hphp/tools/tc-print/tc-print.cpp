@@ -58,7 +58,7 @@ bool            collectBCStats  = false;
 bool            inclusiveStats  = false;
 bool            verboseStats    = false;
 bool            hostOpcodes     = false;
-folly::Optional<MD5> md5Filter;
+folly::Optional<SHA1> sha1Filter;
 PerfEventType   sortBy          = EVENT_CYCLES;
 bool            sortByDensity   = false;
 bool            sortBySize      = false;
@@ -121,7 +121,7 @@ void usage() {
     "    -p <FILE>       : uses raw profile data from <FILE>\n"
     "    -s              : prints all translations sorted by creation "
     "order\n"
-    "    -u <MD5>        : prints all translations from the specified "
+    "    -u <SHA1>        : prints all translations from the specified "
     "unit\n"
     "    -t <NUMBER>     : prints top <NUMBER> translations according to "
     "profiling info\n"
@@ -234,7 +234,7 @@ void parseOptions(int argc, char *argv[]) {
         break;
       case 'u':
         if (strlen(optarg) == 32) {
-          md5Filter = MD5(optarg);
+          sha1Filter = SHA1(optarg);
         } else {
           usage();
           exit(1);
@@ -517,11 +517,11 @@ void printTrans(TransID transId) {
     const Func* curFunc = nullptr;
     for (auto& block : tRec->blocks) {
       std::stringstream byteInfo;
-      auto unit = g_repo->getUnit(block.md5);
+      auto unit = g_repo->getUnit(block.sha1);
       if (!unit) {
         byteInfo << folly::format(
           "<<< couldn't find unit {} to print bytecode range [{},{}) >>>\n",
-          block.md5, block.bcStart, block.bcPast);
+          block.sha1, block.bcStart, block.bcPast);
         continue;
       }
 
@@ -795,7 +795,7 @@ void printTopBytecodes(const OfflineTransData* tdata,
     const TransFragment& tfrag = ranking[i].second;
     const TransRec* trec = tdata->getTransRec(tfrag.tid);
 
-    Unit* unit = g_repo->getUnit(trec->md5);
+    Unit* unit = g_repo->getUnit(trec->sha1);
     always_assert(unit);
 
     g_logger->printGeneric("\n====================\n");
@@ -904,7 +904,7 @@ int main(int argc, char *argv[]) {
       auto tRec = TREC(t);
       if (!tRec->isValid()) continue;
       if (tRec->kind == TransKind::Anchor) continue;
-      if (md5Filter && tRec->md5 != *md5Filter) continue;
+      if (sha1Filter && tRec->sha1 != *sha1Filter) continue;
 
       printTrans(t);
       bool opt = (tRec->kind == TransKind::OptPrologue

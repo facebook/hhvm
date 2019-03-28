@@ -65,7 +65,7 @@ void genText(UnitEmitter* ue, const std::string& outputPath) {
     if (!f) {
       Logger::Error("Unable to open %s for write", fullPath.c_str());
     } else {
-      f << "Hash: " << ue->md5().toString() << std::endl;
+      f << "Hash: " << ue->sha1().toString() << std::endl;
       f << unit->toString();
       f.close();
     }
@@ -305,7 +305,7 @@ extern "C" {
  * a NULL `code' parameter to do initialization.
  */
 
-Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
+Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
                           const char* filename,
                           const Native::FuncTable& nativeFuncs,
                           Unit** releaseUnit, bool forDebuggerEval,
@@ -348,7 +348,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
       if (const char* dot = strrchr(filename, '.')) {
         const char hhbc_ext[] = "hhas";
         if (!strcmp(dot + 1, hhbc_ext)) {
-          ue = assemble_string(code, codeLen, filename, md5, nativeFuncs);
+          ue = assemble_string(code, codeLen, filename, sha1, nativeFuncs);
         }
       }
     }
@@ -356,7 +356,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
     // If ue != nullptr then we assembled it above, so don't feed it into
     // the extern compiler
     if (!ue) {
-      auto uc = UnitCompiler::create(code, codeLen, filename, md5,
+      auto uc = UnitCompiler::create(code, codeLen, filename, sha1,
                                      nativeFuncs, forDebuggerEval, options);
       assertx(uc);
       try {
@@ -381,7 +381,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const MD5& md5,
         // the unit was not committed to the Repo, probably because
         // another thread did it first. Try to use the winner.
         auto u = Repo::get().loadUnit(filename ? filename : "",
-                                      md5,
+                                      sha1,
                                       nativeFuncs);
         if (u != nullptr) {
           return u.release();

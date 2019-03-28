@@ -141,8 +141,8 @@ inline int64_t Unit::sn() const {
   return m_sn;
 }
 
-inline MD5 Unit::md5() const {
-  return m_md5;
+inline SHA1 Unit::sha1() const {
+  return m_sha1;
 }
 
 inline const StringData* Unit::filepath() const {

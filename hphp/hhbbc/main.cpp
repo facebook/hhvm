@@ -305,7 +305,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
-      [&] (const std::pair<std::string,MD5>& kv) {
+      [&] (const std::pair<std::string,SHA1>& kv) {
         return Repo::get().urp().loadEmitter(
           kv.first, kv.second, Native::s_noNativeFuncs
         );

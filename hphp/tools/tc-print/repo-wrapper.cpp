@@ -92,15 +92,15 @@ RepoWrapper::~RepoWrapper() {
 }
 
 void RepoWrapper::addUnit(Unit* unit) {
-  unitCache.insert({unit->md5(), unit});
+  unitCache.insert({unit->sha1(), unit});
 }
 
-Unit* RepoWrapper::getUnit(MD5 md5) {
-  CacheType::const_iterator it = unitCache.find(md5);
+Unit* RepoWrapper::getUnit(SHA1 sha1) {
+  CacheType::const_iterator it = unitCache.find(sha1);
   if (it != unitCache.end()) return it->second;
-  auto unit = repo->loadUnit("", md5, Native::s_noNativeFuncs).release();
+  auto unit = repo->loadUnit("", sha1, Native::s_noNativeFuncs).release();
 
-  if (unit) unitCache.insert({md5, unit});
+  if (unit) unitCache.insert({sha1, unit});
   return unit;
 }
 

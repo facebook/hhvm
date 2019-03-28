@@ -156,7 +156,7 @@ std::unique_ptr<php::Unit> make_test_unit(php::Program& program) {
   std::unique_ptr<UnitEmitter> ue(assemble_string(
     hhas.c_str(), hhas.size(),
     "ignore.php",
-    MD5("12345432123454321234543212345432"),
+    SHA1("1234543212345432123454321234543212345432"),
     Native::s_noNativeFuncs
   ));
   return parse_unit(program, std::move(ue));

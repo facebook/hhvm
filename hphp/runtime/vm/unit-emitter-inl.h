@@ -25,8 +25,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Basic info.
 
-inline const MD5& UnitEmitter::md5() const {
-  return m_md5;
+inline const SHA1& UnitEmitter::sha1() const {
+  return m_sha1;
 }
 
 inline const unsigned char* UnitEmitter::bc() const {

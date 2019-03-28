@@ -34,9 +34,9 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/lock-free-ptr-wrapper.h"
-#include "hphp/util/md5.h"
 #include "hphp/util/mutex.h"
 #include "hphp/util/service-data.h"
+#include "hphp/util/sha1.h"
 
 #include <map>
 #include <ostream>
@@ -343,9 +343,9 @@ public:
   int64_t sn() const;
 
   /*
-   * MD5 of the Unit.
+   * SHA1 of the Unit.
    */
-  MD5 md5() const;
+  SHA1 sha1() const;
 
   /*
    * File and directory paths.
@@ -916,7 +916,7 @@ private:
    */
 
   int64_t m_sn{-1};             // Note: could be 32-bit
-  MD5 m_md5;
+  SHA1 m_sha1;
   VMFixedVector<const ArrayData*> m_arrays;
   mutable PseudoMainCacheMap* m_pseudoMainCache{nullptr};
   mutable LockFreePtrWrapper<VMCompactVector<LineInfo>> m_lineMap;

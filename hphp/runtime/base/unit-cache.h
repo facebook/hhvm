@@ -69,10 +69,10 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
 Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
 
 /*
- * Mangle a file's md5sum with runtime options that affect the Unit output.
+ * Mangle a file's sha1sum with runtime options that affect the Unit output.
  * The parser and this module need to agree on how this is done.
  */
-std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions&);
+std::string mangleUnitSha1(const std::string& fileSha1, const RepoOptions&);
 
 /*
  * Return the number of php files that are currently loaded in this process.

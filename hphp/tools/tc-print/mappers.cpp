@@ -126,7 +126,7 @@ ExtOpcodeResult getExtOpcode(TCA addr, const TransRec* trec) {
     if ((bcMap[i].aStart       <= addr && bcMap[i+1].aStart       > addr) ||
         (bcMap[i].acoldStart   <= addr && bcMap[i+1].acoldStart   > addr) ||
         (bcMap[i].afrozenStart <= addr && bcMap[i+1].afrozenStart > addr)) {
-      auto* unit = g_repo->getUnit(bcMap[i].md5);
+      auto* unit = g_repo->getUnit(bcMap[i].sha1);
       always_assert(unit);
       return {true, (ExtOpcode)unit->getOp(bcMap[i].bcStart)};
     }
@@ -143,7 +143,7 @@ AddrToBcMapper::operator()(const TCA& addr) {
   if (tid == INVALID_ID) return folly::none;
 
   const TransRec* trec = transData->getTransRec(tid);
-  Unit* unit = g_repo->getUnit(trec->md5);
+  Unit* unit = g_repo->getUnit(trec->sha1);
   if (!unit) return folly::none;
 
   auto r = getExtOpcode(addr, trec);

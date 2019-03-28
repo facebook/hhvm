@@ -103,7 +103,7 @@ struct RepoOptions {
 
   std::string path() const { return m_path; }
   std::string cacheKeyRaw() const;
-  std::string cacheKeyMd5() const;
+  std::string cacheKeySha1() const;
   std::string toJSON() const;
   folly::dynamic toDynamic() const;
   struct stat stat() const { return m_stat; }

@@ -29,7 +29,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/compact-vector.h"
 #include "hphp/util/copy-ptr.h"
-#include "hphp/util/md5.h"
+#include "hphp/util/sha1.h"
 
 #include "hphp/runtime/base/user-attributes.h"
 #include "hphp/runtime/vm/func.h"
@@ -595,7 +595,7 @@ using TypeAlias = ::HPHP::TypeAlias;
  * Representation of a php file (normal compilation unit).
  */
 struct Unit {
-  MD5 md5;
+  SHA1 sha1;
   LSString filename;
   bool isHHFile{false};
   bool useStrictTypes{false};

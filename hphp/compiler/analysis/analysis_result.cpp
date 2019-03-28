@@ -67,7 +67,7 @@ void AnalysisResult::finish() {
 
 void AnalysisResult::addHhasFile(std::unique_ptr<UnitEmitter>&& ue) {
   const uint64_t sz = m_hhasFiles.size();
-  ue->setMd5(MD5 { sz });
+  ue->setSha1(SHA1 { sz });
   m_hhasFiles.emplace_back(std::move(ue));
 }
 

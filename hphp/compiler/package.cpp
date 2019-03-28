@@ -357,10 +357,10 @@ bool Package::parseImpl(const std::string* fileName) {
       std::string content {
         std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
       };
-      MD5 md5{string_md5(content)};
+      SHA1 sha1{string_sha1(content)};
 
       std::unique_ptr<UnitEmitter> ue{
-        assemble_string(content.data(), content.size(), fileName->c_str(), md5,
+        assemble_string(content.data(), content.size(), fileName->c_str(), sha1,
                         Native::s_noNativeFuncs)
       };
       Lock lock(m_ar->getMutex());
@@ -390,12 +390,12 @@ bool Package::parseImpl(const std::string* fileName) {
   std::ifstream s(fullPath);
   std::string content {
     std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
-  MD5 md5{string_md5(content)};
+  SHA1 sha1{string_sha1(content)};
 
   // Invoke external compiler. If it fails to compile the file we log an
   // error and and skip it.
   auto uc = UnitCompiler::create(
-    content.data(), content.size(), fileName->c_str(), md5,
+    content.data(), content.size(), fileName->c_str(), sha1,
     Native::s_noNativeFuncs, false, RepoOptions::forFile(fileName->data()));
   assertx(uc);
   try {

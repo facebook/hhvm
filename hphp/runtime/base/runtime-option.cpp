@@ -363,8 +363,8 @@ PARSERFLAGS();
 #undef E
 }
 
-std::string RepoOptions::cacheKeyMd5() const {
-  return string_md5(cacheKeyRaw());
+std::string RepoOptions::cacheKeySha1() const {
+  return string_sha1(cacheKeyRaw());
 }
 
 std::string RepoOptions::toJSON() const {

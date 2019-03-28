@@ -34,7 +34,7 @@ namespace HPHP { namespace jit {
 
 struct OfflineCode;
 
-typedef char MD5Str[33];
+typedef char SHA1Str[41];
 
 struct TransAddrRange {
   TCA    start;

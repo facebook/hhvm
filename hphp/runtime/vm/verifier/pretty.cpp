@@ -219,7 +219,7 @@ void printBlocks(const FuncEmitter* func, const Graph* g) {
 }
 
 void printGml(const UnitEmitter* unit) {
-  std::string filename = unit->md5().toString() + ".gml";
+  std::string filename = unit->sha1().toString() + ".gml";
   FILE* file = fopen(filename.c_str(), "w");
   if (!file) {
     std::cerr << "Couldn't open GML output file " << filename << std::endl;

@@ -86,7 +86,7 @@
 #include <folly/Range.h>
 #include <folly/String.h>
 
-#include "hphp/util/md5.h"
+#include "hphp/util/sha1.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
@@ -3506,12 +3506,12 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const char* code,
   int codeLen,
   const char* filename,
-  const MD5& md5,
+  const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
   bool swallowErrors,
   AsmCallbacks* callbacks
 ) {
-  auto ue = std::make_unique<UnitEmitter>(md5, nativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
   if (!SystemLib::s_inited) {
     ue->m_mergeOnly = true;
   }
@@ -3531,19 +3531,21 @@ std::unique_ptr<UnitEmitter> assemble_string(
     }
   } catch (const FatalErrorException& e) {
     if (!swallowErrors) throw;
-    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime,
+                         makeStaticString(e.what()));
   } catch (const AssemblerError& e) {
     if (!swallowErrors) throw;
-    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const AssemblerFatal& e) {
     if (!swallowErrors) throw;
-    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime, makeStaticString(e.what()));
   } catch (const std::exception& e) {
     if (!swallowErrors) {
       // assembler should throw only AssemblerErrors and FatalErrorExceptions
       throw AssemblerError(folly::sformat("AssemblerError: {}", e.what()));
     }
-    ue = createFatalUnit(sd, md5, FatalOp::Runtime, makeStaticString(e.what()));
+    ue = createFatalUnit(sd, sha1, FatalOp::Runtime,
+                         makeStaticString(e.what()));
   }
 
   return ue;

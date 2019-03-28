@@ -37,7 +37,7 @@
 #include "hphp/util/functional.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash-set.h"
-#include "hphp/util/md5.h"
+#include "hphp/util/sha1.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -69,11 +69,11 @@ struct UnitEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
-  explicit UnitEmitter(const MD5& md5, const Native::FuncTable&);
+  explicit UnitEmitter(const SHA1& sha1, const Native::FuncTable&);
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
-  void setMd5(const MD5& md5) { m_md5 = md5; }
+  void setSha1(const SHA1& sha1) { m_sha1 = sha1; }
   /*
    * Commit this unit to a repo.
    */
@@ -101,9 +101,9 @@ struct UnitEmitter {
   // Basic data.
 
   /*
-   * The MD5 hash of the Unit.
+   * The SHA1 hash of the Unit.
    */
-  const MD5& md5() const;
+  const SHA1& sha1() const;
 
   /*
    * Bytecode pointer and current emit position.
@@ -399,7 +399,7 @@ public:
   const Native::FuncTable& m_nativeFuncs;
 
 private:
-  MD5 m_md5;
+  SHA1 m_sha1;
 
   unsigned char* m_bc;
   size_t m_bclen;
@@ -483,10 +483,10 @@ struct UnitRepoProxy : public RepoProxy {
   explicit UnitRepoProxy(Repo& repo);
   ~UnitRepoProxy();
   void createSchema(int repoId, RepoTxn& txn); // throws(RepoExc)
-  std::unique_ptr<Unit> load(const std::string& name, const MD5& md5,
+  std::unique_ptr<Unit> load(const std::string& name, const SHA1& sha1,
                              const Native::FuncTable&);
   std::unique_ptr<UnitEmitter> loadEmitter(const std::string& name,
-                                           const MD5& md5,
+                                           const SHA1& sha1,
                                            const Native::FuncTable&);
 
   struct InsertUnitLineTableStmt : public RepoProxy::Stmt {
@@ -505,13 +505,13 @@ struct UnitRepoProxy : public RepoProxy {
     void insert(const UnitEmitter& ue,
                 RepoTxn& txn,
                 int64_t& unitSn,
-                const MD5& md5,
+                const SHA1& sha1,
                 const unsigned char* bc,
                 size_t bclen); // throws(RepoExc)
   };
   struct GetUnitStmt : public RepoProxy::Stmt {
     GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
-    RepoStatus get(UnitEmitter& ue, const MD5& md5);
+    RepoStatus get(UnitEmitter& ue, const SHA1& sha1);
   };
   struct InsertUnitLitstrStmt : public RepoProxy::Stmt {
     InsertUnitLitstrStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -584,12 +584,12 @@ struct UnitRepoProxy : public RepoProxy {
 #undef URP_OP
 
 private:
-  RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const MD5&);
+  RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const SHA1&);
 };
 
 std::unique_ptr<UnitEmitter> createFatalUnit(
   StringData* filename,
-  const MD5& md5,
+  const SHA1& sha1,
   FatalOp op,
   StringData* err
 );

@@ -157,17 +157,17 @@ CachedUnit lookupUnitRepoAuth(const StringData* path,
     /*
      * We got the lock, so we're responsible for updating the entry.
      */
-    MD5 md5;
+    SHA1 sha1;
     if (Repo::get().findFile(path->data(),
                              RuntimeOption::SourceRoot,
-                             md5) == RepoStatus::error) {
+                             sha1) == RepoStatus::error) {
       cu.unit.update_and_unlock(nullptr);
       return cu.cachedUnit();
     }
 
     auto unit = Repo::get().loadUnit(
         path->data(),
-        md5,
+        sha1,
         nativeFuncs)
       .release();
     if (unit) {
@@ -197,7 +197,7 @@ struct CachedUnitWithFree {
     const RepoOptions& options
   ) : cu(src)
     , needsTreadmill{needsTreadmill}
-    , repoOptionsHash(options.cacheKeyMd5())
+    , repoOptionsHash(options.cacheKeySha1())
   {
     if (statInfo) {
 #ifdef _MSC_VER
@@ -231,7 +231,7 @@ struct CachedUnitWithFree {
   mutable dev_t devId;
   bool needsTreadmill;
 
-  MD5 repoOptionsHash;
+  SHA1 repoOptionsHash;
 };
 
 struct CachedUnitNonRepo {
@@ -295,7 +295,7 @@ bool isChanged(
 #endif
          cachedUnit->ino != s->st_ino ||
          cachedUnit->devId != s->st_dev ||
-         cachedUnit->repoOptionsHash != MD5{options.cacheKeyMd5()} ||
+         cachedUnit->repoOptionsHash != SHA1{options.cacheKeySha1()} ||
          stressUnitCache();
 }
 
@@ -326,15 +326,16 @@ CachedUnit createUnitFromString(const char* path,
                                 OptLog& ent,
                                 const Native::FuncTable& nativeFuncs,
                                 const RepoOptions& options) {
-  auto const md5 = MD5{mangleUnitMd5(string_md5(contents.slice()), options)};
+  auto const sha1 = SHA1{mangleUnitSha1(string_sha1(contents.slice()),
+                                        options)};
   // Try the repo; if it's not already there, invoke the compiler.
-  if (auto unit = Repo::get().loadUnit(path, md5, nativeFuncs)) {
+  if (auto unit = Repo::get().loadUnit(path, sha1, nativeFuncs)) {
     return CachedUnit { unit.release(), rds::allocBit() };
   }
   LogTimer compileTimer("compile_ms", ent);
   rqtrace::EventGuard trace{"COMPILE_UNIT"};
   trace.annotate("file_size", folly::to<std::string>(contents.size()));
-  auto const unit = compile_file(contents.data(), contents.size(), md5, path,
+  auto const unit = compile_file(contents.data(), contents.size(), sha1, path,
                                  nativeFuncs, options, releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
 }
@@ -712,7 +713,7 @@ void logLoad(
       ent.setStr("result", "success");
     }
 
-    ent.setStr("md5", u->md5().toString());
+    ent.setStr("sha1", u->sha1().toString());
     ent.setStr("repo_sn", folly::to<std::string>(u->sn()));
     ent.setStr("repo_id", folly::to<std::string>(u->repoID()));
 
@@ -766,8 +767,9 @@ const std::string mangleUnitPHP7Options() {
 
 //////////////////////////////////////////////////////////////////////
 
-std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
-  std::string t = fileMd5 + '\0'
+std::string mangleUnitSha1(const std::string& fileSha1,
+                           const RepoOptions& opts) {
+  std::string t = fileSha1 + '\0'
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::EnableHipHopSyntax ? '1' : '0')
     + (RuntimeOption::EnablePocketUniverses ? '1' : '0')
@@ -809,7 +811,7 @@ std::string mangleUnitMd5(const std::string& fileMd5, const RepoOptions& opts) {
     + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()
     + hackc_version();
-  return string_md5(t);
+  return string_sha1(t);
 }
 
 size_t numLoadedUnits() {

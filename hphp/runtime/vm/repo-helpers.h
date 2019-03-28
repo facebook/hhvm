@@ -20,8 +20,8 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/util/md5.h"
 #include "hphp/util/portability.h"
+#include "hphp/util/sha1.h"
 
 #include <sqlite3.h>
 
@@ -97,7 +97,7 @@ struct RepoQuery {
                 bool isStatic=false);
   void bindBlob(const char* paramName, const BlobEncoder& blob,
                 bool isStatic=false);
-  void bindMd5(const char* paramName, const MD5& md5);
+  void bindSha1(const char* paramName, const SHA1& sha1);
   void bindTypedValue(const char* paramName, const TypedValue& tv);
   void bindText(const char* paramName, const char* text, size_t size,
                 bool isStatic=false);
@@ -132,7 +132,7 @@ struct RepoQuery {
   // into the named type then an error is thrown.
   void getBlob(int iCol, const void*& blob, size_t& size); // throws(RepoExc)
   BlobDecoder getBlob(int iCol); // throws(RepoExc)
-  void getMd5(int iCol, MD5& md5); // throws(RepoExc)
+  void getSha1(int iCol, SHA1& sha1); // throws(RepoExc)
   void getTypedValue(int iCol, TypedValue& tv); // throws(RepoExc)
   void getText(int iCol, const char*& text); // throws(RepoExc)
   void getText(int iCol, const char*& text, size_t& size); // throws(RepoExc)

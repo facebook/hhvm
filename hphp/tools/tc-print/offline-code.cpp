@@ -181,7 +181,7 @@ size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
   TCA tcaStart, tcaStop;
   auto const& bcMap = bcMappingInfo.bcMapping;
 
-  curr = next = TransBCMapping { MD5(), 0, 0, 0, 0 };
+  curr = next = TransBCMapping { SHA1(), 0, 0, 0, 0 };
   tcaStart = tcaStop = 0;
 
   // Account for the sentinel.
@@ -218,7 +218,7 @@ size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
 
   if (currBC < mappingSize && tcaStart == ip) {
     std::stringstream lineInfo;
-    if (auto currUnit = g_repo->getUnit(curr.md5)) {
+    if (auto currUnit = g_repo->getUnit(curr.sha1)) {
       auto bcPast = curr.bcStart + instrLen(currUnit->at(curr.bcStart));
 
       currUnit->prettyPrint(lineInfo,
@@ -227,7 +227,7 @@ size_t OfflineCode::printBCMapping(BCMappingInfo bcMappingInfo,
     } else {
       lineInfo << folly::format(
         "<<< couldn't find unit {} to print bytecode at offset {} >>>\n",
-        curr.md5, curr.bcStart);
+        curr.sha1, curr.bcStart);
     }
     g_logger->printLine(lineInfo.str());
     currBC++;

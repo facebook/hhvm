@@ -1817,8 +1817,8 @@ static int execute_program_impl(int argc, char** argv) {
     contents << fs.rdbuf();
 
     auto const str = contents.str();
-    auto const md5 = MD5{
-      mangleUnitMd5(string_md5(str), RepoOptions::defaults())
+    auto const sha1 = SHA1{
+      mangleUnitSha1(string_sha1(str), RepoOptions::defaults())
     };
 
     compilers_start();
@@ -1836,7 +1836,7 @@ static int execute_program_impl(int argc, char** argv) {
     // Ensure write to SystemLib::s_inited is visible by other threads.
     std::atomic_thread_fence(std::memory_order_release);
 
-    auto compiled = compile_file(str.c_str(), str.size(), md5, file.c_str(),
+    auto compiled = compile_file(str.c_str(), str.size(), sha1, file.c_str(),
                                  Native::s_noNativeFuncs,
                                  RepoOptions::defaults(), nullptr);
 
@@ -2780,9 +2780,10 @@ void flushLoadedUnitLogs() {
   for (auto u : *tl_loaded_units) {
     StructuredLogEntry ent;
     auto const path = logPath(prefix, u->filepath()->toCppString());
-    auto const md5 = u->md5().toString();
+    auto const sha1 = u->sha1().toString();
     ent.setStr("filename", basename(u->filepath()->data()));
     ent.setStr("filepath", path);
+    ent.setStr("sha1", sha1);
     ent.force_init = true;
     ent.ratelim.emplace(
       "hhvm_loaded_files", path, RuntimeOption::EvalLogLoadedUnitsRate, futures

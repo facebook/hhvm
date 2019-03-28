@@ -66,7 +66,7 @@ void OfflineTransData::loadTCData(string dumpDir) {
   // Read translations
   for (uint32_t tid = 0; tid < nTranslations; tid++) {
     TransRec  tRec;
-    MD5Str    md5Str;
+    SHA1Str    sha1Str;
     uint32_t  kind;
     FuncId    funcId;
     int32_t   resumeMode;
@@ -83,8 +83,8 @@ void OfflineTransData::loadTCData(string dumpDir) {
       READ_EMPTY();
       continue;
     }
-    READ(" src.md5 = %s", md5Str);
-    tRec.md5 = MD5(md5Str);
+    READ(" src.sha1 = %s", sha1Str);
+    tRec.sha1 = SHA1(sha1Str);
     READ(" src.funcId = %u", &funcId);
     READ(" src.funcName = %s", funcName);
     tRec.funcName = funcName;
@@ -94,19 +94,19 @@ void OfflineTransData::loadTCData(string dumpDir) {
 
     READ(" src.blocks = %lu", &numBlocks);
     for (size_t i = 0; i < numBlocks; ++i) {
-      MD5Str md5Tmp;
+      SHA1Str sha1Tmp;
       Offset start = kInvalidOffset;
       Offset past = kInvalidOffset;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
-          sscanf(buf, "%s %d %d", md5Tmp, &start, &past) != 3) {
+          sscanf(buf, "%s %d %d", sha1Tmp, &start, &past) != 3) {
         snprintf(buf, BUFLEN,
                  "Error reading bytecode block #%lu at translation %u\n",
                  i, tRec.id);
         error(buf);
       }
 
-      tRec.blocks.emplace_back(TransRec::Block{MD5(md5Tmp), start, past});
+      tRec.blocks.emplace_back(TransRec::Block{SHA1(sha1Tmp), start, past});
     }
 
     READ(" src.guards = %lu", &numGuards);
@@ -166,11 +166,11 @@ void OfflineTransData::loadTCData(string dumpDir) {
     READ(" bcMapping = %lu", &numBCMappings);
     for (size_t i = 0; i < numBCMappings; i++) {
       TransBCMapping bcMap;
-      MD5Str md5Tmp;
+      SHA1Str sha1Tmp;
 
       if (gzgets(file, buf, BUFLEN) == Z_NULL ||
           sscanf(buf, "%s %d %p %p %p",
-                 md5Tmp, &bcMap.bcStart,
+                 sha1Tmp, &bcMap.bcStart,
                  (void**)&bcMap.aStart,
                  (void**)&bcMap.acoldStart,
                  (void**)&bcMap.afrozenStart) != 5) {
@@ -182,12 +182,12 @@ void OfflineTransData::loadTCData(string dumpDir) {
         error(buf);
       }
 
-      bcMap.md5 = MD5(md5Tmp);
+      bcMap.sha1 = SHA1(sha1Tmp);
       tRec.bcMapping.push_back(bcMap);
     }
 
     // push a sentinel bcMapping so that we can figure out stop offsets later on
-    const TransBCMapping sentinel { tRec.md5, 0,
+    const TransBCMapping sentinel { tRec.sha1, 0,
                                     tRec.aStart + tRec.aLen,
                                     tRec.acoldStart + tRec.acoldLen,
                                     tRec.afrozenStart + tRec.afrozenLen };
@@ -309,7 +309,7 @@ void OfflineTransData::printTransRec(TransID transId,
 
   std::cout << folly::format(
     "Translation {} {{\n"
-    "  src.md5 = {}\n"
+    "  src.sha1 = {}\n"
     "  src.funcId = {}\n"
     "  src.funcName = {}\n"
     "  src.resumeMode = {}\n"
@@ -318,7 +318,7 @@ void OfflineTransData::printTransRec(TransID transId,
     "  src.bcStartOffset = {}\n"
     "  src.guards = {}\n",
     tRec->id,
-    tRec->md5,
+    tRec->sha1,
     tRec->src.funcID(),
     tRec->funcName,
     static_cast<int32_t>(tRec->src.resumeMode()),

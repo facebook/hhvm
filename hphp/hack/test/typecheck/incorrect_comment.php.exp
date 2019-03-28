@@ -1,2 +1,2 @@
 File "incorrect_comment.php", line 1, characters 1-3:
-Incorrect comment; possible values include strict, partial, or empty (Parsing[1002])
+Invalid mode; try '// strict' or '// partial'

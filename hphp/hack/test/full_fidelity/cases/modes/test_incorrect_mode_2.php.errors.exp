@@ -1,1 +1,1 @@
-(1,1)-(1,4) Incorrect comment; possible values include strict, partial, or empty
+(1,1)-(1,4) Invalid mode; try '// strict' or '// partial'

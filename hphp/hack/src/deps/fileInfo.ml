@@ -33,7 +33,7 @@ type mode =
 [@@deriving show]
 
 let parse_mode = function
-  | "strict" | "" -> Some Mstrict
+  | "strict" -> Some Mstrict
   | "partial" -> Some Mpartial
   | "experimental" -> Some Mexperimental
   | _ -> None

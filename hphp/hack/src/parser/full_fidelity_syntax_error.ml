@@ -565,7 +565,7 @@ let collection_intrinsic_many_typeargs =
   "Collection expression must have less than three type arguments"
 
 let invalid_hack_mode =
-  "Incorrect comment; possible values include strict, partial, or empty"
+  "Invalid mode; try '// strict' or '// partial'"
 
 let pair_initializer_needed =
   "Initializer needed for Pair object"

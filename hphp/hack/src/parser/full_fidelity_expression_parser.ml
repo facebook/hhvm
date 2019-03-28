@@ -2479,7 +2479,7 @@ module WithStatementAndDeclAndTypeParser
       (* ERROR RECOVERY: We probably got a < without a following / or name.
          TODO: For now we'll just bail out. We could use a more
          sophisticated strategy here. *)
-      let parser = with_error parser SyntaxError.error1026 in
+      let parser = with_error parser SyntaxError.error1039 in
       let (parser, missing1) = Make.missing parser (pos parser) in
       let (parser, missing2) = Make.missing parser (pos parser) in
       Make.xhp_close

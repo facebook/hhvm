@@ -388,6 +388,15 @@ var_dump(strrpos("0123456789a123456789b123456789c", "7", 28));
 
 var_dump(strripos("abcdef abcdef", "A"));
 
+var_dump(strrpos("abc", "c\0", -1));
+var_dump(strripos("abc", "c\0", -1));
+var_dump(strrpos("abc", "abc", -3));
+var_dump(strripos("abc", "abc", -3));
+var_dump(strrpos("aaaa", "aa", -1));
+var_dump(strripos("aaaa", "aa", -1));
+var_dump(strrpos("aaaa", "aa", -2));
+var_dump(strripos("aaaa", "aa", -2));
+
 $text = "This is a test";
 var_dump(substr_count($text, "is"));
 var_dump(substr_count($text, "is", 3));

@@ -294,7 +294,7 @@ RegionVec regionizeFunc(const Func* func, std::string& transCFGAnnot) {
       outFile.close();
     }
   }
-  if (mcgen::dumpTCAnnotation(*func, TransKind::Optimize) &&
+  if (mcgen::dumpTCAnnotation(TransKind::Optimize) &&
       RuntimeOption::EvalDumpRegion >= 2) {
     std::ostringstream cfgStream;
     cfg.print(cfgStream, funcId, profData);

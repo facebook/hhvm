@@ -2492,7 +2492,8 @@ void hphp_process_init() {
           }
           if (RuntimeOption::EvalDumpTC ||
               RuntimeOption::EvalDumpIR ||
-              RuntimeOption::EvalDumpRegion) {
+              RuntimeOption::EvalDumpRegion ||
+              RuntimeOption::EvalDumpInlDecision) {
             jit::mcgen::joinWorkerThreads();
             jit::tc::dump();
           }

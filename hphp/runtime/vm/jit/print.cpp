@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/guard-constraints.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/mcgen.h"
 
 #include "hphp/ppc64-asm/asm-ppc64.h"
 #include "hphp/ppc64-asm/dasm-ppc64.h"
@@ -246,9 +247,9 @@ void print(const SSATmp* tmp) {
 
 static constexpr auto kIndent = 4;
 
-void disasmRange(std::ostream& os, TCA begin, TCA end) {
+void disasmRange(std::ostream& os, TransKind kind, TCA begin, TCA end) {
   assertx(begin <= end);
-  bool const printEncoding = dumpIREnabled(kAsmEncodingLevel);
+  bool const printEncoding = dumpIREnabled(kind, kAsmEncodingLevel);
 
   switch (arch()) {
     case Arch::X64: {
@@ -367,7 +368,7 @@ void printIRInstruction(std::ostream& os,
   os << '\n';
 }
 
-void print(std::ostream& os, const Block* block, AreaIndex /*area*/,
+void print(std::ostream& os, const Block* block, TransKind kind,
            const AsmInfo* asmInfo, const GuardConstraints* guards,
            BCMarker* markerPtr) {
   BCMarker dummy;
@@ -479,12 +480,12 @@ void print(std::ostream& os, const Block* block, AreaIndex /*area*/,
         // If it doesn't belong to any other instruction then print it.
         if (!asmInfo->instRangeExists(currArea,
                                       TcaRange(lastEnd, instRange.begin()))) {
-          disasmRange(os, lastEnd, instRange.begin());
+          disasmRange(os, kind, lastEnd, instRange.begin());
         } else {
           os << "\n";
         }
       }
-      disasmRange(os, instRange.begin(), instRange.end());
+      disasmRange(os, kind, instRange.begin(), instRange.end());
       lastRange[(int)currArea] = instRange;
     }
     os << "\n";
@@ -506,13 +507,13 @@ void print(std::ostream& os, const Block* block, AreaIndex /*area*/,
 }
 
 void print(const Block* block) {
-  print(std::cerr, block, AreaIndex::Main);
+  print(std::cerr, block, TransKind::Optimize);
   std::cerr << std::endl;
 }
 
 std::string Block::toString() const {
   std::ostringstream out;
-  print(out, this, AreaIndex::Main);
+  print(out, this, TransKind::Optimize);
   return out.str();
 }
 
@@ -541,8 +542,8 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   // For nice-looking dumps, we want to remember curMarker between blocks.
   BCMarker curMarker;
   static bool dotBodies = getenv("HHIR_DOT_BODIES");
-
-  os << "TransKind: " << show(unit.context().kind) << "\n";
+  auto const kind = unit.context().kind;
+  os << "TransKind: " << show(kind) << "\n";
   if (unit.context().kind == TransKind::Optimize) {
     os << "OptIndex : " << unit.context().optIndex << "\n";
   }
@@ -558,7 +559,7 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
     [&] (Block* b) { return b->hint() == Block::Hint::Unlikely; }
   );
 
-  if (dumpIREnabled(kExtraExtraLevel)) printOpcodeStats(os, blocks);
+  if (dumpIREnabled(kind, kExtraExtraLevel)) printOpcodeStats(os, blocks);
 
   // Print the block CFG above the actual code.
 
@@ -571,7 +572,7 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
           block->hint() != Block::Hint::Unused) {
         // Include the IR in the body of the node
         std::ostringstream out;
-        print(out, block, AreaIndex::Main, asmInfo, guards, &curMarker);
+        print(out, block, kind, asmInfo, guards, &curMarker);
         auto bodyRaw = out.str();
         std::string body;
         body.reserve(bodyRaw.size() * 1.25);
@@ -627,18 +628,15 @@ void print(std::ostream& os, const IRUnit& unit, const AsmInfo* asmInfo,
   }
   os << "}\n";
 
-  AreaIndex currentArea = AreaIndex::Main;
   curMarker = BCMarker();
   for (auto it = blocks.begin(); it != blocks.end(); ++it) {
     if (it == cold) {
       os << folly::format("\n{:-^60}", "cold blocks");
-      currentArea = AreaIndex::Cold;
     }
     if (it == frozen) {
       os << folly::format("\n{:-^60}", "frozen blocks");
-      currentArea = AreaIndex::Frozen;
     }
-    print(os, *it, currentArea, asmInfo, guards, &curMarker);
+    print(os, *it, kind, asmInfo, guards, &curMarker);
   }
 }
 
@@ -667,7 +665,7 @@ std::string banner(const char* caption) {
 void printUnit(int level, const IRUnit& unit, const char* caption,
                AsmInfo* ai,
                const GuardConstraints* guards, Annotations* annotations) {
-  if (dumpIREnabled(level)) {
+  if (dumpIREnabled(unit.context().kind, level)) {
     std::ostringstream str;
     str << banner(caption);
     print(str, unit, ai, guards);
@@ -679,6 +677,11 @@ void printUnit(int level, const IRUnit& unit, const char* caption,
       annotations->emplace_back(caption, str.str());
     }
   }
+}
+
+bool dumpIREnabled(TransKind kind, int level /* = 1 */) {
+  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
+    (RuntimeOption::EvalDumpIR >= level && mcgen::dumpTCAnnotation(kind));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

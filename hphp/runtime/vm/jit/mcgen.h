@@ -144,10 +144,9 @@ bool initialized();
 int64_t jitInitTime();
 
 /*
- * Whether we should dump TC annotations for translations of `func' of
- * `transKind'.
+ * Whether we should dump TC annotations for translations of `transKind'.
  */
-bool dumpTCAnnotation(const Func& func, TransKind transKind);
+bool dumpTCAnnotation(TransKind transKind);
 
 /*
  * How many JIT worker threads are active.

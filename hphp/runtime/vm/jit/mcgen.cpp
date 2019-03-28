@@ -74,9 +74,9 @@ bool initialized() { return s_inited; }
 
 int64_t jitInitTime() { return s_startTime; }
 
-bool dumpTCAnnotation(const Func& func, TransKind transKind) {
+bool dumpTCAnnotation(TransKind transKind) {
   return RuntimeOption::EvalDumpTCAnnotationsForAllTrans ||
-    (transKind == TransKind::Optimize && func.isHot());
+         transKind == TransKind::Optimize;
 }
 
 }}}

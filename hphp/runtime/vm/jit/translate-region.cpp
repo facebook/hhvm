@@ -449,8 +449,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   if (psk.srcKey.op() != Op::FCall) {
     return nullptr;
   }
-  auto caller = psk.srcKey.func();
-  auto annotationsPtr = mcgen::dumpTCAnnotation(*caller, irgs.context.kind) ?
+  auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         &annotations : nullptr;
   if (!inl.canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
 
@@ -521,8 +520,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
          show(irgs.context.kind), profFactor, show(region));
 
   if (RuntimeOption::EvalDumpRegion &&
-      mcgen::dumpTCAnnotation(*irgs.context.srcKey().func(),
-                              irgs.context.kind)) {
+      mcgen::dumpTCAnnotation(irgs.context.kind)) {
     annotations.emplace_back("RegionDesc", show(region));
   }
 

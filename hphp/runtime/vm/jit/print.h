@@ -52,7 +52,7 @@ void print(const SSATmp*);
 
 // Block
 void print(std::ostream& os, const Block* block,
-           AreaIndex area,
+           TransKind kind,
            const AsmInfo* asmInfo = nullptr,
            const GuardConstraints* guards = nullptr,
            BCMarker* curMarker = nullptr);
@@ -68,10 +68,7 @@ void print(const IRUnit& unit);
  * Some utilities related to dumping. Rather than file-by-file control, we
  * control most IR logging via the hhir trace module.
  */
-static inline bool dumpIREnabled(int level = 1) {
-  return HPHP::Trace::moduleEnabledRelease(HPHP::Trace::printir, level) ||
-         RuntimeOption::EvalDumpIR >= level;
-}
+bool dumpIREnabled(TransKind kind, int level = 1);
 
 /*
  * The constants here define the behavior of different printir trace
@@ -113,9 +110,10 @@ inline std::ostream& operator<<(std::ostream& os, GuardConstraint gc) {
 
 std::string banner(const char* caption);
 
-void disasmRange(std::ostream& os, TCA begin, TCA end);
-inline void disasmRange(std::ostream& os, TcaRange r) {
-  return disasmRange(os, r.begin(), r.end());
+void disasmRange(std::ostream& os, TransKind kind, TCA begin, TCA end);
+
+inline void disasmRange(std::ostream& os, TransKind kind, TcaRange r) {
+  return disasmRange(os, kind, r.begin(), r.end());
 }
 
 }}

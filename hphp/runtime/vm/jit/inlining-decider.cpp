@@ -534,9 +534,8 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
   assertx(callee);
   assertx(sk.func() == callee);
 
-  auto annotationsPtr =
-    mcgen::dumpTCAnnotation(*callerSk.func(), irgs.context.kind) ? &annotations
-                                                                 : nullptr;
+  auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
+                        &annotations : nullptr;
   // Tracing return lambdas.
   auto refuse = [&] (const std::string& why) {
     FTRACE(2, "shouldInline: rejecting callee region: {}", show(region));
@@ -840,10 +839,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   auto const& fpiInfo = fpiStack.back();
   auto ctx = fpiInfo.ctxType;
 
-  auto caller = sk.func();
   auto kind = irgs.context.kind;
-  auto annotationsPtr = mcgen::dumpTCAnnotation(*caller, kind) ? &annotations
-                                                               : nullptr;
+  auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ? &annotations : nullptr;
 
   if (ctx == TBottom) {
     traceRefusal(sk, callee, "ctx is TBottom", annotationsPtr);

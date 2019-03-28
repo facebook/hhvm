@@ -185,7 +185,7 @@ void emitVunit(Vunit& vunit, const IRUnit& unit,
   auto frozen_start = frozen->frontier();
 
   folly::Optional<AsmInfo> optAI;
-  if (dumpIREnabled()) optAI.emplace(unit);
+  if (dumpIREnabled(unit.context().kind)) optAI.emplace(unit);
   auto ai = optAI.get_pointer();
 
   Vtext vtext{main, cold, *frozen, code.data()};

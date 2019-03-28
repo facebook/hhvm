@@ -1160,7 +1160,7 @@ TCA UniqueStubs::add(const char* name, TCA start,
   ONTRACE(2,
           [&]{
             std::ostringstream os;
-            disasmRange(os, start, end);
+            disasmRange(os, TransKind::Optimize, start, end);
             FTRACE(2, "{}\n", os.str());
           }()
          );

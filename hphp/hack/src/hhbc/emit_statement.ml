@@ -903,31 +903,35 @@ and emit_iterator_key_value_storage env iterator =
 (* Emit code for either the key or value l-value operation in foreach await.
  * `indices` is the initial prefix of the array indices ([0] for key or [1] for
  * value) that is prepended onto the indices needed for list destructuring
+ *
+ * TODO: we don't need unnamed local if the target is a local
  *)
-and emit_foreach_await_lvalue_storage env expr1 indices local =
-  let instrs1, instrs2 = emit_lval_op_list env (fst expr1) (Some local) indices expr1 in
-    gather [
-      instrs1;
-      instrs2;
-    ]
+and emit_foreach_await_lvalue_storage env expr1 indices keep_on_stack =
+  Scope.with_unnamed_local @@ fun local ->
+  (* before *)
+  instr_popl local,
+  (* inner *)
+  of_pair @@ emit_lval_op_list env (fst expr1) (Some local) indices expr1,
+  (* after *)
+  if keep_on_stack then instr_pushl local else instr_unsetl local
 
 (* Emit code for the value and possibly key l-value operation in a foreach
- * await statement. `local` is the temporary into which the result of invoking
- * the `next` method has been stored. For example:
+ * await statement. The result of invocation of the `next` method has been
+ * stored on top of the stack. For example:
  *   foreach (foo() await as $a->f => list($b[0], $c->g)) { ... }
  * Here, we need to construct l-value operations that access the [0] (for $a->f)
  * and [1;0] (for $b[0]) and [1;1] (for $c->g) indices of the array returned
  * from the `next` method.
  *)
-and emit_foreach_await_key_value_storage env iterator local =
+and emit_foreach_await_key_value_storage env iterator =
   match iterator with
   | A.As_kv (expr_k, expr_v) ->
-    let key_instrs = emit_foreach_await_lvalue_storage env expr_k [0] local in
-    let value_instrs = emit_foreach_await_lvalue_storage env expr_v [1] local in
-    gather [key_instrs; value_instrs]
+    let key_instrs = emit_foreach_await_lvalue_storage env expr_k [0] true in
+    let value_instrs = emit_foreach_await_lvalue_storage env expr_v [1] false in
+    gather [ key_instrs; value_instrs]
 
   | A.As_v expr_v ->
-    emit_foreach_await_lvalue_storage env expr_v [1] local
+    emit_foreach_await_lvalue_storage env expr_v [1] false
 
 (*Generates a code to initialize a given foreach-* value.
   Returns: preamble * load_code
@@ -967,49 +971,51 @@ and emit_iterator_lvalue_storage env v local =
     ]
 
 and emit_foreach env pos collection await_pos iterator block =
-  Local.scope @@ fun () ->
-    match await_pos with
-    | None -> emit_foreach_ env pos collection iterator block
-    | Some pos -> emit_foreach_await env pos collection iterator block
+  match await_pos with
+  | None -> emit_foreach_ env pos collection iterator block
+  | Some pos -> emit_foreach_await env pos collection iterator block
 
 and emit_foreach_await env pos collection iterator block =
+  let instr_collection = emit_expr ~need_ref:false env collection in
+  Scope.with_unnamed_local @@ fun iter_temp_local ->
+  let input_is_async_iterator_label = Label.next_regular () in
   let next_label = Label.next_regular () in
   let exit_label = Label.next_regular () in
+  let pop_and_exit_label = Label.next_regular () in
   let async_eager_label = Label.next_regular () in
-  let iter_temp_local = Local.get_unnamed_local () in
-  let collection_expr = emit_expr ~need_ref:false env collection in
-  let result_temp_local = Local.get_unnamed_local () in
   let next_meth = Hhbc_id.Method.from_raw_string "next" in
-  let set_key_and_value =
-    emit_foreach_await_key_value_storage env iterator result_temp_local in
+  (* before *)
   gather [
-    collection_expr;
-    instr_setl iter_temp_local;
-    with_temp_local iter_temp_local begin fun _ _ -> gather [
-      instr_instanceofd (Hhbc_id.Class.from_raw_string "HH\\AsyncIterator");
-      instr_jmpnz next_label;
-      Emit_fatal.emit_fatal_runtime pos
-        "Unable to iterate non-AsyncIterator asynchronously";
-      instr_label next_label;
-      instr_cgetl iter_temp_local;
-      instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
-      instr_fcall (make_fcall_args ~async_eager_label 0);
-      instr_await;
-      instr_label async_eager_label;
-      instr_setl result_temp_local;
-      instr_popc;
-      instr_istypel result_temp_local OpNull;
-      instr_jmpnz exit_label;
-      with_temp_local result_temp_local begin fun _ _ -> set_key_and_value end;
-      instr_unsetl result_temp_local;
-      (Emit_env.do_in_loop_body exit_label next_label env block emit_stmt);
-      emit_pos pos;
-      instr_jmp next_label;
-      instr_label exit_label;
-      instr_unsetl result_temp_local;
-    ] end;
-    instr_unsetl iter_temp_local;
-  ]
+    instr_collection;
+    instr_dup;
+    instr_instanceofd (Hhbc_id.Class.from_raw_string "HH\\AsyncIterator");
+    instr_jmpnz input_is_async_iterator_label;
+    Emit_fatal.emit_fatal_runtime pos
+      "Unable to iterate non-AsyncIterator asynchronously";
+    instr_label input_is_async_iterator_label;
+    instr_popl iter_temp_local
+  ],
+  (* inner *)
+  gather [
+    instr_label next_label;
+    instr_cgetl iter_temp_local;
+    instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
+    instr_fcall (make_fcall_args ~async_eager_label 0);
+    instr_await;
+    instr_label async_eager_label;
+    instr_dup;
+    instr_istypec OpNull;
+    instr_jmpnz pop_and_exit_label;
+    emit_foreach_await_key_value_storage env iterator;
+    (Emit_env.do_in_loop_body exit_label next_label env block emit_stmt);
+    emit_pos pos;
+    instr_jmp next_label;
+    instr_label pop_and_exit_label;
+    instr_popc;
+    instr_label exit_label
+  ],
+  (* after *)
+  instr_unsetl iter_temp_local
 
 and emit_foreach_ env pos collection iterator block =
   let instr_collection = emit_expr ~need_ref:false env collection in

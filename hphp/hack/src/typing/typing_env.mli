@@ -153,6 +153,7 @@ val is_generic_parameter: env -> string -> bool
 val get_tyvar_lower_bounds : env -> Ident.t -> tparam_bounds
 val get_tyvar_upper_bounds : env -> Ident.t -> tparam_bounds
 (* Optionally supply intersection or union operations to simplify the bounds *)
+val empty_tyvar_info : tyvar_info
 val add_tyvar_upper_bound :
   ?intersect:(locl ty -> locl ty list -> locl ty list) ->
   env -> Ident.t -> locl ty -> env

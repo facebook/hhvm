@@ -72,7 +72,7 @@ let singleton_bound ty = TySet.singleton ty
 let env_with_tvenv env tvenv =
   { env with tvenv = tvenv }
 
-let empty_tvar_info =
+let empty_tyvar_info =
   { tyvar_pos = Pos.none;
     eager_solve_fail = false;
     lower_bounds = empty_bounds;
@@ -88,7 +88,7 @@ let add_current_tyvar env p v =
     match env.tyvars_stack with
     | tyvars::rest ->
       let env = env_with_tvenv env
-        (IMap.add v { empty_tvar_info with tyvar_pos = p } env.tvenv) in
+        (IMap.add v { empty_tyvar_info with tyvar_pos = p } env.tvenv) in
       { env with tyvars_stack = (v :: tyvars) :: rest }
     | _ -> env
   else env
@@ -137,7 +137,7 @@ let get_type_unsafe env x =
   | Some ty -> env, ty
 
 let get_tyvar_info env var =
-  Option.value (IMap.get var env.tvenv) ~default:empty_tvar_info
+  Option.value (IMap.get var env.tvenv) ~default:empty_tyvar_info
 
 let get_tyvar_eager_solve_fail env var =
   let tvinfo = get_tyvar_info env var in
@@ -510,7 +510,7 @@ let remove_tyvar env var =
   (* Don't remove it entirely if we have marked it as eager_solve_fail *)
   let tvinfo = get_tyvar_info env var in
   if tvinfo.eager_solve_fail
-  then set_tyvar_info env var { empty_tvar_info with eager_solve_fail = true }
+  then set_tyvar_info env var { empty_tyvar_info with eager_solve_fail = true }
   else env_with_tvenv env (IMap.remove var env.tvenv)
 
 let set_tyvar_eager_solve_fail env var =

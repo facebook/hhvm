@@ -21,6 +21,7 @@
 
 #include "hphp/util/lock.h"
 #include "hphp/util/overflow.h"
+#include <algorithm>
 #include <cmath>
 
 #ifndef _MSC_VER
@@ -385,13 +386,13 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
     if (pos >= 0) {
       ptr = bstrrstr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrstr(input, len + pos + s_len, s, s_len);
+      ptr = bstrrstr(input, len + std::min(pos + s_len, 0), s, s_len);
     }
   } else {
     if (pos >= 0) {
       ptr = bstrrcasestr(input + pos, len - pos, s, s_len);
     } else {
-      ptr = bstrrcasestr(input, len + pos + s_len, s, s_len);
+      ptr = bstrrcasestr(input, len + std::min(pos + s_len, 0), s, s_len);
     }
   }
   if (ptr != nullptr) {

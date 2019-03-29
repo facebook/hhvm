@@ -32,11 +32,10 @@ namespace jit {
 
 /*
  * Set whether or not the current thread is allowed to acquire the global write
- * lease or a concurrent (Func-specific) write lease. Used to enforce
- * Eval.NumSingleJitRequests.
+ * lease or a concurrent (Func-specific) write lease.  Used to disable jit for
+ * certain requests.
  */
 void setMayAcquireLease(bool f);
-void setMayAcquireConcurrentLease(bool f);
 
 bool couldAcquireOptimizeLease(const Func*);
 

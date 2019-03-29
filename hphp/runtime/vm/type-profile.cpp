@@ -223,7 +223,6 @@ void profileRequestStart() {
     }
   }
   jit::setMayAcquireLease(okToJit);
-  jit::setMayAcquireConcurrentLease(okToJit);
 
   // Force interpretation if needed.
   if (rl_typeProfileLocals->forceInterpret != forceInterp) {

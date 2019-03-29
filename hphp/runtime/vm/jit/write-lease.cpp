@@ -71,8 +71,7 @@ private:
   int64_t m_hintExpire{0};
 };
 
-__thread bool threadCanAcquire = true;
-__thread bool threadCanAcquireConcurrent = true;
+static __thread bool threadCanAcquire = true;
 
 AtomicVector<int64_t> s_funcOwners{0, Treadmill::kInvalidRequestIdx};
 static InitFiniNode s_funcOwnersReinit([]{
@@ -190,10 +189,6 @@ void setMayAcquireLease(bool f) {
   threadCanAcquire = f;
 }
 
-void setMayAcquireConcurrentLease(bool f) {
-  threadCanAcquireConcurrent = f;
-}
-
 bool couldAcquireOptimizeLease(const Func* func) {
   switch (lockLevel(TransKind::Optimize)) {
     case LockLevel::None:
@@ -216,10 +211,9 @@ bool couldAcquireOptimizeLease(const Func* func) {
 LeaseHolder::LeaseHolder(const Func* func, TransKind kind, bool isWorker)
   : m_func{RuntimeOption::EvalJitConcurrently > 0 ? func : nullptr}
 {
+  if (!threadCanAcquire) return;
   assertx(func || RuntimeOption::EvalJitConcurrently == 0);
   auto const level = m_func ? lockLevel(kind) : LockLevel::Global;
-
-  if (level == LockLevel::Func && !threadCanAcquireConcurrent) return;
 
   if (level == LockLevel::Global && !s_globalLease.amOwner()) {
     auto const blocking = RuntimeOption::EvalJitRequireWriteLease &&

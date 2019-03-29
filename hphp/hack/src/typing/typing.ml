@@ -1176,10 +1176,6 @@ and expr
   with e ->
     let pos = Pos.string (Pos.to_absolute p) in
     prerr_endline (Printf.sprintf "Exception while typechecking expression at position %s" pos);
-    let msg = Exn.to_string e in
-    let stack = Printexc.get_backtrace () in
-    prerr_endline (Printf.sprintf "Exception: %s" msg);
-    prerr_endline (Printf.sprintf "Stack trace: %s" stack);
     raise e
 
 and raw_expr

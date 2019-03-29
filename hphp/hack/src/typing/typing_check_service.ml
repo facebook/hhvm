@@ -110,10 +110,6 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
     Errors.merge errors' errors
   with e ->
     let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
-    let msg = Exn.to_string e in
-    let stack = Printexc.get_backtrace () in
-    let () = prerr_endline ("Exception: " ^ msg) in
-    let () = prerr_endline ("Stack trace: " ^ stack) in
     raise e
 
 let check_files dynamic_view_files opts errors progress ~memory_cap =

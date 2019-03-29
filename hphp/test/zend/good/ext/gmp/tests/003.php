@@ -1,5 +1,6 @@
 <?php
         /* Binary */
+        $test = array();
         $test[] = gmp_init("0b10011010010");
         $test[] = gmp_init("0b10011010010", 2);
         $test[] = gmp_init("10011010010");

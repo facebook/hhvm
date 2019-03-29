@@ -1,11 +1,3 @@
-object(X) (0) {
-}
-array(1) {
-  [-1]=>
-  object(X) (0) {
-  }
-}
-1
 
 Warning: Illegal string offset: -1 in %s/test/slow/array/promote_string2.php on line 8
 NULL

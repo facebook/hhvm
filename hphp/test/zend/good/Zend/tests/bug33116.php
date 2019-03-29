@@ -1,6 +1,7 @@
 <?php
 function __autoload($class)
 {
+  if (!array_key_exists('include', $GLOBALS)) $GLOBALS['include'] = array();
   $GLOBALS['include'][] = $class;
   eval("class DefClass{}");
 }

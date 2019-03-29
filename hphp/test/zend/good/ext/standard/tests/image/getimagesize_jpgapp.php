@@ -8,7 +8,7 @@
 /*
  * Load APP info from jpeg
  */
-
+$arr = array();
 $arr['this'] = "will";
 $arr['all'] = "be destroyed!";
 $arr['APP1'] = "and this too";

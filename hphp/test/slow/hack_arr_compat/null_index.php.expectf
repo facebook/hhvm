@@ -3,25 +3,11 @@ NULL
 === indexing into a boolean ===
 === indexing into invalid keys ===
 
-Notice: Undefined index: invalid key in %s/test/slow/hack_arr_compat/null_index.php on line 16
-=== assigning to an index of null ===
-
-Notice: Hack Array Compat: Promoting null to array in %s/test/slow/hack_arr_compat/null_index.php on line 21
-
-Notice: Hack Array Compat: Promoting null to array in %s/test/slow/hack_arr_compat/null_index.php on line 23
-
-Notice: Hack Array Compat: Promoting null to array in %s/test/slow/hack_arr_compat/null_index.php on line 25
-=== assigning to an index of false ===
-
-Notice: Hack Array Compat: Promoting false to array in %s/test/slow/hack_arr_compat/null_index.php on line 29
-
-Notice: Hack Array Compat: Promoting false to array in %s/test/slow/hack_arr_compat/null_index.php on line 31
-
-Notice: Hack Array Compat: Promoting false to array in %s/test/slow/hack_arr_compat/null_index.php on line 33
+Notice: Undefined index: invalid key in %s/null_index.php on line 16
 === assigning to an index of true ===
 
-Warning: Cannot use a scalar value as an array in %s/test/slow/hack_arr_compat/null_index.php on line 37
+Warning: Cannot use a scalar value as an array in %s/null_index.php on line 21
 
-Warning: Cannot use a scalar value as an array in %s/test/slow/hack_arr_compat/null_index.php on line 39
+Warning: Cannot use a scalar value as an array in %s/null_index.php on line 23
 
-Warning: Cannot use a scalar value as an array in %s/test/slow/hack_arr_compat/null_index.php on line 41
+Warning: Cannot use a scalar value as an array in %s/null_index.php on line 25

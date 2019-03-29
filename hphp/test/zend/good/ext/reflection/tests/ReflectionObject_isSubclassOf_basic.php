@@ -6,14 +6,16 @@ class C extends B {}
 interface I {}
 class X implements I {}
 
-$classNames = array('A', 'B', 'C', 'I', 'X'); 
+$classNames = array('A', 'B', 'C', 'I', 'X');
 
 //Create ReflectionClasses
+$rcs = array();
 foreach ($classNames as $className) {
 	$rcs[$className] = new ReflectionClass($className);
 }
 
 //Create ReflectionObjects
+$ros = array();
 foreach ($classNames as $className) {
 	if ($rcs[$className]->isInstantiable()) {
 		$ros[$className] = new ReflectionObject(new $className);
@@ -30,6 +32,6 @@ foreach ($ros as $childName => $child) {
 			var_dump($child->isSubclassOf($ros[$parentName]));
 		}
 		echo "   - Using string argument: ";
-		var_dump($child->isSubclassOf($parentName)); 
+		var_dump($child->isSubclassOf($parentName));
 	}
 }

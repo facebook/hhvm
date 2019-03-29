@@ -168,8 +168,6 @@ object(Foo) (1) {
 }
 
 test_null_base()
-
-Notice: Undefined variable: arr in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 286
 bool(true)
 bool(true)
 bool(true)
@@ -197,8 +195,6 @@ array(1) {
     }
   }
 }
-
-Notice: Undefined index: 2 in %s/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 309
 bool(true)
 n_dump from line %d:
 array(2) {

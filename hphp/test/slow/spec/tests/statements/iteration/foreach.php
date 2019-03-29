@@ -44,9 +44,9 @@ foreach ($colors as $color)
 var_dump($colors);
 
 $ary = array();
-$ary[0][0] = "abc";
+$ary[0] = ["abc"];
 $ary[0][1] = "ij";
-$ary[1][0] = "mnop";
+$ary[1] = ["mnop"];
 $ary[1][1] = "xyz";
 
 foreach ($ary as $e1)

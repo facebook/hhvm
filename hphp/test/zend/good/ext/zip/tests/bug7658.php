@@ -31,7 +31,7 @@ $zip->addFile($dirname . "bug7658.xml","content.xml");
 $zip->close();
 echo "\n";
 $zip->open($file);
-
+$found = array();
 for($i=0; $i < $zip->numFiles; $i++) {
 	$sb = $zip->statIndex($i);
 	$found[] = $sb['name'];

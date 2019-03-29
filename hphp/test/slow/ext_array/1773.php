@@ -1,7 +1,7 @@
 <?php
 
 function xsort(&$a) {
-  $b = false;
+  $b = array();
   $b[0] = $a;
   uksort(&$a, function ($i, $j) use($b) {
       if ($b[0][$i] == $b[0][$j]) return 0;

@@ -9,7 +9,7 @@ class foo {
 
 $baz = new foo;
 $baz->method();
-
+$arr = array();
 $arr[3] = new foo;
 $arr[3]->method();
 

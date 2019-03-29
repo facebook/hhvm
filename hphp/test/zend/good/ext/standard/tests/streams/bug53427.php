@@ -1,4 +1,5 @@
 <?php
+$read = array();
 $read[1] = fopen(__FILE__, "r");
 $read["myindex"] = reset(&$read);
 $write = NULL;

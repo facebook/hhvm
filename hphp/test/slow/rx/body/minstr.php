@@ -75,7 +75,7 @@ class C {
     $a['two'][2] = false;
     $a[$l1][2] = false;
     $a[__hhvm_intrinsics\launder_value(1)][2] = false;
-    $a[][2] = false;
+
     $mo->p[2] = false;
     $mo->{$lp}[2] = false;
     $mo->{__hhvm_intrinsics\launder_value('p')}[2] = false;

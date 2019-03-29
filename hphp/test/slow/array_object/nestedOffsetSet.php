@@ -9,6 +9,7 @@ $foo = new ThisIsAnArray();
 $foo['foo'] = 'foo';
 $foo['arr'] = [];
 $foo['arr']['ta'] = 'bar';
+$foo['arr']['l1'] = array();
 $foo['arr']['l1']['l2'] = 'baz';
 
 var_dump($foo['foo']);

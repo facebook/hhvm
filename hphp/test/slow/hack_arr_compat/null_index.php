@@ -16,22 +16,6 @@ $arr = ['key' => 'val'];
 $t = $arr['invalid key']['invalid key 2'];
 $t = $arr['key']['invalid key 2'];
 
-echo "=== assigning to an index of null ===\n";
-$t = null;
-$t[0] = "foo";
-$t = null;
-$t[1] = "bar";
-$t = null;
-$t["foo"] = "bar";
-
-echo "=== assigning to an index of false ===\n";
-$b = false;
-$b[0] = "foo";
-$b = false;
-$b[1] = "foo";
-$b = false;
-$b["foo"] = "bar";
-
 echo "=== assigning to an index of true ===\n";
 $b = true;
 $b[0] = "foo";

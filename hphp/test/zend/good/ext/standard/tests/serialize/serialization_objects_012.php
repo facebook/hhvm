@@ -12,6 +12,7 @@
 
 echo "\n\nArray containing same object twice:\n";
 $obj = new stdclass;
+$a = array();
 $a[0] = $obj;
 $a[1] = $a[0];
 var_dump($a);

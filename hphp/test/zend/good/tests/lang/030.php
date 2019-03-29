@@ -7,6 +7,7 @@ class foo {
 	}
 
 	function echoName() {
+		if (!array_key_exists('names', $GLOBALS)) $GLOBALS['names'] = array();
      	$GLOBALS['names'][]=$this->Name;
 	}
 }

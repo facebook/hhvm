@@ -1,4 +1,4 @@
-<?php 
+<?php
 class test
 {
 	public $a, $b;
@@ -14,7 +14,7 @@ class test
 		$this->b = 0;
 	}
 }
-
+$t = array();
 $t['one'] = 'ABC';
 $t['two'] = new test();
 

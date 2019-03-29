@@ -2,6 +2,7 @@
 error_reporting(E_ALL & ~E_STRICT);
 
 function f() { return 0; }
+$a = array(array(), array());
 $a[0][1] = 'good';
 $a[1][1] = 'bad';
 
@@ -14,10 +15,12 @@ echo $a[${'i'}=f()][++${'i'}];
 unset(${'i'});
 
 echo "\n" . '$i[0]=f(): ';
+$i = array();
 echo $a[$i[0]=f()][++$i[0]];
 unset($i);
 
 echo "\n" . '$i[0][0]=f(): ';
+$i = array(array());
 echo $a[$i[0][0]=f()][++$i[0][0]];
 unset($i);
 
@@ -30,10 +33,12 @@ echo $a[$i->p->q=f()][++$i->p->q];
 unset($i);
 
 echo "\n" . '$i->p[0]=f(): ';
+$i->p = array();
 echo $a[$i->p[0]=f()][++$i->p[0]];
 unset($i);
 
 echo "\n" . '$i->p[0]->p=f(): ';
+$i->p = array();
 echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 

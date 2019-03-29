@@ -19,9 +19,9 @@ Foo::$b = function ($x) {
  }
 ;
 (Foo::$b)("bar\n");
-Foo::$c[0] = function ($x) {
+Foo::$c = [function ($x) {
  echo '.' . $x;
- }
+}]
 ;
 (Foo::$c[0])("baz\n");
 }

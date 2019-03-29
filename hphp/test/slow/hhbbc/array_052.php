@@ -5,7 +5,8 @@ class A { public function yo() { echo "hi\n"; } }
 function foo() {
   $x = array(array(new A));
   for ($i = 0; $i < 10; ++$i) {
-    $x[][] = new A;
+    $x[] = array();
+    $x[$i + 1][] = new A;
   }
   return $x;
 }

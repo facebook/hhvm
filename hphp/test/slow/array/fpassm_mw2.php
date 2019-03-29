@@ -6,6 +6,7 @@ function byref(&$a) {}
 <<__EntryPoint>>
 function main() {
   $a = array();
-  byref(&$a[][0]);
+  $a[] = array();
+  byref(&$a[0][0]);
   var_dump($a);
 }

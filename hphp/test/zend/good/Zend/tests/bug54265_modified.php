@@ -7,7 +7,7 @@
  * The results are different for HHVM and PHP 5 due to the following reason.
  * In PHP 5, the second argument of str_repeat becomes null, which is then
  * cast into an int. As a result, $my_var is 0 instead of null.
- * 
+ *
  */
 function my_errorhandler($errno, $errormsg) {
 
@@ -16,7 +16,7 @@ function my_errorhandler($errno, $errormsg) {
   return null;
 }
 set_error_handler("my_errorhandler");
-try { $my_var = str_repeat("A", $my_var[0]->errormsg = "xyz"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { $my_var = array(); $my_var = str_repeat("A", $my_var[0]->errormsg = "xyz"); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(ZendGoodZendTestsBug54265Modified::$my_var);
 
 abstract final class ZendGoodZendTestsBug54265Modified {

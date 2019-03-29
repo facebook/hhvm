@@ -4,6 +4,7 @@
 function main($a, $k) {
   echo "============== $k ==================\n";
 
+  $a[$k] = array();
   $a[$k][$k] = 'abc';
   var_dump($a);
   var_dump($a[$k][$k]);

@@ -5,7 +5,6 @@ function foo() {
   return " foo ";
 }
 class A implements ArrayAccess {
-  private $data = array();
   public function offsetUnset($index) {
 }
   public function offsetGet($index) {
@@ -13,7 +12,6 @@ class A implements ArrayAccess {
     return " get ";
   }
   public function offsetSet($index, $value) {
-    $data[$index] = $value;
   }
   public function offsetExists($index) {
  }

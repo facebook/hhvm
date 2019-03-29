@@ -1,6 +1,6 @@
-Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 16
+Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 11
 
-Notice: Undefined index:  in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 16
+Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 16
 bool(true)
 
 Notice: Undefined variable: z in %s/hphp/test/slow/null_coalesce_assignment/bad_intermediate.php on line 17

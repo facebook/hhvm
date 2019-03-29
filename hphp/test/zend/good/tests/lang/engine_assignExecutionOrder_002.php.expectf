@@ -33,12 +33,3 @@ Y=,Z=
 Notice: %s
 AA=10
 CC=10 DD=30
-Array
-(
-    [0] => array created in f()
-    [array entry created after f()] => Array
-        (
-            [1] => hello
-        )
-
-)

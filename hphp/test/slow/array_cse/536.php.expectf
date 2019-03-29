@@ -1,8 +1,0 @@
-
-Notice: Undefined index: 2 in %s/test/slow/array_cse/536.php on line 5
-NULL
-
-Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/536.php on line 4
-
-Warning: Cannot use a scalar value as an array in %s/test/slow/array_cse/536.php on line 5
-NULL

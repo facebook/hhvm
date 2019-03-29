@@ -5,6 +5,7 @@ function test($a) {
   $s = varray[];
   foreach ($a as $v) {
     foreach ($v as $t) {
+      $s = $s ?? varray[];
       $s[] = $t;
     }
     $s = $s ?? varray[];

@@ -8,7 +8,8 @@ function foo() {
   $y = ($x[0] = 2);
   var_dump($x);
   var_dump($y);
-  $y = ($x[][] = 2);
+  $x[] = 2;
+  $y = 2;
   var_dump($x);
   var_dump($y);
 }

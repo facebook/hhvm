@@ -5,6 +5,7 @@ const MAX_LOOPS = 5;
 function withRefValue($elements, $transform) {
 	echo "\n---( Array with $elements element(s): )---\n";
 	//Build array:
+	$a = array();
 	for ($i=0; $i<$elements; $i++) {
 		$a[] = "v.$i";
 	}
@@ -63,4 +64,3 @@ withRefValue(1, $transform);
 withRefValue(2, $transform);
 withRefValue(3, $transform);
 withRefValue(4, $transform);
-

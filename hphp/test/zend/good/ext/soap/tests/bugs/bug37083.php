@@ -39,6 +39,7 @@ for ($i = 0; $i < 10; $i++) {
                          'cache_wsdl'=>WSDL_CACHE_BOTH));
 	$search=new stdClass();
 	$search->queryString='argo';
+	$search->ranges = array();
 	$search->ranges[]=$r=new stdClass();
 	$r->field='maxDateTime';
 	$r->min='2003-04-01';

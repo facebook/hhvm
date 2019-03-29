@@ -5,11 +5,3 @@ object(stdClass) (1) {
   ["derp"]=>
   string(6) "foobar"
 }
-But $undef->foo["bar"] should not warn:
-object(stdClass) (1) {
-  ["bar"]=>
-  array(1) {
-    ["baz"]=>
-    string(8) "herpderp"
-  }
-}

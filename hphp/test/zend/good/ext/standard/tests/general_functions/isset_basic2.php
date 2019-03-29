@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : bool isset  ( mixed $var  [, mixed $var  [,  $...  ]] )
  * Description:  Determine if a variable is set and is not NULL
- */		
+ */
 
 class foo {}
 
@@ -25,13 +25,14 @@ var_dump(isset($i, $f, $s, $b));
 
 echo "\n\nArray test:\n";
 $arr = array();
-var_dump(isset($var)); 
+var_dump(isset($var));
 var_dump(isset($var[1]));
-var_dump(isset($var, $var[1])); 
+var_dump(isset($var, $var[1]));
 echo "..now set\n";
+$var = array();
 $var[1] = 10;
-var_dump(isset($var)); 
-var_dump(isset($var[1])); 
-var_dump(isset($var, $var[1])); 
+var_dump(isset($var));
+var_dump(isset($var[1]));
+var_dump(isset($var, $var[1]));
 
 echo "===DONE===\n";

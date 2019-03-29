@@ -14,7 +14,7 @@ function checkStatic() {
     var_dump($e->getMessage());
   }
   foo(&$a[1]);
-  foo(&$a[5][10]);
+  $a[5] = array(); foo(&$a[5][10]);
   var_dump($a);
 }
 
@@ -45,7 +45,7 @@ function checkNonStatic($a) {
     echo "Caught: ".$e->getMessage()."\n";
   }
   try {
-    foo(&$a[5][10]);
+    if (is_array($a)) $a[5] = array(); foo(&$a[5][10]);
   } catch (Exception $e) {
     echo "Caught: ".$e->getMessage()."\n";
   }

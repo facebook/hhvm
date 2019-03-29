@@ -282,8 +282,8 @@ function test_multi_dim_basic(): void {
 
 function test_null_base(): void {
   echo("test_null_base()\n");
-
-  VS($arr[1] ??= 'hello', 'hello'); // This doesn't fatal, just warns
+  $arr = array(); $arreq = array();
+  VS($arr[1] ??= 'hello', 'hello');
   VS($arreq[1] = 'hello', 'hello'); // Consistent with plain ol' equals
   VS($arr, $arreq); // $arr and $arreq get set consistently by `??=` and `=`
 
@@ -306,7 +306,7 @@ function test_multi_dim_lvars(): void {
 
   VS($arr[$x][$z][$q] ??= ($x = 2), 2);
   n_dump($arr);
-  VS($arr[$x][$z][$w] ??= ($w = 3), 3);
+  $arr[$x] = darray[$z => darray[]]; VS($arr[$x][$z][$w] ??= ($w = 3), 3);
   n_dump($arr);
   $arr[$x][$z][$w] ??= 5;
   VS($arr[$x][$z][$w] ??= ($w = 'Not me'), 5);

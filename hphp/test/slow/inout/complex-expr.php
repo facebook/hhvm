@@ -14,9 +14,10 @@ function fuzz(inout $a) {
 }
 
 function main() {
-  $arr = array();
-  $arr[0][12][]['bar']['x'] = 'value1';
-  $arr[18][]['hello']['y'] = 'value2';
+  $arr = [0 => [12 => array(['bar' => array()])],
+          18 => array(['hello' => array()])];
+  $arr[0][12][0]['bar']['x'] = 'value1';
+  $arr[18][0]['hello']['y'] = 'value2';
 
   list(
     $original,

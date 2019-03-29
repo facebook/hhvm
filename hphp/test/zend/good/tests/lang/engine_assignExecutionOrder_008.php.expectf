@@ -8,8 +8,12 @@ good
 $i->p->q=f(): 
 Warning: %s
 good
-$i->p[0]=f(): good
+$i->p[0]=f(): 
+Warning: %s
+good
 $i->p[0]->p=f(): 
+Warning: %s
+
 Warning: %s
 good
 C::$p=f(): good

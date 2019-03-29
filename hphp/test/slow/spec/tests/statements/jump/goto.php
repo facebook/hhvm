@@ -9,10 +9,10 @@
 error_reporting(-1);
 
 $table = array();
-$table[0][0] = 34;
+$table[0] = [34];
 $table[0][1] = -3;
 $table[0][2] = 345;
-$table[1][0] = 123;
+$table[1] = [123];
 $table[1][1] = 9854;
 $table[1][2] = -765;
 

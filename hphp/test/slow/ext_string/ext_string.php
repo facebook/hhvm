@@ -146,7 +146,7 @@ $ret = chunk_split("ABCD", 2);
 var_dump($ret, "AB\r\nCD\r\n");
 
 $s = "This is\tan ";
-$tok = strtok($s, " \n\t");
+$tok = strtok($s, " \n\t"); $tokens = array();
 while ($tok) {
   $tokens[] = $tok;
   $tok = strtok(" \n\t");
@@ -157,7 +157,7 @@ var_dump($tokens);
   var_dump(str_replace("%body%", "black", "<body text='%body%'>"));
 }
 {
-  $vowels[] = "a";
+  $vowels = array(); $vowels[] = "a";
   $vowels[] = "e";
   $vowels[] = "i";
   $vowels[] = "o";

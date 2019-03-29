@@ -15,7 +15,7 @@ abstract final class FooStatics {
 }
 
 function foo($a, $b, &$c) {
-  $c[$a][$b] = FooStatics::$num++;
+  if (!array_key_exists($a, $c)) $c[$a] = array(); $c[$a][$b] = FooStatics::$num++;
 }
 
 function main($foo, $cuf, $cufa) {

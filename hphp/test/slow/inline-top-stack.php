@@ -23,7 +23,7 @@ function green($a) {
 
 <<__ALWAYS_INLINE>>
 function blue($a) {
-  $a['exns'][__FUNCTION__] = new Exception;
+  $a['exns'] = [__FUNCTION__ => new Exception];
   green($a);
 }
 

@@ -7,8 +7,8 @@ class Foo {
 function f(): void {
 
   $arr = darray[4 =>
-    darray[2 =>
-      darray[]
+    darray[
+      2 => darray[], $z => darray[]
     ]];
   $arreq = $arr;
   $x = 4;

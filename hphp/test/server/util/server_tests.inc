@@ -263,13 +263,14 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
 
 function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 
- 
+
   @list($path, $post, $headers) = (array)$path;
   if ($post) {
     $post = http_build_query($post);
     $post = '--data-urlencode='.urlencode($post);;
   }
   if ($headers) {
+    $s = array();
     foreach ($headers as $h => $v) {
       $s[] = "-H '$h: $v'";
     }

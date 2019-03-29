@@ -2,7 +2,7 @@
 
 function err($x) { throw new Exception(); }
 function foo() {
-  $x[0]['asd'] = true;
+  $x = [['asd' => true]];
   try {
     $x[0]['asd'][] = 2;
   } catch (Exception $e) {

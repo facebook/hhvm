@@ -1,8 +1,4 @@
 --Start--
-NULL
---End--
-
---Start--
 int(0)
 
 Warning: Cannot use a scalar value as an array in %s
@@ -43,10 +39,6 @@ Warning: Cannot use a scalar value as an array in %s
 --End--
 
 --Start--
-bool(false)
---End--
-
---Start--
 bool(true)
 
 Warning: Cannot use a scalar value as an array in %s
@@ -55,4 +47,3 @@ Warning: Cannot use a scalar value as an array in %s
 
 Warning: Cannot use a scalar value as an array in %s
 --End--
-

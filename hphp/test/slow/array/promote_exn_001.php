@@ -5,6 +5,7 @@ function err($x, $y) { throw new Exception('heh'); }
 function foo() {
   echo "----\n";
   $lol = new stdclass;
+  $x = array();
   try {
     $x[$lol] = 2;
   } catch (Exception $y) {

@@ -6,13 +6,14 @@ class z extends domDocument{
 	public $p_variable;
 
 	function __construct(){
+		$this->p_array = array();
 		$this->p_array[] = 'bonus';
 		$this->p_array[] = 'vir';
 		$this->p_array[] = 'semper';
 		$this->p_array[] = 'tiro';
 
 		$this->p_variable = 'Cessante causa cessat effectus';
-	}	
+	}
 }
 
 $z=new z();

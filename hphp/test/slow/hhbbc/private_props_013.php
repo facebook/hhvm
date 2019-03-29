@@ -5,7 +5,8 @@ class A {
   private $y = "string";
 
   public function heh(int $i) {
-    $this->x[][3]->foo[] = $i;
+    $this->x = [array()];
+    $this->x[0][3]->foo = [$i];
     return $this;
   }
   public function getY() { return $this->y; }

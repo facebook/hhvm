@@ -1,3 +1,4 @@
+Warning: Creating default object from empty value in %s/private_props_013.php on line %d
 object(A) (2) {
   ["x":"A":private]=>
   array(1) {

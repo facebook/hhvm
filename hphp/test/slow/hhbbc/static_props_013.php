@@ -1,7 +1,7 @@
 <?hh
 
 class A {
-  private static $x = null;
+  private static $x = array();
   private static $y = "string";
 
   public static function heh(int $i) {

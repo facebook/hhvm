@@ -121,7 +121,7 @@ echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
 echo "--------- test with target vars being array elements -------------\n";
-
+$a = array();
 $v = list($a[0], $a[2], $a[4]) = array(0, 100, 67);
 print_r($a);
 print_r($v);

@@ -364,7 +364,11 @@ class SplObjectStorage
    * @return     mixed   No value is returned.
    */
   public function setInfo($data) {
-    current(&$this->__storage)['inf'] = $data;;
+    $key = key(&$this->__storage);
+    if ($key === null) {
+      return;
+    }
+    $this->__storage[$key]['inf'] = $data;
   }
 
 

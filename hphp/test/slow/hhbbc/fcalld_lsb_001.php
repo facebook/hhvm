@@ -3,7 +3,7 @@
 class someJunk { public function __construct(private $blah) {} }
 
 class Foo {
-  private static $foo;
+  private static $foo = array();
   protected static function createInstance() { return new stdclass; }
   public static function get($x) {
     self::$foo[] = new someJunk(static::createInstance($x));

@@ -9,6 +9,7 @@ function foo($ids) {
   foreach ($ids as $id) {
     $target = unknown($id);
     if ($target !== null) {
+      if (!array_key_exists($target, $x)) $x[$target] = array();
       $x[$target][] = $id;
     }
   }

@@ -4,6 +4,7 @@
 <<__EntryPoint>>
 function main_strtr_segfault() {
 $key = 'aaaa';
+$map = array();
 for ( $i = 0; $i < 66; ++$i ) {
   $map[$key++] = 'x';
 }

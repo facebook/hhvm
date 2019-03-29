@@ -12,6 +12,7 @@ class E {
 }
 
 function getProps($class, $obj) {
+  $ret = array();
   foreach ((new ReflectionClass($class))->getProperties() as $key => $prop) {
     $values = array();
 

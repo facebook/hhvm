@@ -7,6 +7,7 @@ function test($x) {
   var_dump($a, $b);
   $a = $x;
   $b = $a;
+  $a[0] = array();
   $a[0][1] = 1;
   var_dump($a, $b);
   }

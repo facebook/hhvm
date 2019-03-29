@@ -8,6 +8,7 @@ class Foo {
 
   public function __construct() {
     $this->x = new B();
+    $GLOBALS['foo'] = array();
     $GLOBALS['foo'][12]->bar = 2;
   }
 

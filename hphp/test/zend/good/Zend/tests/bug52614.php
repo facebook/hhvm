@@ -36,9 +36,6 @@ class foo {
 
 $foo = new foo;
 
-$foo->f1()[0] = 1;
-var_dump($foo->a1);
-
 $foo->f2()[0] = 1;
 var_dump($foo->a2);
 
@@ -51,7 +48,7 @@ var_dump($foo->o1);
 $foo->f5()->a = 1;
 var_dump($foo->o2);
 
-$foo->a1[0] = 1;
+$foo->a1 = [1];
 $foo->f7(&$foo->a1[0]);
 var_dump($foo->a1[0]);
 $foo->f1()[0]++;

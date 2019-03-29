@@ -6,6 +6,6 @@
 			echo "Hello World\n";
 		}
 	}
-	$y[0] = 'hello';
+	$y = ['hello'];
 	A::$y[0]();
 echo "===DONE===\n";

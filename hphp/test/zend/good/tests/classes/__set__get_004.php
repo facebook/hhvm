@@ -1,11 +1,11 @@
 <?php
 class Test {
-	protected $x;
+	protected $x = array();
 
 	function __get($name) {
 		if (isset($this->x[$name])) {
 			return $this->x[$name];
-		} 
+		}
 		else
 		{
 			return NULL;

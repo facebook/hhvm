@@ -3,6 +3,7 @@
 class A {
   var $a;
   function __set($n, $v) {
+    $this->a = array();
  $this->a[$n] = $v;
  }
   function __get($n) {

@@ -6,6 +6,7 @@ for ($i=0; $i<$num; $i++) {
   $a[$i] = Array(1);
 }
 
+$b = array();
 for ($i=0; $i<$num; $i++) {
   $b[$i] = $a[$i][0];
 }

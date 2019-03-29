@@ -4,6 +4,7 @@ function increment(&$x) {
   $x++;
 }
 function foo(){
+  $foo = array();
   increment(&$foo[0]);
   echo "done\n";
 }

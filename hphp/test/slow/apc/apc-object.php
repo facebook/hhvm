@@ -20,19 +20,10 @@ class WithStuff extends ParentClass {
 }
 
 if (apc_exists('foo')) {
-  class X {
-    private $foo;
-    function __construct() { $this->foo='bar'; }
-    function show() { var_dump($this->foo); }
-  };
-
+  include 'apc-object-1.inc';
   var_dump(apc_fetch('foo'));
 } else {
-  class X {
-    private $foo;
-    function __construct() { $this->foo='bar'; }
-    function show() { var_dump($this->foo); }
-  }
+  include 'apc-object-2.inc';
   apc_store('foo', new X);
   var_dump(apc_fetch('foo'));
 

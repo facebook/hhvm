@@ -1,15 +1,10 @@
 <?php
 
 if (isset($g)) {
-  class X {
-}
+  include '1722-1.inc';
 }
  else {
-  class X {
-function X() {
-var_dump(__METHOD__);
-}
-}
+  include '1722-2.inc';
 }
 class Y extends X {
   function __construct($a, $b) {

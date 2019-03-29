@@ -21,12 +21,7 @@ function setup() {
   file_put_contents($file, "<?php $text");
   include $file;
   unlink($file);
-  class X extends Y {
-    private $priv = 42;
-    function foo() {
-      var_dump($this->priv + self::C);
-    }
-  }
+  include 'func-guards.inc';
 }
 
 

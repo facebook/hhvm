@@ -8,9 +8,9 @@ function fail($t, $n, $e) {
     var_dump($e);
   }
   if ($n == 'C') {
-    class C {}
+    include 'autoload-fail-1.inc';
   } else if ($n == 'D') {
-    class D {}
+    include 'autoload-fail-2.inc';
   }
 }
 

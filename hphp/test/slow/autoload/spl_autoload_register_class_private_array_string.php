@@ -1,13 +1,5 @@
 <?php
 
-function test() {
-  class testCore {
-    public function __construct() {
-      var_dump("myClass");
-    }
-  }
-}
-
 class ClassAutoloader {
   public function __construct() {
     spl_autoload_register(array('ClassAutoloader', 'loader'));
@@ -16,7 +8,7 @@ class ClassAutoloader {
     echo 'Trying to load ', $className, ' via ', __METHOD__, "()\n";
     if ($className == "testCore") {
       var_dump("myClass expect");
-      test();
+      include 'spl_autoload_register_class_private.inc';
     }
   }
 }

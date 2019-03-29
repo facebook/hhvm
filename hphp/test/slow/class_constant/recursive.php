@@ -2,19 +2,12 @@
 
 function __autoload($cls) {
   if ($cls === "H2") {
-    class H2 {
-      const BAR = H1::FOO;
-    }
+    include 'recursive-1.inc';
   } else if ($cls == "I2") {
-
     if (I1::$i2_is_recursive) {
-      class I2 {
-        const BAR = I1::FOO;
-      }
+      include 'recursive-2.inc';
     } else {
-      class I2 {
-        const BAR = 123;
-      }
+      include 'recursive-3.inc';
     }
   }
 }

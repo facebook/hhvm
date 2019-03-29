@@ -17,8 +17,7 @@ y:', $this->y, '
 function main_60() {
 ;
 if (0) {
- class a extends Exception {
-}
+ include '60.inc';
  }
 try {
   throw(new b(1, 2));

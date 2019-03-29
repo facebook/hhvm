@@ -4,9 +4,7 @@ trait T {
 }
 function __autoload($c) {
   var_dump($c);
-  class A {
- use T;
- }
+  include '1532.inc';
 }
 
 <<__EntryPoint>>

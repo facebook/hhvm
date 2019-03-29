@@ -1,12 +1,9 @@
 <?php
 
 if (true) {
-  class c extends AppendIterator {
-}
-}
- else {
-  class c {
-}
+  include '740-1.inc';
+} else {
+  include '740-2.inc';
 }
 class d extends c {
   public function rewind() {

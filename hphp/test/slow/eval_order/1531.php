@@ -4,8 +4,7 @@ class B {
 }
 function __autoload($c) {
   var_dump($c);
-  class A extends B {
-}
+  include '1531.inc';
 }
 
 <<__EntryPoint>>

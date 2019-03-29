@@ -1,12 +1,9 @@
 <?php
 
-if(0){
-class y{
-}
-}
-else{
-class y{
-}
+if (0) {
+  include '1311-1.inc';
+} else {
+  include '1311-2.inc';
 }
 abstract class x extends y {
   private static $nextSerial = 1;

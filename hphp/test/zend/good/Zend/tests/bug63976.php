@@ -1,14 +1,9 @@
 <?php
 if (1) {
-  class Foo {
-    const TABLE = "foo";
-    public $table = self::TABLE;
-  }
+  include 'bug63976-1.inc';
 }
 if (1) {
-  class Bar extends Foo {
-    const TABLE = "bar";
-  }
+  include 'bug63976-2.inc';
 }
 $bar = new Bar();
 var_dump($bar->table);

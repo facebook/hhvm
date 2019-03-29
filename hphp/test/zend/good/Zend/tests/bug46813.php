@@ -1,11 +1,6 @@
 <?php
 namespace test;
-{
-	class inner
-	{
-
-	}
-}
+class inner {}
 
 $inner = new \test\inner();
 

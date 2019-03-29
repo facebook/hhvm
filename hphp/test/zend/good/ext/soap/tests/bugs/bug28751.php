@@ -1,10 +1,6 @@
 <?php
 function __autoload($className) {
-	class SoapServerActions {
-    function test() {
-      return "Hello World";
-    }
-	}
+  include 'bug28751.inc';
 }
 
 $server = new SoapServer(NULL, array('uri'=>"http://testuri.org"));

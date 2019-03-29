@@ -1,0 +1,11 @@
+<?php
+
+class autoload_class
+{
+  public function __construct()
+  {
+    print "autoload success\n";
+  }
+}
+
+$x = 1;

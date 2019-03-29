@@ -11,6 +11,9 @@ POSTFIX
 [a] => \-ArrayPOSTFIX
 [0] =>   |-2POSTFIX
 [1] =>   |-bPOSTFIX
+[3] =>   |-ArrayPOSTFIX
+[0] =>   | |-4POSTFIX
+[1] =>   | \-cPOSTFIX
 [3] =>   \-ArrayPOSTFIX
 [0] =>     |-4POSTFIX
 [1] =>     \-cPOSTFIX
@@ -24,6 +27,9 @@ POSTFIX
 [a] => \-Array
 [0] =>   |-2
 [1] =>   |-b
+[3] =>   |-Array
+[0] =>   | |-4
+[1] =>   | \-c
 [3] =>   \-Array
 [0] =>     |-4
 [1] =>     \-c

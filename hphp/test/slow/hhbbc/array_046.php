@@ -9,7 +9,7 @@ function val() {
 }
 function bar() {
   $x = foo();
-  return $x[val()];
+  return $x[\HH\array_key_cast(val())];
 }
 function main() {
   var_dump(bar());

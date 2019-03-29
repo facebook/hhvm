@@ -302,7 +302,7 @@ array(3) {
   int(1)
   ["two"]=>
   int(2)
-  [0]=>
+  ["1"]=>
   int(1)
 }
 -- With more arguments --
@@ -311,11 +311,11 @@ array(7) {
   int(1)
   ["two"]=>
   int(2)
-  [0]=>
+  ["1"]=>
   int(1)
-  [1]=>
+  [0]=>
   string(3) "one"
-  [2]=>
+  [1]=>
   int(2)
   ["string"]=>
   string(5) "hello"

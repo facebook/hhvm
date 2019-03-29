@@ -1,5 +1,3 @@
-
-Notice: Hack Array Compat: Intish index cast in %s on line 6
 array(1) {
   [1]=>
   int(1)

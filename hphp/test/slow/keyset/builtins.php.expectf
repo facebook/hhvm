@@ -931,30 +931,30 @@ prev 2: string(1) "7"
 reset: string(1) "7"
 count: int(4)
 array_pad 1: array(7) {
-  [5]=>
-  int(5)
-  [7]=>
-  int(7)
-  [8]=>
-  int(8)
-  [10]=>
-  int(10)
-  [11]=>
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
+  [0]=>
   string(1) "n"
-  [12]=>
+  [1]=>
   string(1) "n"
-  [13]=>
+  [2]=>
   string(1) "n"
 }
 array_pad 2: array(4) {
-  [5]=>
-  int(5)
-  [7]=>
-  int(7)
-  [8]=>
-  int(8)
-  [10]=>
-  int(10)
+  ["5"]=>
+  string(1) "5"
+  ["7"]=>
+  string(1) "7"
+  ["8"]=>
+  string(1) "8"
+  ["10"]=>
+  string(2) "10"
 }
 array_replace: array(5) {
   ["5"]=>

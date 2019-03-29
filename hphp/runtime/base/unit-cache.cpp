@@ -793,7 +793,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + std::to_string(RuntimeOption::EvalForbidDynamicCalls)
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
-    + (RuntimeOption::EvalEnableIntishCast ? '1' : '0')
     + (RuntimeOption::EvalDisableHphpcOpts ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'

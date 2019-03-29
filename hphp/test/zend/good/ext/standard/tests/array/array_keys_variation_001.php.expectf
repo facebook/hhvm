@@ -74,7 +74,7 @@ array(5) {
   [3]=>
   int(3)
   [4]=>
-  int(5)
+  string(1) "5"
 }
 
 -- Iteration 9 --

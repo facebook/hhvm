@@ -171,8 +171,6 @@ void raise_disallowed_dynamic_call(const Func* f);
 void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
 void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 
-void raise_intish_index_cast();
-
 void raise_convert_object_to_string(const char* cls_name);
 
 ///////////////////////////////////////////////////////////////////////////////

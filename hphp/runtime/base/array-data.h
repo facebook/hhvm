@@ -766,7 +766,7 @@ public:
    * (which may depend on the array kind, e.g.).  If true, `i' is set to the
    * intish value of `key'.
    */
-  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::AllowCastAndWarn>
   bool convertKey(const StringData* key, int64_t& i) const;
 
   /*
@@ -1054,7 +1054,6 @@ void raiseHackArrCompatMissingSetOp();
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);
 
-bool checkHACIntishCast();
 bool checkHACRefBind();
 bool checkHACFalseyPromote();
 bool checkHACEmptyStringPromote();
@@ -1062,7 +1061,10 @@ bool checkHACCompare();
 bool checkHACArrayPlus();
 bool checkHACArrayKeyCast();
 
-template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+/*
+ * Like isStrictlyInteger() but changes behavior with the value of `ic'.
+ */
+template <IntishCast IC = IntishCast::AllowCastAndWarn>
 folly::Optional<int64_t> tryIntishCast(const StringData* key);
 
 ///////////////////////////////////////////////////////////////////////////////

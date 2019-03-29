@@ -240,8 +240,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
     RuntimeOption::UndefinedFunctionFallback =
       s_globalData.UndefinedFunctionFallback;
-    RuntimeOption::EvalEnableIntishCast =
-      s_globalData.EnableIntishCast;
     RuntimeOption::EvalAbortBuildOnVerifyError =
       s_globalData.AbortBuildOnVerifyError;
     RuntimeOption::DisallowDynamicVarEnvFuncs =

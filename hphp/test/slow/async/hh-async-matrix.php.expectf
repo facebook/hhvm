@@ -144,13 +144,13 @@ HH\Asio\vm() => object(HH\Vector) (8) {
   0 => 3.14,
 )"
   [7]=>
-  string(95) "stdClass::__set_state(array(
-  0 => 4,
-  1 => 8,
-  2 => 15,
-  3 => 16,
-  4 => 23,
-  5 => 42,
+  string(107) "stdClass::__set_state(array(
+  '0' => 4,
+  '1' => 8,
+  '2' => 15,
+  '3' => 16,
+  '4' => 23,
+  '5' => 42,
 ))"
 }
 HH\Asio\vmw() => object(HH\Vector) (8) {
@@ -171,13 +171,13 @@ HH\Asio\vmw() => object(HH\Vector) (8) {
   0 => 3.14,
 )"
   [7]=>
-  string(95) "stdClass::__set_state(array(
-  0 => 4,
-  1 => 8,
-  2 => 15,
-  3 => 16,
-  4 => 23,
-  5 => 42,
+  string(107) "stdClass::__set_state(array(
+  '0' => 4,
+  '1' => 8,
+  '2' => 15,
+  '3' => 16,
+  '4' => 23,
+  '5' => 42,
 ))"
 }
 HH\Asio\vfk() => object(HH\Vector) (6) {
@@ -273,15 +273,15 @@ HH\Asio\vmk() => object(HH\Vector) (8) {
   ),
 )"
   [7]=>
-  string(130) "array (
+  string(142) "array (
   7 => 
   stdClass::__set_state(array(
-    0 => 4,
-    1 => 8,
-    2 => 15,
-    3 => 16,
-    4 => 23,
-    5 => 42,
+    '0' => 4,
+    '1' => 8,
+    '2' => 15,
+    '3' => 16,
+    '4' => 23,
+    '5' => 42,
   )),
 )"
 }
@@ -318,15 +318,15 @@ HH\Asio\vmkw() => object(HH\Vector) (8) {
   ),
 )"
   [7]=>
-  string(130) "array (
+  string(142) "array (
   7 => 
   stdClass::__set_state(array(
-    0 => 4,
-    1 => 8,
-    2 => 15,
-    3 => 16,
-    4 => 23,
-    5 => 42,
+    '0' => 4,
+    '1' => 8,
+    '2' => 15,
+    '3' => 16,
+    '4' => 23,
+    '5' => 42,
   )),
 )"
 }
@@ -476,13 +476,13 @@ HH\Asio\mm() => object(HH\Map) (8) {
   0 => 3.14,
 )"
   [7]=>
-  string(95) "stdClass::__set_state(array(
-  0 => 4,
-  1 => 8,
-  2 => 15,
-  3 => 16,
-  4 => 23,
-  5 => 42,
+  string(107) "stdClass::__set_state(array(
+  '0' => 4,
+  '1' => 8,
+  '2' => 15,
+  '3' => 16,
+  '4' => 23,
+  '5' => 42,
 ))"
 }
 HH\Asio\mmw() => object(HH\Map) (8) {
@@ -503,13 +503,13 @@ HH\Asio\mmw() => object(HH\Map) (8) {
   0 => 3.14,
 )"
   [7]=>
-  string(95) "stdClass::__set_state(array(
-  0 => 4,
-  1 => 8,
-  2 => 15,
-  3 => 16,
-  4 => 23,
-  5 => 42,
+  string(107) "stdClass::__set_state(array(
+  '0' => 4,
+  '1' => 8,
+  '2' => 15,
+  '3' => 16,
+  '4' => 23,
+  '5' => 42,
 ))"
 }
 HH\Asio\mfk() => object(HH\Map) (6) {
@@ -605,15 +605,15 @@ HH\Asio\mmk() => object(HH\Map) (8) {
   ),
 )"
   [7]=>
-  string(130) "array (
+  string(142) "array (
   7 => 
   stdClass::__set_state(array(
-    0 => 4,
-    1 => 8,
-    2 => 15,
-    3 => 16,
-    4 => 23,
-    5 => 42,
+    '0' => 4,
+    '1' => 8,
+    '2' => 15,
+    '3' => 16,
+    '4' => 23,
+    '5' => 42,
   )),
 )"
 }
@@ -650,15 +650,15 @@ HH\Asio\mmkw() => object(HH\Map) (8) {
   ),
 )"
   [7]=>
-  string(130) "array (
+  string(142) "array (
   7 => 
   stdClass::__set_state(array(
-    0 => 4,
-    1 => 8,
-    2 => 15,
-    3 => 16,
-    4 => 23,
-    5 => 42,
+    '0' => 4,
+    '1' => 8,
+    '2' => 15,
+    '3' => 16,
+    '4' => 23,
+    '5' => 42,
   )),
 )"
 }

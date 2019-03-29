@@ -892,7 +892,7 @@ ArrayData* SetArray::Escalate(const ArrayData* ad) {
   return const_cast<ArrayData*>(ad);
 }
 
-template <typename Init, IntishCast intishCast>
+template <typename Init, IntishCast IC>
 ALWAYS_INLINE
 ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
   auto a = asSet(ad);
@@ -911,7 +911,7 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
       init.set(elm.intKey(), tvAsCVarRef(&elm.tv));
     } else {
       auto const key = elm.strKey();
-      if (auto const intish = tryIntishCast<intishCast>(key)) {
+      if (auto const intish = tryIntishCast<IC>(key)) {
         init.set(*intish, make_tv<KindOfInt64>(*intish));
       } else {
         init.set(key, tvAsCVarRef(&elm.tv));

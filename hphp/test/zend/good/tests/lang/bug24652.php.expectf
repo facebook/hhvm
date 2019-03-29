@@ -1,8 +1,8 @@
 array(1) {
-  [7]=>
+  ["7"]=>
   int(0)
 }
-bool(true)
+bool(false)
 bool(true)
 ----------
 array(1) {
@@ -10,4 +10,4 @@ array(1) {
   int(0)
 }
 bool(true)
-bool(true)
+bool(false)

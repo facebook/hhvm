@@ -244,7 +244,7 @@ array(2) {
 array(5) {
   ["red"]=>
   int(10)
-  [4]=>
+  ["4"]=>
   int(3)
   [9]=>
   int(5)
@@ -347,7 +347,7 @@ array(4) {
 }
 ================= what about int-looking strings? It appears not. =================
 array(4) {
-  [12]=>
+  ["12"]=>
   int(10)
   ["0x10"]=>
   int(16)

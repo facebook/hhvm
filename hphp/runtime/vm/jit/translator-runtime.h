@@ -85,7 +85,6 @@ inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
 
 ArrayData* addNewElemHelper(ArrayData* a, TypedValue value);
 ArrayData* addElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
-template <ICMode intishCast>
 ArrayData* addElemStringKeyHelper(ArrayData* ad, StringData* key,
                                   TypedValue val);
 ArrayData* dictAddElemIntKeyHelper(ArrayData* ad, int64_t key, TypedValue val);
@@ -162,9 +161,6 @@ void raise_error_sd(const StringData* sd);
 
 TypedValue arrayIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue arrayIdxS(ArrayData*, StringData*, TypedValue);
-
-template <ICMode intishCast>
-TypedValue arrayIdxSi(ArrayData*, StringData*, TypedValue);
 
 TypedValue dictIdxI(ArrayData*, int64_t, TypedValue);
 TypedValue dictIdxS(ArrayData*, StringData*, TypedValue);
@@ -243,13 +239,11 @@ namespace MInstrHelpers {
 void setNewElem(tv_lval base, Cell val, const MInstrPropState*);
 void setNewElemArray(tv_lval base, Cell val);
 void setNewElemVec(tv_lval base, Cell val);
-template<ICMode intishCast>
 TypedValue setOpElem(tv_lval base, TypedValue key, Cell val, SetOpOp op,
                      const MInstrPropState*);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-template<ICMode intishCast>
 TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
                       const MInstrPropState*);
 tv_lval elemVecID(tv_lval base, int64_t key);

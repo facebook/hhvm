@@ -2,7 +2,7 @@
 
 // Test that Map::toArray() raises a warning on a int/string collision.
 
-function should_warn() {
+function should_not_warn() {
   var_dump((Map {1 => 42, '1' => 13, 'hello' => 'world'})->toArray());
   var_dump((Map {0 => 'a', '0' => 'b'})->toArray());
 
@@ -18,9 +18,9 @@ function no_warn() {
 }
 
 function main() {
-  echo "WARN\n";
+  echo "ALSO DON'T WARN\n";
   echo "-------------\n\n";
-  should_warn();
+  should_not_warn();
   echo "\n";
   echo "DON'T WARN\n";
   echo "-------------\n\n";

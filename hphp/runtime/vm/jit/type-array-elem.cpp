@@ -77,12 +77,7 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
   assertx(arr <= TArr);
 
   auto const dissected = [&]{
-    if (idx.hasConstVal(TStr)) {
-      int64_t val;
-      if (RuntimeOption::EvalEnableIntishCast &&
-          idx.strVal()->isStrictlyInteger(val)) return Type::cns(val);
-      return idx;
-    }
+    if (idx <= TStr) return idx;
     if (idx <= TInt) return idx;
     return TInt | TStr;
   }();

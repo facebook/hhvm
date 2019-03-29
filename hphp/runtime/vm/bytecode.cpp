@@ -3650,86 +3650,21 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
   auto const result = [&]() -> tv_rval {
     switch (mode) {
       case MOpMode::None:
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return Elem<MOpMode::None, ICMode::Warn>(
-              mstate.tvRef, b, key
-            );
-          case ICMode::Cast:
-            return Elem<MOpMode::None, ICMode::Cast>(
-              mstate.tvRef, b, key
-            );
-          case ICMode::Ignore:
-            return Elem<MOpMode::None, ICMode::Ignore>(
-              mstate.tvRef, b, key
-            );
-        }
+        return Elem<MOpMode::None>(mstate.tvRef, b, key);
       case MOpMode::Warn:
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return Elem<MOpMode::Warn, ICMode::Warn>(
-              mstate.tvRef, b, key
-            );
-          case ICMode::Cast:
-            return Elem<MOpMode::Warn, ICMode::Cast>(
-              mstate.tvRef, b, key
-            );
-          case ICMode::Ignore:
-            return Elem<MOpMode::Warn, ICMode::Ignore>(
-              mstate.tvRef, b, key
-            );
-        }
+        return Elem<MOpMode::Warn>(mstate.tvRef, b, key);
       case MOpMode::InOut:
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return Elem<MOpMode::InOut, ICMode::Warn>(
-              mstate.tvRef, b, key
-            );
-          case ICMode::Cast:
-            return Elem<MOpMode::InOut, ICMode::Cast>(
-              mstate.tvRef, b, key
-            );
-          case ICMode::Ignore:
-            return Elem<MOpMode::InOut, ICMode::Ignore>(
-              mstate.tvRef, b, key
-            );
-        }
+        return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
       case MOpMode::Define:
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return reffy
-              ? ElemD<MOpMode::Define, true, ICMode::Warn>(
-                  mstate.tvRef, b, key, &mstate.propState
-                )
-              : ElemD<MOpMode::Define, false, ICMode::Warn>(
-                  mstate.tvRef, b, key, &mstate.propState
-                );
-          case ICMode::Cast:
-            return reffy
-              ? ElemD<MOpMode::Define, true, ICMode::Cast>(
-                  mstate.tvRef, b, key, &mstate.propState
-                )
-              : ElemD<MOpMode::Define, false, ICMode::Cast>(
-                  mstate.tvRef, b, key, &mstate.propState
-                );
-          case ICMode::Ignore:
-            return reffy
-              ? ElemD<MOpMode::Define, true, ICMode::Ignore>(
-                  mstate.tvRef, b, key, &mstate.propState
-                )
-              : ElemD<MOpMode::Define, false, ICMode::Ignore>(
-                  mstate.tvRef, b, key, &mstate.propState
-                );
-        }
+        return reffy
+          ? ElemD<MOpMode::Define, true>(
+              mstate.tvRef, b, key, &mstate.propState
+            )
+          : ElemD<MOpMode::Define, false>(
+              mstate.tvRef, b, key, &mstate.propState
+            );
       case MOpMode::Unset:
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return ElemU<ICMode::Warn>(mstate.tvRef, b, key);
-          case ICMode::Cast:
-            return ElemU<ICMode::Cast>(mstate.tvRef, b, key);
-          case ICMode::Ignore:
-            return ElemU<ICMode::Ignore>(mstate.tvRef, b, key);
-        }
+        return ElemU(mstate.tvRef, b, key);
     }
     always_assert(false);
   }().as_lval();
@@ -3832,23 +3767,9 @@ void queryMImpl(MemberKey mk, int32_t nDiscard, QueryMOp op) {
       } else {
         assertx(mcodeIsElem(mk.mcode));
 
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            result.m_data.num = op == QueryMOp::Empty
-              ? IssetEmptyElem<true, ICMode::Warn>(mstate.base, key)
-              : IssetEmptyElem<false, ICMode::Warn>(mstate.base, key);
-            break;
-          case ICMode::Cast:
-            result.m_data.num = op == QueryMOp::Empty
-              ? IssetEmptyElem<true, ICMode::Cast>(mstate.base, key)
-              : IssetEmptyElem<false, ICMode::Cast>(mstate.base, key);
-            break;
-          case ICMode::Ignore:
-            result.m_data.num = op == QueryMOp::Empty
-              ? IssetEmptyElem<true, ICMode::Ignore>(mstate.base, key)
-              : IssetEmptyElem<false, ICMode::Ignore>(mstate.base, key);
-            break;
-        }
+        result.m_data.num = op == QueryMOp::Empty
+          ? IssetEmptyElem<true>(mstate.base, key)
+          : IssetEmptyElem<false>(mstate.base, key);
       }
       break;
   }
@@ -3881,23 +3802,9 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
-      auto const result = ([&] {
-        switch (intishCastMode()) {
-          case ICMode::Warn:
-            return SetElem<true, ICMode::Warn>(
-              mstate.base, key, topC, &mstate.propState
-            );
-          case ICMode::Cast:
-            return SetElem<true, ICMode::Cast>(
-              mstate.base, key, topC, &mstate.propState
-            );
-          case ICMode::Ignore:
-            return SetElem<true, ICMode::Ignore>(
-              mstate.base, key, topC, &mstate.propState
-            );
-        }
-        not_reached();
-      })();
+      auto const result = SetElem<true>(
+        mstate.base, key, topC, &mstate.propState
+      );
       if (result) {
         tvDecRefGen(topC);
         topC->m_type = KindOfString;
@@ -3941,23 +3848,9 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
       arGetContextClass(vmfp()), subop, mstate.base, key, &mstate.propState
     );
   } else if (mcodeIsElem(mk.mcode)) {
-    switch (intishCastMode()) {
-      case ICMode::Warn:
-        result = IncDecElem<ICMode::Warn>(
-          subop, mstate.base, key, &mstate.propState
-        );
-        break;
-      case ICMode::Cast:
-        result = IncDecElem<ICMode::Cast>(
-          subop, mstate.base, key, &mstate.propState
-        );
-        break;
-      case ICMode::Ignore:
-        result = IncDecElem<ICMode::Ignore>(
-          subop, mstate.base, key, &mstate.propState
-        );
-        break;
-    }
+    result = IncDecElem(
+      subop, mstate.base, key, &mstate.propState
+    );
   } else {
     result = IncDecNewElem(mstate.tvRef, subop, mstate.base, &mstate.propState);
   }
@@ -3975,23 +3868,9 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
     result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
                        mstate.base, key, rhs, &mstate.propState);
   } else if (mcodeIsElem(mk.mcode)) {
-    switch (intishCastMode()) {
-      case ICMode::Warn:
-        result = SetOpElem<ICMode::Warn>(
-          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
-        );
-        break;
-      case ICMode::Cast:
-        result = SetOpElem<ICMode::Cast>(
-          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
-        );
-        break;
-      case ICMode::Ignore:
-        result = SetOpElem<ICMode::Ignore>(
-          mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
-        );
-        break;
-    }
+    result = SetOpElem(
+      mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
+    );
   } else {
     result =
       SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs, &mstate.propState);
@@ -4011,17 +3890,7 @@ OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {
     UnsetProp(arGetContextClass(vmfp()), mstate.base, key);
   } else {
     assertx(mcodeIsElem(mk.mcode));
-    switch (intishCastMode()) {
-      case ICMode::Warn:
-        UnsetElem<ICMode::Warn>(mstate.base, key);
-        break;
-      case ICMode::Cast:
-        UnsetElem<ICMode::Cast>(mstate.base, key);
-        break;
-      case ICMode::Ignore:
-        UnsetElem<ICMode::Ignore>(mstate.base, key);
-        break;
-    }
+    UnsetElem(mstate.base, key);
   }
 
   mFinal(mstate, nDiscard, folly::none);

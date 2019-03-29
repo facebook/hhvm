@@ -2,8 +2,10 @@ array(1) {
   [1]=>
   string(3) "bar"
 }
-array(1) {
+array(2) {
   [1]=>
+  int(42)
+  ["1"]=>
   string(3) "bar"
 }
 int(42)

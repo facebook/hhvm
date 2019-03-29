@@ -18,7 +18,7 @@ function no_warn() {
 }
 
 function main() {
-  echo "WARN\n";
+  echo "ALSO DON'T WARN\n";
   echo "-------------\n\n";
   should_warn();
   echo "\n";

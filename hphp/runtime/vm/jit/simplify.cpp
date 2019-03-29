@@ -1954,25 +1954,6 @@ SSATmp* simplifyConcatStrInt(State& env, const IRInstruction* inst) {
 
 namespace {
 
-bool intlikeCheck(const ArrayData* a) {
-  bool intlike = false;
-  if (!RuntimeOption::EvalEnableIntishCast) return false;
-  IterateKV(
-    a,
-    [&](Cell k, TypedValue v) {
-      if (isIntType(k.m_type)) return false;
-      assertx(isStringType(k.m_type));
-      int64_t n;
-      if (k.m_data.pstr->isStrictlyInteger(n)) {
-        intlike = true;
-        return true;
-      }
-      return false;
-    }
-  );
-  return intlike;
-}
-
 template <typename G, typename C>
 SSATmp* arrayLikeConvImpl(State& env, const IRInstruction* inst,
                           G get, C convert) {
@@ -1989,13 +1970,7 @@ template <typename G>
 SSATmp* convToArrImpl(State& env, const IRInstruction* inst, G get) {
   return arrayLikeConvImpl(
     env, inst, get,
-    [&](ArrayData* a) {
-      return (!checkHACIntishCast() ||
-              (!a->isDict() && !a->isKeyset()) ||
-              !intlikeCheck(a))
-        ? a->toPHPArray(true)
-        : nullptr;
-    }
+    [&](ArrayData* a) { return a->toPHPArray(true); }
   );
 }
 
@@ -2059,13 +2034,7 @@ template <typename G>
 SSATmp* convToDArrImpl(State& env, const IRInstruction* inst, G get) {
   return arrayLikeConvImpl(
     env, inst, get,
-    [&](ArrayData* a) {
-      return (!checkHACIntishCast() ||
-              (!a->isDict() && !a->isKeyset()) ||
-              !intlikeCheck(a))
-        ? a->toDArray(true)
-        : nullptr;
-    }
+    [&](ArrayData* a) { return a->toDArray(true); }
   );
 }
 
@@ -2996,19 +2965,7 @@ SSATmp* arrStrKeyImpl(State& env, const IRInstruction* inst, bool& skip) {
   assertx(arr->arrVal()->isPHPArray());
 
   skip = false;
-  auto const rval = [&] {
-    int64_t val;
-    if (RuntimeOption::EvalEnableIntishCast &&
-        arr->arrVal()->useWeakKeys() &&
-        idx->strVal()->isStrictlyInteger(val)) {
-      if (checkHACIntishCast()) {
-        skip = true;
-        return tv_rval{};
-      }
-      return arr->arrVal()->rval(val);
-    }
-    return arr->arrVal()->rval(idx->strVal());
-  }();
+  auto const rval = arr->arrVal()->rval(idx->strVal());
   return rval ? cns(env, rval.tv()) : nullptr;
 }
 

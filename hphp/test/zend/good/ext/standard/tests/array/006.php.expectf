@@ -9,9 +9,9 @@ array(3) {
 }
 fubar
 array(2) {
-  [3]=>
+  ["3"]=>
   string(3) "foo"
-  [4]=>
+  ["4"]=>
   string(3) "bar"
 }
 fubar

@@ -11,5 +11,11 @@ function test($a) {
 
 <<__EntryPoint>>
 function main_442() {
-test(array('a' => 'x',           false => 'y',           '1' => false,           null => 'z',           'c' => 'w'));
+  test(array(
+    'a' => 'x',
+    false => 'y',
+    '1' => false,
+    null => 'z',
+    'c' => 'w'
+  ));
 }

@@ -20,7 +20,7 @@ $s[] = 'foo';
 
 $arr = $s->toArray();
 var_dump($arr);
-var_dump((count($s) - 1) === count($arr));
+var_dump((count($s)) === count($arr));
 $s->remove('123');
 var_dump($s->toArray()); // on collision, last entry wins
 }

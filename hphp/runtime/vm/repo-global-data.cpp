@@ -55,7 +55,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(HackArrCompatDVCmpNotices);
   SHOW(HackArrCompatSerializeNotices);
   SHOW(HackArrDVArrs);
-  SHOW(EnableIntishCast);
   SHOW(EnableIntrinsicsExtension);
   SHOW(ForbidDynamicCalls);
   SHOW(NoticeOnBuiltinDynamicCalls);

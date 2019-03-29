@@ -6,7 +6,7 @@ array(4) {
   string(4) "zero"
   [1]=>
   string(3) "one"
-  [3]=>
+  ["3"]=>
   string(5) "three"
   ["four"]=>
   int(4)
@@ -18,7 +18,7 @@ New array:
 array(3) {
   [0]=>
   string(3) "one"
-  [1]=>
+  ["3"]=>
   string(5) "three"
   ["four"]=>
   int(4)

@@ -29,14 +29,22 @@ array(2) {
 }
 
 -- Iteration 3 --
-array(1) {
+array(3) {
+  [0]=>
+  string(4) "zero"
+  [1]=>
+  int(1)
   ["two"]=>
   float(2)
 }
-array(2) {
-  [2]=>
+array(4) {
+  ["2"]=>
   string(16) "2.00000000000001"
-  [3]=>
+  ["1"]=>
+  string(1) "1"
+  ["0"]=>
+  string(4) "zero"
+  ["3"]=>
   string(1) "a"
 }
 
@@ -69,12 +77,16 @@ array(2) {
 }
 
 -- Iteration 6 --
-array(1) {
+array(2) {
   [0]=>
   string(4) "zero"
+  [1]=>
+  int(1)
 }
-array(1) {
-  [0]=>
+array(2) {
+  ["1"]=>
+  int(1)
+  ["0"]=>
   int(0)
 }
 
@@ -107,12 +119,16 @@ array(2) {
 }
 
 -- Iteration 9 --
-array(1) {
+array(2) {
   [0]=>
   string(4) "zero"
+  [1]=>
+  int(1)
 }
-array(1) {
-  [0]=>
+array(2) {
+  ["1"]=>
+  float(1)
+  ["0"]=>
   float(1.0E-11)
 }
 Done

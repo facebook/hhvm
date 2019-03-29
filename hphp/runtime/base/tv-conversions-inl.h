@@ -117,13 +117,13 @@ inline double cellToDouble(Cell cell) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template <IntishCast intishCast>
+template <IntishCast IC>
 inline Cell cellToKey(Cell cell, const ArrayData* ad) {
   assertx(cellIsPlausible(cell));
 
   auto coerceKey = [&] (const StringData* str) {
     int64_t n;
-    if (ad->convertKey<intishCast>(str, n)) {
+    if (ad->convertKey<IC>(str, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return make_tv<KindOfString>(const_cast<StringData*>(str));
@@ -131,7 +131,7 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
 
   if (isStringType(cell.m_type)) {
     int64_t n;
-    if (ad->convertKey<intishCast>(cell.m_data.pstr, n)) {
+    if (ad->convertKey<IC>(cell.m_data.pstr, n)) {
       return make_tv<KindOfInt64>(n);
     }
     return cell;
@@ -190,10 +190,10 @@ inline Cell cellToKey(Cell cell, const ArrayData* ad) {
   not_reached();
 }
 
-template <IntishCast intishCast>
+template <IntishCast IC>
 inline Cell tvToKey(TypedValue tv, const ArrayData* ad) {
   assertx(tvIsPlausible(tv));
-  return cellToKey<intishCast>(tvToCell(tv), ad);
+  return cellToKey<IC>(tvToCell(tv), ad);
 }
 
 

@@ -1693,7 +1693,7 @@ bool MixedArray::hasIntishKeys() const {
   * Copy this from adIn, intish casting all the intish string keys in
   * accordance with the value of the intishCast template parameter
   */
-template <IntishCast intishCast>
+template <IntishCast IC>
 ALWAYS_INLINE
 ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
                                           bool asDArray /* = false */) {
@@ -1707,7 +1707,7 @@ ArrayData* MixedArray::copyWithIntishCast(MixedArray* adIn,
     if (e.hasIntKey()) {
       out->updateWithRef(e.ikey, e.data);
     } else {
-      if (auto const intish = tryIntishCast<intishCast>(e.skey)) {
+      if (auto const intish = tryIntishCast<IC>(e.skey)) {
         out->updateWithRef(*intish, e.data);
       } else {
         out->updateWithRef(e.skey, e.data);
@@ -1738,7 +1738,7 @@ ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
   }
 }
 
-template <IntishCast intishCast>
+template <IntishCast IC>
 ALWAYS_INLINE
 ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
                                     bool copy,
@@ -1764,7 +1764,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
     // Either we need to make a copy anyways, or we don't, but there are
     // int-like string keys. In either case, create the array from scratch,
     // inserting each element one-by-one, doing key conversion as necessary.
-    return copyWithIntishCast<intishCast>(a, toDArray);
+    return copyWithIntishCast<IC>(a, toDArray);
   }
 }
 

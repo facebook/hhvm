@@ -4,12 +4,12 @@ function main() {
   // test CGetM
   $a = array();
   $a[0] = "one";
-  echo $a["0"] . "\n";
+  echo $a["0"];
 
- // test SetM
+  // test SetM
   $a = array();
   $a["0"] = "two";
-  echo $a[0] . "\n";
+  echo $a[0];
 
   // test IssetM
   $a = array("narf");

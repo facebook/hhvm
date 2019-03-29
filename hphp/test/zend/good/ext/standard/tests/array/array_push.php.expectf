@@ -118,14 +118,15 @@ Array
     [F] => FFF
     [blank] => 
     [3] => 3.7
-    [5] => Five
+    [5] => 7
     [6] => 8.6
+    [5] => Five
     [4name] => jonny
     [a] => 
 )
 
 Output after push is :
-int(14)
+int(15)
 
 -- Input Array for Iteration 9 is --
 Array

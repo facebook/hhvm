@@ -4095,62 +4095,20 @@ ArrKey disect_array_key(const Type& keyTy) {
     return ret;
   }
 
-  auto const intishCast = RuntimeOption::EvalEnableIntishCast;
-
   if (keyTy.subtypeOf(BOptStr)) {
     if (keyTy.subtypeOf(BStr)) {
       if (keyTy.strictSubtypeOf(TStr) && keyTy.m_dataTag == DataTag::Str) {
-        int64_t i;
-        if (intishCast && keyTy.m_data.sval->isStrictlyInteger(i)) {
-          ret.i = i;
-          ret.type = ival(i);
-          ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
-        } else {
-          ret.s = keyTy.m_data.sval;
-          ret.type = keyTy;
-        }
-        return ret;
-      }
-      // Might stay a string or become an integer. The effective type is
-      // uncounted if the string is static.
-      if (intishCast) {
-        ret.type = keyTy.subtypeOf(BSStr) ? TUncArrKey : TArrKey;
-        ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
-        return ret;
+        ret.s = keyTy.m_data.sval;
       } else {
-        // if intish cast is disabled, a non-null string remains a string
-        ret.type = keyTy;
         ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
-        return ret;
       }
-    }
-
-    // if intish cast is disabled, the key will remain a str, but since it is
-    // optional, we cannot include the value itself, as explained below
-    if (!intishCast) {
-      ret.type = keyTy.subtypeOf(BOptSStr) ? TSStr : TStr;
-      ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
+      ret.type = keyTy;
       return ret;
     }
 
-    // If we have an OptStr with a value, we can at least exclude the
-    // possibility of integer-like strings by looking at that value.
-    // But we can't use the value itself, because if it is null the key
-    // will act like the empty string.  In that case, the code uses the
-    // static empty string, so if it was an OptCStr it needs to
-    // incorporate SStr, but an OptSStr can stay as SStr.
-    if (keyTy.subtypeOf(BOptStr) && keyTy.m_dataTag == DataTag::Str) {
-      int64_t ignore;
-      if (!keyTy.m_data.sval->isStrictlyInteger(ignore)) {
-        ret.type = keyTy.subtypeOf(BOptSStr) ? TSStr : TStr;
-        ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
-        return ret;
-      }
-    }
-    // An optional string is fine because a null will just become the empty
-    // string. So, if the string is static, the effective type is uncounted
-    // still. The effective type is ArrKey because it might become an integer.
-    ret.type = keyTy.subtypeOf(BOptSStr) ? TUncArrKey : TArrKey;
+    // Since the key is optional, we cannot include the value itself, as
+    // explained below.
+    ret.type = keyTy.subtypeOf(BOptSStr) ? TSStr : TStr;
     ret.mayThrow = RuntimeOption::EvalHackArrCompatNotices;
     return ret;
   }

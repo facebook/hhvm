@@ -10,8 +10,8 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-bool(true)
 bool(false)
+bool(true)
 bool(false)
 bool(true)
 array(3) {

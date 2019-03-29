@@ -613,7 +613,9 @@ dict(2) {
   int(200)
 }
 ----------------------------------------------------
-array(1) {
+array(2) {
+  ["12345"]=>
+  int(100)
   [12345]=>
   int(200)
 }
@@ -631,7 +633,9 @@ float(1)
 
 Notice: Dict to string conversion in %s on line %d
 string(4) "Dict"
-object(stdClass) (1) {
+object(stdClass) (2) {
+  ["12345"]=>
+  int(100)
   [12345]=>
   int(200)
 }

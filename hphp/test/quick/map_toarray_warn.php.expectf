@@ -1,30 +1,30 @@
-WARN
+ALSO DON'T WARN
 -------------
 
-
-Warning: Map::toArray() for a map containing both int(1) and string('1') in %s/quick/map_toarray_warn.php on line 6
-array(2) {
+array(3) {
   [1]=>
+  int(42)
+  ["1"]=>
   int(13)
   ["hello"]=>
   string(5) "world"
 }
-
-Warning: Map::toArray() for a map containing both int(0) and string('0') in %s/quick/map_toarray_warn.php on line 7
-array(1) {
+array(2) {
   [0]=>
+  string(1) "a"
+  ["0"]=>
   string(1) "b"
 }
-
-Warning: Map::toArray() for a map containing both int(9223372036854775807) and string('9223372036854775807') in %s/quick/map_toarray_warn.php on line 9
-array(1) {
+array(2) {
+  ["9223372036854775807"]=>
+  string(1) "a"
   [9223372036854775807]=>
   string(1) "b"
 }
-
-Warning: Map::toArray() for a map containing both int(-9223372036854775808) and string('-9223372036854775808') in %s/quick/map_toarray_warn.php on line 12
-array(1) {
+array(2) {
   [-9223372036854775808]=>
+  string(1) "a"
+  ["-9223372036854775808"]=>
   string(1) "b"
 }
 

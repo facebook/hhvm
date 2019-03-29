@@ -32,7 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Forward declare to avoid including tv-conversions.h and creating a cycle.
-template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+template <IntishCast IC = IntishCast::AllowCastAndWarn>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 
 struct ArrayIter;
@@ -207,7 +207,9 @@ public:
   Array toShape() const { COPY_BODY(toShape(true), CreateShape()) }
   Array toKeyset() const { COPY_BODY(toKeyset(true), CreateKeyset()) }
   Array toPHPArray() const { COPY_BODY(toPHPArray(true), Array{}) }
-  Array toPHPArrayIntishCast() const { COPY_BODY(toPHPArrayIntishCast(true), Array{}) }
+  Array toPHPArrayIntishCast() const {
+    COPY_BODY(toPHPArrayIntishCast(true), Array{})
+  }
   Array toVArray() const { COPY_BODY(toVArray(true), CreateVArray()) }
   Array toDArray() const { COPY_BODY(toDArray(true), CreateDArray()) }
 
@@ -256,9 +258,9 @@ public:
   /*
    * Converts `k' to a valid key for this array kind.
    */
-  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::AllowCastAndWarn>
   Cell convertKey(Cell k) const;
-  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::AllowCastAndWarn>
   Cell convertKey(const Variant& k) const;
 
   /*
@@ -689,12 +691,12 @@ ALWAYS_INLINE const Array& toCArrRef(tv_rval tv) {
   return asCArrRef(tvIsRef(tv) ? val(tv).pref->cell() : tv);
 }
 
-template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+template <IntishCast IC = IntishCast::AllowCastAndWarn>
 ALWAYS_INLINE Array toArray(tv_rval rval) {
   if (isArrayLikeType(type(rval))) {
     return Array{assert_not_null(val(rval).parr)};
   }
-  return Array::attach(tvCastToArrayLikeData<intishCast>(*rval));
+  return Array::attach(tvCastToArrayLikeData<IC>(*rval));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

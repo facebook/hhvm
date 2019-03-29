@@ -1,22 +1,22 @@
 *** Output for Zero Argument ***
 
-Warning: %s
+Warning: array_slice() expects at least 2 parameters, 0 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 22
 
 *** Output for Single array Argument ***
 
-Warning: %s
+Warning: array_slice() expects at least 2 parameters, 1 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 26
 
 *** Output for invalid number of Arguments ***
 
-Warning: %s
+Warning: array_slice() expects at most 4 parameters, 5 given in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 30
 
 *** Output for scalar Argument ***
 
-Warning: %s
+Warning: Invalid operand type was used: array_slice expects an array or collection as argument 1 in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 34
 
 *** Output for string Argument ***
 
-Warning: %s
+Warning: Invalid operand type was used: array_slice expects an array or collection as argument 1 in %s/test/zend/good/ext/standard/tests/array/array_slice.php on line 38
 
 *** Iteration 1 ***
 
@@ -620,69 +620,69 @@ array(0) {
 
 *** Variation with first two Arguments ***
 array(4) {
-  [0]=>
+  ["2"]=>
   string(3) "two"
-  [1]=>
+  ["3"]=>
   string(5) "three"
-  [2]=>
+  ["4"]=>
   string(4) "four"
-  [3]=>
+  ["5"]=>
   string(4) "five"
 }
 array(5) {
-  [0]=>
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  ["2"]=>
   string(3) "two"
-  [2]=>
+  ["3"]=>
   string(5) "three"
-  [3]=>
+  ["4"]=>
   string(4) "four"
-  [4]=>
+  ["5"]=>
   string(4) "five"
 }
 array(2) {
-  [0]=>
+  ["4"]=>
   string(4) "four"
-  [1]=>
+  ["5"]=>
   string(4) "five"
 }
 
 *** Variation with first three Arguments ***
 array(3) {
-  [0]=>
+  ["2"]=>
   string(3) "two"
-  [1]=>
+  ["3"]=>
   string(5) "three"
-  [2]=>
+  ["4"]=>
   string(4) "four"
 }
 array(0) {
 }
 array(1) {
-  [0]=>
+  ["2"]=>
   string(3) "two"
 }
 array(3) {
-  [0]=>
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  ["2"]=>
   string(3) "two"
-  [2]=>
+  ["3"]=>
   string(5) "three"
 }
 array(0) {
 }
 array(2) {
-  [0]=>
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  ["2"]=>
   string(3) "two"
 }
 array(2) {
-  [0]=>
+  ["4"]=>
   string(4) "four"
-  [1]=>
+  ["5"]=>
   string(4) "five"
 }
 array(0) {
@@ -692,39 +692,39 @@ array(0) {
 
 *** Variation with first two arguments with preserve_key value TRUE ***
 array(3) {
-  [2]=>
+  ["2"]=>
   string(3) "two"
-  [3]=>
+  ["3"]=>
   string(5) "three"
-  [4]=>
+  ["4"]=>
   string(4) "four"
 }
 array(0) {
 }
 array(1) {
-  [2]=>
+  ["2"]=>
   string(3) "two"
 }
 array(3) {
-  [1]=>
+  ["1"]=>
   string(3) "one"
-  [2]=>
+  ["2"]=>
   string(3) "two"
-  [3]=>
+  ["3"]=>
   string(5) "three"
 }
 array(0) {
 }
 array(2) {
-  [1]=>
+  ["1"]=>
   string(3) "one"
-  [2]=>
+  ["2"]=>
   string(3) "two"
 }
 array(2) {
-  [4]=>
+  ["4"]=>
   string(4) "four"
-  [5]=>
+  ["5"]=>
   string(4) "five"
 }
 array(0) {
@@ -851,111 +851,119 @@ array(0) {
 *** Iteration 8 ***
 
 *** Variation with first two Arguments ***
-array(9) {
-  [0]=>
+array(10) {
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  [0]=>
   int(6)
   [""]=>
   string(5) "blank"
-  [2]=>
+  [1]=>
   string(5) "float"
   ["F"]=>
   string(3) "FFF"
   ["blank"]=>
   string(0) ""
-  [3]=>
+  [2]=>
   float(3.7)
+  [3]=>
+  int(7)
   [4]=>
-  string(4) "Five"
-  [5]=>
   float(8.6)
+  ["5"]=>
+  string(4) "Five"
 }
-array(10) {
+array(11) {
   ["f"]=>
   string(3) "fff"
-  [0]=>
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  [0]=>
   int(6)
   [""]=>
   string(5) "blank"
-  [2]=>
+  [1]=>
   string(5) "float"
   ["F"]=>
   string(3) "FFF"
   ["blank"]=>
   string(0) ""
-  [3]=>
+  [2]=>
   float(3.7)
+  [3]=>
+  int(7)
   [4]=>
-  string(4) "Five"
-  [5]=>
   float(8.6)
+  ["5"]=>
+  string(4) "Five"
 }
 array(2) {
   [0]=>
-  string(4) "Five"
-  [1]=>
   float(8.6)
+  ["5"]=>
+  string(4) "Five"
 }
 
 *** Variation with first three Arguments ***
 array(3) {
-  [0]=>
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  [0]=>
   int(6)
   [""]=>
   string(5) "blank"
-}
-array(0) {
-}
-array(6) {
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(6)
-  [""]=>
-  string(5) "blank"
-  [2]=>
-  string(5) "float"
-  ["F"]=>
-  string(3) "FFF"
-  ["blank"]=>
-  string(0) ""
-}
-array(3) {
-  ["f"]=>
-  string(3) "fff"
-  [0]=>
-  string(3) "one"
-  [1]=>
-  int(6)
 }
 array(0) {
 }
 array(7) {
-  ["f"]=>
-  string(3) "fff"
-  [0]=>
+  ["1"]=>
   string(3) "one"
-  [1]=>
+  [0]=>
   int(6)
   [""]=>
   string(5) "blank"
-  [2]=>
+  [1]=>
   string(5) "float"
   ["F"]=>
   string(3) "FFF"
   ["blank"]=>
   string(0) ""
+  [2]=>
+  float(3.7)
+}
+array(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+}
+array(0) {
+}
+array(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [0]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [1]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [2]=>
+  float(3.7)
 }
 array(2) {
   [0]=>
-  string(4) "Five"
-  [1]=>
   float(8.6)
+  ["5"]=>
+  string(4) "Five"
 }
 array(0) {
 }
@@ -964,43 +972,17 @@ array(0) {
 
 *** Variation with first two arguments with preserve_key value TRUE ***
 array(3) {
-  [1]=>
+  ["1"]=>
   string(3) "one"
   [4]=>
   int(6)
   [""]=>
   string(5) "blank"
-}
-array(0) {
-}
-array(6) {
-  [1]=>
-  string(3) "one"
-  [4]=>
-  int(6)
-  [""]=>
-  string(5) "blank"
-  [2]=>
-  string(5) "float"
-  ["F"]=>
-  string(3) "FFF"
-  ["blank"]=>
-  string(0) ""
-}
-array(3) {
-  ["f"]=>
-  string(3) "fff"
-  [1]=>
-  string(3) "one"
-  [4]=>
-  int(6)
 }
 array(0) {
 }
 array(7) {
-  ["f"]=>
-  string(3) "fff"
-  [1]=>
+  ["1"]=>
   string(3) "one"
   [4]=>
   int(6)
@@ -1012,12 +994,42 @@ array(7) {
   string(3) "FFF"
   ["blank"]=>
   string(0) ""
+  [3]=>
+  float(3.7)
+}
+array(3) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+}
+array(0) {
+}
+array(8) {
+  ["f"]=>
+  string(3) "fff"
+  ["1"]=>
+  string(3) "one"
+  [4]=>
+  int(6)
+  [""]=>
+  string(5) "blank"
+  [2]=>
+  string(5) "float"
+  ["F"]=>
+  string(3) "FFF"
+  ["blank"]=>
+  string(0) ""
+  [3]=>
+  float(3.7)
 }
 array(2) {
-  [5]=>
-  string(4) "Five"
   [6]=>
   float(8.6)
+  ["5"]=>
+  string(4) "Five"
 }
 array(0) {
 }

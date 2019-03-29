@@ -9,7 +9,7 @@
 ZendGoodExtPcreTestsPregReplaceCallbackBasic::$replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'); //array will have the default key values (0-9) and each value is the corresponding key written in words.
 function integer_word($matches) {
 
-    return ZendGoodExtPcreTestsPregReplaceCallbackBasic::$replacement[$matches[0]]; //all examples will be looking for an integer value, if one is found it will be stored in $matches[0] which corresponds to a key in the $replacements array
+    return ZendGoodExtPcreTestsPregReplaceCallbackBasic::$replacement[\HH\array_key_cast($matches[0])]; //all examples will be looking for an integer value, if one is found it will be stored in $matches[0] which corresponds to a key in the $replacements array
 
 }
 $subject1 = 'there are 7 words in this sentence.';

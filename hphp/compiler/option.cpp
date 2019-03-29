@@ -237,7 +237,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 #define BIND_HAC_OPTION_SELF(Name)  BIND_HAC_OPTION(Name, Name)
 
   BIND_HAC_OPTION_SELF(Notices)
-  BIND_HAC_OPTION(CheckIntishCast, Notices)
   BIND_HAC_OPTION(CheckRefBind, Notices)
   BIND_HAC_OPTION(CheckFalseyPromote, Notices)
   BIND_HAC_OPTION(CheckCompare, Notices)
@@ -252,9 +251,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 #undef BIND_HAC_OPTION_SELF
 #undef BIND_HAC_OPTION
 
-  Config::Bind(RuntimeOption::EvalEnableIntishCast,
-               ini, config, "EnableIntishCast",
-               RuntimeOption::EvalEnableIntishCast);
   Config::Bind(RuntimeOption::EvalHackArrDVArrs,
                ini, config, "HackArrDVArrs",
                RuntimeOption::EvalHackArrDVArrs);

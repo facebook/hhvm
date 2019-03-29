@@ -63,11 +63,15 @@ string(9) "5.67E+14+"
 
 Notice: Array to string conversion in %s/lexical_structure/tokens/string_literals.php on line 103
 \colors contains >Array<
-\colors[1] contains >white<
+
+Notice: Undefined index: 1 in %s/lexical_structure/tokens/string_literals.php on line 104
+\colors[1] contains ><
 
 Notice: Array to string conversion in %s/lexical_structure/tokens/string_literals.php on line 105
 \colors[1] contains >Array [1]<
-string(5) "white"
+
+Notice: Undefined index: 1 in %s/lexical_structure/tokens/string_literals.php on line 108
+string(0) ""
 
 Notice: Undefined index: 01 in %s/lexical_structure/tokens/string_literals.php on line 109
 string(0) ""

@@ -630,7 +630,7 @@ private:
                                     ArrayData::DVArray);
 
 
-  template <IntishCast intishCast>
+  template <IntishCast IC>
   static ArrayData* FromDictImpl(ArrayData*, bool, bool);
 
   static bool DictEqualHelper(const ArrayData*, const ArrayData*, bool);
@@ -747,7 +747,7 @@ private:
    * Copy this from adIn, intish casting all the intish string keys in
    * accordance with the value of the intishCast template parameter
    */
-  template <IntishCast intishCast>
+  template <IntishCast IC>
   static ArrayData* copyWithIntishCast(MixedArray* adIn, bool asDArray = false);
 
   template <typename AccessorT>

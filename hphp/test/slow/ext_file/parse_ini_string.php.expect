@@ -139,14 +139,14 @@ array(1) {
 string(22) "negative_number_as_key"
 ===
 array(1) {
-  [-1]=>
+  ["-1"]=>
   string(11) "SimpleError"
 }
 ===
 array(1) {
   ["FORMERRORCODES"]=>
   array(1) {
-    [-1]=>
+    ["-1"]=>
     string(11) "SimpleError"
   }
 }

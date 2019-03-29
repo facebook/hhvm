@@ -29,13 +29,13 @@ array(4) {
   string(1) "a"
 }
 array(4) {
-  [0]=>
+  ["0"]=>
   string(4) "1.00"
   ["1.00"]=>
   string(4) "2.00"
   ["2.00"]=>
   string(4) "3.00"
-  [1]=>
+  [0]=>
   string(1) "d"
 }
 -- Result of comparing floating points and strings containing integers : --
@@ -59,13 +59,13 @@ array(4) {
   string(1) "b"
 }
 array(4) {
-  [0]=>
+  ["0"]=>
   string(4) "1.00"
   ["1.00"]=>
   string(4) "2.00"
   ["2.00"]=>
   string(4) "3.00"
-  [1]=>
+  [0]=>
   string(1) "d"
 }
 -- Result of comparing strings containing integers and strings containing floating points : --
@@ -80,13 +80,13 @@ array(4) {
   string(1) "c"
 }
 array(4) {
-  [0]=>
+  ["0"]=>
   string(4) "1.00"
   ["1.00"]=>
   string(4) "2.00"
   ["2.00"]=>
   string(4) "3.00"
-  [1]=>
+  [0]=>
   string(1) "d"
 }
 -- Result of comparing more than two arrays: --

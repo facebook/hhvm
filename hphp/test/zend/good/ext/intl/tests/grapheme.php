@@ -97,7 +97,7 @@ function ut_main()
 			$result = grapheme_strpos($test[0], $test[1]);
 		}
 		else {
-			$res_str .= " from $test[2]";
+			$res_str .= " from ".$test[2];
 			$result = grapheme_strpos($test[0], $test[1], $test[2]);
 		}
 		$res_str .= " = ";
@@ -161,7 +161,7 @@ function ut_main()
 			$result = grapheme_stripos($test[0], $test[1]);
 		}
 		else {
-			$res_str .= " from $test[2]";
+			$res_str .= " from ".$test[2];
 			$result = grapheme_stripos($test[0], $test[1], $test[2]);
 		}
 		$res_str .= " = ";
@@ -227,7 +227,7 @@ function ut_main()
 			$result = grapheme_strrpos($test[0], $test[1]);
 		}
 		else {
-			$res_str .= " from $test[2]";
+			$res_str .= " from ".$test[2];
 			$result = grapheme_strrpos($test[0], $test[1], $test[2]);
 		}
 		$res_str .= " = ";
@@ -292,7 +292,7 @@ function ut_main()
 			$result = grapheme_strripos($test[0], $test[1]);
 		}
 		else {
-			$res_str .= " from $test[2]";
+			$res_str .= " from ".$test[2];
 			$result = grapheme_strripos($test[0], $test[1], $test[2]);
 		}
 		$res_str .= " = ";
@@ -384,12 +384,12 @@ function ut_main()
 
 	foreach( $tests as $test ) {
 	    $arg0 = urlencode($test[0]);
-		$res_str .= "substring of \"$arg0\" from \"$test[1]\" - grapheme_substr";
+		$res_str .= "substring of \"$arg0\" from \"".$test[1]."\" - grapheme_substr";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_substr($test[0], $test[1]);
 		}
 		else {
-			$res_str .= " with length $test[2]";
+			$res_str .= " with length ".(string)$test[2];
 			$result = grapheme_substr($test[0], $test[1], $test[2]);
 		}
 		$res_str .= " = ";
@@ -590,16 +590,16 @@ function ut_main()
 	$next = -1;
 	foreach( $tests as $test ) {
 	    $arg0 = urlencode($test[0]);
-		$res_str .= "extract from \"$arg0\" \"$test[1]\" graphemes - grapheme_extract";
+		$res_str .= "extract from \"$arg0\" \"".$test[1]."\" graphemes - grapheme_extract";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_extract($test[0], $test[1]);
 		}
 		elseif ( 4 == count ( $test ) ) {
-			$res_str .= " starting at byte position $test[2]";
+			$res_str .= " starting at byte position ".(string)$test[2];
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2]);
 		}
 		else {
-			$res_str .= " starting at byte position $test[2] with \$next";
+			$res_str .= " starting at byte position ".(string)$test[2]." with \$next";
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_COUNT, $test[2], &$next);
 		}
 		$res_str .= " = ";
@@ -611,7 +611,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]);
 		if ( 5 == count ( $test ) ) {
-			$res_str .= " \$next=$next == $test[3] ";
+			$res_str .= " \$next=$next == ".$test[3]." ";
 			if ( $next != $test[3] ) {
 				$res_str .= "***FAILED***";
 			}
@@ -659,12 +659,12 @@ function ut_main()
 
 	foreach( $tests as $test ) {
 	    $arg0 = urlencode($test[0]);
-		$res_str .= "extract from \"$arg0\" \"$test[1]\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES";
+		$res_str .= "extract from \"$arg0\" \"".$test[1]."\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES);
 		}
 		else {
-			$res_str .= " starting at byte position $test[2]";
+			$res_str .= " starting at byte position ".$test[2];
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXBYTES, $test[2]);
 		}
 		$res_str .= " = ";
@@ -723,12 +723,12 @@ function ut_main()
 
 	foreach( $tests as $test ) {
 	    $arg0 = urlencode($test[0]);
-		$res_str .= "extract from \"$arg0\" \"$test[1]\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS";
+		$res_str .= "extract from \"$arg0\" \"".$test[1]."\" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS";
 		if ( 3 == count( $test ) ) {
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS);
 		}
 		else {
-			$res_str .= " starting at byte position $test[2]";
+			$res_str .= " starting at byte position ".$test[2];
 			$result = grapheme_extract($test[0], $test[1], GRAPHEME_EXTR_MAXCHARS, $test[2]);
 		}
 		$res_str .= " = ";

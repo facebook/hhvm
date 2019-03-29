@@ -144,7 +144,9 @@ array(12) {
     string(3) "abc"
   }
 }
-array(1) {
+array(2) {
+  ["123"]=>
+  string(3) "abc"
   [123]=>
   string(3) "def"
 }

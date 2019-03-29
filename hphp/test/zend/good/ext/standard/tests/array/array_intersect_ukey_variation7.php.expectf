@@ -2,9 +2,9 @@
 
 -- Result of strings containing integers intersection --
 array(2) {
-  [0]=>
+  ["0"]=>
   string(1) "1"
-  [1]=>
+  ["1"]=>
   string(1) "2"
 }
 
@@ -18,9 +18,9 @@ array(2) {
 
 -- Result of strings containing integers and strings containing floating points intersection --
 array(2) {
-  [0]=>
+  ["0"]=>
   string(1) "1"
-  [1]=>
+  ["1"]=>
   string(1) "2"
 }
 ===DONE===

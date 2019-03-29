@@ -4,12 +4,12 @@ array(0) {
 }
 -- Iteration 2 --
 array(1) {
-  [0]=>
+  ["0"]=>
   int(0)
 }
 -- Iteration 3 --
 array(1) {
-  [1]=>
+  ["1"]=>
   int(1)
 }
 -- Iteration 4 --

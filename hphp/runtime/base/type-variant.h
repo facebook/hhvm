@@ -1090,9 +1090,9 @@ struct Variant : private TypedValue {
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
   // arrays unchanged. Use toPHPArray() if you want the result to always be a
   // PHP array.
-  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::AllowCastAndWarn>
   Array toArray() const {
-    return HPHP::toArray<intishCast>(asTypedValue());
+    return HPHP::toArray<IC>(asTypedValue());
   }
   Array toPHPArray() const {
     if (isArrayType(m_type)) return Array(m_data.parr);
@@ -1184,7 +1184,7 @@ struct Variant : private TypedValue {
    * Convert to a valid key or throw an exception. If convertStrKeys is true
    * int-like string keys will be converted to int keys.
    */
-  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::AllowCastAndWarn>
   VarNR toKey(const ArrayData*) const;
 
   /* Creating a temporary Array, String, or Object with no ref-counting and
@@ -1647,9 +1647,6 @@ private:
 struct VarNR : private TypedValueAux {
   static VarNR MakeKey(const String& s) {
     if (s.empty()) return VarNR(staticEmptyString());
-    if (auto const intish = tryIntishCast(s.get())) {
-      return VarNR(*intish);
-    }
     return VarNR(s);
   }
 
@@ -1892,18 +1889,18 @@ inline bool isa_non_null(const Variant& v) {
 
 // Defined here to avoid introducing a dependency cycle between type-variant
 // and type-array
-template <IntishCast intishCast>
+template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(Cell k) const {
-  return cellToKey<intishCast>(k, m_arr ? m_arr.get() : staticEmptyArray());
+  return cellToKey<IC>(k, m_arr ? m_arr.get() : staticEmptyArray());
 }
-template <IntishCast intishCast>
+template <IntishCast IC>
 ALWAYS_INLINE Cell Array::convertKey(const Variant& k) const {
-  return convertKey<intishCast>(*k.toCell());
+  return convertKey<IC>(*k.toCell());
 }
 
-template <IntishCast intishCast>
+template <IntishCast IC>
 inline VarNR Variant::toKey(const ArrayData* ad) const {
-  return VarNR(tvToKey<intishCast>(*this, ad));
+  return VarNR(tvToKey<IC>(*this, ad));
 }
 
 struct alignas(16) OptionalVariant {

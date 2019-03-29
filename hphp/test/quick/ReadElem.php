@@ -7,7 +7,7 @@ print $a[0] . "\n";
 print $a[1] . "\n";
 print $a[2] . "\n";
 print $a[3];# . "\n";
-print $a["0"] . "\n";
+print $a["0"];# . "\n";
 print $a["x"];# . "\n";
 
 $s = "abc";

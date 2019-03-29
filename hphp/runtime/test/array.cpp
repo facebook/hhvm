@@ -313,30 +313,30 @@ TEST(Array, Offsets) {
     tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(1));
     EXPECT_TRUE(equal(arr[1], 10));
     EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    EXPECT_FALSE(equal(arr[s_1], 10));
+    EXPECT_FALSE(equal(arr[Variant("1")], 10));
   }
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(Variant(1.5)));
     EXPECT_TRUE(equal(arr[1], 10));
     EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
-    EXPECT_TRUE(equal(arr[s_1], 10));
-    EXPECT_TRUE(equal(arr[Variant("1")], 10));
+    EXPECT_FALSE(equal(arr[s_1], 10));
+    EXPECT_FALSE(equal(arr[Variant("1")], 10));
   }
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(s_1));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
+    EXPECT_FALSE(equal(arr[1], 10));
+    EXPECT_FALSE(equal(arr[Variant(1.5)], 10));
     EXPECT_TRUE(equal(arr[s_1], 10));
     EXPECT_TRUE(equal(arr[Variant("1")], 10));
   }
   {
     Array arr;
     tvSet(make_tv<KindOfInt64>(10), arr.lvalAt(Variant("1")));
-    EXPECT_TRUE(equal(arr[1], 10));
-    EXPECT_TRUE(equal(arr[Variant(1.5)], 10));
+    EXPECT_FALSE(equal(arr[1], 10));
+    EXPECT_FALSE(equal(arr[Variant(1.5)], 10));
     EXPECT_TRUE(equal(arr[s_1], 10));
     EXPECT_TRUE(equal(arr[Variant("1")], 10));
   }
@@ -400,7 +400,7 @@ TEST(ARRAY, Membership) {
     tvSet(*v1.asTypedValue(), arr.lvalAt(0));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(String(s_0));
-    EXPECT_TRUE(!arr.exists(0));
+    EXPECT_TRUE(arr.exists(0));
   }
   {
     Array arr;
@@ -408,7 +408,7 @@ TEST(ARRAY, Membership) {
     tvSet(*v1.asTypedValue(), arr.lvalAt(0));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(Variant("0"));
-    EXPECT_TRUE(!arr.exists(0));
+    EXPECT_TRUE(arr.exists(0));
   }
   {
     Array arr;
@@ -416,7 +416,7 @@ TEST(ARRAY, Membership) {
     tvSet(*v1.asTypedValue(), arr.lvalAt(0));
     EXPECT_TRUE(arr.exists(0));
     arr.remove(Variant(Variant("0")));
-    EXPECT_TRUE(!arr.exists(0));
+    EXPECT_TRUE(arr.exists(0));
   }
   {
     Array arr;
@@ -465,8 +465,8 @@ TEST(ARRAY, Membership) {
     Variant value = String("value");
     tvSet(*value.asTypedValue(), arr.lvalAt(1));
     EXPECT_TRUE(arr.exists(1));
-    EXPECT_TRUE(arr.exists(s_1));
-    EXPECT_TRUE(arr.exists(Variant("1")));
+    EXPECT_TRUE(!arr.exists(s_1));
+    EXPECT_TRUE(!arr.exists(Variant("1")));
     EXPECT_TRUE(arr.exists(Variant(1)));
     EXPECT_TRUE(arr.exists(Variant(1.5)));
   }
@@ -474,19 +474,19 @@ TEST(ARRAY, Membership) {
     Array arr;
     Variant value = String("value");
     tvSet(*value.asTypedValue(), arr.lvalAt(s_1));
-    EXPECT_TRUE(arr.exists(1));
+    EXPECT_TRUE(!arr.exists(1));
     EXPECT_TRUE(arr.exists(s_1));
     EXPECT_TRUE(arr.exists(Variant("1")));
-    EXPECT_TRUE(arr.exists(Variant(1)));
-    EXPECT_TRUE(arr.exists(Variant(1.5)));
+    EXPECT_TRUE(!arr.exists(Variant(1)));
+    EXPECT_TRUE(!arr.exists(Variant(1.5)));
   }
   {
     Array arr;
     Variant value = String("value");
     tvSet(*value.asTypedValue(), arr.lvalAt(Variant(1.5)));
     EXPECT_TRUE(arr.exists(1));
-    EXPECT_TRUE(arr.exists(s_1));
-    EXPECT_TRUE(arr.exists(Variant("1")));
+    EXPECT_TRUE(!arr.exists(s_1));
+    EXPECT_TRUE(!arr.exists(Variant("1")));
     EXPECT_TRUE(arr.exists(Variant(1)));
     EXPECT_TRUE(arr.exists(Variant(1.5)));
   }
@@ -494,11 +494,11 @@ TEST(ARRAY, Membership) {
     Array arr;
     Variant value = String("value");
     tvSet(*value.asTypedValue(), arr.lvalAt(Variant("1")));
-    EXPECT_TRUE(arr.exists(1));
+    EXPECT_TRUE(!arr.exists(1));
     EXPECT_TRUE(arr.exists(s_1));
     EXPECT_TRUE(arr.exists(Variant("1")));
-    EXPECT_TRUE(arr.exists(Variant(1)));
-    EXPECT_TRUE(arr.exists(Variant(1.5)));
+    EXPECT_TRUE(!arr.exists(Variant(1)));
+    EXPECT_TRUE(!arr.exists(Variant(1.5)));
   }
   {
     Array arr = Array::CreateVec();

@@ -275,14 +275,7 @@ void AppendPeephole::append(
         auto const val = tv(last->second);
         if (!key || !val) return folly::none;
         if (op.op == Op::AddElemC) {
-          int64_t ikey{};
-          if (RuntimeOption::EvalEnableIntishCast &&
-              arr->isPHPArray() && isStringType(key->m_type) &&
-              key->m_data.pstr->isStrictlyInteger(ikey)) {
-            cur.asTypedValue()->m_data.parr = arr->set(ikey, *val);
-          } else {
-            cur.asTypedValue()->m_data.parr = arr->set(*key, *val);
-          }
+          cur.asTypedValue()->m_data.parr = arr->set(*key, *val);
         } else {
           cur.asTypedValue()->m_data.parr = arr->append(*val);
         }

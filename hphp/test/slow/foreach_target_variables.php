@@ -16,7 +16,7 @@ $array = [1, 2, 3];
 
 $a = [];
 foreach ($array as $a[0] => $a[1]) {
-    echo "$a[0] => $a[1],";
+  echo $a[0], " => ", $a[1], ",";
 }
 echo "\n";
 

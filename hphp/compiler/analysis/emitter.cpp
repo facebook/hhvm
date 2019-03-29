@@ -172,7 +172,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
-  gd.EnableIntishCast = RuntimeOption::EvalEnableIntishCast;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
 

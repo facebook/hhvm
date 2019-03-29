@@ -1427,30 +1427,30 @@ HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
 x = array (
-  0 => 'a',
-  1 => 'b',
+  '0' => 'a',
+  '1' => 'b',
 )
 is_array(x) === true
 HH\is_darray(x) === true
 HH\is_varray(x) === false
 bool(true)
-string(19) "
-FA F8 61 F8 62 FC "
+string(32) "
+FB F8 30 F8 61 F8 31 F8  62 FC "
 bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(array (
-  0 => 'a',
-  1 => 'b',
+  '0' => 'a',
+  '1' => 'b',
 ))) === array (
   0 => 'a',
   1 => 'b',
-): true
+): false
 gettype(fb_compact_unserialize(fb_compact_serialize(array))) === array
 fb_compact_unserialize success: true
 is_array(fb_compact_unserialize(fb_compact_serialize(array))) === true
 HH\is_darray(fb_compact_unserialize(fb_compact_serialize(array))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(array))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: true
+fb_unserialize(fb_compact_serialize(x)) === x: false
 gettype(fb_unserialize(fb_serialize(array))) === array
 fb_compact_unserialize success: true
 is_array(fb_unserialize(fb_compact_serialize(array))) === true
@@ -1492,29 +1492,29 @@ HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 ====
 x = array (
   0 => 'a',
-  1 => 'b',
+  '1' => 'b',
 )
 is_array(x) === true
 HH\is_darray(x) === true
 HH\is_varray(x) === false
 bool(true)
-string(19) "
-FA F8 61 F8 62 FC "
+string(29) "
+FB 00 F8 61 F8 31 F8 62  FC "
 bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(array (
   0 => 'a',
-  1 => 'b',
+  '1' => 'b',
 ))) === array (
   0 => 'a',
   1 => 'b',
-): true
+): false
 gettype(fb_compact_unserialize(fb_compact_serialize(array))) === array
 fb_compact_unserialize success: true
 is_array(fb_compact_unserialize(fb_compact_serialize(array))) === true
 HH\is_darray(fb_compact_unserialize(fb_compact_serialize(array))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(array))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: true
+fb_unserialize(fb_compact_serialize(x)) === x: false
 gettype(fb_unserialize(fb_serialize(array))) === array
 fb_compact_unserialize success: true
 is_array(fb_unserialize(fb_compact_serialize(array))) === true
@@ -1555,30 +1555,30 @@ HH\is_varray(fb_unserialize(fb_compact_serialize(dict))) === false
 
 ====
 x = array (
-  0 => 'a',
+  '0' => 'a',
   1 => 'b',
 )
 is_array(x) === true
 HH\is_darray(x) === true
 HH\is_varray(x) === false
 bool(true)
-string(19) "
-FA F8 61 F8 62 FC "
+string(29) "
+FB F8 30 F8 61 01 F8 62  FC "
 bool(true)
 int(1)
 fb_compact_unserialize(fb_compact_serialize(array (
-  0 => 'a',
+  '0' => 'a',
   1 => 'b',
 ))) === array (
   0 => 'a',
   1 => 'b',
-): true
+): false
 gettype(fb_compact_unserialize(fb_compact_serialize(array))) === array
 fb_compact_unserialize success: true
 is_array(fb_compact_unserialize(fb_compact_serialize(array))) === true
 HH\is_darray(fb_compact_unserialize(fb_compact_serialize(array))) === true
 HH\is_varray(fb_compact_unserialize(fb_compact_serialize(array))) === false
-fb_unserialize(fb_compact_serialize(x)) === x: true
+fb_unserialize(fb_compact_serialize(x)) === x: false
 gettype(fb_unserialize(fb_serialize(array))) === array
 fb_compact_unserialize success: true
 is_array(fb_unserialize(fb_compact_serialize(array))) === true

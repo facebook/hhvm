@@ -38,7 +38,7 @@ class thing {
     foreach ($this->paper as $field => $bool) {
       if ($bool) {
         $translation = $location[$offset++];
-        $arr[$field] = $this->puppies[$field][$translation];
+        $arr[$field] = $this->puppies[$field][(int)$translation];
       } else {
         $arr[$field] = substr($location, $offset,
                               $this->kittens[$field]);

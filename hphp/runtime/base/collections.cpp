@@ -82,11 +82,11 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Casting and Copying
 
-template <IntishCast intishCast>
+template <IntishCast IC>
 Array toArray(const ObjectData* obj) {
   assertx(obj->isCollection());
   switch (obj->collectionType()) {
-#define X(type) case CollectionType::type: return c_##type::ToArray<intishCast>(obj);
+#define X(type) case CollectionType::type: return c_##type::ToArray<IC>(obj);
 COLLECTIONS_ALL_TYPES(X)
 #undef X
   }

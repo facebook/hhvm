@@ -5,22 +5,14 @@ array(0) {
 array(0) {
 }
 -- Iteration 2 --
-array(1) {
-  [0]=>
-  int(0)
+array(0) {
 }
-array(1) {
-  [0]=>
-  int(0)
+array(0) {
 }
 -- Iteration 3 --
-array(1) {
-  [1]=>
-  int(1)
+array(0) {
 }
-array(1) {
-  [1]=>
-  int(1)
+array(0) {
 }
 -- Iteration 4 --
 array(1) {
@@ -86,21 +78,21 @@ array(2) {
   object(classA) (0) {
   }
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
 }
 array(2) {
   [11]=>
   object(classA) (0) {
   }
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
 }
 -- Iteration 11 --
 array(4) {
   [222]=>
   string(5) "fruit"
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
   ["int"]=>
   int(133)
   ["heredoc"]=>
@@ -110,7 +102,7 @@ array(4) {
   [222]=>
   string(5) "fruit"
   ["resource"]=>
-  resource(%d) of type (stream)
+  resource(4) of type (stream)
   ["int"]=>
   int(133)
   ["heredoc"]=>

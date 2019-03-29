@@ -1,7 +1,7 @@
 *** Testing array_udiff_assoc() : variation - testing with multiple array arguments ***
 array(2) {
-  [4]=>
-  string(4) "four"
+  ["3"]=>
+  string(5) "three"
   ["0.5"]=>
   int(5)
 }

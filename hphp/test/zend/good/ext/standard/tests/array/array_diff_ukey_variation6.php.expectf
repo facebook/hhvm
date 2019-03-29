@@ -2,7 +2,7 @@
 
 --decimal indexed--
 array(1) {
-  [-17]=>
+  ["-17"]=>
   string(3) "-17"
 }
 array(1) {

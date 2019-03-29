@@ -19,7 +19,7 @@ function main() {
   var_dump(a() === 'bar');
   var_dump(b() === 24);
   var_dump(c() === 42);
-  var_dump(d() === 42);
+  var_dump(d() === null);
   var_dump(e() === null);
 }
 

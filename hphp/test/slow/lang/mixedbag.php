@@ -75,7 +75,8 @@ function ary3($n = 2000) {
     }
   }
   $last = $n-1;
-  print "$Y[0] $Y[$last]\n";
+  echo $Y[0];
+  print " $Y[$last]\n";
 }
 
 function fibo_r($n){

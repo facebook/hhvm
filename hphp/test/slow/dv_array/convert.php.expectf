@@ -340,16 +340,20 @@ array(3) {
 bool(false)
 bool(true)
 ============== test_darray =========================
-array(1) {
+array(2) {
   [100]=>
+  string(3) "abc"
+  ["100"]=>
   string(3) "def"
 }
 bool(false)
 bool(true)
 ============== test_darray =========================
-array(1) {
+array(2) {
   [100]=>
   int(100)
+  ["100"]=>
+  string(3) "100"
 }
 bool(false)
 bool(true)
@@ -780,16 +784,20 @@ array(3) {
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-array(1) {
+array(2) {
   [100]=>
+  string(3) "abc"
+  ["100"]=>
   string(3) "def"
 }
 bool(false)
 bool(true)
 ============== test_indirect (HH\darray) ==================
-array(1) {
+array(2) {
   [100]=>
   int(100)
+  ["100"]=>
+  string(3) "100"
 }
 bool(false)
 bool(true)

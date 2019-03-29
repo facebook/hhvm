@@ -1,21 +1,29 @@
 array(1) {
-  [1]=>
+  ["1"]=>
   NULL
 }
 array(1) {
-  [100]=>
+  ["100"]=>
   bool(false)
 }
-array(1) {
-  [123]=>
-  bool(false)
-}
-array(1) {
-  [123]=>
+array(2) {
+  ["123"]=>
   bool(true)
+  [123]=>
+  bool(false)
 }
 array(2) {
   [123]=>
+  bool(false)
+  ["123"]=>
+  bool(true)
+}
+array(4) {
+  [123]=>
+  string(1) "a"
+  ["456"]=>
+  string(1) "b"
+  ["123"]=>
   string(1) "c"
   [456]=>
   string(1) "d"

@@ -315,10 +315,6 @@ ALWAYS_INLINE void decRefArr(ArrayData* arr) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE bool checkHACIntishCast() {
-  return RuntimeOption::EvalHackArrCompatNotices &&
-         RuntimeOption::EvalHackArrCompatCheckIntishCast;
-}
 ALWAYS_INLINE bool checkHACRefBind() {
   return RuntimeOption::EvalHackArrCompatNotices &&
          RuntimeOption::EvalHackArrCompatCheckRefBind;

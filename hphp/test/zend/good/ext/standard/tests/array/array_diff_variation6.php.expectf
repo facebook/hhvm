@@ -4,7 +4,7 @@ array(1) {
   string(1) "d"
 }
 array(3) {
-  [0]=>
+  ["0"]=>
   string(1) "a"
   ["b"]=>
   string(1) "3"

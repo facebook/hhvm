@@ -165,10 +165,6 @@ void raise_disallowed_dynamic_call(const Func* f) {
   );
 }
 
-void raise_intish_index_cast() {
-  raise_notice("Hack Array Compat: Intish index cast");
-}
-
 void raise_convert_object_to_string(const char* cls_name) {
   raise_error("Cannot convert object to string (got instance of %s)", cls_name);
 }

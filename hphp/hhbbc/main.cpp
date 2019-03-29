@@ -280,7 +280,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   // When running hhvm, these option is not loaded from GD, but read from CLI.
   RuntimeOption::EvalJitEnableRenameFunction = gd.EnableRenameFunction;
   RuntimeOption::EvalHackArrCompatNotices =
-    RuntimeOption::EvalHackArrCompatCheckIntishCast =
     RuntimeOption::EvalHackArrCompatCheckRefBind =
     RuntimeOption::EvalHackArrCompatCheckFalseyPromote =
     RuntimeOption::EvalHackArrCompatCheckCompare =
@@ -299,7 +298,6 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalHackArrCompatSerializeNotices =
     gd.HackArrCompatSerializeNotices;
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
-  RuntimeOption::EvalEnableIntishCast = gd.EnableIntishCast;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
@@ -383,7 +381,6 @@ void write_global_data(
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
-  gd.EnableIntishCast = RuntimeOption::EvalEnableIntishCast;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

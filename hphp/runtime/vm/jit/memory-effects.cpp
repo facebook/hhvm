@@ -144,14 +144,6 @@ AliasClass pointee(
       }
       if (key->hasConstVal(TStr)) {
         assertx(!base->isA(TVec));
-        int64_t n;
-        auto const arrTy = base->type();
-        if (!arrTy.subtypeOfAny(TDict, TKeyset) &&
-            RuntimeOption::EvalEnableIntishCast &&
-            key->strVal()->isStrictlyInteger(n)) {
-          if (arrTy.maybe(TDict) || arrTy.maybe(TKeyset)) return AElemAny;
-          return AElemI { base, n };
-        }
         return AElemS { base, key->strVal() };
       }
       return AElemAny;

@@ -546,12 +546,12 @@ and emit_for env p e1 e2 e3 b =
     | cond -> final cond
   in
   gather [
-    emit_ignored_expr env ~pop_pos:p e1;
+    emit_ignored_expr env e1;
     emit_cond ~jmpz:true break_label;
     instr_label start_label;
     (Emit_env.do_in_loop_body break_label cont_label env b emit_stmt);
     instr_label cont_label;
-    emit_ignored_expr env ~pop_pos:p e3;
+    emit_ignored_expr env e3;
     emit_cond ~jmpz:false start_label;
     instr_label break_label;
   ]

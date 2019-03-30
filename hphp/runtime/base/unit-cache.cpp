@@ -806,6 +806,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::DisableStaticClosures ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')
+    + (RuntimeOption::EvalNoticeOnByRefArgumentTypehintViolation ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()

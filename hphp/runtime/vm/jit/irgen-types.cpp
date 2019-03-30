@@ -1318,6 +1318,9 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   auto const& tc = (id == TypeConstraint::ReturnId)
     ? func->returnTypeConstraint()
     : func->params()[id].typeConstraint;
+  bool isByRefArg = (id == TypeConstraint::ReturnId)
+    ? false
+    : func->byRef(id);
   assertx(ind >= 0);
 
   verifyTypeImpl(
@@ -1357,7 +1360,9 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       updateMarker(env);
       env.irb->exceptionStackBoundary();
       auto const failHard =
-        hard && RuntimeOption::EvalCheckReturnTypeHints >= 3;
+        hard && RuntimeOption::EvalCheckReturnTypeHints >= 3 &&
+        // we never hard enforce "return" typehints for by-reference arguments
+        !isByRefArg;
       gen(
         env,
         failHard ? VerifyRetFailHard : VerifyRetFail,

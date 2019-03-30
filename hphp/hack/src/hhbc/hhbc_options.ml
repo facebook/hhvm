@@ -64,6 +64,7 @@ type t = {
   option_enable_stronger_await_binding    : bool;
   option_disable_lval_as_an_expression    : bool;
   option_enable_pocket_universes          : bool;
+  option_notice_on_byref_argument_typehint_violation : bool;
 }
 
 let default = {
@@ -121,6 +122,7 @@ let default = {
   option_enable_stronger_await_binding = false;
   option_disable_lval_as_an_expression = false;
   option_enable_pocket_universes = false;
+  option_notice_on_byref_argument_typehint_violation = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -174,6 +176,7 @@ let rx_is_enabled o = o.option_rx_is_enabled
 let enable_stronger_await_binding o = o.option_enable_stronger_await_binding
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 let enable_pocket_universes o = o.option_enable_pocket_universes
+let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_argument_typehint_violation
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -231,6 +234,7 @@ let to_string o =
     ; Printf.sprintf "enable_stronger_await_binding: %B" @@ enable_stronger_await_binding o
     ; Printf.sprintf "disable_lval_as_an_expression: %B" @@ disable_lval_as_an_expression o
     ; Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o
+    ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
     ]
 
 (* The Hack.Lang.IntsOverflowToInts setting overrides the
@@ -370,6 +374,8 @@ let set_option options name value =
     { options with option_disable_lval_as_an_expression = as_bool value }
   | "hack.lang.enablepocketuniverses" ->
     { options with option_enable_pocket_universes = as_bool value }
+  | "hhvm.notice_on_by_ref_argument_typehint_violation" ->
+    { options with option_notice_on_byref_argument_typehint_violation = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -491,6 +497,8 @@ let value_setters = [
     fun opts v -> { opts with option_disable_lval_as_an_expression = (v = 1) });
   (set_value "hhvm.hack.lang.enable_pocket_universes" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_pocket_universes = (v = 1) });
+  (set_value "hhvm.notice_on_by_ref_argument_typehint_violation" get_value_from_config_int @@
+    fun opts v -> { opts with option_notice_on_byref_argument_typehint_violation = (v = 1) });
   (set_value "doc_root" get_value_from_config_string @@
     fun opts v -> { opts with option_doc_root = v });
   (set_value "hhvm.server.include_search_paths" get_value_from_config_string_array @@

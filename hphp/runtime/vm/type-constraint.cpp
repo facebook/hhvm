@@ -1042,6 +1042,24 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
 void TypeConstraint::verifyOutParamFail(const Func* func,
                                         TypedValue* tv,
                                         int paramNum) const {
+  // we reuse VerifyOutType bytecode for log typehint violations on
+  // byref parameters. For byref parameters we raise notice but never do
+  // any hard enforcement - basically we treat it as soft typehint.
+  if (func->byRef(paramNum)) {
+    if (RuntimeOption::EvalNoticeOnByRefArgumentTypehintViolation) {
+      std::string msg = folly::sformat(
+          "Argument {} returned from {}() by reference must be of type "
+          "{}, {} given",
+          paramNum + 1,
+          func->fullDisplayName(),
+          displayName(func->cls()),
+          describe_actual_type(tv, isHHType())
+      );
+      raise_warning_unsampled(msg);
+    }
+    return;
+  }
+
   auto c = tvToCell(tv);
   if (auto const at = checkDVArray(c)) {
     raise_hackarr_compat_type_hint_outparam_notice(

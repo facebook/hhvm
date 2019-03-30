@@ -222,22 +222,32 @@ let is_mixed_or_dynamic t =
  String_utils.string_ends_with t "HH\\dynamic"
 
 let emit_verify_out params =
-  let param_instrs = List.filter_mapi params ~f:(fun i p ->
-    if not @@ Hhas_param.is_inout p then None else
-      let b = match Hhas_param.type_info p with
-        | None -> false
-        | Some { Hhas_type_info.type_info_user_type = Some t; _ } ->
-          not @@ is_mixed_or_dynamic t
-        | _ -> true in
-      Some (
-        gather [
-          instr_cgetl (Local.Named (Hhas_param.name p));
-          if b then instr_verifyOutType (Param_unnamed i) else empty
-        ]
-      )) in
+  let is_verifiable p = match Hhas_param.type_info p with
+    | None -> false
+    | Some { Hhas_type_info.type_info_user_type = Some t; _ } ->
+       not @@ is_mixed_or_dynamic t
+    | _ -> true
+  and emit_verify_out_type_for_refs =
+    Hhbc_options.notice_on_byref_argument_typehint_violation
+      !Hhbc_options.compiler_options
+  in let param_instrs = List.filter_mapi params ~f:(fun i p ->
+    if Hhas_param.is_inout p then
+      Some (gather [
+              instr_cgetl (Local.Named (Hhas_param.name p));
+              if is_verifiable p then instr_verifyOutType (Param_unnamed i) else empty
+            ])
+    else if Hhas_param.is_reference p && is_verifiable p &&
+              emit_verify_out_type_for_refs then
+      Some (gather [
+              instr_cgetl (Local.Named (Hhas_param.name p));
+              instr_verifyOutType (Param_unnamed i);
+              instr_popc
+            ])
+    else None
+  ) in
   let param_instrs = List.rev param_instrs in
-  let len = List.length param_instrs in
-  if len = 0 then (0, empty) else (len, gather param_instrs)
+  let inout_cnt = List.count ~f:(fun p -> Hhas_param.is_inout p) params in
+  (inout_cnt, gather param_instrs)
 
 let modify_prog_for_debugger_eval instr_seq =
   let instr_list = Instruction_sequence.instr_seq_to_list instr_seq in

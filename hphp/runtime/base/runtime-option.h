@@ -1051,6 +1051,7 @@ struct RuntimeOption {
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   F(bool, NoticeOnBadMethodStaticness, false)                           \
   F(bool, ForbidDivisionByZero, false)                                  \
+  F(bool, NoticeOnByRefArgumentTypehintViolation, false)                \
   /*                                                                    \
    * Control dynamic calls to functions and dynamic constructs of       \
    * classes which haven't opted into being called that way.            \

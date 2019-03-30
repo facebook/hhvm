@@ -4151,6 +4151,12 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
 }
 
 void in(ISS& env, const bc::VerifyOutType& op) {
+  // We reuse VerifyOutType bytecode for log typehint violations on
+  // byref parameters. Do not perform any optimizations for byref parameters,
+  // as we do not enforce those.
+  if (env.ctx.func->params[op.arg1].byRef) {
+    return;
+  }
   verifyRetImpl(env, env.ctx.func->params[op.arg1].typeConstraint,
                 false, false);
 }

@@ -623,24 +623,6 @@ StackTransInfo instrStackTransInfo(PC opcode) {
   not_reached();
 }
 
-bool pushesActRec(Op opcode) {
-  switch (opcode) {
-    case OpFPushFunc:
-    case OpFPushFuncD:
-    case OpFPushFuncU:
-    case OpFPushObjMethod:
-    case OpFPushObjMethodD:
-    case OpFPushClsMethod:
-    case OpFPushClsMethodS:
-    case OpFPushClsMethodSD:
-    case OpFPushClsMethodD:
-    case OpFPushCtor:
-      return true;
-    default:
-      return false;
-  }
-}
-
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
   if (ad->isVecArray()) out += "vec(";
   else if (ad->isDict()) out += "dict(";

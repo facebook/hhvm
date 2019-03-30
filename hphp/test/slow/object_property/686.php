@@ -66,8 +66,7 @@ $obj = new C;
  $obj->bar2();
 var_dump(serialize($obj));
 if (false) {
-  class R{
-}
+  include '686.inc';
 }
 $d = new D;
 $d->qq();

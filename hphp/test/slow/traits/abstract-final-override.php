@@ -24,9 +24,9 @@ class C extends B {}
 
 <<__EntryPoint>>
 function main_abstract_final_override() {
-if (isset($g)) {
-  class A {}
-}
+  if (isset($g)) {
+    include 'abstract-final-override.inc';
+  }
 
-var_dump(new C);
+  var_dump(new C());
 }

@@ -25,13 +25,9 @@ function main() {
 <<__EntryPoint>>
 function main_private_props_006() {
 if (mt_rand()) {
-  class Bar {
-    const A = "asd";
-  }
+  include 'private_props_006-1.inc';
 } else {
-  class Bar {
-    const B = 42;
-  }
+  include 'private_props_006-2.inc';
 }
 
 main();

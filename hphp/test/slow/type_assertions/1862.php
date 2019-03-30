@@ -56,20 +56,9 @@ class B1 extends A1 {
   }
 }
 if (rand(0, 1)) {
-  class C1 extends B1 {
-    public $c1prop;
-    function c1method() {
-      return 2;
-    }
-  }
-}
- else {
-  class C1 extends B1 {
-    public $c1prop;
-    function c1method() {
-      return 2;
-    }
-  }
+  include '1862-1.inc';
+} else {
+  include '1862-2.inc';
 }
 class D1 extends C1 {
   public $d1prop;

@@ -1,15 +1,11 @@
 <?php
 
 if (isset($g)) {
-  trait T {}
+  include 'fatal_missing_trait.inc';
 }
 
 class C {
   use T;
 }
 
-function main() {
-  var_dump(new C);
-}
-
-main();
+var_dump(new C());

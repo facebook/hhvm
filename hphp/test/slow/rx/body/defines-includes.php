@@ -1,9 +1,9 @@
 <?hh
 
+class C {}
+
 <<__Rx>>
 function test() {
-  class C {}             // DefCls
-  // we don't emit DefClsNop outside of systemlib
   class_alias('C', 'D'); // AliasCls
   // we don't emit DefTypeAlias outside of pseudo-mains
 

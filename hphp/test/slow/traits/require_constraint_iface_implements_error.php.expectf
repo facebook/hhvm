@@ -1,1 +1,1 @@
-Fatal error: Only traits may use 'require implements'. in %s/test/slow/traits/require_constraint_iface_implements_error.php on line 10
+Fatal error: Only traits may use 'require implements'. in %s on line 4

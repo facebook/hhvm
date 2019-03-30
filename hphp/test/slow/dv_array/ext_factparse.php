@@ -59,43 +59,10 @@ trait TR2 implements I0, I1<int> {
   require implements I2;
 }
 
-# For multiple declarations of the same class we union the possible base types.
-if (rand()) {
-  class CL3 extends CL0 {
-    use TR0;
-  }
-} else {
-  class CL3 implements I0 {
-    use TR0;
-  }
-}
-
 enum E0 : int {
   EV0 = 0;
   EV1 = 1;
 }
-
-if (rand()) {
-  class M0 {
-  }
-} else {
-  interface M0 {
-  }
-}
-
-if (rand()) {
-  final class M1 {
-  }
-} else {
-  abstract class M1 {
-  }
-}
-
-# Does not compile.
-# function f9() {
-#   const CO6 = 1;
-# }
-
 
 #
 # Execute single-threaded test

@@ -5,9 +5,7 @@ function a() {
 }
 
 function b() {
-  class NotAnObject {
-    const FOO = 2;
-  }
+  include 'enum-param-2.inc';
 }
 
 function test2(NotAnObject $o) {

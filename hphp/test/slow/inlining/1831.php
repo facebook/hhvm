@@ -1,13 +1,11 @@
 <?php
 
 function h() {
- class X{
+ include '1831.inc';
 }
-;
- }
 function f($a, $b, $c) {
  return h();
- }
+}
 function g($a, $b, $c) {
   return f($a++, $b++ + $a++, $c);
 }

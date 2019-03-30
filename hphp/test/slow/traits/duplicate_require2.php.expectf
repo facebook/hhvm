@@ -2,4 +2,4 @@ Iteration: 1
 Iteration: 2
 Iteration: 3
 
-Fatal error: Conflicting requirements for 'A'%sin %s/test/slow/traits/duplicate_require2.php on line %d
+Fatal error: Conflicting requirements for 'A' in %s on line %d

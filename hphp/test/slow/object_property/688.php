@@ -18,10 +18,8 @@ function test() {
 
 <<__EntryPoint>>
 function main_688() {
-;
-if (0) {
- class X{
-}
- }
-test();
+  if (0) {
+    include '688.inc';
+  }
+  test();
 }

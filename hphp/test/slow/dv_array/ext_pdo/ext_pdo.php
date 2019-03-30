@@ -88,8 +88,7 @@ try {
   $vstmt = $dbh->query("select * from foo", PDO::FETCH_COLUMN, 0);
   var_dump($vstmt->fetchAll());
 
-  class MyShadyObject {
-  }
+  include 'ext_pdo.inc';
 
   //Test object fetching
   foreach ($dbh->query("select * from foo", PDO::FETCH_CLASS,

@@ -2,13 +2,13 @@ dict(3) {
   ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(4383056505853746297)
+    int(710971236120442494)
     ["md5sum1"]=>
-    int(-2974079675222806495)
+    int(7581368581380780967)
     ["sha1sum"]=>
-    string(40) "394475b1e5c57740f3fde1b4cc1e10efc49265ba"
+    string(40) "fe215048b54d55d538c1f82799f9db15f36f3ba6"
     ["types"]=>
-    vec(13) {
+    vec(10) {
       dict(4) {
         ["name"]=>
         string(3) "CL0"
@@ -45,20 +45,6 @@ dict(3) {
           string(2) "I1"
           string(3) "TR0"
           string(3) "TR1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(3) "CL3"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(4)
-        ["baseTypes"]=>
-        vec(3) {
-          string(3) "CL0"
-          string(2) "I0"
-          string(3) "TR0"
         }
       }
       dict(4) {
@@ -116,28 +102,6 @@ dict(3) {
         ["requireExtends"]=>
         vec(1) {
           string(3) "CL1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(2) "M0"
-        ["kindOf"]=>
-        string(5) "mixed"
-        ["flags"]=>
-        int(5)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(2) "M1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(7)
-        ["baseTypes"]=>
-        vec(0) {
         }
       }
       dict(6) {
@@ -220,13 +184,13 @@ dict(3) {
   ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(-766628480674557984)
+    int(-6166587352886191145)
     ["md5sum1"]=>
-    int(4132325208887423240)
+    int(3538371896544415899)
     ["sha1sum"]=>
-    string(40) "50e891dd1b93031067bca08fb2adcd3bc9a4d0e4"
+    string(40) "de7817eb10fce40db6d90ab9ac1234fbbee4469a"
     ["types"]=>
-    vec(13) {
+    vec(10) {
       dict(4) {
         ["name"]=>
         string(6) "NS\CL0"
@@ -263,20 +227,6 @@ dict(3) {
           string(5) "NS\I1"
           string(6) "NS\TR0"
           string(6) "NS\TR1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(6) "NS\CL3"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(4)
-        ["baseTypes"]=>
-        vec(3) {
-          string(6) "NS\CL0"
-          string(5) "NS\I0"
-          string(6) "NS\TR0"
         }
       }
       dict(4) {
@@ -334,28 +284,6 @@ dict(3) {
         ["requireExtends"]=>
         vec(1) {
           string(6) "NS\CL1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(5) "NS\M0"
-        ["kindOf"]=>
-        string(5) "mixed"
-        ["flags"]=>
-        int(5)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(5) "NS\M1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(7)
-        ["baseTypes"]=>
-        vec(0) {
         }
       }
       dict(6) {
@@ -438,13 +366,13 @@ dict(3) {
   ["%s"]=>
   dict(7) {
     ["md5sum0"]=>
-    int(177695044982738465)
+    int(3932987630331472577)
     ["md5sum1"]=>
-    int(321704508444983991)
+    int(-7802989863953681645)
     ["sha1sum"]=>
-    string(40) "9d0fa69dd74b7da21b9fa8b3c56ef5456feffd51"
+    string(40) "2a8128c198b86655f2eb28d7b95f894f2df78608"
     ["types"]=>
-    vec(13) {
+    vec(10) {
       dict(4) {
         ["name"]=>
         string(9) "NS\NS\CL0"
@@ -481,20 +409,6 @@ dict(3) {
           string(8) "NS\NS\I1"
           string(9) "NS\NS\TR0"
           string(9) "NS\NS\TR1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(9) "NS\NS\CL3"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(4)
-        ["baseTypes"]=>
-        vec(3) {
-          string(9) "NS\NS\CL0"
-          string(8) "NS\NS\I0"
-          string(9) "NS\NS\TR0"
         }
       }
       dict(4) {
@@ -552,28 +466,6 @@ dict(3) {
         ["requireExtends"]=>
         vec(1) {
           string(9) "NS\NS\CL1"
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(8) "NS\NS\M0"
-        ["kindOf"]=>
-        string(5) "mixed"
-        ["flags"]=>
-        int(5)
-        ["baseTypes"]=>
-        vec(0) {
-        }
-      }
-      dict(4) {
-        ["name"]=>
-        string(8) "NS\NS\M1"
-        ["kindOf"]=>
-        string(5) "class"
-        ["flags"]=>
-        int(7)
-        ["baseTypes"]=>
-        vec(0) {
         }
       }
       dict(6) {

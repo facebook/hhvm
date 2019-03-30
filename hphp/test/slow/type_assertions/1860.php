@@ -9,18 +9,9 @@ function get() {
  return true;
  }
 if (get()) {
-  class X {
-    public function f() {
-      var_dump('X1::f');
-    }
-  }
-}
- else {
-  class X {
-    public function f() {
-      var_dump('X2::f');
-    }
-  }
+  include '1860-1.inc';
+} else {
+  include '1860-2.inc';
 }
 class Y extends X {
 }

@@ -3,19 +3,15 @@
 class X {
   private $a = array(1,2,3);
   function foo() {
- yield $this->a;
- }
+    yield $this->a;
+  }
 }
 if (isset($g)) {
-  class Y {
+  include '2182-1.inc';
+} else {
+  include '2182-2.inc';
 }
-}
- else {
-  class Y extends X {
-}
-}
-class Z extends Y {
-}
+class Z extends Y {}
 function test() {
   $z = new Z;
   foreach ($z->foo() as $v) {

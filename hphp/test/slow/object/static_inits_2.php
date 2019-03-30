@@ -4,13 +4,9 @@ function __autoload($x) {
 
   $GLOBALS['y'] = new stdclass;
   if (mt_rand()) {
-    class Zoo {
-      const Bar = 2;
-    }
+    include 'static_inits_2-1.inc';
   } else {
-    class Zoo {
-      const Baz = 4;
-    }
+    include 'static_inits_2-2.inc';
   }
 }
 

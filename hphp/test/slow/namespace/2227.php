@@ -17,22 +17,10 @@ class Foo {
 <<__EntryPoint>>
 function main_2227() {
 if (\rand(0, 1)) {
-  class B {
-    static $baz = 'baz';
-    const FOO = 30;
-    function f() {
-      return Foo::NoSuchConstant;
-    }
-  }
+  include '2227-1.inc';
 }
  else {
-  class B {
-    static $baz = 'baz';
-    const FOO = 30;
-    function f() {
-      return Foo::NoSuchConstant;
-    }
-  }
+  include '2227-2.inc';
 }
 $f = new Foo(array(0));
 \var_dump(Foo::$baz);

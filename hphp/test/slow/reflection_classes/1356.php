@@ -7,15 +7,10 @@ class BbBb {
 function main_1356() {
 $z=true;
 if ($z) {
-  class AaaA {
-    function f() {
-      var_dump(get_class());
-    }
-  }
+  include '1356-1.inc';
 }
  else {
-  class aAAa {
-}
+  include '1356-2.inc';
 }
 $r = new ReflectionClass('aaaa');
 var_dump($r->getName());

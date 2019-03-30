@@ -14,21 +14,9 @@ function main(Base $b) {
 <<__EntryPoint>>
 function main_func_family_009() {
 if (mt_rand() > 100) {
-  abstract class Middle extends Base {
-    abstract function abs();
-
-    function concrete_override() {
-      $x = parent::concrete_override();
-      return null;
-    }
-  }
-  class Derived extends Middle {
-    function abs() {}
-  }
+  include 'func_family_009-1.inc';
 } else {
-  class Derived extends Base {
-    function concrete_override() { return 2; }
-  }
+  include 'func_family_009-2.inc';
 }
 
 main(new Base);

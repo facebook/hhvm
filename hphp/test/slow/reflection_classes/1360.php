@@ -8,12 +8,9 @@ class Base {
 }
 $condition = 123;
 if ($condition) {
-  class A extends Base {
-}
-}
- else {
-  class A extends Base {
-}
+  include '1360-1.inc';
+} else {
+  include '1360-2.inc';
 }
 class B extends A {
   function bar() {

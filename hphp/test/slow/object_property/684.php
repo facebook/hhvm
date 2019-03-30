@@ -11,14 +11,10 @@ class B {
 <<__EntryPoint>>
 function main_684() {
 if (f()) {
- class A {
- }
+ include '684-1.inc';
  }
 else {
- class A {
- static $a = 100;
- var $b = 1000;
- }
+ include '684-2.inc';
  }
 $vars = get_class_vars('A');
  asort(&$vars);

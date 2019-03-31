@@ -1144,14 +1144,15 @@ struct CatchMaker {
 private:
   void prepareForCatch() const {
     if (inlining()) {
-      fpushActRec(env,
-                  cns(env, m_callee),
-                  m_params.thiz ? m_params.thiz : cns(env, TNullptr),
-                  m_params.size(),
-                  nullptr,
-                  /* This can be a lie, but we only care about the dynamic flag
-                   * in prologues, so its value doesn't matter here. */
-                  cns(env, false));
+      allocActRec(env);
+      fsetActRec(env,
+                 cns(env, m_callee),
+                 m_params.thiz ? m_params.thiz : cns(env, TNullptr),
+                 m_params.size(),
+                 nullptr,
+                 /* This can be a lie, but we only care about the dynamic flag
+                  * in prologues, so its value doesn't matter here. */
+                 cns(env, false));
     }
     /*
      * We're potentially spilling to a different depth than the unwinder

@@ -447,6 +447,10 @@ inline SSATmp* pushIncRef(IRGS& env, SSATmp* tmp,
   return push(env, tmp);
 }
 
+inline void allocActRec(IRGS& env) {
+  env.irb->fs().incBCSPDepth(kNumActRecCells);
+}
+
 inline Type topType(IRGS& env, BCSPRelOffset idx = BCSPRelOffset{0},
                     GuardConstraint gc = DataTypeSpecific) {
   FTRACE(5, "Asking for type of stack elem {}\n", idx.offset);

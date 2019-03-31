@@ -26,7 +26,7 @@ let tparams_has_reified tparams =
 let valid_newable_hint env tp (pos, hint) =
   match hint with
   | Aast.Happly ((p, h), _) ->
-    begin match Tast_env.get_class env h with
+    begin match Env.get_class env h with
     | Some cls ->
       if Cls.kind cls <> Ast.Cnormal then
         Errors.invalid_newable_type_argument tp p
@@ -34,13 +34,13 @@ let valid_newable_hint env tp (pos, hint) =
       (* This case should never happen *)
       Errors.invalid_newable_type_argument tp p end
   | Aast.Habstr name ->
-    if not @@ Tast_env.get_newable env name then
+    if not @@ Env.get_newable env name then
       Errors.invalid_newable_type_argument tp pos
   | _ ->
     Errors.invalid_newable_type_argument tp pos
 
 let verify_has_consistent_bound env (tparam: Tast.tparam) =
-  let upper_bounds = Typing_set.elements (Tast_env.get_upper_bounds env (snd tparam.tp_name)) in
+  let upper_bounds = Typing_set.elements (Env.get_upper_bounds env (snd tparam.tp_name)) in
   let bound_classes = List.filter_map upper_bounds ~f:(function
     | _, Tclass ((_, class_id), _, _) ->
       Env.get_class env class_id
@@ -59,21 +59,27 @@ let verify_has_consistent_bound env (tparam: Tast.tparam) =
  *
  * where Tf does not exist at runtime.
  *)
-let verify_targ_valid_for_reified_tparam env tparam targ =
+let verify_targ_valid env tparam targ =
   (* There is some subtlety here. If a type *parameter* is declared reified,
    * even if it is soft, we require that the argument be concrete or reified, not soft
    * reified or erased *)
   begin match tparam.tp_reified with
   | Nast.Reified
   | Nast.SoftReified ->
-    let ty = Env.hint_to_ty env targ in
-    begin match Typing_generic.IsGeneric.ty ty with
-    | Some resolved_targ ->
-      begin match (Tast_env.get_reified env (snd resolved_targ)) with
-      | Nast.Erased -> Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ "not reified"
-      | Nast.SoftReified -> Errors.erased_generic_passed_to_reified tparam.tp_name resolved_targ "soft reified"
-      | Nast.Reified -> () end
-    | _ -> () end
+    begin match targ with
+    | _, Happly ((p, h), []) when h = Naming_special_names.Typehints.wildcard ->
+      if not @@ Env.get_allow_wildcards env then
+        Errors.invalid_reified_argument tparam.tp_name (p, h) "a wildcard"
+    | _ ->
+      let ty = Env.hint_to_ty env targ in
+      begin match (Typing_generic.IsGeneric.ty ty) with
+      | Some (p, t) ->
+        begin match (Env.get_reified env t) with
+        | Nast.Erased -> Errors.invalid_reified_argument tparam.tp_name (p, t) "not reified"
+        | Nast.SoftReified -> Errors.invalid_reified_argument tparam.tp_name (p, t) "soft reified"
+        | Nast.Reified -> () end
+      | None -> () end
+    end
   | Nast.Erased -> () end;
 
   begin if Attributes.mem UA.uaEnforceable tparam.tp_user_attributes then
@@ -90,7 +96,7 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     Errors.require_args_reify decl_pos expr_pos;
   (* Unequal_lengths case handled elsewhere *)
   List.iter2 tparams targs ~f:begin fun tparam targ ->
-    verify_targ_valid_for_reified_tparam env tparam targ
+    verify_targ_valid env tparam targ
   end |> ignore
 
 let handler = object
@@ -118,8 +124,8 @@ let handler = object
         | None -> () end
     | (pos, _), New ((_, CIstatic), _, _, _, _) ->
       let open Option in
-      let t = Tast_env.get_self_id env >>=
-        Tast_env.get_class env >>|
+      let t = Env.get_self_id env >>=
+        Env.get_class env >>|
         Cls.tparams >>|
         tparams_has_reified in
       Option.iter t ~f:(fun has_reified -> if has_reified then
@@ -132,7 +138,7 @@ let handler = object
       let tc = Env.get_class env class_id in
       Option.iter tc ~f:(fun tc ->
         let tparams = Typing_classes_heap.tparams tc in
-        ignore (List.iter2 tparams targs ~f:(verify_targ_valid_for_reified_tparam env));
+        ignore (List.iter2 tparams targs ~f:(verify_targ_valid env));
 
         (* TODO: This check could be unified with the existence check above,
          * but would require some consolidation T38941033. List.iter2 gives
@@ -155,8 +161,8 @@ let handler = object
 
   method! at_class_typeconst env { c_tconst_name = (_, name); c_tconst_type; _ } =
     let open Option in
-    let t = Tast_env.get_self_id env >>=
-      Tast_env.get_class env >>=
+    let t = Env.get_self_id env >>=
+      Env.get_class env >>=
       (fun cls -> Typing_classes_heap.get_typeconst cls name) in
     match t with
     | Some { ttc_enforceable = (pos, enforceable); _ } ->

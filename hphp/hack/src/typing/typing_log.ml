@@ -466,7 +466,8 @@ let env_as_value env =
     subtype_prop;
     log_levels = _;
     tvenv;
-    tyvars_stack } = env in
+    tyvars_stack;
+    allow_wildcards; } = env in
   make_map [
     "pos", pos_as_value pos;
     "outer_pos", pos_as_value outer_pos;
@@ -486,6 +487,7 @@ let env_as_value env =
     "global_tpenv", tpenv_as_value env global_tpenv;
     "subtype_prop", subtype_prop_as_value env subtype_prop;
     "todo", todo_as_value todo;
+    "allow_wildcards", bool_as_value allow_wildcards;
   ]
 
 let log_env_diff p ?function_name old_env new_env =

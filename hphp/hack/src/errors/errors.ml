@@ -336,6 +336,14 @@ end
 
 let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;
+  Typing.err_code Typing.InvalidEnforceableTypeArgument;
+  Typing.err_code Typing.RequireArgsReify;
+  Typing.err_code Typing.InvalidReifiedArgument;
+  Typing.err_code Typing.GenericsNotAllowed;
+  Typing.err_code Typing.InvalidNewableTypeArgument;
+  Typing.err_code Typing.InvalidNewableTypeParamConstraints;
+  Typing.err_code Typing.NewWithoutNewable;
+  Typing.err_code Typing.NewStaticClassReified;
 ]
 let ignored_fixme_codes = ref default_ignored_fixme_codes
 
@@ -2485,8 +2493,8 @@ let require_args_reify def_pos arg_pos =
     def_pos, "Definition is here"
   ]
 
-let erased_generic_passed_to_reified (def_pos, def_name) (arg_pos, arg_name) reification =
-  add_list (Typing.err_code Typing.ErasedGenericPassedToReified) [
+let invalid_reified_argument (def_pos, def_name) (arg_pos, arg_name) reification =
+  add_list (Typing.err_code Typing.InvalidReifiedArgument) [
     arg_pos, arg_name ^ " is " ^ reification ^ ", it cannot be used as a reified type argument";
     def_pos, def_name ^ " is reified"
   ]

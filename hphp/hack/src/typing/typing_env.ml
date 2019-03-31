@@ -701,6 +701,7 @@ let empty tcopt file ~droot = {
   log_levels = TypecheckerOptions.log_levels tcopt;
   tvenv = IMap.empty;
   tyvars_stack = [];
+  allow_wildcards = false;
 }
 
 let set_env_reactive env reactive =

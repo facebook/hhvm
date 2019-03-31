@@ -544,7 +544,7 @@ module Typing                               = struct
   | InvalidEnforceableTypeArgument
   | RequireArgsReify
   | TypecheckerTimeout
-  | ErasedGenericPassedToReified
+  | InvalidReifiedArgument
   | GenericsNotAllowed
   | InvalidNewableTypeArgument
   | InvalidNewableTypeParamConstraints

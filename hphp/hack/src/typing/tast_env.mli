@@ -249,3 +249,6 @@ val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool
 val get_env_mutability: env -> Typing_mutability_env.mutability_env
 val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option
 val set_env_reactive: env -> Typing_defs.reactivity -> env
+
+val set_allow_wildcards: env -> env
+val get_allow_wildcards: env -> bool

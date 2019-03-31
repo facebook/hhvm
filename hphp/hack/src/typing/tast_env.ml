@@ -208,3 +208,7 @@ let get_env_mutability = Typing_env.get_env_mutability
 
 let get_fun = Typing_env.get_fun
 let set_env_reactive = Typing_env.set_env_reactive
+
+let set_allow_wildcards env = { env with Typing_env.allow_wildcards = true }
+
+let get_allow_wildcards env = env.Typing_env.allow_wildcards

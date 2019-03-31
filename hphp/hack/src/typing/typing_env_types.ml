@@ -146,6 +146,7 @@ type env = {
   log_levels : int SMap.t ;
   tvenv : tvenv;
   tyvars_stack : (Pos.t * Ident.t list) list;
+  allow_wildcards : bool ;
 }
 and genv = {
   tcopt   : TypecheckerOptions.t;

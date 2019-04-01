@@ -1,6 +1,8 @@
-File "valid_targ_wildcard_new.php", line 8, characters 11-11:
-Wildcard typehints are not allowed in this position (Naming[2084])
 File "valid_targ_wildcard_new.php", line 7, characters 9-9:
+_ is a wildcard, it cannot be used as a reified type argument (Typing[4305])
+  File "valid_targ_wildcard_new.php", line 4, characters 15-16:
+  Tc is reified
+File "valid_targ_wildcard_new.php", line 8, characters 11-11:
 _ is a wildcard, it cannot be used as a reified type argument (Typing[4305])
   File "valid_targ_wildcard_new.php", line 4, characters 15-16:
   Tc is reified

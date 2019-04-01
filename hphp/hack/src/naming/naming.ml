@@ -861,7 +861,7 @@ module Make (GetLocals : GetLocals) = struct
       aast_hint ~forbid_this ~allow_typedef ~allow_wildcard in
     match x with
     | Aast.Htuple hl ->
-      N.Htuple (List.map hl ~f:(aast_hint ~allow_retonly env))
+      N.Htuple (List.map hl ~f:(aast_hint ~allow_retonly ~tp_depth:(tp_depth+1) env))
     | Aast.Hoption h ->
       (* void/noreturn are permitted for Typing.option_return_only_typehint *)
       N.Hoption (aast_hint ~allow_retonly env h)
@@ -935,7 +935,7 @@ module Make (GetLocals : GetLocals) = struct
         ShapeMap.fold
           (fun key { Aast.sfi_optional; sfi_hint } acc ->
             let _pos, new_key = convert_shape_name env key in
-            let new_field = { N.sfi_optional; sfi_hint = aast_hint ~allow_retonly env sfi_hint } in
+            let new_field = { N.sfi_optional; sfi_hint = aast_hint ~allow_retonly ~tp_depth:(tp_depth+1) env sfi_hint } in
             ShapeMap.add new_key new_field acc)
           nsi_field_map
           ShapeMap.empty in
@@ -965,15 +965,17 @@ module Make (GetLocals : GetLocals) = struct
     | Some h -> h
     | None -> begin
       match x with
-        | x when x = SN.Typehints.wildcard && allow_wildcard && tp_depth = 1 ->
-          if hl <> [] then
-            (Errors.tparam_with_tparam p x;
-            N.Hany)
-          else
-            N.Happly(id, [])
         | x when x = SN.Typehints.wildcard ->
-          Errors.wildcard_disallowed p;
-          N.Hany
+          if allow_wildcard && tp_depth >= 1 (* prevents 3 as _ *)
+          then
+            if hl <> [] then
+              (Errors.tparam_with_tparam p x;
+              N.Hany)
+            else
+              N.Happly(id, [])
+          else
+            (Errors.wildcard_disallowed p;
+            N.Hany)
         | x when
           (  x = ("\\"^SN.Typehints.void)
           || x = ("\\"^SN.Typehints.null)

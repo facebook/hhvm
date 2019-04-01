@@ -1,0 +1,6 @@
+File "class-method-access.php", line 9, characters 9-9:
+Could not find static method f in type C (Typing[4090])
+  File "class-method-access.php", line 4, characters 19-19:
+  The closest thing is f but it's not a static method
+  File "class-method-access.php", line 3, characters 7-7:
+  Declaration of C is here

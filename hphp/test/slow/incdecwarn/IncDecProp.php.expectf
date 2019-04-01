@@ -1,0 +1,152 @@
+Test begin
+--- C ---
+int(1)
+int(-1)
+int(0)
+int(0)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+int(1)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+C Object
+(
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+    [p] => 1
+    [q] => 
+    [r] => 1
+    [s] => 
+)
+--- D ---
+In D::__get(a)
+
+Warning: Unsupported operand type (string) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+
+Notice: Increment on string 'D::a' in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+string(4) "D::b"
+In D::__get(b)
+int(43)
+int(1)
+int(-1)
+int(0)
+int(0)
+In D::__get(l)
+int(1)
+In D::__get(m)
+int(-1)
+In D::__get(n)
+int(0)
+In D::__get(o)
+int(0)
+In D::__get(p)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+int(1)
+In D::__get(q)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+In D::__get(r)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+In D::__get(s)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+NULL
+D Object
+(
+    [container:D:private] => Array
+        (
+            [a] => D::a
+            [b] => 42
+            [l] => 0
+            [m] => 0
+            [n] => 0
+            [o] => 0
+        )
+
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+    [a] => D::b
+    [b] => 43
+    [l] => 1
+    [m] => -1
+    [n] => 1
+    [o] => -1
+    [p] => 1
+    [q] => 
+    [r] => 1
+    [s] => 
+)
+--- E ---
+int(1)
+int(-1)
+int(0)
+int(0)
+In E::__get(l)
+In E::__set(l, 1)
+int(1)
+In E::__get(m)
+In E::__set(m, -1)
+int(-1)
+In E::__get(n)
+In E::__set(n, 1)
+int(0)
+In E::__get(o)
+In E::__set(o, -1)
+int(0)
+In E::__get(p)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+In E::__set(p, 1)
+int(1)
+In E::__get(q)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+In E::__set(q, )
+NULL
+In E::__get(r)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+In E::__set(r, 1)
+NULL
+In E::__get(s)
+
+Warning: Unsupported operand type (null) for IncDec in %s/test/slow/incdecwarn/IncDecProp.php on line %d
+In E::__set(s, )
+NULL
+E Object
+(
+    [container:E:private] => Array
+        (
+            [a] => E::a
+            [b] => 42
+            [l] => 1
+            [m] => -1
+            [n] => 1
+            [o] => -1
+            [p] => 1
+            [q] => 
+            [r] => 1
+            [s] => 
+        )
+
+    [preInc] => 1
+    [preDec] => -1
+    [postInc] => 1
+    [postDec] => -1
+)
+Test end

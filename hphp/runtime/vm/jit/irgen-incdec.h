@@ -29,14 +29,17 @@ namespace HPHP { namespace jit { namespace irgen {
  * support irgen for the given source's type.
  */
 inline SSATmp* incDec(IRGS& env, IncDecOp op, SSATmp* src) {
-  if (src->isA(TNull)) {
-    return isInc(op) ? cns(env, 1) : src;
-  }
+  // Old behavior handles non int/double types.  New behavior warns/fatals for
+  // non int/double types.
+  if (RuntimeOption::EvalWarnOnIncDecInvalidType == 0) {
+    if (src->isA(TNull)) {
+      return isInc(op) ? cns(env, 1) : src;
+    }
 
-  if (src->type().subtypeOfAny(TBool, TArrLike, TObj, TRes)) {
-    return src;
+    if (src->type().subtypeOfAny(TBool, TArrLike, TObj, TRes)) {
+      return src;
+    }
   }
-
   if (!src->type().subtypeOfAny(TInt, TDbl)) {
     return nullptr;
   }

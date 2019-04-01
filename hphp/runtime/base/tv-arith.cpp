@@ -479,6 +479,23 @@ void stringIncDecOp(Op op, tv_lval cell, StringData* sd) {
   }
 }
 
+void raiseIncDecInvalidType(tv_lval cell) {
+  switch (RuntimeOption::EvalWarnOnIncDecInvalidType) {
+    case 0:
+      break;
+    case 1:
+      raise_warning("Unsupported operand type (%s) for IncDec",
+                    describe_actual_type(cell, true).c_str());
+      break;
+    case 2:
+      raise_error("Unsupported operand type (%s) for IncDec",
+                  describe_actual_type(cell, true).c_str());
+      // fallthrough
+    default:
+      always_assert(false);
+  }
+}
+
 /*
  * Inc or Dec for a string, depending on Op.  Op must implement
  *
@@ -497,6 +514,7 @@ void cellIncDecOp(Op op, tv_lval cell) {
   switch (type(cell)) {
     case KindOfUninit:
     case KindOfNull:
+      raiseIncDecInvalidType(cell);
       op.nullCase(cell);
       return;
 
@@ -509,12 +527,14 @@ void cellIncDecOp(Op op, tv_lval cell) {
       return;
 
     case KindOfFunc: {
+      raiseIncDecInvalidType(cell);
       auto s = funcToStringHelper(val(cell).pfunc);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
     }
 
     case KindOfClass: {
+      raiseIncDecInvalidType(cell);
       auto s = classToStringHelper(val(cell).pclass);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
@@ -522,6 +542,7 @@ void cellIncDecOp(Op op, tv_lval cell) {
 
     case KindOfPersistentString:
     case KindOfString:
+      raiseIncDecInvalidType(cell);
       stringIncDecOp(op, cell, val(cell).pstr);
       return;
 
@@ -539,6 +560,7 @@ void cellIncDecOp(Op op, tv_lval cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+      raiseIncDecInvalidType(cell);
       return;
 
     case KindOfRef:

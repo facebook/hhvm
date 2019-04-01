@@ -753,6 +753,12 @@ struct RuntimeOption {
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \
   F(uint32_t, WarnOnTooManyArguments,  0)                               \
+  /* WarnOnIncDecInvalidType:
+   * 0 - No restrictions on types that can be incremented or decremented
+   * 1 - Warn when incrementing or decrementing non numeric types
+   * 2 - Throw when incrementing or decrementing non numeric types
+   */                                                                   \
+  F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
   F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \

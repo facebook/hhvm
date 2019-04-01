@@ -91,7 +91,7 @@ Array
     [0] => Array
         (
             [file] => %sdebug_backtrace_options.php
-            [line] => 17
+            [line] => 18
             [function] => backtrace_print
             [args] => Array
                 (
@@ -155,7 +155,7 @@ Array
     [0] => Array
         (
             [file] => %sdebug_backtrace_options.php
-            [line] => 19
+            [line] => 20
             [function] => backtrace_print
             [args] => Array
                 (
@@ -215,7 +215,7 @@ Array
     [0] => Array
         (
             [file] => %sdebug_backtrace_options.php
-            [line] => 21
+            [line] => 22
             [function] => backtrace_print
             [args] => Array
                 (
@@ -279,7 +279,7 @@ Array
     [0] => Array
         (
             [file] => %sdebug_backtrace_options.php
-            [line] => 23
+            [line] => 24
             [function] => backtrace_print
         )
 
@@ -315,7 +315,7 @@ Array
     [0] => Array
         (
             [file] => %sdebug_backtrace_options.php
-            [line] => 25
+            [line] => 26
             [function] => backtrace_print
         )
 

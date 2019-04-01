@@ -7,6 +7,7 @@ function backtrace_print($opt = null)
 	} else {
 		print_r(debug_backtrace($opt));
 	}
+	__hhvm_intrinsics\launder_value($opt);
 }
 
 function doit($a, $b, $how)
@@ -26,8 +27,8 @@ function doit($a, $b, $how)
 }
 
 class foo {
-	protected function doCall($dowhat, $how) 
-	{  
+	protected function doCall($dowhat, $how)
+	{
 	   $dowhat('a','b', $how);
 	}
 	static function statCall($dowhat, $how)
@@ -38,4 +39,3 @@ class foo {
 }
 foo::statCall("doit", "debug_print_backtrace");
 foo::statCall("doit", "backtrace_print");
-

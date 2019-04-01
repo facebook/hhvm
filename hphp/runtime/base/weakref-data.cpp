@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/weakref-data.h"
 
 #include "hphp/runtime/base/string-hash-map.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-object.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/base/rds-local.h"
@@ -66,6 +67,13 @@ WeakRefData::~WeakRefData() {
     ObjectData* obj = unpack_tv<KindOfObject>(&pointee);
     s_weakref_data.get()->erase((uintptr_t)obj);
   }
+}
+
+bool WeakRefData::isValid() const {
+  if (LIKELY(isRefcountedType(pointee.m_type))) {
+    return tvGetCount(pointee) > 0;
+  }
+  return pointee.m_type != KindOfUninit;
 }
 
 } // namespace HPHP

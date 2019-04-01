@@ -39,6 +39,8 @@ struct WeakRefData {
 
   ~WeakRefData();
   explicit WeakRefData(const TypedValue& tv): pointee(tv) {}
+
+  bool isValid() const;
 };
 
 void weakref_cleanup();

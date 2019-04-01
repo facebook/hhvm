@@ -4057,18 +4057,22 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
                    bool reduce_this, bool ts_flavor) {
   // If it is the ts flavor, then second thing on the stack, otherwise first
   auto stackT = topC(env, (int)ts_flavor);
+  auto const stackEquiv = topStkEquiv(env, (int)ts_flavor);
 
   // If there is no return type constraint, or if the return type
-  // constraint is a typevar, or if the top of stack is the same
-  // or a subtype of the type constraint, then this is a no-op.
+  // constraint is a typevar, or if the top of stack is the same or a
+  // subtype of the type constraint, then this is a no-op, unless
+  // reified types could be involved.
   if (env.index.satisfies_constraint(env.ctx, stackT, constraint)) {
     if (ts_flavor) {
-      // this is handled differently in ts flavor
+      // we wouldn't get here if reified types were definitely not
+      // involved, so just bail.
       popC(env);
+      popC(env);
+      push(env, std::move(stackT), stackEquiv);
       return;
     }
-    reduce(env, bc::Nop {});
-    return;
+    return reduce(env, bc::Nop{});
   }
 
   // For CheckReturnTypeHints >= 3 AND the constraint is not soft.
@@ -4092,23 +4096,30 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
     tcT = is_opt(tcT) ? TOptObj : TObj;
   }
 
+  // In some circumstances, verifyRetType can modify the type. If it
+  // does that we can't reduce even when we know it succeeds.
+  auto dont_reduce = false;
   if (!constraint.isSoft()) {
     // VerifyRetType will convert a TFunc to a TStr implicitly
     // (and possibly warn)
     if (tcT.subtypeOf(TStr) && stackT.couldBe(BFunc | BCls)) {
-      topC(env, (int)ts_flavor) = stackT |= TStr;
+      stackT |= TStr;
+      dont_reduce = true;
     }
 
     // VerifyRetType will convert TClsMeth to TVec/TVArr/TArr implicitly
     if (stackT.couldBe(BClsMeth)) {
       if (tcT.couldBe(BVec)) {
-        topC(env, (int)ts_flavor) = stackT |= TVec;
+        stackT |= TVec;
+        dont_reduce = true;
       }
       if (tcT.couldBe(BVArr)) {
-        topC(env, (int)ts_flavor) = stackT |= TVArr;
+        stackT |= TVArr;
+        dont_reduce = true;
       }
       if (tcT.couldBe(TArr)) {
-        topC(env, (int)ts_flavor) = stackT |= TArr;
+        stackT |= TArr;
+        dont_reduce = true;
       }
     }
   }
@@ -4116,9 +4127,11 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // If CheckReturnTypeHints < 3 OR if the constraint is soft,
   // then there are no optimizations we can safely do here, so
   // just leave the top of stack as is.
-  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft()
-      || (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
+  if (RuntimeOption::EvalCheckReturnTypeHints < 3 || constraint.isSoft() ||
+      (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis())) {
     if (ts_flavor) popC(env);
+    popC(env);
+    push(env, std::move(stackT), stackEquiv);
     return;
   }
 
@@ -4126,16 +4139,16 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
   // be this, we can replace the check with a non null check.  These cases are
   // likely from a BareThis that could return Null.  Since the runtime will
   // split these translations, it will rarely in practice return null.
-  if (constraint.isThis() && !constraint.isNullable() && is_opt(stackT) &&
+  if (reduce_this &&
+      !dont_reduce &&
+      constraint.isThis() &&
+      !constraint.isNullable() &&
+      is_opt(stackT) &&
       env.index.satisfies_constraint(env.ctx, unopt(stackT), constraint)) {
-    if (reduce_this) {
-      if (ts_flavor) {
-        reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
-        return;
-      }
-      reduce(env, bc::VerifyRetNonNullC {});
-      return;
+    if (ts_flavor) {
+      return reduce(env, bc::PopC {}, bc::VerifyRetNonNullC {});
     }
+    return reduce(env, bc::VerifyRetNonNullC {});
   }
 
   auto retT = intersection_of(std::move(tcT), std::move(stackT));

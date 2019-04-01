@@ -284,7 +284,7 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
 
   assertx(stack.isValidAddress(reinterpret_cast<uintptr_t>(prevFp)) ||
          prevFp->resumed());
-  pc = skipCall(prevFp->func()->unit()->at(callOff + prevFp->func()->base()));
+  pc = prevFp->func()->unit()->at(callOff + prevFp->func()->base());
   fp = prevFp;
   return phpException;
 }
@@ -426,6 +426,7 @@ void unwindPhp() {
   auto& stack = vmStack();
   auto& pc = vmpc();
   auto fault = g_context->m_faults.back();
+  bool fromTearDownFrame = false;
 
   ITRACE(1, "entering unwinder for fault: {}\n", describeFault(fault));
   SCOPE_EXIT {
@@ -478,7 +479,13 @@ void unwindPhp() {
      * what the FPI table expects.)
      */
     if (discard) {
-      discardStackTemps(fp, stack, fault.m_raiseOffset);
+      if (fromTearDownFrame) {
+        fromTearDownFrame = false;
+        auto const raiseOffset = fp->m_func->unit()->offsetOf(skipCall(pc));
+        discardStackTemps(fp, stack, raiseOffset);
+      } else {
+        discardStackTemps(fp, stack, fault.m_raiseOffset);
+      }
     }
 
     do {
@@ -519,6 +526,7 @@ void unwindPhp() {
     fault.m_userException = tearDownFrame(fp, stack, pc, fault.m_userException);
     if (fault.m_userException == nullptr) {
       g_context->m_faults.pop_back();
+      if (fp) pc = skipCall(pc);
       return;
     }
 
@@ -531,6 +539,7 @@ void unwindPhp() {
     fault.m_raiseOffset = kInvalidOffset;
     fault.m_handledCount = 0;
     g_context->m_faults.back() = fault;
+    fromTearDownFrame = true;
   } while (fp);
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
@@ -602,6 +611,7 @@ void unwindCpp(Exception* exception) {
     // Discard the frame
     DEBUG_ONLY auto const phpException = tearDownFrame(fp, stack, pc, nullptr);
     assertx(phpException == nullptr);
+    if (fp) pc = skipCall(pc);
   } while (fp);
 
   // Propagate the C++ exception to the outer VM nesting

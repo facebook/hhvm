@@ -127,7 +127,7 @@ int64_t HHVM_FUNCTION(ob_get_length) {
 int64_t HHVM_FUNCTION(ob_get_level) {
   return g_context->obGetLevel();
 }
-Array HHVM_FUNCTION(ob_get_status, bool full_status /* = false */) {
+Variant HHVM_FUNCTION(ob_get_status, bool full_status /* = false */) {
   return g_context->obGetStatus(full_status);
 }
 void HHVM_FUNCTION(ob_implicit_flush, bool flag /* = true */) {
@@ -149,7 +149,12 @@ int64_t HHVM_FUNCTION(hphp_get_stats, const String& name) {
 }
 Array HHVM_FUNCTION(hphp_get_status) {
   auto const out = ServerStats::ReportStatus(Writer::Format::JSON);
-  return Variant::attach(HHVM_FN(json_decode)(String(out))).toArray();
+  auto result = HHVM_FN(json_decode)(
+    String(out),
+    false,
+    512,
+    HPHP::k_JSON_FB_DARRAYS_AND_VARRAYS);
+  return Variant::attach(result).toDArray();
 }
 Array HHVM_FUNCTION(hphp_get_iostatus) {
   return ServerStats::GetThreadIOStatuses();

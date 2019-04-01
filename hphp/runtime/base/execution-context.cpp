@@ -436,10 +436,10 @@ const StaticString
   s_default_output_handler("default output handler");
 
 Array ExecutionContext::obGetStatus(bool full) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   int level = 0;
   for (auto& buffer : m_buffers) {
-    Array status;
+    Array status = Array::CreateDArray();
     if (level < m_protectedLevel || buffer.handler.isNull()) {
       status.set(s_name, s_default_output_handler);
       status.set(s_type, 0);
@@ -495,7 +495,7 @@ void ExecutionContext::obSetImplicitFlush(bool on) {
 }
 
 Array ExecutionContext::obGetHandlers() {
-  Array ret;
+  Array ret = Array::CreateVArray();
   for (auto& ob : m_buffers) {
     auto& handler = ob.handler;
     ret.append(handler.isNull() ? s_default_output_handler : handler);

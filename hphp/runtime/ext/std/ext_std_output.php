@@ -166,7 +166,7 @@ function ob_get_level(): int;
  * @return array
  */
 <<__Native>>
-function ob_get_status(bool $full_status = false): array;
+function ob_get_status(bool $full_status = false): varray_or_darray;
 
 /* ob_implicit_flush() will turn implicit flushing on or off. Implicit
  * flushing will result in a flush operation after every output call, so that
@@ -182,7 +182,7 @@ function ob_implicit_flush(bool $flag = true): void;
  * with ob_start(), ob_list_handlers() will return "default output handler".
  */
 <<__Native>>
-function ob_list_handlers(): array;
+function ob_list_handlers(): varray;
 
 /* Adds an entry to a log file that's written when server crashes. This is
  * useful for diagnose why server crashed. For example, logged-on user's ID.
@@ -213,14 +213,14 @@ function hphp_get_stats(string $name): int;
  * @return array - Array of thread statuses.
  */
 <<__HipHopSpecific, __Native>>
-function hphp_get_status(): array;
+function hphp_get_status(): darray;
 
 /* Returns I/O status of current thread. EnableNetworkIOStatus has to be
  * turned on.
  * @return array - Array of all I/O so far for current thread.
  */
 <<__HipHopSpecific, __Native>>
-function hphp_get_iostatus(): array;
+function hphp_get_iostatus(): darray;
 
 <<__HipHopSpecific, __Native, __Deprecated("this will be removed")>>
 function hphp_set_iostatus_address(string $name): void;

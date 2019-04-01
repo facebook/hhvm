@@ -46,6 +46,7 @@ type t = {
   option_enable_intrinsics_extension      : bool;
   option_enable_hhjs                      : bool;
   option_dump_hhjs                        : bool;
+  option_hhjs_additional_transform        : string;
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
   option_hhjs_repo_root                   : string;
@@ -104,6 +105,7 @@ let default = {
   option_enable_intrinsics_extension = false;
   option_enable_hhjs = false;
   option_dump_hhjs = false;
+  option_hhjs_additional_transform = "";
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
   option_hhjs_repo_root = "";
@@ -158,6 +160,7 @@ let enable_reified_generics o = o.option_enable_reified_generics
 let enable_intrinsics_extension o = o.option_enable_intrinsics_extension
 let enable_hhjs o = o.option_enable_hhjs
 let dump_hhjs o = o.option_dump_hhjs
+let hhjs_additional_transform o = o.option_hhjs_additional_transform
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let hhjs_repo_root o = o.option_hhjs_repo_root
@@ -335,6 +338,8 @@ let set_option options name value =
     { options with option_dump_hhjs = as_bool value }
   | "eval.hhjsuniquefilenames" ->
     { options with option_hhjs_unique_filenames = as_bool value }
+  | "eval.hhjsadditionaltransform" ->
+    { options with option_hhjs_additional_transform = value }
   | "eval.hhjsbabeltransform" ->
     { options with option_hhjs_babel_transform = value }
   | "eval.hhjsreporoot" ->
@@ -513,6 +518,8 @@ let value_setters = [
      fun opts v -> { opts with option_enable_hhjs = (v = 1) });
   (set_value "hhvm.dump_hhjs" get_value_from_config_int @@
      fun opts v -> { opts with option_dump_hhjs = (v = 1) });
+  (set_value "hhvm.hhjs_additional_transform" get_value_from_config_string @@
+     fun opts v -> { opts with option_hhjs_additional_transform = v });
   (set_value "hhvm.hhjs_unique_filenames" get_value_from_config_int @@
      fun opts v -> { opts with option_hhjs_unique_filenames = (v = 1) });
   (set_value "hhvm.hhjs_babel_transform" get_value_from_config_string @@

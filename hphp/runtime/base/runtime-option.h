@@ -90,6 +90,7 @@ struct RepoOptions {
   H(bool,           EnableReifiedGenerics,          true)             \
   H(bool,           DisableLvalAsAnExpression,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
+  E(std::string,    HHJSAdditionalTransform,        "")               \
   E(bool,           HHJSUniqueFilenames,            true)             \
   E(std::string,    HHJSBabelTransform,                               \
                                          hhjsBabelTransformDefault()) \

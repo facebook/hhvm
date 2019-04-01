@@ -10,6 +10,10 @@ function foo() {
   $a->appendChild($b);
   $b->appendChild($c);
 
+  // DOMDocument frees elements when they are not referenced. So we need to keep
+  // $a alive until here.
+  __hhvm_intrinsics\launder_value($a);
+
   return $c;
 }
 

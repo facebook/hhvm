@@ -210,7 +210,7 @@ ALWAYS_INLINE bool Countable::hasExactlyOneRef() const {
 
 ALWAYS_INLINE void MaybeCountable::incRefCount() const {
   assertx(!tl_sweeping);
-  assertx(checkCountZ() /* due to static init order */);
+  assertx(checkCount());
   if (one_bit_refcount) {
     if (m_count == OneReference) m_count = MultiReference;
     return;
@@ -221,7 +221,7 @@ ALWAYS_INLINE void MaybeCountable::incRefCount() const {
 
 ALWAYS_INLINE void Countable::incRefCount() const {
   assertx(!tl_sweeping);
-  assertx(checkCountZ() /* due to static init order */);
+  assertx(checkCount());
   if (one_bit_refcount) {
     if (unconditional_one_bit_incref || m_count == OneReference) {
       m_count = MultiReference;

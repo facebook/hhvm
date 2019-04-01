@@ -2177,6 +2177,7 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
 
 bool FuncChecker::checkBlock(State& cur, Block* b) {
   bool ok = true;
+  bool exnVisited = false;
   auto const verify_rx = (RuntimeOption::EvalRxVerifyBody > 0) &&
     funcAttrIsAnyRx(m_func->attrs) && !m_func->isRxDisabled;
   if (m_errmode == kVerbose) {
@@ -2190,8 +2191,21 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
                    instrToString(pc, unit()) << std::endl;
     }
     auto const op = peek_op(pc);
-
-    if (b->exn) ok &= checkExnEdge(cur, b);
+    auto const skipExnEdge = [&] {
+      // Catch does not throw. Do not propagate silence state as Catch may be
+      // followed by a Silence End.
+      if (op == Op::Catch) return true;
+      if (op != Op::Silence) return false;
+      auto npc = pc;
+      decode_op(npc);
+      decode_iva(npc);
+      // Do not propagate silence state before processing Silence End.
+      return decode_oa<SilenceOp>(npc) == SilenceOp::End;
+    }();
+    if (b->exn && !skipExnEdge) {
+      ok &= checkExnEdge(cur, b);
+      exnVisited = true;
+    }
     if (isMemberFinalOp(op)) ok &= checkMemberKey(&cur, pc, op);
     ok &= checkOp(&cur, pc, op, b);
     ok &= checkInputs(&cur, pc, b);
@@ -2204,6 +2218,10 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
   }
+  // If we did not visit the exn edge yet because the block contained only Catch
+  // and Silence End opcodes, visit the edge to initialize its state. The
+  // silence state is now correct as Silence End was processed.
+  if (b->exn && !exnVisited) ok &= checkExnEdge(cur, b);
   ok &= checkSuccEdges(b, &cur);
   return ok;
 }

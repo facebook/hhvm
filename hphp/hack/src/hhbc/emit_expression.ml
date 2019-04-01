@@ -3849,13 +3849,14 @@ and emit_unop ~need_ref env pos op e =
       let fault_label = Label.next_fault () in
       let temp_local = Local.get_unnamed_local () in
       let cleanup = instr_silence_end temp_local in
-      let body =
-        gather [emit_expr ~need_ref:false env e; emit_pos pos; cleanup] in
+      let body = emit_expr ~need_ref:false env e in
       let fault = gather [emit_pos enclosing_span; cleanup; instr_unwind] in
       emit_box_if_necessary pos need_ref @@ gather [
         emit_pos pos;
         instr_silence_start temp_local;
-        instr_try_fault fault_label body fault
+        instr_try_fault fault_label body fault;
+        emit_pos pos;
+        cleanup
       ]
 
 and emit_exprs env exprs =

@@ -97,7 +97,6 @@ struct RepoOptions {
   E(std::string,    HHJSRepoRoot,                   "")               \
   E(std::string,    HHJSNodeModules,                "")               \
   E(bool,           EmitFuncPointers,               true)             \
-  E(bool,           EmitClsMethPointers,            EmitFuncPointers) \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   E(bool,           EmitMethCallerFuncPointers,     false)            \
   /**/
@@ -1050,6 +1049,9 @@ struct RuntimeOption {
   F(bool, RaiseFuncConversionWarning, false)                            \
   /* Raise warning when class pointers are used as strings. */          \
   F(bool, RaiseClassConversionWarning, false)                           \
+  F(bool, EmitClsMethPointers, false)                                   \
+  /* true to skip type refinement for ClsMeth type at HHBBC. */         \
+  F(bool, IsCompatibleClsMethType, false)                               \
   /* Raise warning when ClsMethDataRef is used as varray/vec. */        \
   F(bool, RaiseClsMethConversionWarning, false)                         \
   /* Raise warning when strings are used as classes. */                 \

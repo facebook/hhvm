@@ -300,7 +300,9 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
+  RuntimeOption::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
+  RuntimeOption::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, false, true),
       [&] (const std::pair<std::string,SHA1>& kv) {
@@ -385,7 +387,9 @@ void write_global_data(
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
+  gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
+  gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

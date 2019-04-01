@@ -1157,7 +1157,8 @@ void isTypeHelper(ISS& env,
   // If the type could be ClsMeth and Arr/Vec, skip location refining.
   // Otherwise, refine location based on the testType.
   auto testTy = type_of_istype(typeOp);
-  if (val.couldBe(BClsMeth)) {
+  if (RuntimeOption::EvalIsCompatibleClsMethType && val.couldBe(BClsMeth)) {
+    assertx(RuntimeOption::EvalEmitClsMethPointers);
     if (RuntimeOption::EvalHackArrDVArrs) {
       if ((typeOp == IsTypeOp::Vec) || (typeOp == IsTypeOp::VArray)) {
         if (val.couldBe(BVec | BVArr)) return bail();
@@ -2135,6 +2136,7 @@ void isTypeArrLike(ISS& env, const Type& ty) {
 
 namespace {
 bool isCompactTypeClsMeth(ISS& env, IsTypeOp op, const Type& t) {
+  assertx(RuntimeOption::EvalEmitClsMethPointers);
   if (t.couldBe(BClsMeth)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       if (op == IsTypeOp::Vec || op == IsTypeOp::VArray) {
@@ -2174,7 +2176,10 @@ void isTypeLImpl(ISS& env, const Op& op) {
     nothrow(env);
   }
 
-  if (isCompactTypeClsMeth(env, op.subop2, loc)) return;
+  if (RuntimeOption::EvalIsCompatibleClsMethType &&
+      isCompactTypeClsMeth(env, op.subop2, loc)) {
+    return;
+  }
 
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
@@ -2192,7 +2197,10 @@ void isTypeCImpl(ISS& env, const Op& op) {
     nothrow(env);
   }
 
-  if (isCompactTypeClsMeth(env, op.subop1, t1)) return;
+  if (RuntimeOption::EvalIsCompatibleClsMethType &&
+      isCompactTypeClsMeth(env, op.subop1, t1)) {
+    return;
+  }
 
   switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);

@@ -2629,6 +2629,10 @@ void RuntimeOption::Load(
     RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend &&
     RuntimeOption::EvalHackArrCompatNotices;
 
+  if (!RuntimeOption::EvalEmitClsMethPointers) {
+    RuntimeOption::EvalIsCompatibleClsMethType = false;
+  }
+
   // Initialize defaults for repo-specific parser configuration options.
   RepoOptions::setDefaults(config, ini);
 }

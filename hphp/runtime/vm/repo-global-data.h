@@ -200,11 +200,16 @@ struct Repo::GlobalData {
    */
   uint64_t Signature = 0;
 
+  bool EmitClsMethPointers = false;
+
   /*
    * If clsmeth type may raise,
    * hhbbc IsTypeX optimization may be disabled.
    */
   bool IsVecNotices = false;
+
+  /* Skip ClsMeth type refinement when this is true. */
+  bool IsCompatibleClsMethType = false;
 
   std::vector<const StringData*> APCProfile;
 
@@ -243,7 +248,9 @@ struct Repo::GlobalData {
       (Signature)
       (AbortBuildOnVerifyError)
       (UndefinedFunctionFallback)
+      (EmitClsMethPointers)
       (IsVecNotices)
+      (IsCompatibleClsMethType)
       ;
   }
 };

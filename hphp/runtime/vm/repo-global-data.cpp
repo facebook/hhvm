@@ -62,7 +62,9 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(AbortBuildOnVerifyError);
   SHOW(UndefinedFunctionFallback);
   SHOW(Signature);
+  SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
+  SHOW(IsCompatibleClsMethType);
 #undef SHOW
   return out;
 }

@@ -2875,8 +2875,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     end
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
-let check_repeated_properties namespace_name class_name (errors, p_names) prop =
-  let full_name = combine_names namespace_name class_name in
+let check_repeated_properties full_name (errors, p_names) prop =
   match syntax prop with
   | PropertyDeclaration { property_declarators; _} ->
     let declarators = syntax_to_list_no_separators property_declarators in
@@ -3107,9 +3106,10 @@ let classish_errors env node namespace_name names errors =
         let methods = syntax_to_list_no_separators methods in
         let declared_name_str =
           Option.value ~default:"" (Syntax.extract_text cd.classish_name) in
+        let full_name = combine_names namespace_name declared_name_str in
         let errors, _ =
-          List.fold methods ~f:(check_repeated_properties namespace_name declared_name_str)
-          ~init:(errors, SSet.empty) in
+          List.fold methods ~f:(check_repeated_properties full_name)
+            ~init:(errors, SSet.empty) in
         let has_abstract_fn =
           List.exists methods ~f:methodish_contains_abstract in
         let has_private_method =

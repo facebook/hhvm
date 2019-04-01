@@ -1,0 +1,12 @@
+File "dup_check.bad.php", line 9, characters 15-15:
+[PocketUniverses] T (case type) is declared multiple times (Naming[2101])
+File "dup_check.bad.php", line 12, characters 12-12:
+[PocketUniverses] x (case expression) is declared multiple times (Naming[2101])
+File "dup_check.bad.php", line 18, characters 12-12:
+[PocketUniverses] T (A member type) is declared multiple times (Naming[2101])
+File "dup_check.bad.php", line 21, characters 7-7:
+[PocketUniverses] x (A member expr) is declared multiple times (Naming[2101])
+File "dup_check.bad.php", line 16, characters 7-7:
+[PocketUniverses] A (member) is declared multiple times (Naming[2101])
+File "dup_check.bad.php", line 25, characters 8-8:
+[PocketUniverses] F (enum) is declared multiple times (Naming[2101])

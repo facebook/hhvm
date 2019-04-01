@@ -14,6 +14,7 @@ let visitor = Nast_visitor.iter_with [
   Variadic_check.handler;
   Class_tparams_check.handler;
   Control_context_check.handler;
+  Pocket_universes_check.handler;
 ]
 
 let program = visitor#go

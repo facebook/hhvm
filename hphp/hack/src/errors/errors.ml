@@ -1045,6 +1045,10 @@ let no_tparams_on_type_consts pos =
   add (Naming.err_code Naming.NoTparamsOnTypeConsts) pos
     "Type parameters are not allowed on class type constants"
 
+let pu_duplication pos name kind =
+  add (Naming.err_code Naming.PocketUniversesDuplication) pos
+    (sprintf "[PocketUniverses] %s (%s) is declared multiple times" name kind)
+
 (*****************************************************************************)
 (* Init check errors *)
 (*****************************************************************************)

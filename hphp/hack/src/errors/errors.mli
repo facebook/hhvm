@@ -528,6 +528,7 @@ val byref_dynamic_call : Pos.t -> unit
 val reference_in_strict_mode : Pos.t -> unit
 val anon_use_capture_by_ref : Pos.t -> unit
 val no_tparams_on_type_consts : Pos.t -> unit
+val pu_duplication : Pos.t -> string -> string -> unit
 val invalid_type_for_atmost_rx_as_rxfunc_parameter : Pos.t -> string -> unit
 val missing_annotation_for_atmost_rx_as_rxfunc_parameter : Pos.t -> unit
 val mutable_in_nonreactive_context : Pos.t -> unit

@@ -1,0 +1,5 @@
+Typing[4105] Too many arguments
+   --> messages_same_line.php
+  3 | function foo(): void {} function bar() { foo(1); }
+    |                                          ^^^^^^ Too many arguments
+    |          ^^^ Definition is here

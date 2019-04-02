@@ -385,7 +385,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       in
       let%lwt status = rpc args (Rpc.STATUS ignore_ide) in
       let exit_status =
-        ClientCheckStatus.go status args.output_json args.from in
+        ClientCheckStatus.go status args.output_json args.from args.error_format in
       Lwt.return exit_status
     | MODE_STATUS_SINGLE filename ->
       let file_input = match filename with
@@ -401,7 +401,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         has_unsaved_changes = false;
       } in
       let exit_status =
-        ClientCheckStatus.go status args.output_json args.from in
+        ClientCheckStatus.go status args.output_json args.from args.error_format in
       Lwt.return exit_status
     | MODE_SEARCH (query, type_) ->
       let%lwt results = rpc args @@ Rpc.SEARCH (query, type_) in
@@ -421,7 +421,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
            Lwt.return Exit_status.No_error
         | _ ->
            let%lwt results = rpc args @@ Rpc.LINT fnl in
-           ClientLint.go results args.output_json;
+           ClientLint.go results args.output_json args.error_format;
            Lwt.return Exit_status.No_error
       end
     | MODE_LINT_STDIN filename ->
@@ -433,12 +433,12 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         let contents = Sys_utils.read_stdin_to_string () in
         let%lwt results = rpc args @@ Rpc.LINT_STDIN
           { ServerCommandTypes.filename; contents } in
-        ClientLint.go results args.output_json;
+        ClientLint.go results args.output_json args.error_format;
         Lwt.return Exit_status.No_error
       end
     | MODE_LINT_ALL code ->
       let%lwt results = rpc args @@ Rpc.LINT_ALL code in
-      ClientLint.go results args.output_json;
+      ClientLint.go results args.output_json args.error_format;
       Lwt.return Exit_status.No_error
     | MODE_LINT_XCONTROLLER filename ->
       begin try
@@ -460,7 +460,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
             end
           in
           let%lwt results = rpc args @@ Rpc.LINT_XCONTROLLER files in
-          ClientLint.go results args.output_json;
+          ClientLint.go results args.output_json args.error_format;
           Lwt.return Exit_status.No_error
         with Exit -> Lwt.return Exit_status.Input_error
       end

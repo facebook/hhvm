@@ -57,6 +57,9 @@ let print_error_color e =
   print_reason_color ~first:true ~code (List.hd_exn msg_list);
   List.iter (List.tl_exn msg_list) (print_reason_color ~first:false ~code)
 
+let print_error_contextual e =
+  Printf.printf "%s" (Errors.to_contextual_string e)
+
 let is_stale_msg liveness =
    match liveness with
     | Stale_status ->
@@ -73,7 +76,7 @@ let warn_unsaved_changes () =
 {|there is an editor connected to the Hack server.
 The errors below may reflect your unsaved changes in the editor.|}
 
-let go status output_json from =
+let go status output_json from error_format =
   let {
     Server_status.liveness;
     has_unsaved_changes;
@@ -87,7 +90,11 @@ let go status output_json from =
     let oc = if output_json then stderr else stdout in
     ServerError.print_error_list oc ~stale_msg ~output_json ~error_list ~edges_added:None
   end else begin
-    List.iter error_list print_error_color;
+    let f = match error_format with
+      | Errors.Context -> print_error_contextual
+      | Errors.Raw -> print_error_color
+    in
+    List.iter error_list f;
     Option.iter stale_msg ~f:(fun msg -> Printf.printf "%s" msg);
     if has_unsaved_changes then warn_unsaved_changes ()
   end;

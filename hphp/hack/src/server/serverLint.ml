@@ -24,13 +24,17 @@ let output_json oc el =
   Out_channel.output_string oc (Hh_json.json_to_string res);
   Out_channel.flush stderr
 
-let output_text oc el =
+let output_text oc el format =
   (* Essentially the same as type error output, except that we only have one
    * message per error, and no additional 'typing reasons' *)
   if el = []
   then Out_channel.output_string oc "No lint errors!\n"
   else begin
-    let sl = List.map el Lint.to_string in
+    let f = match format with
+      | Errors.Context -> Lint.to_contextual_string
+      | Errors.Raw -> Lint.to_string
+    in
+    let sl = List.map el f in
     List.iter sl begin fun s ->
       Printf.fprintf oc "%s\n%!" s;
     end

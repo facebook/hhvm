@@ -65,6 +65,20 @@ let to_string lint =
   let code = Errors.error_code_to_string lint.code in
   Printf.sprintf "%s\n%s (%s)" (Pos.string lint.pos) lint.message code
 
+let to_contextual_string lint =
+  let color = match lint.severity with
+    | Lint_error -> Tty.apply_color (Tty.Bold Tty.Red)
+    | Lint_warning -> Tty.apply_color (Tty.Bold Tty.Yellow)
+    | Lint_advice -> Tty.apply_color (Tty.Bold Tty.White)
+  in
+  let heading =
+    Printf.sprintf "%s %s"
+      (color (Errors.error_code_to_string lint.code))
+      (Tty.apply_color (Tty.Bold Tty.White) lint.message)
+  in
+  let (fn, ctx, msg) = Errors.format_message "" lint.pos in
+  Printf.sprintf "%s\n%s\n%s\n%s\n" heading fn ctx msg
+
 let to_json {pos; code; severity; message; bypass_changed_lines;
     autofix=(original, replacement)} =
   let line, scol, ecol = Pos.info_pos pos in

@@ -19,6 +19,7 @@ type 'a message = 'a * string
 
 type phase = Init | Parsing | Naming | Decl | Typing
 type severity = Warning | Error
+type format = Context | Raw
 
 (* The file and phase of analysis being currently performed *)
 let current_context : (Relative_path.t * phase) ref = ref (Relative_path.default, Typing)
@@ -263,6 +264,120 @@ let to_absolute error =
   let code, msg_l = (get_code error), (to_list error) in
   let msg_l = List.map msg_l (fun (p, s) -> Pos.to_absolute p, s) in
   code, msg_l
+
+let read_lines path = In_channel.read_lines path
+
+let line_margin (line_num : int option): string =
+  let padded_num = match line_num with
+    | Some line_num -> Printf.sprintf "%3d" line_num
+    | None -> "   "
+  in
+  Tty.apply_color (Tty.Normal Tty.Cyan) (padded_num ^ " |")
+
+(* Get the lines of source code associated with this position. *)
+let load_context_lines (pos : Pos.absolute): string list =
+  let path = Pos.filename pos in
+  let line = Pos.line pos in
+  let end_line = Pos.end_line pos in
+  let lines =
+    try read_lines path
+    with (Sys_error _) -> []
+  in
+  (* Line numbers are 1-indexed. *)
+  List.filteri lines ~f:(fun i _ -> (i + 1 >= line) && (i + 1 <= end_line))
+
+let format_context_lines (pos : Pos.absolute) (lines : string list): string =
+  let lines = (match lines with
+    | [] -> [Tty.apply_color (Tty.Dim Tty.White) "No source found"]
+    | ls -> ls) in
+  let line_num = Pos.line pos in
+  let format_line i (line : string) =
+    Printf.sprintf "%s %s" (line_margin (Some (line_num + i))) line in
+  let formatted_lines = List.mapi ~f:format_line lines in
+  (* TODO: display all the lines, showing the underline on all of them. *)
+  List.hd_exn formatted_lines
+
+let tilde_line (pos: Pos.absolute) (msg: string) (first_context_line: string option): string =
+  let start_line, start_column = Pos.line_column pos in
+  let end_line, end_column = Pos.end_line_column pos in
+  let underline_width = match first_context_line with
+    | None -> 4 (* Arbitrary choice when source isn't available. *)
+    | Some first_context_line ->
+       if start_line = end_line then
+         end_column - start_column
+       else
+         (String.length first_context_line) - start_column
+  in
+  let underline = String.make underline_width '^' in
+  let underline_padding = match first_context_line with
+    | Some _ -> (String.make start_column ' ')
+    | None -> ""
+  in
+  Printf.sprintf "%s %s%s"
+    (line_margin None)
+    underline_padding
+    (Tty.apply_color (Tty.Bold Tty.Red) (underline ^ " " ^ msg))
+
+let format_message (msg: string) (pos: Pos.absolute): string * string * string =
+  let context_lines = load_context_lines pos in
+  let filename = Filename.basename (Pos.filename pos) in
+  let pretty_filename =
+    Printf.sprintf "   %s %s"
+      (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
+      (Tty.apply_color (Tty.Normal Tty.Green) filename) in
+  let pretty_ctx = format_context_lines pos context_lines in
+  let pretty_msg = tilde_line pos msg (List.hd context_lines) in
+  (pretty_filename, pretty_ctx, pretty_msg)
+
+(** Given a list of error messages, format them with context.
+    The list may not be ordered, and multiple messages may occur on one line.
+ *)
+let format_messages (msgs: Pos.absolute message list): string =
+  (* Order by filename, to keep messages within the same file
+     together. Within each file, order by line number. *)
+  let cmp m1 m2 =
+    match compare (Pos.filename (fst m1)) (Pos.filename (fst m2)) with
+    | 0 -> compare (Pos.line (fst m1)) (Pos.line (fst m2))
+    | x -> x in
+  let msgs = List.stable_sort cmp msgs in
+  let rec aux msgs prev : string list =
+    match msgs with
+    | msg::msgs ->
+       let (pos, err_msg) = msg in
+       let filename = Pos.filename pos in
+       let line = Pos.line pos in
+       let (pretty_filename, pretty_ctx, pretty_msg) = format_message err_msg pos in
+       let formatted : string list = (match prev with
+         | Some (prev_filename, prev_line)  when prev_filename = filename && prev_line = line ->
+            (* Previous message was on this line too, just show the message itself*)
+            [pretty_msg]
+         | Some (prev_filename, _) when prev_filename = filename ->
+            (* Previous message was this file, but an earlier line. *)
+            [pretty_ctx; pretty_msg]
+         | _ ->
+            [pretty_filename; pretty_ctx; pretty_msg])
+       in
+       formatted @ aux msgs (Some (filename, line))
+    | [] -> []
+  in
+  String.concat ~sep:"\n" (aux msgs None) ^ "\n"
+
+let to_contextual_string (error : Pos.absolute error_) : string =
+  let error_code = get_code error in
+  let msgl = to_list error in
+  let buf = Buffer.create 50 in
+  (match msgl with
+  | [] -> failwith "Impossible: an error always has non-empty list of messages"
+  | (_, msg) :: _ ->
+      Buffer.add_string buf begin
+        Printf.sprintf "%s %s\n"
+          (Tty.apply_color (Tty.Bold Tty.Red) (error_code_to_string error_code))
+          (Tty.apply_color (Tty.Bold Tty.White) msg)
+        end);
+  (try Buffer.add_string buf (format_messages msgl)
+   with _ -> Buffer.add_string buf "Error could not be pretty-printed. Please file a bug.");
+  Buffer.add_string buf "\n";
+  Buffer.contents buf
 
 let to_string ?(indent=false) (error : Pos.absolute error_) : string =
   let error_code, msgl = (get_code error), (to_list error) in

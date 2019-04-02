@@ -82,6 +82,7 @@ let parse_check_args cmd =
   let autostart = ref true in
   let config = ref [] in
   let dynamic_view = ref false in
+  let error_format = ref Errors.Context in
   let file_info_on_disk = ref false in
   let force_dormant_start = ref false in
   let format_from = ref 0 in
@@ -214,6 +215,13 @@ let parse_check_args cmd =
     "--dynamic-view",
       Arg.Set dynamic_view,
       " Replace occurrences of untyped code with dynamic";
+    "--error-format",
+      Arg.String (fun s ->
+          match s with
+          | "raw" -> error_format := Errors.Raw
+          | "context" -> error_format := Errors.Context
+          | _ -> print_string "Warning: unrecognized error format.\n"),
+      "<raw|context> Error formatting style";
     "--file-info-on-disk",
       Arg.Set file_info_on_disk,
       " [experimental] a saved state option to store file info" ^
@@ -532,6 +540,7 @@ let parse_check_args cmd =
     autostart = !autostart;
     config = !config;
     dynamic_view = !dynamic_view;
+    error_format = !error_format;
     file_info_on_disk = !file_info_on_disk;
     force_dormant_start = !force_dormant_start;
     from = !from;

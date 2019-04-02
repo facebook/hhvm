@@ -74,6 +74,7 @@ type mode =
 type options = {
   files : string list;
   mode : mode;
+  error_format : Errors.format;
   no_builtins : bool;
   all_errors : bool;
   tcopt : GlobalOptions.t;
@@ -124,33 +125,37 @@ let die str =
   exit 2
 
 
-let print_error ?(oc = stderr) ?(indent=false) l =
-  Out_channel.output_string oc (Errors.to_string ~indent (Errors.to_absolute l))
+let print_error format ?(oc = stderr) l =
+  let formatter = match format with
+    | Errors.Context -> Errors.to_contextual_string
+    | Errors.Raw -> (fun e -> Errors.to_string ~indent:false e)
+  in
+  Out_channel.output_string oc (formatter (Errors.to_absolute l))
 
-let write_error_list errors oc =
+let write_error_list format errors oc =
   (if errors <> []
-  then List.iter ~f:(print_error ~oc ~indent:true) errors
+  then List.iter ~f:(print_error format ~oc) errors
   else Out_channel.output_string oc "No errors\n");
   Out_channel.close oc
 
-let write_first_error errors oc =
+let write_first_error format errors oc =
   (if errors <> []
-  then print_error ~oc (List.hd_exn errors)
+  then print_error format ~oc (List.hd_exn errors)
   else Out_channel.output_string oc "No errors\n");
   Out_channel.close oc
 
-let print_error_list errors =
+let print_error_list format errors =
   if errors <> []
-  then List.iter ~f:(print_error ~indent:true) errors
+  then List.iter ~f:(print_error format) errors
   else Printf.printf "No errors\n"
 
-let print_first_error errors =
+let print_first_error format errors =
   if errors <> []
-  then print_error (List.hd_exn errors)
+  then print_error format (List.hd_exn errors)
   else Printf.printf "No errors\n"
 
-let print_errors (errors:Errors.t) =
-  print_error_list (Errors.get_error_list errors)
+let print_errors format (errors:Errors.t) =
+  print_error_list format (Errors.get_error_list errors)
 
 let parse_options () =
   let fn_ref = ref [] in
@@ -167,6 +172,7 @@ let parse_options () =
     then raise (Arg.Bad "only a single mode should be specified")
     else mode := x in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
+  let error_format = ref Errors.Context in
   let safe_array = ref (Some false) in
   let safe_vector_array = ref (Some false) in
   let forbid_nullable_cast = ref false in
@@ -247,6 +253,13 @@ let parse_options () =
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       " Dump all symbol information";
+    "--error-format",
+    Arg.String (fun s ->
+        match s with
+        | "raw" -> error_format := Errors.Raw
+        | "context" -> error_format := Errors.Context
+        | _ -> print_string "Warning: unrecognized error format.\n"),
+    "<raw|context> Error formatting style";
     "--lint",
       Arg.Unit (set_mode Lint),
       " Produce lint errors";
@@ -468,6 +481,7 @@ let parse_options () =
     mode = !mode;
     no_builtins = !no_builtins;
     all_errors = !all_errors;
+    error_format = !error_format;
     tcopt;
     batch_mode = !batch_mode;
   }
@@ -793,7 +807,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt files_contents files_info parse_errors
-  all_errors batch_mode =
+  all_errors error_format batch_mode =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -922,7 +936,7 @@ let handle_mode
           Pos.compare (Lint.get_pos x) (Lint.get_pos y)
         end lint_errors in
         let lint_errors = List.map ~f: Lint.to_absolute lint_errors in
-        ServerLint.output_text stdout lint_errors;
+        ServerLint.output_text stdout lint_errors error_format;
         exit 2
       end
       else Printf.printf "No lint errors\n"
@@ -1009,12 +1023,12 @@ let handle_mode
       files_contents in
     print_tasts tasts tcopt;
     if not @@ Errors.is_empty errors then begin
-      print_errors errors;
+      print_errors error_format errors;
       Printf.printf "Did not typecheck the TAST as there are typing errors.";
       exit 2
     end else
       let tast_check_errors = typecheck_tasts tasts tcopt filename in
-      print_error_list tast_check_errors;
+      print_error_list error_format tast_check_errors;
       if tast_check_errors <> [] then exit 2
     )
   | Dump_typed_full_fidelity_json ->
@@ -1089,8 +1103,8 @@ let handle_mode
       if parse_errors <> []
       then
         (* This closes the out channel *)
-        (if all_errors then write_error_list parse_errors oc
-        else write_first_error parse_errors oc)
+        (if all_errors then write_error_list error_format parse_errors oc
+        else write_first_error error_format parse_errors oc)
       else
         begin
         Typing_log.out_channel := oc;
@@ -1098,8 +1112,8 @@ let handle_mode
         let files_contents = file_to_files filename in
         let parse_errors, individual_file_info = parse_name_and_decl popt files_contents in
         let errors = check_file tcopt (Errors.get_error_list parse_errors) individual_file_info in
-        (if all_errors then write_error_list errors oc
-        else write_first_error errors oc);
+        (if all_errors then write_error_list error_format errors oc
+        else write_first_error error_format errors oc);
         ServerIdeUtils.revert_local_changes ()
         end
     )
@@ -1136,9 +1150,9 @@ let handle_mode
           (Relative_path.Map.get files_info filename)
         );
       (if all_errors then
-        print_error_list errors
+        print_error_list error_format errors
       else
-        print_first_error errors);
+        print_first_error error_format errors);
       if errors <> [] then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
@@ -1148,7 +1162,7 @@ let handle_mode
       compute_least_type tcopt filename
     )
   | Linearization ->
-    if parse_errors <> [] then (print_error (List.hd_exn parse_errors); exit 2);
+    if parse_errors <> [] then (print_error error_format (List.hd_exn parse_errors); exit 2);
     let files_info = Relative_path.Map.fold builtins
       ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
       ~init:files_info
@@ -1190,7 +1204,7 @@ let handle_mode
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {files; mode; no_builtins; tcopt; all_errors; batch_mode } popt =
+let decl_and_run_mode {files; mode; error_format; no_builtins; tcopt; all_errors; batch_mode } popt =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins = if no_builtins then Relative_path.Map.empty else builtins in
@@ -1211,7 +1225,7 @@ let decl_and_run_mode {files; mode; no_builtins; tcopt; all_errors; batch_mode }
     parse_name_and_decl popt to_decl in
 
   handle_mode mode files tcopt popt files_contents files_info
-    (Errors.get_error_list errors) all_errors batch_mode
+    (Errors.get_error_list errors) all_errors error_format batch_mode
 
 let main_hack ({files; mode; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)

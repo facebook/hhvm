@@ -60,6 +60,7 @@ type client_check_env = {
   autostart: bool;
   config : (string * string) list;
   dynamic_view: bool;
+  error_format: Errors.format;
   file_info_on_disk: bool;
   force_dormant_start: bool;
   from: string;

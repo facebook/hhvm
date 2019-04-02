@@ -26,6 +26,7 @@ val add :
   unit
 val to_absolute : Relative_path.t t -> string t
 val to_string : string t -> string
+val to_contextual_string : string t -> string
 val to_json : string t -> Hh_json.json
 
 val internal_error : Pos.t -> string -> unit

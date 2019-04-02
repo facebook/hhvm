@@ -144,12 +144,12 @@ using namespace detail;
 void init(const std::string& extractPath,
           const std::string& fallbackPath,
           bool trust) {
-#if defined(__clang__)
-  // Clang is currently broken... It doesn't emit uncalled member functions in a
+#if defined(__clang__) && !defined(CLANG_STANDALONE_DEBUG)
+  // Older versions of clang don't emit uncalled member functions in a
   // template class, even when using ATTRIBUTE_USED. This prevents the custom
   // scanners from being emitted (silently), which causes all sorts of
-  // problems. Punt for now until we can figure out a fix. This means that we'll
-  // continue to just conservative scan everything. See t10336705.
+  // problems. Fixed in https://reviews.llvm.org/D56928. Clang builds also
+  // need -fstandalone-debug to emit full types in DWARF.
   return;
 #elif defined(__linux__) || defined(__FreeBSD__)
 

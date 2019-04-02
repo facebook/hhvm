@@ -111,7 +111,7 @@ template <typename T, typename A> struct Indexer {
 };
 
 template <typename T, typename A>
-  volatile Index Indexer<T, A>::s_index = kIndexUnknown;
+  volatile Index ATTRIBUTE_USED Indexer<T, A>::s_index = kIndexUnknown;
 
 // Empty types used as part of type annotations. These types don't really
 // matter, as the behavior is inferred from the field names.

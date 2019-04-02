@@ -3365,8 +3365,11 @@ int main(int argc, char** argv) {
       return 1;
     }
 
-#ifdef __clang__
-  /* Doesn't work with Clang at the moment. t10336705 */
+#if defined(__clang__) && !defined(CLANG_STANDALONE_DEBUG)
+    // Doesn't work with older Clang that don't support attribute used
+    // in member functions of template classes.
+    // Fixed in https://reviews.llvm.org/D56928
+    // Doesn't work with Clang without -fstandalone-debug
   auto skip = true;
 #else
   auto skip = vm.count("skip") || getenv("HHVM_DISABLE_TYPE_SCANNERS");

@@ -2767,8 +2767,12 @@ let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty
       (* Default behaviour is currently to force solve *)
       expand_type_and_solve env ~description_of_expected p ty
     | Some widety ->
-      let env = sub_type env ty widety in
-      env, widety
+      Errors.try_
+        (fun () ->
+          let env = sub_type env ty widety in
+          env, widety)
+        (fun _ ->
+          expand_type_and_solve env ~description_of_expected p ty)
     end
 
   | _ ->

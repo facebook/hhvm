@@ -914,6 +914,7 @@ StatCache StatCache::s_sc;
 
 void StatCache::requestInit() {
   if (!RuntimeOption::ServerStatCache) return;
+  TRACE(5, "StatCache: requestInit refresh");
   s_sc.refresh();
 }
 
@@ -935,6 +936,13 @@ std::string StatCache::readlink(const std::string& path) {
 std::string StatCache::realpath(const char* path) {
   if (!RuntimeOption::ServerStatCache) return realpathLibc(path);
   return s_sc.realpathImpl(path);
+}
+
+void StatCache::clearCache() {
+  if (!RuntimeOption::ServerStatCache) return;
+
+  SimpleLock lock(s_sc.m_lock);
+  s_sc.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

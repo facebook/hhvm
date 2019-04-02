@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/timestamp.h"
 #include "hphp/runtime/base/unit-cache.h"
 
@@ -294,6 +295,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/memory.xml:      show memory status in XML\n"
         "/memory.json:     show memory status in JSON\n"
         "/memory.html:     show memory status in HTML\n"
+
+        "/statcache-clear: clear the stat cache entries\n"
 
         "/stats-on:        main switch: enable server stats\n"
         "/stats-off:       main switch: disable server stats\n"
@@ -678,6 +681,11 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (cmd == "proxy") {
       handleProxyRequest(cmd, transport);
+      break;
+    }
+
+    if (cmd == "statcache-clear") {
+      StatCache::clearCache();
       break;
     }
 

@@ -78,6 +78,7 @@ struct StatCache {
     int m_wd;                // Watch descriptor; -1 if a file.
 
     bool m_valid;            // True if m_stat/m_lstat are currently valid.
+
     struct stat m_stat;      // Cached stat() result.
     struct stat m_lstat;     // Cached lstat() result.
     std::string m_link;      // Cached readlink() result.
@@ -100,6 +101,7 @@ struct StatCache {
   static int lstat(const std::string& path, struct stat* buf);
   static std::string readlink(const std::string& path);
   static std::string realpath(const char* path);
+  static void clearCache();
 
  private:
   bool init();

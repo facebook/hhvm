@@ -324,10 +324,9 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   template <class F, bool inc = true>
   static void IterateKV(const ArrayData* arr, F fn);
 
-  static MixedArray* ToMixed(ArrayData*, bool promotion = true);
-  static MixedArray* ToMixedCopy(const ArrayData*, bool promotion = true);
-  static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t,
-                                        bool promotion = true);
+  static MixedArray* ToMixed(ArrayData*);
+  static MixedArray* ToMixedCopy(const ArrayData*);
+  static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);
 
   static size_t capacityToSizeIndex(size_t);
 
@@ -335,7 +334,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 private:
   static uint8_t sizeClass(const ArrayData*);
 
-  static MixedArray* ToMixedHeader(const ArrayData*, size_t, bool);
+  static MixedArray* ToMixedHeader(const ArrayData*, size_t);
 
   static ArrayData* Grow(ArrayData*, bool);
   static ArrayData* PrepareForInsert(ArrayData*, bool);

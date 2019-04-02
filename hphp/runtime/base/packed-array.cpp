@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <folly/Format.h>
 #include <folly/Likely.h>
 
 #include "hphp/runtime/base/apc-array.h"
@@ -117,15 +118,8 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
 
 ALWAYS_INLINE
 MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
-                                       size_t neededSize,
-                                       bool promotion) {
+                                       size_t neededSize) {
   assertx(checkInvariants(old));
-
-  if (promotion &&
-      UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
-      old->isVArray()) {
-    raise_hackarr_compat_notice("varray promoting to darray");
-  }
 
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
@@ -159,9 +153,9 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
  * The returned array is mixed, and is guaranteed not to be isFull().
  * (Note: only unset can call ToMixed when we aren't about to insert.)
  */
-MixedArray* PackedArray::ToMixed(ArrayData* old, bool promotion) {
+MixedArray* PackedArray::ToMixed(ArrayData* old) {
   auto const oldSize = old->m_size;
-  auto const ad      = ToMixedHeader(old, oldSize + 1, promotion);
+  auto const ad      = ToMixedHeader(old, oldSize + 1);
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
   auto const srcData = packedData(old);
@@ -188,11 +182,11 @@ MixedArray* PackedArray::ToMixed(ArrayData* old, bool promotion) {
  * time as converting to mixed.  The returned mixed array is
  * guaranteed not to be full.
  */
-MixedArray* PackedArray::ToMixedCopy(const ArrayData* old, bool promotion) {
+MixedArray* PackedArray::ToMixedCopy(const ArrayData* old) {
   assertx(checkInvariants(old));
 
   auto const oldSize = old->m_size;
-  auto const ad      = ToMixedHeader(old, oldSize + 1, promotion);
+  auto const ad      = ToMixedHeader(old, oldSize + 1);
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
   auto const srcData = packedData(old);
@@ -218,10 +212,9 @@ MixedArray* PackedArray::ToMixedCopy(const ArrayData* old, bool promotion) {
  * it.
  */
 MixedArray* PackedArray::ToMixedCopyReserve(const ArrayData* old,
-                                            size_t neededSize,
-                                            bool promotion) {
+                                            size_t neededSize) {
   assertx(neededSize >= old->m_size);
-  auto const ad      = ToMixedHeader(old, neededSize, promotion);
+  auto const ad      = ToMixedHeader(old, neededSize);
   auto const oldSize = old->m_size;
   auto const mask    = ad->mask();
   auto dstData       = ad->data();
@@ -730,6 +723,13 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
     return append();
   }
 
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
+      adIn->isVArray()) {
+    raise_hackarr_compat_notice(
+      folly::sformat("varray promoting to darray: out of bounds key {}", k)
+    );
+  }
+
   auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
                           : PackedArray::ToMixed(adIn);
   return promoted(mixed);
@@ -740,6 +740,13 @@ auto MutableOpStr(ArrayData* adIn, StringData* /*k*/, bool copy,
                   PromotedFn promoted) {
   assertx(PackedArray::checkInvariants(adIn));
   assertx(adIn->isPacked());
+
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
+      adIn->isVArray()) {
+    raise_hackarr_compat_notice(
+      "varray promoting to darray: invalid key: expected int, got string"
+    );
+  }
 
   auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
                           : PackedArray::ToMixed(adIn);
@@ -1039,6 +1046,10 @@ ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
   assertx(adIn->isPacked());
   if (size_t(k) < adIn->m_size) {
     // Escalate to mixed for correctness; unset preserves m_nextKI.
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
+        adIn->isVArray()) {
+      raise_hackarr_compat_notice("varray promoting to darray: removing key");
+    }
     //
     // TODO(#2606310): if we're removing the /last/ element, we
     // probably could stay packed, but this needs to be verified.
@@ -1374,10 +1385,10 @@ ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   auto mixed = [&] {
     switch (ArrayCommon::CheckForRefs(ad)) {
       case ArrayCommon::RefCheckResult::Pass:
-        return copy ? ToMixedCopy(ad, false) : ToMixed(ad, false);
+        return copy ? ToMixedCopy(ad) : ToMixed(ad);
       case ArrayCommon::RefCheckResult::Collapse:
         // Unconditionally copy to remove unreferenced refs
-        return ToMixedCopy(ad, false);
+        return ToMixedCopy(ad);
       case ArrayCommon::RefCheckResult::Fail:
         throwRefInvalidArrayValueException(staticEmptyDictArray());
         break;

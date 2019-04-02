@@ -189,7 +189,7 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
   auto ret = ad->isVecArray()
     // TODO(T39123862)
     ? PackedArray::ToDictVec(ad, ad->cowCheck())
-    : ToMixedCopy(ad, false);
+    : ToMixedCopy(ad);
   assertx(ret->empty() || ret->hasExactlyOneRef());
   return ret;
 }

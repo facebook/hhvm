@@ -29,6 +29,31 @@ function test_sort() {
   asort(&$x);
 }
 
+function test_unset() {
+  $x = varray[1, 2];
+  unset($x[1]);
+  $x = varray[1, 2];
+  unset($x[0]);
+  $x = varray[1, 2];
+  unset($x[2]);
+}
+
+function test_serialization($x) {
+  $str = fb_serialize($x);
+  $success = false;
+  $_ = fb_unserialize($str, &$success);
+  invariant($success, 'unable to round-trip %s', var_export($x, true));
+}
+
+function test_misc() {
+  $x = [1, 2, 3, 4];
+  unset($x[0]);
+  $x = [1, 2, 3, 4];
+  $x['foo'] = 1;
+  $x = [1, 2, 3, 4];
+  $x[42] = 1;
+}
+
 <<__EntryPoint>>
 function main_varr_to_darr() {
   test(varray[]);
@@ -48,4 +73,14 @@ function main_varr_to_darr() {
   test_implicit_append();
 
   test_sort();
+
+  test_unset();
+
+  test_serialization(varray[]);
+  test_serialization(darray[]);
+  test_serialization(varray[1, 2, 3]);
+  test_serialization(darray[1 => 2, 3 => 4]);
+
+  test_misc();
+
 }

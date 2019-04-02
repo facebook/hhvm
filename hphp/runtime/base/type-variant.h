@@ -73,7 +73,7 @@ public:
   bool isArray()     const { return isArrayLikeType(getType()); }
   bool isPHPArray()  const { return isArrayType(getType()); }
   bool isPHPArrayOrShape() const { return isArrayOrShapeType(getType()); }
-  bool isVecArray()  const { return isVectype(getType()); }
+  bool isVecArray()  const { return isVecType(getType()); }
   bool isDict()      const { return isDictType(getType()); }
   bool isDictOrShape() const { return isDictOrShapeType(getType()); }
   bool isKeyset()    const { return isKeysetType(getType()); }

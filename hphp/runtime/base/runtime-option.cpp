@@ -1187,7 +1187,7 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
                                                   Hdf& config) {
 
   // Machine metrics
-  string hostname, tier, cpu, tiers;
+  string hostname, tier, cpu, tiers, tags;
   {
     hostname = Config::GetString(ini, config, "Machine.name");
     if (hostname.empty()) {
@@ -1207,6 +1207,13 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
         tiers.clear();
       }
     }
+
+    tags = Config::GetString(ini, config, "Machine.tags");
+    if (!tags.empty()) {
+      if (!folly::readFile(tags.c_str(), tags)) {
+        tags.clear();
+      }
+    }
   }
 
   std::vector<std::string> messages;
@@ -1218,8 +1225,8 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
         messages.emplace_back(folly::sformat(
                                 "Matching tiers using: "
                                 "machine='{}', tier='{}', "
-                                "cpu = '{}', tiers = '{}'",
-                                hostname, tier, cpu, tiers));
+                                "cpu = '{}', tiers = '{}', tags = '{}'",
+                                hostname, tier, cpu, tiers, tags));
       }
       // Check the patterns using "&" rather than "&&" so they all get
       // evaluated; otherwise with multiple patterns, if an earlier
@@ -1227,6 +1234,7 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
       if (matchHdfPattern(hostname, ini, hdf, "machine") &
           matchHdfPattern(tier, ini, hdf, "tier") &
           matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
+          matchHdfPattern(tags, ini, hdf, "tags", "m") &
           matchHdfPattern(cpu, ini, hdf, "cpu")) {
         messages.emplace_back(folly::sformat(
                                 "Matched tier: {}", hdf.getName()));

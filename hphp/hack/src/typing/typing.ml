@@ -2969,9 +2969,14 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         | CIexpr _ -> (r_witness, snd c_ty)
         | _ -> obj_ty in
       let env, new_ty =
-        if check_parent
-        then env, c_ty
-        else ExprDepTy.make env cid c_ty in
+        let (_, cid_ty), _ = tcid in
+        match cid_ty with
+        | _, Tabstract (AKgeneric _, _) ->
+          env, cid_ty
+        | _ ->
+          if check_parent
+          then env, c_ty
+          else ExprDepTy.make env cid c_ty in
       (* Set variance according to type of `new` expression now. Lambda arguments
        * to the constructor might depend on it, and `call_construct` only uses
        * `ctor_fty` to set the variance which has void return type *)

@@ -19,7 +19,7 @@ let rec hint env (p, h) =
   let h = hint_ p env h in
   Typing_reason.Rhint p, h
 
-and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint } =
+and shape_field_info_to_shape_field_type env { sfi_optional; sfi_hint; _ } =
   { sft_optional = sfi_optional; sft_ty = hint env sfi_hint }
 
 and hint_ p env = function
@@ -138,7 +138,10 @@ and hint_ p env = function
         | true, false ->
           FieldsFullyKnown in
     let fdm =
-      ShapeMap.map (shape_field_info_to_shape_field_type env) nsi_field_map in
+      List.fold_left
+        ~f:(fun acc i -> ShapeMap.add i.sfi_name (shape_field_info_to_shape_field_type env i) acc)
+        ~init:ShapeMap.empty
+        nsi_field_map in
     Tshape (shape_fields_known, fdm)
   | Hsoft (p, h_) ->
     hint_ p env h_

@@ -361,6 +361,8 @@ struct
     T.cv_id = cv.S.cv_id;
     T.cv_expr = Option.map cv.S.cv_expr (map_expr menv);
     T.cv_user_attributes = List.map cv.S.cv_user_attributes (map_user_attribute menv);
+    T.cv_is_promoted_variadic = cv.S.cv_is_promoted_variadic;
+    T.cv_doc_comment = cv.S.cv_doc_comment;
   }
 
   and map_method menv m =
@@ -425,6 +427,7 @@ struct
     T.cst_type = c.S.cst_type;
     T.cst_value = Option.map c.S.cst_value (map_expr menv);
     T.cst_namespace = c.S.cst_namespace;
+    T.cst_span = c.S.cst_span;
   }
 
   and map_ns_use (k, id1, id2) =
@@ -456,6 +459,7 @@ struct
         map_program ~map_expr_annotation ~map_env_annotation ~map_funcbody_annotation p)
     | S.NamespaceUse usel -> T.NamespaceUse (List.map usel map_ns_use)
     | S.SetNamespaceEnv env -> T.SetNamespaceEnv env
+    | S.FileAttributes fa -> T.FileAttributes (map_file_attribute menv fa)
 
   and map_program
     ~map_expr_annotation

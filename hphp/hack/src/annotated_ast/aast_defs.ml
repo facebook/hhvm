@@ -113,11 +113,12 @@ and tprim =
 and shape_field_info = {
   sfi_optional: bool;
   sfi_hint : hint;
+  sfi_name : Ast.shape_field_name;
 }
 
 and nast_shape_info = {
   nsi_allows_unknown_fields : bool;
-  nsi_field_map : shape_field_info shape_map;
+  nsi_field_map : shape_field_info list;
 }
 
 and kvc_kind = [
@@ -182,9 +183,14 @@ and where_constraint = hint * Ast.constraint_kind * hint
     ancestors=["endo_defs_base"];
   }]
 
+let string_of_visibility vis =
+  match vis with
+  | Private -> "private"
+  | Public -> "public"
+  | Protected -> "protected"
+
 type id = lid [@@deriving show]
 type pstring = Ast.pstring [@@deriving show]
-type shape_field_name = Ast.shape_field_name [@@deriving show]
 
 type og_null_flavor = Ast.og_null_flavor =
   | OG_nullthrows

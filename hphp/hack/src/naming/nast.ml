@@ -224,7 +224,7 @@ class type ['a] visitor_type = object
   method on_using : 'a -> using_stmt -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
-  method on_shape : 'a -> (shape_field_name * expr) list -> 'a
+  method on_shape : 'a -> (Ast.shape_field_name * expr) list -> 'a
   method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
   method on_keyValCollection : 'a -> kvc_kind -> (targ * targ) option -> field list -> 'a
   method on_collection : 'a -> collection_targ option -> afield list -> 'a
@@ -804,7 +804,8 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Constant g -> this#on_gconst acc g
     | Namespace (_, p) -> this#on_program acc p
     | NamespaceUse _
-    | SetNamespaceEnv _ -> acc
+    | SetNamespaceEnv _
+    | FileAttributes _ -> acc
 
   method on_program acc p =
     let acc = List.fold_left p ~init:acc ~f:this#on_def in

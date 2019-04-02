@@ -87,4 +87,5 @@ let def_env x =
   | Stmt _
   | Namespace _
   | NamespaceUse _
-  | SetNamespaceEnv _ -> empty_env
+  | SetNamespaceEnv _
+  | FileAttributes _ -> empty_env

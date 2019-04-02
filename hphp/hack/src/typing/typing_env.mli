@@ -31,7 +31,7 @@ val get_type_unsafe : env -> int -> env * locl ty
 val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
 val make_ft : Pos.t -> reactivity -> bool -> decl fun_params -> decl ty -> decl fun_type
-val get_shape_field_name : Nast.shape_field_name -> string
+val get_shape_field_name : Ast.shape_field_name -> string
 val empty_fake_members : fake_members
 val empty_local_id_map : local_id_map
 val add_to_local_id_map :

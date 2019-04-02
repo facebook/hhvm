@@ -21,7 +21,6 @@ open String_utils
 (* Alias for Nast used by functions on potentially unnamed Aast values *)
 module Aast = Ast_to_nast.Aast
 module N = Nast
-module ShapeMap = N.ShapeMap
 module SN = Naming_special_names
 module NS = Namespaces
 
@@ -932,13 +931,16 @@ module Make (GetLocals : GetLocals) = struct
       N.Haccess ((pos, root_ty), ids)
     | Aast.Hshape { Aast.nsi_allows_unknown_fields; nsi_field_map } ->
       let nsi_field_map =
-        ShapeMap.fold
-          (fun key { Aast.sfi_optional; sfi_hint } acc ->
-            let _pos, new_key = convert_shape_name env key in
-            let new_field = { N.sfi_optional; sfi_hint = aast_hint ~allow_retonly ~tp_depth:(tp_depth+1) env sfi_hint } in
-            ShapeMap.add new_key new_field acc)
-          nsi_field_map
-          ShapeMap.empty in
+        List.map
+          ~f:(fun { Aast.sfi_optional; sfi_hint; sfi_name } ->
+            let _pos, new_key = convert_shape_name env sfi_name in
+            let new_field =
+              { N.sfi_optional;
+                sfi_hint = aast_hint ~allow_retonly ~tp_depth:(tp_depth+1) env sfi_hint;
+                sfi_name = new_key
+              } in
+            new_field)
+          nsi_field_map in
       N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
     | Aast.Hany
     | Aast.Hmixed
@@ -1400,6 +1402,8 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_id = cv.Aast.cv_id
     ; N.cv_expr = expr
     ; N.cv_user_attributes = []
+    ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
+    ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
     }
 
   and aast_enum_ env e =
@@ -1491,6 +1495,8 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_id = cv.Aast.cv_id
     ; N.cv_expr = expr
     ; N.cv_user_attributes = attrs
+    ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
+    ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
     }
 
   and aast_class_prop_non_static env ?(const = None) cv =
@@ -1518,6 +1524,8 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_id = cv.Aast.cv_id
     ; N.cv_expr = expr
     ; N.cv_user_attributes = attrs
+    ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
+    ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
     }
 
   and aast_class_method env c_meth =
@@ -2912,6 +2920,7 @@ module Make (GetLocals : GetLocals) = struct
       cst_type = hint;
       cst_value = e;
       cst_namespace = cst.Aast.cst_namespace;
+      cst_span = cst.Aast.cst_span;
     }
 
   let global_const cst =
@@ -2939,7 +2948,8 @@ module Make (GetLocals : GetLocals) = struct
         let (genv, lenv) = !top_level_env in
         let genv = { genv with namespace = nsenv } in
         top_level_env := (genv, lenv);
-        acc in
+        acc
+      | Aast.FileAttributes _ -> acc in
     let on_program aast =
       let nast = List.fold_left ~f:aux ~init:[] aast in
       List.rev nast in

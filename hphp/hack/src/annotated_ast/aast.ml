@@ -119,7 +119,7 @@ and expr_ =
   | Array of afield list
   | Darray of (targ * targ) option * (expr * expr) list
   | Varray of targ option * expr list
-  | Shape of (shape_field_name * expr) list
+  | Shape of (Ast.shape_field_name * expr) list
     (* TODO: T38184446 Consolidate collections in AAST *)
   | ValCollection of vc_kind * targ option * expr list
     (* TODO: T38184446 Consolidate collections in AAST *)
@@ -321,7 +321,7 @@ and class_ = {
   c_uses           : hint list        ;
   c_method_redeclarations : method_redeclaration list;
   c_xhp_attr_uses  : hint list        ;
-  c_xhp_category   : pstring list     ;
+  c_xhp_category   : (pos * pstring list) option;
   c_req_extends    : hint list        ;
   c_req_implements : hint list        ;
   c_implements     : hint list        ;
@@ -384,6 +384,8 @@ and class_var = {
   cv_id              : sid                ;
   cv_expr            : expr option        ;
   cv_user_attributes : user_attribute list;
+  cv_doc_comment     : string option      ;
+  cv_is_promoted_variadic : bool          ;
 }
 
 and method_ = {
@@ -444,6 +446,7 @@ and gconst = {
   cst_type: hint option;
   cst_value: expr option;
   cst_namespace: nsenv;
+  cst_span: pos;
 }
 
 and pu_enum = {
@@ -471,6 +474,7 @@ and def =
   | Namespace of sid * program
   | NamespaceUse of (ns_kind * sid * sid) list
   | SetNamespaceEnv of nsenv
+  | FileAttributes of file_attribute
 
 and ns_kind =
   | NSNamespace

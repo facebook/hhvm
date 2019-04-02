@@ -6464,6 +6464,8 @@ and class_var_def env ~is_static c cv =
       T.cv_id = cv.cv_id;
       T.cv_expr = typed_cv_expr;
       T.cv_user_attributes = List.map cv.cv_user_attributes (user_attribute env);
+      T.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
+      T.cv_doc_comment = cv.cv_doc_comment; (* Can make None to save space *)
     }
   end
 
@@ -6707,7 +6709,8 @@ and typedef_def tcopt typedef  =
   end in
   let env = begin match hint with
     | pos, Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
-      check_shape_keys_validity env pos (ShapeMap.keys nsi_field_map)
+      let get_name sfi = sfi.sfi_name in
+      check_shape_keys_validity env pos (List.map ~f:get_name nsi_field_map)
     | _ -> env
   end in
   let env = Typing_attributes.check_def env new_object
@@ -6750,6 +6753,7 @@ and gconst_def tcopt cst =
     T.cst_type = cst.cst_type;
     T.cst_value = typed_cst_value;
     T.cst_namespace = cst.cst_namespace;
+    T.cst_span = cst.cst_span;
   }
 
 (* Calls the method of a class, but allows the f callback to override the
@@ -6822,7 +6826,8 @@ let nast_to_tast opts nast =
       T.Stmt (snd (stmt env s))
     | Nast.Namespace _
     | Nast.NamespaceUse _
-    | Nast.SetNamespaceEnv _ ->
+    | Nast.SetNamespaceEnv _
+    | Nast.FileAttributes _ ->
       failwith "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   Nast_check.program nast;

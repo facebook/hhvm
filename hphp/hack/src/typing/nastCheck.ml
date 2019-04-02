@@ -431,10 +431,9 @@ and hint_ env p = function
       );
       ()
   | Hshape { nsi_allows_unknown_fields=_; nsi_field_map } ->
-      let compute_hint_for_shape_field_info _ { sfi_hint; _; } =
+      let compute_hint_for_shape_field_info { sfi_hint; _; } =
         hint env sfi_hint in
-
-      ShapeMap.iter compute_hint_for_shape_field_info nsi_field_map
+      List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
   | Hsoft h ->
       hint env h; ()
 

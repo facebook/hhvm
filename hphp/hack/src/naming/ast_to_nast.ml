@@ -15,7 +15,7 @@ type class_body =
   c_uses           : Aast.hint list                       ;
   c_method_redeclarations : Aast.method_redeclaration list;
   c_xhp_attr_uses  : Aast.hint list                       ;
-  c_xhp_category   : pstring list                         ;
+  c_xhp_category   : (pos * pstring list) option          ;
   c_req_extends    : Aast.hint list                       ;
   c_req_implements : Aast.hint list                       ;
   c_consts         : Aast.class_const list                ;
@@ -35,7 +35,7 @@ let make_empty_class_body = {
   c_uses = [];
   c_method_redeclarations = [];
   c_xhp_attr_uses = [];
-  c_xhp_category = [];
+  c_xhp_category = None;
   c_req_extends = [];
   c_req_implements = [];
   c_consts = [];
@@ -86,15 +86,19 @@ and get_pos_shape_name name =
 
 and on_shape_info info =
   let on_shape_field sf =
-    Aast.{ sfi_optional = sf.sf_optional; sfi_hint = on_hint sf.sf_hint } in
-  let nfm =
+    Aast.{ sfi_optional = sf.sf_optional; sfi_hint = on_hint sf.sf_hint; sfi_name = sf.sf_name } in
+  let _, nfm =
     List.fold_left
-      (fun acc sf ->
-        if ShapeMap.mem sf.sf_name acc
+      (fun (map_, list_) sf ->
+        if ShapeMap.mem sf.sf_name map_
         then Errors.fd_name_already_bound (get_pos_shape_name sf.sf_name);
-        ShapeMap.add sf.sf_name (on_shape_field sf) acc)
-      ShapeMap.empty
+        let sfi = on_shape_field sf in
+        let map_ = ShapeMap.add sf.sf_name sfi map_ in
+        let list_ = sfi :: list_ in
+        map_, list_)
+      (ShapeMap.empty, [])
       info.si_shape_field_list in
+  let nfm = List.rev nfm in
   Aast.{
     nsi_allows_unknown_fields = info.si_allows_unknown_fields;
     nsi_field_map = nfm;
@@ -158,35 +162,25 @@ and on_class_elt trait_or_interface body elt : class_body =
   | ClassTraitRequire (MustImplement, h) ->
     let hints = on_hint h :: body.c_req_implements in
     { body with c_req_implements = hints; }
-  | ClassVars cv when List.mem Static cv.cv_kinds ->
-    let attrs = on_list on_user_attribute cv.cv_user_attributes in
-    let vars =
-      on_list_append_acc
-        body.c_static_vars
-        (on_class_var false (optional on_hint cv.cv_hint) attrs cv.cv_kinds)
-        cv.cv_names in
+  | ClassVars cvs when List.mem Static cvs.cv_kinds ->
+    let vars = on_class_vars_with_acc body.c_static_vars cvs in
     { body with c_static_vars = vars; }
-  | ClassVars { cv_names; cv_user_attributes; cv_hint; cv_kinds; _ } ->
-    let attrs = on_list on_user_attribute cv_user_attributes in
-    let vars =
-      on_list_append_acc
-      body.c_vars
-      (on_class_var false (optional on_hint cv_hint) attrs cv_kinds)
-      cv_names in
+  | ClassVars cvs ->
+    let vars = on_class_vars_with_acc body.c_vars cvs in
     { body with c_vars = vars; }
   | XhpAttr (hopt, var, is_required, maybe_enum)  ->
     (* TODO: T37984688 Updating naming.ml to use c_xhp_attrs *)
     let hopt = optional on_hint hopt in
     let attrs =
       (hopt,
-        on_class_var true hopt [] [] var,
+        on_class_var true hopt [] [] false None var,
         is_required,
         optional on_xhp_attr maybe_enum) :: body.c_xhp_attrs in
     { body with c_xhp_attrs = attrs; }
-  | XhpCategory (_, cs) ->
-    if body.c_xhp_category <> [] && cs <> []
+  | XhpCategory (p, cs) ->
+    if body.c_xhp_category <> None && cs <> []
     then Errors.multiple_xhp_category (fst (List.hd cs));
-    { body with c_xhp_category = cs; }
+    { body with c_xhp_category = Some (p, cs); }
   | XhpChild (p, c) ->
     let children = (p, on_xhp_child c) :: body.c_xhp_children in
     { body with c_xhp_children = children; }
@@ -499,7 +493,7 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
     c_tconst_user_attributes = on_list on_user_attribute tc.tconst_user_attributes;
   }
 
-and on_class_var is_xhp h attrs kinds (_, id, eopt) : Aast.class_var =
+and on_class_var is_xhp h attrs kinds variadic doc_com (_, id, eopt) : Aast.class_var =
   let cv_final = List.mem Final kinds in
   let cv_visibility = List.fold_left
     begin
@@ -520,7 +514,30 @@ and on_class_var is_xhp h attrs kinds (_, id, eopt) : Aast.class_var =
     cv_id = id;
     cv_expr = optional on_expr eopt;
     cv_user_attributes = attrs;
+    cv_is_promoted_variadic = variadic;
+    cv_doc_comment = doc_com
   }
+
+(**
+ * Doc comments are currently used for codegen but are not required for typing.
+ * When used for codegen, doc comments are only used for the emission of the
+ * first variable in a list of class vars declared together. For instance, $x:
+ * `public int $x, $y;`
+ *)
+and on_class_vars_with_acc acc cvs =
+  match cvs.cv_names with
+  | cv :: rest ->
+    let with_dc_name =
+      on_class_var
+        false
+        (optional on_hint cvs.cv_hint)
+        (on_list on_user_attribute cvs.cv_user_attributes)
+        cvs.cv_kinds
+        cvs.cv_is_promoted_variadic in
+    let cv = with_dc_name cvs.cv_doc_comment cv in
+    let acc = cv :: acc in
+    on_list_append_acc acc (with_dc_name None) rest
+  | [] -> acc
 
 and on_xhp_attr (p, b, el) = (p, b, on_list on_expr el)
 
@@ -640,7 +657,7 @@ and on_class_body trait_or_interface cb =
     c_uses = List.rev reversed_body.c_uses;
     c_method_redeclarations = List.rev reversed_body.c_method_redeclarations;
     c_xhp_attr_uses = List.rev reversed_body.c_xhp_attr_uses;
-    c_xhp_category = List.rev reversed_body.c_xhp_category;
+    c_xhp_category = reversed_body.c_xhp_category;
     c_req_extends = List.rev reversed_body.c_req_extends;
     c_req_implements = List.rev reversed_body.c_req_implements;
     c_consts = List.rev reversed_body.c_consts;
@@ -729,6 +746,7 @@ and on_constant (c : gconst) : Aast.gconst =
     cst_type = optional on_hint c.cst_type;
     cst_value = Some (on_expr c.cst_value);
     cst_namespace = c.cst_namespace;
+    cst_span = c.cst_span;
   }
 
 and on_ns_use (k, id1, id2): (Aast.ns_kind * Aast.sid * Aast.sid) =
@@ -750,7 +768,7 @@ and on_def : def -> Aast.def = function
   | Namespace (id, p) -> Aast.Namespace (id, on_program p)
   | NamespaceUse usel -> Aast.NamespaceUse (on_list on_ns_use usel)
   | SetNamespaceEnv env -> Aast.SetNamespaceEnv env
-  | FileAttributes _ -> Aast.Stmt (Pos.none, Aast.Noop)
+  | FileAttributes fa -> Aast.FileAttributes (on_file_attribute fa)
 
 and on_program ast = on_list on_def ast
 

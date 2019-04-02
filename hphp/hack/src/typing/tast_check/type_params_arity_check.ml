@@ -52,7 +52,7 @@ let rec check_hint env (pos, hint) =
     | _ -> ()
     end
   | Aast.Hshape Aast.{ nsi_allows_unknown_fields=_; nsi_field_map } ->
-    ShapeMap.iter (fun _ v -> check_hint env v.Aast.sfi_hint) nsi_field_map
+    List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
   | Aast.Hsoft h ->
     check_hint env h
   | Aast.Haccess _ -> ()

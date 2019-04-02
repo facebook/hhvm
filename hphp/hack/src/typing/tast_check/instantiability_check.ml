@@ -87,7 +87,7 @@ let rec check_hint env (pos, hint) =
     List.iter hl (check_hint env)
 
 and check_shape env Aast.{ nsi_allows_unknown_fields=_; nsi_field_map } =
-  ShapeMap.iter (fun _ v -> check_hint env v.Aast.sfi_hint) nsi_field_map
+  List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
 
 (* Need to skip the root of the Haccess element *)
 and check_access env h _ =

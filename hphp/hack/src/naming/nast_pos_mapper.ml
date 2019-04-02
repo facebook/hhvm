@@ -159,19 +159,18 @@ and hint_ f = function
     Hfun (is_reactive, is_coroutine, List.map hl (hint f), kl, m, b, hint f h, rm)
   | Happly (sid, hl) -> Happly (pstring f sid, List.map hl (hint f))
   | Hshape nast_shape_info ->
-    let add_shape_field_info_to_shape_map sf shape_field_info acc =
-      let map_over_shape_field_info ~f shape_field_info =
-        { shape_field_info with sfi_hint=f shape_field_info.sfi_hint } in
-      let sf = shape_field f sf in
+    let on_shape_field_info shape_field_info =
+      let map_over_shape_field_info ~fn shape_field_info =
+        { shape_field_info with
+          sfi_hint = fn shape_field_info.sfi_hint;
+          sfi_name = shape_field f shape_field_info.sfi_name;
+        } in
       let h = hint f in
-      let shape_field_info = map_over_shape_field_info ~f:h shape_field_info in
-      ShapeMap.add sf shape_field_info acc in
-
+      map_over_shape_field_info ~fn:h shape_field_info in
     let nsi_field_map =
-      ShapeMap.fold
-        add_shape_field_info_to_shape_map
-        nast_shape_info.nsi_field_map
-        ShapeMap.empty in
+      List.map
+        ~f:on_shape_field_info
+        nast_shape_info.nsi_field_map in
     Hshape { nast_shape_info with nsi_field_map }
   | Haccess (h, sids) -> Haccess (hint f h, List.map sids (pstring f))
   | Hsoft h -> Hsoft (hint f h)

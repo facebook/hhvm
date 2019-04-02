@@ -176,7 +176,8 @@ let def_env d =
   | Stmt _
   | Namespace _
   | NamespaceUse _
-  | SetNamespaceEnv _ -> empty GlobalOptions.default
+  | SetNamespaceEnv _
+  | FileAttributes _ -> empty GlobalOptions.default
 
 let set_ppl_lambda env =
   { env with Typing_env.inside_ppl_class = false }

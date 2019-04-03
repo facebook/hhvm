@@ -33,6 +33,8 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             '--retries',
             '60',
             '--no-load',
+            '--error-format',
+            'raw',
             self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
             stdin=stdin)

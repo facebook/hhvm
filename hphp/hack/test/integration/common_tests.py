@@ -170,6 +170,8 @@ class CommonTestDriver(unittest.TestCase):
                 'check',
                 '--retries',
                 '20',
+                '--error-format',
+                'raw',
                 self.repo_dir
             ] + list(map(lambda x: x.format(root=root), options)),
             stdin=stdin)

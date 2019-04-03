@@ -4888,21 +4888,17 @@ OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
   ar->trashThis();
 }
 
-void fPushObjMethodImpl(StringData* name,
-                        ObjectData* obj,
-                        int numArgs,
-                        bool dynamic) {
+void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
   const Func* f;
   LookupResult res;
+  assertx(tvIsObject(vmStack().topC()));
+  auto const obj = vmStack().topC()->m_data.pobj;
   auto cls = obj->getVMClass();
-  try {
-    res = lookupObjMethod(
-      f, cls, name, arGetContextClass(vmfp()), true);
-  } catch (...) {
-    decRefObj(obj);
-    throw;
-  }
+  // if lookup throws, obj will be decref'd via stack
+  res = lookupObjMethod(
+    f, cls, name, arGetContextClass(vmfp()), true);
   assertx(f);
+  vmStack().discard();
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
   if (res == LookupResult::MethodFoundNoThis) {
@@ -4939,6 +4935,8 @@ void fPushObjMethodImpl(StringData* name,
 
 void fPushNullObjMethod(int numArgs) {
   assertx(SystemLib::s_nullFunc);
+  assertx(tvIsNull(vmStack().topC()));
+  vmStack().discard();
   ActRec* ar = vmStack().allocA();
   ar->m_func = SystemLib::s_nullFunc;
   ar->trashThis();
@@ -4993,11 +4991,9 @@ OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
                             getDataTypeString(c2->m_type).get()->data());
     }
     vmStack().popC();
-    vmStack().popC();
     fPushNullObjMethod(numArgs);
     return;
   }
-  ObjectData* obj = c2->m_data.pobj;
   StringData* name = c1->m_data.pstr;
 
   if (UNLIKELY(args.size)) {
@@ -5005,9 +5001,9 @@ OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
     name = mangleInOutName(name, args);
   }
 
-  // We handle decReffing obj and name in fPushObjMethodImpl
-  vmStack().ndiscard(2);
-  fPushObjMethodImpl(name, obj, numArgs, true);
+  // We handle decReffing name in fPushObjMethodImpl
+  vmStack().discard();
+  fPushObjMethodImpl(name, numArgs, true);
 }
 
 OPTBLD_INLINE void
@@ -5018,14 +5014,10 @@ iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
       throw_call_non_object(name->data(),
                             getDataTypeString(c1->m_type).get()->data());
     }
-    vmStack().popC();
     fPushNullObjMethod(numArgs);
     return;
   }
-  ObjectData* obj = c1->m_data.pobj;
-  // We handle decReffing obj in fPushObjMethodImpl
-  vmStack().discard();
-  fPushObjMethodImpl(const_cast<StringData*>(name), obj, numArgs, false);
+  fPushObjMethodImpl(const_cast<StringData*>(name), numArgs, false);
 }
 
 namespace {

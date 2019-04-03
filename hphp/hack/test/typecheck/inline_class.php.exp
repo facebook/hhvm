@@ -1,2 +1,0 @@
-File "inline_class.php", line 3, characters 5-16:
-Encountered unexpected text 'class bar {}', was expecting a statement. (Parsing[1002])

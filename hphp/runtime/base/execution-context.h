@@ -611,6 +611,7 @@ public:
   Variant m_memThresholdCallback;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
+  hphp_fast_set<std::string> m_setprofileFunctions;
 public:
   Cell m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops

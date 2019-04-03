@@ -3,13 +3,15 @@
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/server/server-stats.h"
+#include "hphp/runtime/base/array-iterator.h"
 
 namespace HPHP {
 /////////////////////////////////////////////////////////////////////////////
 
 void HHVM_FUNCTION(fb_setprofile,
   const Variant& callback,
-  int64_t flags = EventHook::ProfileDefault
+  int64_t flags,
+  ArrayArg functions
 ) {
   if (RequestInfo::s_requestInfo->m_profiler != nullptr) {
     // phpprof is enabled, don't let PHP code override it
@@ -17,6 +19,17 @@ void HHVM_FUNCTION(fb_setprofile,
   }
   g_context->m_setprofileCallback = callback;
   g_context->m_setprofileFlags = flags;
+  g_context->m_setprofileFunctions.clear();
+  g_context->m_setprofileFunctions.reserve(functions->size());
+  IterateV(
+    functions.get(),
+    [&](TypedValue tv) -> bool {
+      if (isStringType(type(tv))) {
+        g_context->m_setprofileFunctions.emplace(val(tv).pstr->toCppString());
+      }
+      return false;
+    }
+  );
   if (callback.isNull()) {
     HPHP::EventHook::Disable();
   } else {

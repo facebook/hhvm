@@ -128,7 +128,10 @@ bool shouldRunUserProfiler(const Func* func) {
   // Don't do anything if we are running the profiling function itself
   // or if we haven't set up a profiler.
   if (g_context->m_executingSetprofileCallback ||
-      g_context->m_setprofileCallback.isNull()) {
+      g_context->m_setprofileCallback.isNull() ||
+      (!g_context->m_setprofileFunctions.empty() &&
+        g_context->m_setprofileFunctions.count(
+          func->fullName()->toCppString()) == 0)) {
     return false;
   }
   // Don't profile 86ctor, since its an implementation detail,

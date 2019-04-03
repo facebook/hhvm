@@ -1700,11 +1700,11 @@ let skip_to_end_of_markup lexer =
     if index != 0 then failwith "Should only try to lex header at start of document";
     if peek_def ~def:'\x00' lexer index = '#' && peek_def ~def:'\x00' lexer (succ index) = '!'
     then succ (skip_while_to_offset lexer not_newline)
-    (* this should really just be `index` - but, skip empty lines as the FFP *)
+    (* this should really just be `index` - but, skip whitespace as the FFP *)
     (* tests use magic comments in leading markup to set flags, but blank *)
     (* them out before parsing; the newlines are kept to provide correct line *)
     (* numbers in errors *)
-    else skip_while_to_offset lexer is_newline
+    else skip_while_to_offset lexer (fun c -> is_newline c || is_whitespace_no_newline c)
   in
   if peek lexer start_offset = '<' && peek_def ~def:'\x00' lexer (succ start_offset) = '?'
   then make_markup_and_suffix (with_offset lexer start_offset)

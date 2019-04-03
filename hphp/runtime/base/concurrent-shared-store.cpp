@@ -614,7 +614,9 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
   SharedMutex::ReadHolder l(m_lock);
   bool expired = false;
   bool promoteObj = false;
+  bool needsToLocal = false;
   auto tag = tagStringData(keyStr.get());
+
   {
     Map::const_accessor acc;
     if (!m_vars.find(acc, tag)) {
@@ -654,9 +656,13 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
           !svar->objAttempted()) {
         // Hold ref here for later promoting the object
         svar->referenceNonRoot();
-        promoteObj = true;
+        needsToLocal = promoteObj = true;
+      } else if (svar->isTypedValue()) {
+        value = svar->toLocal();
+      } else {
+        svar->referenceNonRoot();
+        needsToLocal = true;
       }
-      value = sval->toLocal();
       if (!promoteObj) {
         /*
          * Successful slow-case lookup => add value to cache (if key and kind
@@ -675,11 +681,14 @@ bool ConcurrentTableSharedStore::get(const String& keyStr, Variant& value) {
     return false;
   }
 
-  if (promoteObj)  {
-    handlePromoteObj(keyStr, svar, value);
-    // release the extra ref
-    svar->unreferenceNonRoot();
+  if (needsToLocal) {
+    SCOPE_EXIT { svar->unreferenceNonRoot(); };
+
+    l.unlock(); // toLocal() may reenter the autolaoder
+    value = svar->toLocal();
+    if (promoteObj) handlePromoteObj(keyStr, svar, value);
   }
+
   return true;
 }
 
@@ -738,7 +747,10 @@ bool ConcurrentTableSharedStore::cas(const String& key, int64_t old,
   auto const oldHandle =
     sval.data().match([&](APCHandle* h) { return h; },
                       [&](char* /*file*/) { return unserialize(key, &sval); });
-  if (!oldHandle || oldHandle->toLocal().toInt64() != old) {
+  if (!oldHandle ||
+      (oldHandle->kind() != APCKind::Int &&
+       oldHandle->kind() != APCKind::Double) ||
+      oldHandle->toLocal().toInt64() != old) {
     return false;
   }
 

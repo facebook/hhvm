@@ -207,7 +207,7 @@ TEST(APC, BasicPrimeStuff) {
   EXPECT_TRUE(found);
   EXPECT_FALSE(store->get("int_200", val));
 
-  EXPECT_EQ(store->cas("obj_1", 1, 2), true); // stdclass converts to 1
+  EXPECT_EQ(store->cas("obj_1", 1, 2), false); // cannot cas an object
   EXPECT_EQ(store->cas("obj_2", 4, 5), false);
   EXPECT_EQ(store->cas("int_4", 4, 5), true);
   EXPECT_EQ(store->cas("int_5", 4, 5), false);

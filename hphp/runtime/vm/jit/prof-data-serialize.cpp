@@ -1398,7 +1398,9 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
       throw std::runtime_error(
           "Stale profile data (check Eval.ProfDataTTLHours)");
     } else if (buildTime > currTime) {
-      throw std::runtime_error("profile data dumped in the future?");
+      throw std::runtime_error(
+          folly::sformat("profile data build timestame: {}, currTime: {}",
+                         buildTime, currTime).c_str());
     }
 
     InstanceBits::deserialize(ser);

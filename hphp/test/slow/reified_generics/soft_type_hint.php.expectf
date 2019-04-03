@@ -1,0 +1,12 @@
+Warning: Value returned from function f() must be of type @int, null given in %s on line 7
+NULL
+int(1)
+
+Warning: Value returned from function f() must be of type @C, null given in %s on line 7
+NULL
+object(C) (0) {
+}
+
+Warning: Value returned from function f() must be of type @C, D given in %s on line 7
+object(D) (0) {
+}

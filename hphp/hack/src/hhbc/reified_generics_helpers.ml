@@ -40,12 +40,12 @@ let rec has_reified_type_constraint env h =
       if List.is_empty hl || is_all_erased hl then NotReified else
         List.fold_right hl ~init:MaybeReified
           ~f:(fun h v -> combine v @@ has_reified_type_constraint env h)
+  | A.Hsoft h
   | A.Hoption h -> has_reified_type_constraint env h
   | A.Htuple _
   | A.Hshape _
   | A.Hfun _
-  | A.Haccess _
-  | A.Hsoft _ -> NotReified
+  | A.Haccess _ -> NotReified
 
 let rec remove_awaitable (pos, _h as h) = match _h with
   | A.Happly ((_, id), [h]) when String.lowercase id = "awaitable" -> h

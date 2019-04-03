@@ -805,7 +805,10 @@ Array resolveTS(TSEnv& env,
       assertx(arr.exists(s_id));
       auto id = arr[s_id].toInt64Val();
       assertx(id < env.tsList->size());
-      return env.tsList->at(id);
+      // We want the data in the reified generic array to write over the data
+      // in newarr hence using merge
+      newarr = newarr.merge(env.tsList->at(id)).toDArray();
+      break;
     }
     case TypeStructure::Kind::T_xhp:
     default:

@@ -861,6 +861,7 @@ bool checkTypeStructureMatchesCellImpl(
       // on these during resolution
       always_assert(false);
   }
+  if (!warn && is_ts_soft(ts.get())) warn = true;
   if (genErrorMessage && !result) {
     if (givenType.empty()) givenType = describe_actual_type(&c1, true);
     if (expectedType.empty()) {

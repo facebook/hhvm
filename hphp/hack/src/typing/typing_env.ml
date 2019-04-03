@@ -205,6 +205,11 @@ let get_shape_field_name = function
   | Ast.SFlit_str (_, s) -> s
   | Ast.SFclass_const ((_, s1), (_, s2)) -> s1^"::"^s2
 
+let get_shape_field_name_pos = function
+  | Ast.SFlit_int (p, _)
+  | Ast.SFlit_str (p, _)
+  | Ast.SFclass_const ((p, _), _) -> p
+
 let get_tpenv_lower_bounds tpenv name =
 match SMap.get name tpenv with
 | None -> empty_bounds

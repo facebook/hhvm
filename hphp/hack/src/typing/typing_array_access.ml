@@ -229,34 +229,48 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
           env, err_witness env p
       )
   | Tshape (_, fdm) ->
-    let p = fst e2 in
-    (match TUtils.shape_field_name env e2 with
+    if is_lvalue || lhs_of_null_coalesce
+    then
+      (* The expression $s['x'] ?? $y is semantically equivalent to
+         Shapes::idx ($s, 'x') ?? $y.  I.e., if $s['x'] occurs on
+         the left of a coalesce operator, then for type checking it
+         can be treated as if it evaluated to null instead of
+         throwing an exception if the field 'x' doesn't exist in $s.
+       *)
+      Typing_shapes.idx env expr_pos Reason.Rnone ty1 e2 None
+    else
+      let p = fst e2 in
+      begin match TUtils.shape_field_name env e2 with
       | None ->
           (* there was already an error in shape_field name,
              don't report another one for a missing field *)
           env, err_witness env p
-      | Some field -> (match ShapeMap.get field fdm with
+      | Some field ->
+        begin match ShapeMap.get field fdm with
         | None ->
           Errors.undefined_field
             ~use_pos:p
             ~name:(TUtils.get_printable_shape_field_name field)
             ~shape_type_pos:(Reason.to_pos r);
           env, err_witness env p
-        | Some { sft_optional = true; _ }
-          when not is_lvalue && not lhs_of_null_coalesce ->
-          let declared_field =
+        | Some {sft_optional; sft_ty} ->
+          if sft_optional
+          then
+            let declared_field =
               List.find_exn
                 ~f:(fun x -> Ast.ShapeField.compare field x = 0)
                 (ShapeMap.keys fdm) in
-          let declaration_pos = match declared_field with
-            | Ast.SFlit_int (p, _) | Ast.SFlit_str (p, _) | Ast.SFclass_const ((p, _), _) -> p in
-          Errors.array_get_with_optional_field
-            p
-            declaration_pos
-            (TUtils.get_printable_shape_field_name field);
-          env, err_witness env p
-        | Some { sft_optional = _; sft_ty } -> env, sft_ty)
-    )
+            begin
+              Errors.array_get_with_optional_field
+                p
+                (Env.get_shape_field_name_pos declared_field)
+                (TUtils.get_printable_shape_field_name field);
+              env, err_witness env p
+            end
+          else
+            env, sft_ty
+        end
+      end
   | Toption ty -> nullable_container_get env ty
   | Tprim Tnull ->
     let ty =

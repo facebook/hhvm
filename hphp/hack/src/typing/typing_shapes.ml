@@ -172,7 +172,7 @@ let is_shape_field_required env field_name shape_ty =
  *     Shapes::idx(e1, sfn, e2) : t
  *
  *)
-let idx env p fty shape_ty field default =
+let idx env p fty_pos shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
   let env, res = Env.fresh_unresolved_type env p in
   match TUtils.shape_field_name env field with
@@ -193,7 +193,7 @@ let idx env p fty shape_ty field default =
            TypecheckerOptions.experimental_stronger_shape_idx_ret &&
          is_shape_field_required env field_name shape_ty
       then res
-      else TUtils.ensure_option env (fst fty) res)
+      else TUtils.ensure_option env fty_pos res)
     | Some (default_pos, default_ty) ->
       let env =
         Type.sub_type (fst field) Reason.URparam env

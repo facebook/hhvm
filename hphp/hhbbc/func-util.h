@@ -37,6 +37,8 @@ uint32_t closure_num_use_vars(const php::Func*);
  */
 bool is_pseudomain(const php::Func*);
 
+bool is_methcaller(const StringData* name);
+
 /*
  * Locals with certain special names can be set in the enclosing scope by
  * various php routines.  We don't attempt to track their types.  Furthermore,

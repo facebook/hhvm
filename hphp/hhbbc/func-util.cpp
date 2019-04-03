@@ -37,6 +37,10 @@ bool is_pseudomain(const php::Func* f) {
   return f->unit->pseudomain.get() == f;
 }
 
+bool is_methcaller(const StringData* name) {
+  return Func::isMethCallerName(name);
+}
+
 bool is_volatile_local(const php::Func* func,
                        LocalId lid) {
   if (is_pseudomain(func)) return true;

@@ -1984,6 +1984,11 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
         continue;
       }
       if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
+
+      // Remove the duplicated MethCaller names.
+      if (is_methcaller(f->name)) {
+        index.funcs.erase(funcs.first, funcs.second);
+      }
     }
     if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
     index.funcs.insert({f->name, f.get()});

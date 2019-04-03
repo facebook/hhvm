@@ -11,3 +11,8 @@ $x = \HH\meth_caller(\Ans\A::class, "afunc");
 // A::class is in Ans\Bns namespace
 $x = \HH\meth_caller(A::class, "afunc");
 \var_dump($x, $x(new A(), 1));
+
+$x = \HH\meth_caller(\Ans\A::class, "afunc");
+\var_dump($x, $x(new \Ans\A(), 4));
+// failure case
+\var_dump($x, $x(new A(), 4));

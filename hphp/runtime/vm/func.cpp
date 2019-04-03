@@ -354,6 +354,10 @@ const StringData* Func::genMemoizeImplName(const StringData* origName) {
   return makeStaticString(folly::sformat("{}$memoize_impl", origName->data()));
 }
 
+bool Func::isMethCallerName(const StringData* name) {
+  return (name->size() > 11) && !memcmp(name->data(), "MethCaller$", 11);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // FuncId manipulation.
 

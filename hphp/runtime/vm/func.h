@@ -728,6 +728,11 @@ struct Func final {
    */
   static const StringData* genMemoizeImplName(const StringData*);
 
+  /*
+   * Given a function name, return true if it's meth_caller.
+   */
+  static bool isMethCallerName(const StringData*);
+
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]
 

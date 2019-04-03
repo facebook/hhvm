@@ -653,6 +653,10 @@ void Unit::defFunc(Func* func, bool debugger) {
       rds::initHandle(handle);
     } else {
       if (funcAddr.get() == func) return;
+      if (Func::isMethCallerName(func->name())) {
+        // emit the duplicated meth_caller directly
+        return;
+      }
       raise_error(Strings::FUNCTION_ALREADY_DEFINED, func->name()->data());
     }
     funcAddr = func;

@@ -143,6 +143,11 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   if (preClass && preClass->attrs() & AttrInterface) {
     attrs |= AttrAbstract;
   }
+  bool isMethCaller = Func::isMethCallerName(name);
+  if (isMethCaller) {
+    attrs |= RuntimeOption::RepoAuthoritative ?
+            (AttrBuiltin | AttrPersistent) : AttrBuiltin;
+  }
   if (attrs & AttrPersistent && !preClass) {
     if ((RuntimeOption::EvalJitEnableRenameFunction ||
          attrs & AttrInterceptable ||
@@ -153,7 +158,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       attrs = Attr(attrs & ~AttrPersistent);
     }
   } else {
-    assertx(preClass || !(attrs & AttrBuiltin));
+    assertx(preClass || !(attrs & AttrBuiltin) || isMethCaller);
   }
   if (!RuntimeOption::RepoAuthoritative) {
     // In non-RepoAuthoritative mode, any function could get a VarEnv because

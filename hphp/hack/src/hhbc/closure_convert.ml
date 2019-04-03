@@ -584,7 +584,7 @@ let convert_meth_caller_to_func_ptr env st p pc cls pf func =
       [(p, Lvar args_var)]) in
     let fd =  {
       f_mode = (get_scope_fmode env.scope);
-      f_namespace = st.namespace;
+      f_namespace = Namespace_env.empty_with_default_popt;
       f_name = (p, mangle_name);
       f_params =
         [(make_fn_param obj_var false); (make_fn_param args_var true)];
@@ -593,7 +593,7 @@ let convert_meth_caller_to_func_ptr env st p pc cls pf func =
       f_tparams = [];
       f_constrs = [];
       f_ret = None;
-      f_user_attributes = [];
+      f_user_attributes = [{ua_name = (p, "builtin"); ua_params = []}];
       f_file_attributes = [];
       f_fun_kind = FSync;
       f_span = p;

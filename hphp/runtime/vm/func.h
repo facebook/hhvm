@@ -1481,14 +1481,6 @@ struct PrologueID {
 bool disallowDynamicVarEnvFuncs();
 
 /*
- * Could the function write or read to the locals in the environment of
- * its caller?
- *
- * This occurs, e.g., if `func' is extract().
- */
-bool funcReadsLocals(const Func*);
-
-/*
  * Could the function `callee` attempt to read the caller frame?
  *
  * This occurs, e.g., if `func' is is_callable().

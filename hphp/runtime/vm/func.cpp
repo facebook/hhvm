@@ -1046,22 +1046,12 @@ bool disallowDynamicVarEnvFuncs() {
   return RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON;
 }
 
-bool funcReadsLocals(const Func* callee) {
-  assertx(callee != nullptr);
-
-  // A skip-frame function can dynamically call a function which reads from the
-  // caller's frame. If we don't forbid such dynamic calls, we have to be
-  // pessimistic.
-  return callee->isSkipFrame() && !disallowDynamicVarEnvFuncs();
-}
-
 bool funcNeedsCallerFrame(const Func* callee) {
   assertx(callee != nullptr);
 
   return
     (callee->isCPPBuiltin() &&
-      s_ignores_frame.count(callee->name()->data()) == 0) ||
-    funcReadsLocals(callee);
+      s_ignores_frame.count(callee->name()->data()) == 0);
 }
 
 void logFunc(const Func* func, StructuredLogEntry& ent) {

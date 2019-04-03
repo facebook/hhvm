@@ -631,63 +631,6 @@ void fpushFuncCommon(IRGS& env,
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Could `inst' read from the locals in the environment of `caller'?
- *
- * This occurs, e.g., if `inst' is a call to compact().
- */
-bool callReadsLocals(const NormalizedInstruction& inst,
-                     const Func* caller) {
-
-  auto const unit = caller->unit();
-
-  auto const checkTaintId = [&](Id id) {
-    auto const str = unit->lookupLitstrId(id);
-    // Only builtins can access a caller's locals or be skip-frame.
-    auto const callee = Unit::lookupBuiltin(str);
-    return callee && funcReadsLocals(callee);
-  };
-
-  if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
-  if (!isFCallStar(inst.op())) return false;
-
-  auto const fpi = caller->findFPI(inst.source.offset());
-  assertx(fpi != nullptr);
-  auto const fpushPC = unit->at(fpi->m_fpushOff);
-  auto const op = peek_op(fpushPC);
-
-  switch (op) {
-    case OpFPushFunc:
-      // Dynamic calls.  If we've forbidden dynamic calls to functions which
-      // access the caller's frame, we know this can't be one.
-      return !disallowDynamicVarEnvFuncs();
-
-    case OpFPushFuncD:
-      return checkTaintId(getImm(fpushPC, 1).u_SA);
-
-    case OpFPushFuncU:
-      return checkTaintId(getImm(fpushPC, 1).u_SA) ||
-             checkTaintId(getImm(fpushPC, 2).u_SA);
-
-    case OpFPushObjMethod:
-    case OpFPushObjMethodD:
-    case OpFPushClsMethod:
-    case OpFPushClsMethodS:
-    case OpFPushClsMethodSD:
-    case OpFPushClsMethodD:
-    case OpFPushCtor:
-      // None of these access the caller's frame because they all call methods,
-      // not top-level functions. However, they might still be marked as
-      // skip-frame and therefore something they call can affect our frame. We
-      // don't have to worry about this if they're not allowed to call such
-      // functions dynamically.
-      return !disallowDynamicVarEnvFuncs();
-
-    default:
-      always_assert("Unhandled FPush type in callAccessesLocals" && 0);
-  }
-}
-
-/*
  * Could `inst' attempt to read the caller frame?
  *
  * This occurs, e.g., if `inst' is a call to is_callable().
@@ -1535,10 +1478,6 @@ void emitFCall(IRGS& env,
   auto const numStackInputs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
 
-  auto const readLocals = callee
-    ? funcReadsLocals(callee)
-    : callReadsLocals(*env.currentNormalizedInstruction, curFunc(env));
-
   if (!emitCallerReffinessChecks(env, callee, fca, actRecOff)) return;
   emitCallerDynamicCallChecks(env, callee, actRecOff);
   emitCallerRxChecks(env, callee, actRecOff);
@@ -1550,7 +1489,6 @@ void emitFCall(IRGS& env,
       fca.numRets - 1,
       bcOff(env),
       callee,
-      readLocals
     };
     push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
     return;
@@ -1572,7 +1510,6 @@ void emitFCall(IRGS& env,
         fca.numRets - 1,
         bcOff(env) - curFunc(env)->base(),
         callee,
-        readLocals,
         needsCallerFrame,
         asyncEagerReturn,
       },
@@ -1666,7 +1603,6 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
       0,
       callBcOffset,
       callee,
-      funcReadsLocals(callee),
       funcNeedsCallerFrame(callee),
       false
     },

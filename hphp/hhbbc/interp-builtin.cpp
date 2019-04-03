@@ -401,7 +401,6 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   }();
 
   for (auto i = uint32_t{0}; i < num_args; ++i) popT(env);
-  specialFunctionEffects(env, func);
   push(env, rt);
 }
 

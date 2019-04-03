@@ -871,57 +871,6 @@ void killLocals(ISS& env) {
 }
 
 //////////////////////////////////////////////////////////////////////
-// Special functions
-
-void specialFunctionEffects(ISS& env, const res::Func& func) {
-  /*
-   * Skip-frame functions won't read from the caller's frame, but they might
-   * dynamically call a function which can. So, skip-frame functions read our
-   * locals unless they can't call such functions.
-   */
-  if ((RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
-       func.mightBeSkipFrame())) {
-    readUnknownLocals(env);
-  }
-}
-
-void specialFunctionEffects(ISS& env, ActRec ar) {
-  switch (ar.kind) {
-  case FPIKind::Unknown:
-    // fallthrough
-  case FPIKind::Func:
-    if (!ar.func) {
-      if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON) {
-        readUnknownLocals(env);
-      }
-      return;
-    }
-  case FPIKind::Builtin:
-    specialFunctionEffects(env, *ar.func);
-    if (ar.fallbackFunc) specialFunctionEffects(env, *ar.fallbackFunc);
-    break;
-  case FPIKind::Ctor:
-  case FPIKind::ObjMeth:
-  case FPIKind::ObjMethNS:
-  case FPIKind::ClsMeth:
-  case FPIKind::ObjInvoke:
-  case FPIKind::CallableArr:
-    /*
-     * Methods cannot read or write to the caller's frame, but they can be
-     * skip-frame (if they're a builtin). So, its possible they'll dynamically
-     * call a function which reads from the caller's frame. If we don't
-     * forbid this, we have to be pessimistic. Imagine something like
-     * Vector::map calling assert.
-     */
-    if (RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON &&
-        (!ar.func || ar.func->mightBeSkipFrame())) {
-      readUnknownLocals(env);
-    }
-    break;
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
 // class-ref slots
 
 // Read the specified class-ref slot without discarding the stored value.

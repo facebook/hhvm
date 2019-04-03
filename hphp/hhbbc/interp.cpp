@@ -3400,7 +3400,6 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
   }
 
   fpiPop(env);
-  specialFunctionEffects(env, ar);
 
   if (!fca.hasUnpack() && ar.func->name()->isame(s_function_exists.get())) {
     handle_function_exists(env, fca.numArgs, false);
@@ -3550,7 +3549,6 @@ void in(ISS& env, const bc::FCall& op) {
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
   fpiPop(env);
-  specialFunctionEffects(env, ar);
   if (fca.asyncEagerTarget != NoBlockId) {
     assertx(fca.numRets == 1);
     push(env, TInitCell);

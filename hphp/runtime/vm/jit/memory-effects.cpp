@@ -862,8 +862,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->numOut - 1
         ),
         // Locals.
-        extra->readLocals
-          ? AFrameAny : backtrace_locals(inst),
+        backtrace_locals(inst),
         // Callee.
         actrec_func(inst.src(0), extra->spOffset + extra->numParams)
       };
@@ -897,8 +896,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->numOut - 1
         ),
         // Locals.
-        extra->readLocals
-          ? AFrameAny : backtrace_locals(inst),
+        backtrace_locals(inst),
         // Callee.
         actrec_func(inst.src(0), extra->spOffset + extra->numParams)
       };
@@ -906,7 +904,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case CallBuiltin:
     {
-      auto const extra = inst.extra<CallBuiltin>();
       auto const stk = [&] () -> AliasClass {
         AliasClass ret = AEmpty;
         for (auto i = uint32_t{2}; i < inst.numSrcs(); ++i) {
@@ -919,9 +916,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      auto const readLocs = extra->readLocals ? AFrameAny : AEmpty;
       return may_load_store_kill(
-        stk | AHeapAny | readLocs,
+        stk | AHeapAny,
         AEmpty,
         AMIStateAny
       );

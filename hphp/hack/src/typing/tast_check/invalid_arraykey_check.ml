@@ -54,6 +54,9 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
     | Some _ -> ()
     | None ->
       if snd (Env.subtype env ty_have (fst ty_have, Tdynamic))
+      (* Terrible heuristic to agree with legacy: if we inferred `nothing` for
+       * the key type of the array, just let it pass *)
+      || snd (Env.subtype env ty_expect (fst ty_expect, Tunresolved []))
       || snd (Env.subtype env ty_have ty_expect)
       then ()
       else

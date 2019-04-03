@@ -3769,7 +3769,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_atom_mapping_right_paren = validate_option_with (validate_token) x.pocket_atom_mapping_right_paren
     ; pocket_atom_mapping_mappings = validate_list_with (validate_pumapping_aggregate) x.pocket_atom_mapping_mappings
     ; pocket_atom_mapping_left_paren = validate_option_with (validate_token) x.pocket_atom_mapping_left_paren
-    ; pocket_atom_mapping_expression = validate_token x.pocket_atom_mapping_expression
+    ; pocket_atom_mapping_name = validate_expression x.pocket_atom_mapping_name
     ; pocket_atom_mapping_glyph = validate_token x.pocket_atom_mapping_glyph
     }
   | s -> validation_fail (Some SyntaxKind.PocketAtomMappingDeclaration) s
@@ -3777,7 +3777,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.PocketAtomMappingDeclaration
       { pocket_atom_mapping_glyph = invalidate_token x.pocket_atom_mapping_glyph
-      ; pocket_atom_mapping_expression = invalidate_token x.pocket_atom_mapping_expression
+      ; pocket_atom_mapping_name = invalidate_expression x.pocket_atom_mapping_name
       ; pocket_atom_mapping_left_paren = invalidate_option_with (invalidate_token) x.pocket_atom_mapping_left_paren
       ; pocket_atom_mapping_mappings = invalidate_list_with (invalidate_pumapping_aggregate) x.pocket_atom_mapping_mappings
       ; pocket_atom_mapping_right_paren = invalidate_option_with (invalidate_token) x.pocket_atom_mapping_right_paren
@@ -3810,7 +3810,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_pocket_field_type_expr_declaration : pocket_field_type_expr_declaration validator = function
   | { Syntax.syntax = Syntax.PocketFieldTypeExprDeclaration x; value = v } -> v,
     { pocket_field_type_expr_semicolon = validate_token x.pocket_field_type_expr_semicolon
-    ; pocket_field_type_expr_name = validate_token x.pocket_field_type_expr_name
+    ; pocket_field_type_expr_name = validate_expression x.pocket_field_type_expr_name
     ; pocket_field_type_expr_type = validate_specifier x.pocket_field_type_expr_type
     ; pocket_field_type_expr_case = validate_token x.pocket_field_type_expr_case
     }
@@ -3820,7 +3820,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.PocketFieldTypeExprDeclaration
       { pocket_field_type_expr_case = invalidate_token x.pocket_field_type_expr_case
       ; pocket_field_type_expr_type = invalidate_specifier x.pocket_field_type_expr_type
-      ; pocket_field_type_expr_name = invalidate_token x.pocket_field_type_expr_name
+      ; pocket_field_type_expr_name = invalidate_expression x.pocket_field_type_expr_name
       ; pocket_field_type_expr_semicolon = invalidate_token x.pocket_field_type_expr_semicolon
       }
     ; Syntax.value = v
@@ -3828,7 +3828,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_pocket_field_type_declaration : pocket_field_type_declaration validator = function
   | { Syntax.syntax = Syntax.PocketFieldTypeDeclaration x; value = v } -> v,
     { pocket_field_type_semicolon = validate_token x.pocket_field_type_semicolon
-    ; pocket_field_type_name = validate_token x.pocket_field_type_name
+    ; pocket_field_type_name = validate_expression x.pocket_field_type_name
     ; pocket_field_type_type = validate_token x.pocket_field_type_type
     ; pocket_field_type_case = validate_token x.pocket_field_type_case
     }
@@ -3838,7 +3838,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.PocketFieldTypeDeclaration
       { pocket_field_type_case = invalidate_token x.pocket_field_type_case
       ; pocket_field_type_type = invalidate_token x.pocket_field_type_type
-      ; pocket_field_type_name = invalidate_token x.pocket_field_type_name
+      ; pocket_field_type_name = invalidate_expression x.pocket_field_type_name
       ; pocket_field_type_semicolon = invalidate_token x.pocket_field_type_semicolon
       }
     ; Syntax.value = v
@@ -3846,13 +3846,13 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_pocket_mapping_id_declaration : pocket_mapping_id_declaration validator = function
   | { Syntax.syntax = Syntax.PocketMappingIdDeclaration x; value = v } -> v,
     { pocket_mapping_id_initializer = validate_simple_initializer x.pocket_mapping_id_initializer
-    ; pocket_mapping_id_name = validate_token x.pocket_mapping_id_name
+    ; pocket_mapping_id_name = validate_expression x.pocket_mapping_id_name
     }
   | s -> validation_fail (Some SyntaxKind.PocketMappingIdDeclaration) s
   and invalidate_pocket_mapping_id_declaration : pocket_mapping_id_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PocketMappingIdDeclaration
-      { pocket_mapping_id_name = invalidate_token x.pocket_mapping_id_name
+      { pocket_mapping_id_name = invalidate_expression x.pocket_mapping_id_name
       ; pocket_mapping_id_initializer = invalidate_simple_initializer x.pocket_mapping_id_initializer
       }
     ; Syntax.value = v
@@ -3861,7 +3861,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | { Syntax.syntax = Syntax.PocketMappingTypeDeclaration x; value = v } -> v,
     { pocket_mapping_type_type = validate_specifier x.pocket_mapping_type_type
     ; pocket_mapping_type_equal = validate_token x.pocket_mapping_type_equal
-    ; pocket_mapping_type_name = validate_token x.pocket_mapping_type_name
+    ; pocket_mapping_type_name = validate_expression x.pocket_mapping_type_name
     ; pocket_mapping_type_keyword = validate_token x.pocket_mapping_type_keyword
     }
   | s -> validation_fail (Some SyntaxKind.PocketMappingTypeDeclaration) s
@@ -3869,7 +3869,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.PocketMappingTypeDeclaration
       { pocket_mapping_type_keyword = invalidate_token x.pocket_mapping_type_keyword
-      ; pocket_mapping_type_name = invalidate_token x.pocket_mapping_type_name
+      ; pocket_mapping_type_name = invalidate_expression x.pocket_mapping_type_name
       ; pocket_mapping_type_equal = invalidate_token x.pocket_mapping_type_equal
       ; pocket_mapping_type_type = invalidate_specifier x.pocket_mapping_type_type
       }

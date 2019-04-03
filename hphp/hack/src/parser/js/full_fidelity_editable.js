@@ -21403,7 +21403,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
 {
   constructor(
     glyph,
-    expression,
+    name,
     left_paren,
     mappings,
     right_paren,
@@ -21411,14 +21411,14 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   {
     super('pocket_atom_mapping', {
       glyph: glyph,
-      expression: expression,
+      name: name,
       left_paren: left_paren,
       mappings: mappings,
       right_paren: right_paren,
       semicolon: semicolon });
   }
   get glyph() { return this.children.glyph; }
-  get expression() { return this.children.expression; }
+  get name() { return this.children.name; }
   get left_paren() { return this.children.left_paren; }
   get mappings() { return this.children.mappings; }
   get right_paren() { return this.children.right_paren; }
@@ -21426,16 +21426,16 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   with_glyph(glyph){
     return new PocketAtomMappingDeclaration(
       glyph,
-      this.expression,
+      this.name,
       this.left_paren,
       this.mappings,
       this.right_paren,
       this.semicolon);
   }
-  with_expression(expression){
+  with_name(name){
     return new PocketAtomMappingDeclaration(
       this.glyph,
-      expression,
+      name,
       this.left_paren,
       this.mappings,
       this.right_paren,
@@ -21444,7 +21444,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   with_left_paren(left_paren){
     return new PocketAtomMappingDeclaration(
       this.glyph,
-      this.expression,
+      this.name,
       left_paren,
       this.mappings,
       this.right_paren,
@@ -21453,7 +21453,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   with_mappings(mappings){
     return new PocketAtomMappingDeclaration(
       this.glyph,
-      this.expression,
+      this.name,
       this.left_paren,
       mappings,
       this.right_paren,
@@ -21462,7 +21462,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   with_right_paren(right_paren){
     return new PocketAtomMappingDeclaration(
       this.glyph,
-      this.expression,
+      this.name,
       this.left_paren,
       this.mappings,
       right_paren,
@@ -21471,7 +21471,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
   with_semicolon(semicolon){
     return new PocketAtomMappingDeclaration(
       this.glyph,
-      this.expression,
+      this.name,
       this.left_paren,
       this.mappings,
       this.right_paren,
@@ -21484,14 +21484,14 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     let new_parents = parents.slice();
     new_parents.push(this);
     var glyph = this.glyph.rewrite(rewriter, new_parents);
-    var expression = this.expression.rewrite(rewriter, new_parents);
+    var name = this.name.rewrite(rewriter, new_parents);
     var left_paren = this.left_paren.rewrite(rewriter, new_parents);
     var mappings = this.mappings.rewrite(rewriter, new_parents);
     var right_paren = this.right_paren.rewrite(rewriter, new_parents);
     var semicolon = this.semicolon.rewrite(rewriter, new_parents);
     if (
       glyph === this.glyph &&
-      expression === this.expression &&
+      name === this.name &&
       left_paren === this.left_paren &&
       mappings === this.mappings &&
       right_paren === this.right_paren &&
@@ -21503,7 +21503,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     {
       return rewriter(new PocketAtomMappingDeclaration(
         glyph,
-        expression,
+        name,
         left_paren,
         mappings,
         right_paren,
@@ -21515,9 +21515,9 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     let glyph = EditableSyntax.from_json(
       json.pocket_atom_mapping_glyph, position, source);
     position += glyph.width;
-    let expression = EditableSyntax.from_json(
-      json.pocket_atom_mapping_expression, position, source);
-    position += expression.width;
+    let name = EditableSyntax.from_json(
+      json.pocket_atom_mapping_name, position, source);
+    position += name.width;
     let left_paren = EditableSyntax.from_json(
       json.pocket_atom_mapping_left_paren, position, source);
     position += left_paren.width;
@@ -21532,7 +21532,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     position += semicolon.width;
     return new PocketAtomMappingDeclaration(
         glyph,
-        expression,
+        name,
         left_paren,
         mappings,
         right_paren,
@@ -21543,7 +21543,7 @@ class PocketAtomMappingDeclaration extends EditableSyntax
     if (PocketAtomMappingDeclaration._children_keys == null)
       PocketAtomMappingDeclaration._children_keys = [
         'glyph',
-        'expression',
+        'name',
         'left_paren',
         'mappings',
         'right_paren',

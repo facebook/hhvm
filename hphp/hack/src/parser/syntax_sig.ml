@@ -1049,7 +1049,7 @@ module type Syntax_S = sig
     }
   | PocketAtomMappingDeclaration            of
     { pocket_atom_mapping_glyph                          : t
-    ; pocket_atom_mapping_expression                     : t
+    ; pocket_atom_mapping_name                           : t
     ; pocket_atom_mapping_left_paren                     : t
     ; pocket_atom_mapping_mappings                       : t
     ; pocket_atom_mapping_right_paren                    : t

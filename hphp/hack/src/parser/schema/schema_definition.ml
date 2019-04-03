@@ -2256,7 +2256,7 @@ let schema : schema_node list =
     ; aggregates  = [ PUField ]
     ; fields      =
       [ "glyph", Token
-      ; "expression", Token
+      ; "name", Aggregate Expression
       ; "left_paren", ZeroOrOne Token
       ; "mappings", ZeroOrMore (Aggregate PUMapping)
       ; "right_paren", ZeroOrOne Token
@@ -2287,7 +2287,7 @@ let schema : schema_node list =
     ; fields      =
       [ "case", Token
       ; "type", Aggregate Specifier
-      ; "name", Token
+      ; "name", Aggregate Expression
       ; "semicolon", Token
       ]
     }
@@ -2300,7 +2300,7 @@ let schema : schema_node list =
     ; fields      =
       [ "case", Token
       ; "type", Token
-      ; "name", Token
+      ; "name", Aggregate Expression
       ; "semicolon", Token
       ]
     }
@@ -2311,7 +2311,7 @@ let schema : schema_node list =
     ; prefix      = "pocket_mapping_id"
     ; aggregates  = [ PUMapping ]
     ; fields =
-      [ "name", Token
+      [ "name", Aggregate Expression
       ; "initializer", Just "SimpleInitializer"
       ]
     }
@@ -2323,7 +2323,7 @@ let schema : schema_node list =
     ; aggregates  = [ PUMapping ]
     ; fields =
       [ "keyword", Token
-      ; "name", Token
+      ; "name", Aggregate Expression
       ; "equal",  Token
       ; "type", Aggregate Specifier
       ]

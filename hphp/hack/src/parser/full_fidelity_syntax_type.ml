@@ -1162,7 +1162,7 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   | PocketAtomMappingDeclaration            of
     { pocket_atom_mapping_glyph                          : t
-    ; pocket_atom_mapping_expression                     : t
+    ; pocket_atom_mapping_name                           : t
     ; pocket_atom_mapping_left_paren                     : t
     ; pocket_atom_mapping_mappings                       : t
     ; pocket_atom_mapping_right_paren                    : t
@@ -2512,7 +2512,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and pocket_atom_mapping_declaration =
     { pocket_atom_mapping_glyph: Token.t value
-    ; pocket_atom_mapping_expression: Token.t value
+    ; pocket_atom_mapping_name: expression value
     ; pocket_atom_mapping_left_paren: Token.t option value
     ; pocket_atom_mapping_mappings: pumapping_aggregate listesque value
     ; pocket_atom_mapping_right_paren: Token.t option value
@@ -2529,22 +2529,22 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and pocket_field_type_expr_declaration =
     { pocket_field_type_expr_case: Token.t value
     ; pocket_field_type_expr_type: specifier value
-    ; pocket_field_type_expr_name: Token.t value
+    ; pocket_field_type_expr_name: expression value
     ; pocket_field_type_expr_semicolon: Token.t value
     }
   and pocket_field_type_declaration =
     { pocket_field_type_case: Token.t value
     ; pocket_field_type_type: Token.t value
-    ; pocket_field_type_name: Token.t value
+    ; pocket_field_type_name: expression value
     ; pocket_field_type_semicolon: Token.t value
     }
   and pocket_mapping_id_declaration =
-    { pocket_mapping_id_name: Token.t value
+    { pocket_mapping_id_name: expression value
     ; pocket_mapping_id_initializer: simple_initializer value
     }
   and pocket_mapping_type_declaration =
     { pocket_mapping_type_keyword: Token.t value
-    ; pocket_mapping_type_name: Token.t value
+    ; pocket_mapping_type_name: expression value
     ; pocket_mapping_type_equal: Token.t value
     ; pocket_mapping_type_type: specifier value
     }

@@ -2368,14 +2368,14 @@ module WithToken(Token: TokenType) = struct
          acc
       | PocketAtomMappingDeclaration {
         pocket_atom_mapping_glyph;
-        pocket_atom_mapping_expression;
+        pocket_atom_mapping_name;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
         pocket_atom_mapping_semicolon;
       } ->
          let acc = f acc pocket_atom_mapping_glyph in
-         let acc = f acc pocket_atom_mapping_expression in
+         let acc = f acc pocket_atom_mapping_name in
          let acc = f acc pocket_atom_mapping_left_paren in
          let acc = f acc pocket_atom_mapping_mappings in
          let acc = f acc pocket_atom_mapping_right_paren in
@@ -4309,14 +4309,14 @@ module WithToken(Token: TokenType) = struct
       ]
       | PocketAtomMappingDeclaration {
         pocket_atom_mapping_glyph;
-        pocket_atom_mapping_expression;
+        pocket_atom_mapping_name;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
         pocket_atom_mapping_semicolon;
       } -> [
         pocket_atom_mapping_glyph;
-        pocket_atom_mapping_expression;
+        pocket_atom_mapping_name;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
@@ -6251,14 +6251,14 @@ module WithToken(Token: TokenType) = struct
       ]
       | PocketAtomMappingDeclaration {
         pocket_atom_mapping_glyph;
-        pocket_atom_mapping_expression;
+        pocket_atom_mapping_name;
         pocket_atom_mapping_left_paren;
         pocket_atom_mapping_mappings;
         pocket_atom_mapping_right_paren;
         pocket_atom_mapping_semicolon;
       } -> [
         "pocket_atom_mapping_glyph";
-        "pocket_atom_mapping_expression";
+        "pocket_atom_mapping_name";
         "pocket_atom_mapping_left_paren";
         "pocket_atom_mapping_mappings";
         "pocket_atom_mapping_right_paren";
@@ -8418,7 +8418,7 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.PocketAtomMappingDeclaration, [
           pocket_atom_mapping_glyph;
-          pocket_atom_mapping_expression;
+          pocket_atom_mapping_name;
           pocket_atom_mapping_left_paren;
           pocket_atom_mapping_mappings;
           pocket_atom_mapping_right_paren;
@@ -8426,7 +8426,7 @@ module WithToken(Token: TokenType) = struct
         ]) ->
         PocketAtomMappingDeclaration {
           pocket_atom_mapping_glyph;
-          pocket_atom_mapping_expression;
+          pocket_atom_mapping_name;
           pocket_atom_mapping_left_paren;
           pocket_atom_mapping_mappings;
           pocket_atom_mapping_right_paren;
@@ -11085,7 +11085,7 @@ module WithToken(Token: TokenType) = struct
 
       let make_pocket_atom_mapping_declaration
         pocket_atom_mapping_glyph
-        pocket_atom_mapping_expression
+        pocket_atom_mapping_name
         pocket_atom_mapping_left_paren
         pocket_atom_mapping_mappings
         pocket_atom_mapping_right_paren
@@ -11093,7 +11093,7 @@ module WithToken(Token: TokenType) = struct
       =
         let syntax = PocketAtomMappingDeclaration {
           pocket_atom_mapping_glyph;
-          pocket_atom_mapping_expression;
+          pocket_atom_mapping_name;
           pocket_atom_mapping_left_paren;
           pocket_atom_mapping_mappings;
           pocket_atom_mapping_right_paren;

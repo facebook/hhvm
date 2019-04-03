@@ -2899,7 +2899,7 @@ and pXhpChild : xhp_child parser = fun node env ->
 and pPUField: pufield parser = fun node env ->
   match syntax node with
   | PocketAtomMappingDeclaration
-    { pocket_atom_mapping_expression = expr
+    { pocket_atom_mapping_name = expr
     ; pocket_atom_mapping_mappings   = mappings
     ; _
     } -> let id = pos_name expr env in

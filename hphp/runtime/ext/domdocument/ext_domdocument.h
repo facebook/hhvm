@@ -43,9 +43,8 @@ Object newDOMDocument(bool construct = true);
 
 struct DOMNode {
   ~DOMNode() {
-    if (m_node) {
-      assertx(m_node->getCache() &&
-             Native::data<DOMNode>(m_node->getCache()) == this);
+    if (m_node && m_node->getCache()) {
+      assertx(Native::data<DOMNode>(m_node->getCache()) == this);
       m_node->clearCache();
     }
   }
@@ -67,7 +66,7 @@ struct DOMNode {
   void setNode(XMLNode n) {
     if (m_node) {
       assertx(m_node->getCache() &&
-             Native::data<DOMNode>(m_node->getCache()) == this);
+              Native::data<DOMNode>(m_node->getCache()) == this);
       m_node->clearCache();
     }
 

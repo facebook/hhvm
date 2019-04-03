@@ -101,9 +101,20 @@ struct XMLNodeData : SweepableResourceData {
   explicit XMLNodeData(xmlNodePtr p);
   virtual ~XMLNodeData();
 
-  ObjectData* getCache() const { return m_cache; }
-  void clearCache() { m_cache = nullptr; }
-  void setCache(ObjectData* o) { m_cache = o; }
+  ObjectData* getCache() const {
+    if (m_cache && m_cache->isValid()) {
+      return m_cache->pointee.m_data.pobj;
+    }
+    return nullptr;
+  }
+
+  void clearCache() {
+    if (m_cache) {
+      m_cache.reset();
+    }
+  }
+
+  void setCache(ObjectData* o) { m_cache = WeakRefData::forObject(Object{o}); }
 
   void reset() { m_node = nullptr; }
   void setDoc(req::ptr<XMLDocumentData>&& doc);
@@ -114,7 +125,8 @@ struct XMLNodeData : SweepableResourceData {
   void unlink() { xmlUnlinkNode(m_node); }
 
 private:
-  ObjectData* m_cache {nullptr}; // XXX: to avoid a cycle this is a weak ref
+  // XXX: to avoid a cycle this is a weak ref
+  req::shared_ptr<WeakRefData> m_cache;
   xmlNodePtr m_node {nullptr};
   xmlNodePtr m_lastSeenRoot {nullptr}; // subtree node last belonged too
   req::ptr<XMLDocumentData> m_doc {nullptr};
@@ -196,7 +208,7 @@ inline XMLNode libxml_register_node(xmlDocPtr p) {
 }
 
 
-inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
+inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_cache(nullptr), m_node(p) {
   assertx(p && !p->_private);
   m_node->_private = this;
 
@@ -208,7 +220,7 @@ inline XMLNodeData::XMLNodeData(xmlNodePtr p) : m_node(p) {
 
 inline XMLNodeData::~XMLNodeData() {
   if (m_node) {
-    assertx(!m_cache && m_node->_private == this);
+    assertx((!m_cache || !m_cache->isValid()) && m_node->_private == this);
 
     m_node->_private = nullptr;
     php_libxml_node_free_resource(m_node, m_lastSeenRoot);

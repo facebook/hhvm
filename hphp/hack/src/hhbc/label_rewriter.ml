@@ -46,10 +46,10 @@ let get_regular_labels instr =
   | IMisc (MemoGetEager (l1, l2, _)) -> [l1; l2]
   | _ -> []
 
-(* Get any labels referred to in catch or fault handlers *)
+(* Get any labels referred to in fault handlers *)
 let get_catch_or_fault_labels instr =
   match instr with
-  | ITry (TryCatchLegacyBegin l | TryFaultBegin l) -> [l]
+  | ITry (TryFaultBegin l) -> [l]
   | _ -> []
 
 (* Generate new labels for all labels referenced in instructions and default
@@ -134,8 +134,6 @@ let rewrite_params_and_body defs used refs params body =
     | IContFlow (SSwitch pairs) ->
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
-    | ITry (TryCatchLegacyBegin l) ->
-      Some (ITry (TryCatchLegacyBegin (relabel l)))
     | ITry (TryFaultBegin l) -> Some (ITry (TryFaultBegin (relabel l)))
     | IMisc (MemoGet (l, r)) ->
       Some (IMisc (MemoGet (relabel l, r)))

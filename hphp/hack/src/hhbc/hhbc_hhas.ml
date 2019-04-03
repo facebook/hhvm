@@ -307,7 +307,6 @@ let string_of_mutator x =
 
 let string_of_label = function
   | Label.Regular id -> "L" ^ (string_of_int id)
-  | Label.Catch id -> "C" ^ (string_of_int id)
   | Label.Fault id -> "F" ^ (string_of_int id)
   | Label.DefaultArg id -> "DV" ^ (string_of_int id)
   | Label.Named id -> id
@@ -519,7 +518,6 @@ let string_of_misc instruction =
     | VerifyOutType id -> sep ["VerifyOutType"; string_of_param_id id]
     | VerifyRetTypeC -> "VerifyRetTypeC"
     | VerifyRetTypeTS -> "VerifyRetTypeTS"
-    | Catch -> "Catch"
     | ChainFaults -> "ChainFaults"
     | CheckThis -> "CheckThis"
     | CGetCUNop -> "CGetCUNop"
@@ -654,10 +652,7 @@ let string_of_try instruction =
   match instruction with
   | TryFaultBegin label ->
     ".try_fault " ^ (string_of_label label) ^ " {"
-  | TryCatchLegacyBegin label ->
-    ".try_catch " ^ (string_of_label label) ^ " {"
-  | TryFaultEnd
-  | TryCatchLegacyEnd -> "}"
+  | TryFaultEnd -> "}"
   | TryCatchBegin -> ".try {"
   | TryCatchMiddle -> "} .catch {"
   | TryCatchEnd -> "}"
@@ -742,7 +737,6 @@ let adjusted_indent instruction indent =
   | IComment _ -> 0
   | ILabel _
   | ITry TryFaultEnd
-  | ITry TryCatchLegacyEnd
   | ITry TryCatchMiddle
   | ITry TryCatchEnd -> indent - 2
   | _ -> indent
@@ -750,10 +744,8 @@ let adjusted_indent instruction indent =
 let new_indent instruction indent =
   match instruction with
   | ITry (TryFaultBegin _)
-  | ITry (TryCatchLegacyBegin _)
   | ITry TryCatchBegin -> indent + 2
   | ITry TryFaultEnd
-  | ITry TryCatchLegacyEnd
   | ITry TryCatchEnd -> indent - 2
   | _ -> indent
 

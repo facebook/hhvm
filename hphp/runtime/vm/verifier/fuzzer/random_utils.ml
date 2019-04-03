@@ -101,7 +101,6 @@ let random_key () : MemberKey.t =
      |> rand_elt) ()
 
 let random_fault_label () : Label.t = Label.Fault (Random.int 10)
-let random_catch_label () : Label.t = Label.Catch (Random.int 10)
 let random_adata_id () : adata_id =  "A_" ^ (Random.int 10 |> string_of_int)
 
 (* A list of generators for instructions. Doesn't include all instructions;
@@ -232,7 +231,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMisc (BareThis (random_bare_op())));
     (fun () -> IMisc CheckThis);
     (fun () -> IMisc (InitThisLoc (random_local ())));
-    (fun () -> IMisc Catch);
     (fun () -> IMisc (OODeclExists (random_class_kind ())));
     (fun () -> IMisc (VerifyParamType (random_param_id ())));
     (fun () -> IMisc VerifyRetTypeC);

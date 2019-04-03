@@ -462,7 +462,6 @@ type instruct_misc =
   | CheckThis
   | InitThisLoc of local_id
   | FuncNumArgs
-  | Catch
   | ChainFaults
   | OODeclExists of class_kind
   | VerifyParamType of param_id
@@ -521,8 +520,6 @@ type instruct_try =
   | TryCatchBegin
   | TryCatchMiddle
   | TryCatchEnd
-  | TryCatchLegacyBegin of Label.t
-  | TryCatchLegacyEnd
   | TryFaultBegin of Label.t
   | TryFaultEnd
 

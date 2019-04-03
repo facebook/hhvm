@@ -131,7 +131,6 @@ let stk_data : instruct -> stack_sig = function
   | IMutator CheckProp _
   | IMisc This
   | IMisc BareThis _
-  | IMisc Catch
   | IMisc GetMemoKeyL _
   | IGenerator CreateCont
   | IGenerator ContValid

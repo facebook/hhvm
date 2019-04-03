@@ -459,6 +459,7 @@ let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidNewableTypeParamConstraints;
   Typing.err_code Typing.NewWithoutNewable;
   Typing.err_code Typing.NewStaticClassReified;
+  Typing.err_code Typing.MemoizeReified
 ]
 let ignored_fixme_codes = ref default_ignored_fixme_codes
 
@@ -2625,6 +2626,10 @@ let new_static_class_reified pos =
 let new_without_newable pos name =
   add (Typing.err_code Typing.NewWithoutNewable) pos
     (name ^ " cannot be used with `new` because it does not have the <<__Newable>> attribute")
+
+let memoize_reified_generics pos =
+  add (Typing.err_code Typing.MemoizeReified) pos "The <<__Memoize>> attribute cannot \
+    be used on a function or method that has reified type parameters"
 
 let ignored_result_of_freeze pos =
   add (Typing.err_code Typing.IgnoredResultOfFreeze) pos

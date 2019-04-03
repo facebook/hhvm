@@ -99,6 +99,12 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     verify_targ_valid env tparam targ
   end |> ignore
 
+let check_no_memoize pos ua tparams =
+  if List.exists ua (fun { ua_name; _ } -> UA.uaMemoize = snd ua_name) &&
+    List.exists tparams (fun { Tast.tp_reified; _ } -> tp_reified <> Erased)
+  then
+    Errors.memoize_reified_generics pos
+
 let handler = object
   inherit Tast_visitor.handler_base
 
@@ -175,5 +181,11 @@ let handler = object
       | _ -> () end
     | _ ->
       ()
+
+  method! at_fun_def _ { f_name = (pos, _); f_tparams = tparams; f_user_attributes = ua; _ } =
+    check_no_memoize pos ua tparams
+
+  method! at_method_ _ { m_name = (pos, _); m_tparams = tparams; m_user_attributes = ua; _ } =
+    check_no_memoize pos ua tparams
 
 end

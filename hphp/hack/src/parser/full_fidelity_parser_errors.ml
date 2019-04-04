@@ -1986,6 +1986,12 @@ let is_in_unyieldable_magic_method context =
 
 let function_call_argument_errors ~in_constructor_call node errors =
   match syntax node with
+  | PrefixUnaryExpression
+    { prefix_unary_operator = { syntax = Token token; _ }
+    ; prefix_unary_operand
+    } when Token.kind token = TokenKind.Ampersand &&
+      SN.Superglobals.is_superglobal @@ text prefix_unary_operand ->
+        make_error_from_node node SyntaxError.error2078 :: errors
   | DecoratedExpression
     { decorated_expression_decorator = { syntax = Token token ; _ }
     ; decorated_expression_expression = expression
@@ -2163,6 +2169,9 @@ let rec check_reference node errors env =
   | PrefixUnaryExpression { prefix_unary_operator; _ }
     when token_kind prefix_unary_operator <> Some TokenKind.Dollar ->
     make_error_from_node node SyntaxError.nested_unary_reference :: errors
+  | SubscriptExpression { subscript_receiver; _ }
+    when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
+    make_error_from_node node SyntaxError.error2078 :: errors
   | FunctionCallExpression _
   | FunctionCallWithTypeArgumentsExpression _
   | ListExpression _

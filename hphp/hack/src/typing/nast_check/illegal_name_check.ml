@@ -40,8 +40,6 @@ let handler = object
         ref_expr SN.SpecialIdents.this
       | Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.dollardollar ->
         ref_expr SN.SpecialIdents.dollardollar
-      | Lvar (_, x) when Local_id.to_string x |> SN.Superglobals.is_superglobal ->
-        ref_expr @@ "Superglobal " ^ Local_id.to_string x
       | _ -> ()
       end
     | Id (pos, const) ->

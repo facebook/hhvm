@@ -169,6 +169,7 @@ val error2074 : string -> string
 val error2075 : string -> string
 val error2076 : string
 val error2077 : string
+val error2078 : string
 
 (* Start giving names rather than numbers *)
 val list_must_be_lvar : string

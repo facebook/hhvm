@@ -124,17 +124,17 @@ and linearize (env : env) (c : shallow_class) : linearization =
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
   let interfaces     = get_ancestors Interface c.sc_implements in
   let req_implements = get_ancestors ReqImpl c.sc_req_implements in
-  let xhp_attr_uses  = get_ancestors XHPAttr (List.rev c.sc_xhp_attr_uses) in
-  let traits         = get_ancestors Trait (List.rev c.sc_uses) in
+  let xhp_attr_uses  = get_ancestors XHPAttr c.sc_xhp_attr_uses in
+  let traits         = get_ancestors Trait c.sc_uses in
   let req_extends    = get_ancestors ReqExtends c.sc_req_extends in
   let parents        = get_ancestors Parent (from_parent c) in
   let ancestors =
     List.concat [
-      interfaces;
-      req_implements;
-      xhp_attr_uses;
-      traits;
-      req_extends;
+      List.rev interfaces;
+      List.rev req_implements;
+      List.rev xhp_attr_uses;
+      List.rev traits;
+      List.rev req_extends;
       parents;
     ]
   in

@@ -1462,7 +1462,7 @@ module PrintClass = struct
     end
 
   let constructor tcopt (ce_opt, consist) =
-    let consist_str = if consist then " (consistent in hierarchy)" else "" in
+    let consist_str = Format.asprintf "(%a)" Pp_type.pp_consistent_kind consist in
     let ce_str = match ce_opt with
       | None -> ""
       | Some ce -> class_elt tcopt ce

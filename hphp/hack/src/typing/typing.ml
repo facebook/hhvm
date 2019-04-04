@@ -2986,7 +2986,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
       let env, _tcid, tel, tuel, ctor_fty =
         let env = check_expected_ty "New" env new_ty expected in
         call_construct p env class_info params el uel cid in
-      if not (snd (Cls.construct class_info)) then
+      if (snd (Cls.construct class_info)) = Inconsistent then
         (match cid with
           | CIstatic -> Errors.new_inconsistent_construct p cname `static
           | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname

@@ -20,7 +20,7 @@ open Typing_defs
 
 type inherited = {
   ih_substs   : subst_context SMap.t;
-  ih_cstr     : element option * bool;
+  ih_cstr     : element option * consistent_kind;
   ih_consts   : class_const SMap.t ;
   ih_typeconsts : typeconst_type SMap.t ;
   ih_props    : element SMap.t ;

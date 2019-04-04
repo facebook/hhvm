@@ -340,7 +340,7 @@ let compute_complete_global
               (Phase.decl (get_constructor_ty c))
               Constructor_kind
               (* Only do doc block fallback on constructors if they're consistent. *)
-              (if snd (Cls.construct c) then Some c else None)
+              (if snd (Cls.construct c) <> Inconsistent then Some c else None)
           else
             let kind = match (Cls.kind c) with
               | Ast.Cabstract -> Abstract_class_kind

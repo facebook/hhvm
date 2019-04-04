@@ -414,8 +414,8 @@ let default_constructor_ce class_ =
 
 (* When an interface defines a constructor, we check that they are compatible *)
 let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst subst =
-  let explicit_consistency = snd (Cls.construct parent_class) in
-  if (Cls.kind parent_class) = Ast.Cinterface || explicit_consistency
+  let consistent = snd (Cls.construct parent_class) <> Inconsistent in
+  if (Cls.kind parent_class) = Ast.Cinterface || consistent
   then (
     match (fst (Cls.construct parent_class)), (fst (Cls.construct class_)) with
       | Some parent_cstr, _  when parent_cstr.ce_synthesized -> ()
@@ -434,7 +434,7 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
         check_override env ~check_member_unique:false "__construct" `FromMethod
           ~ignore_fun_return:true
           (parent_class, parent_ty) (class_, class_ty) parent_cstr cstr
-      | None, Some cstr when explicit_consistency ->
+      | None, Some cstr when consistent ->
         let parent_cstr = default_constructor_ce parent_class in
         let parent_cstr = Inst.instantiate_ce psubst parent_cstr in
         let cstr = Inst.instantiate_ce subst cstr in

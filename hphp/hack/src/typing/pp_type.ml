@@ -681,6 +681,12 @@ fun fmt (a0,a1) ->
 and show_requirement : requirement -> string = fun x ->
   Format.asprintf "%a" pp_requirement x
 
+and pp_consistent_kind : Format.formatter -> consistent_kind -> unit = fun fmt ck ->
+  match ck with
+  | Inconsistent -> Format.pp_print_string fmt "Inconsistent"
+  | ConsistentConstruct -> Format.pp_print_string fmt "ConsistentConstruct"
+  | FinalClass -> Format.pp_print_string fmt "FinalClass"
+
 and pp_class_type : Format.formatter -> class_type -> unit = fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
@@ -794,7 +800,7 @@ and pp_class_type : Format.formatter -> class_type -> unit = fun fmt x ->
     Format.pp_print_string fmt ")"
   );
   Format.fprintf fmt ",@ ";
-  Format.fprintf fmt "%B" a1;
+  pp_consistent_kind fmt a1;
   Format.fprintf fmt "@])";
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";

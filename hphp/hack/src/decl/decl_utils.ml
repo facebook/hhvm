@@ -86,3 +86,23 @@ let rec infer_const (p, expr_) =
 
 let infer_const expr =
   try Some (infer_const expr) with Exit -> None
+
+let coalesce_consistent parent current =
+  (* If the parent's constructor is consistent via <<__ConsistentConstruct>>, then
+   * we want to carry this forward even if the child is final. Example:
+   *
+   * <<__ConsistentConstruct>>
+   * class C {
+   *   public function f(): void {
+   *     new static();
+   *   }
+   * }
+   * final class D<reify T> {}
+   *
+   * Even though D's consistency locally comes from the final class, calling
+   * new static() will cause a runtime exception because D has reified generics. *)
+  match parent with
+  | Inconsistent -> current
+  | ConsistentConstruct -> parent
+  (* This case is unreachable, because parent would have to be a final class *)
+  | FinalClass -> parent

@@ -99,7 +99,7 @@ type decl_class_type = {
   dc_sprops              : element SMap.t;
   dc_methods             : element SMap.t;
   dc_smethods            : element SMap.t;
-  dc_construct           : element option * bool;
+  dc_construct           : element option * consistent_kind;
   dc_ancestors           : decl ty SMap.t ;
   dc_req_ancestors       : requirement list;
   dc_req_ancestors_extends : SSet.t;

@@ -28,7 +28,7 @@ module Inst = Decl_instantiate
 
 type inherited = {
   ih_substs   : subst_context SMap.t;
-  ih_cstr     : element option * bool (* consistency required *);
+  ih_cstr     : element option * consistent_kind;
   ih_consts   : class_const SMap.t ;
   ih_typeconsts : typeconst_type SMap.t ;
   ih_props    : element SMap.t ;
@@ -39,7 +39,7 @@ type inherited = {
 
 let empty = {
   ih_substs   = SMap.empty;
-  ih_cstr     = None, false;
+  ih_cstr     = None, Inconsistent;
   ih_consts   = SMap.empty;
   ih_typeconsts = SMap.empty;
   ih_props    = SMap.empty;
@@ -161,7 +161,7 @@ let add_constructor (cstr, cstr_consist) (acc, acc_consist) =
     | Some ce, Some acce when should_keep_old_sig ce acce ->
       acc
     | _ -> cstr
-  in ce, cstr_consist || acc_consist
+  in ce, Decl_utils.coalesce_consistent acc_consist cstr_consist
 
 let add_inherited inherited acc = {
   ih_substs = SMap.merge begin fun _ sub old_sub ->

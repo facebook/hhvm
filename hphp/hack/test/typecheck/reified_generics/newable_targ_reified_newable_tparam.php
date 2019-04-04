@@ -1,8 +1,8 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class A { // A is a valid newable constraint
-  final public function __construct() {}
+final class A { // A is a valid newable constraint
+  public function __construct() {}
 }
 
 function f<

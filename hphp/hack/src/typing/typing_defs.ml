@@ -493,6 +493,16 @@ and class_const = {
  *)
 and requirement = Pos.t * decl ty
 
+(* In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
+ * or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
+ * If we have a new final class that doesn't extend from <<__ConsistentConstruct>>,
+ * then we use Final. Only classes that are Inconsistent or Final can have reified
+ * generics. *)
+and consistent_kind =
+  | Inconsistent
+  | ConsistentConstruct
+  | FinalClass
+
 and class_type = {
   tc_need_init           : bool;
   (* Whether the typechecker knows of all (non-interface) ancestors
@@ -517,7 +527,7 @@ and class_type = {
   tc_methods             : class_elt SMap.t;
   tc_smethods            : class_elt SMap.t;
   (* the bool represents final constructor or __ConsistentConstruct *)
-  tc_construct           : class_elt option * bool;
+  tc_construct           : class_elt option * consistent_kind;
   (* This includes all the classes, interfaces and traits this class is
    * using. *)
   tc_ancestors           : decl ty SMap.t ;

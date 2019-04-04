@@ -57,7 +57,7 @@ val suggest_static_member :
   bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
 val get_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
 val suggest_member : bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
-val get_construct : env -> Typing_classes_heap.t -> class_elt option * bool
+val get_construct : env -> Typing_classes_heap.t -> class_elt option * consistent_kind
 val check_todo : env -> env
 val get_return : env -> Typing_env_return_info.t
 val set_return : env -> Typing_env_return_info.t -> env

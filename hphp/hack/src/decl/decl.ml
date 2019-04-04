@@ -522,30 +522,29 @@ and trait_exists env acc trait =
 
 and constructor_decl (pcstr, pconsist) class_ =
   (* constructors in children of class_ must be consistent? *)
-  let cconsist = class_.sc_final ||
-    Attrs.mem
-      SN.UserAttributes.uaConsistentConstruct
-      class_.sc_user_attributes in
-  match class_.sc_constructor, pcstr with
-  | None, _ -> pcstr, cconsist || pconsist
-  | Some method_, Some {elt_final = true; elt_origin; _ } ->
-    let ft = Decl_heap.Constructors.find_unsafe elt_origin in
-    Errors.override_final ~parent:(ft.ft_pos) ~child:(fst method_.sm_name);
-    let cstr, mconsist = build_constructor class_ method_ in
-    cstr, cconsist || mconsist || pconsist
-  | Some method_, _ ->
-    let cstr, mconsist = build_constructor class_ method_ in
-    cstr, cconsist || mconsist || pconsist
+  let cconsist =
+    if class_.sc_final
+    then FinalClass
+    else if Attrs.mem SN.UserAttributes.uaConsistentConstruct class_.sc_user_attributes
+      then ConsistentConstruct
+      else Inconsistent in
+
+  let cstr = match class_.sc_constructor, pcstr with
+    | None, _ -> pcstr
+    | Some method_, Some {elt_final = true; elt_origin; _ } ->
+      let ft = Decl_heap.Constructors.find_unsafe elt_origin in
+      Errors.override_final ~parent:(ft.ft_pos) ~child:(fst method_.sm_name);
+      let cstr = build_constructor class_ method_ in
+      cstr
+    | Some method_, _ ->
+      let cstr = build_constructor class_ method_ in
+      cstr in
+  cstr, Decl_utils.coalesce_consistent pconsist cconsist
 
 and build_constructor class_ method_ =
   let ft = method_.sm_type in
   let _, class_name = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
-  let mconsist = method_.sm_final || class_.sc_kind = Ast.Cinterface in
-  (* due to the requirement of calling parent::__construct, a private
-   * constructor cannot be overridden *)
-  let mconsist = mconsist || method_.sm_visibility = Private in
-  let mconsist = mconsist || ft.ft_abstract in
   (* the alternative to overriding
    * UserAttributes.uaConsistentConstruct is marking the corresponding
    * 'new static()' UNSAFE, potentially impacting the safety of a large
@@ -566,7 +565,7 @@ and build_constructor class_ method_ =
     elt_reactivity = None;
   } in
   Decl_heap.Constructors.add class_name ft;
-  Some cstr, mconsist
+  Some cstr
 
 and class_const_fold c acc scc =
   let c_name = (snd c.sc_name) in

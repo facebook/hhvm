@@ -1984,8 +1984,8 @@ let new_inconsistent_construct new_pos (cpos, cname) kind =
   add_list (Typing.err_code Typing.NewStaticInconsistent) [
     new_pos, preamble^"; __construct arguments are not \
     guaranteed to be consistent in child classes";
-    cpos, ("This declaration neither defines an abstract/final __construct"
-           ^" nor uses <<__ConsistentConstruct>> attribute")]
+    cpos, ("This declaration is neither final nor uses \
+           the <<__ConsistentConstruct>> attribute")]
 
 let pair_arity pos =
   add (Typing.err_code Typing.PairArity) pos "A pair has exactly 2 elements"
@@ -2999,11 +2999,10 @@ let invalid_newable_type_param_constraints (tparam_pos, tparam_name) constraint_
     if List.is_empty constraint_list
     then "No constraints"
     else "The constraints " ^ (String.concat ~sep:", " (List.map ~f:Utils.strip_ns constraint_list)) in
-  let msg = "The type parameter " ^ tparam_name ^ " has the <<__Newable>> attribute. " ^
-    "Newable type parameters must be constrained with `as`, and exactly one of those constraints " ^
-    "must be a valid newable class. The class must either be final or have a constructor that is " ^
-    "consistent. This can be accomplished by making the constructor final or " ^
-    "having <<__ConsistentConstruct>>. " ^ partial ^ " are valid newable classes" in
+  let msg = "The type parameter " ^ tparam_name ^ " has the <<__Newable>> attribute. \
+    Newable type parameters must be constrained with `as`, and exactly one of those constraints must be \
+    a valid newable class. The class must either be final, or it must have the <<__ConsistentConstruct>> \
+    attribute or extend a class that has it. " ^ partial ^ " are valid newable classes" in
   add (Typing.err_code Typing.InvalidNewableTypeParamConstraints) tparam_pos msg
 
 let override_final ~parent ~child =

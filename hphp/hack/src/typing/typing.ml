@@ -2946,7 +2946,9 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
       let env, obj_ty_, params =
         match cid, tal, snd c_ty with
         (* Explicit type arguments *)
-        | CI _, (_::_), Tclass(_, _, tyl) -> env, (snd c_ty), tyl
+        | CI _, (_::_), Tclass(_, _, tyl)
+        | CIself, [], Tclass(_, _, tyl) ->
+          env, (snd c_ty), tyl
         | _ ->
           let env, params = List.map_env env (Cls.tparams class_info)
             (fun env tparam ->

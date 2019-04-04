@@ -1,0 +1,2 @@
+File "consistent_construct_final.php", line 6, characters 5-16:
+Cannot call new static because the current class has reified generics (Typing[4310])

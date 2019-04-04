@@ -2623,6 +2623,11 @@ let new_static_class_reified pos =
   add (Typing.err_code Typing.NewStaticClassReified) pos
     "Cannot call new static because the current class has reified generics"
 
+let consistent_construct_reified pos =
+  add (Typing.err_code Typing.ConsistentConstructReified) pos
+    "This class or one of its ancestors is annotated with <<__ConsistentConstruct>>. \
+     It cannot have reified generics."
+
 let new_without_newable pos name =
   add (Typing.err_code Typing.NewWithoutNewable) pos
     (name ^ " cannot be used with `new` because it does not have the <<__Newable>> attribute")

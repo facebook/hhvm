@@ -188,4 +188,14 @@ let handler = object
   method! at_method_ _ { m_name = (pos, _); m_tparams = tparams; m_user_attributes = ua; _ } =
     check_no_memoize pos ua tparams
 
+  method! at_class_ env { c_name = (pos, name); _ } =
+    match Env.get_class env name with
+    | Some cls ->
+      begin match Cls.construct cls with
+      | _, Typing_defs.ConsistentConstruct ->
+        if List.exists ~f:(fun t -> t.tp_reified <> Nast.Erased) (Cls.tparams cls) then
+          Errors.consistent_construct_reified pos;
+      | _ -> () end
+    | None -> ()
+
 end

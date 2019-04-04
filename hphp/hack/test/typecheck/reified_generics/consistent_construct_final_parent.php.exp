@@ -1,0 +1,2 @@
+File "consistent_construct_final_parent.php", line 11, characters 13-13:
+This class or one of its ancestors is annotated with <<__ConsistentConstruct>>. It cannot have reified generics. (Typing[4312])

@@ -584,6 +584,7 @@ val invalid_move_use : Pos.t -> unit
 val require_args_reify : Pos.t -> Pos.t -> unit
 val invalid_reified_argument : Pos.t * string -> Pos.t * string -> string -> unit
 val new_static_class_reified : Pos.t -> unit
+val consistent_construct_reified : Pos.t -> unit
 val new_without_newable: Pos.t -> string -> unit
 val memoize_reified_generics: Pos.t -> unit
 val ignored_result_of_freeze : Pos.t -> unit

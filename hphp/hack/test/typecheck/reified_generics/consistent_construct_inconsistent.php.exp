@@ -1,0 +1,4 @@
+File "consistent_construct_inconsistent.php", line 6, characters 9-14:
+Can't use new static() for C; __construct arguments are not guaranteed to be consistent in child classes (Typing[4060])
+  File "consistent_construct_inconsistent.php", line 4, characters 7-7:
+  This declaration is neither final nor uses the <<__ConsistentConstruct>> attribute

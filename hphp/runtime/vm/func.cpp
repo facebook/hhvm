@@ -358,6 +358,11 @@ bool Func::isMethCallerName(const StringData* name) {
   return (name->size() > 11) && !memcmp(name->data(), "MethCaller$", 11);
 }
 
+size_t Func::methCallerOffset(const StringData* name) {
+  if (isMethCallerName(name)) return 11;
+  return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // FuncId manipulation.
 

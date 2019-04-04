@@ -219,6 +219,9 @@ namespace HH {
   <<__Native, __IsFoldable, __Rx>>
   function is_list_like(<<__MaybeMutable>> arraylike $var): bool;
 
+  <<__Native, __IsFoldable, __Rx>>
+  function is_meth_caller(<<__MaybeMutable>> mixed $var): bool;
+
  /*
   * Behaves like serialize() but takes an optional set of options.
   *

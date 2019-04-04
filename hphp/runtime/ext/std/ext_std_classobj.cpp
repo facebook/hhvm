@@ -342,6 +342,48 @@ String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v) {
   return String::attach(const_cast<StringData*>(funcToStringHelper(c)));
 }
 
+namespace {
+const StaticString
+  s_meth_caller_cls("\\__SystemLib\\MethCallerHelper"),
+  s_meth_caller_get_cls_name("getClassNameImpl"),
+  s_meth_caller_get_meth_name("getMethodNameImpl");
+
+String getMethCallerClsOrMethNameHelper(
+  const char* fn, TypedValue v, bool isClass) {
+  if (tvIsFunc(v)) {
+    if (auto const pos = Func::methCallerOffset(val(v).pfunc->name())) {
+      auto clsMethName = val(v).pfunc->name()->slice();
+      clsMethName.uncheckedAdvance(pos);
+      auto const sep = folly::qfind(clsMethName, folly::StringPiece("::"));
+      assertx(sep != std::string::npos);
+      if (isClass) {
+        clsMethName = clsMethName.uncheckedSubpiece(0, sep);
+      } else {
+        clsMethName.uncheckedAdvance(sep + 2);
+      }
+      return String::attach(makeStaticString(clsMethName));
+    }
+  } else if (tvIsObject(v)) {
+    auto const obj = val(v).pobj;
+    if (obj->instanceof(s_meth_caller_cls)) {
+      return ObjectData::InvokeSimple(
+        obj,
+        isClass ? s_meth_caller_get_cls_name : s_meth_caller_get_meth_name)
+        .toString();
+    }
+  }
+  raise_error("Argument 1 passed to %s must be a MethCaller", fn);
+}
+}
+
+String HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v) {
+  return getMethCallerClsOrMethNameHelper(__FUNCTION__+5, v, true);
+}
+
+String HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v) {
+  return getMethCallerClsOrMethNameHelper(__FUNCTION__+5, v, false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initClassobj() {
@@ -366,6 +408,8 @@ void StandardExtension::initClassobj() {
   HHVM_FE(call_user_method_array);
   HHVM_FALIAS(HH\\class_meth_get_class, HH_class_meth_get_class);
   HHVM_FALIAS(HH\\class_meth_get_method, HH_class_meth_get_method);
+  HHVM_FALIAS(HH\\meth_caller_get_class, HH_meth_caller_get_class);
+  HHVM_FALIAS(HH\\meth_caller_get_method, HH_meth_caller_get_method);
 
   loadSystemlib("std_classobj");
 }

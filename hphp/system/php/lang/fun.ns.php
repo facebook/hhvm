@@ -17,11 +17,26 @@ namespace __SystemLib {
       );
       return $x->{$this->method}(...$args);
     }
-    public function getClassName(): string {
+    public function getClassNameImpl(): string {
       return $this->class;
     }
-    public function getMethodName(): string {
+    public function getMethodNameImpl(): string {
       return $this->method;
+    }
+    public function getClassName(): string {
+      if (\ini_get("hhvm.notice_on_meth_caller_helper_use")) {
+        \trigger_error("getClassName() called on __SystemLib\MethCallerHelper)",
+          \E_USER_WARNING);
+      }
+      return $this->getClassNameImpl();
+    }
+    public function getMethodName(): string {
+      if (\ini_get("hhvm.notice_on_meth_caller_helper_use")) {
+        \trigger_error(
+          "getMethodName() called on __SystemLib\MethCallerHelper)",
+          \E_USER_WARNING);
+      }
+      return $this->getMethodNameImpl();
     }
   };
 }

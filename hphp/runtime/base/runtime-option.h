@@ -1049,6 +1049,9 @@ struct RuntimeOption {
   F(bool, RaiseClsMethConversionWarning, false)                         \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \
+  /* trigger E_USER_WARNING error when getClassName()/getMethodName()
+   * is used on __SystemLib\MethCallerHelper */                         \
+  F(bool, NoticeOnMethCallerHelperUse, false)                           \
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   F(bool, NoticeOnBadMethodStaticness, false)                           \

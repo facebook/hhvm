@@ -732,6 +732,7 @@ struct Func final {
    * Given a function name, return true if it's meth_caller.
    */
   static bool isMethCallerName(const StringData*);
+  static size_t methCallerOffset(const StringData*);
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtins.                                                          [const]

@@ -1,41 +1,69 @@
 <?hh
 
 namespace {
-  \var_dump(\HH\meth_caller(A::class, "f"));
-  $f = () ==> {
-    \var_dump(\HH\meth_caller(B::class, "f"));
-  };
-  $f();
+$x = \HH\meth_caller(A::class, "f");
+\var_dump(
+  $x, \HH\is_meth_caller($x),
+  \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+$f = () ==> {
+  $x = \HH\meth_caller(B::class, "f");
+  \var_dump(
+    $x, \HH\is_meth_caller($x),
+    \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+};
+$f();
 
-  function afunc() {
-    \var_dump(\HH\meth_caller(C::class, "f"));
-  }
-  afunc();
+function afunc() {
+  $x = \HH\meth_caller(C::class, "f");
+  \var_dump(
+    $x, \HH\is_meth_caller($x),
+    \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+}
+afunc();
 
-  class Acls {
-    function bfunc() {
-      \var_dump(\HH\meth_caller(D::class, "f"));
-    }
+class Acls {
+  function bfunc() {
+    $x = \HH\meth_caller(D::class, "f");
+    \var_dump(
+      $x, \HH\is_meth_caller($x),
+      \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
   }
-  new Acls()->bfunc();
+}
+new Acls()->bfunc();
 }
 
 namespace Ans {
-  \var_dump(\HH\meth_caller(A::class, "f"));
-  $f = () ==> {
-    \var_dump(\HH\meth_caller(B::class, "f"));
-  };
-  $f();
+$x = \HH\meth_caller(A::class, "f");
+\var_dump(
+  $x, \HH\is_meth_caller($x),
+  \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+$f = () ==> {
+  $x = \HH\meth_caller(B::class, "f");
+  \var_dump(
+    $x, \HH\is_meth_caller($x),
+    \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+};
+$f();
 
-  function afunc() {
-    \var_dump(\HH\meth_caller(C::class, "f"));
-  }
-  afunc();
+function afunc() {
+  $x = \HH\meth_caller(C::class, "f");
+  \var_dump(
+    $x, \HH\is_meth_caller($x),
+    \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+}
+afunc();
 
-  class Acls {
-    function bfunc() {
-      \var_dump(\HH\meth_caller(D::class, "f"));
-    }
+class Acls {
+  function bfunc() {
+    $x = \HH\meth_caller(D::class, "f");
+    \var_dump(
+      $x, \HH\is_meth_caller($x),
+      \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
   }
-  new Acls()->bfunc();
+}
+new Acls()->bfunc();
+\var_dump(\HH\is_meth_caller(new Acls()));
+
+// bad argument
+\HH\meth_caller_get_class(\HH\fun("afunc"));
 }

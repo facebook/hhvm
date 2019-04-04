@@ -35,6 +35,7 @@ bool HHVM_FUNCTION(is_array, const Variant& v);
 bool HHVM_FUNCTION(HH_is_vec, const Variant& v);
 bool HHVM_FUNCTION(is_object, const Variant& v);
 bool HHVM_FUNCTION(is_resource, const Variant& v);
+bool HHVM_FUNCTION(HH_is_meth_caller, TypedValue v);
 
 String HHVM_FUNCTION(gettype, const Variant& v);
 String HHVM_FUNCTION(get_resource_type, const Resource& handle);

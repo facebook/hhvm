@@ -59,6 +59,8 @@ void getMethodNames(Class* cls, Class* ctx, Array& result);
 
 String HHVM_FUNCTION(HH_class_meth_get_class, TypedValue v);
 String HHVM_FUNCTION(HH_class_meth_get_method, TypedValue v);
+String HHVM_FUNCTION(HH_meth_caller_get_class, TypedValue v);
+String HHVM_FUNCTION(HH_meth_caller_get_method, TypedValue v);
 ///////////////////////////////////////////////////////////////////////////////
 }
 

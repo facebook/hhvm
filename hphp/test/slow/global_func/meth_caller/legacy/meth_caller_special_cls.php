@@ -5,10 +5,21 @@ class B extends A {
   function f($x) { return $x * 2; }
 
   static function specail_classes() {
-    var_dump(HH\meth_caller(parent::class, "f")(new A(), 1));
-    var_dump(HH\meth_caller(parent::class, "f")(new B(), 1));
-    var_dump(HH\meth_caller(static::class, "f")(new B(), 2));
-    var_dump(HH\meth_caller(self::class, "f")(new B(), 3));
+    $x = HH\meth_caller(parent::class, "f");
+    var_dump(
+      \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+    var_dump($x(new A(), 1));
+    var_dump($x(new B(), 1));
+
+    $x = HH\meth_caller(static::class, "f");
+    var_dump(
+      \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+    var_dump($x(new B(), 2));
+
+    $x = HH\meth_caller(self::class, "f");
+    var_dump(
+      \HH\meth_caller_get_class($x), \HH\meth_caller_get_method($x));
+    var_dump($x(new B(), 3));
   }
 }
 

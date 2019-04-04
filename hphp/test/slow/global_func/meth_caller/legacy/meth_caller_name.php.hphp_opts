@@ -1,3 +1,5 @@
 -vRuntime.Eval.EmitFuncPointers=0
 -vRuntime.Eval.EmitMethCallerFuncPointers=0
 -vEval.EnablePHP=1
+
+-vRuntime.Eval.NoticeOnMethCallerHelperUse=1

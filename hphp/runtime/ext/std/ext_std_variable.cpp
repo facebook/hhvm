@@ -46,7 +46,8 @@ const StaticString
   s_object("object"),
   s_array("array"),
   s_NULL("NULL"),
-  s_null("null");
+  s_null("null"),
+  s_meth_caller_cls("\\__SystemLib\\MethCallerHelper");
 
 String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.getType() == KindOfResource && v.toCResRef().isInvalid()) {
@@ -199,6 +200,17 @@ bool HHVM_FUNCTION(is_object, const Variant& v) {
 
 bool HHVM_FUNCTION(is_resource, const Variant& v) {
   return (v.getType() == KindOfResource && !v.toCResRef().isInvalid());
+}
+
+bool HHVM_FUNCTION(HH_is_meth_caller, TypedValue v) {
+  if (tvIsFunc(v)) {
+    auto const f = val(v).pfunc;
+    return qfind(f->name()->slice(), folly::StringPiece("MethCaller$")) !=
+           std::string::npos;
+  } else if (tvIsObject(v)) {
+    return val(v).pobj->instanceof(s_meth_caller_cls);
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -691,6 +703,7 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_darray, HH_is_darray);
   HHVM_FALIAS(HH\\is_any_array, HH_is_any_array);
   HHVM_FALIAS(HH\\is_list_like, HH_is_list_like);
+  HHVM_FALIAS(HH\\is_meth_caller, HH_is_meth_caller);
   HHVM_FE(is_object);
   HHVM_FE(is_resource);
   HHVM_FE(boolval);

@@ -52,4 +52,8 @@ namespace HH {
 function class_meth_get_class(mixed $class_meth): string;
 <<__Rx>>
 function class_meth_get_method(mixed $class_meth): string;
+<<__Rx>>
+function meth_caller_get_class(mixed $meth_caller): string;
+<<__Rx>>
+function meth_caller_get_method(mixed $meth_caller): string;
 }

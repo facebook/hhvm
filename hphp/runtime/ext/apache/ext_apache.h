@@ -32,9 +32,6 @@ struct ApacheExtension final : Extension {
   ApacheExtension();
   ~ApacheExtension() override;
   void moduleInit() override;
-  void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
-  static bool Enable;
-  bool moduleEnabled() const override { return Enable; }
 
   static void UpdateHealthLevel(HealthLevel newStatus) {
     m_healthLevel = newStatus;

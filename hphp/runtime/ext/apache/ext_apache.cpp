@@ -116,33 +116,22 @@ Array HHVM_FUNCTION(get_headers_secure) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool ApacheExtension::Enable(true);
-
 ApacheExtension::ApacheExtension() : Extension("apache") {}
 
 ApacheExtension::~ApacheExtension() {}
 
 void ApacheExtension::moduleInit() {
-  if (Enable) {
-    HHVM_FE(apache_note);
-    HHVM_FE(apache_request_headers);
-    HHVM_FE(apache_response_headers);
-    HHVM_FE(apache_setenv);
-    HHVM_FALIAS(getallheaders, apache_request_headers);
-    HHVM_FE(apache_get_config);
-    HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
+  HHVM_FE(apache_note);
+  HHVM_FE(apache_request_headers);
+  HHVM_FE(apache_response_headers);
+  HHVM_FE(apache_setenv);
+  HHVM_FALIAS(getallheaders, apache_request_headers);
+  HHVM_FE(apache_get_config);
+  HHVM_FALIAS(HH\\get_headers_secure, get_headers_secure);
 
-    HHVM_RC_INT(APACHE_MAP, 200);
+  HHVM_RC_INT(APACHE_MAP, 200);
 
-    loadSystemlib();
-  }
-}
-
-void ApacheExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
-  Enable = RuntimeOption::ServerExecutionMode() ||
-           Config::GetBool(ini,
-                           config, "Apache.EnableInCLI",
-                           RuntimeOption::EnableHipHopSyntax);
+  loadSystemlib();
 }
 
 static ApacheExtension s_apache_extension;

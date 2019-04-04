@@ -167,6 +167,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.TypeConstant _
   | Syntax.GenericTypeSpecifier _
   | Syntax.NullableTypeSpecifier _
+  | Syntax.LikeTypeSpecifier _
   | Syntax.SoftTypeSpecifier _
   | Syntax.ListItem _
   | Syntax.PocketAtomExpression _

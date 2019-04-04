@@ -406,6 +406,8 @@ class EditableSyntax
       return GenericTypeSpecifier.from_json(json, position, source);
     case 'nullable_type_specifier':
       return NullableTypeSpecifier.from_json(json, position, source);
+    case 'like_type_specifier':
+      return LikeTypeSpecifier.from_json(json, position, source);
     case 'soft_type_specifier':
       return SoftTypeSpecifier.from_json(json, position, source);
     case 'reified_type_argument':
@@ -20720,6 +20722,70 @@ class NullableTypeSpecifier extends EditableSyntax
     return NullableTypeSpecifier._children_keys;
   }
 }
+class LikeTypeSpecifier extends EditableSyntax
+{
+  constructor(
+    tilde,
+    type)
+  {
+    super('like_type_specifier', {
+      tilde: tilde,
+      type: type });
+  }
+  get tilde() { return this.children.tilde; }
+  get type() { return this.children.type; }
+  with_tilde(tilde){
+    return new LikeTypeSpecifier(
+      tilde,
+      this.type);
+  }
+  with_type(type){
+    return new LikeTypeSpecifier(
+      this.tilde,
+      type);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var tilde = this.tilde.rewrite(rewriter, new_parents);
+    var type = this.type.rewrite(rewriter, new_parents);
+    if (
+      tilde === this.tilde &&
+      type === this.type)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new LikeTypeSpecifier(
+        tilde,
+        type), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let tilde = EditableSyntax.from_json(
+      json.like_tilde, position, source);
+    position += tilde.width;
+    let type = EditableSyntax.from_json(
+      json.like_type, position, source);
+    position += type.width;
+    return new LikeTypeSpecifier(
+        tilde,
+        type);
+  }
+  get children_keys()
+  {
+    if (LikeTypeSpecifier._children_keys == null)
+      LikeTypeSpecifier._children_keys = [
+        'tilde',
+        'type'];
+    return LikeTypeSpecifier._children_keys;
+  }
+}
 class SoftTypeSpecifier extends EditableSyntax
 {
   constructor(
@@ -22481,6 +22547,7 @@ exports.ShapeExpression = ShapeExpression;
 exports.TupleExpression = TupleExpression;
 exports.GenericTypeSpecifier = GenericTypeSpecifier;
 exports.NullableTypeSpecifier = NullableTypeSpecifier;
+exports.LikeTypeSpecifier = LikeTypeSpecifier;
 exports.SoftTypeSpecifier = SoftTypeSpecifier;
 exports.ReifiedTypeArgument = ReifiedTypeArgument;
 exports.TypeArguments = TypeArguments;

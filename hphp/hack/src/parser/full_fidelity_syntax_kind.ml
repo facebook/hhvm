@@ -182,6 +182,7 @@ type t =
   | TupleExpression
   | GenericTypeSpecifier
   | NullableTypeSpecifier
+  | LikeTypeSpecifier
   | SoftTypeSpecifier
   | ReifiedTypeArgument
   | TypeArguments
@@ -366,6 +367,7 @@ let to_string kind =
   | TupleExpression                         -> "tuple_expression"
   | GenericTypeSpecifier                    -> "generic_type_specifier"
   | NullableTypeSpecifier                   -> "nullable_type_specifier"
+  | LikeTypeSpecifier                       -> "like_type_specifier"
   | SoftTypeSpecifier                       -> "soft_type_specifier"
   | ReifiedTypeArgument                     -> "reified_type_argument"
   | TypeArguments                           -> "type_arguments"

@@ -221,6 +221,7 @@ module WithToken(Token: TokenType) = struct
       | TupleExpression                         _ -> SyntaxKind.TupleExpression
       | GenericTypeSpecifier                    _ -> SyntaxKind.GenericTypeSpecifier
       | NullableTypeSpecifier                   _ -> SyntaxKind.NullableTypeSpecifier
+      | LikeTypeSpecifier                       _ -> SyntaxKind.LikeTypeSpecifier
       | SoftTypeSpecifier                       _ -> SyntaxKind.SoftTypeSpecifier
       | ReifiedTypeArgument                     _ -> SyntaxKind.ReifiedTypeArgument
       | TypeArguments                           _ -> SyntaxKind.TypeArguments
@@ -411,6 +412,7 @@ module WithToken(Token: TokenType) = struct
     let is_tuple_expression                             = has_kind SyntaxKind.TupleExpression
     let is_generic_type_specifier                       = has_kind SyntaxKind.GenericTypeSpecifier
     let is_nullable_type_specifier                      = has_kind SyntaxKind.NullableTypeSpecifier
+    let is_like_type_specifier                          = has_kind SyntaxKind.LikeTypeSpecifier
     let is_soft_type_specifier                          = has_kind SyntaxKind.SoftTypeSpecifier
     let is_reified_type_argument                        = has_kind SyntaxKind.ReifiedTypeArgument
     let is_type_arguments                               = has_kind SyntaxKind.TypeArguments
@@ -2292,6 +2294,13 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc nullable_question in
          let acc = f acc nullable_type in
+         acc
+      | LikeTypeSpecifier {
+        like_tilde;
+        like_type;
+      } ->
+         let acc = f acc like_tilde in
+         let acc = f acc like_type in
          acc
       | SoftTypeSpecifier {
         soft_at;
@@ -4234,6 +4243,13 @@ module WithToken(Token: TokenType) = struct
         nullable_question;
         nullable_type;
       ]
+      | LikeTypeSpecifier {
+        like_tilde;
+        like_type;
+      } -> [
+        like_tilde;
+        like_type;
+      ]
       | SoftTypeSpecifier {
         soft_at;
         soft_type;
@@ -6175,6 +6191,13 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "nullable_question";
         "nullable_type";
+      ]
+      | LikeTypeSpecifier {
+        like_tilde;
+        like_type;
+      } -> [
+        "like_tilde";
+        "like_type";
       ]
       | SoftTypeSpecifier {
         soft_at;
@@ -8333,6 +8356,14 @@ module WithToken(Token: TokenType) = struct
         NullableTypeSpecifier {
           nullable_question;
           nullable_type;
+        }
+      | (SyntaxKind.LikeTypeSpecifier, [
+          like_tilde;
+          like_type;
+        ]) ->
+        LikeTypeSpecifier {
+          like_tilde;
+          like_type;
         }
       | (SyntaxKind.SoftTypeSpecifier, [
           soft_at;
@@ -10970,6 +11001,17 @@ module WithToken(Token: TokenType) = struct
         let syntax = NullableTypeSpecifier {
           nullable_question;
           nullable_type;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_like_type_specifier
+        like_tilde
+        like_type
+      =
+        let syntax = LikeTypeSpecifier {
+          like_tilde;
+          like_type;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

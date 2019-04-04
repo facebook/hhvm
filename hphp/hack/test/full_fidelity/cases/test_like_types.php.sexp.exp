@@ -1,0 +1,121 @@
+((script 178
+  ((list 178
+    ((markup_section 4
+      ((missing 0 ()) (() markup 0 ())
+       (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
+       (missing 0 ())))
+     (function_declaration 172
+      ((missing 0 ())
+       (function_declaration_header 169
+        ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
+         (() name 1 ()) (missing 0 ()) (() "(" 1 ((end_of_line 1)))
+         (list 147
+          ((list_item 8
+            ((parameter_declaration 7
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (like_type_specifier 4
+                ((((whitespace 2)) ~ 1 ())
+                 (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 27
+            ((parameter_declaration 26
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (vector_type_specifier 23
+                ((((whitespace 2)) vec 3 ()) (() < 1 ())
+                 (like_type_specifier 18
+                  ((() ~ 1 ())
+                   (dictionary_type_specifier 17
+                    ((() dict 4 ()) (() < 1 ())
+                     (list 11
+                      ((list_item 4
+                        ((simple_type_specifier 3 ((() int 3 ())))
+                         (() , 1 ((whitespace 1)))))
+                       (list_item 6
+                        ((simple_type_specifier 6 ((() string 6 ())))
+                         (missing 0 ())))))
+                     (() > 1 ())))))
+                 (missing 0 ()) (() > 1 ((whitespace 1)))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 20
+            ((parameter_declaration 19
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (like_type_specifier 16
+                ((((whitespace 2)) ~ 1 ())
+                 (type_constant 15
+                  ((() name 9 ()) (() :: 2 ()) (() name 4 ((whitespace 1)))))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 26
+            ((parameter_declaration 25
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (closure_type_specifier 22
+                ((((whitespace 2)) "(" 1 ()) (missing 0 ())
+                 (() function 8 ()) (() "(" 1 ())
+                 (list 4
+                  ((list_item 4
+                    ((closure_parameter_type_specifier 4
+                      ((missing 0 ())
+                       (like_type_specifier 4
+                        ((() ~ 1 ())
+                         (simple_type_specifier 3 ((() int 3 ())))))))
+                     (missing 0 ())))))
+                 (() ")" 1 ()) (() : 1 ((whitespace 1)))
+                 (simple_type_specifier 4 ((() void 4 ())))
+                 (() ")" 1 ((whitespace 1)))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 9
+            ((parameter_declaration 8
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (nullable_type_specifier 5
+                ((((whitespace 2)) ? 1 ())
+                 (like_type_specifier 4
+                  ((() ~ 1 ())
+                   (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 9
+            ((parameter_declaration 8
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (like_type_specifier 5
+                ((((whitespace 2)) ~ 1 ())
+                 (nullable_type_specifier 4
+                  ((() ? 1 ())
+                   (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 9
+            ((parameter_declaration 8
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (like_type_specifier 5
+                ((((whitespace 2)) ~ 1 ())
+                 (like_type_specifier 4
+                  ((() ~ 1 ())
+                   (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))
+           (list_item 18
+            ((parameter_declaration 17
+              ((missing 0 ()) (missing 0 ()) (missing 0 ())
+               (tuple_type_specifier 14
+                ((((whitespace 2)) "(" 1 ())
+                 (list 12
+                  ((list_item 4
+                    ((simple_type_specifier 3 ((() int 3 ())))
+                     (() , 1 ((whitespace 1)))))
+                   (list_item 7
+                    ((like_type_specifier 7
+                      ((() ~ 1 ())
+                       (simple_type_specifier 6 ((() string 6 ())))))
+                     (missing 0 ())))))
+                 (() ")" 1 ((whitespace 1)))))
+               (() variable 2 ()) (missing 0 ())))
+             (() , 1 ((end_of_line 1)))))))
+         (() ")" 1 ()) (() : 1 ((whitespace 1)))
+         (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
+         (missing 0 ())))
+       (compound_statement 2
+        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

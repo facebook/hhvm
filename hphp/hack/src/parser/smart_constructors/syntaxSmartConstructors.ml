@@ -206,6 +206,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_tuple_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_tuple_expression arg0 arg1 arg2 arg3
     let make_generic_type_specifier arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_generic_type_specifier arg0 arg1
     let make_nullable_type_specifier arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_nullable_type_specifier arg0 arg1
+    let make_like_type_specifier arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_like_type_specifier arg0 arg1
     let make_soft_type_specifier arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_soft_type_specifier arg0 arg1
     let make_reified_type_argument arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_reified_type_argument arg0 arg1
     let make_type_arguments arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_type_arguments arg0 arg1 arg2

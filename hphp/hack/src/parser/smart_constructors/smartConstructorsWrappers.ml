@@ -194,6 +194,7 @@ module type SyntaxKind_S = sig
   val is_tuple_expression : r -> bool
   val is_generic_type_specifier : r -> bool
   val is_nullable_type_specifier : r -> bool
+  val is_like_type_specifier : r -> bool
   val is_soft_type_specifier : r -> bool
   val is_reified_type_argument : r -> bool
   val is_type_arguments : r -> bool
@@ -395,6 +396,7 @@ module SyntaxKind(SC : SC_S)
   let make_tuple_expression arg0 arg1 arg2 arg3 state = compose SK.TupleExpression (SC.make_tuple_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_generic_type_specifier arg0 arg1 state = compose SK.GenericTypeSpecifier (SC.make_generic_type_specifier (snd arg0) (snd arg1) state)
   let make_nullable_type_specifier arg0 arg1 state = compose SK.NullableTypeSpecifier (SC.make_nullable_type_specifier (snd arg0) (snd arg1) state)
+  let make_like_type_specifier arg0 arg1 state = compose SK.LikeTypeSpecifier (SC.make_like_type_specifier (snd arg0) (snd arg1) state)
   let make_soft_type_specifier arg0 arg1 state = compose SK.SoftTypeSpecifier (SC.make_soft_type_specifier (snd arg0) (snd arg1) state)
   let make_reified_type_argument arg0 arg1 state = compose SK.ReifiedTypeArgument (SC.make_reified_type_argument (snd arg0) (snd arg1) state)
   let make_type_arguments arg0 arg1 arg2 state = compose SK.TypeArguments (SC.make_type_arguments (snd arg0) (snd arg1) (snd arg2) state)
@@ -578,6 +580,7 @@ module SyntaxKind(SC : SC_S)
   let is_tuple_expression                             = has_kind SK.TupleExpression
   let is_generic_type_specifier                       = has_kind SK.GenericTypeSpecifier
   let is_nullable_type_specifier                      = has_kind SK.NullableTypeSpecifier
+  let is_like_type_specifier                          = has_kind SK.LikeTypeSpecifier
   let is_soft_type_specifier                          = has_kind SK.SoftTypeSpecifier
   let is_reified_type_argument                        = has_kind SK.ReifiedTypeArgument
   let is_type_arguments                               = has_kind SK.TypeArguments

@@ -144,6 +144,7 @@ let rec parse_type_specifier ?(allow_var=false) parser =
   | LeftParen -> parse_tuple_or_closure_type_specifier parser
   | Shape -> parse_shape_specifier parser
   | Question -> parse_nullable_type_specifier parser
+  | Tilde -> parse_like_type_specifier parser
   | At -> parse_soft_type_specifier parser
   | Classname -> parse_classname_type_specifier parser
   | _ ->
@@ -727,6 +728,17 @@ and parse_nullable_type_specifier parser =
   let (parser, question) = assert_token parser Question in
   let (parser, nullable_type) = parse_type_specifier parser in
   Make.nullable_type_specifier parser question nullable_type
+
+and parse_like_type_specifier parser =
+  (* SPEC:
+    like-type-specifier:
+      ~ type-specifier
+
+  * Note that it is perfectly legal to have trivia between the ~ and the
+    underlying type. *)
+  let (parser, tilde) = assert_token parser Tilde in
+  let (parser, like_type) = parse_type_specifier parser in
+  Make.like_type_specifier parser tilde like_type
 
 and parse_soft_type_specifier parser =
   (* SPEC (Draft)

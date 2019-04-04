@@ -317,6 +317,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.ShapeTypeSpecifier _ -> tag validate_shape_type_specifier (fun x -> SpecShape x) x
     | Syntax.GenericTypeSpecifier _ -> tag validate_generic_type_specifier (fun x -> SpecGeneric x) x
     | Syntax.NullableTypeSpecifier _ -> tag validate_nullable_type_specifier (fun x -> SpecNullable x) x
+    | Syntax.LikeTypeSpecifier _ -> tag validate_like_type_specifier (fun x -> SpecLike x) x
     | Syntax.SoftTypeSpecifier _ -> tag validate_soft_type_specifier (fun x -> SpecSoft x) x
     | Syntax.TupleTypeSpecifier _ -> tag validate_tuple_type_specifier (fun x -> SpecTuple x) x
     | s -> aggregation_fail Def.Specifier s
@@ -341,6 +342,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | SpecShape             thing -> invalidate_shape_type_specifier           (value, thing)
     | SpecGeneric           thing -> invalidate_generic_type_specifier         (value, thing)
     | SpecNullable          thing -> invalidate_nullable_type_specifier        (value, thing)
+    | SpecLike              thing -> invalidate_like_type_specifier            (value, thing)
     | SpecSoft              thing -> invalidate_soft_type_specifier            (value, thing)
     | SpecTuple             thing -> invalidate_tuple_type_specifier           (value, thing)
   and validate_parameter : parameter validator = fun x ->
@@ -3650,6 +3652,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       Syntax.NullableTypeSpecifier
       { nullable_question = invalidate_token x.nullable_question
       ; nullable_type = invalidate_specifier x.nullable_type
+      }
+    ; Syntax.value = v
+    }
+  and validate_like_type_specifier : like_type_specifier validator = function
+  | { Syntax.syntax = Syntax.LikeTypeSpecifier x; value = v } -> v,
+    { like_type = validate_specifier x.like_type
+    ; like_tilde = validate_token x.like_tilde
+    }
+  | s -> validation_fail (Some SyntaxKind.LikeTypeSpecifier) s
+  and invalidate_like_type_specifier : like_type_specifier invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.LikeTypeSpecifier
+      { like_tilde = invalidate_token x.like_tilde
+      ; like_type = invalidate_specifier x.like_type
       }
     ; Syntax.value = v
     }

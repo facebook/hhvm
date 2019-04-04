@@ -1359,6 +1359,14 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
+  let make_like_type_specifier p0 p1 stack =
+    match stack with
+    | a1 :: a0 :: rem ->
+      let () = verify ~stack [p0; p1] [a0; a1] "like_type_specifier" in
+      let node = Syntax.make_like_type_specifier p0 p1 in
+      node :: rem, node
+    | _ -> failwith "Unexpected stack state"
+    
   let make_soft_type_specifier p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->

@@ -1119,6 +1119,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { nullable_question                                  : t
     ; nullable_type                                      : t
     }
+  | LikeTypeSpecifier                       of
+    { like_tilde                                         : t
+    ; like_type                                          : t
+    }
   | SoftTypeSpecifier                       of
     { soft_at                                            : t
     ; soft_type                                          : t
@@ -1322,6 +1326,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | SpecShape             of shape_type_specifier
   | SpecGeneric           of generic_type_specifier
   | SpecNullable          of nullable_type_specifier
+  | SpecLike              of like_type_specifier
   | SpecSoft              of soft_type_specifier
   | SpecTuple             of tuple_type_specifier
   and parameter =
@@ -2475,6 +2480,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and nullable_type_specifier =
     { nullable_question: Token.t value
     ; nullable_type: specifier value
+    }
+  and like_type_specifier =
+    { like_tilde: Token.t value
+    ; like_type: specifier value
     }
   and soft_type_specifier =
     { soft_at: Token.t value

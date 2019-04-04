@@ -1006,6 +1006,10 @@ module type Syntax_S = sig
     { nullable_question                                  : t
     ; nullable_type                                      : t
     }
+  | LikeTypeSpecifier                       of
+    { like_tilde                                         : t
+    ; like_type                                          : t
+    }
   | SoftTypeSpecifier                       of
     { soft_at                                            : t
     ; soft_type                                          : t
@@ -1269,6 +1273,7 @@ module type Syntax_S = sig
   val make_tuple_expression : t -> t -> t -> t -> t
   val make_generic_type_specifier : t -> t -> t
   val make_nullable_type_specifier : t -> t -> t
+  val make_like_type_specifier : t -> t -> t
   val make_soft_type_specifier : t -> t -> t
   val make_reified_type_argument : t -> t -> t
   val make_type_arguments : t -> t -> t -> t
@@ -1451,6 +1456,7 @@ module type Syntax_S = sig
   val is_tuple_expression : t -> bool
   val is_generic_type_specifier : t -> bool
   val is_nullable_type_specifier : t -> bool
+  val is_like_type_specifier : t -> bool
   val is_soft_type_specifier : t -> bool
   val is_reified_type_argument : t -> bool
   val is_type_arguments : t -> bool

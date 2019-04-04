@@ -516,6 +516,9 @@ module WithOp(Op : Op_S) = struct
   let make_nullable_type_specifier arg0 arg1 state =
     if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
     else state, Op.flatten [arg0; arg1]
+  let make_like_type_specifier arg0 arg1 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
+    else state, Op.flatten [arg0; arg1]
   let make_soft_type_specifier arg0 arg1 state =
     if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
     else state, Op.flatten [arg0; arg1]

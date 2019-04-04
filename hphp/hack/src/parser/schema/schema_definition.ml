@@ -2132,6 +2132,17 @@ let schema : schema_node list =
       ; "type", Aggregate Specifier
       ]
     }
+  ; { kind_name   = "LikeTypeSpecifier"
+    ; type_name   = "like_type_specifier"
+    ; func_name   = "like_type_specifier"
+    ; description = "like_type_specifier"
+    ; prefix      = "like"
+    ; aggregates  = [ Specifier ]
+    ; fields =
+      [ "tilde", Token
+      ; "type", Aggregate Specifier
+      ]
+    }
   ; { kind_name   = "SoftTypeSpecifier"
     ; type_name   = "soft_type_specifier"
     ; func_name   = "soft_type_specifier"

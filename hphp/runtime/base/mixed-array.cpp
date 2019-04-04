@@ -395,7 +395,7 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
     ad->initHeader_16(HeaderKind::Mixed, OneReference, ArrayData::kDArray);
   }
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
-  ad->m_nextKI           = 0;
+  ad->m_nextKI           = size;
 
   // Append values by moving -- no refcounts are updated.
   auto const data = ad->data();
@@ -416,7 +416,7 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
   assertx(ad->m_scale == scale);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == size);
-  assertx(ad->m_nextKI == 0);
+  assertx(ad->m_nextKI == size);
   assertx(ad->checkInvariants());
   return ad;
 }

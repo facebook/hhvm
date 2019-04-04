@@ -1645,7 +1645,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       , varargs
       )
     | GenericTypeSpecifier { generic_class_type; generic_argument_list } ->
-        if is_typechecker env && not (is_missing generic_argument_list) then
+        if not (is_missing generic_argument_list) then
           raise_parsing_error env (`Node generic_argument_list) SyntaxError.targs_not_allowed;
         let name = pos_name generic_class_type env in
         Id name

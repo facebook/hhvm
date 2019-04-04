@@ -599,7 +599,6 @@ struct RuntimeOption {
   static std::vector<std::string> TzdataSearchPaths;
 
 #define HAC_CHECK_OPTS                         \
-  HC(IntishCast, intish_cast)                  \
   HC(RefBind, ref_bind)                        \
   HC(FalseyPromote, falsey_promote)            \
   HC(EmptyStringPromote, empty_string_promote) \
@@ -988,7 +987,6 @@ struct RuntimeOption {
    * HackArrCompatNotices option, and control whether various runtime
    * checks are made; they do not affect any optimizations. */          \
   F(bool, HackArrCompatNotices, false)                                  \
-  F(bool, HackArrCompatCheckIntishCast, false)                          \
   F(bool, HackArrCompatCheckRefBind, false)                             \
   F(bool, HackArrCompatCheckFalseyPromote, false)                       \
   F(bool, HackArrCompatCheckEmptyStringPromote, false)                  \
@@ -1016,12 +1014,7 @@ struct RuntimeOption {
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
-  /* Disables intish cast wherever we would have warned for             \
-   * HackArrCompatCheckIntishCast--this includes intish key cast in any \
-   * PHP code and much of the runtime and extensions */                 \
-  F(bool, EnableIntishCast, true)                                       \
   F(bool, HackArrDVArrs, false)                                         \
-  F(uint32_t, LogSuppressedIntishCastRate, 0)                           \
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \
   F(bool, IsExprEnableUnresolvedWarning, false)                         \

@@ -56,8 +56,7 @@ bool canInstantiateClass(const Class* cls) {
 void fpushObjMethodUnknown(IRGS& env,
                            SSATmp* obj,
                            const StringData* methodName,
-                           uint32_t numParams,
-                           bool shouldFatal) {
+                           uint32_t numParams) {
   implIncStat(env, Stats::ObjMethod_cached);
   allocActRec(env);
   fsetActRec(env,
@@ -75,9 +74,7 @@ void fpushObjMethodUnknown(IRGS& env,
 
   gen(env,
       LdObjMethod,
-      LdObjMethodData {
-        spOffBCFromIRSP(env), methodName, shouldFatal
-      },
+      LdObjMethodData { spOffBCFromIRSP(env), methodName },
       objCls,
       sp(env));
 }
@@ -232,7 +229,6 @@ void fpushObjMethodWithBaseClass(
   const Class* baseClass,
   const StringData* methodName,
   uint32_t numParams,
-  bool shouldFatal,
   bool exactClass
 ) {
   bool magicCall = false;
@@ -246,7 +242,7 @@ void fpushObjMethodWithBaseClass(
     return;
   }
 
-  fpushObjMethodUnknown(env, obj, methodName, numParams, shouldFatal);
+  fpushObjMethodUnknown(env, obj, methodName, numParams);
 }
 
 const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
@@ -463,7 +459,6 @@ void fpushObjMethod(IRGS& env,
                     SSATmp* obj,
                     const StringData* methodName,
                     uint32_t numParams,
-                    bool shouldFatal,
                     Block* sideExit) {
   implIncStat(env, Stats::ObjMethod_total);
 
@@ -498,7 +493,7 @@ void fpushObjMethod(IRGS& env,
   }
 
   fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
-                              shouldFatal, exactClass);
+                              exactClass);
 
   if (profile && profile->profiling()) {
     gen(env,
@@ -956,8 +951,7 @@ void emitFPushObjMethodD(IRGS& env,
   auto const obj = popC(env);
 
   if (obj->type() <= TObj) {
-    fpushObjMethod(env, obj, methodName, numParams,
-      true /* shouldFatal */, sideExit);
+    fpushObjMethod(env, obj, methodName, numParams, sideExit);
     return;
   }
 

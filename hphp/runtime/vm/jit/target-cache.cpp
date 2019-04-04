@@ -216,25 +216,6 @@ void raiseFatal(ActRec* ar, Class* cls, StringData* name, Class* ctx) {
 }
 
 NEVER_INLINE
-void nullFunc(ActRec* ar, StringData* name) {
-  try {
-    raise_warning("Invalid argument: function: method '%s' not found",
-                  name->data());
-    ar->m_func = SystemLib::s_nullFunc;
-    auto const obj = ar->getThisUnsafe();
-    ar->trashThis();
-    decRefObj(obj);
-  } catch (...) {
-    // The jit stored an ObjectData in the ActRec, but we didn't set
-    // a func yet.
-    auto const obj = ar->getThisUnsafe();
-    *arPreliveOverwriteCells(ar) = make_tv<KindOfObject>(obj);
-    throw;
-  }
-}
-
-template<bool fatal>
-NEVER_INLINE
 void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
   auto func = lookupMethodCtx(
     cls,
@@ -247,8 +228,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
   if (UNLIKELY(!func)) {
     func = cls->lookupMethod(s_call.get());
     if (UNLIKELY(!func)) {
-      if (fatal) return raiseFatal(ar, cls, name, ctx);
-      return nullFunc(ar, name);
+      return raiseFatal(ar, cls, name, ctx);
     }
     ar->setMagicDispatch(name);
     assertx(!(func->attrs() & AttrStatic));
@@ -277,7 +257,6 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
   }
 }
 
-template<bool fatal>
 NEVER_INLINE
 void readMagicOrStatic(Entry* mce,
                        ActRec* ar,
@@ -287,7 +266,7 @@ void readMagicOrStatic(Entry* mce,
                        uintptr_t mceKey) {
   auto const storedClass = reinterpret_cast<Class*>(mceKey & ~0x3u);
   if (storedClass != cls) {
-    return lookup<fatal>(mce, ar, name, cls, ctx);
+    return lookup(mce, ar, name, cls, ctx);
   }
 
   auto const mceValue = mce->m_value;
@@ -313,7 +292,6 @@ void readMagicOrStatic(Entry* mce,
   }
 }
 
-template <bool fatal>
 NEVER_INLINE void
 readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
@@ -332,7 +310,6 @@ readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-template<bool fatal>
 EXTERNALLY_VISIBLE void
 handleSlowPath(rds::Handle mce_handle,
                ActRec* ar,
@@ -373,18 +350,18 @@ handleSlowPath(rds::Handle mce_handle,
     // immediate), so we check this bit to ensure we don't try to
     // treat the immediate as a real Func* if it isn't yet.
     if (mcePrime & 0x1) {
-      return lookup<fatal>(mce, ar, name, cls, ctx);
+      return lookup(mce, ar, name, cls, ctx);
     }
     mceValue = reinterpret_cast<const Func*>(mcePrime >> 32);
     if (UNLIKELY(!mceValue)) {
       // The inline Func* might be null if it was uncacheable (not
       // low-malloced).
-      return lookup<fatal>(mce, ar, name, cls, ctx);
+      return lookup(mce, ar, name, cls, ctx);
     }
     mce->m_value = mceValue; // below assumes this is already in local cache
   } else {
     if (UNLIKELY(mceKey & 0x3)) {
-      return readMagicOrStatic<fatal>(mce, ar, name, cls, ctx, mceKey);
+      return readMagicOrStatic(mce, ar, name, cls, ctx, mceKey);
     }
     mceValue = mce->m_value;
   }
@@ -393,7 +370,7 @@ handleSlowPath(rds::Handle mce_handle,
   // Note: if you manually CSE mceValue->methodSlot() here, gcc 4.8
   // will strangely generate two loads instead of one.
   if (UNLIKELY(cls->numMethods() <= mceValue->methodSlot())) {
-    return lookup<fatal>(mce, ar, name, cls, ctx);
+    return lookup(mce, ar, name, cls, ctx);
   }
   auto const cand = cls->getMethod(mceValue->methodSlot());
 
@@ -455,7 +432,7 @@ handleSlowPath(rds::Handle mce_handle,
       ar->m_func   = cand;
       mce->m_value = cand;
       if (UNLIKELY(cand->isStaticInPrologue())) {
-        return readPublicStatic<fatal>(mce, ar, cls, cand);
+        return readPublicStatic(mce, ar, cls, cand);
       }
       mce->m_key = reinterpret_cast<uintptr_t>(cls);
       return;
@@ -479,10 +456,9 @@ handleSlowPath(rds::Handle mce_handle,
     }
   }
 
-  return lookup<fatal>(mce, ar, name, cls, ctx);
+  return lookup(mce, ar, name, cls, ctx);
 }
 
-template<bool fatal>
 EXTERNALLY_VISIBLE void
 handlePrimeCacheInit(rds::Handle mce_handle,
                      ActRec* ar,
@@ -500,7 +476,7 @@ handlePrimeCacheInit(rds::Handle mce_handle,
   // If rawTarget doesn't have the flag bit we must have a smash in flight, but
   // the call is still pointed at us.  Just do a lookup.
   if (!(rawTarget & 0x1)) {
-    return lookup<fatal>(mce, ar, name, cls, ctx);
+    return lookup(mce, ar, name, cls, ctx);
   }
 
   // We should be able to use DECLARE_FRAME_POINTER here,
@@ -524,7 +500,7 @@ handlePrimeCacheInit(rds::Handle mce_handle,
   TCA movAddr = TCA(rawTarget >> 1);
 
   // First fill the request local method cache for this call.
-  lookup<fatal>(mce, ar, name, cls, ctx);
+  lookup(mce, ar, name, cls, ctx);
 
   auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
     auto const imm = smashableMovqImm(addr);
@@ -577,25 +553,8 @@ handlePrimeCacheInit(rds::Handle mce_handle,
 
   // Regardless of whether the inline cache was populated, smash the
   // call to start doing real dispatch.
-  smashCall(callAddr, fatal ?
-            tc::ustubs().handleSlowPathFatal : tc::ustubs().handleSlowPath);
+  smashCall(callAddr, tc::ustubs().handleSlowPathFatal);
 }
-
-template
-void handlePrimeCacheInit<false>(rds::Handle, ActRec*, StringData*,
-                                 Class*, Class*, uintptr_t);
-
-template
-void handlePrimeCacheInit<true>(rds::Handle, ActRec*, StringData*,
-                                Class*, Class*, uintptr_t);
-
-template
-void handleSlowPath<false>(rds::Handle, ActRec*, StringData*,
-                           Class*, Class*, uintptr_t);
-
-template
-void handleSlowPath<true>(rds::Handle, ActRec*, StringData*,
-                          Class*, Class*, uintptr_t);
 
 } // namespace MethodCache
 

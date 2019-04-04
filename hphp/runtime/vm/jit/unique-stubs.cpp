@@ -1115,18 +1115,10 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
   ADD(callToExit,         emitCallToExit(hot(), data, *this));
   ADD(throwSwitchMode,    emitThrowSwitchMode(frozen, data));
 
-  ADD(handlePrimeCacheInit,
-      emitHelperThunk(code, cold, data,
-                      MethodCache::handlePrimeCacheInit<false>));
   ADD(handlePrimeCacheInitFatal,
-      emitHelperThunk(code, cold, data,
-                      MethodCache::handlePrimeCacheInit<true>));
-  ADD(handleSlowPath,
-      emitHelperThunk(code, main, data,
-                      MethodCache::handleSlowPath<false>));
+      emitHelperThunk(code, cold, data, MethodCache::handlePrimeCacheInit));
   ADD(handleSlowPathFatal,
-      emitHelperThunk(code, main, data,
-                      MethodCache::handleSlowPath<true>));
+      emitHelperThunk(code, main, data, MethodCache::handleSlowPath));
 
 #undef ADD
 

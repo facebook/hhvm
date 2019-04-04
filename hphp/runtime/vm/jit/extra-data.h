@@ -857,21 +857,17 @@ struct FuncNameData : IRExtraData {
 
 struct LdObjMethodData : IRExtraData {
   explicit LdObjMethodData(IRSPRelOffset offset,
-                           const StringData* method,
-                           bool fatal)
+                           const StringData* method)
     : offset(offset)
     , method(method)
-    , fatal(fatal)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(offset.offset, ',', method->data(), ',',
-      fatal ? "fatal" : "warn");
+    return folly::to<std::string>(offset.offset, ',', method->data());
   }
 
   IRSPRelOffset offset;
   const StringData* method;
-  bool fatal;
 };
 
 struct LdFuncCachedUData : IRExtraData {

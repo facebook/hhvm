@@ -73,8 +73,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                    inst->marker().func()->fullName()->slice());
   }
 
-  auto const mc_handler = extra->fatal ? tc::ustubs().handlePrimeCacheInitFatal
-                                       : tc::ustubs().handlePrimeCacheInit;
+  auto const mc_handler = tc::ustubs().handlePrimeCacheInitFatal;
 
   /*
    * The `mcprep' instruction here creates a smashable move, which serves as
@@ -83,7 +82,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
    * On our first time through this codepath in the TC, we "prime" this cache
    * (which holds across /all/ requests) by smashing the mov immediate to hold
    * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
-   * not always possible (see handlePrimeCacheInit() for details), in which
+   * not always possible (see handlePrimeCacheInitFatal() for details), in which
    * case we smash an immediate with some low bits set, so that we always miss
    * on the inline cache when comparing against our live Class*.
    *

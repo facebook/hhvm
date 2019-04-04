@@ -120,7 +120,6 @@ struct Entry {
   const Func* m_value;
 };
 
-template<bool fatal>
 void handlePrimeCacheInit(rds::Handle mce_handle,
                           ActRec* ar,
                           StringData* name,
@@ -128,7 +127,6 @@ void handlePrimeCacheInit(rds::Handle mce_handle,
                           Class* ctx,
                           uintptr_t rawTarget);
 
-template<bool fatal>
 void handleSlowPath(rds::Handle mce_handle,
                     ActRec* ar,
                     StringData* name,

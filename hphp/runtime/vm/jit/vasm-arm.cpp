@@ -751,7 +751,7 @@ void Vgen::emit(const mcprep& i) {
    *
    * We set the low bit for two reasons: the Class* will never be a valid
    * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePrimeCacheInit can tell it's not been smashed yet
+   * handlePrimeCacheInitFatal can tell it's not been smashed yet
    */
 
   align(*env.cb, &env.meta, Alignment::SmashMovq, AlignContext::Live);

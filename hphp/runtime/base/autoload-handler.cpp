@@ -363,7 +363,7 @@ bool AutoloadHandler::autoloadClassPHP5Impl(const String& className,
   // in which case autoload is allowed to be reentrant.
   if (!forceSplStack) {
     const auto arrkey =
-      m_loading.convertKey<IntishCast::CastSilently>(className);
+      m_loading.convertKey<IntishCast::Cast>(className);
     if (m_loading.exists(arrkey)) { return false; }
     m_loading.set(arrkey, make_tv<KindOfString>(className.get()));
   } else {

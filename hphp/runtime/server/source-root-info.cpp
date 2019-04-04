@@ -220,7 +220,7 @@ Array SourceRootInfo::setServerVariables(Array server) const {
        it != RuntimeOption::SandboxServerVariables.end();
        ++it) {
     String idx(it->first);
-    const auto arrkey = server.convertKey<IntishCast::CastSilently>(idx);
+    const auto arrkey = server.convertKey<IntishCast::Cast>(idx);
     String str(parseSandboxServerVariable(it->second));
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }

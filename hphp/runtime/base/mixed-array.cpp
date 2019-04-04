@@ -1729,7 +1729,7 @@ ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
   if (adIn->size() == 0) return staticEmptyArray();
 
   if (copy || adIn->hasIntishKeys()) {
-    return copyWithIntishCast<IntishCast::CastSilently>(adIn);
+    return copyWithIntishCast<IntishCast::Cast>(adIn);
   } else {
     // we don't need to CoW and there were no intish keys, so we can just update
     // dv-arrayness in place and get on with our day
@@ -1769,14 +1769,14 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
 }
 
 ArrayData* MixedArray::ToPHPArrayDict(ArrayData* adIn, bool copy) {
-  auto out = FromDictImpl<IntishCast::AllowCastAndWarn>(adIn, copy, false);
+  auto out = FromDictImpl<IntishCast::None>(adIn, copy, false);
   assertx(out->isNotDVArray());
   assertx(!out->isLegacyArray());
   return out;
 }
 
 ArrayData* MixedArray::ToPHPArrayIntishCastDict(ArrayData* adIn, bool copy) {
-  auto out = FromDictImpl<IntishCast::CastSilently>(adIn, copy, false);
+  auto out = FromDictImpl<IntishCast::Cast>(adIn, copy, false);
   assertx(out->isNotDVArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1808,7 +1808,7 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
 
 ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return in;
-  auto out = FromDictImpl<IntishCast::AllowCastAndWarn>(in, copy, true);
+  auto out = FromDictImpl<IntishCast::None>(in, copy, true);
   assertx(out->isDArray());
   assertx(!out->isLegacyArray());
   return out;
@@ -1817,7 +1817,7 @@ ArrayData* MixedArray::ToDArrayDict(ArrayData* in, bool copy) {
 ArrayData* MixedArray::ToDArrayShape(ArrayData* in, bool copy) {
   assertx(in->isShape());
   if (RuntimeOption::EvalHackArrDVArrs) {
-    auto out = FromDictImpl<IntishCast::AllowCastAndWarn>(in, copy, true);
+    auto out = FromDictImpl<IntishCast::None>(in, copy, true);
     assertx(out->isDArray());
     assertx(!out->isLegacyArray());
     return out;

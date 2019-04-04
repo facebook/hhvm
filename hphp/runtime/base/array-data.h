@@ -63,22 +63,9 @@ struct arr_lval : tv_lval {
 
 /*
  * We use this enum as a template parameter in a few key places to determine
- * whether or not a check for intish cast should occur and if a warning should
- * be logged.
- *
- * Currently, there a few spots in extensions where we cast explicitly and do
- * not log (CastSilently) In the JIT and the rest of the runtime, whether we
- * [cast and possibly warn] or [don't cast at all] is controlled by a runtime
- * flag. Whether the warning is emitted or not is controlled by another flag.
-
- * Eventually, the flag will go away and we will default to not checking/casting
- * at all, except where the cast was made explicit (CastSilently)
+ * whether we should explicitly perform legacy PHP intish key cast.
  */
-enum class IntishCast : int8_t {
-  AllowCastAndWarn, /* Cast if EnableIntishCast allows it,
-                       Log if CheckIntishCast is on and we casted */
-  CastSilently,     /* Unconditionally do cast, never log */
-};
+enum class IntishCast : int8_t { None, Cast };
 
 struct ArrayData : MaybeCountable {
   /*
@@ -766,7 +753,7 @@ public:
    * (which may depend on the array kind, e.g.).  If true, `i' is set to the
    * intish value of `key'.
    */
-  template <IntishCast IC = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::None>
   bool convertKey(const StringData* key, int64_t& i) const;
 
   /*
@@ -1064,7 +1051,7 @@ bool checkHACArrayKeyCast();
 /*
  * Like isStrictlyInteger() but changes behavior with the value of `ic'.
  */
-template <IntishCast IC = IntishCast::AllowCastAndWarn>
+template <IntishCast IC = IntishCast::None>
 folly::Optional<int64_t> tryIntishCast(const StringData* key);
 
 ///////////////////////////////////////////////////////////////////////////////

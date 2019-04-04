@@ -568,7 +568,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
         transport.writeString(sv.data(), sv.size());
     } return;
     case T_MAP: {
-      Array ht = value.toArray<IntishCast::CastSilently>();
+      Array ht = value.toArray<IntishCast::Cast>();
       uint8_t keytype = (char)tvCastToInt64(
         fieldspec.rvalAt(s_ktype, AccessFlags::ErrorKey).tv()
       );
@@ -589,7 +589,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       }
     } return;
     case T_LIST: {
-      Array ht = value.toArray<IntishCast::CastSilently>();
+      Array ht = value.toArray<IntishCast::Cast>();
       Variant val;
 
       uint8_t valtype = tvCastToInt64(
@@ -605,7 +605,7 @@ void binary_serialize(int8_t thrift_typeID, PHPOutputTransport& transport,
       }
     } return;
     case T_SET: {
-      Array ht = value.toArray<IntishCast::CastSilently>();
+      Array ht = value.toArray<IntishCast::Cast>();
 
       uint8_t keytype = (char)tvCastToInt64(
         fieldspec.rvalAt(s_etype, AccessFlags::ErrorKey).tv()

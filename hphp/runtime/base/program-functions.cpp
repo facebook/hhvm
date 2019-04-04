@@ -261,7 +261,7 @@ static void process_env_variables(Array& variables, char** envp,
                            std::map<std::string, std::string>& envVariables) {
   for (auto& kv : envVariables) {
     String idx(kv.first);
-    auto const arrkey = variables.convertKey<IntishCast::CastSilently>(idx);
+    auto const arrkey = variables.convertKey<IntishCast::Cast>(idx);
     String str(kv.second);
     variables.set(arrkey, make_tv<KindOfString>(str.get()));
   }
@@ -367,7 +367,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
       } else {
         String key_str(index, index_len, CopyString);
         auto const key =
-          symtable->convertKey<IntishCast::CastSilently>(key_str.toCell());
+          symtable->convertKey<IntishCast::Cast>(key_str.toCell());
         auto const v = symtable->rvalAt(key).unboxed();
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, make_tv<KindOfPersistentArray>(staticEmptyArray()));
@@ -395,7 +395,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
     } else {
       String key_str(index, index_len, CopyString);
       auto key =
-        symtable->convertKey<IntishCast::CastSilently>(key_str.toCell());
+        symtable->convertKey<IntishCast::Cast>(key_str.toCell());
       if (overwrite || !symtable->exists(key)) {
         symtable->set(key, *value.toCell(), true);
       }

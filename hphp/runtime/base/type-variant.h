@@ -1090,7 +1090,7 @@ struct Variant : private TypedValue {
   // Convert a non-array-like type to a PHP array, leaving PHP arrays and Hack
   // arrays unchanged. Use toPHPArray() if you want the result to always be a
   // PHP array.
-  template <IntishCast IC = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::None>
   Array toArray() const {
     return HPHP::toArray<IC>(asTypedValue());
   }
@@ -1184,7 +1184,7 @@ struct Variant : private TypedValue {
    * Convert to a valid key or throw an exception. If convertStrKeys is true
    * int-like string keys will be converted to int keys.
    */
-  template <IntishCast IC = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::None>
   VarNR toKey(const ArrayData*) const;
 
   /* Creating a temporary Array, String, or Object with no ref-counting and

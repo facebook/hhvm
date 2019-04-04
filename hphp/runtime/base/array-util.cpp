@@ -253,7 +253,7 @@ Variant ArrayUtil::CountValues(const Array& input) {
     if (isIntType(inner.type()) || isStringType(inner.type()) ||
       isFuncType(inner.type()) || isClassType(inner.type())) {
       auto const inner_key =
-        ret.convertKey<IntishCast::CastSilently>(inner.tv());
+        ret.convertKey<IntishCast::Cast>(inner.tv());
       if (!ret.exists(inner_key)) {
         ret.set(inner_key, make_tv<KindOfInt64>(1));
       } else {
@@ -413,7 +413,7 @@ Variant ArrayUtil::StringUnique(const Array& input) {
     auto const str = tvCastToString(iter.secondVal());
     if (!seenValues.exists(str)) {
       seenValues.append(str);
-      ret.set(ret.convertKey<IntishCast::CastSilently>(iter.first()),
+      ret.set(ret.convertKey<IntishCast::Cast>(iter.first()),
                                                        iter.secondVal());
     }
   }
@@ -428,7 +428,7 @@ Variant ArrayUtil::NumericUnique(const Array& input) {
     std::pair<std::set<double>::iterator, bool> res =
       seenValues.insert(value);
     if (res.second) { // it was inserted
-      ret.set(ret.convertKey<IntishCast::CastSilently>(iter.first()),
+      ret.set(ret.convertKey<IntishCast::Cast>(iter.first()),
                                                        iter.secondVal());
     }
   }

@@ -646,7 +646,7 @@ inline Variant ArrayData::getKey(ssize_t pos) const {
 template <IntishCast IC>
 ALWAYS_INLINE bool ArrayData::convertKey(const StringData* key,
                                          int64_t& i) const {
-  return IC == IntishCast::CastSilently &&
+  return IC == IntishCast::Cast &&
          key->isStrictlyInteger(i) &&
          useWeakKeys();
 }
@@ -655,7 +655,7 @@ template <IntishCast IC>
 ALWAYS_INLINE
 folly::Optional<int64_t> tryIntishCast(const StringData* key) {
   int64_t i;
-  if (UNLIKELY(IC == IntishCast::CastSilently &&
+  if (UNLIKELY(IC == IntishCast::Cast &&
                key->isStrictlyInteger(i))) {
     return i;
   }

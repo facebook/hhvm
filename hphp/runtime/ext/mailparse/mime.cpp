@@ -165,7 +165,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
             rfc2231_to_mime(value_buf, NULL, 0, prevcharset_p);
 
             auto const name_key =
-              m_attributes.convertKey<IntishCast::CastSilently>(name_buf);
+              m_attributes.convertKey<IntishCast::Cast>(name_buf);
             auto str = value_buf.detach();
             m_attributes.set(name_key, make_tv<KindOfString>(str.get()));
             value_buf.clear();
@@ -178,7 +178,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
             if (!currentencoded) {
               /* Add string*/
               auto const updated_name_key =
-                m_attributes.convertKey<IntishCast::CastSilently>(name);
+                m_attributes.convertKey<IntishCast::Cast>(name);
               m_attributes.set(updated_name_key,
                                make_tv<KindOfString>(value.get()));
             } else {    /* Encoded name changed*/
@@ -198,7 +198,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
           }
         } else {
           auto const name_key =
-            m_attributes.convertKey<IntishCast::CastSilently>(name);
+            m_attributes.convertKey<IntishCast::Cast>(name);
           m_attributes.set(name_key, make_tv<KindOfString>(value.get()));
         }
       }
@@ -216,7 +216,7 @@ MimePart::MimeHeader::MimeHeader(php_rfc822_tokenized_t *toks)
     /* Finalize packet */
     rfc2231_to_mime(value_buf, NULL, 0, prevcharset_p);
     auto const name_key =
-      m_attributes.convertKey<IntishCast::CastSilently>(name_buf);
+      m_attributes.convertKey<IntishCast::Cast>(name_buf);
     auto str = value_buf.detach();
     m_attributes.set(name_key, make_tv<KindOfString>(str.get()));
   }
@@ -230,7 +230,7 @@ void MimePart::MimeHeader::clear() {
 
 Variant MimePart::MimeHeader::get(const String& attrname) {
   auto const arrkey =
-    m_attributes.convertKey<IntishCast::CastSilently>(attrname);
+    m_attributes.convertKey<IntishCast::Cast>(attrname);
   return m_attributes[arrkey];
 }
 
@@ -238,7 +238,7 @@ void MimePart::MimeHeader::getAll(Array &ret, const String& valuelabel,
                                   const String& attrprefix) {
   for (ArrayIter iter(m_attributes); iter; ++iter) {
     String s = attrprefix + iter.first().toString();
-    auto const arrkey = ret.convertKey<IntishCast::CastSilently>(s);
+    auto const arrkey = ret.convertKey<IntishCast::Cast>(s);
     ret.set(arrkey, iter.secondVal());
   }
 
@@ -250,7 +250,7 @@ void MimePart::MimeHeader::getAll(Array &ret, const String& valuelabel,
    * doesn't overwrite content-type with the type="text/html"
    * value.
    * */
-  auto const arrkey = ret.convertKey<IntishCast::CastSilently>(valuelabel);
+  auto const arrkey = ret.convertKey<IntishCast::Cast>(valuelabel);
   ret.set(arrkey, make_tv<KindOfString>(m_value.get()));
 }
 
@@ -686,7 +686,7 @@ bool MimePart::processHeader() {
     }
 
     auto const header_arrkey =
-      m_headers.convertKey<IntishCast::CastSilently>(header_key);
+      m_headers.convertKey<IntishCast::Cast>(header_key);
     /* add the header to the hash.
      * join multiple To: or Cc: lines together */
     if ((header_key == s_to || header_key == s_cc) &&

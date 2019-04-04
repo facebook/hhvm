@@ -926,20 +926,20 @@ ArrayData* SetArray::ToArrayImpl(ArrayData* ad, bool toDArray) {
 
 ArrayData* SetArray::ToPHPArray(ArrayData* ad, bool) {
   auto out =
-    ToArrayImpl<MixedArrayInit, IntishCast::AllowCastAndWarn>(ad, false);
+    ToArrayImpl<MixedArrayInit, IntishCast::None>(ad, false);
   assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToPHPArrayIntishCast(ArrayData* ad, bool) {
-  auto out = ToArrayImpl<MixedArrayInit, IntishCast::CastSilently>(ad, false);
+  auto out = ToArrayImpl<MixedArrayInit, IntishCast::Cast>(ad, false);
   assertx(out->isNotDVArray());
   return out;
 }
 
 ArrayData* SetArray::ToDArray(ArrayData* ad, bool copy) {
   if (RuntimeOption::EvalHackArrDVArrs) return ToDict(ad, copy);
-  auto out = ToArrayImpl<DArrayInit, IntishCast::AllowCastAndWarn>(ad, true);
+  auto out = ToArrayImpl<DArrayInit, IntishCast::None>(ad, true);
   assertx(out->isDArray());
   return out;
 }

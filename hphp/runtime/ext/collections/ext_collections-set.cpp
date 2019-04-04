@@ -255,7 +255,7 @@ Array BaseSet::toPHPArray() {
   if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
     raise_hack_arr_compat_array_producing_func_notice("Set::toArray");
   }
-  return toPHPArrayImpl<IntishCast::AllowCastAndWarn>();
+  return toPHPArrayImpl<IntishCast::None>();
 }
 
 Variant BaseSet::firstValue() {

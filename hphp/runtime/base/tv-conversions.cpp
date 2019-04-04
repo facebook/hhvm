@@ -640,17 +640,17 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
 }
 
 template
-ArrayData* tvCastToArrayLikeData<IntishCast::AllowCastAndWarn>(TypedValue);
+ArrayData* tvCastToArrayLikeData<IntishCast::None>(TypedValue);
 template
-ArrayData* tvCastToArrayLikeData<IntishCast::CastSilently>(TypedValue);
+ArrayData* tvCastToArrayLikeData<IntishCast::Cast>(TypedValue);
 
-template <IntishCast IC /* = IntishCast::AllowCastAndWarn */>
+template <IntishCast IC /* = IntishCast::None */>
 Array tvCastToArrayLike(TypedValue tv) {
   return Array::attach(tvCastToArrayLikeData<IC>(tv));
 }
 
-template Array tvCastToArrayLike<IntishCast::CastSilently>(TypedValue);
-template Array tvCastToArrayLike<IntishCast::AllowCastAndWarn>(TypedValue);
+template Array tvCastToArrayLike<IntishCast::Cast>(TypedValue);
+template Array tvCastToArrayLike<IntishCast::None>(TypedValue);
 
 template <typename LHS, typename T>
 static enable_if_lval_t<
@@ -674,7 +674,7 @@ enable_if_lval_t<T, void> tvCastToShapeInPlace(T tv) {
   assign(tv, ad->toShape(ad->cowCheck()));
 }
 
-template<typename T, IntishCast IC /* = IntishCast::AllowCastAndWarn */>
+template<typename T, IntishCast IC /* = IntishCast::None */>
 enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
@@ -719,10 +719,10 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isDict());
 
-        if (IC == IntishCast::CastSilently) {
+        if (IC == IntishCast::Cast) {
           a = MixedArray::ToPHPArrayIntishCastDict(adIn, true);
         } else {
-          assertx(IC == IntishCast::AllowCastAndWarn);
+          assertx(IC == IntishCast::None);
           a = MixedArray::ToPHPArrayDict(adIn, true);
         }
 
@@ -734,10 +734,10 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isDict());
 
-        if (IC == IntishCast::CastSilently) {
+        if (IC == IntishCast::Cast) {
           a = MixedArray::ToPHPArrayIntishCastDict(adIn, adIn->cowCheck());
         } else {
-          assertx(IC == IntishCast::AllowCastAndWarn);
+          assertx(IC == IntishCast::None);
           a = MixedArray::ToPHPArrayDict(adIn, adIn->cowCheck());
         }
 
@@ -749,10 +749,10 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isKeyset());
 
-        if (IC == IntishCast::CastSilently) {
+        if (IC == IntishCast::Cast) {
           a = SetArray::ToPHPArrayIntishCast(adIn, true);
         } else {
-          assertx(IC == IntishCast::AllowCastAndWarn);
+          assertx(IC == IntishCast::None);
           a = SetArray::ToPHPArray(adIn, true);
         }
 
@@ -764,10 +764,10 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         auto* adIn = val(tv).parr;
         assertx(adIn->isKeyset());
 
-        if (IC == IntishCast::CastSilently) {
+        if (IC == IntishCast::Cast) {
           a = SetArray::ToPHPArrayIntishCast(adIn, adIn->cowCheck());
         } else {
-          assertx(IC == IntishCast::AllowCastAndWarn);
+          assertx(IC == IntishCast::None);
           a = SetArray::ToPHPArray(adIn, adIn->cowCheck());
         }
 
@@ -794,10 +794,10 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfPersistentArray: {
         auto* adIn = val(tv).parr;
         assertx(adIn->isPHPArray());
-        if (IC == IntishCast::CastSilently) {
+        if (IC == IntishCast::Cast) {
           a = adIn->toPHPArrayIntishCast(true);
         } else {
-          assertx(IC == IntishCast::AllowCastAndWarn);
+          assertx(IC == IntishCast::None);
           a = adIn->toPHPArray(true);
         }
         continue;
@@ -806,10 +806,10 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       case KindOfArray: {
         auto* adIn = val(tv).parr;
         assertx(adIn->isPHPArray());
-        if (IC == IntishCast::CastSilently) {
+        if (IC == IntishCast::Cast) {
           a = adIn->toPHPArrayIntishCast(adIn->cowCheck());
         } else {
-          assertx(IC == IntishCast::AllowCastAndWarn);
+          assertx(IC == IntishCast::None);
           a = adIn->toPHPArray(adIn->cowCheck());
         }
         if (a != adIn) tvDecRefArr(tv);
@@ -1880,7 +1880,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToShapeInPlace(T tv, bool builtin) {
   not_reached();
 }
 
-template<typename T, IntishCast IC /* = IntishCast::AllowCastAndWarn */>
+template<typename T, IntishCast IC /* = IntishCast::None */>
 enable_if_lval_t<T, bool> tvCoerceParamToArrayInPlace(T tv, bool /*builtin*/) {
   assertx(tvIsPlausible(*tv));
   tvUnboxIfNeeded(tv);
@@ -2139,8 +2139,8 @@ template bool tvCoerceParamTo##kind##InPlace<tv_lval, IC>( \
   tv_lval, bool); \
 template bool tvCoerceParamTo##kind##InPlace<arr_lval, IC>( \
   arr_lval, bool);
-Y(Array, IntishCast::CastSilently)
-Y(Array, IntishCast::AllowCastAndWarn)
+Y(Array, IntishCast::Cast)
+Y(Array, IntishCast::None)
 #undef Y
 #undef X
 }

@@ -142,7 +142,7 @@ TypedValue HHVM_FUNCTION(array_column,
   for (ArrayIter it(arr_input); it; ++it) {
     Array sub;
     if (UNLIKELY(RuntimeOption::PHP7_Builtins && it.second().isObject())) {
-      sub = it.second().toObject().get()->toArray<IntishCast::CastSilently>();
+      sub = it.second().toObject().get()->toArray<IntishCast::Cast>();
     } else if (it.second().isArray()) {
       sub = it.second().toArray();
     } else {
@@ -153,7 +153,7 @@ TypedValue HHVM_FUNCTION(array_column,
     if (val.isNull()) {
       elem = sub;
     } else {
-      auto const val_key = sub.convertKey<IntishCast::CastSilently>(val);
+      auto const val_key = sub.convertKey<IntishCast::Cast>(val);
       if (sub.exists(val_key)) {
         elem = sub[val_key];
       } else {
@@ -164,14 +164,14 @@ TypedValue HHVM_FUNCTION(array_column,
     if (idx.isNull()) {
       ret.append(elem);
     } else {
-      auto const idx_key = sub.convertKey<IntishCast::CastSilently>(idx);
+      auto const idx_key = sub.convertKey<IntishCast::Cast>(idx);
       if (!sub.exists(idx_key)) {
         ret.append(elem);
       } else if (sub[idx_key].isObject()) {
-        ret.setUnknownKey<IntishCast::CastSilently>(sub[idx_key].toString(),
+        ret.setUnknownKey<IntishCast::Cast>(sub[idx_key].toString(),
                                                     elem);
       } else {
-        ret.setUnknownKey<IntishCast::CastSilently>(sub[idx_key], elem);
+        ret.setUnknownKey<IntishCast::Cast>(sub[idx_key], elem);
       }
     }
   }
@@ -200,10 +200,10 @@ TypedValue HHVM_FUNCTION(array_combine,
        iter1; ++iter1, ++iter2) {
     auto const key = iter1.secondRvalPlus().unboxed();
     if (key.type() == KindOfInt64 || isStringType(key.type())) {
-      ret.setWithRef(ret.convertKey<IntishCast::CastSilently>(key.tv()),
+      ret.setWithRef(ret.convertKey<IntishCast::Cast>(key.tv()),
                      iter2.secondValPlus());
     } else {
-      ret.setWithRef(ret.convertKey<IntishCast::CastSilently>(tvCastToString(key.tv())),
+      ret.setWithRef(ret.convertKey<IntishCast::Cast>(tvCastToString(key.tv())),
                      iter2.secondValPlus());
     }
   }
@@ -224,7 +224,7 @@ TypedValue HHVM_FUNCTION(array_count_values,
         input.asCArrRef()
         // If this isn't exactly an Array, then it must be a hack collection,
         // so it is safe to get the object data
-        : collections::toArray<IntishCast::CastSilently>(
+        : collections::toArray<IntishCast::Cast>(
             input.getObjectData()
           )));
 }
@@ -241,12 +241,12 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
     [&](TypedValue v) {
       auto const inner = tvToCell(v);
       if (isIntType(inner.m_type) || isStringType(inner.m_type)) {
-        ai->setUnknownKey<IntishCast::CastSilently>(VarNR(inner), value);
+        ai->setUnknownKey<IntishCast::Cast>(VarNR(inner), value);
       } else {
         raise_hack_strict(RuntimeOption::StrictArrayFillKeys,
                           "strict_array_fill_keys",
                           "keys must be ints or strings");
-        ai->setUnknownKey<IntishCast::CastSilently>(tvCastToString(v), value);
+        ai->setUnknownKey<IntishCast::Cast>(tvCastToString(v), value);
       }
     },
     [&](ObjectData* coll) {
@@ -306,7 +306,7 @@ TypedValue HHVM_FUNCTION(array_flip,
     auto const inner = iter.secondRvalPlus().unboxed();
     if (inner.type() == KindOfInt64 || isStringType(inner.type()) ||
       isFuncType(inner.type())|| isClassType(inner.type())) {
-      ret.setUnknownKey<IntishCast::CastSilently>(VarNR(inner.tv()),
+      ret.setUnknownKey<IntishCast::Cast>(VarNR(inner.tv()),
                                                   iter.first());
     } else {
       raise_warning("Can only flip STRING and INTEGER values!");
@@ -451,13 +451,13 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       // There is no need to do toKey() conversion, for a key that is already
       // in the array.
       auto const arrkey =
-        arr1.convertKey<IntishCast::CastSilently>(*key.asTypedValue());
+        arr1.convertKey<IntishCast::Cast>(*key.asTypedValue());
       auto const lval = arr1.lvalAt(arrkey, AccessFlags::Key);
-      auto subarr1 = tvCastToArrayLike<IntishCast::CastSilently>(lval.tv())
+      auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv())
         .toPHPArray();
       php_array_merge_recursive(
         seen, couldRecur(lval, subarr1.get()), subarr1,
-        tvCastToArrayLike<IntishCast::CastSilently>(iter.secondVal())
+        tvCastToArrayLike<IntishCast::Cast>(iter.secondVal())
       );
       tvUnset(lval); // avoid contamination of the value that was strongly bound
       tvSet(make_tv<KindOfArray>(subarr1.get()), lval);
@@ -644,12 +644,12 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
 
   for (ArrayIter iter(arr2); iter; ++iter) {
     const auto key =
-      Variant::wrap(arr1.convertKey<IntishCast::CastSilently>(iter.first()));
+      Variant::wrap(arr1.convertKey<IntishCast::Cast>(iter.first()));
     auto const rval = iter.secondRval().unboxed();
     if (arr1.exists(key, true) && isArrayLikeType(rval.type())) {
       auto const lval = arr1.lvalAt(key, AccessFlags::Key);
       if (isArrayLikeType(lval.unboxed().type())) {
-        Array subarr1 = tvCastToArrayLike<IntishCast::CastSilently>(
+        Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()
         ).toPHPArrayIntishCast();
         php_array_replace_recursive(seen, couldRecur(lval, subarr1.get()),
@@ -1000,7 +1000,7 @@ TypedValue HHVM_FUNCTION(array_slice,
       return tvReturn(ArrNR{cell_input.m_data.parr}
                         .asArray().toPHPArrayIntishCast());
     }
-    return tvReturn(cell_input.m_data.pobj->toArray<IntishCast::CastSilently>());
+    return tvReturn(cell_input.m_data.pobj->toArray<IntishCast::Cast>());
   }
 
   int pos = 0;
@@ -1805,7 +1805,7 @@ static inline bool checkIsClsMethAndRaise(
     if (isArrayLikeType(c1.m_type)) { \
       return tvReturn(container1); \
     } else { \
-      return tvReturn(container1.toArray<IntishCast::CastSilently>());  \
+      return tvReturn(container1.toArray<IntishCast::Cast>());  \
     } \
   } \
   Array ret = Array::Create();
@@ -1838,7 +1838,7 @@ TypedValue HHVM_FUNCTION(array_diff,
     if (checkSetHelper(st, c, strTv, true)) continue;
     const auto key = isKey
       ? *iter.first().asTypedValue()
-      : ret.convertKey<IntishCast::CastSilently>(iter.first());
+      : ret.convertKey<IntishCast::Cast>(iter.first());
     ret.setWithRef(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
@@ -1893,7 +1893,7 @@ TypedValue HHVM_FUNCTION(array_diff_key,
     if (checkSetHelper(st, c, strTv, !isKey)) continue;
     const auto arrkey = isKey
       ? c
-      : ret.convertKey<IntishCast::CastSilently>(key);
+      : ret.convertKey<IntishCast::Cast>(key);
     ret.setWithRef(arrkey, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
@@ -2246,7 +2246,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
     if (!checkSetHelper(st, c, strTv, true)) continue;
     const auto key = isKey
       ? iter.first()
-      : Variant::wrap(ret.convertKey<IntishCast::CastSilently>(iter.first()));
+      : Variant::wrap(ret.convertKey<IntishCast::Cast>(iter.first()));
     ret.setWithRef(key, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));
@@ -2308,7 +2308,7 @@ TypedValue HHVM_FUNCTION(array_intersect_key,
     if (!checkSetHelper(st, c, strTv, !isKey)) continue;
     auto arrkey = isKey
       ? key
-      : Variant::wrap(ret.convertKey<IntishCast::CastSilently>(key));
+      : Variant::wrap(ret.convertKey<IntishCast::Cast>(key));
     ret.setWithRef(arrkey, iter.secondValPlus(), true);
   }
   return tvReturn(std::move(ret));

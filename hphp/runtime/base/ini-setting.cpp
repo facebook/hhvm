@@ -526,7 +526,7 @@ IniSettingMap::IniSettingMap(IniSettingMap&& i) noexcept {
 
 const IniSettingMap IniSettingMap::operator[](const String& key) const {
   assertx(this->isArray());
-  if (auto const intish = tryIntishCast<IntishCast::CastSilently>(key.get())) {
+  if (auto const intish = tryIntishCast<IntishCast::Cast>(key.get())) {
     return IniSettingMap(m_map.toCArrRef()[*intish]);
   }
   return IniSettingMap(m_map.toCArrRef()[key]);
@@ -628,7 +628,7 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     // b will be hash and an array already, but c and d might
     // not exist and will need to be made an array
     auto& arr = forceToArray(val);
-    const auto key = arr.convertKey<IntishCast::CastSilently>(index);
+    const auto key = arr.convertKey<IntishCast::Cast>(index);
     if (last) {
       String s{value};
       arr.set(key, make_tv<KindOfString>(s.get()));

@@ -297,7 +297,7 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
    * (not-integer-like) or not when using MixedPHPArrayInitBase, and if not you
    * should probably use toKey yourself.
    */
-  template <IntishCast IC = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::None>
   MixedPHPArrayInitBase& setUnknownKey(const Variant& name, const Variant& v) {
     auto const k = name.toKey<IC>(this->m_arr).tv();
     if (LIKELY(!isNullType(k.m_type))) {
@@ -897,7 +897,7 @@ struct DArrayInit {
     return setValidKey(*name.asTypedValue(), *v.asTypedValue());
   }
 
-  template <IntishCast IC = IntishCast::AllowCastAndWarn>
+  template <IntishCast IC = IntishCast::None>
   DArrayInit& setUnknownKey(const Variant& name, const Variant& v) {
     auto const k = name.toKey<IC>(m_arr).tv();
     if (LIKELY(!isNullType(k.m_type))) {

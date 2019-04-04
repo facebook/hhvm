@@ -94,9 +94,9 @@ COLLECTIONS_ALL_TYPES(X)
 }
 
 template
-Array toArray<IntishCast::AllowCastAndWarn>(const ObjectData*);
+Array toArray<IntishCast::None>(const ObjectData*);
 template
-Array toArray<IntishCast::CastSilently>(const ObjectData*);
+Array toArray<IntishCast::Cast>(const ObjectData*);
 
 bool toBool(const ObjectData* obj) {
   assertx(obj->isCollection());

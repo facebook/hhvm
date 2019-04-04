@@ -131,7 +131,7 @@ public:
     return &data()[k];
   }
 
-  template <IntishCast intishCast = IntishCast::AllowCastAndWarn>
+  template <IntishCast intishCast = IntishCast::None>
   static Array ToArray(const ObjectData* obj) {
     check_collection_cast_to_array();
     return const_cast<BaseVector*>(

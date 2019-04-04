@@ -47,9 +47,9 @@ enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv); \
 template<typename T> \
 enable_if_lval_t<T, bool> tvCoerceParamTo##kind##InPlace(T tv, bool builtin);
 #define Y(kind) \
-template<typename T, IntishCast IC = IntishCast::AllowCastAndWarn> \
+template<typename T, IntishCast IC = IntishCast::None> \
 enable_if_lval_t<T, void> tvCastTo##kind##InPlace(T tv); \
-template<typename T, IntishCast IC = IntishCast::AllowCastAndWarn> \
+template<typename T, IntishCast IC = IntishCast::None> \
 enable_if_lval_t<T, bool> tvCoerceParamTo##kind##InPlace(T tv, bool builtin);
 X(Boolean)
 X(Int64)
@@ -119,13 +119,13 @@ bool tvCastToBoolean(TypedValue tv);
 int64_t tvCastToInt64(TypedValue tv);
 double tvCastToDouble(TypedValue tv);
 String tvCastToString(TypedValue tv);
-template <IntishCast IC = IntishCast::AllowCastAndWarn>
+template <IntishCast IC = IntishCast::None>
 Array tvCastToArrayLike(TypedValue tv);
 Object tvCastToObject(TypedValue tv);
 
 StringData* tvCastToStringData(TypedValue tv);
 StringData* cellCastToStringData(Cell c);
-template <IntishCast IC /* = IntishCast::AllowCastAndWarn */>
+template <IntishCast IC /* = IntishCast::None */>
 ArrayData* tvCastToArrayLikeData(TypedValue tv);
 ObjectData* tvCastToObjectData(TypedValue tv);
 
@@ -139,9 +139,9 @@ double cellToDouble(Cell);
 /*
  * Convert `tv' or `cell' to a valid array key for `ad', or throw an exception.
  */
-template <IntishCast IC = IntishCast::AllowCastAndWarn>
+template <IntishCast IC = IntishCast::None>
 Cell cellToKey(Cell cell, const ArrayData* ad);
-template <IntishCast IC = IntishCast::AllowCastAndWarn>
+template <IntishCast IC = IntishCast::None>
 Cell tvToKey(TypedValue tv, const ArrayData* ad);
 
 /*

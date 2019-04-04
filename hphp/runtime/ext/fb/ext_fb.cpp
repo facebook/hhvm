@@ -794,7 +794,7 @@ int fb_compact_unserialize_from_buffer(
           arr.set(key.toInt64(), value);
         } else if (key.getType() == KindOfString ||
                    key.getType() == KindOfPersistentString) {
-          const auto arrkey = arr.convertKey<IntishCast::CastSilently>(key);
+          const auto arrkey = arr.convertKey<IntishCast::Cast>(key);
           arr.set(arrkey, *value.asTypedValue());
         } else {
           return FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE;

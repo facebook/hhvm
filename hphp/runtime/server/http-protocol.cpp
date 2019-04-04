@@ -73,7 +73,7 @@ static void CopyParams(Array& dest, const Array& src) {
     src.get(),
     [&](Cell k, TypedValue v) {
       const auto arraykey =
-        dest.convertKey<IntishCast::CastSilently>(k);
+        dest.convertKey<IntishCast::Cast>(k);
       dest.set(arraykey, v, true);
     }
   );
@@ -202,7 +202,7 @@ static void PrepareEnv(Array& env, Transport *transport) {
     String key(header.first);
     String value(header.second.back());
     g_context->setenv(key, value);
-    env.set(env.convertKey<IntishCast::CastSilently>(key),
+    env.set(env.convertKey<IntishCast::Cast>(key),
             make_tv<KindOfString>(value.get()));
   }
 }
@@ -791,14 +791,14 @@ void HttpProtocol::PrepareServerVariable(Array& server,
   for (auto& kv : RuntimeOption::ServerVariables) {
     String idx(kv.first);
     const auto arrkey =
-      server.convertKey<IntishCast::CastSilently>(idx);
+      server.convertKey<IntishCast::Cast>(idx);
     String str(kv.second);
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }
   for (auto& kv : vhost->getServerVars()) {
     String idx(kv.first);
     const auto arrkey =
-      server.convertKey<IntishCast::CastSilently>(idx);
+      server.convertKey<IntishCast::Cast>(idx);
     String str(kv.second);
     server.set(arrkey, make_tv<KindOfString>(str.get()), true);
   }

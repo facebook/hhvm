@@ -1669,7 +1669,7 @@ Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
       if (result_type & PHP_MYSQL_ASSOC) {
         MySQLFieldInfo *info = res->getFieldInfo(i);
         auto const arrkey =
-          ret.convertKey<IntishCast::CastSilently>(info->name);
+          ret.convertKey<IntishCast::Cast>(info->name);
         ret.set(arrkey, *res->getField(i).asTypedValue());
       }
     }
@@ -1702,7 +1702,7 @@ Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
     }
     if (result_type & PHP_MYSQL_ASSOC) {
       String str(mysql_field->name, CopyString);
-      auto const array_key = ret.convertKey<IntishCast::CastSilently>(str);
+      auto const array_key = ret.convertKey<IntishCast::Cast>(str);
       ret.set(array_key, *data.asTypedValue());
     }
   }

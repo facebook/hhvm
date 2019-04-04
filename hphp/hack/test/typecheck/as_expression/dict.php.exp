@@ -2,7 +2,7 @@ File "dict.php", line 6, characters 16-17:
 Invalid argument (Typing[4110])
   File "dict.php", line 22, characters 28-30:
   This is an int
-  File "hhi_lib__srcs/hackarray.hhi", line 11, characters 34-41:
+  File "hackarray.hhi", line 11, characters 34-41:
   It is incompatible with an array key (int/string)
 File "dict.php", line 4, characters 9-12:
 The type dict expects 2 type parameter(s) (Typing[4101])
@@ -10,5 +10,5 @@ File "dict.php", line 12, characters 16-17:
 Invalid argument (Typing[4110])
   File "dict.php", line 22, characters 28-30:
   This is an int
-  File "hhi_lib__srcs/hackarray.hhi", line 11, characters 34-41:
+  File "hackarray.hhi", line 11, characters 34-41:
   It is incompatible with an array key (int/string)

@@ -202,14 +202,14 @@ let tests = [
   ((fst f5), 3, 10),
   "{\"position\":{\"file\":\"/f5.php\",\"line\":3,\"character\":10},\
   \"deps\":[{\"name\":\"class_meth\",\"kind\":\"function\",\"position\":\
-  {\"filename\":\"/hhi/hhi_lib__srcs/func_pointers.hhi\",\"line\":129,\"char_start\":10,\
+  {\"filename\":\"/hhi/func_pointers.hhi\",\"line\":129,\"char_start\":10,\
   \"char_end\":19}},{\"name\":\"f5f\",\"kind\":\"function\",\"position\":\
   {\"filename\":\"/f5.php\",\"line\":9,\"char_start\":10,\"char_end\":12}},\
   {\"name\":\"fun\",\"kind\":\"function\",\"position\":\
-  {\"filename\":\"/hhi/hhi_lib__srcs/func_pointers.hhi\",\
+  {\"filename\":\"/hhi/func_pointers.hhi\",\
   \"line\":48,\"char_start\":10,\"char_end\":12}},\
   {\"name\":\"inst_meth\",\"kind\":\"function\",\
-  \"position\":{\"filename\":\"/hhi/hhi_lib__srcs/func_pointers.hhi\",\
+  \"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\
   \"line\":171,\"char_start\":10,\"char_end\":18}},\
   {\"name\":\"C\",\"kind\":\"class\",\"position\":\
   {\"filename\":\"/f5.php\",\"line\":12,\"char_start\":7,\

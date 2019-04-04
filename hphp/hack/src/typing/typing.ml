@@ -4525,8 +4525,11 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
       (Reason.to_pos (fst concrete_ty));
     default ()
 
-and widen_class_for_obj_get member_name env ty =
+and widen_class_for_obj_get ~is_method ~nullsafe member_name env ty =
   match ty with
+  | _, Tprim Tnull ->
+    if Option.is_some nullsafe then env, Some ty else env, None
+
   | (r2, Tclass ((_, class_name) as class_id, _, tyl)) ->
     let default () =
       let ty = (r2, Tclass (class_id, Nonexact, tyl)) in
@@ -4534,7 +4537,7 @@ and widen_class_for_obj_get member_name env ty =
     begin match Env.get_class env class_name with
     | None -> default ()
     | Some class_info ->
-      match Env.get_member false (*is_method*) env class_info member_name with
+      match Env.get_member is_method env class_info member_name with
       | Some { ce_origin; _ } ->
         (* If this member was inherited then we obtain the type from which
          * it is inherited as our wider type *)
@@ -4569,7 +4572,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
     if is_method
     then SubType.expand_type_and_solve env ~description_of_expected:"an object" obj_pos ty1
     else SubType.expand_type_and_narrow env ~description_of_expected:"an object"
-      (widen_class_for_obj_get id_str) obj_pos ty1 in
+      (widen_class_for_obj_get ~is_method ~nullsafe id_str) obj_pos ty1 in
   let nullable_obj_get ty = match nullsafe with
     | Some p1 ->
         let env, method_, x = obj_get_ ~obj_pos ~is_method ~nullsafe ~valkind

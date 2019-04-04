@@ -2688,12 +2688,13 @@ let expand_type_and_solve env ~description_of_expected p ty =
  * we widen `exact C` to `B`, if `B` is the base class from which `C` inherits
  * field f.
  *
- * The `widen` function extends this to unions, nullables, and abstract types.
+ * The `widen` function extends this to nullables and abstract types.
+ * General unions have been dealt with already.
  *)
 let rec widen env widen_concrete_type ty =
   let env, ty = Env.expand_type env ty in
   match ty with
-  | r, Toption ty ->
+   | r, Toption ty ->
     begin match widen env widen_concrete_type ty with
     | env, Some ty -> env, Some (r, Toption ty)
     | env, None -> env, None
@@ -2706,37 +2707,40 @@ let rec widen env widen_concrete_type ty =
   (* For other abstract types, just widen to the bound, if possible *)
   | _, Tabstract (_, Some ty) ->
     widen env widen_concrete_type ty
-  (* For unions, widen pointwise *)
-  | (r, Tunresolved tyl) ->
-    let rec widen_tys env tyl res =
-      match tyl with
-      | [] ->
-        (* We really don't want to just guess `nothing` *)
-        if List.is_empty res then env, None
-        else env, Some (r, Tunresolved res)
-      | ty :: tyl ->
-        match widen env widen_concrete_type ty with
-        | env, None -> widen_tys env tyl res
-        | env, Some ty -> widen_tys env tyl (ty :: res)
-    in widen_tys env tyl []
   | _ ->
     widen_concrete_type env ty
 
-let expand_type_and_try_solve env ty =
-  let env, ety = Env.expand_type env ty in
-  match ety with
-  | _, Tvar var ->
-    let tyvar_info = Env.get_tyvar_info env var in
-    let lower_bounds = tyvar_info.Env.lower_bounds in
-    let upper_bounds = tyvar_info.Env.upper_bounds in
-    begin match Typing_set.choose_opt (Typing_set.inter lower_bounds upper_bounds) with
-    | Some ty ->
-      let env = bind env var ty in
-      env, ty
-    | None -> env, ety
-    end
-  | _ ->
-    env, ety
+(* Deconstruct a type into its union elements, if it's a union or nullable.
+ * If any elements are type variables, take their lower bounds.
+ * Return (has_var, nullable_reason, elements) where
+ *   has_var = true if any union elements are type variables
+ *   nullable_reason = Some r if there is a nullable/null element with reason r
+ *   elements are the de-duplicated elements of the union
+ *)
+let get_union_elements env ty =
+  let rec aux env tyl (has_var, nullable_reason, res) =
+  match tyl with
+  | [] -> env, has_var,
+      begin match nullable_reason with
+      | None -> res
+      | Some r -> MakeType.null r::res
+      end
+  | ty::tyl ->
+    let env, ety = Env.expand_type env ty in
+    match ety with
+    | _, Tunresolved tyl' ->
+      aux env (tyl' @ tyl) (has_var, nullable_reason, res)
+    | r, Toption ty ->
+      aux env (ty::tyl) (has_var, Some r, res)
+    | _, Tvar var ->
+      let tyvar_info = Env.get_tyvar_info env var in
+      (* Lower bounds of type variable, excluding itself *)
+      let lower_bounds = Typing_set.remove ety tyvar_info.Env.lower_bounds in
+      aux env tyl (true, nullable_reason, Typing_set.elements lower_bounds @ res)
+    | _ ->
+      aux env tyl (has_var, nullable_reason, ety::res)
+  in
+    aux env [ty] (false, None, [])
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.
@@ -2755,28 +2759,39 @@ let expand_type_and_try_solve env ty =
  * member access and array indexing.
  *)
 let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
-  (* First see if we already have an equality in the constraints *)
-  let env, ety = expand_type_and_try_solve env ty in
-  match ety with
-  | (r, Tvar var) ->
-    let tyvar_info = Env.get_tyvar_info env var in
-    let env, lowerty = lower_bounds_as_union env r var tyvar_info.Env.lower_bounds in
-    let env, new_upper = widen env widen_concrete_type lowerty in
-    begin match new_upper with
-    | None ->
-      (* Default behaviour is currently to force solve *)
-      expand_type_and_solve env ~description_of_expected p ty
-    | Some widety ->
+  (* Deconstruct the type into union elements (if it's a union). For variables,
+   * take the lower bounds. If there are no variables, then we have a concrete
+   * type so just return expanded type
+   *)
+  let env, has_var, tys = get_union_elements env ty in
+  if not has_var
+  then Env.expand_type env ty
+  else
+  (* Now for each union element, use widen_concrete_type to suggest a concrete
+   * upper bound. *)
+    let rec widen_tys env tyl res =
+      match tyl with
+      | [] ->
+        env, res
+
+      | ty :: tyl ->
+        let env, opt_upper = widen env widen_concrete_type ty in
+        let res = match opt_upper with None -> res | Some ty -> ty :: res in
+        widen_tys env tyl res in
+
+    let env, widened_tys = widen_tys env tys [] in
+    (* We really don't want to just guess `nothing` if none of the types can be widened *)
+    if List.is_empty widened_tys
+    (* Default behaviour is currently to force solve *)
+    then expand_type_and_solve env ~description_of_expected p ty
+    else
+    let env, widened_ty = TUtils.union_list env (fst ty) widened_tys in
       Errors.try_
         (fun () ->
-          let env = sub_type env ty widety in
-          env, widety)
+          let env = sub_type env ty widened_ty in
+          env, widened_ty)
         (fun _ ->
           expand_type_and_solve env ~description_of_expected p ty)
-    end
-
-  | _ ->
-    env, ety
 
 (* Solve type variables on top of stack, without losing completeness, and pop
  * variables off the stack

@@ -629,7 +629,7 @@ Array ServerStats::getThreadIOStatuses() {
   DArrayInit ret(status.size());
   for (auto const& iter : status) {
     ret.set(String(iter.first),
-            make_map_array(s_ct, iter.second.count,
+            make_darray(s_ct, iter.second.count,
                            s_wt, iter.second.wall_time));
   }
   status.clear();

@@ -108,9 +108,8 @@ module PositionedValueBuilder = struct
        the node are missing - this means that entire node is missing.
        NOTE: offset must match otherwise it will mean that there is a real node
        in between that should be picked instead *)
-    | (PSV.Missing { offset = o1; _} as v), PSV.Missing { offset = o2; _} when o1 = o2
-      -> v
-
+    | PSV.Missing { offset = o1; source_text}, PSV.Missing { offset = o2; _} when o1 = o2
+      -> PSV.Missing { offset = o1; source_text }
     | _ -> assert false
 
   let width n =

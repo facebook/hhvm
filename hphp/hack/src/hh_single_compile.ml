@@ -368,8 +368,10 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
         P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then
+        let is_js_file = Filename.check_suffix (Relative_path.to_absolute filename) "js" in
         Emit_program.from_ast
           ~is_hh_file
+          ~is_js_file
           ~is_evaled:(is_file_path_for_evaled_code filename)
           ~for_debugger_eval:(compiler_options.for_debugger_eval)
           ~popt

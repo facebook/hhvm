@@ -70,11 +70,12 @@ let debugger_eval_should_modify ast =
     | Ast.Stmt (_, Ast.Expr _) -> true
     | _ -> false
 
-let from_ast ~is_hh_file ~is_evaled ~for_debugger_eval ~popt ast =
+let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~popt ast =
   Utils.try_finally
   ~f:begin fun () ->
     try
       Emit_env.set_is_hh_file is_hh_file;
+      Emit_env.set_is_js_file is_js_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
       let { ast_defs = closed_ast; global_state; strict_types } =

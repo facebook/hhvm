@@ -409,13 +409,29 @@ let add_class env st cd =
   { st with hoisted_classes = cd :: st.hoisted_classes },
   make_defcls cd n
 
-let make_closure_name env st =
+let make_closure_name env st name =
   let per_fun_idx = st.closure_cnt_per_fun in
   SU.Closures.mangle_closure
-    (make_scope_name st.namespace env.scope) per_fun_idx
+    (make_scope_name st.namespace env.scope) per_fun_idx name
+
+(* Get the user-provided closure name from the set of user attributes. This is
+ * only allowed in systemlib and in transpiled javascript, otherwise we ignore the
+ * attribute
+ *
+ * Returns the filtered list of attributes and the closure nam
+ *)
+let get_closure_name attrs =
+  let is_closure_name attr = (snd attr.ua_name) = "__ClosureName" in
+  if Emit_env.is_systemlib () || Emit_env.is_js ()
+   then match List.find attrs is_closure_name with
+     | Some { ua_params = [(_, String s)]; _ } ->
+       (List.filter attrs (Fn.compose not is_closure_name)),(Some s)
+     | _ -> attrs, None
+   else attrs, None
 
 let make_closure ~class_num
   p env st lambda_vars fun_tparams class_tparams is_static fd body =
+  let user_attrs, name = get_closure_name fd.f_user_attributes in
   let md = {
     m_kind = [Public] @ (if is_static then [Static] else []);
     m_tparams = fun_tparams;
@@ -423,7 +439,7 @@ let make_closure ~class_num
     m_name = (fst fd.f_name, "__invoke");
     m_params = fd.f_params;
     m_body = body;
-    m_user_attributes = fd.f_user_attributes;
+    m_user_attributes = user_attrs;
     m_ret = fd.f_ret;
     m_fun_kind = fd.f_fun_kind;
     m_span = fd.f_span;
@@ -440,7 +456,7 @@ let make_closure ~class_num
     c_final = false;
     c_kind = Cnormal;
     c_is_xhp = false;
-    c_name = (p, make_closure_name env st);
+    c_name = (p, make_closure_name env st name);
     c_tparams = class_tparams;
     c_extends = [(p, Happly((p, "Closure"), []))];
     c_implements = [];

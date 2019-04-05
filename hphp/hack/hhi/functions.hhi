@@ -87,6 +87,8 @@ namespace HH {
   <<__Rx>>
   function is_list_like(<<__MaybeMutable>> mixed $arg): bool;
   <<__Rx>>
+  function is_class_meth(<<__MaybeMutable>> mixed $arg): bool;
+  <<__Rx>>
   function is_meth_caller(<<__MaybeMutable>> mixed $arg): bool;
 
   <<__Rx>>

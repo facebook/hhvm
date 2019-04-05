@@ -1179,12 +1179,14 @@ void isTypeHelper(ISS& env,
   if (istype.op == Op::IsTypeC) {
     if (!is_type_might_raise(testTy, val)) nothrow(env);
     popT(env);
+  } else if (istype.op == Op::IssetL) {
+    nothrow(env);
   } else if (!locCouldBeUninit(env, location) &&
              !is_type_might_raise(testTy, val)) {
     nothrow(env);
   }
 
-  auto const negate = jmp.op == Op::JmpNZ;
+  auto const negate = (jmp.op == Op::JmpNZ) == (istype.op != Op::IssetL);
   auto const was_true = [&] (Type t) {
     if (testTy.subtypeOf(BNull)) return intersection_of(t, TNull);
     assertx(!testTy.couldBe(BNull));
@@ -1284,6 +1286,17 @@ template<class JmpOp>
 void group(ISS& env, const bc::IsTypeL& istype,
            const bc::Not&, const JmpOp& jmp) {
   isTypeHelper(env, istype.subop2, istype.loc1, istype, invertJmp(jmp));
+}
+
+template<class JmpOp>
+void group(ISS& env, const bc::IssetL& isset, const JmpOp& jmp) {
+  isTypeHelper(env, IsTypeOp::Null, isset.loc1, isset, jmp);
+}
+
+template<class JmpOp>
+void group(ISS& env, const bc::IssetL& isset,
+           const bc::Not&, const JmpOp& jmp) {
+  isTypeHelper(env, IsTypeOp::Null, isset.loc1, isset, invertJmp(jmp));
 }
 
 // If we duplicate a value, and then test its type and Jmp based on that result,
@@ -1552,9 +1565,13 @@ void in(ISS& env, const bc::NativeImpl&) {
 
 void in(ISS& env, const bc::CGetL& op) {
   if (locIsThis(env, op.loc1)) {
-    auto const subop = peekLocRaw(env, op.loc1).couldBe(BUninit) ?
-      BareThisOp::Notice : BareThisOp::NoNotice;
-    return reduce(env, bc::BareThis { subop });
+    auto const& ty = peekLocRaw(env, op.loc1);
+    if (!ty.subtypeOf(BInitNull)) {
+      auto const subop = ty.couldBe(BUninit) ?
+        BareThisOp::Notice : ty.couldBe(BNull) ?
+        BareThisOp::NoNotice : BareThisOp::NeverNull;
+      return reduce(env, bc::BareThis { subop });
+    }
   }
   if (!peekLocCouldBeUninit(env, op.loc1)) {
     auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
@@ -4705,6 +4722,7 @@ void interpStep(ISS& env, Iterator& it, Iterator stop) {
   X(IsTypeStructC)
   X(IsTypeL)
   X(IsTypeC)
+  X(IssetL)
   X(Same)
   X(NSame)
   default: break;

@@ -12,4 +12,5 @@ async function foo(mixed $a, mixed $b, mixed $c, mixed $x) : Awaitable<void> {
   await $a * $x;
   await $a |> $b($$) |> $c($$);
   await $a ? $b : $c;
+  await foo<int>();
 }

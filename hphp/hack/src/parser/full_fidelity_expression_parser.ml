@@ -66,7 +66,10 @@ module WithStatementAndDeclAndTypeParser
 
   [@@@warning "-32"] (* next line warning 32 unused variable pp_binary_expression_prefix_kind *)
   type binary_expression_prefix_kind =
-    | Prefix_byref_assignment | Prefix_assignment | Prefix_none [@@deriving show]
+    | Prefix_byref_assignment
+    | Prefix_assignment
+    | Prefix_less_than of (t * Parser.SC.r)
+    | Prefix_none [@@deriving show]
   [@@@warning "+32"]
 
   let make_and_track_prefix_unary_expression parser operator kind operand =
@@ -879,13 +882,13 @@ module WithStatementAndDeclAndTypeParser
     | None -> true
     | Some kind -> operator_has_lower_precedence kind parser
 
-  and parse_remaining_expression_or_specified_function_call parser term
-      prefix_kind =
+  and try_parse_specified_function_call parser term =
+    if not (can_term_take_type_args term) then None else
     let (parser1, (type_arguments, no_arg_is_missing)) =
       parse_generic_type_arguments parser
     in
-    if no_arg_is_missing && parser.errors = parser1.errors
-    then
+    if not no_arg_is_missing || parser.errors <> parser1.errors then None
+    else
       let parser, result =
         begin match peek_token_kind parser1 with
         | ColonColon ->
@@ -902,9 +905,7 @@ module WithStatementAndDeclAndTypeParser
             type_arguments
             left args right
         end in
-      parse_remaining_expression parser result
-    else
-      parse_remaining_binary_expression parser term prefix_kind
+      Some (parse_remaining_expression parser result)
 
   (* Checks if given expression is a PHP variable.
   per PHP grammar:
@@ -949,9 +950,24 @@ module WithStatementAndDeclAndTypeParser
    - Prefix_assignment - left_term  and operator can be interpreted as a
    prefix of assignment
    - Prefix_byref_assignment - left_term and operator can be interpreted as a
-   prefix of byref assignment.*)
-  and check_if_parsable_as_assignment parser left_term operator left_precedence
+   prefix of byref assignment.
+   - Prefix_less_than - is the start of a specified function call f<T>(...)
+   *)
+  and check_if_should_override_normal_precedence parser left_term operator left_precedence
   =
+    (*
+      We need to override the precedence of the < operator in the case where it
+      is the start of a specified function call.
+    *)
+    let maybe_prefix = if operator = LessThan then
+      match try_parse_specified_function_call parser left_term with
+      | Some r -> Some (Prefix_less_than r)
+      | None -> None
+    else None in
+    match maybe_prefix with
+    | Some r -> r
+    | None ->
+
     (* in PHP precedence of assignment in expression is bumped up to
        recognize cases like !$x = ... or $a == $b || $c = ...
        which should be parsed as !($x = ...) and $a == $b || ($c = ...)
@@ -982,7 +998,7 @@ module WithStatementAndDeclAndTypeParser
     | None -> (parser, term)
     | Some token ->
     let assignment_prefix_kind =
-      check_if_parsable_as_assignment parser term token parser.precedence
+      check_if_should_override_normal_precedence parser term token parser.precedence
     in
     (* stop parsing expression if:
     - precedence of the operator is less than precedence of the operator
@@ -990,14 +1006,14 @@ module WithStatementAndDeclAndTypeParser
     AND
     - <term> <operator> does not look like a prefix of
       some assignment expression*)
-    if operator_has_lower_precedence token parser &&
-       assignment_prefix_kind = Prefix_none then (parser, term)
-    else match token with
+    match assignment_prefix_kind with
+    | Prefix_less_than r -> r
+    | Prefix_none when operator_has_lower_precedence token parser ->
+      (parser, term)
+    | _ ->
+    match token with
     (* Binary operators *)
     (* TODO Add an error if PHP style <> is used in Hack. *)
-    | LessThan when can_term_take_type_args term ->
-      parse_remaining_expression_or_specified_function_call parser term
-        assignment_prefix_kind
     | And
     | Or
     | Xor
@@ -1808,7 +1824,7 @@ module WithStatementAndDeclAndTypeParser
           bumped priority fort the assignment we reset precedence before parsing
           right hand side of the assignment to make sure it is consumed.
           *)
-        check_if_parsable_as_assignment
+        check_if_should_override_normal_precedence
           parser
           right_term
           kind

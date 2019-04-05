@@ -1,12 +1,12 @@
-((script 511
-  ((list 511
+((script 531
+  ((list 531
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 438
+     (function_declaration 458
       ((missing 0 ())
        (function_declaration_header 76
         ((list 5
@@ -49,9 +49,9 @@
                 ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
              (() > 1 ((whitespace 1)))))))
          (missing 0 ())))
-       (compound_statement 361
+       (compound_statement 381
         ((() { 1 ((end_of_line 1)))
-         (list 355
+         (list 375
           ((expression_statement 11
             ((prefix_unary_expression 10
               ((((whitespace 2)) await 5 ((whitespace 1)))
@@ -147,6 +147,20 @@
                (() ? 1 ((whitespace 1)))
                (variable 2 ((() variable 2 ((whitespace 1)))))
                (() : 1 ((whitespace 1))) (variable 2 ((() variable 2 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 17
+            ((prefix_unary_expression 16
+              ((((whitespace 2)) await 5 ((whitespace 1)))
+               (function_call_with_type_arguments_expression 10
+                ((() name 3 ())
+                 (type_arguments 5
+                  ((() < 1 ())
+                   (list 3
+                    ((list_item 3
+                      ((simple_type_specifier 3 ((() int 3 ())))
+                       (missing 0 ())))))
+                   (() > 1 ())))
+                 (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

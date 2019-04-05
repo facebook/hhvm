@@ -625,8 +625,7 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
         [&] (Block* taken) { gen(env, CheckType, TFunc, taken, src); },
         [&] {
           if (RuntimeOption::EvalIsStringNotices) {
-            gen(env, RaiseNotice, cns(env, s_FUNC_IS_STRING.get())
-            );
+            gen(env, RaiseNotice, cns(env, s_FUNC_IS_STRING.get()));
           }
           return cns(env, true);
         },
@@ -636,8 +635,7 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
             [&] (Block* taken) { gen(env, CheckType, TCls, taken, src); },
             [&] {
               if (RuntimeOption::EvalIsStringNotices) {
-                gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get())
-                );
+                gen(env, RaiseNotice, cns(env, s_CLASS_IS_STRING.get()));
               }
               return cns(env, true);
             },
@@ -821,6 +819,21 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
     PUNT(InstanceOfD_MaybeObj);
   }
   if (!src->isA(TObj)) {
+    if (src->type().subtypeOfAny(TCls, TFunc)) {
+      if (!interface_supports_string(className)) return cns(env, false);
+      if (RuntimeOption::EvalIsStringNotices) {
+        gen(
+          env,
+          RaiseNotice,
+          cns(
+            env,
+            src->isA(TFunc) ? s_FUNC_IS_STRING.get() : s_CLASS_IS_STRING.get()
+          )
+        );
+      }
+      return cns(env, true);
+    }
+
     bool res = ((src->isA(TArr) && interface_supports_array(className))) ||
       (src->isA(TVec) && interface_supports_vec(className)) ||
       (src->isA(TDict) && interface_supports_dict(className)) ||
@@ -882,6 +895,25 @@ void emitInstanceOf(IRGS& env) {
     if (t2->isA(TInt))    return gen(env, InterfaceSupportsInt, t1);
     if (t2->isA(TStr))    return gen(env, InterfaceSupportsStr, t1);
     if (t2->isA(TDbl))    return gen(env, InterfaceSupportsDbl, t1);
+    if (t2->isA(TFunc) || t2->isA(TCls)) {
+      auto const warn =
+        (t2->isA(TCls) && RuntimeOption::EvalRaiseClassConversionWarning) ||
+        (t2->isA(TFunc) && RuntimeOption::EvalRaiseFuncConversionWarning);
+
+      if (!warn) return gen(env, InterfaceSupportsStr, t1);
+      return cond(
+        env,
+        [&] (Block* taken) {
+          gen(env, JmpZero, taken, gen(env, InterfaceSupportsStr, t1));
+        },
+        [&] {
+          auto const m = t2->isA(TCls) ? s_CLASS_CONVERSION : s_FUNC_CONVERSION;
+          gen(env, RaiseNotice, cns(env, m.get()));
+          return cns(env, true);
+        },
+        [&] { return cns(env, false); }
+      );
+    }
     if (!t2->type().maybe(TObj|TArr|TVec|TDict|TKeyset|
                           TInt|TStr|TDbl)) return cns(env, false);
     return nullptr;
@@ -1336,14 +1368,16 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
     },
     [&] (SSATmp* val) { // func to string conversions
       auto const str = gen(env, LdFuncName, val);
-      discard(env, 1);
-      push(env, str);
+      auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+      gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+      env.irb->exceptionStackBoundary();
       return true;
     },
     [&] (SSATmp* val) { // class to string conversions
       auto const str = gen(env, LdClsName, val);
-      discard(env, 1);
-      push(env, str);
+      auto const offset = offsetFromIRSP(env, BCSPRelOffset { ind });
+      gen(env, StStk, IRSPRelOffsetData{offset}, sp(env), str);
+      env.irb->exceptionStackBoundary();
       return true;
     },
     [&] (SSATmp* val) { // clsmeth to varray/vec conversions

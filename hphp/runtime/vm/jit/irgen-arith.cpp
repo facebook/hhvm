@@ -861,6 +861,19 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 
 void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TStr);
+
+  if (right->isA(TFunc)) {
+    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_funcToStringWarning.get()));
+    }
+    right = gen(env, LdFuncName, right);
+  } else if (right->isA(TCls)) {
+    if (RuntimeOption::EvalRaiseClassConversionWarning) {
+      gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
+    }
+    right = gen(env, LdClsName, right);
+  }
+
   auto const rightTy = right->type();
 
   // Left operand is a string.

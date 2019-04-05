@@ -10,32 +10,32 @@ classMeth{
 
 Notice: class_meth Compat: Argument 1 passed to test_varray_as_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 17
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_param() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 18
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vec_as_param() must be of type HH\vec, clsmeth given in %s/decl_type_warn.php on line 19
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vec_dict_as_param() must be of type HH\vec_or_dict, clsmeth given in %s/decl_type_warn.php on line 20
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_container_as_param() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 21
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 classMeth{
     class(A)
@@ -50,32 +50,32 @@ Caught: Argument 1 returned from test_array_as_io_param() as an inout parameter 
 
 Notice: class_meth Compat: Argument 1 passed to test_varry_as_io_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 35
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_io_param() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 36
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vec_as_io_param() must be of type HH\vec, clsmeth given in %s/decl_type_warn.php on line 37
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_vec_dict_as_io_param() must be of type HH\vec_or_dict, clsmeth given in %s/decl_type_warn.php on line 38
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_container_as_io_param() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 39
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 classMeth{
     class(A)
@@ -89,32 +89,32 @@ classMeth{
 
 Notice: class_meth Compat: Value returned from function test_return_as_varray() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 58
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_vdarray() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 61
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_vec() must be of type HH\vec, clsmeth given in %s/decl_type_warn.php on line 64
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_vec_dict() must be of type HH\vec_or_dict, clsmeth given in %s/decl_type_warn.php on line 67
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_container() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 70
 vec(2) {
-class(A)
-function(A::func1)
+  class(A)
+  function(A::func1)
 }
 Caught: Static property 'B::s_a' declared as type array, clsmeth assigned
 

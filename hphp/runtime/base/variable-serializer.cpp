@@ -1446,6 +1446,7 @@ void VariableSerializer::serializeFunc(const Func* func) {
       // TODO (T29639296)
       // For now we use function(foo) to dump function pointers in most cases,
       // and this can be changed in the future.
+      indent();
       m_buf->append("function(");
       m_buf->append(name->data());
       m_buf->append(")\n");
@@ -1481,6 +1482,7 @@ void VariableSerializer::serializeClass(const Class* cls) {
       // TODO (T29639296)
       // For now we use function(foo) to dump function pointers in most cases,
       // and this can be changed in the future.
+      indent();
       m_buf->append("class(");
       m_buf->append(cls->name());
       m_buf->append(")\n");

@@ -768,6 +768,10 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
     return bail();
   }
 
+  // Same currently lies about the distinction between Func/Cls/Str
+  if (ty0.couldBe(BFunc | BCls) && ty1.couldBe(BStr)) return bail();
+  if (ty1.couldBe(BFunc | BCls) && ty0.couldBe(BStr)) return bail();
+
   // We need to loosen away the d/varray bits here because array comparison does
   // not take into account the difference.
   auto isect = intersection_of(

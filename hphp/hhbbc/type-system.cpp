@@ -2530,15 +2530,19 @@ Type unnullish(Type t) {
 
 Type return_with_context(Type t, Type context) {
   assertx(t.subtypeOf(BInitGen));
-  // We don't assert the context is a TCls of TObj because sometimes we set it
+  // We don't assert the context is a TCls or TObj because sometimes we set it
   // to TTop when handling dynamic calls.
   if (((is_specialized_obj(t) && t.m_data.dobj.isCtx) ||
         (is_specialized_cls(t) && t.m_data.dcls.isCtx)) &&
       context.subtypeOfAny(TCls, TObj) && context != TBottom) {
-    context = toobj(context);
+    context = is_specialized_obj(t) ? toobj(context) : objcls(context);
     if (is_specialized_obj(context) && dobj_of(context).type == DObj::Exact &&
         dobj_of(context).cls.couldBeMocked()) {
       context = subObj(dobj_of(context).cls);
+    }
+    if (is_specialized_cls(context) && dcls_of(context).type == DCls::Exact &&
+        dcls_of(context).cls.couldBeMocked()) {
+      context = subCls(dcls_of(context).cls);
     }
     bool o = is_opt(t);
     t = intersection_of(unctx(std::move(t)), context);
@@ -4058,6 +4062,30 @@ Type assert_nonemptiness(Type t) {
 
 //////////////////////////////////////////////////////////////////////
 
+folly::Optional<ArrKey> maybe_class_func_key(const Type& keyTy, bool strict) {
+  auto ret = ArrKey{};
+
+  if (keyTy.subtypeOf(BOptCls | BOptFunc)) {
+    ret.mayThrow = true;
+    if (keyTy.subtypeOf(BCls | BFunc)) {
+      ret.type = TStr;
+      if (keyTy.strictSubtypeOf(TCls)) {
+        ret.s = dcls_of(keyTy).cls.name();
+      }
+      return ret;
+    }
+    ret.type = TUncArrKey;
+    return ret;
+  } else if (keyTy.couldBe(BOptCls | BOptFunc)) {
+    ret.mayThrow = true;
+    if (strict) ret.type = keyTy.couldBe(BCStr) ? TArrKey : TUncArrKey;
+    else        ret.type = TInitCell;
+    return ret;
+  }
+
+  return {};
+}
+
 /*
  * For known strings that are strictly integers, we'll set both the known
  * integer and string keys, so generally the int case should be checked first
@@ -4077,6 +4105,8 @@ Type assert_nonemptiness(Type t) {
 
 ArrKey disect_array_key(const Type& keyTy) {
   auto ret = ArrKey{};
+
+  if (auto const r = maybe_class_func_key(keyTy, false)) return *r;
 
   if (keyTy.subtypeOf(BOptInt)) {
     if (keyTy.subtypeOf(BInt)) {
@@ -5216,6 +5246,8 @@ std::pair<Type,Type> vec_newelem(Type vec, const Type& val) {
 
 ArrKey disect_strict_key(const Type& keyTy) {
   auto ret = ArrKey{};
+
+  if (auto const r = maybe_class_func_key(keyTy, true)) return *r;
 
   if (!keyTy.couldBe(BArrKey)) {
     ret.type = TBottom;

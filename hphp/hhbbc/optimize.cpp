@@ -131,7 +131,6 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
     auto const realT = state.stack[state.stack.size() - idx - 1].type;
     auto const flav  = stack_flav(realT);
 
-    assert(realT.subtypeOf(BBottom) || !realT.subtypeOf(BCls));
     if (options.FilterAssertions && !realT.strictSubtypeOf(flav)) {
       return;
     }

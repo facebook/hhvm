@@ -207,6 +207,7 @@ let parse_options () =
   let disable_unsafe_expr = ref None in
   let disable_unsafe_block = ref None in
   let pocket_universes = ref false in
+  let disallow_byref_prop_args = ref (Some false) in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -427,6 +428,9 @@ let parse_options () =
     "--pocket-universes",
       Arg.Set pocket_universes,
       "Enables support for Pocket Universes";
+    "--disallow-byref-prop-args",
+      Arg.Unit (set_bool disallow_byref_prop_args),
+      "Disallow passing properties by reference to functions";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -461,6 +465,7 @@ let parse_options () =
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_ref_param_on_constructor:(not_ !allow_ref_param_on_constructor)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
+    ?tco_disallow_byref_prop_args:(!disallow_byref_prop_args)
     ~log_levels:(!log_levels)
     ()
   in

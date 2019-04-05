@@ -599,3 +599,4 @@ val misplaced_mutability_hint : Pos.t -> unit
 val mutability_hint_in_non_rx_function : Pos.t -> unit
 val invalid_mutability_in_return_type_hint : Pos.t -> unit
 val typechecker_timeout : Pos.t * string -> int -> unit
+val byref_on_property : Pos.t -> unit

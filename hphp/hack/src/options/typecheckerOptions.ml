@@ -77,3 +77,4 @@ let disallow_byref_dynamic_calls = GlobalOptions.tco_disallow_byref_dynamic_call
 let log_levels = GlobalOptions.log_levels
 let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars
 let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_expr_type_arguments
+let disallow_byref_prop_args = GlobalOptions.tco_disallow_byref_prop_args

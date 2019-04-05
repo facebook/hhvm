@@ -1,0 +1,4 @@
+File "byref_on_property.php", line 17, characters 21-32:
+Properties cannot be passed by reference (NastCheck[3079])
+File "byref_on_property.php", line 19, characters 21-33:
+Properties cannot be passed by reference (NastCheck[3079])

@@ -216,7 +216,7 @@ type t = {
  tco_ignore_collection_expr_type_arguments : bool;
 
  (* Flag to disallow passing properties by ref *)
- po_disallow_byref_prop_args : bool;
+ tco_disallow_byref_prop_args : bool;
 } [@@deriving show]
 
 val make :
@@ -261,7 +261,7 @@ val make :
   ?po_disable_unsafe_block: bool ->
   ?tco_typecheck_xhp_cvars: bool ->
   ?tco_ignore_collection_expr_type_arguments: bool ->
-  ?po_disallow_byref_prop_args: bool ->
+  ?tco_disallow_byref_prop_args: bool ->
   unit ->
   t
 
@@ -331,4 +331,4 @@ val po_disable_unsafe_block : t -> bool
 val setup_pocket_universes : t -> bool -> t
 val tco_typecheck_xhp_cvars : t -> bool
 val tco_ignore_collection_expr_type_arguments : t -> bool
-val po_disallow_byref_prop_args : t -> bool
+val tco_disallow_byref_prop_args : t -> bool

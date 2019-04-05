@@ -50,7 +50,7 @@ type t = {
   po_disable_unsafe_block : bool;
   tco_typecheck_xhp_cvars : bool;
   tco_ignore_collection_expr_type_arguments : bool;
-  po_disallow_byref_prop_args : bool;
+  tco_disallow_byref_prop_args : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -240,7 +240,7 @@ let default = {
  po_disable_unsafe_block = false;
  tco_typecheck_xhp_cvars = false;
  tco_ignore_collection_expr_type_arguments = false;
- po_disallow_byref_prop_args = false;
+ tco_disallow_byref_prop_args = false;
 }
 
 let make
@@ -285,7 +285,7 @@ let make
   ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
   ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
-  ?(po_disallow_byref_prop_args = default.po_disallow_byref_prop_args)
+  ?(tco_disallow_byref_prop_args = default.tco_disallow_byref_prop_args)
   ()
 = {
   tco_safe_array;
@@ -330,7 +330,7 @@ let make
   po_disable_unsafe_block;
   tco_typecheck_xhp_cvars;
   tco_ignore_collection_expr_type_arguments;
-  po_disallow_byref_prop_args;
+  tco_disallow_byref_prop_args;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -379,7 +379,7 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
 let po_disable_unsafe_block t = t.po_disable_unsafe_block
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
-let po_disallow_byref_prop_args t = t.po_disallow_byref_prop_args
+let tco_disallow_byref_prop_args t = t.tco_disallow_byref_prop_args
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
 let setup_pocket_universes env enabled =

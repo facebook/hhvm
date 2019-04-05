@@ -187,8 +187,9 @@ let rec hint_to_type_constraint
     t [TC.Soft; TC.HHType; TC.ExtendedHint]
 
   | A.Hlike _ ->
-    (* TODO(T42626544) Add runtime support for like-types *)
-    failwith "like-types are not supported"
+    if Emit_env.is_hh_syntax_enabled ()
+    then TC.make None []
+    else TC.make (Some "mixed") []
 
 and make_tc_with_flags_if_non_empty_flags
   ~kind ~tparams ~skipawaitable ~namespace t flags =

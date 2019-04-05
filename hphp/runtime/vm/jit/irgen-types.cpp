@@ -1174,6 +1174,7 @@ bool emitIsAsTypeStructWithoutResolvingIfPossible(
       push(env, is_nullable_ts ? check_nullable(env, res, c) : res);
       return true;
     }
+    case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
       return fail();
     case TypeStructure::Kind::T_typevar:

@@ -94,6 +94,7 @@ const std::string
   s_resource("resource"),
   s_num("num"),
   s_arraykey("arraykey"),
+  s_nothing("nothing"),
   s_noreturn("noreturn"),
   s_mixed("mixed"),
   s_nonnull("nonnull"),
@@ -278,6 +279,9 @@ std::string fullName(const Array& arr, bool forDisplay) {
       break;
     case TypeStructure::Kind::T_arraykey:
       name += forDisplay ? s_arraykey : s_hh + s_arraykey;
+      break;
+    case TypeStructure::Kind::T_nothing:
+      name += forDisplay ? s_nothing : s_hh + s_nothing;
       break;
     case TypeStructure::Kind::T_noreturn:
       name += forDisplay ? s_noreturn : s_hh + s_noreturn;

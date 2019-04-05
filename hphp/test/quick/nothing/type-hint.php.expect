@@ -1,0 +1,7 @@
+Argument 1 passed to takes_nothing() must be an instance of nothing, int given
+Argument 1 passed to takes_nothing() must be an instance of nothing, float given
+Argument 1 passed to takes_nothing() must be an instance of nothing, string given
+Argument 1 passed to takes_nothing() must be an instance of nothing, bool given
+Argument 1 passed to takes_nothing() must be an instance of nothing, bool given
+Argument 1 passed to takes_nothing() must be an instance of nothing, stdClass given
+Argument 1 passed to takes_nothing() must be an instance of nothing, null given

@@ -1,0 +1,45 @@
+array(2) {
+  ["kind"]=>
+  int(29)
+  ["alias"]=>
+  string(1) "T"
+}
+array(1) {
+  ["kind"]=>
+  int(29)
+}
+array(2) {
+  ["nullable"]=>
+  bool(true)
+  ["kind"]=>
+  int(29)
+}
+array(2) {
+  ["kind"]=>
+  int(20)
+  ["generic_types"]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(29)
+    }
+  }
+}
+array(2) {
+  ["kind"]=>
+  int(19)
+  ["generic_types"]=>
+  array(2) {
+    [0]=>
+    array(1) {
+      ["kind"]=>
+      int(4)
+    }
+    [1]=>
+    array(1) {
+      ["kind"]=>
+      int(29)
+    }
+  }
+}

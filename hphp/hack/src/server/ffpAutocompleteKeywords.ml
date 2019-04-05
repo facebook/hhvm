@@ -239,7 +239,7 @@ let noreturn_keyword = {
 
 let primitive_types = {
   keywords = ["array"; "arraykey"; "bool"; "classname"; "darray"; "float"; "int"; "mixed"; "num";
-  "string"; "resource"; "varray"];
+  "string"; "resource"; "varray"; "nothing"];
   is_valid_in_context = is_type_valid
 }
 

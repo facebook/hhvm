@@ -117,7 +117,10 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
           break;
         case 5: strip = !strcasecmp(stripped, "float"); break;
         case 6: strip = !strcasecmp(stripped, "string"); break;
-        case 7: strip = !strcasecmp(stripped, "nonnull"); break;
+        case 7:
+          strip = (!strcasecmp(stripped, "nonnull") ||
+                   !strcasecmp(stripped, "nothing"));
+          break;
         case 8:
           strip = (!strcasecmp(stripped, "resource") ||
                    !strcasecmp(stripped, "noreturn") ||
@@ -135,6 +138,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
   if (extra && m_flags & Flags::Resolved && m_type != AnnotType::Object) {
     const char* str = nullptr;
     switch (m_type) {
+      case AnnotType::Nothing:  str = "nothing"; break;
       case AnnotType::NoReturn: str = "noreturn"; break;
       case AnnotType::Null:     str = "null"; break;
       case AnnotType::Bool:     str = "bool"; break;
@@ -410,6 +414,7 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
           return std::make_tuple(tc.type(), nullptr, tc.isNullable());
         }
         break;
+      case MetaType::Nothing:
       case MetaType::NoReturn:
       case MetaType::Self:
       case MetaType::Parent:
@@ -586,6 +591,7 @@ bool TypeConstraint::checkTypeAliasObjImpl(const Class* cls) const {
       return true;
     case AnnotMetaType::Callable:
       return cls->lookupMethod(s___invoke.get()) != nullptr;
+    case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
@@ -680,6 +686,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
           if (isPasses) return false;
           return is_callable(cellAsCVarRef(*val));
         case MetaType::Precise:
+        case MetaType::Nothing:
         case MetaType::NoReturn:
         case MetaType::Number:
         case MetaType::ArrayKey:
@@ -807,6 +814,7 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
     case MetaType::Parent:
     case MetaType::Callable:
     case MetaType::Precise:
+    case MetaType::Nothing:
     case MetaType::NoReturn:
     case MetaType::Number:
     case MetaType::ArrayKey:
@@ -1407,6 +1415,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::ArrayKey:
       return tc.isNullable() ? MK::None : MK::IntOrStr;
     case AnnotMetaType::Mixed:
+    case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nonnull:
     case AnnotMetaType::Self:

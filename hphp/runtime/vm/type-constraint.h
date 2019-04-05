@@ -246,6 +246,7 @@ struct TypeConstraint {
   bool isParent()   const { return m_type == Type::Parent; }
   bool isCallable() const { return m_type == Type::Callable; }
   bool isNumber()   const { return m_type == Type::Number; }
+  bool isNothing()  const { return m_type == Type::Nothing; }
   bool isNoReturn() const { return m_type == Type::NoReturn; }
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
   bool isArrayLike() const { return m_type == Type::ArrayLike; }
@@ -295,7 +296,7 @@ struct TypeConstraint {
   AnnotType type()  const { return m_type; }
 
   bool validForProp() const {
-    return !isSelf() && !isParent() && !isCallable() && !isNoReturn();
+    return !isSelf() && !isParent() && !isCallable() && !isNothing() && !isNoReturn();
   }
 
   /*

@@ -68,6 +68,7 @@ enum class Kind : uint8_t {
   T_arraylike = 27,
 
   T_null = 28,
+  T_nothing = 29,
 
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */

@@ -65,6 +65,7 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       const char* name;
       AnnotType type;
     } pairs[] = {
+      { "HH\\nothing",  AnnotType::Nothing },
       { "HH\\noreturn", AnnotType::NoReturn },
       { "HH\\null",     AnnotType::Null },
       { "HH\\void",     AnnotType::Null },
@@ -279,6 +280,7 @@ Cell annotDefaultValue(AnnotType at) {
     case AnnotType::Callable:
     case AnnotType::Resource:
     case AnnotType::Object:
+    case AnnotType::Nothing:
     case AnnotType::NoReturn:
     case AnnotType::Null:     return make_tv<KindOfNull>();
     case AnnotType::Nonnull:

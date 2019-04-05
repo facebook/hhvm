@@ -2432,6 +2432,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
       return check(ts_type, TDArr);
     case TypeStructure::Kind::T_vec:
       return check(ts_type, TVArr);
+    case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
       return result(TFalse);
     case TypeStructure::Kind::T_mixed:
@@ -2515,6 +2516,7 @@ bool canReduceToDontResolve(SArray ts) {
     case TypeStructure::Kind::T_arraykey:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_nonnull:

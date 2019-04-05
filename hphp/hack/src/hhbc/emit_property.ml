@@ -66,6 +66,7 @@ let valid_tc_for_prop tc =
      not (is_self name) &&
      not (is_parent name) &&
      not (String.lowercase name = "callable") &&
+     not (String.lowercase name = "hh\\nothing") &&
      not (String.lowercase name = "hh\\noreturn")
 
 let from_ast

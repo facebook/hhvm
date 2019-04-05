@@ -1033,6 +1033,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
         return (isSProp && !tc.couldSeeMockObject())
           ? Type::ExactObj(propCls)
           : Type::SubObj(propCls);
+      case A::Nothing:
       case A::NoReturn:
       case A::Self:
       case A::Parent:

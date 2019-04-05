@@ -48,7 +48,8 @@ enum class AnnotMetaType : uint8_t {
   VecOrDict = 11,
   ArrayLike = 12,
   Nonnull = 13,
-  NoReturn = 14
+  NoReturn = 14,
+  Nothing = 15
 };
 
 enum class AnnotType : uint16_t {
@@ -77,7 +78,8 @@ enum class AnnotType : uint16_t {
   VArrOrDArr = (uint16_t)AnnotMetaType::VArrOrDArr << 8 | (uint8_t)KindOfUninit,
   VecOrDict  = (uint16_t)AnnotMetaType::VecOrDict << 8  | (uint8_t)KindOfUninit,
   ArrayLike  = (uint16_t)AnnotMetaType::ArrayLike << 8  | (uint8_t)KindOfUninit,
-  NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit
+  NoReturn   = (uint16_t)AnnotMetaType::NoReturn << 8   | (uint8_t)KindOfUninit,
+  Nothing    = (uint16_t)AnnotMetaType::Nothing << 8    | (uint8_t)KindOfUninit
 };
 
 inline AnnotMetaType getAnnotMetaType(AnnotType at) {
@@ -261,6 +263,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
               isDictType(dt) || isKeysetType(dt))
         ? AnnotAction::Pass
         : AnnotAction::Fail;
+    case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;
     case AnnotMetaType::Precise:

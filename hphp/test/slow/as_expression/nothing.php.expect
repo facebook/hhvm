@@ -1,0 +1,10 @@
+not nothing: integer
+not nothing: boolean
+not nothing: double
+not nothing: string
+not nothing: resource
+not nothing: object
+not nothing: vec
+not nothing: dict
+not nothing: keyset
+not nothing: NULL

@@ -4632,6 +4632,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
        * typehints (ex. "(function(..): ..)" typehints).
        */
       return { TCell, true };
+    case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
       return TBottom;
     case AnnotMetaType::Nonnull:

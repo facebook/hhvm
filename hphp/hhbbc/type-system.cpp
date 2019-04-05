@@ -3153,6 +3153,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
       //  : union_of(union_of(union_of(TArr, TVec), TDict), TKeyset);
       return folly::none;
 
+    case TypeStructure::Kind::T_nothing:
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_nonnull:

@@ -67,11 +67,4 @@ test: build-hack copy-hack-files
 
 do-test:
 	dune runtest
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/autocomplete
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/color
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/colour
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/coverage
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/dumpsymbolinfo
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/dump_inheritance
-	python3 ./test/verify.py --program ./bin/hh_single_type_check ./test/typecheck
-	python3 ./test/integration/runner.py ./bin/hh_server ./bin/hh_client
+	# python3 ./test/integration/runner.py ./bin/hh_server ./bin/hh_client

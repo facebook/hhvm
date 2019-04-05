@@ -318,20 +318,31 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
     });
 }
 
-bool optimizeProfiledPushMethod(IRGS& env,
-                                TargetProfile<MethProfile>& profile,
+template<class Fn>
+void optimizeProfiledPushMethod(IRGS& env,
                                 SSATmp* objOrCls,
                                 const Class* knownClass,
-                                Block* sideExit,
                                 const StringData* methodName,
                                 uint32_t numParams,
-                                bool dynamic) {
-  if (!profile.optimizing()) return false;
-  if (env.transFlags.noProfiledFPush && env.firstBcInst) return false;
-
+                                bool dynamic,
+                                Fn emitFPush) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
-
-  auto isStaticCall = objOrCls->type() <= TCls;
+  auto const isStaticCall = objOrCls->type() <= TCls;
+  auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
+                                            methProfileKey.get());
+  if (!profile.optimizing()) {
+    emitFPush();
+    if (profile.profiling()) {
+      gen(
+        env,
+        ProfileMethod,
+        ProfileCallTargetData { spOffBCFromIRSP(env), profile.handle() },
+        sp(env),
+        isStaticCall ? objOrCls : cns(env, TNullptr)
+      );
+    }
+    return;
+  }
 
   auto getCtx = [&](const Func* callee,
                     SSATmp* ctx,
@@ -347,6 +358,14 @@ bool optimizeProfiledPushMethod(IRGS& env,
     return ret;
   };
 
+  auto const fallback = [&] {
+    hint(env, Block::Hint::Unlikely);
+    IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+
+    emitFPush();
+    gen(env, Jmp, makeExit(env, nextBcOff(env)));
+  };
+
   MethProfile data = profile.data();
 
   if (auto const uniqueMeth = data.uniqueMeth()) {
@@ -354,112 +373,121 @@ bool optimizeProfiledPushMethod(IRGS& env,
     if (auto const uniqueClass = data.uniqueClass()) {
       // Profiling saw a unique class.
       // Check for it, then burn in the func
-      auto const refined = gen(env, CheckType,
-                               isStaticCall ?
-                               Type::ExactCls(uniqueClass) :
-                               Type::ExactObj(uniqueClass),
-                               sideExit, objOrCls);
-      env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
-      auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
-      allocActRec(env);
-      fsetActRec(env, cns(env, uniqueMeth), ctx, numParams,
-                 isMagic ? methodName : nullptr, cns(env, dynamic));
-      return true;
+      ifThen(
+        env,
+        [&] (Block* sideExit) {
+          auto const ty = isStaticCall
+            ? Type::ExactCls(uniqueClass) : Type::ExactObj(uniqueClass);
+          auto const refined = gen(env, CheckType, ty, sideExit, objOrCls);
+          env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
+          auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
+          allocActRec(env);
+          fsetActRec(env, cns(env, uniqueMeth), ctx, numParams,
+                     isMagic ? methodName : nullptr, cns(env, dynamic));
+        },
+        fallback
+      );
+      return;
     }
 
-    if (isMagic) return false;
+    if (isMagic) return emitFPush();
 
     // Although there were multiple classes, the method was unique
     // (this comes up eg for a final method in a base class).  But
     // note that we can't allow a magic call here since it's possible
     // that an as-yet-unseen derived class defines a method named
     // methodName.
-    auto const slot = cns(env, uniqueMeth->methodSlot());
-    auto const negSlot = cns(env, -1 - uniqueMeth->methodSlot());
-    auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
-    auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
-    auto const len = gen(env, LdFuncVecLen, cls);
-    auto const cmp = gen(env, LteInt, len, slot);
-    gen(env, JmpNZero, sideExit, cmp);
-    auto const meth = gen(env, LdClsMethod, cls, negSlot);
-    auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
-    gen(env, JmpZero, sideExit, same);
-    allocActRec(env);
-    fsetActRec(
+    ifThen(
       env,
-      cns(env, uniqueMeth),
-      ctx,
-      numParams,
-      nullptr,
-      cns(env, dynamic)
+      [&] (Block* sideExit) {
+        auto const slot = cns(env, uniqueMeth->methodSlot());
+        auto const negSlot = cns(env, -(uniqueMeth->methodSlot() + 1));
+        auto const cls = isStaticCall
+          ? objOrCls : gen(env, LdObjClass, objOrCls);
+        auto const len = gen(env, LdFuncVecLen, cls);
+        auto const cmp = gen(env, LteInt, len, slot);
+        gen(env, JmpNZero, sideExit, cmp);
+        auto const meth = gen(env, LdClsMethod, cls, negSlot);
+        auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
+        gen(env, JmpZero, sideExit, same);
+        auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
+        allocActRec(env);
+        fsetActRec(env, cns(env, uniqueMeth), ctx, numParams, nullptr,
+                   cns(env, dynamic));
+      },
+      fallback
     );
-    return true;
+    return;
   }
 
   // If we know anything about the class, other than it's an interface, the
   // remaining cases aren't worth the extra check.
-  if (knownClass != nullptr && !isInterface(knownClass)) return false;
+  if (knownClass != nullptr && !isInterface(knownClass)) return emitFPush();
 
   if (auto const baseMeth = data.baseMeth()) {
     if (!baseMeth->name()->isame(methodName)) {
-      return false;
+      return emitFPush();
     }
 
     // The method was defined in a common base class.  We just need to check for
     // an instance of the class, and then use the method from the right slot.
-    auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
-    auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
-    auto flag = gen(env, ExtendsClass,
-                    ExtendsClassData{baseMeth->cls(), true}, cls);
-    gen(env, JmpZero, sideExit, flag);
-    auto negSlot = cns(env, -1 - baseMeth->methodSlot());
-    auto meth = gen(env, LdClsMethod, cls, negSlot);
-    allocActRec(env);
-    fsetActRec(
+    ifThen(
       env,
-      meth,
-      ctx,
-      numParams,
-      nullptr,
-      cns(env, dynamic)
+      [&] (Block* sideExit) {
+        auto const cls = isStaticCall
+          ? objOrCls : gen(env, LdObjClass, objOrCls);
+        auto const ecData = ExtendsClassData{baseMeth->cls(), true};
+        auto const flag = gen(env, ExtendsClass, ecData, cls);
+        gen(env, JmpZero, sideExit, flag);
+        auto const negSlot = cns(env, -(baseMeth->methodSlot() + 1));
+        auto const meth = gen(env, LdClsMethod, cls, negSlot);
+        auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
+        allocActRec(env);
+        fsetActRec(env, meth, ctx, numParams, nullptr, cns(env, dynamic));
+      },
+      fallback
     );
-    return true;
+    return;
   }
 
   // If we know anything about the class, the other cases below are not worth
   // the extra checks they insert.
-  if (knownClass != nullptr) return false;
+  if (knownClass != nullptr) return emitFPush();
 
   if (auto const intfMeth = data.interfaceMeth()) {
     if (!intfMeth->name()->isame(methodName)) {
-      return false;
+      return emitFPush();
     }
 
     // The method was defined in a common interface, so check for that and use
     // LdIfaceMethod.
-    auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
-    auto const cls = isStaticCall ? objOrCls : gen(env, LdObjClass, objOrCls);
-    auto flag = gen(env, InstanceOfIfaceVtable,
-                    ClassData{intfMeth->cls()}, cls);
-    gen(env, JmpZero, sideExit, flag);
-    auto const vtableSlot =
-      intfMeth->cls()->preClass()->ifaceVtableSlot();
-    auto meth = gen(env, LdIfaceMethod,
-                    IfaceMethodData{vtableSlot, intfMeth->methodSlot()},
-                    cls);
-    allocActRec(env);
-    fsetActRec(env, meth, ctx, numParams, nullptr, cns(env, dynamic));
-    return true;
+    ifThen(
+      env,
+      [&] (Block* sideExit) {
+        auto const cls = isStaticCall
+          ? objOrCls : gen(env, LdObjClass, objOrCls);
+        auto const cData = ClassData{intfMeth->cls()};
+        auto const flag = gen(env, InstanceOfIfaceVtable, cData, cls);
+        gen(env, JmpZero, sideExit, flag);
+        auto const vtableSlot = intfMeth->cls()->preClass()->ifaceVtableSlot();
+        auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
+        auto const meth = gen(env, LdIfaceMethod, imData, cls);
+        auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
+        allocActRec(env);
+        fsetActRec(env, meth, ctx, numParams, nullptr, cns(env, dynamic));
+      },
+      fallback
+    );
+    return;
   }
 
-  return false;
+  return emitFPush();
 }
 
 void fpushObjMethod(IRGS& env,
                     SSATmp* obj,
                     const StringData* methodName,
-                    uint32_t numParams,
-                    Block* sideExit) {
+                    uint32_t numParams) {
   implIncStat(env, Stats::ObjMethod_total);
 
   assertx(obj->type() <= TObj);
@@ -477,33 +505,19 @@ void fpushObjMethod(IRGS& env,
     }
   }
 
+  auto const emitFPush = [&] {
+    fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
+                                exactClass);
+  };
+
+  // If we know the class exactly without profiling, then we don't need PGO.
+  if (knownClass && !isInterface(knownClass)) return emitFPush();
+  if (!RuntimeOption::RepoAuthoritative) return emitFPush();
+
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
-  const bool usePGO = !knownClass || isInterface(knownClass);
-
-  folly::Optional<TargetProfile<MethProfile>> profile;
-  if (usePGO && RuntimeOption::RepoAuthoritative) {
-    profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
-
-    // If we know the class exactly without profiling, then we don't need PGO.
-    if (optimizeProfiledPushMethod(env, *profile, obj, knownClass, sideExit,
-                                   methodName, numParams, false)) {
-      return;
-    }
-  }
-
-  fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
-                              exactClass);
-
-  if (profile && profile->profiling()) {
-    gen(env,
-        ProfileMethod,
-        ProfileCallTargetData {
-          spOffBCFromIRSP(env), profile->handle()
-        },
-        sp(env),
-        cns(env, TNullptr));
-  }
+  optimizeProfiledPushMethod(env, obj, knownClass, methodName, numParams, false,
+                             emitFPush);
 }
 
 void fpushFuncObj(IRGS& env, uint32_t numParams) {
@@ -944,14 +958,10 @@ void emitFPushObjMethodD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
                          ObjMethodOp subop) {
-  TransFlags trFlags;
-  trFlags.noProfiledFPush = true;
-  auto sideExit = makeExit(env, trFlags);
-
   auto const obj = popC(env);
 
   if (obj->type() <= TObj) {
-    fpushObjMethod(env, obj, methodName, numParams, sideExit);
+    fpushObjMethod(env, obj, methodName, numParams);
     return;
   }
 
@@ -1173,88 +1183,64 @@ void emitResolveClsMethod(IRGS& env) {
 
 namespace {
 
-template <typename Peek, typename Get, typename Kill>
+template <typename Take, typename Get>
 ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
                                         uint32_t numParams,
-                                        Peek peekCls,
+                                        Take takeCls,
                                         Get getMeth,
-                                        Kill killCls,
                                         bool forward,
                                         bool dynamic) {
-  TransFlags trFlags;
-  trFlags.noProfiledFPush = true;
-  auto sideExit = makeExit(env, trFlags);
-
-  // We can side-exit, so peek the slot rather than reading from it.
-  auto const clsVal = peekCls();
+  auto const clsVal = takeCls();
   auto const methVal = getMeth();
 
   if (!methVal->isA(TStr)) {
     PUNT(FPushClsMethod-unknownType);
   }
 
-  folly::Optional<TargetProfile<MethProfile>> profile;
+  auto const emitFPush = [&] {
+    allocActRec(env);
+    fsetActRec(
+      env,
+      cns(env, TNullptr),
+      cns(env, TNullptr),
+      numParams,
+      nullptr,
+      cns(env, dynamic)
+    );
 
-  if (methVal->hasConstVal()) {
-    auto const methodName = methVal->strVal();
-    const Class* cls = nullptr;
-    bool exact = false;
-    if (auto clsSpec = clsVal->type().clsSpec()) {
-      cls = clsSpec.cls();
-      exact = clsSpec.exact();
-    }
+    /*
+     * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
+     * stack and must handle that properly if we throw or re-enter.
+     */
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
 
-    if (cls) {
-      if (fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
-                              exact, false, forward, dynamic)) {
-        killCls();
-        return;
-      }
-    }
+    auto const lcmData = LookupClsMethodData { spOffBCFromIRSP(env), forward };
+    gen(env, LookupClsMethod, lcmData, clsVal, methVal, sp(env), fp(env));
+    decRef(env, methVal);
+  };
 
-    if (RuntimeOption::RepoAuthoritative &&
-        !clsVal->hasConstVal() &&
-        !forward) {
-      profile.emplace(env.context, env.irb->curMarker(), methProfileKey.get());
+  if (!methVal->hasConstVal()) return emitFPush();
 
-      if (optimizeProfiledPushMethod(env, *profile, clsVal, nullptr, sideExit,
-                                     methodName, numParams, dynamic)) {
-        killCls();
-        return;
-      }
-    }
+  auto const methodName = methVal->strVal();
+  const Class* cls = nullptr;
+  bool exact = false;
+  if (auto clsSpec = clsVal->type().clsSpec()) {
+    cls = clsSpec.cls();
+    exact = clsSpec.exact();
   }
 
-  killCls();
-  allocActRec(env);
-  fsetActRec(env,
-             cns(env, TNullptr),
-             cns(env, TNullptr),
-             numParams,
-             nullptr,
-             cns(env, dynamic));
-
-  /*
-   * Similar to FPushFunc/FPushObjMethod, we have an incomplete ActRec on the
-   * stack and must handle that properly if we throw or re-enter.
-   */
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  gen(env, LookupClsMethod,
-      LookupClsMethodData { spOffBCFromIRSP(env), forward },
-      clsVal, methVal, sp(env), fp(env));
-  decRef(env, methVal);
-
-  if (profile && profile->profiling()) {
-    gen(env,
-        ProfileMethod,
-        ProfileCallTargetData {
-          spOffBCFromIRSP(env), profile->handle()
-        },
-        sp(env),
-        clsVal);
+  if (cls && fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
+                                 exact, false, forward, dynamic)) {
+    return;
   }
+
+  if (!RuntimeOption::RepoAuthoritative || clsVal->hasConstVal() || forward) {
+    return emitFPush();
+  }
+
+  optimizeProfiledPushMethod(env, clsVal, nullptr, methodName, numParams,
+                             dynamic, emitFPush);
 }
 
 }
@@ -1267,9 +1253,8 @@ void emitFPushClsMethod(IRGS& env,
   fpushClsMethodCommon(
     env,
     numParams,
-    [&] { return peekClsRefCls(env, slot); },
+    [&] { return takeClsRefCls(env, slot); },
     [&] { return popC(env); },
-    [&] { killClsRef(env, slot); },
     false,
     true
   );
@@ -1285,7 +1270,6 @@ void emitFPushClsMethodS(IRGS& env,
     numParams,
     [&] { return specialClsRefToCls(env, ref); },
     [&] { return popC(env); },
-    []  {},
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     true
   );
@@ -1300,7 +1284,6 @@ void emitFPushClsMethodSD(IRGS& env,
     numParams,
     [&] { return specialClsRefToCls(env, ref); },
     [&] { return cns(env, name); },
-    []  {},
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
     false
   );

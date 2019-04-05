@@ -89,6 +89,7 @@
 #include "hphp/util/sha1.h"
 
 #include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/repo-auth-type-codec.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/variable-serializer.h"
@@ -1729,10 +1730,12 @@ void checkSize(TypedValue tv, size_t& available) {
   };
 
   if (isArrayLikeType(type(tv))) {
-    auto const scale = MixedArray::computeScaleFromSize(val(tv).parr->size());
-    update(MixedArray::computeAllocBytes(scale));
+    update(allocSize(val(tv).parr));
 
-    IterateVNoInc(val(tv).parr, [&] (TypedValue v) {
+    IterateKVNoInc(val(tv).parr, [&] (Cell k, TypedValue v) {
+      if (isStringType(type(k))) {
+        update(val(k).pstr->heapSize());
+      }
       checkSize(v, available);
     });
   }

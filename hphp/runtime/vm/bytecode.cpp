@@ -1650,7 +1650,8 @@ namespace {
 void checkForReifiedGenericsErrors(const ActRec* ar) {
   if (!ar->m_func->hasReifiedGenerics()) return;
   if (!ar->hasReifiedGenerics()) {
-    raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN);
+    raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN,
+      ar->m_func->fullName()->data());
   }
   auto const tv = frame_local(ar, ar->m_func->numParams());
   assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
@@ -4899,6 +4900,11 @@ void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
     f, cls, name, arGetContextClass(vmfp()), true);
   assertx(f);
   vmStack().discard();
+  if (f->hasReifiedGenerics()) {
+    if (!isReifiedName(name)) {
+      raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
+    }
+  }
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
   if (res == LookupResult::MethodFoundNoThis) {
@@ -5136,6 +5142,11 @@ void pushClsMethodImpl(Class* cls,
     obj->incRefCount();
   }
   assertx(f);
+  if (f->hasReifiedGenerics()) {
+    if (!isReifiedName(name)) {
+      raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
+    }
+  }
   ActRec* ar = vmStack().allocA();
   ar->m_func = f;
   if (obj) {

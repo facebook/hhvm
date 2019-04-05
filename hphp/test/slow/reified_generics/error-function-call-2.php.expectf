@@ -1,1 +1,1 @@
-Fatal error: Cannot call a reified function without the reified generics in %s on line 4
+Fatal error: Cannot call the reified function 'f' without the reified generics in %s on line 4

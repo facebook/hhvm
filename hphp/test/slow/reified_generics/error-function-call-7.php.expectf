@@ -1,0 +1,1 @@
+Fatal error: Cannot call the reified function 'C::f' without the reified generics in %s on line %d

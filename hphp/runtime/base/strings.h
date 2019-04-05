@@ -117,7 +117,7 @@ auto constexpr HACKARR_COMPAT_DICT_IS_DARR = "is_darray() called on dict";
 auto constexpr FUNCTION_CALLED_DYNAMICALLY = "'%s' called dynamically";
 auto constexpr CLASS_CONSTRUCTED_DYNAMICALLY = "'%s' constructed dynamically";
 auto constexpr REIFIED_GENERICS_NOT_GIVEN =
-  "Cannot call a reified function without the reified generics";
+  "Cannot call the reified function '%s' without the reified generics";
 auto constexpr NEW_STATIC_ON_REIFIED_CLASS =
   "Cannot call new static since class %s has reified generics";
 

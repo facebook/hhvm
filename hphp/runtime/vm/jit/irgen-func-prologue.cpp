@@ -100,10 +100,6 @@ SSATmp* emitLdARReifiedGenericsSafe(IRGS& env) {
   );
 }
 
-const StaticString s_reified_generics_not_given(
-  Strings::REIFIED_GENERICS_NOT_GIVEN
-);
-
 // Check whether HasReifiedGenerics is set on the ActRec
 void emitARHasReifiedGenericsCheck(IRGS& env) {
   auto const func = curFunc(env);
@@ -126,9 +122,11 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
     },
     [&] {
       if (!func->hasReifiedGenerics()) return;
-      // null out VarEnv before raising error
       hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseError, cns(env, s_reified_generics_not_given.get()));
+      auto const msg = folly::sformat(
+        "Cannot call the reified function '{}' without the reified generics",
+        func->fullName());
+      gen(env, RaiseError, cns(env, makeStaticString(msg)));
     }
   );
   // Now that we know that first local is not Tuninit,

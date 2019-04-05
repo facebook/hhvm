@@ -808,6 +808,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 let handle_mode
   mode filenames tcopt popt files_contents files_info parse_errors
   all_errors error_format batch_mode =
+  let new_inference = GlobalOptions.tco_new_inference tcopt in
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -1095,10 +1096,11 @@ let handle_mode
     let results = ServerHighlightRefs.go (file, line, column) tcopt  in
     ClientHighlightRefs.go results ~output_json:false;
   | Errors when batch_mode ->
+    let ext = if new_inference then ".out" else ".legacy.out" in
     (* For each file in our batch, run typechecking serially.
       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
-      let oc = Out_channel.create ((Relative_path.to_absolute filename) ^ ".out") in
+      let oc = Out_channel.create ((Relative_path.to_absolute filename) ^ ext) in
       (* This means builtins had errors, so lets just print those if we see them *)
       if parse_errors <> []
       then

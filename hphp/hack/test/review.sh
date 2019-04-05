@@ -32,13 +32,21 @@ for f in "$@"; do
     EXP=/dev/null
   fi
 
-  echo "$ARROW Diff between $EXP and $(basename "$f$OUT_EXT") $(tput sgr0)"
+  if [ -e "$f$OUT_EXT" ]; then
+    OUT="$f$OUT_EXT"
+  elif [ -n "${FALLBACK_OUT_EXT+x}" ] && [ -e "$f$FALLBACK_OUT_EXT" ]; then
+    OUT="$f$FALLBACK_OUT_EXT"
+  else
+    OUT=/dev/null
+  fi
+
+  echo "$ARROW Diff between $EXP and $(basename "$OUT") $(tput sgr0)"
 
   # Use git diff to give us color and word diffs. The patience algorithm
   # produces more readable diffs in some situations.
   git --no-pager diff --diff-algorithm=histogram --color=always \
     --word-diff=color --word-diff-regex='[a-zA-Z0-9_:;-]+' \
-    $EXP "$f$OUT_EXT" | tail -n +5
+    $EXP "$OUT" | tail -n +5
   echo
   if [ "$NO_COPY" = true ]; then
     if [ "$TERM" = "dumb" ]; then
@@ -53,7 +61,7 @@ for f in "$@"; do
   fi
   echo ""
   if [ "$REPLY" = "y" ] && [ "$NO_COPY" = false ]; then
-    cp "$f$OUT_EXT" "$f$EXP_EXT"
+    cp "$OUT" "$EXP"
   elif [ "$REPLY" = "q" ]; then
     exit 0
   fi

@@ -817,7 +817,7 @@ module Make (GetLocals : GetLocals) = struct
       ~allow_wildcard
       ~in_where_clause
       ~tp_depth
-      env h
+      env (p, h)
 
   and aast_unwrap_mutability p =
     match p with
@@ -853,7 +853,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and aast_hint_ ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard
             ~in_where_clause ?(tp_depth=0)
-        env x =
+        env (p, x) =
     let pu_enabled = TypecheckerOptions.experimental_feature_enabled
         (fst env).tcopt GlobalOptions.tco_experimental_pocket_universes in
     let aast_hint =
@@ -864,6 +864,9 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Hoption h ->
       (* void/noreturn are permitted for Typing.option_return_only_typehint *)
       N.Hoption (aast_hint ~allow_retonly env h)
+    | Aast.Hlike h ->
+      Errors.experimental_feature p "like-types";
+      N.Hlike (aast_hint ~allow_retonly env h)
     | Aast.Hsoft h ->
       let h = aast_hint ~allow_retonly env h
       in snd h

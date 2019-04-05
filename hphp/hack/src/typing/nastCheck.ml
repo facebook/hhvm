@@ -405,9 +405,12 @@ and hint_ env p = function
   | Hvarray_or_darray ty
   | Hvarray ty ->
       hint env ty
-  | Htuple hl -> List.iter hl (hint env)
-  | Hoption h ->
-      hint env h; ()
+  | Htuple hl ->
+      List.iter hl (hint env)
+  | Hoption h
+  | Hsoft h
+  | Hlike h ->
+      hint env h
   | Hfun (_, _, hl, _, _, variadic_hint, h, _) ->
       List.iter hl (hint env);
       hint env h;
@@ -434,8 +437,6 @@ and hint_ env p = function
       let compute_hint_for_shape_field_info { sfi_hint; _; } =
         hint env sfi_hint in
       List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
-  | Hsoft h ->
-      hint env h; ()
 
 and check_happly unchecked_tparams env h =
   let env = { env with Env.pos = (fst h) } in

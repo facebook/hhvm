@@ -851,6 +851,9 @@ and convert_hint env st (p, h as hint) =
   | Hoption h ->
     let st, h = convert_hint env st h in
     st, (p, Hoption h)
+  | Hlike h ->
+    let st, h = convert_hint env st h in
+    st, (p, Hlike h)
   | Hsoft h ->
     let st, h = convert_hint env st h in
     st, (p, Hsoft h)

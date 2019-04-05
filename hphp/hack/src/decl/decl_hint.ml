@@ -59,6 +59,9 @@ and hint_ p env = function
   | Hoption h ->
     let h = hint env h in
     Toption h
+  | Hlike (p, h_) ->
+    (* TODO(T42626544) Add typechecker support for like-types *)
+    hint_ p env h_
   | Hfun (reactivity, is_coroutine, hl, kl, muts, vh, h, mut_ret) ->
     let make_param (p, _ as x) k mut =
       let fp_mutability =

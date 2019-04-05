@@ -41,6 +41,7 @@ let rec has_reified_type_constraint env h =
         List.fold_right hl ~init:MaybeReified
           ~f:(fun h v -> combine v @@ has_reified_type_constraint env h)
   | A.Hsoft h
+  | A.Hlike h
   | A.Hoption h -> has_reified_type_constraint env h
   | A.Htuple _
   | A.Hshape _
@@ -51,6 +52,8 @@ let rec remove_awaitable (pos, _h as h) = match _h with
   | A.Happly ((_, id), [h]) when String.lowercase id = "awaitable" -> h
   (* For @Awaitable<T>, the soft type hint is moved to the inner type, i.e @T *)
   | A.Hsoft h -> pos, A.Hsoft (remove_awaitable h)
+  (* For ~Awaitable<T>, the like-type hint is moved to the inner type, i.e ~T *)
+  | A.Hlike h -> pos, A.Hlike (remove_awaitable h)
   (* For ?Awaitable<T>, the optional is dropped *)
   | A.Hoption h -> remove_awaitable h
   | A.Htuple _

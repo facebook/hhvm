@@ -218,6 +218,7 @@ class ['self] erase_body_visitor = object (_self: 'self)
 
   method! on_hint_ from_cstrs = function
     | Hoption h -> Hoption (super#on_hint from_cstrs h)
+    | Hlike h -> Hlike (super#on_hint from_cstrs h)
     | Hfun (ic, hlist, plist, vhint, h) ->
       Hfun (
         ic, List.map ~f:(super#on_hint from_cstrs) hlist, plist,

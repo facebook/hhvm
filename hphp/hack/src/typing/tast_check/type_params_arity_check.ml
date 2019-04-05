@@ -42,7 +42,9 @@ let rec check_hint env (pos, hint) =
     check_hint env ty
   | Aast.Htuple hl ->
     List.iter hl (check_hint env)
-  | Aast.Hoption h ->
+  | Aast.Hoption h
+  | Aast.Hsoft h
+  | Aast.Hlike h ->
     check_hint env h
   | Aast.Hfun (_, _, hl, _, _, variadic_hint, h, _) ->
     List.iter hl (check_hint env);
@@ -53,8 +55,6 @@ let rec check_hint env (pos, hint) =
     end
   | Aast.Hshape Aast.{ nsi_allows_unknown_fields=_; nsi_field_map } ->
     List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map
-  | Aast.Hsoft h ->
-    check_hint env h
   | Aast.Haccess _ -> ()
   | Aast.Hany  | Aast.Hmixed | Aast.Hnonnull | Aast.Hprim _
   | Aast.Hthis | Aast.Habstr _  | Aast.Hdynamic | Aast.Hnothing -> ()

@@ -128,6 +128,7 @@ and on_hint (p, h) : Aast.hint =
   | Hshape s -> (p, Aast.Hshape (on_shape_info s))
   | Haccess (root, id, ids) -> (p, on_haccess root id ids)
   | Hsoft h -> (p, Aast.Hsoft (on_hint h))
+  | Hlike h -> (p, Aast.Hlike (on_hint h))
 
 and on_class_elt trait_or_interface body elt : class_body =
   match elt with

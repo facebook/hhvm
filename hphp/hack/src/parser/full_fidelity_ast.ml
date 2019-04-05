@@ -920,7 +920,7 @@ let rec pHint : hint parser = fun node env ->
       Hoption (pHint nullable_type env)
     | LikeTypeSpecifier { like_type; _ } ->
       raise_parsing_error env (`Node node) "Like-Types are unsupported";
-      pHint_ like_type env
+      Hlike (pHint like_type env)
     | SoftTypeSpecifier { soft_type; _ } ->
       Hsoft (pHint soft_type env)
     | ClosureTypeSpecifier {

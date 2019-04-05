@@ -25,7 +25,7 @@ let has_valid_access_modifiers kind_list =
 
 let rec hint_uses_tparams tparam_names (_, hint)  =
   match hint with
-  | Ast.Hsoft h  | Ast.Hoption h ->
+  | Ast.Hsoft h  | Ast.Hoption h | Ast.Hlike h ->
     hint_uses_tparams tparam_names h
   | Ast.Hfun (_, ps, _, _, r) ->
     List.exists ps ~f:(hint_uses_tparams tparam_names) ||

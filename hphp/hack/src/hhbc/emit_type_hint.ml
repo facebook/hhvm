@@ -62,6 +62,8 @@ let rec fmt_hint ~tparams ~namespace ?(strip_tparams=false) (_, h) =
 
   | A.Hoption t -> "?" ^ fmt_hint ~tparams ~namespace t
 
+  | A.Hlike t -> "~" ^ fmt_hint ~tparams ~namespace t
+
   | A.Hsoft h -> "@" ^ fmt_hint ~tparams ~namespace h
 
   | A.Hshape { A.si_shape_field_list; _ } ->
@@ -183,6 +185,10 @@ let rec hint_to_type_constraint
   | A.Hsoft t ->
     make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
     t [TC.Soft; TC.HHType; TC.ExtendedHint]
+
+  | A.Hlike _ ->
+    (* TODO(T42626544) Add runtime support for like-types *)
+    failwith "like-types are not supported"
 
 and make_tc_with_flags_if_non_empty_flags
   ~kind ~tparams ~skipawaitable ~namespace t flags =

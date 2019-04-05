@@ -206,6 +206,9 @@ and hint_to_type_constant_list ~tparams ~namespace ~targ_map h =
   | A.Hsoft h ->
     [TV.String "soft", TV.Bool true]
     @ hint_to_type_constant_list ~tparams ~namespace ~targ_map h
+  | A.Hlike h ->
+    (* TODO(T42626544) Add like-types to TypeStructure *)
+    hint_to_type_constant_list ~tparams ~namespace ~targ_map h
 
 and hint_to_type_constant
   ?(is_typedef = false) ~tparams ~namespace ~targ_map h =

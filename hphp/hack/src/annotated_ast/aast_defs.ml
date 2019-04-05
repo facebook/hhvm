@@ -57,6 +57,7 @@ and variadic_hint =
   | Hnon_variadic
 and hint_ =
   | Hoption of hint
+  | Hlike of hint
   | Hfun of func_reactive * is_coroutine * hint list * Ast.param_kind option list *
     param_mutability option list * variadic_hint * hint * mutable_return
   | Htuple of hint list

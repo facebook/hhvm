@@ -24,6 +24,7 @@ let validate_classname (pos, hint) =
     | Aast.Haccess _
     | Aast.Hdynamic
     | Aast.Hsoft _
+    | Aast.Hlike _
     | Aast.Hnothing ->
       ()
     | Aast.Htuple _
@@ -69,6 +70,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hvarray_or_darray h
   | Aast.Hvarray h
   | Aast.Hoption h
+  | Aast.Hlike h
   | Aast.Hsoft h ->
     check_hint env h
   | Aast.Habstr _

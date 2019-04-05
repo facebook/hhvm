@@ -2827,6 +2827,7 @@ and fixup_type_arg env ~isas hint =
   let rec aux (p, hint) =
     match hint with
     | A.Hoption h -> p, A.Hoption (aux h)
+    | A.Hlike h -> p, A.Hlike (aux h)
     | A.Hfun (b, hl, l, vh, h) ->
       p, A.Hfun (b, List.map ~f:aux hl, l, vh, aux h)
     | A.Htuple hl -> p, A.Htuple (List.map ~f:aux hl)

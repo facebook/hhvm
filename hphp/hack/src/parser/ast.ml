@@ -332,6 +332,7 @@ and variadic_hint =
   | Hnon_variadic
 and hint_ =
   | Hoption of hint
+  | Hlike of hint
   | Hfun of is_coroutine * hint list * param_kind option list * variadic_hint * hint
   | Htuple of hint list
   | Happly of id * hint list

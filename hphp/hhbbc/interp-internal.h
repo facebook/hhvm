@@ -445,7 +445,6 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
     return env.index.is_effect_free(*ar.func) &&
       is_scalar(env.index.lookup_return_type_raw(func));
   }();
-  if (foldable) effect_free(env);
   ar.foldable = foldable;
   ar.pushBlk = env.bid;
 

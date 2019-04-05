@@ -971,9 +971,9 @@ void in(ISS& env, const bc::CastBool&) {
 }
 
 void in(ISS& env, const bc::CastInt&) {
-  constprop(env);
   auto const t = topC(env);
   if (t.subtypeOf(BInt)) return reduce(env, bc::Nop {});
+  constprop(env);
   popC(env);
   // Objects can raise a warning about converting to int.
   if (!t.couldBe(BObj)) nothrow(env);
@@ -2295,19 +2295,20 @@ template<bool asExpression>
 void isAsTypeStructImpl(ISS& env, SArray ts) {
   auto const t = topC(env, 1); // operand to is/as
 
+  bool may_raise = true;
   auto result = [&] (
     const Type& out,
     const folly::Optional<Type>& test = folly::none
   ) {
     if (asExpression && out.subtypeOf(BTrue)) {
-      constprop(env);
-      return reduce(env, bc::PopC {}, bc::Nop {});
+      return reduce(env, bc::PopC {});
     }
     auto const location = topStkEquiv(env, 1);
     popC(env); // type structure
     popC(env); // operand to is/as
     if (!asExpression) {
       constprop(env);
+      if (!may_raise) nothrow(env);
       return push(env, out);
     }
     if (out.subtypeOf(BFalse)) {
@@ -2385,8 +2386,7 @@ void isAsTypeStructImpl(ISS& env, SArray ts) {
   }
 
   if (!asExpression) {
-    if (ts_type && !is_type_might_raise(*ts_type, t)) nothrow(env);
-    constprop(env);
+    if (ts_type && !is_type_might_raise(*ts_type, t)) may_raise = false;
   }
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
@@ -2669,7 +2669,6 @@ namespace {
 template <typename Op>
 folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
                                                         const Op& op) {
-  nothrow(env);
   auto equivLoc = topStkEquiv(env);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
@@ -2701,6 +2700,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
   } else {
     equivLoc = NoLocalId;
   }
+  nothrow(env);
   auto val = popC(env);
   setLoc(env, op.loc1, val);
   if (equivLoc == StackThisId) {

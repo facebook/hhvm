@@ -447,6 +447,7 @@ const int CURLPROTO_TELNET = 0;
 const int CURLPROTO_TFTP = 0;
 
 const int CURLPROXY_HTTP = 0;
+const int CURLPROXY_HTTPS = 0;
 const int CURLPROXY_SOCKS4 = 0;
 const int CURLPROXY_SOCKS4A = 0;
 const int CURLPROXY_SOCKS5 = 0;

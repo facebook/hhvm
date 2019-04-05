@@ -317,7 +317,7 @@ void ProxygenServer::start() {
 
   if (m_takeover_agent) {
     m_takeover_agent->setupFdServer(m_worker.getEventBase()->getLibeventBase(),
-                                    m_httpServerSocket->getSocket(), this);
+                                    m_httpServerSocket->getNetworkSocket().toFd(), this);
   }
 
   m_httpAcceptor.reset(new HPHPSessionAcceptor(m_httpConfig, this));

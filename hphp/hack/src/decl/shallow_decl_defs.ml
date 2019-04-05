@@ -43,7 +43,6 @@ type shallow_method = {
   sm_override   : bool;
   sm_reactivity : Decl_defs.method_reactivity option;
   sm_type       : decl fun_type;
-  sm_unsafecstr : bool;
   sm_visibility : Aast.visibility;
 } [@@deriving show]
 

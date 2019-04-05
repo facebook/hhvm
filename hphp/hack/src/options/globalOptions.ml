@@ -50,7 +50,6 @@ type t = {
   po_disable_unsafe_block : bool;
   tco_typecheck_xhp_cvars : bool;
   tco_ignore_collection_expr_type_arguments : bool;
-  tco_disallow_unsafe_construct : bool;
   po_disallow_byref_prop_args : bool;
 } [@@deriving show]
 
@@ -241,7 +240,6 @@ let default = {
  po_disable_unsafe_block = false;
  tco_typecheck_xhp_cvars = false;
  tco_ignore_collection_expr_type_arguments = false;
- tco_disallow_unsafe_construct = false;
  po_disallow_byref_prop_args = false;
 }
 
@@ -287,7 +285,6 @@ let make
   ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
   ?(tco_typecheck_xhp_cvars = default.tco_typecheck_xhp_cvars)
   ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
-  ?(tco_disallow_unsafe_construct = default.tco_disallow_unsafe_construct)
   ?(po_disallow_byref_prop_args = default.po_disallow_byref_prop_args)
   ()
 = {
@@ -333,7 +330,6 @@ let make
   po_disable_unsafe_block;
   tco_typecheck_xhp_cvars;
   tco_ignore_collection_expr_type_arguments;
-  tco_disallow_unsafe_construct;
   po_disallow_byref_prop_args;
 }
 let tco_safe_array t = t.tco_safe_array
@@ -386,7 +382,6 @@ let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 let po_disallow_byref_prop_args t = t.po_disallow_byref_prop_args
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
-let tco_disallow_unsafe_construct t = t.tco_disallow_unsafe_construct
 let setup_pocket_universes env enabled =
   let exp_features = env.tco_experimental_features in
   let exp_features = if enabled then

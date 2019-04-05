@@ -116,7 +116,6 @@ module UserAttributes = struct
   let uaOverride            = "__Override"
   let uaConsistentConstruct = "__ConsistentConstruct"
   let uaConst               = "__Const"
-  let uaUnsafeConstruct     = "__UNSAFE_Construct"
   let uaDeprecated          = "__Deprecated"
   let uaEntryPoint          = "__EntryPoint"
   let uaMemoize             = "__Memoize"
@@ -154,7 +153,6 @@ module UserAttributes = struct
       uaOverride;
       uaConsistentConstruct;
       uaConst;
-      uaUnsafeConstruct;
       uaDeprecated;
       uaEntryPoint;
       uaMemoize;

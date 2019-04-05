@@ -545,11 +545,6 @@ and build_constructor class_ method_ =
   let ft = method_.sm_type in
   let _, class_name = class_.sc_name in
   let vis = visibility class_name method_.sm_visibility in
-  (* the alternative to overriding
-   * UserAttributes.uaConsistentConstruct is marking the corresponding
-   * 'new static()' UNSAFE, potentially impacting the safety of a large
-   * type hierarchy. *)
-  let consist_override = method_.sm_unsafecstr in
   let cstr = {
     elt_final = method_.sm_final;
     elt_abstract = ft.ft_abstract;
@@ -557,7 +552,7 @@ and build_constructor class_ method_ =
     elt_const = false;
     elt_lateinit = false;
     elt_lsb = false;
-    elt_override = consist_override;
+    elt_override = false;
     elt_memoizelsb = false;
     elt_synthesized = false;
     elt_visibility = vis;

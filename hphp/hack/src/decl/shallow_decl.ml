@@ -247,8 +247,6 @@ let method_ env c m =
       Some (Method_local None)
     | _ -> None
   in
-  let unsafe_cstr =
-    Attrs.mem SN.UserAttributes.uaUnsafeConstruct m.m_user_attributes in
   {
     sm_abstract = ft.ft_abstract;
     sm_final = m.m_final;
@@ -257,7 +255,6 @@ let method_ env c m =
     sm_override = override;
     sm_reactivity = reactivity;
     sm_type = ft;
-    sm_unsafecstr = unsafe_cstr;
     sm_visibility = m.m_visibility;
   }
 

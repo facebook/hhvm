@@ -3921,8 +3921,10 @@ void in(ISS& env, const bc::BareThis& op) {
 }
 
 void in(ISS& env, const bc::InitThisLoc& op) {
-  setLocRaw(env, op.loc1, TCell);
-  env.state.thisLoc = op.loc1;
+  if (!is_volatile_local(env.ctx.func, op.loc1)) {
+    setLocRaw(env, op.loc1, TCell);
+    env.state.thisLoc = op.loc1;
+  }
 }
 
 void in(ISS& env, const bc::FuncNumArgs& op) {

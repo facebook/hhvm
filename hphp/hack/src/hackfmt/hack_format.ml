@@ -3154,37 +3154,56 @@ and make_string text width =
     | _ -> MultilineString (split_text, width)
   end
 
+and has_n_or_more_newlines node n =
+  let rec aux count node =
+    if count = n then raise Exit else
+    match Syntax.syntax node with
+    | Syntax.Token token ->
+      let count_eol count t =
+        count + if Trivia.kind t = TriviaKind.EndOfLine then 1 else 0
+      in
+      let count = List.fold (Token.leading token) ~init:count ~f:count_eol in
+      let count = List.fold (Token.trailing token) ~init:count ~f:count_eol in
+      count
+    | _ -> List.fold (Syntax.children node) ~init:count ~f:aux
+  in
+  try let _ : int = aux 0 node in false
+  with Exit -> true
+
 (* Check the leading trivia of the node's leading token.
    Treat the node's text as a multiline string if the leading trivia contains
    an ignore comment. *)
 and transform_node_if_ignored node =
   let leading_before, leading_including_and_after =
     leading_ignore_comment (Syntax.leading_trivia node) in
-  if List.length leading_including_and_after > 0 then
-    let node = replace_leading_trivia node leading_including_and_after in
-    let node, trailing_trivia = remove_trailing_trivia node in
-    Some(Concat[
-      transform_leading_trivia leading_before;
-      (* If we have a non-error-suppression comment here, then we want to ensure
-         that we don't join it up onto the preceding line. Since we only scan
-         leading trivia for hackfmt-ignore comments, and joining the comment
-         onto the preceding line would make it trailing trivia, we would make
-         the ignore comment useless if we joined it with the preceding line
-         (breaking idempotence of hackfmt). Adding [Newline] here ensures a line
-         break.
+  if List.length leading_including_and_after = 0 then None else
+  let node = replace_leading_trivia node leading_including_and_after in
+  let node, trailing_trivia = remove_trailing_trivia node in
+  let is_fixme =
+    match Trivia.kind (List.hd_exn leading_including_and_after) with
+    | TriviaKind.(FixMe | IgnoreError) -> true
+    | _ -> false
+  in
+  (* Don't format nodes with an error-suppression comment if the node spans more
+     than 3 lines--this leads to confusing behavior. *)
+  if is_fixme && has_n_or_more_newlines node 3 then None else
+  Some(Concat[
+    transform_leading_trivia leading_before;
+    (* If we have a non-error-suppression comment here, then we want to ensure
+       that we don't join it up onto the preceding line. Since we only scan
+       leading trivia for hackfmt-ignore comments, and joining the comment
+       onto the preceding line would make it trailing trivia, we would make
+       the ignore comment useless if we joined it with the preceding line
+       (breaking idempotence of hackfmt). Adding [Newline] here ensures a line
+       break.
 
-         Error-suppression comments are different--they are specially handled by
-         the lexer to ensure that they always appear in leading trivia. *)
-      begin match Trivia.kind (List.hd_exn leading_including_and_after) with
-      | TriviaKind.(FixMe | IgnoreError) -> Nothing
-      | _ -> Newline
-      end;
-      make_string (Syntax.text node) (Syntax.width node);
-      transform_trailing_trivia trailing_trivia;
-      if has_newline trailing_trivia then Newline else Nothing;
-    ])
-  else
-    None
+       Error-suppression comments are different--they are specially handled by
+       the lexer to ensure that they always appear in leading trivia. *)
+    if is_fixme then Nothing else Newline;
+    make_string (Syntax.text node) (Syntax.width node);
+    transform_trailing_trivia trailing_trivia;
+    if has_newline trailing_trivia then Newline else Nothing;
+  ])
 
 and ignore_re = Str.regexp_string "hackfmt-ignore"
 

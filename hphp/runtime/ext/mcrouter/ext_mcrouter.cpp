@@ -17,7 +17,7 @@
 #include "mcrouter/lib/McResUtil.h" // @nolint
 #include "mcrouter/lib/carbon/Result.h" // @nolint
 #include "mcrouter/lib/network/CarbonMessageList.h" // @nolint
-#include "mcrouter/lib/network/gen/Memcache.h" // @nolint
+#include "mcrouter/lib/network/gen/MemcacheMessages.h" // @nolint
 #include "mcrouter/options.h" // @nolint
 
 namespace mc  = facebook::memcache;

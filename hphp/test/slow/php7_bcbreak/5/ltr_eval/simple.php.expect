@@ -10,7 +10,7 @@ array(3) {
 }
 int(1)
 int(2)
-NULL
+int(1)
 int(2)
 array(2) {
   [0]=>

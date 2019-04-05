@@ -22,6 +22,6 @@ NULL
 int(1)
 int(2)
 int(3)
-string(1) "d"
-string(1) "e"
+int(1)
+int(2)
 string(4) "derp"

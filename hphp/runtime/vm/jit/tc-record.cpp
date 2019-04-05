@@ -152,6 +152,14 @@ void reportJitMaturity() {
   if (!jitMaturityCounter) return;
   auto const before = jitMaturityCounter->getValue();
   if (before == 100) return;
+
+  // If retranslateAll is pending, wait until it finishes before counting in
+  // optimized translations.
+  auto const hotSize = !mcgen::retranslateAllPending() * code().hot().used();
+  // When we jit from serialized profile data, aprof is empty. In order to make
+  // jit maturity somewhat comparable between the two cases, we pretend to have
+  // some profiling code.
+  auto const profSize = std::max(code().prof().used(), hotSize);
   // Optimized translations are faster than profiling translations, which are
   // faster than the interpreter.  But when optimized translations are
   // generated, some profiling translations will become dead.  We assume the
@@ -159,10 +167,7 @@ void reportJitMaturity() {
   // profiling translations is comparable to the incremental value of a
   // profiling translation of similar size; thus we don't have to apply
   // different weights to code in different regions.
-  auto codeSize = code().prof().used() + code().main().used();
-  // When retranslateAll is used, we only add ahot after retranslateAll
-  // finishes.
-  if (!mcgen::retranslateAllPending()) codeSize += code().hot().used();
+  auto codeSize = profSize + hotSize + code().main().used();
   auto const fullSize = RuntimeOption::EvalJitMatureSize;
   // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
   // warmupStatusString() is empty, which indicates that the JIT is warmed up

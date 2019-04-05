@@ -20,6 +20,10 @@ let get_fixme_patches codes (env: env) =
   let poslist = Fixmes.get_unused_fixmes codes fixmelist Naming_table.fold env.naming_table in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
+let get_lambda_parameter_rewrite_patches env files =
+  List.concat_map files (fun file ->
+    ServerRewriteLambdaParameters.get_patches env.tcopt (Relative_path.from_root file))
+
 let find_def_filename current_filename definition =
   let open SymbolDefinition in
   if Pos.filename definition.pos = ServerIdeUtils.path then

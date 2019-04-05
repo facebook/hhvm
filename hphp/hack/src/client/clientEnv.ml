@@ -42,6 +42,7 @@ type client_mode =
 | MODE_OUTLINE2
 | MODE_REFACTOR of string * string * string
 | MODE_REMOVE_DEAD_FIXMES of int list
+| MODE_REWRITE_LAMBDA_PARAMETERS of string list
 | MODE_RETRIEVE_CHECKPOINT of string
 | MODE_SAVE_STATE of string
 (* TODO figure out why we can't reference FuzzySearchService from here *)
@@ -117,6 +118,7 @@ let mode_to_string = function
   | MODE_OUTLINE2 -> "MODE_OUTLINE2"
   | MODE_REFACTOR _ -> "MODE_REFACTOR"
   | MODE_REMOVE_DEAD_FIXMES _ -> "MODE_REMOVE_DEAD_FIXMES"
+  | MODE_REWRITE_LAMBDA_PARAMETERS _ -> "MODE_REWRITE_LAMBDA_PARAMETERS"
   | MODE_RETRIEVE_CHECKPOINT _ -> "MODE_RETRIEVE_CHECKPOINT"
   | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
   | MODE_SEARCH _ -> "MODE_SEARCH"

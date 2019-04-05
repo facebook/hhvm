@@ -409,6 +409,17 @@ let parse_check_args cmd =
         Arg.Unit (set_mode (MODE_REMOVE_DEAD_FIXMES [])),
       " (mode) remove dead HH_FIXME for any error code < 5000 " ^
       "(first do hh_client restart --no-load)";
+    "--rewrite-lambda-parameters",
+       Arg.Rest begin fun fn ->
+         mode := match !mode with
+          | None ->
+            Some (MODE_REWRITE_LAMBDA_PARAMETERS [fn])
+          | Some (MODE_REWRITE_LAMBDA_PARAMETERS fnl) ->
+            Some (MODE_REWRITE_LAMBDA_PARAMETERS (fn :: fnl))
+          | _ -> raise (Arg.Bad "only a single mode should be specified")
+         end,
+      " (mode) rewrite lambdas in the files from the given list" ^
+      " with suggested parameter types";
     "--replace-state-after-saving",
       Arg.Set replace_state_after_saving,
       " if combined with --save-mini, causes the saved state" ^

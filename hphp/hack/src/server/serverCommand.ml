@@ -24,6 +24,7 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | STATUS _ -> true
   | LIST_FILES_WITH_ERRORS -> true  (* Same as STATUS *)
   | REMOVE_DEAD_FIXMES _ -> true (* needs same information as STATUS *)
+  | REWRITE_LAMBDA_PARAMETERS _ -> true
   (* some Ai stuff - calls to those will likely never be interleaved with IDE
    * file sync commands (and resulting small checks), but putting it here just
    * to be safe *)

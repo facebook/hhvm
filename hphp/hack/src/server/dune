@@ -176,6 +176,7 @@
     serverRage
     serverRefactor
     serverRevisionTracker
+    serverRewriteLambdaParameters
     serverSearch
     serverSignatureHelp
     serverStamp

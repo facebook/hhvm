@@ -115,7 +115,7 @@ field types on the left of $[[\]]$.
 }}
 
 t, u {{ ocaml ty }} :: 'ty_' ::=                           {{ com syntax of types }}
-  | noreturn :: :: noreturn                 {{ com bottom type }}
+  | nothing :: :: nothing                 {{ com bottom type }}
   | mixed  ::   :: mixed                    {{ com top type }}
   | nonnull ::  :: nonnull                  {{ com nonnull type }}
   | null   ::   :: null                     {{ com null type }}
@@ -615,7 +615,7 @@ enum N : t asdecl
 ---------------------- :: enum_as_arraykey
 G |- N <: arraykey
 
-{{ com \subsection{Noreturn} }}
+{{ com \subsection{Nothing} }}
 
 {{ com
 
@@ -623,12 +623,12 @@ Hack has a bottom type.
 
 }}
 
------------------- :: noreturn_bottom
-G |- noreturn <: t
+------------------ :: nothing_bottom
+G |- nothing <: t
 
 {{ com
 
-Note that this makes $[[noreturn]]$ a neutral element with respect to union.
+Note that this makes $[[nothing]]$ a neutral element with respect to union.
 
 }}
 
@@ -753,10 +753,10 @@ G |- t1 <: u1 .. G |- tn <: un
 ---------------------------- :: tuple_co
 G |- ( t1,..,tn ) <: (u1,..,un)
 
-{{ com A tuple collapses if any of its types is the bottom type $[[noreturn]]$ }}
+{{ com A tuple collapses if any of its types is the bottom type $[[nothing]]$ }}
 
------------------------------------------------------- :: tuple_noreturn
-G |- (t1 , .. , tm , noreturn , t1', .. , tn') <: noreturn
+------------------------------------------------------ :: tuple_nothing
+G |- (t1 , .. , tm , nothing , t1', .. , tn') <: nothing
 
 {{ com \subsection{Hack arrays} }}
 
@@ -817,11 +817,11 @@ G |- array<> <: array<t1,t2>
 
 {{ com Arrays over the bottom type $[[nonnull]]$ are inhabited by the empty array only. }}
 
-------------------------------- :: vecarray_over_noreturn_as_emptyarray
-G |- array<noreturn> <: array<>
+------------------------------- :: vecarray_over_nothing_as_emptyarray
+G |- array<nothing> <: array<>
 
----------------------------------- :: maparray_over_noreturn_as_emptyarray
-G |- array<t, noreturn> <: array<>
+---------------------------------- :: maparray_over_nothing_as_emptyarray
+G |- array<t, nothing> <: array<>
 
 {{ com \subsection{Functions} }}
 {{ com
@@ -868,15 +868,15 @@ G |- shape ( sft1 , .. , sftn ) <: shape ( sft1' , .. , sftn' )
 -------------------------------------------------- :: closed_shape_widen
 G |- shape ( sft1 , .. , sftm ) <: shape ( sft1 , .. , sftm , ?sfn1' => t1' , .. , ?sfnn' => tn' )
 
-{{ com Width subtyping on closed shapes: optional fields of type $[[noreturn]]$ can be dropped }}
+{{ com Width subtyping on closed shapes: optional fields of type $[[nothing]]$ can be dropped }}
 
 -------------------------------------------------- :: closed_shape_narrow
-G |- shape ( sft1 , .. , sftm , ?sfn1' => noreturn , .. , ?sfnn' => noreturn ) <: shape ( sft1 , .. , sftm )
+G |- shape ( sft1 , .. , sftm , ?sfn1' => nothing , .. , ?sfnn' => nothing ) <: shape ( sft1 , .. , sftm )
 
-{{ com A closed shape collapses if any of its required field types is $[[noreturn]]$ }}
+{{ com A closed shape collapses if any of its required field types is $[[nothing]]$ }}
 
 -------------------------------------------------- :: closed_shape_empty
-G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn') <: noreturn
+G |- shape ( sft1 , .. , sftm , sfn => nothing , sft1' , .. , sftn') <: nothing
 
 {{ com Closed shapes can be opened }}
 
@@ -904,10 +904,10 @@ G |- shape ( sft1 , .. , sfti , vardots \ sfn1 , .. , sfnm ) <: shape (sft1 , ..
 -------------------------------------------------- :: open_shape_set_unset
 G |- shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn , sfn1' , .. , sfnj' ) <: shape ( sft1 , .. , sftn , vardots \ sfn1 , .. , sfni , sfn1' , .. , sfnj' )
 
-{{ com An open shape collapses if any of its required field types is $[[noreturn]]$ }}
+{{ com An open shape collapses if any of its required field types is $[[nothing]]$ }}
 
 -------------------------------------------------- :: open_shape_empty
-G |- shape ( sft1 , .. , sftm , sfn => noreturn , sft1' , .. , sftn' , vardots \ ) <: noreturn
+G |- shape ( sft1 , .. , sftm , sfn => nothing , sft1' , .. , sftn' , vardots \ ) <: nothing
 
 {{ com \subsection{Class and interface inheritance} }}
 

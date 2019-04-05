@@ -278,7 +278,8 @@ void ProxygenServer::start() {
   bool socketSetupSucceeded = false;
   if (m_accept_sock >= 0) {
     try {
-      m_httpServerSocket->useExistingSocket(m_accept_sock);
+      m_httpServerSocket->useExistingSocket(
+        folly::NetworkSocket::fromFd(m_accept_sock));
       socketSetupSucceeded = true;
       Logger::Info("inheritfd: successfully inherited fd %d for server",
                    m_accept_sock);
@@ -291,7 +292,8 @@ void ProxygenServer::start() {
     m_accept_sock = m_takeover_agent->takeover();
     if (m_accept_sock >= 0) {
       try {
-        m_httpServerSocket->useExistingSocket(m_accept_sock);
+        m_httpServerSocket->useExistingSocket(
+          folly::NetworkSocket::fromFd(m_accept_sock));
         needListen = false;
         m_takeover_agent->requestShutdown();
         socketSetupSucceeded = true;
@@ -352,7 +354,8 @@ void ProxygenServer::start() {
       if (m_accept_sock_ssl >= 0) {
         Logger::Info("inheritfd: using inherited fd %d for ssl",
                      m_accept_sock_ssl);
-        m_httpsServerSocket->useExistingSocket(m_accept_sock_ssl);
+        m_httpsServerSocket->useExistingSocket(
+          folly::NetworkSocket::fromFd(m_accept_sock_ssl));
       } else {
         m_httpsServerSocket->setReusePortEnabled(RuntimeOption::StopOldServer);
         m_httpsServerSocket->bind(m_httpsConfig.bindAddress);

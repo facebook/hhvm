@@ -794,12 +794,17 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
     }
   }
   if (l > MaxLocalId) return ok;
+  auto fixThis = false;
   auto equiv = findLocEquiv(env, l);
   if (equiv != NoLocalId) {
     do {
+      if (equiv == env.state.thisLoc) fixThis = true;
       refineLocHelper(env, equiv, refine(peekLocRaw(env, equiv)));
       equiv = findLocEquiv(env, equiv);
     } while (equiv != l);
+  }
+  if (fixThis || l == env.state.thisLoc) {
+    env.state.thisType = refine(env.state.thisType);
   }
   refineLocHelper(env, l, refine(peekLocRaw(env, l)));
   return ok;

@@ -1042,7 +1042,6 @@ void CLIWorker::doJob(int client) {
         clearThreadLocalIO();
         LightProcess::setThreadLocalAfdtOverride(nullptr);
         Logger::SetThreadHook(nullptr);
-        Stream::setThreadLocalFileHandler(nullptr);
         try {
           cli_write(client, "exit", ret);
         } catch (const Exception& ex) {
@@ -1089,6 +1088,9 @@ void CLIWorker::doJob(int client) {
 
       CLIWrapper wrapper(client);
       Stream::setThreadLocalFileHandler(&wrapper);
+      SCOPE_EXIT {
+        Stream::setThreadLocalFileHandler(nullptr);
+      };
       RID().setSafeFileAccess(false);
       define_stdio_constants();
 

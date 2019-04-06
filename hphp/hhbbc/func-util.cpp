@@ -41,13 +41,13 @@ bool is_methcaller(const StringData* name) {
   return Func::isMethCallerName(name);
 }
 
-bool is_volatile_local(const php::Func* func,
-                       LocalId lid) {
-  if (is_pseudomain(func)) return true;
-  // Note: unnamed locals in a pseudomain probably are safe (i.e. can't be
-  // changed through $GLOBALS), but for now we don't bother.
+bool is_volatile_local(const php::Func* func, LocalId lid) {
   auto const& l = func->locals[lid];
   if (!l.name) return false;
+
+  // Named pseudomain locals are bound to $GLOBALS.
+  if (is_pseudomain(func)) return true;
+
   return l.name->same(s_86metadata.get());
 }
 

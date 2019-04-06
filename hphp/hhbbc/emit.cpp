@@ -1407,7 +1407,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.finish(fe.ue().bcPos(), false /* load */);
 }
 
-void emit_init_func(FuncEmitter& fe, const php::Func& func) {
+void renumber_locals(const php::Func& func) {
   Id id = 0;
 
   for (auto& loc : const_cast<php::Func&>(func).locals) {
@@ -1418,7 +1418,10 @@ void emit_init_func(FuncEmitter& fe, const php::Func& func) {
       loc.id = id++;
     }
   }
+}
 
+void emit_init_func(FuncEmitter& fe, const php::Func& func) {
+  renumber_locals(func);
   fe.init(
     std::get<0>(func.srcInfo.loc),
     std::get<1>(func.srcInfo.loc),
@@ -1442,6 +1445,7 @@ void emit_pseudomain(EmitUnitState& state,
                      const php::Unit& unit) {
   FTRACE(2,  "    pseudomain\n");
   auto& pm = *unit.pseudomain;
+  renumber_locals(pm);
   ue.initMain(std::get<0>(pm.srcInfo.loc),
               std::get<1>(pm.srcInfo.loc));
   auto const fe = ue.getMain();

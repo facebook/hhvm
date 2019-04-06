@@ -353,7 +353,6 @@ struct EmitBcInfo {
 
   std::vector<BlockId> blockOrder;
   uint32_t maxStackDepth;
-  uint32_t maxFpiDepth;
   bool containsCalls;
   std::vector<FPI> fpiRegions;
   std::vector<BlockInfo> blockInfo;
@@ -623,14 +622,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
     auto push = [&] (int32_t n) {
       currentStackDepth += n;
-      if (currentStackDepth > ret.maxStackDepth) {
-        ret.maxStackDepth = currentStackDepth;
-      }
+      auto const depth = currentStackDepth + fpiStack.size() * kNumActRecCells;
+      ret.maxStackDepth = std::max<uint32_t>(ret.maxStackDepth, depth);
     };
 
     auto fpush = [&] {
       fpiStack.push_back({startOffset, kInvalidOffset, currentStackDepth});
-      ret.maxFpiDepth = std::max<uint32_t>(ret.maxFpiDepth, fpiStack.size());
+      auto const depth = currentStackDepth + fpiStack.size() * kNumActRecCells;
+      ret.maxStackDepth = std::max<uint32_t>(ret.maxStackDepth, depth);
     };
 
     auto fcall = [&] (Op op) {
@@ -1403,8 +1402,7 @@ void emit_finish_func(EmitUnitState& state,
   fe.maxStackCells = info.maxStackDepth +
                      fe.numLocals() +
                      fe.numIterators() * kNumIterCells +
-                     clsRefCountToCells(fe.numClsRefSlots()) +
-                     info.maxFpiDepth * kNumActRecCells;
+                     clsRefCountToCells(fe.numClsRefSlots());
 
   fe.finish(fe.ue().bcPos(), false /* load */);
 }

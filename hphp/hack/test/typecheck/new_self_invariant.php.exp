@@ -1,8 +1,0 @@
-File "new_self_invariant.php", line 8, characters 12-21:
-Invalid return type (Typing[4110])
-File "new_self_invariant.php", line 6, characters 9-10:
-This is a value of generic type Td
-File "new_self_invariant.php", line 7, characters 26-28:
-It is incompatible with an int
-File "new_self_invariant.php", line 7, characters 26-28:
-Considering that this type argument is invariant with respect to D

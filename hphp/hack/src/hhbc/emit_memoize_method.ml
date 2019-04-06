@@ -99,7 +99,7 @@ let make_memoize_instance_method_no_params_code
         instr_retc
       ];
     instr_label notfound;
-    instr_this;
+    instr_this; instr_nulluninit; instr_nulluninit;
     instr_fpushobjmethodd_nullthrows 0 renamed_name;
     instr_fcall fcall_args;
     instr_memoset None;
@@ -154,7 +154,7 @@ let make_memoize_instance_method_with_params_code ~pos
         instr_retc
       ];
     instr_label notfound;
-    instr_this;
+    instr_this; instr_nulluninit; instr_nulluninit;
     instr_fpushobjmethodd_nullthrows param_count renamed_name;
     param_code_gets params;
     instr_fcall fcall_args;
@@ -196,6 +196,7 @@ let make_memoize_static_method_no_params_code
         instr_retc
       ];
     instr_label notfound;
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     get_cls_method info 0 method_id with_lsb;
     instr_fcall fcall_args;
     instr_memoset None;
@@ -246,6 +247,7 @@ let make_memoize_static_method_with_params_code ~pos
         instr_retc
       ];
     instr_label notfound;
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     get_cls_method info param_count method_id with_lsb;
     param_code_gets params;
     instr_fcall fcall_args;

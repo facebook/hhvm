@@ -677,6 +677,7 @@ void inlSingletonSProp(IRGS& env,
   gen(env, JmpNZero, exitBlock, isnull);
 
   // Return the singleton.
+  discard(env, 3);
   pushIncRef(env, value);
 }
 

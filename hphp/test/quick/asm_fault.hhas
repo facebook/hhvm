@@ -1,6 +1,9 @@
 # Some tests for catch regions.
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -20,6 +23,8 @@
 
     NewObjD "Exception"
     Dup
+    NullUninit
+    NullUninit
     FPushCtor 1
     CGetL $msg
     FCall <> 1 1 "" - "" ""
@@ -43,6 +48,9 @@
     Print
     PopC
 
+    NullUninit
+    NullUninit
+    NullUninit
     FPushFuncD 1 "throw_stuff"
     String "the message"
     FCall <> 1 1 "" - "" ""
@@ -80,18 +88,24 @@ repeat:
 
 make_one:    NewObjD "One"
              Dup
+             NullUninit
+             NullUninit
              FPushCtor 0
              FCall <> 0 1 "" - "" ""
              PopC
              Throw
 make_two:    NewObjD "Two"
              Dup
+             NullUninit
+             NullUninit
              FPushCtor 0
              FCall <> 0 1 "" - "" ""
              PopC
              Throw
 make_three:  NewObjD "Three"
              Dup
+             NullUninit
+             NullUninit
              FPushCtor 1
              String "third exception from throw_various"
              FCall <> 1 1 "" - "" ""
@@ -135,6 +149,9 @@ on_three:    String "three\n"
          False
          SetL $ever_caught
          PopC
+         NullUninit
+         NullUninit
+         NullUninit
          String "foo"
 
 resume:  .try {
@@ -147,6 +164,8 @@ resume:  .try {
            PopC
            String "top-level catch handler got: "
            PushL $ex
+           NullUninit
+           NullUninit
            FPushObjMethodD 0 "getMessage" NullThrows
            FCall <> 0 1 "" - "" ""
            Concat
@@ -160,6 +179,9 @@ resume:  .try {
            SetL $ever_caught
            PopC
            JmpNZ resume2
+           NullUninit
+           NullUninit
+           NullUninit
            String "throw_various"
            Jmp resume
          }

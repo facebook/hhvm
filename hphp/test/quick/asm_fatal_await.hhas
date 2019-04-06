@@ -1,5 +1,11 @@
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "HH\\Asio\\join"
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   FCall <> 1 1 "" - "" ""
@@ -15,6 +21,8 @@
 .function main() isAsync {
   NewObjD "heh"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC

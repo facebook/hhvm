@@ -598,10 +598,13 @@ namespace imm {
                     }
 
 #define POP_FPUSH(nin, nobj)                                                   \
-                    uint32_t numPop() const { return nin + nobj; }             \
+                    uint32_t numPop() const { return nin + 3; }                \
                     Flavor popFlavor(uint32_t i) const {                       \
                       assert(i < numPop());                                    \
-                      return Flavor::C;                                        \
+                      if (i < nin) return Flavor::C;                           \
+                      i -= nin;                                                \
+                      if (i < 2) return Flavor::U;                             \
+                      return nobj ? Flavor::C : Flavor::U;                     \
                     }
 
 #define POP_FCALL   uint32_t numPop() const {                                  \

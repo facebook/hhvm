@@ -1,10 +1,19 @@
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 2 "var_dump"
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 3 "test"
   String "a"
   String "b"
   String "c"
   FCall <> 3 1 "" - "" ""
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 3 "test"
   Null
   String "b"

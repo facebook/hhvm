@@ -2,6 +2,9 @@
 # Test removing tracelet guards that things are KindOfRef
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   PopC

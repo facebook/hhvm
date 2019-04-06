@@ -4,6 +4,9 @@
 
 .main {
   DefCls 0
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "test"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -41,55 +44,87 @@
 }
 
 .function test() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_class"
   NewObjD "C"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_class"
   Null
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int_soft"
   Int 5
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int_soft"
   Array @A_0
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int_soft"
   Null
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int_nullable"
   Int 6
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int_nullable"
   Null
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int"
   Int 5
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_mixed"
   Array @A_0
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "use_int"
   Array @A_0
   FCall <> 1 1 "" - "" ""

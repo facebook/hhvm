@@ -269,6 +269,7 @@ let emit_reified_init_body env num_reified ast_class =
     (* parent::86reifiedinit($generic_arr) *)
     let call_parent =
       gather [
+        instr_nulluninit; instr_nulluninit; instr_nulluninit;
         instr_fpushclsmethodsd 1 Hhbc_ast.SpecialClsRef.Parent
           (Hhbc_id.Method.from_raw_string SU.Reified.reified_init_method_name);
         generic_arr;

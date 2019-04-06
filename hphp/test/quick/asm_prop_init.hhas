@@ -3,10 +3,16 @@
 #
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "init_test"
   FCall <> 0 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "uninit_test"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -86,6 +92,8 @@
   ClsRefGetC 0
   NewObj 0 NoGenerics
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -105,6 +113,9 @@
 }
 
 .function init_test {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "do_test"
     String "Init"
   FCall <> 1 1 "" - "" ""
@@ -112,6 +123,9 @@
 }
 
 .function uninit_test {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "do_test"
     String "Uninit"
   FCall <> 1 1 "" - "" ""

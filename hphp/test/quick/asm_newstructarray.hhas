@@ -3,6 +3,9 @@
 #
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   RetC
@@ -17,6 +20,9 @@
   SetL $arr
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
   CGetL $arr
   FCall <> 1 1 "" - "" ""

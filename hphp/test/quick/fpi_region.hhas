@@ -9,7 +9,13 @@
   Int 2
   SetL $bar
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 2 "add"
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 2 "add"
   Int 1
   SetL $foo
@@ -24,6 +30,9 @@
   FCall <> 2 1 "" - "" ""
   SetL $baz
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
   CGetL $baz
   FCall <> 1 1 "" - "" ""

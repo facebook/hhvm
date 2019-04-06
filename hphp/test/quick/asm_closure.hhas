@@ -5,6 +5,10 @@
   SetL $x
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
+
   CUGetL $x
   CreateCl 1 0
 

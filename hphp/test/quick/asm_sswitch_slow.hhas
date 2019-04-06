@@ -2,6 +2,9 @@
 # implementation.
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   RetC
@@ -41,11 +44,17 @@ fail:
 }
 
 .function case_three() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "get_three"
   FCall <> 0 1 "" - "" ""
   SetL $foo
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "sswitch_on"
   CGetL $foo
   FCall <> 1 1 "" - "" ""
@@ -63,12 +72,17 @@ fail:
 .function with_obj() {
   NewObjD "Obj"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
   SetL $obj
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "sswitch_on"
   CGetL $obj
   FCall <> 1 1 "" - "" ""
@@ -76,6 +90,9 @@ fail:
 }
 
 .function case_default() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "sswitch_on"
   String "kujhasekguheku"
   FCall <> 1 1 "" - "" ""
@@ -83,14 +100,23 @@ fail:
 }
 
 .function main() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "case_three"
   FCall <> 0 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "with_obj"
   FCall <> 0 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "case_default"
   FCall <> 0 1 "" - "" ""
   PopC

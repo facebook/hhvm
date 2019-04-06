@@ -7,11 +7,17 @@
   DefTypeAlias 2
   DefTypeAlias 3
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "foo"
   Int 0
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "foo"
   String "hi"
   FCall <> 1 1 "" - "" ""
@@ -19,52 +25,81 @@
 
   NewObjD "C"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
   SetL $x
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "bar"
   CGetL $x
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "bar"
   String "hi"
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "bar"
   Null
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "baz"
   CGetL $x
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "baz"
   String "hi"
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "baz"
   Null
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "quux"
   CGetL $x
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "quux"
   String "hi"
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "quux"
   Null
   FCall <> 1 1 "" - "" ""

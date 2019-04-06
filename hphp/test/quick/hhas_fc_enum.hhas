@@ -2,10 +2,16 @@
 
 .main {
   DefCls 0
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "test"
   ClsCnsD "FOO" "Foo"
   FCall <> 1 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "test"
   String "hi"
   FCall <> 1 1 "" - "" ""

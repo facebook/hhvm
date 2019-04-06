@@ -863,7 +863,7 @@ and emit_new env pos expr targs args uargs =
   empty,
   gather [
     newobj_instrs;
-    instr_dup;
+    instr_dup; instr_nulluninit; instr_nulluninit;
     instr_fpushctor nargs;
     instr_args;
     instr_uargs;
@@ -1411,6 +1411,7 @@ and inline_gena_call env arg =
   ],
   (* inner *)
   gather [
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     instr_fpushclsmethodd 1
       (Hhbc_id.Method.from_raw_string
          (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
@@ -3025,18 +3026,19 @@ and emit_call_lhs_and_fpush
       else name in
     let obj = emit_object_expr env obj in
     if does_not_have_non_tparam_generics then
-      obj,
+      gather [ obj; instr_nulluninit; instr_nulluninit ],
       instr_fpushobjmethodd nargs name null_flavor
     else
-      obj,
+      gather [ obj; instr_nulluninit; instr_nulluninit ],
       gather [
         reified_call_body id;
         instr_fpushobjmethod nargs null_flavor inout_arg_positions
       ]
   | A.Obj_get (obj, method_expr, null_flavor) ->
+    let obj = emit_object_expr env obj in
     let tmp = Local.get_unnamed_local () in
     gather [
-      emit_object_expr env obj;
+      obj; instr_nulluninit; instr_nulluninit;
       emit_expr ~need_ref:false env method_expr;
       instr_popl tmp
     ],
@@ -3066,10 +3068,10 @@ and emit_call_lhs_and_fpush
       let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
       Emit_symbol_refs.add_class fq_cid_string;
       if does_not_have_non_tparam_generics then
-        empty,
+        gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         instr_fpushclsmethodd nargs method_id fq_cid
       else
-        empty,
+        gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         gather [
           reified_call_body method_id_string;
           instr_string fq_cid_string;
@@ -3078,10 +3080,10 @@ and emit_call_lhs_and_fpush
         ]
     | Class_special clsref ->
       if does_not_have_non_tparam_generics then
-        empty,
+        gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         instr_fpushclsmethodsd nargs clsref method_id
       else
-        empty,
+        gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         gather [
           reified_call_body method_id_string;
           instr_fpushclsmethods nargs clsref
@@ -3094,15 +3096,18 @@ and emit_call_lhs_and_fpush
         instr_fpushclsmethod nargs []
       ] in
       if does_not_have_non_tparam_generics then
-        empty,
+        gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         emit_fpush (instr_string method_id_string)
       else
-        empty,
+        gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         emit_fpush (reified_call_body method_id_string)
     | Class_reified instrs ->
       (* TODO(T31677864): Implement reification here *)
       let tmp = Local.get_unnamed_local () in
-      gather [ instrs; instr_popl tmp ],
+      gather [
+        instr_nulluninit; instr_nulluninit; instr_nulluninit;
+        instrs; instr_popl tmp
+      ],
       gather [
         instr_string method_id_string;
         instr_pushl tmp;
@@ -3122,7 +3127,10 @@ and emit_call_lhs_and_fpush
     begin match cexpr with
     | Class_id cid ->
       let tmp = Local.get_unnamed_local () in
-      gather [ emit_meth_name (); instr_popl tmp ],
+      gather [
+        instr_nulluninit; instr_nulluninit; instr_nulluninit;
+        emit_meth_name (); instr_popl tmp
+      ],
       gather [
         instr_pushl tmp;
         emit_known_class_id env cid;
@@ -3130,7 +3138,10 @@ and emit_call_lhs_and_fpush
       ]
     | Class_special clsref ->
       let tmp = Local.get_unnamed_local () in
-      gather [ emit_meth_name (); instr_popl tmp ],
+      gather [
+        instr_nulluninit; instr_nulluninit; instr_nulluninit;
+        emit_meth_name (); instr_popl tmp
+      ],
       gather [
         instr_pushl tmp;
         instr_fpushclsmethods nargs clsref
@@ -3139,6 +3150,7 @@ and emit_call_lhs_and_fpush
       let cls = Local.get_unnamed_local () in
       let meth = Local.get_unnamed_local () in
       gather [
+        instr_nulluninit; instr_nulluninit; instr_nulluninit;
         emit_expr ~need_ref:false env expr;
         instr_popl cls;
         emit_meth_name ();
@@ -3154,6 +3166,7 @@ and emit_call_lhs_and_fpush
       let cls = Local.get_unnamed_local () in
       let meth = Local.get_unnamed_local () in
       gather [
+        instr_nulluninit; instr_nulluninit; instr_nulluninit;
         instrs;
         instr_popl cls;
         emit_meth_name ();
@@ -3182,22 +3195,22 @@ and emit_call_lhs_and_fpush
         fq_id (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else fq_id in
     if does_not_have_non_tparam_generics then
-      empty,
+      gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       match id_opt with
       | Some id when phpism_undefined_function_fallback () -> instr_fpushfuncu nargs fq_id id
       | _ -> instr_fpushfuncd nargs fq_id
     else
-      empty,
+      gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
         reified_call_body (Hhbc_id.Function.to_raw_string fq_id);
         instr_fpushfunc nargs inout_arg_positions
       ]
   | A.String s ->
     if does_not_have_non_tparam_generics then
-      empty,
+      gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
     else
-      empty,
+      gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
         reified_call_body s;
         instr_fpushfunc nargs inout_arg_positions
@@ -3205,6 +3218,7 @@ and emit_call_lhs_and_fpush
   | _ ->
     let tmp = Local.get_unnamed_local () in
     gather [
+      instr_nulluninit; instr_nulluninit; instr_nulluninit;
       emit_expr ~need_ref:false env expr;
       instr_popl tmp
     ],

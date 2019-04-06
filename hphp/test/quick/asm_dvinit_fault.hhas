@@ -5,7 +5,13 @@
 #
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
+    NullUninit
+    NullUninit
+    NullUninit
     FPushFuncD 0 "main"
     FCall <> 0 1 "" - "" ""
   FCall <> 1 1 "" - "" ""
@@ -34,6 +40,8 @@ dv_init2:
 
       NewObjD "Exception"
       Dup
+      NullUninit
+      NullUninit
       FPushCtor 0
       FCall <> 0 1 "" - "" ""
       PopC

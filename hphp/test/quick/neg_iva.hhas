@@ -21,6 +21,9 @@
   Dim Define ET:"q"
   SetM -1 PC:1
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
   CGetL $foo
   FCall <> 1 1 "" - "" ""

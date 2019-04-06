@@ -4,6 +4,9 @@
 
 .main {
   .numiters 1;
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "R"
   FCall <> 0 1 "" - "" ""
   IterInit 0 L0 $i

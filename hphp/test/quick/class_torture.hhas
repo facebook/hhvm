@@ -6,6 +6,8 @@
   DefCls 0
   NewObjD "A"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
   String "foo"
   FCall <> 1 1 "" - "" ""
@@ -15,6 +17,8 @@
   DefCls 0
   NewObjD "B"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
   String "foo"
   FCall <> 1 1 "" - "" ""
@@ -24,6 +28,8 @@
   DefCls 0
   NewObjD "C"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
   String "foo"
   FCall <> 1 1 "" - "" ""
@@ -33,6 +39,8 @@
   DefCls 0
   NewObjD "E"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
   String "foo"
   FCall <> 1 1 "" - "" ""
@@ -42,6 +50,8 @@
   DefCls 0
   NewObjD "G"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
   String "foo"
   FCall <> 1 1 "" - "" ""

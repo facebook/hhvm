@@ -1,6 +1,9 @@
 # tests that OODeclExists with bad argument types properly punts to the interpreter
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
   String "abc"
   String "asdfasdf"

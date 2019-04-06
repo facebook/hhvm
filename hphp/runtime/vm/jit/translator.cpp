@@ -274,13 +274,23 @@ static const struct {
 
   /*** 8. Call instructions ***/
 
+  { OpNewObj,      {None,             Stack1,       OutObject       }},
+  { OpNewObjD,     {None,             Stack1,       OutObject       }},
+  { OpNewObjS,     {None,             Stack1,       OutObject       }},
+
+  /*
+   * FPush* and FCall are special. Like the Ret* instructions, their
+   * manipulation of the runtime stack are outside the boundaries of
+   * the tracelet abstraction.
+   */
   { OpFPushFunc,   {Stack1,           FStack,       OutFDesc        }},
   { OpFPushFuncD,  {None,             FStack,       OutFDesc        }},
   { OpFPushFuncU,  {None,             FStack,       OutFDesc        }},
+  { OpFPushCtor,   {None,             FStack,       OutFDesc        }},
   { OpFPushObjMethod,
-                   {StackTop2,        FStack,       OutFDesc        }},
-  { OpFPushObjMethodD,
                    {Stack1,           FStack,       OutFDesc        }},
+  { OpFPushObjMethodD,
+                   {None,             FStack,       OutFDesc        }},
   { OpFPushClsMethod,
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethodS,
@@ -289,14 +299,6 @@ static const struct {
                    {None,             FStack,       OutFDesc        }},
   { OpFPushClsMethodD,
                    {None,             FStack,       OutFDesc        }},
-  { OpNewObj,      {None,             Stack1,       OutObject       }},
-  { OpNewObjD,     {None,             Stack1,       OutObject       }},
-  { OpNewObjS,     {None,             Stack1,       OutObject       }},
-  { OpFPushCtor,   {Stack1,           FStack,       OutFDesc        }},
-  /*
-   * FCall is special. Like the Ret* instructions, its manipulation of the
-   * runtime stack are outside the boundaries of the tracelet abstraction.
-   */
   { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
@@ -495,6 +497,17 @@ int64_t countOperands(uint64_t mask) {
 int64_t getStackPopped(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
+    case Op::FPushFunc:
+    case Op::FPushFuncD:
+    case Op::FPushFuncU:
+    case Op::FPushCtor:
+    case Op::FPushObjMethod:
+    case Op::FPushObjMethodD:
+    case Op::FPushClsMethod:
+    case Op::FPushClsMethodS:
+    case Op::FPushClsMethodSD:
+    case Op::FPushClsMethodD:
+      return countOperands(getInstrInfo(op).in) + 3;
     case Op::FCall: {
       auto const fca = getImm(pc, 0).u_FCA;
       return fca.numArgs + (fca.hasUnpack() ? 1 : 0) + fca.numRets +
@@ -526,16 +539,16 @@ int64_t getStackPopped(PC pc) {
     case Op::NewStructDict:
       return getImmVector(pc).size();
 
-    default:             break;
+    default:
+      break;
   }
 
   uint64_t mask = getInstrInfo(op).in;
-  int64_t count = 0;
 
   // All instructions with these properties are handled above
   assertx((mask & (StackN | BStackN)) == 0);
 
-  return count + countOperands(mask);
+  return countOperands(mask);
 }
 
 int64_t getStackPushed(PC pc) {
@@ -731,6 +744,21 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     SKTRACE(1, sk, "getInputs: BStackN %d %d\n", stackOff.offset, numArgs);
     for (int i = 0; i < numArgs; i++) {
       inputs.emplace_back(Location::Stack { stackOff-- });
+    }
+  }
+  if (isFPush(ni.op())) {
+    SKTRACE(1, sk, "getInputs: %s %d %d\n",
+            opcodeToName(ni.op()), stackOff.offset, ni.imm[0].u_IVA);
+    stackOff -= 2;
+    switch (ni.op()) {
+      case Op::FPushCtor:
+      case Op::FPushObjMethod:
+      case Op::FPushObjMethodD:
+        inputs.emplace_back(Location::Stack { stackOff-- });
+        break;
+      default:
+        stackOff--;
+        break;
     }
   }
 

@@ -5,6 +5,8 @@
   DefCls 0
   NewObjD "A"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
   String "foo"
   FCall <> 1 1 "" - "" ""
@@ -12,12 +14,19 @@
   SetL $x
   PopC
   CGetL $x
+  NullUninit
+  NullUninit
   FPushObjMethodD 1 "set" NullThrows
   String "bar"
   FCall <> 1 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
   CGetL $x
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "get" NullThrows
   FCall <> 0 1 "" - "" ""
   FCall <> 1 1 "" - "" ""

@@ -58,7 +58,6 @@ void fpushObjMethodUnknown(IRGS& env,
                            const StringData* methodName,
                            uint32_t numParams) {
   implIncStat(env, Stats::ObjMethod_cached);
-  allocActRec(env);
   fsetActRec(env,
              cns(env, TNullptr),  // Will be set by LdObjMethod
              obj,
@@ -236,7 +235,6 @@ void fpushObjMethodWithBaseClass(
   if (auto func = lookupObjMethodWithBaseClass(
         env, obj, baseClass, methodName, exactClass,
         objOrCls, magicCall)) {
-    allocActRec(env);
     fsetActRec(env, func, objOrCls, numParams,
                magicCall ? methodName : nullptr, cns(env, false));
     return;
@@ -381,7 +379,6 @@ void optimizeProfiledPushMethod(IRGS& env,
           auto const refined = gen(env, CheckType, ty, sideExit, objOrCls);
           env.irb->constrainValue(refined, GuardConstraint(uniqueClass));
           auto const ctx = getCtx(uniqueMeth, refined, uniqueClass);
-          allocActRec(env);
           fsetActRec(env, cns(env, uniqueMeth), ctx, numParams,
                      isMagic ? methodName : nullptr, cns(env, dynamic));
         },
@@ -411,7 +408,6 @@ void optimizeProfiledPushMethod(IRGS& env,
         auto const same = gen(env, EqFunc, meth, cns(env, uniqueMeth));
         gen(env, JmpZero, sideExit, same);
         auto const ctx = getCtx(uniqueMeth, objOrCls, nullptr);
-        allocActRec(env);
         fsetActRec(env, cns(env, uniqueMeth), ctx, numParams, nullptr,
                    cns(env, dynamic));
       },
@@ -442,7 +438,6 @@ void optimizeProfiledPushMethod(IRGS& env,
         auto const negSlot = cns(env, -(baseMeth->methodSlot() + 1));
         auto const meth = gen(env, LdClsMethod, cls, negSlot);
         auto const ctx = getCtx(baseMeth, objOrCls, nullptr);
-        allocActRec(env);
         fsetActRec(env, meth, ctx, numParams, nullptr, cns(env, dynamic));
       },
       fallback
@@ -473,7 +468,6 @@ void optimizeProfiledPushMethod(IRGS& env,
         auto const imData = IfaceMethodData{vtableSlot, intfMeth->methodSlot()};
         auto const meth = gen(env, LdIfaceMethod, imData, cls);
         auto const ctx = getCtx(intfMeth, objOrCls, nullptr);
-        allocActRec(env);
         fsetActRec(env, meth, ctx, numParams, nullptr, cns(env, dynamic));
       },
       fallback
@@ -525,7 +519,6 @@ void fpushFuncObj(IRGS& env, uint32_t numParams) {
   auto const obj      = popC(env);
   auto const cls      = gen(env, LdObjClass, obj);
   auto const func     = gen(env, LdObjInvoke, slowExit, cls);
-  allocActRec(env);
   fsetActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }
 
@@ -533,7 +526,6 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
   auto const thisAR = fp(env);
 
   auto const arr = popC(env);
-  allocActRec(env);
   fsetActRec(
     env,
     cns(env, TNullptr),
@@ -559,7 +551,6 @@ void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
   auto const clsMeth = popC(env);
   auto const cls = gen(env, LdClsFromClsMeth, clsMeth);
   auto const func = gen(env, LdFuncFromClsMeth, clsMeth);
-  allocActRec(env);
   fsetActRec(
     env,
     func,
@@ -614,7 +605,6 @@ void fpushFuncCommon(IRGS& env,
     // We know the function, but we have to ensure its unit is loaded. Use
     // LdFuncCached, ignoring the result to ensure this.
     if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { name });
-    allocActRec(env);
     fsetActRec(env,
                cns(env, lookup.func),
                cns(env, TNullptr),
@@ -627,7 +617,6 @@ void fpushFuncCommon(IRGS& env,
   auto const ssaFunc = fallback
     ? gen(env, LdFuncCachedU, LdFuncCachedUData { name, fallback })
     : gen(env, LdFuncCached, FuncNameData { name });
-  allocActRec(env);
   fsetActRec(env,
              ssaFunc,
              cns(env, TNullptr),
@@ -864,7 +853,7 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
 }
 
 void emitFPushCtor(IRGS& env, uint32_t numParams) {
-  auto const obj = popC(env);
+  auto const obj = topC(env, BCSPRelOffset{2});
   if (!obj->isA(TObj)) PUNT(FPushCtor-NonObj);
 
   auto const func = [&] {
@@ -879,7 +868,6 @@ void emitFPushCtor(IRGS& env, uint32_t numParams) {
     return gen(env, LdClsCtor, cns(env, exactCls), fp(env));
   }();
 
-  allocActRec(env);
   fsetActRec(env, func, obj, numParams, nullptr, cns(env, false));
 }
 
@@ -896,17 +884,17 @@ void emitFPushFuncU(IRGS& env,
 
 void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   if (v.size() != 0) PUNT(InOut-FPushFunc);
+  auto const callee = topC(env);
 
-  if (topC(env)->isA(TObj)) return fpushFuncObj(env, numParams);
-  if (topC(env)->isA(TArr) || topC(env)->isA(TVec)) {
+  if (callee->isA(TObj)) return fpushFuncObj(env, numParams);
+  if (callee->isA(TArr) || callee->isA(TVec)) {
     return fpushFuncArr(env, numParams);
   }
-  if (topC(env)->isA(TFunc)) {
-    auto const func = popC(env);
-    allocActRec(env);
+  if (callee->isA(TFunc)) {
+    popC(env);
     fsetActRec(
       env,
-      func,
+      callee,
       cns(env, TNullptr),
       numParams,
       nullptr,
@@ -918,12 +906,11 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
     return fpushFuncClsMeth(env, numParams);
   }
 
-  if (!topC(env)->isA(TStr)) {
+  if (!callee->isA(TStr)) {
     PUNT(FPushFunc_not_Str);
   }
 
-  auto const funcName = popC(env);
-  allocActRec(env);
+  popC(env);
   fsetActRec(env,
              cns(env, TNullptr),
              cns(env, TNullptr),
@@ -934,13 +921,13 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  storeReifiedGenerics(env, funcName);
+  storeReifiedGenerics(env, callee);
 
   gen(env, LdFunc,
       IRSPRelOffsetData { spOffBCFromIRSP(env) },
-      funcName, sp(env), fp(env));
+      callee, sp(env), fp(env));
 
-  decRef(env, funcName);
+  decRef(env, callee);
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
@@ -958,7 +945,7 @@ void emitFPushObjMethodD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
                          ObjMethodOp subop) {
-  auto const obj = popC(env);
+  auto const obj = topC(env, BCSPRelOffset{2});
 
   if (obj->type() <= TObj) {
     fpushObjMethod(env, obj, methodName, numParams);
@@ -966,7 +953,6 @@ void emitFPushObjMethodD(IRGS& env,
   }
 
   if (obj->type() <= TInitNull && subop == ObjMethodOp::NullSafe) {
-    allocActRec(env);
     fsetActRec(
       env,
       cns(env, SystemLib::s_nullFunc),
@@ -1058,7 +1044,6 @@ bool fpushClsMethodKnown(IRGS& env,
   auto funcTmp = lookupClsMethodKnown(env, methodName, ctxTmp, baseClass, exact,
                                       check, forward, magicCall, ctx);
   if (!funcTmp) return false;
-  allocActRec(env);
   fsetActRec(env,
              funcTmp,
              ctx,
@@ -1086,7 +1071,6 @@ void emitFPushClsMethodD(IRGS& env,
   auto const data = ClsMethodData { className, methodName, ne };
   auto func = loadClsMethodUnknown(env, data, slowExit);
   auto const clsCtx = gen(env, LdClsMethodCacheCls, data);
-  allocActRec(env);
   fsetActRec(env,
              func,
              clsCtx,
@@ -1198,7 +1182,6 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 
   auto const emitFPush = [&] {
-    allocActRec(env);
     fsetActRec(
       env,
       cns(env, TNullptr),

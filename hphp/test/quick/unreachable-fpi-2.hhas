@@ -1,4 +1,7 @@
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "foo"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -13,6 +16,9 @@
   Jmp L0
 L2:
   Jmp L1
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "bar"
   FCall <> 0 1 "" - "" ""
   PopC

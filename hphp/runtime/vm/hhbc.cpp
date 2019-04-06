@@ -411,7 +411,7 @@ int instrNumPops(PC pc) {
 #define C_MFINAL(n) -10 - n
 #define CUMANY -3
 #define CVUMANY -3
-#define FPUSH(nin, nobj) (nin + nobj)
+#define FPUSH(nin, nobj) (nin + 3)
 #define FCALL -4
 #define CMANY -3
 #define SMANY -1
@@ -509,6 +509,15 @@ FlavorDesc manyFlavor(PC op, uint32_t i, FlavorDesc flavor) {
   return flavor;
 }
 
+template<int nin, int nobj>
+FlavorDesc fpushFlavor(PC op, uint32_t i) {
+  always_assert(i < uint32_t(instrNumPops(op)));
+  if (i < nin) return CV;
+  i -= nin;
+  if (i < 2) return UV;
+  return nobj ? CV : UV;
+}
+
 FlavorDesc fcallFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
   auto const fca = getImm(op, 0).u_FCA;
@@ -532,7 +541,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define C_MFINAL(n) return manyFlavor(op, idx, CV);
 #define CUMANY return manyFlavor(op, idx, CUV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
-#define FPUSH(nin, nobj) return CV;
+#define FPUSH(nin, nobj) return fpushFlavor<nin, nobj>(op, idx);
 #define FCALL return fcallFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);

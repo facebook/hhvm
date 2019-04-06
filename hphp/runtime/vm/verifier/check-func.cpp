@@ -790,7 +790,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define NOV { },
   #define CUMANY { },
   #define CVUMANY { },
-  #define FPUSH(nin, nobj) { },
+  #define FPUSH(nin, nobj) { nobj ? CV : UV },
   #define FCALL { },
   #define CMANY { },
   #define SMANY { },
@@ -843,6 +843,10 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPushClsMethodD: {  // IVA..., FPUSH, FPUSH
     auto const numPops = instrNumPops(pc);
     auto idx = 0;
+    m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
+    m_tmp_sig[idx++] = UV;
+    m_tmp_sig[idx++] = UV;
+    assertx(idx == numPops || idx + 1 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }

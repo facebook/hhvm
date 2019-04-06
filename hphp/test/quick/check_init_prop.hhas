@@ -3,6 +3,8 @@
   DefCls 0
   NewObjD "C"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
 

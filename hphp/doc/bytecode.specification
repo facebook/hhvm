@@ -1966,8 +1966,38 @@ InitProp <propName> <op> [C] -> []
 8. Call instructions
 --------------------
 
-FPushFunc <num params>                 [C]  ->  []
-FPushFuncD <num params> <litstr id>    []  ->  []
+NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
+NewObjD <litstr id>                        []  ->  [C:Obj]
+NewObjS <mode>                             []  ->  [C:Obj]
+
+  New object. First, these instructions load a value into x as given
+  by the following table:
+
+    instruction   x
+    ------------+----
+      NewObj    | %1
+      NewObjD   | %1
+      NewObjS   | %1
+
+  When loading %1 into x, NewObjD will perform the work performed by the
+  ClsRefGetC instruction to convert the name given by %1 into a classref.
+  NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
+  the specified mode.
+
+  This instruction pushes an uninitialized object onto the stack, to be
+  initialized during FCall*.
+
+  If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
+  slot's reified generics portion is valid.
+  If MaybeGenerics is passed to NewObj, this indicates that data at cls-ref
+  slot's reified generics portion will be nulled out when there are no reified
+  generics.
+
+FPush* opcodes
+--------------
+
+FPushFunc <num params>                 [U U U C]  ->  []
+FPushFuncD <num params> <litstr id>    [U U U]  ->  []
 
   FPI push function. First, these instructions load a value into x as given by
   the following table:
@@ -2005,23 +2035,23 @@ FPushFuncD <num params> <litstr id>    []  ->  []
   If x is not a string, object, array, or func, this instruction throws a fatal
   error.
 
-FPushFuncU <num params> <litstr id> <litstr fallback> []  ->  []
+FPushFuncU <num params> <litstr id> <litstr fallback> [U U U]  ->  []
 
   FPI push function unqualified. Identical to FPushFuncD except first tries to
   lookup the function named %2 and if it isn't defined calls the function named
   %3. As for FPushFuncD the litstr in %2 and %3 must not start with a '\'
   %character.
 
-FPushObjMethod <num params> <nullsafe>                 [C C]  ->  []
-FPushObjMethodD <num params> <litstr id> <nullsafe>    [C]  ->  []
+FPushObjMethod <num params> <nullsafe>                 [C U U C]  ->  []
+FPushObjMethodD <num params> <litstr id> <nullsafe>    [C U U]  ->  []
 
   FPI push object-based method. First, these instructions load values into x
   and y as given by the following table:
 
     instruction           x    y
     -------------------+----+-----
-      FPushObjMethod   | $2 | $1
-      FPushObjMethodD  | $1 | %2
+      FPushObjMethod   | $4 | $1
+      FPushObjMethodD  | $3 | %2
 
   If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
   a string, this instruction throws a fatal error. Next, this instruction
@@ -2040,10 +2070,10 @@ FPushObjMethodD <num params> <litstr id> <nullsafe>    [C]  ->  []
   If object x does not have an accessible method named y and it does not have a
   __call method, this instruction throws a fatal error.
 
-FPushClsMethod   <num params> <class-ref slot>          [C]  ->  []
-FPushClsMethodD  <num params> <litstr id> <litstr id>   []   ->  []
-FPushClsMethodS  <num params> <mode>                    [C]  ->  []
-FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
+FPushClsMethod   <num params> <class-ref slot>          [U U U C]  ->  []
+FPushClsMethodD  <num params> <litstr id> <litstr id>   [U U U]    ->  []
+FPushClsMethodS  <num params> <mode>                    [U U U C]  ->  []
+FPushClsMethodSD <num params> <mode> <litstr id>        [U U U]    ->  []
 
   FPI push class-based method. First, these instructions load values into x and
   y as given by the following table:
@@ -2081,40 +2111,13 @@ FPushClsMethodSD <num params> <mode> <litstr id>        []   ->  []
   __call method or a __callStatic method could not be found, this instruction
   throws a fatal error.
 
-NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
-NewObjD <litstr id>                        []  ->  [C:Obj]
-NewObjS <mode>                             []  ->  [C:Obj]
-
-  New object. First, these instructions load a value into x as given
-  by the following table:
-
-    instruction   x
-    ------------+----
-      NewObj    | %1
-      NewObjD   | %1
-      NewObjS   | %1
-
-  When loading %1 into x, NewObjD will perform the work performed by the
-  ClsRefGetC instruction to convert the name given by %1 into a classref.
-  NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
-  the specified mode.
-
-  This instruction pushes an uninitialized object onto the stack, to be
-  initialized during FCall*.
-
-  If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
-  slot's reified generics portion is valid.
-  If MaybeGenerics is passed to NewObj, this indicates that data at cls-ref
-  slot's reified generics portion will be nulled out when there are no reified
-  generics.
-
-FPushCtor <num params>  [C:Obj]  ->  []
+FPushCtor <num params>  [C:Obj U U]  ->  []
 
   FPI push constructor.
 
   This instruction pushes a new entry on the FPI stack, initializing it with
   the number of parameters being passed (given by %1) and a reference to the
-  FPI structure for the constructor for class of the object given by $1.
+  FPI structure for the constructor for class of the object given by $3.
 
 FCall* opcodes
 --------------

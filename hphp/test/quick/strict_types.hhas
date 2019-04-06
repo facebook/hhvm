@@ -3,7 +3,13 @@
 .strict 1;
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 2 "add"
   String "1"
   String "2"

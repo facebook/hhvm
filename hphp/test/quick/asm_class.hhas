@@ -8,6 +8,9 @@
   DefCls 2
   DefCls 3
   DefCls 4
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -62,6 +65,8 @@
 .class Derived extends Base implements(IDunno IDunno2) {
   .method [public] some_junk {
     This
+    NullUninit
+    NullUninit
     FPushObjMethodD 0 "prot_method" NullThrows
     FCall <> 0 1 "" - "" ""
     PopC
@@ -131,6 +136,8 @@
 .function prop_test {
   NewObjD "WithProps"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -144,11 +151,15 @@
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "print_funk" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "print_defaulted" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
@@ -162,12 +173,17 @@
 
   NewObjD "Base"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
   SetL $base
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   String "print_it"
   String "Base"
   ClsRefGetC 0
@@ -178,6 +194,8 @@
 
   NewObjD "Derived"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -185,25 +203,36 @@
   PopC
 
   CGetL $derived
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "some_junk" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $base
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "overriden" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $derived
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "overriden" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $derived
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "abs_method" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "prop_test"
   FCall <> 0 1 "" - "" ""
   PopC

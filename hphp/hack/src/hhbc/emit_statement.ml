@@ -465,7 +465,7 @@ and emit_using env pos is_block_scoped has_await e b =
         else
           instr_popc, None
       in gather [
-        instr_cgetl local;
+        instr_cgetl local; instr_nulluninit; instr_nulluninit;
         instr_fpushobjmethodd 0 fn_name A.OG_nullthrows;
         instr_fcall (make_fcall_args ?async_eager_label 0);
         epilogue;
@@ -993,7 +993,7 @@ and emit_foreach_await env pos collection iterator block =
   (* inner *)
   gather [
     instr_label next_label;
-    instr_cgetl iter_temp_local;
+    instr_cgetl iter_temp_local; instr_nulluninit; instr_nulluninit;
     instr_fpushobjmethodd 0 next_meth A.OG_nullthrows;
     instr_fcall (make_fcall_args ~async_eager_label 0);
     instr_await;

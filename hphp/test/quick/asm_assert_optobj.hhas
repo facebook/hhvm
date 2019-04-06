@@ -3,6 +3,8 @@
 
   NewObjD "Foo"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -10,9 +12,13 @@
   PopC
 
   CGetL $object
+  NullUninit
+  NullUninit
   FPushObjMethodD 1 "main" NullThrows
    NewObjD "Foo"
    Dup
+   NullUninit
+   NullUninit
    FPushCtor 0
    FCall <> 0 1 "" - "" ""
    PopC
@@ -20,6 +26,8 @@
   PopC
 
   CGetL $object
+  NullUninit
+  NullUninit
   FPushObjMethodD 1 "main" NullThrows
    Null
   FCall <> 1 1 "" - "" ""

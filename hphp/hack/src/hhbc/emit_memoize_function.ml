@@ -37,6 +37,7 @@ let make_memoize_function_no_params_code
         instr_retc
       ];
     instr_label notfound;
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     instr_fpushfuncd 0 renamed_function_id;
     instr_fcall fcall_args;
     instr_memoset None;
@@ -86,6 +87,7 @@ let make_memoize_function_with_params_code
         instr_retc
       ];
     instr_label notfound;
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     instr_fpushfuncd param_count renamed_method_id;
     param_code_gets params;
     instr_fcall fcall_args;

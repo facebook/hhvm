@@ -2,6 +2,9 @@
 # execution stack locations.
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "set_error_handler"
     String "thrower"
   FCall <> 1 1 "" - "" ""
@@ -12,12 +15,18 @@
   # be stored along wtih other arguments inside the exception unless we pass
   # ignore args. If this happens the exception will keep the DtorPrinter objects
   # alive past the end of test_unwind_dirty_stack_regs.
+  NullUninit
+  NullUninit
+  NullUninit
   FPushClsMethodD 1 "setTraceOptions" "Exception"
     CnsE "DEBUG_BACKTRACE_IGNORE_ARGS"
   FCall <> 1 1 "" - "" ""
   PopC
 
   .try {
+    NullUninit
+    NullUninit
+    NullUninit
     FPushFuncD 0 "test_unwind_dirty_stack_regs"
     FCall <> 0 1 "" - "" ""
     RetC
@@ -26,6 +35,8 @@
     PopC
     String "Received exception:  "
     PushL _1
+    NullUninit
+    NullUninit
     FPushObjMethodD 0 "getMessage" NullThrows
     FCall <> 0 1 "" - "" ""
     Concat
@@ -41,6 +52,8 @@
 .function thrower() {
   NewObjD "Exception"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
     String "hi"
   FCall <> 1 1 "" - "" ""
@@ -73,6 +86,8 @@
 .function make_obj($id) {
   NewObjD "DtorPrinter"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 1
     CGetL $id
   FCall <> 1 1 "" - "" ""
@@ -96,16 +111,25 @@
 # stack.
 
 .function test_unwind_dirty_stack_regs() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "make_obj"
     Int 0
   FCall <> 1 1 "" - "" ""
   SetL $k_0
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "make_obj"
     Int 1
   FCall <> 1 1 "" - "" ""
   SetL $k_1
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "make_obj"
     Int 2
   FCall <> 1 1 "" - "" ""
@@ -116,6 +140,9 @@
   CGetL $k_1
   CGetL $k_2
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "get_undefined_var"
   FCall <> 0 1 "" - "" ""
   PopC

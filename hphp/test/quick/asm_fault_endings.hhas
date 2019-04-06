@@ -1,5 +1,8 @@
 .main {
   .try {
+    NullUninit
+    NullUninit
+    NullUninit
     FPushFuncD 0 "main"
     FCall <> 0 1 "" - "" ""
     RetC
@@ -20,6 +23,8 @@
     .try {
       NewObjD "Exception"
       Dup
+      NullUninit
+      NullUninit
       FPushCtor 1
       String "ex"
       FCall <> 1 1 "" - "" ""

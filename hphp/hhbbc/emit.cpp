@@ -717,7 +717,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CUMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
 #define POP_FPUSH(nin, nobj) \
-                       pop(nin + nobj);
+                       pop(nin + 3);
 #define POP_FCALL      pop(data.fca.numArgs + (data.fca.hasUnpack() ? 1 : 0) + \
                            data.fca.numRets - 1);
 

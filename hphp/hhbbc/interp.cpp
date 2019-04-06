@@ -1977,6 +1977,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
         return reduce(
           env,
           bc::CGetL { op.loc1 },
+          bc::NullUninit {},
+          bc::NullUninit {},
           bc::FPushObjMethodD {
             0,
             s_getInstanceKey.get(),
@@ -1999,6 +2001,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
         return reduce(
           env,
           bc::CGetL { op.loc1 },
+          bc::NullUninit {},
+          bc::NullUninit {},
           bc::FPushObjMethodD {
             0,
             s_getInstanceKey.get(),
@@ -2906,14 +2910,18 @@ void in(ISS& env, const bc::FPushFuncD& op) {
           env,
           ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
         );
-        return reduce(env, bc::Nop {});
+        return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
       }
     }
   }
   if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
               op.arg1, false)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
   }
+
+  popU(env);
+  popU(env);
+  popU(env);
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {
@@ -2937,6 +2945,9 @@ void in(ISS& env, const bc::FPushFunc& op) {
     }
   }
   popC(env);
+  popU(env);
+  popU(env);
+  popU(env);
   if (t1.subtypeOf(BObj)) {
     fpiPushNoFold(env, ActRec { FPIKind::ObjInvoke, t1 });
   } else if (t1.subtypeOf(BArr)) {
@@ -2963,6 +2974,9 @@ void in(ISS& env, const bc::FPushFuncU& op) {
       return fpushfuncd(rfuncPair.second);
     }
   }
+  popU(env);
+  popU(env);
+  popU(env);
   fpiPushNoFold(
     env,
     ActRec {
@@ -3001,7 +3015,7 @@ const StaticString s_nullFunc { "__SystemLib\\__86null" };
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
-  auto const input = topC(env);
+  auto const input = topC(env, 2);
   auto const mayCallMethod = input.couldBe(BObj);
   auto const mayCallNullsafe = !nullThrows && input.couldBe(BNull);
   auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
@@ -3009,6 +3023,8 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   if (!mayCallMethod && !mayCallNullsafe) {
     // This FPush may only throw, make sure it's not optimized away.
     fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TBottom });
+    popU(env);
+    popU(env);
     popC(env);
     return unreachable(env);
   }
@@ -3017,7 +3033,8 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     // Null input, this may only call the nullsafe helper, so do that.
     return reduce(
       env,
-      bc::PopC {},
+      bc::PopU {}, bc::PopU {}, bc::PopC {},
+      bc::NullUninit {}, bc::NullUninit {}, bc::NullUninit {},
       bc::FPushFuncD { op.arg1, s_nullFunc.get(), op.has_unpack }
     );
   }
@@ -3045,10 +3062,10 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     // or FCall may throw.
     fpiPushNoFold(env, ar());
   } else if (fpiPush(env, ar(), op.arg1, false)) {
-    return reduce(env, bc::PopC {});
+    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopC {});
   }
 
-  auto const location = topStkEquiv(env);
+  auto const location = topStkEquiv(env, 2);
   if (location != NoLocalId) {
     if (!refineLocation(env, location, [&] (Type t) {
       if (nullThrows) return intersection_of(t, TObj);
@@ -3060,12 +3077,14 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     }
   }
 
+  popU(env);
+  popU(env);
   popC(env);
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env); // meth name
-  auto const t2 = topC(env, 1); // object
+  auto const t2 = topC(env, 3); // object
   auto const clsTy = objcls(t2);
   folly::Optional<res::Func> rfunc;
   auto const name = getNameFromType(t1);
@@ -3083,11 +3102,14 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
     }
   }
   popC(env);
+  popU(env);
+  popU(env);
+  popC(env);
   fpiPushNoFold(
     env,
     ActRec {
       FPIKind::ObjMeth,
-      popC(env),
+      t2,
       is_specialized_cls(clsTy)
         ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
         : folly::none,
@@ -3106,8 +3128,11 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   );
   if (fpiPush(env, ActRec { FPIKind::ClsMeth, clsType, rcls, rfun }, op.arg1,
               false)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
   }
+  popU(env);
+  popU(env);
+  popU(env);
 }
 
 namespace {
@@ -3135,6 +3160,7 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
 void in(ISS& env, const bc::FPushClsMethod& op) {
   auto const t1 = peekClsRefSlot(env, op.slot);
   auto const t2 = topC(env);
+
   folly::Optional<res::Class> rcls;
   auto exactCls = false;
   if (is_specialized_cls(t1)) {
@@ -3160,12 +3186,17 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   }
   if (fpiPush(env, ActRec { FPIKind::ClsMeth, t1, rcls, rfunc }, op.arg1,
               true)) {
-    return reduce(env,
-                  bc::DiscardClsRef { op.slot },
-                  bc::PopC {});
+    return reduce(
+      env,
+      bc::DiscardClsRef { op.slot },
+      bc::PopC {}, bc::PopU {}, bc::PopU {}, bc::PopU {}
+    );
   }
   takeClsRefSlot(env, op.slot);
   popC(env);
+  popU(env);
+  popU(env);
+  popU(env);
 }
 
 void in(ISS& env, const bc::FPushClsMethodS& op) {
@@ -3195,9 +3226,12 @@ void in(ISS& env, const bc::FPushClsMethodS& op) {
                 rcls,
                 rfunc
               }, op.arg1, true)) {
-    return reduce(env, bc::PopC {});
+    return reduce(env, bc::PopC {}, bc::PopU {}, bc::PopU {}, bc::PopU {});
   }
   popC(env);
+  popU(env);
+  popU(env);
+  popU(env);
 }
 
 void in(ISS& env, const bc::FPushClsMethodSD& op) {
@@ -3227,8 +3261,11 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
                 rcls,
                 rfun
               }, op.arg1, false)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
   }
+  popU(env);
+  popU(env);
+  popU(env);
 }
 
 void in(ISS& env, const bc::NewObjD& op) {
@@ -3284,7 +3321,10 @@ void in(ISS& env, const bc::NewObj& op) {
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
-  auto const obj = popC(env);
+  auto const obj = topC(env, 2);
+  popU(env);
+  popU(env);
+  popC(env);
   if (!is_specialized_obj(obj)) {
     return fpiPushNoFold(env, ActRec { FPIKind::Ctor, TObj });
   }
@@ -3479,6 +3519,8 @@ void in(ISS& env, const bc::FCall& op) {
             env,
             bc::NewObjD { exCls },
             bc::Dup {},
+            bc::NullUninit {},
+            bc::NullUninit {},
             bc::FPushCtor { 1, false },
             bc::String { err },
             bc::FCall {

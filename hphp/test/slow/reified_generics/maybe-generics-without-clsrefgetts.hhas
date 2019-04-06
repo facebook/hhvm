@@ -2,10 +2,16 @@
 
 .main {
   DefCls 0
+  NullUninit
+  NullUninit
+  NullUninit
   String "f"
   FPushFunc 0
   FCall <> 0 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
   String "done"
   FCall <> 1 1 "" - "" ""
@@ -21,6 +27,8 @@
   ClsRefGetC 0
   NewObj 0 MaybeGenerics
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC

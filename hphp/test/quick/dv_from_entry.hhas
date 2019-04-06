@@ -4,6 +4,9 @@
 .filepath "/data/users/sainati/fbsource/fbcode/hphp/test/quick/dv.php";
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "foo"
   FCall <> 0 1 "" - "" ""
   PopC

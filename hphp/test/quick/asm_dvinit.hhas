@@ -7,6 +7,9 @@
   Print
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   RetC
@@ -63,24 +66,39 @@
 }
 
 .function main() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "foo"
   String "sup: "
   FCall <> 1 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 2 "foo"
   String "sup: "
   String " non-default y value\n"
   FCall <> 2 1 "" - "" ""
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "multiple"
   FCall <> 0 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "multiple"
   String "nondef\n"
   FCall <> 1 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 2 "multiple"
   String "nondef1\n"
   String "nondef2\n"

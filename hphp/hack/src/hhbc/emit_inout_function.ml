@@ -41,6 +41,7 @@ let emit_body_instrs_inout params call_instrs =
     ~flags ~num_rets:(num_inout + 1) param_count in
   gather [
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     call_instrs;
     param_instrs;
     instr_fcall fcall_args;
@@ -70,6 +71,7 @@ let emit_body_instrs_ref params call_instrs =
   let flags = { default_fcall_flags with has_unpack = has_variadic } in
   let fcall_args = make_fcall_args ~flags param_count in
   gather [
+    instr_nulluninit; instr_nulluninit; instr_nulluninit;
     call_instrs;
     param_instrs;
     instr_fcall fcall_args;

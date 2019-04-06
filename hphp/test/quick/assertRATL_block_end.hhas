@@ -1,6 +1,9 @@
 # tests that AssertRATL cannot appear at the end of a block
 
 .main {
+    NullUninit
+    NullUninit
+    NullUninit
     FPushFuncD 1 "foo"
     Int 9
     FCall <> 1 1 "" - "" ""
@@ -10,6 +13,9 @@
 }
 
 .function foo($x){
+    NullUninit
+    NullUninit
+    NullUninit
     Int 2
     JmpNZ target_label
     AssertRATL $x Int

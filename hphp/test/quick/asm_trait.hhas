@@ -10,6 +10,9 @@
   DefCls 4
   DefCls 5
   DefCls 6
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   RetC
@@ -70,6 +73,8 @@
 .function main() {
   NewObjD "UseFrob"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -77,12 +82,16 @@
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "frob" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "AliasFrob"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -90,12 +99,16 @@
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "heh" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "Publicize"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -103,12 +116,16 @@
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "foo" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   NewObjD "Resolution"
   Dup
+  NullUninit
+  NullUninit
   FPushCtor 0
   FCall <> 0 1 "" - "" ""
   PopC
@@ -116,11 +133,15 @@
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "frob" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC
 
   CGetL $obj
+  NullUninit
+  NullUninit
   FPushObjMethodD 0 "yo" NullThrows
   FCall <> 0 1 "" - "" ""
   PopC

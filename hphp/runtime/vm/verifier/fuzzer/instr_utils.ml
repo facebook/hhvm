@@ -69,14 +69,17 @@ let string_of_stack (stk : stack) : string =
  * TODO(T20108993): autogenerate this from the bytecode spec. *)
 let stk_data : instruct -> stack_sig = function
   | IMutator UnsetL _
-  | ICall FPushFuncD _
-  | ICall FPushClsMethodD _
-  | ICall FPushFuncU _
   | IIncludeEvalDefine DefClsNop _
   | IIncludeEvalDefine DefCls _
   | IIncludeEvalDefine DefTypeAlias _
   | IGenerator ContCheck _                 -> [], []
-  | ICall FPushObjMethod _                 -> ["C"; "C"], []
+  | ICall FPushFuncD _
+  | ICall FPushFuncU _
+  | ICall FPushClsMethodD _                -> ["U"; "U"; "U"], []
+  | ICall FPushFunc _                      -> ["U"; "U"; "U"; "C"], []
+  | ICall FPushCtor _
+  | ICall FPushObjMethodD _                -> ["C"; "U"; "U"], []
+  | ICall FPushObjMethod _                 -> ["C"; "U"; "U"; "C"], []
   | IOp Fatal _
   | IContFlow JmpZ _
   | IContFlow JmpNZ _
@@ -88,9 +91,6 @@ let stk_data : instruct -> stack_sig = function
   | IGet ClsRefGetTS _
   | IMutator UnsetG
   | IMutator InitProp _
-  | ICall FPushCtor _
-  | ICall FPushFunc _
-  | ICall FPushObjMethodD _
   | IIterator IterInit _
   | IIterator IterInitK _
   | IMisc CheckReifiedGenericMismatch

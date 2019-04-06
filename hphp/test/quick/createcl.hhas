@@ -1,12 +1,21 @@
 # tests that verifier checks properties of the CreateCl bytecode
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "foo"
   FCall <> 0 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "bar"
   FCall <> 0 1 "" - "" ""
   PopC
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "baz"
   FCall <> 0 1 "" - "" ""
   PopC

@@ -3,6 +3,9 @@
 #
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   String "main"
   FPushFunc 0
   FCall <> 0 1 "" - "" "" # allow the JIT why not
@@ -21,6 +24,9 @@
 
 .function ArrayMember() {
   .numclsrefslots 1;
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
     String "arr"
     String "ClassWithArray"
@@ -33,6 +39,9 @@
   SetL $x
   PopC
 
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 1 "var_dump"
     String "arr"
     Int 2
@@ -48,6 +57,9 @@
 }
 
 .function main() {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "ArrayMember"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -98,11 +110,17 @@ unset_label:  String "win\n"
               Print
               PopC
 
+              NullUninit
+              NullUninit
+              NullUninit
               FPushFuncD 1 "var_dump"
               CGetL $arr
               FCall <> 1 1 "" - "" ""
               PopC
 
+              NullUninit
+              NullUninit
+              NullUninit
               FPushFuncD 1 "var_dump"
               Int 1
               String "b"

@@ -3,6 +3,9 @@
 #
 
 .main {
+  NullUninit
+  NullUninit
+  NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
   PopC
@@ -23,6 +26,9 @@
           AddElemC
           SetL $d
           PopC
+          NullUninit
+          NullUninit
+          NullUninit
           FPushFuncD 1 "var_dump"
           NewLikeArrayL $d 3
           FCall <> 1 1 "" - "" ""

@@ -111,9 +111,9 @@ void insert_assertions_step(ArrayTypeTable::Builder& arrTable,
   for (LocalId i = 0; i < state.locals.size(); ++i) {
     if (func.locals[i].killed) continue;
     if (options.FilterAssertions) {
-      if (i < mayReadLocalSet.size() && !mayReadLocalSet.test(i)) {
-        continue;
-      }
+      // Do not emit assertions for untracked locals.
+      if (i >= mayReadLocalSet.size()) break;
+      if (!mayReadLocalSet.test(i)) continue;
     }
     auto const realT = state.locals[i];
     auto const op = makeAssert<bc::AssertRATL>(arrTable, i, realT);

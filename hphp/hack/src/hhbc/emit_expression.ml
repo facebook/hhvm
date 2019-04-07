@@ -3858,18 +3858,22 @@ and emit_unop ~need_ref env pos op e =
   | A.Uref -> emit_expr_as_ref env e
   | A.Usilence ->
     Local.scope @@ fun () ->
-      let enclosing_span = Ast_scope.Scope.get_span env.Emit_env.env_scope in
-      let fault_label = Label.next_fault () in
       let temp_local = Local.get_unnamed_local () in
-      let cleanup = instr_silence_end temp_local in
-      let body = emit_expr ~need_ref:false env e in
-      let fault = gather [emit_pos enclosing_span; cleanup; instr_unwind] in
+      let done_label = Label.next_regular () in
       emit_box_if_necessary pos need_ref @@ gather [
         emit_pos pos;
         instr_silence_start temp_local;
-        instr_try_fault fault_label body fault;
+        instr_try_catch_begin;
+        emit_expr ~need_ref:false env e;
+        instr_jmp done_label;
+        instr_try_catch_middle;
         emit_pos pos;
-        cleanup
+        instr_silence_end temp_local;
+        instr_throw;
+        instr_try_catch_end;
+        instr_label done_label;
+        emit_pos pos;
+        instr_silence_end temp_local
       ]
 
 and emit_exprs env exprs =

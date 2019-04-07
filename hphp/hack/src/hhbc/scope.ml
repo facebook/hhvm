@@ -14,7 +14,7 @@ open Local
 
 (* Run emit () in a new unnamed local scope, which produces three instruction
  * blocks -- before, inner, after. If emit () registered any unnamed locals, the
- * inner block will be wrapped in a try/fault that will unset these unnamed
+ * inner block will be wrapped in a try/catch that will unset these unnamed
  * locals upon exception. *)
 let with_unnamed_locals emit =
   let current_next_local = !next_local in
@@ -26,17 +26,23 @@ let with_unnamed_locals emit =
       ~f:(fun idx -> instr_unsetl (Unnamed (idx + current_next_local))) in
   next_local := current_next_local;
   temp_local_map := current_temp_local_map;
-  let fault_block = gather [ local_unsets; instr_unwind ] in
-  let fault_label = Label.next_fault () in
+  let after_label = Label.next_regular () in
   gather [
     before;
-    instr_try_fault fault_label inner fault_block;
+    instr_try_catch_begin;
+    inner;
+    instr_jmp after_label;
+    instr_try_catch_middle;
+    local_unsets;
+    instr_throw;
+    instr_try_catch_end;
+    instr_label after_label;
     after
   ]
 
 (* Run emit () in a new unnamed local and iterator scope, which produces three
  * instruction blocks -- before, inner, after. If emit () registered any unnamed
- * locals or iterators, the inner block will be wrapped in a try/fault that will
+ * locals or iterators, the inner block will be wrapped in a try/catch that will
  * unset these unnamed locals and free these iterators upon exception. *)
 let with_unnamed_locals_and_iterators emit =
   let current_next_local = !next_local in
@@ -54,11 +60,18 @@ let with_unnamed_locals_and_iterators emit =
   next_local := current_next_local;
   temp_local_map := current_temp_local_map;
   next_iterator :=  current_next_iterator;
-  let fault_block = gather [ local_unsets; iter_frees; instr_unwind ] in
-  let fault_label = Label.next_fault () in
+  let after_label = Label.next_regular () in
   gather [
     before;
-    instr_try_fault fault_label inner fault_block;
+    instr_try_catch_begin;
+    inner;
+    instr_jmp after_label;
+    instr_try_catch_middle;
+    local_unsets;
+    iter_frees;
+    instr_throw;
+    instr_try_catch_end;
+    instr_label after_label;
     after
   ]
 

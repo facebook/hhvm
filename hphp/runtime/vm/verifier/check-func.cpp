@@ -1330,15 +1330,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       }
       break;
     }
-    case Op::Catch: {
-      auto handler = Func::findEHbyHandler(m_func->ehtab, offset(pc));
-      if (!handler || offset(pc) != handler->m_handler) {
-        ferror("{} must be the first instruction in a Catch handler\n",
-               opcodeToName(op));
-        return false;
-      }
-      break;
-    }
     case Op::AssertRATL:
     case Op::AssertRATStk: {
       if (pc == b->last){
@@ -1774,7 +1765,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::RetM:
     case Op::Fatal:
     case Op::Throw:
-    case Op::Catch:
     case Op::ChainFaults:
       return true;
 
@@ -2124,16 +2114,19 @@ bool FuncChecker::checkExnEdge(State cur, Block* b) {
   // not every instruction can throw; there is room for improvement
   // here if we want to note in the bytecode table which instructions
   // can actually throw to the fault handler.
-  int save_stklen = cur.stklen;
-  int save_fpilen = cur.fpilen;
+  auto save_stklen = cur.stklen;
+  auto save_stktop = cur.stklen ? cur.stk[0] : CV;
+  auto save_fpilen = cur.fpilen;
   auto save_slots = cur.clsRefSlots;
   auto save_slots_clsrefgetts = cur.writtenByClsRefGetTSSlots;
-  cur.stklen = 0;
+  cur.stklen = 1;
+  cur.stk[0] = CV;
   cur.fpilen = 0;
   cur.clsRefSlots.reset();
   cur.writtenByClsRefGetTSSlots.reset();
   auto const ok = checkEdge(b, cur, b->exn);
   cur.stklen = save_stklen;
+  cur.stk[0] = save_stktop;
   cur.fpilen = save_fpilen;
   cur.clsRefSlots = std::move(save_slots);
   cur.writtenByClsRefGetTSSlots = std::move(save_slots_clsrefgetts);
@@ -2157,9 +2150,6 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     }
     auto const op = peek_op(pc);
     auto const skipExnEdge = [&] {
-      // Catch does not throw. Do not propagate silence state as Catch may be
-      // followed by a Silence End.
-      if (op == Op::Catch) return true;
       if (op != Op::Silence) return false;
       auto npc = pc;
       decode_op(npc);
@@ -2183,9 +2173,9 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkOutputs(&cur, pc, b);
     if (verify_rx) ok &= checkRxOp(&cur, pc, op);
   }
-  // If we did not visit the exn edge yet because the block contained only Catch
-  // and Silence End opcodes, visit the edge to initialize its state. The
-  // silence state is now correct as Silence End was processed.
+  // If we did not visit the exn edge yet because the block contained only
+  // Silence End opcodes, visit the edge to initialize its state. The silence
+  // state is now correct as Silence End was processed.
   if (b->exn && !exnVisited) ok &= checkExnEdge(cur, b);
   ok &= checkSuccEdges(b, &cur);
   return ok;

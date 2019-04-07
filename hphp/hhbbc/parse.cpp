@@ -238,7 +238,7 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
   ExnTreeInfo ret;
   func.exnNodes.reserve(fe.ehtab.size());
   for (auto& eh : fe.ehtab) {
-    auto const catchBlk = findBlock(eh.m_handler);
+    auto const catchBlk = findBlock(eh.m_handler, true);
     auto node = php::ExnNode{};
     node.idx = func.exnNodes.size();
     node.parent = NoExnNodeId;
@@ -959,13 +959,16 @@ void build_cfg(ParseUnitState& puState,
   std::map<Offset,std::pair<BlockId, copy_ptr<php::Block>>> blockMap;
   auto const bc = fe.ue().bc();
 
-  auto findBlock = [&] (Offset off) {
+  auto findBlock = [&] (Offset off, bool catchEntry = false) {
     auto& ent = blockMap[off];
     if (!ent.second) {
       auto blk         = php::Block{};
       ent.first        = blockMap.size() - 1;
       blk.exnNodeId    = NoExnNodeId;
+      blk.catchEntry   = catchEntry;
       ent.second.emplace(std::move(blk));
+    } else if (catchEntry) {
+      ent.second.mutate()->catchEntry = true;
     }
     return ent.first;
   };

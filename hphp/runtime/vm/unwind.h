@@ -30,8 +30,8 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Find a catch exception handler for a given raise location. Return the offset
- * following the Catch opcode if the handler was found or InvalidAbsoluteOffset.
+ * Find a catch exception handler for a given raise location if the handler was
+ * found or InvalidAbsoluteOffset.
  */
 Offset findCatchHandler(const Func* func, Offset raiseOffset);
 

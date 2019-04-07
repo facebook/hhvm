@@ -437,7 +437,6 @@ void emitDefCls(IRGS& env, uint32_t)          { INTERP }
 void emitAliasCls(IRGS& env,
                   const StringData*,
                   const StringData*)          { INTERP }
-void emitCatch(IRGS& env)                     { INTERP }
 void emitChainFaults(IRGS& env)               { INTERP }
 void emitContGetReturn(IRGS& env)             { INTERP }
 void emitContAssignDelegate(IRGS& env, int32_t)

@@ -33,6 +33,8 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
+const StaticString s_Throwable("Throwable");
+
 template<class JoinOp>
 bool merge_into(Iter& dst, const Iter& src, JoinOp join) {
   auto const mergeCounts = [](IterTypes::Count c1, IterTypes::Count c2) {
@@ -172,7 +174,8 @@ bool operator==(const ActRec& a, const ActRec& b) {
 }
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
 
-State without_stacks(const State& src) {
+State with_throwable_only(const Index& index, const State& src) {
+  auto throwable = subObj(index.builtin_class(s_Throwable.get()));
   auto ret          = State{};
   ret.initialized   = src.initialized;
   ret.thisType      = src.thisType;
@@ -198,6 +201,7 @@ State without_stacks(const State& src) {
   ret.locals        = src.locals;
   ret.clsRefSlots   = src.clsRefSlots;
   ret.iters         = src.iters;
+  ret.stack.push_back(StackElem { std::move(throwable), NoLocalId });
   return ret;
 }
 

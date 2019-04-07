@@ -478,10 +478,6 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
 
       // You can't have multiple handlers at the same location.
       assertx(ehHandlers.empty() || ehHandlers.top() != off);
-
-      // Skip the implicitly defined Catch opcode by .catch {} directive.
-      assertx(peek_op(bcIter) == OpCatch);
-      bcIter += instrLen(bcIter);
       continue;
     }
 

@@ -343,10 +343,7 @@ const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 Offset findCatchHandler(const Func* func, Offset raiseOffset) {
   auto const eh = func->findEH(raiseOffset);
   if (eh == nullptr) return InvalidAbsoluteOffset;
-  auto pc = func->unit()->at(eh->m_handler);
-  UNUSED auto const op = decode_op(pc);
-  assertx(op == Op::Catch);
-  return func->unit()->offsetOf(pc);
+  return eh->m_handler;
 }
 
 void chainFaultObjects(ObjectData* top, ObjectData* prev) {
@@ -500,7 +497,8 @@ void unwindPhp(ObjectData* phpException) {
           // change if we have a reentry during unwinding.  When we're
           // ready to resume, we need to replace the fault to reflect
           // any state changes we've made (handledCount, etc).
-          g_context->m_faults.back() = fault;
+          vmStack().pushObjectNoRc(fault.m_userException);
+          g_context->m_faults.pop_back();
           return;
         case UnwindAction::Propagate:
           break;

@@ -94,6 +94,7 @@ struct Block {
    * Programs" (http://dl.acm.org/citation.cfm?id=316171).
    */
   BlockId fallthrough{NoBlockId};
+  bool catchEntry{false};
   bool fallthroughNS{false};
   bool multiPred{false};
   bool multiSucc{false};

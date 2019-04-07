@@ -297,7 +297,7 @@ folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
 // need to be propagated across throw exit edges.
 void miThrow(ISS& env) {
   for (auto exit : env.blk.throwExits) {
-    auto const stackLess = without_stacks(env.state);
+    auto const stackLess = with_throwable_only(env.index, env.state);
     env.propagate(exit, &stackLess);
   }
 }

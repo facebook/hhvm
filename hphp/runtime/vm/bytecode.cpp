@@ -5779,16 +5779,6 @@ OPTBLD_INLINE void iopFuncNumArgs() {
   }
 }
 
-OPTBLD_INLINE void iopCatch() {
-  auto vm = &*g_context;
-  assertx(vm->m_faults.size() > 0);
-  Fault fault = vm->m_faults.back();
-  vm->m_faults.pop_back();
-  assertx(fault.m_raiseFrame == vmfp());
-  assertx(fault.m_userException);
-  vmStack().pushObjectNoRc(fault.m_userException);
-}
-
 OPTBLD_INLINE void iopChainFaults() {
   auto const current = *vmStack().indC(1);
   auto const prev = *vmStack().indC(0);

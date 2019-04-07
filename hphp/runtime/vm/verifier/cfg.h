@@ -176,12 +176,6 @@ struct SomeFunc {
       [&] (const FuncEmitter* f) { return Func::findEH(f->ehtab, off); }
     );
   }
-  const EHEnt* findEHbyHandler(Offset off) const {
-    return m_func.match(
-      [&] (const Func* f) { return Func::findEHbyHandler(f->ehtab(), off); },
-      [&] (const FuncEmitter* f) { return Func::findEHbyHandler(f->ehtab, off);}
-    );
-  }
 
 private:
   Either<const Func*, const FuncEmitter*> m_func;

@@ -275,7 +275,8 @@ the bytecode offset of the entry point that should be used by the dispatcher
 
 Catch entry points are used by the unwinder to resume normal execution once a
 matching "catch" block has been found and all the necessary cleanup has been
-performed.
+performed. When catch entry points are entered, the stack contains a single
+Throwable object.
 
 More details about the unwinder and catch entry points can be found in the
 "Exception handler (EH) table" and "Processing exceptions" sections.
@@ -436,12 +437,12 @@ Step 2) Let E be the EH entry found in step 1, and let D be the region depth of
         E. Set the current exception info's region depth to D (overwriting the
         previous value). Continue on to step 3.
 
-Step 3) transfer control to E's catch entry point; the catch entry point begins
-        with a Catch instruction which will take care of popping the current
-        exception info off of the exception stack. If this catch entry point
-        corresponds to a PHP try/catch statement, it is responsible for finding
-        the matching PHP catch clause (e.g. by using the InstanceOfD opcode)
-        and rethrowing the exception if no matching clause was found.
+Step 3) Pop the current exception info off of the exception stack and push the
+        exception object implementing the Throwable interface on the evaluation
+        stack, then transfer control to E's catch entry point. If this catch
+        entry point corresponds to a PHP try/catch statement, it is responsible
+        for finding the matching PHP catch clause (e.g. by using the InstanceOfD
+        opcode) and rethrowing the exception if no matching clause was found.
 
 Step 4) Pop the current frame off of the call stack and then check if the call
         stack is empty. If the call stack is empty, read the current exception
@@ -708,47 +709,45 @@ be empty. In all the above cases, all classref slots must be uninitialized.
 7) The last instruction of the function body must be either a control flow
 without fallthrough or a terminal instruction.
 
-8) Each catch entry point must point to a Catch instruction.
-
-9) Each FPI region enumerated in the FPI region table must start immediately
+8) Each FPI region enumerated in the FPI region table must start immediately
 after an FPush* instruction and it must end with the FCall instruction. Each
 use of the FPush* instruction must be the instruction immediately before
 exactly one FPI region. Likewise, each use of the FCall instruction must be
 the last instruction in exactly one FPI region.
 
-10) Each FPI region may not contain any other instruction than FCall, with the
+9) Each FPI region may not contain any other instruction than FCall, with the
 exception of assertion instructions. There may not be jumps anywhere in the
 function that transfer control from the outside of a given FPI region to the
 inside of that region. Finally, an entry point may not point to an instruction
 inside an FPI region.
 
-11) The initialization state of each iterator variable must be known at every
+10) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are two
 possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
 via IterInit*). Every range of bytecode for which an iterator variable i is
 initialized must be protected by an EH entry with a catch handler that unsets
 i by calling IterFree.
 
-12) The iterator variable referenced by IterInit* must be in the uninitialized
+11) The iterator variable referenced by IterInit* must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
 IterNext* and IterFree must be in the "iter-initialized" state. Note that
 IterInit* conditionally initialize the iterator variable, and IterNext*
 conditionally free the iterator variable.
 
-13) Each EH table must follow all of the rules specified in the "Exception
+12) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
 
-14) The initialization state of each classref slot must be known at every point
+13) The initialization state of each classref slot must be known at every point
 in the code and must be the same for all control paths. A classref slot must be
 initialized before being read and becomes uninitialized after being read. A
 classref slot must be uninitialized before being written to and becomes
 initialized after being written.
 
-15) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
+14) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
 from the following instruction by control flow. Practically speaking, this means
 that the instruction immediately following an assertion cannot be a jump target.
 
-16) Sequences of member instructions should be consistent and continuous. That
+15) Sequences of member instructions should be consistent and continuous. That
 is, only member instructions and asserts may appear in the sequence, control
 flow cannot interrupt the sequence, and the member op mode should be consistent
 across all instructions in the sequence. This is because in the case of
@@ -3496,12 +3495,6 @@ InitThisLoc <local variable id>    []  ->  []
 FuncNumArgs   []   ->   [C:Int]
 
   Push the number of arguments the current function was called with.
-
-Catch    []  ->  [C:Obj]
-
-  Catch. Retrieves the current exception object and pushes it onto the stack.
-  The exception object must implement the builtin Throwable interface. This
-  instruction may only be used at the beginning of a catch entry point.
 
 ChainFaults    [C C]  ->  [C]
 

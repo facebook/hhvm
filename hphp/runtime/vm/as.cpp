@@ -1913,7 +1913,6 @@ void parse_try_catch(AsmState& as, int nestLevel) {
 
   // Emit catch body.
   as.enterReachableRegion(0);
-  as.ue->emitOp(OpCatch);
   as.adjustStack(1);
   as.enforceStackDepth(1);
 

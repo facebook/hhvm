@@ -314,9 +314,9 @@ bool operator!=(const ActRec&, const ActRec&);
 
 /*
  * Return a copy of a State without copying either the evaluation
- * stack or FPI stack.
+ * stack or FPI stack, pushing Throwable on the stack.
  */
-State without_stacks(const State&);
+State with_throwable_only(const Index& env, const State&);
 
 //////////////////////////////////////////////////////////////////////
 

@@ -337,7 +337,6 @@ static const struct {
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
   { OpFuncNumArgs, {None,             Stack1,       OutInt64        }},
-  { OpCatch,       {None,             Stack1,       OutObject       }},
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
@@ -1089,7 +1088,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::Eval:
   case Op::DefClsNop:
   case Op::DefTypeAlias:
-  case Op::Catch:
   case Op::ChainFaults:
   case Op::ContAssignDelegate:
   case Op::ContEnterDelegate:

@@ -837,7 +837,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
     if (!info.expectedStackDepth) {
       // unreachable, or entry block
-      info.expectedStackDepth = 0;
+      info.expectedStackDepth = b->catchEntry ? 1 : 0;
     }
 
     currentStackDepth = *info.expectedStackDepth;

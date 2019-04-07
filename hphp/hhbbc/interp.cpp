@@ -59,7 +59,6 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-const StaticString s_Throwable("Throwable");
 const StaticString s_construct("__construct");
 const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
@@ -1533,11 +1532,6 @@ void in(ISS& env, const bc::RetCSuspended&) {
 
 void in(ISS& env, const bc::Throw& /*op*/) {
   popC(env);
-}
-
-void in(ISS& env, const bc::Catch&) {
-  nothrow(env);
-  return push(env, subObj(env.index.builtin_class(s_Throwable.get())));
 }
 
 void in(ISS& env, const bc::ChainFaults&) {
@@ -4764,10 +4758,10 @@ StepFlags interpOps(Interp& interp,
 
   // If there are throw exit edges, make a copy of the state (except
   // stacks) in case we need to propagate across throw exits (if
-  // it's a PEI).
+  // it's a PEI) and push Throwable.
   auto const stateBefore = interp.blk->throwExits.empty()
     ? State{}
-    : without_stacks(interp.state);
+    : with_throwable_only(env.index, interp.state);
 
   auto const numPushed   = iter->numPush();
   interpStep(env, iter, stop);

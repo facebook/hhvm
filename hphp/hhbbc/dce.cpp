@@ -1685,7 +1685,6 @@ void dce(Env& env, const bc::CastObject& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CastString& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CastVArray& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CastVec& op) { dce_default(env, op); }
-void dce(Env& env, const bc::Catch& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CGetG& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CGetQuietG& op) { dce_default(env, op); }

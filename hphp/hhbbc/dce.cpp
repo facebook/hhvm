@@ -38,6 +38,7 @@
 #include "hphp/hhbbc/analyze.h"
 #include "hphp/hhbbc/cfg-opts.h"
 #include "hphp/hhbbc/cfg.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/interp.h"
 #include "hphp/hhbbc/optimize.h"
@@ -1192,7 +1193,8 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
       }
       if (!isLocLive(env, loc) &&
           !setCouldHaveSideEffects(locRaw(env, loc)) &&
-          !readCouldHaveSideEffects(locRaw(env, loc))) {
+          !readCouldHaveSideEffects(locRaw(env, loc)) &&
+          !is_volatile_local(env.dceState.ainfo.ctx.func, loc)) {
         // note: PushL does not deal with Uninit, so we need the
         // readCouldHaveSideEffects here, regardless of quiet.
         env.dceState.replaceMap.insert({ env.id, { bc::PushL { loc } } });

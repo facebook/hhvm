@@ -25,6 +25,7 @@ namespace HPHP { namespace HHBBC {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_86metadata("86metadata");
+const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -48,7 +49,9 @@ bool is_volatile_local(const php::Func* func, LocalId lid) {
   // Named pseudomain locals are bound to $GLOBALS.
   if (is_pseudomain(func)) return true;
 
-  return l.name->same(s_86metadata.get());
+  return (RuntimeOption::EnableArgsInBacktraces &&
+          l.name->same(s_reified_generics_var.get())) ||
+         l.name->same(s_86metadata.get());
 }
 
 SString memoize_impl_name(const php::Func* func) {

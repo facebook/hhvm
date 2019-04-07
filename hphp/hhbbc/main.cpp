@@ -300,6 +300,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RuntimeOption::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RuntimeOption::UndefinedFunctionFallback = gd.UndefinedFunctionFallback;
+  RuntimeOption::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
   RuntimeOption::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   RuntimeOption::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
@@ -372,6 +373,7 @@ void write_global_data(
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.AbortBuildOnVerifyError     = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.UndefinedFunctionFallback   = RuntimeOption::UndefinedFunctionFallback;
+  gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.HackArrCompatIsArrayNotices =

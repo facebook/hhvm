@@ -196,6 +196,11 @@ struct Repo::GlobalData {
   uint64_t UndefinedFunctionFallback = 0;
 
   /*
+   * Should we display function arguments in backtraces?
+   */
+  bool EnableArgsInBacktraces = false;
+
+  /*
    * A more-or-less unique identifier for the repo
    */
   uint64_t Signature = 0;
@@ -248,6 +253,7 @@ struct Repo::GlobalData {
       (Signature)
       (AbortBuildOnVerifyError)
       (UndefinedFunctionFallback)
+      (EnableArgsInBacktraces)
       (EmitClsMethPointers)
       (IsVecNotices)
       (IsCompatibleClsMethType)

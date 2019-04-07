@@ -1081,6 +1081,7 @@ function hphp_cmd($options, $test, $program) {
     find_test_ext($test, 'ini', 'hphp_config'),
     '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
+    '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.HackCompilerExtractPath='
       .escapeshellarg(bin_root().'/hackc_%{schema}'),
     '-vParserThreadCount=' . ($options['repo-threads'] ?? 1),

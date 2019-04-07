@@ -32,12 +32,5 @@
 (36,30)-(36,31) Lval can no longer be used as an expression. Pull it out into it's own statement.
 (37,25)-(37,26) Lval can no longer be used as an expression. Pull it out into it's own statement.
 (38,31)-(38,32) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(39,15)-(39,16) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(40,20)-(40,21) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(41,4)-(41,5) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(41,20)-(41,21) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(42,4)-(42,5) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(42,25)-(42,26) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(43,20)-(43,21) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(44,26)-(44,27) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(45,4)-(45,33) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(39,4)-(39,33) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(40,30)-(40,31) Lval can no longer be used as an expression. Pull it out into it's own statement.

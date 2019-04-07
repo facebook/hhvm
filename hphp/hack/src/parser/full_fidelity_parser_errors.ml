@@ -1662,12 +1662,7 @@ let parameter_rx_errors context errors node =
         | FunctionCallWithTypeArgumentsExpression {
           function_call_with_type_arguments_argument_list = { syntax = arg_list; _ }; _ }
       ) as call_expression :: parents when phys_equal arg_list node ->
-        (match parents with
-        | PrefixUnaryExpression { prefix_unary_operator = op; _ } as call_expression :: parents
-          when token_kind op = Some TokenKind.Await ->
-          Some (call_expression, parents)
-        | _ ->
-          Some (call_expression, parents))
+        Some (call_expression, parents)
       | _ -> None
     in
     let lval_ness_of_function_arg next_node next_parents =
@@ -1700,10 +1695,10 @@ let parameter_rx_errors context errors node =
     | PrefixUnaryExpression {
       prefix_unary_operator = token;
       prefix_unary_operand = { syntax = lval; _ }
-    } as next_node :: next_parents
+    } :: _
       when phys_equal lval node &&
            Some TokenKind.Ampersand = token_kind token ->
-      lval_ness_of_function_arg next_node next_parents
+      LvalTypeNone
 
     | (PrefixUnaryExpression {
       prefix_unary_operator = token;

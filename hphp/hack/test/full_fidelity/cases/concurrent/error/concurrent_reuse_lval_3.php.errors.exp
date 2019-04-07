@@ -1,1 +1,0 @@
-(5,25)-(5,26) Lval can no longer be used as an expression. Pull it out into it's own statement.

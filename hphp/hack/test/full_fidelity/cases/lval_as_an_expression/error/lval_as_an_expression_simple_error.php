@@ -36,11 +36,6 @@ async function foo(): void {
   ($y = my_inout2<int>(inout $x));
   $y = (my_inout2(inout $x));
   $y = await (my_inout2(inout $x));
-  (my_inout1(&$x));
-  (my_inout1<int>(&$x));
-  ($y = my_inout2(&$x));
-  ($y = my_inout2<int>(&$x));
-  $y = (my_inout2(&$x));
-  $y = await (my_inout2(&$x));
   (list($x1, $x2, list($x3, $x4)) = tuple(1, 2, tuple(3, 4)));
+  $y = await my_inout2(inout $x);
 }

@@ -46,28 +46,10 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Enumerates actions that should be taken by the enterVM loop after
- * unwinding an exception.
- */
-enum class UnwindAction {
-  /*
-   * The exception was not handled in this nesting of the VM---it
-   * needs to be rethrown.
-   */
-  Propagate,
-
-  /*
-   * The exception was either handled, or a catch or fault handler was
-   * identified and the VM state has been prepared for entry to it.
-   */
-  ResumeVM,
-};
-
 #if (!defined(NDEBUG) || defined(USE_TRACE))
-std::string describeFault(const Fault& f) {
+std::string describeEx(ObjectData* phpException) {
   return folly::format("[user exception] {}",
-                       implicit_cast<void*>(f.m_userException)).str();
+                       implicit_cast<void*>(phpException)).str();
 }
 #endif
 
@@ -123,34 +105,6 @@ void discardMemberTVRefs(PC pc) {
     tvDecRefGen(mstate.tvRef2);
     tvWriteUninit(mstate.tvRef2);
   }
-}
-
-UnwindAction checkHandlers(const EHEnt* eh,
-                           const ActRec* const fp,
-                           PC& pc,
-                           Fault& fault) {
-  auto const func = fp->m_func;
-  ITRACE(1, "checkHandlers: func {} ({})\n",
-         func->fullName()->data(),
-         func->unit()->filepath()->data());
-
-  for (int i = 0;; ++i) {
-    // Skip the initial m_handledCount - 1 handlers that were
-    // considered before.
-    if (fault.m_handledCount <= i) {
-      fault.m_handledCount++;
-      ITRACE(1, "checkHandlers: entering catch at {}\n", eh->m_handler);
-      pc = func->unit()->at(eh->m_handler);
-      DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-      return UnwindAction::ResumeVM;
-    }
-    if (eh->m_parentIndex != -1) {
-      eh = &func->ehtab()[eh->m_parentIndex];
-    } else {
-      break;
-    }
-  }
-  return UnwindAction::Propagate;
 }
 
 /**
@@ -310,28 +264,6 @@ DEBUG_ONLY bool throwable_has_expected_props() {
     isException(exCls->declPropTypeConstraint(s_previousIdx));
 }
 
-bool chainFaults(Fault& fault) {
-  always_assert(!g_context->m_faults.empty());
-  auto& faults = g_context->m_faults;
-  faults.pop_back();
-  if (faults.empty()) {
-    faults.push_back(fault);
-    return false;
-  }
-  auto prev = faults.back();
-  if (fault.m_raiseNesting == prev.m_raiseNesting &&
-      fault.m_raiseFrame == prev.m_raiseFrame) {
-    fault.m_raiseOffset = prev.m_raiseOffset;
-    fault.m_handledCount = prev.m_handledCount;
-    chainFaultObjects(fault.m_userException, prev.m_userException);
-    faults.pop_back();
-    faults.push_back(fault);
-    return true;
-  }
-  faults.push_back(fault);
-  return false;
-}
-
 const StaticString s_hphpd_break("hphpd_break");
 const StaticString s_fb_enable_code_coverage("fb_enable_code_coverage");
 const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
@@ -387,9 +319,8 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
  *   - Discard all evaluation stack temporaries (including pre-live
  *     activation records).
  *
- *   - Check if the faultOffset that raised the exception is inside a
- *     protected region, if so, if it can handle the Fault resume the
- *     VM at the handler.
+ *   - Check if the current PC is inside a protected region, if so,
+ *     leave the exception on the stack and resume the VM at the handler.
  *
  *   - Check if we are handling user exception in an eagerly executed
  *     async function. If so, pop its frame, wrap the exception into
@@ -401,141 +332,75 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
  *     current VM nesting level, rethrow the exception, otherwise go
  *     to the first step and repeat this process in the caller's
  *     frame.
- *
- * Note: it's important that the unwinder makes a copy of the Fault
- * it's currently operating on, as the underlying faults vector may
- * reallocate due to nested exception handling.
  */
 void unwindPhp(ObjectData* phpException) {
-  Fault fault;
-  fault.m_userException = phpException;
-  fault.m_userException->incRefCount();
-  g_context->m_faults.push_back(fault);
+  phpException->incRefCount();
 
   auto& fp = vmfp();
   auto& stack = vmStack();
   auto& pc = vmpc();
   bool fromTearDownFrame = false;
 
-  ITRACE(1, "entering unwinder for fault: {}\n", describeFault(fault));
+  ITRACE(1, "entering unwinder for exception: {}\n", describeEx(phpException));
   SCOPE_EXIT {
-    ITRACE(1, "leaving unwinder for fault: {}\n", describeFault(fault));
+    ITRACE(1, "leaving unwinder for exception: {}\n", describeEx(phpException));
   };
 
   discardMemberTVRefs(pc);
 
   do {
-    bool discard = false;
-    if (fault.m_raiseOffset == kInvalidOffset) {
-      /*
-       * This block executes whenever we want to treat the fault as if
-       * it was freshly thrown. Freshly thrown faults either were never
-       * previously seen by the unwinder OR were propagated from the
-       * previous frame. In such a case, we fill in the fields with
-       * the information from the current frame.
-       */
-      always_assert(fault.m_raiseNesting == kInvalidNesting);
-      // Nesting is set to the current VM nesting.
-      fault.m_raiseNesting = g_context->m_nestedVMs.size();
-      // Raise frame is set to the current frame
-      fault.m_raiseFrame = fp;
-      // Raise offset is set to the offset of the current PC.
-      fault.m_raiseOffset = fp->m_func->unit()->offsetOf(pc);
-      // No handlers were yet examined for this fault.
-      fault.m_handledCount = 0;
-      // We will be also discarding stack temps.
-      discard = true;
-    }
+    auto const func = fp->func();
+    auto const raiseOffset = func->unit()->offsetOf(pc);
 
-    ITRACE(1, "unwind: func {}, raiseOffset {} fp {}\n",
-           fp->m_func->name()->data(),
-           fault.m_raiseOffset,
+    ITRACE(1, "unwindPhp: func {}, raiseOffset {} fp {}\n",
+           func->name()->data(),
+           raiseOffset,
            implicit_cast<void*>(fp));
 
-    assertx(fault.m_raiseNesting != kInvalidNesting);
-    assertx(fault.m_raiseFrame != nullptr);
-    assertx(fault.m_raiseOffset != kInvalidOffset);
-
-    /*
-     * If the handledCount is non-zero, we've already seen this fault once
-     * while unwinding this frema, and popped all eval stack
-     * temporaries the first time it was thrown (before entering a
-     * fault funclet).  When the Unwind instruction was executed in
-     * the funclet, the eval stack must have been left empty again.
-     *
-     * (We have to skip discardStackTemps in this case because it will
-     * look for FPI regions and assume the stack offsets correspond to
-     * what the FPI table expects.)
-     */
-    if (discard) {
-      if (fromTearDownFrame) {
-        fromTearDownFrame = false;
-        auto const raiseOffset = fp->m_func->unit()->offsetOf(skipCall(pc));
-        discardStackTemps(fp, stack, raiseOffset);
-      } else {
-        discardStackTemps(fp, stack, fault.m_raiseOffset);
-      }
+    if (fromTearDownFrame) {
+      fromTearDownFrame = false;
+      discardStackTemps(fp, stack, func->unit()->offsetOf(skipCall(pc)));
+    } else {
+      discardStackTemps(fp, stack, raiseOffset);
     }
 
-    do {
-      // Note: we skip catch/finally clauses if we have a pending C++
-      // exception as part of our efforts to avoid running more PHP
-      // code in the face of such exceptions. Similarly, if the frame
-      // has already been torn down (eg an exception thrown by a user
-      // profiler on function exit), we can't execute any handlers in
-      // *this* frame.
-      if (RequestInfo::s_requestInfo->m_pendingException != nullptr ||
-          UNLIKELY(fp->localsDecRefd())) {
-        continue;
-      }
+    // Note: we skip catch/finally clauses if we have a pending C++
+    // exception as part of our efforts to avoid running more PHP
+    // code in the face of such exceptions. Similarly, if the frame
+    // has already been torn down (eg an exception thrown by a user
+    // profiler on function exit), we can't execute any handlers in
+    // *this* frame.
+    if (RequestInfo::s_requestInfo->m_pendingException == nullptr &&
+        !UNLIKELY(fp->localsDecRefd())) {
 
-      const EHEnt* eh = fp->m_func->findEH(fault.m_raiseOffset);
+      const EHEnt* eh = func->findEH(raiseOffset);
       if (eh != nullptr) {
-        switch (checkHandlers(eh, fp, pc, fault)) {
-        case UnwindAction::ResumeVM:
-          // We've kept our own copy of the Fault, because m_faults may
-          // change if we have a reentry during unwinding.  When we're
-          // ready to resume, we need to replace the fault to reflect
-          // any state changes we've made (handledCount, etc).
-          vmStack().pushObjectNoRc(fault.m_userException);
-          g_context->m_faults.pop_back();
-          return;
-        case UnwindAction::Propagate:
-          break;
-        }
-      }
-      // If we came here, it means that no further EHs were found for
-      // the current fault offset and handledCount. This means we are
-      // allowed to chain the current exception with the previous
-      // one (if it exists). This is because the current exception
-      // escapes the exception handler where it was thrown.
-    } while (chainFaults(fault));
+        // Found exception handler. Push the exception on top of the
+        // stack and resume VM.
+        ITRACE(1, "unwindPhp: entering catch at {} func {} ({})\n",
+               eh->m_handler,
+               func->fullName()->data(),
+               func->unit()->filepath()->data());
 
-    // We found no more handlers in this frame, so the nested fault
-    // count starts over for the caller frame.
-    fault.m_userException = tearDownFrame(fp, stack, pc, fault.m_userException);
-    if (fault.m_userException == nullptr) {
-      g_context->m_faults.pop_back();
+        vmStack().pushObjectNoRc(phpException);
+        pc = func->unit()->at(eh->m_handler);
+        DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
+        return;
+      }
+    };
+
+    // We found no more handlers in this frame.
+    phpException = tearDownFrame(fp, stack, pc, phpException);
+    if (phpException == nullptr) {
       if (fp) pc = skipCall(pc);
       return;
     }
 
-    // Once we are done with EHs for the current frame we restore
-    // default values for the fields inside Fault. This makes sure
-    // that on another loop pass we will treat the fault just
-    // as if it was freshly thrown.
-    fault.m_raiseNesting = kInvalidNesting;
-    fault.m_raiseFrame = nullptr;
-    fault.m_raiseOffset = kInvalidOffset;
-    fault.m_handledCount = 0;
-    g_context->m_faults.back() = fault;
     fromTearDownFrame = true;
   } while (fp);
 
   ITRACE(1, "unwind: reached the end of this nesting's ActRec chain\n");
-  g_context->m_faults.pop_back();
-
-  throw_object(Object::attach(fault.m_userException));
+  throw_object(Object::attach(phpException));
 }
 
 /*
@@ -576,15 +441,6 @@ void unwindCpp(Exception* exception) {
            fp->func()->name()->data(),
            offset,
            implicit_cast<void*>(fp));
-
-    // Discard all PHP exceptions pending for this frame
-    auto& faults = g_context->m_faults;
-    while (UNLIKELY(!faults.empty()) &&
-           faults.back().m_raiseFrame == fp &&
-           faults.back().m_raiseNesting == g_context->m_nestedVMs.size()) {
-      decRefObj(faults.back().m_userException);
-      faults.pop_back();
-    }
 
     // Discard stack temporaries
     discardStackTemps(fp, stack, offset);

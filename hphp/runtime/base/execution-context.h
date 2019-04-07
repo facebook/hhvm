@@ -594,7 +594,6 @@ public:
   req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;
   req::vector<const StringData*> m_evaledFilesOrder;
-  req::vector<Fault> m_faults;
   int m_lambdaCounter;
   using VMStateVec = req::TinyVector<VMState, 32>;
   VMStateVec m_nestedVMs;

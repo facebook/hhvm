@@ -1798,10 +1798,6 @@ static inline void enterVMCustomHandler(ActRec* ar, Action action) {
   assertx(isReturnHelper(reinterpret_cast<void*>(ar->m_savedRip)));
   assertx(ar->m_callOff == 0);
 
-  auto ec = &*g_context;
-  DEBUG_ONLY int faultDepth = ec->m_faults.size();
-  SCOPE_EXIT { assertx(ec->m_faults.size() == faultDepth); };
-
   vmFirstAR() = ar;
   vmJitCalledFrame() = nullptr;
   vmJitReturnAddr() = 0;

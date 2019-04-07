@@ -217,7 +217,7 @@ let stack_history (seq : IS.t) : (instruct * stack) list =
 (* Produces a map from stack height to indices in the instruction sequence
    with that height, as well as a list of all the heights in the table. This
    map doesn't include the last instruction, since swapping the position of a
-   Ret* or Unwind instruction is not desirable. *)
+   Ret* instruction is not desirable. *)
 let height_map (lst : (instruct * stack) list) :
     int list * (int, int list) Hashtbl.t =
   if List.length lst < 0 then failwith "cannot get history of empty sequence";

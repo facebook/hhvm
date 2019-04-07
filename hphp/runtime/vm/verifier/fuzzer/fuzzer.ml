@@ -251,7 +251,6 @@ let maintain_stack (data : Instr_utils.seq_data) :
           let old_stk = !stk in
           stk := num_fold List.tl_exn (List.length !stk - 1) !stk;
           empty_stk old_stk 1
-      | IContFlow Unwind (* require a stack height of 0 *)
       | IMisc NativeImpl -> let old_stk = !stk in
                             stk := []; empty_stk old_stk 0
       | ILabel _
@@ -501,10 +500,8 @@ let mutate_reorder (input : HP.t) : mutation_monad =
     let newseq = subinstrs (-1) start1 @ subinstrs start2 end2 @
                  subinstrs end1 start2 @ subinstrs start1 end1 @
                  subinstrs end2 (List.length instrs - 1) in
-    (* Reattach fault regions that were discarded by converting to list *)
-    IS.gather [IS.InstrSeq.flat_map (IS.Instr_list newseq)
-               ~f:(maintain_stack (seq_data is) List.return);
-               IS.extract_fault_funclets is] in
+    IS.InstrSeq.flat_map (IS.Instr_list newseq)
+      ~f:(maintain_stack (seq_data is) List.return) in
   Nondet.return input |> mutate mut input !reorder_reps
 
 (* This will randomly remove some of the instructions in a sequence. *)
@@ -521,8 +518,8 @@ let mutate_remove (input : HP.t) : mutation_monad =
     IS.InstrSeq.flat_map is (maintain_stack (seq_data is) remove) in
   Nondet.return input |> mutate mut input !remove_reps
 
-(* This will randomly wrap instruction sequences in try/fault or try/catch
-   blocks with trivial handlers. *)
+(* This will randomly wrap instruction sequences in try/catch blocks with
+   with trivial handlers. *)
 let mutate_exceptions (input : HP.t) : mutation_monad =
   let rec new_exn_region (f : IS.t -> IS.t * IS.t) (is : IS.t) : IS.t =
     let primary = IS.instr_seq_to_list is in
@@ -535,12 +532,8 @@ let mutate_exceptions (input : HP.t) : mutation_monad =
            let body, faults = subinstrs start end_pos |> IS.instrs |> f in
            IS.gather [subinstrs (-1) start |> IS.instrs; body;
                       subinstrs end_pos (primary_len - 1) |> IS.instrs;
-                      IS.extract_fault_funclets is; faults]
+                      faults]
          with Invalid_argument _ -> new_exn_region f is in
-  let make_fault (label : Label.t) (body : IS.t) : IS.t * IS.t =
-    let open IS in gather [ITry (TryFaultBegin label) |> instr; body;
-                           ITry TryFaultEnd |> instr],
-                   gather [ILabel label |> instr; instr_unwind] in
   let make_catch (label : Label.t) (body : IS.t) : IS.t * IS.t =
     let open IS in gather [instr_try_catch_begin; body; instr_jmp label;
                            instr_try_catch_middle; instr_throw;
@@ -548,12 +541,9 @@ let mutate_exceptions (input : HP.t) : mutation_monad =
   let resume_label () =
     Label.get_next_label () |> string_of_int |> (^) "resume" |> Label.named in
   let new_catch = resume_label ()       |> make_catch |> new_exn_region in
-  let new_fault = random_fault_label () |> make_fault |> new_exn_region in
   let mut (is : IS.t) =
     if not (should_mutate()) then is
-    else if Random.int 2 < 1
-      then new_catch is
-      else new_fault is in
+    else new_catch is in
   Nondet.return input |> mutate mut input !exn_reps
 
 (* This will replace random instructions with others of the

@@ -274,7 +274,6 @@ type instruct_control_flow =
   | RetC
   | RetCSuspended
   | RetM of num_params
-  | Unwind
   | Throw
 
 type instruct_special_flow =
@@ -520,8 +519,6 @@ type instruct_try =
   | TryCatchBegin
   | TryCatchMiddle
   | TryCatchEnd
-  | TryFaultBegin of Label.t
-  | TryFaultEnd
 
 type srcloc = { line_begin:int; col_begin:int; line_end:int; col_end:int }
 type instruct =

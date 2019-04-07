@@ -462,11 +462,9 @@ let emit_body
     stmt_instrs;
     default_value_setters;
   ] in
-  let fault_instrs = extract_fault_funclets body_instrs in
   let body_instrs = if debugger_modify_program
     then modify_prog_for_debugger_eval body_instrs
     else body_instrs in
-  let body_instrs = gather [body_instrs; fault_instrs] in
   make_body
     body_instrs
     decl_vars

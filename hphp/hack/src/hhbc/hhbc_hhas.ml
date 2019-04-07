@@ -307,7 +307,6 @@ let string_of_mutator x =
 
 let string_of_label = function
   | Label.Regular id -> "L" ^ (string_of_int id)
-  | Label.Fault id -> "F" ^ (string_of_int id)
   | Label.DefaultArg id -> "DV" ^ (string_of_int id)
   | Label.Named id -> id
 
@@ -367,7 +366,6 @@ let string_of_control_flow instruction =
   | RetCSuspended -> "RetCSuspended"
   | RetM p -> "RetM " ^ string_of_int p
   | Throw -> "Throw"
-  | Unwind -> "Unwind"
   | Switch (kind, base, labels) -> string_of_switch kind base labels
   | SSwitch cases -> string_of_sswitch cases
 
@@ -650,9 +648,6 @@ let string_of_iterator instruction =
 
 let string_of_try instruction =
   match instruction with
-  | TryFaultBegin label ->
-    ".try_fault " ^ (string_of_label label) ^ " {"
-  | TryFaultEnd -> "}"
   | TryCatchBegin -> ".try {"
   | TryCatchMiddle -> "} .catch {"
   | TryCatchEnd -> "}"
@@ -736,16 +731,13 @@ let adjusted_indent instruction indent =
   match instruction with
   | IComment _ -> 0
   | ILabel _
-  | ITry TryFaultEnd
   | ITry TryCatchMiddle
   | ITry TryCatchEnd -> indent - 2
   | _ -> indent
 
 let new_indent instruction indent =
   match instruction with
-  | ITry (TryFaultBegin _)
   | ITry TryCatchBegin -> indent + 2
-  | ITry TryFaultEnd
   | ITry TryCatchEnd -> indent - 2
   | _ -> indent
 

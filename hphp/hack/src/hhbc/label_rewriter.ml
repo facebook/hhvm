@@ -46,17 +46,10 @@ let get_regular_labels instr =
   | IMisc (MemoGetEager (l1, l2, _)) -> [l1; l2]
   | _ -> []
 
-(* Get any labels referred to in fault handlers *)
-let get_catch_or_fault_labels instr =
-  match instr with
-  | ITry (TryFaultBegin l) -> [l]
-  | _ -> []
-
 (* Generate new labels for all labels referenced in instructions and default
  * parameter values, in the same order as used by DumpHhas:
  *   1. First, labels referenced by normal control-flow (jumps, switches, etc)
- *   2. Next, labels referenced by catch or fault handlers
- *   3. Last, labels referenced by default parameter values
+ *   2. Last, labels referenced by default parameter values
  *)
 let create_label_ref_map defs params body =
   let process_ref (n, (used, refs) as acc) l =
@@ -74,7 +67,6 @@ let create_label_ref_map defs params body =
     List.fold_left (get_labels instr) ~init:acc ~f:process_ref) in
   let acc = (0, (ISet.empty, IMap.empty)) in
   let acc = gather_using get_regular_labels acc body in
-  let acc = gather_using get_catch_or_fault_labels acc body in
   let acc =
     List.fold_left params ~init:acc
     ~f:(fun acc param ->
@@ -134,7 +126,6 @@ let rewrite_params_and_body defs used refs params body =
     | IContFlow (SSwitch pairs) ->
       Some (IContFlow (SSwitch
         (List.map pairs (fun (id,l) -> (id, relabel l)))))
-    | ITry (TryFaultBegin l) -> Some (ITry (TryFaultBegin (relabel l)))
     | IMisc (MemoGet (l, r)) ->
       Some (IMisc (MemoGet (relabel l, r)))
     | IMisc (MemoGetEager (l1, l2, r)) ->

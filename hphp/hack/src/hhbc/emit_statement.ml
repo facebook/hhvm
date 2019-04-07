@@ -735,7 +735,6 @@ and emit_try_finally_ env pos try_block finally_block =
   let finally_body_for_catch =
     finally_body
     |> Label_rewriter.clone_with_fresh_regular_labels
-    |> strip_fault_bodies
   in
 
   (* (3) Finally epilogue *)

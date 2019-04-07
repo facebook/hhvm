@@ -100,7 +100,6 @@ let random_key () : MemberKey.t =
       fun () -> W]
      |> rand_elt) ()
 
-let random_fault_label () : Label.t = Label.Fault (Random.int 10)
 let random_adata_id () : adata_id =  "A_" ^ (Random.int 10 |> string_of_int)
 
 (* A list of generators for instructions. Doesn't include all instructions;

@@ -187,13 +187,14 @@ type stored_value_kind =
    <i, Some (l, local_kind) :: rest> is emitted as
 
    i
-   try-fault F {
+   .try {
      setl/popl l; depending on local_kind
      <rest>
+   } .catch {
+     unset l
+     throw
    }
    unsetl l
-   F: unset l
-      unwind
    *)
 type instruction_sequence_with_locals =
   (Instruction_sequence.t * (Local.t * stored_value_kind) option) list

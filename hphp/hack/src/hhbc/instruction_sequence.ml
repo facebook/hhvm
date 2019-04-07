@@ -25,7 +25,6 @@ type t =
 | Instr_one of instruct
 | Instr_list of instruct list
 | Instr_concat of t list
-| Instr_try_fault of t * t
 
 (* Some helper constructors *)
 let instr x = Instr_one x
@@ -80,7 +79,6 @@ let instr_break level = instr (ISpecialFlow (Break level))
 let instr_goto label = instr (ISpecialFlow (Goto label))
 let instr_iter_break label itrs =
   instr (IIterator (IterBreak (label, itrs)))
-let instr_unwind = instr (IContFlow Unwind)
 let instr_false = instr (ILitConst False)
 let instr_true = instr (ILitConst True)
 let instr_eq = instr (IOp Eq)
@@ -302,8 +300,6 @@ module InstrSeq = struct
       | [x] -> Instr_one x
       | x -> Instr_list x
       end
-    | Instr_try_fault (try_body, fault_body) ->
-      Instr_try_fault ((flat_map try_body ~f), (flat_map fault_body ~f))
     | Instr_list instrl ->
       Instr_list (flat_map_list instrl ~f)
     | Instr_concat instrseql ->
@@ -314,8 +310,6 @@ module InstrSeq = struct
     match instrseq with
     | Instr_empty -> Instr_empty
     | Instr_one x -> f x
-    | Instr_try_fault (try_body, fault_body) ->
-      Instr_try_fault ((flat_map_seq try_body ~f), (flat_map_seq fault_body ~f))
     | Instr_list instrl ->
       Instr_concat (List.map instrl ~f)
     | Instr_concat instrseql ->
@@ -327,8 +321,6 @@ module InstrSeq = struct
     match instrseq with
     | Instr_empty -> init
     | Instr_one x -> f init x
-    | Instr_try_fault (try_body, fault_body) ->
-      fold_left fault_body ~init:(fold_left try_body ~f ~init) ~f
     | Instr_list instrl ->
       List.fold_left instrl ~f ~init
     | Instr_concat instrseql ->
@@ -342,8 +334,6 @@ module InstrSeq = struct
       | Some x -> Instr_one x
       | None -> Instr_empty
       end
-    | Instr_try_fault (try_body, fault_body) ->
-      Instr_try_fault ((filter_map try_body ~f), (filter_map fault_body ~f))
     | Instr_list instrl ->
       Instr_list (List.filter_map instrl ~f)
     | Instr_concat instrseql ->
@@ -361,8 +351,6 @@ let instr_seq_to_list t =
       match s with
       | Instr_empty -> go acc sl
       | Instr_one x -> go (x :: acc) sl
-      (* NOTE we discard fault blocks when linearizing an instruction sequence *)
-      | Instr_try_fault (try_body, _fault_body) -> go acc (try_body :: sl)
       | Instr_list instrl -> go (List.rev_append instrl acc) sl
       | Instr_concat sl' -> go acc (sl' @ sl) in
   let rec compact_src_locs acc = function
@@ -375,51 +363,9 @@ let instr_seq_to_list t =
     | i :: is -> compact_src_locs (i :: acc) is in
   go [] [t] |> compact_src_locs []
 
-let instr_try_fault fault_label try_body fault_body =
-  let instr_try_fault_body = gather [
-    instr (ITry (TryFaultBegin (fault_label)));
-    try_body;
-    instr (ITry TryFaultEnd)
-  ] in
-  let fault_body = gather [
-    instr_label fault_label;
-    fault_body
-  ] in
-  Instr_try_fault (instr_try_fault_body, fault_body)
-
 let instr_try_catch_begin = instr (ITry TryCatchBegin)
 let instr_try_catch_middle = instr (ITry TryCatchMiddle)
 let instr_try_catch_end = instr (ITry TryCatchEnd)
-
-(* Return a list of all fault funclets in instrseq, to be emitted after the
-function's main body. *)
-let extract_fault_funclets instrseq =
-  let rec aux instrseq acc =
-    match instrseq with
-    | Instr_empty
-    | Instr_one _ -> acc
-    | Instr_try_fault (try_body, fault_body) ->
-    (* collect fault handlers in try body and fault body, then prepend
-       the outer fault handler *)
-      fault_body :: aux fault_body (aux try_body acc)
-    | Instr_list _ -> acc
-    | Instr_concat ([]) -> acc
-    | Instr_concat (h :: t) -> aux (Instr_concat t) (aux h acc) in
-  (* fault handlers are accumulated in reverse so result list needs to
-     be reversed to get the correct order *)
-  gather (List.rev @@ aux instrseq [])
-
-(* Return a copy of instrseq with any fault bodies stripped out. This is used
-when we copy the body of a finally block, to avoid generating two copies of the
-fault body. *)
-let rec strip_fault_bodies instrseq =
-  match instrseq with
-  | Instr_empty
-  | Instr_one _
-  | Instr_list _ -> instrseq
-  | Instr_concat l -> Instr_concat (List.map l strip_fault_bodies)
-  | Instr_try_fault (try_body, _) ->
-      Instr_try_fault (strip_fault_bodies try_body, Instr_empty)
 
 let get_num_cls_ref_slots instrseq =
   InstrSeq.fold_left
@@ -473,10 +419,6 @@ let rewrite_user_labels instrseq =
     | Instr_one i ->
       let i, map = rewrite_user_labels_instr name_label_map i in
       (Instr_one i), map
-    | Instr_try_fault (try_body, fault_body) ->
-      let try_body, name_label_map = aux try_body name_label_map in
-      let fault_body, name_label_map = aux fault_body name_label_map in
-      Instr_try_fault (try_body, fault_body), name_label_map
     | Instr_concat l ->
       let l, name_label_map = List.fold_left l
         ~f:(fun (acc, map) s -> let l, map = aux s map in l :: acc, map)
@@ -542,10 +484,6 @@ let rewrite_class_refs instrseq =
     | Instr_one i ->
       let n, s, i = rewrite_class_refs_instr num stack i in
       Instr_one i, n, s
-    | Instr_try_fault (try_body, fault_body) ->
-      let try_body, num, stack = aux try_body num stack in
-      let fault_body, num, stack = aux fault_body num stack in
-      Instr_try_fault (try_body, fault_body), num, stack
     | Instr_concat l ->
       let l, num, stack = List.fold_left l
         ~f:(fun (acc, n, s) is -> let l, n, s = aux is n s in l :: acc, n, s)
@@ -614,7 +552,6 @@ let first instrs =
     | Instr_one i -> if is_srcloc i then None else Some i
     | Instr_list l -> List.find l (fun x -> not (is_srcloc x))
     | Instr_concat l -> List.find_map ~f:aux l
-    | Instr_try_fault (t, f) -> match aux t with None -> aux f | v -> v
   in
   aux instrs
 
@@ -625,6 +562,5 @@ let is_empty instrs =
     | Instr_one i -> is_srcloc i
     | Instr_list l -> List.is_empty l || List.for_all ~f:is_srcloc l
     | Instr_concat l -> List.for_all ~f:aux l
-    | Instr_try_fault (t, f) -> aux t && aux f
   in
   aux instrs

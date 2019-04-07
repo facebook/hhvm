@@ -10,14 +10,12 @@
 (* Labels, regardless of flavor have unique IDs *)
 type t =
   | Regular of int
-  | Fault of int
   | DefaultArg of int
   | Named of string
 
 let id label =
   match label with
   | Regular id
-  | Fault id
   | DefaultArg id -> id
   | Named _ -> failwith "Label should be rewritten before this point (id)"
 
@@ -25,8 +23,6 @@ let option_map f label =
   match label with
   | Regular id ->
     begin match f id with None -> None | Some id -> Some (Regular id) end
-  | Fault id ->
-    begin match f id with None -> None | Some id -> Some (Fault id) end
   | DefaultArg id ->
     begin match f id with None -> None | Some id -> Some (DefaultArg id) end
   | Named _ ->
@@ -35,7 +31,6 @@ let option_map f label =
 let map f label =
   match label with
   | Regular id -> Regular (f id)
-  | Fault id -> Fault (f id)
   | DefaultArg id -> DefaultArg (f id)
   | Named _ -> failwith "Label should be rewritten before this point (map)"
 
@@ -49,9 +44,6 @@ let get_next_label () =
 
 let next_regular () =
   Regular (get_next_label())
-
-let next_fault () =
-  Fault (get_next_label())
 
 let next_default_arg () =
   DefaultArg (get_next_label())

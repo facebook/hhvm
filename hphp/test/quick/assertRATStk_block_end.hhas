@@ -8,8 +8,9 @@
   Int 2
   JmpNZ target_label
   AssertRATStk 3 Cell
-  target_label: FPushFuncD 1 "var_dump"
+target_label:
   Int 42
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
   PopC

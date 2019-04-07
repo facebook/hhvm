@@ -1507,7 +1507,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
 #define NUM_PUSH_INS_1(a) 1
-#define NUM_PUSH_FPUSH 0
+#define NUM_PUSH_FPUSH immIVA[0]
 #define NUM_PUSH_FCALL immFCA.numRets
 #define NUM_POP_NOV 0
 #define NUM_POP_ONE(a) 1
@@ -1517,7 +1517,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_C_MFINAL(n) (immIVA[0] + n)
 #define NUM_POP_CUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
-#define NUM_POP_FPUSH(nin, nobj) (nin + 3)
+#define NUM_POP_FPUSH(nin, nobj) (immIVA[0] + nin + 3)
 #define NUM_POP_FCALL (immFCA.numArgs + (immFCA.hasUnpack() ? 1 : 0) + \
                        immFCA.numRets - 1)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
@@ -1555,6 +1555,10 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     as.adjustStack(-NUM_POP_##pop);                                    \
                                                                        \
+    if (isFPush(Op##name)) {                                           \
+      as.beginFpi(curOpcodeOff);                                       \
+    }                                                                  \
+                                                                       \
     if (thisOpcode == OpMemoGet) {                                     \
       /* MemoGet pushes after branching */                             \
       assertx(labelJumps.size() == 1);                                 \
@@ -1578,10 +1582,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
       for (auto& kv : labelJumps) {                                    \
         as.addLabelJump(kv.first, kv.second, curOpcodeOff);            \
       }                                                                \
-    }                                                                  \
-                                                                       \
-    if (isFPush(Op##name)) {                                           \
-      as.beginFpi(curOpcodeOff);                                       \
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \

@@ -350,11 +350,11 @@ called the FPI stack. Each entry on the FPI stack consists of a reference to an
 FPI structure and a bytecode address of entry point into the corresponding
 function. The entry on the top of the FPI stack is called the "current FPI".
 
-The FPush* instructions push a new entry onto the FPI stack, initializing the
-entry with a reference to the FPI structure for a given function and the
-bytecode address of the appropriate entry point. Arguments are pushed on the
-stack either as cells or as refs, but they may be refs only if the parameter
-is passed by ref. The FCall* instructions look at the current FPI to get the
+Arguments are pushed on the stack either as cells or as refs, but they may be
+refs only if the parameter is passed by ref. Then, the FPush* instructions push
+a new entry onto the FPI stack, initializing the entry with a reference to the
+FPI structure for a given function and the bytecode address of the appropriate
+entry point. Finally, the FCall instruction look at the current FPI to get the
 bytecode address of the function (the callee), transfers the parameters from the
 evaluation stack to the callee, pops the current FPI off of the FPI stack, and
 then invokes the dispatcher to call the function.
@@ -363,8 +363,8 @@ Calls to builtin functions may be optimized to avoid pushing an entry on the
 FPI stack if it is known that the builtin function does not need access to the
 call stack. In this case, the arguments to the builtin are pushed on stack as
 Cells and Vars, and the builtin can be invoked with the FCallBuiltin
-instruction. Unless otherwise noted, subsequent references to FCall*
-instructions should be meant to refer to non-optimized FCall instructions, i.e.
+instruction. Unless otherwise noted, subsequent references to the FCall
+instruction should be meant to refer to non-optimized FCall instruction, i.e.
 all FCall instructions other than FCallBuiltin.
 
 
@@ -372,14 +372,14 @@ Calling convention
 ------------------
 
 The caller may pass any number of parameters to the callee by pushing zero or
-more cells or refs on the stack prior to executing an FCall* instruction. The
-caller must pass the parameters in forward order, i.e. the first pushed value
-corresponds to the first parameter, and so forth.
+more cells or refs on the stack prior to executing an FPush*/FCall instruction
+sequence. The caller must pass the parameters in forward order, i.e. the first
+pushed value corresponds to the first parameter, and so forth.
 
-The FPush*/FCall* instructions can be used to call a global function, a method
+The FPush*/FCall instructions can be used to call a global function, a method
 on an object, or a method from a class. The caller is responsible for
-evaluating all of the parameters in forward order. When the caller executes an
-FCall* instruction, the dispatcher creates a new frame and moves the parameters
+evaluating all of the parameters in forward order. When the caller executes the
+FCall instruction, the dispatcher creates a new frame and moves the parameters
 prepared by the caller into the callee's variable environment. The dispatcher
 then transfers control to the appropriate entry point of the callee (either the
 main entry point or a DV entry point) based on the number of parameters passed.
@@ -674,15 +674,9 @@ FPI regions
 An FPI region is a contiguous range of bytecode that constitutes a call site.
 Each FPI region begins immediately after an FPush* instruction that pushes an
 FPI structure onto the FPI stack and should normally end with the corresponding
-FCall* instruction that pops that FPI structure off of the FPI stack. If two
-FPI regions overlap, one of the FPI regions must be completely enclosed by the
-other FPI region. An FPI region may not contain backward jumps, nor may it
-contain forward jumps that jump past the end of the FPI region.
-
-In the case of an exception, an FPI region can terminate without an FCall*, and
-without pushing a value on the stack for each argument if these instructions
-would be unreachable (e.g. calling a function that never returns). In this case
-it is possible for multiple fpi regions to end at the same bytecode.
+FCall instruction that pops that FPI structure off of the FPI stack. Since there
+are no other instructions between FPush* and FCall, only the FCall instruction
+is considered to be a part of the FPI region.
 
 Each function has an "FPI region table". Each row in the FPI region table
 consists of offset of the FPush* instruction that begins the region, the FCall
@@ -778,56 +772,44 @@ funclets may not contain the Ret* instructions. Also, each catch entry point
 must point to a Catch instruction.
 
 9) Each FPI region enumerated in the FPI region table must start immediately
-after an FPush* instruction and it must end with an FCall* instruction. Each
+after an FPush* instruction and it must end with the FCall instruction. Each
 use of the FPush* instruction must be the instruction immediately before
-exactly one FPI region. Likewise, each use of the FCall* instruction must be
+exactly one FPI region. Likewise, each use of the FCall instruction must be
 the last instruction in exactly one FPI region.
 
-10) Each FPI region may not contain backward jumps, nor may it contain forward
-jumps that jump outside the end of the FPI region. Also, there may not be jumps
-anywhere in the function that transfer control from the outside of a given FPI
-region to the inside of that region. An FPI region may not contain the Ret*,
-Unwind or Throw instructions. Finally, an entry point may not point to
-an instruction inside an FPI region.
+10) Each FPI region may not contain any other instruction than FCall, with the
+exception of assertion instructions. There may not be jumps anywhere in the
+function that transfer control from the outside of a given FPI region to the
+inside of that region. Finally, an entry point may not point to an instruction
+inside an FPI region.
 
-11) The depth of the FPI stack at any given point in the bytecode must be the
-same for all possible control flow paths. Also, for any given FPI region that
-passes n parameters, all possible control flow paths from the beginning of the
-region to the end must push exactly n cells or values on the stack.
-
-12) Given an evaluation stack of depth n after an FPush* instruction, the
-evaluation stack before the corresponding FCall* instruction must also have a
-depth of n. Finally, no instruction between an FPush* and its corresponding
-FCall* may consume any of the values from the evaluation stack that were
-pushed onto the stack before the FPush* instruction.
-
-13) The initialization state of each iterator variable must be known at every
+11) The initialization state of each iterator variable must be known at every
 point in the code and must be the same for all control paths. There are two
 possible states: (1) uninitialized, and (2) "iter-initialized" (initialized
 via IterInit*). Every range of bytecode for which an iterator variable i is
 initialized must be protected by a fault funclet that unsets i by calling
 IterFree.
 
-14) The iterator variable referenced by IterInit* must be in the uninitialized
+12) The iterator variable referenced by IterInit* must be in the uninitialized
 state when the instruction executes. An iterator variable referenced by
 IterNext* and IterFree must be in the "iter-initialized" state. Note that
 IterInit* conditionally initialize the iterator variable, and IterNext*
 conditionally free the iterator variable.
 
-15) Each EH table must follow all of the rules specified in the "Exception
+13) Each EH table must follow all of the rules specified in the "Exception
 handler (EH) table" section.
 
-16) The initialization state of each classref slot must be known at every point
+14) The initialization state of each classref slot must be known at every point
 in the code and must be the same for all control paths. A classref slot must be
 initialized before being read and becomes uninitialized after being read. A
 classref slot must be uninitialized before being written to and becomes
 initialized after being written.
 
-17) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
+15) Assertion (AssertRATL and AssertRATStk) instructions cannot be separated
 from the following instruction by control flow. Practically speaking, this means
 that the instruction immediately following an assertion cannot be a jump target.
 
-18) Sequences of member instructions should be consistent and continuous. That
+16) Sequences of member instructions should be consistent and continuous. That
 is, only member instructions and asserts may appear in the sequence, control
 flow cannot interrupt the sequence, and the member op mode should be consistent
 across all instructions in the sequence. This is because in the case of
@@ -1984,8 +1966,8 @@ NewObjS <mode>                             []  ->  [C:Obj]
   NewObjS will perform the same work as LateBoundCls/Self/Parent depending on
   the specified mode.
 
-  This instruction pushes an uninitialized object onto the stack, to be
-  initialized during FCall*.
+  This instruction pushes a default-initialized object onto the stack. The
+  initialization will complete by running a constructor with FPushCtor/FCall.
 
   If HasGenerics is passed to NewObj, this indicates that the data at cls-ref
   slot's reified generics portion is valid.
@@ -1996,8 +1978,8 @@ NewObjS <mode>                             []  ->  [C:Obj]
 FPush* opcodes
 --------------
 
-FPushFunc <num params>                 [U U U C]  ->  []
-FPushFuncD <num params> <litstr id>    [U U U]  ->  []
+FPushFunc <num params>                 [U U U C|V..C|V C]  ->  [C|V..C|V]
+FPushFuncD <num params> <litstr id>    [U U U C|V..C|V]  ->  [C|V..C|V]
 
   FPI push function. First, these instructions load a value into x as given by
   the following table:
@@ -2035,23 +2017,26 @@ FPushFuncD <num params> <litstr id>    [U U U]  ->  []
   If x is not a string, object, array, or func, this instruction throws a fatal
   error.
 
-FPushFuncU <num params> <litstr id> <litstr fallback> [U U U]  ->  []
+FPushFuncU <num params> <litstr id> <litstr fallback>
+  [U U U C|V..C|V]  ->  [C|V..C|V]
 
   FPI push function unqualified. Identical to FPushFuncD except first tries to
   lookup the function named %2 and if it isn't defined calls the function named
   %3. As for FPushFuncD the litstr in %2 and %3 must not start with a '\'
   %character.
 
-FPushObjMethod <num params> <nullsafe>                 [C U U C]  ->  []
-FPushObjMethodD <num params> <litstr id> <nullsafe>    [C U U]  ->  []
+FPushObjMethod <num params> <nullsafe>
+  [C U U C|V..C|V C]  ->  [C|V..C|V]
+FPushObjMethodD <num params> <litstr id> <nullsafe>
+  [C U U C|V..C|V]  ->  [C|V..C|V]
 
   FPI push object-based method. First, these instructions load values into x
   and y as given by the following table:
 
-    instruction           x    y
-    -------------------+----+-----
-      FPushObjMethod   | $4 | $1
-      FPushObjMethodD  | $3 | %2
+    instruction           x                   y
+    -------------------+-------------------+-----
+      FPushObjMethod   | $(num params + 4) | $1
+      FPushObjMethodD  | $(num params + 3) | %2
 
   If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
   a string, this instruction throws a fatal error. Next, this instruction
@@ -2070,10 +2055,14 @@ FPushObjMethodD <num params> <litstr id> <nullsafe>    [C U U]  ->  []
   If object x does not have an accessible method named y and it does not have a
   __call method, this instruction throws a fatal error.
 
-FPushClsMethod   <num params> <class-ref slot>          [U U U C]  ->  []
-FPushClsMethodD  <num params> <litstr id> <litstr id>   [U U U]    ->  []
-FPushClsMethodS  <num params> <mode>                    [U U U C]  ->  []
-FPushClsMethodSD <num params> <mode> <litstr id>        [U U U]    ->  []
+FPushClsMethod   <num params> <class-ref slot>
+  [U U U C|V..C|V C]  ->  [C|V..C|V]
+FPushClsMethodD  <num params> <litstr id> <litstr id>
+  [U U U C|V..C|V]    ->  [C|V..C|V]
+FPushClsMethodS  <num params> <mode>
+  [U U U C|V..C|V C]  ->  [C|V..C|V]
+FPushClsMethodSD <num params> <mode> <litstr id>
+  [U U U C|V..C|V]    ->  [C|V..C|V]
 
   FPI push class-based method. First, these instructions load values into x and
   y as given by the following table:
@@ -2111,13 +2100,14 @@ FPushClsMethodSD <num params> <mode> <litstr id>        [U U U]    ->  []
   __call method or a __callStatic method could not be found, this instruction
   throws a fatal error.
 
-FPushCtor <num params>  [C:Obj U U]  ->  []
+FPushCtor <num params>  [C:Obj U U C|V..C|V]  ->  [C|V..C|V]
 
   FPI push constructor.
 
   This instruction pushes a new entry on the FPI stack, initializing it with
   the number of parameters being passed (given by %1) and a reference to the
-  FPI structure for the constructor for class of the object given by $3.
+  FPI structure for the constructor for class of the object given by
+  $(num params + 3).
 
 FCall* opcodes
 --------------

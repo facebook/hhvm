@@ -2,23 +2,23 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 2 "var_dump"
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 3 "test"
   String "a"
   String "b"
   String "c"
+  FPushFuncD 3 "test"
   FCall <> 3 1 "" - "" ""
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 3 "test"
   Null
   String "b"
   String "c"
+  FPushFuncD 3 "test"
   FCall <> 3 1 "" - "" ""
+  FPushFuncD 2 "var_dump"
   FCall <> 2 1 "" - "" ""
   PopC
   Int 1

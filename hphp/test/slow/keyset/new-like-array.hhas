@@ -23,8 +23,8 @@
           NullUninit
           NullUninit
           NullUninit
-          FPushFuncD 1 "var_dump"
           NewLikeArrayL $ks 3
+          FPushFuncD 1 "var_dump"
           FCall <> 1 1 "" - "" ""
           PopC
           True

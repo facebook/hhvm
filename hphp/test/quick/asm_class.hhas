@@ -184,11 +184,11 @@
   NullUninit
   NullUninit
   NullUninit
+  String "printing this string"
   String "print_it"
   String "Base"
   ClsRefGetC 0
   FPushClsMethod 1 0
-  String "printing this string"
   FCall <> 1 1 "" - "" ""
   PopC
 

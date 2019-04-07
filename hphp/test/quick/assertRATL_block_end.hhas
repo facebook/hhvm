@@ -4,8 +4,8 @@
     NullUninit
     NullUninit
     NullUninit
-    FPushFuncD 1 "foo"
     Int 9
+    FPushFuncD 1 "foo"
     FCall <> 1 1 "" - "" ""
     PopC
     Int 1
@@ -19,8 +19,9 @@
     Int 2
     JmpNZ target_label
     AssertRATL $x Int
-    target_label: FPushFuncD 1 "var_dump"
+  target_label:
     Int 42
+    FPushFuncD 1 "var_dump"
     FCall <> 1 1 "" - "" ""
     RetC
 }

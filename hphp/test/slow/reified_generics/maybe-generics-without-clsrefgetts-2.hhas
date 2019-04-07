@@ -12,8 +12,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "var_dump"
   String "done"
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
   Int 1
@@ -25,8 +25,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "__hhvm_intrinsics\\launder_value"
   Int 1
+  FPushFuncD 1 "__hhvm_intrinsics\\launder_value"
   FCall <> 1 1 "" - "" ""
   JmpZ L0
   NewDArray 0

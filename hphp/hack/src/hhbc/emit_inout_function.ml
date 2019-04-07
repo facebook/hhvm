@@ -42,8 +42,8 @@ let emit_body_instrs_inout params call_instrs =
   gather [
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
-    call_instrs;
     param_instrs;
+    call_instrs;
     instr_fcall fcall_args;
     instr_popl local;
     gather @@ inout_setters;
@@ -72,8 +72,8 @@ let emit_body_instrs_ref params call_instrs =
   let fcall_args = make_fcall_args ~flags param_count in
   gather [
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
-    call_instrs;
     param_instrs;
+    call_instrs;
     instr_fcall fcall_args;
     gather param_get_instrs;
     instr_retm (List.length param_get_instrs + 1)

@@ -3,8 +3,8 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 1
   String "foo"
+  FPushCtor 1
   FCall <> 1 1 "" - "" ""
   PopC
   Throw

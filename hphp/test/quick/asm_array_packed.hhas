@@ -14,7 +14,6 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "var_dump"
 
   Int 1
   Int 2
@@ -82,6 +81,7 @@
   Int 64
   NewPackedArray 64
 
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
 

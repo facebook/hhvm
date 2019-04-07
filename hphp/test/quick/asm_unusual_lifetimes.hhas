@@ -18,9 +18,9 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 2 "main"
     PushL $a
     PushL $b
+  FPushFuncD 2 "main"
   FCall <> 2 1 "" - "" ""
   RetC
 }

@@ -308,6 +308,17 @@ void push(ISS& env, Type t, LocalId l) {
   env.state.stack.push_back(StackElem {std::move(t), l});
 }
 
+void discardAR(ISS& env, uint32_t idx) {
+  assert(topT(env, idx).subtypeOf(BUninit));
+  assert(topT(env, idx + 1).subtypeOf(BUninit));
+  assert(topT(env, idx + 2).subtypeOf(BCell));
+  auto& stack = env.state.stack;
+  stack.erase(stack.end() - idx - 3, stack.end() - idx);
+  if (idx && stack[stack.size() - idx].equivLoc == StackDupId) {
+    stack[stack.size() - idx].equivLoc = NoLocalId;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 // $this
 

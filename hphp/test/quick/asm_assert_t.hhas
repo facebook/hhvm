@@ -33,9 +33,9 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 2 "obj_type"
   CGetL $x
   CGetL $y
+  FPushFuncD 2 "obj_type"
   FCall <> 2 1 "" - "" ""
   PopC
 

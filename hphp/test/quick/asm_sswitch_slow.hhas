@@ -55,8 +55,8 @@ fail:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "sswitch_on"
   CGetL $foo
+  FPushFuncD 1 "sswitch_on"
   FCall <> 1 1 "" - "" ""
   RetC
 }
@@ -83,8 +83,8 @@ fail:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "sswitch_on"
   CGetL $obj
+  FPushFuncD 1 "sswitch_on"
   FCall <> 1 1 "" - "" ""
   RetC
 }
@@ -93,8 +93,8 @@ fail:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "sswitch_on"
   String "kujhasekguheku"
+  FPushFuncD 1 "sswitch_on"
   FCall <> 1 1 "" - "" ""
   RetC
 }

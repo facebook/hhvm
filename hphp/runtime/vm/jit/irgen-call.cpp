@@ -53,17 +53,21 @@ bool canInstantiateClass(const Class* cls) {
 //////////////////////////////////////////////////////////////////////
 
 // Pushing for object method when we don't know the Func* statically.
-void fpushObjMethodUnknown(IRGS& env,
-                           SSATmp* obj,
-                           const StringData* methodName,
-                           uint32_t numParams) {
+IRSPRelOffset fpushObjMethodUnknown(
+  IRGS& env,
+  SSATmp* obj,
+  const StringData* methodName,
+  uint32_t numParams
+) {
   implIncStat(env, Stats::ObjMethod_cached);
-  fsetActRec(env,
-             cns(env, TNullptr),  // Will be set by LdObjMethod
-             obj,
-             numParams,
-             nullptr,
-             cns(env, false));
+  auto const arOffset = fsetActRec(
+    env,
+    cns(env, TNullptr),  // Will be set by LdObjMethod
+    obj,
+    numParams,
+    nullptr,
+    cns(env, false)
+  );
   auto const objCls = gen(env, LdObjClass, obj);
 
   // This is special.  We need to move the stackpointer in case LdObjMethod
@@ -73,9 +77,10 @@ void fpushObjMethodUnknown(IRGS& env,
 
   gen(env,
       LdObjMethod,
-      LdObjMethodData { spOffBCFromIRSP(env), methodName },
+      LdObjMethodData { arOffset, methodName },
       objCls,
       sp(env));
+  return arOffset;
 }
 
 /*
@@ -222,7 +227,7 @@ SSATmp* lookupObjMethodWithBaseClass(
   return nullptr;
 }
 
-void fpushObjMethodWithBaseClass(
+IRSPRelOffset fpushObjMethodWithBaseClass(
   IRGS& env,
   SSATmp* obj,
   const Class* baseClass,
@@ -235,12 +240,11 @@ void fpushObjMethodWithBaseClass(
   if (auto func = lookupObjMethodWithBaseClass(
         env, obj, baseClass, methodName, exactClass,
         objOrCls, magicCall)) {
-    fsetActRec(env, func, objOrCls, numParams,
-               magicCall ? methodName : nullptr, cns(env, false));
-    return;
+    return fsetActRec(env, func, objOrCls, numParams,
+                      magicCall ? methodName : nullptr, cns(env, false));
   }
 
-  fpushObjMethodUnknown(env, obj, methodName, numParams);
+  return fpushObjMethodUnknown(env, obj, methodName, numParams);
 }
 
 const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
@@ -329,12 +333,12 @@ void optimizeProfiledPushMethod(IRGS& env,
   auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
                                             methProfileKey.get());
   if (!profile.optimizing()) {
-    emitFPush();
+    auto const arOffset = emitFPush();
     if (profile.profiling()) {
       gen(
         env,
         ProfileMethod,
-        ProfileCallTargetData { spOffBCFromIRSP(env), profile.handle() },
+        ProfileCallTargetData { arOffset, profile.handle() },
         sp(env),
         isStaticCall ? objOrCls : cns(env, TNullptr)
       );
@@ -387,7 +391,10 @@ void optimizeProfiledPushMethod(IRGS& env,
       return;
     }
 
-    if (isMagic) return emitFPush();
+    if (isMagic) {
+      emitFPush();
+      return;
+    }
 
     // Although there were multiple classes, the method was unique
     // (this comes up eg for a final method in a base class).  But
@@ -418,11 +425,15 @@ void optimizeProfiledPushMethod(IRGS& env,
 
   // If we know anything about the class, other than it's an interface, the
   // remaining cases aren't worth the extra check.
-  if (knownClass != nullptr && !isInterface(knownClass)) return emitFPush();
+  if (knownClass != nullptr && !isInterface(knownClass)) {
+    emitFPush();
+    return;
+  }
 
   if (auto const baseMeth = data.baseMeth()) {
     if (!baseMeth->name()->isame(methodName)) {
-      return emitFPush();
+      emitFPush();
+      return;
     }
 
     // The method was defined in a common base class.  We just need to check for
@@ -447,11 +458,15 @@ void optimizeProfiledPushMethod(IRGS& env,
 
   // If we know anything about the class, the other cases below are not worth
   // the extra checks they insert.
-  if (knownClass != nullptr) return emitFPush();
+  if (knownClass != nullptr) {
+    emitFPush();
+    return;
+  }
 
   if (auto const intfMeth = data.interfaceMeth()) {
     if (!intfMeth->name()->isame(methodName)) {
-      return emitFPush();
+      emitFPush();
+      return;
     }
 
     // The method was defined in a common interface, so check for that and use
@@ -475,7 +490,7 @@ void optimizeProfiledPushMethod(IRGS& env,
     return;
   }
 
-  return emitFPush();
+  emitFPush();
 }
 
 void fpushObjMethod(IRGS& env,
@@ -500,13 +515,16 @@ void fpushObjMethod(IRGS& env,
   }
 
   auto const emitFPush = [&] {
-    fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
-                                exactClass);
+    return fpushObjMethodWithBaseClass(env, obj, knownClass, methodName,
+                                       numParams, exactClass);
   };
 
   // If we know the class exactly without profiling, then we don't need PGO.
-  if (knownClass && !isInterface(knownClass)) return emitFPush();
-  if (!RuntimeOption::RepoAuthoritative) return emitFPush();
+  if (!RuntimeOption::RepoAuthoritative ||
+      (knownClass && !isInterface(knownClass))) {
+    emitFPush();
+    return;
+  }
 
   // If we don't know anything about the object's class, or all we know is an
   // interface that it implements, then enable PGO.
@@ -526,7 +544,7 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
   auto const thisAR = fp(env);
 
   auto const arr = popC(env);
-  fsetActRec(
+  auto const arOffset = fsetActRec(
     env,
     cns(env, TNullptr),
     cns(env, TNullptr),
@@ -542,7 +560,7 @@ void fpushFuncArr(IRGS& env, uint32_t numParams) {
   env.irb->exceptionStackBoundary();
 
   gen(env, LdArrFuncCtx,
-      IRSPRelOffsetData { spOffBCFromIRSP(env) },
+      IRSPRelOffsetData { arOffset },
       arr, sp(env), thisAR);
   decRef(env, arr);
 }
@@ -672,14 +690,19 @@ bool callNeedsCallerFrame(const NormalizedInstruction& inst,
 
 //////////////////////////////////////////////////////////////////////
 
-void fsetActRec(IRGS& env,
-                SSATmp* func,
-                SSATmp* objOrClass,
-                uint32_t numArgs,
-                const StringData* invName,
-                SSATmp* dynamicCall) {
+IRSPRelOffset fsetActRec(
+  IRGS& env,
+  SSATmp* func,
+  SSATmp* objOrClass,
+  uint32_t numArgs,
+  const StringData* invName,
+  SSATmp* dynamicCall
+) {
   ActRecInfo info;
-  info.spOffset = offsetFromIRSP(env, BCSPRelOffset{0});
+  info.spOffset = offsetFromIRSP(
+    env,
+    BCSPRelOffset{static_cast<int32_t>(numArgs)}
+  );
   info.numArgs = numArgs;
 
   gen(
@@ -692,6 +715,8 @@ void fsetActRec(IRGS& env,
     invName ? cns(env, invName) : cns(env, TNullptr),
     dynamicCall
   );
+
+  return info.spOffset;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -717,14 +742,14 @@ SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   always_assert(false);
 }
 
-void storeReifiedGenerics(IRGS& env, SSATmp* funName) {
+void storeReifiedGenerics(IRGS& env, IRSPRelOffset arOffset, SSATmp* funName) {
   if (funName->hasConstVal(TStr)) {
     auto const name = funName->strVal();
     if (!isReifiedName(name)) return;
     auto const ts = getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
     gen(env,
         StARReifiedGenerics,
-        IRSPRelOffsetData { spOffBCFromIRSP(env) },
+        IRSPRelOffsetData { arOffset },
         sp(env),
         cns(env, ts));
     return;
@@ -748,7 +773,7 @@ void storeReifiedGenerics(IRGS& env, SSATmp* funName) {
       auto const ts = gen(env, LdReifiedGeneric, funName);
       gen(env,
           StARReifiedGenerics,
-          IRSPRelOffsetData { spOffBCFromIRSP(env) },
+          IRSPRelOffsetData { arOffset },
           sp(env),
           ts);
     }
@@ -853,7 +878,8 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
 }
 
 void emitFPushCtor(IRGS& env, uint32_t numParams) {
-  auto const obj = topC(env, BCSPRelOffset{2});
+  auto const objPos = static_cast<int32_t>(numParams + 2);
+  auto const obj = topC(env, BCSPRelOffset{objPos});
   if (!obj->isA(TObj)) PUNT(FPushCtor-NonObj);
 
   auto const func = [&] {
@@ -911,20 +937,22 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   }
 
   popC(env);
-  fsetActRec(env,
-             cns(env, TNullptr),
-             cns(env, TNullptr),
-             numParams,
-             nullptr,
-             cns(env, true));
+  auto const arOffset = fsetActRec(
+    env,
+    cns(env, TNullptr),
+    cns(env, TNullptr),
+    numParams,
+    nullptr,
+    cns(env, true)
+  );
 
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
-  storeReifiedGenerics(env, callee);
+  storeReifiedGenerics(env, arOffset, callee);
 
   gen(env, LdFunc,
-      IRSPRelOffsetData { spOffBCFromIRSP(env) },
+      IRSPRelOffsetData { arOffset },
       callee, sp(env), fp(env));
 
   decRef(env, callee);
@@ -945,7 +973,8 @@ void emitFPushObjMethodD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
                          ObjMethodOp subop) {
-  auto const obj = topC(env, BCSPRelOffset{2});
+  auto const objPos = static_cast<int32_t>(numParams + 2);
+  auto const obj = topC(env, BCSPRelOffset{objPos});
 
   if (obj->type() <= TObj) {
     fpushObjMethod(env, obj, methodName, numParams);
@@ -1182,7 +1211,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 
   auto const emitFPush = [&] {
-    fsetActRec(
+    auto const arOffset = fsetActRec(
       env,
       cns(env, TNullptr),
       cns(env, TNullptr),
@@ -1198,12 +1227,16 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
     updateMarker(env);
     env.irb->exceptionStackBoundary();
 
-    auto const lcmData = LookupClsMethodData { spOffBCFromIRSP(env), forward };
+    auto const lcmData = LookupClsMethodData { arOffset, forward };
     gen(env, LookupClsMethod, lcmData, clsVal, methVal, sp(env), fp(env));
     decRef(env, methVal);
+    return arOffset;
   };
 
-  if (!methVal->hasConstVal()) return emitFPush();
+  if (!methVal->hasConstVal()) {
+    emitFPush();
+    return;
+  }
 
   auto const methodName = methVal->strVal();
   const Class* cls = nullptr;
@@ -1219,7 +1252,8 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 
   if (!RuntimeOption::RepoAuthoritative || clsVal->hasConstVal() || forward) {
-    return emitFPush();
+    emitFPush();
+    return;
   }
 
   optimizeProfiledPushMethod(env, clsVal, nullptr, methodName, numParams,
@@ -1536,8 +1570,12 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args) {
   auto const callBcOffset = bcOff(env) - curFunc(env)->base();
 
-  env.irb->fs().setFPushOverride(Op::FPushFuncD);
   allocActRec(env);
+  for (int32_t i = 0; i < numParams; i++) {
+    push(env, args[i]);
+  }
+
+  env.irb->fs().setFPushOverride(Op::FPushFuncD);
   fsetActRec(
     env,
     cns(env, callee),
@@ -1548,9 +1586,6 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
   );
   assertx(!env.irb->fs().hasFPushOverride());
 
-  for (int32_t i = 0; i < numParams; i++) {
-    push(env, args[i]);
-  }
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 

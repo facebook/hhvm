@@ -513,6 +513,9 @@ void finish_builtin(ISS& env,
     bc::FCallBuiltin {
       static_cast<uint32_t>(func->params.size()), numArgs, func->name }
   );
+  repl.emplace_back(bc::PopU2 {});
+  repl.emplace_back(bc::PopU2 {});
+  repl.emplace_back(bc::PopU2 {});
 
   reduce(env, std::move(repl));
   fpiPop(env);

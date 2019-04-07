@@ -2910,18 +2910,15 @@ void in(ISS& env, const bc::FPushFuncD& op) {
           env,
           ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
         );
-        return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
+        return reduce(env, bc::Nop {});
       }
     }
   }
   if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
               op.arg1, false)) {
-    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
+    return reduce(env, bc::Nop {});
   }
-
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {
@@ -2945,9 +2942,7 @@ void in(ISS& env, const bc::FPushFunc& op) {
     }
   }
   popC(env);
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
   if (t1.subtypeOf(BObj)) {
     fpiPushNoFold(env, ActRec { FPIKind::ObjInvoke, t1 });
   } else if (t1.subtypeOf(BArr)) {
@@ -2974,9 +2969,7 @@ void in(ISS& env, const bc::FPushFuncU& op) {
       return fpushfuncd(rfuncPair.second);
     }
   }
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
   fpiPushNoFold(
     env,
     ActRec {
@@ -3015,20 +3008,20 @@ const StaticString s_nullFunc { "__SystemLib\\__86null" };
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
   auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
-  auto const input = topC(env, 2);
+  auto const input = topC(env, op.arg1 + 2);
+  auto const location = topStkEquiv(env, op.arg1 + 2);
   auto const mayCallMethod = input.couldBe(BObj);
   auto const mayCallNullsafe = !nullThrows && input.couldBe(BNull);
   auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
 
   if (!mayCallMethod && !mayCallNullsafe) {
     // This FPush may only throw, make sure it's not optimized away.
+    discardAR(env, op.arg1);
     fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TBottom });
-    popU(env);
-    popU(env);
-    popC(env);
     return unreachable(env);
   }
 
+  /* TODO: optimize the whole call to Null once FPush+FCall is merged
   if (!mayCallMethod && !mayThrowNonObj) {
     // Null input, this may only call the nullsafe helper, so do that.
     return reduce(
@@ -3038,6 +3031,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
       bc::FPushFuncD { op.arg1, s_nullFunc.get(), op.has_unpack }
     );
   }
+  */
 
   auto const ar = [&] {
     assertx(mayCallMethod);
@@ -3053,7 +3047,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
 
   if (!mayCallMethod) {
     // Calls nullsafe helper, but can't fold as we may still throw.
-    assertx(mayCallNullsafe && mayThrowNonObj);
+    assertx(mayCallNullsafe /*&& mayThrowNonObj*/);
     auto const func = env.index.resolve_func(env.ctx, s_nullFunc.get());
     assertx(func.exactFunc());
     fpiPushNoFold(env, ActRec { FPIKind::Func, TBottom, folly::none, func });
@@ -3062,10 +3056,11 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     // or FCall may throw.
     fpiPushNoFold(env, ar());
   } else if (fpiPush(env, ar(), op.arg1, false)) {
-    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopC {});
+    return reduce(env, bc::Nop {});
   }
 
-  auto const location = topStkEquiv(env, 2);
+  discardAR(env, op.arg1);
+
   if (location != NoLocalId) {
     if (!refineLocation(env, location, [&] (Type t) {
       if (nullThrows) return intersection_of(t, TObj);
@@ -3076,15 +3071,11 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
       unreachable(env);
     }
   }
-
-  popU(env);
-  popU(env);
-  popC(env);
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const t1 = topC(env); // meth name
-  auto const t2 = topC(env, 3); // object
+  auto const t2 = topC(env, op.arg1 + 3); // object
   auto const clsTy = objcls(t2);
   folly::Optional<res::Func> rfunc;
   auto const name = getNameFromType(t1);
@@ -3102,9 +3093,7 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
     }
   }
   popC(env);
-  popU(env);
-  popU(env);
-  popC(env);
+  discardAR(env, op.arg1);
   fpiPushNoFold(
     env,
     ActRec {
@@ -3128,11 +3117,9 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   );
   if (fpiPush(env, ActRec { FPIKind::ClsMeth, clsType, rcls, rfun }, op.arg1,
               false)) {
-    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
+    return reduce(env, bc::Nop {});
   }
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
 }
 
 namespace {
@@ -3186,17 +3173,11 @@ void in(ISS& env, const bc::FPushClsMethod& op) {
   }
   if (fpiPush(env, ActRec { FPIKind::ClsMeth, t1, rcls, rfunc }, op.arg1,
               true)) {
-    return reduce(
-      env,
-      bc::DiscardClsRef { op.slot },
-      bc::PopC {}, bc::PopU {}, bc::PopU {}, bc::PopU {}
-    );
+    return reduce(env, bc::DiscardClsRef { op.slot }, bc::PopC {});
   }
   takeClsRefSlot(env, op.slot);
   popC(env);
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushClsMethodS& op) {
@@ -3226,12 +3207,10 @@ void in(ISS& env, const bc::FPushClsMethodS& op) {
                 rcls,
                 rfunc
               }, op.arg1, true)) {
-    return reduce(env, bc::PopC {}, bc::PopU {}, bc::PopU {}, bc::PopU {});
+    return reduce(env, bc::PopC {});
   }
   popC(env);
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushClsMethodSD& op) {
@@ -3261,11 +3240,9 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
                 rcls,
                 rfun
               }, op.arg1, false)) {
-    return reduce(env, bc::PopU {}, bc::PopU {}, bc::PopU {});
+    return reduce(env, bc::Nop {});
   }
-  popU(env);
-  popU(env);
-  popU(env);
+  discardAR(env, op.arg1);
 }
 
 void in(ISS& env, const bc::NewObjD& op) {
@@ -3321,10 +3298,8 @@ void in(ISS& env, const bc::NewObj& op) {
 }
 
 void in(ISS& env, const bc::FPushCtor& op) {
-  auto const obj = topC(env, 2);
-  popU(env);
-  popU(env);
-  popC(env);
+  auto const obj = topC(env, op.arg1 + 2);
+  discardAR(env, op.arg1);
   if (!is_specialized_obj(obj)) {
     return fpiPushNoFold(env, ActRec { FPIKind::Ctor, TObj });
   }
@@ -3417,6 +3392,13 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
       }();
       if (auto v = tv(ty)) {
         BytecodeVec repl { fca.numArgs, bc::PopC {} };
+        repl.push_back(bc::PopU {});
+        repl.push_back(bc::PopU {});
+        if (ar.kind == FPIKind::ObjMeth || ar.kind == FPIKind::ObjMethNS) {
+          repl.push_back(bc::PopC {});
+        } else {
+          repl.push_back(bc::PopU {});
+        }
         repl.push_back(gen_constant(*v));
         fpiPop(env);
         reduce(env, std::move(repl));
@@ -3521,8 +3503,8 @@ void in(ISS& env, const bc::FCall& op) {
             bc::Dup {},
             bc::NullUninit {},
             bc::NullUninit {},
-            bc::FPushCtor { 1, false },
             bc::String { err },
+            bc::FPushCtor { 1, false },
             bc::FCall {
               FCallArgs(1), staticEmptyString(), staticEmptyString() },
             bc::PopC {},

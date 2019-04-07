@@ -429,8 +429,13 @@ bool conjureBeginInlining(IRGS& env,
 
   always_assert(isFPush(env.context.callerFPushOp));
   auto const numParams = args.size();
-  env.irb->fs().setFPushOverride(env.context.callerFPushOp);
+
   allocActRec(env);
+  for (auto const argType : args) {
+    push(env, conjure(argType));
+  }
+
+  env.irb->fs().setFPushOverride(env.context.callerFPushOp);
   fsetActRec(
     env,
     cns(env, func),
@@ -440,10 +445,6 @@ bool conjureBeginInlining(IRGS& env,
     conjure(TBool)
   );
   assertx(!env.irb->fs().hasFPushOverride());
-
-  for (auto const argType : args) {
-    push(env, conjure(argType));
-  }
 
   return beginInlining(
     env,

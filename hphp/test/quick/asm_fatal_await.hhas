@@ -2,12 +2,12 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "HH\\Asio\\join"
   NullUninit
   NullUninit
   NullUninit
   FPushFuncD 0 "main"
   FCall <> 0 1 "" - "" ""
+  FPushFuncD 1 "HH\\Asio\\join"
   FCall <> 1 1 "" - "" ""
   PopC
   Null

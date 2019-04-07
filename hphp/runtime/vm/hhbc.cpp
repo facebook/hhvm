@@ -408,10 +408,10 @@ int instrNumPops(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define MFINAL -3
-#define C_MFINAL(n) -10 - n
+#define C_MFINAL(n) -10 - (n)
 #define CUMANY -3
 #define CVUMANY -3
-#define FPUSH(nin, nobj) (nin + 3)
+#define FPUSH(nin, nobj) C_MFINAL(nin + 3)
 #define FCALL -4
 #define CMANY -3
 #define SMANY -1
@@ -471,7 +471,7 @@ int instrNumPushes(PC pc) {
 #define FOUR(...) 4
 #define FIVE(...) 5
 #define INS_1(...) 0
-#define FPUSH 0
+#define FPUSH -2
 #define FCALL -1
 #define O(name, imm, pop, push, flags) push,
     OPCODES
@@ -489,7 +489,9 @@ int instrNumPushes(PC pc) {
   auto const op = peek_op(pc);
   int n = numberOfPushes[size_t(op)];
 
-  // The FCall call flavors push a tuple of arguments onto the stack
+  // The FPush* opcodes push all arguments onto the stack
+  if (n == -2) return getImm(pc, 0).u_IVA;
+  // The FCall opcode pushes all return values onto the stack
   if (n == -1) return getImm(pc, 0).u_FCA.numRets;
 
   return n;
@@ -514,6 +516,9 @@ FlavorDesc fpushFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
   if (i < nin) return CV;
   i -= nin;
+  auto const numArgs = getImm(op, 0).u_IVA;
+  if (i < numArgs) return CVV;
+  i -= numArgs;
   if (i < 2) return UV;
   return nobj ? CV : UV;
 }

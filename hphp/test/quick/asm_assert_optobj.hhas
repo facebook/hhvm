@@ -14,7 +14,6 @@
   CGetL $object
   NullUninit
   NullUninit
-  FPushObjMethodD 1 "main" NullThrows
    NewObjD "Foo"
    Dup
    NullUninit
@@ -22,14 +21,15 @@
    FPushCtor 0
    FCall <> 0 1 "" - "" ""
    PopC
+  FPushObjMethodD 1 "main" NullThrows
   FCall <> 1 1 "" - "" ""
   PopC
 
   CGetL $object
   NullUninit
   NullUninit
-  FPushObjMethodD 1 "main" NullThrows
    Null
+  FPushObjMethodD 1 "main" NullThrows
   FCall <> 1 1 "" - "" ""
   PopC
 

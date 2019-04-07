@@ -5,15 +5,15 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "test"
   ClsCnsD "FOO" "Foo"
+  FPushFuncD 1 "test"
   FCall <> 1 1 "" - "" ""
   PopC
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "test"
   String "hi"
+  FPushFuncD 1 "test"
   FCall <> 1 1 "" - "" ""
   PopC
   Int 1

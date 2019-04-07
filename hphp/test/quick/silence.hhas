@@ -4,9 +4,9 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 2 "add"
   Int 3
   Int 2
+  FPushFuncD 2 "add"
   FCall <> 2 1 "" - "" ""
   Silence $z Start
   SetL $z
@@ -31,8 +31,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "var_dump"
   Int 1
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
   Jmp L1
@@ -43,8 +43,8 @@ L0:
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "var_dump"
   Int 2
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
 L1:

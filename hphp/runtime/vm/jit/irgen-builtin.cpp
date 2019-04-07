@@ -1148,7 +1148,8 @@ private:
       fsetActRec(env,
                  cns(env, m_callee),
                  m_params.thiz ? m_params.thiz : cns(env, TNullptr),
-                 m_params.size(),
+                 // Params are not on the stack.
+                 0,
                  nullptr,
                  /* This can be a lie, but we only care about the dynamic flag
                   * in prologues, so its value doesn't matter here. */

@@ -864,9 +864,10 @@ and emit_new env pos expr targs args uargs =
   gather [
     newobj_instrs;
     instr_dup; instr_nulluninit; instr_nulluninit;
-    instr_fpushctor nargs;
     instr_args;
     instr_uargs;
+    emit_pos pos;
+    instr_fpushctor nargs;
     emit_fcall pos args uargs None;
     instr_popc
   ],
@@ -1412,11 +1413,11 @@ and inline_gena_call env arg =
   (* inner *)
   gather [
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
+    instr_cgetl arr_local;
     instr_fpushclsmethodd 1
       (Hhbc_id.Method.from_raw_string
          (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
       (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
-    instr_cgetl arr_local;
     instr_fcall (make_fcall_args ~async_eager_label 1);
     instr_await;
     instr_label async_eager_label;
@@ -3443,10 +3444,10 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
     gather [
       gather @@ List.init num_uninit ~f:(fun _ -> instr_nulluninit);
       instr_lhs;
-      emit_pos pos;
-      instr_fpush;
       instr_args;
       instr_uargs;
+      emit_pos pos;
+      instr_fpush;
       emit_fcall pos args uargs async_eager_label;
       instr_inout_setters
     ],

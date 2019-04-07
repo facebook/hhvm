@@ -717,7 +717,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define POP_CUMANY     pop(data.arg##1);
 #define POP_CVUMANY    pop(data.arg##1);
 #define POP_FPUSH(nin, nobj) \
-                       pop(nin + 3);
+                       pop(data.arg1 + nin + 3);
 #define POP_FCALL      pop(data.fca.numArgs + (data.fca.hasUnpack() ? 1 : 0) + \
                            data.fca.numRets - 1);
 
@@ -726,7 +726,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
 #define PUSH_INS_1(x)          push(1);
-#define PUSH_FPUSH             push(0);
+#define PUSH_FPUSH             push(data.arg1);
 #define PUSH_FCALL             push(data.fca.numRets);
 
 #define O(opcode, imms, inputs, outputs, flags)                 \
@@ -749,6 +749,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (isRet(Op::opcode)) ret_assert();                      \
       ue.emitOp(Op::opcode);                                    \
       POP_##inputs                                              \
+      if (isFPush(Op::opcode))     fpush();                     \
       if (isFCallStar(Op::opcode)) end_fpi(startOffset);        \
                                                                 \
       size_t numTargets = 0;                                    \
@@ -773,7 +774,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         }                                                       \
       }                                                         \
                                                                 \
-      if (isFPush(Op::opcode))     fpush();                     \
       if (isFCallStar(Op::opcode)) fcall(Op::opcode);           \
       if (flags & TF) currentStackDepth = 0;                    \
       emit_srcloc();                                            \

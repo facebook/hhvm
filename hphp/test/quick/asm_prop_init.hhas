@@ -116,8 +116,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "do_test"
     String "Init"
+  FPushFuncD 1 "do_test"
   FCall <> 1 1 "" - "" ""
   RetC
 }
@@ -126,8 +126,8 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "do_test"
     String "Uninit"
+  FPushFuncD 1 "do_test"
   FCall <> 1 1 "" - "" ""
   RetC
 }

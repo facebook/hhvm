@@ -4636,8 +4636,8 @@ OPTBLD_INLINE ActRec* fPushFuncImpl(
   const Func* func, int numArgs, ArrayData* reifiedGenerics
 ) {
   DEBUGGER_IF(phpBreakpointEnabled(func->name()->data()));
-  vmStack().ndiscard(3);
-  ActRec* ar = vmStack().allocA();
+  assertx(kNumActRecCells == 3);
+  ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = func;
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
@@ -4893,8 +4893,8 @@ OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
 void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
   const Func* f;
   LookupResult res;
-  assertx(tvIsObject(vmStack().indC(2)));
-  auto const obj = vmStack().indC(2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(numArgs + 2)));
+  auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
   auto cls = obj->getVMClass();
   // if lookup throws, obj will be decref'd via stack
   res = lookupObjMethod(
@@ -4905,8 +4905,8 @@ void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
     }
   }
-  vmStack().ndiscard(3);
-  ActRec* ar = vmStack().allocA();
+  assertx(kNumActRecCells == 3);
+  ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = f;
   if (res == LookupResult::MethodFoundNoThis) {
     decRefObj(obj);
@@ -4943,8 +4943,8 @@ void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
 void fPushNullObjMethod(int numArgs) {
   assertx(SystemLib::s_nullFunc);
   assertx(tvIsNull(vmStack().indC(2)));
-  vmStack().ndiscard(3);
-  ActRec* ar = vmStack().allocA();
+  assertx(kNumActRecCells == 3);
+  ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = SystemLib::s_nullFunc;
   ar->trashThis();
   ar->initNumArgs(numArgs);
@@ -4991,7 +4991,7 @@ OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
     raise_error(Strings::METHOD_NAME_MUST_BE_STRING);
   }
 
-  Cell* c2 = vmStack().indC(3); // Object.
+  Cell* c2 = vmStack().indC(numArgs + 3); // Object.
   if (c2->m_type != KindOfObject) {
     if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c2->m_type))) {
       throw_call_non_object(c1->m_data.pstr->data(),
@@ -5015,7 +5015,7 @@ OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
 
 OPTBLD_INLINE void
 iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
-  Cell* c1 = vmStack().indC(2);
+  Cell* c1 = vmStack().indC(numArgs + 2);
   if (c1->m_type != KindOfObject) {
     if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c1->m_type))) {
       throw_call_non_object(name->data(),
@@ -5148,8 +5148,8 @@ void pushClsMethodImpl(Class* cls,
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
     }
   }
-  vmStack().ndiscard(3);
-  ActRec* ar = vmStack().allocA();
+  assertx(kNumActRecCells == 3);
+  ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = f;
   if (obj) {
     ar->setThis(obj);
@@ -5314,17 +5314,17 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
 }
 
 OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
-  assertx(tvIsObject(vmStack().indC(2)));
-  auto const obj = vmStack().indC(2)->m_data.pobj;
+  assertx(tvIsObject(vmStack().indC(numArgs + 2)));
+  auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
 
   const Func* func;
   auto const ctx = arGetContextClass(vmfp());
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
   assertx(res == LookupResult::MethodFoundWithThis);
 
-  // Push new activation record.
-  vmStack().ndiscard(3);
-  auto ar = vmStack().allocA();
+  // Write new activation record.
+  assertx(kNumActRecCells == 3);
+  auto ar = vmStack().indA(numArgs);
   ar->m_func = func;
   ar->setThis(obj);
   ar->initNumArgs(numArgs);

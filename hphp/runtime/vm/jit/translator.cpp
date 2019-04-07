@@ -507,7 +507,8 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
     case Op::FPushClsMethodD:
-      return countOperands(getInstrInfo(op).in) + 3;
+      return getImm(pc, 0).u_IVA + countOperands(getInstrInfo(op).in) + 3;
+
     case Op::FCall: {
       auto const fca = getImm(pc, 0).u_FCA;
       return fca.numArgs + (fca.hasUnpack() ? 1 : 0) + fca.numRets +
@@ -554,8 +555,21 @@ int64_t getStackPopped(PC pc) {
 int64_t getStackPushed(PC pc) {
   auto const op = peek_op(pc);
   switch (op) {
-    case Op::FCall:        return getImm(pc, 0).u_FCA.numRets;
-    default:               break;
+    case Op::FPushFunc:
+    case Op::FPushFuncD:
+    case Op::FPushFuncU:
+    case Op::FPushCtor:
+    case Op::FPushObjMethod:
+    case Op::FPushObjMethodD:
+    case Op::FPushClsMethod:
+    case Op::FPushClsMethodS:
+    case Op::FPushClsMethodSD:
+    case Op::FPushClsMethodD:
+      return getImm(pc, 0).u_IVA + kNumActRecCells;
+    case Op::FCall:
+      return getImm(pc, 0).u_FCA.numRets;
+    default:
+      break;
   }
 
   uint64_t mask = getInstrInfo(op).out;
@@ -747,9 +761,11 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     }
   }
   if (isFPush(ni.op())) {
+    int numArgs = ni.imm[0].u_IVA;
+
     SKTRACE(1, sk, "getInputs: %s %d %d\n",
-            opcodeToName(ni.op()), stackOff.offset, ni.imm[0].u_IVA);
-    stackOff -= 2;
+            opcodeToName(ni.op()), stackOff.offset, numArgs);
+    stackOff -= numArgs + 2;
     switch (ni.op()) {
       case Op::FPushCtor:
       case Op::FPushObjMethod:

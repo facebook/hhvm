@@ -27,11 +27,11 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "var_dump"
     String "arr"
     String "ClassWithArray"
     ClsRefGetC 0
     CGetS 0
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
 
@@ -42,13 +42,13 @@
   NullUninit
   NullUninit
   NullUninit
-  FPushFuncD 1 "var_dump"
     String "arr"
     Int 2
     CGetL $x
     ClsRefGetC 0
     BaseSC 1 0 Warn
     QueryM 2 CGet EC:0
+  FPushFuncD 1 "var_dump"
   FCall <> 1 1 "" - "" ""
   PopC
 
@@ -113,18 +113,18 @@ unset_label:  String "win\n"
               NullUninit
               NullUninit
               NullUninit
-              FPushFuncD 1 "var_dump"
               CGetL $arr
+              FPushFuncD 1 "var_dump"
               FCall <> 1 1 "" - "" ""
               PopC
 
               NullUninit
               NullUninit
               NullUninit
-              FPushFuncD 1 "var_dump"
               Int 1
               String "b"
               NewPackedArray 2
+              FPushFuncD 1 "var_dump"
               FCall <> 1 1 "" - "" ""
               PopC
 

@@ -270,9 +270,9 @@ let emit_reified_init_body env num_reified ast_class =
     let call_parent =
       gather [
         instr_nulluninit; instr_nulluninit; instr_nulluninit;
+        generic_arr;
         instr_fpushclsmethodsd 1 Hhbc_ast.SpecialClsRef.Parent
           (Hhbc_id.Method.from_raw_string SU.Reified.reified_init_method_name);
-        generic_arr;
         instr_fcall (make_fcall_args 1);
         instr_popc;
       ] in

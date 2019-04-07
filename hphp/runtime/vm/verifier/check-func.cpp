@@ -47,7 +47,7 @@ namespace Verifier {
  */
 struct FpiState {
   Offset fpush;   // offset of fpush (can get num_params from this)
-  int stkmin;     // stklen before FPush
+  int stkmin;     // stklen before FPush repushes args
   bool operator==(const FpiState& s) const {
     return fpush == s.fpush && stkmin == s.stkmin;
   }
@@ -841,11 +841,13 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPushClsMethodS:
   case Op::FPushClsMethodSD:
   case Op::FPushClsMethodD: {  // IVA..., FPUSH, FPUSH
+    auto const numArgs = getImm(pc, 0).u_IVA;
     auto const numPops = instrNumPops(pc);
     auto idx = 0;
     m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
     m_tmp_sig[idx++] = UV;
     m_tmp_sig[idx++] = UV;
+    for (int i = 0; i < numArgs; ++i) m_tmp_sig[idx++] = CVV;
     assertx(idx == numPops || idx + 1 == numPops);
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
@@ -1595,6 +1597,19 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->stklen += pushes;
     if (op == Op::BaseSC) {
       if (pushes == 1) outs[0] = outs[1];
+    } else if (isFPush(op)) {
+      for (int i = 0; i < pushes; ++i) {
+        outs[i] = outs[i + 3];
+      }
+
+      if (cur->fpilen >= maxFpi()) {
+        error("%s", "more FPush* instructions than FPI regions\n");
+        return false;
+      }
+      FpiState& fpi = cur->fpi[cur->fpilen];
+      cur->fpilen++;
+      fpi.fpush = offset(pc);
+      fpi.stkmin = cur->stklen - pushes;
     } else if (op == Op::FCall) {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = CV;
@@ -1603,16 +1618,6 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
       for (int i = 0; i < pushes; ++i) {
         outs[i] = outputSigs[size_t(op)][i];
       }
-    }
-    if (isFPush(op)) {
-      if (cur->fpilen >= maxFpi()) {
-        error("%s", "more FPush* instructions than FPI regions\n");
-        return false;
-      }
-      FpiState& fpi = cur->fpi[cur->fpilen];
-      cur->fpilen++;
-      fpi.fpush = offset(pc);
-      fpi.stkmin = cur->stklen;
     }
   }
 

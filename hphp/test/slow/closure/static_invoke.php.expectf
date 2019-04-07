@@ -1,4 +1,5 @@
 statically known invoke
+string(1) "f"
 
 Fatal error: Non-static method __invoke() cannot be called statically in %s/test/slow/closure/static_invoke.php on line 20
 call_user_func
@@ -14,5 +15,6 @@ cuf(X::bar)
 Strict Warning: Non-static method X::bar() should not be called statically in %s/test/slow/closure/static_invoke.php on line 28
 string(6) "X::bar"
 statically unknown invoke
+string(1) "f"
 
 Fatal error: Non-static method __invoke() cannot be called statically in %s/test/slow/closure/static_invoke.php on line 30

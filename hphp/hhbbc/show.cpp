@@ -269,10 +269,6 @@ std::string show(const Func& func, const Bytecode& bc) {
 std::string show(const Func& func, const Block& block) {
   std::string ret;
 
-  if (block.section != php::Block::Section::Main) {
-    folly::toAppend("(fault funclet)\n", &ret);
-  }
-
   if (block.exnNodeId != NoExnNodeId) {
     ret += "(exnNode:";
     appendExnTreeString(func, ret, block.exnNodeId);
@@ -293,14 +289,6 @@ std::string show(const Func& func, const Block& block) {
   if (!block.throwExits.empty()) {
     ret += "(throw:";
     for (auto ex : block.throwExits) {
-      folly::toAppend(" blk:", ex, &ret);
-    }
-    ret += ")\n";
-  }
-
-  if (!block.unwindExits.empty()) {
-    ret += "(unwind:";
-    for (auto ex : block.unwindExits) {
       folly::toAppend(" blk:", ex, &ret);
     }
     ret += ")\n";
@@ -339,10 +327,6 @@ std::string dot_cfg(const Func& func) {
         ret += folly::sformat("B{} -> B{} [color=red];", bid, ex);
         outputed = true;
       }
-      for (auto ex : b->unwindExits) {
-        ret += folly::sformat("B{} -> B{} [color=blue];", bid, ex);
-        outputed = true;
-      }
     }
     if (outputed) ret += "\n";
   }
@@ -368,9 +352,7 @@ std::string show(const Func& func) {
   for (auto const bid : func.blockRange()) {
     auto const blk = func.blocks[bid].get();
     if (blk->dead) continue;
-    folly::format(&ret, "block #{} (section {})\n{}",
-                  bid, static_cast<size_t>(blk->section),
-                  indent(2, show(func, *blk)));
+    folly::format(&ret, "block #{}\n{}", bid, indent(2, show(func, *blk)));
   }
 
   visitExnLeaves(func, [&] (const php::ExnNode& node) {
@@ -378,15 +360,7 @@ std::string show(const Func& func) {
     if (node.parent != NoExnNodeId) {
       folly::format(&ret, "(^{}) ", node.parent);
     }
-    ret += match<std::string>(
-      node.info,
-      [&] (const FaultRegion& fr) {
-        return folly::to<std::string>("fault->", fr.faultEntry);
-      },
-      [&] (const CatchRegion& cr) {
-        return folly::to<std::string>("catch->", cr.catchEntry);
-      }
-    ) + '\n';
+    ret += folly::to<std::string>("catch->", node.region.catchEntry) + '\n';
   });
 
   return ret;

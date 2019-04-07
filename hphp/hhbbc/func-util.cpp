@@ -76,15 +76,7 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
   always_assert(!dst->exnNodes.size() || !other.exnNodes.size());
   dst->exnNodes.reserve(dst->exnNodes.size() + other.exnNodes.size());
   for (auto en : other.exnNodes) {
-    if (delta) {
-      match<void>(en.info,
-                  [&](php::FaultRegion& fr) {
-                    fr.faultEntry += delta;
-                  },
-                  [&](php::CatchRegion& cr) {
-                    cr.catchEntry += delta;
-                  });
-    }
+    en.region.catchEntry += delta;
     dst->exnNodes.push_back(std::move(en));
   }
   for (auto theirs : other.blocks) {
@@ -92,7 +84,6 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
       auto const ours = theirs.mutate();
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
       for (auto &id : ours->throwExits) id += delta;
-      for (auto &id : ours->unwindExits) id += delta;
       for (auto& bc : ours->hhbcs) {
         // When merging functions (used for 86xints) we have to drop
         // the src info, because it might reference a different unit

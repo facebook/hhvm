@@ -123,8 +123,7 @@ inline int getImmIva(PC pc) {
 }
 
 inline int numSuccBlocks(const Block* b) {
-  // Fault handlers are a special case with 1 edge (to the parent)
-  return peek_op(b->last) == Op::Unwind ? 1 : numSuccs(b->last);
+  return numSuccs(b->last);
 }
 
 #define APPLY(d, l, r)                         \

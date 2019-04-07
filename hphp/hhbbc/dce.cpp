@@ -1815,7 +1815,6 @@ void dce(Env& env, const bc::Switch& op) { dce_default(env, op); }
 void dce(Env& env, const bc::This& op) { dce_default(env, op); }
 void dce(Env& env, const bc::UGetCUNop& op) { dce_default(env, op); }
 void dce(Env& env, const bc::UnsetG& op) { dce_default(env, op); }
-void dce(Env& env, const bc::Unwind& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyParamType& op) { dce_default(env, op); }
 void dce(Env& env, const bc::VerifyParamTypeTS& op) { dce_default(env, op); }

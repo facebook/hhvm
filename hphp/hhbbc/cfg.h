@@ -42,14 +42,6 @@ void visitExnLeaves(const php::Func& func, const php::ExnNode& n, Fun f) {
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Returns whether this block ends with an Unwind instruction.
- * I.e. it is terminal for a fault funclet.
- */
-inline bool ends_with_unwind(const php::Block& b) {
-  return b.hhbcs.back().op == Op::Unwind;
-}
-
-/*
  * Returns whether a block consists of a single Nop instruction.
  */
 inline bool is_single_nop(const php::Block& b) {
@@ -78,20 +70,13 @@ void forEachTakenEdge(Bc& b, Fun f) {
  * distinguished.
  *
  * Exit edges are traversed only if the block consists of
- * more than a single Nop instruction.  The order_blocks routine in
- * emit.cpp relies on this for correctness: if the only block for a
- * protected fault region is empty, we need to not include the fault
- * funclet blocks as reachable, or we can end up with fault funclet
- * handlers without an EHEnt pointing at them.  In cases other than
- * emit.cpp, this is not required for correctness, but is slightly
- * better than always traversing the exit edges.
+ * more than a single Nop instruction.
  */
 template<class Fun>
 void forEachSuccessor(const php::Block& block, Fun f) {
   if (!is_single_nop(block)) {
     forEachTakenEdge(block.hhbcs.back(), f);
     for (auto& ex : block.throwExits)  f(ex);
-    for (auto& ex : block.unwindExits) f(ex);
   }
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
@@ -113,7 +98,6 @@ void forEachNormalSuccessor(Block& block, Fun f) {
 template<class Fun>
 void forEachNonThrowSuccessor(const php::Block& block, Fun f) {
   forEachTakenEdge(block.hhbcs.back(), f);
-  for (auto& ex : block.unwindExits) f(ex);
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }
 

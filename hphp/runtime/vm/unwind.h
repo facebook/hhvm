@@ -36,11 +36,6 @@ namespace HPHP {
 Offset findCatchHandler(const Func* func, Offset raiseOffset);
 
 /*
- * Unwind the PHP exception on the top of the fault stack.
- */
-void unwindPhp();
-
-/*
  * Unwind the PHP exception.
  */
 void unwindPhp(ObjectData* phpException);
@@ -80,14 +75,6 @@ template<class Action> void exception_handler(Action action);
 void chainFaultObjects(ObjectData* top, ObjectData* prev);
 
 //////////////////////////////////////////////////////////////////////
-
-/*
- * This exception is thrown when executing an Unwind bytecode, which
- * will reraise the current fault and resume propagating it.
- */
-struct VMPrepareUnwind : BaseException {
-  const char* what() const noexcept override { return "VMPrepareUnwind"; }
-};
 
 /*
  * Thrown when we need to "switch modes" by re-starting the current VM

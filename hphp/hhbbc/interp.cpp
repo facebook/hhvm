@@ -1531,14 +1531,6 @@ void in(ISS& env, const bc::RetCSuspended&) {
   );
 }
 
-void in(ISS& env, const bc::Unwind&) {
-  nothrow(env); // Don't propagate to throw edges
-  for (auto exit : env.blk.unwindExits) {
-    auto const stackLess = without_stacks(env.state);
-    env.propagate(exit, &stackLess);
-  }
-}
-
 void in(ISS& env, const bc::Throw& /*op*/) {
   popC(env);
 }

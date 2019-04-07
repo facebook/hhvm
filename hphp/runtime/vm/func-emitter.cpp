@@ -385,17 +385,10 @@ namespace {
  *
  *    a) e1 and e2 do not overlap, and e1 comes first
  *    b) e1 encloses e2
- *    c) e1 and e2 have the same region, but e1 is a Catch funclet and
- *       e2 is a Fault funclet.
  */
 struct EHEntComp {
   bool operator()(const EHEnt& e1, const EHEnt& e2) const {
     if (e1.m_base == e2.m_base) {
-      if (e1.m_past == e2.m_past) {
-        static_assert(!static_cast<uint8_t>(EHEnt::Type::Catch),
-            "Catch should be the smallest type");
-        return e1.m_type < e2.m_type;
-      }
       return e1.m_past > e2.m_past;
     }
     return e1.m_base < e2.m_base;

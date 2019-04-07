@@ -139,20 +139,10 @@ UnwindAction checkHandlers(const EHEnt* eh,
     // considered before.
     if (fault.m_handledCount <= i) {
       fault.m_handledCount++;
-      switch (eh->m_type) {
-      case EHEnt::Type::Fault:
-        ITRACE(1, "checkHandlers: entering fault at {}: save {}\n",
-               eh->m_handler,
-               func->unit()->offsetOf(pc));
-        pc = func->unit()->at(eh->m_handler);
-        DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-        return UnwindAction::ResumeVM;
-      case EHEnt::Type::Catch:
-        ITRACE(1, "checkHandlers: entering catch at {}\n", eh->m_handler);
-        pc = func->unit()->at(eh->m_handler);
-        DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
-        return UnwindAction::ResumeVM;
-      }
+      ITRACE(1, "checkHandlers: entering catch at {}\n", eh->m_handler);
+      pc = func->unit()->at(eh->m_handler);
+      DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
+      return UnwindAction::ResumeVM;
     }
     if (eh->m_parentIndex != -1) {
       eh = &func->ehtab()[eh->m_parentIndex];
@@ -353,7 +343,6 @@ const StaticString s_xdebug_start_code_coverage("xdebug_start_code_coverage");
 Offset findCatchHandler(const Func* func, Offset raiseOffset) {
   auto const eh = func->findEH(raiseOffset);
   if (eh == nullptr) return InvalidAbsoluteOffset;
-  if (eh->m_type != EHEnt::Type::Catch) return InvalidAbsoluteOffset;
   auto pc = func->unit()->at(eh->m_handler);
   UNUSED auto const op = decode_op(pc);
   assertx(op == Op::Catch);
@@ -420,12 +409,15 @@ void chainFaultObjects(ObjectData* top, ObjectData* prev) {
  * it's currently operating on, as the underlying faults vector may
  * reallocate due to nested exception handling.
  */
-void unwindPhp() {
-  assertx(!g_context->m_faults.empty());
+void unwindPhp(ObjectData* phpException) {
+  Fault fault;
+  fault.m_userException = phpException;
+  fault.m_userException->incRefCount();
+  g_context->m_faults.push_back(fault);
+
   auto& fp = vmfp();
   auto& stack = vmStack();
   auto& pc = vmpc();
-  auto fault = g_context->m_faults.back();
   bool fromTearDownFrame = false;
 
   ITRACE(1, "entering unwinder for fault: {}\n", describeFault(fault));
@@ -546,15 +538,6 @@ void unwindPhp() {
   g_context->m_faults.pop_back();
 
   throw_object(Object::attach(fault.m_userException));
-}
-
-void unwindPhp(ObjectData* phpException) {
-  Fault fault;
-  fault.m_userException = phpException;
-  fault.m_userException->incRefCount();
-  g_context->m_faults.push_back(fault);
-
-  unwindPhp();
 }
 
 /*

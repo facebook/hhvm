@@ -32,20 +32,6 @@ inline void exception_handler(Action action) {
     return;
   }
 
-  /*
-   * Unwind (repropagating from a fault funclet) is slightly different
-   * from the throw cases, because we need to re-raise the exception
-   * as if it came from the same offset to handle nested fault
-   * handlers correctly, and we continue propagating the current Fault
-   * instead of pushing a new one.
-   */
-  catch (const VMPrepareUnwind&) {
-    checkVMRegState();
-    ITRACE_MOD(Trace::unwind, 1, "unwind: restoring offset {}\n", vmpc());
-    unwindPhp();
-    return;
-  }
-
   catch (const Object& o) {
     checkVMRegState();
     ITRACE_MOD(Trace::unwind, 1, "unwind: Object of class {}\n",

@@ -333,10 +333,9 @@ void insert_assertions(const Index& index,
     };
 
     if (state.unreachable) {
-      if (cblk->fallthrough != NoBlockId || cblk->unwindExits.size()) {
+      if (cblk->fallthrough != NoBlockId) {
         auto const blk = cblk.mutate();
         blk->fallthrough = NoBlockId;
-        blk->unwindExits = {};
       }
       if (!(instrFlags(op.op) & TF)) {
         gen(bc::BreakTraceHint {});
@@ -486,10 +485,8 @@ BlockId make_block(FuncAnalysis& ainfo,
 
   auto newBlk           = copy_ptr<php::Block>{php::Block{}};
   auto const blk        = newBlk.mutate();
-  blk->section          = srcBlk->section;
   blk->exnNodeId        = srcBlk->exnNodeId;
   blk->throwExits       = srcBlk->throwExits;
-  blk->unwindExits      = srcBlk->unwindExits;
   auto const bid = ainfo.ctx.func->blocks.size();
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
@@ -514,7 +511,6 @@ BlockId make_fatal_block(FuncAnalysis& ainfo,
   };
   blk->fallthrough = NoBlockId;
   blk->throwExits = {};
-  blk->unwindExits = {};
   blk->exnNodeId = NoExnNodeId;
   return bid;
 }
@@ -615,11 +611,9 @@ void first_pass(const Index& index,
       // might be part way through converting an FPush/FCall to an
       // FCallBuiltin, for example
       auto opc = genOut(&op);
-      if (interp.blk->fallthrough != NoBlockId ||
-          interp.blk->unwindExits.size()) {
+      if (interp.blk->fallthrough != NoBlockId) {
         auto const blk = ctx.func->blocks[bid].mutate();
         blk->fallthrough = NoBlockId;
-        blk->unwindExits = {};
       }
       if (!(instrFlags(opc) & TF)) {
         gen(bc::BreakTraceHint {});

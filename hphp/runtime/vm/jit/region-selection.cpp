@@ -925,7 +925,6 @@ bool breaksRegion(SrcKey sk) {
     case Op::Exit:
     case Op::Fatal:
     case Op::Throw:
-    case Op::Unwind:
     case Op::Eval:
     case Op::NativeImpl:
       return true;

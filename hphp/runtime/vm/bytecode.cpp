@@ -3292,12 +3292,6 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   return jitReturnPost(jitReturn);
 }
 
-OPTBLD_INLINE void iopUnwind() {
-  assertx(!g_context->m_faults.empty());
-  assertx(g_context->m_faults.back().m_raiseOffset != kInvalidOffset);
-  throw VMPrepareUnwind();
-}
-
 OPTBLD_INLINE void iopThrow(PC&) {
   Cell* c1 = vmStack().topC();
   if (c1->m_type != KindOfObject ||

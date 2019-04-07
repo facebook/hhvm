@@ -66,7 +66,6 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
     };
     blk->fallthrough = NoBlockId;
     blk->throwExits = {};
-    blk->unwindExits = {};
     blk->exnNodeId = NoExnNodeId;
   }
 
@@ -343,7 +342,6 @@ bool buildSwitches(php::Func& func,
           removed->hhbcs = { bc::Nop {} };
           removed->fallthrough = NoBlockId;
           removed->throwExits = {};
-          removed->unwindExits = {};
           removed->exnNodeId = NoExnNodeId;
         }
         ret = true;
@@ -414,7 +412,6 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
       auto const blk = func.blocks[bid].mutate();
       blk->exnNodeId = NoExnNodeId;
       blk->throwExits = {};
-      blk->unwindExits = {};
       continue;
     }
   }
@@ -481,7 +478,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       );
     }
     for (auto& ex : cblk->throwExits)  handleSucc(ex);
-    for (auto& ex : cblk->unwindExits) handleSucc(ex);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
   blockInfo[func.mainEntry].multiplePreds = true;
@@ -499,7 +495,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       if (blockInfo[bid].multipleSuccs ||
           blockInfo[cblk->fallthrough].multiplePreds ||
           cblk->exnNodeId != cnxt->exnNodeId ||
-          cblk->section != cnxt->section ||
           cblk->throwExits != cnxt->throwExits) {
         break;
       }
@@ -514,10 +509,6 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       auto const blk = cblk.mutate();
       blk->fallthrough = cnxt->fallthrough;
       blk->fallthroughNS = cnxt->fallthroughNS;
-      // The predecessor should not have any unwind exits (because that
-      // would make the block terminal), while the successor might.
-      assert(blk->unwindExits.empty());
-      blk->unwindExits = cnxt->unwindExits;
       std::copy(cnxt->hhbcs.begin(), cnxt->hhbcs.end(),
                 std::back_inserter(blk->hhbcs));
       auto const nxt = cnxt.mutate();

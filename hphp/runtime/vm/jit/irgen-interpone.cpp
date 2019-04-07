@@ -420,7 +420,6 @@ void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
 void emitFatal(IRGS& env, FatalOp)            { INTERP }
-void emitUnwind(IRGS& env)                    { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }
 void emitSetOpS(IRGS& env, SetOpOp, uint32_t) { INTERP }
 void emitIncDecG(IRGS& env, IncDecOp)         { INTERP }

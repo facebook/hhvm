@@ -1862,35 +1862,6 @@ void parse_declvars(AsmState& as) {
 void parse_function_body(AsmState&, int nestLevel = 0);
 
 /*
- * directive-fault : identifier integer? '{' function-body
- *                 ;
- */
-void parse_fault(AsmState& as, int nestLevel) {
-  const Offset start = as.ue->bcPos();
-
-  std::string label;
-  if (!as.in.readword(label)) {
-    as.error("expected label name after .try_fault");
-  }
-  int iterId = -1;
-  as.in.skipWhitespace();
-  if (as.in.peek() != '{') {
-    iterId = read_opcode_arg<int32_t>(as);
-  }
-  as.in.expectWs('{');
-  parse_function_body(as, nestLevel + 1);
-
-  auto& eh = as.fe->addEHEnt();
-  eh.m_type = EHEnt::Type::Fault;
-  eh.m_base = start;
-  eh.m_past = as.ue->bcPos();
-  eh.m_iterId = iterId;
-  eh.m_end = kInvalidOffset;
-
-  as.addLabelEHEnt(label, as.fe->ehtab.size() - 1);
-}
-
-/*
  * directive-catch : identifier integer? '{' function-body
  *                 ;
  */
@@ -1910,7 +1881,6 @@ void parse_catch(AsmState& as, int nestLevel) {
   parse_function_body(as, nestLevel + 1);
 
   auto& eh = as.fe->addEHEnt();
-  eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = as.ue->bcPos();
   eh.m_iterId = iterId;
@@ -1959,7 +1929,6 @@ void parse_try_catch(AsmState& as, int nestLevel) {
   const Offset end = as.ue->bcPos();
 
   auto& eh = as.fe->addEHEnt();
-  eh.m_type = EHEnt::Type::Catch;
   eh.m_base = start;
   eh.m_past = handler;
   eh.m_iterId = iterId;
@@ -2178,7 +2147,6 @@ void parse_function_body(AsmState& as, int nestLevel /* = 0 */) {
       if (word == ".numiters")  { parse_numiters(as); continue; }
       if (word == ".declvars")  { parse_declvars(as); continue; }
       if (word == ".numclsrefslots") { parse_numclsrefslots(as); continue; }
-      if (word == ".try_fault") { parse_fault(as, nestLevel); continue; }
       if (word == ".try_catch") { parse_catch(as, nestLevel); continue; }
       if (word == ".try") { parse_try_catch(as, nestLevel); continue; }
       if (word == ".srcloc") { parse_srcloc(as, nestLevel); continue; }

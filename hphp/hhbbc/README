@@ -174,9 +174,6 @@ edges.  Here is an overview (the code is in analyze_func):
        propagates the state after the last instruction across the
        fallthrough edge.
 
-     - If the block ends with an Unwind instruction, it propagates the state
-       before the instruction across all the unwind edges.
-
      - Add any blocks that had their input states changed back to the
        list and repeat.
 

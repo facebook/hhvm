@@ -243,14 +243,11 @@ std::vector<BlockId> initial_sort(const php::Func& f) {
  *
  * Rules about block order:
  *
- *   - The "primary function body" must come first.  This is all blocks
- *     that aren't part of a fault funclet.
- *
  *   - All bytecodes corresponding to a given FPI region must be
  *     contiguous. Note that an FPI region can start or end part way
  *     through a block, so this constraint is on bytecodes, not blocks
  *
- *   - Each funclet must have all of its blocks contiguous, with the
+ *   - Each DV funclet must have all of its blocks contiguous, with the
  *     entry block first.
  *
  *   - Main entry point must be the first block.
@@ -275,28 +272,11 @@ std::vector<BlockId> order_blocks(const php::Func& f) {
   }();
   sorted.insert(end(sorted), begin(dvBlocks), end(dvBlocks));
 
-  // This stable sort will keep the blocks only reachable from DV
-  // entry points after all other main code, and move fault funclets
-  // after all that.
-  std::stable_sort(
-    begin(sorted), end(sorted),
-    [&] (BlockId a, BlockId b) {
-      auto const blka = f.blocks[a].get();
-      auto const blkb = f.blocks[b].get();
-      using T = std::underlying_type<php::Block::Section>::type;
-      return static_cast<T>(blka->section) < static_cast<T>(blkb->section);
-    }
-  );
-
   FTRACE(2, "      block order:{}\n",
     [&] {
       std::string ret;
       for (auto const bid : sorted) {
-        auto const b = f.blocks[bid].get();
         ret += " ";
-        if (b->section != php::Block::Section::Main) {
-          ret += "f";
-        }
         ret += folly::to<std::string>(bid);
       }
       return ret;
@@ -330,8 +310,8 @@ struct EmitBcInfo {
     // The offset past the end of this block.
     Offset past;
 
-    // How many fault regions the jump at the end of this block is leaving.
-    // 0 if there is no jump or if the jump is to the same fault region or a
+    // How many catch regions the jump at the end of this block is leaving.
+    // 0 if there is no jump or if the jump is to the same catch region or a
     // child
     int regionsToPop;
 
@@ -362,10 +342,7 @@ using ExnNodePtr = php::ExnNode*;
 
 bool handleEquivalent(const php::Func& func, ExnNodeId eh1, ExnNodeId eh2) {
   auto entry = [&] (ExnNodeId eid) {
-    return match<BlockId>(
-      func.exnNodes[eid].info,
-      [] (const php::CatchRegion& c) { return c.catchEntry; },
-      [] (const php::FaultRegion& f) { return f.faultEntry; });
+    return func.exnNodes[eid].region.catchEntry;
   };
 
   while (eh1 != eh2) {
@@ -934,18 +911,13 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         // common parent. If the common parent is null, we pop all regions
         info.regionsToPop = depth(b->exnNodeId) - depth(parent);
         assert(info.regionsToPop >= 0);
-        FTRACE(4, "      popped fault regions: {}\n", info.regionsToPop);
+        FTRACE(4, "      popped catch regions: {}\n", info.regionsToPop);
       }
     }
 
     if (b->throwExits.size()) {
       FTRACE(4, "      throw:");
       for (auto DEBUG_ONLY id : b->throwExits) FTRACE(4, " {}", id);
-      FTRACE(4, "\n");
-    }
-    if (b->unwindExits.size()) {
-      FTRACE(4, "      unwind:");
-      for (auto DEBUG_ONLY id : b->unwindExits) FTRACE(4, " {}", id);
       FTRACE(4, "\n");
     }
     if (fallthrough != NoBlockId) {
@@ -1021,15 +993,7 @@ void emit_eh_region(FuncEmitter& fe,
   FTRACE(2,  "    func {}: ExnNode {}\n", fe.name, region->node->idx);
 
   auto const unreachable = [&] (const php::ExnNode& node) {
-    return match<bool>(
-      node.info,
-      [&] (const php::CatchRegion& cr) {
-        return blockInfo[cr.catchEntry].offset == kInvalidOffset;
-      },
-      [&] (const php::FaultRegion& fr) {
-        return blockInfo[fr.faultEntry].offset == kInvalidOffset;
-      }
-    );
+    return blockInfo[node.region.catchEntry].offset == kInvalidOffset;
   };
 
   // A region on a single empty block.
@@ -1062,21 +1026,10 @@ void emit_eh_region(FuncEmitter& fe,
   }
   parentIndexMap[region] = fe.ehtab.size() - 1;
 
-  match<void>(
-    region->node->info,
-    [&] (const php::CatchRegion& cr) {
-      eh.m_type = EHEnt::Type::Catch;
-      eh.m_handler = blockInfo[cr.catchEntry].offset;
-      eh.m_end = kInvalidOffset;
-      eh.m_iterId = cr.iterId;
-    },
-    [&] (const php::FaultRegion& fr) {
-      eh.m_type = EHEnt::Type::Fault;
-      eh.m_handler = blockInfo[fr.faultEntry].offset;
-      eh.m_end = kInvalidOffset;
-      eh.m_iterId = fr.iterId;
-    }
-  );
+  auto const& cr = region->node->region;
+  eh.m_handler = blockInfo[cr.catchEntry].offset;
+  eh.m_end = kInvalidOffset;
+  eh.m_iterId = cr.iterId;
 
   assert(eh.m_handler != kInvalidOffset);
 }
@@ -1174,8 +1127,8 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
     }
 
     for (int i = 0; i < info.blockInfo[bid].regionsToPop; i++) {
-      // If the block ended in a jump out of the fault region, this effectively
-      // ends all fault regions deeper than the one we are jumping to
+      // If the block ended in a jump out of the catch region, this effectively
+      // ends all catch regions deeper than the one we are jumping to
       pop_active(info.blockInfo[bid].past);
     }
 

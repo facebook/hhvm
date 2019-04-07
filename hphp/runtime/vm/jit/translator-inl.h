@@ -77,7 +77,6 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::LIterInitK: // Ditto
     case Op::IterBreak:
     case Op::Throw:
-    case Op::Unwind:
     case Op::Eval:
     case Op::NativeImpl:
     case Op::BreakTraceHint:

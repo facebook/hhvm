@@ -68,18 +68,6 @@ struct SrcInfo {
  */
 struct Block {
   /*
-   * Blocks in HHBC are each part of a bytecode "section".  The section
-   * is either the "primary function body", or a fault funclet.  We
-   * represent fault funclet sections with unique ids.
-   *
-   * Each section must be a contiguous region of bytecode, with the
-   * primary function body first.  These ids are tracked just to
-   * maintain this invariant at emit time.
-   */
-  enum class Section : uint32_t { Main = 0 };
-  Section section;
-
-  /*
    * The pointer for this block's exception region, or nullptr if
    * there is none.
    */
@@ -101,9 +89,6 @@ struct Block {
    *
    *  - throwExits (these represent edges traversed for exceptions mid-block)
    *
-   *  - unwindExits (these represent edges traversed for block-ending Unwind
-   *                 ops)
-   *
    * For the idea behind the factored exit edge thing, see "Efficient
    * and Precise Modeling of Exceptions for the Analysis of Java
    * Programs" (http://dl.acm.org/citation.cfm?id=316171).
@@ -115,7 +100,6 @@ struct Block {
   bool dead{false};
 
   CompactVector<BlockId> throwExits;
-  CompactVector<BlockId> unwindExits;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -129,28 +113,15 @@ struct Block {
  * information is used to construct exception handling regions at emit
  * time.
  *
- * There are two types of regions; CatchRegions and FaultRegions.
- * These correspond to the two types of regions described in
- * bytecode.specification.  Note though that although it's not
- * specified there, in addition to an entry offset, these regions
- * optionally list some information about iterators if the reason the
- * region is there is to free iterator variables.
+ * The catch region is described in bytecode.specification. Note though
+ * that although it's not specified there, in addition to an entry offset,
+ * these regions optionally list some information about iterators if the
+ * reason the region is there is to free iterator variables.
  *
  * Exceptional control flow is also represented more explicitly with
  * factored exit edges (see php::Block).  This tree structure just
  * exists to get the EHEnts right.
- *
- * Note: blocks in fault funclets will have exceptional edges to the
- * blocks listed as handlers in any ExnNode that contained the
- * fault-protected region, since those control flow paths are
- * possible.  Generally they will have nullptr for their exnNode
- * pointers, however, although they may also have other EH-protected
- * regions inside of them (this currently occurs in the case of
- * php-level finally blocks cloned into fault funclets).
  */
-
-struct FaultRegion { BlockId faultEntry;
-                     Id iterId; };
 
 struct CatchRegion { BlockId catchEntry;
                      Id iterId; };
@@ -160,7 +131,7 @@ struct ExnNode {
   uint32_t depth;
   CompactVector<ExnNodeId> children;
   ExnNodeId parent;
-  boost::variant<FaultRegion,CatchRegion> info;
+  CatchRegion region;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -294,9 +265,9 @@ struct FuncBase {
   auto blockRange() const { return IntLikeRange<BlockId> {blocks}; }
 
   /*
-   * Try and fault regions form a tree structure.  The tree is hanging
+   * Catch regions form a tree structure.  The tree is hanging
    * off the func here, with children ids.  Each block that is
-   * within a try or fault region has the index into this array of the
+   * within a catch region has the index into this array of the
    * inner-most ExnNode protecting it.
    *
    * Note that this is updated during the concurrent analyze pass.

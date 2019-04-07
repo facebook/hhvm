@@ -58,27 +58,12 @@ bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
   // nothing else).
   if (b.exnNodeId != NoExnNodeId) {
     assert(b.throwExits.size() == 1);
-    match<void>(
-      f.exnNodes[b.exnNodeId].info,
-      [&] (const CatchRegion& cr) {
-        assert(cr.catchEntry == b.throwExits[0]);
-      },
-      [&] (const FaultRegion& fr) {
-        assert(fr.faultEntry == b.throwExits[0]);
-      }
-    );
+    assert(f.exnNodes[b.exnNodeId].region.catchEntry == b.throwExits[0]);
   }
 
-  if (b.section == php::Block::Section::Main) {
-    // Non-fault funclets should not have unwind exits. It can only have a throw
-    // exit if it has an exnNode (which was checked above).
-    assert(!ends_with_unwind(b));
-    assert(b.unwindExits.empty());
-    assert(b.exnNodeId != NoExnNodeId || b.throwExits.empty());
-  } else if (!ends_with_unwind(b)) {
-    // Only blocks which end with an unwind can have unwind exits.
-    assert(b.unwindExits.empty());
-  }
+  // A block can only have a throw exit if it has an exnNode (which was checked
+  // above).
+  assert(b.exnNodeId != NoExnNodeId || b.throwExits.empty());
 
   // The exit lists contains unique elements.
   hphp_fast_set<BlockId> exitSet;
@@ -87,9 +72,6 @@ bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
   assert(exitSet.size() == b.throwExits.size());
 
   exitSet.clear();
-  std::copy(begin(b.unwindExits), end(b.unwindExits),
-            std::inserter(exitSet, begin(exitSet)));
-  assert(exitSet.size() == b.unwindExits.size());
 
   return true;
 }
@@ -136,47 +118,6 @@ void checkExnTreeBasic(const php::Func& f,
   }
 }
 
-void checkFaultEntryRec(const php::Func& func,
-                        boost::dynamic_bitset<>& seenBlocks,
-                        BlockId faultEntryId,
-                        const php::ExnNode& exnNode) {
-
-  auto const& faultEntry = *func.blocks[faultEntryId];
-  // Loops in fault funclets could cause us to revisit the same block,
-  // so we track the ones we've seen.
-  if (seenBlocks.size() < faultEntryId + 1) {
-    seenBlocks.resize(faultEntryId + 1);
-  }
-  if (seenBlocks[faultEntryId]) return;
-  seenBlocks[faultEntryId] = true;
-
-  /*
-   * All funclets aren't in the main section.
-   */
-  assert(faultEntry.section != php::Block::Section::Main);
-
-  // Note: right now we're only asserting about normal successors, but
-  // there can be exception-only successors for catch blocks inside of
-  // fault funclets for finally handlers.  (Just going un-asserted for
-  // now.)
-  forEachNormalSuccessor(faultEntry, [&] (BlockId succ) {
-    checkFaultEntryRec(func, seenBlocks, succ, exnNode);
-  });
-}
-
-void checkExnTreeMore(const php::Func& func, const ExnNode* node) {
-  match<void>(
-    node->info,
-    [&](const FaultRegion& fr) {
-      boost::dynamic_bitset<> seenBlocks;
-      checkFaultEntryRec(func, seenBlocks, fr.faultEntry, *node);
-    },
-    [] (const CatchRegion&) {}
-  );
-
-  for (auto& c : node->children) checkExnTreeMore(func, &func.exnNodes[c]);
-}
-
 bool DEBUG_ONLY checkExnTree(const php::Func& f) {
   boost::dynamic_bitset<> seenIds;
   ExnNodeId idx{0};
@@ -193,11 +134,6 @@ bool DEBUG_ONLY checkExnTree(const php::Func& f) {
     assert(seenIds[i] == true || f.exnNodes[i].idx == NoExnNodeId);
   }
 
-  // The following assertions come after the above, because if the
-  // tree is totally clobbered it's easy for the wrong ones to fire.
-  for (auto& n : f.exnNodes) {
-    if (n.idx != NoExnNodeId) checkExnTreeMore(f, &n);
-  }
   return true;
 }
 

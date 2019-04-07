@@ -61,10 +61,9 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  * 2.  Stack underflow & overflow not allowed.  INS_1 stack
  *     refs must be in-bounds.
  * 3.  Empty stack at try-region starts (but not ends).
- * 5.  |stack| == 1 before Ret*, == 0 before Unwind.
+ * 5.  |stack| == 1 before Ret*.
  * 6.  no jumps between sections, where section is main body or any funclet.
- * 8.  each section must end with a terminal;  main body cannot contain Unwind;
- *     Funclets may not contain Ret*.
+ * 8.  each section must end with a terminal.
  * 9.  each fpi starts with FPush* and ends with FCall; each FPush must be
  *     the first instr in exactly 1 fpi region.
  * 10. no back-jumps in FPI; no forward jumps out of FPI; no jumps into

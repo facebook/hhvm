@@ -192,8 +192,8 @@ enum InstrFlags {
   NF = 0x0,
 
   /* Terminal: next instruction is not reachable via fall through or the callee
-   * returning control. This includes instructions like Throw and Unwind that
-   * always throw exceptions. */
+   * returning control. This includes instructions like Throw that always throw
+   * exceptions. */
   TF = 0x1,
 
   /* Control flow: If this instruction finishes executing (doesn't throw an
@@ -583,7 +583,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(RetC,            NA,               ONE(CV),         NOV,        CF_TF) \
   O(RetM,            ONE(IVA),         CMANY,           NOV,        CF_TF) \
   O(RetCSuspended,   NA,               ONE(CV),         NOV,        CF_TF) \
-  O(Unwind,          NA,               NOV,             NOV,        TF) \
   O(Throw,           NA,               ONE(CV),         NOV,        CF_TF) \
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetQuietL,      ONE(LA),          NOV,             ONE(CV),    NF) \

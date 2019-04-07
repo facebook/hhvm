@@ -113,7 +113,7 @@ struct FuncChecker {
   bool checkRegion(const char* name, Offset b, Offset p,
                    const char* regionName, Offset base, Offset past,
                    bool check_instrs = true);
-  bool checkSection(bool main, const char* name, Offset base, Offset past);
+  bool checkPrimaryBody(Offset base, Offset past);
   bool checkImmediates(const char* name, PC instr);
   bool checkImmVec(PC& pc, size_t elemSize);
 #define ARGTYPE(name, type) bool checkImm##name(PC& pc, PC instr);
@@ -287,32 +287,14 @@ bool FuncChecker::checkOffsets() {
   Offset base = m_func->base;
   Offset past = m_func->past;
   checkRegion("func", base, past, "unit", 0, unit()->bcPos(), false);
-  // find instruction boundaries and make sure no branches escape
-  SectionMap sections;
-  for (auto& eh : m_func->ehtab) {
-    if (eh.m_type == EHEnt::Type::Fault) {
-      ok &= checkOffset("fault funclet", eh.m_handler, "func bytecode", base,
-                        past, false);
-      sections[eh.m_handler] = 0;
-    }
-  }
-  Offset funclets = !sections.empty() ? sections.begin()->first : past;
-  sections[base] = funclets; // primary body
   // Get instruction boundaries and check branches within primary body
   // and each faultlet.
-  for (auto i = sections.begin(), end = sections.end(); i != end;) {
-    Offset section_base = i->first; ++i;
-    Offset section_past = i == end ? past : i->first;
-    sections[section_base] = section_past;
-    ok &= checkSection(section_base == base,
-                       section_base == base ? "primary body" : "funclet body",
-                       section_base, section_past);
-  }
+  ok &= checkPrimaryBody(base, past);
   // DV entry points must be in the primary function body
   for (auto& param : m_func->params) {
     if (param.hasDefaultValue()) {
       ok &= checkOffset("dv-entry", param.funcletOff, "func body", base,
-                        funclets);
+                        past);
     }
   }
   // Every FPI region must be contained within one section, either the
@@ -320,33 +302,17 @@ bool FuncChecker::checkOffsets() {
   for (auto& fpi : m_func->fpitab) {
     Offset fpi_base = fpiBase(fpi, bc);
     Offset fpi_past = fpiPast(fpi, bc);
-    if (checkRegion("fpi", fpi_base, fpi_past, "func", base, past)) {
-      // FPI is within whole func, but we also need to check within the section
-      Offset section_base = findSection(sections, fpi_base);
-      Offset section_past = sections[section_base];
-      ok &= checkRegion("fpi", fpi_base, fpi_past,
-                        section_base == base ?  "func body" : "funclet",
-                        section_base, section_past);
-    } else {
-      ok = false;
-    }
-  }
-  // check EH regions and targets
-  for (auto& eh : m_func->ehtab) {
-    if (eh.m_type == EHEnt::Type::Fault) {
-      ok &= checkOffset("fault", eh.m_handler, "funclets", funclets, past);
-    }
+    ok &= checkRegion("fpi", fpi_base, fpi_past, "func", base, past);
   }
   return ok;
 }
 
 /**
- * Scan instructions in the given section to find valid instruction
+ * Scan instructions in the given range to find valid instruction
  * boundaries, and check that branches a) land on valid boundaries,
- * b) do not escape the section.
+ * b) do not escape the range.
  */
-bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
-                               Offset past) {
+bool FuncChecker::checkPrimaryBody(Offset base, Offset past) {
   bool ok = true;
   typedef std::list<PC> BranchList;
   BranchList branches;
@@ -355,7 +321,7 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   for (InstrRange i(at(base), at(past)); !i.empty();) {
     auto pc = i.popFront();
     auto const op = peek_op(pc);
-    if (!checkImmediates(name, pc)) {
+    if (!checkImmediates("primary body", pc)) {
       ferror("checkImmediates failed for {} @ {}\n",
              opcodeToName(op), offset(pc));
       return false;
@@ -381,22 +347,14 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
     }
     if (i.empty()) {
       if (offset(pc + instrLen(pc)) != past) {
-        error("Last instruction in %s at %d overflows [%d:%d]\n",
-               name, offset(pc), base, past);
+        error("Last instruction in primary body at %d overflows [%d:%d]\n",
+              offset(pc), base, past);
         ok = false;
       }
       if ((instrFlags(op) & TF) == 0) {
-        error("Last instruction in %s is not terminal %d:%s\n",
-               name, offset(pc), instrToString(pc, unit()).c_str());
+        error("Last instruction in primary body is not terminal %d:%s\n",
+              offset(pc), instrToString(pc, unit()).c_str());
         ok = false;
-      } else {
-        if (isRet(pc) && !is_main) {
-          error("Ret* may not appear in %s\n", name);
-          ok = false;
-        } else if (op == Op::Unwind && is_main) {
-          error("Unwind may not appear in %s\n", name);
-          ok = false;
-        }
       }
     }
   }
@@ -405,9 +363,9 @@ bool FuncChecker::checkSection(bool is_main, const char* name, Offset base,
   for (auto const branch : branches) {
     auto const targets = instrJumpTargets(bc, offset(branch));
     for (auto const& target : targets) {
-      ok &= checkOffset("branch target", target, name, base, past);
+      ok &= checkOffset("branch target", target, "primary body", base, past);
       if (peek_op(branch) == Op::JmpNS && target == offset(branch)) {
-        error("JmpNS may not have zero offset in %s\n", name);
+        error("JmpNS may not have zero offset in %s\n", "primary body");
         ok = false;
       }
     }
@@ -601,7 +559,7 @@ bool FuncChecker::checkImmRATA(PC& pc, PC const /*instr*/) {
 }
 
 bool FuncChecker::checkImmBA(PC& pc, PC const instr) {
-  // we check branch offsets in checkSection(). ignore here.
+  // we check branch offsets in checkPrimaryBody(). ignore here.
   assertx(!instrJumpTargets(unit()->bc(), offset(instr)).empty());
   pc += sizeof(Offset);
   return true;
@@ -1027,14 +985,14 @@ bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
 }
 
 bool FuncChecker::checkTerminal(State* cur, PC pc) {
-  if (isRet(pc) || peek_op(pc) == Op::Unwind) {
+  if (isRet(pc)) {
     if (cur->stklen != 0) {
-      error("stack depth must equal 0 after Ret* and Unwind; got %d\n",
+      error("stack depth must equal 0 after Ret*; got %d\n",
              cur->stklen);
       return false;
     }
     if (cur->clsRefSlots.any() || cur->writtenByClsRefGetTSSlots.any()) {
-      ferror("all class-ref slots must be uninitialized after Ret* and Unwind; "
+      ferror("all class-ref slots must be uninitialized after Ret*; "
              "got [{}][{}]\n",
              slotsToString(cur->clsRefSlots),
              slotsToString(cur->writtenByClsRefGetTSSlots));
@@ -1374,8 +1332,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
     }
     case Op::Catch: {
       auto handler = Func::findEHbyHandler(m_func->ehtab, offset(pc));
-      if (!handler || handler->m_type != EHEnt::Type::Catch ||
-          offset(pc) != handler->m_handler) {
+      if (!handler || offset(pc) != handler->m_handler) {
         ferror("{} must be the first instruction in a Catch handler\n",
                opcodeToName(op));
         return false;
@@ -1635,7 +1592,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   }
 
   if (cur->fpilen > 0 && (op == Op::RetC || op == Op::RetCSuspended ||
-                          op == Op::RetM || op == Op::Unwind)) {
+                          op == Op::RetM)) {
     error("%s instruction encountered inside of FPI region\n",
           opcodeToName(op));
     ok = false;
@@ -1818,7 +1775,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::Fatal:
     case Op::Throw:
     case Op::Catch:
-    case Op::Unwind:
     case Op::ChainFaults:
       return true;
 
@@ -2258,9 +2214,7 @@ bool FuncChecker::checkFlow() {
   }
   // Make sure eval stack is correct at start of each try region
   for (auto& handler : m_func->ehtab) {
-    if (handler.m_type == EHEnt::Type::Catch) {
-      ok &= checkEHStack(handler, builder.at(handler.m_base));
-    }
+    ok &= checkEHStack(handler, builder.at(handler.m_base));
   }
 
   return ok;

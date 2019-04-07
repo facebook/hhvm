@@ -38,8 +38,7 @@ void FPIEnt::serde(SerDe& sd) {
 
 template<class SerDe>
 void EHEnt::serde(SerDe& sd) {
-  sd(m_type)
-    (m_base)
+  sd(m_base)
     (m_past)
     (m_iterId)
     (m_handler)
@@ -667,8 +666,8 @@ Func::findEHbyHandler(const Container& ehtab, Offset o) {
   // We cannot rely on m_end to be a useful value (not kInvalidOffset), so
   // instead we take the handler whose start is the closest without going
   // over the offset we are looking for. We can rely on the fault handlers
-  // to be both contigous and dominated by an Unwind/Catch because we
-  // verify this in checkSection() in the verifier
+  // to be both contigous and dominated by a Catch because we verify this
+  // in checkSection() in the verifier
 
   for (uint32_t i = 0, sz = ehtab.size(); i < sz; ++i) {
     if (ehtab[i].m_handler <= o && ehtab[i].m_handler > closest) {

@@ -83,13 +83,6 @@ void GraphBuilder::linkBlocks() {
     }
     PC next_pc = !i.empty() ? i.front() : m_unit.at(m_func.past());
     Block* next = at(next_pc);
-    if (peek_op(pc) == Op::Unwind) { // exn block
-      if (auto const eh = m_func.findEHbyHandler(offset(pc))) {
-        // link the end of each fault handler to the beginning of its parent
-        succs(block)[0] = eh->m_parentIndex >= 0 ?
-          at(m_func.ehent(eh->m_parentIndex).m_handler) : nullptr;
-      }
-    }
     if (next) {
       block->next_linear = next;
       block->end = next_pc;
@@ -122,17 +115,12 @@ void GraphBuilder::createExBlocks() {
 
 /**
  * Link primary body blocks to exception handler blocks as follows:
- * 1. For each block in the body, traverse from the innermost to
- *    outermost exception handler that includes the block.  For
- *    catch handlers, add an edge to each handler entry point. For
- *    fault handlers, add an edge to the fault handler and stop.
- * 2. For each fault handler block ending in Unwind, find the EH
- *    entry for the funclet, then traverse outwards starting from the
- *    next outermost.  Add any catch edges found, and stop at the first
- *    enclosing fault funclet, as in step 1.
- * The resulting linkage reflects exception control-flow; fault funclets
- * unconditionally handle any exception in their protected region, so they
- * "dominate" outer-more handlers.
+ *
+ * For each block in the body, traverse from the innermost to outermost
+ * exception handler that includes the block. For each handler, add an edge
+ * to each handler entry point.
+ *
+ * The resulting linkage reflects exception control-flow.
  */
 void GraphBuilder::linkExBlocks() {
   // For every block, add edges to reachable fault and catch handlers.

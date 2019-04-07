@@ -134,13 +134,9 @@ std::string opt_escaped_long(const StringData* sd) {
 
 //////////////////////////////////////////////////////////////////////
 
-struct EHFault { std::string label; };
 struct EHCatchLegacy { std::string label; };
 struct EHCatch { Offset end; };
-using EHInfo = boost::variant< EHFault
-                             , EHCatchLegacy
-                             , EHCatch
-                             >;
+using EHInfo = boost::variant<EHCatchLegacy, EHCatch>;
 
 struct FuncInfo {
   FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
@@ -155,7 +151,7 @@ struct FuncInfo {
   // names we chose for its handlers).
   std::unordered_map<const EHEnt*,EHInfo> ehInfo;
 
-  // Fault and catch protected region starts in order.
+  // Try/catch protected region starts in order.
   std::vector<std::pair<Offset,const EHEnt*>> ehStarts;
 };
 
@@ -192,14 +188,8 @@ FuncInfo find_func_info(const Func* func) {
   auto find_eh_entries = [&] {
     for (auto& eh : func->ehtab()) {
       finfo.ehInfo[&eh] = [&]() -> EHInfo {
-        switch (eh.m_type) {
-        case EHEnt::Type::Catch:
-          if (eh.m_end != kInvalidOffset) return EHCatch { eh.m_end };
-          return EHCatchLegacy { add_target("C", eh.m_handler) };
-        case EHEnt::Type::Fault:
-          return EHFault { add_target("F", eh.m_handler) };
-        }
-        not_reached();
+        if (eh.m_end != kInvalidOffset) return EHCatch { eh.m_end };
+        return EHCatchLegacy { add_target("C", eh.m_handler) };
       }();
       finfo.ehStarts.emplace_back(eh.m_base, &eh);
     }
@@ -509,10 +499,6 @@ void print_func_body(Output& out, const FuncInfo& finfo) {
         },
         [&] (const EHCatchLegacy& ehCatch) {
           out.fmtln(".try_catch {} {{", ehCatch.label);
-          ehEnds.push(ehIter->second->m_past);
-        },
-        [&] (const EHFault& fault) {
-          out.fmtln(".try_fault {} {{", fault.label);
           ehEnds.push(ehIter->second->m_past);
         }
       );

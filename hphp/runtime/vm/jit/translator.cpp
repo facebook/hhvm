@@ -225,7 +225,6 @@ static const struct {
   { OpRetCSuspended,
                    {None,             None,         OutNone         }},
   { OpThrow,       {Stack1,           None,         OutNone         }},
-  { OpUnwind,      {None,             None,         OutNone         }},
 
   /*** 5. Get instructions ***/
 
@@ -1076,7 +1075,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ClsCns:
   case Op::Exit:
   case Op::Fatal:
-  case Op::Unwind:
   case Op::SetOpG:
   case Op::SetOpS:
   case Op::IncDecG:

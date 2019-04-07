@@ -96,8 +96,7 @@ void pretty_print(const FuncEmitter* fe, std::ostream& out) {
   auto const& ehtab = fe->ehtab;
   size_t ehId = 0;
   for (auto it = ehtab.begin(); it != ehtab.end(); ++it, ++ehId) {
-    bool catcher = it->m_type == EHEnt::Type::Catch;
-    out << " EH " << ehId << " " << (catcher ? "Catch" : "Fault") << " for " <<
+    out << " EH " << ehId << " Catch for " <<
       it->m_base << ":" << it->m_past;
     if (it->m_parentIndex != -1) {
       out << " outer EH " << it->m_parentIndex;

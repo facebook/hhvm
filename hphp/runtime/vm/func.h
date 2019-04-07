@@ -86,12 +86,6 @@ enum class ParamMode : uint8_t {
  * Exception handler table entry.
  */
 struct EHEnt {
-  enum class Type : uint8_t {
-    Catch,
-    Fault
-  };
-
-  Type m_type;
   Offset m_base;
   Offset m_past;
   int m_iterId;

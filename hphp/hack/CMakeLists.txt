@@ -162,6 +162,8 @@ function(invoke_dune name target)
         export OPAMROOT=${OPAMROOT} &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         export PYTHONPATH="${HPHP_HOME}" && # needed for verify.py for `hack_dune_test`
+        export HACK_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}" &&
+        export HACK_BUILD_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/_build/default" &&
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}

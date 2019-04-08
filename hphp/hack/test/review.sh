@@ -34,6 +34,16 @@ for f in "$@"; do
     EXP=/dev/null
   fi
 
+  if [ ! -z "${OUTPUT_ROOT}" ]; then
+    if [[ "$f" = "$SOURCE_ROOT"* ]]; then
+      f="${OUTPUT_ROOT}${f#"${SOURCE_ROOT}"}"
+    elif [[ "$f" = ./hphp/hack/* ]]; then
+      f="${OUTPUT_ROOT}/${f#"./hphp/hack/"}"
+    elif [[ "$f" = hphp/hack/* ]]; then
+      f="${OUTPUT_ROOT}/${f#"hphp/hack/"}"
+    fi
+  fi
+
   if [ -e "$f$OUT_EXT" ]; then
     OUT="$f$OUT_EXT"
   elif [ -n "${FALLBACK_OUT_EXT+x}" ] && [ -e "$f$FALLBACK_OUT_EXT" ]; then
@@ -41,12 +51,14 @@ for f in "$@"; do
   else
     OUT=/dev/null
   fi
-
   echo "$ARROW Diff between $EXP and $(basename "$OUT") $(tput sgr0)"
 
   # Use git diff to give us color and word diffs. The patience algorithm
   # produces more readable diffs in some situations.
-  git --no-pager diff --diff-algorithm=histogram --color=always \
+  #
+  # --no-index makes us ignore the git repo, if any - otherwise this only
+  # works in hg checkouts (i.e. fbcode)
+  git --no-pager diff --no-index --diff-algorithm=histogram --color=always \
     --word-diff=color --word-diff-regex='[a-zA-Z0-9_:;-]+' \
     $EXP "$OUT" | tail -n +5
   echo

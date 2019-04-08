@@ -35,7 +35,6 @@ type t = {
   tco_disallow_stringish_magic : bool;
   tco_disallow_anon_use_capture_by_ref : bool;
   tco_new_inference : float;
-  tco_new_inference_no_eager_solve : bool;
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
   tco_disable_instanceof_refinement : bool;
@@ -225,7 +224,6 @@ let default = {
  tco_disallow_stringish_magic = false;
  tco_disallow_anon_use_capture_by_ref = false;
  tco_new_inference = 0.0;
- tco_new_inference_no_eager_solve = false;
  tco_timeout = 0;
  tco_disallow_invalid_arraykey = false;
  tco_disable_instanceof_refinement = false;
@@ -270,7 +268,6 @@ let make
   ?(tco_disallow_stringish_magic = default.tco_disallow_stringish_magic)
   ?(tco_disallow_anon_use_capture_by_ref = default.tco_disallow_anon_use_capture_by_ref)
   ?(tco_new_inference = default.tco_new_inference)
-  ?(tco_new_inference_no_eager_solve = default.tco_new_inference_no_eager_solve)
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
   ?(tco_disable_instanceof_refinement = default.tco_disable_instanceof_refinement)
@@ -317,7 +314,6 @@ let make
   tco_disallow_stringish_magic;
   tco_disallow_anon_use_capture_by_ref;
   tco_new_inference;
-  tco_new_inference_no_eager_solve;
   tco_timeout;
   tco_disallow_invalid_arraykey;
   tco_disable_instanceof_refinement;
@@ -365,7 +361,6 @@ let tco_disallow_scrutinee_case_value_type_mismatch t =
 let tco_disallow_stringish_magic t = t.tco_disallow_stringish_magic
 let tco_disallow_anon_use_capture_by_ref t = t.tco_disallow_anon_use_capture_by_ref
 let tco_new_inference t = t.tco_new_inference > 0.0
-let tco_new_inference_no_eager_solve t = t.tco_new_inference_no_eager_solve
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let tco_disable_instanceof_refinement t = t.tco_disable_instanceof_refinement

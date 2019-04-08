@@ -195,7 +195,6 @@ let parse_options () =
   let disallow_stringish_magic = ref None in
   let log_inference_constraints = ref None in
   let new_inference = ref None in
-  let new_inference_no_eager_solve = ref None in
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
   let enable_stronger_await_binding = ref None in
@@ -385,9 +384,6 @@ let parse_options () =
     "--new-inference",
         Arg.Unit (fun () -> new_inference := Some 1.0),
         " Type inference by constraint generation.";
-    "--new-inference-no-eager-solve",
-        Arg.Unit (set_bool new_inference_no_eager_solve),
-        " Do not eagerly solve invariant type variable constraints.";
     "--timeout",
         Arg.Int (fun secs -> timeout := Some secs),
         " Timeout in seconds for checking a function or a class.";
@@ -453,7 +449,6 @@ let parse_options () =
     ?tco_disallow_stringish_magic:(!disallow_stringish_magic)
     ?tco_log_inference_constraints:(!log_inference_constraints)
     ?tco_new_inference:(!new_inference)
-    ?tco_new_inference_no_eager_solve:(!new_inference_no_eager_solve)
     ?tco_disallow_invalid_arraykey:(!disallow_invalid_arraykey)
     ?po_auto_namespace_map:(!auto_namespace_map)
     ?po_enable_concurrent:(!enable_concurrent)

@@ -1,5 +1,4 @@
 --new-inference
---new-inference-no-eager-solve
 --all-errors
 --disallow-stringish-magic
 --hh-log-level prop 1

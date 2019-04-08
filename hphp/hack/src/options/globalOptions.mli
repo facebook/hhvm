@@ -157,12 +157,6 @@ type t = {
  tco_new_inference : float;
 
  (*
-  * Switch off eager solving of invariant type variable
-  * for constructs such as method invocation
-  *)
- tco_new_inference_no_eager_solve : bool;
-
- (*
   * If non-zero, give up type checking a class or function after this many seconds
   *)
  tco_timeout : int;
@@ -246,7 +240,6 @@ val make :
   ?tco_disallow_stringish_magic: bool ->
   ?tco_disallow_anon_use_capture_by_ref: bool ->
   ?tco_new_inference: float ->
-  ?tco_new_inference_no_eager_solve: bool ->
   ?tco_timeout: int ->
   ?tco_disallow_invalid_arraykey: bool ->
   ?tco_disable_instanceof_refinement: bool ->
@@ -292,7 +285,6 @@ val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 val tco_disallow_stringish_magic : t -> bool
 val tco_disallow_anon_use_capture_by_ref : t -> bool
 val tco_new_inference : t -> bool
-val tco_new_inference_no_eager_solve : t -> bool
 val tco_timeout : t -> int
 val tco_disallow_invalid_arraykey : t -> bool
 val tco_disable_instanceof_refinement : t -> bool

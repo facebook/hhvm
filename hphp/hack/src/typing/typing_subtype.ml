@@ -2667,9 +2667,8 @@ let solve_all_unsolved_tyvars env =
  *    #1 := vec<#2>  where C <: #2
  *)
 let expand_type_and_solve env ~description_of_expected p ty =
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env)
-  and eager_solve = not (TypecheckerOptions.new_inference_no_eager_solve (Env.get_tcopt env)) in
-  if new_inference && eager_solve then
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  if new_inference then
     let env', ety = Typing_utils.simplify_unions env ty
       ~on_tyvar:(fun env r v ->
         let env = solve_tyvar ~force_solve:true ~freshen:true env r v in

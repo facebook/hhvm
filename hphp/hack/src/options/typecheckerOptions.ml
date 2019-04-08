@@ -68,7 +68,6 @@ let disallow_scrutinee_case_value_type_mismatch =
 let disallow_stringish_magic = GlobalOptions.tco_disallow_stringish_magic
 let disallow_anon_use_capture_by_ref = GlobalOptions.tco_disallow_anon_use_capture_by_ref
 let new_inference = GlobalOptions.tco_new_inference
-let new_inference_no_eager_solve = GlobalOptions.tco_new_inference_no_eager_solve
 let timeout = GlobalOptions.tco_timeout
 let disallow_invalid_arraykey = GlobalOptions.tco_disallow_invalid_arraykey
 let disable_instanceof_refinement = GlobalOptions.tco_disable_instanceof_refinement

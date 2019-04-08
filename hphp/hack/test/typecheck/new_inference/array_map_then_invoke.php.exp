@@ -1,6 +1,1 @@
-File "array_map_then_invoke.php", line 16, characters 10-12:
-You are trying to access the member foo on a value whose class is unknown (Typing[4296])
-  File "array_map_then_invoke.php", line 15, characters 8-19:
-  It is unknown because a type could not be determined here
-  File "array_map_then_invoke.php", line 8, characters 69-70:
-    via this generic Tv
+No errors

@@ -111,11 +111,13 @@ const std::string DebugTransport::wrapOutgoingMessage(
 }
 
 void DebugTransport::enqueueOutgoingUserMessage(
+  request_id_t threadId,
   const char* message,
   const char* level
 ) {
   folly::dynamic userMessage = folly::dynamic::object;
 
+  userMessage["threadId"] = threadId;
   userMessage["category"] = level;
   userMessage["output"] = message;
   enqueueOutgoingEventMessage(userMessage, EventTypeOutput);

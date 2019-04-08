@@ -23,6 +23,7 @@
 #include <condition_variable>
 #include <mutex>
 
+#include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/logging.h"
 #include "hphp/util/async-func.h"
 #include "hphp/util/lock.h"
@@ -56,6 +57,7 @@ struct DebugTransport {
   // put the message into the outgoing message queue and then return. A worker
   // thread will process outgoing messages in order and send them to the client.
   virtual void enqueueOutgoingUserMessage(
+    request_id_t threadId,
     const char* message,
     const char* level = OutputLevelLog
   );

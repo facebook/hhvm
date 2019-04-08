@@ -594,7 +594,9 @@ void Debugger::sendUserMessage(const char* message, const char* level) {
   }
 
   if (m_transport != nullptr) {
-    m_transport->enqueueOutgoingUserMessage(message, level);
+    m_transport->enqueueOutgoingUserMessage(
+      getCurrentThreadId(), message, level
+    );
   }
 }
 
@@ -919,6 +921,7 @@ DebuggerRequestInfo* Debugger::attachToRequest(RequestInfo* ti) {
       }
     } else {
       m_transport->enqueueOutgoingUserMessage(
+        kDummyTheadId,
         "Failed to attach to new HHVM request: another debugger is already "
           "attached.",
         DebugTransport::OutputLevelError

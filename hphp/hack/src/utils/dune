@@ -15,7 +15,7 @@
     utils)
   (c_names
     get_build_id
-    get_build_id.gen)
+    get_build_id_gen)
   (c_flags (:standard
     (:include ../dune_config/incl_hphp_parent.sexp)
     (:include config/build-id-opt)

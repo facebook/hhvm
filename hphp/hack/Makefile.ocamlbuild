@@ -154,7 +154,7 @@ ALL_INCLUDE_PATHS=$(EXTRA_INCLUDE_PATHS) $(HEADER_DIRS)
 ################################################################################
 
 OBJECT_FILES_TO_BUILD=$(patsubst %.c,%.o,$(NATIVE_C_FILES))
-NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) src/utils/get_build_id.gen.o src/utils/get_build_id.o src/utils/compiler_id_impl.o
+NATIVE_OBJECT_FILES=$(OBJECT_FILES_TO_BUILD) src/utils/get_build_id_gen.o src/utils/get_build_id.o src/utils/compiler_id_impl.o
 INCLUDE_OPTS=$(foreach dir,$(MODULES),-I src/$(dir))
 NATIVE_LIB_OPTS=$(foreach lib, $(NATIVE_LIBRARIES),-cclib -l$(lib))
 EXTRA_NATIVE_LIB_OPTS=$(foreach lib, $(EXTRA_NATIVE_LIBRARIES),-cclib -l$(lib))
@@ -162,7 +162,7 @@ EXTRA_INCLUDE_OPTS=$(foreach dir, $(ALL_INCLUDE_PATHS),-ccopt -I$(dir))
 EXTRA_CC_OPTS=$(foreach opt, $(EXTRA_CC_FLAGS),-ccopt $(opt))
 EXTRA_LINK=$(EXTRA_LINK_OPTS) $(foreach dir, $(EXTRA_LIB_PATHS),-cclib -L$(dir))
 FRAMEWORK_OPTS=$(foreach framework, $(FRAMEWORKS),-cclib -framework -cclib $(framework))
-BUILD_ID_OBJECTS=_build/src/utils/compiler_id_impl.o _build/src/utils/get_build_id.o _build/src/utils/get_build_id.gen.o
+BUILD_ID_OBJECTS=_build/src/utils/compiler_id_impl.o _build/src/utils/get_build_id.o _build/src/utils/get_build_id_gen.o
 CC_DEFINES=-cflag -ccopt -cflag -DUSE_UNISTD=1
 
 .PHONY: $(BUILD_ID_OBJECTS)
@@ -183,7 +183,7 @@ all: build-hack copy-hack-files
 clean:
 	$(OCAMLBUILD) -clean
 	find ./bin -mindepth 1 -not -path ../bin/README -delete
-	rm -f src/utils/get_build_id.gen.c
+	rm -f src/utils/get_build_id_gen.c
 	rm -f src/options/buildOptions.ml
 
 build-hack: $(TARGETS)
@@ -244,12 +244,12 @@ build-hack-native-deps: $(NATIVE_C_FILES) $(BUILD_ID_OBJECTS)
 		-cflags "-g $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS)" \
 		$(OBJECT_FILES_TO_BUILD)
 
-_build/src/utils/get_build_id.gen.c: $(ALL_SRC_FILES)
+_build/src/utils/get_build_id_gen.c: $(ALL_SRC_FILES)
 	mkdir -p $(dir $@)
 	cd $(ROOT) && \
-        $(OCAML) -I scripts -w -3 unix.cma scripts/gen_build_id.ml _build/src/utils/get_build_id.gen.c
+        $(OCAML) -I scripts -w -3 unix.cma scripts/gen_build_id.ml _build/src/utils/get_build_id_gen.c
 
-_build/src/utils/get_build_id.gen.o: _build/src/utils/get_build_id.gen.c
+_build/src/utils/get_build_id_gen.o: _build/src/utils/get_build_id_gen.c
 	cd $(dir $@) && $(OCAMLC) $(EXTRA_INCLUDE_OPTS) $(EXTRA_CC_OPTS) -c $(notdir $<)
 
 _build/ppx/ppx_gen_hhi:

@@ -36,7 +36,6 @@ struct MInstrState;
 struct TypeConstraint;
 struct c_Pair;
 struct c_Vector;
-enum class ICMode : int8_t;
 
 namespace jit {
 //////////////////////////////////////////////////////////////////////

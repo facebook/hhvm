@@ -222,19 +222,8 @@ and varray_to_typed_value ns fields =
   TV.VArray tv_fields
 
 and darray_to_typed_value ns fields =
-  let fields =
-    List.map
-      fields
-      ~f:(fun (v1,v2) ->
-        match snd v1 with
-        | A.String s ->
-           begin match Int64.of_string s with
-           | _ ->
-              (expr_to_typed_value ns v1, expr_to_typed_value ns v2)
-           | exception Failure _ ->
-              (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2)
-           end
-        | _ -> (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
+  let fields = List.map fields ~f:(fun (v1,v2) ->
+    (key_expr_to_typed_value ns v1, expr_to_typed_value ns v2))
   in
   let a = update_duplicates_in_map fields in
   TV.DArray a
@@ -258,15 +247,12 @@ and shape_to_typed_value ns fields =
 
 and key_expr_to_typed_value ?(restrict_keys=false) ns expr =
   let tv = expr_to_typed_value ns expr in
-  begin match tv with
-  | TV.Int _ | TV.String _ when restrict_keys || hack_arr_compat_notices () -> ()
-  | _ when restrict_keys -> raise NotLiteral
-  | TV.Bool _ when hack_arr_compat_notices () -> raise NotLiteral
-  | _ when hack_arr_compat_notices () -> raise NotLiteral
-  | _ -> () end;
-  match TV.cast_to_arraykey tv with
-  | Some tv -> tv
-  | None -> raise NotLiteral
+  match tv with
+    | TV.Int _ | TV.String _ -> tv
+    | _ when restrict_keys || hack_arr_compat_notices () -> raise NotLiteral
+    | _ -> match TV.cast_to_arraykey tv with
+      | Some tv -> tv
+      | None -> raise NotLiteral
 
 and afield_to_typed_value_pair ?(restrict_keys=false) ns afield =
   match afield with

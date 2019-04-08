@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/tv-variant.h"
+#include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
@@ -188,6 +189,23 @@ bool EvaluateCommand::executeImpl(
 
   (*responseMsg)["body"] = folly::dynamic::object;
   folly::dynamic& body = (*responseMsg)["body"];
+
+  try {
+    VariableSerializer vs(
+      VariableSerializer::Type::DebuggerDump,
+      0,
+      2
+    );
+    body["serialized"] = vs.serialize(result.result, true).get()->data();
+  } catch (const StringBufferLimitException& e) {
+    // we will still return the structured serialized result if
+    // VariableSerializer fails, so the client can fall back on it
+    // (and for IDE's)
+  } catch (...) {
+    assertx(false);
+    throw;
+  }
+
   body["result"] = serializedResult["value"];
   body["type"] = serializedResult["type"];
 

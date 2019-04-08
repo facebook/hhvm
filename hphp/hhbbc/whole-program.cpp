@@ -333,9 +333,10 @@ void analyze_iteratively(Index& index, php::Program& program,
     ++round;
     trace_time update_time("updating");
 
-    DependencyContextSet deps;
+    std::vector<DependencyContextSet> deps_vec{parallel::num_threads};
 
-    auto update_func = [&] (FuncAnalysisResult& fa) {
+    auto update_func = [&] (FuncAnalysisResult& fa,
+                            DependencyContextSet& deps) {
       SCOPE_ASSERT_DETAIL("update_func") {
         return "Updating Func: " + show(fa.ctx);
       };
@@ -369,7 +370,8 @@ void analyze_iteratively(Index& index, php::Program& program,
       }
     };
 
-    auto update_class = [&] (ClassAnalysis& ca) {
+    auto update_class = [&] (ClassAnalysis& ca,
+                             DependencyContextSet& deps) {
       {
         SCOPE_ASSERT_DETAIL("update_class") {
           return "Updating Class: " + show(ca.ctx);
@@ -382,20 +384,35 @@ void analyze_iteratively(Index& index, php::Program& program,
                                              ca.badPropInitialValues,
                                              deps);
       }
-      for (auto& fa : ca.methods)  update_func(fa);
-      for (auto& fa : ca.closures) update_func(fa);
+      for (auto& fa : ca.methods)  update_func(fa, deps);
+      for (auto& fa : ca.closures) update_func(fa, deps);
     };
 
-    for (auto& result : results) {
-      switch (result->type) {
-      case WorkType::Func:
-        update_func(result->func);
-        break;
-      case WorkType::Class:
-        update_class(result->cls);
-        break;
+    parallel::for_each(
+      results,
+      [&] (auto& result, size_t worker) {
+        assertx(worker < deps_vec.size());
+        switch (result->type) {
+          case WorkType::Func:
+            update_func(result->func, deps_vec[worker]);
+            break;
+          case WorkType::Class:
+            update_class(result->cls, deps_vec[worker]);
+            break;
+        }
+      }
+    );
+
+    {
+      trace_time _("merging deps");
+      for (auto& deps : deps_vec) {
+        if (&deps == &deps_vec[0]) continue;
+        for (auto& d : deps) deps_vec[0].insert(d);
+        deps.clear();
       }
     }
+
+    auto& deps = deps_vec[0];
 
     if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
       index.refine_public_statics(deps);

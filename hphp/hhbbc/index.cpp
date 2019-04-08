@@ -40,6 +40,7 @@
 #include <folly/Optional.h>
 #include <folly/Range.h>
 #include <folly/String.h>
+#include <folly/concurrency/ConcurrentHashMap.h>
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-comparisons.h"
@@ -957,6 +958,8 @@ std::string show(const Func& f) {
 //////////////////////////////////////////////////////////////////////
 
 using IfaceSlotMap = hphp_hash_map<const php::Class*, Slot>;
+using ConstInfoConcurrentMap =
+  tbb::concurrent_hash_map<SString, ConstInfo, StringDataHashCompare>;
 
 struct Index::IndexData {
   explicit IndexData(Index* index) : m_index{index} {}
@@ -978,7 +981,7 @@ struct Index::IndexData {
   ISStringToMany<const php::Func>        funcs;
   ISStringToMany<const php::TypeAlias>   typeAliases;
   ISStringToMany<const php::Class>       enums;
-  hphp_fast_map<SString, ConstInfo> constants;
+  ConstInfoConcurrentMap                 constants;
   hphp_fast_set<SString, string_data_hash, string_data_isame> classAliases;
 
   // Map from each class to all the closures that are allocated in
@@ -1056,7 +1059,8 @@ struct Index::IndexData {
   // inferred types for the public static properties is the union of all these
   // mutations. If a function is not analyzed in a particular analysis round,
   // its mutations are left unchanged from the previous round.
-  hphp_hash_map<const php::Func*, PublicSPropMutations> publicSPropMutations;
+  folly::ConcurrentHashMap<const php::Func*,
+                           PublicSPropMutations> publicSPropMutations;
 
   /*
    * Map from interfaces to their assigned vtable slots, computed in
@@ -1064,7 +1068,7 @@ struct Index::IndexData {
    */
   IfaceSlotMap ifaceSlotMap;
 
-  hphp_fast_map<
+  hphp_hash_map<
     const php::Class*,
     CompactVector<Type>
   > closureUseVars;
@@ -1112,6 +1116,9 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 using IndexData = Index::IndexData;
+
+std::mutex closure_use_vars_mutex;
+std::mutex private_propstate_mutex;
 
 DependencyContext make_dep(const php::Func* func) {
   return DependencyContext{DependencyContextType::Func, func};
@@ -1888,15 +1895,18 @@ bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
 
 void add_system_constants_to_index(IndexData& index) {
   for (auto cnsPair : Native::getConstants()) {
-    auto& c = index.constants[cnsPair.first];
     assertx(cnsPair.second.m_type != KindOfUninit ||
             cnsPair.second.dynamic());
     auto t = cnsPair.second.dynamic() ?
       TInitCell : from_cell(cnsPair.second);
-    c.func = nullptr;
-    c.type = t;
-    c.system = true;
-    c.readonly = false;
+
+    ConstInfoConcurrentMap::accessor acc;
+    if (index.constants.insert(acc, cnsPair.first)) {
+      acc->second.func = nullptr;
+      acc->second.type = t;
+      acc->second.system = true;
+      acc->second.readonly = false;
+    }
   }
 }
 
@@ -4797,29 +4807,29 @@ Type Index::lookup_class_constant(Context ctx,
 
 folly::Optional<Type> Index::lookup_constant(Context ctx,
                                              SString cnsName) const {
-  auto it = m_data->constants.find(cnsName);
-  if (it == m_data->constants.end()) {
+  ConstInfoConcurrentMap::const_accessor acc;
+  if (!m_data->constants.find(acc, cnsName)) {
     // flag to indicate that the constant isn't in the index yet.
     if (options.HardConstProp) return folly::none;
     return TInitCell;
   }
 
-  if (it->second.func &&
-      !it->second.readonly &&
-      !it->second.system &&
-      !tv(it->second.type)) {
+  if (acc->second.func &&
+      !acc->second.readonly &&
+      !acc->second.system &&
+      !tv(acc->second.type)) {
     // we might refine the type
-    add_dependency(*m_data, it->second.func, ctx, Dep::ConstVal);
+    add_dependency(*m_data, acc->second.func, ctx, Dep::ConstVal);
   }
 
-  return it->second.type;
+  return acc->second.type;
 }
 
 folly::Optional<Cell> Index::lookup_persistent_constant(SString cnsName) const {
   if (!options.HardConstProp) return folly::none;
-  auto it = m_data->constants.find(cnsName);
-  if (it == m_data->constants.end()) return folly::none;
-  return tv(it->second.type);
+  ConstInfoConcurrentMap::const_accessor acc;
+  if (!m_data->constants.find(acc, cnsName)) return folly::none;
+  return tv(acc->second.type);
 }
 
 bool Index::func_depends_on_arg(const php::Func* func, int arg) const {
@@ -5314,9 +5324,9 @@ void Index::init_public_static_prop_types() {
 }
 
 void Index::refine_class_constants(
-  const Context& ctx,
-  const CompactVector<std::pair<size_t, TypedValue>>& resolved,
-  DependencyContextSet& deps) {
+    const Context& ctx,
+    const CompactVector<std::pair<size_t, TypedValue>>& resolved,
+    DependencyContextSet& deps) {
   if (!resolved.size()) return;
   auto& constants = ctx.func->cls->constants;
   for (auto const& c : resolved) {
@@ -5340,14 +5350,18 @@ void Index::refine_constants(const FuncAnalysisResult& fa,
       // if there's already an entry, we don't want to do anything,
       // otherwise just insert a dummy entry to indicate that it was
       // read.
-      m_data->constants.emplace(it.first,
-                                ConstInfo {func, TInitCell, false, true});
+      ConstInfoConcurrentMap::accessor acc;
+      if (m_data->constants.insert(acc, it.first)) {
+        acc->second = ConstInfo {func, TInitCell, false, true};
+      }
       continue;
     }
 
     if (it.second.m_type == kDynamicConstant || !is_pseudomain(func)) {
       // two definitions, or a non-pseuodmain definition
-      auto& c = m_data->constants[it.first];
+      ConstInfoConcurrentMap::accessor acc;
+      m_data->constants.insert(acc, it.first);
+      auto& c = acc->second;
       if (!c.system) {
         c.func = nullptr;
         c.type = TInitCell;
@@ -5361,26 +5375,30 @@ void Index::refine_constants(const FuncAnalysisResult& fa,
 
     assertx(t.equivalentlyRefined(unctx(t)));
 
-    auto const res = m_data->constants.emplace(it.first, ConstInfo {func, t});
-
-    if (res.second || res.first->second.system) continue;
-
-    if (res.first->second.readonly) {
-      res.first->second.func = func;
-      res.first->second.type = t;
-      res.first->second.readonly = false;
+    ConstInfoConcurrentMap::accessor acc;
+    if (m_data->constants.insert(acc, it.first)) {
+      acc->second = ConstInfo {func, t};
       continue;
     }
 
-    if (res.first->second.func != func) {
-      res.first->second.func = nullptr;
-      res.first->second.type = TInitCell;
+    if (acc->second.system) continue;
+
+    if (acc->second.readonly) {
+      acc->second.func = func;
+      acc->second.type = t;
+      acc->second.readonly = false;
       continue;
     }
 
-    assertx(t.moreRefined(res.first->second.type));
-    if (!t.equivalentlyRefined(res.first->second.type)) {
-      res.first->second.type = t;
+    if (acc->second.func != func) {
+      acc->second.func = nullptr;
+      acc->second.type = TInitCell;
+      continue;
+    }
+
+    assertx(t.moreRefined(acc->second.type));
+    if (!t.equivalentlyRefined(acc->second.type)) {
+      acc->second.type = t;
       find_deps(*m_data, func, Dep::ConstVal, deps);
     }
   }
@@ -5535,7 +5553,6 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     dep = Dep::InlineDepthLimit;
   }
 
-
   if (dep != Dep{}) find_deps(*m_data, func, dep, deps);
 }
 
@@ -5550,7 +5567,11 @@ bool Index::refine_closure_use_vars(const php::Class* cls,
     );
   }
 
-  auto& current = m_data->closureUseVars[cls];
+  auto& current = [&] () -> CompactVector<Type>& {
+    std::lock_guard<std::mutex> _{closure_use_vars_mutex};
+    return m_data->closureUseVars[cls];
+  }();
+
   always_assert(current.empty() || current.size() == vars.size());
   if (current.empty()) {
     current = vars;
@@ -5574,23 +5595,30 @@ void refine_private_propstate(Container& cont,
                               const php::Class* cls,
                               const PropState& state) {
   assertx(!is_used_trait(*cls));
-  auto it = cont.find(cls);
-  if (it == end(cont)) {
-    cont[cls] = state;
-    return;
-  }
+  auto* elm = [&] () -> typename Container::value_type* {
+    std::lock_guard<std::mutex> _{private_propstate_mutex};
+    auto it = cont.find(cls);
+    if (it == end(cont)) {
+      cont[cls] = state;
+      return nullptr;
+    }
+    return &*it;
+  }();
+
+  if (!elm) return;
+
   for (auto& kv : state) {
-    auto& target = it->second[kv.first].ty;
-    assertx(it->second[kv.first].tc == kv.second.tc);
+    auto& target = elm->second[kv.first];
+    assertx(target.tc == kv.second.tc);
     always_assert_flog(
-      kv.second.ty.moreRefined(target),
+      kv.second.ty.moreRefined(target.ty),
       "PropState refinement failed on {}::${} -- {} was not a subtype of {}\n",
       cls->name->data(),
       kv.first->data(),
       show(kv.second.ty),
-      show(target)
+      show(target.ty)
     );
-    target = kv.second.ty;
+    target.ty = kv.second.ty;
   }
 }
 

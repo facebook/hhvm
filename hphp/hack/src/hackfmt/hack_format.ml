@@ -1444,6 +1444,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
               function_call_receiver = {
                 syntax = Token {Token.kind = TokenKind.Name; text = "genva"; _}; _
               } as genva_token;
+              function_call_type_args;
               function_call_left_paren;
               function_call_right_paren;
               function_call_argument_list;
@@ -1462,6 +1463,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
             t env await_keyword;
             Space;
             t env genva_token;
+            t env function_call_type_args;
             t env function_call_left_paren;
             nest env function_call_right_paren
               [transform_arg_list env function_call_argument_list];
@@ -1529,8 +1531,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
           then Nest [t env false_expr]
           else t env false_expr;
       ])
-  | Syntax.FunctionCallExpression _
-  | Syntax.FunctionCallWithTypeArgumentsExpression _ ->
+  | Syntax.FunctionCallExpression _ ->
     handle_possible_chaining env node
   | Syntax.EvalExpression {
       eval_keyword = kw;
@@ -2515,7 +2516,7 @@ and handle_possible_chaining env node =
     let first_receiver, acc = handle_chaining acc receiver in
     first_receiver, (arrow, member, targs, args) :: acc
 
-  and handle_fun_call acc node receiver ?targs lp args rp =
+  and handle_fun_call acc node receiver targs lp args rp =
     match Syntax.syntax receiver with
     | Syntax.MemberSelectionExpression {
         member_object = obj;
@@ -2526,7 +2527,7 @@ and handle_possible_chaining env node =
         safe_member_operator = arrow;
         safe_member_name = member; } ->
       handle_member_selection acc
-        (obj, arrow, member, targs)
+        (obj, arrow, member, if Syntax.is_missing targs then None else Some targs)
         (Some (lp, args, rp))
     | _ -> node, []
 
@@ -2534,17 +2535,11 @@ and handle_possible_chaining env node =
     match Syntax.syntax node with
     | Syntax.FunctionCallExpression {
         function_call_receiver = receiver;
+        function_call_type_args = targs;
         function_call_left_paren = lp;
         function_call_argument_list = args;
         function_call_right_paren = rp; } ->
-      handle_fun_call acc node receiver lp args rp
-    | Syntax.FunctionCallWithTypeArgumentsExpression {
-        function_call_with_type_arguments_receiver = receiver;
-        function_call_with_type_arguments_type_args = targs;
-        function_call_with_type_arguments_left_paren = lp;
-        function_call_with_type_arguments_argument_list = args;
-        function_call_with_type_arguments_right_paren = rp; } ->
-      handle_fun_call acc node receiver ~targs lp args rp
+      handle_fun_call acc node receiver targs lp args rp
     | Syntax.MemberSelectionExpression {
         member_object = obj;
         member_operator = arrow;
@@ -2581,19 +2576,10 @@ and handle_possible_chaining env node =
     match Syntax.syntax node with
     | Syntax.FunctionCallExpression {
         function_call_receiver = receiver;
+        function_call_type_args = targs;
         function_call_left_paren = lp;
         function_call_argument_list = args;
         function_call_right_paren = rp; } ->
-      Concat [
-        t env receiver;
-        transform_argish env lp args rp;
-      ]
-    | Syntax.FunctionCallWithTypeArgumentsExpression {
-        function_call_with_type_arguments_receiver = receiver;
-        function_call_with_type_arguments_type_args = targs;
-        function_call_with_type_arguments_left_paren = lp;
-        function_call_with_type_arguments_argument_list = args;
-        function_call_with_type_arguments_right_paren = rp; } ->
       Concat [
         t env receiver;
         t env targs;

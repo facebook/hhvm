@@ -347,7 +347,7 @@
                  (parenthesized_expression 18
                   ((() "(" 1 ())
                    (function_call_expression 16
-                    ((() name 9 ()) (() "(" 1 ())
+                    ((() name 9 ()) (missing 0 ()) (() "(" 1 ())
                      (list 5
                       ((list_item 5
                         ((literal 5 ((() double_quoted_string_literal 5 ())))
@@ -509,7 +509,8 @@
                 ((variable 2 ((() variable 2 ((whitespace 1)))))
                  (() instanceof 10 ((whitespace 1)))
                  (function_call_expression 7
-                  ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
+                  ((variable 2 ((() variable 2 ()))) (missing 0 ())
+                   (() "(" 1 ())
                    (list 3 ((list_item 3 ((() name 3 ()) (missing 0 ())))))
                    (() ")" 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))

@@ -33,14 +33,14 @@
                      (prefix_unary_expression 12
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 6
-                        ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                         (() ")" 1 ())))))))
+                        ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                         (missing 0 ()) (() ")" 1 ())))))))
                    (() ";" 1 ((end_of_line 1)))))
                  (expression_statement 15
                   ((prefix_unary_expression 14
                     ((((whitespace 4)) await 5 ((whitespace 1)))
                      (function_call_expression 8
-                      ((() name 4 ()) (() "(" 1 ())
+                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
                        (list 2
                         ((list_item 2
                           ((variable 2 ((() variable 2 ()))) (missing 0 ())))))

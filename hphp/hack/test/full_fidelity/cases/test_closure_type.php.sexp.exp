@@ -40,7 +40,8 @@
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() = 1 ((whitespace 1)))
                (function_call_expression 5
-                ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
+                ((variable 2 ((() variable 2 ()))) (missing 0 ())
+                 (() "(" 1 ())
                  (list 1
                   ((list_item 1
                     ((literal 1 ((() decimal_literal 1 ()))) (missing 0 ())))))
@@ -81,7 +82,7 @@
           ((return_statement 19
             ((((whitespace 2)) return 6 ((whitespace 1)))
              (function_call_expression 11
-              ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
+              ((variable 2 ((() variable 2 ()))) (missing 0 ()) (() "(" 1 ())
                (list 7
                 ((list_item 2
                   ((literal 1 ((() decimal_literal 1 ())))
@@ -136,7 +137,8 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 17
             ((function_call_expression 16
-              ((variable 2 ((((whitespace 2)) variable 2 ()))) (() "(" 1 ())
+              ((variable 2 ((((whitespace 2)) variable 2 ()))) (missing 0 ())
+               (() "(" 1 ())
                (list 12
                 ((list_item 9
                   ((decorated_expression 8

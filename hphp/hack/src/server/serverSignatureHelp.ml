@@ -36,10 +36,6 @@ let get_positional_info (cst : Syntax.t) (file_offset : int) : ((int * int) * in
     match syntax.syntax with
     | FunctionCallExpression children ->
       Some (children.function_call_receiver, children.function_call_argument_list)
-    | FunctionCallWithTypeArgumentsExpression children ->
-      Some (
-        children.function_call_with_type_arguments_receiver,
-        children.function_call_with_type_arguments_argument_list)
     | ConstructorCall children ->
       Some (children.constructor_call_type, children.constructor_call_argument_list)
     | _ -> None

@@ -66,7 +66,7 @@
        (compound_statement 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (expression_statement 36
-      ((function_call_with_type_arguments_expression 35
+      ((function_call_expression 35
         ((((end_of_line 1)) name 1 ())
          (type_arguments 31
           ((() < 1 ())

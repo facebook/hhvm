@@ -159,8 +159,8 @@
                  (list 6
                   ((expression_statement 6
                     ((function_call_expression 5
-                      ((() name 3 ()) (() "(" 1 ()) (missing 0 ())
-                       (() ")" 1 ())))
+                      ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
+                       (missing 0 ()) (() ")" 1 ())))
                      (() ";" 1 ((whitespace 1)))))))
                  (missing 0 ())))))
              (() } 1
@@ -175,13 +175,13 @@
                  (list 13
                   ((expression_statement 6
                     ((function_call_expression 5
-                      ((() name 3 ()) (() "(" 1 ()) (missing 0 ())
-                       (() ")" 1 ())))
+                      ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
+                       (missing 0 ()) (() ")" 1 ())))
                      (() ";" 1 ((whitespace 1)))))
                    (expression_statement 6
                     ((function_call_expression 5
-                      ((() name 3 ()) (() "(" 1 ()) (missing 0 ())
-                       (() ")" 1 ())))
+                      ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
+                       (missing 0 ()) (() ")" 1 ())))
                      (() ";" 1 ((whitespace 1)))))))
                  (missing 0 ())))))
              (() } 1

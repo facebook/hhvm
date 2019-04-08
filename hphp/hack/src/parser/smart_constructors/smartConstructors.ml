@@ -138,8 +138,7 @@ module type SmartConstructors_S = sig
   val make_define_expression : r -> r -> r -> r -> t -> t * r
   val make_halt_compiler_expression : r -> r -> r -> r -> t -> t * r
   val make_isset_expression : r -> r -> r -> r -> t -> t * r
-  val make_function_call_expression : r -> r -> r -> r -> t -> t * r
-  val make_function_call_with_type_arguments_expression : r -> r -> r -> r -> r -> t -> t * r
+  val make_function_call_expression : r -> r -> r -> r -> r -> t -> t * r
   val make_parenthesized_expression : r -> r -> r -> t -> t * r
   val make_braced_expression : r -> r -> r -> t -> t * r
   val make_embedded_braced_expression : r -> r -> r -> t -> t * r
@@ -330,8 +329,7 @@ end) = struct
     let define_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_define_expression arg0 arg1 arg2 arg3)
     let halt_compiler_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_halt_compiler_expression arg0 arg1 arg2 arg3)
     let isset_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_isset_expression arg0 arg1 arg2 arg3)
-    let function_call_expression parser arg0 arg1 arg2 arg3 = call parser (SCI.make_function_call_expression arg0 arg1 arg2 arg3)
-    let function_call_with_type_arguments_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_function_call_with_type_arguments_expression arg0 arg1 arg2 arg3 arg4)
+    let function_call_expression parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_function_call_expression arg0 arg1 arg2 arg3 arg4)
     let parenthesized_expression parser arg0 arg1 arg2 = call parser (SCI.make_parenthesized_expression arg0 arg1 arg2)
     let braced_expression parser arg0 arg1 arg2 = call parser (SCI.make_braced_expression arg0 arg1 arg2)
     let embedded_braced_expression parser arg0 arg1 arg2 = call parser (SCI.make_embedded_braced_expression arg0 arg1 arg2)

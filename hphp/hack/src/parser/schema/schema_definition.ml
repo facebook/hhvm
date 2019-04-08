@@ -1442,20 +1442,7 @@ let schema : schema_node list =
     ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
     ; fields =
       [ "receiver", Aggregate Expression
-      ; "left_paren", Token
-      ; "argument_list", ZeroOrMore (Aggregate Expression)
-      ; "right_paren", Token
-      ]
-    }
-  ; { kind_name   = "FunctionCallWithTypeArgumentsExpression"
-    ; type_name   = "function_call_with_type_arguments_expression"
-    ; func_name   = "function_call_with_type_arguments_expression"
-    ; description = "function_call_with_type_arguments_expression"
-    ; prefix      = "function_call_with_type_arguments"
-    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
-    ; fields =
-      [ "receiver", Aggregate Expression
-      ; "type_args", Just "TypeArguments"
+      ; "type_args", ZeroOrOne (Just "TypeArguments")
       ; "left_paren", Token
       ; "argument_list", ZeroOrMore (Aggregate Expression)
       ; "right_paren", Token

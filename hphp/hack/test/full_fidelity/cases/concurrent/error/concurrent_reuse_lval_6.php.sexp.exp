@@ -23,7 +23,7 @@
                   ((prefix_unary_expression 16
                     ((((whitespace 4)) await 5 ((whitespace 1)))
                      (function_call_expression 10
-                      ((() name 4 ()) (() "(" 1 ())
+                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
                        (list 4
                         ((list_item 4
                           ((postfix_unary_expression 4
@@ -35,7 +35,7 @@
                   ((prefix_unary_expression 16
                     ((((whitespace 4)) await 5 ((whitespace 1)))
                      (function_call_expression 10
-                      ((() name 4 ()) (() "(" 1 ())
+                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
                        (list 4
                         ((list_item 4
                           ((postfix_unary_expression 4

@@ -33,8 +33,8 @@
                      (prefix_unary_expression 12
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 6
-                        ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                         (() ")" 1 ())))))
+                        ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                         (missing 0 ()) (() ")" 1 ())))))
                      (() ")" 1 ((whitespace 1)))))
                    (() + 1 ((whitespace 1)))
                    (parenthesized_expression 9

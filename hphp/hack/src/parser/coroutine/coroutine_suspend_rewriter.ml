@@ -247,6 +247,7 @@ type rewrite_suspend_result =
  *)
 let rewrite_suspend
   function_call_receiver
+  function_call_type_args
   function_call_left_paren
   function_call_argument_list
   function_call_right_paren
@@ -266,6 +267,7 @@ let rewrite_suspend
     let invoke_coroutine =
       FunctionCallExpression {
         function_call_receiver;
+        function_call_type_args;
         function_call_left_paren;
         function_call_argument_list;
         function_call_right_paren;
@@ -288,6 +290,7 @@ let rewrite_suspend
   let invoke_coroutine =
     FunctionCallExpression {
         function_call_receiver;
+        function_call_type_args;
         function_call_left_paren;
         function_call_argument_list;
         function_call_right_paren;
@@ -648,6 +651,7 @@ let rewrite_suspends_in_statement
         prefix_unary_operand = {
           syntax = FunctionCallExpression {
             function_call_receiver;
+            function_call_type_args;
             function_call_left_paren;
             function_call_argument_list;
             function_call_right_paren;};
@@ -669,6 +673,7 @@ let rewrite_suspends_in_statement
       let { next_label; next_temp; expression = new_node; extra_info } =
         rewrite_suspend
           function_call_receiver
+          function_call_type_args
           function_call_left_paren
           function_call_argument_list
           function_call_right_paren

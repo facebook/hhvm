@@ -156,8 +156,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val define_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val halt_compiler_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val isset_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val function_call_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val function_call_with_type_arguments_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val function_call_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val parenthesized_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val braced_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val embedded_braced_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r

@@ -27,16 +27,16 @@
                      (prefix_unary_expression 10
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 4
-                        ((() name 2 ()) (() "(" 1 ()) (missing 0 ())
-                         (() ")" 1 ())))))))
+                        ((() name 2 ()) (missing 0 ()) (() "(" 1 ())
+                         (missing 0 ()) (() ")" 1 ())))))))
                    (() ";" 1 ((end_of_line 1)))))
                  (return_statement 18
                   ((((whitespace 4)) return 6 ((whitespace 1)))
                    (prefix_unary_expression 10
                     ((() await 5 ((whitespace 1)))
                      (function_call_expression 4
-                      ((() name 2 ()) (() "(" 1 ()) (missing 0 ())
-                       (() ")" 1 ())))))
+                      ((() name 2 ()) (missing 0 ()) (() "(" 1 ())
+                       (missing 0 ()) (() ")" 1 ())))))
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))))))
          (() } 1 ((end_of_line 1)))))))

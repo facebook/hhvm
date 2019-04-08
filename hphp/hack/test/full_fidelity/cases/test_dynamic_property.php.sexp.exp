@@ -38,8 +38,8 @@
                  (braced_expression 7
                   ((() { 1 ())
                    (function_call_expression 5
-                    ((() name 3 ()) (() "(" 1 ()) (missing 0 ())
-                     (() ")" 1 ())))
+                    ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
+                     (missing 0 ()) (() ")" 1 ())))
                    (() } 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))

@@ -98,7 +98,7 @@
          (() } 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
      (expression_statement 14
       ((function_call_expression 13
-        ((() name 1 ((whitespace 1))) (() "(" 1 ())
+        ((() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
          (list 9
           ((list_item 3
             ((variable 2 ((() variable 2 ()))) (() , 1 ((whitespace 1)))))
@@ -110,7 +110,7 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 10) (end_of_line 1)))))
      (expression_statement 10
       ((function_call_expression 9
-        ((() name 1 ((whitespace 1))) (() "(" 1 ())
+        ((() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
          (list 5
           ((list_item 5
             ((decorated_expression 5
@@ -120,7 +120,7 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))))
      (expression_statement 14
       ((function_call_expression 13
-        ((() name 1 ((whitespace 1))) (() "(" 1 ())
+        ((() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
          (list 9
           ((list_item 6
             ((decorated_expression 5
@@ -131,7 +131,7 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 18
       ((function_call_expression 17
-        ((() name 1 ((whitespace 1))) (() "(" 1 ())
+        ((() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
          (list 13
           ((list_item 3
             ((variable 2 ((() variable 2 ()))) (() , 1 ((whitespace 1)))))
@@ -144,7 +144,7 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 16
       ((function_call_expression 15
-        ((() name 1 ((whitespace 1))) (() "(" 1 ())
+        ((() name 1 ((whitespace 1))) (missing 0 ()) (() "(" 1 ())
          (list 10
           ((list_item 3
             ((variable 2 ((() variable 2 ()))) (() , 1 ((whitespace 1)))))

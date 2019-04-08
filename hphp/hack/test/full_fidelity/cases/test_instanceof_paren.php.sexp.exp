@@ -24,7 +24,7 @@
          (parenthesized_expression 15
           ((() "(" 1 ())
            (function_call_expression 13
-            ((() name 10 ()) (() "(" 1 ())
+            ((() name 10 ()) (missing 0 ()) (() "(" 1 ())
              (list 1 ((list_item 1 ((() name 1 ()) (missing 0 ())))))
              (() ")" 1 ())))
            (() ")" 1 ())))))

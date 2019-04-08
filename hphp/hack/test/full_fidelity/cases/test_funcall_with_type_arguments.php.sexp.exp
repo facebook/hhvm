@@ -10,7 +10,7 @@
       ((function_call_expression 7
         ((((end_of_line 1) (single_line_comment 51) (end_of_line 1)) name 1
           ())
-         (() "(" 1 ())
+         (missing 0 ()) (() "(" 1 ())
          (list 4
           ((list_item 4
             ((literal 4 ((() single_quoted_string_literal 4 ())))
@@ -18,7 +18,7 @@
          (() ")" 1 ())))
        (() ";" 1 ((whitespace 1) (single_line_comment 36) (end_of_line 1)))))
      (expression_statement 20
-      ((function_call_with_type_arguments_expression 19
+      ((function_call_expression 19
         ((() name 2 ())
          (type_arguments 8
           ((() < 1 ())
@@ -35,7 +35,7 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 26) (end_of_line 1)))))
      (expression_statement 20
       ((function_call_expression 19
-        ((() name 3 ()) (() "(" 1 ())
+        ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 14
           ((list_item 6
             ((binary_expression 5
@@ -51,7 +51,7 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 48) (end_of_line 1)))))
      (expression_statement 24
       ((function_call_expression 23
-        ((() name 4 ()) (() "(" 1 ())
+        ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
          (list 17
           ((list_item 8
             ((binary_expression 7
@@ -67,10 +67,10 @@
        (() ";" 1 ((whitespace 1) (single_line_comment 44) (end_of_line 1)))))
      (expression_statement 25
       ((function_call_expression 24
-        ((() name 5 ()) (() "(" 1 ())
+        ((() name 5 ()) (missing 0 ()) (() "(" 1 ())
          (list 17
           ((list_item 17
-            ((function_call_with_type_arguments_expression 17
+            ((function_call_expression 17
               ((() name 3 ())
                (type_arguments 12
                 ((() < 1 ())
@@ -89,7 +89,7 @@
       ((binary_expression 24
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 19
+         (function_call_expression 19
           ((() name 2 ())
            (type_arguments 8
             ((() < 1 ())
@@ -108,7 +108,7 @@
       ((binary_expression 16
         ((variable 2 ((((end_of_line 1)) variable 2 ((whitespace 1)))))
          (() ?? 2 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 10
+         (function_call_expression 10
           ((() name 3 ())
            (type_arguments 5
             ((() < 1 ())
@@ -122,7 +122,7 @@
       ((binary_expression 15
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 10
+         (function_call_expression 10
           ((() name 3 ())
            (type_arguments 5
             ((() < 1 ())
@@ -136,7 +136,7 @@
       ((binary_expression 17
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 12
+         (function_call_expression 12
           ((() name 3 ())
            (type_arguments 5
             ((() < 1 ())
@@ -153,7 +153,7 @@
       ((binary_expression 21
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 16
+         (function_call_expression 16
           ((() name 3 ())
            (type_arguments 5
             ((() < 1 ())
@@ -172,7 +172,7 @@
       ((binary_expression 18
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 13
+         (function_call_expression 13
           ((scope_resolution_expression 6
             ((() name 1 ()) (() :: 2 ()) (() name 3 ())))
            (type_arguments 5
@@ -187,7 +187,7 @@
       ((binary_expression 20
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 15
+         (function_call_expression 15
           ((scope_resolution_expression 6
             ((() name 1 ()) (() :: 2 ()) (() name 3 ())))
            (type_arguments 5
@@ -205,7 +205,7 @@
       ((binary_expression 24
         ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
          (() * 1 ((whitespace 1)))
-         (function_call_with_type_arguments_expression 19
+         (function_call_expression 19
           ((scope_resolution_expression 6
             ((() name 1 ()) (() :: 2 ()) (() name 3 ())))
            (type_arguments 5
@@ -223,10 +223,10 @@
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 16
       ((function_call_expression 15
-        ((() name 3 ()) (() "(" 1 ())
+        ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 10
           ((list_item 10
-            ((function_call_with_type_arguments_expression 10
+            ((function_call_expression 10
               ((() name 3 ())
                (type_arguments 5
                 ((() < 1 ())
@@ -241,10 +241,10 @@
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 18
       ((function_call_expression 17
-        ((() name 3 ()) (() "(" 1 ())
+        ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 12
           ((list_item 12
-            ((function_call_with_type_arguments_expression 12
+            ((function_call_expression 12
               ((() name 3 ())
                (type_arguments 5
                 ((() < 1 ())
@@ -263,10 +263,10 @@
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 22
       ((function_call_expression 21
-        ((() name 3 ()) (() "(" 1 ())
+        ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 16
           ((list_item 16
-            ((function_call_with_type_arguments_expression 16
+            ((function_call_expression 16
               ((() name 3 ())
                (type_arguments 5
                 ((() < 1 ())
@@ -289,7 +289,7 @@
      (expression_statement 15
       ((binary_expression 14
         ((() name 3 ()) (() < 1 ())
-         (function_call_with_type_arguments_expression 10
+         (function_call_expression 10
           ((() name 3 ())
            (type_arguments 5
             ((() < 1 ())

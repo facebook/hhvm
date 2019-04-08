@@ -60,183 +60,182 @@ module WithToken(Token: TokenType) = struct
       | Missing                             -> SyntaxKind.Missing
       | Token                             t -> SyntaxKind.Token (Token.kind t)
       | SyntaxList                        _ -> SyntaxKind.SyntaxList
-      | EndOfFile                               _ -> SyntaxKind.EndOfFile
-      | Script                                  _ -> SyntaxKind.Script
-      | QualifiedName                           _ -> SyntaxKind.QualifiedName
-      | SimpleTypeSpecifier                     _ -> SyntaxKind.SimpleTypeSpecifier
-      | LiteralExpression                       _ -> SyntaxKind.LiteralExpression
-      | PrefixedStringExpression                _ -> SyntaxKind.PrefixedStringExpression
-      | VariableExpression                      _ -> SyntaxKind.VariableExpression
-      | PipeVariableExpression                  _ -> SyntaxKind.PipeVariableExpression
-      | FileAttributeSpecification              _ -> SyntaxKind.FileAttributeSpecification
-      | EnumDeclaration                         _ -> SyntaxKind.EnumDeclaration
-      | Enumerator                              _ -> SyntaxKind.Enumerator
-      | AliasDeclaration                        _ -> SyntaxKind.AliasDeclaration
-      | PropertyDeclaration                     _ -> SyntaxKind.PropertyDeclaration
-      | PropertyDeclarator                      _ -> SyntaxKind.PropertyDeclarator
-      | NamespaceDeclaration                    _ -> SyntaxKind.NamespaceDeclaration
-      | NamespaceBody                           _ -> SyntaxKind.NamespaceBody
-      | NamespaceEmptyBody                      _ -> SyntaxKind.NamespaceEmptyBody
-      | NamespaceUseDeclaration                 _ -> SyntaxKind.NamespaceUseDeclaration
-      | NamespaceGroupUseDeclaration            _ -> SyntaxKind.NamespaceGroupUseDeclaration
-      | NamespaceUseClause                      _ -> SyntaxKind.NamespaceUseClause
-      | FunctionDeclaration                     _ -> SyntaxKind.FunctionDeclaration
-      | FunctionDeclarationHeader               _ -> SyntaxKind.FunctionDeclarationHeader
-      | WhereClause                             _ -> SyntaxKind.WhereClause
-      | WhereConstraint                         _ -> SyntaxKind.WhereConstraint
-      | MethodishDeclaration                    _ -> SyntaxKind.MethodishDeclaration
-      | MethodishTraitResolution                _ -> SyntaxKind.MethodishTraitResolution
-      | ClassishDeclaration                     _ -> SyntaxKind.ClassishDeclaration
-      | ClassishBody                            _ -> SyntaxKind.ClassishBody
-      | TraitUsePrecedenceItem                  _ -> SyntaxKind.TraitUsePrecedenceItem
-      | TraitUseAliasItem                       _ -> SyntaxKind.TraitUseAliasItem
-      | TraitUseConflictResolution              _ -> SyntaxKind.TraitUseConflictResolution
-      | TraitUse                                _ -> SyntaxKind.TraitUse
-      | RequireClause                           _ -> SyntaxKind.RequireClause
-      | ConstDeclaration                        _ -> SyntaxKind.ConstDeclaration
-      | ConstantDeclarator                      _ -> SyntaxKind.ConstantDeclarator
-      | TypeConstDeclaration                    _ -> SyntaxKind.TypeConstDeclaration
-      | DecoratedExpression                     _ -> SyntaxKind.DecoratedExpression
-      | ParameterDeclaration                    _ -> SyntaxKind.ParameterDeclaration
-      | VariadicParameter                       _ -> SyntaxKind.VariadicParameter
-      | AttributeSpecification                  _ -> SyntaxKind.AttributeSpecification
-      | InclusionExpression                     _ -> SyntaxKind.InclusionExpression
-      | InclusionDirective                      _ -> SyntaxKind.InclusionDirective
-      | CompoundStatement                       _ -> SyntaxKind.CompoundStatement
-      | AlternateLoopStatement                  _ -> SyntaxKind.AlternateLoopStatement
-      | ExpressionStatement                     _ -> SyntaxKind.ExpressionStatement
-      | MarkupSection                           _ -> SyntaxKind.MarkupSection
-      | MarkupSuffix                            _ -> SyntaxKind.MarkupSuffix
-      | UnsetStatement                          _ -> SyntaxKind.UnsetStatement
-      | LetStatement                            _ -> SyntaxKind.LetStatement
-      | UsingStatementBlockScoped               _ -> SyntaxKind.UsingStatementBlockScoped
-      | UsingStatementFunctionScoped            _ -> SyntaxKind.UsingStatementFunctionScoped
-      | DeclareDirectiveStatement               _ -> SyntaxKind.DeclareDirectiveStatement
-      | DeclareBlockStatement                   _ -> SyntaxKind.DeclareBlockStatement
-      | WhileStatement                          _ -> SyntaxKind.WhileStatement
-      | IfStatement                             _ -> SyntaxKind.IfStatement
-      | ElseifClause                            _ -> SyntaxKind.ElseifClause
-      | ElseClause                              _ -> SyntaxKind.ElseClause
-      | AlternateIfStatement                    _ -> SyntaxKind.AlternateIfStatement
-      | AlternateElseifClause                   _ -> SyntaxKind.AlternateElseifClause
-      | AlternateElseClause                     _ -> SyntaxKind.AlternateElseClause
-      | TryStatement                            _ -> SyntaxKind.TryStatement
-      | CatchClause                             _ -> SyntaxKind.CatchClause
-      | FinallyClause                           _ -> SyntaxKind.FinallyClause
-      | DoStatement                             _ -> SyntaxKind.DoStatement
-      | ForStatement                            _ -> SyntaxKind.ForStatement
-      | ForeachStatement                        _ -> SyntaxKind.ForeachStatement
-      | SwitchStatement                         _ -> SyntaxKind.SwitchStatement
-      | AlternateSwitchStatement                _ -> SyntaxKind.AlternateSwitchStatement
-      | SwitchSection                           _ -> SyntaxKind.SwitchSection
-      | SwitchFallthrough                       _ -> SyntaxKind.SwitchFallthrough
-      | CaseLabel                               _ -> SyntaxKind.CaseLabel
-      | DefaultLabel                            _ -> SyntaxKind.DefaultLabel
-      | ReturnStatement                         _ -> SyntaxKind.ReturnStatement
-      | GotoLabel                               _ -> SyntaxKind.GotoLabel
-      | GotoStatement                           _ -> SyntaxKind.GotoStatement
-      | ThrowStatement                          _ -> SyntaxKind.ThrowStatement
-      | BreakStatement                          _ -> SyntaxKind.BreakStatement
-      | ContinueStatement                       _ -> SyntaxKind.ContinueStatement
-      | EchoStatement                           _ -> SyntaxKind.EchoStatement
-      | ConcurrentStatement                     _ -> SyntaxKind.ConcurrentStatement
-      | SimpleInitializer                       _ -> SyntaxKind.SimpleInitializer
-      | AnonymousClass                          _ -> SyntaxKind.AnonymousClass
-      | AnonymousFunction                       _ -> SyntaxKind.AnonymousFunction
-      | Php7AnonymousFunction                   _ -> SyntaxKind.Php7AnonymousFunction
-      | AnonymousFunctionUseClause              _ -> SyntaxKind.AnonymousFunctionUseClause
-      | LambdaExpression                        _ -> SyntaxKind.LambdaExpression
-      | LambdaSignature                         _ -> SyntaxKind.LambdaSignature
-      | CastExpression                          _ -> SyntaxKind.CastExpression
-      | ScopeResolutionExpression               _ -> SyntaxKind.ScopeResolutionExpression
-      | MemberSelectionExpression               _ -> SyntaxKind.MemberSelectionExpression
-      | SafeMemberSelectionExpression           _ -> SyntaxKind.SafeMemberSelectionExpression
-      | EmbeddedMemberSelectionExpression       _ -> SyntaxKind.EmbeddedMemberSelectionExpression
-      | YieldExpression                         _ -> SyntaxKind.YieldExpression
-      | YieldFromExpression                     _ -> SyntaxKind.YieldFromExpression
-      | PrefixUnaryExpression                   _ -> SyntaxKind.PrefixUnaryExpression
-      | PostfixUnaryExpression                  _ -> SyntaxKind.PostfixUnaryExpression
-      | BinaryExpression                        _ -> SyntaxKind.BinaryExpression
-      | InstanceofExpression                    _ -> SyntaxKind.InstanceofExpression
-      | IsExpression                            _ -> SyntaxKind.IsExpression
-      | AsExpression                            _ -> SyntaxKind.AsExpression
-      | NullableAsExpression                    _ -> SyntaxKind.NullableAsExpression
-      | ConditionalExpression                   _ -> SyntaxKind.ConditionalExpression
-      | EvalExpression                          _ -> SyntaxKind.EvalExpression
-      | EmptyExpression                         _ -> SyntaxKind.EmptyExpression
-      | DefineExpression                        _ -> SyntaxKind.DefineExpression
-      | HaltCompilerExpression                  _ -> SyntaxKind.HaltCompilerExpression
-      | IssetExpression                         _ -> SyntaxKind.IssetExpression
-      | FunctionCallExpression                  _ -> SyntaxKind.FunctionCallExpression
-      | FunctionCallWithTypeArgumentsExpression _ -> SyntaxKind.FunctionCallWithTypeArgumentsExpression
-      | ParenthesizedExpression                 _ -> SyntaxKind.ParenthesizedExpression
-      | BracedExpression                        _ -> SyntaxKind.BracedExpression
-      | EmbeddedBracedExpression                _ -> SyntaxKind.EmbeddedBracedExpression
-      | ListExpression                          _ -> SyntaxKind.ListExpression
-      | CollectionLiteralExpression             _ -> SyntaxKind.CollectionLiteralExpression
-      | ObjectCreationExpression                _ -> SyntaxKind.ObjectCreationExpression
-      | ConstructorCall                         _ -> SyntaxKind.ConstructorCall
-      | ArrayCreationExpression                 _ -> SyntaxKind.ArrayCreationExpression
-      | ArrayIntrinsicExpression                _ -> SyntaxKind.ArrayIntrinsicExpression
-      | DarrayIntrinsicExpression               _ -> SyntaxKind.DarrayIntrinsicExpression
-      | DictionaryIntrinsicExpression           _ -> SyntaxKind.DictionaryIntrinsicExpression
-      | KeysetIntrinsicExpression               _ -> SyntaxKind.KeysetIntrinsicExpression
-      | VarrayIntrinsicExpression               _ -> SyntaxKind.VarrayIntrinsicExpression
-      | VectorIntrinsicExpression               _ -> SyntaxKind.VectorIntrinsicExpression
-      | ElementInitializer                      _ -> SyntaxKind.ElementInitializer
-      | SubscriptExpression                     _ -> SyntaxKind.SubscriptExpression
-      | EmbeddedSubscriptExpression             _ -> SyntaxKind.EmbeddedSubscriptExpression
-      | AwaitableCreationExpression             _ -> SyntaxKind.AwaitableCreationExpression
-      | XHPChildrenDeclaration                  _ -> SyntaxKind.XHPChildrenDeclaration
-      | XHPChildrenParenthesizedList            _ -> SyntaxKind.XHPChildrenParenthesizedList
-      | XHPCategoryDeclaration                  _ -> SyntaxKind.XHPCategoryDeclaration
-      | XHPEnumType                             _ -> SyntaxKind.XHPEnumType
-      | XHPRequired                             _ -> SyntaxKind.XHPRequired
-      | XHPClassAttributeDeclaration            _ -> SyntaxKind.XHPClassAttributeDeclaration
-      | XHPClassAttribute                       _ -> SyntaxKind.XHPClassAttribute
-      | XHPSimpleClassAttribute                 _ -> SyntaxKind.XHPSimpleClassAttribute
-      | XHPSimpleAttribute                      _ -> SyntaxKind.XHPSimpleAttribute
-      | XHPSpreadAttribute                      _ -> SyntaxKind.XHPSpreadAttribute
-      | XHPOpen                                 _ -> SyntaxKind.XHPOpen
-      | XHPExpression                           _ -> SyntaxKind.XHPExpression
-      | XHPClose                                _ -> SyntaxKind.XHPClose
-      | TypeConstant                            _ -> SyntaxKind.TypeConstant
-      | VectorTypeSpecifier                     _ -> SyntaxKind.VectorTypeSpecifier
-      | KeysetTypeSpecifier                     _ -> SyntaxKind.KeysetTypeSpecifier
-      | TupleTypeExplicitSpecifier              _ -> SyntaxKind.TupleTypeExplicitSpecifier
-      | VarrayTypeSpecifier                     _ -> SyntaxKind.VarrayTypeSpecifier
-      | VectorArrayTypeSpecifier                _ -> SyntaxKind.VectorArrayTypeSpecifier
-      | TypeParameter                           _ -> SyntaxKind.TypeParameter
-      | TypeConstraint                          _ -> SyntaxKind.TypeConstraint
-      | DarrayTypeSpecifier                     _ -> SyntaxKind.DarrayTypeSpecifier
-      | MapArrayTypeSpecifier                   _ -> SyntaxKind.MapArrayTypeSpecifier
-      | DictionaryTypeSpecifier                 _ -> SyntaxKind.DictionaryTypeSpecifier
-      | ClosureTypeSpecifier                    _ -> SyntaxKind.ClosureTypeSpecifier
-      | ClosureParameterTypeSpecifier           _ -> SyntaxKind.ClosureParameterTypeSpecifier
-      | ClassnameTypeSpecifier                  _ -> SyntaxKind.ClassnameTypeSpecifier
-      | FieldSpecifier                          _ -> SyntaxKind.FieldSpecifier
-      | FieldInitializer                        _ -> SyntaxKind.FieldInitializer
-      | ShapeTypeSpecifier                      _ -> SyntaxKind.ShapeTypeSpecifier
-      | ShapeExpression                         _ -> SyntaxKind.ShapeExpression
-      | TupleExpression                         _ -> SyntaxKind.TupleExpression
-      | GenericTypeSpecifier                    _ -> SyntaxKind.GenericTypeSpecifier
-      | NullableTypeSpecifier                   _ -> SyntaxKind.NullableTypeSpecifier
-      | LikeTypeSpecifier                       _ -> SyntaxKind.LikeTypeSpecifier
-      | SoftTypeSpecifier                       _ -> SyntaxKind.SoftTypeSpecifier
-      | ReifiedTypeArgument                     _ -> SyntaxKind.ReifiedTypeArgument
-      | TypeArguments                           _ -> SyntaxKind.TypeArguments
-      | TypeParameters                          _ -> SyntaxKind.TypeParameters
-      | TupleTypeSpecifier                      _ -> SyntaxKind.TupleTypeSpecifier
-      | ErrorSyntax                             _ -> SyntaxKind.ErrorSyntax
-      | ListItem                                _ -> SyntaxKind.ListItem
-      | PocketAtomExpression                    _ -> SyntaxKind.PocketAtomExpression
-      | PocketIdentifierExpression              _ -> SyntaxKind.PocketIdentifierExpression
-      | PocketAtomMappingDeclaration            _ -> SyntaxKind.PocketAtomMappingDeclaration
-      | PocketEnumDeclaration                   _ -> SyntaxKind.PocketEnumDeclaration
-      | PocketFieldTypeExprDeclaration          _ -> SyntaxKind.PocketFieldTypeExprDeclaration
-      | PocketFieldTypeDeclaration              _ -> SyntaxKind.PocketFieldTypeDeclaration
-      | PocketMappingIdDeclaration              _ -> SyntaxKind.PocketMappingIdDeclaration
-      | PocketMappingTypeDeclaration            _ -> SyntaxKind.PocketMappingTypeDeclaration
+      | EndOfFile                         _ -> SyntaxKind.EndOfFile
+      | Script                            _ -> SyntaxKind.Script
+      | QualifiedName                     _ -> SyntaxKind.QualifiedName
+      | SimpleTypeSpecifier               _ -> SyntaxKind.SimpleTypeSpecifier
+      | LiteralExpression                 _ -> SyntaxKind.LiteralExpression
+      | PrefixedStringExpression          _ -> SyntaxKind.PrefixedStringExpression
+      | VariableExpression                _ -> SyntaxKind.VariableExpression
+      | PipeVariableExpression            _ -> SyntaxKind.PipeVariableExpression
+      | FileAttributeSpecification        _ -> SyntaxKind.FileAttributeSpecification
+      | EnumDeclaration                   _ -> SyntaxKind.EnumDeclaration
+      | Enumerator                        _ -> SyntaxKind.Enumerator
+      | AliasDeclaration                  _ -> SyntaxKind.AliasDeclaration
+      | PropertyDeclaration               _ -> SyntaxKind.PropertyDeclaration
+      | PropertyDeclarator                _ -> SyntaxKind.PropertyDeclarator
+      | NamespaceDeclaration              _ -> SyntaxKind.NamespaceDeclaration
+      | NamespaceBody                     _ -> SyntaxKind.NamespaceBody
+      | NamespaceEmptyBody                _ -> SyntaxKind.NamespaceEmptyBody
+      | NamespaceUseDeclaration           _ -> SyntaxKind.NamespaceUseDeclaration
+      | NamespaceGroupUseDeclaration      _ -> SyntaxKind.NamespaceGroupUseDeclaration
+      | NamespaceUseClause                _ -> SyntaxKind.NamespaceUseClause
+      | FunctionDeclaration               _ -> SyntaxKind.FunctionDeclaration
+      | FunctionDeclarationHeader         _ -> SyntaxKind.FunctionDeclarationHeader
+      | WhereClause                       _ -> SyntaxKind.WhereClause
+      | WhereConstraint                   _ -> SyntaxKind.WhereConstraint
+      | MethodishDeclaration              _ -> SyntaxKind.MethodishDeclaration
+      | MethodishTraitResolution          _ -> SyntaxKind.MethodishTraitResolution
+      | ClassishDeclaration               _ -> SyntaxKind.ClassishDeclaration
+      | ClassishBody                      _ -> SyntaxKind.ClassishBody
+      | TraitUsePrecedenceItem            _ -> SyntaxKind.TraitUsePrecedenceItem
+      | TraitUseAliasItem                 _ -> SyntaxKind.TraitUseAliasItem
+      | TraitUseConflictResolution        _ -> SyntaxKind.TraitUseConflictResolution
+      | TraitUse                          _ -> SyntaxKind.TraitUse
+      | RequireClause                     _ -> SyntaxKind.RequireClause
+      | ConstDeclaration                  _ -> SyntaxKind.ConstDeclaration
+      | ConstantDeclarator                _ -> SyntaxKind.ConstantDeclarator
+      | TypeConstDeclaration              _ -> SyntaxKind.TypeConstDeclaration
+      | DecoratedExpression               _ -> SyntaxKind.DecoratedExpression
+      | ParameterDeclaration              _ -> SyntaxKind.ParameterDeclaration
+      | VariadicParameter                 _ -> SyntaxKind.VariadicParameter
+      | AttributeSpecification            _ -> SyntaxKind.AttributeSpecification
+      | InclusionExpression               _ -> SyntaxKind.InclusionExpression
+      | InclusionDirective                _ -> SyntaxKind.InclusionDirective
+      | CompoundStatement                 _ -> SyntaxKind.CompoundStatement
+      | AlternateLoopStatement            _ -> SyntaxKind.AlternateLoopStatement
+      | ExpressionStatement               _ -> SyntaxKind.ExpressionStatement
+      | MarkupSection                     _ -> SyntaxKind.MarkupSection
+      | MarkupSuffix                      _ -> SyntaxKind.MarkupSuffix
+      | UnsetStatement                    _ -> SyntaxKind.UnsetStatement
+      | LetStatement                      _ -> SyntaxKind.LetStatement
+      | UsingStatementBlockScoped         _ -> SyntaxKind.UsingStatementBlockScoped
+      | UsingStatementFunctionScoped      _ -> SyntaxKind.UsingStatementFunctionScoped
+      | DeclareDirectiveStatement         _ -> SyntaxKind.DeclareDirectiveStatement
+      | DeclareBlockStatement             _ -> SyntaxKind.DeclareBlockStatement
+      | WhileStatement                    _ -> SyntaxKind.WhileStatement
+      | IfStatement                       _ -> SyntaxKind.IfStatement
+      | ElseifClause                      _ -> SyntaxKind.ElseifClause
+      | ElseClause                        _ -> SyntaxKind.ElseClause
+      | AlternateIfStatement              _ -> SyntaxKind.AlternateIfStatement
+      | AlternateElseifClause             _ -> SyntaxKind.AlternateElseifClause
+      | AlternateElseClause               _ -> SyntaxKind.AlternateElseClause
+      | TryStatement                      _ -> SyntaxKind.TryStatement
+      | CatchClause                       _ -> SyntaxKind.CatchClause
+      | FinallyClause                     _ -> SyntaxKind.FinallyClause
+      | DoStatement                       _ -> SyntaxKind.DoStatement
+      | ForStatement                      _ -> SyntaxKind.ForStatement
+      | ForeachStatement                  _ -> SyntaxKind.ForeachStatement
+      | SwitchStatement                   _ -> SyntaxKind.SwitchStatement
+      | AlternateSwitchStatement          _ -> SyntaxKind.AlternateSwitchStatement
+      | SwitchSection                     _ -> SyntaxKind.SwitchSection
+      | SwitchFallthrough                 _ -> SyntaxKind.SwitchFallthrough
+      | CaseLabel                         _ -> SyntaxKind.CaseLabel
+      | DefaultLabel                      _ -> SyntaxKind.DefaultLabel
+      | ReturnStatement                   _ -> SyntaxKind.ReturnStatement
+      | GotoLabel                         _ -> SyntaxKind.GotoLabel
+      | GotoStatement                     _ -> SyntaxKind.GotoStatement
+      | ThrowStatement                    _ -> SyntaxKind.ThrowStatement
+      | BreakStatement                    _ -> SyntaxKind.BreakStatement
+      | ContinueStatement                 _ -> SyntaxKind.ContinueStatement
+      | EchoStatement                     _ -> SyntaxKind.EchoStatement
+      | ConcurrentStatement               _ -> SyntaxKind.ConcurrentStatement
+      | SimpleInitializer                 _ -> SyntaxKind.SimpleInitializer
+      | AnonymousClass                    _ -> SyntaxKind.AnonymousClass
+      | AnonymousFunction                 _ -> SyntaxKind.AnonymousFunction
+      | Php7AnonymousFunction             _ -> SyntaxKind.Php7AnonymousFunction
+      | AnonymousFunctionUseClause        _ -> SyntaxKind.AnonymousFunctionUseClause
+      | LambdaExpression                  _ -> SyntaxKind.LambdaExpression
+      | LambdaSignature                   _ -> SyntaxKind.LambdaSignature
+      | CastExpression                    _ -> SyntaxKind.CastExpression
+      | ScopeResolutionExpression         _ -> SyntaxKind.ScopeResolutionExpression
+      | MemberSelectionExpression         _ -> SyntaxKind.MemberSelectionExpression
+      | SafeMemberSelectionExpression     _ -> SyntaxKind.SafeMemberSelectionExpression
+      | EmbeddedMemberSelectionExpression _ -> SyntaxKind.EmbeddedMemberSelectionExpression
+      | YieldExpression                   _ -> SyntaxKind.YieldExpression
+      | YieldFromExpression               _ -> SyntaxKind.YieldFromExpression
+      | PrefixUnaryExpression             _ -> SyntaxKind.PrefixUnaryExpression
+      | PostfixUnaryExpression            _ -> SyntaxKind.PostfixUnaryExpression
+      | BinaryExpression                  _ -> SyntaxKind.BinaryExpression
+      | InstanceofExpression              _ -> SyntaxKind.InstanceofExpression
+      | IsExpression                      _ -> SyntaxKind.IsExpression
+      | AsExpression                      _ -> SyntaxKind.AsExpression
+      | NullableAsExpression              _ -> SyntaxKind.NullableAsExpression
+      | ConditionalExpression             _ -> SyntaxKind.ConditionalExpression
+      | EvalExpression                    _ -> SyntaxKind.EvalExpression
+      | EmptyExpression                   _ -> SyntaxKind.EmptyExpression
+      | DefineExpression                  _ -> SyntaxKind.DefineExpression
+      | HaltCompilerExpression            _ -> SyntaxKind.HaltCompilerExpression
+      | IssetExpression                   _ -> SyntaxKind.IssetExpression
+      | FunctionCallExpression            _ -> SyntaxKind.FunctionCallExpression
+      | ParenthesizedExpression           _ -> SyntaxKind.ParenthesizedExpression
+      | BracedExpression                  _ -> SyntaxKind.BracedExpression
+      | EmbeddedBracedExpression          _ -> SyntaxKind.EmbeddedBracedExpression
+      | ListExpression                    _ -> SyntaxKind.ListExpression
+      | CollectionLiteralExpression       _ -> SyntaxKind.CollectionLiteralExpression
+      | ObjectCreationExpression          _ -> SyntaxKind.ObjectCreationExpression
+      | ConstructorCall                   _ -> SyntaxKind.ConstructorCall
+      | ArrayCreationExpression           _ -> SyntaxKind.ArrayCreationExpression
+      | ArrayIntrinsicExpression          _ -> SyntaxKind.ArrayIntrinsicExpression
+      | DarrayIntrinsicExpression         _ -> SyntaxKind.DarrayIntrinsicExpression
+      | DictionaryIntrinsicExpression     _ -> SyntaxKind.DictionaryIntrinsicExpression
+      | KeysetIntrinsicExpression         _ -> SyntaxKind.KeysetIntrinsicExpression
+      | VarrayIntrinsicExpression         _ -> SyntaxKind.VarrayIntrinsicExpression
+      | VectorIntrinsicExpression         _ -> SyntaxKind.VectorIntrinsicExpression
+      | ElementInitializer                _ -> SyntaxKind.ElementInitializer
+      | SubscriptExpression               _ -> SyntaxKind.SubscriptExpression
+      | EmbeddedSubscriptExpression       _ -> SyntaxKind.EmbeddedSubscriptExpression
+      | AwaitableCreationExpression       _ -> SyntaxKind.AwaitableCreationExpression
+      | XHPChildrenDeclaration            _ -> SyntaxKind.XHPChildrenDeclaration
+      | XHPChildrenParenthesizedList      _ -> SyntaxKind.XHPChildrenParenthesizedList
+      | XHPCategoryDeclaration            _ -> SyntaxKind.XHPCategoryDeclaration
+      | XHPEnumType                       _ -> SyntaxKind.XHPEnumType
+      | XHPRequired                       _ -> SyntaxKind.XHPRequired
+      | XHPClassAttributeDeclaration      _ -> SyntaxKind.XHPClassAttributeDeclaration
+      | XHPClassAttribute                 _ -> SyntaxKind.XHPClassAttribute
+      | XHPSimpleClassAttribute           _ -> SyntaxKind.XHPSimpleClassAttribute
+      | XHPSimpleAttribute                _ -> SyntaxKind.XHPSimpleAttribute
+      | XHPSpreadAttribute                _ -> SyntaxKind.XHPSpreadAttribute
+      | XHPOpen                           _ -> SyntaxKind.XHPOpen
+      | XHPExpression                     _ -> SyntaxKind.XHPExpression
+      | XHPClose                          _ -> SyntaxKind.XHPClose
+      | TypeConstant                      _ -> SyntaxKind.TypeConstant
+      | VectorTypeSpecifier               _ -> SyntaxKind.VectorTypeSpecifier
+      | KeysetTypeSpecifier               _ -> SyntaxKind.KeysetTypeSpecifier
+      | TupleTypeExplicitSpecifier        _ -> SyntaxKind.TupleTypeExplicitSpecifier
+      | VarrayTypeSpecifier               _ -> SyntaxKind.VarrayTypeSpecifier
+      | VectorArrayTypeSpecifier          _ -> SyntaxKind.VectorArrayTypeSpecifier
+      | TypeParameter                     _ -> SyntaxKind.TypeParameter
+      | TypeConstraint                    _ -> SyntaxKind.TypeConstraint
+      | DarrayTypeSpecifier               _ -> SyntaxKind.DarrayTypeSpecifier
+      | MapArrayTypeSpecifier             _ -> SyntaxKind.MapArrayTypeSpecifier
+      | DictionaryTypeSpecifier           _ -> SyntaxKind.DictionaryTypeSpecifier
+      | ClosureTypeSpecifier              _ -> SyntaxKind.ClosureTypeSpecifier
+      | ClosureParameterTypeSpecifier     _ -> SyntaxKind.ClosureParameterTypeSpecifier
+      | ClassnameTypeSpecifier            _ -> SyntaxKind.ClassnameTypeSpecifier
+      | FieldSpecifier                    _ -> SyntaxKind.FieldSpecifier
+      | FieldInitializer                  _ -> SyntaxKind.FieldInitializer
+      | ShapeTypeSpecifier                _ -> SyntaxKind.ShapeTypeSpecifier
+      | ShapeExpression                   _ -> SyntaxKind.ShapeExpression
+      | TupleExpression                   _ -> SyntaxKind.TupleExpression
+      | GenericTypeSpecifier              _ -> SyntaxKind.GenericTypeSpecifier
+      | NullableTypeSpecifier             _ -> SyntaxKind.NullableTypeSpecifier
+      | LikeTypeSpecifier                 _ -> SyntaxKind.LikeTypeSpecifier
+      | SoftTypeSpecifier                 _ -> SyntaxKind.SoftTypeSpecifier
+      | ReifiedTypeArgument               _ -> SyntaxKind.ReifiedTypeArgument
+      | TypeArguments                     _ -> SyntaxKind.TypeArguments
+      | TypeParameters                    _ -> SyntaxKind.TypeParameters
+      | TupleTypeSpecifier                _ -> SyntaxKind.TupleTypeSpecifier
+      | ErrorSyntax                       _ -> SyntaxKind.ErrorSyntax
+      | ListItem                          _ -> SyntaxKind.ListItem
+      | PocketAtomExpression              _ -> SyntaxKind.PocketAtomExpression
+      | PocketIdentifierExpression        _ -> SyntaxKind.PocketIdentifierExpression
+      | PocketAtomMappingDeclaration      _ -> SyntaxKind.PocketAtomMappingDeclaration
+      | PocketEnumDeclaration             _ -> SyntaxKind.PocketEnumDeclaration
+      | PocketFieldTypeExprDeclaration    _ -> SyntaxKind.PocketFieldTypeExprDeclaration
+      | PocketFieldTypeDeclaration        _ -> SyntaxKind.PocketFieldTypeDeclaration
+      | PocketMappingIdDeclaration        _ -> SyntaxKind.PocketMappingIdDeclaration
+      | PocketMappingTypeDeclaration      _ -> SyntaxKind.PocketMappingTypeDeclaration
 
 
     let kind node =
@@ -251,183 +250,182 @@ module WithToken(Token: TokenType) = struct
     let is_list node =
       kind node = SyntaxKind.SyntaxList
 
-    let is_end_of_file                                  = has_kind SyntaxKind.EndOfFile
-    let is_script                                       = has_kind SyntaxKind.Script
-    let is_qualified_name                               = has_kind SyntaxKind.QualifiedName
-    let is_simple_type_specifier                        = has_kind SyntaxKind.SimpleTypeSpecifier
-    let is_literal_expression                           = has_kind SyntaxKind.LiteralExpression
-    let is_prefixed_string_expression                   = has_kind SyntaxKind.PrefixedStringExpression
-    let is_variable_expression                          = has_kind SyntaxKind.VariableExpression
-    let is_pipe_variable_expression                     = has_kind SyntaxKind.PipeVariableExpression
-    let is_file_attribute_specification                 = has_kind SyntaxKind.FileAttributeSpecification
-    let is_enum_declaration                             = has_kind SyntaxKind.EnumDeclaration
-    let is_enumerator                                   = has_kind SyntaxKind.Enumerator
-    let is_alias_declaration                            = has_kind SyntaxKind.AliasDeclaration
-    let is_property_declaration                         = has_kind SyntaxKind.PropertyDeclaration
-    let is_property_declarator                          = has_kind SyntaxKind.PropertyDeclarator
-    let is_namespace_declaration                        = has_kind SyntaxKind.NamespaceDeclaration
-    let is_namespace_body                               = has_kind SyntaxKind.NamespaceBody
-    let is_namespace_empty_body                         = has_kind SyntaxKind.NamespaceEmptyBody
-    let is_namespace_use_declaration                    = has_kind SyntaxKind.NamespaceUseDeclaration
-    let is_namespace_group_use_declaration              = has_kind SyntaxKind.NamespaceGroupUseDeclaration
-    let is_namespace_use_clause                         = has_kind SyntaxKind.NamespaceUseClause
-    let is_function_declaration                         = has_kind SyntaxKind.FunctionDeclaration
-    let is_function_declaration_header                  = has_kind SyntaxKind.FunctionDeclarationHeader
-    let is_where_clause                                 = has_kind SyntaxKind.WhereClause
-    let is_where_constraint                             = has_kind SyntaxKind.WhereConstraint
-    let is_methodish_declaration                        = has_kind SyntaxKind.MethodishDeclaration
-    let is_methodish_trait_resolution                   = has_kind SyntaxKind.MethodishTraitResolution
-    let is_classish_declaration                         = has_kind SyntaxKind.ClassishDeclaration
-    let is_classish_body                                = has_kind SyntaxKind.ClassishBody
-    let is_trait_use_precedence_item                    = has_kind SyntaxKind.TraitUsePrecedenceItem
-    let is_trait_use_alias_item                         = has_kind SyntaxKind.TraitUseAliasItem
-    let is_trait_use_conflict_resolution                = has_kind SyntaxKind.TraitUseConflictResolution
-    let is_trait_use                                    = has_kind SyntaxKind.TraitUse
-    let is_require_clause                               = has_kind SyntaxKind.RequireClause
-    let is_const_declaration                            = has_kind SyntaxKind.ConstDeclaration
-    let is_constant_declarator                          = has_kind SyntaxKind.ConstantDeclarator
-    let is_type_const_declaration                       = has_kind SyntaxKind.TypeConstDeclaration
-    let is_decorated_expression                         = has_kind SyntaxKind.DecoratedExpression
-    let is_parameter_declaration                        = has_kind SyntaxKind.ParameterDeclaration
-    let is_variadic_parameter                           = has_kind SyntaxKind.VariadicParameter
-    let is_attribute_specification                      = has_kind SyntaxKind.AttributeSpecification
-    let is_inclusion_expression                         = has_kind SyntaxKind.InclusionExpression
-    let is_inclusion_directive                          = has_kind SyntaxKind.InclusionDirective
-    let is_compound_statement                           = has_kind SyntaxKind.CompoundStatement
-    let is_alternate_loop_statement                     = has_kind SyntaxKind.AlternateLoopStatement
-    let is_expression_statement                         = has_kind SyntaxKind.ExpressionStatement
-    let is_markup_section                               = has_kind SyntaxKind.MarkupSection
-    let is_markup_suffix                                = has_kind SyntaxKind.MarkupSuffix
-    let is_unset_statement                              = has_kind SyntaxKind.UnsetStatement
-    let is_let_statement                                = has_kind SyntaxKind.LetStatement
-    let is_using_statement_block_scoped                 = has_kind SyntaxKind.UsingStatementBlockScoped
-    let is_using_statement_function_scoped              = has_kind SyntaxKind.UsingStatementFunctionScoped
-    let is_declare_directive_statement                  = has_kind SyntaxKind.DeclareDirectiveStatement
-    let is_declare_block_statement                      = has_kind SyntaxKind.DeclareBlockStatement
-    let is_while_statement                              = has_kind SyntaxKind.WhileStatement
-    let is_if_statement                                 = has_kind SyntaxKind.IfStatement
-    let is_elseif_clause                                = has_kind SyntaxKind.ElseifClause
-    let is_else_clause                                  = has_kind SyntaxKind.ElseClause
-    let is_alternate_if_statement                       = has_kind SyntaxKind.AlternateIfStatement
-    let is_alternate_elseif_clause                      = has_kind SyntaxKind.AlternateElseifClause
-    let is_alternate_else_clause                        = has_kind SyntaxKind.AlternateElseClause
-    let is_try_statement                                = has_kind SyntaxKind.TryStatement
-    let is_catch_clause                                 = has_kind SyntaxKind.CatchClause
-    let is_finally_clause                               = has_kind SyntaxKind.FinallyClause
-    let is_do_statement                                 = has_kind SyntaxKind.DoStatement
-    let is_for_statement                                = has_kind SyntaxKind.ForStatement
-    let is_foreach_statement                            = has_kind SyntaxKind.ForeachStatement
-    let is_switch_statement                             = has_kind SyntaxKind.SwitchStatement
-    let is_alternate_switch_statement                   = has_kind SyntaxKind.AlternateSwitchStatement
-    let is_switch_section                               = has_kind SyntaxKind.SwitchSection
-    let is_switch_fallthrough                           = has_kind SyntaxKind.SwitchFallthrough
-    let is_case_label                                   = has_kind SyntaxKind.CaseLabel
-    let is_default_label                                = has_kind SyntaxKind.DefaultLabel
-    let is_return_statement                             = has_kind SyntaxKind.ReturnStatement
-    let is_goto_label                                   = has_kind SyntaxKind.GotoLabel
-    let is_goto_statement                               = has_kind SyntaxKind.GotoStatement
-    let is_throw_statement                              = has_kind SyntaxKind.ThrowStatement
-    let is_break_statement                              = has_kind SyntaxKind.BreakStatement
-    let is_continue_statement                           = has_kind SyntaxKind.ContinueStatement
-    let is_echo_statement                               = has_kind SyntaxKind.EchoStatement
-    let is_concurrent_statement                         = has_kind SyntaxKind.ConcurrentStatement
-    let is_simple_initializer                           = has_kind SyntaxKind.SimpleInitializer
-    let is_anonymous_class                              = has_kind SyntaxKind.AnonymousClass
-    let is_anonymous_function                           = has_kind SyntaxKind.AnonymousFunction
-    let is_php7_anonymous_function                      = has_kind SyntaxKind.Php7AnonymousFunction
-    let is_anonymous_function_use_clause                = has_kind SyntaxKind.AnonymousFunctionUseClause
-    let is_lambda_expression                            = has_kind SyntaxKind.LambdaExpression
-    let is_lambda_signature                             = has_kind SyntaxKind.LambdaSignature
-    let is_cast_expression                              = has_kind SyntaxKind.CastExpression
-    let is_scope_resolution_expression                  = has_kind SyntaxKind.ScopeResolutionExpression
-    let is_member_selection_expression                  = has_kind SyntaxKind.MemberSelectionExpression
-    let is_safe_member_selection_expression             = has_kind SyntaxKind.SafeMemberSelectionExpression
-    let is_embedded_member_selection_expression         = has_kind SyntaxKind.EmbeddedMemberSelectionExpression
-    let is_yield_expression                             = has_kind SyntaxKind.YieldExpression
-    let is_yield_from_expression                        = has_kind SyntaxKind.YieldFromExpression
-    let is_prefix_unary_expression                      = has_kind SyntaxKind.PrefixUnaryExpression
-    let is_postfix_unary_expression                     = has_kind SyntaxKind.PostfixUnaryExpression
-    let is_binary_expression                            = has_kind SyntaxKind.BinaryExpression
-    let is_instanceof_expression                        = has_kind SyntaxKind.InstanceofExpression
-    let is_is_expression                                = has_kind SyntaxKind.IsExpression
-    let is_as_expression                                = has_kind SyntaxKind.AsExpression
-    let is_nullable_as_expression                       = has_kind SyntaxKind.NullableAsExpression
-    let is_conditional_expression                       = has_kind SyntaxKind.ConditionalExpression
-    let is_eval_expression                              = has_kind SyntaxKind.EvalExpression
-    let is_empty_expression                             = has_kind SyntaxKind.EmptyExpression
-    let is_define_expression                            = has_kind SyntaxKind.DefineExpression
-    let is_halt_compiler_expression                     = has_kind SyntaxKind.HaltCompilerExpression
-    let is_isset_expression                             = has_kind SyntaxKind.IssetExpression
-    let is_function_call_expression                     = has_kind SyntaxKind.FunctionCallExpression
-    let is_function_call_with_type_arguments_expression = has_kind SyntaxKind.FunctionCallWithTypeArgumentsExpression
-    let is_parenthesized_expression                     = has_kind SyntaxKind.ParenthesizedExpression
-    let is_braced_expression                            = has_kind SyntaxKind.BracedExpression
-    let is_embedded_braced_expression                   = has_kind SyntaxKind.EmbeddedBracedExpression
-    let is_list_expression                              = has_kind SyntaxKind.ListExpression
-    let is_collection_literal_expression                = has_kind SyntaxKind.CollectionLiteralExpression
-    let is_object_creation_expression                   = has_kind SyntaxKind.ObjectCreationExpression
-    let is_constructor_call                             = has_kind SyntaxKind.ConstructorCall
-    let is_array_creation_expression                    = has_kind SyntaxKind.ArrayCreationExpression
-    let is_array_intrinsic_expression                   = has_kind SyntaxKind.ArrayIntrinsicExpression
-    let is_darray_intrinsic_expression                  = has_kind SyntaxKind.DarrayIntrinsicExpression
-    let is_dictionary_intrinsic_expression              = has_kind SyntaxKind.DictionaryIntrinsicExpression
-    let is_keyset_intrinsic_expression                  = has_kind SyntaxKind.KeysetIntrinsicExpression
-    let is_varray_intrinsic_expression                  = has_kind SyntaxKind.VarrayIntrinsicExpression
-    let is_vector_intrinsic_expression                  = has_kind SyntaxKind.VectorIntrinsicExpression
-    let is_element_initializer                          = has_kind SyntaxKind.ElementInitializer
-    let is_subscript_expression                         = has_kind SyntaxKind.SubscriptExpression
-    let is_embedded_subscript_expression                = has_kind SyntaxKind.EmbeddedSubscriptExpression
-    let is_awaitable_creation_expression                = has_kind SyntaxKind.AwaitableCreationExpression
-    let is_xhp_children_declaration                     = has_kind SyntaxKind.XHPChildrenDeclaration
-    let is_xhp_children_parenthesized_list              = has_kind SyntaxKind.XHPChildrenParenthesizedList
-    let is_xhp_category_declaration                     = has_kind SyntaxKind.XHPCategoryDeclaration
-    let is_xhp_enum_type                                = has_kind SyntaxKind.XHPEnumType
-    let is_xhp_required                                 = has_kind SyntaxKind.XHPRequired
-    let is_xhp_class_attribute_declaration              = has_kind SyntaxKind.XHPClassAttributeDeclaration
-    let is_xhp_class_attribute                          = has_kind SyntaxKind.XHPClassAttribute
-    let is_xhp_simple_class_attribute                   = has_kind SyntaxKind.XHPSimpleClassAttribute
-    let is_xhp_simple_attribute                         = has_kind SyntaxKind.XHPSimpleAttribute
-    let is_xhp_spread_attribute                         = has_kind SyntaxKind.XHPSpreadAttribute
-    let is_xhp_open                                     = has_kind SyntaxKind.XHPOpen
-    let is_xhp_expression                               = has_kind SyntaxKind.XHPExpression
-    let is_xhp_close                                    = has_kind SyntaxKind.XHPClose
-    let is_type_constant                                = has_kind SyntaxKind.TypeConstant
-    let is_vector_type_specifier                        = has_kind SyntaxKind.VectorTypeSpecifier
-    let is_keyset_type_specifier                        = has_kind SyntaxKind.KeysetTypeSpecifier
-    let is_tuple_type_explicit_specifier                = has_kind SyntaxKind.TupleTypeExplicitSpecifier
-    let is_varray_type_specifier                        = has_kind SyntaxKind.VarrayTypeSpecifier
-    let is_vector_array_type_specifier                  = has_kind SyntaxKind.VectorArrayTypeSpecifier
-    let is_type_parameter                               = has_kind SyntaxKind.TypeParameter
-    let is_type_constraint                              = has_kind SyntaxKind.TypeConstraint
-    let is_darray_type_specifier                        = has_kind SyntaxKind.DarrayTypeSpecifier
-    let is_map_array_type_specifier                     = has_kind SyntaxKind.MapArrayTypeSpecifier
-    let is_dictionary_type_specifier                    = has_kind SyntaxKind.DictionaryTypeSpecifier
-    let is_closure_type_specifier                       = has_kind SyntaxKind.ClosureTypeSpecifier
-    let is_closure_parameter_type_specifier             = has_kind SyntaxKind.ClosureParameterTypeSpecifier
-    let is_classname_type_specifier                     = has_kind SyntaxKind.ClassnameTypeSpecifier
-    let is_field_specifier                              = has_kind SyntaxKind.FieldSpecifier
-    let is_field_initializer                            = has_kind SyntaxKind.FieldInitializer
-    let is_shape_type_specifier                         = has_kind SyntaxKind.ShapeTypeSpecifier
-    let is_shape_expression                             = has_kind SyntaxKind.ShapeExpression
-    let is_tuple_expression                             = has_kind SyntaxKind.TupleExpression
-    let is_generic_type_specifier                       = has_kind SyntaxKind.GenericTypeSpecifier
-    let is_nullable_type_specifier                      = has_kind SyntaxKind.NullableTypeSpecifier
-    let is_like_type_specifier                          = has_kind SyntaxKind.LikeTypeSpecifier
-    let is_soft_type_specifier                          = has_kind SyntaxKind.SoftTypeSpecifier
-    let is_reified_type_argument                        = has_kind SyntaxKind.ReifiedTypeArgument
-    let is_type_arguments                               = has_kind SyntaxKind.TypeArguments
-    let is_type_parameters                              = has_kind SyntaxKind.TypeParameters
-    let is_tuple_type_specifier                         = has_kind SyntaxKind.TupleTypeSpecifier
-    let is_error                                        = has_kind SyntaxKind.ErrorSyntax
-    let is_list_item                                    = has_kind SyntaxKind.ListItem
-    let is_pocket_atom_expression                       = has_kind SyntaxKind.PocketAtomExpression
-    let is_pocket_identifier_expression                 = has_kind SyntaxKind.PocketIdentifierExpression
-    let is_pocket_atom_mapping_declaration              = has_kind SyntaxKind.PocketAtomMappingDeclaration
-    let is_pocket_enum_declaration                      = has_kind SyntaxKind.PocketEnumDeclaration
-    let is_pocket_field_type_expr_declaration           = has_kind SyntaxKind.PocketFieldTypeExprDeclaration
-    let is_pocket_field_type_declaration                = has_kind SyntaxKind.PocketFieldTypeDeclaration
-    let is_pocket_mapping_id_declaration                = has_kind SyntaxKind.PocketMappingIdDeclaration
-    let is_pocket_mapping_type_declaration              = has_kind SyntaxKind.PocketMappingTypeDeclaration
+    let is_end_of_file                          = has_kind SyntaxKind.EndOfFile
+    let is_script                               = has_kind SyntaxKind.Script
+    let is_qualified_name                       = has_kind SyntaxKind.QualifiedName
+    let is_simple_type_specifier                = has_kind SyntaxKind.SimpleTypeSpecifier
+    let is_literal_expression                   = has_kind SyntaxKind.LiteralExpression
+    let is_prefixed_string_expression           = has_kind SyntaxKind.PrefixedStringExpression
+    let is_variable_expression                  = has_kind SyntaxKind.VariableExpression
+    let is_pipe_variable_expression             = has_kind SyntaxKind.PipeVariableExpression
+    let is_file_attribute_specification         = has_kind SyntaxKind.FileAttributeSpecification
+    let is_enum_declaration                     = has_kind SyntaxKind.EnumDeclaration
+    let is_enumerator                           = has_kind SyntaxKind.Enumerator
+    let is_alias_declaration                    = has_kind SyntaxKind.AliasDeclaration
+    let is_property_declaration                 = has_kind SyntaxKind.PropertyDeclaration
+    let is_property_declarator                  = has_kind SyntaxKind.PropertyDeclarator
+    let is_namespace_declaration                = has_kind SyntaxKind.NamespaceDeclaration
+    let is_namespace_body                       = has_kind SyntaxKind.NamespaceBody
+    let is_namespace_empty_body                 = has_kind SyntaxKind.NamespaceEmptyBody
+    let is_namespace_use_declaration            = has_kind SyntaxKind.NamespaceUseDeclaration
+    let is_namespace_group_use_declaration      = has_kind SyntaxKind.NamespaceGroupUseDeclaration
+    let is_namespace_use_clause                 = has_kind SyntaxKind.NamespaceUseClause
+    let is_function_declaration                 = has_kind SyntaxKind.FunctionDeclaration
+    let is_function_declaration_header          = has_kind SyntaxKind.FunctionDeclarationHeader
+    let is_where_clause                         = has_kind SyntaxKind.WhereClause
+    let is_where_constraint                     = has_kind SyntaxKind.WhereConstraint
+    let is_methodish_declaration                = has_kind SyntaxKind.MethodishDeclaration
+    let is_methodish_trait_resolution           = has_kind SyntaxKind.MethodishTraitResolution
+    let is_classish_declaration                 = has_kind SyntaxKind.ClassishDeclaration
+    let is_classish_body                        = has_kind SyntaxKind.ClassishBody
+    let is_trait_use_precedence_item            = has_kind SyntaxKind.TraitUsePrecedenceItem
+    let is_trait_use_alias_item                 = has_kind SyntaxKind.TraitUseAliasItem
+    let is_trait_use_conflict_resolution        = has_kind SyntaxKind.TraitUseConflictResolution
+    let is_trait_use                            = has_kind SyntaxKind.TraitUse
+    let is_require_clause                       = has_kind SyntaxKind.RequireClause
+    let is_const_declaration                    = has_kind SyntaxKind.ConstDeclaration
+    let is_constant_declarator                  = has_kind SyntaxKind.ConstantDeclarator
+    let is_type_const_declaration               = has_kind SyntaxKind.TypeConstDeclaration
+    let is_decorated_expression                 = has_kind SyntaxKind.DecoratedExpression
+    let is_parameter_declaration                = has_kind SyntaxKind.ParameterDeclaration
+    let is_variadic_parameter                   = has_kind SyntaxKind.VariadicParameter
+    let is_attribute_specification              = has_kind SyntaxKind.AttributeSpecification
+    let is_inclusion_expression                 = has_kind SyntaxKind.InclusionExpression
+    let is_inclusion_directive                  = has_kind SyntaxKind.InclusionDirective
+    let is_compound_statement                   = has_kind SyntaxKind.CompoundStatement
+    let is_alternate_loop_statement             = has_kind SyntaxKind.AlternateLoopStatement
+    let is_expression_statement                 = has_kind SyntaxKind.ExpressionStatement
+    let is_markup_section                       = has_kind SyntaxKind.MarkupSection
+    let is_markup_suffix                        = has_kind SyntaxKind.MarkupSuffix
+    let is_unset_statement                      = has_kind SyntaxKind.UnsetStatement
+    let is_let_statement                        = has_kind SyntaxKind.LetStatement
+    let is_using_statement_block_scoped         = has_kind SyntaxKind.UsingStatementBlockScoped
+    let is_using_statement_function_scoped      = has_kind SyntaxKind.UsingStatementFunctionScoped
+    let is_declare_directive_statement          = has_kind SyntaxKind.DeclareDirectiveStatement
+    let is_declare_block_statement              = has_kind SyntaxKind.DeclareBlockStatement
+    let is_while_statement                      = has_kind SyntaxKind.WhileStatement
+    let is_if_statement                         = has_kind SyntaxKind.IfStatement
+    let is_elseif_clause                        = has_kind SyntaxKind.ElseifClause
+    let is_else_clause                          = has_kind SyntaxKind.ElseClause
+    let is_alternate_if_statement               = has_kind SyntaxKind.AlternateIfStatement
+    let is_alternate_elseif_clause              = has_kind SyntaxKind.AlternateElseifClause
+    let is_alternate_else_clause                = has_kind SyntaxKind.AlternateElseClause
+    let is_try_statement                        = has_kind SyntaxKind.TryStatement
+    let is_catch_clause                         = has_kind SyntaxKind.CatchClause
+    let is_finally_clause                       = has_kind SyntaxKind.FinallyClause
+    let is_do_statement                         = has_kind SyntaxKind.DoStatement
+    let is_for_statement                        = has_kind SyntaxKind.ForStatement
+    let is_foreach_statement                    = has_kind SyntaxKind.ForeachStatement
+    let is_switch_statement                     = has_kind SyntaxKind.SwitchStatement
+    let is_alternate_switch_statement           = has_kind SyntaxKind.AlternateSwitchStatement
+    let is_switch_section                       = has_kind SyntaxKind.SwitchSection
+    let is_switch_fallthrough                   = has_kind SyntaxKind.SwitchFallthrough
+    let is_case_label                           = has_kind SyntaxKind.CaseLabel
+    let is_default_label                        = has_kind SyntaxKind.DefaultLabel
+    let is_return_statement                     = has_kind SyntaxKind.ReturnStatement
+    let is_goto_label                           = has_kind SyntaxKind.GotoLabel
+    let is_goto_statement                       = has_kind SyntaxKind.GotoStatement
+    let is_throw_statement                      = has_kind SyntaxKind.ThrowStatement
+    let is_break_statement                      = has_kind SyntaxKind.BreakStatement
+    let is_continue_statement                   = has_kind SyntaxKind.ContinueStatement
+    let is_echo_statement                       = has_kind SyntaxKind.EchoStatement
+    let is_concurrent_statement                 = has_kind SyntaxKind.ConcurrentStatement
+    let is_simple_initializer                   = has_kind SyntaxKind.SimpleInitializer
+    let is_anonymous_class                      = has_kind SyntaxKind.AnonymousClass
+    let is_anonymous_function                   = has_kind SyntaxKind.AnonymousFunction
+    let is_php7_anonymous_function              = has_kind SyntaxKind.Php7AnonymousFunction
+    let is_anonymous_function_use_clause        = has_kind SyntaxKind.AnonymousFunctionUseClause
+    let is_lambda_expression                    = has_kind SyntaxKind.LambdaExpression
+    let is_lambda_signature                     = has_kind SyntaxKind.LambdaSignature
+    let is_cast_expression                      = has_kind SyntaxKind.CastExpression
+    let is_scope_resolution_expression          = has_kind SyntaxKind.ScopeResolutionExpression
+    let is_member_selection_expression          = has_kind SyntaxKind.MemberSelectionExpression
+    let is_safe_member_selection_expression     = has_kind SyntaxKind.SafeMemberSelectionExpression
+    let is_embedded_member_selection_expression = has_kind SyntaxKind.EmbeddedMemberSelectionExpression
+    let is_yield_expression                     = has_kind SyntaxKind.YieldExpression
+    let is_yield_from_expression                = has_kind SyntaxKind.YieldFromExpression
+    let is_prefix_unary_expression              = has_kind SyntaxKind.PrefixUnaryExpression
+    let is_postfix_unary_expression             = has_kind SyntaxKind.PostfixUnaryExpression
+    let is_binary_expression                    = has_kind SyntaxKind.BinaryExpression
+    let is_instanceof_expression                = has_kind SyntaxKind.InstanceofExpression
+    let is_is_expression                        = has_kind SyntaxKind.IsExpression
+    let is_as_expression                        = has_kind SyntaxKind.AsExpression
+    let is_nullable_as_expression               = has_kind SyntaxKind.NullableAsExpression
+    let is_conditional_expression               = has_kind SyntaxKind.ConditionalExpression
+    let is_eval_expression                      = has_kind SyntaxKind.EvalExpression
+    let is_empty_expression                     = has_kind SyntaxKind.EmptyExpression
+    let is_define_expression                    = has_kind SyntaxKind.DefineExpression
+    let is_halt_compiler_expression             = has_kind SyntaxKind.HaltCompilerExpression
+    let is_isset_expression                     = has_kind SyntaxKind.IssetExpression
+    let is_function_call_expression             = has_kind SyntaxKind.FunctionCallExpression
+    let is_parenthesized_expression             = has_kind SyntaxKind.ParenthesizedExpression
+    let is_braced_expression                    = has_kind SyntaxKind.BracedExpression
+    let is_embedded_braced_expression           = has_kind SyntaxKind.EmbeddedBracedExpression
+    let is_list_expression                      = has_kind SyntaxKind.ListExpression
+    let is_collection_literal_expression        = has_kind SyntaxKind.CollectionLiteralExpression
+    let is_object_creation_expression           = has_kind SyntaxKind.ObjectCreationExpression
+    let is_constructor_call                     = has_kind SyntaxKind.ConstructorCall
+    let is_array_creation_expression            = has_kind SyntaxKind.ArrayCreationExpression
+    let is_array_intrinsic_expression           = has_kind SyntaxKind.ArrayIntrinsicExpression
+    let is_darray_intrinsic_expression          = has_kind SyntaxKind.DarrayIntrinsicExpression
+    let is_dictionary_intrinsic_expression      = has_kind SyntaxKind.DictionaryIntrinsicExpression
+    let is_keyset_intrinsic_expression          = has_kind SyntaxKind.KeysetIntrinsicExpression
+    let is_varray_intrinsic_expression          = has_kind SyntaxKind.VarrayIntrinsicExpression
+    let is_vector_intrinsic_expression          = has_kind SyntaxKind.VectorIntrinsicExpression
+    let is_element_initializer                  = has_kind SyntaxKind.ElementInitializer
+    let is_subscript_expression                 = has_kind SyntaxKind.SubscriptExpression
+    let is_embedded_subscript_expression        = has_kind SyntaxKind.EmbeddedSubscriptExpression
+    let is_awaitable_creation_expression        = has_kind SyntaxKind.AwaitableCreationExpression
+    let is_xhp_children_declaration             = has_kind SyntaxKind.XHPChildrenDeclaration
+    let is_xhp_children_parenthesized_list      = has_kind SyntaxKind.XHPChildrenParenthesizedList
+    let is_xhp_category_declaration             = has_kind SyntaxKind.XHPCategoryDeclaration
+    let is_xhp_enum_type                        = has_kind SyntaxKind.XHPEnumType
+    let is_xhp_required                         = has_kind SyntaxKind.XHPRequired
+    let is_xhp_class_attribute_declaration      = has_kind SyntaxKind.XHPClassAttributeDeclaration
+    let is_xhp_class_attribute                  = has_kind SyntaxKind.XHPClassAttribute
+    let is_xhp_simple_class_attribute           = has_kind SyntaxKind.XHPSimpleClassAttribute
+    let is_xhp_simple_attribute                 = has_kind SyntaxKind.XHPSimpleAttribute
+    let is_xhp_spread_attribute                 = has_kind SyntaxKind.XHPSpreadAttribute
+    let is_xhp_open                             = has_kind SyntaxKind.XHPOpen
+    let is_xhp_expression                       = has_kind SyntaxKind.XHPExpression
+    let is_xhp_close                            = has_kind SyntaxKind.XHPClose
+    let is_type_constant                        = has_kind SyntaxKind.TypeConstant
+    let is_vector_type_specifier                = has_kind SyntaxKind.VectorTypeSpecifier
+    let is_keyset_type_specifier                = has_kind SyntaxKind.KeysetTypeSpecifier
+    let is_tuple_type_explicit_specifier        = has_kind SyntaxKind.TupleTypeExplicitSpecifier
+    let is_varray_type_specifier                = has_kind SyntaxKind.VarrayTypeSpecifier
+    let is_vector_array_type_specifier          = has_kind SyntaxKind.VectorArrayTypeSpecifier
+    let is_type_parameter                       = has_kind SyntaxKind.TypeParameter
+    let is_type_constraint                      = has_kind SyntaxKind.TypeConstraint
+    let is_darray_type_specifier                = has_kind SyntaxKind.DarrayTypeSpecifier
+    let is_map_array_type_specifier             = has_kind SyntaxKind.MapArrayTypeSpecifier
+    let is_dictionary_type_specifier            = has_kind SyntaxKind.DictionaryTypeSpecifier
+    let is_closure_type_specifier               = has_kind SyntaxKind.ClosureTypeSpecifier
+    let is_closure_parameter_type_specifier     = has_kind SyntaxKind.ClosureParameterTypeSpecifier
+    let is_classname_type_specifier             = has_kind SyntaxKind.ClassnameTypeSpecifier
+    let is_field_specifier                      = has_kind SyntaxKind.FieldSpecifier
+    let is_field_initializer                    = has_kind SyntaxKind.FieldInitializer
+    let is_shape_type_specifier                 = has_kind SyntaxKind.ShapeTypeSpecifier
+    let is_shape_expression                     = has_kind SyntaxKind.ShapeExpression
+    let is_tuple_expression                     = has_kind SyntaxKind.TupleExpression
+    let is_generic_type_specifier               = has_kind SyntaxKind.GenericTypeSpecifier
+    let is_nullable_type_specifier              = has_kind SyntaxKind.NullableTypeSpecifier
+    let is_like_type_specifier                  = has_kind SyntaxKind.LikeTypeSpecifier
+    let is_soft_type_specifier                  = has_kind SyntaxKind.SoftTypeSpecifier
+    let is_reified_type_argument                = has_kind SyntaxKind.ReifiedTypeArgument
+    let is_type_arguments                       = has_kind SyntaxKind.TypeArguments
+    let is_type_parameters                      = has_kind SyntaxKind.TypeParameters
+    let is_tuple_type_specifier                 = has_kind SyntaxKind.TupleTypeSpecifier
+    let is_error                                = has_kind SyntaxKind.ErrorSyntax
+    let is_list_item                            = has_kind SyntaxKind.ListItem
+    let is_pocket_atom_expression               = has_kind SyntaxKind.PocketAtomExpression
+    let is_pocket_identifier_expression         = has_kind SyntaxKind.PocketIdentifierExpression
+    let is_pocket_atom_mapping_declaration      = has_kind SyntaxKind.PocketAtomMappingDeclaration
+    let is_pocket_enum_declaration              = has_kind SyntaxKind.PocketEnumDeclaration
+    let is_pocket_field_type_expr_declaration   = has_kind SyntaxKind.PocketFieldTypeExprDeclaration
+    let is_pocket_field_type_declaration        = has_kind SyntaxKind.PocketFieldTypeDeclaration
+    let is_pocket_mapping_id_declaration        = has_kind SyntaxKind.PocketMappingIdDeclaration
+    let is_pocket_mapping_type_declaration      = has_kind SyntaxKind.PocketMappingTypeDeclaration
 
 
     let is_loop_statement node =
@@ -1715,27 +1713,16 @@ module WithToken(Token: TokenType) = struct
          acc
       | FunctionCallExpression {
         function_call_receiver;
+        function_call_type_args;
         function_call_left_paren;
         function_call_argument_list;
         function_call_right_paren;
       } ->
          let acc = f acc function_call_receiver in
+         let acc = f acc function_call_type_args in
          let acc = f acc function_call_left_paren in
          let acc = f acc function_call_argument_list in
          let acc = f acc function_call_right_paren in
-         acc
-      | FunctionCallWithTypeArgumentsExpression {
-        function_call_with_type_arguments_receiver;
-        function_call_with_type_arguments_type_args;
-        function_call_with_type_arguments_left_paren;
-        function_call_with_type_arguments_argument_list;
-        function_call_with_type_arguments_right_paren;
-      } ->
-         let acc = f acc function_call_with_type_arguments_receiver in
-         let acc = f acc function_call_with_type_arguments_type_args in
-         let acc = f acc function_call_with_type_arguments_left_paren in
-         let acc = f acc function_call_with_type_arguments_argument_list in
-         let acc = f acc function_call_with_type_arguments_right_paren in
          acc
       | ParenthesizedExpression {
         parenthesized_expression_left_paren;
@@ -3663,27 +3650,16 @@ module WithToken(Token: TokenType) = struct
       ]
       | FunctionCallExpression {
         function_call_receiver;
+        function_call_type_args;
         function_call_left_paren;
         function_call_argument_list;
         function_call_right_paren;
       } -> [
         function_call_receiver;
+        function_call_type_args;
         function_call_left_paren;
         function_call_argument_list;
         function_call_right_paren;
-      ]
-      | FunctionCallWithTypeArgumentsExpression {
-        function_call_with_type_arguments_receiver;
-        function_call_with_type_arguments_type_args;
-        function_call_with_type_arguments_left_paren;
-        function_call_with_type_arguments_argument_list;
-        function_call_with_type_arguments_right_paren;
-      } -> [
-        function_call_with_type_arguments_receiver;
-        function_call_with_type_arguments_type_args;
-        function_call_with_type_arguments_left_paren;
-        function_call_with_type_arguments_argument_list;
-        function_call_with_type_arguments_right_paren;
       ]
       | ParenthesizedExpression {
         parenthesized_expression_left_paren;
@@ -5612,27 +5588,16 @@ module WithToken(Token: TokenType) = struct
       ]
       | FunctionCallExpression {
         function_call_receiver;
+        function_call_type_args;
         function_call_left_paren;
         function_call_argument_list;
         function_call_right_paren;
       } -> [
         "function_call_receiver";
+        "function_call_type_args";
         "function_call_left_paren";
         "function_call_argument_list";
         "function_call_right_paren";
-      ]
-      | FunctionCallWithTypeArgumentsExpression {
-        function_call_with_type_arguments_receiver;
-        function_call_with_type_arguments_type_args;
-        function_call_with_type_arguments_left_paren;
-        function_call_with_type_arguments_argument_list;
-        function_call_with_type_arguments_right_paren;
-      } -> [
-        "function_call_with_type_arguments_receiver";
-        "function_call_with_type_arguments_type_args";
-        "function_call_with_type_arguments_left_paren";
-        "function_call_with_type_arguments_argument_list";
-        "function_call_with_type_arguments_right_paren";
       ]
       | ParenthesizedExpression {
         parenthesized_expression_left_paren;
@@ -7723,29 +7688,17 @@ module WithToken(Token: TokenType) = struct
         }
       | (SyntaxKind.FunctionCallExpression, [
           function_call_receiver;
+          function_call_type_args;
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
         ]) ->
         FunctionCallExpression {
           function_call_receiver;
+          function_call_type_args;
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
-        }
-      | (SyntaxKind.FunctionCallWithTypeArgumentsExpression, [
-          function_call_with_type_arguments_receiver;
-          function_call_with_type_arguments_type_args;
-          function_call_with_type_arguments_left_paren;
-          function_call_with_type_arguments_argument_list;
-          function_call_with_type_arguments_right_paren;
-        ]) ->
-        FunctionCallWithTypeArgumentsExpression {
-          function_call_with_type_arguments_receiver;
-          function_call_with_type_arguments_type_args;
-          function_call_with_type_arguments_left_paren;
-          function_call_with_type_arguments_argument_list;
-          function_call_with_type_arguments_right_paren;
         }
       | (SyntaxKind.ParenthesizedExpression, [
           parenthesized_expression_left_paren;
@@ -10209,32 +10162,17 @@ module WithToken(Token: TokenType) = struct
 
       let make_function_call_expression
         function_call_receiver
+        function_call_type_args
         function_call_left_paren
         function_call_argument_list
         function_call_right_paren
       =
         let syntax = FunctionCallExpression {
           function_call_receiver;
+          function_call_type_args;
           function_call_left_paren;
           function_call_argument_list;
           function_call_right_paren;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_function_call_with_type_arguments_expression
-        function_call_with_type_arguments_receiver
-        function_call_with_type_arguments_type_args
-        function_call_with_type_arguments_left_paren
-        function_call_with_type_arguments_argument_list
-        function_call_with_type_arguments_right_paren
-      =
-        let syntax = FunctionCallWithTypeArgumentsExpression {
-          function_call_with_type_arguments_receiver;
-          function_call_with_type_arguments_type_args;
-          function_call_with_type_arguments_left_paren;
-          function_call_with_type_arguments_argument_list;
-          function_call_with_type_arguments_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

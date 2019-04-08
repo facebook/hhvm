@@ -60,7 +60,7 @@
                      (prefix_unary_expression 15
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 9
-                        ((() name 6 ()) (() "(" 1 ())
+                        ((() name 6 ()) (missing 0 ()) (() "(" 1 ())
                          (list 1
                           ((list_item 1
                             ((literal 1 ((() decimal_literal 1 ())))
@@ -76,7 +76,7 @@
                      (prefix_unary_expression 15
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 9
-                        ((() name 6 ()) (() "(" 1 ())
+                        ((() name 6 ()) (missing 0 ()) (() "(" 1 ())
                          (list 1
                           ((list_item 1
                             ((literal 1 ((() decimal_literal 1 ())))
@@ -92,7 +92,7 @@
                      (prefix_unary_expression 15
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 9
-                        ((() name 6 ()) (() "(" 1 ())
+                        ((() name 6 ()) (missing 0 ()) (() "(" 1 ())
                          (list 1
                           ((list_item 1
                             ((literal 1 ((() decimal_literal 1 ())))
@@ -108,7 +108,7 @@
                      (prefix_unary_expression 15
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 9
-                        ((() name 6 ()) (() "(" 1 ())
+                        ((() name 6 ()) (missing 0 ()) (() "(" 1 ())
                          (list 1
                           ((list_item 1
                             ((literal 1 ((() decimal_literal 1 ())))
@@ -124,7 +124,7 @@
                      (prefix_unary_expression 15
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 9
-                        ((() name 6 ()) (() "(" 1 ())
+                        ((() name 6 ()) (missing 0 ()) (() "(" 1 ())
                          (list 1
                           ((list_item 1
                             ((literal 1 ((() decimal_literal 1 ())))

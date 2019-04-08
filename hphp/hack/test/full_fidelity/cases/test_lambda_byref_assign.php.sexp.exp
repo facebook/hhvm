@@ -58,7 +58,8 @@
          (prefix_unary_expression 10
           ((() & 1 ())
            (function_call_expression 9
-            ((() name 7 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))))
+            ((() name 7 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+             (() ")" 1 ())))))))
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 17
       ((binary_expression 16
@@ -78,7 +79,7 @@
            (function_call_expression 12
             ((member_selection_expression 10
               ((variable 2 ((() variable 2 ()))) (() -> 2 ()) (() name 6 ())))
-             (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))))
+             (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))))
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 14
       ((binary_expression 13
@@ -159,7 +160,7 @@
               ((member_selection_expression 9
                 ((variable 4 ((() variable 4 ()))) (() -> 2 ())
                  (() name 3 ())))
-               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
              (() ")" 1 ())))))))
        (() ";" 1 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))
      (expression_statement 65
@@ -173,7 +174,7 @@
              (function_call_expression 56
               ((scope_resolution_expression 13
                 ((() name 6 ()) (() :: 2 ()) (() name 5 ())))
-               (() "(" 1 ())
+               (missing 0 ()) (() "(" 1 ())
                (list 41
                 ((list_item 39
                   ((scope_resolution_expression 38
@@ -197,7 +198,7 @@
                 ((list 15
                   ((list_item 4 ((() name 3 ()) (() "\\" 1 ())))
                    (list_item 11 ((() name 11 ()) (missing 0 ())))))))
-               (() "(" 1 ())
+               (missing 0 ()) (() "(" 1 ())
                (list 21
                 ((list_item 18
                   ((variable 17 ((() variable 17 ())))

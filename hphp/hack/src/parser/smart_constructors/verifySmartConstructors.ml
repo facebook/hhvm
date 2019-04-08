@@ -927,19 +927,11 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     
-  let make_function_call_expression p0 p1 p2 p3 stack =
-    match stack with
-    | a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3] [a0; a1; a2; a3] "function_call_expression" in
-      let node = Syntax.make_function_call_expression p0 p1 p2 p3 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-    
-  let make_function_call_with_type_arguments_expression p0 p1 p2 p3 p4 stack =
+  let make_function_call_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "function_call_with_type_arguments_expression" in
-      let node = Syntax.make_function_call_with_type_arguments_expression p0 p1 p2 p3 p4 in
+      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "function_call_expression" in
+      let node = Syntax.make_function_call_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
     

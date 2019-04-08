@@ -1364,12 +1364,16 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       )
     | FunctionCallExpression
       { function_call_receiver      = recv
+      ; function_call_type_args = type_args
       ; function_call_argument_list = args
       ; _ }
       ->
       let hints =
-        begin match (syntax recv) with
-          | GenericTypeSpecifier { generic_argument_list; _ } ->
+        begin match (syntax recv), (syntax type_args) with
+          | _, TypeArguments { type_arguments_types; _ } ->
+            couldMap ~f:pHint type_arguments_types env
+          (* TODO might not be needed *)
+          | GenericTypeSpecifier { generic_argument_list; _ }, _ ->
             begin match syntax generic_argument_list with
               | TypeArguments { type_arguments_types; _ }
                 -> couldMap ~f:pHint type_arguments_types env
@@ -1393,19 +1397,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | _ -> recv in
       let args, varargs = split_args_varargs args in
       Call (recv, hints, args, varargs)
-    | FunctionCallWithTypeArgumentsExpression
-      { function_call_with_type_arguments_receiver = recv
-      ; function_call_with_type_arguments_type_args = type_args
-      ; function_call_with_type_arguments_argument_list = args
-      ; _ }
-      ->
-      let hints =
-        begin match (syntax type_args) with
-          | TypeArguments { type_arguments_types; _ } ->
-            couldMap ~f:pHint type_arguments_types env
-          | _ -> missing_syntax "type arguments" type_args env
-        end in
-      Call (pExpr recv env, hints, couldMap ~f:pExpr args env, [])
     | QualifiedName _ ->
       if in_string location
       then

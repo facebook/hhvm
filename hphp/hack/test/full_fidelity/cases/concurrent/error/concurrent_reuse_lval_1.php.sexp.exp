@@ -23,7 +23,7 @@
                   ((prefix_unary_expression 19
                     ((((whitespace 4)) await 5 ((whitespace 1)))
                      (function_call_expression 13
-                      ((() name 4 ()) (() "(" 1 ())
+                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
                        (list 7
                         ((list_item 7
                           ((binary_expression 7
@@ -37,7 +37,7 @@
                   ((prefix_unary_expression 14
                     ((((whitespace 4)) await 5 ((whitespace 1)))
                      (function_call_expression 8
-                      ((() name 4 ()) (() "(" 1 ())
+                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
                        (list 2
                         ((list_item 2
                           ((variable 2 ((() variable 2 ()))) (missing 0 ())))))

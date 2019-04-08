@@ -78,7 +78,7 @@
              (missing 0 ()) (() ")" 1 ())))))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 13
-      ((function_call_with_type_arguments_expression 12
+      ((function_call_expression 12
         ((member_selection_expression 5
           ((variable 2 ((((end_of_line 1)) variable 2 ()))) (() -> 2 ())
            (() name 1 ())))
@@ -91,7 +91,7 @@
          (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
        (() ";" 1 ((whitespace 2) (single_line_comment 5) (end_of_line 1)))))
      (expression_statement 14
-      ((function_call_with_type_arguments_expression 13
+      ((function_call_expression 13
         ((member_selection_expression 6
           ((variable 2 ((() variable 2 ()))) (() -> 2 ()) (() variable 2 ())))
          (type_arguments 5
@@ -103,7 +103,7 @@
          (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
        (() ";" 1 ((whitespace 1) (single_line_comment 14) (end_of_line 1)))))
      (expression_statement 14
-      ((function_call_with_type_arguments_expression 13
+      ((function_call_expression 13
         ((safe_member_selection_expression 6
           ((variable 2 ((((end_of_line 1)) variable 2 ()))) (() ?-> 3 ())
            (() name 1 ())))
@@ -116,7 +116,7 @@
          (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
        (() ";" 1 ((whitespace 1) (single_line_comment 5) (end_of_line 1)))))
      (expression_statement 15
-      ((function_call_with_type_arguments_expression 14
+      ((function_call_expression 14
         ((safe_member_selection_expression 7
           ((variable 2 ((() variable 2 ()))) (() ?-> 3 ())
            (() variable 2 ())))
@@ -129,7 +129,7 @@
          (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
        (() ";" 1 ((whitespace 1) (single_line_comment 15) (end_of_line 1)))))
      (expression_statement 12
-      ((function_call_with_type_arguments_expression 11
+      ((function_call_expression 11
         ((scope_resolution_expression 4
           ((((end_of_line 1)) name 1 ()) (() :: 2 ()) (() name 1 ())))
          (type_arguments 5
@@ -141,7 +141,7 @@
          (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
        (() ";" 1 ((whitespace 3) (single_line_comment 5) (end_of_line 1)))))
      (expression_statement 13
-      ((function_call_with_type_arguments_expression 12
+      ((function_call_expression 12
         ((scope_resolution_expression 5
           ((() name 1 ()) (() :: 2 ()) (() variable 2 ())))
          (type_arguments 5

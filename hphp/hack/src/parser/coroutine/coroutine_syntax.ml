@@ -400,6 +400,7 @@ let make_function_call_expression_syntax receiver_syntax argument_list =
   let argument_list_syntax = make_comma_list argument_list in
   make_function_call_expression
     receiver_syntax
+    (make_missing ())
     left_paren_syntax
     argument_list_syntax
     right_paren_syntax

@@ -26,7 +26,8 @@
             ((prefix_unary_expression 9
               ((((whitespace 2)) await 5 ((whitespace 1)))
                (function_call_expression 3
-                ((() name 1 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+                ((() name 1 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+                 (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (concurrent_statement 57
             ((((whitespace 2)) concurrent 10 ((whitespace 1)))
@@ -41,22 +42,23 @@
                      (prefix_unary_expression 12
                       ((() await 5 ((whitespace 1)))
                        (function_call_expression 6
-                        ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                         (() ")" 1 ())))))))
+                        ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                         (missing 0 ()) (() ")" 1 ())))))))
                    (() ";" 1 ((end_of_line 1)))))
                  (expression_statement 13
                   ((prefix_unary_expression 12
                     ((((whitespace 4)) await 5 ((whitespace 1)))
                      (function_call_expression 6
-                      ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                       (() ")" 1 ())))))
+                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                       (missing 0 ()) (() ")" 1 ())))))
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))))
            (expression_statement 10
             ((prefix_unary_expression 9
               ((((whitespace 2)) await 5 ((whitespace 1)))
                (function_call_expression 3
-                ((() name 1 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+                ((() name 1 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+                 (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

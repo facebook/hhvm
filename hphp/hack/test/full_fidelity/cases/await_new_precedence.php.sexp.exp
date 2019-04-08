@@ -89,7 +89,7 @@
                 ((member_selection_expression 7
                   ((variable 2 ((() variable 2 ()))) (() -> 2 ())
                    (() name 3 ())))
-                 (() "(" 1 ())
+                 (missing 0 ()) (() "(" 1 ())
                  (list 2
                   ((list_item 2
                     ((variable 2 ((() variable 2 ()))) (missing 0 ())))))
@@ -103,7 +103,7 @@
                   ((member_selection_expression 7
                     ((variable 2 ((() variable 2 ()))) (() -> 2 ())
                      (() name 3 ())))
-                   (() "(" 1 ())
+                   (missing 0 ()) (() "(" 1 ())
                    (list 2
                     ((list_item 2
                       ((variable 2 ((() variable 2 ()))) (missing 0 ())))))
@@ -126,14 +126,16 @@
                    (variable 2 ((() variable 2 ((whitespace 1)))))))
                  (() |> 2 ((whitespace 1)))
                  (function_call_expression 6
-                  ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
+                  ((variable 2 ((() variable 2 ()))) (missing 0 ())
+                   (() "(" 1 ())
                    (list 2
                     ((list_item 2
                       ((pipe_variable 2 ((() $$ 2 ()))) (missing 0 ())))))
                    (() ")" 1 ((whitespace 1)))))))
                (() |> 2 ((whitespace 1)))
                (function_call_expression 6
-                ((variable 2 ((() variable 2 ()))) (() "(" 1 ())
+                ((variable 2 ((() variable 2 ()))) (missing 0 ())
+                 (() "(" 1 ())
                  (list 2
                   ((list_item 2
                     ((pipe_variable 2 ((() $$ 2 ()))) (missing 0 ())))))
@@ -151,7 +153,7 @@
            (expression_statement 17
             ((prefix_unary_expression 16
               ((((whitespace 2)) await 5 ((whitespace 1)))
-               (function_call_with_type_arguments_expression 10
+               (function_call_expression 10
                 ((() name 3 ())
                  (type_arguments 5
                   ((() < 1 ())

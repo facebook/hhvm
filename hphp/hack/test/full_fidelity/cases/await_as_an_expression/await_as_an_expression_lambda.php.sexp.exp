@@ -35,8 +35,8 @@
                       ((prefix_unary_expression 12
                         ((() await 5 ((whitespace 1)))
                          (function_call_expression 6
-                          ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                           (() ")" 1 ())))))
+                          ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                           (missing 0 ()) (() ")" 1 ())))))
                        (() ";" 1 ((whitespace 1)))))))
                    (() } 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))
@@ -51,14 +51,14 @@
                    (list 16
                     ((expression_statement 16
                       ((function_call_expression 15
-                        ((() name 1 ()) (() "(" 1 ())
+                        ((() name 1 ()) (missing 0 ()) (() "(" 1 ())
                          (list 12
                           ((list_item 12
                             ((prefix_unary_expression 12
                               ((() await 5 ((whitespace 1)))
                                (function_call_expression 6
-                                ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                                 (() ")" 1 ())))))
+                                ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                                 (missing 0 ()) (() ")" 1 ())))))
                              (missing 0 ())))))
                          (() ")" 1 ())))
                        (() ";" 1 ((whitespace 1)))))))
@@ -77,8 +77,8 @@
                  (prefix_unary_expression 12
                   ((() await 5 ((whitespace 1)))
                    (function_call_expression 6
-                    ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                     (() ")" 1 ())))))))))
+                    ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                     (missing 0 ()) (() ")" 1 ())))))))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 34
             ((binary_expression 33
@@ -91,14 +91,14 @@
                    (missing 0 ()) (missing 0 ())))
                  (() ==> 3 ((whitespace 1)))
                  (function_call_expression 15
-                  ((() name 1 ()) (() "(" 1 ())
+                  ((() name 1 ()) (missing 0 ()) (() "(" 1 ())
                    (list 12
                     ((list_item 12
                       ((prefix_unary_expression 12
                         ((() await 5 ((whitespace 1)))
                          (function_call_expression 6
-                          ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                           (() ")" 1 ())))))
+                          ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                           (missing 0 ()) (() ")" 1 ())))))
                        (missing 0 ())))))
                    (() ")" 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))
@@ -119,8 +119,8 @@
                       ((prefix_unary_expression 12
                         ((() await 5 ((whitespace 1)))
                          (function_call_expression 6
-                          ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                           (() ")" 1 ())))))
+                          ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                           (missing 0 ()) (() ")" 1 ())))))
                        (() ";" 1 ((whitespace 1)))))))
                    (() } 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))
@@ -139,14 +139,14 @@
                    (list 16
                     ((expression_statement 16
                       ((function_call_expression 15
-                        ((() name 1 ()) (() "(" 1 ())
+                        ((() name 1 ()) (missing 0 ()) (() "(" 1 ())
                          (list 12
                           ((list_item 12
                             ((prefix_unary_expression 12
                               ((() await 5 ((whitespace 1)))
                                (function_call_expression 6
-                                ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                                 (() ")" 1 ())))))
+                                ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                                 (missing 0 ()) (() ")" 1 ())))))
                              (missing 0 ())))))
                          (() ")" 1 ())))
                        (() ";" 1 ((whitespace 1)))))))
@@ -168,8 +168,8 @@
                       ((prefix_unary_expression 12
                         ((() await 5 ((whitespace 1)))
                          (function_call_expression 6
-                          ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                           (() ")" 1 ())))))
+                          ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                           (missing 0 ()) (() ")" 1 ())))))
                        (() ";" 1 ((whitespace 1)))))))
                    (() } 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))
@@ -187,14 +187,14 @@
                    (list 16
                     ((expression_statement 16
                       ((function_call_expression 15
-                        ((() name 1 ()) (() "(" 1 ())
+                        ((() name 1 ()) (missing 0 ()) (() "(" 1 ())
                          (list 12
                           ((list_item 12
                             ((prefix_unary_expression 12
                               ((() await 5 ((whitespace 1)))
                                (function_call_expression 6
-                                ((() name 4 ()) (() "(" 1 ()) (missing 0 ())
-                                 (() ")" 1 ())))))
+                                ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
+                                 (missing 0 ()) (() ")" 1 ())))))
                              (missing 0 ())))))
                          (() ")" 1 ())))
                        (() ";" 1 ((whitespace 1)))))))

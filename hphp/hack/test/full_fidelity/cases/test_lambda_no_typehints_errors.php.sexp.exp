@@ -51,7 +51,8 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 38
             ((function_call_expression 37
-              ((((end_of_line 1) (whitespace 2)) name 3 ()) (() "(" 1 ())
+              ((((end_of_line 1) (whitespace 2)) name 3 ()) (missing 0 ())
+               (() "(" 1 ())
                (list 32
                 ((list_item 32
                   ((lambda_expression 32

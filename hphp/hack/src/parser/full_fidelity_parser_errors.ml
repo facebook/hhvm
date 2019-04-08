@@ -1659,8 +1659,6 @@ let parameter_rx_errors context errors node =
         get_arg_call_node_with_parents next_node next_parents
       | (FunctionCallExpression {
           function_call_argument_list = { syntax = arg_list; _ }; _ }
-        | FunctionCallWithTypeArgumentsExpression {
-          function_call_with_type_arguments_argument_list = { syntax = arg_list; _ }; _ }
       ) as call_expression :: parents when phys_equal arg_list node ->
         Some (call_expression, parents)
       | _ -> None
@@ -2168,7 +2166,6 @@ let rec check_reference node errors =
     when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
     make_error_from_node node SyntaxError.error2078 :: errors
   | FunctionCallExpression _
-  | FunctionCallWithTypeArgumentsExpression _
   | ListExpression _
   | MemberSelectionExpression _
   | ObjectCreationExpression _
@@ -2374,10 +2371,6 @@ let await_as_an_expression_errors await_node parents errors =
     | FunctionCallExpression {
         function_call_receiver = r;
         function_call_argument_list = args; _
-      } |
-      FunctionCallWithTypeArgumentsExpression {
-        function_call_with_type_arguments_receiver = r;
-        function_call_with_type_arguments_argument_list = args; _
       }
         when phys_equal node r ||
              (phys_equal node args && not (is_safe_member_selection_expression r))
@@ -3844,8 +3837,10 @@ let declare_errors _env node parents errors =
 
 let dynamic_method_call_errors node errors =
   match syntax node with
-  | FunctionCallWithTypeArgumentsExpression
-    { function_call_with_type_arguments_receiver = receiver; _ } ->
+  | FunctionCallExpression
+    {
+      function_call_type_args = type_args;
+      function_call_receiver = receiver; _ } when not (is_missing type_args) ->
     let is_dynamic = match syntax receiver with
       | ScopeResolutionExpression { scope_resolution_name = name; _ }
       | MemberSelectionExpression { member_name = name; _ }
@@ -3943,9 +3938,6 @@ let find_syntax_errors env =
         let errors =
           methodish_errors env node errors in
         trait_require_clauses, names, errors
-      | FunctionCallWithTypeArgumentsExpression _ ->
-        let errors = dynamic_method_call_errors node errors in
-        trait_require_clauses, names, errors
       | InstanceofExpression _
       | LiteralExpression _
       | SafeMemberSelectionExpression _
@@ -3975,6 +3967,7 @@ let find_syntax_errors env =
       | ConditionalExpression _
       | CollectionLiteralExpression _
       | VariableExpression _ ->
+        let errors = dynamic_method_call_errors node errors in
         let errors =
           expression_errors env is_in_concurrent_block namespace_name node parents errors in
         let errors = check_nonrx_annotation node errors in

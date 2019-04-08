@@ -113,7 +113,8 @@
                     ((member_selection_expression 9
                       ((variable 5 ((((whitespace 4)) variable 5 ())))
                        (() -> 2 ()) (() name 2 ())))
-                     (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+                     (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+                     (() ")" 1 ())))
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))))

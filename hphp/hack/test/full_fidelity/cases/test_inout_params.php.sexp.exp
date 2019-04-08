@@ -246,7 +246,8 @@
          (list 26
           ((expression_statement 26
             ((function_call_expression 25
-              ((variable 2 ((((whitespace 2)) variable 2 ()))) (() "(" 1 ())
+              ((variable 2 ((((whitespace 2)) variable 2 ()))) (missing 0 ())
+               (() "(" 1 ())
                (list 21
                 ((list_item 11
                   ((decorated_expression 10
@@ -369,7 +370,8 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 15
             ((function_call_expression 14
-              ((((end_of_line 1) (whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((end_of_line 1) (whitespace 2)) name 4 ()) (missing 0 ())
+               (() "(" 1 ())
                (list 8
                 ((list_item 8
                   ((decorated_expression 8
@@ -380,7 +382,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 15
             ((function_call_expression 14
-              ((((whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
                (list 8
                 ((list_item 8
                   ((decorated_expression 8
@@ -391,7 +393,8 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 25
             ((function_call_expression 24
-              ((((end_of_line 1) (whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((end_of_line 1) (whitespace 2)) name 4 ()) (missing 0 ())
+               (() "(" 1 ())
                (list 18
                 ((list_item 9
                   ((decorated_expression 8
@@ -407,7 +410,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 20
             ((function_call_expression 19
-              ((((whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
                (list 13
                 ((list_item 4
                   ((prefix_unary_expression 3
@@ -422,7 +425,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 20
             ((function_call_expression 19
-              ((((whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
                (list 13
                 ((list_item 9
                   ((decorated_expression 8
@@ -437,7 +440,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 15
             ((function_call_expression 14
-              ((((whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
                (list 8
                 ((list_item 4
                   ((prefix_unary_expression 3
@@ -461,7 +464,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 31
             ((function_call_expression 30
-              ((((whitespace 2)) name 6 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 6 ()) (missing 0 ()) (() "(" 1 ())
                (list 22
                 ((list_item 9
                   ((decorated_expression 8
@@ -487,7 +490,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 44
             ((function_call_expression 43
-              ((((whitespace 2)) name 6 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 6 ()) (missing 0 ()) (() "(" 1 ())
                (list 35
                 ((list_item 4
                   ((prefix_unary_expression 3
@@ -519,11 +522,11 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 30
             ((function_call_expression 29
-              ((((whitespace 2)) name 4 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 4 ()) (missing 0 ()) (() "(" 1 ())
                (list 23
                 ((list_item 14
                   ((function_call_expression 13
-                    ((() name 3 ()) (() "(" 1 ())
+                    ((() name 3 ()) (missing 0 ()) (() "(" 1 ())
                      (list 8
                       ((list_item 8
                         ((literal 8 ((() single_quoted_string_literal 8 ())))
@@ -586,7 +589,8 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 138
             ((function_call_expression 137
-              ((((whitespace 2)) name 36 ()) (() "(" 1 ((end_of_line 1)))
+              ((((whitespace 2)) name 36 ()) (missing 0 ())
+               (() "(" 1 ((end_of_line 1)))
                (list 91
                 ((list_item 3
                   ((literal 2 ((((whitespace 4)) decimal_literal 2 ())))
@@ -606,8 +610,8 @@
                      (subscript_expression 11
                       ((variable 2 ((() variable 2 ()))) (() [ 1 ())
                        (function_call_expression 7
-                        ((variable 5 ((() variable 5 ()))) (() "(" 1 ())
-                         (missing 0 ()) (() ")" 1 ())))
+                        ((variable 5 ((() variable 5 ()))) (missing 0 ())
+                         (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
                        (() ] 1 ())))))
                    (() , 1 ((end_of_line 1)))))
                  (list_item 9

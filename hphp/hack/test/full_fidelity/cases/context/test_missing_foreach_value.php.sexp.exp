@@ -60,14 +60,15 @@
                                    (() "\\" 1 ())))
                                  (list_item 9
                                   ((() name 9 ()) (missing 0 ())))))))
-                             (() "(" 1 ())
+                             (missing 0 ()) (() "(" 1 ())
                              (list 45
                               ((list_item 45
                                 ((cast_expression 45
                                   ((() "(" 1 ()) (() string 6 ())
                                    (() ")" 1 ())
                                    (function_call_expression 37
-                                    ((() name 11 ()) (() "(" 1 ())
+                                    ((() name 11 ()) (missing 0 ())
+                                     (() "(" 1 ())
                                      (list 24
                                       ((list_item 4
                                         ((literal 3
@@ -135,7 +136,8 @@
                      (function_call_expression 20
                       ((scope_resolution_expression 18
                         ((() name 7 ()) (() :: 2 ()) (() name 9 ())))
-                       (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+                       (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+                       (() ")" 1 ())))))
                    (() ";" 1 ((end_of_line 1)))))
                  (expression_statement 32
                   ((binary_expression 31
@@ -177,14 +179,15 @@
                                    (() "\\" 1 ())))
                                  (list_item 9
                                   ((() name 9 ()) (missing 0 ())))))))
-                             (() "(" 1 ())
+                             (missing 0 ()) (() "(" 1 ())
                              (list 45
                               ((list_item 45
                                 ((cast_expression 45
                                   ((() "(" 1 ()) (() string 6 ())
                                    (() ")" 1 ())
                                    (function_call_expression 37
-                                    ((() name 11 ()) (() "(" 1 ())
+                                    ((() name 11 ()) (missing 0 ())
+                                     (() "(" 1 ())
                                      (list 24
                                       ((list_item 4
                                         ((literal 3

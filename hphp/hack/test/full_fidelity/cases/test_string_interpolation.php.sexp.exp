@@ -21,7 +21,7 @@
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 46
       ((function_call_expression 45
-        ((() name 8 ()) (() "(" 1 ())
+        ((() name 8 ()) (missing 0 ()) (() "(" 1 ())
          (list 35
           ((list_item 35
             ((literal 35

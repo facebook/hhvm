@@ -111,7 +111,7 @@
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 18
       ((function_call_expression 17
-        ((((end_of_line 1)) name 3 ()) (() "(" 1 ())
+        ((((end_of_line 1)) name 3 ()) (missing 0 ()) (() "(" 1 ())
          (list 12
           ((list_item 12
             ((list_expression 12

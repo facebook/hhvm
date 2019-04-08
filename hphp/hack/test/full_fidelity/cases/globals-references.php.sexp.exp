@@ -35,7 +35,7 @@
          (list 13
           ((expression_statement 13
             ((function_call_expression 12
-              ((((whitespace 2)) name 1 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 1 ()) (missing 0 ()) (() "(" 1 ())
                (list 9
                 ((list_item 9
                   ((prefix_unary_expression 9

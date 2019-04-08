@@ -6,7 +6,7 @@
        (missing 0 ())))
      (expression_statement 41
       ((function_call_expression 40
-        ((((end_of_line 1)) name 8 ()) (() "(" 1 ())
+        ((((end_of_line 1)) name 8 ()) (missing 0 ()) (() "(" 1 ())
          (list 30
           ((list_item 30
             ((binary_expression 30

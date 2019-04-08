@@ -19,7 +19,7 @@
          (list 43
           ((expression_statement 20
             ((function_call_expression 19
-              ((((whitespace 2)) name 1 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 1 ()) (missing 0 ()) (() "(" 1 ())
                (list 16
                 ((list_item 16
                   ((prefix_unary_expression 16
@@ -33,7 +33,7 @@
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 20
             ((function_call_expression 19
-              ((((whitespace 2)) name 1 ()) (() "(" 1 ())
+              ((((whitespace 2)) name 1 ()) (missing 0 ()) (() "(" 1 ())
                (list 16
                 ((list_item 16
                   ((prefix_unary_expression 16

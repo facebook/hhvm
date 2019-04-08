@@ -198,7 +198,8 @@
             ((parenthesized_expression 36
               ((() "(" 1 ())
                (function_call_expression 34
-                ((() name 32 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
+                ((() name 32 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+                 (() ")" 1 ())))
                (() ")" 1 ())))
              (() "(" 1 ())
              (list 2

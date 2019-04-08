@@ -22,7 +22,9 @@ ARROW="$(tput bold)$(tput setaf 6)==>$(tput setaf 7)"
 
 for f in "$@"; do
   echo "$ARROW $f $(tput sgr0)"
-  nl --body-numbering=a "$f"
+  # `-b a` means to number all lines; this is the same as
+  # --body-numbering=a, but works with both BSD and GNU `nl`
+  nl -b a "$f"
   echo
   if [ -e "$f$EXP_EXT" ]; then
     EXP="$f$EXP_EXT"

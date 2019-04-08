@@ -109,14 +109,15 @@ if(NOT MAKE)
   set(MAKE make)
 endif()
 
-add_custom_target(
-  opam.stamp
-  ALL
+add_custom_command(
+  OUTPUT opam.stamp
+  DEPENDS ocaml opam_setup.sh
   COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/opam_setup.sh
     "${OCAML_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}"
+    && cmake -E touch opam.stamp
 )
-add_dependencies(opam.stamp ocaml)
+add_custom_target(opam_setup DEPENDS opam.stamp opam_setup.sh)
 
 if (SKIP_OPAM)
   set(OPAMROOT "~/.opam")
@@ -147,7 +148,7 @@ function(invoke_ocamlbuild name target)
         OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
   )
-  add_dependencies(${name} ocaml opam.stamp)
+  add_dependencies(${name} ocaml opam_setup)
 endfunction()
 
 invoke_ocamlbuild(hack all ALL)
@@ -175,7 +176,7 @@ function(invoke_dune name target)
 
   add_dependencies(${name} ocaml)
   if (NOT SKIP_OPAM)
-    add_dependencies(${name} opam.stamp)
+    add_dependencies(${name} opam_setup)
   endif()
 endfunction()
 

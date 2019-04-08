@@ -1,5 +1,7 @@
 *.[oad]
 *.hhbc
+*.rej
+*.orig
 .mkdir
 .DS_Store
 hphp.log
@@ -74,7 +76,10 @@ install_manifest.txt
 
 # CMake-generated files that need to stay in the source tree because
 # of ocamlbuild
-hphp/hack/src/options/buildOptions.ml
+/hphp/hack/src/options/buildOptions.ml
+/hphp/hack/opam.stamp
+/hphp/hack/test/.mypy_cache
+/hphp/util/generated-hhjs-babel-transform.txt
 
 # CPack
 CPackConfig.cmake

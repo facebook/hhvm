@@ -318,9 +318,13 @@ let tilde_line (pos: Pos.absolute) (msg: string) (first_context_line: string opt
     underline_padding
     (Tty.apply_color (Tty.Bold Tty.Red) (underline ^ " " ^ msg))
 
+let relative_path path =
+  let cwd = Filename.concat (Sys.getcwd ()) "" in
+  lstrip path cwd
+
 let format_message (msg: string) (pos: Pos.absolute): string * string * string =
   let context_lines = load_context_lines pos in
-  let filename = Filename.basename (Pos.filename pos) in
+  let filename = relative_path (Pos.filename pos) in
   let pretty_filename =
     Printf.sprintf "   %s %s"
       (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")

@@ -62,14 +62,14 @@ let make_info ast_class class_id ast_methods =
     memoize_class_id = class_id;
   }
 
-let get_cls_method info param_count method_id with_lsb =
+let call_cls_method info fcall_args method_id with_lsb =
   let method_id =
     Hhbc_id.Method.add_suffix method_id memoize_suffix in
   if info.memoize_is_trait || with_lsb
   then
-    instr_fpushclsmethodsd param_count SpecialClsRef.Self method_id
+    instr_fcallclsmethodsd fcall_args SpecialClsRef.Self method_id
   else
-    instr_fpushclsmethodd param_count method_id info.memoize_class_id
+    instr_fcallclsmethodd fcall_args method_id info.memoize_class_id
 
 let make_memoize_instance_method_no_params_code
       scope deprecation_info method_id is_async =
@@ -100,8 +100,7 @@ let make_memoize_instance_method_no_params_code
       ];
     instr_label notfound;
     instr_this; instr_nulluninit; instr_nulluninit;
-    instr_fpushobjmethodd_nullthrows 0 renamed_name;
-    instr_fcall fcall_args;
+    instr_fcallobjmethodd_nullthrows fcall_args renamed_name;
     instr_memoset None;
     if is_async then
       gather [
@@ -156,8 +155,7 @@ let make_memoize_instance_method_with_params_code ~pos
     instr_label notfound;
     instr_this; instr_nulluninit; instr_nulluninit;
     param_code_gets params;
-    instr_fpushobjmethodd_nullthrows param_count renamed_name;
-    instr_fcall fcall_args;
+    instr_fcallobjmethodd_nullthrows fcall_args renamed_name;
     instr_memoset (Some (first_local, param_count));
     if is_async then
       gather [
@@ -197,8 +195,7 @@ let make_memoize_static_method_no_params_code
       ];
     instr_label notfound;
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
-    get_cls_method info 0 method_id with_lsb;
-    instr_fcall fcall_args;
+    call_cls_method info fcall_args method_id with_lsb;
     instr_memoset None;
     if is_async then
       gather [
@@ -249,8 +246,7 @@ let make_memoize_static_method_with_params_code ~pos
     instr_label notfound;
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
     param_code_gets params;
-    get_cls_method info param_count method_id with_lsb;
-    instr_fcall fcall_args;
+    call_cls_method info fcall_args method_id with_lsb;
     instr_memoset (Some (first_local, param_count));
     if is_async then
       gather [

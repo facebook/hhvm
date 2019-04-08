@@ -390,7 +390,7 @@ type instruct_call =
   | NewObjD of class_id
   | NewObjS of SpecialClsRef.t
   | FPushCtor of num_params
-  | FCall of fcall_args * class_id * function_id
+  | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * string
 
 type instruct_base =

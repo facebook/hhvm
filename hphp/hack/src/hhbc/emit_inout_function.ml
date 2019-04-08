@@ -43,8 +43,7 @@ let emit_body_instrs_inout params call_instrs =
     gather @@ List.init num_inout ~f:(fun _ -> instr_nulluninit);
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
     param_instrs;
-    call_instrs;
-    instr_fcall fcall_args;
+    call_instrs fcall_args;
     instr_popl local;
     gather @@ inout_setters;
     instr_pushl local;
@@ -73,8 +72,7 @@ let emit_body_instrs_ref params call_instrs =
   gather [
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
     param_instrs;
-    call_instrs;
-    instr_fcall fcall_args;
+    call_instrs fcall_args;
     gather param_get_instrs;
     instr_retm (List.length param_get_instrs + 1)
   ]
@@ -132,16 +130,15 @@ let emit_wrapper_function
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_fun.Ast.f_ret in
-  let param_count = List.length params in
   let modified_params, name, call_instrs =
     if wrapper_type = Emit_inout_helpers.InoutWrapper then
       List.map ~f:Hhas_param.switch_inout_to_reference params,
       original_id,
-      instr_fpushfuncd param_count renamed_id
+      fun fcall_args -> instr_fcallfuncd fcall_args renamed_id
     else
       List.map ~f:Hhas_param.switch_reference_to_inout params,
       renamed_id,
-      instr_fpushfuncd param_count original_id
+      fun fcall_args -> instr_fcallfuncd fcall_args original_id
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =
@@ -204,7 +201,6 @@ let emit_wrapper_method
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ast_method.Ast.m_ret in
-  let param_count = List.length params in
   let wrapper_type, original_id, renamed_id, params =
     if is_closure || has_ref_params then
       Emit_inout_helpers.RefWrapper, renamed_id, original_id,
@@ -212,14 +208,11 @@ let emit_wrapper_method
     else
       Emit_inout_helpers.InoutWrapper, original_id, renamed_id, params
   in
-  let call_instrs =
+  let call_instrs fcall_args =
     if is_closure then
-      gather [
-        instr_this;
-        instr_fpushfunc param_count []
-      ]
+      gather [ instr_this; instr_fcallfunc fcall_args [] ]
     else
-      instr_fpushclsmethodsd param_count H.SpecialClsRef.Self renamed_id
+      instr_fcallclsmethodsd fcall_args H.SpecialClsRef.Self renamed_id
   in
   Local.reset_local @@ List.length decl_vars + List.length params;
   let body_instrs =

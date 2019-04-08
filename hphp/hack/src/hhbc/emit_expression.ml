@@ -797,7 +797,6 @@ and emit_reified_targs env pos targs =
 and emit_new env pos expr targs args uargs =
   if has_inout_args args then
     Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
-  let nargs = List.length args + List.length uargs in
   let scope = Emit_env.get_scope env in
   (* If `new self` or `new parent `when self or parent respectively has
    * reified generics, do not resolve *)
@@ -868,8 +867,7 @@ and emit_new env pos expr targs args uargs =
     instr_args;
     instr_uargs;
     emit_pos pos;
-    instr_fpushctor nargs;
-    emit_fcall pos args uargs None;
+    instr_fcallctor (get_fcall_args args uargs None);
     instr_popc
   ],
   empty
@@ -1415,11 +1413,11 @@ and inline_gena_call env arg =
   gather [
     instr_nulluninit; instr_nulluninit; instr_nulluninit;
     instr_cgetl arr_local;
-    instr_fpushclsmethodd 1
+    instr_fcallclsmethodd
+      (make_fcall_args ~async_eager_label 1)
       (Hhbc_id.Method.from_raw_string
          (if hack_arr_dv_arrs () then "fromDict" else "fromDArray"))
       (Hhbc_id.Class.from_raw_string "HH\\AwaitAllWaitHandle");
-    instr_fcall (make_fcall_args ~async_eager_label 1);
     instr_await;
     instr_label async_eager_label;
     instr_popc;
@@ -2981,16 +2979,14 @@ and emit_args_and_inout_setters env args =
   else
     instr_args, empty
 
-(* Emit code to make the function call *)
-and emit_fcall call_pos args uargs async_eager_label =
+(* Create fcall_args for a given call *)
+and get_fcall_args args uargs async_eager_label =
   let num_args = List.length args in
   let num_rets = List.fold_left args ~init:1
     ~f:(fun acc arg -> if is_inout_arg arg then acc + 1 else acc) in
   let flags = { default_fcall_flags with has_unpack = uargs <> [] } in
   let by_refs = List.map args expr_starts_with_ref in
-  let fcall_args = make_fcall_args
-    ~flags ~num_rets ~by_refs ?async_eager_label num_args in
-  emit_pos_then call_pos @@ instr_fcall fcall_args
+  make_fcall_args ~flags ~num_rets ~by_refs ?async_eager_label num_args
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
 and emit_object_expr env (_, expr_ as expr) =
@@ -3006,8 +3002,8 @@ and is_inout_arg = function
 and has_inout_args es =
   List.exists es ~f:is_inout_arg
 
-and emit_call_lhs_and_fpush
-  env (pos, expr_ as expr) targs nargs has_splat inout_arg_positions =
+and emit_call_lhs_and_fcall
+  env (pos, expr_ as expr) fcall_args targs inout_arg_positions =
   let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
@@ -3029,12 +3025,12 @@ and emit_call_lhs_and_fpush
     let obj = emit_object_expr env obj in
     if does_not_have_non_tparam_generics then
       gather [ obj; instr_nulluninit; instr_nulluninit ],
-      instr_fpushobjmethodd nargs name null_flavor
+      instr_fcallobjmethodd fcall_args name null_flavor
     else
       gather [ obj; instr_nulluninit; instr_nulluninit ],
       gather [
         reified_call_body id;
-        instr_fpushobjmethod nargs null_flavor inout_arg_positions
+        instr_fcallobjmethod fcall_args null_flavor inout_arg_positions
       ]
   | A.Obj_get (obj, method_expr, null_flavor) ->
     let obj = emit_object_expr env obj in
@@ -3046,7 +3042,7 @@ and emit_call_lhs_and_fpush
     ],
     gather [
       instr_pushl tmp;
-      instr_fpushobjmethod nargs null_flavor inout_arg_positions
+      instr_fcallobjmethod fcall_args null_flavor inout_arg_positions
     ]
 
   | A.Class_const (cid, (_, id)) ->
@@ -3071,38 +3067,38 @@ and emit_call_lhs_and_fpush
       Emit_symbol_refs.add_class fq_cid_string;
       if does_not_have_non_tparam_generics then
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
-        instr_fpushclsmethodd nargs method_id fq_cid
+        instr_fcallclsmethodd fcall_args method_id fq_cid
       else
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         gather [
           reified_call_body method_id_string;
           instr_string fq_cid_string;
           instr_clsrefgetc;
-          instr_fpushclsmethod nargs []
+          instr_fcallclsmethod fcall_args []
         ]
     | Class_special clsref ->
       if does_not_have_non_tparam_generics then
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
-        instr_fpushclsmethodsd nargs clsref method_id
+        instr_fcallclsmethodsd fcall_args clsref method_id
       else
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         gather [
           reified_call_body method_id_string;
-          instr_fpushclsmethods nargs clsref
+          instr_fcallclsmethods fcall_args clsref
         ]
     | Class_expr expr ->
-      let emit_fpush instr_meth = gather [
+      let emit_fcall instr_meth = gather [
         instr_meth;
         emit_expr ~need_ref:false env expr;
         instr_clsrefgetc;
-        instr_fpushclsmethod nargs []
+        instr_fcallclsmethod fcall_args []
       ] in
       if does_not_have_non_tparam_generics then
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
-        emit_fpush (instr_string method_id_string)
+        emit_fcall (instr_string method_id_string)
       else
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
-        emit_fpush (reified_call_body method_id_string)
+        emit_fcall (reified_call_body method_id_string)
     | Class_reified instrs ->
       (* TODO(T31677864): Implement reification here *)
       let tmp = Local.get_unnamed_local () in
@@ -3114,7 +3110,7 @@ and emit_call_lhs_and_fpush
         instr_string method_id_string;
         instr_pushl tmp;
         instr_clsrefgetc;
-        instr_fpushclsmethod nargs []
+        instr_fcallclsmethod fcall_args []
       ]
     end
 
@@ -3136,7 +3132,7 @@ and emit_call_lhs_and_fpush
       gather [
         instr_pushl tmp;
         emit_known_class_id env cid;
-        instr_fpushclsmethod nargs inout_arg_positions
+        instr_fcallclsmethod fcall_args inout_arg_positions
       ]
     | Class_special clsref ->
       let tmp = Local.get_unnamed_local () in
@@ -3146,7 +3142,7 @@ and emit_call_lhs_and_fpush
       ],
       gather [
         instr_pushl tmp;
-        instr_fpushclsmethods nargs clsref
+        instr_fcallclsmethods fcall_args clsref
       ]
     | Class_expr expr ->
       let cls = Local.get_unnamed_local () in
@@ -3162,7 +3158,7 @@ and emit_call_lhs_and_fpush
         instr_pushl meth;
         instr_pushl cls;
         instr_clsrefgetc;
-        instr_fpushclsmethod nargs inout_arg_positions
+        instr_fcallclsmethod fcall_args inout_arg_positions
       ]
     | Class_reified instrs ->
       let cls = Local.get_unnamed_local () in
@@ -3178,7 +3174,7 @@ and emit_call_lhs_and_fpush
         instr_pushl meth;
         instr_pushl cls;
         instr_clsrefgetc;
-        instr_fpushclsmethod nargs inout_arg_positions
+        instr_fcallclsmethod fcall_args inout_arg_positions
       ]
     end
 
@@ -3186,10 +3182,11 @@ and emit_call_lhs_and_fpush
     let fq_id, id_opt =
       Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) id in
     let fq_id, id_opt =
+      let flags, num_args, _, _, _ = fcall_args in
       match id_opt, SU.strip_global_ns s with
-      | None, "min" when nargs = 2 && not has_splat ->
+      | None, "min" when num_args = 2 && not flags.has_unpack ->
         Hhbc_id.Function.from_raw_string "__SystemLib\\min2", None
-      | None, "max" when nargs = 2 && not has_splat ->
+      | None, "max" when num_args = 2 && not flags.has_unpack ->
         Hhbc_id.Function.from_raw_string  "__SystemLib\\max2", None
       | _ -> fq_id, id_opt in
     let fq_id = if has_inout_args
@@ -3199,23 +3196,25 @@ and emit_call_lhs_and_fpush
     if does_not_have_non_tparam_generics then
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       match id_opt with
-      | Some id when phpism_undefined_function_fallback () -> instr_fpushfuncu nargs fq_id id
-      | _ -> instr_fpushfuncd nargs fq_id
+      | Some id when phpism_undefined_function_fallback () ->
+        instr_fcallfuncu fcall_args fq_id id
+      | _ ->
+        instr_fcallfuncd fcall_args fq_id
     else
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
         reified_call_body (Hhbc_id.Function.to_raw_string fq_id);
-        instr_fpushfunc nargs inout_arg_positions
+        instr_fcallfunc fcall_args inout_arg_positions
       ]
   | A.String s ->
     if does_not_have_non_tparam_generics then
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
-      instr_fpushfuncd nargs (Hhbc_id.Function.from_raw_string s)
+      instr_fcallfuncd fcall_args (Hhbc_id.Function.from_raw_string s)
     else
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
         reified_call_body s;
-        instr_fpushfunc nargs inout_arg_positions
+        instr_fcallfunc fcall_args inout_arg_positions
       ]
   | _ ->
     let tmp = Local.get_unnamed_local () in
@@ -3226,7 +3225,7 @@ and emit_call_lhs_and_fpush
     ],
     gather [
       instr_pushl tmp;
-      instr_fpushfunc nargs inout_arg_positions
+      instr_fcallfunc fcall_args inout_arg_positions
     ]
 
 and get_call_builtin_func_info lower_fq_id =
@@ -3429,12 +3428,12 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   (match expr_ with
     | A.Id (_, s) -> Emit_symbol_refs.add_function s
     | _ -> ());
-  let nargs = List.length args + List.length uargs in
+  let fcall_args = get_fcall_args args uargs async_eager_label in
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
   let default () = Scope.with_unnamed_locals @@ fun () ->
-    let instr_lhs, instr_fpush = emit_call_lhs_and_fpush
-      env expr targs nargs (uargs <> []) inout_arg_positions in
+    let instr_lhs, instr_fcall =
+      emit_call_lhs_and_fcall env expr fcall_args targs inout_arg_positions in
     let instr_args, instr_inout_setters =
       emit_args_and_inout_setters env args in
     let instr_uargs = match uargs with
@@ -3448,8 +3447,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
       instr_args;
       instr_uargs;
       emit_pos pos;
-      instr_fpush;
-      emit_fcall pos args uargs async_eager_label;
+      instr_fcall;
       instr_inout_setters
     ],
     empty in

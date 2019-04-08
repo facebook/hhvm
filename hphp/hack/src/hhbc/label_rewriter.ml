@@ -37,7 +37,7 @@ let get_regular_labels instr =
   | IIterator (LIterNext (_, _, l, _))
   | IIterator (LIterNextK (_, _, l, _, _))
   | IIterator (IterBreak (l, _))
-  | ICall (FCall ((_, _, _, _, Some l), _, _))
+  | ICall (FCall ((_, _, _, _, Some l)))
   | IGenDelegation (YieldFromDelegate (_, l))
   | IMisc (MemoGet (l, _))
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) -> [l]
@@ -115,8 +115,8 @@ let rewrite_params_and_body defs used refs params body =
       Some (IIterator (IterBreak (relabel l, x)))
     | IGenDelegation (YieldFromDelegate (i, l)) ->
       Some (IGenDelegation (YieldFromDelegate (i, relabel l)))
-    | ICall (FCall ((fl, na, nr, br, Some l), c, f)) ->
-      Some (ICall (FCall ((fl, na, nr, br, Some (relabel l)), c, f)))
+    | ICall (FCall ((fl, na, nr, br, Some l))) ->
+      Some (ICall (FCall ((fl, na, nr, br, Some (relabel l)))))
     | IContFlow (Jmp l)   -> Some (IContFlow (Jmp (relabel l)))
     | IContFlow (JmpNS l) -> Some (IContFlow (JmpNS (relabel l)))
     | IContFlow (JmpZ l)  -> Some (IContFlow (JmpZ (relabel l)))
@@ -200,8 +200,8 @@ let clone_with_fresh_regular_labels block =
       IIterator (LIterNextK (id, b, relabel l, k, v))
     | IIterator (IterBreak (l, x)) ->
       IIterator (IterBreak (relabel l, x))
-    | ICall (FCall ((fl, na, nr, br, Some l), c, f)) ->
-      ICall (FCall ((fl, na, nr, br, Some (relabel l)), c, f))
+    | ICall (FCall ((fl, na, nr, br, Some l))) ->
+      ICall (FCall ((fl, na, nr, br, Some (relabel l))))
     | IContFlow (Jmp l)   -> IContFlow (Jmp (relabel l))
     | IContFlow (JmpNS l) -> IContFlow (JmpNS (relabel l))
     | IContFlow (JmpZ l)  -> IContFlow (JmpZ (relabel l))

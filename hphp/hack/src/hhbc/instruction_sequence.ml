@@ -50,6 +50,8 @@ let make_fcall_args ?(flags=default_fcall_flags) ?(num_rets=1)
   if by_refs <> [] && (List.length by_refs) <> num_args then
     failwith "length of by_refs must be either zero or num_args";
   flags, num_args, num_rets, by_refs, async_eager_label
+let num_args_of (flags, num_args, _, _, _) =
+  if flags.has_unpack then num_args + 1 else num_args
 
 let instr_lit_const l =
   instr (ILitConst l)
@@ -166,7 +168,6 @@ let instr_switch labels = instr (IContFlow (Switch (Unbounded, 0, labels)))
 let instr_newobj id op = instr (ICall (NewObj (id, op)))
 let instr_newobjd id = instr (ICall (NewObjD id))
 let instr_newobjs scref = instr (ICall (NewObjS scref))
-let instr_fpushctor nargs = instr (ICall (FPushCtor nargs))
 let instr_clone = instr (IOp Clone)
 let instr_newstructarray keys = instr (ILitConst (NewStructArray keys))
 let instr_newstructdarray keys = instr (ILitConst (NewStructDArray keys))
@@ -182,13 +183,6 @@ let instr_basec stack_index mode = instr (IBase (BaseC(stack_index, mode)))
 let instr_basesc y mode =
   instr (IBase(BaseSC(y, class_ref_rewrite_sentinel, mode)))
 let instr_baseh = instr (IBase BaseH)
-let instr_fpushfunc n param_locs = instr (ICall(FPushFunc(n, param_locs)))
-let instr_fpushfuncd n id = instr (ICall(FPushFuncD(n, id)))
-let instr_fpushfuncu n id fallback = instr (ICall(FPushFuncU(n, id, fallback)))
-let instr_fcall fcall_args =
-  let no_class = Hhbc_id.Class.from_raw_string "" in
-  let no_func = Hhbc_id.Function.from_raw_string "" in
-  instr (ICall(FCall(fcall_args, no_class, no_func)))
 let instr_cgetcunop = instr (IMisc CGetCUNop)
 let instr_ugetcunop = instr (IMisc UGetCUNop)
 let instr_memoget label range =
@@ -208,20 +202,51 @@ let instr_verifyOutType i = instr (IMisc (VerifyOutType i))
 let instr_dim op key = instr (IBase (Dim (op, key)))
 let instr_dim_warn_pt key = instr_dim MemberOpMode.Warn (MemberKey.PT key)
 let instr_dim_define_pt key = instr_dim MemberOpMode.Define (MemberKey.PT key)
-let instr_fpushobjmethod n flavor pl =
-  instr (ICall (FPushObjMethod (n, flavor, pl)))
-let instr_fpushobjmethodd num_params method_ flavor =
-  instr (ICall (FPushObjMethodD (num_params, method_, flavor)))
-let instr_fpushclsmethodd num_params method_name class_name =
-  instr (ICall (FPushClsMethodD (num_params, method_name, class_name)))
-let instr_fpushclsmethod num_params pl =
-  instr (ICall (FPushClsMethod (num_params, class_ref_rewrite_sentinel, pl)))
-let instr_fpushclsmethods num_params scref =
-  instr (ICall (FPushClsMethodS (num_params, scref)))
-let instr_fpushclsmethodsd num_params scref method_name =
-  instr (ICall (FPushClsMethodSD (num_params, scref, method_name)))
-let instr_fpushobjmethodd_nullthrows num_params method_ =
-  instr_fpushobjmethodd num_params method_ Ast.OG_nullthrows
+let instr_fcallfunc fcall_args param_locs = gather [
+  instr (ICall (FPushFunc ((num_args_of fcall_args), param_locs)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallfuncd fcall_args id = gather [
+  instr (ICall (FPushFuncD ((num_args_of fcall_args), id)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallfuncu fcall_args id fallback = gather [
+  instr (ICall (FPushFuncU ((num_args_of fcall_args), id, fallback)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallctor fcall_args = gather [
+  instr (ICall (FPushCtor (num_args_of fcall_args)));
+  instr (ICall (FCall (fcall_args)))
+] 
+let instr_fcallobjmethod fcall_args flavor pl = gather [
+  instr (ICall (FPushObjMethod ((num_args_of fcall_args), flavor, pl)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallobjmethodd fcall_args method_ flavor = gather [
+  instr (ICall (FPushObjMethodD ((num_args_of fcall_args), method_, flavor)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallclsmethodd fcall_args method_name class_name = gather [
+  instr (ICall (
+    FPushClsMethodD ((num_args_of fcall_args), method_name, class_name)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallclsmethod fcall_args pl = gather [
+  instr (ICall (
+    FPushClsMethod ((num_args_of fcall_args), class_ref_rewrite_sentinel, pl)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallclsmethods fcall_args scref = gather [
+  instr (ICall (FPushClsMethodS ((num_args_of fcall_args), scref)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallclsmethodsd fcall_args scref method_name = gather [
+  instr (ICall (
+    FPushClsMethodSD ((num_args_of fcall_args), scref, method_name)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallobjmethodd_nullthrows fcall_args method_ =
+  instr_fcallobjmethodd fcall_args method_ Ast.OG_nullthrows
 let instr_querym num_params op key =
   instr (IFinal (QueryM (num_params, op, key)))
 let instr_querym_cget_pt num_params key =

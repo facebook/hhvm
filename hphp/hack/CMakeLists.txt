@@ -151,8 +151,10 @@ function(invoke_ocamlbuild name target)
   add_dependencies(${name} ocaml opam_setup)
 endfunction()
 
-invoke_ocamlbuild(hack all ALL)
-invoke_ocamlbuild(hack_test test)
+if (NOT WITH_DUNE)
+  invoke_ocamlbuild(hack all ALL)
+  invoke_ocamlbuild(hack_test test)
+endif()
 
 function(invoke_dune name target)
   add_custom_target(
@@ -181,10 +183,19 @@ function(invoke_dune name target)
   endif()
 endfunction()
 
-invoke_dune(hack_dune_debug debug)
-invoke_dune(hack_dune_test test)
-# TODO: when ocamlbuild is removed, add ALL to hack_dune
-invoke_dune(hack_dune all)
+if (WITH_DUNE)
+  invoke_dune(hack_dune_debug debug)
+  invoke_dune(hack_dune_test test)
+  # TODO: when ocamlbuild is removed, add ALL to hack_dune
+  invoke_dune(hack_dune all)
+  get_property(DEBUG_CONFIGURATIONS GLOBAL PROPERTY DEBUG_CONFIGURATIONS)
+  list(FIND DEBUG_CONFIGURATIONS "${CMAKE_BUILD_TYPE}" DEBUG_IDX)
+  if (DEBUG_IDX EQUAL -1)
+    add_custom_target(hack DEPENDS hack_dune)
+  else()
+    add_custom_target(hack DEPENDS hack_dune_debug)
+  endif()
+endif()
 
 if(NOT LZ4_FOUND)
   # if the system does not have lz4, make sure that the one in public_tl

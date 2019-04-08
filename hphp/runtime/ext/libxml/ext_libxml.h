@@ -229,8 +229,8 @@ inline XMLNodeData::~XMLNodeData() {
 }
 
 inline void XMLNodeData::setDoc(req::ptr<XMLDocumentData>&& doc) {
-  if (m_doc) m_doc->detachNode();
   if (doc) doc->attachNode();
+  if (m_doc) m_doc->detachNode();
   m_doc = std::move(doc);
 }
 

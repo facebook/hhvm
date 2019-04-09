@@ -4936,7 +4936,7 @@ void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
 
 void fPushNullObjMethod(int numArgs) {
   assertx(SystemLib::s_nullFunc);
-  assertx(tvIsNull(vmStack().indC(2)));
+  assertx(tvIsNull(vmStack().indC(numArgs + 2)));
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = SystemLib::s_nullFunc;

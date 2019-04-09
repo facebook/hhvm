@@ -1,2 +1,0 @@
-File "suspend_outside_of_coroutines2.php", line 4, characters 8-19:
-suspend is only allowed in coroutines. (NastCheck[3038])

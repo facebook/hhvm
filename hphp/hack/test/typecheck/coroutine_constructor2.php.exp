@@ -1,2 +1,0 @@
-File "coroutine_constructor2.php", line 4, characters 29-31:
-This is a dangerous method name, if you want to define a constructor, use __construct (NastCheck[3007])

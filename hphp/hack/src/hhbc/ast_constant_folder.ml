@@ -109,10 +109,7 @@ let rec expr_to_typed_value
   | A.Int s -> begin
     match try_type_intlike s with
     | Some v -> v
-    | None ->
-      if Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
-      then TV.Int Caml.Int64.max_int
-      else TV.Float (float_of_string_custom s)
+    | None -> TV.Int Caml.Int64.max_int
   end
   | A.True -> TV.Bool true
   | A.False -> TV.Bool false

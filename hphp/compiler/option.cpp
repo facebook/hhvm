@@ -267,9 +267,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   {
     // Hack
-    Config::Bind(RuntimeOption::IntsOverflowToInts, ini, config,
-                 "Hack.Lang.IntsOverflowToInts",
-                 RuntimeOption::IntsOverflowToInts);
     Config::Bind(RuntimeOption::StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys",
                  RuntimeOption::StrictArrayFillKeys);

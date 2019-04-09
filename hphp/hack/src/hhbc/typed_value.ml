@@ -210,15 +210,10 @@ let to_string v =
   | Float f -> Some (SU.Float.to_string f)
   | _ -> None
 
-let ints_overflow_to_ints () =
-  Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
-
 (* Integer operations. For now, we don't attempt to implement the
  * overflow-to-float semantics *)
 let add_int i1 i2 =
-  if ints_overflow_to_ints ()
-  then Some (Int (Int64.(+) i1 i2))
-  else None
+  Some (Int (Int64.(+) i1 i2))
 
 let neg i =
   match i with
@@ -227,9 +222,7 @@ let neg i =
   | _ -> None
 
 let sub_int i1 i2 =
-  if ints_overflow_to_ints ()
-  then Some (Int (Int64.(-) i1 i2))
-  else None
+  Some (Int (Int64.(-) i1 i2))
 
 (* Arithmetic. For now, only on pure integer or float operands *)
 let sub v1 v2 =
@@ -239,9 +232,7 @@ let sub v1 v2 =
   | _ -> None
 
 let mul_int i1 i2 =
-  if ints_overflow_to_ints ()
-  then Some (Int (Int64.( * ) i1 i2))
-  else None
+  Some (Int (Int64.( * ) i1 i2))
 
 (* Arithmetic. For now, only on pure integer or float operands *)
 let mul v1 v2 =

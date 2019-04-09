@@ -493,7 +493,6 @@ bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
-bool RuntimeOption::IntsOverflowToInts = true;
 bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfData = true;
 bool RuntimeOption::EnablePocketUniverses = false;
@@ -1893,8 +1892,6 @@ void RuntimeOption::Load(
   }
   {
     // Hack Language
-    Config::Bind(IntsOverflowToInts, ini, config,
-                 "Hack.Lang.IntsOverflowToInts", true);
     auto const def = RuntimeOption::EnableHipHopSyntax ?
       HackStrictOption::ON : HackStrictOption::OFF;
 

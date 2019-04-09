@@ -510,7 +510,6 @@ struct RuntimeOption {
   static bool TimeoutsUseWallTime;
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
-  static bool IntsOverflowToInts;
   static HackStrictOption StrictArrayFillKeys;
   static HackStrictOption DisallowDynamicVarEnvFuncs;
   static HackStrictOption IconvIgnoreCorrect;

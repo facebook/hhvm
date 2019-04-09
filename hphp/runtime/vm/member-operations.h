@@ -2243,22 +2243,23 @@ inline Cell IncDecBody(IncDecOp op, tv_lval fr) {
     return incDecBodySlow(op, fr);
   }
 
-  // fast cases, assuming integers overflow to ints
+  // fast cases, assuming integers overflow to ints. Because int64_t overflow is
+  // undefined behavior reinterpret_cast<uint64_t&> first
   switch (op) {
   case IncDecOp::PreInc:
-    ++val(fr).num;
+    ++reinterpret_cast<uint64_t&>(val(fr).num);
     return *fr;
   case IncDecOp::PostInc: {
     auto const tmp = *fr;
-    ++val(fr).num;
+    ++reinterpret_cast<uint64_t&>(val(fr).num);
     return tmp;
   }
   case IncDecOp::PreDec:
-    --val(fr).num;
+    --reinterpret_cast<uint64_t&>(val(fr).num);
     return *fr;
   case IncDecOp::PostDec: {
     auto const tmp = *fr;
-    --val(fr).num;
+    --reinterpret_cast<uint64_t&>(val(fr).num);
     return tmp;
   }
   default:

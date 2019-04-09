@@ -1,4 +1,4 @@
-float(9.2233720368548E+18)
+int(9223372036854774812)
 
 Warning: Division by zero in %s/test/slow/arithmetic/edge_cases.php on line 8
 int(5)

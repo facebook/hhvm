@@ -13,7 +13,6 @@ module J = Hh_json
 
 (* Compiler configuration options, as set by -v key=value on the command line *)
 type t = {
-  option_ints_overflow_to_ints            : bool option;
   option_enable_hiphop_syntax             : bool;
   option_php7_scalar_types                : bool;
   option_enable_xhp                       : bool;
@@ -68,7 +67,6 @@ type t = {
 }
 
 let default = {
-  option_ints_overflow_to_ints = None;
   option_enable_hiphop_syntax = false;
   option_php7_scalar_types = false;
   option_enable_xhp = false;
@@ -236,13 +234,6 @@ let to_string o =
     ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
     ]
 
-(* The Hack.Lang.IntsOverflowToInts setting overrides the
- * Eval.EnableHipHopSyntax setting *)
-let ints_overflow_to_ints options =
-  match options.option_ints_overflow_to_ints with
-  | Some v -> v
-  | None -> options.option_enable_hiphop_syntax
-
 let as_bool s =
   match String.lowercase s with
   | "0" | "false" -> false
@@ -277,8 +268,6 @@ let set_option options name value =
   match String.lowercase name with
   | "eval.enablehiphopsyntax" ->
     { options with option_enable_hiphop_syntax = as_bool value }
-  | "hack.lang.intsoverflowtoints" ->
-    { options with option_ints_overflow_to_ints = Some (as_bool value) }
   | "hack.compiler.constantfolding" ->
     { options with option_constant_folding = as_bool value }
   | "hack.compiler.optimizenullcheck" ->
@@ -444,8 +433,6 @@ let value_setters = [
     fun opts v -> { opts with option_enable_xhp = (v = 1) });
   (set_value "hhvm.php7.scalar_types" get_value_from_config_int @@
     fun opts v -> { opts with option_php7_scalar_types = (v = 1) });
-  (set_value "hhvm.hack.lang.ints_overflow_to_ints" get_value_from_config_int @@
-    fun opts v -> { opts with option_ints_overflow_to_ints = Some (v = 1) });
   (set_value "hack.compiler.constant_folding" get_value_from_config_int @@
     fun opts v -> { opts with option_constant_folding = (v = 1) });
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@

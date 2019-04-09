@@ -138,7 +138,7 @@ let parse_options () =
       ("-v"
           , Arg.String (fun str -> config_list := str :: !config_list)
             , " Configuration: Eval.EnableHipHopSyntax=<value> "
-              ^ "or Hack.Lang.IntsOverflowToInts=<value>"
+              ^ "or Hack.Lang.EnableConcurrent=<value>"
               ^ "\n"
               ^ "\t\tAllows overriding config options passed on a file"
       );

@@ -282,12 +282,10 @@ let reified_generics () =
 
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
-  let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
-  | A.Plus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
-  | A.Minus -> instr (IOp (if ints_overflow_to_ints then Sub else  SubO))
-  | A.Star -> instr (IOp (if ints_overflow_to_ints then Mul else MulO))
+  | A.Plus -> instr (IOp Add)
+  | A.Minus -> instr (IOp Sub)
+  | A.Star -> instr (IOp Mul)
   | A.Slash -> instr (IOp Div)
   | A.Eqeq -> instr (IOp Eq)
   | A.Eqeqeq -> instr (IOp Same)
@@ -314,12 +312,10 @@ let from_binop op =
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
-  let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
-  | A.Plus -> Some (if ints_overflow_to_ints then PlusEqual else PlusEqualO)
-  | A.Minus -> Some (if ints_overflow_to_ints then MinusEqual else MinusEqualO)
-  | A.Star -> Some (if ints_overflow_to_ints then MulEqual else MulEqualO)
+  | A.Plus -> Some PlusEqual
+  | A.Minus -> Some MinusEqual
+  | A.Star -> Some MulEqual
   | A.Slash -> Some DivEqual
   | A.Starstar -> Some PowEqual
   | A.Amp -> Some AndEqual
@@ -332,13 +328,11 @@ let binop_to_eqop op =
   | _ -> None
 
 let unop_to_incdec_op op =
-  let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options in
   match op with
-  | A.Uincr -> if ints_overflow_to_ints then PreInc else PreIncO
-  | A.Udecr -> if ints_overflow_to_ints then PreDec else PreDecO
-  | A.Upincr -> if ints_overflow_to_ints then PostInc else PostIncO
-  | A.Updecr -> if ints_overflow_to_ints then PostDec else PostDecO
+  | A.Uincr -> PreInc
+  | A.Udecr -> PreDec
+  | A.Upincr -> PostInc
+  | A.Updecr -> PostDec
   | _ -> failwith "invalid incdec op"
 
 let collection_type = function
@@ -3844,14 +3838,11 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     Emit_fatal.raise_fatal_parse pos "Can't use return value in write context"
 
 and from_unop op =
-  let ints_overflow_to_ints =
-    Hhbc_options.ints_overflow_to_ints !Hhbc_options.compiler_options
-  in
   match op with
   | A.Utild -> instr (IOp BitNot)
   | A.Unot -> instr (IOp Not)
-  | A.Uplus -> instr (IOp (if ints_overflow_to_ints then Add else AddO))
-  | A.Uminus -> instr (IOp (if ints_overflow_to_ints then Sub else SubO))
+  | A.Uplus -> instr (IOp Add)
+  | A.Uminus -> instr (IOp Sub)
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
     failwith "this unary operation cannot be translated"
 

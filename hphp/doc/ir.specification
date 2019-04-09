@@ -1970,15 +1970,16 @@ To string conversions:
   For debugging purposes.  Store kTVTrashJITHeap to a heap slot pointed to by
   S0.
 
-| RecordReifiedGenericsAndGetName<offset,size>, D(StaticStr), S(StkPtr), NF
+| RecordReifiedGenericsAndGetName, D(StaticStr), SVArr, CRc
 
-  Creates a list of reified generics from the stack, adds them to the reified
+  Takes a varray of reified generics from the stack, adds them to the reified
   generics table and returns mangled name used as the key
 
-| RecordReifiedGenericsAndGetTSList<offset,size>, DVArr, S(StkPtr), NF
+| RecordReifiedGenericsAndGetTSList, DVArr, SVArr, CRc
 
-  Creates a list of reified generics from the stack, adds them to the reified
-  generics table and returns this type structure list
+  Takes a varray of reified generics from the stack and adds them to the reified
+  generics table and returns the input varray of reified generics, possibly
+  static
 
 | MangleReifiedName, D(StaticStr), S(StaticStr) S(StaticStr), NF
 

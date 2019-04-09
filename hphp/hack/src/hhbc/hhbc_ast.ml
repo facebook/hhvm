@@ -472,8 +472,8 @@ type instruct_misc =
   | Parent of classref_id
   | LateBoundCls of classref_id
   | ClsRefName of classref_id
-  | ReifiedName of int * string
-  | RecordReifiedGeneric of int
+  | ReifiedName of string
+  | RecordReifiedGeneric
   | CheckReifiedGenericMismatch
   | NativeImpl
   | AKExists

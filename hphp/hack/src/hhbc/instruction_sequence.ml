@@ -105,8 +105,8 @@ let instr_istypestructc mode = instr (IOp (IsTypeStructC mode))
 let instr_astypestructc mode = instr (IOp (AsTypeStructC mode))
 let instr_combine_and_resolve_type_struct i =
   instr (IOp (CombineAndResolveTypeStruct i))
-let instr_reified_name i name = instr (IMisc (ReifiedName (i, name)))
-let instr_record_reified_generic i = instr (IMisc (RecordReifiedGeneric i))
+let instr_reified_name name = instr (IMisc (ReifiedName name))
+let instr_record_reified_generic = instr (IMisc RecordReifiedGeneric)
 let instr_check_reified_generic_mismatch =
   instr (IMisc CheckReifiedGenericMismatch)
 let instr_int i = instr (ILitConst (Int (Int64.of_int i)))

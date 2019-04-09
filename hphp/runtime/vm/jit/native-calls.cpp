@@ -611,6 +611,10 @@ static CallMap s_callMap {
     {VerifyReifiedReturnType, VerifyReifiedReturnTypeImpl, DNone, SSync,
                               {{TV, 0}, {SSA, 1}}},
     {MangleReifiedName, mangleReifiedName, DSSA,  SNone, {{SSA, 0}, {SSA, 1}}},
+    {RecordReifiedGenericsAndGetName, recordReifiedGenericsAndGetName,
+                                      DSSA, SSync, {{SSA, 0}}},
+    {RecordReifiedGenericsAndGetTSList, recordReifiedGenericsAndGetTSList,
+                                        DSSA, SSync, {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

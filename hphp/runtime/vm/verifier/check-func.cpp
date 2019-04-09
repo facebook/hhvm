@@ -475,8 +475,6 @@ bool FuncChecker::checkImmIVA(PC& pc, PC const instr) {
     case Op::ConcatN:
       return k >= 2 && k <= kMaxConcatN;
     case Op::CombineAndResolveTypeStruct:
-    case Op::RecordReifiedGeneric:
-    case Op::ReifiedName:
       return k >= 1;
     default:
       return true;
@@ -838,8 +836,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
-  case Op::RecordReifiedGeneric: // ONE(IVA),CMANY,   ONE(CV)
-  case Op::ReifiedName:     // ONE(IVA),     CMANY,   ONE(CV)
   case Op::CombineAndResolveTypeStruct:
                             // ONE(IVA),     CMANY,   ONE(CV)
   case Op::RetM:            // ONE(IVA),     CMANY,   NA

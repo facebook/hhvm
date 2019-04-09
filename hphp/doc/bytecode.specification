@@ -3570,20 +3570,21 @@ LateBoundCls <class-ref slot>    []  ->  []
   Late-bound class. Creates a classref that refers to the current late-bound
   class and writes it to %1.
 
-RecordReifiedGeneric <num args> [C..C] -> [C:Arr|Vec]
+RecordReifiedGeneric [C:Arr|Vec] -> [C:Arr|Vec]
 
-  Takes %1 amount of type structures from the stack and unless the entry already
-  exists adds a mapping from the grouped name of these type structures to a
-  static array that contains the runtime representation of these type structures
-  to the global reified generics table. Returns the resulting static list
-  of type structures.
+  Takes a varray or vec based on runtime flag of type structures from the stack
+  and unless the entry already exists adds a mapping from the grouped name of
+  these type structures to a static array that contains the runtime
+  representation of these type structures to the global reified generics table.
+  Returns the resulting static list of type structures.
 
-ReifiedName <num args> <name> [C..C] -> [C:Str]
+ReifiedName <name> [C:Arr|Vec] -> [C:Str]
 
-  Takes %1 type structures from the stack and mangles the type structures into
-  the name given by %2. Returns the mangled name.
-  This instruction also performs RecordReifiedGeneric instruction's recording
-  duty but it can be implemented more efficiently subsumed in this instruction.
+  Takes a varray or vec based on runtime flag of type structures from the stack
+  and mangles the type structures into the name given by %1. Returns the mangled
+  name. This instruction also performs RecordReifiedGeneric instruction's
+  recording duty but it can be implemented more efficiently subsumed in this
+  instruction.
 
 CheckReifiedGenericMismatch [C:Arr|Vec] -> []
 

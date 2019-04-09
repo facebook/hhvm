@@ -22,8 +22,9 @@
 
 .function <"" N  > f() {
   .numclsrefslots 1;
-  NewDArray 0
-  ReifiedName 1 "C"
+  Int 1
+  NewVArray 1
+  ReifiedName "C"
   ClsRefGetC 0
   NewObj 0 MaybeGenerics
   Dup

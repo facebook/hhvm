@@ -29,8 +29,9 @@
   FPushFuncD 1 "__hhvm_intrinsics\\launder_value"
   FCall <> 1 1 "" - "" ""
   JmpZ L0
-  NewDArray 0
-  ReifiedName 1 "C"
+  Int 1
+  NewVArray 1
+  ReifiedName "C"
   ClsRefGetC 0
   Jmp L1
 L0:

@@ -221,11 +221,11 @@ ArrayData* resolveTypeStructHelper(
 bool isTypeStructHelper(ArrayData*, Cell);
 void asTypeStructHelper(ArrayData*, Cell);
 
-/* Reified generics helpers */
-StringData*
-recordReifiedGenericsAndGetName(uint32_t n, const TypedValue* values);
-ArrayData*
-recordReifiedGenericsAndGetTSList(uint32_t n, const TypedValue* values);
+/* Reified generics helpers
+ * Both functions decref the input array by turning it into a static array
+ */
+StringData* recordReifiedGenericsAndGetName(ArrayData*);
+ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 /*
  * Throw a VMSwitchMode exception.
  */

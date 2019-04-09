@@ -356,8 +356,8 @@ static const struct {
   { OpParent,      {None,             None,         OutNone         }},
   { OpLateBoundCls,{None,             None,         OutNone         }},
   { OpRecordReifiedGeneric,
-                   {StackN,           Stack1,       OutVArray       }},
-  { OpReifiedName, {StackN,           Stack1,       OutString       }},
+                   {Stack1,           Stack1,       OutVArray       }},
+  { OpReifiedName, {Stack1,           Stack1,       OutString       }},
   { OpCheckReifiedGenericMismatch,
                    {Stack1,           None,         OutNone         }},
   { OpNativeImpl,  {None,             None,         OutNone         }},
@@ -523,8 +523,6 @@ int64_t getStackPopped(PC pc) {
     case Op::NewVArray:
     case Op::ConcatN:
     case Op::CombineAndResolveTypeStruct:
-    case Op::RecordReifiedGeneric:
-    case Op::ReifiedName:
     case Op::FCallBuiltin:
     case Op::CreateCl:
       return getImm(pc, 0).u_IVA;
@@ -737,8 +735,6 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
                    ni.op() == Op::NewKeysetArray ||
                    ni.op() == Op::NewVArray ||
                    ni.op() == Op::CombineAndResolveTypeStruct ||
-                   ni.op() == Op::RecordReifiedGeneric ||
-                   ni.op() == Op::ReifiedName ||
                    ni.op() == Op::ConcatN)
       ? ni.imm[0].u_IVA
       : ni.immVec.numStackValues();

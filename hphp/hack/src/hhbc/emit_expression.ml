@@ -405,7 +405,8 @@ let is_reified_tparam ~is_fun env name =
     else Ast_scope.Scope.get_class_tparams scope
   in
   let is_soft =
-    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft") in
+    List.exists ~f:(function { A.ua_name = n; _ } ->
+      snd n = SN.UserAttributes.uaSoft) in
   List.find_mapi tparams
     ~f:(fun i { A.tp_name = (_, id)
               ; A.tp_reified = is_reified
@@ -791,8 +792,42 @@ and has_non_tparam_generics env targs =
     | _ -> true)
 
 and emit_reified_targs env pos targs =
-  List.map targs
-    ~f:(fun h -> fst @@ emit_reified_arg env ~isas:false pos h)
+  let len = List.length targs in
+  let scope = Emit_env.get_scope env in
+  let current_fun_tparams = Ast_scope.Scope.get_fun_tparams scope in
+  let current_cls_tparam = Ast_scope.Scope.get_class_tparams scope in
+  let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
+  let is_soft { A.tp_user_attributes = ua; _} =
+    List.exists ua ~f:(function { A.ua_name = n; _ } ->
+      snd n = SN.UserAttributes.uaSoft) in
+  let is_same tparam =
+    List.length tparam = len &&
+    List.for_all2_exn tparam targs
+      ~f:(fun tp ta -> match tp, ta with
+          | { A.tp_name = (_, name1); _}, (_, A.Happly ((_, name2), [])) ->
+              name1 = name2 && not (is_soft tp)
+          | _, _ -> false)
+  in
+  if not is_in_lambda && is_same current_fun_tparams then
+    instr_cgetl (Local.Named SU.Reified.reified_generics_local_name)
+  else if not is_in_lambda && is_same current_cls_tparam then
+    gather [
+      instr_checkthis;
+      instr_baseh;
+      instr_querym 0 QueryOp.CGet (MemberKey.PT (
+        Hhbc_id.Prop.from_raw_string SU.Reified.reified_prop_name));
+    ]
+  (* TODO(T31677864): If the full generic array is static and does not require
+   * resolution, emit it as static array *)
+  else begin
+    gather [
+      gather @@
+        List.map targs
+          ~f:(fun h -> fst @@ emit_reified_arg env ~isas:false pos h);
+      instr_lit_const
+        (if hack_arr_dv_arrs () then NewVecArray len else NewVArray len);
+    ]
+  end
 
 and emit_new env pos expr targs args uargs =
   if has_inout_args args then
@@ -830,10 +865,9 @@ and emit_new env pos expr targs args uargs =
             let fq_id =
               Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id
               |> fst |> Hhbc_id.Class.to_raw_string in
-            let reified_targs = emit_reified_targs env pos targs in
             gather [
-              gather reified_targs;
-              instr_reified_name (List.length reified_targs) fq_id;
+              emit_reified_targs env pos targs;
+              instr_reified_name fq_id;
             ]
           | Class_reified instrs -> instrs
           | _ -> failwith "Internal error: This node can only be id or reified"
@@ -3008,10 +3042,9 @@ and emit_call_lhs_and_fcall
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
   let reified_call_body name =
-    let reified_targs = emit_reified_targs env pos targs in
     gather [
-      gather reified_targs;
-      instr_reified_name (List.length reified_targs) name;
+      emit_reified_targs env pos targs;
+      instr_reified_name name;
     ] in
   match expr_ with
   | A.Obj_get (obj, (_, A.String id), null_flavor)

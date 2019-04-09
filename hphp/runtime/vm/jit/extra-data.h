@@ -332,23 +332,6 @@ struct IndexData : IRExtraData {
 };
 
 /*
- * Range from the stack starting from offset up to size
- */
-struct StackRangeData : IRExtraData {
-  explicit StackRangeData(IRSPRelOffset offset, uint32_t size)
-    : offset(offset)
-    , size(size)
-  {}
-
-  std::string show() const {
-    return folly::format("{},{}", offset.offset, size).str();
-  }
-
-  IRSPRelOffset offset;
-  uint32_t size;
-};
-
-/*
  * Iterator ID.
  */
 struct IterId : IRExtraData {
@@ -1752,8 +1735,6 @@ X(VerifyRetCls,                 ParamData);
 X(VerifyRetFail,                ParamData);
 X(VerifyRetFailHard,            ParamData);
 X(VerifyReifiedLocalType,       ParamData);
-X(RecordReifiedGenericsAndGetName,   StackRangeData);
-X(RecordReifiedGenericsAndGetTSList, StackRangeData);
 
 #undef X
 

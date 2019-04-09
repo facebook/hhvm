@@ -49,6 +49,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -1039,17 +1040,9 @@ void asTypeStructHelper(ArrayData* a, Cell c) {
 
 namespace {
 
-// Creates a list of reified generics from the stack and adds them to the
-// reified generics table
+// Adds the list of reified generics to the reified generics table
 std::pair<StringData*, ArrayData*>
-recordReifiedGenericsAndGetInfo(uint32_t n, const TypedValue* values) {
-  assertx(n != 0);
-  auto tsList = ArrayData::CreateVArray();
-  for (int i = 0; i < n; ++i) {
-    auto a = values[n - i - 1];
-    isValidTSType(a, true);
-    tsList = tsList->appendInPlace(a);
-  }
+recordReifiedGenericsAndGetInfo(ArrayData* tsList) {
   auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
   addToReifiedGenericsTable(mangledName, tsList);
   return std::make_pair(mangledName, tsList);
@@ -1057,16 +1050,14 @@ recordReifiedGenericsAndGetInfo(uint32_t n, const TypedValue* values) {
 
 } // namespace
 
-StringData*
-recordReifiedGenericsAndGetName(uint32_t n, const TypedValue* values) {
-  return recordReifiedGenericsAndGetInfo(n, values).first;
+StringData* recordReifiedGenericsAndGetName(ArrayData* tsList) {
+  return recordReifiedGenericsAndGetInfo(tsList).first;
 }
 
-ArrayData*
-recordReifiedGenericsAndGetTSList(uint32_t n, const TypedValue* values) {
-  auto tsList = recordReifiedGenericsAndGetInfo(n, values).second;
-  ArrayData::GetScalarArray(&tsList);
-  return tsList;
+ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
+  auto result = recordReifiedGenericsAndGetInfo(tsList).second;
+  ArrayData::GetScalarArray(&result);
+  return result;
 }
 
 void throwOOBException(TypedValue base, TypedValue key) {

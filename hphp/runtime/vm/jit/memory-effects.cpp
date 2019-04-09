@@ -1630,17 +1630,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Unreachable code kills every memory location.
     return may_load_store_kill(AEmpty, AEmpty, AUnknown);
 
-  case RecordReifiedGenericsAndGetName:
-  case RecordReifiedGenericsAndGetTSList: {
-    auto const extra = inst.extra<StackRangeData>();
-    auto const stack_in = AStack {
-      inst.src(0),
-      extra->offset + static_cast<int32_t>(extra->size) - 1,
-      static_cast<int32_t>(extra->size)
-    };
-    return may_load_store(stack_in, AEmpty);
-  }
-
   case ResolveTypeStruct: {
     auto const extra = inst.extra<ResolveTypeStructData>();
     auto const stack_in = AStack {
@@ -2160,6 +2149,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AddNewElemVec:
   case IsTypeStruct:
   case LdReifiedGeneric:
+  case RecordReifiedGenericsAndGetName:
+  case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);
 
   case ConvArrToKeyset: // Decrefs input values

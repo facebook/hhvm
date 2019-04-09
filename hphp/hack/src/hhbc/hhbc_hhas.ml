@@ -505,9 +505,8 @@ let string_of_misc instruction =
     | Parent id -> sep ["Parent"; string_of_classref id]
     | LateBoundCls id -> sep ["LateBoundCls"; string_of_classref id]
     | ClsRefName id -> sep ["ClsRefName"; string_of_classref id]
-    | ReifiedName (n, name) ->
-      sep ["ReifiedName"; string_of_int n; SU.quote_string name]
-    | RecordReifiedGeneric n -> sep ["RecordReifiedGeneric"; string_of_int n]
+    | ReifiedName name -> sep ["ReifiedName"; SU.quote_string name]
+    | RecordReifiedGeneric-> "RecordReifiedGeneric"
     | CheckReifiedGenericMismatch -> "CheckReifiedGenericMismatch"
     | VerifyParamType id -> sep ["VerifyParamType"; string_of_param_id id]
     | VerifyParamTypeTS id -> sep ["VerifyParamTypeTS"; string_of_param_id id]

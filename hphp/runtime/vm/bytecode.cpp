@@ -2679,23 +2679,27 @@ OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {
   }
 }
 
-OPTBLD_INLINE void iopRecordReifiedGeneric(uint32_t n) {
-  assertx(n != 0);
-  auto const tsList =
-    jit::recordReifiedGenericsAndGetTSList(n, vmStack().topC());
-  vmStack().ndiscard(n);
+OPTBLD_INLINE void iopRecordReifiedGeneric() {
+  auto const tsList = vmStack().topC();
+  assertx(tvIsVecOrVArray(tsList));
+  // recordReifiedGenericsAndGetTSList decrefs the tsList
+  auto const result =
+    jit::recordReifiedGenericsAndGetTSList(tsList->m_data.parr);
+  vmStack().discard();
   if (RuntimeOption::EvalHackArrDVArrs) {
-    vmStack().pushStaticVec(tsList);
+    vmStack().pushStaticVec(result);
   } else {
-    vmStack().pushStaticArray(tsList);
+    vmStack().pushStaticArray(result);
   }
 }
 
-OPTBLD_INLINE void iopReifiedName(uint32_t n, const StringData* name) {
-  assertx(n != 0);
-  auto const result = jit::recordReifiedGenericsAndGetName(n, vmStack().topC());
+OPTBLD_INLINE void iopReifiedName(const StringData* name) {
+  auto const tsList = vmStack().topC();
+  assertx(tvIsVecOrVArray(tsList));
+  // recordReifiedGenericsAndGetName decrefs the tsList
+  auto const result = jit::recordReifiedGenericsAndGetName(tsList->m_data.parr);
   auto const mangledName = mangleReifiedName(name, result);
-  vmStack().ndiscard(n);
+  vmStack().discard();
   vmStack().pushStaticString(mangledName);
 }
 

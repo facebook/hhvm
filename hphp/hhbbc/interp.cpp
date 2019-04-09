@@ -2639,31 +2639,22 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
 
 void in(ISS& env, const bc::RecordReifiedGeneric& op) {
   // TODO(T31677864): implement real optimizations
-  assertx(op.arg1 > 0);
-  auto valid = true;
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  auto const resultingArray = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
-  for (int i = 0; i < op.arg1; ++i) {
-    auto const t = popC(env);
-    valid &= t.couldBe(requiredTSType);
+  auto const t = popC(env);
+  if (!t.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    return unreachable(env);
   }
-  if (!valid) return unreachable(env);
   nothrow(env);
-  push(env, resultingArray);
+  push(env, RuntimeOption::EvalHackArrDVArrs ? TSVec : TSVArr);
 }
 
 void in(ISS& env, const bc::ReifiedName& op) {
   // TODO(T31677864): implement real optimizations
-  assertx(op.arg1 > 0);
-  auto valid = true;
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  for (int i = 0; i < op.arg1; ++i) {
-    auto const t = popC(env);
-    valid &= t.couldBe(requiredTSType);
+  auto const t = popC(env);
+  if (!t.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    return unreachable(env);
   }
-  if (!valid) return unreachable(env);
   nothrow(env);
-  return push(env, rname(op.str2));
+  return push(env, rname(op.str1));
 }
 
 void in(ISS& env, const bc::CheckReifiedGenericMismatch& op) {

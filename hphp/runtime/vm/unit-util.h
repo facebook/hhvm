@@ -122,7 +122,7 @@ inline std::string mangleReifiedGenericsName(const ArrayData* tsList) {
   IterateV(
     tsList,
     [&](TypedValue v) {
-      assertx(isArrayLikeType(v.m_type));
+      assertx(tvIsDictOrDArray(v));
       auto str =
         TypeStructure::toStringForDisplay(ArrNR(v.m_data.parr)).toCppString();
       str.erase(remove_if(str.begin(), str.end(), isspace), str.end());

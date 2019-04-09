@@ -337,12 +337,9 @@ let make_param_local_ty env param =
     { (Phase.env_with_self env) with from_class = Some CIstatic; } in
   let env, ty =
     match param.param_hint with
-    | None when param.param_expr = None ->
+    | None ->
       let r = Reason.Rwitness param.param_pos in
       env, (r, TUtils.tany env)
-    | None ->
-      (* if the type is missing, use an unbound type variable *)
-      Env.fresh_type env param.param_pos
     | Some x ->
       let ty = Decl_hint.hint env.Env.decl_env x in
       let condition_type =
@@ -378,20 +375,31 @@ let make_param_local_ty env param =
 
 (* Given a localized parameter type and parameter information, infer
  * a type for the parameter default expression (if present) and check that
- * it is a subtype of the parameter type. Set the type of the parameter in
- * the locals environment *)
+ * it is a subtype of the parameter type (if present). If no parameter type
+ * is specified, then union with Tany. (So it's as though we did a conditional
+ * assignment of the default expression to the parameter).
+ * Set the type of the parameter in the locals environment *)
 let rec bind_param env (ty1, param) =
-  let env, param_te =
+  let env, param_te, ty1 =
     match param.param_expr with
     | None ->
         Typing_suggest.save_param (param.param_name) env ty1 (Reason.none, Tany);
-        env, None
+        env, None, ty1
     | Some e ->
         let env, te, ty2 = expr ~expected:(param.param_pos, Reason.URparam, ty1) env e in
         Typing_sequencing.sequence_check_expr e;
         Typing_suggest.save_param (param.param_name) env ty1 ty2;
-        let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
-        env, Some te
+        let env, ty1 =
+          if Option.is_none param.param_hint
+          (* In this case ty1 must be Tany, so just union it with the type of
+           * the default expression *)
+          then Union.union env ty1 ty2
+          (* Otherwise we have an explicit type, and the default expression type
+           * must be a subtype *)
+          else
+            let env = Type.sub_type param.param_pos Reason.URhint env ty2 ty1 in
+            env, ty1 in
+        env, Some te, ty1
   in
   let tparam = {
     T.param_annotation = T.make_expr_annotation param.param_pos ty1;

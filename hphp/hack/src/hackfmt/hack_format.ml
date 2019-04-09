@@ -3170,8 +3170,8 @@ and transform_node_if_ignored node =
     | TriviaKind.(FixMe | IgnoreError) -> true
     | _ -> false
   in
-  (* Don't format nodes with an error-suppression comment if the node spans more
-     than 3 lines--this leads to confusing behavior. *)
+  (* Don't suppress formatting for nodes with an error-suppression comment if
+     the node spans more than 3 lines--this leads to confusing behavior. *)
   if is_fixme && has_n_or_more_newlines node 3 then None else
   Some(Concat[
     transform_leading_trivia leading_before;

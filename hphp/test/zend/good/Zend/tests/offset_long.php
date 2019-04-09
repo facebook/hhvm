@@ -16,7 +16,7 @@ var_dump($long[$fp]);
 $obj = new stdClass;
 var_dump($long[$obj]);
 
-$arr = Array(1,2,3);
+$arr = array(1,2,3);
 var_dump($long[$arr]);
 
 echo "Done\n";

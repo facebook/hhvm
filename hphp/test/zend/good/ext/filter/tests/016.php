@@ -1,13 +1,13 @@
 <?php
-$values = Array(
-'a@b.c',	
-'abuse@example.com',	
-'test!.!@#$%^&*@example.com',	
-'test@@#$%^&*())).com',	
-'test@.com',	
-'test@com',	
-'@',	
-'[]()/@example.com',	
+$values = array(
+'a@b.c',
+'abuse@example.com',
+'test!.!@#$%^&*@example.com',
+'test@@#$%^&*())).com',
+'test@.com',
+'test@com',
+'@',
+'[]()/@example.com',
 'QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET',
 'e.x.a.m.p.l.e.@example.com',
 'firstname.lastname@employee.2something.com',

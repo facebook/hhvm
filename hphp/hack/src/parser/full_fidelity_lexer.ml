@@ -27,7 +27,6 @@ module Env = struct
     enable_unsafe_block := not disable_unsafe_block
   let is_hh () = !is_hh_file || !force_hh_opt
   let enable_xhp () = is_hh () || !enable_xhp_opt
-  let force_kw_in_lowercase () = is_hh ()
 
 end
 
@@ -1432,11 +1431,6 @@ let is_next_xhp_class_name lexer =
 type kw_set = [ `AllKeywords | `NonReservedKeywords | `NoKeywords ]
 
 let as_case_insensitive_keyword text =
-  (* Some keywords are case-insensitive in Hack or PHP. *)
-  (* TODO: Consider making non-lowercase versions of these keywords errors
-     in strict mode. *)
-  (* TODO: Consider making these illegal, period, and code-modding away all
-  non-lower versions in our codebase. *)
   let lower = String.lowercase_ascii text in
   match lower with
   | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean" | "break"
@@ -1455,14 +1449,12 @@ let as_case_insensitive_keyword text =
   | _ -> text
 
 let enforce_lowercase lexer ~original_text ~lowered_text =
-  if Env.force_kw_in_lowercase () then
-    match lowered_text with
-    | "true" | "false" | "null" -> lexer
-    | _ ->
-      if original_text <> lowered_text then
-        with_error lexer (SyntaxError.uppercase_kw original_text)
-      else lexer
-  else lexer
+  match lowered_text with
+  | "true" | "false" | "null" -> lexer
+  | _ ->
+    if original_text <> lowered_text then
+      with_error lexer (SyntaxError.uppercase_kw original_text)
+    else lexer
 
 let as_keyword ~only_reserved kind lexer =
   if kind = TokenKind.Name then

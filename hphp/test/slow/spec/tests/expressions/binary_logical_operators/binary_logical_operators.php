@@ -38,11 +38,11 @@ function f($a) { echo "inside f($a)\n"; return 10;}
 function g($a) { echo "inside g($a)\n"; return 0;}
 
 $i = 5;
-$v = (f($i++) AND g($i));
+$v = (f($i++) and g($i));
 var_dump($v);
 $i = 0;
-$v = (g($i++) OR f($i));
+$v = (g($i++) or f($i));
 var_dump($v);
 $i = 5;
-$v = (f($i++) XOR g($i));
+$v = (f($i++) xor g($i));
 var_dump($v);

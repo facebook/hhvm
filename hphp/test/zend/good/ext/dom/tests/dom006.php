@@ -1,6 +1,6 @@
 <?php
 
-Class books extends domDocument {
+class books extends domDocument {
     function addBook($title, $author) {
         $titleElement = $this->createElement("title");
         $titleElement->appendChild($this->createTextNode($title));
@@ -13,7 +13,7 @@ Class books extends domDocument {
         $bookElement->appendChild($authorElement);
         $this->documentElement->appendChild($bookElement);
     }
-   
+
 }
 
 $dom = new books;

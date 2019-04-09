@@ -8,7 +8,7 @@ spl_autoload_register('f2');
 spl_autoload_register($class ==> { echo "cf1: [[$class]]\n"; });
 spl_autoload_register($class ==> { echo "cf2: [[$class]]\n"; });
 
-foreach (spl_autoload_functions() AS $func)
+foreach (spl_autoload_functions() as $func)
 {
     spl_autoload_unregister($func);
 }

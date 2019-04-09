@@ -17,7 +17,7 @@ var_dump($rc->hasProperty('staticFoo'));
 //C should not have property bar
 var_dump($rc->hasProperty('bar'));
 
-Class C {
+class C {
   public $publicFoo;
   protected $protectedFoo;
   private $privateFoo;

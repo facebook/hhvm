@@ -8,9 +8,9 @@ $increment = 50;
 /* Create some more holes to give the memory allocator something to
  * work with. */
 $num = 5000;
-$a = Array();
+$a = array();
 for ($i=0; $i<$num; $i++) {
-  $a[$i] = Array(1);
+  $a[$i] = array(1);
 }
 $b = array();
 for ($i=0; $i<$num; $i++) {

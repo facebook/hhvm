@@ -20,7 +20,7 @@ namespace Fiz\Biz\Buz {
         function foo,
         function bar as buz,
         const FOO,
-        const BAR AS BOZ
+        const BAR as BOZ
     };
 
     class C { function __construct() {echo __METHOD__,"\n";}}

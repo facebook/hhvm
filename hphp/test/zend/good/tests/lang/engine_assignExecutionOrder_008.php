@@ -42,7 +42,7 @@ $i->p = array();
 echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 
-Class C {
+class C {
 	static $p;
 }
 

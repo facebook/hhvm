@@ -47,7 +47,7 @@ class C1
 $c1 = new C1;
 $c1->f();
 
-Interface I1 {}
+interface I1 {}
 //Interface NS3\Sub1\I1 {}  // prefix not allowed in definition
 
 

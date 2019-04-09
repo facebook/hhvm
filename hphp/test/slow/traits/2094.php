@@ -11,8 +11,8 @@ class c {
  }
 
 
-CONST INIT1 = 123;
-CONST INIT2 = 456;
+const INIT1 = 123;
+const INIT2 = 456;
 <<__EntryPoint>>
 function main_2094() {
 $obj = new c;

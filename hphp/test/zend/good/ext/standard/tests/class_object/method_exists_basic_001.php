@@ -1,20 +1,20 @@
 <?php
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-Class B {
+class B {
 	public function inherit_pub() {}
 	protected function inherit_prot() {}
 	private function inherit_priv() {}
 	static public function inherit_static_pub() {}
 	static protected function inherit_static_prot() {}
-	static private function inherit_static_priv() {}	
+	static private function inherit_static_priv() {}
 }
 
-Class C extends B {
+class C extends B {
 	public function pub() {}
 	protected function prot() {}
 	private function priv() {}

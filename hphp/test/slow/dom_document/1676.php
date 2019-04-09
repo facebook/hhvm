@@ -44,7 +44,7 @@ $length = $nots->length;
 var_dump($length);
 echo "Length: ".$length."\n";
 
-foreach ($nots AS $key=>$node) {
+foreach ($nots as $key=>$node) {
   echo "Key $key: ".$node->nodeName." (".
        $node->systemId.") (".$node->publicId.")\n";
 }
@@ -69,7 +69,7 @@ $length = $ents->length;
 echo "Length: ".$length."\n";
 
 $a = array();
-foreach ($ents AS $key=>$node) {
+foreach ($ents as $key=>$node) {
   $a[$key] = $node;
 }
 ksort(&$a);

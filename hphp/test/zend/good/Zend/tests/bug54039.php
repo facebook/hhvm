@@ -1,5 +1,5 @@
 <?php
-Class S1 { static $v = 0; }
+class S1 { static $v = 0; }
 function test_1() {
 	$v = ++S1::$v;
 	echo "Outer function increments \$v to $v\n";
@@ -12,7 +12,7 @@ function test_1() {
 $f = test_1(); $f();
 $f = test_1(); $f();
 
-Class S2 { static $v = 0; }
+class S2 { static $v = 0; }
 function test_2() {
 	$v = S2::$v;
 	$f = function() use($v) {
@@ -26,7 +26,7 @@ function test_2() {
 $f = test_2(); $f();
 $f = test_2(); $f();
 
-Class S3 { static $v = ""; }
+class S3 { static $v = ""; }
 function test_3() {
 	$v = S3::$v .= 'b';
 	echo "Outer function catenates 'b' onto \$v to give $v\n";

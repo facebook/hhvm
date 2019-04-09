@@ -1,5 +1,5 @@
 <?php
-$a = Array("some","blah");
+$a = array("some","blah");
 $i = new ArrayIterator($a);
 
 $ci = new CachingIterator($i);

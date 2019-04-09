@@ -1,5 +1,5 @@
 <?php
-Class C { }
+class C { }
 
 $rc = new ReflectionObject(new C);
 $methods = array("getFileName", "getStartLine", "getEndLine");

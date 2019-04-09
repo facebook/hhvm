@@ -24,7 +24,7 @@ if(!$proc) {
 
 $proc->importStylesheet($xsl);
 
-$parameters = Array(
+$parameters = array(
 					'foo' => 'barbar',
 					'foo1' => 'test',
 					);
@@ -34,5 +34,3 @@ $proc->setParameter( "", $parameters);
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
-
-

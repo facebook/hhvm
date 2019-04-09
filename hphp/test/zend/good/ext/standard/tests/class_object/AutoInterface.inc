@@ -1,4 +1,3 @@
 <?php
 
-Interface AutoInterface {}
-
+interface AutoInterface {}

@@ -14,12 +14,3 @@ foreach ($colors as $a)
 {
     echo $a.' ';
 }
-echo "\n";
-
-// try various case combinations of keywords
-
-fOREacH ($colors As $a)
-{
-    eChO $a.' ';
-}
-ECHO "\n";

@@ -20,7 +20,7 @@ var_dump($rc->hasMethod('bar'));
 //Method names are case insensitive
 var_dump($rc->hasMethod('PUBLICfOO'));
 
-Class C {
+class C {
   public function publicFoo()
   {
     return true;

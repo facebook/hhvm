@@ -1,8 +1,8 @@
 <?php
 $GLOBALS['HTTP_RAW_POST_DATA']="
-<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\" 
-	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
-	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" 
+<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"
+	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
 	xmlns:enc=\"http://schemas.xmlsoap.org/soap/encoding/\"
 	xmlns:ns1=\"http://schemas.nothing.com\"
 >
@@ -15,21 +15,21 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </dotest>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 class test{
 	function dotest(book $book){
 		$classname=get_class($book);
 		return "Classname: ".$classname;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
-$options=Array(
+$options=array(
 		'actor' =>'http://schema.nothing.com',
 		'classmap' => array('book'=>'book', 'wsdltype2'=>'classname2')
 		);

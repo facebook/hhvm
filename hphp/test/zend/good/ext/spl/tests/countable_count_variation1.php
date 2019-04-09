@@ -1,29 +1,29 @@
 <?php
 
-Class returnNull implements Countable {
+class returnNull implements Countable {
 	function count() {
 	}
 }
 
-Class returnString implements Countable {
+class returnString implements Countable {
 	function count() {
 		return "hello";
 	}
 }
 
-Class returnObject implements Countable {
+class returnObject implements Countable {
 	function count() {
 		return new returnObject;
 	}
 }
 
-Class returnArray implements Countable {
+class returnArray implements Countable {
 	function count() {
 		return array(1,2,3);
 	}
 }
 
-Class throwException implements Countable {
+class throwException implements Countable {
 	function count() {
 		throw new Exception('Thrown from count');
 	}
@@ -48,4 +48,3 @@ try {
 } catch (Exception $e) {
 	echo $e->getMessage();
 }
-

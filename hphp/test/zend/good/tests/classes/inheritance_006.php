@@ -1,13 +1,13 @@
 <?php
-Class A {
+class A {
 	private $c;
 }
 
-Class B extends A {
+class B extends A {
 	private $c;
 }
 
-Class C extends B {
+class C extends B {
 }
 
 var_dump(new C);

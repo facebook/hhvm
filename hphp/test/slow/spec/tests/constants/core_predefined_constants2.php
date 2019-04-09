@@ -61,4 +61,4 @@ trace("__COMPILER_HALT_OFFSET__", __COMPILER_HALT_OFFSET__);
 trace("TRUE", TRUE);
 trace("FALSE", FALSE);
 trace("NULL", NULL);
-__HALT_COMPILER();
+__halt_compiler();

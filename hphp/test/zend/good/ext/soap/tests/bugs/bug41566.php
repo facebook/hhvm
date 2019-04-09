@@ -3,7 +3,7 @@ function test() {
   $aUser = new User();
   $aUser->sName = 'newUser';
 
-  $aUsers = Array();
+  $aUsers = array();
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
   $aUsers[] = $aUser;
@@ -12,7 +12,7 @@ function test() {
 }
 
 /* Simple User definition */
-Class User {
+class User {
   /** @var string */
   public $sName;
 }
@@ -39,8 +39,8 @@ echo "ok\n";
 
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope" 
-  xmlns:ns1="http://testuri.org" 
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"
+  xmlns:ns1="http://testuri.org"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
   xmlns:enc="http://www.w3.org/2003/05/soap-encoding">
   <env:Body>

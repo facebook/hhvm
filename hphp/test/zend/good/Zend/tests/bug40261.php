@@ -1,9 +1,9 @@
 <?php
 $num = 100000;
 
-$a = Array();
+$a = array();
 for ($i=0; $i<$num; $i++) {
-  $a[$i] = Array(1);
+  $a[$i] = array(1);
 }
 
 $b = array();

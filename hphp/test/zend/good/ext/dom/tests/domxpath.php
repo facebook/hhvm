@@ -4,7 +4,7 @@ require_once("dom_test.inc");
 function MyAverage($nodelist) {
 	$count = 0;
 	$val = 0;
-	foreach ($nodelist AS $node) {
+	foreach ($nodelist as $node) {
 		$count++;
 		$val += $node->textContent;
 	}

@@ -9,6 +9,6 @@ var_dump($rc->getFileName());
 var_dump($rc->getStartLine());
 var_dump($rc->getEndLine());
 
-Class C {
+class C {
 
 }

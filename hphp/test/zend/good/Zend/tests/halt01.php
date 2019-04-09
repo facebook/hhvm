@@ -2,6 +2,6 @@
 
 print "yo!\n";
 
-__HALT_COMPILER();
+__halt_compiler();
 
 none of this should be displayed!

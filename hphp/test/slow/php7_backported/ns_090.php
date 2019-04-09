@@ -12,7 +12,7 @@ namespace Foo\Bar\Baz {
 namespace Fiz\Biz\Buz {
 
     use Foo\Bar\Baz\{ A, B, C as AC, D };
-    use Foo\Bar\Baz\{ function foo, function bar as buz, const FOO, const BAR AS BOZ };
+    use Foo\Bar\Baz\{ function foo, function bar as buz, const FOO, const BAR as BOZ };
 
     class C { function __construct() {echo __METHOD__,"\n";}}
     function bar(){echo __FUNCTION__,"\n";}

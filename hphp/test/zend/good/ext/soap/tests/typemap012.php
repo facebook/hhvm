@@ -3,20 +3,20 @@ class TestSoapClient extends SoapClient{
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
   		echo $request;
   		exit;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 
 function book_to_xml($book) {
 	throw new SoapFault("Client", "Conversion Error");
 }
 
-$options=Array(
+$options=array(
 		'actor' =>'http://schemas.nothing.com',
 		'typemap' => array(array("type_ns"   => "http://schemas.nothing.com",
 		                         "type_name" => "book",

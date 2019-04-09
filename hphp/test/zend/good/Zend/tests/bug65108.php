@@ -13,7 +13,7 @@ class B {
 
 new B();
 
-Class E {
+class E {
    private function f() {}
    function __call($name, $args) {}
 }

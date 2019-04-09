@@ -1,5 +1,5 @@
 <?php
-Class Foo
+class Foo
 {
 	const A = 1;
 	const B = self::A;
@@ -8,7 +8,7 @@ Class Foo
 $rc = new ReflectionClass('Foo');
 print_r($rc->getConstants());
 
-Class Foo2
+class Foo2
 {
         const A = 1;
         const B = self::A;

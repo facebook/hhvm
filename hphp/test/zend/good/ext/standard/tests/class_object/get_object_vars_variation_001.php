@@ -1,11 +1,11 @@
 <?php
 /* Prototype  : proto array get_object_vars(object obj)
- * Description: Returns an array of object properties 
+ * Description: Returns an array of object properties
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-Class A {
+class A {
 	public static $var = 'hello';
 }
 

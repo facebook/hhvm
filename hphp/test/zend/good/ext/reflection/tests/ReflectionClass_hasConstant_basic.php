@@ -8,6 +8,6 @@ var_dump($rc->hasConstant('foo'));
 //C should not have constant bar
 var_dump($rc->hasConstant('bar'));
 
-Class C {
+class C {
   const foo=1;
 }

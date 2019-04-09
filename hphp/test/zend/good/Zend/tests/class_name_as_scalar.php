@@ -26,7 +26,7 @@ namespace Foo\Bar {
         }
     }
     echo "In NS\n";
-    \var_dump(Moo::CLASS); // resolve in namespace
+    \var_dump(Moo::class); // resolve in namespace
 }
 
 namespace {
@@ -35,8 +35,8 @@ namespace {
     echo "Top\n";
     \var_dump(One::class); // resolve from use
     \var_dump(Boo::class); // resolve in global namespace
-    \var_dump(Moo::CLASS); // resolve from use as
-    \var_dump(\Moo::Class); // resolve fully qualified
+    \var_dump(Moo::class); // resolve from use as
+    \var_dump(\Moo::class); // resolve fully qualified
     $class = One::class; // assign class as scalar to var
     $x = new $class; // create new class from original scalar assignment
     \var_dump($x);
@@ -46,4 +46,3 @@ namespace {
     echo "Compile Check\n";
     Foo\Bar\Three::checkCompileTime();
 }
-

@@ -287,6 +287,7 @@ let is_valid_rx_mutable_arg env e =
   | KeyValCollection ((`Map | `ImmMap), _, _)
   | ValCollection ((`Vector | `ImmVector | `Set | `ImmSet), _, _)
   | Pair _
+  | Clone _
   | Xml _ ->
     true
   | _ -> is_fun_call_returning_mutable env e

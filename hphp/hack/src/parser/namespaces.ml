@@ -22,10 +22,7 @@ module SN = Naming_special_names
  * namespace. This is a tiny bit weird, but since Facebook www all runs
  * in the global namespace relying on this autoimport, this makes the
  * most sense there.
- *
- * See hhvm/compiler/parser/parser.cpp Parser::getAutoAliasedClasses
- * for the canonical list of classes and Parser::onCall for the
- * canonical list of functions. *)
+ *)
 let autoimport_classes = [
   "Traversable";
   "KeyedTraversable";
@@ -66,29 +63,47 @@ let autoimport_classes = [
   "Shapes";
   "TypeStructureKind";
 ]
-let autoimport_funcs = [
+let autoimport_funcs =   [
+  "fun";
+  "meth_caller";
+  "class_meth";
+  "inst_meth";
+  "invariant_callback_register";
   "invariant";
   "invariant_violation";
-  "type_structure";
   "idx";
-  "vec";
+  "type_structure";
+  "asio_get_current_context_idx";
+  "asio_get_running_in_context";
+  "asio_get_running";
+  "xenon_get_data";
+  "thread_memory_stats";
+  "thread_mark_stack";
+  "objprof_get_strings";
+  "objprof_get_data";
+  "objprof_get_paths";
+  "heapgraph_create";
+  "heapgraph_stats";
+  "heapgraph_foreach_node";
+  "heapgraph_foreach_edge";
+  "heapgraph_foreach_root";
+  "heapgraph_dfs_nodes";
+  "heapgraph_dfs_edges";
+  "heapgraph_node";
+  "heapgraph_edge";
+  "heapgraph_node_in_edges";
+  "heapgraph_node_out_edges";
+  "server_warmup_status";
   "dict";
+  "vec";
   "keyset";
-  "is_darray";
+  "varray";
+  "darray";
   "is_vec";
   "is_dict";
   "is_keyset";
   "is_varray";
-  (* typechecker debugging/test functions *)
-  "hh_show";
-  "hh_show_env";
-  (* these are operators, not functions:
-   * foo() !== \foo(), even in the root namespace *)
-  "empty";
-  "isset";
-  "unset";
-  "exit";
-  "die";
+  "is_darray";
 ]
 let autoimport_types = [
   "typename";
@@ -120,6 +135,18 @@ let get_autoimport_name_namespace id =
    function names when auto-importing *)
 let is_autoimport_name id =
   fst (get_autoimport_name_namespace id)
+
+let is_always_global_function =
+  let h = HashSet.create 23 in
+  let funcs = SN.PseudoFunctions.all_pseudo_functions @ [
+    "\\echo";
+    "\\exit";
+    "\\die";
+    "\\func_get_args";
+    "\\func_get_arg";
+  ] in
+  List.iter funcs (HashSet.add h);
+  fun x -> HashSet.mem h x
 
 let elaborate_into_ns ns_name id =
 match ns_name with
@@ -196,6 +223,8 @@ let elaborate_id_impl ~autoimport nsenv kind id =
   let global_id = Utils.add_ns id in
   if kind = ElaborateConst && SN.PseudoConsts.is_pseudo_const global_id then
     false, global_id (* Pseudo-constants are always global. *)
+  else if kind = ElaborateFun && is_always_global_function global_id then
+    false, global_id
   else
 
   let bslash_loc, has_bslash =

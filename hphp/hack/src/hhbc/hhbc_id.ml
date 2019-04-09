@@ -80,64 +80,13 @@ end
 module Function = struct
   type t = string
 
-  (* See hphp/compiler/parser.cpp. *)
-  let builtins_in_hh =
-  [
-    "fun";
-    "meth_caller";
-    "class_meth";
-    "inst_meth";
-    "invariant_callback_register";
-    "invariant";
-    "invariant_violation";
-    "idx";
-    "type_structure";
-    "asio_get_current_context_idx";
-    "asio_get_running_in_context";
-    "asio_get_running";
-    "xenon_get_data";
-    "thread_memory_stats";
-    "thread_mark_stack";
-    "objprof_get_strings";
-    "objprof_get_data";
-    "objprof_get_paths";
-    "heapgraph_create";
-    "heapgraph_stats";
-    "heapgraph_foreach_node";
-    "heapgraph_foreach_edge";
-    "heapgraph_foreach_root";
-    "heapgraph_dfs_nodes";
-    "heapgraph_dfs_edges";
-    "heapgraph_node";
-    "heapgraph_edge";
-    "heapgraph_node_in_edges";
-    "heapgraph_node_out_edges";
-    "server_warmup_status";
-    "dict";
-    "vec";
-    "keyset";
-    "varray";
-    "darray";
-    "is_vec";
-    "is_dict";
-    "is_keyset";
-    "is_varray";
-    "is_darray";
-  ]
-
-  let builtins_at_top = [
-    "echo";
-    "exit";
-    "die";
-  ]
-
   let has_hh_prefix s =
     let s = String.lowercase s in
     String_utils.string_starts_with s "hh\\"
 
   let is_hh_builtin s =
     let s = if has_hh_prefix s then String_utils.lstrip s "hh\\" else s in
-    List.mem ~equal:(=) builtins_in_hh s
+    List.mem ~equal:(=) Namespaces.autoimport_funcs s
 
   let from_raw_string s = s
   let to_raw_string s = s
@@ -153,10 +102,8 @@ module Function = struct
        * it's an HH\ or top-level function with implicit namespace.
        *)
     | Some id ->
-      if List.mem ~equal:(=) builtins_in_hh id && (Emit_env.is_hh_syntax_enabled ())
+      if List.mem ~equal:(=) Namespaces.autoimport_funcs id && (Emit_env.is_hh_syntax_enabled ())
       then SU.prefix_namespace "HH" id, Some id
-      else if List.mem ~equal:(=) builtins_at_top (String.lowercase id)
-      then id, None
       else fq_id, backoff_id
       (* Likewise for top-level, with no namespace *)
     | None ->

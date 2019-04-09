@@ -12,6 +12,8 @@ type elaborate_kind =
   | ElaborateClass
   | ElaborateConst
 
+val autoimport_funcs : string list
+
 val elaborate_id : ?autoimport:bool -> Namespace_env.env ->
                    elaborate_kind ->
                    Ast.id ->

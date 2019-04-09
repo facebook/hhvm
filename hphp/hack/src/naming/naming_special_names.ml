@@ -265,6 +265,16 @@ module PseudoFunctions = struct
   let hh_log_level = "\\hh_log_level"
   let hh_loop_forever = "\\hh_loop_forever"
 
+  let all_pseudo_functions = [
+    empty;
+    isset;
+    unset;
+    hh_show;
+    hh_show_env;
+    hh_log_level;
+    hh_loop_forever;
+  ]
+
 end
 
 module StdlibFunctions = struct

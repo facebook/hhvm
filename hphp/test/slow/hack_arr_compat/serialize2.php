@@ -84,8 +84,16 @@ function test($name, $options) {
   $obj->c = dict['a' => 1, 'b' => 2];
   $obj->d = keyset['a', 'b', 'c'];
   var_dump(HH\serialize_with_options($obj, $options));
+  try {
+    var_dump(HH\serialize_with_options(new LateInitClass(), $options));
+  } catch (Exception $ex) {
+    var_dump($ex->getMessage());
+  }
 }
 
+class LateInitClass {
+  <<__LateInit>> public string $prop;
+}
 
 <<__EntryPoint>>
 function main_serialize2() {
@@ -106,4 +114,5 @@ test(
     "warnOnPHPArrays" => true
   ]
 );
+test("ignore lateinit", dict["ignoreLateInit" => true]);
 }

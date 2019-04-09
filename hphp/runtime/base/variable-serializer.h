@@ -104,6 +104,9 @@ struct VariableSerializer {
   void setVecLikeDArrayWarn()  { m_vdWarn = true; }
   void setDictLikeDArrayWarn() { m_ddWarn = true; }
 
+  // ignore uninitialized late init props and do not attempt to serialize them
+  void setIgnoreLateInit() { m_ignoreLateInit = true; }
+
   enum class ArrayKind { PHP, Dict, Shape, Vec, Keyset, VArray, DArray };
 
   // One entry for each vec or dict in the value being serialized (in a
@@ -250,6 +253,7 @@ private:
   bool m_edWarn{false};          // warn when attempting on empty darrays
   bool m_vdWarn{false};          // warn when attempting on vec-like darrays
   bool m_ddWarn{false};          // warn when attempting on non-vec-like darrays
+  bool m_ignoreLateInit{false};  // ignore uninitalized late init props
   bool m_hasHackWarned{false};   // have we already warned on Hack arrays?
   bool m_hasDictWarned{false};   // have we already warned on dicts?
   bool m_hasPHPWarned{false};    // have we already warned on PHP arrays?

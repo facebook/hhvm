@@ -88,8 +88,16 @@ function test($name, $options) {
   $obj->c = dict['a' => 1, 'b' => 2];
   $obj->d = keyset['a', 'b', 'c'];
   var_dump(json_encode($obj, $options));
+  try {
+    var_dump(json_encode(new LateInitClass(), $options));
+  } catch (Exception $ex) {
+    var_dump($ex->getMessage());
+  }
 }
 
+class LateInitClass {
+  <<__LateInit>> public string $prop;
+}
 
 <<__EntryPoint>>
 function main_json_encode() {
@@ -114,6 +122,7 @@ test(
   "everything",
   JSON_FB_WARN_PHP_ARRAYS | JSON_FB_WARN_DICTS | JSON_FB_FORCE_PHP_ARRAYS
 );
+test("ignore lateinit", JSON_FB_IGNORE_LATEINIT);
 echo "==================== no repeated warnings =========================\n";
 var_dump(json_encode(vec[
   darray[], darray[],

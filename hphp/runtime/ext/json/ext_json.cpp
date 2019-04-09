@@ -63,6 +63,7 @@ const int64_t k_JSON_FB_DARRAYS_AND_VARRAYS = 1ll << 29;
 const int64_t k_JSON_FB_WARN_EMPTY_DARRAYS = 1ll << 30;
 const int64_t k_JSON_FB_WARN_VEC_LIKE_DARRAYS = 1ll << 31;
 const int64_t k_JSON_FB_WARN_DICT_LIKE_DARRAYS = 1ll << 32;
+const int64_t k_JSON_FB_IGNORE_LATEINIT = 1ll << 33;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;
@@ -132,6 +133,7 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
   if (options & k_JSON_FB_WARN_EMPTY_DARRAYS) vs.setEmptyDArrayWarn();
   if (options & k_JSON_FB_WARN_VEC_LIKE_DARRAYS) vs.setVecLikeDArrayWarn();
   if (options & k_JSON_FB_WARN_DICT_LIKE_DARRAYS) vs.setDictLikeDArrayWarn();
+  if (options & k_JSON_FB_IGNORE_LATEINIT) vs.setIgnoreLateInit();
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
   assertx(json.get() != nullptr);
@@ -283,6 +285,7 @@ struct JsonExtension final : Extension {
                 k_JSON_FB_WARN_VEC_LIKE_DARRAYS);
     HHVM_RC_INT(JSON_FB_WARN_DICT_LIKE_DARRAYS,
                 k_JSON_FB_WARN_DICT_LIKE_DARRAYS);
+    HHVM_RC_INT(JSON_FB_IGNORE_LATEINIT, k_JSON_FB_IGNORE_LATEINIT);
 
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);
     HHVM_RC_INT(JSON_ERROR_DEPTH, k_JSON_ERROR_DEPTH);

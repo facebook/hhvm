@@ -647,7 +647,7 @@ void VariableSerializer::write(const Object& v) {
         }
         m_buf->append("{}");
       } else {
-        auto props = v->toArray(true);
+        auto props = v->toArray(true, m_ignoreLateInit);
         pushObjectInfo(v->getClassName(), 'O');
         serializeArray(props, true);
         popObjectInfo();
@@ -1827,7 +1827,8 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   if ((getType() != VariableSerializer::Type::PrintR) &&
       (getType() != VariableSerializer::Type::VarDump)) {
     auto const ignoreLateInit =
-      (getType() == VariableSerializer::Type::DebugDump ||
+      (m_ignoreLateInit ||
+       getType() == VariableSerializer::Type::DebugDump ||
        getType() == VariableSerializer::Type::DebuggerDump ||
        getType() == VariableSerializer::Type::DebuggerSerialize);
     return obj->toArray(false, ignoreLateInit);
@@ -1974,7 +1975,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
 
           if (propVal.type() == KindOfUninit &&
               (prop.attrs & AttrLateInitSoft)) {
-            raise_soft_late_init_prop(prop.cls, memberName.get(), false);
+            if (!m_ignoreLateInit) {
+              raise_soft_late_init_prop(prop.cls, memberName.get(), false);
+            }
             tvDup(
               *g_context->getSoftLateInitDefault().asTypedValue(),
               propVal
@@ -1993,7 +1996,11 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
               continue;
             }
           } else if (prop.attrs & AttrLateInit) {
-            throw_late_init_prop(prop.cls, memberName.get(), false);
+            if (m_ignoreLateInit) {
+              continue;
+            } else {
+              throw_late_init_prop(prop.cls, memberName.get(), false);
+            }
           }
         }
         if (!attrMask &&

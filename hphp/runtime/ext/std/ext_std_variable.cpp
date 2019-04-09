@@ -438,7 +438,8 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
                                     bool keepDVArrays,
                                     bool forcePHPArrays,
                                     bool hackWarn,
-                                    bool phpWarn) {
+                                    bool phpWarn,
+                                    bool ignoreLateInit) {
   auto const empty_hack = [&](const ArrayData* arr, const StaticString& empty) {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatSerializeNotices &&
                  hackWarn)) {
@@ -562,6 +563,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
   if (forcePHPArrays) vs.setForcePHPArrays();
   if (hackWarn)       vs.setHackWarn();
   if (phpWarn)        vs.setPHPWarn();
+  if (ignoreLateInit) vs.setIgnoreLateInit();
   // Keep the count so recursive calls to serialize() embed references properly.
   return vs.serialize(value, true, true);
 }
@@ -569,13 +571,14 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
 }
 
 String HHVM_FUNCTION(serialize, const Variant& value) {
-  return serialize_impl(value, false, false, false, false);
+  return serialize_impl(value, false, false, false, false, false);
 }
 
 const StaticString
   s_forcePHPArrays("forcePHPArrays"),
   s_warnOnHackArrays("warnOnHackArrays"),
-  s_warnOnPHPArrays("warnOnPHPArrays");
+  s_warnOnPHPArrays("warnOnPHPArrays"),
+  s_ignoreLateInit("ignoreLateInit");
 
 String HHVM_FUNCTION(HH_serialize_with_options,
                      const Variant& value, const Array& options) {
@@ -587,13 +590,15 @@ String HHVM_FUNCTION(HH_serialize_with_options,
     options.exists(s_warnOnHackArrays) &&
       options[s_warnOnHackArrays].toBoolean(),
     options.exists(s_warnOnPHPArrays) &&
-      options[s_warnOnPHPArrays].toBoolean()
+      options[s_warnOnPHPArrays].toBoolean(),
+    options.exists(s_ignoreLateInit) &&
+      options[s_ignoreLateInit].toBoolean()
   );
 }
 
 String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
                      const Variant& value) {
-  return serialize_impl(value, true, false, false, false);
+  return serialize_impl(value, true, false, false, false, false);
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,

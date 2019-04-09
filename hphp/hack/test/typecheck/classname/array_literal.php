@@ -9,7 +9,7 @@ function test(string $bar, string $baz): void {
   $arr = array('foo', 'bar', C1::class, T1::class);
   $index = 0;
   $arr[$index] = 'foo'; // force conversion from tuple-like to vec-like
-  hh_show($arr);
+  expect_array_of_string($arr);
   $arr_nested_routing = array(
     'foo/' => array('*' => I::class, $baz => C1::class, 'cdr' => T1::class),
     $bar => C2::class,
@@ -17,3 +17,5 @@ function test(string $bar, string $baz): void {
   );
   hh_show($arr_nested_routing);
 }
+
+function expect_array_of_string(array<string> $arr):void {}

@@ -13,7 +13,7 @@ function test_array_filter(
   $intersection_type = $int ? $container : $keyed_container;
 
   hh_show(array_filter($untyped_array));
-  hh_show(array_filter($vector_array));
+  take_string_array(array_filter($vector_array));
   take_int_string_array(array_filter($hashtable_array));
   hh_show(array_filter($container));
   take_int_string_array(array_filter($keyed_container));
@@ -33,6 +33,7 @@ function test_array_filter(
   take_arraykey_nullable_string_array(array_filter($intersection_type, $f));
 }
 
+function take_string_array(array<string> $_):void {}
 function take_int_string_array(array<int, string> $_) {}
 function take_arraykey_string_array(array<arraykey, string> $_) {}
 

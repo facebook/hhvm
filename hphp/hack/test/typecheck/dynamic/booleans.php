@@ -2,16 +2,18 @@
 
 function testBools(dynamic $x): void {
   $y = $x && true; // $y : bool
-  hh_show($y);
+  expect_boolean($y);
   $y = $x || false; // $y : bool
-  hh_show($y);
+  expect_boolean($y);
   $y = !$x; // $y : bool
-  hh_show($y);
+  expect_boolean($y);
   $y = $x === 5; // $y : bool
-  hh_show($y);
+  expect_boolean($y);
   $y = $x == 5; // $y : bool
-  hh_show($y);
+  expect_boolean($y);
   if ($x) // valid, no sketchy null check warning
   {
   }
 }
+
+function expect_boolean(bool $_):void {}

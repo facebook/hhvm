@@ -8,14 +8,16 @@ class CamelCase {
 //// f2.php
 <?hh // partial
 function foo(cAmelCase $arg): :xhp {
-  hh_show($arg);
+  expect_CamelCase($arg);
   $v = ret();
-  hh_show($v);
+  expect_CamelCase($v);
   return new :xhp();
 }
 
 function ret(): camelcase {
   return new cAMELcASE();
 }
+
+function expect_CamelCase(CamelCase $x):void {}
 
 class :xhp {}

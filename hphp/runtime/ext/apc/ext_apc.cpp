@@ -587,7 +587,7 @@ Variant HHVM_FUNCTION(apc_cache_info,
 }
 
 Array HHVM_FUNCTION(apc_sma_info, bool /*limited*/ /* = false */) {
-  return empty_array();
+  return empty_darray();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

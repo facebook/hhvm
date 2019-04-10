@@ -136,7 +136,7 @@ function apc_clear_cache(string $cache_type = ""): bool;
  *
  */
 <<__Native>>
-function apc_sma_info(bool $limited = false): array;
+function apc_sma_info(bool $limited = false): darray;
 
 /**
  * Increases a stored number.

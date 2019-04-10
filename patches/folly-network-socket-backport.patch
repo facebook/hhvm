@@ -1,3 +1,25 @@
+diff --git a/third-party/folly/src/folly/io/async/AsyncServerSocket.cpp b/third-party/folly/src/folly/io/async/AsyncServerSocket.cpp
+index 82904d31..b51f3343 100644
+--- a/third-party/folly/src/folly/io/async/AsyncServerSocket.cpp
++++ b/third-party/folly/src/folly/io/async/AsyncServerSocket.cpp
+@@ -111,7 +111,7 @@ void AsyncServerSocket::RemoteAcceptor::messageAvailable(
+         connectionEventCallback_->onConnectionDequeuedByAcceptorCallback(
+             msg.fd, msg.address);
+       }
+-      callback_->connectionAccepted(msg.fd, msg.address);
++      callback_->connectionAccepted(folly::NetworkSocket::fromFd(msg.fd), msg.address);
+       break;
+     }
+     case MessageType::MSG_ERROR: {
+@@ -928,7 +928,7 @@ void AsyncServerSocket::dispatchSocket(int socket, SocketAddress&& address) {
+
+   CallbackInfo* info = nextCallback();
+   if (info->eventBase == nullptr || info->eventBase == this->eventBase_) {
+-    info->callback->connectionAccepted(socket, address);
++    info->callback->connectionAccepted(folly::NetworkSocket::fromFd(socket), address);
+     return;
+   }
+
 diff --git a/third-party/folly/src/folly/io/async/AsyncServerSocket.h b/third-party/folly/src/folly/io/async/AsyncServerSocket.h
 index 0edbcafa..eb161224 100644
 --- a/third-party/folly/src/folly/io/async/AsyncServerSocket.h
@@ -10,6 +32,15 @@ index 0edbcafa..eb161224 100644
  #include <folly/portability/Sockets.h>
 
  #include <limits.h>
+@@ -157,7 +157,7 @@ class AsyncServerSocket : public DelayedDestruction, public AsyncSocketBase {
+      *                    remain valid until connectionAccepted() returns.
+      */
+     virtual void connectionAccepted(
+-        int fd,
++        NetworkSocket fd,
+         const SocketAddress& clientAddr) noexcept = 0;
+
+     /**
 @@ -293,6 +294,9 @@ class AsyncServerSocket : public DelayedDestruction, public AsyncSocketBase {
     * ownership of the file descriptor.
     */
@@ -125,3 +156,45 @@ index 00000000..51d5c571
 +  return os;
 +}
 +} // namespace folly
+diff --git a/third-party/wangle/src/wangle/acceptor/Acceptor.cpp b/third-party/wangle/src/wangle/acceptor/Acceptor.cpp
+index 51911be..328f731 100644
+--- a/third-party/wangle/src/wangle/acceptor/Acceptor.cpp
++++ b/third-party/wangle/src/wangle/acceptor/Acceptor.cpp
+@@ -213,7 +213,8 @@ bool Acceptor::canAccept(const SocketAddress& address) {
+
+ void
+ Acceptor::connectionAccepted(
+-    int fd, const SocketAddress& clientAddr) noexcept {
++    folly::NetworkSocket fdNetworkSocket, const SocketAddress& clientAddr) noexcept {
++  int fd = fdNetworkSocket.toFd();
+   namespace fsp = folly::portability::sockets;
+   if (!canAccept(clientAddr)) {
+     // Send a RST to free kernel memory faster
+diff --git a/third-party/wangle/src/wangle/acceptor/Acceptor.h b/third-party/wangle/src/wangle/acceptor/Acceptor.h
+index ec005e9..9b84de8 100644
+--- a/third-party/wangle/src/wangle/acceptor/Acceptor.h
++++ b/third-party/wangle/src/wangle/acceptor/Acceptor.h
+@@ -392,7 +392,7 @@ class Acceptor :
+
+   // AsyncServerSocket::AcceptCallback methods
+   void connectionAccepted(
+-      int fd,
++      folly::NetworkSocket fd,
+       const folly::SocketAddress& clientAddr) noexcept override;
+   void acceptError(const std::exception& ex) noexcept override;
+   void acceptStopped() noexcept override;
+diff --git a/third-party/mcrouter/src/mcrouter/lib/network/AsyncMcServer.cpp b/third-party/mcrouter/src/mcrouter/lib/network/AsyncMcServer.cpp
+index c3fa836b..ca233196 100644
+--- a/third-party/mcrouter/src/mcrouter/lib/network/AsyncMcServer.cpp
++++ b/third-party/mcrouter/src/mcrouter/lib/network/AsyncMcServer.cpp
+@@ -271,8 +271,9 @@ class McServerThread {
+     AcceptCallback(McServerThread* mcServerThread, bool secure)
+         : mcServerThread_(mcServerThread), secure_(secure) {}
+     void connectionAccepted(
+-        int fd,
++        folly::NetworkSocket fdNetworkSocket,
+         const folly::SocketAddress& /* clientAddr */) noexcept final {
++      int fd = fdNetworkSocket.toFd();
+       if (secure_) {
+         const auto& server = mcServerThread_->server_;
+         auto& opts = server.opts_;

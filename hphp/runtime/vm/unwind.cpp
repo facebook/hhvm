@@ -387,7 +387,7 @@ void unwindPhp(ObjectData* phpException) {
         DEBUGGER_ATTACHED_ONLY(phpDebuggerExceptionHandlerHook());
         return;
       }
-    };
+    }
 
     // We found no more handlers in this frame.
     phpException = tearDownFrame(fp, stack, pc, phpException);

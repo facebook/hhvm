@@ -288,7 +288,6 @@ bool FuncChecker::checkOffsets() {
   Offset past = m_func->past;
   checkRegion("func", base, past, "unit", 0, unit()->bcPos(), false);
   // Get instruction boundaries and check branches within primary body
-  // and each faultlet.
   ok &= checkPrimaryBody(base, past);
   // DV entry points must be in the primary function body
   for (auto& param : m_func->params) {
@@ -297,8 +296,7 @@ bool FuncChecker::checkOffsets() {
                         past);
     }
   }
-  // Every FPI region must be contained within one section, either the
-  // primary body or one fault funclet
+  // Every FPI region must be contained within the primary body
   for (auto& fpi : m_func->fpitab) {
     Offset fpi_base = fpiBase(fpi, bc);
     Offset fpi_past = fpiPast(fpi, bc);
@@ -1421,7 +1419,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b) {
       break;
     }
     case Op::Fatal:
-      // fatals skip all fault handlers, and the silence state is reset
+      // fatals don't do exception handling, and the silence state is reset
       // by the runtime.
       cur->silences.clear();
       break;
@@ -2106,12 +2104,11 @@ void FuncChecker::copyState(State* to, const State* from) {
 }
 
 bool FuncChecker::checkExnEdge(State cur, Block* b) {
-  // Reachable catch blocks and fault funclets have an empty stack and
-  // non-initialized class-ref slots. Checking an edge to the fault
-  // handler right before every instruction is unnecessary since
-  // not every instruction can throw; there is room for improvement
-  // here if we want to note in the bytecode table which instructions
-  // can actually throw to the fault handler.
+  // Reachable catch blocks have just the exception on the stack and
+  // non-initialized class-ref slots. Checking an edge to the catch block
+  // right before every instruction is unnecessary since not every instruction
+  // can throw; there is room for improvement here if we want to note in the
+  // bytecode table which instructions can actually throw.
   auto save_stklen = cur.stklen;
   auto save_stktop = cur.stklen ? cur.stk[0] : CV;
   auto save_fpilen = cur.fpilen;

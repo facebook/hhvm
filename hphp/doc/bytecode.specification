@@ -407,56 +407,34 @@ the EH table where Q's region depth equals I and P overlaps with Q.
 Processing exceptions
 ---------------------
 
-The unwinder maintains a stack of exception infos called the "exception stack".
-An "exception info" is a record that contains an exception object, a reference
-to a frame on the call stack, a program counter (PC), and a non-negative
-integer "region depth". When a thread of execution first begins, the exception
-stack is initially empty.
-
 HHBC allows programs to throw exceptions via the Throw instruction. When a
-Throw instruction executes, it pushes a new exception info to the top of the
-exception stack that contains the thrown exception object, a reference to the
-frame that threw the exception, the PC at the time the exception was thrown,
-and a region depth of D where D equals the number of protected regions in the
-current frame's EH table that cover PC. Then it transfers control to the
-unwinder which starts processing the exception info at the top of the exception
-stack by following the steps given at the end of this section starting with
-step 1 until control is transferred elsewhere.
+Throw instruction executes it transfers control to the unwinder, which follows
+the steps below starting with step 1 until control is transferred elsewhere.
 
-Here are the steps that the unwinder follows to process the exception info at
-the top of the stack (called the "current exception info"):
+Step 1) Discard all temporary values on the evaluation stack.
 
-Step 1) Consult the EH table of the current exception info's function. Check if
-        there are any EH entries that cover the current exception info's PC and
-        have a region depth that is less than the current exception info's
-        region depth. If one or more matching EH entries are found, choose the
-        EH entry with the greatest region depth and continue on to step 2. If
-        no matching EH entries are found go to step 4.
+Step 2) Consult the EH table of the current function. If there are any EH
+        entries that cover the current PC, choose the EH entry with the
+        greatest region depth and continue on to step 3. If no matching EH
+        entries are found go to step 4.
 
-Step 2) Let E be the EH entry found in step 1, and let D be the region depth of
-        E. Set the current exception info's region depth to D (overwriting the
-        previous value). Continue on to step 3.
+Step 3) Push the exception object implementing the Throwable interface on the
+        evaluation stack, then transfer control to the catch entry point. If
+        this catch entry point corresponds to a PHP try/catch statement, it is
+        responsible for finding the matching PHP catch clause (e.g. by using
+        the InstanceOfD opcode) and rethrowing the exception if no matching
+        clause was found.
 
-Step 3) Pop the current exception info off of the exception stack and push the
-        exception object implementing the Throwable interface on the evaluation
-        stack, then transfer control to E's catch entry point. If this catch
-        entry point corresponds to a PHP try/catch statement, it is responsible
-        for finding the matching PHP catch clause (e.g. by using the InstanceOfD
-        opcode) and rethrowing the exception if no matching clause was found.
+Step 4) Check if we are handling user exception in an eagerly executed async
+        function. If so, pop the current frame, wrap the exception into a
+        failed StaticWaitHandle object, leave it on the stack as a return
+        value from the async function and resume execution.
 
-Step 4) Pop the current frame off of the call stack and then check if the call
-        stack is empty. If the call stack is empty, read the current exception
-        info's exception X, clear the exception stack, and transfer control to
-        the unhandled exception facility passing along exception X. If the call
-        stack is not empty continue to step 5.
-
-Step 5) Update the current exception info to refer to the new current frame at
-        the top of the call stack, and set the current exception info's PC to
-        point to the FCall* instruction which immediately precedes the PC of
-        the current frame. Next, set the current exception info's region depth
-        to D, where D equals the number of protected regions in the current
-        frame's EH table that cover the current exception info's PC. Then go to
-        step 1.
+Step 5) Pop the current frame off of the call stack and then check if the call
+        stack is empty. If the call stack is empty transfer control to the
+        unhandled exception facility passing along the exception. If the call
+        stack is not empty, then set the PC to point to the FCall* instruction
+        which invoked the frame we just discarded and go to step 1.
 
 
 Property access

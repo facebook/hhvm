@@ -7,5 +7,5 @@
  *
  *)
 
-let parse_file _ _ = None
-let extract_facts _ = None
+let parse_file _ _ _ = None
+let extract_facts _ _ = None

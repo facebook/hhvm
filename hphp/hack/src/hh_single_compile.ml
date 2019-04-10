@@ -391,8 +391,8 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
   then log_success compiler_options filename debug_time;
   hhas
 
-let extract_facts ?pretty ~filename text =
-  let json_facts = match Hackc_parse_delegator.extract_facts filename with
+let extract_facts ?pretty ~filename ~source_root text =
+  let json_facts = match Hackc_parse_delegator.extract_facts filename source_root with
     | Some result -> Some result
     | None ->
       let enable_hh_syntax =
@@ -436,17 +436,17 @@ let make_popt () =
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
 
 let process_single_source_unit compiler_options
-  handle_output handle_exception filename source_text =
+  handle_output handle_exception filename source_text source_root =
   try
     let popt = make_popt () in
     let debug_time = new_debug_time () in
     let t = Unix.gettimeofday () in
     let output =
       if compiler_options.extract_facts
-      then extract_facts ~pretty:true ~filename source_text
+      then extract_facts ~pretty:true ~filename ~source_root source_text
       else begin
         let fail_or_ast =
-          match Hackc_parse_delegator.parse_file filename source_text with
+          match Hackc_parse_delegator.parse_file filename source_text source_root with
           | Some fail_or_ast -> fail_or_ast
           | None -> parse_file compiler_options popt filename source_text
         in
@@ -543,6 +543,7 @@ let decl_and_run_mode compiler_options =
             (get_obj "config_overrides")
             (fun _af -> JSON_Object [])
             header in
+          let source_root = get_field_opt (get_string "root") header in
           set_compiler_options (Some config_overrides);
           let compiler_options = { compiler_options with for_debugger_eval } in
           let result = process_single_source_unit
@@ -550,7 +551,8 @@ let decl_and_run_mode compiler_options =
             handle_output
             handle_exception
             (Relative_path.create Relative_path.Dummy filename)
-            body in
+            body
+            source_root in
           Hhbc_options.set_compiler_options old_config;
           result)
         ; facts = (fun header body -> (
@@ -559,6 +561,7 @@ let decl_and_run_mode compiler_options =
             (get_string "file")
             (fun af -> fail_daemon None ("Cannot determine file name of source unit: " ^ af))
             header in
+          let source_root = get_field_opt (get_string "root") header in
           let body =
             if String.length body = 0
             then Sys_utils.cat filename
@@ -566,7 +569,7 @@ let decl_and_run_mode compiler_options =
           let path = Relative_path.create Relative_path.Dummy filename in
           handle_output
             path
-            (extract_facts ~filename:path body))
+            (extract_facts ~filename:path ~source_root body))
             (new_debug_time ()))
         ; parse = (fun header body -> (
           let filename = get_field
@@ -596,7 +599,7 @@ let decl_and_run_mode compiler_options =
         let filename = Relative_path.create Relative_path.Dummy filename in
         let abs_path = Relative_path.to_absolute filename in
         process_single_source_unit
-          compiler_options handle_output handle_exception filename (cat abs_path) in
+          compiler_options handle_output handle_exception filename (cat abs_path) None in
 
       let filenames, handle_output = match compiler_options.input_file_list with
         (* List of source files explicitly given *)

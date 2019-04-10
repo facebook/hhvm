@@ -47,7 +47,6 @@ type t = {
   option_hhjs_additional_transform        : string;
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
-  option_hhjs_repo_root                   : string;
   option_hhjs_node_modules                : SSet.t;
   option_enable_concurrent                : bool;
   option_enable_await_as_an_expression    : bool;
@@ -104,7 +103,6 @@ let default = {
   option_hhjs_additional_transform = "";
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
-  option_hhjs_repo_root = "";
   option_hhjs_node_modules = SSet.empty;
   option_enable_concurrent = false;
   option_enable_await_as_an_expression = false;
@@ -158,7 +156,6 @@ let dump_hhjs o = o.option_dump_hhjs
 let hhjs_additional_transform o = o.option_hhjs_additional_transform
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
-let hhjs_repo_root o = o.option_hhjs_repo_root
 let hhjs_node_modules o = o.option_hhjs_node_modules
 let enable_concurrent o = o.option_enable_concurrent
 let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
@@ -256,14 +253,6 @@ let get_hhjs_node_modules_from_string = function
       Some v_set
   | None -> None
 
-let get_validate_hhjs_repo_root_from_string path =
-  match path with
-  | "" -> ""
-  | _ -> begin match Sys_utils.realpath path with
-    | Some p -> p
-    | None -> raise (Arg.Bad ("repo root " ^ path ^ " does not exist."))
-    end
-
 let set_option options name value =
   match String.lowercase name with
   | "eval.enablehiphopsyntax" ->
@@ -325,8 +314,6 @@ let set_option options name value =
     { options with option_hhjs_additional_transform = value }
   | "eval.hhjsbabeltransform" ->
     { options with option_hhjs_babel_transform = value }
-  | "eval.hhjsreporoot" ->
-    { options with option_hhjs_repo_root = get_validate_hhjs_repo_root_from_string value}
   | "eval.hhjsnodemodules" ->
     let hhjs_node_modules = match get_hhjs_node_modules_from_string @@ Some value with
     | Some s -> s
@@ -503,8 +490,6 @@ let value_setters = [
      fun opts v -> { opts with option_hhjs_unique_filenames = (v = 1) });
   (set_value "hhvm.hhjs_babel_transform" get_value_from_config_string @@
      fun opts v -> { opts with option_hhjs_babel_transform = v });
-  (set_value "hhvm.hhjs_repo_root" get_value_from_config_string @@
-     fun opts v -> { opts with option_hhjs_repo_root = get_validate_hhjs_repo_root_from_string v });
   (set_value "hhvm.hhjs_node_modules" get_hhjs_node_modules_from_config_string @@
     fun opts v -> { opts with option_hhjs_node_modules = v });
   (set_value "hhvm.hack.lang.phpism.undefined_function_fallback" get_value_from_config_int @@

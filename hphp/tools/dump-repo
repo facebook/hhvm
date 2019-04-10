@@ -16,12 +16,12 @@ else
     dump_what=-vEval.DumpBytecode="${DUMP_LEVEL:-1}"
 fi
 
-table=$(sqlite3 $repo ".tables 'FileMd5%'")
+table=$(sqlite3 "$repo" ".tables 'FileSha1%'")
 where=
 if [[ -n $pattern ]] ; then
    where="WHERE path like '$pattern'"
 fi
-sqlite3 $repo "select path from $table $where" | \
+sqlite3 "$repo" "select path from $table $where" | \
    grep -v "^/:" | \
    xargs -I% sh -c \
         "echo ==== Dumping % ======; \

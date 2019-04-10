@@ -18,9 +18,25 @@ module TUtils       = Typing_utils
 module Type         = Typing_ops
 module MakeType     = Typing_make_type
 
+
+let widen_for_refine_shape ~expr_pos field_name env ty =
+  match ty with
+  | r, Tshape (fields_known, fields) ->
+    begin match ShapeMap.get field_name fields with
+    | None ->
+      let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
+      let sft = {sft_optional = true; sft_ty = element_ty} in
+      env, Some (r, Tshape (fields_known, ShapeMap.add field_name sft fields))
+    | Some _ ->
+      env, Some ty
+    end
+  | _ ->
+    env, None
+
 let rec refine_shape field_name pos env shape =
   let env, shape =
-    Typing_subtype.expand_type_and_solve ~description_of_expected:"a shape" env pos shape in
+    Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
+      (widen_for_refine_shape ~expr_pos:pos field_name) pos shape in
   match shape with
   | shape_r, Tshape (fields_known, fields) ->
     let refine_shape_field_type refined_sft_ty =
@@ -95,6 +111,9 @@ let shapes_idx_not_null env shape_ty (p, field) =
   match TUtils.shape_field_name env (p, field) with
   | None -> env, (r, shape_ty)
   | Some field ->
+   let env, (r, shape_ty) =
+    Typing_subtype.expand_type_and_narrow ~description_of_expected:"a shape" env
+      (widen_for_refine_shape ~expr_pos:p field) p (r, shape_ty) in
     begin match shape_ty with
     | Tshape (fieldsknown, ftm) ->
       let env, field_type =

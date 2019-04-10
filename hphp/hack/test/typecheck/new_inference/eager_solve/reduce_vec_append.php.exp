@@ -1,6 +1,1 @@
-File "reduce_vec_append.php", line 18, characters 14-19:
-Invalid return type (Typing[4110])
-  File "reduce_vec_append.php", line 20, characters 5-9:
-  This is an undefined value
-  File "reduce_vec_append.php", line 16, characters 18-22:
-  It is incompatible with an object of type vec
+No errors

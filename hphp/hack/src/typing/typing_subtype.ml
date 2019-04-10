@@ -2758,13 +2758,16 @@ let get_union_elements env ty =
  * member access and array indexing.
  *)
 let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
+  if not (TypecheckerOptions.new_inference (Env.get_tcopt env))
+  then Env.expand_type env ty
+  else
   (* Deconstruct the type into union elements (if it's a union). For variables,
    * take the lower bounds. If there are no variables, then we have a concrete
    * type so just return expanded type
    *)
   let env, has_var, tys = get_union_elements env ty in
   if not has_var
-  then Env.expand_type env ty
+  then Typing_utils.simplify_unions env ty
   else
   (* Now for each union element, use widen_concrete_type to suggest a concrete
    * upper bound. *)

@@ -33,14 +33,97 @@ let error_assign_array_append env p ty =
   Errors.array_append p (Reason.to_pos (fst ty)) (Typing_print.error env ty);
   env, (ty, err_witness env p)
 
+(* Given a type `ty` known to be a lower bound on the type of the array operand
+ * to an array get operation, compute the largest upper bound on that type
+ * that validates the get operation. For example, if `vec<string>` is a lower
+ * bound, then the type must be a subtype of `KeyedContainer<#1,#2>` for some
+ * unresolved types #1 and #2. If `(string,int)` is a lower bound, then
+ * `(#1, #2)` is a suitable upper bound. Shapes are the most complex. If
+ * `shape(known_fields, ...)` is a lower bound (an open shape type), and the
+ * access is through a literal field f, then `shape('f' => #1, ...)` is a
+ * suitable upper bound.
+ *)
+let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
+  Typing_log.(log_with_level env "typing" 1 (fun () ->
+    log_types expr_pos env
+      [Log_head ("widen_for_array_get",
+      [Log_type ("ty", ty)])]));
+  match ty with
+  (* The null type is valid only with a null-coalescing use of array get *)
+  | _, Tprim Tnull when lhs_of_null_coalesce ->
+    env, Some ty
+
+  (* All class-based containers, and keyset, vec and dict, are subtypes of
+   * some instantiation of KeyedContainer
+   *)
+  | r, Tclass ((_, cn), _, _)
+  when cn = SN.Collections.cVector
+    || cn = SN.Collections.cVec
+    || cn = SN.Collections.cMap
+    || cn = SN.Collections.cStableMap
+    || cn = SN.Collections.cDict
+    || cn = SN.Collections.cKeyset
+    || cn = SN.Collections.cConstMap
+    || cn = SN.Collections.cImmMap
+    || cn = SN.Collections.cKeyedContainer
+    || cn = SN.Collections.cConstVector
+    || cn = SN.Collections.cImmVector ->
+    let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
+    let env, index_ty = Env.fresh_invariant_type_var env expr_pos in
+    let ty = MakeType.keyed_container r index_ty element_ty in
+    env, Some ty
+
+  (* The same is true of PHP arrays *)
+  | r, Tarraykind _ ->
+    let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
+    let env, index_ty = Env.fresh_invariant_type_var env expr_pos in
+    let ty = MakeType.keyed_container r index_ty element_ty in
+    env, Some ty
+
+  (* For tuples, we just freshen the element types *)
+  | r, Ttuple tyl ->
+    (* requires integer literal *)
+    begin match index_expr with
+    (* Should freshen type variables *)
+    | _, Int _ ->
+      let env, params = List.map_env env tyl
+        (fun env _ty -> Env.fresh_invariant_type_var env expr_pos) in
+      env, Some (r, Ttuple params)
+    | _ ->
+      env, None
+    end
+  (* Whatever the lower bound, construct an open, singleton shape type. *)
+  | r, Tshape (_, fdm) ->
+    begin match TUtils.shape_field_name env index_expr with
+    | None ->
+      env, None
+    | Some field ->
+      match ShapeMap.get field fdm with
+      (* If field is in the lower bound but is optional, then no upper bound makes sense
+       * unless this is a null-coalesce access *)
+      | Some { sft_optional = true; _ } when not lhs_of_null_coalesce ->
+        env, None
+      | _ ->
+        let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
+        let fields_known = FieldsPartiallyKnown ShapeMap.empty in
+        let upper_fdm = ShapeMap.add field
+          {sft_optional = lhs_of_null_coalesce; sft_ty = element_ty} ShapeMap.empty in
+        let upper_shape_ty = (r, Tshape (fields_known, upper_fdm)) in
+        env, Some upper_shape_ty
+    end
+  | _ ->
+    env, None
+
 let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
   is_lvalue env ty1 e2 ty2 =
   Typing_log.(log_with_level env "typing" 1 (fun () ->
     log_types expr_pos env
       [Log_head ("array_get",
       [Log_type ("ty1", ty1); Log_type("ty2", ty2)])]));
-  let env, (r, ety1_ as ety1) = SubType.expand_type_and_solve env
-    ~description_of_expected:"an array or collection" array_pos ty1 in
+  let env, (r, ety1_ as ety1) = SubType.expand_type_and_narrow env
+    ~description_of_expected:"an array or collection"
+    (widen_for_array_get ~lhs_of_null_coalesce ~expr_pos e2) array_pos ty1 in
+
   (* This is a little weird -- we enforce the right arity when you use certain
    * collections, even in partial mode (where normally completely omitting the
    * type parameter list is admitted). Basically the "omit type parameter"
@@ -314,9 +397,38 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
     let env = SubType.sub_type env ty1 keyed_container in
     env, value
 
+(* Given a type `ty` known to be a lower bound on the type of the array operand
+ * to an array append operation, compute the largest upper bound on that type
+ * that validates the get operation. For example, if `vec<string>` is a lower
+ * bound, then `vec<#1>` is a suitable upper bound.`
+ *)
+let widen_for_assign_array_append ~expr_pos env ty =
+  match ty with
+  | r, Tclass ((_, cn) as id, _, tyl)
+    when cn = SN.Collections.cVec
+      || cn = SN.Collections.cKeyset
+      || cn = SN.Collections.cVector
+      || cn = SN.Collections.cMap ->
+    let env, params = List.map_env env tyl
+      (fun env _ty -> Env.fresh_invariant_type_var env expr_pos) in
+    let ty = r, Tclass (id, Nonexact, params) in
+    env, Some ty
+
+  | r, Tarraykind (AKvec _) ->
+    let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKvec element_ty))
+
+  | r, Tarraykind (AKvarray _) ->
+    let env, element_ty = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKvarray element_ty))
+
+  | _ ->
+    env, None
+
 let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
-  let env, ety1 = SubType.expand_type_and_solve
-      ~description_of_expected:"an array or collection" env array_pos ty1 in
+  let env, ety1 = SubType.expand_type_and_narrow
+      ~description_of_expected:"an array or collection" env
+      (widen_for_assign_array_append ~expr_pos) array_pos ty1 in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
   log_types expr_pos env
     [Log_head ("assign_array_append",

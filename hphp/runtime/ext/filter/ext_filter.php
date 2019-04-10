@@ -30,5 +30,5 @@ function filter_id(string $filtername): mixed;
  */
 <<__Native, __Rx>>
 function filter_var(mixed $variable,
-                    int $filter = 516,
-                    mixed $options = array()): mixed;
+                    int $filter = FILTER_DEFAULT,
+                    mixed $options = darray[]): mixed;

@@ -773,7 +773,7 @@ function htmlspecialchars(string $str,
 function fb_htmlspecialchars(string $str,
                              int $quote_style = ENT_COMPAT,
                              string $charset = "ISO-8859-1",
-                             mixed $extra = array()): string;
+                             mixed $extra = varray[]): string;
 
 /**
  * Returns a quoted printable string created according to  RFC2045, section

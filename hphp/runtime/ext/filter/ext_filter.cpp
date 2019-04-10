@@ -397,8 +397,8 @@ Variant HHVM_FUNCTION(filter_id,
 
 Variant HHVM_FUNCTION(filter_var,
                       const Variant& variable,
-                      int64_t filter /* = 516 */,
-                      const Variant& options /* = empty_array_ref */) {
+                      int64_t filter /* = FILTER_DEFAULT */,
+                      const Variant& options /* = shape() */) {
   int64_t filter_flags;
   if (options.isArray()) {
     filter_flags = options.toCArrRef()[s_flags].toInt64();

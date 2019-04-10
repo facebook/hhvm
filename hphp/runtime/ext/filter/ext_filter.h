@@ -28,8 +28,8 @@ Variant HHVM_FUNCTION(filter_id,
                       const String& filtername);
 Variant HHVM_FUNCTION(filter_var,
                       const Variant& variable,
-                      int64_t filter = 516,
-                      const Variant& options = empty_array_ref);
+                      int64_t filter,
+                      const Variant& options);
 Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name);
 void HHVM_FUNCTION(_filter_snapshot_globals);
 

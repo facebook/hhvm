@@ -49,8 +49,7 @@ void HHVM_FUNCTION(var_dump,
                    const Variant& v, const Array& _argv = null_array);
 void HHVM_FUNCTION(debug_zval_dump, const Variant& variable);
 String HHVM_FUNCTION(serialize, const Variant& value);
-Variant HHVM_FUNCTION(unserialize, const String& str,
-                      const Array& options = empty_array_ref);
+Variant HHVM_FUNCTION(unserialize, const String& str, const Array& options);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

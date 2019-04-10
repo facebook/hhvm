@@ -44,7 +44,6 @@ namespace HPHP {
 ////////////////////////////////////////////////////////////////////////////////
 
 const Array null_array{};
-const Array empty_array_ref{staticEmptyArray()};
 const StaticString array_string("Array");
 const StaticString vec_string("Vec");
 const StaticString dict_string("Dict");

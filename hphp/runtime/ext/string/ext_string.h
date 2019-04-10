@@ -173,9 +173,9 @@ String HHVM_FUNCTION(htmlspecialchars,
                      bool double_encode = true);
 String HHVM_FUNCTION(fb_htmlspecialchars,
                      const String& str,
-                     int quote_style = k_ENT_HTML_QUOTE_DOUBLE,
-                     const String& charset = "ISO-8859-1",
-                     const Variant& extra = empty_array_ref);
+                     int quote_style,
+                     const String& charset,
+                     const Variant& extra);
 String HHVM_FUNCTION(quoted_printable_encode,
                      const String& str);
 String HHVM_FUNCTION(quoted_printable_decode,

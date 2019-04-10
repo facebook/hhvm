@@ -602,7 +602,7 @@ String HHVM_FUNCTION(hhvm_intrinsics_serialize_keep_dvarrays,
 }
 
 Variant HHVM_FUNCTION(unserialize, const String& str,
-                                   const Array& options /* =[] */) {
+                                   const Array& options) {
   return unserialize_from_string(
     str,
     VariableUnserializer::Type::Serialize,

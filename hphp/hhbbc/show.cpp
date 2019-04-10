@@ -286,12 +286,8 @@ std::string show(const Func& func, const Block& block) {
     );
   }
 
-  if (!block.throwExits.empty()) {
-    ret += "(throw:";
-    for (auto ex : block.throwExits) {
-      folly::toAppend(" blk:", ex, &ret);
-    }
-    ret += ")\n";
+  if (block.throwExit != NoBlockId) {
+    ret += folly::sformat("(throw: blk:{})\n", block.throwExit);
   }
 
   return ret;
@@ -321,14 +317,9 @@ std::string dot_cfg(const Func& func) {
       outputed = true;
     });
     if (outputed) ret += "\n";
-    outputed = false;
-    if (!is_single_nop(*b)) {
-      for (auto ex : b->throwExits) {
-        ret += folly::sformat("B{} -> B{} [color=red];", bid, ex);
-        outputed = true;
-      }
+    if (!is_single_nop(*b) && b->throwExit != NoBlockId) {
+      ret += folly::sformat("B{} -> B{} [color=red];\n", bid, b->throwExit);
     }
-    if (outputed) ret += "\n";
   }
   return ret;
 }

@@ -65,7 +65,7 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
       bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
     };
     blk->fallthrough = NoBlockId;
-    blk->throwExits = {};
+    blk->throwExit = NoBlockId;
     blk->exnNodeId = NoExnNodeId;
   }
 
@@ -341,7 +341,7 @@ bool buildSwitches(php::Func& func,
           removed->dead = true;
           removed->hhbcs = { bc::Nop {} };
           removed->fallthrough = NoBlockId;
-          removed->throwExits = {};
+          removed->throwExit = NoBlockId;
           removed->exnNodeId = NoExnNodeId;
         }
         ret = true;
@@ -411,7 +411,7 @@ bool rebuild_exn_tree(const FuncAnalysis& ainfo) {
     if (!reachable(bid)) {
       auto const blk = func.blocks[bid].mutate();
       blk->exnNodeId = NoExnNodeId;
-      blk->throwExits = {};
+      blk->throwExit = NoBlockId;
       continue;
     }
   }
@@ -477,7 +477,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         }
       );
     }
-    for (auto& ex : cblk->throwExits)  handleSucc(ex);
+    if (cblk->throwExit != NoBlockId) handleSucc(cblk->throwExit);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
   blockInfo[func.mainEntry].multiplePreds = true;
@@ -495,7 +495,7 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       if (blockInfo[bid].multipleSuccs ||
           blockInfo[cblk->fallthrough].multiplePreds ||
           cblk->exnNodeId != cnxt->exnNodeId ||
-          cblk->throwExits != cnxt->throwExits) {
+          cblk->throwExit != cnxt->throwExit) {
         break;
       }
 

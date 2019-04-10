@@ -915,10 +915,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       }
     }
 
-    if (b->throwExits.size()) {
-      FTRACE(4, "      throw:");
-      for (auto DEBUG_ONLY id : b->throwExits) FTRACE(4, " {}", id);
-      FTRACE(4, "\n");
+    if (b->throwExit != NoBlockId) {
+      FTRACE(4, "      throw: {}\n", b->throwExit);
     }
     if (fallthrough != NoBlockId) {
       FTRACE(4, "      fallthrough: {}\n", fallthrough);

@@ -68,10 +68,9 @@ struct SrcInfo {
  */
 struct Block {
   /*
-   * The pointer for this block's exception region, or nullptr if
-   * there is none.
+   * The id of this block's ExnNode, or NoExnNodeId if there is none.
    */
-  ExnNodeId exnNodeId;
+  ExnNodeId exnNodeId{NoExnNodeId};
 
   /*
    * Instructions in the block.  Never empty guarantee.
@@ -85,22 +84,21 @@ struct Block {
    *    to the named block).  If fallthroughNS is true, this edge
    *    represents a no-surprise jump.
    *
-   *  - Taken edges (these are encoded in the last instruction in hhbcs).
+   *  - throwExit (the edges traversed for exceptions from this block)
    *
-   *  - throwExits (these represent edges traversed for exceptions mid-block)
+   *  - Taken edges (these are encoded in the last instruction in hhbcs).
    *
    * For the idea behind the factored exit edge thing, see "Efficient
    * and Precise Modeling of Exceptions for the Analysis of Java
    * Programs" (http://dl.acm.org/citation.cfm?id=316171).
    */
   BlockId fallthrough{NoBlockId};
+  BlockId throwExit{NoBlockId};
   bool catchEntry{false};
   bool fallthroughNS{false};
   bool multiPred{false};
   bool multiSucc{false};
   bool dead{false};
-
-  CompactVector<BlockId> throwExits;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -486,7 +486,7 @@ BlockId make_block(FuncAnalysis& ainfo,
   auto newBlk           = copy_ptr<php::Block>{php::Block{}};
   auto const blk        = newBlk.mutate();
   blk->exnNodeId        = srcBlk->exnNodeId;
-  blk->throwExits       = srcBlk->throwExits;
+  blk->throwExit        = srcBlk->throwExit;
   auto const bid = ainfo.ctx.func->blocks.size();
   ainfo.ctx.func->blocks.push_back(std::move(newBlk));
 
@@ -510,7 +510,7 @@ BlockId make_fatal_block(FuncAnalysis& ainfo,
     bc_with_loc(srcLoc, bc::Fatal { FatalOp::Runtime })
   };
   blk->fallthrough = NoBlockId;
-  blk->throwExits = {};
+  blk->throwExit = NoBlockId;
   blk->exnNodeId = NoExnNodeId;
   return bid;
 }

@@ -76,7 +76,7 @@ template<class Fun>
 void forEachSuccessor(const php::Block& block, Fun f) {
   if (!is_single_nop(block)) {
     forEachTakenEdge(block.hhbcs.back(), f);
-    for (auto& ex : block.throwExits)  f(ex);
+    if (block.throwExit != NoBlockId) f(block.throwExit);
   }
   if (block.fallthrough != NoBlockId) f(block.fallthrough);
 }

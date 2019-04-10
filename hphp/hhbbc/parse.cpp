@@ -261,70 +261,6 @@ ExnTreeInfo build_exn_tree(const FuncEmitter& fe,
   return ret;
 }
 
-BlockId node_entry_block(const php::ExnNode& node) {
-  return node.region.catchEntry;
-}
-
-/*
- * Build the exceptional edge lists for a function for the simple (and common
- * case). If the function's exception tree is all flat (no children), then
- * throw exits just jump to the associated handler (and any throw in the handler
- * will exit the function).
- */
-void build_exceptional_edges_simple(php::Func& func) {
-  for (auto& blk : func.blocks) {
-    assert(blk->throwExits.empty());
-    if (blk->exnNodeId == NoExnNodeId) continue;
-    blk.mutate()->throwExits.push_back(
-      node_entry_block(func.exnNodes[blk->exnNodeId])
-    );
-  }
-}
-
-/*
- * Populate the throw edges for all blocks in the function.
- *
- * - A throwing instruction (which can happen anytime within a block) will jump
- *   to the block's exception handler (given by the exnNode), if any. If there
- *   is not, it will exit the function (and thus no edge).
- */
-void build_exceptional_edges(const ExnTreeInfo& tinfo, php::Func& func) {
-  // Check for the simple and quicker cases
-  if (func.exnNodes.empty()) return;
-  if (std::all_of(
-        func.exnNodes.begin(),
-        func.exnNodes.end(),
-        [](auto const& n){ return n.children.empty(); })
-     ) {
-    return build_exceptional_edges_simple(func);
-  }
-
-  FTRACE(4, "    -------- build exceptional edges (full) --------\n");
-  FTRACE(8, "{}\n", show(func));
-
-  for (auto const bid : func.blockRange()) {
-    auto const blk = func.blocks[bid].mutate();
-    assert(blk->throwExits.empty());
-
-    if (blk->exnNodeId != NoExnNodeId) {
-      blk->throwExits.push_back(
-        node_entry_block(func.exnNodes[blk->exnNodeId])
-      );
-    }
-
-    FTRACE(
-      8, "    blk:{} (throw:{})\n",
-      bid,
-      [&]{
-        using namespace folly::gen;
-        return from(blk->throwExits)
-          | map([] (BlockId b) { return folly::sformat(" blk:{}", b); })
-          | unsplit<std::string>("");
-      }()
-    );
-  }
-}
-
 template<class T> T decode(PC& pc) {
   auto const ret = *reinterpret_cast<const T*>(pc);
   pc += sizeof ret;
@@ -767,6 +703,7 @@ void build_cfg(ParseUnitState& puState,
       auto it = exnTreeInfo.ehMap.find(eh);
       assert(it != end(exnTreeInfo.ehMap));
       block->exnNodeId = it->second;
+      block->throwExit = func.exnNodes[it->second].region.catchEntry;
     }
 
     populate_block(puState, fe, func, *block, bcStart, bcStop, findBlock);
@@ -786,8 +723,6 @@ void build_cfg(ParseUnitState& puState,
     blk->multiPred = predSuccCounts[id].first > 1;
     func.blocks[id] = std::move(kv.second.second);
   }
-
-  build_exceptional_edges(exnTreeInfo, func);
 }
 
 void add_frame_variables(php::Func& func, const FuncEmitter& fe) {

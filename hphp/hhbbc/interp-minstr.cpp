@@ -296,9 +296,9 @@ folly::Optional<Type> array_do_newelem(ISS& env, const Type& value) {
 // MInstrs can throw in between each op, so the states of locals
 // need to be propagated across throw exit edges.
 void miThrow(ISS& env) {
-  for (auto exit : env.blk.throwExits) {
+  if (env.blk.throwExit != NoBlockId) {
     auto const stackLess = with_throwable_only(env.index, env.state);
-    env.propagate(exit, &stackLess);
+    env.propagate(env.blk.throwExit, &stackLess);
   }
 }
 

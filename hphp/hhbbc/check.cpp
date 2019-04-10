@@ -54,24 +54,11 @@ bool DEBUG_ONLY checkBlock(const php::Func& f, const php::Block& b) {
     });
   }
 
-  // If the block has an exnNode, it should always have a throw edge to it (and
-  // nothing else).
-  if (b.exnNodeId != NoExnNodeId) {
-    assert(b.throwExits.size() == 1);
-    assert(f.exnNodes[b.exnNodeId].region.catchEntry == b.throwExits[0]);
-  }
-
-  // A block can only have a throw exit if it has an exnNode (which was checked
-  // above).
-  assert(b.exnNodeId != NoExnNodeId || b.throwExits.empty());
-
-  // The exit lists contains unique elements.
-  hphp_fast_set<BlockId> exitSet;
-  std::copy(begin(b.throwExits), end(b.throwExits),
-            std::inserter(exitSet, begin(exitSet)));
-  assert(exitSet.size() == b.throwExits.size());
-
-  exitSet.clear();
+  // A block should either have a matching exnNodeId and throwExit, or neither
+  // should be set.
+  assert(b.throwExit == (b.exnNodeId != NoExnNodeId
+    ? f.exnNodes[b.exnNodeId].region.catchEntry
+    : NoBlockId));
 
   return true;
 }

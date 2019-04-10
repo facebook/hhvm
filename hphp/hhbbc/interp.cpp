@@ -4772,10 +4772,10 @@ StepFlags interpOps(Interp& interp,
   auto flags = StepFlags{};
   ISS env { interp, flags, propagate };
 
-  // If there are throw exit edges, make a copy of the state (except
-  // stacks) in case we need to propagate across throw exits (if
+  // If there is a throw exit edge, make a copy of the state (except
+  // stacks) in case we need to propagate across the throw exit (if
   // it's a PEI) and push Throwable.
-  auto const stateBefore = interp.blk->throwExits.empty()
+  auto const stateBefore = interp.blk->throwExit == NoBlockId
     ? State{}
     : with_throwable_only(env.index, interp.state);
 
@@ -4820,8 +4820,8 @@ StepFlags interpOps(Interp& interp,
   assertx(!flags.effectFree || !flags.wasPEI);
   if (flags.wasPEI) {
     FTRACE(2, "   PEI.\n");
-    for (auto exit : interp.blk->throwExits) {
-      propagate(exit, &stateBefore);
+    if (interp.blk->throwExit != NoBlockId) {
+      propagate(interp.blk->throwExit, &stateBefore);
     }
   }
   return flags;

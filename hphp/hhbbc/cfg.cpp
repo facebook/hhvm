@@ -144,11 +144,11 @@ computeThrowPreds(const php::Func& func,
       preds.resize(bid + 1);
     }
     auto const b = func.blocks[bid].get();
-    for (auto& ex : b->throwExits) {
-      if (preds.size() < ex + 1) {
-        preds.resize(ex + 1);
+    if (b->throwExit != NoBlockId) {
+      if (preds.size() < b->throwExit + 1) {
+        preds.resize(b->throwExit + 1);
       }
-      preds[ex].insert(bid);
+      preds[b->throwExit].insert(bid);
     }
   }
   return preds;

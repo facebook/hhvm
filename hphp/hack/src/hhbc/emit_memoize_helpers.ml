@@ -12,11 +12,15 @@ open Instruction_sequence
 
 let memoize_suffix = "$memoize_impl"
 
+let getmemokeyl local index name =
+  [ instr_getmemokeyl (Local.Named name)
+  ; instr_setl (Local.Unnamed (local + index))
+  ; instr_popc
+  ]
+
 let param_code_sets params local =
-  gather @@ List.concat_mapi params (fun index param ->
-      [ instr_getmemokeyl (Local.Named (Hhas_param.name param));
-        instr_setl (Local.Unnamed (local + index));
-        instr_popc ])
+  gather @@ List.concat_mapi params
+    (fun index param -> getmemokeyl local index @@ Hhas_param.name param)
 
 let param_code_gets params =
   gather @@ List.map params (fun param ->

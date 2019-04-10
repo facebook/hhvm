@@ -1,0 +1,5 @@
+(rule
+  (targets get_build_id.gen.c)
+  (deps gen_build_id.ml utils.ml)
+  (action
+    (run ocaml -I scripts -w -3 -unsafe-string unix.cma gen_build_id.ml get_build_id.gen.c)))

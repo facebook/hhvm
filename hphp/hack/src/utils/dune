@@ -1,3 +1,5 @@
+(copy_files ../../scripts/get_build_id.gen.c)
+
 (library
   (name utils_core)
   (wrapped false)

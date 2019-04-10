@@ -4888,7 +4888,11 @@ OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
   ar->trashThis();
 }
 
-void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
+namespace {
+
+void fPushObjMethodImpl(
+  StringData* name, int numArgs, bool dynamic, folly::Optional<Array> tsList
+) {
   const Func* f;
   LookupResult res;
   assertx(tvIsObject(vmStack().indC(numArgs + 2)));
@@ -4899,7 +4903,7 @@ void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
     f, cls, name, arGetContextClass(vmfp()), true);
   assertx(f);
   if (f->hasReifiedGenerics()) {
-    if (!isReifiedName(name)) {
+    if (!isReifiedName(name) && !tsList) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
     }
   }
@@ -4931,9 +4935,15 @@ void fPushObjMethodImpl(StringData* name, int numArgs, bool dynamic) {
     decRefStr(name);
   }
   if (f->hasReifiedGenerics()) {
-    assertx(isReifiedName(name));
-    auto const reifiedGenerics =
-      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
+    auto reifiedGenerics = [&] {
+      if (!tsList) {
+        return getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
+      }
+      auto tsListAD = tsList->detach();
+      // The array-data passed on the stack may not be static
+      ArrayData::GetScalarArray(&tsListAD);
+      return tsListAD;
+    }();
     ar->setReifiedGenerics(reifiedGenerics);
   }
 }
@@ -4982,6 +4992,27 @@ ALWAYS_INLINE StringData* mangleInOutName(
     );
 }
 
+ALWAYS_INLINE
+void fPushObjMethodDImpl(
+  uint32_t numArgs,
+  const StringData* name,
+  ObjMethodOp op,
+  folly::Optional<Array> tsList
+) {
+  Cell* c1 = vmStack().indC(numArgs + 2);
+  if (c1->m_type != KindOfObject) {
+    if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c1->m_type))) {
+      throw_call_non_object(name->data(),
+                            getDataTypeString(c1->m_type).get()->data());
+    }
+    fPushNullObjMethod(numArgs);
+    return;
+  }
+  fPushObjMethodImpl(const_cast<StringData*>(name), numArgs, false, tsList);
+}
+
+} // namespace
+
 OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
                                      imm_array<uint32_t> args) {
   Cell* c1 = vmStack().topC(); // Method name.
@@ -5008,21 +5039,21 @@ OPTBLD_INLINE void iopFPushObjMethod(uint32_t numArgs, ObjMethodOp op,
 
   // We handle decReffing name in fPushObjMethodImpl
   vmStack().discard();
-  fPushObjMethodImpl(name, numArgs, true);
+  fPushObjMethodImpl(name, numArgs, true, folly::none);
 }
 
 OPTBLD_INLINE void
 iopFPushObjMethodD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
-  Cell* c1 = vmStack().indC(numArgs + 2);
-  if (c1->m_type != KindOfObject) {
-    if (UNLIKELY(op == ObjMethodOp::NullThrows || !isNullType(c1->m_type))) {
-      throw_call_non_object(name->data(),
-                            getDataTypeString(c1->m_type).get()->data());
-    }
-    fPushNullObjMethod(numArgs);
-    return;
-  }
-  fPushObjMethodImpl(const_cast<StringData*>(name), numArgs, false);
+  fPushObjMethodDImpl(numArgs, name, op, folly::none);
+}
+
+OPTBLD_INLINE void
+iopFPushObjMethodRD(uint32_t numArgs, const StringData* name, ObjMethodOp op) {
+  auto const tsListCell = vmStack().topC();
+  assertx(tvIsVecOrVArray(tsListCell));
+  auto const tsList = Array::attach(tsListCell->m_data.parr);
+  vmStack().discard();
+  fPushObjMethodDImpl(numArgs, name, op, tsList);
 }
 
 namespace {

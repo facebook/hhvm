@@ -793,6 +793,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPushCtor:
   case Op::FPushObjMethod:
   case Op::FPushObjMethodD:
+  case Op::FPushObjMethodRD:
   case Op::FPushClsMethod:
   case Op::FPushClsMethodS:
   case Op::FPushClsMethodSD:
@@ -1784,6 +1785,7 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushFuncU:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
+    case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodD:
     case Op::FPushClsMethodS:

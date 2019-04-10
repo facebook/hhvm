@@ -416,6 +416,10 @@ void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp, const ImmVector&) {
   INTERP
 }
 
+void emitFPushObjMethodRD(IRGS& env, uint32_t, const StringData*, ObjMethodOp) {
+  INTERP
+}
+
 void emitAddElemV(IRGS& env)                  { INTERP }
 void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }

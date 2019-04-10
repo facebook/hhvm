@@ -2981,17 +2981,21 @@ void in(ISS& env, const bc::ResolveClsMethod& op) {
   push(env, TClsMeth);
 }
 
+namespace {
+
 const StaticString s_nullFunc { "__SystemLib\\__86null" };
 
-void in(ISS& env, const bc::FPushObjMethodD& op) {
+template <typename Op>
+void implFPushObjMethodD(ISS& env, const Op& op, bool isRFlavor) {
   auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
-  auto const input = topC(env, op.arg1 + 2);
-  auto const location = topStkEquiv(env, op.arg1 + 2);
+  auto const input = topC(env, op.arg1 + 2 + isRFlavor);
+  auto const location = topStkEquiv(env, op.arg1 + 2 + isRFlavor);
   auto const mayCallMethod = input.couldBe(BObj);
   auto const mayCallNullsafe = !nullThrows && input.couldBe(BNull);
   auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
 
   if (!mayCallMethod && !mayCallNullsafe) {
+    if (isRFlavor) popC(env);
     // This FPush may only throw, make sure it's not optimized away.
     discardAR(env, op.arg1);
     fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TBottom });
@@ -3001,6 +3005,7 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
   /* TODO: optimize the whole call to Null once FPush+FCall is merged
   if (!mayCallMethod && !mayThrowNonObj) {
     // Null input, this may only call the nullsafe helper, so do that.
+    // TODO: rflavor has different stack input
     return reduce(
       env,
       bc::PopU {}, bc::PopU {}, bc::PopC {},
@@ -3033,9 +3038,11 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
     // or FCall may throw.
     fpiPushNoFold(env, ar());
   } else if (fpiPush(env, ar(), op.arg1, false)) {
+    if (isRFlavor) return reduce(env, bc::PopC {}, bc::Nop {});
     return reduce(env, bc::Nop {});
   }
 
+  if (isRFlavor) popC(env);
   discardAR(env, op.arg1);
 
   if (location != NoLocalId) {
@@ -3048,6 +3055,30 @@ void in(ISS& env, const bc::FPushObjMethodD& op) {
       unreachable(env);
     }
   }
+}
+
+} // namespace
+
+void in(ISS& env, const bc::FPushObjMethodD& op) {
+  implFPushObjMethodD(env, op, false);
+}
+
+void in(ISS& env, const bc::FPushObjMethodRD& op) {
+  auto const tsList = topC(env);
+  if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    return unreachable(env);
+  }
+  auto const input = topC(env, op.arg1 + 3);
+  auto const clsTy = objcls(intersection_of(input, TObj));
+  auto const func = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  if (!func.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushObjMethodD { op.arg1, op.str2, op.subop3, op.has_unpack  }
+    );
+  }
+  implFPushObjMethodD(env, op, true);
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {

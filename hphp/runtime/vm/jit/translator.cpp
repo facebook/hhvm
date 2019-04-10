@@ -290,6 +290,8 @@ static const struct {
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushObjMethodD,
                    {None,             FStack,       OutFDesc        }},
+  { OpFPushObjMethodRD,
+                   {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethod,
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethodS,
@@ -501,6 +503,7 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushCtor:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
+    case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
@@ -557,6 +560,7 @@ int64_t getStackPushed(PC pc) {
     case Op::FPushCtor:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
+    case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
@@ -764,6 +768,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       case Op::FPushCtor:
       case Op::FPushObjMethod:
       case Op::FPushObjMethodD:
+      case Op::FPushObjMethodRD:
         inputs.emplace_back(Location::Stack { stackOff-- });
         break;
       default:
@@ -961,6 +966,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFuncD:
   case Op::FPushFuncU:
   case Op::FPushObjMethodD:
+  case Op::FPushObjMethodRD:
   case Op::FuncNumArgs:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:

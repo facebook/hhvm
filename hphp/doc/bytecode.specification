@@ -160,7 +160,7 @@ default values are called "optional parameters".
 The metadata of each function specifies a set of non-overlapping ranges of
 bytecode that compose the function body, and it specifies the main entry point
 and 0 or more DV entry points (entry points are discussed in more detail in
-the "Entry points" section). 
+the "Entry points" section).
 
 The total size of the bytecode for the function body must not exceed 2^31 - 1
 bytes. The bytecode for a function must be one contiguous range of bytecode.
@@ -1961,6 +1961,8 @@ FPushObjMethod <num params> <nullsafe>
   [C U U C|V..C|V C]  ->  [C|V..C|V]
 FPushObjMethodD <num params> <litstr id> <nullsafe>
   [C U U C|V..C|V]  ->  [C|V..C|V]
+FPushObjMethodRD <num params> <litstr id> <nullsafe>
+  [C U U C|V..C|V C]  ->  [C|V..C|V]
 
   FPI push object-based method. First, these instructions load values into x
   and y as given by the following table:
@@ -1969,6 +1971,7 @@ FPushObjMethodD <num params> <litstr id> <nullsafe>
     -------------------+-------------------+-----
       FPushObjMethod   | $(num params + 4) | $1
       FPushObjMethodD  | $(num params + 3) | %2
+      FPushObjMethodRD | $(num params + 4) | %2
 
   If x is not an object and nullsafe != ObjMethodOp::NullThrows, or if y is not
   a string, this instruction throws a fatal error. Next, this instruction
@@ -1986,6 +1989,8 @@ FPushObjMethodD <num params> <litstr id> <nullsafe>
 
   If object x does not have an accessible method named y and it does not have a
   __call method, this instruction throws a fatal error.
+
+  FPushObjMethodRD's $1 contains a list of reified generics.
 
 FPushClsMethod   <num params> <class-ref slot>
   [U U U C|V..C|V C]  ->  [C|V..C|V]

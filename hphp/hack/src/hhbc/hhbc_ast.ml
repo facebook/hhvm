@@ -382,6 +382,7 @@ type instruct_call =
   | FPushFuncU of num_params * function_id * string
   | FPushObjMethod of num_params * Ast.og_null_flavor * param_locations
   | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
+  | FPushObjMethodRD of num_params * method_id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id * param_locations
   | FPushClsMethodD of num_params * method_id * class_id
   | FPushClsMethodS of num_params * SpecialClsRef.t

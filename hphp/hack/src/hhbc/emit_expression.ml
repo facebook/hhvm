@@ -3056,8 +3056,8 @@ and emit_call_lhs_and_fcall
     else
       gather [ obj; instr_nulluninit; instr_nulluninit ],
       gather [
-        reified_call_body id;
-        instr_fcallobjmethod fcall_args null_flavor inout_arg_positions
+        emit_reified_targs env pos targs;
+        instr_fcallobjmethodrd fcall_args name null_flavor
       ]
   | A.Obj_get (obj, method_expr, null_flavor) ->
     let obj = emit_object_expr env obj in

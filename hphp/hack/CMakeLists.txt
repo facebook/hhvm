@@ -122,7 +122,7 @@ add_custom_target(opam_setup DEPENDS opam.stamp opam_setup.sh)
 if (SKIP_OPAM)
   set(OPAMROOT "~/.opam")
 else ()
-  set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/_build/.opam")
+  set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/_build/opam")
 endif()
 
 # ARGV2 (optional unnamed argument) is expected to only be set to ALL

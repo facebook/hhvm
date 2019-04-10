@@ -1,12 +1,23 @@
 #!/bin/bash
-# Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+
+# Copyright (c) 2017, Facebook, Inc.
+# All rights reserved.
+#
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the "hack" directory of this source tree.
 
 set -euf
 
 OCAML_PREFIX=$(dirname "$1")
 ROOT="$2"
 export PATH="$OCAML_PREFIX:$PATH"
-export OPAMROOT="$ROOT/_build/.opam"
+# detect if we are building inside FB by checking a specific dune file
+if [ -e "$ROOT/src/facebook/dune" ]; then
+  OPAMROOT="$ROOT/facebook/opam"
+else
+  OPAMROOT="$ROOT/_build/opam"
+fi
+export OPAMROOT="$OPAMROOT"
 mkdir -p "$OPAMROOT"
 export OPAMYES="1"
 
@@ -53,13 +64,13 @@ HACK_OPAM_DEFAULT_NAME="hack-switch"
 HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
 
 MINI_TARBALL="$ROOT/facebook/opam2-mini-repository.tar.gz"
-MINI_REPO="$ROOT/_build/opam2-mini-repository"
+MINI_REPO="$ROOT/facebook/opam2-mini-repository"
 
 # OSS does not provide bubblewrap yet so we disable it
 if [ -f "$MINI_TARBALL" ]
 then
   rm -rf "$MINI_REPO" ||:
-  tar xzf "$MINI_TARBALL" -C "$ROOT/_build"
+  tar xzf "$MINI_TARBALL" -C "$ROOT/facebook"
   opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO" --no-setup --bare
 else
   opam init --disable-sandboxing --reinit --no-setup --bare

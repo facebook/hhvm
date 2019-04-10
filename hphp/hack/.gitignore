@@ -15,3 +15,5 @@ src/parsing/parser.mli
 _obuild/
 .ocp/
 hhi/**/INDEX
+facebook/opam
+facebook/opam2-mini-repository

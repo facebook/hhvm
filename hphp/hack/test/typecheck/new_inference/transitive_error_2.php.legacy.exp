@@ -1,0 +1,8 @@
+File "transitive_error_2.php", line 12, characters 3-3:
+Some type constraint(s) here are violated (Typing[4110])
+File "transitive_error_2.php", line 8, characters 12-12:
+'T' is a constrained type parameter
+File "transitive_error_2.php", line 8, characters 17-22:
+This is a string
+File "transitive_error_2.php", line 4, characters 20-22:
+It is incompatible with an int

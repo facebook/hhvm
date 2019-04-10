@@ -1,0 +1,14 @@
+File "newtype_tparam.php--def.php", line 4, characters 14-20:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtype_tparam.php--def.php", line 4, characters 24-30:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtype_tparam.php--use.php", line 8, characters 20-26:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtype_tparam.php--use.php", line 9, characters 10-11:
+Invalid argument (Typing[4110])
+File "newtype_tparam.php--use.php", line 6, characters 21-21:
+This is an object of type N
+File "newtype_tparam.php--use.php", line 6, characters 21-21:
+Considering that this type argument is invariant with respect to Inv
+File "newtype_tparam.php--use.php", line 8, characters 33-33:
+It is incompatible with a value of generic type T

@@ -1,0 +1,8 @@
+File "subtype.php", line 4, characters 24-30:
+Unbound name: nothing (an object type) (Naming[2049])
+File "subtype.php", line 5, characters 10-11:
+Invalid return type (Typing[4110])
+File "subtype.php", line 4, characters 24-30:
+This is an object of type nothing
+File "subtype.php", line 4, characters 15-17:
+It is incompatible with an int

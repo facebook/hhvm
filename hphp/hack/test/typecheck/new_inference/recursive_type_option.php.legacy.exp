@@ -1,0 +1,6 @@
+File "recursive_type_option.php", line 8, characters 10-14:
+Invalid return type (Typing[4110])
+File "recursive_type_option.php", line 3, characters 25-27:
+This is an int
+File "recursive_type_option.php", line 5, characters 13-16:
+It is incompatible with a nullable type

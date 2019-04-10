@@ -1,0 +1,72 @@
+File "array_get_bad.php", line 29, characters 14-21:
+Invalid index type for this array (Typing[4110])
+File "array_get_bad.php", line 29, characters 18-20:
+This is an int
+File "array_get_bad.php", line 14, characters 3-13:
+This can only be indexed with integers
+File "array_get_bad.php", line 29, characters 18-20:
+It is incompatible with a string
+File "array_get_bad.php", line 31, characters 14-20:
+Invalid index type for this vec (Typing[4110])
+File "array_get_bad.php", line 31, characters 17-19:
+This is an int because only int can be used to index into a Vector or vec.
+File "array_get_bad.php", line 31, characters 17-19:
+It is incompatible with a string
+File "array_get_bad.php", line 33, characters 14-25:
+Invalid index type for this Vector (Typing[4110])
+File "array_get_bad.php", line 33, characters 22-24:
+This is an int because only int can be used to index into a Vector or vec.
+File "array_get_bad.php", line 33, characters 22-24:
+It is incompatible with a string
+File "array_get_bad.php", line 35, characters 14-26:
+Invalid index type for this ConstVector (Typing[4110])
+File "array_get_bad.php", line 35, characters 23-25:
+This is an int
+File "array_get_bad.php", line 17, characters 3-19:
+This can only be indexed with integers
+File "array_get_bad.php", line 35, characters 23-25:
+It is incompatible with a string
+File "array_get_bad.php", line 37, characters 14-26:
+Invalid index type for this ImmVector (Typing[4110])
+File "array_get_bad.php", line 37, characters 23-25:
+This is an int
+File "array_get_bad.php", line 18, characters 3-17:
+This can only be indexed with integers
+File "array_get_bad.php", line 37, characters 23-25:
+It is incompatible with a string
+File "array_get_bad.php", line 39, characters 15-21:
+Invalid index type for this array (Typing[4110])
+File "array_get_bad.php", line 20, characters 9-14:
+This is a string
+File "array_get_bad.php", line 39, characters 19-20:
+It is incompatible with an int
+File "array_get_bad.php", line 41, characters 15-20:
+Invalid index type for this dict (Typing[4110])
+File "array_get_bad.php", line 21, characters 8-13:
+This is a string
+File "array_get_bad.php", line 41, characters 18-19:
+It is incompatible with an int
+File "array_get_bad.php", line 43, characters 15-22:
+Invalid index type for this Map (Typing[4110])
+File "array_get_bad.php", line 22, characters 7-12:
+This is a string
+File "array_get_bad.php", line 43, characters 20-21:
+It is incompatible with an int
+File "array_get_bad.php", line 45, characters 15-23:
+Invalid index type for this ImmMap (Typing[4110])
+File "array_get_bad.php", line 23, characters 10-15:
+This is a string
+File "array_get_bad.php", line 45, characters 21-22:
+It is incompatible with an int
+File "array_get_bad.php", line 47, characters 15-23:
+Invalid index type for this ConstMap (Typing[4110])
+File "array_get_bad.php", line 24, characters 12-17:
+This is a string
+File "array_get_bad.php", line 47, characters 21-22:
+It is incompatible with an int
+File "array_get_bad.php", line 49, characters 16-22:
+Invalid index type for this keyset (Typing[4110])
+File "array_get_bad.php", line 25, characters 10-15:
+This is a string
+File "array_get_bad.php", line 49, characters 20-21:
+It is incompatible with an int

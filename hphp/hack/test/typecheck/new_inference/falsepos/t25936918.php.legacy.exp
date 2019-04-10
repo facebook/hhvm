@@ -1,0 +1,8 @@
+File "t25936918.php", line 9, characters 12-13:
+Invalid argument (Typing[4110])
+File "t25936918.php", line 9, characters 10-10:
+This is a nullable type
+File "t25936918.php", line 9, characters 10-14:
+It was implicitly typed as a nullable type during this operation
+File "t25936918.php", line 8, characters 24-26:
+It is incompatible with an int

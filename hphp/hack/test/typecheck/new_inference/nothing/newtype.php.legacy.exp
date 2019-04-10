@@ -1,0 +1,6 @@
+File "newtype.php--def.php", line 4, characters 31-37:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtype.php--def.php", line 4, characters 41-47:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtype.php--use.php", line 4, characters 25-31:
+Unbound name: nothing (an object type) (Naming[2049])

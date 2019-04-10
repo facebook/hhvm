@@ -1,0 +1,20 @@
+File "tparam.php", line 4, characters 37-43:
+Unbound name: nothing (an object type) (Naming[2049])
+File "tparam.php", line 4, characters 21-27:
+Unbound name: nothing (an object type) (Naming[2049])
+File "tparam.php", line 8, characters 21-27:
+Unbound name: nothing (an object type) (Naming[2049])
+File "tparam.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+File "tparam.php", line 8, characters 37-39:
+This is an int
+File "tparam.php", line 8, characters 30-30:
+It is incompatible with a value of generic type T
+File "tparam.php", line 12, characters 21-27:
+Unbound name: nothing (an object type) (Naming[2049])
+File "tparam.php", line 13, characters 10-11:
+Invalid return type (Typing[4110])
+File "tparam.php", line 12, characters 38-41:
+This is null
+File "tparam.php", line 12, characters 31-31:
+It is incompatible with a value of generic type T

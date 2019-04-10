@@ -1,0 +1,11 @@
+File "t13262460.php", line 17, characters 7-7:
+Class C does not correctly implement all required members  (Typing[4110])
+File "t13262460.php", line 17, characters 17-17:
+Some members are incompatible with those declared in type B
+Read the following to see why:
+File "t13262460.php", line 18, characters 19-21:
+Member foo has the wrong type
+File "t13262460.php", line 18, characters 28-28:
+This is an object of type C
+File "t13262460.php", line 18, characters 23-23:
+It is incompatible with a value of generic type T

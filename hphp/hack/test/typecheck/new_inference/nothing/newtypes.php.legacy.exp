@@ -1,0 +1,16 @@
+File "newtypes.php--def1.php", line 4, characters 15-21:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtypes.php--def1.php", line 4, characters 25-31:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtypes.php--def2.php", line 4, characters 15-21:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtypes.php--def2.php", line 4, characters 25-31:
+Unbound name: nothing (an object type) (Naming[2049])
+File "newtypes.php--use.php", line 9, characters 10-11:
+Invalid argument (Typing[4110])
+File "newtypes.php--use.php", line 6, characters 21-22:
+This is an object of type N1
+File "newtypes.php--use.php", line 6, characters 21-22:
+Considering that this type argument is invariant with respect to Inv
+File "newtypes.php--use.php", line 8, characters 19-20:
+It is incompatible with an object of type N2

@@ -1,0 +1,6 @@
+File "typedef_string_concat1.php--use.php", line 8, characters 33-40:
+This is a string (Typing[4110])
+File "typedef_string_concat1.php--use.php", line 4, characters 11-14:
+It is incompatible with a nonnull value arising from an implicit 'as ?nonnull' constraint on this type
+File "typedef_string_concat1.php--use.php", line 6, characters 19-19:
+Was expecting a return type hint (Typing[4030])

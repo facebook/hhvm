@@ -1,0 +1,10 @@
+File "null.php", line 4, characters 42-48:
+Unbound name: nothing (an object type) (Naming[2049])
+File "null.php", line 8, characters 39-45:
+Unbound name: nothing (an object type) (Naming[2049])
+File "null.php", line 9, characters 10-11:
+Invalid return type (Typing[4110])
+File "null.php", line 8, characters 52-55:
+This is null
+File "null.php", line 8, characters 39-45:
+It is incompatible with an object of type nothing

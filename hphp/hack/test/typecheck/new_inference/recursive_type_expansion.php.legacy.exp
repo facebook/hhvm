@@ -1,0 +1,4 @@
+File "recursive_type_expansion.php", line 14, characters 3-12:
+Invalid assignment (Typing[4155])
+File "recursive_type_expansion.php", line 13, characters 12-17:
+Type circularity: in order to type-check this expression it is necessary for a type [rec] to be equal to type \Vector<[rec]_>

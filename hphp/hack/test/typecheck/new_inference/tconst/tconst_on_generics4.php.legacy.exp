@@ -1,0 +1,6 @@
+File "tconst_on_generics4.php", line 32, characters 10-11:
+Invalid return type (Typing[4110])
+File "tconst_on_generics4.php", line 26, characters 16-18:
+This is an int
+File "tconst_on_generics4.php", line 13, characters 18-23:
+It is incompatible with a string

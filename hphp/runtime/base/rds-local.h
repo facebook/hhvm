@@ -100,13 +100,11 @@ namespace local {
   RLHotWrapper_ ## f f;
 
 namespace detail {
-using ArrayDataHash = std::pair<const ArrayData*,size_t>;
 struct HotRDSLocals {
   void* rdslocal_base;
   void* g_context;
 
   bool t_eager_gc;
-  ArrayDataHash s_cachedHash;
 
   TYPE_SCAN_IGNORE_FIELD(rdslocal_base);
   TYPE_SCAN_IGNORE_FIELD(g_context);

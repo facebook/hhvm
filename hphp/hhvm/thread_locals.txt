@@ -90,6 +90,7 @@ HPHP::s_xbox_prev_req_init_doc
 HPHP::s_note
 HPHP::s_state
 HPHP::s_globals
+HPHP::s_cachedHash
 HPHP::jit::irgen::IRBuilder::optimizeInst(HPHP::jit::IRInstruction*, HPHP::jit::irgen::IRBuilder::CloneFlag, HPHP::jit::Block*)::instNest
 HPHP::Trace::dumpEntry(HPHP::Trace::RingBufferEntry const*)::indentDepth
 HPHP::high_arena_tcache # Only needed in lowptr builds.

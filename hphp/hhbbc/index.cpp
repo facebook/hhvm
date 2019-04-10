@@ -506,8 +506,10 @@ struct ClassInfo {
   const MethTabEntryPair* ctor = nullptr;
 
   /*
-   * Subclasses of this class, including this class itself (unless it
-   * is an interface).
+   * Subclasses of this class, including this class itself.
+   *
+   * For interfaces, this is the list of instantiable classes that
+   * implement this interface.
    *
    * For traits, this is the list of classes that use the trait where
    * the trait wasn't flattened into the class (including the trait
@@ -996,13 +998,6 @@ struct Index::IndexData {
     hphp_fast_set<php::Func*>
   > classExtraMethodMap;
 
-  // Map from every interface to the list of instantiable classes which can
-  // implement it.
-  hphp_fast_map<
-    const php::Class*,
-    CompactVector<ClassInfo*>
-  > ifaceImplementerMap;
-
   /*
    * Map from each class name to ClassInfo objects for all
    * not-known-to-be-impossible resolutions of the class at runtime.
@@ -1489,105 +1484,6 @@ bool build_class_properties(BuildClsInfo& info,
   }
 
   return true;
-}
-
-void build_methods_for_iface(IndexData& data, ClassInfo* iface) {
-  std::vector<SString> names;
-  auto const impls = data.ifaceImplementerMap.find(iface->cls);
-  if (impls == data.ifaceImplementerMap.end()) return;
-
-  // We start by collecting the list of methods shared across all classes which
-  // implement iface (including indirectly). And then add the public methods
-  // which are not constructors and have no private ancestors to the method
-  // families of iface. Note that this set may be larger than the methods
-  // declared on iface and may also be missing methods declared on iface. In
-  // practice this is the set of methods we can depend on having accessible
-  // given any object which is known to implement iface.
-  auto it = impls->second.begin();
-  for (auto& par : (*it)->methods) names.push_back(par.first);
-
-  while (++it != impls->second.end()) {
-    auto& methods = (*it)->methods;
-    for (auto nameIt = names.begin(); nameIt != names.end();) {
-      if (!methods.count(*nameIt)) nameIt = names.erase(nameIt);
-      else ++nameIt;
-    }
-  }
-
-  hphp_fast_set<SString> added;
-
-  auto add_method = [&] (SString name) {
-    res::Func::FuncFamily::PFuncVec funcs;
-    bool containsInterceptables = false;
-
-    hphp_hash_set<const php::Func*> seen;
-
-    for (auto cinfo : impls->second) {
-      assertx(!(cinfo->cls->attrs & AttrInterface));
-
-      auto methIt = cinfo->methods.find(name);
-      assertx(methIt != cinfo->methods.end());
-      auto mte = mteFromIt(methIt);
-
-      // Don't create method families for interfaces with non-public methods
-      // or methods which may be constructors. We won't always know from context
-      // which implementer we are referring to and whether we share a common
-      // context. In practice interfaces generally declare public methods.
-      if (cinfo->ctor == mte || !(mte->second.attrs & AttrPublic)) return;
-
-      // If the method has a private ancestor we won't be able to determine from
-      // context if a given resolution should be for the private ancestor or the
-      // interface method. In theory we could dump all of the private ancestors
-      // into the family too but as is noted above we also don't currently
-      // handle non-public resolution.
-      if (mte->second.hasPrivateAncestor) return;
-
-      if (mte->second.attrs & AttrInterceptable) {
-        containsInterceptables = true;
-      }
-
-      // Avoid adding duplicate entries to the list
-      if (seen.emplace(mte->second.func).second) funcs.push_back(mte);
-    }
-
-    if (!funcs.empty()) {
-      funcs.shrink_to_fit();
-      iface->methodFamilies.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(name),
-        std::forward_as_tuple(std::move(funcs),
-                              containsInterceptables,
-                              false)
-      );
-      added.emplace(name);
-    }
-  };
-
-  for (auto name : names) {
-    add_method(name);
-  }
-
-  for (auto& m : iface->cls->methods) {
-    if (added.count(m->name)) {
-      iface->methods.emplace(
-        m->name,
-        MethTabEntry { m.get(), m->attrs, false, true }
-      );
-    }
-  }
-  return;
-}
-
-void build_iface_methods(IndexData& data) {
-  trace_time tracer("build interface methods");
-  parallel::for_each(
-    data.allClassInfos,
-    [&] (const std::unique_ptr<ClassInfo>& info) {
-      if (info->cls->attrs & AttrInterface) {
-        build_methods_for_iface(data, info.get());
-      }
-    }
-  );
 }
 
 /*
@@ -2613,6 +2509,7 @@ void compute_subclass_list_rec(IndexData& index,
 void compute_subclass_list(IndexData& index) {
   auto fixupTraits = false;
   for (auto& cinfo : index.allClassInfos) {
+    if (cinfo->cls->attrs & AttrInterface) continue;
     for (auto& cparent : cinfo->baseList) {
       cparent->subclassList.push_back(cinfo.get());
     }
@@ -2638,17 +2535,21 @@ void compute_subclass_list(IndexData& index) {
   }
 }
 
-void define_func_family(IndexData& index, ClassInfo* cinfo,
-                        SString name, const MethTabEntryPair* mte) {
+bool define_func_family(IndexData& index, ClassInfo* cinfo,
+                        SString name, bool isCtor,
+                        const php::Func* func = nullptr) {
   FuncFamily::PFuncVec funcs{};
   auto containsInterceptables = false;
-  auto const isCtor = mte == cinfo->ctor;
-  for (auto& cleaf : cinfo->subclassList) {
+  for (auto const cleaf : cinfo->subclassList) {
     auto const leafFn = [&] () -> const MethTabEntryPair* {
       if (isCtor) return cleaf->ctor;
       auto const leafFnIt = cleaf->methods.find(name);
       if (leafFnIt == end(cleaf->methods)) return nullptr;
-      return mteFromIt(leafFnIt);
+      auto const mte = mteFromIt(leafFnIt);
+      if (cleaf->ctor == mte) {
+        return nullptr;
+      }
+      return mte;
     }();
     if (!leafFn) continue;
     if (leafFn->second.func->attrs & AttrInterceptable) {
@@ -2656,6 +2557,8 @@ void define_func_family(IndexData& index, ClassInfo* cinfo,
     }
     funcs.push_back(leafFn);
   }
+
+  if (funcs.empty()) return false;
 
   std::sort(begin(funcs), end(funcs),
             [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
@@ -2665,9 +2568,15 @@ void define_func_family(IndexData& index, ClassInfo* cinfo,
               // that, sort by name so that different case spellings
               // come in the same order.
               if (a->second.func == b->second.func)   return false;
-              if (b->second.func == mte->second.func) return false;
-              if (a->second.func == mte->second.func) return true;
+              if (func) {
+                if (b->second.func == func) return false;
+                if (a->second.func == func) return true;
+              }
               if (auto d = a->first->compare(b->first)) {
+                if (!func) {
+                  if (b->first == name) return false;
+                  if (a->first == name) return true;
+                }
                 return d < 0;
               }
               return std::less<const void*>{}(a->second.func, b->second.func);
@@ -2680,24 +2589,16 @@ void define_func_family(IndexData& index, ClassInfo* cinfo,
     end(funcs)
   );
 
-  /*
-   * Note: right now abstract functions are part of the family.
-   *
-   * They have bytecode bodies that just fatal, so it won't hurt
-   * return type inference (we'll just add an extra TBottom to the
-   * return type union).  It can hurt parameter reffiness if the
-   * abstract function is declared with reffiness that doesn't match
-   * the overloads---it's still actually possible to call the abstract
-   * function in some cases, including in a late-bound context if it
-   * is static, so the reffiness declaration on the abstract method
-   * actually matters.  It could be avoided on an instance---but we're
-   * not trying to notice those cases right now.
-   *
-   * For now we're leaving that alone, which gives the invariant that
-   * every FuncFamily we create here is non-empty.
-   */
-  always_assert(!funcs.empty());
   funcs.shrink_to_fit();
+
+  if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
+    FTRACE(4, "define_func_family: {}::{}:\n",
+           cinfo->cls->name, name);
+    for (auto const DEBUG_ONLY func : funcs) {
+      FTRACE(4, "  {}::{}\n",
+             func->second.func->cls->name, func->second.func->name);
+    }
+  }
 
   cinfo->methodFamilies.emplace(
     std::piecewise_construct,
@@ -2706,30 +2607,123 @@ void define_func_family(IndexData& index, ClassInfo* cinfo,
                           containsInterceptables,
                           isCtor)
   );
+
+  return true;
+}
+
+void build_abstract_func_families(IndexData& data, ClassInfo* cinfo) {
+  std::vector<SString> extras;
+
+  // We start by collecting the list of methods shared across all
+  // subclasses of cinfo (including indirectly). And then add the
+  // public methods which are not constructors and have no private
+  // ancestors to the method families of cinfo. Note that this set
+  // may be larger than the methods declared on cinfo and may also
+  // be missing methods declared on cinfo. In practice this is the
+  // set of methods we can depend on having accessible given any
+  // object which is known to implement cinfo.
+  auto it = cinfo->subclassList.begin();
+  while (true) {
+    if (it == cinfo->subclassList.end()) return;
+    auto const sub = *it++;
+    assertx(!(sub->cls->attrs & AttrInterface));
+    if (sub == cinfo || (sub->cls->attrs & AttrAbstract)) continue;
+    for (auto& par : sub->methods) {
+      if (!par.second.hasPrivateAncestor &&
+          (par.second.attrs & AttrPublic) &&
+          !cinfo->methodFamilies.count(par.first) &&
+          !cinfo->methods.count(par.first)) {
+        extras.push_back(par.first);
+      }
+    }
+    if (!extras.size()) return;
+    break;
+  }
+
+  auto end = extras.end();
+  while (it != cinfo->subclassList.end()) {
+    auto const sub = *it++;
+    assertx(!(sub->cls->attrs & AttrInterface));
+    if (sub == cinfo || (sub->cls->attrs & AttrAbstract)) continue;
+    for (auto nameIt = extras.begin(); nameIt != end;) {
+      auto const meth = sub->methods.find(*nameIt);
+      if (meth == sub->methods.end() ||
+          !(meth->second.attrs & AttrPublic) ||
+          meth->second.hasPrivateAncestor) {
+        *nameIt = *--end;
+        if (end == extras.begin()) return;
+      } else {
+        ++nameIt;
+      }
+    }
+  }
+  extras.erase(end, extras.end());
+
+  if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
+    FTRACE(5, "Adding extra methods to {}:\n", cinfo->cls->name);
+    for (auto const DEBUG_ONLY extra : extras) {
+      FTRACE(5, "  {}\n", extra);
+    }
+  }
+
+  hphp_fast_set<SString> added;
+
+  for (auto name : extras) {
+    if (define_func_family(data, cinfo, name, false) &&
+        (cinfo->cls->attrs & AttrInterface)) {
+      added.emplace(name);
+    }
+  }
+
+  if (cinfo->cls->attrs & AttrInterface) {
+    for (auto& m : cinfo->cls->methods) {
+      if (added.count(m->name)) {
+        cinfo->methods.emplace(
+          m->name,
+          MethTabEntry { m.get(), m->attrs, false, true }
+        );
+      }
+    }
+  }
+  return;
 }
 
 void define_func_families(IndexData& index) {
-  for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->cls->attrs & AttrTrait) continue;
-    auto didCtor = false;
-    for (auto& kv : cinfo->methods) {
-      auto const mte = mteFromElm(kv);
+  trace_time tracer("define_func_families");
 
-      if (mte->second.attrs & AttrNoOverride) continue;
-      if (mte == cinfo->ctor) {
-        define_func_family(index, cinfo.get(), s_construct.get(), mte);
-        didCtor = true;
-        continue;
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      if (cinfo->cls->attrs & AttrTrait) return;
+      FTRACE(4, "Defining func families for {}\n", cinfo->cls->name);
+      if (!(cinfo->cls->attrs & AttrInterface)) {
+        auto didCtor = false;
+        for (auto& kv : cinfo->methods) {
+          auto const mte = mteFromElm(kv);
+
+          if (mte->second.attrs & AttrNoOverride) continue;
+          if (mte == cinfo->ctor) {
+            define_func_family(index, cinfo.get(), s_construct.get(),
+                               true, mte->second.func);
+            didCtor = true;
+            continue;
+          }
+          if (mte->second.attrs & AttrPrivate) continue;
+          if (is_special_method_name(mte->first)) continue;
+
+          define_func_family(index, cinfo.get(), mte->first,
+                             false, mte->second.func);
+        }
+        if (cinfo->ctor && !didCtor) {
+          define_func_family(index, cinfo.get(), s_construct.get(),
+                             true, cinfo->ctor->second.func);
+        }
       }
-      if (mte->second.attrs & AttrPrivate) continue;
-      if (is_special_method_name(mte->first)) continue;
-
-      define_func_family(index, cinfo.get(), mte->first, mte);
+      if (cinfo->cls->attrs & (AttrInterface | AttrAbstract)) {
+        build_abstract_func_families(index, cinfo.get());
+      }
     }
-    if (cinfo->ctor && !didCtor) {
-      define_func_family(index, cinfo.get(), s_construct.get(), cinfo->ctor);
-    }
-  }
+  );
 }
 
 /*
@@ -2898,7 +2892,8 @@ void compute_iface_vtables(IndexData& index) {
 
     for (auto& ipair : cinfo->implInterfaces) {
       ++iface_uses[ipair.second->cls];
-      index.ifaceImplementerMap[ipair.second->cls].push_back(cinfo.get());
+      auto impl = const_cast<ClassInfo*>(ipair.second);
+      impl->subclassList.push_back(cinfo.get());
       for (auto& jpair : cinfo->implInterfaces) {
         cg.add(ipair.second->cls, jpair.second->cls);
       }
@@ -3604,11 +3599,11 @@ Index::Index(php::Program* program,
   compute_subclass_list(*m_data);
   clean_86reifiedinit_methods(*m_data); // uses the base class lists
   mark_no_override_methods(*m_data);    // uses AttrUnique
-  define_func_families(*m_data);        // uses AttrNoOverride functions
   find_magic_methods(*m_data);          // uses the subclass lists
   find_mocked_classes(*m_data);
   compute_iface_vtables(*m_data);
-  build_iface_methods(*m_data);
+  define_func_families(*m_data);        // AttrNoOverride, iface_vtables,
+                                        // subclass_list
 
   check_invariants(*m_data);
 
@@ -4251,14 +4246,10 @@ res::Func Index::resolve_method(Context ctx,
   auto const cinfo = dcls.cls.val.right();
   if (!cinfo) return name_only();
 
-  // Interfaces may have more method families than methods, so look at the
-  // method families first. Note that interfaces only have methods and method
-  // families for which all methods are public on all implementer classes and
-  // no methods have private ancestors. This avoids the need for context checks
-  // which would be difficult as the base class is unknown. Interfaces are
-  // generally used to declare public methods so this trade-off is unlikely to
-  // cost anything in practice.
-  if (cinfo->cls->attrs & AttrInterface) {
+  // Classes may have more method families than methods. Any such
+  // method families are guaranteed to all be public so we can do this
+  // lookup as a last gasp before resorting to name_only().
+  auto const find_extra_method = [&] {
     auto methIt = cinfo->methodFamilies.find(name);
     if (methIt == end(cinfo->methodFamilies)) return name_only();
     if (methIt->second.possibleFuncs()->size() == 1) {
@@ -4267,7 +4258,11 @@ res::Func Index::resolve_method(Context ctx,
     // If there was a sole implementer we can resolve to a single method, even
     // if the method was not declared on the interface itself.
     return res::Func { this, &methIt->second };
-  }
+  };
+
+  // Interfaces *only* have the extra methods defined for all
+  // subclasses
+  if (cinfo->cls->attrs & AttrInterface) return find_extra_method();
 
   /*
    * Whether or not the context class has a private method with the
@@ -4300,7 +4295,7 @@ res::Func Index::resolve_method(Context ctx,
    * Look up the method in the target class.
    */
   auto const methIt = cinfo->methods.find(name);
-  if (methIt == end(cinfo->methods)) return name_only();
+  if (methIt == end(cinfo->methods)) return find_extra_method();
   if (methIt->second.attrs & AttrInterceptable) return name_only();
   auto const ftarget = methIt->second.func;
 

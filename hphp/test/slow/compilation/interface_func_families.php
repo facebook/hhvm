@@ -1,0 +1,27 @@
+<?hh
+
+interface I {}
+
+abstract class X {}
+
+abstract class Y extends X implements I {
+}
+
+class Z extends Y {
+  function foo($x) : int { return (int)$x; }
+}
+
+function x(X $x) : X {
+  if ($x is Y) return $x;
+  return new Z;
+}
+
+function g(X $x, int $i) {
+  $x = x($x);
+  if ($x instanceof I) {
+    return $x->foo($i);
+  }
+  return ~42;
+}
+
+echo g(new Z, 42), "\n";

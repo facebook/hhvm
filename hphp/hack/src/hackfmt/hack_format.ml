@@ -2396,6 +2396,8 @@ and handle_possible_compound_statement env
         alternate_loop_closing_semicolon;
       if space then Space else Nothing;
     ]
+  | Syntax.Token _ ->
+    t env node
   | _ ->
     Concat [
       Newline;

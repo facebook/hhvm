@@ -1820,7 +1820,10 @@ let rec connect (state: state) : state Lwt.t =
         (* Pre_init will of course be empty; *)
         (* Lost_server will exit rather than reconnect with unsaved changes. *)
         uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
-        (* Similarly, file_edits will be empty: *)
+        (* TODO(ljw): if a file is already open, and we connect here, and then *)
+        (* the user closes the file -- then at that time we'll send CLOSE to the *)
+        (* server without it having first received OPEN. I've seen erratic behavior *)
+        (* from the server in that situation but haven't been able to repro it. *)
         file_edits = ImmQueue.empty;
       })
   with e ->

@@ -731,20 +731,6 @@ struct RuntimeOption {
         fatal error.
   */                                                                    \
   F(int32_t, CheckPropTypeHints,       0)                               \
-  /* Whether or not to assume that VerifyParamType instructions must
-     throw if the parameter does not match the associated type
-     constraint. This changes program behavior because parameter type
-     hint validation is normally a recoverable fatal. When this option
-     is on, hhvm will fatal if the error handler tries to recover in
-     this situation.
-     1) In repo-mode, we only set this option to hphpc, and serialize
-        it in Repo::GlobalData::HardTypeHints. Subsequent invocations
-        to hhbbc/hhvm runtime will only load it from the GlobalData.
-     2) In non-repo mode, we set this option to the runtime as usual.
-     3) Both HHBBC and the runtime should query only this option
-        instead of the GlobalData.
-  */                                                                    \
-  F(bool, HardTypeHints,               RepoAuthoritative)               \
   /* WarnOnTooManyArguments:
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \

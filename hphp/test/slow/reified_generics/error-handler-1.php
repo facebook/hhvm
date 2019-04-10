@@ -2,7 +2,7 @@
 
 class Foo {}
 
-function f(Foo $a) {
+function f(@Foo $a) {
   return $a;
 }
 

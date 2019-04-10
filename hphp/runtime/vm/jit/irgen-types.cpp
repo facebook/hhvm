@@ -1465,7 +1465,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       return true;
     },
     [&] (Type valType, bool hard) { // Check failure
-      auto const failHard = hard && RuntimeOption::EvalHardTypeHints &&
+      auto const failHard = hard &&
         !(tc.isArray() && valType.maybe(TObj)) &&
         !verify_fail_may_coerce(func);
       gen(

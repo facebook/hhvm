@@ -12,7 +12,7 @@ set_error_handler(
   }
 );
 
-function f<reify T>(T $x) { echo "done\n"; }
+function f<reify T>(@T $x) { echo "done\n"; }
 
 f<int>(1);
 f<num>(1);

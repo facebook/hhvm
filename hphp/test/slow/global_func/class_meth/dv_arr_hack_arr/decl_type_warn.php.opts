@@ -3,7 +3,6 @@
 
 -vEval.CheckPropTypeHints=2
 -vEval.CheckReturnTypeHints=2
--vEval.HardTypeHints=0
 
 -vEval.VecHintNotices=1
 

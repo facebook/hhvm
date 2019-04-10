@@ -2,7 +2,7 @@
 
 class Foo<reify T> {}
 
-function f(Foo<int> $a) {
+function f(@Foo<int> $a) {
   return $a;
 }
 

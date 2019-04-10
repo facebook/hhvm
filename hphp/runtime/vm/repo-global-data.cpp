@@ -29,7 +29,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(EnableHipHopSyntax);
   SHOW(InitialNamedEntityTableSize);
   SHOW(InitialStaticStringTableSize);
-  SHOW(HardTypeHints);
   SHOW(HardReturnTypeHints);
   SHOW(CheckPropTypeHints);
   SHOW(ThisTypeHintLevel);

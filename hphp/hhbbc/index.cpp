@@ -3227,22 +3227,20 @@ Type context_sensitive_return_type(IndexData& data,
   auto const returnType = return_with_context(finfo->returnTy, callCtx.context);
 
   auto checkParam = [&] (int i) {
-    if (RuntimeOption::EvalHardTypeHints) {
-      auto const constraint = finfo->func->params[i].typeConstraint;
-      if (constraint.hasConstraint() &&
-          !constraint.isTypeVar() &&
-          !constraint.isTypeConstant()) {
-        auto ctx = Context {
-          finfo->func->unit,
-          const_cast<php::Func*>(finfo->func),
-          finfo->func->cls
-        };
-        auto t = loosen_dvarrayness(
-          data.m_index->lookup_constraint(ctx, constraint));
-        if (!callCtx.args[i].moreRefined(t)) return true;
-        if (!callCtx.args[i].equivalentlyRefined(t)) return true;
-        return false;
-      }
+    auto const constraint = finfo->func->params[i].typeConstraint;
+    if (constraint.hasConstraint() &&
+        !constraint.isTypeVar() &&
+        !constraint.isTypeConstant()) {
+      auto ctx = Context {
+        finfo->func->unit,
+        const_cast<php::Func*>(finfo->func),
+        finfo->func->cls
+      };
+      auto t = loosen_dvarrayness(
+        data.m_index->lookup_constraint(ctx, constraint));
+      if (!callCtx.args[i].moreRefined(t)) return true;
+      if (!callCtx.args[i].equivalentlyRefined(t)) return true;
+      return false;
     }
     return callCtx.args[i].strictSubtypeOf(TInitCell);
   };

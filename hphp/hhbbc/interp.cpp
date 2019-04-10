@@ -1854,7 +1854,6 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   using MK = MemoKeyConstraint;
   folly::Optional<res::Class> resolvedCls;
   auto const mkc = [&] {
-    if (!RuntimeOption::EvalHardTypeHints) return MK::None;
     if (op.loc1 >= env.ctx.func->params.size()) return MK::None;
     auto tc = env.ctx.func->params[op.loc1].typeConstraint;
     if (tc.type() == AnnotType::Object) {
@@ -4050,9 +4049,7 @@ bool couldBeMocked(const Type& t) {
 void in(ISS& env, const bc::VerifyParamType& op) {
   IgnoreUsedParams _{env};
 
-  if (env.ctx.func->isMemoizeImpl &&
-      !locCouldBeRef(env, op.loc1) &&
-      RuntimeOption::EvalHardTypeHints) {
+  if (env.ctx.func->isMemoizeImpl && !locCouldBeRef(env, op.loc1)) {
     // a MemoizeImpl's params have already been checked by the wrapper
     return reduce(env, bc::Nop {});
   }
@@ -4068,19 +4065,16 @@ void in(ISS& env, const bc::VerifyParamType& op) {
     }
   }
 
-  if (!RuntimeOption::EvalHardTypeHints) return;
-
   /*
-   * In HardTypeHints mode, we assume that if this opcode doesn't
-   * throw, the parameter was of the specified type (although it may
-   * have been a Ref if the parameter was by reference).
+   * We assume that if this opcode doesn't throw, the parameter was of the
+   * specified type (although it may have been a Ref if the parameter was
+   * by reference).
    *
    * The env.setLoc here handles dealing with a parameter that was
    * already known to be a reference.
    *
-   * NB: VerifyParamType of a reference parameter can kill any
-   * references if it re-enters, even if Option::HardTypeHints is
-   * on.
+   * NB: VerifyParamType of a reference parameter can kill any references
+   * if it re-enters.
    */
   if (RuntimeOption::EvalThisTypeHintLevel != 3 && constraint.isThis()) {
     return;

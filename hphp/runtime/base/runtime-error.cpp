@@ -92,9 +92,7 @@ void raise_typehint_error(const std::string& msg) {
     SystemLib::throwTypeErrorObject(msg);
   }
   raise_recoverable_error_without_first_frame(msg);
-  if (RuntimeOption::EvalHardTypeHints) {
-    raise_error("Error handler tried to recover from typehint violation");
-  }
+  raise_error("Error handler tried to recover from typehint violation");
 }
 
 void raise_reified_typehint_error(const std::string& msg, bool warn) {

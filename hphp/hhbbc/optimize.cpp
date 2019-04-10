@@ -1352,9 +1352,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
                  insert_assertions);
   }
 
-  if (RuntimeOption::EvalHardTypeHints) {
-    for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
-  }
+  for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
 
   if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {
     fixTypeConstraint(index, func->retTypeConstraint);

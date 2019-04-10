@@ -52,15 +52,6 @@ struct Repo::GlobalData {
   uint32_t InitialStaticStringTableSize = 0;
 
   /*
-   * Indicates whether a repo was compiled with HardTypeHints.
-   *
-   * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
-   * raise if you violate a parameter typehint, because doing so
-   * would allow violating assumptions from the optimizer.
-   */
-  bool HardTypeHints = false;
-
-  /*
    * Indicates whether a repo was compiled with HardReturnTypeHints.
    *
    * If so, we disallow recovering from the E_RECOVERABLE_ERROR we
@@ -225,7 +216,6 @@ struct Repo::GlobalData {
       (EnableHipHopSyntax)
       (InitialNamedEntityTableSize)
       (InitialStaticStringTableSize)
-      (HardTypeHints)
       (ThisTypeHintLevel)
       (HardReturnTypeHints)
       (CheckPropTypeHints)

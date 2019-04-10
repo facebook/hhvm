@@ -1,26 +1,80 @@
 array(6) {
   [0]=>
-  int(4096)
+  int(2)
   [1]=>
-  string(67) "Argument 1 passed to main() must be an instance of int, float given"
+  string(59) "Argument 1 to test_soft() must be of type @int, float given"
   [2]=>
   string(%d) "%s"
   [3]=>
-  int(18)
+  int(13)
   [4]=>
   array(0) {
   }
   [5]=>
-  array(1) {
+  array(3) {
     [0]=>
     array(2) {
       ["file"]=>
       string(%d) "%s"
       ["line"]=>
-      int(18)
+      int(13)
+    }
+    [1]=>
+    array(4) {
+      ["file"]=>
+      string(%d) "%s"
+      ["line"]=>
+      int(22)
+      ["function"]=>
+      string(9) "test_soft"
+      ["args"]=>
+      array(1) {
+        [0]=>
+        float(0)
+      }
+    }
+    [2]=>
+    array(2) {
+      ["function"]=>
+      string(4) "main"
+      ["args"]=>
+      array(0) {
+      }
     }
   }
 }
-in main
+in test_soft
 bool(false)
-done with main
+array(6) {
+  [0]=>
+  int(4096)
+  [1]=>
+  string(72) "Argument 1 passed to test_hard() must be an instance of int, float given"
+  [2]=>
+  string(%d) "%s"
+  [3]=>
+  int(23)
+  [4]=>
+  array(0) {
+  }
+  [5]=>
+  array(2) {
+    [0]=>
+    array(2) {
+      ["file"]=>
+      string(%d) "%s"
+      ["line"]=>
+      int(23)
+    }
+    [1]=>
+    array(2) {
+      ["function"]=>
+      string(4) "main"
+      ["args"]=>
+      array(0) {
+      }
+    }
+  }
+}
+
+Fatal error: Error handler tried to recover from typehint violation in %s on line 17

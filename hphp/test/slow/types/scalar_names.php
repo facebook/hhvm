@@ -21,21 +21,21 @@ class arraykey {
 class num {
 }
 
-function test_hh_string(HH\string $foo) { var_dump($foo); }
-function test_hh_int(HH\int $foo) { var_dump($foo); }
-function test_hh_float(HH\float $foo) { var_dump($foo); }
-function test_hh_bool(HH\bool $foo) { var_dump($foo); }
-function test_hh_resource(HH\resource $foo) { var_dump($foo); }
-function test_hh_arraykey(HH\arraykey $foo) { var_dump($foo); }
-function test_hh_num(HH\num $foo) { var_dump($foo); }
+function test_hh_string(@HH\string $foo) { var_dump($foo); }
+function test_hh_int(@HH\int $foo) { var_dump($foo); }
+function test_hh_float(@HH\float $foo) { var_dump($foo); }
+function test_hh_bool(@HH\bool $foo) { var_dump($foo); }
+function test_hh_resource(@HH\resource $foo) { var_dump($foo); }
+function test_hh_arraykey(@HH\arraykey $foo) { var_dump($foo); }
+function test_hh_num(@HH\num $foo) { var_dump($foo); }
 
-function test_string(string $foo) { var_dump($foo); }
-function test_int(int $foo) { var_dump($foo); }
-function test_float(float $foo) { var_dump($foo); }
-function test_bool(bool $foo) { var_dump($foo); }
-function test_resource(resource $foo) { var_dump($foo); }
-function test_arraykey(arraykey $foo) { var_dump($foo); }
-function test_num(num $foo) { var_dump($foo); }
+function test_string(@string $foo) { var_dump($foo); }
+function test_int(@int $foo) { var_dump($foo); }
+function test_float(@float $foo) { var_dump($foo); }
+function test_bool(@bool $foo) { var_dump($foo); }
+function test_resource(@resource $foo) { var_dump($foo); }
+function test_arraykey(@arraykey $foo) { var_dump($foo); }
+function test_num(@num $foo) { var_dump($foo); }
 
 
 // It's important that we're in a "<?php" file and that HH syntax

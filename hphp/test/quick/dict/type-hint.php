@@ -3,85 +3,85 @@
 
 class Foo {}
 
-function takes_dict1(dict $foo): dict {
+function takes_dict1(@dict $foo): dict {
   return $foo;
 }
-function takes_dict2(dict<Foo> $bar): dict<Foo> {
+function takes_dict2(@dict<Foo> $bar): dict<Foo> {
   return $bar;
 }
-function takes_dict3(dict<Foo,> $baz): dict<Foo,> {
+function takes_dict3(@dict<Foo,> $baz): dict<Foo,> {
   return $baz;
 }
-function takes_dict4(dict<Foo, Bar> $biz): dict<Foo, Bar> {
+function takes_dict4(@dict<Foo, Bar> $biz): dict<Foo, Bar> {
   return $biz;
 }
-function takes_dict5(?dict $d): ?dict {
+function takes_dict5(@?dict $d): ?dict {
   return $d;
 }
-function takes_container1(Container<Foo> $c): Container<Foo> {
+function takes_container1(@Container<Foo> $c): Container<Foo> {
   return $c;
 }
-function takes_container2(?Container<Foo> $c): ?Container<Foo> {
+function takes_container2(@?Container<Foo> $c): ?Container<Foo> {
   return $c;
 }
-function takes_keyed_container(KeyedContainer $c): KeyedContainer {
+function takes_keyed_container(@KeyedContainer $c): KeyedContainer {
   return $c;
 }
-function takes_traversable(Traversable<Foo> $t): Traversable<Foo> {
+function takes_traversable(@Traversable<Foo> $t): Traversable<Foo> {
   return $t;
 }
-function takes_keyed_traversable(KeyedTraversable $t): KeyedTraversable {
+function takes_keyed_traversable(@KeyedTraversable $t): KeyedTraversable {
   return $t;
 }
-function takes_vec(vec $v): vec {
+function takes_vec(@vec $v): vec {
   return $v;
 }
-function takes_keyset(keyset $ks): keyset {
+function takes_keyset(@keyset $ks): keyset {
   return $ks;
 }
-function takes_array1(array $arr): array {
+function takes_array1(@array $arr): array {
   return $arr;
 }
-function takes_array2(?array $arr): ?array {
+function takes_array2(@?array $arr): ?array {
   return $arr;
 }
-function takes_bool(bool $b): bool {
+function takes_bool(@bool $b): bool {
   return $b;
 }
-function takes_string(string $s): string {
+function takes_string(@string $s): string {
   return $s;
 }
-function takes_xhp_child(XHPChild $x): XHPChild {
+function takes_xhp_child(@XHPChild $x): XHPChild {
   return $x;
 }
-function takes_foo(Foo $f): Foo {
+function takes_foo(@Foo $f): Foo {
   return $f;
 }
-function takes_array_access(ArrayAccess<int, Foo> $a): ArrayAccess<int, Foo> {
+function takes_array_access(@ArrayAccess<int, Foo> $a): ArrayAccess<int, Foo> {
   return $a;
 }
-function takes_vector_container(Vector $v): Vector {
+function takes_vector_container(@Vector $v): Vector {
   return $v;
 }
-function takes_map_container(Map $m): Map {
+function takes_map_container(@Map $m): Map {
   return $m;
 }
-function takes_null(null $x): null {
+function takes_null(@null $x): null {
   return $x;
 }
-function takes_nonnull(nonnull $x): nonnull {
+function takes_nonnull(@nonnull $x): nonnull {
   return $x;
 }
-function takes_mixed(mixed $m): mixed {
+function takes_mixed(@mixed $m): mixed {
   return $m;
 }
-function takes_vec_or_dict1(vec_or_dict $x): vec_or_dict {
+function takes_vec_or_dict1(@vec_or_dict $x): vec_or_dict {
   return $x;
 }
-function takes_vec_or_dict2(?vec_or_dict $x): ?vec_or_dict {
+function takes_vec_or_dict2(@?vec_or_dict $x): ?vec_or_dict {
   return $x;
 }
-function takes_vec_or_dict3(vec_or_dict<int> $x): vec_or_dict<int> {
+function takes_vec_or_dict3(@vec_or_dict<int> $x): vec_or_dict<int> {
   return $x;
 }
 

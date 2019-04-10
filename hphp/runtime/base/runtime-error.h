@@ -127,8 +127,7 @@ void raise_hack_strict(HackStrictOption option, const char *ini_setting,
 
 /*
  * raise_typehint_error() is the same as raise_recoverable_error(), except
- * when compiled in RepoAuthoritative mode with HardTypeHints the error
- * handler is not allowed to recover.
+ * the error handler is not allowed to recover.
  * raise_reified_typehint_error flavor also takes a warn flag that demotes the
  * error to a warning for reified generics migrations purposes
  */

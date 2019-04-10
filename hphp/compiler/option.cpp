@@ -185,9 +185,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     AutoloadRoot = Config::GetString(ini, config, "AutoloadMap.root");
   }
 
-  Config::Bind(RuntimeOption::EvalHardTypeHints, ini, config,
-               "HardTypeHints", RuntimeOption::EvalHardTypeHints);
-
   static bool HardReturnTypeHints;
   Config::Bind(HardReturnTypeHints, ini, config, "HardReturnTypeHints", true);
 

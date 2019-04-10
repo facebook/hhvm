@@ -138,7 +138,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.UsedHHBBC                   = RuntimeOption::EvalUseHHBBC;
   gd.Signature                   = nanos.count();
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
-  gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = true;

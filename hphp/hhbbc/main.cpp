@@ -352,7 +352,6 @@ void write_global_data(
   gd.UsedHHBBC                   = true;
   gd.Signature                   = nanos.count();
   gd.EnableHipHopSyntax          = RuntimeOption::EnableHipHopSyntax;
-  gd.HardTypeHints               = RuntimeOption::EvalHardTypeHints;
   gd.ThisTypeHintLevel           = RuntimeOption::EvalThisTypeHintLevel;
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;

@@ -148,9 +148,7 @@ State entry_state(const Index& index, Context const ctx,
       continue;
     }
     auto const& param = ctx.func->params[locId];
-    if (ctx.func->isMemoizeImpl &&
-        !param.byRef &&
-        RuntimeOption::EvalHardTypeHints) {
+    if (ctx.func->isMemoizeImpl && !param.byRef) {
       auto const& constraint = param.typeConstraint;
       if (constraint.hasConstraint() && !constraint.isTypeVar() &&
           !constraint.isTypeConstant()) {
@@ -552,19 +550,16 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     if (it == end(propState)) return;
 
     /*
-     * When HardTypeHints isn't on, DisallowDynamicVarEnvFuncs isn't on, or any
-     * functions are interceptable, we don't require the constraints to actually
+     * When DisallowDynamicVarEnvFuncs isn't on, or any functions are
+     * interceptable, we don't require the constraints to actually
      * match, and relax all the HNI types to Gen.
      *
-     * This is because extensions may wish to assign to properties
-     * after a typehint guard, which is going to fail without
-     * HardTypeHints.  Or, with any interceptable functions, it's
-     * quite possible that some function calls in systemlib might not
-     * be known to return things matching the property type hints for
+     * This is because with any interceptable functions, it's quite
+     * possible that some function calls in systemlib might not be
+     * known to return things matching the property type hints for
      * some properties, or not to take their arguments by reference.
      */
     auto const hniTy =
-      !RuntimeOption::EvalHardTypeHints ||
       RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON ||
       clsAnalysis.anyInterceptable
         ? TGen

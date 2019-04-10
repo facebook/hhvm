@@ -1,21 +1,17 @@
 <?hh
-function handler($errno, $errmsg) {
-  if ($errno === E_RECOVERABLE_ERROR) {
-    echo "E_RECOVERABLE_ERROR: $errmsg\n";
-  } else {
-    return false;
-  }
-}
+
 type X = arraykey;
 newtype Y = ?arraykey;
 newtype A = arraykey;
 type B = ?arraykey;
 newtype C = X;
 type D = Y;
-function a(A $x) {}
-function b(B $x) {}
-function c(C $x) {}
-function d(D $x) {}
+function a(@A $x) {}
+function b(@B $x) {}
+function c(@C $x) {}
+function d(@D $x) {}
+
+<<__EntryPoint>>
 function main() {
   a(null);
   a(1);
@@ -34,11 +30,4 @@ function main() {
   d(1.0);
   d('foo');
   echo "Done\n";
-}
-
-<<__EntryPoint>>
-function main_typedef_arraykey() {
-error_reporting(-1);
-set_error_handler('handler');
-main();
 }

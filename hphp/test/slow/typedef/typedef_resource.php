@@ -1,21 +1,17 @@
 <?hh
-function handler($errno, $errmsg) {
-  if ($errno === E_RECOVERABLE_ERROR) {
-    echo "E_RECOVERABLE_ERROR: $errmsg\n";
-  } else {
-    return false;
-  }
-}
+
 type X = resource;
 newtype Y = ?resource;
 newtype A = resource;
 type B = ?resource;
 newtype C = X;
 type D = Y;
-function a(A $x) {}
-function b(B $x) {}
-function c(C $x) {}
-function d(D $x) {}
+function a(@A $x) {}
+function b(@B $x) {}
+function c(@C $x) {}
+function d(@D $x) {}
+
+<<__EntryPoint>>
 function main() {
   $x = imagecreate(10, 10);
   a(null);
@@ -31,11 +27,4 @@ function main() {
   d(1);
   d($x);
   echo "Done\n";
-}
-
-<<__EntryPoint>>
-function main_typedef_resource() {
-error_reporting(-1);
-set_error_handler('handler');
-main();
 }

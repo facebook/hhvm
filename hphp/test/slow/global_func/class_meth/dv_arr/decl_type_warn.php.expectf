@@ -3,7 +3,7 @@ classMeth{
     function(func1)
 }
 
-Notice: class_meth Compat: Argument 1 passed to test_array_as_param() must be of type array, clsmeth given in %s/decl_type_warn.php on line 16
+Notice: class_meth Compat: Argument 1 passed to test_array_as_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 16
 array(2) {
   [0]=>
   class(A)
@@ -11,7 +11,7 @@ array(2) {
   function(A::func1)
 }
 
-Notice: class_meth Compat: Argument 1 passed to test_varray_as_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 17
+Notice: class_meth Compat: Argument 1 passed to test_varray_as_param() must be of type @HH\varray, clsmeth given in %s/decl_type_warn.php on line 17
 array(2) {
   [0]=>
   class(A)
@@ -19,73 +19,79 @@ array(2) {
   function(A::func1)
 }
 
-Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_param() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 18
+Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_param() must be of type @HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 18
 array(2) {
   [0]=>
   class(A)
   [1]=>
   function(A::func1)
-}
-Caught: Argument 1 passed to test_vec_as_param() must be an instance of HH\vec, clsmeth given
-classMeth{
-    class(A)
-    function(func1)
-}
-Caught: Argument 1 passed to test_vec_dict_as_param() must be an instance of HH\vec_or_dict, clsmeth given
-classMeth{
-    class(A)
-    function(func1)
 }
 
-Notice: class_meth Compat: Argument 1 passed to test_container_as_param() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 21
-array(2) {
-  [0]=>
-  class(A)
-  [1]=>
-  function(A::func1)
-}
+Warning: Argument 1 to test_vec_as_param() must be of type @HH\vec, clsmeth given in %s
 classMeth{
     class(A)
     function(func1)
 }
 
-Notice: class_meth Compat: Argument 1 passed to test_array_as_io_param() must be of type array, clsmeth given in %s/decl_type_warn.php on line 34
-array(2) {
-  [0]=>
-  class(A)
-  [1]=>
-  function(A::func1)
-}
-
-Notice: class_meth Compat: Argument 1 passed to test_varry_as_io_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 35
-array(2) {
-  [0]=>
-  class(A)
-  [1]=>
-  function(A::func1)
-}
-
-Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_io_param() must be of type HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 36
-array(2) {
-  [0]=>
-  class(A)
-  [1]=>
-  function(A::func1)
-}
-Caught: Argument 1 passed to test_vec_as_io_param() must be an instance of HH\vec, clsmeth given
+Warning: Argument 1 to test_vec_dict_as_param() must be of type @HH\vec_or_dict, clsmeth given in %s
 classMeth{
     class(A)
     function(func1)
 }
-Caught: Argument 1 returned from test_vec_as_io_param() as an inout parameter must be of type HH\vec, clsmeth given
-Caught: Argument 1 passed to test_vec_dict_as_io_param() must be an instance of HH\vec_or_dict, clsmeth given
+
+Notice: class_meth Compat: Argument 1 passed to test_container_as_param() must be of type @HH\Container, clsmeth given in %s/decl_type_warn.php on line 21
+array(2) {
+  [0]=>
+  class(A)
+  [1]=>
+  function(A::func1)
+}
 classMeth{
     class(A)
     function(func1)
 }
-Caught: Argument 1 returned from test_vec_dict_as_io_param() as an inout parameter must be of type HH\vec_or_dict, clsmeth given
 
-Notice: class_meth Compat: Argument 1 passed to test_container_as_io_param() must be of type HH\Container, clsmeth given in %s/decl_type_warn.php on line 39
+Notice: class_meth Compat: Argument 1 passed to test_array_as_io_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 34
+array(2) {
+  [0]=>
+  class(A)
+  [1]=>
+  function(A::func1)
+}
+
+Notice: class_meth Compat: Argument 1 passed to test_varry_as_io_param() must be of type @HH\varray, clsmeth given in %s/decl_type_warn.php on line 35
+array(2) {
+  [0]=>
+  class(A)
+  [1]=>
+  function(A::func1)
+}
+
+Notice: class_meth Compat: Argument 1 passed to test_vdarray_as_io_param() must be of type @HH\varray_or_darray, clsmeth given in %s/decl_type_warn.php on line 36
+array(2) {
+  [0]=>
+  class(A)
+  [1]=>
+  function(A::func1)
+}
+
+Warning: Argument 1 to test_vec_as_io_param() must be of type @HH\vec, clsmeth given in %s
+classMeth{
+    class(A)
+    function(func1)
+}
+
+Warning: Argument 1 returned from test_vec_as_io_param() as an inout parameter must be of type @HH\vec, clsmeth given in %s
+
+Warning: Argument 1 to test_vec_dict_as_io_param() must be of type @HH\vec_or_dict, clsmeth given in %s
+classMeth{
+    class(A)
+    function(func1)
+}
+
+Warning: Argument 1 returned from test_vec_dict_as_io_param() as an inout parameter must be of type @HH\vec_or_dict, clsmeth given in %s
+
+Notice: class_meth Compat: Argument 1 passed to test_container_as_io_param() must be of type @HH\Container, clsmeth given in %s/decl_type_warn.php on line 39
 array(2) {
   [0]=>
   class(A)

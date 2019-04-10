@@ -1,11 +1,5 @@
 <?hh
-function handler($errno, $errmsg) {
-  if ($errno === E_RECOVERABLE_ERROR) {
-    echo "E_RECOVERABLE_ERROR: $errmsg\n";
-  } else {
-    return false;
-  }
-}
+
 type X = callable;
 newtype Y = ?callable;
 newtype A = callable;
@@ -15,10 +9,12 @@ type D = Y;
 class Q {
   public static function foo() {}
 }
-function a(A $x) {}
-function b(B $x) {}
-function c(C $x) {}
-function d(D $x) {}
+function a(@A $x) {}
+function b(@B $x) {}
+function c(@C $x) {}
+function d(@D $x) {}
+
+<<__EntryPoint>>
 function main() {
   a(null);
   a(1);
@@ -49,11 +45,4 @@ function main() {
   d(array('Q','non_existent'));
   d(function () { return 123; });
   echo "Done\n";
-}
-
-<<__EntryPoint>>
-function main_typedef_callable() {
-error_reporting(-1);
-set_error_handler('handler');
-main();
 }

@@ -15,7 +15,7 @@ set_error_handler(
 class C {}
 class D {}
 
-function f<reify T>(T $x): T { return $x; }
+function f<reify T>(@T $x): @T { return $x; }
 
 f<C>(new C());
 f<D>(new C());

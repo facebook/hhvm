@@ -12,7 +12,7 @@ set_error_handler(
   }
 );
 
-function f<reify T>($x): T { return $x; }
+function f<reify T>($x): @T { return $x; }
 
 f<int>(1);
 f<num>(1);

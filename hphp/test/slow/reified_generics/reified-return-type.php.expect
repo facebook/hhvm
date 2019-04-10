@@ -1,5 +1,5 @@
-ERROR: Value returned from function f() must be of type int, float given on line 19
-ERROR: Value returned from function f() must be of type int, bool given on line 21
-ERROR: Value returned from function f() must be of type bool, int given on line 24
-ERROR: Value returned from function f() must be of type shape('x' => int, 'y' => string), array given on line 27
-ERROR: Value returned from function f() must be of type (int, string), array given on line 30
+ERROR: Value returned from function f() must be of type @int, float given on line 15
+ERROR: Value returned from function f() must be of type @int, bool given on line 15
+ERROR: Value returned from function f() must be of type @bool, int given on line 15
+ERROR: Value returned from function f() must be of type @shape('x' => int, 'y' => string), array given on line 15
+ERROR: Value returned from function f() must be of type @(int, string), array given on line 15

@@ -4,6 +4,5 @@
 
 -vCheckPropTypeHints=2
 -vCheckReturnTypeHints=2
--vHardTypeHints=0
 
 -vHackArrDVArrs=0

@@ -8,7 +8,7 @@ class y {
   public $foo = array(1,2,3);
 }
 class x {
-  function __construct(y $y) {
+  function __construct(@y $y) {
     var_dump($y->foo);
   }
 }

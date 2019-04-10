@@ -1039,7 +1039,7 @@ void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
                                      int paramNums) const {
   verifyFail(func, tv, paramNums);
   assertx(
-    isSoft() || !RuntimeOption::EvalHardTypeHints ||
+    isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
      isArrayType(tv->m_type)) ||

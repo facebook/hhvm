@@ -1038,25 +1038,19 @@ void asTypeStructHelper(ArrayData* a, Cell c) {
   }
 }
 
-namespace {
-
-// Adds the list of reified generics to the reified generics table
-std::pair<StringData*, ArrayData*>
-recordReifiedGenericsAndGetInfo(ArrayData* tsList) {
-  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  addToReifiedGenericsTable(mangledName, tsList);
-  return std::make_pair(mangledName, tsList);
-}
-
-} // namespace
-
 StringData* recordReifiedGenericsAndGetName(ArrayData* tsList) {
-  return recordReifiedGenericsAndGetInfo(tsList).first;
+  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
+  bool didAdd = false;
+  addToReifiedGenericsTable(mangledName, tsList, didAdd);
+  if (!didAdd) decRefArr(tsList);
+  return mangledName;
 }
 
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
-  auto result = recordReifiedGenericsAndGetInfo(tsList).second;
-  ArrayData::GetScalarArray(&result);
+  auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
+  bool didAdd = false;
+  auto result = addToReifiedGenericsTable(mangledName, tsList, didAdd);
+  if (!didAdd) decRefArr(tsList);
   return result;
 }
 

@@ -28,9 +28,10 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void addToReifiedGenericsTable(
+ArrayData* addToReifiedGenericsTable(
   const StringData* name,
-  ArrayData*& tsList
+  ArrayData* tsList,
+  bool& didAdd
 ) {
   auto const ne = NamedEntity::get(name, true);
   auto const generics = ne->getCachedReifiedGenerics();
@@ -41,13 +42,15 @@ void addToReifiedGenericsTable(
     ne->m_cachedReifiedGenerics.bind(rds::Mode::Normal);
     ArrayData::GetScalarArray(&tsList);
     ne->setCachedReifiedGenerics(tsList);
-    return;
+    didAdd = true;
+    return tsList;
   }
   // it already exists on the named entity table
   if (debug && !tsList->equal(generics, true)) {
     raise_error("Mismatched reified types");
   }
-  return;
+  didAdd = false;
+  return generics;
 }
 
 ArrayData* getReifiedTypeList(const StringData* name) {

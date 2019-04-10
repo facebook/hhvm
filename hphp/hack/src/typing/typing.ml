@@ -1182,9 +1182,10 @@ and expr
       ~valkind ~check_defined
       ?is_func_arg ?array_ref_ctx ?expected env e
   with e ->
+    let stack = Caml.Printexc.get_raw_backtrace () in
     let pos = Pos.string (Pos.to_absolute p) in
     prerr_endline (Printf.sprintf "Exception while typechecking expression at position %s" pos);
-    raise e
+    Caml.Printexc.raise_with_backtrace e stack
 
 and raw_expr
   ?(accept_using_var = false)

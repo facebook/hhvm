@@ -325,10 +325,11 @@ let main root =
       try
         serve env
       with e ->
-        let stack = Printexc.get_backtrace () in
+        let raw_stack = Caml.Printexc.get_raw_backtrace () in
+        let stack = Caml.Printexc.raw_backtrace_to_string raw_stack in
         let () = Hh_logger.exc
           ~prefix:"WatchmanEventWatcher uncaught exception. exiting." ~stack e in
-        raise e
+        Caml.Printexc.raise_with_backtrace e raw_stack
     end
   | Error Failure_daemon_already_running
   | Error Failure_watchman_init ->

@@ -109,8 +109,9 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
     end in
     Errors.merge errors' errors
   with e ->
+    let stack = Caml.Printexc.get_raw_backtrace () in
     let () = prerr_endline ("Exception on file " ^ (Relative_path.S.to_string fn)) in
-    raise e
+    Caml.Printexc.raise_with_backtrace e stack
 
 let check_files dynamic_view_files opts errors progress ~memory_cap =
   SharedMem.invalidate_caches();

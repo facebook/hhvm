@@ -63,8 +63,9 @@ let make_then_revert_local_changes f () =
   make_local_changes ();
   let result = try f () with
     | e ->
+      let stack = Caml.Printexc.get_raw_backtrace () in
       revert_local_changes ();
-      raise e
+      Caml.Printexc.raise_with_backtrace e stack
   in
   revert_local_changes ();
   result

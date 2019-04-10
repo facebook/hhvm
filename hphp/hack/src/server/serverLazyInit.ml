@@ -47,8 +47,9 @@ let lock_and_load_deptable (fn: string) ~(ignore_hh_version: bool) : unit =
   with
   | SharedMem.Sql_assertion_failure 11
   | SharedMem.Sql_assertion_failure 14 as e -> (* SQL_corrupt *)
+    let stack = Caml.Printexc.get_raw_backtrace () in
     LoadScriptUtils.delete_corrupted_saved_state fn;
-    raise e
+    Caml.Printexc.raise_with_backtrace e stack
 
 (* download_and_load_state_exn does these things:
  * mk_state_future which synchronously downloads ss and kicks of async dirty query

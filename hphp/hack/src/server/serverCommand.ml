@@ -198,8 +198,9 @@ let with_decl_tracking f =
     let res = f () in
     res, Decl.stop_tracking ()
   with e ->
+    let stack = Caml.Printexc.get_raw_backtrace () in
     let _ : FileInfo.names = Decl.stop_tracking () in
-    raise e
+    Caml.Printexc.raise_with_backtrace e stack
 
 (* Construct a continuation that will finish handling the command and update
  * the environment. Server can execute the continuation immediately, or store it
@@ -225,9 +226,9 @@ let actually_handle genv client msg full_recheck_needed ~is_stale = fun env ->
       let (new_env, response), declared_names = try
         with_decl_tracking @@ fun () -> ServerRpc.handle ~is_stale genv env cmd
       with e ->
-        let stack = Printexc.get_backtrace () in
-        if ServerCommandTypes.is_critical_rpc cmd then raise e
-        else raise (Nonfatal_rpc_exception (e, stack, env))
+        let stack = Caml.Printexc.get_raw_backtrace () in
+        if ServerCommandTypes.is_critical_rpc cmd then Caml.Printexc.raise_with_backtrace e stack
+        else raise (Nonfatal_rpc_exception (e, Caml.Printexc.raw_backtrace_to_string stack, env))
       in
       let cmd_string = ServerCommandTypesUtils.debug_describe_t cmd in
       let parsed_files = Full_fidelity_parser_profiling.stop_profiling () in

@@ -735,6 +735,10 @@ struct RuntimeOption {
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \
   F(uint32_t, WarnOnTooManyArguments,  0)                               \
+  /* GetClassBadArgument:
+   * 0 -> no warning, 1 -> warning, 2 -> exception
+   */                                                                   \
+  F(uint32_t, GetClassBadArgument,     0)                               \
   /* WarnOnIncDecInvalidType:
    * 0 - No restrictions on types that can be incremented or decremented
    * 1 - Warn when incrementing or decrementing non numeric types

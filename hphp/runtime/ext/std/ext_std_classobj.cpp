@@ -192,8 +192,20 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
+  auto logOrThrow = [&](const Variant& object) {
+    auto msg = folly::sformat("get_class() was called with {}, expected object",
+                              getDataTypeString(object.getType()));
+    if (RuntimeOption::EvalGetClassBadArgument == 2) {
+      SystemLib::throwRuntimeExceptionObject(msg);
+    }
+    if (RuntimeOption::EvalGetClassBadArgument == 1) {
+      raise_warning(msg);
+    }
+  };
   if (object.isNull()) {
     // No arg passed.
+    logOrThrow(object);
+
     auto cls = GetCallerClassSkipBuiltins();
     if (cls) {
       return Variant{cls->name(), Variant::PersistentStrInit{}};
@@ -202,7 +214,10 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
     raise_warning("get_class() called without object from outside a class");
     return false;
   }
-  if (!object.isObject()) return false;
+  if (!object.isObject()) {
+    logOrThrow(object);
+    return false;
+  }
   return Variant{object.toCObjRef()->getVMClass()->name(),
                  Variant::PersistentStrInit{}};
 }

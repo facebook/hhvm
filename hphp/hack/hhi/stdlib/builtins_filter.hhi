@@ -8,13 +8,6 @@
 *
 */
 
-const int INPUT_POST = 0;
-const int INPUT_GET = 0;
-const int INPUT_COOKIE = 0;
-const int INPUT_ENV = 0;
-const int INPUT_SERVER = 0;
-const int INPUT_SESSION = 0;
-const int INPUT_REQUEST = 0;
 const int FILTER_FLAG_NONE = 0;
 const int FILTER_REQUIRE_SCALAR = 0;
 const int FILTER_REQUIRE_ARRAY = 0;

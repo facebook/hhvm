@@ -30,13 +30,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64_t k_INPUT_POST = 0;
-const int64_t k_INPUT_GET = 1;
-const int64_t k_INPUT_COOKIE = 2;
-const int64_t k_INPUT_ENV = 4;
-const int64_t k_INPUT_SERVER = 5;
-const int64_t k_INPUT_SESSION = 6;
-const int64_t k_INPUT_REQUEST = 99;
 const int64_t k_FILTER_FLAG_NONE = 0;
 const int64_t k_FILTER_REQUIRE_SCALAR = 33554432;
 const int64_t k_FILTER_REQUIRE_ARRAY = 16777216;
@@ -111,13 +104,6 @@ struct FilterRequestData final {
   }
 
   Array getVar(int64_t type) {
-    switch (type) {
-      case k_INPUT_GET: return m_GET;
-      case k_INPUT_POST: return m_POST;
-      case k_INPUT_COOKIE: return m_COOKIE;
-      case k_INPUT_SERVER: return m_SERVER;
-      case k_INPUT_ENV: return m_ENV;
-    }
     return empty_array();
   }
 
@@ -131,7 +117,7 @@ private:
 RDS_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 
 static struct FilterExtension final : Extension {
-  FilterExtension() : Extension("filter", "0.11.0") {}
+  FilterExtension() : Extension("filter", "0.12.0") {}
 
   void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
     HHVM_SYS_FE(__SystemLib_filter_input_get_var);
@@ -139,13 +125,6 @@ static struct FilterExtension final : Extension {
   }
 
   void moduleInit() override {
-    HHVM_RC_INT(INPUT_POST, k_INPUT_POST);
-    HHVM_RC_INT(INPUT_GET, k_INPUT_GET);
-    HHVM_RC_INT(INPUT_COOKIE, k_INPUT_COOKIE);
-    HHVM_RC_INT(INPUT_ENV, k_INPUT_ENV);
-    HHVM_RC_INT(INPUT_SERVER, k_INPUT_SERVER);
-    HHVM_RC_INT(INPUT_SESSION, k_INPUT_SESSION);
-    HHVM_RC_INT(INPUT_REQUEST, k_INPUT_REQUEST);
     HHVM_RC_INT(FILTER_FLAG_NONE, k_FILTER_FLAG_NONE);
     HHVM_RC_INT(FILTER_REQUIRE_SCALAR, k_FILTER_REQUIRE_SCALAR);
     HHVM_RC_INT(FILTER_REQUIRE_ARRAY, k_FILTER_REQUIRE_ARRAY);

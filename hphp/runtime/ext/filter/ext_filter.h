@@ -33,13 +33,6 @@ Variant HHVM_FUNCTION(filter_var,
 Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name);
 void HHVM_FUNCTION(_filter_snapshot_globals);
 
-extern const int64_t k_INPUT_POST;
-extern const int64_t k_INPUT_GET;
-extern const int64_t k_INPUT_COOKIE;
-extern const int64_t k_INPUT_ENV;
-extern const int64_t k_INPUT_SERVER;
-extern const int64_t k_INPUT_SESSION;
-extern const int64_t k_INPUT_REQUEST;
 extern const int64_t k_FILTER_FLAG_NONE;
 extern const int64_t k_FILTER_REQUIRE_SCALAR;
 extern const int64_t k_FILTER_REQUIRE_ARRAY;

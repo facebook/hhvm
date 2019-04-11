@@ -216,11 +216,6 @@ configure_file(
 )
 endif(NOT WITH_DUNE)
 
-configure_file(
-  "src/fsnotify/dune.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/fsnotify/dune"
-)
-
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
   DESTINATION bin
   COMPONENT dev)

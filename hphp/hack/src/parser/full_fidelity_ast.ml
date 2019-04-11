@@ -1700,6 +1700,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | p, Class_const ((_, pid), (_, "")) -> p, pid
         | ty -> ty
       in
+      if ParserOptions.disable_instanceof env.parser_options then
+        raise_parsing_error env (`Node node) SyntaxError.instanceof_disabled;
       InstanceOf (pExpr instanceof_left_operand env, ty)
       (* TODO: Priority fix? *)
       (*match pExpr instanceof_left_operand env with

@@ -803,6 +803,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
     + (RuntimeOption::DisableStaticClosures ? '1' : '0')
+    + (RuntimeOption::DisableInstanceof ? '1' : '0')
     + (RuntimeOption::EvalRxIsEnabled ? '1' : '0')
     + (RuntimeOption::EvalEmitClsMethPointers ? '1' : '0')
     + (RuntimeOption::EvalIsVecNotices ? '1' : '0')

@@ -278,6 +278,7 @@ val instanceof_memberselection_inside_scoperesolution: string
 val instanceof_missing_subscript_index: string
 val instanceof_new_unknown_node: string -> string
 val instanceof_reference: string
+val instanceof_disabled: string
 val invalid_await_use: string
 val toplevel_await_use: string
 val invalid_constructor_method_call: string

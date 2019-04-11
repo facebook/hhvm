@@ -498,6 +498,9 @@ let instanceof_new_unknown_node msg =
 
 let instanceof_reference = "References are not allowed on the right side of an instanceof operation"
 
+let instanceof_disabled = "The 'instanceof' operator is not supported in Hack; \
+  use the 'is' operator or 'is_a()'"
+
 let invalid_await_use = "Await cannot be used as an expression"
 
 let toplevel_await_use = "Await cannot be used in a toplevel statement"

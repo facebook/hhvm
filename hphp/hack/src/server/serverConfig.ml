@@ -275,6 +275,7 @@ let load config_filename options =
     ?tco_disable_instanceof_refinement:(bool_opt "disable_instanceof_refinement" config)
     ?tco_disallow_ref_param_on_constructor:(bool_opt "disallow_ref_param_on_constructor" config)
     ?tco_disallow_byref_dynamic_calls:(bool_opt "disallow_byref_dynamic_calls" config)
+    ?po_disable_instanceof:(bool_opt "disable_instanceof" config)
     ?po_enable_stronger_await_binding:(bool_opt "stronger_await_binding" config)
     ?po_disable_lval_as_an_expression:(bool_opt "disable_lval_as_an_expression" config)
     ?po_disable_unsafe_expr:(bool_opt "disable_unsafe_expr" config)

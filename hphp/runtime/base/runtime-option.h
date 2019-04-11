@@ -578,6 +578,9 @@ struct RuntimeOption {
   // Disables static closures
   // true => error, false => default behaviour
   static bool DisableStaticClosures;
+  // Disables the `instanceof` operator
+  // true => error, false => default behaviour
+  static bool DisableInstanceof;
 
   // Disables the setting of reserved variable php_errorsmg
   // true => error, false => php_errormsg can be set

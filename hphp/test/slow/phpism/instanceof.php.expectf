@@ -1,0 +1,1 @@
+Fatal error: The 'instanceof' operator is not supported in Hack; use the 'is' operator or 'is_a()' in %s on line %d

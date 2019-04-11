@@ -10,24 +10,12 @@
 open Core_kernel
 open ServerEnv
 
-module SearchServiceRunner  = struct
-  type info =
-    | Full of FileInfo.t
-    | Fast of FileInfo.names
-
-  type t = (HackSearchService.SS.Trie.SearchUpdates.key * info)
+module SearchServiceRunner = struct
+  type t = Relative_path.t * SymbolIndex.info
 
   (* Chosen so that multiworker takes about ~2.5 seconds *)
   let chunk_size genv =
     genv.local_config.ServerLocalConfig.search_chunk_size
-
-  (* Update the search service for this file *)
-  let update_single (fn, info) =
-    match info with
-    | Full infos ->
-      HackSearchService.WorkerApi.update_from_fileinfo fn infos
-    | Fast names ->
-      HackSearchService.WorkerApi.update_from_fast fn names
 
   let queue = Queue.create ()
 
@@ -40,29 +28,18 @@ module SearchServiceRunner  = struct
         let x = Queue.dequeue_exn queue in
         iter (x::acc) (n-1) in
     let fast = iter [] num_files in
-    let update_single_search _ fast_list =
-      List.iter fast_list update_single in
 
-    (* If there aren't enough files just do it on one thread *)
-    (if (List.length fast) < 100
-      then update_single_search () fast
-      else
-        let next_fast_files =
-          MultiWorker.next genv.workers fast in
-        MultiWorker.call
-            genv.workers
-            ~job:update_single_search
-            ~neutral:()
-            ~merge:(fun _ _ -> ())
-            ~next:next_fast_files);
+    SymbolIndex.update genv.workers fast;
 
-    HackSearchService.MasterApi.update_search_index
-      ~fuzzy:!HackSearchService.fuzzy (List.map fast fst);
     if (List.length fast > 0) then begin
-      let str = Printf.sprintf "Updating %d search files:" (List.length fast) in
+      let str =
+        Printf.sprintf
+          "Updated search index for symbols in %d files:"
+          (List.length fast)
+      in
       ignore(Hh_logger.log_duration (str) t);
       if Queue.is_empty queue
-      then Hh_logger.log "Done updating search files"
+      then Hh_logger.log "Done updating search index"
     end
 
   (* Completely clears the queue *)
@@ -81,7 +58,7 @@ module SearchServiceRunner  = struct
 
   let update x = Queue.enqueue queue x
 
-  let update_full fn ast = Queue.enqueue queue (fn, Full ast)
+  let update_full fn ast = Queue.enqueue queue (fn, SymbolIndex.Full ast)
 
   let should_run_completely genv =
    chunk_size genv = 0

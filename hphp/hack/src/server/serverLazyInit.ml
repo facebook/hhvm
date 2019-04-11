@@ -182,7 +182,7 @@ let update_search (genv: ServerEnv.genv) (saved: Naming_table.saved_state_info) 
 
     Relative_path.Map.iter fast
       ~f: (fun fn names ->
-          SearchServiceRunner.update (fn, (SearchServiceRunner.Fast names));
+          SearchServiceRunner.update (fn, (SymbolIndex.Fast names));
         );
     HackEventLogger.update_search_end t;
     Hh_logger.log_duration "Loading search indices" t

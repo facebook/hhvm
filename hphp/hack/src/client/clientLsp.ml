@@ -1121,30 +1121,30 @@ let do_workspaceSymbol
   let%lwt results = rpc conn ref_unblocked_time command in
 
   let hack_to_lsp_kind = function
-    | HackSearchService.Class (Some Ast.Cabstract) -> SymbolInformation.Class
-    | HackSearchService.Class (Some Ast.Cnormal) -> SymbolInformation.Class
-    | HackSearchService.Class (Some Ast.Cinterface) -> SymbolInformation.Interface
-    | HackSearchService.Class (Some Ast.Ctrait) -> SymbolInformation.Interface
+    | SymbolIndex.Class (Some Ast.Cabstract) -> SymbolInformation.Class
+    | SymbolIndex.Class (Some Ast.Cnormal) -> SymbolInformation.Class
+    | SymbolIndex.Class (Some Ast.Cinterface) -> SymbolInformation.Interface
+    | SymbolIndex.Class (Some Ast.Ctrait) -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
-    | HackSearchService.Class (Some Ast.Cenum) -> SymbolInformation.Enum
-    | HackSearchService.Class (None) -> assert false (* should never happen *)
-    | HackSearchService.Method _ -> SymbolInformation.Method
-    | HackSearchService.ClassVar _ -> SymbolInformation.Property
-    | HackSearchService.Function -> SymbolInformation.Function
-    | HackSearchService.Typedef -> SymbolInformation.Class
+    | SymbolIndex.Class (Some Ast.Cenum) -> SymbolInformation.Enum
+    | SymbolIndex.Class (None) -> assert false (* should never happen *)
+    | SymbolIndex.Method _ -> SymbolInformation.Method
+    | SymbolIndex.ClassVar _ -> SymbolInformation.Property
+    | SymbolIndex.Function -> SymbolInformation.Function
+    | SymbolIndex.Typedef -> SymbolInformation.Class
     (* LSP doesn't have typedef, so we approximate with class *)
-    | HackSearchService.Constant -> SymbolInformation.Constant
+    | SymbolIndex.Constant -> SymbolInformation.Constant
   in
   let hack_to_lsp_container = function
-    | HackSearchService.Method (_, scope) -> Some scope
-    | HackSearchService.ClassVar (_, scope) -> Some scope
+    | SymbolIndex.Method (_, scope) -> Some scope
+    | SymbolIndex.ClassVar (_, scope) -> Some scope
     | _ -> None
   in
   (* Hack sometimes gives us back items with an empty path, by which it       *)
   (* intends "whichever path you asked me about". That would be meaningless   *)
   (* here. If it does, then it'll pick up our default path (also empty),      *)
   (* which will throw and go into our telemetry. That's the best we can do.   *)
-  let hack_symbol_to_lsp (symbol: HackSearchService.symbol) =
+  let hack_symbol_to_lsp (symbol: SymbolIndex.symbol) =
     { SymbolInformation.
       name = (Utils.strip_ns symbol.name);
       kind = hack_to_lsp_kind symbol.result_type;

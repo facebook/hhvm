@@ -8,7 +8,7 @@
  *)
 
 open Core_kernel
-module SS = HackSearchService
+module SS = SymbolIndex
 module SUtils = SearchUtils
 
 let print_results results =

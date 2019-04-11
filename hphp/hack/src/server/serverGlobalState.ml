@@ -25,7 +25,7 @@ let save ~logging_init = {
     saved_hhi = Path.make (Relative_path.(path_of_prefix Hhi));
     saved_tmp = Path.make (Relative_path.(path_of_prefix Tmp));
     trace = !Typing_deps.trace;
-    fuzzy = !HackSearchService.fuzzy;
+    fuzzy = SymbolIndex.fuzzy_search_enabled ();
     profile_log = !Utils.profile;
     fixme_codes = !Errors.ignored_fixme_codes;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
@@ -38,7 +38,7 @@ let restore state =
   Relative_path.(set_path_prefix Hhi state.saved_hhi);
   Relative_path.(set_path_prefix Tmp state.saved_tmp);
   Typing_deps.trace := state.trace;
-  HackSearchService.fuzzy := state.fuzzy;
+  SymbolIndex.set_fuzzy_search_enabled state.fuzzy;
   Utils.profile := state.profile_log;
   Errors.ignored_fixme_codes := state.fixme_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;

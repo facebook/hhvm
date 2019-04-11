@@ -229,12 +229,12 @@ let get_constructor_ty c =
 
 (* Global identifier autocomplete uses search service to find matching names *)
 let search_funs_and_classes input ~limit ~on_class ~on_function =
-  HackSearchService.MasterApi.query_autocomplete input ~limit
+  SymbolIndex.query_for_autocomplete input ~limit
     ~filter_map:begin fun _ _ res ->
       let name = res.SearchUtils.name in
       match res.SearchUtils.result_type with
-      | HackSearchService.Class _-> on_class name
-      | HackSearchService.Function -> on_function name
+      | SymbolIndex.Class _-> on_class name
+      | SymbolIndex.Function -> on_function name
       | _ -> None
     end
 

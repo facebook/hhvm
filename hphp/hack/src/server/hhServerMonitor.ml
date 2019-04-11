@@ -83,7 +83,8 @@ let monitor_daemon_main (options: ServerArgs.options) ~(proc_stack: string list)
   if local_config.ServerLocalConfig.use_full_fidelity_parser then
     HackEventLogger.set_use_full_fidelity_parser true;
 
-  HackSearchService.fuzzy := local_config.ServerLocalConfig.enable_fuzzy_search;
+  SymbolIndex.set_fuzzy_search_enabled
+    local_config.ServerLocalConfig.enable_fuzzy_search;
   if ServerArgs.check_mode options then
     ServerMain.run_once options config local_config
   else

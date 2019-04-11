@@ -144,15 +144,15 @@ let get_globals
     ]
     in
     let {value; _} =
-      HackSearchService.MasterApi.query_autocomplete input ~limit:(Some 100)
+      SymbolIndex.query_for_autocomplete input ~limit:(Some 100)
         ~filter_map:begin fun _ _ res ->
           let name = Utils.strip_ns res.SearchUtils.name in
           match res.SearchUtils.result_type with
-          | HackSearchService.Class (Some Ast.Ctrait) ->
+          | SymbolIndex.Class (Some Ast.Ctrait) ->
             make_trait_completion context replace_pos name
-          | HackSearchService.Class (Some Ast.Cinterface) ->
+          | SymbolIndex.Class (Some Ast.Cinterface) ->
             make_interface_completion context replace_pos name
-          | HackSearchService.Class _ ->
+          | SymbolIndex.Class _ ->
             make_class_completion context replace_pos name
           | _ -> None
         end

@@ -20,7 +20,7 @@ type check_kind =
   (* Lazy check is a check limited to the files open in IDE. It:
    * - produces push diagnostics for those files
    * - updates their parsing / naming / decl definitions on heap
-   * - updates their parsing level indexes, like HackSearchService or
+   * - updates their parsing level indexes, like SymbolIndex or
    *     ServerEnv.naming_table
    * - invalidates their declaration dependencies, by removing them from the
    *     heap and depending on lazy declaration to redeclare them on
@@ -248,7 +248,7 @@ let parsing genv env to_check ~stop_at_errors =
   Fixmes.HH_FIXMES.remove_batch ide_files;
   Fixmes.DECL_HH_FIXMES.remove_batch ide_files;
 
-  HackSearchService.MasterApi.clear_shared_memory to_check;
+  SymbolIndex.remove_files to_check;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in

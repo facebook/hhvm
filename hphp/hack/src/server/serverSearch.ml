@@ -8,7 +8,7 @@
 *)
 
 open Hh_core
-module SS = HackSearchService
+module SS = SymbolIndex
 module SUtils = SearchUtils
 
 let scope_string_from_type result_type =
@@ -59,30 +59,30 @@ let result_to_json res =
 let re_colon_colon = Str.regexp "::"
 
 let go workers query type_ =
-  let fuzzy = !HackSearchService.fuzzy in
+  let fuzzy = SymbolIndex.fuzzy_search_enabled () in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
     match Str.split_delim re_colon_colon query with
     | [class_name_query; method_query] ->
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
-        HackSearchService.MasterApi.query ~fuzzy workers class_name_query type_
+        SymbolIndex.query ~fuzzy workers class_name_query type_
         |> List.find ~f:begin fun result ->
           match result with
-          | SearchUtils.{result_type = HackSearchService.Class _; _} -> true
+          | SearchUtils.{result_type = SymbolIndex.Class _; _} -> true
           | _ -> false
         end
       in
       begin match class_ with
       | Some SearchUtils.{name; _} ->
-        HackSearchService.ClassMethods.query name method_query
+        SymbolIndex.query_class_methods name method_query
       | None ->
         (* When we can't find a class with a name similar to the given one,
            just return no search results. *)
         []
       end
     | _  ->
-      HackSearchService.MasterApi.query ~fuzzy workers query type_
+      SymbolIndex.query ~fuzzy workers query type_
   in
 
   List.map results SearchUtils.to_absolute

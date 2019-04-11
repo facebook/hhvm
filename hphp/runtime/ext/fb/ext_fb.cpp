@@ -1216,6 +1216,29 @@ int64_t HHVM_FUNCTION(HH_non_crypto_md5_lower, StringArg str) {
   return folly::Endian::big(pre_decode);
 }
 
+int64_t HHVM_FUNCTION(HH_int_mul_overflow, int64_t a, int64_t b) {
+  // On x86_64, this compiles down to mov+mul+mov+retq
+  uint64_t ua = a;
+  uint64_t ub = b;
+  __uint128_t full_product =
+    static_cast<__uint128_t>(ua) * static_cast<__uint128_t>(ub);
+  // Return only the part that would overflow 64-bit multiplication.
+  return static_cast<int64_t>(full_product >> 64);
+}
+
+int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
+                      int64_t a, int64_t b, int64_t bias) {
+  uint64_t ua = a;
+  uint64_t ub = b;
+  uint64_t umbias = static_cast<uint64_t>(-1 - bias);
+  __uint128_t full =
+    static_cast<__uint128_t>(ua) * static_cast<__uint128_t>(ub);
+  // The assembly for this looks faster than 128-bit add to 'full'
+  // (8 instructions vs. 11)
+  uint64_t full_lower = static_cast<uint64_t>(full);
+  return static_cast<int64_t>(full >> 64) + (full_lower > umbias);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 EXTERNALLY_VISIBLE
@@ -1261,6 +1284,8 @@ struct FBExtension : Extension {
                 HH_disable_code_coverage_with_frequency);
     HHVM_FALIAS(HH\\non_crypto_md5_upper, HH_non_crypto_md5_upper);
     HHVM_FALIAS(HH\\non_crypto_md5_lower, HH_non_crypto_md5_lower);
+    HHVM_FALIAS(HH\\int_mul_overflow, HH_int_mul_overflow);
+    HHVM_FALIAS(HH\\int_mul_add_overflow, HH_int_mul_add_overflow);
 
     loadSystemlib();
   }

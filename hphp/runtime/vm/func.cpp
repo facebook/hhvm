@@ -820,6 +820,8 @@ FuncSet s_ignores_frame = {
   "fb_lazy_realpath",
   "HH\\non_crypto_md5_upper",
   "HH\\non_crypto_md5_lower",
+  "HH\\int_mul_overflow",
+  "HH\\int_mul_add_overflow",
   "hash",
   "hash_algos",
   "hash_file",

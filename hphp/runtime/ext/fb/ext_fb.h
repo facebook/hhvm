@@ -54,6 +54,9 @@ Variant HHVM_FUNCTION(fb_lazy_lstat, const String& filename);
 Variant HHVM_FUNCTION(fb_lazy_realpath, const String& filename);
 int64_t HHVM_FUNCTION(HH_non_crypto_md5_upper, StringArg str);
 int64_t HHVM_FUNCTION(HH_non_crypto_md5_lower, StringArg str);
+int64_t HHVM_FUNCTION(HH_int_mul_overflow, int64_t a, int64_t b);
+int64_t HHVM_FUNCTION(HH_int_mul_add_overflow,
+                      int64_t a, int64_t b, int64_t bias);
 
 ///////////////////////////////////////////////////////////////////////////////
 

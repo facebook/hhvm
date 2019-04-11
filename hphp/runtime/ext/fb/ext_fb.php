@@ -239,4 +239,20 @@ function non_crypto_md5_upper(string $str): int;
  */
 <<__Native, __IsFoldable, __Rx>>
 function non_crypto_md5_lower(string $str): int;
+
+/* Returns the overflow part of multiplying two ints, as if they were unsigned.
+ * In other words, this returns the upper 64 bits of the full product of
+ * (unsigned)$a and (unsigned)$b. (The lower 64 bits is just `$a * $b`
+ * regardless of signed/unsigned).
+ */
+<<__Native, __IsFoldable, __Rx>>
+function int_mul_overflow(int $a, int $b): int;
+
+/* Returns the overflow part of multiplying two ints plus another int, as if
+ * they were all unsigned. Specifically, this returns the upper 64 bits of
+ * full (unsigned)$a * (unsigned)$b + (unsigned)$bias. $bias can be used to
+ * manipulate rounding of the result.
+ */
+<<__Native, __IsFoldable, __Rx>>
+function int_mul_add_overflow(int $a, int $b, int $bias): int;
 } // HH namespace

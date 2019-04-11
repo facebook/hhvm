@@ -63,7 +63,7 @@ for f in "$@"; do
   fi
   echo ""
   if [ "$REPLY" = "y" ] && [ "$NO_COPY" = false ]; then
-    cp "$OUT" "$SRC$EXP_EXT"
+    cp "$OUT" "$f$EXP_EXT"
   elif [ "$REPLY" = "q" ]; then
     exit 0
   fi

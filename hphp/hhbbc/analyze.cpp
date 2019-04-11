@@ -375,6 +375,8 @@ FuncAnalysis do_analyze_collect(const Index& index,
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
 
+  hphp_fast_map<BlockId, BlockUpdateInfo> blockUpdates;
+
   /*
    * Iterate until a fixed point.
    *
@@ -418,19 +420,22 @@ FuncAnalysis do_analyze_collect(const Index& index,
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
       };
 
+      auto const blk = ctx.func->blocks[bid].get();
       auto stateOut = ai.bdata[bid].stateIn;
       auto interp   = Interp {
-        index, ctx, collect, bid, ctx.func->blocks[bid].get(), stateOut
+        index, ctx, collect, bid, blk, stateOut
       };
       auto flags    = run(interp, propagate);
-      auto& stateIn = ai.bdata[bid].stateIn;
-      stateIn.speculated                = stateOut.speculated;
-      stateIn.speculatedPops            = stateOut.speculatedPops;
-      stateIn.speculatedIsUnconditional = stateOut.speculatedIsUnconditional;
-      stateIn.speculatedIsFallThrough   = stateOut.speculatedIsFallThrough;
       if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
           !collect.effectFree) {
         break;
+      }
+      if (flags.updateInfo.replacedBcs.size() ||
+          flags.updateInfo.unchangedBcs != blk->hhbcs.size() ||
+          flags.updateInfo.fallthrough != blk->fallthrough) {
+        blockUpdates[bid] = flags.updateInfo;
+      } else {
+        blockUpdates.erase(bid);
       }
 
       if (flags.returned) {
@@ -462,7 +467,9 @@ FuncAnalysis do_analyze_collect(const Index& index,
   ai.unfoldableFuncs = collect.unfoldableFuncs;
   ai.usedParams = collect.usedParams;
   ai.publicSPropMutations = std::move(collect.publicSPropMutations);
-
+  for (auto& elm : blockUpdates) {
+    ai.blockUpdates.emplace_back(elm.first, std::move(elm.second));
+  }
   index.fixup_return_type(ctx.func, ai.inferredReturn);
 
   /*

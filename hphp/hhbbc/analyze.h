@@ -135,6 +135,11 @@ struct FuncAnalysisResult {
    * Public static property mutations in this function.
    */
   PublicSPropMutations publicSPropMutations;
+
+  /*
+   * Vector of block updates
+   */
+  CompactVector<std::pair<BlockId, BlockUpdateInfo>> blockUpdates;
 };
 
 struct FuncAnalysis : FuncAnalysisResult {

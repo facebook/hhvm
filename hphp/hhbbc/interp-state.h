@@ -362,8 +362,6 @@ private:
 struct StateBase {
   StateBase() {
     initialized = unreachable = false;
-    speculatedIsUnconditional = false;
-    speculatedIsFallThrough = false;
   };
   StateBase(const StateBase&) = default;
   StateBase(StateBase&&) = default;
@@ -372,13 +370,7 @@ struct StateBase {
 
   uint8_t initialized : 1;
   uint8_t unreachable : 1;
-  // if set, speculated is where we end up when we fall through
-  uint8_t speculatedIsFallThrough : 1;
-  // if set, speculated is taken unconditionally
-  uint8_t speculatedIsUnconditional : 1;
-  // when speculated is set, the number of extra pops to be inserted
-  uint8_t speculatedPops{};
-  uint32_t speculated = NoBlockId;
+
   LocalId thisLoc = NoLocalId;
   Type thisType;
   CompactVector<Type> locals;
@@ -421,6 +413,13 @@ struct State : StateBase {
   State() = default;
   State(const State&) = default;
   State(State&&) = default;
+
+  enum class Compact {};
+  State(const State& src, Compact) : StateBase(src) {
+    for (auto const& elm : src.stack) {
+      stack.push_back(elm);
+    }
+  }
 
   // delete assignment operator, so we have to explicitly choose what
   // we want to do from amongst the various copies.

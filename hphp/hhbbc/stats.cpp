@@ -441,8 +441,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
       Interp interp { index, ctx, collect, bid, blk, state };
       for (auto& bc : blk->hhbcs) {
         auto noop    = [] (BlockId, const State*) {};
-        auto flags   = StepFlags {};
-        ISS env { interp, flags, noop };
+        ISS env { interp, noop };
         StatsSS sss { env, stats };
         dispatch(sss, bc);
       }

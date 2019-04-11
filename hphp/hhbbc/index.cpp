@@ -5499,14 +5499,15 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
   };
 
   auto dep = Dep{};
-  if (finfo->retParam != fa.retParam) {
+  if (finfo->retParam == NoLocalId && fa.retParam != NoLocalId) {
+    // This is just a heuristic; it doesn't mean that the value passed
+    // in was returned, but that the value of the parameter at the
+    // point of the RetC was returned. We use it to make (heuristic)
+    // decisions about whether to do inline interps, so we only allow
+    // it to change once (otherwise later passes might not do the
+    // inline interp, and get worse results, which could trigger other
+    // assertions in Index::refine_*).
     dep = Dep::ReturnTy;
-    always_assert_flog(
-        fa.retParam != NoLocalId,
-        "Index retParam went from {} to unset in {}.\n",
-        finfo->retParam,
-        error_loc()
-    );
     finfo->retParam = fa.retParam;
   }
 

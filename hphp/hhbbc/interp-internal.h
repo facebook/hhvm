@@ -50,7 +50,6 @@ TRACE_SET_MOD(hhbbc);
  */
 struct ISS {
   explicit ISS(Interp& bag,
-               StepFlags& flags,
                PropagateFn propagate)
     : index(bag.index)
     , ctx(bag.ctx)
@@ -58,8 +57,8 @@ struct ISS {
     , bid(bag.bid)
     , blk(*bag.blk)
     , state(bag.state)
-    , flags(flags)
     , propagate(propagate)
+    , analyzeDepth(options.StrengthReduce ? 0 : 1)
   {}
 
   const Index& index;
@@ -68,9 +67,27 @@ struct ISS {
   const BlockId bid;
   const php::Block& blk;
   State& state;
-  StepFlags& flags;
+  StepFlags flags;
   PropagateFn propagate;
   bool recordUsedParams{true};
+
+  folly::Optional<State> stateBefore;
+
+  // If we're inside an impl (as opposed to reduce) this will be > 0
+  uint32_t analyzeDepth{0};
+  int32_t srcLoc{-1};
+
+  // As we process the block, we keep track of the optimized bytecode
+  // stream. We expect that in steady state, there will be no changes;
+  // so as we process the block, if the initial bytecodes are the
+  // same, we just keep track of how many are the same in
+  // unchangedBcs. Once things diverge, the replacements are stored in
+  // replacedBcs.
+
+  // number of unchanged bcs to take from blk.hhbcs
+  uint32_t unchangedBcs{0};
+  // new bytecodes
+  BytecodeVec replacedBcs;
 };
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs);
@@ -143,6 +160,8 @@ template<class... Bytecodes>
 void reduce(ISS& env, Bytecodes&&... hhbc) {
   reduce(env, { std::forward<Bytecodes>(hhbc)... });
 }
+
+bool will_reduce(ISS& env) { return env.analyzeDepth == 0; }
 
 void nothrow(ISS& env) {
   FTRACE(2, "    nothrow\n");

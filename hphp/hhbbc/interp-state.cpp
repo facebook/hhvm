@@ -287,9 +287,6 @@ template<class JoinOp>
 bool merge_impl(State& dst, const State& src, JoinOp join) {
   if (!dst.initialized) {
     dst.copy_and_compact(src);
-    dst.speculatedIsUnconditional = dst.speculatedIsFallThrough = false;
-    dst.speculatedPops = 0;
-    dst.speculated = NoBlockId;
     return true;
   }
 
@@ -578,28 +575,6 @@ std::string state_string(const php::Func& f, const State& st,
 
   if (st.mInstrState.base.loc != BaseLoc::None) {
     folly::format(&ret, "mInstrState   :: {}\n", show(f, st.mInstrState));
-  }
-
-  if (st.speculated != NoBlockId) {
-    folly::format(
-      &ret,
-      "speculated   :: B{}({}{}{})\n",
-      st.speculated,
-      st.speculatedPops,
-      st.speculatedIsUnconditional ? ", unconditional" : "",
-      st.speculatedIsFallThrough ? ", fallthrough" : ""
-    );
-  } else if (st.speculatedPops ||
-             st.speculatedIsUnconditional ||
-             st.speculatedIsFallThrough) {
-    folly::format(
-      &ret,
-      "Broken speculated info  :: {}({}{}{})\n",
-      -1,
-      st.speculatedPops,
-      st.speculatedIsUnconditional ? ", unconditional" : "",
-      st.speculatedIsFallThrough ? ", fallthrough" : ""
-    );
   }
 
   return ret;

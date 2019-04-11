@@ -342,6 +342,7 @@ void analyze_iteratively(Index& index, php::Program& program,
       };
       index.refine_return_info(fa, deps);
       index.refine_constants(fa, deps);
+      update_bytecode(fa.ctx.func, std::move(fa.blockUpdates));
 
       if (options.AnalyzePublicStatics && mode == AnalyzeMode::NormalPass) {
         index.record_public_static_mutations(

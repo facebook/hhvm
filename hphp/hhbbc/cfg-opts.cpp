@@ -102,8 +102,9 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
         blk->fallthrough = reachableTarget;
         break;
       }
-      default: {
-        FTRACE(2, "blk: {} -", bid, reachableTarget);
+      case Op::Switch:
+      case Op::SSwitch: {
+        FTRACE(2, "blk: {} -", bid);
         auto const blk = blocks[bid].mutate();
         forEachNormalSuccessor(
           *blk,
@@ -117,6 +118,8 @@ void remove_unreachable_blocks(const FuncAnalysis& ainfo) {
         FTRACE(2, "\n");
         break;
       }
+      default:
+        break;
     }
   }
 }

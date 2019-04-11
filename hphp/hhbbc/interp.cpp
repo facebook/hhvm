@@ -21,6 +21,8 @@
 #include <iterator>
 
 #include <folly/Optional.h>
+#include <folly/gen/Base.h>
+#include <folly/gen/String.h>
 
 #include "hphp/util/trace.h"
 #include "hphp/runtime/base/array-init.h"
@@ -70,19 +72,54 @@ const StaticString s_byRefError("Only variables can be passed by reference");
 const StaticString s_trigger_error("trigger_error");
 const StaticString s_this("HH\\this");
 
+void interpStep(ISS& env, const Bytecode& bc);
+
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
-  BytecodeVec currentReduction;
-  if (!options.StrengthReduce) reduce = false;
+  if (!will_reduce(env)) reduce = false;
+
+  if (reduce) {
+    using namespace folly::gen;
+    ITRACE(2, "(reduce: {}\n",
+           from(bcs) |
+           map([&] (const Bytecode& bc) { return show(env.ctx.func, bc); }) |
+           unsplit<std::string>(", "));
+    if (bcs.size()) {
+      auto ef = !env.flags.reduced || env.flags.effectFree;
+      Trace::Indent _;
+      for (auto const& bc : bcs) {
+        assert(
+          env.flags.jmpDest == NoBlockId &&
+          "you can't use impl with branching opcodes before last position"
+        );
+        interpStep(env, bc);
+        if (!env.flags.effectFree) ef = false;
+        if (env.state.unreachable || env.flags.jmpDest != NoBlockId) break;
+      }
+      env.flags.effectFree = ef;
+    } else if (!env.flags.reduced) {
+      effect_free(env);
+    }
+    env.flags.reduced = true;
+    return;
+  }
+
+  env.analyzeDepth++;
+  SCOPE_EXIT { env.analyzeDepth--; };
+
+  // We should be at the start of a bytecode.
+  assertx(env.flags.wasPEI &&
+          !env.flags.canConstProp &&
+          !env.flags.effectFree);
 
   env.flags.wasPEI          = false;
   env.flags.canConstProp    = true;
   env.flags.effectFree      = true;
 
-  for (auto it = begin(bcs); it != end(bcs); ++it) {
+  for (auto const& bc : bcs) {
     assert(env.flags.jmpDest == NoBlockId &&
            "you can't use impl with branching opcodes before last position");
 
@@ -90,55 +127,23 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
     auto const canConstProp = env.flags.canConstProp;
     auto const effectFree = env.flags.effectFree;
 
-    FTRACE(3, "    (impl {}\n", show(env.ctx.func, *it));
+    ITRACE(3, "    (impl {}\n", show(env.ctx.func, bc));
     env.flags.wasPEI          = true;
     env.flags.canConstProp    = false;
     env.flags.effectFree      = false;
-    env.flags.strengthReduced = folly::none;
-    default_dispatch(env, *it);
+    default_dispatch(env, bc);
 
-    if (env.flags.strengthReduced) {
-      if (instrFlags(env.flags.strengthReduced->back().op) & TF) {
-        unreachable(env);
-      }
-      if (reduce) {
-        std::move(begin(*env.flags.strengthReduced),
-                  end(*env.flags.strengthReduced),
-                  std::back_inserter(currentReduction));
-      }
-    } else {
-      if (instrFlags(it->op) & TF) {
-        unreachable(env);
-      }
-      auto applyConstProp = [&] {
+    if (env.flags.canConstProp) {
+      [&] {
         if (env.flags.effectFree && !env.flags.wasPEI) return;
         auto stk = env.state.stack.end();
-        for (auto i = it->numPush(); i--; ) {
+        for (auto i = bc.numPush(); i--; ) {
           --stk;
           if (!is_scalar(stk->type)) return;
         }
         env.flags.effectFree = true;
         env.flags.wasPEI = false;
-      };
-      if (reduce) {
-        auto added = false;
-        if (env.flags.canConstProp) {
-          if (env.collect.propagate_constants) {
-            if (env.collect.propagate_constants(*it, env.state,
-                                                currentReduction)) {
-              added = true;
-              env.flags.canConstProp = false;
-              env.flags.wasPEI = false;
-              env.flags.effectFree = true;
-            }
-          } else {
-            applyConstProp();
-          }
-        }
-        if (!added) currentReduction.push_back(std::move(*it));
-      } else if (env.flags.canConstProp) {
-        applyConstProp();
-      }
+      }();
     }
 
     // If any of the opcodes in the impl list said they could throw,
@@ -146,13 +151,7 @@ void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
     env.flags.wasPEI = env.flags.wasPEI || wasPEI;
     env.flags.canConstProp = env.flags.canConstProp && canConstProp;
     env.flags.effectFree = env.flags.effectFree && effectFree;
-    if (env.state.unreachable) break;
-  }
-
-  if (reduce) {
-    env.flags.strengthReduced = std::move(currentReduction);
-  } else {
-    env.flags.strengthReduced = folly::none;
+    if (env.state.unreachable || env.flags.jmpDest != NoBlockId) break;
   }
 }
 
@@ -1093,26 +1092,19 @@ void in(ISS& /*env*/, const bc::Jmp&) {
 template<bool Negate, class JmpOp>
 void jmpImpl(ISS& env, const JmpOp& op) {
   auto const location = topStkEquiv(env);
-  auto const e = emptiness(popC(env));
+  auto const e = emptiness(topC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
-    effect_free(env);
-    jmp_setdest(env, op.target1);
-    return;
+    reduce(env, bc::PopC {});
+    return jmp_setdest(env, op.target1);
   }
 
-  if (e == (Negate ? Emptiness::Empty : Emptiness::NonEmpty)) {
-    effect_free(env);
-    jmp_nevertaken(env);
-    return;
+  if (e == (Negate ? Emptiness::Empty : Emptiness::NonEmpty) ||
+      (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
+       next_real_block(*env.ctx.func, op.target1))) {
+    return reduce(env, bc::PopC{});
   }
 
-  if (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
-      next_real_block(*env.ctx.func, op.target1)) {
-    effect_free(env);
-    jmp_nevertaken(env);
-    return;
-  }
-
+  popC(env);
   nothrow(env);
 
   if (location == NoLocalId) return env.propagate(op.target1, &env.state);
@@ -1450,12 +1442,12 @@ void group(ISS& env,
 }
 
 void in(ISS& env, const bc::Switch& op) {
-  auto v = tv(popC(env));
+  auto v = tv(topC(env));
 
   if (v) {
     auto go = [&] (BlockId blk) {
-      effect_free(env);
-      jmp_setdest(env, blk);
+      reduce(env, bc::PopC {});
+      return jmp_setdest(env, blk);
     };
     auto num_elems = op.targets.size();
     if (op.subop1 == SwitchKind::Unbounded) {
@@ -1481,13 +1473,14 @@ void in(ISS& env, const bc::Switch& op) {
     }
   }
 
+  popC(env);
   forEachTakenEdge(op, [&] (BlockId id) {
       env.propagate(id, &env.state);
   });
 }
 
 void in(ISS& env, const bc::SSwitch& op) {
-  auto v = tv(popC(env));
+  auto v = tv(topC(env));
 
   if (v) {
     for (auto& kv : op.targets) {
@@ -1496,13 +1489,13 @@ void in(ISS& env, const bc::SSwitch& op) {
       });
       if (!match) break;
       if (*match) {
-        effect_free(env);
-        jmp_setdest(env, kv.second);
-        return;
+        reduce(env, bc::PopC {});
+        return jmp_setdest(env, kv.second);
       }
     }
   }
 
+  popC(env);
   forEachTakenEdge(op, [&] (BlockId id) {
       env.propagate(id, &env.state);
   });
@@ -3620,57 +3613,60 @@ void in(ISS& env, const bc::FCall& op) {
 namespace {
 
 void iterInitImpl(ISS& env, IterId iter, LocalId valueLoc,
-                  BlockId target, const Type& base, LocalId baseLoc) {
-  assert(iterIsDead(env, iter));
-
+                  BlockId target, const Type& base, LocalId baseLoc,
+                  bool needsPop) {
   auto ity = iter_types(base);
-  if (!ity.mayThrowOnInit) nothrow(env);
 
-  auto const taken = [&]{
-    // Take the branch before setting locals if the iter is already
-    // empty, but after popping.  Similar for the other IterInits
-    // below.
-    freeIter(env, iter);
-    env.propagate(target, &env.state);
-  };
-
-  auto const fallthrough = [&]{
+  auto const fallthrough = [&] {
     setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid });
     // Do this after setting the iterator, in case it clobbers the base local
     // equivalency.
     setLoc(env, valueLoc, std::move(ity.value));
   };
 
+  assert(iterIsDead(env, iter));
+
+  if (!ity.mayThrowOnInit) {
+    if (ity.count == IterTypes::Count::Empty && will_reduce(env)) {
+      if (needsPop) {
+        reduce(env, bc::PopC{});
+      } else {
+        reduce(env);
+      }
+      return jmp_setdest(env, target);
+    }
+    nothrow(env);
+  }
+
+  if (needsPop) {
+    popC(env);
+  }
+
   switch (ity.count) {
     case IterTypes::Count::Empty:
-      freeIter(env, iter);
       mayReadLocal(env, valueLoc);
       jmp_setdest(env, target);
-      break;
+      return;
     case IterTypes::Count::Single:
     case IterTypes::Count::NonEmpty:
       fallthrough();
-      jmp_nevertaken(env);
-      break;
+      return jmp_nevertaken(env);
     case IterTypes::Count::ZeroOrOne:
     case IterTypes::Count::Any:
-      taken();
+      // Take the branch before setting locals if the iter is already
+      // empty, but after popping.  Similar for the other IterInits
+      // below.
+      env.propagate(target, &env.state);
       fallthrough();
-      break;
+      return;
   }
+  always_assert(false);
 }
 
 void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
-                   BlockId target, const Type& base, LocalId baseLoc) {
-  assert(iterIsDead(env, iter));
-
+                   BlockId target, const Type& base, LocalId baseLoc,
+                   bool needsPop) {
   auto ity = iter_types(base);
-  if (!ity.mayThrowOnInit) nothrow(env);
-
-  auto const taken = [&]{
-    freeIter(env, iter);
-    env.propagate(target, &env.state);
-  };
 
   auto const fallthrough = [&]{
     setIter(env, iter, LiveIter { ity, baseLoc, NoLocalId, env.bid });
@@ -3681,29 +3677,48 @@ void iterInitKImpl(ISS& env, IterId iter, LocalId valueLoc, LocalId keyLoc,
     if (!locCouldBeRef(env, keyLoc)) setIterKey(env, iter, keyLoc);
   };
 
+  assert(iterIsDead(env, iter));
+
+  if (!ity.mayThrowOnInit) {
+    if (ity.count == IterTypes::Count::Empty && will_reduce(env)) {
+      if (needsPop) {
+        reduce(env, bc::PopC{});
+      } else {
+        reduce(env);
+      }
+      return jmp_setdest(env, target);
+    }
+    nothrow(env);
+  }
+
+  if (needsPop) {
+    popC(env);
+  }
+
   switch (ity.count) {
     case IterTypes::Count::Empty:
-      freeIter(env, iter);
       mayReadLocal(env, valueLoc);
       mayReadLocal(env, keyLoc);
-      jmp_setdest(env, target);
-      break;
+      return jmp_setdest(env, target);
     case IterTypes::Count::Single:
     case IterTypes::Count::NonEmpty:
       fallthrough();
-      jmp_nevertaken(env);
-      break;
+      return jmp_nevertaken(env);
     case IterTypes::Count::ZeroOrOne:
     case IterTypes::Count::Any:
-      taken();
+      env.propagate(target, &env.state);
       fallthrough();
-      break;
+      return;
   }
+
+  always_assert(false);
 }
 
-void iterNextImpl(ISS& env, IterId iter, LocalId valueLoc, BlockId target) {
-  auto const curLoc = locRaw(env, valueLoc);
-
+void iterNextImpl(ISS& env,
+                  IterId iter, LocalId valueLoc, BlockId target,
+                  LocalId baseLoc) {
+  auto const curLoc = peekLocRaw(env, valueLoc);
+  auto noThrow = false;
   auto const noTaken = match<bool>(
     env.state.iters[iter],
     [&] (DeadIter)           {
@@ -3711,7 +3726,7 @@ void iterNextImpl(ISS& env, IterId iter, LocalId valueLoc, BlockId target) {
       return false;
     },
     [&] (const LiveIter& ti) {
-      if (!ti.types.mayThrowOnNext) nothrow(env);
+      if (!ti.types.mayThrowOnNext) noThrow = true;
       if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
@@ -3727,6 +3742,19 @@ void iterNextImpl(ISS& env, IterId iter, LocalId valueLoc, BlockId target) {
       not_reached();
     }
   );
+
+  if (noTaken && noThrow && will_reduce(env)) {
+    if (baseLoc != NoLocalId) {
+      return reduce(env, bc::LIterFree { iter, baseLoc });
+    }
+    return reduce(env, bc::IterFree { iter });
+  }
+
+  mayReadLocal(env, valueLoc);
+  mayReadLocal(env, baseLoc);
+
+  if (noThrow) nothrow(env);
+
   if (noTaken) {
     jmp_nevertaken(env);
     freeIter(env, iter);
@@ -3740,10 +3768,10 @@ void iterNextImpl(ISS& env, IterId iter, LocalId valueLoc, BlockId target) {
 }
 
 void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
-                   LocalId keyLoc, BlockId target) {
-  auto const curValue = locRaw(env, valueLoc);
-  auto const curKey = locRaw(env, keyLoc);
-
+                   LocalId keyLoc, BlockId target, LocalId baseLoc) {
+  auto const curValue = peekLocRaw(env, valueLoc);
+  auto const curKey = peekLocRaw(env, keyLoc);
+  auto noThrow = false;
   auto const noTaken = match<bool>(
     env.state.iters[iter],
     [&] (DeadIter)           {
@@ -3751,7 +3779,7 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
       return false;
     },
     [&] (const LiveIter& ti) {
-      if (!ti.types.mayThrowOnNext) nothrow(env);
+      if (!ti.types.mayThrowOnNext) noThrow = true;
       if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
       switch (ti.types.count) {
         case IterTypes::Count::Single:
@@ -3769,6 +3797,20 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
       not_reached();
     }
   );
+
+  if (noTaken && noThrow && will_reduce(env)) {
+    if (baseLoc != NoLocalId) {
+      return reduce(env, bc::LIterFree { iter, baseLoc });
+    }
+    return reduce(env, bc::IterFree { iter });
+  }
+
+  mayReadLocal(env, valueLoc);
+  mayReadLocal(env, keyLoc);
+  mayReadLocal(env, baseLoc);
+
+  if (noThrow) nothrow(env);
+
   if (noTaken) {
     jmp_nevertaken(env);
     freeIter(env, iter);
@@ -3785,9 +3827,16 @@ void iterNextKImpl(ISS& env, IterId iter, LocalId valueLoc,
 }
 
 void in(ISS& env, const bc::IterInit& op) {
-  auto const baseLoc = topStkLocal(env);
-  auto base = popC(env);
-  iterInitImpl(env, op.iter1, op.loc3, op.target2, std::move(base), baseLoc);
+  auto base = topC(env);
+  iterInitImpl(
+    env,
+    op.iter1,
+    op.loc3,
+    op.target2,
+    std::move(base),
+    topStkLocal(env),
+    true
+  );
 }
 
 void in(ISS& env, const bc::LIterInit& op) {
@@ -3797,13 +3846,13 @@ void in(ISS& env, const bc::LIterInit& op) {
     op.loc4,
     op.target3,
     locAsCell(env, op.loc2),
-    op.loc2
+    op.loc2,
+    false
   );
 }
 
 void in(ISS& env, const bc::IterInitK& op) {
-  auto const baseLoc = topStkLocal(env);
-  auto base = popC(env);
+  auto base = topC(env);
   iterInitKImpl(
     env,
     op.iter1,
@@ -3811,7 +3860,8 @@ void in(ISS& env, const bc::IterInitK& op) {
     op.loc4,
     op.target2,
     std::move(base),
-    baseLoc
+    topStkLocal(env),
+    true
   );
 }
 
@@ -3823,42 +3873,46 @@ void in(ISS& env, const bc::LIterInitK& op) {
     op.loc5,
     op.target3,
     locAsCell(env, op.loc2),
-    op.loc2
+    op.loc2,
+    false
   );
 }
 
 void in(ISS& env, const bc::IterNext& op) {
-  iterNextImpl(env, op.iter1, op.loc3, op.target2);
+  iterNextImpl(env, op.iter1, op.loc3, op.target2, NoLocalId);
 }
 
 void in(ISS& env, const bc::LIterNext& op) {
-  mayReadLocal(env, op.loc2);
-  iterNextImpl(env, op.iter1, op.loc4, op.target3);
+  iterNextImpl(env, op.iter1, op.loc4, op.target3, op.loc2);
 }
 
 void in(ISS& env, const bc::IterNextK& op) {
-  iterNextKImpl(env, op.iter1, op.loc3, op.loc4, op.target2);
+  iterNextKImpl(env, op.iter1, op.loc3, op.loc4, op.target2, NoLocalId);
 }
 
 void in(ISS& env, const bc::LIterNextK& op) {
-  mayReadLocal(env, op.loc2);
-  iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target3);
+  iterNextKImpl(env, op.iter1, op.loc4, op.loc5, op.target3, op.loc2);
 }
 
 void in(ISS& env, const bc::IterFree& op) {
   // IterFree is used for weak iterators too, so we can't assert !iterIsDead.
-  nothrow(env);
-
-  match<void>(
+  auto const isNop = match<bool>(
     env.state.iters[op.iter1],
-    []  (DeadIter) {},
+    []  (DeadIter) {
+      return true;
+    },
     [&] (const LiveIter& ti) {
       if (ti.baseLocal != NoLocalId) hasInvariantIterBase(env);
+      return false;
     }
   );
 
+  if (isNop && will_reduce(env)) return reduce(env);
+
+  nothrow(env);
   freeIter(env, op.iter1);
 }
+
 void in(ISS& env, const bc::LIterFree& op) {
   nothrow(env);
   mayReadLocal(env, op.loc2);
@@ -4591,11 +4645,13 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
   always_assert(op.locrange.first + op.locrange.count
                 <= env.ctx.func->locals.size());
 
-  // If we can use an equivalent, earlier range, then use that instead.
-  auto const equiv = equivLocalRange(env, op.locrange);
-  if (equiv != op.locrange.first) {
-    reduce(env, rebind(LocalRange { equiv, op.locrange.count }));
-    return true;
+  if (will_reduce(env)) {
+    // If we can use an equivalent, earlier range, then use that instead.
+    auto const equiv = equivLocalRange(env, op.locrange);
+    if (equiv != op.locrange.first) {
+      reduce(env, rebind(LocalRange { equiv, op.locrange.count }));
+      return true;
+    }
   }
 
   auto retTy = memoizeImplRetType(env);
@@ -4611,6 +4667,11 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
       (!env.ctx.func->cls ||
        (env.ctx.func->attrs & AttrStatic) ||
        thisAvailable(env))) {
+    if (will_reduce(env) && retTy.first == TBottom) {
+      reduce(env);
+      jmp_setdest(env, op.target1);
+      return true;
+    }
     nothrow(env);
   }
 
@@ -4697,6 +4758,8 @@ void in(ISS& env, const bc::MemoSetEager& op) {
 
 }
 
+namespace {
+
 //////////////////////////////////////////////////////////////////////
 
 void dispatch(ISS& env, const Bytecode& op) {
@@ -4708,88 +4771,46 @@ void dispatch(ISS& env, const Bytecode& op) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Iterator, class... Args>
-void group(ISS& env, Iterator& it, Args&&... args) {
-  FTRACE(2, " {}\n", [&]() -> std::string {
-    auto ret = std::string{};
-    for (auto i = size_t{0}; i < sizeof...(Args); ++i) {
-      ret += " " + show(env.ctx.func, it[i]);
-      if (i != sizeof...(Args) - 1) ret += ';';
-    }
-    return ret;
-  }());
-  it += sizeof...(Args);
-  return interp_step::group(env, std::forward<Args>(args)...);
-}
-
-template<class Iterator>
-void interpStep(ISS& env, Iterator& it, Iterator stop) {
-  /*
-   * During the analysis phase, we analyze some common bytecode
-   * patterns involving conditional jumps as groups to be able to
-   * add additional information to the type environment depending on
-   * whether the branch is taken or not.
-   */
-  auto const o1 = it->op;
-  auto const o2 = it + 1 != stop ? it[1].op : Op::Nop;
-  auto const o3 = it + 1 != stop &&
-                  it + 2 != stop ? it[2].op : Op::Nop;
-
-#define X(y)                                                             \
-  case Op::y:                                                            \
-    switch (o2) {                                                        \
-    case Op::Not:                                                        \
-      switch (o3) {                                                      \
-      case Op::JmpZ:                                                     \
-        return group(env, it, it[0].y, it[1].Not, it[2].JmpZ);           \
-      case Op::JmpNZ:                                                    \
-        return group(env, it, it[0].y, it[1].Not, it[2].JmpNZ);          \
-      default: break;                                                    \
-      }                                                                  \
-      break;                                                             \
-    case Op::JmpZ:                                                       \
-      return group(env, it, it[0].y, it[1].JmpZ);                        \
-    case Op::JmpNZ:                                                      \
-      return group(env, it, it[0].y, it[1].JmpNZ);                       \
-    default: break;                                                      \
-    }                                                                    \
-    break;
-
-  switch (o1) {
-  X(InstanceOfD)
-  X(IsTypeStructC)
-  X(IsTypeL)
-  X(IsTypeC)
-  X(IssetL)
-  X(Same)
-  X(NSame)
-  default: break;
+void record(ISS& env, const Bytecode& bc) {
+  if (bc.srcLoc != env.srcLoc) {
+    Bytecode tmp = bc;
+    tmp.srcLoc = env.srcLoc;
+    return record(env, tmp);
   }
-#undef X
 
-  FTRACE(2, "  {}\n", show(env.ctx.func, *it));
-  dispatch(env, *it++);
+  if (!env.replacedBcs.size() &&
+      env.unchangedBcs < env.blk.hhbcs.size() &&
+      bc == env.blk.hhbcs[env.unchangedBcs]) {
+    env.unchangedBcs++;
+    return;
+  }
+
+  ITRACE(2, "  => {}\n", show(env.ctx.func, bc));
+  env.replacedBcs.push_back(bc);
 }
 
-template<class Iterator>
-StepFlags interpOps(Interp& interp,
-                    Iterator& iter, Iterator stop,
-                    PropagateFn propagate) {
-  auto flags = StepFlags{};
-  ISS env { interp, flags, propagate };
+void interpStep(ISS& env, const Bytecode& bc) {
+  ITRACE(2, "  {}\n", show(env.ctx.func, bc));
+  Trace::Indent _;
 
-  // If there is a throw exit edge, make a copy of the state (except
-  // stacks) in case we need to propagate across the throw exit (if
-  // it's a PEI) and push Throwable.
-  auto const stateBefore = interp.blk->throwExit == NoBlockId
-    ? State{}
-    : with_throwable_only(env.index, interp.state);
+  // If there are throw exit edges, make a copy of the state (except
+  // stacks) in case we need to propagate across throw exits (if
+  // it's a PEI).
+  if (!env.stateBefore && env.blk.throwExit != NoBlockId) {
+    env.stateBefore.emplace(with_throwable_only(env.index, env.state));
+  }
 
-  auto const numPushed   = iter->numPush();
-  interpStep(env, iter, stop);
+  env.flags = {};
 
-  auto fix_const_outputs = [&] {
-    auto elems = interp.state.stack.end();
+  default_dispatch(env, bc);
+
+  if (env.flags.reduced) return;
+
+  auto const_prop = [&] {
+    if (!options.ConstantProp || !env.flags.canConstProp) return false;
+
+    auto const numPushed   = bc.numPush();
+    auto elems = env.state.stack.end();
     constexpr auto numCells = 4;
     Cell cells[numCells];
 
@@ -4805,36 +4826,70 @@ StepFlags interpOps(Interp& interp,
       }
       ++i;
     }
+
+    auto const slot = visit(bc, ReadClsRefSlotVisitor{});
+    if (slot != NoClsRefSlotId) interpStep(env, bc::DiscardClsRef { slot });
+
+    if (env.flags.wasPEI) {
+      ITRACE(2, "   nothrow (due to constprop)\n");
+      env.flags.wasPEI = false;
+    }
+    if (!env.flags.effectFree) {
+      ITRACE(2, "   effect_free (due to constprop)\n");
+      env.flags.effectFree = true;
+    }
+
+    auto const numPop = bc.numPop();
+    for (auto j = 0; j < numPop; j++) {
+      switch (bc.popFlavor(j)) {
+        case Flavor::CVU:
+          // Note that we only support C's for CVU so far (this only
+          // comes up with FCallBuiltin)---we'll fail the verifier if
+          // something changes to send V's or U's through here.
+        case Flavor::CU:
+          // We only support C's for CU right now.
+        case Flavor::C:
+          push(env, TInitNull);
+          interpStep(env, bc::PopC {});
+          break;
+        case Flavor::V:
+          push(env, TRef);
+          interpStep(env, bc::PopV {});
+          break;
+        case Flavor::U:  not_reached();
+        case Flavor::CV: not_reached();
+      }
+    }
+
     while (i--) {
-      elems->type = from_cell(i < numCells ?
-                              cells[i] : *tv(elems->type));
+      auto const v = i < numCells ? cells[i] : *tv(elems->type);
+      elems->type = from_cell(v);
       ++elems;
+      record(env, gen_constant(v));
     }
     return true;
   };
 
-  if (options.ConstantProp && flags.canConstProp && fix_const_outputs()) {
-    if (flags.wasPEI) {
-      FTRACE(2, "   nothrow (due to constprop)\n");
-      flags.wasPEI = false;
-    }
-    if (!flags.effectFree) {
-      FTRACE(2, "   effect_free (due to constprop)\n");
-      flags.effectFree = true;
-    }
+  if (const_prop()) {
+    return;
   }
 
-  assertx(!flags.effectFree || !flags.wasPEI);
-  if (flags.wasPEI) {
-    FTRACE(2, "   PEI.\n");
-    if (interp.blk->throwExit != NoBlockId) {
-      propagate(interp.blk->throwExit, &stateBefore);
+  assertx(!env.flags.effectFree || !env.flags.wasPEI);
+  if (env.flags.wasPEI) {
+    ITRACE(2, "   PEI.\n");
+    if (env.stateBefore) {
+      env.propagate(env.blk.throwExit, &*env.stateBefore);
     }
   }
-  return flags;
+  env.stateBefore.clear();
+
+  record(env, bc);
 }
 
-namespace {
+void interpOne(ISS& env, const Bytecode& bc) {
+  env.srcLoc = bc.srcLoc;
+  interpStep(env, bc);
+}
 
 BlockId speculate(Interp& interp) {
   auto low_water = interp.state.stack.size();
@@ -4844,77 +4899,144 @@ BlockId speculate(Interp& interp) {
     interp.collect.opts = interp.collect.opts - CollectionOpts::Speculating;
   };
 
+  auto failed = false;
+  ISS env { interp, [&] (BlockId, const State*) { failed = true; } };
+
   FTRACE(4, "  Speculate B{}\n", interp.bid);
-  auto const stop = end(interp.blk->hhbcs);
-  auto iter       = begin(interp.blk->hhbcs);
-  while (iter != stop) {
-    auto const numPop = iter->numPop() +
-      (iter->op == Op::CGetL2 ? 1 :
-       iter->op == Op::Dup ? -1 : 0);
+  for (auto const& bc : interp.blk->hhbcs) {
+    assertx(!interp.state.unreachable);
+    auto const numPop = bc.numPop() +
+      (bc.op == Op::CGetL2 ? 1 :
+       bc.op == Op::Dup ? -1 : 0);
     if (interp.state.stack.size() - numPop < low_water) {
       low_water = interp.state.stack.size() - numPop;
     }
 
-    auto const flags = interpOps(interp, iter, stop,
-                                 [] (BlockId, const State*) {});
+    interpOne(env, bc);
+    if (failed) {
+      FTRACE(3, "  Bailing from speculate because propagate was called\n");
+      return NoBlockId;
+    }
+
+    auto const& flags = env.flags;
     if (!flags.effectFree) {
       FTRACE(3, "  Bailing from speculate because not effect free\n");
       return NoBlockId;
     }
 
     assertx(!flags.returned);
-    assertx(!interp.state.unreachable);
 
     if (flags.jmpDest != NoBlockId && interp.state.stack.size() == low_water) {
-      FTRACE(2, "  Speculate found destination block {}\n", flags.jmpDest);
+      FTRACE(2, "  Speculate found target block {}\n", flags.jmpDest);
       return flags.jmpDest;
     }
   }
 
-  return NoBlockId;
+  if (interp.state.stack.size() != low_water) {
+    FTRACE(3,
+           "  Bailing from speculate because the speculated block "
+           "left items on the stack\n");
+    return NoBlockId;
+  }
+
+  if (interp.blk->fallthrough == NoBlockId) {
+    FTRACE(3,
+           "  Bailing from speculate because there was no fallthrough");
+    return NoBlockId;
+  }
+
+  FTRACE(2, "  Speculate found fallthrough block {}\n",
+         interp.blk->fallthrough);
+
+  return interp.blk->fallthrough;
 }
 
-BlockId speculateHelper(Interp& interpIn, BlockId target, bool unconditional) {
-  if (target == NoBlockId || !options.RemoveDeadBlocks) return target;
+const Bytecode* last_op(ISS& env) {
+  if (env.replacedBcs.size()) return &env.replacedBcs.back();
+  if (env.unchangedBcs) {
+    return &env.blk.hhbcs[env.unchangedBcs - 1];
+  }
+  return nullptr;
+}
 
-  int pops = 0;
-  auto const fallthrough = target == interpIn.blk->fallthrough;
+Bytecode& mutate_last_op(ISS& env) {
+  if (!env.replacedBcs.size()) {
+    assertx(env.unchangedBcs);
+    env.replacedBcs.push_back(env.blk.hhbcs[--env.unchangedBcs]);
+  }
+  return env.replacedBcs.back();
+}
 
-  folly::Optional<State> state;
-  while (true) {
-    auto const func = interpIn.ctx.func;
-    auto const targetBlk = func->blocks[target].get();
-    if (!targetBlk->multiPred) return target;
-    switch (targetBlk->hhbcs.back().op) {
-      case Op::JmpZ:
-      case Op::JmpNZ:
-      case Op::SSwitch:
-      case Op::Switch:
-        break;
-      default:
-        return target;
+BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
+  assertx(orig != NoBlockId);
+
+  auto const last = last_op(env);
+  bool endsInControlFlow = last && instrIsNonCallControlFlow(last->op);
+  auto target = orig;
+  auto pops = 0;
+
+  if (options.RemoveDeadBlocks) {
+    while (true) {
+      auto const func = env.ctx.func;
+      auto const targetBlk = func->blocks[target].get();
+      if (!targetBlk->multiPred) break;
+      auto const ok = [&] {
+        switch (targetBlk->hhbcs.back().op) {
+          case Op::JmpZ:
+          case Op::JmpNZ:
+          case Op::SSwitch:
+          case Op::Switch:
+          return true;
+          default:
+          return false;
+        }
+      }();
+
+      if (!ok) break;
+
+      State state{env.state, State::Compact{}};
+
+      Interp interp {
+        env.index, env.ctx, env.collect, target, targetBlk, state
+      };
+
+      auto const new_target = speculate(interp);
+      if (new_target == NoBlockId) break;
+
+      const ssize_t delta = env.state.stack.size() - state.stack.size();
+      assertx(delta >= 0);
+      if (delta && endsInControlFlow) break;
+
+      pops += delta;
+      target = new_target;
+      env.state.copy_from(std::move(state));
     }
+  }
 
-    if (!state) state.emplace(interpIn.state);
-
-    Interp interp {
-      interpIn.index, interpIn.ctx, interpIn.collect, target, targetBlk, *state
-    };
-
-    auto const new_target = speculate(interp);
-    if (new_target == NoBlockId) return target;
-
-    pops += interpIn.state.stack.size() - state->stack.size();
-    if (pops > std::numeric_limits<decltype(
-          interpIn.state.speculatedPops)>::max()) {
-      return target;
+  if (endsInControlFlow && updateTaken) {
+    assertx(!pops);
+    auto needsUpdate = target != orig;
+    if (!needsUpdate) {
+      forEachTakenEdge(
+        *last,
+        [&] (BlockId bid) {
+          if (bid != orig) needsUpdate = true;
+        }
+      );
     }
-    target = new_target;
-    interpIn.state.copy_and_compact(*state);
-    interpIn.state.speculated = target;
-    interpIn.state.speculatedPops = pops;
-    interpIn.state.speculatedIsUnconditional = unconditional;
-    interpIn.state.speculatedIsFallThrough = fallthrough;
+    if (needsUpdate) {
+      auto& bc = mutate_last_op(env);
+      forEachTakenEdge(
+        bc,
+        [&] (BlockId& bid) {
+          bid = bid == orig ? target : NoBlockId;
+        }
+      );
+    }
+  }
+
+  while (pops--) {
+    record(env, bc::PopC {});
   }
 
   return target;
@@ -4931,70 +5053,83 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
            property_state_string(interp.collect.props));
   };
 
-  interp.state.speculated = NoBlockId;
-  interp.state.speculatedPops = 0;
-  interp.state.speculatedIsFallThrough = false;
-  interp.state.speculatedIsUnconditional = false;
-
+  auto env = ISS { interp, propagate };
   auto ret = RunFlags {};
+  auto finish = [&] (BlockId fallthrough) {
+    ret.updateInfo.fallthrough = fallthrough;
+    ret.updateInfo.unchangedBcs = env.unchangedBcs;
+    ret.updateInfo.replacedBcs = std::move(env.replacedBcs);
+    return ret;
+  };
+
   auto const stop = end(interp.blk->hhbcs);
   auto iter       = begin(interp.blk->hhbcs);
   while (iter != stop) {
-    auto const flags = interpOps(interp, iter, stop, propagate);
+    interpOne(env, *iter++);
+    auto const& flags = env.flags;
     if (interp.collect.effectFree && !flags.effectFree) {
       interp.collect.effectFree = false;
       if (any(interp.collect.opts & CollectionOpts::EffectFreeOnly)) {
         FTRACE(2, "  Bailing because not effect free\n");
-        return ret;
+        return finish(NoBlockId);
       }
-    }
-
-    if (interp.state.unreachable) {
-      FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
-      return ret;
-    }
-
-    if (flags.jmpDest != NoBlockId) {
-      if (flags.jmpDest != interp.blk->fallthrough) {
-        FTRACE(2, "  <took branch; no fallthrough>\n");
-      } else {
-        FTRACE(2, "  <branch never taken>\n");
-      }
-      propagate(speculateHelper(interp, flags.jmpDest, true), &interp.state);
-      return ret;
     }
 
     if (flags.returned) {
       FTRACE(2, "  returned {}\n", show(*flags.returned));
       always_assert(iter == stop);
       always_assert(interp.blk->fallthrough == NoBlockId);
-      if (!ret.returned) {
-        ret.retParam = flags.retParam;
-      } else if (ret.retParam != flags.retParam) {
-        ret.retParam = NoLocalId;
-      }
+      assertx(!ret.returned);
+      ret.retParam = flags.retParam;
       ret.returned = flags.returned;
-      return ret;
+      return finish(NoBlockId);
+    }
+
+    if (flags.jmpDest != NoBlockId) {
+      auto const hasFallthrough = [&] {
+        if (flags.jmpDest != interp.blk->fallthrough) {
+          FTRACE(2, "  <took branch; no fallthrough>\n");
+          auto const last = last_op(env);
+          return !last || !instrIsNonCallControlFlow(last->op);
+        } else {
+          FTRACE(2, "  <branch never taken>\n");
+          return true;
+        }
+      }();
+      auto const newDest = speculateHelper(env, flags.jmpDest, true);
+      propagate(newDest, &interp.state);
+      return finish(hasFallthrough ? newDest : NoBlockId);
+    }
+
+    if (interp.state.unreachable) {
+      FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
+      return finish(NoBlockId);
     }
   }
 
   FTRACE(2, "  <end block>\n");
   if (interp.blk->fallthrough != NoBlockId) {
-    propagate(speculateHelper(interp, interp.blk->fallthrough, false), &interp.state);
+    auto const fallthrough =
+      speculateHelper(env, interp.blk->fallthrough, false);
+    propagate(fallthrough, &interp.state);
+    return finish(fallthrough);
   }
-  return ret;
+  return finish(interp.blk->fallthrough);
 }
 
 StepFlags step(Interp& interp, const Bytecode& op) {
-  auto flags   = StepFlags{};
   auto noop    = [] (BlockId, const State*) {};
-  ISS env { interp, flags, noop };
+  ISS env { interp, noop };
+  env.analyzeDepth++;
   dispatch(env, op);
-  return flags;
+  return env.flags;
 }
 
 void default_dispatch(ISS& env, const Bytecode& op) {
   dispatch(env, op);
+  if (instrFlags(op.op) & TF && env.flags.jmpDest == NoBlockId) {
+    unreachable(env);
+  }
 }
 
 folly::Optional<Type> thisType(const Index& index, Context ctx) {

@@ -46,6 +46,12 @@ constexpr auto kDynamicConstant = kExtraInvalidDataType;
 
 //////////////////////////////////////////////////////////////////////
 
+struct BlockUpdateInfo {
+  BlockId fallthrough{NoBlockId};
+  uint32_t unchangedBcs{0};
+  CompactVector<Bytecode> replacedBcs;
+};
+
 /*
  * RunFlags are information about running an entire block in the
  * interpreter.
@@ -63,6 +69,7 @@ struct RunFlags {
    * NoLocalId.
    */
   LocalId retParam{NoLocalId};
+  BlockUpdateInfo updateInfo;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -89,12 +96,6 @@ struct StepFlags {
   bool wasPEI = true;
 
   /*
-   * If set to something other than NoBlockId, then this block
-   * unconditionally falls through to that block.
-   */
-  BlockId jmpDest = NoBlockId;
-
-  /*
    * If an instruction sets this flag, it means that if it pushed a
    * type with a constant value, it had no side effects other than
    * computing the value which was pushed.  This means the instruction
@@ -114,6 +115,18 @@ struct StepFlags {
   bool effectFree = false;
 
   /*
+   * Set by impl_vec to indicate that this instruction was already
+   * dealt with via reduce.
+   */
+  bool reduced = false;
+
+  /*
+   * If set to something other than NoBlockId, then this block
+   * unconditionally falls through to that block.
+   */
+  BlockId jmpDest = NoBlockId;
+
+  /*
    * If an instruction may read or write to locals, these flags
    * indicate which ones.  We don't track this information for local
    * ids past kMaxTrackedLocals, which are assumed to always be in
@@ -129,12 +142,6 @@ struct StepFlags {
    * not read a local that isn't mentioned in this set.
    */
   std::bitset<kMaxTrackedLocals> mayReadLocalSet;
-
-  /*
-   * If the instruction on this step could've been replaced with
-   * cheaper bytecode, this is the list of bytecode that can be used.
-   */
-  folly::Optional<BytecodeVec> strengthReduced;
 
   /*
    * If this is not none, the interpreter executed a return on this

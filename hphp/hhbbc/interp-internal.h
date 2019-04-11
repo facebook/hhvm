@@ -351,10 +351,14 @@ folly::Optional<Type> thisTypeFromContext(const Index& index, Context ctx) {
   return folly::none;
 }
 
-folly::Optional<Type> thisType(ISS& env) {
-  if (!is_specialized_obj(env.state.thisType)) return folly::none;
-  return is_opt(env.state.thisType) ?
-    unopt(env.state.thisType) : env.state.thisType;
+Type thisType(ISS& env) {
+  return env.state.thisType;
+}
+
+Type thisTypeNonNull(ISS& env) {
+  if (!env.state.thisType.couldBe(TObj)) return TBottom;
+  if (is_opt(env.state.thisType)) return unopt(env.state.thisType);
+  return env.state.thisType;
 }
 
 folly::Optional<Type> selfCls(ISS& env) {
@@ -992,7 +996,7 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
   if (!elem) return folly::none;
   if (elem->ty.couldBe(BUninit)) {
     auto const rthis = thisType(env);
-    if (!rthis || dobj_of(*rthis).cls.couldHaveMagicGet()) {
+    if (!is_specialized_obj(rthis) || dobj_of(rthis).cls.couldHaveMagicGet()) {
       return TInitCell;
     }
   }

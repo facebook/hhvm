@@ -139,13 +139,15 @@ Type baseLocNameType(const Base& b) {
 //////////////////////////////////////////////////////////////////////
 
 bool couldBeThisObj(ISS& env, const Base& b) {
-  auto const thisTy = thisType(env);
+  auto const thisTy = thisTypeFromContext(env.index, env.ctx);
   return b.type.couldBe(thisTy ? *thisTy : TObj);
 }
 
 bool mustBeThisObj(ISS& env, const Base& b) {
   if (b.loc == BaseLoc::This) return true;
-  if (auto const ty = thisType(env)) return b.type.subtypeOf(*ty);
+  if (auto const ty = thisTypeFromContext(env.index, env.ctx)) {
+    return b.type.subtypeOf(*ty);
+  }
   return false;
 }
 
@@ -159,7 +161,7 @@ bool mustBeInStack(const Base& b) {
 
 bool couldBeInProp(ISS& env, const Base& b) {
   if (b.loc != BaseLoc::Prop) return false;
-  auto const thisTy = thisType(env);
+  auto const thisTy = thisTypeFromContext(env.index, env.ctx);
   if (!thisTy) return true;
   if (!b.locTy.couldBe(*thisTy)) return false;
   if (b.locName) return isTrackedThisProp(env, b.locName);
@@ -823,7 +825,7 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
   }
 
   if (mustBeThisObj(env, env.state.mInstrState.base)) {
-    auto const optThisTy = thisType(env);
+    auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
     if (name) {
       auto const ty = [&] {
@@ -1439,8 +1441,9 @@ void in(ISS& env, const bc::BaseC& op) {
 }
 
 void in(ISS& env, const bc::BaseH&) {
-  auto const ty = thisType(env);
-  startBase(env, Base{ty ? *ty : TObj, BaseLoc::This});
+  auto const ty = thisTypeNonNull(env);
+  if (ty.subtypeOf(BBottom)) return unreachable(env);
+  startBase(env, Base{ty, BaseLoc::This});
   nothrow(env);
 }
 

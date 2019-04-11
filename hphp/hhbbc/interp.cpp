@@ -1258,8 +1258,7 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
           selfClsExact(env);
         return clsTy ? *clsTy : TCls;
       } else {
-        auto const s = thisType(env);
-        return s ? *s : TObj;
+        return thisTypeNonNull(env);
       }
     }
     return TBottom;
@@ -3933,9 +3932,10 @@ void in(ISS& env, const bc::This&) {
   if (thisAvailable(env)) {
     return reduce(env, bc::BareThis { BareThisOp::NeverNull });
   }
-  auto const ty = thisType(env);
-  push(env, ty ? *ty : TObj, StackThisId);
+  auto const ty = thisTypeNonNull(env);
+  push(env, ty, StackThisId);
   setThisAvailable(env);
+  if (ty.subtypeOf(BBottom)) unreachable(env);
 }
 
 void in(ISS& env, const bc::LateBoundCls& op) {
@@ -3968,10 +3968,10 @@ void in(ISS& env, const bc::BareThis& op) {
     case BareThisOp::NeverNull:
       setThisAvailable(env);
       if (!env.state.unreachable) effect_free(env);
-      return push(env, ty ? *ty : TObj, StackThisId);
+      return push(env, ty, StackThisId);
   }
 
-  push(env, ty ? opt(*ty) : TOptObj, StackThisId);
+  push(env, ty, StackThisId);
 }
 
 void in(ISS& env, const bc::InitThisLoc& op) {

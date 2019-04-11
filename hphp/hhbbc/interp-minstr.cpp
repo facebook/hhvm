@@ -1328,28 +1328,6 @@ void pessimisticFinalNewElem(ISS& env, const Type& type) {
   array_do_newelem(env, type);
 }
 
-void miFinalVGetNewElem(ISS& env, int32_t nDiscard) {
-  handleInThisNewElem(env);
-  handleInPublicStaticNewElem(env);
-  promoteBaseNewElem(env);
-  pessimisticFinalNewElem(env, TInitGen);
-
-  auto const finish = [&](Type ty) {
-    endBase(env);
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-  };
-
-  auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(BVec) ||
-      baseTy.subtypeOf(BDict) ||
-      baseTy.subtypeOf(BKeyset)) {
-    unreachable(env);
-    return finish(TBottom);
-  }
-  finish(TRef);
-}
-
 void miFinalSetNewElem(ISS& env, int32_t nDiscard) {
   auto const t1 = popC(env);
 
@@ -1530,10 +1508,9 @@ void in(ISS& env, const bc::VGetM& op) {
   if (!key) return;
   if (mcodeIsProp(op.mkey.mcode)) {
     miFinalVGetProp(env, op.arg1, *key, op.mkey.mcode == MQT);
-  } else if (mcodeIsElem(op.mkey.mcode)) {
-    miFinalVGetElem(env, op.arg1, *key);
   } else {
-    miFinalVGetNewElem(env, op.arg1);
+    assertx(mcodeIsElem(op.mkey.mcode));
+    miFinalVGetElem(env, op.arg1, *key);
   }
 }
 

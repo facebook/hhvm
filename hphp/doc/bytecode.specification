@@ -2730,26 +2730,6 @@ UnsetElemL <local variable id>    [B]  ->  []
 
   If y is not a string, array, or object, this operation does nothing.
 
-VGetNewElem    [B]  ->  [V]
-
-  Get new element as ref.
-
-  If $1 is an array, this operation creates a new element with the next
-  available numeric key in array $1 and pushes it onto the stack as a ref.
-
-  If $1 is an object that implements the ArrayAccess interface, this operation
-  pushes $1->offsetGet($2) onto the stack as a ref.
-
-  If $1 is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If $1 is null, false, or the empty string, this operation first sets $1 to a
-  new empty array. Then it creates a new element with the next available
-  numeric key in array $1 and pushes it onto the stack as a ref.
-
-  If $1 is true, integer, or double, this operation raises a warning and pushes
-  null onto the stack.
-
 SetNewElem    [C B]  ->  [C]
 
   Set new element. If $1 is an array, this operation executes $1[] = $2 and
@@ -3138,7 +3118,7 @@ QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
 VGetM <stack count> <member key>    [...]  ->  [V]
 
-  {VGet}{Prop,Elem} or VGetNewElem member operation.
+  {VGet}{Prop,Elem} member operation.
 
 SetM <stack count> <member key>    [... C]  ->  [C]
 

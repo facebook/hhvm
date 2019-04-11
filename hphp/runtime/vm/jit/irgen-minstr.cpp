@@ -2204,11 +2204,9 @@ void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
       auto const base = extractBaseIfObj(env);
       return gen(env, VGetProp, base, key, propStatePtrFinalProp(env, base));
     }
-    if (mcodeIsElem(mk.mcode)) {
-      auto const base = ldMBase(env);
-      return gen(env, VGetElem, base, key, propStatePtrElem(env, base));
-    }
-    PUNT(VGetNewElem);
+    assertx(mcodeIsElem(mk.mcode));
+    auto const base = ldMBase(env);
+    return gen(env, VGetElem, base, key, propStatePtrElem(env, base));
   }();
 
   mFinalImpl(env, nDiscard, result);

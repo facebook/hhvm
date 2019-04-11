@@ -851,7 +851,7 @@ Array DateTime::toArray(ArrayFormat format) const {
   bool error;
   switch (format) {
   case ArrayFormat::TimeMap:
-    return make_map_array(
+    return make_darray(
       s_seconds, second(),
       s_minutes, minute(),
       s_hours,   hour(),
@@ -868,7 +868,7 @@ Array DateTime::toArray(ArrayFormat format) const {
     {
       struct tm tm;
       toTm(tm);
-      return make_map_array(
+      return make_darray(
         s_tm_sec,   tm.tm_sec,
         s_tm_min,   tm.tm_min,
         s_tm_hour,  tm.tm_hour,
@@ -884,7 +884,7 @@ Array DateTime::toArray(ArrayFormat format) const {
     {
       struct tm tm;
       toTm(tm);
-      return make_packed_array(
+      return make_varray(
         tm.tm_sec,
         tm.tm_min,
         tm.tm_hour,
@@ -897,7 +897,7 @@ Array DateTime::toArray(ArrayFormat format) const {
       );
     }
   }
-  return empty_array();
+  return empty_varray();
 }
 
 bool DateTime::fromString(const String& input, req::ptr<TimeZone> tz,
@@ -996,7 +996,7 @@ const StaticString
   s_astronomical_twilight_end("astronomical_twilight_end");
 
 Array DateTime::getSunInfo(double latitude, double longitude) const {
-  Array ret;
+  Array ret = Array::CreateDArray();
   timelib_sll sunrise, sunset, transit;
   double ddummy;
 

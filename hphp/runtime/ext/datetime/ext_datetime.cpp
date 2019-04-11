@@ -331,7 +331,7 @@ Array HHVM_METHOD(DateTime, __sleep) {
                  make_tv<KindOfInt64>(zoneType));
   auto const timezone = zone_type_to_string(zoneType, data->m_dt);
   this_->setProp(nullptr, s_timezone.get(), timezone.toCell());
-  return make_packed_array(s_date, s_timezone_type, s_timezone);
+  return make_varray(s_date, s_timezone_type, s_timezone);
 }
 
 void HHVM_METHOD(DateTime, __wakeup) {
@@ -355,7 +355,7 @@ Array HHVM_METHOD(DateTime, __debuginfo) {
 
 Array DateTimeData::getDebugInfo() const {
   assertx(m_dt);
-  return make_map_array(
+  return make_darray(
     s_date, format(s_ISOformat),
     s_timezone_type, m_dt->zoneType(),
     s_timezone, zone_type_to_string(m_dt->zoneType(), m_dt)
@@ -543,7 +543,7 @@ Array HHVM_METHOD(DateTimeZone, __debuginfo) {
 
 Array DateTimeZoneData::getDebugInfo() const {
   assertx(m_tz);
-  return make_map_array(
+  return make_darray(
     s_timezone_type, m_tz->type(),
     s_timezone, m_tz->name()
   );
@@ -818,7 +818,7 @@ static Array HHVM_FUNCTION(getdate, int64_t argc, int64_t timestamp) {
            toArray(DateTime::ArrayFormat::TimeMap);
 }
 
-static Array HHVM_FUNCTION(localtime, int64_t argc,
+static Variant HHVM_FUNCTION(localtime, int64_t argc,
                            int64_t timestamp, bool is_assoc) {
   if (argc < 1) {
     timestamp = TimeStamp::Current();

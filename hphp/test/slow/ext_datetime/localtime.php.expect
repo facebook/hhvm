@@ -18,6 +18,7 @@ array(9) {
   [8]=>
   int(1)
 }
+bool(true)
 array(9) {
   ["tm_sec"]=>
   int(56)
@@ -38,3 +39,4 @@ array(9) {
   ["tm_isdst"]=>
   int(1)
 }
+bool(true)

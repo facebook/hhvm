@@ -18,5 +18,6 @@ array(9) {
   ["astronomical_twilight_end"]=>
   int(1165939386)
 }
+bool(true)
 string(5) "08:52"
 string(5) "18:15"

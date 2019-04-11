@@ -197,13 +197,13 @@ class DateTime implements DateTimeInterface {
   public function sub(DateInterval $interval): mixed;
 
   <<__Native>>
-  public function __sleep(): array;
+  public function __sleep(): varray;
 
   <<__Native>>
   public function __wakeup(): void;
 
   <<__Native>>
-  public function __debugInfo(): array;
+  public function __debugInfo(): darray;
 
 }
 
@@ -283,7 +283,7 @@ class DateTimeZone {
                                   string $country = ""): mixed;
 
   <<__Native>>
-  public function __debugInfo(): array;
+  public function __debugInfo(): darray;
 }
 
 /**
@@ -430,7 +430,7 @@ function date_default_timezone_get(): string;
 <<__Native>>
 function date_default_timezone_set(string $name): bool;
 
-function date_get_last_errors(): array {
+function date_get_last_errors(): darray {
   return DateTime::getLastErrors();
 }
 
@@ -480,7 +480,7 @@ function date_sub(DateTime $datetime, DateInterval $interval): mixed {
  *
  */
 <<__Native>>
-function date_sun_info(int $ts, float $latitude, float $longitude): array;
+function date_sun_info(int $ts, float $latitude, float $longitude): darray;
 
 /**
  * date_sunrise() returns the sunrise time for a given day (specified as a
@@ -580,7 +580,7 @@ function date(string $format, int $timestamp = -1): mixed;
  *
  */
 <<__Native("NumArgs")>>
-function getdate(int $timestamp = -1): array;
+function getdate(int $timestamp = -1): darray;
 
 /**
  * This is an interface to gettimeofday(2). It returns an associative array
@@ -706,7 +706,7 @@ function idate(string $format, int $timestamp = -1): mixed;
  */
 <<__Native("NumArgs")>>
 function localtime(int $timestamp = -1,
-                   bool $is_associative = false): array;
+                   bool $is_associative = false): varray_or_darray;
 
 /**
  * microtime() returns the current Unix timestamp with microseconds. This

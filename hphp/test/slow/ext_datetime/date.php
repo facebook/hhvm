@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function format($dt) {
   var_dump(date_format($dt, "Y-m-d H:i:s"));
@@ -86,6 +86,7 @@ var_dump(mktime(0, 0, 0, 2, 26 - 91, 2010));
 $d = strtotime("2008-09-10 12:34:56");
 $today = getdate($d);
 var_dump($today);
+var_dump(is_darray($today));
 
 $tod = gettimeofday();
 var_dump(count($tod));

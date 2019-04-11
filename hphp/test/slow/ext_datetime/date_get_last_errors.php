@@ -1,10 +1,11 @@
-<?php
+<?hh
 
 
 <<__EntryPoint>>
 function main_date_get_last_errors() {
 $dt = date_create("asdfasdf");
 $errs = date_get_last_errors();
+var_dump(is_darray($errs));
 var_dump(count($errs) === 4);
 
 var_dump($errs['warning_count'] === 1);

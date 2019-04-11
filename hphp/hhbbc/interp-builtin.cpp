@@ -38,16 +38,8 @@ bool builtin_get_class(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topT(env);
   if (op.arg2 == 0) {
-    // AttrNoOverride naturally handles classes - but it also handles
-    // traits, because we only set it if there are no uses of the
-    // trait in the program (this is after any trait flattening has
-    // taken place).
-    if (!env.ctx.cls || !(env.ctx.cls->attrs & AttrNoOverride)) return false;
-    assertx(ty.subtypeOf(BUninit));
-    reduce(env,
-           bc::PopU {},
-           bc::String { env.ctx.cls->name });
-    return true;
+    // Support for get_class() is being removed.
+    return false;
   }
 
   if (!ty.subtypeOf(BObj)) return false;

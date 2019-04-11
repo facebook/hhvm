@@ -212,6 +212,14 @@ struct PublicSPropEntry {
   const TypeConstraint* tc;
   uint32_t refinements;
   bool everModified;
+  /*
+   * This flag is set during analysis to indicate that we resolved the
+   * intial value (and updated it on the php::Class). This doesn't
+   * need to be atomic, because only one thread can resolve the value
+   * (the one processing the 86sinit), and it's been joined by the
+   * time we read the flag in refine_public_statics.
+   */
+  bool initialValueResolved;
 };
 
 /*
@@ -5643,6 +5651,18 @@ void Index::record_public_static_mutations(const php::Func& func,
   m_data->publicSPropMutations.insert_or_assign(&func, std::move(mutations));
 }
 
+void Index::update_static_prop_init_val(const php::Class* cls,
+                                        SString name) const {
+  for (auto& info : find_range(m_data->classInfo, cls->name)) {
+    auto const cinfo = info.second;
+    if (cinfo->cls != cls) continue;
+    auto const it = cinfo->publicStaticProps.find(name);
+    if (it != cinfo->publicStaticProps.end()) {
+      it->second.initialValueResolved = true;
+    }
+  }
+}
+
 void Index::refine_public_statics(DependencyContextSet& deps) {
   trace_time update("update public statics");
 
@@ -5773,6 +5793,16 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
           *this, *cinfo->cls, kv.second.tc, unctx(it->second)
         );
       }();
+
+      if (kv.second.initialValueResolved) {
+        for (auto& prop : cinfo->cls->properties) {
+          if (prop.name != kv.first) continue;
+          kv.second.initializerType = from_cell(prop.val);
+          kv.second.initialValueResolved = false;
+          break;
+        }
+        assertx(!kv.second.initialValueResolved);
+      }
 
       // The type from the indexer doesn't contain the in-class initializer
       // types. Add that here.

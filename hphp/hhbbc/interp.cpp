@@ -4559,6 +4559,7 @@ void in(ISS& env, const bc::InitProp& op) {
       prop.attrs = (Attr)(prop.attrs & ~AttrDeepInit);
       if (!v) break;
       prop.val = *v;
+      env.index.update_static_prop_init_val(env.ctx.func->cls, op.str1);
       return reduce(env, bc::PopC {});
     }
   }

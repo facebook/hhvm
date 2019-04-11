@@ -923,6 +923,19 @@ struct Index {
   void record_public_static_mutations(const php::Func& func,
                                       PublicSPropMutations mutations);
 
+
+  /*
+   * If we resolve the intial value of a public property, we need to
+   * tell the refine_public_statics phase about it, because the init
+   * value won't be included in the mutations any more.
+   *
+   * Note that we can't modify the initial value here, because other
+   * threads might be reading it (via loookup_public_static), so we
+   * set a flag to tell us to update it during the next
+   * refine_public_statics pass.
+   */
+  void update_static_prop_init_val(const php::Class* cls,
+                                   SString name) const;
   /*
    * After a round of analysis with all the public static property mutations
    * being recorded with record_public_static_mutations, the types can be

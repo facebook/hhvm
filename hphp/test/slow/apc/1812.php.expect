@@ -1,9 +1,17 @@
 Array
 (
-    [0] => Array
+    [0] => Ref Object
         (
-            [0] => Array
+            [a] => Array
+                (
+                    [0] => Ref Object
+                        (
+                            [a] => Array
  *RECURSION*
+                        )
+
+                )
+
         )
 
 )

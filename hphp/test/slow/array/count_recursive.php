@@ -1,12 +1,9 @@
 <?hh
 
-function run(&$ref, $arr) {
-  $ref = $arr;
-  var_dump(count($arr, COUNT_RECURSIVE));
-}
-
 <<__EntryPoint>>
 function main() {
-  $arr = [];
-  run(&$arr[], $arr);
+  $a = null;
+  $aa = array(&$a);
+  $a = array(&$aa);
+  var_dump(count($a, COUNT_RECURSIVE));
 }

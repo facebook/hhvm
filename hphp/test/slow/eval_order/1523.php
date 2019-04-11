@@ -44,12 +44,12 @@ c::$a = 2;
 var_dump(c::$a . f(&c::$a));
 $a = array(2);
 var_dump($a[0] . g(&$a));
+
+
+
+
 $a = array(2);
 var_dump(($a[0] . '') . g(&$a));
-$a = array(2);
-var_dump($a[0] . h(&$a[0]));
-$a = array(2);
-var_dump(($a[0] . '') . h(&$a[0]));
 $a = new stdclass;
 $a->prop = 2;
 var_dump($a->prop . k($a));

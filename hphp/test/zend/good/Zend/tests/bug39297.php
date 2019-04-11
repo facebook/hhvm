@@ -1,6 +1,6 @@
 <?php
-function compareByRef(&$first, &$second) {
-    return $first === $second;
+function compareByRef(&$first, $id, &$second) {
+    return $first[$id] === $second;
 }
 
 class MyTree implements ArrayAccess {
@@ -34,4 +34,4 @@ $root = new MyTree();
 $child = new MyTree();
 $root[$id] = $child;
 
-var_dump(compareByRef(&$root[$id], &$child));
+var_dump(compareByRef(&$root,$id, &$child));

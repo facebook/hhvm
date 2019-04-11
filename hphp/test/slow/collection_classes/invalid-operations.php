@@ -1,7 +1,6 @@
 <?hh
 
-function by_ref(&$ref) {}
-
+<<__EntryPoint>>
 function main() {
   $containers = Vector {
     ImmVector {Vector {}, Vector {}},
@@ -173,19 +172,5 @@ function main() {
   }
   echo "\n";
 
-  $x = Pair {array(1), array(2)};
-
-  try {
-    by_ref(&$x[0][0]);
-  } catch (InvalidOperationException $e) {
-    echo "Caught exception: " . $e->getMessage() . "\n";
-  }
-  $y = 2;
-  var_dump($x);
 }
 
-
-<<__EntryPoint>>
-function main_invalid_operations() {
-main();
-}

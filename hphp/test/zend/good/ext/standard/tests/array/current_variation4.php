@@ -24,9 +24,4 @@ echo "End Position:     ";
 end(&$multi_array);
 var_dump(current(&$multi_array));
 
-echo "\n-- Access an Array Within an Array --\n";
-//accessing an array within an array
-echo "Initial Position: ";
-var_dump(current(&$multi_array[1]));
-
 echo "===DONE===\n";

@@ -26,10 +26,10 @@ var_dump($a2);
 f($a1, &$a2);        // variable $a2 is passed by reference
 var_dump($a1);
 var_dump($a2);
-
-$a2 = [10,20,30];
+$twenty = 20;
+$a2 = [10,&$twenty,30];
 var_dump($a2);
-f($a1, &$a2[1]); // variable $a2[1] is passed by reference
+f($a1, &$twenty); // reference inside $a2 remains intact
 var_dump($a1);
 var_dump($a2);
 

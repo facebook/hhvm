@@ -2,14 +2,14 @@
 
 function foo(&$a) {
   var_dump('foo');
-  $a = 1;
+  $a[0] = 1;
 }
 function bar(&$a) {
   var_dump('bar');
-  $a = 2;
+  $a[0] = 2;
 }
 function goo($name, $obj, $params, $data, &$done) {
-  return $data(&$params[0]);
+  return $data(&$params);
 }
 
 <<__EntryPoint>>

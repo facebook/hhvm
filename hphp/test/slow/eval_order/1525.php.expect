@@ -54,9 +54,6 @@ object(X) (1) {
   ["2"]=>
   string(3) "foo"
 }
-get:int(10)
-get:int(11)
-get:int(12)
 int(20)
 object(X) (1) {
   ["2"]=>
@@ -72,51 +69,196 @@ object(X) (1) {
   ["2"]=>
   string(3) "foo"
 }
+get:int(1)
 get:int(20)
 get:int(21)
-get:int(22)
-int(30)
-object(X) (1) {
+set:string(2) "22"
+object(X) (2) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (2) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+  }
 }
-int(31)
-object(X) (1) {
+set:int(22)
+object(X) (2) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (2) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+  }
 }
-int(32)
-object(X) (1) {
+get:int(0)
+get:int(10)
+get:int(11)
+set:string(2) "12"
+object(X) (3) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
 }
-get:int(30)
-get:int(31)
-get:int(32)
+set:int(12)
+object(X) (3) {
+  ["2"]=>
+  string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+}
 int(0)
-object(X) (1) {
+object(X) (3) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
 }
 int(1)
-object(X) (1) {
+object(X) (3) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
 }
 int(2)
-object(X) (1) {
+object(X) (3) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
 }
 int(3)
-object(X) (1) {
+object(X) (3) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
 }
 int(4)
-object(X) (1) {
+object(X) (3) {
   ["2"]=>
   string(3) "foo"
+  ["22"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
+  ["12"]=>
+  object(X) (3) {
+    ["2"]=>
+    string(3) "foo"
+    ["22"]=>
+    *RECURSION*
+    ["12"]=>
+    *RECURSION*
+  }
 }
 get:string(1) "3"
 get:string(1) "4"

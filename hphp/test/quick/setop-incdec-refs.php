@@ -13,22 +13,8 @@ function properties(&$a, $c) {
   var_dump($a);
 }
 
-function elements(&$v, $a) {
-  $v = 'a string';
-  var_dump($a);
-  $x = $a['ref'] .= ' tail';
-  var_dump($a);
-  var_dump($v);
-
-  $x = $a['ref']++;
-  var_dump($a);
-  var_dump($v);
-}
-
 <<__EntryPoint>>
 function main() {
   $c = new stdclass;
   properties(&$c->foo, $c);
-  $a = array();
-  elements(&$a['ref'], $a);
 }

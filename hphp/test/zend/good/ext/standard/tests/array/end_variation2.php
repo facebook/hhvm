@@ -18,6 +18,4 @@ $array_arg = array ('a' => 'z', array(9, 8, 7));
 echo "\n-- Pass a two-dimensional array as \$array_arg --\n";
 var_dump(end(&$array_arg));
 
-echo "\n-- Pass a sub-array as \$array_arg --\n";
-var_dump(end(&$array_arg[0]));
 echo "===DONE===\n";

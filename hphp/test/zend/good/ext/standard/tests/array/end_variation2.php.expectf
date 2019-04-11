@@ -9,7 +9,4 @@ array(3) {
   [2]=>
   int(7)
 }
-
--- Pass a sub-array as $array_arg --
-int(7)
 ===DONE===

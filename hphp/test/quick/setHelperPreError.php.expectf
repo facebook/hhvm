@@ -1,6 +1,0 @@
-Test begin
-
-Warning: Cannot use a scalar value as an array in %s on line 10
-NULL
-int(1)
-Test end

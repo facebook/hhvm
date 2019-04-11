@@ -12,19 +12,3 @@ object(stdClass) (1) {
   &int(14)
 }
 int(14)
-array(1) {
-  ["ref"]=>
-  &string(8) "a string"
-}
-array(1) {
-  ["ref"]=>
-  &string(13) "a string tail"
-}
-string(13) "a string tail"
-
-Notice: Increment on string 'a string tail' in %s/test/quick/setop-incdec-refs.php on line %d
-array(1) {
-  ["ref"]=>
-  &string(13) "a string taim"
-}
-string(13) "a string taim"

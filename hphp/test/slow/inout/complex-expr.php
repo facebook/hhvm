@@ -13,6 +13,7 @@ function fuzz(inout $a) {
   );
 }
 
+<<__EntryPoint>>
 function main() {
   $arr = [0 => [12 => array(['bar' => array()])],
           18 => array(['hello' => array()])];
@@ -42,27 +43,6 @@ function main() {
 
   $arr[0][12][0]['bar']['x'] = 'value1';
   $arr[18][0]['hello']['y'] = 'value2';
-
-  list(
-    $original,
-    $new,
-    list(
-      $callee,
-      $caller,
-    ),
-  ) = fuzz(&$arr[0][12][0]['bar']['x']);
-
-  var_dump($original, $new, $callee, $caller, $arr);
-
-  list(
-    $original,
-    $new,
-    list(
-      $callee,
-      $caller,
-    ),
-  ) = fuzz(&$arr[18][0]['hello']['y']);
-  var_dump($original, $new, $callee, $caller, $arr);
 
   $a = array(Vector{1, 2});
   list(
@@ -96,10 +76,4 @@ function main() {
     ),
   ) = fuzz(inout $a[0][0]);
   var_dump($original, $new, $callee, $caller, $a);
-}
-
-
-<<__EntryPoint>>
-function main_complex_expr() {
-main();
 }

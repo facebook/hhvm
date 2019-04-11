@@ -229,16 +229,6 @@ function fini_isset($a, $k) {
   }
 }
 
-function fini_vget($a, $k) {
-  $print = (&$what) ==> { var_dump($what); };
-  try {
-    $print(&$a[1][$k]);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
-  var_dump($a);
-}
-
 function fini_set($a, $k) {
   try {
     $a[1][$k] = 123;
@@ -303,23 +293,6 @@ function fini($a) {
   fini_isset($a, '1');
   fini_isset($a, 'foo');
   fini_isset($a, true);
-
-  echo "======= fini_vget ==================================\n";
-  fini_vget($a, 1);
-  fini_vget($a, 3);
-  fini_vget($a, '1');
-  fini_vget($a, 'foo');
-  fini_vget($a, true);
-
-  echo "======= fini_vget_new_elem =========================\n";
-  $print = (&$what) ==> { var_dump($what); };
-  try {
-    $copy = $a;
-    $print(&$copy[1][]);
-    var_dump($copy);
-  } catch (Exception $e) {
-    echo "Exception: \"" . $e->getMessage() . "\"\n";
-  }
 
   echo "======= fini_set ===================================\n";
   fini_set($a, 1);

@@ -2,7 +2,7 @@
 
 class A {
   function foo(&$test) {
-    $test = 10;
+    $test[3] = 10;
   }
 }
 
@@ -11,6 +11,6 @@ function main_1213() {
 $obj = new A();
 $method = 'foo';
 $aa = array();
-$obj->$method(&$aa[3]);
+$obj->$method(&$aa);
 var_dump($aa);
 }

@@ -2162,9 +2162,6 @@ let rec check_reference node errors =
   | PrefixUnaryExpression { prefix_unary_operator; _ }
     when token_kind prefix_unary_operator <> Some TokenKind.Dollar ->
     make_error_from_node node SyntaxError.nested_unary_reference :: errors
-  | SubscriptExpression { subscript_receiver; _ }
-    when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
-    make_error_from_node node SyntaxError.error2078 :: errors
   | FunctionCallExpression _
   | ListExpression _
   | MemberSelectionExpression _
@@ -2172,7 +2169,6 @@ let rec check_reference node errors =
   | PipeVariableExpression _
   | SafeMemberSelectionExpression _
   | ScopeResolutionExpression _
-  | SubscriptExpression _
   | VariableExpression _ -> errors
   | Token token when Token.kind token = TokenKind.Variable -> errors
   | PrefixUnaryExpression {

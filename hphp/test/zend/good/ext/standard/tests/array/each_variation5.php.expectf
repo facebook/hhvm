@@ -45,16 +45,4 @@ array(4) {
   ["key"]=>
   string(3) "one"
 }
-
--- Pass each() a sub-array --
-array(4) {
-  [1]=>
-  string(1) "a"
-  ["value"]=>
-  string(1) "a"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
 Done

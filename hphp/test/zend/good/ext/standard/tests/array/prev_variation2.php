@@ -23,6 +23,4 @@ echo "\n-- Pass a two-dimensional array as \$array_arg --\n";
 var_dump(prev(&$array_arg));
 var_dump(prev(&$array_arg));
 
-echo "\n-- Pass a sub-array as \$array_arg --\n";
-var_dump(prev(&$array_arg[0]));
 echo "===DONE===\n";

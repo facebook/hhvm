@@ -11,7 +11,4 @@ Next Position:    array(3) {
   int(3)
 }
 End Position:     string(3) "two"
-
--- Access an Array Within an Array --
-Initial Position: int(1)
 ===DONE===

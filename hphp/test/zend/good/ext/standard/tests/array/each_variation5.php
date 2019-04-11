@@ -8,7 +8,6 @@
 /*
  * Test behaviour of each() when passed:
  * 1. a two-dimensional array
- * 2. a sub-array
  */
 
 echo "*** Testing each() : usage variations ***\n";
@@ -23,8 +22,5 @@ echo "\n-- Pass each() a two-dimensional array --\n";
 for ($i = 1; $i < count($arr); $i++) {
 	var_dump( each(&$arr) );
 }
-
-echo "\n-- Pass each() a sub-array --\n";
-var_dump( each(&$arr[2]));
 
 echo "Done";

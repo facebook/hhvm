@@ -1,15 +1,15 @@
 <?php
 
+
+
 class c {
- function f(&$a, $b) {
- $a = $b;
- }
- }
+ function f(&$a, $b, $c) { $a[$b] = $c; }
+}
 function setNullVariantHelper($f, $value) {
   $a = array();
   $obj = new c;
   $a[$obj] = 1;
-  $obj->$f(&$a[$obj], $value);
+  $obj->$f(&$a, $obj, $value);
   var_dump($a[$obj] = 1);
 }
 function setNullVariant($value) {

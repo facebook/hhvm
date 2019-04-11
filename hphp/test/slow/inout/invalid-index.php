@@ -13,9 +13,6 @@ function checkStatic() {
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
-  foo(&$a[1]);
-  $a[5] = array(); foo(&$a[5][10]);
-  var_dump($a);
 }
 
 function getOne(inout $a, $k) {
@@ -39,16 +36,6 @@ function checkNonStatic($a) {
   getTwo(inout $a, 'apple', 'banana');
   getTwo(inout $a, 'apple', 'orange');
   getTwo(inout $a, 50, 100);
-  try {
-    foo(&$a[1]);
-  } catch (Exception $e) {
-    echo "Caught: ".$e->getMessage()."\n";
-  }
-  try {
-    if (is_array($a)) $a[5] = array(); foo(&$a[5][10]);
-  } catch (Exception $e) {
-    echo "Caught: ".$e->getMessage()."\n";
-  }
   var_dump($a);
 }
 
@@ -60,6 +47,7 @@ function checkNums($a) {
   getTwo(inout $a, 50, 100);
 }
 
+<<__EntryPoint>>
 function main() {
   checkStatic();
   $a = ['apple' => ['orange' => 5]];
@@ -70,10 +58,4 @@ function main() {
   checkNonStatic($b);
   checkNums($c);
   checkNums($d);
-}
-
-
-<<__EntryPoint>>
-function main_invalid_index() {
-main();
 }

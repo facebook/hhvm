@@ -16,7 +16,4 @@ Inside passbyRef call:
 NULL
 
 After call
-array(1) {
-  [0]=>
-  NULL
-}
+NULL

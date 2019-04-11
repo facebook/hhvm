@@ -253,53 +253,6 @@ bool(true)
 bool(false)
 bool(false)
 Exception: "Invalid vec key: expected a key of type int, bool given"
-======= fini_vget ==================================
-Exception: "Vecs cannot contain references"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-Exception: "Vecs cannot contain references"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-Exception: "Invalid vec key: expected a key of type int, string given"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-Exception: "Invalid vec key: expected a key of type int, bool given"
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  vec(3) {
-    NULL
-    string(3) "abc"
-    string(0) ""
-  }
-}
-======= fini_vget_new_elem =========================
-Exception: "Vecs cannot contain references"
 ======= fini_set ===================================
 array(2) {
   [0]=>

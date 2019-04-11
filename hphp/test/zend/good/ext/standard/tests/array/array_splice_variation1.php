@@ -9,7 +9,7 @@ echo "test behaviour when input array is in a reference set\n";
 
 $inner_array = array(1, 2);
 $input_array= array(&$inner_array, &$inner_array);
-var_dump (array_splice (&$input_array[0],1,1));
+var_dump (array_splice (&$inner_array,1,1));
 var_dump ($input_array);
 
 echo "Test behaviour of input arrays containing references \n";
@@ -19,7 +19,13 @@ echo "Test behaviour of input arrays containing references \n";
  *  reference value with a string key.
  */
 $numbers=array(0,1,2,3,4,5,6,7,8,9,10,11,12);
-$input_array=array(0,1,&$numbers[2],"three"=>&$numbers[3],4,&$numbers[5],"six"=>&$numbers[6],7,&$numbers[8],"nine"=>&$numbers[9]);
+$n2 = 2;
+$n3 = 3;
+$n5 = 5;
+$n6 = 6;
+$n8 = 8;
+$n9 = 9;
+$input_array=array(0,1,&$n2,"three"=>&$n3,4,&$n5,"six"=>&$n6,7,&$n8,"nine"=>&$n9);
 var_dump (array_splice (&$input_array,4,3));
 var_dump ($input_array);
 

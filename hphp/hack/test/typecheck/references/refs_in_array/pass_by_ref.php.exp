@@ -1,2 +1,2 @@
-File "pass_by_ref.php", line 7, characters 13-18:
-Passing array elements by reference is no longer supported; use 'inout' instead (Typing[4253])
+File "pass_by_ref.php", line 7, characters 14-17:
+Only variables, members, and the results of function calls can be used as references (Parsing[1002])

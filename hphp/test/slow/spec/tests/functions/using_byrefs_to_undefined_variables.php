@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
    +-------------------------------------------------------------+
@@ -32,17 +32,6 @@ var_dump($x);
 f(&$x);           // non-existant variable going in
 var_dump($x);
 
-$a = array(10, 20, 30);
-var_dump($a);
-
-f(&$a[0]);
-var_dump($a);
-
-f(&$a[5]);      // non-existant element going in
-var_dump($a);
-
-f(&$a["red"]);  // non-existant element going in
-var_dump($a);
 //*/
 ///*
 
@@ -58,16 +47,3 @@ function h(&$p)
 var_dump($x);
 h(&$x);           // non-existant variable going in
 var_dump($x);
-
-$a = array(10, 20, 30);
-var_dump($a);
-
-h(&$a[0]);
-var_dump($a);
-
-h(&$a[5]);      // non-existant element going in
-var_dump($a);
-
-h(&$a["red"]);  // non-existant element going in
-var_dump($a);
-//*/

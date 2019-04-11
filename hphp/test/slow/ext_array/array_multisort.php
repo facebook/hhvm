@@ -9,16 +9,18 @@ function a() {
 }
 
 function b() {
+  $ar0 = array("10", 11, 100, 100, "a");
+  $ar1 = array(1, 2, "2", 3, 1);
   $ar = array(
-    array("10", 11, 100, 100, "a"),
-    array(1, 2, "2", 3, 1)
+    &$ar0,
+    &$ar1,
   );
   $asc = SORT_ASC;
   $string = SORT_STRING;
   $numeric = SORT_NUMERIC;
   $desc = SORT_DESC;
-  array_multisort(&$ar[0],
-                  &$asc, &$string, &$ar[1],
+  array_multisort(&$ar0,
+                  &$asc, &$string, &$ar1,
                   &$numeric, &$desc);
   var_dump($ar);
 }

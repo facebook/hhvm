@@ -10,7 +10,4 @@ array(3) {
   int(7)
 }
 bool(false)
-
--- Pass a sub-array as $array_arg --
-int(8)
 ===DONE===

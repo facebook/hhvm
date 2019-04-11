@@ -30,31 +30,33 @@ function test_set(&$ref, $array, $key) {
 
 function mixed() {
   echo "mixed:\n";
-  $array = ["key0" => new Foo("value0"), "key1" => new Foo("value1"),
+  $key1 =  new Foo("value1");
+  $array = ["key0" => new Foo("value0"), "key1" => &$key1,
             "key2" => new Foo("value2"), "key3" => new Foo("value3")];
-  test_map(&$array["key1"], $array, "key1");
-  test_vector(&$array["key1"], $array, 1);
+  test_map(&$key1, $array, "key1");
+  test_vector(&$key1, $array, 1);
 
-  $set_array = ["key0" => "value0", "key1" => "value1",
+  $value1 = "value1";
+  $set_array = ["key0" => "value0", "key1" => &$value1,
                 "key2" => "value2", "key3" => "value3"];
-  test_set(&$set_array["key1"], $set_array, "value1");
+  test_set(&$value1, $set_array, "value1");
 }
 
 function packed() {
   echo "packed:\n";
-  $array = [new Foo("value0"), new Foo("value1"),
+  $value1 = new Foo("value1");
+  $array = [new Foo("value0"), &$value1,
             new Foo("value2"), new Foo("value3")];
-  test_map(&$array[1], $array, 1);
-  test_vector(&$array[1], $array, 1);
+  test_map(&$value1, $array, 1);
+  test_vector(&$value1, $array, 1);
 
-  $set_array = ["value0", "value1", "value2", "value3"];
-  test_set(&$set_array[1], $set_array, "value1");
+  $value1 = "value1";
+  $set_array = ["value0", &$value1, "value2", "value3"];
+  test_set(&$value1, $set_array, "value1");
 }
 
 <<__EntryPoint>>
 function main_array_with_ref() {
-;
-
 mixed();
 packed();
 }

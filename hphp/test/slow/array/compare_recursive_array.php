@@ -13,7 +13,9 @@ function run(&$ref, &$ref2, $recur, $recur2) {
 
 <<__EntryPoint>>
 function main() {
-  $recur = array();
-  $recur2 = array();
-  run(&$recur[], &$recur2[], $recur, $recur2);
+  $r = null;
+  $r2 = null;
+  $recur = [&$r];
+  $recur2 = [&$r2];
+  run(&$r, &$r2, $recur, $recur2);
 }

@@ -1,9 +1,10 @@
 <?php
 
 /* Various combinations of arrays to be used for the test */
+$mixed_array1 = array( 1,2,3,4,5,6,7,8,9 );
 $mixed_array = array(
   array(),
-  array( 1,2,3,4,5,6,7,8,9 ),
+  &$mixed_array1,
   array( "One", "_Two", "Three", "Four", "Five" ),
   array( 6, "six", 7, "seven", 8, "eight", 9, "nine" ),
   array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee" ),
@@ -20,18 +21,18 @@ $mixed_array = array(
 echo"\n*** Checking for internal array pointer being reset when pop is called ***\n";
 
 echo "\nCurrent Element is : ";
-var_dump( current(&$mixed_array[1]) );
+var_dump( current(&$mixed_array1) );
 
 echo "\nNext Element is : ";
-var_dump( next(&$mixed_array[1]) );
+var_dump( next(&$mixed_array1) );
 
 echo "\nNext Element is : ";
-var_dump( next(&$mixed_array[1]) );
+var_dump( next(&$mixed_array1) );
 
 echo "\nPOPed Element is : ";
-var_dump( array_pop(&$mixed_array[1]) );
+var_dump( array_pop(&$mixed_array1) );
 
 echo "\nCurrent Element after POP operation is: ";
-var_dump( current(&$mixed_array[1]) );
+var_dump( current(&$mixed_array1) );
 
 echo"\nDone";

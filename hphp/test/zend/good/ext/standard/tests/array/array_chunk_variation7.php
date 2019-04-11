@@ -16,13 +16,16 @@ $size = 2;
 
 echo "\n-- Testing array_chunk(), input array containing references \n";
 
-$numbers=array(1, 2, 3, 4);
+$n0 = 1;
+$n1 = 2;
+$n2 = 3;
+$n3 = 4;
 // reference array
-$input_array = array ( 
-  "one" => &$numbers[0], 
-  "two" => &$numbers[1], 
-  "three" => &$numbers[2],
-  "four" => &$numbers[3]
+$input_array = array (
+  "one" => &$n0,
+  "two" => &$n1,
+  "three" => &$n2,
+  "four" => &$n3,
 );
 
 var_dump( array_chunk($input_array, $size) );

@@ -8,39 +8,17 @@ int(5)
 
 Notice: Undefined index on inout parameter: 50 in %s/invalid-index.php on line 12
 string(85) "Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays"
-NULL
-NULL
-array(4) {
-  ["apple"]=>
-  array(2) {
-    ["orange"]=>
-    int(12)
-    ["banana"]=>
-    int(12)
-  }
-  [10]=>
-  int(12)
-  [1]=>
-  int(12)
-  [5]=>
-  array(1) {
-    [10]=>
-    int(12)
-  }
-}
 
-Notice: Undefined index on inout parameter: 10 in %s/invalid-index.php on line 23
+Notice: Undefined index on inout parameter: 10 in %s/invalid-index.php on line 20
 NULL
 
-Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 31
+Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 28
 NULL
 int(5)
 
-Notice: Undefined index on inout parameter: 50 in %s/invalid-index.php on line 31
+Notice: Undefined index on inout parameter: 50 in %s/invalid-index.php on line 28
 Caught: Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays
-NULL
-NULL
-array(4) {
+array(2) {
   ["apple"]=>
   array(2) {
     ["orange"]=>
@@ -50,22 +28,13 @@ array(4) {
   }
   [10]=>
   int(12)
-  [1]=>
-  int(12)
-  [5]=>
-  array(1) {
-    [10]=>
-    int(12)
-  }
 }
 Caught: Out of bounds dict access: invalid index 10
 
-Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 31
+Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 28
 NULL
 int(5)
 Caught: Out of bounds dict access: invalid index 50
-Caught: Dicts cannot contain references
-Caught: Out of bounds dict access: invalid index 5
 dict(1) {
   ["apple"]=>
   array(2) {

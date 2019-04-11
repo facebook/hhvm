@@ -2,7 +2,7 @@
 
 function g(&$x) {
  var_dump($x);
- }
+}
 function f($x) {
   if (is_array($x)) {
 
@@ -11,10 +11,7 @@ function f($x) {
     var_dump($x[0][1]);
   }
   if (is_array($x) && $x) {
-
     g(&$x);
-    g(&$x[0]);
-    g(&$x[0][1]);
   }
 }
 

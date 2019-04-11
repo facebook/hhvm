@@ -1,6 +1,6 @@
 array(3) {
   [0]=>
-  array(3) {
+  &array(3) {
     ["c"]=>
     int(1)
     ["a"]=>
@@ -9,7 +9,7 @@ array(3) {
     int(3)
   }
   [1]=>
-  array(3) {
+  &array(3) {
     ["z"]=>
     int(5)
     ["y"]=>
@@ -18,7 +18,7 @@ array(3) {
     int(6)
   }
   [2]=>
-  array(3) {
+  &array(3) {
     ["r"]=>
     int(7)
     ["q"]=>

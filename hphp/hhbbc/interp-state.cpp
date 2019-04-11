@@ -465,6 +465,25 @@ void InterpStack::rewind(int numPop, int numPush) {
   always_assert(false);
 }
 
+void InterpStack::peek(int numPop,
+                       const StackElem** values,
+                       int numPush) const {
+  for (auto i = 0; i < numPop; i++) values[i] = nullptr;
+
+  auto const sz = index.size() - numPush;
+  for (auto i = elems.size() - numPush; i--; ) {
+    auto const& elm = elems[i];
+    if (elm.index >= sz &&
+        elm.index - sz < numPop &&
+        values[elm.index - sz] == nullptr) {
+      values[elm.index - sz] = &elm;
+      if (!--numPop) return;
+    }
+  }
+
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 static std::string fpiKindStr(FPIKind k) {

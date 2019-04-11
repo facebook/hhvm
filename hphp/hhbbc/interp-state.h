@@ -331,6 +331,7 @@ public:
   // instruction ran (which is known to have popped numPop items and
   // pushed numPush items).
   void rewind(int numPop, int numPush);
+  void peek(int numPop, const StackElem** values, int numPush) const;
 private:
   CompactVector<uint32_t> index;
   CompactVector<StackElem> elems;

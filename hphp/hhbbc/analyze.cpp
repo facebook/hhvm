@@ -257,7 +257,7 @@ prepare_incompleteQ(const Index& index,
       for (auto i = knownArgs->args.size(); i < numParams; ++i) {
         auto const dv = ctx.func->params[i].dvEntryPoint;
         if (dv != NoBlockId) {
-          ai.bdata[dv].stateIn = entryState;
+          ai.bdata[dv].stateIn.copy_from(entryState);
           incompleteQ.push(rpoId(ai, dv));
           return true;
         }
@@ -266,7 +266,7 @@ prepare_incompleteQ(const Index& index,
     }();
 
     if (!useDvInit) {
-      ai.bdata[ctx.func->mainEntry].stateIn = entryState;
+      ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
       incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
     }
 
@@ -276,7 +276,7 @@ prepare_incompleteQ(const Index& index,
   for (auto paramId = uint32_t{0}; paramId < numParams; ++paramId) {
     auto const dv = ctx.func->params[paramId].dvEntryPoint;
     if (dv != NoBlockId) {
-      ai.bdata[dv].stateIn = entryState;
+      ai.bdata[dv].stateIn.copy_from(entryState);
       incompleteQ.push(rpoId(ai, dv));
       for (auto locId = paramId; locId < numParams; ++locId) {
         ai.bdata[dv].stateIn.locals[locId] = ctx.func->params[locId].isVariadic
@@ -286,7 +286,7 @@ prepare_incompleteQ(const Index& index,
     }
   }
 
-  ai.bdata[ctx.func->mainEntry].stateIn = entryState;
+  ai.bdata[ctx.func->mainEntry].stateIn.copy_from(entryState);
   incompleteQ.push(rpoId(ai, ctx.func->mainEntry));
 
   return incompleteQ;
@@ -936,6 +936,7 @@ locally_propagated_states(const Index& index,
   for (auto& op : blk->hhbcs) {
     ret.emplace_back(state, StepFlags{});
     ret.back().second = step(interp, op);
+    state.stack.compact();
   }
 
   ret.emplace_back(std::move(state), StepFlags{});

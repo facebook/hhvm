@@ -170,7 +170,7 @@ void AppendPeephole::finalize() {
 void AppendPeephole::prestep(
     const Bytecode& op,
     const std::vector<PeepholeStackElem>& srcStack,
-    HPHP::CompactVector<HPHP::HHBBC::StackElem>& stack) {
+    InterpStack& stack) {
 
   switch (op.op) {
     case Op::Concat:
@@ -189,7 +189,7 @@ void AppendPeephole::append(
     const Bytecode& op,
     bool squashAddElem,
     const std::vector<PeepholeStackElem>& srcStack,
-    const HPHP::CompactVector<HPHP::HHBBC::StackElem>& stack) {
+    const InterpStack& stack) {
   FTRACE(1,
          "AppendPeephole::append {} (working-size {})\n",
          m_next.show(op), m_working.size());
@@ -342,7 +342,7 @@ void AppendPeephole::push_back(const Bytecode& op, ASKind kind) {
 
 int AppendPeephole::squashAbove(const std::vector<PeepholeStackElem>& srcStack,
                                 int depth,
-                                CompactVector<StackElem>* stack) {
+                                InterpStack* stack) {
   while (!m_working.empty()) {
     auto const &b = m_working.back();
     if (depth > b.stackix && srcStack[b.stackix].op == b.generator) {
@@ -360,7 +360,7 @@ int AppendPeephole::squashAbove(const std::vector<PeepholeStackElem>& srcStack,
  * Reorder and rewrite the most nested concat subsequence, and append it to
  * the previous subsequence in the stack.
  */
-void AppendPeephole::squash(CompactVector<StackElem>* stack) {
+void AppendPeephole::squash(InterpStack* stack) {
   assert(!m_working.empty());
 
   auto workstream = std::move(m_working.back());

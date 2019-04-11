@@ -213,10 +213,120 @@ struct StackElem {
   // value of $this, or NoLocalId if it has no known equivalents.
   // Note that the location may not match the stack value wrt Uninit.
   LocalId equivLoc;
+};
 
-  bool operator==(const StackElem& other) const {
-    return type == other.type && equivLoc == other.equivLoc;
+struct InterpStack {
+private:
+  template<typename S>
+  struct Iterator {
+    friend struct InterpStack;
+    Iterator(S* owner, uint32_t idx) :
+        owner(owner), idx(idx) {
+      assertx(idx <= owner->size());
+    }
+    void operator++() {
+      assertx(idx < owner->size());
+      ++idx;
+    }
+    void operator--() {
+      assertx(idx);
+      --idx;
+    }
+    Iterator operator-(ssize_t off) {
+      return Iterator(owner, idx - off);
+    }
+    Iterator operator+(ssize_t off) {
+      return Iterator(owner, idx + off);
+    }
+    auto& operator*() const {
+      assertx(idx < owner->index.size());
+      return owner->elems[owner->index[idx]];
+    }
+    auto* operator->() const {
+      return &operator*();
+    }
+    // very special helper for use with Add*ElemC. To prevent
+    // quadratic time/space when appending to an array, we need to
+    // ensure we're appending to an array with a single reference; but
+    // popping from an InterpStack doesn't actually remove the
+    // element. This allows us to drop the type's datatag. It means
+    // that rewinding wouldn't see the original type; but Add*ElemC is
+    // very carefully coded anyway.
+    auto unspecialize() const {
+      auto t = std::move((*this)->type);
+      (*this)->type = loosen_values(t);
+      return t;
+    }
+    template<typename T>
+    bool operator==(const Iterator<T>& other) const {
+      return owner == other.owner && idx == other.idx;
+    }
+    template<typename T>
+    bool operator!=(const Iterator<T>& other) const {
+      return !operator==(other);
+    }
+    template<typename T>
+    const Iterator& operator=(const Iterator<T>& other) const {
+      owner = other.owner;
+      idx = other.idx;
+      return *this;
+    }
+  private:
+    S* owner;
+    uint32_t idx;
+  };
+public:
+  using iterator = Iterator<InterpStack>;
+  using const_iterator = Iterator<const InterpStack>;
+  auto begin() { return iterator(this, 0); }
+  auto end() { return iterator(this, index.size()); }
+  auto begin() const { return const_iterator(this, 0); }
+  auto end() const { return const_iterator(this, index.size()); }
+  auto& operator[](size_t idx) { return *iterator(this, idx); }
+  auto& operator[](size_t idx) const { return *const_iterator(this, idx); }
+  auto& back() { return *iterator(this, index.size() - 1); }
+  auto& back() const { return *const_iterator(this, index.size() - 1); }
+  void push_back(const StackElem& elm) {
+    index.push_back(elems.size());
+    elems.push_back(elm);
   }
+  void push_back(StackElem&& elm) {
+    index.push_back(elems.size());
+    elems.push_back(std::move(elm));
+  }
+  void push_back(Type&& t, LocalId equivLoc) {
+    push_back({std::move(t), equivLoc});
+  }
+  void pop_back() {
+    index.pop_back();
+  }
+  void erase(iterator i1, iterator i2) {
+    assertx(i1.owner == i2.owner);
+    assertx(i1.idx < i2.idx);
+    i1.owner->index.erase(i1.owner->index.begin() + i1.idx,
+                          i1.owner->index.begin() + i2.idx);
+  }
+  bool empty() const { return index.empty(); }
+  size_t size() const { return index.size(); }
+  void clear() {
+    index.clear();
+    elems.clear();
+  }
+  void compact() {
+    uint32_t i = 0;
+    for (auto& ix : index) {
+      if (ix != i) {
+        assertx(ix > i);
+        std::swap(elems[i], elems[ix]);
+        ix = i;
+      }
+      ++i;
+    }
+    elems.resize(i);
+  }
+private:
+  CompactVector<uint32_t> index;
+  CompactVector<StackElem> elems;
 };
 
 /*
@@ -245,17 +355,20 @@ struct StackElem {
  * aren't possible at runtime.  We're only doing this to handle FPI regions for
  * now, but it's not ideal.
  *
+ * We split off a base class from State as a convenience to enable the use
+ * default copy construction and assignment.
+ *
  */
-struct State {
-  State() {
+struct StateBase {
+  StateBase() {
     initialized = unreachable = false;
     speculatedIsUnconditional = false;
     speculatedIsFallThrough = false;
   };
-  State(const State&) = default;
-  State(State&&) = default;
-  State& operator=(const State&) = default;
-  State& operator=(State&&) = default;
+  StateBase(const StateBase&) = default;
+  StateBase(StateBase&&) = default;
+  StateBase& operator=(const StateBase&) = default;
+  StateBase& operator=(StateBase&&) = default;
 
   uint8_t initialized : 1;
   uint8_t unreachable : 1;
@@ -271,7 +384,6 @@ struct State {
   CompactVector<Type> locals;
   CompactVector<Iter> iters;
   CompactVector<Type> clsRefSlots;
-  CompactVector<StackElem> stack;
   CompactVector<ActRec> fpiStack;
 
   struct MInstrState {
@@ -303,6 +415,42 @@ struct State {
    * compare types if they care.
    */
   CompactVector<LocalId> equivLocals;
+};
+
+struct State : StateBase {
+  State() = default;
+  State(const State&) = default;
+  State(State&&) = default;
+
+  // delete assignment operator, so we have to explicitly choose what
+  // we want to do from amongst the various copies.
+  State& operator=(const State&) = delete;
+  State& operator=(State&&) = delete;
+
+  void copy_from(const State& src) {
+    *static_cast<StateBase*>(this) = src;
+    stack = src.stack;
+  }
+
+  void copy_from(State&& src) {
+    *static_cast<StateBase*>(this) = std::move(src);
+    stack = std::move(src.stack);
+  }
+
+  void copy_and_compact(const State& src) {
+    *static_cast<StateBase*>(this) = src;
+    stack.clear();
+    for (auto const& elm : src.stack) {
+      stack.push_back(elm);
+    }
+  }
+
+  void swap(State& other) {
+    std::swap(static_cast<StateBase&>(*this), static_cast<StateBase&>(other));
+    std::swap(stack, other.stack);
+  }
+
+  InterpStack stack;
 };
 
 /*
@@ -459,5 +607,4 @@ std::string state_string(const php::Func&, const State&, const CollectedInfo&);
 //////////////////////////////////////////////////////////////////////
 
 }}
-
 #endif

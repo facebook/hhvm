@@ -286,7 +286,7 @@ bool merge_into(ActRec& dst, const ActRec& src) {
 template<class JoinOp>
 bool merge_impl(State& dst, const State& src, JoinOp join) {
   if (!dst.initialized) {
-    dst = src;
+    dst.copy_and_compact(src);
     dst.speculatedIsUnconditional = dst.speculatedIsFallThrough = false;
     dst.speculatedPops = 0;
     dst.speculated = NoBlockId;
@@ -309,7 +309,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
     // If we're going to code currently believed to be unreachable, take the
     // src state, and consider the dest state changed only if the source state
     // was reachable.
-    dst = src;
+    dst.copy_and_compact(src);
     return !src.unreachable;
   }
 

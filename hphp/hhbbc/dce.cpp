@@ -2159,7 +2159,7 @@ dce_visit(const Index& index,
       [&] {
         using namespace folly::gen;
         return from(states[idx].first.stack)
-          | map([&] (const StackElem& e) { return show(e.type); })
+          | map([&] (auto const& e) { return show(e.type); })
           | unsplit<std::string>(" ");
       }()
     );

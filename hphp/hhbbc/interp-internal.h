@@ -235,7 +235,7 @@ void hasInvariantIterBase(ISS& env) {
 
 Type popT(ISS& env) {
   assert(!env.state.stack.empty());
-  auto const ret = std::move(env.state.stack.back().type);
+  auto const ret = env.state.stack.back().type;
   FTRACE(2, "    pop:  {}\n", show(ret));
   assert(ret.subtypeOf(BGen));
   env.state.stack.pop_back();
@@ -274,26 +274,26 @@ void discard(ISS& env, int n) {
   }
 }
 
-Type& topT(ISS& env, uint32_t idx = 0) {
+const Type& topT(ISS& env, uint32_t idx = 0) {
   assert(idx < env.state.stack.size());
   return env.state.stack[env.state.stack.size() - idx - 1].type;
 }
 
-Type& topC(ISS& env, uint32_t i = 0) {
+const Type& topC(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(BInitCell));
   return topT(env, i);
 }
 
-Type& topCV(ISS& env, uint32_t i = 0) { return topT(env, i); }
+const Type& topCV(ISS& env, uint32_t i = 0) { return topT(env, i); }
 
-Type& topV(ISS& env, uint32_t i = 0) {
+const Type& topV(ISS& env, uint32_t i = 0) {
   assert(topT(env, i).subtypeOf(BRef));
   return topT(env, i);
 }
 
 void push(ISS& env, Type t) {
   FTRACE(2, "    push: {}\n", show(t));
-  env.state.stack.push_back(StackElem {std::move(t), NoLocalId});
+  env.state.stack.push_back(std::move(t), NoLocalId);
 }
 
 void push(ISS& env, Type t, LocalId l) {
@@ -305,7 +305,7 @@ void push(ISS& env, Type t, LocalId l) {
     assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
   }
   FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
-  env.state.stack.push_back(StackElem {std::move(t), l});
+  env.state.stack.push_back(std::move(t), l);
 }
 
 void discardAR(ISS& env, uint32_t idx) {
@@ -794,12 +794,12 @@ bool refineLocation(ISS& env, LocalId l, F fun) {
     return r1;
   };
   if (l == StackDupId) {
-    auto stk = &env.state.stack.back();
+    auto stk = env.state.stack.end();
     while (true) {
+      --stk;
       stk->type = refine(std::move(stk->type));
       if (stk->equivLoc != StackDupId) break;
-      assertx(stk != &env.state.stack.front());
-      --stk;
+      assertx(stk != env.state.stack.begin());
     }
     l = stk->equivLoc;
   }
@@ -832,10 +832,10 @@ void refineLocation(ISS& env, LocalId l,
   auto const target_reachable = refineLocation(env, l, pre);
   if (!target_reachable) jmp_nevertaken(env);
   // swap, so we can restore this state if the branch is always taken.
-  std::swap(env.state, state);
+  env.state.swap(state);
   if (!refineLocation(env, l, post)) {
     jmp_setdest(env, target);
-    env.state = std::move(state);
+    env.state.copy_from(std::move(state));
   } else if (target_reachable) {
     env.propagate(target, &state);
   }

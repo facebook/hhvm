@@ -442,6 +442,9 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   auto const v = popC(env);
   auto const k = popC(env);
 
+  auto inTy = (env.state.stack.end() - 1).unspecialize();
+  popC(env);
+
   auto const outTy = [&] (Type ty) ->
     folly::Optional<std::pair<Type,ThrowMode>> {
     if (ty.subtypeOf(BArr)) {
@@ -451,7 +454,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
       return dict_set(std::move(ty), k, v);
     }
     return folly::none;
-  }(popC(env));
+  }(std::move(inTy));
 
   if (!outTy) {
     return push(env, union_of(TArr, TDict));
@@ -476,6 +479,8 @@ void in(ISS& env, const bc::AddElemV& /*op*/) {
 
 void in(ISS& env, const bc::AddNewElemC&) {
   auto v = popC(env);
+  auto inTy = (env.state.stack.end() - 1).unspecialize();
+  popC(env);
 
   auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(BArr)) {
@@ -488,7 +493,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
       return keyset_newelem(std::move(ty), std::move(v)).first;
     }
     return folly::none;
-  }(popC(env));
+  }(std::move(inTy));
 
   if (!outTy) {
     return push(env, TInitCell);
@@ -851,10 +856,10 @@ void sameJmpImpl(ISS& env, const Same& same, const JmpOp& jmp) {
     handle_same() : handle_differ();
   if (!target_reachable) jmp_nevertaken(env);
   // swap, so we can restore this state if the branch is always taken.
-  std::swap(env.state, save);
+  env.state.swap(save);
   if (!(sameIsJmpTarget ? handle_differ() : handle_same())) {
     jmp_setdest(env, jmp.target1);
-    env.state = std::move(save);
+    env.state.copy_from(std::move(save));
   } else if (target_reachable) {
     env.propagate(jmp.target1, &save);
   }
@@ -4784,12 +4789,13 @@ StepFlags interpOps(Interp& interp,
   interpStep(env, iter, stop);
 
   auto fix_const_outputs = [&] {
-    auto elems = &interp.state.stack.back();
+    auto elems = interp.state.stack.end();
     constexpr auto numCells = 4;
     Cell cells[numCells];
 
     auto i = size_t{0};
     while (i < numPushed) {
+      --elems;
       if (i < numCells) {
         auto const v = tv(elems->type);
         if (!v) return false;
@@ -4798,11 +4804,11 @@ StepFlags interpOps(Interp& interp,
         return false;
       }
       ++i;
-      --elems;
     }
-    while (++elems, i--) {
+    while (i--) {
       elems->type = from_cell(i < numCells ?
                               cells[i] : *tv(elems->type));
+      ++elems;
     }
     return true;
   };
@@ -4904,7 +4910,7 @@ BlockId speculateHelper(Interp& interpIn, BlockId target, bool unconditional) {
       return target;
     }
     target = new_target;
-    interpIn.state = *state;
+    interpIn.state.copy_and_compact(*state);
     interpIn.state.speculated = target;
     interpIn.state.speculatedPops = pops;
     interpIn.state.speculatedIsUnconditional = unconditional;

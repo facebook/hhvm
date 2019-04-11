@@ -89,7 +89,7 @@ struct AppendPeephole {
    */
   void prestep(const Bytecode& op,
                const std::vector<PeepholeStackElem>& srcStack,
-               CompactVector<StackElem>& stack);
+               InterpStack& stack);
 
   /*
    * Register the next bytecode into the stream.
@@ -101,7 +101,7 @@ struct AppendPeephole {
   void append(const Bytecode& op,
               bool squashAddElem,
               const std::vector<PeepholeStackElem>& srcStack,
-              const CompactVector<StackElem>& stack);
+              const InterpStack& stack);
 
 private:
   enum class ASKind {
@@ -136,10 +136,10 @@ private:
 
 private:
   void push_back(const Bytecode& op, ASKind = ASKind::Normal);
-  void squash(CompactVector<StackElem>* stack);
+  void squash(InterpStack* stack);
   int squashAbove(const std::vector<PeepholeStackElem>& srcStack,
                   int depth,
-                  CompactVector<StackElem>* stack);
+                  InterpStack* stack);
 
 private:
   BasicPeephole m_next;

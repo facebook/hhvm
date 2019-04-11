@@ -139,11 +139,10 @@ let is_autoimport_name id =
 let is_always_global_function =
   let h = HashSet.create 23 in
   let funcs = SN.PseudoFunctions.all_pseudo_functions @ [
+    "\\assert";
     "\\echo";
     "\\exit";
     "\\die";
-    "\\func_get_args";
-    "\\func_get_arg";
   ] in
   List.iter funcs (HashSet.add h);
   fun x -> HashSet.mem h x

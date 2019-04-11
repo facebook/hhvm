@@ -192,7 +192,7 @@ StepFlags step(Interp&, const Bytecode& op);
  * the given block should be re-processed.
  */
 using PropagateFn = std::function<void (BlockId, const State*)>;
-RunFlags run(Interp&, PropagateFn);
+RunFlags run(Interp&, const State& in, PropagateFn);
 
 /*
  * Dispatch a bytecode to the default interpreter.

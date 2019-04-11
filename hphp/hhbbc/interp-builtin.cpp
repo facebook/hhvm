@@ -509,6 +509,11 @@ void finish_builtin(ISS& env,
   repl.emplace_back(bc::PopU2 {});
   repl.emplace_back(bc::PopU2 {});
 
+  env.savedFoldableActRecs.emplace_back(
+    static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()),
+    ActRec{ FPIKind::Builtin, TBottom }
+  );
+
   reduce(env, std::move(repl));
   fpiPop(env);
 }

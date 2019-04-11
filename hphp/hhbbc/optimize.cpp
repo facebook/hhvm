@@ -1222,6 +1222,7 @@ void update_bytecode(
 
   for (auto& ent : blockUpdates) {
     auto blk = func->blocks[ent.first].mutate();
+    auto const srcLoc = blk->hhbcs.front().srcLoc;
     if (!ent.second.unchangedBcs) {
       if (ent.second.replacedBcs.size()) {
         blk->hhbcs = std::move(ent.second.replacedBcs);
@@ -1235,6 +1236,9 @@ void update_bytecode(
       for (auto& bc : ent.second.replacedBcs) {
         blk->hhbcs.push_back(std::move(bc));
       }
+    }
+    if (blk->hhbcs.empty()) {
+      blk->hhbcs.push_back(bc_with_loc(srcLoc, bc::Nop {}));
     }
     auto fatal_block = NoBlockId;
     auto fatal = [&] {

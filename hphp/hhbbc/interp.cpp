@@ -47,6 +47,7 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/optimize.h"
+#include "hphp/hhbbc/peephole.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-ops.h"
@@ -73,6 +74,114 @@ const StaticString s_trigger_error("trigger_error");
 const StaticString s_this("HH\\this");
 
 void interpStep(ISS& env, const Bytecode& bc);
+
+// The number of pops as seen by interp.
+uint32_t numPop(const Bytecode& bc) {
+  if (bc.op == Op::CGetL2) return 1;
+  return bc.numPop();
+}
+
+// The number of pushes as seen by interp.
+uint32_t numPush(const Bytecode& bc) {
+  if (bc.op == Op::CGetL2) return 2;
+  return bc.numPush();
+}
+
+void reprocess(ISS& env) {
+  env.reprocess = true;
+}
+
+const Bytecode* last_op(ISS& env, int idx = 0) {
+  if (!will_reduce(env)) return nullptr;
+
+  if (env.replacedBcs.size() > idx) {
+    return &env.replacedBcs[env.replacedBcs.size() - idx - 1];
+  }
+
+  idx -= env.replacedBcs.size();
+  if (env.unchangedBcs > idx) {
+    return &env.blk.hhbcs[env.unchangedBcs - idx - 1];
+  }
+  return nullptr;
+}
+
+Bytecode& mutate_last_op(ISS& env) {
+  assertx(will_reduce(env));
+
+  if (!env.replacedBcs.size()) {
+    assertx(env.unchangedBcs);
+    env.replacedBcs.push_back(env.blk.hhbcs[--env.unchangedBcs]);
+  }
+  return env.replacedBcs.back();
+}
+
+/*
+ * Can be used to replace one op with another when rewind/reduce isn't
+ * safe (eg to change a SetL to a PopL - its not safe to rewind/reduce
+ * because the SetL changed both the Type and the equiv of its local).
+ */
+void replace_last_op(ISS& env, Bytecode&& bc) {
+  auto& last = mutate_last_op(env);
+  auto const newPush = numPush(bc);
+  auto const oldPush = numPush(last);
+  auto const newPops = numPop(bc);
+  auto const oldPops = numPop(last);
+
+  assertx(newPush <= oldPush);
+  assertx(newPops <= oldPops);
+
+  if (newPush != oldPush || newPops != oldPops) {
+    env.state.stack.rewind(oldPops - newPops, oldPush - newPush);
+  }
+  ITRACE(2, "(replace: {}->{}\n",
+         show(env.ctx.func, last), show(env.ctx.func, bc));
+  last = bc_with_loc(last.srcLoc, bc);
+}
+
+/*
+ * Assuming bc was just interped, rewind to the state immediately
+ * before it was interped.
+ *
+ * This is rarely what you want. Its used for constprop, where the
+ * bytecode has been interped, but not yet committed to the bytecode
+ * stream. We want to undo its effects, the spit out pops for its
+ * inputs, and commit a constant-generating bytecode.
+ */
+void rewind(ISS& env, const Bytecode& bc) {
+  ITRACE(2, "(rewind: {}\n", show(env.ctx.func, bc));
+  env.state.stack.rewind(numPop(bc), numPush(bc));
+}
+
+/*
+ * Used for peephole opts. Will undo the *stack* effects of the last n
+ * committed byte codes, and remove them from the bytecode stream, in
+ * preparation for writing out an optimized replacement sequence.
+ *
+ * WARNING: Does not undo other changes to state, such as local types,
+ * local equivalency, and thisType. Take care when rewinding such
+ * things.
+ */
+void rewind(ISS& env, int n) {
+  if (env.savedFoldableActRecs.size()) {
+    auto idx = env.unchangedBcs + env.replacedBcs.size() - n;
+    auto it = env.savedFoldableActRecs.end();
+    do {
+      --it;
+      if (it->first > idx) {
+        it->first = idx;
+      }
+    } while (it != env.savedFoldableActRecs.begin());
+  }
+  assertx(n);
+  while (env.replacedBcs.size()) {
+    rewind(env, env.replacedBcs.back());
+    env.replacedBcs.pop_back();
+    if (!--n) return;
+  }
+  while (n--) {
+    rewind(env, env.blk.hhbcs[--env.unchangedBcs]);
+  }
+}
 
 }
 
@@ -199,16 +308,46 @@ SString getNameFromType(const Type& t) {
 
 namespace interp_step {
 
-void in(ISS& env, const bc::Nop&)  { effect_free(env); }
+void in(ISS& env, const bc::Nop&)  { reduce(env); }
 void in(ISS& env, const bc::DiscardClsRef& op) {
   nothrow(env);
   takeClsRefSlot(env, op.slot);
 }
 void in(ISS& env, const bc::PopC&) {
+  if (auto const last = last_op(env)) {
+    if (poppable(last->op)) {
+      rewind(env, 1);
+      return reduce(env);
+    }
+    if (last->op == Op::This) {
+      // can't rewind This because it removed null from thisType (so
+      // CheckThis at this point is a no-op) - and note that it must
+      // have *been* nullable, or we'd have turned it into a
+      // `BareThis NeverNull`
+      replace_last_op(env, bc::CheckThis {});
+      return reduce(env);
+    }
+    if (last->op == Op::SetL) {
+      // can't rewind a SetL because it changes local state
+      replace_last_op(env, bc::PopL { last->SetL.loc1 });
+      return reduce(env);
+    }
+  }
+
   effect_free(env);
   popC(env);
 }
-void in(ISS& env, const bc::PopU&) { effect_free(env); popU(env); }
+
+void in(ISS& env, const bc::PopU&) {
+  if (auto const last = last_op(env)) {
+    if (last->op == Op::NullUninit) {
+      rewind(env, 1);
+      return reduce(env);
+    }
+  }
+  effect_free(env); popU(env);
+}
+
 void in(ISS& env, const bc::PopU2&) {
   effect_free(env);
   auto equiv = topStkEquiv(env);
@@ -733,6 +872,26 @@ std::pair<Type,bool> resolveSame(ISS& env) {
 
 template<bool Negate>
 void sameImpl(ISS& env) {
+  if (auto const last = last_op(env)) {
+    if (last->op == Op::Null) {
+      rewind(env, 1);
+      reduce(env, bc::IsTypeC { IsTypeOp::Null });
+      if (Negate) reduce(env, bc::Not {});
+      return;
+    }
+    if (auto const prev = last_op(env, 1)) {
+      if (prev->op == Op::Null &&
+          (last->op == Op::CGetL || last->op == Op::CGetL2)) {
+        auto const loc = last->op == Op::CGetL ?
+          last->CGetL.loc1 : last->CGetL2.loc1;
+        rewind(env, 2);
+        reduce(env, bc::IsTypeL { loc, IsTypeOp::Null });
+        if (Negate) reduce(env, bc::Not {});
+        return;
+      }
+    }
+  }
+
   auto pair = resolveSame<Negate>(env);
   discard(env, 2);
 
@@ -973,13 +1132,13 @@ void in(ISS& env, const bc::Not&) {
 
 void in(ISS& env, const bc::CastBool&) {
   auto const t = topC(env);
-  if (t.subtypeOf(BBool)) return reduce(env, bc::Nop {});
+  if (t.subtypeOf(BBool)) return reduce(env);
   castBoolImpl(env, popC(env), false);
 }
 
 void in(ISS& env, const bc::CastInt&) {
   auto const t = topC(env);
-  if (t.subtypeOf(BInt)) return reduce(env, bc::Nop {});
+  if (t.subtypeOf(BInt)) return reduce(env);
   constprop(env);
   popC(env);
   // Objects can raise a warning about converting to int.
@@ -999,7 +1158,7 @@ void in(ISS& env, const bc::CastInt&) {
 // will be optimized away.
 void castImpl(ISS& env, Type target, void(*fn)(TypedValue*)) {
   auto const t = topC(env);
-  if (t.subtypeOf(target)) return reduce(env, bc::Nop {});
+  if (t.subtypeOf(target)) return reduce(env);
   popC(env);
   if (fn) {
     if (auto val = tv(t)) {
@@ -1089,8 +1248,9 @@ void in(ISS& /*env*/, const bc::Jmp&) {
   always_assert(0 && "blocks should not contain Jmp instructions");
 }
 
-template<bool Negate, class JmpOp>
+template<class JmpOp>
 void jmpImpl(ISS& env, const JmpOp& op) {
+  auto const Negate = std::is_same<JmpOp, bc::JmpNZ>::value;
   auto const location = topStkEquiv(env);
   auto const e = emptiness(topC(env));
   if (e == (Negate ? Emptiness::NonEmpty : Emptiness::Empty)) {
@@ -1104,6 +1264,13 @@ void jmpImpl(ISS& env, const JmpOp& op) {
     return reduce(env, bc::PopC{});
   }
 
+  if (auto const last = last_op(env)) {
+    if (last->op == Op::Not) {
+      rewind(env, 1);
+      return reduce(env, invertJmp(op));
+    }
+  }
+
   popC(env);
   nothrow(env);
 
@@ -1115,8 +1282,8 @@ void jmpImpl(ISS& env, const JmpOp& op) {
                  Negate ? assert_emptiness : assert_nonemptiness);
 }
 
-void in(ISS& env, const bc::JmpNZ& op) { jmpImpl<true>(env, op); }
-void in(ISS& env, const bc::JmpZ& op)  { jmpImpl<false>(env, op); }
+void in(ISS& env, const bc::JmpNZ& op) { jmpImpl(env, op); }
+void in(ISS& env, const bc::JmpZ& op)  { jmpImpl(env, op); }
 
 void in(ISS& env, const bc::Select& op) {
   auto const cond = topC(env);
@@ -1601,12 +1768,27 @@ void in(ISS& env, const bc::CUGetL& op) {
 
 void in(ISS& env, const bc::PushL& op) {
   if (auto val = tv(peekLocRaw(env, op.loc1))) {
-    return reduce(env, gen_constant(*val), bc::UnsetL { op.loc1 });
+    return reduce(env, bc::UnsetL { op.loc1 }, gen_constant(*val));
   }
 
   auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
   if (minLocEquiv != NoLocalId) {
     return reduce(env, bc::CGetL { minLocEquiv }, bc::UnsetL { op.loc1 });
+  }
+
+  if (auto const last = last_op(env)) {
+    if (last->op == Op::PopL &&
+        last->PopL.loc1 == op.loc1) {
+      // rewind is ok, because we're just going to unset the local
+      // (and note the unset can't be a no-op because the PopL set it
+      // to an InitCell). But its possible that before the PopL, the
+      // local *was* unset, so maybe would have killed the no-op. The
+      // only way to fix that is to reprocess the block with the new
+      // instruction sequence and see what happens.
+      reprocess(env);
+      rewind(env, 1);
+      return reduce(env, bc::UnsetL { op.loc1 });
+    }
   }
 
   impl(env, bc::CGetL { op.loc1 }, bc::UnsetL { op.loc1 });
@@ -2666,9 +2848,19 @@ namespace {
  * state. Otherwise, pop the stack value, perform the set, and return a pair
  * giving the value's type, and any other local its known to be equivalent to.
  */
-template <typename Op>
+template <typename Set>
 folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
-                                                        const Op& op) {
+                                                        const Set& op) {
+  if (auto const prev = last_op(env, 1)) {
+    if (prev->op == Op::CGetL2 &&
+        prev->CGetL2.loc1 == op.loc1 &&
+        last_op(env)->op == Op::Concat) {
+      rewind(env, 2);
+      reduce(env, bc::SetOpL { op.loc1, SetOpOp::ConcatEqual });
+      return folly::none;
+    }
+  }
+
   auto equivLoc = topStkEquiv(env);
   // If the local could be a Ref, don't record equality because the stack
   // element and the local won't actually have the same type.
@@ -2730,7 +2922,7 @@ void in(ISS& env, const bc::SetL& op) {
   if (auto p = moveToLocImpl(env, op)) {
     push(env, std::move(p->first), p->second);
   } else {
-    reduce(env, bc::Nop {});
+    reduce(env);
   }
 }
 
@@ -2863,7 +3055,7 @@ void in(ISS& env, const bc::IncDecS& op) {
 
 void in(ISS& env, const bc::UnsetL& op) {
   if (locRaw(env, op.loc1).subtypeOf(TUninit)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
   nothrow(env);
   setLocRaw(env, op.loc1, TUninit);
@@ -2878,18 +3070,22 @@ void in(ISS& env, const bc::FPushFuncD& op) {
   auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
   if (!any(env.collect.opts & CollectionOpts::Speculating)) {
     if (auto const func = rfunc.exactFunc()) {
-      if (can_emit_builtin(func, op.arg1, op.has_unpack)) {
+      if (will_reduce(env) && can_emit_builtin(func, op.arg1, op.has_unpack)) {
+        auto ar = ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc };
+        env.savedFoldableActRecs.emplace_back(
+          static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()), ar
+        );
         fpiPushNoFold(
           env,
-          ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
+          std::move(ar)
         );
-        return reduce(env, bc::Nop {});
+        return reduce(env);
       }
     }
   }
   if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
               op.arg1, false)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
   discardAR(env, op.arg1);
 }
@@ -3034,8 +3230,8 @@ void implFPushObjMethodD(ISS& env, const Op& op, bool isRFlavor) {
     // or FCall may throw.
     fpiPushNoFold(env, ar());
   } else if (fpiPush(env, ar(), op.arg1, false)) {
-    if (isRFlavor) return reduce(env, bc::PopC {}, bc::Nop {});
-    return reduce(env, bc::Nop {});
+    if (isRFlavor) return reduce(env, bc::PopC {});
+    return reduce(env);
   }
 
   if (isRFlavor) popC(env);
@@ -3121,7 +3317,7 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
   );
   if (fpiPush(env, ActRec { FPIKind::ClsMeth, clsType, rcls, rfun }, op.arg1,
               false)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
   discardAR(env, op.arg1);
 }
@@ -3244,7 +3440,7 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
                 rcls,
                 rfun
               }, op.arg1, false)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
   discardAR(env, op.arg1);
 }
@@ -3395,6 +3591,10 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
           env.ctx, func, ar.context, std::move(args));
       }();
       if (auto v = tv(ty)) {
+        env.savedFoldableActRecs.emplace_back(
+          static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()),
+          ActRec{ FPIKind::Unknown, TBottom }
+        );
         BytecodeVec repl { fca.numArgs, bc::PopC {} };
         repl.push_back(bc::PopU {});
         repl.push_back(bc::PopU {});
@@ -4005,7 +4205,7 @@ void in(ISS& env, const bc::LateBoundCls& op) {
 
 void in(ISS& env, const bc::CheckThis&) {
   if (thisAvailable(env)) {
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
   setThisAvailable(env);
 }
@@ -4110,7 +4310,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
 
   if (env.ctx.func->isMemoizeImpl && !locCouldBeRef(env, op.loc1)) {
     // a MemoizeImpl's params have already been checked by the wrapper
-    return reduce(env, bc::Nop {});
+    return reduce(env);
   }
 
   // Generally we won't know anything about the params, but
@@ -4120,7 +4320,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
                                      locAsCell(env, op.loc1),
                                      constraint)) {
     if (!locAsCell(env, op.loc1).couldBe(BFunc | BCls)) {
-      return reduce(env, bc::Nop {});
+      return reduce(env);
     }
   }
 
@@ -4188,7 +4388,7 @@ void verifyRetImpl(ISS& env, const TypeConstraint& constraint,
       push(env, std::move(stackT), stackEquiv);
       return;
     }
-    return reduce(env, bc::Nop{});
+    return reduce(env);
   }
 
   // For CheckReturnTypeHints >= 3 AND the constraint is not soft.
@@ -4322,7 +4522,7 @@ void in(ISS& env, const bc::VerifyRetNonNullC& /*op*/) {
   auto stackT = topC(env);
 
   if (!stackT.couldBe(BInitNull)) {
-    reduce(env, bc::Nop {});
+    reduce(env);
     return;
   }
 
@@ -4810,25 +5010,15 @@ void interpStep(ISS& env, const Bytecode& bc) {
     if (!options.ConstantProp || !env.flags.canConstProp) return false;
 
     auto const numPushed   = bc.numPush();
-    auto elems = env.state.stack.end();
-    constexpr auto numCells = 4;
-    Cell cells[numCells];
+    TinyVector<Cell> cells;
 
     auto i = size_t{0};
     while (i < numPushed) {
-      --elems;
-      if (i < numCells) {
-        auto const v = tv(elems->type);
-        if (!v) return false;
-        cells[i] = *v;
-      } else if (!is_scalar(elems->type)) {
-        return false;
-      }
+      auto const v = tv(topT(env, i));
+      if (!v) return false;
+      cells.push_back(*v);
       ++i;
     }
-
-    auto const slot = visit(bc, ReadClsRefSlotVisitor{});
-    if (slot != NoClsRefSlotId) interpStep(env, bc::DiscardClsRef { slot });
 
     if (env.flags.wasPEI) {
       ITRACE(2, "   nothrow (due to constprop)\n");
@@ -4839,6 +5029,8 @@ void interpStep(ISS& env, const Bytecode& bc) {
       env.flags.effectFree = true;
     }
 
+    rewind(env, bc);
+
     auto const numPop = bc.numPop();
     for (auto j = 0; j < numPop; j++) {
       switch (bc.popFlavor(j)) {
@@ -4846,14 +5038,16 @@ void interpStep(ISS& env, const Bytecode& bc) {
           // Note that we only support C's for CVU so far (this only
           // comes up with FCallBuiltin)---we'll fail the verifier if
           // something changes to send V's or U's through here.
+          interpStep(env, bc::PopC {});
+          break;
         case Flavor::CU:
           // We only support C's for CU right now.
+          interpStep(env, bc::PopC {});
+          break;
         case Flavor::C:
-          push(env, TInitNull);
           interpStep(env, bc::PopC {});
           break;
         case Flavor::V:
-          push(env, TRef);
           interpStep(env, bc::PopV {});
           break;
         case Flavor::U:  not_reached();
@@ -4861,11 +5055,12 @@ void interpStep(ISS& env, const Bytecode& bc) {
       }
     }
 
+    auto const slot = visit(bc, ReadClsRefSlotVisitor{});
+    if (slot != NoClsRefSlotId) interpStep(env, bc::DiscardClsRef { slot });
+
     while (i--) {
-      auto const v = i < numCells ? cells[i] : *tv(elems->type);
-      elems->type = from_cell(v);
-      ++elems;
-      record(env, gen_constant(v));
+      push(env, from_cell(cells[i]));
+      record(env, gen_constant(cells[i]));
     }
     return true;
   };
@@ -4951,24 +5146,10 @@ BlockId speculate(Interp& interp) {
   return interp.blk->fallthrough;
 }
 
-const Bytecode* last_op(ISS& env) {
-  if (env.replacedBcs.size()) return &env.replacedBcs.back();
-  if (env.unchangedBcs) {
-    return &env.blk.hhbcs[env.unchangedBcs - 1];
-  }
-  return nullptr;
-}
-
-Bytecode& mutate_last_op(ISS& env) {
-  if (!env.replacedBcs.size()) {
-    assertx(env.unchangedBcs);
-    env.replacedBcs.push_back(env.blk.hhbcs[--env.unchangedBcs]);
-  }
-  return env.replacedBcs.back();
-}
-
 BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   assertx(orig != NoBlockId);
+
+  if (!will_reduce(env)) return orig;
 
   auto const last = last_op(env);
   bool endsInControlFlow = last && instrIsNonCallControlFlow(last->op);
@@ -5046,7 +5227,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
 
 //////////////////////////////////////////////////////////////////////
 
-RunFlags run(Interp& interp, PropagateFn propagate) {
+RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
   SCOPE_EXIT {
     FTRACE(2, "out {}{}\n",
            state_string(*interp.ctx.func, interp.state, interp.collect),
@@ -5062,10 +5243,60 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
     return ret;
   };
 
-  auto const stop = end(interp.blk->hhbcs);
-  auto iter       = begin(interp.blk->hhbcs);
-  while (iter != stop) {
-    interpOne(env, *iter++);
+  CompactVector<std::pair<uint32_t, ActRec>> savedFoldableActRecs;
+  size_t foldableIdx = 0;
+  BytecodeVec retryBcs;
+  auto retryOffset = interp.blk->hhbcs.size();
+  auto size = retryOffset;
+  BlockId retryFallthrough = interp.blk->fallthrough;
+  size_t idx = 0;
+
+  while (true) {
+    while (foldableIdx < savedFoldableActRecs.size()) {
+      auto const& ar = savedFoldableActRecs[foldableIdx];
+      if (ar.first != idx) {
+        assertx(ar.first > idx);
+        break;
+      }
+      if (ar.second.func) {
+        FTRACE(2, "    fpi+: {} {}\n",
+               env.state.fpiStack.size(), show(ar.second));
+        env.state.fpiStack.push_back(ar.second);
+      } else {
+        FTRACE(2, "    fpi-: {} {}\n",
+               env.state.fpiStack.size() - 1, show(env.state.fpiStack.back()));
+        env.state.fpiStack.pop_back();
+      }
+      env.savedFoldableActRecs.emplace_back(
+        static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()),
+        ar.second
+      );
+      foldableIdx++;
+    }
+
+    if (idx == size) {
+      if (!env.reprocess) break;
+      FTRACE(2, "  Reprocess mutated block {}\n", interp.bid);
+      assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
+      retryOffset = env.unchangedBcs;
+      retryBcs = std::move(env.replacedBcs);
+      savedFoldableActRecs = std::move(env.savedFoldableActRecs);
+      foldableIdx = 0;
+      env.unchangedBcs = 0;
+      env.state.copy_from(in);
+      env.reprocess = false;
+      env.savedFoldableActRecs.clear();
+      env.replacedBcs.clear();
+      size = retryOffset + retryBcs.size();
+      idx = 0;
+      continue;
+    }
+
+    auto const& bc = idx < retryOffset ?
+      interp.blk->hhbcs[idx] : retryBcs[idx - retryOffset];
+    ++idx;
+
+    interpOne(env, bc);
     auto const& flags = env.flags;
     if (interp.collect.effectFree && !flags.effectFree) {
       interp.collect.effectFree = false;
@@ -5076,16 +5307,19 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
     }
 
     if (flags.returned) {
-      FTRACE(2, "  returned {}\n", show(*flags.returned));
-      always_assert(iter == stop);
+      always_assert(idx == size);
+      if (env.reprocess) continue;
+
       always_assert(interp.blk->fallthrough == NoBlockId);
       assertx(!ret.returned);
+      FTRACE(2, "  returned {}\n", show(*flags.returned));
       ret.retParam = flags.retParam;
       ret.returned = flags.returned;
       return finish(NoBlockId);
     }
 
     if (flags.jmpDest != NoBlockId) {
+      always_assert(idx == size);
       auto const hasFallthrough = [&] {
         if (flags.jmpDest != interp.blk->fallthrough) {
           FTRACE(2, "  <took branch; no fallthrough>\n");
@@ -5096,25 +5330,29 @@ RunFlags run(Interp& interp, PropagateFn propagate) {
           return true;
         }
       }();
+      if (hasFallthrough) retryFallthrough = flags.jmpDest;
+      if (env.reprocess) continue;
       auto const newDest = speculateHelper(env, flags.jmpDest, true);
       propagate(newDest, &interp.state);
       return finish(hasFallthrough ? newDest : NoBlockId);
     }
 
     if (interp.state.unreachable) {
+      if (env.reprocess) {
+        idx = size;
+        continue;
+      }
       FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
       return finish(NoBlockId);
     }
   }
 
   FTRACE(2, "  <end block>\n");
-  if (interp.blk->fallthrough != NoBlockId) {
-    auto const fallthrough =
-      speculateHelper(env, interp.blk->fallthrough, false);
-    propagate(fallthrough, &interp.state);
-    return finish(fallthrough);
+  if (retryFallthrough != NoBlockId) {
+    retryFallthrough = speculateHelper(env, retryFallthrough, false);
+    propagate(retryFallthrough, &interp.state);
   }
-  return finish(interp.blk->fallthrough);
+  return finish(retryFallthrough);
 }
 
 StepFlags step(Interp& interp, const Bytecode& op) {

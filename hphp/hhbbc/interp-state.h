@@ -213,6 +213,7 @@ struct StackElem {
   // value of $this, or NoLocalId if it has no known equivalents.
   // Note that the location may not match the stack value wrt Uninit.
   LocalId equivLoc;
+  uint32_t index;
 };
 
 struct InterpStack {
@@ -289,8 +290,10 @@ public:
   void push_back(const StackElem& elm) {
     index.push_back(elems.size());
     elems.push_back(elm);
+    elems.back().index = index.size() - 1;
   }
   void push_back(StackElem&& elm) {
+    elm.index = index.size();
     index.push_back(elems.size());
     elems.push_back(std::move(elm));
   }
@@ -324,6 +327,10 @@ public:
     }
     elems.resize(i);
   }
+  // rewind the stack to the state it was in before the last
+  // instruction ran (which is known to have popped numPop items and
+  // pushed numPush items).
+  void rewind(int numPop, int numPush);
 private:
   CompactVector<uint32_t> index;
   CompactVector<StackElem> elems;

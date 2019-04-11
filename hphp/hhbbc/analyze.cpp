@@ -425,7 +425,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
       auto interp   = Interp {
         index, ctx, collect, bid, blk, stateOut
       };
-      auto flags    = run(interp, propagate);
+      auto flags    = run(interp, ai.bdata[bid].stateIn, propagate);
       if (any(collect.opts & CollectionOpts::EffectFreeOnly) &&
           !collect.effectFree) {
         break;

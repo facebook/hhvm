@@ -76,7 +76,7 @@ struct ISS {
   // If we're inside an impl (as opposed to reduce) this will be > 0
   uint32_t analyzeDepth{0};
   int32_t srcLoc{-1};
-
+  bool reprocess{false};
   // As we process the block, we keep track of the optimized bytecode
   // stream. We expect that in steady state, there will be no changes;
   // so as we process the block, if the initial bytecodes are the
@@ -88,6 +88,13 @@ struct ISS {
   uint32_t unchangedBcs{0};
   // new bytecodes
   BytecodeVec replacedBcs;
+  /*
+   * If we end up reprocessing the modified bytecodes for this block,
+   * the FPush* and or FCall* for any foldable actrecs will have been
+   * dropped, but we still need to make sure the correct pushes and
+   * pops occur to keep the stack balanced.
+   */
+  CompactVector<std::pair<uint32_t, ActRec>> savedFoldableActRecs;
 };
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs);
@@ -415,11 +422,11 @@ folly::Optional<Type> parentClsExact(ISS& env) {
  */
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   auto foldable = [&] {
-    if (!options.ConstantFoldBuiltins) return false;
-    if (any(env.collect.opts & CollectionOpts::Speculating)) return false;
-    if (!env.collect.propagate_constants &&
-        any(env.collect.opts & CollectionOpts::Optimizing)) {
-      // we're in the optimization phase, but we're not folding constants
+    if (!options.ConstantFoldBuiltins ||
+        !will_reduce(env) ||
+        any(env.collect.opts & CollectionOpts::Speculating) ||
+        (!env.collect.propagate_constants &&
+         any(env.collect.opts & CollectionOpts::Optimizing))) {
       return false;
     }
     if (nArgs < 0 ||
@@ -481,8 +488,12 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   }();
   ar.foldable = foldable;
   ar.pushBlk = env.bid;
-
-  FTRACE(2, "    fpi+: {}\n", show(ar));
+  if (foldable) {
+    env.savedFoldableActRecs.emplace_back(
+      static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()), ar
+    );
+  }
+  FTRACE(2, "    fpi+: {} {}\n", env.state.fpiStack.size(), show(ar));
   env.state.fpiStack.push_back(std::move(ar));
   return foldable;
 }
@@ -491,14 +502,14 @@ void fpiPushNoFold(ISS& env, ActRec ar) {
   ar.foldable = false;
   ar.pushBlk = env.bid;
 
-  FTRACE(2, "    fpi+: {}\n", show(ar));
+  FTRACE(2, "    fpi+: {} {}\n", env.state.fpiStack.size(), show(ar));
   env.state.fpiStack.push_back(std::move(ar));
 }
 
 ActRec fpiPop(ISS& env) {
   assert(!env.state.fpiStack.empty());
   auto const ret = env.state.fpiStack.back();
-  FTRACE(2, "    fpi-: {}\n", show(ret));
+  FTRACE(2, "    fpi-: {} {}\n", env.state.fpiStack.size() - 1, show(ret));
   env.state.fpiStack.pop_back();
   return ret;
 }
@@ -506,6 +517,20 @@ ActRec fpiPop(ISS& env) {
 ActRec& fpiTop(ISS& env) {
   assert(!env.state.fpiStack.empty());
   return env.state.fpiStack.back();
+}
+
+void unfoldable(ISS& env, ActRec& ar) {
+  env.propagate(ar.pushBlk, nullptr);
+  ar.foldable = false;
+  // we're going to reprocess the whole fpi region; any results we've
+  // got so far are bogus, so stop prevent further useless work by
+  // marking the next bytecode unreachable
+  unreachable(env);
+  // This also means we shouldn't reprocess any changes to the
+  // bytecode, since we're pretending the block ends here, and we may
+  // have already thrown away the FPush.
+  env.reprocess = false;
+  FTRACE(2, "     fpi: not foldable\n");
 }
 
 void fpiNotFoldable(ISS& env) {
@@ -519,13 +544,7 @@ void fpiNotFoldable(ISS& env) {
   auto const func = ar.func->exactFunc();
   assertx(func);
   env.collect.unfoldableFuncs.emplace(func, ar.pushBlk);
-  env.propagate(ar.pushBlk, nullptr);
-  ar.foldable = false;
-  // we're going to reprocess the whole fpi region; any results we've
-  // got so far are bogus, so stop prevent further useless work by
-  // marking the next bytecode unreachable
-  unreachable(env);
-  FTRACE(2, "     fpi: not foldable\n");
+  unfoldable(env, ar);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -160,6 +160,8 @@ inline Peephole make_peephole(BytecodeVec& sink,
   return AppendPeephole(BasicPeephole(sink, index, ctx));
 }
 
+bool poppable(Op op);
+
 //////////////////////////////////////////////////////////////////////
 
 }}

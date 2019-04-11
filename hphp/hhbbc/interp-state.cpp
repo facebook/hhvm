@@ -435,6 +435,36 @@ bool widen_into(State& dst, const State& src) {
   return merge_impl(dst, src, widening_union);
 }
 
+void InterpStack::rewind(int numPop, int numPush) {
+  auto constexpr NoIndex =
+    std::numeric_limits<decltype(index)::value_type>::max();
+
+  while (numPush) {
+    index.pop_back();
+    elems.pop_back();
+    numPush--;
+  }
+
+  if (!numPop) return;
+
+  auto const sz = index.size();
+  for (int i = 0; i < numPop; i++) {
+    index.push_back(NoIndex);
+  }
+
+  for (auto i = elems.size(); i--; ) {
+    auto const& elm = elems[i];
+    if (elm.index >= sz &&
+        elm.index < index.size() &&
+        index[elm.index] == NoIndex) {
+      index[elm.index] = i;
+      if (!--numPop) return;
+    }
+  }
+
+  always_assert(false);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 static std::string fpiKindStr(FPIKind k) {

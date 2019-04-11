@@ -625,13 +625,18 @@ void populate_block(ParseUnitState& puState,
    * If a block ends with an unconditional jump, change it to a
    * fallthrough edge.
    *
-   * Just convert the opcode to a Nop, because this could create an
-   * empty block and we have an invariant that no blocks are empty.
+   * If the jmp is the only instruction, convert it to a Nop, to avoid
+   * creating an empty block (we have an invariant that no blocks are
+   * empty).
    */
 
   auto make_fallthrough = [&] {
     blk.fallthrough = blk.hhbcs.back().Jmp.target1;
-    blk.hhbcs.back() = bc_with_loc(blk.hhbcs.back().srcLoc, bc::Nop{});
+    if (blk.hhbcs.size() == 1) {
+      blk.hhbcs.back() = bc_with_loc(blk.hhbcs.back().srcLoc, bc::Nop{});
+    } else {
+      blk.hhbcs.pop_back();
+    }
   };
 
   switch (blk.hhbcs.back().op) {

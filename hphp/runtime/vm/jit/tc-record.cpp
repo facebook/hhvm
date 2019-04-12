@@ -153,44 +153,39 @@ void reportJitMaturity() {
   auto const before = jitMaturityCounter->getValue();
   if (before == 100) return;
 
-  // If retranslateAll is pending, wait until it finishes before counting in
+  // Limit jit maturity to 70 before retranslateAll finishes (if enabled).
+  constexpr uint64_t kMaxMaturityBeforeRTA = 70;
+  auto const beforeRetranslateAll = mcgen::retranslateAllPending();
+  // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
-  auto const hotSize = !mcgen::retranslateAllPending() * code().hot().used();
+  auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();
   // When we jit from serialized profile data, aprof is empty. In order to make
   // jit maturity somewhat comparable between the two cases, we pretend to have
   // some profiling code.
   auto const profSize = std::max(code().prof().used(), hotSize);
-  // Optimized translations are faster than profiling translations, which are
-  // faster than the interpreter.  But when optimized translations are
-  // generated, some profiling translations will become dead.  We assume the
-  // incremental value of an optimized translation over the corresponding
-  // profiling translations is comparable to the incremental value of a
-  // profiling translation of similar size; thus we don't have to apply
-  // different weights to code in different regions.
-  auto codeSize = profSize + hotSize + code().main().used();
+  auto const mainSize = code().main().used();
+
   auto const fullSize = RuntimeOption::EvalJitMatureSize;
+  const uint64_t codeSize = profSize + mainSize + hotSize;
+  int64_t maturity = before;
+  if (beforeRetranslateAll) {
+    maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
+  } else if (codeSize >= fullSize) {
+    maturity = (mainSize >= CodeCache::AMaxUsage) ? 100 : 99;
+  } else {
+    maturity = std::pow(codeSize / static_cast<double>(fullSize),
+                        RuntimeOption::EvalJitMaturityExponent) * 99;
+  }
+
   // If EvalJitMatureAfterWarmup is set, we consider the JIT to be mature once
   // warmupStatusString() is empty, which indicates that the JIT is warmed up
   // based on the rate in which JITed code is being produced.
-  const bool warmedUp = RuntimeOption::EvalJitMatureAfterWarmup &&
-                        warmupStatusString().empty();
-  int64_t after;
-  if (warmedUp || codeSize >= fullSize) {
-    after = 100;
-  } else {
-    after = std::pow(codeSize / static_cast<double>(fullSize),
-                     RuntimeOption::EvalJitMaturityExponent) * 100;
-    if (after < 1) {
-      after = 1;
-    }
-  }
-  // Make sure jit maturity is less than 100 before the JIT stops.
-  if (after > 99 && code().main().used() < CodeCache::AMaxUsage && !warmedUp) {
-    after = 99;
+  if (RuntimeOption::EvalJitMatureAfterWarmup && warmupStatusString().empty()) {
+    maturity = 100;
   }
 
-  if (after > before) {
-    jitMaturityCounter->setValue(after);
+  if (maturity > before) {
+    jitMaturityCounter->setValue(maturity);
   }
 
   code().forEachBlock([&] (const char* name, const CodeBlock& a) {

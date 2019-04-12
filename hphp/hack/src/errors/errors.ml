@@ -297,7 +297,8 @@ let format_context_lines (pos : Pos.absolute) (lines : string list): string =
   (* TODO: display all the lines, showing the underline on all of them. *)
   List.hd_exn formatted_lines
 
-let tilde_line (pos: Pos.absolute) (msg: string) (first_context_line: string option): string =
+ (* Format this message as "  ^^^ You did something wrong here". *)
+let format_substring_underline (pos: Pos.absolute) (msg: string) (first_context_line: string option) is_first: string =
   let start_line, start_column = Pos.line_column pos in
   let end_line, end_column = Pos.end_line_column pos in
   let underline_width = match first_context_line with
@@ -309,48 +310,83 @@ let tilde_line (pos: Pos.absolute) (msg: string) (first_context_line: string opt
          (String.length first_context_line) - start_column
   in
   let underline = String.make underline_width '^' in
-  let underline_padding = match first_context_line with
-    | Some _ -> (String.make start_column ' ')
-    | None -> ""
+  let underline_padding = if Option.is_some first_context_line then
+    (String.make start_column ' ')
+  else
+    ""
   in
+  let color = if is_first then Tty.Bold Tty.Red else Tty.Dim Tty.Default in
   Printf.sprintf "%s %s%s"
     (line_margin None)
     underline_padding
-    (Tty.apply_color (Tty.Bold Tty.Red) (underline ^ " " ^ msg))
+    (Tty.apply_color color (underline ^ " " ^ msg))
 
-let relative_path path =
-  let cwd = Filename.concat (Sys.getcwd ()) "" in
-  lstrip path cwd
-
-let format_message (msg: string) (pos: Pos.absolute): string * string * string =
-  let context_lines = load_context_lines pos in
+let format_filename (pos: Pos.absolute): string =
+  let relative_path path =
+    let cwd = Filename.concat (Sys.getcwd ()) "" in
+    lstrip path cwd
+  in
   let filename = relative_path (Pos.filename pos) in
-  let pretty_filename =
-    Printf.sprintf "   %s %s"
-      (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
-      (Tty.apply_color (Tty.Normal Tty.Green) filename) in
+  Printf.sprintf "   %s %s"
+    (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
+    (Tty.apply_color (Tty.Normal Tty.Green) filename)
+
+(* Format the line of code associated with this message, and the message itself. *)
+let format_message (msg: string) (pos: Pos.absolute) ~is_first : string * string =
+  let context_lines = load_context_lines pos in
   let pretty_ctx = format_context_lines pos context_lines in
-  let pretty_msg = tilde_line pos msg (List.hd context_lines) in
-  (pretty_filename, pretty_ctx, pretty_msg)
+  let pretty_msg = format_substring_underline pos msg (List.hd context_lines) is_first in
+  (pretty_ctx, pretty_msg)
+
+(** Sort messages such that messages in the same file are together.
+    Do not reorder the files or messages within a file.
+ *)
+let group_by_file (msgs : Pos.absolute message list): Pos.absolute message list =
+  let rec build_map msgs grouped filenames =
+    match msgs with
+    | msg::msgs ->
+       (let filename = (Pos.filename (fst msg)) in
+       match String.Map.find grouped filename with
+       | Some file_msgs ->
+          let grouped = String.Map.set grouped ~key:filename ~data:(file_msgs @ [msg]) in
+          build_map msgs grouped filenames
+       | None ->
+          let grouped = String.Map.set grouped ~key:filename ~data:[msg] in
+          build_map msgs grouped (filename::filenames))
+       | [] -> (grouped, filenames)
+  in
+  let grouped, filenames = build_map msgs String.Map.empty [] in
+  List.concat_map (List.rev filenames) ~f:(fun fn -> String.Map.find_exn grouped fn)
 
 (** Given a list of error messages, format them with context.
     The list may not be ordered, and multiple messages may occur on one line.
  *)
 let format_messages (msgs: Pos.absolute message list): string =
-  (* Order by filename, to keep messages within the same file
-     together. Within each file, order by line number. *)
-  let cmp m1 m2 =
+  let msgs = group_by_file msgs in
+  (* The first message is the 'primary' message, so add a boolean to distinguish it. *)
+  let rec label_first msgs is_first =
+    match msgs with
+    | msg::msgs -> (msg, is_first)::label_first msgs false
+    | [] -> []
+  in
+  let labelled_msgs = label_first msgs true in
+
+  (* Sort messages by line number, so we can display with context. *)
+  let cmp (m1, _) (m2, _) =
     match compare (Pos.filename (fst m1)) (Pos.filename (fst m2)) with
     | 0 -> compare (Pos.line (fst m1)) (Pos.line (fst m2))
-    | x -> x in
-  let msgs = List.stable_sort cmp msgs in
+    | _ -> 0 in
+  let sorted_msgs = List.stable_sort cmp labelled_msgs in
+
+  (* For every message, show it alongside the relevant line. If there
+     are multiple messages associated with the line, only show it once. *)
   let rec aux msgs prev : string list =
     match msgs with
-    | msg::msgs ->
+     | (msg, is_first)::msgs ->
        let (pos, err_msg) = msg in
        let filename = Pos.filename pos in
        let line = Pos.line pos in
-       let (pretty_filename, pretty_ctx, pretty_msg) = format_message err_msg pos in
+       let pretty_ctx, pretty_msg = format_message err_msg pos is_first in
        let formatted : string list = (match prev with
          | Some (prev_filename, prev_line)  when prev_filename = filename && prev_line = line ->
             (* Previous message was on this line too, just show the message itself*)
@@ -359,12 +395,12 @@ let format_messages (msgs: Pos.absolute message list): string =
             (* Previous message was this file, but an earlier line. *)
             [pretty_ctx; pretty_msg]
          | _ ->
-            [pretty_filename; pretty_ctx; pretty_msg])
+            [format_filename pos; pretty_ctx; pretty_msg])
        in
        formatted @ aux msgs (Some (filename, line))
     | [] -> []
   in
-  String.concat ~sep:"\n" (aux msgs None) ^ "\n"
+  String.concat ~sep:"\n" (aux sorted_msgs None) ^ "\n"
 
 let to_contextual_string (error : Pos.absolute error_) : string =
   let error_code = get_code error in

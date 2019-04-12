@@ -76,7 +76,8 @@ let to_contextual_string lint =
       (color (Errors.error_code_to_string lint.code))
       (Tty.apply_color (Tty.Bold Tty.White) lint.message)
   in
-  let (fn, ctx, msg) = Errors.format_message "" lint.pos in
+  let fn = Errors.format_filename lint.pos in
+  let ctx, msg = Errors.format_message "" lint.pos ~is_first:true in
   Printf.sprintf "%s\n%s\n%s\n%s\n" heading fn ctx msg
 
 let to_json {pos; code; severity; message; bypass_changed_lines;

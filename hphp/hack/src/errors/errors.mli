@@ -392,7 +392,8 @@ val invalid_switch_case_value_type : Pos.t -> string -> string -> unit
 val to_json : Pos.absolute error_ -> Hh_json.json
 val to_string : ?indent:bool -> Pos.absolute error_ -> string
 val to_contextual_string : Pos.absolute error_ -> string
-val format_message : string -> Pos.absolute -> string * string * string
+val format_filename : Pos.absolute -> string
+val format_message : string -> Pos.absolute -> is_first:bool -> string * string
 val try_ : (unit -> 'a) -> (error -> 'a) -> 'a
 val try_with_error : (unit -> 'a) -> (unit -> 'a) -> 'a
 val try_add_err : Pos.t -> string -> (unit -> 'a) -> (unit -> 'a) -> 'a

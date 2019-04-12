@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- *)
+*)
 
 open Core_kernel
 
@@ -70,8 +70,8 @@ let add_member ~include_empty name values members =
   if InvSSet.is_empty values && not include_empty
   then members
   else
-  let elements = InvSSet.fold (fun el acc -> J.JSON_String el :: acc ) values [] in
-  (name, J.JSON_Array elements) :: members
+    let elements = InvSSet.fold (fun el acc -> J.JSON_String el :: acc ) values [] in
+    (name, J.JSON_Array elements) :: members
 
 let list_to_json_array l =
   let elements =
@@ -81,7 +81,7 @@ let list_to_json_array l =
 let type_facts_to_json name tf =
   let members =
     add_member ~include_empty:(tf.kind = TKInterface || tf.kind = TKTrait)
-    "requireExtends" tf.require_extends []
+      "requireExtends" tf.require_extends []
     |> add_member ~include_empty:(tf.kind = TKTrait)
       "requireImplements" tf.require_implements
     |> add_member ~include_empty:true "baseTypes" tf.base_types in

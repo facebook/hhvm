@@ -404,7 +404,7 @@ let extract_facts ?pretty ~filename ~source_root text =
         ~hhvm_compat_mode:true
         ~force_hh:enable_hh_syntax
         ~enable_xhp
-        ~filename text
+        ~filename ~text
   in
   (* return empty string if file has syntax errors *)
   Option.value_map ~default:"" ~f:(Hh_json.json_to_string ?pretty) json_facts

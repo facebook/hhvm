@@ -21,3 +21,5 @@ pub mod syntax_kind;
 pub mod smart_constructors;
 pub mod smart_constructors_generated;
 pub mod syntax_smart_constructors;
+
+pub mod syntax_error;

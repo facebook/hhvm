@@ -88,7 +88,6 @@ function(invoke_dune name target)
       ${name}
       COMMAND
         export OPAMROOT=${OPAMROOT} &&
-        export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
         export PYTHONPATH="${HPHP_HOME}" && # needed for verify.py for `hack_dune_test`
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
@@ -104,7 +103,6 @@ function(invoke_dune name target)
         BYTECODE="${EMIT_OCAML_BYTECODE}"
         OCAML="${OCAML_EXECUTABLE}"
         OCAMLC="${OCAMLC_EXECUTABLE}"
-        OCAMLBUILD="${OCAMLBUILD_EXECUTABLE}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 

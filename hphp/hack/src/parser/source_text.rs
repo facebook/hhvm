@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- */
+*/
 
 pub const INVALID: char = '\x00';
 
@@ -51,5 +51,9 @@ impl<'a> SourceText<'a> {
         } else {
             &self.text()[start..(start + length)]
         }
+    }
+
+    pub fn sub_as_str(&self, start: usize, length: usize) -> &'a str {
+        unsafe { std::str::from_utf8_unchecked(self.sub(start, length)) }
     }
 }

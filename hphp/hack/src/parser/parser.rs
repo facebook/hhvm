@@ -46,6 +46,17 @@ where
         }
     }
 
+    fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv) {
+        (self.lexer, self.errors, self.env)
+    }
+
+    pub fn parse_header_only(env: ParserEnv, text: &'a SourceText<'a>) -> Option<S::R> {
+        let (lexer, errors, env) = Self::make(text, env).into_parts();
+        let mut decl_parser: DeclarationParser<S> =
+            DeclarationParser::make(lexer, env, Context::empty(), errors);
+        decl_parser.parse_leading_markup_section()
+    }
+
     pub fn parse_script(&mut self) -> S::R {
         let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
             self.lexer.clone(),

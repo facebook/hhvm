@@ -1,3 +1,4 @@
+#![feature(box_patterns)]
 /**
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
@@ -38,3 +39,5 @@ pub mod type_parser;
 pub mod minimal_syntax;
 pub mod minimal_token;
 pub mod minimal_trivia;
+
+pub mod file_mode;

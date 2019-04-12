@@ -83,11 +83,9 @@ else()
   list(APPEND extra_link_opts "$<TARGET_LINKER_FILE:sqlite3>")
 endif()
 
-# ARGV2 (optional unnamed argument) is expected to only be set to ALL
 function(invoke_dune name target)
   add_custom_target(
       ${name}
-      ${ARGV2}
       COMMAND
         export OPAMROOT=${OPAMROOT} &&
         export OCAMLFIND_COMMANDS="-ocamlc=${OCAMLC_EXECUTABLE} -ocamlopt=${OCAMLOPT_EXECUTABLE}" &&
@@ -132,13 +130,12 @@ if (NOT PC_SQLITE3_FOUND)
   add_dependencies(hack_dune_test sqlite3)
 endif()
 
-get_property(DEBUG_CONFIGURATIONS GLOBAL PROPERTY DEBUG_CONFIGURATIONS)
-list(FIND DEBUG_CONFIGURATIONS "${CMAKE_BUILD_TYPE}" DEBUG_IDX)
-if (DEBUG_IDX EQUAL -1)
-  add_custom_target(hack ALL DEPENDS hack_dune)
-else()
-  add_custom_target(hack ALL DEPENDS hack_dune_debug)
-endif()
+# Intentionally not using `hack_dune_debug` as it generates output files of a
+# different format (bytecode instead of raw executables, which is useful if
+# you're working with Hack, but means that e.g. hhvm can't find
+# `hh_single_compile` in the source tree. Keep it around, but require it to be
+# explicitly used
+add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client

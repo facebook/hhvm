@@ -17,3 +17,7 @@ pub mod lexable_trivia;
 pub mod syntax;
 mod syntax_generated;
 pub mod syntax_kind;
+
+pub mod smart_constructors;
+pub mod smart_constructors_generated;
+pub mod syntax_smart_constructors;

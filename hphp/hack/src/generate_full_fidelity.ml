@@ -761,6 +761,40 @@ end (* ParserWrapper *)
   }
 end (* GenerateFFSmartConstructors *)
 
+module GenerateFFRustSmartConstructors = struct
+  let to_make_methods x =
+    let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i ^ " : Self::R") in
+    let stack = String.concat ~sep:", " fields in
+    sprintf "    fn make_%s(%s) -> Self::R;\n" x.type_name stack
+
+  let full_fidelity_smart_constructors_template: string = make_header CStyle "" ^ "
+use crate::lexable_token::LexableToken;
+use crate::smart_constructors::NodeType;
+
+pub trait SmartConstructors {
+    type Token: LexableToken;
+    type R: NodeType;
+    fn make_missing(offset : usize) -> Self::R;
+    fn make_token(arg0: Self::Token) -> Self::R;
+    fn make_list(arg0: Box<Vec<Self::R>>, offset: usize) -> Self::R;
+MAKE_METHODS
+}"
+  let full_fidelity_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^
+      "smart_constructors_generated.rs";
+    template = full_fidelity_smart_constructors_template;
+    transformations = [
+      { pattern = "MAKE_METHODS"; func = to_make_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFRustSmartConstructors *)
+
 module GenerateFFParserSig = struct
   let to_make_methods x =
     let args = map_and_concat_separated " -> " (fun _ -> "SC.r") x.fields in
@@ -991,6 +1025,68 @@ end (* WithSyntax *)
     aggregate_transformations = [];
   }
 end (* GenerateFFSyntaxSmartConstructors *)
+
+module GenerateFFRustSyntaxSmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d : Self::R" i)in
+    let args = String.concat ~sep:", " args in
+    let params = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let params = String.concat ~sep:", " params in
+
+    sprintf "    fn make_%s(%s) -> Self::R {
+        Self::R::make_%s(%s)
+    }\n\n"
+      x.type_name args x.type_name params
+
+  let full_fidelity_syntax_smart_constructors_template: string = (make_header CStyle "") ^ "
+use crate::lexable_token::LexableToken;
+use crate::smart_constructors::SmartConstructors;
+use crate::syntax::{Syntax, SyntaxValueType};
+
+use std::marker::PhantomData;
+
+#[derive(Clone)]
+pub struct SyntaxSmartConstructors<T, V> {
+    _phantom1: PhantomData<T>,
+    _phantom2: PhantomData<V>,
+}
+
+impl<T, V> SmartConstructors for SyntaxSmartConstructors<T, V>
+where
+    T: LexableToken,
+    V: SyntaxValueType<T>,
+{
+    type Token = T;
+    type R = Syntax<T, V>;
+
+    fn make_missing(offset: usize) -> Self::R {
+        Self::R::make_missing(offset)
+    }
+
+    fn make_token(arg: Self::Token) -> Self::R {
+        Self::R::make_token(arg)
+    }
+
+    fn make_list(arg: Box<Vec<Self::R>>, offset: usize) -> Self::R {
+        Self::R::make_list(arg, offset)
+    }
+
+CONSTRUCTOR_METHODS}
+"
+  let full_fidelity_syntax_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^ "syntax_smart_constructors.rs";
+    template = full_fidelity_syntax_smart_constructors_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFRustSyntaxSmartConstructors *)
 
 module GenerateFlattenSmartConstructors = struct
   let to_constructor_methods x =
@@ -2596,9 +2692,13 @@ let () =
   generate_file
     GenerateFFSmartConstructors.full_fidelity_smart_constructors;
   generate_file
+    GenerateFFRustSmartConstructors.full_fidelity_smart_constructors;
+  generate_file
     GenerateFFVerifySmartConstructors.full_fidelity_verify_smart_constructors;
   generate_file
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
+  generate_file
+    GenerateFFRustSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
   generate_file
     GenerateFlattenSmartConstructors.flatten_smart_constructors;
   generate_file

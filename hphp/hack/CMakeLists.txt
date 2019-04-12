@@ -85,6 +85,8 @@ function(invoke_dune name target)
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}
+        CMAKE_INSTALL_FULL_SYSCONFDIR="${CMAKE_INSTALL_FULL_SYSCONFDIR}"
+        CMAKE_INSTALL_FULL_BINDIR="${CMAKE_INSTALL_FULL_BINDIR}"
         EXTRA_INCLUDE_PATHS="${extra_include_paths}"
         EXTRA_LINK_OPTS="${extra_link_opts}"
         EXTRA_LIB_PATHS="${extra_lib_paths}"
@@ -126,12 +128,6 @@ else()
   add_custom_target(hack ALL DEPENDS hack_dune_debug)
 endif()
 add_custom_target(hack_test DEPENDS hack_dune_test)
-
-configure_file(
-  "src/options/buildOptions.ml.in"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/options/default_buildOptions.ml"
-  ESCAPE_QUOTES
-)
 
 install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
   DESTINATION bin

@@ -8,13 +8,22 @@
     errors)
   (preprocess (pps ppx_deriving.std)))
 
+(executable
+  (name discover)
+  (modules discover)
+  (libraries dune.configurator))
+
+(rule
+  (targets generated_buildOptions.ml)
+  (action (run ./discover.exe)))
+
 (library
   (name build_options)
   (wrapped false)
   (modules buildOptions)
   (libraries (select buildOptions.ml from
     (facebook -> facebook/buildOptions.ml)
-    (-> default_buildOptions.ml))))
+    (-> generated_buildOptions.ml))))
 
 (library
   (name parser_options)

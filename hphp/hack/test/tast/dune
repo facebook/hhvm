@@ -13,4 +13,4 @@
           (glob_files %{project_root}/test/tast/re_prefixed_string/*.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/tast
     --program %{exe:../../src/hh_single_type_check.exe}
-    --flags --new-inference)))
+    --flags --new-inference --new-inference-lambda)))

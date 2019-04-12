@@ -270,6 +270,7 @@ let load config_filename options =
     ?tco_disallow_anon_use_capture_by_ref:
       (bool_opt "disallow_anon_use_capture_by_ref" config)
     ?tco_new_inference:(float_opt "new_inference" config)
+    ?tco_new_inference_lambda:(bool_opt "new_inference_lambda" config)
     ?tco_timeout:(int_opt "timeout" config)
     ?tco_disallow_invalid_arraykey:(bool_opt "disallow_invalid_arraykey" config)
     ?tco_disable_instanceof_refinement:(bool_opt "disable_instanceof_refinement" config)

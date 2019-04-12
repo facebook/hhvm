@@ -2412,29 +2412,31 @@ and expr_
             (* If we're in partial mode then type-check definition anyway,
              * so treating parameters without type hints as "untyped"
             *)
-
-            if TypecheckerOptions.new_inference (Env.get_tcopt env)
-            then
-              if Env.is_strict env
-              then begin
-                Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
-                let freshen_untyped_param env ft_param =
-                  match snd ft_param.fp_type with
-                  | Tany ->
-                    let env, ty = Env.fresh_invariant_type_var env ft_param.fp_pos in
-                    env, { ft_param with fp_type = ty }
-                  | _ ->
-                    env, ft_param in
-                let env, ft_params = List.map_env env declared_ft.ft_params freshen_untyped_param in
-                let declared_ft = { declared_ft with ft_params } in
-                check_body_under_known_params env declared_ft
-              end
-              else begin
-                Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
-                check_body_under_known_params env declared_ft
-              end
+            if TypecheckerOptions.new_inference (Env.get_tcopt env) && not (Env.is_strict env)
+            then begin
+              Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
+              check_body_under_known_params env declared_ft
+            end
             else
-            begin
+            (* If new_inference and new_inference_lambda are enabled,
+             * check lambda using constraints *)
+            if TypecheckerOptions.new_inference (Env.get_tcopt env)
+            && TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
+            then begin
+              Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
+              let freshen_untyped_param env ft_param =
+                match snd ft_param.fp_type with
+                | Tany ->
+                  let env, ty = Env.fresh_invariant_type_var env ft_param.fp_pos in
+                  env, { ft_param with fp_type = ty }
+                | _ ->
+                  env, ft_param in
+              let env, ft_params = List.map_env env declared_ft.ft_params freshen_untyped_param in
+              let declared_ft = { declared_ft with ft_params } in
+              check_body_under_known_params env declared_ft
+            end
+            (* Legacy lambda inference *)
+            else begin
               Typing_log.increment_feature_count env FL.Lambda.unknown_params;
               (* check for recursive function calls *)
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in

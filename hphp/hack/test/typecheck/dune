@@ -56,6 +56,7 @@ let () =
   let typecheck_deps = deps files_tc in
   let cmds = [ "--flags"
              ; "--new-inference"
+             ; "--new-inference-lambda"
              ; "--error-format raw"
              ] in
   let cmd = String.concat " " cmds in

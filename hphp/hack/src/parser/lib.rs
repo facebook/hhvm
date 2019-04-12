@@ -26,5 +26,11 @@ pub mod syntax_error;
 
 pub mod lexer;
 
+pub mod declaration_parser;
+pub mod expression_parser;
 pub mod operator;
+pub mod parser;
 pub mod parser_env;
+pub mod parser_trait;
+pub mod statement_parser;
+pub mod type_parser;

@@ -16,13 +16,59 @@
 
 #include "hphp/runtime/base/runtime-option.h"
 
+#include "hphp/parser/scanner.h"
+#include "hphp/runtime/base/apc-file-storage.h"
+#include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/builtin-functions.h"
+#include "hphp/runtime/base/config.h"
+#include "hphp/runtime/base/crash-reporter.h"
+#include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/file-util-defs.h"
+#include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/hphp-system.h"
+#include "hphp/runtime/base/ini-setting.h"
+#include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/preg.h"
+#include "hphp/runtime/base/request-info.h"
+#include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/zend-url.h"
+#include "hphp/runtime/ext/extension-registry.h"
+#include "hphp/runtime/server/access-log.h"
+#include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/files-match.h"
+#include "hphp/runtime/server/satellite-server.h"
+#include "hphp/runtime/server/virtual-host.h"
+#include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/vm/treadmill.h"
+#include "hphp/util/arch.h"
+#include "hphp/util/atomic-vector.h"
+#include "hphp/util/build-info.h"
+#include "hphp/util/cpuid.h"
+#include "hphp/util/current-executable.h"
+#include "hphp/util/file-cache.h"
+#include "hphp/util/hardware-counter.h"
+#include "hphp/util/hdf.h"
+#include "hphp/util/hphp-config.h"
+#include "hphp/util/hugetlb.h"
+#include "hphp/util/log-file-flusher.h"
+#include "hphp/util/logger.h"
+#include "hphp/util/network.h"
+#include "hphp/util/process.h"
+#include "hphp/util/service-data.h"
+#include "hphp/util/stack-trace.h"
+#include "hphp/util/text-util.h"
+#include "hphp/zend/zend-string.h"
+
 #include <cstdint>
 #include <libgen.h>
 #include <limits>
-#include <stdexcept>
 #include <map>
 #include <memory>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -33,59 +79,10 @@
 #include <folly/portability/SysTime.h>
 #include <folly/portability/Unistd.h>
 
-#include "hphp/util/arch.h"
-#include "hphp/util/atomic-vector.h"
-#include "hphp/util/build-info.h"
-#include "hphp/util/cpuid.h"
-#include "hphp/util/current-executable.h"
-#include "hphp/util/hdf.h"
-#include "hphp/util/hphp-config.h"
-#include "hphp/util/text-util.h"
-#include "hphp/util/network.h"
-#include "hphp/util/hardware-counter.h"
-#include "hphp/util/logger.h"
-#include "hphp/util/stack-trace.h"
-#include "hphp/util/process.h"
-#include "hphp/util/file-cache.h"
-#include "hphp/util/log-file-flusher.h"
-#include "hphp/util/service-data.h"
-
 #if defined (__linux__) && defined (__aarch64__)
 #include <sys/auxv.h>
 #include <asm/hwcap.h>
 #endif
-
-#include "hphp/parser/scanner.h"
-#include "hphp/zend/zend-string.h"
-
-#include "hphp/runtime/server/satellite-server.h"
-#include "hphp/runtime/server/virtual-host.h"
-#include "hphp/runtime/server/files-match.h"
-#include "hphp/runtime/server/access-log.h"
-#include "hphp/runtime/server/cli-server.h"
-
-#include "hphp/runtime/base/apc-file-storage.h"
-#include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/config.h"
-#include "hphp/runtime/base/crash-reporter.h"
-#include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/extended-logger.h"
-#include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/file-util-defs.h"
-#include "hphp/runtime/base/hphp-system.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/preg.h"
-#include "hphp/runtime/base/static-string-table.h"
-#include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/ext/extension-registry.h"
-
-#include "hphp/runtime/vm/jit/code-cache.h"
-#include "hphp/runtime/vm/jit/mcgen-translate.h"
-#include "hphp/runtime/vm/treadmill.h"
 
 #ifdef __APPLE__
 #define st_mtim st_mtimespec
@@ -1751,6 +1748,16 @@ void RuntimeOption::Load(
 
     if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
 
+    Config::Bind(ServerForkEnabled, ini, config,
+                 "Server.Forking.Enabled", ServerForkEnabled);
+    Config::Bind(ServerForkLogging, ini, config,
+                 "Server.Forking.LogForkAttempts", ServerForkLogging);
+    if (!ServerForkEnabled && ServerExecutionMode()) {
+      // Only use hugetlb pages when we don't fork().
+      low_2m_pages(EvalMaxLowMemHugePages);
+      high_2m_pages(EvalMaxHighArenaHugePages);
+    }
+
     EvalHackCompilerExtractPath = insertSchema(
       EvalHackCompilerExtractPath.data()
     );
@@ -1783,8 +1790,6 @@ void RuntimeOption::Load(
       DumpPreciseProfData = false;
     }
     EvalJitPGOUseAddrCountedCheck &= addr_encodes_persistency;
-    low_2m_pages(EvalMaxLowMemHugePages);
-    high_2m_pages(EvalMaxHighArenaHugePages);
     HardwareCounter::Init(EvalProfileHWEnable,
                           url_decode(EvalProfileHWEvents.data(),
                                      EvalProfileHWEvents.size()).toCppString(),
@@ -2007,10 +2012,6 @@ void RuntimeOption::Load(
                  ServerAddVaryEncoding);
     Config::Bind(ServerLogSettingsOnStartup, ini, config,
                  "Server.LogSettingsOnStartup", false);
-    Config::Bind(ServerForkEnabled, ini, config,
-                 "Server.Forking.Enabled", true);
-    Config::Bind(ServerForkLogging, ini, config,
-                 "Server.Forking.LogForkAttempts", false);
     Config::Bind(ServerWarmupConcurrently, ini, config,
                  "Server.WarmupConcurrently", false);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");

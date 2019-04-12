@@ -1622,7 +1622,8 @@ module Make (GetLocals : GetLocals) = struct
         TypecheckerOptions.experimental_type_const_attributes || List.is_empty attrs)
     then Errors.experimental_feature (fst t.Aast.c_tconst_name) "type constant attributes";
     N.
-    { c_tconst_name = t.Aast.c_tconst_name
+    { c_tconst_abstract = t.Aast.c_tconst_abstract
+    ; c_tconst_name = t.Aast.c_tconst_name
     ; c_tconst_constraint = constr
     ; c_tconst_type = type_
     ; c_tconst_user_attributes = attrs

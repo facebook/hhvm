@@ -487,7 +487,12 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
       Errors.abstract_with_typeconst tc.tconst_name;
       None
     | h, _ -> h in
+  let ak = match tc.tconst_abstract, tc.tconst_constraint with
+    | true, _ -> Aast.TCAbstract
+    | false, Some _ -> Aast.TCPartiallyAbstract
+    | false, None -> Aast.TCConcrete in
   Aast.{
+    c_tconst_abstract = ak;
     c_tconst_name = tc.tconst_name;
     c_tconst_constraint = optional on_hint tc.tconst_constraint;
     c_tconst_type = optional on_hint tconst_type;

@@ -363,6 +363,11 @@ and ca_type =
 (* expr = None indicates an abstract const *)
 and class_const = hint option * sid * expr option
 
+and typeconst_abstract_kind =
+  | TCAbstract
+  | TCPartiallyAbstract
+  | TCConcrete
+
 (* This represents a type const definition. If a type const is abstract then
  * then the type hint acts as a constraint. Any concrete definition of the
  * type const must satisfy the constraint.
@@ -370,6 +375,7 @@ and class_const = hint option * sid * expr option
  * If the type const is not abstract then a type must be specified.
  *)
 and class_typeconst = {
+  c_tconst_abstract : typeconst_abstract_kind;
   c_tconst_name : sid;
   c_tconst_constraint : hint option;
   c_tconst_type : hint option;

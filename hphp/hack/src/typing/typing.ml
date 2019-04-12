@@ -6357,7 +6357,13 @@ and check_extend_abstract_const ~is_final p seq =
       ) -> ()
   end
 
+and typeconst_abstract_kind = function
+  | Nast.TCAbstract -> T.TCAbstract
+  | Nast.TCPartiallyAbstract -> T.TCPartiallyAbstract
+  | Nast.TCConcrete -> T.TCConcrete
+
 and typeconst_def env {
+  c_tconst_abstract;
   c_tconst_name = (pos, _) as id;
   c_tconst_constraint;
   c_tconst_type;
@@ -6371,6 +6377,7 @@ and typeconst_def env {
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.typeconst c_tconst_user_attributes in
   {
+    T.c_tconst_abstract = typeconst_abstract_kind c_tconst_abstract;
     T.c_tconst_name = id;
     T.c_tconst_constraint = c_tconst_constraint;
     T.c_tconst_type = c_tconst_type;

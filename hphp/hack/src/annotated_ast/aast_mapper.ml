@@ -344,8 +344,15 @@ struct
   and map_class_const menv (h, id, e) =
     (h, id, Option.map e (map_expr menv))
 
+  and map_typeconst_abstract_kind ak =
+    match ak with
+    | S.TCAbstract -> T.TCAbstract
+    | S.TCPartiallyAbstract -> T.TCPartiallyAbstract
+    | S.TCConcrete -> T.TCConcrete
+
   and map_class_typeconst menv tc =
   {
+    T.c_tconst_abstract = map_typeconst_abstract_kind tc.S.c_tconst_abstract;
     T.c_tconst_name = tc.S.c_tconst_name;
     T.c_tconst_constraint = tc.S.c_tconst_constraint;
     T.c_tconst_type = tc.S.c_tconst_type;

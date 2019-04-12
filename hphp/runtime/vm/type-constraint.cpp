@@ -1084,7 +1084,7 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     return;
   }
 
-  if (!isSoft() && isClsMethType(c->m_type)) {
+  if (isClsMethType(c->m_type)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       if (isClsMethCompactVec()) {
         if (RuntimeOption::EvalVecHintNotices) {
@@ -1269,7 +1269,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   }
 
-  if (!isSoft() && isClsMethType(c->m_type)) {
+  if (isClsMethType(c->m_type)) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       if (isClsMethCompactVec()) {
         if (RuntimeOption::EvalVecHintNotices) {

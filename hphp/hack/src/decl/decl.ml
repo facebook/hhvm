@@ -679,6 +679,7 @@ and typeconst_fold c ((typeconsts, consts) as acc) stc =
         | Some ptc -> ptc.ttc_enforceable
         | None -> Pos.none, false in
     let tc = {
+      ttc_abstract = stc.stc_abstract;
       ttc_name = stc.stc_name;
       ttc_constraint = stc.stc_constraint;
       ttc_type = stc.stc_type;

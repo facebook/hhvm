@@ -72,6 +72,7 @@ let typeconst env c tc =
         | Some { ua_name = (pos, _); _ } -> pos, true
         | None -> Pos.none, false in
       Some {
+        stc_abstract = tc.c_tconst_abstract;
         stc_name = tc.c_tconst_name;
         stc_constraint = constr;
         stc_type = ty;

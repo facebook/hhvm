@@ -18,6 +18,7 @@ type shallow_class_const = {
 } [@@deriving show]
 
 type shallow_typeconst = {
+  stc_abstract    : Nast.typeconst_abstract_kind;
   stc_constraint  : decl ty option;
   stc_name        : Aast.sid;
   stc_type        : decl ty option;

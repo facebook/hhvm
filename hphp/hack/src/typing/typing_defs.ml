@@ -539,6 +539,7 @@ and class_type = {
 }
 
 and typeconst_type = {
+  ttc_abstract    : Nast.typeconst_abstract_kind;
   ttc_name        : Nast.sid;
   ttc_constraint  : decl ty option;
   ttc_type        : decl ty option;

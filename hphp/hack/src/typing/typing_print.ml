@@ -1416,6 +1416,7 @@ module PrintClass = struct
     end
 
   let typeconst tcopt {
+    ttc_abstract = _;
     ttc_name = tc_name;
     ttc_constraint = tc_constraint;
     ttc_type = tc_type;

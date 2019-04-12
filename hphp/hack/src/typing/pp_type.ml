@@ -853,6 +853,11 @@ and pp_typeconst_type : Format.formatter -> typeconst_type -> unit =
 fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
+  Format.fprintf fmt "@[%s =@ " "ttc_abstract";
+  Nast.pp_typeconst_abstract_kind fmt x.ttc_abstract;
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
   Format.fprintf fmt "@[%s =@ " "ttc_name";
   Nast.pp_sid fmt x.ttc_name;
   Format.fprintf fmt "@]";

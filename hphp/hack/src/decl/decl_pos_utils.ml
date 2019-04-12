@@ -190,7 +190,8 @@ let rec ty (p, x) =
     }
 
   and typeconst tc =
-    { ttc_name = string_id tc.ttc_name;
+    { ttc_abstract = tc.ttc_abstract;
+      ttc_name = string_id tc.ttc_name;
       ttc_constraint = ty_opt tc.ttc_constraint;
       ttc_type = ty_opt tc.ttc_type;
       ttc_origin = tc.ttc_origin;

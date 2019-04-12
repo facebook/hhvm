@@ -101,3 +101,32 @@ where
         &self.context
     }
 }
+
+impl<'a, S> TypeParser<'a, S>
+where
+    S: SmartConstructors,
+{
+    pub fn parse_generic_type_parameter_list(&mut self) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_type_constraint_opt(&mut self) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_return_type(&mut self) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_possible_generic_specifier(&mut self) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_type_specifier(&mut self, _allow_var: bool) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_simple_type_or_type_constant(&mut self) -> S::R {
+        unimplemented!()
+    }
+}

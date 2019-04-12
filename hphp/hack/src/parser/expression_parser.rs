@@ -104,3 +104,16 @@ where
         &self.context
     }
 }
+
+impl<'a, S> ExpressionParser<'a, S>
+where
+    S: SmartConstructors,
+{
+    pub fn parse_constructor_call(&mut self) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_expression(&mut self) -> S::R {
+        unimplemented!()
+    }
+}

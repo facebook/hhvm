@@ -98,3 +98,24 @@ where
         &self.context
     }
 }
+
+impl<'a, S> StatementParser<'a, S>
+where
+    S: SmartConstructors,
+{
+    pub fn parse_statement(&mut self) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_possible_php_function(&mut self, _toplevel: bool) -> S::R {
+        unimplemented!()
+    }
+
+    pub fn parse_header(&mut self) -> (S::R, bool) {
+        unimplemented!()
+    }
+
+    pub fn parse_compound_statement(&mut self) -> S::R {
+        unimplemented!()
+    }
+}

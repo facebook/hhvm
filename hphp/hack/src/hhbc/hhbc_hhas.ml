@@ -1060,7 +1060,7 @@ and string_of_param_default_value ~env expr =
     let id =
       match env with
       | Some env ->
-        Hhbc_id.Class.to_raw_string @@ fst @@
+        Hhbc_id.Class.to_raw_string @@
           Hhbc_id.Class.elaborate_id
             (Emit_env.get_namespace env) (p, id)
       | _ -> id

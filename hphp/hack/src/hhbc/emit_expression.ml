@@ -617,7 +617,7 @@ and emit_instanceof env pos e1 e2 =
       in
       from_class_ref @@ gather [ instr_clsref; instr_clsrefname ]
     | Class_id name ->
-      let n, _ =
+      let n =
         Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) name in
       gather [
         lhs;
@@ -858,7 +858,7 @@ and emit_new env pos expr targs args uargs =
           | Class_id id ->
             let fq_id =
               Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id
-              |> fst |> Hhbc_id.Class.to_raw_string in
+              |> Hhbc_id.Class.to_raw_string in
             gather [
               emit_reified_targs env pos targs;
               instr_reified_name fq_id;
@@ -872,7 +872,7 @@ and emit_new env pos expr targs args uargs =
   let newobj_instrs = match cexpr with
     (* Special case for statically-known class *)
   | Class_id id ->
-    let fq_id, _id_opt =
+    let fq_id =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
     gather [ emit_pos pos; instr_newobjd fq_id ]
@@ -969,7 +969,7 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     emit_pos_then pos instrs
 
 and emit_known_class_id env id =
-  let fq_id, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
+  let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
   Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
   gather [
     instr_string (Hhbc_id.Class.to_raw_string fq_id);
@@ -1070,7 +1070,7 @@ and emit_class_const env pos cid (_, id) =
     emit_load_class_const env pos cexpr id
 
 and emit_class_const_impl env cid id =
-  let fq_id, _id_opt =
+  let fq_id =
     Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
   let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
   emit_pos_then (fst cid) @@
@@ -2531,7 +2531,7 @@ and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_ex
   (* Special case for class name *)
   | Some (_, (A.Class_const ((_, A.Id (p, cName as cid)), (_, id))))
     when is_special_class_constant_accessed_with_class_id cid id ->
-    let fq_id, _ =
+    let fq_id =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p, cName) in
     MemberKey.ET (Hhbc_id.Class.to_raw_string fq_id)
   (* General case *)
@@ -3089,7 +3089,7 @@ and emit_call_lhs_and_fcall
     begin match cexpr with
     (* Statically known *)
     | Class_id cid ->
-      let fq_cid, _ = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
+      let fq_cid = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
       let fq_cid_string = Hhbc_id.Class.to_raw_string fq_cid in
       Emit_symbol_refs.add_class fq_cid_string;
       if does_not_have_non_tparam_generics then

@@ -183,7 +183,7 @@ and class_const_to_typed_value ns cid id =
     let cexpr = expr_to_class_expr ~resolve_self:true [] cid in
     begin match cexpr with
     | Class_id cid ->
-      let fq_id, _ = Hhbc_id.Class.elaborate_id ns cid in
+      let fq_id = Hhbc_id.Class.elaborate_id ns cid in
       TV.String (Hhbc_id.Class.to_raw_string fq_id)
     | _ -> raise UserDefinedConstant
     end

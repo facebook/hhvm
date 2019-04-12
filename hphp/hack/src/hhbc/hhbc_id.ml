@@ -44,17 +44,17 @@ module Class = struct
       else ns in
     let mangled_name = SU.Xhp.mangle n in
     let stripped_mangled_name = SU.strip_global_ns mangled_name in
-    let was_renamed, id, fallback_id =
+    let was_renamed, id, _ =
       elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in
     if was_renamed || mangled_name.[0] = '\\'
-    then id, fallback_id
+    then id
     else
     match Hh_autoimport.opt_normalize
       ~is_hack:(Emit_env.is_hh_syntax_enabled ())
       ~php7_scalar_types:(Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
       stripped_mangled_name with
-    | None -> id, fallback_id
-    | Some s -> s, None
+    | None -> id
+    | Some s -> s
   let to_unmangled_string s =
     SU.Xhp.unmangle s
 end

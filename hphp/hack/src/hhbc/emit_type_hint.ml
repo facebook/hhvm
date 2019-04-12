@@ -27,7 +27,7 @@ let fmt_name_or_prim ~tparams ~namespace x =
   then name
   else
     let needs_unmangling = Xhp.is_xhp (strip_ns name) in
-    let fq_id, _ = Hhbc_id.Class.elaborate_id namespace x in
+    let fq_id = Hhbc_id.Class.elaborate_id namespace x in
     if needs_unmangling then Hhbc_id.Class.to_unmangled_string fq_id
     else Hhbc_id.Class.to_raw_string fq_id
 
@@ -161,7 +161,7 @@ let rec hint_to_type_constraint
         if is_self name || is_parent name
         then name
         else
-          let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
+          let fq_id = Hhbc_id.Class.elaborate_id namespace id in
           Hhbc_id.Class.to_raw_string fq_id
       in
       let tc_flags = [TC.HHType] in
@@ -248,7 +248,7 @@ let fail_if_contains_reserved_id hint namespace =
     let is_reserved id =
       let fully_qualified_id =
         Hhbc_id.Class.elaborate_id namespace id
-        |> fst |> Hhbc_id.Class.to_unmangled_string in
+        |> Hhbc_id.Class.to_unmangled_string in
       SN.Typehints.is_namespace_with_reserved_hh_name fully_qualified_id in
     let fail_if_reserved pos_id =
       let pos, id = pos_id in
@@ -290,7 +290,7 @@ let hint_to_class ~namespace h =
   fail_if_contains_reserved_id h namespace;
   match h with
   | (_, A.Happly (id, _)) ->
-    let fq_id, _ = Hhbc_id.Class.elaborate_id namespace id in
+    let fq_id = Hhbc_id.Class.elaborate_id namespace id in
     fq_id
   | _ -> Hhbc_id.Class.from_raw_string "__type_is_not_class__"
 

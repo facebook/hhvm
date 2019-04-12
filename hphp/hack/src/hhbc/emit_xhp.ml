@@ -76,7 +76,7 @@ let emit_xhp_attribute_array ~ns xal =
     | Some (_, es) -> p, A.Varray (None, es)
   in
   let get_attribute_array_values id enumo =
-    let id, _ = Hhbc_id.Class.elaborate_id ns (p, id) in
+    let id = Hhbc_id.Class.elaborate_id ns (p, id) in
     let id = Hhbc_id.Class.to_raw_string id in
     let type_ = hint_to_num id in
     let type_ident = (p, A.Int (string_of_int type_)) in

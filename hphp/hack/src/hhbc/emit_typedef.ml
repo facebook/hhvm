@@ -25,7 +25,7 @@ let kind_to_type_structure ~tparams ~namespace k =
 let emit_typedef : Ast.typedef -> Hhas_typedef.t =
   fun ast_typedef ->
   let namespace = ast_typedef.Ast.t_namespace in
-  let typedef_name, _ =
+  let typedef_name =
     Hhbc_id.Class.elaborate_id namespace ast_typedef.Ast.t_id in
   let typedef_attributes =
     Emit_attribute.from_asts namespace ast_typedef.Ast.t_user_attributes in

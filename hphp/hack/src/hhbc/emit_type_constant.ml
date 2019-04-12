@@ -80,7 +80,7 @@ and is_resolved_classname = function
   | _ -> false
 
 let add_ns ~namespace id =
-  let classname, _ = Hhbc_id.Class.elaborate_id namespace id in
+  let classname = Hhbc_id.Class.elaborate_id namespace id in
   Hhbc_id.Class.to_raw_string classname
 
 let shape_field_name ~namespace = function

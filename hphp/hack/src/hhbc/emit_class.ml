@@ -332,7 +332,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
    * class_is_immutable, but for now class_is_immutable is the only thing that
    * turns it on. *)
   let class_no_dynamic_props = class_is_immutable in
-  let class_id, _ =
+  let class_id =
     Hhbc_id.Class.elaborate_id namespace ast_class.Ast.c_name in
   let class_is_trait = ast_class.A.c_kind = Ast.Ctrait in
   let class_is_interface = ast_is_interface ast_class in
@@ -347,7 +347,7 @@ let emit_class : A.class_ * Closure_convert.hoist_kind -> Hhas_class.t =
         | _ -> None)
   in
   let elaborate_namespace_id namespace id =
-    let id, _ = Hhbc_id.Class.elaborate_id namespace id in
+    let id = Hhbc_id.Class.elaborate_id namespace id in
     Hhbc_id.Class.to_raw_string id in
   let class_use_aliases =
     List.filter_map

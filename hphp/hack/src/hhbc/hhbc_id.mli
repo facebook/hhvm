@@ -24,8 +24,8 @@ module Class : sig
   (* Given a namespace environment and a possibly-qualified identifier,
    * determine the HHAS representation of the identifier, with
    * namespace qualification but no initial backslash, and XHP
-   * mangling. Also return the unqualified form as a string *)
-  val elaborate_id : Namespace_env.env -> Ast.id -> t * string option
+   * mangling. *)
+  val elaborate_id : Namespace_env.env -> Ast.id -> t
 end
 
 module Function : sig

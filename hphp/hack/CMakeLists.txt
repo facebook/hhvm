@@ -93,6 +93,7 @@ function(invoke_dune name target)
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}
         DUNE_BUILD_DIR="${DUNE_BUILD_DIR}"
+        CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
         CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
         CMAKE_INSTALL_FULL_SYSCONFDIR="${CMAKE_INSTALL_FULL_SYSCONFDIR}"
         CMAKE_INSTALL_FULL_BINDIR="${CMAKE_INSTALL_FULL_BINDIR}"
@@ -136,22 +137,22 @@ endif()
 add_custom_target(hack ALL DEPENDS hack_dune)
 add_custom_target(hack_test DEPENDS hack_dune_test)
 
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_client
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_client
   DESTINATION bin
   COMPONENT dev)
 
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_server
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_server
   DESTINATION bin
   COMPONENT dev)
 
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hackfmt
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hackfmt
   DESTINATION bin
   COMPONENT dev)
 
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_parse
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_parse
   DESTINATION bin
   COMPONENT dev)
 
-install(PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/bin/hh_single_compile
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/bin/hh_single_compile
   DESTINATION bin
   COMPONENT dev)

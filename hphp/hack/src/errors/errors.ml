@@ -267,10 +267,10 @@ let to_absolute error =
 
 let read_lines path = In_channel.read_lines path
 
-let line_margin (line_num : int option): string =
+let line_margin (line_num : int option) col_width: string =
   let padded_num = match line_num with
-    | Some line_num -> Printf.sprintf "%3d" line_num
-    | None -> "   "
+    | Some line_num -> Printf.sprintf "%*d" col_width line_num
+    | None -> String.make col_width ' '
   in
   Tty.apply_color (Tty.Normal Tty.Cyan) (padded_num ^ " |")
 
@@ -286,19 +286,19 @@ let load_context_lines (pos : Pos.absolute): string list =
   (* Line numbers are 1-indexed. *)
   List.filteri lines ~f:(fun i _ -> (i + 1 >= line) && (i + 1 <= end_line))
 
-let format_context_lines (pos : Pos.absolute) (lines : string list): string =
+let format_context_lines (pos : Pos.absolute) (lines : string list) col_width: string =
   let lines = (match lines with
     | [] -> [Tty.apply_color (Tty.Dim Tty.White) "No source found"]
     | ls -> ls) in
   let line_num = Pos.line pos in
   let format_line i (line : string) =
-    Printf.sprintf "%s %s" (line_margin (Some (line_num + i))) line in
+    Printf.sprintf "%s %s" (line_margin (Some (line_num + i)) col_width) line in
   let formatted_lines = List.mapi ~f:format_line lines in
   (* TODO: display all the lines, showing the underline on all of them. *)
   List.hd_exn formatted_lines
 
  (* Format this message as "  ^^^ You did something wrong here". *)
-let format_substring_underline (pos: Pos.absolute) (msg: string) (first_context_line: string option) is_first: string =
+let format_substring_underline (pos: Pos.absolute) (msg: string) (first_context_line: string option) is_first col_width: string =
   let start_line, start_column = Pos.line_column pos in
   let end_line, end_column = Pos.end_line_column pos in
   let underline_width = match first_context_line with
@@ -317,7 +317,7 @@ let format_substring_underline (pos: Pos.absolute) (msg: string) (first_context_
   in
   let color = if is_first then Tty.Bold Tty.Red else Tty.Dim Tty.Default in
   Printf.sprintf "%s %s%s"
-    (line_margin None)
+    (line_margin None col_width)
     underline_padding
     (Tty.apply_color color (underline ^ " " ^ msg))
 
@@ -331,11 +331,17 @@ let format_filename (pos: Pos.absolute): string =
     (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
     (Tty.apply_color (Tty.Normal Tty.Green) filename)
 
+let column_width line_number = 
+  let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1 in
+  (max 3 (num_digits line_number))
+
 (* Format the line of code associated with this message, and the message itself. *)
-let format_message (msg: string) (pos: Pos.absolute) ~is_first : string * string =
+let format_message (msg: string) (pos: Pos.absolute) ~is_first ~col_width : string * string =
+  let col_width = Option.value col_width ~default:(column_width (Pos.line pos)) in
+  
   let context_lines = load_context_lines pos in
-  let pretty_ctx = format_context_lines pos context_lines in
-  let pretty_msg = format_substring_underline pos msg (List.hd context_lines) is_first in
+  let pretty_ctx = format_context_lines pos context_lines col_width in
+  let pretty_msg = format_substring_underline pos msg (List.hd context_lines) is_first col_width in
   (pretty_ctx, pretty_msg)
 
 (** Sort messages such that messages in the same file are together.
@@ -357,6 +363,19 @@ let group_by_file (msgs : Pos.absolute message list): Pos.absolute message list 
   in
   let grouped, filenames = build_map msgs String.Map.empty [] in
   List.concat_map (List.rev filenames) ~f:(fun fn -> String.Map.find_exn grouped fn)
+
+(* Work out the column width needed for each file. Files with many
+   lines need a wider column due to the higher line numbers. *)
+let col_widths (msgs: Pos.absolute message list): int Core_kernel.String.Map.t =
+  (* Find the longest line number for every file in msgs. *)
+  let longest_lines =
+    List.fold msgs ~init:String.Map.empty
+      ~f:(fun acc msg ->
+        let filename = Pos.filename (fst msg) in
+        let current_max = Option.value (String.Map.find acc filename) ~default:0 in
+        String.Map.set acc ~key:filename ~data:(max current_max (Pos.line (fst msg))))
+  in
+  String.Map.map longest_lines ~f:column_width
 
 (** Given a list of error messages, format them with context.
     The list may not be ordered, and multiple messages may occur on one line.
@@ -380,13 +399,15 @@ let format_messages (msgs: Pos.absolute message list): string =
 
   (* For every message, show it alongside the relevant line. If there
      are multiple messages associated with the line, only show it once. *)
+  let col_widths = col_widths msgs in
   let rec aux msgs prev : string list =
     match msgs with
      | (msg, is_first)::msgs ->
        let (pos, err_msg) = msg in
        let filename = Pos.filename pos in
        let line = Pos.line pos in
-       let pretty_ctx, pretty_msg = format_message err_msg pos is_first in
+       let col_width = String.Map.find col_widths filename in
+       let pretty_ctx, pretty_msg = format_message err_msg pos ~is_first ~col_width in
        let formatted : string list = (match prev with
          | Some (prev_filename, prev_line)  when prev_filename = filename && prev_line = line ->
             (* Previous message was on this line too, just show the message itself*)

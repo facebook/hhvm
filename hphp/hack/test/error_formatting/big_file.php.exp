@@ -1,0 +1,7 @@
+Typing[4105] Too many arguments
+   --> big_file.php
+   3 | function foo(): void {}
+     |          ^^^ Definition is here
+1009 |   foo(1);
+     |   ^^^^^^ Too many arguments
+

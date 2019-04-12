@@ -33,15 +33,21 @@ if(NOT MAKE)
   set(MAKE make)
 endif()
 
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+  set(OPAM_STAMP_FILE "_build/opam.stamp")
+else()
+  set(OPAM_STAMP_FILE "opam.stamp")
+endif()
+
 add_custom_command(
-  OUTPUT opam.stamp
+  OUTPUT "${OPAM_STAMP_FILE}"
   DEPENDS ocaml opam_setup.sh
   COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/opam_setup.sh
     "${OCAML_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}"
-    && cmake -E touch opam.stamp
+    && cmake -E touch "${OPAM_STAMP_FILE}"
 )
-add_custom_target(opam_setup DEPENDS opam.stamp opam_setup.sh)
+add_custom_target(opam_setup DEPENDS "${OPAM_STAMP_FILE}" opam_setup.sh)
 
 if (SKIP_OPAM)
   set(OPAMROOT "~/.opam")

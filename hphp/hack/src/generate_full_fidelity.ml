@@ -1440,6 +1440,46 @@ let full_fidelity_trivia_kind =
 
 end (* GenerateFFSyntaxKind *)
 
+module GenerateFFRustTriviaKind = struct
+
+  let to_trivia { trivia_kind; trivia_text = _; } =
+    sprintf "    %s,\n" trivia_kind
+
+  let to_to_string { trivia_kind; trivia_text } =
+    sprintf ("            TriviaKind::%s => \"%s\",\n")
+      trivia_kind trivia_text
+
+  let full_fidelity_trivia_kind_template = make_header CStyle "" ^ "
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum TriviaKind {
+TRIVIA}
+
+impl TriviaKind {
+    pub fn to_string(&self) -> &str {
+        match self {
+TO_STRING        }
+    }
+}
+"
+  let full_fidelity_trivia_kind =
+  {
+    filename = full_fidelity_path_prefix ^ "trivia_kind.rs";
+    template = full_fidelity_trivia_kind_template;
+    transformations = [];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [
+      { trivia_pattern = "TRIVIA";
+        trivia_func = map_and_concat to_trivia };
+      { trivia_pattern = "TO_STRING";
+        trivia_func = map_and_concat to_to_string }];
+    aggregate_transformations = [];
+  }
+
+end (* GenerateFFRustTriviaKind *)
+
 module GenerateFFSyntaxKind = struct
 
   let to_tokens x =
@@ -2273,15 +2313,116 @@ IS_VARIABLE_TEXT_VARIABLE_TEXT  | _ -> false
 
 end (* GenerateFFTokenKind *)
 
+module GenerateFFRustTokenKind = struct
+
+  let token_kind x =
+    match x.token_kind with
+    | "Self" -> "SelfToken"
+    | x -> x
+
+  let to_from_string x =
+    let token_text = escape_token_text x.token_text in
+    let guard = if x.is_xhp then
+        "(is_hack || allow_xhp)"
+      else if x.hack_only then
+        "is_hack"
+        else ""
+      in
+    let guard = guard ^ if x.allowed_as_identifier then
+        let and_ = if guard = "" then "" else " && " in
+        and_ ^ "!only_reserved"
+      else ""
+    in
+    let guard = if guard = "" then "" else " if "  ^ guard in
+    sprintf "            \"%s\"%s => Some(TokenKind::%s),\n" token_text guard (token_kind x)
+
+  let to_kind_declaration x =
+    sprintf "    %s,\n" (token_kind x)
+
+  let token_text x =
+    escape_token_text x.token_text
+
+  let to_to_string x =
+    sprintf "            TokenKind::%s => \"%s\",\n" (token_kind x) (token_text x)
+
+let full_fidelity_rust_token_kind_template = make_header CStyle "" ^ "
+
+#[allow(non_camel_case_types)] // allow Include_once and Require_once
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum TokenKind {
+    // No text tokens
+KIND_DECLARATIONS_NO_TEXT    // Given text tokens
+KIND_DECLARATIONS_GIVEN_TEXT    // Variable text tokens
+KIND_DECLARATIONS_VARIABLE_TEXT}
+
+impl TokenKind {
+    pub fn to_string(&self) -> &str {
+        match self {
+            // No text tokens
+TO_STRING_NO_TEXT            // Given text tokens
+TO_STRING_GIVEN_TEXT            // Variable text tokes
+TO_STRING_VARIABLE_TEXT        }
+    }
+
+    pub fn from_string(
+        keyword: &[u8],
+        is_hack: bool,
+        allow_xhp: bool,
+        only_reserved: bool,
+    ) -> Option<Self> {
+        let keyword = unsafe { std::str::from_utf8_unchecked(keyword) };
+        match keyword {
+            \"true\" if !only_reserved => Some(TokenKind::BooleanLiteral),
+            \"false\" if !only_reserved => Some(TokenKind::BooleanLiteral),
+FROM_STRING_GIVEN_TEXT            _ => None,
+        }
+    }
+}
+"
+
+  let full_fidelity_token_kind =
+  {
+    filename = full_fidelity_path_prefix ^ "token_kind.rs";
+    template = full_fidelity_rust_token_kind_template;
+    transformations = [];
+
+    token_no_text_transformations = [
+      { token_pattern = "KIND_DECLARATIONS_NO_TEXT";
+        token_func = map_and_concat to_kind_declaration };
+      { token_pattern = "TO_STRING_NO_TEXT";
+        token_func = map_and_concat to_to_string };
+    ];
+    token_given_text_transformations = [
+      { token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
+        token_func = map_and_concat to_kind_declaration };
+      { token_pattern = "FROM_STRING_GIVEN_TEXT";
+        token_func = map_and_concat to_from_string };
+      { token_pattern = "TO_STRING_GIVEN_TEXT";
+        token_func = map_and_concat to_to_string };
+    ];
+    token_variable_text_transformations = [
+      { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
+        token_func = map_and_concat to_kind_declaration };
+      { token_pattern = "TO_STRING_VARIABLE_TEXT";
+        token_func = map_and_concat to_to_string };
+    ];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+
+end (* GenerateFFTRustTokenKind *)
+
 let () =
   generate_file GenerateFFSyntaxType.full_fidelity_syntax_type;
   generate_file GenerateFFSyntaxSig.full_fidelity_syntax_sig;
   generate_file GenerateFFValidatedSyntax.full_fidelity_validated_syntax;
   generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
+  generate_file GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;
   generate_file GenerateFFTokenKind.full_fidelity_token_kind;
+  generate_file GenerateFFRustTokenKind.full_fidelity_token_kind;
   generate_file GenerateFFJSONSchema.full_fidelity_json_schema;
   generate_file
     GenerateFFSmartConstructors.full_fidelity_smart_constructors;

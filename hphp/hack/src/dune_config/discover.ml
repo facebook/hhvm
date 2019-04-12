@@ -19,6 +19,10 @@ let find_hphp_parent dir =
 
 let () =
   C.main ~name:"hphpdir" (fun (_c : C.t) ->
-    let workingdir = Sys.getcwd () in
-    let hphp_parent = find_hphp_parent workingdir in
-    C.Flags.write_lines "hphp_parent" [ hphp_parent ])
+    let source_root = match Sys.getenv "CMAKE_SOURCE_DIR" with
+    | t -> t^"/"
+    | exception Not_found ->
+      let workingdir = Sys.getcwd () in
+      find_hphp_parent workingdir
+    in
+    C.Flags.write_lines "hphp_parent" [ source_root ])

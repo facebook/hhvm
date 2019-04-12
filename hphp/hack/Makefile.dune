@@ -3,6 +3,7 @@ EXTRA_LIB_PATHS=
 EXTRA_LINK_OPTS=
 EXTRA_NATIVE_LIBRARIES=
 BYTECODE=
+DUNE_BUILD_DIR=
 
 ROOT=$(shell pwd)
 
@@ -18,8 +19,6 @@ debug: build-hack-debug copy-hack-debug-files
 
 clean:
 	find ./bin -mindepth 1 -not -path ./bin/README -delete
-	rm -f $(ROOT)/src/utils/get_build_id_gen.c
-	rm -f $(ROOT)/src/options/default_buildOptions.ml
 	dune clean
 
 # First argument is the extension to use.
@@ -30,7 +29,7 @@ clean:
 # 1=bc 2=-debug
 define build_hack
 $(eval ext := $(if $(filter $(2),-debug),".bc",""))
-build-hack$(2): _build/default/src/utils/get_build_id_gen.c
+build-hack$(2):
 	dune build \
 		src/hh_server.$(1) \
 		src/hh_client.$(1) \
@@ -42,24 +41,19 @@ build-hack$(2): _build/default/src/utils/get_build_id_gen.c
 
 copy-hack$(2)-files: build-hack$(2)
 	mkdir -p bin
-	cp _build/default/src/hh_server.$(1) ./bin/hh_server$(ext)
-	cp _build/default/src/hh_client.$(1) ./bin/hh_client$(ext)
-	cp _build/default/src/hh_single_type_check.$(1) ./bin/hh_single_type_check$(ext)
-	cp _build/default/src/hackfmt.$(1) ./bin/hackfmt$(ext)
-	cp _build/default/src/hh_parse.$(1) ./bin/hh_parse$(ext)
-	cp _build/default/src/hh_single_compile.$(1) ./bin/hh_single_compile$(ext)
-	cp _build/default/src/hh_single_parse.$(1) ./bin/hh_single_parse$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hh_server.$(1) ./bin/hh_server$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hh_client.$(1) ./bin/hh_client$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hh_single_type_check.$(1) ./bin/hh_single_type_check$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hackfmt.$(1) ./bin/hackfmt$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hh_parse.$(1) ./bin/hh_parse$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hh_single_compile.$(1) ./bin/hh_single_compile$(ext)
+	cp $(DUNE_BUILD_DIR)/default/src/hh_single_parse.$(1) ./bin/hh_single_parse$(ext)
 endef
 
 # Define rules for normal build / debug build
 # The name of the rules is important as it matches what is expected by cmake
 $(eval $(call build_hack,exe,))
 $(eval $(call build_hack,bc,-debug))
-
-
-_build/default/src/utils/get_build_id_gen.c:
-	cd $(ROOT) && \
-        $(OCAML) -I scripts -w -3 -unsafe-string unix.cma scripts/gen_build_id.ml src/utils/get_build_id_gen.c
 
 
 .PHONY: test do-test

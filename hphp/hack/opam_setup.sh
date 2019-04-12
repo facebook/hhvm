@@ -9,20 +9,21 @@
 set -euf
 
 OCAML_PREFIX=$(dirname "$1")
-ROOT="$2"
+SOURCE_ROOT="$2"
+BUILD_ROOT="${3:-"${SOURCE_ROOT}/_build"}"
 export PATH="$OCAML_PREFIX:$PATH"
 # detect if we are building inside FB by checking a specific dune file
-if [ -e "$ROOT/src/facebook/dune" ]; then
-  OPAMROOT="$ROOT/facebook/opam"
+if [ -e "$SOURCE_ROOT/src/facebook/dune" ]; then
+  OPAMROOT="$SOURCE_ROOT/facebook/opam"
 else
-  OPAMROOT="$ROOT/_build/opam"
+  OPAMROOT="${BUILD_ROOT}/opam"
 fi
 export OPAMROOT="$OPAMROOT"
 mkdir -p "$OPAMROOT"
 export OPAMYES="1"
 
 # shellcheck disable=SC1090
-source "$ROOT/opam_helpers.sh"
+source "$SOURCE_ROOT/opam_helpers.sh"
 
 # Shamelessly copied from
 # https://github.com/facebook/infer/blob/master/scripts/opam_utils.sh
@@ -48,7 +49,7 @@ opam_switch_create_if_needed () {
         mkdir -p "$source_dir"
         opam source "$switch" --dir "$ocaml_dir"
         pushd "$ocaml_dir"
-        patch -p1 < "$ROOT/ocaml.patch"
+        patch -p1 < "$SOURCE_ROOT/ocaml.patch"
         popd
         opam pin add ocaml-variants.4.05.0+arm64-patch "$ocaml_dir"
         eval "$(opam env)"
@@ -63,14 +64,14 @@ HACK_OPAM_SWITCH="ocaml-base-compiler.4.05.0"
 HACK_OPAM_DEFAULT_NAME="hack-switch"
 HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
 
-MINI_TARBALL="$ROOT/facebook/opam2-mini-repository.tar.gz"
-MINI_REPO="$ROOT/facebook/opam2-mini-repository"
+MINI_TARBALL="$SOURCE_ROOT/facebook/opam2-mini-repository.tar.gz"
+MINI_REPO="$SOURCE_ROOT/facebook/opam2-mini-repository"
 
 # OSS does not provide bubblewrap yet so we disable it
 if [ -f "$MINI_TARBALL" ]
 then
   rm -rf "$MINI_REPO" ||:
-  tar xzf "$MINI_TARBALL" -C "$ROOT/facebook"
+  tar xzf "$MINI_TARBALL" -C "$SOURCE_ROOT/facebook"
   opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO" --no-setup --bare
 else
   opam init --disable-sandboxing --reinit --no-setup --bare

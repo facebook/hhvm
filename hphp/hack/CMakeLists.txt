@@ -34,8 +34,10 @@ if(NOT MAKE)
 endif()
 
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+  set(DUNE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/_build")
   set(OPAM_STAMP_FILE "_build/opam.stamp")
 else()
+  set(DUNE_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}")
   set(OPAM_STAMP_FILE "opam.stamp")
 endif()
 
@@ -44,7 +46,9 @@ add_custom_command(
   DEPENDS ocaml opam_setup.sh
   COMMAND
     ${CMAKE_CURRENT_SOURCE_DIR}/opam_setup.sh
-    "${OCAML_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${OCAML_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${DUNE_BUILD_DIR}"
     && cmake -E touch "${OPAM_STAMP_FILE}"
 )
 add_custom_target(opam_setup DEPENDS "${OPAM_STAMP_FILE}" opam_setup.sh)
@@ -52,7 +56,7 @@ add_custom_target(opam_setup DEPENDS "${OPAM_STAMP_FILE}" opam_setup.sh)
 if (SKIP_OPAM)
   set(OPAMROOT "~/.opam")
 else ()
-  set(OPAMROOT "${CMAKE_CURRENT_SOURCE_DIR}/_build/opam")
+  set(OPAMROOT "${DUNE_BUILD_DIR}/opam")
 endif()
 
 if(LZ4_FOUND)
@@ -91,6 +95,8 @@ function(invoke_dune name target)
         PATH="${TP_BUILD_DIR}/ocaml/build/bin:$(PATH)"
         opam config exec --
         $(MAKE) --makefile=Makefile.dune ${target}
+        DUNE_BUILD_DIR="${DUNE_BUILD_DIR}"
+        CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
         CMAKE_INSTALL_FULL_SYSCONFDIR="${CMAKE_INSTALL_FULL_SYSCONFDIR}"
         CMAKE_INSTALL_FULL_BINDIR="${CMAKE_INSTALL_FULL_BINDIR}"
         EXTRA_INCLUDE_PATHS="${extra_include_paths}"

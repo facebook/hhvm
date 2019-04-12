@@ -2578,7 +2578,8 @@ module Make (GetLocals : GetLocals) = struct
       List.iter2_exn idl idl' (Env.aast_add_lvar env);
       let f = aast_expr_lambda env f in
       N.Efun (f, idl')
-    | Aast.Lfun f ->
+    | Aast.Lfun (_, _::_) -> assert false
+    | Aast.Lfun (f, []) ->
       (* We have to build the capture list while we're finding names in
          the closure body---accumulate it in to_capture. *)
       let to_capture = ref [] in
@@ -2594,7 +2595,7 @@ module Make (GetLocals : GetLocals) = struct
       let f = aast_expr_lambda env f in
       (* TODO T28711692: Compute the correct capture list for let variables,
        * it does not seem to affect typechecking... *)
-      N.Efun (f, !to_capture)
+      N.Lfun (f, !to_capture)
     | Aast.Xml (x, al, el) ->
       N.Xml (Env.type_name env x ~allow_typedef:false ~allow_generics:false, aast_attrl env al,
         aast_exprl env el)

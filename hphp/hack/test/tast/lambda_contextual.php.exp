@@ -34,7 +34,7 @@
                    (Id ([6:3-12], "\\takes_fun"))),
                   [],
                   [(([6:13-22], (function(int $x): num)),
-                    (Efun (
+                    (Lfun (
                        { f_span = [6:13-22]; f_annotation = ();
                          f_mode = <opaque>; f_ret = None;
                          f_name = ([6:13-22], ";anonymous"); f_tparams = [];

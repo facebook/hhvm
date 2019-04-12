@@ -1392,7 +1392,6 @@ and expr_
 
   try
   match e with
-  | Lfun _
   | Import _
   | Collection _
   | Omitted
@@ -2289,7 +2288,9 @@ and expr_
         refine_type env (fst e) expr_ty hint_ty
     in
     make_result env p (T.As (te, hint, is_nullable)) hint_ty
-  | Efun (f, idl) ->
+  | Efun (f, idl)
+  | Lfun (f, idl) ->
+      let is_anon = match e with Efun _ -> true | Lfun _ -> false | _ -> assert false in
       (* This is the function type as declared on the lambda itself.
        * If type hints are absent then use Tany instead. *)
       let declared_ft = Decl.fun_decl_in_env env.Env.decl_env f in
@@ -2317,7 +2318,7 @@ and expr_
         let old_inside_ppl_class = env.Typing_env.inside_ppl_class in
         let env = { env with Typing_env.inside_ppl_class = false } in
         let ft = { ft with ft_reactive = reactivity } in
-        let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl in
+        let (is_coroutine, _counter, _, anon) = anon_make env p f ft idl is_anon in
         let ft = { ft with ft_is_coroutine = is_coroutine } in
         let env, tefun, ty = anon ?ret_ty env ft.ft_params ft.ft_arity in
         let env = Env.set_env_reactive env old_reactivity in
@@ -2439,7 +2440,7 @@ and expr_
               let reactivity = fun_reactivity env.Env.decl_env f.f_user_attributes f.f_params in
               let old_reactivity = Env.env_reactivity env in
               let env = Env.set_env_reactive env reactivity in
-              let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl in
+              let is_coroutine, counter, pos, anon = anon_make env p f declared_ft idl is_anon in
               let env, tefun, _, anon_id = Errors.try_with_error
                 (fun () ->
                   let (_, tefun, ty) = anon env declared_ft.ft_params declared_ft.ft_arity in
@@ -2697,18 +2698,21 @@ and anon_check_param env param =
       let env = Type.coerce_type hint_pos Reason.URhint env paramty hty in
       env
 
-and anon_block env b =
-  let is_not_next = function C.Next -> false | _ -> true in
-  let all_but_next = List.filter C.all ~f:is_not_next in
-  let env, (tb, implicit_return) = LEnv.stash_and_do env all_but_next (
+and stash_conts_for_anon env is_anon captured f =
+  let captured = if Env.is_local_defined env this then (Pos.none, this) :: captured else captured in
+  let initial_locals = if is_anon
+    then Env.get_locals env captured
+    else Env.next_cont_exn env in
+  let env, (tfun, result) = Typing_lenv.stash_and_do env C.all (
     fun env ->
-      let env, tb = block env b in
-      let implicit_return = LEnv.has_next env in
-      env, (tb, implicit_return)) in
-  env, tb, implicit_return
+      let env = Env.reinitialize_locals env in
+      let env = Env.set_locals env initial_locals in
+      let env, tfun, result = f env in
+      env, (tfun, result)) in
+  env, tfun, result
 
 (* Make a type-checking function for an anonymous function. *)
-and anon_make tenv p f ft idl =
+and anon_make tenv p f ft idl is_anon =
   let anon_lenv = tenv.Env.lenv in
   let is_typing_self = ref false in
   let nb = Nast.assert_named_body f.f_body in
@@ -2726,6 +2730,7 @@ and anon_make tenv p f ft idl =
     else begin
       is_typing_self := true;
       Env.anon anon_lenv env begin fun env ->
+      stash_conts_for_anon env is_anon idl begin fun env ->
         let env = Env.clear_params env in
         let make_variadic_arg env varg tyl =
           let remaining_types =
@@ -2815,7 +2820,8 @@ and anon_make tenv p f ft idl =
             ~is_explicit:(Option.is_some ret_ty)
             hret) in
         let local_tpenv = env.Env.lenv.Env.tpenv in
-        let env, tb, implicit_return = anon_block env nb.fb_ast in
+        let env, tb = block env nb.fb_ast in
+        let implicit_return = LEnv.has_next env in
         let env =
           if not implicit_return || Nast.named_body_is_unsafe nb
           then env
@@ -2848,10 +2854,13 @@ and anon_make tenv p f ft idl =
           T.f_static = f.f_static;
         } in
         let ty = (Reason.Rwitness p, Tfun ft) in
-        let te = T.make_typed_expr p ty (T.Efun (tfun_, idl)) in
+        let te = if is_anon
+          then T.make_typed_expr p ty (T.Efun (tfun_, idl))
+          else T.make_typed_expr p ty (T.Lfun (tfun_, idl)) in
         let env = Env.set_tyvar_variance env ty in
         env, te, hret
-      end
+      end (* stash_conts_for_anon *)
+      end (* Env.anon *)
     end
 
 (*****************************************************************************)
@@ -5063,7 +5072,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
       (* Force subtype with expected result *)
       let env = check_expected_ty "Call result" env ft.ft_ret expected in
       let env = Env.set_tyvar_variance env ft.ft_ret in
-      let is_lambda e = match snd e with Efun _ -> true | _ -> false in
+      let is_lambda e = match snd e with Efun _ | Lfun _ -> true | _ -> false in
 
       let get_next_param_info paraml =
         match paraml with

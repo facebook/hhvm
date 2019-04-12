@@ -202,7 +202,6 @@ module CheckFunctionBody = struct
   and expr_ p f_type env exp = match f_type, exp with
     | _, Collection _
     | _, Import _
-    | _, Lfun _
     | _, Omitted
     | _, BracedExpr _
     | _, ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
@@ -297,6 +296,7 @@ module CheckFunctionBody = struct
         expr f_type env e;
         ()
     | _, Efun _ -> ()
+    | _, Lfun _ -> ()
 
     | _, PU_atom _ -> ()
     | _, PU_identifier _ -> ()
@@ -671,7 +671,6 @@ and expr env (p, e) =
 and expr_ env _p = function
   | Collection _
   | Import _
-  | Lfun _
   | Omitted
   | BracedExpr _
   | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
@@ -805,7 +804,8 @@ and expr_ env _p = function
       List.iter el (expr env);
       List.iter uel (expr env);
       ()
-  | Efun (f, _) ->
+  | Efun (f, _)
+  | Lfun (f, _) ->
       let body = Nast.assert_named_body f.f_body in
       func env f body; ()
   | Xml (_, attrl, el) ->

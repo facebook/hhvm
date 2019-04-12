@@ -809,11 +809,7 @@ let fun_mutable user_attributes =
   | _ :: tl -> go tl in
   go user_attributes
 
-let tany env =
-  let dynamic_view_enabled =
-    TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env) in
-  if dynamic_view_enabled then Tdynamic else Tany
-
+let tany = Env.tany
 let terr env =
   let dynamic_view_enabled =
     TypecheckerOptions.dynamic_view (Typing_env.get_tcopt env) in

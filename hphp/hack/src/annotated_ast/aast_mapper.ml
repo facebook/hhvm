@@ -121,7 +121,7 @@ struct
     | S.Assert (S.AE_assert e) -> T.Assert (T.AE_assert (map_expr menv e))
     | S.Clone e -> T.Clone (map_expr menv e)
     | S.Omitted -> T.Omitted
-    | S.Lfun f -> T.Lfun (map_fun menv f)
+    | S.Lfun (f, ids) -> T.Lfun (map_fun menv f, ids)
     | S.Import (f, e) -> T.Import (f, map_expr menv e)
     | S.Collection (id, tal, fl) -> T.Collection (id, tal, List.map fl (map_afield menv))
     | S.BracedExpr e -> T.BracedExpr (map_expr menv e)

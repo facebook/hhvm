@@ -120,6 +120,7 @@ let check_expr env (expr:ETast.expr) (gamma:gamma) : gamma =
       | _ -> (* TODO *) super#on_Binop env bop expr1 expr2
 
     method! on_Efun _env _fun _id_list = raise Not_implemented
+    method! on_Lfun _env _fun _id_list = raise Not_implemented
 
     method! on_Class_const env class_id const_name =
       match class_id, const_name with

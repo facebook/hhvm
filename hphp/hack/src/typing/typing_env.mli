@@ -109,12 +109,15 @@ module FakeMembers :
       env * Local_id.t
   end
 val unbind : env -> locl ty -> env * locl ty
+val tany : env -> 'a ty_
+val next_cont_exn : env -> local_id_map
 val set_local : env -> Local_id.t -> locl ty -> env
 val is_using_var : env -> Local_id.t -> bool
 val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
-val get_locals : env -> local Local_id.Map.t
 val get_local : env -> Local_id.t -> locl ty
+val get_locals : env -> Nast.lid list -> local_id_map
+val set_locals : env -> local_id_map -> env
 val is_local_defined : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Nast.lid -> locl ty
 val set_local_expr_id : env -> Local_id.t -> expression_id -> env

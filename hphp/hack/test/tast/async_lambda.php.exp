@@ -35,7 +35,7 @@
                   (([6:3-6], (function(): Awaitable<void>)),
                    (Lvar ([6:3-6], $f0))),
                   (([6:9-8:4], (function(): Awaitable<_>)),
-                   (Efun (
+                   (Lfun (
                       { f_span = [6:9-8:4]; f_annotation = ();
                         f_mode = <opaque>; f_ret = None;
                         f_name = ([6:9-8:4], ";anonymous"); f_tparams = [];
@@ -74,7 +74,7 @@
                    (([9:3-6], (function(nothing $x): Awaitable<void>)),
                     (Lvar ([9:3-6], $f1))),
                    (([9:9-11:4], (function(nothing $x): Awaitable<_>)),
-                    (Efun (
+                    (Lfun (
                        { f_span = [9:9-11:4]; f_annotation = ();
                          f_mode = <opaque>; f_ret = None;
                          f_name = ([9:9-11:4], ";anonymous"); f_tparams = [];

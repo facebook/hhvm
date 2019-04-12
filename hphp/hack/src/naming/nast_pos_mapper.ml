@@ -79,10 +79,10 @@ and expr_ f = function
   | KeyValCollection (s, tap, fl) ->
     KeyValCollection (s, tap, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
   | Omitted -> Omitted
-  | Lfun f ->
+  | Lfun (f, idl) ->
     Errors.internal_error (fst f.f_name)
       "Nast_pos_mapper cannot handle lambdas";
-    Lfun (f)
+    Lfun (f, idl)
   | Collection _
   | BracedExpr _
   | ParenthesizedExpr _

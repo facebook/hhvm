@@ -302,7 +302,7 @@ and on_expr (p, e) : Aast.expr =
     let ids =
       List.map (fun ((p, id)) -> (p, Local_id.make_unscoped id)) use_list in
     Aast.Efun (on_fun f, ids)
-  | Lfun f -> Aast.Lfun (on_fun f)
+  | Lfun f -> Aast.Lfun (on_fun f, [])
   | BracedExpr e -> Aast.BracedExpr (on_expr e)
   | ParenthesizedExpr e -> Aast.ParenthesizedExpr (on_expr e)
   | Xml (id, xhpl, el) -> Aast.Xml (id, on_list on_xhp_attribute xhpl, on_list on_expr el)

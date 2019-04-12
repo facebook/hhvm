@@ -1155,6 +1155,14 @@ let unbind = unbind []
 
 let add_to_local_id_map = Local_id.Map.add ?combine:None
 
+let set_local_ env x ty =
+  let local_types = LEnvC.add_to_cont C.Next x ty env.lenv.local_types in
+  { env with lenv = { env.lenv with local_types } }
+
+let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.local_types
+
+let next_cont_exn env = LEnvC.get_cont C.Next env.lenv.local_types
+
 (* We maintain 2 states for a local: the type
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
@@ -1164,15 +1172,14 @@ let set_local env x new_type =
   let new_type = match new_type with
     | _, Tunresolved [ty] -> ty
     | _ -> new_type in
-  match LEnvC.get_cont_option C.Next env.lenv.local_types with
+  match next_cont_opt env with
   | None -> env
   | Some next_cont ->
     let expr_id = match LID.Map.get x next_cont with
       | None -> Ident.tmp()
       | Some (_, y) -> y in
     let local = new_type, expr_id in
-    let local_types = LEnvC.add_to_cont C.Next x local env.lenv.local_types in
-    { env with lenv = { env.lenv with local_types } }
+    set_local_ env x local
 
 let is_using_var env x =
   LID.Set.mem x env.lenv.local_using_vars
@@ -1205,9 +1212,6 @@ let local_is_mutable ~include_borrowed env id =
   | Some (_, TME.Borrowed) -> include_borrowed
   | _ -> false
 
-let get_locals env =
-  LEnvC.get_cont C.Next env.lenv.local_types
-
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
   let not_found_is_ok x =
     let x = LID.to_string x in
@@ -1220,15 +1224,24 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
       Errors.undefined ~in_rx_scope p (LID.to_string x);
     | None -> () in
   let lcl = LID.Map.get x ctx in
-  match lcl with
-  | None ->
-    if not_found_is_ok x then () else error_if_pos_provided p;
-    false, (Reason.Rnone, Tany)
+  begin match lcl with
+  | None -> if not_found_is_ok x then () else error_if_pos_provided p
+  | Some _ -> ()
+  end;
+  lcl
+
+let tany env =
+  let dynamic_view_enabled = TypecheckerOptions.dynamic_view (get_tcopt env) in
+  if dynamic_view_enabled then Tdynamic else Tany
+
+let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx =
+  match get_local_in_ctx env ?error_if_undef_at_pos x ctx with
+  | None -> false, (Reason.Rnone, tany env)
   | Some (x, _) -> true, x
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
-  let next_cont = get_locals env in
-  get_local_in_ctx env ?error_if_undef_at_pos:p x next_cont
+  let next_cont = next_cont_exn env in
+  get_local_ty_in_ctx env ?error_if_undef_at_pos:p x next_cont
 
 (* While checking todos at the end of a function body, the Next continuation
  * might have been moved to the 'Exit' (if there is a `return` statement)
@@ -1237,7 +1250,7 @@ let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
 let get_local_for_todo ?error_if_undef_at_pos:p env x =
   let local_types = env.lenv.local_types in
   let ctx = LEnvC.try_get_conts [C.Next; C.Exit; C.Catch] local_types in
-  get_local_in_ctx env ?error_if_undef_at_pos:p x ctx
+  get_local_ty_in_ctx env ?error_if_undef_at_pos:p x ctx
 
 let get_local_ ?error_if_undef_at_pos:p env x =
   if env.checking_todos
@@ -1245,6 +1258,16 @@ let get_local_ ?error_if_undef_at_pos:p env x =
     else get_local_in_next_continuation ?error_if_undef_at_pos:p env x
 
 let get_local env x = snd (get_local_ env x)
+
+let get_locals env plids =
+  let next_cont = next_cont_exn env in
+  List.fold plids ~init:LID.Map.empty ~f:(fun locals (p, lid) ->
+    match get_local_in_ctx env ~error_if_undef_at_pos:p lid next_cont with
+    | None -> locals
+    | Some ty_eid -> LID.Map.add lid ty_eid locals)
+
+let set_locals env locals =
+  LID.Map.fold (fun lid ty env -> set_local_ env lid ty) locals env
 
 let is_local_defined env x = fst (get_local_ env x)
 

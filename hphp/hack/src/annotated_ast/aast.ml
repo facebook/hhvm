@@ -166,11 +166,10 @@ and expr_ =
   | As of expr * hint * (* is nullable *) bool
   | New of class_id * targ list * expr list * expr list * (* constructor *) expr_annotation
   | Efun of fun_ * lid list
+  | Lfun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
   | Unsafe_expr of expr
   | Callconv of Ast.param_kind * expr
-  (* We'll add this for now, but later on we should go straight to an Efun *)
-  | Lfun of fun_
   | Import of import_flavor * expr
   (* TODO: T38184446 Consolidate collections in AAST *)
   | Collection of sid * collection_targ option * afield list

@@ -230,7 +230,8 @@ let sequence_visitor ~require_used used_vars =
     | Array_get (e1, Some e2)
       -> this#check_unsequenced_exprs env e1 e2
 
-    | Efun (f, idl) ->
+    | Efun (f, idl)
+    | Lfun (f, idl) ->
       let nb = Nast.assert_named_body f.f_body in
       (* Ignore the current environment and start fresh. *)
       let _acc = this#on_block empty_env nb.fb_ast in

@@ -35,37 +35,45 @@ let make_suggest_ty tys =
 let visitor = object
   inherit Tast_visitor.endo as super
   method! on_expr env x =
-  let result =
-    match x with
-    | (pos, (_p, Tanon(_anon_arity, id))), Tast.Efun (efun, ids) ->
+    let on_fun pos id f =
       let ftys = Tast_env.get_anonymous_lambda_types env id in
       if List.is_empty ftys
-      then x
+      then None
       else
       let newty = make_suggest_ty ftys in
       (* If we have a single type, propagate types onto parameters *)
-      begin match ftys with
-      | [(_, Tfun { ft_params; _ })] ->
-        begin let rec add_types tfun_params efun_params =
-        match tfun_params, efun_params with
-        | _, [] -> []
-        | { fp_type; _ } :: tfun_params,
-          ({ Tast.param_hint = None; Tast.param_annotation = (pos, _); _ } as param)::params ->
-          { param with Tast.param_annotation = (pos, make_suggest_ty [fp_type]) }
-            :: add_types tfun_params params
-        | _ :: tfun_params, param :: params ->
-          param :: add_types tfun_params params
-        | [], _ -> efun_params
-        in
-        let f_params = add_types ft_params efun.Tast.f_params in
-        ((pos, newty), Tast.Efun ({ efun with Tast.f_params = f_params }, ids))
+      let newty, f = match ftys with
+        | [(_, Tfun { ft_params; _ })] ->
+          let rec add_types tfun_params efun_params =
+            match tfun_params, efun_params with
+            | _, [] -> []
+            | { fp_type; _ } :: tfun_params,
+              ({ Tast.param_hint = None; Tast.param_annotation = (pos, _); _ } as param)::params ->
+              { param with Tast.param_annotation = (pos, make_suggest_ty [fp_type]) }
+                :: add_types tfun_params params
+            | _ :: tfun_params, param :: params ->
+              param :: add_types tfun_params params
+            | [], _ -> efun_params
+            in
+          let f_params = add_types ft_params f.Tast.f_params in
+          (pos, newty), {f with Tast.f_params = f_params }
+        | _ -> (pos, newty), f in
+      Some (newty, f) in
+    let result =
+      match x with
+      | (pos, (_p, Tanon(_anon_arity, id))), Tast.Efun (f, ids) ->
+        begin match on_fun pos id f with
+        | None -> x
+        | Some (newty, f) -> newty, Tast.Efun (f, ids)
+        end
+      | (pos, (_p, Tanon(_anon_arity, id))), Tast.Lfun (f, ids) ->
+        begin match on_fun pos id f with
+        | None -> x
+        | Some (newty, f) -> newty, Tast.Lfun (f, ids)
         end
       | _ ->
-        ((pos, newty), Tast.Efun (efun, ids))
-      end
-    | _ ->
-      x
-  in
+        x
+    in
     super#on_expr env result
 end
 

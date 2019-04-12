@@ -550,7 +550,8 @@ let check = object(self)
         super#on_expr (env, ctx) expr
       | _, This when ctx.disallow_this ->
         Errors.escaping_mutable_object (get_position e)
-      | (_, (_, Tfun _)), Efun (f, idl) ->
+      | (_, (_, Tfun _)), Efun (f, idl)
+      | (_, (_, Tfun _)), Lfun (f, idl) ->
         List.iter idl (check_escaping_mutable env);
 
         let ctx =

@@ -121,6 +121,8 @@ end = struct
         end ~default:acc
 
       method! on_efun acc _ _ = acc
+
+      method! on_lfun acc _ _ = acc
     end
 
   let make st = visitor#on_stmt SMap.empty st

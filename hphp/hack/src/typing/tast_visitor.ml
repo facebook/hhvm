@@ -27,6 +27,7 @@ class virtual iter = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
+  method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
   (* By default, ignore unsafe code. To visit it, use {!iter_unsafe}. *)
   method! on_Unsafe_expr _ _ = ()
@@ -56,6 +57,8 @@ class virtual ['state] iter_with_state = object (self)
 
   method! on_Efun (env, state) x =
     super#on_Efun (Env.set_ppl_lambda env, state) x
+  method! on_Lfun (env, state) x =
+    super#on_Lfun (Env.set_ppl_lambda env, state) x
 
   (* Ignore unsafe code. *)
   method! on_Unsafe_expr _ _ = ()
@@ -86,6 +89,7 @@ class virtual ['a] reduce = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
+  method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
   (* By default, ignore unsafe code. To visit it, use {!reduce_unsafe}. *)
   method! on_Unsafe_expr _ _ = self#zero
@@ -117,6 +121,7 @@ class virtual map = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
+  method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
   (* By default, ignore unsafe code. To visit it, use {!map_unsafe}. *)
   method! on_Unsafe_expr _ e = Tast.Unsafe_expr e
@@ -147,6 +152,7 @@ class virtual endo = object (self)
   method! on_static_method env = super#on_static_method (Env.set_static env)
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
+  method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
 
   (* By default, ignore unsafe code. To visit it, use {!endo_unsafe}. *)
   method! on_Unsafe_expr _ x _ = x

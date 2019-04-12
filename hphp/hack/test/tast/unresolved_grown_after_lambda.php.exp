@@ -36,7 +36,7 @@ Errors:
                (Binop ((Eq None),
                   (([5:3-5], (function(): int)), (Lvar ([5:3-5], $f))),
                   (([5:8-12:4], (function(): int)),
-                   (Efun (
+                   (Lfun (
                       { f_span = [5:8-12:4]; f_annotation = ();
                         f_mode = <opaque>;
                         f_ret = (Some ([5:12-15], (Hprim Tint)));

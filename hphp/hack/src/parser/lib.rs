@@ -34,3 +34,7 @@ pub mod parser_env;
 pub mod parser_trait;
 pub mod statement_parser;
 pub mod type_parser;
+
+pub mod minimal_syntax;
+pub mod minimal_token;
+pub mod minimal_trivia;

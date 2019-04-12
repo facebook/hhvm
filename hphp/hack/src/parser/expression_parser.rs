@@ -116,4 +116,12 @@ where
     pub fn parse_expression(&mut self) -> S::R {
         unimplemented!()
     }
+
+    pub fn with_as_expressions<T>(&mut self, _enabled: bool, _f: &Fn(&mut Self) -> T) -> T {
+        unimplemented!()
+    }
+
+    pub fn parse_cast_or_parenthesized_or_lambda_expression(&mut self) -> S::R {
+        unimplemented!()
+    }
 }

@@ -401,7 +401,8 @@ bool Package::parseImpl(const std::string* fileName) {
   try {
     auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());
     if (ue && !ue->m_ICE) {
-      m_ar->lock()->addHhasFile(std::move(ue));
+      Lock lock(m_ar->getMutex());
+      m_ar->addHhasFile(std::move(ue));
       report(0);
       return true;
     } else {

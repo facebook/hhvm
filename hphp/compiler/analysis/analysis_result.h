@@ -61,26 +61,6 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
     CodeGen,
   };
 
-  struct Locker {
-    explicit Locker(const AnalysisResult *ar) :
-        m_ar(const_cast<AnalysisResult*>(ar)),
-        m_mutex(m_ar->getMutex()) {
-      m_mutex.lock();
-    }
-    Locker(const Locker &l) : m_ar(l.m_ar), m_mutex(l.m_mutex) {
-      const_cast<Locker&>(l).m_ar = 0;
-    }
-    ~Locker() {
-      if (m_ar) m_mutex.unlock();
-    }
-    AnalysisResult *operator->() const {
-      return m_ar;
-    }
-  private:
-    AnalysisResult *m_ar;
-    Mutex &m_mutex;
-  };
-
   struct ParseOnDemandCalbacks : AsmCallbacks {
     explicit ParseOnDemandCalbacks(AnalysisResultConstRawPtr ar) : m_ar(ar) {}
 
@@ -104,7 +84,6 @@ struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
 public:
   AnalysisResult();
   ~AnalysisResult();
-  Locker lock() const { return Locker(this); }
   void setPackage(Package *package) { m_package = package;}
   void setParseOnDemand(bool v) { m_parseOnDemand = v;}
   bool isParseOnDemand() const { return m_package && m_parseOnDemand;}

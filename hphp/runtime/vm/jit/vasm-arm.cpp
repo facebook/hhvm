@@ -359,6 +359,7 @@ struct Vgen {
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
   void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(const orq& i);
+  void emit(const orli& i);
   void emit(const orqi& i);
   void emit(const pop& i);
   void emit(const popp& i);
@@ -1090,6 +1091,7 @@ void Vgen::emit(const vasm_opc& i) {                  \
   }                                                   \
 }
 
+Y(orli, Orr, W, i.s0.l(), xzr);
 Y(orqi, Orr, X, i.s0.q(), xzr);
 Y(orq, Orr, X, X(i.s0), xzr);
 Y(xorb, Eor, W, W(i.s0), wzr);

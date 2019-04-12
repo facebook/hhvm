@@ -1266,22 +1266,37 @@ bool simplify(Env& env, const setcc& vsetcc, Vlabel b, size_t i) {
  * Or with constant values
  */
 
+namespace {
+
+template <typename Or>
+bool implOrSimplify(
+  Env& env, const Or& inst, Vlabel b, size_t i, size_t immed
+) {
+ if (env.use_counts[inst.sf] != 0) return false;
+ if (immed == 0) return simplify_impl(env, b, i, copy{inst.s1, inst.d});
+
+ auto const it = env.unit.regToConst.find(inst.s1);
+ if (it == env.unit.regToConst.end() || it->second.isUndef) return false;
+ return simplify_impl(
+   env, b, i,
+   [&] (Vout& v) {
+     auto const s = v.cns(immed | it->second.val);
+     v << copy{s, inst.d};
+     return 1;
+   }
+ );
+}
+
+} // namespace
+
+bool simplify(Env& env, const orli& inst, Vlabel b, size_t i) {
+  auto const immed = inst.s0.l();
+  return implOrSimplify(env, inst, b, i, immed);
+}
+
 bool simplify(Env& env, const orqi& inst, Vlabel b, size_t i) {
-  if (env.use_counts[inst.sf] != 0) return false;
-
   auto const immed = inst.s0.q();
-  if (immed == 0) return simplify_impl(env, b, i, copy{inst.s1, inst.d});
-
-  auto const it = env.unit.regToConst.find(inst.s1);
-  if (it == env.unit.regToConst.end() || it->second.isUndef) return false;
-  return simplify_impl(
-    env, b, i,
-    [&] (Vout& v) {
-      auto const s = v.cns(immed | it->second.val);
-      v << copy{s, inst.d};
-      return 1;
-    }
-  );
+  return implOrSimplify(env, inst, b, i, immed);
 }
 
 bool simplify(Env& env, const orq& inst, Vlabel b, size_t i) {

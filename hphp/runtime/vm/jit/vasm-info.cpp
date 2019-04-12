@@ -233,6 +233,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::nop:
     case Vinstr::not:
     case Vinstr::notb:
+    case Vinstr::orli:
     case Vinstr::orq:
     case Vinstr::orqi:
     case Vinstr::reload:

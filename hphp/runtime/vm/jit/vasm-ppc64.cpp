@@ -377,6 +377,11 @@ struct Vgen {
   void emit(const movzwl& i) { a.rlwinm(Reg64(i.d), Reg64(i.s), 0, 16, 31); }
   void emit(const movzwq& i) { a.rlwinm(i.d, Reg64(i.s), 0, 16, 31); }
   void emit(const movzlq& i) { a.rlwinm(i.d, Reg64(i.s), 0, 0, 31); }
+  void emit(const orli& i) {
+    a.limmediate(rAsm, i.s0.l());
+    a.or(Reg64(i.d), Reg64(i.s1), rAsm, true /** or. implies Rc = 1 **/);
+    copyCR0toCR1(a, rAsm);
+  }
   void emit(const orqi& i) {
     a.limmediate(rAsm, i.s0.l());
     a.or(i.d, i.s1, rAsm, true /** or. implies Rc = 1 **/);

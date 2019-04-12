@@ -2726,6 +2726,76 @@ bool canReduceToDontResolve(SArray ts) {
   not_reached();
 }
 
+folly::Optional<ArrayData*> resolveTSStatically(ISS& env, SArray ts) {
+  auto const finish = [&] (ArrayData* result) {
+    ArrayData::GetScalarArray(&result);
+    return result;
+  };
+  switch (get_ts_kind(ts)) {
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_nothing:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_resource:
+    // Following ones don't reify, so no need to check the generics
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_arraylike:
+      return finish(ts->copy());
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_enum:
+      // TODO(T31677864): We can optimize this further if generics also don't
+      // need resolving
+      if (isTSAllWildcards(ts)) return finish(ts->copy());
+      return folly::none;
+    case TypeStructure::Kind::T_tuple:
+    case TypeStructure::Kind::T_shape:
+      // TODO(T31677864): We can also optimize these
+      return folly::none;
+    case TypeStructure::Kind::T_unresolved: {
+      // TODO(T31677864): We can also try to resolve the generics statically
+      if (ts->exists(s_generic_types) || !ts->exists(s_classname)) {
+        return folly::none;
+      }
+      auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
+      if (!rcls || !rcls->resolved()) return folly::none;
+      auto const attrs = rcls->cls()->attrs;
+      auto const kind = [&] {
+        if (attrs & AttrEnum)      return TypeStructure::Kind::T_enum;
+        if (attrs & AttrTrait)     return TypeStructure::Kind::T_trait;
+        if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
+        return TypeStructure::Kind::T_class;
+      }();
+      auto result = ts->copy();
+      return finish(result->setInPlace(s_kind.get(),
+                                       Variant(static_cast<uint8_t>(kind))));
+    }
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
+    case TypeStructure::Kind::T_reifiedtype:
+    case TypeStructure::Kind::T_fun:
+    case TypeStructure::Kind::T_typevar:
+    case TypeStructure::Kind::T_trait:
+      return folly::none;
+    }
+    not_reached();
+  }
+
 } // namespace
 
 void in(ISS& env, const bc::IsLateBoundCls& op) {
@@ -2774,10 +2844,19 @@ void in(ISS& env, const bc::AsTypeStructC& op) {
 }
 
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
-  // TODO(T31677864): implement real optimizations
   assertx(op.arg1 > 0);
   auto valid = true;
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
+  auto const first = tv(topC(env));
+  if (op.arg1 == 1 && first && isValidTSType(*first, false)) {
+    auto const ts = first->m_data.parr;
+    if (canReduceToDontResolve(ts)) return reduce(env, bc::Nop {});
+    if (auto const resolved = resolveTSStatically(env, ts)) {
+      return RuntimeOption::EvalHackArrDVArrs
+        ? reduce(env, bc::PopC {}, bc::Dict  { *resolved })
+        : reduce(env, bc::PopC {}, bc::Array { *resolved });
+    }
+  }
   for (int i = 0; i < op.arg1; ++i) {
     auto const t = popC(env);
     valid &= t.couldBe(requiredTSType);

@@ -26,4 +26,5 @@ pub mod syntax_error;
 
 pub mod lexer;
 
+pub mod operator;
 pub mod parser_env;

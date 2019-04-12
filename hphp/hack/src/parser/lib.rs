@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- */
+*/
 pub mod token_kind;
 pub mod trivia_kind;
 
@@ -13,3 +13,7 @@ pub mod source_text;
 
 pub mod lexable_token;
 pub mod lexable_trivia;
+
+pub mod syntax;
+mod syntax_generated;
+pub mod syntax_kind;

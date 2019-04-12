@@ -463,6 +463,127 @@ end (* MakeValidated *)
   }
 end (* GenerateFFSyntaxType *)
 
+
+module GenerateFFRustSyntax = struct
+
+  let from_children x =
+    let mapper prefix (f,_) = sprintf "%s_%s : (Box::new(ts.pop().unwrap()))" prefix f in
+    let fields = map_and_concat_separated ",\n       " (mapper x.prefix) x.fields in
+    sprintf("SyntaxKind::%s => SyntaxVariant::%s {
+        %s
+    },")
+    x.kind_name x.kind_name fields
+
+  let to_kind x =
+    sprintf ("            SyntaxVariant::%s {..} => SyntaxKind::%s,\n") x.kind_name x.kind_name
+
+  let to_children x =
+    let mapper prefix (f,_) = sprintf "&*%s_%s" prefix f in
+    let fields2 = map_and_concat_separated ",\n       " (mapper x.prefix) x.fields in
+    let mapper prefix (f,_) = sprintf "ref %s_%s" prefix f in
+    let fields = map_and_concat_separated ",\n       " (mapper x.prefix) x.fields in
+    sprintf("SyntaxVariant::%s {
+        %s
+    } => vec![%s],")
+    x.kind_name fields fields2
+
+  let fold_over x =
+    let mapper prefix (f,_) = sprintf "let acc = f(&x.%s_%s, acc)" prefix f in
+    let fields = map_and_concat_separated ";\n                " (mapper x.prefix) x.fields in
+    sprintf("            SyntaxVariant::%s(x) => {
+                %s;
+                acc
+            },\n")
+    x.kind_name fields
+
+  let to_syntax_variant x =
+    sprintf ("    %s(Box<%sChildren<T, V>>),\n") x.kind_name x.kind_name
+
+  let to_syntax_variant_children x =
+    let mapper prefix (f,_) = sprintf "    pub %s_%s: Syntax<T, V>," prefix f in
+    let fields = map_and_concat_separated "\n" (mapper x.prefix) x.fields in
+    sprintf ("#[derive(Debug, Clone)]\npub struct %sChildren<T, V> {\n%s\n}\n\n") x.kind_name fields
+
+  let to_syntax_constructors x =
+    let mapper prefix (f,_) = sprintf "%s_%s: Self" prefix f in
+    let args = map_and_concat_separated ", " (mapper x.prefix) x.fields in
+    let mapper prefix (f,_) = sprintf "%s_%s" prefix f in
+    let fields = map_and_concat_separated ",\n            " (mapper x.prefix) x.fields in
+    sprintf("    pub fn make_%s(%s) -> Self {
+        let syntax = SyntaxVariant::%s(Box::new(%sChildren {
+            %s,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }\n\n")
+    x.type_name args x.kind_name x.kind_name fields
+
+  let full_fidelity_syntax_template = make_header CStyle "" ^ "
+use crate::lexable_token::LexableToken;
+use crate::syntax::*;
+use crate::syntax_kind::SyntaxKind;
+
+impl<T, V> Syntax<T, V>
+where
+    T: LexableToken,
+    V: SyntaxValueType<T>,
+{
+SYNTAX_CONSTRUCTORS    pub fn fold_over_children<'a, U>(
+        f: &Fn(&'a Self, U) -> U,
+        acc: U,
+        syntax: &'a SyntaxVariant<T, V>,
+    ) -> U {
+        match syntax {
+            SyntaxVariant::Missing => acc,
+            SyntaxVariant::Token (_) => acc,
+            SyntaxVariant::SyntaxList(elems) => {
+                let mut acc = acc;
+                for item in elems.iter() {
+                    acc = f(item, acc)
+                }
+                acc
+            },
+FOLD_OVER_CHILDREN
+        }
+    }
+
+    pub fn kind(&self) -> SyntaxKind  {
+        match self.syntax {
+            SyntaxVariant::Missing => SyntaxKind::Missing,
+            SyntaxVariant::Token (_) => SyntaxKind::Token,
+            SyntaxVariant::SyntaxList (_) => SyntaxKind::SyntaxList,
+TO_KIND        }
+    }
+}
+
+SYNTAX_CHILDREN
+#[derive(Debug, Clone)]
+pub enum SyntaxVariant<T, V> {
+    Token(Box<T>),
+    Missing,
+    SyntaxList(Box<Vec<Syntax<T, V>>>),
+SYNTAX_VARIANT}
+  "
+  let full_fidelity_syntax =
+  {
+    filename = full_fidelity_path_prefix ^ "syntax_generated.rs";
+    template = full_fidelity_syntax_template;
+    transformations = [
+      { pattern = "SYNTAX_VARIANT"; func = to_syntax_variant };
+      { pattern = "SYNTAX_CHILDREN"; func = to_syntax_variant_children };
+      { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
+      { pattern = "FOLD_OVER_CHILDREN"; func = fold_over};
+      { pattern = "TO_KIND"; func = to_kind };
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+
+end (* GenerateFFRustSyntax *)
+
 module GenerateFFSyntaxSig = struct
 
   let to_constructor_methods x =
@@ -1522,6 +1643,52 @@ let full_fidelity_syntax_kind =
 
 end (* GenerateFFTriviaKind *)
 
+module GenerateFFRustSyntaxKind = struct
+  let to_tokens x =
+    sprintf "    %s,\n" x.kind_name
+
+  let to_to_string x =
+    sprintf ("            SyntaxKind::" ^^ kind_name_fmt ^^ " => \"%s\",\n")
+      x.kind_name x.description
+
+  let full_fidelity_syntax_kind_template = make_header CStyle "" ^ "
+
+#[derive(Debug, Copy, Clone)]
+pub enum SyntaxKind {
+    Missing,
+    Token,
+    SyntaxList,
+TOKENS
+}
+
+impl SyntaxKind {
+    pub fn to_string(&self) -> &str {
+        match self {
+            SyntaxKind::SyntaxList => \"list\",
+            SyntaxKind::Missing => \"missing\",
+            SyntaxKind::Token => \"token\",
+TO_STRING        }
+    }
+}"
+
+let full_fidelity_syntax_kind =
+{
+  filename = full_fidelity_path_prefix ^ "syntax_kind.rs";
+  template = full_fidelity_syntax_kind_template;
+  transformations = [
+    { pattern = "TOKENS"; func = to_tokens };
+    { pattern = "TO_STRING"; func = to_to_string };
+  ];
+  token_no_text_transformations = [];
+  token_given_text_transformations = [];
+  token_variable_text_transformations = [];
+  trivia_transformations = [];
+  aggregate_transformations = [];
+}
+
+end (* GenerateFFRustSyntaxKind *)
+
+
 module GenerateFFJavaScript = struct
 
   let to_from_json x =
@@ -2419,7 +2586,9 @@ let () =
   generate_file GenerateFFTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
+  generate_file GenerateFFRustSyntax.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
+  generate_file GenerateFFRustSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;
   generate_file GenerateFFTokenKind.full_fidelity_token_kind;
   generate_file GenerateFFRustTokenKind.full_fidelity_token_kind;

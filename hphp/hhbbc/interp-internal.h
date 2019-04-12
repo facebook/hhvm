@@ -88,13 +88,6 @@ struct ISS {
   uint32_t unchangedBcs{0};
   // new bytecodes
   BytecodeVec replacedBcs;
-  /*
-   * If we end up reprocessing the modified bytecodes for this block,
-   * the FPush* and or FCall* for any foldable actrecs will have been
-   * dropped, but we still need to make sure the correct pushes and
-   * pops occur to keep the stack balanced.
-   */
-  CompactVector<std::pair<uint32_t, ActRec>> savedFoldableActRecs;
 };
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs);
@@ -488,11 +481,6 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   }();
   ar.foldable = foldable;
   ar.pushBlk = env.bid;
-  if (foldable) {
-    env.savedFoldableActRecs.emplace_back(
-      static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()), ar
-    );
-  }
   FTRACE(2, "    fpi+: {} {}\n", env.state.fpiStack.size(), show(ar));
   env.state.fpiStack.push_back(std::move(ar));
   return foldable;

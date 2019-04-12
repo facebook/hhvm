@@ -162,16 +162,6 @@ void rewind(ISS& env, const Bytecode& bc) {
  * things.
  */
 void rewind(ISS& env, int n) {
-  if (env.savedFoldableActRecs.size()) {
-    auto idx = env.unchangedBcs + env.replacedBcs.size() - n;
-    auto it = env.savedFoldableActRecs.end();
-    do {
-      --it;
-      if (it->first > idx) {
-        it->first = idx;
-      }
-    } while (it != env.savedFoldableActRecs.begin());
-  }
   assertx(n);
   while (env.replacedBcs.size()) {
     rewind(env, env.replacedBcs.back());
@@ -3122,13 +3112,9 @@ void in(ISS& env, const bc::FPushFuncD& op) {
   if (!any(env.collect.opts & CollectionOpts::Speculating)) {
     if (auto const func = rfunc.exactFunc()) {
       if (will_reduce(env) && can_emit_builtin(func, op.arg1, op.has_unpack)) {
-        auto ar = ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc };
-        env.savedFoldableActRecs.emplace_back(
-          static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()), ar
-        );
         fpiPushNoFold(
           env,
-          std::move(ar)
+          ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
         );
         return reduce(env);
       }
@@ -3642,10 +3628,6 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
           env.ctx, func, ar.context, std::move(args));
       }();
       if (auto v = tv(ty)) {
-        env.savedFoldableActRecs.emplace_back(
-          static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()),
-          ActRec{ FPIKind::Unknown, TBottom }
-        );
         BytecodeVec repl { fca.numArgs, bc::PopC {} };
         repl.push_back(bc::PopU {});
         repl.push_back(bc::PopU {});
@@ -5294,8 +5276,6 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
     return ret;
   };
 
-  CompactVector<std::pair<uint32_t, ActRec>> savedFoldableActRecs;
-  size_t foldableIdx = 0;
   BytecodeVec retryBcs;
   auto retryOffset = interp.blk->hhbcs.size();
   auto size = retryOffset;
@@ -5303,40 +5283,15 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
   size_t idx = 0;
 
   while (true) {
-    while (foldableIdx < savedFoldableActRecs.size()) {
-      auto const& ar = savedFoldableActRecs[foldableIdx];
-      if (ar.first != idx) {
-        assertx(ar.first > idx);
-        break;
-      }
-      if (ar.second.func) {
-        FTRACE(2, "    fpi+: {} {}\n",
-               env.state.fpiStack.size(), show(ar.second));
-        env.state.fpiStack.push_back(ar.second);
-      } else {
-        FTRACE(2, "    fpi-: {} {}\n",
-               env.state.fpiStack.size() - 1, show(env.state.fpiStack.back()));
-        env.state.fpiStack.pop_back();
-      }
-      env.savedFoldableActRecs.emplace_back(
-        static_cast<uint32_t>(env.unchangedBcs + env.replacedBcs.size()),
-        ar.second
-      );
-      foldableIdx++;
-    }
-
     if (idx == size) {
       if (!env.reprocess) break;
       FTRACE(2, "  Reprocess mutated block {}\n", interp.bid);
       assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
       retryOffset = env.unchangedBcs;
       retryBcs = std::move(env.replacedBcs);
-      savedFoldableActRecs = std::move(env.savedFoldableActRecs);
-      foldableIdx = 0;
       env.unchangedBcs = 0;
       env.state.copy_from(in);
       env.reprocess = false;
-      env.savedFoldableActRecs.clear();
       env.replacedBcs.clear();
       size = retryOffset + retryBcs.size();
       idx = 0;

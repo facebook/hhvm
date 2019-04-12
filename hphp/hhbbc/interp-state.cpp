@@ -295,7 +295,7 @@ bool merge_impl(State& dst, const State& src, JoinOp join) {
   assert(dst.iters.size() == src.iters.size());
   assert(dst.clsRefSlots.size() == src.clsRefSlots.size());
   assert(dst.stack.size() == src.stack.size());
-  assert(dst.fpiStack.size() == src.fpiStack.size());
+  assert(dst.fpiStack.size() + src.fpiStack.size() == 0);
 
   if (src.unreachable) {
     // If we're coming from unreachable code and the dst is already

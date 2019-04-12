@@ -869,7 +869,9 @@ let num_workers options local_config =
     end
 
 let setup_server ~informant_managed ~monitor_pid options config local_config =
-  let num_workers = num_workers options local_config in
+  let num_workers =
+    num_workers options local_config |> Ai.modify_worker_count
+  in
   let handle = SharedMem.init ~num_workers (ServerConfig.sharedmem_config config) in
   let init_id = Random_id.short_string () in
   Hh_logger.log "Version: %s" Build_id.build_id_ohai;

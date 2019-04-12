@@ -2,6 +2,7 @@
 *.hhbc
 *.rej
 *.orig
+.merlin
 .mkdir
 .DS_Store
 hphp.log

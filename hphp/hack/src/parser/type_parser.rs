@@ -129,4 +129,12 @@ where
     pub fn parse_simple_type_or_type_constant(&mut self) -> S::R {
         unimplemented!()
     }
+
+    pub fn parse_generic_type_argument_list(&mut self) -> (S::R, bool) {
+        unimplemented!()
+    }
+
+    pub fn parse_remaining_type_specifier(&mut self, _name: S::R) -> S::R {
+        unimplemented!()
+    }
 }

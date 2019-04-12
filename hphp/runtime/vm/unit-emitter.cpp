@@ -815,7 +815,7 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
-      "(unitSn INTEGER PRIMARY KEY, sha1 BLOB UNIQUE, preload INTEGER, "
+      "(unitSn INTEGER PRIMARY KEY, sha1 BLOB UNIQUE, "
       "bc BLOB, data BLOB);",
       m_repo.table(repoId, "Unit"));
     txn.exec(createQuery);
@@ -965,18 +965,13 @@ void UnitRepoProxy::InsertUnitStmt
   BlobEncoder dataBlob;
 
   if (!prepared()) {
-    /*
-     * Do not put preload into data; its needed to choose the
-     * units in preloadRepo.
-     */
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(NULL, @sha1, @preload, @bc, @data);",
+      "INSERT INTO {} VALUES(NULL, @sha1, @bc, @data);",
       m_repo.table(m_repoId, "Unit"));
     txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindSha1("@sha1", sha1);
-  query.bindInt("@preload", ue.m_preloadPriority);
   query.bindBlob("@bc", (const void*)bc, bclen);
   const_cast<UnitEmitter&>(ue).serdeMetaData(dataBlob);
   query.bindBlob("@data", dataBlob, /* static */ true);
@@ -989,7 +984,7 @@ RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const SHA1& sha1) {
     auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
-        "SELECT unitSn, preload, bc, data FROM {} WHERE sha1 == @sha1;",
+        "SELECT unitSn, bc, data FROM {} WHERE sha1 == @sha1;",
         m_repo.table(m_repoId, "Unit"));
       txn.prepare(*this, selectQuery);
     }
@@ -1000,13 +995,11 @@ RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const SHA1& sha1) {
       return RepoStatus::error;
     }
     int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
-    int preloadPriority;                /**/ query.getInt(1, preloadPriority);
-    const void* bc; size_t bclen;       /**/ query.getBlob(2, bc, bclen);
-    BlobDecoder dataBlob =              /**/ query.getBlob(3);
+    const void* bc; size_t bclen;       /**/ query.getBlob(1, bc, bclen);
+    BlobDecoder dataBlob =              /**/ query.getBlob(2);
 
     ue.m_repoId = m_repoId;
     ue.m_sn = unitSn;
-    ue.m_preloadPriority = preloadPriority;
     ue.setBc(static_cast<const unsigned char*>(bc), bclen);
     ue.serdeMetaData(dataBlob);
 

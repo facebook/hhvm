@@ -1557,7 +1557,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   auto ue = std::make_unique<UnitEmitter>(unit.sha1, Native::s_noNativeFuncs);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
-  ue->m_preloadPriority = unit.preloadPriority;
   ue->m_isHHFile = unit.isHHFile;
   ue->m_useStrictTypes = unit.useStrictTypes;
   ue->m_useStrictTypesForBuiltins = unit.useStrictTypesForBuiltins;

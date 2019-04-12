@@ -388,7 +388,6 @@ public:
   bool m_useStrictTypesForBuiltins{false};
   bool m_returnSeen{false};
   bool m_ICE{false}; // internal compiler error
-  int m_preloadPriority{0};
   TypedValue m_mainReturn;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;

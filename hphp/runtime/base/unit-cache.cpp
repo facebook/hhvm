@@ -936,55 +936,6 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
 
 //////////////////////////////////////////////////////////////////////
 
-void preloadRepo() {
-  auto& repo = Repo::get();
-  auto units = repo.enumerateUnits(RepoIdLocal, true, false);
-  if (units.size() == 0) {
-    units = repo.enumerateUnits(RepoIdCentral, true, false);
-  }
-  if (!units.size()) return;
-
-  std::vector<VMWorker> workers;
-  auto const numWorkers = Process::GetCPUCount();
-  // Compute a batch size that causes each thread to process approximately 16
-  // batches.  Even if the batches are somewhat imbalanced in what they contain,
-  // the straggler workers are very unlikey to take more than 10% longer than
-  // the first worker to finish.
-  size_t batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
-  std::atomic<size_t> index{0};
-  for (auto worker = 0; worker < numWorkers; ++worker) {
-    workers.emplace_back(
-      VMWorker(
-        [&] {
-          ProfileNonVMThread nonVM;
-          hphp_session_init(Treadmill::SessionKind::PreloadRepo);
-          while (true) {
-            auto begin = index.fetch_add(batchSize);
-            auto end = std::min(begin + batchSize, units.size());
-            if (begin >= end) break;
-            auto unitCount = end - begin;
-            for (auto i = size_t{0}; i < unitCount; ++i) {
-              auto& kv = units[begin + i];
-              try {
-                lookupUnit(String(RuntimeOption::SourceRoot + kv.first).get(),
-                           "", nullptr, Native::s_noNativeFuncs);
-              } catch (...) {
-                // swallow errors silently
-              }
-            }
-          }
-          hphp_context_exit();
-          hphp_session_exit();
-    }));
-  }
-  for (auto& worker : workers) {
-    worker.start();
-  }
-  for (auto& worker : workers) {
-    worker.waitForEnd();
-  }
-}
-
 void clearUnitCacheForExit() {
   s_nonRepoUnitCache.clear();
   s_repoUnitCache.clear();

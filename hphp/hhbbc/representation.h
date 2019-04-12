@@ -571,7 +571,6 @@ struct Unit {
   bool useStrictTypes{false};
   bool useStrictTypesForBuiltins{false};
   std::atomic<bool> persistent{true};
-  int preloadPriority{0};
   std::unique_ptr<Func> pseudomain;
   CompactVector<std::unique_ptr<Func>> funcs;
   CompactVector<std::unique_ptr<Class>> classes;

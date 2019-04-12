@@ -1098,7 +1098,6 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   auto ret      = std::make_unique<php::Unit>();
   ret->sha1     = ue.sha1();
   ret->filename = ue.m_filepath;
-  ret->preloadPriority = ue.m_preloadPriority;
   ret->isHHFile = ue.m_isHHFile;
   ret->useStrictTypes = ue.m_useStrictTypes;
   ret->useStrictTypesForBuiltins = ue.m_useStrictTypesForBuiltins;

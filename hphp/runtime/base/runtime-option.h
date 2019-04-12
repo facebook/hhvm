@@ -1163,7 +1163,6 @@ public:
   static bool RepoCommit;
   static bool RepoDebugInfo;
   static bool RepoAuthoritative;
-  static bool RepoPreload;
   static int64_t RepoLocalReadaheadRate;
   static bool RepoLocalReadaheadConcurrent;
 

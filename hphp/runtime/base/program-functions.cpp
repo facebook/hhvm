@@ -1160,14 +1160,6 @@ static int start_server(const std::string &username, int xhprof) {
     InitFiniNode::WarmupConcurrentWaitForEnd();
   }
 
-  if (RuntimeOption::RepoPreload) {
-    HttpServer::CheckMemAndWait();
-    BootStats::Block timer("Preloading Repo", true);
-    profileWarmupStart();
-    preloadRepo();
-    profileWarmupEnd();
-  }
-
   // If we have any warmup requests, replay them before listening for
   // real connections
   {

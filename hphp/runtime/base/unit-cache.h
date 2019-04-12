@@ -105,8 +105,6 @@ String resolveVmInclude(StringData* path,
                         const Native::FuncTable&,
                         bool allow_dir = false);
 
-void preloadRepo();
-
 /*
  * Needed to avoid order of destruction issues. Destroying the unit
  * caches destroys the units, which destroys the classes, which tries

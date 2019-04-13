@@ -200,49 +200,33 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   if (magicCheck) {
     auto const invName = srcLoc(env, inst, 3).reg();
     auto const sf = v.makeReg();
-    v << testq{invName, invName, sf};
-    naaf = unlikelyCond(
-      v,
-      vcold(env),
-      CC_NZ,
-      sf,
-      v.makeReg(),
-      [&] (Vout& v) {
-        auto const dst = v.makeReg();
-        v << orqi{
-          static_cast<int32_t>(ActRec::Flags::MagicDispatch),
-          naaf,
-          dst,
-          v.makeReg()
-        };
-        return dst;
-      },
-      [&] (Vout& v) { return naaf; }
-    );
+    auto const naaf2 = v.makeReg();
+    auto const dst = v.makeReg();
+    v << orli{
+      static_cast<int32_t>(ActRec::Flags::MagicDispatch),
+      naaf,
+      dst,
+      v.makeReg()
+    };
+    v << testb{invName, invName, sf};
+    v << cmovl{CC_NZ, sf, naaf, dst, naaf2};
+    naaf = naaf2;
   }
 
   if (dynamicCheck) {
     auto const dynamicReg = srcLoc(env, inst, 4).reg();
     auto const sf = v.makeReg();
+    auto const naaf2 = v.makeReg();
+    auto const dst = v.makeReg();
+    v << orli{
+      static_cast<int32_t>(ActRec::Flags::DynamicCall),
+      naaf,
+      dst,
+      v.makeReg()
+    };
     v << testb{dynamicReg, dynamicReg, sf};
-    naaf = unlikelyCond(
-      v,
-      vcold(env),
-      CC_NZ,
-      sf,
-      v.makeReg(),
-      [&] (Vout& v) {
-        auto const dst = v.makeReg();
-        v << orqi{
-          static_cast<int32_t>(ActRec::Flags::DynamicCall),
-          naaf,
-          dst,
-          v.makeReg()
-        };
-        return dst;
-      },
-      [&] (Vout& v) { return naaf; }
-    );
+    v << cmovl{CC_NZ, sf, naaf, dst, naaf2};
+    naaf = naaf2;
   }
 
   if (reifiedCheck) {

@@ -105,54 +105,51 @@ let add_const name const acc =
 let add_members members acc =
   SMap.fold SMap.add members acc
 
-let is_abstract_typeconst x = x.ttc_type = None
-
-let can_override_typeconst x =
-  (is_abstract_typeconst x) || x.ttc_constraint <> None
-
 let add_typeconst name sig_ typeconsts =
   match SMap.get name typeconsts with
   | None ->
       (* The type constant didn't exist so far, let's add it *)
       SMap.add name sig_ typeconsts
-  (* This covers the following case
-   *
-   * interface I1 { abstract const type T; }
-   * interface I2 { const type T = int; }
-   *
-   * class C implements I1, I2 {}
-   *
-   * Then C::T == I2::T since I2::T is not abstract
-   *)
-  | Some old_sig
-    when not (is_abstract_typeconst old_sig) && (is_abstract_typeconst sig_) ->
+  | Some old_sig ->
+    let open Nast in
+    match old_sig.ttc_abstract, sig_.ttc_abstract with
+    (* This covers the following case
+     *
+     * interface I1 { abstract const type T; }
+     * interface I2 { const type T = int; }
+     *
+     * class C implements I1, I2 {}
+     *
+     * Then C::T == I2::T since I2::T is not abstract
+     *)
+    | TCConcrete, TCAbstract
+    | TCPartiallyAbstract, TCAbstract ->
       typeconsts
-  (* This covers the following case
-   *
-   * abstract P { const type T as arraykey = arraykey; }
-   * interface I { const type T = int; }
-   *
-   * class C extends P implements I {}
-   *
-   * Then C::T == I::T since P::T has a constraint and thus can be overridden
-   * by it's child, while I::T cannot be overridden.
-   *)
-  | Some old_sig
-    when not (can_override_typeconst old_sig) && (can_override_typeconst sig_) ->
+    (* This covers the following case
+     *
+     * abstract P { const type T as arraykey = arraykey; }
+     * interface I { const type T = int; }
+     *
+     * class C extends P implements I {}
+     *
+     * Then C::T == I::T since P::T has a constraint and thus can be overridden
+     * by it's child, while I::T cannot be overridden.
+     *)
+    | TCConcrete, TCPartiallyAbstract ->
       typeconsts
-  (* When a type constant is declared in multiple parents we need to make a
-   * subtle choice of what type we inherit. For example in:
-   *
-   * interface I1 { abstract const type t as Container<int>; }
-   * interface I2 { abstract const type t as KeyedContainer<int, int>; }
-   * abstract class C implements I1, I2 {}
-   *
-   * Depending on the order the interfaces are declared, we may report an error.
-   * Since this could be confusing there is special logic in Typing_extends that
-   * checks for this potentially ambiguous situation and warns the programmer to
-   * explicitly declare T in C.
-   *)
-  | _ ->
+    | _, _ ->
+     (* When a type constant is declared in multiple parents we need to make a
+      * subtle choice of what type we inherit. For example in:
+      *
+      * interface I1 { abstract const type t as Container<int>; }
+      * interface I2 { abstract const type t as KeyedContainer<int, int>; }
+      * abstract class C implements I1, I2 {}
+      *
+      * Depending on the order the interfaces are declared, we may report an error.
+      * Since this could be confusing there is special logic in Typing_extends that
+      * checks for this potentially ambiguous situation and warns the programmer to
+      * explicitly declare T in C.
+      *)
       SMap.add name sig_ typeconsts
 
 let add_constructor (cstr, cstr_consist) (acc, acc_consist) =

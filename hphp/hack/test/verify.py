@@ -323,14 +323,12 @@ def report_failures(total: int,
         fallback_out_ext_var = ''
         if fallback_out_extension is not None:
             fallback_out_ext_var = "FALLBACK_OUT_EXT=%s " % fallback_out_extension
-
-        print("OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s %s/review.sh %s" %
+        print("OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
                 (out_extension,
                 expect_extension,
                 fallback_out_ext_var,
                 fallback_expect_ext_var,
                 "true" if no_copy else "false",
-                os.path.dirname(os.path.abspath(__file__)),
                 " ".join(fnames)))
         if dump_on_failure:
             dump_failures(failures)

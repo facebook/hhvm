@@ -57,7 +57,8 @@ IRSPRelOffset fpushObjMethodUnknown(
   IRGS& env,
   SSATmp* obj,
   const StringData* methodName,
-  uint32_t numParams
+  uint32_t numParams,
+  SSATmp* ts
 ) {
   implIncStat(env, Stats::ObjMethod_cached);
   auto const arOffset = fsetActRec(
@@ -67,7 +68,7 @@ IRSPRelOffset fpushObjMethodUnknown(
     numParams,
     nullptr,
     cns(env, false),
-    nullptr
+    ts
   );
   auto const objCls = gen(env, LdObjClass, obj);
 
@@ -234,7 +235,8 @@ IRSPRelOffset fpushObjMethodWithBaseClass(
   const Class* baseClass,
   const StringData* methodName,
   uint32_t numParams,
-  bool exactClass
+  bool exactClass,
+  SSATmp* ts
 ) {
   bool magicCall = false;
   SSATmp* objOrCls = nullptr;
@@ -243,10 +245,10 @@ IRSPRelOffset fpushObjMethodWithBaseClass(
         objOrCls, magicCall)) {
     return fsetActRec(env, func, objOrCls, numParams,
                       magicCall ? methodName : nullptr,
-                      cns(env, false), nullptr);
+                      cns(env, false), ts);
   }
 
-  return fpushObjMethodUnknown(env, obj, methodName, numParams);
+  return fpushObjMethodUnknown(env, obj, methodName, numParams, ts);
 }
 
 const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
@@ -501,7 +503,8 @@ void optimizeProfiledPushMethod(IRGS& env,
 void fpushObjMethod(IRGS& env,
                     SSATmp* obj,
                     const StringData* methodName,
-                    uint32_t numParams) {
+                    uint32_t numParams,
+                    SSATmp* tsList) {
   implIncStat(env, Stats::ObjMethod_total);
 
   assertx(obj->type() <= TObj);
@@ -521,7 +524,7 @@ void fpushObjMethod(IRGS& env,
 
   auto const emitFPush = [&] {
     return fpushObjMethodWithBaseClass(env, obj, knownClass, methodName,
-                                       numParams, exactClass);
+                                       numParams, exactClass, tsList);
   };
 
   // If we know the class exactly without profiling, then we don't need PGO.
@@ -972,15 +975,18 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
   push(env, cns(env, func));
 }
 
-void emitFPushObjMethodD(IRGS& env,
+namespace {
+
+void implFPushObjMethodD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
-                         ObjMethodOp subop) {
+                         ObjMethodOp subop,
+                         SSATmp* tsList) {
   auto const objPos = static_cast<int32_t>(numParams + 2);
   auto const obj = topC(env, BCSPRelOffset{objPos});
 
   if (obj->type() <= TObj) {
-    fpushObjMethod(env, obj, methodName, numParams);
+    fpushObjMethod(env, obj, methodName, numParams, tsList);
     return;
   }
 
@@ -992,11 +998,28 @@ void emitFPushObjMethodD(IRGS& env,
       numParams,
       nullptr,
       cns(env, true),
-      nullptr);
+      tsList);
     return;
   }
 
   PUNT(FPushObjMethodD-nonObj);
+}
+
+} // namespace
+
+void emitFPushObjMethodD(IRGS& env,
+                         uint32_t numParams,
+                         const StringData* methodName,
+                         ObjMethodOp subop) {
+  implFPushObjMethodD(env, numParams, methodName, subop, nullptr);
+}
+
+
+void emitFPushObjMethodRD(IRGS& env,
+                         uint32_t numParams,
+                         const StringData* methodName,
+                         ObjMethodOp subop) {
+  implFPushObjMethodD(env, numParams, methodName, subop, popC(env));
 }
 
 namespace {

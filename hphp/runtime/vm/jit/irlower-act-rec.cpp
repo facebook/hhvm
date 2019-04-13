@@ -68,6 +68,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const ctxTmp = inst->src(2);
   auto const invNameTmp = inst->src(3);
   auto const isDynamic = inst->src(4);
+  auto const tsListTmp = inst->src(5);
   auto& v = vmain(env);
 
   auto const ar = sp[cellsToBytes(extra->spOffset.offset)];
@@ -170,6 +171,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
 
   bool dynamicCheck = false;
   bool magicCheck = false;
+  bool reifiedCheck = false;
   if (!isDynamic->hasConstVal()) {
     dynamicCheck = true;
   } else if (isDynamic->hasConstVal(true)) {
@@ -180,6 +182,15 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     flags = static_cast<ActRec::Flags>(flags | ActRec::Flags::MagicDispatch);
   } else if (!invNameTmp->isA(TNullptr)) {
     magicCheck = true;
+  }
+
+  if (!tsListTmp->type().maybe(TNullptr)) {
+    auto const tsList = srcLoc(env, inst, 5).reg();
+    v << store{tsList, ar + AROFF(m_reifiedGenerics)};
+    flags =
+      static_cast<ActRec::Flags>(flags | ActRec::Flags::HasReifiedGenerics);
+  } else if (!tsListTmp->isA(TNullptr)) {
+    reifiedCheck = true;
   }
 
   auto naaf = v.cns(
@@ -234,6 +245,23 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     );
   }
 
+  if (reifiedCheck) {
+    auto const tsList = srcLoc(env, inst, 5).reg();
+    v << store{tsList, ar + AROFF(m_reifiedGenerics)};
+    auto const sf = v.makeReg();
+    auto const naaf2 = v.makeReg();
+    auto const dst = v.makeReg();
+    v << orli{
+      static_cast<int32_t>(ActRec::Flags::HasReifiedGenerics),
+      naaf,
+      dst,
+      v.makeReg()
+    };
+    v << testq{tsList, tsList, sf};
+    v << cmovl{CC_NZ, sf, naaf, dst, naaf2};
+    naaf = naaf2;
+  }
+
   v << storel{naaf, ar + AROFF(m_numArgsAndFlags)};
 }
 
@@ -267,19 +295,6 @@ void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
   auto const off = cellsToBytes(inst->extra<LdARCtx>()->offset.offset);
   vmain(env) << load{sp[off + AROFF(m_thisUnsafe)], dst};
-}
-
-void cgStARReifiedGenerics(IRLS& env, const IRInstruction* inst) {
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const src = srcLoc(env, inst, 1).reg();
-  auto const off =
-    cellsToBytes(inst->extra<StARReifiedGenerics>()->offset.offset);
-  vmain(env) << store{src, sp[off + AROFF(m_reifiedGenerics)]};
-  vmain(env) << orlim{
-     static_cast<int32_t>(ActRec::Flags::HasReifiedGenerics),
-     sp[off + AROFF(m_numArgsAndFlags)],
-     vmain(env).makeReg()
-   };
 }
 
 void cgLdARReifiedGenerics(IRLS& env, const IRInstruction* inst) {

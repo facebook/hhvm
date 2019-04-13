@@ -1760,7 +1760,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckARMagicFlag:
   case LdARNumArgsAndFlags:
   case StARNumArgsAndFlags:
-  case StARReifiedGenerics:
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
   case LdTVAux:

@@ -442,7 +442,8 @@ bool conjureBeginInlining(IRGS& env,
     thisType != TBottom ? conjure(thisType) : nullptr,
     numParams,
     nullptr, /* invName */
-    conjure(TBool)
+    conjure(TBool),
+    nullptr
   );
   assertx(!env.irb->fs().hasFPushOverride());
 

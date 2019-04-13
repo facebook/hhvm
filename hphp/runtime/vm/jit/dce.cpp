@@ -702,7 +702,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckARMagicFlag:
   case StARNumArgsAndFlags:
   case StARInvName:
-  case StARReifiedGenerics:
   case ExitPlaceholder:
   case ThrowOutOfBounds:
   case ThrowInvalidArrayKey:

@@ -1722,7 +1722,8 @@ To string conversions:
 
 | SpillFrame<offset,numArgs>,
 |   ND,
-|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Str,Nullptr) S(Bool),
+|   S(StkPtr) S(Func,Nullptr) S(Ctx,Cls,Nullptr) S(Str,Nullptr) S(Bool)
+|   S(Arr|Vec,Nullptr),
 |   NF
 
   Operands:
@@ -1733,6 +1734,7 @@ To string conversions:
           (for FPushClsMethodF), or nullptr (for FPushFunc*).
      S3 - invoke name for magic dispatch
      S4 - whether this is a "dynamic" call
+     S5 - reified generics type structure list
 
   Defines the fields for an activation record and writes them to the stack
   pointed to by S0, at `offset'.
@@ -3533,12 +3535,6 @@ fields of that struct for holding intermediate values.
   register for the m_type member, and thus ignore m_aux.  LdTVAux is only valid
   when we know that S0's m_type and m_aux were both materialized into the same
   64-bit register.
-
-| StARReifiedGenerics<spoff>, ND, S(StkPtr) SVArr, NF
-
-  Store S1 to m_reifiedGenerics on the ActRec pointed to by the stack pointer
-  S0 and the stack pointer offet. Also, sets the HasReifiedGenerics bit of the
-  m_numArgsAndFlags on the same ActRec.
 
 | LdARReifiedGenerics, DVArr, S(FramePtr), NF
 

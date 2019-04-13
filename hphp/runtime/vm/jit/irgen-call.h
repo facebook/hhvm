@@ -43,7 +43,8 @@ IRSPRelOffset fsetActRec(
   SSATmp* objOrClass,
   uint32_t numArgs,
   const StringData* invName,
-  SSATmp* dynamicCall
+  SSATmp* dynamicCall,
+  SSATmp* tsList
 );
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,

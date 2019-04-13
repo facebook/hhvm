@@ -985,7 +985,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Sqrt:
   case StARInvName:
   case StARNumArgsAndFlags:
-  case StARReifiedGenerics:
   case StArResumeAddr:
   case StClosureArg:
   case StClosureCtx:

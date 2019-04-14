@@ -455,7 +455,7 @@ end = struct
 
   let add_param env param =
     let p_name = param.N.param_name in
-    let id = Local_id.get p_name in
+    let id = Local_id.make_unscoped p_name in
     let p_pos = param.N.param_pos in
     let () = add_lvar env (p_pos, p_name) (p_pos, id) in
     env
@@ -1725,7 +1725,7 @@ module Make (GetLocals : GetLocals) = struct
   and aast_fun_param env (param : Aast.fun_param) =
     let p = param.Aast.param_pos in
     let name = param.Aast.param_name in
-    let ident = Local_id.get name in
+    let ident = Local_id.make_unscoped name in
     Env.add_lvar env (p, name) (p, ident);
     let ty = Option.map param.Aast.param_hint (aast_hint env) in
     let eopt = Option.map param.Aast.param_expr (aast_expr env) in

@@ -413,7 +413,7 @@ let rec bind_param env (ty1, param) =
     T.param_user_attributes = List.map param.param_user_attributes (user_attribute env);
   } in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
-  let id = Local_id.get param.param_name in
+  let id = Local_id.make_unscoped param.param_name in
   let env = Env.set_local env id ty1 in
   let env = Env.set_param env id (ty1, mode) in
   let env = if has_accept_disposable_attribute param
@@ -2695,7 +2695,7 @@ and anon_check_param env param =
   | None -> env
   | Some hty ->
       let env, hty = Phase.localize_hint_with_self env hty in
-      let paramty = Env.get_local env (Local_id.get param.param_name) in
+      let paramty = Env.get_local env (Local_id.make_unscoped param.param_name) in
       let hint_pos = Reason.to_pos (fst hty) in
       let env = Type.coerce_type hint_pos Reason.URhint env paramty hty in
       env

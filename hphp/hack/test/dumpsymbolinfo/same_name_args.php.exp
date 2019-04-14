@@ -4,12 +4,12 @@
     {
       "pos":{"filename":"same_name_args.php","line":6,"char_start":21,"char_end":22},
       "type":"_",
-      "ident":-187650736
+      "ident":0
     },
     {
       "pos":{"filename":"same_name_args.php","line":7,"char_start":21,"char_end":22},
       "type":"_",
-      "ident":-187650736
+      "ident":0
     }
   ]
 }

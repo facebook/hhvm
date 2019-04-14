@@ -1116,12 +1116,12 @@ module FakeMembers = struct
   let make _ env obj_name member_name =
     let my_fake_local_id = make_id obj_name member_name in
     let env = add_member env my_fake_local_id in
-    env, LID.get my_fake_local_id
+    env, Local_id.make_unscoped my_fake_local_id
 
   let make_static _ env class_name member_name =
     let my_fake_local_id = make_static_id class_name member_name in
     let env = add_member env my_fake_local_id in
-    env, LID.get my_fake_local_id
+    env, Local_id.make_unscoped my_fake_local_id
 
 end
 

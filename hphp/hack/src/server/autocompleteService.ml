@@ -723,7 +723,7 @@ class local_types = object (self)
     | _ -> super#on_expr env e
 
   method! on_fun_param _ fp =
-    let id = Local_id.get fp.Tast.param_name in
+    let id = Local_id.make_unscoped fp.Tast.param_name in
     let _, ty = fp.Tast.param_annotation in
     self#add id ty
 end

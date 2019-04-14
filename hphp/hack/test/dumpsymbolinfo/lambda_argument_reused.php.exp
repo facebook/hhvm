@@ -54,7 +54,7 @@
     {
       "pos":{"filename":"lambda_argument_reused.php","line":12,"char_start":8,"char_end":9},
       "type":"{suggest:(C | D)}",
-      "ident":-187650736
+      "ident":0
     },
     {
       "pos":{"filename":"lambda_argument_reused.php","line":13,"char_start":5,"char_end":6},
@@ -69,7 +69,7 @@
         "char_end":11
       },
       "type":"{suggest:(C | D)}",
-      "ident":-187650736
+      "ident":0
     },
     {
       "pos":{

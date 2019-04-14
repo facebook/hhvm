@@ -42,7 +42,7 @@ let visitor = object (self)
       Result_set.singleton {
         pos = Pos.to_relative_string pos;
         type_ = Tast_env.print_ty env ty;
-        ident_ = Local_id.to_int (Local_id.get param.Tast.param_name);
+        ident_ = Local_id.to_int (Local_id.make_unscoped param.Tast.param_name);
       }
     in
     self#plus acc @@ super#on_fun_param env param

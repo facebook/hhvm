@@ -17,12 +17,12 @@
     {
       "pos":{"filename":"async_lambda.php","line":3,"char_start":33,"char_end":34},
       "type":"string",
-      "ident":-591072621
+      "ident":0
     },
     {
       "pos":{"filename":"async_lambda.php","line":3,"char_start":65,"char_end":66},
       "type":"string",
-      "ident":-591072621
+      "ident":0
     },
     {
       "pos":{"filename":"async_lambda.php","line":6,"char_start":3,"char_end":5},
@@ -42,7 +42,7 @@
     {
       "pos":{"filename":"async_lambda.php","line":9,"char_start":15,"char_end":16},
       "type":"nothing",
-      "ident":-187650736
+      "ident":0
     },
     {
       "pos":{"filename":"async_lambda.php","line":10,"char_start":5,"char_end":8},
@@ -52,7 +52,7 @@
     {
       "pos":{"filename":"async_lambda.php","line":10,"char_start":28,"char_end":29},
       "type":"nothing",
-      "ident":-187650736
+      "ident":0
     }
   ]
 }

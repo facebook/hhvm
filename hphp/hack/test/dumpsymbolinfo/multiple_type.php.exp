@@ -29,22 +29,22 @@
     {
       "pos":{"filename":"multiple_type.php","line":12,"char_start":18,"char_end":20},
       "type":"C1",
-      "ident":-105071986
+      "ident":0
     },
     {
       "pos":{"filename":"multiple_type.php","line":12,"char_start":26,"char_end":28},
       "type":"C2",
-      "ident":-253810349
+      "ident":0
     },
     {
       "pos":{"filename":"multiple_type.php","line":12,"char_start":36,"char_end":37},
       "type":"bool",
-      "ident":-1047294126
+      "ident":0
     },
     {
       "pos":{"filename":"multiple_type.php","line":13,"char_start":7,"char_end":8},
       "type":"bool",
-      "ident":-1047294126
+      "ident":0
     },
     {
       "pos":{"filename":"multiple_type.php","line":14,"char_start":5,"char_end":6},
@@ -54,7 +54,7 @@
     {
       "pos":{"filename":"multiple_type.php","line":14,"char_start":10,"char_end":12},
       "type":"C1",
-      "ident":-105071986
+      "ident":0
     },
     {
       "pos":{"filename":"multiple_type.php","line":15,"char_start":5,"char_end":6},
@@ -69,7 +69,7 @@
     {
       "pos":{"filename":"multiple_type.php","line":17,"char_start":10,"char_end":12},
       "type":"C2",
-      "ident":-253810349
+      "ident":0
     },
     {
       "pos":{"filename":"multiple_type.php","line":18,"char_start":5,"char_end":6},

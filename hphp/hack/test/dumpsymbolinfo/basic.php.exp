@@ -41,7 +41,7 @@
     {
       "pos":{"filename":"basic.php","line":3,"char_start":31,"char_end":34},
       "type":"_",
-      "ident":-612218741
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":4,"char_start":3,"char_end":6},
@@ -56,22 +56,22 @@
     {
       "pos":{"filename":"basic.php","line":6,"char_start":10,"char_end":13},
       "type":"_",
-      "ident":-612218741
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":12,"char_start":38,"char_end":43},
       "type":"string",
-      "ident":-284160294
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":13,"char_start":20,"char_end":25},
       "type":"string",
-      "ident":-284160294
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":16,"char_start":32,"char_end":35},
       "type":"_",
-      "ident":-387800971
+      "ident":0
     },
     {
       "pos":{"filename":"basic.php","line":21,"char_start":5,"char_end":8},

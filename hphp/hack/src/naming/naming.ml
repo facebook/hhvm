@@ -123,8 +123,6 @@ module Env : sig
   val new_let_local : genv * lenv -> Ast.id -> positioned_ident
   val found_dollardollar : genv * lenv -> Pos.t -> Local_id.t
   val inside_pipe : genv * lenv -> bool
-  val new_pending_lvar : genv * lenv -> Ast.id -> unit
-  val promote_pending_lvar : genv * lenv -> string -> unit
   val lvar : genv * lenv -> Ast.id -> positioned_ident
   val aast_lvar : genv * lenv -> Aast.lid -> positioned_ident
   val let_local : genv * lenv -> Ast.id -> positioned_ident option
@@ -175,19 +173,6 @@ end = struct
      *)
     all_locals: all_locals ref;
 
-    (* Some statements can define new variables afterwards, e.g.,
-     * if (...) {
-     *    $x = ...;
-     * } else {
-     *    $x = ...;
-     * }
-     * We need to give $x the same name in both branches, but we don't want
-     * $x to actually be a local until after the if block. So we stash it here,
-     * to indicate a name has been pre-allocated, but that the variable isn't
-     * actually defined yet.
-     *)
-    pending_locals: map ref;
-
     (* The set of lexically-scoped local `let` variables *)
     (* TODO: Currently these locals live in a separate namespace, it is
      * worthwhile considering unified namespace for all local variables T28712009 *)
@@ -229,7 +214,6 @@ end = struct
   let empty_local unbound_handler = {
     locals     = ref SMap.empty;
     all_locals = ref SMap.empty;
-    pending_locals = ref SMap.empty;
     let_locals = ref SMap.empty;
     pipe_locals = ref [];
     unbound_handler;
@@ -439,11 +423,6 @@ end = struct
     | Some _ -> p, name
     | None -> handle_unbound_name genv get_full_pos get_canon (p, name) kind
 
-  let check_variable_scoping env (_p, x) =
-    match SMap.get x !(env.all_locals) with
-    | Some _p' -> () (*Errors.different_scope p x p'*)
-    | None -> ()
-
   (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
     lenv.locals := SMap.add name (p, x) !(lenv.locals);
@@ -470,9 +449,7 @@ end = struct
       match lcl with
       | Some lcl -> snd lcl
       | None ->
-          let ident = (match SMap.get x !(lenv.pending_locals) with
-            | Some (_, ident) -> ident
-            | None -> Local_id.make_unscoped x) in
+          let ident = Local_id.make_unscoped x in
           lenv.all_locals := SMap.add x p !(lenv.all_locals);
           lenv.locals := SMap.add x (p, ident) !(lenv.locals);
           ident
@@ -508,20 +485,6 @@ end = struct
     | [] -> false
     | _ -> true
 
-  let new_pending_lvar (_, lenv) (p, x) =
-    match SMap.get x !(lenv.locals), SMap.get x !(lenv.pending_locals) with
-    | None, None ->
-        let y = p, Local_id.make_unscoped x in
-        lenv.pending_locals := SMap.add x y !(lenv.pending_locals)
-    | _ -> ()
-
-  let promote_pending_lvar (_, lenv) x =
-    match SMap.get x !(lenv.pending_locals) with
-    | Some (p, ident) ->
-      lenv.locals := SMap.add x (p, ident) !(lenv.locals);
-      lenv.pending_locals := SMap.remove x !(lenv.pending_locals)
-    | None -> ()
-
   let handle_undefined_variable (_genv, env) (p, x) =
     match env.unbound_handler with
     | None -> p, Local_id.make_unscoped x
@@ -536,9 +499,7 @@ end = struct
         let lcl = SMap.get x !(env.locals) in
         match lcl with
         | Some lcl -> p, snd lcl
-        | None ->
-            check_variable_scoping env (p, x);
-            handle_undefined_variable (genv, env) (p, x)
+        | None -> handle_undefined_variable (genv, env) (p, x)
     in
     p, ident
 
@@ -653,11 +614,9 @@ end = struct
   let scope env f =
     let _genv, lenv = env in
     let lenv_copy = !(lenv.locals) in
-    let lenv_pending_copy = !(lenv.pending_locals) in
     let lenv_scoped_copy = !(lenv.let_locals) in
     let res = f env in
     lenv.locals := lenv_copy;
-    lenv.pending_locals := lenv_pending_copy;
     lenv.let_locals := lenv_scoped_copy;
     res
 
@@ -1823,8 +1782,8 @@ module Make (GetLocals : GetLocals) = struct
       (* Arbitrary expression. This will be assigned to a temporary *)
     | _ -> []
 
-  and aast_stmt env (pos, st_ as st) =
-    let stmt = match st_ with
+  and aast_stmt env (pos, st) =
+    let stmt = match st with
     | Aast.Let (x, h, e) -> aast_let_stmt env x h e
     | Aast.Block _ -> failwith "aast_stmt block error"
     | Aast.Unsafe_block _ -> failwith "aast_stmt unsafe_block error"
@@ -1841,7 +1800,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.GotoLabel label -> name_goto_label env label
     | Aast.Goto label -> name_goto env label
     | Aast.Awaitall el -> aast_awaitall_stmt env el
-    | Aast.If (e, b1, b2) -> aast_if_stmt env st e b1 b2
+    | Aast.If (e, b1, b2) -> aast_if_stmt env e b1 b2
     | Aast.Do (b, e) -> aast_do_stmt env b e
     | Aast.While (e, b) ->
       N.While (aast_expr env e, aast_block env b)
@@ -1850,9 +1809,9 @@ module Make (GetLocals : GetLocals) = struct
       N.Expr (p, N.Any)
     | Aast.Using s -> aast_using_stmt env s.Aast.us_has_await s.Aast.us_expr s.Aast.us_block
     | Aast.For (st1, e, st2, b) -> aast_for_stmt env st1 e st2 b
-    | Aast.Switch (e, cl) -> aast_switch_stmt env st e cl
+    | Aast.Switch (e, cl) -> aast_switch_stmt env e cl
     | Aast.Foreach (e, ae, b) -> aast_foreach_stmt env e ae b
-    | Aast.Try (b, cl, fb) -> aast_try_stmt env st b cl fb
+    | Aast.Try (b, cl, fb) -> aast_try_stmt env b cl fb
     | Aast.Def_inline _ -> (* No convenient pos information on Aast *)
       Errors.experimental_feature Pos.none "inlined definitions"; N.Expr (Pos.none, N.Any)
     | Aast.Expr (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, uel))
@@ -1881,7 +1840,7 @@ module Make (GetLocals : GetLocals) = struct
             then
               let b1, b2 = [cp, Aast.Expr violation], [Pos.none, Aast.Noop] in
               let cond = (cond_p, Aast.Unop (Ast.Unot, (cond_p, cond))) in
-              aast_if_stmt env st cond b1 b2
+              aast_if_stmt env cond b1 b2
             else (* a false <condition> means unconditional invariant_violation *)
               N.Expr (aast_expr env violation)
         end
@@ -1896,21 +1855,16 @@ module Make (GetLocals : GetLocals) = struct
     let x = Env.new_let_local env (p, name) in
     N.Let (x, h, e)
 
-  and aast_if_stmt env st e b1 b2 =
+  and aast_if_stmt env e b1 b2 =
     let e = aast_expr env e in
-    let nsenv = (fst env).namespace in
-    let _, vars = GetLocals.aast_stmt (nsenv, SMap.empty) st in
-    SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) vars;
-    let result = Env.scope env
+    Env.scope env
       (fun env ->
         let all1, b1 = aast_branch env b1 in
         let all2, b2 = aast_branch env b2 in
         Env.extend_all_locals env all2;
         Env.extend_all_locals env all1;
         N.If (e, b1, b2)
-      ) in
-    SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
-    result
+      )
 
   and aast_do_stmt env b e =
     (* lexical block of `do` is extended to the expr of loop termination *)
@@ -1948,18 +1902,13 @@ module Make (GetLocals : GetLocals) = struct
         let e3 = aast_expr env e3 in
         N.For (e1, e2, e3, b))
 
-  and aast_switch_stmt env st e cl =
+  and aast_switch_stmt env e cl =
     let e = aast_expr env e in
-    let nsenv = (fst env).namespace in
-    let _, vars = GetLocals.aast_stmt (nsenv, SMap.empty) st in
-    SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) vars;
-    let result = Env.scope env begin fun env ->
+    Env.scope env begin fun env ->
       let all_locals_l, cl = aast_casel env cl in
       List.iter all_locals_l (Env.extend_all_locals env);
       N.Switch (e, cl)
-    end in
-    SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
-    result
+    end
 
   and aast_foreach_stmt env e ae b =
     let e = aast_expr env e in
@@ -2012,12 +1961,8 @@ module Make (GetLocals : GetLocals) = struct
       let ev = handle_v ev in
       N.Await_as_kv (p, k, ev)
 
-  and aast_try_stmt env st b cl fb =
-    let nsenv = (fst env).namespace in
-    let _, vars =
-      GetLocals.aast_stmt (nsenv, SMap.empty) st in
-    SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) vars;
-    let result = Env.scope
+  and aast_try_stmt env b cl fb =
+    Env.scope
       env
       (fun env ->
         let genv, lenv = env in
@@ -2030,9 +1975,7 @@ module Make (GetLocals : GetLocals) = struct
         let all_locals_cl, cl = aast_catchl env cl in
         List.iter all_locals_cl (Env.extend_all_locals env);
         Env.extend_all_locals env all_locals_b;
-        N.Try (b, cl, fb)) in
-    SMap.iter (fun x _ -> Env.promote_pending_lvar env x) vars;
-    result
+        N.Try (b, cl, fb))
 
   and aast_stmt_list ?after_unsafe stl env =
     let aast_stmt_list = aast_stmt_list ?after_unsafe in
@@ -2492,15 +2435,6 @@ module Make (GetLocals : GetLocals) = struct
       (* The order matters here, of course -- e1 can define vars that need to
        * be available in e2 and e3. *)
       let e1 = aast_expr env e1 in
-      let nsenv = (fst env).namespace in
-      let get_lvalues = function e ->
-        snd @@ GetLocals.aast_stmt (nsenv, SMap.empty) (fst e, Aast.Expr e) in
-      let e2_lvalues =
-        Option.value (Option.map e2opt get_lvalues) ~default:SMap.empty
-      in
-      let e3_lvalues = get_lvalues e3 in
-      let lvalues = smap_inter e2_lvalues e3_lvalues in
-      SMap.iter (fun x p -> Env.new_pending_lvar env (p, x)) lvalues;
       let e2opt, e3 = Env.scope env (fun env ->
         let all2, e2opt = Env.scope_all env (fun env -> aast_oexpr env e2opt) in
         let all3, e3 = Env.scope_all env (fun env -> aast_expr env e3) in
@@ -2508,7 +2442,6 @@ module Make (GetLocals : GetLocals) = struct
         Env.extend_all_locals env all3;
         e2opt, e3
       ) in
-      SMap.iter (fun x _ -> Env.promote_pending_lvar env x) lvalues;
       N.Eif (e1, e2opt, e3)
     | Aast.InstanceOf (e, (_, Aast.CIexpr (p, Aast.Id x))) ->
       let id =

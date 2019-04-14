@@ -86,7 +86,6 @@ type unbound_handler = (Pos.t * string) -> positioned_ident
 (* The primitives to manipulate the naming environment *)
 module Env : sig
 
-  type all_locals
   type lenv
 
   val empty_local : unbound_handler option -> lenv
@@ -137,15 +136,12 @@ module Env : sig
   val copy_let_locals : genv * lenv -> genv * lenv -> unit
 
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
-  val scope_all : genv * lenv -> (genv * lenv -> 'a) -> all_locals * 'a
   val scope_lexical : genv * lenv -> (genv * lenv -> 'a) -> 'a
-  val extend_all_locals : genv * lenv -> all_locals -> unit
   val remove_locals : genv * lenv -> Ast.id list -> unit
   val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Local_id.t * N.expr
 end = struct
 
   type map = positioned_ident SMap.t
-  type all_locals = Pos.t SMap.t
 
   type pipe_scope = {
     (* The identifier for the special pipe variable $$ for this pipe scope. *)
@@ -160,18 +156,6 @@ end = struct
 
     (* The set of locals *)
     locals: map ref;
-
-    (* We keep all the locals, even if we are in a different scope
-     * to provide better error messages.
-     * if you write:
-     * if(...) {
-     *   $x = ...;
-     * }
-     * Technically, passed this point, $x is unbound.
-     * But it is much better to keep it somewhere, so that you can
-     * say it is bound, but in a different scope.
-     *)
-    all_locals: all_locals ref;
 
     (* The set of lexically-scoped local `let` variables *)
     (* TODO: Currently these locals live in a separate namespace, it is
@@ -213,7 +197,6 @@ end = struct
 
   let empty_local unbound_handler = {
     locals     = ref SMap.empty;
-    all_locals = ref SMap.empty;
     let_locals = ref SMap.empty;
     pipe_locals = ref [];
     unbound_handler;
@@ -450,7 +433,6 @@ end = struct
       | Some lcl -> snd lcl
       | None ->
           let ident = Local_id.make_unscoped x in
-          lenv.all_locals := SMap.add x p !(lenv.all_locals);
           lenv.locals := SMap.add x (p, ident) !(lenv.locals);
           ident
     in
@@ -464,7 +446,6 @@ end = struct
    (* TODO: Emit warning if names are getting shadowed T28436131 *)
   let new_let_local (_, lenv) (p, x) =
     let ident = Local_id.make_scoped x in
-    lenv.all_locals := SMap.add x p !(lenv.all_locals);
     lenv.let_locals := SMap.add x (p, ident) !(lenv.let_locals);
     p, ident
 
@@ -625,14 +606,6 @@ end = struct
     lenv.locals :=
       List.fold_left vars ~f:(fun l id -> SMap.remove (snd id) l) ~init:!(lenv.locals)
 
-  let scope_all env f =
-    let _genv, lenv = env in
-    let lenv_all_locals_copy = !(lenv.all_locals) in
-    let res = scope env f in
-    let lenv_all_locals = !(lenv.all_locals) in
-    lenv.all_locals := lenv_all_locals_copy;
-    lenv_all_locals, res
-
   (* Add a new lexical scope for block-scoped `let` variables.
      No other changes in the local environment *)
   let scope_lexical env f =
@@ -646,9 +619,6 @@ end = struct
   let copy_let_locals (_genv1, lenv1) (_genv2, lenv2) =
     let let_locals_1 = !(lenv1.let_locals) in
     lenv2.let_locals := let_locals_1
-
-  let extend_all_locals (_genv, lenv) more_locals =
-    lenv.all_locals := SMap.union more_locals !(lenv.all_locals)
 
   (** Push a new pipe scope on the stack of pipe scopes in the environment
    * and create an identifier for the $$ variable associated to this pipe,
@@ -1859,10 +1829,8 @@ module Make (GetLocals : GetLocals) = struct
     let e = aast_expr env e in
     Env.scope env
       (fun env ->
-        let all1, b1 = aast_branch env b1 in
-        let all2, b2 = aast_branch env b2 in
-        Env.extend_all_locals env all2;
-        Env.extend_all_locals env all1;
+        let b1 = aast_branch env b1 in
+        let b2 = aast_branch env b2 in
         N.If (e, b1, b2)
       )
 
@@ -1905,8 +1873,7 @@ module Make (GetLocals : GetLocals) = struct
   and aast_switch_stmt env e cl =
     let e = aast_expr env e in
     Env.scope env begin fun env ->
-      let all_locals_l, cl = aast_casel env cl in
-      List.iter all_locals_l (Env.extend_all_locals env);
+      let cl = aast_casel env cl in
       N.Switch (e, cl)
     end
 
@@ -1969,12 +1936,9 @@ module Make (GetLocals : GetLocals) = struct
         (* isolate finally from the rest of the try-catch: if the first
          * statement of the try is an uncaught exception, finally will
          * still be executed *)
-        let all_finally, fb = aast_branch ({genv with in_finally = true}, lenv) fb in
-        Env.extend_all_locals env all_finally;
-        let all_locals_b, b = aast_branch ({genv with in_try = true}, lenv) b in
-        let all_locals_cl, cl = aast_catchl env cl in
-        List.iter all_locals_cl (Env.extend_all_locals env);
-        Env.extend_all_locals env all_locals_b;
+        let fb = aast_branch ({genv with in_finally = true}, lenv) fb in
+        let b = aast_branch ({genv with in_try = true}, lenv) b in
+        let cl = aast_catchl env cl in
         N.Try (b, cl, fb))
 
   and aast_stmt_list ?after_unsafe stl env =
@@ -2001,7 +1965,7 @@ module Make (GetLocals : GetLocals) = struct
     else aast_stmt_list stl env
 
   and aast_branch ?after_unsafe env stmt_l =
-    Env.scope_all env (aast_stmt_list ?after_unsafe stmt_l)
+    Env.scope env (aast_stmt_list ?after_unsafe stmt_l)
 
   (**
    * Names a goto label.
@@ -2436,10 +2400,8 @@ module Make (GetLocals : GetLocals) = struct
        * be available in e2 and e3. *)
       let e1 = aast_expr env e1 in
       let e2opt, e3 = Env.scope env (fun env ->
-        let all2, e2opt = Env.scope_all env (fun env -> aast_oexpr env e2opt) in
-        let all3, e3 = Env.scope_all env (fun env -> aast_expr env e3) in
-        Env.extend_all_locals env all2;
-        Env.extend_all_locals env all3;
+        let e2opt = Env.scope env (fun env -> aast_oexpr env e2opt) in
+        let e3 = Env.scope env (fun env -> aast_expr env e3) in
         e2opt, e3
       ) in
       N.Eif (e1, e2opt, e3)
@@ -2648,20 +2610,20 @@ module Make (GetLocals : GetLocals) = struct
       | _ -> N.CI (Env.type_name env cid ~allow_typedef:false ~allow_generics:true)
 
   and aast_casel env l =
-    List.map_env [] l (aast_case env)
+    List.map l (aast_case env)
 
-  and aast_case env acc c =
+  and aast_case env c =
     match c with
     | Aast.Default b ->
-      let all_locals, b = aast_branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
-      all_locals :: acc, N.Default b
+      let b = aast_branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
+      N.Default b
     | Aast.Case (e, b) ->
       let e = aast_expr env e in
-      let all_locals, b = aast_branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
-      all_locals :: acc, N.Case (e, b)
+      let b = aast_branch ~after_unsafe:(Pos.none, N.Fallthrough) env b in
+      N.Case (e, b)
 
-  and aast_catchl env l = List.map_env [] l (aast_catch env)
-  and aast_catch env acc ((p1, lid1), (p2, lid2), b) =
+  and aast_catchl env l = List.map l (aast_catch env)
+  and aast_catch env ((p1, lid1), (p2, lid2), b) =
     Env.scope
       env
       (fun env ->
@@ -2672,8 +2634,8 @@ module Make (GetLocals : GetLocals) = struct
             && name2.[0] = '$' (* This is always true if not in experimental mode *)
           then Env.new_lvar env (p2, name2)
           else Env.new_let_local env (p2, name2) in
-        let all_locals, b = aast_branch env b in
-        all_locals :: acc, (Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false, x2, b))
+        let b = aast_branch env b in
+        Env.type_name env (p1, lid1) ~allow_typedef:true ~allow_generics:false, x2, b)
 
   and aast_afield env field =
     match field with

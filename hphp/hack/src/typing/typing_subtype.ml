@@ -802,8 +802,9 @@ and simplify_subtype
           coll = SN.Rx.cTraversable ||
           coll = SN.Collections.cContainer) ->
       (match akind with
-        (* array <: Traversable<t> and emptyarray <: Traversable<t> for any t *)
-      | AKany -> valid ()
+        (* array <: Traversable<_> and emptyarray <: Traversable<t> for any t *)
+      | AKany ->
+        simplify_subtype ~seen_generic_params ~deep ~this_ty (fst ety_sub, Tany) tv_super env
       | AKempty -> valid ()
       (* vec<tv> <: Traversable<tv_super>
        * iff tv <: tv_super
@@ -823,7 +824,10 @@ and simplify_subtype
          || coll = SN.Collections.cKeyedContainer) ->
     let r = fst ety_sub in
       (match akind with
-      | AKany -> valid ()
+      | AKany ->
+        env |>
+        simplify_subtype ~seen_generic_params ~deep ~this_ty (fst ety_sub, Tany) tk_super &&&
+        simplify_subtype ~seen_generic_params ~deep ~this_ty (fst ety_sub, Tany) tv_super
       | AKempty -> valid ()
       | AKvarray tv
       | AKvec tv ->

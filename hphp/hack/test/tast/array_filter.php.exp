@@ -70,7 +70,7 @@
            (Expr
               (([13:3-31], array),
                (Call (Cnormal,
-                  (([13:3-15], (function<Tv>(Container<nothing> $input, ?(function(nothing): bool) $callback): array)),
+                  (([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): array)),
                    (Id ([13:3-15], "\\array_filter"))),
                   [],
                   [(([13:16-30], array), (Lvar ([13:16-30], $untyped_array)))
@@ -163,7 +163,7 @@
            (Expr
               (([22:3-35], array),
                (Call (Cnormal,
-                  (([22:3-15], (function<Tv>(Container<nothing> $input, ?(function(nothing): bool) $callback): array)),
+                  (([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): array)),
                    (Id ([22:3-15], "\\array_filter"))),
                   [],
                   [(([22:16-30], array), (Lvar ([22:16-30], $untyped_array)));

@@ -1225,7 +1225,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
       instr_issetg
     ]
   | A.Array_get (base_expr, opt_elem_expr) ->
-    fst (emit_array_get ~need_ref:false env pos QueryOp.Isset base_expr opt_elem_expr)
+    fst (emit_array_get env pos QueryOp.Isset base_expr opt_elem_expr)
   | A.Class_get (cid, id)  ->
     emit_class_get env QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
@@ -1265,7 +1265,7 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
       instr_emptyg
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
-    fst (emit_array_get ~need_ref:false env pos QueryOp.Empty base_expr opt_elem_expr)
+    fst (emit_array_get env pos QueryOp.Empty base_expr opt_elem_expr)
   | A.Class_get (cid, id) ->
     emit_class_get env QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
@@ -1692,8 +1692,11 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
       instr (IGet CGetG)
     ]
   | A.Array_get(base_expr, opt_elem_expr) ->
+    if need_ref then Emit_fatal.raise_fatal_parse pos
+      "references of subscript expressions should not parse"
+    else
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
-    fst (emit_array_get ~need_ref env pos query_op base_expr opt_elem_expr)
+    fst (emit_array_get env pos query_op base_expr opt_elem_expr)
   | A.Obj_get (expr, prop, nullflavor) ->
     let query_op = if need_ref then QueryOp.Empty else QueryOp.CGet in
     fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
@@ -2249,7 +2252,7 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) env pos (_, expr_ as expr)
       instr (IGet CGetQuietG)
     ], None
   | A.Array_get(base_expr, opt_elem_expr) ->
-    emit_array_get ~null_coalesce_assignment ~need_ref:false
+    emit_array_get ~null_coalesce_assignment
       env pos QueryOp.CGetQuiet base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
     emit_obj_get ~null_coalesce_assignment ~need_ref:false
@@ -2311,17 +2314,17 @@ and is_trivial ~is_base env (_, e) =
 (* Emit code for e1[e2] or isset(e1[e2]).
  *)
 
-and emit_array_get ?(null_coalesce_assignment=false) ?(no_final=false) ?mode ~need_ref
+and emit_array_get ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
   env outer_pos qop base_expr opt_elem_expr =
   let result =
-    emit_array_get_worker ~null_coalesce_assignment ~no_final ?mode ~need_ref ~inout_param_info:None
+    emit_array_get_worker ~null_coalesce_assignment ~no_final ?mode ~inout_param_info:None
     env outer_pos qop base_expr opt_elem_expr in
   match result with
   | Array_get_regular i, querym_n_unpopped -> i, querym_n_unpopped
   | Array_get_inout _, _ -> failwith "unexpected inout"
 
 and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
-  ~need_ref ~inout_param_info
+  ~inout_param_info
   env outer_pos qop base_expr opt_elem_expr =
   (* Disallow use of array(..)[] *)
   match base_expr, opt_elem_expr with
@@ -2334,7 +2337,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
     get_local_temp_kind ~is_base:false inout_param_info env opt_elem_expr in
   let mode =
     if null_coalesce_assignment then MemberOpMode.Warn
-    else Option.value mode ~default:(get_queryMOpMode need_ref qop) in
+    else Option.value mode ~default:(get_queryMOpMode false qop) in
   let querym_n_unpopped = ref None in
   let elem_expr_instrs, elem_stack_size =
     emit_elem_instrs ~local_temp_kind ~null_coalesce_assignment env opt_elem_expr in
@@ -2347,9 +2350,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
   let make_final total_stack_size =
     if no_final then empty else
     instr (IFinal (
-      if need_ref then
-        VGetM (total_stack_size, mk)
-      else if null_coalesce_assignment then begin
+      if null_coalesce_assignment then begin
         querym_n_unpopped := Some total_stack_size;
         QueryM (0, qop, mk)
       end else
@@ -2949,14 +2950,12 @@ and emit_args_and_inout_setters env args =
     (* inout $arr[...][...] *)
     | A.Callconv (A.Pinout, (pos, A.Array_get (base_expr, opt_elem_expr))) ->
       let array_get_result =
-        fst (emit_array_get_worker ~need_ref:false
-          ~inout_param_info:(Some (i, aliases)) env pos
+        fst (emit_array_get_worker ~inout_param_info:(Some (i, aliases)) env pos
           QueryOp.InOut base_expr opt_elem_expr) in
       begin match array_get_result with
       | Array_get_regular instrs ->
         let setter_base =
-          fst (emit_array_get ~no_final:true ~need_ref:false
-            ~mode:MemberOpMode.Define
+          fst (emit_array_get ~no_final:true ~mode:MemberOpMode.Define
             env pos QueryOp.InOut base_expr opt_elem_expr) in
         let setter = gather [
           setter_base;

@@ -152,27 +152,23 @@ GlobalsArray::SetStrInPlace(ArrayData* ad, StringData* k, Cell v) {
 }
 
 ArrayData*
-GlobalsArray::SetWithRefIntInPlace(ArrayData* ad, int64_t k, TypedValue v) {
-  return SetWithRefStrInPlace(ad, String(k).get(), v);
+GlobalsArray::SetWithRefIntInPlace(ArrayData*, int64_t, TypedValue) {
+  throw_not_implemented("references not allowed in $GLOBALS");
 }
 
 ArrayData*
-GlobalsArray::SetWithRefStrInPlace(ArrayData* ad, StringData* k, TypedValue v) {
-  auto a = asGlobals(ad);
-  tvSetWithRef(v, *a->m_tab->lookupAdd(k));
-  return a;
+GlobalsArray::SetWithRefStrInPlace(ArrayData*,  StringData*, TypedValue) {
+  throw_not_implemented("references not allowed in $GLOBALS");
 }
 
 ArrayData*
-GlobalsArray::SetRefIntInPlace(ArrayData* ad, int64_t k, tv_lval v) {
-  return SetRefStrInPlace(ad, String(k).get(), v);
+GlobalsArray::SetRefIntInPlace(ArrayData*, int64_t, tv_lval) {
+  throw_not_implemented("references not allowed in $GLOBALS");
 }
 
 ArrayData*
-GlobalsArray::SetRefStrInPlace(ArrayData* ad, StringData* k, tv_lval v) {
-  auto a = asGlobals(ad);
-  tvAsVariant(a->m_tab->lookupAdd(k)).assignRef(v);
-  return a;
+GlobalsArray::SetRefStrInPlace(ArrayData*, StringData*, tv_lval) {
+  throw_not_implemented("references not allowed in $GLOBALS");
 }
 
 ArrayData*

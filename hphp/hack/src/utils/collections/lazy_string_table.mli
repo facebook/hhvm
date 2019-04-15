@@ -10,7 +10,7 @@
 open Core_kernel
 
 type 'a t
-(** [Typing_class_member_cache.t] provides a memoization cache for any
+(** [Lazy_string_table.t] provides a memoization cache for any
     [(string * 'a) Sequence.t] where:
 
     + It is desirable to look up elements in the sequence by their [string] key
@@ -23,16 +23,16 @@ type 'a t
     once (so it will behave correctly if the input sequence depends on mutable
     state).
 
-    Intended for caches of class members, where we want to lazily parse ancestor
-    classes only as necessary, and our implementation of [merge] will provide
-    the logic for member overriding. *)
+    Originally written for caches of class members, where we want to lazily
+    parse ancestor classes only as necessary, and our implementation of [merge]
+    provides the logic for member overriding. *)
 
 val make:
   is_canonical:('a -> bool) ->
   merge:(earlier:'a -> later:'a -> 'a) ->
   (string * 'a) Sequence.t ->
   'a t
-(** Create a new [Typing_class_member_cache.t] memoizing the given sequence.
+(** Create a new [Lazy_string_table.t] memoizing the given sequence.
 
     A good implementation of [merge] is necessary for correctness, since [merge]
     is used when a key-value pair emitted later in the sequence has the same key

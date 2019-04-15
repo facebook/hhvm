@@ -3,7 +3,6 @@
   (wrapped false)
   (modules
     pp_type
-    typing_class_member_cache
     typing_defs
     typing_reason)
   (libraries

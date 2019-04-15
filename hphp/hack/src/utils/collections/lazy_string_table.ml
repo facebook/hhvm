@@ -23,15 +23,15 @@ let make ~is_canonical ~merge seq =
 type 'a advance_result =
   | Complete
   (** The cache's [seq] has been exhausted, and its [tbl] now contains the
-      complete mapping of all members. *)
+      complete mapping of all elements. *)
   | Skipped
-  (** The cache's [seq] emitted some non-canonical member, which may or may not
-      have replaced a previously emitted member stored in the [tbl]. *)
+  (** The cache's [seq] emitted some non-canonical element, which may or may not
+      have replaced a previously emitted element stored in the [tbl]. *)
   | Yield of string * 'a
-  (** The cache's [seq] emitted this canonical member (along with its ID). This
-      member may be immediately used without traversing the rest of the sequence
-      (since canonical members cannot be replaced or updated as we traverse the
-      rest of the sequence). *)
+  (** The cache's [seq] emitted this canonical element (along with its ID). This
+      element may be immediately used without traversing the rest of the
+      sequence (since canonical elements cannot be replaced or updated as we
+      traverse the rest of the sequence). *)
 
 (** Fetch the next value from the cache's [seq]. Update its [tbl] by storing the
     new value, ignoring the new value, or merging the new value with an existing

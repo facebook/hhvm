@@ -6,6 +6,7 @@
   (modules
     hh_single_type_check)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     ai
     client

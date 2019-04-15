@@ -17,6 +17,14 @@ let find_hphp_parent dir =
       reconstruct_till_hphp path acc in
   reconstruct_till_hphp path ""
 
+let find_sqlite () =
+  let split = (fun s -> if s = "" then [] else String.split_on_char ' ' s) in
+  let rpath = match Sys.getenv "FB_LD_OPTS" with
+    | t -> let flags = split t in
+      List.fold_left (fun acc x -> "-ccopt" :: x :: acc ) [] flags
+    | exception Not_found -> [] in
+  C.Flags.write_sexp "ld-opts.sexp" rpath
+
 let () =
   C.main ~name:"hphpdir" (fun (_c : C.t) ->
     let source_root = match Sys.getenv "CMAKE_SOURCE_DIR" with
@@ -25,4 +33,5 @@ let () =
       let workingdir = Sys.getcwd () in
       find_hphp_parent workingdir
     in
+    find_sqlite ();
     C.Flags.write_lines "hphp_parent" [ source_root ])

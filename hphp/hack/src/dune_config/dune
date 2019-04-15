@@ -4,7 +4,7 @@
     dune.configurator))
 
 (rule
-  (targets hphp_parent)
+  (targets hphp_parent ld-opts.sexp)
   (action (run ./discover.exe)))
 
 (rule

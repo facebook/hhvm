@@ -1159,6 +1159,7 @@ public:
   static bool RepoAuthoritative;
   static int64_t RepoLocalReadaheadRate;
   static bool RepoLocalReadaheadConcurrent;
+  static uint32_t RepoBusyTimeoutMS;
 
   // pprof/hhprof options
   static bool HHProfEnabled;

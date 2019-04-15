@@ -690,22 +690,6 @@ void Repo::initCentral() {
   fail_no_repo();
 }
 
-static int busyHandler(void* opaque, int nCalls) {
-  Repo* repo UNUSED = static_cast<Repo*>(opaque);
-  // yield to allow other threads access to the machine
-  // spin-wait can starve other threads.
-  // We need to give up eventually or we will wait forever in the event of a
-  // deadlock. We've already waited nCalls * (nCalls - 1) / 2 ms; at nCalls
-  // of 300 that's just under 45 seconds.
-  if (nCalls < 300) {
-    usleep(1000 * nCalls);
-    return 1; // Tell SQLite to retry.
-  } else {
-    Logger::Error("Failed to acquire SQLite lock during repository operation");
-    return 0; // Tell SQLite to give up.
-  }
-}
-
 namespace {
 /*
  * Convert the permission bits from the given stat struct to an ls-style
@@ -849,8 +833,9 @@ RepoStatus Repo::openCentral(const char* rawPath, std::string& errorMsg) {
     return RepoStatus::error;
   }
 
-  // Register a busy handler to avoid spurious SQLITE_BUSY errors.
-  sqlite3_busy_handler(m_dbc, busyHandler, (void*)this);
+  if (RuntimeOption::RepoBusyTimeoutMS) {
+    sqlite3_busy_timeout(m_dbc, RuntimeOption::RepoBusyTimeoutMS);
+  }
   try {
     m_beginStmt.prepare("BEGIN TRANSACTION;");
     m_rollbackStmt.prepare("ROLLBACK;");

@@ -1046,6 +1046,7 @@ bool RuntimeOption::RepoDebugInfo = true;
 // perf-sensitive.
 int64_t RuntimeOption::RepoLocalReadaheadRate = 0;
 bool RuntimeOption::RepoLocalReadaheadConcurrent = false;
+uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
 bool RuntimeOption::HHProfActive = false;
@@ -1667,6 +1668,8 @@ void RuntimeOption::Load(
                  "Repo.LocalReadaheadRate", 0);
     Config::Bind(RepoLocalReadaheadConcurrent, ini, config,
                  "Repo.LocalReadaheadConcurrent", false);
+    Config::Bind(RepoBusyTimeoutMS, ini, config,
+                 "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
   }
 
   if (use_jemalloc) {

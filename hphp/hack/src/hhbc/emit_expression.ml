@@ -261,9 +261,6 @@ let is_global_namespace env =
 let enable_intrinsics_extension () =
   Hhbc_options.enable_intrinsics_extension !Hhbc_options.compiler_options
 
-let phpism_undefined_function_fallback () =
-  Hhbc_options.phpism_undefined_function_fallback !Hhbc_options.compiler_options
-
 let optimize_null_check () =
   Hhbc_options.optimize_null_check !Hhbc_options.compiler_options
 
@@ -3206,27 +3203,23 @@ and emit_call_lhs_and_fcall
     end
 
   | A.Id (_, s as id) ->
-    let fq_id, id_opt =
+    let fq_id =
       Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) id in
-    let fq_id, id_opt =
+    let fq_id =
       let flags, num_args, _, _, _ = fcall_args in
-      match id_opt, SU.strip_global_ns s with
-      | None, "min" when num_args = 2 && not flags.has_unpack ->
-        Hhbc_id.Function.from_raw_string "__SystemLib\\min2", None
-      | None, "max" when num_args = 2 && not flags.has_unpack ->
-        Hhbc_id.Function.from_raw_string  "__SystemLib\\max2", None
-      | _ -> fq_id, id_opt in
+      match SU.strip_global_ns s with
+      | "min" when num_args = 2 && not flags.has_unpack ->
+        Hhbc_id.Function.from_raw_string "__SystemLib\\min2"
+      | "max" when num_args = 2 && not flags.has_unpack ->
+        Hhbc_id.Function.from_raw_string  "__SystemLib\\max2"
+      | _ -> fq_id in
     let fq_id = if has_inout_args
       then Hhbc_id.Function.add_suffix
         fq_id (Emit_inout_helpers.inout_suffix inout_arg_positions)
       else fq_id in
     if does_not_have_non_tparam_generics then
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
-      match id_opt with
-      | Some id when phpism_undefined_function_fallback () ->
-        instr_fcallfuncu fcall_args fq_id id
-      | _ ->
-        instr_fcallfuncd fcall_args fq_id
+      instr_fcallfuncd fcall_args fq_id
     else
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
@@ -3276,7 +3269,7 @@ and emit_name_string env e =
 
 and emit_special_function env pos id args uargs default =
   let nargs = List.length args + List.length uargs in
-  let fq_id, _ =
+  let fq_id =
     Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) (Pos.none, id) in
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
@@ -3351,14 +3344,11 @@ and emit_special_function env pos id args uargs default =
         ("fun() expects exactly 1 parameter, " ^ (string_of_int nargs) ^
          " given")
     else begin match args with
-      | [(pos, A.String func_name)] ->
-        let func_id, id_opt = Hhbc_id.Function.elaborate_id_with_builtins
-          (Emit_env.get_namespace env) (pos, func_name) in
-        let func_id = Option.value_map id_opt
-          ~default:func_id ~f:Hhbc_id.Function.from_raw_string in
+      | [(_, A.String func_name)] ->
+        let func_name = SU.strip_global_ns func_name in
         if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options
-        then Some (instr_resolve_func func_id)
-        else Some (instr_string (Hhbc_id.Function.to_raw_string func_id))
+        then Some (instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name)
+        else Some (instr_string func_name)
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     end

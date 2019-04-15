@@ -92,27 +92,28 @@ module Function = struct
   let to_raw_string s = s
   let add_suffix s suffix = s ^ suffix
 
-  let elaborate_id ns id =
-    let _, x, y = elaborate_id ns Namespaces.ElaborateFun id in
-    x, y
   let elaborate_id_with_builtins ns id =
-    let fq_id, backoff_id = elaborate_id ns id in
+    let _, fq_id, backoff_id = elaborate_id ns Namespaces.ElaborateFun id in
     match backoff_id with
       (* OK we are in a namespace so let's look at the backoff ID and see if
        * it's an HH\ or top-level function with implicit namespace.
        *)
     | Some id ->
       if List.mem ~equal:(=) Namespaces.autoimport_funcs id && (Emit_env.is_hh_syntax_enabled ())
-      then SU.prefix_namespace "HH" id, Some id
-      else fq_id, backoff_id
+      then SU.prefix_namespace "HH" id
+      else fq_id
       (* Likewise for top-level, with no namespace *)
     | None ->
       if is_hh_builtin fq_id && (Emit_env.is_hh_syntax_enabled ())
       then
         if has_hh_prefix fq_id
-        then fq_id, None
-        else SU.prefix_namespace "HH" fq_id, Some fq_id
-      else fq_id, None
+        then fq_id
+        else SU.prefix_namespace "HH" fq_id
+      else fq_id
+
+    let elaborate_id ns id =
+      let _, fq_id, _ = elaborate_id ns Namespaces.ElaborateFun id in
+      fq_id
 end
 
 module Const = struct

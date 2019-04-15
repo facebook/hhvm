@@ -2,7 +2,7 @@
 
 namespace Foo;
 use function Bar\f;
-require_once 'undefined_function_default.inc';
+require_once 'undefined_function1.inc';
 
 <<__EntryPoint>>
 function main(): void {

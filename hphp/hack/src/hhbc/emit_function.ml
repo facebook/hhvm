@@ -17,7 +17,7 @@ module A = Ast
 let emit_function : A.fun_ * Closure_convert.hoist_kind -> Hhas_function.t list =
   fun (ast_fun, hoisted) ->
   let namespace = ast_fun.A.f_namespace in
-  let original_id, _ =
+  let original_id =
     Hhbc_id.Function.elaborate_id namespace ast_fun.A.f_name in
   let function_is_async =
     ast_fun.Ast.f_fun_kind = Ast_defs.FAsync

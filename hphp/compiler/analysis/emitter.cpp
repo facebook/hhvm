@@ -49,8 +49,6 @@ namespace Compiler {
 
 namespace {
 
-static HHBBC::UnitEmitterQueue s_ueq;
-
 void genText(UnitEmitter* ue, const std::string& outputPath) {
   std::unique_ptr<Unit> unit(ue->create(true));
   auto const basePath = AnalysisResult::prepareFile(
@@ -223,6 +221,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         commitSome(ues);
       }
 
+      HHBBC::UnitEmitterQueue ueq;
+
       auto commitLoop = [&] {
         folly::Optional<Timer> commitTime;
         // kBatchSize needs to strike a balance between reducing
@@ -233,7 +233,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         // the 2-10 range is reasonable.
         static const unsigned kBatchSize = 8;
 
-        while (auto ue = s_ueq.pop()) {
+        while (auto ue = ueq.pop()) {
           if (!commitTime) {
             commitTime.emplace(Timer::WallTime, "committing units to repo");
           }
@@ -270,7 +270,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
           };
 
           HHBBC::whole_program(
-            std::move(ues), s_ueq, arrTable,
+            std::move(ues), ueq, arrTable,
             Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
         });
 

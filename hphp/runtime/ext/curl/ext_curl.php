@@ -478,7 +478,7 @@ function curl_destroy_pool(string $poolName): bool;
  * @return array
  */
 <<__Native, __HipHopSpecific>>
-function curl_list_pools(): array;
+function curl_list_pools(): darray<string, darray>;
 
 
 } // namespace HH

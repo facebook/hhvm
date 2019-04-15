@@ -1,5 +1,6 @@
 array(0) {
 }
+bool(true)
 array(1) {
   ["unittest"]=>
   array(4) {
@@ -20,5 +21,8 @@ array(1) {
     }
   }
 }
+bool(true)
+bool(true)
 array(0) {
 }
+bool(true)

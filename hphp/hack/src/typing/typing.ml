@@ -890,6 +890,9 @@ and stmt_ env pos st =
     env, T.For(te1, te2, te3, tb)
   | Switch ((pos, _) as e, cl) ->
       let env, te, ty = expr env e in
+      (* Exhaustiveness etc is sensitive to unions, so normalize to avoid
+       * most of the problems. TODO: make it insensitive *)
+      let env, ty = Union.simplify_unions env ty in
       (* NB: A 'continue' inside a 'switch' block is equivalent to a 'break'.
        * See the note in
        * http://php.net/manual/en/control-structures.continue.php *)
@@ -1948,7 +1951,19 @@ and expr_
       let env, te2, ty2 = expr ?expected env e2 in
       let env, ty1' = Env.fresh_unresolved_type env (fst e1) in
       let env = SubType.sub_type env ty1 (MakeType.nullable Reason.Rnone ty1') in
-      let env, ty_result = Union.union env ty1' ty2 in
+      let env, ty_result =
+        if TypecheckerOptions.new_inference (Env.get_tcopt env)
+        then
+        (* Essentially mimic a call to
+         *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
+         * That way we let the constraint solver take care of the union logic.
+         *)
+        let env, ty_result = Env.fresh_unresolved_type env (fst e2) in
+        let env = SubType.sub_type env ty1' ty_result in
+        let env = SubType.sub_type env ty2 ty_result in
+        env, ty_result
+      else
+        Union.union env ty1' ty2 in
       make_result env p (T.Binop (Ast.QuestionQuestion, te1, te2)) ty_result
   (* For example, e1 += e2. This is typed and translated as if
    * written e1 = e1 + e2.

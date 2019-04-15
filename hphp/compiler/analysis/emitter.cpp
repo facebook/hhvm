@@ -195,12 +195,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   decltype(ues) ues_to_print;
   auto const outputPath = ar->getOutputPath();
 
-  std::thread wp_thread, dispatcherThread;
+  std::thread wp_thread;
   auto unexpectedException = [&] (const char* what) {
-    if (dispatcherThread.joinable()) {
-      Logger::Error("emitAllHHBC exited via an exception "
-                    "before dispatcherThread was joined: %s", what);
-    }
     if (wp_thread.joinable()) {
       Logger::Error("emitAllHHBC exited via an exception "
                     "before wp_thread was joined: %s", what);

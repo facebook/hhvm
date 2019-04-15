@@ -800,7 +800,6 @@ uint64_t RuntimeOption::DisableCallUserFunc = 0;
 uint64_t RuntimeOption::DisableCallUserFuncArray = 0;
 uint64_t RuntimeOption::DisableParseStrSingleArg = 0;
 uint64_t RuntimeOption::DisableDefine = 2;
-uint64_t RuntimeOption::UndefinedFunctionFallback = 2;
 uint64_t RuntimeOption::DisableAssert = 0;
 bool RuntimeOption::DisallowExecutionOperator = true;
 bool RuntimeOption::DisableReservedVariables = true;
@@ -1576,9 +1575,6 @@ void RuntimeOption::Load(
   }
   {
     // PHPisms
-    Config::Bind(UndefinedFunctionFallback, ini, config,
-                 "Hack.Lang.Phpism.UndefinedFunctionFallback",
-                 UndefinedFunctionFallback);
     Config::Bind(DisableCallUserFunc, ini, config,
                  "Hack.Lang.Phpism.DisableCallUserFunc",
                  DisableCallUserFunc);

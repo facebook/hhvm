@@ -623,11 +623,9 @@ SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
               });
 }
 
-void fpushFuncCommon(IRGS& env,
-                     uint32_t numParams,
-                     const StringData* name,
-                     const StringData* fallback) {
+} // namespace
 
+void emitFPushFuncD(IRGS& env, uint32_t numParams, const StringData* name) {
   auto const lookup = lookupImmutableFunc(curUnit(env), name);
   if (lookup.func) {
     // We know the function, but we have to ensure its unit is loaded. Use
@@ -643,11 +641,8 @@ void fpushFuncCommon(IRGS& env,
     return;
   }
 
-  auto const ssaFunc = fallback
-    ? gen(env, LdFuncCachedU, LdFuncCachedUData { name, fallback })
-    : gen(env, LdFuncCached, FuncNameData { name });
   fsetActRec(env,
-             ssaFunc,
+             gen(env, LdFuncCached, FuncNameData { name }),
              cns(env, TNullptr),
              numParams,
              nullptr,
@@ -655,6 +650,7 @@ void fpushFuncCommon(IRGS& env,
              nullptr);
 }
 
+namespace {
 
 //////////////////////////////////////////////////////////////////////
 
@@ -688,10 +684,6 @@ bool callNeedsCallerFrame(const NormalizedInstruction& inst,
 
   if (op == OpFPushFunc)  return true;
   if (op == OpFPushFuncD) return checkTaintId(getImm(fpushPC, 1).u_SA);
-  if (op == OpFPushFuncU) {
-    return checkTaintId(getImm(fpushPC, 1).u_SA) ||
-           checkTaintId(getImm(fpushPC, 2).u_SA);
-  }
 
   return false;
 }
@@ -901,17 +893,6 @@ void emitFPushCtor(IRGS& env, uint32_t numParams) {
   }();
 
   fsetActRec(env, func, obj, numParams, nullptr, cns(env, false), nullptr);
-}
-
-void emitFPushFuncD(IRGS& env, uint32_t nargs, const StringData* name) {
-  fpushFuncCommon(env, nargs, name, nullptr);
-}
-
-void emitFPushFuncU(IRGS& env,
-                    uint32_t nargs,
-                    const StringData* name,
-                    const StringData* fallback) {
-  fpushFuncCommon(env, nargs, name, fallback);
 }
 
 void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {

@@ -635,7 +635,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             ONE(CV),    NF) \
   O(FPushFunc,       TWO(IVA,I32LA),   FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushFuncD,      TWO(IVA,SA),      FPUSH(0, 0),     FPUSH,      PF) \
-  O(FPushFuncU,      THREE(IVA,SA,SA), FPUSH(0, 0),     FPUSH,      PF) \
   O(FPushCtor,       ONE(IVA),         FPUSH(0, 1),     FPUSH,      PF) \
   O(FPushObjMethod,  THREE(IVA,OA(ObjMethodOp),I32LA),                  \
                                        FPUSH(1, 1),     FPUSH,      PF) \
@@ -1032,10 +1031,7 @@ constexpr bool isFPushObjMethod(Op opcode) {
 }
 
 constexpr bool isFPushFunc(Op opcode) {
-  return
-    opcode == OpFPushFunc  ||
-    opcode == OpFPushFuncD ||
-    opcode == OpFPushFuncU;
+  return opcode == OpFPushFunc || opcode == OpFPushFuncD;
 }
 
 inline bool isFCallStar(Op opcode) {

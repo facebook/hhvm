@@ -210,10 +210,6 @@ let instr_fcallfuncd fcall_args id = gather [
   instr (ICall (FPushFuncD ((num_args_of fcall_args), id)));
   instr (ICall (FCall (fcall_args)))
 ]
-let instr_fcallfuncu fcall_args id fallback = gather [
-  instr (ICall (FPushFuncU ((num_args_of fcall_args), id, fallback)));
-  instr (ICall (FCall (fcall_args)))
-]
 let instr_fcallctor fcall_args = gather [
   instr (ICall (FPushCtor (num_args_of fcall_args)));
   instr (ICall (FCall (fcall_args)))

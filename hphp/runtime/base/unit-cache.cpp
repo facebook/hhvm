@@ -799,7 +799,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::RepoDebugInfo ? '1' : '0')
     + (RuntimeOption::EvalEnableHHJS ? '1' : '0')
     + (RuntimeOption::EvalDumpHHJS ? '1' : '0')
-    + std::to_string(RuntimeOption::UndefinedFunctionFallback)
     + (RuntimeOption::DisallowExecutionOperator ? '1' : '0')
     + (RuntimeOption::DisableNontoplevelDeclarations ? '1' : '0')
     + (RuntimeOption::DisableStaticClosures ? '1' : '0')

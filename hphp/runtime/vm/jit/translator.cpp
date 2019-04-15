@@ -284,7 +284,6 @@ static const struct {
    */
   { OpFPushFunc,   {Stack1,           FStack,       OutFDesc        }},
   { OpFPushFuncD,  {None,             FStack,       OutFDesc        }},
-  { OpFPushFuncU,  {None,             FStack,       OutFDesc        }},
   { OpFPushCtor,   {None,             FStack,       OutFDesc        }},
   { OpFPushObjMethod,
                    {Stack1,           FStack,       OutFDesc        }},
@@ -499,7 +498,6 @@ int64_t getStackPopped(PC pc) {
   switch (op) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
-    case Op::FPushFuncU:
     case Op::FPushCtor:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
@@ -556,7 +554,6 @@ int64_t getStackPushed(PC pc) {
   switch (op) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
-    case Op::FPushFuncU:
     case Op::FPushCtor:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
@@ -964,7 +961,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushCtor:
   case Op::FPushFunc:
   case Op::FPushFuncD:
-  case Op::FPushFuncU:
   case Op::FPushObjMethodD:
   case Op::FPushObjMethodRD:
   case Op::FuncNumArgs:

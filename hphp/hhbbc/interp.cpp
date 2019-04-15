@@ -3130,7 +3130,7 @@ void in(ISS& env, const bc::FPushFuncD& op) {
 void in(ISS& env, const bc::FPushFunc& op) {
   auto const t1 = topC(env);
   folly::Optional<res::Func> rfunc;
-  // FPushFuncD and FPushFuncU require that the names of inout functions be
+  // FPushFuncD requires that the names of inout functions be
   // mangled, so skip those for now.
   auto const name = getNameFromType(t1);
   if (name && op.argv.size() == 0) {
@@ -3158,34 +3158,6 @@ void in(ISS& env, const bc::FPushFunc& op) {
   } else {
     fpiPushNoFold(env, ActRec { FPIKind::Unknown, TTop });
   }
-}
-
-void in(ISS& env, const bc::FPushFuncU& op) {
-  auto const rfuncPair =
-    env.index.resolve_func_fallback(env.ctx, op.str2, op.str3);
-  if (options.ElideAutoloadInvokes) {
-    auto const fpushfuncd = [&](auto const& fn) {
-      return reduce(env, bc::FPushFuncD { op.arg1, fn->name(), op.has_unpack });
-    };
-    if (rfuncPair.first && !rfuncPair.second) {
-      return fpushfuncd(rfuncPair.first);
-    }
-    if (!rfuncPair.first && rfuncPair.second &&
-        RuntimeOption::UndefinedFunctionFallback == 0) {
-      return fpushfuncd(rfuncPair.second);
-    }
-  }
-  discardAR(env, op.arg1);
-  fpiPushNoFold(
-    env,
-    ActRec {
-      FPIKind::Func,
-      TBottom,
-      folly::none,
-      rfuncPair.first,
-      rfuncPair.second
-    }
-  );
 }
 
 void in(ISS& env, const bc::ResolveFunc& op) {

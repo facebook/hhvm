@@ -459,7 +459,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsTypeCns:
   case LdFunc:
   case LdFuncCached:
-  case LdFuncCachedU:
   case LdObjMethod:
   case LdSSwitchDestSlow:
   case LdSwitchObjIndex:

@@ -237,8 +237,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EvalReffinessInvariance  = s_globalData.ReffinessInvariance;
     RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
-    RuntimeOption::UndefinedFunctionFallback =
-      s_globalData.UndefinedFunctionFallback;
     RuntimeOption::EnableArgsInBacktraces = s_globalData.EnableArgsInBacktraces;
     RuntimeOption::EvalAbortBuildOnVerifyError =
       s_globalData.AbortBuildOnVerifyError;

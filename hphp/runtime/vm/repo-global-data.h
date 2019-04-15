@@ -181,12 +181,6 @@ struct Repo::GlobalData {
   bool AbortBuildOnVerifyError = false;
 
   /*
-   * Controls PHP's behavior of falling back to the default namespace for
-   * undefined functions.
-   */
-  uint64_t UndefinedFunctionFallback = 0;
-
-  /*
    * Should we display function arguments in backtraces?
    */
   bool EnableArgsInBacktraces = false;
@@ -242,7 +236,6 @@ struct Repo::GlobalData {
       (NoticeOnBuiltinDynamicCalls)
       (Signature)
       (AbortBuildOnVerifyError)
-      (UndefinedFunctionFallback)
       (EnableArgsInBacktraces)
       (EmitClsMethPointers)
       (IsVecNotices)

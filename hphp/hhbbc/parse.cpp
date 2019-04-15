@@ -380,11 +380,6 @@ void populate_block(ParseUnitState& puState,
   auto createcl = [&] (const Bytecode& b) {
     puState.createClMap[b.CreateCl.arg2].insert(&func);
   };
-  auto fpushfuncu = [&] (const Bytecode& b) {
-    if (b.FPushFuncU.str3 == s_class_alias.get()) {
-      puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
-    }
-  };
   auto fpushfuncd = [&] (const Bytecode& b) {
     if (b.FPushFuncD.str2 == s_class_alias.get()) {
       puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
@@ -513,7 +508,6 @@ void populate_block(ParseUnitState& puState,
       if (Op::opcode == Op::DefClsNop)   defclsnop(b);             \
       if (Op::opcode == Op::AliasCls)    aliascls(b);              \
       if (Op::opcode == Op::CreateCl)    createcl(b);              \
-      if (Op::opcode == Op::FPushFuncU)  fpushfuncu(b);            \
       if (Op::opcode == Op::FPushFuncD)  fpushfuncd(b);            \
       blk.hhbcs.push_back(std::move(b));                           \
       assert(pc == next);                                          \

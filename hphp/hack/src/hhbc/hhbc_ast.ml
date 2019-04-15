@@ -379,7 +379,6 @@ type instruct_mutator =
 type instruct_call =
   | FPushFunc of num_params * param_locations
   | FPushFuncD of num_params * function_id
-  | FPushFuncU of num_params * function_id * string
   | FPushObjMethod of num_params * Ast.og_null_flavor * param_locations
   | FPushObjMethodD of num_params * method_id * Ast.og_null_flavor
   | FPushObjMethodRD of num_params * method_id * Ast.og_null_flavor

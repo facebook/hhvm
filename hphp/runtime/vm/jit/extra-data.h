@@ -853,28 +853,6 @@ struct LdObjMethodData : IRExtraData {
   const StringData* method;
 };
 
-struct LdFuncCachedUData : IRExtraData {
-  explicit LdFuncCachedUData(const StringData* name,
-                             const StringData* fallback)
-    : name(name)
-    , fallback(fallback)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(name->data(), ',', fallback->data());
-  }
-
-  size_t hash() const {
-    return hash_int64_pair((uint32_t)name->hash(), (uint32_t)fallback->hash());
-  }
-  bool equals(const LdFuncCachedUData& o) const {
-    return name == o.name && fallback == o.fallback;
-  }
-
-  const StringData* name;
-  const StringData* fallback;
-};
-
 /*
  * Offset and stack deltas for InterpOne.
  */
@@ -1615,7 +1593,6 @@ X(CheckSubClsCns,               LdSubClsCnsData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
-X(LdFuncCachedU,                LdFuncCachedUData);
 X(LdObjMethod,                  LdObjMethodData);
 X(RaiseMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncArgData);

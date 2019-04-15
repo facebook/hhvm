@@ -4873,22 +4873,6 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
   ar->trashThis();
 }
 
-OPTBLD_INLINE void iopFPushFuncU(uint32_t numArgs, Id nsFunc, Id globalFunc) {
-  Unit* unit = vmfp()->m_func->unit();
-  const NamedEntityPair nep = unit->lookupNamedEntityPairId(nsFunc);
-  Func* func = Unit::loadFunc(nep.second, nep.first);
-  if (func == nullptr) {
-    const NamedEntityPair nep2 = unit->lookupNamedEntityPairId(globalFunc);
-    raise_undefined_function_fallback_notice(nep.first, nep2.first);
-    func = Unit::loadFunc(nep2.second, nep2.first);
-    if (func == nullptr) {
-      raise_call_to_undefined(unit->lookupLitstrId(nsFunc));
-    }
-  }
-  ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
-  ar->trashThis();
-}
-
 namespace {
 
 void fPushObjMethodImpl(

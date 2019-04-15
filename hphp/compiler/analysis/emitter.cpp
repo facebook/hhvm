@@ -155,7 +155,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
-  gd.UndefinedFunctionFallback   = RuntimeOption::UndefinedFunctionFallback;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;

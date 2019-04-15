@@ -1486,12 +1486,6 @@ To string conversions:
   instruction does not assume the loaded function will be called immediately,
   so it will raise a resolution failure error instead of a call failure error.
 
-| LdFuncCachedU<funcName,fallbackName>, D(Func), NA, NF
-
-  Try to load a Func named funcName from the RDS, if it isn't defined, try to
-  load a Func named fallbackName. If that also isn't defined, invoke autoload.
-  If this still doesn't result in a Func, raise a fatal error.
-
 | LdARFuncPtr<offset>, DParam(Func), S(StkPtr), NF
 
   Loads the m_func member of an ActRec. S0 is the base address, with `offset'

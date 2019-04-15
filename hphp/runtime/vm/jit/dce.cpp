@@ -457,7 +457,6 @@ bool canDCE(IRInstruction* inst) {
   case LdArrFuncCtx:
   case LdFunc:
   case LdFuncCached:
-  case LdFuncCachedU:
   case LookupFuncCached:
   case AllocObj:
   case AllocObjReified:

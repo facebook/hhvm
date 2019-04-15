@@ -2077,7 +2077,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCls:          // autoload
   case LdClsCached:    // autoload
   case LdFuncCached:   // autoload
-  case LdFuncCachedU:  // autoload
   case LdSwitchObjIndex:  // decrefs arg
   case InitClsCns:      // autoload
   case LookupClsMethodCache:  // autoload

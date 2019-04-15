@@ -159,24 +159,6 @@ const Func* lookupUnknownFunc(const StringData* name) {
   return loadUnknownFuncHelper(name, raise_resolve_undefined);
 }
 
-const Func* lookupFallbackFunc(const StringData* name,
-                               const StringData* fallback) {
-  VMRegAnchor _;
-
-  // Try to load the first function.
-  auto func = Unit::loadFunc(name);
-  if (LIKELY(!func)) {
-    // Then try to load the fallback function.
-    raise_undefined_function_fallback_notice(name, fallback);
-    func = Unit::loadFunc(fallback);
-    if (UNLIKELY(!func)) {
-      raise_error("Call to undefined function %s()",
-                  stripInOutSuffix(name)->data());
-    }
-  }
-  return func;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -280,23 +262,6 @@ void cgLookupFuncCached(IRLS& env, const IRInstruction* inst) {
   ldFuncCachedHelper<LookupFuncCached>(
     env, inst, CallSpec::direct(lookupUnknownFunc)
   );
-}
-
-void cgLdFuncCachedU(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<LdFuncCachedU>();
-
-  implLdCached<Func>(env, inst, extra->name, [&] (Vout& v, rds::Handle) {
-    // If we get here, things are going to be slow anyway, so shunt all the
-    // autoloading logic to lookupFallbackFunc().
-    auto const ptr = v.makeReg();
-    auto const args = argGroup(env, inst)
-      .immPtr(extra->name)
-      .immPtr(extra->fallback);
-
-    cgCallHelper(v, env, CallSpec::direct(lookupFallbackFunc),
-                 callDest(ptr), SyncOptions::Sync, args);
-    return ptr;
-  });
 }
 
 void cgLdClsCachedSafe(IRLS& env, const IRInstruction* inst) {

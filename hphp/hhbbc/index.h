@@ -570,23 +570,6 @@ struct Index {
   res::Func resolve_func(Context, SString name) const;
 
   /*
-   * Try to resolve a function using namespace-style fallback lookup.
-   *
-   * The name `name' is tried first, and `fallback' is used if this
-   * isn't found.  Both names must already be namespace-normalized.
-   * If we don't know which will be called at runtime, both will be
-   * returned.
-   *
-   * Note: the returned function may or may not be defined at the
-   * program point (it could require a function autoload that might
-   * fail).
-   */
-  std::pair<folly::Optional<res::Func>, folly::Optional<res::Func>>
-    resolve_func_fallback(Context,
-                          SString name,
-                          SString fallback) const;
-
-  /*
    * Try to resolve a class method named `name' with a given Context
    * and class type.
    *

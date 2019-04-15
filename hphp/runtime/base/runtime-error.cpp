@@ -195,20 +195,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
                name.c_str());
 }
 
-void raise_undefined_function_fallback_notice(const StringData* name,
-                                              const StringData* fallback) {
-  // If the option is set to 2, we won't emit FPushFuncU, meaning this
-  // function should never get called.
-  assertx(RuntimeOption::UndefinedFunctionFallback < 2);
-  if (RuntimeOption::UndefinedFunctionFallback == 1) {
-    raise_notice(
-      "Undefined function '%s', falling back to '%s'",
-      name->data(),
-      fallback->data()
-    );
-  }
-}
-
 namespace {
 
 const char* arrayAnnotTypeToName(AnnotType at) {

@@ -4509,36 +4509,6 @@ res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   return resolve_func_helper(funcs, name);
 }
 
-std::pair<folly::Optional<res::Func>, folly::Optional<res::Func>>
-Index::resolve_func_fallback(Context /*ctx*/, SString nsName,
-                             SString fallbackName) const {
-  assert(!needsNSNormalization(nsName));
-  assert(!needsNSNormalization(fallbackName));
-
-  // It's possible that in some requests nsName might succeed, while
-  // in others fallbackName must succeed.  Both ranges must be
-  // considered before we can decide which function we're after.
-  auto const r1 = find_range(m_data->funcs, nsName);
-  auto const r2 = find_range(m_data->funcs, fallbackName);
-  if ((begin(r1) != end(r1) && begin(r2) != end(r2)) ||
-      !RuntimeOption::RepoAuthoritative) {
-    // It could come from either at runtime.  (We could try to rule it
-    // out by figuring out if one must be defined based on the
-    // ctx.unit, but it's unlikely to matter for now.)
-    return std::make_pair(
-      resolve_func_helper(r1, nsName),
-      resolve_func_helper(r2, fallbackName)
-    );
-  }
-
-  assert(RuntimeOption::RepoAuthoritative);
-  if (begin(r2) == end(r2)) {
-    return std::make_pair(resolve_func_helper(r1, nsName), folly::none);
-  } else {
-    return std::make_pair(folly::none, resolve_func_helper(r2, fallbackName));
-  }
-}
-
 /*
  * Gets a type for the constraint.
  *

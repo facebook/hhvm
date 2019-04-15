@@ -227,14 +227,6 @@ HAC_CHECK_OPTS
 #undef HC
 
 ///////////////////////////////////////////////////////////////////////////////
-/*
- * PHPism notices.
- */
-
-void raise_undefined_function_fallback_notice(const StringData* name,
-                                              const StringData* fallback);
-
-///////////////////////////////////////////////////////////////////////////////
 
 void raise_str_to_class_notice(const StringData* name);
 

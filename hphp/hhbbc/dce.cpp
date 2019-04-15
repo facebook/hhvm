@@ -1737,7 +1737,6 @@ void dce(Env& env, const bc::FPushClsMethodSD& op) { dce_default(env, op); }
 void dce(Env& env, const bc::FPushCtor& op) { dce_default(env, op); }
 void dce(Env& env, const bc::FPushFunc& op) { dce_default(env, op); }
 void dce(Env& env, const bc::FPushFuncD& op) { dce_default(env, op); }
-void dce(Env& env, const bc::FPushFuncU& op) { dce_default(env, op); }
 void dce(Env& env, const bc::FPushObjMethod& op) { dce_default(env, op); }
 void dce(Env& env, const bc::FPushObjMethodD& op) { dce_default(env, op); }
 void dce(Env& env, const bc::FPushObjMethodRD& op) { dce_default(env, op); }

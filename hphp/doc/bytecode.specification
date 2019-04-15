@@ -1927,14 +1927,6 @@ FPushFuncD <num params> <litstr id>    [U U U C|V..C|V]  ->  [C|V..C|V]
   If x is not a string, object, array, or func, this instruction throws a fatal
   error.
 
-FPushFuncU <num params> <litstr id> <litstr fallback>
-  [U U U C|V..C|V]  ->  [C|V..C|V]
-
-  FPI push function unqualified. Identical to FPushFuncD except first tries to
-  lookup the function named %2 and if it isn't defined calls the function named
-  %3. As for FPushFuncD the litstr in %2 and %3 must not start with a '\'
-  %character.
-
 FPushObjMethod <num params> <nullsafe>
   [C U U C|V..C|V C]  ->  [C|V..C|V]
 FPushObjMethodD <num params> <litstr id> <nullsafe>

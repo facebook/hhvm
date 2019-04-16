@@ -66,6 +66,8 @@ struct Repo : RepoProxy {
 
   Repo();
   ~Repo() noexcept;
+  Repo(const Repo&) = delete;
+  Repo& operator=(const Repo&) = delete;
 
   const char* dbName(int repoId) const {
     assertx(repoId < RepoIdCount);

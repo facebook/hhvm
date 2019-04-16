@@ -45,11 +45,6 @@ void flush_thread_caches() {
   high_arena_tcache_flush();
 #endif
 #endif
-#ifdef USE_TCMALLOC
-  if (MallocExtensionInstance) {
-    MallocExtensionInstance()->MarkThreadIdle();
-  }
-#endif
 }
 
 bool purge_all(std::string* errStr) {
@@ -82,11 +77,6 @@ bool purge_all(std::string* errStr) {
       *errStr = "mallctlbymib(arena.all.purge)";
     }
     return false;
-  }
-#endif
-#ifdef USE_TCMALLOC
-  if (MallocExtensionInstance) {
-    MallocExtensionInstance()->ReleaseFreeMemory();
   }
 #endif
   return true;

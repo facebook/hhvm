@@ -39,10 +39,6 @@
 # endif
 #endif
 
-#ifdef USE_TCMALLOC
-#include <gperftools/malloc_extension.h>
-#endif
-
 #ifndef USE_JEMALLOC
 # ifdef __FreeBSD__
 #  include "stdlib.h"
@@ -66,12 +62,6 @@
 # endif
 #endif
 
-extern "C" {
-#ifdef USE_TCMALLOC
-#define MallocExtensionInstance _ZN15MallocExtension8instanceEv
-  MallocExtension* MallocExtensionInstance() __attribute__((__weak__));
-#endif
-}
 
 enum class NotNull {};
 

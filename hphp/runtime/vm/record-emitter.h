@@ -96,6 +96,11 @@ struct RecordEmitter {
   UnitEmitter& ue() const { return m_ue; }
   const StringData* name() const { return m_name; }
   Attr attrs() const { return m_attrs; }
+  UserAttributeMap userAttributes() const { return m_userAttributes; }
+  void setUserAttributes(UserAttributeMap map) {
+    m_userAttributes = std::move(map);
+  }
+
   Id id() const { return m_id; }
 
   void commit(RepoTxn& txn) const; // throws(RepoExc)
@@ -104,6 +109,12 @@ struct RecordEmitter {
 
   template<class SerDe> void serdeMetaData(SerDe&);
 
+  std::pair<int,int> getLocation() const {
+    return std::make_pair(m_line1, m_line2);
+  }
+  const StringData* docComment() const { return m_docComment; }
+
+  const FieldMap::Builder& fieldMap() const { return m_fieldMap; }
   bool addField(const StringData* n,
                 Attr attrs,
                 const StringData* userType,

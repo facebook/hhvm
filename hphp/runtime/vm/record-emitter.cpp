@@ -188,8 +188,7 @@ void RecordRepoProxy::InsertRecordStmt
   if (!prepared()) {
     std::stringstream ssInsert;
     ssInsert << "INSERT INTO " << m_repo.table(m_repoId, "Record")
-             << " VALUES(@unitSn, @recordId, @name"
-                "@extraData);";
+             << " VALUES(@unitSn, @recordId, @name, @extraData);";
     txn.prepare(*this, ssInsert.str());
   }
 
@@ -216,7 +215,7 @@ void RecordRepoProxy::GetRecordsStmt
     std::stringstream ssSelect;
     ssSelect << "SELECT recordId,name,extraData FROM "
              << m_repo.table(m_repoId, "Record")
-             << " WHERE unitSn = @unitSn ORDER BY recordId ASC;";
+             << " WHERE unitSn == @unitSn ORDER BY recordId ASC;";
     txn.prepare(*this, ssSelect.str());
   }
   RepoTxnQuery query(txn, *this);
@@ -226,7 +225,7 @@ void RecordRepoProxy::GetRecordsStmt
     if (query.row()) {
       Id recordId;        /**/ query.getId(0, recordId);
       std::string name;   /**/ query.getStdString(1, name);
-      BlobDecoder extraBlob = /**/ query.getBlob(3);
+      BlobDecoder extraBlob = /**/ query.getBlob(2);
       RecordEmitter* re = ue.newRecordEmitter(name);
       re->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited) {

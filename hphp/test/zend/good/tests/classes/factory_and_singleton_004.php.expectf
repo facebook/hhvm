@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to private test::__construct() from invalid context in %s/factory_and_singleton_004.php on line 8

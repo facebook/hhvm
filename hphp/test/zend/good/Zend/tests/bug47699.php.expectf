@@ -1,2 +1,2 @@
 BB
-Fatal error: %s
+Fatal error: Class undefined: X in %s/bug47699.php on line 11

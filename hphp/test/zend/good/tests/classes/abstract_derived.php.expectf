@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class derived contains an abstract method and must therefore be declared abstract in %s/abstract_derived.php on line 8

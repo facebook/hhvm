@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class undefined: Foo\Foo in %s/bug43344_2.php on line 3

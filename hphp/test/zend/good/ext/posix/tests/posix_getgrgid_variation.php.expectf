@@ -1,8 +1,8 @@
 *** Testing posix_getgrgid() : usage variations ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/posix_getgrgid_variation.php on line 52
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/posix_getgrgid_variation.php on line 55
 
 Arg value 10.5 
 valid output
@@ -19,39 +19,39 @@ valid output
 Arg value 0.5 
 valid output
 
-Notice: %s
+Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
-Notice: %s
+Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
-Notice: %s
+Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
-Notice: %s
+Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
-Notice: %s
+Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
 Arg value  
@@ -74,22 +74,22 @@ valid output
 
 Arg value  
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, string given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
 Arg value  
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, string given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
 Arg value string 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, string given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
 Arg value string 
 
-Warning: %s
+Warning: posix_getgrgid() expects parameter 1 to be integer, string given in %s/posix_getgrgid_variation.php on line 65
 valid output
 
 Arg value  
@@ -98,4 +98,4 @@ valid output
 Arg value  
 valid output
 
-Catchable fatal error: %s
+Catchable fatal error: Object of class stdClass could not be converted to string in %s/posix_getgrgid_variation.php on line 64

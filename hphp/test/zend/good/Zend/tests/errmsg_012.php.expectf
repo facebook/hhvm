@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: __autoload() must take exactly 1 argument in %s/errmsg_012.php on line 3

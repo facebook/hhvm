@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: A try statement requires a catch or a finally clause. in %s/try_finally_004.php on line 5

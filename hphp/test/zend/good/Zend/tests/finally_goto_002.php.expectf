@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: 'goto' into finally statement is disallowed in %s/finally_goto_002.php on line 4

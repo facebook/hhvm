@@ -19,4 +19,4 @@ hey, this is a function inside an eval()!
 hey, this is a regular echo'd eval()
 hey, this is a function inside an eval()!
 
-Fatal error: %s
+Fatal error: An expression is expected here. in %s/019.php(12)(336d5ebc5436534e61d16e63ddfca327) : eval()'d code on line 1

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method 'smallTalk' declared in multiple traits in %s/conflict003.php on line 22

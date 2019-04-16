@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Clone method test::__clone() cannot be static in %s/errmsg_034.php on line 5

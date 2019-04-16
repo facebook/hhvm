@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Declaration of MySQL::query() must be compatible with that of DB::query() in %s/variadic_changed_byref_error.php on line 7

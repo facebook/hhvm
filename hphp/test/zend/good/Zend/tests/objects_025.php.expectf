@@ -7,4 +7,4 @@ static - ok
 non-static - ok
 static - ok
 
-Fatal error: %s
+Fatal error: Method name must be a string in %s/objects_025.php on line 30

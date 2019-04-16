@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class Sub contains abstract method (offsetExists) and must therefore be declared abstract or implement the remaining methods in %s/argument_restriction_005.php on line 2

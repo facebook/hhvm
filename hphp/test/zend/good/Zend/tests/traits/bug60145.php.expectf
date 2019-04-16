@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Interfaces cannot use traits in %s/bug60145.php on line 8

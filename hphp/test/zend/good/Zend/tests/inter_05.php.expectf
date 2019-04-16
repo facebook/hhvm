@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: a cannot implement Exception - it is not an interface in %s/inter_05.php on line 3

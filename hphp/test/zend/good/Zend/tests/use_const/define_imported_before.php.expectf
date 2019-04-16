@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot use const foo\bar as bar because the name is already in use in %s/define_imported_before.php on line 6

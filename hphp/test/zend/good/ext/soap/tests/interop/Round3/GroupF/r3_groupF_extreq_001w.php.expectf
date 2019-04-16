@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Uncaught SoapFault exception: [WSDL] SOAP_ERROR: Parsing WSDL: Unknown required WSDL extension 'http://soapinterop.org/ext'

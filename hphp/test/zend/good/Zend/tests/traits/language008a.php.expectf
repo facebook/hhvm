@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to protected MyClass::sayHello() from invalid context in %s/language008a.php on line 16

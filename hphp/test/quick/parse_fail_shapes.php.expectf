@@ -1,2 +1,2 @@
 
-Fatal error: %s in %s on line 5
+Fatal error: Shape field name must be a nonempty single-quoted string or a class constant in %s/parse_fail_shapes.php on line 5

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method Test::__get() must take exactly 1 arguments in %s/__set__get_002.php on line 3

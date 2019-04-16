@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot override final method A::A() in %s/final_ctor3.php on line 5

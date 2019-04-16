@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Declaration of C::oneArgument() must be compatible with that of IFoo::oneArgument() in %s/bug60153.php on line 11

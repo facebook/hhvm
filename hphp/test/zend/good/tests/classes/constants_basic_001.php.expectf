@@ -1,3 +1,4 @@
+
 Attempt to access various kinds of class constants:
 int(1)
 float(1.5)
@@ -6,7 +7,7 @@ float(1.5)
 int(-1)
 float(-1.5)
 int(13)
-string(%d) "%s"
+string(%d) %s/constants_basic_001.php"
 string(1) "C"
 string(1) "C"
 string(0) ""
@@ -19,4 +20,4 @@ string(6) "hello2"
 
 Expecting fatal error:
 
-Fatal error: %s
+Fatal error: Couldn't find constant C::c19 in %s/constants_basic_001.php on line 48

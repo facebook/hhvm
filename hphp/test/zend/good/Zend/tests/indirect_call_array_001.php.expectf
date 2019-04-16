@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Invalid callable (array) in %s/indirect_call_array_001.php on line 4

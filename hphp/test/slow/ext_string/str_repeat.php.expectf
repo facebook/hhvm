@@ -1,4 +1,5 @@
-Warning: %s
+
+Warning: Second argument has to be greater than or equal to 0 in %s/str_repeat.php on line 6
 NULL
 
-Fatal error: %s
+Fatal error: String length exceeded: 9223372036854775807 > %d in %s/str_repeat.php on line 8

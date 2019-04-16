@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: No code may exist outside of namespace {} in %s/ns_083.php on line 5

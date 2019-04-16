@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Parameter $params is variadic and has a type constraint (string); variadic params with type constraints are not supported in non-Hack files in %s/variadic_changed_typehint_error.php on line 4

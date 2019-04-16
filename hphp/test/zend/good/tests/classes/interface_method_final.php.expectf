@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class if_a contains an abstract method and must therefore be declared abstract in %s/interface_method_final.php on line 5

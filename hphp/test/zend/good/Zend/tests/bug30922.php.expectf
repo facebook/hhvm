@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Keyword instanceOf must be written in lowercase in %s/bug30922.php on line 6

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Invalid expression in constant initializer in %s/constants_error_005.php on line 4

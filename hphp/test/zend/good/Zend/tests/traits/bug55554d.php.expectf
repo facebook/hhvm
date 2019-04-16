@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: ReportCollision has colliding constructor definitions coming from traits

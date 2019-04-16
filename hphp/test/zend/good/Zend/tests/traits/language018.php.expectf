@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Only 'final' and visibility modifiers are allowed in trait alias rule in %s/language018.php on line 7

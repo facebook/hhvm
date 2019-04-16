@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot take a reference to a static scope resolution expression in %s/constants_error_007.php on line 10

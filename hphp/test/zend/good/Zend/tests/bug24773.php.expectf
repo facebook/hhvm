@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Operator not supported for strings in %s/bug24773.php on line 3

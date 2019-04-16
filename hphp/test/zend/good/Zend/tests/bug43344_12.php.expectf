@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Undefined constant 'bar' in %s/bug43344_12.php on line 2

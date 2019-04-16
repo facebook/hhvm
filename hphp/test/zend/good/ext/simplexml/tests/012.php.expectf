@@ -1,8 +1,8 @@
 
-Warning: %s
+Warning: Cannot write or create unnamed attribute in %s/012.php on line 11
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <foo attr="value"/>
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <foo attr="new value"/>
 
-Fatal error: %s
+Fatal error: Cannot create unnamed attribute in %s/012.php on line 20

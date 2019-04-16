@@ -1,4 +1,4 @@
 NULL
 NULL
 
-Fatal error: %s
+Fatal error: Object does not implement ArrayAccess in %s/dereference_010.php on line 17

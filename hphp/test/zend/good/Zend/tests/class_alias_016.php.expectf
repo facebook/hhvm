@@ -1,4 +1,4 @@
 object(foo\bar) (0) {
 }
 
-Fatal error: %s
+Fatal error: Class undefined: foo\foo in %s/class_alias_016.php on line 11

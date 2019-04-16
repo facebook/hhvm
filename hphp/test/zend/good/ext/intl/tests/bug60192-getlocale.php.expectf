@@ -1,2 +1,2 @@
 
-Catchable fatal error: %s
+Catchable fatal error: Collator not initialized in %s/bug60192-getlocale.php on line 10

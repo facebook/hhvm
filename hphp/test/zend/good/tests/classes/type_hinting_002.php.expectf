@@ -1,2 +1,2 @@
 
-Catchable fatal error: %s
+Catchable fatal error: Argument 1 passed to Foo::a() must be an instance of NonExisting, Foo given in %s/type_hinting_002.php on line 8

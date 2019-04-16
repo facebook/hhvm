@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot access parent::class when no class scope is active in %s/class_name_as_scalar_error_006.php on line 3

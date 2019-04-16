@@ -1,3 +1,3 @@
 PRE-CLASS-GUARD
 
-Fatal error: %s
+Fatal error: trait declaration of property 'hello' is incompatible with previous declaration in %s/property003.php on line 14

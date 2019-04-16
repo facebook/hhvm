@@ -1,3 +1,3 @@
 
-Fatal error: %s
+Fatal error: Can't use [] for reading in %s/bug55007.php(4)(87c2341348606a3a0f852c20af85ec66) : eval()'d code on line 1
 My error handler runs.

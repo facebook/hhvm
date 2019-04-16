@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method 'world' declared in multiple traits in %s/language010.php on line 17

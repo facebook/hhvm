@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Yield can only be used inside a function in %s/yield_outside_function_error.php on line 3

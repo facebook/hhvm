@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: strict_types declaration must not use block mode in %s/scalar_strict_declaration_placement_008.php on line 2

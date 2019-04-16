@@ -9,4 +9,4 @@ const ok
 class ok
 ok
 
-Fatal error: %s
+Fatal error: Undefined constant 'unknown' in %s/ns_058.php on line 40

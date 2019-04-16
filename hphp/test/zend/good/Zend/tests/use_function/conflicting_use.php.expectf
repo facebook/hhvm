@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot use function bar\baz as baz because the name is already in use in %s/conflicting_use.php on line 16

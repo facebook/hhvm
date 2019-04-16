@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Unknown trait 'A' in %s/bug60165d.php on line 11

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Encountered unexpected token 'string'. in %s/function_arguments_001.php on line 2

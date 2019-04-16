@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: C cannot inherit the constant FOO from I2, because it was previously inherited from I1 in %s/interface_constant_inheritance_003.php on line 10

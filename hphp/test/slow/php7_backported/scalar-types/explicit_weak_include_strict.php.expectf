@@ -1,1 +1,2 @@
-Catchable fatal error: %s
+
+Catchable fatal error: Argument 1 passed to takes_int() must be an instance of int, double given in %s/weak_include_strict_2.inc on line 9

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Non-static method ReflectionClass::getName() cannot be called statically in %s/ReflectionClass_getName_error1.php on line 2

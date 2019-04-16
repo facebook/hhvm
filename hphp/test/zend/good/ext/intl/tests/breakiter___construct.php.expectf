@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to private IntlBreakIterator::__construct() from invalid context in %s/breakiter___construct.php on line 4

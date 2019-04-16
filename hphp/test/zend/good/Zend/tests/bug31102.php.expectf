@@ -4,4 +4,4 @@ __autoload(Test2,2)
 Caught: __autoload
 __autoload(Test3,3)
 
-Fatal error: %s
+Fatal error: Class undefined: Test3 in %s/bug31102.php(30)(9168acdcf36bd95b243e1029df92786d) : eval()'d code on line 1

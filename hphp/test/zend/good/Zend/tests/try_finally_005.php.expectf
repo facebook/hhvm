@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Goto to a label outside a finally block is not supported in %s/try_finally_005.php on line 2

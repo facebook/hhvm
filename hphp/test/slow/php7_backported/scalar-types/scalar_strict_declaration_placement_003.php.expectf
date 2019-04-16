@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: A .php file must begin with '<?hh'. in %s/scalar_strict_declaration_placement_003.php on line 1

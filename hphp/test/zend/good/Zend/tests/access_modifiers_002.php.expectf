@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Multiple access type modifiers are not allowed: properties of test in %s/access_modifiers_002.php on line 4

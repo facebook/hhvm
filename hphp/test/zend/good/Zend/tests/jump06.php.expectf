@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: 'goto' to undefined label 'L1' in %s/jump06.php on line 1

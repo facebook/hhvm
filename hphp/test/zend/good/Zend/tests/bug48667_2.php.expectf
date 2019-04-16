@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class A cannot implement both IteratorAggregate and Iterator at the same time in %s/bug48667_2.php on line 3

@@ -2,4 +2,4 @@ T:m1
 T:m1
 T:m2
 
-Fatal error: %s
+Fatal error: Call to undefined method C1::a2() in %s/alias01.php on line 15

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Constructor test::__construct() cannot be static in %s/errmsg_032.php on line 5

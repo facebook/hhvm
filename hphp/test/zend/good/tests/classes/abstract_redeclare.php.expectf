@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class fail contains an abstract method and must therefore be declared abstract in %s/abstract_redeclare.php on line 11

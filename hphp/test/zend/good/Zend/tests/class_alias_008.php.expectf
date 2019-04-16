@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot instantiate abstract class foo in %s/class_alias_008.php on line 9

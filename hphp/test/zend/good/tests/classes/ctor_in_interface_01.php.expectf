@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Declaration of implem::__construct() must be compatible with that of constr::__construct() in %s/ctor_in_interface_01.php on line 7

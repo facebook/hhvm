@@ -1,3 +1,3 @@
 NULL
 
-Catchable fatal error: %s
+Catchable fatal error: Argument 1 passed to foo\bar::__construct() must be an instance of array, stdClass given in %s/ns_071.php on line 12

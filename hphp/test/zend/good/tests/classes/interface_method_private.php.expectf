@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Access type for interface method must be omitted in %s/interface_method_private.php on line 5

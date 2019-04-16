@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot override previously defined constant I1::FOO in I2 in %s/interface_constant_inheritance_001.php on line 6

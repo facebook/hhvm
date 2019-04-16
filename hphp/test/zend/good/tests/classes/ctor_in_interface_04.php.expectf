@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Declaration of derived::__construct() must be compatible with that of constr::__construct() in %s/ctor_in_interface_04.php on line 14

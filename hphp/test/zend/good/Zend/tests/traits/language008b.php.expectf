@@ -1,2 +1,2 @@
 Hello World!Hello World!
-Fatal error: %s
+Fatal error: Call to private MyClass::sayHelloWorld() from invalid context in %s/language008b.php on line 21

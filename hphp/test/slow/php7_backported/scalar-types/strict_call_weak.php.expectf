@@ -1,1 +1,2 @@
-Catchable fatal error: %s
+
+Catchable fatal error: Argument 1 passed to function_declared_in_weak_mode() must be an instance of int, double given in %s/strict_call_weak.php on line 10

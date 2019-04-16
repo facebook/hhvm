@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Couldn't find constant Foo::B in %s/bug41633_2.php on line 3

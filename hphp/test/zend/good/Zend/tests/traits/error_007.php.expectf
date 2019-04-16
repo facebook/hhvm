@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot instantiate trait abc in %s/error_007.php on line 6

@@ -1,2 +1,2 @@
 
-Catchable fatal error: %s
+Catchable fatal error: Argument 1 passed to blah() must be an instance of Foo, stdClass given in %s/catchable_error_001.php on line 15

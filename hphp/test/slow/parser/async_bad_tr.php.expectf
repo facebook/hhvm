@@ -1,2 +1,2 @@
 
-Fatal error: %s in %s on line 3
+Fatal error: Encountered unexpected token 'async'. in %s/async_bad_tr.php on line 3

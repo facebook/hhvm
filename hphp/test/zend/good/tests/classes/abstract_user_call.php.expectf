@@ -1,3 +1,3 @@
 test::func()
 
-Fatal error: %s
+Fatal error: Cannot call abstract method test_base::func() in %s/abstract_user_call.php on line 20

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Non-static method foo::foo() cannot be called statically in %s/dynamic_call_001.php on line 10

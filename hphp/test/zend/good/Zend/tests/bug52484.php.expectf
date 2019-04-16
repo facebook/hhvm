@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot access empty property in %s/bug52484.php on line 5

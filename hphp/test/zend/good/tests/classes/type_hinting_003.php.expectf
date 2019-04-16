@@ -16,4 +16,4 @@ array(1) {
   int(25)
 }
 
-Catchable fatal error: %s
+Catchable fatal error: Argument 1 passed to Test::f1() must be an instance of array, int given in %s/type_hinting_003.php on line 35

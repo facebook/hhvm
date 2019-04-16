@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot use static or parent::class in constant declaration in %s/class_name_as_scalar_error_002.php on line 5

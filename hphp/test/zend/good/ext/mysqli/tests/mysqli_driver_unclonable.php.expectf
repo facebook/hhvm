@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Trying to clone an uncloneable object of class mysqli_result in %s/mysqli_driver_unclonable.php on line 3

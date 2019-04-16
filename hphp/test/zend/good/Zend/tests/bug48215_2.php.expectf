@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to undefined method b::b() in %s/bug48215_2.php on line 9

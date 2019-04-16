@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to undefined method SessionHandler::create_sid() in %s/bug67972.php on line 3

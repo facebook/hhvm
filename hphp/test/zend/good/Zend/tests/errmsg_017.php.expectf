@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method test::__unset() must take exactly 1 arguments in %s/errmsg_017.php on line 4

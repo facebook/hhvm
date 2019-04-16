@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot declare abstract method test::foo private in %s/errmsg_002.php on line 4

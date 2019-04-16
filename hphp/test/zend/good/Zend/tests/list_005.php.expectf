@@ -7,4 +7,4 @@ NULL
 NULL
 ----
 
-Fatal error: %s
+Fatal error: Object does not implement ArrayAccess in %s/list_005.php on line 21

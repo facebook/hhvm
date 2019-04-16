@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to protected bar::test() from invalid context in %s/error_012.php on line 12

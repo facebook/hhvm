@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Object does not implement ArrayAccess in %s/clone_004.php on line 13

@@ -1,2 +1,2 @@
 
-Catchable fatal error: %s
+Catchable fatal error: Argument 1 passed to FooBar::a() must implement interface Foo, Blort given in %s/type_hinting_001.php on line 27

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class test contains an abstract method and must therefore be declared abstract in %s/errmsg_037.php on line 5

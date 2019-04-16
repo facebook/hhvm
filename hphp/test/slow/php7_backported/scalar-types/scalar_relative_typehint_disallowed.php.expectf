@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: An expression is expected here. in %s/scalar_relative_typehint_disallowed.php on line 8

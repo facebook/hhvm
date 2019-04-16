@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Invalid static property access: foo::f in %s/objects_029.php on line 11

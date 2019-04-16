@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot redeclare testClass::TEST_CONST in %s/bug29446.php on line 5

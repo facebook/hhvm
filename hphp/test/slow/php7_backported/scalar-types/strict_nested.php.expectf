@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: strict_types declaration must be the very first statement in the script in %s/strict_nested.php on line 26

@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: An expression is expected here. in %s/scalar_strict_declaration_placement_001.php on line 14

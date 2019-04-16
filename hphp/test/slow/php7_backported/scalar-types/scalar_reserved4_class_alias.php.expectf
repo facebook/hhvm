@@ -1,1 +1,2 @@
-Fatal error: %s
+
+Fatal error: Fatal error: Cannot use 'string' as class name as it is reserved in %s/scalar_reserved4_class_alias.php on line 7

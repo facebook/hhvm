@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to protected test::__construct() from invalid context in %s/factory_and_singleton_003.php on line 8

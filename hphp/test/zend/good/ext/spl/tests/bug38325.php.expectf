@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Class undefined: ThisClassDoesNotExistEverFoo in %s/bug38325.php on line 3

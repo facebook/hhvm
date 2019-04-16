@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: A variadic parameter ('...') must not have a default value. in %s/no_default_error.php on line 3

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot change static method pass::show() to non-static in fail in %s/static_mix_1.php on line 9

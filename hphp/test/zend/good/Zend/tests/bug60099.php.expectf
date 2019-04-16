@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: __halt_compiler function should appear only at the top level in %s/bug60099.php on line 3

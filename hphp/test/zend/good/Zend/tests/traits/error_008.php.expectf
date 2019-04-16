@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: foo cannot implement abc - it is not an interface in %s/error_008.php on line 5

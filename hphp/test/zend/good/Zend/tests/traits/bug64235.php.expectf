@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Unknown trait 'TestParentClass' in %s/bug64235.php on line 21

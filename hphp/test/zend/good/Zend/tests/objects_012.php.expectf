@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: bar cannot implement foo - it is not an interface in %s/objects_012.php on line 6

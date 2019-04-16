@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Redeclared method test::foo in %s/errmsg_011.php on line 6

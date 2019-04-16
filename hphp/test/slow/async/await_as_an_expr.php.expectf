@@ -1,1 +1,2 @@
-%AFatal error: %s in %s on line %s
+
+Fatal error: Await cannot be used as an expression in %s/await_as_an_expr.php on line 5

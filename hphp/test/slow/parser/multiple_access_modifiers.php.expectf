@@ -1,2 +1,2 @@
 
-Fatal error: %s in %s on line %d
+Fatal error: A method declaration cannot have multiple visibility modifiers. in %s/multiple_access_modifiers.php on line 3

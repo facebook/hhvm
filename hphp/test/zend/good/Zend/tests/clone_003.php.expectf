@@ -1,4 +1,4 @@
 
-Notice: %s
+Notice: Undefined variable: b in %s/clone_003.php on line 3
 
-Fatal error: %s
+Fatal error: clone called on non-object in %s/clone_003.php on line 3

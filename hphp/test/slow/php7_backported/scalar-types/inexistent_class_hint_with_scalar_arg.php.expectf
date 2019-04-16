@@ -1,1 +1,2 @@
-Catchable fatal error: %s
+
+Catchable fatal error: Argument 1 passed to foo() must be an instance of bar, null given in %s/inexistent_class_hint_with_scalar_arg.php on line 4

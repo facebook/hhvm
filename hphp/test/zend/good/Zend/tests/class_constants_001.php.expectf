@@ -1,4 +1,4 @@
 string(6) "string"
 int(1)
 
-Fatal error: %s
+Fatal error: Couldn't find constant test::val3 in %s/class_constants_001.php on line 11

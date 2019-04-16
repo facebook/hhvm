@@ -1,2 +1,2 @@
 
-Fatal error: %s in %s on line 3
+Fatal error: A class member, method, type, trait usage, trait require, xhp attribute, xhp use, or xhp category is expected here. in %s/async_bad_if.php on line 3

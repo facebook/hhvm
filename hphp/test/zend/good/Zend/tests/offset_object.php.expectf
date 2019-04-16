@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Object does not implement ArrayAccess in %s/offset_object.php on line 4

@@ -1,8 +1,8 @@
 *** Testing posix_kill() : usage variations ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/posix_kill_variation1.php on line 53
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/posix_kill_variation1.php on line 56
 
 Arg value 10.5 
 bool(false)
@@ -19,35 +19,35 @@ bool(false)
 Arg value 0.5 
 bool(false)
 
-Notice: %s
+Notice: Array to string conversion in %s/posix_kill_variation1.php on line 65
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, array given in %s/posix_kill_variation1.php on line 66
 
-Notice: %s
-
-Arg value Array 
-
-Warning: %s
-
-Notice: %s
+Notice: Array to string conversion in %s/posix_kill_variation1.php on line 65
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, array given in %s/posix_kill_variation1.php on line 66
 
-Notice: %s
-
-Arg value Array 
-
-Warning: %s
-
-Notice: %s
+Notice: Array to string conversion in %s/posix_kill_variation1.php on line 65
 
 Arg value Array 
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, array given in %s/posix_kill_variation1.php on line 66
+
+Notice: Array to string conversion in %s/posix_kill_variation1.php on line 65
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 1 to be integer, array given in %s/posix_kill_variation1.php on line 66
+
+Notice: Array to string conversion in %s/posix_kill_variation1.php on line 65
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 1 to be integer, array given in %s/posix_kill_variation1.php on line 66
 
 Arg value  
 bool(false)
@@ -69,19 +69,19 @@ bool(false)
 
 Arg value  
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, string given in %s/posix_kill_variation1.php on line 66
 
 Arg value  
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, string given in %s/posix_kill_variation1.php on line 66
 
 Arg value string 
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, string given in %s/posix_kill_variation1.php on line 66
 
 Arg value string 
 
-Warning: %s
+Warning: posix_kill() expects parameter 1 to be integer, string given in %s/posix_kill_variation1.php on line 66
 
 Arg value  
 bool(false)
@@ -89,4 +89,4 @@ bool(false)
 Arg value  
 bool(false)
 
-Catchable fatal error: %s
+Catchable fatal error: Object of class stdClass could not be converted to string in %s/posix_kill_variation1.php on line 65

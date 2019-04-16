@@ -2,4 +2,4 @@
 0 0 3 0 0 0
 0 0 8 0 0 0
 
-Fatal error: %s
+Fatal error: Class cdt3 contains abstract method (diff) and must therefore be declared abstract or implement the remaining methods in %s/bug65768.php on line 23

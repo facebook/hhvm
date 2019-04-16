@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Call to undefined function abc() in %s/isset_func_error.php on line 2

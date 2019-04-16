@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Non-static method DOMDocument::saveHTMLFile() cannot be called statically in %s/DOMDocument_saveHTMLFile_error2.php on line 2

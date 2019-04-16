@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: An expression is expected here. in %s/scalar_float_with_invalid_default.php on line 9

@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Cannot use function foo\BAR as BAR because the name is already in use in %s/case_insensivity.php on line 5

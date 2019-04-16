@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Can't use [] for reading in %s/bug41351_2.php on line 5

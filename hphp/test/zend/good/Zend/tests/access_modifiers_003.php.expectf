@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: A class, interface, or trait declaration cannot have duplicate modifiers. in %s/access_modifiers_003.php on line 3

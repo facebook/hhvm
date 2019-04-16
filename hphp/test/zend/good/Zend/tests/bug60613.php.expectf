@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Method name must be a string in %s/bug60613.php on line 8

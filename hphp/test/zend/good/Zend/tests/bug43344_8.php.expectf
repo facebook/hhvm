@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Undefined constant 'Foo\bar' in %s/bug43344_8.php on line 3

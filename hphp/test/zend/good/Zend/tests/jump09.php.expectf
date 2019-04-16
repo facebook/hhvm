@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: 'goto' into loop or switch statement is disallowed in %s/jump09.php on line 1

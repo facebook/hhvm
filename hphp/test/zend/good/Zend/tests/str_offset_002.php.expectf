@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Only variables, members, and the results of function calls can be used as references in %s/str_offset_002.php on line 3

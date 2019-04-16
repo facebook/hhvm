@@ -1,2 +1,2 @@
 
-Fatal error: %s
+Fatal error: Failed to evaluate a trait precedence (foo). Method of trait test was defined to be excluded multiple times in %s/error_010.php on line 10

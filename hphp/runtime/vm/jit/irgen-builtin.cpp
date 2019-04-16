@@ -1157,7 +1157,7 @@ private:
                  nullptr,
                  /* This can be a lie, but we only care about the dynamic flag
                   * in prologues, so its value doesn't matter here. */
-                 cns(env, false),
+                 false,
                  nullptr);
     }
     /*

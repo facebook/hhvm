@@ -65,6 +65,8 @@ and expr_ f = function
   | Typename n -> Typename (pstring f n)
   | New (cid, tl, el, uel, ctor_annot) ->
     New (class_id f cid, tl, List.map el (expr f), List.map uel (expr f), ctor_annot)
+  | Record (cid, fl) ->
+    Record (class_id f cid, List.map fl (fun (e1, e2) -> expr f e1, expr f e2))
   | Efun (fun_, idl) ->
     (* properly handling this would involve writing the mapper for all
      * statements *)

@@ -254,6 +254,7 @@ and on_expr (p, e) : Aast.expr =
   | Darray (tap, d) -> Aast.Darray (optional (both on_targ) tap, on_list on_darray_element d)
   | Shape s -> Aast.Shape (on_list on_shape s)
   | Collection (id, tal, al) -> Aast.Collection (id, on_collection_targ tal, on_list on_afield al)
+  | Record (_,_) -> Aast.Any (* TODO: T37786581 *)
   | Null -> Aast.Null
   | True -> Aast.True
   | False -> Aast.False

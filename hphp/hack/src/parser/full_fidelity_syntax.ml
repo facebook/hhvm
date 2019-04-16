@@ -177,6 +177,7 @@ module WithToken(Token: TokenType) = struct
       | CollectionLiteralExpression       _ -> SyntaxKind.CollectionLiteralExpression
       | ObjectCreationExpression          _ -> SyntaxKind.ObjectCreationExpression
       | ConstructorCall                   _ -> SyntaxKind.ConstructorCall
+      | RecordCreationExpression          _ -> SyntaxKind.RecordCreationExpression
       | ArrayCreationExpression           _ -> SyntaxKind.ArrayCreationExpression
       | ArrayIntrinsicExpression          _ -> SyntaxKind.ArrayIntrinsicExpression
       | DarrayIntrinsicExpression         _ -> SyntaxKind.DarrayIntrinsicExpression
@@ -369,6 +370,7 @@ module WithToken(Token: TokenType) = struct
     let is_collection_literal_expression        = has_kind SyntaxKind.CollectionLiteralExpression
     let is_object_creation_expression           = has_kind SyntaxKind.ObjectCreationExpression
     let is_constructor_call                     = has_kind SyntaxKind.ConstructorCall
+    let is_record_creation_expression           = has_kind SyntaxKind.RecordCreationExpression
     let is_array_creation_expression            = has_kind SyntaxKind.ArrayCreationExpression
     let is_array_intrinsic_expression           = has_kind SyntaxKind.ArrayIntrinsicExpression
     let is_darray_intrinsic_expression          = has_kind SyntaxKind.DarrayIntrinsicExpression
@@ -1822,6 +1824,17 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc constructor_call_left_paren in
          let acc = f acc constructor_call_argument_list in
          let acc = f acc constructor_call_right_paren in
+         acc
+      | RecordCreationExpression {
+        record_creation_type;
+        record_creation_left_bracket;
+        record_creation_members;
+        record_creation_right_bracket;
+      } ->
+         let acc = f acc record_creation_type in
+         let acc = f acc record_creation_left_bracket in
+         let acc = f acc record_creation_members in
+         let acc = f acc record_creation_right_bracket in
          acc
       | ArrayCreationExpression {
         array_creation_left_bracket;
@@ -3788,6 +3801,17 @@ module WithToken(Token: TokenType) = struct
         constructor_call_argument_list;
         constructor_call_right_paren;
       ]
+      | RecordCreationExpression {
+        record_creation_type;
+        record_creation_left_bracket;
+        record_creation_members;
+        record_creation_right_bracket;
+      } -> [
+        record_creation_type;
+        record_creation_left_bracket;
+        record_creation_members;
+        record_creation_right_bracket;
+      ]
       | ArrayCreationExpression {
         array_creation_left_bracket;
         array_creation_members;
@@ -5753,6 +5777,17 @@ module WithToken(Token: TokenType) = struct
         "constructor_call_left_paren";
         "constructor_call_argument_list";
         "constructor_call_right_paren";
+      ]
+      | RecordCreationExpression {
+        record_creation_type;
+        record_creation_left_bracket;
+        record_creation_members;
+        record_creation_right_bracket;
+      } -> [
+        "record_creation_type";
+        "record_creation_left_bracket";
+        "record_creation_members";
+        "record_creation_right_bracket";
       ]
       | ArrayCreationExpression {
         array_creation_left_bracket;
@@ -7891,6 +7926,18 @@ module WithToken(Token: TokenType) = struct
           constructor_call_left_paren;
           constructor_call_argument_list;
           constructor_call_right_paren;
+        }
+      | (SyntaxKind.RecordCreationExpression, [
+          record_creation_type;
+          record_creation_left_bracket;
+          record_creation_members;
+          record_creation_right_bracket;
+        ]) ->
+        RecordCreationExpression {
+          record_creation_type;
+          record_creation_left_bracket;
+          record_creation_members;
+          record_creation_right_bracket;
         }
       | (SyntaxKind.ArrayCreationExpression, [
           array_creation_left_bracket;
@@ -10422,6 +10469,21 @@ module WithToken(Token: TokenType) = struct
           constructor_call_left_paren;
           constructor_call_argument_list;
           constructor_call_right_paren;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_record_creation_expression
+        record_creation_type
+        record_creation_left_bracket
+        record_creation_members
+        record_creation_right_bracket
+      =
+        let syntax = RecordCreationExpression {
+          record_creation_type;
+          record_creation_left_bracket;
+          record_creation_members;
+          record_creation_right_bracket;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

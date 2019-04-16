@@ -112,6 +112,8 @@ let string_of_lit_const instruction =
     | NewStructDict l  ->
       sep ["NewStructDict"; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | NewPair -> "NewPair"
+    | NewRecord (cid, l) ->
+      sep ["NewRecord"; string_of_class_id cid; "<" ^ string_of_list_of_shape_fields l ^ ">"]
     | ClsCns (cnsid, cr) ->
       sep ["ClsCns"; string_of_const_id cnsid; string_of_classref cr]
     | ClsCnsD (cnsid, cid) ->
@@ -1148,6 +1150,10 @@ and string_of_param_default_value ~env expr =
     ^ "("
     ^ String.concat ~sep:", " es
     ^ ")"
+  | A.Record (e, es) ->
+    let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
+    let e = String_utils.lstrip (string_of_param_default_value ~env e) "\\\\" in
+    e ^ (string_of_afield_list ~env es)
   | A.Class_get (e1, e2) ->
     let s1 = match snd e1 with
       | A.Id (_, s1) ->

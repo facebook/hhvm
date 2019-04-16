@@ -516,6 +516,10 @@ where
         Self::R::make_constructor_call(arg0, arg1, arg2, arg3)
     }
 
+    fn make_record_creation_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
+        Self::R::make_record_creation_expression(arg0, arg1, arg2, arg3)
+    }
+
     fn make_array_creation_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         Self::R::make_array_creation_expression(arg0, arg1, arg2)
     }

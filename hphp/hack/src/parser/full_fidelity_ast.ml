@@ -1639,6 +1639,16 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           raise_parsing_error env (`Node generic_argument_list) SyntaxError.targs_not_allowed;
         let name = pos_name generic_class_type env in
         Id name
+    | RecordCreationExpression
+      { record_creation_type = rec_type
+      ; record_creation_members = members
+      ; _ } ->
+      let e = match syntax rec_type with
+      | SimpleTypeSpecifier _ ->
+        let name = pos_name rec_type env in
+        (fst name, Id name)
+      | _ -> pExpr rec_type env in
+      Record (e, couldMap ~f:pMember members env)
     | LiteralExpression { literal_expression = expr } ->
       (match syntax expr with
       | Token _ ->

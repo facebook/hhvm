@@ -142,6 +142,7 @@ pub trait SmartConstructors {
     fn make_collection_literal_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
     fn make_object_creation_expression(arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_constructor_call(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
+    fn make_record_creation_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
     fn make_array_creation_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_array_intrinsic_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;
     fn make_darray_intrinsic_expression(arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;

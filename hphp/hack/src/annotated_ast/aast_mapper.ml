@@ -110,6 +110,8 @@ struct
     | S.New (ci, tl, el1, el2, ctor_annot) ->
       T.New (map_class_id menv ci, tl, map_exprl menv el1,
         map_exprl menv el2, menv.map_expr_annotation ctor_annot)
+    | S.Record (ci, fl) ->
+      T.Record (map_class_id menv ci, List.map fl (map_field menv))
     | S.Efun (ef, ids) -> T.Efun(map_fun menv ef, ids)
     | S.Xml (id, pl, el) ->
       T.Xml (id, List.map pl (fun attr -> match attr with

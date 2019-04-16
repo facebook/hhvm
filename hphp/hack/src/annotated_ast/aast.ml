@@ -165,6 +165,7 @@ and expr_ =
   | Is of expr * hint
   | As of expr * hint * (* is nullable *) bool
   | New of class_id * targ list * expr list * expr list * (* constructor *) expr_annotation
+  | Record of class_id * (expr * expr) list
   | Efun of fun_ * lid list
   | Lfun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
@@ -543,6 +544,7 @@ let expr_to_string expr =
   | Is _ -> "Is"
   | As _ -> "As"
   | New _  -> "New"
+  | Record _ -> "Record"
   | Efun _  -> "Efun"
   | Xml _  -> "Xml"
   | Unsafe_expr _ -> "Unsafe_expr"

@@ -162,6 +162,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_collection_literal_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_collection_literal_expression arg0 arg1 arg2 arg3
     let make_object_creation_expression arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_object_creation_expression arg0 arg1
     let make_constructor_call arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_constructor_call arg0 arg1 arg2 arg3
+    let make_record_creation_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_record_creation_expression arg0 arg1 arg2 arg3
     let make_array_creation_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_array_creation_expression arg0 arg1 arg2
     let make_array_intrinsic_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_array_intrinsic_expression arg0 arg1 arg2 arg3
     let make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4 state = State.next state [arg0; arg1; arg2; arg3; arg4], Syntax.make_darray_intrinsic_expression arg0 arg1 arg2 arg3 arg4

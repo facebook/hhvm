@@ -270,6 +270,7 @@ class type ['a] visitor_type = object
   method on_class_id : 'a -> class_id -> 'a
   method on_class_id_ : 'a -> class_id_ -> 'a
   method on_new : 'a -> class_id -> expr list -> expr list -> 'a
+  method on_record : 'a -> class_id -> (expr * expr) list -> 'a
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_lfun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
@@ -511,6 +512,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
    | Typename n -> this#on_typename acc n
    | New         (cid, _, el, uel, _)   -> this#on_new acc cid el uel
    | Efun        (f, idl)-> this#on_efun acc f idl
+   | Record      (cid, fl)        -> this#on_record acc cid fl
    | Xml         (sid, attrl, el) -> this#on_xml acc sid attrl el
    | Unsafe_expr (e)              -> this#on_unsafe_expr acc e
    | Callconv    (kind, e)        -> this#on_callconv acc kind e
@@ -706,6 +708,10 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     if is_body_named f.f_body
     then this#on_block acc f.f_body.fb_ast
     else failwith "lambdas expected to be named in the context of the surrounding function"
+
+  method on_record acc cid fl =
+    let acc = this#on_class_id acc cid in
+    List.fold_left fl ~f:this#on_field ~init:acc
 
   method on_xml acc _ attrl el =
     let acc = List.fold_left attrl ~init:acc ~f:begin fun acc attr -> match attr with

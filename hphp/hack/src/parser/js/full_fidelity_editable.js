@@ -318,6 +318,8 @@ class EditableSyntax
       return ObjectCreationExpression.from_json(json, position, source);
     case 'constructor_call':
       return ConstructorCall.from_json(json, position, source);
+    case 'record_creation_expression':
+      return RecordCreationExpression.from_json(json, position, source);
     case 'array_creation_expression':
       return ArrayCreationExpression.from_json(json, position, source);
     case 'array_intrinsic_expression':
@@ -815,8 +817,6 @@ class EditableToken extends EditableSyntax
        return new EndwhileToken(leading, trailing);
     case 'enum':
        return new EnumToken(leading, trailing);
-    case 'record':
-       return new RecordDecToken(leading, trailing);
     case 'eval':
        return new EvalToken(leading, trailing);
     case 'extends':
@@ -907,6 +907,10 @@ class EditableToken extends EditableSyntax
        return new RealToken(leading, trailing);
     case 'reify':
        return new ReifyToken(leading, trailing);
+    case 'recordname':
+       return new RecordToken(leading, trailing);
+    case 'record':
+       return new RecordDecToken(leading, trailing);
     case 'require':
        return new RequireToken(leading, trailing);
     case 'require_once':
@@ -1523,13 +1527,6 @@ class EnumToken extends EditableToken
     super('enum', leading, trailing, 'enum');
   }
 }
-class RecordDecToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('record', leading, trailing, 'record');
-  }
-}
 class EvalToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1843,6 +1840,20 @@ class ReifyToken extends EditableToken
   constructor(leading, trailing)
   {
     super('reify', leading, trailing, 'reify');
+  }
+}
+class RecordToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('recordname', leading, trailing, 'recordname');
+  }
+}
+class RecordDecToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('record', leading, trailing, 'record');
   }
 }
 class RequireToken extends EditableToken
@@ -16182,6 +16193,110 @@ class ConstructorCall extends EditableSyntax
     return ConstructorCall._children_keys;
   }
 }
+class RecordCreationExpression extends EditableSyntax
+{
+  constructor(
+    type,
+    left_bracket,
+    members,
+    right_bracket)
+  {
+    super('record_creation_expression', {
+      type: type,
+      left_bracket: left_bracket,
+      members: members,
+      right_bracket: right_bracket });
+  }
+  get type() { return this.children.type; }
+  get left_bracket() { return this.children.left_bracket; }
+  get members() { return this.children.members; }
+  get right_bracket() { return this.children.right_bracket; }
+  with_type(type){
+    return new RecordCreationExpression(
+      type,
+      this.left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_left_bracket(left_bracket){
+    return new RecordCreationExpression(
+      this.type,
+      left_bracket,
+      this.members,
+      this.right_bracket);
+  }
+  with_members(members){
+    return new RecordCreationExpression(
+      this.type,
+      this.left_bracket,
+      members,
+      this.right_bracket);
+  }
+  with_right_bracket(right_bracket){
+    return new RecordCreationExpression(
+      this.type,
+      this.left_bracket,
+      this.members,
+      right_bracket);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var type = this.type.rewrite(rewriter, new_parents);
+    var left_bracket = this.left_bracket.rewrite(rewriter, new_parents);
+    var members = this.members.rewrite(rewriter, new_parents);
+    var right_bracket = this.right_bracket.rewrite(rewriter, new_parents);
+    if (
+      type === this.type &&
+      left_bracket === this.left_bracket &&
+      members === this.members &&
+      right_bracket === this.right_bracket)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new RecordCreationExpression(
+        type,
+        left_bracket,
+        members,
+        right_bracket), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let type = EditableSyntax.from_json(
+      json.record_creation_type, position, source);
+    position += type.width;
+    let left_bracket = EditableSyntax.from_json(
+      json.record_creation_left_bracket, position, source);
+    position += left_bracket.width;
+    let members = EditableSyntax.from_json(
+      json.record_creation_members, position, source);
+    position += members.width;
+    let right_bracket = EditableSyntax.from_json(
+      json.record_creation_right_bracket, position, source);
+    position += right_bracket.width;
+    return new RecordCreationExpression(
+        type,
+        left_bracket,
+        members,
+        right_bracket);
+  }
+  get children_keys()
+  {
+    if (RecordCreationExpression._children_keys == null)
+      RecordCreationExpression._children_keys = [
+        'type',
+        'left_bracket',
+        'members',
+        'right_bracket'];
+    return RecordCreationExpression._children_keys;
+  }
+}
 class ArrayCreationExpression extends EditableSyntax
 {
   constructor(
@@ -22387,7 +22502,6 @@ exports.EndifToken = EndifToken;
 exports.EndswitchToken = EndswitchToken;
 exports.EndwhileToken = EndwhileToken;
 exports.EnumToken = EnumToken;
-exports.RecordDecToken = RecordDecToken;
 exports.EvalToken = EvalToken;
 exports.ExtendsToken = ExtendsToken;
 exports.FallthroughToken = FallthroughToken;
@@ -22433,6 +22547,8 @@ exports.ProtectedToken = ProtectedToken;
 exports.PublicToken = PublicToken;
 exports.RealToken = RealToken;
 exports.ReifyToken = ReifyToken;
+exports.RecordToken = RecordToken;
+exports.RecordDecToken = RecordDecToken;
 exports.RequireToken = RequireToken;
 exports.Require_onceToken = Require_onceToken;
 exports.RequiredToken = RequiredToken;
@@ -22690,6 +22806,7 @@ exports.ListExpression = ListExpression;
 exports.CollectionLiteralExpression = CollectionLiteralExpression;
 exports.ObjectCreationExpression = ObjectCreationExpression;
 exports.ConstructorCall = ConstructorCall;
+exports.RecordCreationExpression = RecordCreationExpression;
 exports.ArrayCreationExpression = ArrayCreationExpression;
 exports.ArrayIntrinsicExpression = ArrayIntrinsicExpression;
 exports.DarrayIntrinsicExpression = DarrayIntrinsicExpression;

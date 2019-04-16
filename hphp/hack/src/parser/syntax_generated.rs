@@ -1326,6 +1326,17 @@ where
         Self::make(syntax, value)
     }
 
+    pub fn make_record_creation_expression(record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
+        let syntax = SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
+            record_creation_type,
+            record_creation_left_bracket,
+            record_creation_members,
+            record_creation_right_bracket,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     pub fn make_array_creation_expression(array_creation_left_bracket: Self, array_creation_members: Self, array_creation_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::ArrayCreationExpression(Box::new(ArrayCreationExpressionChildren {
             array_creation_left_bracket,
@@ -2830,6 +2841,13 @@ where
                 let acc = f(&x.constructor_call_right_paren, acc);
                 acc
             },
+            SyntaxVariant::RecordCreationExpression(x) => {
+                let acc = f(&x.record_creation_type, acc);
+                let acc = f(&x.record_creation_left_bracket, acc);
+                let acc = f(&x.record_creation_members, acc);
+                let acc = f(&x.record_creation_right_bracket, acc);
+                acc
+            },
             SyntaxVariant::ArrayCreationExpression(x) => {
                 let acc = f(&x.array_creation_left_bracket, acc);
                 let acc = f(&x.array_creation_members, acc);
@@ -3368,6 +3386,7 @@ where
             SyntaxVariant::CollectionLiteralExpression {..} => SyntaxKind::CollectionLiteralExpression,
             SyntaxVariant::ObjectCreationExpression {..} => SyntaxKind::ObjectCreationExpression,
             SyntaxVariant::ConstructorCall {..} => SyntaxKind::ConstructorCall,
+            SyntaxVariant::RecordCreationExpression {..} => SyntaxKind::RecordCreationExpression,
             SyntaxVariant::ArrayCreationExpression {..} => SyntaxKind::ArrayCreationExpression,
             SyntaxVariant::ArrayIntrinsicExpression {..} => SyntaxKind::ArrayIntrinsicExpression,
             SyntaxVariant::DarrayIntrinsicExpression {..} => SyntaxKind::DarrayIntrinsicExpression,
@@ -4384,6 +4403,14 @@ pub struct ConstructorCallChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct RecordCreationExpressionChildren<T, V> {
+    pub record_creation_type: Syntax<T, V>,
+    pub record_creation_left_bracket: Syntax<T, V>,
+    pub record_creation_members: Syntax<T, V>,
+    pub record_creation_right_bracket: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ArrayCreationExpressionChildren<T, V> {
     pub array_creation_left_bracket: Syntax<T, V>,
     pub array_creation_members: Syntax<T, V>,
@@ -4979,6 +5006,7 @@ pub enum SyntaxVariant<T, V> {
     CollectionLiteralExpression(Box<CollectionLiteralExpressionChildren<T, V>>),
     ObjectCreationExpression(Box<ObjectCreationExpressionChildren<T, V>>),
     ConstructorCall(Box<ConstructorCallChildren<T, V>>),
+    RecordCreationExpression(Box<RecordCreationExpressionChildren<T, V>>),
     ArrayCreationExpression(Box<ArrayCreationExpressionChildren<T, V>>),
     ArrayIntrinsicExpression(Box<ArrayIntrinsicExpressionChildren<T, V>>),
     DarrayIntrinsicExpression(Box<DarrayIntrinsicExpressionChildren<T, V>>),

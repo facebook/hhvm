@@ -277,6 +277,9 @@ and expr acc (_, e) =
     let acc = exprs acc es2 in
     let acc = exprs acc es3 in
     acc
+  | Record (e1, exprexprs) ->
+    let acc = expr acc e1 in
+    List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
   | Yield f ->
     field acc f
   | Eif (e1, oe2, e3) ->
@@ -466,6 +469,11 @@ let rec aast_expr acc (_, e) =
     acc
   | Aast.New _ ->
     failwith "Unexpected Expr: Typing_get_locals expected CIexpr in New"
+  | Aast.Record ((_, Aast.CIexpr e1), exprexprs) ->
+    let acc = aast_expr acc e1 in
+    List.fold_left exprexprs ~init:acc ~f:(fun acc -> fun (e1, e2) -> expr_expr acc e1 e2)
+  | Aast.Record _ ->
+    failwith "Unexpected Expr: Typing_get_locals expected CIexpr in Record"
   | Aast.Yield f ->
     field acc f
   | Aast.Eif (e1, oe2, e3) ->

@@ -441,7 +441,7 @@ class SplFileInfo {
 
   protected function setPathname($file_name) {
     if ($file_name !== false) {
-      $file_name = rtrim($file_name, '/');
+      $file_name = rtrim((string)$file_name, '/');
     }
     $this->fileName = $file_name;
   }

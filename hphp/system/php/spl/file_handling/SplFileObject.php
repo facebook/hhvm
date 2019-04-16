@@ -209,14 +209,14 @@ class SplFileObject extends SplFileInfo
    * text it reads.
    *
    * @allowable_tags
-   *             mixed   Optional parameter to specify tags which should not
+   *             string   Optional parameter to specify tags which should not
    *                     be stripped.
    *
    * @return     mixed   Returns a string containing the next line of the
    *                     file with HTML and PHP code stripped, or FALSE on
    *                     error.
    */
-  public function fgetss($allowable_tags = null) {
+  public function fgetss(string $allowable_tags = '') {
     return fgetss($this->rsrc, $this->maxLineLen, $allowable_tags);
   }
 

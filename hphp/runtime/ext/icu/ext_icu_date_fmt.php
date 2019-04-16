@@ -47,9 +47,9 @@ class IntlDateFormatter {
                               mixed $timezone = NULL, mixed $calendar = NULL,
                               string $pattern = ''): void;
 
-  public static function create($locale, $datetype, $timetype,
-                                $timezone = NULL, $calendar = NULL,
-                                $pattern = ''): mixed {
+  public static function create(string $locale, int $datetype, int $timetype,
+                                mixed $timezone = NULL, mixed $calendar = NULL,
+                                string $pattern = ''): mixed {
     try {
       return new IntlDateFormatter($locale, $datetype, $timetype,
                                    $timezone, $calendar, $pattern);

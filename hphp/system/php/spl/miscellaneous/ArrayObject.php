@@ -234,7 +234,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
     if ($this->isArray()) {
       return array_key_exists($index, $this->storage);
     } else {
-      return property_exists($this->storage, $index);
+      return property_exists($this->storage, (string)$index);
     }
   }
 

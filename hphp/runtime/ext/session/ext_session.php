@@ -373,7 +373,7 @@ namespace {
                                     mixed $destroy = null,
                                     mixed $gc = null): bool {
     if ($open is SessionHandlerInterface) {
-      return \__SystemLib\session_set_save_handler($open, $close);
+      return \__SystemLib\session_set_save_handler($open, (bool)$close);
     }
     return \__SystemLib\session_set_save_handler(
       new \__SystemLib\SessionForwardingHandler($open, $close, $read, $write,

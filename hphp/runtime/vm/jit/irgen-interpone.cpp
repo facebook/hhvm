@@ -132,6 +132,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
     case OutKeysetImm:   return TKeyset;
     case OutObject:
     case OutThisObject:  return TObj;
+    case OutRecord:      return TRecord;
     case OutResource:    return TRes;
 
     case OutFDesc:       return folly::none;

@@ -132,8 +132,7 @@ static const struct {
   { OpAddNewElemV, {StackTop2,        Stack1,       OutArray        }},
   { OpNewCol,      {None,             Stack1,       OutObject       }},
   { OpNewPair,     {StackTop2,        Stack1,       OutObject       }},
-  // TODO (arnabde): Create OutRecord
-  { OpNewRecord,   {StackN,             Stack1,       OutObject       }},
+  { OpNewRecord,   {StackN,           Stack1,       OutRecord       }},
   { OpColFromArray,   {Stack1,        Stack1,       OutObject       }},
   { OpCnsE,        {None,             Stack1,       OutCns          }},
   { OpClsCns,      {None,             Stack1,       OutUnknown      }},
@@ -535,6 +534,7 @@ int64_t getStackPopped(PC pc) {
     case Op::SetOpM:
       return getImm(pc, 0).u_IVA + 1;
 
+    case Op::NewRecord:
     case Op::NewStructArray:
     case Op::NewStructDArray:
     case Op::NewStructDict:

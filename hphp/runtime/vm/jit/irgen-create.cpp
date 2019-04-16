@@ -509,8 +509,9 @@ void newStructImpl(IRGS& env, const ImmVector& immVec, Opcode op) {
     extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
   }
 
+  auto const structData = gen(env, op, extra, sp(env));
   discard(env, numArgs);
-  push(env, gen(env, op, extra, sp(env)));
+  push(env, structData);
 }
 
 }
@@ -603,9 +604,20 @@ void emitNewPair(IRGS& env) {
   push(env, gen(env, NewPair, c2, c1));
 }
 
-void emitNewRecord(IRGS& env, const StringData*, const ImmVector&) {
-  // TODO(arnabde)
-  always_assert(false);
+void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
+  auto const cachedRec = gen(env, LdRecCached, cns(env, name));
+  auto const numArgs = immVec.size();
+  auto const ids = immVec.vec32();
+  NewStructData extra;
+  extra.offset = spOffBCFromIRSP(env);
+  extra.numKeys = numArgs;
+  extra.keys = new (env.unit.arena()) StringData*[numArgs];
+  for (auto i = size_t{0}; i < numArgs; ++i) {
+    extra.keys[i] = curUnit(env)->lookupLitstrId(ids[i]);
+  }
+  auto const recData = gen(env, NewRecord, extra, cachedRec, sp(env));
+  discard(env, numArgs);
+  push(env, recData);
 }
 
 void emitColFromArray(IRGS& env, CollectionType type) {

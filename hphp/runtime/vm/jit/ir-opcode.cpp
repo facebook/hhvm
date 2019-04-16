@@ -457,6 +457,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsTypeCns:
   case LdFunc:
   case LdFuncCached:
+  case LdRecCached:
   case LdObjMethod:
   case LdSSwitchDestSlow:
   case LdSwitchObjIndex:
@@ -482,6 +483,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqObj:
   case NeqVec:
   case NewKeysetArray:
+  case NewRecord:
   case OODeclExists:
   case OrdStrIdx:
   case PrintBool:

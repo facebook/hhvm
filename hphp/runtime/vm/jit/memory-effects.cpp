@@ -1242,6 +1242,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store_move(stack_in, AEmpty, stack_in);
     }
 
+  case NewRecord:
+    {
+      auto const extra = inst.extra<NewStructData>();
+      auto const stack_in = AStack {
+        inst.src(1),
+        extra->offset + static_cast<int32_t>(extra->numKeys) - 1,
+        static_cast<int32_t>(extra->numKeys)
+      };
+      return may_load_store_move(stack_in, AEmpty, stack_in);
+    }
   case MemoGetStaticValue:
   case MemoGetLSBValue:
   case MemoGetInstanceValue:
@@ -2068,6 +2078,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdCls:          // autoload
   case LdClsCached:    // autoload
   case LdFuncCached:   // autoload
+  case LdRecCached:    // autoload
   case LdSwitchObjIndex:  // decrefs arg
   case InitClsCns:      // autoload
   case LookupClsMethodCache:  // autoload

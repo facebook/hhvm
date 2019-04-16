@@ -59,6 +59,7 @@ struct TSEnv {
 const StaticString
   s_nullable("nullable"),
   s_exact("exact"),
+  s_like("like"),
   s_name("name"),
   s_classname("classname"),
   s_kind("kind"),
@@ -238,6 +239,12 @@ void shapeTypeName(const Array& arr, std::string& name, bool forDisplay) {
 
 std::string fullName(const Array& arr, bool forDisplay) {
   std::string name;
+
+  if (arr.exists(s_like)) {
+    assertx(arr[s_like].toBoolean());
+    name += '~';
+  }
+
   if (arr.exists(s_nullable)) {
     assertx(arr[s_nullable].toBoolean());
     name += '?';
@@ -601,6 +608,15 @@ Array resolveGenerics(TSEnv& env,
   return resolveList(env, genericsArr, typeCns, typeCnsCls, generics);
 }
 
+/**
+ * Copy modifiers, i.e. whether the type is nullable, soft, or a like-type.
+ */
+void copyTypeModifiers(const Array& from, Array& to) {
+  if (from.exists(s_like))     to.set(s_like, true_varNR.tv());
+  if (from.exists(s_nullable)) to.set(s_nullable, true_varNR.tv());
+  if (from.exists(s_soft))     to.set(s_soft, true_varNR.tv());
+}
+
 Array resolveTS(TSEnv& env,
                 const Array& arr,
                 const Class::Const& typeCns,
@@ -611,8 +627,7 @@ Array resolveTS(TSEnv& env,
     arr[s_kind].toInt64Val());
 
   auto newarr = Array::CreateDArray();
-  if (arr.exists(s_nullable)) newarr.set(s_nullable, true_varNR.tv());
-  if (arr.exists(s_soft)) newarr.set(s_soft, true_varNR.tv());
+  copyTypeModifiers(arr, newarr);
   newarr.set(s_kind, Variant(static_cast<uint8_t>(kind)));
 
   if (arr.exists(s_allows_unknown_fields)) {
@@ -705,13 +720,7 @@ Array resolveTS(TSEnv& env,
         } else {
           ts = resolve();
         }
-        if (arr.exists(s_nullable)) {
-          ts.set(s_nullable, true_varNR.tv());
-        }
-        if (arr.exists(s_soft)) {
-          ts.set(s_soft, true_varNR.tv());
-        }
-
+        copyTypeModifiers(arr, ts);
         return ts;
       }
 
@@ -787,15 +796,7 @@ Array resolveTS(TSEnv& env,
         assertx(typeCnsVal.exists(s_classname));
         clsName = typeCnsVal[s_classname].toCStrRef();
       }
-
-      if (arr.exists(s_nullable)) {
-        typeCnsVal.set(s_nullable, true_varNR.tv());
-      }
-
-      if (arr.exists(s_soft)) {
-        typeCnsVal.set(s_soft, true_varNR.tv());
-      }
-
+      copyTypeModifiers(arr, typeCnsVal);
       return typeCnsVal;
     }
     case TypeStructure::Kind::T_typevar: {

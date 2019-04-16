@@ -73,6 +73,8 @@ newtype TypeStructure<T> as shape(
   'value' => ?darray,
   'typevars' => ?string,
   'alias' => ?string,
+  ?'exact' => bool,
+  ?'like' => bool,
 ) = shape(
   'nullable' => ?bool,
   'kind' => TypeStructureKind,
@@ -106,6 +108,10 @@ newtype TypeStructure<T> as shape(
   'typevars' => ?string,
   // for type aliases
   'alias' => ?string,
+  // if the type is exact (i.e., not a subtype)
+  ?'exact' => bool,
+  // if the type is a like-type
+  ?'like' => bool,
 );
 
 /*

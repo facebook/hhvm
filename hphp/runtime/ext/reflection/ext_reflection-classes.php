@@ -1372,6 +1372,8 @@ namespace HH {
     'alias' => ?string,
     // if the type is exact (i.e., not a subtype)
     ?'exact' => bool,
+    // if the type is a like-type
+    ?'like' => bool,
   );
 
   /**

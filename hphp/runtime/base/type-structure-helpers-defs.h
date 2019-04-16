@@ -27,6 +27,7 @@ const StaticString s_kind("kind");
 const StaticString s_value("value");
 const StaticString s_nullable("nullable");
 const StaticString s_soft("soft");
+const StaticString s_like("like");
 const StaticString s_optional_shape_field("optional_shape_field");
 const StaticString s_classname("classname");
 const StaticString s_wildcard("_");
@@ -41,6 +42,13 @@ ALWAYS_INLINE bool is_ts_nullable(const ArrayData* ts) {
   assertx(!nullable_field.is_set() ||
           (isBoolType(nullable_field.type()) && nullable_field.val().num));
   return nullable_field.is_set();
+}
+
+ALWAYS_INLINE bool is_ts_like_type(const ArrayData* ts) {
+  auto const like_field = ts->rval(s_like.get());
+  assertx(!like_field.is_set() ||
+          (isBoolType(like_field.type()) && like_field.val().num));
+  return like_field.is_set();
 }
 
 ALWAYS_INLINE bool is_ts_soft(const ArrayData* ts) {

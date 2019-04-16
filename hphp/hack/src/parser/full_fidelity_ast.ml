@@ -3140,12 +3140,18 @@ and pDef : def list parser = fun node env ->
     ; _ } ->
       let pFields node =
         match syntax node with
-        | RecordField { record_field_name = name; record_field_type = ftype; _ } ->
+        | RecordField {
+          record_field_name = name;
+          record_field_type = ftype;
+          record_field_init = init; _ } ->
             fun env -> ClassVars
             { cv_kinds = []
             ; cv_hint = Some (pHint ftype env)
             ; cv_is_promoted_variadic = false
-            ; cv_names = [(pPos node env, pos_name name env, None)]
+            ; cv_names = [
+              (pPos node env,
+              pos_name name env,
+              mpOptional pSimpleInitializer init env)]
             ; cv_doc_comment = None
             ; cv_user_attributes = []
             }

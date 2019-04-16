@@ -571,6 +571,7 @@
         { "field_name" : "name" },
         { "field_name" : "colon" },
         { "field_name" : "type" },
+        { "field_name" : "init" },
         { "field_name" : "comma" }
       ] },
     { "kind_name" : "AliasDeclaration",

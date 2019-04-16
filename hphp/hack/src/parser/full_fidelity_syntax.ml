@@ -614,11 +614,13 @@ module WithToken(Token: TokenType) = struct
         record_field_name;
         record_field_colon;
         record_field_type;
+        record_field_init;
         record_field_comma;
       } ->
          let acc = f acc record_field_name in
          let acc = f acc record_field_colon in
          let acc = f acc record_field_type in
+         let acc = f acc record_field_init in
          let acc = f acc record_field_comma in
          acc
       | AliasDeclaration {
@@ -2577,11 +2579,13 @@ module WithToken(Token: TokenType) = struct
         record_field_name;
         record_field_colon;
         record_field_type;
+        record_field_init;
         record_field_comma;
       } -> [
         record_field_name;
         record_field_colon;
         record_field_type;
+        record_field_init;
         record_field_comma;
       ]
       | AliasDeclaration {
@@ -4541,11 +4545,13 @@ module WithToken(Token: TokenType) = struct
         record_field_name;
         record_field_colon;
         record_field_type;
+        record_field_init;
         record_field_comma;
       } -> [
         "record_field_name";
         "record_field_colon";
         "record_field_type";
+        "record_field_init";
         "record_field_comma";
       ]
       | AliasDeclaration {
@@ -6572,12 +6578,14 @@ module WithToken(Token: TokenType) = struct
           record_field_name;
           record_field_colon;
           record_field_type;
+          record_field_init;
           record_field_comma;
         ]) ->
         RecordField {
           record_field_name;
           record_field_colon;
           record_field_type;
+          record_field_init;
           record_field_comma;
         }
       | (SyntaxKind.AliasDeclaration, [
@@ -8789,12 +8797,14 @@ module WithToken(Token: TokenType) = struct
         record_field_name
         record_field_colon
         record_field_type
+        record_field_init
         record_field_comma
       =
         let syntax = RecordField {
           record_field_name;
           record_field_colon;
           record_field_type;
+          record_field_init;
           record_field_comma;
         } in
         let value = ValueBuilder.value_from_syntax syntax in

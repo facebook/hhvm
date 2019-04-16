@@ -142,11 +142,12 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_record_field(record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_comma: Self) -> Self {
+    pub fn make_record_field(record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_init: Self, record_field_comma: Self) -> Self {
         let syntax = SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
             record_field_name,
             record_field_colon,
             record_field_type,
+            record_field_init,
             record_field_comma,
         }));
         let value = V::from_syntax(&syntax);
@@ -2069,6 +2070,7 @@ where
                 let acc = f(&x.record_field_name, acc);
                 let acc = f(&x.record_field_colon, acc);
                 let acc = f(&x.record_field_type, acc);
+                let acc = f(&x.record_field_init, acc);
                 let acc = f(&x.record_field_comma, acc);
                 acc
             },
@@ -3517,6 +3519,7 @@ pub struct RecordFieldChildren<T, V> {
     pub record_field_name: Syntax<T, V>,
     pub record_field_colon: Syntax<T, V>,
     pub record_field_type: Syntax<T, V>,
+    pub record_field_init: Syntax<T, V>,
     pub record_field_comma: Syntax<T, V>,
 }
 

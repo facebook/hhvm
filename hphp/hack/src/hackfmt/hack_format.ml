@@ -260,12 +260,14 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       record_field_name = name;
       record_field_colon = colon_kw;
       record_field_type = record_field_type;
+      record_field_init = record_field_init;
       record_field_comma = comma_kw } ->
     Concat [
       t env name;
       t env colon_kw;
       Space;
       t env record_field_type;
+      t env record_field_init;
       t env comma_kw;
       Newline;
     ]

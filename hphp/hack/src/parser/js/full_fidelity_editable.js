@@ -4047,23 +4047,27 @@ class RecordField extends EditableSyntax
     name,
     colon,
     type,
+    init,
     comma)
   {
     super('record_field', {
       name: name,
       colon: colon,
       type: type,
+      init: init,
       comma: comma });
   }
   get name() { return this.children.name; }
   get colon() { return this.children.colon; }
   get type() { return this.children.type; }
+  get init() { return this.children.init; }
   get comma() { return this.children.comma; }
   with_name(name){
     return new RecordField(
       name,
       this.colon,
       this.type,
+      this.init,
       this.comma);
   }
   with_colon(colon){
@@ -4071,6 +4075,7 @@ class RecordField extends EditableSyntax
       this.name,
       colon,
       this.type,
+      this.init,
       this.comma);
   }
   with_type(type){
@@ -4078,6 +4083,15 @@ class RecordField extends EditableSyntax
       this.name,
       this.colon,
       type,
+      this.init,
+      this.comma);
+  }
+  with_init(init){
+    return new RecordField(
+      this.name,
+      this.colon,
+      this.type,
+      init,
       this.comma);
   }
   with_comma(comma){
@@ -4085,6 +4099,7 @@ class RecordField extends EditableSyntax
       this.name,
       this.colon,
       this.type,
+      this.init,
       comma);
   }
   rewrite(rewriter, parents)
@@ -4096,11 +4111,13 @@ class RecordField extends EditableSyntax
     var name = this.name.rewrite(rewriter, new_parents);
     var colon = this.colon.rewrite(rewriter, new_parents);
     var type = this.type.rewrite(rewriter, new_parents);
+    var init = this.init.rewrite(rewriter, new_parents);
     var comma = this.comma.rewrite(rewriter, new_parents);
     if (
       name === this.name &&
       colon === this.colon &&
       type === this.type &&
+      init === this.init &&
       comma === this.comma)
     {
       return rewriter(this, parents);
@@ -4111,6 +4128,7 @@ class RecordField extends EditableSyntax
         name,
         colon,
         type,
+        init,
         comma), parents);
     }
   }
@@ -4125,6 +4143,9 @@ class RecordField extends EditableSyntax
     let type = EditableSyntax.from_json(
       json.record_field_type, position, source);
     position += type.width;
+    let init = EditableSyntax.from_json(
+      json.record_field_init, position, source);
+    position += init.width;
     let comma = EditableSyntax.from_json(
       json.record_field_comma, position, source);
     position += comma.width;
@@ -4132,6 +4153,7 @@ class RecordField extends EditableSyntax
         name,
         colon,
         type,
+        init,
         comma);
   }
   get children_keys()
@@ -4141,6 +4163,7 @@ class RecordField extends EditableSyntax
         'name',
         'colon',
         'type',
+        'init',
         'comma'];
     return RecordField._children_keys;
   }

@@ -33,12 +33,6 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(CheckPropTypeHints);
   SHOW(ThisTypeHintLevel);
   SHOW(HardPrivatePropInference);
-  out += "  DisallowDynamicVarEnvFuncs: ";
-  switch (gd.DisallowDynamicVarEnvFuncs) {
-    case HackStrictOption::OFF:  out += "OFF\n";  break;
-    case HackStrictOption::WARN: out += "WARN\n"; break;
-    case HackStrictOption::ON:   out += "ON\n";   break;
-  }
   SHOW(ElideAutoloadInvokes);
   SHOW(PHP7_IntSemantics);
   SHOW(PHP7_NoHexNumerics);

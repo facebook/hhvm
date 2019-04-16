@@ -516,7 +516,6 @@ bool HHVM_FUNCTION(clear_instance_memoization, const Object& obj) {
 }
 
 void HHVM_FUNCTION(set_frame_metadata, const Variant&) {
-  raise_disallowed_dynamic_call(Unit::lookupFunc(s_set_frame_metadata.get()));
   SystemLib::throwInvalidArgumentExceptionObject(
     "Unsupported dynamic call of set_frame_metadata()");
 }

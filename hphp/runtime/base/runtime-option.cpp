@@ -820,7 +820,6 @@ std::string RuntimeOption::DynamicExtensionPath = ".";
 
 HackStrictOption
   RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
-  RuntimeOption::DisallowDynamicVarEnvFuncs = HackStrictOption::OFF,
   RuntimeOption::IconvIgnoreCorrect = HackStrictOption::OFF,
   RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
 
@@ -1903,8 +1902,6 @@ void RuntimeOption::Load(
 
     Config::Bind(StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys", def);
-    Config::Bind(DisallowDynamicVarEnvFuncs, ini, config,
-                 "Hack.Lang.DisallowDynamicVarEnvFuncs", def);
     Config::Bind(IconvIgnoreCorrect, ini, config,
                  "Hack.Lang.IconvIgnoreCorrect", def);
     Config::Bind(MinMaxAllowDegenerate, ini, config,

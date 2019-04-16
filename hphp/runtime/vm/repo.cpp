@@ -240,8 +240,6 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EnableArgsInBacktraces = s_globalData.EnableArgsInBacktraces;
     RuntimeOption::EvalAbortBuildOnVerifyError =
       s_globalData.AbortBuildOnVerifyError;
-    RuntimeOption::DisallowDynamicVarEnvFuncs =
-      s_globalData.DisallowDynamicVarEnvFuncs;
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;
     }

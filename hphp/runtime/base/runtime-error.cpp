@@ -155,14 +155,6 @@ void raise_property_typehint_unset_error(const Class* declCls,
   );
 }
 
-void raise_disallowed_dynamic_call(const Func* f) {
-  raise_hack_strict(
-    RuntimeOption::DisallowDynamicVarEnvFuncs,
-    "disallow_dynamic_var_env_funcs",
-    Strings::DISALLOWED_DYNCALL, f->fullName()->data()
-  );
-}
-
 void raise_convert_object_to_string(const char* cls_name) {
   raise_error("Cannot convert object to string (got instance of %s)", cls_name);
 }

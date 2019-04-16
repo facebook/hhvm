@@ -1048,10 +1048,6 @@ FuncSet s_ignores_frame = {
 
 }
 
-bool disallowDynamicVarEnvFuncs() {
-  return RuntimeOption::DisallowDynamicVarEnvFuncs == HackStrictOption::ON;
-}
-
 bool funcNeedsCallerFrame(const Func* callee) {
   assertx(callee != nullptr);
 

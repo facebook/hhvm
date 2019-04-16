@@ -267,9 +267,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
     Config::Bind(RuntimeOption::StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys",
                  RuntimeOption::StrictArrayFillKeys);
-    Config::Bind(RuntimeOption::DisallowDynamicVarEnvFuncs, ini, config,
-                 "Hack.Lang.DisallowDynamicVarEnvFuncs",
-                 RuntimeOption::DisallowDynamicVarEnvFuncs);
   }
 
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",

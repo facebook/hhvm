@@ -165,8 +165,6 @@ void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
                                          bool isSoft);
 
-void raise_disallowed_dynamic_call(const Func* f);
-
 void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
 void raise_call_to_undefined(const StringData* name, const Class* c = nullptr);
 

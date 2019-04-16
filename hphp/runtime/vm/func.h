@@ -1450,12 +1450,6 @@ struct PrologueID {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Whether dynamic calls to builtin functions that touch the caller's frame are
- * forbidden.
- */
-bool disallowDynamicVarEnvFuncs();
-
-/*
  * Could the function `callee` attempt to read the caller frame?
  *
  * This occurs, e.g., if `func' is is_callable().

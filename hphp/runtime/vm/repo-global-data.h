@@ -80,13 +80,6 @@ struct Repo::GlobalData {
   bool HardPrivatePropInference = false;
 
   /*
-   * Indicates whether the repo was compiled with DisallowDynamicVarEnvFuncs. If
-   * so, we assume that '$f()' doesn't read or write over locals (that
-   * haven't been passed).
-   */
-  HackStrictOption DisallowDynamicVarEnvFuncs = HackStrictOption::OFF;
-
-  /*
    * Indicates whether the repo was compiled with ElideAutoloadInvokes. If so,
    * potential invocations of the autoloader may have been optimized away if it
    * could be proven the invocation would not find a viable function.
@@ -214,7 +207,6 @@ struct Repo::GlobalData {
       (HardReturnTypeHints)
       (CheckPropTypeHints)
       (HardPrivatePropInference)
-      (DisallowDynamicVarEnvFuncs)
       (ElideAutoloadInvokes)
       (PHP7_IntSemantics)
       (PHP7_NoHexNumerics)

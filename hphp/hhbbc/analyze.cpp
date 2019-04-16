@@ -557,9 +557,8 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
     if (it == end(propState)) return;
 
     /*
-     * When DisallowDynamicVarEnvFuncs isn't on, or any functions are
-     * interceptable, we don't require the constraints to actually
-     * match, and relax all the HNI types to Gen.
+     * When any functions are interceptable, we don't require the constraints to
+     * actually match, and relax all the HNI types to Gen.
      *
      * This is because with any interceptable functions, it's quite
      * possible that some function calls in systemlib might not be
@@ -567,7 +566,6 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
      * some properties, or not to take their arguments by reference.
      */
     auto const hniTy =
-      RuntimeOption::DisallowDynamicVarEnvFuncs != HackStrictOption::ON ||
       clsAnalysis.anyInterceptable
         ? TGen
         : from_hni_constraint(prop.userType);

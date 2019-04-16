@@ -510,7 +510,6 @@ struct RuntimeOption {
   static bool CheckFlushOnUserClose;
   static bool EvalAuthoritativeMode;
   static HackStrictOption StrictArrayFillKeys;
-  static HackStrictOption DisallowDynamicVarEnvFuncs;
   static HackStrictOption IconvIgnoreCorrect;
   static HackStrictOption MinMaxAllowDegenerate;
   static bool LookForTypechecker;

@@ -139,7 +139,6 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.HardReturnTypeHints         = RuntimeOption::EvalCheckReturnTypeHints >= 3;
   gd.CheckPropTypeHints          = RuntimeOption::EvalCheckPropTypeHints;
   gd.HardPrivatePropInference    = true;
-  gd.DisallowDynamicVarEnvFuncs  = RuntimeOption::DisallowDynamicVarEnvFuncs;
   gd.ElideAutoloadInvokes        = HHBBC::options.ElideAutoloadInvokes;
   gd.PHP7_IntSemantics           = RuntimeOption::PHP7_IntSemantics;
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;

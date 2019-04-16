@@ -212,7 +212,7 @@ class type ['a] visitor_type = object
   method on_return : 'a -> expr option -> 'a
   method on_goto_label : 'a -> pstring -> 'a
   method on_goto : 'a -> pstring -> 'a
-  method on_awaitall : 'a -> (id option * expr) list -> 'a
+  method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
@@ -335,13 +335,16 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | None -> acc
     | Some e -> this#on_expr acc e
 
-  method on_awaitall acc el = List.fold_left ~f:(fun acc (x, y) ->
-    let acc = match x with
-    | Some x -> this#on_lvar acc x
-    | None -> acc in
-    let acc = this#on_expr acc y in
+  method on_awaitall acc el b =
+    let acc = List.fold_left ~f:(fun acc (x, y) ->
+      let acc = match x with
+      | Some x -> this#on_lvar acc x
+      | None -> acc in
+      let acc = this#on_expr acc y in
+      acc
+    ) ~init:acc el in
+    let acc = this#on_block acc b in
     acc
-  ) ~init:acc el
 
   method on_if acc e b1 b2 =
     let acc = this#on_expr acc e in
@@ -446,7 +449,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Noop                    -> this#on_noop acc
     | Unsafe_block b          -> this#on_unsafe_block acc b
     | Fallthrough             -> this#on_fallthrough acc
-    | Awaitall el             -> this#on_awaitall acc el
+    | Awaitall (el, b)        -> this#on_awaitall acc el b
     | Def_inline d            -> this#on_def_inline acc d
     | Let     (x, h, e)       -> this#on_let acc x h e
     | Block b                 -> this#on_block acc b

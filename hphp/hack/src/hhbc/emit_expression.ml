@@ -1531,7 +1531,7 @@ and try_inline_genva_call_ env pos args uargs inline_context =
     gather @@ List.map reserved_locals_reversed ~f:instr_popl in
   let await_all =
     gather [
-      instr_awaitall (Some ((List.hd_exn reserved_locals_reversed), args_count));
+      instr_awaitall_list reserved_locals_reversed;
       instr_popc;
     ] in
   let process_results =

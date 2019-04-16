@@ -221,6 +221,9 @@ and on_darray_element (e1, e2) =
 and on_shape (sfn, e) =
   (sfn, on_expr e)
 
+and on_awaitall el b =
+  (on_list on_awaitall_expr el, on_block b)
+
 and on_awaitall_expr (e1, e2) =
   let e2 = on_expr e2 in
   let e1 =
@@ -352,7 +355,7 @@ and on_stmt_ p st :  Aast.stmt_ =
   | Return e                  -> Aast.Return (optional on_expr e)
   | GotoLabel label           -> Aast.GotoLabel label
   | Goto label                -> Aast.Goto label
-  | Awaitall el               -> Aast.Awaitall (on_list on_awaitall_expr el)
+  | Awaitall (el, s)          -> Aast.Awaitall (on_awaitall el s)
   | If (e, b1, b2)            -> Aast.If (on_expr e, on_block b1, on_block b2)
   | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)
   | While (e, b)              -> Aast.While (on_expr e, on_block b)

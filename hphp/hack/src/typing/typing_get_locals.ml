@@ -154,10 +154,12 @@ let rec stmt (acc:(Namespace_env.env * Pos.t SMap.t)) (_, st_) =
         acc
     end (* match *)
   | Declare _ | Return _ | GotoLabel _ | Goto _ | Def_inline _ | Noop -> acc
-  | Awaitall el ->
-    List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
+  | Awaitall (el, b) ->
+    let acc = List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
       expr acc e2
-    )
+    ) in
+    let acc = block acc b in
+    acc
   | Let (_x, _h, e) ->
     (* We would like to exclude scoped locals here, but gather the locals in
      * expression *)
@@ -549,8 +551,10 @@ let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Aast.GotoLabel _
   | Aast.Def_inline _
   | Aast.Noop -> acc
-  | Aast.Awaitall el ->
-    List.fold_left ~init:acc ~f:(fun acc (_, e2) -> aast_expr acc e2) el
+  | Aast.Awaitall (el, b) ->
+    let acc = List.fold_left ~init:acc ~f:(fun acc (_, e2) -> aast_expr acc e2) el in
+    let acc = aast_block acc b in
+    acc
   | Aast.Let (_x, _h, e) ->
     (* We would like to exclude scoped locals here, but gather the locals in
      * expression *)

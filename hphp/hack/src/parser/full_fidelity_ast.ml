@@ -2234,7 +2234,6 @@ and pStmt : stmt parser = fun node env ->
     let (lifted_awaits, stmt) =
       with_new_concurrent_scope env (fun () -> pStmt concurrent_stmt env) in
     (* lifted awaits are accumulated in reverse *)
-    let await_all = pos, Awaitall (List.rev lifted_awaits.awaits) in
     let stmt = match stmt with
     | pos, Block stmts ->
       let body_stmts, assign_stmts, _ =
@@ -2260,7 +2259,7 @@ and pStmt : stmt parser = fun node env ->
       pos, Block (List.concat [List.rev body_stmts; List.rev assign_stmts])
     | _ -> failwith "Unexpected concurrent stmt structure" in
 
-    pos, Block [await_all; stmt]
+    pos, Awaitall ((List.rev lifted_awaits.awaits), [stmt])
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 && env.codegen ->
     (* OCaml optimisers; Forgive them, for they know not what they do!
@@ -2295,8 +2294,7 @@ and lift_awaits_in_statement env pos f =
   | None -> result
   | Some lifted_awaits ->
     (* lifted awaits are accumulated in reverse *)
-    let await_all = pos, Awaitall (List.rev lifted_awaits.awaits) in
-    pos, Block [await_all; result]
+    pos, Awaitall ((List.rev lifted_awaits.awaits), [result])
 
 and is_hashbang text =
   match Syntax.extract_text text with

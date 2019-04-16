@@ -1774,7 +1774,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Return e -> N.Return (Option.map e (aast_expr env))
     | Aast.GotoLabel label -> name_goto_label env label
     | Aast.Goto label -> name_goto env label
-    | Aast.Awaitall el -> aast_awaitall_stmt env el
+    | Aast.Awaitall (el, b) -> aast_awaitall_stmt env el b
     | Aast.If (e, b1, b2) -> aast_if_stmt env e b1 b2
     | Aast.Do (b, e) -> aast_do_stmt env b e
     | Aast.While (e, b) ->
@@ -2006,7 +2006,7 @@ module Make (GetLocals : GetLocals) = struct
     if in_finally then Errors.goto_invoked_in_finally label_pos;
     N.Goto label
 
-  and aast_awaitall_stmt env el =
+  and aast_awaitall_stmt env el b =
     let el =
       List.map
         ~f:(fun (e1, e2) ->
@@ -2023,7 +2023,8 @@ module Make (GetLocals : GetLocals) = struct
             | None -> None in
           (e1, e2))
       el in
-    N.Awaitall el
+    let s = aast_block env b in
+    N.Awaitall (el, s)
 
   and aast_expr_obj_get_name env expr =
     match expr with

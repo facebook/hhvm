@@ -69,10 +69,11 @@ module CheckFunctionBody = struct
         ()
     | _, ( Noop | Fallthrough | GotoLabel _ | Goto _ | Break | Continue
          | Unsafe_block _ ) -> ()
-    | _, Awaitall el ->
+    | _, Awaitall (el, b) ->
         List.iter el (fun (_, y) ->
           expr f_type env y;
         );
+        block f_type env b;
         ()
     | _, If (cond, b1, b2) ->
         expr f_type env cond;
@@ -595,10 +596,11 @@ and stmt_ env = function
   | Return (Some e)
   | Expr e | Throw (_, e) ->
     expr env e
-  | Awaitall el ->
+  | Awaitall (el, b) ->
       List.iter el (fun (_, y) ->
         expr env y;
       );
+      block env b;
       ()
   | If (e, b1, b2) ->
     expr env e;

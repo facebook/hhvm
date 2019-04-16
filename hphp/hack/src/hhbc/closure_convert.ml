@@ -1033,9 +1033,10 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
   | Return opt_e ->
     let st, opt_e = convert_opt_expr env st opt_e in
     st, (p, Return opt_e)
-  | Awaitall el ->
+  | Awaitall (el, b) ->
     let st, el = List.map_env st el (convert_snd_expr env) in
-    st, (p, Awaitall el)
+    let st, b = convert_block env st b in
+    st, (p, Awaitall (el, b))
   | If (e, b1, b2) ->
     let st, e = convert_expr env st e in
     let st, b1 = convert_block env st b1 in

@@ -262,6 +262,24 @@ let instr_yieldk = instr (IGenerator YieldK)
 let instr_createcont = instr (IGenerator CreateCont)
 let instr_awaitall range = instr (IAsync (AwaitAll range))
 
+let instr_awaitall_list unnamed_locals =
+  let head, tail = match unnamed_locals with
+  | head :: tail -> head, tail
+  | _ -> failwith "Expected at least one await" in
+
+  let get_unnamed_offset unnamed_local = match unnamed_local with
+  | Local.Unnamed i -> i
+  | _ -> failwith "Expected unnamed local" in
+
+  let _ = List.fold_left tail
+    ~init:(get_unnamed_offset head)
+    ~f:(fun acc unnamed_local ->
+      let next_offset = get_unnamed_offset unnamed_local in
+      assert (acc + 1 = next_offset);
+      next_offset
+    ) in
+  instr_awaitall (Some (head, List.length unnamed_locals))
+
 let instr_exit = instr (IOp Hhbc_ast.Exit)
 let instr_idx = instr (IMisc Idx)
 let instr_array_idx = instr (IMisc ArrayIdx)

@@ -239,9 +239,10 @@ struct
     | S.Return oe -> T.Return (Option.map oe (map_expr menv))
     | S.GotoLabel label -> T.GotoLabel label
     | S.Goto label -> T.Goto label
-    | S.Awaitall el ->
+    | S.Awaitall (el, b) ->
       let el = List.map el (fun (lid, expr) -> (lid, map_expr menv expr)) in
-      T.Awaitall el
+      let b = map_block menv b in
+      T.Awaitall (el, b)
     | S.If(e, b1, b2) -> T.If (map_expr menv e, map_block menv b1, map_block menv b2)
     | S.Do(b, e) -> T.Do(map_block menv b, map_expr menv e)
     | S.While(e, b) -> T.While(map_expr menv e, map_block menv b)

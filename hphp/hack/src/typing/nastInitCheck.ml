@@ -280,10 +280,12 @@ and stmt env acc st =
       if are_all_init env acc
       then acc
       else raise (InitReturn acc)
-    | Awaitall el ->
-      List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
+    | Awaitall (el, b) ->
+      let acc = List.fold_left el ~init:acc ~f:(fun acc (_, e2) ->
         expr acc e2
-      )
+      ) in
+      let acc = block acc b in
+      acc
     | If (e1, b1, b2) ->
       let acc = expr acc e1 in
       let b1 = block acc b1 in

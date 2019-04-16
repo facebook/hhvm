@@ -447,11 +447,12 @@ let check = object(self)
   method! on_Expr (env, ctx) e =
     self#on_expr (env, set_expr_statement ctx) e
 
-  method! on_Awaitall (env, ctx) els =
+  method! on_Awaitall (env, ctx) (els, b) =
     let allow_awaitable_s = (env, allow_awaitable ctx) in
     List.iter els ~f:(fun (_, rhs) ->
       super#on_expr allow_awaitable_s rhs
-    )
+    );
+    self#on_block (env, ctx) b
 
   method! on_expr (env, ctx) expr =
     let check_reactivity =

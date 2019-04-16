@@ -52,7 +52,7 @@ class type ['a] ast_visitor_type = object
   method on_array_get : 'a -> expr -> expr option -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
   method on_await : 'a -> expr -> 'a
-  method on_awaitall : 'a -> (id option * expr) list -> 'a
+  method on_awaitall : 'a -> (id option * expr) list -> block -> 'a
   method on_binop : 'a -> bop -> expr -> expr -> 'a
   method on_pipe : 'a -> expr -> expr -> 'a
   method on_block : 'a -> block -> 'a
@@ -250,13 +250,14 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
     | None -> acc
     | Some e -> this#on_expr acc e
 
-  method on_awaitall acc el =
-    List.fold_left (fun acc (e1, e2) ->
+  method on_awaitall acc el b =
+    let acc = List.fold_left (fun acc (e1, e2) ->
       let acc = (match e1 with
       | None -> acc
       | Some e -> this#on_lvar acc e) in
       this#on_expr acc e2
-    ) acc el
+    ) acc el in
+    this#on_block acc b
 
   method on_if acc e b1 b2 =
     let acc = this#on_expr acc e in
@@ -372,7 +373,7 @@ class virtual ['a] ast_visitor: ['a] ast_visitor_type = object(this)
       this#on_def_inline acc d
     | Noop                    -> this#on_noop acc
     | Fallthrough             -> this#on_fallthrough acc
-    | Awaitall el             -> this#on_awaitall acc el
+    | Awaitall (el, b)        -> this#on_awaitall acc el b
     | Markup (s, e)           -> this#on_markup acc s e
     | Using s                 -> this#on_using acc s
     | Declare (is_block, e, b) -> this#on_declare acc is_block e b

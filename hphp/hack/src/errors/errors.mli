@@ -360,7 +360,7 @@ val attribute_too_few_arguments : Pos.t -> string -> int -> unit
 val attribute_param_type : Pos.t -> string -> unit
 val deprecated_use : Pos.t -> Pos.t -> string -> unit
 val abstract_with_typeconst : Pos.t * string -> unit
-val cannot_declare_constant : [< `enum | `trait] -> Pos.t -> Pos.t * string -> unit
+val cannot_declare_constant : [< `enum | `trait | `record] -> Pos.t -> Pos.t * string -> unit
 val ambiguous_inheritance : Pos.t -> string -> string -> error -> unit
 val cyclic_typeconst : Pos.t -> string list -> unit
 val explain_contravariance : Pos.t -> string -> error -> unit

@@ -193,6 +193,20 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enumerator_value                                   : t
     ; enumerator_semicolon                               : t
     }
+  | RecordDeclaration                 of
+    { record_attribute_spec                              : t
+    ; record_keyword                                     : t
+    ; record_name                                        : t
+    ; record_left_brace                                  : t
+    ; record_fields                                      : t
+    ; record_right_brace                                 : t
+    }
+  | RecordField                       of
+    { record_field_name                                  : t
+    ; record_field_colon                                 : t
+    ; record_field_type                                  : t
+    ; record_field_comma                                 : t
+    }
   | AliasDeclaration                  of
     { alias_attribute_spec                               : t
     ; alias_keyword                                      : t
@@ -1213,6 +1227,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDEndOfFile                    of end_of_file
   | TLDFileAttributeSpecification   of file_attribute_specification
   | TLDEnum                         of enum_declaration
+  | TLDRecord                       of record_declaration
   | TLDAlias                        of alias_declaration
   | TLDNamespace                    of namespace_declaration
   | TLDNamespaceUse                 of namespace_use_declaration
@@ -1545,6 +1560,20 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; enumerator_equal: Token.t value
     ; enumerator_value: expression value
     ; enumerator_semicolon: Token.t value
+    }
+  and record_declaration =
+    { record_attribute_spec: attribute_specification option value
+    ; record_keyword: Token.t value
+    ; record_name: Token.t value
+    ; record_left_brace: Token.t value
+    ; record_fields: record_field listesque value
+    ; record_right_brace: Token.t value
+    }
+  and record_field =
+    { record_field_name: Token.t value
+    ; record_field_colon: Token.t value
+    ; record_field_type: type_constraint value
+    ; record_field_comma: Token.t value
     }
   and alias_declaration =
     { alias_attribute_spec: attribute_specification option value

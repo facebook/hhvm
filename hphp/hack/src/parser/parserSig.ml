@@ -60,6 +60,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val file_attribute_specification : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val enum_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val enumerator : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val record_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val record_field : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val alias_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val property_declaration : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val property_declarator : t -> SC.r -> SC.r -> t * SC.r

@@ -156,6 +156,34 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
+  ; { kind_name   = "RecordDeclaration"
+    ; type_name   = "record_declaration"
+    ; func_name   = "record_declaration"
+    ; description = "record_declaration"
+    ; prefix      = "record"
+    ; aggregates  = [ TopLevelDeclaration ]
+    ; fields =
+      [ "attribute_spec", ZeroOrOne (Just "AttributeSpecification")
+      ; "keyword", Token
+      ; "name", Token
+      ; "left_brace", Token
+      ; "fields", ZeroOrMore (Just "RecordField")
+      ; "right_brace", Token
+      ]
+    }
+  ; { kind_name   = "RecordField"
+    ; type_name   = "record_field"
+    ; func_name   = "record_field"
+    ; description = "record_field"
+    ; prefix      = "record_field"
+    ; aggregates  = []
+    ; fields =
+      [ "name", Token
+      ; "colon", Token
+      ; "type", Just "TypeConstraint"
+      ; "comma", Token
+      ]
+    }
   ; { kind_name   = "AliasDeclaration"
     ; type_name   = "alias_declaration"
     ; func_name   = "alias_declaration"

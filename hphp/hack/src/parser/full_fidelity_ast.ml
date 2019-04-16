@@ -3133,6 +3133,41 @@ and pDef : def list parser = fun node env ->
         }
       ; c_doc_comment = doc_comment_opt
       }]
+  | RecordDeclaration
+    { record_attribute_spec = attrs
+    ; record_name           = name
+    ; record_fields         = fields
+    ; _ } ->
+      let pFields node =
+        match syntax node with
+        | RecordField { record_field_name = name; record_field_type = ftype; _ } ->
+            fun env -> ClassVars
+            { cv_kinds = []
+            ; cv_hint = Some (pHint ftype env)
+            ; cv_is_promoted_variadic = false
+            ; cv_names = [(pPos node env, pos_name name env, None)]
+            ; cv_doc_comment = None
+            ; cv_user_attributes = []
+            }
+        | _ -> missing_syntax "record_field" node env
+      in
+      [ Class
+      { c_mode            = mode_annotation env.fi_mode
+      ; c_user_attributes = pUserAttributes env attrs
+      ; c_file_attributes = []
+      ; c_final           = false
+      ; c_kind            = Crecord
+      ; c_is_xhp          = false
+      ; c_name            = pos_name name env
+      ; c_tparams         = []
+      ; c_extends         = []
+      ; c_implements      = []
+      ; c_body            = couldMap fields env ~f:pFields
+      ; c_namespace       = Namespace_env.empty env.parser_options
+      ; c_span            = pPos node env
+      ; c_enum            = None
+      ; c_doc_comment = doc_comment_opt
+      }]
   | InclusionDirective
     { inclusion_expression
     ; inclusion_semicolon = _

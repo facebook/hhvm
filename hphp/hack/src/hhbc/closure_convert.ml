@@ -47,6 +47,8 @@ type env = {
   variable_scopes: variables list;
   (* How many existing classes are there? *)
   defined_class_count : int;
+  (* How many existing records are there? *)
+  defined_record_count : int;
   (* How many existing functions are there? *)
   defined_function_count : int;
   (* if we are immediately in using statement *)
@@ -333,7 +335,7 @@ let rec make_scope_name ns scope =
 let env_with_function env fd =
   env_with_function_like env (ScopeItem.Function fd) ~is_closure_body:false fd
 
-let env_toplevel class_count function_count defs =
+let env_toplevel class_count record_count function_count defs =
   let scope = Scope.toplevel in
   let all_vars =
     get_vars scope
@@ -344,6 +346,7 @@ let env_toplevel class_count function_count defs =
   ; pos = Pos.none
   ; variable_scopes = [{ all_vars; parameter_names = SSet.empty }]
   ; defined_class_count = class_count
+  ; defined_record_count = record_count
   ; defined_function_count = function_count
   ; in_using = false
   }
@@ -404,10 +407,21 @@ let make_defcls cd n =
   c_body = [];
   c_name = (fst cd.c_name, string_of_int n) }
 
+(* Make a stub record purely for the purpose of emitting the DefRecord instruction
+ *)
+let make_defrecord cd n =
+{ cd with
+  c_body = [];
+  c_kind = Crecord;
+  c_name = (fst cd.c_name, string_of_int n) }
+
 let add_class env st cd =
   let n = env.defined_class_count + List.length st.hoisted_classes in
   { st with hoisted_classes = cd :: st.hoisted_classes },
   make_defcls cd n
+
+let add_record env st cd =
+  st, make_defrecord cd env.defined_record_count
 
 let make_closure_name env st name =
   let per_fun_idx = st.closure_cnt_per_fun in
@@ -1091,7 +1105,9 @@ and convert_stmt env st (p, stmt_ as stmt) : _ * stmt =
         process_inline_defs st defs
       | Class cd :: _defs ->
         let st, cd = convert_class env st cd in
-        let st, stub_cd = add_class env st cd in
+        let st, stub_cd =
+          if cd.c_kind = Crecord then add_record env st cd
+          else add_class env st cd in
         st, (p, Def_inline (Class stub_cd))
       | _ ->
         failwith "expected single class or function declaration" in
@@ -1320,14 +1336,14 @@ and convert_gconst env st gconst =
   let st, expr = convert_expr env st gconst.Ast.cst_value in
   st, { gconst with Ast.cst_value = expr }
 
-and convert_defs env class_count typedef_count st dl =
+and convert_defs env class_count record_count typedef_count st dl =
   match dl with
   | [] -> st, []
   | Fun fd :: dl ->
     let let_vars_copy = st.let_vars in
     let st = { st with let_vars = SMap.empty } in
     let st, fd = convert_fun env st fd in
-    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, dl = convert_defs env class_count record_count typedef_count st dl in
     { st with let_vars = let_vars_copy }, (TopLevel, Fun fd) :: dl
     (* Convert a top-level class definition into a true class definition and
      * a stub class that just corresponds to the DefCls instruction *)
@@ -1335,16 +1351,25 @@ and convert_defs env class_count typedef_count st dl =
     let let_vars_copy = st.let_vars in
     let st = { st with let_vars = SMap.empty } in
     let st, cd = convert_class env st cd in
-    let stub_class = make_defcls cd class_count in
-    let st, dl = convert_defs env (class_count + 1) typedef_count st dl in
+    let stub_class =
+      if cd.c_kind = Crecord then
+        make_defrecord cd record_count
+      else
+        make_defcls cd class_count in
+    let st, dl =
+      if cd.c_kind = Crecord then
+        convert_defs env class_count (record_count + 1) typedef_count st dl
+      else
+        convert_defs env (class_count + 1) record_count typedef_count st dl
+    in
     { st with let_vars = let_vars_copy },
       (TopLevel, Class cd) :: (TopLevel, Stmt (Pos.none, Def_inline (Class stub_class))) :: dl
   | Stmt stmt :: dl ->
     let st, stmt = convert_stmt env st stmt in
-    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, dl = convert_defs env class_count record_count typedef_count st dl in
     st, (TopLevel, Stmt stmt) :: dl
   | Typedef td :: dl ->
-    let st, dl = convert_defs env class_count (typedef_count + 1) st dl in
+    let st, dl = convert_defs env class_count record_count (typedef_count + 1) st dl in
     let st, t_user_attributes =
       convert_user_attributes env st td.t_user_attributes in
     let td = { td with t_user_attributes } in
@@ -1353,26 +1378,33 @@ and convert_defs env class_count typedef_count st dl =
     st, (TopLevel, Typedef td) :: (TopLevel, Stmt (Pos.none, Def_inline (Typedef stub_td))) :: dl
   | Constant c :: dl ->
     let st, c = convert_gconst env st c in
-    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, dl = convert_defs env class_count record_count typedef_count st dl in
     st, (TopLevel, Constant c) :: dl
   | Namespace(_id, dl) :: dl' ->
-    convert_defs env class_count typedef_count st (dl @ dl')
+    convert_defs env class_count record_count typedef_count st (dl @ dl')
   | NamespaceUse x :: dl ->
-    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, dl = convert_defs env class_count record_count typedef_count st dl in
     st, (TopLevel, NamespaceUse x) :: dl
   | SetNamespaceEnv ns :: dl ->
     let st = set_namespace st ns in
-    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, dl = convert_defs env class_count record_count typedef_count st dl in
     st, (TopLevel, SetNamespaceEnv ns) :: dl
   | FileAttributes fa :: dl ->
-    let st, dl = convert_defs env class_count typedef_count st dl in
+    let st, dl = convert_defs env class_count record_count typedef_count st dl in
     let st, fa_user_attributes =
       convert_user_attributes env st fa.fa_user_attributes in
     let fa = { fa with fa_user_attributes } in
     st, (TopLevel, FileAttributes fa) :: dl
 
 let count_classes defs =
-  List.count defs ~f:(function Class _ -> true | _ -> false)
+  List.count defs ~f:(function
+    | Class {c_kind; _} -> c_kind <> Crecord
+    | _ -> false)
+
+let count_records defs =
+  List.count defs ~f:(function
+    | Class {c_kind; _} -> c_kind = Crecord
+    | _ -> false)
 
 let hoist_toplevel_functions all_defs =
   let funs, nonfuns =
@@ -1392,9 +1424,9 @@ let convert_toplevel_prog ~popt defs =
   (* First compute the number of explicit classes in order to generate correct
    * integer identifiers for the generated classes. .main counts as a top-level
    * function and we place hoisted functions just after that *)
-  let env = env_toplevel (count_classes defs) 1 defs in
+  let env = env_toplevel (count_classes defs) (count_records defs) 1 defs in
   let st = initial_state popt in
-  let st, original_defs = convert_defs env 0 0 st defs in
+  let st, original_defs = convert_defs env 0 0 0 st defs in
   let main_state = st.current_function_state in
   let st =
     record_function_state

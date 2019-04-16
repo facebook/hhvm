@@ -129,6 +129,30 @@ where
         Self::make(syntax, value)
     }
 
+    pub fn make_record_declaration(record_attribute_spec: Self, record_keyword: Self, record_name: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
+        let syntax = SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
+            record_attribute_spec,
+            record_keyword,
+            record_name,
+            record_left_brace,
+            record_fields,
+            record_right_brace,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
+    pub fn make_record_field(record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_comma: Self) -> Self {
+        let syntax = SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
+            record_field_name,
+            record_field_colon,
+            record_field_type,
+            record_field_comma,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     pub fn make_alias_declaration(alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
             alias_attribute_spec,
@@ -2032,6 +2056,22 @@ where
                 let acc = f(&x.enumerator_semicolon, acc);
                 acc
             },
+            SyntaxVariant::RecordDeclaration(x) => {
+                let acc = f(&x.record_attribute_spec, acc);
+                let acc = f(&x.record_keyword, acc);
+                let acc = f(&x.record_name, acc);
+                let acc = f(&x.record_left_brace, acc);
+                let acc = f(&x.record_fields, acc);
+                let acc = f(&x.record_right_brace, acc);
+                acc
+            },
+            SyntaxVariant::RecordField(x) => {
+                let acc = f(&x.record_field_name, acc);
+                let acc = f(&x.record_field_colon, acc);
+                let acc = f(&x.record_field_type, acc);
+                let acc = f(&x.record_field_comma, acc);
+                acc
+            },
             SyntaxVariant::AliasDeclaration(x) => {
                 let acc = f(&x.alias_attribute_spec, acc);
                 let acc = f(&x.alias_keyword, acc);
@@ -3220,6 +3260,8 @@ where
             SyntaxVariant::FileAttributeSpecification {..} => SyntaxKind::FileAttributeSpecification,
             SyntaxVariant::EnumDeclaration {..} => SyntaxKind::EnumDeclaration,
             SyntaxVariant::Enumerator {..} => SyntaxKind::Enumerator,
+            SyntaxVariant::RecordDeclaration {..} => SyntaxKind::RecordDeclaration,
+            SyntaxVariant::RecordField {..} => SyntaxKind::RecordField,
             SyntaxVariant::AliasDeclaration {..} => SyntaxKind::AliasDeclaration,
             SyntaxVariant::PropertyDeclaration {..} => SyntaxKind::PropertyDeclaration,
             SyntaxVariant::PropertyDeclarator {..} => SyntaxKind::PropertyDeclarator,
@@ -3458,6 +3500,24 @@ pub struct EnumeratorChildren<T, V> {
     pub enumerator_equal: Syntax<T, V>,
     pub enumerator_value: Syntax<T, V>,
     pub enumerator_semicolon: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct RecordDeclarationChildren<T, V> {
+    pub record_attribute_spec: Syntax<T, V>,
+    pub record_keyword: Syntax<T, V>,
+    pub record_name: Syntax<T, V>,
+    pub record_left_brace: Syntax<T, V>,
+    pub record_fields: Syntax<T, V>,
+    pub record_right_brace: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct RecordFieldChildren<T, V> {
+    pub record_field_name: Syntax<T, V>,
+    pub record_field_colon: Syntax<T, V>,
+    pub record_field_type: Syntax<T, V>,
+    pub record_field_comma: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -4810,6 +4870,8 @@ pub enum SyntaxVariant<T, V> {
     FileAttributeSpecification(Box<FileAttributeSpecificationChildren<T, V>>),
     EnumDeclaration(Box<EnumDeclarationChildren<T, V>>),
     Enumerator(Box<EnumeratorChildren<T, V>>),
+    RecordDeclaration(Box<RecordDeclarationChildren<T, V>>),
+    RecordField(Box<RecordFieldChildren<T, V>>),
     AliasDeclaration(Box<AliasDeclarationChildren<T, V>>),
     PropertyDeclaration(Box<PropertyDeclarationChildren<T, V>>),
     PropertyDeclarator(Box<PropertyDeclaratorChildren<T, V>>),

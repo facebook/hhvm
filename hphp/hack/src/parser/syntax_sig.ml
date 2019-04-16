@@ -80,6 +80,20 @@ module type Syntax_S = sig
     ; enumerator_value                                   : t
     ; enumerator_semicolon                               : t
     }
+  | RecordDeclaration                 of
+    { record_attribute_spec                              : t
+    ; record_keyword                                     : t
+    ; record_name                                        : t
+    ; record_left_brace                                  : t
+    ; record_fields                                      : t
+    ; record_right_brace                                 : t
+    }
+  | RecordField                       of
+    { record_field_name                                  : t
+    ; record_field_colon                                 : t
+    ; record_field_type                                  : t
+    ; record_field_comma                                 : t
+    }
   | AliasDeclaration                  of
     { alias_attribute_spec                               : t
     ; alias_keyword                                      : t
@@ -1117,6 +1131,8 @@ module type Syntax_S = sig
   val make_file_attribute_specification : t -> t -> t -> t -> t -> t
   val make_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_enumerator : t -> t -> t -> t -> t
+  val make_record_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_record_field : t -> t -> t -> t -> t
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_property_declaration : t -> t -> t -> t -> t -> t
   val make_property_declarator : t -> t -> t
@@ -1299,6 +1315,8 @@ module type Syntax_S = sig
   val is_file_attribute_specification : t -> bool
   val is_enum_declaration : t -> bool
   val is_enumerator : t -> bool
+  val is_record_declaration : t -> bool
+  val is_record_field : t -> bool
   val is_alias_declaration : t -> bool
   val is_property_declaration : t -> bool
   val is_property_declarator : t -> bool

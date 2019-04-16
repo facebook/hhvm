@@ -46,10 +46,15 @@ let emit_return env =
 
 let emit_def_inline = function
   | A.Class cd ->
-    let defcls_fn =
-      if Emit_env.is_systemlib () then instr_defclsnop else instr_defcls in
-    Emit_pos.emit_pos_then (fst cd.Ast.c_name) @@
-    defcls_fn (int_of_string (snd cd.Ast.c_name))
+    (match cd.Ast.c_kind with
+    | A.Crecord ->
+      Emit_pos.emit_pos_then (fst cd.Ast.c_name) @@
+      instr_defrecord (int_of_string (snd cd.Ast.c_name))
+    | _ ->
+      let defcls_fn =
+        if Emit_env.is_systemlib () then instr_defclsnop else instr_defcls in
+      Emit_pos.emit_pos_then (fst cd.Ast.c_name) @@
+      defcls_fn (int_of_string (snd cd.Ast.c_name)))
   | A.Typedef td ->
     Emit_pos.emit_pos_then (fst td.Ast.t_id) @@
     instr_deftypealias (int_of_string (snd td.Ast.t_id))

@@ -111,6 +111,8 @@
       "token_text" : "endwhile" },
     { "token_kind" : "Enum",
       "token_text" : "enum" },
+    { "token_kind" : "RecordDec",
+      "token_text" : "record" },
     { "token_kind" : "Eval",
       "token_text" : "eval" },
     { "token_kind" : "Extends",
@@ -548,6 +550,28 @@
         { "field_name" : "equal" },
         { "field_name" : "value" },
         { "field_name" : "semicolon" }
+      ] },
+    { "kind_name" : "RecordDeclaration",
+      "type_name" : "record_declaration",
+      "description" : "record_declaration",
+      "prefix" : "record",
+      "fields" : [
+        { "field_name" : "attribute_spec" },
+        { "field_name" : "keyword" },
+        { "field_name" : "name" },
+        { "field_name" : "left_brace" },
+        { "field_name" : "fields" },
+        { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "RecordField",
+      "type_name" : "record_field",
+      "description" : "record_field",
+      "prefix" : "record_field",
+      "fields" : [
+        { "field_name" : "name" },
+        { "field_name" : "colon" },
+        { "field_name" : "type" },
+        { "field_name" : "comma" }
       ] },
     { "kind_name" : "AliasDeclaration",
       "type_name" : "alias_declaration",

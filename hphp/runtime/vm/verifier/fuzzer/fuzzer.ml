@@ -705,6 +705,7 @@ let mutate_metadata (input : HP.t)  =
       (cls |> HC.is_abstract        |> mutate_bool)
       (cls |> HC.is_interface       |> mutate_bool)
       (cls |> HC.is_trait           |> mutate_bool)
+      (cls |> HC.is_record          |> mutate_bool)
       (cls |> HC.is_xhp             |> mutate_bool)
       (cls.HC.class_hoisted         |> mutate_hoisted)
       (cls |> HC.is_immutable       |> mutate_bool)

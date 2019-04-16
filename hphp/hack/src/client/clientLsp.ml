@@ -1127,6 +1127,8 @@ let do_workspaceSymbol
     | SymbolIndex.Class (Some Ast.Ctrait) -> SymbolInformation.Interface
     (* LSP doesn't have traits, so we approximate with interface *)
     | SymbolIndex.Class (Some Ast.Cenum) -> SymbolInformation.Enum
+    (* TODO(T36697624): Add SymbolInformation.Record *)
+    | SymbolIndex.Class (Some Ast.Crecord) -> SymbolInformation.Enum
     | SymbolIndex.Class (None) -> assert false (* should never happen *)
     | SymbolIndex.Method _ -> SymbolInformation.Method
     | SymbolIndex.ClassVar _ -> SymbolInformation.Property

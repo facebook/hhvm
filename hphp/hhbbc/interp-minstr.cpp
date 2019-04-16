@@ -1173,28 +1173,6 @@ void miFinalCGetElem(ISS& env, int32_t nDiscard,
   push(env, transform(std::move(ty)));
 }
 
-void miFinalVGetElem(ISS& env, int32_t nDiscard, const Type& key) {
-  handleInThisElemD(env);
-  handleInPublicStaticElemD(env);
-  promoteBaseElemD(env);
-  pessimisticFinalElemD(env, key, TInitGen);
-
-  auto const finish = [&](Type ty) {
-    endBase(env);
-    discard(env, nDiscard);
-    push(env, std::move(ty));
-  };
-
-  auto const& baseTy = env.state.mInstrState.base.type;
-  if (baseTy.subtypeOf(BVec) ||
-      baseTy.subtypeOf(BDict) ||
-      baseTy.subtypeOf(BKeyset)) {
-    unreachable(env);
-    return finish(TBottom);
-  }
-  finish(TRef);
-}
-
 void miFinalSetElem(ISS& env,
                     int32_t nDiscard,
                     const Type& key,
@@ -1506,12 +1484,8 @@ void in(ISS& env, const bc::QueryM& op) {
 void in(ISS& env, const bc::VGetM& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
-  if (mcodeIsProp(op.mkey.mcode)) {
-    miFinalVGetProp(env, op.arg1, *key, op.mkey.mcode == MQT);
-  } else {
-    assertx(mcodeIsElem(op.mkey.mcode));
-    miFinalVGetElem(env, op.arg1, *key);
-  }
+  assertx(mcodeIsProp(op.mkey.mcode));
+  miFinalVGetProp(env, op.arg1, *key, op.mkey.mcode == MQT);
 }
 
 void in(ISS& env, const bc::SetM& op) {

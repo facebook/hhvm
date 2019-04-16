@@ -2469,39 +2469,6 @@ CGetElemL <local variable id>    [B]  ->  [C]
   If y is not a string, array, or object, this operation will push null onto
   the stack.
 
-VGetElemC                        [C B]  ->  [V]
-VGetElemL <local variable id>    [B]  ->  [V]
-
-  Get element as ref.
-
-  These instructions first load a value into x and a base into y, as given by
-  the following table:
-
-         operation    x    y
-       ------------+----+-----
-        VGetElemC  | $2 | $1
-        VGetElemL  | %1 | $1
-
-  If y is an array, this operation retrieves the element at index x from array
-  y and pushes it onto the stack as a ref. If there is no element at index x,
-  this operation creates a new element at index x, and pushes it onto the stack
-  as a ref.
-
-  If y is an object that implements the ArrayAccess interface, this operation
-  pushes y->offsetGet(x) onto the stack as a ref.
-
-  If y is a non-empty string or an object that does not implement the
-  ArrayAccess interface, this operation throws a fatal error.
-
-  If y is null, false, or the empty string, this operation sets y to a new
-  empty array. Then this operation retrieves the element at index x from array
-  y and pushes it onto the stack as a ref. If there is no element at index x,
-  this operation creates a new element at index x, and pushes it onto the stack
-  as a ref.
-
-  If y is true, integer, or double, this operation raises a warning and pushes
-  null onto the stack.
-
 IssetElemC                        [C B]  ->  [C:Bool]
 IssetElemL <local variable id>    [B]  ->  [C:Bool]
 
@@ -3110,7 +3077,7 @@ QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
 VGetM <stack count> <member key>    [...]  ->  [V]
 
-  {VGet}{Prop,Elem} member operation.
+  VGetProp member operation.
 
 SetM <stack count> <member key>    [... C]  ->  [C]
 

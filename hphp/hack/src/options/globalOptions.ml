@@ -166,6 +166,12 @@ let tco_experimental_track_subtype_prop = "track_subtype_prop"
  *)
 let tco_experimental_pocket_universes = "pocket_universes"
 
+(**
+ * Enable abstract const type with default syntax, i.e.
+ * abstract const type T as num = int;
+ *)
+let tco_experimental_abstract_type_const_with_default = "abstract_type_const_with_default"
+
 let tco_experimental_all =
  SSet.empty |> List.fold_right SSet.add
    [
@@ -188,6 +194,7 @@ let tco_experimental_all =
      tco_experimental_type_const_attributes;
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
+     tco_experimental_abstract_type_const_with_default;
    ]
 
 let tco_migration_flags_all =

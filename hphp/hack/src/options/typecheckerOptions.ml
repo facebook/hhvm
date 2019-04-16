@@ -51,6 +51,8 @@ let experimental_trait_method_redeclarations =
   GlobalOptions.tco_experimental_trait_method_redeclarations
 let experimental_type_const_attributes =
   GlobalOptions.tco_experimental_type_const_attributes
+let experimental_abstract_type_const_with_default =
+  GlobalOptions.tco_experimental_abstract_type_const_with_default
 
 let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization

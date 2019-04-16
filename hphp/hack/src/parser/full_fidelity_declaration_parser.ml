@@ -1340,8 +1340,8 @@ module WithExpressionAndStatementAndTypeParser
       parse_generic_type_parameter_list_opt parser
     in
     let (parser, type_constraint) = parse_type_constraint_opt parser in
-    let (parser, equal_token, type_specifier) = if SC.is_missing abstr then
-      let (parser, equal_token) = require_equal parser in
+    let (parser, equal_token, type_specifier) = if peek_token_kind parser = Equal then
+      let (parser, equal_token) = assert_token parser Equal in
       let (parser, type_spec) = parse_type_specifier parser in
       (parser, equal_token, type_spec)
     else

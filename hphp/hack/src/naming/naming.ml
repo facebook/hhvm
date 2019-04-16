@@ -1550,6 +1550,11 @@ module Make (GetLocals : GetLocals) = struct
     if not (TypecheckerOptions.experimental_feature_enabled (fst env).tcopt
         TypecheckerOptions.experimental_type_const_attributes || List.is_empty attrs)
     then Errors.experimental_feature (fst t.Aast.c_tconst_name) "type constant attributes";
+    begin match t.Aast.c_tconst_abstract with
+    | Aast.TCAbstract (Some _) when not (TypecheckerOptions.experimental_feature_enabled (fst env).tcopt
+      TypecheckerOptions.experimental_abstract_type_const_with_default) ->
+      Errors.experimental_feature (fst t.Aast.c_tconst_name) "abstract type constant with default"
+    | _ -> () end;
     N.
     { c_tconst_abstract = t.Aast.c_tconst_abstract
     ; c_tconst_name = t.Aast.c_tconst_name

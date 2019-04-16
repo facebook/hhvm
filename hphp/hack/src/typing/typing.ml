@@ -6384,7 +6384,7 @@ and check_extend_abstract_const ~is_final p seq =
   end
 
 and typeconst_abstract_kind = function
-  | Nast.TCAbstract -> T.TCAbstract
+  | Nast.TCAbstract default -> T.TCAbstract default
   | Nast.TCPartiallyAbstract -> T.TCPartiallyAbstract
   | Nast.TCConcrete -> T.TCConcrete
 

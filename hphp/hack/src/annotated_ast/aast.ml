@@ -363,7 +363,7 @@ and ca_type =
 and class_const = hint option * sid * expr option
 
 and typeconst_abstract_kind =
-  | TCAbstract
+  | TCAbstract of hint option (* default *)
   | TCPartiallyAbstract
   | TCConcrete
 

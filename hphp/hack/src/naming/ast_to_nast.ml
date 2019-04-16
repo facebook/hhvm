@@ -478,21 +478,32 @@ and on_ca_type ty : Aast.ca_type =
   | CA_enum sl -> Aast.CA_enum (sl)
 
 and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
-  let tconst_type =
-    match tc.tconst_type, tc.tconst_abstract with
-    | None, false ->
+  let tconst_type, abstract_kind =
+    match tc.tconst_abstract, tc.tconst_constraint, tc.tconst_type with
+    (* const type T;
+     * const type T as int; *)
+    | false, _, None ->
       Errors.not_abstract_without_typeconst tc.tconst_name;
-      tc.tconst_constraint
-    | Some _, true ->
-      Errors.abstract_with_typeconst tc.tconst_name;
-      None
-    | h, _ -> h in
-  let ak = match tc.tconst_abstract, tc.tconst_constraint with
-    | true, _ -> Aast.TCAbstract
-    | false, Some _ -> Aast.TCPartiallyAbstract
-    | false, None -> Aast.TCConcrete in
+      tc.tconst_constraint, Aast.TCConcrete (* this is a degenerate case, so safe to call it concrete *)
+    (* const type T = int; *)
+    | false, None, Some _ ->
+      tc.tconst_type, Aast.TCConcrete
+    (* const type T as num = int; *)
+    | false, Some _, Some _ ->
+      tc.tconst_type, Aast.TCPartiallyAbstract
+    (* abstract const type T;
+     * abstract const type T as num; *)
+    | true, _, None ->
+      (* Choice of tc.tconst_type based on the existing behavior, previously captured by the h, _ case
+       * TODO: Change to tc.tconst_constraint and merge these two cases *)
+      tc.tconst_type, Aast.TCAbstract (optional on_hint tc.tconst_type);
+    (* abstract const type T = int;
+     * abstract const type T as num = int; *)
+    | true, _, Some _ ->
+      tc.tconst_constraint, Aast.TCAbstract (optional on_hint tc.tconst_type) in
+
   Aast.{
-    c_tconst_abstract = ak;
+    c_tconst_abstract = abstract_kind;
     c_tconst_name = tc.tconst_name;
     c_tconst_constraint = optional on_hint tc.tconst_constraint;
     c_tconst_type = optional on_hint tconst_type;

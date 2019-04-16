@@ -122,8 +122,8 @@ let add_typeconst name sig_ typeconsts =
      *
      * Then C::T == I2::T since I2::T is not abstract
      *)
-    | TCConcrete, TCAbstract
-    | TCPartiallyAbstract, TCAbstract ->
+    | TCConcrete, TCAbstract _
+    | TCPartiallyAbstract, TCAbstract _ ->
       typeconsts
     (* This covers the following case
      *

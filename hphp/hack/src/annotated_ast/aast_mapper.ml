@@ -346,7 +346,7 @@ struct
 
   and map_typeconst_abstract_kind ak =
     match ak with
-    | S.TCAbstract -> T.TCAbstract
+    | S.TCAbstract default -> T.TCAbstract default
     | S.TCPartiallyAbstract -> T.TCPartiallyAbstract
     | S.TCConcrete -> T.TCConcrete
 

@@ -165,23 +165,6 @@ let handler = object
     if List.exists tparam.tp_user_attributes (fun { ua_name; _ } -> UA.uaNewable = snd ua_name) then
       verify_has_consistent_bound env tparam
 
-  method! at_class_typeconst env { c_tconst_name = (_, name); c_tconst_type; _ } =
-    let open Option in
-    let t = Env.get_self_id env >>=
-      Env.get_class env >>=
-      (fun cls -> Typing_classes_heap.get_typeconst cls name) in
-    match t with
-    | Some { ttc_enforceable = (pos, enforceable); _ } ->
-      (* using c_tconst_type here instead of ttc_type because the Type_test_hint_check works on
-       * hints instead of decl tys *)
-      begin match c_tconst_type with
-      | Some h when enforceable ->
-        Type_test_hint_check.validate_hint env h
-          (Errors.invalid_enforceable_type "constant" (pos, name))
-      | _ -> () end
-    | _ ->
-      ()
-
   method! at_fun_def _ { f_name = (pos, _); f_tparams = tparams; f_user_attributes = ua; _ } =
     check_no_memoize pos ua tparams
 

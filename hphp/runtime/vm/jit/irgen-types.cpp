@@ -1642,7 +1642,7 @@ void emitVerifyParamTypeTS(IRGS& env, int32_t paramId) {
 
 void emitOODeclExists(IRGS& env, OODeclExistsOp subop) {
   auto const tAutoload = topC(env);
-  auto const tCls = topC(env);
+  auto const tCls = topC(env, BCSPRelOffset{1});
 
   if (!tCls->isA(TStr) || !tAutoload->isA(TBool)){ // result of Cast
     PUNT(OODeclExists-BadTypes);

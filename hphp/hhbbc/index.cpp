@@ -4602,6 +4602,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfRef:
       case KindOfFunc:
       case KindOfClass:
+      case KindOfRecord:
         always_assert_flog(false, "Unexpected DataType");
         break;
       }

@@ -55,16 +55,17 @@ namespace HPHP {
  * - Audit jit::emitTypeTest().
  */
 #define DATATYPES \
-  DT(PersistentArray,  -12) \
-  DT(Array,            -11) \
-  DT(PersistentShape,  -10) \
-  DT(Shape,             -9) \
-  DT(PersistentKeyset,  -8) \
-  DT(Keyset,            -7) \
-  DT(PersistentDict,    -6) \
-  DT(Dict,              -5) \
-  DT(PersistentVec,     -4) \
-  DT(Vec,               -3) \
+  DT(PersistentArray,  -14) \
+  DT(Array,            -13) \
+  DT(PersistentShape,  -12) \
+  DT(Shape,            -11) \
+  DT(PersistentKeyset, -10) \
+  DT(Keyset,            -9) \
+  DT(PersistentDict,    -8) \
+  DT(Dict,              -7) \
+  DT(PersistentVec,     -6) \
+  DT(Vec,               -5) \
+  DT(Record,            -3) \
   DT(PersistentString,  -2) \
   DT(String,            -1) \
   DT(Uninit,             0) \
@@ -347,6 +348,7 @@ constexpr bool isIntType(DataType t) { return t == KindOfInt64; }
 constexpr bool isBoolType(DataType t) { return t == KindOfBoolean; }
 constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
 constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
+constexpr bool isRecordType(DataType t) { return t == KindOfRecord; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
 constexpr bool isRefType(DataType t) { return t == KindOfRef; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }

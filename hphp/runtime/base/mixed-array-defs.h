@@ -436,6 +436,8 @@ void ConvertTvToUncounted(
     case KindOfDouble: {
       break;
     }
+    case KindOfRecord:
+      raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfObject:
     case KindOfResource:
     case KindOfRef:

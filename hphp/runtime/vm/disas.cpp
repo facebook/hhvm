@@ -644,18 +644,27 @@ void print_constant(Output& out, const PreClass::Const* cns) {
     member_tv_initializer(cns->val()));
 }
 
-void print_property(Output& out, const PreClass::Prop* prop) {
+template<class T>
+void print_prop_or_field_impl(Output& out, const T& f) {
   out.fmtln(".property{}{} {}{} =",
-    opt_attrs(AttrContext::Prop, prop->attrs(), &prop->userAttributes()),
+    opt_attrs(AttrContext::Prop, f.attrs(), &f.userAttributes()),
     RuntimeOption::EvalDisassemblerDocComments &&
     RuntimeOption::EvalDisassemblerPropDocComments
-      ? opt_escaped_long(prop->docComment())
+      ? opt_escaped_long(f.docComment())
       : std::string(""),
-    opt_type_info(prop->userType(), prop->typeConstraint()),
-    prop->name()->data());
+    opt_type_info(f.userType(), f.typeConstraint()),
+    f.name()->data());
   indented(out, [&] {
-    out.fmtln("{};", member_tv_initializer(prop->val()));
+      out.fmtln("{};", member_tv_initializer(f.val()));
   });
+}
+
+void print_field(Output& out, const Record::Field& field) {
+  print_prop_or_field_impl(out, field);
+}
+
+void print_property(Output& out, const PreClass::Prop* prop) {
+  print_prop_or_field_impl(out, *prop);
 }
 
 void print_method(Output& out, const Func* func) {
@@ -770,6 +779,25 @@ void print_cls_directives(Output& out, const PreClass* cls) {
   for (auto* m : cls->allMethods())    print_method(out, m);
 }
 
+void print_rec_fields(Output& out, const Record* rec) {
+  for (auto& f : rec->allFields()) print_field(out, f);
+}
+
+void print_rec(Output& out, const Record* rec) {
+  out.indent();
+  out.fmt(".record {}", rec->name()->toCppString());
+  out.fmt(" {{");
+  out.nl();
+  if (RuntimeOption::EvalDisassemblerDocComments) {
+    if (rec->docComment() && !rec->docComment()->empty()) {
+      out.fmtln(".doc {};", escaped_long(rec->docComment()));
+    }
+  }
+  indented(out, [&] { print_rec_fields(out, rec); });
+  out.fmt("}}");
+  out.nl();
+}
+
 void print_cls(Output& out, const PreClass* cls) {
   out.indent();
   auto name = cls->name()->toCppString();
@@ -851,6 +879,7 @@ void print_unit(Output& out, const Unit* unit) {
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func(out, func);
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());
+  for (auto& rec : unit->records())       print_rec(out, rec.get());
   for (auto& alias : unit->typeAliases()) print_alias(out, alias);
   out.fmtln("# {} ends here", unit->filepath());
 }

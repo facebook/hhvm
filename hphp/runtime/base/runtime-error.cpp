@@ -167,6 +167,10 @@ void raise_convert_object_to_string(const char* cls_name) {
   raise_error("Cannot convert object to string (got instance of %s)", cls_name);
 }
 
+void raise_convert_record_to_type(const char* typeName) {
+  raise_error("Cannot convert record to %s", typeName);
+}
+
 void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }

@@ -1259,8 +1259,8 @@ x = vec [
 is_array(x) === false
 HH\is_darray(x) === false
 HH\is_varray(x) === true
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
 bool(true)
 string(13) "
 FA F3 F3 FC "
@@ -1299,8 +1299,8 @@ x = dict [
 is_array(x) === false
 HH\is_darray(x) === true
 HH\is_varray(x) === false
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class
-fb_compact_serialize(): unable to serialize object/resource/ref/func/class
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
+fb_compact_serialize(): unable to serialize object/resource/ref/func/class/record
 bool(true)
 string(19) "
 FB 2A F3 2F F3 FC "

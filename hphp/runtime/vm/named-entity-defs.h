@@ -35,7 +35,7 @@ void NamedEntity::foreach_name(Fn fn) {
 template<class Fn>
 void NamedEntity::foreach_class(Fn fn) {
   foreach_name([&](NamedEntity& name) {
-    for (auto cls = name.clsList(); cls; cls = cls->m_nextClass) {
+    for (auto cls = name.clsList(); cls; cls = cls->m_next) {
       for (auto const& clone : cls->scopedClones()) {
         fn(clone.second.get());
       }

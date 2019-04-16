@@ -35,6 +35,7 @@ namespace HPHP {
 
 struct Func;
 struct String;
+struct Record;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,6 +124,22 @@ struct NamedEntity {
 
 
   /////////////////////////////////////////////////////////////////////////////
+  // Record cache.
+
+  /*
+   * Get the rds::Handle that caches this Record*, creating a (non-persistent)
+   * one if it doesn't exist yet.
+   */
+  rds::Handle getRecordHandle() const;
+
+  /*
+   * Set and get the cached Record*.
+   */
+  void setCachedRecord(Record* c);
+  Record* getCachedRecord() const;
+
+
+  /////////////////////////////////////////////////////////////////////////////
   // Type alias cache.
 
   /*
@@ -181,6 +198,11 @@ struct NamedEntity {
   void setUniqueFunc(Func* func);
 
   /////////////////////////////////////////////////////////////////////////////
+  // Record.
+  Record* recordList() const;
+  void pushRecord(Record*);
+  void removeRecord(Record*);
+  /////////////////////////////////////////////////////////////////////////////
   // Global table.                                                     [static]
 
   /*
@@ -225,12 +247,15 @@ public:
     mutable rds::Link<TypeAliasReq, rds::Mode::NonLocal> m_cachedTypeAlias{};
     mutable rds::Link<ArrayData*, rds::Mode::NonLocal> m_cachedReifiedGenerics;
   };
+  mutable rds::Link<LowPtr<Record>, rds::Mode::NonLocal> m_cachedRecord;
 
+  template<class T>
+  using ListType = AtomicLowPtr<T, std::memory_order_acquire,
+                                   std::memory_order_release>;
 private:
-  AtomicLowPtr<Class, std::memory_order_acquire,
-               std::memory_order_release> m_clsList{nullptr};
-  AtomicLowPtr<Func, std::memory_order_acquire,
-               std::memory_order_release> m_uniqueFunc{nullptr};
+  ListType<Class> m_clsList{nullptr};
+  ListType<Func> m_uniqueFunc{nullptr};
+  ListType<Record> m_recordList{nullptr};
 };
 
 /*

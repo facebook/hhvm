@@ -114,6 +114,7 @@ struct ScalarHash {
           case KindOfFunc:
           case KindOfClass:
           case KindOfClsMeth:
+          case KindOfRecord:
             always_assert(false);
         }
       }
@@ -1225,6 +1226,9 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfObject:
     return tv->m_data.pobj->getClassName().get()->toCppString();
 
+  case KindOfRecord:
+    return tv->m_data.prec->getRecord()->name()->toCppString();
+
   case KindOfFunc:            return "func";
   case KindOfClass:           return "class";
   case KindOfClsMeth:         return "clsmeth";
@@ -1262,6 +1266,7 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
+  case KindOfRecord:
     return "<invalid key type>";
   }
   not_reached();

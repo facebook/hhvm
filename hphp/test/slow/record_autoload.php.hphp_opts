@@ -1,0 +1,1 @@
+ --ffile=hphp/test/slow/autoload_record_foo.inc  -vRuntime.Eval.HackRecords=true

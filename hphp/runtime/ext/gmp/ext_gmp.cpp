@@ -166,6 +166,7 @@ static bool variantToGMPData(const char* const fnCaller,
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
+  case KindOfRecord:
     raise_warning(cs_GMP_INVALID_TYPE, fnCaller);
     return false;
   }

@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/litstr-repo-proxy.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
+#include "hphp/runtime/vm/record-emitter.h"
 #include "hphp/runtime/vm/repo-status.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 
@@ -95,6 +96,7 @@ struct Repo : RepoProxy {
 
   UnitRepoProxy& urp() { return m_urp; }
   PreClassRepoProxy& pcrp() { return m_pcrp; }
+  RecordRepoProxy& rrp() { return m_rrp; }
   FuncRepoProxy& frp() { return m_frp; }
   LitstrRepoProxy& lsrp() { return m_lsrp; }
 
@@ -238,6 +240,7 @@ private:
   RepoStmt m_commitStmt;
   UnitRepoProxy m_urp;
   PreClassRepoProxy m_pcrp;
+  RecordRepoProxy m_rrp;
   FuncRepoProxy m_frp;
   LitstrRepoProxy m_lsrp;
 };

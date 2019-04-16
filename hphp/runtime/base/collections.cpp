@@ -301,6 +301,8 @@ void deepCopy(TypedValue* tv) {
       tv->m_data.pobj = obj;
       return;
     }
+    case KindOfRecord:
+      raise_error(Strings::RECORD_NOT_SUPPORTED); // TODO (T41020058)
   }
   not_reached();
 }

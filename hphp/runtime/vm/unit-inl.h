@@ -244,7 +244,7 @@ inline const RepoAuthType::Array* Unit::lookupArrayTypeId(Id id) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Funcs and PreClasses.
+// Funcs and PreClasses and Records.
 
 inline Func* Unit::lookupFuncId(Id id) const {
   assertx(id < Id(mergeInfo()->m_firstHoistablePreClass));
@@ -254,6 +254,11 @@ inline Func* Unit::lookupFuncId(Id id) const {
 inline PreClass* Unit::lookupPreClassId(Id id) const {
   assertx(id < Id(m_preClasses.size()));
   return m_preClasses[id].get();
+}
+
+inline Record* Unit::lookupRecordId(Id id) const {
+  assertx(id < Id(m_records.size()));
+  return m_records[id].get();
 }
 
 inline Unit::FuncRange Unit::funcs() const {
@@ -266,6 +271,14 @@ inline folly::Range<PreClassPtr*> Unit::preclasses() {
 
 inline folly::Range<const PreClassPtr*> Unit::preclasses() const {
   return { m_preClasses.data(), m_preClasses.size() };
+}
+
+inline folly::Range<RecordPtr*> Unit::records() {
+  return { m_records.data(), m_records.size() };
+}
+
+inline folly::Range<const RecordPtr*> Unit::records() const {
+  return { m_records.data(), m_records.size() };
 }
 
 template<class Fn> void Unit::forEachFunc(Fn fn) const {
@@ -296,6 +309,17 @@ inline folly::Range<const TypeAlias*> Unit::typeAliases() const {
 
 inline const UserAttributeMap& Unit::fileAttributes() const {
   return m_fileAttributes;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Record lookup.
+
+inline Record* Unit::lookupRecord(const NamedEntity* ne) {
+  return ne->getCachedRecord();
+}
+
+inline Record* Unit::lookupRecord(const StringData* name) {
+  return lookupRecord(NamedEntity::get(name));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

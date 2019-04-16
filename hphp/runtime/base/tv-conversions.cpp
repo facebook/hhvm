@@ -126,6 +126,9 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
 
+      case KindOfRecord:
+        raise_convert_record_to_type("bool");
+
       case KindOfRef:
         break;
     }
@@ -217,6 +220,9 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
 
+      case KindOfRecord:
+        raise_convert_record_to_type("double");
+
       case KindOfRef:
         break;
     }
@@ -302,6 +308,9 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
 
+      case KindOfRecord:
+        raise_convert_record_to_type("int");
+
       case KindOfRef:
         break;
     }
@@ -371,6 +380,9 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("double");
       return 1.0;
+
+    case KindOfRecord:
+      raise_convert_record_to_type("double");
 
     case KindOfRef:
       break;
@@ -484,6 +496,9 @@ void cellCastToStringInPlace(tv_lval tv) {
         return persistentString(array_string.get());
       }
 
+    case KindOfRecord:
+      raise_convert_record_to_type("string");
+
     case KindOfRef:
       break;
   }
@@ -576,6 +591,9 @@ StringData* cellCastToStringData(Cell tv) {
         return array_string.get();
       }
 
+    case KindOfRecord:
+      raise_convert_record_to_type("string");
+
     case KindOfRef:
       not_reached();
   }
@@ -632,6 +650,9 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
       assertx(ad->isPHPArray());
       return ad.detach();
     }
+
+    case KindOfRecord:
+      raise_convert_record_to_type("array");
 
     case KindOfRef:
       break;
@@ -839,6 +860,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfRecord:
+        raise_convert_record_to_type("array");
+
       case KindOfRef:
         break;
     }
@@ -961,6 +985,9 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         continue;
       }
 
+      case KindOfRecord:
+        raise_convert_record_to_type("vec");
+
       case KindOfRef:
         break;
     }
@@ -1079,6 +1106,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         continue;
       }
 
+      case KindOfRecord:
+        raise_convert_record_to_type("dict");
+
       case KindOfRef:
         break;
     }
@@ -1192,6 +1222,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         SystemLib::throwInvalidOperationExceptionObject(
           "clsmeth to keyset conversion"
         );
+
+      case KindOfRecord:
+        raise_convert_record_to_type("keyset");
 
       case KindOfRef:
         break;
@@ -1320,6 +1353,9 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
       }
+
+      case KindOfRecord:
+        raise_convert_record_to_type("varray");
 
       case KindOfRef:
         break;
@@ -1452,6 +1488,9 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfRecord:
+        raise_convert_record_to_type("darray");
+
       case KindOfRef:
         break;
     }
@@ -1516,6 +1555,9 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
         val(tv).pclsmeth->getCls(), val(tv).pclsmeth->getFunc());
       return ObjectData::FromArray(arr.get()).detach();
     }
+
+    case KindOfRecord:
+      raise_convert_record_to_type("object");
 
     case KindOfRef:
       break;
@@ -1590,6 +1632,9 @@ enable_if_lval_t<T, void> tvCastToObjectInPlace(T tv) {
       case KindOfObject:
         return;
 
+      case KindOfRecord:
+        raise_convert_record_to_type("object");
+
       case KindOfRef:
         break;
     }
@@ -1633,6 +1678,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfArray:
       case KindOfObject:
       case KindOfClsMeth:
+      case KindOfRecord:
         tvDecRefCountable(tv);
         continue;
       case KindOfResource:
@@ -1684,6 +1730,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToBooleanInPlace(T tv, bool builtin) {
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRecord:
       return false;
 
     case KindOfRef:
@@ -1724,6 +1771,7 @@ static enable_if_lval_t<T, bool> tvCanBeCoercedToNumber(T tv, bool builtin) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return false;
 
     case KindOfRef:
@@ -1796,6 +1844,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToStringInPlace(T tv, bool builtin) {
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfClsMeth:
+    case KindOfRecord:
       return false;
 
     case KindOfObject:
@@ -1833,6 +1882,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToShapeInPlace(T tv, bool builtin) {
     case KindOfKeyset:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfRecord:
       return false;
 
     case KindOfPersistentShape:
@@ -1901,6 +1951,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToArrayInPlace(T tv, bool /*builtin*/) {
     case KindOfKeyset:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfRecord:
       return false;
 
     case KindOfPersistentShape:
@@ -1968,6 +2019,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToVecInPlace(T tv, bool /*builtin*/) {
     case KindOfArray:
     case KindOfFunc:
     case KindOfClass:
+    case KindOfRecord:
       return false;
 
     case KindOfPersistentVec:
@@ -2011,6 +2063,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToDictInPlace(T tv, bool /*builtin*/) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return false;
 
     case KindOfPersistentShape:
@@ -2062,6 +2115,7 @@ enable_if_lval_t<T, bool> tvCoerceParamToKeysetInPlace(T tv, bool /*builtin*/) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       return false;
 
     case KindOfPersistentKeyset:

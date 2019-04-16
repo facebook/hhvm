@@ -40,6 +40,7 @@ struct StringData;
 struct MemoCacheBase;
 struct Func;
 struct Class;
+struct RecordData;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,7 @@ union Value {
   const Func*   pfunc;  // KindOfFunc
   Class*        pclass; // KindOfClass
   ClsMethDataRef pclsmeth; // KindOfClsMeth
+  RecordData*   prec;   // KindOfRecord
 };
 
 enum VarNrFlag { NR_FLAG = 1 << 29 };
@@ -283,6 +285,7 @@ X(KindOfPersistentString, const StringData*);
 X(KindOfFunc,         Func*);
 X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
+X(KindOfRecord,       RecordData*);
 
 #undef X
 

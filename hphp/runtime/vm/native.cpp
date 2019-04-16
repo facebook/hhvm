@@ -243,6 +243,7 @@ void callFunc(const Func* func, void *ctx,
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRecord:
     case KindOfRef: {
       assertx(isBuiltinByRef(ret.m_type));
       if (func->isReturnByValue()) {
@@ -385,6 +386,8 @@ void coerceFCallArgs(TypedValue* args,
         break;
       }
 
+      case KindOfRecord: // TODO (T41031632)
+        raise_error(Strings::RECORD_NOT_SUPPORTED);
       case KindOfUninit:
       case KindOfNull:
       case KindOfPersistentString:
@@ -621,6 +624,8 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
+    case KindOfRecord: // TODO (T41031632)
+      raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
   not_reached();
 }

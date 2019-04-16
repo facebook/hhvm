@@ -44,6 +44,7 @@ namespace HPHP {
 
 struct FuncEmitter;
 struct PreClassEmitter;
+struct RecordEmitter;
 struct StringData;
 
 namespace Native {
@@ -251,6 +252,29 @@ struct UnitEmitter {
   PreClassEmitter* newBarePreClassEmitter(const std::string& name,
                                           PreClass::Hoistable hoistable);
 
+  void addRecordEmitter(RecordEmitter* re);
+  RecordEmitter* newRecordEmitter(const std::string& name);
+  /*
+   * Create a new RecordEmitter without adding it to the hoistability
+   * tracking data structures.
+   * It should be added later with addRecordEmitter.
+   */
+  RecordEmitter* newBareRecordEmitter(const std::string& name);
+
+  /////////////////////////////////////////////////////////////////////////////
+  // RecordEmitters.
+
+  /*
+   * Number of RecordEmitters in the Unit.
+   */
+  size_t numRecords() const;
+
+  /*
+   * The RecordEmitter for `recordId'.
+   */
+  const RecordEmitter* re(Id recordId) const;
+  RecordEmitter* re(Id recordId);
+
   /////////////////////////////////////////////////////////////////////////////
   // Type aliases.
 
@@ -438,6 +462,11 @@ private:
    * PreClassEmitter table.
    */
   std::vector<PreClassEmitter*> m_pceVec;
+
+  /*
+   * RecordEmitter table.
+   */
+  std::vector<RecordEmitter*> m_reVec;
 
   /*
    * Hoistability tables.

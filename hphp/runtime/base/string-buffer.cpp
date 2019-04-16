@@ -199,6 +199,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRecord:
       append(v.toString());
   }
 }

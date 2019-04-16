@@ -3236,6 +3236,7 @@ Type from_cell(Cell cell) {
 
   case KindOfPersistentShape:
   case KindOfShape:
+  case KindOfRecord: // TODO(arnabde)
     not_implemented();
 
   case KindOfPersistentArray:
@@ -3270,6 +3271,7 @@ Type from_DataType(DataType dt) {
   case KindOfDict:     return TDict;
   case KindOfPersistentKeyset:
   case KindOfKeyset:   return TKeyset;
+  case KindOfRecord:   //TODO(arnabde)
   case KindOfPersistentShape:
   case KindOfShape:    not_implemented();
   case KindOfPersistentArray:

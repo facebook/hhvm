@@ -782,6 +782,7 @@ static std::string toStringElm(const TypedValue* tv) {
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
+  case KindOfRecord:
     os << "C:";
     break;
   }
@@ -865,6 +866,14 @@ static std::string toStringElm(const TypedValue* tv) {
       print_count();
       os << ":Object("
          << tv->m_data.pobj->getClassName().get()->data()
+         << ")";
+      continue;
+    case KindOfRecord:
+      assertx(tv->m_data.prec->checkCount());
+      os << tv->m_data.prec;
+      print_count();
+      os << ":Record("
+         << tv->m_data.prec->getRecord()->name()->data()
          << ")";
       continue;
     case KindOfResource:
@@ -2156,6 +2165,26 @@ OPTBLD_INLINE void iopNewDArray(uint32_t capacity) {
   }
 }
 
+// TODO (T29595301): Use id instead of StringData
+OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
+  auto rec = Unit::loadRecord(s);
+  if (!rec) {
+    raise_error(Strings::UNKNOWN_RECORD, s->data());
+  }
+  auto const n = ids.size;
+  assertx(n > 0 && n <= ArrayData::MaxElemsOnStack);
+  req::vector<const StringData*> names;
+  names.reserve(n);
+  auto const unit = vmfp()->m_func->unit();
+  for (size_t i = 0; i < n; ++i) {
+    auto name = unit->lookupLitstrId(ids[i]);
+    names.push_back(name);
+  }
+  auto recdata = RecordData::newRecord(rec, names, vmStack().topC());
+  vmStack().ndiscard(n);
+  vmStack().pushRecordNoRc(recdata);
+}
+
 OPTBLD_INLINE void iopAddElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
@@ -2943,6 +2972,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfFunc:
             case KindOfClass:
             case KindOfClsMeth:
+            case KindOfRecord:
               not_reached();
           }
           if (val->m_type == KindOfString) tvDecRefStr(val);
@@ -2993,6 +3023,9 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           intval = val->m_data.pres->data()->o_toInt64();
           tvDecRefRes(val);
           return;
+
+        case KindOfRecord: // TODO (T41029094)
+          raise_error(Strings::RECORD_NOT_SUPPORTED);
 
         case KindOfRef:
           break;
@@ -5732,6 +5765,11 @@ OPTBLD_INLINE void iopEval(PC origpc, PC& pc) {
 OPTBLD_INLINE void iopDefCls(uint32_t cid) {
   PreClass* c = vmfp()->m_func->unit()->lookupPreClassId(cid);
   Unit::defClass(c);
+}
+
+OPTBLD_INLINE void iopDefRecord(uint32_t cid) {
+  Record* r = vmfp()->m_func->unit()->lookupRecordId(cid);
+  Unit::defRecord(r);
 }
 
 OPTBLD_INLINE void iopAliasCls(const StringData* original,

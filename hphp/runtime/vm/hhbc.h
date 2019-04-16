@@ -503,6 +503,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewKeysetArray,  ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewVArray,       ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(NewDArray,       ONE(IVA),         NOV,             ONE(CV),    NF) \
+  O(NewRecord,       TWO(SA,VSA),      SMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
   O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
@@ -670,6 +671,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(Eval,            NA,               ONE(CV),         ONE(CV),    CF) \
   O(DefCls,          ONE(IVA),         NOV,             NOV,        NF) \
   O(DefClsNop,       ONE(IVA),         NOV,             NOV,        NF) \
+  O(DefRecord,       ONE(IVA),         NOV,             NOV,        NF) \
   O(AliasCls,        TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \
   O(DefCns,          ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(DefTypeAlias,    ONE(IVA),         NOV,             NOV,        NF) \

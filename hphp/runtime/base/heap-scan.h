@@ -181,6 +181,8 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::ClsMeth:
       // ClsMeth only holds pointers to non-request allocated data
       return;
+    case HeaderKind::Record:
+      return static_cast<const RecordData*>(h)->scan(scanner);
     case HeaderKind::Cpp:
     case HeaderKind::SmallMalloc:
     case HeaderKind::BigMalloc: {
@@ -216,6 +218,11 @@ inline void c_Awaitable::scan(type_scan::Scanner& scanner) const {
               asio_object_size(this);
   scanner.scanByIndex(m_tyindex, this, size);
   ObjectData::scan(scanner);
+}
+
+inline void RecordData::scan(type_scan::Scanner& scanner) const {
+  auto fields = fieldVec();
+  scanner.scan(*fields, m_record->numFields() * sizeof(*fields));
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

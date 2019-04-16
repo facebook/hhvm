@@ -1644,6 +1644,10 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeClsMeth(val(tv).pclsmeth, skipNestCheck);
       return;
+
+    case KindOfRecord:
+      // TODO(T41025646): implement serialization of record
+      always_assert(false);
   }
   not_reached();
 }

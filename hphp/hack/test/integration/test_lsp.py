@@ -255,11 +255,21 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         self.load_and_run("highlight", variables)
 
     def test_formatting(self):
+
+        # This test will fail if hackfmt can't be found
+        if not self.run_hackfmt_check():
+            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
+
         self.prepare_environment()
         variables = self.setup_php_file("messy.php")
         self.load_and_run("formatting", variables)
 
     def test_ontypeformatting(self):
+
+        # This test will fail if hackfmt can't be found
+        if not self.run_hackfmt_check():
+            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
+
         self.prepare_environment()
         variables = self.setup_php_file("ontypeformatting.php")
         self.load_and_run("ontypeformatting", variables)

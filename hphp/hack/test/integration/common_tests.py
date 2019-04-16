@@ -176,6 +176,21 @@ class CommonTestDriver(unittest.TestCase):
             ] + list(map(lambda x: x.format(root=root), options)),
             stdin=stdin)
 
+    # Check to see if you can run hackfmt
+    def run_hackfmt_check(self):
+        try:
+            #
+            (stdout_data, stderr_data, retcode) = self.proc_call(
+                [
+                    "hackfmt",
+                    "-help"
+                ]
+            )
+            return retcode == 0
+        # If the file isn't found you will get this
+        except FileNotFoundError:
+            return False
+
     # Runs `hh_client check` asserting the stdout is equal the expected.
     # Returns stderr.
     # Note: assert_laoded_mini_state is ignored here and only used

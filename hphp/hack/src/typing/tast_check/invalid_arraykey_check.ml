@@ -58,6 +58,8 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
        * the key type of the array, just let it pass *)
       || snd (Env.subtype env ty_expect (fst ty_expect, Tunresolved []))
       || snd (Env.subtype env ty_have ty_expect)
+      (* If the key is not even an arraykey, we've already produced an error *)
+      || not (Env.can_subtype env ty_have (Reason.Rnone, Tprim Tarraykey)) && should_enforce env
       then ()
       else
       let _, ty_have = Env.expand_type env ty_have in
@@ -104,12 +106,33 @@ let handler = object
     | _ -> ()
 end
 
+let index_visitor = object(this)
+  inherit [_] Tast_visitor.iter_with_state as super
+
+  (* Distinguish between lvalue and rvalue array indexing.
+   * Suppose $x : dict<string,int>
+   * We want to check rvalue e.g. $y = $x[3], or $z[$x[3]] = 5
+   * But not lvalue e.g. $x[3] = 5 or list ($x[3], $w) = e;
+   *)
+  method! on_expr (env, is_lvalue) (((p, _), expr) as e) =
+    match expr with
+    | Array_get (((p1, ty1), _) as e1, Some (((p2, ty2), _) as e2)) ->
+      if not is_lvalue
+      then array_get ~array_pos:p1 ~expr_pos:p ~index_pos:p2 env ty1 ty2;
+      this#on_expr (env, false) e1;
+      this#on_expr (env, false) e2
+    | Binop (Ast.Eq _, e1, e2) ->
+      this#on_expr (env, true) e1;
+      this#on_expr (env, false) e2
+    | List el ->
+      List.iter ~f:(this#on_expr (env, is_lvalue)) el
+    | _ ->
+      super#on_expr (env, is_lvalue) e
+end
+
 let index_handler = object
   inherit Tast_visitor.handler_base
 
-  method! at_expr env ((p, _), expr) =
-    match expr with
-    | Array_get (((p1, ty1), _e1), Some ((p2, ty2), _e2)) ->
-      array_get ~array_pos:p1 ~expr_pos:p ~index_pos:p2 env ty1 ty2
-    | _ -> ()
+  method! at_fun_def env = index_visitor#on_fun_def (env, false)
+  method! at_method_ env = index_visitor#on_method_ (env, false)
 end

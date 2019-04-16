@@ -241,7 +241,7 @@ template<class T> constexpr size_t sizeClass() {
  */
 inline size_t allocSize(const HeapObject* h) {
   // Ordering depends on ext_wait-handle.h.
-  static const uint16_t waithandle_sizes[] = {
+  static constexpr uint16_t waithandle_sizes[] = {
     sizeClass<c_StaticWaitHandle>(),
     0, /* AsyncFunction */
     sizeClass<c_AsyncGeneratorWaitHandle>(),
@@ -345,11 +345,16 @@ inline size_t allocSize(const HeapObject* h) {
   switch (kind) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-      // size = kSizeIndex2Size[h->aux16]
+      // size = kSizeIndex2Size[h->aux16>>8]
       size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
+      assertx(size == MemoryManager::sizeClass(size));
+      return size;
+    case HeaderKind::Apc:
+      // size = h->m_size * 16 + sizeof(APCLocalArray)
+      size = static_cast<const APCLocalArray*>(h)->heapSize();
       break;
-    case HeaderKind::Shape:
     case HeaderKind::Mixed:
+    case HeaderKind::Shape:
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();
@@ -358,27 +363,20 @@ inline size_t allocSize(const HeapObject* h) {
       // size = fn of h->m_scale
       size = static_cast<const SetArray*>(h)->heapSize();
       break;
-    case HeaderKind::Apc:
-      // size = h->m_size * 16 + sizeof(APCLocalArray)
-      size = static_cast<const APCLocalArray*>(h)->heapSize();
-      break;
     case HeaderKind::String:
       // size = isFlat ? isRefCounted ? table[aux16] : m_size+C : proxy_size;
       size = static_cast<const StringData*>(h)->heapSize();
       break;
-    case HeaderKind::Closure:
+    case HeaderKind::Resource:
+      // size = h->aux16
+      // [ResourceHdr][ResourceData subclass]
+      size = static_cast<const ResourceHdr*>(h)->heapSize();
+      break;
     case HeaderKind::Object:
+    case HeaderKind::Closure:
       // size = h->m_cls->m_declProperties.m_extra * sz(TV) + sz(OD)
       // [ObjectData][props]
       size = static_cast<const ObjectData*>(h)->heapSize();
-      break;
-    case HeaderKind::ClosureHdr:
-      // size = h->aux32
-      // [ClosureHdr][ObjectData][use vars]
-      size = static_cast<const ClosureHdr*>(h)->size();
-      break;
-    case HeaderKind::MemoData:
-      size = static_cast<const MemoNode*>(h)->objOff() + memoObj(h)->heapSize();
       break;
     case HeaderKind::WaitHandle: {
       // size = table[h->whkind & mask]
@@ -395,16 +393,6 @@ inline size_t allocSize(const HeapObject* h) {
       // [ObjectData][children...]
       size = static_cast<const c_AwaitAllWaitHandle*>(h)->heapSize();
       break;
-    case HeaderKind::Resource:
-      // size = h->aux16
-      // [ResourceHdr][ResourceData subclass]
-      size = static_cast<const ResourceHdr*>(h)->heapSize();
-      break;
-    case HeaderKind::Cpp:
-    case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
-      // size = h->nbytes // 64-bit
-      size = static_cast<const MallocNode*>(h)->nbytes;
-      break;
     case HeaderKind::AsyncFuncFrame:
       // size = h->obj_offset + C // 32-bit
       // [NativeNode][locals][Resumable][c_AsyncFunctionWaitHandle]
@@ -420,6 +408,19 @@ inline size_t allocSize(const HeapObject* h) {
       size = native->obj_offset + Native::obj(native)->heapSize();
       break;
     }
+    case HeaderKind::ClosureHdr:
+      // size = h->aux32
+      // [ClosureHdr][ObjectData][use vars]
+      size = static_cast<const ClosureHdr*>(h)->size();
+      break;
+    case HeaderKind::MemoData:
+      size = static_cast<const MemoNode*>(h)->objOff() + memoObj(h)->heapSize();
+      break;
+    case HeaderKind::Cpp:
+    case HeaderKind::SmallMalloc: // [MallocNode][bytes...]
+      // size = h->nbytes // 64-bit
+      size = static_cast<const MallocNode*>(h)->nbytes;
+      break;
     // the following sizes are intentionally not rounded up to size class.
     case HeaderKind::BigMalloc: // [MallocNode][raw bytes...]
       size = static_cast<const MallocNode*>(h)->nbytes;

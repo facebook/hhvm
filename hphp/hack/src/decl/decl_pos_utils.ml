@@ -189,8 +189,13 @@ let rec ty (p, x) =
       cc_origin = cc.cc_origin;
     }
 
+  and typeconst_abstract_kind = function
+    | Nast.TCAbstract default -> Nast.TCAbstract (Option.map default ~f:(Nast_pos_mapper.hint pos))
+    | Nast.TCPartiallyAbstract -> Nast.TCPartiallyAbstract
+    | Nast.TCConcrete -> Nast.TCConcrete
+
   and typeconst tc =
-    { ttc_abstract = tc.ttc_abstract;
+    { ttc_abstract = typeconst_abstract_kind tc.ttc_abstract;
       ttc_name = string_id tc.ttc_name;
       ttc_constraint = ty_opt tc.ttc_constraint;
       ttc_type = ty_opt tc.ttc_type;

@@ -1,0 +1,11 @@
+File "default_change_invalid.php", line 7, characters 7-7:
+Class A does not correctly implement all required members  (Typing[4110])
+File "default_change_invalid.php", line 7, characters 17-18:
+Some members are incompatible with those declared in type AA
+Read the following to see why:
+File "default_change_invalid.php", line 4, characters 23-23:
+Unable to satisfy constraint on this type constant
+File "default_change_invalid.php", line 4, characters 28-35:
+This is an array key (int/string)
+File "default_change_invalid.php", line 8, characters 18-21:
+It is incompatible with a bool

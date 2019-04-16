@@ -1,0 +1,8 @@
+File "default_basic.php", line 22, characters 9-9:
+Invalid argument (Typing[4110])
+File "default_basic.php", line 6, characters 21-27:
+This is a string
+File "default_basic.php", line 14, characters 18-23:
+  resulting from expanding the type constant B::T
+File "default_basic.php", line 22, characters 9-9:
+It is incompatible with an int

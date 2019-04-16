@@ -30,8 +30,6 @@ Variant HHVM_FUNCTION(filter_var,
                       const Variant& variable,
                       int64_t filter,
                       const Variant& options);
-Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name);
-void HHVM_FUNCTION(_filter_snapshot_globals);
 
 extern const int64_t k_FILTER_FLAG_NONE;
 extern const int64_t k_FILTER_REQUIRE_SCALAR;

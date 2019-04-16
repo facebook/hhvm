@@ -22,9 +22,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/rds-local.h"
-#include "hphp/runtime/base/php-globals.h"
 
 namespace HPHP {
 
@@ -78,51 +75,9 @@ const int64_t k_FILTER_FLAG_IPV6 = 2097152;
 const int64_t k_FILTER_FLAG_NO_RES_RANGE = 4194304;
 const int64_t k_FILTER_FLAG_NO_PRIV_RANGE = 8388608;
 
-const StaticString
-  s_GET("_GET"),
-  s_POST("_POST"),
-  s_COOKIE("_COOKIE"),
-  s_SERVER("_SERVER"),
-  s_ENV("_ENV");
-
-struct FilterRequestData final {
-  void requestInit() {
-    // This doesn't copy them yet, but will do COW if they are modified
-    m_GET    = php_global(s_GET).toArray();
-    m_POST   = php_global(s_POST).toArray();
-    m_COOKIE = php_global(s_COOKIE).toArray();
-    m_SERVER = php_global(s_SERVER).toArray();
-    m_ENV    = php_global(s_ENV).toArray();
-  }
-
-  void requestShutdown() {
-    m_GET.detach();
-    m_POST.detach();
-    m_COOKIE.detach();
-    m_SERVER.detach();
-    m_ENV.detach();
-  }
-
-  Array getVar(int64_t type) {
-    return empty_array();
-  }
-
-private:
-  Array m_GET;
-  Array m_POST;
-  Array m_COOKIE;
-  Array m_SERVER;
-  Array m_ENV;
-};
-RDS_LOCAL_NO_CHECK(FilterRequestData, s_filter_request_data);
 
 static struct FilterExtension final : Extension {
-  FilterExtension() : Extension("filter", "0.12.0") {}
-
-  void moduleLoad(const IniSetting::Map& /*ini*/, Hdf /*config*/) override {
-    HHVM_SYS_FE(__SystemLib_filter_input_get_var);
-    HHVM_SYS_FE(_filter_snapshot_globals);
-  }
+  FilterExtension() : Extension("filter", "0.12.1") {}
 
   void moduleInit() override {
     HHVM_RC_INT(FILTER_FLAG_NONE, k_FILTER_FLAG_NONE);
@@ -181,20 +136,7 @@ static struct FilterExtension final : Extension {
     loadSystemlib();
   }
 
-  void threadInit() override {
-    s_filter_request_data.getCheck();
-  }
-
-  void requestShutdown() override {
-    // warm up the s_filter_request_data
-    s_filter_request_data->requestShutdown();
-  }
 } s_filter_extension;
-
-namespace {
-InitFiniNode globalsInit([]() { s_filter_request_data->requestInit(); },
-                         InitFiniNode::When::GlobalsInit);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -433,14 +375,6 @@ Variant HHVM_FUNCTION(filter_var,
 }
 
 #undef FAIL_IF
-
-Array HHVM_FUNCTION(__SystemLib_filter_input_get_var, int64_t variable_name) {
-  return s_filter_request_data->getVar(variable_name);
-}
-
-void HHVM_FUNCTION(_filter_snapshot_globals) {
-  s_filter_request_data->requestInit();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

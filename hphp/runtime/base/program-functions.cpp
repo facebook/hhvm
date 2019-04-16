@@ -769,7 +769,6 @@ init_command_line_globals(int argc, char** argv, char** envp,
     Xenon::getInstance().surpriseAll();
   }
 
-  InitFiniNode::GlobalsInit();
   // Initialize the debugger
   DEBUGGER_ATTACHED_ONLY(phpDebuggerRequestInitHook());
 }

@@ -261,7 +261,6 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     auto env = php_global(s__ENV);
     env.toArrRef().set(s_HPHP_RPC, 1);
     php_global_set(s__ENV, std::move(env));
-    InitFiniNode::GlobalsInit();
   }
 
   bool isFile = rpcFunc.rfind('.') != std::string::npos;

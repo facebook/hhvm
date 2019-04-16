@@ -433,7 +433,6 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
   {
     ServerStatsHelper ssh("input");
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
-    InitFiniNode::GlobalsInit();
 
     if (RuntimeOption::EnableHphpdDebugger) {
       Eval::DSandboxInfo sInfo = sourceRootInfo.getSandboxInfo();

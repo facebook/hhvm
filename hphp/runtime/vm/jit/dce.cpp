@@ -654,7 +654,6 @@ bool canDCE(IRInstruction* inst) {
   case OrdStrIdx:
   case MapGet:
   case CGetElem:
-  case VGetElem:
   case ArraySet:
   case ArraySetRef:
   case VecSet:

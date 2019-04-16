@@ -751,32 +751,6 @@ CGETELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType>
-RefData* vGetElemImpl(tv_lval base, key_type<keyType> key,
-                      const MInstrPropState* pState) {
-  TypedValue localTvRef;
-  auto result = ElemD<MOpMode::Define, true, keyType>(
-    localTvRef, base, key, pState
-  );
-  return vGetRefShuffle(localTvRef, result);
-}
-
-#define VGETELEM_HELPER_TABLE(m)  \
-  /* name         keyType */      \
-  m(vGetElemC,    KeyType::Any)   \
-  m(vGetElemI,    KeyType::Int)   \
-  m(vGetElemS,    KeyType::Str)   \
-
-#define X(nm, kt)                                   \
-inline RefData* nm(tv_lval base, key_type<kt> key,  \
-                   const MInstrPropState* pState) { \
-  return vGetElemImpl<kt>(base, key, pState);       \
-}
-VGETELEM_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 template<KeyType keyType, bool setRef>
 auto arraySetImpl(ArrayData* a, key_type<keyType> key,
                   Cell value, TypedValue* ref) {

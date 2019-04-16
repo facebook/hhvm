@@ -83,7 +83,6 @@ bool loadsCell(const IRInstruction& inst) {
   case KeysetGetK:
   case MapGet:
   case CGetElem:
-  case VGetElem:
   case ArrayIdx:
   case DictIdx:
   case KeysetIdx:

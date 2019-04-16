@@ -2197,16 +2197,12 @@ void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto key = memberKey(env, mk);
 
   auto const result = [&] {
-    if (mcodeIsProp(mk.mcode)) {
-      if (mk.mcode == MQT) {
-        gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
-      }
-      auto const base = extractBaseIfObj(env);
-      return gen(env, VGetProp, base, key, propStatePtrFinalProp(env, base));
+    assertx(mcodeIsProp(mk.mcode));
+    if (mk.mcode == MQT) {
+      gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
     }
-    assertx(mcodeIsElem(mk.mcode));
-    auto const base = ldMBase(env);
-    return gen(env, VGetElem, base, key, propStatePtrElem(env, base));
+    auto const base = extractBaseIfObj(env);
+    return gen(env, VGetProp, base, key, propStatePtrFinalProp(env, base));
   }();
 
   mFinalImpl(env, nDiscard, result);

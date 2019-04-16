@@ -3070,10 +3070,6 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from S0.
 
-| VGetElem, D(BoxedInitCell), S(LvalToGen) S(Cell) S(MIPropSPtr,Nullptr), MElem|PRc
-
-  Get element with key S1 from base S0 as a reference.
-
 | MemoGetStaticValue<func,T>, DParam(InitCell), NA, B
 
   Get the memo value associated with the static function "func". If the value

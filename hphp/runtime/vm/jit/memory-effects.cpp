@@ -1430,7 +1430,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpElem:
   case SetOpProp:
   case SetProp:
-  case VGetElem:
   case VGetProp:
     return minstr_final_with_prop_state(inst);
 

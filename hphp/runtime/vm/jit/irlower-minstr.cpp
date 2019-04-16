@@ -339,15 +339,6 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
                SyncOptions::Sync, elemArgs(env, inst));
 }
 
-void cgVGetElem(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  BUILD_OPTAB(VGETELEM_HELPER_TABLE, getKeyType(key));
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, elemArgs(env, inst).ssa(2));
-}
-
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key));

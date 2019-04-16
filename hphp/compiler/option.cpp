@@ -31,6 +31,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 
+#include "hphp/util/file-cache.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

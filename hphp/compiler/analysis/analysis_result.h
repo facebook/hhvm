@@ -18,12 +18,10 @@
 #define incl_HPHP_ANALYSIS_RESULT_H_
 
 #include "hphp/compiler/option.h"
-#include "hphp/compiler/package.h"
 
 #include "hphp/runtime/vm/as.h"
 
-#include "hphp/util/compact-vector.h"
-#include "hphp/util/thread-local.h"
+#include "hphp/util/mutex.h"
 
 #include <tbb/concurrent_hash_map.h>
 #include <atomic>
@@ -37,6 +35,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct Package;
 struct AnalysisResult;
 using AnalysisResultPtr = std::shared_ptr<AnalysisResult>;
 using AnalysisResultConstRawPtr = const AnalysisResult*;
@@ -44,22 +43,6 @@ using AnalysisResultConstRawPtr = const AnalysisResult*;
 struct UnitEmitter;
 
 struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
-  /**
-   * There are multiple passes over our syntax trees. This lists all of them.
-   */
-  enum Phase {
-    // parse
-    ParseAllFiles,
-
-    // analyzeProgram
-    AnalyzeAll,
-    AnalyzeFinal,
-
-    // pre-optimize
-    FirstPreOptimize,
-
-    CodeGen,
-  };
 
   struct ParseOnDemandCalbacks : AsmCallbacks {
     explicit ParseOnDemandCalbacks(AnalysisResultConstRawPtr ar) : m_ar(ar) {}

@@ -83,7 +83,7 @@ struct LockFreePtrWrapper {
     template<typename U>
     static const U* getter(const U& p, int f) { return &p; }
     template<typename U>
-    static const U* getter(const U* p, int f) { return p; }
+    static U* getter(U* p, int f) { return p; }
     template<typename U>
     static auto getter(const U& p, bool f) -> decltype(p.operator->(), p) {
       return p;

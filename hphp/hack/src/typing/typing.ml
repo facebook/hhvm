@@ -6357,31 +6357,9 @@ and check_extend_abstract_typeconst ~is_final p seq =
 
 and check_extend_abstract_const ~is_final p seq =
   Sequence.iter seq begin fun (x, cc) ->
-    match cc.cc_type with
-    | r, _ when cc.cc_abstract && not cc.cc_synthesized ->
-      Errors.implement_abstract ~is_final p (Reason.to_pos r) "constant" x
-    | _,
-      (
-          Terr
-        | Tdynamic
-        | Tany
-        | Tmixed
-        | Tnonnull
-        | Tnothing
-        | Tarray (_, _)
-        | Tdarray (_, _)
-        | Tvarray _
-        | Tvarray_or_darray _
-        | Toption _
-        | Tprim _
-        | Tfun _
-        | Tapply (_, _)
-        | Ttuple _
-        | Tshape _
-        | Taccess (_, _)
-        | Tthis
-        | Tgeneric _
-      ) -> ()
+    if cc.cc_abstract && not cc.cc_synthesized then
+      let cc_pos = Reason.to_pos (fst cc.cc_type) in
+      Errors.implement_abstract ~is_final p cc_pos "constant" x
   end
 
 and typeconst_abstract_kind = function

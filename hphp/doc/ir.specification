@@ -255,14 +255,6 @@ loaded, using a separate CheckRefInner instruction.
   This is similar to a CheckMBase except that it does not imply a runtime check
   and cannot cause control flow.
 
-| CastStk<T,offset>, ND, S(StkPtr), NF
-
-  Cast the stack element at `offset' (in cells) from S0 to type T.
-
-| CastMem<T>, ND, S(PtrToGen), NF
-
-  Cast the TypedValue at S0 to type T.
-
 The following instructions deal with parameter coercion (the standard type
 conversion for arguments to HNI functions). If parameter coercion fails these
 functions will throw a TVCoercion exception. They may throw other types of

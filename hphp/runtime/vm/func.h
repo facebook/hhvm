@@ -956,13 +956,6 @@ struct Func final {
   bool isFoldable() const;
 
   /*
-   * Whether the function's return is coerced to the correct type.  If so, it
-   * may also return null or bool if coercion fails, depending on the coercion
-   * kind.
-   */
-  bool isParamCoerceMode() const;
-
-  /*
    * Supports async eager return optimization?
    */
   bool supportsAsyncEagerReturn() const;

@@ -446,23 +446,6 @@ SSATmp* IRBuilder::preOptimizeLdClsRefCls(IRInstruction* inst) {
   );
 }
 
-SSATmp* IRBuilder::preOptimizeCastStk(IRInstruction* inst) {
-  auto const off = inst->extra<CastStk>()->offset;
-  auto const curType = stack(off, DataTypeGeneric).type;
-
-  if (inst->typeParam() == TNullableObj && curType <= TNull) {
-    // If we're casting Null to NullableObj, we still need to call
-    // tvCastToNullableObjectInPlace. See comment there and t3879280 for
-    // details.
-    return nullptr;
-  }
-  if (curType <= inst->typeParam()) {
-    inst->convertToNop();
-    return nullptr;
-  }
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
   auto const off = inst->extra<CoerceStk>()->offset;
   auto const curType = stack(off, DataTypeGeneric).type;
@@ -496,7 +479,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdLoc)
   X(LdStk)
   X(LdClsRefCls)
-  X(CastStk)
   X(CoerceStk)
   X(LdARFuncPtr)
   X(LdARIsDynamic)

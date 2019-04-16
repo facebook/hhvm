@@ -1579,13 +1579,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   // The following may re-enter, and also deal with a stack slot.
-  case CastStk:
-    {
-      auto const stk = AStack {
-        inst.src(0), inst.extra<CastStk>()->offset, 1
-      };
-      return may_load_store(stk, stk);
-    }
   case CoerceStk:
     {
       auto const stk = AStack {
@@ -1594,7 +1587,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store(stk, stk);
     }
 
-  case CastMem:
   case CoerceMem:
     {
       auto aInst = inst.src(0)->inst();

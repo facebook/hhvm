@@ -1547,7 +1547,6 @@ X(CheckStk,                     IRSPRelOffsetData);
 X(HintStkInner,                 IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
 X(StOutValue,                   IndexData);
-X(CastStk,                      IRSPRelOffsetData);
 X(CoerceStk,                    CoerceStkData);
 X(CoerceMem,                    CoerceMemData);
 X(CoerceCellToInt,              FuncArgData);

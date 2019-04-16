@@ -595,10 +595,6 @@ inline bool Func::isFoldable() const {
   return m_attrs & AttrIsFoldable;
 }
 
-inline bool Func::isParamCoerceMode() const {
-  return nativeFuncPtr() != nullptr;
-}
-
 inline bool Func::supportsAsyncEagerReturn() const {
   return m_attrs & AttrSupportsAsyncEagerReturn;
 }

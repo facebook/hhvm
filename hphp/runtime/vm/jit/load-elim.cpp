@@ -450,14 +450,9 @@ Flags handle_general_effects(Local& env,
     if (auto flags = handleCheck(TInitGen)) return *flags;
     break;
 
-  case CastStk:
   case CoerceStk:
     {
-      auto const stkOffset = [&]{
-        if (inst.is(CastStk)) return inst.extra<CastStk>()->offset;
-        if (inst.is(CoerceStk)) return inst.extra<CoerceStk>()->offset;
-        always_assert(false);
-      }();
+      auto const stkOffset = inst.extra<CoerceStk>()->offset;
       auto const stk =
         canonicalize(AliasClass { AStack { inst.src(0), stkOffset, 1 } });
       always_assert(stk <= canonicalize(m.loads));
@@ -465,14 +460,6 @@ Flags handle_general_effects(Local& env,
       auto const meta = env.global.ainfo.find(stk);
       auto const tloc = find_tracked(env, meta);
       if (!tloc) break;
-      if (inst.op() == CastStk &&
-          inst.typeParam() == TNullableObj &&
-          tloc->knownType <= TNull) {
-        // If we're casting Null to NullableObj, we still need to call
-        // tvCastToNullableObjectInPlace.  See comment there and t3879280 for
-        // details.
-        break;
-      }
       if (tloc->knownType <= inst.typeParam()) {
         return FJmpNext{};
       }

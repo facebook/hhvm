@@ -270,7 +270,7 @@ void callFunc(const Func* func, void *ctx,
 //////////////////////////////////////////////////////////////////////////////
 
 #define COERCE_OR_CAST(kind, warn_kind)                         \
-  if (paramCoerceMode) {                                        \
+  {                                                             \
     auto ty = args[-i].m_type;                                  \
     if (!tvCoerceParamTo##kind##InPlace(&args[-i],              \
                                         func->isBuiltin())) {   \
@@ -298,8 +298,6 @@ void callFunc(const Func* func, void *ctx,
         );                                                      \
       }                                                         \
     }                                                           \
-  } else {                                                      \
-    tvCastTo##kind##InPlace(&args[-i]);                         \
   }
 
 #define CASE(kind)                                      \
@@ -311,8 +309,6 @@ void coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
   assertx(numArgs == func->numParams());
-
-  bool paramCoerceMode = func->isParamCoerceMode();
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];

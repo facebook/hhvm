@@ -94,50 +94,6 @@ X(Resource)
 
 namespace {
 
-void implCast(IRLS& env, const IRInstruction* inst, Vreg base, int offset) {
-  auto type = inst->typeParam();
-  auto nullable = false;
-
-  if (!type.isKnownDataType()) {
-    assertx(TNull <= type);
-    type -= TNull;
-    assertx(type.isKnownDataType());
-    nullable = true;
-  }
-  assertx(IMPLIES(nullable, type <= TObj));
-
-  auto const args = argGroup(env, inst).addr(base, offset);
-
-  auto const helper = [&]() -> void (*)(TypedValue*) {
-    if (type <= TBool) {
-      return tvCastToBooleanInPlace<TypedValue*>;
-    } else if (type <= TInt) {
-      return tvCastToInt64InPlace<TypedValue*>;
-    } else if (type <= TDbl) {
-      return tvCastToDoubleInPlace<TypedValue*>;
-    } else if (type <= TArr) {
-      return tvCastToArrayInPlace<TypedValue*>;
-    } else if (type <= TVec) {
-      return tvCastToVecInPlace<TypedValue*>;
-    } else if (type <= TDict) {
-      return tvCastToDictInPlace<TypedValue*>;
-    } else if (type <= TKeyset) {
-      return tvCastToKeysetInPlace<TypedValue*>;
-    } else if (type <= TStr) {
-      return tvCastToStringInPlace<TypedValue*>;
-    } else if (type <= TObj) {
-      return nullable ? tvCastToNullableObjectInPlace<TypedValue*> :
-                        tvCastToObjectInPlace<TypedValue*>;
-    } else if (type <= TRes) {
-      return tvCastToResourceInPlace<TypedValue*>;
-    } else {
-      not_reached();
-    }
-  }();
-  cgCallHelper(vmain(env), env, CallSpec::direct(helper),
-               kVoidDest, SyncOptions::Sync, args);
-}
-
 void implCoerce(IRLS& env, const IRInstruction* inst,
                 Vreg base, int offset, Func const* callee, int argNum) {
   auto const type = inst->typeParam();
@@ -180,19 +136,6 @@ void implCoerce(IRLS& env, const IRInstruction* inst,
                kVoidDest, SyncOptions::Sync, args);
 }
 
-}
-
-void cgCastStk(IRLS& env, const IRInstruction *inst) {
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const offset = inst->extra<CastStk>()->offset;
-
-  implCast(env, inst, sp, cellsToBytes(offset.offset));
-}
-
-void cgCastMem(IRLS& env, const IRInstruction *inst) {
-  auto const ptr = srcLoc(env, inst, 0).reg();
-
-  implCast(env, inst, ptr, 0);
 }
 
 void cgCoerceStk(IRLS& env, const IRInstruction *inst) {

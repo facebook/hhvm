@@ -305,8 +305,6 @@ bool canDCE(IRInstruction* inst) {
   case AssertStk:
   case AssertMBase:
   case AssertARFunc:
-  case CastStk:
-  case CastMem:
   case CoerceStk:
   case CoerceMem:
   case CoerceCellToBool:

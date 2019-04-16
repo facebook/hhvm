@@ -337,8 +337,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Call:
   case CallBuiltin:
   case CallUnpack:
-  case CastMem:
-  case CastStk:
   case CGetElem:
   case CGetProp:
   case CGetPropQ:

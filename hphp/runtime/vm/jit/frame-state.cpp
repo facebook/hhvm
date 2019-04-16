@@ -661,10 +661,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     setValue(cslotts(inst->extra<KillClsRefTS>()->slot), nullptr);
     break;
 
-  case CastStk:
-    setType(stk(inst->extra<CastStk>()->offset), inst->typeParam());
-    break;
-
   case CoerceStk:
     setType(stk(inst->extra<CoerceStk>()->offset), inst->typeParam());
     break;
@@ -673,7 +669,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     updateLocalRefPredictions(inst->src(0), inst->src(1));
     break;
 
-  case CastMem:
   case CoerceMem: {
     auto addr = canonical(inst->src(0));
     if (!addr->inst()->is(LdLocAddr)) break;

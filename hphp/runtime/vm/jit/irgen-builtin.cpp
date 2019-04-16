@@ -1190,20 +1190,6 @@ SSATmp* coerce_value(IRGS& env,
                      uint32_t paramIdx,
                      const CatchMaker& maker) {
   auto const result = [&] () -> SSATmp* {
-    if (!callee->isParamCoerceMode()) {
-      if (ty <= TInt) {
-        return gen(env, ConvCellToInt, maker.makeUnusualCatch(), oldVal);
-      }
-      if (ty <= TDbl) {
-        return gen(env, ConvCellToDbl, maker.makeUnusualCatch(), oldVal);
-      }
-      if (ty <= TBool) {
-        return gen(env, ConvCellToBool, oldVal);
-      }
-
-      always_assert(false);
-    }
-
     if (ty <= TInt) {
       return gen(env,
                  CoerceCellToInt,
@@ -1251,23 +1237,13 @@ void coerce_stack(IRGS& env,
                   uint32_t paramIdx,
                   BCSPRelOffset offset,
                   const CatchMaker& maker) {
-  if (callee->isParamCoerceMode()) {
-    always_assert(ty.isKnownDataType());
-    gen(env,
-        CoerceStk,
-        ty,
-        CoerceStkData { offsetFromIRSP(env, offset), callee, paramIdx + 1 },
-        maker.makeUnusualCatch(),
-        sp(env));
-  } else {
-    always_assert(ty.isKnownDataType() || ty <= TNullableObj);
-    gen(env,
-        CastStk,
-        ty,
-        IRSPRelOffsetData { offsetFromIRSP(env, offset) },
-        maker.makeUnusualCatch(),
-        sp(env));
-  }
+  always_assert(ty.isKnownDataType());
+  gen(env,
+      CoerceStk,
+      ty,
+      CoerceStkData { offsetFromIRSP(env, offset), callee, paramIdx + 1 },
+      maker.makeUnusualCatch(),
+      sp(env));
 
   /*
    * We can throw after writing to the stack above; inform IRBuilder about it.
@@ -1305,15 +1281,12 @@ SSATmp* realize_param(IRGS& env,
   if (param.needsConversion) {
     auto const baseTy = targetTy - TNull;
     assertx(baseTy.isKnownDataType());
-    auto const convertTy =
-      (!callee->isParamCoerceMode() &&
-       targetTy == TNullableObj) ? targetTy : baseTy;
+    auto const convertTy = baseTy;
 
     if (auto const value = cond(
           env,
           [&] (Block* convert) -> SSATmp* {
-            if (targetTy == baseTy ||
-                !callee->isParamCoerceMode()) {
+            if (targetTy == baseTy) {
               return checkType(baseTy, convert);
             }
             return cond(
@@ -1421,12 +1394,8 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           if (param.isOutputArg) {
             return cns(env, TNullptr);
           }
-          if (callee->isParamCoerceMode()) {
-            gen(env, CoerceMem, ty, CoerceMemData { callee, paramIdx + 1 },
-                maker.makeUnusualCatch(), param.value);
-          } else {
-            gen(env, CastMem, ty, maker.makeUnusualCatch(), param.value);
-          }
+          gen(env, CoerceMem, ty, CoerceMemData { callee, paramIdx + 1 },
+              maker.makeUnusualCatch(), param.value);
           return nullptr;
         },
         [&] {
@@ -1531,6 +1500,8 @@ SSATmp* builtinCall(IRGS& env,
                     ParamPrep& params,
                     int32_t numNonDefault,
                     const CatchMaker& catchMaker) {
+  assertx(callee->nativeFuncPtr());
+
   // Try to replace the builtin call with a specialized implementation of the
   // builtin
   auto optRet = optimizedFCallBuiltin(env, callee, params, numNonDefault);

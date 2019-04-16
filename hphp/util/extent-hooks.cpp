@@ -16,6 +16,8 @@
 
 #include "hphp/util/extent-hooks.h"
 
+#include "hphp/util/assertions.h"
+#include "hphp/util/managed-arena.h"
 #include <folly/portability/SysMman.h>
 
 #if USE_JEMALLOC_EXTENT_HOOKS

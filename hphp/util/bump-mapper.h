@@ -21,6 +21,10 @@
 #include <mutex>
 #include <stddef.h>
 
+#include "hphp/util/alloc-defs.h"
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+
 namespace HPHP { namespace alloc {
 
 enum class LockPolicy : uint8_t {
@@ -142,4 +146,5 @@ struct Bump2MMapper : public Bump4KMapper {
 
 }}
 
+#endif
 #endif

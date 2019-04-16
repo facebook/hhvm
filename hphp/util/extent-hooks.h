@@ -17,11 +17,10 @@
 #ifndef incl_HPHP_UTIL_EXTENT_HOOK_H_
 #define incl_HPHP_UTIL_EXTENT_HOOK_H_
 
-#include "hphp/util/alloc.h"
+#include "hphp/util/alloc-defs.h"
+#include "hphp/util/bump-mapper.h"
 
 #if USE_JEMALLOC_EXTENT_HOOKS
-
-#include "hphp/util/bump-mapper.h"
 
 /*
  * Recent versions of jemalloc (specifically, jemalloc 5.x here) allow us to

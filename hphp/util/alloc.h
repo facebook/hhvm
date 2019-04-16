@@ -26,42 +26,10 @@
 #include <folly/Portability.h>
 #include <folly/portability/PThread.h>
 
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/low-ptr-def.h"
-
-#if FOLLY_SANITIZE
-// ASan is less precise than valgrind so we'll need a superset of those tweaks
-# define VALGRIND
-// TODO: (t2869817) ASan doesn't play well with jemalloc
-# ifdef USE_JEMALLOC
-#  undef USE_JEMALLOC
-# endif
-#endif
-
-#ifndef USE_JEMALLOC
-# ifdef __FreeBSD__
-#  include "stdlib.h"
-#  include "malloc_np.h"
-# else
-#  include "malloc.h"
-# endif
-#else
-# include <jemalloc/jemalloc.h>
-# if (JEMALLOC_VERSION_MAJOR >= 5) && defined(USE_LOWPTR) && \
-     defined(__linux__) && !defined(USE_JEMALLOC_EXTENT_HOOKS)
-#  define USE_JEMALLOC_EXTENT_HOOKS 1
-#  if (JEMALLOC_VERSION_MAJOR > 5) || (JEMALLOC_VERSION_MINOR >= 1)
-#   define JEMALLOC_METADATA_1G_PAGES 1
-#  endif
-# endif
-# if (JEMALLOC_VERSION_MAJOR > 4)
-#  define JEMALLOC_NEW_ARENA_CMD "arenas.create"
-# else
-#  define JEMALLOC_NEW_ARENA_CMD "arenas.extend"
-# endif
-#endif
-
 
 enum class NotNull {};
 
@@ -78,34 +46,6 @@ inline void* operator new(size_t, NotNull, void* location) {
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-
-constexpr bool use_jemalloc =
-#ifdef USE_JEMALLOC
-  true
-#else
-  false
-#endif
-  ;
-
-// When we have control over the virtual address space for the heap, all
-// static/uncounted strings/arrays have addresses lower than kUncountedMaxAddr,
-// and all counted HeapObjects have higher addresses.
-constexpr bool addr_encodes_persistency =
-#if USE_JEMALLOC_EXTENT_HOOKS && defined(__x86_64__) && defined(__linux__)
-  true
-#else
-  false
-#endif
-  ;
-
-// ASAN modifies the generated code in ways that cause abnormally high C++
-// stack usage.
-constexpr size_t kStackSizeMinimum =
-#if FOLLY_SANITIZE
-  16 << 20;
-#else
-  8 << 20;
-#endif
 
 struct OutOfMemoryException : Exception {
   explicit OutOfMemoryException(size_t size)
@@ -142,27 +82,6 @@ extern int low_arena_flags;
 extern __thread int high_arena_flags;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
-
-#ifndef MAX_MANAGED_ARENA_COUNT
-#define MAX_MANAGED_ARENA_COUNT 4
-#endif
-static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
-// All ManagedArena's represented as an array of pair<id, pointer>.  Each
-// pointer can be casted to the underlying ExtentAllocator/Arena. We use this
-// to access the state of ExtentAllocators in extent hooks.  An id of zero
-// indicates an empty entry.  If the arena doesn't have a custom extent hook,
-// the arena won't be registered here.
-using ArenaArray = std::array<std::pair<unsigned, void*>,
-                              MAX_MANAGED_ARENA_COUNT>;
-extern ArenaArray g_arenas;
-template<typename T> inline T* GetByArenaId(unsigned id) {
-  for (auto i : g_arenas) {
-    if (i.first == id) {
-      return static_cast<T*>(i.second);
-    }
-  }
-  return nullptr;
-}
 
 // Explicit per-thread tcache for the huge arenas.
 extern __thread int high_arena_tcache;
@@ -292,8 +211,6 @@ using MemBlock = MemRange<void*>;
 extern __thread uintptr_t s_stackLimit;
 extern __thread size_t s_stackSize;
 void init_stack_limits(pthread_attr_t* attr);
-
-extern const size_t s_pageSize;
 
 /*
  * The numa node this thread is bound to

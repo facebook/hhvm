@@ -16,18 +16,17 @@
 
 #include "hphp/util/managed-arena.h"
 
+#include "hphp/util/assertions.h"
+
 #if USE_JEMALLOC_EXTENT_HOOKS
 
-namespace HPHP {
-
-ArenaArray g_arenas;
-
-namespace alloc {
+namespace HPHP { namespace alloc {
 
 static_assert(alignof(HighArena) <= 64, "");
 static_assert(alignof(LowArena) <= 64, "");
 alignas(64) uint8_t g_highArena[sizeof(HighArena)];
 alignas(64) uint8_t g_lowArena[sizeof(LowArena)];
+ArenaArray g_arenas;
 
 //////////////////////////////////////////////////////////////////////
 

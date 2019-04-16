@@ -17,13 +17,12 @@
 #ifndef incl_HPHP_UTIL_MANAGED_ARENA_H_
 #define incl_HPHP_UTIL_MANAGED_ARENA_H_
 
-#include "hphp/util/alloc.h"
-
-#if USE_JEMALLOC_EXTENT_HOOKS
-
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/extent-hooks.h"
 #include <string>
+
+#if USE_JEMALLOC_EXTENT_HOOKS
 
 namespace HPHP { namespace alloc {
 
@@ -85,6 +84,27 @@ using HighArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
 // Not using std::aligned_storage<> because zero initialization can be useful.
 extern uint8_t g_lowArena[sizeof(LowArena)];
 extern uint8_t g_highArena[sizeof(HighArena)];
+
+#ifndef MAX_MANAGED_ARENA_COUNT
+#define MAX_MANAGED_ARENA_COUNT 4
+#endif
+static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
+// All ManagedArena's represented as an array of pair<id, pointer>.  Each
+// pointer can be casted to the underlying ExtentAllocator/Arena. We use this
+// to access the state of ExtentAllocators in extent hooks.  An id of zero
+// indicates an empty entry.  If the arena doesn't have a custom extent hook,
+// the arena won't be registered here.
+using ArenaArray = std::array<std::pair<unsigned, void*>,
+                              MAX_MANAGED_ARENA_COUNT>;
+extern ArenaArray g_arenas;
+template<typename T> inline T* GetByArenaId(unsigned id) {
+  for (auto i : g_arenas) {
+    if (i.first == id) {
+      return static_cast<T*>(i.second);
+    }
+  }
+  return nullptr;
+}
 
 inline LowArena* lowArena() {
   auto p = reinterpret_cast<LowArena*>(&g_lowArena);

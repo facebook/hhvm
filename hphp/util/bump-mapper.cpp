@@ -16,6 +16,8 @@
 
 #include "hphp/util/bump-mapper.h"
 
+#if USE_JEMALLOC_EXTENT_HOOKS
+
 #include "hphp/util/assertions.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/maphuge.h"
@@ -178,3 +180,5 @@ bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
 
 } // namespace alloc
 } // namespace HPHP
+
+#endif

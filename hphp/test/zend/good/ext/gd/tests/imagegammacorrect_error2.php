@@ -1,4 +1,4 @@
 <?php
 $image = tmpfile();
-$gamma = imagegammacorrect($image, 1, 5);
+$gamma = imagegammacorrect($image, 1.0, 5.0);
 

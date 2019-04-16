@@ -11,5 +11,5 @@ function array_map_recursive($callback, $array) {
 }
 
 function openssl_pkey_get_bin2hex_details($res) {
-  return array_map_recursive('bin2hex', openssl_pkey_get_details($res));
+  return array_map_recursive($v ==> bin2hex((string)$v), openssl_pkey_get_details($res));
 }

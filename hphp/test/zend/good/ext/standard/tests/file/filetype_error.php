@@ -2,7 +2,7 @@
 /*
 Prototype: string filetype ( string $filename );
 Description: Returns the type of the file. Possible values are fifo, char,
-             dir, block, link, file, and unknown. 
+             dir, block, link, file, and unknown.
 */
 
 echo "*** Testing error conditions ***";
@@ -11,7 +11,7 @@ print( filetype("/no/such/file/dir") );
 
 /* unknown type */
 print( filetype("string") );
-print( filetype(100) );
+print( filetype('100') );
 
 /* No.of args less than expected */
 try { print( filetype() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

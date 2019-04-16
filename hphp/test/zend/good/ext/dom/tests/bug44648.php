@@ -19,7 +19,7 @@ try {
 }
 
 try {
-  $root->setAttributeNS(NULL, '@ghi', '789');
+  $root->setAttributeNS('', '@ghi', '789');
 } catch (DOMException $e) {
   echo $e->getMessage()."\n";
 }

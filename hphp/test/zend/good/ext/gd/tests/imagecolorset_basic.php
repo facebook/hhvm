@@ -13,7 +13,7 @@ imagecolorset($im, $bg, 0, 0, 255);
 
 // Get output and generate md5 hash
 ob_start();
-imagepng($im, null, 9);
+imagepng($im, '', 9);
 $result_image = ob_get_contents();
 ob_end_clean();
 echo md5(base64_encode($result_image));

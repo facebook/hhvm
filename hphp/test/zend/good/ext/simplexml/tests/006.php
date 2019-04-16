@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
@@ -30,28 +30,28 @@ EOF
 
 foreach($sxe as $name => $data) {
 	var_dump($name);
-	var_dump(trim($data));
+	var_dump(trim((string)$data));
 }
 
 echo "===CLONE===\n";
 
 foreach(clone $sxe as $name => $data) {
 	var_dump($name);
-	var_dump(trim($data));
+	var_dump(trim((string)$data));
 }
 
 echo "===ELEMENT===\n";
 
 foreach($sxe->elem11 as $name => $data) {
 	var_dump($name);
-	var_dump(trim($data));
+	var_dump(trim((string)$data));
 }
 
 echo "===COMMENT===\n";
 
 foreach($sxe->elem1 as $name => $data) {
 	var_dump($name);
-	var_dump(trim($data));
+	var_dump(trim((string)$data));
 }
 
 echo "===DONE===\n";

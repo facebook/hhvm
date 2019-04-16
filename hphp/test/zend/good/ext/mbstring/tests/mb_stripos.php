@@ -15,12 +15,12 @@ mb_internal_encoding('UTF-8') or print("mb_internal_encoding() failed\n");
 echo  "== POSITIVE OFFSET ==\n";
 print  mb_stripos($euc_jp,b'日本語', 0, 'EUC-JP') . "\n";
 print  mb_stripos($euc_jp, b'0', 0,     'EUC-JP') . "\n";
-print  mb_stripos($euc_jp, 3, 0,       'EUC-JP') . "\n";
-print  mb_stripos($euc_jp, 0, 0,       'EUC-JP') . "\n";
+print  mb_stripos($euc_jp, '3', 0,       'EUC-JP') . "\n";
+print  mb_stripos($euc_jp, '0', 0,       'EUC-JP') . "\n";
 print  mb_stripos($euc_jp,b'日本語', 15, 'EUC-JP') . "\n";
 print  mb_stripos($euc_jp, b'0', 15,     'EUC-JP') . "\n";
-print  mb_stripos($euc_jp, 3, 15,       'EUC-JP') . "\n";
-print  mb_stripos($euc_jp, 0, 15,       'EUC-JP') . "\n";
+print  mb_stripos($euc_jp, '3', 15,       'EUC-JP') . "\n";
+print  mb_stripos($euc_jp, '0', 15,       'EUC-JP') . "\n";
 
 // Negative offset
 // Note: PHP Warning - offset is negative.
@@ -30,17 +30,17 @@ $r = mb_stripos($euc_jp,b'日本語', -15, 'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
 $r = mb_stripos($euc_jp, b'0', -15,     'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
-$r = mb_stripos($euc_jp, 3, -15,       'EUC-JP');
+$r = mb_stripos($euc_jp, '3', -15,       'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
-$r = mb_stripos($euc_jp, 0, -15,       'EUC-JP');
+$r = mb_stripos($euc_jp, '0', -15,       'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
 $r = mb_stripos($euc_jp,b'日本語', -50, 'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
 $r = mb_stripos($euc_jp, b'0', -50,     'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
-$r = mb_stripos($euc_jp, 3, -50,       'EUC-JP');
+$r = mb_stripos($euc_jp, '3', -50,       'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
-$r = mb_stripos($euc_jp, 0, -50,       'EUC-JP');
+$r = mb_stripos($euc_jp, '0', -50,       'EUC-JP');
 ($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
 
 // Out of range - should return false
@@ -49,9 +49,9 @@ $r =  mb_stripos($euc_jp,b'日本語', 40, 'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
 $r =  mb_stripos($euc_jp, b'0', 40,     'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_stripos($euc_jp, 3, 40,       'EUC-JP');
+$r =  mb_stripos($euc_jp, '3', 40,       'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =   mb_stripos($euc_jp, 0, 40,       'EUC-JP');
+$r =   mb_stripos($euc_jp, '0', 40,       'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
 // Note: Returned NULL string
 // echo gettype($r). ' val '. $r ."\n"; 
@@ -71,8 +71,8 @@ mb_internal_encoding('EUC-JP')  or print("mb_internal_encoding() failed\n");
 
 print  mb_stripos($euc_jp,b'日本語', 0) . "\n";
 print  mb_stripos($euc_jp, b'0', 0) . "\n";
-print  mb_stripos($euc_jp, 3, 0) . "\n";
-print  mb_stripos($euc_jp, 0, 0) . "\n";
+print  mb_stripos($euc_jp, '3', 0) . "\n";
+print  mb_stripos($euc_jp, '0', 0) . "\n";
 
 $r = mb_stripos($euc_jp,b'韓国語', 0);
 ($r === FALSE) ? print "OK_STR\n"     : print "NG_STR\n";
@@ -85,8 +85,8 @@ mb_internal_encoding('EUC-JP')  or print("mb_internal_encoding() failed\n");
 
 print  mb_stripos($euc_jp,b'日本語') . "\n";
 print  mb_stripos($euc_jp, b'0') . "\n";
-print  mb_stripos($euc_jp, 3) . "\n";
-print  mb_stripos($euc_jp, 0) . "\n";
+print  mb_stripos($euc_jp, '3') . "\n";
+print  mb_stripos($euc_jp, '0') . "\n";
 
 $r = mb_stripos($euc_jp,b'韓国語');
 ($r === FALSE) ? print "OK_STR\n"     : print "NG_STR\n";

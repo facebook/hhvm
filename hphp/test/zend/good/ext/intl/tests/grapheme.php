@@ -755,7 +755,7 @@ function check_result($result, $expected) {
         	$result = 'false';
 	}
 
-	if ( strcmp($result, $expected) != 0 ) {
+	if ( strcmp((string)$result, (string)$expected) != 0 ) {
 		return " **FAILED** ";
 	}
 

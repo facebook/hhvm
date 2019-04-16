@@ -1,7 +1,7 @@
 <?php
 class bomb {
   static function go($n)	{
-   $backtrace = debug_backtrace(false);
+   $backtrace = debug_backtrace(0);
    $backtrace[1]['args'][1] = 'bomb';
   }
 }

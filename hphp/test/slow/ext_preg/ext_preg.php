@@ -304,7 +304,7 @@ function test_ereg_replace() {
   VS(ereg_replace("( )is", "\\1was", $str), "This was a test");
   VS(ereg_replace("(( )is)", "\\2was", $str), "This was a test");
 
-  $num = 4;
+  $num = '4';
   $str = "This string has four words.";
   $str = ereg_replace("four", $num, $str);
   VS($str, "This string has 4 words.");

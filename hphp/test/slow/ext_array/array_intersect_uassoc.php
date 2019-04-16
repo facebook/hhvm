@@ -1,19 +1,19 @@
-<?php
+<?hh
 
 
 <<__EntryPoint>>
 function main_array_intersect_uassoc() {
-$array1 = array(
+$array1 = dict[
   "a" => "green",
   "b" => "brown",
   "c" => "blue",
-  "red"
-);
-$array2 = array(
+  "0" => "red"
+];
+$array2 = dict[
   "a" => "GREEN",
   "B" => "brown",
-  "yellow",
-  "red"
-);
+  "0" => "yellow",
+  "1" => "red"
+];
 var_dump(array_intersect_uassoc($array1, $array2, 'strcasecmp'));
 }

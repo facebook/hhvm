@@ -9,7 +9,7 @@ ob_start(function($buffer) { C::$storage .= $buffer; }, 20);
 echo str_repeat("0", 20); // fill in the buffer
 
 for($i = 0; $i < 10; $i++) {
-    echo str_pad($i, 9, ' ', STR_PAD_LEFT) . "\n"; // full buffer dumped every time
+    echo str_pad((string)$i, 9, ' ', STR_PAD_LEFT) . "\n"; // full buffer dumped every time
 }
 
 ob_end_flush();

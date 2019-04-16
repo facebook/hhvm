@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main_colorcrash() {
 $img=imagecreatetruecolor(10, 10);
-imagetruecolortopalette($img, false, PHP_INT_MAX / 8);
+imagetruecolortopalette($img, false, (int)(PHP_INT_MAX / 8));
 
 $img = imagecreate(100, 100);
 imageline($img, 0, 0, 100, 100, -7);

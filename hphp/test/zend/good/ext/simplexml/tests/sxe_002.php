@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -32,12 +32,12 @@ $sxe = simplexml_load_string((binary)$xml, 'SimpleXMLIterator');
 foreach(new RecursiveIteratorIterator($sxe, 1) as $name => $data) {
 	var_dump($name);
 	var_dump(get_class($data));
-	var_dump(trim($data));
+	var_dump(trim((string)$data));
 }
 
 echo "===DUMP===\n";
 
 var_dump(get_class($sxe));
-var_dump(trim($sxe->elem1));
+var_dump(trim((string)$sxe->elem1));
 
 echo "===DONE===\n";

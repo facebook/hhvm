@@ -1,6 +1,6 @@
 <?hh
 function retimer() {
-  $t = new IntervalTimer(1, 1, () ==> {});
+  $t = new IntervalTimer(1.0, 1.0, () ==> {});
   return $t;
 }
 
@@ -8,7 +8,7 @@ function retimer() {
 <<__EntryPoint>>
 function main_doublestart() {
 echo "t1\n";
-$t1 = new IntervalTimer(1, 1, () ==> {});
+$t1 = new IntervalTimer(1.0, 1.0, () ==> {});
 $t1->start();
 $t1->start();
 
@@ -16,7 +16,7 @@ $t1->stop();
 $t1->stop();
 
 echo "t2\n";
-$t2 = new IntervalTimer(1, 1, () ==> {});
+$t2 = new IntervalTimer(1.0, 1.0, () ==> {});
 $t2->stop();
 
 echo "t3\n";

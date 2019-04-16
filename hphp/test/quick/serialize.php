@@ -15,7 +15,7 @@ class C {
   function __construct() {
     $this->a = null;
     $this->b = acos(1.01);
-    $this->c = log(0);
+    $this->c = log(0.0);
     echo "C has a safe constructor.\n";
   }
   function __wakeup() {
@@ -79,7 +79,7 @@ function main() {
   test_serialization(new E, array('E'));
   test_serialization(new F, array('F'));
   test_serialization(new G, array('G'));
-  test_serialization(array("Hello World<>$%", acos(1.01), log(0), 50), array());
+  test_serialization(array("Hello World<>$%", acos(1.01), log(0.0), 50), array());
   test_serialization(
     array( new A, array(new B, array(new C, array(new E, array(new F))))),
     array('abc' => 'A', 5 => 'C', 'E', 'B', 'F')

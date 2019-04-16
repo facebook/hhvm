@@ -7,19 +7,19 @@ $values = array(23,
 				027,
 				"23",
 				"23.45",
-				"2.345e1",				
+				"2.345e1",
 				null,
 				true,
-				false);	
+				false);
 
 echo "\n LOG tests...no base\n";
 for ($i = 0; $i < count($values); $i++) {
-	$res = log($values[$i]);
+	$res = log((float)$values[$i]);
 	var_dump($res);
 }
 
 echo "\n LOG tests...base\n";
 for ($i = 0; $i < count($values); $i++) {
-	$res = log($values[$i], 4);
+	$res = log((float)$values[$i], 4.0);
 	var_dump($res);
 }

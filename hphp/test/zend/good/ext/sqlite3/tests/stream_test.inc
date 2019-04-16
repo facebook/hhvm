@@ -15,7 +15,7 @@ class SQLite3_Test_Stream
 	public function stream_read($count)
 	{
 		$ret = substr(self::$string, $this->position, $count);
-		$this->position += strlen($ret);
+		$this->position += $ret === false ? 0 : strlen($ret);
 		return $ret;
 	}
 

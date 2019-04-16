@@ -12,7 +12,7 @@ try {
   var_dump("setFont");
 }
 
-$draw->setFontSize(12);
+$draw->setFontSize(12.0);
 var_dump($draw->getFontSize());
 
 $draw->setFontStretch(Imagick::STRETCH_SEMIEXPANDED);

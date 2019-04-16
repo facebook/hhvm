@@ -2,7 +2,7 @@
 $a = 'test';
 sodium_memzero(&$a);
 if ($a !== 'test') {
-  echo strlen($a);
+  echo strlen((string)$a);
 } else {
   echo $a;
 }

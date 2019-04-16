@@ -34,7 +34,7 @@ VERIFY($xml->startAttributeNS("fb", "attr2",
                                     "http://www.facebook.com/"));
 VERIFY($xml->endAttribute());
 VERIFY($xml->writeElementNS("prefix", "name",
-                                  "http://some.url/", 1337));
+                                  "http://some.url/", '1337'));
 VERIFY($xml->startElement("node"));
 VERIFY($xml->fullEndElement());
 VERIFY($xml->endElement());

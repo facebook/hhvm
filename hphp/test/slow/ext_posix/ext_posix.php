@@ -45,7 +45,7 @@ $ret = posix_getpwnam("root");
 VERIFY($ret != false);
 VERIFY(count((array)$ret) != 0);
 VS(posix_getpwnam(""), false);
-VS(posix_getpwnam(-1), false);
+VS(posix_getpwnam('-1'), false);
 
 $ret = posix_getpwuid(0);
 VERIFY($ret != false);

@@ -4,7 +4,7 @@
 
 	$im = imagecreatetruecolor(30, 50);
 	imagefill($im, 0, 0, (16777215 - 255));
-	$im = imagerotate($im, 270, 255);
+	$im = imagerotate($im, 270.0, 255);
 	imagepng($im, $dest);
 
 	$im2 = imagecreatefrompng($dest);

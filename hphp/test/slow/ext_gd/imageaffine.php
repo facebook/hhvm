@@ -15,8 +15,8 @@ $arrAffine = [
     [ -1.2, 0, 0, -0.6, 0, 0 ],
     [ 1, 2, 0, 1, 0, 0 ],
     [ 2, 1, 0, 1, 0, 0 ],
-    [ cos(15), sin(15), -sin(15), cos(15), 0, 0 ],
-    [ cos(15), -sin(15), sin(15), cos(15), 0, 0 ]
+    [ cos(15.0), sin(15.0), -sin(15.0), cos(15.0), 0, 0 ],
+    [ cos(15.0), -sin(15.0), sin(15.0), cos(15.0), 0, 0 ]
 ];
 
 $RSR_base = imagecreatetruecolor(400, 300);
@@ -30,7 +30,7 @@ var_dump(md5_file($base_img));
 $drawcolor = imagecolorallocate($RSR_base, 255, 0, 0);
 $triangle = [ 50, 50, 50, 150, 200, 150 ];
 $points = 3;
-imageantialias($RSR_base, 1);
+imageantialias($RSR_base, true);
 $drawtriangle = imagefilledpolygon($RSR_base, $triangle,
                                     $points, $drawcolor);
 imagepng($RSR_base, $tgt_img);

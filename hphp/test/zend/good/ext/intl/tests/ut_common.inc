@@ -130,11 +130,11 @@ function ut_coll_set_default( $coll )
 
 // FIXME: incomplete list
 
-function ut_nfmt_create( $locale, $style, $pattern = null )
+function ut_nfmt_create( $locale, $style, $pattern = '' )
 {
     return $GLOBALS['oo-mode'] ? new NumberFormatter( $locale, $style, $pattern ) : numfmt_create( $locale, $style, $pattern );
 }
-function ut_nfmt_format( $fmt, $number, $type = null )
+function ut_nfmt_format( $fmt, $number, $type = 0 )
 {
     return $GLOBALS['oo-mode'] ? $fmt->format( $number, $type ) : numfmt_format( $fmt, $number, $type );
 }
@@ -329,7 +329,7 @@ function ut_msgfmt_get_error_message( $fmt )
     return $GLOBALS['oo-mode'] ? $fmt->getErrorMessage() : msgfmt_get_error_message( $fmt );
 }
 /* IntlDateFormatter functions */
-function ut_datefmt_create( $locale, $datetype, $timetype, $timezone = null, $calendar = null ,$pattern = null)
+function ut_datefmt_create( $locale, $datetype, $timetype, $timezone = null, $calendar = null ,$pattern = '')
 {
     return $GLOBALS['oo-mode'] ? datefmt_create( $locale, $datetype, $timetype, $timezone, $calendar ,$pattern ) : datefmt_create( $locale, $datetype, $timetype, $timezone, $calendar ,$pattern);
 }

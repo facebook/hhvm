@@ -1,5 +1,5 @@
 <?php
- 
+
 const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
@@ -14,7 +14,7 @@ $longVals = array(
 
 foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
-   var_dump(sqrt($longVal));
+   var_dump(sqrt((float)$longVal));
 }
-   
+
 echo "===DONE===\n";

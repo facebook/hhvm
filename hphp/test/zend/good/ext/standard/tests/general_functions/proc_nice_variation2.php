@@ -14,5 +14,5 @@ $variation_array = array(
 
 
 foreach ( $variation_array as $var ) {
-  var_dump(proc_nice( $var  ) );
+  var_dump(proc_nice((int)$var  ) );
 }

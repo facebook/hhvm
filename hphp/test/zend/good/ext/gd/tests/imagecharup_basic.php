@@ -5,7 +5,7 @@ $white = imagecolorallocate($image, 255,255,255);
 $result = imagecharup($image, 1, 5, 5, 'C', $white);
 
 ob_start();
-imagepng($image, null, 9);
+imagepng($image, '', 9);
 $img = ob_get_contents();
 ob_end_clean();
 

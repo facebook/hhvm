@@ -17,6 +17,6 @@ $pid = pcntl_fork();
 if ($pid) {
   var_dump(stream_socket_accept($socket));
 } else {
-  stream_socket_client("tcp://127.0.0.1:$port", &$errno, &$errstr, 2);
+  stream_socket_client("tcp://127.0.0.1:$port", &$errno, &$errstr, 2.0);
 }
 }

@@ -16,7 +16,7 @@ while (!$socket) {
 
 sleep(1);
 $time = microtime();
-var_dump(stream_socket_client("tcp://127.0.0.1:$port", &$errno, &$errstr, 0));
+var_dump(stream_socket_client("tcp://127.0.0.1:$port", &$errno, &$errstr, 0.0));
 $elapsed = microtime() - $time;
 if ($elapsed > 1) {
   print "FAILURE";

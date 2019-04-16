@@ -41,7 +41,7 @@ foreach($files as $name => $cont)
 
 	// write manifest entry
 	$manifest .= pack('V', strlen($name)) . (binary)$name;
-	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, strlen($meta)) . (binary)$meta;
+	$manifest .= pack('VVVVVV', $ulen, $time, $clen, $crc32, $flags|$perm, $meta === null ? 0 : strlen($meta)) . (binary)$meta;
 
 	// globals
 	$gflags |= $flags;

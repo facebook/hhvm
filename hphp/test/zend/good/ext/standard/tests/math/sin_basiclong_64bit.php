@@ -14,7 +14,7 @@ $longVals = array(
 
 foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
-   var_dump(sin($longVal));
+   var_dump(sin((float)$longVal));
 }
 
 echo "===DONE===\n";

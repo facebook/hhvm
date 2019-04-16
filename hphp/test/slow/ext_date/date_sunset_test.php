@@ -14,9 +14,9 @@ date_default_timezone_set("Asia/Calcutta");
 //Initialise the variables
 $time = mktime(0, 0, 0, 1, 26, 2012);
 $latitude = 38.4;
-$longitude = -9;
-$zenith = 90;
-$gmt_offset = 1;
+$longitude = -9.0;
+$zenith = 90.0;
+$gmt_offset = 1.0;
 
 echo "\n-- Testing date_sunset() function by passing one parameter --\n";
 var_dump( date_sunset($time) );

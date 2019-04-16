@@ -13,7 +13,7 @@ function test_encryption($method) {
   }
 
   // Empty IV error
-  var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, &$tag, ''));
+  var_dump(openssl_encrypt('data', $method, 'password', 0, '', &$tag, ''));
 
   // Failing to retrieve tag (max is 16 bytes)
   var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 32), &$tag, '', 20));

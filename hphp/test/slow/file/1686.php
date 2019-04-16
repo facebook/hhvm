@@ -13,7 +13,7 @@ $bytes = fread($output, 1024);
 print "From file, without Maxlen: <".serialize($bytes).">.\n";
 fseek($input, 0);
 $output = fopen('php://memory', 'w+');
-stream_copy_to_stream($input, $output, null);
+stream_copy_to_stream($input, $output, 0);
 fseek($output, 0);
 $bytes = fread($output, 1024);
 print "From file, using Maxlen null: <".serialize($bytes).">.\n";

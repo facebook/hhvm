@@ -1,5 +1,5 @@
 <?php
-$filename = null;
+$filename = '';
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);

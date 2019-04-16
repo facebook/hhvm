@@ -12,7 +12,7 @@ var_dump(str_replace(" is", " was", $str));
 var_dump(mb_ereg_replace("( )is", "\\1was", $str));
 var_dump(mb_ereg_replace("(( )is)", "\\2was", $str));
 
-$num = 4;
+$num = '4';
 $str = "This string has four words.";
 $str = mb_ereg_replace("four", $num, $str);
 var_dump($str);

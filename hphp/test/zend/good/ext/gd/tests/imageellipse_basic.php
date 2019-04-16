@@ -7,7 +7,7 @@ $image = imagecreatetruecolor(400, 300);
 imageellipse($image, 200, 150, 300, 200, 16777215);
 
 ob_start();
-imagepng($image, null, 9);
+imagepng($image, '', 9);
 $img = ob_get_contents();
 ob_end_clean();
 

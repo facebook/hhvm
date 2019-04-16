@@ -29,7 +29,7 @@ $patterns = array (
   '$file_path/glob_variation/wonder5',
   "$file_path/glob_variation/?wonder?",
   "$file_path/glob_variation/wonder?",
-  TRUE  // boolean true
+  '1'  // boolean true
 );
 $counter = 1;
 /* loop through $patterns to match each $pattern with the files created

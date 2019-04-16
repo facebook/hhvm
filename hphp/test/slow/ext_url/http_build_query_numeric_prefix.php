@@ -14,5 +14,5 @@ $query = array(
     'initial_db_version' => 27916,
 );
 var_dump(http_build_query($query, null, "&"));
-var_dump(http_build_query($query, 52, "&"));
+var_dump(http_build_query($query, '52', "&"));
 }

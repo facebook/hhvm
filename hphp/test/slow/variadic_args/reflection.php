@@ -20,10 +20,10 @@ function reflect_meth($class, $name) {
 
 function reflect_param(ReflectionParameter $param) {
   var_dump($param->getName());
-  echo '  ', 'optional: ', var_export($param->isOptional(), 1), "\n";
-  echo '  ', 'variadic: ', var_export($param->isVariadic(), 1), "\n";
+  echo '  ', 'optional: ', var_export($param->isOptional(), true), "\n";
+  echo '  ', 'variadic: ', var_export($param->isVariadic(), true), "\n";
   echo '  ', 'hasDefaultAvail: ',
-    var_export($param->isDefaultValueAvailable(), 1), "\n";
+    var_export($param->isDefaultValueAvailable(), true), "\n";
 }
 
 function main() {

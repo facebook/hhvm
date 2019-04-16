@@ -3,6 +3,6 @@
 
 <<__EntryPoint>>
 function main_ephemeral() {
-(new IntervalTimer(1, 1, () ==> {}))->start();
+(new IntervalTimer(1.0, 1.0, () ==> {}))->start();
 echo "OK\n";
 }

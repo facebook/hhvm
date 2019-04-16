@@ -29,8 +29,8 @@ class PDOTest {
 			$attr = null;
 		}
 
-		if ($user === false) $user = NULL;
-		if ($pass === false) $pass = NULL;
+		if ($user === false) $user = '';
+		if ($pass === false) $pass = '';
 
 		$db = new $classname($dsn, $user, $pass, $attr);
 

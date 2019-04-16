@@ -6,7 +6,7 @@ function cmp ($a, $b) {
         and $a = array_sum ($a);
     is_array ($b)
         and $b = array_sum ($b);
-    return strcmp ($a, $b);
+    return strcmp ((string)$a, (string)$b);
 }
 
 echo " -- Testing uasort() -- \n";

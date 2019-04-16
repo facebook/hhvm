@@ -12,7 +12,7 @@ function test_decryption($method) {
   }
 
   // no IV
-  var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, NULL, $test['tag'], $test['aad']));
+  var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, '', $test['tag'], $test['aad']));
   // failed because no AAD
   var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, $test['iv'], $test['tag']));
   // failed because wrong tag

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -40,11 +40,11 @@ echo "===RESET===\n";
 for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 	var_dump($sxe->hasChildren());
 	var_dump(trim($sxe->key()));
-	var_dump(trim($sxe->current()));
+	var_dump(trim((string)$sxe->current()));
 	foreach($sxe->getChildren() as $name => $data) {
 		var_dump($name);
 		var_dump(get_class($data));
-		var_dump(trim($data));
+		var_dump(trim((string)$data));
 	}
 }
 

@@ -13,7 +13,7 @@ function test_encryption($method) {
   }
 
   // Empty IV error
-  var_dump(openssl_encrypt('data', $method, 'password', 0, NULL, &$tag, ''));
+  var_dump(openssl_encrypt('data', $method, 'password', 0, '', &$tag, ''));
 
   // Test setting different IV length and unlimeted tag
   var_dump(openssl_encrypt('data', $method, 'password', 0, str_repeat('x', 10), &$tag, '', 1024));

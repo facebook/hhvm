@@ -18,7 +18,7 @@ var_dump(is_darray($sun_info));
  */
 var_dump(
   date_sunrise(strtotime("2004-12-20"), SUNFUNCS_RET_STRING,
-               38.4, -9, 90, 1)
+               38.4, -9.0, 90.0, 1.0)
 );
 
 /*
@@ -30,6 +30,6 @@ var_dump(
  */
 var_dump(
   date_sunset(strtotime("2004-12-20"), SUNFUNCS_RET_STRING,
-              38.4, -9, 90, 1)
+              38.4, -9.0, 90.0, 1.0)
 );
 }

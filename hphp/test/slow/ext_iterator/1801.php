@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1801() {
 $ite=new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir/');
-$bytestotal=0;
+$bytestotal=0.0;
 $nbfiles=0;
 $files = array();
  // order changes per machine

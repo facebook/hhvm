@@ -33,7 +33,7 @@ foreach($character_classes as $string => $pattern) {
 	}
 	// make sure any multibyte output is in base 64
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_ereg($pattern, $string, &$regs));
+	var_dump(mb_ereg($pattern, (string)$string, &$regs));
 	base64_encode_var_dump($regs);
 	$iterator++;
 }

@@ -38,10 +38,10 @@ $xpathdoc = $xpath->document;
 var_dump($xpathdoc instanceof DOMDocument);
 
 $root = $dom->documentElement;
-$root->appendChild($dom->createElementNS("urn::default", "testnode", 3));
-$root->appendChild($dom->createElementNS("urn::default", "testnode", 4));
-$root->appendChild($dom->createElementNS("urn::default", "testnode", 4));
-$root->appendChild($dom->createElementNS("urn::default", "testnode", 5));
+$root->appendChild($dom->createElementNS("urn::default", "testnode", '3'));
+$root->appendChild($dom->createElementNS("urn::default", "testnode", '4'));
+$root->appendChild($dom->createElementNS("urn::default", "testnode", '4'));
+$root->appendChild($dom->createElementNS("urn::default", "testnode", '5'));
 
 $avg = $xpath->evaluate('number(php:function("MyAverage", //def:testnode))');
 var_dump($avg);

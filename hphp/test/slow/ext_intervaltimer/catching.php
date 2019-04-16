@@ -3,7 +3,7 @@
 function busy() {}
 
 $t = new IntervalTimer(
-  200, 0.6,
+  200.0, 0.6,
   () ==> {
     throw new Exception('buffalo');
   });

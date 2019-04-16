@@ -35,8 +35,8 @@ var_dump(array_column(
 ));
 
 function nocase($a, $b) {
-  $la = strtolower($a);
-  $lb = strtolower($b);
+  $la = strtolower((string)$a);
+  $lb = strtolower((string)$b);
   return ($la === $lb) ? 0 : (($la > $lb) ? 1 : (-1));
 }
 

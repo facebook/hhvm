@@ -35,6 +35,6 @@ echo "---\n";
 
 var_dump(strcmp($output, $a));
 var_dump(strcmp($output, $output2));
-var_dump(strcmp($output, $output3));
+var_dump(strcmp($output, (string)$output3));
 var_dump(strcmp($output, $output4));	// different
-var_dump(strcmp($output, $output5));	// different
+var_dump(strcmp($output, (string)$output5));	// different

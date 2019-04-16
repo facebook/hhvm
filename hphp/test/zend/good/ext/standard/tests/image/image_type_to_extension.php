@@ -23,7 +23,7 @@
 
 	try { var_dump(image_type_to_extension(-1, array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	try { var_dump(image_type_to_extension(new stdclass)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-	var_dump(image_type_to_extension(1000000, NULL));
+	var_dump(image_type_to_extension(1000000, false));
 	try { var_dump(image_type_to_extension()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 	var_dump(image_type_to_extension(0));
 	try { var_dump(image_type_to_extension(0, 0, 0)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

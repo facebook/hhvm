@@ -3,7 +3,7 @@ $im = new Imagick();
 $im->newImage(100, 100, new ImagickPixel("white"));
 
 $new = clone $im;
-$new->thumbnailImage(200, null);
+$new->thumbnailImage(200, 0);
 var_dump($im->width, $new->width);
 
 // In hphp, `clone` is a reserved word, and following code will be syntax error

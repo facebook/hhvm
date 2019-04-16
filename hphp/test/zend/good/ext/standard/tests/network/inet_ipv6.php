@@ -14,7 +14,7 @@ $a = array(
 
 foreach ($a as $address) {
 	$packed = inet_pton($address);
-	var_dump(inet_ntop($packed));
+	var_dump(inet_ntop((string)$packed));
 }
 
 echo "Done\n";

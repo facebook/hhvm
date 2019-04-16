@@ -10,7 +10,7 @@ var_dump( fileowner("/no/such/file/dir") );
 
 /* Invalid arguments */
 var_dump( fileowner("string") );
-var_dump( fileowner(100) );
+var_dump( fileowner('100') );
 
 /* Invalid no.of arguments */
 try { var_dump( fileowner() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args < expected

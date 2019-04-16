@@ -5,7 +5,7 @@ abstract final class zeroInterval { public static $x; }
 
 $x = 0;
 $t = new IntervalTimer(
-  0, 0.1,
+  0.0, 0.1,
   ($w) ==> {
 
     zeroInterval::$x++;

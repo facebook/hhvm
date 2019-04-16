@@ -22,7 +22,7 @@ foreach ($opt_choices as $opts) {
     sprintf('tls://localhost:%d', $port),
     &$errno,
     &$errstr,
-    600,
+    600.0,
     STREAM_CLIENT_CONNECT,
     $ctx
   );

@@ -10,7 +10,11 @@ function do_single_test($header)
 
 
 	$result = iconv_mime_decode($header, ZendGoodExtIconvTestsIconvMimeDecode::$mode, "UTF-8");
-	printf("(%d) \"%s\"\n", iconv_strlen($result, "UTF-8"), $result);
+	if ($result === false) {
+		printf("(%d) \"%s\"\n", 0, '');
+	} else {
+		printf("(%d) \"%s\"\n", iconv_strlen($result, "UTF-8"), $result);
+	}
 }
 
 function do_regression_test()

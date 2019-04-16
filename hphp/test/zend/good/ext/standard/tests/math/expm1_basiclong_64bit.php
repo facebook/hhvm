@@ -14,7 +14,7 @@ $longVals = array(
 
 foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
-   var_dump(expm1($longVal));
+   var_dump(expm1((float)$longVal));
 }
 
 echo "===DONE===\n";

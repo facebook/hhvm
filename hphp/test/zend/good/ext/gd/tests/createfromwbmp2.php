@@ -6,7 +6,7 @@ if (!$fp) {
 }
 
 //write header
-$c = 0;
+$c = '0';
 fputs($fp, chr($c), 1);
 fputs($fp, $c, 1);
 

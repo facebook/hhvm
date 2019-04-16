@@ -1,12 +1,12 @@
 <?php
 
-$sqrt3 = sqrt(3);
+$sqrt3 = sqrt(3.0);
 
 $pixel = new ImagickPixel('red');
-var_dump($pixel->isPixelSimilar($pixel, 0));
-var_dump($pixel->isPixelSimilar('red', 0));
-var_dump($pixel->isPixelSimilar('#FF0000', 0));
-var_dump($pixel->isPixelSimilar('rgb(255, 0, 0)', 0));
+var_dump($pixel->isPixelSimilar($pixel, 0.0));
+var_dump($pixel->isPixelSimilar('red', 0.0));
+var_dump($pixel->isPixelSimilar('#FF0000', 0.0));
+var_dump($pixel->isPixelSimilar('rgb(255, 0, 0)', 0.0));
 var_dump($pixel->isPixelSimilar('green', 0.01));
 var_dump($pixel->isPixelSimilar('#0000FF', 0.02));
 var_dump($pixel->isPixelSimilar('rgb(0, 0, 0)', 0.03));

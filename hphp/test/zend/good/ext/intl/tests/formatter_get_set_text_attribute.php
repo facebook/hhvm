@@ -56,7 +56,7 @@ function ut_main()
             $res_str .= "ERROR: New $attr_name symbol value has not been set correctly.\n";
 
         // Restore attribute's value to default
-        ut_nfmt_set_text_attribute( $fmt, $attr, $def_val );
+      	ut_nfmt_set_text_attribute( $fmt, $attr, (string)$def_val );
 
         if( $attr == NumberFormatter::PADDING_CHARACTER )
            ut_nfmt_set_attribute( $fmt, NumberFormatter::FORMAT_WIDTH, 0 );

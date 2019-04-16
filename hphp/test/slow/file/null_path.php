@@ -41,7 +41,7 @@ var_dump(realpath($path1));
 var_dump(disk_free_space($path1));
 var_dump(diskfreespace($path1));
 var_dump(disk_total_space($path1));
-var_dump(chmod($path1, '644'));
+var_dump(chmod($path1, 644));
 var_dump(chown($path1, 'nobody'));
 var_dump(lchown($path1, 'nobody'));
 var_dump(chgrp($path1, 'nogrp'));

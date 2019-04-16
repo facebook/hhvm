@@ -105,7 +105,7 @@ $mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE,
                    FALSE, NULL);
 for( $i =0; $i < count( $mode_arr ); $i++) {
   echo "For mode '$mode_arr[$i]' count is => ";
-  var_dump(count($arr, $mode_arr[$i]));
+  var_dump(count($arr, (int)$mode_arr[$i]));
 }
 
 

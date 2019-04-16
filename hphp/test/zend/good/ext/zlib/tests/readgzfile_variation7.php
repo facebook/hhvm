@@ -1,7 +1,7 @@
 <?php
 
 
-$use_include_path = false;
+$use_include_path = 0;
 
 
 $heredoc = <<<EOT

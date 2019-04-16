@@ -14,7 +14,7 @@ $longVals = array(
 
 foreach ($longVals as $longVal) {
    echo "--- testing: $longVal ---\n";
-   var_dump(is_finite($longVal));
+   var_dump(is_finite((float)$longVal));
 }
 
 echo "===DONE===\n";

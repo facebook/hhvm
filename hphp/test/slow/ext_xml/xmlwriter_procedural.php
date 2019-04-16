@@ -33,7 +33,7 @@ VERIFY(xmlwriter_start_attribute_ns($xml, "fb", "attr2",
                                     "http://www.facebook.com/"));
 VERIFY(xmlwriter_end_attribute($xml));
 VERIFY(xmlwriter_write_element_ns($xml, "prefix", "name",
-                                  "http://some.url/", 1337));
+                                  "http://some.url/", '1337'));
 VERIFY(xmlwriter_start_element($xml, "node"));
 VERIFY(xmlwriter_full_end_element($xml));
 VERIFY(xmlwriter_end_element($xml));

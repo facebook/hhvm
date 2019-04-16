@@ -12,8 +12,8 @@ class C2 {
   }
 }
 function foo($a) {
-  if ($a == 0) return is_callable(array('C', 'f'), null);
-  return is_callable(array('C2', 'f'), null);
+  if ($a == 0) return is_callable(array('C', 'f'), false);
+  return is_callable(array('C2', 'f'), false);
 }
 
 <<__EntryPoint>>

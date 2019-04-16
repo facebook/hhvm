@@ -28,7 +28,7 @@ function reflect() {
   $rc = new ReflectionClass("C");
   print_r($rc->getInterfaceNames());
   print_r($rc->getConstants());
-  print_r(get_class_constants($rc));
+  print_r(get_class_constants((string)$rc));
 }
 
 

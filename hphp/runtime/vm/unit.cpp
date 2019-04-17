@@ -501,11 +501,10 @@ int Unit::getLineNumber(Offset pc) const {
     // with no destructor
     auto lineMap(m_lineMap.get());
     if (lineMap->empty()) return INT_MIN;
-    auto const it = std::upper_bound(
+    auto const it = std::partition_point(
       lineMap->begin(), lineMap->end(),
-      *lineMap->begin(), // Will be the first (ignored) param to our predicate
-      [&] (const LineInfo&, const LineInfo& elm) {
-        return pc < elm.first.past;
+      [&] (const LineInfo& elm) {
+        return !(pc < elm.first.past);
       }
     );
     if (it != lineMap->end() && it->first.base <= pc) return it->second;

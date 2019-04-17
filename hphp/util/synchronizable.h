@@ -37,7 +37,8 @@ struct Synchronizable {
   void notify();
   void notifyAll();
 
-  Mutex &getMutex() { return m_mutex;}
+  const Mutex& getMutex() const { return m_mutex; }
+  Mutex& getMutex() { return m_mutex; }
 
  private:
   Mutex m_mutex;

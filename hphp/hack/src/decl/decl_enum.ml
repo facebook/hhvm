@@ -19,7 +19,7 @@ module SN = Naming_special_names
  * an optional subtyping constraint. For subclasses of Enum<T>, both
  * base and type these are T.
  * For first-class enums, we distinguish between these. *)
-let is_enum name enum get_ancestor =
+let enum_kind name enum get_ancestor =
   match enum with
     | None ->
       (match get_ancestor SN.FB.cEnum with
@@ -37,7 +37,7 @@ let is_enum name enum get_ancestor =
  * that could *lose* type information.
  *)
 let rewrite_class name enum get_ancestor consts =
-  match is_enum name enum get_ancestor with
+  match enum_kind name enum get_ancestor with
     | None
     | Some (_, (_, (Tmixed | Tprim Tarraykey)), _) -> consts
     | Some (_, ty, _) ->
@@ -46,3 +46,15 @@ let rewrite_class name enum get_ancestor consts =
     SMap.mapi (fun k c ->
                if k = SN.Members.mClass then c else {c with cc_type = ty})
       consts
+
+(* Same as above, but for use when shallow_class_decl is enabled *)
+let rewrite_class_consts enum_kind =
+  Sequence.map ~f:begin fun (k, c as pair) ->
+    match Lazy.force enum_kind with
+    | None
+    | Some (_, (_, (Tmixed | Tprim Tarraykey)), _) -> pair
+    | Some (_, ty, _) ->
+    (* A special constant called "class" gets added, and we don't
+     * want to rewrite its type. *)
+      if k = SN.Members.mClass then pair else k, {c with cc_type = ty}
+  end

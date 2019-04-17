@@ -36,7 +36,7 @@ let member_type env member_ce =
       (match maybe_enum with
         | None -> default_result
         | Some tc ->
-          (match Decl_enum.is_enum (Cls.pos tc, Cls.name tc)
+          (match Decl_enum.enum_kind (Cls.pos tc, Cls.name tc)
               (Cls.enum_type tc) (Cls.get_ancestor tc) with
                 | None -> default_result
                 | Some (_base, (_, enum_ty), _constraint) ->
@@ -83,7 +83,7 @@ let enum_check_const ty_exp env (_, (p, _), _) t =
  * hints are compatible with the type. *)
 let enum_class_check env tc consts const_types =
   let enum_info_opt =
-    Decl_enum.is_enum (Cls.pos tc, Cls.name tc) (Cls.enum_type tc)
+    Decl_enum.enum_kind (Cls.pos tc, Cls.name tc) (Cls.enum_type tc)
     (Cls.get_ancestor tc) in
   match enum_info_opt with
     | Some (ty_exp, _, ty_constraint) ->

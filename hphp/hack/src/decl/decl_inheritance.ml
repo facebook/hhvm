@@ -19,6 +19,7 @@ module LSTable = Lazy_string_table
 module Reason = Typing_reason
 
 type inherited_members = {
+  consts : class_const LSTable.t;
   props : class_elt LSTable.t;
   sprops : class_elt LSTable.t;
   methods : class_elt LSTable.t;
@@ -120,6 +121,55 @@ let shallow_prop_to_ielt child_class mro subst prop : inheritable_elt =
     }
   }
 
+let shallow_const_to_class_const child_class mro subst const =
+  let ty =
+    let ty = const.scc_type in
+    if child_class = mro.mro_name then ty else
+    Decl_instantiate.instantiate subst ty
+  in
+  snd const.scc_name, {
+    cc_synthesized = mro.mro_synthesized;
+    cc_abstract = const.scc_abstract;
+    cc_pos = fst const.scc_name;
+    cc_type = ty;
+    cc_expr = const.scc_expr;
+    cc_origin = mro.mro_name;
+  }
+
+(** Each class [C] implicitly defines a class constant named [class], which has
+    type [classname<C>]. *)
+and classname_const class_id =
+  let pos, name = class_id in
+  let reason = Reason.Rclass_class (pos, name) in
+  let classname_ty =
+    reason, Tapply ((pos, SN.Classes.cClassname), [reason, Tthis]) in
+  SN.Members.mClass, {
+    cc_abstract = false;
+    cc_pos = pos;
+    cc_synthesized = true;
+    cc_type = classname_ty;
+    cc_expr = None;
+    cc_origin = name;
+  }
+
+(** Each concrete type constant [const type <sometype> T] implicitly defines a
+    class constant of the same name with type [TypeStructure<sometype>].
+    Given a typeconst definition, this function returns the corresponding
+    implicit class constant representing its reified type structure. *)
+let typeconst_structure class_name stc =
+  let pos = fst stc.stc_name in
+  let r = Reason.Rwitness pos in
+  let tsid = pos, SN.FB.cTypeStructure in
+  let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [stc.stc_name])]) in
+  snd stc.stc_name, {
+    cc_abstract    = Option.is_none stc.stc_type;
+    cc_pos         = pos;
+    cc_synthesized = true;
+    cc_type        = ts_ty;
+    cc_expr        = None;
+    cc_origin      = class_name;
+  }
+
 (** Given a linearization, pair each MRO element with its shallow class and its
     type parameter substitutions. Drop MRO elements for which we cannot find a
     shallow class (this should only happen in partial-mode files when the
@@ -147,6 +197,12 @@ let filter_for_method_lookup lin =
     properties or XHP attributes. *)
 let filter_for_prop_lookup lin =
   Sequence.filter lin ~f:(fun (mro, _, _) -> not mro.mro_consts_only)
+
+(** Return a linearization suitable for lookup of class constants and type
+    constants, where ancestors are included in the linearization only if the
+    child class inherits their constants. *)
+let filter_for_const_lookup lin =
+  Sequence.filter lin ~f:(fun (mro, _, _) -> not mro.mro_xhp_attrs_only)
 
 module SPairSet = Reordered_argument_set(Caml.Set.Make(struct
   type t = string * string
@@ -283,6 +339,59 @@ let make_elt_cache class_name seq =
     ~is_canonical:(is_elt_canonical class_name)
     ~merge:(merge_elts class_name)
 
+(** Given a linearization filtered for const lookup, return a [Sequence.t]
+    emitting each constant in linearization order. *)
+let consts child_class_name get_ancestor lin =
+  (* If a class extends the legacy [Enum] class, we give all of the constants
+     in the class the type of the Enum, as a convenience. Modern Hack enums
+     should replace the legacy Enum class, but perhaps they cannot do so
+     without allowing subtyping (as legacy enums do).
+
+     Detecting the legacy Enum as an ancestor is the reason that we need access
+     to [get_ancestor] here. We then invoke [Decl_enum.rewrite_class_consts]
+     below if the class does indeed extend [Enum].
+
+     The [classname_const] here is the implicit constant [C::class], which has
+     type [classname<C>]. *)
+  let classname_const, enum_kind =
+    match Shallow_classes_heap.get child_class_name with
+    | None -> Sequence.empty, lazy None
+    | Some cls ->
+      Sequence.singleton (classname_const cls.sc_name),
+      lazy (Decl_enum.enum_kind cls.sc_name cls.sc_enum_type get_ancestor)
+  in
+  let consts_and_typeconst_structures =
+    lin
+    |> Sequence.map ~f:begin fun (mro, cls, subst) ->
+      let consts =
+        cls.sc_consts
+        |> Sequence.of_list
+        |> Sequence.map
+          ~f:(shallow_const_to_class_const child_class_name mro subst)
+      in
+      (* Each concrete type constant implicitly defines a class constant of the
+         same name with that type's TypeStructure. *)
+      let typeconst_structures =
+        cls.sc_typeconsts
+        |> Sequence.of_list
+        |> Sequence.map ~f:(typeconst_structure (snd cls.sc_name))
+      in
+      Sequence.append consts typeconst_structures
+    end
+    |> Sequence.concat
+    |> Decl_enum.rewrite_class_consts enum_kind
+  in
+  Sequence.append classname_const consts_and_typeconst_structures
+
+let make_consts_cache class_name lin =
+  LSTable.make lin
+    ~is_canonical:(fun cc -> cc.cc_origin = class_name || not cc.cc_abstract)
+    ~merge:begin fun ~earlier ~later ->
+      if earlier.cc_origin = class_name then earlier else
+      if not earlier.cc_abstract then earlier else
+      if not later.cc_abstract then later else earlier
+    end
+
 let constructor_elt child_class_name (mro, cls, subst) =
   let consistent =
     if cls.sc_final then FinalClass else
@@ -325,6 +434,12 @@ let props_cache ~static class_name lin =
   |> filter_or_chown_privates class_name
   |> make_elt_cache class_name
 
+let consts_cache class_name get_ancestor lin =
+  lin
+  |> filter_for_const_lookup
+  |> consts class_name get_ancestor
+  |> make_consts_cache class_name
+
 let construct class_name lin =
   lazy begin
     lin
@@ -333,7 +448,7 @@ let construct class_name lin =
     |> Sequence.fold ~init:(None, Inconsistent) ~f:(fold_constructors class_name)
   end
 
-let make class_name =
+let make class_name get_ancestor =
   let lin =
     Decl_linearize.get_linearization class_name
     |> get_shallow_classes_and_substs
@@ -356,6 +471,7 @@ let make class_name =
   let all_inherited_methods = make_inheritance_cache all_methods in
   let all_inherited_smethods = make_inheritance_cache all_smethods in
   {
+    consts = consts_cache class_name get_ancestor lin;
     props = props_cache class_name lin ~static:false;
     sprops = props_cache class_name lin ~static:true;
     methods;

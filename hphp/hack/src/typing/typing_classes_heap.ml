@@ -30,12 +30,14 @@ type class_type_variant =
 type t = class_type_variant
 
 let make_lazy_class_type class_name sc c =
-  let inherited_members = Decl_inheritance.make class_name in
+  let ancestors = Decl_ancestors.ancestors_cache class_name in
+  let get_ancestor = LSTable.get ancestors in
+  let inherited_members = Decl_inheritance.make class_name get_ancestor in
   {
     sc;
     c;
     ih = inherited_members;
-    ancestors = Decl_ancestors.ancestors_cache class_name;
+    ancestors;
   }
 
 let shallow_decl_enabled () =
@@ -254,7 +256,7 @@ let all_extends_ancestors t =
 
 let get_const t id =
   match t with
-  | Lazy lc -> SMap.get id lc.c.tc_consts
+  | Lazy lc -> LSTable.get lc.ih.consts id
   | Eager c -> SMap.get id c.tc_consts
 
 let get_typeconst t id =
@@ -284,7 +286,7 @@ let get_smethod t id =
 
 let has_const t id =
   match t with
-  | Lazy _ -> Option.is_some (get_const t id)
+  | Lazy lc -> LSTable.mem lc.ih.consts id
   | Eager _ -> Option.is_some (get_const t id)
 
 let has_typeconst t id =
@@ -314,7 +316,7 @@ let has_smethod t id =
 
 let consts t =
   match t with
-  | Lazy lc -> Sequence.of_list (SMap.bindings lc.c.tc_consts)
+  | Lazy lc -> LSTable.to_seq lc.ih.consts |> sort_by_key
   | Eager c -> Sequence.of_list (SMap.bindings c.tc_consts)
 
 let typeconsts t =

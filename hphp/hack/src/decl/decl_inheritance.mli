@@ -12,6 +12,7 @@ open Typing_defs
 module LSTable = Lazy_string_table
 
 type inherited_members = {
+  consts : class_const LSTable.t;
   props : class_elt LSTable.t;
   sprops : class_elt LSTable.t;
   methods : class_elt LSTable.t;
@@ -21,4 +22,4 @@ type inherited_members = {
   construct: (class_elt option * consistent_kind) Lazy.t;
 }
 
-val make: string -> inherited_members
+val make: string -> (string -> decl ty option) -> inherited_members

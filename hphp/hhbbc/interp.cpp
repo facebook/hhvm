@@ -2794,6 +2794,8 @@ folly::Optional<ArrayData*> resolveTSStatically(ISS& env, SArray ts) {
 } // namespace
 
 void in(ISS& env, const bc::IsLateBoundCls& op) {
+  auto const cls = env.ctx.cls;
+  if (cls && !(cls->attrs & AttrTrait)) effect_free(env);
   popC(env);
   return push(env, TBool);
 }

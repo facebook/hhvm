@@ -31,7 +31,7 @@ namespace HPHP {
 // helpers
 
 static inline StrNR ctxClassName() {
-  Class* ctx = g_context->getContextClass();
+  Class* ctx = GetCallerClassSkipCPPBuiltins();
   return ctx ? ctx->nameStr() : StrNR(staticEmptyString());
 }
 

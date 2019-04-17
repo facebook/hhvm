@@ -1161,21 +1161,6 @@ ObjectData* ExecutionContext::getThis() {
   return nullptr;
 }
 
-Class* ExecutionContext::getContextClass() {
-  VMRegAnchor _;
-  ActRec* ar = vmfp();
-  assertx(ar != nullptr);
-  if (ar->skipFrame()) ar = getPrevVMStateSkipFrame(ar);
-  return ar ? ar->m_func->cls() : nullptr;
-}
-
-Class* ExecutionContext::getParentContextClass() {
-  if (Class* ctx = getContextClass()) {
-    return ctx->parent();
-  }
-  return nullptr;
-}
-
 const RepoOptions& ExecutionContext::getRepoOptionsForCurrentFrame() const {
   VMRegAnchor _;
 

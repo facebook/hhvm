@@ -382,8 +382,6 @@ public:
 
   ActRec* getStackFrame();
   ObjectData* getThis();
-  Class* getContextClass();
-  Class* getParentContextClass();
   StringData* getContainingFileName();
   int getLine();
   Array getCallerInfo();

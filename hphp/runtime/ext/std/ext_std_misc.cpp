@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/exceptions.h"
@@ -349,13 +350,14 @@ static Class* getClassByName(const char* name, int len) {
   Class* cls = nullptr;
   // translate "self" or "parent"
   if (len == 4 && !memcmp(name, "self", 4)) {
-    cls = g_context->getContextClass();
+    cls = GetCallerClassSkipCPPBuiltins();
     if (!cls) {
       raise_fatal_error("Cannot access self:: "
                                 "when no class scope is active");
     }
   } else if (len == 6 && !memcmp(name, "parent", 6)) {
-    cls = g_context->getParentContextClass();
+    auto const child = GetCallerClassSkipCPPBuiltins();
+    cls = child ? child->parent() : nullptr;
     if (!cls) {
       raise_fatal_error("Cannot access parent");
     }

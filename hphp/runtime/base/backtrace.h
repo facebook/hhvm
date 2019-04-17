@@ -221,8 +221,10 @@ int64_t createBacktraceHash(bool consider_metadata);
 req::ptr<CompactTrace> createCompactBacktrace();
 const Func* GetCallerFunc();
 const Func* GetCallerFuncSkipBuiltins();
+const Func* GetCallerFuncSkipCPPBuiltins();
 Class* GetCallerClass();
 Class* GetCallerClassSkipBuiltins();
+Class* GetCallerClassSkipCPPBuiltins();
 
 } // HPHP
 

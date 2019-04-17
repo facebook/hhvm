@@ -619,6 +619,16 @@ const Func* GetCallerFuncSkipBuiltins() {
   return ret;
 }
 
+const Func* GetCallerFuncSkipCPPBuiltins() {
+  const Func* ret = nullptr;
+  walkStack([&] (const ActRec* fp, Offset) {
+    if (fp->func()->isSkipFrame()) return false;
+    ret = fp->func();
+    return true;
+  }, true);
+  return ret;
+}
+
 Class* GetCallerClass() {
   if (auto const f = GetCallerFunc()) return f->cls();
   return nullptr;
@@ -626,6 +636,11 @@ Class* GetCallerClass() {
 
 Class* GetCallerClassSkipBuiltins() {
   if (auto const f = GetCallerFuncSkipBuiltins()) return f->cls();
+  return nullptr;
+}
+
+Class* GetCallerClassSkipCPPBuiltins() {
+  if (auto const f = GetCallerFuncSkipCPPBuiltins()) return f->cls();
   return nullptr;
 }
 

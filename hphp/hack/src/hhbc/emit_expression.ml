@@ -3225,6 +3225,10 @@ and get_call_builtin_func_info lower_fq_id =
   | "hh\\dict" -> Some (1, IOp CastDict)
   | "hh\\varray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastVec else CastVArray))
   | "hh\\darray" -> Some (1, IOp (if hack_arr_dv_arrs () then CastDict else CastDArray))
+  | "hh\\global_empty" -> Some (1, IIsset EmptyG)
+  | "hh\\global_get" -> Some (1, IGet CGetG)
+  | "hh\\global_get_safe" -> Some (1, IGet CGetQuietG)
+  | "hh\\global_isset" -> Some (1, IIsset IssetG)
   | _ -> None
 
 (* TODO: work out what HHVM does special here *)
@@ -3378,6 +3382,36 @@ and emit_special_function env pos id args uargs default =
         | _ ->
           Emit_fatal.raise_fatal_runtime pos
             ("class_meth() expects exactly 2 parameters, " ^
+             (string_of_int nargs) ^ " given")
+      end
+
+  | "hh\\global_set", _ ->
+    begin match args with
+      | [gkey; gvalue] -> Some (
+        gather[
+          emit_expr ~need_ref:false env gkey;
+          emit_expr ~need_ref:false env gvalue;
+          emit_pos pos;
+          instr (IMutator SetG);
+          instr_popc;
+          instr_null
+        ])
+      | _ -> Emit_fatal.raise_fatal_runtime pos
+            ("global_set() expects exactly 2 parameters, " ^
+             (string_of_int nargs) ^ " given")
+      end
+
+  | "hh\\global_unset", _ ->
+      begin match args with
+      | [gkey] ->
+        Some(gather [
+          emit_expr ~need_ref:false env gkey;
+          emit_pos pos;
+          instr (IMutator UnsetG);
+          instr_null
+        ])
+      | _ -> Emit_fatal.raise_fatal_runtime pos
+            ("global_unset() expects exactly 1 parameter, " ^
              (string_of_int nargs) ^ " given")
       end
 

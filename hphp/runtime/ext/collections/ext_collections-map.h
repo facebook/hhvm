@@ -13,7 +13,7 @@ struct BaseVector;
 
 namespace collections {
 struct MapIterator;
-void deepCopy(TypedValue*);
+void deepCopy(tv_lval);
 }
 
 /**
@@ -268,10 +268,10 @@ protected:
     target->reserve(sz);
     assertx(target->canMutateBuffer());
     target->setSize(sz);
-    auto* out = target->data();
+    int64_t out = 0;
     auto* eLimit = elmLimit();
     for (auto* e = firstElm(); e != eLimit; e = nextElm(e, eLimit), ++out) {
-      cellDup(e->data, *out);
+      cellDup(e->data, target->dataAt(out));
     }
     return Object{std::move(target)};
   }
@@ -283,21 +283,20 @@ protected:
     assertx(vec->canMutateBuffer());
     auto* e = firstElm();
     auto* eLimit = elmLimit();
-    ssize_t j = 0;
+    int64_t j = 0;
     for (; e != eLimit; e = nextElm(e, eLimit), vec->incSize(), ++j) {
       if (e->hasIntKey()) {
-        vec->data()[j].m_data.num = e->ikey;
-        vec->data()[j].m_type = KindOfInt64;
+        tvCopy(make_tv<KindOfInt64>(e->ikey), vec->dataAt(j));
       } else {
         assertx(e->hasStrKey());
-        cellDup(make_tv<KindOfString>(e->skey), vec->data()[j]);
+        cellDup(make_tv<KindOfString>(e->skey), vec->dataAt(j));
       }
     }
     return Object{std::move(vec)};
   }
 
 private:
-  friend void collections::deepCopy(TypedValue*);
+  friend void collections::deepCopy(tv_lval);
 
   friend struct collections::CollectionsExtension;
   friend struct collections::MapIterator;

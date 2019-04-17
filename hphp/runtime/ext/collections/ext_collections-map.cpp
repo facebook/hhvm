@@ -668,7 +668,7 @@ BaseMap::php_concat(const Variant& iterable) {
     if (isTombstone(i)) {
       continue;
     }
-    cellDup(data()[i].data, vec->data()[j]);
+    cellDup(data()[i].data, vec->dataAt(j));
     ++j;
   }
   for (; iter; ++iter) {

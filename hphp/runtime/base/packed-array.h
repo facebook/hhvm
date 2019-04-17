@@ -237,6 +237,11 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalSilentInt(ArrayData*, int64_t, bool);
   static constexpr auto LvalSilentIntVec = &LvalSilentInt;
 
+  // Like LvalInt, but without any bounds checking. Used to implement the
+  // Vector / ImmVector collection types in ext/collections. This function
+  // never copies the array, so we can return tv_lval instead of arr_lval.
+  static tv_lval LvalUncheckedInt(ArrayData*, int64_t);
+
   /////////////////////////////////////////////////////////////////////
 
   static bool checkInvariants(const ArrayData*);

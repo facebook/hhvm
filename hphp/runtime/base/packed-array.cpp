@@ -794,6 +794,13 @@ arr_lval PackedArray::LvalSilentInt(ArrayData* adIn, int64_t k, bool copy) {
   return arr_lval { ad, &packedData(ad)[k] };
 }
 
+tv_lval PackedArray::LvalUncheckedInt(ArrayData* ad, int64_t k) {
+  // NOTE: We cannot check that k is less than the array's length here, because
+  // the vector extension allocates the array and uses this method to fill it.
+  assertx(k < PackedArray::capacity(ad));
+  return &packedData(ad)[k];
+}
+
 arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData* k, bool copy) {
   return MutableOpStr(adIn, k, copy,
     // TODO(#2606310): Make use of our knowledge that the key is missing.

@@ -100,7 +100,7 @@ Array toArray(const ObjectData* obj);
 bool toBool(const ObjectData* obj);
 ObjectData* clone(ObjectData* obj);
 
-void deepCopy(TypedValue* tv);
+void deepCopy(tv_lval tv);
 
 /*
  * Return the inner-array for array-backed collections, and nullptr if it's a

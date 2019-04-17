@@ -54,7 +54,8 @@ void BaseVector::throwBadKeyType() {
              "Only integer keys may be used with Vectors");
 }
 
-ALWAYS_INLINE static
+namespace {
+
 bool invokeAndCastToBool(const CallCtx& ctx, int argc,
                          const TypedValue* argv) {
   auto ret = Variant::attach(
@@ -62,6 +63,21 @@ bool invokeAndCastToBool(const CallCtx& ctx, int argc,
   );
   return ret.toBoolean();
 }
+
+void copySlice(ArrayData* from, ArrayData* to,
+               int64_t from_pos, int64_t to_pos, int64_t size) {
+  assertx(0 < size && from_pos + size <= from->size());
+  assertx(from->hasPackedLayout() && to->hasPackedLayout());
+  int64_t offset = from_pos - to_pos;
+  int64_t to_end = to_pos + size;
+  do {
+    auto from_elm = PackedArray::LvalUncheckedInt(from, to_pos + offset);
+    auto to_elm = PackedArray::LvalUncheckedInt(to, to_pos);
+    cellDup(*from_elm, to_elm);
+  } while (++to_pos < to_end);
+}
+
+}  // namespace
 
 /////////////////////////////////////////////////////////////////////////////
 // BaseVector
@@ -88,18 +104,15 @@ BaseVector::php_map(const Variant& callback) {
   if (useKey) {
     argv[0] = make_tv<KindOfInt64>(0);
   }
-  auto from = data();
-  auto end = from + m_size;
-  auto to = nv->data();
+  uint32_t i = 0;
   do {
-    argv[argc-1] = *from;
-    *to = g_context->invokeFuncFew(ctx, argc, argv);
+    argv[argc-1] = *dataAt(i);
+    tvCopy(g_context->invokeFuncFew(ctx, argc, argv), nv->dataAt(i));
     nv->incSize();
     if (useKey) {
       argv[0].m_data.num++;
     }
-    ++to;
-  } while (++from < end);
+  } while (++i < m_size);
   return Object{std::move(nv)};
 }
 
@@ -123,18 +136,17 @@ BaseVector::php_filter(const Variant& callback) {
   if (useKey) {
     argv[0] = make_tv<KindOfInt64>(0);
   }
-  auto elm = data();
-  auto end = elm + m_size;
+  uint32_t i = 0;
   do {
-    argv[argc-1] = *elm;
+    argv[argc-1] = *dataAt(i);
     bool b = invokeAndCastToBool(ctx, argc, argv);
     if (b) {
-      nv->addRaw(*elm);
+      nv->addRaw(*dataAt(i));
     }
     if (useKey) {
       argv[0].m_data.num++;
     }
-  } while (++elm < end);
+  } while (++i < m_size);
   return Object{std::move(nv)};
 }
 
@@ -153,12 +165,7 @@ BaseVector::php_take(const Variant& n) {
   }
   auto vec = req::make<TVector>(sz);
   vec->setSize(sz);
-  auto from = data();
-  auto end = from + sz;
-  auto to = vec->data();
-  do {
-    cellDup(*from++, *to++);
-  } while (from < end);
+  copySlice(m_arr, vec->m_arr, 0, 0, sz);
   return Object{std::move(vec)};
 }
 
@@ -176,13 +183,13 @@ BaseVector::php_takeWhile(const Variant& fn) {
     return Object{req::make<TVector>()};
   }
   auto vec = req::make<TVector>(0);
-  auto elm = data();
-  auto end = elm + m_size;
+  uint32_t i = 0;
   do {
-    bool b = invokeAndCastToBool(ctx, 1, elm);
+    const auto elm = *dataAt(i);
+    bool b = invokeAndCastToBool(ctx, 1, &elm);
     if (!b) break;
-    vec->addRaw(*elm);
-  } while (++elm < end);
+    vec->addRaw(elm);
+  } while (++i < m_size);
   return Object{std::move(vec)};
 }
 
@@ -202,12 +209,7 @@ BaseVector::php_skip(const Variant& n) {
   }
   auto vec = req::make<TVector>(sz);
   vec->setSize(sz);
-  auto from = data() + skipAmt;
-  auto end = data() + m_size;
-  auto to = vec->data();
-  do {
-    cellDup(*from++, *to++);
-  } while (from < end);
+  copySlice(m_arr, vec->m_arr, skipAmt, 0, sz);
   return Object{std::move(vec)};
 }
 
@@ -224,22 +226,19 @@ BaseVector::php_skipWhile(const Variant& fn) {
   if (m_size == 0) {
     return Object{req::make<TVector>()};
   }
-  auto from = data();
-  auto end = from + m_size;
+  uint32_t skipAmt = 0;
   do {
-    bool b = invokeAndCastToBool(ctx, 1, from);
+    const auto elm = *dataAt(skipAmt);
+    bool b = invokeAndCastToBool(ctx, 1, &elm);
     if (!b) break;
-  } while (++from < end);
-  auto sz = end - from;
+  } while (++skipAmt < m_size);
+  uint32_t sz = m_size - skipAmt;
   if (sz == 0) {
     return Object{req::make<TVector>()};
   }
   auto vec = req::make<TVector>(sz);
   vec->setSize(sz);
-  auto to = vec->data();
-  do {
-    cellDup(*from++, *to++);
-  } while (from < end);
+  copySlice(m_arr, vec->m_arr, skipAmt, 0, sz);
   return Object{std::move(vec)};
 }
 
@@ -264,12 +263,7 @@ BaseVector::php_slice(const Variant& start, const Variant& len) {
   }
   auto vec = req::make<TVector>(sz);
   vec->setSize(sz);
-  auto from = data() + skipAmt;
-  auto end = from + sz;
-  auto to = vec->data();
-  do {
-    cellDup(*from++, *to++);
-  } while (from < end);
+  copySlice(m_arr, vec->m_arr, skipAmt, 0, sz);
   return Object{std::move(vec)};
 }
 
@@ -283,12 +277,7 @@ BaseVector::php_concat(const Variant& iterable) {
   auto vec = req::make<TVector>(sz);
   if (m_size > 0) {
     vec->setSize(m_size);
-    auto from = data();
-    auto end = from + m_size;
-    auto to = vec->data();
-    do {
-      cellDup(*from++, *to++);
-    } while (from < end);
+    copySlice(m_arr, vec->m_arr, 0, 0, m_size);
   }
   for (; iter; ++iter) {
     vec->addRaw(iter.second());
@@ -307,14 +296,13 @@ BaseVector::php_zip(const Variant& iterable) {
   }
   uint32_t sz = std::min(itSize, size_t(m_size));
   auto vec = req::make<TVector>(sz);
-  auto elm = data();
-  auto end = elm + m_size;
+  uint32_t i = 0;
   do {
     Variant v = iter.second();
-    auto pair = req::make<c_Pair>(*elm, *v.toCell());
+    auto pair = req::make<c_Pair>(*dataAt(i), *v.toCell());
     vec->addRaw(make_tv<KindOfObject>(pair.get()));
     ++iter;
-  } while (++elm < end && iter);
+  } while (++i < m_size && iter);
   return Object{std::move(vec)};
 }
 
@@ -357,9 +345,10 @@ void BaseVector::addAllImpl(const Variant& t) {
 }
 
 int64_t BaseVector::linearSearch(const Variant& search_value) {
-  for (auto elm = data(), end = elm + m_size; elm < end; ++elm) {
-    if (same(search_value, tvAsCVarRef(elm))) {
-      return elm - data();
+  auto search_tv = *search_value.asTypedValue();
+  for (uint32_t i = 0; i < m_size; ++i) {
+    if (tvSame(search_tv, *dataAt(i))) {
+      return i;
     }
   }
   return -1;
@@ -374,11 +363,10 @@ BaseVector::php_keys() {
   }
   auto vec = req::make<TVector>(m_size);
   vec->setSize(m_size);
-  auto elm = vec->data();
-  int64_t i = 0;
+  uint32_t i = 0;
   do {
-    *elm++ = make_tv<KindOfInt64>(i++);
-  } while (i < m_size);
+    tvCopy(make_tv<KindOfInt64>(i), vec->dataAt(i));
+  } while (++i < m_size);
   return Object{std::move(vec)};
 }
 
@@ -433,27 +421,36 @@ void BaseVector::addFront(TypedValue tv) {
 }
 
 Variant BaseVector::popFront() {
-  if (m_size) {
-    mutate();
-    Variant ret(tvAsCVarRef(&data()[0]), Variant::CellCopy());
-    decSize();
-    memmove(data(), data()+1, m_size * sizeof(TypedValue));
-    return ret;
-  } else {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Cannot pop empty Vector");
+  if (UNLIKELY(m_size == 0)) {
+    SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Vector");
   }
+  const auto tv = removeKeyImpl(0);
+  return Variant(tvAsCVarRef(&tv), Variant::CellCopy());
+}
+
+TypedValue BaseVector::removeKeyImpl(int64_t k) {
+  assertx(contains(k));
+  mutate();
+  const auto result = *dataAt(k);
+  if (k+1 < m_size) {
+    static_assert(PackedArray::stores_typed_values, "");
+    size_t bytes = (m_size-(k+1)) * sizeof(TypedValue);
+    std::memmove(&packedData(m_arr)[k], &packedData(m_arr)[k+1], bytes);
+  }
+  decSize();
+  return result;
 }
 
 void BaseVector::reserveImpl(uint32_t newCap) {
-  auto oldBuf = data();
   auto oldAd = arrayData();
   m_arr = PackedArray::MakeReserveVec(newCap);
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
     assertx(oldAd->isVecArray());
     if (m_size > 0) {
-      std::memcpy(data(), oldBuf, m_size * sizeof(TypedValue));
+      static_assert(PackedArray::stores_typed_values, "");
+      size_t bytes = m_size * sizeof(TypedValue);
+      std::memcpy(packedData(m_arr), packedData(oldAd), bytes);
       // Mark oldAd as having 0 elements so that the array release logic doesn't
       // decRef the elements (since we teleported the elements to a new array)
       oldAd->m_size = 0;
@@ -461,12 +458,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
     decRefArr(oldAd);
   } else {
     if (m_size > 0) {
-      auto from = oldBuf;
-      auto end = oldBuf + m_size;
-      auto to = data();
-      do {
-        cellDup(*from++, *to++);
-      } while (from < end);
+      copySlice(oldAd, m_arr, 0, 0, m_size);
     }
     assertx(!oldAd->decWillRelease());
     oldAd->decRefCount();
@@ -517,12 +509,10 @@ BaseVector::fromKeysOf(const TypedValue& container) {
     return Object{req::make<TVector>()};
   }
   auto vec = req::make<TVector>(sz);
-  vec->setSize(sz);
   ArrayIter iter(container);
   assertx(iter);
-  auto elm = vec->data();
   do {
-    cellDup(*iter.first().toCell(), *elm++);
+    vec->addRaw(*iter.first().toCell());
     ++iter;
   } while (iter);
   return Object{std::move(vec)};
@@ -563,14 +553,7 @@ void c_Vector::clear() {
 
 void c_Vector::removeKey(int64_t k) {
   if (!contains(k)) return;
-  mutate();
-  auto const old = data()[k];
-  if (k+1 < m_size) {
-    memmove(&data()[k], &data()[k+1],
-            (m_size-(k+1)) * sizeof(TypedValue));
-  }
-  decSize();
-  tvDecRefGen(old);
+  tvDecRefGen(removeKeyImpl(k));
 }
 
 void c_Vector::addAllKeysOf(const Variant& container) {
@@ -588,14 +571,13 @@ void c_Vector::addAllKeysOf(const Variant& container) {
 }
 
 Variant c_Vector::pop() {
-  if (m_size) {
-    mutate();
-    decSize();
-    return Variant(tvAsCVarRef(&data()[m_size]), Variant::CellCopy());
-  } else {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Cannot pop empty Vector");
+  if (UNLIKELY(m_size == 0)) {
+    SystemLib::throwInvalidOperationExceptionObject("Cannot pop empty Vector");
   }
+  mutate();
+  decSize();
+  const auto tv = *dataAt(m_size);
+  return Variant(tvAsCVarRef(&tv), Variant::CellCopy());
 }
 
 void c_Vector::resize(uint32_t sz, const Cell* val) {
@@ -614,22 +596,16 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
     // keeping into a new vec, swap them, and decref the old one.
     dropImmCopy();
     auto oldAd = arrayData();
-    auto from = data();
-    auto end = from + sz;
     m_arr = PackedArray::MakeReserveVec(sz);
-    auto to = data();
-    do {
-      cellDup(*from++, *to++);
-    } while (from < end);
+    copySlice(oldAd, m_arr, 0, 0, sz);
     arrayData()->m_size = m_size = sz;
     decRefArr(oldAd);
   } else {
     reserve(sz);
-    auto elm = data() + m_size;
-    auto end = data() + sz;
+    uint32_t i = m_size;
     do {
-      cellDup(*val, *elm);
-    } while (++elm < end);
+      cellDup(*val, dataAt(i));
+    } while (++i < sz);
     setSize(sz);
   }
 }
@@ -637,12 +613,11 @@ void c_Vector::resize(uint32_t sz, const Cell* val) {
 void c_Vector::reverse() {
   if (m_size < 2) return;
   mutate();
-  auto start = data();
-  auto end = start + m_size - 1;
+  uint32_t i = 0;
+  uint32_t j = m_size - 1;
   do {
-    std::swap(start->m_data.num, end->m_data.num);
-    std::swap(start->m_type, end->m_type);
-  } while (++start < --end);
+    tvSwap(dataAt(i), dataAt(j));
+  } while (++i < --j);
 }
 
 void c_Vector::splice(int64_t startPos, int64_t endPos) {
@@ -653,17 +628,13 @@ void c_Vector::splice(int64_t startPos, int64_t endPos) {
   assertx(0 <= startPos && startPos < endPos && endPos <= m_size);
   uint32_t sz = m_size - (endPos - startPos);
   dropImmCopy();
-  auto oldBuf = data();
   auto oldAd = arrayData();
   m_arr = PackedArray::MakeReserveVec(sz);
-  auto to = data();
-  for (auto from = oldBuf, end = from + startPos; from < end; ++from, ++to) {
-    cellDup(*from, *to);
+  if (startPos > 0) {
+    copySlice(oldAd, m_arr, 0, 0, startPos);
   }
-  auto from = oldBuf + endPos;
-  auto end = oldBuf + m_size;
-  for (; from < end; ++from, ++to) {
-    cellDup(*from, *to);
+  if (sz > startPos) {
+    copySlice(oldAd, m_arr, endPos, startPos, sz - startPos);
   }
   arrayData()->m_size = m_size = sz;
   decRefArr(oldAd);
@@ -715,8 +686,8 @@ void c_Vector::shuffle() {
   mutate();
   uint32_t i = 1;
   do {
-    uint32_t j = math_mt_rand(0, i);
-    std::swap(data()[i], data()[j]);
+    const uint32_t j = math_mt_rand(0, i);
+    tvSwap(dataAt(i), dataAt(j));
   } while (++i < m_size);
 }
 
@@ -736,14 +707,13 @@ Object c_Vector::fromArray(const Class*, const Variant& arr) {
   }
   auto target = req::make<c_Vector>(sz);
   target->setSize(sz);
-  auto elm = target->data();
-  auto end = elm + sz;
+  uint32_t i = 0;
   ssize_t pos = ad->iter_begin();
   do {
     assertx(pos != ad->iter_end());
-    cellDup(tvToCell(ad->atPos(pos)), *elm);
+    cellDup(tvToCell(ad->atPos(pos)), target->dataAt(i));
     pos = ad->iter_advance(pos);
-  } while (++elm < end);
+  } while (++i < sz);
   return Object{std::move(target)};
 }
 

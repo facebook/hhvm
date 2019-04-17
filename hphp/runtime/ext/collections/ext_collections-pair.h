@@ -13,7 +13,7 @@ struct BaseMap;
 struct c_Vector;
 
 namespace collections {
-void deepCopy(TypedValue*);
+void deepCopy(tv_lval);
 struct PairIterator;
 }
 
@@ -148,7 +148,7 @@ struct c_Pair : ObjectData {
   TypedValue elm0;
   TypedValue elm1;
 
-  friend void collections::deepCopy(TypedValue*);
+  friend void collections::deepCopy(tv_lval);
   friend struct collections::PairIterator;
   friend struct collections::CollectionsExtension;
   friend struct c_Vector;

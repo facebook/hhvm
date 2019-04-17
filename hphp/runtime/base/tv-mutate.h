@@ -538,6 +538,31 @@ enable_if_lval_t<T&&, void> tvSetDouble(double v, T&& inTo) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
+ * Swap operation. Since both TypedValues are touched by a swap, both must be
+ * valid to call this method, and neither one has its refcount updated.
+ */
+
+template<typename T, typename U, typename Ret = void>
+using enable_if_both_lvals_t = typename std::enable_if<
+  conjunction<
+    std::is_same<enable_if_lval_t<T, void>, void>,
+    std::is_same<enable_if_lval_t<U, void>, void>
+  >::value,
+  Ret
+>::type;
+
+template<typename T, typename U> ALWAYS_INLINE
+enable_if_both_lvals_t<T&&, U&&> tvSwap(T&& a, U&& b) {
+  assertx(tvIsPlausible(as_tv(a)));
+  assertx(tvIsPlausible(as_tv(b)));
+  using std::swap;
+  swap(type(a), type(b));
+  swap(val(a), val(b));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+/*
  * Write garbage into a memory slot for a TypedValue that should not be used
  * anymore.
  *

@@ -19,7 +19,7 @@ struct c_AwaitAllWaitHandle;
 
 namespace collections {
 void append(ObjectData*, TypedValue*);
-void deepCopy(TypedValue*);
+void deepCopy(tv_lval);
 struct VectorIterator;
 }
 
@@ -331,15 +331,12 @@ protected:
     std::is_base_of<BaseVector, TVector>::value, TVector*>::type
   static Clone(ObjectData* obj);
 
-  Cell* data() const {
-    static_assert(PackedArray::stores_typed_values, "");
-    return packedData(m_arr);
+  tv_lval dataAt(int64_t index) const {
+    return PackedArray::LvalUncheckedInt(m_arr, index);
   }
 
-  tv_lval dataAt(int64_t index) const {
-    static_assert(PackedArray::stores_typed_values, "");
-    return &packedData(m_arr)[index];
-  }
+  // Returns the value at k, with no refcount change. Requires contains(k).
+  TypedValue removeKeyImpl(int64_t k);
 
   void reserveImpl(uint32_t newCap);
 
@@ -468,7 +465,7 @@ private:
   friend struct c_Pair;
   friend struct c_AwaitAllWaitHandle;
 
-  friend void collections::deepCopy(TypedValue*);
+  friend void collections::deepCopy(tv_lval);
 
   friend void collectionReserve(ObjectData* obj, int64_t sz);
   friend void collectionInitAppend(ObjectData* obj, TypedValue* val);

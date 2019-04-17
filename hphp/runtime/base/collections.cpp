@@ -138,6 +138,8 @@ ArrayData* asArray(ObjectData* obj) {
 /////////////////////////////////////////////////////////////////////////////
 // Deep Copy
 
+namespace {
+
 ArrayData* deepCopyArray(ArrayData* arr) {
   assertx(arr->isPHPArray());
   Array ar(arr);
@@ -201,8 +203,10 @@ ObjectData* deepCopyImmSet(c_ImmSet* st) {
   return c_ImmSet::Clone(st);
 }
 
-void deepCopy(TypedValue* tv) {
-  switch (tv->m_type) {
+}  // namespace
+
+void deepCopy(tv_lval lval) {
+  switch (type(lval)) {
     DT_UNCOUNTED_CASE:
     case KindOfString:
     case KindOfResource:
@@ -212,45 +216,50 @@ void deepCopy(TypedValue* tv) {
       return;
 
     case KindOfVec: {
-      auto arr = deepCopyVecArray(tv->m_data.parr);
-      decRefArr(tv->m_data.parr);
-      tv->m_data.parr = arr;
+      auto& original = val(lval).parr;
+      auto arr = deepCopyVecArray(original);
+      decRefArr(original);
+      original = arr;
       return;
     }
 
     case KindOfShape: {
+      auto& original = val(lval).parr;
       auto arr = RuntimeOption::EvalHackArrDVArrs ?
-        deepCopyDict(tv->m_data.parr) : deepCopyArray(tv->m_data.parr);
-      decRefArr(tv->m_data.parr);
-      tv->m_data.parr = arr;
+        deepCopyDict(original) : deepCopyArray(original);
+      decRefArr(original);
+      original = arr;
       return;
     }
 
     case KindOfDict: {
-      auto arr = deepCopyDict(tv->m_data.parr);
-      decRefArr(tv->m_data.parr);
-      tv->m_data.parr = arr;
+      auto& original = val(lval).parr;
+      auto arr = deepCopyDict(original);
+      decRefArr(original);
+      original = arr;
       return;
     }
 
     case KindOfArray: {
-      auto arr = deepCopyArray(tv->m_data.parr);
-      decRefArr(tv->m_data.parr);
-      tv->m_data.parr = arr;
+      auto& original = val(lval).parr;
+      auto arr = deepCopyArray(original);
+      decRefArr(original);
+      original = arr;
       return;
     }
 
     case KindOfObject: {
-      auto obj = tv->m_data.pobj;
+      auto& original = val(lval).pobj;
+      auto obj = original;
       if (!obj->isCollection()) return;
       const auto copyVector = [](BaseVector* vec) {
-        if (vec->size() > 0 && vec->arrayData()->isRefCounted()) {
+        const auto size = vec->size();
+        if (size > 0 && vec->arrayData()->isRefCounted()) {
           vec->mutate();
-          auto elm = vec->data();
-          auto end = vec->data() + vec->size();
+          int64_t i = 0;
           do {
-            deepCopy(elm);
-          } while (++elm < end);
+            deepCopy(vec->dataAt(i));
+          } while (++i < size);
         }
         return vec;
       };
@@ -296,9 +305,9 @@ void deepCopy(TypedValue* tv) {
         default:
           assertx(false);
       }
-      assertx(obj != tv->m_data.pobj || tv->m_data.pobj->hasMultipleRefs());
-      decRefObj(tv->m_data.pobj);
-      tv->m_data.pobj = obj;
+      assertx(obj != original || original->hasMultipleRefs());
+      decRefObj(original);
+      original = obj;
       return;
     }
     case KindOfRecord:

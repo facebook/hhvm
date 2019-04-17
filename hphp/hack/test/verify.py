@@ -323,13 +323,22 @@ def report_failures(total: int,
         fallback_out_ext_var = ''
         if fallback_out_extension is not None:
             fallback_out_ext_var = "FALLBACK_OUT_EXT=%s " % fallback_out_extension
-        print("OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
+        output_dir_var = ''
+        fname_map_var = lambda f: f
+        if os.environ.get('HACK_BUILD_ROOT') is not None and os.environ.get('HACK_SOURCE_ROOT') is not None:
+            output_dir_var = ("SOURCE_ROOT=%s OUTPUT_ROOT=%s " %
+                    (os.environ['HACK_SOURCE_ROOT'],
+                    os.environ['HACK_BUILD_ROOT']))
+            prefix = os.path.abspath(os.environ['HACK_BUILD_ROOT'])
+            fname_map_var = lambda f: "hphp/hack/"+os.path.relpath(f, prefix)
+        print("OUT_EXT=%s EXP_EXT=%s %s%s%sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
                 (out_extension,
                 expect_extension,
                 fallback_out_ext_var,
                 fallback_expect_ext_var,
+                output_dir_var,
                 "true" if no_copy else "false",
-                " ".join(fnames)))
+                " ".join(map(fname_map_var, fnames))))
         if dump_on_failure:
             dump_failures(failures)
 

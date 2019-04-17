@@ -30,6 +30,8 @@ let make_local_changes () =
   Decl_heap.Classes.LocalChanges.push_stack();
   Decl_heap.Typedefs.LocalChanges.push_stack();
   Decl_heap.GConsts.LocalChanges.push_stack();
+
+  Shallow_classes_heap.push_local_changes ();
   ()
 
 let revert_local_changes () =
@@ -53,6 +55,8 @@ let revert_local_changes () =
   Decl_heap.Classes.LocalChanges.pop_stack();
   Decl_heap.Typedefs.LocalChanges.pop_stack();
   Decl_heap.GConsts.LocalChanges.pop_stack();
+
+  Shallow_classes_heap.pop_local_changes ();
 
   SharedMem.invalidate_caches ();
   ()

@@ -220,6 +220,7 @@ let oldify_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems
   Decl_heap.Funs.oldify_batch n_funs;
   Decl_class_elements.oldify_all elems;
   Decl_heap.Classes.oldify_batch n_classes;
+  Shallow_classes_heap.oldify_batch n_classes;
   Decl_heap.Typedefs.oldify_batch n_types;
   Decl_heap.GConsts.oldify_batch n_consts;
   if collect_garbage then SharedMem.collect `gentle;
@@ -229,6 +230,7 @@ let remove_old_defs { FileInfo.n_funs; n_classes; n_types; n_consts } elems =
   Decl_heap.Funs.remove_old_batch n_funs;
   Decl_class_elements.remove_old_all elems;
   Decl_heap.Classes.remove_old_batch n_classes;
+  Shallow_classes_heap.remove_old_batch n_classes;
   Decl_heap.Typedefs.remove_old_batch n_types;
   Decl_heap.GConsts.remove_old_batch n_consts;
   SharedMem.collect `gentle;

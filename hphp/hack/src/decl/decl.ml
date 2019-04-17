@@ -270,6 +270,9 @@ let check_if_cyclic class_env (pos, cid) =
   then Errors.cyclic_class_def stack pos;
   is_cyclic
 
+let shallow_decl_enabled () =
+  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+
 let rec class_decl_if_missing class_env c =
   let _, cid as c_name = c.Ast.c_name in
   if check_if_cyclic class_env c_name
@@ -424,7 +427,11 @@ and class_decl c =
   let consts =
     Decl_enum.rewrite_class c.sc_name enum (fun x -> SMap.get x impl) consts in
   let has_own_cstr = has_concrete_cstr && (None <> c.sc_constructor) in
-  let deferred_members = Decl_init_check.class_ ~has_own_cstr env c in
+  let deferred_members =
+    if shallow_decl_enabled ()
+    then SSet.empty
+    else Decl_init_check.class_ ~has_own_cstr env c
+  in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc = {
     dc_final = c.sc_final;

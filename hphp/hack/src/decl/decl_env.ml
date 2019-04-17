@@ -43,3 +43,8 @@ let get_construct env class_ =
   let dep = Dep.Cstr (class_.dc_name) in
   Option.iter env.droot (fun root -> Typing_deps.add_idep root dep);
   class_.dc_construct
+
+let add_constructor_dependency env class_name =
+  add_wclass env class_name;
+  let dep = Dep.Cstr class_name in
+  Option.iter env.droot (fun root -> Typing_deps.add_idep root dep)

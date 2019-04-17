@@ -107,11 +107,6 @@ module Classes = struct
     | Some _ -> true
 end
 
-let need_init t =
-  match t with
-  | Lazy lc -> lc.c.tc_need_init
-  | Eager c -> c.tc_need_init
-
 let members_fully_known t =
   match t with
   | Lazy lc -> lc.c.tc_members_fully_known
@@ -141,11 +136,6 @@ let ppl t =
   match t with
   | Lazy lc -> Attrs.mem SN.UserAttributes.uaProbabilisticModel lc.sc.sc_user_attributes
   | Eager c -> c.tc_ppl
-
-let deferred_init_members t =
-  match t with
-  | Lazy lc -> lc.c.tc_deferred_init_members
-  | Eager c -> c.tc_deferred_init_members
 
 let kind t =
   match t with
@@ -207,6 +197,25 @@ let has_ancestor t ancestor =
   match t with
   | Lazy lc -> LSTable.mem lc.ancestors ancestor
   | Eager c -> SMap.mem ancestor c.tc_ancestors
+
+let need_init t =
+  match t with
+  | Lazy _ ->
+    begin match fst (construct t) with
+    | None -> false
+    | Some ce -> not ce.ce_abstract
+    end
+  | Eager c ->
+    c.tc_need_init
+
+(* We cannot invoke [Typing_deferred_members.class_] here because it would be a
+   dependency cycle. Instead, we raise an exception. We should remove this
+   function (along with [Decl_init_check]) altogether when we delete legacy
+   class declaration, since [Typing_deferred_members] makes it obsolete. *)
+let deferred_init_members t =
+  match t with
+  | Lazy _ -> failwith "shallow_class_decl is enabled"
+  | Eager c -> c.tc_deferred_init_members
 
 let requires_ancestor t ancestor =
   match t with

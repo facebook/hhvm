@@ -22,6 +22,9 @@ module Reason = Typing_reason
 module TySet = Typing_set
 module Cls = Typing_classes_heap
 
+let shallow_decl_enabled () =
+  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+
 (*****************************************************************************)
 (* Computes the string representing a type in an error message.
  * We generally don't want to show the whole type. If an error was due
@@ -1482,10 +1485,19 @@ module PrintClass = struct
     end
 
   let class_type tcopt c =
+    let tenv = Typing_env.empty tcopt (Pos.filename (Cls.pos c)) None in
     let tc_need_init = bool (Cls.need_init c) in
     let tc_members_fully_known = bool (Cls.members_fully_known c) in
     let tc_abstract = bool (Cls.abstract c) in
-    let tc_deferred_init_members = sset (Cls.deferred_init_members c) in
+    let tc_deferred_init_members = sset @@
+      if shallow_decl_enabled ()
+      then
+        match Shallow_classes_heap.get (Cls.name c) with
+        | Some cls -> Typing_deferred_members.class_ tenv cls
+        | None -> SSet.empty
+      else
+        Cls.deferred_init_members c
+    in
     let tc_kind = class_kind (Cls.kind c) in
     let tc_name = (Cls.name c) in
     let tc_tparams = tparam_list tcopt (Cls.tparams c) in

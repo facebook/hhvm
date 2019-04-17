@@ -762,6 +762,10 @@ let get_class env x =
   add_wclass env x;
   TLazyHeap.get_class x
 
+let get_class_dep env x =
+  Decl_env.add_extends_dependency env.decl_env x;
+  get_class env x
+
 let get_enum_constraint env x =
   match get_class env x with
   | None -> None

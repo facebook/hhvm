@@ -32,6 +32,7 @@
     typing_classes_heap
     typing_coercion
     typing_continuations
+    typing_deferred_members
     typing_dependent_type
     typing_env
     typing_env_from_def

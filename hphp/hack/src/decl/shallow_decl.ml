@@ -282,6 +282,28 @@ let enum_type hint e =
 
 let class_ env c =
   let hint = Decl_hint.hint env in
+  let sc_extends        = List.map ~f:hint c.c_extends in
+  let sc_uses           = List.map ~f:hint c.c_uses in
+  let sc_req_extends    = List.map ~f:hint c.c_req_extends in
+  let sc_req_implements = List.map ~f:hint c.c_req_implements in
+  let sc_implements     = List.map ~f:hint c.c_implements in
+  let additional_parents =
+    (* In an abstract class or a trait, we assume the interfaces
+       will be implemented in the future, so we take them as
+       part of the class (as requested by dependency injection implementers) *)
+    match c.c_kind with
+    | Ast.Cabstract -> sc_implements
+    | Ast.Ctrait -> sc_implements @ sc_req_implements
+    | _ -> []
+  in
+  let add_cstr_dep ty =
+    let _, (_, class_name), _ = Decl_utils.unwrap_class_type ty in
+    Decl_env.add_constructor_dependency env class_name
+  in
+  List.iter ~f:add_cstr_dep sc_extends;
+  List.iter ~f:add_cstr_dep sc_uses;
+  List.iter ~f:add_cstr_dep sc_req_extends;
+  List.iter ~f:add_cstr_dep additional_parents;
   {
     sc_mode = c.c_mode;
     sc_final = c.c_final;
@@ -289,14 +311,14 @@ let class_ env c =
     sc_kind = c.c_kind;
     sc_name = c.c_name;
     sc_tparams = List.map c.c_tparams.c_tparam_list (type_param env);
-    sc_extends        = List.map ~f:hint c.c_extends;
-    sc_uses           = List.map ~f:hint c.c_uses;
+    sc_extends;
+    sc_uses;
     sc_method_redeclarations =
       List.map c.c_method_redeclarations (method_redeclaration env);
-    sc_xhp_attr_uses  = List.map ~f:hint c.c_xhp_attr_uses;
-    sc_req_extends    = List.map ~f:hint c.c_req_extends;
-    sc_req_implements = List.map ~f:hint c.c_req_implements;
-    sc_implements     = List.map ~f:hint c.c_implements;
+    sc_xhp_attr_uses = List.map ~f:hint c.c_xhp_attr_uses;
+    sc_req_extends;
+    sc_req_implements;
+    sc_implements;
     sc_consts = List.filter_map c.c_consts (class_const env c);
     sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
     sc_props = List.map c.c_vars (prop env);

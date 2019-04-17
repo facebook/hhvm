@@ -27,7 +27,11 @@ val abstract              : t -> bool
 val final                 : t -> bool
 val const                 : t -> bool
 val ppl                   : t -> bool
+
 val deferred_init_members : t -> SSet.t
+(** To be used only when {!ServerLocalConfig.shallow_class_decl} is not enabled.
+    Raises [Failure] if used when shallow_class_decl is enabled. *)
+
 val kind                  : t -> Ast.class_kind
 val is_xhp                : t -> bool
 val is_disposable         : t -> bool

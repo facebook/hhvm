@@ -450,6 +450,7 @@ let check_constructors env (parent_class, parent_ty) (class_, class_ty) psubst s
     match fst (Cls.construct parent_class), fst (Cls.construct class_) with
     | Some parent_cstr, _ when parent_cstr.ce_synthesized -> ()
     | Some parent_cstr, Some child_cstr ->
+      check_final_method `FromMethod parent_cstr child_cstr;
       check_visibility parent_cstr child_cstr
     | _, _ -> ()
   )

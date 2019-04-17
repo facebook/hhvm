@@ -15,5 +15,6 @@ class Foo {
 }
 class Bar extends Foo {
   protected function __construct() {
+    parent::__construct();
   }
 }

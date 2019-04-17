@@ -48,6 +48,7 @@ val get_enum_constraint : env -> Classes.key -> decl ty option
 val add_wclass : env -> string -> unit
 val fresh_tenv : env -> (env -> 'a) -> 'a
 val get_class : env -> Classes.key -> Classes.t option
+val get_class_dep : env -> Classes.key -> Classes.t option
 val get_typedef : env -> Typedefs.key -> Typedefs.t option
 val get_const : env -> Typing_classes_heap.t -> string -> class_const option
 val get_typeconst : env -> Typing_classes_heap.t -> string -> typeconst_type option

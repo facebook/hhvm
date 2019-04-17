@@ -1,9 +1,0 @@
-Skipping recursive setting at key hhvm.env_variables with offset ANOTHERSTR.
-A false recursive setting at key hhvm.env_variables with offset MYINT and value 3. Value is literal or pointing to setting that does not exist. Skipping!
-Skipping recursive setting at key hhvm.env_variables with offset ANOTHERSTR.
-A false recursive setting at key hhvm.env_variables with offset MYINT and value 3. Value is literal or pointing to setting that does not exist. Skipping!
-string(2) "11"
-array(1) {
-  ["MYBOOL"]=>
-  string(1) "1"
-}

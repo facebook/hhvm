@@ -111,6 +111,15 @@ std::string convert_long_to_bytes(int64_t value) {
     return false; \
   }
 
+#define INI_ASSERT_ARR_INNER(v, t) \
+  if (!value.isArray() && !value.isObject()) { \
+    return false; \
+  } \
+  for (ArrayIter iter(value.toArray()); iter; ++iter) { \
+    if (!iter.second().is##t()) return false; \
+  }
+
+
 bool ini_on_update(const Variant& value, bool& p) {
   INI_ASSERT_STR(value);
   if ((str.size() == 0) ||
@@ -228,7 +237,7 @@ bool ini_on_update(const Variant& value, Array& p) {
 }
 
 bool ini_on_update(const Variant& value, std::set<std::string>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.insert(iter.second().toString().toCppString());
   }
@@ -237,7 +246,7 @@ bool ini_on_update(const Variant& value, std::set<std::string>& p) {
 
 bool ini_on_update(const Variant& value,
                    std::set<std::string, stdltistr>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.insert(iter.second().toString().toCppString());
   }
@@ -246,7 +255,7 @@ bool ini_on_update(const Variant& value,
 
 bool ini_on_update(const Variant& value,
                    boost::container::flat_set<std::string>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.insert(iter.second().toString().toCppString());
   }
@@ -254,7 +263,7 @@ bool ini_on_update(const Variant& value,
 }
 
 bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, Integer);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.push_back(iter.second().toInt64());
   }
@@ -262,7 +271,7 @@ bool ini_on_update(const Variant& value, std::vector<uint32_t>& p) {
 }
 
 bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p.push_back(iter.second().toString().toCppString());
   }
@@ -271,7 +280,7 @@ bool ini_on_update(const Variant& value, std::vector<std::string>& p) {
 
 bool ini_on_update(const Variant& value,
                    std::unordered_map<std::string, int>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, Integer);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p[iter.first().toString().toCppString()] = iter.second().toInt64();
   }
@@ -280,7 +289,7 @@ bool ini_on_update(const Variant& value,
 
 bool ini_on_update(const Variant& value,
                    std::map<std::string, std::string>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p[iter.first().toString().toCppString()] =
       iter.second().toString().toCppString();
@@ -290,7 +299,7 @@ bool ini_on_update(const Variant& value,
 
 bool ini_on_update(const Variant& value,
                    std::map<std::string, std::string, stdltistr>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p[iter.first().toString().toCppString()] =
       iter.second().toString().toCppString();
@@ -300,7 +309,7 @@ bool ini_on_update(const Variant& value,
 
 bool ini_on_update(const Variant& value,
                    hphp_string_imap<std::string>& p) {
-  INI_ASSERT_ARR(value);
+  INI_ASSERT_ARR_INNER(value, String);
   for (ArrayIter iter(value.toArray()); iter; ++iter) {
     p[iter.first().toString().toCppString()] =
       iter.second().toString().toCppString();
@@ -588,27 +597,17 @@ void IniSetting::ParserCallback::onPopEntry(
   auto arr = static_cast<Variant*>(arg);
   forceToArray(*arr);
 
-  bool oEmpty = offset.empty();
-  // Substitution copy or symlink
-  // Offset come in like: hhvm.a.b\0c\0@
-  // Check for `\0` because it is possible, although unlikely, to have
-  // something like hhvm.a.b[c@]. Thus we wouldn't want to make a substitution.
-  if (!oEmpty && (offset.size() == 1 || offset[offset.size() - 2] == '\0') &&
-      (offset.back() == '@' || offset.back() == ':')) {
-    makeSettingSub(key, offset, value, *arr);
-  } else {                                 // Normal array value
-    String skey(key);
-    auto& arr_ref = arr->toArrRef();
-    if (!arr_ref.exists(skey)) {
-      arr_ref.set(skey, empty_array());
-    }
-    auto const hash = arr_ref.lvalAt(skey);
-    forceToArray(hash);
-    if (!oEmpty) {                         // a[b]
-      makeArray(hash, offset, value);
-    } else {                               // a[]
-      asArrRef(hash).append(value);
-    }
+  String skey(key);
+  auto& arr_ref = arr->toArrRef();
+  if (!arr_ref.exists(skey)) {
+    arr_ref.set(skey, empty_array());
+  }
+  auto const hash = arr_ref.lvalAt(skey);
+  forceToArray(hash);
+  if (!offset.empty()) {                 // a[b]
+    makeArray(hash, offset, value);
+  } else {                               // a[]
+    asArrRef(hash).append(value);
   }
 }
 
@@ -641,77 +640,6 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     }
     val = arr.lvalAt(key);
     p += index.size() + 1;
-  }
-}
-
-void IniSetting::ParserCallback::makeSettingSub(const String& key,
-                                                const std::string& offset,
-                                                const std::string& value,
-                                                Variant& cur_settings) {
-  assertx(offset.size() == 1 ||
-         (offset.size() >=2 && offset[offset.size()-2] == 0));
-  auto type = offset.substr(offset.size() - 1);
-  assertx(type == ":" || type == "@");
-  std::vector<std::string> copy_name_parts = split_brackets(value);
-  assertx(!copy_name_parts.empty());
-  auto base = tv_lval{cur_settings.asTypedValue()};
-  bool skip = false;
-  for (auto& part : copy_name_parts) {
-    auto lval = forceToArray(base).lvalAt(String(part));
-    if (isNullType(lval.unboxed().type())) {
-      skip = true;
-    } else {
-      base = lval;
-    }
-  }
-  // if skip is true we have something like:
-  //   hhvm.env_variables["MYINT"][:] = 3
-  //   hhvm.stats.slot_duration[:] = "hhvm.stats.slot_duration"
-  if (skip) {
-    Logger::Warning("A false recursive setting at key %s with offset %s and "
-                    "value %s. Value is literal or pointing to setting that "
-                    "does not exist. Skipping!", key.c_str(),
-                    offset.c_str(), value.c_str());
-  } else if (offset == ":") {
-    cur_settings.toArrRef().setRef(key, base);
-  } else if (offset == "@") {
-    cur_settings.toArrRef().set(key, *base);
-  } else {
-    traverseToSet(key, offset, base, cur_settings, type);
-  }
-}
-
-void IniSetting::ParserCallback::traverseToSet(const String &key,
-                                               const std::string& offset,
-                                               tv_lval value,
-                                               Variant& cur_settings,
-                                               const std::string& stopChar) {
-  assertx(stopChar == "@" || stopChar == ":");
-  assertx(offset != stopChar);
-  assertx(cur_settings.isArray());
-  auto isSymlink = stopChar == ":";
-  auto start = offset.c_str();
-  auto p = start;
-  tv_lval first = cur_settings.toArrRef().lvalAt(key);
-  forceToArray(first);
-  String index;
-  bool done = false;
-  while (!done) {
-    index = String(p);
-    p += index.size() + 1;
-    if (strcmp(p, stopChar.c_str()) != 0) {
-      first = forceToArray(first).lvalAt(index);
-    } else {
-      done = true;
-    }
-  }
-  if (isSymlink) {
-    toArrRef(first).setRef(index, value);
-  } else if (first == value) {
-    Logger::Warning("Skipping recursive setting at key %s with offset %s.",
-                    key.c_str(), offset.c_str());
-  } else {
-    toArrRef(first).set(index, *value);
   }
 }
 
@@ -758,9 +686,12 @@ void IniSetting::ParserCallback::onOp(
 void IniSetting::SectionParserCallback::onSection(
     const std::string &name, void *arg) {
   auto const data = (CallbackData*)arg;
-  data->active_section.unset(); // break ref() from previous section
+  if (!data->active_name.isNull()) {
+    data->arr.toArrRef().set(data->active_name, data->active_section);
+    data->active_section.unset();
+  }
   data->active_section = Array::Create();
-  data->arr.toArrRef().setRef(String(name), data->active_section);
+  data->active_name = String(name);
 }
 
 Variant* IniSetting::SectionParserCallback::activeArray(CallbackData* data) {
@@ -841,6 +772,9 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
     SectionParserCallback cb;
     data.arr = Array::Create();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {
+      if (!data.active_name.isNull()) {
+        data.arr.toArrRef().set(data.active_name, data.active_section);
+      }
       ret = data.arr;
     }
   } else {

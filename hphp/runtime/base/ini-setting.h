@@ -158,6 +158,7 @@ struct IniSetting {
 private:
 
   struct CallbackData {
+    String active_name;
     Variant active_section;
     Variant arr;
   };

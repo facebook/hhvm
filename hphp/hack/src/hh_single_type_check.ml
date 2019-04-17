@@ -208,6 +208,7 @@ let parse_options () =
   let disable_unsafe_block = ref None in
   let pocket_universes = ref false in
   let disallow_byref_prop_args = ref (Some false) in
+  let shallow_class_decl = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -431,6 +432,9 @@ let parse_options () =
     "--disallow-byref-prop-args",
       Arg.Unit (set_bool disallow_byref_prop_args),
       "Disallow passing properties by reference to functions";
+    "--shallow-class-decl",
+      Arg.Set shallow_class_decl,
+      "Look up class members lazily from shallow declarations"
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -466,6 +470,7 @@ let parse_options () =
     ?tco_disallow_ref_param_on_constructor:(not_ !allow_ref_param_on_constructor)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
     ?tco_disallow_byref_prop_args:(!disallow_byref_prop_args)
+    ~tco_shallow_class_decl:(!shallow_class_decl)
     ~log_levels:(!log_levels)
     ()
   in

@@ -48,4 +48,20 @@ impl TriviaKind {
             TriviaKind::AfterHaltCompiler => "after_halt_compiler",
         }
     }
+
+    pub fn ocaml_tag(&self) -> u8 {
+        match self {
+            TriviaKind::WhiteSpace => 0,
+            TriviaKind::EndOfLine => 1,
+            TriviaKind::DelimitedComment => 2,
+            TriviaKind::SingleLineComment => 3,
+            TriviaKind::Unsafe => 4,
+            TriviaKind::UnsafeExpression => 5,
+            TriviaKind::FixMe => 6,
+            TriviaKind::IgnoreError => 7,
+            TriviaKind::FallThrough => 8,
+            TriviaKind::ExtraTokenError => 9,
+            TriviaKind::AfterHaltCompiler => 10,
+        }
+    }
 }

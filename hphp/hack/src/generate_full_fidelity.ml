@@ -1748,6 +1748,12 @@ module GenerateFFRustTriviaKind = struct
     sprintf ("            TriviaKind::%s => \"%s\",\n")
       trivia_kind trivia_text
 
+  let ocaml_tag = ref (-1)
+  let to_ocaml_tag { trivia_kind; trivia_text = _ } =
+    incr ocaml_tag;
+    sprintf ("            TriviaKind::%s => %d,\n")
+      trivia_kind !ocaml_tag
+
   let full_fidelity_trivia_kind_template = make_header CStyle "" ^ "
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -1758,6 +1764,11 @@ impl TriviaKind {
     pub fn to_string(&self) -> &str {
         match self {
 TO_STRING        }
+    }
+
+    pub fn ocaml_tag(&self) -> u8 {
+        match self {
+OCAML_TAG        }
     }
 }
 "
@@ -1773,7 +1784,9 @@ TO_STRING        }
       { trivia_pattern = "TRIVIA";
         trivia_func = map_and_concat to_trivia };
       { trivia_pattern = "TO_STRING";
-        trivia_func = map_and_concat to_to_string }];
+        trivia_func = map_and_concat to_to_string };
+      { trivia_pattern = "OCAML_TAG";
+        trivia_func = map_and_concat to_ocaml_tag };];
     aggregate_transformations = [];
   }
 
@@ -1829,6 +1842,12 @@ module GenerateFFRustSyntaxKind = struct
     sprintf ("            SyntaxKind::" ^^ kind_name_fmt ^^ " => \"%s\",\n")
       x.kind_name x.description
 
+  let tag = ref 1
+  let to_ocaml_tag x =
+    incr tag;
+    sprintf ("            SyntaxKind::%s => %d,\n")
+      x.kind_name !tag
+
   let full_fidelity_syntax_kind_template = make_header CStyle "" ^ "
 
 #[derive(Debug, Copy, Clone)]
@@ -1847,6 +1866,14 @@ impl SyntaxKind {
             SyntaxKind::Token => \"token\",
 TO_STRING        }
     }
+
+    pub fn ocaml_tag(&self) -> u8 {
+        match self {
+            SyntaxKind::Missing => 0,
+            SyntaxKind::Token => 0,
+            SyntaxKind::SyntaxList => 1,
+OCAML_TAG        }
+    }
 }"
 
 let full_fidelity_syntax_kind =
@@ -1856,6 +1883,7 @@ let full_fidelity_syntax_kind =
   transformations = [
     { pattern = "TOKENS"; func = to_tokens };
     { pattern = "TO_STRING"; func = to_to_string };
+    { pattern = "OCAML_TAG"; func = to_ocaml_tag };
   ];
   token_no_text_transformations = [];
   token_given_text_transformations = [];
@@ -2690,6 +2718,11 @@ module GenerateFFRustTokenKind = struct
   let to_to_string x =
     sprintf "            TokenKind::%s => \"%s\",\n" (token_kind x) (token_text x)
 
+  let ocaml_tag =  ref (-1)
+  let to_ocaml_tag x =
+    incr ocaml_tag;
+    sprintf "            TokenKind::%s => %d,\n" (token_kind x) !ocaml_tag
+
 let full_fidelity_rust_token_kind_template = make_header CStyle "" ^ "
 
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
@@ -2722,6 +2755,11 @@ TO_STRING_VARIABLE_TEXT        }
 FROM_STRING_GIVEN_TEXT            _ => None,
         }
     }
+
+    pub fn ocaml_tag(&self) -> u8 {
+        match self {
+OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
+    }
 }
 "
 
@@ -2736,6 +2774,8 @@ FROM_STRING_GIVEN_TEXT            _ => None,
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_NO_TEXT";
         token_func = map_and_concat to_to_string };
+      { token_pattern = "OCAML_TAG_NO_TEXT";
+        token_func = map_and_concat to_ocaml_tag };
     ];
     token_given_text_transformations = [
       { token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
@@ -2744,12 +2784,16 @@ FROM_STRING_GIVEN_TEXT            _ => None,
         token_func = map_and_concat to_from_string };
       { token_pattern = "TO_STRING_GIVEN_TEXT";
         token_func = map_and_concat to_to_string };
+      { token_pattern = "OCAML_TAG_GIVEN_TEXT";
+        token_func = map_and_concat to_ocaml_tag };
     ];
     token_variable_text_transformations = [
       { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_VARIABLE_TEXT";
         token_func = map_and_concat to_to_string };
+      { token_pattern = "OCAML_TAG_VARIABLE_TEXT";
+        token_func = map_and_concat to_ocaml_tag };
     ];
     trivia_transformations = [];
     aggregate_transformations = [];

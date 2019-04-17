@@ -420,10 +420,10 @@ let generate_string template =
 
   let result = List.fold_left (tokens_folder no_text_tokens)
     result template.token_no_text_transformations in
-  let result = List.fold_left (tokens_folder variable_text_tokens)
-    result template.token_variable_text_transformations in
   let result = List.fold_left (tokens_folder given_text_tokens)
     result template.token_given_text_transformations in
+  let result = List.fold_left (tokens_folder variable_text_tokens)
+    result template.token_variable_text_transformations in
   let result = List.fold_left (trivia_folder trivia_kinds)
     result template.trivia_transformations in
   let result = List.fold_left

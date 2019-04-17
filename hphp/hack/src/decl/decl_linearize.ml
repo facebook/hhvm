@@ -14,7 +14,16 @@ open Typing_defs
 
 (* Module calculating the Member Resolution Order of a class *)
 
-type env = { class_stack: SSet.t; decl_env: Decl_env.env }
+type linearization_kind =
+  | Member_resolution
+  | Ancestor_types
+  [@@deriving show]
+
+type env = {
+  class_stack: SSet.t;
+  decl_env: Decl_env.env;
+  linearization_kind: linearization_kind;
+}
 
 (** These state variants drive the Sequence generating the linearization. *)
 type state =
@@ -41,7 +50,15 @@ type state =
       (with the appropriate source and type parameters substituted) unless it
       was already emitted earlier in the current linearization sequence. *)
 
-module Cache = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (struct
+module CacheKey = struct
+  type t = string * linearization_kind [@@deriving show]
+  let compare = compare
+  let to_string = show
+end
+
+module CacheKeySet = Reordered_argument_set(Caml.Set.Make(CacheKey))
+
+module Cache = SharedMem.WithCache (SharedMem.ProfiledImmediate) (CacheKey) (struct
   type t = mro_element list
   let prefix = Prefix.make()
   let description = "Linearization"
@@ -49,9 +66,18 @@ end)
 
 let push_local_changes = Cache.LocalChanges.push_stack
 let pop_local_changes = Cache.LocalChanges.pop_stack
-let remove_batch = Cache.remove_batch
 
-module LocalCache = SharedMem.LocalCache (StringKey) (struct
+let remove_batch classes =
+  let keys =
+    SSet.fold classes ~init:CacheKeySet.empty ~f:begin fun class_name acc ->
+      let acc = CacheKeySet.add acc (class_name, Member_resolution) in
+      let acc = CacheKeySet.add acc (class_name, Ancestor_types) in
+      acc
+    end
+  in
+  Cache.remove_batch keys
+
+module LocalCache = SharedMem.LocalCache (CacheKey) (struct
   type t = linearization
   let prefix = Prefix.make()
   let description = "LazyLinearization"
@@ -132,21 +158,53 @@ and linearize (env : env) (c : shallow_class) : linearization =
     mro_copy_private_members = c.sc_kind = Ast.Ctrait;
   } in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
-  let interfaces     = get_ancestors Interface c.sc_implements in
-  let req_implements = get_ancestors ReqImpl c.sc_req_implements in
-  let xhp_attr_uses  = get_ancestors XHPAttr c.sc_xhp_attr_uses in
-  let traits         = get_ancestors Trait c.sc_uses in
-  let req_extends    = get_ancestors ReqExtends c.sc_req_extends in
-  let parents        = get_ancestors Parent (from_parent c) in
+  let interfaces c     = get_ancestors Interface c.sc_implements in
+  let req_implements c = get_ancestors ReqImpl c.sc_req_implements in
+  let xhp_attr_uses c  = get_ancestors XHPAttr c.sc_xhp_attr_uses in
+  let traits c         = get_ancestors Trait c.sc_uses in
+  let req_extends c    = get_ancestors ReqExtends c.sc_req_extends in
+  let parents c        = get_ancestors Parent (from_parent c) in
+  let extends c        = get_ancestors Parent c.sc_extends in
+  (* HHVM implicitly adds the Stringish interface to every class, interface, and
+     trait with a __toString method. The primitive type `string` is considered
+     to also implement this interface. *)
+  let stringish_interface c =
+    let module SN = Naming_special_names in
+    if mro_name = SN.Classes.cStringish then [] else
+    let is_to_string m = snd m.sm_name = SN.Members.__toString in
+    match List.find c.sc_methods is_to_string with
+    | None -> []
+    | Some { sm_type = { ft_pos = pos; _ }; _ } ->
+      let ty =
+        Typing_reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), []) in
+      [ancestor_from_ty Interface ty]
+  in
   let ancestors =
-    List.concat [
-      List.rev interfaces;
-      List.rev req_implements;
-      List.rev xhp_attr_uses;
-      List.rev traits;
-      List.rev req_extends;
-      parents;
-    ]
+    match env.linearization_kind with
+    | Member_resolution ->
+      List.concat [
+        List.rev (interfaces c);
+        List.rev (req_implements c);
+        List.rev (xhp_attr_uses c);
+        List.rev (traits c);
+        List.rev (req_extends c);
+        parents c;
+      ]
+    | Ancestor_types ->
+      (* In order to match the historical handling of ancestor types (used in
+         use cases like subtyping and override checking), we need to build the
+         linearization in the order [extends; implements; uses]. Require-extends
+         and require-implements relationships need to be included only to
+         support Stringish (and can be removed here if we remove support for the
+         magic Stringish type, or require it to be explicitly implemented). *)
+      List.concat [
+        extends c;
+        req_extends c;
+        req_implements c;
+        stringish_interface c;
+        interfaces c;
+        traits c;
+      ]
   in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])
@@ -169,9 +227,21 @@ and next_state (env : env) (class_name : string) (state, ancestors, acc, synths)
     | exception Lazy.Undefined -> Skip (Next_ancestor, ancestors, acc, synths)
     | Some (next, rest) ->
       let should_skip, synths =
-        if next.mro_synthesized
-        then true, next::synths
-        else List.mem acc next ~equal:(=), synths
+        match env.linearization_kind with
+        | Member_resolution ->
+          if next.mro_synthesized
+          then true, next::synths
+          else List.mem acc next ~equal:(=), synths
+        | Ancestor_types ->
+          (* For ancestor types, we don't care about require-extends or
+             require-implements relationships, except for the fact that we want
+             Stringish as an ancestor if we have some ancestor which requires
+             it. *)
+          let should_skip =
+            next.mro_synthesized && next.mro_name <> SN.Classes.cStringish
+          in
+          let equal a b = a.mro_name = b.mro_name in
+          should_skip || List.mem acc next ~equal, synths
       in
       if should_skip
       then Skip (Ancestor rest, ancestors, acc, synths)
@@ -185,31 +255,38 @@ and next_state (env : env) (class_name : string) (state, ancestors, acc, synths)
     then Skip (Synthesized_elts synths, ancestors, next::acc, synths)
     else Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
   | Synthesized_elts [], _ ->
-    Cache.add class_name (List.rev acc);
+    let key = class_name, env.linearization_kind in
+    Cache.add key (List.rev acc);
     Done
 
 and get_linearization (env : env) (class_name : string) : linearization =
-  let { class_stack; _ } = env in
+  let { class_stack; linearization_kind; _ } = env in
   if SSet.mem class_stack class_name then Sequence.empty else
   let class_stack = SSet.add class_stack class_name in
   let env = { env with class_stack } in
-  match Cache.get class_name with
+  let key = class_name, linearization_kind in
+  match Cache.get key with
   | Some lin -> Sequence.of_list lin
   | None ->
-    match LocalCache.get class_name with
+    match LocalCache.get key with
     | Some lin -> lin
     | None ->
       match Shallow_classes_heap.get class_name with
       | None -> Sequence.empty
       | Some c ->
         let lin = linearize env c in
-        LocalCache.add class_name lin;
+        LocalCache.add key lin;
         lin
 
-let get_linearization class_name =
+let get_linearization ?(kind=Member_resolution) class_name =
   let decl_env = { Decl_env.
     mode = FileInfo.Mstrict;
     droot = Some (Typing_deps.Dep.Class class_name);
     decl_tcopt = GlobalNamingOptions.get ();
   } in
-  get_linearization { class_stack = SSet.empty; decl_env } class_name
+  let env = {
+    class_stack = SSet.empty;
+    decl_env;
+    linearization_kind = kind;
+  } in
+  get_linearization env class_name

@@ -9,7 +9,12 @@
 
 open Decl_defs
 
-val get_linearization : string -> linearization
+type linearization_kind =
+  | Member_resolution
+  | Ancestor_types
+  [@@deriving show]
+
+val get_linearization : ?kind:linearization_kind -> string -> linearization
 
 val push_local_changes : unit -> unit
 val pop_local_changes : unit -> unit

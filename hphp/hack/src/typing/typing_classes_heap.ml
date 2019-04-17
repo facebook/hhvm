@@ -12,11 +12,13 @@ open Typing_defs
 open Shallow_decl_defs
 
 module Attrs = Attributes
+module LSTable = Lazy_string_table
 module SN = Naming_special_names
 
 type lazy_class_type = {
   sc: shallow_class;
   c: class_type;
+  ancestors: decl ty LSTable.t;
 }
 
 type class_type_variant =
@@ -25,10 +27,11 @@ type class_type_variant =
 
 type t = class_type_variant
 
-let make_lazy_class_type _class_name sc c =
+let make_lazy_class_type class_name sc c =
   {
     sc;
     c;
+    ancestors = Decl_ancestors.ancestors_cache class_name;
   }
 
 let shallow_decl_enabled () =
@@ -185,14 +188,20 @@ let decl_errors t =
   | Lazy lc -> lc.c.tc_decl_errors
   | Eager c -> c.tc_decl_errors
 
+let sort_by_key seq =
+  seq
+  |> Sequence.to_list_rev
+  |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
+  |> Sequence.of_list
+
 let get_ancestor t ancestor =
   match t with
-  | Lazy lc -> SMap.get ancestor lc.c.tc_ancestors
+  | Lazy lc -> LSTable.get lc.ancestors ancestor
   | Eager c -> SMap.get ancestor c.tc_ancestors
 
 let has_ancestor t ancestor =
   match t with
-  | Lazy lc -> SMap.mem ancestor lc.c.tc_ancestors
+  | Lazy lc -> LSTable.mem lc.ancestors ancestor
   | Eager c -> SMap.mem ancestor c.tc_ancestors
 
 let requires_ancestor t ancestor =
@@ -206,16 +215,14 @@ let extends t ancestor =
   | Eager c -> SSet.mem ancestor c.tc_extends
 
 let all_ancestors t =
-  Sequence.of_list @@
   match t with
-  | Lazy lc -> SMap.bindings lc.c.tc_ancestors
-  | Eager c -> SMap.bindings c.tc_ancestors
+  | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key
+  | Eager c -> SMap.bindings c.tc_ancestors |> Sequence.of_list
 
 let all_ancestor_names t =
-  Sequence.of_list @@
   match t with
-  | Lazy lc -> SMap.ordered_keys lc.c.tc_ancestors
-  | Eager c -> SMap.ordered_keys c.tc_ancestors
+  | Lazy _ -> Sequence.map (all_ancestors t) fst
+  | Eager c -> SMap.ordered_keys c.tc_ancestors |> Sequence.of_list
 
 let all_ancestor_reqs t =
   match t with

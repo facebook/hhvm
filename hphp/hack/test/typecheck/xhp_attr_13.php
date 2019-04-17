@@ -13,3 +13,5 @@ function takes_string(string $s) {}
 class Foo extends Enum<int> {}
 
 class :xhp {}
+
+class Enum<T> {}

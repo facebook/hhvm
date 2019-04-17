@@ -2090,11 +2090,14 @@ and pStmt : stmt parser = fun node env ->
             )
       in
       pos, If (if_condition, if_statement, if_elseif_statement))
-  | ExpressionStatement { expression_statement_expression; _ } ->
-    lift_awaits_in_statement env pos (fun () ->
-      if is_missing expression_statement_expression
+  | ExpressionStatement { expression_statement_expression = e; _ } ->
+    let f = fun () ->
+      if is_missing e
       then pos, Noop
-      else pos, Expr (pExpr ~location:AsStatement expression_statement_expression env))
+      else pos, Expr (pExpr ~location:AsStatement e env) in
+    if is_simple_assignment_await_expression e || is_simple_await_expression e
+    then f ()
+    else lift_awaits_in_statement env pos f
   | CompoundStatement { compound_statements; compound_right_brace; _ } ->
     let tail =
       match leading_token compound_right_brace with
@@ -2203,12 +2206,15 @@ and pStmt : stmt parser = fun node env ->
       | _ -> []
     )
   | ReturnStatement { return_expression; _ } ->
-    lift_awaits_in_statement env pos (fun () ->
+    let f = fun () ->
       let expr = match syntax return_expression with
         | Missing -> None
         | _ -> Some (pExpr ~location:RightOfReturn return_expression env)
       in
-      pos, Return (expr))
+      pos, Return (expr) in
+    if is_simple_await_expression return_expression
+    then f ()
+    else lift_awaits_in_statement env pos f
   | Syntax.GotoLabel { goto_label_name; _ } ->
     let pos_label = pPos goto_label_name env in
     let label_name = text goto_label_name in
@@ -2305,6 +2311,21 @@ and lift_awaits_in_statement env pos f =
   | Some lifted_awaits ->
     (* lifted awaits are accumulated in reverse *)
     pos, Awaitall ((List.rev lifted_awaits.awaits), [result])
+
+and is_simple_await_expression e =
+  match syntax e with
+  | PrefixUnaryExpression { prefix_unary_operator = operator; _ } ->
+    token_kind operator = Some TK.Await
+  | _ ->
+    false
+
+and is_simple_assignment_await_expression e =
+  match syntax e with
+  | BinaryExpression { binary_operator; binary_right_operand; _ } ->
+    is_simple_await_expression binary_right_operand &&
+    token_kind binary_operator = Some TK.Equal
+  | _ ->
+    false
 
 and is_hashbang text =
   match Syntax.extract_text text with

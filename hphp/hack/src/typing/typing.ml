@@ -934,7 +934,8 @@ and stmt_ env pos st =
      (* Do nothing, this doesn't occur in Hack code. *)
      failwith "Should never typecheck nested definitions"
   | Awaitall (el, b) ->
-    let env, el = List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
+      let env = might_throw env in
+      let env, el = List.fold_left el ~init:(env, []) ~f:(fun (env, tel) (e1, e2) ->
       let env, te2, ty2 = expr env e2 in
       let env, ty2 = Async.overload_extract_from_awaitable env (fst e2) ty2 in
       (match e1 with

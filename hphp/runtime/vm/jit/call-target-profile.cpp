@@ -104,8 +104,9 @@ void CallTargetProfile::reduce(CallTargetProfile& profile,
             [&] (const Entry& a, const Entry& b) {
               // Sort in decreasing order of `count' while keeping invalid
               // entries at the end.
-              if (b.funcId == InvalidFuncId) return true;
-              return a.count >= b.count;
+              if (b.funcId == InvalidFuncId) return a.funcId != InvalidFuncId;
+              if (a.funcId == InvalidFuncId) return false;
+              return a.count > b.count;
             });
   auto const nEntriesToCopy = std::min(kMaxEntries, nEntries);
   memcpy(profile.m_entries, allEntries, nEntriesToCopy * sizeof(Entry));

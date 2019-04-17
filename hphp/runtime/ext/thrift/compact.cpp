@@ -1048,7 +1048,7 @@ struct CompactReader {
         int64_t i = 0;
         do {
           auto val = readField(valueSpec, valueType);
-          cellDup(*val.toCell(), *vec->appendForUnserialize(i));
+          cellDup(*val.toCell(), vec->appendForUnserialize(i));
         } while (++i < size);
         readCollectionEnd();
         return Variant(std::move(vec));

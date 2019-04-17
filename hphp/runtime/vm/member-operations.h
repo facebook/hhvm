@@ -516,7 +516,7 @@ inline tv_rval ElemObject(TypedValue& tvRef,
     auto res = collections::get(base, &scratch);
     if (!res) {
       res = &tvRef;
-      tvWriteNull(*res);
+      tvWriteNull(res);
     }
     return res;
   }
@@ -2158,17 +2158,17 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     }
 
     case KindOfObject: {
-      TypedValue* result;
       if (LIKELY(val(base).pobj->isCollection())) {
-        result = collections::atRw(val(base).pobj, &key);
+        auto result = collections::atRw(val(base).pobj, &key);
         setopBody(tvToCell(result), op, rhs);
+        return result;
       } else {
         tvRef = objOffsetGet(instanceFromTv(base), key);
-        result = &tvRef;
+        auto result = &tvRef;
         setopBody(tvToCell(result), op, rhs);
         objOffsetSet(instanceFromTv(base), key, result, false);
+        return result;
       }
-      return result;
     }
 
     case KindOfClsMeth:

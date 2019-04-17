@@ -384,27 +384,23 @@ BaseVector::php_keys() {
 
 bool BaseVector::OffsetIsset(ObjectData* obj, const TypedValue* key) {
   assertx(!isRefType(key->m_type));
-  auto vec = static_cast<BaseVector*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = vec->get(key->m_data.num);
-  } else {
+  if (UNLIKELY(key->m_type != KindOfInt64)) {
     throwBadKeyType();
-    result = nullptr;
+    return false;
   }
-  return result ? !cellIsNull(tvToCell(result)) : false;
+  const auto vec = static_cast<BaseVector*>(obj);
+  const auto result = vec->get(key->m_data.num);
+  return result ? !cellIsNull(*tvToCell(result)) : false;
 }
 
 bool BaseVector::OffsetEmpty(ObjectData* obj, const TypedValue* key) {
   assertx(!isRefType(key->m_type));
-  auto vec = static_cast<BaseVector*>(obj);
-  TypedValue* result;
-  if (key->m_type == KindOfInt64) {
-    result = vec->get(key->m_data.num);
-  } else {
+  if (UNLIKELY(key->m_type != KindOfInt64)) {
     throwBadKeyType();
-    result = nullptr;
+    return false;
   }
+  const auto vec = static_cast<BaseVector*>(obj);
+  const auto result = vec->get(key->m_data.num);
   return result ? !cellToBool(*result) : true;
 }
 

@@ -1107,7 +1107,7 @@ uint64_t pairIsset(c_Pair* pair, int64_t index) {
 
 uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   auto result = vec->get(index);
-  return result ? !cellIsNull(result) : false;
+  return result ? !cellIsNull(*result) : false;
 }
 
 TypedValue incDecElem(tv_lval base, TypedValue key,

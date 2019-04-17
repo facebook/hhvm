@@ -20,6 +20,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/runtime/base/header-kind.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/type-string.h"
 
 namespace HPHP {
@@ -117,21 +118,21 @@ inline const ArrayData* asArray(const ObjectData* obj) {
  * If the key does not exist in the collection, at() will throw an exception
  * while get() will return nullptr
  */
-TypedValue* at(ObjectData* obj, const TypedValue* key);
-TypedValue* get(ObjectData* obj, const TypedValue* key);
+tv_lval at(ObjectData* obj, const TypedValue* key);
+tv_lval get(ObjectData* obj, const TypedValue* key);
 
 /* atLval() is used to get the address of an element when the
  * caller is NOT going to do direct write per se, but it intends to use
  * the element as the base of a member operation in an "lvalue" context
  * (which could mutate the element in various ways).
  */
-TypedValue* atLval(ObjectData* obj, const TypedValue* key);
+tv_lval atLval(ObjectData* obj, const TypedValue* key);
 
 /* atRw() is used to get the address of an element for reading
  * and writing. It is typically used for read-modify-write operations (the
  * SetOp* and IncDec* instructions).
  */
-TypedValue* atRw(ObjectData* obj, const TypedValue* key);
+tv_lval atRw(ObjectData* obj, const TypedValue* key);
 
 /* Check for {key} within {obj} Collection
  * `contains` merely need to exist

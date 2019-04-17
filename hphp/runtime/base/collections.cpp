@@ -310,8 +310,16 @@ void deepCopy(TypedValue* tv) {
 /////////////////////////////////////////////////////////////////////////////
 // Read/Write access
 
+namespace {
+
+// Value types (everything except Object and Resource) are handled specially:
+// any value-type members of an immutable collection are also immutable.
+inline bool isValueType(DataType type) {
+  return type != KindOfObject && type != KindOfResource;
+}
+
 template <bool throwOnMiss>
-static inline TypedValue* atImpl(ObjectData* obj, const TypedValue* key) {
+inline tv_lval atImpl(ObjectData* obj, const TypedValue* key) {
   assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
 #define X(type) case CollectionType::type: \
@@ -322,16 +330,18 @@ COLLECTIONS_ALL_TYPES(X)
   return nullptr;
 }
 
-TypedValue* at(ObjectData* obj, const TypedValue* key) {
+}  // namespace
+
+tv_lval at(ObjectData* obj, const TypedValue* key) {
   return atImpl<true>(obj, key);
 }
-TypedValue* get(ObjectData* obj, const TypedValue* key) {
+tv_lval get(ObjectData* obj, const TypedValue* key) {
   return atImpl<false>(obj, key);
 }
 
-TypedValue* atLval(ObjectData* obj, const TypedValue* key) {
+tv_lval atLval(ObjectData* obj, const TypedValue* key) {
   assertx(!isRefType(key->m_type));
-  TypedValue* ret;
+  tv_lval ret;
   switch (obj->collectionType()) {
     case CollectionType::Pair:
       ret = c_Pair::OffsetAt<true>(obj, key);
@@ -343,9 +353,7 @@ TypedValue* atLval(ObjectData* obj, const TypedValue* key) {
       // if the element is a value-type (anything other than objects and
       // resources) we need to sever any buffer sharing that might be going on
       auto* vec = static_cast<c_Vector*>(obj);
-      if (UNLIKELY(!vec->canMutateBuffer() &&
-                   ret->m_type != KindOfObject &&
-                   ret->m_type != KindOfResource)) {
+      if (UNLIKELY(!vec->canMutateBuffer() && isValueType(type(ret)))) {
         vec->mutate();
         ret = BaseVector::OffsetAt<true>(obj, key);
       }
@@ -361,9 +369,7 @@ TypedValue* atLval(ObjectData* obj, const TypedValue* key) {
       // if the element is a value-type (anything other than objects and
       // resources) we need to sever any buffer sharing that might be going on
       auto* mp = static_cast<c_Map*>(obj);
-      if (UNLIKELY(!mp->canMutateBuffer() &&
-                   ret->m_type != KindOfObject &&
-                   ret->m_type != KindOfResource)) {
+      if (UNLIKELY(!mp->canMutateBuffer() && isValueType(type(ret)))) {
         mp->mutate();
         ret = BaseMap::OffsetAt<true>(obj, key);
       }
@@ -385,13 +391,13 @@ TypedValue* atLval(ObjectData* obj, const TypedValue* key) {
   // promotion, null->stdClass promotion, and mutating strings or arrays
   // in place (see "test/slow/collection_classes/invalid-operations.php"
   // for examples).
-  if (ret->m_type != KindOfObject && ret->m_type != KindOfResource) {
+  if (isValueType(type(ret))) {
     throw_cannot_modify_immutable_object(obj->getClassName().data());
   }
   return ret;
 }
 
-TypedValue* atRw(ObjectData* obj, const TypedValue* key) {
+tv_lval atRw(ObjectData* obj, const TypedValue* key) {
   assertx(!isRefType(key->m_type));
   switch (obj->collectionType()) {
     case CollectionType::Vector:

@@ -1654,7 +1654,7 @@ void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
   reserveForAdd(sz);
   for (int64_t i = 0; i < sz; ++i) {
     auto tv = bvec->appendForUnserialize(i);
-    tv->m_type = KindOfNull;
+    HPHP::type(tv) = KindOfNull;
     unserializeVariant(tv, UnserializeMode::ColValue);
   }
 }

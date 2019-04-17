@@ -6,6 +6,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP {
@@ -51,12 +52,14 @@ protected:
 public:
   Variant firstValue() const {
     if (!m_size) return init_null_variant;
-    return tvAsCVarRef(&data()[0]);
+    const auto tv = *dataAt(0);
+    return Variant(tvAsCVarRef(&tv));
   }
 
   Variant lastValue() const {
     if (!m_size) return init_null_variant;
-    return tvAsCVarRef(&data()[m_size-1]);
+    const auto tv = *dataAt(m_size-1);
+    return Variant(tvAsCVarRef(&tv));
   }
 
   template<class TVector, bool useKey>
@@ -125,10 +128,10 @@ public:
     --m_size;
     arrayData()->m_size = m_size;
   }
-  TypedValue* appendForUnserialize(int64_t k) {
+  tv_lval appendForUnserialize(int64_t k) {
     assertx(k == m_size);
     incSize();
-    return &data()[k];
+    return dataAt(k);
   }
 
   template <IntishCast intishCast = IntishCast::None>
@@ -144,7 +147,7 @@ public:
   }
 
   template <bool throwOnMiss>
-  static TypedValue* OffsetAt(ObjectData* obj, const TypedValue* key) {
+  static tv_lval OffsetAt(ObjectData* obj, const TypedValue* key) {
     assertx(!isRefType(key->m_type));
     auto vec = static_cast<BaseVector*>(obj);
     if (key->m_type == KindOfInt64) {
@@ -160,15 +163,15 @@ public:
   static bool Equals(const ObjectData* obj1, const ObjectData* obj2);
 
   template<typename T> typename
-    std::enable_if<std::is_integral<T>::value, TypedValue*>::type
+    std::enable_if<std::is_integral<T>::value, tv_lval>::type
   at(T key) {
     if (UNLIKELY((uint64_t)key >= (uint64_t)m_size)) {
       collections::throwOOB(key);
       return nullptr;
     }
-    return &data()[key];
+    return dataAt(key);
   }
-  TypedValue* at(const TypedValue* key) {
+  tv_lval at(const TypedValue* key) {
     assertx(!isRefType(key->m_type));
     if (LIKELY(key->m_type == KindOfInt64)) {
       return at(key->m_data.num);
@@ -177,14 +180,14 @@ public:
   }
 
   template<typename T> typename
-    std::enable_if<std::is_integral<T>::value, TypedValue*>::type
+    std::enable_if<std::is_integral<T>::value, tv_lval>::type
   get(T key) {
     if ((uint64_t)key >= (uint64_t)m_size) {
       return nullptr;
     }
-    return &data()[key];
+    return dataAt(key);
   }
-  TypedValue* get(const TypedValue* key) {
+  tv_lval get(const TypedValue* key) {
     assertx(!isRefType(key->m_type));
     if (LIKELY(key->m_type == KindOfInt64)) {
       return get(key->m_data.num);
@@ -328,7 +331,16 @@ protected:
     std::is_base_of<BaseVector, TVector>::value, TVector*>::type
   static Clone(ObjectData* obj);
 
-  Cell* data() const { return packedData(m_arr); }
+  Cell* data() const {
+    static_assert(PackedArray::stores_typed_values, "");
+    return packedData(m_arr);
+  }
+
+  tv_lval dataAt(int64_t index) const {
+    static_assert(PackedArray::stores_typed_values, "");
+    return &packedData(m_arr)[index];
+  }
+
   void reserveImpl(uint32_t newCap);
 
   void addAllImpl(const Variant& t);
@@ -366,9 +378,9 @@ protected:
       collections::throwOOB(key);
       return;
     }
-    TypedValue* tv = &data()[key];
-    auto const oldTV = *tv;
-    cellDup(val, *tv);
+    auto lval = dataAt(key);
+    auto const oldTV = *lval;
+    cellDup(val, lval);
     tvDecRefGen(oldTV);
   }
   void setRaw(int64_t key, const TypedValue* val) {
@@ -395,11 +407,13 @@ protected:
 
   Object getIterator();
   Variant php_at(const Variant& key) {
-    return tvAsCVarRef(at(key.toCell()));
+    const auto tv = *at(key.toCell())  ;
+    return Variant(tvAsCVarRef(&tv));
   }
   Variant php_get(const Variant& key) {
-    if (auto tv = get(key.toCell())) {
-      return tvAsCVarRef(tv);
+    if (const auto lval = get(key.toCell())) {
+      const auto tv = *lval;
+      return Variant(tvAsCVarRef(&tv));
     }
     return init_null_variant;
   }
@@ -639,7 +653,8 @@ struct VectorIterator {
     if (m_pos >= vec->m_size) {
       throw_iterator_not_valid();
     }
-    return tvAsCVarRef(&vec->data()[m_pos]);
+    const auto tv = *vec->dataAt(m_pos);
+    return Variant(tvAsCVarRef(&tv));
   }
 
   int64_t key() const {

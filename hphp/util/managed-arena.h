@@ -78,12 +78,13 @@ struct ManagedArena : public ExtentAllocator {
   unsigned m_arenaId{0};
 };
 
-using LowArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
-using HighArena = alloc::ManagedArena<alloc::BumpExtentAllocator>;
-
-// Not using std::aligned_storage<> because zero initialization can be useful.
-extern uint8_t g_lowArena[sizeof(LowArena)];
-extern uint8_t g_highArena[sizeof(HighArena)];
+using RangeArena = alloc::ManagedArena<alloc::MultiRangeExtentAllocator>;
+using LowArena = RangeArena;
+using HighArena = RangeArena;
+static_assert(alignof(RangeArena) <= 64, "");
+using RangeArenaStorage = std::aligned_storage<sizeof(RangeArena), 64>::type;
+extern RangeArenaStorage g_lowArena;
+extern RangeArenaStorage g_highArena;
 
 #ifndef MAX_MANAGED_ARENA_COUNT
 #define MAX_MANAGED_ARENA_COUNT 4

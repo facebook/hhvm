@@ -16,12 +16,13 @@
 
 #include "hphp/util/bump-mapper.h"
 
-#if USE_JEMALLOC_EXTENT_HOOKS
-
 #include "hphp/util/assertions.h"
 #include "hphp/util/hugetlb.h"
-#include "hphp/util/maphuge.h"
 #include "hphp/util/numa.h"
+
+#include <algorithm>
+#include <atomic>
+#include <mutex>
 
 #include <folly/portability/SysMman.h>
 
@@ -29,75 +30,26 @@
 #include <numaif.h>
 #endif
 
+#if USE_JEMALLOC_EXTENT_HOOKS
+
 namespace HPHP { namespace alloc {
 
-BumpAllocState::BumpAllocState(uintptr_t base, size_t maxCap, LockPolicy p)
-  : m_base(base)
-  , m_maxCapacity(maxCap)
-  , m_lockPolicy(p) {
-  auto ret = mmap((void*)base, maxCap, PROT_NONE,
-                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
-                  -1, 0);
-  if (ret != (void*)base) {
-    char msg[128];
-    if (ret == MAP_FAILED) {
-      std::snprintf(msg, sizeof(msg),
-                    "failed to reserve address range 0x%" PRIxPTR
-                    " to 0x%" PRIxPTR ", errno = %d",
-                    base, base + maxCap, errno);
-    } else {
-      munmap(ret, maxCap);
-      std::snprintf(msg, sizeof(msg),
-                    "failed to reserve address range 0x%" PRIxPTR
-                    " to 0x%" PRIxPTR ", got 0x%p instead",
-                    base, base + maxCap, ret);
-    }
-    throw std::runtime_error{msg};
-  }
-}
+bool Bump1GMapper::addMappingImpl() {
+  if (m_currHugePages >= m_maxHugePages) return false;
+  if (get_huge1g_info().free_hugepages <= 0) return false;
 
-void BumpMapper::append(BumpMapper* m) {
-  // add things one by one so that we can easily avoid loops in the chain.
-  assert(!m->m_fallback);
-  assert(m != this);
-  if (m_fallback) {
-    return m_fallback->append(m);
-  }
-  m_fallback = m;
-}
-
-bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
-  // Check quota and alignment before mmap
-  if (m_currNumPages >= m_maxNumPages) {
-    m_failed = true;
+  std::lock_guard<RangeState> _(m_state);
+  auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
+  if (reinterpret_cast<uintptr_t>(currFrontier) % size1g != 0) return false;
+  auto const newFrontier = currFrontier + size1g;
+  if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
     return false;
   }
-  auto const currFrontier = state.frontier();
-  if (currFrontier % size1g != 0) return false;
-
-  HugePageInfo info = get_huge1g_info();
-  if (info.nr_hugepages == num_1g_pages()) {
-    // The current process has grabbed all reserved 1G huge pages.  Fail all
-    // subsequent efforts (because we don't release the huge pages before
-    // shutting down, and we don't dynamically add 1G pages to the system).
-    m_failed = true;
-    return false;
-  }
-  if (info.free_hugepages <= 0) {
-    // We have not obtained all the 1G pages we intended to, but someone else is
-    // holding the page now.  This would probably make the page unusable to this
-    // arena, even after the other process releases the 1G page because we need
-    // 1G alignment in the frontier.
-    return false;
-  }
-
-  auto const newPageStart = currFrontier;
-
 #ifdef HAVE_NUMA
-  assert((m_interleaveMask & ~numa_node_set) == 0);
+  assertx((m_interleaveMask & ~numa_node_set) == 0);
   if (const int numAllowedNodes = __builtin_popcount(m_interleaveMask)) {
     int failCount = 0;
-    // Try to map 1G pages in round-robin fashion starting from m_nextNode.  We
+    // Try to map huge pages in round-robin fashion starting from m_nextNode. We
     // try on each allowed NUMA node at most once.
     do {
       auto const currNode = m_nextNode;
@@ -106,10 +58,9 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
         // Node not allowed, try next one.
         continue;
       }
-      if (mmap_1g(reinterpret_cast<void*>(newPageStart),
-                  currNode, /* MAP_FIXED */true)) {
-        state.m_currCapacity += size1g;
-        m_failed = (++m_currNumPages >= m_maxNumPages);
+      if (mmap_1g(currFrontier, currNode, /* MAP_FIXED */ true)) {
+        ++m_currHugePages;
+        m_state.low_map.store(newFrontier, std::memory_order_release);
         return true;
       }
       if (++failCount >= numAllowedNodes) return false;
@@ -118,10 +69,9 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
 #endif
   // This covers cases when HAVE_NUMA is defined, and when `m_interleaveMask` is
   // set to 0 (on single-socket machines).
-  if (mmap_1g(reinterpret_cast<void*>(newPageStart), -1,
-              /* MAP_FIXED */ true)) {
-    ++m_currNumPages;
-    state.m_currCapacity += size1g;
+  if (mmap_1g(currFrontier, -1, /* MAP_FIXED */ true)) {
+    ++m_currHugePages;
+    m_state.low_map.store(newFrontier, std::memory_order_release);
     return true;
   }
   return false;
@@ -129,54 +79,79 @@ bool Bump1GMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
 
 constexpr size_t kChunkSize = 4 * size2m;
 
-bool Bump4KMapper::addMappingImpl(BumpAllocState& state, size_t /*newSize*/) {
-  auto const currFrontier = state.frontier();
-  if (currFrontier % size4k != 0) return false;
-  void* newPageStart = reinterpret_cast<void*>(currFrontier);
-  void* newPages = mmap(newPageStart, kChunkSize,
+bool Bump2MMapper::addMappingImpl() {
+  if (m_currHugePages >= m_maxHugePages) return false;
+  if (get_huge2m_info().free_hugepages <= 0) return false;
+
+  std::lock_guard<RangeState> _(m_state);
+  // Recheck the mapping frontiers after grabbing the lock
+  auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
+  if (reinterpret_cast<uintptr_t>(currFrontier) % size2m != 0) return false;
+  auto const hugeSize = std::min(kChunkSize,
+                                 size2m * (m_maxHugePages - m_currHugePages));
+  auto const newFrontier = currFrontier + hugeSize;
+  if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
+    return false;
+  }
+  void* newPages = mmap(currFrontier, hugeSize,
+                        PROT_READ | PROT_WRITE,
+                        MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED | MAP_HUGETLB,
+                        -1, 0);
+  if (newPages == MAP_FAILED) return false;
+  assertx(newPages == currFrontier);    // MAP_FIXED should work
+#ifdef HAVE_NUMA
+  if (m_interleaveMask) {
+    unsigned long mask = m_interleaveMask;
+    mbind(newPages, hugeSize, MPOL_INTERLEAVE,
+          &mask, 32 /* max node */, 0 /* flag */);
+  }
+#endif
+  m_currHugePages += hugeSize / size2m;
+  m_state.low_map.store(newFrontier, std::memory_order_release);
+  return true;
+}
+
+
+template<Direction D>
+bool BumpNormalMapper<D>::addMappingImpl() {
+  std::lock_guard<RangeState> _(m_state);
+  auto const high = m_state.high_map.load(std::memory_order_relaxed);
+  auto const low = m_state.low_map.load(std::memory_order_relaxed);
+  auto const maxSize = static_cast<size_t>(high - low);
+  if (maxSize == 0) return false;       // fully mapped
+  auto const size = std::min(kChunkSize, maxSize);
+
+  auto const newPageStart = (D == Direction::LowToHigh) ? low : high - size;
+  assertx(reinterpret_cast<uintptr_t>(newPageStart) % size4k == 0);
+
+  void* newPages = mmap(newPageStart, size,
                         PROT_READ | PROT_WRITE,
                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
                         -1, 0);
   if (newPages == MAP_FAILED) return false;
   if (newPages != newPageStart) {
-    // failed to get desired address range
-    munmap(newPages, kChunkSize);
+    assertx(false);                     // MAP_FIXED should've worked.
+    munmap(newPages, size);
     return false;
   }
-  state.m_currCapacity += kChunkSize;
 
 #ifdef HAVE_NUMA
   if (m_interleaveMask) {
     unsigned long mask = m_interleaveMask;
-    mbind(newPages, kChunkSize, MPOL_INTERLEAVE,
+    mbind(newPages, size, MPOL_INTERLEAVE,
           &mask, 32 /* max node */, 0 /* flag */);
   }
 #endif
+  if (D == Direction::LowToHigh) {
+    m_state.low_map.store(newPageStart + size, std::memory_order_release);
+  } else {
+    m_state.high_map.store(newPageStart, std::memory_order_release);
+  }
   return true;
 }
 
-bool Bump2MMapper::addMappingImpl(BumpAllocState& state, size_t newSize) {
-  // Check quota and alignment before trying to map.  Note that m_maxNumPages
-  // may be initialized later for this mapper, so don't fail permanently before
-  // it is initialized.
-  if (m_currNumPages >= m_maxNumPages) {
-    if (m_maxNumPages) {
-      m_failed = true;
-    }
-    return false;
-  }
-  auto newPageBase = reinterpret_cast<void*>(state.frontier());
-  // Add some normal pages, and then remap with huge pages.
-  if (!Bump4KMapper::addMappingImpl(state, newSize)) {
-    return false;
-  }
-  auto const nHugePages =
-    std::min(static_cast<unsigned>(kChunkSize / size2m),
-             m_maxNumPages - m_currNumPages);
-  remap_interleaved_2m_pages(newPageBase, nHugePages);
-  m_currNumPages += nHugePages;
-  return true;
-}
+template bool BumpNormalMapper<Direction::LowToHigh>::addMappingImpl();
+template bool BumpNormalMapper<Direction::HighToLow>::addMappingImpl();
 
 } // namespace alloc
 } // namespace HPHP

@@ -53,8 +53,8 @@ static bool extent_merge(extent_hooks_t* /*extent_hooks*/, void* /*addra*/,
   return false;
 }
 
-extent_hooks_t BumpExtentAllocator::s_hooks {
-  BumpExtentAllocator::extent_alloc,
+extent_hooks_t MultiRangeExtentAllocator::s_hooks {
+  MultiRangeExtentAllocator::extent_alloc,
   nullptr,                              // dalloc
   nullptr,                              // destroy
   extent_commit,
@@ -65,55 +65,56 @@ extent_hooks_t BumpExtentAllocator::s_hooks {
   extent_merge
 };
 
-BumpExtentAllocator::BumpExtentAllocator(uintptr_t highAddr, size_t maxCap,
-                                         LockPolicy p, BumpMapper* mapper)
-  : BumpAllocState(highAddr, maxCap, p)
-  , m_mapper(mapper) {
-  if (highAddr == 0 || maxCap == 0) return;
-
-  auto constexpr mask = (1u << 21) - 1;
-  if ((m_base | maxCap) & mask) {
-    throw std::invalid_argument{"address and capacity not multiple of 2M"};
+void MultiRangeExtentAllocator::appendMapper(RangeMapper* m) {
+  for (auto& p : m_mappers) {
+    if (p == nullptr) {
+      p = m;
+      return;
+    }
   }
+  throw std::runtime_error{"too many mappers (check kMaxMapperCount)"};
 }
 
-void* BumpExtentAllocator::
+size_t MultiRangeExtentAllocator::maxCapacity() const {
+  size_t result = 0;
+  for (auto& p : m_mappers) {
+    if (p == nullptr) {
+      break;
+    }
+    result += p->getRangeState().capacity();
+  }
+  return result;
+}
+
+
+void* MultiRangeExtentAllocator::
 extent_alloc(extent_hooks_t* extent_hooks, void* addr,
              size_t size, size_t alignment, bool* zero,
              bool* commit, unsigned arena_ind) {
-  assert(extent_hooks == &BumpExtentAllocator::s_hooks);
-  if (addr != nullptr) return nullptr;
+  assertx(extent_hooks == &MultiRangeExtentAllocator::s_hooks);
+  if (addr != nullptr) {
+    assertx(false);
+    return nullptr;
+  }
   assert(folly::isPowTwo(alignment));
-  const uintptr_t mask = ~(alignment - 1);
+  constexpr size_t size2m = (2u << 20);
+  if (auto rem = size % size2m) {
+    size += size2m - rem;               // round up to align at 2M
+  }
+  assertx(alignment <= size2m);
 
-  BumpExtentAllocator* extAlloc = GetByArenaId<BumpExtentAllocator>(arena_ind);
-  do {
-    size_t oldSize = extAlloc->m_size.load(std::memory_order_relaxed);
-    uintptr_t ret = (extAlloc->m_base + oldSize + alignment - 1) & mask;
-    size_t newSize = ret + size - extAlloc->m_base;
-    if (newSize <= extAlloc->m_currCapacity) {
-      // Looks like existing capacity is enough.
-      if (extAlloc->m_size.compare_exchange_weak(oldSize, newSize)) {
-        *zero = true;
-        *commit = true;
-        return reinterpret_cast<void*>(ret);
-      }
-    } else {
-      if (newSize > extAlloc->m_maxCapacity) return nullptr;
-      if (extAlloc->m_lockPolicy != LockPolicy::Blocking) {
-        if (!extAlloc->m_mutex.try_lock()) {
-          return nullptr;
-        }
-      } else {
-        extAlloc->m_mutex.lock();
-      }
-      bool succ = extAlloc->m_mapper &&
-        extAlloc->m_mapper->addMapping(*extAlloc, newSize);
-      extAlloc->m_mutex.unlock();
-      if (!succ) return nullptr;
+  auto extAlloc = GetByArenaId<MultiRangeExtentAllocator>(arena_ind);
+  for (auto rangeMapper : extAlloc->m_mappers) {
+    if (!rangeMapper) return nullptr;
+    // RangeMapper::addMappingImpl() holds the lock on RangeState when adding
+    // new mappings, so no additional locking is needed here.
+    if (auto addr = rangeMapper->alloc(size)) {
+      extAlloc->m_allocatedSize.fetch_add(size, std::memory_order_relaxed);
+      return addr;
     }
-  } while (true);
+  }
   not_reached();
+  return nullptr;
 }
 
 }}

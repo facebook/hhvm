@@ -26,6 +26,7 @@
 #include <folly/Portability.h>
 #include <folly/portability/PThread.h>
 
+#include "hphp/util/address-range.h"
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/exception.h"
@@ -55,19 +56,6 @@ struct OutOfMemoryException : Exception {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// Address ranges for the managed arenas. Low arena is in [1G, 4G), and high
-// arena in [4G, kUncountedMaxAddr) at most. LOW_PTR builds won't work if low
-// arena overflows. High arena overflow would result in a crash, so we size it
-// large enough to make sure we run out of memory before it overflows. These
-// constants are only meaningful when addr_encodes_persistency is true. We make
-// them available for all modes to avoid having ifdefs everywhere.
-constexpr unsigned kUncountedMaxShift = 38;
-constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
-constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
-constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
-constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
-constexpr size_t kLowArenaMaxCap = kLowArenaMaxAddr - kLowArenaMinAddr;
-constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
 
 #ifdef USE_JEMALLOC
 

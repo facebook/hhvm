@@ -16,17 +16,45 @@
 
 #include "hphp/util/managed-arena.h"
 
+#include "hphp/util/address-range.h"
 #include "hphp/util/assertions.h"
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
 namespace HPHP { namespace alloc {
 
-static_assert(alignof(HighArena) <= 64, "");
-static_assert(alignof(LowArena) <= 64, "");
-alignas(64) uint8_t g_highArena[sizeof(HighArena)];
-alignas(64) uint8_t g_lowArena[sizeof(LowArena)];
+static_assert(sizeof(RangeState) <= 64, "");
+static_assert(alignof(RangeState) <= 64, "");
+using RangeStateStorage = std::aligned_storage<sizeof(RangeState), 64>::type;
+
+RangeArenaStorage g_lowArena{};
+RangeArenaStorage g_highArena{};
+RangeStateStorage g_ranges[3];
 ArenaArray g_arenas;
+
+NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
+  auto result = reinterpret_cast<RangeState*>(g_ranges + index);
+  if (!result->low()) {
+    static std::atomic_flag lock = ATOMIC_FLAG_INIT;
+    while (lock.test_and_set(std::memory_order_acquire)) {
+      // Spin while another thread initializes the ranges. We don't really reach
+      // here, because the function is called very early during process
+      // initialization when there is only one thread. Do it just for extra
+      // safety in case someone starts to abuse the code.
+    }
+    if (!result->high()) {
+      new (&(g_ranges[AddrRangeClass::VeryLow]))
+        RangeState(kLowArenaMinAddr, 2ull << 30);
+      new (&(g_ranges[AddrRangeClass::Low]))
+        RangeState(2ull << 30, kLowArenaMaxAddr);
+      new (&(g_ranges[AddrRangeClass::Uncounted]))
+        RangeState(kLowArenaMaxAddr, kHighArenaMaxAddr);
+    }
+    lock.clear(std::memory_order_release);
+    assertx(result->high());
+  }
+  return *result;
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -73,7 +101,7 @@ std::string ManagedArena<ExtentAllocator>::reportStats() {
   std::snprintf(buffer, sizeof(buffer),
                 "Arena %d: capacity %zd, max_capacity %zd, used %zd\n",
                 id(),
-                ExtentAllocator::mappedSize(),
+                ExtentAllocator::allocatedSize(),
                 ExtentAllocator::maxCapacity(),
                 activeSize(id()));
   return std::string{buffer};
@@ -83,7 +111,7 @@ template<typename ExtentAllocator>
 size_t ManagedArena<ExtentAllocator>::unusedSize() {
   mallctl_epoch();
   auto const active = activeSize(id());
-  return ExtentAllocator::mappedSize() - active;
+  return ExtentAllocator::allocatedSize() - active;
 }
 
 template<typename ExtentAllocator>
@@ -94,7 +122,7 @@ void ManagedArena<ExtentAllocator>::init() {
     initializeMibs();
   }
   if (m_arenaId != 0) {
-    // Should call init() multiple times for the same instance.
+    // Shouldn't call init() multiple times for the same instance.
     not_reached();
     return;
   }
@@ -118,7 +146,7 @@ void ManagedArena<ExtentAllocator>::init() {
 
   if (Traits::get_hooks() != nullptr) {
     // The only place where we need `GetByArenaId` is in custom extent hooks.
-    assert(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
+    assertx(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
     for (auto& i : g_arenas) {
       if (!i.first) {
         i.first = m_arenaId;
@@ -132,9 +160,9 @@ void ManagedArena<ExtentAllocator>::init() {
   }
 }
 
-template void ManagedArena<BumpExtentAllocator>::init();
-template size_t ManagedArena<BumpExtentAllocator>::unusedSize();
-template std::string ManagedArena<BumpExtentAllocator>::reportStats();
+template void ManagedArena<MultiRangeExtentAllocator>::init();
+template size_t ManagedArena<MultiRangeExtentAllocator>::unusedSize();
+template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats();
 
 template void ManagedArena<DefaultExtentAllocator>::init();
 

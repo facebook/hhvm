@@ -16,6 +16,7 @@
 #include "hphp/util/alloc.h"
 
 #include <atomic>
+#include <mutex>
 
 #include <stdlib.h>
 #include <errno.h>
@@ -334,67 +335,77 @@ static void set_arena_retain_grow_limit(unsigned id) {
 }
 
 using namespace alloc;
-static BumpMapper* getHugeMapperWithFallback(unsigned n1GPages,
-                                             bool use2MFallback,
-                                             short nextNode) {
+static NEVER_INLINE
+RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
+                            bool use2MPages, short nextNode) {
 #ifdef HAVE_NUMA
   const int max_node = numa_max_node();
 #else
   constexpr int max_node = 0;
 #endif
-  BumpMapper* mapper = nullptr;
-  BumpMapper* fallback = nullptr;
+  RangeMapper* head = nullptr;
+  RangeMapper** ptail = &head;
   if (max_node < 1) {
     // We either don't have libnuma, or run on a single-socket CPU.  In either
     // case, no need to worry about NUMA.
-    fallback = new Bump4KMapper;
     if (n1GPages) {
-      mapper = new Bump1GMapper(n1GPages);
-    } else if (use2MFallback) {
-      mapper = new Bump2MMapper;
+      RangeMapper::append(ptail, new Bump1GMapper(range, n1GPages));
     }
+    if (use2MPages) {
+      RangeMapper::append(ptail, new Bump2MMapper(range));
+    }
+    RangeMapper::append(ptail, new BumpNormalMapper(range));
 #ifdef HAVE_NUMA
   } else {
-    fallback = new Bump4KMapper(numa_node_set);
     if (n1GPages) {
-      mapper = new Bump1GMapper(n1GPages, numa_node_set, nextNode);
-    } else {
-      mapper = new Bump2MMapper(numa_node_set);
+      RangeMapper::append(ptail, new Bump1GMapper(range, n1GPages,
+                                                  numa_node_set, nextNode));
     }
+    if (use2MPages) {
+      RangeMapper::append(ptail, new Bump2MMapper(range, 0, numa_node_set));
+    }
+    RangeMapper::append(ptail, new BumpNormalMapper(range, 0, numa_node_set));
 #endif
   }
-  if (mapper) {
-    mapper->append(fallback);
-  } else {
-    mapper = fallback;
-  }
-  return mapper;
+  assertx(head);
+  return head;
 }
 
 void setup_low_arena(unsigned n1GPages) {
   assert(reinterpret_cast<uintptr_t>(sbrk(0)) <= kLowArenaMinAddr);
-  auto mapper = getHugeMapperWithFallback(n1GPages, true, 0);
+  // Initialize mappers for the VeryLow and Low address ranges.
+  auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
+  auto& lowRange = getRange(AddrRangeClass::Low);
+  auto veryLowMapper =
+    getMapperChain(veryLowRange, (n1GPages != 0) ? 1 : 0, true, 0);
+  auto lowMapper =
+    getMapperChain(lowRange, (n1GPages > 1) ? (n1GPages - 1) : 0, true, 1);
+  veryLowRange.setLowMapper(veryLowMapper);
+  lowRange.setLowMapper(lowMapper);
   if (n1GPages == 0) {
-    low_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
+    low_2m_mapper = dynamic_cast<Bump2MMapper*>(veryLowMapper);
+  } else if (n1GPages == 1) {
+    low_2m_mapper = dynamic_cast<Bump2MMapper*>(lowMapper);
+  } else {
+    low_2m_mapper = dynamic_cast<Bump2MMapper*>(lowMapper->next());
   }
-  auto ma = LowArena::CreateAt(&g_lowArena, kLowArenaMinAddr, kLowArenaMaxCap,
-                               LockPolicy::Blocking, mapper);
+  auto ma = LowArena::CreateAt(&g_lowArena);
+  ma->appendMapper(veryLowMapper);
+  ma->appendMapper(lowMapper);
   set_arena_retain_grow_limit(ma->id());
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 }
 
 void setup_high_arena(unsigned n1GPages) {
-  // If we use 1G huge pages on NUMA servers, start grabbing 1G huge pages from
-  // a node different from the one for low arena.
-  auto mapper = getHugeMapperWithFallback(n1GPages, true,
-                                          num_numa_nodes() / 2 + 1);
+  auto& range = getRange(AddrRangeClass::Uncounted);
+  auto mapper = getMapperChain(range, n1GPages, true, num_numa_nodes() / 2 + 1);
+  range.setLowMapper(mapper);
   if (n1GPages == 0) {
     high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
   }
-  auto ma = HighArena::CreateAt(&g_highArena,
-                                kLowArenaMaxAddr, kHighArenaMaxCap,
-                                LockPolicy::Blocking, mapper);
+  auto ma = HighArena::CreateAt(&g_highArena);
+  ma->appendMapper(range.getLowMapper());
   set_arena_retain_grow_limit(ma->id());
   high_arena = ma->id();
   high_arena_tcache_create();           // set up high_arena_flags
@@ -567,10 +578,7 @@ struct JEMallocInitializer {
     // one of these variables forces the STL default allocator to call
     // new() or delete() for each allocation or deletion.  Otherwise
     // the STL allocator tries to avoid the high cost of doing
-    // allocations by pooling memory internally.  However, tcmalloc
-    // does allocations really fast, especially for the types of small
-    // items one sees in STL, so it's better off just using us.
-    // TODO: control whether we do this via an environment variable?
+    // allocations by pooling memory internally.
     setenv("GLIBCPP_FORCE_NEW", "1", false /* no overwrite*/);
     setenv("GLIBCXX_FORCE_NEW", "1", false /* no overwrite*/);
 

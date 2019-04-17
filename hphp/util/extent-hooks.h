@@ -20,6 +20,9 @@
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/bump-mapper.h"
 
+#include <array>
+#include <atomic>
+
 #if USE_JEMALLOC_EXTENT_HOOKS
 
 /*
@@ -32,8 +35,7 @@
  * alloc hook, and ignore everything else.  As a result, we are unable to
  * reclaim memory given to the arena, even when the arena is ready to give it
  * back to the system.  Therefore, this should only be used in arenas where the
- * total size of allocated memory doesn't decrease significantly where the
- * server is running.
+ * total size of allocated memory doesn't decrease significantly.
  */
 
 namespace HPHP { namespace alloc {
@@ -71,32 +73,38 @@ template<typename T> struct extent_allocator_traits {
  */
 struct DefaultExtentAllocator {};
 
-/**
- * Extent hooks that do bump mapping for ManagedArena.
+/*
+ * An extent allocator that gets mappings from a list of RangeMappers, in order
+ * of preference. For example, we may prefer huge pages with addresses below 2G,
+ * but anything below 4G is also acceptable.
  */
-struct BumpExtentAllocator : private BumpAllocState {
-  // Both highAddr and maxCap should be 2M-aligned.
-  BumpExtentAllocator(uintptr_t highAddr, size_t maxCap,
-                      LockPolicy p, BumpMapper* mapper);
+struct MultiRangeExtentAllocator {
+ public:
+  MultiRangeExtentAllocator() {
+    for (auto& p : m_mappers) p = nullptr;
+  }
 
-  using BumpAllocState::mappedSize;
-  using BumpAllocState::allocatedSize;
-  using BumpAllocState::maxCapacity;
+  void appendMapper(RangeMapper* m);
+
+  size_t allocatedSize() const {
+    return m_allocatedSize.load(std::memory_order_relaxed);
+  }
+
+  size_t maxCapacity() const;
 
   static void* extent_alloc(extent_hooks_t* extent_hooks, void* addr,
                             size_t size, size_t alignment, bool* zero,
                             bool* commit, unsigned arena_ind);
 
+ public:
   // The hook passed to the underlying arena upon creation.
   static extent_hooks_t s_hooks;
 
-  BumpMapper* const m_mapper;
+ private:
+  static constexpr std::size_t kMaxMapperCount = 7u;
+  std::array<RangeMapper*, kMaxMapperCount> m_mappers;
+  std::atomic_size_t m_allocatedSize;
 };
-
-static_assert(extent_allocator_traits<BumpExtentAllocator>::get_hooks(), "");
-static_assert(!extent_allocator_traits<DefaultExtentAllocator>::get_hooks(), "");
-static_assert(extent_allocator_traits<BumpExtentAllocator>::
-              get_decay_ms() == 60000, "");
 
 }}
 

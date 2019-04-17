@@ -76,8 +76,8 @@ std::vector<std::unique_ptr<UnitEmitter>> AnalysisResult::getHhasFiles() {
 }
 
 bool AnalysisResult::inParseOnDemandDirs(const std::string &filename) const {
-  for (size_t i = 0; i < m_parseOnDemandDirs.size(); i++) {
-    if (filename.find(m_parseOnDemandDirs[i]) == 0) return true;
+  for (auto const& dir : m_parseOnDemandDirs) {
+    if (filename.find(dir) == 0) return true;
   }
   return false;
 }

@@ -403,14 +403,14 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   tl_heap.getCheck();
   IniSetting::Map ini = IniSetting::Map::object;
   Hdf config;
-  for (auto& file : po.config) {
+  for (auto const& file : po.config) {
     Config::ParseConfigFile(file, ini, config);
   }
-  for (unsigned int i = 0; i < po.iniStrings.size(); i++) {
-    Config::ParseIniString(po.iniStrings[i].c_str(), ini);
+  for (auto const& iniString : po.iniStrings) {
+    Config::ParseIniString(iniString, ini);
   }
-  for (unsigned int i = 0; i < po.confStrings.size(); i++) {
-    Config::ParseHdfString(po.confStrings[i].c_str(), config);
+  for (auto const& confString : po.confStrings) {
+    Config::ParseHdfString(confString, config);
   }
   Hdf runtime = config["Runtime"];
   if (config.exists("EnableHipHopSyntax")) {
@@ -432,7 +432,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // We don't want debug info in repo builds, since we don't support attaching
   // a debugger in repo authoritative mode, but we want the default for debug
   // info to be true so that it's present in sandboxes. Override that default
-  // here, since we only get here when building for repo authoritatibe mode.
+  // here, since we only get here when building for repo authoritative mode.
   RuntimeOption::RepoDebugInfo = false;
   // Default RepoLocalMode to off so we build systemlib from source.
   // This can be overridden when running lots of repo builds (eg
@@ -447,8 +447,8 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   std::vector<std::string> badnodes;
   config.lint(badnodes);
-  for (unsigned int i = 0; i < badnodes.size(); i++) {
-    Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
+  for (auto const& badnode : badnodes) {
+    Logger::Error("Possible bad config node: %s", badnode.c_str());
   }
 
   // we need to initialize pcre cache table very early
@@ -465,27 +465,25 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::RootDirectory = po.configDir;
   Option::IncludeSearchPaths = po.includePaths;
 
-  for (unsigned int i = 0; i < po.excludeDirs.size(); i++) {
-    Option::PackageExcludeDirs.insert
-      (FileUtil::normalizeDir(po.excludeDirs[i]));
+  for (auto const& dir : po.excludeDirs) {
+    Option::PackageExcludeDirs.insert(FileUtil::normalizeDir(dir));
   }
-  for (unsigned int i = 0; i < po.excludeFiles.size(); i++) {
-    Option::PackageExcludeFiles.insert(po.excludeFiles[i]);
+  for (auto const& file : po.excludeFiles) {
+    Option::PackageExcludeFiles.insert(file);
   }
-  for (unsigned int i = 0; i < po.excludePatterns.size(); i++) {
-    Option::PackageExcludePatterns.insert
-      (format_pattern(po.excludePatterns[i], true));
+  for (auto const& pattern : po.excludePatterns) {
+    Option::PackageExcludePatterns.insert(
+      format_pattern(pattern, true /* prefixSlash */));
   }
-  for (unsigned int i = 0; i < po.excludeStaticDirs.size(); i++) {
-    Option::PackageExcludeStaticDirs.insert
-      (FileUtil::normalizeDir(po.excludeStaticDirs[i]));
+  for (auto const& dir : po.excludeStaticDirs) {
+    Option::PackageExcludeStaticDirs.insert(FileUtil::normalizeDir(dir));
   }
-  for (unsigned int i = 0; i < po.excludeStaticFiles.size(); i++) {
-    Option::PackageExcludeStaticFiles.insert(po.excludeStaticFiles[i]);
+  for (auto const& file : po.excludeStaticFiles) {
+    Option::PackageExcludeStaticFiles.insert(file);
   }
-  for (unsigned int i = 0; i < po.excludeStaticPatterns.size(); i++) {
-    Option::PackageExcludeStaticPatterns.insert
-      (format_pattern(po.excludeStaticPatterns[i], true));
+  for (auto const& pattern : po.excludeStaticPatterns) {
+    Option::PackageExcludeStaticPatterns.insert(
+      format_pattern(pattern, true /* prefixSlash */));
   }
 
   Option::ProgramName = po.program;
@@ -582,26 +580,26 @@ int process(const CompilerOptions &po) {
         po.ffiles.empty() && po.inputs.empty() && po.inputList.empty()) {
       package.addAllFiles(false);
     } else {
-      for (unsigned int i = 0; i < po.modules.size(); i++) {
-        package.addDirectory(po.modules[i], false);
+      for (auto const& module : po.modules) {
+        package.addDirectory(module, false /*force*/);
       }
-      for (unsigned int i = 0; i < po.fmodules.size(); i++) {
-        package.addDirectory(po.fmodules[i], true);
+      for (auto const& fmodule : po.fmodules) {
+        package.addDirectory(fmodule, true /*force*/);
       }
-      for (unsigned int i = 0; i < po.hhjsDirs.size(); i++) {
-        package.addHHJSDirectory(po.hhjsDirs[i], false);
+      for (auto const& hhjsDir : po.hhjsDirs) {
+        package.addHHJSDirectory(hhjsDir, false);
       }
-      for (unsigned int i = 0; i < po.ffiles.size(); i++) {
-        package.addSourceFile(po.ffiles[i]);
+      for (auto const& ffile : po.ffiles) {
+        package.addSourceFile(ffile);
       }
-      for (unsigned int i = 0; i < po.cmodules.size(); i++) {
-        package.addStaticDirectory(po.cmodules[i]);
+      for (auto const& cmodule : po.cmodules) {
+        package.addStaticDirectory(cmodule);
       }
-      for (unsigned int i = 0; i < po.cfiles.size(); i++) {
-        package.addStaticFile(po.cfiles[i]);
+      for (auto const& cfile : po.cfiles) {
+        package.addStaticFile(cfile);
       }
-      for (unsigned int i = 0; i < po.inputs.size(); i++) {
-        package.addSourceFile(po.inputs[i]);
+      for (auto const& input : po.inputs) {
+        package.addSourceFile(input);
       }
       if (!po.inputList.empty()) {
         package.addInputList(po.inputList);

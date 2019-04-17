@@ -10,6 +10,7 @@ use crate::lexable_token::LexableToken;
 use crate::smart_constructors::NodeType;
 pub use crate::syntax_generated::*;
 use crate::syntax_kind::SyntaxKind;
+use crate::syntax_type::*;
 use crate::token_kind::TokenKind;
 
 use std::marker::Sized;
@@ -29,29 +30,25 @@ pub struct Syntax<T, V> {
     pub value: V,
 }
 
-impl<T, V> Syntax<T, V>
+impl<T, V> SyntaxTypeBase<T, V> for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
 {
-    pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {
-        Self { syntax, value }
-    }
-
-    pub fn make_missing(offset: usize) -> Self {
+    fn make_missing(offset: usize) -> Self {
         let children: Vec<Self> = vec![];
         let value = V::from_children(SyntaxKind::Missing, offset, &children);
         let syntax = SyntaxVariant::Missing;
         Self::make(syntax, value)
     }
 
-    pub fn make_token(arg: T) -> Self {
+    fn make_token(arg: T) -> Self {
         let value = V::from_token(&arg);
         let syntax = SyntaxVariant::Token(Box::new(arg));
         Self::make(syntax, value)
     }
 
-    pub fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self {
+    fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self {
         /* An empty list is represented by Missing; everything else is a
         SyntaxList, even if the list has only one item. */
         if arg.is_empty() {
@@ -62,13 +59,23 @@ where
             Self::make(syntax, value)
         }
     }
+}
+
+impl<T, V> Syntax<T, V>
+where
+    T: LexableToken,
+    V: SyntaxValueType<T>,
+{
+    pub fn make(syntax: SyntaxVariant<T, V>, value: V) -> Self {
+        Self { syntax, value }
+    }
 
     pub fn children<'a>(&'a self) -> Vec<&'a Self> {
         let f = |node: &'a Self, mut acc: Vec<&'a Self>| {
             acc.push(node);
             acc
         };
-        Syntax::fold_over_children(&f, vec![], &self.syntax)
+        Self::fold_over_children(&f, vec![], &self.syntax)
     }
 
     fn get_token(&self) -> Option<&T> {

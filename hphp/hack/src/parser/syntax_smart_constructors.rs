@@ -19,6 +19,7 @@
 use crate::lexable_token::LexableToken;
 use crate::smart_constructors::SmartConstructors;
 use crate::syntax::{Syntax, SyntaxValueType};
+use crate::syntax_type::*;
 
 use std::marker::PhantomData;
 

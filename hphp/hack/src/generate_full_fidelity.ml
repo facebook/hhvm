@@ -509,7 +509,7 @@ module GenerateFFRustSyntax = struct
     let args = map_and_concat_separated ", " (mapper x.prefix) x.fields in
     let mapper prefix (f,_) = sprintf "%s_%s" prefix f in
     let fields = map_and_concat_separated ",\n            " (mapper x.prefix) x.fields in
-    sprintf("    pub fn make_%s(%s) -> Self {
+    sprintf("    fn make_%s(%s) -> Self {
         let syntax = SyntaxVariant::%s(Box::new(%sChildren {
             %s,
         }));
@@ -522,13 +522,14 @@ module GenerateFFRustSyntax = struct
 use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
+use crate::syntax_type::SyntaxType;
 
-impl<T, V> Syntax<T, V>
+impl<T, V> SyntaxType<T, V> for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
 {
-SYNTAX_CONSTRUCTORS    pub fn fold_over_children<'a, U>(
+SYNTAX_CONSTRUCTORS    fn fold_over_children<'a, U>(
         f: &Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
@@ -547,7 +548,7 @@ FOLD_OVER_CHILDREN
         }
     }
 
-    pub fn kind(&self) -> SyntaxKind  {
+    fn kind(&self) -> SyntaxKind  {
         match self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,
             SyntaxVariant::Token (_) => SyntaxKind::Token,
@@ -563,7 +564,7 @@ pub enum SyntaxVariant<T, V> {
     Missing,
     SyntaxList(Box<Vec<Syntax<T, V>>>),
 SYNTAX_VARIANT}
-  "
+"
   let full_fidelity_syntax =
   {
     filename = full_fidelity_path_prefix ^ "syntax_generated.rs";
@@ -583,6 +584,86 @@ SYNTAX_VARIANT}
   }
 
 end (* GenerateFFRustSyntax *)
+
+module GenerateFFRustSyntaxType = struct
+
+  let to_kind x =
+    sprintf ("            SyntaxVariant::%s {..} => SyntaxKind::%s,\n") x.kind_name x.kind_name
+
+  let to_children x =
+    let mapper prefix (f,_) = sprintf "&*%s_%s" prefix f in
+    let fields2 = map_and_concat_separated ",\n       " (mapper x.prefix) x.fields in
+    let mapper prefix (f,_) = sprintf "ref %s_%s" prefix f in
+    let fields = map_and_concat_separated ",\n       " (mapper x.prefix) x.fields in
+    sprintf("SyntaxVariant::%s {
+        %s
+    } => vec![%s],")
+    x.kind_name fields fields2
+
+  let into_children x =
+    let mapper prefix (f,_) = sprintf "x.%s_%s" prefix f in
+    let fields = map_and_concat_separated ",\n                " (mapper x.prefix) x.fields in
+    sprintf("            SyntaxVariant::%s (x) => { vec!(
+                %s
+            )},\n")
+    x.kind_name fields
+
+  let fold_over x =
+    let mapper prefix (f,_) = sprintf "let acc = f(&x.%s_%s, acc)" prefix f in
+    let fields = map_and_concat_separated ";\n                " (mapper x.prefix) x.fields in
+    sprintf("            SyntaxVariant::%s(x) => {
+                %s;
+                acc
+            },\n")
+    x.kind_name fields
+
+  let to_syntax_constructors x =
+    let mapper prefix (f,_) = sprintf "%s_%s: Self" prefix f in
+    let args = map_and_concat_separated ", " (mapper x.prefix) x.fields in
+    sprintf("    fn make_%s(%s) -> Self;\n")
+    x.type_name args
+
+  let full_fidelity_syntax_template = make_header CStyle "" ^ "
+use crate::lexable_token::LexableToken;
+use crate::syntax::*;
+use crate::syntax_kind::SyntaxKind;
+
+pub trait SyntaxTypeBase<T, V> {
+    fn make_missing(offset: usize) -> Self;
+    fn make_token(arg: T) -> Self;
+    fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self where Self : Sized;
+}
+
+pub trait SyntaxType<T, V> : SyntaxTypeBase<T, V>
+where
+    T: LexableToken,
+    V: SyntaxValueType<T>,
+{
+SYNTAX_CONSTRUCTORS
+
+    fn fold_over_children<'a, U>(
+        f: &Fn(&'a Self, U) -> U,
+        acc: U,
+        syntax: &'a SyntaxVariant<T, V>,
+    ) -> U;
+    fn kind(&self) -> SyntaxKind;
+}
+  "
+  let full_fidelity_syntax =
+  {
+    filename = full_fidelity_path_prefix ^ "syntax_type.rs";
+    template = full_fidelity_syntax_template;
+    transformations = [
+      { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+
+end (* GenerateFFRustSyntaxType *)
 
 module GenerateFFSyntaxSig = struct
 
@@ -1042,6 +1123,7 @@ module GenerateFFRustSyntaxSmartConstructors = struct
 use crate::lexable_token::LexableToken;
 use crate::smart_constructors::SmartConstructors;
 use crate::syntax::{Syntax, SyntaxValueType};
+use crate::syntax_type::*;
 
 use std::marker::PhantomData;
 
@@ -2683,6 +2765,7 @@ let () =
   generate_file GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
   generate_file GenerateFFSyntax.full_fidelity_syntax;
   generate_file GenerateFFRustSyntax.full_fidelity_syntax;
+  generate_file GenerateFFRustSyntaxType.full_fidelity_syntax;
   generate_file GenerateFFSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFRustSyntaxKind.full_fidelity_syntax_kind;
   generate_file GenerateFFJavaScript.full_fidelity_javascript;

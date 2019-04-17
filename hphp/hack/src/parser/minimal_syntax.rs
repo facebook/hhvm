@@ -10,6 +10,7 @@ use crate::lexable_token::LexableToken;
 use crate::minimal_token::MinimalToken;
 use crate::syntax::{Syntax, SyntaxValueType, SyntaxVariant};
 use crate::syntax_kind::SyntaxKind;
+use crate::syntax_type::SyntaxType;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MinimalValue {
@@ -23,7 +24,7 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
             acc + w
         };
 
-        let full_width = Syntax::fold_over_children(&f, 0, variant);
+        let full_width = SyntaxType::fold_over_children(&f, 0, variant);
         Self { full_width }
     }
 

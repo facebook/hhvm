@@ -19,13 +19,14 @@
 use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
+use crate::syntax_type::SyntaxType;
 
-impl<T, V> Syntax<T, V>
+impl<T, V> SyntaxType<T, V> for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
 {
-    pub fn make_end_of_file(end_of_file_token: Self) -> Self {
+    fn make_end_of_file(end_of_file_token: Self) -> Self {
         let syntax = SyntaxVariant::EndOfFile(Box::new(EndOfFileChildren {
             end_of_file_token,
         }));
@@ -33,7 +34,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_script(script_declarations: Self) -> Self {
+    fn make_script(script_declarations: Self) -> Self {
         let syntax = SyntaxVariant::Script(Box::new(ScriptChildren {
             script_declarations,
         }));
@@ -41,7 +42,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_qualified_name(qualified_name_parts: Self) -> Self {
+    fn make_qualified_name(qualified_name_parts: Self) -> Self {
         let syntax = SyntaxVariant::QualifiedName(Box::new(QualifiedNameChildren {
             qualified_name_parts,
         }));
@@ -49,7 +50,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_simple_type_specifier(simple_type_specifier: Self) -> Self {
+    fn make_simple_type_specifier(simple_type_specifier: Self) -> Self {
         let syntax = SyntaxVariant::SimpleTypeSpecifier(Box::new(SimpleTypeSpecifierChildren {
             simple_type_specifier,
         }));
@@ -57,7 +58,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_literal_expression(literal_expression: Self) -> Self {
+    fn make_literal_expression(literal_expression: Self) -> Self {
         let syntax = SyntaxVariant::LiteralExpression(Box::new(LiteralExpressionChildren {
             literal_expression,
         }));
@@ -65,7 +66,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_prefixed_string_expression(prefixed_string_name: Self, prefixed_string_str: Self) -> Self {
+    fn make_prefixed_string_expression(prefixed_string_name: Self, prefixed_string_str: Self) -> Self {
         let syntax = SyntaxVariant::PrefixedStringExpression(Box::new(PrefixedStringExpressionChildren {
             prefixed_string_name,
             prefixed_string_str,
@@ -74,7 +75,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_variable_expression(variable_expression: Self) -> Self {
+    fn make_variable_expression(variable_expression: Self) -> Self {
         let syntax = SyntaxVariant::VariableExpression(Box::new(VariableExpressionChildren {
             variable_expression,
         }));
@@ -82,7 +83,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pipe_variable_expression(pipe_variable_expression: Self) -> Self {
+    fn make_pipe_variable_expression(pipe_variable_expression: Self) -> Self {
         let syntax = SyntaxVariant::PipeVariableExpression(Box::new(PipeVariableExpressionChildren {
             pipe_variable_expression,
         }));
@@ -90,7 +91,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_file_attribute_specification(file_attribute_specification_left_double_angle: Self, file_attribute_specification_keyword: Self, file_attribute_specification_colon: Self, file_attribute_specification_attributes: Self, file_attribute_specification_right_double_angle: Self) -> Self {
+    fn make_file_attribute_specification(file_attribute_specification_left_double_angle: Self, file_attribute_specification_keyword: Self, file_attribute_specification_colon: Self, file_attribute_specification_attributes: Self, file_attribute_specification_right_double_angle: Self) -> Self {
         let syntax = SyntaxVariant::FileAttributeSpecification(Box::new(FileAttributeSpecificationChildren {
             file_attribute_specification_left_double_angle,
             file_attribute_specification_keyword,
@@ -102,7 +103,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_enum_declaration(enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self {
+    fn make_enum_declaration(enum_attribute_spec: Self, enum_keyword: Self, enum_name: Self, enum_colon: Self, enum_base: Self, enum_type: Self, enum_left_brace: Self, enum_enumerators: Self, enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EnumDeclaration(Box::new(EnumDeclarationChildren {
             enum_attribute_spec,
             enum_keyword,
@@ -118,7 +119,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_enumerator(enumerator_name: Self, enumerator_equal: Self, enumerator_value: Self, enumerator_semicolon: Self) -> Self {
+    fn make_enumerator(enumerator_name: Self, enumerator_equal: Self, enumerator_value: Self, enumerator_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::Enumerator(Box::new(EnumeratorChildren {
             enumerator_name,
             enumerator_equal,
@@ -129,7 +130,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_record_declaration(record_attribute_spec: Self, record_keyword: Self, record_name: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
+    fn make_record_declaration(record_attribute_spec: Self, record_keyword: Self, record_name: Self, record_left_brace: Self, record_fields: Self, record_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::RecordDeclaration(Box::new(RecordDeclarationChildren {
             record_attribute_spec,
             record_keyword,
@@ -142,7 +143,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_record_field(record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_init: Self, record_field_comma: Self) -> Self {
+    fn make_record_field(record_field_name: Self, record_field_colon: Self, record_field_type: Self, record_field_init: Self, record_field_comma: Self) -> Self {
         let syntax = SyntaxVariant::RecordField(Box::new(RecordFieldChildren {
             record_field_name,
             record_field_colon,
@@ -154,7 +155,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_alias_declaration(alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
+    fn make_alias_declaration(alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AliasDeclaration(Box::new(AliasDeclarationChildren {
             alias_attribute_spec,
             alias_keyword,
@@ -169,7 +170,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_property_declaration(property_attribute_spec: Self, property_modifiers: Self, property_type: Self, property_declarators: Self, property_semicolon: Self) -> Self {
+    fn make_property_declaration(property_attribute_spec: Self, property_modifiers: Self, property_type: Self, property_declarators: Self, property_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PropertyDeclaration(Box::new(PropertyDeclarationChildren {
             property_attribute_spec,
             property_modifiers,
@@ -181,7 +182,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_property_declarator(property_name: Self, property_initializer: Self) -> Self {
+    fn make_property_declarator(property_name: Self, property_initializer: Self) -> Self {
         let syntax = SyntaxVariant::PropertyDeclarator(Box::new(PropertyDeclaratorChildren {
             property_name,
             property_initializer,
@@ -190,7 +191,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_namespace_declaration(namespace_keyword: Self, namespace_name: Self, namespace_body: Self) -> Self {
+    fn make_namespace_declaration(namespace_keyword: Self, namespace_name: Self, namespace_body: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceDeclaration(Box::new(NamespaceDeclarationChildren {
             namespace_keyword,
             namespace_name,
@@ -200,7 +201,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_namespace_body(namespace_left_brace: Self, namespace_declarations: Self, namespace_right_brace: Self) -> Self {
+    fn make_namespace_body(namespace_left_brace: Self, namespace_declarations: Self, namespace_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceBody(Box::new(NamespaceBodyChildren {
             namespace_left_brace,
             namespace_declarations,
@@ -210,7 +211,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_namespace_empty_body(namespace_semicolon: Self) -> Self {
+    fn make_namespace_empty_body(namespace_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceEmptyBody(Box::new(NamespaceEmptyBodyChildren {
             namespace_semicolon,
         }));
@@ -218,7 +219,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_namespace_use_declaration(namespace_use_keyword: Self, namespace_use_kind: Self, namespace_use_clauses: Self, namespace_use_semicolon: Self) -> Self {
+    fn make_namespace_use_declaration(namespace_use_keyword: Self, namespace_use_kind: Self, namespace_use_clauses: Self, namespace_use_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceUseDeclaration(Box::new(NamespaceUseDeclarationChildren {
             namespace_use_keyword,
             namespace_use_kind,
@@ -229,7 +230,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_namespace_group_use_declaration(namespace_group_use_keyword: Self, namespace_group_use_kind: Self, namespace_group_use_prefix: Self, namespace_group_use_left_brace: Self, namespace_group_use_clauses: Self, namespace_group_use_right_brace: Self, namespace_group_use_semicolon: Self) -> Self {
+    fn make_namespace_group_use_declaration(namespace_group_use_keyword: Self, namespace_group_use_kind: Self, namespace_group_use_prefix: Self, namespace_group_use_left_brace: Self, namespace_group_use_clauses: Self, namespace_group_use_right_brace: Self, namespace_group_use_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceGroupUseDeclaration(Box::new(NamespaceGroupUseDeclarationChildren {
             namespace_group_use_keyword,
             namespace_group_use_kind,
@@ -243,7 +244,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_namespace_use_clause(namespace_use_clause_kind: Self, namespace_use_name: Self, namespace_use_as: Self, namespace_use_alias: Self) -> Self {
+    fn make_namespace_use_clause(namespace_use_clause_kind: Self, namespace_use_name: Self, namespace_use_as: Self, namespace_use_alias: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceUseClause(Box::new(NamespaceUseClauseChildren {
             namespace_use_clause_kind,
             namespace_use_name,
@@ -254,7 +255,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_function_declaration(function_attribute_spec: Self, function_declaration_header: Self, function_body: Self) -> Self {
+    fn make_function_declaration(function_attribute_spec: Self, function_declaration_header: Self, function_body: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclaration(Box::new(FunctionDeclarationChildren {
             function_attribute_spec,
             function_declaration_header,
@@ -264,7 +265,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_function_declaration_header(function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_colon: Self, function_type: Self, function_where_clause: Self) -> Self {
+    fn make_function_declaration_header(function_modifiers: Self, function_keyword: Self, function_name: Self, function_type_parameter_list: Self, function_left_paren: Self, function_parameter_list: Self, function_right_paren: Self, function_colon: Self, function_type: Self, function_where_clause: Self) -> Self {
         let syntax = SyntaxVariant::FunctionDeclarationHeader(Box::new(FunctionDeclarationHeaderChildren {
             function_modifiers,
             function_keyword,
@@ -281,7 +282,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_where_clause(where_clause_keyword: Self, where_clause_constraints: Self) -> Self {
+    fn make_where_clause(where_clause_keyword: Self, where_clause_constraints: Self) -> Self {
         let syntax = SyntaxVariant::WhereClause(Box::new(WhereClauseChildren {
             where_clause_keyword,
             where_clause_constraints,
@@ -290,7 +291,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_where_constraint(where_constraint_left_type: Self, where_constraint_operator: Self, where_constraint_right_type: Self) -> Self {
+    fn make_where_constraint(where_constraint_left_type: Self, where_constraint_operator: Self, where_constraint_right_type: Self) -> Self {
         let syntax = SyntaxVariant::WhereConstraint(Box::new(WhereConstraintChildren {
             where_constraint_left_type,
             where_constraint_operator,
@@ -300,7 +301,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_methodish_declaration(methodish_attribute: Self, methodish_function_decl_header: Self, methodish_function_body: Self, methodish_semicolon: Self) -> Self {
+    fn make_methodish_declaration(methodish_attribute: Self, methodish_function_decl_header: Self, methodish_function_body: Self, methodish_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::MethodishDeclaration(Box::new(MethodishDeclarationChildren {
             methodish_attribute,
             methodish_function_decl_header,
@@ -311,7 +312,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_methodish_trait_resolution(methodish_trait_attribute: Self, methodish_trait_function_decl_header: Self, methodish_trait_equal: Self, methodish_trait_name: Self, methodish_trait_semicolon: Self) -> Self {
+    fn make_methodish_trait_resolution(methodish_trait_attribute: Self, methodish_trait_function_decl_header: Self, methodish_trait_equal: Self, methodish_trait_name: Self, methodish_trait_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::MethodishTraitResolution(Box::new(MethodishTraitResolutionChildren {
             methodish_trait_attribute,
             methodish_trait_function_decl_header,
@@ -323,7 +324,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_classish_declaration(classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_body: Self) -> Self {
+    fn make_classish_declaration(classish_attribute: Self, classish_modifiers: Self, classish_keyword: Self, classish_name: Self, classish_type_parameters: Self, classish_extends_keyword: Self, classish_extends_list: Self, classish_implements_keyword: Self, classish_implements_list: Self, classish_body: Self) -> Self {
         let syntax = SyntaxVariant::ClassishDeclaration(Box::new(ClassishDeclarationChildren {
             classish_attribute,
             classish_modifiers,
@@ -340,7 +341,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_classish_body(classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self {
+    fn make_classish_body(classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::ClassishBody(Box::new(ClassishBodyChildren {
             classish_body_left_brace,
             classish_body_elements,
@@ -350,7 +351,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_trait_use_precedence_item(trait_use_precedence_item_name: Self, trait_use_precedence_item_keyword: Self, trait_use_precedence_item_removed_names: Self) -> Self {
+    fn make_trait_use_precedence_item(trait_use_precedence_item_name: Self, trait_use_precedence_item_keyword: Self, trait_use_precedence_item_removed_names: Self) -> Self {
         let syntax = SyntaxVariant::TraitUsePrecedenceItem(Box::new(TraitUsePrecedenceItemChildren {
             trait_use_precedence_item_name,
             trait_use_precedence_item_keyword,
@@ -360,7 +361,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_trait_use_alias_item(trait_use_alias_item_aliasing_name: Self, trait_use_alias_item_keyword: Self, trait_use_alias_item_modifiers: Self, trait_use_alias_item_aliased_name: Self) -> Self {
+    fn make_trait_use_alias_item(trait_use_alias_item_aliasing_name: Self, trait_use_alias_item_keyword: Self, trait_use_alias_item_modifiers: Self, trait_use_alias_item_aliased_name: Self) -> Self {
         let syntax = SyntaxVariant::TraitUseAliasItem(Box::new(TraitUseAliasItemChildren {
             trait_use_alias_item_aliasing_name,
             trait_use_alias_item_keyword,
@@ -371,7 +372,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_trait_use_conflict_resolution(trait_use_conflict_resolution_keyword: Self, trait_use_conflict_resolution_names: Self, trait_use_conflict_resolution_left_brace: Self, trait_use_conflict_resolution_clauses: Self, trait_use_conflict_resolution_right_brace: Self) -> Self {
+    fn make_trait_use_conflict_resolution(trait_use_conflict_resolution_keyword: Self, trait_use_conflict_resolution_names: Self, trait_use_conflict_resolution_left_brace: Self, trait_use_conflict_resolution_clauses: Self, trait_use_conflict_resolution_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::TraitUseConflictResolution(Box::new(TraitUseConflictResolutionChildren {
             trait_use_conflict_resolution_keyword,
             trait_use_conflict_resolution_names,
@@ -383,7 +384,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_trait_use(trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self {
+    fn make_trait_use(trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TraitUse(Box::new(TraitUseChildren {
             trait_use_keyword,
             trait_use_names,
@@ -393,7 +394,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_require_clause(require_keyword: Self, require_kind: Self, require_name: Self, require_semicolon: Self) -> Self {
+    fn make_require_clause(require_keyword: Self, require_kind: Self, require_name: Self, require_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::RequireClause(Box::new(RequireClauseChildren {
             require_keyword,
             require_kind,
@@ -404,7 +405,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_const_declaration(const_visibility: Self, const_abstract: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self {
+    fn make_const_declaration(const_visibility: Self, const_abstract: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ConstDeclaration(Box::new(ConstDeclarationChildren {
             const_visibility,
             const_abstract,
@@ -417,7 +418,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_constant_declarator(constant_declarator_name: Self, constant_declarator_initializer: Self) -> Self {
+    fn make_constant_declarator(constant_declarator_name: Self, constant_declarator_initializer: Self) -> Self {
         let syntax = SyntaxVariant::ConstantDeclarator(Box::new(ConstantDeclaratorChildren {
             constant_declarator_name,
             constant_declarator_initializer,
@@ -426,7 +427,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_type_const_declaration(type_const_attribute_spec: Self, type_const_abstract: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self {
+    fn make_type_const_declaration(type_const_attribute_spec: Self, type_const_abstract: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraint: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstDeclaration(Box::new(TypeConstDeclarationChildren {
             type_const_attribute_spec,
             type_const_abstract,
@@ -443,7 +444,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_decorated_expression(decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self {
+    fn make_decorated_expression(decorated_expression_decorator: Self, decorated_expression_expression: Self) -> Self {
         let syntax = SyntaxVariant::DecoratedExpression(Box::new(DecoratedExpressionChildren {
             decorated_expression_decorator,
             decorated_expression_expression,
@@ -452,7 +453,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_parameter_declaration(parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self {
+    fn make_parameter_declaration(parameter_attribute: Self, parameter_visibility: Self, parameter_call_convention: Self, parameter_type: Self, parameter_name: Self, parameter_default_value: Self) -> Self {
         let syntax = SyntaxVariant::ParameterDeclaration(Box::new(ParameterDeclarationChildren {
             parameter_attribute,
             parameter_visibility,
@@ -465,7 +466,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_variadic_parameter(variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self {
+    fn make_variadic_parameter(variadic_parameter_call_convention: Self, variadic_parameter_type: Self, variadic_parameter_ellipsis: Self) -> Self {
         let syntax = SyntaxVariant::VariadicParameter(Box::new(VariadicParameterChildren {
             variadic_parameter_call_convention,
             variadic_parameter_type,
@@ -475,7 +476,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_attribute_specification(attribute_specification_left_double_angle: Self, attribute_specification_attributes: Self, attribute_specification_right_double_angle: Self) -> Self {
+    fn make_attribute_specification(attribute_specification_left_double_angle: Self, attribute_specification_attributes: Self, attribute_specification_right_double_angle: Self) -> Self {
         let syntax = SyntaxVariant::AttributeSpecification(Box::new(AttributeSpecificationChildren {
             attribute_specification_left_double_angle,
             attribute_specification_attributes,
@@ -485,7 +486,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_inclusion_expression(inclusion_require: Self, inclusion_filename: Self) -> Self {
+    fn make_inclusion_expression(inclusion_require: Self, inclusion_filename: Self) -> Self {
         let syntax = SyntaxVariant::InclusionExpression(Box::new(InclusionExpressionChildren {
             inclusion_require,
             inclusion_filename,
@@ -494,7 +495,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_inclusion_directive(inclusion_expression: Self, inclusion_semicolon: Self) -> Self {
+    fn make_inclusion_directive(inclusion_expression: Self, inclusion_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::InclusionDirective(Box::new(InclusionDirectiveChildren {
             inclusion_expression,
             inclusion_semicolon,
@@ -503,7 +504,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_compound_statement(compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self {
+    fn make_compound_statement(compound_left_brace: Self, compound_statements: Self, compound_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::CompoundStatement(Box::new(CompoundStatementChildren {
             compound_left_brace,
             compound_statements,
@@ -513,7 +514,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_alternate_loop_statement(alternate_loop_opening_colon: Self, alternate_loop_statements: Self, alternate_loop_closing_keyword: Self, alternate_loop_closing_semicolon: Self) -> Self {
+    fn make_alternate_loop_statement(alternate_loop_opening_colon: Self, alternate_loop_statements: Self, alternate_loop_closing_keyword: Self, alternate_loop_closing_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AlternateLoopStatement(Box::new(AlternateLoopStatementChildren {
             alternate_loop_opening_colon,
             alternate_loop_statements,
@@ -524,7 +525,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_expression_statement(expression_statement_expression: Self, expression_statement_semicolon: Self) -> Self {
+    fn make_expression_statement(expression_statement_expression: Self, expression_statement_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ExpressionStatement(Box::new(ExpressionStatementChildren {
             expression_statement_expression,
             expression_statement_semicolon,
@@ -533,7 +534,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_markup_section(markup_prefix: Self, markup_text: Self, markup_suffix: Self, markup_expression: Self) -> Self {
+    fn make_markup_section(markup_prefix: Self, markup_text: Self, markup_suffix: Self, markup_expression: Self) -> Self {
         let syntax = SyntaxVariant::MarkupSection(Box::new(MarkupSectionChildren {
             markup_prefix,
             markup_text,
@@ -544,7 +545,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_markup_suffix(markup_suffix_less_than_question: Self, markup_suffix_name: Self) -> Self {
+    fn make_markup_suffix(markup_suffix_less_than_question: Self, markup_suffix_name: Self) -> Self {
         let syntax = SyntaxVariant::MarkupSuffix(Box::new(MarkupSuffixChildren {
             markup_suffix_less_than_question,
             markup_suffix_name,
@@ -553,7 +554,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_unset_statement(unset_keyword: Self, unset_left_paren: Self, unset_variables: Self, unset_right_paren: Self, unset_semicolon: Self) -> Self {
+    fn make_unset_statement(unset_keyword: Self, unset_left_paren: Self, unset_variables: Self, unset_right_paren: Self, unset_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::UnsetStatement(Box::new(UnsetStatementChildren {
             unset_keyword,
             unset_left_paren,
@@ -565,7 +566,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_let_statement(let_statement_keyword: Self, let_statement_name: Self, let_statement_colon: Self, let_statement_type: Self, let_statement_initializer: Self, let_statement_semicolon: Self) -> Self {
+    fn make_let_statement(let_statement_keyword: Self, let_statement_name: Self, let_statement_colon: Self, let_statement_type: Self, let_statement_initializer: Self, let_statement_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::LetStatement(Box::new(LetStatementChildren {
             let_statement_keyword,
             let_statement_name,
@@ -578,7 +579,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_using_statement_block_scoped(using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self {
+    fn make_using_statement_block_scoped(using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self {
         let syntax = SyntaxVariant::UsingStatementBlockScoped(Box::new(UsingStatementBlockScopedChildren {
             using_block_await_keyword,
             using_block_using_keyword,
@@ -591,7 +592,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_using_statement_function_scoped(using_function_await_keyword: Self, using_function_using_keyword: Self, using_function_expression: Self, using_function_semicolon: Self) -> Self {
+    fn make_using_statement_function_scoped(using_function_await_keyword: Self, using_function_using_keyword: Self, using_function_expression: Self, using_function_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::UsingStatementFunctionScoped(Box::new(UsingStatementFunctionScopedChildren {
             using_function_await_keyword,
             using_function_using_keyword,
@@ -602,7 +603,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_declare_directive_statement(declare_directive_keyword: Self, declare_directive_left_paren: Self, declare_directive_expression: Self, declare_directive_right_paren: Self, declare_directive_semicolon: Self) -> Self {
+    fn make_declare_directive_statement(declare_directive_keyword: Self, declare_directive_left_paren: Self, declare_directive_expression: Self, declare_directive_right_paren: Self, declare_directive_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::DeclareDirectiveStatement(Box::new(DeclareDirectiveStatementChildren {
             declare_directive_keyword,
             declare_directive_left_paren,
@@ -614,7 +615,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_declare_block_statement(declare_block_keyword: Self, declare_block_left_paren: Self, declare_block_expression: Self, declare_block_right_paren: Self, declare_block_body: Self) -> Self {
+    fn make_declare_block_statement(declare_block_keyword: Self, declare_block_left_paren: Self, declare_block_expression: Self, declare_block_right_paren: Self, declare_block_body: Self) -> Self {
         let syntax = SyntaxVariant::DeclareBlockStatement(Box::new(DeclareBlockStatementChildren {
             declare_block_keyword,
             declare_block_left_paren,
@@ -626,7 +627,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_while_statement(while_keyword: Self, while_left_paren: Self, while_condition: Self, while_right_paren: Self, while_body: Self) -> Self {
+    fn make_while_statement(while_keyword: Self, while_left_paren: Self, while_condition: Self, while_right_paren: Self, while_body: Self) -> Self {
         let syntax = SyntaxVariant::WhileStatement(Box::new(WhileStatementChildren {
             while_keyword,
             while_left_paren,
@@ -638,7 +639,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_if_statement(if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_elseif_clauses: Self, if_else_clause: Self) -> Self {
+    fn make_if_statement(if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_elseif_clauses: Self, if_else_clause: Self) -> Self {
         let syntax = SyntaxVariant::IfStatement(Box::new(IfStatementChildren {
             if_keyword,
             if_left_paren,
@@ -652,7 +653,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_elseif_clause(elseif_keyword: Self, elseif_left_paren: Self, elseif_condition: Self, elseif_right_paren: Self, elseif_statement: Self) -> Self {
+    fn make_elseif_clause(elseif_keyword: Self, elseif_left_paren: Self, elseif_condition: Self, elseif_right_paren: Self, elseif_statement: Self) -> Self {
         let syntax = SyntaxVariant::ElseifClause(Box::new(ElseifClauseChildren {
             elseif_keyword,
             elseif_left_paren,
@@ -664,7 +665,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_else_clause(else_keyword: Self, else_statement: Self) -> Self {
+    fn make_else_clause(else_keyword: Self, else_statement: Self) -> Self {
         let syntax = SyntaxVariant::ElseClause(Box::new(ElseClauseChildren {
             else_keyword,
             else_statement,
@@ -673,7 +674,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_alternate_if_statement(alternate_if_keyword: Self, alternate_if_left_paren: Self, alternate_if_condition: Self, alternate_if_right_paren: Self, alternate_if_colon: Self, alternate_if_statement: Self, alternate_if_elseif_clauses: Self, alternate_if_else_clause: Self, alternate_if_endif_keyword: Self, alternate_if_semicolon: Self) -> Self {
+    fn make_alternate_if_statement(alternate_if_keyword: Self, alternate_if_left_paren: Self, alternate_if_condition: Self, alternate_if_right_paren: Self, alternate_if_colon: Self, alternate_if_statement: Self, alternate_if_elseif_clauses: Self, alternate_if_else_clause: Self, alternate_if_endif_keyword: Self, alternate_if_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AlternateIfStatement(Box::new(AlternateIfStatementChildren {
             alternate_if_keyword,
             alternate_if_left_paren,
@@ -690,7 +691,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_alternate_elseif_clause(alternate_elseif_keyword: Self, alternate_elseif_left_paren: Self, alternate_elseif_condition: Self, alternate_elseif_right_paren: Self, alternate_elseif_colon: Self, alternate_elseif_statement: Self) -> Self {
+    fn make_alternate_elseif_clause(alternate_elseif_keyword: Self, alternate_elseif_left_paren: Self, alternate_elseif_condition: Self, alternate_elseif_right_paren: Self, alternate_elseif_colon: Self, alternate_elseif_statement: Self) -> Self {
         let syntax = SyntaxVariant::AlternateElseifClause(Box::new(AlternateElseifClauseChildren {
             alternate_elseif_keyword,
             alternate_elseif_left_paren,
@@ -703,7 +704,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_alternate_else_clause(alternate_else_keyword: Self, alternate_else_colon: Self, alternate_else_statement: Self) -> Self {
+    fn make_alternate_else_clause(alternate_else_keyword: Self, alternate_else_colon: Self, alternate_else_statement: Self) -> Self {
         let syntax = SyntaxVariant::AlternateElseClause(Box::new(AlternateElseClauseChildren {
             alternate_else_keyword,
             alternate_else_colon,
@@ -713,7 +714,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_try_statement(try_keyword: Self, try_compound_statement: Self, try_catch_clauses: Self, try_finally_clause: Self) -> Self {
+    fn make_try_statement(try_keyword: Self, try_compound_statement: Self, try_catch_clauses: Self, try_finally_clause: Self) -> Self {
         let syntax = SyntaxVariant::TryStatement(Box::new(TryStatementChildren {
             try_keyword,
             try_compound_statement,
@@ -724,7 +725,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_catch_clause(catch_keyword: Self, catch_left_paren: Self, catch_type: Self, catch_variable: Self, catch_right_paren: Self, catch_body: Self) -> Self {
+    fn make_catch_clause(catch_keyword: Self, catch_left_paren: Self, catch_type: Self, catch_variable: Self, catch_right_paren: Self, catch_body: Self) -> Self {
         let syntax = SyntaxVariant::CatchClause(Box::new(CatchClauseChildren {
             catch_keyword,
             catch_left_paren,
@@ -737,7 +738,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_finally_clause(finally_keyword: Self, finally_body: Self) -> Self {
+    fn make_finally_clause(finally_keyword: Self, finally_body: Self) -> Self {
         let syntax = SyntaxVariant::FinallyClause(Box::new(FinallyClauseChildren {
             finally_keyword,
             finally_body,
@@ -746,7 +747,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_do_statement(do_keyword: Self, do_body: Self, do_while_keyword: Self, do_left_paren: Self, do_condition: Self, do_right_paren: Self, do_semicolon: Self) -> Self {
+    fn make_do_statement(do_keyword: Self, do_body: Self, do_while_keyword: Self, do_left_paren: Self, do_condition: Self, do_right_paren: Self, do_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::DoStatement(Box::new(DoStatementChildren {
             do_keyword,
             do_body,
@@ -760,7 +761,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_for_statement(for_keyword: Self, for_left_paren: Self, for_initializer: Self, for_first_semicolon: Self, for_control: Self, for_second_semicolon: Self, for_end_of_loop: Self, for_right_paren: Self, for_body: Self) -> Self {
+    fn make_for_statement(for_keyword: Self, for_left_paren: Self, for_initializer: Self, for_first_semicolon: Self, for_control: Self, for_second_semicolon: Self, for_end_of_loop: Self, for_right_paren: Self, for_body: Self) -> Self {
         let syntax = SyntaxVariant::ForStatement(Box::new(ForStatementChildren {
             for_keyword,
             for_left_paren,
@@ -776,7 +777,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_foreach_statement(foreach_keyword: Self, foreach_left_paren: Self, foreach_collection: Self, foreach_await_keyword: Self, foreach_as: Self, foreach_key: Self, foreach_arrow: Self, foreach_value: Self, foreach_right_paren: Self, foreach_body: Self) -> Self {
+    fn make_foreach_statement(foreach_keyword: Self, foreach_left_paren: Self, foreach_collection: Self, foreach_await_keyword: Self, foreach_as: Self, foreach_key: Self, foreach_arrow: Self, foreach_value: Self, foreach_right_paren: Self, foreach_body: Self) -> Self {
         let syntax = SyntaxVariant::ForeachStatement(Box::new(ForeachStatementChildren {
             foreach_keyword,
             foreach_left_paren,
@@ -793,7 +794,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_switch_statement(switch_keyword: Self, switch_left_paren: Self, switch_expression: Self, switch_right_paren: Self, switch_left_brace: Self, switch_sections: Self, switch_right_brace: Self) -> Self {
+    fn make_switch_statement(switch_keyword: Self, switch_left_paren: Self, switch_expression: Self, switch_right_paren: Self, switch_left_brace: Self, switch_sections: Self, switch_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::SwitchStatement(Box::new(SwitchStatementChildren {
             switch_keyword,
             switch_left_paren,
@@ -807,7 +808,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_alternate_switch_statement(alternate_switch_keyword: Self, alternate_switch_left_paren: Self, alternate_switch_expression: Self, alternate_switch_right_paren: Self, alternate_switch_opening_colon: Self, alternate_switch_sections: Self, alternate_switch_closing_endswitch: Self, alternate_switch_closing_semicolon: Self) -> Self {
+    fn make_alternate_switch_statement(alternate_switch_keyword: Self, alternate_switch_left_paren: Self, alternate_switch_expression: Self, alternate_switch_right_paren: Self, alternate_switch_opening_colon: Self, alternate_switch_sections: Self, alternate_switch_closing_endswitch: Self, alternate_switch_closing_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::AlternateSwitchStatement(Box::new(AlternateSwitchStatementChildren {
             alternate_switch_keyword,
             alternate_switch_left_paren,
@@ -822,7 +823,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_switch_section(switch_section_labels: Self, switch_section_statements: Self, switch_section_fallthrough: Self) -> Self {
+    fn make_switch_section(switch_section_labels: Self, switch_section_statements: Self, switch_section_fallthrough: Self) -> Self {
         let syntax = SyntaxVariant::SwitchSection(Box::new(SwitchSectionChildren {
             switch_section_labels,
             switch_section_statements,
@@ -832,7 +833,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_switch_fallthrough(fallthrough_keyword: Self, fallthrough_semicolon: Self) -> Self {
+    fn make_switch_fallthrough(fallthrough_keyword: Self, fallthrough_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::SwitchFallthrough(Box::new(SwitchFallthroughChildren {
             fallthrough_keyword,
             fallthrough_semicolon,
@@ -841,7 +842,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_case_label(case_keyword: Self, case_expression: Self, case_colon: Self) -> Self {
+    fn make_case_label(case_keyword: Self, case_expression: Self, case_colon: Self) -> Self {
         let syntax = SyntaxVariant::CaseLabel(Box::new(CaseLabelChildren {
             case_keyword,
             case_expression,
@@ -851,7 +852,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_default_label(default_keyword: Self, default_colon: Self) -> Self {
+    fn make_default_label(default_keyword: Self, default_colon: Self) -> Self {
         let syntax = SyntaxVariant::DefaultLabel(Box::new(DefaultLabelChildren {
             default_keyword,
             default_colon,
@@ -860,7 +861,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_return_statement(return_keyword: Self, return_expression: Self, return_semicolon: Self) -> Self {
+    fn make_return_statement(return_keyword: Self, return_expression: Self, return_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ReturnStatement(Box::new(ReturnStatementChildren {
             return_keyword,
             return_expression,
@@ -870,7 +871,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_goto_label(goto_label_name: Self, goto_label_colon: Self) -> Self {
+    fn make_goto_label(goto_label_name: Self, goto_label_colon: Self) -> Self {
         let syntax = SyntaxVariant::GotoLabel(Box::new(GotoLabelChildren {
             goto_label_name,
             goto_label_colon,
@@ -879,7 +880,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_goto_statement(goto_statement_keyword: Self, goto_statement_label_name: Self, goto_statement_semicolon: Self) -> Self {
+    fn make_goto_statement(goto_statement_keyword: Self, goto_statement_label_name: Self, goto_statement_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::GotoStatement(Box::new(GotoStatementChildren {
             goto_statement_keyword,
             goto_statement_label_name,
@@ -889,7 +890,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_throw_statement(throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self {
+    fn make_throw_statement(throw_keyword: Self, throw_expression: Self, throw_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ThrowStatement(Box::new(ThrowStatementChildren {
             throw_keyword,
             throw_expression,
@@ -899,7 +900,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_break_statement(break_keyword: Self, break_level: Self, break_semicolon: Self) -> Self {
+    fn make_break_statement(break_keyword: Self, break_level: Self, break_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::BreakStatement(Box::new(BreakStatementChildren {
             break_keyword,
             break_level,
@@ -909,7 +910,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_continue_statement(continue_keyword: Self, continue_level: Self, continue_semicolon: Self) -> Self {
+    fn make_continue_statement(continue_keyword: Self, continue_level: Self, continue_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ContinueStatement(Box::new(ContinueStatementChildren {
             continue_keyword,
             continue_level,
@@ -919,7 +920,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_echo_statement(echo_keyword: Self, echo_expressions: Self, echo_semicolon: Self) -> Self {
+    fn make_echo_statement(echo_keyword: Self, echo_expressions: Self, echo_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::EchoStatement(Box::new(EchoStatementChildren {
             echo_keyword,
             echo_expressions,
@@ -929,7 +930,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_concurrent_statement(concurrent_keyword: Self, concurrent_statement: Self) -> Self {
+    fn make_concurrent_statement(concurrent_keyword: Self, concurrent_statement: Self) -> Self {
         let syntax = SyntaxVariant::ConcurrentStatement(Box::new(ConcurrentStatementChildren {
             concurrent_keyword,
             concurrent_statement,
@@ -938,7 +939,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_simple_initializer(simple_initializer_equal: Self, simple_initializer_value: Self) -> Self {
+    fn make_simple_initializer(simple_initializer_equal: Self, simple_initializer_value: Self) -> Self {
         let syntax = SyntaxVariant::SimpleInitializer(Box::new(SimpleInitializerChildren {
             simple_initializer_equal,
             simple_initializer_value,
@@ -947,7 +948,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_anonymous_class(anonymous_class_class_keyword: Self, anonymous_class_left_paren: Self, anonymous_class_argument_list: Self, anonymous_class_right_paren: Self, anonymous_class_extends_keyword: Self, anonymous_class_extends_list: Self, anonymous_class_implements_keyword: Self, anonymous_class_implements_list: Self, anonymous_class_body: Self) -> Self {
+    fn make_anonymous_class(anonymous_class_class_keyword: Self, anonymous_class_left_paren: Self, anonymous_class_argument_list: Self, anonymous_class_right_paren: Self, anonymous_class_extends_keyword: Self, anonymous_class_extends_list: Self, anonymous_class_implements_keyword: Self, anonymous_class_implements_list: Self, anonymous_class_body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousClass(Box::new(AnonymousClassChildren {
             anonymous_class_class_keyword,
             anonymous_class_left_paren,
@@ -963,7 +964,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_anonymous_function(anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_coroutine_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
+    fn make_anonymous_function(anonymous_attribute_spec: Self, anonymous_static_keyword: Self, anonymous_async_keyword: Self, anonymous_coroutine_keyword: Self, anonymous_function_keyword: Self, anonymous_left_paren: Self, anonymous_parameters: Self, anonymous_right_paren: Self, anonymous_colon: Self, anonymous_type: Self, anonymous_use: Self, anonymous_body: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunction(Box::new(AnonymousFunctionChildren {
             anonymous_attribute_spec,
             anonymous_static_keyword,
@@ -982,7 +983,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_php7_anonymous_function(php7_anonymous_attribute_spec: Self, php7_anonymous_static_keyword: Self, php7_anonymous_async_keyword: Self, php7_anonymous_coroutine_keyword: Self, php7_anonymous_function_keyword: Self, php7_anonymous_left_paren: Self, php7_anonymous_parameters: Self, php7_anonymous_right_paren: Self, php7_anonymous_use: Self, php7_anonymous_colon: Self, php7_anonymous_type: Self, php7_anonymous_body: Self) -> Self {
+    fn make_php7_anonymous_function(php7_anonymous_attribute_spec: Self, php7_anonymous_static_keyword: Self, php7_anonymous_async_keyword: Self, php7_anonymous_coroutine_keyword: Self, php7_anonymous_function_keyword: Self, php7_anonymous_left_paren: Self, php7_anonymous_parameters: Self, php7_anonymous_right_paren: Self, php7_anonymous_use: Self, php7_anonymous_colon: Self, php7_anonymous_type: Self, php7_anonymous_body: Self) -> Self {
         let syntax = SyntaxVariant::Php7AnonymousFunction(Box::new(Php7AnonymousFunctionChildren {
             php7_anonymous_attribute_spec,
             php7_anonymous_static_keyword,
@@ -1001,7 +1002,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_anonymous_function_use_clause(anonymous_use_keyword: Self, anonymous_use_left_paren: Self, anonymous_use_variables: Self, anonymous_use_right_paren: Self) -> Self {
+    fn make_anonymous_function_use_clause(anonymous_use_keyword: Self, anonymous_use_left_paren: Self, anonymous_use_variables: Self, anonymous_use_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::AnonymousFunctionUseClause(Box::new(AnonymousFunctionUseClauseChildren {
             anonymous_use_keyword,
             anonymous_use_left_paren,
@@ -1012,7 +1013,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_lambda_expression(lambda_attribute_spec: Self, lambda_async: Self, lambda_coroutine: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self {
+    fn make_lambda_expression(lambda_attribute_spec: Self, lambda_async: Self, lambda_coroutine: Self, lambda_signature: Self, lambda_arrow: Self, lambda_body: Self) -> Self {
         let syntax = SyntaxVariant::LambdaExpression(Box::new(LambdaExpressionChildren {
             lambda_attribute_spec,
             lambda_async,
@@ -1025,7 +1026,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_lambda_signature(lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_colon: Self, lambda_type: Self) -> Self {
+    fn make_lambda_signature(lambda_left_paren: Self, lambda_parameters: Self, lambda_right_paren: Self, lambda_colon: Self, lambda_type: Self) -> Self {
         let syntax = SyntaxVariant::LambdaSignature(Box::new(LambdaSignatureChildren {
             lambda_left_paren,
             lambda_parameters,
@@ -1037,7 +1038,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_cast_expression(cast_left_paren: Self, cast_type: Self, cast_right_paren: Self, cast_operand: Self) -> Self {
+    fn make_cast_expression(cast_left_paren: Self, cast_type: Self, cast_right_paren: Self, cast_operand: Self) -> Self {
         let syntax = SyntaxVariant::CastExpression(Box::new(CastExpressionChildren {
             cast_left_paren,
             cast_type,
@@ -1048,7 +1049,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_scope_resolution_expression(scope_resolution_qualifier: Self, scope_resolution_operator: Self, scope_resolution_name: Self) -> Self {
+    fn make_scope_resolution_expression(scope_resolution_qualifier: Self, scope_resolution_operator: Self, scope_resolution_name: Self) -> Self {
         let syntax = SyntaxVariant::ScopeResolutionExpression(Box::new(ScopeResolutionExpressionChildren {
             scope_resolution_qualifier,
             scope_resolution_operator,
@@ -1058,7 +1059,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_member_selection_expression(member_object: Self, member_operator: Self, member_name: Self) -> Self {
+    fn make_member_selection_expression(member_object: Self, member_operator: Self, member_name: Self) -> Self {
         let syntax = SyntaxVariant::MemberSelectionExpression(Box::new(MemberSelectionExpressionChildren {
             member_object,
             member_operator,
@@ -1068,7 +1069,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_safe_member_selection_expression(safe_member_object: Self, safe_member_operator: Self, safe_member_name: Self) -> Self {
+    fn make_safe_member_selection_expression(safe_member_object: Self, safe_member_operator: Self, safe_member_name: Self) -> Self {
         let syntax = SyntaxVariant::SafeMemberSelectionExpression(Box::new(SafeMemberSelectionExpressionChildren {
             safe_member_object,
             safe_member_operator,
@@ -1078,7 +1079,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_embedded_member_selection_expression(embedded_member_object: Self, embedded_member_operator: Self, embedded_member_name: Self) -> Self {
+    fn make_embedded_member_selection_expression(embedded_member_object: Self, embedded_member_operator: Self, embedded_member_name: Self) -> Self {
         let syntax = SyntaxVariant::EmbeddedMemberSelectionExpression(Box::new(EmbeddedMemberSelectionExpressionChildren {
             embedded_member_object,
             embedded_member_operator,
@@ -1088,7 +1089,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_yield_expression(yield_keyword: Self, yield_operand: Self) -> Self {
+    fn make_yield_expression(yield_keyword: Self, yield_operand: Self) -> Self {
         let syntax = SyntaxVariant::YieldExpression(Box::new(YieldExpressionChildren {
             yield_keyword,
             yield_operand,
@@ -1097,7 +1098,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_yield_from_expression(yield_from_yield_keyword: Self, yield_from_from_keyword: Self, yield_from_operand: Self) -> Self {
+    fn make_yield_from_expression(yield_from_yield_keyword: Self, yield_from_from_keyword: Self, yield_from_operand: Self) -> Self {
         let syntax = SyntaxVariant::YieldFromExpression(Box::new(YieldFromExpressionChildren {
             yield_from_yield_keyword,
             yield_from_from_keyword,
@@ -1107,7 +1108,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_prefix_unary_expression(prefix_unary_operator: Self, prefix_unary_operand: Self) -> Self {
+    fn make_prefix_unary_expression(prefix_unary_operator: Self, prefix_unary_operand: Self) -> Self {
         let syntax = SyntaxVariant::PrefixUnaryExpression(Box::new(PrefixUnaryExpressionChildren {
             prefix_unary_operator,
             prefix_unary_operand,
@@ -1116,7 +1117,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_postfix_unary_expression(postfix_unary_operand: Self, postfix_unary_operator: Self) -> Self {
+    fn make_postfix_unary_expression(postfix_unary_operand: Self, postfix_unary_operator: Self) -> Self {
         let syntax = SyntaxVariant::PostfixUnaryExpression(Box::new(PostfixUnaryExpressionChildren {
             postfix_unary_operand,
             postfix_unary_operator,
@@ -1125,7 +1126,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_binary_expression(binary_left_operand: Self, binary_operator: Self, binary_right_operand: Self) -> Self {
+    fn make_binary_expression(binary_left_operand: Self, binary_operator: Self, binary_right_operand: Self) -> Self {
         let syntax = SyntaxVariant::BinaryExpression(Box::new(BinaryExpressionChildren {
             binary_left_operand,
             binary_operator,
@@ -1135,7 +1136,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_instanceof_expression(instanceof_left_operand: Self, instanceof_operator: Self, instanceof_right_operand: Self) -> Self {
+    fn make_instanceof_expression(instanceof_left_operand: Self, instanceof_operator: Self, instanceof_right_operand: Self) -> Self {
         let syntax = SyntaxVariant::InstanceofExpression(Box::new(InstanceofExpressionChildren {
             instanceof_left_operand,
             instanceof_operator,
@@ -1145,7 +1146,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_is_expression(is_left_operand: Self, is_operator: Self, is_right_operand: Self) -> Self {
+    fn make_is_expression(is_left_operand: Self, is_operator: Self, is_right_operand: Self) -> Self {
         let syntax = SyntaxVariant::IsExpression(Box::new(IsExpressionChildren {
             is_left_operand,
             is_operator,
@@ -1155,7 +1156,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_as_expression(as_left_operand: Self, as_operator: Self, as_right_operand: Self) -> Self {
+    fn make_as_expression(as_left_operand: Self, as_operator: Self, as_right_operand: Self) -> Self {
         let syntax = SyntaxVariant::AsExpression(Box::new(AsExpressionChildren {
             as_left_operand,
             as_operator,
@@ -1165,7 +1166,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_nullable_as_expression(nullable_as_left_operand: Self, nullable_as_operator: Self, nullable_as_right_operand: Self) -> Self {
+    fn make_nullable_as_expression(nullable_as_left_operand: Self, nullable_as_operator: Self, nullable_as_right_operand: Self) -> Self {
         let syntax = SyntaxVariant::NullableAsExpression(Box::new(NullableAsExpressionChildren {
             nullable_as_left_operand,
             nullable_as_operator,
@@ -1175,7 +1176,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_conditional_expression(conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self {
+    fn make_conditional_expression(conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self {
         let syntax = SyntaxVariant::ConditionalExpression(Box::new(ConditionalExpressionChildren {
             conditional_test,
             conditional_question,
@@ -1187,7 +1188,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_eval_expression(eval_keyword: Self, eval_left_paren: Self, eval_argument: Self, eval_right_paren: Self) -> Self {
+    fn make_eval_expression(eval_keyword: Self, eval_left_paren: Self, eval_argument: Self, eval_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::EvalExpression(Box::new(EvalExpressionChildren {
             eval_keyword,
             eval_left_paren,
@@ -1198,7 +1199,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_empty_expression(empty_keyword: Self, empty_left_paren: Self, empty_argument: Self, empty_right_paren: Self) -> Self {
+    fn make_empty_expression(empty_keyword: Self, empty_left_paren: Self, empty_argument: Self, empty_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::EmptyExpression(Box::new(EmptyExpressionChildren {
             empty_keyword,
             empty_left_paren,
@@ -1209,7 +1210,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_define_expression(define_keyword: Self, define_left_paren: Self, define_argument_list: Self, define_right_paren: Self) -> Self {
+    fn make_define_expression(define_keyword: Self, define_left_paren: Self, define_argument_list: Self, define_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::DefineExpression(Box::new(DefineExpressionChildren {
             define_keyword,
             define_left_paren,
@@ -1220,7 +1221,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_halt_compiler_expression(halt_compiler_keyword: Self, halt_compiler_left_paren: Self, halt_compiler_argument_list: Self, halt_compiler_right_paren: Self) -> Self {
+    fn make_halt_compiler_expression(halt_compiler_keyword: Self, halt_compiler_left_paren: Self, halt_compiler_argument_list: Self, halt_compiler_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::HaltCompilerExpression(Box::new(HaltCompilerExpressionChildren {
             halt_compiler_keyword,
             halt_compiler_left_paren,
@@ -1231,7 +1232,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_isset_expression(isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self {
+    fn make_isset_expression(isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::IssetExpression(Box::new(IssetExpressionChildren {
             isset_keyword,
             isset_left_paren,
@@ -1242,7 +1243,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_function_call_expression(function_call_receiver: Self, function_call_type_args: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self {
+    fn make_function_call_expression(function_call_receiver: Self, function_call_type_args: Self, function_call_left_paren: Self, function_call_argument_list: Self, function_call_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::FunctionCallExpression(Box::new(FunctionCallExpressionChildren {
             function_call_receiver,
             function_call_type_args,
@@ -1254,7 +1255,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_parenthesized_expression(parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self {
+    fn make_parenthesized_expression(parenthesized_expression_left_paren: Self, parenthesized_expression_expression: Self, parenthesized_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ParenthesizedExpression(Box::new(ParenthesizedExpressionChildren {
             parenthesized_expression_left_paren,
             parenthesized_expression_expression,
@@ -1264,7 +1265,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_braced_expression(braced_expression_left_brace: Self, braced_expression_expression: Self, braced_expression_right_brace: Self) -> Self {
+    fn make_braced_expression(braced_expression_left_brace: Self, braced_expression_expression: Self, braced_expression_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::BracedExpression(Box::new(BracedExpressionChildren {
             braced_expression_left_brace,
             braced_expression_expression,
@@ -1274,7 +1275,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_embedded_braced_expression(embedded_braced_expression_left_brace: Self, embedded_braced_expression_expression: Self, embedded_braced_expression_right_brace: Self) -> Self {
+    fn make_embedded_braced_expression(embedded_braced_expression_left_brace: Self, embedded_braced_expression_expression: Self, embedded_braced_expression_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::EmbeddedBracedExpression(Box::new(EmbeddedBracedExpressionChildren {
             embedded_braced_expression_left_brace,
             embedded_braced_expression_expression,
@@ -1284,7 +1285,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_list_expression(list_keyword: Self, list_left_paren: Self, list_members: Self, list_right_paren: Self) -> Self {
+    fn make_list_expression(list_keyword: Self, list_left_paren: Self, list_members: Self, list_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ListExpression(Box::new(ListExpressionChildren {
             list_keyword,
             list_left_paren,
@@ -1295,7 +1296,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_collection_literal_expression(collection_literal_name: Self, collection_literal_left_brace: Self, collection_literal_initializers: Self, collection_literal_right_brace: Self) -> Self {
+    fn make_collection_literal_expression(collection_literal_name: Self, collection_literal_left_brace: Self, collection_literal_initializers: Self, collection_literal_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::CollectionLiteralExpression(Box::new(CollectionLiteralExpressionChildren {
             collection_literal_name,
             collection_literal_left_brace,
@@ -1306,7 +1307,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_object_creation_expression(object_creation_new_keyword: Self, object_creation_object: Self) -> Self {
+    fn make_object_creation_expression(object_creation_new_keyword: Self, object_creation_object: Self) -> Self {
         let syntax = SyntaxVariant::ObjectCreationExpression(Box::new(ObjectCreationExpressionChildren {
             object_creation_new_keyword,
             object_creation_object,
@@ -1315,7 +1316,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_constructor_call(constructor_call_type: Self, constructor_call_left_paren: Self, constructor_call_argument_list: Self, constructor_call_right_paren: Self) -> Self {
+    fn make_constructor_call(constructor_call_type: Self, constructor_call_left_paren: Self, constructor_call_argument_list: Self, constructor_call_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ConstructorCall(Box::new(ConstructorCallChildren {
             constructor_call_type,
             constructor_call_left_paren,
@@ -1326,7 +1327,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_record_creation_expression(record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
+    fn make_record_creation_expression(record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
             record_creation_type,
             record_creation_left_bracket,
@@ -1337,7 +1338,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_array_creation_expression(array_creation_left_bracket: Self, array_creation_members: Self, array_creation_right_bracket: Self) -> Self {
+    fn make_array_creation_expression(array_creation_left_bracket: Self, array_creation_members: Self, array_creation_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::ArrayCreationExpression(Box::new(ArrayCreationExpressionChildren {
             array_creation_left_bracket,
             array_creation_members,
@@ -1347,7 +1348,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_array_intrinsic_expression(array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self {
+    fn make_array_intrinsic_expression(array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ArrayIntrinsicExpression(Box::new(ArrayIntrinsicExpressionChildren {
             array_intrinsic_keyword,
             array_intrinsic_left_paren,
@@ -1358,7 +1359,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_darray_intrinsic_expression(darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self {
+    fn make_darray_intrinsic_expression(darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::DarrayIntrinsicExpression(Box::new(DarrayIntrinsicExpressionChildren {
             darray_intrinsic_keyword,
             darray_intrinsic_explicit_type,
@@ -1370,7 +1371,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_dictionary_intrinsic_expression(dictionary_intrinsic_keyword: Self, dictionary_intrinsic_explicit_type: Self, dictionary_intrinsic_left_bracket: Self, dictionary_intrinsic_members: Self, dictionary_intrinsic_right_bracket: Self) -> Self {
+    fn make_dictionary_intrinsic_expression(dictionary_intrinsic_keyword: Self, dictionary_intrinsic_explicit_type: Self, dictionary_intrinsic_left_bracket: Self, dictionary_intrinsic_members: Self, dictionary_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::DictionaryIntrinsicExpression(Box::new(DictionaryIntrinsicExpressionChildren {
             dictionary_intrinsic_keyword,
             dictionary_intrinsic_explicit_type,
@@ -1382,7 +1383,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_keyset_intrinsic_expression(keyset_intrinsic_keyword: Self, keyset_intrinsic_explicit_type: Self, keyset_intrinsic_left_bracket: Self, keyset_intrinsic_members: Self, keyset_intrinsic_right_bracket: Self) -> Self {
+    fn make_keyset_intrinsic_expression(keyset_intrinsic_keyword: Self, keyset_intrinsic_explicit_type: Self, keyset_intrinsic_left_bracket: Self, keyset_intrinsic_members: Self, keyset_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::KeysetIntrinsicExpression(Box::new(KeysetIntrinsicExpressionChildren {
             keyset_intrinsic_keyword,
             keyset_intrinsic_explicit_type,
@@ -1394,7 +1395,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_varray_intrinsic_expression(varray_intrinsic_keyword: Self, varray_intrinsic_explicit_type: Self, varray_intrinsic_left_bracket: Self, varray_intrinsic_members: Self, varray_intrinsic_right_bracket: Self) -> Self {
+    fn make_varray_intrinsic_expression(varray_intrinsic_keyword: Self, varray_intrinsic_explicit_type: Self, varray_intrinsic_left_bracket: Self, varray_intrinsic_members: Self, varray_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::VarrayIntrinsicExpression(Box::new(VarrayIntrinsicExpressionChildren {
             varray_intrinsic_keyword,
             varray_intrinsic_explicit_type,
@@ -1406,7 +1407,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_vector_intrinsic_expression(vector_intrinsic_keyword: Self, vector_intrinsic_explicit_type: Self, vector_intrinsic_left_bracket: Self, vector_intrinsic_members: Self, vector_intrinsic_right_bracket: Self) -> Self {
+    fn make_vector_intrinsic_expression(vector_intrinsic_keyword: Self, vector_intrinsic_explicit_type: Self, vector_intrinsic_left_bracket: Self, vector_intrinsic_members: Self, vector_intrinsic_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::VectorIntrinsicExpression(Box::new(VectorIntrinsicExpressionChildren {
             vector_intrinsic_keyword,
             vector_intrinsic_explicit_type,
@@ -1418,7 +1419,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_element_initializer(element_key: Self, element_arrow: Self, element_value: Self) -> Self {
+    fn make_element_initializer(element_key: Self, element_arrow: Self, element_value: Self) -> Self {
         let syntax = SyntaxVariant::ElementInitializer(Box::new(ElementInitializerChildren {
             element_key,
             element_arrow,
@@ -1428,7 +1429,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_subscript_expression(subscript_receiver: Self, subscript_left_bracket: Self, subscript_index: Self, subscript_right_bracket: Self) -> Self {
+    fn make_subscript_expression(subscript_receiver: Self, subscript_left_bracket: Self, subscript_index: Self, subscript_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::SubscriptExpression(Box::new(SubscriptExpressionChildren {
             subscript_receiver,
             subscript_left_bracket,
@@ -1439,7 +1440,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_embedded_subscript_expression(embedded_subscript_receiver: Self, embedded_subscript_left_bracket: Self, embedded_subscript_index: Self, embedded_subscript_right_bracket: Self) -> Self {
+    fn make_embedded_subscript_expression(embedded_subscript_receiver: Self, embedded_subscript_left_bracket: Self, embedded_subscript_index: Self, embedded_subscript_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::EmbeddedSubscriptExpression(Box::new(EmbeddedSubscriptExpressionChildren {
             embedded_subscript_receiver,
             embedded_subscript_left_bracket,
@@ -1450,7 +1451,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_awaitable_creation_expression(awaitable_attribute_spec: Self, awaitable_async: Self, awaitable_coroutine: Self, awaitable_compound_statement: Self) -> Self {
+    fn make_awaitable_creation_expression(awaitable_attribute_spec: Self, awaitable_async: Self, awaitable_coroutine: Self, awaitable_compound_statement: Self) -> Self {
         let syntax = SyntaxVariant::AwaitableCreationExpression(Box::new(AwaitableCreationExpressionChildren {
             awaitable_attribute_spec,
             awaitable_async,
@@ -1461,7 +1462,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_children_declaration(xhp_children_keyword: Self, xhp_children_expression: Self, xhp_children_semicolon: Self) -> Self {
+    fn make_xhp_children_declaration(xhp_children_keyword: Self, xhp_children_expression: Self, xhp_children_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::XHPChildrenDeclaration(Box::new(XHPChildrenDeclarationChildren {
             xhp_children_keyword,
             xhp_children_expression,
@@ -1471,7 +1472,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_children_parenthesized_list(xhp_children_list_left_paren: Self, xhp_children_list_xhp_children: Self, xhp_children_list_right_paren: Self) -> Self {
+    fn make_xhp_children_parenthesized_list(xhp_children_list_left_paren: Self, xhp_children_list_xhp_children: Self, xhp_children_list_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::XHPChildrenParenthesizedList(Box::new(XHPChildrenParenthesizedListChildren {
             xhp_children_list_left_paren,
             xhp_children_list_xhp_children,
@@ -1481,7 +1482,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_category_declaration(xhp_category_keyword: Self, xhp_category_categories: Self, xhp_category_semicolon: Self) -> Self {
+    fn make_xhp_category_declaration(xhp_category_keyword: Self, xhp_category_categories: Self, xhp_category_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::XHPCategoryDeclaration(Box::new(XHPCategoryDeclarationChildren {
             xhp_category_keyword,
             xhp_category_categories,
@@ -1491,7 +1492,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_enum_type(xhp_enum_optional: Self, xhp_enum_keyword: Self, xhp_enum_left_brace: Self, xhp_enum_values: Self, xhp_enum_right_brace: Self) -> Self {
+    fn make_xhp_enum_type(xhp_enum_optional: Self, xhp_enum_keyword: Self, xhp_enum_left_brace: Self, xhp_enum_values: Self, xhp_enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::XHPEnumType(Box::new(XHPEnumTypeChildren {
             xhp_enum_optional,
             xhp_enum_keyword,
@@ -1503,7 +1504,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_required(xhp_required_at: Self, xhp_required_keyword: Self) -> Self {
+    fn make_xhp_required(xhp_required_at: Self, xhp_required_keyword: Self) -> Self {
         let syntax = SyntaxVariant::XHPRequired(Box::new(XHPRequiredChildren {
             xhp_required_at,
             xhp_required_keyword,
@@ -1512,7 +1513,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_class_attribute_declaration(xhp_attribute_keyword: Self, xhp_attribute_attributes: Self, xhp_attribute_semicolon: Self) -> Self {
+    fn make_xhp_class_attribute_declaration(xhp_attribute_keyword: Self, xhp_attribute_attributes: Self, xhp_attribute_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::XHPClassAttributeDeclaration(Box::new(XHPClassAttributeDeclarationChildren {
             xhp_attribute_keyword,
             xhp_attribute_attributes,
@@ -1522,7 +1523,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_class_attribute(xhp_attribute_decl_type: Self, xhp_attribute_decl_name: Self, xhp_attribute_decl_initializer: Self, xhp_attribute_decl_required: Self) -> Self {
+    fn make_xhp_class_attribute(xhp_attribute_decl_type: Self, xhp_attribute_decl_name: Self, xhp_attribute_decl_initializer: Self, xhp_attribute_decl_required: Self) -> Self {
         let syntax = SyntaxVariant::XHPClassAttribute(Box::new(XHPClassAttributeChildren {
             xhp_attribute_decl_type,
             xhp_attribute_decl_name,
@@ -1533,7 +1534,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_simple_class_attribute(xhp_simple_class_attribute_type: Self) -> Self {
+    fn make_xhp_simple_class_attribute(xhp_simple_class_attribute_type: Self) -> Self {
         let syntax = SyntaxVariant::XHPSimpleClassAttribute(Box::new(XHPSimpleClassAttributeChildren {
             xhp_simple_class_attribute_type,
         }));
@@ -1541,7 +1542,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_simple_attribute(xhp_simple_attribute_name: Self, xhp_simple_attribute_equal: Self, xhp_simple_attribute_expression: Self) -> Self {
+    fn make_xhp_simple_attribute(xhp_simple_attribute_name: Self, xhp_simple_attribute_equal: Self, xhp_simple_attribute_expression: Self) -> Self {
         let syntax = SyntaxVariant::XHPSimpleAttribute(Box::new(XHPSimpleAttributeChildren {
             xhp_simple_attribute_name,
             xhp_simple_attribute_equal,
@@ -1551,7 +1552,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_spread_attribute(xhp_spread_attribute_left_brace: Self, xhp_spread_attribute_spread_operator: Self, xhp_spread_attribute_expression: Self, xhp_spread_attribute_right_brace: Self) -> Self {
+    fn make_xhp_spread_attribute(xhp_spread_attribute_left_brace: Self, xhp_spread_attribute_spread_operator: Self, xhp_spread_attribute_expression: Self, xhp_spread_attribute_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::XHPSpreadAttribute(Box::new(XHPSpreadAttributeChildren {
             xhp_spread_attribute_left_brace,
             xhp_spread_attribute_spread_operator,
@@ -1562,7 +1563,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_open(xhp_open_left_angle: Self, xhp_open_name: Self, xhp_open_attributes: Self, xhp_open_right_angle: Self) -> Self {
+    fn make_xhp_open(xhp_open_left_angle: Self, xhp_open_name: Self, xhp_open_attributes: Self, xhp_open_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::XHPOpen(Box::new(XHPOpenChildren {
             xhp_open_left_angle,
             xhp_open_name,
@@ -1573,7 +1574,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_expression(xhp_open: Self, xhp_body: Self, xhp_close: Self) -> Self {
+    fn make_xhp_expression(xhp_open: Self, xhp_body: Self, xhp_close: Self) -> Self {
         let syntax = SyntaxVariant::XHPExpression(Box::new(XHPExpressionChildren {
             xhp_open,
             xhp_body,
@@ -1583,7 +1584,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_xhp_close(xhp_close_left_angle: Self, xhp_close_name: Self, xhp_close_right_angle: Self) -> Self {
+    fn make_xhp_close(xhp_close_left_angle: Self, xhp_close_name: Self, xhp_close_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::XHPClose(Box::new(XHPCloseChildren {
             xhp_close_left_angle,
             xhp_close_name,
@@ -1593,7 +1594,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_type_constant(type_constant_left_type: Self, type_constant_separator: Self, type_constant_right_type: Self) -> Self {
+    fn make_type_constant(type_constant_left_type: Self, type_constant_separator: Self, type_constant_right_type: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstant(Box::new(TypeConstantChildren {
             type_constant_left_type,
             type_constant_separator,
@@ -1603,7 +1604,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_vector_type_specifier(vector_type_keyword: Self, vector_type_left_angle: Self, vector_type_type: Self, vector_type_trailing_comma: Self, vector_type_right_angle: Self) -> Self {
+    fn make_vector_type_specifier(vector_type_keyword: Self, vector_type_left_angle: Self, vector_type_type: Self, vector_type_trailing_comma: Self, vector_type_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::VectorTypeSpecifier(Box::new(VectorTypeSpecifierChildren {
             vector_type_keyword,
             vector_type_left_angle,
@@ -1615,7 +1616,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_keyset_type_specifier(keyset_type_keyword: Self, keyset_type_left_angle: Self, keyset_type_type: Self, keyset_type_trailing_comma: Self, keyset_type_right_angle: Self) -> Self {
+    fn make_keyset_type_specifier(keyset_type_keyword: Self, keyset_type_left_angle: Self, keyset_type_type: Self, keyset_type_trailing_comma: Self, keyset_type_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::KeysetTypeSpecifier(Box::new(KeysetTypeSpecifierChildren {
             keyset_type_keyword,
             keyset_type_left_angle,
@@ -1627,7 +1628,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_tuple_type_explicit_specifier(tuple_type_keyword: Self, tuple_type_left_angle: Self, tuple_type_types: Self, tuple_type_right_angle: Self) -> Self {
+    fn make_tuple_type_explicit_specifier(tuple_type_keyword: Self, tuple_type_left_angle: Self, tuple_type_types: Self, tuple_type_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::TupleTypeExplicitSpecifier(Box::new(TupleTypeExplicitSpecifierChildren {
             tuple_type_keyword,
             tuple_type_left_angle,
@@ -1638,7 +1639,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_varray_type_specifier(varray_keyword: Self, varray_left_angle: Self, varray_type: Self, varray_trailing_comma: Self, varray_right_angle: Self) -> Self {
+    fn make_varray_type_specifier(varray_keyword: Self, varray_left_angle: Self, varray_type: Self, varray_trailing_comma: Self, varray_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::VarrayTypeSpecifier(Box::new(VarrayTypeSpecifierChildren {
             varray_keyword,
             varray_left_angle,
@@ -1650,7 +1651,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_vector_array_type_specifier(vector_array_keyword: Self, vector_array_left_angle: Self, vector_array_type: Self, vector_array_right_angle: Self) -> Self {
+    fn make_vector_array_type_specifier(vector_array_keyword: Self, vector_array_left_angle: Self, vector_array_type: Self, vector_array_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::VectorArrayTypeSpecifier(Box::new(VectorArrayTypeSpecifierChildren {
             vector_array_keyword,
             vector_array_left_angle,
@@ -1661,7 +1662,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_type_parameter(type_attribute_spec: Self, type_reified: Self, type_variance: Self, type_name: Self, type_constraints: Self) -> Self {
+    fn make_type_parameter(type_attribute_spec: Self, type_reified: Self, type_variance: Self, type_name: Self, type_constraints: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameter(Box::new(TypeParameterChildren {
             type_attribute_spec,
             type_reified,
@@ -1673,7 +1674,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_type_constraint(constraint_keyword: Self, constraint_type: Self) -> Self {
+    fn make_type_constraint(constraint_keyword: Self, constraint_type: Self) -> Self {
         let syntax = SyntaxVariant::TypeConstraint(Box::new(TypeConstraintChildren {
             constraint_keyword,
             constraint_type,
@@ -1682,7 +1683,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_darray_type_specifier(darray_keyword: Self, darray_left_angle: Self, darray_key: Self, darray_comma: Self, darray_value: Self, darray_trailing_comma: Self, darray_right_angle: Self) -> Self {
+    fn make_darray_type_specifier(darray_keyword: Self, darray_left_angle: Self, darray_key: Self, darray_comma: Self, darray_value: Self, darray_trailing_comma: Self, darray_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::DarrayTypeSpecifier(Box::new(DarrayTypeSpecifierChildren {
             darray_keyword,
             darray_left_angle,
@@ -1696,7 +1697,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_map_array_type_specifier(map_array_keyword: Self, map_array_left_angle: Self, map_array_key: Self, map_array_comma: Self, map_array_value: Self, map_array_right_angle: Self) -> Self {
+    fn make_map_array_type_specifier(map_array_keyword: Self, map_array_left_angle: Self, map_array_key: Self, map_array_comma: Self, map_array_value: Self, map_array_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::MapArrayTypeSpecifier(Box::new(MapArrayTypeSpecifierChildren {
             map_array_keyword,
             map_array_left_angle,
@@ -1709,7 +1710,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_dictionary_type_specifier(dictionary_type_keyword: Self, dictionary_type_left_angle: Self, dictionary_type_members: Self, dictionary_type_right_angle: Self) -> Self {
+    fn make_dictionary_type_specifier(dictionary_type_keyword: Self, dictionary_type_left_angle: Self, dictionary_type_members: Self, dictionary_type_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::DictionaryTypeSpecifier(Box::new(DictionaryTypeSpecifierChildren {
             dictionary_type_keyword,
             dictionary_type_left_angle,
@@ -1720,7 +1721,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_closure_type_specifier(closure_outer_left_paren: Self, closure_coroutine: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_colon: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
+    fn make_closure_type_specifier(closure_outer_left_paren: Self, closure_coroutine: Self, closure_function_keyword: Self, closure_inner_left_paren: Self, closure_parameter_list: Self, closure_inner_right_paren: Self, closure_colon: Self, closure_return_type: Self, closure_outer_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ClosureTypeSpecifier(Box::new(ClosureTypeSpecifierChildren {
             closure_outer_left_paren,
             closure_coroutine,
@@ -1736,7 +1737,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_closure_parameter_type_specifier(closure_parameter_call_convention: Self, closure_parameter_type: Self) -> Self {
+    fn make_closure_parameter_type_specifier(closure_parameter_call_convention: Self, closure_parameter_type: Self) -> Self {
         let syntax = SyntaxVariant::ClosureParameterTypeSpecifier(Box::new(ClosureParameterTypeSpecifierChildren {
             closure_parameter_call_convention,
             closure_parameter_type,
@@ -1745,7 +1746,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_classname_type_specifier(classname_keyword: Self, classname_left_angle: Self, classname_type: Self, classname_trailing_comma: Self, classname_right_angle: Self) -> Self {
+    fn make_classname_type_specifier(classname_keyword: Self, classname_left_angle: Self, classname_type: Self, classname_trailing_comma: Self, classname_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::ClassnameTypeSpecifier(Box::new(ClassnameTypeSpecifierChildren {
             classname_keyword,
             classname_left_angle,
@@ -1757,7 +1758,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_field_specifier(field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self {
+    fn make_field_specifier(field_question: Self, field_name: Self, field_arrow: Self, field_type: Self) -> Self {
         let syntax = SyntaxVariant::FieldSpecifier(Box::new(FieldSpecifierChildren {
             field_question,
             field_name,
@@ -1768,7 +1769,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_field_initializer(field_initializer_name: Self, field_initializer_arrow: Self, field_initializer_value: Self) -> Self {
+    fn make_field_initializer(field_initializer_name: Self, field_initializer_arrow: Self, field_initializer_value: Self) -> Self {
         let syntax = SyntaxVariant::FieldInitializer(Box::new(FieldInitializerChildren {
             field_initializer_name,
             field_initializer_arrow,
@@ -1778,7 +1779,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_shape_type_specifier(shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self {
+    fn make_shape_type_specifier(shape_type_keyword: Self, shape_type_left_paren: Self, shape_type_fields: Self, shape_type_ellipsis: Self, shape_type_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeTypeSpecifier(Box::new(ShapeTypeSpecifierChildren {
             shape_type_keyword,
             shape_type_left_paren,
@@ -1790,7 +1791,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_shape_expression(shape_expression_keyword: Self, shape_expression_left_paren: Self, shape_expression_fields: Self, shape_expression_right_paren: Self) -> Self {
+    fn make_shape_expression(shape_expression_keyword: Self, shape_expression_left_paren: Self, shape_expression_fields: Self, shape_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::ShapeExpression(Box::new(ShapeExpressionChildren {
             shape_expression_keyword,
             shape_expression_left_paren,
@@ -1801,7 +1802,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_tuple_expression(tuple_expression_keyword: Self, tuple_expression_left_paren: Self, tuple_expression_items: Self, tuple_expression_right_paren: Self) -> Self {
+    fn make_tuple_expression(tuple_expression_keyword: Self, tuple_expression_left_paren: Self, tuple_expression_items: Self, tuple_expression_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::TupleExpression(Box::new(TupleExpressionChildren {
             tuple_expression_keyword,
             tuple_expression_left_paren,
@@ -1812,7 +1813,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_generic_type_specifier(generic_class_type: Self, generic_argument_list: Self) -> Self {
+    fn make_generic_type_specifier(generic_class_type: Self, generic_argument_list: Self) -> Self {
         let syntax = SyntaxVariant::GenericTypeSpecifier(Box::new(GenericTypeSpecifierChildren {
             generic_class_type,
             generic_argument_list,
@@ -1821,7 +1822,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_nullable_type_specifier(nullable_question: Self, nullable_type: Self) -> Self {
+    fn make_nullable_type_specifier(nullable_question: Self, nullable_type: Self) -> Self {
         let syntax = SyntaxVariant::NullableTypeSpecifier(Box::new(NullableTypeSpecifierChildren {
             nullable_question,
             nullable_type,
@@ -1830,7 +1831,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_like_type_specifier(like_tilde: Self, like_type: Self) -> Self {
+    fn make_like_type_specifier(like_tilde: Self, like_type: Self) -> Self {
         let syntax = SyntaxVariant::LikeTypeSpecifier(Box::new(LikeTypeSpecifierChildren {
             like_tilde,
             like_type,
@@ -1839,7 +1840,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_soft_type_specifier(soft_at: Self, soft_type: Self) -> Self {
+    fn make_soft_type_specifier(soft_at: Self, soft_type: Self) -> Self {
         let syntax = SyntaxVariant::SoftTypeSpecifier(Box::new(SoftTypeSpecifierChildren {
             soft_at,
             soft_type,
@@ -1848,7 +1849,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_reified_type_argument(reified_type_argument_reified: Self, reified_type_argument_type: Self) -> Self {
+    fn make_reified_type_argument(reified_type_argument_reified: Self, reified_type_argument_type: Self) -> Self {
         let syntax = SyntaxVariant::ReifiedTypeArgument(Box::new(ReifiedTypeArgumentChildren {
             reified_type_argument_reified,
             reified_type_argument_type,
@@ -1857,7 +1858,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_type_arguments(type_arguments_left_angle: Self, type_arguments_types: Self, type_arguments_right_angle: Self) -> Self {
+    fn make_type_arguments(type_arguments_left_angle: Self, type_arguments_types: Self, type_arguments_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::TypeArguments(Box::new(TypeArgumentsChildren {
             type_arguments_left_angle,
             type_arguments_types,
@@ -1867,7 +1868,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_type_parameters(type_parameters_left_angle: Self, type_parameters_parameters: Self, type_parameters_right_angle: Self) -> Self {
+    fn make_type_parameters(type_parameters_left_angle: Self, type_parameters_parameters: Self, type_parameters_right_angle: Self) -> Self {
         let syntax = SyntaxVariant::TypeParameters(Box::new(TypeParametersChildren {
             type_parameters_left_angle,
             type_parameters_parameters,
@@ -1877,7 +1878,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_tuple_type_specifier(tuple_left_paren: Self, tuple_types: Self, tuple_right_paren: Self) -> Self {
+    fn make_tuple_type_specifier(tuple_left_paren: Self, tuple_types: Self, tuple_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::TupleTypeSpecifier(Box::new(TupleTypeSpecifierChildren {
             tuple_left_paren,
             tuple_types,
@@ -1887,7 +1888,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_error(error_error: Self) -> Self {
+    fn make_error(error_error: Self) -> Self {
         let syntax = SyntaxVariant::ErrorSyntax(Box::new(ErrorSyntaxChildren {
             error_error,
         }));
@@ -1895,7 +1896,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_list_item(list_item: Self, list_separator: Self) -> Self {
+    fn make_list_item(list_item: Self, list_separator: Self) -> Self {
         let syntax = SyntaxVariant::ListItem(Box::new(ListItemChildren {
             list_item,
             list_separator,
@@ -1904,7 +1905,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_atom_expression(pocket_atom_glyph: Self, pocket_atom_expression: Self) -> Self {
+    fn make_pocket_atom_expression(pocket_atom_glyph: Self, pocket_atom_expression: Self) -> Self {
         let syntax = SyntaxVariant::PocketAtomExpression(Box::new(PocketAtomExpressionChildren {
             pocket_atom_glyph,
             pocket_atom_expression,
@@ -1913,7 +1914,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_identifier_expression(pocket_identifier_qualifier: Self, pocket_identifier_pu_operator: Self, pocket_identifier_field: Self, pocket_identifier_operator: Self, pocket_identifier_name: Self) -> Self {
+    fn make_pocket_identifier_expression(pocket_identifier_qualifier: Self, pocket_identifier_pu_operator: Self, pocket_identifier_field: Self, pocket_identifier_operator: Self, pocket_identifier_name: Self) -> Self {
         let syntax = SyntaxVariant::PocketIdentifierExpression(Box::new(PocketIdentifierExpressionChildren {
             pocket_identifier_qualifier,
             pocket_identifier_pu_operator,
@@ -1925,7 +1926,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_atom_mapping_declaration(pocket_atom_mapping_glyph: Self, pocket_atom_mapping_name: Self, pocket_atom_mapping_left_paren: Self, pocket_atom_mapping_mappings: Self, pocket_atom_mapping_right_paren: Self, pocket_atom_mapping_semicolon: Self) -> Self {
+    fn make_pocket_atom_mapping_declaration(pocket_atom_mapping_glyph: Self, pocket_atom_mapping_name: Self, pocket_atom_mapping_left_paren: Self, pocket_atom_mapping_mappings: Self, pocket_atom_mapping_right_paren: Self, pocket_atom_mapping_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PocketAtomMappingDeclaration(Box::new(PocketAtomMappingDeclarationChildren {
             pocket_atom_mapping_glyph,
             pocket_atom_mapping_name,
@@ -1938,7 +1939,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_enum_declaration(pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self {
+    fn make_pocket_enum_declaration(pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
             pocket_enum_modifiers,
             pocket_enum_enum,
@@ -1951,7 +1952,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_field_type_expr_declaration(pocket_field_type_expr_case: Self, pocket_field_type_expr_type: Self, pocket_field_type_expr_name: Self, pocket_field_type_expr_semicolon: Self) -> Self {
+    fn make_pocket_field_type_expr_declaration(pocket_field_type_expr_case: Self, pocket_field_type_expr_type: Self, pocket_field_type_expr_name: Self, pocket_field_type_expr_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PocketFieldTypeExprDeclaration(Box::new(PocketFieldTypeExprDeclarationChildren {
             pocket_field_type_expr_case,
             pocket_field_type_expr_type,
@@ -1962,7 +1963,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_field_type_declaration(pocket_field_type_case: Self, pocket_field_type_type: Self, pocket_field_type_name: Self, pocket_field_type_semicolon: Self) -> Self {
+    fn make_pocket_field_type_declaration(pocket_field_type_case: Self, pocket_field_type_type: Self, pocket_field_type_name: Self, pocket_field_type_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
             pocket_field_type_case,
             pocket_field_type_type,
@@ -1973,7 +1974,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_mapping_id_declaration(pocket_mapping_id_name: Self, pocket_mapping_id_initializer: Self) -> Self {
+    fn make_pocket_mapping_id_declaration(pocket_mapping_id_name: Self, pocket_mapping_id_initializer: Self) -> Self {
         let syntax = SyntaxVariant::PocketMappingIdDeclaration(Box::new(PocketMappingIdDeclarationChildren {
             pocket_mapping_id_name,
             pocket_mapping_id_initializer,
@@ -1982,7 +1983,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn make_pocket_mapping_type_declaration(pocket_mapping_type_keyword: Self, pocket_mapping_type_name: Self, pocket_mapping_type_equal: Self, pocket_mapping_type_type: Self) -> Self {
+    fn make_pocket_mapping_type_declaration(pocket_mapping_type_keyword: Self, pocket_mapping_type_name: Self, pocket_mapping_type_equal: Self, pocket_mapping_type_type: Self) -> Self {
         let syntax = SyntaxVariant::PocketMappingTypeDeclaration(Box::new(PocketMappingTypeDeclarationChildren {
             pocket_mapping_type_keyword,
             pocket_mapping_type_name,
@@ -1993,7 +1994,7 @@ where
         Self::make(syntax, value)
     }
 
-    pub fn fold_over_children<'a, U>(
+    fn fold_over_children<'a, U>(
         f: &Fn(&'a Self, U) -> U,
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
@@ -3264,7 +3265,7 @@ where
         }
     }
 
-    pub fn kind(&self) -> SyntaxKind  {
+    fn kind(&self) -> SyntaxKind  {
         match self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,
             SyntaxVariant::Token (_) => SyntaxKind::Token,
@@ -5069,4 +5070,3 @@ pub enum SyntaxVariant<T, V> {
     PocketMappingIdDeclaration(Box<PocketMappingIdDeclarationChildren<T, V>>),
     PocketMappingTypeDeclaration(Box<PocketMappingTypeDeclarationChildren<T, V>>),
 }
-  

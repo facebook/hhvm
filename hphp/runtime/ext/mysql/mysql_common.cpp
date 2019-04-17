@@ -998,7 +998,7 @@ MySQLFieldInfo *MySQLResult::fetchFieldInfo() {
 ///////////////////////////////////////////////////////////////////////////////
 // MySQLStmtVariables
 
-MySQLStmtVariables::MySQLStmtVariables(const Array& arr): m_arr(arr) {
+MySQLStmtVariables::MySQLStmtVariables(RefVector&& v): m_arr(std::move(v)) {
   int count = m_arr.size();
   m_vars   = req::calloc_raw_array<MYSQL_BIND>(count);
   m_null   = req::calloc_raw_array<my_bool>(count);
@@ -1120,7 +1120,7 @@ void MySQLStmtVariables::update_result() {
       }
     }
 
-    tvSet(*v.asTypedValue(), m_arr.lvalAt(i));
+    tvSet(*v.asTypedValue(), m_arr[i]->cell());
   }
 }
 
@@ -1154,7 +1154,7 @@ bool MySQLStmtVariables::bind_params(MYSQL_STMT *stmt) {
   m_value_arr.clear();
   for (int i = 0; i < m_arr.size(); i++) {
     MYSQL_BIND *b = &m_vars[i];
-    auto const var = m_arr.lvalAt(i).unboxed();
+    tv_rval var = m_arr[i]->cell();
     Variant v;
     if (isNullType(var.type())) {
       *b->is_null = 1;
@@ -1258,17 +1258,17 @@ Variant MySQLStmt::attr_set(int64_t attr, int64_t value) {
   return !mysql_stmt_attr_set(m_stmt, (enum_stmt_attr_type)attr, &value);
 }
 
-Variant MySQLStmt::bind_param(const String& types, const Array& vars) {
+Variant MySQLStmt::bind_param(const String& types, RefVector&& vars) {
   VALIDATE_PREPARED
 
-  m_param_vars = req::make_unique<MySQLStmtVariables>(vars);
+  m_param_vars = req::make_unique<MySQLStmtVariables>(std::move(vars));
   return m_param_vars->init_params(m_stmt, types);
 }
 
-Variant MySQLStmt::bind_result(const Array& vars) {
+Variant MySQLStmt::bind_result(RefVector&& vars) {
   VALIDATE_PREPARED
 
-  m_result_vars = req::make_unique<MySQLStmtVariables>(vars);
+  m_result_vars = req::make_unique<MySQLStmtVariables>(std::move(vars));
   return m_result_vars->bind_result(m_stmt);
 }
 

@@ -366,8 +366,10 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+using RefVector = req::vector<req::ptr<RefData>>;
+
 struct MySQLStmtVariables {
-  explicit MySQLStmtVariables(const Array& arr);
+  explicit MySQLStmtVariables(RefVector&& refs);
   ~MySQLStmtVariables();
 
   bool init_params(MYSQL_STMT *stmt, const String& types);
@@ -376,7 +378,7 @@ struct MySQLStmtVariables {
   void update_result();
 
 private:
-  Array                   m_arr;
+  RefVector              m_arr;
   req::vector<Variant>   m_value_arr;
   MYSQL_BIND             *m_vars;
   my_bool                *m_null;
@@ -403,8 +405,8 @@ struct MySQLStmt : public SweepableResourceData {
   Variant affected_rows();
   Variant attr_get(int64_t attr);
   Variant attr_set(int64_t attr, int64_t value);
-  Variant bind_param(const String& types, const Array& vars);
-  Variant bind_result(const Array& vars);
+  Variant bind_param(const String& types, RefVector&& vars);
+  Variant bind_result(RefVector&& vars);
   Variant data_seek(int64_t offset);
   Variant get_errno();
   Variant get_error();

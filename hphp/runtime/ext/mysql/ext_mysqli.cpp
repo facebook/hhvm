@@ -141,7 +141,7 @@ static TypedValue* bind_param_helper(const Object& obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  PackedArrayInit vars(type_size);
+  RefVector vars;
   for (int i = 0; i < type_size; i++) {
     char t = types[i];
     if (t != 'i' && t != 'd' && t != 's' && t != 'b') {
@@ -154,10 +154,10 @@ static TypedValue* bind_param_helper(const Object& obj, ActRec* ar,
     if (!rparam) {
       return arReturn(ar, false);
     }
-    vars.appendRef(*rparam);
+    vars.emplace_back(rparam->asTypedValue()->m_data.pref);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_param(types, vars.toArray()));
+  return arReturn(ar, getStmt(obj)->bind_param(types, std::move(vars)));
 }
 
 static TypedValue* bind_result_helper(const Object& obj, ActRec* ar,
@@ -169,17 +169,17 @@ static TypedValue* bind_result_helper(const Object& obj, ActRec* ar,
     return arReturn(ar, false);
   }
 
-  PackedArrayInit vars(ar->numArgs());
+  RefVector vars;
   for (int i = start_index; i < ar->numArgs(); i++) {
     auto rparam = getArg<KindOfRef>(ar, i);
 
     if (!rparam) {
       return arReturn(ar, false);
     }
-    vars.appendRef(*rparam);
+    vars.emplace_back(rparam->asTypedValue()->m_data.pref);
   }
 
-  return arReturn(ar, getStmt(obj)->bind_result(vars.toArray()));
+  return arReturn(ar, getStmt(obj)->bind_result(std::move(vars)));
 }
 
 //////////////////////////////////////////////////////////////////////////////

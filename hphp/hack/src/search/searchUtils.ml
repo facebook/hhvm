@@ -10,10 +10,17 @@
 (* Known search providers *)
 type search_provider =
   | AllLocalIndex
-  | SqliteIndex
+  (*
+   * This is called the GleanApiIndex rather than GleanIndex since it
+   * actually calls a thrift API for all answers.  All other providers
+   * get their answers locally.
+   *)
+  | GleanApiIndex
   | GrepIndex
-  | RipGrepIndex
   | NoIndex
+  | RipGrepIndex
+  | SqliteIndex
+  | TrieIndex
 
 (* Shared Search code between Fuzzy and Trie based searches *)
 module type Searchable = sig
@@ -43,8 +50,12 @@ type search_result_type =
 (* Individual result object as known by the autocomplete system *)
 type symbol = (Pos.absolute, search_result_type) term
 
+(* Used by some legacy APIs *)
+type legacy_symbol = (FileInfo.pos, search_result_type) term
+
 (* Collected results as known by the autocomplete system *)
 type result = symbol list
+
 
 (*
  * Needed to distinguish between two types of typechecker updates
@@ -72,8 +83,10 @@ type si_kind =
  *
  * Although [@@deriving] would be a very ocaml-ish way to solve this same
  * problem, we would run the risk that anyone who edits the code to reorder
- * the numbers would cause unexpected autocomplete behavior due to mismatches
- * between the ocaml definitions and the integers stored in sqlite.
+ * list of si_kinds, perhaps by adding something new in its correct
+ * alphabetic order, would cause unexpected autocomplete behavior due to
+ * mismatches between the [@@deriving] ordinal values and the integers
+ * stored in sqlite.
  *)
 let kind_to_int (kind: si_kind): int =
   match kind with

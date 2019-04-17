@@ -301,7 +301,9 @@ static Variant call_intercept_handler(
     }
     intArgs = par.append(done).toArray();
   } else {
-    intArgs = par.appendRef(done).toArray();
+    Variant tmp;
+    tmp.assignRef(done);
+    intArgs = par.appendWithRef(tmp).toArray();
   }
 
   auto ret = Variant::attach(

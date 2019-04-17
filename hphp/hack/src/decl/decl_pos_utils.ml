@@ -122,6 +122,7 @@ let rec ty (p, x) =
     | Tgeneric _ as x      -> x
     | Ttuple tyl           -> Ttuple (List.map tyl ty)
     | Toption x            -> Toption (ty x)
+    | Tlike x              -> Tlike (ty x)
     | Tfun ft              -> Tfun (fun_type ft)
     | Tapply (sid, xl)     -> Tapply (string_id sid, List.map xl ty)
     | Taccess (root_ty, ids) ->

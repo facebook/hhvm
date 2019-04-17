@@ -50,6 +50,7 @@ end = struct
         end
       | Tvar _ -> assert false (* Expansion got rid of Tvars ... *)
       | Toption x -> ty x
+      | Tlike x -> ty x
       | Tfun fty ->
           List.iter (List.map fty.ft_params (fun x -> x.fp_type)) ty;
           ty fty.ft_ret;

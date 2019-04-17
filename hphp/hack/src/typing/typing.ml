@@ -3416,6 +3416,7 @@ and call_parent_construct pos env el uel =
         | Tvarray_or_darray _
         | Tgeneric _
         | Toption _
+        | Tlike _
         | Tprim _
         | Terr
         | Tfun _

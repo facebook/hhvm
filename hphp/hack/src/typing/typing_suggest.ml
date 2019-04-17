@@ -144,6 +144,7 @@ let get_implements (_, x) =
             | Tgeneric _
             | Tfun _
             | Toption _
+            | Tlike _
             | Tapply (_, _)
             | Ttuple _
             | Tshape _

@@ -70,6 +70,8 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
 
     | Toption ty ->
       Toption (strip_ty ty)
+    | Tlike ty ->
+      Tlike (strip_ty ty)
     | Tabstract (abstract_kind, ty_opt) ->
       let abstract_kind = match abstract_kind with
         | AKnewtype (name, tparams) ->

@@ -23,6 +23,7 @@ class type ['a] type_visitor_type = object
   method on_tvarray_or_darray : 'a -> Reason.t -> decl ty -> 'a
   method on_tgeneric : 'a -> Reason.t -> string -> 'a
   method on_toption : 'a -> Reason.t -> 'b ty -> 'a
+  method on_tlike : 'a -> Reason.t -> 'b ty -> 'a
   method on_tprim : 'a -> Reason.t -> Nast.tprim -> 'a
   method on_tvar : 'a -> Reason.t -> Ident.t -> 'a
   method on_type : 'a -> 'b ty -> 'a
@@ -61,6 +62,8 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
     this#on_type acc ty
   method on_tgeneric acc _ _ = acc
   method on_toption: type a. _ -> Reason.t -> a ty -> _ =
+    fun acc _ ty -> this#on_type acc ty
+  method on_tlike: type a. _ -> Reason.t -> a ty -> _ =
     fun acc _ ty -> this#on_type acc ty
   method on_tprim acc _ _ = acc
   method on_tvar acc _ _ = acc
@@ -125,6 +128,7 @@ class virtual ['a] type_visitor : ['a] type_visitor_type = object(this)
       this#on_tvarray_or_darray acc r ty
     | Tgeneric s -> this#on_tgeneric acc r s
     | Toption ty -> this#on_toption acc r ty
+    | Tlike ty -> this#on_tlike acc r ty
     | Tprim prim -> this#on_tprim acc r prim
     | Tvar id -> this#on_tvar acc r id
     | Tfun fty -> this#on_tfun acc r fty

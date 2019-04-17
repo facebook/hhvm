@@ -116,6 +116,10 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt "(@[<2>Toption@ ";
     pp_ty fmt a0;
     Format.fprintf fmt "@])"
+  | Tlike a0 ->
+    Format.fprintf fmt "(@[<2>Tlike@ ";
+    pp_ty fmt a0;
+    Format.fprintf fmt "@])"
   | Tprim a0 ->
     Format.fprintf fmt "(@[<2>Tprim@ ";
     Nast.pp_tprim fmt a0;

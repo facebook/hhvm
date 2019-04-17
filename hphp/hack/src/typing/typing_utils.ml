@@ -726,6 +726,7 @@ let unwrap_class_type = function
       | Tvarray_or_darray _
       | Tgeneric _
       | Toption _
+      | Tlike _
       | Tprim _
       | Tfun _
       | Ttuple _

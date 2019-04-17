@@ -170,6 +170,10 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
          else
            Toption ty in
        env, (ety_env, (r, ty_))
+  | r, Tlike ty ->
+      let env, ty = localize ~ety_env env ty in
+      let env, lty = TUtils.union env (MakeType.dynamic r) ty in
+      env, (ety_env, lty)
   | r, Tfun ft ->
       let env, ft = localize_ft ~use_pos:ft.ft_pos ~ety_env env ft in
       env, (ety_env, (r, Tfun ft))

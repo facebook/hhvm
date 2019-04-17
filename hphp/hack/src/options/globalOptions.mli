@@ -318,6 +318,7 @@ val tco_experimental_trait_method_redeclarations : string
 val tco_experimental_type_const_attributes : string
 val tco_experimental_decl_linearization : string
 val tco_experimental_track_subtype_prop : string
+val tco_experimental_like_types : string
 val tco_experimental_pocket_universes : string
 val tco_experimental_abstract_type_const_with_default : string
 val tco_experimental_all : SSet.t

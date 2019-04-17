@@ -162,6 +162,11 @@ let tco_experimental_decl_linearization = "decl_linearization"
 let tco_experimental_track_subtype_prop = "track_subtype_prop"
 
 (**
+ * Enable like-types
+ *)
+let tco_experimental_like_types = "like_types"
+
+(**
  * Enable support for the Pocket Universes
  *)
 let tco_experimental_pocket_universes = "pocket_universes"
@@ -195,6 +200,7 @@ let tco_experimental_all =
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
      tco_experimental_abstract_type_const_with_default;
+     tco_experimental_like_types;
    ]
 
 let tco_migration_flags_all =

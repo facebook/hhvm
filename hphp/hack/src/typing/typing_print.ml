@@ -77,6 +77,7 @@ module ErrorString = struct
     | Tnonnull           -> "a nonnull value"
     | Toption (_, Tnonnull) -> "a mixed value"
     | Toption _          -> "a nullable type"
+    | Tlike (_, x)            -> type_ x
     | Tprim tp           -> tprim tp
     | Tvar _             -> "some value"
     | Tanon _    -> "a function"
@@ -212,6 +213,7 @@ module Suggest = struct
     | Tabstract (AKgeneric s, _) -> s
     | Toption (_, Tnonnull)  -> "mixed"
     | Toption ty             -> "?" ^ type_ ty
+    | Tlike ty             -> "~" ^ type_ ty
     | Tprim tp               -> prim tp
     | Tvar _                 -> "..."
     | Tanon _       -> "..."
@@ -364,6 +366,7 @@ module Full = struct
       ]
     | Toption (_, Tnonnull) -> text "mixed"
     | Toption x -> Concat [text "?"; k x]
+    | Tlike x -> Concat [text "~"; k x]
     | Tprim x -> text @@ prim x
     | Tvar n ->
       let _, n' = Env.get_var env n in
@@ -802,6 +805,8 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "mixed"
   | Toption ty ->
     obj @@ kind "nullable" @ args [ty]
+  | Tlike ty ->
+    obj @@ kind "like" @ args [ty]
   | Tprim tp ->
     obj @@ kind "primitive" @ name (prim tp)
   | Tapply ((_, cid), tys) ->

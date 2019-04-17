@@ -114,6 +114,8 @@ and _ ty_ =
 
   | Tnothing : decl ty_
 
+  | Tlike : decl ty -> decl ty_
+
   (*========== Following Types Exist in Both Phases ==========*)
   | Tany
   | Tnonnull

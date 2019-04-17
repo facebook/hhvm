@@ -67,6 +67,8 @@ and instantiate_ subst x =
       | _, Toption _ -> snd ty
       | _ -> Toption ty
       )
+  | Tlike ty ->
+      Tlike (instantiate subst ty)
   | Tfun ft ->
       let tparams, instantiate_tparams = ft.ft_tparams in
       let outer_subst = subst in

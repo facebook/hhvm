@@ -494,6 +494,8 @@ and type_ tcopt root variance env (reason, ty) =
       generic_ env variance name
   | Toption ty ->
       type_ tcopt root variance env ty
+  | Tlike ty ->
+      type_ tcopt root variance env ty
   | Tprim _ -> ()
   | Tfun ft ->
       List.iter ft.ft_params ~f:begin fun { fp_type = (r, _ as ty); _ } ->

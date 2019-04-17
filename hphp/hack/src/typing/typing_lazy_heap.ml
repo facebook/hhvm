@@ -31,17 +31,7 @@ let get_type_id_filename x expected_kind =
     Some res
   | _ -> None
 
-let get_class x =
-  match Classes.get x with
-  | Some c ->
-    Some c
-  | None ->
-    match get_type_id_filename x Naming_table.TClass with
-    | Some filename ->
-      Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_class_in_file filename x);
-      Classes.get x
-    | _ -> None
+let get_class = Typing_classes_heap.Classes.get
 
 let get_fun x =
   match Funs.get x with

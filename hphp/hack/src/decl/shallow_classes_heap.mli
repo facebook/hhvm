@@ -24,6 +24,13 @@ val get : string -> shallow_class option
 val class_naming_and_decl : Ast.class_ -> shallow_class
 (** Convert the given class AST to a shallow class declaration and return it. *)
 
+val class_decl_if_missing : Ast.class_ -> shallow_class
+(** If a shallow declaration for the class with the given name is present in the
+    cache, return it. Otherwise, convert the given class AST to a shallow class
+    declaration, store it in the cache, and return it.
+
+    Raises [Failure] if [shallow_class_decl] is not enabled. *)
+
 val push_local_changes : unit -> unit
 val pop_local_changes : unit -> unit
 

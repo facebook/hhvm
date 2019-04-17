@@ -513,6 +513,8 @@ and class_type = {
   tc_abstract            : bool;
   tc_final               : bool;
   tc_const               : bool;
+  (* True when the class is annotated with the __PPL attribute. *)
+  tc_ppl                 : bool;
   (* When a class is abstract (or in a trait) the initialization of
    * a protected member can be delayed *)
   tc_deferred_init_members : SSet.t;

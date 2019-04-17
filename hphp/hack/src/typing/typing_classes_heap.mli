@@ -26,6 +26,7 @@ val members_fully_known   : t -> bool
 val abstract              : t -> bool
 val final                 : t -> bool
 val const                 : t -> bool
+val ppl                   : t -> bool
 val deferred_init_members : t -> SSet.t
 val kind                  : t -> Ast.class_kind
 val is_xhp                : t -> bool

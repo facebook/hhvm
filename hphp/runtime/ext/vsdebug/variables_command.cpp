@@ -58,7 +58,7 @@ DebugSummaryPHPExecutor::DebugSummaryPHPExecutor(
   DebuggerSession *session,
   request_id_t threadId,
   const Object &obj
-) : PHPExecutor(debugger, session, "Debug summary returned", threadId)
+) : PHPExecutor(debugger, session, "Debug summary returned", threadId, true)
   , m_obj{obj}
 {
 }

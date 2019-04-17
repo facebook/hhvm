@@ -34,7 +34,8 @@ public:
     Debugger *debugger,
     DebuggerSession *session,
     const std::string &breakpointFireMessage,
-    request_id_t threadId
+    request_id_t threadId,
+    bool evalSilent
   );
 
   void execute();
@@ -47,6 +48,7 @@ protected:
   std::string m_breakpointFireMessage;
   request_id_t m_threadId;
   DebuggerRequestInfo* m_ri;
+  bool m_evalSilent;
 };
 
 }

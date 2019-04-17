@@ -45,7 +45,6 @@ protected:
   std::string m_expr;
   Unit *m_rawUnit;
   int m_frameDepth;
-  bool m_evalSilent;
 
   void callPHPCode() override;
 };
@@ -58,10 +57,9 @@ EvaluatePHPExecutor::EvaluatePHPExecutor(
   const std::string &expr,
   int frameDepth,
   bool evalSilent
-) : PHPExecutor(debugger, session, "Evaluation returned", threadId)
+) : PHPExecutor(debugger, session, "Evaluation returned", threadId, evalSilent)
   , m_expr{expr}
   , m_frameDepth{frameDepth}
-  , m_evalSilent{evalSilent}
 {
 }
 
@@ -154,10 +152,7 @@ bool EvaluateCommand::executeImpl(
 
   if (result.failed) {
     if (!evalSilent) {
-      m_debugger->sendUserMessage(
-        result.error.c_str(),
-        DebugTransport::OutputLevelError
-      );
+      // Note that the VM will have already sent the message to stderr
       throw DebuggerCommandException("Failed to evaluate expression");
     } else {
       // Return empty response with no type in silent eval context.

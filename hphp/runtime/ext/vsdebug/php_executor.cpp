@@ -33,12 +33,14 @@ PHPExecutor::PHPExecutor(
   Debugger *debugger,
   DebuggerSession *session,
   const std::string &breakpointFireMessage,
-  request_id_t threadId
+  request_id_t threadId,
+  bool evalSilent
 ) : m_debugger{debugger},
     m_session{session},
     m_breakpointFireMessage{breakpointFireMessage},
     m_threadId{threadId},
-    m_ri{nullptr}
+    m_ri{nullptr},
+    m_evalSilent{evalSilent}
 {
 }
 
@@ -52,7 +54,9 @@ void PHPExecutor::execute()
   // are swallowed.
   RequestInjectionData& rid = RID();
   const int previousErrorLevel = rid.getErrorReportingLevel();
-  rid.setErrorReportingLevel(0);
+  if (m_evalSilent) {
+    rid.setErrorReportingLevel(0);
+  }
 
   m_ri = m_debugger->getRequestInfo();
   assertx(m_ri->m_evaluateCommandDepth >= 0);

@@ -292,6 +292,7 @@ void Debugger::setClientConnected(
         m_connectionNotifyCondition.notify_all();
       }
     } else {
+      // disconnected case
       auto logger = Eval::Debugger::GetUsageLogger();
       if (logger != nullptr) {
         VSDebugLogger::Log(

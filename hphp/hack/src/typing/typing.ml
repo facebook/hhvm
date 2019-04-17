@@ -6178,6 +6178,9 @@ and check_parent_abstract position parent_type class_type =
       ~is_final position (Cls.typeconsts class_type);
   end else ()
 
+and shallow_decl_enabled () =
+  TCO.shallow_class_decl (GlobalNamingOptions.get ())
+
 and class_def tcopt c =
   let env = EnvFromDef.class_env tcopt c in
   let tc = Env.get_class env (snd c.c_name) in
@@ -6192,6 +6195,8 @@ and class_def tcopt c =
       None
   | Some tc ->
     Typing_requirements.check_class env tc;
+    if shallow_decl_enabled () then
+      Typing_inheritance.check_class env tc;
     Some (class_def_ env c tc)
 
 and class_def_ env c tc =

@@ -70,3 +70,20 @@ val props      : t -> (string * class_elt) Sequence.t
 val sprops     : t -> (string * class_elt) Sequence.t
 val methods    : t -> (string * class_elt) Sequence.t
 val smethods   : t -> (string * class_elt) Sequence.t
+
+(** The following functions return _all_ class member declarations defined in or
+    inherited by this class with the given member name, including ones which
+    were overridden, for purposes such as override checking. The list is ordered
+    in reverse with respect to the linearization (so members defined in more
+    derived classes occur later in the list).
+
+    To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
+    Raises [Failure] if used when shallow_class_decl is not enabled. *)
+val all_inherited_methods    : t -> string -> class_elt list
+val all_inherited_smethods   : t -> string -> class_elt list
+
+val shallow_decl : t -> Shallow_decl_defs.shallow_class
+(** Return the shallow declaration for the given class.
+
+    To be used only when {!ServerLocalConfig.shallow_class_decl} is enabled.
+    Raises [Failure] if used when shallow_class_decl is not enabled. *)

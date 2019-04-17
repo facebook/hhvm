@@ -450,6 +450,7 @@ and 'phase fun_param = {
 and 'phase fun_params = 'phase fun_param list
 
 and class_elt = {
+  ce_abstract    : bool;
   ce_final       : bool;
   ce_is_xhp_attr : bool;
   ce_override    : bool;

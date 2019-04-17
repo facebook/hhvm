@@ -399,7 +399,8 @@ let default_constructor_ce class_ =
              ft_decl_errors = None;
              ft_returns_void_to_rx = false;
            }
-  in { ce_final       = false;
+  in { ce_abstract    = false;
+       ce_final       = false;
        ce_is_xhp_attr = false;
        ce_const       = false;
        ce_lateinit    = false;

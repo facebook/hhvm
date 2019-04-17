@@ -12,6 +12,8 @@ open Typing_defs
 
 module Reason = Typing_reason
 
+type 'a subst = 'a ty SMap.t
+
 (*****************************************************************************)
 (* Builds a substitution out of a list of type parameters and a list of types.
  *
@@ -26,7 +28,7 @@ module Reason = Typing_reason
  *)
 (*****************************************************************************)
 
-let make tparams tyl =
+let make tparams tyl : 'a subst =
   (* We tolerate missing types in silent_mode. When that happens, we bind
    * all the parameters we can, and bind the remaining ones to "Tany".
    *)

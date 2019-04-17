@@ -14,9 +14,9 @@ open ServerEnv
 module Test = Integration_test_base
 
 let foo_contents = "<?hh // partial
-class Foo {
-  <<__Override>>
-  public function f() {}
+interface I {}
+class Foo extends I {
+
 }
 "
 
@@ -44,9 +44,10 @@ let () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let expected_error =
-    "File \"/foo.php\", line 4, characters 19-19:\n" ^
-    "Foo::f() is marked as override; no non-private parent definition found " ^
-    "or overridden parent is defined in non-<?hh code (Typing[4087])\n" in
+    "File \"/foo.php\", line 3, characters 7-9:\n\
+     a class cannot extend an interface (Typing[4115])\n\
+     File \"/foo.php\", line 3, characters 19-19:\n\
+     This is an interface" in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);
 
   (* Now let's edit a wholly unrelated file *)

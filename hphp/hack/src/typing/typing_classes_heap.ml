@@ -8,6 +8,7 @@
  *)
 
 open Core_kernel
+open Decl_inheritance
 open Typing_defs
 open Shallow_decl_defs
 
@@ -18,6 +19,7 @@ module SN = Naming_special_names
 type lazy_class_type = {
   sc: shallow_class;
   c: class_type;
+  ih: inherited_members;
   ancestors: decl ty LSTable.t;
 }
 
@@ -28,9 +30,11 @@ type class_type_variant =
 type t = class_type_variant
 
 let make_lazy_class_type class_name sc c =
+  let inherited_members = Decl_inheritance.make class_name in
   {
     sc;
     c;
+    ih = inherited_members;
     ancestors = Decl_ancestors.ancestors_cache class_name;
   }
 
@@ -261,12 +265,12 @@ let get_sprop t id =
 
 let get_method t id =
   match t with
-  | Lazy lc -> SMap.get id lc.c.tc_methods
+  | Lazy lc -> LSTable.get lc.ih.methods id
   | Eager c -> SMap.get id c.tc_methods
 
 let get_smethod t id =
   match t with
-  | Lazy lc -> SMap.get id lc.c.tc_smethods
+  | Lazy lc -> LSTable.get lc.ih.smethods id
   | Eager c -> SMap.get id c.tc_smethods
 
 let has_const t id =
@@ -291,12 +295,12 @@ let has_sprop t id =
 
 let has_method t id =
   match t with
-  | Lazy _ -> Option.is_some (get_method t id)
+  | Lazy lc -> LSTable.mem lc.ih.methods id
   | Eager _ -> Option.is_some (get_method t id)
 
 let has_smethod t id =
   match t with
-  | Lazy _ -> Option.is_some (get_smethod t id)
+  | Lazy lc -> LSTable.mem lc.ih.smethods id
   | Eager _ -> Option.is_some (get_smethod t id)
 
 let consts t =
@@ -321,10 +325,27 @@ let sprops t =
 
 let methods t =
   match t with
-  | Lazy lc -> Sequence.of_list (SMap.bindings lc.c.tc_methods)
+  | Lazy lc -> LSTable.to_seq lc.ih.methods |> sort_by_key
   | Eager c -> Sequence.of_list (SMap.bindings c.tc_methods)
 
 let smethods t =
   match t with
-  | Lazy lc -> Sequence.of_list (SMap.bindings lc.c.tc_smethods)
+  | Lazy lc -> LSTable.to_seq lc.ih.smethods |> sort_by_key
   | Eager c -> Sequence.of_list (SMap.bindings c.tc_smethods)
+
+let get_all cache id = LSTable.get cache id |> Option.value ~default:[]
+
+let all_inherited_methods t id =
+  match t with
+  | Lazy lc -> get_all lc.ih.all_inherited_methods id
+  | Eager _ -> failwith "shallow_class_decl is disabled"
+
+let all_inherited_smethods t id =
+  match t with
+  | Lazy lc -> get_all lc.ih.all_inherited_smethods id
+  | Eager _ -> failwith "shallow_class_decl is disabled"
+
+let shallow_decl t =
+  match t with
+  | Lazy lc -> lc.sc
+  | Eager _ -> failwith "shallow_class_decl is disabled"

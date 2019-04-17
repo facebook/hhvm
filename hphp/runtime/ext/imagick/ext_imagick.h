@@ -310,10 +310,13 @@ String convertMagickData(size_t size, unsigned char* &data);
 
 template<typename T>
 ALWAYS_INLINE
-Array convertArray(size_t num, const T* arr) {
+typename std::enable_if<
+  std::is_scalar<typename std::remove_pointer<T>::type>::value,
+  Array
+>::type convertArray(size_t num, const T* arr) {
   VArrayInit ret(num);
   for (size_t i = 0; i < num; ++i) {
-    ret.appendWithRef(arr[i]);
+    ret.append(arr[i]);
   }
   return ret.toArray();
 }

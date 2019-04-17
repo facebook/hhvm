@@ -39,7 +39,7 @@ Array createImagickPixelArray(size_t num, PixelWand* wands[], bool owner) {
   } else {
     VArrayInit ret(num);
     for (int i = 0; i < num; ++i) {
-      ret.appendWithRef(createImagickPixel(wands[i], owner));
+      ret.append(createImagickPixel(wands[i], owner));
     }
     return ret.toArray();
   }

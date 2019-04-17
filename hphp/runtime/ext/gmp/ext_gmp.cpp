@@ -419,8 +419,8 @@ static Variant HHVM_FUNCTION(gmp_div_qr,
   }
 
   PackedArrayInit returnArray(2);
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturnQ));
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturnR));
+  returnArray.append(mpzToGMPObject(gmpReturnQ));
+  returnArray.append(mpzToGMPObject(gmpReturnR));
 
   mpz_clear(gmpDataA);
   mpz_clear(gmpDataB);
@@ -1065,8 +1065,8 @@ static Variant HHVM_FUNCTION(gmp_rootrem,
   mpz_rootrem(gmpReturn0, gmpReturn1, gmpData, (uint32_t)root);
 
   PackedArrayInit returnArray(2);
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturn0));
-  returnArray.appendWithRef(mpzToGMPObject(gmpReturn1));
+  returnArray.append(mpzToGMPObject(gmpReturn0));
+  returnArray.append(mpzToGMPObject(gmpReturn1));
 
   mpz_clear(gmpData);
   mpz_clear(gmpReturn0);
@@ -1207,8 +1207,8 @@ static Variant HHVM_FUNCTION(gmp_sqrtrem,
   mpz_sqrtrem(gmpSquareRoot, gmpRemainder, gmpData);
 
   PackedArrayInit returnArray(2);
-  returnArray.appendWithRef(mpzToGMPObject(gmpSquareRoot));
-  returnArray.appendWithRef(mpzToGMPObject(gmpRemainder));
+  returnArray.append(mpzToGMPObject(gmpSquareRoot));
+  returnArray.append(mpzToGMPObject(gmpRemainder));
 
   mpz_clear(gmpData);
   mpz_clear(gmpSquareRoot);

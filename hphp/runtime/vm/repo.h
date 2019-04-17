@@ -119,7 +119,7 @@ struct Repo : RepoProxy {
    * repo.
    */
   std::vector<std::pair<std::string,SHA1>> enumerateUnits(
-    int repoId, bool preloadOnly, bool warn);
+    int repoId, bool warn);
 
   /*
    * Check if the repo has global data. If it does the repo was built using

@@ -311,19 +311,12 @@ std::unique_ptr<Unit> Repo::loadUnit(const std::string& name, const SHA1& sha1,
 }
 
 std::vector<std::pair<std::string,SHA1>>
-Repo::enumerateUnits(int repoId, bool preloadOnly, bool warn) {
+Repo::enumerateUnits(int repoId, bool warn) {
   std::vector<std::pair<std::string,SHA1>> ret;
 
   try {
     RepoStmt stmt(*this);
-    stmt.prepare(preloadOnly ?
-                 folly::sformat(
-                   "SELECT path, {0}.sha1 FROM {0} "
-                   "LEFT JOIN {1} ON ({0}.sha1={1}.sha1) WHERE preload != 0 "
-                   "ORDER BY preload DESC;",
-                   table(repoId, "FileSha1"),
-                   table(repoId, "Unit")) :
-                 folly::sformat(
+    stmt.prepare(folly::sformat(
                    "SELECT path, sha1 FROM {};",
                    table(repoId, "FileSha1"))
                 );

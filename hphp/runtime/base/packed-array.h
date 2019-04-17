@@ -113,10 +113,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
   static arr_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, tv_lval v);
-  static ArrayData* SetRefIntInPlace(ArrayData*, int64_t k, tv_lval v);
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, tv_lval v);
-  static ArrayData* SetRefStrInPlace(ArrayData*, StringData* k, tv_lval v);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static ArrayData* RemoveStr(ArrayData*, const StringData* k);
@@ -137,8 +133,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static bool Uasort(ArrayData*, const Variant&);
   static ArrayData* Append(ArrayData*, Cell v);
   static ArrayData* AppendInPlace(ArrayData*, Cell v);
-  static ArrayData* AppendRef(ArrayData*, tv_lval v);
-  static ArrayData* AppendRefInPlace(ArrayData*, tv_lval v);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
   static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
@@ -178,12 +172,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalIntRefVec(ArrayData*, int64_t, bool);
   static arr_lval LvalStrRefVec(ArrayData*, StringData*, bool);
   static arr_lval LvalNewRefVec(ArrayData*, bool);
-  static ArrayData* SetRefIntVec(ArrayData*, int64_t, tv_lval);
-  static constexpr auto SetRefIntInPlaceVec = &SetRefIntVec;
-  static ArrayData* SetRefStrVec(ArrayData*, StringData*, tv_lval);
-  static constexpr auto SetRefStrInPlaceVec = &SetRefStrVec;
-  static ArrayData* AppendRefVec(ArrayData*, tv_lval);
-  static constexpr auto AppendRefInPlaceVec = &AppendRefVec;
   static ArrayData* AppendWithRefVec(ArrayData*, TypedValue);
   static ArrayData* AppendWithRefInPlaceVec(ArrayData*, TypedValue);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
@@ -361,11 +349,8 @@ private:
                                       bool copy);
   static ArrayData* SetWithRefIntVecImpl(ArrayData*, int64_t k,
                                          TypedValue v, bool copy);
-  static ArrayData* SetRefIntImpl(ArrayData*, int64_t k, tv_lval v, bool copy);
-  static ArrayData* SetRefStrImpl(ArrayData*, StringData*, tv_lval, bool copy);
 
   static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRefImpl(ArrayData*, tv_lval v, bool copy);
   static ArrayData* AppendWithRefImpl(ArrayData*, TypedValue v, bool copy);
   static ArrayData* AppendWithRefVecImpl(ArrayData*, TypedValue, bool copy);
 

@@ -667,14 +667,6 @@ arr_lval SetArray::LvalNewRef(ArrayData* ad, bool) {
   throwRefInvalidArrayValueException(ad);
 }
 
-ArrayData* SetArray::SetRefInt(ArrayData* ad, int64_t, tv_lval) {
-  throwRefInvalidArrayValueException(ad);
-}
-
-ArrayData* SetArray::SetRefStr(ArrayData* ad, StringData*, tv_lval) {
-  throwRefInvalidArrayValueException(ad);
-}
-
 ArrayData* SetArray::SetInt(ArrayData*, int64_t, Cell) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (set int)"
@@ -778,10 +770,6 @@ ArrayData* SetArray::AppendWithRef(ArrayData* ad, TypedValue v) {
 ArrayData* SetArray::AppendWithRefInPlace(ArrayData* ad, TypedValue v) {
   if (tvIsReferenced(v)) throwRefInvalidArrayValueException(ad);
   return AppendInPlace(ad, tvToInitCell(v));
-}
-
-ArrayData* SetArray::AppendRef(ArrayData* ad, tv_lval) {
-  throwRefInvalidArrayValueException(ad);
 }
 
 ArrayData* SetArray::PlusEq(ArrayData* ad, const ArrayData*) {

@@ -460,29 +460,6 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(LvalNewRef)
 
   /*
-   * ArrayData* SetRefInt(ArrayData*, int64_t key, tv_lval v)
-   *
-   *   Binding set with an integer key.  Box `v' if it is not already
-   *   boxed, and then insert a KindOfRef that points to v's RefData.
-   *   SetRefInt() has copy/grow semantics; SetRefIntInPlace may only
-   *   grow or escalate.
-   */
-  DISPATCH(SetRefInt)
-  DISPATCH(SetRefIntInPlace)
-
-  /*
-   * ArrayData* SetRefStr(ArrayData*, StringData* key, tv_lval v)
-   *
-   *  Binding set with a string key.  The string `key' must not be an
-   *  integer-like string.  Box `v' if it is not already boxed, and
-   *  then insert a KindOfRef that points to v's RefData. SetRefStr()
-   *  has copy/grow semantics; SetRefStrInPlace() may only grow or
-   *  escalate.
-   */
-  DISPATCH(SetRefStr)
-  DISPATCH(SetRefStrInPlace)
-
-  /*
    * ArrayData* RemoveInt(ArrayData*, int64_t key)
    *
    *   Remove an array element with an integer key.  If there was no
@@ -638,19 +615,6 @@ const ArrayFunctions g_array_funcs = {
    */
   DISPATCH(Append)
   DISPATCH(AppendInPlace)
-
-  /*
-   * ArrayData* AppendRef(ArrayData*, tv_lval v)
-   *
-   *   Binding append.  This function appends a new KindOfRef to the
-   *   array with the next available integer key, boxes v if it is not
-   *   already boxed, and points the new value to the same RefData.
-   *   If there is no next available integer key, this function does
-   *   not append a value. AppendRef() has copy/grow semantics;
-   *   AppendRefInPlace() may only escalate or grow.
-   */
-  DISPATCH(AppendRef)
-  DISPATCH(AppendRefInPlace)
 
   /*
    * ArrayData* AppendWithRef(ArrayData*, TypedValue v)
@@ -854,20 +818,6 @@ ArrayData* ArrayData::CreateWithRef(TypedValue name, TypedValue value) {
 
   ArrayInit init(1, ArrayInit::Map{});
   init.setWithRef(name, value);
-  return init.create();
-}
-
-ArrayData* ArrayData::CreateRef(Variant& value) {
-  PackedArrayInit pai(1);
-  pai.appendRef(value);
-  return pai.create();
-}
-
-ArrayData* ArrayData::CreateRef(TypedValue name, tv_lval value) {
-  if (debug) assertForCreate(name);
-
-  ArrayInit init(1, ArrayInit::Map{});
-  init.setRef(name, value, true);
   return init.create();
 }
 

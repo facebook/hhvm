@@ -984,61 +984,6 @@ ArrayData* PackedArray::SetWithRefStrVec(ArrayData* adIn, StringData* k,
   throwInvalidArrayKeyException(k, adIn);
 }
 
-ArrayData* PackedArray::SetRefIntImpl(ArrayData* adIn, int64_t k,
-                                      tv_lval v, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-
-  return MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) {
-      tvBoxIfNeeded(v);
-      tvBind(v.tv(), packedData(ad)[k]);
-      return ad;
-    },
-    [&] { return AppendRefImpl(adIn, v, copy); },
-    // TODO(#2606310): Make use of our knowledge that the key is missing.
-    [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }
-  );
-}
-
-ArrayData* PackedArray::SetRefInt(ArrayData* adIn, int64_t k, tv_lval v) {
-  return SetRefIntImpl(adIn, k, v, adIn->cowCheck());
-}
-
-ArrayData* PackedArray::SetRefIntInPlace(ArrayData* a, int64_t k, tv_lval v) {
-  return SetRefIntImpl(a, k, v, false/*copy*/);
-}
-
-ArrayData* PackedArray::SetRefIntVec(ArrayData* adIn, int64_t, tv_lval) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecArray());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData* PackedArray::SetRefStrImpl(ArrayData* adIn, StringData* k,
-                                      tv_lval v, bool copy) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-
-  return MutableOpStr(adIn, k, copy,
-    // TODO(#2606310): Make use of our knowledge that the key is missing.
-    [&] (MixedArray* mixed) { return mixed->updateRef(k, v); }
-  );
-}
-
-ArrayData* PackedArray::SetRefStr(ArrayData* a, StringData* k, tv_lval v) {
-  return SetRefStrImpl(a, k, v, a->cowCheck());
-}
-
-ArrayData*
-PackedArray::SetRefStrInPlace(ArrayData* a, StringData* k, tv_lval v) {
-  return SetRefStrImpl(a, k, v, false/*copy*/);
-}
-
-ArrayData* PackedArray::SetRefStrVec(ArrayData* adIn, StringData* k, tv_lval) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecArray());
-  throwInvalidArrayKeyException(k, adIn);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
@@ -1149,33 +1094,6 @@ ArrayData* PackedArray::Append(ArrayData* adIn, Cell v) {
 
 ArrayData* PackedArray::AppendInPlace(ArrayData* adIn, Cell v) {
   return AppendImpl(adIn, v, false);
-}
-
-ArrayData* PackedArray::AppendRefImpl(ArrayData* adIn, tv_lval v, bool copy) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isPacked());
-  if (checkHACRefBind()) raiseHackArrCompatRefNew();
-  auto const ad = PrepareForInsert(adIn, copy);
-  auto& dst = packedData(ad)[ad->m_size++];
-  tvBoxIfNeeded(v);
-  dst.m_data.pref = v.val().pref;
-  dst.m_type = KindOfRef;
-  dst.m_data.pref->incRefCount();
-  return ad;
-}
-
-ArrayData* PackedArray::AppendRef(ArrayData* adIn, tv_lval v) {
-  return AppendRefImpl(adIn, v, adIn->cowCheck());
-}
-
-ArrayData* PackedArray::AppendRefInPlace(ArrayData* adIn, tv_lval v) {
-  return AppendRefImpl(adIn, v, false);
-}
-
-ArrayData* PackedArray::AppendRefVec(ArrayData* adIn, tv_lval) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isVecArray());
-  throwRefInvalidArrayValueException(adIn);
 }
 
 ArrayData*

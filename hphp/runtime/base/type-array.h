@@ -506,12 +506,6 @@ public:
    */
   FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
 
-  /*
-   * Set an element to a reference to `v', boxing it if it's unboxed.
-   */
-  FOR_EACH_KEY_TYPE(setRef, Variant&)
-  FOR_EACH_KEY_TYPE(setRef, tv_lval);
-
 #undef D
 #undef I
 #undef V
@@ -541,7 +535,6 @@ public:
   void append(const Variant& v);
   void appendWithRef(TypedValue v);
   void appendWithRef(const Variant& v);
-  void appendRef(Variant& v);
   void prepend(TypedValue v);
   void prepend(const Variant& v);
 
@@ -577,8 +570,6 @@ private:
   template<typename T> void removeImpl(const T& key);
   template<typename T> void setImpl(const T& key, TypedValue v);
   template<typename T> void setWithRefImpl(const T& key, TypedValue v);
-  template<typename T> void setRefImpl(const T& key, Variant& v);
-  template<typename T> void setRefImpl(const T& key, tv_lval v);
 
   static void compileTimeAssertions();
 

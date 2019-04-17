@@ -180,21 +180,6 @@ ArrayData* MixedArray::updateWithRef(K k, TypedValue data) {
   return this;
 }
 
-template <class K>
-ArrayData* MixedArray::updateRef(K k, tv_lval data) {
-  assertx(!isFull());
-
-  auto p = insert(k);
-
-  tvBoxIfNeeded(data);
-  if (p.found) {
-    tvBind(data.tv(), p.tv);
-    return this;
-  }
-  refDup(data.tv(), p.tv);
-  return this;
-}
-
 template <bool warn, class K>
 arr_lval MixedArray::addLvalImpl(K k) {
   assertx(!isFull());

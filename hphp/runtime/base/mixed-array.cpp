@@ -1033,22 +1033,6 @@ void MixedArray::nextInsert(Cell v) {
   cellDup(v, e->data);
 }
 
-ArrayData* MixedArray::nextInsertRef(tv_lval data) {
-  assertx(!isFull());
-  assertx(m_nextKI >= 0);
-
-  int64_t ki = m_nextKI;
-  auto h = hash_int64(ki);
-  // The check above enforces an invariant that allows us to always
-  // know that m_nextKI is not present in the array, so it is safe
-  // to use findForNewInsert()
-  auto ei = findForNewInsert(h);
-  auto e = allocElm(ei);
-  e->setIntKey(ki, h);
-  m_nextKI = static_cast<uint64_t>(ki) + 1; // Update next free element.
-  return initRef(e->data, data);
-}
-
 ArrayData* MixedArray::nextInsertWithRef(TypedValue data) {
   assertx(!isFull());
 
@@ -1199,38 +1183,6 @@ ArrayData* MixedArray::SetWithRefStrInPlace(ArrayData* ad, StringData* k,
 }
 
 ArrayData*
-MixedArray::SetRefInt(ArrayData* ad, int64_t k, tv_lval v) {
-  auto a = asMixed(ad);
-  assertx(a->isMixed());
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return a->prepareForInsert(a->cowCheck())->updateRef(k, v);
-}
-
-ArrayData*
-MixedArray::SetRefIntInPlace(ArrayData* ad, int64_t k, tv_lval v) {
-  auto a = asMixed(ad);
-  assertx(a->isMixed());
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return a->prepareForInsert(false/*copy*/)->updateRef(k, v);
-}
-
-ArrayData*
-MixedArray::SetRefStr(ArrayData* ad, StringData* k, tv_lval v) {
-  auto a = asMixed(ad);
-  assertx(a->isMixed());
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return a->prepareForInsert(a->cowCheck())->updateRef(k, v);
-}
-
-ArrayData*
-MixedArray::SetRefStrInPlace(ArrayData* ad, StringData* k, tv_lval v) {
-  auto a = asMixed(ad);
-  assertx(a->isMixed());
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  return a->prepareForInsert(false/*copy*/)->updateRef(k, v);
-}
-
-ArrayData*
 MixedArray::AddInt(ArrayData* ad, int64_t k, Cell v, bool copy) {
   assertx(!ad->exists(k));
   return asMixed(ad)->prepareForInsert(copy)->addVal(k, v);
@@ -1325,30 +1277,6 @@ ArrayData* MixedArray::Append(ArrayData* ad, Cell v) {
 
 ArrayData* MixedArray::AppendInPlace(ArrayData* ad, Cell v) {
   return AppendImpl(ad, v, false);
-}
-
-ArrayData* MixedArray::AppendRefImpl(ArrayData* ad, tv_lval v, bool copy) {
-  auto a = asMixed(ad);
-  assertx(a->isMixed());
-
-  if (checkHACRefBind()) raiseHackArrCompatRefNew();
-
-  if (UNLIKELY(a->m_nextKI < 0)) {
-    raise_warning("Cannot add element to the array as the next element is "
-                  "already occupied");
-    return a;
-  }
-
-  // TODO: maybe inline nextInsertRef manually (this is the only caller).
-  return a->prepareForInsert(copy)->nextInsertRef(v);
-}
-
-ArrayData* MixedArray::AppendRef(ArrayData* ad, tv_lval v) {
-  return AppendRefImpl(ad, v, ad->cowCheck());
-}
-
-ArrayData* MixedArray::AppendRefInPlace(ArrayData* ad, tv_lval v) {
-  return AppendRefImpl(ad, v, false);
 }
 
 ArrayData*
@@ -1975,26 +1903,6 @@ arr_lval MixedArray::LvalNewRefDict(ArrayData* adIn, bool) {
 }
 
 ArrayData*
-MixedArray::SetRefIntDict(ArrayData* adIn, int64_t, tv_lval) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDictOrShape());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData*
-MixedArray::SetRefStrDict(ArrayData* adIn, StringData*, tv_lval) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDictOrShape());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData* MixedArray::AppendRefDict(ArrayData* adIn, tv_lval) {
-  assertx(asMixed(adIn)->checkInvariants());
-  assertx(adIn->isDictOrShape());
-  throwRefInvalidArrayValueException(adIn);
-}
-
-ArrayData*
 MixedArray::AppendWithRefDict(ArrayData* adIn, TypedValue v) {
   assertx(asMixed(adIn)->checkInvariants());
   assertx(adIn->isDictOrShape());
@@ -2071,46 +1979,6 @@ arr_lval MixedArray::LvalNewRefShape(ArrayData* adIn, bool copy) {
   return RuntimeOption::EvalHackArrDVArrs
     ? LvalNewRefDict(adIn, copy)
     : LvalNewRef(adIn, copy);
-}
-
-ArrayData*
-MixedArray::SetRefIntShape(ArrayData* adIn, int64_t k, tv_lval v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? SetRefIntDict(adIn, k, v)
-    : SetRefInt(adIn, k, v);
-}
-
-ArrayData*
-MixedArray::SetRefIntInPlaceShape(ArrayData* adIn, int64_t k, tv_lval v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? SetRefIntInPlaceDict(adIn, k, v)
-    : SetRefIntInPlace(adIn, k, v);
-}
-
-ArrayData*
-MixedArray::SetRefStrShape(ArrayData* adIn, StringData* k, tv_lval v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? SetRefStrDict(adIn, k, v)
-    : SetRefStr(adIn, k, v);
-}
-
-ArrayData*
-MixedArray::SetRefStrInPlaceShape(ArrayData* adIn, StringData* k, tv_lval v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? SetRefStrInPlaceDict(adIn, k, v)
-    : SetRefStrInPlace(adIn, k, v);
-}
-
-ArrayData* MixedArray::AppendRefShape(ArrayData* adIn, tv_lval v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? AppendRefDict(adIn, v)
-    : AppendRef(adIn, v);
-}
-
-ArrayData* MixedArray::AppendRefInPlaceShape(ArrayData* adIn, tv_lval v) {
-  return RuntimeOption::EvalHackArrDVArrs
-    ? AppendRefInPlaceDict(adIn, v)
-    : AppendRefInPlace(adIn, v);
 }
 
 ArrayData*

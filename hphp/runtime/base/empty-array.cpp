@@ -293,32 +293,9 @@ arr_lval EmptyArray::LvalNewRef(ArrayData* ad, bool copy) {
   return LvalNew(ad, copy);
 }
 
-ArrayData* EmptyArray::SetRefInt(ArrayData*, int64_t k, tv_lval v) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  tvBoxIfNeeded(v);
-  tvIncRefCountable(v.tv());
-  auto const lval = k == 0 ? EmptyArray::MakePacked(v.tv())
-                           : EmptyArray::MakeMixed(k, v.tv());
-  return lval.arr;
-}
-
-ArrayData* EmptyArray::SetRefStr(ArrayData*, StringData* k, tv_lval v) {
-  if (checkHACRefBind()) raiseHackArrCompatRefBind(k);
-  tvBoxIfNeeded(v);
-  tvIncRefCountable(v.tv());
-  return EmptyArray::MakeMixed(k, v.tv()).arr;
-}
-
 ArrayData* EmptyArray::Append(ArrayData*, Cell v) {
   tvIncRefGen(v);
   return EmptyArray::MakePackedInl(v).arr;
-}
-
-ArrayData* EmptyArray::AppendRef(ArrayData*, tv_lval v) {
-  if (checkHACRefBind()) raiseHackArrCompatRefNew();
-  tvBoxIfNeeded(v);
-  tvIncRefCountable(v.tv());
-  return EmptyArray::MakePacked(v.tv()).arr;
 }
 
 ArrayData* EmptyArray::AppendWithRef(ArrayData*, TypedValue v) {

@@ -372,7 +372,6 @@ private:
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
-  using ArrayData::setRef;
   using ArrayData::remove;
   using ArrayData::release;
 
@@ -434,10 +433,6 @@ public:
   static constexpr auto SetWithRefIntInPlace = &SetWithRefInt;
   static ArrayData* SetWithRefStr(ArrayData*, StringData*, TypedValue);
   static constexpr auto SetWithRefStrInPlace = &SetWithRefStr;
-  static ArrayData* SetRefInt(ArrayData*, int64_t, tv_lval);
-  static constexpr auto SetRefIntInPlace = &SetRefInt;
-  static ArrayData* SetRefStr(ArrayData*, StringData*, tv_lval);
-  static constexpr auto SetRefStrInPlace = &SetRefStr;
   static ArrayData* RemoveInt(ArrayData*, int64_t);
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
@@ -446,8 +441,6 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell);
   static ArrayData* AppendInPlace(ArrayData*, Cell);
-  static ArrayData* AppendRef(ArrayData*, tv_lval);
-  static constexpr auto AppendRefInPlace = &AppendRef;
   static ArrayData* AppendWithRef(ArrayData*, TypedValue);
   static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue);
   static ArrayData* PlusEq(ArrayData*, const ArrayData*);

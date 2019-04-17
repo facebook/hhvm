@@ -96,10 +96,6 @@ public:
   static constexpr auto SetWithRefInt = &SetWithRefIntInPlace;
   static ArrayData* SetWithRefStrInPlace(ArrayData*, StringData*, TypedValue);
   static constexpr auto SetWithRefStr = &SetWithRefStrInPlace;
-  static ArrayData* SetRefIntInPlace(ArrayData*, int64_t k, tv_lval v);
-  static constexpr auto SetRefInt = &SetRefIntInPlace;
-  static ArrayData* SetRefStrInPlace(ArrayData*, StringData* k, tv_lval v);
-  static constexpr auto SetRefStr = &SetRefStrInPlace;
   static ArrayData* RemoveIntInPlace(ArrayData*, int64_t k);
   static constexpr auto RemoveInt = &RemoveIntInPlace;
   static ArrayData* RemoveStrInPlace(ArrayData*, const StringData* k);
@@ -107,8 +103,6 @@ public:
 
   static ArrayData* AppendInPlace(ArrayData*, Cell v);
   static constexpr auto Append = &AppendInPlace;
-  static ArrayData* AppendRefInPlace(ArrayData*, tv_lval v);
-  static constexpr auto AppendRef = &AppendRefInPlace;
   static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static constexpr auto AppendWithRef = &AppendWithRefInPlace;
 

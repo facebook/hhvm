@@ -519,27 +519,6 @@ public:
   ArrayData* setWithRefInPlace(int64_t k, TypedValue v);
 
   /*
-   * Like set(), except `v' is first boxed if it's not already a ref.
-   */
-  ArrayData* setRef(int64_t k, tv_lval v);
-  ArrayData* setRef(StringData* k, tv_lval v);
-  ArrayData* setRef(Cell k, tv_lval v);
-  ArrayData* setRef(const String& k, tv_lval v);
-  ArrayData* setRef(const Variant& k, tv_lval v);
-  ArrayData* setRefInPlace(StringData* k, tv_lval v);
-  ArrayData* setRefInPlace(int64_t k, tv_lval v);
-  ArrayData* setRefInPlace(Cell k, tv_lval v);
-
-  ArrayData* setRef(int64_t k, Variant& v);
-  ArrayData* setRef(StringData* k, Variant& v);
-  ArrayData* setRef(Cell k, Variant& v);
-  ArrayData* setRef(const String& k, Variant& v);
-  ArrayData* setRef(const Variant& k, Variant& v);
-
-  ArrayData* setRef(const StringData*, tv_lval) = delete;
-  ArrayData* setRef(const StringData*, Variant&) = delete;
-
-  /*
    * Remove the value at key `k'. remove() will make a copy first if necesary;
    * removeInPlace() will never copy, but may escalate.
    *
@@ -571,13 +550,6 @@ public:
   ArrayData* appendWithRef(TypedValue v);
   ArrayData* appendWithRefInPlace(TypedValue v);
   ArrayData* appendWithRef(const Variant& v);
-
-  /*
-   * Like append(), except `v' is first boxed if it's not already a ref.
-   */
-  ArrayData* appendRef(tv_lval v);
-  ArrayData* appendRefInPlace(tv_lval v);
-  ArrayData* appendRef(Variant& v);
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration.
@@ -955,10 +927,6 @@ struct ArrayFunctions {
   arr_lval (*lvalStrRef[NK])(ArrayData*, StringData* k, bool copy);
   arr_lval (*lvalNew[NK])(ArrayData*, bool copy);
   arr_lval (*lvalNewRef[NK])(ArrayData*, bool copy);
-  ArrayData* (*setRefInt[NK])(ArrayData*, int64_t k, tv_lval v);
-  ArrayData* (*setRefIntInPlace[NK])(ArrayData*, int64_t k, tv_lval v);
-  ArrayData* (*setRefStr[NK])(ArrayData*, StringData* k, tv_lval v);
-  ArrayData* (*setRefStrInPlace[NK])(ArrayData*, StringData* k, tv_lval v);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeIntInPlace[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
@@ -979,8 +947,6 @@ struct ArrayFunctions {
   ArrayData* (*copyStatic[NK])(const ArrayData*);
   ArrayData* (*append[NK])(ArrayData*, Cell v);
   ArrayData* (*appendInPlace[NK])(ArrayData*, Cell v);
-  ArrayData* (*appendRef[NK])(ArrayData*, tv_lval v);
-  ArrayData* (*appendRefInPlace[NK])(ArrayData*, tv_lval v);
   ArrayData* (*appendWithRef[NK])(ArrayData*, TypedValue v);
   ArrayData* (*appendWithRefInPlace[NK])(ArrayData*, TypedValue v);
   ArrayData* (*plusEq[NK])(ArrayData*, const ArrayData* elems);

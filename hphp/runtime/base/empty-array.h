@@ -106,10 +106,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static arr_lval LvalStrRef(ArrayData*, StringData* k, bool copy);
   static arr_lval LvalNew(ArrayData*, bool copy);
   static arr_lval LvalNewRef(ArrayData*, bool copy);
-  static ArrayData* SetRefInt(ArrayData*, int64_t k, tv_lval v);
-  static constexpr auto SetRefIntInPlace = &SetRefInt;
-  static ArrayData* SetRefStr(ArrayData*, StringData* k, tv_lval v);
-  static constexpr auto SetRefStrInPlace = &SetRefStr;
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterLast = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterEnd = &ArrayCommon::ReturnInvalidIndex;
@@ -138,8 +134,6 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v);
   static constexpr auto AppendInPlace = &Append;
-  static ArrayData* AppendRef(ArrayData*, tv_lval v);
-  static constexpr auto AppendRefInPlace = &AppendRef;
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
   static constexpr auto AppendWithRefInPlace = &AppendWithRef;
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);

@@ -650,22 +650,6 @@ void Array::setWithRefImpl(const T& key, TypedValue v) {
   }
 }
 
-template<typename T> ALWAYS_INLINE
-void Array::setRefImpl(const T& key, Variant& v) {
-  setRefImpl(key, tv_lval{v.asTypedValue()});
-}
-
-template<typename T> ALWAYS_INLINE
-void Array::setRefImpl(const T& key, tv_lval v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::CreateRef(key, v));
-  } else {
-    escalate();
-    auto const escalated = m_arr->setRef(key, v);
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace detail {
@@ -806,8 +790,6 @@ FOR_EACH_KEY_TYPE(void, remove, )
 
 FOR_EACH_KEY_TYPE(set, TypedValue)
 FOR_EACH_KEY_TYPE(setWithRef, TypedValue)
-FOR_EACH_KEY_TYPE(setRef, Variant&)
-FOR_EACH_KEY_TYPE(setRef, tv_lval)
 
 #undef I
 #undef V
@@ -856,15 +838,6 @@ void Array::append(TypedValue v) {
   assertx(m_arr);
   auto const escalated = m_arr->append(tvToInitCell(v));
   if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-}
-
-void Array::appendRef(Variant& v) {
-  if (!m_arr) {
-    m_arr = Ptr::attach(ArrayData::CreateRef(v));
-  } else {
-    auto const escalated = m_arr->appendRef(v);
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  }
 }
 
 void Array::appendWithRef(TypedValue v) {

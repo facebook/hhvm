@@ -329,7 +329,6 @@ private:
   using ArrayData::lval;
   using ArrayData::lvalNew;
   using ArrayData::set;
-  using ArrayData::setRef;
   using ArrayData::remove;
   using ArrayData::release;
 
@@ -370,10 +369,6 @@ public:
   static ArrayData* SetWithRefIntInPlace(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetWithRefStr(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetWithRefStrInPlace(ArrayData*, StringData*, TypedValue);
-  static ArrayData* SetRefInt(ArrayData* ad, int64_t k, tv_lval v);
-  static ArrayData* SetRefIntInPlace(ArrayData* ad, int64_t k, tv_lval v);
-  static ArrayData* SetRefStr(ArrayData* ad, StringData* k, tv_lval v);
-  static ArrayData* SetRefStrInPlace(ArrayData* ad, StringData* k, tv_lval v);
   static ArrayData* AddInt(ArrayData*, int64_t k, Cell v, bool copy);
   static ArrayData* AddStr(ArrayData*, StringData* k, Cell v, bool copy);
   static ArrayData* RemoveInt(ArrayData*, int64_t k);
@@ -384,8 +379,6 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static ArrayData* Append(ArrayData*, Cell v);
   static ArrayData* AppendInPlace(ArrayData*, Cell v);
-  static ArrayData* AppendRef(ArrayData*, tv_lval v);
-  static ArrayData* AppendRefInPlace(ArrayData*, tv_lval v);
   static ArrayData* AppendWithRef(ArrayData*, TypedValue v);
   static ArrayData* AppendWithRefInPlace(ArrayData*, TypedValue v);
   static ArrayData* PlusEq(ArrayData*, const ArrayData* elems);
@@ -487,12 +480,6 @@ public:
   static ArrayData* SetWithRefStrDict(ArrayData*, StringData* k, TypedValue v);
   static ArrayData* SetWithRefStrInPlaceDict(ArrayData*, StringData* k,
                                              TypedValue v);
-  static ArrayData* SetRefIntDict(ArrayData*, int64_t, tv_lval);
-  static constexpr auto SetRefIntInPlaceDict = &SetRefIntDict;
-  static ArrayData* SetRefStrDict(ArrayData*, StringData*, tv_lval);
-  static constexpr auto SetRefStrInPlaceDict = &SetRefStrDict;
-  static ArrayData* AppendRefDict(ArrayData*, tv_lval);
-  static constexpr auto AppendRefInPlaceDict = &AppendRefDict;
   static ArrayData* AppendWithRefDict(ArrayData*, TypedValue);
   static ArrayData* AppendWithRefInPlaceDict(ArrayData*, TypedValue);
   static constexpr auto PlusEqDict = &PlusEq;
@@ -591,12 +578,6 @@ public:
   static ArrayData* SetWithRefStrShape(ArrayData*, StringData* k, TypedValue);
   static ArrayData* SetWithRefStrInPlaceShape(ArrayData*, StringData* k,
                                               TypedValue);
-  static ArrayData* SetRefIntShape(ArrayData*, int64_t, tv_lval);
-  static ArrayData* SetRefIntInPlaceShape(ArrayData*, int64_t, tv_lval);
-  static ArrayData* SetRefStrShape(ArrayData*, StringData*, tv_lval);
-  static ArrayData* SetRefStrInPlaceShape(ArrayData*, StringData*, tv_lval);
-  static ArrayData* AppendRefShape(ArrayData*, tv_lval);
-  static ArrayData* AppendRefInPlaceShape(ArrayData*, tv_lval);
   static ArrayData* AppendWithRefShape(ArrayData*, TypedValue);
   static ArrayData* AppendWithRefInPlaceShape(ArrayData*, TypedValue);
   static constexpr auto PlusEqShape = &PlusEq;
@@ -780,11 +761,9 @@ private:
   static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
   static ArrayData* AppendImpl(ArrayData*, Cell v, bool copy);
-  static ArrayData* AppendRefImpl(ArrayData*, tv_lval v, bool copy);
   static ArrayData* AppendWithRefImpl(ArrayData*, TypedValue v, bool copy);
 
   void nextInsert(Cell);
-  ArrayData* nextInsertRef(tv_lval data);
   ArrayData* nextInsertWithRef(TypedValue data);
   ArrayData* nextInsertWithRef(const Variant& data);
   ArrayData* addVal(int64_t ki, Cell data);
@@ -796,7 +775,6 @@ private:
   template <bool warn, class K> arr_lval addLvalImpl(K k);
   template <class K> ArrayData* update(K k, Cell data);
   template <class K> ArrayData* updateWithRef(K k, TypedValue data);
-  template <class K> ArrayData* updateRef(K k, tv_lval data);
 
   void eraseNoCompact(ssize_t pos);
   void erase(ssize_t pos) {

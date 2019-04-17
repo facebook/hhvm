@@ -236,22 +236,6 @@ inline ArrayData* ArrayData::setWithRefInPlace(StringData* k, TypedValue v) {
   return g_array_funcs.setWithRefStrInPlace[kind()](this, k, v);
 }
 
-inline ArrayData* ArrayData::setRef(int64_t k, tv_lval v) {
-  return g_array_funcs.setRefInt[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::setRefInPlace(int64_t k, tv_lval v) {
-  return g_array_funcs.setRefIntInPlace[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::setRef(StringData* k, tv_lval v) {
-  return g_array_funcs.setRefStr[kind()](this, k, v);
-}
-
-inline ArrayData* ArrayData::setRefInPlace(StringData* k, tv_lval v) {
-  return g_array_funcs.setRefStrInPlace[kind()](this, k, v);
-}
-
 inline ArrayData* ArrayData::remove(int64_t k) {
   return g_array_funcs.removeInt[kind()](this, k);
 }
@@ -290,14 +274,6 @@ inline ArrayData* ArrayData::appendWithRefInPlace(TypedValue v) {
 
 inline ArrayData* ArrayData::appendWithRef(const Variant& v) {
   return g_array_funcs.appendWithRef[kind()](this, *v.asTypedValue());
-}
-
-inline ArrayData* ArrayData::appendRef(tv_lval v) {
-  return g_array_funcs.appendRef[kind()](this, v);
-}
-
-inline ArrayData* ArrayData::appendRefInPlace(tv_lval v) {
-  return g_array_funcs.appendRefInPlace[kind()](this, v);
 }
 
 inline ssize_t ArrayData::iter_begin() const {
@@ -492,30 +468,6 @@ inline ArrayData* ArrayData::setWithRefInPlace(Cell k, TypedValue v) {
                              : setWithRefInPlace(detail::getStringKey(k), v);
 }
 
-inline ArrayData* ArrayData::setRef(Cell k, tv_lval v) {
-  assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? setRef(detail::getIntKey(k), v)
-                             : setRef(detail::getStringKey(k), v);
-}
-
-inline ArrayData* ArrayData::setRefInPlace(Cell k, tv_lval v) {
-  assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? setRefInPlace(detail::getIntKey(k), v)
-                             : setRefInPlace(detail::getStringKey(k), v);
-}
-
-inline ArrayData* ArrayData::setRef(int64_t k, Variant& v) {
-  return setRef(k, tv_lval{v.asTypedValue()});
-}
-
-inline ArrayData* ArrayData::setRef(StringData* k, Variant& v) {
-  return setRef(k, tv_lval{v.asTypedValue()});
-}
-
-inline ArrayData* ArrayData::setRef(Cell k, Variant& v) {
-  return setRef(k, tv_lval{v.asTypedValue()});
-}
-
 inline ArrayData* ArrayData::remove(Cell k) {
   assertx(IsValidKey(k));
   return detail::isIntKey(k) ? remove(detail::getIntKey(k))
@@ -600,25 +552,6 @@ inline ArrayData* ArrayData::setWithRefInPlace(const String& k, TypedValue v) {
   return setWithRefInPlace(k.get(), v);
 }
 
-inline ArrayData*
-ArrayData::setRef(const String& k, tv_lval v) {
-  assertx(IsValidKey(k));
-  return setRef(k.get(), v);
-}
-
-inline ArrayData*
-ArrayData::setRef(const Variant& k, tv_lval v) {
-  return setRef(*k.toCell(), v);
-}
-
-inline ArrayData* ArrayData::setRef(const String& k, Variant& v) {
-  return setRef(k, tv_lval{v.asTypedValue()});
-}
-
-inline ArrayData* ArrayData::setRef(const Variant& k, Variant& v) {
-  return setRef(k, tv_lval{v.asTypedValue()});
-}
-
 inline ArrayData* ArrayData::remove(const String& k) {
   assertx(IsValidKey(k));
   return remove(k.get());
@@ -626,10 +559,6 @@ inline ArrayData* ArrayData::remove(const String& k) {
 
 inline ArrayData* ArrayData::remove(const Variant& k) {
   return remove(*k.toCell());
-}
-
-inline ArrayData* ArrayData::appendRef(Variant& v) {
-  return appendRef(tv_lval{v.asTypedValue()});
 }
 
 inline Variant ArrayData::getValue(ssize_t pos) const {

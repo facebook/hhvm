@@ -884,7 +884,6 @@ struct RuntimeOption {
   F(int32_t, DumpHhas,                 0)                               \
   F(string, DumpHhasToFile,            "")                              \
   F(bool, DisableHphpcOpts,            false)                           \
-  F(bool, DisableErrorHandler,         false)                           \
   F(bool, DumpTC,                      false)                           \
   F(string, DumpTCPath,                "/tmp")                          \
   F(bool, DumpTCAnchors,               false)                           \

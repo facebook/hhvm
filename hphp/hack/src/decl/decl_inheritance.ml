@@ -20,6 +20,7 @@ module Reason = Typing_reason
 
 type inherited_members = {
   consts : class_const LSTable.t;
+  typeconsts : typeconst_type LSTable.t;
   props : class_elt LSTable.t;
   sprops : class_elt LSTable.t;
   methods : class_elt LSTable.t;
@@ -168,6 +169,24 @@ let typeconst_structure class_name stc =
     cc_type        = ts_ty;
     cc_expr        = None;
     cc_origin      = class_name;
+  }
+
+let shallow_typeconst_to_typeconst_type child_class mro subst stc =
+  let constraint_ =
+    if child_class = mro.mro_name then stc.stc_constraint else
+    Option.map stc.stc_constraint (Decl_instantiate.instantiate subst)
+  in
+  let ty =
+    if child_class = mro.mro_name then stc.stc_type else
+    Option.map stc.stc_type (Decl_instantiate.instantiate subst)
+  in
+  snd stc.stc_name, {
+    ttc_abstract = stc.stc_abstract;
+    ttc_name = stc.stc_name;
+    ttc_constraint = constraint_;
+    ttc_type = ty;
+    ttc_origin = mro.mro_name;
+    ttc_enforceable = stc.stc_enforceable;
   }
 
 (** Given a linearization, pair each MRO element with its shallow class and its
@@ -392,6 +411,78 @@ let make_consts_cache class_name lin =
       if not later.cc_abstract then later else earlier
     end
 
+(** Given a linearization filtered for const lookup, return a [Sequence.t]
+    emitting each type constant in linearization order. *)
+let typeconsts child_class_name lin =
+  lin
+  |> Sequence.map ~f:begin fun (mro, cls, subst) ->
+    cls.sc_typeconsts
+    |> Sequence.of_list
+    |> Sequence.map
+      ~f:(shallow_typeconst_to_typeconst_type child_class_name mro subst)
+  end
+  |> Sequence.concat
+
+let make_typeconst_cache class_name lin =
+  LSTable.make lin
+    ~is_canonical:(fun t ->
+      t.ttc_origin = class_name || t.ttc_abstract = TCConcrete)
+    ~merge:begin fun ~earlier:descendant_tc ~later:ancestor_tc ->
+      match descendant_tc.ttc_abstract, ancestor_tc.ttc_abstract with
+      (* This covers the following case:
+       *
+       * interface I1 { abstract const type T; }
+       * interface I2 { const type T = int; }
+       *
+       * class C implements I2, I1 {}
+       *
+       * Then C::T == I2::T since I2::T is not abstract.
+       *)
+      | TCAbstract _, (TCConcrete | TCPartiallyAbstract) ->
+        ancestor_tc
+
+      (* NB: The following comment (written in D1825740) claims that this arm is
+         necessary to cover the example it describes. But this example does not
+         exercise this arm--the interface appears earlier in the linearization
+         than the abstract class, so the descendant typeconst is the concrete
+         one. Furthermore, returning [descendant_tc] rather than [ancestor_tc]
+         from this arm does not cause any of our typecheck tests to fail.
+
+         I have left it to avoid possibly introducing a subtle behavioral change
+         compared to eager decl. We are planning to remove partially-abstract
+         type constants in any case, so this arm will be removed soon.
+      *)
+      (* This covers the following case:
+       *
+       * abstract class P { const type T as arraykey = arraykey; }
+       * interface I { const type T = int; }
+       *
+       * class C extends P implements I {}
+       *
+       * Then C::T == I::T since P::T has a constraint and thus can be
+       * overridden by its child, while I::T cannot be overridden.
+       *)
+      | TCPartiallyAbstract, TCConcrete ->
+        ancestor_tc
+
+      (* When a type constant is declared in multiple parents we need to make a
+       * subtle choice of what type we inherit. For example, in:
+       *
+       * interface I1 { abstract const type t as Container<int>; }
+       * interface I2 { abstract const type t as KeyedContainer<int, int>; }
+       * abstract class C implements I1, I2 {}
+       *
+       * Depending on the order the interfaces are declared, we may report an
+       * error. Since this could be confusing there is special logic in
+       * Typing_extends that checks for this potentially ambiguous situation
+       * and requires the user to explicitly declare T in C.
+       *)
+      | TCAbstract _, TCAbstract _
+      | TCPartiallyAbstract, (TCAbstract _ | TCPartiallyAbstract)
+      | TCConcrete, (TCAbstract _ | TCPartiallyAbstract | TCConcrete) ->
+        descendant_tc
+    end
+
 let constructor_elt child_class_name (mro, cls, subst) =
   let consistent =
     if cls.sc_final then FinalClass else
@@ -440,6 +531,12 @@ let consts_cache class_name get_ancestor lin =
   |> consts class_name get_ancestor
   |> make_consts_cache class_name
 
+let typeconsts_cache class_name lin =
+  lin
+  |> filter_for_const_lookup
+  |> typeconsts class_name
+  |> make_typeconst_cache class_name
+
 let construct class_name lin =
   lazy begin
     lin
@@ -472,6 +569,7 @@ let make class_name get_ancestor =
   let all_inherited_smethods = make_inheritance_cache all_smethods in
   {
     consts = consts_cache class_name get_ancestor lin;
+    typeconsts = typeconsts_cache class_name lin;
     props = props_cache class_name lin ~static:false;
     sprops = props_cache class_name lin ~static:true;
     methods;

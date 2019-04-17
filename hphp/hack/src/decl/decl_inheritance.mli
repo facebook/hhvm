@@ -13,6 +13,7 @@ module LSTable = Lazy_string_table
 
 type inherited_members = {
   consts : class_const LSTable.t;
+  typeconsts : typeconst_type LSTable.t;
   props : class_elt LSTable.t;
   sprops : class_elt LSTable.t;
   methods : class_elt LSTable.t;

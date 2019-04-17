@@ -261,7 +261,7 @@ let get_const t id =
 
 let get_typeconst t id =
   match t with
-  | Lazy lc -> SMap.get id lc.c.tc_typeconsts
+  | Lazy lc -> LSTable.get lc.ih.typeconsts id
   | Eager c -> SMap.get id c.tc_typeconsts
 
 let get_prop t id =
@@ -291,7 +291,7 @@ let has_const t id =
 
 let has_typeconst t id =
   match t with
-  | Lazy _ -> Option.is_some (get_typeconst t id)
+  | Lazy lc -> LSTable.mem lc.ih.typeconsts id
   | Eager _ -> Option.is_some (get_typeconst t id)
 
 let has_prop t id =
@@ -321,7 +321,7 @@ let consts t =
 
 let typeconsts t =
   match t with
-  | Lazy lc -> Sequence.of_list (SMap.bindings lc.c.tc_typeconsts)
+  | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> sort_by_key
   | Eager c -> Sequence.of_list (SMap.bindings c.tc_typeconsts)
 
 let props t =

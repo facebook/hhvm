@@ -290,6 +290,7 @@ let load config_filename options =
     ~tco_log_inference_constraints:(ServerArgs.log_inference_constraints options)
     ~tco_migration_flags:(config_tc_migration_flags config)
     ?tco_disallow_byref_prop_args:(bool_opt "disallow_byref_prop_args" config)
+    ~tco_shallow_class_decl:(local_config.ServerLocalConfig.shallow_class_decl)
     ()
   in
   Errors.ignored_fixme_codes :=

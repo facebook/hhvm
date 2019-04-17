@@ -79,6 +79,9 @@ type t = {
   idle_gc_slice : int;
   (* Global name autocomplete will be missing some features to improve performance *)
   basic_autocomplete_only : bool;
+  (* Look up class members lazily from shallow declarations instead of eagerly
+     computing folded declarations representing the entire class type. *)
+  shallow_class_decl : bool;
 }
 
 let default = {
@@ -128,6 +131,7 @@ let default = {
   load_decls_from_saved_state = false;
   idle_gc_slice = 0;
   basic_autocomplete_only = false;
+  shallow_class_decl = false;
 }
 
 let path =
@@ -257,6 +261,8 @@ let load_ fn ~silent =
       ~default:default.idle_gc_slice config in
   let basic_autocomplete_only = bool_if_version "basic_autocomplete_only"
       ~default:default.basic_autocomplete_only config in
+  let shallow_class_decl = bool_if_version "shallow_class_decl"
+      ~default:default.shallow_class_decl config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -303,6 +309,7 @@ let load_ fn ~silent =
     load_decls_from_saved_state;
     idle_gc_slice;
     basic_autocomplete_only;
+    shallow_class_decl;
   }
 
 let load ~silent =

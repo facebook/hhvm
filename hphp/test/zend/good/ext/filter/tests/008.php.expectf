@@ -1,4 +1,4 @@
-array(20) {
+array(19) {
   [0]=>
   string(3) "int"
   [1]=>
@@ -37,8 +37,6 @@ array(20) {
   string(12) "number_float"
   [18]=>
   string(12) "magic_quotes"
-  [19]=>
-  string(8) "callback"
 }
 
 Warning: %s

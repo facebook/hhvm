@@ -52,7 +52,6 @@ const int64_t k_FILTER_SANITIZE_URL = 518;
 const int64_t k_FILTER_SANITIZE_NUMBER_INT = 519;
 const int64_t k_FILTER_SANITIZE_NUMBER_FLOAT = 520;
 const int64_t k_FILTER_SANITIZE_MAGIC_QUOTES = 521;
-const int64_t k_FILTER_CALLBACK = 1024;
 const int64_t k_FILTER_FLAG_ALLOW_OCTAL = 1;
 const int64_t k_FILTER_FLAG_ALLOW_HEX = 2;
 const int64_t k_FILTER_FLAG_STRIP_LOW = 4;
@@ -106,7 +105,6 @@ static struct FilterExtension final : Extension {
     HHVM_RC_INT(FILTER_SANITIZE_NUMBER_INT, k_FILTER_SANITIZE_NUMBER_INT);
     HHVM_RC_INT(FILTER_SANITIZE_NUMBER_FLOAT, k_FILTER_SANITIZE_NUMBER_FLOAT);
     HHVM_RC_INT(FILTER_SANITIZE_MAGIC_QUOTES, k_FILTER_SANITIZE_MAGIC_QUOTES);
-    HHVM_RC_INT(FILTER_CALLBACK, k_FILTER_CALLBACK);
     HHVM_RC_INT(FILTER_FLAG_ALLOW_OCTAL, k_FILTER_FLAG_ALLOW_OCTAL);
     HHVM_RC_INT(FILTER_FLAG_ALLOW_HEX, k_FILTER_FLAG_ALLOW_HEX);
     HHVM_RC_INT(FILTER_FLAG_STRIP_LOW, k_FILTER_FLAG_STRIP_LOW);
@@ -223,10 +221,6 @@ static const filter_list_entry filter_list[] = {
     StaticString("magic_quotes"),
     k_FILTER_SANITIZE_MAGIC_QUOTES,
     php_filter_magic_quotes
-  }, {
-    StaticString("callback"),
-    k_FILTER_CALLBACK,
-    php_filter_callback
   },
 };
 
@@ -351,11 +345,6 @@ Variant HHVM_FUNCTION(filter_var,
   if (!(filter_flags & k_FILTER_REQUIRE_ARRAY ||
         filter_flags & k_FILTER_FORCE_ARRAY)) {
     filter_flags |= k_FILTER_REQUIRE_SCALAR;
-  }
-
-  // No idea why, but zend does this..
-  if (filter == k_FILTER_CALLBACK) {
-    filter_flags = 0;
   }
 
   if (variable.isArray()) {

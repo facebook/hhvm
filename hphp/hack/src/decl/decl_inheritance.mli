@@ -18,6 +18,7 @@ type inherited_members = {
   smethods : class_elt LSTable.t;
   all_inherited_methods : class_elt list LSTable.t;
   all_inherited_smethods : class_elt list LSTable.t;
+  construct: (class_elt option * consistent_kind) Lazy.t;
 }
 
 val make: string -> inherited_members

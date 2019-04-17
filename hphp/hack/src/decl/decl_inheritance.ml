@@ -25,6 +25,7 @@ type inherited_members = {
   smethods : class_elt LSTable.t;
   all_inherited_methods : class_elt list LSTable.t;
   all_inherited_smethods : class_elt list LSTable.t;
+  construct: (class_elt option * consistent_kind) Lazy.t;
 }
 
 (** [inheritable_elt] is a representation internal to Decl_inheritance which is
@@ -61,7 +62,7 @@ let base_visibility origin_class_name = function
 
 let ft_to_ty ft = Reason.Rwitness ft.ft_pos, Tfun ft
 
-let shallow_method_to_ielt child_class mro subst meth : inheritable_elt =
+let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   let visibility = base_visibility mro.mro_name meth.sm_visibility in
   let ty = lazy begin
     let ty = ft_to_ty meth.sm_type in
@@ -69,22 +70,25 @@ let shallow_method_to_ielt child_class mro subst meth : inheritable_elt =
     Decl_instantiate.instantiate subst ty
   end in
   {
+    ce_abstract = meth.sm_abstract;
+    ce_final = meth.sm_final;
+    ce_is_xhp_attr = false;
+    ce_const = false;
+    ce_lateinit = false;
+    ce_override = meth.sm_override;
+    ce_lsb = false;
+    ce_memoizelsb = meth.sm_memoizelsb;
+    ce_synthesized = mro.mro_synthesized;
+    ce_visibility = visibility;
+    ce_origin = mro.mro_name;
+    ce_type = ty;
+  }
+
+let shallow_method_to_ielt child_class mro subst meth : inheritable_elt =
+  {
     id = snd meth.sm_name;
     should_chown_privates = mro.mro_copy_private_members;
-    elt = {
-      ce_abstract = meth.sm_abstract;
-      ce_final = meth.sm_final;
-      ce_is_xhp_attr = false;
-      ce_const = false;
-      ce_lateinit = false;
-      ce_override = meth.sm_override;
-      ce_lsb = false;
-      ce_memoizelsb = meth.sm_memoizelsb;
-      ce_synthesized = mro.mro_synthesized;
-      ce_visibility = visibility;
-      ce_origin = mro.mro_name;
-      ce_type = ty;
-    }
+    elt = shallow_method_to_class_elt child_class mro subst meth;
   }
 
 let shallow_prop_to_ielt child_class mro subst prop : inheritable_elt =
@@ -279,6 +283,34 @@ let make_elt_cache class_name seq =
     ~is_canonical:(is_elt_canonical class_name)
     ~merge:(merge_elts class_name)
 
+let constructor_elt child_class_name (mro, cls, subst) =
+  let consistent =
+    if cls.sc_final then FinalClass else
+    let consistent_attr_present =
+      Attributes.mem
+        SN.UserAttributes.uaConsistentConstruct
+        cls.sc_user_attributes
+    in
+    if consistent_attr_present then ConsistentConstruct else Inconsistent
+  in
+  let elt =
+    Option.map cls.sc_constructor
+      ~f:(shallow_method_to_class_elt child_class_name mro subst)
+  in
+  elt, consistent
+
+let fold_constructors child_class_name acc ancestor =
+  let descendant_cstr, descendant_consist = acc in
+  let ancestor_cstr, ancestor_consist = ancestor in
+  let cstr =
+    match descendant_cstr, ancestor_cstr with
+    | None, _ -> ancestor_cstr
+    | Some d, Some a when should_use_ancestor_sig child_class_name d a ->
+      ancestor_cstr
+    | _ -> descendant_cstr
+  in
+  cstr, Decl_utils.coalesce_consistent ancestor_consist descendant_consist
+
 let get_all_methods ~static class_name lin =
   lin
   |> filter_for_method_lookup
@@ -292,6 +324,14 @@ let props_cache ~static class_name lin =
   |> prop_ielts ~static class_name
   |> filter_or_chown_privates class_name
   |> make_elt_cache class_name
+
+let construct class_name lin =
+  lazy begin
+    lin
+    |> filter_for_method_lookup
+    |> Sequence.map ~f:(constructor_elt class_name)
+    |> Sequence.fold ~init:(None, Inconsistent) ~f:(fold_constructors class_name)
+  end
 
 let make class_name =
   let lin =
@@ -322,4 +362,5 @@ let make class_name =
     smethods;
     all_inherited_methods;
     all_inherited_smethods;
+    construct = construct class_name lin;
   }

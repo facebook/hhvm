@@ -179,7 +179,7 @@ let tparams t =
 
 let construct t =
   match t with
-  | Lazy lc -> lc.c.tc_construct
+  | Lazy lc -> Lazy.force lc.ih.construct
   | Eager c -> c.tc_construct
 
 let enum_type t =

@@ -925,59 +925,6 @@ and emit_shape env expr fl =
   in
   emit_expr ~need_ref:false env (p, A.Darray (None, fl))
 
-and emit_call_expr env pos e targs args uargs async_eager_label =
-  match snd e, targs, args, uargs with
-  | A.Id (_, "__hhas_adata"), _, [ (_, A.String data) ], [] ->
-    let v = Typed_value.HhasAdata data in
-    emit_pos_then pos @@ instr (ILitConst (TypedValue v))
-  | A.Id (_, id), _, _, []
-    when String.lowercase id = "isset" ->
-    emit_call_isset_exprs env pos args
-  | A.Id (_, id), _, [arg1], []
-    when String.lowercase id = "empty" ->
-    emit_call_empty_expr env pos arg1
-  | A.Id (_, id), _, ([_; _] | [_; _; _]), []
-    when String.lowercase id = "idx" && not (jit_enable_rename_function ()) ->
-    emit_idx env pos args
-
-  | A.Id (_, id), _, [arg1], []
-    when String.lowercase id = "eval" ->
-    emit_eval env pos arg1
-  | A.Id (_, "class_alias"), _, [_, A.String c1; _, A.String c2], []
-    when is_global_namespace env -> gather [
-      emit_pos pos;
-      instr_true;
-      instr_alias_cls c1 c2
-    ]
-  | A.Id (_, "class_alias"), _, [_, A.String c1; _, A.String c2; arg3], []
-    when is_global_namespace env -> gather [
-      emit_expr ~need_ref:false env arg3;
-      emit_pos pos;
-      instr_alias_cls c1 c2
-    ]
-  | A.Id (_, id), _, [arg1], []
-    when String.lowercase id = "hh\\set_frame_metadata" ||
-         String.lowercase id = "\\hh\\set_frame_metadata" ->
-    gather [
-      emit_expr ~need_ref:false env arg1;
-      emit_pos pos;
-      instr_popl (Local.Named "$86metadata");
-      instr_null;
-    ]
-  | A.Id (_, id), _, [], []
-    when String.lowercase id = "func_num_args" ||
-         String.lowercase id = "\\func_num_args" ->
-    emit_pos_then pos @@ instr_func_num_args
-  | A.Id (_, s), _, [], []
-    when (String.lowercase s = "exit" || String.lowercase s = "die") ->
-    emit_pos_then pos @@ emit_exit env None
-  | A.Id (_, s), _, [arg1], []
-    when (String.lowercase s = "exit" || String.lowercase s = "die") ->
-    emit_pos_then pos @@ emit_exit env (Some arg1)
-  | _, _, _, _ ->
-    let instrs = emit_call env pos e targs args uargs async_eager_label in
-    emit_pos_then pos instrs
-
 and emit_known_class_id env id =
   let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
   Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
@@ -1584,7 +1531,8 @@ and emit_await env pos expr =
     let after_await = Label.next_regular () in
     let instrs = match snd expr with
     | A.Call (e, targs, args, uargs) ->
-      emit_call_expr env pos e targs args uargs (Some after_await)
+      emit_pos_then pos @@
+        emit_call env pos e targs args uargs (Some after_await)
     | _ ->
       emit_expr ~need_ref:false env expr
     in gather [
@@ -1715,7 +1663,7 @@ and emit_expr env ~need_ref (pos, expr_ as expr) =
     fst (emit_obj_get ~need_ref env pos query_op expr prop nullflavor)
   | A.Call (e, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
-      emit_call_expr env pos e targs args uargs None
+      emit_pos_then pos @@ emit_call env pos e targs args uargs None
   | A.New (typeexpr, targs, args, uargs) ->
     emit_box_if_necessary pos need_ref @@
       emit_new env pos typeexpr targs args uargs
@@ -3265,6 +3213,7 @@ and emit_call_lhs_and_fcall
 
 and get_call_builtin_func_info lower_fq_id =
   match lower_fq_id with
+  | "func_num_args" -> Some (0, IMisc FuncNumArgs)
   | "array_key_exists" -> Some (2, IMisc AKExists)
   | "hphp_array_idx" -> Some (3, IMisc ArrayIdx)
   | "intval" -> Some (1, IOp CastInt)
@@ -3302,6 +3251,11 @@ and emit_special_function env pos id args uargs default =
          ] end in
     Some instrs
 
+  | "isset", _ -> Some (emit_call_isset_exprs env pos args)
+  | "empty", [arg1] -> Some (emit_call_empty_expr env pos arg1)
+  | "idx", _ when (nargs = 2 || nargs = 3) && not (jit_enable_rename_function ()) ->
+    Some (emit_idx env pos args)
+
   | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in
     let expr_id = pos, A.Id (pos, "\\hh\\invariant_violation") in
@@ -3331,6 +3285,23 @@ and emit_special_function env pos id args uargs default =
       instr_label l1;
     ])
 
+  | "__hhas_adata", [ (_, A.String data) ] ->
+    let v = Typed_value.HhasAdata data in
+    Some (emit_pos_then pos @@ instr (ILitConst (TypedValue v)))
+
+  | "class_alias",  [_, A.String c1; _, A.String c2]
+    when is_global_namespace env -> Some(gather [
+      emit_pos pos;
+      instr_true;
+      instr_alias_cls c1 c2
+    ])
+  | "class_alias", [_, A.String c1; _, A.String c2; arg3]
+    when is_global_namespace env -> Some(gather [
+      emit_expr ~need_ref:false env arg3;
+      emit_pos pos;
+      instr_alias_cls c1 c2
+    ])
+
   | ("class_exists" | "interface_exists" | "trait_exists" as id), arg1::_
     when nargs = 1 || nargs = 2 ->
     let class_kind =
@@ -3349,6 +3320,16 @@ and emit_special_function env pos id args uargs default =
       ];
       instr (IMisc (OODeclExists class_kind))
     ])
+
+  | "hh\\set_frame_metadata", [arg1] ->
+    Some (gather [
+      emit_expr ~need_ref:false env arg1;
+      emit_pos pos;
+      instr_popl (Local.Named "$86metadata");
+      instr_null;
+    ])
+
+  | "eval", [arg1] -> Some (emit_eval env pos arg1)
 
   | ("exit" | "die"), _ when nargs = 0 || nargs = 1 ->
     Some (emit_exit env (List.hd args))
@@ -3439,6 +3420,7 @@ and emit_special_function env pos id args uargs default =
       ])
     | _ ->
       begin match get_call_builtin_func_info lower_fq_name with
+      | Some (0, i) when args = [] -> Some (emit_pos_then pos (instr i))
       | Some (nargs, i) when nargs = List.length args ->
         Some (
           gather [

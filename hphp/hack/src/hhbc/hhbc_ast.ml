@@ -190,9 +190,7 @@ type instruct_lit_const =
   | NewPair
   | NewRecord of class_id * string list
   | AddElemC
-  | AddElemV
   | AddNewElemC
-  | AddNewElemV
   | NewCol of CollectionType.t
   | ColFromArray of CollectionType.t
   | CnsE of const_id

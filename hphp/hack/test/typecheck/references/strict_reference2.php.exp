@@ -1,2 +1,2 @@
-File "strict_reference2.php", line 4, characters 14-16:
-Arrays cannot contain references. (Typing[4225])
+File "strict_reference2.php", line 4, characters 14-15:
+Collection element cannot be marked as reference (Parsing[1002])

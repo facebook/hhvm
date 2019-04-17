@@ -1657,9 +1657,7 @@ void dce_default(Env& env, const Op& op) {
 }
 
 void dce(Env& env, const bc::Add& op) { dce_default(env, op); }
-void dce(Env& env, const bc::AddElemV& op) { dce_default(env, op); }
 void dce(Env& env, const bc::AddNewElemC& op) { dce_default(env, op); }
-void dce(Env& env, const bc::AddNewElemV& op) { dce_default(env, op); }
 void dce(Env& env, const bc::AddO& op) { dce_default(env, op); }
 void dce(Env& env, const bc::AliasCls& op) { dce_default(env, op); }
 void dce(Env& env, const bc::AssertRATL& op) { dce_default(env, op); }

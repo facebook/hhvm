@@ -505,9 +505,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewDArray,       ONE(IVA),         NOV,             ONE(CV),    NF) \
   O(NewRecord,       TWO(SA,VSA),      SMANY,           ONE(CV),    NF) \
   O(AddElemC,        NA,               THREE(CV,CV,CV), ONE(CV),    NF) \
-  O(AddElemV,        NA,               THREE(VV,CV,CV), ONE(CV),    NF) \
   O(AddNewElemC,     NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(AddNewElemV,     NA,               TWO(VV,CV),      ONE(CV),    NF) \
   O(NewCol,          ONE(OA(CollectionType)),                           \
                                        NOV,             ONE(CV),    NF) \
   O(NewPair,         NA,               TWO(CV,CV),      ONE(CV),    NF) \

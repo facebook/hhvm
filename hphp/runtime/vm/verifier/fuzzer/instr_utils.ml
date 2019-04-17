@@ -119,7 +119,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc Idx
   | IMisc ArrayIdx
   | ILitConst AddElemC                     -> ["C"; "C"; "C"], ["C"]
-  | ILitConst AddElemV                     -> ["C"; "C"; "V"], ["C"]
   | IGet CGetL _
   | IGet PushL _
   | IGet CUGetL _
@@ -144,7 +143,6 @@ let stk_data : instruct -> stack_sig = function
   | IMisc OODeclExists _
   | IMisc AKExists
   | IGenerator YieldK                      -> ["C"; "C"], ["C"]
-  | ILitConst AddNewElemV                  -> ["C"; "V"], ["V"]
   | IOp Abs
   | IOp Not
   | IOp Floor

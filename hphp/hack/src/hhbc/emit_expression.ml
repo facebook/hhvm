@@ -451,17 +451,11 @@ let parse_include e =
 
 let rec expr_and_new env pos instr_to_add_new instr_to_add = function
   | A.AFvalue e ->
-    let add_instr =
-      if expr_starts_with_ref e then instr_add_new_elemv else instr_to_add_new
-    in
-    gather [emit_expr ~need_ref:false env e; emit_pos pos; add_instr]
+    gather [emit_expr ~need_ref:false env e; emit_pos pos; instr_to_add_new]
   | A.AFkvalue (k, v) ->
-    let add_instr =
-      if expr_starts_with_ref v then instr_add_elemv else instr_to_add
-    in
     gather [
       emit_two_exprs env (fst k) k v;
-      add_instr;
+      instr_to_add;
     ]
 
 and get_local env (pos, str) =

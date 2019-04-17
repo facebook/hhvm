@@ -604,12 +604,6 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   push(env, std::move(outTy->first));
 }
 
-void in(ISS& env, const bc::AddElemV& /*op*/) {
-  popV(env); popC(env);
-  popC(env);
-  push(env, TArr);
-}
-
 void in(ISS& env, const bc::AddNewElemC&) {
   auto v = popC(env);
   auto inTy = (env.state.stack.end() - 1).unspecialize();
@@ -640,12 +634,6 @@ void in(ISS& env, const bc::AddNewElemC&) {
     }
   }
   push(env, std::move(*outTy));
-}
-
-void in(ISS& env, const bc::AddNewElemV&) {
-  popV(env);
-  popC(env);
-  push(env, TArr);
 }
 
 void in(ISS& env, const bc::NewCol& op) {

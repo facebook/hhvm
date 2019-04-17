@@ -3,7 +3,7 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 
 ==============================================================
 "$a = 123; const BADARRAY = [&$a];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(52)(9a0e43dc21e1d994595d14c7cffa7f08) : eval()'d code on line 1
+Fatal error: Collection element cannot be marked as reference in %s/test/slow/constant/bad-arrays.php(52)(9a0e43dc21e1d994595d14c7cffa7f08) : eval()'d code on line 1
 
 ==============================================================
 "$a = 123; const BADARRAY = [100 + $a + 200];" ====>
@@ -35,7 +35,7 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 
 ==============================================================
 "$a = 123; const BADARRAY = [1, [2, &$a], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(52)(02811b2f602b5c0492addfd365e72877) : eval()'d code on line 1
+Fatal error: Collection element cannot be marked as reference in %s/test/slow/constant/bad-arrays.php(52)(02811b2f602b5c0492addfd365e72877) : eval()'d code on line 1
 
 ==============================================================
 "$a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3];" ====>

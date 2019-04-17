@@ -1013,26 +1013,12 @@ AddElemC    [C C C]  ->  [C:Arr|Dict]
 
   If $3 is not an array or dict, this instruction throws a fatal error.
 
-AddElemV    [C C V]  ->  [C:Arr]
-
-  Add element. If $3 is an array, this instruction executes $3[$2] = &$1 and
-  then pushes $3 onto the stack.
-
-  If $3 is not an array, this instruction throws a fatal error.
-
 AddNewElemC    [C C]  ->  [C:Arr|Vec|Keyset]
 
   Add new element. If $2 is an array, vec, or keyset this instruction executes
   $2[] = $1 and then pushes $2 onto the stack.
 
   If $2 is not an array, vec, or keyset, this instruction throws a fatal error.
-
-AddNewElemV    [C V]  ->  [C:Arr]
-
-  Add new element. If $2 is an array, this instruction executes $2[] = &$1 and
-  then pushes $2 onto the stack.
-
-  If $2 is not an array, this instruction throws a fatal error.
 
 NewCol <coll type>    []  ->  [C:Obj]
 

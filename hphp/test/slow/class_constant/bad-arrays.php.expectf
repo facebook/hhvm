@@ -3,7 +3,7 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/class_co
 
 ==============================================================
 "class Cls1 { static public $a = 123; const BADARRAY = [&$a]; };" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(52)(0786df85e82baf3701e50d311b3a5651) : eval()'d code on line 1
+Fatal error: Collection element cannot be marked as reference in %s/test/slow/class_constant/bad-arrays.php(52)(0786df85e82baf3701e50d311b3a5651) : eval()'d code on line 1
 
 ==============================================================
 "class Cls1 { static public $a = 123; const BADARRAY = [100 + $a + 200]; };" ====>
@@ -35,7 +35,7 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/class_co
 
 ==============================================================
 "class Cls1 { static public $a = 123; const BADARRAY = [1, [2, &$a], 3]; };" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/class_constant/bad-arrays.php(52)(24c3665df42a981cf5a3cc633a29d792) : eval()'d code on line 1
+Fatal error: Collection element cannot be marked as reference in %s/test/slow/class_constant/bad-arrays.php(52)(24c3665df42a981cf5a3cc633a29d792) : eval()'d code on line 1
 
 ==============================================================
 "class Cls1 { static public $a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3]; };" ====>

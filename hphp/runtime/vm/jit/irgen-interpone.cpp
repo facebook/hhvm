@@ -417,8 +417,6 @@ void emitFPushObjMethod(IRGS& env, uint32_t, ObjMethodOp, const ImmVector&) {
   INTERP
 }
 
-void emitAddElemV(IRGS& env)                  { INTERP }
-void emitAddNewElemV(IRGS& env)               { INTERP }
 void emitExit(IRGS& env)                      { INTERP }
 void emitFatal(IRGS& env, FatalOp)            { INTERP }
 void emitSetOpG(IRGS& env, SetOpOp)           { INTERP }

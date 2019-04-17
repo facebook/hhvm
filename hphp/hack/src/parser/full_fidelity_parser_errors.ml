@@ -2590,6 +2590,9 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         make_error_from_node node SyntaxError.list_as_subscript :: errors
       | _ -> errors
     else check_collection_members m errors
+  | ArrayCreationExpression  { array_creation_members = m; _ }
+  | ArrayIntrinsicExpression { array_intrinsic_members = m; _ } ->
+    check_collection_members m errors
   | VarrayIntrinsicExpression { varray_intrinsic_members = m; _ }
   | DarrayIntrinsicExpression { darray_intrinsic_members = m; _ } ->
     let errors =
@@ -2791,7 +2794,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       | _ -> `InvalidClass in
     let num_initializers =
       List.length (syntax_to_list_no_separators initializers) in
-    begin match status with
+    let errors = begin match status with
     | `ValidClass "pair" when num_initializers <> 2 ->
       let msg =
         if num_initializers = 0
@@ -2810,7 +2813,8 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       let e =
         make_error_from_node node SyntaxError.invalid_class_in_collection_initializer in
       e :: errors
-    end
+    end in
+    check_collection_members initializers errors
   | PipeVariableExpression _
     when ParserOptions.enable_await_as_an_expression env.parser_options ->
     let closest_pipe_operator = List.find_exn parents ~f:begin fun node ->
@@ -3933,6 +3937,11 @@ let find_syntax_errors env =
           redeclaration_errors env node parents namespace_name names errors in
         let errors =
           methodish_errors env node errors in
+        trait_require_clauses, names, errors
+      | ArrayCreationExpression _
+      | ArrayIntrinsicExpression _ ->
+        let errors =
+          expression_errors env is_in_concurrent_block namespace_name node parents errors in
         trait_require_clauses, names, errors
       | InstanceofExpression _
       | LiteralExpression _

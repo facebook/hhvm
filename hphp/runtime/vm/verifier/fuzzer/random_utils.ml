@@ -206,9 +206,7 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IOp Shr);
     (fun () -> IOp InstanceOf);
     (fun () -> IMutator SetG);
-    (fun () -> ILitConst AddNewElemV);
     (fun () -> ILitConst AddElemC);
-    (fun () -> ILitConst AddElemV);
     (fun () -> IMutator (IncDecL (random_local (), random_incdec_op ())));
     (fun () -> IMutator (IncDecG (random_incdec_op ())));
     (fun () -> IMutator (UnsetL (random_local ())));

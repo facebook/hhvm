@@ -2202,22 +2202,6 @@ OPTBLD_INLINE void iopAddElemC() {
   vmStack().popC();
 }
 
-OPTBLD_INLINE void iopAddElemV() {
-  Ref* r1 = vmStack().topV();
-  Cell* c2 = vmStack().indC(1);
-  Cell* c3 = vmStack().indC(2);
-  if (!isArrayType(c3->m_type)) {
-    raise_error("AddElemV: $3 must be an array");
-  }
-  if (c2->m_type == KindOfInt64) {
-    cellAsVariant(*c3).asArrRef().setRef(c2->m_data.num, tvAsVariant(r1));
-  } else {
-    cellAsVariant(*c3).asArrRef().setRef(tvAsCVarRef(c2), tvAsVariant(r1));
-  }
-  vmStack().popV();
-  vmStack().popC();
-}
-
 OPTBLD_INLINE void iopAddNewElemC() {
   Cell* c1 = vmStack().topC();
   Cell* c2 = vmStack().indC(1);
@@ -2240,16 +2224,6 @@ OPTBLD_INLINE void iopAddNewElemC() {
   }
   assertx(cellIsPlausible(*c2));
   vmStack().popC();
-}
-
-OPTBLD_INLINE void iopAddNewElemV() {
-  Ref* r1 = vmStack().topV();
-  Cell* c2 = vmStack().indC(1);
-  if (!isArrayType(c2->m_type)) {
-    raise_error("AddNewElemV: $2 must be an array");
-  }
-  cellAsVariant(*c2).asArrRef().appendRef(tvAsVariant(r1));
-  vmStack().popV();
 }
 
 OPTBLD_INLINE void iopNewCol(CollectionType cType) {

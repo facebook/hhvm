@@ -121,8 +121,6 @@ let string_of_lit_const instruction =
     | File -> "File"
     | Dir -> "Dir"
     | NullUninit -> "NullUninit"
-    | AddElemV -> "AddElemV"
-    | AddNewElemV -> "AddNewElemV"
     | Method -> "Method"
     | NewArray n -> sep ["NewArray"; string_of_int n]
     | NewLikeArrayL (id, n) ->

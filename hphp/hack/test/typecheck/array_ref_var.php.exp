@@ -1,2 +1,2 @@
-File "array_ref_var.php", line 13, characters 14-18:
-Arrays cannot contain references. (Typing[4225])
+File "array_ref_var.php", line 13, characters 14-17:
+Collection element cannot be marked as reference (Parsing[1002])

@@ -74,7 +74,7 @@ class foo
 }
 
 $obj = new foo(); //creating new object
-$arr = array(&$obj, &$obj);
+$arr = array($obj, $obj);
 var_dump( implode(",", $arr) );
 var_dump($arr);
 

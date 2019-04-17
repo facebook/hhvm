@@ -18,8 +18,8 @@ $value1 = 100;
 $value2 = 33;
 $value3 = 555;
 
-// an array containing integer references
-$unsorted_numerics =  array( &$value1 , &$value2, &$value3);
+
+$unsorted_numerics =  array( $value1 , $value2, $value3);
 
 echo "\n-- Testing sort() by supplying reference variable array, 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;

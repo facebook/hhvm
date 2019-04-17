@@ -19,7 +19,7 @@ abstract final class DafnaStatics {
 
 function dafna()
 {
-	
+
 	print "Dafna!\n";
 	print call_user_func("still_working")."\n";
 	DafnaStatics::$foo++;
@@ -49,6 +49,5 @@ endfor;
 
 $dafna = new dafna_class();
 
-print $name=call_user_func(array(&$dafna,"GetMyName"));
+print $name=call_user_func(array($dafna,"GetMyName"));
 print "\n";
-

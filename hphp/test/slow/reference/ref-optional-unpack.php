@@ -12,7 +12,7 @@ $arr = array();
 foo(43, ...$arr);
 var_dump($arr);
 
-$arr = array(&$val);
+$arr = array($val);
 foo(44, ...$arr);
 var_dump($val);
 var_dump($arr);

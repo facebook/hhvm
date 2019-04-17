@@ -15,18 +15,18 @@ $value1 = 10;
 $value2 = "hello";
 $value3 = 0;
 
-// input array containing elements as reference variables
+
 $arr1 = array(
   0 => 0,
-  1 => &$value2,
-  2 => &$value2,
+  1 => $value2,
+  2 => $value2,
   3 => "hello",
-  4 => &$value3,
-  $value2 => &$value2
+  4 => $value3,
+  $value2 => $value2
 );
 
 // initialize the second argument
-$arr2 = array($value2 => "hello", &$value2);
+$arr2 = array($value2 => "hello", $value2);
 
 echo "-- With default argument --\n";
 var_dump( array_merge_recursive($arr1) );

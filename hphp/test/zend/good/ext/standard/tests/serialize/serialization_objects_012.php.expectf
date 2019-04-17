@@ -39,44 +39,6 @@ array(2) {
 }
 
 
-Array containing object and reference to that object:
-array(2) {
-  [0]=>
-  &object(stdClass) (0) {
-  }
-  [1]=>
-  &object(stdClass) (0) {
-  }
-}
-string(37) "a:2:{i:0;O:8:"stdClass":0:{}i:1;R:2;}"
-array(2) {
-  [0]=>
-  &object(stdClass) (0) {
-  }
-  [1]=>
-  &object(stdClass) (0) {
-  }
-}
-array(2) {
-  [0]=>
-  &object(stdClass) (1) {
-    ["a"]=>
-    string(7) "newProp"
-  }
-  [1]=>
-  &object(stdClass) (1) {
-    ["a"]=>
-    string(7) "newProp"
-  }
-}
-array(2) {
-  [0]=>
-  &string(10) "a0.changed"
-  [1]=>
-  &string(10) "a0.changed"
-}
-
-
 Object containing same object twice:object(stdClass) (2) {
   ["a"]=>
   object(stdClass) (0) {

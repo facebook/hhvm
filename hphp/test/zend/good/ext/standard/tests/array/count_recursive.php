@@ -97,18 +97,6 @@ $resource2 = opendir( "." );  // Creating dir resource
 $arr_resource = array("a" => $resource1, "b" => $resource2);
 var_dump(count($arr_resource));
 
-echo "\n-- Testing count() on arrays containing references --\n";
-$inner = array("a", "b", "c");
-$arr = array(1, &$inner, &$inner);
-
-$mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE,
-                   FALSE, NULL);
-for( $i =0; $i < count( $mode_arr ); $i++) {
-  echo "For mode '$mode_arr[$i]' count is => ";
-  var_dump(count($arr, (int)$mode_arr[$i]));
-}
-
-
 echo "\n-- Testing error conditions --";
 try { var_dump( count() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args = 0
 try { var_dump( count(array(), COUNT_NORMAL, 100) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // No. of args > expected

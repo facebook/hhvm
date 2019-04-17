@@ -1,7 +1,7 @@
 <?php
 
 function foo($v) {
-  $a = array('key' => &$v);
+  $a = array('key' => $v);
   return $a;
 }
 function goo($v) {

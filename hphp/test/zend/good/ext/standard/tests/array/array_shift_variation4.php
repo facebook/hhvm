@@ -12,7 +12,7 @@ echo "*** Testing array_shift() : usage variations ***\n";
 
 $stack_first = array(array(1, 2, 3), 'one', 'two');
 $last = array (1, 2, 3);
-$stack_last = array ('zero', 'one', &$last );
+$stack_last = array ('zero', 'one', $last );
 echo "\n-- Before shift: --\n";
 echo "---- \$stack_first:\n";
 var_dump($stack_first);
@@ -29,6 +29,7 @@ var_dump($stack_first);
 echo "---- Pop element from array within array:\n";
 echo "Returned value:\t";
 var_dump(array_shift(&$last));
+$stack_last[2] = $last;
 echo "New array:\n";
 var_dump($stack_last);
 

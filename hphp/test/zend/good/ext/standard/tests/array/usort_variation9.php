@@ -28,13 +28,13 @@ $value1 = -5;
 $value2 = 100;
 $value3 = 0;
 
-// array_args an array containing elements with reference variables
+
 $array_arg = array(
   0 => 10,
-  1 => &$value1,
-  2 => &$value2,
+  1 => $value1,
+  2 => $value2,
   3 => 200,
-  4 => &$value3,
+  4 => $value3,
 );
 
 echo "\n-- Sorting \$array_arg containing different references --\n";

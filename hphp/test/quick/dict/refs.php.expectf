@@ -1,6 +1,0 @@
-========== convert_with_ref ========================
-convert_with_ref exception: "Dicts cannot contain references"
-========== ref_unserialize =========================
-
-Notice: Unable to unserialize: [D:2:{s:3:"foo";D:1:{s:1:"a";s:1:"b";}s:3:"bar";R:2;}]. Dicts cannot contain references. in %s on line %d
-bool(false)

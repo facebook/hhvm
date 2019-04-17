@@ -27,22 +27,6 @@ var_dump($ua);
 $ua[0] = "a0.changed";
 var_dump($ua);
 
-
-echo "\n\nArray containing object and reference to that object:\n";
-$obj = new stdclass;
-$a = array(&$obj, &$obj);
-var_dump($a);
-
-$ser = serialize($a);
-var_dump($ser);
-
-$ua = unserialize($ser);
-var_dump($ua);
-$ua[0]->a = "newProp";
-var_dump($ua);
-$ua[0] = "a0.changed";
-var_dump($ua);
-
 echo "\n\nObject containing same object twice:";
 $obj = new stdclass;
 $contaner = new stdclass;

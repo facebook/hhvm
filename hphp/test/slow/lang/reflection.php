@@ -69,13 +69,13 @@ print "--- export(\"f\") ---\n";
 var_dump($rf->export('f', true));
 print "\n";
 
-# invoke() can't be used because $b is pass-by-reference.
 
-print "--- invokeArgs(\"f\") ---\n";
-$b = "b";
-var_dump($rf->invokeArgs(array("a", &$b, "c")));
-var_dump($rf->invokeArgs(array("a", &$b, "c")));
-print "\n";
+
+
+
+
+
+
 
 
 

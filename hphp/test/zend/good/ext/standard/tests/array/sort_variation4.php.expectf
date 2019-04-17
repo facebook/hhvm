@@ -4,32 +4,32 @@
 bool(true)
 array(3) {
   [0]=>
-  &int(33)
+  int(33)
   [1]=>
-  &int(100)
+  int(100)
   [2]=>
-  &int(555)
+  int(555)
 }
 
 -- Testing sort() by supplying reference variable array, 'flag' = SORT_REGULAR --
 bool(true)
 array(3) {
   [0]=>
-  &int(33)
+  int(33)
   [1]=>
-  &int(100)
+  int(100)
   [2]=>
-  &int(555)
+  int(555)
 }
 
 -- Testing sort() by supplying reference variable array, 'flag' = SORT_NUMERIC --
 bool(true)
 array(3) {
   [0]=>
-  &int(33)
+  int(33)
   [1]=>
-  &int(100)
+  int(100)
   [2]=>
-  &int(555)
+  int(555)
 }
 Done

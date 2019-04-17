@@ -1,6 +1,6 @@
 <?php
 $category = array("f");
-$tree = array(&$category);
+$tree = array($category);
 
 $iterator = new RecursiveIteratorIterator(
     new RecursiveArrayIterator($tree),

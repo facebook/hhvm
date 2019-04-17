@@ -27,10 +27,6 @@ function test2(&$a, $b) {
 <<__EntryPoint>>
 function main_1090() {
   test();
-  $x = 1;
-  $arr = array('hello' => &$x);
-  $arr['hello'] = $x;
-  var_dump($arr);
   $v = 10;
   test2(&$v, $v);
   var_dump($v);

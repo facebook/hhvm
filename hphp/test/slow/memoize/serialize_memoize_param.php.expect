@@ -90,7 +90,5 @@ Exception of class 'Exception' with message: string(9) "clowntown"
 InvalidArgumentException: string(83) "Cannot serialize object of type Cls3 because it does not implement HH\IMemoizeParam"
 ==== resource ====
 InvalidArgumentException: string(41) "Cannot Serialize unexpected type Resource"
-==== ref ====
-InvalidArgumentException: string(36) "Cannot Serialize unexpected type Ref"
 ==== recursion depth ====
 InvalidArgumentException: string(20) "Array depth exceeded"

@@ -1,2 +1,0 @@
-Warning: explode() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/Zend/tests/unexpected_ref_bug.php on line 9
-Done.

@@ -1,9 +1,0 @@
-Verification Error (unit %s/test/slow/rx/body/ref-array-literal.php func test): references are forbidden in Rx functions: VGetL
-
-Verification Error (unit %s/test/slow/rx/body/ref-array-literal.php func test): references are forbidden in Rx functions: AddElemV
-
-Verification Error (unit %s/test/slow/rx/body/ref-array-literal.php func test): references are forbidden in Rx functions: VGetL
-
-Verification Error (unit %s/test/slow/rx/body/ref-array-literal.php func test): references are forbidden in Rx functions: AddNewElemV
-
-Done

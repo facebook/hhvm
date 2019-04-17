@@ -18,20 +18,20 @@ $value1 = 100;
 $value2 = 33;
 $value3 = 555;
 
-// an array containing integer references
-$unsorted_numerics =  array( 1 => &$value1 , 2 => &$value2, 3 => &$value3);
 
-echo "\n-- Testing asort() by supplying reference variable array, 'flag' value is defualt --\n";
+$unsorted_numerics =  array( 1 => $value1 , 2 => $value2, 3 => $value3);
+
+echo "\n-- Testing asort() 'flag' value is defualt --\n";
 $temp_array = $unsorted_numerics;
 var_dump( asort(&$temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing asort() by supplying reference variable array, 'flag' = SORT_REGULAR --\n";
+echo "\n-- Testing asort() 'flag' = SORT_REGULAR --\n";
 $temp_array = $unsorted_numerics;
 var_dump( asort(&$temp_array, SORT_REGULAR) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing asort() by supplying reference variable array, 'flag' = SORT_NUMERIC --\n";
+echo "\n-- Testing asort() 'flag' = SORT_NUMERIC --\n";
 var_dump( asort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 

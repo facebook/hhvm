@@ -76,9 +76,9 @@ function main($foo, $cuf, $cufa) {
   expect_fail(() ==> { $cuf($foo, $c, $d, &$b); });
   echo '$b[$c][$d] = $b['.$c.']['.$d.'] = '.$b[$c][$d]."\n";
 
-  $x = array($c, $d, &$b);
-  $y = array(&$c, $d, &$b);
-  $z = array($c, &$d, &$b);
+  $x = array($c, $d, $b);
+  $y = array($c, $d, $b);
+  $z = array($c, $d, $b);
 
   echo "CUFA calls:\n";
   expect_fail(() ==> call_user_func_array($foo, $x));

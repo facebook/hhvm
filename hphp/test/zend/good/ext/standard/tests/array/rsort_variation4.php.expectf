@@ -4,21 +4,21 @@
 bool(true)
 array(3) {
   [0]=>
-  &int(555)
+  int(555)
   [1]=>
-  &int(100)
+  int(100)
   [2]=>
-  &int(33)
+  int(33)
 }
 
 -- 'flag' = SORT_REGULAR --
 bool(true)
 array(3) {
   [0]=>
-  &int(555)
+  int(555)
   [1]=>
-  &int(100)
+  int(100)
   [2]=>
-  &int(33)
+  int(33)
 }
 Done

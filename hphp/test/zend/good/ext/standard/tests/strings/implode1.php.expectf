@@ -104,10 +104,10 @@ string(18) "Array2Array2PHP250"
 string(13) "Object,Object"
 array(2) {
   [0]=>
-  &object(foo) (0) {
+  object(foo) (0) {
   }
   [1]=>
-  &object(foo) (0) {
+  object(foo) (0) {
   }
 }
 

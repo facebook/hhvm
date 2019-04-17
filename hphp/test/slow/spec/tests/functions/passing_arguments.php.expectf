@@ -8,7 +8,7 @@ array(3) {
   [0]=>
   int(10)
   [1]=>
-  &int(20)
+  int(20)
   [2]=>
   int(30)
 }
@@ -19,7 +19,7 @@ array(3) {
   [0]=>
   int(10)
   [1]=>
-  &int(200)
+  int(20)
   [2]=>
   int(30)
 }
@@ -33,29 +33,29 @@ object(C) (1) {
   ["member"]=>
   int(200)
 }
-g In:  $p1: 1
-g Out: $p1: 200
+g In:  $p1: 1.
+g Out: $p1: 200.
 int(200)
-g In:  $p1: -123
-g Out: $p1: 200
+g In:  $p1: -123.
+g Out: $p1: 200.
 int(200)
-g In:  $p1: 1230
-g Out: $p1: 200
+g In:  $p1: 1230.
+g Out: $p1: 200.
 int(200)
-g In:  $p1: 
-g Out: $p1: 200
+g In:  $p1: .
+g Out: $p1: 200.
 int(200)
-g In:  $p1: abc
-g Out: $p1: 200
+g In:  $p1: abc.
+g Out: $p1: 200.
 int(200)
 
 Notice: Array to string conversion in %s/functions/passing_arguments.php on line 51
-g In:  $p1: Array
-g Out: $p1: 200
+g In:  $p1: Array.
+g Out: $p1: 200.
 int(200)
-g In:  $p1: 10
-g Out: $p1: 200
+g In:  $p1: 10.
+g Out: $p1: 200.
 int(200)
 int(10)
-g In:  $p1: 10
-g Out: $p1: 200
+g In:  $p1: 10.
+g Out: $p1: 200.

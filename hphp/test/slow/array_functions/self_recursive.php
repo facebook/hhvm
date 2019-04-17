@@ -10,7 +10,7 @@ function test($g) {
 }
 
 function main() {
-  $a = array('g' => &$a);
+  $a = array('g' => $GLOBALS);
 
   test($a);
   test($GLOBALS);

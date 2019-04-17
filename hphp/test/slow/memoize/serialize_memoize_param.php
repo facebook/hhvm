@@ -174,10 +174,6 @@ function test() {
 
   test_exception("resource", imagecreate(1, 1));
 
-  $val = 1;
-  $array_with_ref = [&$val, &$val];
-  test_exception("ref", $array_with_ref);
-
   $wrapped = [0];
   for ($i = 0; $i < 128; $i++) {
     $wrapped = Vector{[$wrapped]};

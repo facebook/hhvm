@@ -1,6 +1,4 @@
 *** Testing each() : usage variations ***
-
--- Array made up of referenced variables: --
 -- Call each until at the end of the array: --
 array(4) {
   [1]=>

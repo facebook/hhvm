@@ -45,7 +45,7 @@ array(2) {
   [0]=>
   array(1) {
     ["two"]=>
-    &int(2)
+    int(2)
   }
 }
 array(2) {

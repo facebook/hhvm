@@ -201,9 +201,9 @@ object(Big) (6) {
   ["wacky"]=>
   array(2) {
     [0]=>
-    &int(10)
+    int(10)
     [1]=>
-    &int(10)
+    int(10)
   }
   ["nothing"]=>
   NULL
@@ -232,7 +232,7 @@ object(Big) (6) {
     }
   }
 }
-string(1127) "O:3:"Big":6:{s:8:"groupAll";a:10:{i:0;O:5:"Small":2:{s:4:"name";s:4:"foo0";s:3:"num";i:0;}i:1;O:5:"Small":2:{s:4:"name";s:4:"foo1";s:3:"num";i:3;}i:2;O:5:"Small":2:{s:4:"name";s:4:"foo2";s:3:"num";i:6;}i:3;O:5:"Small":2:{s:4:"name";s:4:"foo3";s:3:"num";i:9;}i:4;O:5:"Small":2:{s:4:"name";s:4:"foo4";s:3:"num";i:12;}i:5;O:5:"Small":2:{s:4:"name";s:4:"foo5";s:3:"num";i:15;}i:6;O:5:"Small":2:{s:4:"name";s:4:"foo6";s:3:"num";i:18;}i:7;O:5:"Small":2:{s:4:"name";s:4:"foo7";s:3:"num";i:21;}i:8;O:5:"Small":2:{s:4:"name";s:4:"foo8";s:3:"num";i:24;}i:9;O:5:"Small":2:{s:4:"name";s:4:"foo9";s:3:"num";i:27;}}s:6:"group1";a:5:{i:0;a:2:{i:0;s:4:"foo0";i:1;r:3;}i:1;a:2:{i:0;s:4:"foo2";i:1;r:9;}i:2;a:2:{i:0;s:4:"foo4";i:1;r:15;}i:3;a:2:{i:0;s:4:"foo6";i:1;r:21;}i:4;a:2:{i:0;s:4:"foo8";i:1;r:27;}}s:6:"group2";a:5:{i:0;a:2:{i:0;s:4:"foo1";i:1;r:6;}i:1;a:2:{i:0;s:4:"foo3";i:1;r:12;}i:2;a:2:{i:0;s:4:"foo5";i:1;r:18;}i:3;a:2:{i:0;s:4:"foo7";i:1;r:24;}i:4;a:2:{i:0;s:4:"foo9";i:1;r:30;}}s:5:"wacky";a:2:{i:0;i:10;i:1;R:66;}s:7:"nothing";N;s:9:"unrelated";a:3:{i:0;O:5:"Small":2:{s:4:"name";s:5:"foo10";s:3:"num";i:30;}i:1;r:69;i:2;r:69;}}"
+string(1127) "O:3:"Big":6:{s:8:"groupAll";a:10:{i:0;O:5:"Small":2:{s:4:"name";s:4:"foo0";s:3:"num";i:0;}i:1;O:5:"Small":2:{s:4:"name";s:4:"foo1";s:3:"num";i:3;}i:2;O:5:"Small":2:{s:4:"name";s:4:"foo2";s:3:"num";i:6;}i:3;O:5:"Small":2:{s:4:"name";s:4:"foo3";s:3:"num";i:9;}i:4;O:5:"Small":2:{s:4:"name";s:4:"foo4";s:3:"num";i:12;}i:5;O:5:"Small":2:{s:4:"name";s:4:"foo5";s:3:"num";i:15;}i:6;O:5:"Small":2:{s:4:"name";s:4:"foo6";s:3:"num";i:18;}i:7;O:5:"Small":2:{s:4:"name";s:4:"foo7";s:3:"num";i:21;}i:8;O:5:"Small":2:{s:4:"name";s:4:"foo8";s:3:"num";i:24;}i:9;O:5:"Small":2:{s:4:"name";s:4:"foo9";s:3:"num";i:27;}}s:6:"group1";a:5:{i:0;a:2:{i:0;s:4:"foo0";i:1;r:3;}i:1;a:2:{i:0;s:4:"foo2";i:1;r:9;}i:2;a:2:{i:0;s:4:"foo4";i:1;r:15;}i:3;a:2:{i:0;s:4:"foo6";i:1;r:21;}i:4;a:2:{i:0;s:4:"foo8";i:1;r:27;}}s:6:"group2";a:5:{i:0;a:2:{i:0;s:4:"foo1";i:1;r:6;}i:1;a:2:{i:0;s:4:"foo3";i:1;r:12;}i:2;a:2:{i:0;s:4:"foo5";i:1;r:18;}i:3;a:2:{i:0;s:4:"foo7";i:1;r:24;}i:4;a:2:{i:0;s:4:"foo9";i:1;r:30;}}s:5:"wacky";a:2:{i:0;i:10;i:1;i:10;}s:7:"nothing";N;s:9:"unrelated";a:3:{i:0;O:5:"Small":2:{s:4:"name";s:5:"foo10";s:3:"num";i:30;}i:1;r:70;i:2;r:70;}}"
 object(Big) (6) {
   ["groupAll"]=>
   array(10) {
@@ -436,9 +436,9 @@ object(Big) (6) {
   ["wacky"]=>
   array(2) {
     [0]=>
-    &int(10)
+    int(10)
     [1]=>
-    &int(10)
+    int(10)
   }
   ["nothing"]=>
   NULL

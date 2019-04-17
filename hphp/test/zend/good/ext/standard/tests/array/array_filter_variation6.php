@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -26,16 +26,16 @@ function callback($input)
     return false;
   }
 }
-  
+
 // initializing variables
 $value1 = array(1, 2, 8);
 $value2 = array(5, 6, 4);
-$input = array(&$value1, 10, &$value2, 'value');
+$input = array($value1, 10, $value2, 'value');
 
 // with 'callback' argument
 var_dump( array_filter($input, 'callback') );
 
 // with default 'callback' argument
-var_dump( array_filter($input) ); 
+var_dump( array_filter($input) );
 
 echo "Done";

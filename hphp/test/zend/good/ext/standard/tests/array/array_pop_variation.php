@@ -4,7 +4,7 @@
 $mixed_array1 = array( 1,2,3,4,5,6,7,8,9 );
 $mixed_array = array(
   array(),
-  &$mixed_array1,
+  $mixed_array1,
   array( "One", "_Two", "Three", "Four", "Five" ),
   array( 6, "six", 7, "seven", 8, "eight", 9, "nine" ),
   array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee" ),

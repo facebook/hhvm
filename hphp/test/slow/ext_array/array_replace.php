@@ -39,11 +39,10 @@ function d() {
 }
 
 function e() {
-  $v = 1;
-  $a = array("one" => 1);
-  $b = array("two" => &$v);
-  $r = array_replace($a, array($b));
   $v = 2;
+  $a = array("one" => 1);
+  $b = array("two" => $v);
+  $r = array_replace($a, array($b));
   var_dump($r);
 }
 

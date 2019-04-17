@@ -29,7 +29,7 @@ class Big {
   }
   function finish() {
     $x = 10;
-    $this->wacky = array(&$x, &$x);
+    $this->wacky = array($x, $x);
     $s = new Small();
     $this->unrelated[] = $s;
     $this->unrelated[] = $s;

@@ -1,3 +1,3 @@
 <?php
 $a = "aaa";
-$x = array(&$a[1]);
+$x = foo(&$a[1]);

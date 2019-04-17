@@ -11,7 +11,7 @@ $o->$f = 100;
 $a = (array)$o;
 $v = 1;
 $a[10] = $v;
-$a[11] = array(&$v);
+$a[11] = array($v);
 var_dump($a);
 $b = array(10 => 10);
 var_dump(array_diff_key($a, $b));

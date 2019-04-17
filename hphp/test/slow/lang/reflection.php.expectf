@@ -221,12 +221,6 @@ Function [ <user> function f ] {
 }
 "
 
---- invokeArgs("f") ---
-In f()
-int(5)
-In f()
-int(6)
-
 --- invoke("g") ---
 In g(a, b, some string)
 NULL

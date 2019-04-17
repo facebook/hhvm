@@ -1,6 +1,0 @@
-========== convert_with_ref ========================
-convert_with_ref exception: "Vecs cannot contain references"
-========== ref_unserialize =========================
-
-Notice: Unable to unserialize: [v:2:{v:1:{i:123;}R:2;}]. Vecs cannot contain references. in %s on line %d
-bool(false)

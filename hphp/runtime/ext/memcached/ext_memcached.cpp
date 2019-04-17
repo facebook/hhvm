@@ -291,20 +291,6 @@ struct MemcachedData {
     }
     return true;
   }
-  memcached_return doCacheCallback(const Variant& callback, ObjectData* this_,
-                                   const String& key, Variant& value) {
-    Array params(PackedArrayInit(3).append(Variant(this_))
-                                   .append(key)
-                                   .appendRef(value).toArray());
-    if (!vm_call_user_func(callback, params).toBoolean()) {
-      return MEMCACHED_NOTFOUND;
-    }
-
-    std::vector<char> payload; uint32_t flags;
-    toPayload(value, payload, flags);
-    return memcached_set(&m_impl->memcached, key.c_str(), key.length(),
-                         payload.data(), payload.size(), 0, flags);
-  }
   bool getMultiImpl(const String& server_key, const Array& keys, bool enableCas,
                     Array *returnValue) {
     std::vector<const char*> keysCopy;
@@ -536,10 +522,7 @@ Variant HHVM_METHOD(Memcached, getbykey, const String& server_key,
                               &result.value, &status)) {
     if (status == MEMCACHED_END) status = MEMCACHED_NOTFOUND;
     if (status == MEMCACHED_NOTFOUND && !cache_cb.isNull()) {
-      status = data->doCacheCallback(cache_cb, this_, key, returnValue);
-      if (!data->handleError(status)) return false;
-      cas_token.assignIfRef(0.0);
-      return returnValue;
+      raise_warning("Memcached::getbykey() no longer supports callbacks");
     }
     data->handleError(status);
     return false;

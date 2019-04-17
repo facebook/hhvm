@@ -8,7 +8,7 @@
 *)
 
 open Hh_core
-module SS = SymbolIndex
+module SS = SearchUtils
 module SUtils = SearchUtils
 
 let scope_string_from_type result_type =
@@ -59,7 +59,8 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go workers query type_ =
+let go workers query type_
+  : SearchUtils.result =
   let fuzzy = SymbolIndex.fuzzy_search_enabled () in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
@@ -70,7 +71,7 @@ let go workers query type_ =
         SymbolIndex.query ~fuzzy workers class_name_query type_
         |> List.find ~f:begin fun result ->
           match result with
-          | SearchUtils.{result_type = SymbolIndex.Class _; _} -> true
+          | SearchUtils.{result_type = SearchUtils.Class _; _} -> true
           | _ -> false
         end
       in

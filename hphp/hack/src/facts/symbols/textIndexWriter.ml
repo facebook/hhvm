@@ -6,13 +6,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-
-open IndexBuilderTypes
-
+open SearchUtils
 
 let record_in_textfile
     (filename: string)
-    (symbols: found_symbol_result list): unit =
+    (symbols: si_results): unit =
 
   (* Open a temporary file *)
   let open Core_kernel in
@@ -21,8 +19,8 @@ let record_in_textfile
 
   (* Write lines to file *)
   List.iter symbols ~f:(fun symbol -> begin
-    let kindstr = Printf.sprintf "%d" (kind_to_int symbol.found_symbol_kind) in
-      Out_channel.output_string channel symbol.found_symbol_name;
+    let kindstr = Printf.sprintf "%d" (kind_to_int symbol.si_kind) in
+      Out_channel.output_string channel symbol.si_name;
       Out_channel.output_string channel " ";
       Out_channel.output_string channel kindstr;
       Out_channel.output_string channel "\n";

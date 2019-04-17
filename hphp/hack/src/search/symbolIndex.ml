@@ -8,19 +8,17 @@
  *)
 
 open Core_kernel
+open SearchUtils
 
 include HackSearchService
 
+(* Note that fuzzy search does not currently do anything *)
 let fuzzy_search_enabled () = !fuzzy
 let set_fuzzy_search_enabled x = fuzzy := x
 
 let query = MasterApi.query
 let query_for_autocomplete = MasterApi.query_autocomplete
 let query_class_methods = ClassMethods.query
-
-type info =
-  | Full of FileInfo.t
-  | Fast of FileInfo.names
 
 let index_symbols_in_file (fn, info) =
   match info with

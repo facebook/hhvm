@@ -10,18 +10,9 @@
 open Core_kernel
 open Utils
 open Reordered_argument_collections
+open SearchUtils
 
 let fuzzy = ref false
-type search_result_type =
-  | Class of Ast.class_kind option
-  | Method of bool * string
-  | ClassVar of bool * string
-  | Function
-  | Typedef
-  | Constant
-
-type symbol = (Pos.absolute, search_result_type) SearchUtils.term
-type result = symbol list
 
 module SS = SearchService.Make(struct
   type t = search_result_type

@@ -148,11 +148,11 @@ let get_globals
         ~filter_map:begin fun _ _ res ->
           let name = Utils.strip_ns res.SearchUtils.name in
           match res.SearchUtils.result_type with
-          | SymbolIndex.Class (Some Ast.Ctrait) ->
+          | SearchUtils.Class (Some Ast.Ctrait) ->
             make_trait_completion context replace_pos name
-          | SymbolIndex.Class (Some Ast.Cinterface) ->
+          | SearchUtils.Class (Some Ast.Cinterface) ->
             make_interface_completion context replace_pos name
-          | SymbolIndex.Class _ ->
+          | SearchUtils.Class _ ->
             make_class_completion context replace_pos name
           | _ -> None
         end

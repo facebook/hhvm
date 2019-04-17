@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-open IndexBuilderTypes
+open SearchUtils
 
 (* Some SQL commands we'll need *)
 let sql_begin_transaction =
@@ -64,7 +64,7 @@ let prepare_or_reset_statement (db) (stmt_ref) (sql_command_text) =
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db
     (filename: string)
-    (symbols: found_symbol_result list): unit =
+    (symbols: si_results): unit =
 
   (* Open the database and do basic prep *)
   let db = Sqlite3.db_open filename in
@@ -78,9 +78,9 @@ let record_in_db
   let insert_symbol_stmt = ref None in
   Core_kernel.List.iter symbols ~f:(fun symbol -> begin
         let stmt = prepare_or_reset_statement db insert_symbol_stmt sql_insert_symbol in
-        let _ = Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT symbol.found_symbol_name) in
+        let _ = Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT symbol.si_name) in
         let _ = Sqlite3.bind stmt 2 (Sqlite3.Data.INT
-                                       (Int64.of_int (kind_to_int symbol.found_symbol_kind))) in
+                                       (Int64.of_int (kind_to_int symbol.si_kind))) in
         let _ = Sqlite3.step stmt in
         ()
       end);

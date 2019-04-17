@@ -11,7 +11,7 @@ open Core_kernel
 open ServerEnv
 
 module SearchServiceRunner = struct
-  type t = Relative_path.t * SymbolIndex.info
+  type t = Relative_path.t * SearchUtils.info
 
   (* Chosen so that multiworker takes about ~2.5 seconds *)
   let chunk_size genv =
@@ -58,7 +58,7 @@ module SearchServiceRunner = struct
 
   let update x = Queue.enqueue queue x
 
-  let update_full fn ast = Queue.enqueue queue (fn, SymbolIndex.Full ast)
+  let update_full fn ast = Queue.enqueue queue (fn, SearchUtils.Full ast)
 
   let should_run_completely genv =
    chunk_size genv = 0

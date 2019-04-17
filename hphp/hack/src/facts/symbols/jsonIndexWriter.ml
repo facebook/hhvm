@@ -6,12 +6,11 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-
-open IndexBuilderTypes
+open SearchUtils
 
 let record_in_jsonfile
     (filename: string)
-    (symbols: found_symbol_result list) =
+    (symbols: si_results) =
 
   (* Open the file *)
   let open Core_kernel in
@@ -22,10 +21,10 @@ let record_in_jsonfile
   let open Hh_json in
   let json_array = List.map symbols ~f:(fun symbol -> begin
         id := !id + 1;
-        let kind_int = kind_to_int symbol.found_symbol_kind in
+        let kind_int = kind_to_int symbol.si_kind in
         JSON_Object [ ("key", JSON_Object [
               ("kind", JSON_Number (string_of_int kind_int));
-              ("name", JSON_String symbol.found_symbol_name);
+              ("name", JSON_String symbol.si_name);
             ]);
           ("id", JSON_Number (string_of_int !id));
         ]

@@ -233,8 +233,8 @@ let search_funs_and_classes input ~limit ~on_class ~on_function =
     ~filter_map:begin fun _ _ res ->
       let name = res.SearchUtils.name in
       match res.SearchUtils.result_type with
-      | SymbolIndex.Class _-> on_class name
-      | SymbolIndex.Function -> on_function name
+      | SearchUtils.Class _-> on_class name
+      | SearchUtils.Function -> on_function name
       | _ -> None
     end
 

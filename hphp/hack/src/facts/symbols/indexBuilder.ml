@@ -9,18 +9,23 @@
 *)
 
 open Core_kernel
-open IndexBuilderTypes
+open SearchUtils
 open Facts
 
-(* Combine two results *)
-let merge_results
-    (res1: index_builder_parse_result)
-    (res2: index_builder_parse_result): index_builder_parse_result =
-  List.append res1 res2
-;;
+(* Keep track of all references yet to scan *)
+let files_scanned = ref 0
+let error_count = ref 0
 
+type index_builder_context = {
+  repo_folder: string;
+  sqlite_filename: string option;
+  text_filename: string option;
+  json_filename: string option;
+}
+
+(* Combine two results *)
 (* Parse one single file and capture information about it *)
-let parse_file (filename: string): index_builder_parse_result =
+let parse_file (filename: string): si_results =
   if Sys.is_directory filename then begin
     []
   end else begin
@@ -43,29 +48,29 @@ let parse_file (filename: string): index_builder_parse_result =
         let class_keys = InvSMap.keys facts.types in
         let classes_mapped = Core_kernel.List.map class_keys ~f:(fun key -> begin
               let info_opt = InvSMap.get key facts.types in
-              let fsk = begin
+              let kind = begin
                 match info_opt with
-                | None -> FSK_Unknown
+                | None -> SI_Unknown
                 | Some info -> begin
                     match info.kind with
-                    | TKClass -> FSK_Class
-                    | TKInterface -> FSK_Interface
-                    | TKEnum -> FSK_Enum
-                    | TKTrait -> FSK_Trait
-                    | TKMixed -> FSK_Mixed
-                    | _ -> FSK_Unknown
+                    | TKClass -> SI_Class
+                    | TKInterface -> SI_Interface
+                    | TKEnum -> SI_Enum
+                    | TKTrait -> SI_Trait
+                    | TKMixed -> SI_Mixed
+                    | _ -> SI_Unknown
                   end
               end in
               {
-                found_symbol_name = key;
-                found_symbol_kind = fsk;
+                si_name = key;
+                si_kind = kind;
               }
             end) in
 
         (* Identify all functions in the file *)
         let functions_mapped = Core_kernel.List.map facts.functions ~f:(fun funcname -> {
-              found_symbol_name = funcname;
-              found_symbol_kind = FSK_Function;
+              si_name = funcname;
+              si_kind = SI_Function;
             }) in
 
         (* Return unified results *)
@@ -83,7 +88,7 @@ let parse_batch acc files =
     if Path.file_exists (Path.make file) then
       try
         let res = parse_file file in
-        merge_results res acc;
+        List.append res acc;
       with exn ->
         error_count := !error_count + 1;
         Printf.fprintf stderr "exception: %s\nfailed to parse \"%s\"\n"
@@ -98,7 +103,7 @@ let parallel_parse ~workers files =
   MultiWorker.call workers
     ~job:parse_batch
     ~neutral:[]
-    ~merge:(merge_results)
+    ~merge:(List.append)
     ~next:(MultiWorker.next workers files)
 ;;
 

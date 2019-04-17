@@ -147,4 +147,10 @@ let handler = object
     | Some _ -> Option.iter cst.cst_type (check_hint env)
     | _ -> ()
 
+  method! at_expr env (_, e) =
+    match e with
+    | Is (_, h) -> check_hint env h
+    | As (_, h, _) -> check_hint env h
+    | _ -> ()
+
 end

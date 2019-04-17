@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Tast
-open Ast_defs
 open Typing_defs
 
 module Env = Tast_env
@@ -95,8 +94,6 @@ let visitor = object(this)
   method! on_tobject acc r = update acc @@ Invalid (r, "the object type")
   method! on_tclass acc r cls _ tyl =
     match Env.get_class acc.env (snd cls) with
-    | Some tc when Cls.kind tc = Ctrait ->
-      update acc @@ Invalid (r, "a trait")
     | Some tc ->
       let tparams = Cls.tparams tc in
       begin match tyl with

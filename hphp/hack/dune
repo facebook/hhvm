@@ -10,6 +10,12 @@
     src/hh_single_parse.exe))
 
 (alias
+  (name hh)
+  (deps
+    src/hh_server.exe
+    src/hh_client.exe))
+
+(alias
   (name debug)
   (deps
     src/hh_server.bc

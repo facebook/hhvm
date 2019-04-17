@@ -214,7 +214,7 @@ module type SmartConstructors_S = sig
 end (* SmartConstructors_S *)
 
 module ParserWrapper (Parser : sig
-  type parser_type [@@deriving show]
+  type parser_type
   module SCI : SmartConstructors_S
   val call : parser_type -> (SCI.t -> SCI.t * SCI.r) -> parser_type * SCI.r
 end) = struct

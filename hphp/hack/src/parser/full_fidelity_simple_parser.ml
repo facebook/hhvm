@@ -97,7 +97,7 @@ module WithLexer(Lexer : Lexer_S) = struct
     Context.print_expected parser.context
 
   include SmartConstructors.ParserWrapper(struct
-    type parser_type = t [@@deriving show]
+    type parser_type = t
     module SCI = SC
     let call = sc_call
   end)

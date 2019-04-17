@@ -359,6 +359,9 @@ let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
   SSet.fold (get_gconst_deps ~conservative_redecl old_gconsts) gconsts
     (DepSet.empty, DepSet.empty, DepSet.empty)
 
+let shallow_decl_enabled () =
+  TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
+
 (*****************************************************************************)
 (* Determine which functions/classes have to be rechecked after comparing
  * the old and the new type signature of "cid" (class identifier).
@@ -367,6 +370,9 @@ let get_gconsts_deps ~conservative_redecl old_gconsts gconsts =
 let get_class_deps ~conservative_redecl old_classes new_classes trace cid
     (changed, to_redecl, to_recheck) =
   match SMap.find_unsafe cid old_classes, SMap.find_unsafe cid new_classes with
+  | _ when shallow_decl_enabled () ->
+      get_all_dependencies ~conservative_redecl
+        trace cid (changed, to_redecl, to_recheck)
   | None, _ | _, None ->
       get_all_dependencies ~conservative_redecl
         trace cid (changed, to_redecl, to_recheck)

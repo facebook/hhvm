@@ -19,6 +19,8 @@ module LSTable = Lazy_string_table
 module Reason = Typing_reason
 
 type inherited_members = {
+  props : class_elt LSTable.t;
+  sprops : class_elt LSTable.t;
   methods : class_elt LSTable.t;
   smethods : class_elt LSTable.t;
   all_inherited_methods : class_elt list LSTable.t;
@@ -85,6 +87,35 @@ let shallow_method_to_ielt child_class mro subst meth : inheritable_elt =
     }
   }
 
+let shallow_prop_to_ielt child_class mro subst prop : inheritable_elt =
+  let visibility = base_visibility mro.mro_name prop.sp_visibility in
+  let ty = lazy begin
+    let ty = match prop.sp_type with
+      | None -> Reason.Rwitness (fst prop.sp_name), Tany
+      | Some ty -> ty
+    in
+    if child_class = mro.mro_name then ty else
+    Decl_instantiate.instantiate subst ty
+  end in
+  {
+    id = snd prop.sp_name;
+    should_chown_privates = mro.mro_copy_private_members;
+    elt = {
+      ce_abstract = false;
+      ce_final = true;
+      ce_is_xhp_attr = prop.sp_is_xhp_attr;
+      ce_const = prop.sp_const;
+      ce_lateinit = prop.sp_lateinit;
+      ce_override = false;
+      ce_lsb = prop.sp_lsb;
+      ce_memoizelsb = false;
+      ce_synthesized = false;
+      ce_visibility = visibility;
+      ce_origin = mro.mro_name;
+      ce_type = ty;
+    }
+  }
+
 (** Given a linearization, pair each MRO element with its shallow class and its
     type parameter substitutions. Drop MRO elements for which we cannot find a
     shallow class (this should only happen in partial-mode files when the
@@ -106,6 +137,12 @@ let get_shallow_classes_and_substs
 let filter_for_method_lookup lin =
   Sequence.filter lin ~f:(fun (mro, _, _) ->
     not mro.mro_xhp_attrs_only && not mro.mro_consts_only)
+
+(** Return a linearization suitable for property lookup, where ancestors are
+    included in the linearization only if the child class inherits their
+    properties or XHP attributes. *)
+let filter_for_prop_lookup lin =
+  Sequence.filter lin ~f:(fun (mro, _, _) -> not mro.mro_consts_only)
 
 module SPairSet = Reordered_argument_set(Caml.Set.Make(struct
   type t = string * string
@@ -143,6 +180,17 @@ let method_ielts ~static child_class_name lin =
         SPairSet.add acc (trait, trait_method)
       end in
       Some (methods_seq, (removed, rest))
+  end
+  |> Sequence.concat
+
+(** Given a linearization filtered for property lookup, return a [Sequence.t]
+    emitting each property (as an {!inheritable_elt}) in linearization order. *)
+let prop_ielts ~static child_class_name lin =
+  lin
+  |> Sequence.map ~f:begin fun (mro, cls, subst) ->
+    (if static then cls.sc_sprops else cls.sc_props)
+    |> Sequence.of_list
+    |> Sequence.map ~f:(shallow_prop_to_ielt child_class_name mro subst)
   end
   |> Sequence.concat
 
@@ -238,6 +286,13 @@ let get_all_methods ~static class_name lin =
   |> filter_or_chown_privates class_name
   |> Sequence.memoize
 
+let props_cache ~static class_name lin =
+  lin
+  |> filter_for_prop_lookup
+  |> prop_ielts ~static class_name
+  |> filter_or_chown_privates class_name
+  |> make_elt_cache class_name
+
 let make class_name =
   let lin =
     Decl_linearize.get_linearization class_name
@@ -261,6 +316,8 @@ let make class_name =
   let all_inherited_methods = make_inheritance_cache all_methods in
   let all_inherited_smethods = make_inheritance_cache all_smethods in
   {
+    props = props_cache class_name lin ~static:false;
+    sprops = props_cache class_name lin ~static:true;
     methods;
     smethods;
     all_inherited_methods;

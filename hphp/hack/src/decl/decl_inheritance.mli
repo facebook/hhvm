@@ -12,6 +12,8 @@ open Typing_defs
 module LSTable = Lazy_string_table
 
 type inherited_members = {
+  props : class_elt LSTable.t;
+  sprops : class_elt LSTable.t;
   methods : class_elt LSTable.t;
   smethods : class_elt LSTable.t;
   all_inherited_methods : class_elt list LSTable.t;

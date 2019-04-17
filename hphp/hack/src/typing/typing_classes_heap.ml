@@ -255,12 +255,12 @@ let get_typeconst t id =
 
 let get_prop t id =
   match t with
-  | Lazy lc -> SMap.get id lc.c.tc_props
+  | Lazy lc -> LSTable.get lc.ih.props id
   | Eager c -> SMap.get id c.tc_props
 
 let get_sprop t id =
   match t with
-  | Lazy lc -> SMap.get id lc.c.tc_sprops
+  | Lazy lc -> LSTable.get lc.ih.sprops id
   | Eager c -> SMap.get id c.tc_sprops
 
 let get_method t id =
@@ -285,12 +285,12 @@ let has_typeconst t id =
 
 let has_prop t id =
   match t with
-  | Lazy _ -> Option.is_some (get_prop t id)
+  | Lazy lc -> LSTable.mem lc.ih.props id
   | Eager _ -> Option.is_some (get_prop t id)
 
 let has_sprop t id =
   match t with
-  | Lazy _ -> Option.is_some (get_sprop t id)
+  | Lazy lc -> LSTable.mem lc.ih.sprops id
   | Eager _ -> Option.is_some (get_sprop t id)
 
 let has_method t id =
@@ -315,12 +315,12 @@ let typeconsts t =
 
 let props t =
   match t with
-  | Lazy lc -> Sequence.of_list (SMap.bindings lc.c.tc_props)
+  | Lazy lc -> LSTable.to_seq lc.ih.props |> sort_by_key
   | Eager c -> Sequence.of_list (SMap.bindings c.tc_props)
 
 let sprops t =
   match t with
-  | Lazy lc -> Sequence.of_list (SMap.bindings lc.c.tc_sprops)
+  | Lazy lc -> LSTable.to_seq lc.ih.sprops |> sort_by_key
   | Eager c -> Sequence.of_list (SMap.bindings c.tc_sprops)
 
 let methods t =

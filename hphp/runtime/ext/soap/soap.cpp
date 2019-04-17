@@ -125,7 +125,8 @@ void SoapData::reset() {
 
   m_cur_uniq_ns = 0;
   m_cur_uniq_ref = 0;
-  m_ref_map.reset();
+  m_ref_map.clear();
+  m_node_map.clear();
 
   m_sdls.clear();
   m_typemaps.clear();

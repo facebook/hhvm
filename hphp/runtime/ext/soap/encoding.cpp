@@ -462,24 +462,25 @@ static encodePtr find_encoder_by_type_name(sdl *sdl, const char *type) {
 
 static Variant soap_find_xml_ref(xmlNodePtr node) {
   USE_SOAP_GLOBAL;
-  Array& ref_map = SOAP_GLOBAL(ref_map);
-  if (ref_map.exists((int64_t)node)) {
-    return Variant::wrap(ref_map.lvalAt((int64_t)node).tv());
+  auto& ref_map = SOAP_GLOBAL(ref_map);
+  auto const it = ref_map.find(node);
+  if (it != ref_map.end()) {
+    return Variant(it->second.get());
   }
   return uninit_null();
 }
 
 static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
-  int64_t hash = 0;
+  HeapObject* hash = nullptr;
   if (data.isObject()) {
-    hash = (int64_t)data.getObjectData();
+    hash = data.getObjectData();
   } else if (data.isReferenced()) {
-    hash = (int64_t)data.getRefData();
+    hash = data.asTypedValue()->m_data.pref;
   }
   if (hash) {
-    Array &ref_map = SOAP_GLOBAL(ref_map);
-    xmlNodePtr node_ptr = (xmlNodePtr)ref_map[hash].toInt64();
+    auto& node_map = SOAP_GLOBAL(node_map);
+    auto node_ptr = folly::get_default(node_map, hash);
     if (node_ptr) {
       if (node_ptr == node) {
         return false;
@@ -526,27 +527,32 @@ static bool soap_check_zval_ref(const Variant& data, xmlNodePtr node) {
       }
       return true;
     }
-    ref_map.set(hash, (int64_t)node);
+    node_map.emplace(hash, node);
   }
   return false;
 }
 
 static bool soap_check_xml_ref(Variant& data, xmlNodePtr node) {
   USE_SOAP_GLOBAL;
-  Array& ref_map = SOAP_GLOBAL(ref_map);
-  if (ref_map.exists((int64_t)node)) {
-    auto const data2 = ref_map.lvalAt((int64_t)node);
-    auto const inner2 = data2.unboxed();
+  auto& ref_map = SOAP_GLOBAL(ref_map);
+  auto const it = ref_map.find(node);
+  if (it != ref_map.end()) {
+    auto const& data2 = it->second;
+    tv_lval inner2 = data2->cell();
     if (!(data.isObject() && isObjectType(inner2.type()) &&
           data.getObjectData() == inner2.val().pobj) &&
-        !(data.isReferenced() && tvIsReferenced(data2.tv()) &&
-          data.getRefData() == val(data2).pref->var())) {
-      tvBoxIfNeeded(data2);
-      tvBind(data2.tv(), *data.asTypedValue());
+        !(data.isReferenced() && data2->isReferenced() &&
+          data.getRefData() == data2->var())) {
+      tvBind(make_tv<KindOfRef>(data2.get()), *data.asTypedValue());
       return true;
     }
   } else {
-    ref_map.setRef((int64_t)node, data);
+    req::ptr<RefData> v{
+      isRefType(data.getType()) ? data.asTypedValue()->m_data.pref
+                                : RefData::Make(*data.asTypedValue())};
+
+    tvBind(make_tv<KindOfRef>(v.get()), *data.asTypedValue());
+    ref_map.emplace(node, std::move(v));
   }
   return false;
 }
@@ -3263,6 +3269,7 @@ void encode_reset_ns() {
   SOAP_GLOBAL(cur_uniq_ns) = 0;
   SOAP_GLOBAL(cur_uniq_ref) = 0;
   SOAP_GLOBAL(ref_map).clear();
+  SOAP_GLOBAL(node_map).clear();
 }
 
 void encode_finish() {
@@ -3270,6 +3277,7 @@ void encode_finish() {
   SOAP_GLOBAL(cur_uniq_ns) = 0;
   SOAP_GLOBAL(cur_uniq_ref) = 0;
   SOAP_GLOBAL(ref_map).clear();
+  SOAP_GLOBAL(node_map).clear();
 }
 
 encodePtr get_conversion(int encode) {

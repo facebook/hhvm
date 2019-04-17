@@ -130,7 +130,10 @@ public:
   // misc
   int m_cur_uniq_ns;
   int m_cur_uniq_ref;
-  Array m_ref_map; // reference handling
+
+  // reference handling
+  req::fast_map<xmlNodePtr, req::ptr<RefData>> m_ref_map;
+  req::fast_map<HeapObject*, xmlNodePtr> m_node_map;
 
   int64_t m_cache;
 

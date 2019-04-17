@@ -41,7 +41,17 @@ type state =
       (with the appropriate source and type parameters substituted) unless it
       was already emitted earlier in the current linearization sequence. *)
 
-module Cache = SharedMem.LocalCache (StringKey) (struct
+module Cache = SharedMem.WithCache (SharedMem.ProfiledImmediate) (StringKey) (struct
+  type t = mro_element list
+  let prefix = Prefix.make()
+  let description = "Linearization"
+end)
+
+let push_local_changes = Cache.LocalChanges.push_stack
+let pop_local_changes = Cache.LocalChanges.pop_stack
+let remove_batch = Cache.remove_batch
+
+module LocalCache = SharedMem.LocalCache (StringKey) (struct
   type t = linearization
   let prefix = Prefix.make()
   let description = "LazyLinearization"
@@ -140,10 +150,10 @@ and linearize (env : env) (c : shallow_class) : linearization =
   in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])
-    ~f:(next_state env)
+    ~f:(next_state env mro_name)
   |> Sequence.memoize
 
-and next_state (env : env) (state, ancestors, acc, synths) =
+and next_state (env : env) (class_name : string) (state, ancestors, acc, synths) =
   let open Sequence.Step in
   match state, ancestors with
   | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
@@ -174,7 +184,9 @@ and next_state (env : env) (state, ancestors, acc, synths) =
     if List.mem acc next ~equal:(=)
     then Skip (Synthesized_elts synths, ancestors, next::acc, synths)
     else Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
-  | Synthesized_elts [], _ -> Done
+  | Synthesized_elts [], _ ->
+    Cache.add class_name (List.rev acc);
+    Done
 
 and get_linearization (env : env) (class_name : string) : linearization =
   let { class_stack; _ } = env in
@@ -182,14 +194,17 @@ and get_linearization (env : env) (class_name : string) : linearization =
   let class_stack = SSet.add class_stack class_name in
   let env = { env with class_stack } in
   match Cache.get class_name with
-  | Some lin -> lin
+  | Some lin -> Sequence.of_list lin
   | None ->
-    match Shallow_classes_heap.get class_name with
-    | None -> Sequence.empty
-    | Some c ->
-      let lin = linearize env c in
-      Cache.add class_name lin;
-      lin
+    match LocalCache.get class_name with
+    | Some lin -> lin
+    | None ->
+      match Shallow_classes_heap.get class_name with
+      | None -> Sequence.empty
+      | Some c ->
+        let lin = linearize env c in
+        LocalCache.add class_name lin;
+        lin
 
 let get_linearization class_name =
   let decl_env = { Decl_env.

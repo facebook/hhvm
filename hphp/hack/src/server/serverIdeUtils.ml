@@ -32,6 +32,7 @@ let make_local_changes () =
   Decl_heap.GConsts.LocalChanges.push_stack();
 
   Shallow_classes_heap.push_local_changes ();
+  Decl_linearize.push_local_changes ();
   ()
 
 let revert_local_changes () =
@@ -57,6 +58,7 @@ let revert_local_changes () =
   Decl_heap.GConsts.LocalChanges.pop_stack();
 
   Shallow_classes_heap.pop_local_changes ();
+  Decl_linearize.pop_local_changes ();
 
   SharedMem.invalidate_caches ();
   ()

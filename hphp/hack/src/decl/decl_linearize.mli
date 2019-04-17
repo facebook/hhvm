@@ -10,3 +10,8 @@
 open Decl_defs
 
 val get_linearization : string -> linearization
+
+val push_local_changes : unit -> unit
+val pop_local_changes : unit -> unit
+
+val remove_batch : SSet.t -> unit

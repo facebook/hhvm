@@ -127,21 +127,24 @@ let visitor = object(this)
     | _ -> false
 end
 
-let validate_hint env hint emit_error =
-  let hint_ty = Env.hint_to_ty env hint in
+let validate_type env root_ty emit_error =
   let should_suppress = ref false in
-  let validate_type env ty =
+  let validate env ty =
     let state = visitor#on_type {env = env; validity = Valid} ty in
     match state.validity with
       | Invalid (r, msg) ->
         if not !should_suppress
-        then emit_error (fst hint) (Reason.to_pos r) msg;
+        then emit_error (Reason.to_pos (fst root_ty)) (Reason.to_pos r) msg;
         should_suppress := true
       | Valid -> ()
   in
-  let env, hint_ty = Env.localize_with_dty_validator
-    env hint_ty (validate_type env) in
-  validate_type env hint_ty
+  let env, root_ty =
+    Env.localize_with_dty_validator env root_ty (validate env) in
+  validate env root_ty
+
+let validate_hint env hint emit_error =
+  let hint_ty = Env.hint_to_ty env hint in
+  validate_type env hint_ty emit_error
 
 let handler = object
   inherit Tast_visitor.handler_base

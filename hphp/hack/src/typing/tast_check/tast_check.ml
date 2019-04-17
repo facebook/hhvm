@@ -41,7 +41,6 @@ let visitor = Tast_visitor.iter_with [
   Abstract_class_check.handler;
   Type_params_arity_check.handler;
   Class_parent_check.handler;
-  Type_const_check.handler;
 ]
 
 let program = visitor#go

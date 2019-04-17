@@ -495,6 +495,13 @@ let tconst_subsumption env parent_typeconst child_typeconst =
     parent_typeconst.ttc_constraint
     ~f:(sub_type_decl parent_pos Reason.URtypeconst_cstr env);
 
+  begin match child_typeconst.ttc_type, parent_typeconst.ttc_enforceable with
+  | None, _ | _, (_, false) -> ()
+  | Some ty, (pos, true) ->
+    Type_test_hint_check.validate_type (Tast_env.typing_env_as_tast_env env) ty
+      (Errors.invalid_enforceable_type "constant" (pos, name))
+  end;
+
   (* If the parent cannot be overridden, we unify the types otherwise we ensure
    * the child's assigned type is compatible with the parent's *)
   let check x y =

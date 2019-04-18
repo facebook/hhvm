@@ -213,6 +213,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     ("version", "display version number")
     ("target,t", value<std::string>(&po.target)->default_value("run"),
      "hhbc | "
+     "cache | "
      "filecache | "
      "run (default)")
     ("format,f", value<std::string>(&po.format),
@@ -374,9 +375,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
     return 1;
   }
 
-  if (po.target != "run"
-      && po.target != "hhbc"
-      && po.target != "filecache") {
+  if (po.target != "run" &&
+      po.target != "hhbc" &&
+      po.target != "cache" &&
+      po.target != "filecache") {
     Logger::Error("Error in command line: target '%s' is not supported.",
                   po.target.c_str());
     // desc[ription] is the --help output
@@ -438,6 +440,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   // This can be overridden when running lots of repo builds (eg
   // test/run) for better performance.
   RuntimeOption::RepoLocalMode = "--";
+  RuntimeOption::RepoJournal = "memory";
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
   RuntimeOption::RepoAuthoritative = false;
@@ -571,6 +574,7 @@ int process(const CompilerOptions &po) {
 
   {
     Timer timer2(Timer::WallTime, "parsing inputs");
+    if (po.target == "cache") package.cache_only();
     ar->setPackage(&package);
     ar->setParseOnDemand(po.parseOnDemand);
     if (!po.parseOnDemand) {
@@ -635,8 +639,8 @@ int process(const CompilerOptions &po) {
     ret = hhbcTarget(po, std::move(ar), fileCacheThread);
   } else if (po.target == "run") {
     ret = runTargetCheck(po, std::move(ar), fileCacheThread);
-  } else if (po.target == "filecache") {
-    // do nothing
+  } else if (po.target == "filecache" || po.target == "cache") {
+    ar->finish();
   } else {
     Logger::Error("Unknown target: %s", po.target.c_str());
     return 1;
@@ -702,7 +706,6 @@ int hhbcTarget(const CompilerOptions &po, AnalysisResultPtr&& ar,
   }
 
   Repo::shutdown();
-  RuntimeOption::RepoJournal = "memory";
   RuntimeOption::RepoLocalMode = "--";
   unlink(RuntimeOption::RepoCentralPath.c_str());
   /* without this, emitClass allows classes with interfaces to be

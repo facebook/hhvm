@@ -55,8 +55,7 @@ AnalysisResult::~AnalysisResult() {
 
 void AnalysisResult::finish() {
   if (m_finish) {
-    decltype(m_finish) f;
-    f.swap(m_finish);
+    auto f = std::move(m_finish);
     f(shared_from_this());
   }
 }
@@ -67,6 +66,7 @@ void AnalysisResult::finish() {
 void AnalysisResult::addHhasFile(std::unique_ptr<UnitEmitter>&& ue) {
   const uint64_t sz = m_hhasFiles.size();
   ue->setSha1(SHA1 { sz });
+  ue->m_symbol_refs.clear();
   m_hhasFiles.emplace_back(std::move(ue));
 }
 

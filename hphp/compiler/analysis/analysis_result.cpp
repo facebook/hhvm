@@ -46,8 +46,7 @@ using namespace HPHP;
 
 AnalysisResult::AnalysisResult()
   : m_package(nullptr),
-    m_parseOnDemand(false),
-    m_asmCallbacks(this) {
+    m_parseOnDemand(false) {
 }
 
 AnalysisResult::~AnalysisResult() {
@@ -75,19 +74,19 @@ std::vector<std::unique_ptr<UnitEmitter>> AnalysisResult::getHhasFiles() {
   return std::move(m_hhasFiles);
 }
 
-bool AnalysisResult::inParseOnDemandDirs(const std::string &filename) const {
+bool AnalysisResult::inParseOnDemandDirs(const std::string& filename) const {
   for (auto const& dir : m_parseOnDemandDirs) {
     if (filename.find(dir) == 0) return true;
   }
   return false;
 }
 
-void AnalysisResult::parseOnDemand(const std::string &name) const {
+void AnalysisResult::parseOnDemand(const std::string& name) const {
   if (m_package) {
     auto const& root = m_package->getRoot();
     auto rname = name;
-    if (name.find(root) == 0) {
-      rname = name.substr(root.length());
+    if (rname.compare(0, root.length(), root) == 0) {
+      rname = rname.substr(root.length());
     }
     if ((m_parseOnDemand || inParseOnDemandDirs(rname)) &&
         Option::PackageExcludeFiles.find(rname) ==
@@ -99,22 +98,36 @@ void AnalysisResult::parseOnDemand(const std::string &name) const {
 }
 
 template <class Map>
-void AnalysisResult::parseOnDemandBy(const std::string &name,
-                                     const Map &amap) const {
+void AnalysisResult::parseOnDemandBy(const CompactVector<std::string>& syms,
+                                     const Map& amap) const {
   if (m_package) {
-    auto it = amap.find(name);
-    if (it != amap.end()) {
-      parseOnDemand(Option::AutoloadRoot + it->second);
+    for (auto const& name : syms) {
+      auto it = amap.find(name);
+      if (it != amap.end()) {
+        parseOnDemand(Option::AutoloadRoot + it->second);
+      }
     }
   }
 }
 
-template void AnalysisResult::parseOnDemandBy(
-  const std::string &name, const std::map<std::string,std::string> &amap) const;
+void AnalysisResult::parseOnDemandBy(
+    SymbolRef kind, const CompactVector<std::string>& syms) const {
+  switch (kind) {
+    case SymbolRef::Include:
+      for (auto const& name : syms) parseOnDemand(name);
+      return;
 
-template void AnalysisResult::parseOnDemandBy(
-  const std::string &name,
-  const std::map<std::string,std::string,stdltistr> &amap) const;
+    case SymbolRef::Class:
+      return parseOnDemandBy(syms, Option::AutoloadClassMap);
+
+    case SymbolRef::Function:
+      return parseOnDemandBy(syms, Option::AutoloadFuncMap);
+
+    case SymbolRef::Constant:
+      return parseOnDemandBy(syms, Option::AutoloadConstMap);
+  }
+  not_reached();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions

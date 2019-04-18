@@ -260,7 +260,7 @@ struct ExternCompiler {
     folly::StringPiece code,
     const Native::FuncTable& nativeFuncs,
     bool forDebuggerEval,
-    AsmCallbacks* callbacks,
+    bool wantsSymbolRefs,
     const RepoOptions& options
   ) {
     if (!isRunning()) {
@@ -284,7 +284,7 @@ struct ExternCompiler {
                                 sha1,
                                 nativeFuncs,
                                 false /* swallow errors */,
-                                callbacks
+                                wantsSymbolRefs
                               );
       logTime(log, t, "assemble_hhas");
       if (RuntimeOption::EvalLogExternCompilerPerf) {
@@ -387,7 +387,7 @@ struct CompilerPool {
                          const SHA1& sha1,
                          const Native::FuncTable& nativeFuncs,
                          bool forDebuggerEval,
-                         AsmCallbacks* callbacks,
+                         bool wantsSymbolRefs,
                          bool& internal_error,
                          const RepoOptions& options);
   FfpResult parse(std::string name, const char* code, int len);
@@ -563,7 +563,7 @@ CompilerResult CompilerPool::compile(const char* code,
                                      const SHA1& sha1,
                                      const Native::FuncTable& nativeFuncs,
                                      bool forDebuggerEval,
-                                     AsmCallbacks* callbacks,
+                                     bool wantsSymbolRefs,
                                      bool& internal_error,
                                      const RepoOptions& options
 ) {
@@ -573,7 +573,7 @@ CompilerResult CompilerPool::compile(const char* code,
                       folly::StringPiece(code, len),
                       nativeFuncs,
                       forDebuggerEval,
-                      callbacks,
+                      wantsSymbolRefs,
                       options);
   };
   return run_compiler(
@@ -999,7 +999,7 @@ CompilerResult hackc_compile(
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
   bool forDebuggerEval,
-  AsmCallbacks* callbacks,
+  bool wantsSymbolRefs,
   bool& internal_error,
   const RepoOptions& options
 ) {
@@ -1010,7 +1010,7 @@ CompilerResult hackc_compile(
     sha1,
     nativeFuncs,
     forDebuggerEval,
-    callbacks,
+    wantsSymbolRefs,
     internal_error,
     options
   );
@@ -1179,7 +1179,7 @@ UnitCompiler::create(const char* code,
 }
 
 std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
-  AsmCallbacks* callbacks) const {
+  bool wantsSymbolRefs) const {
   bool ice = false;
   auto res = hackc_compile(m_code,
                            m_codeLen,
@@ -1187,7 +1187,7 @@ std::unique_ptr<UnitEmitter> HackcUnitCompiler::compile(
                            m_sha1,
                            m_nativeFuncs,
                            m_forDebuggerEval,
-                           callbacks,
+                           wantsSymbolRefs,
                            ice,
                            m_options);
   std::unique_ptr<UnitEmitter> unitEmitter;

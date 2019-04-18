@@ -520,10 +520,16 @@ struct Label {
   std::vector<size_t> ehEnts;
 };
 
+struct HashSymbolRef {
+  size_t operator()(SymbolRef s) const {
+    return static_cast<size_t>(s);
+  }
+};
+
 struct AsmState {
-  explicit AsmState(std::istream& in, AsmCallbacks* callbacks = nullptr)
-    : in(in)
-    , callbacks(callbacks)
+  explicit AsmState(std::istream& in, bool wants_symbol_refs = false)
+    : in{in}
+    , wants_symbol_refs{wants_symbol_refs}
   {
     currentStackDepth->setBase(*this, 0);
   }
@@ -828,7 +834,10 @@ struct AsmState {
   std::set<std::string,stdltistr> hoistables;
   std::unordered_map<uint32_t,Offset> defClsOffsets;
   Location::Range srcLoc{-1,-1,-1,-1};
-  AsmCallbacks* callbacks{ nullptr };
+  hphp_fast_map<SymbolRef,
+                CompactVector<std::string>,
+                HashSymbolRef> symbol_refs;
+  bool wants_symbol_refs;
 };
 
 void StackDepth::adjust(AsmState& as, int delta) {
@@ -3408,13 +3417,10 @@ void parse_strict(AsmState& as) {
 /*
  * directive-symbols : '{' identifier identifier* '}'
  */
-void parse_symbol_refs(
-  AsmState& as,
-  void (AsmCallbacks::*onSymbol)(const std::string&)
-) {
+void parse_symbol_refs(AsmState& as, SymbolRef symbol_kind) {
   as.in.expectWs('{');
 
-  if (as.callbacks) {
+  if (as.wants_symbol_refs) {
     while (true) {
       as.in.skipWhitespace();
       std::string symbol;
@@ -3423,7 +3429,7 @@ void parse_symbol_refs(
       if (symbol.empty()) {
         break;
       }
-      (as.callbacks->*onSymbol)(symbol);
+      as.symbol_refs[symbol_kind].push_back(symbol);
     }
   } else {
     while (as.in.peek() != '}') {
@@ -3439,19 +3445,19 @@ void parse_symbol_refs(
  * directive-filepaths : '{' string string* '}'
  */
 void parse_includes(AsmState& as) {
-  parse_symbol_refs(as, &AsmCallbacks::onInclude);
+  parse_symbol_refs(as, SymbolRef::Include);
 }
 
 void parse_constant_refs(AsmState& as) {
-  parse_symbol_refs(as, &AsmCallbacks::onConstantRef);
+  parse_symbol_refs(as, SymbolRef::Constant);
 }
 
 void parse_function_refs(AsmState& as) {
-  parse_symbol_refs(as, &AsmCallbacks::onFunctionRef);
+  parse_symbol_refs(as, SymbolRef::Function);
 }
 
 void parse_class_refs(AsmState& as) {
-  parse_symbol_refs(as, &AsmCallbacks::onClassRef);
+  parse_symbol_refs(as, SymbolRef::Class);
 }
 
 /*
@@ -3546,6 +3552,12 @@ void parse(AsmState& as) {
     as.error("no .main found in hhas unit");
   }
 
+  if (as.symbol_refs.size()) {
+    for (auto& ent : as.symbol_refs) {
+      as.ue->m_symbol_refs.push_back(std::move(ent));
+    }
+  }
+
   if (RuntimeOption::EvalAssemblerFoldDefaultValues) {
     for (auto& fe : as.ue->fevec()) fixup_default_values(as, fe.get());
     for (size_t n = 0; n < as.ue->numPreClasses(); ++n) {
@@ -3565,7 +3577,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   const SHA1& sha1,
   const Native::FuncTable& nativeFuncs,
   bool swallowErrors,
-  AsmCallbacks* callbacks
+  bool wantsSymbolRefs
 ) {
   auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
   if (!SystemLib::s_inited) {
@@ -3579,7 +3591,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   try {
     auto const mode = std::istringstream::binary | std::istringstream::in;
     std::istringstream instr(std::string(code, codeLen), mode);
-    AsmState as(instr, callbacks);
+    AsmState as(instr, wantsSymbolRefs);
     as.ue = ue.get();
     parse(as);
     if (ue->m_isHHFile) {

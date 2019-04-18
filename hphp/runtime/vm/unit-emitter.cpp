@@ -815,6 +815,7 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_useStrictTypesForBuiltins)
     (m_metaData)
     (m_fileAttributes)
+    (m_symbol_refs)
     ;
 
   if (RuntimeOption::EvalLoadFilepathFromUnitCache) {

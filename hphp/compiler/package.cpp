@@ -399,8 +399,11 @@ bool Package::parseImpl(const std::string* fileName) {
     Native::s_noNativeFuncs, false, RepoOptions::forFile(fileName->data()));
   assertx(uc);
   try {
-    auto ue = uc->compile(m_ar->getParseOnDemandCallBacks());
+    auto ue = uc->compile(true);
     if (ue && !ue->m_ICE) {
+      for (auto& ent : ue->m_symbol_refs) {
+        m_ar->parseOnDemandBy(ent.first, ent.second);
+      }
       Lock lock(m_ar->getMutex());
       m_ar->addHhasFile(std::move(ue));
       report(0);

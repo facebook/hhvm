@@ -58,6 +58,13 @@ struct FuncTable;
  */
 size_t hhbc_arena_capacity();
 
+enum class SymbolRef : uint8_t {
+  Include,
+  Class,
+  Function,
+  Constant
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -415,7 +422,8 @@ public:
   TypedValue m_mainReturn;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
-
+  CompactVector<
+    std::pair<SymbolRef, CompactVector<std::string>>> m_symbol_refs;
   /*
    * name=>NativeFuncInfo for native funcs in this unit
    */

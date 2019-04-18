@@ -102,7 +102,7 @@ struct UnitCompiler {
     const RepoOptions& options);
 
   virtual std::unique_ptr<UnitEmitter> compile(
-    AsmCallbacks* callbacks = nullptr) const = 0;
+    bool wantsSymbolRefs = false) const = 0;
 
   virtual const char* getName() const = 0;
 
@@ -120,7 +120,7 @@ struct HackcUnitCompiler : public UnitCompiler {
   using UnitCompiler::UnitCompiler;
 
   virtual std::unique_ptr<UnitEmitter> compile(
-    AsmCallbacks* callbacks = nullptr) const override;
+    bool wantsSymbolRefs = false) const override;
 
   virtual const char* getName() const override { return "HackC"; }
 };

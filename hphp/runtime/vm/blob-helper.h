@@ -37,6 +37,8 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 
+#include "hphp/util/compact-vector.h"
+
 /*
  * This module contains helpers for serializing and deserializing
  * metadata into blobs suitable for insertion into the hhbc repo.
@@ -234,6 +236,11 @@ struct BlobEncoder {
   }
 
   template<class T>
+  void encode(const CompactVector<T>& vec) {
+    encodeContainer(vec, "CompactVector");
+  }
+
+  template<class T>
   typename std::enable_if<
     std::is_same<typename T::value_type,
                  std::pair<typename T::key_type const,
@@ -409,12 +416,13 @@ struct BlobDecoder {
     decode(val.second);
   }
 
-  template<class T>
-  void decode(std::vector<T>& vec) {
+  template<typename Cont>
+  auto decode(Cont& vec) -> decltype(vec.emplace_back(), void()) {
     uint32_t size;
     decode(size);
+    if (size) vec.reserve(vec.size() + size);
     for (uint32_t i = 0; i < size; ++i) {
-      vec.push_back(T());
+      vec.emplace_back();
       decode(vec.back());
     }
   }

@@ -20,6 +20,7 @@
 #include "hphp/compiler/option.h"
 
 #include "hphp/runtime/vm/as.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include "hphp/util/mutex.h"
 
@@ -43,28 +44,6 @@ using AnalysisResultConstRawPtr = const AnalysisResult*;
 struct UnitEmitter;
 
 struct AnalysisResult : std::enable_shared_from_this<AnalysisResult> {
-
-  struct ParseOnDemandCalbacks : AsmCallbacks {
-    explicit ParseOnDemandCalbacks(AnalysisResultConstRawPtr ar) : m_ar(ar) {}
-
-    virtual void onInclude(const std::string& include) override {
-      m_ar->parseOnDemand(include);
-    }
-    virtual void onConstantRef(const std::string& constant) override {
-      m_ar->parseOnDemandByConstant(constant);
-    }
-    virtual void onFunctionRef(const std::string& function) override {
-      m_ar->parseOnDemandByFunction(function);
-    }
-    virtual void onClassRef(const std::string& cls) override {
-      m_ar->parseOnDemandByClass(cls);
-    }
-
-   private:
-    AnalysisResultConstRawPtr m_ar;
-  };
-
-public:
   AnalysisResult();
   ~AnalysisResult();
   void setPackage(Package *package) { m_package = package;}
@@ -84,26 +63,9 @@ public:
   /**
    * Parser creates a FileScope upon parsing a new file.
    */
-  void parseOnDemand(const std::string &name) const;
-  void parseOnDemandByClass(const std::string &name) const {
-    parseOnDemandBy(name, Option::AutoloadClassMap);
-  }
-  void parseOnDemandByFunction(const std::string &name) const {
-    parseOnDemandBy(name, Option::AutoloadFuncMap);
-  }
-  void parseOnDemandByConstant(const std::string &name) const {
-    parseOnDemandBy(name, Option::AutoloadConstMap);
-  }
-  template <class Map>
-  void parseOnDemandBy(const std::string &name,
-                       const Map& amap) const;
-  ParseOnDemandCalbacks* getParseOnDemandCallBacks() {
-    if (isParseOnDemand()) {
-      return &m_asmCallbacks;
-    }
-
-    return nullptr;
-  }
+  void parseOnDemand(const std::string& name) const;
+  void parseOnDemandBy(SymbolRef kind,
+                       const CompactVector<std::string>& syms) const;
 
   /**
    * For function declaration parsing.
@@ -129,14 +91,15 @@ private:
 
   std::string m_outputPath;
 
-  ParseOnDemandCalbacks m_asmCallbacks;
-
   Mutex m_mutex;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.
    */
   bool inParseOnDemandDirs(const std::string &filename) const;
+  template <class Map>
+  void parseOnDemandBy(const CompactVector<std::string>& syms,
+                       const Map& amap) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

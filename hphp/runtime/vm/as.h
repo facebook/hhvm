@@ -84,9 +84,6 @@ struct AssemblerUnserializationError : AssemblerError {
   using AssemblerError::AssemblerError;
 };
 
-AsmResult assemble_expression(UnitEmitter&, FuncEmitter*, int,
-                              const std::string&);
-
 //////////////////////////////////////////////////////////////////////
 
 }

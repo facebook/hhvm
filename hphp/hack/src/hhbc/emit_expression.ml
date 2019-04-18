@@ -582,11 +582,6 @@ and emit_binop env pos op e1 e2 =
     | _ ->
       default ()
 
-and emit_box_if_necessary pos need_ref instrs =
-  match need_ref with
-  | false -> instrs
-  | true -> gather [ instrs; emit_pos pos; instr_box ]
-
 and emit_instanceof env pos e1 e2 =
   match (e1, e2) with
   | (_, (_, A.Id _)) ->
@@ -1668,7 +1663,7 @@ and emit_expr env (pos, expr_ as expr) =
   | A.Class_const (cid, id) ->
     emit_class_const env pos cid id
   | A.Unop (op, e) ->
-    emit_unop ~need_ref:false env pos op e
+    emit_unop env pos op e
   | A.Binop (op, e1, e2) ->
     emit_binop env pos op e1 e2
   | A.Pipe (e1, e2) ->
@@ -2438,8 +2433,8 @@ and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr pr
   | _ ->
     begin match snd prop with
     | A.Id (_, s) when SU.Xhp.is_xhp s ->
-      (emit_box_if_necessary pos need_ref @@
-        emit_xhp_obj_get env pos expr s null_flavor),
+      let instrs = emit_xhp_obj_get env pos expr s null_flavor in
+      (if need_ref then gather [ instrs; emit_pos pos; instr_box ] else instrs),
       None
     | _ ->
       let mode =
@@ -3869,34 +3864,33 @@ and from_unop op =
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
     failwith "this unary operation cannot be translated"
 
-and emit_unop ~need_ref env pos op e =
+and emit_unop env pos op e =
   match op with
   | A.Utild ->
-    emit_box_if_necessary pos need_ref @@ gather [
+    gather [
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Unot ->
-    emit_box_if_necessary pos need_ref @@ gather [
+    gather [
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uplus ->
-    emit_box_if_necessary pos need_ref @@ gather [
+    gather [
       emit_pos pos;
       instr (ILitConst (Int (Int64.zero)));
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uminus ->
-    emit_box_if_necessary pos need_ref @@ gather [
+    gather [
       emit_pos pos;
       instr (ILitConst (Int (Int64.zero)));
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
-    emit_box_if_necessary pos need_ref @@
     emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
   | A.Uref ->
     failwith "A.Uref is used only for argument passing"
@@ -3904,7 +3898,7 @@ and emit_unop ~need_ref env pos op e =
     Local.scope @@ fun () ->
       let temp_local = Local.get_unnamed_local () in
       let done_label = Label.next_regular () in
-      emit_box_if_necessary pos need_ref @@ gather [
+      gather [
         emit_pos pos;
         instr_silence_start temp_local;
         instr_try_catch_begin;

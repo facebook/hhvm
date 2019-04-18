@@ -4,7 +4,8 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
- */
+*/
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
 use crate::lexable_token::LexableToken;
@@ -133,3 +134,21 @@ impl PositionedToken {
         Self(Rc::clone(&x.0))
     }
 }
+
+impl Hash for PositionedToken {
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: Hasher,
+    {
+        let ptr = Rc::into_raw((*self).0.clone());
+        ptr.hash(state);
+        let _ = unsafe { Rc::from_raw(ptr) };
+    }
+}
+
+impl PartialEq for PositionedToken {
+    fn eq(&self, other: &Self) -> bool {
+        return Rc::ptr_eq(&(*self).0, &(*other).0);
+    }
+}
+impl Eq for PositionedToken {}

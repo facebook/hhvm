@@ -12,12 +12,17 @@ use parser_rust as parser;
 use ocaml::core::memory;
 use ocaml::core::mlvalues::{empty_list, Size, Tag, Value};
 
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::iter::Iterator;
 
 use parser::lexable_token::LexableToken;
 use parser::minimal_syntax::MinimalValue;
 use parser::minimal_token::MinimalToken;
 use parser::minimal_trivia::MinimalTrivia;
+use parser::positioned_syntax::PositionedValue;
+use parser::positioned_token::PositionedToken;
+use parser::positioned_trivia::PositionedTrivia;
 use parser::syntax::SyntaxVariant;
 use parser::syntax::{Syntax, SyntaxValueType};
 use parser::syntax_kind::SyntaxKind;
@@ -44,11 +49,25 @@ pub unsafe fn caml_tuple(fields: &[Value]) -> Value {
     caml_block(0, fields)
 }
 
-pub struct SerializationContext {}
+pub struct SerializationContext {
+    source_text: Value,
+    shared_tokens: RefCell<HashMap<PositionedToken, Value>>,
+}
 
 impl SerializationContext {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(source_text: Value) -> Self {
+        Self {
+            source_text,
+            shared_tokens: RefCell::new(HashMap::new()),
+        }
+    }
+
+    pub fn get(&self, token: &PositionedToken) -> Option<Value> {
+        self.shared_tokens.borrow().get(token).cloned()
+    }
+
+    pub fn set(&self, token: PositionedToken, value: Value) {
+        self.shared_tokens.borrow_mut().insert(token, value);
     }
 }
 
@@ -69,7 +88,7 @@ where
 }
 
 /* Not implementing ToOcaml for integer types, because Value itself is an integer too and it makes
- * it too easy to accidentally treat a pointer to heap as integer and try double convert it */
+* it too easy to accidentally treat a pointer to heap as integer and try double convert it */
 fn usize_to_ocaml(x: usize) -> Value {
     (x << 1) + 1
 }
@@ -159,5 +178,117 @@ where
             }
         };
         caml_tuple(&[syntax, value])
+    }
+}
+
+impl ToOcaml for PositionedTrivia {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        // From full_fidelity_positioned_trivia.ml:
+        // type t = {
+        //   kind: TriviaKind.t;
+        //   source_text : SourceText.t;
+        //   offset : int;
+        //   width : int
+        // }
+        caml_tuple(&[
+            self.kind.to_ocaml(context),
+            context.source_text,
+            usize_to_ocaml(self.offset),
+            usize_to_ocaml(self.width),
+        ])
+    }
+}
+
+// TODO (kasper): we replicate LazyTrivia memory saving bit-packing when converting from Rust to
+// OCaml values, but Rust values themselves are not packed. We should consider porting this
+// optimization there too.
+fn trivia_kind_mask(kind: TriviaKind) -> usize {
+    1 << (62 - (kind.ocaml_tag()))
+}
+
+fn build_lazy_trivia(trivia_list: &[PositionedTrivia], acc: Option<usize>) -> Option<usize> {
+    trivia_list
+        .iter()
+        .fold(acc, |acc, trivia| match (acc, trivia.kind) {
+            (None, _) | (_, TriviaKind::AfterHaltCompiler) | (_, TriviaKind::ExtraTokenError) => {
+                None
+            }
+            (Some(mask), kind) => Some(mask | trivia_kind_mask(kind)),
+        })
+}
+
+impl ToOcaml for PositionedToken {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        if let Some(res) = context.get(self) {
+            return res;
+        }
+
+        let kind = self.kind().to_ocaml(context);
+        let offset = usize_to_ocaml(self.offset());
+        let leading_width = usize_to_ocaml(self.leading_width());
+        let width = usize_to_ocaml(self.width());
+        let trailing_width = usize_to_ocaml(self.trailing_width());
+
+        let lazy_trivia_mask = Some(0);
+        let lazy_trivia_mask = build_lazy_trivia(&self.leading(), lazy_trivia_mask);
+        let lazy_trivia_mask = build_lazy_trivia(&self.trailing(), lazy_trivia_mask);
+
+        let trivia = match lazy_trivia_mask {
+            Some(mask) => usize_to_ocaml(mask),
+            None => {
+                //( Trivia.t list * Trivia.t list)
+                let leading = to_list(self.leading(), context);
+                let trailing = to_list(self.trailing(), context);
+                caml_tuple(&[leading, trailing])
+            }
+        };
+        // From full_fidelity_positioned_token.ml:
+        // type t = {
+        //   kind: TokenKind.t;
+        //   source_text: SourceText.t;
+        //   offset: int; (* Beginning of first trivia *)
+        //   leading_width: int;
+        //   width: int; (* Width of actual token, not counting trivia *)
+        //   trailing_width: int;
+        //   trivia: LazyTrivia.t;
+        // }
+        let res = caml_tuple(&[
+            kind,
+            context.source_text,
+            offset,
+            leading_width,
+            width,
+            trailing_width,
+            trivia,
+        ]);
+        context.set(Self::clone_rc(self), res);
+        res
+    }
+}
+
+const TOKEN_VALUE_VARIANT: u8 = 0;
+const TOKEN_SPAN_VARIANT: u8 = 1;
+const MISSING_VALUE_VARIANT: u8 = 2;
+
+impl ToOcaml for PositionedValue {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        match self {
+            PositionedValue::TokenValue(t) => {
+                let token = t.to_ocaml(context);
+                // TokenValue of  ...
+                caml_block(TOKEN_VALUE_VARIANT, &[token])
+            }
+            PositionedValue::TokenSpan { left, right } => {
+                let left = left.to_ocaml(context);
+                let right = right.to_ocaml(context);
+                // TokenSpan { left: Token.t; right: Token.t }
+                caml_block(TOKEN_SPAN_VARIANT, &[left, right])
+            }
+            PositionedValue::Missing { offset } => {
+                let offset = usize_to_ocaml(*offset);
+                // Missing of {...}
+                caml_block(MISSING_VALUE_VARIANT, &[context.source_text, offset])
+            }
+        }
     }
 }

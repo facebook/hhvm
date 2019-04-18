@@ -9,6 +9,7 @@
 module SourceText = Full_fidelity_source_text
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module Env = Full_fidelity_parser_env
+module PositionedSyntax = Full_fidelity_positioned_syntax
 
 (* We could pass ParserEnv, but the less complicated structs we need to
  * synchronize on the boundary between Rust and OCaml, the better. *)
@@ -32,6 +33,32 @@ let env_to_opts env = (
   (Env.hhvm_compat_mode env),
   (Env.php5_compat_mode env)
 )
+let set_global_lexer_env env =
+  (* Parsing of file sets up global variables in lexer module. Those variables
+   * are then accessed even after parsing, with the assumption that they have
+   * not changed since the tree was created (which must accidentally be true,
+   * lucky us).
+   * Going through Rust parser would bypass setting those variables and produces
+   * incorrect results. I'll just set them here directly to maintain the same
+   * behavior. *)
+  Full_fidelity_lexer.Env.set
+    ~force_hh:(Env.force_hh env)
+    ~enable_xhp:(Env.enable_xhp env)
+    ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
+    ~disable_unsafe_block:(Env.disable_unsafe_block env)
 
-external parse_minimal: SourceText.t -> parser_opts -> MinimalSyntax.t = "parse_minimal"
-let parse_minimal text env = parse_minimal text (env_to_opts env)
+external parse_minimal:
+  SourceText.t ->
+  parser_opts ->
+  MinimalSyntax.t = "parse_minimal"
+let parse_minimal text env =
+  set_global_lexer_env env;
+  parse_minimal text (env_to_opts env)
+
+external parse_positioned:
+  SourceText.t ->
+  parser_opts ->
+  PositionedSyntax.t = "parse_positioned"
+let parse_positioned text env =
+  set_global_lexer_env env;
+  parse_positioned text (env_to_opts env)

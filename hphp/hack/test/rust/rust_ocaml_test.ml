@@ -17,6 +17,7 @@ module Printf = OcamlPrintf
 
 module SourceText = Full_fidelity_source_text
 module MinimalSyntax = Full_fidelity_minimal_syntax
+module PositionedSyntax = Full_fidelity_positioned_syntax
 module Env = Full_fidelity_parser_env
 
 let user = match Sys_utils.getenv_user () with
@@ -25,6 +26,10 @@ let user = match Sys_utils.getenv_user () with
 
 let fbcode = Printf.sprintf "/data/users/%s/fbsource/fbcode/" user
 
+type parser =
+  | MINIMAL
+  | POSITIONED
+
 type mode =
   | RUST
   | OCAML
@@ -32,6 +37,7 @@ type mode =
 
 type args = {
    mode : mode;
+   parser : parser;
    is_experimental : bool;
    enable_stronger_await_binding : bool;
    disable_unsafe_expr : bool;
@@ -145,6 +151,7 @@ let get_files args =
 
 let parse_args () =
   let mode = ref COMPARE in
+  let parser = ref MINIMAL in
   let is_experimental = ref false in
   let enable_stronger_await_binding = ref false in
   let disable_unsafe_expr = ref false in
@@ -160,6 +167,7 @@ let parse_args () =
   let options =  [
     "--rust", Arg.Unit (fun () -> mode := RUST), "";
     "--ocaml", Arg.Unit (fun () -> mode := OCAML), "";
+    "--positioned", Arg.Unit (fun () -> parser := POSITIONED), "";
     "--experimental", Arg.Set is_experimental, "";
     "--enable-stronger-await-binding", Arg.Set enable_stronger_await_binding, "";
     "--disable-unsafe-expr", Arg.Set disable_unsafe_expr, "";
@@ -176,6 +184,7 @@ let parse_args () =
   Arg.parse options (fun _ -> ()) "";
   {
     mode = !mode;
+    parser = !parser;
     is_experimental = !is_experimental;
     enable_stronger_await_binding = !enable_stronger_await_binding;
     disable_unsafe_expr = !disable_unsafe_expr;
@@ -194,8 +203,16 @@ module MinimalParser = struct
   let parse = Rust_parser_ffi.parse_minimal
 end
 
+module PositionedParser = struct
+  type r = PositionedSyntax.t
+  let parse = Rust_parser_ffi.parse_positioned
+end
+
 module MinimalTest_ = WithSyntax(MinimalSyntax)
 module MinimalTest = MinimalTest_.WithParser(MinimalParser)
+
+module PositionedTest_ = WithSyntax(PositionedSyntax)
+module PositionedTest = PositionedTest_.WithParser(PositionedParser)
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
 
@@ -220,6 +237,9 @@ let () =
     ?mode
     ()
   in
-  MinimalTest.test_batch args env files;
+  begin match args.parser with
+    | MINIMAL -> MinimalTest.test_batch args env files
+    | POSITIONED -> PositionedTest.test_batch args env files
+  end;
   let _ = Hh_logger.log_duration "Done:" t  in
   ()

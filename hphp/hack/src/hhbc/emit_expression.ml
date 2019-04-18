@@ -3888,9 +3888,6 @@ and from_unop op =
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
     failwith "this unary operation cannot be translated"
 
-and emit_expr_as_ref env e =
-  emit_expr ~need_ref:true { env with Emit_env.env_allows_array_append = true} e
-
 and emit_unop ~need_ref env pos op e =
   match op with
   | A.Utild ->
@@ -3920,7 +3917,8 @@ and emit_unop ~need_ref env pos op e =
   | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
     emit_box_if_necessary pos need_ref @@
     emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
-  | A.Uref -> emit_expr_as_ref env e
+  | A.Uref ->
+    failwith "A.Uref is used only for argument passing"
   | A.Usilence ->
     Local.scope @@ fun () ->
       let temp_local = Local.get_unnamed_local () in

@@ -42,3 +42,7 @@ pub mod minimal_token;
 pub mod minimal_trivia;
 
 pub mod file_mode;
+
+pub mod positioned_syntax;
+pub mod positioned_token;
+pub mod positioned_trivia;

@@ -117,7 +117,7 @@ let from_constant env (_hint, name, const_init) =
         Some v, None
       | None ->
         Some Typed_value.Uninit,
-        Some (Emit_expression.emit_expr ~need_ref:false env init) in
+        Some (Emit_expression.emit_expr env init) in
     Hhas_constant.make constant_name constant_value initializer_instrs
 
 let from_type_constant ~namespace ast_type_constant =

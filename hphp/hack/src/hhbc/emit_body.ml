@@ -64,7 +64,7 @@ let rec emit_def env def =
     let cns_name = snd c.Ast.cst_name in
     let cns_id = Hhbc_id.Const.from_ast_name cns_name in
       gather [
-        Emit_expression.emit_expr ~need_ref:false env c.Ast.cst_value;
+        Emit_expression.emit_expr env c.Ast.cst_value;
         Emit_pos.emit_pos_then c.Ast.cst_span
           @@ instr (IIncludeEvalDefine (DefCns cns_id));
         instr_popc;

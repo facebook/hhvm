@@ -164,7 +164,7 @@ let from_ast
         Some Typed_value.Uninit, deep_init, false,
           Some (gather [
             prolog;
-            Emit_expression.emit_expr ~need_ref:false env expr;
+            Emit_expression.emit_expr env expr;
             epilog]) in
   Hhas_property.make
     attributes

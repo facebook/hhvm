@@ -220,7 +220,7 @@ let rec emit_stmt env (pos, st_) =
     ]
   | A.Return (Some expr) ->
     gather [
-      emit_expr ~need_ref:false env expr;
+      emit_expr env expr;
       Emit_pos.emit_pos pos;
       emit_return env;
     ]
@@ -251,7 +251,7 @@ let rec emit_stmt env (pos, st_) =
     emit_for env pos e1 e2 e3 (pos, A.Block b)
   | A.Throw e ->
     gather [
-      emit_expr ~need_ref:false env e;
+      emit_expr env e;
       Emit_pos.emit_pos pos;
       instr (IContFlow Throw);
     ]
@@ -367,7 +367,7 @@ and emit_awaitall_single_no_assign env pos e =
 
 and emit_awaitall_ env _pos el =
   let load_args = gather @@ List.map el
-    ~f:(fun (_, arg) -> emit_expr ~need_ref:false env arg) in
+    ~f:(fun (_, arg) -> emit_expr env arg) in
   let tmp_locals = List.map el ~f:(fun (local, _) -> local) in
   let init_locals = gather @@ List.rev_map tmp_locals ~f:instr_popl in
   let await_all = gather [
@@ -440,14 +440,14 @@ and emit_using env pos is_block_scoped has_await e b =
       | A.Binop (A.Eq None, (_, A.Lvar (_, id)), _)
       | A.Lvar (_, id) ->
         Local.Named id, gather [
-          emit_expr ~need_ref:false env e;
+          emit_expr env e;
           Emit_pos.emit_pos (fst b);
           instr_popc;
         ]
       | _ ->
         let l = Local.get_unnamed_local () in
         l, gather [
-          emit_expr ~need_ref:false env e;
+          emit_expr env e;
           instr_setl l;
           instr_popc
         ]
@@ -578,12 +578,12 @@ and emit_switch env pos scrutinee_expr cl =
         instr_jmpnz case_handler_label
       ]
     | _ ->
-      emit_expr ~need_ref:false env scrutinee_expr, instr_popc,
+      emit_expr env scrutinee_expr, instr_popc,
       fun case_expr case_handler_label ->
       let next_case_label = Label.next_regular () in
       gather [
         instr_dup;
-        emit_expr ~need_ref:false env case_expr;
+        emit_expr env case_expr;
         emit_pos (fst case_expr);
         instr_eq;
         instr_jmpz next_case_label;
@@ -980,7 +980,7 @@ and emit_foreach env pos collection await_pos iterator block =
   | Some pos -> emit_foreach_await env pos collection iterator block
 
 and emit_foreach_await env pos collection iterator block =
-  let instr_collection = emit_expr ~need_ref:false env collection in
+  let instr_collection = emit_expr env collection in
   Scope.with_unnamed_local @@ fun iter_temp_local ->
   let input_is_async_iterator_label = Label.next_regular () in
   let next_label = Label.next_regular () in
@@ -1022,7 +1022,7 @@ and emit_foreach_await env pos collection iterator block =
   instr_unsetl iter_temp_local
 
 and emit_foreach_ env pos collection iterator block =
-  let instr_collection = emit_expr ~need_ref:false env collection in
+  let instr_collection = emit_expr env collection in
   Scope.with_unnamed_locals_and_iterators @@ fun () ->
   let iterator_number = Iterator.get_iterator () in
   let loop_break_label = Label.next_regular () in
@@ -1058,7 +1058,7 @@ and emit_yield_from_delegates env pos e =
   let loop_label = Label.next_regular () in
   let done_label = Label.next_regular () in
   gather [
-    emit_expr ~need_ref:false env e;
+    emit_expr env e;
     emit_pos pos;
     instr_contAssignDelegate iterator_number;
     instr_try_catch_begin;

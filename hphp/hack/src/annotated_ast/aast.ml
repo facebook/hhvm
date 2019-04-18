@@ -307,6 +307,9 @@ and class_tparams = {
   c_tparam_constraints: (reify_kind * (Ast.constraint_kind * hint) list) SMap.t [@opaque]
 }
 
+and use_as_alias = sid option * pstring * sid option * use_as_visibility list
+and insteadof_alias = sid * pstring * sid list
+
 and class_ = {
   c_span           : pos              ;
   c_annotation     : env_annotation   ;
@@ -319,6 +322,8 @@ and class_ = {
   c_tparams        : class_tparams    ;
   c_extends        : hint list        ;
   c_uses           : hint list        ;
+  c_use_as_alias   : use_as_alias list;
+  c_insteadof_alias: insteadof_alias list;
   c_method_redeclarations : method_redeclaration list;
   c_xhp_attr_uses  : hint list        ;
   c_xhp_category   : (pos * pstring list) option;

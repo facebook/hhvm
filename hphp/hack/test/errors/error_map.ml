@@ -153,6 +153,9 @@ MutabilityHintInNonRx = 2098
 InvalidReturnMutableHint = 2099
 NoTparamsOnTypeConsts = 2100
 PocketUniversesDuplication = 2101
+UnsupportedTraitUseAs = 2102
+UnsupportedInsteadOf = 2103
+InvalidTraitUseAsVisibility = 2104
 
 NastCheck Errors:
 AbstractBody = 3001

@@ -601,3 +601,6 @@ val mutability_hint_in_non_rx_function : Pos.t -> unit
 val invalid_mutability_in_return_type_hint : Pos.t -> unit
 val typechecker_timeout : Pos.t * string -> int -> unit
 val byref_on_property : Pos.t -> unit
+val unsupported_trait_use_as : Pos.t -> unit
+val unsupported_instead_of : Pos.t -> unit
+val invalid_trait_use_as_visibility : Pos.t -> unit

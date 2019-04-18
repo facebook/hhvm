@@ -7,12 +7,15 @@
  *
  *)
 open Ast
+open Core_kernel
 module Aast = Nast
 module SN = Naming_special_names
 
 type class_body =
 {
   c_uses           : Aast.hint list                       ;
+  c_use_as_aliases : Aast.use_as_alias list               ;
+  c_insteadof_aliases: Aast.insteadof_alias list          ;
   c_method_redeclarations : Aast.method_redeclaration list;
   c_xhp_attr_uses  : Aast.hint list                       ;
   c_xhp_category   : (pos * pstring list) option          ;
@@ -33,6 +36,8 @@ type class_body =
 
 let make_empty_class_body = {
   c_uses = [];
+  c_use_as_aliases = [];
+  c_insteadof_aliases = [];
   c_method_redeclarations = [];
   c_xhp_attr_uses = [];
   c_xhp_category = None;
@@ -51,12 +56,13 @@ let make_empty_class_body = {
   c_pu_enums = [];
 }
 
-let on_list f l = List.map f l
+let on_list f l = List.map ~f:f l
+let mem lst e = List.mem ~equal:(=) lst e
 
 let on_list_append_acc acc f l =
   List.fold_left
-    (fun acc li -> f li :: acc)
-    acc
+    ~f:(fun acc li -> f li :: acc)
+    ~init:acc
     l
 let optional f = function
   | None -> None
@@ -65,7 +71,7 @@ let optional f = function
 let both f (p1, p2) = (f p1, f p2)
 
 let reification reified attributes =
-  let soft = List.exists (fun { Aast.ua_name = (_, n); _ } -> n = SN.UserAttributes.uaSoft)
+  let soft = List.exists ~f:(fun { Aast.ua_name = (_, n); _ } -> n = SN.UserAttributes.uaSoft)
     attributes in
   if reified
   then if soft
@@ -89,14 +95,14 @@ and on_shape_info info =
     Aast.{ sfi_optional = sf.sf_optional; sfi_hint = on_hint sf.sf_hint; sfi_name = sf.sf_name } in
   let _, nfm =
     List.fold_left
-      (fun (map_, list_) sf ->
+      ~f:(fun (map_, list_) sf ->
         if ShapeMap.mem sf.sf_name map_
         then Errors.fd_name_already_bound (get_pos_shape_name sf.sf_name);
         let sfi = on_shape_field sf in
         let map_ = ShapeMap.add sf.sf_name sfi map_ in
         let list_ = sfi :: list_ in
         map_, list_)
-      (ShapeMap.empty, [])
+      ~init:(ShapeMap.empty, [])
       info.si_shape_field_list in
   let nfm = List.rev nfm in
   Aast.{
@@ -147,10 +153,25 @@ and on_class_elt trait_or_interface body elt : class_body =
   | ClassUse h  ->
     let hints = on_hint h :: body.c_uses in
     { body with c_uses = hints; }
-  | ClassUseAlias (_, (p, _), _, _) ->
-    Errors.unsupported_feature p "Trait use aliasing"; body
-  | ClassUsePrecedence (_, (p, _), _) ->
-    Errors.unsupported_feature p "The insteadof keyword"; body
+  | ClassUseAlias (ido1, (p, s), ido2, kl) ->
+    Errors.unsupported_trait_use_as p;
+    let visl =
+      List.filter_map
+        ~f:(fun k ->
+          match k with
+          | Private -> Some Aast.UseAsPrivate
+          | Public -> Some Aast.UseAsPublic
+          | Protected -> Some Aast.UseAsProtected
+          | Final -> Some Aast.UseAsFinal
+          | _ ->
+            Errors.invalid_trait_use_as_visibility p; None)
+        kl in
+    let use_as_aliases = (ido1, (p, s), ido2, visl) :: body.c_use_as_aliases in
+    { body with c_use_as_aliases = use_as_aliases }
+  | ClassUsePrecedence (id1, (p, s), id2) ->
+    Errors.unsupported_instead_of p;
+    let insteadof_aliases = (id1, (p, s), id2) :: body.c_insteadof_aliases in
+    { body with c_insteadof_aliases = insteadof_aliases }
   | MethodTraitResolution res ->
     let redecls = on_method_trait_resolution res :: body.c_method_redeclarations in
     { body with c_method_redeclarations = redecls; }
@@ -163,7 +184,7 @@ and on_class_elt trait_or_interface body elt : class_body =
   | ClassTraitRequire (MustImplement, h) ->
     let hints = on_hint h :: body.c_req_implements in
     { body with c_req_implements = hints; }
-  | ClassVars cvs when List.mem Static cvs.cv_kinds ->
+  | ClassVars cvs when mem cvs.cv_kinds Static ->
     let vars = on_class_vars_with_acc body.c_static_vars cvs in
     { body with c_static_vars = vars; }
   | ClassVars cvs ->
@@ -180,7 +201,7 @@ and on_class_elt trait_or_interface body elt : class_body =
     { body with c_xhp_attrs = attrs; }
   | XhpCategory (p, cs) ->
     if body.c_xhp_category <> None && cs <> []
-    then Errors.multiple_xhp_category (fst (List.hd cs));
+    then Errors.multiple_xhp_category (fst (List.hd_exn cs));
     { body with c_xhp_category = Some (p, cs); }
   | XhpChild (p, c) ->
     let children = (p, on_xhp_child c) :: body.c_xhp_children in
@@ -189,7 +210,7 @@ and on_class_elt trait_or_interface body elt : class_body =
     if body.c_constructor <> None
     then Errors.method_name_already_bound (fst m.m_name) (snd m.m_name);
     { body with c_constructor = Some (on_method ~trait_or_interface m) }
-  | Method m when List.mem Static m.m_kind ->
+  | Method m when mem m.m_kind Static ->
     let statics = on_method m :: body.c_static_methods in
     { body with c_static_methods = statics; }
   | Method m ->
@@ -304,7 +325,7 @@ and on_expr (p, e) : Aast.expr =
     )
   | Efun (f, use_list) ->
     let ids =
-      List.map (fun ((p, id)) -> (p, Local_id.make_unscoped id)) use_list in
+      List.map ~f:(fun ((p, id)) -> (p, Local_id.make_unscoped id)) use_list in
     Aast.Efun (on_fun f, ids)
   | Lfun f -> Aast.Lfun (on_fun f, [])
   | BracedExpr e -> Aast.BracedExpr (on_expr e)
@@ -515,9 +536,9 @@ and on_class_typeconst (tc: Ast.typeconst) : Aast.class_typeconst =
   }
 
 and on_class_var is_xhp h attrs kinds variadic doc_com (_, id, eopt) : Aast.class_var =
-  let cv_final = List.mem Final kinds in
+  let cv_final = mem kinds Final in
   let cv_visibility = List.fold_left
-    begin
+    ~f:begin
       fun acc k ->
         match k with
         | Private -> Aast.Private
@@ -525,7 +546,7 @@ and on_class_var is_xhp h attrs kinds variadic doc_com (_, id, eopt) : Aast.clas
         | Protected -> Aast.Protected
         | _ -> acc
     end
-    Aast.Public
+    ~init:Aast.Public
     kinds in
   Aast.{
     cv_final;
@@ -566,7 +587,7 @@ and on_constr (h1, k, h2) = (on_hint h1, k, on_hint h2)
 
 and on_method_trait_resolution res : Aast.method_redeclaration =
   let acc = false, false, false, None in
-  let final, abs, static, vis = List.fold_left kind acc res.mt_kind in
+  let final, abs, static, vis = List.fold_left ~f:kind ~init:acc res.mt_kind in
   let vis =
     match vis with
     | None ->
@@ -619,7 +640,7 @@ and on_method ?(trait_or_interface=false) m : Aast.method_ =
     Aast.fb_annotation = Aast.BodyNamingAnnotation.NamedWithUnsafeBlocks;
   } in
   let acc = false, false, false, None in
-  let final, abs, static, vis = List.fold_left kind acc m.m_kind in
+  let final, abs, static, vis = List.fold_left ~f:kind ~init:acc m.m_kind in
   let vis =
     match vis with
     | None -> Errors.method_needs_visibility (fst m.m_name); Aast.Public
@@ -673,9 +694,11 @@ and on_pu pu_name pu_is_final fields =
        }
 
 and on_class_body trait_or_interface cb =
-  let reversed_body = List.fold_left (on_class_elt trait_or_interface) make_empty_class_body cb in
+  let reversed_body = List.fold_left ~f:(on_class_elt trait_or_interface) ~init:make_empty_class_body cb in
   { reversed_body with
     c_uses = List.rev reversed_body.c_uses;
+    c_use_as_aliases = List.rev reversed_body.c_use_as_aliases;
+    c_insteadof_aliases = List.rev reversed_body.c_insteadof_aliases;
     c_method_redeclarations = List.rev reversed_body.c_method_redeclarations;
     c_xhp_attr_uses = List.rev reversed_body.c_xhp_attr_uses;
     c_xhp_category = reversed_body.c_xhp_category;
@@ -712,6 +735,8 @@ and on_class c : Aast.class_ =
       c_tparams               = c_tparams;
       c_extends               = on_list on_hint c.c_extends;
       c_uses                  = body.c_uses;
+      c_use_as_alias          = body.c_use_as_aliases;
+      c_insteadof_alias       = body.c_insteadof_aliases;
       c_method_redeclarations = body.c_method_redeclarations;
       c_xhp_attr_uses         = body.c_xhp_attr_uses;
       c_xhp_category          = body.c_xhp_category;

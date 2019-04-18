@@ -331,14 +331,14 @@ let format_filename (pos: Pos.absolute): string =
     (Tty.apply_color (Tty.Normal Tty.Cyan) "-->")
     (Tty.apply_color (Tty.Normal Tty.Green) filename)
 
-let column_width line_number = 
+let column_width line_number =
   let num_digits x = int_of_float (Float.log10 (float_of_int x)) + 1 in
   (max 3 (num_digits line_number))
 
 (* Format the line of code associated with this message, and the message itself. *)
 let format_message (msg: string) (pos: Pos.absolute) ~is_first ~col_width : string * string =
   let col_width = Option.value col_width ~default:(column_width (Pos.line pos)) in
-  
+
   let context_lines = load_context_lines pos in
   let pretty_ctx = format_context_lines pos context_lines col_width in
   let pretty_msg = format_substring_underline pos msg (List.hd context_lines) is_first col_width in
@@ -743,6 +743,22 @@ let unterminated_xhp_comment pos =
 
 let parsing_error (p, msg) =
   add (Parsing.err_code Parsing.ParsingError) p msg
+
+(*****************************************************************************)
+(* Legacy AST / AAST errors *)
+(*****************************************************************************)
+
+let unsupported_trait_use_as pos =
+  add (Naming.err_code Naming.UnsupportedTraitUseAs) pos
+  "Trait use as is a PHP feature that is unsupported in Hack"
+
+let unsupported_instead_of pos =
+  add (Naming.err_code Naming.UnsupportedInsteadOf) pos
+  "insteadof is a PHP feature that is unsupported in Hack"
+
+let invalid_trait_use_as_visibility pos =
+  add (Naming.err_code Naming.InvalidTraitUseAsVisibility) pos
+  "Cannot redeclare trait method's visibility in this manner"
 
 (*****************************************************************************)
 (* Naming errors *)

@@ -299,6 +299,8 @@ struct
     T.c_tparams = map_class_tparams menv c.S.c_tparams;
     T.c_extends = c.S.c_extends;
     T.c_uses = c.S.c_uses;
+    T.c_use_as_alias = c.S.c_use_as_alias;
+    T.c_insteadof_alias = c.S.c_insteadof_alias;
     T.c_method_redeclarations =
       List.map c.S.c_method_redeclarations ~f:(map_method_redeclaration menv);
     T.c_xhp_attr_uses = c.S.c_xhp_attr_uses;

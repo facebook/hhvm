@@ -6300,6 +6300,11 @@ and class_def_ env c tc =
     T.c_tparams = class_type_param env c.c_tparams;
     T.c_extends = c.c_extends;
     T.c_uses = c.c_uses;
+    (* c_use_as_alias and c_insteadof_alias are PHP features not supported
+     * in Hack but are required since we have runtime support for it
+     *)
+    T.c_use_as_alias = [];
+    T.c_insteadof_alias = [];
     T.c_method_redeclarations = typed_method_redeclarations;
     T.c_xhp_attr_uses = c.c_xhp_attr_uses;
     T.c_xhp_category = c.c_xhp_category;

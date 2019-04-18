@@ -12,7 +12,8 @@
             tp_user_attributes = [] }
           ];
         c_tparam_constraints = <opaque> };
-      c_extends = []; c_uses = []; c_method_redeclarations = [];
+      c_extends = []; c_uses = []; c_use_as_alias = [];
+      c_insteadof_alias = []; c_method_redeclarations = [];
       c_xhp_attr_uses = []; c_xhp_category = None; c_req_extends = [];
       c_req_implements = []; c_implements = []; c_consts = [];
       c_typeconsts = []; c_static_vars = []; c_vars = [];

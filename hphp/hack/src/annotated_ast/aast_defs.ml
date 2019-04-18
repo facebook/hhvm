@@ -143,6 +143,12 @@ and visibility =
   | Public [@visitors.name "visibility_Public"]
   | Protected [@visitors.name "visibility_Protected"]
 
+and use_as_visibility =
+  | UseAsPublic
+  | UseAsPrivate
+  | UseAsProtected
+  | UseAsFinal
+
 and typedef_visibility =
   | Transparent
   | Opaque

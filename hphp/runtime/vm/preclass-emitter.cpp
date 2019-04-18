@@ -404,7 +404,7 @@ void PreClassRepoProxy::InsertPreClassStmt
     std::string::npos : qfind(n, ';');
   auto const nm = pos == std::string::npos ?
     n : folly::StringPiece{n.data(), pos};
-  BlobEncoder extraBlob;
+  BlobEncoder extraBlob{pce.useGlobalIds()};
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@preClassId", preClassId);
@@ -434,7 +434,7 @@ void PreClassRepoProxy::GetPreClassesStmt
       Id preClassId;          /**/ query.getId(0, preClassId);
       std::string name;       /**/ query.getStdString(1, name);
       int hoistable;          /**/ query.getInt(2, hoistable);
-      BlobDecoder extraBlob = /**/ query.getBlob(3);
+      BlobDecoder extraBlob = /**/ query.getBlob(3, ue.useGlobalIds());
       PreClassEmitter* pce = ue.newPreClassEmitter(
         name, (PreClass::Hoistable)hoistable);
       pce->serdeMetaData(extraBlob);

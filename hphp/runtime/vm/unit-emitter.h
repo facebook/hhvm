@@ -77,7 +77,9 @@ struct UnitEmitter {
   /////////////////////////////////////////////////////////////////////////////
   // Initialization and execution.
 
-  explicit UnitEmitter(const SHA1& sha1, const Native::FuncTable&);
+  explicit UnitEmitter(const SHA1& sha1,
+                       const Native::FuncTable&,
+                       bool useGlobalIds);
   UnitEmitter(UnitEmitter&&) = delete;
   ~UnitEmitter();
 
@@ -142,6 +144,7 @@ struct UnitEmitter {
   Id numArrays() const { return m_arrays.size(); }
   Id numLitstrs() const { return m_litstrs.size(); }
 
+  bool useGlobalIds() const { return m_useGlobalIds; }
   /*
    * Merge a literal string into either the global LitstrTable or the table for
    * the Unit.
@@ -419,6 +422,7 @@ public:
   bool m_useStrictTypesForBuiltins{false};
   bool m_returnSeen{false};
   bool m_ICE{false}; // internal compiler error
+  bool m_useGlobalIds{0};
   TypedValue m_mainReturn;
   UserAttributeMap m_metaData;
   UserAttributeMap m_fileAttributes;
@@ -561,7 +565,7 @@ struct UnitRepoProxy : public RepoProxy {
   struct InsertUnitArrayTypeTableStmt : public RepoProxy::Stmt {
     InsertUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
     void insert(RepoTxn& txn, int64_t unitSn,
-                const ArrayTypeTable& att); // throws(RepoExc)
+                const UnitEmitter& ue); // throws(RepoExc)
   };
   struct GetUnitArrayTypeTableStmt : public RepoProxy::Stmt {
     GetUnitArrayTypeTableStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}
@@ -618,9 +622,6 @@ struct UnitRepoProxy : public RepoProxy {
   c##Stmt o[RepoIdCount];
   URP_OPS
 #undef URP_OP
-
-private:
-  RepoStatus loadHelper(UnitEmitter& ue, const std::string&, const SHA1&);
 };
 
 std::unique_ptr<UnitEmitter> createFatalUnit(

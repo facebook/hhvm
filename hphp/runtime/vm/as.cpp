@@ -3579,7 +3579,7 @@ std::unique_ptr<UnitEmitter> assemble_string(
   bool swallowErrors,
   bool wantsSymbolRefs
 ) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs, false);
   if (!SystemLib::s_inited) {
     ue->m_mergeOnly = true;
   }

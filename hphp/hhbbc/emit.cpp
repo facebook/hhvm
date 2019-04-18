@@ -1578,7 +1578,9 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
 
   assert(check(unit));
 
-  auto ue = std::make_unique<UnitEmitter>(unit.sha1, Native::s_noNativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(unit.sha1,
+                                          Native::s_noNativeFuncs,
+                                          true);
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
   ue->m_isHHFile = unit.isHHFile;

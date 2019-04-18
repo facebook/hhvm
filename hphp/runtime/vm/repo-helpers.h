@@ -131,7 +131,7 @@ struct RepoQuery {
   // Get the column value as the named type. If the value cannot be converted
   // into the named type then an error is thrown.
   void getBlob(int iCol, const void*& blob, size_t& size); // throws(RepoExc)
-  BlobDecoder getBlob(int iCol); // throws(RepoExc)
+  BlobDecoder getBlob(int iCol, bool useGlobalIds); // throws(RepoExc)
   void getSha1(int iCol, SHA1& sha1); // throws(RepoExc)
   void getTypedValue(int iCol, TypedValue& tv); // throws(RepoExc)
   void getText(int iCol, const char*& text); // throws(RepoExc)

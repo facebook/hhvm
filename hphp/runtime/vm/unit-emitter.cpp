@@ -89,8 +89,11 @@ size_t hhbc_arena_capacity() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-UnitEmitter::UnitEmitter(const SHA1& sha1, const Native::FuncTable& nativeFuncs)
-  : m_mainReturn(make_tv<KindOfUninit>())
+UnitEmitter::UnitEmitter(const SHA1& sha1,
+                         const Native::FuncTable& nativeFuncs,
+                         bool useGlobalIds)
+  : m_useGlobalIds(useGlobalIds)
+  , m_mainReturn(make_tv<KindOfUninit>())
   , m_nativeFuncs(nativeFuncs)
   , m_sha1(sha1)
   , m_bc((unsigned char*)malloc(BCMaxInit))
@@ -150,7 +153,7 @@ void UnitEmitter::repopulateArrayTypeTable(
 }
 
 Id UnitEmitter::mergeLitstr(const StringData* litstr) {
-  if (Option::WholeProgram) {
+  if (m_useGlobalIds) {
     return encodeGlobalLitstrId(LitstrTable::get().mergeLitstr(litstr));
   }
   return mergeUnitLitstr(litstr);
@@ -488,7 +491,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         ).toCppString()
       );
     }
-    urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, m_arrayTypeTable);
+    urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, *this);
     for (auto& fe : m_fes) {
       fe->commit(txn);
     }
@@ -842,8 +845,8 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
-      "(unitSn INTEGER PRIMARY KEY, sha1 BLOB UNIQUE, "
-      "bc BLOB, data BLOB);",
+      "(unitSn INTEGER PRIMARY KEY, sha1 BLOB UNIQUE, globalids INTEGER,"
+      " bc BLOB, data BLOB);",
       m_repo.table(repoId, "Unit"));
     txn.exec(createQuery);
   }
@@ -896,59 +899,55 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   }
 }
 
-RepoStatus UnitRepoProxy::loadHelper(UnitEmitter& ue,
-                                     const std::string& name,
-                                     const SHA1& sha1) {
+std::unique_ptr<UnitEmitter> UnitRepoProxy::loadEmitter(
+    const std::string& name,
+    const SHA1& sha1,
+    const Native::FuncTable& nativeFuncs) {
+  // We set useGlobalIds to false as a placeholder; it will be set
+  // correctly by UnitRepoProxy::GetUnitStmt::get.
+  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs, false);
   if (!RuntimeOption::EvalLoadFilepathFromUnitCache) {
-    ue.m_filepath = makeStaticString(name);
+    ue->m_filepath = makeStaticString(name);
   }
   // Look for a repo that contains a unit with matching SHA1.
   int repoId;
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
-    if (getUnit[repoId].get(ue, sha1) == RepoStatus::success) {
+    if (getUnit[repoId].get(*ue, sha1) == RepoStatus::success) {
       break;
     }
   }
   if (repoId < 0) {
     TRACE(3, "No repo contains '%s' (0x%s)\n",
              name.c_str(), sha1.toString().c_str());
-    return RepoStatus::error;
+    return nullptr;
   }
   try {
-    getUnitLitstrs[repoId].get(ue);
-    getUnitArrays[repoId].get(ue);
-    getUnitArrayTypeTable[repoId].get(ue);
-    m_repo.pcrp().getPreClasses[repoId].get(ue);
-    m_repo.rrp().getRecords[repoId].get(ue);
-    getUnitMergeables[repoId].get(ue);
-    getUnitLineTable[repoId].get(ue.m_sn, ue.m_lineTable);
-    m_repo.frp().getFuncs[repoId].get(ue);
+    getUnitLitstrs[repoId].get(*ue);
+    getUnitArrays[repoId].get(*ue);
+    getUnitArrayTypeTable[repoId].get(*ue);
+    m_repo.pcrp().getPreClasses[repoId].get(*ue);
+    m_repo.rrp().getRecords[repoId].get(*ue);
+    getUnitMergeables[repoId].get(*ue);
+    getUnitLineTable[repoId].get(ue->m_sn, ue->m_lineTable);
+    m_repo.frp().getFuncs[repoId].get(*ue);
   } catch (RepoExc& re) {
     TRACE(0,
           "Repo error loading '%s' (0x%s) from '%s': %s\n",
           name.c_str(), sha1.toString().c_str(),
           m_repo.repoName(repoId).c_str(), re.msg().c_str());
-    return RepoStatus::error;
+    return nullptr;
   }
   TRACE(3, "Repo loaded '%s' (0x%s) from '%s'\n",
            name.c_str(), sha1.toString().c_str(),
            m_repo.repoName(repoId).c_str());
-  return RepoStatus::success;
-}
-
-std::unique_ptr<UnitEmitter>
-UnitRepoProxy::loadEmitter(const std::string& name, const SHA1& sha1,
-                           const Native::FuncTable& nativeFuncs) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
-  if (loadHelper(*ue, name, sha1) == RepoStatus::error) ue.reset();
   return ue;
 }
 
 std::unique_ptr<Unit>
 UnitRepoProxy::load(const std::string& name, const SHA1& sha1,
                     const Native::FuncTable& nativeFuncs) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, nativeFuncs);
-  if (loadHelper(*ue, name, sha1) == RepoStatus::error) return nullptr;
+  auto ue = loadEmitter(name, sha1, nativeFuncs);
+  if (!ue) return nullptr;
 
 #ifdef USE_JEMALLOC
   if (RuntimeOption::TrackPerUnitMemory) {
@@ -990,16 +989,17 @@ void UnitRepoProxy::InsertUnitStmt
                   ::insert(const UnitEmitter& ue,
                            RepoTxn& txn, int64_t& unitSn, const SHA1& sha1,
                            const unsigned char* bc, size_t bclen) {
-  BlobEncoder dataBlob;
+  BlobEncoder dataBlob{ue.useGlobalIds()};
 
   if (!prepared()) {
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(NULL, @sha1, @bc, @data);",
+      "INSERT INTO {} VALUES(NULL, @sha1, @globalids, @bc, @data);",
       m_repo.table(m_repoId, "Unit"));
     txn.prepare(*this, insertQuery);
   }
   RepoTxnQuery query(txn, *this);
   query.bindSha1("@sha1", sha1);
+  query.bindBool("@globalids", ue.m_useGlobalIds);
   query.bindBlob("@bc", (const void*)bc, bclen);
   const_cast<UnitEmitter&>(ue).serdeMetaData(dataBlob);
   query.bindBlob("@data", dataBlob, /* static */ true);
@@ -1012,7 +1012,7 @@ RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const SHA1& sha1) {
     auto txn = RepoTxn{m_repo.begin()};
     if (!prepared()) {
       auto selectQuery = folly::sformat(
-        "SELECT unitSn, bc, data FROM {} WHERE sha1 == @sha1;",
+        "SELECT unitSn, globalids, bc, data FROM {} WHERE sha1 == @sha1;",
         m_repo.table(m_repoId, "Unit"));
       txn.prepare(*this, selectQuery);
     }
@@ -1023,11 +1023,13 @@ RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const SHA1& sha1) {
       return RepoStatus::error;
     }
     int64_t unitSn;                     /**/ query.getInt64(0, unitSn);
-    const void* bc; size_t bclen;       /**/ query.getBlob(1, bc, bclen);
-    BlobDecoder dataBlob =              /**/ query.getBlob(2);
+    bool useGlobalIds;                  /**/ query.getBool(1, useGlobalIds);
+    const void* bc; size_t bclen;       /**/ query.getBlob(2, bc, bclen);
+    BlobDecoder dataBlob =              /**/ query.getBlob(3, useGlobalIds);
 
     ue.m_repoId = m_repoId;
     ue.m_sn = unitSn;
+    ue.m_useGlobalIds = useGlobalIds;
     ue.setBc(static_cast<const unsigned char*>(bc), bclen);
     ue.serdeMetaData(dataBlob);
 
@@ -1079,7 +1081,7 @@ void UnitRepoProxy::GetUnitLitstrsStmt
 }
 
 void UnitRepoProxy::InsertUnitArrayTypeTableStmt::insert(
-  RepoTxn& txn, int64_t unitSn, const ArrayTypeTable& att) {
+  RepoTxn& txn, int64_t unitSn, const UnitEmitter& ue) {
 
   if (!prepared()) {
     auto insertQuery = folly::sformat(
@@ -1089,8 +1091,8 @@ void UnitRepoProxy::InsertUnitArrayTypeTableStmt::insert(
   }
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
-  BlobEncoder dataBlob;
-  dataBlob(att);
+  BlobEncoder dataBlob{ue.useGlobalIds()};
+  dataBlob(ue.m_arrayTypeTable);
   query.bindBlob("@arrayTypeTable", dataBlob, /* static */ true);
   query.exec();
 }
@@ -1110,7 +1112,7 @@ void UnitRepoProxy::GetUnitArrayTypeTableStmt
 
   query.step();
   assertx(query.row());
-  BlobDecoder dataBlob = query.getBlob(1);
+  BlobDecoder dataBlob = query.getBlob(1, ue.useGlobalIds());
   dataBlob(ue.m_arrayTypeTable);
   dataBlob.assertDone();
   query.step();
@@ -1267,7 +1269,7 @@ void UnitRepoProxy::InsertUnitLineTableStmt
     txn.prepare(*this, insertQuery);
   }
 
-  BlobEncoder dataBlob;
+  BlobEncoder dataBlob{false};
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   dataBlob(
@@ -1297,7 +1299,7 @@ void UnitRepoProxy::GetUnitLineTableStmt::get(int64_t unitSn,
   query.bindInt64("@unitSn", unitSn);
   query.step();
   if (query.row()) {
-    BlobDecoder dataBlob = query.getBlob(0);
+    BlobDecoder dataBlob = query.getBlob(0, false);
     dataBlob(
       lineTable,
       [&](const LineEntry& prev, const LineEntry& delta) -> LineEntry {
@@ -1372,7 +1374,7 @@ UnitRepoProxy::GetSourceLocTabStmt::get(int64_t unitSn,
 std::unique_ptr<UnitEmitter>
 createFatalUnit(StringData* filename, const SHA1& sha1, FatalOp /*op*/,
                 StringData* err) {
-  auto ue = std::make_unique<UnitEmitter>(sha1, Native::s_noNativeFuncs);
+  auto ue = std::make_unique<UnitEmitter>(sha1, Native::s_noNativeFuncs, false);
   ue->m_filepath = filename;
   ue->m_isHHFile = true;
   ue->initMain(1, 1);

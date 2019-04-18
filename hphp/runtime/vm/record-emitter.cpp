@@ -197,7 +197,7 @@ void RecordRepoProxy::InsertRecordStmt
     std::string::npos : qfind(n, ';');
   auto const nm = pos == std::string::npos ?
     n : folly::StringPiece{n.data(), pos};
-  BlobEncoder extraBlob;
+  BlobEncoder extraBlob(pce.ue().useGlobalIds());
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindId("@recordId", recordId);
@@ -225,7 +225,7 @@ void RecordRepoProxy::GetRecordsStmt
     if (query.row()) {
       Id recordId;        /**/ query.getId(0, recordId);
       std::string name;   /**/ query.getStdString(1, name);
-      BlobDecoder extraBlob = /**/ query.getBlob(2);
+      BlobDecoder extraBlob = /**/ query.getBlob(2, ue.useGlobalIds());
       RecordEmitter* re = ue.newRecordEmitter(name);
       re->serdeMetaData(extraBlob);
       if (!SystemLib::s_inited) {

@@ -640,7 +640,7 @@ void FuncRepoProxy::InsertFuncStmt
     txn.prepare(*this, insertQuery);
   }
 
-  BlobEncoder extraBlob;
+  BlobEncoder extraBlob{fe.useGlobalIds()};
   RepoTxnQuery query(txn, *this);
   query.bindInt64("@unitSn", unitSn);
   query.bindInt("@funcSn", funcSn);
@@ -672,7 +672,7 @@ void FuncRepoProxy::GetFuncsStmt
       Id preClassId;            /**/ query.getId(1, preClassId);
       StringData* name;         /**/ query.getStaticString(2, name);
       bool top;                 /**/ query.getBool(3, top);
-      BlobDecoder extraBlob =   /**/ query.getBlob(4);
+      BlobDecoder extraBlob =   /**/ query.getBlob(4, ue.useGlobalIds());
 
       FuncEmitter* fe;
       if (preClassId < 0) {

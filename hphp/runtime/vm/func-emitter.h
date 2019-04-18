@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/repo-helpers.h"
 #include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit.h"
+#include "hphp/runtime/vm/unit-emitter.h"
 
 #include <utility>
 #include <vector>
@@ -125,7 +126,7 @@ struct FuncEmitter {
    */
   void setIds(int sn, Id id);
 
-
+  bool useGlobalIds() const;
   /////////////////////////////////////////////////////////////////////////////
   // Locals, iterators, and parameters.
 

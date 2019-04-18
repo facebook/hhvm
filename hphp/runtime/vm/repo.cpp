@@ -202,7 +202,7 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
         throw RepoExc("No rows in %s. Did you forget to compile that file with "
                       "this HHVM version?", tbl.c_str());
       }
-      BlobDecoder decoder = query.getBlob(1);
+      BlobDecoder decoder = query.getBlob(1, true);
       decoder(s_globalData);
       FTRACE(1, "GlobalData loaded from '{}':\n", repoName(repoId));
       FTRACE(1, "{}", show(s_globalData));
@@ -284,7 +284,7 @@ void Repo::saveGlobalData(GlobalData newData) {
   );
   auto txn = RepoTxn{begin()};
   RepoTxnQuery query(txn, stmt);
-  BlobEncoder encoder;
+  BlobEncoder encoder{true};
   encoder(s_globalData);
   encoder(globalArrayTypeTable());
   encoder(s_globalData.APCProfile);

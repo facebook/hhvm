@@ -302,7 +302,7 @@ void readRelocations(
       auto b64 = line.substr(pos + 1);
       auto decoded = base64_decode(b64.c_str(), b64.size(), true);
 
-      BlobDecoder blob(decoded.data(), decoded.size());
+      BlobDecoder blob(decoded.data(), decoded.size(), false);
       TransRelocInfoHelper trih;
       blob(trih);
 
@@ -733,7 +733,7 @@ perfRelocMapInfo(TCA start, TCA /*end*/, TCA coldStart, TCA coldEnd, SrcKey sk,
   trih.coldRange = std::make_pair(uint32_t(coldStart - code().base()),
                                   uint32_t(coldEnd - code().base()));
 
-  BlobEncoder blob;
+  BlobEncoder blob{false};
   blob(trih);
 
   auto data = base64_encode(static_cast<const char*>(blob.data()), blob.size());

@@ -100,7 +100,7 @@ public:
 
 struct BlobEncoder {
   static const bool deserializing = false;
-
+  explicit BlobEncoder(bool l) : m_useGlobalIds{l} {}
   /*
    * Currently the most basic encoder/decode only works for integral
    * types.  (We don't want this to accidentally get used for things
@@ -152,7 +152,7 @@ struct BlobEncoder {
 
   void encode(const LowStringPtr& s) {
     const StringData* sd = s;
-    if (Option::WholeProgram) {
+    if (m_useGlobalIds) {
       Id id = LitstrTable::get().mergeLitstr(sd);
       encode(id);
       return;
@@ -296,6 +296,7 @@ private:
 
 private:
   std::vector<char> m_blob;
+  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -303,9 +304,10 @@ private:
 struct BlobDecoder {
   static const bool deserializing = true;
 
-  explicit BlobDecoder(const void* vp, size_t sz)
+  BlobDecoder(const void* vp, size_t sz, bool l)
     : m_p(static_cast<const unsigned char*>(vp))
     , m_last(m_p + sz)
+    , m_useGlobalIds{l}
   {}
 
   void assertDone() {
@@ -355,7 +357,7 @@ struct BlobDecoder {
   }
 
   void decode(LowStringPtr& s) {
-    if (RuntimeOption::RepoAuthoritative) {
+    if (m_useGlobalIds) {
       Id id;
       decode(id);
       s = LitstrTable::get().lookupLitstrId(id);
@@ -513,6 +515,7 @@ private:
 private:
   const unsigned char* m_p;
   const unsigned char* const m_last;
+  bool m_useGlobalIds;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -389,11 +389,11 @@ void RepoQuery::getBlob(int iCol, const void*& blob, size_t& size) {
   size = size_t(sqlite3_column_bytes(m_stmt.get(), iCol));
 }
 
-BlobDecoder RepoQuery::getBlob(int iCol) {
+BlobDecoder RepoQuery::getBlob(int iCol, bool useGlobalIds) {
   const void* vp;
   size_t sz;
   getBlob(iCol, vp, sz);
-  return BlobDecoder(vp, sz);
+  return BlobDecoder(vp, sz, useGlobalIds);
 }
 
 void RepoQuery::getSha1(int iCol, SHA1& sha1) {

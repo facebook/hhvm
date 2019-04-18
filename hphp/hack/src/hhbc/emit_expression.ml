@@ -2984,14 +2984,23 @@ and emit_args_and_inout_setters env args =
     | A.Unop (A.Uref, expr) ->
       begin match snd expr with
       (* passed by reference *)
-      | A.Array_get _
-      | A.Class_get _
-      | A.Lvar _
-      | A.Obj_get _ ->
-        emit_expr_as_ref env expr, empty
+      | A.Array_get _ ->
+        Emit_fatal.raise_fatal_parse (fst expr)
+          "references of subscript expressions should not parse"
+      | A.Class_get (cid, id) ->
+        let env = { env with Emit_env.env_allows_array_append = true } in
+        emit_class_get env QueryOp.CGet true cid id
+      | A.Lvar id ->
+        emit_pos_then (fst expr) @@
+        emit_local ~notice:Notice ~need_ref:true env id
+      | A.Obj_get (obj, prop, nullflavor) ->
+        let env = { env with Emit_env.env_allows_array_append = true } in
+        fst (emit_obj_get ~need_ref:true env (fst expr) QueryOp.Empty obj prop
+          nullflavor)
       (* passed by value *)
-      | _ -> emit_expr ~need_ref:false env expr, empty
-      end
+      | _ -> emit_expr ~need_ref:false env expr
+      end,
+      empty
 
     (* regular argument *)
     | _ -> emit_expr ~need_ref:false env arg, empty

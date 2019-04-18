@@ -38,7 +38,8 @@
 namespace HPHP {
 
 constexpr auto kPollInterval = std::chrono::milliseconds(60000); // 60 sec
-
+constexpr uint32_t kStreamFlowControl = 1 << 20; // 1 MB
+constexpr uint32_t kConnFlowControl = kStreamFlowControl * 1.5; // 1.5 MB
 using folly::SocketAddress;
 using folly::AsyncServerSocket;
 using wangle::Acceptor;
@@ -198,13 +199,15 @@ ProxygenServer::ProxygenServer(
   m_httpsConfig.connectionIdleTimeout = timeout;
   m_httpsConfig.transactionIdleTimeout = timeout;
 
+  // Set flow control (for uploads) to 1MB.  We could also make this
+  // configurable if needed
+  m_httpsConfig.initialReceiveWindow = kStreamFlowControl;
+  m_httpsConfig.receiveSessionWindowSize = kConnFlowControl;
   if (RuntimeOption::ServerEnableH2C) {
     m_httpConfig.allowedPlaintextUpgradeProtocols = {
       proxygen::http2::kProtocolCleartextString };
-    // Set flow control (for uploads) to 1MB.  We could also make this
-    // configurable if needed
-    m_httpConfig.initialReceiveWindow = 1 << 20;
-    m_httpConfig.receiveSessionWindowSize = 1 << 20;
+    m_httpConfig.initialReceiveWindow = kStreamFlowControl;
+    m_httpConfig.receiveSessionWindowSize = kConnFlowControl;
   }
 
   if (!options.m_takeoverFilename.empty()) {

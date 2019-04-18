@@ -210,7 +210,11 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         logs = self.get_server_logs()
         self.assertIn("Using watchman", logs)
         if assert_loaded_saved_state:
-            self.assertIn("loading saved state succeeded", logs)
+            self.assertIn(
+                "loading saved state succeeded",
+                logs,
+                msg=("***Logs contain an init with no saved state. Did your "
+                     "hh_server die and get restarted by the monitor?***"))
         return result
 
     def assertEqualString(self, first, second, msg=None):

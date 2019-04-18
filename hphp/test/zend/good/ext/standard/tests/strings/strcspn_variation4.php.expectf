@@ -17,23 +17,23 @@ int(0)
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, array given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, array given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, array given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, array given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, array given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
 int(0)
@@ -55,23 +55,23 @@ int(0)
 
 -- Iteration with len value as "" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "string" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "string" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, string given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "object" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, object given in %s/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
 int(0)
@@ -79,7 +79,7 @@ int(0)
 -- Iteration with len value as "" --
 int(0)
 
--- Iteration with len value as "Resource id #%d" --
+-- Iteration with len value as "Resource id #4" --
 
-Warning: %s
+Warning: strcspn() expects parameter 4 to be integer, resource given in %s/strcspn_variation4.php on line 89
 Done

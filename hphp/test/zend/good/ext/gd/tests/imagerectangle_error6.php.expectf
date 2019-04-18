@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagerectangle() expects parameter 5 to be integer, string given in %s/imagerectangle_error6.php on line 6

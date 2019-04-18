@@ -2,75 +2,67 @@
 
 Arg value 12345 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value -2345 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value 10.5 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value -10.5 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value 101234567000 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value 1.07654321E-9 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value 0.5 
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value Array 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value Array 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value Array 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value Array 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value Array 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value  
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value  
 
-Warning: %s
-bool(false)
-
-Arg value 1 
-int(1)
-
-Arg value  
-
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value 1 
@@ -78,40 +70,48 @@ int(1)
 
 Arg value  
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
+bool(false)
+
+Arg value 1 
+int(1)
+
+Arg value  
+
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value  
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value  
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value string 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value string 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value Some Ascii Data 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, object given in %s/xml_parser_get_option_variation2.php on line 81
 
-Arg value Resource id %s
+Arg value Resource id #5 
 
-Warning: %s
+Warning: xml_parser_get_option() expects parameter 2 to be integer, resource given in %s/xml_parser_get_option_variation2.php on line 81
 
 Arg value  
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 
 Arg value  
 
-Warning: %s
+Warning: Unknown option in %s/xml_parser_get_option_variation2.php on line 81
 bool(false)
 Done

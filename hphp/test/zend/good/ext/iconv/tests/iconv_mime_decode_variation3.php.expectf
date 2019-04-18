@@ -2,47 +2,47 @@
 
 -- Iteration 1 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `0' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 2 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `1' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 3 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `12345' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 4 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `-2345' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 5 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `10.5' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 6 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `-10.5' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 7 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `123456789000' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 8 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `1.23456789E-9' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 9 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `0.5' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 10 --
@@ -53,7 +53,7 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 12 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `1' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 13 --
@@ -61,7 +61,7 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 14 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `1' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 15 --
@@ -75,22 +75,22 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 18 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `string' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 19 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `string' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 20 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `hello world' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 21 --
 
-Notice: %s
+Notice: iconv_mime_decode(): Wrong charset, conversion from `???' to `Class A object' is not allowed in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 
 -- Iteration 22 --
@@ -101,6 +101,6 @@ string(44) "5375626a6563743a20412053616d706c652054657374"
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: iconv_mime_decode() expects parameter 3 to be string, resource given in %s/iconv_mime_decode_variation3.php on line 95
 bool(false)
 Done

@@ -1,8 +1,8 @@
 *** Testing chop() : with different unexpected values for charlist argument ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/chop_variation2.php on line 73
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/chop_variation2.php on line 76
 
 --- Testing chop() by supplying different values for 'charlist' argument ---
 -- Iteration 1 --
@@ -25,19 +25,19 @@ string(17) "hello world12345 "
 string(17) "hello world12345 "
 -- Iteration 10 --
 
-Warning: %s
+Warning: chop() expects parameter 2 to be string, array given in %s/chop_variation2.php on line 90
 -- Iteration 11 --
 
-Warning: %s
+Warning: chop() expects parameter 2 to be string, array given in %s/chop_variation2.php on line 90
 -- Iteration 12 --
 
-Warning: %s
+Warning: chop() expects parameter 2 to be string, array given in %s/chop_variation2.php on line 90
 -- Iteration 13 --
 
-Warning: %s
+Warning: chop() expects parameter 2 to be string, array given in %s/chop_variation2.php on line 90
 -- Iteration 14 --
 
-Warning: %s
+Warning: chop() expects parameter 2 to be string, array given in %s/chop_variation2.php on line 90
 -- Iteration 15 --
 string(17) "hello world12345 "
 -- Iteration 16 --
@@ -58,7 +58,7 @@ string(17) "hello world12345 "
 string(17) "hello world12345 "
 -- Iteration 24 --
 
-Warning: %s
+Warning: chop() expects parameter 2 to be string, resource given in %s/chop_variation2.php on line 90
 -- Iteration 25 --
 string(17) "hello world12345 "
 -- Iteration 26 --

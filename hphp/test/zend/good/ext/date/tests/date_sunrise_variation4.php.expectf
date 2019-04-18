@@ -22,35 +22,35 @@ int(1218199315)
 
 --empty array--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 94
 
 --int indexed array--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 94
 
 --associative array--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 94
 
 --nested arrays--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, array given in %s/date_sunrise_variation4.php on line 94
 
 --uppercase NULL--
 string(5) "05:12"
@@ -84,67 +84,67 @@ int(1218172321)
 
 --empty string DQ--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 94
 
 --empty string SQ--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 94
 
 --string DQ--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 94
 
 --string SQ--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 94
 
 --mixed case string--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 94
 
 --heredoc--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, string given in %s/date_sunrise_variation4.php on line 94
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/date_sunrise_variation4.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/date_sunrise_variation4.php on line 92
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/date_sunrise_variation4.php on line 93
 
-Warning: %s
+Warning: date_sunrise() expects parameter 4 to be double, object given in %s/date_sunrise_variation4.php on line 94
 
 --undefined var--
 string(5) "05:12"

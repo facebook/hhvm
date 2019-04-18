@@ -2,7 +2,7 @@
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -10,7 +10,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -18,7 +18,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -26,7 +26,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -34,7 +34,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -42,7 +42,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -50,7 +50,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -58,7 +58,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -66,7 +66,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -74,7 +74,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -82,7 +82,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -90,7 +90,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -98,7 +98,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -106,7 +106,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -114,7 +114,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -122,7 +122,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -130,7 +130,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -138,7 +138,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -146,7 +146,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -154,7 +154,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -162,7 +162,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -170,7 +170,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -178,7 +178,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -186,7 +186,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -194,7 +194,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -202,7 +202,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -210,7 +210,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -218,7 +218,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -226,7 +226,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -234,7 +234,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -242,7 +242,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -250,7 +250,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -258,7 +258,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -266,7 +266,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -274,7 +274,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -282,7 +282,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -290,7 +290,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -298,7 +298,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -306,7 +306,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -314,7 +314,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -322,7 +322,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -330,7 +330,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -338,7 +338,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -346,7 +346,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -354,7 +354,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -362,7 +362,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -370,7 +370,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -378,7 +378,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -386,7 +386,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -394,7 +394,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -402,7 +402,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -410,7 +410,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -418,7 +418,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -426,7 +426,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -434,7 +434,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -442,7 +442,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -450,7 +450,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -458,7 +458,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -466,7 +466,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -474,7 +474,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -482,7 +482,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -490,7 +490,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -498,7 +498,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -506,7 +506,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -514,7 +514,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -522,7 +522,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -530,7 +530,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -538,7 +538,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -546,7 +546,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -554,7 +554,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -562,7 +562,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -570,7 +570,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -578,7 +578,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -586,7 +586,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -594,7 +594,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -602,7 +602,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -610,7 +610,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -618,7 +618,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -626,7 +626,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -634,7 +634,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -642,7 +642,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -650,7 +650,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -658,7 +658,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -666,7 +666,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -674,7 +674,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -682,7 +682,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -690,7 +690,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -698,7 +698,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -706,7 +706,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -714,7 +714,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -722,7 +722,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -730,7 +730,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -738,7 +738,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -746,7 +746,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -754,7 +754,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -762,7 +762,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -770,7 +770,7 @@ string(0) ""
 
 -- file opened in r+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -778,7 +778,7 @@ string(0) ""
 
 -- file opened in r+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -786,7 +786,7 @@ string(0) ""
 
 -- file opened in r+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -794,7 +794,7 @@ string(0) ""
 
 -- file opened in a+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -802,7 +802,7 @@ string(0) ""
 
 -- file opened in a+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -810,7 +810,7 @@ string(0) ""
 
 -- file opened in a+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -818,7 +818,7 @@ string(0) ""
 
 -- file opened in w+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -826,7 +826,7 @@ string(0) ""
 
 -- file opened in w+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -834,7 +834,7 @@ string(0) ""
 
 -- file opened in w+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -842,7 +842,7 @@ string(0) ""
 
 -- file opened in x+ --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -850,7 +850,7 @@ string(0) ""
 
 -- file opened in x+b --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)
@@ -858,7 +858,7 @@ string(0) ""
 
 -- file opened in x+t --
 
-Warning: %s
+Warning: Invalid argument: enclosure:  in %s/fputcsv_variation3.php on line 55
 bool(false)
 int(0)
 bool(false)

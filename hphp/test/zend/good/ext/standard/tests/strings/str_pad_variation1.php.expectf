@@ -17,13 +17,13 @@ string(20) "-20.5               "
 string(20) "101234567000        "
 -- Iteration 9 --
 
-Warning: %s
+Warning: str_pad() expects parameter 1 to be string, array given in %s/str_pad_variation1.php on line 77
 -- Iteration 10 --
 
-Warning: %s
+Warning: str_pad() expects parameter 1 to be string, array given in %s/str_pad_variation1.php on line 77
 -- Iteration 11 --
 
-Warning: %s
+Warning: str_pad() expects parameter 1 to be string, array given in %s/str_pad_variation1.php on line 77
 -- Iteration 12 --
 string(20) "1                   "
 -- Iteration 13 --
@@ -40,7 +40,7 @@ string(20) "                    "
 string(20) "sample object       "
 -- Iteration 19 --
 
-Warning: %s
+Warning: str_pad() expects parameter 1 to be string, resource given in %s/str_pad_variation1.php on line 77
 -- Iteration 20 --
 string(20) "                    "
 -- Iteration 21 --

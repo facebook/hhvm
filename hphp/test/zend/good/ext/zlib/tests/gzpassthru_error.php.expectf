@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: gzpassthru() expects exactly 1 parameter, 2 given in %s/gzpassthru_error.php on line 7
 
-Warning: %s
+Warning: gzpassthru() expects exactly 1 parameter, 0 given in %s/gzpassthru_error.php on line 8
 ===DONE===

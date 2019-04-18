@@ -53,31 +53,31 @@ float(0)
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, string given in %s/log1p_variation1.php on line 81
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, string given in %s/log1p_variation1.php on line 81
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, array given in %s/log1p_variation1.php on line 81
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, string given in %s/log1p_variation1.php on line 81
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, string given in %s/log1p_variation1.php on line 81
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, string given in %s/log1p_variation1.php on line 81
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, object given in %s/log1p_variation1.php on line 81
 
 -- Iteration 25 --
 float(0)
@@ -87,5 +87,5 @@ float(0)
 
 -- Iteration 27 --
 
-Warning: %s
+Warning: log1p() expects parameter 1 to be double, resource given in %s/log1p_variation1.php on line 81
 ===Done===

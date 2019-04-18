@@ -51,15 +51,15 @@ array(2) {
 string(10) "DATA_ERROR"
 int(-4)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/004.php on line 34
 bool(false)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/004.php on line 35
 bool(false)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/004.php on line 36
 bool(false)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/004.php on line 37
 bool(false)
 Done

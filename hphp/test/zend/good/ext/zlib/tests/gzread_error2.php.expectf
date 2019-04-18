@@ -1,10 +1,10 @@
 string(10) "When you'r"
 
-Warning: %s
+Warning: fread(): Length parameter must be greater than 0 in %s/gzread_error2.php on line 5
 bool(false)
 string(5) "e tau"
 
-Warning: %s
+Warning: fread(): Length parameter must be greater than 0 in %s/gzread_error2.php on line 7
 bool(false)
 string(8) "ght thro"
 ===DONE===

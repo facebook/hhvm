@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagecolordeallocate() expects parameter 1 to be resource, string given in %s/imagecolordeallocate_error2.php on line 5

@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: dngettext() expects exactly 4 parameters, 3 given in %s/gettext_dngettext-wrongparams.php on line 6

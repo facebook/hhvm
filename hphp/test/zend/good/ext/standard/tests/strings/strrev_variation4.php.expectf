@@ -29,23 +29,23 @@ string(3) "5.0"
 
 -- Iterator 10 --
 
-Warning: %s
+Warning: strrev() expects parameter 1 to be string, array given in %s/strrev_variation4.php on line 79
 
 -- Iterator 11 --
 
-Warning: %s
+Warning: strrev() expects parameter 1 to be string, array given in %s/strrev_variation4.php on line 79
 
 -- Iterator 12 --
 
-Warning: %s
+Warning: strrev() expects parameter 1 to be string, array given in %s/strrev_variation4.php on line 79
 
 -- Iterator 13 --
 
-Warning: %s
+Warning: strrev() expects parameter 1 to be string, array given in %s/strrev_variation4.php on line 79
 
 -- Iterator 14 --
 
-Warning: %s
+Warning: strrev() expects parameter 1 to be string, array given in %s/strrev_variation4.php on line 79
 
 -- Iterator 15 --
 string(0) ""
@@ -76,7 +76,7 @@ string(6) "tcejbo"
 
 -- Iterator 24 --
 
-Warning: %s
+Warning: strrev() expects parameter 1 to be string, resource given in %s/strrev_variation4.php on line 79
 
 -- Iterator 25 --
 string(0) ""

@@ -50,31 +50,31 @@ float(5)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, string given in %s/hypot_variation1.php on line 80
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, string given in %s/hypot_variation1.php on line 80
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, array given in %s/hypot_variation1.php on line 80
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, string given in %s/hypot_variation1.php on line 80
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, string given in %s/hypot_variation1.php on line 80
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, string given in %s/hypot_variation1.php on line 80
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, object given in %s/hypot_variation1.php on line 80
 
 -- Iteration 24 --
 float(5)
@@ -84,5 +84,5 @@ float(5)
 
 -- Iteration 26 --
 
-Warning: %s
+Warning: hypot() expects parameter 1 to be double, resource given in %s/hypot_variation1.php on line 80
 ===Done===

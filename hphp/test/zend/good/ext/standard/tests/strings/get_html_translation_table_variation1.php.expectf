@@ -3,38 +3,38 @@
 --- Testing get_html_translation_table() by supplying different values for 'table' argument ---
 -- Iteration 1 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 2 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 3 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 4 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 5 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 6 --
 int(252)
@@ -86,38 +86,38 @@ array(4) {
 }
 -- Iteration 10 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 11 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 12 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, object given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, object given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 13 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 14 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 15 --
 array(4) {
@@ -163,10 +163,10 @@ array(4) {
 }
 -- Iteration 17 --
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, resource given in %s/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: %s
+Warning: get_html_translation_table() expects parameter 1 to be integer, resource given in %s/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 18 --
 array(4) {

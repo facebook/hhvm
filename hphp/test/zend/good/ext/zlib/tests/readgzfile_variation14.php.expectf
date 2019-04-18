@@ -1,9 +1,9 @@
 
-Warning: %s
+Warning: readgzfile() expects parameter 2 to be integer, string given in %s/readgzfile_variation14.php on line 20
 
-Warning: %s
+Warning: readgzfile() expects parameter 2 to be integer, string given in %s/readgzfile_variation14.php on line 20
 
-Warning: %s
+Warning: readgzfile() expects parameter 2 to be integer, string given in %s/readgzfile_variation14.php on line 20
 
-Warning: %s
+Warning: readgzfile() expects parameter 2 to be integer, string given in %s/readgzfile_variation14.php on line 20
 ===DONE===

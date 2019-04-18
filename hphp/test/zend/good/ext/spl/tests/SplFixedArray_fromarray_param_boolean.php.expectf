@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: SplFixedArray::fromArray() expects parameter 1 to be array, boolean given in %s/SplFixedArray_fromarray_param_boolean.php on line 2

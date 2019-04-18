@@ -14,4 +14,4 @@ ok
 __callstatic:
 string(3) "www"
 
-Warning: %s
+Warning: Invalid argument: function: class not found in %s/bug45186.php on line 31

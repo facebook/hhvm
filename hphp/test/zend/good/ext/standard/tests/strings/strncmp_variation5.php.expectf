@@ -1,8 +1,8 @@
 *** Test strncmp() function: by supplying all types for 'len' ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/strncmp_variation5.php on line 72
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/strncmp_variation5.php on line 75
 -- Iteration 1 --
 int(0)
 -- Iteration 2 --
@@ -25,19 +25,19 @@ int(0)
 int(0)
 -- Iteration 11 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, array given in %s/strncmp_variation5.php on line 89
 -- Iteration 12 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, array given in %s/strncmp_variation5.php on line 89
 -- Iteration 13 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, array given in %s/strncmp_variation5.php on line 89
 -- Iteration 14 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, array given in %s/strncmp_variation5.php on line 89
 -- Iteration 15 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, array given in %s/strncmp_variation5.php on line 89
 -- Iteration 16 --
 int(0)
 -- Iteration 17 --
@@ -52,18 +52,18 @@ int(0)
 int(0)
 -- Iteration 22 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, string given in %s/strncmp_variation5.php on line 89
 -- Iteration 23 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, string given in %s/strncmp_variation5.php on line 89
 -- Iteration 24 --
 int(0)
 -- Iteration 25 --
 int(0)
 -- Iteration 26 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, resource given in %s/strncmp_variation5.php on line 89
 -- Iteration 27 --
 
-Warning: %s
+Warning: strncmp() expects parameter 3 to be integer, object given in %s/strncmp_variation5.php on line 89
 *** Done ***

@@ -1,14 +1,14 @@
 *** Testing mb_regex_encoding() : usage variations ***
 
 -- Iteration 1 --
-string(%d) "%s"
+string(5) "UTF-8"
 bool(true)
 string(5) "UCS-4"
 
 -- Iteration 2 --
 string(5) "UCS-4"
 
-Warning: %s
+Warning: Unknown encoding "UCS-4BE" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(5) "UCS-4"
 
@@ -20,21 +20,21 @@ string(7) "UCS-4LE"
 -- Iteration 4 --
 string(7) "UCS-4LE"
 
-Warning: %s
+Warning: Unknown encoding "UCS-2" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(7) "UCS-4LE"
 
 -- Iteration 5 --
 string(7) "UCS-4LE"
 
-Warning: %s
+Warning: Unknown encoding "UCS-2BE" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(7) "UCS-4LE"
 
 -- Iteration 6 --
 string(7) "UCS-4LE"
 
-Warning: %s
+Warning: Unknown encoding "UCS-2LE" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(7) "UCS-4LE"
 
@@ -71,14 +71,14 @@ string(8) "UTF-16LE"
 -- Iteration 13 --
 string(8) "UTF-16LE"
 
-Warning: %s
+Warning: Unknown encoding "UTF-7" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(8) "UTF-16LE"
 
 -- Iteration 14 --
 string(8) "UTF-16LE"
 
-Warning: %s
+Warning: Unknown encoding "UTF7-IMAP" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(8) "UTF-16LE"
 
@@ -115,14 +115,14 @@ string(4) "SJIS"
 -- Iteration 21 --
 string(4) "SJIS"
 
-Warning: %s
+Warning: Unknown encoding "ISO-2022-JP" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(4) "SJIS"
 
 -- Iteration 22 --
 string(4) "SJIS"
 
-Warning: %s
+Warning: Unknown encoding "JIS" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(4) "SJIS"
 
@@ -194,56 +194,56 @@ string(11) "ISO-8859-15"
 -- Iteration 36 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "byte2be" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 37 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "byte2le" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 38 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "byte4be" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 39 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "byte4le" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 40 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "BASE64" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 41 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "HTML-ENTITIES" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 42 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "7bit" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
 -- Iteration 43 --
 string(11) "ISO-8859-15"
 
-Warning: %s
+Warning: Unknown encoding "8bit" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(11) "ISO-8859-15"
 
@@ -255,14 +255,14 @@ string(6) "EUC-CN"
 -- Iteration 45 --
 string(6) "EUC-CN"
 
-Warning: %s
+Warning: Unknown encoding "CP936" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-CN"
 
 -- Iteration 46 --
 string(6) "EUC-CN"
 
-Warning: %s
+Warning: Unknown encoding "HZ" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-CN"
 
@@ -274,7 +274,7 @@ string(6) "EUC-TW"
 -- Iteration 48 --
 string(6) "EUC-TW"
 
-Warning: %s
+Warning: Unknown encoding "CP950" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-TW"
 
@@ -291,35 +291,35 @@ string(6) "EUC-KR"
 -- Iteration 51 --
 string(6) "EUC-KR"
 
-Warning: %s
+Warning: Unknown encoding "UHC" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 52 --
 string(6) "EUC-KR"
 
-Warning: %s
+Warning: Unknown encoding "ISO-2022-KR" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 53 --
 string(6) "EUC-KR"
 
-Warning: %s
+Warning: Unknown encoding "Windows-1251" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 54 --
 string(6) "EUC-KR"
 
-Warning: %s
+Warning: Unknown encoding "Windows-1252" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-KR"
 
 -- Iteration 55 --
 string(6) "EUC-KR"
 
-Warning: %s
+Warning: Unknown encoding "CP866" in %s/mb_regex_encoding_variation2.php on line 76
 bool(false)
 string(6) "EUC-KR"
 

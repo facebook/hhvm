@@ -1,12 +1,12 @@
 
-Warning: %s
+Warning: ngettext() expects parameter 1 to be string, array given in %s/gettext_ngettext-wrongparams.php on line 2
 
-Warning: %s
+Warning: ngettext() expects parameter 2 to be string, array given in %s/gettext_ngettext-wrongparams.php on line 3
 
-Warning: %s
+Warning: ngettext() expects parameter 3 to be integer, array given in %s/gettext_ngettext-wrongparams.php on line 4
 
-Warning: %s
+Warning: ngettext() expects exactly 3 parameters, 0 given in %s/gettext_ngettext-wrongparams.php on line 5
 
-Warning: %s
+Warning: ngettext() expects exactly 3 parameters, 1 given in %s/gettext_ngettext-wrongparams.php on line 6
 
-Warning: %s
+Warning: ngettext() expects exactly 3 parameters, 2 given in %s/gettext_ngettext-wrongparams.php on line 7

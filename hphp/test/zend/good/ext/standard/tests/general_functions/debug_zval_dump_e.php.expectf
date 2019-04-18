@@ -1,4 +1,4 @@
 *** Testing error conditions ***
 
-Warning: %s
+Warning: debug_zval_dump() expects exactly 1 parameter, 0 given in %s/debug_zval_dump_e.php on line 10
 Done

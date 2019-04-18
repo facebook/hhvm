@@ -2,5 +2,5 @@ bool(false)
 bool(false)
 string(3) "foo"
 
-Warning: %s
+Warning: No such file or directory in %s/bug43353.php on line 6
 bool(false)

@@ -71,5 +71,5 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 2 to be string, resource given in %s/iconv_strpos_variation2.php on line 90
 Done

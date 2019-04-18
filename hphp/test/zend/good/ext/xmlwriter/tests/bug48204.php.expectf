@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: File name too long in %s/bug48204.php on line 3
 bool(false)

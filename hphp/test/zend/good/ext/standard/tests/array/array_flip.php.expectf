@@ -1,9 +1,9 @@
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip.php on line 12
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip.php on line 12
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip.php on line 12
 array(6) {
   [1]=>
   string(1) "b"

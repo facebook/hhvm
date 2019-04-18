@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: Invalid operand type was used: array_fill_keys expects an array or collection in %s/array_fill_keys.php on line 2
 NULL
 array(0) {
 }

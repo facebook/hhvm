@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imageellipse() expects exactly 6 parameters, 5 given in %s/imageellipse_error8.php on line 7

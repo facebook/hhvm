@@ -1,4 +1,4 @@
 bool(true)
 
-Warning: %s
+Warning: curl_multi_setopt():Invalid curl multi configuration option in %s/curl_multi_setopt_basic001.php on line 5
 bool(false)

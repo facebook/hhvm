@@ -1,6 +1,6 @@
 *** Testing pathinfo() with miscelleneous input arguments ***
 
-Notice: %s
+Notice: Undefined variable: fp in %s/pathinfo_variaton.php on line 59
 -- Iteration 1 --
 array(3) {
   ["dirname"]=>
@@ -107,15 +107,15 @@ string(0) ""
 string(21) "array( array(), null)"
 -- Iteration 9 --
 
-Warning: %s
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/pathinfo_variaton.php on line 80
 
-Warning: %s
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/pathinfo_variaton.php on line 81
 
-Warning: %s
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/pathinfo_variaton.php on line 82
 
-Warning: %s
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/pathinfo_variaton.php on line 83
 
-Warning: %s
+Warning: pathinfo() expects parameter 1 to be string, object given in %s/pathinfo_variaton.php on line 84
 -- Iteration 10 --
 array(3) {
   ["dirname"]=>

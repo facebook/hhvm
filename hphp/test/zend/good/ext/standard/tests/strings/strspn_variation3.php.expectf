@@ -22,33 +22,33 @@ int(2)
 
 -- Iteration with start value as "Array" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 89
 
-Warning: %s
-
--- Iteration with start value as "Array" --
-
-Warning: %s
-
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "Array" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 89
 
-Warning: %s
-
--- Iteration with start value as "Array" --
-
-Warning: %s
-
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "Array" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 89
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 90
+
+-- Iteration with start value as "Array" --
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 89
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 90
+
+-- Iteration with start value as "Array" --
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 89
+
+Warning: strspn() expects parameter 3 to be integer, array given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "" --
 int(2)
@@ -76,45 +76,45 @@ int(2)
 
 -- Iteration with start value as "" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 89
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 89
 
-Warning: %s
-
--- Iteration with start value as "string" --
-
-Warning: %s
-
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "string" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 89
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 90
+
+-- Iteration with start value as "string" --
+
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 89
+
+Warning: strspn() expects parameter 3 to be integer, string given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "object" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, object given in %s/strspn_variation3.php on line 89
 
-Warning: %s
-
--- Iteration with start value as "" --
-int(2)
-int(2)
+Warning: strspn() expects parameter 3 to be integer, object given in %s/strspn_variation3.php on line 90
 
 -- Iteration with start value as "" --
 int(2)
 int(2)
 
--- Iteration with start value as "Resource id #%d" --
+-- Iteration with start value as "" --
+int(2)
+int(2)
 
-Warning: %s
+-- Iteration with start value as "Resource id #4" --
 
-Warning: %s
+Warning: strspn() expects parameter 3 to be integer, resource given in %s/strspn_variation3.php on line 89
+
+Warning: strspn() expects parameter 3 to be integer, resource given in %s/strspn_variation3.php on line 90
 Done

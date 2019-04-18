@@ -11,19 +11,19 @@ string(20) "Jan 01 1970 05:30:00"
 
 --empty array--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 88
 
 --int indexed array--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 88
 
 --associative array--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 88
 
 --nested arrays--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 88
 
 --uppercase NULL--
 string(20) "Jan 01 1970 05:30:00"
@@ -45,35 +45,35 @@ string(20) "Jan 01 1970 05:30:00"
 
 --empty string DQ--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 88
 
 --empty string SQ--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 88
 
 --string DQ--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 88
 
 --string SQ--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 88
 
 --mixed case string--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 88
 
 --heredoc--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, string given in %s/strftime_variation2.php on line 88
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, object given in %s/strftime_variation2.php on line 88
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: strftime() expects parameter 2 to be integer, object given in %s/strftime_variation2.php on line 88
 
 --undefined var--
 string(20) "Jan 01 1970 05:30:00"

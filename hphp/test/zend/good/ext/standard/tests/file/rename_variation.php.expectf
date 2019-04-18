@@ -5,12 +5,12 @@ bool(false)
 bool(true)
 -- Iteration 2 --
 
-Warning: %s
+Warning: rename(): Not a directory in %s/rename_variation.php on line 26
 bool(false)
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: unlink(%s/rename_variation.phpt2.tmp): No such file or directory in %s/rename_variation.php on line 33
 -- Iteration 3 --
 bool(true)
 bool(false)

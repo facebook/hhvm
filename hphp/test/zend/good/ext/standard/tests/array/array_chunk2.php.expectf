@@ -1,8 +1,8 @@
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk2.php on line 3
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk2.php on line 4
 NULL
 array(5) {
   [0]=>

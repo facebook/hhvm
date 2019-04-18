@@ -1,106 +1,106 @@
 *** Testing array_diff() : usage variations ***
 
 -- Iteration 1 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 2 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 3 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 4 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 5 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 6 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 7 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 8 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 9 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 10 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 11 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 12 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 13 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 14 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 15 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 16 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 17 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 18 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 19 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 20 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 21 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 22 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 23 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 24 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 25 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 
 -- Iteration 26 --
-Warning: %s
+Warning: array_diff() expects parameter 2 to be an array or collection in %s/array_diff_variation2.php on line 92
 NULL
 Done

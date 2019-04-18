@@ -8,21 +8,21 @@ int(%d)
 
 -- With num_req = 0 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation5.php on line 32
 NULL
 
 -- With num_req = -1 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation5.php on line 34
 NULL
 
 -- With num_req = -2 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation5.php on line 36
 NULL
 
 -- With num_req more than number of members in 'input' array --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation5.php on line 38
 NULL
 Done

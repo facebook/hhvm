@@ -19,19 +19,19 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: %s
+Warning: strip_tags() expects parameter 1 to be string, array given in %s/strip_tags_variation1.php on line 82
 -- Iteration 11 --
 
-Warning: %s
+Warning: strip_tags() expects parameter 1 to be string, array given in %s/strip_tags_variation1.php on line 82
 -- Iteration 12 --
 
-Warning: %s
+Warning: strip_tags() expects parameter 1 to be string, array given in %s/strip_tags_variation1.php on line 82
 -- Iteration 13 --
 
-Warning: %s
+Warning: strip_tags() expects parameter 1 to be string, array given in %s/strip_tags_variation1.php on line 82
 -- Iteration 14 --
 
-Warning: %s
+Warning: strip_tags() expects parameter 1 to be string, array given in %s/strip_tags_variation1.php on line 82
 -- Iteration 15 --
 string(0) ""
 -- Iteration 16 --
@@ -56,5 +56,5 @@ string(0) ""
 string(0) ""
 -- Iteration 26 --
 
-Warning: %s
+Warning: strip_tags() expects parameter 1 to be string, resource given in %s/strip_tags_variation1.php on line 82
 ===DONE===

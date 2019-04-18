@@ -2,13 +2,13 @@
 
 -- Testing get_headers() function with format argument as type string --
 
-Warning: %s
+Warning: get_headers() expects parameter 2 to be integer, string given in %s/get_headers_error_002.php on line 13
 
 -- Testing get_headers() function with format argument as type array --
 
-Warning: %s
+Warning: get_headers() expects parameter 2 to be integer, array given in %s/get_headers_error_002.php on line 17
 
 -- Testing get_headers() function with format argument as type object --
 
-Warning: %s
+Warning: get_headers() expects parameter 2 to be integer, object given in %s/get_headers_error_002.php on line 26
 Done

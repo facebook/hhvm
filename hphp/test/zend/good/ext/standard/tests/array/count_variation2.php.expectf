@@ -47,27 +47,27 @@ int(3)
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, string given in %s/count_variation2.php on line 88
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, string given in %s/count_variation2.php on line 88
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, string given in %s/count_variation2.php on line 88
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, string given in %s/count_variation2.php on line 88
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, string given in %s/count_variation2.php on line 88
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, object given in %s/count_variation2.php on line 88
 
 -- Iteration 22 --
 int(3)
@@ -77,5 +77,5 @@ int(3)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: count() expects parameter 2 to be integer, resource given in %s/count_variation2.php on line 88
 Done

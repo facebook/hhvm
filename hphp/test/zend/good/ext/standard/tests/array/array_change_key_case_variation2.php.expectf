@@ -152,27 +152,27 @@ array(3) {
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation2.php on line 76
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation2.php on line 76
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: array_change_key_case() expects parameter 2 to be integer, array given in %s/array_change_key_case_variation2.php on line 76
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation2.php on line 76
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation2.php on line 76
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s/array_change_key_case_variation2.php on line 76
 
 -- Iteration 22 --
 array(3) {

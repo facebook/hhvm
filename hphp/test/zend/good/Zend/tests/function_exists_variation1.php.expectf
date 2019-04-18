@@ -19,13 +19,13 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: %s
+Warning: function_exists() expects parameter 1 to be string, array given in %s/function_exists_variation1.php on line 72
 -- Iteration 11 --
 
-Warning: %s
+Warning: function_exists() expects parameter 1 to be string, array given in %s/function_exists_variation1.php on line 72
 -- Iteration 12 --
 
-Warning: %s
+Warning: function_exists() expects parameter 1 to be string, array given in %s/function_exists_variation1.php on line 72
 -- Iteration 13 --
 bool(false)
 -- Iteration 14 --
@@ -42,7 +42,7 @@ bool(false)
 bool(false)
 -- Iteration 20 --
 
-Warning: %s
+Warning: function_exists() expects parameter 1 to be string, resource given in %s/function_exists_variation1.php on line 72
 -- Iteration 21 --
 bool(false)
 -- Iteration 22 --

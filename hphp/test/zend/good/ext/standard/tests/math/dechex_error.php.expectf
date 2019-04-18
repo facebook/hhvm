@@ -2,7 +2,7 @@
 
 Incorrect number of arguments
 
-Warning: %s
+Warning: dechex() expects exactly 1 parameter, 0 given in %s/dechex_error.php on line 10
 
-Warning: %s
+Warning: dechex() expects exactly 1 parameter, 3 given in %s/dechex_error.php on line 11
 ===Done===

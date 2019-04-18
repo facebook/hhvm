@@ -1,11 +1,11 @@
 Procedural
 NULL
 
-Warning: %s
+Warning: zip_close(): 4 is not a valid Zip Directory resource in %s/doubleclose.php on line 9
 bool(false)
 Object
 bool(true)
 
-Warning: %s
+Warning: ZipArchive::close(): Invalid or uninitialized Zip object in %s/doubleclose.php on line 18
 bool(false)
 Done

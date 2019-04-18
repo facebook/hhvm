@@ -21,26 +21,26 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 10 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/wordwrap_variation4.php on line 73
 -- Iteration 11 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/wordwrap_variation4.php on line 73
 -- Iteration 12 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/wordwrap_variation4.php on line 73
 -- Iteration 13 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/wordwrap_variation4.php on line 73
 -- Iteration 14 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/wordwrap_variation4.php on line 73
 -- Iteration 15 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 16 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 17 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 4 to be boolean, object given in %s/wordwrap_variation4.php on line 73
 -- Iteration 18 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 19 --

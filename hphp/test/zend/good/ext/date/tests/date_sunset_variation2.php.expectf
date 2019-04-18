@@ -2,22 +2,22 @@
 
 --float 10.5--
 
-Warning: %s
+Warning: Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s/date_sunset_variation2.php on line 94
 bool(false)
 
 --float -10.5--
 
-Warning: %s
+Warning: Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s/date_sunset_variation2.php on line 94
 bool(false)
 
 --float 12.3456789000e10--
 
-Warning: %s
+Warning: Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s/date_sunset_variation2.php on line 94
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: %s
+Warning: Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s/date_sunset_variation2.php on line 94
 bool(false)
 
 --float .5--
@@ -25,19 +25,19 @@ int(1218199253)
 
 --empty array--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s/date_sunset_variation2.php on line 94
 
 --int indexed array--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s/date_sunset_variation2.php on line 94
 
 --associative array--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s/date_sunset_variation2.php on line 94
 
 --nested arrays--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, array given in %s/date_sunset_variation2.php on line 94
 
 --uppercase NULL--
 int(1218199253)
@@ -59,35 +59,35 @@ int(1218199253)
 
 --empty string DQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/date_sunset_variation2.php on line 94
 
 --empty string SQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/date_sunset_variation2.php on line 94
 
 --string DQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/date_sunset_variation2.php on line 94
 
 --string SQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/date_sunset_variation2.php on line 94
 
 --mixed case string--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/date_sunset_variation2.php on line 94
 
 --heredoc--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, string given in %s/date_sunset_variation2.php on line 94
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, object given in %s/date_sunset_variation2.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: date_sunset() expects parameter 2 to be integer, object given in %s/date_sunset_variation2.php on line 94
 
 --undefined var--
 int(1218199253)

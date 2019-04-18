@@ -1,17 +1,17 @@
 
-Notice: %s
+Notice: Undefined variable: ch1 in %s/curl_multi_getcontent_error4.php on line 9
 
-Warning: %s
+Warning: curl_setopt() expects parameter 1 to be resource, null given in %s/curl_multi_getcontent_error4.php on line 9
 
-Notice: %s
+Notice: Undefined variable: ch1 in %s/curl_multi_getcontent_error4.php on line 11
 
-Warning: %s
+Warning: curl_setopt() expects parameter 1 to be resource, null given in %s/curl_multi_getcontent_error4.php on line 11
 
-Notice: %s
+Notice: Undefined variable: ch1 in %s/curl_multi_getcontent_error4.php on line 18
 
-Warning: %s
+Warning: curl_multi_add_handle() expects parameter 2 to be resource, null given in %s/curl_multi_getcontent_error4.php on line 18
 
-Notice: %s
+Notice: Undefined variable: ch1 in %s/curl_multi_getcontent_error4.php on line 29
 
-Warning: %s
+Warning: curl_multi_getcontent() expects parameter 1 to be resource, null given in %s/curl_multi_getcontent_error4.php on line 29
 CURL2

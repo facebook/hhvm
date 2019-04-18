@@ -8,7 +8,7 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 -- Iteration 2 --
 string(25) "testing
@@ -26,49 +26,49 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
 -- Iteration 4 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 89
 -- Iteration 5 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 89
 -- Iteration 6 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 89
 -- Iteration 7 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 89
 -- Iteration 8 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, array given in %s/wordwrap_variation2.php on line 89
 -- Iteration 9 --
 string(25) "testing
 wordwrap
@@ -83,7 +83,7 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 -- Iteration 11 --
 string(25) "testing
@@ -99,35 +99,35 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 -- Iteration 13 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 89
 -- Iteration 14 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 89
 -- Iteration 15 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, object given in %s/wordwrap_variation2.php on line 89
 -- Iteration 16 --
 string(25) "testing
 wordwrap
@@ -135,7 +135,7 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 -- Iteration 17 --
 string(25) "testing
@@ -144,35 +144,35 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 -- Iteration 18 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 89
 -- Iteration 19 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, string given in %s/wordwrap_variation2.php on line 89
 -- Iteration 20 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/wordwrap_variation2.php on line 80
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/wordwrap_variation2.php on line 81
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/wordwrap_variation2.php on line 85
 
-Warning: %s
+Warning: wordwrap() expects parameter 2 to be integer, resource given in %s/wordwrap_variation2.php on line 89
 -- Iteration 21 --
 string(25) "testing
 wordwrap
@@ -180,7 +180,7 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 -- Iteration 22 --
 string(25) "testing
@@ -189,6 +189,6 @@ function"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 
-Warning: %s
+Warning: Can't force cut when width is zero in %s/wordwrap_variation2.php on line 89
 bool(false)
 Done

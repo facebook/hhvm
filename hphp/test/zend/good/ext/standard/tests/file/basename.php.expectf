@@ -244,21 +244,21 @@ string(0) ""
 
 *** Testing error conditions ***
 
-Warning: %s
+Warning: basename() expects at least 1 parameter, 0 given in %s/basename.php on line 136
 
-Warning: %s
+Warning: basename() expects at most 2 parameters, 3 given in %s/basename.php on line 139
 
-Warning: %s
+Warning: basename() expects parameter 1 to be string, array given in %s/basename.php on line 143
 
-Warning: %s
+Warning: basename() expects parameter 1 to be string, array given in %s/basename.php on line 144
 
-Warning: %s
+Warning: basename() expects parameter 2 to be string, array given in %s/basename.php on line 145
 
-Warning: %s
+Warning: basename() expects parameter 1 to be string, object given in %s/basename.php on line 146
 
-Warning: %s
+Warning: basename() expects parameter 1 to be string, object given in %s/basename.php on line 147
 
-Warning: %s
+Warning: basename() expects parameter 1 to be string, object given in %s/basename.php on line 148
 
-Warning: %s
+Warning: basename() expects parameter 2 to be string, object given in %s/basename.php on line 149
 Done

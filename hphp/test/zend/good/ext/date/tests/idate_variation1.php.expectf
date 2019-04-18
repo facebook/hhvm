@@ -2,191 +2,191 @@
 
 --int 0--
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 48 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 48 in %s/idate_variation1.php on line 91
 bool(false)
 
 --int 1--
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 49 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 49 in %s/idate_variation1.php on line 91
 bool(false)
 
 --int 12345--
 
-Warning: %s
+Warning: Invalid argument: format: 12345 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: 12345 in %s/idate_variation1.php on line 91
 bool(false)
 
 --int -12345--
 
-Warning: %s
+Warning: Invalid argument: format: -12345 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: -12345 in %s/idate_variation1.php on line 91
 bool(false)
 
 --float 10.5--
 
-Warning: %s
+Warning: Invalid argument: format: 10.5 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: 10.5 in %s/idate_variation1.php on line 91
 bool(false)
 
 --float -10.5--
 
-Warning: %s
+Warning: Invalid argument: format: -10.5 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: -10.5 in %s/idate_variation1.php on line 91
 bool(false)
 
 --float 12.3456789000e10--
 
-Warning: %s
+Warning: Invalid argument: format: 123456789000 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: 123456789000 in %s/idate_variation1.php on line 91
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: %s
+Warning: Invalid argument: format: -123456789000 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: -123456789000 in %s/idate_variation1.php on line 91
 bool(false)
 
 --float .5--
 
-Warning: %s
+Warning: Invalid argument: format: 0.5 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: 0.5 in %s/idate_variation1.php on line 91
 bool(false)
 
 --empty array--
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 90
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 91
 
 --int indexed array--
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 90
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 91
 
 --associative array--
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 90
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 91
 
 --nested arrays--
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 90
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, array given in %s/idate_variation1.php on line 91
 
 --uppercase NULL--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --lowercase null--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --lowercase true--
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 49 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 49 in %s/idate_variation1.php on line 91
 bool(false)
 
 --lowercase false--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --uppercase TRUE--
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 49 in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: unknown format char: 49 in %s/idate_variation1.php on line 91
 bool(false)
 
 --uppercase FALSE--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --empty string DQ--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --empty string SQ--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: Invalid argument: format: Class A object in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: Class A object in %s/idate_variation1.php on line 91
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, object given in %s/idate_variation1.php on line 90
 
-Warning: %s
+Warning: idate() expects parameter 1 to be string, object given in %s/idate_variation1.php on line 91
 
 --undefined var--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 
 --unset var--
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 90
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format:  in %s/idate_variation1.php on line 91
 bool(false)
 ===DONE===

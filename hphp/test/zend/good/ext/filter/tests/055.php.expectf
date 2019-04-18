@@ -11,9 +11,9 @@ bool(false)
 bool(false)
 string(14) "0123.4567.89ab"
 
-Warning: %s
+Warning: Separator must be exactly one character long in %s/055.php on line 19
 bool(false)
 
-Warning: %s
+Warning: Separator must be exactly one character long in %s/055.php on line 19
 bool(false)
 Done

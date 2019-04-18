@@ -1,8 +1,8 @@
 *** Testing strncmp() function: by supplying all types for 'str1' and 'str2' ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/strncmp_variation4.php on line 71
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/strncmp_variation4.php on line 74
 -- Iteration 1 --
 int(0)
 -- Iteration 2 --
@@ -33,29 +33,29 @@ int(0)
 int(0)
 -- Iteration 15 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 89
 
-Warning: %s
+Warning: strncmp() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 90
 -- Iteration 16 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 89
 
-Warning: %s
+Warning: strncmp() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 90
 -- Iteration 17 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 89
 
-Warning: %s
+Warning: strncmp() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 90
 -- Iteration 18 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 89
 
-Warning: %s
+Warning: strncmp() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 90
 -- Iteration 19 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 89
 
-Warning: %s
+Warning: strncmp() expects parameter 1 to be string, array given in %s/strncmp_variation4.php on line 90
 -- Iteration 20 --
 int(0)
 -- Iteration 21 --
@@ -78,9 +78,9 @@ int(0)
 int(0)
 -- Iteration 30 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, resource given in %s/strncmp_variation4.php on line 89
 
-Warning: %s
+Warning: strncmp() expects parameter 1 to be string, resource given in %s/strncmp_variation4.php on line 90
 -- Iteration 31 --
 int(0)
 *** Done ***

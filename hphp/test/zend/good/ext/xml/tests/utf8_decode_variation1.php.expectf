@@ -29,23 +29,23 @@ string(3) "0.5"
 
 Arg value Array 
 
-Warning: %s
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s/utf8_decode_variation1.php on line 74
 
 Arg value Array 
 
-Warning: %s
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s/utf8_decode_variation1.php on line 74
 
 Arg value Array 
 
-Warning: %s
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s/utf8_decode_variation1.php on line 74
 
 Arg value Array 
 
-Warning: %s
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s/utf8_decode_variation1.php on line 74
 
 Arg value Array 
 
-Warning: %s
+Warning: utf8_decode() expects parameter 1 to be string, array given in %s/utf8_decode_variation1.php on line 74
 
 Arg value  
 string(0) ""

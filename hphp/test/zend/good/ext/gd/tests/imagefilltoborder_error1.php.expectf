@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagefilltoborder() expects parameter 1 to be resource, string given in %s/imagefilltoborder_error1.php on line 12

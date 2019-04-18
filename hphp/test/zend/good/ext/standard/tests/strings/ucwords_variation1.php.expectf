@@ -33,19 +33,19 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iteration 16 --
 
-Warning: %s
+Warning: ucwords() expects parameter 1 to be string, array given in %s/ucwords_variation1.php on line 101
 -- Iteration 17 --
 
-Warning: %s
+Warning: ucwords() expects parameter 1 to be string, array given in %s/ucwords_variation1.php on line 101
 -- Iteration 18 --
 
-Warning: %s
+Warning: ucwords() expects parameter 1 to be string, array given in %s/ucwords_variation1.php on line 101
 -- Iteration 19 --
 
-Warning: %s
+Warning: ucwords() expects parameter 1 to be string, array given in %s/ucwords_variation1.php on line 101
 -- Iteration 20 --
 
-Warning: %s
+Warning: ucwords() expects parameter 1 to be string, array given in %s/ucwords_variation1.php on line 101
 -- Iteration 21 --
 string(1) "1"
 -- Iteration 22 --
@@ -78,5 +78,5 @@ string(0) ""
 string(0) ""
 -- Iteration 36 --
 
-Warning: %s
+Warning: ucwords() expects parameter 1 to be string, resource given in %s/ucwords_variation1.php on line 101
 Done

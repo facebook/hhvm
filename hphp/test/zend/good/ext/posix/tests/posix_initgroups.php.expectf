@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: posix_initgroups() expects parameter 2 to be integer, string given in %s/posix_initgroups.php on line 3
 bool(false)

@@ -4,7 +4,7 @@ array(1) {
   string(0) ""
 }
 
-Warning: %s
+Warning: array_unshift() expects parameter 1 to be an array, Vector, or Set in %s/array_unshift.php on line 7
 NULL
 array(1) {
   [0]=>

@@ -1,45 +1,45 @@
 *** Testing error conditions ***
 
 --- Iteration 0 ---
-Warning: %s
+Warning: Invalid argument: operation: 0 in %s/flock_error.php on line 29
 bool(false)
 
 --- Iteration 1 ---
-Warning: %s
+Warning: Invalid argument: operation: 4 in %s/flock_error.php on line 29
 bool(false)
 
 --- Iteration 2 ---
-Warning: %s
+Warning: Invalid argument: operation: 0 in %s/flock_error.php on line 29
 bool(false)
 
 --- Iteration 3 ---
-Warning: %s
+Warning: Invalid argument: operation: 0 in %s/flock_error.php on line 29
 bool(false)
 
 --- Iteration 4 ---
-Warning: %s
+Warning: flock() expects parameter 2 to be integer, array given in %s/flock_error.php on line 29
 
 --- Iteration 5 ---
-Warning: %s
+Warning: flock() expects parameter 2 to be integer, array given in %s/flock_error.php on line 29
 
 --- Iteration 6 ---
-Warning: %s
+Warning: flock() expects parameter 2 to be integer, string given in %s/flock_error.php on line 29
 
 --- Iteration 7 ---
-Warning: %s
+Warning: flock() expects parameter 2 to be integer, string given in %s/flock_error.php on line 29
 
 --- Iteration 8 ---
-Warning: %s
+Warning: flock() expects parameter 2 to be integer, string given in %s/flock_error.php on line 29
 
-Warning: %s
+Warning: Not a valid stream resource in %s/flock_error.php on line 37
 bool(false)
 
-Warning: %s
+Warning: flock() expects parameter 1 to be resource, string given in %s/flock_error.php on line 39
 
-Warning: %s
+Warning: flock() expects at least 2 parameters, 0 given in %s/flock_error.php on line 42
 
-Warning: %s
+Warning: flock() expects at least 2 parameters, 1 given in %s/flock_error.php on line 43
 
-Warning: %s
+Warning: flock() expects at most 3 parameters, 4 given in %s/flock_error.php on line 46
 
 *** Done ***

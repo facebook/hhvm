@@ -1,7 +1,7 @@
 
-Warning: %s
+Warning: gmp_div_qr() expects at least 2 parameters, 0 given in %s/007.php on line 3
 
-Warning: %s
+Warning: gmp_div_qr() expects at least 2 parameters, 1 given in %s/007.php on line 4
 array(2) {
   [0]=>
   object(GMP) (1) {
@@ -15,7 +15,7 @@ array(2) {
   }
 }
 
-Warning: %s
+Warning: gmp_div_qr(): Zero operand not allowed in %s/007.php on line 7
 bool(false)
 array(2) {
   [0]=>
@@ -30,7 +30,7 @@ array(2) {
   }
 }
 
-Warning: %s
+Warning: gmp_div_qr(): Invalid rounding mode in %s/007.php on line 9
 bool(false)
 array(2) {
   [0]=>
@@ -105,9 +105,9 @@ array(2) {
   }
 }
 
-Warning: %s
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/007.php on line 19
 bool(false)
 
-Warning: %s
+Warning: gmp_div_qr(): Unable to convert variable to GMP - wrong type in %s/007.php on line 20
 bool(false)
 Done

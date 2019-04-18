@@ -1,10 +1,10 @@
 
-Notice: %s
+Notice: Undefined variable: arr in %s/033.php on line 3
 
-Notice: %s
+Notice: Undefined variable: arr in %s/033.php on line 5
 
-Notice: %s
+Notice: Undefined variable: arr in %s/033.php on line 7
 
-Notice: %s
+Notice: Cannot access property on non-object in %s/033.php on line 7
 
-Warning: %s
+Warning: Creating default object from empty value in %s/033.php on line 10

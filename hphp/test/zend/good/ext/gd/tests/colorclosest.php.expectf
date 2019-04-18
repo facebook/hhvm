@@ -1,6 +1,6 @@
 FF00FF
 
-Warning: %s
+Warning: Color index -1 out of range in %s/colorclosest.php on line 10
 Array
 (
     [red] => 255
@@ -24,7 +24,7 @@ Array
 )
 64FF00FF
 
-Warning: %s
+Warning: Color index -1 out of range in %s/colorclosest.php on line 44
 Array
 (
     [red] => 255

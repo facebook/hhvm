@@ -15,19 +15,19 @@ int(0)
 int(0)
 -- Iteration 8 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, array given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 9 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, array given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 10 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, array given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 11 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, array given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 12 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, array given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 13 --
 int(0)
 -- Iteration 14 --
@@ -42,18 +42,18 @@ int(0)
 int(0)
 -- Iteration 19 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, string given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 20 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, string given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 21 --
 int(0)
 -- Iteration 22 --
 int(0)
 -- Iteration 23 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, resource given in %s/strncasecmp_variation5.php on line 85
 -- Iteration 24 --
 
-Warning: %s
+Warning: strncasecmp() expects parameter 3 to be integer, object given in %s/strncasecmp_variation5.php on line 85
 *** Done ***

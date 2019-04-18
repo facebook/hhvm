@@ -140,5 +140,5 @@ array(1) {
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_split() expects parameter 2 to be string, resource given in %s/mb_split_variation2.php on line 88
 Done

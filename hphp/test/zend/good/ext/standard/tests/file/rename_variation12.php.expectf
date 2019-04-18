@@ -18,12 +18,12 @@ bool(true)
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: rename(): No such file or directory in %s/rename_variation12.php on line 48
 bool(false)
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: rename(): No such file or directory in %s/rename_variation12.php on line 48
 bool(false)
 
 -- Iteration 7 --
@@ -44,7 +44,7 @@ bool(true)
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: rename(): No such file or directory in %s/rename_variation12.php on line 48
 bool(false)
 
 *** Done ***

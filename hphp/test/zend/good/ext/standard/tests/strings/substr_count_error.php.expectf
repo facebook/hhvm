@@ -1,32 +1,33 @@
+
 *** Testing error conditions ***
 
-Warning: %s
+Warning: substr_count() expects at least 2 parameters, 0 given in %s/substr_count_error.php on line 5
 
-Notice: %s
+Notice: Undefined variable: str in %s/substr_count_error.php on line 8
 
-Warning: %s
+Warning: substr_count() expects at most 4 parameters, 5 given in %s/substr_count_error.php on line 8
 
-Notice: %s
+Notice: Undefined variable: str in %s/substr_count_error.php on line 11
 
-Warning: %s
+Warning: Invalid argument: offset: (out of range) in %s/substr_count_error.php on line 11
 bool(false)
 
-Notice: %s
+Notice: Undefined variable: str in %s/substr_count_error.php on line 14
 
-Warning: %s
+Warning: Invalid argument: offset: (out of range) in %s/substr_count_error.php on line 14
 bool(false)
 
-Notice: %s
+Notice: Undefined variable: str in %s/substr_count_error.php on line 18
 
-Warning: %s
+Warning: Invalid argument: offset: (out of range) in %s/substr_count_error.php on line 18
 bool(false)
 
-Notice: %s
+Notice: Undefined variable: str in %s/substr_count_error.php on line 21
 
-Warning: %s
+Warning: substr_count() expects parameter 3 to be integer, string given in %s/substr_count_error.php on line 21
 
-Notice: %s
+Notice: Undefined variable: str in %s/substr_count_error.php on line 22
 
-Warning: %s
+Warning: Invalid argument: length: (out of range) in %s/substr_count_error.php on line 22
 bool(false)
 Done

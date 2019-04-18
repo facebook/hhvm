@@ -1,28 +1,28 @@
 *** Testing array_flip() : different invalid values in 'input' array argument ***
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 
-Warning: %s
+Warning: Can only flip STRING and INTEGER values! in %s/array_flip_variation4.php on line 52
 array(0) {
 }
 Done

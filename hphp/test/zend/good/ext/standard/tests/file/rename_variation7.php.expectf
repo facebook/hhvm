@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: readlink(): No such file or directory %s/rename_variation7.php.tmp.link in %s/rename_variation7.php on line 12
 bool(false)
 string(%d) "%sthere_is_no_such_file"
 Done

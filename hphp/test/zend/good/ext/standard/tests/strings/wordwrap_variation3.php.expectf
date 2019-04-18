@@ -39,52 +39,52 @@ string(29) "testing0.5wordwrap0.5function"
 string(29) "testing0.5wordwrap0.5function"
 -- Iteration 10 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 90
 -- Iteration 11 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 90
 -- Iteration 12 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 90
 -- Iteration 13 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 90
 -- Iteration 14 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, array given in %s/wordwrap_variation3.php on line 90
 -- Iteration 15 --
 string(25) "testing1wordwrap1function"
 string(25) "testing1wordwrap1function"
 string(25) "testing1wordwrap1function"
 -- Iteration 16 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 17 --
 string(25) "testing1wordwrap1function"
@@ -92,86 +92,86 @@ string(25) "testing1wordwrap1function"
 string(25) "testing1wordwrap1function"
 -- Iteration 18 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 19 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, object given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, object given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, object given in %s/wordwrap_variation3.php on line 90
 -- Iteration 20 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 21 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 22 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 23 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, resource given in %s/wordwrap_variation3.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, resource given in %s/wordwrap_variation3.php on line 86
 
-Warning: %s
+Warning: wordwrap() expects parameter 3 to be string, resource given in %s/wordwrap_variation3.php on line 90
 -- Iteration 25 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 -- Iteration 26 --
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 82
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 86
 bool(false)
 
-Warning: %s
+Warning: Break string cannot be empty in %s/wordwrap_variation3.php on line 90
 bool(false)
 Done

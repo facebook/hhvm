@@ -1,4 +1,4 @@
 NULL
 
-Warning: %s
+Warning: Handler name must be a string in %s/xsltprocessor_registerPHPFunctions-funcnostring.php on line 11
 NULL

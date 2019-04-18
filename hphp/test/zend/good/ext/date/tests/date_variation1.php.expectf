@@ -23,19 +23,19 @@ string(3) "0.5"
 
 -- empty array --
 
-Warning: %s
+Warning: date() expects parameter 1 to be string, array given in %s/date_variation1.php on line 98
 
 -- int indexed array --
 
-Warning: %s
+Warning: date() expects parameter 1 to be string, array given in %s/date_variation1.php on line 98
 
 -- associative array --
 
-Warning: %s
+Warning: date() expects parameter 1 to be string, array given in %s/date_variation1.php on line 98
 
 -- nested arrays --
 
-Warning: %s
+Warning: date() expects parameter 1 to be string, array given in %s/date_variation1.php on line 98
 
 -- uppercase NULL --
 string(0) ""
@@ -78,7 +78,7 @@ string(64) "CFridayam3030 AM 2009b27Europe/London2009-02-27T10:44:30+00:0028"
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: date() expects parameter 1 to be string, object given in %s/date_variation1.php on line 98
 
 -- undefined var --
 string(0) ""
@@ -88,5 +88,5 @@ string(0) ""
 
 -- resource --
 
-Warning: %s
+Warning: date() expects parameter 1 to be string, resource given in %s/date_variation1.php on line 98
 ===DONE===

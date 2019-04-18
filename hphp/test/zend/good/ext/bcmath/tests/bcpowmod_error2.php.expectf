@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: bcpowmod() expects at least 3 parameters, 2 given in %s/bcpowmod_error2.php on line 2

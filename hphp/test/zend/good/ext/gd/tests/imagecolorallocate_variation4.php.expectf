@@ -17,19 +17,19 @@ int(657920)
 
 --empty array--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, array given in %s/imagecolorallocate_variation4.php on line 91
 
 --int indexed array--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, array given in %s/imagecolorallocate_variation4.php on line 91
 
 --associative array--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, array given in %s/imagecolorallocate_variation4.php on line 91
 
 --nested arrays--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, array given in %s/imagecolorallocate_variation4.php on line 91
 
 --uppercase NULL--
 int(657920)
@@ -51,35 +51,35 @@ int(657920)
 
 --empty string DQ--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/imagecolorallocate_variation4.php on line 91
 
 --empty string SQ--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/imagecolorallocate_variation4.php on line 91
 
 --string DQ--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/imagecolorallocate_variation4.php on line 91
 
 --string SQ--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/imagecolorallocate_variation4.php on line 91
 
 --mixed case string--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/imagecolorallocate_variation4.php on line 91
 
 --heredoc--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, string given in %s/imagecolorallocate_variation4.php on line 91
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, object given in %s/imagecolorallocate_variation4.php on line 91
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, object given in %s/imagecolorallocate_variation4.php on line 91
 
 --undefined var--
 int(657920)
@@ -89,5 +89,5 @@ int(657920)
 
 --file resource--
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 4 to be integer, resource given in %s/imagecolorallocate_variation4.php on line 91
 ===DONE===

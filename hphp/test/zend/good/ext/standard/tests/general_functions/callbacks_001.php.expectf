@@ -21,5 +21,5 @@ $this|O::who
 O
 $this|B::who
 
-Warning: %s
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'P' is not a subclass of 'B' in %s/callbacks_001.php on line 63
 ===DONE===

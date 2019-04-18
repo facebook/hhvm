@@ -1,12 +1,13 @@
+
 *** Testing Error Conditions ***
 
-Warning: %s
+Warning: max() expects exactly 1 parameter, 0 given in %s/max_error.php on line 10
 
-Warning: %s
+Warning: max(): When only one parameter is given, it must be an array in %s/max_error.php on line 11
 NULL
 
-Warning: %s
+Warning: max(): Array must contain at least one element in %s/max_error.php on line 12
 bool(false)
 
-Warning: %s
+Warning: max(): When only one parameter is given, it must be an array in %s/max_error.php on line 13
 NULL

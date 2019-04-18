@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: The first parameter of bindtextdomain must not be empty in %s/gettext_bindtextdomain-emptydomain.php on line 3

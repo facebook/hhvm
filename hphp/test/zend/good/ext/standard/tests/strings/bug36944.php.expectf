@@ -1,10 +1,10 @@
 
-Warning: %s
+Warning: Length must be greater than or equal to 0 in %s/bug36944.php on line 3
 bool(false)
 int(%d)
 int(0)
 
-Warning: %s
+Warning: Length must be greater than or equal to 0 in %s/bug36944.php on line 7
 bool(false)
 int(%d)
 int(0)

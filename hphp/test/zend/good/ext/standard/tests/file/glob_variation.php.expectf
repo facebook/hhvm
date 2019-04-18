@@ -238,22 +238,22 @@ array(0) {
 
 -- Iteration 8 --
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 39
 NULL
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 40
 NULL
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 41
 NULL
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 42
 NULL
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 43
 NULL
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 44
 NULL
 
 -- Iteration 9 --
@@ -313,7 +313,7 @@ array(0) {
 }
 array(1) {
   [0]=>
-  string(%d) "1"
+  string(1) "1"
 }
 array(0) {
 }
@@ -358,7 +358,7 @@ array(0) {
 }
 -- Iteration 8 --
 
-Warning: %s
+Warning: glob() expects parameter 1 to be a valid path, string given in %s/glob_variation.php on line 66
 NULL
 -- Iteration 9 --
 array(0) {

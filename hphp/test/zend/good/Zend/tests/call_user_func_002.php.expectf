@@ -1,13 +1,13 @@
-%unicode|string%(3) "foo"
+string(3) "foo"
 
-Warning: %s
+Warning: Invalid argument: function: class not found in %s/call_user_func_002.php on line 7
 
-Warning: %s
+Warning: Invalid argument: function: class not found in %s/call_user_func_002.php on line 8
 
-Notice: %s
+Notice: Undefined variable: foo in %s/call_user_func_002.php on line 9
 
-Warning: %s
+Warning: Invalid argument: function: not a valid callback array in %s/call_user_func_002.php on line 9
 
-Notice: %s
+Notice: Undefined variable: foo in %s/call_user_func_002.php on line 10
 
-Warning: %s
+Warning: Invalid argument: function: not a valid callback array in %s/call_user_func_002.php on line 10

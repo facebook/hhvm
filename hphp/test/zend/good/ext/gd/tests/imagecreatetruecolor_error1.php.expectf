@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: imagecreatetruecolor() expects parameter 1 to be integer, string given in %s/imagecreatetruecolor_error1.php on line 2
 
-Warning: %s
+Warning: imagecreatetruecolor() expects parameter 2 to be integer, string given in %s/imagecreatetruecolor_error1.php on line 3

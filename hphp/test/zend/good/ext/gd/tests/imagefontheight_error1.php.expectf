@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagefontheight() expects parameter 1 to be integer, string given in %s/imagefontheight_error1.php on line 2

@@ -2,7 +2,7 @@ Creating Table
 bool(true)
 Creating Same Table Again
 
-Warning: %s
+Warning: table test already exists in %s/sqlite3_02_create.php on line 9
 bool(false)
 Dropping database
 bool(true)

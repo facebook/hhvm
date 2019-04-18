@@ -12,6 +12,6 @@ __call:
 string(1) "y"
 ok
 
-Warning: %s
+Warning: Invalid argument: function: method 'www' not found in %s/bug45186_2.php on line 26
 
-Warning: %s
+Warning: Invalid argument: function: class not found in %s/bug45186_2.php on line 27

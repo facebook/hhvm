@@ -106,13 +106,13 @@ array(8) {
 }
 -- Iteration 10 --
 
-Warning: %s
+Warning: count_chars() expects parameter 1 to be string, array given in %s/count_chars_variation1.php on line 73
 -- Iteration 11 --
 
-Warning: %s
+Warning: count_chars() expects parameter 1 to be string, array given in %s/count_chars_variation1.php on line 73
 -- Iteration 12 --
 
-Warning: %s
+Warning: count_chars() expects parameter 1 to be string, array given in %s/count_chars_variation1.php on line 73
 -- Iteration 13 --
 array(1) {
   [49]=>
@@ -164,7 +164,7 @@ array(12) {
 }
 -- Iteration 20 --
 
-Warning: %s
+Warning: count_chars() expects parameter 1 to be string, resource given in %s/count_chars_variation1.php on line 73
 -- Iteration 21 --
 array(0) {
 }

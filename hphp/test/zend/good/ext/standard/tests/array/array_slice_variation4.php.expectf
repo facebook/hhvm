@@ -172,7 +172,7 @@ array(3) {
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: array_slice() expects parameter 4 to be boolean, array given in %s/array_slice_variation4.php on line 85
 
 -- Iteration 19 --
 array(3) {
@@ -206,7 +206,7 @@ array(3) {
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: array_slice() expects parameter 4 to be boolean, object given in %s/array_slice_variation4.php on line 85
 
 -- Iteration 23 --
 array(3) {

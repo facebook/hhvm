@@ -15,13 +15,13 @@ string(11) "Test string"
 string(1012) "Test string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
 -- Iteration 8 --
 
-Warning: %s
+Warning: str_pad() expects parameter 2 to be integer, array given in %s/str_pad_variation2.php on line 76
 -- Iteration 9 --
 
-Warning: %s
+Warning: str_pad() expects parameter 2 to be integer, array given in %s/str_pad_variation2.php on line 76
 -- Iteration 10 --
 
-Warning: %s
+Warning: str_pad() expects parameter 2 to be integer, array given in %s/str_pad_variation2.php on line 76
 -- Iteration 11 --
 string(11) "Test string"
 -- Iteration 12 --
@@ -36,10 +36,10 @@ string(11) "Test string"
 string(11) "Test string"
 -- Iteration 17 --
 
-Warning: %s
+Warning: str_pad() expects parameter 2 to be integer, object given in %s/str_pad_variation2.php on line 76
 -- Iteration 18 --
 
-Warning: %s
+Warning: str_pad() expects parameter 2 to be integer, resource given in %s/str_pad_variation2.php on line 76
 -- Iteration 19 --
 string(11) "Test string"
 -- Iteration 20 --

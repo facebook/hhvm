@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: textdomain() expects parameter 1 to be string, array given in %s/gettext_textdomain-wrongparams.php on line 6

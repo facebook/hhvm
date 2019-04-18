@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: Invalid argument: seconds: cannot be negative in %s/time_nanosleep_error3.php on line 3

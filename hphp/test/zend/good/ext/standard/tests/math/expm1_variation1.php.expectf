@@ -47,39 +47,39 @@ float(0)
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, string given in %s/expm1_variation1.php on line 85
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, string given in %s/expm1_variation1.php on line 85
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, array given in %s/expm1_variation1.php on line 85
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, string given in %s/expm1_variation1.php on line 85
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, string given in %s/expm1_variation1.php on line 85
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, string given in %s/expm1_variation1.php on line 85
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, array given in %s/expm1_variation1.php on line 85
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, array given in %s/expm1_variation1.php on line 85
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, object given in %s/expm1_variation1.php on line 85
 
 -- Iteration 25 --
 float(0)
@@ -89,5 +89,5 @@ float(0)
 
 -- Iteration 27 --
 
-Warning: %s
+Warning: expm1() expects parameter 1 to be double, resource given in %s/expm1_variation1.php on line 85
 ===Done===

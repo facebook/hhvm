@@ -23,19 +23,19 @@ string(24) "1970-01-01T00:00:00+0000"
 
 --empty array--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 95
 
 --int indexed array--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 95
 
 --associative array--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 95
 
 --nested arrays--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 95
 
 --uppercase NULL--
 string(24) "1970-01-01T00:00:00+0000"
@@ -57,35 +57,35 @@ string(24) "1970-01-01T00:00:00+0000"
 
 --empty string DQ--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/gmdate_variation2.php on line 95
 
 --empty string SQ--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/gmdate_variation2.php on line 95
 
 --string DQ--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/gmdate_variation2.php on line 95
 
 --string SQ--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/gmdate_variation2.php on line 95
 
 --mixed case string--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/gmdate_variation2.php on line 95
 
 --heredoc--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, string given in %s/gmdate_variation2.php on line 95
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, object given in %s/gmdate_variation2.php on line 95
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: gmdate() expects parameter 2 to be integer, object given in %s/gmdate_variation2.php on line 95
 
 --undefined var--
 string(24) "1970-01-01T00:00:00+0000"

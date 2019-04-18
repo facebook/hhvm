@@ -1,8 +1,8 @@
 *** Testing strtok() : with first argument as non-string ***
 
-Notice: %s
+Notice: Undefined variable: undefined_var in %s/strtok_variation1.php on line 70
 
-Notice: %s
+Notice: Undefined variable: unset_var in %s/strtok_variation1.php on line 73
 
 --- Testing strtok() by supplying different values for 'str' argument ---
 -- Iteration 1 --
@@ -25,19 +25,19 @@ string(11) "1.07654321E"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: %s
+Warning: strtok() expects parameter 1 to be string, array given in %s/strtok_variation1.php on line 89
 -- Iteration 11 --
 
-Warning: %s
+Warning: strtok() expects parameter 1 to be string, array given in %s/strtok_variation1.php on line 89
 -- Iteration 12 --
 
-Warning: %s
+Warning: strtok() expects parameter 1 to be string, array given in %s/strtok_variation1.php on line 89
 -- Iteration 13 --
 
-Warning: %s
+Warning: strtok() expects parameter 1 to be string, array given in %s/strtok_variation1.php on line 89
 -- Iteration 14 --
 
-Warning: %s
+Warning: strtok() expects parameter 1 to be string, array given in %s/strtok_variation1.php on line 89
 -- Iteration 15 --
 string(1) "1"
 -- Iteration 16 --
@@ -62,5 +62,5 @@ bool(false)
 bool(false)
 -- Iteration 26 --
 
-Warning: %s
+Warning: strtok() expects parameter 1 to be string, resource given in %s/strtok_variation1.php on line 89
 Done

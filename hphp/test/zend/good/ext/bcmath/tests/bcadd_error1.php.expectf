@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: bcadd() expects at least 2 parameters, 0 given in %s/bcadd_error1.php on line 2

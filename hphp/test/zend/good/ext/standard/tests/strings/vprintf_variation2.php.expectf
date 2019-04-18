@@ -38,13 +38,13 @@ int(3)
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vprintf_variation2.php on line 84
 
 bool(false)
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vprintf_variation2.php on line 84
 
 bool(false)
 
@@ -82,23 +82,23 @@ int(6)
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vprintf_variation2.php on line 84
 
 bool(false)
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vprintf_variation2.php on line 84
 
 bool(false)
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: Invalid argument: arguments: (too few) in %s/vprintf_variation2.php on line 84
 
 bool(false)
 
 -- Iteration 23 --
-Resource id #%d
-int(%d)
+Resource id #4
+int(14)
 ===DONE===

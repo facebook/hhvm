@@ -5,23 +5,23 @@ bool(false)
 bool(false)
 -- Iteration 3 --
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation15.php on line 80
 bool(false)
 -- Iteration 4 --
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation15.php on line 80
 bool(false)
 -- Iteration 5 --
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation15.php on line 80
 bool(false)
 -- Iteration 6 --
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation15.php on line 80
 bool(false)
 -- Iteration 7 --
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation15.php on line 80
 bool(false)
 -- Iteration 8 --
 bool(false)
@@ -29,19 +29,19 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation15.php on line 80
 -- Iteration 11 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation15.php on line 80
 -- Iteration 12 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation15.php on line 80
 -- Iteration 13 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation15.php on line 80
 -- Iteration 14 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation15.php on line 80
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -52,20 +52,20 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Warning: %s
+Warning: stripos() expects parameter 3 to be integer, object given in %s/stripos_variation15.php on line 80
 -- Iteration 20 --
 
-Warning: %s
+Warning: stripos() expects parameter 3 to be integer, string given in %s/stripos_variation15.php on line 80
 -- Iteration 21 --
 
-Warning: %s
+Warning: stripos() expects parameter 3 to be integer, string given in %s/stripos_variation15.php on line 80
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, resource given in %s/stripos_variation15.php on line 80
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

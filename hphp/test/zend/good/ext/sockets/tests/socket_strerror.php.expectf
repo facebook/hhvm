@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s/socket_strerror.php on line 2
 string(7) "Success"
 string(23) "Operation not permitted"
 string(25) "No such file or directory"
@@ -116,7 +116,7 @@ string(12) "Host is down"
 string(16) "No route to host"
 string(29) "Operation already in progress"
 string(25) "Operation now in progress"
-string(%d) "Stale%sfile handle"
+string(17) "Stale%sfile handle"
 string(24) "Structure needs cleaning"
 string(27) "Not a XENIX named type file"
 string(29) "No XENIX semaphores available"
@@ -132,4 +132,4 @@ string(20) "Key has been revoked"
 string(27) "Key was rejected by service"
 string(10) "Owner died"
 string(21) "State not recoverable"
-string(%d) "%s"
+string(37) "Operation not possible due to RF-kill"

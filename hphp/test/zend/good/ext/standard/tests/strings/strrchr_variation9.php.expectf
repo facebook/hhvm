@@ -19,19 +19,19 @@ string(7) "1.06E-9"
 string(2) ".5"
 -- Iteration 10 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation9.php on line 121
 -- Iteration 11 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation9.php on line 121
 -- Iteration 12 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation9.php on line 121
 -- Iteration 13 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation9.php on line 121
 -- Iteration 14 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation9.php on line 121
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -52,7 +52,7 @@ bool(false)
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, resource given in %s/strrchr_variation9.php on line 121
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

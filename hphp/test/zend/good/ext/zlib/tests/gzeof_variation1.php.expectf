@@ -1,6 +1,6 @@
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: Not a valid stream resource in %s/gzeof_variation1.php on line 12
 bool(false)
 ===DONE===

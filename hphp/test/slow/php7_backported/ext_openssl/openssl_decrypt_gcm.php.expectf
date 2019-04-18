@@ -11,7 +11,7 @@ bool(true)
 TEST 5
 bool(true)
 
-Warning: %s
+Warning: Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s/openssl_decrypt_gcm.php on line 15
 bool(false)
 bool(false)
 bool(false)
@@ -20,7 +20,7 @@ bool(true)
 TEST 1
 bool(true)
 
-Warning: %s
+Warning: Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s/openssl_decrypt_gcm.php on line 15
 bool(false)
 bool(false)
 bool(false)
@@ -31,7 +31,7 @@ bool(true)
 TEST 2
 bool(true)
 
-Warning: %s
+Warning: Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s/openssl_decrypt_gcm.php on line 15
 bool(false)
 bool(false)
 bool(false)

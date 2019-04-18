@@ -4,7 +4,7 @@ Inserting data
 bool(true)
 Request last inserted id
 
-Warning: %s
+Warning: SQLite3::lastinsertrowid() expects exactly 0 parameters, 1 given in %s/sqlite3_32_last_insert_rowid_param.php on line 12
 Closing database
 bool(true)
 Done

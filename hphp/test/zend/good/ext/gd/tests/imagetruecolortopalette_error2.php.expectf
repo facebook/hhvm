@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: imagetruecolortopalette() expects parameter 2 to be boolean, resource given in %s/imagetruecolortopalette_error2.php on line 5
 
-Warning: %s
+Warning: imagetruecolortopalette() expects parameter 2 to be boolean, array given in %s/imagetruecolortopalette_error2.php on line 6

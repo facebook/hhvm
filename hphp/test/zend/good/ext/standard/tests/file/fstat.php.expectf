@@ -53,6 +53,6 @@ array(26) {
   int(%i)
 }
 
-Warning: %s
+Warning: Not a valid stream resource in %s/fstat.php on line 8
 bool(false)
 Done

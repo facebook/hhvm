@@ -1,21 +1,21 @@
 
-Warning: %s
+Warning: Empty regular expression in %s/delimiters.php on line 3
 bool(false)
 
-Warning: %s
-bool(false)
-int(1)
-
-Warning: %s
+Warning: Empty regular expression in %s/delimiters.php on line 4
 bool(false)
 int(1)
 
-Warning: %s
+Warning: Delimiter must not be alphanumeric or backslash in %s/delimiters.php on line 6
 bool(false)
 int(1)
 
-Warning: %s
+Warning: No ending delimiter '~' found: [~a] in %s/delimiters.php on line 8
+bool(false)
+int(1)
+
+Warning: Unknown modifier 'z': [//z] in %s/delimiters.php on line 10
 bool(false)
 
-Warning: %s
+Warning: No ending matching delimiter '}' found: [{] in %s/delimiters.php on line 11
 bool(false)

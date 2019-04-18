@@ -9,7 +9,7 @@ array(2) {
 }
 -- Iteration 2 --
 
-Warning: %s
+Warning: Invalid argument: Number of elements can't be negative in %s/array_fill_variation2.php on line 87
 bool(false)
 -- Iteration 3 --
 array(5) {
@@ -32,19 +32,19 @@ array(0) {
 }
 -- Iteration 6 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, array given in %s/array_fill_variation2.php on line 87
 -- Iteration 7 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, array given in %s/array_fill_variation2.php on line 87
 -- Iteration 8 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, array given in %s/array_fill_variation2.php on line 87
 -- Iteration 9 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, array given in %s/array_fill_variation2.php on line 87
 -- Iteration 10 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, array given in %s/array_fill_variation2.php on line 87
 -- Iteration 11 --
 array(0) {
 }
@@ -69,19 +69,19 @@ array(0) {
 }
 -- Iteration 17 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/array_fill_variation2.php on line 87
 -- Iteration 18 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/array_fill_variation2.php on line 87
 -- Iteration 19 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/array_fill_variation2.php on line 87
 -- Iteration 20 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, string given in %s/array_fill_variation2.php on line 87
 -- Iteration 21 --
 
-Warning: %s
+Warning: array_fill() expects parameter 2 to be integer, object given in %s/array_fill_variation2.php on line 87
 -- Iteration 22 --
 array(0) {
 }

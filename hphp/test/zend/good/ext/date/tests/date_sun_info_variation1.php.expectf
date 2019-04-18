@@ -332,27 +332,27 @@ array(9) {
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/date_sun_info_variation1.php on line 72
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/date_sun_info_variation1.php on line 72
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, array given in %s/date_sun_info_variation1.php on line 72
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/date_sun_info_variation1.php on line 72
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/date_sun_info_variation1.php on line 72
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/date_sun_info_variation1.php on line 72
 
 -- Iteration 22 --
 array(9) {
@@ -400,5 +400,5 @@ array(9) {
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: date_sun_info() expects parameter 1 to be integer, resource given in %s/date_sun_info_variation1.php on line 72
 ===Done===

@@ -47,43 +47,43 @@ int(1)
 
 -- Iteration with str value as "Array"
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 92
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 93
 
-Warning: %s
-
--- Iteration with str value as "Array"
-
-Warning: %s
-
-Warning: %s
-
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 92
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 93
 
-Warning: %s
-
--- Iteration with str value as "Array"
-
-Warning: %s
-
-Warning: %s
-
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 92
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 93
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 94
+
+-- Iteration with str value as "Array"
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 92
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 93
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 94
+
+-- Iteration with str value as "Array"
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 92
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 93
+
+Warning: strcspn() expects parameter 1 to be string, array given in %s/strcspn_variation1.php on line 94
 
 -- Iteration with str value as ""
 int(0)
@@ -140,11 +140,11 @@ int(0)
 bool(false)
 bool(false)
 
--- Iteration with str value as "Resource id #%d"
+-- Iteration with str value as "Resource id #4"
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, resource given in %s/strcspn_variation1.php on line 92
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, resource given in %s/strcspn_variation1.php on line 93
 
-Warning: %s
+Warning: strcspn() expects parameter 1 to be string, resource given in %s/strcspn_variation1.php on line 94
 Done

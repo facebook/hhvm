@@ -2,5 +2,5 @@ int(32)
 int(8)
 int(0)
 
-Warning: %s
+Warning: mcrypt_get_iv_size(): Module initialization failed in %s/mcrypt_get_iv_size.php on line 5
 bool(false)

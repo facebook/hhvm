@@ -2,20 +2,20 @@
 
 -- Testing gzcompress() function with Zero arguments --
 
-Warning: %s
+Warning: gzinflate() expects at least 1 parameter, 0 given in %s/gzinflate_error1.php on line 13
 
 -- Testing gzcompress() function with more than expected no. of arguments --
 
-Warning: %s
+Warning: gzinflate() expects at most 2 parameters, 3 given in %s/gzinflate_error1.php on line 19
 
 -- Testing with a buffer that is too small --
 
-Warning: %s
+Warning: data error in %s/gzinflate_error1.php on line 25
 bool(false)
 
 -- Testing with incorrect parameters --
 
-Warning: %s
+Warning: gzinflate() expects parameter 1 to be string, object given in %s/gzinflate_error1.php on line 36
 
-Warning: %s
+Warning: gzinflate() expects parameter 2 to be integer, object given in %s/gzinflate_error1.php on line 37
 ===DONE===

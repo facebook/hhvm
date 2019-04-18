@@ -1,35 +1,35 @@
 *** Testing readfile() : variation ***
 -- testing '-1' --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation10.php on line 32
 -- testing '1' --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation10.php on line 32
 -- testing '' --
 
-Warning: %s
+Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32
 -- testing '' --
 
-Warning: %s
+Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32
 -- testing '' --
 
-Warning: %s
+Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32
 -- testing ' ' --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation10.php on line 32
 -- testing '%r\x00%r' --
 
-Warning: %s
+Warning: readfile() expects parameter 1 to be a valid path, string given in %s/readfile_variation10.php on line 32
 
-Notice: %s
+Notice: Array to string conversion in %s/readfile_variation10.php on line 31
 -- testing 'Array' --
 
-Warning: %s
--- testing '%sdir' --
+Warning: readfile() expects parameter 1 to be string, array given in %s/readfile_variation10.php on line 32
+-- testing '/no/such/file/dir' --
 
-Warning: %s
--- testing '%sphp' --
+Warning: No such file or directory in %s/readfile_variation10.php on line 32
+-- testing 'php/php' --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation10.php on line 32
 
 *** Done ***

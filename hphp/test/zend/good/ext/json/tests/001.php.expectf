@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: json_decode() expects at least 1 parameter, 0 given in %s/001.php on line 3
 NULL
 NULL
 NULL

@@ -29,23 +29,23 @@ string(6) "302e35"
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 14 --
 
-Warning: %s
+Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 15 --
 string(0) ""
@@ -82,5 +82,5 @@ string(0) ""
 
 -- Iteration 26 --
 
-Warning: %s
+Warning: quoted_printable_decode() expects parameter 1 to be string, resource given in %s/quoted_printable_decode_variation1.php on line 87
 ===DONE===

@@ -1,5 +1,5 @@
 ECB
 CFB
 
-Warning: %s
+Warning: mcrypt_encrypt(): The IV parameter must be as long as the blocksize in %s/bug43143.php on line 9
 END

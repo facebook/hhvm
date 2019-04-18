@@ -3,9 +3,9 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: filesize(): No such file or directory in %s/filesize_variation5.php on line 14
 bool(false)
 
-Warning: %s
+Warning: filesize(): No such file or directory in %s/filesize_variation5.php on line 15
 bool(false)
 *** Done ***

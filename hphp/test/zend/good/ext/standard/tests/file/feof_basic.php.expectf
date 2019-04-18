@@ -24,5 +24,5 @@ bool(false)
 bool(false)
 *** closing file, testing eof ***
 
-Warning: %s
+Warning: Not a valid stream resource in %s/feof_basic.php on line 62
 Done

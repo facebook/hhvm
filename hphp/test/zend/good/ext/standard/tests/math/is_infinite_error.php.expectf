@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: is_infinite() expects exactly 1 parameter, 0 given in %s/is_infinite_error.php on line 2
 
-Warning: %s
+Warning: is_infinite() expects exactly 1 parameter, 3 given in %s/is_infinite_error.php on line 3

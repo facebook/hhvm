@@ -37,35 +37,35 @@ int(62558)
 
 --empty array--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 99
 
 --int indexed array--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 99
 
 --associative array--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 99
 
 --nested arrays--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, array given in %s/date_sunset_variation1.php on line 99
 
 --uppercase NULL--
 string(5) "18:22"
@@ -99,67 +99,67 @@ int(62558)
 
 --empty string DQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 99
 
 --empty string SQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 99
 
 --string DQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 99
 
 --string SQ--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 99
 
 --mixed case string--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 99
 
 --heredoc--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, string given in %s/date_sunset_variation1.php on line 99
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, object given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, object given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, object given in %s/date_sunset_variation1.php on line 99
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, object given in %s/date_sunset_variation1.php on line 97
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, object given in %s/date_sunset_variation1.php on line 98
 
-Warning: %s
+Warning: date_sunset() expects parameter 1 to be integer, object given in %s/date_sunset_variation1.php on line 99
 
 --undefined var--
 string(5) "18:22"

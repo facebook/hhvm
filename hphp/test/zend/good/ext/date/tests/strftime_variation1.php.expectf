@@ -38,27 +38,27 @@ string(3) "0.5"
 
 --empty array--
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 91
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 92
 
 --int indexed array--
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 91
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 92
 
 --associative array--
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 91
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 92
 
 --nested arrays--
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 91
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, array given in %s/strftime_variation1.php on line 92
 
 --uppercase NULL--
 bool(false)
@@ -98,9 +98,9 @@ string(14) "Class A object"
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, object given in %s/strftime_variation1.php on line 91
 
-Warning: %s
+Warning: strftime() expects parameter 1 to be string, object given in %s/strftime_variation1.php on line 92
 
 --undefined var--
 bool(false)

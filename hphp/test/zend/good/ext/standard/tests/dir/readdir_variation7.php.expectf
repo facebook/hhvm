@@ -1,6 +1,6 @@
 *** Testing readdir() : usage variations ***
 resource(%d) of type (stream)
 
-Warning: %s
+Warning: Not a valid directory resource in %s/readdir_variation7.php on line 15
 bool(false)
 ===DONE===

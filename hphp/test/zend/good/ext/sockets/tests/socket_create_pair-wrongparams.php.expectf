@@ -1,17 +1,17 @@
 
-Warning: %s
+Warning: socket_create_pair() expects exactly 4 parameters, 3 given in %s/socket_create_pair-wrongparams.php on line 2
 
-Warning: %s
+Warning: socket_create_pair() expects parameter 1 to be integer, string given in %s/socket_create_pair-wrongparams.php on line 5
 
-Warning: %s
+Warning: unable to create socket pair [94]: Socket type not supported in %s/socket_create_pair-wrongparams.php on line 7
 bool(false)
 
-Warning: %s
+Warning: invalid socket domain [31337] specified for argument 1, assuming AF_INET in %s/socket_create_pair-wrongparams.php on line 9
 
-Warning: %s
+Warning: unable to create socket pair [94]: Socket type not supported in %s/socket_create_pair-wrongparams.php on line 9
 bool(false)
 
-Warning: %s
+Warning: invalid socket type [31337] specified for argument 2, assuming SOCK_STREAM in %s/socket_create_pair-wrongparams.php on line 11
 
-Warning: %s
+Warning: unable to create socket pair [95]: Operation not supported in %s/socket_create_pair-wrongparams.php on line 11
 bool(false)

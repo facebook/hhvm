@@ -136,19 +136,19 @@ array(6) {
 }
 -- Iteration 10 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/array_reverse_variation2.php on line 87
 -- Iteration 11 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/array_reverse_variation2.php on line 87
 -- Iteration 12 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/array_reverse_variation2.php on line 87
 -- Iteration 13 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/array_reverse_variation2.php on line 87
 -- Iteration 14 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/array_reverse_variation2.php on line 87
 -- Iteration 15 --
 array(6) {
   [0]=>
@@ -271,7 +271,7 @@ array(6) {
 }
 -- Iteration 23 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, object given in %s/array_reverse_variation2.php on line 87
 -- Iteration 24 --
 array(6) {
   [0]=>
@@ -304,5 +304,5 @@ array(6) {
 }
 -- Iteration 26 --
 
-Warning: %s
+Warning: array_reverse() expects parameter 2 to be boolean, resource given in %s/array_reverse_variation2.php on line 87
 Done

@@ -19,19 +19,19 @@ string(20) "1. 07 65 43 21 E- 9 "
 string(5) "0. 5 "
 -- Iteration 10 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 1 to be string, array given in %s/chunk_split_variation1.php on line 87
 -- Iteration 11 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 1 to be string, array given in %s/chunk_split_variation1.php on line 87
 -- Iteration 12 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 1 to be string, array given in %s/chunk_split_variation1.php on line 87
 -- Iteration 13 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 1 to be string, array given in %s/chunk_split_variation1.php on line 87
 -- Iteration 14 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 1 to be string, array given in %s/chunk_split_variation1.php on line 87
 -- Iteration 15 --
 string(1) " "
 -- Iteration 16 --
@@ -60,5 +60,5 @@ string(1) " "
 string(1) " "
 -- Iteration 28 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 1 to be string, resource given in %s/chunk_split_variation1.php on line 87
 Done

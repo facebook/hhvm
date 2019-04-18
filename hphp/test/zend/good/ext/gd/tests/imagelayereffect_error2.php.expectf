@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagelayereffect() expects parameter 2 to be integer, string given in %s/imagelayereffect_error2.php on line 4

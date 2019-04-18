@@ -6,20 +6,20 @@ bool(false)
 bool(false)
 bool(true)
 
-Warning: %s
+Warning: hash_equals(): Expected known_string to be a string, integer given in %s/hash_equals.php on line 9
 bool(false)
 
-Warning: %s
+Warning: hash_equals(): Expected user_string to be a string, integer given in %s/hash_equals.php on line 10
 bool(false)
 
-Warning: %s
+Warning: hash_equals(): Expected known_string to be a string, integer given in %s/hash_equals.php on line 11
 bool(false)
 
-Warning: %s
+Warning: hash_equals(): Expected known_string to be a string, null given in %s/hash_equals.php on line 12
 bool(false)
 
-Warning: %s
+Warning: hash_equals(): Expected known_string to be a string, null given in %s/hash_equals.php on line 13
 bool(false)
 
-Warning: %s
+Warning: hash_equals(): Expected known_string to be a string, null given in %s/hash_equals.php on line 14
 bool(false)

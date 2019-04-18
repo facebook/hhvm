@@ -12,6 +12,6 @@ bool(false)
 float(1.234)
 float(1.234)
 
-Warning: %s
+Warning: decimal separator must be one char in %s/031.php on line 29
 bool(false)
 bool(false)

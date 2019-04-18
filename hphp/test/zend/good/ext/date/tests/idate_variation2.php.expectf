@@ -11,19 +11,19 @@ int(1970)
 
 --empty array--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
 
 --int indexed array--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
 
 --associative array--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
 
 --nested arrays--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
 
 --uppercase NULL--
 int(1970)
@@ -45,35 +45,35 @@ int(1970)
 
 --empty string DQ--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
 
 --empty string SQ--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
 
 --string DQ--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
 
 --string SQ--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
 
 --mixed case string--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
 
 --heredoc--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line 88
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line 88
 
 --undefined var--
 int(1970)

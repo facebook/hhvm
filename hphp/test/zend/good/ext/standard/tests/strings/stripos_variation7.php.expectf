@@ -2,7 +2,7 @@
 -- With empty heredoc string --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation7.php on line 16
 bool(false)
 bool(false)
 bool(false)

@@ -1,6 +1,7 @@
 
-Warning: %s
+Warning: xmlwriter_write_attribute_ns() expects exactly 5 parameters, 4 given in %s/xmlwriter_write_attribute_ns_error_001.php on line 6
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
  <elem1 attr1="first"/>
-</root>%wbool(false)
+</root>
+bool(false)

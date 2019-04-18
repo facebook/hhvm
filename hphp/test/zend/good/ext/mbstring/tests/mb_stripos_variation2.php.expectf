@@ -29,12 +29,12 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 12 --
@@ -42,7 +42,7 @@ bool(false)
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 14 --
@@ -50,17 +50,17 @@ bool(false)
 
 -- Iteration 15 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 18 --
@@ -77,15 +77,15 @@ bool(false)
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: Empty delimiter in %s/mb_stripos_variation2.php on line 91
 bool(false)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_stripos() expects parameter 2 to be string, resource given in %s/mb_stripos_variation2.php on line 91
 Done

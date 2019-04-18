@@ -1,44 +1,44 @@
 *** Testing error conditions ***
 -- Testing fread() with zero argument --
 
-Warning: %s
+Warning: fread() expects exactly 2 parameters, 0 given in %s/fread_error.php on line 16
 -- Testing fread() with more than expected number of arguments --
 
-Warning: %s
+Warning: fread() expects exactly 2 parameters, 3 given in %s/fread_error.php on line 20
 -- Testing fread() with invalid length arguments --
 
-Warning: %s
+Warning: fread(): Length parameter must be greater than 0 in %s/fread_error.php on line 25
 bool(false)
 
-Warning: %s
+Warning: fread(): Length parameter must be greater than 0 in %s/fread_error.php on line 27
 bool(false)
 -- Testing fread() with invalid arguments --
 -- Iteration 1 --
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, string given in %s/fread_error.php on line 42
 -- Iteration 2 --
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, integer given in %s/fread_error.php on line 42
 -- Iteration 3 --
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, double given in %s/fread_error.php on line 42
 -- Iteration 4 --
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, boolean given in %s/fread_error.php on line 42
 -- Iteration 5 --
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, array given in %s/fread_error.php on line 42
 -- Iteration 6 --
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, object given in %s/fread_error.php on line 42
 -- Testing fwrite() with closed/unset file handle --
 
-Notice: %s
+Notice: Undefined variable: file_content_type in %s/fread_error.php on line 48
 
-Warning: %s
+Warning: Not a valid stream resource in %s/fread_error.php on line 48
 bool(false)
 
-Warning: %s
+Warning: fread() expects parameter 1 to be resource, null given in %s/fread_error.php on line 53
 
-Warning: %s
+Warning: fclose() expects parameter 1 to be resource, null given in %s/fread_error.php on line 54
 Done

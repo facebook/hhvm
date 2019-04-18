@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: iterator_to_array() expects at least 1 parameter, 0 given in %s/spl_iterator_to_array_basic.php on line 3

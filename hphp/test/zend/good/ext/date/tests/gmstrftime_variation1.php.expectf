@@ -38,27 +38,27 @@ string(3) "0.5"
 
 --empty array--
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 89
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 90
 
 --int indexed array--
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 89
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 90
 
 --associative array--
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 89
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 90
 
 --nested arrays--
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 89
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, array given in %s/gmstrftime_variation1.php on line 90
 
 --uppercase NULL--
 bool(false)
@@ -98,9 +98,9 @@ string(14) "Class A object"
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s/gmstrftime_variation1.php on line 89
 
-Warning: %s
+Warning: gmstrftime() expects parameter 1 to be string, object given in %s/gmstrftime_variation1.php on line 90
 
 --undefined var--
 bool(false)

@@ -1,9 +1,9 @@
 
-Warning: %s
+Warning: gzfile() expects parameter 2 to be integer, array given in %s/gzfile_variation2.php on line 16
 
-Warning: %s
+Warning: gzfile() expects parameter 2 to be integer, array given in %s/gzfile_variation2.php on line 16
 
-Warning: %s
+Warning: gzfile() expects parameter 2 to be integer, array given in %s/gzfile_variation2.php on line 16
 
-Warning: %s
+Warning: gzfile() expects parameter 2 to be integer, array given in %s/gzfile_variation2.php on line 16
 ===DONE===

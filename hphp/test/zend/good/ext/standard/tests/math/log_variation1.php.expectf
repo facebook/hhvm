@@ -50,31 +50,31 @@ float(-INF)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, string given in %s/log_variation1.php on line 79
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, string given in %s/log_variation1.php on line 79
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, array given in %s/log_variation1.php on line 79
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, string given in %s/log_variation1.php on line 79
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, string given in %s/log_variation1.php on line 79
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, string given in %s/log_variation1.php on line 79
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, object given in %s/log_variation1.php on line 79
 
 -- Iteration 24 --
 float(-INF)
@@ -84,5 +84,5 @@ float(-INF)
 
 -- Iteration 26 --
 
-Warning: %s
+Warning: log() expects parameter 1 to be double, resource given in %s/log_variation1.php on line 79
 ===Done===

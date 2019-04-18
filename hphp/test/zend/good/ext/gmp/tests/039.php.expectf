@@ -1,12 +1,12 @@
 
-Warning: %s
+Warning: gmp_testbit(): Index must be greater than or equal to zero in %s/039.php on line 4
 bool(false)
 bool(false)
 bool(false)
 bool(false)
 bool(true)
 
-Warning: %s
+Warning: gmp_testbit(): Index must be greater than or equal to zero in %s/039.php on line 11
 bool(false)
 bool(false)
 bool(true)

@@ -1,1 +1,2 @@
-Warning: %s
+
+Warning: mysql_connect(): Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock' (2) in %s/port-string.php on line 5

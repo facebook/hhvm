@@ -10,7 +10,7 @@ array(3) {
 }
 --Iteration 2 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 3 --
 array(1) {
@@ -19,34 +19,34 @@ array(1) {
 }
 --Iteration 4 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 5 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 6 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, array given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 7 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, array given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 8 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, array given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 9 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, array given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 10 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, array given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 11 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 12 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 13 --
 array(23) {
@@ -99,7 +99,7 @@ array(23) {
 }
 --Iteration 14 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 15 --
 array(23) {
@@ -152,32 +152,32 @@ array(23) {
 }
 --Iteration 16 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 17 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, string given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 18 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, string given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 19 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, string given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 20 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, string given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 21 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, object given in %s/str_split_variation2_64bit.php on line 82
 --Iteration 22 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 23 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation2_64bit.php on line 82
 bool(false)
 --Iteration 24 --
 
-Warning: %s
+Warning: str_split() expects parameter 2 to be integer, resource given in %s/str_split_variation2_64bit.php on line 82
 Done

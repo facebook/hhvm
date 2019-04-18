@@ -1,21 +1,21 @@
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: cannot get cert from parameter 1 in %s/008.php on line 13
 bool(false)
 bool(true)
 
-Warning: %s
+Warning: cannot get cert from parameter 1 in %s/008.php on line 15
 bool(false)
 ---
 bool(true)
 bool(true)
 
-Warning: %s
+Warning: cannot get cert from parameter 1 in %s/008.php on line 25
 bool(false)
 bool(true)
 
-Warning: %s
+Warning: cannot get cert from parameter 1 in %s/008.php on line 27
 bool(false)
 ---
 bool(true)

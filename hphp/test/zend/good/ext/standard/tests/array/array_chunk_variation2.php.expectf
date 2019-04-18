@@ -31,13 +31,13 @@ array(1) {
 
 -- Iteration 2 --
 
-Warning: %s
+Warning: Invalid argument: size: -10 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: -10 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: -10 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 3 --
@@ -71,86 +71,86 @@ array(1) {
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 7 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 8 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, array given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 13 --
@@ -193,13 +193,13 @@ array(2) {
 
 -- Iteration 14 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 15 --
@@ -242,52 +242,52 @@ array(2) {
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 65
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 66
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation2.php on line 67
 NULL
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, string given in %s/array_chunk_variation2.php on line 67
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, object given in %s/array_chunk_variation2.php on line 65
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, object given in %s/array_chunk_variation2.php on line 66
 
-Warning: %s
+Warning: array_chunk() expects parameter 2 to be integer, object given in %s/array_chunk_variation2.php on line 67
 Done

@@ -64,19 +64,19 @@ array(1) {
 }
 -- Iteration 10 --
 
-Warning: %s
+Warning: str_split() expects parameter 1 to be string, array given in %s/str_split_variation1.php on line 84
 -- Iteration 11 --
 
-Warning: %s
+Warning: str_split() expects parameter 1 to be string, array given in %s/str_split_variation1.php on line 84
 -- Iteration 12 --
 
-Warning: %s
+Warning: str_split() expects parameter 1 to be string, array given in %s/str_split_variation1.php on line 84
 -- Iteration 13 --
 
-Warning: %s
+Warning: str_split() expects parameter 1 to be string, array given in %s/str_split_variation1.php on line 84
 -- Iteration 14 --
 
-Warning: %s
+Warning: str_split() expects parameter 1 to be string, array given in %s/str_split_variation1.php on line 84
 -- Iteration 15 --
 array(1) {
   [0]=>
@@ -136,5 +136,5 @@ array(1) {
 }
 -- Iteration 26 --
 
-Warning: %s
+Warning: str_split() expects parameter 1 to be string, resource given in %s/str_split_variation1.php on line 84
 Done

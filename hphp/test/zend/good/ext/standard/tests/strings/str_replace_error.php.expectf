@@ -1,11 +1,12 @@
+
 *** Testing str_replace error conditions ***
-Warning: %s
+Warning: str_replace() expects at least 3 parameters, 0 given in %s/str_replace_error.php on line 12
 
-Warning: %s
+Warning: str_replace() expects at least 3 parameters, 1 given in %s/str_replace_error.php on line 13
 
-Warning: %s
+Warning: str_replace() expects at least 3 parameters, 1 given in %s/str_replace_error.php on line 14
 
-Warning: %s
+Warning: str_replace() expects at least 3 parameters, 2 given in %s/str_replace_error.php on line 15
 
-Warning: %s
+Warning: str_replace() expects at most 4 parameters, 5 given in %s/str_replace_error.php on line 16
 ===DONE===

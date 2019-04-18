@@ -1,14 +1,14 @@
 *** Testing error conditions for fnmatch() ***
-Warning: %s
+Warning: fnmatch() expects parameter 1 to be string, array given in %s/fnmatch_error.php on line 10
 
-Warning: %s
+Warning: fnmatch() expects parameter 1 to be string, resource given in %s/fnmatch_error.php on line 13
 
-Warning: %s
+Warning: fnmatch() expects parameter 1 to be string, object given in %s/fnmatch_error.php on line 17
 
-Warning: %s
+Warning: fnmatch() expects at least 2 parameters, 1 given in %s/fnmatch_error.php on line 21
 
-Warning: %s
+Warning: fnmatch() expects at least 2 parameters, 1 given in %s/fnmatch_error.php on line 22
 
-Warning: %s
+Warning: fnmatch() expects at most 3 parameters, 4 given in %s/fnmatch_error.php on line 25
 
 *** Done ***

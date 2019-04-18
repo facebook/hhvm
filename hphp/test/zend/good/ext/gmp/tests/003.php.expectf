@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s/003.php on line 22
 1234
 1234
 10011010010

@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: XMLWriter::endElement() expects exactly 0 parameters, 1 given in %s/bug41326.php on line 11
 <?xml version="1.0"?>
 <test>
  <foo/>

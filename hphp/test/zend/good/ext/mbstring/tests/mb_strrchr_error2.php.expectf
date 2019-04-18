@@ -2,6 +2,6 @@
 
 -- Testing mb_strrchr() with unknown encoding --
 
-Warning: %s
+Warning: Unknown encoding "unknown-encoding" in %s/mb_strrchr_error2.php on line 16
 bool(false)
 ===DONE===

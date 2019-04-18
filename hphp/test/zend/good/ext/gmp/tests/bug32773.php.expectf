@@ -1,8 +1,8 @@
 10 + 0 = 10
 10 + "0" = 10
 
-Warning: %s
+Warning: gmp_div_q(): Zero operand not allowed in %s/bug32773.php on line 5
 0
 
-Warning: %s
+Warning: gmp_div_qr(): Zero operand not allowed in %s/bug32773.php on line 6
 0

@@ -19,13 +19,13 @@ int(45)
 int(49)
 -- Iteration 10 --
 
-Warning: %s
+Warning: ord() expects parameter 1 to be string, array given in %s/ord_variation1.php on line 71
 -- Iteration 11 --
 
-Warning: %s
+Warning: ord() expects parameter 1 to be string, array given in %s/ord_variation1.php on line 71
 -- Iteration 12 --
 
-Warning: %s
+Warning: ord() expects parameter 1 to be string, array given in %s/ord_variation1.php on line 71
 -- Iteration 13 --
 int(49)
 -- Iteration 14 --
@@ -42,7 +42,7 @@ int(0)
 int(115)
 -- Iteration 20 --
 
-Warning: %s
+Warning: ord() expects parameter 1 to be string, resource given in %s/ord_variation1.php on line 71
 -- Iteration 21 --
 int(0)
 -- Iteration 22 --

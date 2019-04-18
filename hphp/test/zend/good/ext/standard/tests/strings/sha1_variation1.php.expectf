@@ -19,19 +19,19 @@ string(40) "681b45cae882ad795afd54ccc2a04ad58e056b83"
 string(40) "1b390cd54a0c0d4f27fa7adf23e3c45536e9f37c"
 -- Iteration 10 --
 
-Warning: %s
+Warning: sha1() expects parameter 1 to be string, array given in %s/sha1_variation1.php on line 80
 -- Iteration 11 --
 
-Warning: %s
+Warning: sha1() expects parameter 1 to be string, array given in %s/sha1_variation1.php on line 80
 -- Iteration 12 --
 
-Warning: %s
+Warning: sha1() expects parameter 1 to be string, array given in %s/sha1_variation1.php on line 80
 -- Iteration 13 --
 
-Warning: %s
+Warning: sha1() expects parameter 1 to be string, array given in %s/sha1_variation1.php on line 80
 -- Iteration 14 --
 
-Warning: %s
+Warning: sha1() expects parameter 1 to be string, array given in %s/sha1_variation1.php on line 80
 -- Iteration 15 --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 -- Iteration 16 --
@@ -56,5 +56,5 @@ string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"
 -- Iteration 26 --
 
-Warning: %s
+Warning: sha1() expects parameter 1 to be string, resource given in %s/sha1_variation1.php on line 80
 ===DONE===

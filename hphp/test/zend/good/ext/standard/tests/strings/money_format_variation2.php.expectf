@@ -19,13 +19,13 @@ string
 string
 -- Iteration 10 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, array given in %s/money_format_variation2.php on line 88
 -- Iteration 11 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, array given in %s/money_format_variation2.php on line 88
 -- Iteration 12 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, array given in %s/money_format_variation2.php on line 88
 -- Iteration 13 --
 string
 -- Iteration 14 --
@@ -40,24 +40,24 @@ string
 string
 -- Iteration 19 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, string given in %s/money_format_variation2.php on line 88
 -- Iteration 20 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, string given in %s/money_format_variation2.php on line 88
 -- Iteration 21 --
 string
 -- Iteration 22 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, string given in %s/money_format_variation2.php on line 88
 -- Iteration 23 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, object given in %s/money_format_variation2.php on line 88
 -- Iteration 24 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, object given in %s/money_format_variation2.php on line 88
 -- Iteration 25 --
 
-Warning: %s
+Warning: money_format() expects parameter 2 to be double, resource given in %s/money_format_variation2.php on line 88
 -- Iteration 26 --
 string
 -- Iteration 27 --

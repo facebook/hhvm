@@ -2,23 +2,23 @@
 
 -- Testing gzuncompress() function with Zero arguments --
 
-Warning: %s
+Warning: gzuncompress() expects at least 1 parameter, 0 given in %s/gzuncompress_error1.php on line 12
 
 -- Testing gzuncompress() function with more than expected no. of arguments --
 
-Warning: %s
+Warning: gzuncompress() expects at most 2 parameters, 3 given in %s/gzuncompress_error1.php on line 19
 
 -- Testing with a buffer that is too small --
 
-Warning: %s
+Warning: insufficient memory in %s/gzuncompress_error1.php on line 25
 bool(false)
 
 -- Testing with incorrect arguments --
 
-Warning: %s
+Warning: data error in %s/gzuncompress_error1.php on line 28
 bool(false)
 
-Warning: %s
+Warning: gzuncompress() expects parameter 1 to be string, object given in %s/gzuncompress_error1.php on line 37
 
-Warning: %s
+Warning: gzuncompress() expects parameter 2 to be integer, string given in %s/gzuncompress_error1.php on line 39
 ===DONE===

@@ -10,6 +10,6 @@ string(8) "96859101"
 
 -- Testing hash_hmac() function with invalid hash algorithm --
 
-Warning: %s
+Warning: Unknown hashing algorithm: foo in %s/hash_hmac_error.php on line 22
 bool(false)
 ===Done===

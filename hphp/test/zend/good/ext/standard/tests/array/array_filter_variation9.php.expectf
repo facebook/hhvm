@@ -32,9 +32,9 @@ array(8) {
   NULL
 }
 
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter_variation9.php on line 22
 NULL
 
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter_variation9.php on line 25
 NULL
 Done

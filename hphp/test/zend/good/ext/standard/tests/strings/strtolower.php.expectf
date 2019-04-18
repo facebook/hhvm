@@ -161,13 +161,13 @@ string(0) ""
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: strtolower() expects parameter 1 to be string, array given in %s/strtolower.php on line 42
 
 *** Testing strtolower() with two different case strings ***
 strings are same, with Case Insensitive
 
 *** Testing error conditions ***
-Warning: %s
+Warning: strtolower() expects exactly 1 parameter, 0 given in %s/strtolower.php on line 53
 
-Warning: %s
+Warning: strtolower() expects exactly 1 parameter, 2 given in %s/strtolower.php on line 54
 *** Done ***

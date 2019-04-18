@@ -1,12 +1,13 @@
+
 *** Testing Error Conditions ***
 
-Warning: %s
+Warning: min() expects exactly 1 parameter, 0 given in %s/min_error.php on line 10
 
-Warning: %s
+Warning: min(): When only one parameter is given, it must be an array in %s/min_error.php on line 11
 NULL
 
-Warning: %s
+Warning: min(): Array must contain at least one element in %s/min_error.php on line 12
 bool(false)
 
-Warning: %s
+Warning: min(): When only one parameter is given, it must be an array in %s/min_error.php on line 13
 NULL

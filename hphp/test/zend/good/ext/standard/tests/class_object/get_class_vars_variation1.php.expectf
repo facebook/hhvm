@@ -29,19 +29,19 @@ bool(false)
 
 --empty array--
 
-Warning: %s
+Warning: get_class_vars() expects parameter 1 to be string, array given in %s/get_class_vars_variation1.php on line 86
 
 --int indexed array--
 
-Warning: %s
+Warning: get_class_vars() expects parameter 1 to be string, array given in %s/get_class_vars_variation1.php on line 86
 
 --associative array--
 
-Warning: %s
+Warning: get_class_vars() expects parameter 1 to be string, array given in %s/get_class_vars_variation1.php on line 86
 
 --nested arrays--
 
-Warning: %s
+Warning: get_class_vars() expects parameter 1 to be string, array given in %s/get_class_vars_variation1.php on line 86
 
 --uppercase NULL--
 bool(false)
@@ -72,7 +72,7 @@ bool(false)
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: get_class_vars() expects parameter 1 to be string, object given in %s/get_class_vars_variation1.php on line 86
 
 --undefined var--
 bool(false)

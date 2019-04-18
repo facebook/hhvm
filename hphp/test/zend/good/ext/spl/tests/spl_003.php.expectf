@@ -1,8 +1,8 @@
 
-Warning: %s
+Warning: class_parents(): Class foo does not exist in %s/spl_003.php on line 11
 string(3) "foo"
 
-Warning: %s
+Warning: class_parents(): Class foo does not exist and could not be loaded in %s/spl_003.php on line 12
 array(2) {
   ["b"]=>
   string(1) "b"
@@ -29,9 +29,9 @@ bool(false)
 bool(false)
 string(3) "aaa"
 
-Warning: %s
+Warning: class_implements(): Class aaa does not exist and could not be loaded in %s/spl_003.php on line 20
 
-Warning: %s
+Warning: class_implements(): Class bbb does not exist in %s/spl_003.php on line 21
 array(0) {
 }
 array(0) {

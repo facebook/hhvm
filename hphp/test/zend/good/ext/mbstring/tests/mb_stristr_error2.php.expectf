@@ -2,6 +2,6 @@
 
 -- Testing mb_stristr() with unknown encoding --
 
-Warning: %s
+Warning: Unknown encoding "unknown-encoding" in %s/mb_stristr_error2.php on line 16
 bool(false)
 ===DONE===

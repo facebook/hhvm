@@ -10,7 +10,7 @@ array(3) {
 }
 -- accessing child method from parent class --
 
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_object3.php on line 51
 NULL
 -- accessing parent method using child class object --
 array(3) {
@@ -23,6 +23,6 @@ array(3) {
 }
 -- accessing child method using parent class object --
 
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_object3.php on line 57
 NULL
 Done

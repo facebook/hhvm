@@ -167,5 +167,5 @@ array(1) {
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: array_chunk() expects parameter 3 to be boolean, object given in %s/array_chunk_variation3.php on line 59
 Done

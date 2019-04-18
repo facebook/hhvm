@@ -28,30 +28,30 @@ array(6) {
 }
 int(6)
 
-Warning: %s
+Warning: Invalid argument: format: 3 in %s/str_word_count.php on line 9
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: 123 in %s/str_word_count.php on line 10
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: -1 in %s/str_word_count.php on line 11
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: format: 999999999 in %s/str_word_count.php on line 12
 bool(false)
 
-Warning: %s
+Warning: str_word_count() expects parameter 2 to be integer, array given in %s/str_word_count.php on line 13
 
-Warning: %s
+Warning: str_word_count() expects parameter 2 to be integer, string given in %s/str_word_count.php on line 14
 string(55) "Hello friend, you're  
     looking          good today!"
 int(5)
 int(6)
 int(5)
 
-Warning: %s
+Warning: str_word_count() expects parameter 3 to be string, array given in %s/str_word_count.php on line 21
 
-Warning: %s
+Warning: str_word_count() expects parameter 3 to be string, object given in %s/str_word_count.php on line 22
 int(7)
 array(5) {
   [0]=>
@@ -92,9 +92,9 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: %s
+Warning: str_word_count() expects parameter 3 to be string, array given in %s/str_word_count.php on line 27
 
-Warning: %s
+Warning: str_word_count() expects parameter 3 to be string, object given in %s/str_word_count.php on line 28
 array(7) {
   [0]=>
   string(1) "F"
@@ -150,9 +150,9 @@ array(5) {
   string(3) "foo"
 }
 
-Warning: %s
+Warning: str_word_count() expects parameter 3 to be string, array given in %s/str_word_count.php on line 33
 
-Warning: %s
+Warning: str_word_count() expects parameter 3 to be string, object given in %s/str_word_count.php on line 34
 array(7) {
   [0]=>
   string(1) "F"

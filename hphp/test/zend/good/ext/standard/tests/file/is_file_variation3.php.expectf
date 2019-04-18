@@ -6,7 +6,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: is_file() expects parameter 1 to be string, resource given in %s/is_file_variation3.php on line 30
 bool(false)
 bool(false)
 

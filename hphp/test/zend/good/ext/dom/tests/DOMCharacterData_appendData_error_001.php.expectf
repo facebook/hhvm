@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: DOMCharacterData::appendData() expects exactly 1 parameter, 0 given in %s/DOMCharacterData_appendData_error_001.php on line 8

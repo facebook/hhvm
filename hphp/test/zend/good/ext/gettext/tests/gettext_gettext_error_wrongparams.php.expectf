@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: gettext() expects parameter 1 to be string, array given in %s/gettext_gettext_error_wrongparams.php on line 2

@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: bindtextdomain() expects exactly 2 parameters, 1 given in %s/gettext_bindtextdomain-wrongparams.php on line 3
 
-Warning: %s
+Warning: bindtextdomain() expects exactly 2 parameters, 0 given in %s/gettext_bindtextdomain-wrongparams.php on line 4

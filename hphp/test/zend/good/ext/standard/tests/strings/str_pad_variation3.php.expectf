@@ -17,44 +17,44 @@ string(20) "Test string-20.5-20."
 string(20) "Test string101234567"
 -- Iteration 9 --
 
-Warning: %s
+Warning: str_pad() expects parameter 3 to be string, array given in %s/str_pad_variation3.php on line 78
 -- Iteration 10 --
 
-Warning: %s
+Warning: str_pad() expects parameter 3 to be string, array given in %s/str_pad_variation3.php on line 78
 -- Iteration 11 --
 
-Warning: %s
+Warning: str_pad() expects parameter 3 to be string, array given in %s/str_pad_variation3.php on line 78
 -- Iteration 12 --
 string(20) "Test string111111111"
 -- Iteration 13 --
 
-Warning: %s
+Warning: Invalid argument: pad_string: (empty) in %s/str_pad_variation3.php on line 78
 NULL
 -- Iteration 14 --
 string(20) "Test string111111111"
 -- Iteration 15 --
 
-Warning: %s
+Warning: Invalid argument: pad_string: (empty) in %s/str_pad_variation3.php on line 78
 NULL
 -- Iteration 16 --
 
-Warning: %s
+Warning: Invalid argument: pad_string: (empty) in %s/str_pad_variation3.php on line 78
 NULL
 -- Iteration 17 --
 
-Warning: %s
+Warning: Invalid argument: pad_string: (empty) in %s/str_pad_variation3.php on line 78
 NULL
 -- Iteration 18 --
 string(20) "Test stringsample ob"
 -- Iteration 19 --
 
-Warning: %s
+Warning: str_pad() expects parameter 3 to be string, resource given in %s/str_pad_variation3.php on line 78
 -- Iteration 20 --
 
-Warning: %s
+Warning: Invalid argument: pad_string: (empty) in %s/str_pad_variation3.php on line 78
 NULL
 -- Iteration 21 --
 
-Warning: %s
+Warning: Invalid argument: pad_string: (empty) in %s/str_pad_variation3.php on line 78
 NULL
 ===DONE===

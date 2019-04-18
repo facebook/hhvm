@@ -39,9 +39,9 @@ array(6) {
 "
 }
 
-Warning: %s
+Warning: gzfile() expects parameter 2 to be integer, string given in %s/gzfile_variation10.php on line 21
 
-Warning: %s
+Warning: gzfile() expects parameter 2 to be integer, string given in %s/gzfile_variation10.php on line 21
 array(6) {
   [0]=>
   string(36) "When you're taught through feelings

@@ -1,4 +1,4 @@
 NULL
 
-Warning: %s
+Warning: Not allowed to call handler 'ucwords()' in %s/xsltprocessor_registerPHPFunctions-string-notallowed.php on line 11
 NULL

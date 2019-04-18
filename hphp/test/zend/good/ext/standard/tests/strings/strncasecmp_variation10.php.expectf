@@ -29,29 +29,29 @@ int(-%d)
 int(-%d)
 -- Iteration 15 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 88
 
-Warning: %s
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 89
 -- Iteration 16 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 88
 
-Warning: %s
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 89
 -- Iteration 17 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 88
 
-Warning: %s
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 89
 -- Iteration 18 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 88
 
-Warning: %s
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 89
 -- Iteration 19 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 88
 
-Warning: %s
+Warning: strncasecmp() expects parameter 1 to be string, array given in %s/strncasecmp_variation10.php on line 89
 -- Iteration 20 --
 int(-%d)
 -- Iteration 21 --
@@ -74,9 +74,9 @@ int(-%d)
 int(-%d)
 -- Iteration 30 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, resource given in %s/strncasecmp_variation10.php on line 88
 
-Warning: %s
+Warning: strncasecmp() expects parameter 1 to be string, resource given in %s/strncasecmp_variation10.php on line 89
 -- Iteration 31 --
 int(-%d)
 *** Done ***

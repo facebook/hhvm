@@ -1,6 +1,7 @@
+
 -- Too many arguments --
 
-Warning: %s
+Warning: microtime() expects at most 1 parameter, 2 given in %s/microtime_error.php on line 11
 
 -- Bad Arg types --
 
@@ -23,12 +24,12 @@ float(%s)
   }
 }
 
-Warning: %s
+Warning: microtime() expects parameter 1 to be boolean, array given in %s/microtime_error.php on line 25
 
 --> bad arg: object(stdClass) (0) {
 }
 
-Warning: %s
+Warning: microtime() expects parameter 1 to be boolean, object given in %s/microtime_error.php on line 25
 
 --> bad arg: int(1)
 float(%s)

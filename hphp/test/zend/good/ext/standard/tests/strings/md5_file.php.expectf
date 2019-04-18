@@ -1,20 +1,21 @@
+
 *** Testing for error conditions ***
 
-Warning: %s
+Warning: Filename cannot be empty in %s/md5_file.php on line 33
 bool(false)
 
-Warning: %s
+Warning: No such file or directory in %s/md5_file.php on line 36
 bool(false)
 
-Warning: %s
+Warning: No such file or directory in %s/md5_file.php on line 39
 bool(false)
 
-Warning: %s
+Warning: Filename cannot be empty in %s/md5_file.php on line 42
 bool(false)
 
-Warning: %s
+Warning: md5_file() expects at least 1 parameter, 0 given in %s/md5_file.php on line 45
 
-Warning: %s
+Warning: md5_file() expects at most 2 parameters, 3 given in %s/md5_file.php on line 48
 
 *** Hexadecimal Output for Empty file as Argument ***
 string(32) "d41d8cd98f00b204e9800998ecf8427e"

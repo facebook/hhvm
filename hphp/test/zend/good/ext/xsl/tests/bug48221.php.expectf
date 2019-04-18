@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: Cannot create XPath expression (string contains both quote and double-quotes) in %s/bug48221.php on line 5

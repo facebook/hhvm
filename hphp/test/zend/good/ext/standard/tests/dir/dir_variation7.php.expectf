@@ -1,10 +1,10 @@
 *** Testing dir() : remove execute permission from the parent dir ***
 -- After restricting 1st level parent directory --
 
-Warning: %s
+Warning: Permission denied in %s/dir_variation7.php on line 38
 bool(false)
 -- After restricting parent directory --
 
-Warning: %s
+Warning: Permission denied in %s/dir_variation7.php on line 45
 bool(false)
 Done

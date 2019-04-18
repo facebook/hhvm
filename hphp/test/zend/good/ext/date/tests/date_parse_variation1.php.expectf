@@ -40,22 +40,22 @@ array(0) {
 
 -- empty array --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, array given in %s/date_parse_variation1.php on line 97
 bool(false)
 
 -- int indexed array --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, array given in %s/date_parse_variation1.php on line 97
 bool(false)
 
 -- associative array --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, array given in %s/date_parse_variation1.php on line 97
 bool(false)
 
 -- nested arrays --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, array given in %s/date_parse_variation1.php on line 97
 bool(false)
 
 -- uppercase NULL --
@@ -140,7 +140,7 @@ array(2) {
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, object given in %s/date_parse_variation1.php on line 97
 bool(false)
 
 -- undefined var --
@@ -157,6 +157,6 @@ array(1) {
 
 -- resource --
 
-Warning: %s
+Warning: date_parse() expects parameter 1 to be string, resource given in %s/date_parse_variation1.php on line 97
 bool(false)
 ===DONE===

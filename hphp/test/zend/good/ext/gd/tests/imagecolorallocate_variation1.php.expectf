@@ -2,122 +2,122 @@
 
 -- int 0 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line 102
 
 -- int 1 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line 102
 
 -- int 12345 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line 102
 
 -- int -12345 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, integer given in %s/imagecolorallocate_variation1.php on line 102
 
 -- float 10.5 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line 102
 
 -- float -10.5 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line 102
 
 -- float 10.1234567e10 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line 102
 
 -- float 10.7654321E-10 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line 102
 
 -- float .5 --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, double given in %s/imagecolorallocate_variation1.php on line 102
 
 -- empty array --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 102
 
 -- int indexed array --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 102
 
 -- associative array --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 102
 
 -- nested arrays --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 102
 
 -- uppercase NULL --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/imagecolorallocate_variation1.php on line 102
 
 -- lowercase null --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/imagecolorallocate_variation1.php on line 102
 
 -- lowercase true --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line 102
 
 -- lowercase false --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line 102
 
 -- uppercase TRUE --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line 102
 
 -- uppercase FALSE --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s/imagecolorallocate_variation1.php on line 102
 
 -- empty string DQ --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line 102
 
 -- empty string SQ --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line 102
 
 -- string DQ --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line 102
 
 -- string SQ --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line 102
 
 -- mixed case string --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line 102
 
 -- heredoc --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, string given in %s/imagecolorallocate_variation1.php on line 102
 
 -- instance of classWithToString --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, object given in %s/imagecolorallocate_variation1.php on line 102
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, object given in %s/imagecolorallocate_variation1.php on line 102
 
 -- undefined var --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/imagecolorallocate_variation1.php on line 102
 
 -- unset var --
 
-Warning: %s
+Warning: imagecolorallocate() expects parameter 1 to be resource, null given in %s/imagecolorallocate_variation1.php on line 102
 
 -- file resource --
 
-Warning: %s
+Warning: supplied resource is not a valid Image resource in %s/imagecolorallocate_variation1.php on line 102
 bool(false)
 ===DONE===

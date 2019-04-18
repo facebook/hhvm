@@ -11,7 +11,7 @@ bool(false)
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/iconv_strpos_variation3_64bit.php on line 90
 bool(false)
 
 -- Iteration 5 --
@@ -19,7 +19,7 @@ bool(false)
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: Offset not contained in string. in %s/iconv_strpos_variation3_64bit.php on line 90
 bool(false)
 
 -- Iteration 7 --
@@ -51,27 +51,27 @@ int(8)
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s/iconv_strpos_variation3_64bit.php on line 90
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s/iconv_strpos_variation3_64bit.php on line 90
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s/iconv_strpos_variation3_64bit.php on line 90
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s/iconv_strpos_variation3_64bit.php on line 90
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, string given in %s/iconv_strpos_variation3_64bit.php on line 90
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, object given in %s/iconv_strpos_variation3_64bit.php on line 90
 
 -- Iteration 22 --
 int(8)
@@ -81,5 +81,5 @@ int(8)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 3 to be integer, resource given in %s/iconv_strpos_variation3_64bit.php on line 90
 Done

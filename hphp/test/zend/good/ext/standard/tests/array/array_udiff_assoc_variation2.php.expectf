@@ -2,126 +2,126 @@
 
 --int 0--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --int 1--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --int 12345--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --int -12345--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --float 10.5--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --float -10.5--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --float 12.3456789000e10--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --float -12.3456789000e10--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --float .5--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --uppercase NULL--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --lowercase null--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --lowercase true--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --lowercase false--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --uppercase TRUE--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --uppercase FALSE--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --empty string DQ--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --empty string SQ--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --string DQ--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --string SQ--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --mixed case string--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --heredoc--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --undefined var--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 
 --unset var--
 
-Warning: %s
+Warning: Invalid operand type was used: %S expects array(s) in %s/array_udiff_assoc_variation2.php on line 92
 NULL
 ===DONE===

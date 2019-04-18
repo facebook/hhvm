@@ -1,4 +1,4 @@
 string(7) "X$3.14Y"
 
-Warning: %s
+Warning: Invalid argument: format: Only a single %s or %s token can be used in %s/moneyformat.php on line 4
 bool(false)

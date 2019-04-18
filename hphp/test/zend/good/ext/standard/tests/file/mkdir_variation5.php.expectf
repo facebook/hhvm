@@ -7,10 +7,10 @@ Directory created
 Directory created
 -- creating mkdirVar5.tmp/../BADDIR/aSubDir --
 
-Warning: %s
+Warning: mkdir(): No such file or directory in %s/mkdir_variation5.php on line 46
 -- creating BADDIR/aSubDir --
 
-Warning: %s
+Warning: mkdir(): No such file or directory in %s/mkdir_variation5.php on line 46
 -- creating %s/mkdirVar5.tmp/aSubDir --
 Directory created
 -- creating %s/./mkdirVar5.tmp/aSubDir --
@@ -19,7 +19,7 @@ Directory created
 Directory created
 -- creating %s/BADDIR/aSubDir --
 
-Warning: %s
+Warning: mkdir(): No such file or directory in %s/mkdir_variation5.php on line 46
 -- creating mkdirVar5.tmp/aSubDir/ --
 Directory created
 -- creating %s/mkdirVar5.tmp/aSubDir/ --

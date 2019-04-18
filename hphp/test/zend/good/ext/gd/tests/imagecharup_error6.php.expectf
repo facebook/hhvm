@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagecharup() expects parameter 5 to be string, resource given in %s/imagecharup_error6.php on line 3

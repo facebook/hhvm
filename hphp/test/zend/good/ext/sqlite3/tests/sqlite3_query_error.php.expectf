@@ -1,9 +1,9 @@
 Testing SQLite3 query without parameters
 
-Warning: %s
+Warning: SQLite3::query() expects exactly 1 parameter, 0 given in %s/sqlite3_query_error.php on line 5
 Testing SQLite3 query with one array parameter
 
-Warning: %s
+Warning: query() expects parameter 1 to be string, array given in %s/sqlite3_query_error.php on line 8
 Testing SQLite3 qeury with empty string parameter
 bool(false)
 Done

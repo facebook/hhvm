@@ -71,5 +71,5 @@ string(113) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 4 to be string, resource given in %s/mb_encode_mimeheader_variation4.php on line 95
 Done

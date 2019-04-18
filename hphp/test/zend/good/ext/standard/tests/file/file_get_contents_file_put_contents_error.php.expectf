@@ -2,24 +2,24 @@
 
 -- Testing with  Non-existing file --
 
-Warning: %s
+Warning: No such file or directory in %s/file_get_contents_file_put_contents_error.php on line 16
 
 -- Testing No.of arguments less than expected --
 
-Warning: %s
+Warning: file_get_contents() expects at least 1 parameter, 0 given in %s/file_get_contents_file_put_contents_error.php on line 19
 
-Warning: %s
+Warning: file_put_contents() expects at least 2 parameters, 0 given in %s/file_get_contents_file_put_contents_error.php on line 20
 
-Warning: %s
+Warning: file_put_contents() expects at least 2 parameters, 1 given in %s/file_get_contents_file_put_contents_error.php on line 21
 
 -- Testing No.of arguments greater than expected --
 
-Warning: %s
+Warning: file_put_contents() expects at most 4 parameters, 5 given in %s/file_get_contents_file_put_contents_error.php on line 25
 
-Warning: %s
+Warning: file_get_contents() expects at most 5 parameters, 6 given in %s/file_get_contents_file_put_contents_error.php on line 26
 
 -- Testing for invalid negative maxlen values --
-Warning: %s
+Warning: Invalid argument: maxlen: -5 in %s/file_get_contents_file_put_contents_error.php on line 30
 bool(false)
 
 *** Done ***

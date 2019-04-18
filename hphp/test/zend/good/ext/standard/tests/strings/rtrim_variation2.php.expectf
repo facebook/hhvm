@@ -19,13 +19,13 @@ string(19) "!---Hello World---!"
 string(19) "!---Hello World---!"
 -- Iteration 10 --
 
-Warning: %s
+Warning: rtrim() expects parameter 2 to be string, array given in %s/rtrim_variation2.php on line 73
 -- Iteration 11 --
 
-Warning: %s
+Warning: rtrim() expects parameter 2 to be string, array given in %s/rtrim_variation2.php on line 73
 -- Iteration 12 --
 
-Warning: %s
+Warning: rtrim() expects parameter 2 to be string, array given in %s/rtrim_variation2.php on line 73
 -- Iteration 13 --
 string(19) "!---Hello World---!"
 -- Iteration 14 --
@@ -42,7 +42,7 @@ string(19) "!---Hello World---!"
 string(19) "!---Hello World---!"
 -- Iteration 20 --
 
-Warning: %s
+Warning: rtrim() expects parameter 2 to be string, resource given in %s/rtrim_variation2.php on line 73
 -- Iteration 21 --
 string(19) "!---Hello World---!"
 -- Iteration 22 --

@@ -20,6 +20,6 @@
 
 
 --> Above range:
-Warning: %s
+Warning: parse_url(): Invalid URL component identifier 99 in %s/parse_url_error_002.php on line 15
 bool(false)
 Done

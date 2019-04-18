@@ -1,6 +1,6 @@
 
-Warning: %s
+Warning: Not a valid callback function aggregate_test_step in %s/sqlite3_33_createAggregate_notcallable.php on line 8
 
-Warning: %s
+Warning: Not a valid callback function aggregate_test_final in %s/sqlite3_33_createAggregate_notcallable.php on line 9
 bool(true)
 Done

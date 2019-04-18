@@ -11,19 +11,19 @@ bool(false)
 
 -- empty array --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, array given in %s/checkdate_variation3.php on line 90
 
 -- int indexed array --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, array given in %s/checkdate_variation3.php on line 90
 
 -- associative array --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, array given in %s/checkdate_variation3.php on line 90
 
 -- nested arrays --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, array given in %s/checkdate_variation3.php on line 90
 
 -- uppercase NULL --
 bool(false)
@@ -45,35 +45,35 @@ bool(false)
 
 -- empty string DQ --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, string given in %s/checkdate_variation3.php on line 90
 
 -- empty string SQ --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, string given in %s/checkdate_variation3.php on line 90
 
 -- string DQ --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, string given in %s/checkdate_variation3.php on line 90
 
 -- string SQ --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, string given in %s/checkdate_variation3.php on line 90
 
 -- mixed case string --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, string given in %s/checkdate_variation3.php on line 90
 
 -- heredoc --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, string given in %s/checkdate_variation3.php on line 90
 
 -- instance of classWithToString --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, object given in %s/checkdate_variation3.php on line 90
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, object given in %s/checkdate_variation3.php on line 90
 
 -- undefined var --
 bool(false)
@@ -83,5 +83,5 @@ bool(false)
 
 -- resource --
 
-Warning: %s
+Warning: checkdate() expects parameter 3 to be integer, resource given in %s/checkdate_variation3.php on line 90
 ===DONE===

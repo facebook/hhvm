@@ -28,36 +28,36 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 81
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 82
 -- Iteration 11 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 81
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 82
 -- Iteration 12 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 81
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 82
 -- Iteration 13 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 81
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 82
 -- Iteration 14 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 81
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation11.php on line 82
 -- Iteration 15 --
 bool(false)
 bool(false)
 -- Iteration 16 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 17 --
 bool(false)
@@ -65,48 +65,48 @@ bool(false)
 -- Iteration 18 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 19 --
 
-Notice: %s
+Notice: Object of class sample could not be converted to int in %s/stripos_variation11.php on line 81
 bool(false)
 
-Notice: %s
+Notice: Object of class sample could not be converted to int in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 20 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 21 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 22 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 23 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, resource given in %s/stripos_variation11.php on line 81
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, resource given in %s/stripos_variation11.php on line 82
 -- Iteration 25 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 -- Iteration 26 --
 bool(false)
 
-Warning: %s
+Warning: Offset not contained in string in %s/stripos_variation11.php on line 82
 bool(false)
 *** Done ***

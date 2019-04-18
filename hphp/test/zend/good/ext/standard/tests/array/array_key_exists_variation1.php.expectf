@@ -14,27 +14,27 @@ bool(false)
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 7 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 8 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 10 --
@@ -45,22 +45,22 @@ bool(false)
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 14 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 15 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 16 --
@@ -71,7 +71,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 19 --
@@ -85,7 +85,7 @@ bool(true)
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 
 -- Iteration 23 --
@@ -96,6 +96,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation1.php on line 90
 bool(false)
 Done

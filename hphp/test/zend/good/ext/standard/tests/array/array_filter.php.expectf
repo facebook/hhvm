@@ -47,9 +47,9 @@ array(2) {
 array(0) {
 }
 
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter.php on line 26
 NULL
 
-Warning: %s
+Warning: array_filter() expects parameter 2 to be a valid callback in %s/array_filter.php on line 27
 NULL
 == DONE ==

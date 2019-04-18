@@ -10,11 +10,11 @@ The File Contents
 The File Contents
 -- Iteration 5 --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation9.php on line 50
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation9.php on line 50
 
 -- Iteration 7 --
 The File Contents
@@ -26,6 +26,6 @@ The File Contents
 The File Contents
 -- Iteration 11 --
 
-Warning: %s
+Warning: No such file or directory in %s/readfile_variation9.php on line 50
 
 *** Done ***

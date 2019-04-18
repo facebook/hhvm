@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: bcdiv() expects at most 3 parameters, 4 given in %s/bcdiv_error2.php on line 2

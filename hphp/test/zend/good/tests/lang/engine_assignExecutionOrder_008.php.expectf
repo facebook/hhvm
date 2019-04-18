@@ -1,20 +1,21 @@
+
 $i=f(): good
 ${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good
 $i->p=f(): 
-Warning: %s
+Warning: Creating default object from empty value in %s/engine_assignExecutionOrder_008.php on line 28
 good
 $i->p->q=f(): 
-Warning: %s
+Warning: Creating default object from empty value in %s/engine_assignExecutionOrder_008.php on line 32
 good
 $i->p[0]=f(): 
-Warning: %s
+Warning: Creating default object from empty value in %s/engine_assignExecutionOrder_008.php on line 36
 good
 $i->p[0]->p=f(): 
-Warning: %s
+Warning: Creating default object from empty value in %s/engine_assignExecutionOrder_008.php on line 41
 
-Warning: %s
+Warning: Creating default object from empty value in %s/engine_assignExecutionOrder_008.php on line 42
 good
 C::$p=f(): good
 C::$p[0]=f(): good

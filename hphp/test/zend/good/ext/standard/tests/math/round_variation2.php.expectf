@@ -50,31 +50,31 @@ float(123)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, string given in %s/round_variation2.php on line 80
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, string given in %s/round_variation2.php on line 80
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, array given in %s/round_variation2.php on line 80
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, string given in %s/round_variation2.php on line 80
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, string given in %s/round_variation2.php on line 80
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, string given in %s/round_variation2.php on line 80
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, object given in %s/round_variation2.php on line 80
 
 -- Iteration 24 --
 float(123)
@@ -84,5 +84,5 @@ float(123)
 
 -- Iteration 26 --
 
-Warning: %s
+Warning: round() expects parameter 2 to be integer, resource given in %s/round_variation2.php on line 80
 ===Done===

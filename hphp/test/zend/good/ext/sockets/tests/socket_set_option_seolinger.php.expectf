@@ -1,7 +1,7 @@
 
-Warning: %s
+Warning: no key "l_onoff" passed in optval in %s/socket_set_option_seolinger.php on line 8
 
-Warning: %s
+Warning: no key "l_linger" passed in optval in %s/socket_set_option_seolinger.php on line 17
 bool(false)
 bool(true)
 bool(true)

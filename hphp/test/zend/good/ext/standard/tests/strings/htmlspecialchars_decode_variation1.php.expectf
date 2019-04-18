@@ -19,19 +19,19 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 -- Iterator 10 --
 
-Warning: %s
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 11 --
 
-Warning: %s
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 12 --
 
-Warning: %s
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 13 --
 
-Warning: %s
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 14 --
 
-Warning: %s
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 15 --
 string(0) ""
 -- Iterator 16 --
@@ -56,5 +56,5 @@ string(0) ""
 string(0) ""
 -- Iterator 26 --
 
-Warning: %s
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, resource given in %s/htmlspecialchars_decode_variation1.php on line 82
 ===DONE===

@@ -3,7 +3,7 @@
 int(%d)
 - Iteration 2 -
 
-Warning: %s
+Warning: fileowner(): Not a directory in %s/fileowner_variation3.php on line 38
 bool(false)
 - Iteration 3 -
 int(%d)
@@ -11,19 +11,19 @@ int(%d)
 int(%d)
 - Iteration 5 -
 
-Warning: %s
+Warning: fileowner(): No such file or directory in %s/fileowner_variation3.php on line 38
 bool(false)
 - Iteration 6 -
 
-Warning: %s
+Warning: fileowner(): No such file or directory in %s/fileowner_variation3.php on line 38
 bool(false)
 - Iteration 7 -
 
-Warning: %s
+Warning: fileowner() expects parameter 1 to be a valid path, string given in %s/fileowner_variation3.php on line 38
 NULL
 - Iteration 8 -
 
-Warning: %s
+Warning: fileowner() expects parameter 1 to be a valid path, string given in %s/fileowner_variation3.php on line 38
 NULL
 
 *** Done ***

@@ -2,17 +2,17 @@
 
 -- Wildcard = '*' --
 
-Warning: %s
+Warning: No such file or directory in %s/opendir_variation6.php on line 23
 bool(false)
 
-Warning: %s
+Warning: No such file or directory in %s/opendir_variation6.php on line 24
 bool(false)
 
 -- Wildcard = '?' --
 
-Warning: %s
+Warning: No such file or directory in %s/opendir_variation6.php on line 27
 bool(false)
 
-Warning: %s
+Warning: No such file or directory in %s/opendir_variation6.php on line 28
 bool(false)
 ===DONE===

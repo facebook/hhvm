@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagechar() expects parameter 3 to be integer, string given in %s/imagechar_error4.php on line 3

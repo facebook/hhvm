@@ -2,7 +2,7 @@
 
 -- Iteration 1 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 2 --
@@ -10,12 +10,12 @@ int(%d)
 
 -- Iteration 3 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 5 --
@@ -44,32 +44,32 @@ array(10) {
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 7 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 8 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 12 --
@@ -77,7 +77,7 @@ int(%d)
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 14 --
@@ -85,36 +85,36 @@ int(%d)
 
 -- Iteration 15 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/array_rand_variation2.php on line 80
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/array_rand_variation2.php on line 80
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/array_rand_variation2.php on line 80
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: array_rand() expects parameter 2 to be integer, string given in %s/array_rand_variation2.php on line 80
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: array_rand() expects parameter 2 to be integer, object given in %s/array_rand_variation2.php on line 80
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: Second argument has to be between 1 and the number of elements in the array in %s/array_rand_variation2.php on line 80
 NULL
 Done

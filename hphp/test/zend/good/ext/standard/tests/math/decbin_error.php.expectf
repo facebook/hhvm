@@ -2,9 +2,9 @@
 
 -- Testing expm1() function with less than expected no. of arguments --
 
-Warning: %s
+Warning: expm1() expects exactly 1 parameter, 0 given in %s/decbin_error.php on line 11
 
 -- Testing expm1() function with more than expected no. of arguments --
 
-Warning: %s
+Warning: expm1() expects exactly 1 parameter, 2 given in %s/decbin_error.php on line 13
 ===Done===

@@ -1,7 +1,7 @@
 Zip archive comment
 foo comment
 foo comment
-Notice: %s
+Notice: ZipArchive::getCommentName(): Empty string as source in %s/oo_getcomment.php on line 15
 
 
-Warning: %s
+Warning: ZipArchive::getCommentName() expects at least 1 parameter, 0 given in %s/oo_getcomment.php on line 16

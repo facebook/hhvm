@@ -1,7 +1,7 @@
 
-Warning: %s
+Warning: Creating default object from empty value in %s/bug47430.php on line 9
 
-Warning: %s
+Warning: Creating default object from empty value in %s/bug47430.php on line 9
 Array
 (
     [0] => Value

@@ -1,6 +1,6 @@
 Test case 1:
-Warning: %s
+Warning: zip_open(): Empty string as source in %s/zip_open_error.php on line 3
 Test case 2:
-Warning: %s
+Warning: zip_open() expects exactly 1 parameter, 2 given in %s/zip_open_error.php on line 6
 Test case 3:
 Failure

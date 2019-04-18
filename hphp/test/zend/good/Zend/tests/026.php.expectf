@@ -1,6 +1,6 @@
 
-Notice: %s
+Notice: Cannot access property on non-object in %s/026.php on line 10
 ok
 
-Warning: %s
+Warning: Creating default object from empty value in %s/026.php on line 13
 ok

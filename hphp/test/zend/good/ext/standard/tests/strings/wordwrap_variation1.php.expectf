@@ -57,59 +57,59 @@ string(3) "0.5"
 string(3) "0.5"
 -- Iteration 10 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 92
 -- Iteration 11 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 92
 -- Iteration 12 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 92
 -- Iteration 13 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 92
 -- Iteration 14 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, array given in %s/wordwrap_variation1.php on line 92
 -- Iteration 15 --
 string(1) "1"
 string(1) "1"
@@ -136,15 +136,15 @@ string(0) ""
 string(0) ""
 -- Iteration 19 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, object given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, object given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, object given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, object given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, object given in %s/wordwrap_variation1.php on line 92
 -- Iteration 20 --
 string(0) ""
 string(0) ""
@@ -171,15 +171,15 @@ string(0) ""
 string(0) ""
 -- Iteration 24 --
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s/wordwrap_variation1.php on line 82
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s/wordwrap_variation1.php on line 83
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s/wordwrap_variation1.php on line 84
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s/wordwrap_variation1.php on line 88
 
-Warning: %s
+Warning: wordwrap() expects parameter 1 to be string, resource given in %s/wordwrap_variation1.php on line 92
 -- Iteration 25 --
 string(0) ""
 string(0) ""

@@ -33,7 +33,7 @@ string(8) "12twelve"
 
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
-Warning: %s
+Warning: ucfirst() expects parameter 1 to be string, array given in %s/ucfirst.php on line 49
 
 --- Testing objects ---
 string(12) "Hello, world"
@@ -60,7 +60,7 @@ string(0) ""
 string(5) "World"
 string(7) "World'S"
 
-Notice: %s
+Notice: Undefined variable: strS in %s/ucfirst.php on line 110
 string(0) ""
 string(6) "WorldS"
 string(6) "WorldS"
@@ -69,9 +69,9 @@ string(6) "WorldS"
 string(5) "Hello"
 
 #### error conditions ####
-Warning: %s
+Warning: ucfirst() expects exactly 1 parameter, 0 given in %s/ucfirst.php on line 122
 
-Warning: %s
+Warning: ucfirst() expects exactly 1 parameter, 2 given in %s/ucfirst.php on line 124
 
-Warning: %s
+Warning: ucfirst() expects exactly 1 parameter, 2 given in %s/ucfirst.php on line 125
 Done

@@ -1,7 +1,7 @@
 *** Testing str_split() : different intger values for 'split_length' ***
 -- Iteration 1 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation6_64bit.php on line 33
 bool(false)
 -- Iteration 2 --
 array(42) {
@@ -92,7 +92,7 @@ array(42) {
 }
 -- Iteration 3 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation6_64bit.php on line 33
 bool(false)
 -- Iteration 4 --
 array(1) {
@@ -118,6 +118,6 @@ array(1) {
 }
 -- Iteration 8 --
 
-Warning: %s
+Warning: Invalid argument: The length of each segment must be greater than zero in %s/str_split_variation6_64bit.php on line 33
 bool(false)
 Done

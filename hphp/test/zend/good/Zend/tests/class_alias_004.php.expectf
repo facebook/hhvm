@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: Cannot redeclare class test in %s/class_alias_004.php on line 8

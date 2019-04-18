@@ -1,5 +1,5 @@
 *** Testing mb_strpos() : error conditions ***
 
-Warning: %s
+Warning: Unknown encoding "unknown-encoding" in %s/mb_strpos_error2.php on line 17
 bool(false)
 Done

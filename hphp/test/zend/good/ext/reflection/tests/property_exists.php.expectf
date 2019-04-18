@@ -110,10 +110,10 @@ obj(C)::$e
 bool(false)
 ===PROBLEMS===
 
-Warning: %s
+Warning: First parameter must either be an object or the name of an existing class in %s/property_exists.php on line 78
 NULL
 
-Warning: %s
+Warning: First parameter must either be an object or the name of an existing class in %s/property_exists.php on line 79
 NULL
 bool(false)
 bool(false)

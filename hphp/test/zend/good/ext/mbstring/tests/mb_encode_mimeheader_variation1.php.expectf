@@ -71,5 +71,5 @@ string(0) ""
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 1 to be string, resource given in %s/mb_encode_mimeheader_variation1.php on line 92
 Done

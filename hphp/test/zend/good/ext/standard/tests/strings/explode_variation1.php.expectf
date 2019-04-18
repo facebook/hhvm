@@ -48,13 +48,13 @@ array(1) {
 }
 -- Iteration 10 --
 
-Warning: %s
+Warning: explode() expects parameter 1 to be string, array given in %s/explode_variation1.php on line 74
 -- Iteration 11 --
 
-Warning: %s
+Warning: explode() expects parameter 1 to be string, array given in %s/explode_variation1.php on line 74
 -- Iteration 12 --
 
-Warning: %s
+Warning: explode() expects parameter 1 to be string, array given in %s/explode_variation1.php on line 74
 -- Iteration 13 --
 array(2) {
   [0]=>
@@ -64,7 +64,7 @@ array(2) {
 }
 -- Iteration 14 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode_variation1.php on line 74
 bool(false)
 -- Iteration 15 --
 array(2) {
@@ -75,15 +75,15 @@ array(2) {
 }
 -- Iteration 16 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode_variation1.php on line 74
 bool(false)
 -- Iteration 17 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode_variation1.php on line 74
 bool(false)
 -- Iteration 18 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode_variation1.php on line 74
 bool(false)
 -- Iteration 19 --
 array(1) {
@@ -92,13 +92,13 @@ array(1) {
 }
 -- Iteration 20 --
 
-Warning: %s
+Warning: explode() expects parameter 1 to be string, resource given in %s/explode_variation1.php on line 74
 -- Iteration 21 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode_variation1.php on line 74
 bool(false)
 -- Iteration 22 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode_variation1.php on line 74
 bool(false)
 ===DONE===

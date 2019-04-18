@@ -29,12 +29,12 @@ int(0)
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 12 --
@@ -42,7 +42,7 @@ int(0)
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 14 --
@@ -50,17 +50,17 @@ int(0)
 
 -- Iteration 15 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 18 --
@@ -77,15 +77,15 @@ int(1)
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: Empty substring. in %s/mb_substr_count_variation2.php on line 88
 bool(false)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_substr_count() expects parameter 2 to be string, resource given in %s/mb_substr_count_variation2.php on line 88
 Done

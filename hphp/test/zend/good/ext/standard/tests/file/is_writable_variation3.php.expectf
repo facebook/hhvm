@@ -16,9 +16,9 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: is_writable() expects parameter 1 to be string, array given in %s/is_writable_variation3.php on line 27
 
-Warning: %s
+Warning: is_writeable() expects parameter 1 to be string, array given in %s/is_writable_variation3.php on line 28
 bool(false)
 bool(false)
 Done

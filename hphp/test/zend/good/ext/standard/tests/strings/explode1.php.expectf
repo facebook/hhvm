@@ -1,29 +1,29 @@
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 30
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 31
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 32
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 33
 bool(false)
 -- Iteration 2 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 30
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 31
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 32
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 33
 bool(false)
 -- Iteration 3 --
 array(1) {
@@ -127,16 +127,16 @@ array(2) {
 }
 -- Iteration 7 --
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 30
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 31
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 32
 bool(false)
 
-Warning: %s
+Warning: Invalid argument: delimiter: (empty) in %s/explode1.php on line 33
 bool(false)
 -- Iteration 8 --
 array(2) {
@@ -414,7 +414,7 @@ array(2) {
 
 *** Testing error conditions ***
 
-Warning: %s
+Warning: explode() expects at most 3 parameters, 4 given in %s/explode1.php on line 76
 
-Warning: %s
+Warning: explode() expects at least 2 parameters, 1 given in %s/explode1.php on line 77
 Done

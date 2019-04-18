@@ -1,82 +1,82 @@
 *** Testing array_map() : unexpected values for 'callback' argument ***
 
 -- Iteration 1 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 2 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 3 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 4 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 5 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 6 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 7 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 8 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 9 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 10 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 11 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 12 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 13 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 14 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 15 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 16 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 17 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 18 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 19 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 
 -- Iteration 20 --
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation17.php on line 67
 NULL
 Done

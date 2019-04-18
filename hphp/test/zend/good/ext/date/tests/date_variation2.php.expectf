@@ -23,19 +23,19 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- empty array --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 98
 
 -- int indexed array --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 98
 
 -- associative array --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 98
 
 -- nested arrays --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 98
 
 -- uppercase NULL --
 string(24) "January 1, 1970, 1:00 am"
@@ -57,35 +57,35 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- empty string DQ --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 98
 
 -- empty string SQ --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 98
 
 -- string DQ --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 98
 
 -- string SQ --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 98
 
 -- mixed case string --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 98
 
 -- heredoc --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, string given in %s/date_variation2.php on line 98
 
 -- instance of classWithToString --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, object given in %s/date_variation2.php on line 98
 
 -- instance of classWithoutToString --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, object given in %s/date_variation2.php on line 98
 
 -- undefined var --
 string(24) "January 1, 1970, 1:00 am"
@@ -95,5 +95,5 @@ string(24) "January 1, 1970, 1:00 am"
 
 -- resource --
 
-Warning: %s
+Warning: date() expects parameter 2 to be integer, resource given in %s/date_variation2.php on line 98
 ===DONE===

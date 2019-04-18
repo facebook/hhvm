@@ -1,11 +1,11 @@
 
-Warning: %s
+Warning: not a public key (1th member of pubkeys) in %s/002.php on line 8
 bool(false)
 
-Warning: %s
+Warning: Fourth argument to openssl_seal() must be a non-empty array in %s/002.php on line 9
 bool(false)
 
-Warning: %s
+Warning: openssl_seal() expects parameter 1 to be string, array given in %s/002.php on line 10
 
-Warning: %s
+Warning: openssl_seal() expects parameter 1 to be string, array given in %s/002.php on line 11
 Done

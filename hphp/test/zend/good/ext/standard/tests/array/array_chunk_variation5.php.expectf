@@ -2,13 +2,13 @@
 
 -- Testing array_chunk() when size = -1 --
 
-Warning: %s
+Warning: Invalid argument: size: -1 in %s/array_chunk_variation5.php on line 27
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: -1 in %s/array_chunk_variation5.php on line 28
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: -1 in %s/array_chunk_variation5.php on line 29
 NULL
 
 -- Testing array_chunk() when size = 4 --
@@ -48,13 +48,13 @@ array(1) {
 
 -- Testing array_chunk() when size = 0 --
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation5.php on line 27
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation5.php on line 28
 NULL
 
-Warning: %s
+Warning: Invalid argument: size: 0 in %s/array_chunk_variation5.php on line 29
 NULL
 
 -- Testing array_chunk() when size = 1.5 --

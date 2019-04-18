@@ -1,6 +1,6 @@
 
-Warning: %s
+Warning: atan2() expects exactly 2 parameters, 0 given in %s/atan2_error.php on line 2
 
-Warning: %s
+Warning: atan2() expects exactly 2 parameters, 1 given in %s/atan2_error.php on line 3
 
-Warning: %s
+Warning: atan2() expects exactly 2 parameters, 3 given in %s/atan2_error.php on line 4

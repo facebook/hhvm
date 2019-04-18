@@ -2,52 +2,52 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: %s
+Warning: cannot write to a stream opened in read only mode in %s/002.php on line 17
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: %s
+Warning: Invalid argument in %s/002.php on line 25
 
-Warning: %s
+Warning: first parameter has to be string or file-resource in %s/002.php on line 26
 bool(false)
 
-Warning: %s
+Warning: Invalid argument in %s/002.php on line 28
 
-Warning: %s
+Warning: first parameter has to be string or file-resource in %s/002.php on line 29
 bool(false)
 
-Warning: %s
+Warning: cannot read from a stream opened in write only mode in %s/002.php on line 32
 bool(false)
 
-Warning: %s
+Warning: cannot write to a stream opened in read only mode in %s/002.php on line 35
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'rw' in %s/002.php on line 38
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'rw' in %s/002.php on line 41
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'wr' in %s/002.php on line 44
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'wr' in %s/002.php on line 47
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'r+' in %s/002.php on line 50
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'r+' in %s/002.php on line 53
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'w+' in %s/002.php on line 56
 bool(false)
 
-Warning: %s
+Warning: cannot use stream opened in mode 'w+' in %s/002.php on line 59
 bool(false)
 
-Warning: %s
+Warning: cannot write to a stream opened in read only mode in %s/002.php on line 62
 bool(false)
 resource(%d) of type (stream)
 Done

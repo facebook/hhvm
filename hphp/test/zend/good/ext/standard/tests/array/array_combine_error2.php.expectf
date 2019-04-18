@@ -6,16 +6,16 @@ array(0) {
 
 -- Testing array_combine() function with empty array for $keys argument --
 
-Warning: %s
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/array_combine_error2.php on line 16
 bool(false)
 
 -- Testing array_combine() function with empty array for $values argument --
 
-Warning: %s
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/array_combine_error2.php on line 20
 bool(false)
 
 -- Testing array_combine() function by passing array with unequal number of elements --
 
-Warning: %s
+Warning: array_combine(): Both parameters should have an equal number of elements in %s/array_combine_error2.php on line 24
 bool(false)
 Done

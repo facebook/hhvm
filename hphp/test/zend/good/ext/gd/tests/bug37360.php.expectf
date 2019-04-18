@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: '%s/bug37360.gif' is not a valid GIF file in %s/bug37360.php on line 2
 bool(false)

@@ -5,7 +5,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: %s
+Warning: is_dir() expects parameter 1 to be string, resource given in %s/is_dir_variation3.php on line 29
 bool(false)
 bool(false)
 

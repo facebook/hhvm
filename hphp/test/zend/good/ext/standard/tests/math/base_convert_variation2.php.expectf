@@ -2,27 +2,27 @@
 
 -- Iteration 1 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 2 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 1 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 3 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: -1 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: -12 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 2147483647 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 6 --
@@ -30,85 +30,85 @@ string(2) "31"
 
 -- Iteration 7 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: -10 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 8 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 123 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 1 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 14 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 15 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 1 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: base_convert() expects parameter 2 to be integer, string given in %s/base_convert_variation2.php on line 65
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: base_convert() expects parameter 2 to be integer, string given in %s/base_convert_variation2.php on line 65
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: base_convert() expects parameter 2 to be integer, array given in %s/base_convert_variation2.php on line 65
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: base_convert() expects parameter 2 to be integer, string given in %s/base_convert_variation2.php on line 65
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: base_convert() expects parameter 2 to be integer, string given in %s/base_convert_variation2.php on line 65
 
 -- Iteration 22 --
 
-Warning: %s
+Warning: base_convert() expects parameter 2 to be integer, string given in %s/base_convert_variation2.php on line 65
 
 -- Iteration 23 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: Invalid argument: Invalid frombase: 0 in %s/base_convert_variation2.php on line 65
 bool(false)
 ===Done===

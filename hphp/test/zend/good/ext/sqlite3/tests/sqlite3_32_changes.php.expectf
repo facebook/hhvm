@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: SQLite3::changes() expects exactly 0 parameters, 1 given in %s/sqlite3_32_changes.php on line 6

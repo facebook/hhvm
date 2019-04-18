@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: gd-png error: no colors in palette in %s/bug45799.php on line 3

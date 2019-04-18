@@ -38,19 +38,19 @@ float(%f)
 
 --empty array--
 
-Warning: %s
+Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s/gettimeofday_variation1.php on line 94
 
 --int indexed array--
 
-Warning: %s
+Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s/gettimeofday_variation1.php on line 94
 
 --associative array--
 
-Warning: %s
+Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s/gettimeofday_variation1.php on line 94
 
 --nested arrays--
 
-Warning: %s
+Warning: gettimeofday() expects parameter 1 to be boolean, array given in %s/gettimeofday_variation1.php on line 94
 
 --uppercase NULL--
 array(4) {
@@ -144,11 +144,11 @@ float(%f)
 
 --instance of classWithToString--
 
-Warning: %s
+Warning: gettimeofday() expects parameter 1 to be boolean, object given in %s/gettimeofday_variation1.php on line 94
 
 --instance of classWithoutToString--
 
-Warning: %s
+Warning: gettimeofday() expects parameter 1 to be boolean, object given in %s/gettimeofday_variation1.php on line 94
 
 --undefined var--
 array(4) {

@@ -1,12 +1,13 @@
+
 *** Create hard link in different directory with same filename ***
 
-Warning: %s
+Warning: link(): File exists in %s/symlink_link_linkinfo_is_link_variation8.php on line 30
 bool(false)
 bool(true)
 
 *** Create soft link in different directory with same filename ***
 
-Warning: %s
+Warning: symlink(): File exists in %s/symlink_link_linkinfo_is_link_variation8.php on line 50
 bool(false)
 bool(true)
 Done

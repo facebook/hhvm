@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s/bug67252.php on line 4
 bool(false)

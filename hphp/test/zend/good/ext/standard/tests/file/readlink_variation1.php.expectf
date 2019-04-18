@@ -1,26 +1,26 @@
 *** Testing Invalid file types ***
 
-Warning: %s
+Warning: readlink(): No such file or directory -2.34555 in %s/readlink_variation1.php on line 27
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_variation1.php on line 27
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory 1 in %s/readlink_variation1.php on line 27
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_variation1.php on line 27
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory  in %s/readlink_variation1.php on line 27
 bool(false)
 
-Warning: %s
+Warning: readlink() expects parameter 1 to be string, resource given in %s/readlink_variation1.php on line 27
 
-Warning: %s
+Warning: readlink(): No such file or directory 1234 in %s/readlink_variation1.php on line 27
 bool(false)
 
-Warning: %s
+Warning: readlink(): No such file or directory 0 in %s/readlink_variation1.php on line 27
 bool(false)
 
 *** Done ***

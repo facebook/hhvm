@@ -62,27 +62,27 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, string given in %s/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, object given in %s/mb_encode_mimeheader_variation5.php on line 94
 
 -- Iteration 22 --
 string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr868?=
@@ -94,5 +94,5 @@ string(115) "=?UTF-8?B?zpHPhc+Ez4wgzrXOr869zrHOuSDOtc67zrvOt869zrnOus+MIM66zrXOr
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_encode_mimeheader() expects parameter 5 to be integer, resource given in %s/mb_encode_mimeheader_variation5.php on line 94
 Done

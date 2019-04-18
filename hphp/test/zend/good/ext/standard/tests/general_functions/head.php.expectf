@@ -3,19 +3,19 @@ bool(false)
 array(0) {
 }
 
-Warning: %s
+Warning: Cannot modify header information - headers already sent in %s/head.php on line 10
 NULL
 
-Warning: %s
+Warning: Cannot modify header information - headers already sent in %s/head.php on line 11
 NULL
 bool(true)
 array(0) {
 }
 
-Warning: %s
+Warning: Cannot modify header information - headers already sent in %s/head.php on line 14
 NULL
 
-Warning: %s
+Warning: Cannot modify header information - headers already sent in %s/head.php on line 15
 NULL
 bool(true)
 array(0) {

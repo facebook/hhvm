@@ -4,12 +4,12 @@ string(1) "2"
 string(4) "1009"
 string(6) "100003"
 
-Warning: %s
+Warning: gmp_nextprime(): Unable to convert variable to GMP - wrong type in %s/gmp_nextprime.php on line 13
 string(1) "0"
 
-Warning: %s
+Warning: gmp_nextprime(): Unable to convert variable to GMP - string is not an integer in %s/gmp_nextprime.php on line 15
 string(1) "0"
 
-Warning: %s
+Warning: gmp_nextprime(): supplied object is not a valid GMP object in %s/gmp_nextprime.php on line 17
 string(1) "0"
 Done

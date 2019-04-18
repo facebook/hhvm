@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: rename(): No such file or directory in %s/bug45986.php on line 2

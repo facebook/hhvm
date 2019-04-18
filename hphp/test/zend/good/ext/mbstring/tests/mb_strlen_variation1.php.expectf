@@ -71,5 +71,5 @@ int(0)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_strlen() expects parameter 1 to be string, resource given in %s/mb_strlen_variation1.php on line 88
 Done

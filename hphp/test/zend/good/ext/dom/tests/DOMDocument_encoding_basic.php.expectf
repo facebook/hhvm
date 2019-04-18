@@ -1,6 +1,6 @@
 Empty Encoding Read: 
 
-Warning: %s
+Warning: Invalid Document Encoding in %s/DOMDocument_encoding_basic.php on line 16
 Adding invalid encoding: NYPHP DOMinatrix
 Adding ISO-8859-1 encoding: ISO-8859-1
 ISO-8859-1 Encoding Read: ISO-8859-1

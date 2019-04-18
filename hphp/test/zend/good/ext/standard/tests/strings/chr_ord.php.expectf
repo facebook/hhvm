@@ -82,13 +82,13 @@ int(97)
 
 *** Testing chr() error conditions ***
 
-Warning: %s
+Warning: chr() expects exactly 1 parameter, 0 given in %s/chr_ord.php on line 52
 
-Warning: %s
+Warning: chr() expects exactly 1 parameter, 2 given in %s/chr_ord.php on line 54
 
 *** Testing ord() error conditions ***
 
-Warning: %s
+Warning: ord() expects exactly 1 parameter, 0 given in %s/chr_ord.php on line 59
 
-Warning: %s
+Warning: ord() expects exactly 1 parameter, 2 given in %s/chr_ord.php on line 61
 Done

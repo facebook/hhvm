@@ -2,5 +2,5 @@
 Strings are equal
 Strings are equal
 
-Warning: %s
+Warning: insufficient memory in %s/gzinflate_length.php on line 11
 Failed (as expected)

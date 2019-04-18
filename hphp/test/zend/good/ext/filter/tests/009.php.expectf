@@ -4,8 +4,8 @@ int(518)
 int(257)
 bool(false)
 
-Warning: %s
+Warning: filter_id() expects parameter 1 to be string, array given in %s/009.php on line 8
 bool(false)
 
-Warning: %s
+Warning: filter_id() expects exactly 1 parameter, 3 given in %s/009.php on line 10
 Done

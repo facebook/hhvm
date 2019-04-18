@@ -26,12 +26,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: No such file or directory in %s/file_variation8.php on line 47
 bool(false)
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: No such file or directory in %s/file_variation8.php on line 47
 bool(false)
 
 -- Iteration 7 --
@@ -60,7 +60,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: No such file or directory in %s/file_variation8.php on line 47
 bool(false)
 
 *** Done ***

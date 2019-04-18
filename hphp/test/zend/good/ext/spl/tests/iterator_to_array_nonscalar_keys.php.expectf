@@ -1,7 +1,7 @@
 
-Warning: %s
+Warning: Invalid operand type was used: Invalid type used as key in %s/iterator_to_array_nonscalar_keys.php on line 12
 
-Warning: %s
+Warning: Invalid operand type was used: Invalid type used as key in %s/iterator_to_array_nonscalar_keys.php on line 12
 array(4) {
   ["foo"]=>
   int(0)

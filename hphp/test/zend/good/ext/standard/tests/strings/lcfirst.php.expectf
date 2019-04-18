@@ -33,10 +33,10 @@ string(8) "12twelve"
 
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
-Warning: %s
+Warning: lcfirst() expects parameter 1 to be string, array given in %s/lcfirst.php on line 49
 
 --- Testing lowercamelcase action call example ---
-string(%d) "partnerName"
+string(11) "partnerName"
 
 --- Testing objects ---
 string(11) "hello world"
@@ -63,7 +63,7 @@ string(0) ""
 string(5) "world"
 string(7) "world'S"
 
-Notice: %s
+Notice: Undefined variable: strS in %s/lcfirst.php on line 139
 string(0) ""
 string(6) "worldS"
 string(6) "worldS"
@@ -72,9 +72,9 @@ string(6) "worldS"
 string(5) "hello"
 
 #### error conditions ####
-Warning: %s
+Warning: lcfirst() expects exactly 1 parameter, 0 given in %s/lcfirst.php on line 151
 
-Warning: %s
+Warning: lcfirst() expects exactly 1 parameter, 2 given in %s/lcfirst.php on line 153
 
-Warning: %s
+Warning: lcfirst() expects exactly 1 parameter, 2 given in %s/lcfirst.php on line 154
 Done

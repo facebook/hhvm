@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: Invalid argument: nanoseconds: has to be 0 to 999999999 in %s/time_nanosleep_error5.php on line 3

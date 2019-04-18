@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: DOMCharacterData::deleteData() expects exactly 2 parameters, 0 given in %s/DOMCharacterData_deleteData_error_001.php on line 8

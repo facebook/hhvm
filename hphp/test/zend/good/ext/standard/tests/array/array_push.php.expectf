@@ -1,11 +1,12 @@
+
 *** Testing Error Conditions ***
 
-Warning: %s
+Warning: array_push() expects exactly 2 parameters, 0 given in %s/array_push.php on line 36
 
-Warning: %s
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 39
 NULL
 
-Warning: %s
+Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 42
 NULL
 int(11)
 int(1)

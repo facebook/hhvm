@@ -19,13 +19,13 @@ string(5) "-20.5"
 string(12) "101234567000"
 -- Iteration 10 --
 
-Warning: %s
+Warning: rtrim() expects parameter 1 to be string, array given in %s/rtrim_variation1.php on line 73
 -- Iteration 11 --
 
-Warning: %s
+Warning: rtrim() expects parameter 1 to be string, array given in %s/rtrim_variation1.php on line 73
 -- Iteration 12 --
 
-Warning: %s
+Warning: rtrim() expects parameter 1 to be string, array given in %s/rtrim_variation1.php on line 73
 -- Iteration 13 --
 string(1) "1"
 -- Iteration 14 --
@@ -42,7 +42,7 @@ string(0) ""
 string(19) "  !---sample object"
 -- Iteration 20 --
 
-Warning: %s
+Warning: rtrim() expects parameter 1 to be string, resource given in %s/rtrim_variation1.php on line 73
 -- Iteration 21 --
 string(0) ""
 -- Iteration 22 --

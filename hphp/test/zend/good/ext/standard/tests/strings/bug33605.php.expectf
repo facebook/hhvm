@@ -1,3 +1,3 @@
 
-Warning: %s
+Warning: The length must be greater than zero in %s/bug33605.php on line 2
 bool(false)

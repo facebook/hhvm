@@ -1,5 +1,5 @@
 
-Warning: %s
+Warning: Parameter mismatch, pattern is a string while replacement is an array in %s/preg_replace2.php on line 3
 bool(false)
 string(1) "c"
 array(3) {

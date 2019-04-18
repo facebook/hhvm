@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagestring() expects parameter 6 to be integer, string given in %s/imagestring_error7.php on line 3

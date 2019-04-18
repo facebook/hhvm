@@ -8,9 +8,9 @@ array(0) {
 --- testing autoload ---
 attempting to autoload non_existent
 
-Warning: %s
+Warning: class_uses(): Class non_existent does not exist and could not be loaded in %s/class_uses_variation.php on line 16
 bool(false)
 
-Warning: %s
+Warning: class_uses(): Class non_existent2 does not exist in %s/class_uses_variation.php on line 17
 bool(false)
 ===DONE===

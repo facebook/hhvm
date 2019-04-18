@@ -10,9 +10,9 @@ array(3) {
 }
 -- with built-in function 'pow' and one parameter --
 
-Warning: %s
+Warning: pow() expects exactly 2 parameters, 1 given in %s/array_map_variation12.php on line 20
 -- with language construct --
 
-Warning: %s
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation12.php on line 23
 NULL
 Done

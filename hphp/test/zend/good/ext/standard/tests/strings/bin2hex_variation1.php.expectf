@@ -13,13 +13,13 @@ string(10) "2d32302e35"
 string(24) "313031323334353637303030"
 -- Iteration 7 --
 
-Warning: %s
+Warning: bin2hex() expects parameter 1 to be string, array given in %s/bin2hex_variation1.php on line 69
 -- Iteration 8 --
 
-Warning: %s
+Warning: bin2hex() expects parameter 1 to be string, array given in %s/bin2hex_variation1.php on line 69
 -- Iteration 9 --
 
-Warning: %s
+Warning: bin2hex() expects parameter 1 to be string, array given in %s/bin2hex_variation1.php on line 69
 -- Iteration 10 --
 string(2) "31"
 -- Iteration 11 --
@@ -36,7 +36,7 @@ string(0) ""
 string(26) "73616d706c65206f626a656374"
 -- Iteration 17 --
 
-Warning: %s
+Warning: bin2hex() expects parameter 1 to be string, resource given in %s/bin2hex_variation1.php on line 69
 -- Iteration 18 --
 string(0) ""
 -- Iteration 19 --

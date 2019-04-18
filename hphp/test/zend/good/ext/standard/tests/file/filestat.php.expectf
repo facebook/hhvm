@@ -14,18 +14,18 @@ int(%d)
 int(%d)
 int(%d)
 
-Warning: %s
+Warning: fileinode(): No such file or directory in %s/filestat.php on line 21
 bool(false)
 
-Warning: %s
+Warning: fileowner(): No such file or directory in %s/filestat.php on line 22
 bool(false)
 
-Warning: %s
+Warning: filegroup(): No such file or directory in %s/filestat.php on line 23
 bool(false)
 
-Warning: %s
+Warning: fileatime(): No such file or directory in %s/filestat.php on line 24
 bool(false)
 
-Warning: %s
+Warning: filectime(): No such file or directory in %s/filestat.php on line 25
 bool(false)
 Done

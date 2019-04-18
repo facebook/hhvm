@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: Operation disallowed prior to mcrypt_generic_init(). in %s/bug49738.php on line 5

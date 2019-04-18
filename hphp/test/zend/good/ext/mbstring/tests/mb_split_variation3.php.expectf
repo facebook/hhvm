@@ -182,27 +182,27 @@ array(1) {
 
 -- Iteration 16 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/mb_split_variation3.php on line 87
 
 -- Iteration 17 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/mb_split_variation3.php on line 87
 
 -- Iteration 18 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/mb_split_variation3.php on line 87
 
 -- Iteration 19 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/mb_split_variation3.php on line 87
 
 -- Iteration 20 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, string given in %s/mb_split_variation3.php on line 87
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, object given in %s/mb_split_variation3.php on line 87
 
 -- Iteration 22 --
 array(1) {
@@ -218,5 +218,5 @@ array(1) {
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_split() expects parameter 3 to be integer, resource given in %s/mb_split_variation3.php on line 87
 Done

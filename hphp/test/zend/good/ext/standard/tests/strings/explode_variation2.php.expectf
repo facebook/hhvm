@@ -46,13 +46,13 @@ array(1) {
 }
 -- Iteration 10 --
 
-Warning: %s
+Warning: explode() expects parameter 2 to be string, array given in %s/explode_variation2.php on line 74
 -- Iteration 11 --
 
-Warning: %s
+Warning: explode() expects parameter 2 to be string, array given in %s/explode_variation2.php on line 74
 -- Iteration 12 --
 
-Warning: %s
+Warning: explode() expects parameter 2 to be string, array given in %s/explode_variation2.php on line 74
 -- Iteration 13 --
 array(1) {
   [0]=>
@@ -92,7 +92,7 @@ array(2) {
 }
 -- Iteration 20 --
 
-Warning: %s
+Warning: explode() expects parameter 2 to be string, resource given in %s/explode_variation2.php on line 74
 -- Iteration 21 --
 array(1) {
   [0]=>

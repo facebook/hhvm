@@ -1,6 +1,6 @@
 
-Warning: %s
+Warning: imagesetthickness() expects parameter 2 to be integer, string given in %s/imagesetthickness_error2.php on line 4
 
-Warning: %s
+Warning: imagesetthickness() expects parameter 2 to be integer, array given in %s/imagesetthickness_error2.php on line 5
 
-Warning: %s
+Warning: imagesetthickness() expects parameter 2 to be integer, resource given in %s/imagesetthickness_error2.php on line 6

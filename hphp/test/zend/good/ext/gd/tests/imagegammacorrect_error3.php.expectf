@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagegammacorrect() expects parameter 2 to be double, string given in %s/imagegammacorrect_error3.php on line 3

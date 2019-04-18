@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagefilltoborder() expects parameter 4 to be integer, string given in %s/imagefilltoborder_error4.php on line 12

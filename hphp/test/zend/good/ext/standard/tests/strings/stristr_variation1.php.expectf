@@ -15,13 +15,13 @@ bool(false)
 bool(false)
 -- Iteration 8 --
 
-Warning: %s
+Warning: stristr() expects parameter 1 to be string, array given in %s/stristr_variation1.php on line 72
 -- Iteration 9 --
 
-Warning: %s
+Warning: stristr() expects parameter 1 to be string, array given in %s/stristr_variation1.php on line 72
 -- Iteration 10 --
 
-Warning: %s
+Warning: stristr() expects parameter 1 to be string, array given in %s/stristr_variation1.php on line 72
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
@@ -38,7 +38,7 @@ bool(false)
 string(7) " object"
 -- Iteration 18 --
 
-Warning: %s
+Warning: stristr() expects parameter 1 to be string, resource given in %s/stristr_variation1.php on line 72
 -- Iteration 19 --
 bool(false)
 -- Iteration 20 --

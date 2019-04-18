@@ -7,7 +7,7 @@ array(1) {
   string(5) "str%c%c"
 }
 
-Warning: %s
+Warning: Invalid argument: Type a: not enough input, need 6, have 5 in %s/bug61038.php on line 4
 bool(false)
 array(1) {
   [1]=>

@@ -29,23 +29,23 @@ bool(false)
 
 -- Iteration 10 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation9.php on line 81
 
 -- Iteration 11 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation9.php on line 81
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation9.php on line 81
 
 -- Iteration 13 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation9.php on line 81
 
 -- Iteration 14 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, array given in %s/stripos_variation9.php on line 81
 
 -- Iteration 15 --
 bool(false)
@@ -76,7 +76,7 @@ bool(false)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: stripos() expects parameter 1 to be string, resource given in %s/stripos_variation9.php on line 81
 
 -- Iteration 25 --
 bool(false)

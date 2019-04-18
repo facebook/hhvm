@@ -3,7 +3,7 @@
 -- Iteration 1 --
 Pass float as $key:
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation3.php on line 23
 bool(false)
 Cast float to int:
 bool(true)
@@ -11,7 +11,7 @@ bool(true)
 -- Iteration 1 --
 Pass float as $key:
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation3.php on line 23
 bool(false)
 Cast float to int:
 bool(true)
@@ -19,7 +19,7 @@ bool(true)
 -- Iteration 1 --
 Pass float as $key:
 
-Warning: %s
+Warning: Array key should be either a string or an integer in %s/array_key_exists_variation3.php on line 23
 bool(false)
 Cast float to int:
 bool(true)

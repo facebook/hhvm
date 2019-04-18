@@ -2,47 +2,47 @@
 
 -- Iteration 1 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `0' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 2 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `1' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 3 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `12345' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 4 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `-2345' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 5 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `10.5' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 6 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `-10.5' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 7 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `123456789000' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 8 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `1.23456789E-9' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 9 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `0.5' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 10 --
@@ -53,7 +53,7 @@ int(7)
 
 -- Iteration 12 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `1' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 13 --
@@ -61,7 +61,7 @@ int(7)
 
 -- Iteration 14 --
 
-Notice: %s
+Notice: iconv_strpos(): Wrong charset, conversion from `1' to `UCS-4LE' is not allowed in %s/iconv_strpos_variation4.php on line 92
 bool(false)
 
 -- Iteration 15 --
@@ -93,5 +93,5 @@ int(7)
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: iconv_strpos() expects parameter 4 to be string, resource given in %s/iconv_strpos_variation4.php on line 92
 Done

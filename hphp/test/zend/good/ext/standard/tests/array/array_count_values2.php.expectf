@@ -1,9 +1,9 @@
 
-Warning: %s
+Warning: Can only count STRING and INTEGER values! in %s/array_count_values2.php on line 15
 
-Warning: %s
+Warning: Can only count STRING and INTEGER values! in %s/array_count_values2.php on line 15
 
-Warning: %s
+Warning: Can only count STRING and INTEGER values! in %s/array_count_values2.php on line 15
 array(8) {
   [1]=>
   int(2)

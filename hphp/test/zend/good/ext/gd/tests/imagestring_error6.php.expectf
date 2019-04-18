@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imagestring() expects parameter 5 to be string, resource given in %s/imagestring_error6.php on line 3

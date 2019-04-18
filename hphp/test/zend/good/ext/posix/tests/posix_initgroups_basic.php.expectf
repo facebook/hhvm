@@ -1,5 +1,5 @@
 Basic test of POSIX posix_initgroups function
 
-Warning: %s
+Warning: posix_initgroups() expects parameter 2 to be integer, string given in %s/posix_initgroups_basic.php on line 3
 bool(false)
 ===DONE====

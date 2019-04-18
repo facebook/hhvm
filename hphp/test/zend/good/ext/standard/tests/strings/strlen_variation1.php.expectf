@@ -17,13 +17,13 @@ int(5)
 int(12)
 -- Iteration 9 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strlen_variation1.php on line 74
 -- Iteration 10 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strlen_variation1.php on line 74
 -- Iteration 11 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, array given in %s/strlen_variation1.php on line 74
 -- Iteration 12 --
 int(1)
 -- Iteration 13 --
@@ -40,7 +40,7 @@ int(0)
 int(13)
 -- Iteration 19 --
 
-Warning: %s
+Warning: strlen() expects parameter 1 to be string, resource given in %s/strlen_variation1.php on line 74
 -- Iteration 20 --
 int(0)
 -- Iteration 21 --

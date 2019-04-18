@@ -1,3 +1,4 @@
+
 string(0) ""
 string(0) ""
 string(1) "0"
@@ -8,11 +9,11 @@ string(15) "%r\x09%rtesting trim  "
 
 *** Testing error conditions ***
 
-Warning: %s
+Warning: trim() expects at least 1 parameter, 0 given in %s/trim1.php on line 27
 
-Warning: %s
+Warning: trim() expects at most 2 parameters, 3 given in %s/trim1.php on line 29
 
-Warning: %s
+Warning: trim() expects at most 2 parameters, 3 given in %s/trim1.php on line 30
 
 *** Testing with OBJECTS ***
 string(4) "bjec"

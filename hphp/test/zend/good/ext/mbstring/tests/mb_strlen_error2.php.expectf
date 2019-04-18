@@ -1,5 +1,5 @@
 *** Testing mb_strlen() : error ***
 
-Warning: %s
+Warning: Unknown encoding "unknown-encoding" in %s/mb_strlen_error2.php on line 17
 bool(false)
 Done

@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: imageellipse() expects parameter 1 to be resource, string given in %s/imageellipse_error1.php on line 7

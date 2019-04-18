@@ -2,47 +2,47 @@
 
 -- Iteration 1 --
 
-Warning: %s
+Warning: Unknown encoding "0" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 2 --
 
-Warning: %s
+Warning: Unknown encoding "1" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 3 --
 
-Warning: %s
+Warning: Unknown encoding "12345" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 4 --
 
-Warning: %s
+Warning: Unknown encoding "-2345" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 5 --
 
-Warning: %s
+Warning: Unknown encoding "10.5" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 6 --
 
-Warning: %s
+Warning: Unknown encoding "-10.5" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 7 --
 
-Warning: %s
+Warning: Unknown encoding "123456789000" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 8 --
 
-Warning: %s
+Warning: Unknown encoding "1.23456789E-9" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 9 --
 
-Warning: %s
+Warning: Unknown encoding "0.5" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 10 --
@@ -53,7 +53,7 @@ string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 12 --
 
-Warning: %s
+Warning: Unknown encoding "1" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 13 --
@@ -61,7 +61,7 @@ string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 14 --
 
-Warning: %s
+Warning: Unknown encoding "1" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 15 --
@@ -84,7 +84,7 @@ string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 21 --
 
-Warning: %s
+Warning: Unknown encoding "Class A object" in %s/mb_convert_encoding_variation1.php on line 90
 string(0) ""
 
 -- Iteration 22 --
@@ -95,5 +95,5 @@ string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_convert_encoding() expects parameter 2 to be string, resource given in %s/mb_convert_encoding_variation1.php on line 90
 Done

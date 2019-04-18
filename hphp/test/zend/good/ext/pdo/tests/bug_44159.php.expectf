@@ -1,14 +1,14 @@
 
-Warning: %s
+Warning: SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s/bug_44159.php on line 7
 bool(false)
 
-Warning: %s
+Warning: SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s/bug_44159.php on line 8
 bool(false)
 
-Warning: %s
+Warning: SQLSTATE[HY000]: General error: PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); the classname must be a string specifying an existing class in %s/bug_44159.php on line 9
 bool(false)
 
-Warning: %s
+Warning: SQLSTATE[HY000]: General error: attribute value must be an integer in %s/bug_44159.php on line 7
 bool(false)
 bool(true)
 bool(true)

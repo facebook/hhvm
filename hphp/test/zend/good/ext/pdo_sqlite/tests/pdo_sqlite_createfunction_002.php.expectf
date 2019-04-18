@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: function 'bar' is not callable in %s/pdo_sqlite_createfunction_002.php on line 5

@@ -2,7 +2,7 @@
 
 -- Testing array_fill_keys() function with both wrong arguments --
 
-Warning: %s
+Warning: Invalid operand type was used: array_fill_keys expects an array or collection in %s/array_fill_keys_variation3.php on line 20
 NULL
 
 -- Testing array_fill_keys() function with unusual second arguments --
@@ -15,6 +15,6 @@ array(2) {
 
 -- Testing array_fill_keys() function with mixed array --
 
-Warning: %s
+Warning: Invalid operand type was used: array_fill_keys expects an array or collection in %s/array_fill_keys_variation3.php on line 26
 NULL
 Done

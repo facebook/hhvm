@@ -1,13 +1,13 @@
 
-Warning: %s
+Warning: fstat() expects parameter 1 to be resource, null given in %s/fstat_variation3.php on line 16
 
-Warning: %s
+Warning: fstat() expects parameter 1 to be resource, null given in %s/fstat_variation3.php on line 16
 
-Warning: %s
+Warning: fstat() expects parameter 1 to be resource, string given in %s/fstat_variation3.php on line 16
 
-Warning: %s
+Warning: fstat() expects parameter 1 to be resource, string given in %s/fstat_variation3.php on line 16
 
-Warning: %s
+Warning: fstat() expects parameter 1 to be resource, null given in %s/fstat_variation3.php on line 16
 
-Warning: %s
+Warning: fstat() expects parameter 1 to be resource, null given in %s/fstat_variation3.php on line 16
 ===DONE===

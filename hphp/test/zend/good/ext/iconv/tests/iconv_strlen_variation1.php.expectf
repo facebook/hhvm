@@ -74,5 +74,5 @@ int(0)
 
 --resource--
 
-Warning: %s
+Warning: iconv_strlen() expects parameter 1 to be string, resource given in %s/iconv_strlen_variation1.php on line 99
 ===DONE===

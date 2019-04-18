@@ -1,4 +1,4 @@
 
-Warning: %s
+Warning: Invalid threshold value '9' in %s/jpeg2wbmp_error1.php on line 16
 
-Warning: %s
+Warning: Invalid threshold value '-1' in %s/jpeg2wbmp_error1.php on line 17

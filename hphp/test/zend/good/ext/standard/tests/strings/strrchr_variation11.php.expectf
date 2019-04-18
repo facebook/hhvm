@@ -19,19 +19,19 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation11.php on line 80
 -- Iteration 11 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation11.php on line 80
 -- Iteration 12 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation11.php on line 80
 -- Iteration 13 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation11.php on line 80
 -- Iteration 14 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, array given in %s/strrchr_variation11.php on line 80
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -42,7 +42,7 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Notice: %s
+Notice: Object of class sample could not be converted to int in %s/strrchr_variation11.php on line 80
 bool(false)
 -- Iteration 20 --
 bool(false)
@@ -54,7 +54,7 @@ bool(false)
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
+Warning: strrchr() expects parameter 1 to be string, resource given in %s/strrchr_variation11.php on line 80
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

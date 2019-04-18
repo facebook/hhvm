@@ -2,5 +2,5 @@ SimpleXMLElement Object
 (
 )
 
-Warning: %s
+Warning: Invalid argument supplied for foreach() in %s/bug38347.php on line 6
 Done

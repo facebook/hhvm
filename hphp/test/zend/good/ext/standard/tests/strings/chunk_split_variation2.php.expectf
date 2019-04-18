@@ -3,79 +3,79 @@
 string(28) "This is ch*uklen vari*ation*"
 -- Iteration 2 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 3 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 4 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 5 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 6 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
 -- Iteration 7 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
 -- Iteration 8 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
 -- Iteration 9 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
 -- Iteration 10 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
 -- Iteration 11 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 12 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 13 --
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 14 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 15 --
 string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
 -- Iteration 16 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 17 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
 -- Iteration 18 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
 -- Iteration 19 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
 -- Iteration 20 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
 -- Iteration 21 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, object given in %s/chunk_split_variation2.php on line 80
 -- Iteration 22 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 23 --
 
-Warning: %s
+Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
 bool(false)
 -- Iteration 24 --
 
-Warning: %s
+Warning: chunk_split() expects parameter 2 to be integer, resource given in %s/chunk_split_variation2.php on line 80
 ===DONE===

@@ -1,13 +1,14 @@
+
 *** Testing error conditions ***
-Warning: %s
+Warning: file() expects at least 1 parameter, 0 given in %s/file_error.php on line 10
 
-Warning: %s
+Warning: file() expects at most 3 parameters, 4 given in %s/file_error.php on line 13
 
-Warning: %s
+Warning: file() expects parameter 2 to be integer, string given in %s/file_error.php on line 15
 array(0) {
 }
 
-Warning: %s
+Warning: No such file or directory in %s/file_error.php on line 18
 bool(false)
 
 --- Done ---

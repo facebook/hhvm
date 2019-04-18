@@ -1,2 +1,2 @@
 
-Warning: %s
+Warning: SQLite3Result::reset() expects exactly 0 parameters, 1 given in %s/sqlite3result_reset_with_params_fails.php on line 8

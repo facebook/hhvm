@@ -71,5 +71,5 @@ string(0) ""
 
 -- Iteration 24 --
 
-Warning: %s
+Warning: mb_ereg_replace() expects parameter 3 to be string, resource given in %s/mb_ereg_replace_variation3.php on line 88
 Done

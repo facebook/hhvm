@@ -1062,16 +1062,22 @@ and case_list parent_locals ty env switch_pos cl =
       end (* match *)
     else () in
 
-  let make_exhaustive_equivalent_case_list cl =
+  let make_exhaustive_equivalent_case_list env cl =
     let has_default = List.exists cl ~f:(function Default _ -> true | _ -> false) in
-    let is_enum = match snd @@ snd @@ Env.expand_type env ty with
+    let env, ty =
+      (* If it hasn't got a default clause then we need to solve type variables
+       * in order to check for an enum *)
+      if has_default
+      then Env.expand_type env ty
+      else SubType.expand_type_and_solve env ~description_of_expected:"a value" switch_pos ty in
+    let is_enum = match snd ty with
       | Tabstract (AKenum _, _) -> true
       | _ -> false in
     (* If there is no default case and this is not a switch on enum (since
      * exhaustiveness is garanteed elsewhere on enums),
      * then add a default case for control flow correctness
      *)
-    if has_default || is_enum then cl, false else cl @ [Default []], true in
+    if has_default || is_enum then env, cl, false else env, cl @ [Default []], true in
 
   let rec case_list env = function
     | [] -> env, []
@@ -1089,7 +1095,7 @@ and case_list parent_locals ty env switch_pos cl =
       let env, tcl = case_list env rl in
       env, T.Case (te, tb)::tcl in
 
-  let cl, added_empty_default = make_exhaustive_equivalent_case_list cl in
+  let env, cl, added_empty_default = make_exhaustive_equivalent_case_list env cl in
   let env, tcl = case_list env cl in
   let tcl = if added_empty_default then List.take tcl (List.length tcl - 1) else tcl in
   env, tcl

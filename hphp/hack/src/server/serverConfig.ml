@@ -224,7 +224,7 @@ let load config_filename options =
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
   let config = SMap.union config config_overrides in
   process_untrusted_mode config;
-  let local_config = ServerLocalConfig.load ~silent:false in
+  let local_config = ServerLocalConfig.load ~silent:false config_overrides in
   let local_config =
     if ServerArgs.ai_mode options <> None then
       ServerLocalConfig.{

@@ -200,7 +200,7 @@ let dump_saved_state
     dump_class_decls (get_decls_filename output_filename)
 
 let update_save_state
-    ~(file_info_on_disk: bool)
+    ~(enable_reverse_naming_table_fallback: bool)
     ~(save_decls: bool)
     (naming_table: Naming_table.t)
     (errors: Errors.t)
@@ -211,7 +211,7 @@ let update_save_state
   if not (RealDisk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
   dump_saved_state ~save_decls output_filename naming_table errors;
-  let () = if file_info_on_disk then begin
+  let () = if enable_reverse_naming_table_fallback then begin
     failwith "incrementally updating file info on disk not yet implemented"
   end else begin
     Hh_logger.log "skip writing file info to sqlite table"
@@ -226,7 +226,7 @@ let update_save_state
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
 let save_state
-    ~(file_info_on_disk: bool)
+    ~(enable_reverse_naming_table_fallback: bool)
     ~(save_decls: bool)
     (naming_table: Naming_table.t)
     (errors: Errors.t)
@@ -244,7 +244,7 @@ let save_state
   | None ->
     let t = Unix.gettimeofday () in
     dump_saved_state ~save_decls output_filename naming_table errors;
-    let () = if file_info_on_disk then begin
+    let () = if enable_reverse_naming_table_fallback then begin
       Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
       (save_all_file_info_sqlite db_name naming_table : unit)
     end in
@@ -266,7 +266,7 @@ let save_state
     let () = RealDisk.write_file ~file:db_name ~contents:content in
     let _ : float = Hh_logger.log_duration "Made disk copy of loaded saved state. Took" t in
     update_save_state
-      ~file_info_on_disk
+      ~enable_reverse_naming_table_fallback
       ~save_decls
       naming_table
       errors
@@ -281,7 +281,7 @@ let get_in_memory_dep_table_entry_count () : (int, string) result =
 (* If successful, returns the # of edges from the dependency table that were written. *)
 (* TODO: write some other stats, e.g., the number of names, the number of errors, etc. *)
 let go
-    ~(file_info_on_disk: bool)
+    ~(enable_reverse_naming_table_fallback: bool)
     ~(save_decls: bool)
     (naming_table: Naming_table.t)
     (errors: Errors.t)
@@ -290,7 +290,7 @@ let go
   Utils.try_with_stack
   begin
     fun () -> save_state
-      ~file_info_on_disk
+      ~enable_reverse_naming_table_fallback
       ~save_decls
       naming_table errors
       output_filename

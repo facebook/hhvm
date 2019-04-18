@@ -110,14 +110,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | SAVE_STATE (
         filename,
         gen_saved_ignore_type_errors,
-        file_info_on_disk,
         replace_state_after_saving) ->
       if Errors.is_empty env.errorl || gen_saved_ignore_type_errors then
         let save_decls =
           genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
+        let enable_reverse_naming_table_fallback =
+          genv.local_config.ServerLocalConfig.enable_reverse_naming_table_fallback in
         env,
         SaveStateService.go
-          ~file_info_on_disk
+          ~enable_reverse_naming_table_fallback
           ~save_decls
           env.ServerEnv.naming_table
           env.errorl

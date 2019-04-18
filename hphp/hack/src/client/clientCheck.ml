@@ -372,7 +372,6 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let%lwt result = rpc args @@ Rpc.SAVE_STATE (
         Path.to_string path,
         args.gen_saved_ignore_type_errors,
-        args.file_info_on_disk,
         args.replace_state_after_saving) in
       ClientResultPrinter.Int_printer.go result args.output_json;
       Lwt.return Exit_status.No_error

@@ -19,7 +19,6 @@ type options = {
   check_mode: bool;
   config: (string * string) list;
   dynamic_view: bool;
-  file_info_on_disk: bool;
   from: string;
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
@@ -55,8 +54,6 @@ module Messages = struct
   let config = " override arbitrary value from hh.conf (format: <key>=<value>)"
   let daemon = " detach process"
   let dynamic_view = " start with dynamic view for IDE files on by default."
-  let file_info_on_disk = " [experimental] a saved state option to store file info" ^
-                          " (the naming table) in SQLite. Only has meaning in --saved-state mode."
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
   let from_vim = " DEPRECATED"
   let from_emacs = " DEPRECATED"
@@ -181,7 +178,6 @@ let parse_options () =
   let check_mode = ref false in
   let config = ref [] in
   let dynamic_view = ref false in
-  let file_info_on_disk = ref false in
   let from = ref "" in
   let from_emacs = ref false in
   let from_hhclient = ref false in
@@ -220,7 +216,6 @@ let parse_options () =
         Messages.config;
       "--daemon", Arg.Set should_detach, Messages.daemon;
       "--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view;
-      "--file-info-on-disk", Arg.Set file_info_on_disk, Messages.file_info_on_disk;
       "--from-emacs", Arg.Set from_emacs, Messages.from_emacs;
       "--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient;
       "--from-vim", Arg.Set from_vim, Messages.from_vim;
@@ -291,7 +286,6 @@ let parse_options () =
     check_mode;
     config = !config;
     dynamic_view = !dynamic_view;
-    file_info_on_disk = !file_info_on_disk;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh;
@@ -318,7 +312,6 @@ let default_options ~root = {
   check_mode = false;
   config = [];
   dynamic_view = false;
-  file_info_on_disk = false;
   from = "";
   gen_saved_ignore_type_errors = false;
   ignore_hh_version = false;
@@ -347,7 +340,6 @@ let ai_mode options = options.ai_mode
 let check_mode options = options.check_mode
 let config options = options.config
 let dynamic_view options = options.dynamic_view
-let file_info_on_disk options = options.file_info_on_disk
 let from options = options.from
 let gen_saved_ignore_type_errors options = options.gen_saved_ignore_type_errors
 let ignore_hh_version options = options.ignore_hh_version
@@ -392,7 +384,6 @@ let to_string
     check_mode;
     config;
     dynamic_view;
-    file_info_on_disk;
     from;
     gen_saved_ignore_type_errors;
     ignore_hh_version;
@@ -439,7 +430,6 @@ let to_string
         "check_mode: "; string_of_bool check_mode; ", ";
         "config: "; config_str;
         "dynamic_view: "; string_of_bool dynamic_view; ", ";
-        "file_info_on_disk: "; string_of_bool file_info_on_disk; ", ";
         "from: "; from; ", ";
         "gen_saved_ignore_type_errors: "; string_of_bool gen_saved_ignore_type_errors; ", ";
         "ignore_hh_version: "; string_of_bool ignore_hh_version; ", ";

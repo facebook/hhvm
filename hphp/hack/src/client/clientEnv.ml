@@ -62,7 +62,6 @@ type client_check_env = {
   config : (string * string) list;
   dynamic_view: bool;
   error_format: Errors.format;
-  file_info_on_disk: bool;
   force_dormant_start: bool;
   from: string;
   gen_saved_ignore_type_errors: bool;

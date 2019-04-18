@@ -51,11 +51,13 @@ let save_state
 
   if not do_save_state then None
   else begin
-    let file_info_on_disk = ServerArgs.file_info_on_disk genv.ServerEnv.options in
+    let enable_reverse_naming_table_fallback =
+      genv.ServerEnv.local_config.ServerLocalConfig.enable_reverse_naming_table_fallback
+    in
     let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
     let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
     let edges_added: int = SaveStateService.save_state
-        ~file_info_on_disk
+        ~enable_reverse_naming_table_fallback
         ~save_decls
         env.ServerEnv.naming_table
         env.errorl

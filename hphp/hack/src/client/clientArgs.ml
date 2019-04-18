@@ -83,7 +83,6 @@ let parse_check_args cmd =
   let config = ref [] in
   let dynamic_view = ref false in
   let error_format = ref Errors.Context in
-  let file_info_on_disk = ref false in
   let force_dormant_start = ref false in
   let format_from = ref 0 in
   let from = ref "" in
@@ -222,10 +221,6 @@ let parse_check_args cmd =
           | "context" -> error_format := Errors.Context
           | _ -> print_string "Warning: unrecognized error format.\n"),
       "<raw|context> Error formatting style";
-    "--file-info-on-disk",
-      Arg.Set file_info_on_disk,
-      " [experimental] a saved state option to store file info" ^
-      " (the naming table) in SQLite. Only has meaning in --saved-state mode.";
     "--find-class-refs",
       Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
@@ -552,7 +547,6 @@ let parse_check_args cmd =
     config = !config;
     dynamic_view = !dynamic_view;
     error_format = !error_format;
-    file_info_on_disk = !file_info_on_disk;
     force_dormant_start = !force_dormant_start;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;

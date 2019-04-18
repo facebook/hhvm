@@ -39,7 +39,6 @@ module type S = sig
   val check_mode: options -> bool
   val config: options -> (string * string) list
   val dynamic_view: options -> bool
-  val file_info_on_disk: options -> bool
   val from: options -> string
   val gen_saved_ignore_type_errors: options -> bool
   val ignore_hh_version: options -> bool

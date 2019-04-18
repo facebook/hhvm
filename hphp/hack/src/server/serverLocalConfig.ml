@@ -82,6 +82,8 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl : bool;
+  (* Enables the reverse naming table to fall back to SQLite for queries. *)
+  enable_reverse_naming_table_fallback : bool;
 }
 
 let default = {
@@ -132,6 +134,7 @@ let default = {
   idle_gc_slice = 0;
   basic_autocomplete_only = false;
   shallow_class_decl = false;
+  enable_reverse_naming_table_fallback = false;
 }
 
 let path =
@@ -163,12 +166,13 @@ let state_loader_timeouts_ ~default config =
     current_base_rev_timeout;
   }
 
-let load_ fn ~silent =
+let load_ fn ~silent config_overrides =
   (* Print out the contents in our logs so we know what settings this server
    * was started with *)
   let contents = Sys_utils.cat fn in
   if not silent then Printf.eprintf "%s:\n%s\n" fn contents;
   let config = Config_file.parse_contents contents in
+  let config = SMap.union config config_overrides in
   let use_watchman = bool_if_version "use_watchman"
       ~default:default.use_watchman config in
   let use_saved_state = bool_if_version "use_mini_state"
@@ -263,6 +267,8 @@ let load_ fn ~silent =
       ~default:default.basic_autocomplete_only config in
   let shallow_class_decl = bool_if_version "shallow_class_decl"
       ~default:default.shallow_class_decl config in
+  let enable_reverse_naming_table_fallback = bool_if_version "enable_reverse_naming_table_fallback"
+      ~default:default.enable_reverse_naming_table_fallback config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -310,11 +316,12 @@ let load_ fn ~silent =
     idle_gc_slice;
     basic_autocomplete_only;
     shallow_class_decl;
+    enable_reverse_naming_table_fallback;
   }
 
-let load ~silent =
+let load ~silent config_overrides =
   try
-    load_ path ~silent
+    load_ path ~silent config_overrides
   with e ->
     Hh_logger.log "Loading config exception: %s" (Printexc.to_string e);
     Hh_logger.log "Could not load config at %s, using defaults" path;

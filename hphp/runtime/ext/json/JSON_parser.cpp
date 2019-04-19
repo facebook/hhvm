@@ -301,6 +301,13 @@ enum class Mode {
 
 namespace {
 
+int dehexchar(char c) {
+  if (c >= '0' && c <= '9') return c - '0';
+  if (c >= 'A' && c <= 'F') return c - ('A' - 10);
+  if (c >= 'a' && c <= 'f') return c - ('a' - 10);
+  return -1;
+}
+
 NEVER_INLINE
 static void tvDecRefRange(TypedValue* begin, TypedValue* end) {
   assertx(begin <= end);
@@ -429,13 +436,50 @@ struct SimpleParser {
     return true;
   }
 
+  bool handleBackslash(signed char& out) {
+    char ch = *p++;
+    switch (ch) {
+      case 0: return false;
+      case '"': out = ch; return true;
+      case '\\': out = ch; return true;
+      case '/': out = ch; return true;
+      case 'b': out = '\b'; return true;
+      case 'f': out = '\f'; return true;
+      case 'n': out = '\n'; return true;
+      case 'r': out = '\r'; return true;
+      case 't': out = '\t'; return true;
+      case 'u': {
+        uint16_t u16cp = 0;
+        for (int i = 0; i < 4; i++) {
+          auto const hexv = dehexchar(*p++);
+          if (hexv < 0) return false; // includes check for end of string
+          u16cp <<= 4;
+          u16cp |= hexv;
+        }
+        if (u16cp > 0x7f) {
+          return false;
+        } else {
+          out = u16cp;
+          return true;
+        }
+      }
+      default: return false;
+    }
+  }
+
   bool parseString() {
     int len = 0;
     auto const charTop = reinterpret_cast<signed char*>(top);
+    assertx(p[-1] == '"'); // SimpleParser only handles "-quoted strings
     for (signed char ch = *p++; ch != '\"'; ch = *p++) {
-      charTop[len++] = ch;
-      // Signed char means less than ' ' also catches non-ASCII.
-      if (ch < ' ' || ch == '\\' || ch == '\'') return false;
+      charTop[len++] = ch; // overwritten later if `ch == '\\'`
+      if (ch < ' ') {
+        // `ch < ' '` catches null and also non-ASCII (since signed char)
+        return false;
+      }
+      if (ch == '\\') {
+        if (!handleBackslash(charTop[len - 1])) return false;
+      }
     }
     pushStringData(StringData::Make(
       reinterpret_cast<char*>(charTop), len, CopyString));
@@ -794,13 +838,6 @@ static int pop(json_parser *json, Mode mode) {
   json->stack[json->top].mode = Mode::INVALID;
   json->top -= 1;
   return true;
-}
-
-static int dehexchar(char c) {
-  if (c >= '0' && c <= '9') return c - '0';
-  if (c >= 'A' && c <= 'F') return c - ('A' - 10);
-  if (c >= 'a' && c <= 'f') return c - ('a' - 10);
-  return -1;
 }
 
 static String copy_and_clear(UncheckedBuffer &buf) {

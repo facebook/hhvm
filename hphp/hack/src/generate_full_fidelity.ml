@@ -1232,7 +1232,66 @@ end (* WithSyntax *)
     trivia_transformations = [];
     aggregate_transformations = [];
   }
-end (* GenerateFFSyntaxSmartConstructors *)
+end (* GenerateFlattenSmartConstructors *)
+
+module GenerateRustFlattenSmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i)in
+    let args = String.concat ~sep:", " args in
+    let if_cond = List.mapi x.fields ~f:(fun i _ -> sprintf "Self::is_zero(&arg%d)" i) in
+    let if_cond = String.concat ~sep:" && " if_cond in
+    let flatten_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let flatten_args = String.concat ~sep:", " flatten_args in
+    sprintf "    fn make_%s(s: State, %s) -> (State, Self::R) {
+        if %s {
+          (s, Self::zero())
+        } else {
+          (s, Self::flatten(vec!(%s)))
+        }
+    }\n\n"
+      x.type_name args if_cond flatten_args
+
+  let flatten_smart_constructors_template: string = (make_header CStyle "") ^ "
+use crate::smart_constructors_generated::SmartConstructors;
+
+pub trait FlattenOp {
+    type S;
+    fn is_zero(s: &Self::S) -> bool;
+    fn zero() -> Self::S;
+    fn flatten(lst: Vec<Self::S>) -> Self::S;
+}
+
+pub trait FlattenSmartConstructors<State>
+: SmartConstructors<State> + FlattenOp<S=<Self as SmartConstructors<State>>::R>
+{
+    fn make_missing(s: State, _: usize) -> (State, Self::R) {
+       (s, Self::zero())
+    }
+
+    fn make_token(s: State, _: Self::Token) -> (State, Self::R) {
+        (s, Self::zero())
+    }
+
+    fn make_list(s: State, _: Box<Vec<Self::R>>, _: usize) -> (State, Self::R) {
+        (s, Self::zero())
+    }
+
+CONSTRUCTOR_METHODS}
+"
+  let flatten_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^ "flatten_smart_constructors.rs";
+    template = flatten_smart_constructors_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateRustFlattenSmartConstructors *)
 
 module GenerateFFSmartConstructorsWrappers = struct
   let to_constructor_methods x =
@@ -2840,6 +2899,8 @@ let () =
     GenerateFFRustSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
   generate_file
     GenerateFlattenSmartConstructors.flatten_smart_constructors;
+  generate_file
+    GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
   generate_file
     GenerateFFParserSig.full_fidelity_parser_sig;
   generate_file

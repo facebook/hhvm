@@ -18,6 +18,7 @@
 #define incl_LOCK_FREE_PTR_WRAPPER_H_
 
 #include <atomic>
+#include <type_traits>
 
 #include <folly/Portability.h>
 
@@ -69,21 +70,20 @@ struct LockFreePtrWrapper {
    * same effect as returning a T*.
    */
   struct Holder {
+    friend struct LockFreePtrWrapper;
     auto get() { return getter(val, false); }
     auto operator->() { return get(); }
     Holder(const Holder& h) : bits{h.bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(uintptr_t bits) : bits{bits} { assertx(!(bits & ~kPtrMask)); }
     Holder(T&& val) : val{std::move(val)} { assertx(!(bits & ~kPtrMask)); }
     ~Holder() {}
+  private:
     union {
       uintptr_t bits;
       T         val;
     };
-  private:
     template<typename U>
     static const U* getter(const U& p, int f) { return &p; }
-    template<typename U>
-    static U* getter(U* p, int f) { return p; }
     template<typename U>
     static auto getter(const U& p, bool f) -> decltype(p.operator->(), p) {
       return p;
@@ -91,15 +91,16 @@ struct LockFreePtrWrapper {
   };
 
   // Get a bitwise copy of the current value
-  Holder get() const {
-    return Holder { unlocked() };
+  auto get() const {
+    return getImpl<T>();
+  }
+
+  auto operator->() const {
+    return get();
   }
 
   T copy() const {
-    // We need to force a copy, rather than a move from get().val. If you
-    // change this, make sure you know what you're doing.
-    auto const& x = get();
-    return x.val;
+    return copyImpl<T>();
   }
 
   /*
@@ -121,6 +122,39 @@ struct LockFreePtrWrapper {
    */
   T update_and_unlock(T&& v);
 private:
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          std::is_pointer<U>::value,U>::type
+  getImpl() const {
+    return reinterpret_cast<T>(unlocked());
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          !std::is_pointer<U>::value,Holder>::type
+  getImpl() const {
+    return Holder { unlocked() };
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          std::is_pointer<U>::value,T>::type
+  copyImpl() const {
+    return get();
+  }
+
+  template<typename U>
+  typename std::enable_if<std::is_same<T,U>::value &&
+                          !std::is_pointer<U>::value,T>::type
+  copyImpl() const {
+    // We need to force a copy, rather than a move from get().val. If you
+    // change this, make sure you know what you're doing.
+    auto const& x = get();
+    return x.val;
+  }
+
+
+
   uintptr_t unlock_helper(uintptr_t rep);
   uintptr_t raw() const { return bits.load(std::memory_order_relaxed); }
   uintptr_t unlocked() const {

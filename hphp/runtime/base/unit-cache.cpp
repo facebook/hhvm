@@ -106,7 +106,7 @@ struct CachedUnitInternal {
   static Unit* const Uninit;
 
   CachedUnit cachedUnit() const {
-    return CachedUnit { unit.get().get(), rdsBitId };
+    return CachedUnit { unit.get(), rdsBitId };
   }
 
   // nullptr if there is no Unit for this path, Uninit if the CachedUnit

@@ -69,7 +69,7 @@ struct alignas(64) RangeState {
   RangeState& operator=(const RangeState&) = delete;
 
   char* low() const {
-    return low_internal.get().get();
+    return low_internal.get();
   }
 
   char* high() const {

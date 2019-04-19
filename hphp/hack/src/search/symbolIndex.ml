@@ -118,18 +118,6 @@ let query_for_autocomplete
 ;;
 
 (*
- * Legacy API
- * Replaced by "index_search" with kind_opt set to "Some SI_Class"
- *)
-let query_class_methods
-    (s1: string)
-    (s2: string): (Pos.t, search_result_type) term list =
-
-  (* Just route to the trie-based search service for now *)
-  HackSearchService.ClassMethods.query s1 s2
-;;
-
-(*
  * This method is called when the typechecker has finished re-checking a file,
  * or when the saved-state is fully loaded.  Any system that needs to cache
  * this information should capture it here.

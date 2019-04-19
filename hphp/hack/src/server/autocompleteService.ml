@@ -35,6 +35,26 @@ type autocomplete_type =
   | Acshape_key
   | Actrait_only
 
+(*
+ * Take the results, look them up, and add file position information.
+ *)
+let add_position_to_results (raw_results: SearchUtils.si_results): SearchUtils.result =
+  let open SearchUtils in
+
+  Core_kernel.List.filter_map raw_results ~f:(fun r -> begin
+
+          (* Look up each symbol in the naming table *)
+          match Naming_table.Types.get_pos r.si_name with
+          | Some (fileinfo_pos, _) ->
+            let (real_pos, _) = NamingGlobal.GEnv.get_full_pos (fileinfo_pos, r.si_name) in
+            Some {
+              name = r.si_name;
+              pos = (Pos.to_absolute real_pos);
+              result_type = (kind_to_result r.si_kind);
+            }
+          | None -> None
+        end)
+
 let (argument_global_type: autocomplete_type option ref) = ref None
 let auto_complete_for_global = ref ""
 

@@ -40,12 +40,6 @@ val query_for_autocomplete :
     'a option) ->
   'a list Utils.With_complete_flag.t
 
-(* Legacy query interface for class searching *)
-val query_class_methods :
-  string ->
-  string ->
-  (Pos.t, SearchUtils.search_result_type) SearchUtils.term list
-
 (* Legacy update interface when new data is seen by the typechecker *)
 val update :
   MultiWorker.worker list option ->

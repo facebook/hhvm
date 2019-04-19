@@ -243,44 +243,6 @@ module MasterApi = struct
     SS.MasterApi.update_search_index ~fuzzy files
 end
 
-module ClassMethods = struct
-  let get_class_definition_file class_name =
-    let class_def = Naming_table.Types.get_pos class_name in
-    match class_def with
-    | Some (pos, Naming_table.TClass) ->
-      let file =
-        match pos with
-        | FileInfo.Full pos -> Pos.filename pos
-        | FileInfo.File (_, file) -> file
-      in
-      Some file
-    | _ -> None
-
-  let query class_name method_query =
-    let open Option.Monad_infix in
-    let method_query = String.lowercase method_query in
-    let matches_query method_name =
-      let method_name = String.lowercase method_name in
-      String_utils.is_substring method_query method_name
-    in
-    get_class_definition_file class_name
-    >>= (fun file -> Parser_heap.find_class_in_file file class_name)
-    >>| (fun class_ -> class_.Ast.c_body)
-    >>| List.filter_map ~f:begin fun class_elt ->
-      match class_elt with
-      | Ast.Method Ast.{m_kind; m_name = (pos, name); _}
-        when matches_query name ->
-        let is_static = List.mem ~equal:(=) m_kind Ast.Static in
-        Some SearchUtils. {
-            name;
-            pos;
-            result_type = Method (is_static, class_name)
-          }
-      | _ -> None
-    end
-    |> Option.value ~default:[]
-end
-
 (* Differentiate between two types of data sets provided via either
  * the saved state or the typechecker *)
 let index_symbols_in_file (fn, info) =

@@ -77,14 +77,14 @@ let go workers query type_
       in
       begin match class_ with
       | Some SearchUtils.{name; _} ->
-        SymbolIndex.query_class_methods name method_query
+        ClassMethodSearch.query_class_methods name method_query
       | None ->
         (* When we can't find a class with a name similar to the given one,
            just return no search results. *)
         []
       end
     | _  ->
-      SymbolIndex.query ~fuzzy workers query type_
+      let temp_results = SymbolIndex.query ~fuzzy workers query type_ in
+      List.map temp_results SearchUtils.to_absolute
   in
-
-  List.map results SearchUtils.to_absolute
+  results

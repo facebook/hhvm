@@ -166,7 +166,7 @@ let parse_options (): index_builder_context =
 
 (* Let's use the unix find command which seems to be really quick at this sort of thing *)
 let gather_file_list (path: string): string list =
-  let cmdline = Printf.sprintf "find %s -name \"*.php\"" path in
+  let cmdline = Printf.sprintf "find %s \\( -name \"*.php\" -o -name \"*.hhi\" \\)" path in
   let channel = Unix.open_process_in cmdline in
   let result = ref [] in
   (try
@@ -199,7 +199,16 @@ let main (): unit =
   (* Gather list of files *)
   let ctxt = parse_options () in
   Printf.printf "Scanning repository %s... %!" ctxt.repo_folder;
-  let files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name:"" in
+  let repo_files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name:"" in
+
+  (* Next, get the HHI root folder and add all HHI files from there *)
+  let hhi_root_folder = Hhi.get_hhi_root () in
+  let hhi_root_folder_path = Path.to_string hhi_root_folder in
+  Printf.printf "Scanning HHI folder %s... %!" hhi_root_folder_path;
+  let hhi_files = measure_time ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name:"" in
+
+  (* Merge lists *)
+  let files = List.append repo_files hhi_files in
 
   (* Spawn the parallel parser *)
   Printf.printf "Parsing %d files... %!" (List.length files);

@@ -223,6 +223,7 @@ static Array get_frame_args_with_ref(const ActRec* ar) {
   int numNonVariadic = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
 
+  SuppressHACRefBindNotices _guard;
   PackedArrayInit retArray(numArgs);
 
   auto local = reinterpret_cast<TypedValue*>(
@@ -301,6 +302,7 @@ static Variant call_intercept_handler(
     }
     intArgs = par.append(done).toArray();
   } else {
+    SuppressHACRefBindNotices _guard;
     Variant tmp;
     tmp.assignRef(done);
     intArgs = par.appendWithRef(tmp).toArray();

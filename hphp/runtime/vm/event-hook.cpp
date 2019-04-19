@@ -28,6 +28,7 @@
 #include "hphp/runtime/ext/hotprofiler/ext_hotprofiler.h"
 #include "hphp/runtime/ext/intervaltimer/ext_intervaltimer.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
+#include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/xenon/ext_xenon.h"
 
 #include "hphp/runtime/server/server-stats.h"
@@ -284,22 +285,37 @@ static Variant call_intercept_handler(
 
   Variant intArgs;
 
-  auto const inout = f->isInOutWrapper();
-  if (inout) {
-    auto const name = mangleInOutFuncName(f->name(), {2,4});
+  auto const inout = [&] {
+    if (f->isInOutWrapper()) {
+      auto const name = mangleInOutFuncName(f->name(), {2,4});
 
-    if (!f->isMethod()) {
-      f = Unit::lookupFunc(name.get());
-    } else {
-      assertx(cls);
-      f = cls->lookupMethod(name.get());
+      if (!f->isMethod()) {
+        f = Unit::lookupFunc(name.get());
+      } else {
+        assertx(cls);
+        f = cls->lookupMethod(name.get());
+      }
+      if (!f) {
+        raise_error(
+          "fb_intercept used with an inout handler with a bad signature "
+          "(expected parameters three and five to be inout)"
+        );
+      }
+      return true;
+    } else if (f->isClosureBody() && f->anyByRef()) {
+      auto const name = mangleInOutFuncName(f->name(), {2,4});
+      auto const impl = f->implCls();
+      assertx(impl);
+
+      if (auto const invoke = impl->lookupMethod(name.get())) {
+        f = invoke;
+        return true;
+      }
     }
-    if (!f) {
-      raise_error(
-        "fb_intercept used with an inout handler with a bad signature "
-        "(expected parameters three and five to be inout)"
-      );
-    }
+    return false;
+  }();
+
+  if (inout) {
     intArgs = par.append(done).toArray();
   } else {
     SuppressHACRefBindNotices _guard;

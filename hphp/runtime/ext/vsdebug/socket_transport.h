@@ -44,6 +44,7 @@ private:
 
   void createAbortPipe();
   void listenForClientConnection();
+  bool setSocketPermissions(const char* path);
 
   bool bindAndListenTCP(
     struct addrinfo* address,

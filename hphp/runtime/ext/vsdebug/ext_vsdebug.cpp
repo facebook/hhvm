@@ -55,6 +55,13 @@ void VSDebugExtension::moduleLoad(const IniSetting::Map& ini, const Hdf hdf) {
     "Eval.Debugger.VSDebugDomainSocketPath",
     "");
 
+  Config::Bind(
+    s_domainSocketGroup,
+    ini,
+    hdf,
+    "Eval.Debugger.VSDebugDomainSocketGroup",
+    "");
+
   bool commandLineEnabled = RuntimeOption::EnableVSDebugger;
   if (!s_configEnabled && !commandLineEnabled) {
    m_enabled = false;
@@ -219,12 +226,17 @@ std::string& VSDebugExtension::getUnixSocketPath() {
   return s_unixSocketPath;
 }
 
+std::string VSDebugExtension::getDomainSocketGroup() {
+  return s_domainSocketGroup;
+}
+
 // Linkage for the debugger extension.
 static VSDebugExtension s_vsdebug_extension;
 
 // Linkage for configuration options.
 bool VSDebugExtension::s_configEnabled {false};
 std::string VSDebugExtension::s_logFilePath {""};
+std::string VSDebugExtension::s_domainSocketGroup {""};
 int VSDebugExtension::s_attachListenPort {-1};
 bool VSDebugExtension::s_launchMode {false};
 Debugger* VSDebugExtension::s_debugger {nullptr};

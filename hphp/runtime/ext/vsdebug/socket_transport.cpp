@@ -15,9 +15,11 @@
 */
 
 #include "hphp/runtime/ext/vsdebug/debugger.h"
+#include "hphp/runtime/ext/vsdebug/ext_vsdebug.h"
 #include "hphp/runtime/ext/vsdebug/socket_transport.h"
 
 #include <pwd.h>
+#include <grp.h>
 
 namespace HPHP {
 namespace VSDEBUG {
@@ -69,7 +71,6 @@ void SocketTransport::stopConnectionThread() {
   write(m_abortPipeFd[1], &value, 1);
   close(m_abortPipeFd[1]);
   m_abortPipeFd[1] = -1;
-
   m_connectThread.waitForEnd();
 }
 
@@ -232,6 +233,60 @@ void SocketTransport::listenForClientConnection() {
   waitForConnection(socketFds, abortFd);
 }
 
+bool SocketTransport::setSocketPermissions(const char* path) {
+  int mask = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP;
+  const std::string& configGroup = VSDebugExtension::getDomainSocketGroup();
+
+  if (!configGroup.empty()) {
+    const char* groupName = configGroup.c_str();
+    struct group* grp = getgrnam(groupName);
+
+    if (grp == nullptr) {
+      VSDebugLogger::Log(
+        VSDebugLogger::LogLevelError,
+        "Failed to call getgrnam for group %s",
+        groupName
+      );
+      return false;
+    } else {
+      gid_t gid;
+      gid = grp->gr_gid;
+      if (chown(path, -1, gid) < 0) {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelError,
+          "Failed to call chown for socket %s to group id %d",
+          path,
+          gid
+        );
+        return false;
+      } else {
+        VSDebugLogger::Log(
+          VSDebugLogger::LogLevelInfo,
+          "Successfully called chown for socket %s to group id %d",
+          path,
+          gid
+        );
+      }
+    }
+  } else {
+    // If no security group is configured, fall back to the previous
+    // behavior of allowing any local user to talk to the debugger.
+    mask |= S_IROTH | S_IXOTH | S_IWOTH;
+  }
+
+  // Set socket permissions
+  if (chmod(path, mask) < 0) {
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelError,
+      "Failed to call chmod for domain socket: %d.",
+      errno
+    );
+    return false;
+  }
+
+  return true;
+}
+
 bool SocketTransport::bindAndListenDomain(std::vector<int>& socketFds) {
   struct sockaddr_un addr;
   std::string socketPath = m_domainSocketPath;
@@ -256,8 +311,9 @@ bool SocketTransport::bindAndListenDomain(std::vector<int>& socketFds) {
   // If the previous socket was left hanging around, clean it up.
   struct stat tstat;
   if (lstat(addr.sun_path, &tstat) == 0) {
-    if (S_ISSOCK(tstat.st_mode))
+    if (S_ISSOCK(tstat.st_mode)) {
       unlink(addr.sun_path);
+    }
   }
 
   if (bind(sockFd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
@@ -270,15 +326,8 @@ bool SocketTransport::bindAndListenDomain(std::vector<int>& socketFds) {
     return false;
   }
 
-  // Set socket permissions
-  int mask = S_IRUSR | S_IXUSR | S_IWUSR | S_IRGRP | S_IXGRP |
-             S_IWGRP | S_IROTH | S_IXOTH | S_IWOTH;
-  if (chmod(addr.sun_path, mask) < 0) {
-    VSDebugLogger::Log(
-      VSDebugLogger::LogLevelError,
-      "Failed to call fchmod for domain socket: %d.",
-      errno
-    );
+  if (!setSocketPermissions(addr.sun_path)) {
+    return false;
   }
 
   if (listen(sockFd, 0) < 0) {

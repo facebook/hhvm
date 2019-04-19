@@ -40,6 +40,7 @@ struct VSDebugExtension final : Extension {
 
   static Debugger* getDebugger() { return s_debugger; }
   static bool s_launchMode;
+  static std::string getDomainSocketGroup();
 
 private:
 
@@ -51,6 +52,7 @@ private:
   static constexpr int DefaultListenPort = 8999;
   static bool s_configEnabled;
   static std::string s_logFilePath;
+  static std::string s_domainSocketGroup;
   static int s_attachListenPort;
 
   // If specified and nonempty, the debugger will listen locally on a

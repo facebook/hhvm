@@ -51,10 +51,6 @@ inline ArrayData* ArrayData::CreateWithRef(const Variant& name,
   return CreateWithRef(*name.asTypedValue(), value);
 }
 
-inline ArrayData* ArrayData::CreateRef(const Variant& name, tv_lval value) {
-  return CreateRef(*name.asTypedValue(), value);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // ArrayFunction dispatch.
 

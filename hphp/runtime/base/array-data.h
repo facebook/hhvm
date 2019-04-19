@@ -168,14 +168,6 @@ public:
   static ArrayData* CreateWithRef(const Variant& name, TypedValue value);
 
   /*
-   * Like Create(value) or Create(name, value), except `value' is boxed before
-   * insertion.
-   */
-  static ArrayData* CreateRef(Variant& value);
-  static ArrayData* CreateRef(TypedValue name, tv_lval value);
-  static ArrayData* CreateRef(const Variant& name, tv_lval value);
-
-  /*
    * Make a copy of the array.
    *
    * copy() makes a normal request-allocated ArrayData, whereas copyStatic()

@@ -16,21 +16,23 @@ use crate::smart_constructors::SmartConstructors;
 use crate::source_text::SourceText;
 use crate::syntax_error::SyntaxError;
 
-pub struct Parser<'a, S>
+pub struct Parser<'a, S, T>
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
     lexer: Lexer<'a, S::Token>,
     errors: Vec<SyntaxError>,
     env: ParserEnv,
+    sc_state: T,
     _phantom: PhantomData<S>,
 }
 
-impl<'a, S> Parser<'a, S>
+impl<'a, S, T: Clone> Parser<'a, S, T>
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
     pub fn make(source: &'a SourceText<'a>, env: ParserEnv) -> Self {
+        let sc_state = S::initial_state(&env);
         Self {
             lexer: Lexer::make(
                 source,
@@ -42,31 +44,34 @@ where
             ),
             errors: vec![],
             env,
+            sc_state,
             _phantom: PhantomData,
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv) {
-        (self.lexer, self.errors, self.env)
+    fn into_parts(self) -> (Lexer<'a, S::Token>, Vec<SyntaxError>, ParserEnv, T) {
+        (self.lexer, self.errors, self.env, self.sc_state)
     }
 
     pub fn parse_header_only(env: ParserEnv, text: &'a SourceText<'a>) -> Option<S::R> {
-        let (lexer, errors, env) = Self::make(text, env).into_parts();
-        let mut decl_parser: DeclarationParser<S> =
-            DeclarationParser::make(lexer, env, Context::empty(), errors);
+        let (lexer, errors, env, sc_state) = Self::make(text, env).into_parts();
+        let mut decl_parser: DeclarationParser<S, T> =
+            DeclarationParser::make(lexer, env, Context::empty(), errors, sc_state);
         decl_parser.parse_leading_markup_section()
     }
 
     pub fn parse_script(&mut self) -> S::R {
-        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
+        let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             Context::empty(),
             vec![],
+            self.sc_state.clone(),
         );
         let root = decl_parser.parse_script();
-        let (_, _, errors) = decl_parser.into_parts();
+        let (_, _, errors, sc_state) = decl_parser.into_parts();
         self.errors = errors;
+        self.sc_state = sc_state;
         root
     }
 

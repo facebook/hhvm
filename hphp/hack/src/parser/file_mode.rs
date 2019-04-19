@@ -34,9 +34,10 @@ impl FileMode {
 
 use crate::minimal_syntax::MinimalValue;
 use crate::minimal_token::MinimalToken;
+use crate::smart_constructors::NoState;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 
-type MinimalParser<'a> = Parser<'a, SyntaxSmartConstructors<MinimalToken, MinimalValue>>;
+type MinimalParser<'a> = Parser<'a, SyntaxSmartConstructors<MinimalToken, MinimalValue>, NoState>;
 
 pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
     let is_hhi = false; // TODO(kasper) : hhi files

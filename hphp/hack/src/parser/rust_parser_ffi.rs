@@ -18,15 +18,19 @@ use parser::minimal_syntax::MinimalValue;
 use parser::minimal_token::MinimalToken;
 use parser::parser::Parser;
 use parser::parser_env::ParserEnv;
+
 use parser::positioned_syntax::PositionedValue;
 use parser::positioned_token::PositionedToken;
+
+use parser::smart_constructors::NoState;
 use parser::source_text::SourceText;
 use parser::syntax_smart_constructors::SyntaxSmartConstructors;
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 
-type MinimalSyntaxParser<'a> = Parser<'a, SyntaxSmartConstructors<MinimalToken, MinimalValue>>;
+type MinimalSyntaxParser<'a> =
+    Parser<'a, SyntaxSmartConstructors<MinimalToken, MinimalValue>, NoState>;
 type PositionedSyntaxParser<'a> =
-    Parser<'a, SyntaxSmartConstructors<PositionedToken, PositionedValue>>;
+    Parser<'a, SyntaxSmartConstructors<PositionedToken, PositionedValue>, NoState>;
 
 extern "C" {
     fn ocamlpool_enter();

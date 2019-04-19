@@ -846,20 +846,25 @@ module GenerateFFRustSmartConstructors = struct
   let to_make_methods x =
     let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i ^ " : Self::R") in
     let stack = String.concat ~sep:", " fields in
-    sprintf "    fn make_%s(%s) -> Self::R;\n" x.type_name stack
+    sprintf "    fn make_%s(st: State, %s) -> (State, Self::R);\n" x.type_name stack
 
   let full_fidelity_smart_constructors_template: string = make_header CStyle "" ^ "
 use crate::lexable_token::LexableToken;
+use crate::parser_env::ParserEnv;
 use crate::smart_constructors::NodeType;
 
-pub trait SmartConstructors {
+pub trait SmartConstructors<State> {
     type Token: LexableToken;
     type R: NodeType;
-    fn make_missing(offset : usize) -> Self::R;
-    fn make_token(arg0: Self::Token) -> Self::R;
-    fn make_list(arg0: Box<Vec<Self::R>>, offset: usize) -> Self::R;
+
+    fn initial_state(env: &ParserEnv) -> State;
+
+    fn make_missing(st: State, offset : usize) -> (State, Self::R);
+    fn make_token(st: State, arg0: Self::Token) -> (State, Self::R);
+    fn make_list(st: State, arg0: Box<Vec<Self::R>>, offset: usize) -> (State, Self::R);
 MAKE_METHODS
-}"
+}
+"
   let full_fidelity_smart_constructors =
   {
     filename = full_fidelity_path_prefix ^
@@ -1114,14 +1119,15 @@ module GenerateFFRustSyntaxSmartConstructors = struct
     let params = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
     let params = String.concat ~sep:", " params in
 
-    sprintf "    fn make_%s(%s) -> Self::R {
-        Self::R::make_%s(%s)
+    sprintf "    fn make_%s(s: NoState, %s) -> (NoState, Self::R) {
+        (s, Self::R::make_%s(%s))
     }\n\n"
       x.type_name args x.type_name params
 
   let full_fidelity_syntax_smart_constructors_template: string = (make_header CStyle "") ^ "
 use crate::lexable_token::LexableToken;
-use crate::smart_constructors::SmartConstructors;
+use crate::parser_env::ParserEnv;
+use crate::smart_constructors::{SmartConstructors, NoState};
 use crate::syntax::{Syntax, SyntaxValueType};
 use crate::syntax_type::*;
 
@@ -1133,7 +1139,8 @@ pub struct SyntaxSmartConstructors<T, V> {
     _phantom2: PhantomData<V>,
 }
 
-impl<T, V> SmartConstructors for SyntaxSmartConstructors<T, V>
+// TODO(leoo) generalize for any state type
+impl<T, V> SmartConstructors<NoState> for SyntaxSmartConstructors<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
@@ -1141,16 +1148,20 @@ where
     type Token = T;
     type R = Syntax<T, V>;
 
-    fn make_missing(offset: usize) -> Self::R {
-        Self::R::make_missing(offset)
+    fn initial_state(_: &ParserEnv) -> NoState {
+        NoState {}
     }
 
-    fn make_token(arg: Self::Token) -> Self::R {
-        Self::R::make_token(arg)
+    fn make_missing(s: NoState, offset: usize) -> (NoState, Self::R) {
+        (s, Self::R::make_missing(offset))
     }
 
-    fn make_list(arg: Box<Vec<Self::R>>, offset: usize) -> Self::R {
-        Self::R::make_list(arg, offset)
+    fn make_token(s: NoState, arg: Self::Token) -> (NoState, Self::R) {
+        (s, Self::R::make_token(arg))
+    }
+
+    fn make_list(s: NoState, arg: Box<Vec<Self::R>>, offset: usize) -> (NoState, Self::R) {
+        (s, Self::R::make_list(arg, offset))
     }
 
 CONSTRUCTOR_METHODS}
@@ -1874,7 +1885,8 @@ TO_STRING        }
             SyntaxKind::SyntaxList => 1,
 OCAML_TAG        }
     }
-}"
+}
+"
 
 let full_fidelity_syntax_kind =
 {

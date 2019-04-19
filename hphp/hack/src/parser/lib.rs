@@ -20,20 +20,22 @@ mod syntax_generated;
 pub mod syntax_kind;
 pub mod syntax_type;
 
-pub mod smart_constructors;
-pub mod smart_constructors_generated;
-pub mod syntax_smart_constructors;
-
 pub mod syntax_error;
 
 pub mod lexer;
-
-pub mod declaration_parser;
-pub mod expression_parser;
 pub mod operator;
 pub mod parser;
 pub mod parser_env;
+
+#[macro_use]
+pub mod smart_constructors; // must be before users of providing macros (*_parser)
+mod smart_constructors_generated;
+pub mod syntax_smart_constructors;
+
 pub mod parser_trait;
+
+pub mod declaration_parser;
+pub mod expression_parser;
 pub mod statement_parser;
 pub mod type_parser;
 

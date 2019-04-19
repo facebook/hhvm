@@ -21,20 +21,21 @@ use crate::token_kind::TokenKind;
 use crate::trivia_kind::TriviaKind;
 use crate::type_parser::TypeParser;
 
-pub struct StatementParser<'a, S>
+pub struct StatementParser<'a, S, T>
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
     context: Context<S::Token>,
     errors: Vec<SyntaxError>,
+    sc_state: Option<T>,
     _phantom: PhantomData<S>,
 }
 
-impl<'a, S> std::clone::Clone for StatementParser<'a, S>
+impl<'a, S, T: Clone> std::clone::Clone for StatementParser<'a, S, T>
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
     fn clone(&self) -> Self {
         Self {
@@ -42,32 +43,40 @@ where
             env: self.env.clone(),
             context: self.context.clone(),
             errors: self.errors.clone(),
+            sc_state: self.sc_state.clone(),
             _phantom: self._phantom.clone(),
         }
     }
 }
 
-impl<'a, S> ParserTrait<'a, S> for StatementParser<'a, S>
+impl<'a, S, T: Clone> ParserTrait<'a, S, T> for StatementParser<'a, S, T>
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
     fn make(
         lexer: Lexer<'a, S::Token>,
         env: ParserEnv,
         context: Context<S::Token>,
         errors: Vec<SyntaxError>,
+        sc_state: T,
     ) -> Self {
         Self {
             lexer,
             env,
             context,
             errors,
+            sc_state: Some(sc_state),
             _phantom: PhantomData,
         }
     }
 
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>) {
-        (self.lexer, self.context, self.errors)
+    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T) {
+        (
+            self.lexer,
+            self.context,
+            self.errors,
+            self.sc_state.unwrap(),
+        )
     }
 
     fn lexer(&self) -> &Lexer<'a, S::Token> {
@@ -78,15 +87,27 @@ where
         &mut self.lexer
     }
 
-    fn continue_from<P: ParserTrait<'a, S>>(&mut self, other: P) {
-        let (lexer, context, errors) = other.into_parts();
+    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, other: P)
+    where
+        T: Clone,
+    {
+        let (lexer, context, errors, sc_state) = other.into_parts();
         self.lexer = lexer;
         self.context = context;
         self.errors = errors;
+        self.sc_state = Some(sc_state);
     }
 
     fn add_error(&mut self, error: SyntaxError) {
         self.errors.push(error)
+    }
+
+    fn env(&self) -> &ParserEnv {
+        &self.env
+    }
+
+    fn sc_state_mut(&mut self) -> &mut Option<T> {
+        &mut self.sc_state
     }
 
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token> {
@@ -106,16 +127,17 @@ where
     }
 }
 
-impl<'a, S> StatementParser<'a, S>
+impl<'a, S, T: Clone> StatementParser<'a, S, T>
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
-    fn with_type_parser<T>(&mut self, f: &Fn(&mut TypeParser<'a, S>) -> T) -> T {
-        let mut type_parser: TypeParser<S> = TypeParser::make(
+    fn with_type_parser<U>(&mut self, f: &Fn(&mut TypeParser<'a, S, T>) -> U) -> U {
+        let mut type_parser: TypeParser<S, T> = TypeParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
+            self.sc_state.clone().unwrap(),
         );
         let res = f(&mut type_parser);
         self.continue_from(type_parser);
@@ -123,27 +145,29 @@ where
     }
 
     fn parse_type_specifier(&mut self) -> S::R {
-        self.with_type_parser(&|x: &mut TypeParser<'a, S>| x.parse_type_specifier(false))
+        self.with_type_parser(&|x: &mut TypeParser<'a, S, T>| x.parse_type_specifier(false))
     }
 
-    fn with_expression_parser<T>(&mut self, f: &Fn(&mut ExpressionParser<'a, S>) -> T) -> T {
-        let mut expression_parser: ExpressionParser<S> = ExpressionParser::make(
+    fn with_expression_parser<U>(&mut self, f: &Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
+        let mut expression_parser: ExpressionParser<S, T> = ExpressionParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
+            self.sc_state.clone().unwrap(),
         );
         let res = f(&mut expression_parser);
         self.continue_from(expression_parser);
         res
     }
 
-    fn with_decl_parser<T>(&mut self, f: &Fn(&mut DeclarationParser<'a, S>) -> T) -> T {
-        let mut decl_parser: DeclarationParser<S> = DeclarationParser::make(
+    fn with_decl_parser<U>(&mut self, f: &Fn(&mut DeclarationParser<'a, S, T>) -> U) -> U {
+        let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
             self.context.clone(),
             self.errors.clone(),
+            self.sc_state.clone().unwrap(),
         );
         let res = f(&mut decl_parser);
         self.continue_from(decl_parser);
@@ -162,7 +186,7 @@ where
             | TokenKind::Class => {
                 self.with_error(Errors::decl_outside_global_scope);
                 self.with_decl_parser(&|x| {
-                    let missing = S::make_missing(x.pos());
+                    let missing = S!(make_missing, x, x.pos());
                     x.parse_classish_declaration(missing)
                 })
             }
@@ -174,7 +198,7 @@ where
             TokenKind::Declare => self.parse_declare_statement(),
             TokenKind::Let if self.env.is_experimental_mode => self.parse_let_statement(),
             TokenKind::Using => {
-                let missing = S::make_missing(self.pos());
+                let missing = S!(make_missing, self, self.pos());
                 self.parse_using_statement(missing)
             }
             TokenKind::Await if self.peek_token_kind_with_lookahead(1) == TokenKind::Using => {
@@ -216,7 +240,7 @@ where
              * context says is expected later, make the whole statement missing
              * and continue on, starting at the unexpected token. */
             /* TODO T20390825: Make sure this this won't cause premature recovery. */
-            kind if self.expects(kind) => S::make_missing(self.pos()),
+            kind if self.expects(kind) => S!(make_missing, self, self.pos()),
             _ => self.parse_expression_statement(),
         }
     }
@@ -227,12 +251,12 @@ where
                treat ?> as a part of markup text */
             /* The closing ?> tag is not legal hack, but accept it here and give an
                error in a later pass */
-            S::make_missing(self.pos());
+            S!(make_missing, self, self.pos());
         let (markup, suffix_opt) = self.lexer.scan_header();
-        let markup = S::make_token(markup);
+        let markup = S!(make_token, self, markup);
         let (suffix, is_echo_tag, has_suffix) = match suffix_opt {
             Some((less_than_question, language_opt)) => {
-                let less_than_question_token = S::make_token(less_than_question);
+                let less_than_question_token = S!(make_token, self, less_than_question);
                 /* if markup section ends with <?= tag
                 then script section embedded between tags should be treated as if it
                 will be an argument to 'echo'. Technically it should be restricted to
@@ -245,28 +269,35 @@ where
                 let (language, is_echo_tag) = match language_opt {
                     Some(language) => {
                         let is_echo_tag = language.kind() == TokenKind::Equal;
-                        let token = S::make_token(language);
+                        let token = S!(make_token, self, language);
                         (token, is_echo_tag)
                     }
                     None => {
-                        let missing = S::make_missing(self.pos());
+                        let missing = S!(make_missing, self, self.pos());
                         (missing, false)
                     }
                 };
-                let suffix = S::make_markup_suffix(less_than_question_token, language);
+                let suffix = S!(make_markup_suffix, self, less_than_question_token, language);
                 (suffix, is_echo_tag, true)
             }
             None => {
-                let missing = S::make_missing(self.pos());
+                let missing = S!(make_missing, self, self.pos());
                 (missing, false, false)
             }
         };
         let expression = if is_echo_tag {
             self.parse_statement()
         } else {
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         };
-        let s = S::make_markup_section(prefix, markup, suffix, expression);
+        let s = S!(
+            make_markup_section,
+            self,
+            prefix,
+            markup,
+            suffix,
+            expression
+        );
         (s, has_suffix)
     }
 
@@ -295,8 +326,8 @@ where
             | (TokenKind::Async, TokenKind::LeftBrace) /* Async block */
                 => self.parse_expression_statement(),
             | _ => {
-                let missing = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S>| {
-                    let missing = S::make_missing(x.pos());
+                let missing = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
+                    let missing = S!(make_missing, x, x.pos());
                     x.parse_function_declaration(missing)
                 });
                 if !toplevel {
@@ -355,7 +386,9 @@ where
                 _ => self.parse_statement(),
             }
         };
-        S::make_for_statement(
+        S!(
+            make_for_statement,
+            self,
             for_keyword_token,
             for_left_paren,
             for_initializer_expr,
@@ -373,7 +406,7 @@ where
         let foreach_left_paren = self.require_left_paren();
         self.expect_in_new_scope(ExpectedTokens::RightParen);
         let foreach_collection_name =
-            self.with_expression_parser(&|x: &mut ExpressionParser<'a, S>| {
+            self.with_expression_parser(&|x: &mut ExpressionParser<'a, S, T>| {
                 x.with_as_expressions(false, &|x| x.parse_expression())
             });
         let await_token = self.optional_token(TokenKind::Await);
@@ -383,8 +416,8 @@ where
 
         let (foreach_key, foreach_arrow, foreach_value) = match parser1.peek_token_kind() {
             TokenKind::RightParen => {
-                let missing1 = S::make_missing(self.pos());
-                let missing2 = S::make_missing(self.pos());
+                let missing1 = S!(make_missing, self, self.pos());
+                let missing2 = S!(make_missing, self, self.pos());
                 let value = self.parse_expression();
                 (missing1, missing2, value)
             }
@@ -398,7 +431,7 @@ where
                 self.continue_from(parser1);
                 self.with_error(Errors::invalid_foreach_element);
                 let token = self.fetch_token();
-                let error = S::make_error(token);
+                let error = S!(make_error, self, token);
                 let foreach_value = self.parse_expression();
                 (after_as, error, foreach_value)
             }
@@ -410,7 +443,9 @@ where
             TokenKind::Colon => self.parse_alternate_loop_statement(TokenKind::Endforeach),
             _ => self.parse_statement(),
         };
-        S::make_foreach_statement(
+        S!(
+            make_foreach_statement,
+            self,
             foreach_keyword_token,
             foreach_left_paren,
             foreach_collection_name,
@@ -430,7 +465,9 @@ where
         let do_while_keyword_token = self.require_while();
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
         let do_semicolon_token = self.require_semicolon();
-        S::make_do_statement(
+        S!(
+            make_do_statement,
+            self,
             do_keyword_token,
             statement_node,
             do_while_keyword_token,
@@ -448,7 +485,9 @@ where
             TokenKind::Colon => self.parse_alternate_loop_statement(TokenKind::Endwhile),
             _ => self.parse_statement(),
         };
-        S::make_while_statement(
+        S!(
+            make_while_statement,
+            self,
             while_keyword_token,
             left_paren_token,
             expr_node,
@@ -472,16 +511,18 @@ where
                 (colon_token, type_token)
             }
             _ => {
-                let missing_colon = S::make_missing(self.pos());
-                let missing_type = S::make_missing(self.pos());
+                let missing_colon = S!(make_missing, self, self.pos());
+                let missing_type = S!(make_missing, self, self.pos());
                 (missing_colon, missing_type)
             }
         };
         let equal_token = self.require_equal();
         let expr_node = self.parse_expression();
-        let init_node = S::make_simple_initializer(equal_token, expr_node);
+        let init_node = S!(make_simple_initializer, self, equal_token, expr_node);
         let semi_token = self.require_semicolon();
-        S::make_let_statement(
+        S!(
+            make_let_statement,
+            self,
             let_keyword_token,
             name_token,
             colon_token,
@@ -506,7 +547,9 @@ where
         match self.peek_token_kind() {
             TokenKind::Semicolon => {
                 let semi = self.assert_token(TokenKind::Semicolon);
-                S::make_declare_directive_statement(
+                S!(
+                    make_declare_directive_statement,
+                    self,
                     declare_keyword_token,
                     left_paren_token,
                     expr_node,
@@ -516,7 +559,9 @@ where
             }
             TokenKind::Colon => {
                 let statement_node = self.parse_alternate_loop_statement(TokenKind::Enddeclare);
-                S::make_declare_block_statement(
+                S!(
+                    make_declare_block_statement,
+                    self,
                     declare_keyword_token,
                     left_paren_token,
                     expr_node,
@@ -526,7 +571,9 @@ where
             }
             _ => {
                 let statement_node = self.parse_statement();
-                S::make_declare_block_statement(
+                S!(
+                    make_declare_block_statement,
+                    self,
                     declare_keyword_token,
                     left_paren_token,
                     expr_node,
@@ -557,7 +604,7 @@ where
         */
         let mut parser1 = self.clone();
         let expr = if token_kind == TokenKind::LeftParen {
-            parser1.with_expression_parser(&|p: &mut ExpressionParser<'a, S>| {
+            parser1.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
                 p.parse_cast_or_parenthesized_or_lambda_expression()
             })
         } else {
@@ -567,8 +614,15 @@ where
         match token.kind() {
             TokenKind::Semicolon => {
                 self.continue_from(parser1);
-                let semi = S::make_token(token);
-                S::make_using_statement_function_scoped(await_kw, using_kw, expr, semi)
+                let semi = S!(make_token, self, token);
+                S!(
+                    make_using_statement_function_scoped,
+                    self,
+                    await_kw,
+                    using_kw,
+                    expr,
+                    semi
+                )
             }
             _ => {
                 let left_paren = self.require_left_paren();
@@ -578,7 +632,9 @@ where
                     });
                 let right_paren = self.require_right_paren();
                 let statements = self.parse_statement();
-                S::make_using_statement_block_scoped(
+                S!(
+                    make_using_statement_block_scoped,
+                    self,
                     await_kw,
                     using_kw,
                     left_paren,
@@ -605,7 +661,15 @@ where
         let (left_paren, variables, right_paren) =
             self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| x.parse_expression());
         let semi = self.require_semicolon();
-        S::make_unset_statement(keyword, left_paren, variables, right_paren, semi)
+        S!(
+            make_unset_statement,
+            self,
+            keyword,
+            left_paren,
+            variables,
+            right_paren,
+            semi
+        )
     }
 
     /* parses the "( expr ) statement" segment of If, Elseif or Else clauses.
@@ -614,6 +678,7 @@ where
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
         let mut parser1 = self.clone();
         let opening_token = parser1.next_token();
+        // let opening_token_syntax = S!(make_token, parser1, opening_token);
         let statement_node = match opening_token.kind() {
             TokenKind::Colon => {
                 self.continue_from(parser1);
@@ -626,6 +691,7 @@ where
             expr_node,
             right_paren_token,
             opening_token,
+            // opening_token_syntax,
             statement_node,
         )
     }
@@ -642,8 +708,10 @@ where
             ) = self.parse_if_body_helper();
             let elseif_syntax = match elseif_opening_token.kind() {
                 TokenKind::Colon => {
-                    let elseif_opening_token_syntax = S::make_token(elseif_opening_token);
-                    S::make_alternate_elseif_clause(
+                    let elseif_opening_token_syntax = S!(make_token, self, elseif_opening_token);
+                    S!(
+                        make_alternate_elseif_clause,
+                        self,
                         elseif_token,
                         elseif_left_paren,
                         elseif_condition_expr,
@@ -652,7 +720,9 @@ where
                         elseif_statement,
                     )
                 }
-                _ => S::make_elseif_clause(
+                _ => S!(
+                    make_elseif_clause,
+                    self,
                     elseif_token,
                     elseif_left_paren,
                     elseif_condition_expr,
@@ -677,9 +747,11 @@ where
             match opening_token.kind() {
                 TokenKind::Colon => {
                     self.continue_from(parser1);
-                    let opening_token_syntax = S::make_token(opening_token);
+                    let opening_token_syntax = S!(make_token, self, opening_token);
                     let else_consequence = self.parse_alternate_if_block(&|x| x.parse_statement());
-                    S::make_alternate_else_clause(
+                    S!(
+                        make_alternate_else_clause,
+                        self,
                         else_token,
                         opening_token_syntax,
                         else_consequence,
@@ -687,7 +759,7 @@ where
                 }
                 _ => {
                     let else_consequence = self.parse_statement();
-                    S::make_else_clause(else_token, else_consequence)
+                    S!(make_else_clause, self, else_token, else_consequence)
                 }
             }
         }
@@ -704,8 +776,10 @@ where
                 let closing_token =
                     self.require_token(TokenKind::Endif, Errors::error1059(TokenKind::Endif));
                 let semicolon_token = self.require_semicolon();
-                let if_opening_token_syntax = S::make_token(if_opening_token);
-                S::make_alternate_if_statement(
+                let if_opening_token_syntax = S!(make_token, self, if_opening_token);
+                S!(
+                    make_alternate_if_statement,
+                    self,
                     if_keyword_token,
                     if_left_paren,
                     if_expr,
@@ -718,7 +792,9 @@ where
                     semicolon_token,
                 )
             }
-            _ => S::make_if_statement(
+            _ => S!(
+                make_if_statement,
+                self,
                 if_keyword_token,
                 if_left_paren,
                 if_expr,
@@ -818,7 +894,7 @@ where
             match token.kind() {
                 TokenKind::Semicolon if parser1.peek_token_kind() == closing_token_kind => {
                     self.continue_from(parser1);
-                    S::make_list(Box::new(vec![]), self.pos())
+                    S!(make_list, self, Box::new(vec![]), self.pos())
                 }
                 _ => self.parse_terminated_list(&|x| x.parse_switch_section(), closing_token_kind),
             }
@@ -830,7 +906,9 @@ where
                     Errors::error1059(TokenKind::Endswitch),
                 );
                 let semicolon = self.require_semicolon();
-                S::make_alternate_switch_statement(
+                S!(
+                    make_alternate_switch_statement,
+                    self,
                     switch_keyword_token,
                     left_paren_token,
                     expr_node,
@@ -843,7 +921,9 @@ where
             }
             _ => {
                 let right_brace_token = self.require_right_brace();
-                S::make_switch_statement(
+                S!(
+                    make_switch_statement,
+                    self,
                     switch_keyword_token,
                     left_paren_token,
                     expr_node,
@@ -874,7 +954,7 @@ where
         /* We don't get here unless we have fallthrough ; */
         let keyword = self.assert_token(TokenKind::Fallthrough);
         let semi = self.assert_token(TokenKind::Semicolon);
-        S::make_switch_fallthrough(keyword, semi)
+        S!(make_switch_fallthrough, self, keyword, semi)
     }
 
     fn parse_switch_fallthrough_opt(&mut self) -> S::R {
@@ -911,10 +991,10 @@ where
                 .leading()
                 .iter()
                 .any(|x| x.kind() == TriviaKind::FallThrough);
-            let missing = S::make_missing(self.pos());
+            let missing = S!(make_missing, self, self.pos());
             if commented_fallthrough {
-                let missing1 = S::make_missing(self.pos());
-                S::make_switch_fallthrough(missing, missing1)
+                let missing1 = S!(make_missing, self, self.pos());
+                S!(make_switch_fallthrough, self, missing, missing1)
             } else {
                 missing
             }
@@ -929,7 +1009,7 @@ where
         };
         let statements = self.parse_list_until_none(&|x| x.parse_switch_section_statement());
         let fallthrough = self.parse_switch_fallthrough_opt();
-        S::make_switch_section(labels, statements, fallthrough)
+        S!(make_switch_section, self, labels, statements, fallthrough)
     }
 
     fn parse_switch_section_statement(&mut self) -> Option<S::R> {
@@ -976,7 +1056,7 @@ where
             let catch_type = match self.peek_token_kind() {
                 TokenKind::Variable => {
                     self.with_error(Errors::error1007);
-                    S::make_missing(self.pos())
+                    S!(make_missing, self, self.pos())
                 }
                 _ => self.parse_type_specifier(),
             };
@@ -988,7 +1068,9 @@ where
 
             let right_paren = self.require_right_paren();
             let compound_stmt = self.parse_compound_statement();
-            let catch_clause = S::make_catch_clause(
+            let catch_clause = S!(
+                make_catch_clause,
+                self,
                 catch_token,
                 left_paren,
                 catch_type,
@@ -1010,9 +1092,9 @@ where
         if self.peek_token_kind() == TokenKind::Finally {
             let finally_token = self.assert_token(TokenKind::Finally);
             let compound_stmt = self.parse_compound_statement();
-            S::make_finally_clause(finally_token, compound_stmt)
+            S!(make_finally_clause, self, finally_token, compound_stmt)
         } else {
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         }
     }
 
@@ -1029,7 +1111,9 @@ where
         let finally_clause = self.parse_finally_clause_opt();
         /* If the catch and finally are both missing then we give an error in
         a later pass. */
-        S::make_try_statement(
+        S!(
+            make_try_statement,
+            self,
             try_keyword_token,
             try_compound_stmt,
             catch_clauses,
@@ -1049,12 +1133,12 @@ where
         /* We detect if we are not inside a switch or loop in a later pass. */
         let break_token = self.assert_token(TokenKind::Break);
         let level = if self.peek_token_kind() == TokenKind::Semicolon {
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         } else {
             self.parse_expression()
         };
         let semi_token = self.require_semicolon();
-        S::make_break_statement(break_token, level, semi_token)
+        S!(make_break_statement, self, break_token, level, semi_token)
     }
 
     fn parse_continue_statement(&mut self) -> S::R {
@@ -1069,12 +1153,18 @@ where
         /* We detect if we are not inside a loop in a later pass. */
         let continue_token = self.assert_token(TokenKind::Continue);
         let level = if self.peek_token_kind() == TokenKind::Semicolon {
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         } else {
             self.parse_expression()
         };
         let semi_token = self.require_semicolon();
-        S::make_continue_statement(continue_token, level, semi_token)
+        S!(
+            make_continue_statement,
+            self,
+            continue_token,
+            level,
+            semi_token
+        )
     }
 
     fn parse_return_statement(&mut self) -> S::R {
@@ -1082,37 +1172,43 @@ where
         let mut parser1 = self.clone();
         let semi_token = parser1.next_token();
         if semi_token.kind() == TokenKind::Semicolon {
-            let missing = S::make_missing(self.pos());
+            let missing = S!(make_missing, parser1, self.pos());
             self.continue_from(parser1);
-            let semi_token = S::make_token(semi_token);
-            S::make_return_statement(return_token, missing, semi_token)
+            let semi_token = S!(make_token, self, semi_token);
+            S!(
+                make_return_statement,
+                self,
+                return_token,
+                missing,
+                semi_token
+            )
         } else {
             let expr = self.parse_expression();
             let semi_token = self.require_semicolon();
-            S::make_return_statement(return_token, expr, semi_token)
+            S!(make_return_statement, self, return_token, expr, semi_token)
         }
     }
 
     fn parse_goto_label(&mut self) -> S::R {
         let goto_label_name = self.next_token_non_reserved_as_name();
-        let goto_label_name = S::make_token(goto_label_name);
+        let goto_label_name = S!(make_token, self, goto_label_name);
         let colon = self.require_colon();
-        S::make_goto_label(goto_label_name, colon)
+        S!(make_goto_label, self, goto_label_name, colon)
     }
 
     fn parse_goto_statement(&mut self) -> S::R {
         let goto = self.assert_token(TokenKind::Goto);
         let goto_label_name = self.next_token_non_reserved_as_name();
-        let goto_label_name = S::make_token(goto_label_name);
+        let goto_label_name = S!(make_token, self, goto_label_name);
         let semicolon = self.require_semicolon();
-        S::make_goto_statement(goto, goto_label_name, semicolon)
+        S!(make_goto_statement, self, goto, goto_label_name, semicolon)
     }
 
     fn parse_throw_statement(&mut self) -> S::R {
         let throw_token = self.assert_token(TokenKind::Throw);
         let expr = self.parse_expression();
         let semi_token = self.require_semicolon();
-        S::make_throw_statement(throw_token, expr, semi_token)
+        S!(make_throw_statement, self, throw_token, expr, semi_token)
     }
     fn parse_default_label(&mut self) -> S::R {
         /*
@@ -1131,12 +1227,12 @@ where
             let token = parser1.next_token();
             if token.kind() == TokenKind::Semicolon {
                 self.continue_from(parser1);
-                S::make_token(token)
+                S!(make_token, self, token)
             } else {
                 self.require_colon()
             }
         };
-        S::make_default_label(default_token, colon_token)
+        S!(make_default_label, self, default_token, colon_token)
     }
     fn parse_case_label(&mut self) -> S::R {
         /* SPEC:
@@ -1156,18 +1252,18 @@ where
             let token = parser1.next_token();
             if token.kind() == TokenKind::Semicolon {
                 self.continue_from(parser1);
-                S::make_token(token)
+                S!(make_token, self, token)
             } else {
                 self.require_colon()
             }
         };
-        S::make_case_label(case_token, expr, colon_token)
+        S!(make_case_label, self, case_token, expr, colon_token)
     }
 
     fn parse_concurrent_statement(&mut self) -> S::R {
         let keyword = self.assert_token(TokenKind::Concurrent);
         let statement = self.parse_statement();
-        S::make_concurrent_statement(keyword, statement)
+        S!(make_concurrent_statement, self, keyword, statement)
     }
 
     /* SPEC:
@@ -1189,7 +1285,7 @@ where
                 x.parse_expression()
             });
         let semicolon = self.require_semicolon();
-        S::make_echo_statement(token, expression_list, semicolon)
+        S!(make_echo_statement, self, token, expression_list, semicolon)
     }
 
     fn parse_expression_statement(&mut self) -> S::R {
@@ -1197,10 +1293,10 @@ where
         let token = parser1.next_token();
         match token.kind() {
             TokenKind::Semicolon => {
-                let missing = S::make_missing(self.pos());
+                let missing = S!(make_missing, self, self.pos());
                 self.continue_from(parser1);
-                let token = S::make_token(token);
-                S::make_expression_statement(missing, token)
+                let token = S!(make_token, self, token);
+                S!(make_expression_statement, self, missing, token)
             }
             _ => {
                 self.expect_in_new_scope(ExpectedTokens::Semicolon);
@@ -1209,15 +1305,15 @@ where
                     Some(t) => {
                         if expression.is_halt_compiler_expression() {
                             let token = self.rescan_halt_compiler(t);
-                            S::make_token(token)
+                            S!(make_token, self, token)
                         } else {
-                            S::make_token(t)
+                            S!(make_token, self, t)
                         }
                     }
-                    None => S::make_missing(self.pos()),
+                    None => S!(make_missing, self, self.pos()),
                 };
                 self.pop_scope(ExpectedTokens::Semicolon);
-                S::make_expression_statement(expression, token)
+                S!(make_expression_statement, self, expression, token)
             }
         }
     }
@@ -1228,14 +1324,20 @@ where
         match token.kind() {
             TokenKind::Semicolon => {
                 self.continue_from(parser1);
-                S::make_token(token)
+                S!(make_token, self, token)
             }
             _ => {
                 let left_brace_token = self.require_left_brace();
                 let statement_list =
                     self.parse_terminated_list(&|x| x.parse_statement(), TokenKind::RightBrace);
                 let right_brace_token = self.require_right_brace();
-                S::make_compound_statement(left_brace_token, statement_list, right_brace_token)
+                S!(
+                    make_compound_statement,
+                    self,
+                    left_brace_token,
+                    statement_list,
+                    right_brace_token
+                )
             }
         }
     }
@@ -1245,7 +1347,9 @@ where
         let statement_list = self.parse_terminated_list(&|x| x.parse_statement(), terminator);
         let terminate_token = self.require_token(terminator, Errors::error1059(terminator));
         let semicolon_token = self.require_semicolon();
-        S::make_alternate_loop_statement(
+        S!(
+            make_alternate_loop_statement,
+            self,
             colon_token,
             statement_list,
             terminate_token,
@@ -1254,6 +1358,6 @@ where
     }
 
     fn parse_expression(&mut self) -> S::R {
-        self.with_expression_parser(&|p: &mut ExpressionParser<'a, S>| p.parse_expression())
+        self.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| p.parse_expression())
     }
 }

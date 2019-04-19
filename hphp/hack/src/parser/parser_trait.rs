@@ -5,7 +5,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- */
+*/
 use crate::lexable_token::LexableToken;
 use crate::lexable_trivia::LexableTrivia;
 use crate::lexer::{self, Lexer};
@@ -84,21 +84,30 @@ impl<T> Context<T> {
     }
 }
 
-pub trait ParserTrait<'a, S>: Clone
+pub trait ParserTrait<'a, S, T: Clone>: Clone
 where
-    S: SmartConstructors,
+    S: SmartConstructors<T>,
 {
     fn make(
         _: Lexer<'a, S::Token>,
         _: ParserEnv,
         _: Context<S::Token>,
         _: Vec<SyntaxError>,
+        _: T,
     ) -> Self;
     fn add_error(&mut self, _: SyntaxError);
-    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>);
+    fn into_parts(self) -> (Lexer<'a, S::Token>, Context<S::Token>, Vec<SyntaxError>, T);
     fn lexer(&self) -> &Lexer<'a, S::Token>;
     fn lexer_mut(&mut self) -> &mut Lexer<'a, S::Token>;
-    fn continue_from<P: ParserTrait<'a, S>>(&mut self, _: P);
+    fn continue_from<P: ParserTrait<'a, S, T>>(&mut self, _: P)
+    where
+        T: Clone;
+
+    fn env(&self) -> &ParserEnv;
+
+    /** The state is never observably None; it is None only during a Smart Constructor call
+      (It is exposed as Option to avoid clone in SC calls.) */
+    fn sc_state_mut(&mut self) -> &mut Option<T>;
 
     fn skipped_tokens(&self) -> &[S::Token];
     fn skipped_tokens_mut(&mut self) -> &mut Vec<S::Token>;
@@ -194,15 +203,15 @@ where
         let token = self.next_xhp_class_name_or_other_token();
         match token.kind() {
             TokenKind::Name => {
-                let name_token = S::make_token(token);
+                let name_token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(name_token)
             }
             TokenKind::Backslash => {
-                let missing = S::make_missing(self.pos());
-                let backslash = S::make_token(token);
+                let missing = S!(make_missing, self, self.pos());
+                let backslash = S!(make_token, self, token);
                 self.scan_qualified_name(missing, backslash)
             }
-            _ => S::make_token(token),
+            _ => S!(make_token, self, token),
         }
     }
 
@@ -239,7 +248,7 @@ where
         if tparam_open == '<' && attr1 == '<' && attr2 == '<' {
             lexer.advance(1);
             let token = S::Token::make(TokenKind::LessThan, lexer.start(), 1, vec![], vec![]);
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             self.continue_from(parser1);
             self.assert_token(TokenKind::LessThan)
@@ -291,7 +300,7 @@ where
     }
 
     fn fetch_token(&mut self) -> S::R {
-        S::make_token(self.lexer_mut().next_token())
+        S!(make_token, self, self.lexer_mut().next_token())
     }
 
     fn assert_token_with_tokenizer(
@@ -303,7 +312,7 @@ where
         if token.kind() != kind {
             panic!() // TODO(kasper): improve error message)
         }
-        S::make_token(token)
+        S!(make_token, self, token)
     }
 
     fn assert_token(&mut self, kind: TokenKind) -> S::R {
@@ -336,9 +345,9 @@ where
         let token = parser1.next_token();
         if token.kind() == kind {
             self.continue_from(parser1);
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         }
     }
 
@@ -354,9 +363,9 @@ where
             match (name_opt.is_some(), token.kind()) {
                 (true, TokenKind::Backslash) => {
                     /* found backslash, create item and recurse */
-                    let token = S::make_token(token);
+                    let token = S!(make_token, self, token);
                     self.continue_from(parser1);
-                    let part = S::make_list_item(name_opt.unwrap(), token);
+                    let part = S!(make_list_item, self, name_opt.unwrap(), token);
                     /* TODO(T25649779) */
                     parts.push(part);
                     has_backslash = true;
@@ -365,7 +374,7 @@ where
                 (false, TokenKind::Name) => {
                     /* found a name, recurse to look for backslash */
                     self.continue_from(parser1);
-                    let token = S::make_token(token);
+                    let token = S!(make_token, self, token);
                     name_opt = Some(token);
                     has_backslash = false;
                 }
@@ -377,8 +386,8 @@ where
                     /* next token is not part of qualified name but we've consume some
                     part of the input - create part for name with missing backslash
                     and return accumulated result */
-                    let missing = S::make_missing(self.pos());
-                    let part = S::make_list_item(name_opt.unwrap(), missing);
+                    let missing = S!(make_missing, self, self.pos());
+                    let part = S!(make_list_item, self, name_opt.unwrap(), missing);
                     /* TODO(T25649779) */
                     parts.push(part);
                     return (parts, None, false);
@@ -397,18 +406,18 @@ where
         if parts.len() == 0 {
             (name_token_opt.unwrap(), is_backslash)
         } else {
-            let list_node = S::make_list(Box::new(parts), self.pos());
-            let name = S::make_qualified_name(list_node);
+            let list_node = S!(make_list, self, Box::new(parts), self.pos());
+            let name = S!(make_qualified_name, self, list_node);
             (name, is_backslash)
         }
     }
 
     fn scan_qualified_name_extended(&mut self, missing: S::R, backslash: S::R) -> (S::R, bool) {
-        let head = S::make_list_item(missing, backslash);
+        let head = S!(make_list_item, self, missing, backslash);
         let parts = vec![head];
         let (parts, _, is_backslash) = self.scan_qualified_name_worker(None, parts, false);
-        let list_node = S::make_list(Box::new(parts), self.pos());
-        let name = S::make_qualified_name(list_node);
+        let list_node = S!(make_list, self, Box::new(parts), self.pos());
+        let name = S!(make_qualified_name, self, list_node);
         (name, is_backslash)
     }
 
@@ -457,17 +466,17 @@ where
         match token.kind() {
             TokenKind::Name => {
                 self.continue_from(parser1);
-                let token = S::make_token(token);
+                let token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(token)
             }
             TokenKind::Backslash => {
                 self.continue_from(parser1);
 
-                let missing = S::make_missing(self.pos());
-                let token = S::make_token(token);
+                let missing = S!(make_missing, self, self.pos());
+                let token = S!(make_token, self, token);
                 self.scan_qualified_name(missing, token)
             }
-            _ => S::make_missing(self.pos()),
+            _ => S!(make_missing, self, self.pos()),
         }
     }
 
@@ -478,10 +487,10 @@ where
             _ => true,
         });
         if block.is_missing() {
-            let empty1 = S::make_missing(self.pos());
-            let empty2 = S::make_missing(self.pos());
-            let es = S::make_expression_statement(empty1, empty2);
-            S::make_list(Box::new(vec![es]), self.pos())
+            let empty1 = S!(make_missing, self, self.pos());
+            let empty2 = S!(make_missing, self, self.pos());
+            let es = S!(make_expression_statement, self, empty1, empty2);
+            S!(make_list, self, Box::new(vec![es]), self.pos())
         } else {
             self.continue_from(parser1);
             block
@@ -511,18 +520,18 @@ where
         match name.kind() {
             TokenKind::Name => {
                 self.continue_from(parser1);
-                let token = S::make_token(name);
+                let token = S!(make_token, self, name);
                 self.scan_remaining_qualified_name(token)
             }
             TokenKind::Backslash => {
                 self.continue_from(parser1);
-                let missing = S::make_missing(self.pos());
-                let backslash = S::make_token(name);
+                let missing = S!(make_missing, self, self.pos());
+                let backslash = S!(make_token, self, name);
                 self.scan_qualified_name(missing, backslash)
             }
             _ => {
                 self.with_error(Errors::error1004);
-                S::make_missing(self.pos())
+                S!(make_missing, self, self.pos())
             }
         }
     }
@@ -534,7 +543,7 @@ where
     fn require_class_name(&mut self) -> S::R {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             self.require_name_allow_non_reserved()
         }
@@ -610,18 +619,18 @@ where
         match token.kind() {
             TokenKind::Name => {
                 self.continue_from(parser1);
-                let token = S::make_token(token);
+                let token = S!(make_token, self, token);
                 self.scan_remaining_qualified_name(token)
             }
             TokenKind::Variable => {
                 self.continue_from(parser1);
-                S::make_token(token)
+                S!(make_token, self, token)
             }
             _ => {
                 /* ERROR RECOVERY: Create a missing token for the expected token,
                 and continue on from the current token. Don't skip it. */
                 self.with_error(error);
-                S::make_missing(self.pos())
+                S!(make_missing, self, self.pos())
             }
         }
     }
@@ -633,7 +642,7 @@ where
     fn require_xhp_class_name_or_name_or_variable(&mut self) -> S::R {
         if self.is_next_xhp_class_name() {
             let token = self.next_xhp_class_name();
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             self.require_name_or_variable()
         }
@@ -648,12 +657,12 @@ where
         let token = parser1.next_token_non_reserved_as_name();
         if token.kind() == TokenKind::Name {
             self.continue_from(parser1);
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             /* ERROR RECOVERY: Create a missing token for the expected token,
             and continue on from the current token. Don't skip it. */
             self.with_error(Errors::error1004);
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         }
     }
 
@@ -681,13 +690,13 @@ where
     fn require_xhp_name(&mut self) -> S::R {
         if self.is_next_name() {
             let token = self.next_xhp_name();
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             /* ERROR RECOVERY: Create a missing token for the expected token,
             and continue on from the current token. Don't skip it. */
             /* TODO: Different error? */
             self.with_error(Errors::error1004);
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         }
     }
 
@@ -737,9 +746,9 @@ where
                 if kind == TokenKind::EndOfFile || list_kind != SeparatedListKind::ItemsOptional {
                     self.with_error(error)
                 };
-                let missing1 = S::make_missing(self.pos());
-                let missing2 = S::make_missing(self.pos());
-                let list_item = S::make_list_item(missing1, missing2);
+                let missing1 = S!(make_missing, self, self.pos());
+                let missing2 = S!(make_missing, self, self.pos());
+                let list_item = S!(make_list_item, self, missing1, missing2);
                 /* TODO(T25649779) */
                 items.push(list_item);
                 break;
@@ -762,9 +771,9 @@ where
                     self.with_error(error.clone())
                 }
                 self.continue_from(parser1);
-                let item = S::make_missing(self.pos());
-                let separator = S::make_token(token);
-                let list_item = S::make_list_item(item, separator);
+                let item = S!(make_missing, self, self.pos());
+                let separator = S!(make_token, self, token);
+                let list_item = S!(make_list_item, self, item, separator);
                 /* TODO(T25649779) */
                 items.push(list_item)
             } else {
@@ -776,16 +785,16 @@ where
                 let kind = token.kind();
 
                 if close_predicate(kind) {
-                    let missing = S::make_missing(self.pos());
-                    let list_item = S::make_list_item(item, missing);
+                    let missing = S!(make_missing, self, self.pos());
+                    let list_item = S!(make_list_item, self, item, missing);
                     /* TODO(T25649779) */
                     items.push(list_item);
                     break;
                 } else if kind == separator_kind {
                     self.continue_from(parser1);
 
-                    let separator = S::make_token(token);
-                    let list_item = S::make_list_item(item, separator);
+                    let separator = S!(make_token, self, token);
+                    let list_item = S!(make_list_item, self, item, separator);
                     /* TODO(T25649779) */
                     items.push(list_item);
                     let allow_trailing = list_kind != SeparatedListKind::NoTrailing;
@@ -797,8 +806,8 @@ where
                 } else {
                     /* ERROR RECOVERY: We were expecting a close or separator, but
                     got neither. Bail out. Caller will give an error. */
-                    let missing = S::make_missing(self.pos());
-                    let list_item = S::make_list_item(item, missing);
+                    let missing = S!(make_missing, self, self.pos());
+                    let list_item = S!(make_list_item, self, item, missing);
                     /* TODO(T25649779) */
                     items.push(list_item);
                     break;
@@ -806,7 +815,7 @@ where
             }
         }
         let no_arg_is_missing = items.iter().all(|x| !x.is_missing());
-        let item_list = S::make_list(Box::new(items), self.pos());
+        let item_list = S!(make_list, self, Box::new(items), self.pos());
         (item_list, no_arg_is_missing)
     }
 
@@ -828,7 +837,7 @@ where
                 }
             }
         }
-        S::make_list(Box::new(acc), self.pos())
+        S!(make_list, self, Box::new(acc), self.pos())
     }
 
     fn parse_separated_list_opt_predicate(
@@ -841,7 +850,7 @@ where
     ) -> S::R {
         let kind = self.peek_token_kind();
         if close_predicate(kind) {
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         } else {
             let (items, _) = self.parse_separated_list_predicate(
                 separator_kind,
@@ -1138,7 +1147,7 @@ where
                 items.push(result)
             }
         }
-        S::make_list(Box::new(items), self.pos())
+        S!(make_list, self, Box::new(items), self.pos())
     }
 
     fn parse_terminated_list(
@@ -1221,7 +1230,7 @@ where
         let token = parser1.next_token();
         if kinds.iter().any(|x| *x == token.kind()) {
             self.continue_from(parser1);
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             /* ERROR RECOVERY: Look at the next token after this. Is it the one we
              * require? If so, process the current token as extra and return the next
@@ -1231,7 +1240,7 @@ where
             if kinds.iter().any(|x| *x == next_kind) {
                 self.skip_and_log_unexpected_token(true);
                 let token = self.next_token();
-                S::make_token(token)
+                S!(make_token, self, token)
             } else {
                 /* ERROR RECOVERY: We know we didn't encounter an extra token.
                  * So, as a second line of defense, check if the current token
@@ -1242,11 +1251,11 @@ where
                 match kind {
                     Some(kind) => {
                         self.skip_and_log_misspelled_token(*kind);
-                        S::make_missing(self.pos())
+                        S!(make_missing, self, self.pos())
                     }
                     None => {
                         self.with_error(error);
-                        S::make_missing(self.pos())
+                        S!(make_missing, self, self.pos())
                     }
                 }
             }
@@ -1259,7 +1268,7 @@ where
         let token = parser1.next_token();
         if token.kind() == kind {
             self.continue_from(parser1);
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             /* ERROR RECOVERY: Look at the next token after this. Is it the one we
              * require? If so, process the current token as extra and return the next
@@ -1269,17 +1278,17 @@ where
             if next_kind == kind {
                 self.skip_and_log_unexpected_token(true);
                 let token = self.next_token();
-                S::make_token(token)
+                S!(make_token, self, token)
             } else {
                 /* ERROR RECOVERY: We know we didn't encounter an extra token.
                  * So, as a second line of defense, check if the current token
                  * is a misspelling, by our existing narrow definition of misspelling. */
                 if Self::is_misspelled_kind(kind, &self.current_token_text()) {
                     self.skip_and_log_misspelled_token(kind);
-                    S::make_missing(self.pos())
+                    S!(make_missing, self, self.pos())
                 } else {
                     self.with_error(error);
-                    S::make_missing(self.pos())
+                    S!(make_missing, self, self.pos())
                 }
             }
         }
@@ -1325,12 +1334,12 @@ where
 
         if token.kind() == TokenKind::Name {
             self.continue_from(parser1);
-            S::make_token(token)
+            S!(make_token, self, token)
         } else {
             /* ERROR RECOVERY: Create a missing token for the expected token,
             and continue on from the current token. Don't skip it. */
             self.with_error(Errors::error1004);
-            S::make_missing(self.pos())
+            S!(make_missing, self, self.pos())
         }
     }
 
@@ -1349,7 +1358,7 @@ where
     fn require_semicolon(&mut self) -> S::R {
         match self.peek_token_kind() {
             /* TODO: Kill PHPism; no semicolon required right before ?> */
-            TokenKind::QuestionGreaterThan => S::make_missing(self.pos()),
+            TokenKind::QuestionGreaterThan => S!(make_missing, self, self.pos()),
             _ => self.require_token(TokenKind::Semicolon, Errors::error1010),
         }
     }

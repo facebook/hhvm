@@ -305,15 +305,11 @@ struct
       List.map c.S.c_method_redeclarations ~f:(map_method_redeclaration menv);
     T.c_xhp_attr_uses = c.S.c_xhp_attr_uses;
     T.c_xhp_category = c.S.c_xhp_category;
-    T.c_req_extends = c.S.c_req_extends;
-    T.c_req_implements = c.S.c_req_implements;
+    T.c_reqs = c.S.c_reqs;
     T.c_implements = c.S.c_implements;
     T.c_consts = List.map c.S.c_consts (map_class_const menv);
     T.c_typeconsts = List.map c.S.c_typeconsts (map_class_typeconst menv);
-    T.c_static_vars = List.map c.S.c_static_vars (map_class_var menv);
     T.c_vars = List.map c.S.c_vars (map_class_var menv);
-    T.c_constructor = Option.map c.S.c_constructor (map_method menv);
-    T.c_static_methods = List.map c.S.c_static_methods (map_method menv);
     T.c_methods = List.map c.S.c_methods (map_method menv);
     T.c_namespace = c.S.c_namespace;
     T.c_user_attributes = List.map c.S.c_user_attributes (map_user_attribute menv);
@@ -375,6 +371,7 @@ struct
     T.cv_user_attributes = List.map cv.S.cv_user_attributes (map_user_attribute menv);
     T.cv_is_promoted_variadic = cv.S.cv_is_promoted_variadic;
     T.cv_doc_comment = cv.S.cv_doc_comment;
+    T.cv_is_static = cv.S.cv_is_static;
   }
 
   and map_method menv m =

@@ -29,8 +29,9 @@ let handler = object
      let disallow_static_memoized = TypecheckerOptions.experimental_feature_enabled
       (Tast_env.get_tcopt env)
       TypecheckerOptions.experimental_disallow_static_memoized in
+    let constructor, static_methods, _ = split_methods c in
     if disallow_static_memoized && not c.c_final then begin
-      List.iter c.c_static_methods static_memoized_check;
-      Option.iter c.c_constructor static_memoized_check
+      List.iter static_methods static_memoized_check;
+      Option.iter constructor static_memoized_check
     end
 end

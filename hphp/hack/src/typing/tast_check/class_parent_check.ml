@@ -64,10 +64,11 @@ let handler = object
   inherit Tast_visitor.handler_base
 
   method! at_class_ env c =
+    let req_extends, req_implements = split_reqs c in
     List.iter c.c_uses (check_is_trait env);
-    List.iter c.c_req_extends (check_is_class env);
+    List.iter req_extends (check_is_class env);
     List.iter c.c_implements (check_is_interface (env, "implement"));
-    List.iter c.c_req_implements
+    List.iter req_implements
       (check_is_interface (env, "require implementation of"));
 
 end

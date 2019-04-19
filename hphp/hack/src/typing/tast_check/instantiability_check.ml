@@ -122,7 +122,6 @@ let handler = object
     let check_class_vars cvar =
       Option.iter cvar.cv_type (check_hint env) in
     List.iter c.c_vars check_class_vars;
-    List.iter c.c_static_vars check_class_vars;
     check_tparams env c.c_tparams.c_tparam_list
 
   method! at_fun_ env f =

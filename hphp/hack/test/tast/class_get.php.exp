@@ -5,19 +5,17 @@
       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = None; c_req_extends = [];
-      c_req_implements = []; c_implements = []; c_consts = [];
-      c_typeconsts = [];
-      c_static_vars =
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_consts = []; c_typeconsts = [];
+      c_vars =
       [{ cv_final = false; cv_is_xhp = false; cv_visibility = Private;
          cv_type = (Some ([13:18-22], (Hoption ([13:19-22], (Hprim Tint)))));
          cv_id = ([13:23-25], "x");
          cv_expr = (Some (([13:28-32], null), Null));
          cv_user_attributes = []; cv_doc_comment = None;
-         cv_is_promoted_variadic = false }
+         cv_is_promoted_variadic = false; cv_is_static = true }
         ];
-      c_vars = []; c_constructor = None;
-      c_static_methods =
+      c_methods =
       [{ m_span = [15:3-21:4]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([15:26-29], "get"); m_tparams = [];
@@ -43,9 +41,9 @@
          m_ret = (Some ([15:33-36], (Hprim Tint))); m_external = false;
          m_doc_comment = None }
         ];
-      c_methods = []; c_attributes = []; c_xhp_children = [];
-      c_xhp_attrs = []; c_namespace = <opaque>; c_user_attributes = [];
-      c_file_attributes = []; c_enum = None; c_pu_enums = [];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_pu_enums = [];
       c_doc_comment =
       (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */")
       })

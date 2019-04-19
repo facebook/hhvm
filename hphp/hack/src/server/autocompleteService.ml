@@ -704,7 +704,7 @@ class local_types = object (self)
 
   method! on_method_ env m =
     if method_contains_cursor m then begin
-      if not (Tast_env.is_static env) then
+      if not m.Tast.m_static then
         self#add Typing_defs.this (Tast_env.get_self_exn env);
       super#on_method_ env m
     end

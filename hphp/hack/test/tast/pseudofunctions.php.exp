@@ -5,11 +5,9 @@
       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = None; c_req_extends = [];
-      c_req_implements = []; c_implements = []; c_consts = [];
-      c_typeconsts = []; c_static_vars = []; c_vars = [];
-      c_constructor = None;
-      c_static_methods =
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
+      c_implements = []; c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
       [{ m_span = [4:3-46]; m_annotation = (); m_final = false;
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([4:26-35], "staticFoo"); m_tparams = [];
@@ -18,18 +16,17 @@
          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = (Some ([4:39-43], (Hprim Tvoid))); m_external = false;
-         m_doc_comment = None }
-        ];
-      c_methods =
-      [{ m_span = [5:3-41]; m_annotation = (); m_final = false;
-         m_abstract = false; m_static = false; m_visibility = Public;
-         m_name = ([5:19-30], "instanceFoo"); m_tparams = [];
-         m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_body =
-         { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
-         m_fun_kind = FSync; m_user_attributes = [];
-         m_ret = (Some ([5:34-38], (Hprim Tvoid))); m_external = false;
-         m_doc_comment = None }
+         m_doc_comment = None };
+        { m_span = [5:3-41]; m_annotation = (); m_final = false;
+          m_abstract = false; m_static = false; m_visibility = Public;
+          m_name = ([5:19-30], "instanceFoo"); m_tparams = [];
+          m_where_constraints = []; m_variadic = FVnonVariadic;
+          m_params = [];
+          m_body =
+          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+          m_fun_kind = FSync; m_user_attributes = [];
+          m_ret = (Some ([5:34-38], (Hprim Tvoid))); m_external = false;
+          m_doc_comment = None }
         ];
       c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
       c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];

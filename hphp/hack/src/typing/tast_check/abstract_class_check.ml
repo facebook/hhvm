@@ -39,8 +39,9 @@ let check_class _ c =
   if c.c_kind = Ast.Cabstract && c.c_final then begin
     let err m =
       Errors.nonstatic_method_in_abstract_final_class (fst m.m_name) in
-    List.iter c.c_methods err;
-    Option.iter c.c_constructor err
+    let c_constructor, _, c_methods = split_methods c in
+    List.iter c_methods err;
+    Option.iter c_constructor err
   end
 
 let handler = object

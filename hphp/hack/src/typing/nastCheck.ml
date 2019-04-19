@@ -514,19 +514,21 @@ and class_ tenv c =
                ~ety_env:(Phase.env_with_self tenv) in
   let tenv = add_constraints (fst c.c_name) tenv constraints in
   let env = { env with tenv = Env.set_mode tenv c.c_mode } in
+  let c_constructor, c_statics, c_methods = split_methods c in
+  let c_static_vars, c_vars = split_vars c in
 
   if not (c.c_kind = Ast.Cinterface) then begin
-    maybe method_ env c.c_constructor;
+    maybe method_ env c_constructor;
   end;
   List.iter c.c_tparams.c_tparam_list (tparam env);
   List.iter c.c_extends (hint env);
   List.iter c.c_implements (hint env);
   List.iter c.c_consts (class_const env);
   List.iter c.c_typeconsts (typeconst (env, c.c_tparams.c_tparam_list));
-  List.iter c.c_static_vars (class_var env);
-  List.iter c.c_vars (class_var env);
-  List.iter c.c_static_methods (method_ env);
-  List.iter c.c_methods (method_ env);
+  List.iter c_static_vars (class_var env);
+  List.iter c_vars (class_var env);
+  List.iter c_statics (method_ env);
+  List.iter c_methods (method_ env);
 
 and class_const env (h, _, e) =
   maybe hint env h;

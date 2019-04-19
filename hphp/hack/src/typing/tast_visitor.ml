@@ -20,11 +20,21 @@ class virtual iter = object (self)
   method go_def x = self#on_def (Env.def_env x) x
 
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
+  method! on_method_ env x =
+    let env =
+      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      then Env.set_inside_constructor env
+      else if x.Tast.m_static
+      then Env.set_static env
+      else env in
+    super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
-  method! on_static_var env = super#on_static_var (Env.set_static env)
-  method! on_static_method env = super#on_static_method (Env.set_static env)
+  method! on_class_var env cv =
+    let env =
+      if cv.Tast.cv_is_static
+      then Env.set_static env
+      else env in
+    super#on_class_var env cv
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
@@ -45,15 +55,22 @@ class virtual ['state] iter_with_state = object (self)
 
   method! on_fun_ (env, state) x =
     super#on_fun_ (Env.restore_fun_env env x, state) x
+
   method! on_method_ (env, state) x =
+    let env =
+      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      then Env.set_inside_constructor env
+      else if x.Tast.m_static
+      then Env.set_static env
+      else env in
     super#on_method_ (Env.restore_method_env env x, state) x
 
-  method! on_constructor (env, state) =
-    super#on_constructor (Env.set_inside_constructor env, state)
-  method! on_static_var (env, state) =
-    super#on_static_var (Env.set_static env, state)
-  method! on_static_method (env, state) =
-    super#on_static_method (Env.set_static env, state)
+  method! on_class_var (env, state) cv =
+    let env =
+      if cv.Tast.cv_is_static
+      then Env.set_static env
+      else env in
+    super#on_class_var (env, state) cv
 
   method! on_Efun (env, state) x =
     super#on_Efun (Env.set_ppl_lambda env, state) x
@@ -82,11 +99,22 @@ class virtual ['a] reduce = object (self)
   method go_def x = self#on_def (Env.def_env x) x
 
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
-  method! on_static_var env = super#on_static_var (Env.set_static env)
-  method! on_static_method env = super#on_static_method (Env.set_static env)
+  method! on_method_ env x =
+    let env =
+      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      then Env.set_inside_constructor env
+      else if x.Tast.m_static
+      then Env.set_static env
+      else env in
+    super#on_method_ (Env.restore_method_env env x) x
+
+  method! on_class_var env cv =
+    let env =
+      if cv.Tast.cv_is_static
+      then Env.set_static env
+      else env in
+    super#on_class_var env cv
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
@@ -114,11 +142,22 @@ class virtual map = object (self)
   method go_def x = self#on_def (Env.def_env x) x
 
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
-  method! on_static_var env = super#on_static_var (Env.set_static env)
-  method! on_static_method env = super#on_static_method (Env.set_static env)
+  method! on_method_ env x =
+    let env =
+      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      then Env.set_inside_constructor env
+      else if x.Tast.m_static
+      then Env.set_static env
+      else env in
+    super#on_method_ (Env.restore_method_env env x) x
+
+  method! on_class_var env cv =
+    let env =
+      if cv.Tast.cv_is_static
+      then Env.set_static env
+      else env in
+    super#on_class_var env cv
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
@@ -145,11 +184,22 @@ class virtual endo = object (self)
   method go_def x = self#on_def (Env.def_env x) x
 
   method! on_fun_ env x = super#on_fun_ (Env.restore_fun_env env x) x
-  method! on_method_ env x = super#on_method_ (Env.restore_method_env env x) x
 
-  method! on_constructor env = super#on_constructor (Env.set_inside_constructor env)
-  method! on_static_var env = super#on_static_var (Env.set_static env)
-  method! on_static_method env = super#on_static_method (Env.set_static env)
+  method! on_method_ env x =
+    let env =
+      if snd x.Tast.m_name = Naming_special_names.Members.__construct
+      then Env.set_inside_constructor env
+      else if x.Tast.m_static
+      then Env.set_static env
+      else env in
+    super#on_method_ (Env.restore_method_env env x) x
+
+  method! on_class_var env cv =
+    let env =
+      if cv.Tast.cv_is_static
+      then Env.set_static env
+      else env in
+    super#on_class_var env cv
 
   method! on_Efun env x = super#on_Efun (Env.set_ppl_lambda env) x
   method! on_Lfun env x = super#on_Lfun (Env.set_ppl_lambda env) x
@@ -183,8 +233,6 @@ class type handler = object
   method at_gconst : Env.t -> Tast.gconst -> unit
   method at_fun_def : Env.t -> Tast.fun_def -> unit
   method at_method_ : Env.t -> Tast.method_ -> unit
-  method at_static_method : Env.t -> Tast.static_method -> unit
-  method at_constructor : Env.t -> Tast.constructor -> unit
 
   method at_expr : Env.t -> Tast.expr -> unit
   method at_stmt : Env.t -> Tast.stmt -> unit
@@ -208,14 +256,13 @@ end
 
 (** A {!handler} which does not need to make use of every visitation method can
     inherit from this no-op base class. *)
-class virtual handler_base : handler = object
+class virtual handler_base : handler =
+object
   method at_class_ _ _ = ()
   method at_typedef _ _ = ()
   method at_gconst _ _ = ()
   method at_fun_def _ _ = ()
   method at_method_ _ _ = ()
-  method at_static_method _ _ = ()
-  method at_constructor _ _ = ()
 
   method at_expr _ _ = ()
   method at_stmt _ _ = ()
@@ -232,8 +279,8 @@ end
 
 (** Return an {!iter} visitor which invokes all of the given handlers upon
     visiting each node. *)
-let iter_with (handlers : handler list) : iter = object
-
+let iter_with (handlers : handler list) : iter =
+object
   inherit iter as super
 
   method! on_class_ env x =
@@ -254,11 +301,7 @@ let iter_with (handlers : handler list) : iter = object
 
   method! on_method_ env x =
     List.iter handlers (fun v -> v#at_method_ env x);
-    super#on_method_ env x;
-
-  method! on_static_method env m =
-    List.iter handlers (fun v -> v#at_static_method env m);
-    super#on_static_method env m;
+    super#on_method_ env x
 
   method! on_expr env x =
     List.iter handlers (fun v -> v#at_expr env x);
@@ -279,10 +322,6 @@ let iter_with (handlers : handler list) : iter = object
   method! on_hint env h =
     List.iter handlers (fun v -> v#at_hint env h);
     super#on_hint env h;
-
-  method! on_constructor env h =
-    List.iter handlers (fun v -> v#at_constructor env h);
-    super#on_constructor env h;
 
   method! on_tparam env h =
     List.iter handlers (fun v -> v#at_tparam env h);

@@ -112,7 +112,8 @@ module Env = struct
     let tenv = match parent_id c with
       | None -> tenv
       | Some parent_id -> Typing_env.set_parent_id tenv parent_id in
-    let methods = List.fold_left ~f:method_ ~init:SMap.empty c.c_methods in
+    let _, _, methods = split_methods c in
+    let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
     let sc = Shallow_decl.class_ c in
     if shallow_decl_enabled () then begin
       (* Run DeferredMembers.class_ for its error-emitting side effects.
@@ -177,17 +178,18 @@ let save_initialized_members_for_suggest cname initialized_props =
 
 let rec class_ tenv c =
   if c.c_mode = FileInfo.Mdecl then () else
-  match c.c_constructor with
+  let c_constructor, _, _ = split_methods c in
+  match c_constructor with
   | _ when c.c_kind = Ast.Cinterface -> ()
   | Some { m_body =
       { fb_annotation = Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks; _ }; _ } -> ()
   | _ -> (
-    let p = match c.c_constructor with
+    let p = match c_constructor with
       | Some m -> fst m.m_name
       | None -> fst c.c_name
     in
     let env = Env.make tenv c in
-    let inits = constructor env c.c_constructor in
+    let inits = constructor env c_constructor in
 
     let check_inits inits =
       let uninit_props = SSet.diff env.props inits in
@@ -213,7 +215,7 @@ let rec class_ tenv c =
     save_initialized_members_for_suggest (snd c.c_name) inits;
     if c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract
     then begin
-      let has_constructor = match c.c_constructor with
+      let has_constructor = match c_constructor with
         | None -> false
         | Some m when m.m_abstract -> false
         | Some _ -> true in

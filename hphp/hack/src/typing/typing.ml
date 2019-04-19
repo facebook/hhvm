@@ -6251,16 +6251,18 @@ and class_def_ env c tc =
         (if c.c_kind = Ast.Cenum then "enums" else "records"))
     | Ast.Cnormal -> ()
   end;
-  List.iter c.c_static_vars ~f:begin fun {cv_id=(p,id); _} ->
+  let static_vars, vars = split_vars c in
+  List.iter static_vars ~f:begin fun {cv_id=(p,id); _} ->
     check_static_class_element (Cls.get_prop tc) ~elt_type:`Property id p
   end;
-  List.iter c.c_vars ~f:begin fun {cv_id=(p,id); _} ->
+  List.iter vars ~f:begin fun {cv_id=(p,id); _} ->
     check_dynamic_class_element (Cls.get_sprop tc) ~elt_type:`Property id p
   end;
-  List.iter c.c_static_methods ~f:begin fun {m_name=(p,id); _} ->
+  let constructor, static_methods, methods = split_methods c in
+  List.iter static_methods ~f:begin fun {m_name=(p,id); _} ->
     check_static_class_element (Cls.get_method tc) ~elt_type:`Method id p
   end;
-  List.iter c.c_methods ~f:begin fun {m_name=(p,id); _} ->
+  List.iter methods ~f:begin fun {m_name=(p,id); _} ->
     check_dynamic_class_element (Cls.get_smethod tc) ~elt_type:`Method id p
   end;
   (* get a map of method names to list of traits from which they were removed *)
@@ -6273,22 +6275,26 @@ and class_def_ env c tc =
   let env = List.fold c.c_method_redeclarations ~init:env ~f:(supertype_redeclared_method tc) in
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
-  let typed_vars = List.map c.c_vars (class_var_def env ~is_static:false c) in
+  let typed_vars = List.map vars (class_var_def env ~is_static:false c) in
   let typed_method_redeclarations = [] in
-  let typed_methods = List.filter_map c.c_methods (method_def env) in
+  let typed_methods = List.filter_map methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
   let typed_consts, const_types =
     List.unzip (List.map c.c_consts (class_const_def env)) in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
-  let typed_constructor = class_constr_def env c in
+  let typed_constructor = class_constr_def env constructor in
   let env = Env.set_static env in
   let typed_static_vars =
-    List.map c.c_static_vars (class_var_def env ~is_static:true c) in
-  let typed_static_methods = List.filter_map c.c_static_methods (method_def env) in
+    List.map static_vars (class_var_def env ~is_static:true c) in
+  let typed_static_methods = List.filter_map static_methods (method_def env) in
   let filename = Pos.filename (fst c.c_name) in
   let droot = env.Env.decl_env.Decl_env.droot in
   let file_attrs =
     file_attributes (Env.get_tcopt env) filename c.c_mode droot c.c_file_attributes in
+  let methods =
+    match typed_constructor with
+    | None -> typed_static_methods @ typed_methods
+    | Some m -> m :: typed_static_methods @ typed_methods in
   {
     T.c_span = c.c_span;
     T.c_annotation = Env.save env.Env.lenv.Env.tpenv env;
@@ -6308,16 +6314,12 @@ and class_def_ env c tc =
     T.c_method_redeclarations = typed_method_redeclarations;
     T.c_xhp_attr_uses = c.c_xhp_attr_uses;
     T.c_xhp_category = c.c_xhp_category;
-    T.c_req_extends = c.c_req_extends;
-    T.c_req_implements = c.c_req_implements;
+    T.c_reqs = c.c_reqs;
     T.c_implements = c.c_implements;
     T.c_consts = typed_consts;
     T.c_typeconsts = typed_typeconsts;
-    T.c_static_vars = typed_static_vars;
-    T.c_vars = typed_vars;
-    T.c_constructor = typed_constructor;
-    T.c_static_methods = typed_static_methods;
-    T.c_methods = typed_methods;
+    T.c_vars = typed_static_vars @ typed_vars;
+    T.c_methods = methods;
     T.c_file_attributes = file_attrs;
     T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
     T.c_namespace = c.c_namespace;
@@ -6430,11 +6432,9 @@ and class_const_def env (h, id, e) =
     | None ->
       (h, id, None), ty
 
-and class_constr_def env c =
+and class_constr_def env constructor =
   let env = { env with Env.inside_constructor = true } in
-  match Option.map c.c_constructor (method_def env) with
-  | Some (Some c) -> Some c
-  | Some None | None -> None
+  Option.bind constructor (method_def env)
 
 and class_implements_type env c1 removals ctype2 =
   let params =
@@ -6513,6 +6513,7 @@ and class_var_def env ~is_static c cv =
       T.cv_user_attributes = List.map cv.cv_user_attributes (user_attribute env);
       T.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
       T.cv_doc_comment = cv.cv_doc_comment; (* Can make None to save space *)
+      T.cv_is_static = is_static
     }
   end
 

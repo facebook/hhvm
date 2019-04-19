@@ -50,8 +50,9 @@ let check_ppl_class c =
   List.iter (c.c_extends) (check "extend" "class");
   List.iter (c.c_implements) (check "implement" "interface");
   List.iter (c.c_uses) (check "use" "trait");
-  List.iter (c.c_req_extends) (check "require" "class");
-  List.iter (c.c_req_implements) (check "require" "interface")
+  let c_extends, c_implements = split_reqs c in
+  List.iter (c_extends) (check "require" "class");
+  List.iter (c_implements) (check "require" "interface")
 
 (**
  * When we call a method on an object, if the object is a <<__PPL>> object,

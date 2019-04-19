@@ -44,7 +44,7 @@ let pos_contains_line_char pos line char =
 
 type 'a walker = {
   plus: 'a -> 'a -> 'a;
-  on_method: Tast_env.env -> Tast.constructor -> 'a;
+  on_method: Tast_env.env -> Tast.method_ -> 'a;
   on_fun: Tast_env.env -> Tast.fun_ -> 'a;
 }
 

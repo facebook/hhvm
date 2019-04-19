@@ -282,11 +282,14 @@ let enum_type hint e =
 
 let class_ env c =
   let hint = Decl_hint.hint env in
-  let sc_extends        = List.map ~f:hint c.c_extends in
-  let sc_uses           = List.map ~f:hint c.c_uses in
-  let sc_req_extends    = List.map ~f:hint c.c_req_extends in
-  let sc_req_implements = List.map ~f:hint c.c_req_implements in
-  let sc_implements     = List.map ~f:hint c.c_implements in
+  let req_extends, req_implements = split_reqs c in
+  let static_vars, vars = split_vars c in
+  let constructor, statics, rest = split_methods c in
+  let sc_extends = List.map ~f:hint c.c_extends in
+  let sc_uses = List.map ~f:hint c.c_uses in
+  let sc_req_extends = List.map ~f:hint req_extends in
+  let sc_req_implements = List.map ~f:hint req_implements in
+  let sc_implements = List.map ~f:hint c.c_implements in
   let additional_parents =
     (* In an abstract class or a trait, we assume the interfaces
        will be implemented in the future, so we take them as
@@ -315,17 +318,17 @@ let class_ env c =
     sc_uses;
     sc_method_redeclarations =
       List.map c.c_method_redeclarations (method_redeclaration env);
-    sc_xhp_attr_uses = List.map ~f:hint c.c_xhp_attr_uses;
+    sc_xhp_attr_uses  = List.map ~f:hint c.c_xhp_attr_uses;
     sc_req_extends;
     sc_req_implements;
     sc_implements;
     sc_consts = List.filter_map c.c_consts (class_const env c);
     sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
-    sc_props = List.map c.c_vars (prop env);
-    sc_sprops = List.map c.c_static_vars (static_prop env c);
-    sc_constructor = Option.map c.c_constructor ~f:(method_ env c);
-    sc_static_methods = List.map c.c_static_methods (method_ env c);
-    sc_methods = List.map c.c_methods (method_ env c);
+    sc_props = List.map ~f:(prop env) vars;
+    sc_sprops = List.map ~f:(static_prop env c) static_vars;
+    sc_constructor = Option.map ~f:(method_ env c) constructor;
+    sc_static_methods = List.map ~f:(method_ env c) statics;
+    sc_methods = List.map ~f:(method_ env c) rest;
     sc_user_attributes = c.c_user_attributes;
     sc_enum_type = Option.map c.c_enum (enum_type hint);
     sc_decl_errors = Errors.empty;

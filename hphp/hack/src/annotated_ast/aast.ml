@@ -295,10 +295,6 @@ and tparam = {
   tp_user_attributes: user_attribute list
 }
 
-and static_var = class_var
-and static_method = method_
-and constructor = method_
-
 and class_tparams = {
   c_tparam_list: tparam list;
   (* TODO: remove this and use tp_constraints *)
@@ -309,6 +305,7 @@ and class_tparams = {
 
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
 and insteadof_alias = sid * pstring * sid list
+and is_extends = bool
 
 and class_ = {
   c_span           : pos              ;
@@ -327,15 +324,11 @@ and class_ = {
   c_method_redeclarations : method_redeclaration list;
   c_xhp_attr_uses  : hint list        ;
   c_xhp_category   : (pos * pstring list) option;
-  c_req_extends    : hint list        ;
-  c_req_implements : hint list        ;
+  c_reqs           : (hint * is_extends) list;
   c_implements     : hint list        ;
   c_consts         : class_const list ;
   c_typeconsts     : class_typeconst list;
-  c_static_vars    : static_var list  ;
   c_vars           : class_var list   ;
-  c_constructor    : constructor option;
-  c_static_methods : static_method list;
   c_methods        : method_ list     ;
   c_attributes     : class_attr list  ;
   c_xhp_children   : (pos * xhp_child) list;
@@ -397,6 +390,7 @@ and class_var = {
   cv_user_attributes : user_attribute list;
   cv_doc_comment     : string option      ;
   cv_is_promoted_variadic : bool          ;
+  cv_is_static        : bool              ;
 }
 
 and method_ = {
@@ -565,5 +559,49 @@ let expr_to_string expr =
   | ParenthesizedExpr _ -> "ParenthesizedExpr"
   | PU_atom _ -> "PU_atom"
   | PU_identifier _ -> "PU_identifier"
+
+(**
+ * Methods, properties, and requirements are order dependent in bytecode
+ * emission, which is observable in user code via `ReflectionClass`.
+ *)
+(* Splits the methods on a class into the constructor, statics, dynamics *)
+let split_methods class_ =
+  let constr, statics, res =
+    List.fold_left
+      (fun (constr, statics, rest) m ->
+        if snd m.m_name = "__construct"
+        then Some m, statics, rest
+        else if m.m_static
+        then constr, m :: statics, rest
+        else constr, statics, m :: rest)
+      (None, [], [])
+      class_.c_methods in
+  constr, List.rev statics, List.rev res
+
+(* Splits class properties into statics, dynamics *)
+let split_vars class_ =
+  let statics, res =
+    List.fold_left
+      (fun (statics, rest) v ->
+        if v.cv_is_static
+        then
+          v :: statics, rest
+        else
+          statics, v :: rest)
+      ([], [])
+      class_.c_vars in
+  List.rev statics, List.rev res
+
+(* Splits `require`s into extends, implements *)
+let split_reqs class_ =
+  let extends, implements =
+    List.fold_left
+      (fun (extends, implements) (h, is_extends) ->
+        if is_extends
+        then h :: extends, implements
+        else extends, h :: implements)
+      ([], [])
+      class_.c_reqs in
+  List.rev extends, List.rev implements
 
 end (* of AnnotatedAST functor *)

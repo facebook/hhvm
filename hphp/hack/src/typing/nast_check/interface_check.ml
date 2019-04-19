@@ -29,14 +29,16 @@ let enforce_not_async m =
 let check_interface c =
   List.iter c.c_uses (fun (p, _) -> Errors.interface_use_trait p);
 
-  begin match c.c_vars with
-  | hd::_ ->
-    let pos = fst hd.cv_id in
-    Errors.interface_with_member_variable pos
-  | _ -> ()
+  let statics, vars = split_vars c in
+  begin
+    match vars with
+    | hd::_ ->
+      let pos = fst hd.cv_id in
+      Errors.interface_with_member_variable pos
+    | _ -> ()
   end;
 
-  begin match c.c_static_vars with
+  begin match statics with
   | hd::_ ->
     let pos = fst hd.cv_id in
     Errors.interface_with_static_member_variable pos
@@ -50,13 +52,8 @@ let check_interface c =
   end;
 
   (* make sure that interfaces only have empty public methods *)
-  List.iter (c.c_static_methods @ c.c_methods) enforce_no_body;
-  List.iter (c.c_static_methods @ c.c_methods) enforce_not_async;
-
-  (* make sure constructor has no body *)
-  Option.iter c.c_constructor enforce_no_body;
-  Option.iter c.c_constructor enforce_not_async
-
+  List.iter ~f:enforce_no_body c.c_methods;
+  List.iter ~f:enforce_not_async c.c_methods
 
 let handler = object
   inherit Nast_visitor.handler_base

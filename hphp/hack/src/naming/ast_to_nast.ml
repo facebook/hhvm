@@ -19,14 +19,10 @@ type class_body =
   c_method_redeclarations : Aast.method_redeclaration list;
   c_xhp_attr_uses  : Aast.hint list                       ;
   c_xhp_category   : (pos * pstring list) option          ;
-  c_req_extends    : Aast.hint list                       ;
-  c_req_implements : Aast.hint list                       ;
+  c_reqs           : (Aast.hint * Aast.is_extends) list   ;
   c_consts         : Aast.class_const list                ;
   c_typeconsts     : Aast.class_typeconst list            ;
-  c_static_vars    : Aast.static_var list                 ;
   c_vars           : Aast.class_var list                  ;
-  c_constructor    : Aast.constructor option              ;
-  c_static_methods : Aast.static_method list              ;
   c_methods        : Aast.method_ list                    ;
   c_attributes     : Aast.class_attr list                 ;
   c_xhp_children   : (pos * Aast.xhp_child) list          ;
@@ -41,14 +37,10 @@ let make_empty_class_body = {
   c_method_redeclarations = [];
   c_xhp_attr_uses = [];
   c_xhp_category = None;
-  c_req_extends = [];
-  c_req_implements = [];
+  c_reqs = [];
   c_consts = [];
   c_typeconsts = [];
-  c_static_vars = [];
   c_vars = [];
-  c_constructor = None;
-  c_static_methods = [];
   c_methods = [];
   c_attributes = [];
   c_xhp_children = [];
@@ -136,7 +128,7 @@ and on_hint (p, h) : Aast.hint =
   | Hsoft h -> (p, Aast.Hsoft (on_hint h))
   | Hlike h -> (p, Aast.Hlike (on_hint h))
 
-and on_class_elt trait_or_interface body elt : class_body =
+and on_class_elt body elt : class_body =
   match elt with
   | Attributes attrs ->
     let attrs = on_list_append_acc body.c_attributes on_class_attr attrs in
@@ -179,14 +171,11 @@ and on_class_elt trait_or_interface body elt : class_body =
     let hints = on_hint h :: body.c_xhp_attr_uses in
     { body with c_xhp_attr_uses = hints }
   | ClassTraitRequire (MustExtend, h) ->
-    let hints = on_hint h :: body.c_req_extends in
-    { body with c_req_extends = hints; }
+    let hints = (on_hint h, true) :: body.c_reqs in
+    { body with c_reqs = hints; }
   | ClassTraitRequire (MustImplement, h) ->
-    let hints = on_hint h :: body.c_req_implements in
-    { body with c_req_implements = hints; }
-  | ClassVars cvs when mem cvs.cv_kinds Static ->
-    let vars = on_class_vars_with_acc body.c_static_vars cvs in
-    { body with c_static_vars = vars; }
+    let hints = (on_hint h, false) :: body.c_reqs in
+    { body with c_reqs = hints; }
   | ClassVars cvs ->
     let vars = on_class_vars_with_acc body.c_vars cvs in
     { body with c_vars = vars; }
@@ -206,13 +195,6 @@ and on_class_elt trait_or_interface body elt : class_body =
   | XhpChild (p, c) ->
     let children = (p, on_xhp_child c) :: body.c_xhp_children in
     { body with c_xhp_children = children; }
-  | Method m when snd m.m_name = SN.Members.__construct ->
-    if body.c_constructor <> None
-    then Errors.method_name_already_bound (fst m.m_name) (snd m.m_name);
-    { body with c_constructor = Some (on_method ~trait_or_interface m) }
-  | Method m when mem m.m_kind Static ->
-    let statics = on_method m :: body.c_static_methods in
-    { body with c_static_methods = statics; }
   | Method m ->
     let methods = on_method m :: body.c_methods in
     { body with c_methods = methods; }
@@ -548,6 +530,7 @@ and on_class_var is_xhp h attrs kinds variadic doc_com (_, id, eopt) : Aast.clas
     end
     ~init:Aast.Public
     kinds in
+  let cv_is_static = mem kinds Static in
   Aast.{
     cv_final;
     cv_is_xhp = is_xhp;
@@ -557,7 +540,8 @@ and on_class_var is_xhp h attrs kinds variadic doc_com (_, id, eopt) : Aast.clas
     cv_expr = optional on_expr eopt;
     cv_user_attributes = attrs;
     cv_is_promoted_variadic = variadic;
-    cv_doc_comment = doc_com
+    cv_doc_comment = doc_com;
+    cv_is_static;
   }
 
 (**
@@ -693,22 +677,19 @@ and on_pu pu_name pu_is_final fields =
        ; pu_members
        }
 
-and on_class_body trait_or_interface cb =
-  let reversed_body = List.fold_left ~f:(on_class_elt trait_or_interface) ~init:make_empty_class_body cb in
-  { reversed_body with
+and on_class_body cb =
+  let reversed_body = List.fold_left ~f:on_class_elt ~init:make_empty_class_body cb in
+  {
     c_uses = List.rev reversed_body.c_uses;
     c_use_as_aliases = List.rev reversed_body.c_use_as_aliases;
     c_insteadof_aliases = List.rev reversed_body.c_insteadof_aliases;
     c_method_redeclarations = List.rev reversed_body.c_method_redeclarations;
     c_xhp_attr_uses = List.rev reversed_body.c_xhp_attr_uses;
     c_xhp_category = reversed_body.c_xhp_category;
-    c_req_extends = List.rev reversed_body.c_req_extends;
-    c_req_implements = List.rev reversed_body.c_req_implements;
+    c_reqs = List.rev reversed_body.c_reqs;
     c_consts = List.rev reversed_body.c_consts;
     c_typeconsts = List.rev reversed_body.c_typeconsts;
-    c_static_vars = List.rev reversed_body.c_static_vars;
     c_vars = List.rev reversed_body.c_vars;
-    c_static_methods = List.rev reversed_body.c_static_methods;
     c_methods = List.rev reversed_body.c_methods;
     c_attributes = List.rev reversed_body.c_attributes;
     c_xhp_children = List.rev reversed_body.c_xhp_children;
@@ -721,8 +702,7 @@ and on_class c : Aast.class_ =
     Aast.c_tparam_list = on_list on_tparam c.c_tparams;
     Aast.c_tparam_constraints = SMap.empty;
   } in
-  let trait_or_interface = c.c_kind = Ctrait || c.c_kind = Cinterface in
-  let body = on_class_body trait_or_interface c.c_body in
+  let body = on_class_body c.c_body in
   let named_class =
   Aast.{
       c_annotation            = ();
@@ -740,15 +720,11 @@ and on_class c : Aast.class_ =
       c_method_redeclarations = body.c_method_redeclarations;
       c_xhp_attr_uses         = body.c_xhp_attr_uses;
       c_xhp_category          = body.c_xhp_category;
-      c_req_extends           = body.c_req_extends;
-      c_req_implements        = body.c_req_implements;
+      c_reqs                  = body.c_reqs;
       c_implements            = on_list on_hint c.c_implements;
       c_consts                = body.c_consts;
       c_typeconsts            = body.c_typeconsts;
-      c_static_vars           = body.c_static_vars;
       c_vars                  = body.c_vars;
-      c_constructor           = body.c_constructor;
-      c_static_methods        = body.c_static_methods;
       c_methods               = body.c_methods;
       c_attributes            = body.c_attributes;
       c_xhp_children          = body.c_xhp_children;

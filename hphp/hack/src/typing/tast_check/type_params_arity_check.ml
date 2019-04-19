@@ -98,13 +98,7 @@ let handler = object
       if TypecheckerOptions.typecheck_xhp_cvars
       (Env.get_tcopt env) then
       Option.iter v.cv_type (check_hint env) in
-    List.iter c.c_vars check_var;
-    List.iter c.c_static_vars check_var
-
-  method! at_static_method env m =
-    Option.iter m.m_ret (check_hint env);
-    List.iter m.m_tparams (check_tparam env);
-    List.iter m.m_params (check_param env)
+    List.iter c.c_vars check_var
 
   method! at_method_ env m =
     Option.iter m.m_ret (check_hint env);

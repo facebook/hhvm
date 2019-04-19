@@ -5,35 +5,32 @@
       c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
       c_extends = []; c_uses = []; c_use_as_alias = [];
       c_insteadof_alias = []; c_method_redeclarations = [];
-      c_xhp_attr_uses = []; c_xhp_category = None; c_req_extends = [];
-      c_req_implements = [];
+      c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
       c_implements =
       [([3:22-43], (Happly (([3:22-43], "\\HH\\TypeAliasAttribute"), [])))];
-      c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-      c_constructor =
-      (Some { m_span = [3:46-87]; m_annotation = (); m_final = false;
-              m_abstract = false; m_static = false; m_visibility = Public;
-              m_name = ([3:62-73], "__construct"); m_tparams = [];
-              m_where_constraints = [];
-              m_variadic =
-              (FVvariadicArg
-                 { param_annotation = ([3:81-83], varray<int>);
-                   param_hint = (Some ([3:74-77], (Hprim Tint)));
-                   param_is_reference = false; param_is_variadic = true;
-                   param_pos = [3:81-83]; param_name = "$x";
-                   param_expr = None; param_callconv = None;
-                   param_user_attributes = [] });
-              m_params = [];
-              m_body =
-              { fb_ast = [([Pos.none], Noop)];
-                fb_annotation = No unsafe blocks };
-              m_fun_kind = FSync; m_user_attributes = [];
-              m_ret = (Some ([3:62-73], (Happly (([3:62-73], "void"), []))));
-              m_external = false; m_doc_comment = None });
-      c_static_methods = []; c_methods = []; c_attributes = [];
-      c_xhp_children = []; c_xhp_attrs = []; c_namespace = <opaque>;
-      c_user_attributes = []; c_file_attributes = []; c_enum = None;
-      c_pu_enums = []; c_doc_comment = None });
+      c_consts = []; c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [3:46-87]; m_annotation = (); m_final = false;
+         m_abstract = false; m_static = false; m_visibility = Public;
+         m_name = ([3:62-73], "__construct"); m_tparams = [];
+         m_where_constraints = [];
+         m_variadic =
+         (FVvariadicArg
+            { param_annotation = ([3:81-83], varray<int>);
+              param_hint = (Some ([3:74-77], (Hprim Tint)));
+              param_is_reference = false; param_is_variadic = true;
+              param_pos = [3:81-83]; param_name = "$x"; param_expr = None;
+              param_callconv = None; param_user_attributes = [] });
+         m_params = [];
+         m_body =
+         { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+         m_fun_kind = FSync; m_user_attributes = [];
+         m_ret = (Some ([3:62-73], (Happly (([3:62-73], "void"), []))));
+         m_external = false; m_doc_comment = None }
+        ];
+      c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace = <opaque>; c_user_attributes = []; c_file_attributes = [];
+      c_enum = None; c_pu_enums = []; c_doc_comment = None });
   (Class
      { c_span = [4:1-46]; c_annotation = (); c_mode = <opaque>;
        c_final = false; c_is_xhp = false; c_kind = Cnormal;
@@ -41,12 +38,10 @@
        c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
-       c_xhp_attr_uses = []; c_xhp_category = None; c_req_extends = [];
-       c_req_implements = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([4:22-43], (Happly (([4:22-43], "\\HH\\TypeAliasAttribute"), [])))];
-       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes = []; c_enum = None; c_pu_enums = [];
@@ -58,12 +53,10 @@
        c_tparams = { c_tparam_list = []; c_tparam_constraints = <opaque> };
        c_extends = []; c_uses = []; c_use_as_alias = [];
        c_insteadof_alias = []; c_method_redeclarations = [];
-       c_xhp_attr_uses = []; c_xhp_category = None; c_req_extends = [];
-       c_req_implements = [];
+       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
        c_implements =
        [([5:34-55], (Happly (([5:34-55], "\\HH\\TypeAliasAttribute"), [])))];
-       c_consts = []; c_typeconsts = []; c_static_vars = []; c_vars = [];
-       c_constructor = None; c_static_methods = []; c_methods = [];
+       c_consts = []; c_typeconsts = []; c_vars = []; c_methods = [];
        c_attributes = []; c_xhp_children = []; c_xhp_attrs = [];
        c_namespace = <opaque>; c_user_attributes = [];
        c_file_attributes = []; c_enum = None; c_pu_enums = [];

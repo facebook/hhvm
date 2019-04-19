@@ -60,7 +60,11 @@ let get_meth_return_ty tcopt class_name meth_name =
   in
   let c = join @@ map classopt (of_option ~error:"Could not find class") in
   let c = map c Naming.class_ in
-  let meth_list = map c (fun c -> c.c_static_methods @ c.c_methods) in
+  let meth_list =
+    map c
+      (fun c ->
+        let _, statics, rest = split_methods c in
+        statics @ rest) in
   let mopt = map meth_list (List.find ~f:(fun m -> snd m.m_name = meth_name)) in
   let m = join @@ map mopt (of_option ~error:"Could not find method") in
   let args = to_tuple file (to_tuple c m) in

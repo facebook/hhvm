@@ -1149,11 +1149,13 @@ module Make (GetLocals : GetLocals) = struct
     (* Checking for a code smell *)
     List.iter c.Aast.c_tparams.Aast.c_tparam_list aast_check_constraint;
     let name = Env.type_name env c.Aast.c_name ~allow_typedef:false ~allow_generics:false in
-    let smethods = List.map ~f:(aast_method_ (fst env)) c.Aast.c_static_methods in
-    let sprops = List.map ~f:(aast_class_prop_static env) c.Aast.c_static_vars in
+    let constructor, smethods, methods = Aast.split_methods c in
+    let smethods = List.map ~f:(aast_method_ (fst env)) smethods in
+    let sprops, props = Aast.split_vars c in
+    let sprops = List.map ~f:(aast_class_prop_static env) sprops in
     let attrs = aast_user_attributes env c.Aast.c_user_attributes in
     let const = (Attributes.find SN.UserAttributes.uaConst attrs) in
-    let props = List.map ~f:(aast_class_prop_non_static ~const env) c.Aast.c_vars in
+    let props = List.map ~f:(aast_class_prop_non_static ~const env) props in
     let xhp_attrs = List.map ~f:(aast_xhp_attribute_decl env) c.Aast.c_xhp_attrs in
     (* These would be out of order with the old attributes, but that shouldn't matter? *)
     let props = props @ xhp_attrs in
@@ -1172,23 +1174,28 @@ module Make (GetLocals : GetLocals) = struct
                           [enum_type]) in
         parent::parents
       | _ -> parents in
-    let methods = List.map ~f:(aast_class_method env) c.Aast.c_methods in
+    let methods = List.map ~f:(aast_class_method env) methods in
     let uses = List.map ~f:(aast_hint ~allow_typedef:false env) c.Aast.c_uses in
     let pu_enums = List.map ~f:(aast_class_pu_enum env) c.Aast.c_pu_enums in
     let redeclarations =
       List.map ~f:(aast_method_redeclaration env) c.Aast.c_method_redeclarations in
     let xhp_attr_uses =
       List.map ~f:(aast_hint ~allow_typedef:false env) c.Aast.c_xhp_attr_uses in
-    if c.Aast.c_req_implements <> [] && c.Aast.c_kind <> Ast.Ctrait
-    then Errors.invalid_req_implements (fst (List.hd_exn c.Aast.c_req_implements));
+    let c_req_extends, c_req_implements = Aast.split_reqs c in
+    if c_req_implements <> [] && c.Aast.c_kind <> Ast.Ctrait
+    then Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
     let req_implements =
-      List.map ~f:(aast_hint ~allow_typedef:false env) c.Aast.c_req_implements in
-    if c.Aast.c_req_extends <> [] &&
+      List.map ~f:(aast_hint ~allow_typedef:false env) c_req_implements in
+    let req_implements =
+      List.map ~f:(fun h -> (h, false)) req_implements in
+    if c_req_extends <> [] &&
        c.Aast.c_kind <> Ast.Ctrait &&
        c.Aast.c_kind <> Ast.Cinterface
-    then Errors.invalid_req_extends (fst (List.hd_exn c.Aast.c_req_extends));
+    then Errors.invalid_req_extends (fst (List.hd_exn c_req_extends));
     let req_extends =
-      List.map ~f:(aast_hint ~allow_typedef:false env) c.Aast.c_req_extends in
+      List.map ~f:(aast_hint ~allow_typedef:false env) c_req_extends in
+    let req_extends =
+      List.map ~f:(fun h -> (h, true)) req_extends in
     (* Setting a class type parameters constraint to the 'this' type is weird
      * so lets forbid it for now.
      *)
@@ -1199,7 +1206,7 @@ module Make (GetLocals : GetLocals) = struct
       List.map
         ~f:(aast_hint ~allow_retonly:false ~allow_typedef:false env)
         c.Aast.c_implements in
-    let constructor = Option.map c.Aast.c_constructor (aast_method_ (fst env)) in
+    let constructor = Option.map constructor (aast_method_ (fst env)) in
     let constructor, methods, smethods =
       aast_interface c constructor methods smethods in
     let class_tparam_names =
@@ -1211,6 +1218,10 @@ module Make (GetLocals : GetLocals) = struct
       { N.c_tparam_list = tparam_l
       ; N.c_tparam_constraints = constraints
       } in
+    let methods =
+      match constructor with
+      | None -> smethods @ methods
+      | Some c -> c :: smethods @ methods in
     check_tparams_constructor class_tparam_names constructor;
     check_name_collision methods;
     check_tparams_shadow class_tparam_names methods;
@@ -1234,15 +1245,11 @@ module Make (GetLocals : GetLocals) = struct
       N.c_method_redeclarations = redeclarations;
       N.c_xhp_attr_uses         = xhp_attr_uses;
       N.c_xhp_category          = c.Aast.c_xhp_category;
-      N.c_req_extends           = req_extends;
-      N.c_req_implements        = req_implements;
+      N.c_reqs                  = req_extends @ req_implements;
       N.c_implements            = implements;
       N.c_consts                = consts;
       N.c_typeconsts            = typeconsts;
-      N.c_static_vars           = sprops;
-      N.c_vars                  = props;
-      N.c_constructor           = constructor;
-      N.c_static_methods        = smethods;
+      N.c_vars                  = sprops @ props;
       N.c_methods               = methods;
       N.c_user_attributes       = attrs;
       N.c_file_attributes       = file_attributes;
@@ -1346,6 +1353,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_user_attributes = []
     ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
     ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
+    ; N.cv_is_static = cv.Aast.cv_is_static
     }
 
   and aast_enum_ env e =
@@ -1439,6 +1447,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_user_attributes = attrs
     ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
     ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
+    ; N.cv_is_static = cv.Aast.cv_is_static
     }
 
   and aast_class_prop_non_static env ?(const = None) cv =
@@ -1468,6 +1477,7 @@ module Make (GetLocals : GetLocals) = struct
     ; N.cv_user_attributes = attrs
     ; N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic
     ; N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *)
+    ; N.cv_is_static = cv.Aast.cv_is_static
     }
 
   and aast_class_method env c_meth =
@@ -2778,16 +2788,8 @@ module Make (GetLocals : GetLocals) = struct
       Namespace_env.empty_with_default_popt
       (Attributes.mem SN.UserAttributes.uaProbabilisticModel nc.N.c_user_attributes)
     in
-    let inst_meths = List.map nc.N.c_methods (meth_body genv) in
-    let opt_constructor = match nc.N.c_constructor with
-      | None -> None
-      | Some c -> Some (meth_body genv c) in
-    let static_meths = List.map nc.N.c_static_methods (meth_body genv) in
-    { nc with
-      N.c_methods        = inst_meths;
-      N.c_static_methods = static_meths ;
-      N.c_constructor    = opt_constructor ;
-    }
+    let methods = List.map nc.N.c_methods (meth_body genv) in
+    { nc with N.c_methods = methods }
 
   (**************************************************************************)
   (* Typedefs *)

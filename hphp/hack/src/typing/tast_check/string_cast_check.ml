@@ -21,11 +21,11 @@ let should_enforce env =
     (string) casts of objects will be banned in the future. Eventually,
     __toString/(string) casts of objects will be removed from HHVM entirely. *)
 
-let check__toString m is_static =
+let check__toString m =
   let (pos, name) = m.m_name in
   if name = SN.Members.__toString
   then begin
-    if m.m_visibility <> Public || is_static
+    if m.m_visibility <> Public || m.m_static
     then Errors.toString_visibility pos;
     match m.m_ret with
     | Some (_, Hprim Tstring) -> ()
@@ -45,9 +45,5 @@ let handler = object
       then Errors.string_cast p (Env.print_ty env ty)
     | _ -> ()
 
-  method! at_static_method _ m = check__toString m true
-
-  method! at_method_ _ m = check__toString m false
-
-  method! at_constructor _ m = check__toString m true
+  method! at_method_ _ m = check__toString m
 end

@@ -780,11 +780,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = List.fold_left c.c_uses ~f:this#on_hint ~init:acc in
     let acc = List.fold_left c.c_implements ~f:this#on_hint ~init:acc in
 
-    let acc = match c.c_constructor with
-      | Some ctor -> this#on_method_ acc ctor
-      | None -> acc in
     let acc = List.fold_left c.c_methods ~f:this#on_method_ ~init:acc in
-    let acc = List.fold_left c.c_static_methods ~f:this#on_method_ ~init:acc in
     acc
 
   method on_gconst acc g =

@@ -79,13 +79,14 @@ let process_typeconst ?(is_declaration=false) (class_name, tconst_name, pos) =
 let process_class class_ =
   let acc = process_class_id ~is_declaration:true class_.Tast.c_name in
   let c_name = snd class_.Tast.c_name in
-  let all_methods = class_.Tast.c_methods @ class_.Tast.c_static_methods in
+  let constructor, static_methods, methods = Tast.split_methods class_ in
+  let all_methods = static_methods @ methods in
   let acc = List.fold all_methods ~init:acc ~f:begin fun acc method_ ->
     Result_set.union acc @@
       process_member c_name method_.Tast.m_name
         ~is_declaration:true ~is_method:true ~is_const:false
   end in
-  let all_props = class_.Tast.c_vars @ class_.Tast.c_static_vars in
+  let all_props = class_.Tast.c_vars in
   let acc = List.fold all_props ~init:acc ~f:begin fun acc prop ->
     Result_set.union acc @@
       process_member c_name prop.Tast.cv_id
@@ -110,7 +111,7 @@ let process_class class_ =
         process_class_id cid
     | _ -> acc
   end in
-  match class_.Tast.c_constructor with
+  match constructor with
     | Some method_ ->
       let id = fst method_.Tast.m_name, SN.Members.__construct in
       Result_set.union acc @@

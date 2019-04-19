@@ -31,6 +31,8 @@ function foo(): void {
   using $x = new MyDisposable();
   using ($x = new MyDisposable(), $y = new MyDisposable()) {}
   my_inout1(inout $x);
+  @my_inout1(inout $x);
+  $y = @my_inout1(inout $x);
   my_inout1<int>(inout $x);
   $y = my_inout2(inout $x);
   $y = my_inout2<int>(inout $x);

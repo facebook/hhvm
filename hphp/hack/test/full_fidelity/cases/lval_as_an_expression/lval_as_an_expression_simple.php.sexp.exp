@@ -1,5 +1,5 @@
-((script 852
-  ((list 852
+((script 905
+  ((list 905
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -78,7 +78,7 @@
              (literal 1 ((() decimal_literal 1 ())))
              (() ";" 1 ((whitespace 1)))))))
          (() } 1 ((end_of_line 1)))))))
-     (function_declaration 658
+     (function_declaration 711
       ((missing 0 ())
        (function_declaration_header 20
         ((missing 0 ()) (((end_of_line 1)) function 8 ((whitespace 1)))
@@ -86,9 +86,9 @@
          (() ")" 1 ()) (() : 1 ((whitespace 1)))
          (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
          (missing 0 ())))
-       (compound_statement 637
+       (compound_statement 690
         ((() { 1 ((end_of_line 1)))
-         (list 631
+         (list 684
           ((expression_statement 8
             ((binary_expression 7
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -281,6 +281,35 @@
                      (variable 2 ((() variable 2 ())))))
                    (missing 0 ())))))
                (() ")" 1 ())))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 21
+            ((prefix_unary_expression 20
+              ((((whitespace 2)) @ 1 ())
+               (function_call_expression 19
+                ((() name 9 ()) (missing 0 ()) (() "(" 1 ())
+                 (list 8
+                  ((list_item 8
+                    ((decorated_expression 8
+                      ((() inout 5 ((whitespace 1)))
+                       (variable 2 ((() variable 2 ())))))
+                     (missing 0 ())))))
+                 (() ")" 1 ())))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 26
+            ((binary_expression 25
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (prefix_unary_expression 20
+                ((() @ 1 ())
+                 (function_call_expression 19
+                  ((() name 9 ()) (missing 0 ()) (() "(" 1 ())
+                   (list 8
+                    ((list_item 8
+                      ((decorated_expression 8
+                        ((() inout 5 ((whitespace 1)))
+                         (variable 2 ((() variable 2 ())))))
+                       (missing 0 ())))))
+                   (() ")" 1 ())))))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 25
             ((function_call_expression 24

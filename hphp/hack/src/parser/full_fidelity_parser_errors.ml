@@ -1660,7 +1660,14 @@ let parameter_rx_errors context errors node =
       | (FunctionCallExpression {
           function_call_argument_list = { syntax = arg_list; _ }; _ }
       ) as call_expression :: parents when phys_equal arg_list node ->
-        Some (call_expression, parents)
+        (match parents with
+        | PrefixUnaryExpression {
+          prefix_unary_operator = token; _
+        } as next_node :: next_parents
+          when Some TokenKind.At = token_kind token ->
+          Some (next_node, next_parents)
+        | _ ->
+          Some (call_expression, parents))
       | _ -> None
     in
     let lval_ness_of_function_arg next_node next_parents =

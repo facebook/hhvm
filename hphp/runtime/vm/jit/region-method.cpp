@@ -123,15 +123,7 @@ RegionDescPtr selectMethod(const RegionContext& context) {
 
     for (InstrRange inst = blockInstrs(b); !inst.empty();) {
       auto const pc   = inst.popFront();
-      auto const info = instrStackTransInfo(pc);
-      switch (info.kind) {
-      case StackTransInfo::Kind::InsertMid:
-        ++sp;
-        break;
-      case StackTransInfo::Kind::PushPop:
-        sp += info.numPushes - info.numPops;
-        break;
-      }
+      sp += instrNumPushes(pc) - instrNumPops(pc);
     }
 
     for (auto idx = uint32_t{0}; idx < numSuccBlocks(b); ++idx) {

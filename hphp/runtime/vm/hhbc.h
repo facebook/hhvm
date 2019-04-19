@@ -586,7 +586,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(CGetL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetQuietL,      ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CUGetL,          ONE(LA),          NOV,             ONE(CUV),   NF) \
-  O(CGetL2,          ONE(LA),          NOV,             INS_1(CV),  NF) \
+  O(CGetL2,          ONE(LA),          ONE(CV),         TWO(CV,CV), NF) \
   O(PushL,           ONE(LA),          NOV,             ONE(CV),    NF) \
   O(CGetG,           NA,               ONE(CV),         ONE(CV),    NF) \
   O(CGetQuietG,      NA,               ONE(CV),         ONE(CV),    NF) \
@@ -952,17 +952,6 @@ OffsetList instrJumpTargets(PC instrs, Offset pos);
 using OffsetSet = hphp_hash_set<Offset>;
 OffsetSet instrSuccOffsets(PC opc, const Func* func);
 
-struct StackTransInfo {
-  enum class Kind {
-    PushPop,
-    InsertMid
-  };
-  Kind kind;
-  int numPops;   // only for PushPop
-  int numPushes; // only for PushPop
-  int pos;       // only for InsertMid
-};
-
 /*
  * Some CF instructions can be treated as non-CF instructions for most analysis
  * purposes, such as bytecode verification and HHBBC. These instructions change
@@ -1128,7 +1117,6 @@ constexpr bool instrCanHalt(Op op) {
 int instrNumPops(PC opcode);
 int instrNumPushes(PC opcode);
 FlavorDesc instrInputFlavor(PC op, uint32_t idx);
-StackTransInfo instrStackTransInfo(PC opcode);
 
 }
 

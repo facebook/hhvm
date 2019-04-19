@@ -903,18 +903,18 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
 }
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
-  StackTransInfo info = instrStackTransInfo(pc);
+  auto const numPops = instrNumPops(pc);
   auto fpiAdj = isFCallStar(peek_op(pc)) ? 2 : 1;
   int min = cur->fpilen > fpiAdj - 1
     ? cur->fpi[cur->fpilen - fpiAdj].stkmin
     : 0;
-  if (info.numPops > 0 && cur->stklen - info.numPops < min) {
+  if (numPops > 0 && cur->stklen - numPops < min) {
     reportStkUnderflow(b, *cur, pc);
     cur->stklen = 0;
     return false;
   }
-  cur->stklen -= info.numPops;
-  auto ok = checkSig(pc, info.numPops, &cur->stk[cur->stklen], sig(pc));
+  cur->stklen -= numPops;
+  auto ok = checkSig(pc, numPops, &cur->stk[cur->stklen], sig(pc));
   auto const op = peek_op(pc);
   auto const need_live = isMemberDimOp(op) || isMemberFinalOp(op);
   auto const live_ok = need_live || isTypeAssert(op);
@@ -1514,11 +1514,9 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   #define THREE(a,b,c) { a, b, c },
   #define FOUR(a,b,c,d) { a, b, c, d },
   #define FIVE(a,b,c,d,e) { a, b, c, d, e },
-  #define INS_1(a) { a },
   #define O(name, imm, pop, push, flags) push
     OPCODES
   #undef O
-  #undef INS_1
   #undef FIVE
   #undef FOUR
   #undef THREE
@@ -1530,45 +1528,32 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   };
   bool ok = true;
   auto const op = peek_op(pc);
-  StackTransInfo info = instrStackTransInfo(pc);
-  if (info.kind == StackTransInfo::Kind::InsertMid) {
-    int index = cur->stklen - info.pos - 1;
-    if (index < 0) {
-      reportStkUnderflow(b, *cur, pc);
+  auto const pushes = instrNumPushes(pc);
+  if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
+  FlavorDesc *outs = &cur->stk[cur->stklen];
+  cur->stklen += pushes;
+  if (op == Op::BaseSC) {
+    if (pushes == 1) outs[0] = outs[1];
+  } else if (isFPush(op)) {
+    for (int i = 0; i < pushes; ++i) {
+      outs[i] = outs[i + 3];
+    }
+
+    if (cur->fpilen >= maxFpi()) {
+      error("%s", "more FPush* instructions than FPI regions\n");
       return false;
     }
-    memmove(&cur->stk[index + 1], &cur->stk[index],
-           (info.pos + 1) * sizeof(*cur->stk));
-    cur->stk[index] = outputSigs[size_t(op)][0];
-    cur->stklen++;
+    FpiState& fpi = cur->fpi[cur->fpilen];
+    cur->fpilen++;
+    fpi.fpush = offset(pc);
+    fpi.stkmin = cur->stklen - pushes;
+  } else if (op == Op::FCall) {
+    for (int i = 0; i < pushes; ++i) {
+      outs[i] = CV;
+    }
   } else {
-    int pushes = info.numPushes;
-    if (cur->stklen + pushes > maxStack()) reportStkOverflow(b, *cur, pc);
-    FlavorDesc *outs = &cur->stk[cur->stklen];
-    cur->stklen += pushes;
-    if (op == Op::BaseSC) {
-      if (pushes == 1) outs[0] = outs[1];
-    } else if (isFPush(op)) {
-      for (int i = 0; i < pushes; ++i) {
-        outs[i] = outs[i + 3];
-      }
-
-      if (cur->fpilen >= maxFpi()) {
-        error("%s", "more FPush* instructions than FPI regions\n");
-        return false;
-      }
-      FpiState& fpi = cur->fpi[cur->fpilen];
-      cur->fpilen++;
-      fpi.fpush = offset(pc);
-      fpi.stkmin = cur->stklen - pushes;
-    } else if (op == Op::FCall) {
-      for (int i = 0; i < pushes; ++i) {
-        outs[i] = CV;
-      }
-    } else {
-      for (int i = 0; i < pushes; ++i) {
-        outs[i] = outputSigs[size_t(op)][i];
-      }
+    for (int i = 0; i < pushes; ++i) {
+      outs[i] = outputSigs[size_t(op)][i];
     }
   }
 

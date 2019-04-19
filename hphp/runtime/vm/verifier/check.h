@@ -58,8 +58,7 @@ bool checkUnit(const UnitEmitter*, ErrorMode mode = kStderr);
  * Checked:
  * 1.  Depth of eval stack must be same for any control-flow path.
  *     flavor descriptors for every stack element are same for any path.
- * 2.  Stack underflow & overflow not allowed.  INS_1 stack
- *     refs must be in-bounds.
+ * 2.  Stack underflow & overflow not allowed.
  * 3.  Empty stack at try-region starts (but not ends).
  * 4.  |stack| == 1 before Ret*.
  * 5.  The body must end with a terminal.

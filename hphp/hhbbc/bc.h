@@ -626,8 +626,6 @@ namespace imm {
 
 #define PUSH_TWO(x, y)    uint32_t numPush() const { return 2; }
 
-#define PUSH_INS_1(...)   uint32_t numPush() const { return 1; }
-
 #define PUSH_FPUSH        uint32_t numPush() const { return arg1; }
 #define PUSH_FCALL        uint32_t numPush() const { return fca.numRets; }
 
@@ -733,7 +731,6 @@ OPCODES
 #undef PUSH_NOV
 #undef PUSH_ONE
 #undef PUSH_TWO
-#undef PUSH_INS_1
 #undef PUSH_FPUSH
 #undef PUSH_FCALL
 

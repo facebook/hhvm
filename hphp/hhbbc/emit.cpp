@@ -703,7 +703,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #define PUSH_ONE(x)            push(1);
 #define PUSH_TWO(x, y)         push(2);
 #define PUSH_THREE(x, y, z)    push(3);
-#define PUSH_INS_1(x)          push(1);
 #define PUSH_FPUSH             push(data.arg1);
 #define PUSH_FCALL             push(data.fca.numRets);
 
@@ -809,7 +808,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 #undef PUSH_ONE
 #undef PUSH_TWO
 #undef PUSH_THREE
-#undef PUSH_INS_1
 #undef PUSH_FPUSH
 #undef PUSH_FCALL
 

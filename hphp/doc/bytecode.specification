@@ -1501,7 +1501,7 @@ CGetQuietL <local variable id>    []  ->  [C]
   as a cell. If the local variable is not defined, this instruction pushes null
   onto the stack.
 
-CGetL2 <local variable id>    [<F>:<T>]  ->  [C <F>:<T>]
+CGetL2 <local variable id>    [<C>:<T>]  ->  [C <C>:<T>]
 
   Get local as cell. If the local variable given by %1 is defined, this
   instruction gets the value of the local variable, pushes it onto the stack as

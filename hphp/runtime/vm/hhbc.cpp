@@ -470,7 +470,6 @@ int instrNumPushes(PC pc) {
 #define THREE(...) 3
 #define FOUR(...) 4
 #define FIVE(...) 5
-#define INS_1(...) 0
 #define FPUSH -2
 #define FCALL -1
 #define O(name, imm, pop, push, flags) push,
@@ -481,7 +480,6 @@ int instrNumPushes(PC pc) {
 #undef THREE
 #undef FOUR
 #undef FIVE
-#undef INS_1
 #undef FPUSH
 #undef FCALL
 #undef O
@@ -570,71 +568,6 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef CMANY
 #undef SMANY
 #undef O
-}
-
-StackTransInfo instrStackTransInfo(PC opcode) {
-  static const StackTransInfo::Kind transKind[] = {
-#define NOV StackTransInfo::Kind::PushPop
-#define ONE(...) StackTransInfo::Kind::PushPop
-#define TWO(...) StackTransInfo::Kind::PushPop
-#define THREE(...) StackTransInfo::Kind::PushPop
-#define FOUR(...) StackTransInfo::Kind::PushPop
-#define FIVE(...) StackTransInfo::Kind::PushPop
-#define FPUSH StackTransInfo::Kind::PushPop
-#define FCALL StackTransInfo::Kind::PushPop
-#define INS_1(...) StackTransInfo::Kind::InsertMid
-#define O(name, imm, pop, push, flags) push,
-    OPCODES
-#undef NOV
-#undef ONE
-#undef TWO
-#undef THREE
-#undef FOUR
-#undef FIVE
-#undef INS_1
-#undef FPUSH
-#undef FCALL
-#undef O
-  };
-  static const int8_t peekPokeType[] = {
-#define NOV -1
-#define ONE(...) -1
-#define TWO(...) -1
-#define THREE(...) -1
-#define FOUR(...) -1
-#define FIVE(...) -1
-#define FPUSH -1
-#define FCALL -1
-#define INS_1(...) 0
-#define O(name, imm, pop, push, flags) push,
-    OPCODES
-#undef NOV
-#undef ONE
-#undef TWO
-#undef THREE
-#undef FOUR
-#undef FIVE
-#undef INS_1
-#undef FPUSH
-#undef FCALL
-#undef O
-  };
-  StackTransInfo ret;
-  auto const op = peek_op(opcode);
-  ret.kind = transKind[size_t(op)];
-  switch (ret.kind) {
-  case StackTransInfo::Kind::PushPop:
-    ret.pos = 0;
-    ret.numPushes = instrNumPushes(opcode);
-    ret.numPops = instrNumPops(opcode);
-    return ret;
-  case StackTransInfo::Kind::InsertMid:
-    ret.numPops = 0;
-    ret.numPushes = 0;
-    ret.pos = peekPokeType[size_t(op)];
-    return ret;
-  }
-  not_reached();
 }
 
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {

@@ -1750,7 +1750,6 @@ void in(ISS& env, const bc::PushL& op) {
 }
 
 void in(ISS& env, const bc::CGetL2& op) {
-  // Can't constprop yet because of no INS_1 support in bc.h
   if (!peekLocCouldBeUninit(env, op.loc1)) {
     auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
     if (minLocEquiv != NoLocalId) {

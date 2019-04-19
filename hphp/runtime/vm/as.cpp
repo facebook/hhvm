@@ -1525,7 +1525,6 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_PUSH_ONE(a) 1
 #define NUM_PUSH_TWO(a,b) 2
 #define NUM_PUSH_THREE(a,b,c) 3
-#define NUM_PUSH_INS_1(a) 1
 #define NUM_PUSH_FPUSH immIVA[0]
 #define NUM_PUSH_FCALL immFCA.numRets
 #define NUM_POP_NOV 0
@@ -1665,7 +1664,6 @@ OPCODES
 #undef NUM_PUSH_TWO
 #undef NUM_PUSH_THREE
 #undef NUM_PUSH_POS_N
-#undef NUM_PUSH_INS_1
 #undef NUM_PUSH_FPUSH
 #undef NUM_PUSH_FCALL
 #undef NUM_POP_NOV

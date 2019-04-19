@@ -84,6 +84,8 @@ type t = {
   shallow_class_decl : bool;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
   enable_reverse_naming_table_fallback : bool;
+  (* Selects a search provider for autocomplete and symbol search *)
+  symbolindex_search_provider : string;
 }
 
 let default = {
@@ -135,6 +137,7 @@ let default = {
   basic_autocomplete_only = false;
   shallow_class_decl = false;
   enable_reverse_naming_table_fallback = false;
+  symbolindex_search_provider = "TrieIndex";
 }
 
 let path =
@@ -269,6 +272,8 @@ let load_ fn ~silent config_overrides =
       ~default:default.shallow_class_decl config in
   let enable_reverse_naming_table_fallback = bool_if_version "enable_reverse_naming_table_fallback"
       ~default:default.enable_reverse_naming_table_fallback config in
+  let symbolindex_search_provider = string_ "symbolindex_search_provider"
+      ~default:default.symbolindex_search_provider config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -317,6 +322,7 @@ let load_ fn ~silent config_overrides =
     basic_autocomplete_only;
     shallow_class_decl;
     enable_reverse_naming_table_fallback;
+    symbolindex_search_provider;
   }
 
 let load ~silent config_overrides =

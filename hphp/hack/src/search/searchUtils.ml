@@ -22,6 +22,19 @@ type search_provider =
   | SqliteIndex
   | TrieIndex
 
+(* Convert a string to a provider *)
+let provider_of_string (provider_str: string): search_provider =
+  match provider_str with
+  | "SqliteIndex" -> SqliteIndex
+  | "GrepIndex" -> GrepIndex
+  | "RipGrepIndex" -> RipGrepIndex
+  | "NoIndex" -> NoIndex
+  | "AllLocalIndex" -> AllLocalIndex
+  | "GleanApiIndex" -> GleanApiIndex
+  | "TrieIndex" -> TrieIndex
+  | _ -> TrieIndex
+;;
+
 (* Shared Search code between Fuzzy and Trie based searches *)
 module type Searchable = sig
   type t

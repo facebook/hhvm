@@ -11,8 +11,9 @@
 val fuzzy_search_enabled : unit -> bool
 val set_fuzzy_search_enabled : bool -> unit
 
-(* Write the name of the current search provider to the HH_Log *)
-val log_search_provider: unit -> unit
+(* Get, set, or check the currently selected search provider *)
+val get_search_provider: unit -> SearchUtils.search_provider
+val set_search_provider: SearchUtils.search_provider -> unit
 
 (* This is the proper search function everyone should use *)
 val symbol_index_query :

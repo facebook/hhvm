@@ -19,8 +19,8 @@ let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 
 
 (* Display the currently selected search provider *)
-let log_search_provider (): unit =
-  match current_search_provider with
+let log_search_provider (provider: search_provider): unit =
+  match provider with
   | SqliteIndex -> Hh_logger.log "Symbol index provider: Sqlite";
   | GrepIndex -> Hh_logger.log "Symbol index provider: GrepIndex";
   | RipGrepIndex -> Hh_logger.log "Symbol index provider: RipGrep";
@@ -29,6 +29,17 @@ let log_search_provider (): unit =
   | GleanApiIndex -> Hh_logger.log "Symbol index provider: Glean API";
   | TrieIndex -> Hh_logger.log "Symbol index provider: SharedMem/Trie";
     ()
+;;
+
+(* Select the currently selected search provider *)
+let set_search_provider (provider: search_provider): unit =
+  log_search_provider provider;
+  (* This currently does nothing - implementation to follow in the next diff *)
+;;
+
+(* Fetch the currently selected search provider *)
+let get_search_provider (): search_provider =
+  current_search_provider
 ;;
 
 (*
@@ -125,16 +136,16 @@ let query_for_autocomplete
 let update
     (worker_list_opt: MultiWorker.worker list option)
     (files: (Relative_path.t * info) list): unit =
-    match current_search_provider with
-      | AllLocalIndex
-      | GleanApiIndex
-      | GrepIndex
-      | NoIndex
-      | RipGrepIndex
-      | SqliteIndex ->
-        ()
-      | TrieIndex ->
-        HackSearchService.update_from_typechecker worker_list_opt files
+  match current_search_provider with
+  | AllLocalIndex
+  | GleanApiIndex
+  | GrepIndex
+  | NoIndex
+  | RipGrepIndex
+  | SqliteIndex ->
+    ()
+  | TrieIndex ->
+    HackSearchService.update_from_typechecker worker_list_opt files
 ;;
 
 (*
@@ -143,13 +154,13 @@ let update
  *)
 let remove_files (paths: Relative_path.Set.t): unit =
   match current_search_provider with
-    | AllLocalIndex
-    | GleanApiIndex
-    | GrepIndex
-    | NoIndex
-    | RipGrepIndex
-    | SqliteIndex ->
-      ()
-    | TrieIndex ->
-      HackSearchService.MasterApi.clear_shared_memory paths
+  | AllLocalIndex
+  | GleanApiIndex
+  | GrepIndex
+  | NoIndex
+  | RipGrepIndex
+  | SqliteIndex ->
+    ()
+  | TrieIndex ->
+    HackSearchService.MasterApi.clear_shared_memory paths
 ;;

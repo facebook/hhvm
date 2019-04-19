@@ -144,6 +144,12 @@ let init
 
   in
   let env, t = ServerAiInit.ai_check genv env.naming_table env t in
+
+  (* Configure autocomplete search index with the selected search provider *)
+  SymbolIndex.set_search_provider
+    (SearchUtils.provider_of_string
+      genv.local_config.ServerLocalConfig.symbolindex_search_provider);
+
   run_search genv t;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();

@@ -81,7 +81,7 @@ StringData* StringData::MakeShared(folly::StringPiece sl) {
 
   auto const allocSize = sl.size() + kStringOverhead;
   StringData* sd = reinterpret_cast<StringData*>(
-    trueStatic ? low_malloc(allocSize) : uncounted_malloc(allocSize)
+    trueStatic ? lower_malloc(allocSize) : uncounted_malloc(allocSize)
   );
   auto const data = reinterpret_cast<char*>(sd + 1);
 
@@ -142,7 +142,7 @@ StringData* StringData::MakeEmpty() {
 void StringData::destructStatic() {
   assertx(checkSane() && isStatic());
   assertx(isFlat());
-  low_free(this);
+  lower_free(this);
 }
 
 void StringData::ReleaseUncounted(const StringData* str) {

@@ -181,8 +181,11 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
+unsigned lower_arena = 0;
 unsigned high_arena = 0;
+
 int low_arena_flags = 0;
+int lower_arena_flags = 0;
 __thread int high_arena_flags = 0;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -390,11 +393,18 @@ void setup_low_arena(unsigned n1GPages) {
     low_2m_mapper = dynamic_cast<Bump2MMapper*>(lowMapper->next());
   }
   auto ma = LowArena::CreateAt(&g_lowArena);
-  ma->appendMapper(veryLowMapper);
   ma->appendMapper(lowMapper);
+  ma->appendMapper(veryLowMapper);
   set_arena_retain_grow_limit(ma->id());
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
+
+  ma = LowArena::CreateAt(&g_lowerArena);
+  ma->appendMapper(veryLowMapper);
+  ma->appendMapper(lowMapper);
+  set_arena_retain_grow_limit(ma->id());
+  lower_arena = ma->id();
+  lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
 }
 
 void setup_high_arena(unsigned n1GPages) {
@@ -614,6 +624,8 @@ struct JEMallocInitializer {
     // Earlier versions of jemalloc do not have MALLOCX_TCACHE_NONE, but will
     // still bypass tcache when arena is specified.
 #endif
+    lower_arena = low_arena;
+    lower_arena_flags = low_arena_flags;
 
     // We normally maintain the invariant that the region surrounding the
     // current brk is mapped huge, but we don't know yet whether huge pages

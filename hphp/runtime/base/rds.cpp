@@ -342,7 +342,7 @@ folly::Optional<Handle> findFreeBlock(FreeLists& lists, size_t size,
 // 's_persistent_free_lists' yet.
 NEVER_INLINE void addNewPersistentChunk(size_t size) {
   assertx(size > 0 && size < kMaxHandle && size % 4096 == 0);
-  auto const raw = static_cast<char*>(low_malloc(size));
+  auto const raw = static_cast<char*>(lower_malloc(size));
   auto const addr = reinterpret_cast<uintptr_t>(raw);
   memset(raw, 0, size);
 #if !RDS_FIXED_PERSISTENT_BASE
@@ -354,7 +354,7 @@ NEVER_INLINE void addNewPersistentChunk(size_t size) {
   s_persistent_base = s_persistent_frontier - size4g;
 #else
   always_assert_flog(addr >= kMinPersistentHandle && addr < size4g,
-                     "low_malloc() failed to return suitable address for RDS");
+                     "failed to suitable address for persistent RDS");
   assertx(s_persistent_frontier >= s_persistent_limit);
   if (s_persistent_frontier != s_persistent_limit) {
     addFreeBlock(s_persistent_free_lists,

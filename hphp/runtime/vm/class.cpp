@@ -72,7 +72,7 @@ Mutex g_classesMutex;
 
 Class::PropInitVec::~PropInitVec() {
   if (m_capacity > 0) {
-    vm_sized_free(m_data, m_capacity * sizeof(TypedValue));
+    lower_free(m_data);
   }
 }
 
@@ -97,7 +97,7 @@ Class::PropInitVec::operator=(const PropInitVec& piv) {
     }
     unsigned sz = m_size = m_capacity = piv.size();
     if (sz == 0) return *this;
-    m_data = (TypedValueAux*)vm_malloc(sz * sizeof(*m_data));
+    m_data = (TypedValueAux*)lower_malloc(sz * sizeof(*m_data));
     assertx(m_data);
     memcpy(m_data, piv.m_data, sz * sizeof(*m_data));
   }
@@ -109,11 +109,11 @@ void Class::PropInitVec::push_back(const TypedValue& v) {
   if (m_size == m_capacity) {
     unsigned newCap = folly::nextPowTwo(m_size + 1);
     m_capacity = static_cast<int32_t>(newCap);
-    auto newData = vm_malloc(newCap * sizeof(TypedValue));
+    auto newData = lower_malloc(newCap * sizeof(TypedValue));
     if (m_data) {
       auto const oldSize = m_size * sizeof(*m_data);
       memcpy(newData, m_data, oldSize);
-      vm_sized_free(m_data, oldSize);
+      lower_free(m_data);
     }
     m_data = reinterpret_cast<TypedValueAux*>(newData);
     assertx(m_data);
@@ -239,7 +239,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
   auto const size = sizeof_Class + prefix_sz
                     + sizeof(m_classVec[0]) * classVecLen;
 
-  auto const mem = low_malloc(size);
+  auto const mem = lower_malloc(size);
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
   );
@@ -247,7 +247,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
     return new (classPtr) Class(preClass, parent, std::move(usedTraits),
                                 classVecLen, funcVecLen);
   } catch (...) {
-    low_free(mem);
+    lower_free(mem);
     throw;
   }
 }
@@ -433,7 +433,7 @@ void Class::atomicRelease() {
   assertx(!m_cachedClass.bound());
   assertx(!getCount());
   this->~Class();
-  low_free(mallocPtr());
+  lower_free(mallocPtr());
 }
 
 Class::~Class() {

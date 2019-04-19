@@ -27,6 +27,7 @@ static_assert(sizeof(RangeState) <= 64, "");
 static_assert(alignof(RangeState) <= 64, "");
 using RangeStateStorage = std::aligned_storage<sizeof(RangeState), 64>::type;
 
+RangeArenaStorage g_lowerArena{};
 RangeArenaStorage g_lowArena{};
 RangeArenaStorage g_highArena{};
 RangeStateStorage g_ranges[3];

@@ -60,13 +60,15 @@ struct OutOfMemoryException : Exception {
 #ifdef USE_JEMALLOC
 
 // Low arena uses ManagedArena if extent hooks are used, otherwise it is using
-// DSS.  It should always be available for supported versions of jemalloc.  High
+// DSS. It should always be available for supported versions of jemalloc. High
 // arena is 0 if extent hook API isn't used, but mallocx/dallocx could use 0 as
-// flags and behave similarly to malloc/free.  Low arena doesn't use tcache, but
+// flags and behave similarly to malloc/free. Low arena doesn't use tcache, but
 // we need tcache for the high arena, so the flags are thread-local.
 extern unsigned low_arena;
+extern unsigned lower_arena;
 extern unsigned high_arena;
 extern int low_arena_flags;
+extern int lower_arena_flags;
 extern __thread int high_arena_flags;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -354,6 +356,23 @@ inline void low_free(void* ptr) {
 #endif
 }
 
+inline void* lower_malloc(size_t size) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (!size) return nullptr;
+  return mallocx(size, lower_arena_flags);
+#else
+  return low_malloc(size);
+#endif
+}
+
+inline void lower_free(void* ptr) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (ptr) dallocx(ptr, lower_arena_flags);
+#else
+  return low_free(ptr);
+#endif
+}
+
 template <class T>
 struct LowAllocator {
   using value_type = T;
@@ -364,7 +383,8 @@ struct LowAllocator {
   struct rebind { using other = LowAllocator<U>; };
 
   LowAllocator() noexcept {}
-  template<class U> LowAllocator(const LowAllocator<U>&) noexcept {}
+  template<class U>
+  explicit LowAllocator(const LowAllocator<U>&) noexcept {}
   ~LowAllocator() noexcept {}
 
   pointer allocate(size_t num) {
@@ -386,6 +406,43 @@ struct LowAllocator {
     return true;
   }
   template<class U> bool operator!=(const LowAllocator<U>&) const {
+    return false;
+  }
+};
+
+template <class T>
+struct LowerAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+
+  template <class U>
+  struct rebind { using other = LowerAllocator<U>; };
+
+  LowerAllocator() noexcept {}
+  template<class U>
+  explicit LowerAllocator(const LowerAllocator<U>&) noexcept {}
+  ~LowerAllocator() noexcept {}
+
+  pointer allocate(size_t num) {
+    return (pointer)low_malloc(num * sizeof(T));
+  }
+  void deallocate(pointer p, size_t /*num*/) {
+    low_free((void*)p);
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  template<class U> bool operator==(const LowerAllocator<U>&) const {
+    return true;
+  }
+  template<class U> bool operator!=(const LowerAllocator<U>&) const {
     return false;
   }
 };

@@ -6,6 +6,8 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
+use crate::parser_env::ParserEnv;
+
 pub use crate::smart_constructors_generated::*;
 
 // Usage: sc_call(make_foo, parser, arg1, ...)  (in OCaml: Make.foo parser arg1 ...)
@@ -25,8 +27,23 @@ macro_rules! S {
     }}
 }
 
+pub trait StateType<R> {
+    type T;
+    fn initial(env: &ParserEnv) -> Self::T;
+    fn next(t: Self::T, inputs: Vec<&R>) -> Self::T;
+}
+
 #[derive(Clone)]
-pub struct NoState;  // zero-overhead placeholder when there is no state
+pub struct NoState; // zero-overhead placeholder when there is no state
+impl<R> StateType<R> for NoState {
+    type T = NoState;
+    fn initial(_env: &ParserEnv) -> Self::T {
+        NoState {}
+    }
+    fn next(t: Self::T, _inputs: Vec<&R>) -> Self::T {
+        t
+    }
+}
 
 pub trait NodeType {
     fn is_missing(&self) -> bool;

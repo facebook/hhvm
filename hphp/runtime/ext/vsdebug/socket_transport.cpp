@@ -463,11 +463,30 @@ void SocketTransport::cleanupFd(int fd) {
 }
 
 void SocketTransport::shutdownSocket(int sockFd, int abortFd) {
+  VSDebugLogger::Log(
+    VSDebugLogger::LogLevelInfo,
+    "Shutting down sockFd(%d) abortFd(%d)",
+    sockFd,
+    abortFd
+  );
+
+  // The process might be exiting, and this logging is important
+  // for debugging shutdown issues, so explicitly flush here.
+  VSDebugLogger::LogFlush();
+
   // Perform an orderly shutdown of the socket so that the message is actually
   // sent and received. This requires us to shutdown the write end of the socket
   // and then drain the receive buffer before closing the socket. If abortFd
   // is signalled before this is complete, we just close the socket and bail.
-  ::shutdown(sockFd, SHUT_WR);
+  if (::shutdown(sockFd, SHUT_WR) < 0) {
+    // This is normal if there is no client connection.
+    VSDebugLogger::Log(
+      VSDebugLogger::LogLevelWarning,
+      "Socket ::shutdown returned: %d",
+      errno
+    );
+    return;
+  }
 
   int result;
   size_t size = sizeof(struct pollfd) * 2;

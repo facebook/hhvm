@@ -35,6 +35,18 @@ let provider_of_string (provider_str: string): search_provider =
   | _ -> TrieIndex
 ;;
 
+(* Convert a string to a human readable description of the provider *)
+let descriptive_name_of_provider (provider: search_provider): string =
+  match provider with
+  | AllLocalIndex -> "All Local Memory"
+  | GleanApiIndex -> "Glean API"
+  | GrepIndex -> "Grep"
+  | NoIndex -> "Symbol index disabled"
+  | RipGrepIndex -> "RipGrep"
+  | SqliteIndex -> "Sqlite"
+  | TrieIndex -> "SharedMem/Trie"
+;;
+
 (* Shared Search code between Fuzzy and Trie based searches *)
 module type Searchable = sig
   type t

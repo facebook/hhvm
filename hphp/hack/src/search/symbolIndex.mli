@@ -11,9 +11,9 @@
 val fuzzy_search_enabled : unit -> bool
 val set_fuzzy_search_enabled : bool -> unit
 
-(* Get, set, or check the currently selected search provider *)
+(* Get or set the currently selected search provider *)
 val get_search_provider: unit -> SearchUtils.search_provider
-val set_search_provider: SearchUtils.search_provider -> unit
+val set_search_provider: string -> unit
 
 (* This is the proper search function everyone should use *)
 val symbol_index_query :

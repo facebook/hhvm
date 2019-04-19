@@ -10,37 +10,38 @@
 open Core_kernel
 open SearchUtils
 
-(* Select the current search provider with this compile-time constant *)
-let current_search_provider = TrieIndex
-
 (* Note that fuzzy search does not currently do anything *)
 let fuzzy_search_enabled () = !HackSearchService.fuzzy
 let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 
-
-(* Display the currently selected search provider *)
-let log_search_provider (provider: search_provider): unit =
-  match provider with
-  | SqliteIndex -> Hh_logger.log "Symbol index provider: Sqlite";
-  | GrepIndex -> Hh_logger.log "Symbol index provider: GrepIndex";
-  | RipGrepIndex -> Hh_logger.log "Symbol index provider: RipGrep";
-  | NoIndex -> Hh_logger.log "Symbol index provider: None";
-  | AllLocalIndex -> Hh_logger.log "Symbol index provider: All-Local";
-  | GleanApiIndex -> Hh_logger.log "Symbol index provider: Glean API";
-  | TrieIndex -> Hh_logger.log "Symbol index provider: SharedMem/Trie";
-    ()
-;;
-
-(* Select the currently selected search provider *)
-let set_search_provider (provider: search_provider): unit =
-  log_search_provider provider;
-  (* This currently does nothing - implementation to follow in the next diff *)
-;;
+(* Keep track of current search provider in a global *)
+let current_search_provider = ref None
 
 (* Fetch the currently selected search provider *)
-let get_search_provider (): search_provider =
-  current_search_provider
+let get_search_provider (): SearchUtils.search_provider =
+  match !current_search_provider with
+  | Some provider ->
+    provider
+  | None -> failwith "Attempted to fetch search provider, but it is not yet set.";
 ;;
+
+(* Set the currently selected search provider *)
+let set_search_provider (provider_str: string): unit =
+  let provider = SearchUtils.provider_of_string provider_str in
+  match !current_search_provider with
+  | None ->
+    current_search_provider := Some provider;
+    Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
+      (SearchUtils.descriptive_name_of_provider provider)
+      provider_str;
+  | Some existing_provider ->
+
+    (* We don't yet support changing providers on the fly *)
+    if existing_provider <> provider then begin
+      failwith "We do not currently support switching providers after launch";
+    end;
+;;
+
 
 (*
  * Core search function
@@ -52,7 +53,7 @@ let symbol_index_query
     (prefix: string)
     (max_results: int)
     (kind_opt: si_kind option): si_results =
-
+  let provider = get_search_provider () in
   (*
    * Nuclide often sends this exact request to verify that HH is working.
    * Let's capture it and avoid doing unnecessary work.
@@ -67,7 +68,7 @@ let symbol_index_query
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
      * that we haven't seen before *)
-    let local_results = match current_search_provider with
+    let local_results = match provider with
       | AllLocalIndex
       | GleanApiIndex
       | GrepIndex
@@ -79,7 +80,7 @@ let symbol_index_query
     in
 
     (* Next search globals *)
-    let global_results = match current_search_provider with
+    let global_results = match provider with
       | AllLocalIndex
       | GleanApiIndex
       | GrepIndex
@@ -136,7 +137,7 @@ let query_for_autocomplete
 let update
     (worker_list_opt: MultiWorker.worker list option)
     (files: (Relative_path.t * info) list): unit =
-  match current_search_provider with
+  match get_search_provider () with
   | AllLocalIndex
   | GleanApiIndex
   | GrepIndex
@@ -153,7 +154,7 @@ let update
  * Any local caches should be cleared of values for this file.
  *)
 let remove_files (paths: Relative_path.Set.t): unit =
-  match current_search_provider with
+  match get_search_provider () with
   | AllLocalIndex
   | GleanApiIndex
   | GrepIndex

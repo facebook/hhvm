@@ -1,10 +1,10 @@
-<?php
+<?hh
 
 function foo(bar\int $a): int {
     return $a;
 }
 
-?>
-
-
-foo(10);
+<<__EntryPoint>>
+function main(): void {
+  foo(10);
+}

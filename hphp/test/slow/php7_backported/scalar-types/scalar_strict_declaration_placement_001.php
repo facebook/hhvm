@@ -10,13 +10,8 @@ function takes_int(int $x) {
     }
 }
 
-?>
-<?php
-
 declare(strict_types=1);
 var_dump(takes_int(32));
-
-?>
 
 abstract final class Php7BackportedScalarTypesScalarStrictDeclarationPlacement001 {
   public static $errored;

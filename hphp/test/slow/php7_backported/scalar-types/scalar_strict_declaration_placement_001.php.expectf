@@ -1,2 +1,1 @@
-
-Fatal error: An expression is expected here. in %s/scalar_strict_declaration_placement_001.php on line 14
+Fatal error: strict_types declaration must be the very first statement in the script in %s/test/slow/php7_backported/scalar-types/scalar_strict_declaration_placement_001.php on line 13

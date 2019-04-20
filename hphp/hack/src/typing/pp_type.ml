@@ -909,6 +909,13 @@ fun fmt x ->
   Format.fprintf fmt "@[%s =@ " "ttc_origin";
   Format.fprintf fmt "%S" x.ttc_origin;
   Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@[%s =@ " "ttc_enforceable";
+  Format.pp_print_string fmt "(";
+  Pos.pp fmt (fst x.ttc_enforceable);
+  Format.fprintf fmt ", %B)" (snd x.ttc_enforceable);
+  Format.fprintf fmt "@]";
 
   Format.fprintf fmt "@ }@]"
 

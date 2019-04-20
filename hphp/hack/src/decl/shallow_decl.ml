@@ -56,6 +56,11 @@ let class_const env c (h, name, e) =
       scc_type = ty;
     }
 
+let typeconst_abstract_kind env = function
+  | Nast.TCAbstract default -> TCAbstract (Option.map default (Decl_hint.hint env))
+  | Nast.TCPartiallyAbstract -> TCPartiallyAbstract
+  | Nast.TCConcrete -> TCConcrete
+
 let typeconst env c tc =
   match c.c_kind with
   | Ast.Ctrait | Ast.Cenum | Ast.Crecord->
@@ -74,7 +79,7 @@ let typeconst env c tc =
         | Some { ua_name = (pos, _); _ } -> pos, true
         | None -> Pos.none, false in
       Some {
-        stc_abstract = tc.c_tconst_abstract;
+        stc_abstract = typeconst_abstract_kind env tc.c_tconst_abstract;
         stc_name = tc.c_tconst_name;
         stc_constraint = constr;
         stc_type = ty;

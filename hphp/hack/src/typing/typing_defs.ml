@@ -543,8 +543,13 @@ and class_type = {
   tc_decl_errors         : Errors.t option;
 }
 
+and typeconst_abstract_kind =
+  | TCAbstract of decl ty option
+  | TCPartiallyAbstract
+  | TCConcrete
+
 and typeconst_type = {
-  ttc_abstract    : Nast.typeconst_abstract_kind;
+  ttc_abstract    : typeconst_abstract_kind;
   ttc_name        : Nast.sid;
   ttc_constraint  : decl ty option;
   ttc_type        : decl ty option;

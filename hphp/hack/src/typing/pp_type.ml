@@ -858,12 +858,24 @@ and pp_class_type : Format.formatter -> class_type -> unit = fun fmt x ->
 and show_class_type : class_type -> string = fun x ->
   Format.asprintf "%a" pp_class_type x
 
+and pp_typeconst_abstract_kind: Format.formatter -> typeconst_abstract_kind -> unit =
+fun fmt x ->
+  match x with
+  | TCAbstract default ->
+    Format.pp_print_string fmt "TCAbstract {";
+    Option.iter default (pp_ty fmt);
+    Format.pp_print_string fmt "}"
+  | TCPartiallyAbstract ->
+    Format.pp_print_string fmt "TCPartiallyAbstract"
+  | TCConcrete ->
+    Format.pp_print_string fmt "TCConcrete"
+
 and pp_typeconst_type : Format.formatter -> typeconst_type -> unit =
 fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
   Format.fprintf fmt "@[%s =@ " "ttc_abstract";
-  Nast.pp_typeconst_abstract_kind fmt x.ttc_abstract;
+  pp_typeconst_abstract_kind fmt x.ttc_abstract;
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 

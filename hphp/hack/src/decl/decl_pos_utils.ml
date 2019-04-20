@@ -191,9 +191,9 @@ let rec ty (p, x) =
     }
 
   and typeconst_abstract_kind = function
-    | Nast.TCAbstract default -> Nast.TCAbstract (Option.map default ~f:(Nast_pos_mapper.hint pos))
-    | Nast.TCPartiallyAbstract -> Nast.TCPartiallyAbstract
-    | Nast.TCConcrete -> Nast.TCConcrete
+    | TCAbstract default -> TCAbstract (ty_opt default)
+    | TCPartiallyAbstract -> TCPartiallyAbstract
+    | TCConcrete -> TCConcrete
 
   and typeconst tc =
     { ttc_abstract = typeconst_abstract_kind tc.ttc_abstract;

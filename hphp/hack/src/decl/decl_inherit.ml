@@ -111,7 +111,6 @@ let add_typeconst name sig_ typeconsts =
       (* The type constant didn't exist so far, let's add it *)
       SMap.add name sig_ typeconsts
   | Some old_sig ->
-    let open Nast in
     match old_sig.ttc_abstract, sig_.ttc_abstract with
     (* This covers the following case
      *

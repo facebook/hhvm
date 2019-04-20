@@ -1973,10 +1973,6 @@ OPTBLD_INLINE void iopDup() {
   vmStack().dup();
 }
 
-OPTBLD_INLINE void iopBox() {
-  vmStack().box();
-}
-
 OPTBLD_INLINE void iopCGetCUNop() {
 }
 

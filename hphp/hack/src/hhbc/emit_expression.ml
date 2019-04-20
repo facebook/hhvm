@@ -1231,7 +1231,7 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
   | A.Class_get (cid, id)  ->
     emit_class_get env QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
-    fst (emit_obj_get ~need_ref:false env pos QueryOp.Isset expr prop nullflavor)
+    fst (emit_obj_get env pos QueryOp.Isset expr prop nullflavor)
   | A.Lvar (_, n) when SN.Superglobals.is_superglobal n ->
     gather [
       emit_pos outer_pos;
@@ -1271,7 +1271,7 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
   | A.Class_get (cid, id) ->
     emit_class_get env QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
-    fst (emit_obj_get ~need_ref:false env pos QueryOp.Empty expr prop nullflavor)
+    fst (emit_obj_get env pos QueryOp.Empty expr prop nullflavor)
   | A.Lvar(_, id) when SN.Superglobals.is_superglobal id ->
     gather [
       instr_string @@ SU.Locals.strip_dollar id;
@@ -1691,7 +1691,7 @@ and emit_expr env (pos, expr_ as expr) =
   | A.Array_get(base_expr, opt_elem_expr) ->
     fst (emit_array_get env pos QueryOp.CGet base_expr opt_elem_expr)
   | A.Obj_get (expr, prop, nullflavor) ->
-    fst (emit_obj_get ~need_ref:false env pos QueryOp.CGet expr prop nullflavor)
+    fst (emit_obj_get env pos QueryOp.CGet expr prop nullflavor)
   | A.Call (e, targs, args, uargs) ->
     emit_call_expr env pos e targs args uargs None
   | A.New (typeexpr, targs, args, uargs) ->
@@ -2241,7 +2241,7 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) env pos (_, expr_ as expr)
     emit_array_get ~null_coalesce_assignment
       env pos QueryOp.CGetQuiet base_expr opt_elem_expr
   | A.Obj_get (expr, prop, nullflavor) ->
-    emit_obj_get ~null_coalesce_assignment ~need_ref:false
+    emit_obj_get ~null_coalesce_assignment
       env pos QueryOp.CGetQuiet expr prop nullflavor
   | _ ->
     emit_expr env expr, None
@@ -2424,7 +2424,8 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
 
 (* Emit code for e1->e2 or e1?->e2 or isset(e1->e2).
  *)
-and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr prop null_flavor =
+and emit_obj_get ?(null_coalesce_assignment=false) ?(arg_by_ref=false)
+  env pos qop expr prop null_flavor =
   match snd expr with
   | A.Lvar (pos, id)
     when id = SN.SpecialIdents.this && null_flavor = A.OG_nullsafe ->
@@ -2433,13 +2434,11 @@ and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr pr
   | _ ->
     begin match snd prop with
     | A.Id (_, s) when SU.Xhp.is_xhp s ->
-      let instrs = emit_xhp_obj_get env pos expr s null_flavor in
-      (if need_ref then gather [ instrs; emit_pos pos; instr_box ] else instrs),
-      None
+      emit_xhp_obj_get env pos expr s null_flavor, None
     | _ ->
       let mode =
         if null_coalesce_assignment then MemberOpMode.Warn
-        else get_queryMOpMode need_ref qop in
+        else get_queryMOpMode arg_by_ref qop in
       let mk, prop_expr_instrs, prop_stack_size =
         emit_prop_expr ~null_coalesce_assignment env null_flavor 0 prop in
       let base_expr_instrs_begin,
@@ -2453,7 +2452,7 @@ and emit_obj_get ?(null_coalesce_assignment=false) ~need_ref env pos qop expr pr
       let total_stack_size = prop_stack_size + base_stack_size in
       let final_instr =
         instr (IFinal (
-          if need_ref then
+          if arg_by_ref then
             VGetM (total_stack_size, mk)
           else if null_coalesce_assignment then
             QueryM (0, qop, mk)
@@ -2971,7 +2970,7 @@ and emit_args_and_inout_setters env args =
         emit_local ~notice:Notice ~need_ref:true env id
       | A.Obj_get (obj, prop, nullflavor) ->
         let env = { env with Emit_env.env_allows_array_append = true } in
-        fst (emit_obj_get ~need_ref:true env (fst expr) QueryOp.Empty obj prop
+        fst (emit_obj_get ~arg_by_ref:true env (fst expr) QueryOp.Empty obj prop
           nullflavor)
       (* passed by value *)
       | _ -> emit_expr env expr

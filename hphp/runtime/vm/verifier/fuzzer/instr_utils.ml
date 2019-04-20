@@ -35,8 +35,7 @@ let rec rebalance_stk n (req : stack) : instruct list * stack =
   if List.length req < 0 then failwith "cannot rebalance empty stack" else
   match List.hd req, List.tl req |> rebalance_stk (n - 1) with
   | "C", (buf, extra) -> ILitConst (Int (Int64.of_int 1)) :: buf, "C" :: extra
-  | "V", (buf, extra) ->
-    ILitConst (Int (Int64.of_int 1)) :: IBasic (Box) :: buf, "V" :: extra
+  | "V", _ -> failwith "not supported, V flavor being removed"
   | "U", (buf, extra) -> ILitConst NullUninit :: buf, "U" :: extra
   | _ -> [], [] (* Impossible *)
 
@@ -98,8 +97,7 @@ let stk_data : instruct -> stack_sig = function
   | IBasic PopV                            -> ["V"], []
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]
-  | IGet VGetS _
-  | IBasic Box                             -> ["C"], ["V"]
+  | IGet VGetS _                           -> ["C"], ["V"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]
   | IGet VGetL _                           -> [], ["V"]

@@ -58,7 +58,6 @@ let string_of_basic instruction =
     | PopV        -> "PopV"
     | PopU        -> "PopU"
     | Dup         -> "Dup"
-    | Box         -> "Box"
 
 let string_of_list_of_shape_fields sl =
   String.concat ~sep:" " @@ List.map ~f:SU.quote_string sl

@@ -174,7 +174,6 @@ let instr_newstructdict keys = instr (ILitConst (NewStructDict keys))
 let instr_newcol collection_type = instr (ILitConst (NewCol collection_type))
 let instr_colfromarray collection_type =
   instr (ILitConst (ColFromArray collection_type))
-let instr_box = instr (IBasic Box)
 let instr_entrynop = instr (IBasic EntryNop)
 let instr_typedvalue xs = instr (ILitConst (TypedValue xs))
 let instr_basel local mode = instr (IBase(BaseL(local, mode)))

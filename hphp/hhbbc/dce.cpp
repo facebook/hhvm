@@ -1672,7 +1672,6 @@ void dce(Env& env, const bc::BitAnd& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitNot& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitOr& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BitXor& op) { dce_default(env, op); }
-void dce(Env& env, const bc::Box& op) { dce_default(env, op); }
 void dce(Env& env, const bc::BreakTraceHint& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CastArray& op) { dce_default(env, op); }
 void dce(Env& env, const bc::CastBool& op) { dce_default(env, op); }

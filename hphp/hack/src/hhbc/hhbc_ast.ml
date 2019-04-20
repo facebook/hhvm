@@ -149,7 +149,6 @@ type instruct_basic =
   | PopV
   | PopU
   | Dup
-  | Box
 
 type typestruct_resolve_op =
   | Resolve

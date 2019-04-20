@@ -213,10 +213,6 @@ void emitVGetL(IRGS& env, int32_t id) {
   pushIncRef(env, boxed);
 }
 
-void emitBox(IRGS& env) {
-  push(env, gen(env, Box, pop(env, DataTypeGeneric)));
-}
-
 void emitUnsetL(IRGS& env, int32_t id) {
   auto const prev = ldLoc(env, id, makeExit(env), DataTypeBoxAndCountness);
   stLocRaw(env, id, fp(env), cns(env, TUninit));

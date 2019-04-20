@@ -877,11 +877,6 @@ Dup    [C:<T>]  ->  [C:<T> C:<T>]
 
   Duplicate. Duplicates the cell $1 and pushes it onto the stack.
 
-Box    [C:<T>]  ->  [V:<T>]
-
-  Box. Creates a new ref, sets the new ref to point at a copy of cell $1, and
-  pushes the ref onto the stack.
-
 CGetCUNop   [C|U:<T>]  ->  [C:<T>]
 
   Convert a cell or uninit value to a cell, no op. This is a flavor-safety only

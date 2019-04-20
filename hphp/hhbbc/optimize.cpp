@@ -195,7 +195,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
          type.strictSubtypeOf(TInitCell);
   };
   switch (op.op) {
-  case Op::Box:
   case Op::Null:
   case Op::NullUninit:
   case Op::True:

@@ -1926,7 +1926,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
 
     // unsafe: operations definitely involving boxes
     case Op::PopV:
-    case Op::Box:
     case Op::VGetL:
     case Op::VGetS:
     case Op::VGetM:

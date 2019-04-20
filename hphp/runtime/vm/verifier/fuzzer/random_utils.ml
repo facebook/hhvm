@@ -172,7 +172,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
     (fun () -> IMutator (SetL (random_local ())));
     (fun () -> IMutator (SetOpL (random_local (), random_eq_op ())));
     (fun () -> IMutator (SetOpG (random_eq_op ())));
-    (fun () -> IBasic Box);
     (fun () -> IMisc UGetCUNop);
     (fun () -> IMisc CGetCUNop);
     (fun () -> IBasic Dup);

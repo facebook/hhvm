@@ -368,12 +368,6 @@ void in(ISS& env, const bc::AssertRATStk&) {
 
 void in(ISS& env, const bc::BreakTraceHint&) { effect_free(env); }
 
-void in(ISS& env, const bc::Box&) {
-  effect_free(env);
-  popC(env);
-  push(env, TRef);
-}
-
 void in(ISS& env, const bc::CGetCUNop&) {
   effect_free(env);
   auto const t = popCU(env);

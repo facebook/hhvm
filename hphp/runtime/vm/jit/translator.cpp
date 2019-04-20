@@ -99,7 +99,6 @@ static const struct {
                     DontGuardAny,     Stack1,       OutSameAsInput1 }},
   { OpPopL,        {Stack1|Local,     Local,        OutNone         }},
   { OpDup,         {Stack1,           StackTop2,    OutSameAsInput1 }},
-  { OpBox,         {Stack1,           Stack1,       OutVInput       }},
 
   /*** 2. Literal and constant instructions ***/
 
@@ -1067,7 +1066,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   // These are instructions that are always interp-one'd, or are always no-ops.
   case Op::Nop:
   case Op::EntryNop:
-  case Op::Box:
   case Op::CGetCUNop:
   case Op::UGetCUNop:
   case Op::ClsCns:

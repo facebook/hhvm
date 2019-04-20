@@ -504,13 +504,6 @@ public:
   }
 
   ALWAYS_INLINE
-  void box() {
-    assertx(m_top != m_base);
-    assertx(!isRefType(m_top->m_type));
-    tvBox(*m_top);
-  }
-
-  ALWAYS_INLINE
   void pushUninit() {
     assertx(m_top != m_elms);
     m_top--;

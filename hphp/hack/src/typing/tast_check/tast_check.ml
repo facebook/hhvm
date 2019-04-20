@@ -12,7 +12,6 @@ open Core_kernel
 [@@@warning "+33"]
 let visitor = Tast_visitor.iter_with [
   Shape_field_check.handler;
-  Sketchy_null_check.handler;
   String_cast_check.handler;
   Tautology_check.handler;
   Truthiness_test.handler;

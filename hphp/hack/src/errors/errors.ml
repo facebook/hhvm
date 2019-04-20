@@ -2266,30 +2266,6 @@ let bad_call pos ty =
   add (Typing.err_code Typing.BadCall) pos
     ("This call is invalid, this is not a function, it is "^ty)
 
-let sketchy_null_check pos name kind =
-  let name = Option.value name ~default:"$x" in
-  add (Typing.err_code Typing.SketchyNullCheck) pos @@
-    "You are using a sketchy null check ...\n"^
-    match kind with
-    | `Coalesce ->
-      Printf.sprintf "Use %s ?? $default instead of %s ?: $default" name name
-    | `Eq ->
-      Printf.sprintf "Use %s === null instead" name
-    | `Neq ->
-      Printf.sprintf "Use %s !== null instead" name
-
-let sketchy_null_check_primitive pos name kind =
-  let name = Option.value name ~default:"$x" in
-  add (Typing.err_code Typing.SketchyNullCheckPrimitive) pos @@
-    "You are using a sketchy null check on a primitive type ...\n"^
-    match kind with
-    | `Coalesce ->
-      Printf.sprintf "Use %s ?? $default instead of %s ?: $default" name name
-    | `Eq ->
-      Printf.sprintf "Use %s === null instead" name
-    | `Neq ->
-      Printf.sprintf "Use %s !== null instead" name
-
 let extend_final extend_pos decl_pos name =
   let name = (strip_ns name) in
   add_list (Typing.err_code Typing.ExtendFinal) [

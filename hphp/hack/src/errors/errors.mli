@@ -216,8 +216,6 @@ val typing_too_many_args : Pos.t -> Pos.t -> unit
 val typing_too_few_args : Pos.t -> Pos.t -> unit
 val anonymous_recursive_call : Pos.t -> unit
 val bad_call : Pos.t -> string -> unit
-val sketchy_null_check : Pos.t -> string option -> [< `Coalesce | `Eq | `Neq] -> unit
-val sketchy_null_check_primitive : Pos.t -> string option -> [< `Coalesce | `Eq | `Neq] -> unit
 val extend_final : Pos.t -> Pos.t -> string -> unit
 val extend_sealed : Pos.t -> Pos.t -> string -> string -> string -> unit
 val extend_ppl : Pos.t -> string -> bool -> Pos.t -> string -> string -> string -> unit

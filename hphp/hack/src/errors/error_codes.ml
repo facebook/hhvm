@@ -332,8 +332,8 @@ module Typing                               = struct
   | ShapeFieldClassMismatch
   | ShapeFieldTypeMismatch
   | ShouldBeOverride
-  | SketchyNullCheck
-  | SketchyNullCheckPrimitive
+  | SketchyNullCheckDEPRECATED
+  | SketchyNullCheckPrimitiveDEPRECATED
   | SmemberNotFound
   | StaticDynamic
   | StaticOverflowDEPRECATED

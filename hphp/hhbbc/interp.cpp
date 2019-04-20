@@ -2826,15 +2826,41 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
   auto valid = true;
   auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
   auto const first = tv(topC(env));
-  if (op.arg1 == 1 && first && isValidTSType(*first, false)) {
+  if (first && isValidTSType(*first, false)) {
     auto const ts = first->m_data.parr;
-    if (canReduceToDontResolve(ts)) return reduce(env, bc::Nop {});
-    if (auto const resolved = resolveTSStatically(env, ts)) {
-      return RuntimeOption::EvalHackArrDVArrs
-        ? reduce(env, bc::PopC {}, bc::Dict  { *resolved })
-        : reduce(env, bc::PopC {}, bc::Array { *resolved });
+    // Optimize single input that does not need any combination
+    if (op.arg1 == 1) {
+      if (canReduceToDontResolve(ts)) return reduce(env);
+      if (auto const resolved = resolveTSStatically(env, ts)) {
+        return RuntimeOption::EvalHackArrDVArrs
+          ? reduce(env, bc::PopC {}, bc::Dict  { *resolved })
+          : reduce(env, bc::PopC {}, bc::Array { *resolved });
+      }
+    }
+    // Optimize double input that needs a single combination and looks of the
+    // form ?T, @T or ~T
+    if (op.arg1 == 2 && get_ts_kind(ts) == TypeStructure::Kind::T_reifiedtype) {
+      BytecodeVec instrs { bc::PopC {} };
+      auto const tv_true = gen_constant(make_tv<KindOfBoolean>(true));
+      if (ts->exists(s_like.get())) {
+        instrs.push_back(gen_constant(make_tv<KindOfString>(s_like.get())));
+        instrs.push_back(tv_true);
+        instrs.push_back(bc::AddElemC {});
+      }
+      if (ts->exists(s_nullable.get())) {
+        instrs.push_back(gen_constant(make_tv<KindOfString>(s_nullable.get())));
+        instrs.push_back(tv_true);
+        instrs.push_back(bc::AddElemC {});
+      }
+      if (ts->exists(s_soft.get())) {
+        instrs.push_back(gen_constant(make_tv<KindOfString>(s_soft.get())));
+        instrs.push_back(tv_true);
+        instrs.push_back(bc::AddElemC {});
+      }
+      return reduce(env, std::move(instrs));
     }
   }
+
   for (int i = 0; i < op.arg1; ++i) {
     auto const t = popC(env);
     valid &= t.couldBe(requiredTSType);

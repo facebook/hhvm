@@ -1,0 +1,17 @@
+bool(true)
+bool(true)
+bool(false)
+array(2) {
+  ["kind"]=>
+  int(1)
+  ["nullable"]=>
+  bool(true)
+}
+array(3) {
+  ["kind"]=>
+  int(1)
+  ["nullable"]=>
+  bool(true)
+  ["soft"]=>
+  bool(true)
+}

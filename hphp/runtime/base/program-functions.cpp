@@ -1192,17 +1192,7 @@ static int start_server(const std::string &username, int xhprof) {
   if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
 
   if (RuntimeOption::EvalEnableNuma && !getenv("HHVM_DISABLE_NUMA")) {
-#ifdef USE_JEMALLOC
-    unsigned narenas;
-    size_t mib[3];
-    size_t miblen = 3;
-    if (mallctlWrite<uint64_t, true>("epoch", 1) == 0 &&
-        mallctlRead<unsigned, true>("arenas.narenas", &narenas) == 0 &&
-        mallctlnametomib("arena.0.purge", mib, &miblen) == 0) {
-      mib[1] = size_t(narenas);
-      mallctlbymib(mib, miblen, nullptr, nullptr, nullptr, 0);
-    }
-#endif
+    purge_all();
     enable_numa(RuntimeOption::EvalEnableNumaLocal);
     BootStats::mark("enable_numa");
   }

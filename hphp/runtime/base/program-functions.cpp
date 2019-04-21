@@ -1193,9 +1193,13 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::EvalEnableNuma && !getenv("HHVM_DISABLE_NUMA")) {
     purge_all();
-    enable_numa(RuntimeOption::EvalEnableNumaLocal);
+    enable_numa();
     BootStats::mark("enable_numa");
   }
+#ifdef USE_JEMALLOC
+  // Local arenas for worker threads, created even when NUMA isn't used.
+  setup_local_arenas();
+#endif
 
   HttpServer::CheckMemAndWait(true); // Final wait
   if (readaheadThread.get()) {

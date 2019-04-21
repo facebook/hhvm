@@ -71,6 +71,8 @@ extern int low_arena_flags;
 extern int lower_arena_flags;
 extern __thread int high_arena_flags;
 
+void setup_local_arenas();
+
 #if USE_JEMALLOC_EXTENT_HOOKS
 
 // Explicit per-thread tcache for the huge arenas.
@@ -217,11 +219,9 @@ extern __thread MemBlock s_tlSpace;
 extern __thread MemBlock s_hugeRange;
 
 /*
- * enable the numa support in hhvm,
- * and determine whether threads should default to using
- * local memory.
+ * Enable the numa support in hhvm.
  */
-void enable_numa(bool local);
+void enable_numa();
 /*
  * Set the thread affinity, and the jemalloc arena for the current
  * thread.

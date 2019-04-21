@@ -170,7 +170,7 @@ void flush_thread_stack() {
 }
 
 #if !defined USE_JEMALLOC || !defined HAVE_NUMA
-void enable_numa(bool local) {}
+void enable_numa() {}
 void set_numa_binding(int node) {}
 void* mallocx_on_node(size_t size, int node, size_t align) {
   void* ret = nullptr;
@@ -216,47 +216,36 @@ static std::atomic<size_t> a0ReservedLeft(0);
 __thread int high_arena_tcache = -1;
 #endif
 
-#ifdef HAVE_NUMA
-static uint32_t base_arena;
-static bool threads_bind_local = false;
+static unsigned base_arena;
 
-void enable_numa(bool local) {
-  if (local) {
-    threads_bind_local = true;
-
-    unsigned arenas;
-    if (mallctlRead<unsigned, true>("arenas.narenas", &arenas) != 0) {
-      return;
-    }
-
-    base_arena = arenas;
-    for (int i = 0; i < numa_num_nodes; i++) {
-      int arena, ret;
-
+// Create an arena per NUMA node for use by VM worker threads. This is done even
+// when there is only one socket, or when HAVE_NUMA isn't defined. Note that it
+// throws if arena creation fails.
+void setup_local_arenas() {
+  mallctlRead<unsigned>("arenas.narenas", &base_arena); // throw upon failure
+  for (int i = 0; i < num_numa_nodes(); i++) {
+    unsigned arena = 0;
 #if USE_JEMALLOC_EXTENT_HOOKS
-      if (jemallocMetadataCanUseHuge.load() && enableNumaArenaMetadata1GPage) {
-        size_t size = sizeof(unsigned);
-        extent_hooks_t *hooks = &huge_page_metadata_hooks;
-        ret = mallctl(JEMALLOC_NEW_ARENA_CMD, &arena, &size, &hooks,
-                      sizeof(hooks));
-      } else
+    if (jemallocMetadataCanUseHuge.load() && enableNumaArenaMetadata1GPage) {
+      size_t size = sizeof(unsigned);
+      extent_hooks_t *hooks = &huge_page_metadata_hooks;
+      if (mallctl(JEMALLOC_NEW_ARENA_CMD,
+                  &arena, &size, &hooks, sizeof(hooks))) {
+        throw std::runtime_error{JEMALLOC_NEW_ARENA_CMD " failed"};
+      }
+    } else
 #endif
-      {
-        ret = mallctlRead<int, true>(JEMALLOC_NEW_ARENA_CMD, &arena);
-      }
-
-      if (ret != 0) {
-        return;
-      }
-      if (arena != arenas) {
-        return;
-      }
-      arenas++;
+    {
+      mallctlRead<unsigned>(JEMALLOC_NEW_ARENA_CMD, &arena);
     }
+    always_assert(arena == base_arena + i);
   }
+}
 
+#ifdef HAVE_NUMA
+
+void enable_numa() {
   if (numa_available() < 0) return;
-
   /*
    * libnuma is only partially aware of taskset. If on entry,
    * you have completely disabled a node via taskset, the node
@@ -288,23 +277,18 @@ void enable_numa(bool local) {
 }
 
 void set_numa_binding(int node) {
-  if (node < 0) return;
-
+  if (node < 0) return;                 // thread not created from JobQueue
   s_numaNode = node;
+  unsigned arena = base_arena + node;
+  mallctlWrite("thread.arena", arena);
 
   if (use_numa) {
     numa_sched_setaffinity(0, node_to_cpu_mask[node]);
-    if (threads_bind_local) {
-      numa_set_interleave_mask(numa_no_nodes_ptr);
-      bitmask* nodes = numa_allocate_nodemask();
-      numa_bitmask_setbit(nodes, node);
-      numa_set_membind(nodes);
-      numa_bitmask_free(nodes);
-    }
-  }
-  if (threads_bind_local) {
-    int arena = base_arena + node;
-    mallctlWrite("thread.arena", arena);
+    numa_set_interleave_mask(numa_no_nodes_ptr);
+    bitmask* nodes = numa_allocate_nodemask();
+    numa_bitmask_setbit(nodes, node);
+    numa_set_membind(nodes);
+    numa_bitmask_free(nodes);
   }
 }
 

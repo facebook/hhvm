@@ -634,9 +634,7 @@ struct StackElms {
           std::string("VM stack initialization failed: ") +
                       folly::errnoStr(errno).c_str());
       }
-
       madvise(m_elms, algnSz, MADV_DONTNEED);
-      numa_bind_to(m_elms, algnSz, s_numaNode);
     }
     return m_elms;
   }

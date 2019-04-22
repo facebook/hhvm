@@ -365,6 +365,8 @@ let reserved_keyword_as_class_name class_name =
   "Cannot use '" ^ class_name ^ "' as class name as it is reserved"
 let xhp_class_multiple_category_decls =
   "An XHP class cannot have multiple category declarations"
+let xhp_class_multiple_children_decls =
+  "An XHP class cannot have multiple children declarations"
 let inout_param_in_generator =
   "Parameters may not be marked inout on generators"
 let inout_param_in_async_generator =

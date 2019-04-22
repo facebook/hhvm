@@ -3107,6 +3107,35 @@ let class_reified_param_errors env node errors =
 let attr_spec_contains_sealed node =
   attribute_specification_contains node SN.UserAttributes.uaSealed
 
+(* If there's more than one XHP category, report an error on the last one. *)
+let duplicate_xhp_category_errors (elts : Syntax.t list) errors =
+  let category_nodes = List.filter elts ~f:(fun elt ->
+    match syntax elt with
+    | XHPCategoryDeclaration _ -> true
+    | _ -> false)
+  in
+  if List.length category_nodes > 1 then
+    let node = List.last_exn category_nodes in
+    let err = make_error_from_node node SyntaxError.xhp_class_multiple_category_decls in
+    err :: errors
+  else
+    errors
+
+(* If there's more than one XHP children declaration, report an error
+   on the last one. *)
+let duplicate_xhp_children_errors (elts : Syntax.t list) errors =
+  let child_nodes = List.filter elts ~f:(fun elt ->
+    match syntax elt with
+    | XHPChildrenDeclaration _ -> true
+    | _ -> false)
+  in
+  if List.length child_nodes > 1 then
+    let node = List.last_exn child_nodes in
+    let err = make_error_from_node node SyntaxError.xhp_class_multiple_children_decls in
+    err :: errors
+  else
+    errors
+
 let classish_errors env node namespace_name names errors =
   match syntax node with
   | ClassishDeclaration cd ->
@@ -3210,14 +3239,6 @@ let classish_errors env node namespace_name names errors =
         let has_private_method =
           List.exists methods
             ~f:(methodish_modifier_contains_helper is_private) in
-        let has_multiple_xhp_category_decls =
-          let cats = List.filter methods ~f:(fun m ->
-            match syntax m with
-            | XHPCategoryDeclaration _ -> true
-            | _ -> false) in
-          match cats with
-          | [] | [_] -> false
-          | _ -> true in
         let errors =
           if has_abstract_fn &&
              is_token_kind cd.classish_keyword TokenKind.Class &&
@@ -3231,11 +3252,8 @@ let classish_errors env node namespace_name names errors =
           then make_error_from_node node
             SyntaxError.interface_has_private_method :: errors
           else errors in
-        let errors =
-          if has_multiple_xhp_category_decls
-          then make_error_from_node node
-            SyntaxError.xhp_class_multiple_category_decls :: errors
-          else errors in
+        let errors = duplicate_xhp_category_errors methods errors in
+        let errors = duplicate_xhp_children_errors methods errors in
         errors
       | _ -> errors in
     let names, errors =

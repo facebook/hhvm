@@ -1974,6 +1974,7 @@ and pBlock : block parser = fun node env ->
    let stmt = pStmtUnsafe node env in
    fix_last [] stmt
 and pFunctionBody : block parser = fun node env ->
+  with_new_nonconcurrent_scope env (fun () ->
   match syntax node with
   | Missing -> []
   | CompoundStatement
@@ -1988,7 +1989,7 @@ and pFunctionBody : block parser = fun node env ->
     env.saw_yield <- true;
     [ Pos.none, Noop ]
   | CompoundStatement _ ->
-    let block = with_new_nonconcurrent_scope env (fun () -> pBlock node env) in
+    let block = pBlock node env in
     if not env.top_level_statements
     && (  env.fi_mode = FileInfo.Mdecl && not env.codegen
        || env.quick_mode)
@@ -1998,7 +1999,7 @@ and pFunctionBody : block parser = fun node env ->
     [lift_awaits_in_statement env Pos.none (fun () ->
       let p, r = pExpr node env in
       p, Return (Some (p, r))
-    )]
+    )])
 and pStmtUnsafe : stmt list parser = fun node env ->
   let stmt = pStmt node env in
   match leading_token node with

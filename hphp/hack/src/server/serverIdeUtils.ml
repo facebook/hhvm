@@ -15,7 +15,7 @@ let make_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.push_stack();
   Fixmes.DECL_HH_FIXMES.LocalChanges.push_stack();
   File_heap.FileHeap.LocalChanges.push_stack();
-  Parser_heap.ParserHeap.LocalChanges.push_stack();
+  Ast_provider.local_changes_push_stack();
 
   Ide_parser_cache.activate ();
 
@@ -41,7 +41,7 @@ let revert_local_changes () =
   Fixmes.HH_FIXMES.LocalChanges.pop_stack();
   Fixmes.DECL_HH_FIXMES.LocalChanges.pop_stack();
   File_heap.FileHeap.LocalChanges.pop_stack();
-  Parser_heap.ParserHeap.LocalChanges.pop_stack();
+  Ast_provider.local_changes_pop_stack();
 
   Ide_parser_cache.deactivate ();
 
@@ -102,7 +102,7 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
                     } in
     let { FileInfo.n_funs; n_classes; n_types; n_consts; } =
       FileInfo.simplify file_info in
-    Parser_heap.ParserHeap.add path (ast, Parser_heap.Full);
+    Ast_provider.provide_ast_hint path ast Ast_provider.Full;
     NamingGlobal.remove_decls
       ~funs:n_funs
       ~classes:n_classes

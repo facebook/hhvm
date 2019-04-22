@@ -232,19 +232,19 @@ let parsing genv env to_check ~stop_at_errors =
       to_check in
 
   File_heap.FileHeap.remove_batch disk_files;
-  Parser_heap.ParserHeap.remove_batch disk_files;
+  Ast_provider.remove_batch disk_files;
   Fixmes.HH_FIXMES.remove_batch disk_files;
   Fixmes.DECL_HH_FIXMES.remove_batch disk_files;
 
   if stop_at_errors then begin
     File_heap.FileHeap.LocalChanges.push_stack ();
-    Parser_heap.ParserHeap.LocalChanges.push_stack ();
+    Ast_provider.local_changes_push_stack ();
     Fixmes.HH_FIXMES.LocalChanges.push_stack ();
     Fixmes.DECL_HH_FIXMES.LocalChanges.push_stack ();
 
   end;
   (* Do not remove ide files from file heap *)
-  Parser_heap.ParserHeap.remove_batch ide_files;
+  Ast_provider.remove_batch ide_files;
   Fixmes.HH_FIXMES.remove_batch ide_files;
   Fixmes.DECL_HH_FIXMES.remove_batch ide_files;
 
@@ -271,21 +271,21 @@ let parsing genv env to_check ~stop_at_errors =
       Relative_path.Set.diff ide_files ide_failed_parsing in
 
     File_heap.FileHeap.LocalChanges.revert_batch failed_parsing;
-    Parser_heap.ParserHeap.LocalChanges.revert_batch ide_failed_parsing;
+    Ast_provider.local_changes_revert_batch ide_failed_parsing;
     Fixmes.HH_FIXMES.LocalChanges.revert_batch ide_failed_parsing;
     Fixmes.DECL_HH_FIXMES.LocalChanges.revert_batch ide_failed_parsing;
 
 
     File_heap.FileHeap.LocalChanges.commit_batch ide_success_parsing;
-    Parser_heap.ParserHeap.LocalChanges.commit_batch ide_success_parsing;
+    Ast_provider.local_changes_commit_batch ide_success_parsing;
     Fixmes.HH_FIXMES.LocalChanges.commit_batch ide_success_parsing;
     Fixmes.DECL_HH_FIXMES.LocalChanges.commit_batch ide_success_parsing;
-    Parser_heap.ParserHeap.LocalChanges.commit_batch disk_files;
+    Ast_provider.local_changes_commit_batch disk_files;
     Fixmes.HH_FIXMES.LocalChanges.commit_batch disk_files;
     Fixmes.DECL_HH_FIXMES.LocalChanges.commit_batch disk_files;
 
     File_heap.FileHeap.LocalChanges.pop_stack ();
-    Parser_heap.ParserHeap.LocalChanges.pop_stack ();
+    Ast_provider.local_changes_pop_stack ();
     Fixmes.HH_FIXMES.LocalChanges.pop_stack ();
     Fixmes.DECL_HH_FIXMES.LocalChanges.pop_stack ();
 

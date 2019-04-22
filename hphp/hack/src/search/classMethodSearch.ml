@@ -33,7 +33,7 @@ let query_class_methods
     end else true
   in
   get_class_definition_file class_name
-  >>= (fun file -> Parser_heap.find_class_in_file file class_name)
+  >>= (fun file -> Ast_provider.find_class_in_file file class_name)
   >>| (fun class_ -> class_.Ast.c_body)
   >>| List.filter_map ~f:begin fun class_elt ->
     match class_elt with

@@ -38,10 +38,7 @@ let highlight_symbol tcopt (line, char) path file_info symbol =
          tcopt target [] [(path, file_info)] in
       List.rev (List.map results snd)
     | None when symbol.SymbolOccurrence.type_ = SymbolOccurrence.LocalVar ->
-      begin match Parser_heap.ParserHeap.get path with
-      | Some (ast, _) -> ServerFindLocals.go_from_ast ast line char
-      | None -> []
-      end
+      ServerFindLocals.go_from_ast (Ast_provider.get_ast path) line char
     | None -> []
   in
   List.map res Ide_api_types.pos_to_range

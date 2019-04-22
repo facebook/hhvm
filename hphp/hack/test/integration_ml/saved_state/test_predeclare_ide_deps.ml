@@ -64,7 +64,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
 
   (* Check that we didn't pollute parser heaps with anything *)
   assert (not @@ File_heap.FileHeap.mem foo_path);
-  assert (not @@ Parser_heap.ParserHeap.mem foo_path);
+  assert (not @@ Ast_provider.has_for_test foo_path);
 
   (* Check that we did populate declaration heaps *)
   assert (Decl_heap.Funs.mem "\\foo");

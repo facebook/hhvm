@@ -39,7 +39,7 @@ let get_fun_return_ty tcopt fun_name =
   in
   let file = map pos FileInfo.get_pos_filename in
   let funopt =
-    map file (fun file -> Parser_heap.find_fun_in_file file fun_name)
+    map file (fun file -> Ast_provider.find_fun_in_file file fun_name)
   in
   let f = join @@ map funopt (of_option ~error:"Could not find function") in
   let f = map f Naming.fun_ in
@@ -56,7 +56,7 @@ let get_meth_return_ty tcopt class_name meth_name =
   in
   let file = map pos FileInfo.get_pos_filename in
   let classopt =
-     map file (fun file -> Parser_heap.find_class_in_file file class_name)
+     map file (fun file -> Ast_provider.find_class_in_file file class_name)
   in
   let c = join @@ map classopt (of_option ~error:"Could not find class") in
   let c = map c Naming.class_ in

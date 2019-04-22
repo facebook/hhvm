@@ -90,11 +90,8 @@ let process_types_and_funs ~process tcopt def =
 let get_inferred_types tcopt fnl ~process =
   List.iter fnl
     ~f:begin fun fn ->
-      match Parser_heap.ParserHeap.get fn with
-      | None -> ()
-      | Some (ast, _) ->
-        List.iter (Naming.program ast)
-          (process_types_and_funs ~process tcopt)
+      List.iter (Naming.program (Ast_provider.get_ast fn))
+        (process_types_and_funs ~process tcopt)
     end
 
 let get_matching_types tcopt def name =

@@ -56,8 +56,8 @@ let process_parse_result
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
     (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
     if quick then File_heap.FileHeap.write_around fn content;
-    let mode = if quick then Parser_heap.Decl else Parser_heap.Full in
-    Parser_heap.ParserHeap.write_around fn (ast, mode);
+    let mode = if quick then Ast_provider.Decl else Ast_provider.Full in
+    Ast_provider.provide_ast_hint fn ast mode;
     let comments = None in
     let hash = Some (Ast_utils.generate_ast_decl_hash ast) in
     let defs =

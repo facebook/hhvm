@@ -35,7 +35,7 @@ let neutral = Errors.empty
 (*****************************************************************************)
 
 let type_fun opts fn x =
-  match Parser_heap.find_fun_in_file ~full:true fn x with
+  match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
     let fun_ = Naming.fun_ f in
     Nast_check.def (Nast.Fun fun_);
@@ -46,7 +46,7 @@ let type_fun opts fn x =
   | None -> None
 
 let type_class opts fn x =
-  match Parser_heap.find_class_in_file ~full:true fn x with
+  match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
     let class_ = Naming.class_ cls in
     Nast_check.def (Nast.Class class_);
@@ -59,7 +59,7 @@ let type_class opts fn x =
   | None -> None
 
 let check_typedef opts fn x =
-  match Parser_heap.find_typedef_in_file ~full:true fn x with
+  match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
     let typedef = Naming.typedef t in
     Nast_check.def (Nast.Typedef typedef);
@@ -71,7 +71,7 @@ let check_typedef opts fn x =
   | None -> None
 
 let check_const opts fn x =
-  match Parser_heap.find_const_in_file ~full:true fn x with
+  match Ast_provider.find_gconst_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
     let cst = Naming.global_const cst in
@@ -116,7 +116,7 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
 let check_files dynamic_view_files opts errors progress ~memory_cap =
   SharedMem.invalidate_caches();
   File_heap.FileHeap.LocalChanges.push_stack ();
-  Parser_heap.ParserHeap.LocalChanges.push_stack ();
+  Ast_provider.local_changes_push_stack ();
   let check_file =
     if !Utils.profile
     then (fun acc fn ->
@@ -158,7 +158,7 @@ let check_files dynamic_view_files opts errors progress ~memory_cap =
   in
   let result = check_or_exit errors progress in
   TypingLogger.flush_buffers ();
-  Parser_heap.ParserHeap.LocalChanges.pop_stack ();
+  Ast_provider.local_changes_pop_stack ();
   File_heap.FileHeap.LocalChanges.pop_stack ();
   result
 

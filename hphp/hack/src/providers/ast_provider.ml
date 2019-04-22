@@ -8,7 +8,6 @@
  *)
 
 open Core_kernel
-module Lowerer = Full_fidelity_ast
 
 (*****************************************************************************)
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
@@ -30,8 +29,6 @@ module LocalParserCache = SharedMem.LocalCache (Relative_path.S) (struct
     let prefix = Prefix.make()
     let description = "ParserLocal"
   end)
-
-let parse_failure_scuba_table = Scuba.Table.of_name "hh_parse_failure"
 
 let get_from_local_cache ~full file_name =
   let fn = Relative_path.to_absolute file_name in
@@ -96,7 +93,7 @@ let get_typedef defs name =
   end in
   get None defs
 
-let get_const defs name =
+let get_gconst defs name =
   let rec get acc defs =
   List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
@@ -106,19 +103,10 @@ let get_const defs name =
   end in
   get None defs
 
-(* Get top-level statements from definitions *)
-let rec get_statements defs =
-  List.concat @@ List.map defs begin fun def ->
-    match def with
-    | Ast.Stmt st -> [st]
-    | Ast.Namespace(_, defs) -> get_statements defs
-    | _ -> []
-  end
-
 (* Get an AST directly from the parser heap. Will return empty AProgram
    if the file does not exist
 *)
-let get_from_parser_heap ?(full = false) file_name =
+let get_ast ?(full = false) file_name =
   match ParserHeap.get file_name with
     | None ->
       let ast = get_from_local_cache ~full file_name in
@@ -132,13 +120,38 @@ let get_from_parser_heap ?(full = false) file_name =
     | Some (defs, _) -> defs
 
 let find_class_in_file ?(full = false) file_name class_name =
-  get_class (get_from_parser_heap ~full file_name) class_name
+  get_class (get_ast ~full file_name) class_name
 
 let find_fun_in_file ?(full = false) file_name fun_name =
-  get_fun (get_from_parser_heap ~full file_name) fun_name
+  get_fun (get_ast ~full file_name) fun_name
 
 let find_typedef_in_file ?(full = false) file_name name =
-  get_typedef (get_from_parser_heap ~full file_name) name
+  get_typedef (get_ast ~full file_name) name
 
-let find_const_in_file ?(full = false) file_name name =
-  get_const (get_from_parser_heap ~full file_name) name
+let find_gconst_in_file ?(full = false) file_name name =
+  get_gconst (get_ast ~full file_name) name
+
+let local_changes_push_stack () =
+  ParserHeap.LocalChanges.push_stack ()
+
+let local_changes_pop_stack () =
+  ParserHeap.LocalChanges.pop_stack ()
+
+let local_changes_commit_batch paths =
+  ParserHeap.LocalChanges.commit_batch paths
+
+let local_changes_revert_batch paths =
+  ParserHeap.LocalChanges.revert_batch paths
+
+let provide_ast_hint
+    (path: Relative_path.t)
+    (program: Ast.program)
+    (parse_type: parse_type)
+    : unit =
+  ParserHeap.write_around path (program, parse_type)
+
+let remove_batch paths =
+  ParserHeap.remove_batch paths
+
+let has_for_test (path: Relative_path.t) : bool =
+  ParserHeap.mem path

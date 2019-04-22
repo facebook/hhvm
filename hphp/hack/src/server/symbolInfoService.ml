@@ -14,22 +14,18 @@ open ServerCommandTypes.Symbol_info_service
 
 let recheck_naming filename_l =
   List.iter filename_l begin fun file ->
-    match Parser_heap.ParserHeap.get file with
-    | Some (ast, _) -> begin
-        Errors.ignore_ begin fun () ->
-          (* We only need to name to find references to locals *)
-          List.iter ast begin function
-            | Ast.Fun f ->
-                let _ = Naming.fun_ f in
-                ()
-            | Ast.Class c ->
-                let _ = Naming.class_ c in
-                ()
-            | _ -> ()
-          end
-        end
+    Errors.ignore_ begin fun () ->
+      (* We only need to name to find references to locals *)
+      List.iter (Ast_provider.get_ast file) begin function
+        | Ast.Fun f ->
+            let _ = Naming.fun_ f in
+            ()
+        | Ast.Class c ->
+            let _ = Naming.class_ c in
+            ()
+        | _ -> ()
       end
-    | None -> () (* Do nothing if the file is not in parser heap *)
+    end
   end
 
 let helper tcopt acc filetuple_l  =

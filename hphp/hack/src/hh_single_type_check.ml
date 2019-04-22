@@ -498,7 +498,7 @@ let parse_options () =
 
 let compute_least_type tcopt fn =
   let tenv = Typing_infer_return.typing_env_from_file tcopt fn in
-  Option.iter (Parser_heap.find_fun_in_file fn "\\test")
+  Option.iter (Ast_provider.find_fun_in_file fn "\\test")
     ~f:begin fun f ->
       let f = Naming.fun_ f in
       let { Nast.fb_ast; _} = Typing_naming_body.func_body f in
@@ -616,7 +616,7 @@ let check_file opts errors files_info =
 
 let create_nasts files_info =
   let build_nast fn _ =
-    let ast = Parser_heap.get_from_parser_heap ~full:true fn in
+    let ast = Ast_provider.get_ast ~full:true fn in
     Naming.program ast
   in Relative_path.Map.mapi ~f:(build_nast) files_info
 
@@ -635,7 +635,7 @@ let parse_name_and_decl popt files_contents =
         let ast = if ParserOptions.deregister_php_stdlib popt then
           Ast_utils.deregister_ignored_attributes ast else ast in
 
-        Parser_heap.ParserHeap.add fn (ast, Parser_heap.Full);
+        Ast_provider.provide_ast_hint fn ast Ast_provider.Full;
         (* If the feature is turned on, deregister functions with attribute
         __PHPStdLib. This does it for all functions, not just hhi files *)
         let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
@@ -744,7 +744,7 @@ let test_decl_compare filenames popt files_contents files_info =
 
   let typedefs1, funs1, classes1 = get_decls defs in
   (* For the purpose of this test, we can ignore other heaps *)
-  Parser_heap.ParserHeap.remove_batch files;
+  Ast_provider.remove_batch files;
 
   let get_classes path =
     match Relative_path.Map.get files_info path with

@@ -159,7 +159,7 @@ let handlers = {
     S.on_fun = collect_in_decl#on_fun_
   };
   S.get_state = begin fun fn ->
-    Parser_heap.get_from_parser_heap ~full:true fn
+    Ast_provider.get_ast ~full:true fn
   end;
   S.map_result = begin fun ast refs ->
     Results.elements refs

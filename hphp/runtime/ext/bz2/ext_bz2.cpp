@@ -15,6 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/ext/bz2/bz2-file.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/base/stream-wrapper.h"
@@ -272,30 +274,61 @@ struct ChunkedBunzipper {
     }
     m_bzstream.next_in = (char *) chunk.data();
     m_bzstream.avail_in = chunk.length();
-    int factor = 0;
-    unsigned int maxfactor = 16;
-    do {
-      int buffer_length = 1024 * 1024 * (1 << factor);
-      String buffer(buffer_length, ReserveString);
-      char* raw = buffer.mutableData();
+    unsigned int offset = 0;
+    String result(1024 * 1024, ReserveString);
+    int status;
+    bool completed = false;
+    for (int i = 0; i < 20; i++) {
+      char* raw = result.mutableData() + offset;
+      unsigned int avail_len = result.capacity() - offset;
       m_bzstream.next_out = raw;
-      m_bzstream.avail_out = buffer_length;
+      m_bzstream.avail_out = avail_len;
 
-      int status = BZ2_bzDecompress(&m_bzstream);
-      if (status == BZ_STREAM_END || status == BZ_OK) {
-        if (status == BZ_STREAM_END) {
-          m_eof = true;
+      status = BZ2_bzDecompress(&m_bzstream);
+      if (BZ_STREAM_END == status || BZ_OK == status) {
+        unsigned int produced = avail_len - m_bzstream.avail_out;
+        offset += produced;
+        result.setSize(offset);
+        // Unlike zlib, bz2 doesn't always try to fill the output buffer
+        // If the status is BZ_OK, we have to keep looping
+        if (!produced || BZ_STREAM_END == status) {
+          completed = true;
+          break;
         }
-        int64_t produced = buffer_length - m_bzstream.avail_out;
-        if (produced) {
-          buffer.shrink(produced);
-          return buffer;
+        // If less than half available space was used in this loop, don't resize
+        if (avail_len < produced * 2) {
+          result.reserve(result.capacity() + 1);  // bump to next allocation size
         }
+      } else {
+        m_eof = true;
+        BZ2_bzDecompressEnd(&m_bzstream);
+        throw_object(
+          "Exception",
+          make_vec_array(folly::sformat("bz2 error status={}", status))
+        );
         return empty_string();
       }
-    } while (++factor < maxfactor);
-    raise_warning("Failed to extract chunk");
-    return empty_string();
+    }
+
+    if (BZ_STREAM_END == status) {
+      m_eof = true;
+      BZ2_bzDecompressEnd(&m_bzstream);
+    }
+    if (!completed) {
+      throw_object(
+        "Exception",
+        make_vec_array("inflate failed: output too large")
+      );
+      return empty_string();
+    }
+    return result;
+  }
+
+  void close() {
+    if (!m_eof) {
+      m_eof = true;
+      BZ2_bzDecompressEnd(&m_bzstream);
+    }
   }
 
  private:
@@ -323,6 +356,12 @@ String HHVM_METHOD(ChunkedBunzipper,
   return data->inflateChunk(chunk);
 }
 
+void HHVM_METHOD(ChunkedBunzipper, close) {
+  FETCH_CHUNKED_BUNZIPPER(data, this_);
+  assertx(data);
+  return data->close();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct bz2Extension final : Extension {
@@ -348,6 +387,8 @@ struct bz2Extension final : Extension {
                   HHVM_MN(ChunkedBunzipper, eof));
     HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, inflateChunk,
                   HHVM_MN(ChunkedBunzipper, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedBunzipper, close,
+                  HHVM_MN(ChunkedBunzipper, close));
     Native::registerNativeDataInfo<ChunkedBunzipper>(
       s_SystemLib_ChunkedBunzipper.get());
 

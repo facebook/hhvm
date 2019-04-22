@@ -150,5 +150,8 @@ class ChunkedBunzipper {
 
   <<__Native>>
   public function inflateChunk(string $chunk): string;
+
+  <<__Native>>
+  public function close(): void;
 }
 }

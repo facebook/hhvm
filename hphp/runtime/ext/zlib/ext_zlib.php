@@ -368,6 +368,9 @@ class ChunkedInflator {
 
   <<__Native>>
   public function inflateChunk(string $chunk): string;
+
+  <<__Native>>
+  public function close(): void;
 }
 
 <<__NativeData("__SystemLib\\ChunkedGunzipper")>>
@@ -377,5 +380,8 @@ class ChunkedGunzipper {
 
   <<__Native>>
   public function inflateChunk(string $chunk): string;
+
+  <<__Native>>
+  public function close(): void;
 }
 }

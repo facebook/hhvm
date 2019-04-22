@@ -16,6 +16,7 @@
 */
 
 #include "hphp/runtime/ext/zlib/ext_zlib.h"
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"
@@ -33,6 +34,7 @@
 #include <folly/String.h>
 #include <memory>
 #include <algorithm>
+#include <vector>
 
 #define PHP_ZLIB_MODIFIER 1000
 
@@ -468,30 +470,68 @@ struct ChunkedDecompressor {
     }
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();
-    int factor = chunk.length() < 128 * 1024 * 1024 ? 4 : 2;
-    unsigned int maxfactor = 16;
-    do {
-      int buffer_length = chunk.length() * (1 << factor);
-      String buffer(buffer_length, ReserveString);
-      char* raw = buffer.mutableData();
+    unsigned int offset = 0;
+    unsigned int base_length = chunk.length() * 8;
+    String result(base_length, ReserveString);
+    int status;
+    bool completed = false;
+    for (int i = 0; i < 20; i++) {
+      char* raw = result.mutableData() + offset;
       m_zstream.next_out = (Bytef*) raw;
-      m_zstream.avail_out = buffer_length;
-
-      int status = inflate(&m_zstream, Z_SYNC_FLUSH);
+      m_zstream.avail_out = result.capacity() - offset;
+      status = inflate(&m_zstream, Z_SYNC_FLUSH);
       if (status == Z_STREAM_END || status == Z_OK) {
         if (status == Z_STREAM_END) {
           m_eof = true;
         }
-        int64_t produced = buffer_length - m_zstream.avail_out;
-        if (produced) {
-          buffer.shrink(produced);
-          return buffer;
+        unsigned int produced = result.capacity() - offset - m_zstream.avail_out;
+        offset += produced;
+        result.setSize(offset);
+        // from zlib doc https://www.zlib.net/manual.html
+        // "if inflate returns Z_OK and with zero avail_out, it must be called
+        // again after making room in the output buffer because there might be
+        // more output pending"
+        if (m_zstream.avail_out > 0) {
+          completed = true;
+          break;
         }
+        result.reserve(result.capacity() + 1);  // bump to next allocation size
+      } else {
+        m_eof = true;
+        inflateEnd(&m_zstream);
+        throw_object(
+          "Exception",
+          make_vec_array(
+            folly::sformat("zlib error status={} msg=\"{}\"",
+              status,
+              m_zstream.msg
+            )
+          )
+        );
         return empty_string();
       }
-    } while (++factor < maxfactor);
-    raise_warning("Failed to extract chunk");
-    return empty_string();
+    }
+
+    if (Z_STREAM_END == status) {
+      m_eof = true;
+      inflateEnd(&m_zstream);
+    }
+    if (!completed) {
+      // output too large
+      throw_object(
+        "Exception",
+        make_vec_array("inflate failed: output too large")
+      );
+      return empty_string();
+    }
+    return result;
+  }
+
+  void close() {
+    if (!m_eof) {
+      m_eof = true;
+      inflateEnd(&m_zstream);
+    }
   }
 
  private:
@@ -527,6 +567,12 @@ String HHVM_METHOD(ChunkedInflator,
   return data->inflateChunk(chunk);
 }
 
+void HHVM_METHOD(ChunkedInflator, close) {
+  FETCH_CHUNKED_INFLATOR(data, this_);
+  assertx(data);
+  return data->close();
+}
+
 #define FETCH_CHUNKED_GUNZIPPER(dest, src) \
   auto dest = Native::data<ChunkedGunzipper>(src);
 
@@ -542,6 +588,12 @@ String HHVM_METHOD(ChunkedGunzipper,
   FETCH_CHUNKED_GUNZIPPER(data, this_);
   assertx(data);
   return data->inflateChunk(chunk);
+}
+
+void HHVM_METHOD(ChunkedGunzipper, close) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->close();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -597,8 +649,12 @@ struct ZlibExtension final : Extension {
                   HHVM_MN(ChunkedInflator, inflateChunk));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, eof,
                   HHVM_MN(ChunkedGunzipper, eof));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, close,
+                  HHVM_MN(ChunkedGunzipper, close));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, inflateChunk,
                   HHVM_MN(ChunkedGunzipper, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, close,
+                  HHVM_MN(ChunkedGunzipper, close));
 
     Native::registerNativeDataInfo<ChunkedInflator>(
       s_SystemLib_ChunkedInflator.get());

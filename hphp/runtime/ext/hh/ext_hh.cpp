@@ -579,6 +579,26 @@ TypedValue HHVM_FUNCTION(process_event_stats, StringArg event) {
   return tvReturn(from_stats(rqtrace::process_stats_for(event->data())));
 }
 
+int64_t HHVM_FUNCTION(get_request_count) {
+  return requestCount();
+}
+
+Array HHVM_FUNCTION(get_compiled_units, int64_t kind) {
+  auto const& units = g_context.getNoCheck()->m_evaledFiles;
+  KeysetInit init{units.size()};
+  for (auto& u : units) {
+    switch (u.second.flags) {
+    case FileLoadFlags::kDup:     break;
+    case FileLoadFlags::kHitMem:  break;
+    case FileLoadFlags::kWaited:  if (kind < 2) break;
+    case FileLoadFlags::kHitDisk: if (kind < 1) break;
+    case FileLoadFlags::kCompiled:
+      init.add(const_cast<StringData*>(u.first));
+    }
+  }
+  return init.toArray();
+}
+
 }
 
 static struct HHExtension final : Extension {
@@ -597,6 +617,8 @@ static struct HHExtension final : Extension {
     HHVM_NAMED_FE(HH\\clear_instance_memoization,
                   HHVM_FN(clear_instance_memoization));
     HHVM_NAMED_FE(HH\\set_frame_metadata, HHVM_FN(set_frame_metadata));
+    HHVM_NAMED_FE(HH\\get_request_count, HHVM_FN(get_request_count));
+    HHVM_NAMED_FE(HH\\get_compiled_units, HHVM_FN(get_compiled_units));
 
     HHVM_NAMED_FE(HH\\rqtrace\\is_enabled, HHVM_FN(is_enabled));
     HHVM_NAMED_FE(HH\\rqtrace\\force_enable, HHVM_FN(force_enable));

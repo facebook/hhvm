@@ -124,6 +124,14 @@ private:
   bool m_throwAllErrors;
 };
 
+enum class FileLoadFlags {
+  kDup,
+  kHitMem,
+  kWaited,
+  kHitDisk,
+  kCompiled
+};
+
 using InvokeArgs = folly::Range<const TypedValue*>;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -588,6 +596,7 @@ public:
     Unit* unit;
     time_t ts_sec; // timestamp seconds
     unsigned long ts_nsec; // timestamp nanoseconds (or 0 if ns not supported)
+    FileLoadFlags flags;
   };
   req::fast_map<const StringData*, FileInfo, string_data_hash, string_data_same>
     m_evaledFiles;

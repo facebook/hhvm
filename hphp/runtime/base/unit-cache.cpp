@@ -325,23 +325,27 @@ CachedUnit createUnitFromString(const char* path,
                                 Unit** releaseUnit,
                                 OptLog& ent,
                                 const Native::FuncTable& nativeFuncs,
-                                const RepoOptions& options) {
+                                const RepoOptions& options,
+                                FileLoadFlags& flags) {
   auto const sha1 = SHA1{mangleUnitSha1(string_sha1(contents.slice()),
                                         options)};
   // Try the repo; if it's not already there, invoke the compiler.
   if (auto unit = Repo::get().loadUnit(path, sha1, nativeFuncs)) {
+    flags = FileLoadFlags::kHitDisk;
     return CachedUnit { unit.release(), rds::allocBit() };
   }
   LogTimer compileTimer("compile_ms", ent);
   rqtrace::EventGuard trace{"COMPILE_UNIT"};
   trace.annotate("file_size", folly::to<std::string>(contents.size()));
+  flags = FileLoadFlags::kCompiled;
   auto const unit = compile_file(contents.data(), contents.size(), sha1, path,
                                  nativeFuncs, options, releaseUnit);
   return CachedUnit { unit, rds::allocBit() };
 }
 
 CachedUnit createUnitFromUrl(const StringData* const requestedPath,
-                             const Native::FuncTable& nativeFuncs) {
+                             const Native::FuncTable& nativeFuncs,
+                             FileLoadFlags& flags) {
   auto const w = Stream::getWrapperFromURI(StrNR(requestedPath));
   StringBuffer sb;
   {
@@ -357,18 +361,19 @@ CachedUnit createUnitFromUrl(const StringData* const requestedPath,
   }
   OptLog ent;
   return createUnitFromString(requestedPath->data(), sb.detach(), nullptr, ent,
-                              nativeFuncs, RepoOptions::defaults());
+                              nativeFuncs, RepoOptions::defaults(), flags);
 }
 
 CachedUnit createUnitFromFile(const StringData* const path,
                               Unit** releaseUnit, Stream::Wrapper* w,
                               OptLog& ent,
                               const Native::FuncTable& nativeFuncs,
-                              const RepoOptions& options) {
+                              const RepoOptions& options,
+                              FileLoadFlags& flags) {
   auto const contents = readFileAsString(w, path);
   return contents
     ? createUnitFromString(path->data(), *contents, releaseUnit, ent,
-                           nativeFuncs, options)
+                           nativeFuncs, options, flags)
     : CachedUnit{};
 }
 
@@ -436,12 +441,13 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
                                const struct stat* statInfo,
                                OptLog& ent,
                                const Native::FuncTable& nativeFuncs,
-                               const RepoOptions& options) {
+                               const RepoOptions& options,
+                               FileLoadFlags& flags) {
   LogTimer loadTime("load_ms", ent);
   if (strstr(requestedPath->data(), "://") != nullptr) {
     // URL-based units are not currently cached in memory, but the Repo still
     // caches them on disk.
-    return createUnitFromUrl(requestedPath, nativeFuncs);
+    return createUnitFromUrl(requestedPath, nativeFuncs, flags);
   }
 
   rqtrace::EventGuard trace{"WRITE_UNIT"};
@@ -501,6 +507,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
     auto& cachedUnit = rpathAcc->second.cachedUnit;
     if (auto const tmp = cachedUnit.copy()) {
       if (!isChanged(tmp, statInfo, options)) {
+        flags = FileLoadFlags::kHitMem;
         if (ent) ent->setStr("type", "cache_hit_readlock");
         return tmp;
       }
@@ -511,6 +518,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
       if (auto const tmp = cachedUnit.copy()) {
         if (!isChanged(tmp, statInfo, options)) {
           cachedUnit.unlock();
+          flags = FileLoadFlags::kWaited;
           if (ent) ent->setStr("type", "cache_hit_writelock");
           return tmp;
         }
@@ -521,7 +529,7 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 
       trace.finish();
       auto const cu = createUnitFromFile(rpath, &releaseUnit, w, ent,
-                                         nativeFuncs, options);
+                                         nativeFuncs, options, flags);
       auto const isICE = cu.unit && cu.unit->isICE();
       auto p = copy_ptr<CachedUnitWithFree>(cu, statInfo, isICE, options);
       // Don't cache the unit if it was created in response to an internal error
@@ -558,7 +566,8 @@ CachedUnit loadUnitNonRepoAuth(StringData* requestedPath,
 CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
                                  const struct stat* statInfo,
                                  OptLog& ent,
-                                 const Native::FuncTable& nativeFuncs) {
+                                 const Native::FuncTable& nativeFuncs,
+                                 FileLoadFlags& flags) {
   auto const& options = RepoOptions::forFile(requestedPath->data());
   if (!g_context.isNull() && strncmp(requestedPath->data(), "/:", 2)) {
     g_context->onLoadWithOptions(requestedPath->data(), options);
@@ -575,13 +584,14 @@ CachedUnit lookupUnitNonRepoAuth(StringData* requestedPath,
             !strcmp(StatCache::realpath(requestedPath->data()).c_str(),
                     cu.unit->filepath()->data())) {
           if (ent) ent->setStr("type", "cache_hit_readlock");
+          flags = FileLoadFlags::kHitMem;
           return cu;
         }
       }
     }
   }
   return loadUnitNonRepoAuth(requestedPath, statInfo, ent, nativeFuncs,
-    options);
+    options, flags);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -743,11 +753,12 @@ CachedUnit checkoutFile(
   StringData* path,
   const struct stat& statInfo,
   OptLog& ent,
-  const Native::FuncTable& nativeFuncs
+  const Native::FuncTable& nativeFuncs,
+  FileLoadFlags& flags
 ) {
   return RuntimeOption::RepoAuthoritative
     ? lookupUnitRepoAuth(path, nativeFuncs)
-    : lookupUnitNonRepoAuth(path, &statInfo, ent, nativeFuncs);
+    : lookupUnitNonRepoAuth(path, &statInfo, ent, nativeFuncs, flags);
 }
 
 const std::string mangleUnitPHP7Options() {
@@ -897,8 +908,10 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
     }
   }
 
+  FileLoadFlags flags = FileLoadFlags::kHitMem;
+
   // This file hasn't been included yet, so we need to parse the file
-  auto const cunit = checkoutFile(spath.get(), s, ent, nativeFuncs);
+  auto const cunit = checkoutFile(spath.get(), s, ent, nativeFuncs, flags);
   if (cunit.unit && initial_opt) {
     // if initial_opt is not set, this shouldn't be recorded as a
     // per request fetch of the file.
@@ -909,11 +922,13 @@ Unit* lookupUnit(StringData* path, const char* currentDir, bool* initial_opt,
     // rpath (if it exists).
     eContext->m_evaledFilesOrder.push_back(cunit.unit->filepath());
     eContext->m_evaledFiles[spath.get()] =
-      {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
+      {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec),
+       flags};
     spath.get()->incRefCount();
     if (!cunit.unit->filepath()->same(spath.get())) {
       eContext->m_evaledFiles[cunit.unit->filepath()] =
-        {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec)};
+        {cunit.unit, s.st_mtime, static_cast<unsigned long>(s.st_mtim.tv_nsec),
+         FileLoadFlags::kDup};
     }
     if (g_system_profiler) {
       g_system_profiler->fileLoadCallBack(path->toCppString());
@@ -931,7 +946,8 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable& nativeFuncs) {
     return lookupUnitRepoAuth(path, nativeFuncs).unit;
   }
   OptLog ent;
-  return lookupUnitNonRepoAuth(path, nullptr, ent, nativeFuncs).unit;
+  FileLoadFlags flags;
+  return lookupUnitNonRepoAuth(path, nullptr, ent, nativeFuncs, flags).unit;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -128,48 +128,6 @@ let from_ast_wrapper : bool -> _ ->
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
-  (* Restrictions on __construct methods with promoted parameters *)
-  let has_param_promotion = List.exists ast_method.Ast.m_params
-    (fun p -> Option.is_some p.Ast.param_modifier)
-  in
-  if has_param_promotion then
-    if original_name = Naming_special_names.Members.__construct
-    then begin
-      let tparam_names =
-        List.fold_left ast_method.Ast.m_tparams
-          ~init:SSet.empty
-          ~f:(fun acc { Ast.tp_name = (_, n); _ } -> SSet.add n acc) in
-      List.iter ast_method.Ast.m_params (fun p ->
-        if List.length (
-          List.filter ast_class.Ast.c_body
-          (function
-           | Ast.ClassVars { Ast.cv_names = cvl; _ } ->
-               List.exists cvl (fun (_,id,_) ->
-                 snd id = SU.Locals.strip_dollar (snd p.Ast.param_id))
-           | _ -> false)) > 1
-        then Emit_fatal.raise_fatal_parse pos
-          (Printf.sprintf "Cannot redeclare %s::%s" class_name (snd p.Ast.param_id));
-        (* Disallow method type parameters to be used as type annotations
-           on promoted parameters *)
-        (* TODO: move to parser errors *)
-        if Option.is_some p.Ast.param_modifier
-        then match p.Ast.param_hint with
-        | Some h when hint_uses_tparams tparam_names h ->
-          Emit_fatal.raise_fatal_parse pos
-            "parameter modifiers not supported with type variable annotation"
-        | _ -> ());
-
-      if ast_class.Ast.c_kind = Ast.Cinterface || ast_class.Ast.c_kind = Ast.Ctrait
-      then Emit_fatal.raise_fatal_parse pos
-        "Constructor parameter promotion not allowed on traits or interfaces";
-      if List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract
-      then Emit_fatal.raise_fatal_parse pos
-        "parameter modifiers not allowed on abstract __construct";
-      end
-    else
-      (* not in __construct *)
-      Emit_fatal.raise_fatal_parse
-        pos "Parameters modifiers not allowed on methods";
   let has_variadic_param = List.exists ast_method.Ast.m_params
     (fun p -> p.Ast.param_is_variadic)
   in

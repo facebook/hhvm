@@ -1,2 +1,0 @@
-File "trait_interface_constructor_promotion.php", line 8, characters 43-44:
-Interfaces cannot have member variables (NastCheck[3009])

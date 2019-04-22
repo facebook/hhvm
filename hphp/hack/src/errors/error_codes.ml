@@ -140,7 +140,7 @@ module Naming                               = struct
   | MisplacedRxOfScope
   | RxOfScopeAndExplicitRx
   | UnsupportedFeature
-  | TraitInterfaceConstructorPromo
+  | TraitInterfaceConstructorPromoDEPRECATED
   | NonstaticPropertyWithLSB
   | ReferenceInAnonUseClause
   | RxMoveInvalidLocation

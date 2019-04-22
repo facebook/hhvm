@@ -518,21 +518,100 @@ let class_destructor_cannot_be_static node context =
 let clone_cannot_be_static node context =
   has_static node context is_clone
 
+let promoted_params (params : Syntax.t list) : Syntax.t list =
+  List.filter params (fun node ->
+      match syntax node with
+      | ParameterDeclaration { parameter_visibility; _ } ->
+         parameter_visibility |> is_missing |> not
+      | _ -> false)
+
 (* Given a function declaration header, confirm that it is NOT a constructor
  * and that the header containing it has visibility modifiers in parameters
  *)
 let class_non_constructor_has_visibility_param node _context =
   match node with
   | FunctionDeclarationHeader node ->
-    let has_visibility node =
-      match syntax node with
-      | ParameterDeclaration { parameter_visibility; _ } ->
-        parameter_visibility |> is_missing |> not
-      | _ -> false
+    let params = syntax_to_list_no_separators node.function_parameter_list in
+    not (is_construct node.function_name) && promoted_params params <> []
+  | _ -> false
+
+(* Don't allow a promoted parameter in a constructor if the class
+ * already has a property with the same name. Return the clashing name found.
+ *)
+let class_constructor_param_promotion_clash node context : string option =
+  let class_elts node =
+    match Option.map node ~f:syntax with
+    | Some (ClassishDeclaration cd) -> begin
+        match syntax cd.classish_body with
+        | ClassishBody { classish_body_elements; _} ->
+           syntax_to_list_no_separators classish_body_elements
+        | _ -> []
+      end
+    | _ -> []
+  in
+  (* A property declaration may include multiple property names:
+     public int $x, $y;
+   *)
+  let prop_names elt : string list =
+    match syntax elt with
+    | PropertyDeclaration { property_declarators; _} ->
+       let declarators = syntax_to_list_no_separators property_declarators in
+       let names = List.map declarators ~f:(function decl ->
+         match syntax decl with
+         | PropertyDeclarator {property_name; _} ->
+            Some (text property_name)
+         | _ -> None)
+       in
+       List.filter_opt names
+    | _ -> []
+  in
+  let param_names params =
+    let names = List.map params (fun p -> match syntax p with
+                                          | ParameterDeclaration { parameter_name; _ } ->
+        Some (text parameter_name)
+      | _ -> None)
     in
+    List.filter_opt names
+  in
+
+  match node with
+  | FunctionDeclarationHeader node ->
+    if is_construct node.function_name then
+      let class_var_names =
+        List.concat_map (class_elts context.active_classish) ~f:prop_names
+      in
+      let params = syntax_to_list_no_separators node.function_parameter_list in
+      let promoted_param_names = param_names (promoted_params params) in
+      List.find promoted_param_names ~f:(fun name -> List.mem class_var_names name ~equal:(=))
+    else
+      None
+  | _ -> None
+
+(* Ban parameter promotion in abstract constructors. *)
+let abstract_class_constructor_has_visibility_param node _context =
+  match node with
+  | FunctionDeclarationHeader node ->
     let label = node.function_name in
     let params = syntax_to_list_no_separators node.function_parameter_list in
-    (not (is_construct label)) && (List.exists ~f:has_visibility params)
+    is_construct label &&
+      list_contains_predicate is_abstract node.function_modifiers &&
+        promoted_params params <> []
+  | _ -> false
+
+(* Ban parameter promotion in interfaces and traits. *)
+let interface_or_trait_has_visibility_param node context =
+  match node with
+  | FunctionDeclarationHeader node ->
+    let is_interface_or_trait =
+      context.active_classish |> Option.exists ~f:(fun parent_classish ->
+        match syntax parent_classish with
+        | ClassishDeclaration cd ->
+           let kind = token_kind cd.classish_keyword in
+           kind = Some TokenKind.Interface || kind = Some TokenKind.Trait
+        | _ -> false)
+    in
+    let params = syntax_to_list_no_separators node.function_parameter_list in
+    promoted_params params <> [] && is_interface_or_trait
   | _ -> false
 
 (* check that a constructor or a destructor is type annotated *)
@@ -1323,6 +1402,21 @@ let methodish_errors env node errors =
     let errors =
       produce_error_for_header errors class_non_constructor_has_visibility_param
       node env.context SyntaxError.error2010 function_parameter_list in
+    let errors =
+      match class_constructor_param_promotion_clash (syntax node) env.context with
+      | Some clashing_name ->
+         let class_name = Option.value (active_classish_name env.context) ~default:"" in
+         let error_msg = SyntaxError.error2025 class_name clashing_name in
+         let error = (make_error_from_node function_parameter_list error_msg) in
+         error :: errors
+      | None -> errors
+    in
+    let errors =
+      produce_error_for_header errors abstract_class_constructor_has_visibility_param
+      node env.context SyntaxError.error2023 function_parameter_list in
+    let errors =
+      produce_error_for_header errors interface_or_trait_has_visibility_param
+      node env.context SyntaxError.error2024 function_parameter_list in
     let errors =
       function_declaration_header_memoize_lsb env.context errors in
     errors

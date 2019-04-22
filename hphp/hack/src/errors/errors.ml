@@ -765,10 +765,6 @@ let invalid_trait_use_as_visibility pos =
 (*****************************************************************************)
 
 
-let trait_interface_constructor_promo pos =
-  add (Naming.err_code Naming.TraitInterfaceConstructorPromo) pos
-  "Constructor parameter promotion not allowed on traits or interfaces"
-
 let unexpected_arrow pos cname =
   add (Naming.err_code Naming.UnexpectedArrow) pos (
   "Keys may not be specified for "^cname^" initialization"

@@ -1,0 +1,5 @@
+(16,31)-(16,43) Cannot redeclare DuplicateDeclarations::$p
+(20,31)-(20,43) Traits or interfaces cannot have parameters with visibility modifiers
+(24,31)-(24,43) Traits or interfaces cannot have parameters with visibility modifiers
+(28,40)-(28,52) Abstract constructors cannot have parameters with visibility modifiers
+(32,23)-(32,35) Parameters cannot have visibility modifiers (except in parameter lists of constructors).

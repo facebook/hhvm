@@ -1,2 +1,2 @@
 
-Fatal error: Interface method %s cannot contain body in %s on line 4
+Fatal error: Traits or interfaces cannot have parameters with visibility modifiers in %s on line 4

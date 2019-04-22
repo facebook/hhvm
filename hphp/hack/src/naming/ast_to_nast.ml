@@ -396,10 +396,8 @@ and on_tparam t : Aast.tparam =
     tp_user_attributes = attributes;
   }
 
-and on_fun_param ?(trait_or_interface=false) param : Aast.fun_param =
+and on_fun_param param : Aast.fun_param =
   let p, name = param.param_id in
-  if trait_or_interface && param.param_modifier <> None
-  then Errors.trait_interface_constructor_promo p;
   { Aast.param_annotation = p;
     param_hint = optional on_hint param.param_hint;
     param_is_reference = param.param_is_reference;
@@ -616,7 +614,7 @@ and kind (final, abs, static, vis) = function
   | Public -> final, abs, static, Some Aast.Public
   | Protected -> final, abs, static, Some Aast.Protected
 
-and on_method ?(trait_or_interface=false) m : Aast.method_ =
+and on_method m : Aast.method_ =
   let body = on_block m.m_body in
   let body = {
     Aast.fb_ast = body;
@@ -640,7 +638,7 @@ and on_method ?(trait_or_interface=false) m : Aast.method_ =
     m_tparams         = on_list on_tparam m.m_tparams;
     m_where_constraints = on_list on_constr m.m_constrs;
     m_variadic        = determine_variadicity m.m_params;
-    m_params          = on_list (on_fun_param ~trait_or_interface) m.m_params;
+    m_params          = on_list on_fun_param m.m_params;
     m_body            = body;
     m_fun_kind        = m.m_fun_kind;
     m_user_attributes = on_list on_user_attribute m.m_user_attributes;

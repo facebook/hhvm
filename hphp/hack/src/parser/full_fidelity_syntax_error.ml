@@ -168,6 +168,10 @@ let error2020 = "Use of the '{}' subscript operator is deprecated; " ^
 let error2021 = "A variadic parameter ('...') may only appear at the end of " ^
   "a parameter list."
 let error2022 = "A variadic parameter ('...') may not be followed by a comma."
+let error2023 = "Abstract constructors cannot have parameters with visibility modifiers"
+let error2024 = "Traits or interfaces cannot have parameters with visibility modifiers"
+let error2025 class_name prop_name =
+  Printf.sprintf "Cannot redeclare %s::%s" class_name prop_name
 
 let error2029 = "Only traits and interfaces may use 'require extends'."
 let error2030 = "Only traits may use 'require implements'."

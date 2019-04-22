@@ -120,6 +120,9 @@ val error2019 : string -> string -> string
 val error2020 : string
 val error2021 : string
 val error2022 : string
+val error2023 : string
+val error2024 : string
+val error2025 : string -> string -> string
 
 val error2029 : string
 val error2030 : string

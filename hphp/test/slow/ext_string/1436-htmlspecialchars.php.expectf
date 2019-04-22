@@ -3,7 +3,8 @@ string(14) "foo&lt;&gt;bar"
 string(0) ""
 string(0) ""
 NULL
-string(0) ""
+
+Warning: htmlspecialchars() expects parameter 1 to be string, null given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 array(1) {
   ["str"]=>
   string(3) "aaa"
@@ -11,6 +12,8 @@ array(1) {
 
 Warning: htmlspecialchars() expects parameter 1 to be string, array given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 int(42)
-string(2) "42"
+
+Warning: htmlspecialchars() expects parameter 1 to be string, integer given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20
 float(1.234)
-string(5) "1.234"
+
+Warning: htmlspecialchars() expects parameter 1 to be string, double given in %s/test/slow/ext_string/1436-htmlspecialchars.php on line 20

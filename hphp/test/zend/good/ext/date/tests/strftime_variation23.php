@@ -12,12 +12,12 @@ setlocale(LC_ALL, "en_US");
 date_default_timezone_set("UTC");
 $format = '%b %d %Y %H:%M:%S';
 
-echo "\n-- Testing strftime() function with float 12.3456789000e10 to timestamp --\n";
-$timestamp = 12.3456789000e10;
+echo "\n-- Testing strftime() function with int 123456789000 to timestamp --\n";
+$timestamp = 123456789000;
 var_dump( strftime($format, $timestamp) );
 
-echo "\n-- Testing strftime() function with float -12.3456789000e10 to timestamp --\n";
-$timestamp = -12.3456789000e8;
+echo "\n-- Testing strftime() function with int -123456789000 to timestamp --\n";
+$timestamp = -123456789000;
 var_dump( strftime($format, $timestamp) );
 
 echo "===DONE===\n";

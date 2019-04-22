@@ -1,10 +1,16 @@
 Warning: strlen() expects exactly 1 parameter, 0 given in %s on line %d
-int(0)
-int(1)
-int(0)
-int(6)
-int(6)
-int(7)
+
+Warning: strlen() expects parameter 1 to be string, null given in %s on line %d
+
+Warning: strlen() expects parameter 1 to be string, boolean given in %s on line %d
+
+Warning: strlen() expects parameter 1 to be string, boolean given in %s on line %d
+
+Warning: strlen() expects parameter 1 to be string, integer given in %s on line %d
+
+Warning: strlen() expects parameter 1 to be string, double given in %s on line %d
+
+Warning: strlen() expects parameter 1 to be string, double given in %s on line %d
 
 Warning: strlen() expects parameter 1 to be string, array given in %s on line %d
 
@@ -17,7 +23,8 @@ Warning: strlen() expects parameter 1 to be string, dict given in %s on line %d
 Warning: strlen() expects parameter 1 to be string, keyset given in %s on line %d
 
 Warning: strlen() expects parameter 1 to be string, object given in %s on line %d
-int(21)
+
+Warning: strlen() expects parameter 1 to be string, object given in %s on line %d
 int(4)
 int(4)
 int(5)

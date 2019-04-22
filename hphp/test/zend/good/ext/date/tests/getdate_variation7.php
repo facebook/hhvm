@@ -1,18 +1,18 @@
 <?php
 /* Prototype  : array getdate([int timestamp])
- * Description: Get date/time information 
+ * Description: Get date/time information
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing getdate() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 
-echo "\n-- Testing getdate() function by passing float 12.3456789000e10 value to timestamp --\n";
-$timestamp = 12.3456789000e10;
+echo "\n-- Testing getdate() function by passing int 123456789000 value to timestamp --\n";
+$timestamp = 123456789000;
 var_dump( getdate($timestamp) );
 
-echo "\n-- Testing getdate() function by passing float -12.3456789000e10 value to timestamp --\n";
-$timestamp = -12.3456789000e10;
+echo "\n-- Testing getdate() function by passing int -123456789000 value to timestamp --\n";
+$timestamp = -123456789000;
 var_dump( getdate($timestamp) );
 echo "===DONE===\n";

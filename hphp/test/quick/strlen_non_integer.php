@@ -28,10 +28,26 @@ main();
 main();
 
 function main2() {
-  echo "foo: " .strlen($x)."\n";
-  echo "foo: " .strlen(true)."\n";
-  echo "foo: " .strlen(NULL)."\n";
-  echo "foo: " .strlen(false)."\n";
+  try {
+    echo "foo: " .strlen($x)."\n";
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "foo: " .strlen(true)."\n";
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "foo: " .strlen(NULL)."\n";
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    echo "foo: " .strlen(false)."\n";
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
 }
 main2();
 

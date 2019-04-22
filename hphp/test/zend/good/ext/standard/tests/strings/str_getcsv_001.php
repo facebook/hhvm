@@ -21,8 +21,6 @@ var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";
 var_dump(str_getcsv('" "" "', ' '));
 print "-----\n";
-var_dump(str_getcsv(NULL));
-print "-----\n";
 var_dump(str_getcsv(''));
 print "-----\n";
 

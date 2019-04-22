@@ -16,7 +16,7 @@ ServerUtilServerTests::$error_log_file = fopen(ServerUtilServerTests::$LOG_ROOT.
 function tlog($str) {
 
 
-  fwrite(ServerUtilServerTests::$error_log_file, $str);
+  fwrite(ServerUtilServerTests::$error_log_file, $str ?? '');
   fwrite(ServerUtilServerTests::$error_log_file, "\n");
   fflush(ServerUtilServerTests::$error_log_file);
   // error_log($str);
@@ -151,7 +151,10 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
   $chooseAdmin = $adminPort === null;
   $chooseDebug = $debugPort === null;
   $pid = posix_getpid();
-  $safe_children = array_flip(explode(',', exec("pgrep -f -d , -P $pid")));
+  $safe_children = array_flip(array_map(
+    $v ==> (int)$v,
+    explode(',', exec("pgrep -f -d , -P $pid")),
+  ));
 
   for ($i = 0; $i < 5; $i++) {
     if ($chooseServer) $serverPort = get_random_port($adminPort, $debugPort);
@@ -178,7 +181,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
 function checkServerId($serverPort, $expectedIds) {
   $host = php_uname('n');
   $r = request($host, $serverPort, "hello.php");
-  if (preg_match('/Hello, World!(.*+)/', $r, &$matches)) {
+  if (preg_match('/Hello, World!(.*+)/', $r ?? '', &$matches)) {
     foreach ((array)$expectedIds as $id) {
       if ($matches[1] == $id) return true;
     }
@@ -307,9 +310,9 @@ if (!function_exists("request")) {
   include 'server_tests1.inc';
 }
 
-function killChildren($pid, $safe_children) {
+function killChildren($pid, $safe_children = array()) {
   $childIds = exec("pgrep -f -d , -P $pid");
-  foreach (explode(",", $childIds) as $cid) {
+  foreach (array_map($v ==> (int)$v, explode(",", $childIds ?? '')) as $cid) {
     if (!$cid) continue;
     if (isset($safe_children[$cid])) continue;
     tlog("killing ".exec("ps -f -p ".$cid));

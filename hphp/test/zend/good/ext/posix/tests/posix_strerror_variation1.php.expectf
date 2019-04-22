@@ -5,19 +5,24 @@ Notice: Undefined variable: undefined_var in %s/posix_strerror_variation1.php on
 Notice: Undefined variable: unset_var in %s/posix_strerror_variation1.php on line 55
 
 Arg value 10.5
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, double given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value -10.5
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, double given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 101234567000
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, double given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 1.07654321E-9
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, double given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 0.5
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, double given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Notice: Array to string conversion in %s/posix_strerror_variation1.php on line 64
 
@@ -50,22 +55,28 @@ Arg value Array
 Warning: posix_strerror() expects parameter 1 to be integer, array given in %s/posix_strerror_variation1.php on line 65
 
 Arg value 
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, null given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, null given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 1
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 1
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 
 
@@ -84,9 +95,11 @@ Arg value string
 Warning: posix_strerror() expects parameter 1 to be integer, string given in %s/posix_strerror_variation1.php on line 65
 
 Arg value 
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, null given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Arg value 
-string
+
+Warning: posix_strerror() expects parameter 1 to be integer, null given in %s/zend/good/ext/posix/tests/posix_strerror_variation1.php on line 65
 
 Catchable fatal error: Object of class stdClass could not be converted to string in %s/posix_strerror_variation1.php on line 64

@@ -1,16 +1,16 @@
---- Source Image: 400x200, Imagick::thumbnailImage( 100, null, false )
+--- Source Image: 400x200, Imagick::thumbnailImage( 100, 0, false )
 100x50
---- Source Image: 400x200, Imagick::thumbnailImage( null, 100, false )
+--- Source Image: 400x200, Imagick::thumbnailImage( 0, 100, false )
 200x100
 --- Source Image: 400x200, Imagick::thumbnailImage( 100, 100, false )
 100x100
---- Source Image: 400x200, Imagick::thumbnailImage( null, null, false )
+--- Source Image: 400x200, Imagick::thumbnailImage( 0, 0, false )
 Invalid image geometry
 --- Source Image: 400x200, Imagick::thumbnailImage( 100, 100, true )
 100x50
---- Source Image: 400x200, Imagick::thumbnailImage( 100, null, true )
+--- Source Image: 400x200, Imagick::thumbnailImage( 100, 0, true )
 Invalid image geometry
---- Source Image: 400x200, Imagick::thumbnailImage( null, 100, true )
+--- Source Image: 400x200, Imagick::thumbnailImage( 0, 100, true )
 Invalid image geometry
---- Source Image: 400x200, Imagick::thumbnailImage( null, null, true )
+--- Source Image: 400x200, Imagick::thumbnailImage( 0, 0, true )
 Invalid image geometry

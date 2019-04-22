@@ -202,11 +202,11 @@ try {
 }
 try {
   HH\facts_parse(null, varray[null], null, null);
-} catch (InvalidOperationException $e) {
+} catch (Exception $e) {
   var_dump($e->getMessage());
 }
 try {
   HH\facts_parse(null, varray[array()], null, null);
-} catch (InvalidOperationException $e) {
+} catch (Exception $e) {
   var_dump($e->getMessage());
 }

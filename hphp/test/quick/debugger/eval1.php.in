@@ -1,6 +1,6 @@
 run
 print function_exists('test1')
-@ function test1($x){error_log($x);return $x+1;}
+@ function test1($x){error_log((string)$x);return $x+1;}
 print function_exists('test1')
 @ $eval1=test1(4)
 print $eval1

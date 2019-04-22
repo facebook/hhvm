@@ -5,4 +5,4 @@ Warning: imagetruecolortopalette() expects parameter 3 to be integer, resource g
 
 Warning: imagetruecolortopalette() expects parameter 3 to be integer, array given in %s/imagetruecolortopalette_error3.php on line 7
 
-Warning: Number of colors has to be greater than zero in %s/imagetruecolortopalette_error3.php on line 8
+Warning: imagetruecolortopalette() expects parameter 3 to be integer, null given in %s/imagetruecolortopalette_error3.php on line 8

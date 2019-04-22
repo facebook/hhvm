@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto bool posix_kill(int pid, int sig)
- * Description: Send a signal to a process (POSIX.1, 3.3.2) 
+ * Description: Send a signal to a process (POSIX.1, 3.3.2)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_kill() : usage variations ***\n";
@@ -54,7 +54,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );
@@ -62,7 +62,7 @@ $values = array(
 // loop through each element of the array for sig
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value $value\n";
       try { var_dump( posix_kill($pid, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 

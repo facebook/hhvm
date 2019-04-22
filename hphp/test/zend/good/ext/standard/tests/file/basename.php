@@ -1,8 +1,8 @@
 <?php
-/* 
+/*
  * proto string basename(string path [, string suffix])
  * Function is implemented in ext/standard/string.c
- */ 
+ */
 $file_paths = array (
   /* simple paths */
   array("bar"),
@@ -22,15 +22,15 @@ $file_paths = array (
   array("bar.gz", "bar.gz"),
   array("/foo/bar.gz", ".gz"),
   array("foo/bar.gz", ".gz"),
-  array("/bar.gz", ".gz"),  
+  array("/bar.gz", ".gz"),
 
   /* paths with suffix and trailing slashes with suffix removal*/
   array("bar.gz/", ".gz"),
   array("/bar.gz/", ".gz"),
   array("/foo/bar.gz/", ".gz"),
   array("foo/bar.gz/", ".gz"),
-  array("/bar.gz/", ".gz"),  
-  
+  array("/bar.gz/", ".gz"),
+
   /* paths with basename only suffix, with suffix removal*/
   array("/.gz", ".gz"),
   array(".gz", ".gz"),
@@ -106,7 +106,7 @@ $file_path_variations = array (
   /* path with spaces */
   array(" "),
   array(' '),
-  
+
   /* empty paths */
   array(""),
   array(''),
@@ -118,10 +118,10 @@ function check_basename( $path_arrays ) {
    foreach ($path_arrays as $path) {
      echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
      if( 1 == count($path) ) { // no suffix provided
-       var_dump( basename($path[0]) );
+       try { var_dump( basename($path[0]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
      } else { // path as well as suffix provided,
-       var_dump( basename($path[0], $path[1]) );    
-     } 
+       try { var_dump( basename($path[0], $path[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+     }
    }
 }
 
@@ -132,13 +132,13 @@ echo "\n*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
 echo "\n*** Testing error conditions ***\n";
-// zero arguments 
+// zero arguments
 try { var_dump( basename() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 // more than expected no. of arguments
 try { var_dump( basename("/var/tmp/bar.gz", ".gz", ".gz") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-// passing invalid type arguments 
+// passing invalid type arguments
 $object = new stdclass;
 try { var_dump( basename( array("string/bar") ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( basename( array("string/bar"), "bar" ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

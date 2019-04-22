@@ -7,7 +7,7 @@
 */
 
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
-  
+
 echo "\n*** Testing readlink() and realpath() with linkname as empty string, NULL and single space ***\n";
 $link_string = array (
   /* linkname as spaces */
@@ -25,8 +25,8 @@ for($loop_counter = 0; $loop_counter < count($link_string); $loop_counter++) {
   echo $loop_counter + 1;
   echo " --\n";
 
-  var_dump( readlink($link_string[$loop_counter]) ); 
-  var_dump( realpath($link_string[$loop_counter]) ); 
+  var_dump( readlink((string)$link_string[$loop_counter]) );
+  var_dump( realpath((string)$link_string[$loop_counter]) );
 }
 
 echo "Done\n";

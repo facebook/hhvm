@@ -106,7 +106,7 @@ try { var_dump( strstr($resource1, $resource2) ); } catch (Exception $e) { echo 
 
 echo "\n-- Posiibilities with null --\n";
 var_dump( strstr("", NULL) );
-var_dump( strstr(NULL, NULL) );
+try { var_dump( strstr(NULL, NULL) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump( strstr("a", NULL) );
 var_dump( strstr("/x0", "0") );  // Hexadecimal NUL
 
@@ -162,8 +162,8 @@ var_dump( strstr($string, ""));
 try { var_dump( strstr() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // zero argument
 try { var_dump( strstr("") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // null argument
 try { var_dump( strstr($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }  // without "needle"
-var_dump( strstr("a", "b", "c") );  // args > expected
-var_dump( strstr(NULL, "") );
+try { var_dump( strstr("a", "b", "c") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
+try { var_dump( strstr(NULL, "") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nDone";
 

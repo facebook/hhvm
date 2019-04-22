@@ -2442,8 +2442,7 @@ SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
 
   if (isSimplifyOkay(inst) &&
       srcType.subtypeOfAny(TNull, TDbl, TInt, TStr)) {
-    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
-    return gen(env, ConvCellToBool, inst->taken(), src);
+    return nullptr;
   }
 
   // We actually know that any other type will fail causing us to side exit
@@ -2459,8 +2458,7 @@ SSATmp* simplifyCoerceCellToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TInt) return gen(env, Mov, src);
 
   if (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl)) {
-    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
-    return gen(env, ConvCellToInt, inst->taken(), src);
+    return nullptr;
   }
 
   if (srcType <= TStr) return gen(env, CoerceStrToInt, inst->taken(),
@@ -2480,8 +2478,7 @@ SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
 
   if (isSimplifyOkay(inst) &&
       srcType.subtypeOfAny(TBool, TNull, TInt)) {
-    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) return nullptr;
-    return gen(env, ConvCellToDbl, inst->taken(), src);
+    return nullptr;
   }
 
   if (srcType <= TStr) return gen(env, CoerceStrToDbl, inst->taken(),

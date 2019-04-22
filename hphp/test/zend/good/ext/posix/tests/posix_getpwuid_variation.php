@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto array posix_getpwuid(long uid)
- * Description: User database access (POSIX.1, 9.2.2) 
+ * Description: User database access (POSIX.1, 9.2.2)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_getpwuid() : usage variations ***\n";
@@ -53,7 +53,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );
@@ -61,15 +61,17 @@ $values = array(
 // loop through each element of the array for uid
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
-      try { $result = posix_getpwuid($value); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-      if ((is_array($result) && (count($result) == 7)) 
-          || 
+      echo "\nArg value $value\n";
+      try {
+      $result = posix_getpwuid($value);
+      if ((is_array($result) && (count($result) == 7))
+          ||
           ($result === false)) {
           echo "valid output\n";
       } else {
           var_dump($result);
       }
+       } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 
 echo "Done";

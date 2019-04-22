@@ -4,89 +4,102 @@ Notice: Undefined variable: undefined_var in %s/posix_kill_variation2.php on lin
 
 Notice: Undefined variable: unset_var in %s/posix_kill_variation2.php on line 56
 
-Arg value 10.5 
-bool(false)
+Arg value 10.5
 
-Arg value -10.5 
-bool(false)
+Warning: posix_kill() expects parameter 2 to be integer, double given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
-Arg value 101234567000 
-bool(false)
+Arg value -10.5
 
-Arg value 1.07654321E-9 
-bool(false)
+Warning: posix_kill() expects parameter 2 to be integer, double given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
-Arg value 0.5 
-bool(false)
+Arg value 101234567000
+
+Warning: posix_kill() expects parameter 2 to be integer, double given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
+
+Arg value 1.07654321E-9
+
+Warning: posix_kill() expects parameter 2 to be integer, double given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
+
+Arg value 0.5
+
+Warning: posix_kill() expects parameter 2 to be integer, double given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
 Notice: Array to string conversion in %s/posix_kill_variation2.php on line 65
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s/posix_kill_variation2.php on line 66
 
 Notice: Array to string conversion in %s/posix_kill_variation2.php on line 65
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s/posix_kill_variation2.php on line 66
 
 Notice: Array to string conversion in %s/posix_kill_variation2.php on line 65
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s/posix_kill_variation2.php on line 66
 
 Notice: Array to string conversion in %s/posix_kill_variation2.php on line 65
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s/posix_kill_variation2.php on line 66
 
 Notice: Array to string conversion in %s/posix_kill_variation2.php on line 65
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s/posix_kill_variation2.php on line 66
 
-Arg value  
-bool(false)
+Arg value 
 
-Arg value  
-bool(false)
+Warning: posix_kill() expects parameter 2 to be integer, null given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
-Arg value 1 
-bool(false)
+Arg value 
 
-Arg value  
-bool(false)
+Warning: posix_kill() expects parameter 2 to be integer, null given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
-Arg value 1 
-bool(false)
+Arg value 1
 
-Arg value  
-bool(false)
+Warning: posix_kill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
-Arg value  
+Arg value 
+
+Warning: posix_kill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
+
+Arg value 1
+
+Warning: posix_kill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
+
+Arg value 
+
+Warning: posix_kill() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
+
+Arg value 
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s/posix_kill_variation2.php on line 66
 
-Arg value  
+Arg value 
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s/posix_kill_variation2.php on line 66
 
-Arg value string 
+Arg value string
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s/posix_kill_variation2.php on line 66
 
-Arg value string 
+Arg value string
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s/posix_kill_variation2.php on line 66
 
-Arg value  
-bool(false)
+Arg value 
 
-Arg value  
-bool(false)
+Warning: posix_kill() expects parameter 2 to be integer, null given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
+
+Arg value 
+
+Warning: posix_kill() expects parameter 2 to be integer, null given in %s/zend/good/ext/posix/tests/posix_kill_variation2.php on line 66
 
 Catchable fatal error: Object of class stdClass could not be converted to string in %s/posix_kill_variation2.php on line 65

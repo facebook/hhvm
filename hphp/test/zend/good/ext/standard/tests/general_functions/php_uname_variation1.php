@@ -23,34 +23,34 @@ $values = array(
 		  "1" => 1,
 		  "12345" =>  12345,
 		  "-2345" =>  -2345,
-		
+
 		  // float data
 		  "10.5" => 10.5,
 		  "-10.5" => -10.5,
 		  "10.1234567e10" => 10.1234567e10,
 		  "10.7654321E-10" => 10.7654321E-10,
 		  ".5" => .5,
-		
+
 		  // null data
 		  "NULL" => NULL,
 		  "null" =>  null,
-		
+
 		  // boolean data
 		  "true" => true,
 		  "false" => false,
 		  "TRUE" => TRUE,
 		  "FALSE" => FALSE,
-		
+
 		  // empty data
 		  "\"\"" => "",
 		  "''" => '',
-		
+
 		  // object data
 		  "new fooClass()" => new fooClass(),
-		  
+
 		  // undefined data
 		  "undefined var" => $undefined_var,
-		
+
 		 // unset data
 		 "unset var" => $unset_var,
 );
@@ -59,7 +59,7 @@ $values = array(
 
 foreach($values as $key => $value) {
       echo "-- Iterator $key --\n";
-      var_dump( php_uname($value) );
+      try { var_dump( php_uname($value) ); } catch (Exception $e) { echo 'ERROR: '; var_dump($e->getMessage()); }
 };
 
 echo "===DONE===\n";

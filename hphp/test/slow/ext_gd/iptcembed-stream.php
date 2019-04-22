@@ -9,5 +9,5 @@ $s = iptcembed(
   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "data://text/plain;base64,".$jpg
 );
-var_dump(strlen($s));
+var_dump($s);
 }

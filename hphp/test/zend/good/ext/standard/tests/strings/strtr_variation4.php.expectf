@@ -6,17 +6,25 @@ string(0) ""
 string(0) ""
 string(0) ""
 -- Iteration 3 --
-string(0) ""
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 44
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 47
 -- Iteration 4 --
-string(0) ""
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 44
+
+Warning: strtr() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 47
 -- Iteration 5 --
-string(0) ""
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 44
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 47
 -- Iteration 6 --
-string(0) ""
-string(0) ""
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 44
+
+Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation4.php on line 47
 -- Iteration 7 --
 string(0) ""
 string(0) ""

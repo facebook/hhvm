@@ -1,115 +1,91 @@
 *** Testing parse_url() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(60)
-Error: 8 - Undefined variable: unset_var, %s(63)
+Error: 8 - Undefined variable: undefined_var, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(60)
+Error: 8 - Undefined variable: unset_var, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(63)
 
 Arg value 0
-array(1) {
-  ["path"]=>
-  string(1) "0"
-}
+
+Warning: parse_url() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 1
-array(1) {
-  ["path"]=>
-  string(1) "1"
-}
+
+Warning: parse_url() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 12345
-array(1) {
-  ["path"]=>
-  string(5) "12345"
-}
+
+Warning: parse_url() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value -2345
-array(1) {
-  ["path"]=>
-  string(5) "-2345"
-}
+
+Warning: parse_url() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 10.5
-array(1) {
-  ["path"]=>
-  string(4) "10.5"
-}
+
+Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value -10.5
-array(1) {
-  ["path"]=>
-  string(5) "-10.5"
-}
+
+Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 101234567000
-array(1) {
-  ["path"]=>
-  string(12) "101234567000"
-}
+
+Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 1.07654321E-9
-array(1) {
-  ["path"]=>
-  string(13) "1.07654321E-9"
-}
+
+Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 0.5
-array(1) {
-  ["path"]=>
-  string(3) "0.5"
-}
-Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
+
+Warning: parse_url() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
+Warning: parse_url() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
+Warning: parse_url() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
+Warning: parse_url() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
-Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
+Warning: parse_url() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 1 to be string, array given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Warning: parse_url() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+
+Warning: parse_url() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+
+Warning: parse_url() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 1
-array(1) {
-  ["path"]=>
-  string(1) "1"
-}
+
+Warning: parse_url() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+
+Warning: parse_url() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 1
-array(1) {
-  ["path"]=>
-  string(1) "1"
-}
+
+Warning: parse_url() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+
+Arg value 
+
+Warning: parse_url() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
 array(1) {
@@ -122,27 +98,17 @@ array(1) {
   ["path"]=>
   string(0) ""
 }
-
-Arg value 
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
-Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
+Error: 4096 - Object of class stdClass could not be converted to string, %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php(69)
 
 Arg value 
 
-Warning: parse_url() expects parameter 1 to be string, object given in %s/hphp/test/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
+Warning: parse_url() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+
+Warning: parse_url() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 
 Arg value 
-array(1) {
-  ["path"]=>
-  string(0) ""
-}
+
+Warning: parse_url() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/parse_url_variation_001.php on line 70
 Done

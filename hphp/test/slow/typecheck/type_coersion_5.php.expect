@@ -3,12 +3,15 @@ Builtin:
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, boolean given
 Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, integer given
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, integer given
 Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, double given
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, float given
 Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, string given
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, string given
 Builtin:
@@ -16,17 +19,20 @@ WARNING: sha1() expects parameter 2 to be boolean, array given
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, array given
 Builtin:
+WARNING: sha1() expects parameter 2 to be boolean, null given
 User:
 WARNING: Argument 1 to {closure}() must be of type @boolean, null given
 
 Int64
 Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, boolean given
 User:
 WARNING: Argument 1 to {closure}() must be of type @integer, boolean given
 Builtin:
 User:
 WARNING: Argument 1 to {closure}() must be of type @integer, integer given
 Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, double given
 User:
 WARNING: Argument 1 to {closure}() must be of type @integer, float given
 Builtin:
@@ -38,14 +44,17 @@ WARNING: str_pad() expects parameter 2 to be integer, array given
 User:
 WARNING: Argument 1 to {closure}() must be of type @integer, array given
 Builtin:
+WARNING: str_pad() expects parameter 2 to be integer, null given
 User:
 WARNING: Argument 1 to {closure}() must be of type @integer, null given
 
 Double
 Builtin:
+WARNING: number_format() expects parameter 1 to be double, boolean given
 User:
 WARNING: Argument 1 to {closure}() must be of type @float, boolean given
 Builtin:
+WARNING: number_format() expects parameter 1 to be double, integer given
 User:
 WARNING: Argument 1 to {closure}() must be of type @float, integer given
 Builtin:
@@ -60,17 +69,21 @@ WARNING: number_format() expects parameter 1 to be double, array given
 User:
 WARNING: Argument 1 to {closure}() must be of type @float, array given
 Builtin:
+WARNING: number_format() expects parameter 1 to be double, null given
 User:
 WARNING: Argument 1 to {closure}() must be of type @float, null given
 
 String
 Builtin:
+WARNING: rtrim() expects parameter 1 to be string, boolean given
 User:
 WARNING: Argument 1 to {closure}() must be of type @string, boolean given
 Builtin:
+WARNING: rtrim() expects parameter 1 to be string, integer given
 User:
 WARNING: Argument 1 to {closure}() must be of type @string, integer given
 Builtin:
+WARNING: rtrim() expects parameter 1 to be string, double given
 User:
 WARNING: Argument 1 to {closure}() must be of type @string, float given
 Builtin:
@@ -81,6 +94,7 @@ WARNING: rtrim() expects parameter 1 to be string, array given
 User:
 WARNING: Argument 1 to {closure}() must be of type @string, array given
 Builtin:
+WARNING: rtrim() expects parameter 1 to be string, null given
 User:
 WARNING: Argument 1 to {closure}() must be of type @string, null given
 

@@ -43,11 +43,10 @@ $file_paths = array (
   /* path with spaces */
   " ",
   ' ',
-  
+
   /* empty paths */
   "",
   '',
-  NULL,
 );
 
 foreach ($file_paths as $file_path) {

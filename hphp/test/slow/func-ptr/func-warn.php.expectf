@@ -11,8 +11,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -65,8 +64,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -119,8 +117,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -173,8 +170,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -227,8 +223,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -281,8 +276,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -335,8 +329,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -389,8 +382,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -443,8 +435,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
@@ -497,8 +488,7 @@ int(5)
 function(bar)
 notice(bar): Func used in is_string
 bool(true)
-notice(%s): Func to string conversion
-int(3)
+string(57) "strlen() expects parameter 1 to be string, function given"
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint
 notice(baz): Implicit Func to string conversion for type-hint

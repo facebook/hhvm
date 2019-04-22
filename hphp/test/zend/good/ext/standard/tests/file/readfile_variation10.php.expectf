@@ -1,16 +1,16 @@
 *** Testing readfile() : variation ***
 -- testing '-1' --
 
-Warning: No such file or directory in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, integer given in %s/readfile_variation10.php on line 32
 -- testing '1' --
 
-Warning: No such file or directory in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, boolean given in %s/readfile_variation10.php on line 32
 -- testing '' --
 
-Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, boolean given in %s/readfile_variation10.php on line 32
 -- testing '' --
 
-Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32
+Warning: readfile() expects parameter 1 to be string, null given in %s/readfile_variation10.php on line 32
 -- testing '' --
 
 Warning: Filename cannot be empty in %s/readfile_variation10.php on line 32

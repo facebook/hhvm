@@ -1,69 +1,82 @@
 *** Testing image_type_to_mime_type() : usage variations ***
 
 -- Iteration 1 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 2 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 3 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 4 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 5 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, double given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 6 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 7 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 8 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 9 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 10 --
-string(9) "image/gif"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 11 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 12 --
-string(9) "image/gif"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 13 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, boolean given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 14 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 15 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 16 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 17 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, string given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 18 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, object given in %s/image_type_to_mime_type_variation1.php on line 68
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, object given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 19 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 
 -- Iteration 20 --
-string(24) "application/octet-stream"
+
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, null given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 68
 ===DONE===

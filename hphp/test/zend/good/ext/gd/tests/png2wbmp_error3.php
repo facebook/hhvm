@@ -13,7 +13,5 @@ imagepng($im, $file);
 imagedestroy($im);
 
 png2wbmp($file, '', 20, 120, 8);
-png2wbmp($file, null, 20, 120, 8);
-png2wbmp($file, false, 20, 120, 8);
 error_reporting(0);
 unlink(dirname(__FILE__) .'/simpletext.png');

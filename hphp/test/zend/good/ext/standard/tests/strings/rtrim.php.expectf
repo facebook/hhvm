@@ -8,16 +8,11 @@ Warning: rtrim() expects at most 2 parameters, 3 given in %s/rtrim.php on line 9
  *** Output for Normal Behaviour ***
 string(10) "rtrim test"
 string(13) "rtrim test   "
-string(18) "rtrim test        "
-string(18) "rtrim test        "
 string(10) "rtrim test"
 string(11) "rtrim test "
 string(10) "rtrim test"
 string(10) "rtrim test"
 string(10) "rtrim test"
-
-*** Checking with OBJECTS ***
-string(4) "Obje"
 
 *** String with embedded NULL ***
 string(22) "234%r\x00%r05678%r\x00%r00efgh\xijkl"

@@ -1,83 +1,94 @@
 *** Testing idate() : usage variation ***
 
 --float 10.5--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --float -10.5--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --float .5--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, double given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --empty array--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --int indexed array--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --associative array--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --nested arrays--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --uppercase NULL--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --lowercase null--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --lowercase true--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --lowercase false--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --uppercase TRUE--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --uppercase FALSE--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --empty string DQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --empty string SQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --string DQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --string SQ--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --mixed case string--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --heredoc--
 
-Warning: idate() expects parameter 2 to be integer, string given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, string given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --instance of classWithToString--
 
-Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --instance of classWithoutToString--
 
-Warning: idate() expects parameter 2 to be integer, object given in %s/idate_variation2.php on line 88
+Warning: idate() expects parameter 2 to be integer, object given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --undefined var--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 
 --unset var--
-int(1970)
+
+Warning: idate() expects parameter 2 to be integer, null given in %s/zend/good/ext/date/tests/idate_variation2.php on line 88
 ===DONE===

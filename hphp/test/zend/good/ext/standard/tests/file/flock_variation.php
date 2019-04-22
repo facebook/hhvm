@@ -1,11 +1,11 @@
 <?php
-/* 
+/*
 Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files 
+Description: PHP supports a portable way of locking complete files
   in an advisory way
 */
 
-echo "*** Testing flock() fun with the various operation and 
+echo "*** Testing flock() fun with the various operation and
             wouldblock values                                ***\n";
 $file = dirname(__FILE__)."/flock.tmp";
 $fp = fopen($file, "w");
@@ -18,7 +18,7 @@ $operations = array(
   LOCK_EX|LOCK_NB,
   LOCK_SH|LOCK_EX,
   LOCK_UN,
-  1, 
+  1,
   2,
   2.234,
   TRUE
@@ -46,11 +46,11 @@ $wouldblocks = array(
 $i = 0;
 foreach($operations as $operation) {
   echo "--- Outer iteration $i ---\n";
-  var_dump(flock($fp, $operation));
+  var_dump(flock($fp, (int)$operation));
   $j = 0;
   foreach($wouldblocks as $wouldblock) {
     echo "-- Inner iteration $j in $i --\n";
-    var_dump(flock($fp, $operation, &$wouldblock));
+    var_dump(flock($fp, (int)$operation, &$wouldblock));
     $j++;
   }
   $i++;

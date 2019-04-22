@@ -16,17 +16,10 @@ string(17) "ng heredoc string"
 string(10) "ltrim test"
 string(13) "   ltrim test"
 string(18) "        ltrim test"
-string(18) "        ltrim test"
 string(10) "ltrim test"
 string(11) " ltrim test"
 string(10) "ltrim test"
 string(10) "ltrim test"
 string(10) "ltrim test"
-
- *** Output for  scalar argument) ***
-string(5) "12345"
-
- *** Output for  NULL argument) ***
-string(0) ""
 
 Done

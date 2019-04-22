@@ -27,7 +27,7 @@ function foo(string $s) {
 function bar($f) {
   var_dump($f);
   var_dump(is_string($f));
-  var_dump(strlen($f));
+  try { var_dump(strlen($f)); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
 
 function baz(): string {

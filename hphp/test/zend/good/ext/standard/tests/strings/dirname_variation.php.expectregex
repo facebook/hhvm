@@ -52,7 +52,7 @@ string\(1\) "."
 string\(1\) "."
 
 --Iteration 18 --
-string\(1\) "."
+string\(56\) "dirname\(\) expects parameter 1 to be string, object given"
 
 --Iteration 19 --
 string\(1\) "."
@@ -67,8 +67,8 @@ string\(0\) ""
 string\(0\) ""
 
 --Iteration 23 --
-string\(0\) ""
+string\(54\) "dirname\(\) expects parameter 1 to be string, null given"
 
 --Iteration 24 --
-string\(0\) ""
+string\(54\) "dirname\(\) expects parameter 1 to be string, null given"
 Done

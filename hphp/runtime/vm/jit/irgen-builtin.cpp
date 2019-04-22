@@ -231,38 +231,6 @@ SSATmp* opt_ord(IRGS& env, const ParamPrep& params) {
     return gen(env, OrdStr, arg);
   }
 
-  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) {
-    return nullptr;
-  }
-
-  if (params.forNativeImpl) return nullptr;
-
-  // In strict mode type mismatches won't be coerced (for legacy reasons in HH
-  // files builtins are always weak).
-  if (curFunc(env)->unit()->useStrictTypes() &&
-      !curFunc(env)->unit()->isHHFile() &&
-      !RuntimeOption::EnableHipHopSyntax) {
-    return nullptr;
-  }
-
-  // intercept constant, non-string ord() here instead of OrdStr simplify stage.
-  // OrdStr depends on a string as input for its vasm implementation.
-  if (arg->hasConstVal(TBool)) {
-    // ord((string)true)===ord("1"), ord((string)false)===ord("")
-    return cns(env, int64_t{arg_type.boolVal() ? '1' : 0});
-  }
-  if (arg_type <= TNull) {
-    return cns(env, int64_t{0});
-  }
-  if (arg->hasConstVal(TInt)) {
-    const auto conv = folly::to<std::string>(arg_type.intVal());
-    return cns(env, int64_t{conv[0]});
-  }
-  if (arg->hasConstVal(TDbl)) {
-    const auto conv = folly::to<std::string>(arg_type.dblVal());
-    return cns(env, int64_t{conv[0]});
-  }
-
   return nullptr;
 }
 
@@ -415,15 +383,6 @@ SSATmp* opt_sqrt(IRGS& env, const ParamPrep& params) {
   auto const val = params[0].value;
   auto const ty  = val->type();
   if (ty <= TDbl) return gen(env, Sqrt, val);
-
-  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) {
-    return nullptr;
-  }
-
-  if (ty <= TInt) {
-    auto const conv = gen(env, ConvIntToDbl, val);
-    return gen(env, Sqrt, conv);
-  }
   return nullptr;
 }
 
@@ -435,22 +394,6 @@ SSATmp* opt_strlen(IRGS& env, const ParamPrep& params) {
 
   if (ty <= TStr) {
     return gen(env, LdStrLen, val);
-  }
-
-  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams) {
-    return nullptr;
-  }
-
-  if (ty <= TNull) return cns(env, 0);
-  if (ty <= TBool) return gen(env, ConvBoolToInt, val);
-
-  if (ty.subtypeOfAny(TInt, TDbl)) {
-    auto str = ty <= TInt
-      ? gen(env, ConvIntToStr, val)
-      : gen(env, ConvDblToStr, val);
-    auto len = gen(env, LdStrLen, str);
-    decRef(env, str);
-    return len;
   }
 
   return nullptr;

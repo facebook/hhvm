@@ -45,37 +45,22 @@ TRACE_SET_MOD(irlower);
  * Attempt to convert `tv' to a given type, raising a warning and throwing a
  * Exception on failure.
  */
-#define XX(kind, expkind)                                             \
+#define X(kind)                                                      \
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,                   \
                                     const Func* callee,               \
                                     unsigned int arg_num) {           \
   tvCoerceIfStrict(*tv, arg_num, callee);                             \
-  auto ty = tv->m_type;                                               \
-  if (LIKELY(tvCoerceParamTo##kind##InPlace(tv,                       \
-                                            callee->isBuiltin()))) {  \
-    if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&               \
-        tv->m_type != KindOfNull &&                                   \
-        !equivDataTypes(ty, KindOf##expkind)) {                       \
-      raise_warning(                                                  \
-        "Argument %i of type %s was passed to %s, "                   \
-        "it was coerced to %s",                                       \
-        arg_num,                                                      \
-        getDataTypeString(ty).data(),                                 \
-        callee->fullDisplayName()->data(),                            \
-        getDataTypeString(KindOf##expkind).data()                     \
-      );                                                              \
-    }                                                                 \
+  if (equivDataTypes(tv->m_type, KindOf##kind)) {                     \
     return;                                                           \
   }                                                                   \
   auto msg = param_type_error_message(callee->displayName()->data(),  \
-                                      arg_num, KindOf##expkind,       \
+                                      arg_num, KindOf##kind,          \
                                       tv->m_type);                    \
   if (RuntimeOption::PHP7_EngineExceptions) {                         \
     SystemLib::throwTypeErrorObject(msg);                             \
   }                                                                   \
   SystemLib::throwRuntimeExceptionObject(msg);                        \
 }
-#define X(kind) XX(kind, kind)
 X(Boolean)
 X(Int64)
 X(Double)
@@ -85,10 +70,8 @@ X(Dict)
 X(Keyset)
 X(Array)
 X(Object)
-XX(NullableObject, Object)
 X(Resource)
 #undef X
-#undef XX
 
 ///////////////////////////////////////////////////////////////////////////////
 

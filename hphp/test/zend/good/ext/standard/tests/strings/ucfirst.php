@@ -37,7 +37,7 @@ $str_array = array(
 	     	  );
 /* loop to test working of ucfirst with different values */
 foreach ($str_array as $string) {
-  var_dump( ucfirst($string) );
+  try { var_dump( ucfirst($string) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
 
 
@@ -73,9 +73,6 @@ $string2 = (int)get_resource_type($file1);      // converting stream type to int
 
 /* $string1 is of "stream" type */
 var_dump(ucfirst($string1));
-
-/* $string2 holds a value of "int(0)" */
-var_dump(ucfirst($string2));
 
 fclose($file1);                                 // closing the file "dummy-ucfirst.txt"
 unlink("$filename1");                           // deletes "dummy-ucfirst.txt"

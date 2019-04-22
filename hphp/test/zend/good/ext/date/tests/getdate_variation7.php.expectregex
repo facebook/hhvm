@@ -1,6 +1,6 @@
 \*\*\* Testing getdate\(\) : usage variation \*\*\*
 
--- Testing getdate\(\) function by passing float 12.3456789000e10 value to timestamp --
+-- Testing getdate\(\) function by passing int 123456789000 value to timestamp --
 array\(11\) {
   \["seconds"\]=>
   int\((.+)\)
@@ -26,7 +26,7 @@ array\(11\) {
   int\((-1097262584|123456789000)\)
 }
 
--- Testing getdate\(\) function by passing float -12.3456789000e10 value to timestamp --
+-- Testing getdate\(\) function by passing int -123456789000 value to timestamp --
 array\(11\) {
   \["seconds"\]=>
   int\((.+)\)

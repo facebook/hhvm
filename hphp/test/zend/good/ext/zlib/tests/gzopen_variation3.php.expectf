@@ -1,93 +1,106 @@
 *** Testing gzopen() : usage variation ***
 
 --float 10.5--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, double given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --float -10.5--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, double given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --float 12.3456789000e10--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, double given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --float -12.3456789000e10--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, double given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --float .5--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, double given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --empty array--
-Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --int indexed array--
-Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --associative array--
-Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --nested arrays--
-Warning: gzopen() expects parameter 3 to be integer, array given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, array given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --uppercase NULL--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, null given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --lowercase null--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, null given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --lowercase true--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --lowercase false--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --uppercase TRUE--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --uppercase FALSE--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --empty string DQ--
-Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --empty string SQ--
-Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --string DQ--
-Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --string SQ--
-Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --mixed case string--
-Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --heredoc--
-Warning: gzopen() expects parameter 3 to be integer, string given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, string given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --instance of classWithToString--
-Warning: gzopen() expects parameter 3 to be integer, object given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, object given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --instance of classWithoutToString--
-Warning: gzopen() expects parameter 3 to be integer, object given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, object given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 
 --undefined var--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, null given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --unset var--
-resource(%d) of type (stream)
+Warning: gzopen() expects parameter 3 to be integer, null given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
+NULL
 
 --resource--
-Warning: gzopen() expects parameter 3 to be integer, resource given in %s/hphp/test/zend/good/ext/zlib/tests/gzopen_variation3.php on line %d
+Warning: gzopen() expects parameter 3 to be integer, resource given in %s/zend/good/ext/zlib/tests/gzopen_variation3.php on line 97
 NULL
 ===DONE===

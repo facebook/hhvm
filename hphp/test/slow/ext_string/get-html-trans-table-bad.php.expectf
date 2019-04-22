@@ -1,3 +1,4 @@
+string(73) "get_html_translation_table() expects parameter 3 to be string, null given"
 array(4) {
   ["""]=>
   string(6) "&quot;"
@@ -8,25 +9,4 @@ array(4) {
   [">"]=>
   string(4) "&gt;"
 }
-array(4) {
-  ["""]=>
-  string(6) "&quot;"
-  ["&"]=>
-  string(5) "&amp;"
-  ["<"]=>
-  string(4) "&lt;"
-  [">"]=>
-  string(4) "&gt;"
-}
-
-Warning: get_html_translation_table(): charset `5' not supported, assuming utf-8 in %s/get-html-trans-table-bad.php on line %d
-array(4) {
-  ["""]=>
-  string(6) "&quot;"
-  ["&"]=>
-  string(5) "&amp;"
-  ["<"]=>
-  string(4) "&lt;"
-  [">"]=>
-  string(4) "&gt;"
-}
+string(76) "get_html_translation_table() expects parameter 3 to be string, integer given"

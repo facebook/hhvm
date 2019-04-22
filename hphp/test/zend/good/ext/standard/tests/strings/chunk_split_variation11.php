@@ -2,7 +2,7 @@
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: none 
+ * Alias to functions: none
 */
 
 /*
@@ -23,7 +23,7 @@ $chunklen = 6E+0;
 
 //different values for 'ending'
 $values = array (
-  "",  //empty 
+  "",  //empty
   " ",  //space
   "a",  //single char
   "ENDING",  //regular string
@@ -35,7 +35,7 @@ $values = array (
 //loop through each values for 'ending'
 for($count = 0; $count < count($values); $count++) {
   echo "-- Iteration ".($count+1). " --\n";
-  var_dump( chunk_split($heredoc_str, $chunklen, $values[$count]) );
+  try { var_dump( chunk_split($heredoc_str, $chunklen, $values[$count]) ); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
 
 echo "Done";

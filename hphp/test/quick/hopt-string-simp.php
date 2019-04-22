@@ -81,7 +81,11 @@ class B { public function __toString() { return "B"; } }
 
 function foo14() {
   $x = new B();
-  return strlen($x);
+  try {
+    return strlen($x);
+  } catch (Exception $e) {
+    return $e->getMessage();
+  }
 }
 
 class C { public function __call($meth, $args) { return "C"; } }

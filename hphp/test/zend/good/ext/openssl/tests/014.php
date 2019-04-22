@@ -14,6 +14,6 @@ var_dump(openssl_private_encrypt($data, &$encrypted, $privkey));
 var_dump(openssl_private_encrypt($data, &$encrypted, $pubkey));
 var_dump(openssl_private_encrypt($data, &$encrypted, $wrong));
 var_dump(openssl_private_encrypt($data, &$encrypted, $obj));
-var_dump(openssl_private_encrypt($obj, &$encrypted, $privkey));
+try { var_dump(openssl_private_encrypt($obj, &$encrypted, $privkey)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 openssl_public_decrypt($encrypted, &$output, $pubkey);
 var_dump($output);

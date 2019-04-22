@@ -5,11 +5,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -41,11 +43,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -77,11 +81,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -113,11 +119,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -149,11 +157,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -185,11 +195,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -221,11 +233,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -257,11 +271,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -293,11 +309,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)
@@ -329,11 +347,13 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+string(3) "bar"
 bool(true)
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 string(3) "baz"
 bool(true)
 bool(true)

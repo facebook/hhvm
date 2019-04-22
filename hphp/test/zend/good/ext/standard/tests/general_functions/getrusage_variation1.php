@@ -2,7 +2,7 @@
 /* Prototype  :  array getrusage  ([ int $who  ] )
  * Description: Gets the current resource usages
  * Source code: ext/standard/microtime.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -42,13 +42,13 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // string data
 /*16*/ "0",
        '1',
        "1232456",
        "1.23E4",
-       
+
        // undefined data
 /*20*/ @$undefined_var,
 
@@ -60,8 +60,12 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  $res = getrusage($input);
-  echo "User time used (microseconds) " . $res["ru_utime.tv_usec"] . "\n";
+  try {
+    $res = getrusage($input);
+    echo "User time used (microseconds) " . $res["ru_utime.tv_usec"] . "\n";
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
   $iterator++;
 }
 echo "===DONE===\n";

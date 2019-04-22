@@ -126,21 +126,16 @@ string(7) "strings"
 Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 70
 __toString called
 string(5) "spall"
-==== coerce when calling native function ====
-
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 74
-__toString called
-int(6)
 ==== array_diff ====
 
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 77
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 74
 __toString called
 array(1) {
   [0]=>
   string(3) "int"
 }
 
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 78
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 75
 __toString called
 array(1) {
   [0]=>
@@ -148,14 +143,14 @@ array(1) {
 }
 ==== array_intersect ====
 
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 81
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 78
 __toString called
 array(1) {
   [1]=>
   string(6) "string"
 }
 
-Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 82
+Notice: Implicitly invoked C::__toString in %s/test/slow/object_magic_method/tostring_notice.php on line 79
 __toString called
 array(1) {
   [1]=>

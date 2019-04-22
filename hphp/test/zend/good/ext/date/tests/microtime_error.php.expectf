@@ -1,18 +1,21 @@
 
 -- Too many arguments --
 
-Warning: microtime() expects at most 1 parameter, 2 given in %s/microtime_error.php on line 11
+Warning: microtime() expects at most 1 parameter, 2 given in %s/zend/good/ext/date/tests/microtime_error.php on line 11
 
 -- Bad Arg types --
 
 --> bad arg: NULL
-string(%d) "%s %s"
+
+Warning: microtime() expects parameter 1 to be boolean, null given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: float(1.5)
-float(%s)
+
+Warning: microtime() expects parameter 1 to be boolean, double given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: string(5) "hello"
-float(%s)
+
+Warning: microtime() expects parameter 1 to be boolean, string given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: array(2) {
   ["k"]=>
@@ -24,13 +27,14 @@ float(%s)
   }
 }
 
-Warning: microtime() expects parameter 1 to be boolean, array given in %s/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, array given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: object(stdClass) (0) {
 }
 
-Warning: microtime() expects parameter 1 to be boolean, object given in %s/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, object given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: int(1)
-float(%s)
+
+Warning: microtime() expects parameter 1 to be boolean, integer given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 ===DONE===

@@ -1,52 +1,52 @@
 *** Testing escapeshellarg() : usage variations ***
 
 -- Iteration 1 --
-string(3) "'0'"
+string(64) "escapeshellarg() expects parameter 1 to be string, integer given"
 
 -- Iteration 2 --
-string(3) "'1'"
+string(64) "escapeshellarg() expects parameter 1 to be string, integer given"
 
 -- Iteration 3 --
-string(4) "'12'"
+string(64) "escapeshellarg() expects parameter 1 to be string, integer given"
 
 -- Iteration 4 --
-string(5) "'-12'"
+string(64) "escapeshellarg() expects parameter 1 to be string, integer given"
 
 -- Iteration 5 --
-string(12) "'2147483647'"
+string(64) "escapeshellarg() expects parameter 1 to be string, integer given"
 
 -- Iteration 6 --
-string(6) "'10.5'"
+string(63) "escapeshellarg() expects parameter 1 to be string, double given"
 
 -- Iteration 7 --
-string(7) "'-10.5'"
+string(63) "escapeshellarg() expects parameter 1 to be string, double given"
 
 -- Iteration 8 --
-string(10) "'123.4567'"
+string(63) "escapeshellarg() expects parameter 1 to be string, double given"
 
 -- Iteration 9 --
-string(12) "'0.01234567'"
+string(63) "escapeshellarg() expects parameter 1 to be string, double given"
 
 -- Iteration 10 --
-string(5) "'0.5'"
+string(63) "escapeshellarg() expects parameter 1 to be string, double given"
 
 -- Iteration 11 --
-string(2) "''"
+string(61) "escapeshellarg() expects parameter 1 to be string, null given"
 
 -- Iteration 12 --
-string(2) "''"
+string(61) "escapeshellarg() expects parameter 1 to be string, null given"
 
 -- Iteration 13 --
-string(3) "'1'"
+string(64) "escapeshellarg() expects parameter 1 to be string, boolean given"
 
 -- Iteration 14 --
-string(2) "''"
+string(64) "escapeshellarg() expects parameter 1 to be string, boolean given"
 
 -- Iteration 15 --
-string(3) "'1'"
+string(64) "escapeshellarg() expects parameter 1 to be string, boolean given"
 
 -- Iteration 16 --
-string(2) "''"
+string(64) "escapeshellarg() expects parameter 1 to be string, boolean given"
 
 -- Iteration 17 --
 string(2) "''"
@@ -55,8 +55,8 @@ string(2) "''"
 string(2) "''"
 
 -- Iteration 19 --
-string(2) "''"
+string(61) "escapeshellarg() expects parameter 1 to be string, null given"
 
 -- Iteration 20 --
-string(2) "''"
+string(61) "escapeshellarg() expects parameter 1 to be string, null given"
 ===Done===

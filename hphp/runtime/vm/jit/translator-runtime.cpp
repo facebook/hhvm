@@ -400,6 +400,7 @@ StringData* convResToStrHelper(ResourceHdr* r) {
   return r->data()->o_toString().detach();
 }
 
+[[noreturn]]
 inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
                            const Func* func) {
   auto msg = param_type_error_message(func->displayName()->data(),
@@ -412,16 +413,8 @@ inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
 
 void builtinCoercionWarningHelper(DataType ty, DataType expKind,
                                   const Func* callee, int64_t arg_num) {
-  if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&
-      !equivDataTypes(ty, expKind)) {
-    raise_warning(
-      "Argument %ld of type %s was passed to %s, "
-      "it was coerced to %s",
-      arg_num,
-      getDataTypeString(ty).data(),
-      callee->fullDisplayName()->data(),
-      getDataTypeString(expKind).data()
-    );
+  if (!equivDataTypes(ty, expKind)) {
+    coerceCellFail(expKind, ty, arg_num, callee);
   }
 }
 
@@ -433,7 +426,6 @@ bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   DataType type = tv.m_type;
   if (isArrayLikeType(type) || type == KindOfObject || type == KindOfResource) {
     coerceCellFail(KindOfBoolean, type, argNum, func);
-    not_reached();
   }
 
   builtinCoercionWarningHelper(tv.m_type, KindOfBoolean, func, argNum);
@@ -452,7 +444,6 @@ double coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
   }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfDouble, KindOfString, argNum, func);
-    not_reached();
   }
 
   builtinCoercionWarningHelper(KindOfString, KindOfDouble, func, argNum);
@@ -520,7 +511,6 @@ int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
   }
   if (type != KindOfDouble && type != KindOfInt64) {
     coerceCellFail(KindOfInt64, KindOfString, argNum, func);
-    not_reached();
   }
 
   builtinCoercionWarningHelper(KindOfString, KindOfInt64, func, argNum);

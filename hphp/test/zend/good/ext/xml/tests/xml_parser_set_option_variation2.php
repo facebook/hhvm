@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
- * Description: Set options in an XML parser 
+ * Description: Set options in an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_set_option() : usage variations ***\n";

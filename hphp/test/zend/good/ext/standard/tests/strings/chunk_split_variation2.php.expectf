@@ -1,81 +1,74 @@
 *** Testing chunk_split() : with unexpected values for 'chunklen' argument ***
 -- Iteration 1 --
-string(28) "This is ch*uklen vari*ation*"
+
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 2 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 3 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 4 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 5 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 6 --
 
-Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 7 --
 
-Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 8 --
 
-Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 9 --
 
-Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 2 to be integer, array given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 11 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 12 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 13 --
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+
+Warning: chunk_split() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 14 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 15 --
-string(50) "T*h*i*s* *i*s* *c*h*u*k*l*e*n* *v*a*r*i*a*t*i*o*n*"
+
+Warning: chunk_split() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 16 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 17 --
 
-Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 18 --
 
-Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 19 --
 
-Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 20 --
 
-Warning: chunk_split() expects parameter 2 to be integer, string given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 21 --
 
-Warning: chunk_split() expects parameter 2 to be integer, object given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 22 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 23 --
 
-Warning: Invalid argument: chunklen: (non-positive) in %s/chunk_split_variation2.php on line 80
-bool(false)
+Warning: chunk_split() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 -- Iteration 24 --
 
-Warning: chunk_split() expects parameter 2 to be integer, resource given in %s/chunk_split_variation2.php on line 80
+Warning: chunk_split() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation2.php on line 80
 ===DONE===

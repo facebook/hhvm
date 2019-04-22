@@ -1,42 +1,42 @@
 *** Testing php_uname() - usage variations
 -- Iterator 0 --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
 -- Iterator 1 --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
 -- Iterator 12345 --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
 -- Iterator -2345 --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, integer given"
 -- Iterator 10.5 --
-string(%d) "%s"
+ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
 -- Iterator -10.5 --
-string(%d) "%s"
+ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
 -- Iterator 10.1234567e10 --
-string(%d) "%s"
+ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
 -- Iterator 10.7654321E-10 --
-string(%d) "%s"
+ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
 -- Iterator .5 --
-string(%d) "%s"
+ERROR: string(58) "php_uname() expects parameter 1 to be string, double given"
 -- Iterator NULL --
-string(%d) "%s"
+ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
 -- Iterator null --
-string(%d) "%s"
+ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
 -- Iterator true --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
 -- Iterator false --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
 -- Iterator TRUE --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
 -- Iterator FALSE --
-string(%d) "%s"
+ERROR: string(59) "php_uname() expects parameter 1 to be string, boolean given"
 -- Iterator "" --
 string(%d) "%s"
 -- Iterator '' --
 string(%d) "%s"
 -- Iterator new fooClass() --
-string(%d) "%s"
+ERROR: string(58) "php_uname() expects parameter 1 to be string, object given"
 -- Iterator undefined var --
-string(%d) "%s"
+ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
 -- Iterator unset var --
-string(%d) "%s"
+ERROR: string(56) "php_uname() expects parameter 1 to be string, null given"
 ===DONE===

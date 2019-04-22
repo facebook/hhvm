@@ -224,7 +224,7 @@ class Client
         if (!$this->_sock) {
             return false;
         }
-        return \stream_set_timeout($this->_sock, \floor($timeoutMs / 1000), ($timeoutMs % 1000) * 1000);
+        return \stream_set_timeout($this->_sock, (int)\floor($timeoutMs / 1000), ($timeoutMs % 1000) * 1000);
     }
 
 
@@ -235,9 +235,9 @@ class Client
     {
         if (!$this->_sock) {
             if ($this->_persistentSocket) {
-                $this->_sock = \pfsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
+                $this->_sock = \pfsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000.0);
             } else {
-                $this->_sock = \fsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000);
+                $this->_sock = \fsockopen($this->_host, $this->_port, &$errno, &$errstr, $this->_connectTimeout/1000.0);
             }
 
             if (!$this->_sock) {
@@ -281,7 +281,7 @@ class Client
     private function buildNvpair($name, $value)
     {
         $nlen = \strlen($name);
-        $vlen = \strlen($value);
+        $vlen = \strlen((string)$value);
         if ($nlen < 128) {
             /* nameLengthB0 */
             $nvpair = \chr($nlen);

@@ -1,7 +1,7 @@
 <?php
 /* Prototype: string basename ( string $path [, string $suffix] );
    Description: Given a string containing a path to a file,
-                this function will return the base name of the file. 
+                this function will return the base name of the file.
                 If the filename ends in suffix this will also be cut off.
 */
 $file_path_variations = array (
@@ -59,7 +59,7 @@ $file_path_variations = array (
   /* path with spaces */
   array(" "),
   array(' '),
-  
+
   /* empty paths */
   array(""),
   array(''),
@@ -71,10 +71,10 @@ function check_basename( $path_arrays ) {
    foreach ($path_arrays as $path) {
      echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
      if( 1 == count($path) ) { // no suffix provided
-       var_dump( basename($path[0]) );
+       try { var_dump( basename($path[0]) ); } catch (Exception $e) { var_dump($e->getMessage()); }
      } else { // path as well as suffix provided,
-       var_dump( basename($path[0], $path[1]) );    
-     } 
+       try { var_dump( basename($path[0], $path[1]) ); } catch (Exception $e) { var_dump($e->getMessage()); }
+     }
    }
 }
 
@@ -82,4 +82,3 @@ echo "*** Testing possible variations in path and suffix ***\n";
 check_basename( $file_path_variations );
 
 echo "Done\n";
-

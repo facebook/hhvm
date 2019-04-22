@@ -19,5 +19,6 @@ function render($arg1, $arg2) {
 <<__EntryPoint>>
 function main_1585() {
 $GLOBALS['n_indent_level'] = 0;
+$GLOBALS['n_indent_tab'] = "\t";
 var_dump(render("foo", "bar"));
 }

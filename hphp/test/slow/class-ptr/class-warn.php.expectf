@@ -6,13 +6,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -60,13 +62,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -114,13 +118,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -168,13 +174,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -222,13 +230,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -276,13 +286,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -330,13 +342,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -384,13 +398,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -438,13 +454,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
@@ -492,13 +510,15 @@ string(3) "foo"
 bool(true)
 int(3)
 string(5) "hello"
+string(5) "hello"
 bool(true)
 int(5)
 class(bar)
+notice(%s): Class to string conversion
+string(3) "bar"
 notice(bar): Class used in is_string
 bool(true)
-notice(%s): Class to string conversion
-int(3)
+string(54) "strlen() expects parameter 1 to be string, class given"
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint
 notice(baz): Implicit Class to string conversion for type-hint

@@ -1,4 +1,4 @@
-*** Testing flock() fun with the various operation and 
+*** Testing flock() fun with the various operation and
             wouldblock values                                ***
 --- Outer iteration 0 ---
 bool(true)

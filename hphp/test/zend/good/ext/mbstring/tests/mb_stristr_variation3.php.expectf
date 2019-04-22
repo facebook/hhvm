@@ -1,57 +1,79 @@
 *** Testing mb_stristr() : usage variation ***
 
 --int 0--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --int 1--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --int 12345--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --int -12345--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, integer given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --float 10.5--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --float -10.5--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --float 12.3456789000e10--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --float -12.3456789000e10--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --float .5--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, double given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --empty array--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 
 --int indexed array--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 
 --associative array--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 
 --nested arrays--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 
 --uppercase NULL--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --lowercase null--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --lowercase true--
 string(12) "737472696e67"
@@ -66,41 +88,57 @@ string(12) "737472696e67"
 string(8) "5f76616c"
 
 --empty string DQ--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --empty string SQ--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --string DQ--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --string SQ--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --mixed case string--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --heredoc--
-string(12) "737472696e67"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, string given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --instance of classWithToString--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, object given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, object given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, object given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 
 --undefined var--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --unset var--
-string(8) "5f76616c"
+
+Warning: mb_stristr() expects parameter 3 to be boolean, null given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+bool(false)
 
 --resource--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, resource given in %s/hphp/test/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
+Warning: mb_stristr() expects parameter 3 to be boolean, resource given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 113
 bool(false)
 ===DONE===

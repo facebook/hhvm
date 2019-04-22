@@ -1,9 +1,6 @@
 <?php
 
 
-$use_include_path = 
-
-
 $variation = array(
   'lowercase true' => true,
   'lowercase false' =>false,
@@ -13,6 +10,6 @@ $variation = array(
 
 
 foreach ( $variation as $var ) {
-  try { var_dump(readgzfile( $var ,  $use_include_path ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { var_dump(readgzfile( '' ,  $var ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 echo "===DONE===\n";

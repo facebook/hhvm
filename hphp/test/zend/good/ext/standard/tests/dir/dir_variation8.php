@@ -1,12 +1,12 @@
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
  */
 
-/* 
- * Create more than one temporary directory & subdirectory and check if dir() function can open 
+/*
+ * Create more than one temporary directory & subdirectory and check if dir() function can open
  * those directories when wildcard characters are used to refer to them.
  */
 
@@ -17,12 +17,12 @@ $file_path = dirname(__FILE__);
 $dir_path = $file_path."/dir_variation81";
 $sub_dir_path = $dir_path."/sub_dir1";
 
-@mkdir($dir_path1);
+try { @mkdir($dir_path1); } catch (Exception $e) { var_dump($e->getMessage()); }
 @mkdir($sub_dir_path);
 
 /* with different wildcard characters */
 
-echo "-- wildcard = '*' --\n"; 
+echo "-- wildcard = '*' --\n";
 var_dump( dir($file_path."/dir_var*") );
 var_dump( dir($file_path."/*") );
 

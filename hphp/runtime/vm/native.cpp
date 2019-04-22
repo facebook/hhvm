@@ -270,45 +270,10 @@ void callFunc(const Func* func, void *ctx,
 
 //////////////////////////////////////////////////////////////////////////////
 
-#define COERCE_OR_CAST(kind, warn_kind)                         \
-  {                                                             \
-    auto ty = args[-i].m_type;                                  \
-    if (!tvCoerceParamTo##kind##InPlace(&args[-i],              \
-                                        func->isBuiltin())) {   \
-      auto msg = param_type_error_message(                      \
-        func->displayName()->data(),                            \
-        i+1,                                                    \
-        KindOf##warn_kind,                                      \
-        args[-i].m_type                                         \
-      );                                                        \
-      if (RuntimeOption::PHP7_EngineExceptions) {               \
-        SystemLib::throwTypeErrorObject(msg);                   \
-      }                                                         \
-      SystemLib::throwRuntimeExceptionObject(msg);              \
-    } else {                                                    \
-      if (RuntimeOption::EvalWarnOnCoerceBuiltinParams &&       \
-          !equivDataTypes(ty, KindOf##warn_kind) &&             \
-          args[-i].m_type != KindOfNull) {                      \
-        raise_warning(                                          \
-          "Argument %i of type %s was passed to %s, "           \
-          "it was coerced to %s",                               \
-          i + 1,                                                \
-          getDataTypeString(ty).data(),                         \
-          func->fullDisplayName()->data(),                      \
-          getDataTypeString(KindOf##warn_kind).data()           \
-        );                                                      \
-      }                                                         \
-    }                                                           \
-  }
-
-#define CASE(kind)                                      \
-  case KindOf##kind:                                    \
-    COERCE_OR_CAST(kind, kind)                          \
-    break; /* end of case */
-
 void coerceFCallArgs(TypedValue* args,
                      int32_t numArgs, int32_t numNonDefault,
                      const Func* func) {
+  assertx(func->isBuiltin() && "func is not a builtin");
   assertx(numArgs == func->numParams());
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
@@ -365,46 +330,17 @@ void coerceFCallArgs(TypedValue* args,
       return;
     }
 
-    switch (*targetType) {
-      CASE(Boolean)
-      CASE(Int64)
-      CASE(Double)
-      CASE(String)
-      CASE(Vec)
-      CASE(Dict)
-      CASE(Keyset)
-      CASE(Shape)
-      CASE(Array)
-      CASE(Resource)
-
-      case KindOfObject: {
-        if (pi.hasDefaultValue()) {
-          COERCE_OR_CAST(NullableObject, Object);
-        } else {
-          COERCE_OR_CAST(Object, Object);
-        }
-        break;
-      }
-
-      case KindOfRecord: // TODO (T41031632)
-        raise_error(Strings::RECORD_NOT_SUPPORTED);
-      case KindOfUninit:
-      case KindOfNull:
-      case KindOfPersistentString:
-      case KindOfPersistentVec:
-      case KindOfPersistentDict:
-      case KindOfPersistentKeyset:
-      case KindOfPersistentShape:
-      case KindOfPersistentArray:
-      case KindOfRef:
-      case KindOfFunc:
-      case KindOfClass:
-      case KindOfClsMeth:
-        not_reached();
+    auto msg = param_type_error_message(
+      func->displayName()->data(),
+      i+1,
+      *targetType,
+      args[-i].m_type
+    );
+    if (RuntimeOption::PHP7_EngineExceptions) {
+      SystemLib::throwTypeErrorObject(msg);
     }
+    SystemLib::throwRuntimeExceptionObject(msg);
   }
-
-  return;
 }
 
 #undef CASE

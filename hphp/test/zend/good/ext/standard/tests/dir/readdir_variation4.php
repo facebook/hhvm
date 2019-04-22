@@ -49,7 +49,7 @@ foreach($inputs as $key => $input) {
 	echo "\n-- Iteration $iterator --\n";
 	$handle = "fp{$iterator}";
 	var_dump( $handle = fopen(@"$dir_path$input.tmp", 'w') );
-	var_dump( fwrite($handle, $key));
+	try { var_dump( fwrite($handle, $key)); } catch (Exception $e) { var_dump($e->getMessage()); }
 	fclose($handle);
 	$iterator++;
 };

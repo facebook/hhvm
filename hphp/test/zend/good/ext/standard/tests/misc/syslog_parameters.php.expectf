@@ -1,7 +1,7 @@
 
 Warning: openlog() expects exactly 3 parameters, 0 given in %s/syslog_parameters.php on line 2
 
-Warning: openlog() expects parameter 2 to be integer, string given in %s/syslog_parameters.php on line 3
+Warning: openlog() expects parameter 1 to be string, null given in %s/syslog_parameters.php on line 3
 
 Warning: syslog() expects exactly 2 parameters, 0 given in %s/syslog_parameters.php on line 5
 

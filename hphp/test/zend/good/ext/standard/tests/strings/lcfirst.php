@@ -37,7 +37,7 @@ $str_array = array(
 	     	  );
 /* loop to test working of lcfirst with different values */
 foreach ($str_array as $string) {
-  var_dump( lcfirst($string) );
+  try { var_dump( lcfirst($string) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 
 
@@ -104,7 +104,7 @@ $string2 = (int)get_resource_type($file1);      // converting stream type to int
 var_dump(lcfirst($string1));
 
 /* $string2 holds a value of "int(0)" */
-var_dump(lcfirst($string2));
+try { var_dump(lcfirst($string2)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 fclose($file1);                                 // closing the file "dummy-lcfirst.txt"
 unlink("$filename1");                           // deletes "dummy-lcfirst.txt"

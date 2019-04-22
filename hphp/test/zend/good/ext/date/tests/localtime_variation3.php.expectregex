@@ -1,6 +1,6 @@
 \*\*\* Testing localtime\(\) : usage variation \*\*\*
 
--- Testing localtime\(\) function with 'float 12.3456789000e10' to timestamp --
+-- Testing localtime\(\) function with int 123456789000 to timestamp --
 array\(9\) {
   \[0\]=>
   int\((16|0)\)
@@ -42,7 +42,7 @@ array\(9\) {
   int\(0\)
 }
 
--- Testing localtime\(\) function with 'float -12.3456789000e10' to timestamp --
+-- Testing localtime\(\) function with int -123456789000 to timestamp --
 array\(9\) {
   \[0\]=>
   int\((44|52|0)\)

@@ -70,9 +70,6 @@ function test() {
   $s[0] = $c;
   var_dump($s);
 
-  echo "==== coerce when calling native function ====\n";
-  var_dump(strlen($c));
-
   echo "==== array_diff ====\n";
   var_dump(array_diff(array("int", "string"), array($c)));
   var_dump(array_diff(array("int", $c), array("string")));

@@ -1,14 +1,14 @@
 <?php
 /*
  Prototype: string fread ( resource $handle [, int $length] );
- Description: reads up to length bytes from the file pointer referenced by handle. 
-   Reading stops when up to length bytes have been read, EOF (end of file) is 
-   reached, (for network streams) when a packet becomes available, or (after 
+ Description: reads up to length bytes from the file pointer referenced by handle.
+   Reading stops when up to length bytes have been read, EOF (end of file) is
+   reached, (for network streams) when a packet becomes available, or (after
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
 
 echo "*** Testing error conditions ***\n";
-$filename = __FILE__; 
+$filename = __FILE__;
 $file_handle = fopen($filename, "r");
 
 // zero argument
@@ -19,9 +19,9 @@ try { var_dump( fread() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 echo "-- Testing fread() with more than expected number of arguments --\n";
 try { var_dump( fread($file_handle, 10, $file_handle) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-// invalid length argument 
+// invalid length argument
 echo "-- Testing fread() with invalid length arguments --\n";
-$len = 0; 
+$len = 0;
 var_dump( fread($file_handle, $len) );
 $len = -10;
 var_dump( fread($file_handle, $len) );
@@ -45,7 +45,7 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
 // fwrite() on a file handle which is already closed
 echo "-- Testing fwrite() with closed/unset file handle --\n";
 fclose($file_handle);
-var_dump( fread($file_handle,$file_content_type) );
+var_dump( fread($file_handle,0) );
 
 // fwrite on a file handle which is unset
 $fp = fopen($filename, "r");

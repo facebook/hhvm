@@ -26,7 +26,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12,
-       -12,       
+       -12,
        2147483647,
 
        // float data
@@ -45,7 +45,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
@@ -62,7 +62,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(escapeshellarg($input));
+	try { var_dump(escapeshellarg($input)); } catch (Exception $e) { var_dump($e->getMessage()); }
 	$iterator++;
 };
 echo "===Done===";

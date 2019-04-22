@@ -64,7 +64,7 @@ function request($host, $port, $path, $post = [], $headers = [], $extra_args = [
     }
     return trim($result);
   } catch (Exception $e) {
-    tlog("request exception: " . $e->getMessage());
+    tlog("request exception: " . $e->getMessage() .'('.$e->getTraceAsString().')');
     return "";
   }
 }

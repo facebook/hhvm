@@ -9,45 +9,56 @@ int(6)
 -- Iteration 4 --
 int(9)
 -- Iteration 5 --
-int(9)
+
+Warning: sizeof() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 6 --
-int(9)
+
+Warning: sizeof() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 7 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 8 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 9 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 10 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 11 --
 int(6)
 -- Iteration 12 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 13 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 14 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 15 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 16 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s/sizeof_variation5.php on line 61
+Warning: sizeof() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 17 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s/sizeof_variation5.php on line 61
+Warning: sizeof() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 18 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s/sizeof_variation5.php on line 61
+Warning: sizeof() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 19 --
 
-Warning: sizeof() expects parameter 2 to be integer, string given in %s/sizeof_variation5.php on line 61
+Warning: sizeof() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 20 --
-int(6)
+
+Warning: sizeof() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 21 --
 
-Warning: sizeof() expects parameter 2 to be integer, object given in %s/sizeof_variation5.php on line 61
+Warning: sizeof() expects parameter 2 to be integer, object given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 -- Iteration 22 --
 
-Warning: sizeof() expects parameter 2 to be integer, resource given in %s/sizeof_variation5.php on line 61
+Warning: sizeof() expects parameter 2 to be integer, resource given in %s/zend/good/ext/standard/tests/array/sizeof_variation5.php on line 61
 Done

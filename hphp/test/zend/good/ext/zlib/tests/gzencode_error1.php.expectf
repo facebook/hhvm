@@ -24,10 +24,9 @@ Warning: gzencode() expects parameter 1 to be string, object given in %s/gzencod
 
 Warning: gzencode() expects parameter 2 to be integer, object given in %s/gzencode_error1.php on line 43
 
-Warning: encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s/gzencode_error1.php on line 44
-bool(false)
+Warning: %s
 
 Warning: gzencode() expects parameter 3 to be integer, object given in %s/gzencode_error1.php on line 45
 
-Warning: gzencode() expects parameter 2 to be integer, string given in %s/gzencode_error1.php on line 46
+Warning: %s
 ===Done===

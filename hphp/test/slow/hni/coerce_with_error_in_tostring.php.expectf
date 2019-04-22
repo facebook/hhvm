@@ -1,2 +1,0 @@
-
-Catchable fatal error: Method Foo::__toString() must return a string value in %s on line 5

@@ -13,53 +13,53 @@ User time used (microseconds) %d
 User time used (microseconds) %d
 
 -- Iteration 5 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, double given"
 
 -- Iteration 6 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, double given"
 
 -- Iteration 7 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, double given"
 
 -- Iteration 8 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, double given"
 
 -- Iteration 9 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, double given"
 
 -- Iteration 10 --
-User time used (microseconds) %d
+string(57) "getrusage() expects parameter 1 to be integer, null given"
 
 -- Iteration 11 --
-User time used (microseconds) %d
+string(57) "getrusage() expects parameter 1 to be integer, null given"
 
 -- Iteration 12 --
-User time used (microseconds) %d
+string(60) "getrusage() expects parameter 1 to be integer, boolean given"
 
 -- Iteration 13 --
-User time used (microseconds) %d
+string(60) "getrusage() expects parameter 1 to be integer, boolean given"
 
 -- Iteration 14 --
-User time used (microseconds) %d
+string(60) "getrusage() expects parameter 1 to be integer, boolean given"
 
 -- Iteration 15 --
-User time used (microseconds) %d
+string(60) "getrusage() expects parameter 1 to be integer, boolean given"
 
 -- Iteration 16 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, string given"
 
 -- Iteration 17 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, string given"
 
 -- Iteration 18 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, string given"
 
 -- Iteration 19 --
-User time used (microseconds) %d
+string(59) "getrusage() expects parameter 1 to be integer, string given"
 
 -- Iteration 20 --
-User time used (microseconds) %d
+string(57) "getrusage() expects parameter 1 to be integer, null given"
 
 -- Iteration 21 --
-User time used (microseconds) %d
+string(57) "getrusage() expects parameter 1 to be integer, null given"
 ===DONE===

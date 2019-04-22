@@ -218,11 +218,11 @@ try {
 }
 try {
   HH\facts_parse(null, array(null), null, null);
-} catch (InvalidOperationException $e) {
+} catch (Exception $e) {
   var_dump($e->getMessage());
 }
 try {
   HH\facts_parse(null, array(array()), null, null);
-} catch (InvalidOperationException $e) {
+} catch (Exception $e) {
   var_dump($e->getMessage());
 }

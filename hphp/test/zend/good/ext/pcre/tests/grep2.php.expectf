@@ -1,7 +1,7 @@
 
 Warning: preg_grep() expects at most 3 parameters, 4 given in %s/grep2.php on line 3
 
-Warning: preg_grep() expects parameter 2 to be array, integer given in %s/grep2.php on line 4
+Warning: preg_grep() expects parameter 1 to be string, integer given in %s/grep2.php on line 4
 
 Warning: Compilation failed: nothing to repeat at offset 0 in %s/grep2.php on line 5
 bool(false)

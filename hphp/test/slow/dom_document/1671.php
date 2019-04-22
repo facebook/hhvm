@@ -8,6 +8,7 @@ $dom = new domDocument;
 $dom->loadxml($xml);
 $xpath = new DOMXPath($dom);
 $node_list = $xpath->query('//dependencies/dependency[@dependent_id = 8]');
+$attribute = '';
 foreach ($node_list as $node) {
   var_dump($node->getAttribute($attribute));
 }

@@ -14,10 +14,10 @@ function doit($a, $b, $how)
 {
 	echo "==default\n";
 	$how();
-	echo "==true\n";
-	$how(true);
-	echo "==false\n";
-	$how(false);
+	echo "==1\n";
+	$how(1);
+	echo "==0\n";
+	$how(0);
 	echo "==DEBUG_BACKTRACE_PROVIDE_OBJECT\n";
 	$how(DEBUG_BACKTRACE_PROVIDE_OBJECT);
 	echo "==DEBUG_BACKTRACE_IGNORE_ARGS\n";

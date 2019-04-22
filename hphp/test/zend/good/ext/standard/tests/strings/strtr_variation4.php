@@ -41,10 +41,10 @@ for($index = 0; $index < count($str_arr); $index++) {
   $str = $str_arr[$index];  //getting the array element in 'str' variable
 
   //strtr() call in three args syntax form
-  var_dump( strtr($str, $from, $to) );
+  try { var_dump( strtr($str, $from, $to) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   //strtr() call in two args syntax form
-  var_dump( strtr($str, $replace_pairs) );
+  try { var_dump( strtr($str, $replace_pairs) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $count++;
 }

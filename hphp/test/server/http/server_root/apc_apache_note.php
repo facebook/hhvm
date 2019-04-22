@@ -1,7 +1,7 @@
 <?hh
 
 function apc_apache_note() {
-  apache_note('what', apc_fetch('what'));
+  apache_note('what', (string)apc_fetch('what'));
   apc_store('what', 'hello' . rand(100));
 }
 

@@ -1,12 +1,13 @@
 bool(true)
 
-Warning: key param is not a valid private key in %s/014.php on line 14
+Warning: key param is not a valid private key in %s/zend/good/ext/openssl/tests/014.php on line 14
 bool(false)
 
-Warning: key param is not a valid private key in %s/014.php on line 15
+Warning: key param is not a valid private key in %s/zend/good/ext/openssl/tests/014.php on line 15
 bool(false)
 
-Warning: key param is not a valid private key in %s/014.php on line 16
+Warning: key param is not a valid private key in %s/zend/good/ext/openssl/tests/014.php on line 16
 bool(false)
-bool(true)
-string(4) "test"
+
+Warning: openssl_private_encrypt() expects parameter 1 to be string, object given in %s/zend/good/ext/openssl/tests/014.php on line 17
+string(33) "Testing openssl_private_encrypt()"

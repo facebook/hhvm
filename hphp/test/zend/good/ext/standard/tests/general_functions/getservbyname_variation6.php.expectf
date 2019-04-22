@@ -1,4 +1,5 @@
 *** Test substituting argument 1 with object values ***
-bool(false)
 
-Warning: getservbyname() expects parameter 1 to be string, object given in %s/getservbyname_variation6.php on line 27
+Warning: getservbyname() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/general_functions/getservbyname_variation6.php on line 27
+
+Warning: getservbyname() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/general_functions/getservbyname_variation6.php on line 27

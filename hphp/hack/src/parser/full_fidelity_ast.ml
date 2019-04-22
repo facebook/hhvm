@@ -30,13 +30,13 @@ type lifted_awaits = {
 let make_tmp_var_name c =
   SN.SpecialIdents.tmp_var_prefix ^ (string_of_int c)
 
-let lift_await expr awaits ~with_temp_local =
+let lift_await ((pos, _) as expr) awaits ~with_temp_local =
     if (with_temp_local)
     then
       let name = make_tmp_var_name awaits.name_counter in
       awaits.name_counter <- awaits.name_counter + 1;
-      awaits.awaits <- ((Some (Pos.none, name)), expr) :: awaits.awaits;
-      Lvar (Pos.none, name)
+      awaits.awaits <- ((Some (pos, name)), expr) :: awaits.awaits;
+      Lvar (pos, name)
     else
       (awaits.awaits <- (None, expr) :: awaits.awaits;
       Null)
@@ -2256,16 +2256,16 @@ and pStmt : stmt parser = fun node env ->
         List.fold_left ~init:([], [], 1)
           ~f:(fun (body_stmts, assign_stmts, i) n ->
             match n with
-            | (p1, Expr (p2, Binop ((Eq op), e1, e2))) ->
+            | (p1, Expr (p2, Binop ((Eq op), e1, ((p3, _) as e2)))) ->
               let name = make_tmp_var_name i in
-              let tmp_n = Pos.none, Lvar (Pos.none, name) in
+              let tmp_n = p3, Lvar (p3, name) in
               let body_stmts =
                 match tmp_n, e2 with
                 | (_, Lvar (_, name1)), (_, Lvar (_, name2))
                   when name1 = name2 ->
                   body_stmts
                 | _ ->
-                  let new_n = (p1, Expr (Pos.none, Binop ((Eq None), tmp_n, e2))) in
+                  let new_n = (p1, Expr (p2, Binop ((Eq None), tmp_n, e2))) in
                   new_n :: body_stmts in
 
               let assign_stmt = (p1, Expr (p2, Binop ((Eq op), e1, tmp_n))) in

@@ -39,7 +39,7 @@
        { fb_ast =
          [([12:3-16:4],
            (Awaitall
-              ([((Some ([Pos.none], __tmp$2)),
+              ([((Some ([15:16-27], __tmp$2)),
                  (([15:16-27], Awaitable<string>),
                   (Call (Cnormal,
                      (([15:16-25], (function(): Awaitable<string>)),
@@ -51,7 +51,7 @@
                       (([14:11-20], (function(): Awaitable<string>)),
                        (Id ([14:11-20], "\\genString"))),
                       [], [], []))));
-                 ((Some ([Pos.none], __tmp$1)),
+                 ((Some ([13:16-24], __tmp$1)),
                   (([13:16-24], Awaitable<int>),
                    (Call (Cnormal,
                       (([13:16-22], (function(): Awaitable<int>)),
@@ -64,13 +64,13 @@
                      (([13:5-24], int),
                       (Binop ((Eq None),
                          (([13:5-7], int), (Lvar ([13:5-7], $a))),
-                         (([Pos.none], int), (Lvar ([Pos.none], __tmp$1))))))));
+                         (([13:10-24], int), (Lvar ([13:10-24], __tmp$1))))))));
                  ([15:5-28],
                   (Expr
                      (([15:5-27], string),
                       (Binop ((Eq None),
                          (([15:5-7], string), (Lvar ([15:5-7], $c))),
-                         (([Pos.none], string), (Lvar ([Pos.none], __tmp$2)))
+                         (([15:10-27], string), (Lvar ([15:10-27], __tmp$2)))
                          )))))
                  ])))
            ];

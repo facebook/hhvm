@@ -152,7 +152,13 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
     empty_delta_with_cont C.Fallthrough gamma
   | Break ->
     empty_delta_with_cont C.Break gamma
+  (* TempBreak is caught as a naming error in naming.ml *)
+  | TempBreak _ ->
+    empty_delta_with_cont C.Break gamma
   | Continue ->
+    empty_delta_with_cont C.Continue gamma
+  (* TempContinue is caught as a naming error in naming.ml *)
+  | TempContinue _ ->
     empty_delta_with_cont C.Continue gamma
   | Throw (_is_terminal, expr) ->
     let gamma = check_expr expr gamma in

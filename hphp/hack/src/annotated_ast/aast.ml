@@ -66,7 +66,11 @@ and stmt_ =
   | Fallthrough
   | Expr of expr
   | Break
+  (* Temporarily need to support `break int` for codegen but not typecheck *)
+  | TempBreak of expr
   | Continue
+  (* Temporarily need to support `continue int` for codegen but not typecheck *)
+  | TempContinue of expr
   (* is_terminal is new *)
   | Throw of is_terminal * expr
   | Return of expr option
@@ -603,5 +607,15 @@ let split_reqs class_ =
       ([], [])
       class_.c_reqs in
   List.rev extends, List.rev implements
+
+let get_break_continue_level_tast level_opt =
+  match level_opt with
+  | (_, Int s) ->
+    let i = int_of_string s in
+    if i <= 0
+    then Ast_utils.Level_non_positive
+    else Ast_utils.Level_ok (Some i)
+  | _ -> Ast_utils.Level_non_literal
+  | exception _ -> Ast_utils.Level_non_literal
 
 end (* of AnnotatedAST functor *)

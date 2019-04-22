@@ -193,9 +193,11 @@ module Visitor_DEPRECATED = struct
 class type ['a] visitor_type = object
   method on_block : 'a -> block -> 'a
   method on_break : 'a -> 'a
+  method on_temp_break : 'a -> expr -> 'a
   method on_case : 'a -> case -> 'a
   method on_catch : 'a -> catch -> 'a
   method on_continue : 'a -> 'a
+  method on_temp_continue : 'a -> expr -> 'a
   method on_darray : 'a -> (targ * targ) option -> field list -> 'a
   method on_varray : 'a -> targ option -> expr list -> 'a
   method on_do : 'a -> block -> expr -> 'a
@@ -312,7 +314,9 @@ end
 class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_break acc = acc
+  method on_temp_break acc e = this#on_expr acc e
   method on_continue acc = acc
+  method on_temp_continue acc e = this#on_expr acc e
   method on_noop acc = acc
   method on_unsafe_block acc _ = acc
   method on_fallthrough acc = acc
@@ -434,7 +438,9 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_stmt_ acc = function
     | Expr e                  -> this#on_expr acc e
     | Break                   -> this#on_break acc
+    | TempBreak e             -> this#on_temp_break acc e
     | Continue                -> this#on_continue acc
+    | TempContinue e          -> this#on_temp_continue acc e
     | Throw   (is_term, e)    -> this#on_throw acc is_term e
     | Return  eopt            -> this#on_return acc eopt
     | GotoLabel label         -> this#on_goto_label acc label
@@ -877,6 +883,7 @@ end = struct
     object
       inherit loop_visitor
       method! on_continue _ = true
+      method! on_temp_continue _ _ = true
     end
 
   let block b = visitor#on_block false b
@@ -897,6 +904,7 @@ end = struct
     object
       inherit loop_visitor
       method! on_break _ = true
+      method! on_temp_break _ _ = true
     end
 
   let block b = visitor#on_block false b

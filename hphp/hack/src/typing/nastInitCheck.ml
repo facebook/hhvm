@@ -293,8 +293,12 @@ and stmt env acc st =
         else expr acc e
     | GotoLabel _
     | Goto _
+    (* Naming will catch errors with TempBreak *)
+    | TempBreak _
     | Break -> acc
-    | Continue -> acc
+    | Continue
+    (* Naming will catch errors with TempContinue *)
+    | TempContinue _ -> acc
     | Throw _ -> S.Top
     | Return None ->
       if are_all_init env acc

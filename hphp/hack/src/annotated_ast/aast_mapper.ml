@@ -236,7 +236,9 @@ struct
     match s with
     | S.Expr e -> T.Expr (map_expr menv e)
     | S.Break -> T.Break
+    | S.TempBreak e -> T.TempContinue (map_expr menv e)
     | S.Continue -> T.Continue
+    | S.TempContinue e -> T.TempContinue (map_expr menv e)
     | S.Throw (b, e) -> T.Throw (b, map_expr menv e)
     | S.Return oe -> T.Return (Option.map oe (map_expr menv))
     | S.GotoLabel label -> T.GotoLabel label

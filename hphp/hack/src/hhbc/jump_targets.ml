@@ -90,7 +90,9 @@ and collect_valid_target_labels_aux_tast is_hh_file acc s =
   | T.Fallthrough
   | T.Expr _
   | T.Break
+  | T.TempBreak _
   | T.Continue
+  | T.TempContinue _
   | T.Throw _
   | T.Return _
   | T.Goto _

@@ -1787,7 +1787,13 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Markup (_, None) -> N.Noop
     | Aast.Markup (_m, Some e) -> N.Expr (aast_expr env e)
     | Aast.Break -> Aast.Break
+    | Aast.TempBreak _ ->
+      Errors.break_continue_n_not_supported pos;
+      Aast.Break
     | Aast.Continue -> Aast.Continue
+    | Aast.TempContinue _ ->
+      Errors.break_continue_n_not_supported pos;
+      Aast.Continue
     | Aast.Throw (_, e) ->
       let terminal = not (fst env).in_try in
       N.Throw (terminal, aast_expr env e)

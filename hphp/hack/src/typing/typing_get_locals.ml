@@ -327,6 +327,7 @@ and aast_terminal_ nsenv ~in_try st =
   | Aast.Throw _ when not in_try -> raise Exit
   | Aast.Throw _ -> ()
   | Aast.Continue
+  | Aast.TempContinue _
   | Aast.Expr (_, ( Aast.Call (_, (_, Aast.Id (_, "assert")), _, [_, Aast.False], [])
              | Aast.Call (_, (_, Aast.Id (_, "invariant")), _, (_, Aast.False) :: _ :: _, [])))
   | Aast.Return _ -> raise Exit
@@ -350,6 +351,7 @@ and aast_terminal_ nsenv ~in_try st =
     (aast_terminal nsenv ~in_try:true b;
      List.iter catch_l (aast_terminal_catch nsenv ~in_try))
   | Aast.Break (* TODO this is terminal sometimes too, except switch, see above. *)
+  | Aast.TempBreak _
   | Aast.Expr _
   | Aast.Markup _
   | Aast.Let _
@@ -530,7 +532,9 @@ let rec aast_stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
   | Aast.Fallthrough
   | Aast.Markup _
   | Aast.Break
+  | Aast.TempBreak _
   | Aast.Continue
+  | Aast.TempContinue _
   | Aast.Throw _ -> acc
   | Aast.Do (b, e) ->
     let acc = aast_block acc b in

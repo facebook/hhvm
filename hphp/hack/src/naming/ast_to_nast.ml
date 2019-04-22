@@ -351,9 +351,9 @@ and on_stmt_ p st :  Aast.stmt_ =
   | Fallthrough               -> Aast.Fallthrough
   | Noop                      -> Aast.Noop
   | Markup (s, e)             -> Aast.Markup (s, optional on_expr e)
-  | Break (Some _)            -> Errors.break_continue_n_not_supported p; Aast.Break
+  | Break (Some e)            -> Aast.TempBreak (on_expr e)
   | Break None                -> Aast.Break
-  | Continue (Some _)         -> Errors.break_continue_n_not_supported p; Aast.Continue
+  | Continue (Some e)         -> Aast.TempContinue (on_expr e)
   | Continue None             -> Aast.Continue
   | Throw e                   -> Aast.Throw (false, on_expr e)
   | Return e                  -> Aast.Return (optional on_expr e)

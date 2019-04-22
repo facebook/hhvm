@@ -8,8 +8,8 @@
  *)
 include Typing_env_types_sig.S
 
+open Decl_provider
 open Typing_defs
-open Typing_heap
 open Type_parameter_env
 
 val show_env : env -> string
@@ -41,24 +41,24 @@ val empty_local : tpenv -> reactivity -> local_env
 val initial_local : tpenv -> reactivity -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
   droot: Typing_deps.Dep.variant option -> env
-val is_typedef : Typedefs.key -> bool
-val get_enum : env -> Classes.key -> Classes.t option
-val is_enum : env -> Classes.key -> bool
-val get_enum_constraint : env -> Classes.key -> decl ty option
+val is_typedef : typedef_key -> bool
+val get_enum : env -> class_key -> class_decl option
+val is_enum : env -> class_key -> bool
+val get_enum_constraint : env -> class_key -> decl ty option
 val add_wclass : env -> string -> unit
 val fresh_tenv : env -> (env -> 'a) -> 'a
-val get_class : env -> Classes.key -> Classes.t option
-val get_class_dep : env -> Classes.key -> Classes.t option
-val get_typedef : env -> Typedefs.key -> Typedefs.t option
-val get_const : env -> Typing_classes_heap.t -> string -> class_const option
-val get_typeconst : env -> Typing_classes_heap.t -> string -> typeconst_type option
-val get_gconst : env -> GConsts.key -> GConsts.t option
-val get_static_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
+val get_class : env -> class_key -> class_decl option
+val get_class_dep : env -> class_key -> class_decl option
+val get_typedef : env -> typedef_key -> typedef_decl option
+val get_const : env -> class_decl -> string -> class_const option
+val get_typeconst : env -> class_decl -> string -> typeconst_type option
+val get_gconst : env -> gconst_key -> gconst_decl option
+val get_static_member : bool -> env -> class_decl -> string -> class_elt option
 val suggest_static_member :
-  bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
-val get_member : bool -> env -> Typing_classes_heap.t -> string -> class_elt option
-val suggest_member : bool -> Typing_classes_heap.t -> string -> (Pos.t * string) option
-val get_construct : env -> Typing_classes_heap.t -> class_elt option * consistent_kind
+  bool -> class_decl -> string -> (Pos.t * string) option
+val get_member : bool -> env -> class_decl -> string -> class_elt option
+val suggest_member : bool -> class_decl -> string -> (Pos.t * string) option
+val get_construct : env -> class_decl -> class_elt option * consistent_kind
 val check_todo : env -> env
 val get_return : env -> Typing_env_return_info.t
 val set_return : env -> Typing_env_return_info.t -> env
@@ -78,7 +78,7 @@ val get_parent_id : env -> string
 val get_parent : env -> decl ty
 val get_fn_kind : env -> Ast.fun_kind
 val get_file : env -> Relative_path.t
-val get_fun : env -> Funs.key -> Funs.t option
+val get_fun : env -> fun_key -> fun_decl option
 val set_fn_kind : env -> Ast.fun_kind -> env
 val set_inside_ppl_class : env -> bool -> env
 val add_todo : env -> tfun -> env

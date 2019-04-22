@@ -16,7 +16,7 @@ module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Full_fidelity_positioned_syntax)
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 (* Element type, class name, element name. Class name refers to "origin" class,
  * we expect to find said element in AST/NAST of this class *)
@@ -123,7 +123,7 @@ let go ast result =
       (* Classes on typing heap have all the methods from inheritance hierarchy
        * folded together, so we will correctly identify them even if method_name
        * is not defined directly in class c_name *)
-      Typing_lazy_heap.get_class c_name >>= fun class_ ->
+      Decl_provider.get_class c_name >>= fun class_ ->
       if method_name = Naming_special_names.Members.__construct then begin
         match fst (Cls.construct class_) with
           | Some m ->
@@ -139,7 +139,7 @@ let go ast result =
           get_member_def (Static_method, m.ce_origin, method_name)
       end
     | SymbolOccurrence.Property (c_name, property_name) ->
-      Typing_lazy_heap.get_class c_name >>= fun class_ ->
+      Decl_provider.get_class c_name >>= fun class_ ->
       let property_name = clean_member_name property_name in
       begin match Cls.get_prop class_ property_name with
       | Some m -> get_member_def (Property, m.ce_origin, property_name)
@@ -149,7 +149,7 @@ let go ast result =
           (Static_property, m.ce_origin, property_name)
       end
     | SymbolOccurrence.ClassConst (c_name, const_name) ->
-      Typing_lazy_heap.get_class c_name >>= fun class_ ->
+      Decl_provider.get_class c_name >>= fun class_ ->
       Cls.get_const class_ const_name >>= fun m ->
       get_member_def (Class_const, m.cc_origin, const_name)
     | SymbolOccurrence.Function ->
@@ -161,7 +161,7 @@ let go ast result =
     | SymbolOccurrence.Class ->
       summarize_class_typedef result.SymbolOccurrence.name
     | SymbolOccurrence.Typeconst (c_name, typeconst_name) ->
-      Typing_lazy_heap.get_class c_name >>= fun class_ ->
+      Decl_provider.get_class c_name >>= fun class_ ->
       Cls.get_typeconst class_ typeconst_name >>= fun m ->
       get_member_def (Typeconst, m.ttc_origin, typeconst_name)
     | SymbolOccurrence.LocalVar ->

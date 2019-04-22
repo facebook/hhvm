@@ -11,7 +11,7 @@ open Core_kernel
 open Tast
 module ShapeMap = Aast.ShapeMap
 module SN = Naming_special_names
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let validate_classname (pos, hint) =
   match hint with

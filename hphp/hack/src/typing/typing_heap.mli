@@ -24,7 +24,7 @@ module Funs : ReadOnly
 
 module Classes : ReadOnly
   with type key = StringKey.t
-   and type t = Typing_classes_heap.t
+   and type t = Typing_classes_heap.Api.t
 
 module Typedefs : ReadOnly
   with type key = StringKey.t

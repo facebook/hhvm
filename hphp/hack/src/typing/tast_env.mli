@@ -60,7 +60,7 @@ val open_tyvars : env -> Pos.t -> env
 val close_tyvars_and_solve : env -> env
 val set_tyvar_variance : env -> Tast.ty -> env
 
-val get_class : env -> Typing_heap.Classes.key -> Typing_heap.Classes.t option
+val get_class : env -> Decl_provider.class_key -> Decl_provider.class_decl option
 (** Return the info of the given class from the typing heap. *)
 
 val is_static : env -> bool
@@ -107,9 +107,9 @@ val is_visible :
   env ->
   Typing_defs.visibility * bool ->
   Nast.class_id_ option ->
-  Typing_classes_heap.t ->
+  Decl_provider.class_decl ->
   bool
-(** Return {true} if the given {Typing_classes_heap.t} (referred to by the given
+(** Return {true} if the given {Decl_provider.class_decl} (referred to by the given
     {class_id_}, if provided) allows the current class (the one returned by
     {!get_self}) to access its members with the given {visibility}. *)
 
@@ -242,12 +242,12 @@ val can_coerce : env -> Tast.ty -> Tast.ty -> env option
 val is_xhp_child : env -> Pos.t -> Tast.ty -> bool
 (** Verify that an XHP body expression is legal. *)
 
-val get_enum : env -> string -> Typing_classes_heap.t option
+val get_enum : env -> string -> Decl_provider.class_decl option
 val env_reactivity: env -> Typing_defs.reactivity
 val function_is_mutable: env -> Tast.type_param_mutability option
 val local_is_mutable: include_borrowed: bool -> env -> Local_id.t -> bool
 val get_env_mutability: env -> Typing_mutability_env.mutability_env
-val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option
+val get_fun: env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 val set_env_reactive: env -> Typing_defs.reactivity -> env
 
 val set_allow_wildcards: env -> env

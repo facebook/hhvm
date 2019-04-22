@@ -11,7 +11,7 @@ open Tast
 open Core_kernel
 
 module Env = Tast_env
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module SN = Naming_special_names
 
 let check_expr env (pos, e) =

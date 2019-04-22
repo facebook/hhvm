@@ -33,7 +33,7 @@ module SN = Naming_special_names
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 
 type control_context =
@@ -423,7 +423,7 @@ and hint_ env p = function
       | _ -> ()
       end
   | Happly ((_, x), hl) as h when Env.is_typedef x ->
-    begin match Typing_lazy_heap.get_typedef x with
+    begin match Decl_provider.get_typedef x with
       | Some _ ->
         check_happly env.typedef_tparams env.tenv (p, h);
         List.iter hl (hint env)

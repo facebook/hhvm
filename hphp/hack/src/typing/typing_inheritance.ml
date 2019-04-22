@@ -14,7 +14,7 @@ open Core_kernel
 open Shallow_decl_defs
 open Typing_defs
 
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module Env = Typing_env
 
 (** Ensure that all methods which have the override annotation and were

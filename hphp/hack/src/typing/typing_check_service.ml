@@ -12,7 +12,6 @@ open Core_kernel
 module Bucket = Hack_bucket
 
 module Env = Typing_env
-module TLazyHeap = Typing_lazy_heap
 
 type file = Relative_path.t * FileInfo.names
 type progress = {

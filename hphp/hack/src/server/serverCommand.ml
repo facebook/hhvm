@@ -11,8 +11,6 @@ open Core_kernel
 open Utils
 open ServerCommandTypes
 
-module TLazyHeap = Typing_lazy_heap
-
 exception Nonfatal_rpc_exception of exn * string * ServerEnv.env
 
 
@@ -178,21 +176,21 @@ let predeclare_ide_deps genv {FileInfo.n_funs; n_classes; n_types; n_consts} =
           (string -> a) ->
           SSet.t -> unit =
         fun mem declare s -> SSet.iter begin fun x ->
-        (* Depending on Typing_lazy_heap putting the thing we ask for in shared memory *)
+        (* Depending on Decl_provider putting the thing we ask for in shared memory *)
         if not @@ mem x then ignore @@ ((declare x) : a)
       end s in
       let declare_class x =
-        let cls = Typing_lazy_heap.get_class x in
+        let cls = Decl_provider.get_class x in
         (* For now, is_disposable forces the eager computation of all ancestor
            declarations. In the future, we will want to explicitly declare all
            ancestors when shallow decl is enabled instead. *)
-        let _ : bool option = Option.map cls Typing_classes_heap.is_disposable in
+        let _ : bool option = Option.map cls Decl_provider.Class.is_disposable in
         ()
       in
-      iter Decl_heap.Funs.mem Typing_lazy_heap.get_fun n_funs;
+      iter Decl_heap.Funs.mem Decl_provider.get_fun n_funs;
       iter Decl_heap.Classes.mem declare_class n_classes;
-      iter Decl_heap.Typedefs.mem Typing_lazy_heap.get_typedef n_types;
-      iter Decl_heap.GConsts.mem Typing_lazy_heap.get_gconst n_consts
+      iter Decl_heap.Typedefs.mem Decl_provider.get_typedef n_types;
+      iter Decl_heap.GConsts.mem Decl_provider.get_gconst n_consts
     end ~finally:begin fun () ->
       Ast_provider.local_changes_pop_stack ();
       File_heap.FileHeap.LocalChanges.pop_stack ()

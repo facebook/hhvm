@@ -19,7 +19,7 @@ open Typing_defs
 
 module SN = Naming_special_names
 module Phase = Typing_phase
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let member_type env member_ce =
   let lazy default_result = member_ce.ce_type in

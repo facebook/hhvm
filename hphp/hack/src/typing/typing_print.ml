@@ -20,7 +20,7 @@ open Utils
 module SN = Naming_special_names
 module Reason = Typing_reason
 module TySet = Typing_set
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
@@ -943,7 +943,7 @@ let to_locl_ty
 
     | "newtype" ->
       get_string "name" (json, keytrace) >>= fun (name, name_keytrace) ->
-      begin match Typing_lazy_heap.get_typedef name with
+      begin match Decl_provider.get_typedef name with
       | Some _typedef ->
         (* We end up only needing the name of the typedef. *)
         Ok name
@@ -1117,7 +1117,7 @@ let to_locl_ty
     | "class" ->
       get_string "name" (json, keytrace) >>= fun (name, _name_keytrace) ->
       let class_pos =
-        match Typing_lazy_heap.get_class name with
+        match Decl_provider.get_class name with
         | Some class_ty ->
           (Cls.pos class_ty)
         | None ->
@@ -1462,7 +1462,7 @@ module PrintClass = struct
      * ParentPartiallyKnown must inherit one of the ! Unknown parents, so that
      * sigil could be omitted *)
     Sequence.fold m ~init:"" ~f:begin fun acc (field, v) ->
-      let sigil, kind = match Typing_lazy_heap.get_class field with
+      let sigil, kind = match Decl_provider.get_class field with
         | None -> "!", ""
         | Some cls ->
           (if Cls.members_fully_known cls then " " else "~"),

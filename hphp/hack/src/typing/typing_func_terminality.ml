@@ -13,15 +13,14 @@ open Typing_defs
 
 module Env = Typing_env
 module T = Tast
-module TLazyHeap = Typing_lazy_heap
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 (* Not adding a Typing_dep here because it will be added when the
  * Nast is fully processed (by the caller of this code) *)
-let get_fun = TLazyHeap.get_fun
+let get_fun = Decl_provider.get_fun
 
 let get_static_meth (cls_name:string) (meth_name:string) =
-  match TLazyHeap.get_class cls_name with
+  match Decl_provider.get_class cls_name with
   | None -> None
   | Some cls ->
     begin match Cls.get_smethod cls meth_name with

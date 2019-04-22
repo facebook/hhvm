@@ -13,7 +13,7 @@ open Shallow_decl_defs
 open Typing_defs
 
 module Attrs = Attributes
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module Env = Typing_env
 module SN = Naming_special_names
 
@@ -132,7 +132,7 @@ and get_deferred_init_props env c =
   priv_props, props
 
 and class_ env c =
-  match Typing_lazy_heap.get_class (snd c.sc_name) with
+  match Decl_provider.get_class (snd c.sc_name) with
   | None -> SSet.empty
   | Some cls ->
     let has_concrete_cstr = Cls.need_init cls in

@@ -27,10 +27,10 @@ val full_with_identity:
   string
 val debug: Typing_env.env -> 'a Typing_defs.ty -> string
 val with_blank_tyvars: (unit -> 'a) -> 'a
-val class_: TypecheckerOptions.t -> Typing_classes_heap.t -> string
-val gconst: TypecheckerOptions.t -> Decl_heap.GConst.t -> string
-val fun_: TypecheckerOptions.t -> Decl_heap.Fun.t -> string
-val typedef: TypecheckerOptions.t -> Decl_heap.Typedef.t -> string
+val class_: TypecheckerOptions.t -> Decl_provider.class_decl -> string
+val gconst: TypecheckerOptions.t -> Decl_provider.gconst_decl -> string
+val fun_: TypecheckerOptions.t -> Decl_provider.fun_decl -> string
+val typedef: TypecheckerOptions.t -> Decl_provider.typedef_decl -> string
 val constraints_for_type: Typing_env.env -> 'a Typing_defs.ty -> string option
 val class_kind: Ast_defs.class_kind -> bool -> string
 val subtype_prop:
@@ -85,7 +85,7 @@ val to_json: Typing_env.env -> 'a Typing_defs.ty -> Hh_json.json
 
 (* Attempt to deserialize a previously-serialized type back into a type we can
 manipulate. Note that this function accesses the global state in
-`Typing_lazy_heap` to verify that certain type names exist. *)
+`Decl_provider` to verify that certain type names exist. *)
 val json_to_locl_ty:
   ?keytrace: Hh_json.Access.keytrace
   -> Hh_json.json

@@ -12,13 +12,13 @@ open Typing_defs
 open String_utils
 open Tast
 module Env = Tast_env
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module ShapeMap = Aast.ShapeMap
 
 let rec check_hint env (pos, hint) =
   match hint with
   | Aast.Happly ((_, x), hl) when Typing_env.is_typedef x ->
-    begin match Typing_lazy_heap.get_typedef x with
+    begin match Decl_provider.get_typedef x with
     | Some {td_tparams; _} as _ty ->
       check_tparams env pos x td_tparams hl
     | None -> ()

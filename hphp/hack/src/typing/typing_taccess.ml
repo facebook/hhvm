@@ -20,7 +20,7 @@ module Phase = Typing_phase
 module TySet = Typing_set
 module TR = Typing_reactivity
 module CT = Typing_subtype.ConditionTypes
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 type env = {
   tenv : Env.env;

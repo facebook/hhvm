@@ -46,7 +46,7 @@ module Try          = Typing_try
 module TR           = Typing_reactivity
 module FL           = FeatureLogging
 module MakeType     = Typing_make_type
-module Cls          = Typing_classes_heap
+module Cls          = Decl_provider.Class
 
 (* Maps a Nast to a Tast where every type is Tany.
    Used to produce a Tast for unsafe code without inferring types for it. *)
@@ -4070,7 +4070,7 @@ and is_abstract_ft fty = match fty with
         | CI c when is_abstract_ft fty ->
           Errors.classname_abstract_call (snd c) (snd m) p (Reason.to_pos (fst fty))
         | CI (_, classname) ->
-          begin match Typing_heap.Classes.get classname with
+          begin match Decl_provider.get_class classname with
           | Some class_def ->
             let (_, method_name) = m in
             begin match Cls.get_smethod class_def method_name with

@@ -14,7 +14,7 @@ open Typing_defs
 module Env = Tast_env
 module Reason = Typing_reason
 module TySet = Typing_set
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 type validity =
   | Valid

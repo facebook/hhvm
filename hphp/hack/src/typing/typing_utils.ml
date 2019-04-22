@@ -17,7 +17,7 @@ module Reason = Typing_reason
 module Env = Typing_env
 module ShapeMap = Nast.ShapeMap
 module TySet = Typing_set
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 
 (* This can be useful to debug type which blow up in size *)

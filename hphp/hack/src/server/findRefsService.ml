@@ -13,7 +13,7 @@ open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
 open Typing_defs
 
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 
 (* The class containing the member can be specified in two ways:
@@ -39,7 +39,7 @@ let process_fun_id target_fun id =
   else Pos.Map.empty
 
 let check_if_extends_class target_class_name class_name =
-  let class_ = Typing_lazy_heap.get_class class_name in
+  let class_ = Decl_provider.get_class class_name in
   match class_ with
   | Some cls
     when Cls.has_ancestor cls target_class_name
@@ -109,7 +109,7 @@ let find_child_classes target_class_name naming_table files =
 let get_origin_class_name class_name member =
   let origin = match member with
     | Method method_name ->
-      begin match Typing_lazy_heap.get_class class_name with
+      begin match Decl_provider.get_class class_name with
       | Some class_ ->
         let get_origin_class meth = match meth with
           | Some meth -> Some meth.ce_origin
@@ -222,7 +222,7 @@ let parallel_find_refs workers fileinfo_l target tcopt =
 let get_definitions = function
   | IMember (Class_set classes, Method method_name) ->
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
-      match Typing_lazy_heap.get_class class_name with
+      match Decl_provider.get_class class_name with
       | Some class_ ->
         let add_meth get acc = match get method_name with
           | Some meth when meth.ce_origin = (Cls.name class_) ->
@@ -237,7 +237,7 @@ let get_definitions = function
     end
   | IMember (Class_set classes, Class_const class_const_name) ->
     SSet.fold classes ~init:[] ~f:begin fun class_name acc ->
-      match Typing_lazy_heap.get_class class_name with
+      match Decl_provider.get_class class_name with
       | Some class_ ->
         let add_class_const get acc = match get class_const_name with
           | Some class_const when class_const.cc_origin = (Cls.name class_) ->
@@ -251,13 +251,13 @@ let get_definitions = function
     end
   | IClass class_name ->
     Option.value ~default:[] begin Naming_table.Types.get_pos class_name >>=
-    function (_, Naming_table.TClass) -> Typing_lazy_heap.get_class class_name >>=
+    function (_, Naming_table.TClass) -> Decl_provider.get_class class_name >>=
       fun class_ -> Some([(class_name, (Cls.pos class_))])
-    | (_, Naming_table.TTypedef) -> Typing_lazy_heap.get_typedef class_name >>=
+    | (_, Naming_table.TTypedef) -> Decl_provider.get_typedef class_name >>=
       fun type_ -> Some([class_name, type_.td_pos])
     end
   | IFunction fun_name ->
-    begin match Typing_lazy_heap.get_fun fun_name with
+    begin match Decl_provider.get_fun fun_name with
       | Some fun_ -> [fun_name, fun_.ft_pos]
       | None -> []
     end

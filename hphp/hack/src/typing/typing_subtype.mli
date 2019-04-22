@@ -12,7 +12,7 @@ module ConditionTypes : sig
   val try_get_class_for_condition_type :
     Env.env ->
     decl ty ->
-    ((Ast.pos * string) * Typing_heap.Classes.t) option
+    ((Ast.pos * string) * Decl_provider.class_decl) option
 
   val try_get_method_from_condition_type :
     Env.env ->

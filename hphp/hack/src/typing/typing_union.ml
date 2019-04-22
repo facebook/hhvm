@@ -300,7 +300,7 @@ and union_funs env fty1 fty2 =
 and union_class env name tyl1 tyl2 =
   let tparams = match Env.get_class env name with
     | None -> []
-    | Some c -> Typing_classes_heap.tparams c in
+    | Some c -> Decl_provider.Class.tparams c in
   union_tylists_w_variances env tparams tyl1 tyl2
 
 and union_ak env ak1 ak2 =

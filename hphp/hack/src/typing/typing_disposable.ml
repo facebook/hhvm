@@ -14,7 +14,7 @@ open Typing_defs
 
 module Env = Typing_env
 module MakeType = Typing_make_type
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let is_disposable_visitor env =
   object(this)

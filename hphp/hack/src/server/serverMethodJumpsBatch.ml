@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-module TLazyHeap = Typing_lazy_heap
+module TLazyHeap = Decl_provider
 
 let get_ancestors_single class_ ~filter =
   let class_ = MethodJumps.add_ns class_ in
@@ -34,7 +34,7 @@ let parallel_helper workers classes filter =
 (* Entry Point *)
 let go:
   MultiWorker.worker list option ->
-  Typing_heap.Classes.key list ->
+  Decl_provider.class_key list ->
   ServerCommandTypes.Method_jumps.filter ->
   ServerCommandTypes.Method_jumps.result list =
 fun workers classes filter ->

@@ -12,7 +12,7 @@ open Typing_reason
 
 module SN = Naming_special_names
 module MakeType = Typing_make_type
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let check_implements check_new_object attr_interface
   { Nast.ua_name = (attr_pos, attr_name)

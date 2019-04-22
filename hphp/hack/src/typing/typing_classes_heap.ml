@@ -27,8 +27,6 @@ type class_type_variant =
   | Lazy of lazy_class_type
   | Eager of class_type
 
-type t = class_type_variant
-
 let make_lazy_class_type class_name sc c =
   let ancestors = Decl_ancestors.ancestors_cache class_name in
   let get_ancestor = LSTable.get ancestors in
@@ -109,254 +107,258 @@ module Classes = struct
     | Some _ -> true
 end
 
-let members_fully_known t =
-  match t with
-  | Lazy lc -> lc.c.tc_members_fully_known
-  | Eager c -> c.tc_members_fully_known
+module Api = struct
+  type t = class_type_variant
 
-let abstract t =
-  match t with
-  | Lazy lc ->
-    begin match lc.sc.sc_kind with
-    | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
-    | _ -> false
-    end
-  | Eager c ->
-    c.tc_abstract
+  let members_fully_known t =
+    match t with
+    | Lazy lc -> lc.c.tc_members_fully_known
+    | Eager c -> c.tc_members_fully_known
 
-let final t =
-  match t with
-  | Lazy lc -> lc.sc.sc_final
-  | Eager c -> c.tc_final
+  let abstract t =
+    match t with
+    | Lazy lc ->
+      begin match lc.sc.sc_kind with
+      | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
+      | _ -> false
+      end
+    | Eager c ->
+      c.tc_abstract
 
-let const t =
-  match t with
-  | Lazy lc -> Attrs.mem SN.UserAttributes.uaConst lc.sc.sc_user_attributes
-  | Eager c -> c.tc_const
+  let final t =
+    match t with
+    | Lazy lc -> lc.sc.sc_final
+    | Eager c -> c.tc_final
 
-let ppl t =
-  match t with
-  | Lazy lc -> Attrs.mem SN.UserAttributes.uaProbabilisticModel lc.sc.sc_user_attributes
-  | Eager c -> c.tc_ppl
+  let const t =
+    match t with
+    | Lazy lc -> Attrs.mem SN.UserAttributes.uaConst lc.sc.sc_user_attributes
+    | Eager c -> c.tc_const
 
-let kind t =
-  match t with
-  | Lazy lc -> lc.sc.sc_kind
-  | Eager c -> c.tc_kind
+  let ppl t =
+    match t with
+    | Lazy lc -> Attrs.mem SN.UserAttributes.uaProbabilisticModel lc.sc.sc_user_attributes
+    | Eager c -> c.tc_ppl
 
-let is_xhp t =
-  match t with
-  | Lazy lc -> lc.sc.sc_is_xhp
-  | Eager c -> c.tc_is_xhp
+  let kind t =
+    match t with
+    | Lazy lc -> lc.sc.sc_kind
+    | Eager c -> c.tc_kind
 
-let is_disposable t =
-  match t with
-  | Lazy lc -> lc.c.tc_is_disposable
-  | Eager c -> c.tc_is_disposable
+  let is_xhp t =
+    match t with
+    | Lazy lc -> lc.sc.sc_is_xhp
+    | Eager c -> c.tc_is_xhp
 
-let name t =
-  match t with
-  | Lazy lc -> snd lc.sc.sc_name
-  | Eager c -> c.tc_name
+  let is_disposable t =
+    match t with
+    | Lazy lc -> lc.c.tc_is_disposable
+    | Eager c -> c.tc_is_disposable
 
-let pos t =
-  match t with
-  | Lazy lc -> fst lc.sc.sc_name
-  | Eager c -> c.tc_pos
+  let name t =
+    match t with
+    | Lazy lc -> snd lc.sc.sc_name
+    | Eager c -> c.tc_name
 
-let tparams t =
-  match t with
-  | Lazy lc -> lc.sc.sc_tparams
-  | Eager c -> c.tc_tparams
+  let pos t =
+    match t with
+    | Lazy lc -> fst lc.sc.sc_name
+    | Eager c -> c.tc_pos
 
-let construct t =
-  match t with
-  | Lazy lc -> Lazy.force lc.ih.construct
-  | Eager c -> c.tc_construct
+  let tparams t =
+    match t with
+    | Lazy lc -> lc.sc.sc_tparams
+    | Eager c -> c.tc_tparams
 
-let enum_type t =
-  match t with
-  | Lazy lc -> lc.sc.sc_enum_type
-  | Eager c -> c.tc_enum_type
+  let construct t =
+    match t with
+    | Lazy lc -> Lazy.force lc.ih.construct
+    | Eager c -> c.tc_construct
 
-let decl_errors t =
-  match t with
-  | Lazy lc -> lc.c.tc_decl_errors
-  | Eager c -> c.tc_decl_errors
+  let enum_type t =
+    match t with
+    | Lazy lc -> lc.sc.sc_enum_type
+    | Eager c -> c.tc_enum_type
 
-let sort_by_key seq =
-  seq
-  |> Sequence.to_list_rev
-  |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
-  |> Sequence.of_list
+  let decl_errors t =
+    match t with
+    | Lazy lc -> lc.c.tc_decl_errors
+    | Eager c -> c.tc_decl_errors
 
-let get_ancestor t ancestor =
-  match t with
-  | Lazy lc -> LSTable.get lc.ancestors ancestor
-  | Eager c -> SMap.get ancestor c.tc_ancestors
+  let sort_by_key seq =
+    seq
+    |> Sequence.to_list_rev
+    |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
+    |> Sequence.of_list
 
-let has_ancestor t ancestor =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ancestors ancestor
-  | Eager c -> SMap.mem ancestor c.tc_ancestors
+  let get_ancestor t ancestor =
+    match t with
+    | Lazy lc -> LSTable.get lc.ancestors ancestor
+    | Eager c -> SMap.get ancestor c.tc_ancestors
 
-let need_init t =
-  match t with
-  | Lazy _ ->
-    begin match fst (construct t) with
-    | None -> false
-    | Some ce -> not ce.ce_abstract
-    end
-  | Eager c ->
-    c.tc_need_init
+  let has_ancestor t ancestor =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ancestors ancestor
+    | Eager c -> SMap.mem ancestor c.tc_ancestors
 
-(* We cannot invoke [Typing_deferred_members.class_] here because it would be a
-   dependency cycle. Instead, we raise an exception. We should remove this
-   function (along with [Decl_init_check]) altogether when we delete legacy
-   class declaration, since [Typing_deferred_members] makes it obsolete. *)
-let deferred_init_members t =
-  match t with
-  | Lazy _ -> failwith "shallow_class_decl is enabled"
-  | Eager c -> c.tc_deferred_init_members
+  let need_init t =
+    match t with
+    | Lazy _ ->
+      begin match fst (construct t) with
+      | None -> false
+      | Some ce -> not ce.ce_abstract
+      end
+    | Eager c ->
+      c.tc_need_init
 
-let requires_ancestor t ancestor =
-  match t with
-  | Lazy lc -> SSet.mem ancestor lc.c.tc_req_ancestors_extends
-  | Eager c -> SSet.mem ancestor c.tc_req_ancestors_extends
+  (* We cannot invoke [Typing_deferred_members.class_] here because it would be a
+     dependency cycle. Instead, we raise an exception. We should remove this
+     function (along with [Decl_init_check]) altogether when we delete legacy
+     class declaration, since [Typing_deferred_members] makes it obsolete. *)
+  let deferred_init_members t =
+    match t with
+    | Lazy _ -> failwith "shallow_class_decl is enabled"
+    | Eager c -> c.tc_deferred_init_members
 
-let extends t ancestor =
-  match t with
-  | Lazy lc -> SSet.mem ancestor lc.c.tc_extends
-  | Eager c -> SSet.mem ancestor c.tc_extends
+  let requires_ancestor t ancestor =
+    match t with
+    | Lazy lc -> SSet.mem ancestor lc.c.tc_req_ancestors_extends
+    | Eager c -> SSet.mem ancestor c.tc_req_ancestors_extends
 
-let all_ancestors t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key
-  | Eager c -> SMap.bindings c.tc_ancestors |> Sequence.of_list
+  let extends t ancestor =
+    match t with
+    | Lazy lc -> SSet.mem ancestor lc.c.tc_extends
+    | Eager c -> SSet.mem ancestor c.tc_extends
 
-let all_ancestor_names t =
-  match t with
-  | Lazy _ -> Sequence.map (all_ancestors t) fst
-  | Eager c -> SMap.ordered_keys c.tc_ancestors |> Sequence.of_list
+  let all_ancestors t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ancestors |> sort_by_key
+    | Eager c -> SMap.bindings c.tc_ancestors |> Sequence.of_list
 
-let all_ancestor_reqs t =
-  match t with
-  | Lazy lc -> Sequence.of_list lc.c.tc_req_ancestors
-  | Eager c -> Sequence.of_list c.tc_req_ancestors
+  let all_ancestor_names t =
+    match t with
+    | Lazy _ -> Sequence.map (all_ancestors t) fst
+    | Eager c -> SMap.ordered_keys c.tc_ancestors |> Sequence.of_list
 
-let all_ancestor_req_names t =
-  match t with
-  | Lazy lc -> Sequence.of_list (SSet.elements lc.c.tc_req_ancestors_extends)
-  | Eager c -> Sequence.of_list (SSet.elements c.tc_req_ancestors_extends)
+  let all_ancestor_reqs t =
+    match t with
+    | Lazy lc -> Sequence.of_list lc.c.tc_req_ancestors
+    | Eager c -> Sequence.of_list c.tc_req_ancestors
 
-let all_extends_ancestors t =
-  match t with
-  | Lazy lc -> Sequence.of_list (SSet.elements lc.c.tc_extends)
-  | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
+  let all_ancestor_req_names t =
+    match t with
+    | Lazy lc -> Sequence.of_list (SSet.elements lc.c.tc_req_ancestors_extends)
+    | Eager c -> Sequence.of_list (SSet.elements c.tc_req_ancestors_extends)
 
-let get_const t id =
-  match t with
-  | Lazy lc -> LSTable.get lc.ih.consts id
-  | Eager c -> SMap.get id c.tc_consts
+  let all_extends_ancestors t =
+    match t with
+    | Lazy lc -> Sequence.of_list (SSet.elements lc.c.tc_extends)
+    | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
 
-let get_typeconst t id =
-  match t with
-  | Lazy lc -> LSTable.get lc.ih.typeconsts id
-  | Eager c -> SMap.get id c.tc_typeconsts
+  let get_const t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.consts id
+    | Eager c -> SMap.get id c.tc_consts
 
-let get_prop t id =
-  match t with
-  | Lazy lc -> LSTable.get lc.ih.props id
-  | Eager c -> SMap.get id c.tc_props
+  let get_typeconst t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.typeconsts id
+    | Eager c -> SMap.get id c.tc_typeconsts
 
-let get_sprop t id =
-  match t with
-  | Lazy lc -> LSTable.get lc.ih.sprops id
-  | Eager c -> SMap.get id c.tc_sprops
+  let get_prop t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.props id
+    | Eager c -> SMap.get id c.tc_props
 
-let get_method t id =
-  match t with
-  | Lazy lc -> LSTable.get lc.ih.methods id
-  | Eager c -> SMap.get id c.tc_methods
+  let get_sprop t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.sprops id
+    | Eager c -> SMap.get id c.tc_sprops
 
-let get_smethod t id =
-  match t with
-  | Lazy lc -> LSTable.get lc.ih.smethods id
-  | Eager c -> SMap.get id c.tc_smethods
+  let get_method t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.methods id
+    | Eager c -> SMap.get id c.tc_methods
 
-let has_const t id =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ih.consts id
-  | Eager _ -> Option.is_some (get_const t id)
+  let get_smethod t id =
+    match t with
+    | Lazy lc -> LSTable.get lc.ih.smethods id
+    | Eager c -> SMap.get id c.tc_smethods
 
-let has_typeconst t id =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ih.typeconsts id
-  | Eager _ -> Option.is_some (get_typeconst t id)
+  let has_const t id =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ih.consts id
+    | Eager _ -> Option.is_some (get_const t id)
 
-let has_prop t id =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ih.props id
-  | Eager _ -> Option.is_some (get_prop t id)
+  let has_typeconst t id =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ih.typeconsts id
+    | Eager _ -> Option.is_some (get_typeconst t id)
 
-let has_sprop t id =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ih.sprops id
-  | Eager _ -> Option.is_some (get_sprop t id)
+  let has_prop t id =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ih.props id
+    | Eager _ -> Option.is_some (get_prop t id)
 
-let has_method t id =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ih.methods id
-  | Eager _ -> Option.is_some (get_method t id)
+  let has_sprop t id =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ih.sprops id
+    | Eager _ -> Option.is_some (get_sprop t id)
 
-let has_smethod t id =
-  match t with
-  | Lazy lc -> LSTable.mem lc.ih.smethods id
-  | Eager _ -> Option.is_some (get_smethod t id)
+  let has_method t id =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ih.methods id
+    | Eager _ -> Option.is_some (get_method t id)
 
-let consts t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ih.consts |> sort_by_key
-  | Eager c -> Sequence.of_list (SMap.bindings c.tc_consts)
+  let has_smethod t id =
+    match t with
+    | Lazy lc -> LSTable.mem lc.ih.smethods id
+    | Eager _ -> Option.is_some (get_smethod t id)
 
-let typeconsts t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> sort_by_key
-  | Eager c -> Sequence.of_list (SMap.bindings c.tc_typeconsts)
+  let consts t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.consts |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_consts)
 
-let props t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ih.props |> sort_by_key
-  | Eager c -> Sequence.of_list (SMap.bindings c.tc_props)
+  let typeconsts t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.typeconsts |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_typeconsts)
 
-let sprops t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ih.sprops |> sort_by_key
-  | Eager c -> Sequence.of_list (SMap.bindings c.tc_sprops)
+  let props t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.props |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_props)
 
-let methods t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ih.methods |> sort_by_key
-  | Eager c -> Sequence.of_list (SMap.bindings c.tc_methods)
+  let sprops t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.sprops |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_sprops)
 
-let smethods t =
-  match t with
-  | Lazy lc -> LSTable.to_seq lc.ih.smethods |> sort_by_key
-  | Eager c -> Sequence.of_list (SMap.bindings c.tc_smethods)
+  let methods t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.methods |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_methods)
 
-let get_all cache id = LSTable.get cache id |> Option.value ~default:[]
+  let smethods t =
+    match t with
+    | Lazy lc -> LSTable.to_seq lc.ih.smethods |> sort_by_key
+    | Eager c -> Sequence.of_list (SMap.bindings c.tc_smethods)
 
-let all_inherited_methods t id =
-  match t with
-  | Lazy lc -> get_all lc.ih.all_inherited_methods id
-  | Eager _ -> failwith "shallow_class_decl is disabled"
+  let get_all cache id = LSTable.get cache id |> Option.value ~default:[]
 
-let all_inherited_smethods t id =
-  match t with
-  | Lazy lc -> get_all lc.ih.all_inherited_smethods id
-  | Eager _ -> failwith "shallow_class_decl is disabled"
+  let all_inherited_methods t id =
+    match t with
+    | Lazy lc -> get_all lc.ih.all_inherited_methods id
+    | Eager _ -> failwith "shallow_class_decl is disabled"
 
-let shallow_decl t =
-  match t with
-  | Lazy lc -> lc.sc
-  | Eager _ -> failwith "shallow_class_decl is disabled"
+  let all_inherited_smethods t id =
+    match t with
+    | Lazy lc -> get_all lc.ih.all_inherited_smethods id
+    | Eager _ -> failwith "shallow_class_decl is disabled"
+
+  let shallow_decl t =
+    match t with
+    | Lazy lc -> lc.sc
+    | Eager _ -> failwith "shallow_class_decl is disabled"
+end

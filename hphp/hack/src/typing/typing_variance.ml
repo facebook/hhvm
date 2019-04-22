@@ -13,9 +13,8 @@ open Utils
 
 module Env = Typing_env
 module SN = Naming_special_names
-module TLazyHeap = Typing_lazy_heap
 module TGen = Typing_generic
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 (*****************************************************************************)
 (* Module checking the (co/contra)variance annotations (+/-).
@@ -278,11 +277,11 @@ let get_class_variance root (pos, class_name) =
       let tparams =
         if Env.is_typedef class_name
         then
-          match TLazyHeap.get_typedef class_name with
+          match Decl_provider.get_typedef class_name with
           | Some {td_tparams; _} -> td_tparams
           | None -> []
         else
-          match TLazyHeap.get_class class_name with
+          match Decl_provider.get_class class_name with
           | None -> []
           | Some cls -> Cls.tparams cls
       in
@@ -318,7 +317,7 @@ let rec class_ tcopt class_name class_type impl =
 (*****************************************************************************)
 
 and typedef tcopt type_name =
-  match TLazyHeap.get_typedef type_name with
+  match Decl_provider.get_typedef type_name with
   | Some {td_tparams; td_type; td_pos = _; td_constraint = _; td_vis = _;
       td_decl_errors = _;}  ->
      let root = (Typing_deps.Dep.Class type_name, None) in

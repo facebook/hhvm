@@ -16,7 +16,7 @@ include AutocompleteTypes
 
 module Phase = Typing_phase
 module TUtils = Typing_utils
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let ac_env = ref None
 let autocomplete_results : autocomplete_result list ref = ref []
@@ -349,7 +349,7 @@ let compute_complete_global
           (string_to_replace_prefix name)
           (Phase.decl ty) Class_kind None)
       end else begin
-        let target = Typing_lazy_heap.get_class name in
+        let target = Decl_provider.get_class name in
         let target_kind = Option.map target ~f:(fun c -> (Cls.kind c)) in
         if not (should_complete_class completion_type target_kind) then None else
         Option.map target ~f:(fun c ->
@@ -388,7 +388,7 @@ let compute_complete_global
         let ty = Typing_reason.Rnone, Typing_defs.Tany in
         Some (get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None)
       end else begin
-        Option.map (Typing_lazy_heap.get_fun name) ~f:(fun fun_ ->
+        Option.map (Decl_provider.get_fun name) ~f:(fun fun_ ->
           incr result_count;
           let ty = Typing_reason.Rwitness fun_.Typing_defs.ft_pos, Typing_defs.Tfun fun_ in
           get_partial_result (string_to_replace_prefix name) (Phase.decl ty) Function_kind None
@@ -565,7 +565,7 @@ let tast_cid_to_nast_cid cid =
 let autocomplete_typed_member ~is_static env class_ty cid mid =
   Tast_env.get_class_ids env class_ty
   |> List.iter ~f:begin fun cname ->
-    Typing_lazy_heap.get_class cname
+    Decl_provider.get_class cname
     |> Option.iter ~f:begin fun class_ ->
       let cid = Option.map cid tast_cid_to_nast_cid in
       autocomplete_member ~is_static env class_ cid mid
@@ -668,7 +668,7 @@ let visitor = object (self)
     in
     autocomplete_id trimmed_sid env;
     let cid = Nast.CI sid in
-    Typing_lazy_heap.get_class (snd sid)
+    Decl_provider.get_class (snd sid)
     |> Option.iter ~f:begin fun c ->
       List.iter attrs ~f:begin function
         | Tast.Xhp_simple (id, _) ->

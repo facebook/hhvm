@@ -13,7 +13,7 @@ open Typing_defs
 open Utils
 
 module Env = Tast_env
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 
 let get_constant tc (seen, has_default) = function

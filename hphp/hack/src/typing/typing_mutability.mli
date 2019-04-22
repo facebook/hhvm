@@ -11,7 +11,7 @@ module T = Tast
 module type Env_S = sig
   type env
   val env_reactivity: env -> Typing_defs.reactivity
-  val get_fun: env -> Typing_heap.Funs.key -> Typing_heap.Funs.t option
+  val get_fun: env -> Decl_provider.fun_key -> Decl_provider.fun_decl option
 end
 
 module Shared(Env: Env_S): sig

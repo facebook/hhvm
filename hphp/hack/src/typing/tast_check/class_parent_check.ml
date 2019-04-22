@@ -11,7 +11,7 @@ open Core_kernel
 open Tast
 
 module Env = Tast_env
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let check_is_class env (p, h) =
   match h with

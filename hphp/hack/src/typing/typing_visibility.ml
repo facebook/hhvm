@@ -13,7 +13,7 @@ open Utils
 
 module Env = Typing_env
 module TUtils = Typing_utils
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let is_protected_visible env x self_id =
   if x = self_id then None else

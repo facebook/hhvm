@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let get_all_ancestors class_name =
   let rec helper classes_to_check cinfos seen_classes =
@@ -18,7 +18,7 @@ let get_all_ancestors class_name =
     | class_name :: classes when SSet.mem class_name seen_classes ->
       helper classes cinfos seen_classes
     | class_name :: classes ->
-      begin match Typing_lazy_heap.get_class class_name with
+      begin match Decl_provider.get_class class_name with
       | None ->
         helper classes cinfos seen_classes
       | Some class_info ->

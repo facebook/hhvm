@@ -20,7 +20,7 @@ module TUtils = Typing_utils
 module SN = Naming_special_names
 module Phase = Typing_phase
 module TL = Typing_logic
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module TySet = Typing_set
 module MakeType = Typing_make_type
 

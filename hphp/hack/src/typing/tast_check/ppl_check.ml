@@ -12,9 +12,9 @@ open Core_kernel
 open Typing_defs
 open Tast
 
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 module Env = Tast_env
-module TLazyHeap = Typing_lazy_heap
+module TLazyHeap = Decl_provider
 
 let has_ppl_attribute c =
   List.exists

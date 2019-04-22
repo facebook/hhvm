@@ -121,10 +121,10 @@ end
  * the parameter would be too hard anyway.
  *)
 let get_implements (_, x) =
-  match Typing_lazy_heap.get_class x with
+  match Decl_provider.get_class x with
   | None -> SSet.empty
   | Some cls ->
-      let tyl = Typing_classes_heap.all_ancestors cls in
+      let tyl = Decl_provider.Class.all_ancestors cls in
       Sequence.fold tyl ~init:SSet.empty ~f:begin fun set (_, ty) ->
         match ty with
         | _, Tapply ((_, x), []) -> SSet.add x set

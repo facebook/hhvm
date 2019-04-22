@@ -44,7 +44,7 @@
     typing_generic
     typing_generic_constraint
     typing_heap
-    typing_lazy_heap
+    Decl_provider
     typing_lenv_cont
     typing_log
     typing_logic

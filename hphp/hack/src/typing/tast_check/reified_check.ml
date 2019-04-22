@@ -13,7 +13,7 @@ open Typing_defs
 
 module Env = Tast_env
 module UA = Naming_special_names.UserAttributes
-module Cls = Typing_classes_heap
+module Cls = Decl_provider.Class
 
 let tparams_has_reified tparams =
   List.exists tparams ~f:(fun tparam ->
@@ -124,8 +124,8 @@ let handler = object
       | _ ->
         match Env.get_class env class_id with
         | Some cls ->
-          let tparams = Typing_classes_heap.tparams cls in
-          let class_pos = Typing_classes_heap.pos cls in
+          let tparams = Cls.tparams cls in
+          let class_pos = Cls.pos cls in
           verify_call_targs env pos class_pos tparams targs
         | None -> () end
     | (pos, _), New ((_, CIstatic), _, _, _, _) ->
@@ -143,7 +143,7 @@ let handler = object
     | pos, Aast.Happly ((_, class_id), targs) ->
       let tc = Env.get_class env class_id in
       Option.iter tc ~f:(fun tc ->
-        let tparams = Typing_classes_heap.tparams tc in
+        let tparams = Cls.tparams tc in
         ignore (List.iter2 tparams targs ~f:(verify_targ_valid env));
 
         (* TODO: This check could be unified with the existence check above,
@@ -155,7 +155,7 @@ let handler = object
           if targs_length <> 0
           then Errors.type_arity pos class_id (string_of_int (tparams_length))
           else if tparams_has_reified tparams then
-            Errors.require_args_reify (Typing_classes_heap.pos tc) pos
+            Errors.require_args_reify (Cls.pos tc) pos
       )
     | _ ->
       ()

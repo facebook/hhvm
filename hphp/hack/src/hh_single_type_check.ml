@@ -105,13 +105,6 @@ let magic_builtins = [|
   )
 |]
 
-(* Take the builtins (file, contents) array and create relative paths *)
-let builtins = Caml.Array.fold_left begin fun acc (f, src) ->
-  Relative_path.Map.add acc
-    ~key:(Relative_path.create Relative_path.Dummy f)
-    ~data:src
-end Relative_path.Map.empty (Array.append magic_builtins hhi_builtins)
-
 (*****************************************************************************)
 (* Helpers *)
 (*****************************************************************************)
@@ -130,7 +123,7 @@ let print_error format ?(oc = stderr) l =
     | Errors.Context -> Errors.to_contextual_string
     | Errors.Raw -> (fun e -> Errors.to_string ~indent:false e)
   in
-  Out_channel.output_string oc (formatter (Errors.to_absolute l))
+  Out_channel.output_string oc (formatter (Errors.to_absolute_for_test l))
 
 let write_error_list format errors oc =
   (if errors <> []
@@ -722,7 +715,7 @@ let compare_classes c1 c2 =
   let _, is_unchanged = Decl_compare.ClassEltDiff.compare c1 c2 in
   if is_unchanged = `Changed then fail_comparison "ClassEltDiff"
 
-let test_decl_compare filenames popt files_contents files_info =
+let test_decl_compare filenames popt builtins files_contents files_info =
   (* skip some edge cases that we don't handle now... ugly! *)
   if (Relative_path.suffix filenames) = "capitalization3.php" then () else
   if (Relative_path.suffix filenames) = "capitalization4.php" then () else
@@ -816,7 +809,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
   List.concat_map tasts ~f:typecheck_tast
 
 let handle_mode
-  mode filenames tcopt popt files_contents files_info parse_errors
+  mode filenames tcopt popt builtins files_contents files_info parse_errors
   all_errors error_format batch_mode =
   let new_inference = GlobalOptions.tco_new_inference tcopt in
   let expect_single_file () : Relative_path.t =
@@ -1139,7 +1132,8 @@ let handle_mode
           k = filename) in
       let _, individual_file_info = parse_name_and_decl popt files_contents in
       (try
-        test_decl_compare filename popt files_contents individual_file_info;
+        test_decl_compare
+          filename popt builtins files_contents individual_file_info;
         Out_channel.output_string oc ""
       with e ->
         let msg = Exn.to_string e in
@@ -1168,7 +1162,7 @@ let handle_mode
       if errors <> [] then exit 2
   | Decl_compare ->
     let filename = expect_single_file () in
-    test_decl_compare filename popt files_contents files_info
+    test_decl_compare filename popt builtins files_contents files_info
   | Least_upper_bound ->
     iter_over_files (fun filename ->
       compute_least_type tcopt filename
@@ -1216,10 +1210,41 @@ let handle_mode
 (* Main entry point *)
 (*****************************************************************************)
 
-let decl_and_run_mode {files; mode; error_format; no_builtins; tcopt; all_errors; batch_mode } popt =
+let decl_and_run_mode
+  {
+    files;
+    mode;
+    error_format;
+    no_builtins;
+    tcopt;
+    all_errors;
+    batch_mode;
+  }
+  popt
+  hhi_root =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
-  let builtins = if no_builtins then Relative_path.Map.empty else builtins in
+  let builtins =
+    if no_builtins
+    then Relative_path.Map.empty
+    else begin
+      (* Note that the regular `.hhi` files have already been written to disk
+      with `Hhi.get_root ()` *)
+      Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
+        let file_path = Path.concat hhi_root file_name in
+        let file = Path.to_string file_path in
+        Sys_utils.try_touch ~follow_symlinks:true file;
+        Sys_utils.write_file ~file file_contents
+      );
+      (* Take the builtins (file, contents) array and create relative paths *)
+      Caml.Array.fold_left begin fun acc (f, src) ->
+        let f = Path.concat hhi_root f |> Path.to_string in
+        Relative_path.Map.add acc
+          ~key:(Relative_path.create Relative_path.Hhi f)
+          ~data:src
+      end Relative_path.Map.empty (Array.append magic_builtins hhi_builtins)
+    end
+  in
   let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
   let files_contents = List.fold files
   ~f:(fun acc filename ->
@@ -1236,7 +1261,7 @@ let decl_and_run_mode {files; mode; error_format; no_builtins; tcopt; all_errors
   let errors, files_info =
     parse_name_and_decl popt to_decl in
 
-  handle_mode mode files tcopt popt files_contents files_info
+  handle_mode mode files tcopt popt builtins files_contents files_info
     (Errors.get_error_list errors) all_errors error_format batch_mode
 
 let main_hack ({files; mode; tcopt; _} as opts) =
@@ -1246,21 +1271,23 @@ let main_hack ({files; mode; tcopt; _} as opts) =
   EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
   let handle = SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
   ignore (handle: SharedMem.handle);
-  let tmp_hhi = Path.concat (Path.make Sys_utils.temp_dir_name) "hhi" in
-  Hhi.set_hhi_root_for_unit_test tmp_hhi;
-  GlobalParserOptions.set tcopt;
-  GlobalNamingOptions.set tcopt;
-  match mode with
-  | Ai ai_options ->
-    begin match files with
-    | [filename] ->
-      let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
-      Ai.do_ Typing_check_utils.type_file filecontents ai_options tcopt
-    | _ -> die "Ai mode does not support multiple files"
-    end
-  | _ ->
-    decl_and_run_mode opts tcopt;
-  TypingLogger.flush_buffers ()
+  Tempfile.with_tempdir (fun hhi_root ->
+    Hhi.set_hhi_root_for_unit_test hhi_root;
+    Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+    GlobalParserOptions.set tcopt;
+    GlobalNamingOptions.set tcopt;
+    match mode with
+    | Ai ai_options ->
+      begin match files with
+      | [filename] ->
+        let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
+        Ai.do_ Typing_check_utils.type_file filecontents ai_options tcopt
+      | _ -> die "Ai mode does not support multiple files"
+      end
+    | _ ->
+      decl_and_run_mode opts tcopt hhi_root;
+    TypingLogger.flush_buffers ()
+  )
 
 (* command line driver *)
 let _ =

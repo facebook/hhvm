@@ -410,6 +410,7 @@ val has_no_errors : (unit -> 'a) -> bool
 val currently_has_errors : unit -> bool
 val must_error : (unit -> unit) -> (unit -> unit) -> unit
 val to_absolute : error -> Pos.absolute error_
+val to_absolute_for_test : error -> Pos.absolute error_
 
 val merge : t -> t -> t
 val merge_into_current : t -> unit

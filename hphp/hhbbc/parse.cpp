@@ -61,13 +61,8 @@ const StaticString s_Closure("Closure");
 const StaticString s_toString("__toString");
 const StaticString s_Stringish("Stringish");
 const StaticString s_XHPChild("XHPChild");
-const StaticString s_86cinit("86cinit");
-const StaticString s_86sinit("86sinit");
-const StaticString s_86linit("86linit");
-const StaticString s_86pinit("86pinit");
 const StaticString s_attr_Deprecated("__Deprecated");
 const StaticString s_class_alias("class_alias");
-const StaticString s_Reified("__Reified");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -783,7 +778,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isMemoizeWrapper    = fe.isMemoizeWrapper;
   ret->isMemoizeWrapperLSB = fe.isMemoizeWrapperLSB;
   ret->isMemoizeImpl       = Func::isMemoizeImplName(fe.name);
-  ret->isReified           = fe.userAttributes.find(s_Reified.get()) !=
+  ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();
   ret->isRxDisabled        = fe.isRxDisabled;
 
@@ -967,7 +962,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->hoistability       = pce.hoistability();
   ret->userAttributes     = pce.userAttributes();
   ret->id                 = pce.id();
-  ret->hasReifiedGenerics = ret->userAttributes.find(s_Reified.get()) !=
+  ret->hasReifiedGenerics = ret->userAttributes.find(s___Reified.get()) !=
                             ret->userAttributes.end();
 
   for (auto& iface : pce.interfaces()) {

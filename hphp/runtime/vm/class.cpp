@@ -31,10 +31,10 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/runtime/vm/reified-generics.h"
-#include "hphp/runtime/vm/unit-util.h"
-#include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/trait-method-import-data.h"
 #include "hphp/runtime/vm/treadmill.h"
+#include "hphp/runtime/vm/unit-util.h"
+#include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/collections/ext_collections.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -59,9 +59,10 @@ const StaticString s_86cinit("86cinit");
 const StaticString s_86pinit("86pinit");
 const StaticString s_86sinit("86sinit");
 const StaticString s_86linit("86linit");
+const StaticString s_86ctor("86ctor");
+const StaticString s_86metadata("86metadata");
 const StaticString s_86reified_prop("86reified_prop");
 const StaticString s_86reifiedinit("86reifiedinit");
-const StaticString s___OptionalDestruct("__OptionalDestruct");
 const StaticString s___MockClass("__MockClass");
 const StaticString s___Reified("__Reified");
 

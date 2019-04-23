@@ -287,8 +287,6 @@ AliasClass actrec_func(SSATmp* base, IRSPRelOffset offset) {
 // Determine an AliasClass representing any locals in the instruction's frame
 // which might be accessed via debug_backtrace().
 
-const StaticString s_86metadata("86metadata");
-
 AliasClass backtrace_locals(const IRInstruction& inst) {
   auto const func = [&]() -> const Func* {
     auto fp = inst.marker().fp();

@@ -268,8 +268,6 @@ inline Slot Class::lookupSProp(const StringData* sPropName) const {
   return m_staticProperties.findIndex(sPropName);
 }
 
-extern const StaticString s_86reified_prop;
-
 inline Slot Class::lookupReifiedInitProp() const {
   return m_declProperties.findIndex(s_86reified_prop.get());
 }

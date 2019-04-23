@@ -72,10 +72,6 @@ namespace {
 TRACE_SET_MOD(hhbc);
 
 StaticString s_invoke("__invoke");
-StaticString s_86ctor("86ctor");
-StaticString s_86pinit("86pinit");
-StaticString s_86sinit("86sinit");
-StaticString s_86linit("86linit");
 
 constexpr uint32_t k86pinitSlot = 0x80000000u;
 constexpr uint32_t k86sinitSlot = 0x80000001u;

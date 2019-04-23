@@ -37,8 +37,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(runtime);
 
-const StaticString s_86reifiedinit("86reifiedinit");
-
 /**
  * print_string will decRef the string
  */

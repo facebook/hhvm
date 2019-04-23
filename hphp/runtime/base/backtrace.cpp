@@ -47,7 +47,6 @@ const StaticString
   s_include("include"),
   s_main("{main}"),
   s_metadata("metadata"),
-  s_86metadata("86metadata"),
   s_arrow("->"),
   s_double_colon("::");
 

@@ -58,12 +58,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_86pinit("86pinit");
-const StaticString s_86sinit("86sinit");
-const StaticString s_86linit("86linit");
-
-//////////////////////////////////////////////////////////////////////
-
 /*
  * For filtering assertions, some opcodes are considered to have no
  * use for a stack input assertion.

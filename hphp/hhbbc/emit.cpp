@@ -57,7 +57,6 @@ namespace {
 
 const StaticString s_empty("");
 const StaticString s_invoke("__invoke");
-const StaticString s_86cinit("86cinit");
 
 //////////////////////////////////////////////////////////////////////
 

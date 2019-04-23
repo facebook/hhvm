@@ -50,7 +50,16 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+extern const StaticString s_86cinit;
+extern const StaticString s_86pinit;
+extern const StaticString s_86sinit;
+extern const StaticString s_86linit;
+extern const StaticString s_86ctor;
+extern const StaticString s_86metadata;
+extern const StaticString s_86reified_prop;
+extern const StaticString s_86reifiedinit;
 extern const StaticString s___MockClass;
+extern const StaticString s___Reified;
 
 struct Class;
 struct ClassInfo;

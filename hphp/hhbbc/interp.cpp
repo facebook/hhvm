@@ -63,7 +63,6 @@ namespace HPHP { namespace HHBBC {
 namespace {
 
 const StaticString s_construct("__construct");
-const StaticString s_86ctor("86ctor");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");

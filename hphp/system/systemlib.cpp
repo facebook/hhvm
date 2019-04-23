@@ -37,7 +37,6 @@ namespace {
 
 const StaticString s_message("message");
 const StaticString s_code("code");
-const StaticString s_86reifiedinit("86reifiedinit");
 const Slot s_messageIdx{0};
 const Slot s_codeIdx{2};
 
@@ -339,7 +338,7 @@ Func* setupNullClsMethod(Class* cls, StringData* name) {
 
 void setupNullCtor(Class* cls) {
   assertx(!s_nullCtor);
-  s_nullCtor = setupNullClsMethod(cls, makeStaticString("86ctor"));
+  s_nullCtor = setupNullClsMethod(cls, s_86ctor.get());
   s_nullCtor->setHasForeignThis(true);
 }
 

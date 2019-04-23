@@ -134,8 +134,6 @@ void FuncEmitter::commit(RepoTxn& txn) const {
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, top);
 }
 
-const StaticString s___Reified("__Reified");
-
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]) || needsStripInOut(name);
 

@@ -181,8 +181,6 @@ frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
-extern const StaticString s_86reifiedinit;
-
 namespace {
 
 inline void setReifiedGenerics(

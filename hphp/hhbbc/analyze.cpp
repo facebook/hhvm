@@ -52,13 +52,7 @@ struct KnownArgs {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_86cinit("86cinit");
-const StaticString s_86pinit("86pinit");
-const StaticString s_86sinit("86sinit");
-const StaticString s_86linit("86linit");
 const StaticString s_Closure("Closure");
-const StaticString s_86reified_prop("86reified_prop");
-const StaticString s_Reified("__Reified");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -71,7 +65,7 @@ uint32_t rpoId(const FuncAnalysis& ai, BlockId blk) {
 }
 
 Type get_type_of_reified_list(const UserAttributeMap& ua) {
-  auto const it = ua.find(s_Reified.get());
+  auto const it = ua.find(s___Reified.get());
   assertx(it != ua.end());
   auto const tv = it->second;
   assertx(tvIsVecOrVArray(&tv));

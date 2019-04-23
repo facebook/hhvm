@@ -838,7 +838,8 @@ void emitNewObjD(IRGS& env, const StringData* className) {
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
   bool const canInstantiate = canInstantiateClass(cls);
-  if (persistentCls && canInstantiate && !cls->hasNativePropHandler()) {
+  if (persistentCls && canInstantiate && !cls->hasNativePropHandler() &&
+      !cls->hasReifiedGenerics() && !cls->hasReifiedParent()) {
     push(env, allocObjFast(env, cls));
     return;
   }

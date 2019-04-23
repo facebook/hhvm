@@ -1,0 +1,5 @@
+(library
+  (name error_map)
+  (libraries errors)
+  (inline_tests)
+  (preprocess (pps ppx_expect)))

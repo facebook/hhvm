@@ -1,0 +1,18 @@
+
+(alias
+    (name infer_return_types)
+    (deps %{exe:../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/infer_return_types/HH_FLAGS)
+          (glob_files %{project_root}/test/infer_return_types/*.php)
+          (glob_files %{project_root}/test/infer_return_types/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/infer_return_types
+    --program %{exe:../../src/hh_single_type_check.exe}
+    --flags
+    --new-inference --new-inference-lambda
+    --error-format raw)))
+
+(alias
+    (name runtest)
+    (deps (alias infer_return_types)))

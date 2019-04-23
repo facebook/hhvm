@@ -1877,6 +1877,13 @@ void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
     *m_fpushOverride : inst->marker().sk().op();
   m_fpushOverride.clear();
 
+  auto const inlineEligible = [&] {
+    if (func && !func->hasReifiedGenerics()) return true;
+    auto const tsList = inst->src(5);
+    if (tsList->isA(TNullptr)) return true;
+    return false;
+  }();
+
   cur().fpiStack.push_back(FPIInfo {
     cur().spValue,
     retOffset.to<FPInvOffset>(irSPOff()),
@@ -1886,7 +1893,7 @@ void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
     opc,
     func,
     dynamicCall,
-    true /* inlineEligible */,
+    inlineEligible,
     false /* spans */
   });
 }

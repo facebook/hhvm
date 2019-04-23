@@ -493,13 +493,70 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         Tfun _ | Tclass _ | Ttuple _ | Tanon _ | Tshape _) ->
     error_assign_array_append env expr_pos ty1
 
+let widen_for_assign_array_get ~expr_pos index_expr env ty =
+  Typing_log.(log_with_level env "typing" 1 (fun () ->
+    log_types expr_pos env
+      [Log_head ("widen_for_assign_array_get",
+      [Log_type ("ty", ty)])]));
+  match ty with
+  | r, Tclass ((_, cn) as id, _, tyl)
+    when cn = SN.Collections.cVec
+      || cn = SN.Collections.cKeyset
+      || cn = SN.Collections.cVector
+      || cn = SN.Collections.cDict
+      || cn = SN.Collections.cMap
+      || cn = SN.Collections.cStableMap ->
+    let env, params = List.map_env env tyl
+      (fun env _ty -> Env.fresh_invariant_type_var env expr_pos) in
+    let ty = r, Tclass (id, Nonexact, params) in
+    env, Some ty
+
+  | r, Tarraykind (AKvarray _) ->
+    let env, tv = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKvarray tv))
+
+  | r, Tarraykind (AKvec _) ->
+    let env, tv = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKvec tv))
+
+  | r, Tarraykind (AKvarray_or_darray _) ->
+    let env, tv = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKvarray_or_darray tv))
+
+  | r, Tarraykind (AKdarray _) ->
+    let env, tk = Env.fresh_invariant_type_var env expr_pos in
+    let env, tv = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKdarray (tk, tv)))
+
+  | r, Tarraykind (AKmap _) ->
+    let env, tk = Env.fresh_invariant_type_var env expr_pos in
+    let env, tv = Env.fresh_invariant_type_var env expr_pos in
+    env, Some (r, Tarraykind (AKmap (tk, tv)))
+
+  | r, Ttuple tyl ->
+    (* requires integer literal *)
+    begin match index_expr with
+    (* Should freshen type variables *)
+    | _, Int _ ->
+      let env, params = List.map_env env tyl
+        (fun env _ty -> Env.fresh_invariant_type_var env expr_pos) in
+      env, Some (r, Ttuple params)
+    | _ ->
+      env, None
+    end
+
+  | _ ->
+    env, None
+
+
 (* Used for typing an assignment e1[key] = e2
  * where e1 has type ty1, key has type tkey and e2 has type ty2.
  * Return (ty1', ty2') where ty1' is the new array type, and ty2' is the element type
  *)
 let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
-  let env, (r, ety1_ as ety1) = SubType.expand_type_and_solve
-    ~description_of_expected:"an array or collection" env array_pos ty1 in
+  let env, (r, ety1_ as ety1) = SubType.expand_type_and_narrow
+    ~description_of_expected:"an array or collection" env
+    (widen_for_assign_array_get ~expr_pos key) array_pos ty1 in
   Typing_log.(log_with_level env "typing" 1 (fun () ->
   log_types expr_pos env
   [Log_head ("assign_array_get",

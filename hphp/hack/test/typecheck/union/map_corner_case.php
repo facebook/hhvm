@@ -23,6 +23,5 @@ function f(bool $cond, string $key): void {
     $c[$key] = 1;
     $b[$key] = $c;
     $a[$key] = $b;
-    hh_show($a);
   }
 }

@@ -1,0 +1,17 @@
+(library
+    (name full_fidelity_test_utils)
+    (wrapped false)
+    (modules full_fidelity_test_utils)
+    (libraries
+      jdep
+      parser_rewriter
+      parser_syntax_transforms))
+
+(library
+    (name call_order)
+    (wrapped false)
+    (modules callOrder)
+    (libraries
+      full_fidelity_test_utils
+      parser_syntax
+      parser_syntax_tree))

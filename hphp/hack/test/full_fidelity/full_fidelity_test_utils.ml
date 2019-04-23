@@ -120,7 +120,7 @@ let tree_dump_node node =
   let print level text =
     let buf = Buffer.create (level * 2 + String.length text) in
     let () =
-      for i = 1 to level do Buffer.add_string buf "> " done;
+      for _i = 1 to level do Buffer.add_string buf "> " done;
       Buffer.add_string buf text
     in
     Buffer.contents buf

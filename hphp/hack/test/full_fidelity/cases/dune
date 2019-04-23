@@ -1,0 +1,79 @@
+(alias
+    (name full_fidelity_errors_test)
+    (deps %{exe:../../../src/hh_parse.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/full_fidelity/cases/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/*.flags)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/error/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/error/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/context/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/context/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.errors.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/modes/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/modes/*.errors.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/full_fidelity/cases
+    --out-extension .errors.out
+    --expect-extension .errors.exp
+    --program %{exe:../../../src/hh_parse.exe}
+    --flags
+    --full-fidelity-errors)))
+
+(alias
+    (name full_fidelity_sexp_test)
+    (deps %{exe:../../../src/hh_parse.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/full_fidelity/cases/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/*.flags)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/await_as_an_expression/error/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/error/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/concurrent/error/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/context/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/context/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/hh_parse/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/*.sexp.exp)
+          (glob_files %{project_root}/test/full_fidelity/cases/lval_as_an_expression/error/HH_FLAGS)
+          (glob_files %{project_root}/test/full_fidelity/cases/modes/*.php)
+          (glob_files %{project_root}/test/full_fidelity/cases/modes/*.sexp.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/full_fidelity/cases
+    --out-extension .sexp.out
+    --expect-extension .sexp.exp
+    --program %{exe:../../../src/hh_parse.exe}
+    --flags
+    --full-fidelity-s-expression)))
+
+(alias
+    (name runtest)
+    (deps (alias full_fidelity_errors_test) (alias full_fidelity_sexp_test)))

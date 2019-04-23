@@ -1,0 +1,16 @@
+(alias
+    (name verify)
+    (deps %{exe:../../../src/hackfmt.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/hackfmt/tests/*.flags)
+          (glob_files %{project_root}/test/hackfmt/tests/*.php)
+          (glob_files %{project_root}/test/hackfmt/tests/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/hackfmt/tests
+    --program %{exe:../../../src/hackfmt.exe}
+    --idempotence
+    --flags --test)))
+
+(alias
+    (name runtest)
+    (deps (alias verify)))

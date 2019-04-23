@@ -1,0 +1,14 @@
+(alias
+    (name least_upper_bound)
+    (deps %{exe:../../../src/hh_single_type_check.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/typing_ops/least_upper_bound/HH_FLAGS)
+          (glob_files %{project_root}/test/typing_ops/least_upper_bound/*.php)
+          (glob_files %{project_root}/test/typing_ops/least_upper_bound/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/typing_ops/least_upper_bound
+    --program %{exe:../../../src/hh_single_type_check.exe})))
+
+(alias
+    (name runtest)
+    (deps (alias least_upper_bound)))

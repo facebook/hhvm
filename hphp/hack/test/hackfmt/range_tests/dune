@@ -1,0 +1,16 @@
+
+(alias
+    (name verify_range)
+    (deps %{exe:../../../src/hackfmt.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/hackfmt/range_tests/*.flags)
+          (glob_files %{project_root}/test/hackfmt/range_tests/*.php)
+          (glob_files %{project_root}/test/hackfmt/range_tests/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/hackfmt/range_tests
+    --program %{exe:../../../src/hackfmt.exe}
+    --flags --test)))
+
+(alias
+    (name runtest)
+    (deps (alias verify_range)))

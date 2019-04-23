@@ -100,7 +100,7 @@ let cmp_float ?(epsilon = 0.00001) a b =
   abs_float (a -. b) <= epsilon *. (abs_float b)
 
 (* Now some handy shorthands *)
-let (@?) msg a = assert_bool msg a
+let (@?) msg a = assert_bool ~msg a
 
 (* The type of test function *)
 type test_fun = unit -> unit

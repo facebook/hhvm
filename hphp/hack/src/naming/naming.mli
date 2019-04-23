@@ -7,7 +7,7 @@
  *
  *)
 
-module Aast = Ast_to_nast.Aast
+module Aast = Nast
 
 (** Module "naming" a program.
  * Transform all the local names into a unique identifier

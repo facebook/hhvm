@@ -19,7 +19,7 @@ open Utils
 open String_utils
 
 (* Alias for Nast used by functions on potentially unnamed Aast values *)
-module Aast = Ast_to_nast.Aast
+module Aast = Nast
 module N = Nast
 module SN = Naming_special_names
 module NS = Namespaces

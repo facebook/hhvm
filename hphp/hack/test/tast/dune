@@ -1,5 +1,5 @@
 (alias
-    (name runtest)
+    (name tast)
     (deps %{exe:../../src/hh_single_type_check.exe}
           %{project_root}/test/verify.py
           %{project_root}/test/review.sh
@@ -15,3 +15,7 @@
     (action (run %{project_root}/test/verify.py %{project_root}/test/tast
     --program %{exe:../../src/hh_single_type_check.exe}
     --flags --new-inference --new-inference-lambda)))
+
+(alias
+    (name runtest)
+    (deps (alias tast)))

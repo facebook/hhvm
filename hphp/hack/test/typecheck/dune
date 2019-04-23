@@ -64,7 +64,7 @@ let () =
   let typecheck =
     Printf.sprintf "; in %s
 (alias
-    (name runtest)
+    (name typecheck)
     %s
     %s)" test_dir typecheck_deps (command true cmd) in
   let cmds = [ "--out-extension .legacy.out"
@@ -79,7 +79,7 @@ let () =
     Printf.sprintf "
 
 (alias
-    (name runtest)
+    (name typecheck_old_inference)
     %s
     %s)" typecheck_deps (command true cmd) in
   (* decl_compare *)
@@ -89,7 +89,7 @@ let () =
 ; when the test succeeds, the output file will be empty, so none of the
 ; decl_exp files will ever exist for this test
 (alias
-    (name runtest)
+    (name decl_compare)
     %s
     %s)" (deps files_dc)
       (command true "--out-extension .decl_out --expect-extension .decl_exp --flags --decl-compare") in
@@ -107,6 +107,14 @@ let () =
   (*   (name runtest) *)
   (*   %s *)
   (*   %s)" (deps files_tast) (command false cmd) in *)
+  let run_tests =
+    Printf.sprintf "
 
-  let dune_file = typecheck ^ typecheck_old_inference ^ decl_compare in
+(alias
+    (name runtest)
+    (deps (alias typecheck) (alias typecheck_old_inference)
+      (alias decl_compare)))" in
+
+  let dune_file = typecheck ^ typecheck_old_inference ^ decl_compare ^
+                  run_tests in
   Jbuild_plugin.V1.send dune_file

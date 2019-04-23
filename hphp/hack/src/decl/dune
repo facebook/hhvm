@@ -2,6 +2,7 @@
   (name decl)
   (wrapped false)
   (libraries
+    ast_provider
     heap_global_storage
     naming
     naming_attributes

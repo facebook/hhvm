@@ -1,0 +1,16 @@
+(library
+  (name ast_provider)
+  (wrapped false)
+  (modules ast_provider)
+  (libraries
+    ast
+    heap_shared_mem
+    parser_heap
+    relative_path))
+
+(library
+  (name decl_provider)
+  (wrapped false)
+  (modules decl_provider)
+  (libraries
+    typing_heap))

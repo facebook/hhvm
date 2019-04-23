@@ -3,6 +3,7 @@
   (wrapped false)
   (libraries
     ast
+    ast_provider
     file_info
     heap_shared_mem
     naming

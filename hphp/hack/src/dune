@@ -21,6 +21,7 @@
     sys_utils
     tast
     tast_typecheck
+    temp_file
     typed_positioned_syntax
     typing
     utils_core))

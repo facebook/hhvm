@@ -129,7 +129,6 @@
     hh_autoimport
     html_entities
     ide_parser_cache
-    parser_heap
     parser_return)
   (libraries
     ast
@@ -221,5 +220,6 @@
   (modules
     parsing_service)
   (libraries
+    ast_provider
     parser_heap
     procs_procs))

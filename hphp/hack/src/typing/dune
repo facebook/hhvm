@@ -15,6 +15,18 @@
   (preprocess (pps ppx_deriving.std)))
 
 (library
+  (name typing_heap)
+  (wrapped false)
+  (modules
+    typing_classes_heap
+    typing_heap
+    typing_lazy_heap)
+  (libraries
+    core_kernel
+    decl
+    typing_defs))
+
+(library
   (name tast)
   (wrapped false)
   (modules
@@ -29,7 +41,6 @@
     type_visitor
     typing_arrays
     typing_async
-    typing_classes_heap
     typing_coercion
     typing_continuations
     typing_deferred_members
@@ -43,8 +54,6 @@
     typing_expand
     typing_generic
     typing_generic_constraint
-    typing_heap
-    Decl_provider
     typing_lenv_cont
     typing_log
     typing_logic
@@ -69,6 +78,7 @@
   (libraries
     common
     decl
+    decl_provider
     hackfmt_doc
     hackfmt_env
     hackfmt

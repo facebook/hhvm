@@ -532,13 +532,10 @@ bool TypeConstraint::checkTypeAliasNonObj(tv_rval val) const {
         assertx(tvIsArrayOrShape(val));
         return Assert || val.val().parr->isNotDVArray();
       case AnnotAction::WarnFunc:
-        raise_notice("Implicit Func to string conversion for type-hint");
-      case AnnotAction::ConvertFunc:
-        return false; // verifyFail will deal with the conversion
       case AnnotAction::WarnClass:
-        raise_notice("Implicit Class to string conversion for type-hint");
+      case AnnotAction::ConvertFunc:
       case AnnotAction::ConvertClass:
-        return false; // verifyFail will deal with the conversion
+        return false; // verifyFail will deal with the conversion/warning
       case AnnotAction::ClsMethCheck:
         return false;
     }
@@ -738,13 +735,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
       assertx(tvIsArrayOrShape(val));
       return isAssert || val.val().parr->isNotDVArray();
     case AnnotAction::WarnFunc:
-      raise_notice("Implicit Func to string conversion for type-hint");
-    case AnnotAction::ConvertFunc:
-      return false; // verifyFail will handle the conversion
     case AnnotAction::WarnClass:
-      raise_notice("Implicit Class to string conversion for type-hint");
+    case AnnotAction::ConvertFunc:
     case AnnotAction::ConvertClass:
-      return false; // verifyFail will handle the conversion
+      return false; // verifyFail will handle the conversion/warning
     case AnnotAction::ClsMethCheck:
       return false;
   }
@@ -1079,11 +1073,20 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
   }
 
   if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
-    c->m_data.pstr = isFuncType(c->m_type)
-      ? const_cast<StringData*>(c->m_data.pfunc->name())
-      : const_cast<StringData*>(c->m_data.pclass->name());
-    c->m_type = KindOfPersistentString;
-    return;
+    if (isString() || (isObject() && interface_supports_string(m_typeName))) {
+      if (RuntimeOption::EvalStringHintNotices) {
+        if (isFuncType(c->m_type)) {
+          raise_notice("Implicit Func to string conversion for type-hint");
+        } else {
+          raise_notice("Implicit Class to string conversion for type-hint");
+        }
+      }
+      c->m_data.pstr = isFuncType(c->m_type)
+        ? const_cast<StringData*>(c->m_data.pfunc->name())
+        : const_cast<StringData*>(c->m_data.pclass->name());
+      c->m_type = KindOfPersistentString;
+      return;
+    }
   }
 
   if (isClsMethType(c->m_type)) {
@@ -1263,6 +1266,13 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
 
   if (!isSoft() && (isFuncType(c->m_type) || isClassType(c->m_type))) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
+      if (RuntimeOption::EvalStringHintNotices) {
+        if (isFuncType(c->m_type)) {
+          raise_notice("Implicit Func to string conversion for type-hint");
+        } else {
+          raise_notice("Implicit Class to string conversion for type-hint");
+        }
+      }
       c->m_data.pstr = isFuncType(c->m_type)
         ? const_cast<StringData*>(c->m_data.pfunc->name())
         : const_cast<StringData*>(c->m_data.pclass->name());

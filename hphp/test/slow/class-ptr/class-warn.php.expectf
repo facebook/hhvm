@@ -30,9 +30,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -86,9 +84,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -142,9 +138,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -198,9 +192,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -254,9 +246,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -310,9 +300,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -366,9 +354,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -422,9 +408,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -478,9 +462,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"
@@ -534,9 +516,7 @@ class(buz)
 bool(true)
 bool(true)
 class(buz)
-notice(Closure$main): Implicit Class to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, class assigned
-notice(Closure$main#2): Implicit Class to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, class assigned
 notice(io): Implicit Class to string conversion for type-hint
 string(3) "foo"

@@ -294,6 +294,7 @@ void verifyTypeImpl(IRGS& env,
       return;
     case AnnotAction::WarnFunc:
       assertx(valType <= TFunc);
+      if (!funcToStr(val)) return genFail();
       gen(
         env,
         RaiseNotice,
@@ -302,6 +303,7 @@ void verifyTypeImpl(IRGS& env,
           makeStaticString("Implicit Func to string conversion for type-hint")
         )
       );
+      return;
 
     case AnnotAction::ConvertFunc:
       assertx(valType <= TFunc);
@@ -310,6 +312,7 @@ void verifyTypeImpl(IRGS& env,
 
     case AnnotAction::WarnClass:
       assertx(valType <= TCls);
+      if (!classToStr(val)) return genFail();
       gen(
         env,
         RaiseNotice,
@@ -318,6 +321,7 @@ void verifyTypeImpl(IRGS& env,
           makeStaticString("Implicit Class to string conversion for type-hint")
         )
       );
+      return;
 
     case AnnotAction::ConvertClass:
       assertx(valType <= TCls);

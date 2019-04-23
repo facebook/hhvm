@@ -27,9 +27,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -80,9 +78,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -133,9 +129,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -186,9 +180,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -239,9 +231,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -292,9 +282,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -345,9 +333,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -398,9 +384,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -451,9 +435,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"
@@ -504,9 +486,7 @@ function(buz)
 bool(true)
 bool(true)
 function(buz)
-notice(Closure$main): Implicit Func to string conversion for type-hint
 caught: Property 'Props::a' declared as type string, func assigned
-notice(Closure$main#2): Implicit Func to string conversion for type-hint
 caught: Static property 'Props::b' declared as type string, func assigned
 notice(io): Implicit Func to string conversion for type-hint
 string(3) "foo"

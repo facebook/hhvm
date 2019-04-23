@@ -1191,7 +1191,7 @@ static int start_server(const std::string &username, int xhprof) {
 
   if (RuntimeOption::StopOldServer) HttpServer::StopOldServer();
 
-  if (RuntimeOption::EvalEnableNuma && !getenv("HHVM_DISABLE_NUMA")) {
+  if (RuntimeOption::EvalEnableNuma) {
     purge_all();
     enable_numa();
     BootStats::mark("enable_numa");

@@ -1745,6 +1745,7 @@ void RuntimeOption::Load(
 #undef F
 
     if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
+    if (getenv("HHVM_DISABLE_NUMA")) EvalEnableNuma = false;
 
     Config::Bind(ServerForkEnabled, ini, config,
                  "Server.Forking.Enabled", ServerForkEnabled);

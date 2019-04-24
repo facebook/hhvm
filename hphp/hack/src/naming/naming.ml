@@ -2710,17 +2710,93 @@ module Make (GetLocals : GetLocals) = struct
     List.map idl (aast_expr env)
 
   and aast_class_pu_enum env pu_enum =
-    let aux (s, h) = (s, aast_hint ~forbid_this:true env h) in
-    let aast_pu_member m =
-      let pum_types = List.map ~f:aux m.Aast.pum_types in
-      let pum_exprs = List.map ~f:(fun (s, e) -> (s, aast_expr env e))
-          m.Aast.pum_exprs in
-      { Aast.pum_atom = m.Aast.pum_atom
-      ; pum_types
-      ; pum_exprs
-      } in
-    let pu_case_values = List.map ~f:aux pu_enum.Aast.pu_case_values in
-    let pu_members = List.map ~f:aast_pu_member pu_enum.Aast.pu_members in
+    let make_tparam sid def = Aast.{
+      tp_variance = Ast.Invariant;
+      tp_name = sid;
+      tp_constraints = (match def with
+          | None -> []
+          | Some hint -> [Ast.Constraint_eq, hint]);
+      tp_reified = Erased;
+      tp_user_attributes = []
+    } in
+    let pu_case_types = pu_enum.Aast.pu_case_types in
+    (* We create here an extended environment to type the abstract part
+       of a PU enumeration (namely `case type` and `case` statement).
+       Since we are typing the abstract part (`case type/ case`), we only
+       add their name, without hints.
+    *)
+    let env_with_case_types =
+      let genv, lenv = env in
+      let make_tparam sid = make_tparam sid None in
+      (aast_extend_params genv (List.map ~f:make_tparam pu_case_types), lenv)
+    in
+    let pu_case_values =
+      List.map ~f:(fun (sid, h) ->
+          (sid, aast_hint ~forbid_this:true env_with_case_types h)
+        ) pu_enum.Aast.pu_case_values in
+    (* Now when naming each member declaration, the environment can be
+       updated more precisely:
+       - type constraints (type t = foo) are available to have a more precise
+         naming
+       - each `case type` statement must be instantiated exactly once
+       - each `case` statement must be instantiated exactly one
+    *)
+    (* For each member declaration, we gather:
+       - its name
+       - its type constraints (`type T = ...`)
+       - its type expresssions (`foo = ...`)
+
+       Since a member could be declared in several blocks (e.g.
+         :@A(
+            type T = ...
+         )
+         ...
+         :@A(
+            expr = 42
+         )
+         (because of extension via inheritance) we take care to update the
+         lists/maps only once instead of creating duplicates.
+    *)
+    let pu_members, pu_types, pu_exprs =
+      List.fold_left pu_enum.Aast.pu_members ~init:([], SMap.empty, SMap.empty)
+        ~f:(fun (ids, types, exprs)
+             Aast.{ pum_atom = id; pum_types; pum_exprs } ->
+             (* add_id helps to decide if we need to create a new map/list
+                or if we can update and existing one *)
+            let add_id, v = match SMap.find_opt (snd id) types with
+              | None -> (true, List.rev pum_types)
+              | Some types' -> (false, List.rev_append pum_types types') in
+            let add_id, w = match SMap.find_opt (snd id) exprs with
+              | None -> (true, List.rev pum_exprs)
+              | Some exprs' -> (add_id, List.rev_append pum_exprs exprs') in
+            let ids = if add_id then id :: ids else ids
+            and types = SMap.add (snd id) v types
+            and exprs = SMap.add (snd id) w exprs in
+            (ids, types, exprs)
+          ) in
+    let pu_members =
+      let compute_mapping pum_atom =
+        let pum_types = List.rev (SMap.find (snd pum_atom) pu_types) in
+        (* Now that the abstract part is translated, we are going to do the same
+           for each atom declaration (namely `:@A (type T = ..., foo = bar)`).
+           This time, the original environment is extended with the PU types
+           _and_ their specific hints since we have everything at hand
+        *)
+        let env_with_mapped_types =
+          let genv, lenv = env in
+          let make_tparam (sid, h) = make_tparam sid (Some h) in
+          (aast_extend_params genv (List.map ~f:make_tparam pum_types), lenv) in
+        let pum_types = List.map pum_types
+            ~f:(fun (id, h) -> (id, aast_hint ~forbid_this:true env h)) in
+        let pum_exprs = List.rev (SMap.find (snd pum_atom) pu_exprs) in
+        let pum_exprs =
+          List.map ~f:(fun (s, e) -> (s, aast_expr env_with_mapped_types e))
+            pum_exprs
+        in { Aast.pum_atom
+           ; Aast.pum_types
+           ; Aast.pum_exprs
+           }
+      in List.map ~f:compute_mapping pu_members in
     { Aast.pu_name = pu_enum.Aast.pu_name
     ; Aast.pu_is_final = pu_enum.Aast.pu_is_final
     ; Aast.pu_case_types = pu_enum.Aast.pu_case_types

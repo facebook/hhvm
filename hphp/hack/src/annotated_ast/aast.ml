@@ -458,6 +458,31 @@ and gconst = {
   cst_span: pos;
 }
 
+(* Pocket Universe Enumeration, e.g.
+   enum Foo { // pu_name
+     // pu_case_types
+     case type T0;
+     case type T1;
+
+     // pu_case_values
+     case ?T0 default_value;
+     case T1 foo;
+
+     // pu_members
+     :@A( // pum_atom
+       // pum_types
+       type T0 = string,
+       type T1 = int,
+
+       // pum_exprs
+       default_value = null,
+       foo = 42,
+     );
+     :@B( ... )
+     ...
+   }
+*)
+
 and pu_enum = {
   pu_name: sid;
   pu_is_final: bool;

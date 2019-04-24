@@ -16,10 +16,13 @@ module LSTable = Lazy_string_table
 module Reason = Typing_reason
 module SN = Naming_special_names
 
-let all_ancestors class_name =
-  Decl_linearize.(get_linearization ~kind:Ancestor_types) class_name
-  (* Drop the requested class; we only want its ancestors. *)
-  |> (fun lin -> Sequence.drop_eagerly lin 1)
+type ancestor_caches = {
+  ancestors : decl ty LSTable.t; (** Types of parents, interfaces, and traits *)
+  parents_and_traits : unit LSTable.t; (** Names of parents and traits only *)
+}
+
+let all_ancestors lin =
+  lin
   |> Sequence.map ~f:begin fun mro ->
     let { mro_name; mro_type_args; _ } = mro in
     let pos =
@@ -31,8 +34,23 @@ let all_ancestors class_name =
     mro_name, ty
   end
 
+let parents_and_traits lin =
+  lin
+  |> Sequence.filter ~f:(fun mro -> not mro.mro_consts_only)
+  |> Sequence.map ~f:(fun mro -> mro.mro_name, ())
+
 let is_canonical _ = true
 let merge ~earlier ~later:_ = earlier
 
-let ancestors_cache class_name =
-  LSTable.make (all_ancestors class_name) ~is_canonical ~merge
+let make class_name =
+  let lin =
+    Decl_linearize.(get_linearization ~kind:Ancestor_types) class_name
+    (* Drop the requested class; we only want its ancestors. *)
+    |> (fun lin -> Sequence.drop_eagerly lin 1)
+  in
+  {
+    ancestors =
+      LSTable.make (all_ancestors lin) ~is_canonical ~merge;
+    parents_and_traits =
+      LSTable.make (parents_and_traits lin) ~is_canonical ~merge;
+  }

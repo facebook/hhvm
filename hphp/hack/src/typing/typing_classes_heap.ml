@@ -21,6 +21,7 @@ type lazy_class_type = {
   c: class_type;
   ih: inherited_members;
   ancestors: decl ty LSTable.t;
+  parents_and_traits: unit LSTable.t;
 }
 
 type class_type_variant =
@@ -28,7 +29,10 @@ type class_type_variant =
   | Eager of class_type
 
 let make_lazy_class_type class_name sc c =
-  let ancestors = Decl_ancestors.ancestors_cache class_name in
+  let Decl_ancestors.{
+    ancestors;
+    parents_and_traits;
+  } = Decl_ancestors.make class_name in
   let get_ancestor = LSTable.get ancestors in
   let inherited_members = Decl_inheritance.make class_name get_ancestor in
   {
@@ -36,6 +40,7 @@ let make_lazy_class_type class_name sc c =
     c;
     ih = inherited_members;
     ancestors;
+    parents_and_traits;
   }
 
 let shallow_decl_enabled () =
@@ -227,7 +232,7 @@ module Api = struct
 
   let extends t ancestor =
     match t with
-    | Lazy lc -> SSet.mem ancestor lc.c.tc_extends
+    | Lazy lc -> LSTable.mem lc.parents_and_traits ancestor
     | Eager c -> SSet.mem ancestor c.tc_extends
 
   let all_ancestors t =
@@ -252,7 +257,7 @@ module Api = struct
 
   let all_extends_ancestors t =
     match t with
-    | Lazy lc -> Sequence.of_list (SSet.elements lc.c.tc_extends)
+    | Lazy lc -> LSTable.to_seq lc.parents_and_traits |> Sequence.map ~f:fst
     | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
 
   let get_const t id =

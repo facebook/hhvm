@@ -19,6 +19,7 @@ module SN = Naming_special_names
 type ancestor_caches = {
   ancestors : decl ty LSTable.t; (** Types of parents, interfaces, and traits *)
   parents_and_traits : unit LSTable.t; (** Names of parents and traits only *)
+  members_fully_known : bool Lazy.t;
 }
 
 let all_ancestors lin =
@@ -39,6 +40,9 @@ let parents_and_traits lin =
   |> Sequence.filter ~f:(fun mro -> not mro.mro_consts_only)
   |> Sequence.map ~f:(fun mro -> mro.mro_name, ())
 
+let members_fully_known lin =
+  lazy (Sequence.for_all lin ~f:(fun mro -> not mro.mro_class_not_found))
+
 let is_canonical _ = true
 let merge ~earlier ~later:_ = earlier
 
@@ -53,4 +57,5 @@ let make class_name =
       LSTable.make (all_ancestors lin) ~is_canonical ~merge;
     parents_and_traits =
       LSTable.make (parents_and_traits lin) ~is_canonical ~merge;
+    members_fully_known = members_fully_known lin;
   }

@@ -525,10 +525,6 @@ let pBop : (expr -> expr -> expr_) parser = fun node env lhs rhs ->
   | Some TK.EqualEqualEqual             -> Binop (Eqeqeq,            lhs, rhs)
   | Some TK.LessThanLessThanEqual       -> Binop (Eq (Some Ltlt),    lhs, rhs)
   | Some TK.GreaterThanGreaterThanEqual -> Binop (Eq (Some Gtgt),    lhs, rhs)
-  | Some TK.LessThanGreaterThan         ->
-    if is_hack env
-    then raise_parsing_error env (`Node node) SyntaxError.do_not_use_ltgt;
-    Binop (Diff, lhs, rhs)
   | Some TK.ExclamationEqualEqual       -> Binop (Diff2,             lhs, rhs)
   | Some TK.LessThanEqualGreaterThan    -> Binop (Cmp,               lhs, rhs)
   | Some TK.QuestionQuestion            -> Binop (QuestionQuestion,  lhs, rhs)

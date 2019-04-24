@@ -258,7 +258,6 @@ impl Operator {
             | TokenKind::Bar
             | TokenKind::EqualEqual
             | TokenKind::EqualEqualEqual
-            | TokenKind::LessThanGreaterThan
             | TokenKind::ExclamationEqual
             | TokenKind::ExclamationEqualEqual
             | TokenKind::LessThanEqualGreaterThan
@@ -317,7 +316,6 @@ impl Operator {
             TokenKind::EqualEqual => EqualOperator,
             TokenKind::EqualEqualEqual => StrictEqualOperator,
             TokenKind::ExclamationEqual => NotEqualOperator,
-            TokenKind::LessThanGreaterThan => PhpNotEqualOperator,
             TokenKind::ExclamationEqualEqual => StrictNotEqualOperator,
             TokenKind::LessThan => LessThanOperator,
             TokenKind::LessThanEqualGreaterThan => SpaceshipOperator,
@@ -382,7 +380,6 @@ impl Operator {
             | TokenKind::EqualEqual
             | TokenKind::EqualEqualEqual
             | TokenKind::ExclamationEqual
-            | TokenKind::LessThanGreaterThan
             | TokenKind::ExclamationEqualEqual
             | TokenKind::LessThanEqualGreaterThan
             | TokenKind::LessThan

@@ -15,7 +15,6 @@ $a = 10 == 20;
 var_dump($a);
 $a = 10 != 20;
 var_dump($a);
-$a = 10 <> "xxx";
 var_dump($a);
 $a = "zz" === "xx";
 var_dump($a);
@@ -36,7 +35,6 @@ foreach ($oper1 as $e1)
     {
         echo "{$e1} ==   {$e2}  result: "; var_dump($e1 == $e2);
         echo "{$e1} !=   {$e2}  result: "; var_dump($e1 != $e2);
-        echo "{$e1} <>   {$e2}  result: "; var_dump($e1 <> $e2);
         echo "{$e1} ===  {$e2}  result: "; var_dump($e1 === $e2);
         echo "{$e1} !==  {$e2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -58,7 +56,6 @@ foreach ($oper1 as $e1)
     {
         echo "{$e1} ==   {$e2}  result: "; var_dump($e1 == $e2);
         echo "{$e1} !=   {$e2}  result: "; var_dump($e1 != $e2);
-        echo "{$e1} <>   {$e2}  result: "; var_dump($e1 <> $e2);
         echo "{$e1} ===  {$e2}  result: "; var_dump($e1 === $e2);
         echo "{$e1} !==  {$e2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -80,7 +77,6 @@ foreach ($oper1 as $e1)
     {
         echo "{$e1} ==   {$e2}  result: "; var_dump($e1 == $e2);
         echo "{$e1} !=   {$e2}  result: "; var_dump($e1 != $e2);
-        echo "{$e1} <>   {$e2}  result: "; var_dump($e1 <> $e2);
         echo "{$e1} ===  {$e2}  result: "; var_dump($e1 === $e2);
         echo "{$e1} !==  {$e2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -102,7 +98,6 @@ foreach ($oper1 as $e1)
     {
         echo "{$e1} ==   {$e2}  result: "; var_dump($e1 == $e2);
         echo "{$e1} !=   {$e2}  result: "; var_dump($e1 != $e2);
-        echo "{$e1} <>   {$e2}  result: "; var_dump($e1 <> $e2);
         echo "{$e1} ===  {$e2}  result: "; var_dump($e1 === $e2);
         echo "{$e1} !==  {$e2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";
@@ -124,7 +119,6 @@ foreach ($oper1 as $e1)
     {
         echo "{$e1} ==   {$e2}  result: "; var_dump($e1 == $e2);
         echo "{$e1} !=   {$e2}  result: "; var_dump($e1 != $e2);
-        echo "{$e1} <>   {$e2}  result: "; var_dump($e1 <> $e2);
         echo "{$e1} ===  {$e2}  result: "; var_dump($e1 === $e2);
         echo "{$e1} !==  {$e2}  result: "; var_dump($e1 !== $e2);
         echo "=======\n";

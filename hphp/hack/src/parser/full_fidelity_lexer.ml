@@ -1091,7 +1091,6 @@ let rec scan_token_impl : bool -> lexer -> (lexer * TokenKind.t) =
        TODO: This is not in the spec at present.  We should either make it an
        TODO: error, or add it to the specification. *)
     | ('=', '>') -> (advance lexer 3, TokenKind.LessThanEqualGreaterThan)
-    | ('>', _) -> (advance lexer 2, TokenKind.LessThanGreaterThan)
     | ('=', _) -> (advance lexer 2, TokenKind.LessThanEqual)
     | ('<', _) -> (advance lexer 2, TokenKind.LessThanLessThan)
     | _ -> (advance lexer 1, TokenKind.LessThan)

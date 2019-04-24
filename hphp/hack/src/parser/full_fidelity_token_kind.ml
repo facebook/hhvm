@@ -160,7 +160,6 @@ type t =
   | Dollar
   | Slash
   | Percent
-  | LessThanGreaterThan
   | LessThanEqualGreaterThan
   | LessThanLessThan
   | GreaterThanGreaterThan
@@ -383,7 +382,6 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "$"                                                                  -> Some Dollar
   | "/"                                                                  -> Some Slash
   | "%"                                                                  -> Some Percent
-  | "<>"                                                                 -> Some LessThanGreaterThan
   | "<=>"                                                                -> Some LessThanEqualGreaterThan
   | "<<"                                                                 -> Some LessThanLessThan
   | ">>"                                                                 -> Some GreaterThanGreaterThan
@@ -580,7 +578,6 @@ let to_string kind =
   | Dollar                        -> "$"
   | Slash                         -> "/"
   | Percent                       -> "%"
-  | LessThanGreaterThan           -> "<>"
   | LessThanEqualGreaterThan      -> "<=>"
   | LessThanLessThan              -> "<<"
   | GreaterThanGreaterThan        -> ">>"

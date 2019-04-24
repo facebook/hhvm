@@ -1,2 +1,2 @@
-File "ltgt.php", line 4, characters 10-11:
-Do not use '<>', it performs type coercion. Use '!==' instead (Parsing[1002])
+File "ltgt.php", line 4, characters 13-13:
+An expression is expected here. (Parsing[1002])

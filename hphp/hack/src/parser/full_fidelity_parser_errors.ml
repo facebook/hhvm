@@ -2381,7 +2381,6 @@ let get_positions_binop_allows_await t =
   | TokenKind.Dot
   | TokenKind.EqualEqual
   | TokenKind.ExclamationEqual
-  | TokenKind.LessThanGreaterThan
   | TokenKind.ExclamationEqualEqual
   | TokenKind.LessThanEqual
   | TokenKind.LessThanEqualGreaterThan

@@ -1360,7 +1360,6 @@ where
                         | TokenKind::AmpersandAmpersand
                         | TokenKind::BarBar
                         | TokenKind::ExclamationEqual
-                        | TokenKind::LessThanGreaterThan
                         | TokenKind::ExclamationEqualEqual
                         | TokenKind::LessThanEqual
                         | TokenKind::LessThanEqualGreaterThan

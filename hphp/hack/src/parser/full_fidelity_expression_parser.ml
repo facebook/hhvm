@@ -1044,7 +1044,6 @@ module WithStatementAndDeclAndTypeParser
     | AmpersandAmpersand
     | BarBar
     | ExclamationEqual
-    | LessThanGreaterThan
     | ExclamationEqualEqual
     | LessThanEqual
     | LessThanEqualGreaterThan

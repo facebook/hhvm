@@ -58,7 +58,6 @@ async function foo(): Awaitable<void> {
   $x = (await genx()) >= (await geny());
   $x = (await genx()) < (await geny());
   $x = (await genx()) > (await geny());
-  $x = (await genx()) <> (await geny());
   $x = (await genx()) <=> (await geny());
   $x = (await genx()) != (await geny());
   $x = (await genx()) !== (await geny());

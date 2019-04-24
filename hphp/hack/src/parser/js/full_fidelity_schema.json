@@ -303,8 +303,6 @@
       "token_text" : "/" },
     { "token_kind" : "Percent",
       "token_text" : "%" },
-    { "token_kind" : "LessThanGreaterThan",
-      "token_text" : "<>" },
     { "token_kind" : "LessThanEqualGreaterThan",
       "token_text" : "<=>" },
     { "token_kind" : "LessThanLessThan",

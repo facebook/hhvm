@@ -1,5 +1,5 @@
 <?php
- 
+
 const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
@@ -26,7 +26,7 @@ for ($i = 0; $i < count($validNotEquals); $i +=2) {
    $typeToTestVal = $validNotEquals[$i];
    $compares = $validNotEquals[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal != $compareVal && $typeToTestVal <> $compareVal) {
+      if ($typeToTestVal != $compareVal) {
          // do nothing
       }
       else {
@@ -40,7 +40,7 @@ for ($i = 0; $i < count($invalidNotEquals); $i +=2) {
    $typeToTestVal = $invalidNotEquals[$i];
    $compares = $invalidNotEquals[$i + 1];
    foreach($compares as $compareVal) {
-      if ($typeToTestVal != $compareVal || $typeToTestVal <> $compareVal) {
+      if ($typeToTestVal != $compareVal) {
          echo "FAILED: '$typeToTestVal' != '$compareVal'\n";
          $failed = true;
       }
@@ -50,5 +50,5 @@ for ($i = 0; $i < count($invalidNotEquals); $i +=2) {
 if ($failed == false) {
    echo "Test Passed\n";
 }
-   
+
 echo "===DONE===\n";

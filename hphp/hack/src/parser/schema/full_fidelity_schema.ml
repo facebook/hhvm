@@ -320,7 +320,6 @@ let given_text_tokens = List.map token_node_from_list [
   [ "Dollar"; "$"; LF.php_and_hack ];
   [ "Slash"; "/"; LF.php_and_hack ];
   [ "Percent"; "%"; LF.php_and_hack ];
-  [ "LessThanGreaterThan"; "<>"; LF.php_and_hack ];
   [ "LessThanEqualGreaterThan"; "<=>"; LF.php_and_hack ];
   [ "LessThanLessThan"; "<<"; LF.php_and_hack ];
   [ "GreaterThanGreaterThan"; ">>"; LF.php_and_hack ];

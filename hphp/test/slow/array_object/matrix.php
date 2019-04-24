@@ -33,7 +33,6 @@ function main() {
     var_dump($row[0] == $row[1]);
     var_dump($row[0] === $row[1]);
     var_dump($row[0] != $row[1]);
-    var_dump($row[0] <> $row[1]);
     var_dump($row[0] !== $row[1]);
     var_dump($row[0] < $row[1]);
     var_dump($row[0] > $row[1]);

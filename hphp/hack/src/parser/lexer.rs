@@ -1434,10 +1434,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         self.advance(3);
                         TokenKind::LessThanEqualGreaterThan
                     }
-                    ('>', _) => {
-                        self.advance(2);
-                        TokenKind::LessThanGreaterThan
-                    }
                     ('=', _) => {
                         self.advance(2);
                         TokenKind::LessThanEqual

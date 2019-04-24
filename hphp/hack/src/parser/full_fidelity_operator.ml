@@ -248,7 +248,6 @@ let is_trailing_operator_token token =
   | TokenKind.Bar
   | TokenKind.EqualEqual
   | TokenKind.EqualEqualEqual
-  | TokenKind.LessThanGreaterThan
   | TokenKind.ExclamationEqual
   | TokenKind.ExclamationEqualEqual
   | TokenKind.LessThanEqualGreaterThan
@@ -305,7 +304,6 @@ let trailing_from_token token =
   | TokenKind.EqualEqual -> EqualOperator
   | TokenKind.EqualEqualEqual -> StrictEqualOperator
   | TokenKind.ExclamationEqual -> NotEqualOperator
-  | TokenKind.LessThanGreaterThan -> PhpNotEqualOperator
   | TokenKind.ExclamationEqualEqual -> StrictNotEqualOperator
   | TokenKind.LessThan -> LessThanOperator
   | TokenKind.LessThanEqualGreaterThan -> SpaceshipOperator
@@ -369,7 +367,6 @@ let is_binary_operator_token token =
   | TokenKind.EqualEqual
   | TokenKind.EqualEqualEqual
   | TokenKind.ExclamationEqual
-  | TokenKind.LessThanGreaterThan
   | TokenKind.ExclamationEqualEqual
   | TokenKind.LessThanEqualGreaterThan
   | TokenKind.LessThan

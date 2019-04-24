@@ -112,31 +112,19 @@ int64_t requestCount() {
   return numRequests.load(std::memory_order_relaxed);
 }
 
-static inline bool doneProfiling() {
-  return requestCount() >= RuntimeOption::EvalJitProfileInterpRequests ||
-    (!RuntimeOption::ServerExecutionMode() &&
-     !RuntimeOption::EvalJitProfileRecord);
-}
-
 static inline RequestKind getRequestKind() {
   if (rl_typeProfileLocals->nonVMThread) return RequestKind::NonVM;
   if (warmingUp) return RequestKind::Warmup;
-  if (doneProfiling()) return RequestKind::Standard;
-  if (RuntimeOption::ServerExecutionMode() ||
-      RuntimeOption::EvalJitProfileRecord) return RequestKind::Profile;
   return RequestKind::Standard;
 }
 
 void profileRequestStart() {
   rl_typeProfileLocals->requestKind = getRequestKind();
 
-  // Force the request to use interpreter (not even running jitted code) when it
-  // is of RequestKind::Profile, or during retranslateAll when we need to dump
-  // out precise profile data.
-  auto const forceInterp =
-    (rl_typeProfileLocals->requestKind == RequestKind::Profile) ||
-    (jit::mcgen::pendingRetranslateAllScheduled() &&
-     RuntimeOption::DumpPreciseProfData);
+  // Force the request to use interpreter (not even running jitted code) during
+  // retranslateAll when we need to dump out precise profile data.
+  auto const forceInterp = jit::mcgen::pendingRetranslateAllScheduled() &&
+                           RuntimeOption::DumpPreciseProfData;
   bool okToJit = !forceInterp &&
                  (rl_typeProfileLocals->requestKind == RequestKind::Standard);
   if (!RequestInfo::s_requestInfo.isNull()) {

@@ -738,7 +738,6 @@ void logLoad(
 
   switch (rl_typeProfileLocals->requestKind) {
   case RequestKind::Warmup: ent.setStr("request_kind", "warmup"); break;
-  case RequestKind::Profile: ent.setStr("request_kind", "profile"); break;
   case RequestKind::Standard: ent.setStr("request_kind", "standard"); break;
   case RequestKind::NonVM: ent.setStr("request_kind", "nonVM"); break;
   }

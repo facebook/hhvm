@@ -29,7 +29,6 @@ struct Func;
 
 enum class RequestKind {
   Warmup,
-  Profile,
   NonVM,
   Standard,
 };
@@ -60,10 +59,6 @@ struct TypeProfileLocals {
 };
 
 extern RDS_LOCAL_NO_CHECK(TypeProfileLocals, rl_typeProfileLocals);
-
-inline bool isProfileRequest() {
-  return rl_typeProfileLocals->requestKind == RequestKind::Profile;
-}
 
 inline bool isStandardRequest() {
   return rl_typeProfileLocals->requestKind == RequestKind::Standard;

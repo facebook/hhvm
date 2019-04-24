@@ -777,7 +777,6 @@ struct RuntimeOption {
   F(uint64_t, JitGlobalTranslationLimit, -1)                            \
   F(int64_t, JitMaxRequestTranslationTime, -1)                          \
   F(uint32_t, JitMaxRegionInstrs,      1347)                            \
-  F(uint32_t, JitProfileInterpRequests, kDefaultProfileInterpRequests)  \
   F(uint32_t, JitMaxAwaitAllUnroll,    8)                               \
   F(bool, JitProfileWarmupRequests,    false)                           \
   F(uint32_t, JitProfileRequests,      profileRequestsDefault())        \
@@ -792,7 +791,6 @@ struct RuntimeOption {
   F(int32_t,  JitLayoutMainFactor,     1000)                            \
   F(int32_t,  JitLayoutColdFactor,     5)                               \
   F(bool,     JitAHotSizeRoundUp,      true)                            \
-  F(bool, JitProfileRecord,            false)                           \
   F(uint32_t, GdbSyncChunks,           128)                             \
   F(bool, JitKeepDbgFiles,             false)                           \
   /* despite the unfortunate name, this enables function renaming and

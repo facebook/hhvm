@@ -1008,7 +1008,6 @@ const uint64_t kEvalVMStackElmsDefault =
  ;
 
 constexpr uint32_t kEvalVMInitialGlobalTableSizeDefault = 512;
-constexpr int kDefaultProfileInterpRequests = debug ? 1 : 11;
 constexpr uint64_t kJitRelocationSizeDefault = 1 << 20;
 
 static const bool kJitTimerDefault =

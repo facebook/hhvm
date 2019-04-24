@@ -135,6 +135,7 @@
     core_kernel
     heap_shared_mem
     parser
+    parser_coroutine
     parser_editable_positioned_syntax
     parser_namespaces
     parser_ppl

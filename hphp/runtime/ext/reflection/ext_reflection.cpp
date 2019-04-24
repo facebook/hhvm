@@ -640,8 +640,6 @@ static Variant HHVM_METHOD(ReflectionFunctionAbstract, getDocComment) {
   auto const comment = func->docComment();
   if (comment == nullptr || comment->empty()) {
     return false_varNR;
-  } else if (func->isBuiltin() && !HHVM_FUNCTION(hphp_debugger_attached)) {
-    return false_varNR;
   } else {
     auto ret = const_cast<StringData*>(comment);
     return VarNR(ret);
@@ -1164,8 +1162,6 @@ static Variant HHVM_METHOD(ReflectionClass, getDocComment) {
   auto const pcls = cls->preClass();
   auto const comment = pcls->docComment();
   if (comment == nullptr || comment->empty()) {
-    return false_varNR;
-  } else if (pcls->isBuiltin() && !HHVM_FUNCTION(hphp_debugger_attached)) {
     return false_varNR;
   } else {
     auto ret = const_cast<StringData*>(comment);

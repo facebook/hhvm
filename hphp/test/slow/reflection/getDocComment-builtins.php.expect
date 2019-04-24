@@ -1,7 +1,43 @@
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+string(635) "/**
+   * ( excerpt from http://php.net/manual/en/arrayaccess.offsetexists.php )
+   *
+   * Whether or not an offset exists.
+   *
+   * This method is executed when using isset() or empty() on objects
+   * implementing ArrayAccess.
+   *
+   * When using empty() ArrayAccess::offsetGet() will be called and checked
+   * if empty only if ArrayAccess::offsetExists() returns TRUE.
+   *
+   * @index      mixed   An offset to check for.
+   *
+   * @return     mixed   Returns TRUE on success or FALSE on failure.
+   *
+   *                     The return value will be casted to boolean if
+   *                     non-boolean was returned.
+   */"
+string(133) "/**
+ * ( excerpt from http://php.net/manual/en/class.arrayaccess.php )
+ *
+ * Interface to provide accessing objects as arrays.
+ *
+ */"
+string(328) "/**
+   * ( excerpt from
+   * http://php.net/manual/en/reflectionfunctionabstract.getdoccomment.php )
+   *
+   * Get a Doc comment from a function. Warning: This function is currently
+   * not documented; only its argument list is available.
+   *
+   * @return     mixed   The doc comment string if it exists, otherwise FALSE
+   */"
+string(193) "/**
+ * ( excerpt from
+ * http://php.net/manual/en/class.reflectionfunctionabstract.php )
+ *
+ * A parent class to ReflectionFunction and ParentMethod. Read their
+ * descriptions for details.
+ */"
 string(21) "/** @idx herp derp */"
 string(22) "/** I's doc comment */"
 string(23) "/** more doc comment */"

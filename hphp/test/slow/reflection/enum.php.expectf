@@ -11,28 +11,55 @@ Enum [ <user> enum TestEnum extends HH\BuiltinEnum ] {
   }
 
   - Static methods [6] {
+    /**
+       * Get the values of the public consts defined on this class,
+       * indexed by the string name of those consts.
+       *
+       * @return darray['CONST_NAME' => $value, ....]
+       */
     Method [ <internal, inherits HH\BuiltinEnum> final static public method getValues ] {
     }
+    /**
+       * Get the names of all the const values, indexed by value. Calls
+       * invariant_exception if multiple constants have the same value.
+       *
+       * @return darray[$value => 'CONST_NAME', ....]
+       */
     Method [ <internal, inherits HH\BuiltinEnum> final static public method getNames ] {
     }
+    /**
+       * Returns whether or not the value is defined as a constant.
+       */
     Method [ <internal, inherits HH\BuiltinEnum> final static public method isValid ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> HH\mixed $value ]
       }
     }
+    /**
+       * Coerce to a valid value or null.
+       * This is useful for typing deserialized enum values.
+       */
     Method [ <internal, inherits HH\BuiltinEnum> final static public method coerce ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> HH\mixed $value ]
       }
     }
+    /**
+       * Coerce to valid value or throw UnexpectedValueException
+       * This is useful for typing deserialized enum values.
+       */
     Method [ <internal, inherits HH\BuiltinEnum> final static public method assert ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> HH\mixed $value ]
       }
     }
+    /**
+       * Coerce all the values in a traversable. If the value is not an
+       * array of valid items, an UnexpectedValueException is thrown
+       */
     Method [ <internal, inherits HH\BuiltinEnum> final static public method assertAll ] {
 
       - Parameters [1] {

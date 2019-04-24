@@ -21,6 +21,9 @@ type index_builder_context = {
   sqlite_filename: string option;
   text_filename: string option;
   json_filename: string option;
+  json_chunk_size: int;
+  glean_service: string option;
+  glean_repo_name: string option;
 }
 
 (* Combine two results *)
@@ -134,6 +137,9 @@ let parse_options (): index_builder_context =
   let sqlite_filename = ref None in
   let text_filename = ref None in
   let json_filename = ref None in
+  let json_chunk_size = ref 500_000 in
+  let glean_service = ref None in
+  let glean_repo_name = ref None in
   let repository = ref "." in
   let options = ref [
       "--sqlite",
@@ -148,6 +154,18 @@ let parse_options (): index_builder_context =
       Arg.String (fun x -> json_filename := (Some x)),
       "[filename]  Save the global index in a JSON file";
 
+      "--chunk-size",
+      Arg.Int (fun x -> json_chunk_size := x),
+      "[number]    Split the JSON file into chunks of a specified size";
+
+      "--glean-service",
+      Arg.String (fun x -> glean_service := (Some x)),
+      "[service]  Use this specified glean service";
+
+      "--glean-repo-name",
+      Arg.String (fun x -> glean_repo_name := (Some x)),
+      "[repo-name]  Use this specified glean repo name";
+
     ] in
   Arg.parse_dynamic options (fun anonymous_arg -> repository := anonymous_arg) usage;
 
@@ -161,6 +179,9 @@ let parse_options (): index_builder_context =
     sqlite_filename = !sqlite_filename;
     text_filename = !text_filename;
     json_filename = !json_filename;
+    json_chunk_size = !json_chunk_size;
+    glean_service = !glean_service;
+    glean_repo_name = !glean_repo_name;
   }
 ;;
 
@@ -195,9 +216,22 @@ let main (): unit =
   Daemon.check_entry_point ();
   PidLog.init "/tmp/hh_server/global_index_builder.pids";
   PidLog.log ~reason:"main" (Unix.getpid ());
+  let ctxt = parse_options () in
+
+  (* Figure out what global revision we are on *)
+  let hg_process =
+    Process.exec ~cwd:(ctxt.repo_folder) "hg" ["log";"-r";".";"-T";"{globalrev}"] in
+  let globalrev =
+    match Process.read_and_wait_pid ~timeout:30 hg_process with
+    | Ok { Process_types.stdout; _ } ->
+      stdout
+    | Error _ ->
+      "Unknown"
+  in
+  Printf.printf "Repository [%s] is on globalrev [%s]\n%!"
+    ctxt.repo_folder globalrev;
 
   (* Gather list of files *)
-  let ctxt = parse_options () in
   Printf.printf "Scanning repository %s... %!" ctxt.repo_folder;
   let repo_files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name:"" in
 
@@ -242,20 +276,36 @@ let main (): unit =
   end;
 
   (* Are we exporting a json file? *)
-  begin
+  let json_exported_files =
     match ctxt.json_filename with
     | None ->
-      ()
+      []
     | Some filename ->
       Printf.printf "Writing %d symbols to json... %!"
         (List.length results);
       measure_time ~f:(fun () ->
-          JsonIndexWriter.record_in_jsonfile filename results;
-        ) ~name:"";
-  end;
-  ()
-;;
+          JsonIndexWriter.record_in_jsonfiles
+            ctxt.json_chunk_size filename results;
+        ) ~name:""
+  in
+
+  (* Are we exporting to glean? *)
+  begin
+    match (ctxt.glean_service, ctxt.glean_repo_name) with
+    | Some _, None
+    | None, Some _ ->
+      print_endline "Glean requires both a service and a repo name.";
+    | None, None ->
+      ()
+    | Some service, Some repo_name ->
+      Printf.printf "Exporting to glean [%s] [%s]...\n%!"
+        service repo_name;
+      measure_time ~f:(fun () ->
+          GleanExporter.send_to_glean
+            json_exported_files service repo_name globalrev;
+        ) ~name:"Finished writing to Glean: ";
+  end
 
 let () =
   let _ = measure_time ~f:(fun () -> main ()) ~name:"\n\nGlobal Index Built successfully:" in
-  Printf.printf "Done%s" "";
+  print_endline "Done"

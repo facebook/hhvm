@@ -85,7 +85,7 @@ let to_class_type {
   dc_req_ancestors_extends;
   dc_extends;
   dc_sealed_whitelist = _;
-  dc_xhp_attr_deps;
+  dc_xhp_attr_deps = _;
   dc_enum_type;
   dc_decl_errors;
   dc_condition_types = _;
@@ -139,7 +139,7 @@ let to_class_type {
     tc_ancestors = dc_ancestors;
     tc_req_ancestors = dc_req_ancestors;
     tc_req_ancestors_extends = dc_req_ancestors_extends;
-    tc_extends = SSet.union dc_xhp_attr_deps dc_extends;
+    tc_extends = dc_extends;
     tc_enum_type = dc_enum_type;
     tc_decl_errors = dc_decl_errors;
   }

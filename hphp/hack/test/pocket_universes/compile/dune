@@ -1,0 +1,15 @@
+(alias
+    (name pocket_universes_compile_good)
+    (deps %{exe:../../../src/hh_single_compile.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/pocket_universes/compile/*.good.php)
+          (glob_files %{project_root}/test/pocket_universes/compile/*.good.php.exp)
+          %{project_root}/test/pocket_universes/compile/HH_FLAGS)
+    (action (run %{project_root}/test/verify.py %{project_root}/test/pocket_universes/compile
+    --program %{exe:../../../src/hh_single_compile.exe}
+    --in-extension .good.php)))
+
+(alias
+    (name runtest)
+    (deps (alias pocket_universes_compile_good)))

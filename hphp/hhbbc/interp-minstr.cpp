@@ -442,6 +442,7 @@ void startBase(ISS& env, Base base) {
   assert(oldState.base.loc == BaseLoc::None);
   assert(oldState.arrayChain.empty());
   assert(isInitialBaseLoc(base.loc));
+  assert(!base.type.subtypeOf(TBottom));
 
   oldState.base = std::move(base);
   FTRACE(5, "    startBase: {}\n", show(*env.ctx.func, oldState.base));
@@ -471,6 +472,7 @@ void moveBase(ISS& env,
   auto& state = env.state.mInstrState;
   assert(state.base.loc != BaseLoc::None);
   assert(isDimBaseLoc(newBase.loc));
+  assert(!state.base.type.subtypeOf(BBottom));
 
   FTRACE(5, "    moveBase: {} -> {}\n",
          show(*env.ctx.func, state.base),
@@ -500,6 +502,8 @@ void extendArrChain(ISS& env, Type key, Type arr,
   auto& state = env.state.mInstrState;
   assert(state.base.loc != BaseLoc::None);
   assert(mustBeArrLike(arr));
+  assert(!state.base.type.subtypeOf(BBottom));
+  assert(!val.subtypeOf(BBottom));
 
   state.arrayChain.emplace_back(
     State::MInstrState::ArrayChainEnt{std::move(arr), std::move(key), keyLoc}
@@ -835,6 +839,7 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
         );
       }();
 
+      if (ty.subtypeOf(BBottom)) return unreachable(env);
       moveBase(
         env,
         Base { ty, BaseLoc::Prop, thisTy, name },
@@ -856,6 +861,7 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
         name ? sval(name) : TStr
       )
     );
+    if (ty.subtypeOf(BBottom)) return unreachable(env);
     moveBase(env,
              Base { ty,
                     BaseLoc::Prop,
@@ -892,6 +898,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
     promoteBaseElemU(env);
 
     if (auto ty = array_do_elem(env, false, key)) {
+      if (ty->subtypeOf(BBottom)) return unreachable(env);
       moveBase(
         env,
         Base { std::move(*ty), BaseLoc::Elem, env.state.mInstrState.base.type },
@@ -909,6 +916,7 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
   }
 
   if (auto ty = array_do_elem(env, mode == MOpMode::None, key)) {
+    if (ty->subtypeOf(BBottom)) return unreachable(env);
     extendArrChain(
       env, std::move(key), env.state.mInstrState.base.type,
       std::move(*ty),
@@ -1036,6 +1044,7 @@ void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
   }
 
   if (env.state.mInstrState.base.type.subtypeOf(BObj)) {
+    if (t1.subtypeOf(BBottom)) return unreachable(env);
     moveBase(
       env,
       Base { t1, BaseLoc::Prop, env.state.mInstrState.base.type, name }
@@ -1373,19 +1382,25 @@ void in(ISS& env, const bc::BaseGL& op) {
 void in(ISS& env, const bc::BaseSC& op) {
   auto prop = topC(env, op.arg1);
   auto cls = takeClsRefSlot(env, op.slot);
-  startBase(env, miBaseSProp(env, std::move(cls), prop));
+  auto newBase = miBaseSProp(env, std::move(cls), prop);
+  if (newBase.type.subtypeOf(BBottom)) return unreachable(env);
+  startBase(env, std::move(newBase));
 }
 
 void in(ISS& env, const bc::BaseL& op) {
-  startBase(env, miBaseLocal(env, op.loc1, op.subop2));
+  auto newBase = miBaseLocal(env, op.loc1, op.subop2);
+  if (newBase.type.subtypeOf(BBottom)) return unreachable(env);
+  startBase(env, std::move(newBase));
 }
 
 void in(ISS& env, const bc::BaseC& op) {
   assert(op.arg1 < env.state.stack.size());
+  auto ty = topC(env, op.arg1);
+  if (ty.subtypeOf(BBottom)) return unreachable(env);
   startBase(
     env,
     Base {
-      topC(env, op.arg1),
+      std::move(ty),
       BaseLoc::Stack,
       TBottom,
       SString{},

@@ -133,58 +133,6 @@ let usage =
     Sys.argv.(0)
 ;;
 
-let parse_options (): index_builder_context =
-  let sqlite_filename = ref None in
-  let text_filename = ref None in
-  let json_filename = ref None in
-  let json_chunk_size = ref 500_000 in
-  let glean_service = ref None in
-  let glean_repo_name = ref None in
-  let repository = ref "." in
-  let options = ref [
-      "--sqlite",
-      Arg.String (fun x -> sqlite_filename := (Some x)),
-      "[filename]  Save the global index in a Sqlite database";
-
-      "--text",
-      Arg.String (fun x -> text_filename := (Some x)),
-      "[filename]  Save the global index in a finite-state transducer (FST) file";
-
-      "--json",
-      Arg.String (fun x -> json_filename := (Some x)),
-      "[filename]  Save the global index in a JSON file";
-
-      "--chunk-size",
-      Arg.Int (fun x -> json_chunk_size := x),
-      "[number]    Split the JSON file into chunks of a specified size";
-
-      "--glean-service",
-      Arg.String (fun x -> glean_service := (Some x)),
-      "[service]  Use this specified glean service";
-
-      "--glean-repo-name",
-      Arg.String (fun x -> glean_repo_name := (Some x)),
-      "[repo-name]  Use this specified glean repo name";
-
-    ] in
-  Arg.parse_dynamic options (fun anonymous_arg -> repository := anonymous_arg) usage;
-
-  (* Print what we're about to do *)
-  Printf.printf "Building global symbol index for [%s]\n%!"
-    !repository;
-
-  (* Parameters for this execution *)
-  {
-    repo_folder = !repository;
-    sqlite_filename = !sqlite_filename;
-    text_filename = !text_filename;
-    json_filename = !json_filename;
-    json_chunk_size = !json_chunk_size;
-    glean_service = !glean_service;
-    glean_repo_name = !glean_repo_name;
-  }
-;;
-
 (* Let's use the unix find command which seems to be really quick at this sort of thing *)
 let gather_file_list (path: string): string list =
   let cmdline = Printf.sprintf "find %s \\( -name \"*.php\" -o -name \"*.hhi\" \\)" path in
@@ -211,12 +159,8 @@ let measure_time ~f ~(name: string) =
   result
 ;;
 
-(* Run the application *)
-let main (): unit =
-  Daemon.check_entry_point ();
-  PidLog.init "/tmp/hh_server/global_index_builder.pids";
-  PidLog.log ~reason:"main" (Unix.getpid ());
-  let ctxt = parse_options () in
+(* Run the index builder project *)
+let go (ctxt: index_builder_context): unit =
 
   (* Figure out what global revision we are on *)
   let hg_process =
@@ -305,7 +249,4 @@ let main (): unit =
             json_exported_files service repo_name globalrev;
         ) ~name:"Finished writing to Glean: ";
   end
-
-let () =
-  let _ = measure_time ~f:(fun () -> main ()) ~name:"\n\nGlobal Index Built successfully:" in
-  print_endline "Done"
+;;

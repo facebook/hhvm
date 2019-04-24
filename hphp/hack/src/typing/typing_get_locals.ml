@@ -11,7 +11,7 @@ open Core_kernel
 open Ast
 open Utils
 
-module Aast = Ast_to_nast.Aast
+module Aast = Nast
 module FuncTerm = Typing_func_terminality
 module NS = Namespaces
 

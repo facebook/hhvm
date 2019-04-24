@@ -196,6 +196,13 @@ let string_of_visibility vis =
   | Public -> "public"
   | Protected -> "protected"
 
+let string_of_use_as_visibility vis =
+  match vis with
+  | UseAsPublic -> "public"
+  | UseAsPrivate -> "private"
+  | UseAsProtected -> "protected"
+  | UseAsFinal -> "final"
+
 type id = lid [@@deriving show]
 type pstring = Ast.pstring [@@deriving show]
 

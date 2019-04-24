@@ -54,6 +54,11 @@ let empty_saved_env tcopt : saved_env = {
   fun_mutable = None;
 }
 
+(* Used when an env is needed in codegen.
+ * TODO: (arkumar,wilfred,thomasjiang) T42509373 Fix when when needed
+ *)
+let dummy_saved_env = empty_saved_env GlobalOptions.default
+
 (* Typed AST.
  *
  * We re-use the NAST, but annotate expressions with position *and* type, not

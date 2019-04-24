@@ -608,7 +608,7 @@ let split_reqs class_ =
       class_.c_reqs in
   List.rev extends, List.rev implements
 
-let get_break_continue_level_tast level_opt =
+let get_break_continue_level level_opt =
   match level_opt with
   | (_, Int s) ->
     let i = int_of_string s in

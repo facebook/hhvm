@@ -9,29 +9,29 @@
 
 (* Everything needed to describe a function, method, or main body *)
 type t = {
-  body_instrs            : Instruction_sequence.t;
-  body_decl_vars         : string list; (* Actually local_id list *)
-  body_num_iters         : int;
-  body_num_cls_ref_slots : int;
-  body_is_memoize_wrapper: bool;
-  body_is_memoize_wrapper_lsb: bool;
-  body_params            : Hhas_param.t list;
-  body_return_type       : Hhas_type_info.t option;
-  body_doc_comment       : string option;
-  body_env               : Emit_env.t option;
+  body_instrs                 : Instruction_sequence.t;
+  body_decl_vars              : string list; (* Actually local_id list *)
+  body_num_iters              : int;
+  body_num_cls_ref_slots      : int;
+  body_is_memoize_wrapper     : bool;
+  body_is_memoize_wrapper_lsb : bool;
+  body_params                 : Hhas_param.t list;
+  body_return_type            : Hhas_type_info.t option;
+  body_doc_comment            : string option;
+  body_env                    : Emit_env.t option;
 }
 
 let make
-  instrs
-  decl_vars
-  num_iters
-  num_cls_ref_slots
-  is_memoize_wrapper
-  is_memoize_wrapper_lsb
-  params
-  return_type
-  doc_comment
-  env =
+    instrs
+    decl_vars
+    num_iters
+    num_cls_ref_slots
+    is_memoize_wrapper
+    is_memoize_wrapper_lsb
+    params
+    return_type
+    doc_comment
+    env =
   {
     body_instrs = instrs;
     body_decl_vars = decl_vars;

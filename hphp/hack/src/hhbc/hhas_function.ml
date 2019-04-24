@@ -56,6 +56,7 @@ let make
     function_rx_disabled;
   }
 
+
 let attributes f = f.function_attributes
 let name f = f.function_name
 let body f = f.function_body
@@ -73,7 +74,6 @@ let is_interceptable f = f.function_is_interceptable
 let is_memoize_impl f = f.function_is_memoize_impl
 let rx_level f = f.function_rx_level
 let rx_disabled f = f.function_rx_disabled
-
 let with_body f function_body = { f with function_body }
 let params f = f.function_body.Hhas_body.body_params
 let return_type f = f.function_body.Hhas_body.body_return_type

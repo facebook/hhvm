@@ -12,6 +12,7 @@ open Hhbc_ast
 open Hhbc_string_utils
 open Core_kernel
 module A = Ast
+module T = Tast
 module SN = Naming_special_names
 module SU = Hhbc_string_utils
 module TC = Hhas_type_constraint
@@ -19,21 +20,36 @@ module TC = Hhas_type_constraint
 (* Follow HHVM rules here: see EmitterVisitor::requiresDeepInit *)
 let rec expr_requires_deep_init (_, expr_) =
   match expr_ with
-  | A.Unop((A.Uplus | A.Uminus), e1) ->
+  | T.Unop ((A.Uplus | A.Uminus), e1) ->
     expr_requires_deep_init e1
-  | A.Binop(_, e1, e2) ->
+  | T.Binop (_, e1, e2) ->
     expr_requires_deep_init e1 || expr_requires_deep_init e2
-  | A.Lvar _ | A.Null | A.False | A.True | A.Int _
-  | A.Float _ | A.String _ -> false
-  | A.Array fields | A.Collection ((_, ("keyset" | "vec" | "dict")), _, fields) ->
+  | T.Lvar _ | T.Null | T.False | T.True | T.Int _
+  | T.Float _ | T.String _ -> false
+  | T.Array fields | T.Collection ((_, ("keyset" | "vec" | "dict")), _, fields) ->
     List.exists fields aexpr_requires_deep_init
-  | A.Varray (_, fields) -> List.exists fields expr_requires_deep_init
-  | A.Darray (_, fields) -> List.exists fields expr_pair_requires_deep_init
-  | A.Id(_, ("__FILE__" | "__DIR__")) -> false
-  | A.Class_const ((_, A.Id (_, s)), (_, p)) ->
+  | T.Varray (_, fields) -> List.exists fields expr_requires_deep_init
+  | T.Darray (_, fields) -> List.exists fields expr_pair_requires_deep_init
+  | T.Id (_, ("__FILE__" | "__DIR__")) -> false
+  | T.Class_const ((_, T.CIexpr (_, T.Id (_, s))), (_, p)) ->
     class_const_requires_deep_init s p
-  | A.Shape fields ->
+  | T.Shape fields ->
     List.exists fields shape_field_requires_deep_init
+  | T.Typename _
+  | T.Assert _
+  | T.Pair _
+  | T.Special_func _
+  | T.Smethod_id _
+  | T.Method_caller _
+  | T.Method_id _
+  | T.Fun_id _
+  | T.Dollardollar _
+  | T.Lplaceholder _
+  | T.ImmutableVar _
+  | T.This
+  | T.KeyValCollection _
+  | T.ValCollection _
+  | T.Any -> failwith "Expr not found on original AST"
   | _ -> true
 
 and class_const_requires_deep_init s p =
@@ -55,8 +71,8 @@ and expr_pair_requires_deep_init (expr1, expr2) =
 
 and aexpr_requires_deep_init aexpr =
   match aexpr with
-  | A.AFvalue expr -> expr_requires_deep_init expr
-  | A.AFkvalue (expr1, expr2) ->
+  | T.AFvalue expr -> expr_requires_deep_init expr
+  | T.AFkvalue (expr1, expr2) ->
     expr_requires_deep_init expr1 || expr_requires_deep_init expr2
 
 let valid_tc_for_prop tc =
@@ -70,9 +86,10 @@ let valid_tc_for_prop tc =
      not (String.lowercase name = "hh\\noreturn")
 
 let from_ast
-    ast_class
+    class_
     cv_user_attributes
-    cv_kind_list
+    is_static
+    cv_visibility
     class_is_immutable
     type_hint
     tparams
@@ -83,81 +100,84 @@ let from_ast
   HHVM does not allow this.  Fix this in the Hack parser? *)
   let pid = Hhbc_id.Prop.from_ast_name cv_name in
   let attributes = Emit_attribute.from_asts namespace cv_user_attributes in
-  let is_immutable = class_is_immutable ||
-    Hhas_attribute.has_const attributes in
+  let is_immutable = class_is_immutable || Hhas_attribute.has_const attributes in
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
   let is_soft_late_init = Hhas_attribute.has_soft_late_init attributes in
-  let is_private = List.mem ~equal:(=) cv_kind_list Ast.Private in
-  let is_protected = List.mem ~equal:(=) cv_kind_list Ast.Protected in
-  let is_public =
-    List.mem ~equal:(=) cv_kind_list Ast.Public
-    || (not is_private && not is_protected) in
-  let is_static = List.mem ~equal:(=) cv_kind_list Ast.Static in
-  if not is_static
-    && ast_class.Ast.c_final
-    && ast_class.Ast.c_kind = Ast.Cabstract
+  let is_private = cv_visibility = Aast.Private in
+  let is_protected = cv_visibility = Aast.Protected in
+  let is_public = cv_visibility = Aast.Public in
+  if not is_static && class_.T.c_final && class_.T.c_kind = Ast.Cabstract
   then Emit_fatal.raise_fatal_parse pos
-    ("Class " ^ Utils.strip_ns (snd ast_class.Ast.c_name) ^
-      " contains non-static property declaration"
-     ^ " and therefore cannot be declared 'abstract final'");
+    ("Class " ^ Utils.strip_ns (snd class_.T.c_name)
+      ^ " contains non-static property declaration"
+      ^ " and therefore cannot be declared 'abstract final'");
   let tinfo =
     match type_hint with
     | None ->
       Hhas_type_info.make (Some "") (Hhas_type_constraint.make None [])
     | Some h ->
-       let tc =
-         Emit_type_hint.(hint_to_type_info
-                         ~kind:Property ~nullable:false
-                         ~skipawaitable:false ~tparams ~namespace h)
-       in
-       if not (valid_tc_for_prop (Hhas_type_info.type_constraint tc))
-       then Emit_fatal.raise_fatal_parse pos
-         (Printf.sprintf "Invalid property type hint for '%s::$%s'"
-                         (Utils.strip_ns (snd ast_class.Ast.c_name))
-                         (Hhbc_id.Prop.to_raw_string pid))
-       else tc
+      let tc =
+        Emit_type_hint.hint_to_type_info
+          ~kind:Emit_type_hint.Property
+          ~nullable:false
+          ~skipawaitable:false
+          ~tparams
+          ~namespace
+          h in
+      if not (valid_tc_for_prop (Hhas_type_info.type_constraint tc))
+      then
+        Emit_fatal.raise_fatal_parse pos
+          (Printf.sprintf "Invalid property type hint for '%s::$%s'"
+            (Utils.strip_ns (snd class_.T.c_name))
+            (Hhbc_id.Prop.to_raw_string pid))
+      else tc
   in
-  let env = Emit_env.make_class_env ast_class in
+  let env = Emit_env.make_class_env class_ in
   let initial_value, is_deep_init, has_system_initial, initializer_instrs =
     match initial_value with
     | None ->
-       let v = if is_late_init || is_soft_late_init then (Some Typed_value.Uninit) else None
-       in v, false, true, None
+      let v =
+        if is_late_init || is_soft_late_init
+        then Some Typed_value.Uninit
+        else None in
+      v, false, true, None
     | Some expr ->
-       if is_late_init || is_soft_late_init
-       then Emit_fatal.raise_fatal_parse pos
-         (Printf.sprintf "<<__%sLateInit>> property '%s::$%s' cannot have an initial value"
-                         (if is_soft_late_init then "Soft" else "")
-                         (Utils.strip_ns (snd ast_class.Ast.c_name))
-                         (Hhbc_id.Prop.to_raw_string pid));
+      if is_late_init || is_soft_late_init
+      then
+        Emit_fatal.raise_fatal_parse pos
+          (Printf.sprintf "<<__%sLateInit>> property '%s::$%s' cannot have an initial value"
+            (if is_soft_late_init then "Soft" else "")
+            (Utils.strip_ns (snd class_.T.c_name))
+            (Hhbc_id.Prop.to_raw_string pid));
       let is_collection_map =
         match snd expr with
-        | A.Collection ((_, ("Map" | "ImmMap")), _, _) -> true
-        | _ -> false
-      in
+        | T.Collection ((_, ("Map" | "ImmMap")), _, _) -> true
+        | _ -> false in
       let deep_init = not is_static && expr_requires_deep_init expr in
-      match Ast_constant_folder.expr_to_opt_typed_value
-        ast_class.Ast.c_namespace expr with
+      let otv =
+        Ast_constant_folder.expr_to_opt_typed_value
+          class_.T.c_namespace expr in
+      match otv with
       | Some v when not deep_init && not is_collection_map ->
         Some v, false, false, None
       | _ ->
         let label = Label.next_regular () in
         let prolog, epilog =
           if is_static
-          then empty, Emit_pos.emit_pos_then ast_class.Ast.c_span @@
+          then empty, Emit_pos.emit_pos_then class_.T.c_span @@
             instr (IMutator (InitProp (pid, Static)))
           else if is_private
-          then empty, Emit_pos.emit_pos_then ast_class.Ast.c_span @@
+          then empty, Emit_pos.emit_pos_then class_.T.c_span @@
             instr (IMutator (InitProp (pid, NonStatic)))
           else
             gather [
-              Emit_pos.emit_pos ast_class.Ast.c_span;
+              Emit_pos.emit_pos class_.T.c_span;
               instr (IMutator (CheckProp pid));
               instr_jmpnz label;
             ],
             gather [
-              Emit_pos.emit_pos ast_class.Ast.c_span;
+              Emit_pos.emit_pos class_.T.c_span;
               instr (IMutator (InitProp (pid, NonStatic)));
               instr_label label;
             ] in

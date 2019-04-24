@@ -9,8 +9,11 @@
 open Core_kernel
 open Instruction_sequence
 
-let get_first_param_name = function
-  | p :: _ -> snd p.A.param_id
+module T = Tast
+
+let get_first_param_name params =
+  match params with
+  | p :: _ -> p.T.param_name
   | _ -> failwith "native generator requires params"
 
 let emit_generator_method name params =
@@ -47,11 +50,12 @@ let emit_generator_method name params =
     instr_retc
   ]
 
-let emit_native_opcode_impl name params = function
-  | [{ A.ua_name = (_, "__NativeData");
-       A.ua_params = [_, A.String "HH\\AsyncGenerator"]}]
-  | [{ A.ua_name = (_, "__NativeData");
-       A.ua_params = [_, A.String "Generator"]}] ->
+let emit_native_opcode_impl name params ua =
+  match ua with
+  | [{ T.ua_name = (_, "__NativeData");
+       T.ua_params = [_, T.String "HH\\AsyncGenerator"]}]
+  | [{ T.ua_name = (_, "__NativeData");
+       T.ua_params = [_, T.String "Generator"]}] ->
     emit_generator_method name params
   | _ ->
     Emit_fatal.raise_fatal_runtime
@@ -61,11 +65,10 @@ let emit_native_opcode_impl name params = function
 let emit_body scope namespace class_attrs name params ret =
   let body_instrs = emit_native_opcode_impl (snd name) params class_attrs in
   let tparams =
-    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.Ast.tp_name) in
+    List.map (Ast_scope.Scope.get_tparams scope) (fun t -> snd t.T.tp_name) in
   let params =
     Emit_param.from_asts
-      ~namespace ~tparams ~generate_defaults:false ~scope params
-  in
+      ~namespace ~tparams ~generate_defaults:false ~scope params in
   let return_type_info =
     Emit_body.emit_return_type_info
       ~scope ~skipawaitable:false ~namespace ret in

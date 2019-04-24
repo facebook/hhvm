@@ -351,34 +351,80 @@ let log_fail compiler_options filename exc ~stack =
     ~mode:(mode_to_string compiler_options.mode)
     ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
 
+(* Maps an Ast to a Tast where every type is Tany
+ * Used to produce a Tast for unsafe code without inferring types for it. *)
+module AstToTastEnv = struct
+  module AastAnnotations = Tast.Annotations
+  let get_expr_annotation (p: Ast.pos) = p, (Typing_reason.Rnone, Typing_defs.Tany)
+  let env_annotation = Tast.dummy_saved_env
+  let funcbody_annotation = Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
+end
+
+module AstToTast = Ast_to_aast.MapAstToAast(AstToTastEnv)
+
+(**
+ * Converts a legacy ast (ast.ml) into a typed ast (tast.ml / aast.ml)
+ * so that codegen and typing both operate on the same ast structure.
+ * There are some errors that are not valid hack but are still expected
+ * to produce valid bytecode. These errors are caught during the conversion
+ * so as to match legacy behavior.
+ *)
+let convert_to_tast options popt filename is_hh_file ast =
+  let errors, tast =
+    let convert () = AstToTast.convert ast in
+    Errors.do_ convert in
+  let handle_error _path error acc =
+    match Errors.get_code error with
+      (* Ignore these errors to match legacy AST behavior *)
+    | 2086 (* Naming.MethodNeedsVisibility *)
+    | 2102 (* Naming.UnsupportedTraitUseAs *)
+    | 2103 (* Naming.UnsupportedInsteadOf *)
+      -> acc
+    | _ (* Emit fatal parse otherwise *) ->
+      if acc = None
+      then
+        let msg = snd (List.hd_exn (Errors.to_list error)) in
+        let fatal_program =
+          Emit_program.emit_fatal_program
+            ~ignore_message:false
+            Hhbc_ast.FatalOp.Parse
+            (Errors.get_pos error)
+            msg in
+        Some fatal_program
+      else acc in
+  let result = Errors.fold_errors ~init:None ~f:handle_error errors in
+  match result with
+  | Some error -> error
+  | None ->
+    Emit_program.from_ast
+      ~is_hh_file
+      ~is_evaled:(is_file_path_for_evaled_code filename)
+      ~for_debugger_eval:(options.for_debugger_eval)
+      ~popt
+      tast
+
 let do_compile filename compiler_options popt fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
   let hhas_prog =
     match fail_or_ast with
     | `ParseFailure (e, pos) ->
-      let error_t = match SyntaxError.error_type e with
+      let error_t =
+        match SyntaxError.error_type e with
         | SyntaxError.ParseError -> Hhbc_ast.FatalOp.Parse
-        | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime
-      in
+        | SyntaxError.RuntimeError -> Hhbc_ast.FatalOp.Runtime in
       let s = SyntaxError.message e in
       Emit_program.emit_fatal_program ~ignore_message:false error_t pos s
     | `ParseResult (errors, (ast, is_hh_file)) ->
-      List.iter (Errors.get_error_list errors) (fun e ->
-        P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
+      List.iter
+        (Errors.get_error_list errors)
+        (fun e -> P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then
-        let is_js_file = Filename.check_suffix (Relative_path.to_absolute filename) "js" in
-        Emit_program.from_ast
-          ~is_hh_file
-          ~is_js_file
-          ~is_evaled:(is_file_path_for_evaled_code filename)
-          ~for_debugger_eval:(compiler_options.for_debugger_eval)
-          ~popt
-          ast
-      else Emit_program.emit_fatal_program ~ignore_message:true
-        Hhbc_ast.FatalOp.Parse Pos.none "Syntax error"
-      in
+        convert_to_tast compiler_options popt filename is_hh_file ast
+      else
+        Emit_program.emit_fatal_program ~ignore_message:true
+          Hhbc_ast.FatalOp.Parse Pos.none "Syntax error" in
   let t = add_to_time_ref debug_time.codegen_t t in
   let hhas = Hhbc_hhas.to_segments
     ~path:filename

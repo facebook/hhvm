@@ -7,6 +7,7 @@
  *
 *)
 open Core_kernel
+module Ast = Tast
 
 let is_method_interceptable namespace ast_class original_id =
   let open Hhbc_options in

@@ -63,16 +63,16 @@ let create_label_ref_map defs params body =
     | Some _ -> acc in
   let gather_using get_labels acc instrseq =
     InstrSeq.fold_left instrseq ~init:acc
-    ~f:(fun acc instr ->
-    List.fold_left (get_labels instr) ~init:acc ~f:process_ref) in
+      ~f:(fun acc instr ->
+        List.fold_left (get_labels instr) ~init:acc ~f:process_ref) in
   let acc = (0, (ISet.empty, IMap.empty)) in
   let acc = gather_using get_regular_labels acc body in
   let acc =
     List.fold_left params ~init:acc
-    ~f:(fun acc param ->
-      match Hhas_param.default_value param with
-       | None -> acc
-       | Some (l, _) -> process_ref acc l) in
+      ~f:(fun acc param ->
+        match Hhas_param.default_value param with
+        | None -> acc
+        | Some (l, _) -> process_ref acc l) in
   snd acc
 
 (* Relabel the instruction sequence and parameter values so that

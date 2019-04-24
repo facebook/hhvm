@@ -11,7 +11,7 @@ open Core_kernel
 open Instruction_sequence
 open Hhbc_ast
 
-let emit_main is_evaled debugger_modify_program popt defs =
+let emit_main is_evaled debugger_modify_program popt (defs : Tast.program) =
   let body, _is_generator, _is_pair_generator =
     Emit_body.emit_body
       ~pos:Pos.none
@@ -28,9 +28,8 @@ let emit_main is_evaled debugger_modify_program popt defs =
       ~return_value:(if is_evaled then instr_null else instr_int 1)
       ~default_dropthrough:None
       ~doc_comment:None
-      [] [] None defs
-  in
-    body
+      [] [] None defs in
+  body
 
 open Closure_convert
 
@@ -62,15 +61,15 @@ let debugger_eval_should_modify ast =
      there was exactly one user def (both 0 user defs and > 1 user def are
      valid situations where we pass the program through unmodififed) *)
   begin match (List.hd ast) with
-    | Some (Ast.Stmt (_, Ast.Markup _)) -> ()
+    | Some (Tast.Stmt (_, Tast.Markup _)) -> ()
     | _ -> failwith "Lowered AST did not start with a Markup statement"
   end;
   if List.length ast <> 2 then false else
   match List.nth_exn ast 1 with
-    | Ast.Stmt (_, Ast.Expr _) -> true
+    | Tast.Stmt (_, Tast.Expr _) -> true
     | _ -> false
 
-let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~popt ast =
+let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~popt tast =
   Utils.try_finally
   ~f:begin fun () ->
     try
@@ -78,8 +77,8 @@ let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~po
       Emit_env.set_is_js_file is_js_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
-      let { ast_defs = closed_ast; global_state; strict_types } =
-        convert_toplevel_prog ~popt ast in
+      let { ast_defs = closed_ast; global_state = global_state; strict_types = strict_types; } =
+        convert_toplevel_prog ~popt tast in
       let strict_types =
         (* is scalar_types is set - always assume strict_types to have value *)
         if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)
@@ -90,7 +89,7 @@ let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~po
         else None in
       Emit_env.set_global_state global_state;
       let flat_closed_ast = List.map ~f:snd closed_ast in
-      let debugger_modify_program = for_debugger_eval && debugger_eval_should_modify ast in
+      let debugger_modify_program = for_debugger_eval && debugger_eval_should_modify tast in
       let compiled_defs = emit_main is_evaled debugger_modify_program popt flat_closed_ast in
       let compiled_funs = Emit_function.emit_functions_from_program closed_ast in
       let compiled_classes = Emit_class.emit_classes_from_program closed_ast in

@@ -12,15 +12,15 @@ type memoize_info
 (* Record everything about a class and its methods that's used to generate
  * wrapper code for the <<__Memoize>> methods *)
 val make_info :
-  Ast.class_ ->
+  Tast.class_ ->
   Hhbc_id.Class.t ->
-  Ast.method_ list ->
+  Tast.method_ list ->
   memoize_info
 
 (* Emit wrapper methods for <<__Memoize>> methods in the list *)
 val emit_wrapper_methods :
   Emit_env.t ->
   memoize_info ->
-  Ast.class_ ->
-  Ast.method_ list ->
+  Tast.class_ ->
+  Tast.method_ list ->
   Hhas_method.t list

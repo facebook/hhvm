@@ -15,37 +15,41 @@
 * TODO: c_xhp_category ?
 *)
 
+module T = Tast
+
 type t = {
-  class_attributes   : Hhas_attribute.t list;
-  class_base         : Hhbc_id.Class.t option;
-  class_implements   : Hhbc_id.Class.t list;
-  class_name         : Hhbc_id.Class.t;
-  class_span         : Hhas_pos.span;
-  class_is_final     : bool;
-  class_is_sealed    : bool;
-  class_is_abstract  : bool;
-  class_is_interface : bool;
-  class_is_trait     : bool;
-  class_is_record    : bool;
-  class_is_xhp       : bool;
-  class_hoisted      : Closure_convert.hoist_kind;
-  class_is_immutable : bool;
-  class_has_immutable : bool;
-  class_no_dynamic_props : bool;
-  class_needs_no_reifiedinit : bool;
-  class_uses         : string list;
-  class_use_aliases  :
-    (string option * string * string option * Ast.kind list) list;
-  class_use_precedences : (string * string * string list) list;
-  class_method_trait_resolutions:
-    (string * string * string * Ast.kind list * Ast.fun_kind) list;
-  class_enum_type    : Hhas_type_info.t option;
-  class_methods      : Hhas_method.t list;
-  class_properties   : Hhas_property.t list;
-  class_constants    : Hhas_constant.t list;
-  class_type_constants : Hhas_type_constant.t list;
-  class_requirements : (Ast.trait_req_kind * string) list;
-  class_doc_comment : string option;
+  class_attributes               : Hhas_attribute.t list;
+  class_base                     : Hhbc_id.Class.t option;
+  class_implements               : Hhbc_id.Class.t list;
+  class_name                     : Hhbc_id.Class.t;
+  class_span                     : Hhas_pos.span;
+  class_is_final                 : bool;
+  class_is_sealed                : bool;
+  class_is_abstract              : bool;
+  class_is_interface             : bool;
+  class_is_trait                 : bool;
+  class_is_record                : bool;
+  class_is_xhp                   : bool;
+  class_hoisted                  : Closure_convert.hoist_kind;
+  class_is_immutable             : bool;
+  class_has_immutable            : bool;
+  class_no_dynamic_props         : bool;
+  class_needs_no_reifiedinit     : bool;
+  class_uses                     : string list;
+  (* Deprecated - kill please *)
+  class_use_aliases              :
+    (string option * string * string option * T.use_as_visibility list) list;
+  (* Deprecated - kill please *)
+  class_use_precedences          :
+    (string * string * string list) list;
+  class_method_trait_resolutions : (T.method_redeclaration * string) list;
+  class_enum_type                : Hhas_type_info.t option;
+  class_methods                  : Hhas_method.t list;
+  class_properties               : Hhas_property.t list;
+  class_constants                : Hhas_constant.t list;
+  class_type_constants           : Hhas_type_constant.t list;
+  class_requirements             : (Ast.trait_req_kind * string) list;
+  class_doc_comment              : string option;
 }
 
 let make

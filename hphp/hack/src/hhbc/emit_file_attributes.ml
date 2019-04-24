@@ -9,13 +9,15 @@
 
 open Core_kernel
 
-let emit_file_attributes fa =
-  let namespace = fa.Ast.fa_namespace in
-  Emit_attribute.from_asts namespace fa.Ast.fa_user_attributes
+module T = Tast
 
-let emit_file_attributes_from_program ast =
-  let attrs = List.fold ast ~init:[] ~f:(fun acc ast_node ->
-    match ast_node with
-    | Ast.FileAttributes attrs -> acc @ emit_file_attributes attrs
-    | _ -> acc) in
-  attrs
+let emit_file_attributes fa =
+  let namespace = fa.T.fa_namespace in
+  Emit_attribute.from_asts namespace fa.T.fa_user_attributes
+
+let emit_file_attributes_from_program (ast : Tast.def list) =
+  let aux acc node =
+    match node with
+    | T.FileAttributes fa -> acc @ emit_file_attributes fa
+    | _ -> acc in
+  List.fold ast ~init:[] ~f:aux

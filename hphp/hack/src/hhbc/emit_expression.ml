@@ -13,7 +13,6 @@ open Instruction_sequence
 open Ast_class_expr
 open Emit_pos
 
-module A = Ast
 module H = Hhbc_ast
 module TC = Hhas_type_constraint
 module SN = Naming_special_names
@@ -58,7 +57,8 @@ end
 let jit_enable_rename_function () =
   Hhbc_options.jit_enable_rename_function !Hhbc_options.compiler_options
 
-let is_local_this env id =
+let is_local_this env (lid: Aast.local_id): bool =
+  let id = Local_id.get_name lid in
   let scope = Emit_env.get_scope env in
   id = SN.SpecialIdents.this
   && Ast_scope.Scope.has_this scope
@@ -100,21 +100,21 @@ module InoutLocals = struct
       |> f i in
     SMap.add name r m
 
-  let add_write name i m = update name i add_write m
-  let add_inout name i m = update name i add_inout m
-  let add_use name i m = update name i add_use m
+  let add_write name i m = update (Local_id.get_name name) i add_write m
+  let add_inout name i m = update (Local_id.get_name name) i add_inout m
+  let add_use name i m = update (Local_id.get_name name) i add_use m
 
-  let collect_written_variables env args =
+  let collect_written_variables env (args : A.expr list) : alias_info SMap.t =
     (* check value of the argument *)
-    let rec handle_arg ~is_top i acc arg =
+    let rec handle_arg ~is_top i acc (arg : A.expr) =
       match snd arg with
       (* inout $v *)
-      | A.Callconv (A.Pinout, (_, A.Lvar (_, id)))
+      | A.Callconv (Ast.Pinout, (_, A.Lvar (_, id)))
         when not (is_local_this env id) ->
         let acc = add_use id i acc in
         if is_top then add_inout id i acc else add_write id i acc
       (* &$v *)
-      | A.Unop (A.Uref, (_, A.Lvar (_, id))) ->
+      | A.Unop (Ast.Uref, (_, A.Lvar (_, id))) ->
         let acc = add_use id i acc in
         add_write id i acc
       (* $v *)
@@ -126,7 +126,7 @@ module InoutLocals = struct
         dive i acc arg
 
     (* collect lvars on the left hand side of '=' operator *)
-    and collect_lvars_lhs i acc e =
+    and collect_lvars_lhs i acc (e : A.expr) =
       match snd e with
       | A.Lvar (_, id) when not (is_local_this env id) ->
         let acc = add_use id i acc in
@@ -136,34 +136,43 @@ module InoutLocals = struct
       | _ -> acc
 
     (* descend into expression *)
-    and dive i acc expr =
-      let visitor = object(_)
-        inherit [_] Ast_visitor.ast_visitor as super
+    and dive i (acc : alias_info SMap.t) expr: alias_info SMap.t =
+      let state = ref acc in
+      let visitor = object (_)
+        inherit [_] A.iter as super
+
         (* lhs op= _ *)
-        method! on_binop acc bop l r =
-          let acc =
+        method! on_Binop _ bop l r =
+          let _ =
             match bop with
-            | A.Eq _ -> collect_lvars_lhs i acc l
-            | _ -> acc in
-          super#on_binop acc bop l r
+            | Ast.Eq _ -> state := collect_lvars_lhs i !state l
+            | _ -> () in
+          super#on_Binop () bop l r
+
         (* $i++ or $i-- *)
-        method! on_unop acc op e =
-          let acc =
+        method! on_Unop _ op e =
+          let _ =
             match op with
-            | A.Uincr | A.Udecr -> collect_lvars_lhs i acc e
-            | _ -> acc in
-          super#on_unop acc op e
+            | Ast.Uincr
+            | Ast.Udecr -> state := collect_lvars_lhs i !state e
+            | _ -> () in
+          super#on_Unop () op e
+
         (* $v *)
-        method! on_lvar acc (_p, id) =
-          let acc = add_use id 0 acc in
-          super#on_lvar acc (_p, id)
+        method! on_Lvar _ (_p, id) =
+          let _ = state := add_use id 0 !state in
+          super#on_Lvar () (_p, id)
+
         (* f(inout $v) or f(&$v) *)
-        method! on_call acc _ _ args uargs =
+        method! on_Call _ _ _ _ args uargs =
           let f = handle_arg ~is_top:false i in
-          let acc = List.fold_left args ~init:acc ~f in
-          List.fold_left uargs ~init:acc ~f
-        end in
-      visitor#on_expr acc expr in
+          List.iter args ~f:(fun arg -> state := f !state arg);
+          List.iter uargs ~f:(fun arg -> state := f !state arg)
+
+      end in
+      visitor#on_expr () expr;
+      !state
+    in
     List.foldi args ~f:(handle_arg ~is_top:true) ~init:SMap.empty
 
   (* determines if value of a local 'name' that appear in parameter 'i'
@@ -280,56 +289,56 @@ let reified_generics () =
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   match op with
-  | A.Plus -> instr (IOp Add)
-  | A.Minus -> instr (IOp Sub)
-  | A.Star -> instr (IOp Mul)
-  | A.Slash -> instr (IOp Div)
-  | A.Eqeq -> instr (IOp Eq)
-  | A.Eqeqeq -> instr (IOp Same)
-  | A.Starstar -> instr (IOp Pow)
-  | A.Diff -> instr (IOp Neq)
-  | A.Diff2 -> instr (IOp NSame)
-  | A.Lt -> instr (IOp Lt)
-  | A.Lte -> instr (IOp Lte)
-  | A.Gt -> instr (IOp Gt)
-  | A.Gte -> instr (IOp Gte)
-  | A.Dot -> instr (IOp Concat)
-  | A.Amp -> instr (IOp BitAnd)
-  | A.Bar -> instr (IOp BitOr)
-  | A.Ltlt -> instr (IOp Shl)
-  | A.Gtgt -> instr (IOp Shr)
-  | A.Cmp -> instr (IOp Cmp)
-  | A.Percent -> instr (IOp Mod)
-  | A.Xor -> instr (IOp BitXor)
-  | A.LogXor -> instr (IOp Xor)
-  | A.Eq _ -> failwith "assignment is emitted differently"
-  | A.QuestionQuestion -> failwith "null coalescence is emitted differently"
-  | A.Ampamp
-  | A.Barbar ->
+  | Ast.Plus -> instr (IOp Add)
+  | Ast.Minus -> instr (IOp Sub)
+  | Ast.Star -> instr (IOp Mul)
+  | Ast.Slash -> instr (IOp Div)
+  | Ast.Eqeq -> instr (IOp Eq)
+  | Ast.Eqeqeq -> instr (IOp Same)
+  | Ast.Starstar -> instr (IOp Pow)
+  | Ast.Diff -> instr (IOp Neq)
+  | Ast.Diff2 -> instr (IOp NSame)
+  | Ast.Lt -> instr (IOp Lt)
+  | Ast.Lte -> instr (IOp Lte)
+  | Ast.Gt -> instr (IOp Gt)
+  | Ast.Gte -> instr (IOp Gte)
+  | Ast.Dot -> instr (IOp Concat)
+  | Ast.Amp -> instr (IOp BitAnd)
+  | Ast.Bar -> instr (IOp BitOr)
+  | Ast.Ltlt -> instr (IOp Shl)
+  | Ast.Gtgt -> instr (IOp Shr)
+  | Ast.Cmp -> instr (IOp Cmp)
+  | Ast.Percent -> instr (IOp Mod)
+  | Ast.Xor -> instr (IOp BitXor)
+  | Ast.LogXor -> instr (IOp Xor)
+  | Ast.Eq _ -> failwith "assignment is emitted differently"
+  | Ast.QuestionQuestion -> failwith "null coalescence is emitted differently"
+  | Ast.Ampamp
+  | Ast.Barbar ->
     failwith "short-circuiting operator cannot be generated as a simple binop"
 
 let binop_to_eqop op =
   match op with
-  | A.Plus -> Some PlusEqual
-  | A.Minus -> Some MinusEqual
-  | A.Star -> Some MulEqual
-  | A.Slash -> Some DivEqual
-  | A.Starstar -> Some PowEqual
-  | A.Amp -> Some AndEqual
-  | A.Bar -> Some OrEqual
-  | A.Xor -> Some XorEqual
-  | A.Ltlt -> Some SlEqual
-  | A.Gtgt -> Some SrEqual
-  | A.Percent -> Some ModEqual
-  | A.Dot -> Some ConcatEqual
+  | Ast.Plus -> Some PlusEqual
+  | Ast.Minus -> Some MinusEqual
+  | Ast.Star -> Some MulEqual
+  | Ast.Slash -> Some DivEqual
+  | Ast.Starstar -> Some PowEqual
+  | Ast.Amp -> Some AndEqual
+  | Ast.Bar -> Some OrEqual
+  | Ast.Xor -> Some XorEqual
+  | Ast.Ltlt -> Some SlEqual
+  | Ast.Gtgt -> Some SrEqual
+  | Ast.Percent -> Some ModEqual
+  | Ast.Dot -> Some ConcatEqual
   | _ -> None
 
 let unop_to_incdec_op op =
   match op with
-  | A.Uincr -> PreInc
-  | A.Udecr -> PreDec
-  | A.Upincr -> PostInc
-  | A.Updecr -> PostDec
+  | Ast.Uincr -> PreInc
+  | Ast.Udecr -> PreDec
+  | Ast.Upincr -> PostInc
+  | Ast.Updecr -> PostDec
   | _ -> failwith "invalid incdec op"
 
 let collection_type = function
@@ -366,10 +375,10 @@ let istype_op lower_fq_id =
   | _ -> None
 
 (* T29079834: Using this for the is expressions migration *)
-let is_isexp_op lower_fq_id =
+let is_isexp_op lower_fq_id: Aast.hint option =
   if not (Hhbc_options.enable_is_expr_primitive_migration !Hhbc_options.compiler_options)
   then None else
-  let h n = Pos.none, A.Happly ((Pos.none, n), []) in
+  let h n = Pos.none, Aast.Happly ((Pos.none, n), []) in
   match lower_fq_id with
   | "is_int" | "is_integer" | "is_long" -> Some (h "int")
   | "is_bool" -> Some (h "bool")
@@ -389,55 +398,69 @@ let get_queryMOpMode need_ref op =
   | _ -> MemberOpMode.ModeNone
 
 (* Returns either Some (index, is_soft) or None *)
-let is_reified_tparam ~is_fun env name =
+let is_reified_tparam ~(is_fun : bool) (env : Emit_env.t) (name : string) =
   let scope = Emit_env.get_scope env in
   let tparams =
     if is_fun then Ast_scope.Scope.get_fun_tparams scope
-    else Ast_scope.Scope.get_class_tparams scope
+    else (Ast_scope.Scope.get_class_tparams scope).A.c_tparam_list
   in
   let is_soft =
     List.exists ~f:(function { A.ua_name = n; _ } ->
       snd n = SN.UserAttributes.uaSoft) in
   List.find_mapi tparams
     ~f:(fun i { A.tp_name = (_, id)
-              ; A.tp_reified = is_reified
+              ; A.tp_reified = reified
               ; A.tp_user_attributes = ual
               ; _ } ->
-      if is_reified && id = name then Some (i, is_soft ual) else None)
+      if (reified = A.Reified || reified = A.SoftReified)
+          && id = name then Some (i, is_soft ual) else None)
 
-let extract_shape_field_name_pstring env = function
-  | A.SFlit_int s -> A.Int (snd s)
-  | A.SFlit_str s ->
-    A.String (snd s)
-  | A.SFclass_const ((pn, name) as id, p) ->
+let extract_shape_field_name_pstring env annot = function
+  | Ast.SFlit_int s -> A.Int (snd s)
+  | Ast.SFlit_str s -> A.String (snd s)
+  | Ast.SFclass_const ((pn, name) as id, p) ->
     if Option.is_some (is_reified_tparam ~is_fun:true env name) ||
        Option.is_some (is_reified_tparam ~is_fun:false env name) then
       Emit_fatal.raise_fatal_parse pn
         "Reified generics cannot be used in shape keys";
-    A.Class_const ((pn, A.Id id), p)
+    A.Class_const ((annot, A.CI id), p)
 
-let rec text_of_expr e = match e with
+let rec text_of_expr (e : A.expr) = match e with
   (* Note we force string literals to become single-quoted, regardless of
      whether they were single- or double-quoted in the source. Gross. *)
-  | p, A.String s -> (p, "'" ^ s ^ "'")
-  | _, A.Id id | _, A.PU_atom id | _, A.Lvar id -> id
-  | _, A.Array_get ((p, A.Lvar (_, id)), Some e) ->
-    (p, id ^ "[" ^ snd (text_of_expr e) ^ "]")
-  | _ -> Pos.none, "unknown" (* TODO: get text of expression *)
+  | _, A.String s -> "'" ^ s ^ "'"
+  | _, A.Id (_, id) -> id
+  | _, A.Lvar (_, id) -> Local_id.get_name id
+  | _, A.Array_get ((_, A.Lvar (_, id)), Some e) ->
+     (Local_id.get_name id) ^ "[" ^ (text_of_expr e) ^ "]"
+  | _ -> "unknown" (* TODO: get text of expression *)
 
-let parse_include e =
+let text_of_class_id (cid : A.class_id) =
+  match (snd cid) with
+  | A.CIparent -> "parent"
+  | A.CIself -> "self"
+  | A.CIstatic -> "static"
+  | A.CIexpr e -> text_of_expr e
+  | A.CI (_, id) -> id
+
+let text_of_prop (prop : A.class_get_expr) =
+  match prop with
+  | A.CGstring (_, s) -> s
+  | A.CGexpr e -> text_of_expr e
+
+let parse_include (e : A.expr) =
   let strip_backslash p =
     let len = String.length p in
     if len > 0 && p.[0] = '/' then String.sub p 1 (len-1) else p in
   let rec split_var_lit = function
-    | _, A.Binop (A.Dot, e1, e2) -> begin
+    | _, A.Binop (Ast.Dot, e1, e2) -> begin
       let v, l = split_var_lit e2 in
       if v = ""
       then let var, lit = split_var_lit e1 in var, lit ^ l
       else v, ""
     end
     | _, A.String lit -> "", lit
-    | e -> snd (text_of_expr e), "" in
+    | e -> text_of_expr e, "" in
   let var, lit = split_var_lit e in
   let var, lit =
     if var = "__DIR__" then ("", strip_backslash lit) else (var, lit) in
@@ -450,15 +473,14 @@ let parse_include e =
     Hhas_symbol_refs.IncludeRootRelative (var, strip_backslash lit)
 
 let rec expr_and_new env pos instr_to_add_new instr_to_add = function
-  | A.AFvalue e ->
-    gather [emit_expr env e; emit_pos pos; instr_to_add_new]
+  | A.AFvalue e -> gather [emit_expr env e; emit_pos pos; instr_to_add_new]
   | A.AFkvalue (k, v) ->
     gather [
-      emit_two_exprs env (fst k) k v;
+      emit_two_exprs env (fst @@ fst k) k v;
       instr_to_add;
     ]
 
-and get_local env (pos, str) =
+and get_local env (pos, (str : string)): Hhbc_ast.local_id =
   if str = SN.SpecialIdents.dollardollar
   then
     match Emit_env.get_pipe_var env with
@@ -469,7 +491,9 @@ and get_local env (pos, str) =
     then Local.get_unnamed_local_for_tempname str
     else Local.Named str)
 
-and emit_local ~notice ~need_ref env ((pos, str) as id) =
+and emit_local ~notice ~need_ref env (lid: Aast.lid) =
+  let (pos, id) = lid in
+  let str = Local_id.get_name id in
   if SN.Superglobals.is_superglobal str then
     if need_ref then
       Emit_fatal.raise_fatal_parse pos
@@ -480,8 +504,8 @@ and emit_local ~notice ~need_ref env ((pos, str) as id) =
       instr (IGet CGetG)
     ]
   else
-  let local = get_local env id in
-  if is_local_this env str && not (Emit_env.get_needs_local_this env) then
+  let local = get_local env (pos, str) in
+  if is_local_this env id && not (Emit_env.get_needs_local_this env) then
     if need_ref then
       instr_vgetl local
     else
@@ -493,17 +517,17 @@ and emit_local ~notice ~need_ref env ((pos, str) as id) =
 
 (* Emit CGetL2 for local variables, and return true to indicate that
  * the result will be just below the top of the stack *)
-and emit_first_expr env expr =
+and emit_first_expr env (expr : A.expr) =
   match snd expr with
-  | A.Lvar ((_, name) as id)
-    when not ((is_local_this env name && not (Emit_env.get_needs_local_this env))
-      || SN.Superglobals.is_superglobal name) ->
-    instr_cgetl2 (get_local env id), true
+  | A.Lvar (pos, id)
+    when not ((is_local_this env id) && not (Emit_env.get_needs_local_this env)
+              || SN.Superglobals.is_superglobal (Local_id.get_name id)) ->
+     instr_cgetl2 (get_local env (pos, (Local_id.get_name id))), true
   | _ ->
-    emit_expr env expr, false
+     emit_expr env expr, false
 
 (* Special case for binary operations to make use of CGetL2 *)
-and emit_two_exprs env outer_pos e1 e2 =
+and emit_two_exprs env (outer_pos : Pos.t) (e1 : A.expr) (e2 : A.expr) =
   let instrs1, is_under_top = emit_first_expr env e1 in
   let instrs2 = emit_expr env e2 in
   let instrs2_is_var =
@@ -521,34 +545,35 @@ and emit_two_exprs env outer_pos e1 e2 =
       then [instrs1; emit_pos outer_pos; instrs2]
       else [instrs1; instrs2; emit_pos outer_pos]
 
-and emit_is_null env e =
+and emit_is_null env (e : A.expr) =
   match e with
-  | (_, A.Lvar ((_, str) as id)) when not (is_local_this env str) ->
-    instr_istypel (get_local env id) OpNull
+  | (_, A.Lvar (pos, id)) when not (is_local_this env id) ->
+     instr_istypel (get_local env (pos, (Local_id.get_name id))) OpNull
   | _ ->
     gather [
       emit_expr env e;
       instr_istypec OpNull
     ]
 
-and emit_binop env pos op e1 e2 =
+and emit_binop env annot op (e1: A.expr) (e2: A.expr) =
+  let (pos, _) = annot in
   let default () = gather [
     emit_two_exprs env pos e1 e2;
     from_binop op
   ] in
   match op with
-  | A.Ampamp | A.Barbar ->
-    emit_short_circuit_op env pos (A.Binop (op, e1, e2))
-  | A.Eq None ->
+  | Ast.Ampamp | Ast.Barbar ->
+    emit_short_circuit_op env annot (A.Binop (op, e1, e2))
+  | Ast.Eq None ->
     emit_lval_op env pos LValOp.Set e1 (Some e2)
-  | A.Eq (Some A.QuestionQuestion) ->
+  | Ast.Eq (Some Ast.QuestionQuestion) ->
     emit_null_coalesce_assignment env pos e1 e2
-  | A.Eq (Some obop) ->
+  | Ast.Eq (Some obop) ->
     begin match binop_to_eqop obop with
     | None -> failwith "illegal eq op"
     | Some op -> emit_lval_op env pos (LValOp.SetOp op) e1 (Some e2)
     end
-  | A.QuestionQuestion ->
+  | Ast.QuestionQuestion ->
     let end_label = Label.next_regular () in
     gather [
       fst (emit_quiet_expr env pos e1);
@@ -565,16 +590,16 @@ and emit_binop env pos op e1 e2 =
     then default ()
     else
     match op with
-    | A.Eqeqeq when snd e2 = A.Null ->
+    | Ast.Eqeqeq when snd e2 = A.Null ->
       emit_is_null env e1
-    | A.Eqeqeq when snd e1 = A.Null ->
+    | Ast.Eqeqeq when snd e1 = A.Null ->
       emit_is_null env e2
-    | A.Diff2 when snd e2 = A.Null ->
+    | Ast.Diff2 when snd e2 = A.Null ->
       gather [
         emit_is_null env e1;
         instr_not
       ]
-    | A.Diff2 when snd e1 = A.Null ->
+    | Ast.Diff2 when snd e1 = A.Null ->
       gather [
         emit_is_null env e2;
         instr_not
@@ -582,44 +607,40 @@ and emit_binop env pos op e1 e2 =
     | _ ->
       default ()
 
-and emit_instanceof env pos e1 e2 =
-  match (e1, e2) with
-  | (_, (_, A.Id _)) ->
-    let lhs = emit_expr env e1 in
-    let from_class_ref instrs =
-      gather [
+and emit_instanceof (env : Emit_env.t) pos (e: A.expr) (cid: A.class_id) =
+  let lhs = emit_expr env e in
+  let from_class_ref instrs =
+    gather [
         lhs;
         emit_pos pos;
         instrs;
         instr_instanceof;
       ] in
-    let scope = Emit_env.get_scope env in
-    begin match expr_to_class_expr ~resolve_self:true scope e2 with
-    | Class_special clsref ->
-      let instr_clsref = match clsref with
-        | SpecialClsRef.Self -> instr_self
-        | SpecialClsRef.Static -> instr_lateboundcls
-        | SpecialClsRef.Parent -> instr_parent
-      in
-      from_class_ref @@ gather [ instr_clsref; instr_clsrefname ]
-    | Class_id name ->
+  let scope = Emit_env.get_scope env in
+  match class_id_to_class_expr ~resolve_self:true scope cid with
+  | Class_special clsref ->
+    let instr_clsref =
+      match clsref with
+      | SpecialClsRef.Self -> instr_self
+      | SpecialClsRef.Static -> instr_lateboundcls
+      | SpecialClsRef.Parent -> instr_parent in
+     from_class_ref @@ gather [ instr_clsref; instr_clsrefname; ]
+  | Class_id name ->
       let n =
         Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) name in
       gather [
         lhs;
         instr_instanceofd n;
-      ]
-    | Class_reified _
-    | Class_expr _ ->
-      failwith "cannot get this shape from from A.Id"
-    end
-  | _ ->
+        ]
+  | Class_expr e2 ->
     gather [
-      emit_expr env e1;
+      emit_expr env e;
       emit_expr env e2;
-      instr_instanceof ]
+      instr_instanceof; ]
+  | Class_reified _ ->
+     failwith "cannot get this shape from from Aast.Id"
 
-and get_type_structure_for_hint env ~targ_map h =
+and get_type_structure_for_hint env ~targ_map (h : Aast.hint) =
   let namespace = Emit_env.get_namespace env in
   let tv = Emit_type_constant.hint_to_type_constant
     ~tparams:[] ~namespace ~targ_map h in
@@ -669,18 +690,18 @@ and emit_as env pos e h is_nullable = Local.scope @@ fun () ->
     instr_label done_label;
   ]
 
-and emit_is env pos h =
+and emit_is env pos (h: Aast.hint) =
   let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
-  if is_static then
-    begin match snd h with
-    | A.Happly ((_, id), []) when id = SN.Typehints.this ->
+  if is_static
+  then
+    match snd h with
+    | Aast.Happly ((_, id), []) when id = SN.Typehints.this ->
       instr_islateboundcls
     | _ ->
       gather [
         get_type_structure_for_hint env ~targ_map:SMap.empty h;
         instr_istypestructc Resolve;
       ]
-    end
   else
     gather [
       ts_instrs;
@@ -690,7 +711,7 @@ and emit_is env pos h =
 and emit_cast env pos hint expr =
   let op =
     begin match hint with
-    | A.Happly((_, id), []) ->
+    | Aast.Happly((_, id), []) ->
       let id = String.lowercase id in
       begin match id with
       | _ when id = SN.Typehints.int
@@ -716,7 +737,7 @@ and emit_cast env pos hint expr =
     op;
   ]
 
-and emit_conditional_expression env pos etest etrue efalse =
+and emit_conditional_expression env pos (etest : A.expr) (etrue : A.expr option) (efalse : A.expr) =
   match etrue with
   | Some etrue ->
     let false_label = Label.next_regular () in
@@ -762,12 +783,12 @@ and emit_conditional_expression env pos etest etrue efalse =
 and get_erased_tparams env =
   Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
   |> List.filter_map ~f:(function { A.tp_name = (_, name); A.tp_reified; _ }
-       -> Option.some_if (not tp_reified) name)
+       -> Option.some_if (tp_reified = A.Erased) name)
 
-and has_non_tparam_generics env targs =
+and has_non_tparam_generics env (targs : Aast.hint list) =
   let erased_tparams = get_erased_tparams env in
   List.exists targs ~f:(function
-    | _, A.Happly ((_, id), _)
+    | _, Aast.Happly ((_, id), _)
       when List.mem ~equal:String.equal erased_tparams id -> false
     | _ -> true)
 
@@ -790,7 +811,7 @@ and emit_reified_targs env pos targs =
   in
   if not is_in_lambda && is_same current_fun_tparams then
     instr_cgetl (Local.Named SU.Reified.reified_generics_local_name)
-  else if not is_in_lambda && is_same current_cls_tparam then
+  else if not is_in_lambda && is_same (current_cls_tparam.A.c_tparam_list) then
     gather [
       instr_checkthis;
       instr_baseh;
@@ -809,25 +830,25 @@ and emit_reified_targs env pos targs =
     ]
   end
 
-and emit_new env pos expr targs args uargs =
+and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr list) (uargs : A.expr list) =
   if has_inout_args args then
     Emit_fatal.raise_fatal_parse pos "Unexpected inout arg in new expr";
   let scope = Emit_env.get_scope env in
   (* If `new self` or `new parent `when self or parent respectively has
    * reified generics, do not resolve *)
-  let resolve_self = match expr with
-    | _, A.Id (_, n) when SU.is_self n ->
-      Ast_scope.Scope.get_class_tparams scope
-      |> List.for_all ~f:(fun t -> not t.A.tp_reified)
-    | _, A.Id (_, n) when SU.is_parent n ->
-      let cls = Ast_scope.Scope.get_class scope in
+  let resolve_self = match cid with
+    | _, A.CIexpr (_, A.Id (_, n)) when SU.is_self n ->
+      (Ast_scope.Scope.get_class_tparams scope).A.c_tparam_list
+      |> List.for_all ~f:(fun t -> t.A.tp_reified = A.Erased)
+    | _, A.CIexpr (_, A.Id (_, n)) when SU.is_parent n ->
+       let cls = Ast_scope.Scope.get_class scope in
       Option.value_map cls ~default:true ~f:(fun cls ->
       match cls.A.c_extends with
-      | (_, A.Happly (_, l)) :: _ ->
+      | (_, Aast.Happly (_, l)) :: _ ->
         not @@ has_non_tparam_generics env l
       | _ -> true)
     | _ -> true in
-  let cexpr = expr_to_class_expr ~resolve_self scope expr in
+  let cexpr = class_id_to_class_expr ~resolve_self scope cid in
   let cexpr, has_generics = match cexpr with
     | Class_id (_, name) ->
       let cexpr =
@@ -841,16 +862,16 @@ and emit_new env pos expr targs args uargs =
         cexpr, H.NoGenerics
       | None ->
         let instrs = match cexpr with
-          | Class_id id ->
-            let fq_id =
-              Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id
-              |> Hhbc_id.Class.to_raw_string in
-            gather [
-              emit_reified_targs env pos targs;
-              instr_reified_name fq_id;
-            ]
-          | Class_reified instrs -> instrs
-          | _ -> failwith "Internal error: This node can only be id or reified"
+            | Class_id id ->
+              let fq_id =
+                Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id
+                |> Hhbc_id.Class.to_raw_string in
+              gather [
+                emit_reified_targs env pos targs;
+                instr_reified_name fq_id;
+              ]
+            | Class_reified instrs -> instrs
+            | _ -> failwith "Internal error: This node can only be id or reified"
         in
         Class_reified instrs, H.HasGenerics
       end
@@ -862,7 +883,7 @@ and emit_new env pos expr targs args uargs =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
     gather [ emit_pos pos; instr_newobjd fq_id ]
-  | Class_special clsref -> gather [ emit_pos pos; instr_newobjs clsref ]
+  | Class_special cls_ref -> gather [ emit_pos pos; instr_newobjs cls_ref ]
   | Class_reified instrs when has_generics = H.MaybeGenerics ->
     gather [ instrs; instr_clsrefgetts; instr_newobj 0 has_generics ]
   | _ ->
@@ -887,10 +908,11 @@ and emit_new env pos expr targs args uargs =
   empty
 
 (* TODO(T36697624) more efficient bytecode for static records *)
-and emit_record env pos expr es =
-  let rexpr = expr_to_class_expr ~resolve_self:true
-    (Emit_env.get_scope env) expr in
-  match rexpr with
+and emit_record env pos cid es =
+  let cexpr = class_id_to_class_expr ~resolve_self:false
+    (Emit_env.get_scope env) cid
+  in
+  match cexpr with
   | Class_id id ->
     let fq_id =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
@@ -905,12 +927,12 @@ and emit_clone env expr =
     instr_clone;
   ]
 
-and emit_shape env expr fl =
+and emit_shape env (expr : A.expr) (fl : (Ast.shape_field_name * A.expr) list) =
   let p = fst expr in
   let fl =
     List.map fl
              ~f:(fun (fn, e) ->
-                   ((p, extract_shape_field_name_pstring env fn), e))
+                   ((p, extract_shape_field_name_pstring env p fn), e))
   in
   emit_expr env (p, A.Darray (None, fl))
 
@@ -967,7 +989,7 @@ and emit_call_expr env pos e targs args uargs async_eager_label =
     let instrs = emit_call env pos e targs args uargs async_eager_label in
     emit_pos_then pos instrs
 
-and emit_known_class_id env id =
+and emit_known_class_id (env : Emit_env.t) id =
   let fq_id = Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
   Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
   gather [
@@ -995,7 +1017,7 @@ and emit_load_class_ref env pos cexpr =
       instr_clsrefgetc
     ]
 
-and emit_load_class_const env pos cexpr id =
+and emit_load_class_const env pos (cexpr : Ast_class_expr.class_expr) id =
   let load_const =
     if SU.is_class id
     then instr (IMisc (ClsRefName 0))
@@ -1003,42 +1025,44 @@ and emit_load_class_const env pos cexpr id =
   in
   gather [
     emit_load_class_ref env pos cexpr;
-    load_const
+    load_const;
   ]
 
-and emit_class_expr env cexpr prop =
+and emit_class_expr env (cexpr : Ast_class_expr.class_expr) (prop : A.class_get_expr) =
   let load_prop () =
     match prop with
-    | pos, A.Id (_, id) ->
-      emit_pos_then pos @@
-      instr_string id
-    | pos, A.Lvar (_, id) ->
+    | A.CGstring (pos, id) ->
       emit_pos_then pos @@
       instr_string (SU.Locals.strip_dollar id)
-    | e ->
+    | A.CGexpr e ->
       emit_expr env e
   in
-  match cexpr with
-  | Class_expr ((_, (A.BracedExpr _ |
-                     A.Call _ |
-                     A.Lvar (_, "$this") |
-                     A.Binop _ |
-                     A.Class_get _)) as e) ->
-    (* if class is stored as dollar or braced expression (computed dynamically)
-       it needs to be stored in unnamed local and eventually cleaned. *)
+  let aux e =
     let cexpr_local = emit_expr env e in
     empty,
     gather [
       cexpr_local;
       Scope.stash_top_in_unnamed_local load_prop;
-      instr_clsrefgetc
-    ]
+      instr_clsrefgetc;
+    ] in
+  match cexpr with
+  | Class_expr ((_, (A.BracedExpr _ |
+                      A.Call _ |
+                      A.Binop _ |
+                      A.Class_get _)) as e) -> aux e
+  | Class_expr (_, A.Lvar (_, id) as e)
+    when (Local_id.get_name id = "$this") -> aux e
   | _ ->
-    load_prop (),
-    emit_load_class_ref env (fst prop) cexpr
+    begin
+      let pos =
+        match prop with
+        | A.CGstring (pos, _) -> pos
+        | A.CGexpr ((pos, _), _) -> pos in
+      load_prop (), emit_load_class_ref env pos cexpr
+    end
 
-and emit_class_get env qop need_ref cid prop =
-  let cexpr = expr_to_class_expr ~resolve_self:false
+and emit_class_get env qop need_ref (cid : A.class_id) (prop : A.class_get_expr) =
+  let cexpr = class_id_to_class_expr ~resolve_self:false
     (Emit_env.get_scope env) cid
   in
   gather [
@@ -1055,8 +1079,8 @@ and emit_class_get env qop need_ref cid prop =
  * We follow the logic for the Construct::KindOfClassConstantExpression
  * case in emitter.cpp
  *)
-and emit_class_const env pos cid (_, id) =
-  let cexpr = expr_to_class_expr ~resolve_self:true
+and emit_class_const env pos (cid: A.class_id) (_, id): Instruction_sequence.t =
+  let cexpr = class_id_to_class_expr ~resolve_self:true
     (Emit_env.get_scope env) cid in
   let cexpr = match cexpr with
     | Class_id (_, name) ->
@@ -1068,7 +1092,7 @@ and emit_class_const env pos cid (_, id) =
   | _ ->
     emit_load_class_const env pos cexpr id
 
-and emit_class_const_impl env cid id =
+and emit_class_const_impl (env : Emit_env.t) cid id =
   let fq_id =
     Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) cid in
   let fq_id_str = Hhbc_id.Class.to_raw_string fq_id in
@@ -1077,8 +1101,8 @@ and emit_class_const_impl env cid id =
   then instr_string fq_id_str
   else
     begin
-    Emit_symbol_refs.add_class fq_id_str;
-    instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
+      Emit_symbol_refs.add_class fq_id_str;
+      instr (ILitConst (ClsCnsD (Hhbc_id.Const.from_ast_name id, fq_id)))
     end
 
 and emit_yield env pos = function
@@ -1096,7 +1120,7 @@ and emit_yield env pos = function
       instr_yieldk;
     ]
 
-and emit_string2 env pos exprs =
+and emit_string2 env pos (exprs : A.expr list) =
   match exprs with
   | [e] ->
     gather [
@@ -1106,7 +1130,7 @@ and emit_string2 env pos exprs =
     ]
   | e1::e2::es ->
     gather @@ [
-      emit_two_exprs env (fst e1) e1 e2;
+      emit_two_exprs env (fst (fst e1)) e1 e2;
       emit_pos pos;
       instr (IOp Concat);
       gather (List.map es (fun e ->
@@ -1116,8 +1140,7 @@ and emit_string2 env pos exprs =
 
   | [] -> failwith "String2 with zero arguments is impossible"
 
-
-and emit_lambda env fundef ids =
+and emit_lambda (env : Emit_env.t) (fundef : A.fun_) (ids : Aast.lid list) =
   (* Closure conversion puts the class number used for CreateCl in the "name"
    * of the function definition *)
   let fundef_name = snd fundef.A.f_name in
@@ -1126,21 +1149,22 @@ and emit_lambda env fundef ids =
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   gather [
     gather @@ List.map ids
-      (fun id ->
-        match SU.Reified.is_captured_generic @@ snd id with
+      (fun (pos, id) ->
+        match SU.Reified.is_captured_generic @@ (Local_id.get_name id) with
         | Some (is_fun, i) ->
           if is_in_lambda then
             instr_cgetl (Local.Named (
               SU.Reified.reified_generic_captured_name is_fun i))
           else emit_reified_generic_instrs Pos.none ~is_fun i
         | None ->
-          let lid = get_local env id in
+          let lid = get_local env (pos, (Local_id.get_name id)) in
           if explicit_use then instr_cgetl lid else instr_cugetl lid
       );
     instr (IMisc (CreateCl (List.length ids, class_num)))
   ]
 
-and emit_id env (p, s as id) =
+and emit_id (env : Emit_env.t) (id: Aast.sid) =
+  let (p, s) = id in
   let s = String.uppercase s in
   match s with
   | "__FILE__" -> instr (ILitConst File)
@@ -1164,7 +1188,7 @@ and emit_id env (p, s as id) =
 
 and rename_xhp (p, s) = (p, SU.Xhp.mangle s)
 
-and emit_xhp env p id attributes children =
+and emit_xhp (env : Emit_env.t) (annot : A.expr_annotation) id (attributes : A.xhp_attribute list) (children : A.expr list) =
   (* Translate into a constructor call. The arguments are:
    *  1) struct-like array of attributes
    *  2) vec-like array of children
@@ -1175,41 +1199,44 @@ and emit_xhp env p id attributes children =
    *  keys that the runtime will interpret as a spread. These keys are not
    *  parseable as user-specified attributes, so they will never collide.
    *)
+  let (pos, _) = annot in
   let create_spread p id = (p, "...$" ^ string_of_int(id)) in
   let convert_attr (spread_id, attrs) = function
     | A.Xhp_simple (name, v) ->
-        let attr = (A.SFlit_str name, v) in
+        let attr = (Ast.SFlit_str name, v) in
         (spread_id, attr::attrs)
     | A.Xhp_spread e ->
-        let (p, _) = e in
-        let attr = (A.SFlit_str (create_spread p spread_id), e) in
+        let ((p, _), _) = e in
+        let attr = (Ast.SFlit_str (create_spread p spread_id), e) in
         (spread_id + 1, attr::attrs) in
   let (_, attributes) = List.fold_left ~f:convert_attr ~init:(0, []) attributes in
-  let attribute_map = p, A.Shape (List.rev attributes) in
-  let children_vec = p, A.Varray (None, children) in
-  let filename = p, A.Id (p, "__FILE__") in
-  let line = p, A.Id (p, "__LINE__") in
+  let attribute_map = annot, A.Shape (List.rev attributes) in
+  let children_vec = annot, A.Varray (None, children) in
+  let filename = annot, A.Id (pos, "__FILE__") in
+  let line = annot, A.Id (pos, "__LINE__") in
   let renamed_id = rename_xhp id in
   Emit_symbol_refs.add_class (snd renamed_id);
   emit_expr env @@
-    (p, A.New (
-      (p, A.Id renamed_id),
+    (annot, A.New (
+      (annot, A.CI renamed_id),
       [],
       [attribute_map ; children_vec ; filename ; line],
-      []))
+      [],
+      annot))
 
-and emit_import env pos flavor e =
+and emit_import env annot (flavor : Aast.import_flavor) (e : A.expr) =
+  let (pos, _) = annot in
   let inc = parse_include e in
   Emit_symbol_refs.add_include inc;
   let e, import_op = match flavor with
-    | A.Include -> e, IIncludeEvalDefine Incl
-    | A.Require -> e, IIncludeEvalDefine Req
-    | A.IncludeOnce -> e, IIncludeEvalDefine InclOnce
-    | A.RequireOnce ->
+    | Aast.Include -> e, IIncludeEvalDefine Incl
+    | Aast.Require -> e, IIncludeEvalDefine Req
+    | Aast.IncludeOnce -> e, IIncludeEvalDefine InclOnce
+    | Aast.RequireOnce ->
       let include_roots = Hhbc_options.include_roots !Hhbc_options.compiler_options in
       match Hhas_symbol_refs.resolve_to_doc_root_relative inc ~include_roots with
         | Hhas_symbol_refs.DocRootRelative path ->
-          (pos, A.String path), IIncludeEvalDefine ReqDoc
+          (annot, A.String path), IIncludeEvalDefine ReqDoc
         | _ -> e, IIncludeEvalDefine ReqOnce
   in
   gather [
@@ -1218,9 +1245,10 @@ and emit_import env pos flavor e =
     instr import_op;
   ]
 
-and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
+and emit_call_isset_expr env outer_pos (expr : A.expr) =
+  let ((pos, _), expr_) = expr in
   match expr_ with
-  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
     gather [
       emit_expr env e;
       emit_pos outer_pos;
@@ -1232,10 +1260,10 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
     emit_class_get env QueryOp.Isset false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.Isset expr prop nullflavor)
-  | A.Lvar (_, n) when SN.Superglobals.is_superglobal n ->
+  | A.Lvar (_, n) when SN.Superglobals.is_superglobal (Local_id.get_name n) ->
     gather [
       emit_pos outer_pos;
-      instr_string @@ SU.Locals.strip_dollar n;
+      instr_string @@ SU.Locals.strip_dollar (Local_id.get_name n);
       emit_pos outer_pos;
       instr_issetg
     ]
@@ -1248,9 +1276,9 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
       instr_istypec OpNull;
       instr_not
     ]
-  | A.Lvar id ->
+  | A.Lvar (pos, id) ->
     emit_pos_then outer_pos @@
-    instr (IIsset (IssetL (get_local env id)))
+    instr (IIsset (IssetL (get_local env (pos, (Local_id.get_name id)))))
   | _ ->
     gather [
       emit_expr env expr;
@@ -1258,9 +1286,10 @@ and emit_call_isset_expr env outer_pos (pos, expr_ as expr) =
       instr_not
     ]
 
-and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
+and emit_call_empty_expr env outer_pos (annot, expr_ as expr) =
+  let (pos, _) = annot in
   match expr_ with
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
     gather [
       emit_expr env e;
       emit_pos outer_pos;
@@ -1272,18 +1301,18 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
     emit_class_get env QueryOp.Empty false cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.Empty expr prop nullflavor)
-  | A.Lvar(_, id) when SN.Superglobals.is_superglobal id ->
+  | A.Lvar(_, id) when SN.Superglobals.is_superglobal (Local_id.get_name id) ->
     gather [
-      instr_string @@ SU.Locals.strip_dollar id;
+      instr_string @@ SU.Locals.strip_dollar (Local_id.get_name id);
       emit_pos outer_pos;
       instr_emptyg
     ]
-  | A.Lvar id ->
-    if not (is_local_this env (snd id)) ||
+  | A.Lvar (pos, id) ->
+     if not (is_local_this env id) ||
       Emit_env.get_needs_local_this env
     then
       emit_pos_then outer_pos @@
-      instr_emptyl (get_local env id)
+      instr_emptyl (get_local env (pos, (Local_id.get_name id)))
     else
       gather [
         emit_pos pos;
@@ -1298,27 +1327,25 @@ and emit_call_empty_expr env outer_pos (pos, expr_ as expr) =
     ]
 
 and emit_unset_expr env expr =
-  emit_lval_op_nonlist env (fst expr) LValOp.Unset expr empty 0
+  emit_lval_op_nonlist env (fst (fst expr)) LValOp.Unset expr empty 0
 
 and emit_set_range_expr env pos name kind args =
   let raise_fatal msg =
-    Emit_fatal.raise_fatal_parse pos (Printf.sprintf "%s %s" name msg)
-  in
+    Emit_fatal.raise_fatal_parse pos (Printf.sprintf "%s %s" name msg) in
   let range_op, size, allow_count = kind in
-  let base, offset, src, args = match args with
+  let base, offset, src, args =
+    match args with
     | b::o::s::rest -> (b, o, s, rest)
-    | _ -> raise_fatal "expects at least 3 arguments"
-  in
-  let count_instrs = match args, allow_count with
+    | _ -> raise_fatal "expects at least 3 arguments" in
+  let count_instrs =
+    match args, allow_count with
     | [c], true -> emit_expr env c
     | [], _ -> instr_int (-1)
     | _, false -> raise_fatal "expects no more than 3 arguments"
-    | _, true -> raise_fatal "expects no more than 4 arguments"
-  in
+    | _, true -> raise_fatal "expects no more than 4 arguments" in
   let base_expr_begin, base_expr_end, base_setup, base_stack =
     emit_base ~notice:Notice ~is_object:false
-      env MemberOpMode.Define 3 base
-  in
+      env MemberOpMode.Define 3 base in
   gather [
     base_expr_begin;
     base_expr_end;
@@ -1329,7 +1356,7 @@ and emit_set_range_expr env pos name kind args =
     instr (IFinal (SetRangeM (base_stack, range_op, size)))
   ]
 
-and emit_call_isset_exprs env pos exprs =
+and emit_call_isset_exprs env pos (exprs : A.expr list) =
   match exprs with
   | [] -> Emit_fatal.raise_fatal_parse
     pos "Cannot use isset() without any arguments"
@@ -1354,7 +1381,7 @@ and emit_call_isset_exprs env pos exprs =
         instr_label its_done
       ]
 
-and emit_exit env expr_opt =
+and emit_exit env (expr_opt : A.expr option) =
   gather [
     (match expr_opt with
       | None -> instr_int 0
@@ -1362,7 +1389,7 @@ and emit_exit env expr_opt =
     instr_exit;
   ]
 
-and emit_idx env pos es =
+and emit_idx env pos (es : A.expr list) =
   let default = if List.length es = 2 then instr_null else empty in
   gather [
     emit_exprs env es;
@@ -1378,24 +1405,25 @@ and emit_eval env pos e =
     instr_eval;
   ]
 
-and emit_xhp_obj_get env pos e s nullflavor =
-  let fn_name = pos, A.Obj_get (e, (pos, A.Id (pos, "getAttribute")), nullflavor) in
-  let args = [pos, A.String (SU.Xhp.clean s)] in
+and emit_xhp_obj_get env pos (_, ty) (e : A.expr) s nullflavor =
+  let annot = (pos, ty) in
+  let fn_name = annot, A.Obj_get (e, (annot, A.Id (pos, "getAttribute")), nullflavor) in
+  let args = [annot, A.String (SU.Xhp.clean s)] in
   emit_call env pos fn_name [] args [] None
 
-and try_inline_gen_call env e =
+and try_inline_gen_call env (e : A.expr) =
   if not (can_inline_gen_functions ()) then None
   else match snd e with
-  | A.Call ((_, A.Id (_, s)), _, [arg], [])
+  | A.Call (_, (_, A.Id (_, s)), _, [arg], [])
     when String.lowercase (SU.strip_global_ns s) = "gena"->
     Some (inline_gena_call env arg)
   | _ ->
     try_inline_genva_call env e GI_expression
 
-and try_inline_genva_call env e inline_context =
+and try_inline_genva_call env (e : A.expr) (inline_context : genva_inline_context) =
   if not (can_inline_gen_functions ()) then None
   else match e with
-  | pos, A.Call ((_, A.Id (_, s)), _, args, uargs)
+  | pos, A.Call (_, (_, A.Id (_, s)), _, args, uargs)
     when String.lowercase (SU.strip_global_ns s) = "genva"->
     try_inline_genva_call_ env pos args uargs inline_context
   | _ -> None
@@ -1425,7 +1453,7 @@ and emit_iter ~collection f =
   ] in
   iter_init, iterate, iter_done
 
-and inline_gena_call env arg =
+and inline_gena_call env (arg : A.expr) = Local.scope @@ fun () ->
   (* convert input to array *)
   let load_array = emit_expr env arg in
   Scope.with_unnamed_local @@ fun arr_local ->
@@ -1464,19 +1492,20 @@ and inline_gena_call env arg =
   (* after *)
   instr_pushl arr_local
 
-and try_inline_genva_call_ env pos args uargs inline_context =
+and try_inline_genva_call_ env annot (args : A.expr list) (uargs : A.expr list) (inline_context : genva_inline_context) =
+  let (pos, _) = annot in
   let args_count = List.length args in
   let is_valid_list_assignment l =
     List.findi l ~f:(fun i (_, x) -> i >= args_count && x <> A.Omitted)
     |> Option.is_none in
-  let emit_list_assignment lhs rhs =
-    let rec combine lhs rhs =
+  let emit_list_assignment (lhs : A.expr list) rhs =
+    let rec combine (lhs : A.expr list) rhs =
       (* ensure that list of values on left hand side and right hand size
          has the same length *)
       match lhs, rhs with
       | l :: lhs, r :: rhs -> (l, r) :: combine lhs rhs
       (* left hand size is smaller - pad with omitted expression *)
-      | [], r :: rhs -> ((Pos.none, A.Omitted), r) :: combine [] rhs
+      | [], r :: rhs -> ((Tast_annotate.null_annotation Pos.none, A.Omitted), r) :: combine [] rhs
       | _, [] -> [] in
     let generate values ~is_ltr =
       let rec aux lhs_acc set_acc = function
@@ -1566,13 +1595,13 @@ and try_inline_genva_call_ env pos args uargs inline_context =
   gather [ await_all; process_results ], (* inner *)
   empty                                  (* after *)
 
-and emit_await env pos expr =
+and emit_await env pos (expr : A.expr) =
   begin match try_inline_gen_call env expr with
   | Some r -> r
   | None ->
     let after_await = Label.next_regular () in
     let instrs = match snd expr with
-    | A.Call (e, targs, args, uargs) ->
+    | A.Call (_, e, targs, args, uargs) ->
       emit_call_expr env pos e targs args uargs (Some after_await)
     | _ ->
       emit_expr env expr
@@ -1589,10 +1618,10 @@ and emit_await env pos expr =
 
 and emit_callconv _env kind _e =
   match kind with
-  | A.Pinout ->
+  | Ast.Pinout ->
     failwith "emit_callconv: This should have been caught at emit_arg"
 
-and get_reified_var_cexpr env pos name =
+and get_reified_var_cexpr env pos name: Ast_class_expr.class_expr option =
   match emit_reified_type_opt env pos name with
   | None -> None
   | Some instrs -> Some (Class_reified (
@@ -1620,7 +1649,7 @@ and emit_reified_generic_instrs pos ~is_fun index =
     instr_querym 0 QueryOp.CGet (MemberKey.EI (Int64.of_int index))
   ]
 
-and emit_reified_type_opt env pos name =
+and emit_reified_type_opt (env : Emit_env.t) pos name =
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   let cget_instr is_fun i =
     instr_cgetl (Local.Named (SU.Reified.reified_generic_captured_name is_fun i))
@@ -1646,7 +1675,8 @@ and emit_reified_type env pos name =
   | Some instrs -> instrs
   | None -> Emit_fatal.raise_fatal_runtime Pos.none "Invalid reified param"
 
-and emit_expr env (pos, expr_ as expr) =
+and emit_expr (env : Emit_env.t) (expr: A.expr) =
+  let ((pos, _) as annot, expr_) = expr in
   match expr_ with
   | A.Float _ | A.String _ | A.Int _ | A.Null | A.False | A.True ->
     let v = Ast_constant_folder.expr_to_typed_value (Emit_env.get_namespace env) expr in
@@ -1655,18 +1685,18 @@ and emit_expr env (pos, expr_ as expr) =
   | A.PrefixedString (_, e)
   | A.ParenthesizedExpr e ->
     emit_expr env e
-  | A.Lvar id ->
+  | A.Lvar (pos, _ as lid) ->
     gather [
       emit_pos pos;
-      emit_local ~notice:Notice ~need_ref:false env id
+      emit_local ~notice:Notice ~need_ref:false env lid
     ]
   | A.Class_const (cid, id) ->
     emit_class_const env pos cid id
   | A.Unop (op, e) ->
     emit_unop env pos op e
   | A.Binop (op, e1, e2) ->
-    emit_binop env pos op e1 e2
-  | A.Pipe (e1, e2) ->
+    emit_binop env annot op e1 e2
+  | A.Pipe (_, e1, e2) ->
     emit_pipe env e1 e2
   | A.InstanceOf (e1, e2) ->
     emit_instanceof env pos e1 e2
@@ -1682,23 +1712,23 @@ and emit_expr env (pos, expr_ as expr) =
   | A.Eif (etest, etrue, efalse) ->
     emit_conditional_expression env pos etest etrue efalse
   | A.Expr_list es -> gather @@ List.map es ~f:(emit_expr env)
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
     gather [
-      emit_expr env e;
+      emit_expr  env e;
       emit_pos pos;
       instr (IGet CGetG)
     ]
-  | A.Array_get(base_expr, opt_elem_expr) ->
+  | A.Array_get (base_expr, opt_elem_expr) ->
     fst (emit_array_get env pos QueryOp.CGet base_expr opt_elem_expr)
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.CGet expr prop nullflavor)
-  | A.Call (e, targs, args, uargs) ->
+  | A.Call (_, e, targs, args, uargs) ->
     emit_call_expr env pos e targs args uargs None
-  | A.New (typeexpr, targs, args, uargs) ->
-    emit_new env pos typeexpr targs args uargs
-  | A.Record (typeexpr, es) ->
+  | A.New (cid, targs, args, uargs, _constructor_annot) ->
+    emit_new env pos cid targs args uargs
+  | A.Record (cid, es) ->
     let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    emit_record env pos typeexpr es2
+    emit_record env pos cid es2
   | A.Array es ->
     emit_pos_then pos @@ emit_collection env expr es
   | A.Darray (ta, es) ->
@@ -1713,6 +1743,33 @@ and emit_expr env (pos, expr_ as expr) =
     emit_collection env varray_e es2
   | A.Collection ((pos, name), _, fields) ->
     emit_named_collection env expr pos name fields
+  | A.ValCollection (`Vector as name, _, el)
+  | A.ValCollection (`ImmVector as name, _, el)
+  | A.ValCollection (`Set as name, _, el)
+  | A.ValCollection (`ImmSet as name, _, el) ->
+    let name = match name with
+      | `Vector -> "Vector"
+      | `ImmVector -> "ImmVector"
+      | `Set -> "Set"
+      | `ImmSet -> "ImmSet" in
+    let fields = List.map el ~f:(fun e -> A.AFvalue e) in
+    emit_named_collection env expr pos name fields
+  | A.ValCollection (_, _, el) ->
+    let fields = List.map el ~f:(fun e -> A.AFvalue e) in
+    emit_collection env expr fields
+  | A.Pair (e1, e2) ->
+    let fields = [A.AFvalue e1; A.AFvalue e2] in
+    emit_named_collection env expr pos "Pair" fields
+  | A.KeyValCollection (`Map as name, _, fields)
+  | A.KeyValCollection (`ImmMap as name, _, fields) ->
+    let fields = List.map fields ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) in
+    let name = match name with
+      | `Map -> "Map"
+      | `ImmMap -> "ImmMap" in
+    emit_named_collection env expr pos name fields
+  | A.KeyValCollection (_, _, fields) ->
+    let fields = List.map fields ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) in
+    emit_collection env expr fields
   | A.Clone e ->
     emit_pos_then pos @@ emit_clone env e
   | A.Shape fl ->
@@ -1723,7 +1780,7 @@ and emit_expr env (pos, expr_ as expr) =
     failwith "yield break should be in statement position"
   | A.Yield_from _ -> failwith "complex yield_from expression"
   | A.Lfun _ ->
-    failwith "expected Lfun to be converted to Efun during closure conversion"
+    failwith "expected Lfun to be converted to Efun during closure conversion emit_expr"
   | A.Efun (fundef, ids) ->
     emit_pos_then pos @@ emit_lambda env fundef ids
   | A.Class_get (cid, id)  ->
@@ -1738,18 +1795,32 @@ and emit_expr env (pos, expr_ as expr) =
   | A.Callconv (kind, e) ->
     emit_callconv env kind e
   | A.Import (flavor, e) ->
-    emit_import env pos flavor e
+    emit_import env annot flavor e
   | A.Omitted -> empty
-  | A.Unsafeexpr _ ->
+  | A.Unsafe_expr _ ->
     failwith "Unsafe expression should be removed during closure conversion"
   | A.Suspend _ ->
     failwith "Codegen for 'suspend' operator is not supported"
   | A.List _ ->
     Emit_fatal.raise_fatal_parse pos
       "list() can only be used as an lvar. Did you mean to use tuple()?"
+  | A.Any ->
+     failwith "Cannot codegen from an Any node"
+  | A.This
+  | A.Lplaceholder _
+  | A.Dollardollar _ ->
+     failwith "TODO Codegen after naming pass on AAST"
+  | A.Typename _ -> failwith "Typename should not occur in expressions"
+  | A.ImmutableVar _ -> failwith "Codegen for 'let' is not supported"
   | A.PU_atom _
   | A.PU_identifier _ ->
-    failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
+     failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
+  | A.Fun_id _ -> failwith "TODO Unimplemented expression Fun"
+  | A.Method_id (_, _) -> failwith "TODO Unimplemented expression Method"
+  | A.Method_caller (_, _) -> failwith "TODO Unimplemented expression Method"
+  | A.Smethod_id (_, _) -> failwith "TODO Unimplemented expression Smethod"
+  | A.Special_func _ -> failwith "TODO Unimplemented expression Special"
+  | A.Assert _ -> failwith "TODO Unimplemented expression Assert"
 
 and emit_static_collection ~transform_to_collection pos tv =
   let transform_instr =
@@ -1764,9 +1835,9 @@ and emit_static_collection ~transform_to_collection pos tv =
     transform_instr;
   ]
 
-and emit_value_only_collection env pos es constructor =
+and emit_value_only_collection env pos (es : A.afield list) constructor =
   let limit = max_array_elem_on_stack () in
-  let inline exprs =
+  let inline (exprs : A.afield list) =
     gather
     [gather @@ List.map exprs
       ~f:(function
@@ -1776,7 +1847,7 @@ and emit_value_only_collection env pos es constructor =
       emit_pos pos;
       instr @@ ILitConst (constructor @@ List.length exprs)]
   in
-  let outofline exprs =
+  let outofline (exprs : A.afield list) =
     gather @@
     List.map exprs
       ~f:(function
@@ -1789,7 +1860,7 @@ and emit_value_only_collection env pos es constructor =
     | x1 :: [] -> inline x1
     | x1 :: x2 :: _ -> gather [inline x1; outofline x2]
 
-and emit_keyvalue_collection name env pos es constructor =
+and emit_keyvalue_collection name env pos (es : A.afield list) constructor =
   let name = SU.strip_ns name in
   let transform_instr =
     if name = "dict" || name = "array" then empty else
@@ -1808,7 +1879,7 @@ and emit_keyvalue_collection name env pos es constructor =
     transform_instr;
   ]
 
-and emit_struct_array env pos es ctor =
+and emit_struct_array env pos (es : A.afield list) ctor =
   let es =
     List.map es
       ~f:(function A.AFkvalue (k, v) ->
@@ -1828,7 +1899,7 @@ and emit_struct_array env pos es ctor =
 
 (* isPackedInit() returns true if this expression list looks like an
  * array with no keys and no ref values *)
-and is_packed_init ?(hack_arr_compat=true) es =
+and is_packed_init ?(hack_arr_compat=true) (es : A.afield list) =
   let is_only_values =
     List.for_all es ~f:(function A.AFkvalue _ -> false | _ -> true)
   in
@@ -1864,7 +1935,7 @@ and is_packed_init ?(hack_arr_compat=true) es =
   && not has_references
   && (List.length es) > 0
 
-and is_struct_init env es allow_numerics =
+and is_struct_init env (es : A.afield list) allow_numerics =
   let has_references =
     (* Reference can only exist as a value *)
     List.exists es
@@ -1900,18 +1971,58 @@ and is_struct_init env es allow_numerics =
 
 (* transform_to_collection argument keeps track of
  * what collection to transform to *)
-and emit_dynamic_collection env (pos, expr_) es =
+and emit_dynamic_collection env (expr : A.expr) (es : A.afield list) =
+  let ((pos, _), expr_) = expr in
   let count = List.length es in
   match expr_ with
+  | A.ValCollection (`Vec, _, _)
   | A.Collection ((_, "vec"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewVecArray n)
+  | A.ValCollection (`Keyset, _, _)
   | A.Collection ((_, "keyset"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewKeysetArray n)
+  | A.KeyValCollection (`Dict, _, _)
   | A.Collection ((_, "dict"), _, _) ->
      if is_struct_init env es true then
        emit_struct_array env pos es instr_newstructdict
      else
        emit_keyvalue_collection "dict" env pos es (NewDictArray count)
+  | A.ValCollection (`Set, _, _) ->
+     if is_struct_init env es true then
+       gather [
+           emit_struct_array env pos es instr_newstructdict;
+           emit_pos pos;
+           instr_colfromarray (collection_type "Set");
+         ]
+     else
+       emit_keyvalue_collection "Set" env pos es (NewDictArray count)
+  | A.ValCollection (`ImmSet, _, _) ->
+     if is_struct_init env es true then
+       gather [
+           emit_struct_array env pos es instr_newstructdict;
+           emit_pos pos;
+           instr_colfromarray (collection_type "ImmSet");
+         ]
+     else
+       emit_keyvalue_collection "ImmSet" env pos es (NewDictArray count)
+  | A.KeyValCollection (`Map, _, _) ->
+     if is_struct_init env es true then
+       gather [
+           emit_struct_array env pos es instr_newstructdict;
+           emit_pos pos;
+           instr_colfromarray (collection_type "Map");
+         ]
+     else
+       emit_keyvalue_collection "Map" env pos es (NewDictArray count)
+  | A.KeyValCollection (`ImmMap, _, _) ->
+     if is_struct_init env es true then
+       gather [
+           emit_struct_array env pos es instr_newstructdict;
+           emit_pos pos;
+           instr_colfromarray (collection_type "ImmMap");
+         ]
+     else
+       emit_keyvalue_collection "ImmMap" env pos es (NewDictArray count)
   | A.Collection ((_, name), _, _)
      when SU.strip_ns name = "Set"
       || SU.strip_ns name = "ImmSet"
@@ -1948,7 +2059,7 @@ and emit_dynamic_collection env (pos, expr_) es =
   else
     emit_keyvalue_collection "array" env pos es (NewMixedArray count)
 
-and emit_named_collection env expr pos name fields =
+and emit_named_collection env (expr : A.expr) pos name (fields : A.afield list) =
   let name = SU.Types.fix_casing @@ SU.strip_ns name in
   match name with
   | "dict" | "vec" | "keyset" ->
@@ -1961,8 +2072,10 @@ and emit_named_collection env expr pos name fields =
       emit_pos_then pos @@
       instr_newcol collection_type
     else
+    let ((_, ty), _) = expr in
+    let annot = (pos, ty) in
     gather [
-      emit_collection env (pos, A.Collection ((pos, "vec"), None, fields)) fields;
+      emit_collection env (annot, A.Collection ((pos, "vec"), None, fields)) fields;
       instr_colfromarray collection_type;
     ]
   | "Map" | "ImmMap" | "Set" | "ImmSet" ->
@@ -1992,7 +2105,8 @@ and is_php_array = function
  | _, A.Darray _ -> not (hack_arr_dv_arrs ())
  | _ -> false
 
-and emit_collection ?(transform_to_collection) env expr es =
+and emit_collection ?(transform_to_collection) env (expr : A.expr) (es : A.afield list) =
+  let pos = Tast_annotate.get_pos expr in
   match Ast_constant_folder.expr_to_opt_typed_value
           ~allow_maps:true
           ~restrict_keys:(not @@ is_php_array expr)
@@ -2000,11 +2114,11 @@ and emit_collection ?(transform_to_collection) env expr es =
           expr
   with
   | Some tv ->
-    emit_static_collection ~transform_to_collection (fst expr) tv
+    emit_static_collection ~transform_to_collection pos tv
   | None ->
     emit_dynamic_collection env expr es
 
-and emit_pipe env e1 e2 =
+and emit_pipe env (e1: A.expr) (e2: A.expr) =
   let lhs_instrs = emit_expr env e1 in
   Scope.with_unnamed_local @@ fun temp ->
   let env = Emit_env.with_pipe_var temp env in
@@ -2017,10 +2131,12 @@ and emit_pipe env e1 e2 =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
+and emit_jmpz env (expr : A.expr) label: emit_jmp_result =
+  let ((pos, _), expr_) = expr in
   let with_pos i = emit_pos_then pos i in
   let opt = optimize_null_check () in
-  match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
+  let ns = Emit_env.get_namespace env in
+  match Ast_constant_folder.expr_to_opt_typed_value ns expr with
   | Some v ->
     let b = Typed_value.to_bool v in
     if b then
@@ -2033,11 +2149,13 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
         is_label_used = true; }
   | None ->
     begin match expr_ with
-    | A.Unop(A.Unot, e) ->
-      emit_jmpnz env e label
-    | A.Binop(A.Barbar, e1, e2) ->
+    | A.Unop(Ast.Unot, e) ->
+      let (annot, expr_) = e in
+      emit_jmpnz env annot expr_ label
+    | A.Binop(Ast.Barbar, e1, e2) ->
       let skip_label = Label.next_regular () in
-      let r1 = emit_jmpnz env e1 skip_label in
+      let (e1_annot, e1_expr_) = e1 in
+      let r1 = emit_jmpnz env e1_annot e1_expr_ skip_label in
       if not r1.is_fallthrough
       then
         let instrs =
@@ -2056,7 +2174,7 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
         { instrs = with_pos instrs;
           is_fallthrough = r2.is_fallthrough || r1.is_label_used;
           is_label_used = r2.is_label_used }
-    | A.Binop(A.Ampamp, e1, e2) ->
+    | A.Binop(Ast.Ampamp, e1, e2) ->
       let r1 = emit_jmpz env e1 label in
       if not r1.is_fallthrough
       then
@@ -2068,16 +2186,16 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
         { instrs = with_pos @@ gather [ r1.instrs; r2.instrs; ];
           is_fallthrough = r2.is_fallthrough;
            is_label_used = r1.is_label_used || r2.is_label_used }
-    | A.Binop(A.Eqeqeq, e, (_, A.Null))
-    | A.Binop(A.Eqeqeq, (_, A.Null), e) when opt ->
+    | A.Binop(Ast.Eqeqeq, e, (_, A.Null))
+    | A.Binop(Ast.Eqeqeq, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpz label;
         ];
         is_fallthrough = true;
         is_label_used = true; }
-    | A.Binop(A.Diff2, e, (_, A.Null))
-    | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
+    | A.Binop(Ast.Diff2, e, (_, A.Null))
+    | A.Binop(Ast.Diff2, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpnz label;
@@ -2099,10 +2217,11 @@ and emit_jmpz env (pos, expr_ as expr) label: emit_jmp_result =
  * Generate specialized code in case expr is statically known, and for
  * !, && and || expressions
  *)
-and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
+and emit_jmpnz env annot (expr_ : A.expr_) label: emit_jmp_result =
+  let (pos, _) = annot in
   let with_pos i = emit_pos_then pos i in
   let opt = optimize_null_check () in
-  match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) expr with
+  match Ast_constant_folder.expr_to_opt_typed_value (Emit_env.get_namespace env) (annot, expr_) with
   | Some v ->
     if Typed_value.to_bool v
     then
@@ -2115,17 +2234,17 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
         is_label_used = false }
   | None ->
     begin match expr_ with
-    | A.Unop(A.Unot, e) ->
+    | A.Unop(Ast.Unot, e) ->
       emit_jmpz env e label
-    | A.Binop(A.Barbar, e1, e2) ->
-      let r1 = emit_jmpnz env e1 label in
+    | A.Binop(Ast.Barbar, (annot1, e1), (annot2, e2)) ->
+       let r1 = emit_jmpnz env annot1 e1 label in
       if not r1.is_fallthrough then r1
       else
-        let r2 = emit_jmpnz env e2 label in
+        let r2 = emit_jmpnz env annot2 e2 label in
         { instrs = with_pos @@ gather [ r1.instrs; r2.instrs ];
           is_fallthrough = r2.is_fallthrough;
           is_label_used = r1.is_label_used || r2.is_label_used }
-    | A.Binop(A.Ampamp, e1, e2) ->
+    | A.Binop(Ast.Ampamp, e1, (annot2, e2)) ->
       let skip_label = Label.next_regular () in
       let r1 = emit_jmpz env e1 skip_label in
       if not r1.is_fallthrough
@@ -2137,7 +2256,7 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
           is_fallthrough = r1.is_label_used;
           is_label_used = false }
       else begin
-        let r2 = emit_jmpnz env e2 label in
+          let r2 = emit_jmpnz env annot2 e2 label in
         { instrs = with_pos @@ gather [
             r1.instrs;
             r2.instrs;
@@ -2146,16 +2265,16 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
           is_fallthrough = r2.is_fallthrough || r1.is_label_used;
           is_label_used = r2.is_label_used }
       end
-    | A.Binop(A.Eqeqeq, e, (_, A.Null))
-    | A.Binop(A.Eqeqeq, (_, A.Null), e) when opt ->
+    | A.Binop(Ast.Eqeqeq, e, (_, A.Null))
+    | A.Binop(Ast.Eqeqeq, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpnz label;
         ];
         is_fallthrough = true;
         is_label_used = true; }
-    | A.Binop(A.Diff2, e, (_, A.Null))
-    | A.Binop(A.Diff2, (_, A.Null), e) when opt ->
+    | A.Binop(Ast.Diff2, e, (_, A.Null))
+    | A.Binop(Ast.Diff2, (_, A.Null), e) when opt ->
       { instrs = with_pos @@ gather [
           emit_is_null env e;
           instr_jmpz label;
@@ -2164,17 +2283,18 @@ and emit_jmpnz env (pos, expr_ as expr) label: emit_jmp_result =
         is_label_used = true; }
     | _ ->
       { instrs = with_pos @@ gather [
-          emit_expr env expr;
+          emit_expr env (annot, expr_);
           instr_jmpnz label;
         ];
         is_fallthrough = true;
         is_label_used = true; }
     end
 
-and emit_short_circuit_op env pos expr =
+and emit_short_circuit_op env annot (expr : A.expr_) =
+  let (pos, _) = annot in
   let its_true = Label.next_regular () in
   let its_done = Label.next_regular () in
-  let r1 = emit_jmpnz env (pos, expr) its_true in
+  let r1 = emit_jmpnz env annot expr its_true in
   let if_true =
     if r1.is_label_used then gather [
       instr_label its_true;
@@ -2194,7 +2314,7 @@ and emit_short_circuit_op env pos expr =
     r1.instrs;
     if_true; ]
 
-and emit_null_coalesce_assignment env pos e1 e2 =
+and emit_null_coalesce_assignment env pos (e1 : A.expr) (e2 : A.expr) =
   let end_label = Label.next_regular () in
   let do_set_label = Label.next_regular () in
   let l_nonnull = Local.get_unnamed_local () in
@@ -2220,18 +2340,19 @@ and emit_null_coalesce_assignment env pos e1 e2 =
     instr_label end_label;
   ]
 
-and emit_quiet_expr ?(null_coalesce_assignment=false) env pos (_, expr_ as expr) =
+and emit_quiet_expr ?(null_coalesce_assignment=false) (env : Emit_env.t) pos (expr : A.expr): Instruction_sequence.t * Hhbc_ast.num_params option =
+  let (_, expr_) = expr in
   match expr_ with
-  | A.Lvar (name_pos, name) when name = SN.Superglobals.globals ->
+  | A.Lvar (name_pos, name) when (Local_id.get_name name) = SN.Superglobals.globals ->
     gather [
       emit_pos name_pos;
-      instr_string (SU.Locals.strip_dollar name);
+      instr_string (SU.Locals.strip_dollar (Local_id.get_name name));
       emit_pos pos;
       instr (IGet CGetQuietG)
     ], None
-  | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
-    instr_cgetquietl (get_local env id), None
-  | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Lvar ((_, name)) when not (is_local_this env name) ->
+    instr_cgetquietl (get_local env (pos, (Local_id.get_name name))), None
+  | A.Array_get((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
     gather [
       emit_expr env e;
       emit_pos pos;
@@ -2249,7 +2370,7 @@ and emit_quiet_expr ?(null_coalesce_assignment=false) env pos (_, expr_ as expr)
 (* returns instruction that will represent setter for $base[local] where
    is_base is true when result cell is base for another subscript operator and
    false when it is final left hand side of the assignment *)
-and emit_store_for_simple_base ~is_base env pos elem_stack_size base_expr local =
+and emit_store_for_simple_base ~is_base env pos elem_stack_size (base_expr : A.expr) local =
   let base_expr_instrs_begin,
       base_expr_instrs_end,
       base_setup_instrs,
@@ -2267,18 +2388,19 @@ and emit_store_for_simple_base ~is_base env pos elem_stack_size base_expr local 
     expr;
   ]
 
+
 (* get LocalTempKind option for a given expression
    - None - expression can be emitted as is
    - Some Value_kind_local - expression represents local that will be
      overwritten later
    - Some Value_kind_expression - spilled non-trivial expression *)
-and get_local_temp_kind ~is_base inout_param_info env e_opt =
+and get_local_temp_kind ~is_base inout_param_info env (e_opt : A.expr option) =
   match e_opt, inout_param_info with
   (* not inout case - no need to save *)
   | _, None -> None
   (* local that will later be overwritten *)
   | Some (_, A.Lvar (_, id)), Some (i, aliases)
-    when InoutLocals.should_save_local_value id i aliases -> Some Value_kind_local
+    when InoutLocals.should_save_local_value (Local_id.get_name id) i aliases -> Some Value_kind_local
   (* non-trivial expression *)
   | Some e, _ ->
     if is_trivial ~is_base env e then None else Some Value_kind_expression
@@ -2299,24 +2421,22 @@ and is_trivial ~is_base env (_, e) =
 
 (* Emit code for e1[e2] or isset(e1[e2]).
  *)
-
 and emit_array_get ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
-  env outer_pos qop base_expr opt_elem_expr =
-  let result =
-    emit_array_get_worker ~null_coalesce_assignment ~no_final ?mode ~inout_param_info:None
-    env outer_pos qop base_expr opt_elem_expr in
-  match result with
-  | Array_get_regular i, querym_n_unpopped -> i, querym_n_unpopped
-  | Array_get_inout _, _ -> failwith "unexpected inout"
+ env outer_pos qop (base_expr : A.expr) (opt_elem_expr : A.expr option) =
+ let result =
+   emit_array_get_worker ~null_coalesce_assignment ~no_final ?mode ~inout_param_info:None
+   env outer_pos qop base_expr opt_elem_expr in
+ match result with
+ | Array_get_regular i, querym_n_unpopped -> i, querym_n_unpopped
+ | Array_get_inout _, _ -> failwith "unexpected inout"
 
-and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?mode
-  ~inout_param_info
-  env outer_pos qop base_expr opt_elem_expr =
+and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?mode ~inout_param_info
+  env outer_pos qop (base_expr : A.expr) (opt_elem_expr : A.expr option) =
   (* Disallow use of array(..)[] *)
   match base_expr, opt_elem_expr with
-  | (pos, A.Array _), None ->
+  | ((pos, _), A.Array _), None ->
     Emit_fatal.raise_fatal_parse pos "Can't use array() as base in write context"
-  | (pos, _), None when not (Emit_env.does_env_allow_array_append env)->
+  | ((pos, _), _), None when not (Emit_env.does_env_allow_array_append env)->
     Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
   | _ ->
   let local_temp_kind =
@@ -2371,11 +2491,12 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
           make_final (base.stack_size + elem_stack_size);
         ], None
       ] in
-    let store = gather [
-      emit_store_for_simple_base ~is_base:false env outer_pos elem_stack_size
-        base_expr local;
-      instr_popc
-    ] in
+    let store =
+      gather [
+        emit_store_for_simple_base ~is_base:false env outer_pos elem_stack_size
+          base_expr local;
+        instr_popc;
+      ] in
     Array_get_inout { load; store }
 
   | Array_get_base_inout base, None ->
@@ -2393,7 +2514,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
     let store = gather [
       base.store;
       instr_setm 0 mk;
-      instr_popc
+      instr_popc;
     ] in
     Array_get_inout { load; store }
 
@@ -2416,7 +2537,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
     let store = gather [
       base.store;
       instr_setm 0 (MemberKey.EL local);
-      instr_popc
+      instr_popc;
     ] in
     Array_get_inout { load; store }
   in
@@ -2425,16 +2546,17 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
 (* Emit code for e1->e2 or e1?->e2 or isset(e1->e2).
  *)
 and emit_obj_get ?(null_coalesce_assignment=false) ?(arg_by_ref=false)
-  env pos qop expr prop null_flavor =
-  match snd expr with
+  env pos qop (expr : A.expr) (prop : A.expr) null_flavor =
+  let (annot, expr_) = expr in
+  match expr_ with
   | A.Lvar (pos, id)
-    when id = SN.SpecialIdents.this && null_flavor = A.OG_nullsafe ->
+    when (Local_id.get_name id) = SN.SpecialIdents.this && null_flavor = Ast.OG_nullsafe ->
     Emit_fatal.raise_fatal_parse
       pos "?-> is not allowed with $this"
   | _ ->
     begin match snd prop with
     | A.Id (_, s) when SU.Xhp.is_xhp s ->
-      emit_xhp_obj_get env pos expr s null_flavor, None
+      emit_xhp_obj_get env pos annot expr s null_flavor, None
     | _ ->
       let mode =
         if null_coalesce_assignment then MemberOpMode.Warn
@@ -2473,20 +2595,25 @@ and emit_obj_get ?(null_coalesce_assignment=false) ?(arg_by_ref=false)
       instr, querym_n_unpopped
     end
 
-and is_special_class_constant_accessed_with_class_id (_, cName) id =
-  SU.is_class id &&
-  (not (SU.is_self cName || SU.is_parent cName || SU.is_static cName))
+and is_special_class_constant_accessed_with_class_id (cName : A.class_id_) (id : string) =
+  let is_self_parent_or_static =
+    match cName with
+    | A.CIexpr (_, A.Id (_, cName))
+      when SU.is_self cName || SU.is_parent cName || SU.is_static cName -> true
+    | _ -> false in
+  SU.is_class id && (not is_self_parent_or_static)
 
-and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) opt_elem_expr =
+and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) (opt_elem_expr : A.expr option) =
   match opt_elem_expr with
   (* These all have special inline versions of member keys *)
   | Some (_, (A.Int _ | A.String _)) -> empty, 0
-  | Some (_, (A.Lvar ((_, id) as pid))) when not (is_local_this env id) ->
+  | Some (_, (A.Lvar (pos, id))) when not (is_local_this env id) ->
     if Option.is_some local_temp_kind
-    then instr_cgetquietl (get_local env pid), 0
-    else if null_coalesce_assignment then instr_cgetl (get_local env pid), 1
+    then instr_cgetquietl (get_local env (pos, (Local_id.get_name id))), 0
+    else if null_coalesce_assignment then instr_cgetl (get_local env (pos, (Local_id.get_name id))), 1
     else empty, 0
-  | Some (_, (A.Class_const ((_, A.Id cid), (_, id))))
+  (* Handle Foo::class but not self::class. *)
+  | Some (_, (A.Class_const ((_, cid), (_, id))))
     when is_special_class_constant_accessed_with_class_id cid id -> empty, 0
   | Some expr -> emit_expr env expr, 1
   | None -> empty, 0
@@ -2495,12 +2622,12 @@ and emit_elem_instrs env ~local_temp_kind ?(null_coalesce_assignment=false) opt_
  * expressions of the form `base[elem]`.
  * If the array element is missing, use the special key `W`.
  *)
-and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_expr =
+and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index (opt_expr : A.expr option) =
   match opt_expr with
   (* Special case for local *)
-  | Some (_, A.Lvar id) when not (is_local_this env (snd id)) ->
+  | Some (_, A.Lvar (p, id)) when not (is_local_this env id) ->
     if null_coalesce_assignment then MemberKey.EC stack_index
-    else MemberKey.EL (get_local env id)
+    else MemberKey.EL (get_local env (p, (Local_id.get_name id)))
   (* Special case for literal integer *)
   | Some (_, A.Int str as int_expr)->
     let open Ast_constant_folder in
@@ -2512,8 +2639,17 @@ and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_ex
   (* Special case for literal string *)
   | Some (_, A.String str) -> MemberKey.ET str
   (* Special case for class name *)
-  | Some (_, (A.Class_const ((_, A.Id (p, cName as cid)), (_, id))))
+  | Some (_, (A.Class_const ((_, cid), (p, id))))
     when is_special_class_constant_accessed_with_class_id cid id ->
+    let cName =
+      match cid,
+            Ast_scope.Scope.get_class (Emit_env.get_scope env)
+      with
+      | A.CIself, Some cd -> SU.strip_global_ns @@ snd cd.A.c_name
+      | A.CIexpr (_, A.Id (_, id)), _
+      | A.CI (_, id), _ -> SU.strip_global_ns id
+      | _ -> failwith "Unreachable due to is_special_class_constant_accessed_with_class_id"
+    in
     let fq_id =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) (p, cName) in
     MemberKey.ET (Hhbc_id.Class.to_raw_string fq_id)
@@ -2526,11 +2662,11 @@ and get_elem_member_key ?(null_coalesce_assignment=false) env stack_index opt_ex
  * the size of the stack in the case that the property cannot be
  * placed inline in the instruction. *)
 and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
-  stack_index prop_expr =
+  stack_index (prop_expr : A.expr) =
   let mk =
     match snd prop_expr with
-    | A.Id ((_, name) as id) when String_utils.string_starts_with name "$" ->
-      MemberKey.PL (get_local env id)
+    | A.Id (pos, name) when String_utils.string_starts_with name "$" ->
+       MemberKey.PL (get_local env (pos, name))
     (* Special case for known property name *)
     | A.Id (_, id)
     | A.String id ->
@@ -2539,8 +2675,8 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
       | Ast.OG_nullthrows -> MemberKey.PT pid
       | Ast.OG_nullsafe -> MemberKey.QT pid
       end
-    | A.Lvar ((_, name) as id) when not (is_local_this env name) ->
-      MemberKey.PL (get_local env id)
+    | A.Lvar (pos, name) when not (is_local_this env name) ->
+      MemberKey.PL (get_local env (pos, (Local_id.get_name name)))
     (* General case *)
     | _ ->
       MemberKey.PC stack_index
@@ -2548,8 +2684,9 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
   (* For nullsafe access, insist that property is known *)
   begin match mk with
   | MemberKey.PL _ | MemberKey.PC _ ->
-    if null_flavor = A.OG_nullsafe then
-      Emit_fatal.raise_fatal_parse (fst prop_expr)
+    let ((pos, _), _) = prop_expr in
+    if null_flavor = Ast.OG_nullsafe then
+      Emit_fatal.raise_fatal_parse pos
         "?-> can only be used with scalar property names"
   | _ -> ()
   end;
@@ -2593,7 +2730,7 @@ and emit_prop_expr ?(null_coalesce_assignment=false) env null_flavor
  *   QueryM 1 CGet EC:0
  *)
 
-and emit_base ~is_object ~notice ?(null_coalesce_assignment=false) env mode base_offset e =
+and emit_base ~is_object ~notice ?(null_coalesce_assignment=false) env mode base_offset (e : A.expr) =
   let result = emit_base_worker ~is_object ~notice ~inout_param_info:None ~null_coalesce_assignment
     env mode base_offset e in
   match result with
@@ -2606,9 +2743,13 @@ and emit_base ~is_object ~notice ?(null_coalesce_assignment=false) env mode base
 
 and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assignment=false)
   env mode base_offset
-  (pos, expr_ as expr) =
+  (expr : A.expr) =
+  let ((pos, _) as annot, expr_) = expr in
   let base_mode =
-    if mode = MemberOpMode.InOut then MemberOpMode.Warn else mode in
+    if mode = MemberOpMode.InOut
+    then
+      MemberOpMode.Warn
+    else mode in
     let local_temp_kind =
       get_local_temp_kind ~is_base:true inout_param_info env (Some expr) in
     (* generic handler that will try to save local into temp if this is necessary *)
@@ -2630,23 +2771,23 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
           instrs_begin; instrs_end; setup_instrs; stack_size }
    in
    match expr_ with
-   | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal x ->
+   | A.Lvar (name_pos, x) when SN.Superglobals.is_superglobal (Local_id.get_name x) ->
      emit_default
-       (emit_pos_then name_pos @@ instr_string (SU.Locals.strip_dollar x))
+       (emit_pos_then name_pos @@ instr_string (SU.Locals.strip_dollar (Local_id.get_name x)))
        empty
        (instr (IBase (BaseGC (base_offset, base_mode))))
        1
 
-   | A.Lvar (thispos, x) when is_object && x = SN.SpecialIdents.this ->
+   | A.Lvar (thispos, x) when is_object && (Local_id.get_name x) = SN.SpecialIdents.this ->
      emit_default
        (emit_pos_then thispos @@ instr (IMisc CheckThis))
        empty
        (instr (IBase BaseH))
        0
 
-   | A.Lvar ((_, str) as id)
+   | A.Lvar (pos, str)
      when not (is_local_this env str) || Emit_env.get_needs_local_this env ->
-     let v = get_local env id in
+     let v = get_local env (pos, (Local_id.get_name str)) in
      if Option.is_some local_temp_kind
      then begin
        emit_default
@@ -2663,23 +2804,23 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
          0
      end
 
-   | A.Lvar id ->
+   | A.Lvar lid ->
      emit_default
-       (emit_local ~notice ~need_ref:false env id)
+       (emit_local ~notice ~need_ref:false env lid)
        empty
        (instr (IBase (BaseC (base_offset, base_mode))))
        1
 
-   | A.Array_get((_, A.Lvar (_, x)), Some (_, A.Lvar y))
-     when x = SN.Superglobals.globals ->
-     let v = get_local env y in
+   | A.Array_get ((_, A.Lvar (_, x)), Some (_, A.Lvar (y_pos, y_id)))
+     when (Local_id.get_name x) = SN.Superglobals.globals ->
+     let v = get_local env (y_pos, (Local_id.get_name y_id)) in
      emit_default
        empty
        empty
        (instr (IBase (BaseGL (v, base_mode))))
        0
 
-   | A.Array_get((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+   | A.Array_get ((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
      let elem_expr_instrs = emit_expr env e in
      emit_default
        elem_expr_instrs
@@ -2687,7 +2828,8 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        (instr (IBase (BaseGC (base_offset, base_mode))))
        1
    (* $a[] can not be used as the base of an array get unless as an lval *)
-   | A.Array_get(_, None) when not (Emit_env.does_env_allow_array_append env) ->
+   | A.Array_get (_, None)
+      when not (Emit_env.does_env_allow_array_append env) ->
       Emit_fatal.raise_fatal_runtime pos "Can't use [] for reading"
    (* base is in turn array_get - do a specific handling for inout params
       if necessary *)
@@ -2774,7 +2916,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      begin match snd prop_expr with
      | A.Id (_, s) when SU.Xhp.is_xhp s ->
        emit_default
-         (emit_xhp_obj_get env pos base_expr s null_flavor)
+         (emit_xhp_obj_get env pos annot base_expr s null_flavor)
          empty
          (gather [ instr_basec base_offset base_mode ])
          1
@@ -2804,7 +2946,7 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
      end
 
    | A.Class_get(cid, prop) ->
-     let cexpr = expr_to_class_expr ~resolve_self:false
+      let cexpr = class_id_to_class_expr ~resolve_self:false
        (Emit_env.get_scope env) cid in
      let cexpr_begin, cexpr_end = emit_class_expr env cexpr prop in
      emit_default
@@ -2821,53 +2963,53 @@ and emit_base_worker ~is_object ~notice ~inout_param_info ?(null_coalesce_assign
        instr (IBase (BaseC (base_offset, base_mode))))
        1
 
-and emit_ignored_expr env ?(pop_pos = Pos.none) e =
-  match snd e with
-  | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
-  | _ ->
-    gather [
-      emit_expr env e;
-      emit_pos_then pop_pos @@ instr_popc
-    ]
+and emit_ignored_expr env ?(pop_pos : Pos.t = Pos.none) (e : A.expr) =
+ match snd e with
+ | A.Expr_list es -> gather @@ List.map ~f:(emit_ignored_expr env ~pop_pos) es
+ | _ ->
+   gather [
+     emit_expr env e;
+     emit_pos_then pop_pos @@ instr_popc
+   ]
 
 (*
  * Replaces erased generics with underscores or
  * raises a parse error if used with is/as expressions
  *)
-and fixup_type_arg env ~isas hint =
+and fixup_type_arg (env : Emit_env.t) ~isas (hint : Aast.hint): Aast.hint =
   let erased_tparams = get_erased_tparams env in
-  let rec aux (p, hint) =
+  let rec aux (p, hint as _x : Aast.hint) =
     match hint with
-    | A.Hoption h -> p, A.Hoption (aux h)
-    | A.Hlike h -> p, A.Hlike (aux h)
-    | A.Hfun (b, hl, l, vh, h) ->
-      p, A.Hfun (b, List.map ~f:aux hl, l, vh, aux h)
-    | A.Htuple hl -> p, A.Htuple (List.map ~f:aux hl)
-    | A.Happly ((_, id), _)
+    | Aast.Hoption h -> p, Aast.Hoption (aux h)
+    | Aast.Hlike h -> p, Aast.Hlike (aux h)
+    | Aast.Hfun (fr, ic, hl, pkl, pml, vh, h, mr) ->
+      p, Aast.Hfun (fr, ic, List.map ~f:aux hl, pkl, pml, vh, aux h, mr)
+    | Aast.Htuple hl -> p, Aast.Htuple (List.map ~f:aux hl)
+    | Aast.Happly ((_, id), _)
       when List.mem ~equal:String.equal erased_tparams id ->
       if isas then
         Emit_fatal.raise_fatal_parse p
           "Erased generics are not allowed in is/as expressions"
       else
-        (p, A.Happly ((p, "_"), []))
-    | A.Happly (id, hl) -> p, A.Happly (id, List.map ~f:aux hl)
-    | A.Hshape {A.si_allows_unknown_fields = uf; A.si_shape_field_list = fl} ->
-      p, A.Hshape { A.si_allows_unknown_fields = uf
-                  ; A.si_shape_field_list = List.map ~f:aux_sf fl
+        (p, Aast.Happly ((p, "_"), []))
+    | Aast.Happly (id, hl) -> p, Aast.Happly (id, List.map ~f:aux hl)
+    | Aast.Hshape { Aast.nsi_allows_unknown_fields = uf; Aast.nsi_field_map = fm} ->
+      p, Aast.Hshape { Aast.nsi_allows_unknown_fields = uf
+                     ; Aast.nsi_field_map = List.map ~f:aux_sf fm
                   }
-    | A.Haccess _ -> p, hint
-    | A.Hsoft h -> p, A.Hsoft (aux h)
-  and aux_sf = function
-   { A.sf_optional = o; A.sf_name = n; A.sf_hint = h } ->
-   { A.sf_optional = o; A.sf_name = n; A.sf_hint = aux h }
-  in aux hint
+    | Aast.Haccess _ -> p, hint
+    | Aast.Hsoft h -> p, Aast.Hsoft (aux h)
+    | _ -> failwith "todo"
+  and aux_sf sfi =
+    { sfi with Aast.sfi_hint = aux sfi.Aast.sfi_hint } in
+  aux hint
 
-and emit_reified_arg env ~isas pos hint =
+and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   let hint = fixup_type_arg env ~isas hint in
   let scope = Emit_env.get_scope env in
   let f is_fun tparam acc =
     match tparam with
-    | { A.tp_name = (_, id); A.tp_reified = true; _ } -> SMap.add id is_fun acc
+    | { A.tp_name = (_, id); A.tp_reified; _ } when not (tp_reified = A.Erased) -> SMap.add id is_fun acc
     | _ -> acc
   in
   let current_targs =
@@ -2875,24 +3017,39 @@ and emit_reified_arg env ~isas pos hint =
       ~init:SMap.empty ~f:(f true)
   in
   let current_targs =
-    List.fold_right (Ast_scope.Scope.get_class_tparams scope)
+    List.fold_right (Ast_scope.Scope.get_class_tparams scope).A.c_tparam_list
       ~init:current_targs ~f:(f false)
   in
-  let acc = (0, SMap.empty) in
-  let visitor = object(_)
-    inherit [int * int SMap.t] Ast_visitor.ast_visitor
-    method! on_id (i, map as acc) id =
-      let name = snd id in
-      match SMap.get name current_targs with
-      | Some _ when not (SMap.mem name map) -> (i + 1, SMap.add name i map)
-      | _ -> acc
-    end in
-  let count, targ_map = visitor#on_hint acc hint in
+  let acc = ref (0, SMap.empty) in
+  let visitor = object (_)
+    inherit [_] A.iter as super
+    method! on_hint_ _ h =
+      let add_name name =
+        let i, map = !acc in
+        match SMap.get name current_targs with
+        | Some _ when not (SMap.mem name map) ->
+           acc := (i + 1, SMap.add name i map)
+        | _ -> ()
+      in
+      match h with
+      | A.Haccess (_, sids) ->
+         List.iter sids (fun sid -> add_name (snd sid))
+      | A.Happly ((_, name), h) ->
+          add_name name;
+          let _ = List.map ~f:(super#on_hint ()) h in
+          ()
+      | A.Habstr name ->
+        add_name name
+      | _ -> ();
+      super#on_hint_ () h
+  end in
+  visitor#on_hint () hint;
+  let count, targ_map = !acc in
   if count > 0 && not @@ reified_generics ()
   then Emit_fatal.raise_fatal_parse Pos.none "Reified generics are not allowed"
   else
   match snd hint with
-  | A.Happly ((_, name), []) when SMap.mem name current_targs ->
+  | Aast.Happly ((_, name), []) when SMap.mem name current_targs ->
     emit_reified_type env pos name, false
   | _ ->
     let ts = get_type_structure_for_hint env ~targ_map hint in
@@ -2914,17 +3071,17 @@ and emit_reified_arg env ~isas pos hint =
     ], (count = 0)
 
 (* Emit arguments of a function call and inout setter for inout args *)
-and emit_args_and_inout_setters env args =
+and emit_args_and_inout_setters env (args: A.expr list) =
   let aliases =
     if has_inout_args args
     then InoutLocals.collect_written_variables env args
     else SMap.empty in
 
-  let emit_arg_and_inout_setter i arg =
+  let emit_arg_and_inout_setter i (arg : A.expr) =
     match snd arg with
     (* inout $var *)
-    | A.Callconv (A.Pinout, (_, A.Lvar lvar)) ->
-      let local = get_local env lvar in
+    | A.Callconv (Ast.Pinout, (_, A.Lvar (pos, id))) ->
+      let local = get_local env (pos, (Local_id.get_name id)) in
       let not_in_try = not (Emit_env.is_in_try env) in
       let move_instrs =
         if not_in_try && (InoutLocals.should_move_local_value local aliases)
@@ -2933,14 +3090,16 @@ and emit_args_and_inout_setters env args =
       gather [ instr_cgetl local; move_instrs ],
       instr_popl local
     (* inout $arr[...][...] *)
-    | A.Callconv (A.Pinout, (pos, A.Array_get (base_expr, opt_elem_expr))) ->
+    | A.Callconv (Ast.Pinout, ((pos, _), A.Array_get (base_expr, opt_elem_expr))) ->
       let array_get_result =
-        fst (emit_array_get_worker ~inout_param_info:(Some (i, aliases)) env pos
+        fst (emit_array_get_worker
+          ~inout_param_info:(Some (i, aliases)) env pos
           QueryOp.InOut base_expr opt_elem_expr) in
       begin match array_get_result with
       | Array_get_regular instrs ->
         let setter_base =
-          fst (emit_array_get ~no_final:true ~mode:MemberOpMode.Define
+          fst (emit_array_get ~no_final:true
+            ~mode:MemberOpMode.Define
             env pos QueryOp.InOut base_expr opt_elem_expr) in
         let setter = gather [
           setter_base;
@@ -2952,25 +3111,26 @@ and emit_args_and_inout_setters env args =
         rebuild_load_store load store
       end
     (* unsupported inout *)
-    | A.Callconv (A.Pinout, _) ->
+    | A.Callconv (Ast.Pinout, _) ->
       failwith "emit_arg_and_inout_setter: Unexpected inout expression type"
 
     (* by-ref annotated argument *)
-    | A.Unop (A.Uref, expr) ->
+    | A.Unop (Ast.Uref, expr) ->
+      let pos = fst @@ fst expr in
       begin match snd expr with
       (* passed by reference *)
       | A.Array_get _ ->
-        Emit_fatal.raise_fatal_parse (fst expr)
+        Emit_fatal.raise_fatal_parse pos
           "references of subscript expressions should not parse"
       | A.Class_get (cid, id) ->
         let env = { env with Emit_env.env_allows_array_append = true } in
         emit_class_get env QueryOp.CGet true cid id
       | A.Lvar id ->
-        emit_pos_then (fst expr) @@
+        emit_pos_then pos @@
         emit_local ~notice:Notice ~need_ref:true env id
       | A.Obj_get (obj, prop, nullflavor) ->
         let env = { env with Emit_env.env_allows_array_append = true } in
-        fst (emit_obj_get ~arg_by_ref:true env (fst expr) QueryOp.Empty obj prop
+        fst (emit_obj_get ~arg_by_ref:true env pos QueryOp.Empty obj prop
           nullflavor)
       (* passed by value *)
       | _ -> emit_expr env expr
@@ -2981,7 +3141,7 @@ and emit_args_and_inout_setters env args =
     | _ -> emit_expr env arg, empty
   in
 
-  let rec aux i args = match args with
+  let rec aux i (args : A.expr list) = match args with
   | [] -> empty, empty
   | arg :: rem_args ->
     let this_arg, this_setter = emit_arg_and_inout_setter i arg in
@@ -3007,21 +3167,23 @@ and get_fcall_args args uargs async_eager_label =
   make_fcall_args ~flags ~num_rets ~by_refs ?async_eager_label num_args
 
 (* Expression that appears in an object context, such as expr->meth(...) *)
-and emit_object_expr env (_, expr_ as expr) =
+and emit_object_expr env (expr : A.expr) =
+  let (_, expr_) = expr in
   match expr_ with
   | A.Lvar(_, x) when is_local_this env x ->
     instr_this
   | _ -> emit_expr env expr
 
 and is_inout_arg = function
-  | _, A.Callconv (A.Pinout, _) -> true
+  | _, A.Callconv (Ast.Pinout, _) -> true
   | _ -> false
 
 and has_inout_args es =
   List.exists es ~f:is_inout_arg
 
 and emit_call_lhs_and_fcall
-  env (pos, expr_ as expr) fcall_args targs inout_arg_positions =
+  env (expr : A.expr) fcall_args (targs : Aast.targ list) inout_arg_positions =
+  let ((pos, _), expr_) = expr in
   let has_inout_args = List.length inout_arg_positions <> 0 in
   let does_not_have_non_tparam_generics =
     not (has_non_tparam_generics env targs) in
@@ -3063,7 +3225,7 @@ and emit_call_lhs_and_fcall
     ]
 
   | A.Class_const (cid, (_, id)) ->
-    let cexpr = expr_to_class_expr ~resolve_self:false
+    let cexpr = class_id_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     let method_id = Hhbc_id.Method.from_ast_name id in
     let method_id =
@@ -3132,9 +3294,15 @@ and emit_call_lhs_and_fcall
     end
 
   | A.Class_get (cid, e) ->
-    let cexpr = expr_to_class_expr ~resolve_self:false
-      (Emit_env.get_scope env) cid in
-    let emit_meth_name () = emit_expr env e in
+    let cexpr = class_id_to_class_expr ~resolve_self:false
+                  (Emit_env.get_scope env) cid in
+    let emit_meth_name () =
+      match e with
+      | A.CGstring (pos, id) ->
+        emit_pos_then pos @@
+        instr_cgetl (Local.Named id)
+      | A.CGexpr e ->
+        emit_expr env e in
     let cexpr = match cexpr with
       | Class_id (_, name) ->
         Option.value ~default:cexpr (get_reified_var_cexpr env pos name)
@@ -3143,8 +3311,8 @@ and emit_call_lhs_and_fcall
     | Class_id cid ->
       let tmp = Local.get_unnamed_local () in
       gather [
-        instr_nulluninit; instr_nulluninit; instr_nulluninit;
-        emit_meth_name (); instr_popl tmp
+       instr_nulluninit; instr_nulluninit; instr_nulluninit;
+       emit_meth_name (); instr_popl tmp
       ],
       gather [
         instr_pushl tmp;
@@ -3154,8 +3322,8 @@ and emit_call_lhs_and_fcall
     | Class_special clsref ->
       let tmp = Local.get_unnamed_local () in
       gather [
-        instr_nulluninit; instr_nulluninit; instr_nulluninit;
-        emit_meth_name (); instr_popl tmp
+       instr_nulluninit; instr_nulluninit; instr_nulluninit;
+       emit_meth_name (); instr_popl tmp
       ],
       gather [
         instr_pushl tmp;
@@ -3264,7 +3432,7 @@ and get_call_builtin_func_info lower_fq_id =
 and emit_name_string env e =
   emit_expr env e
 
-and emit_special_function env pos id args uargs default =
+and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr list) default =
   let nargs = List.length args + List.length uargs in
   let fq_id =
     Hhbc_id.Function.elaborate_id_with_builtins (Emit_env.get_namespace env) (Pos.none, id) in
@@ -3286,12 +3454,13 @@ and emit_special_function env pos id args uargs default =
 
   | "hh\\invariant", e::rest when hh_enabled ->
     let l = Label.next_regular () in
-    let expr_id = pos, A.Id (pos, "\\hh\\invariant_violation") in
+    let annot = (pos, snd annot) in
+    let expr_id = annot, A.Id (pos, "\\hh\\invariant_violation") in
     Some (gather [
       (* Could use emit_jmpnz for better code *)
       emit_expr env e;
       instr_jmpnz l;
-      emit_ignored_expr env (pos, A.Call (expr_id, [], rest, uargs));
+      emit_ignored_expr env (annot, A.Call (Aast.Cnormal, expr_id, [], rest, uargs));
       Emit_fatal.emit_fatal_runtime pos "invariant_violation";
       instr_label l;
       instr_null;
@@ -3415,13 +3584,13 @@ and emit_special_function env pos id args uargs default =
   | "__hhvm_internal_whresult", [_, A.Lvar (_, param)]
     when Emit_env.is_systemlib () ->
     Some (gather [
-      instr_cgetl (Local.Named param);
+      instr_cgetl (Local.Named (Local_id.get_name param));
       instr_whresult;
     ])
 
   | "__hhvm_internal_newlikearrayl", [_, A.Lvar (_, param); _, A.Int n]
     when Emit_env.is_systemlib () ->
-    Some (instr (ILitConst (NewLikeArrayL (Local.Named param,
+    Some (instr (ILitConst (NewLikeArrayL (Local.Named (Local_id.get_name param),
                                            int_of_string n))))
 
   | _ ->
@@ -3434,15 +3603,15 @@ and emit_special_function env pos id args uargs default =
         emit_is env pos h
       ])
     | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
-      when SN.Superglobals.is_superglobal arg_str ->
+      when SN.Superglobals.is_superglobal (Local_id.get_name arg_str) ->
       Some (gather [
         emit_local ~notice:NoNotice ~need_ref:false env arg_id;
         emit_pos pos;
         instr (IIsset (IsTypeC i))
       ])
-    | [(_, A.Lvar (_, arg_str as arg_id))], Some i, _
+    | [(_, A.Lvar (arg_pos, arg_str))], Some i, _
       when not (is_local_this env arg_str) ->
-      Some (instr (IIsset (IsTypeL (get_local env arg_id, i))))
+      Some (instr (IIsset (IsTypeL (get_local env (arg_pos, (Local_id.get_name arg_str)), i))))
     | [arg_expr], Some i, _ ->
       Some (gather [
         emit_expr env arg_expr;
@@ -3465,10 +3634,11 @@ and emit_special_function env pos id args uargs default =
 and get_inout_arg_positions args =
   List.filter_mapi args
     ~f:(fun i -> function
-          | _, A.Callconv (A.Pinout, _) -> Some i
+          | _, A.Callconv (Ast.Pinout, _) -> Some i
           | _ -> None)
 
-and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
+and emit_call env pos expr (targs: Aast.targ list) (args : A.expr list) (uargs : A.expr list) async_eager_label =
+  let (annot, expr_) = expr in
   (match expr_ with
     | A.Id (_, s) -> Emit_symbol_refs.add_function s
     | _ -> ());
@@ -3476,8 +3646,8 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
   let inout_arg_positions = get_inout_arg_positions args in
   let num_uninit = List.length inout_arg_positions in
   let default () = Scope.with_unnamed_locals @@ fun () ->
-    let instr_lhs, instr_fcall =
-      emit_call_lhs_and_fcall env expr fcall_args targs inout_arg_positions in
+    let instr_lhs, instr_fcall = emit_call_lhs_and_fcall
+      env expr fcall_args targs inout_arg_positions in
     let instr_args, instr_inout_setters =
       emit_args_and_inout_setters env args in
     let instr_uargs = match uargs with
@@ -3498,7 +3668,7 @@ and emit_call env pos (_, expr_ as expr) targs args uargs async_eager_label =
 
   match expr_, args with
   | A.Id (_, id), _ ->
-    let special_fn_opt = emit_special_function env pos id args uargs default in
+    let special_fn_opt = emit_special_function env pos annot id args uargs default in
     begin match special_fn_opt with
     | Some instrs -> instrs
     | None -> default ()
@@ -3527,16 +3697,19 @@ and emit_final_global_op pos op =
   | LValOp.IncDec op -> instr (IMutator (IncDecG op))
   | LValOp.Unset -> emit_pos_then pos @@ instr (IMutator UnsetG)
 
-and emit_final_static_op cid prop op =
+and emit_final_static_op cid (prop : A.class_get_expr) op =
   match op with
   | LValOp.Set -> instr (IMutator (SetS 0))
   | LValOp.SetOp op -> instr (IMutator (SetOpS (op, 0)))
   | LValOp.IncDec op -> instr (IMutator (IncDecS (op, 0)))
   | LValOp.Unset ->
-    let cid = text_of_expr cid in
-    let id = text_of_expr prop in
-    Emit_fatal.emit_fatal_runtime (fst id)
-      ("Attempt to unset static property " ^ snd cid ^ "::" ^ snd id)
+     let pos = match prop with
+       | A.CGexpr ((pos, _), _) -> pos
+       | A.CGstring (pos, _) -> pos in
+    let cid = text_of_class_id cid in
+    let id = text_of_prop prop in
+    Emit_fatal.emit_fatal_runtime pos
+      ("Attempt to unset static property " ^ cid ^ "::" ^ id)
 
 (* Given a local $local and a list of integer array indices i_1, ..., i_n,
  * generate code to extract the value of $local[i_n]...[i_1]:
@@ -3565,30 +3738,32 @@ and emit_array_get_fixed last_usage local indices =
     indices;
   ]
 
-and can_use_as_rhs_in_list_assignment expr =
+and can_use_as_rhs_in_list_assignment (expr : A.expr_) =
+  let open Tast in
   match expr with
-  | A.Call ((_, A.Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
+  | Call (_, (_, Id (_, s)), _, _, _) when String.lowercase s = "echo" ->
     false
-  | A.Lvar _ | A.Array_get _ | A.Obj_get _ | A.Class_get _
-  | A.Call _ | A.New _ | A.Record _ | A.Expr_list _ | A.Yield _ | A.Cast _ | A.Eif _
-  | A.Array _ | A.Varray _ | A.Darray _ | A.Collection _ | A.Clone _ | A.Unop _
-  | A.As _ | A.Await _ -> true
-  | A.Pipe (_, (_, r))
-  | A.Binop ((A.Eq None), (_, A.List _), (_, r)) ->
+  | Lvar _ | Array_get _ | Obj_get _ | Class_get _ | PU_atom _
+  | Call _ | New _ | Record _ | Expr_list _ | Yield _ | Cast _ | Eif _
+  | Array _ | Varray _ | Darray _ | Collection _ | Clone _ | Unop _
+  | As _ | Await _ -> true
+  | Pipe (_, _, (_, r))
+  | Binop ((Ast.Eq None), (_, List _), (_, r)) ->
     can_use_as_rhs_in_list_assignment r
-  | A.Binop (A.Plus, _, _) | A.Binop (A.QuestionQuestion, _, _)
-  | A.Binop (A.Eq _, _, _) | A.Class_const _ -> true
+  | Binop (Ast.Plus, _, _) | Binop (Ast.QuestionQuestion, _, _)
+  | Binop (Ast.Eq _, _, _) | Class_const _ -> true
   (* Everything below is false *)
-  | A.Binop _ | A.Shape _ | A.Null | A.True | A.False | A.Omitted | A.Id _
-  | A.Int _ | A.Float _ | A.String _ | A.String2 _
-  | A.PrefixedString _ | A.Yield_break | A.Yield_from _ | A.Suspend _
-  | A.InstanceOf _ | A.Is _ | A.BracedExpr _ | A.ParenthesizedExpr _
-  | A.Efun _ | A.Lfun _ | A.Xml _ | A.Unsafeexpr _
-  | A.Import _ | A.Callconv _ | A.List _ -> false
-  | A.PU_atom _
-  | A.PU_identifier _ ->
+  | This | Any | ValCollection _ | KeyValCollection _ | ImmutableVar _
+  | Dollardollar _ | Lplaceholder _| Fun_id _| Method_id (_, _) | Method_caller (_, _)
+  | Smethod_id (_, _) | Special_func _ | Pair (_, _) | Assert _ | Typename _
+  | Binop _ | Shape _ | Null | True | False | Omitted | Id _
+  | Int _ | Float _ | String _ | String2 _
+  | PrefixedString _ | Yield_break | Yield_from _ | Suspend _
+  | InstanceOf _ | Is _ | BracedExpr _ | ParenthesizedExpr _
+  | Efun _ | Lfun _ | Xml _ | Unsafe_expr _
+  | Import _ | Callconv _ | List _ -> false
+  | PU_identifier _ ->
     failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
-
 
 (* Generate code for each lvalue assignment in a list destructuring expression.
  * Lvalues are assigned right-to-left, regardless of the nesting structure. So
@@ -3602,7 +3777,7 @@ and can_use_as_rhs_in_list_assignment expr =
  * list($a[$f()]) = b();
  * here f() should be invoked before b()
  *)
-and emit_lval_op_list ?(last_usage=false) env outer_pos local indices expr =
+and emit_lval_op_list ?(last_usage=false) (env : Emit_env.t) (outer_pos : Pos.t) local (indices : int list) (expr : A.expr) =
   let is_ltr = php7_ltr_assign () in
   match snd expr with
   | A.List exprs ->
@@ -3658,11 +3833,11 @@ and emit_lval_op_list ?(last_usage=false) env outer_pos local indices expr =
     lhs, rest
 
 and expr_starts_with_ref = function
-  | _, A.Unop (A.Uref, _) -> true
+  | _, A.Unop (Ast.Uref, _) -> true
   | _ -> false
 
 (* Emit code for an l-value operation *)
-and emit_lval_op ?(null_coalesce_assignment=false) env pos op expr1 opt_expr2 =
+and emit_lval_op ?(null_coalesce_assignment=false) (env : Emit_env.t) pos op (expr1 : A.expr) opt_expr2 =
   match op, expr1, opt_expr2 with
   | LValOp.Set, _, Some e when expr_starts_with_ref e ->
     failwith "parser should not allow by-ref assignments"
@@ -3670,13 +3845,13 @@ and emit_lval_op ?(null_coalesce_assignment=false) env pos op expr1 opt_expr2 =
   | LValOp.Set, (_, A.List l), Some expr2 ->
     let instr_rhs = emit_expr env expr2 in
     let has_elements = List.exists l ~f: (function
-      | _, A.Omitted -> false
-      | _ -> true)
+     | _, A.Omitted -> false
+     | _ -> true)
     in
     if not has_elements then instr_rhs else
     Scope.with_unnamed_local @@ fun local ->
     let loc = if can_use_as_rhs_in_list_assignment (snd expr2)
-      then Some local else None in
+     then Some local else None in
     let instr_lhs, instr_assign = emit_lval_op_list env pos loc [] expr1 in
     (* before *)
     gather [ instr_lhs; instr_rhs; instr_popl local ],
@@ -3697,9 +3872,9 @@ and emit_lval_op ?(null_coalesce_assignment=false) env pos op expr1 opt_expr2 =
           instr_popc;
           instr_pushl temp;
         ], 1
-      | Some (pos, A.Unop (A.Uref, (_, A.Obj_get (_, _, A.OG_nullsafe)
-                                | _, A.Array_get ((_,
-                                  A.Obj_get (_, _, A.OG_nullsafe)), _)))) ->
+      | Some ((pos, _), A.Unop (Ast.Uref, (_, A.Obj_get (_, _, Ast.OG_nullsafe)
+                                  | _, A.Array_get ((_,
+                                    A.Obj_get (_, _, Ast.OG_nullsafe)), _)))) ->
         Emit_fatal.raise_fatal_runtime
           pos "?-> is not allowed in write context"
       | Some e -> emit_expr env e, 1
@@ -3717,7 +3892,8 @@ and emit_lval_op_nonlist ?(null_coalesce_assignment=false) env pos op e rhs_inst
   ]
 
 and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
-  env outer_pos op (pos, expr_) rhs_instrs rhs_stack_size =
+  (env : Emit_env.t) outer_pos op (expr : A.expr) rhs_instrs rhs_stack_size =
+  let ((pos, _), expr_) = expr in
   let env =
   match op with
   (* Unbelieveably, $test[] += 5; is legal in PHP, but $test[] = $test[] + 5 is not *)
@@ -3726,8 +3902,8 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
   | LValOp.IncDec _ -> { env with Emit_env.env_allows_array_append = true }
   | _ -> env in
   match expr_ with
-  | A.Lvar (name_pos, id) when SN.Superglobals.is_superglobal id ->
-    emit_pos_then name_pos @@ instr_string @@ SU.Locals.strip_dollar id,
+  | A.Lvar (name_pos, id) when SN.Superglobals.is_superglobal (Local_id.get_name id) ->
+    emit_pos_then name_pos @@ instr_string @@ SU.Locals.strip_dollar (Local_id.get_name id),
     rhs_instrs,
     emit_final_global_op outer_pos op
 
@@ -3736,12 +3912,12 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     rhs_instrs,
     empty
 
-  | A.Lvar id when not (is_local_this env (snd id)) || op = LValOp.Unset ->
+  | A.Lvar (pos, name) when not (is_local_this env name) || op = LValOp.Unset ->
     empty,
     rhs_instrs,
-    emit_final_local_op outer_pos op (get_local env id)
+    emit_final_local_op outer_pos op (get_local env (pos, (Local_id.get_name name)))
 
-  | A.Array_get ((_, A.Lvar (_, x)), Some e) when x = SN.Superglobals.globals ->
+  | A.Array_get ((_, A.Lvar (_, x)), Some e) when (Local_id.get_name x) = SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op pos op in
     if rhs_stack_size = 0
     then
@@ -3778,7 +3954,7 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
         base_expr_instrs_end,
         base_setup_instrs,
         base_stack_size =
-      emit_base ~notice:Notice ~is_object:false ~null_coalesce_assignment env
+      emit_base ~is_object:false ~notice:Notice ~null_coalesce_assignment env
         mode base_offset base_expr
     in
     let mk = get_elem_member_key ~null_coalesce_assignment env rhs_stack_size opt_elem_expr in
@@ -3799,7 +3975,7 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     ]
 
   | A.Obj_get (e1, e2, null_flavor) ->
-    if null_flavor = A.OG_nullsafe then
+    if null_flavor = Ast.OG_nullsafe then
      Emit_fatal.raise_fatal_parse pos "?-> is not allowed in write context";
     let mode =
       match op with
@@ -3834,7 +4010,7 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
     ]
 
   | A.Class_get (cid, prop) ->
-    let cexpr = expr_to_class_expr ~resolve_self:false
+    let cexpr = class_id_to_class_expr ~resolve_self:false
       (Emit_env.get_scope env) cid in
     let final_instr =
       emit_pos_then pos @@
@@ -3856,44 +4032,44 @@ and emit_lval_op_nonlist_steps ?(null_coalesce_assignment=false)
 
 and from_unop op =
   match op with
-  | A.Utild -> instr (IOp BitNot)
-  | A.Unot -> instr (IOp Not)
-  | A.Uplus -> instr (IOp Add)
-  | A.Uminus -> instr (IOp Sub)
-  | A.Uincr | A.Udecr | A.Upincr | A.Updecr | A.Uref | A.Usilence ->
+  | Ast.Utild -> instr (IOp BitNot)
+  | Ast.Unot -> instr (IOp Not)
+  | Ast.Uplus -> instr (IOp Add)
+  | Ast.Uminus -> instr (IOp Sub)
+  | Ast.Uincr | Ast.Udecr | Ast.Upincr | Ast.Updecr | Ast.Uref | Ast.Usilence ->
     failwith "this unary operation cannot be translated"
 
 and emit_unop env pos op e =
   match op with
-  | A.Utild ->
+  | Ast.Utild ->
     gather [
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
-  | A.Unot ->
+  | Ast.Unot ->
     gather [
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
-  | A.Uplus ->
-    gather [
-      emit_pos pos;
-      instr (ILitConst (Int (Int64.zero)));
-      emit_expr env e;
-      emit_pos_then pos @@ from_unop op
-    ]
-  | A.Uminus ->
+  | Ast.Uplus ->
     gather [
       emit_pos pos;
       instr (ILitConst (Int (Int64.zero)));
       emit_expr env e;
       emit_pos_then pos @@ from_unop op
     ]
-  | A.Uincr | A.Udecr | A.Upincr | A.Updecr ->
+  | Ast.Uminus ->
+    gather [
+      emit_pos pos;
+      instr (ILitConst (Int (Int64.zero)));
+      emit_expr env e;
+      emit_pos_then pos @@ from_unop op
+    ]
+  | Ast.Uincr | Ast.Udecr | Ast.Upincr | Ast.Updecr ->
     emit_lval_op env pos (LValOp.IncDec (unop_to_incdec_op op)) e None
-  | A.Uref ->
-    failwith "A.Uref is used only for argument passing"
-  | A.Usilence ->
+  | Ast.Uref ->
+    failwith "Ast.Uref is used only for argument passing"
+  | Ast.Usilence ->
     Local.scope @@ fun () ->
       let temp_local = Local.get_unnamed_local () in
       let done_label = Label.next_regular () in
@@ -3913,8 +4089,9 @@ and emit_unop env pos op e =
         instr_silence_end temp_local
       ]
 
-and emit_exprs env exprs =
+and emit_exprs env (exprs : A.expr list) =
   match exprs with
   | [] -> empty
   | expr::exprs ->
-    gather (emit_expr env expr :: List.map exprs (emit_expr env))
+    gather (emit_expr env expr ::
+      List.map exprs (emit_expr env))

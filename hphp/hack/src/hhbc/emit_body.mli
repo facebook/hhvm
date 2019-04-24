@@ -35,19 +35,19 @@ val emit_body:
   return_value: Instruction_sequence.t ->
   namespace: Namespace_env.env ->
   doc_comment: string option ->
-  Ast.tparam list ->
-  Ast.fun_param list ->
-  Ast.hint option ->
-  Ast.program ->
+  Tast.tparam list ->
+  Tast.fun_param list ->
+  Aast.hint option ->
+  Tast.program ->
   Hhas_body.t * bool(* is_generator *) * bool (* is_pair_generator *)
 
-val tparams_to_strings : Ast.tparam list -> string list
+val tparams_to_strings : Tast.tparam list -> string list
 
 val emit_method_prolog :
   env: Emit_env.t ->
   pos: Pos.t ->
   params: Hhas_param.t list ->
-  ast_params: Ast.fun_param list ->
+  ast_params: Tast.fun_param list ->
   should_emit_init_this:bool ->
   Instruction_sequence.t
 
@@ -55,7 +55,7 @@ val emit_return_type_info :
   scope: Ast_scope.Scope.t ->
   skipawaitable: bool ->
   namespace: Namespace_env.env ->
-  Ast.hint option ->
+  Aast.hint option ->
   Hhas_type_info.t
 
 val emit_deprecation_warning :

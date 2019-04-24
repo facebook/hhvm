@@ -7,11 +7,13 @@
  *
 *)
 
+val prim_to_string : Aast.tprim -> string
+
 val fmt_hint :
   tparams: string list ->
   namespace: Namespace_env.env ->
   ?strip_tparams: bool ->
-  Ast.hint ->
+  (* Tast.hint *) Aast.hint ->
   string
 
 type type_hint_kind =
@@ -26,16 +28,16 @@ val hint_to_type_info :
   nullable: bool ->
   tparams: string list ->
   namespace: Namespace_env.env ->
-  Ast.hint ->
+  Aast.hint ->
   Hhas_type_info.t
 
 val hint_to_class :
   namespace: Namespace_env.env ->
-  Ast.hint ->
+  Aast.hint ->
   Hhbc_id.Class.t
 
 val emit_type_constraint_for_native_function :
   string list ->
-  Ast.hint option ->
+  Aast.hint option ->
   Hhas_type_info.t ->
   Hhas_type_info.t

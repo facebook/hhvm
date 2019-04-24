@@ -9,6 +9,7 @@
 
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
+module T = Tast
 
 open Core_kernel
 open Instruction_sequence
@@ -48,7 +49,7 @@ let rec hint_uses_tparams tparam_names (_, hint)  =
 (* Extracts inout params
  * Or ref params only if the function is a closure
  *)
-let extract_inout_or_ref_param_locations is_closure_or_func md  =
+let extract_inout_or_ref_param_locations is_closure_or_func md =
   let _, l =
     Emit_inout_helpers.extract_method_inout_or_ref_param_locations
       ~is_closure_or_func md in
@@ -56,94 +57,99 @@ let extract_inout_or_ref_param_locations is_closure_or_func md  =
 
 let has_kind m k = List.mem ~equal:(=) m.Ast.m_kind k
 
-let from_ast_wrapper : bool -> _ ->
-  Ast.class_ -> Ast.method_ -> Hhas_method.t list =
-  fun privatize make_name ast_class ast_method ->
-  if not (has_valid_access_modifiers ast_method.Ast.m_kind) then
+let from_ast_wrapper privatize make_name ast_class ast_method =
+  (* Removed the following error check: Seems like a duplication of
+   * full_fidelity_parser_errors.ml *)
+  (* if not (has_valid_access_modifiers ast_method) then
     Emit_fatal.raise_fatal_parse Pos.none
-      "Multiple access type modifiers are not allowed";
-  let pos, original_name = ast_method.Ast.m_name in
+      "Multiple access type modifiers are not allowed"; *)
+  let pos, original_name = ast_method.T.m_name in
   let class_name =
-    SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.Ast.c_name in
+    SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.T.c_name in
   (* TODO: use something that can't be faked in user code *)
   let method_is_closure_body =
-     original_name = "__invoke"
-     && String.is_prefix ~prefix:"Closure$" class_name in
-  let namespace = ast_class.Ast.c_namespace in
+    original_name = "__invoke"
+      && String.is_prefix ~prefix:"Closure$" class_name in
+  let namespace = ast_class.T.c_namespace in
   let method_attributes =
-    Emit_attribute.from_asts namespace ast_method.Ast.m_user_attributes in
-  let method_attributes = if method_is_closure_body then method_attributes else
-    Emit_attribute.add_reified_attribute
-      method_attributes ast_method.Ast.m_tparams in
+    Emit_attribute.from_asts namespace ast_method.T.m_user_attributes in
+  let method_attributes =
+    if method_is_closure_body
+    then method_attributes
+    else
+      Emit_attribute.add_reified_attribute
+        method_attributes ast_method.T.m_tparams in
   let is_native = Hhas_attribute.has_native method_attributes in
   let is_native_opcode_impl =
     Hhas_attribute.is_native_opcode_impl method_attributes in
+  let method_is_final = ast_method.T.m_final in
   let method_is_abstract =
-    ast_class.Ast.c_kind = Ast.Cinterface ||
-    has_kind ast_method Ast.Abstract in
-  let method_is_final = has_kind ast_method Ast.Final in
-  let method_is_static = has_kind ast_method Ast.Static in
+    ast_class.T.c_kind = Ast.Cinterface || ast_method.T.m_abstract in
+  let method_is_static = ast_method.T.m_static in
   let method_is_private =
     not is_native_opcode_impl &&
-    (privatize || has_kind ast_method Ast.Private) in
+      (privatize || ast_method.T.m_visibility = Aast.Private) in
   let method_is_protected =
     not is_native_opcode_impl &&
-    not privatize &&
-    has_kind ast_method Ast.Protected in
+      not privatize &&
+      ast_method.T.m_visibility = Aast.Protected in
   let method_is_public =
     is_native_opcode_impl ||
     (not privatize && (
-    has_kind ast_method Ast.Public ||
+    ast_method.T.m_visibility = Aast.Public ||
     (not method_is_private && not method_is_protected))) in
   let is_memoize =
-    Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
+    Emit_attribute.ast_any_is_memoize ast_method.T.m_user_attributes in
   let deprecation_info =
-    if is_memoize then None else Hhas_attribute.deprecation_info method_attributes
-  in
+    if is_memoize
+    then None
+    else Hhas_attribute.deprecation_info method_attributes in
   let is_no_injection = Hhas_attribute.is_no_injection method_attributes in
-  let ret = ast_method.Ast.m_ret in
-  let original_method_id = make_name ast_method.Ast.m_name in
+  let ret = ast_method.T.m_ret in
+  let original_method_id = make_name ast_method.T.m_name in
   if not (method_is_static || method_is_closure_body) then
-    List.iter ast_method.Ast.m_params (fun p ->
-      let pos, id = p.Ast.param_id in
-      if id = SN.SpecialIdents.this then
-      Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this");
+    List.iter ast_method.T.m_params ~f:(fun p ->
+      if p.T.param_name = SN.SpecialIdents.this
+      then Emit_fatal.raise_fatal_parse p.T.param_pos "Cannot re-assign $this");
   let inout_param_locations =
     extract_inout_or_ref_param_locations method_is_closure_body ast_method in
   let has_inout_args = List.length inout_param_locations <> 0 in
-  let renamed_method_id = if has_inout_args then
-    Hhbc_id.Method.from_ast_name @@
-      (snd ast_method.Ast.m_name)
-      ^ (Emit_inout_helpers.inout_suffix inout_param_locations)
+  let renamed_method_id =
+    if has_inout_args
+    then
+      Hhbc_id.Method.from_ast_name @@
+        (snd ast_method.T.m_name) ^
+          (Emit_inout_helpers.inout_suffix inout_param_locations)
     else original_method_id in
   let method_is_async =
-    ast_method.Ast.m_fun_kind = Ast_defs.FAsync
-    || ast_method.Ast.m_fun_kind = Ast_defs.FAsyncGenerator in
-  if ast_class.Ast.c_kind = Ast.Cinterface && not (List.is_empty ast_method.Ast.m_body)
-  then Emit_fatal.raise_fatal_parse pos
-    (Printf.sprintf "Interface method %s::%s cannot contain body" class_name original_name);
+    ast_method.T.m_fun_kind = Ast.FAsync
+    || ast_method.T.m_fun_kind = Ast.FAsyncGenerator in
+  if ast_class.T.c_kind = Ast.Cinterface && not (List.is_empty ast_method.T.m_body.T.fb_ast)
+  then
+    Emit_fatal.raise_fatal_parse pos
+      (Printf.sprintf "Interface method %s::%s cannot contain body" class_name original_name);
   if not method_is_static
-    && ast_class.Ast.c_final
-    && ast_class.Ast.c_kind = Ast.Cabstract
+    && ast_class.T.c_final
+    && ast_class.T.c_kind = Ast.Cabstract
   then Emit_fatal.raise_fatal_parse pos
     ("Class " ^ class_name ^ " contains non-static method " ^ original_name
      ^ " and therefore cannot be declared 'abstract final'");
-  let has_variadic_param = List.exists ast_method.Ast.m_params
-    (fun p -> p.Ast.param_is_variadic)
-  in
+  let has_variadic_param =
+    List.exists ast_method.T.m_params ~f:(fun p -> p.T.param_is_variadic) in
   if has_variadic_param && original_name = Naming_special_names.Members.__call
-  then Emit_fatal.raise_fatal_parse pos @@
-    Printf.sprintf "Method %s::__call() cannot take a variadic argument" class_name;
+  then
+    Emit_fatal.raise_fatal_parse pos @@
+      Printf.sprintf "Method %s::__call() cannot take a variadic argument" class_name;
   let default_dropthrough =
-    if List.mem ~equal:(=) ast_method.Ast.m_kind Ast.Abstract
-    then Some (Emit_fatal.emit_fatal_runtimeomitframe pos
-      ("Cannot call abstract method " ^ class_name
-        ^ "::" ^ original_name ^ "()"))
-    else None
-  in
+    if ast_method.T.m_abstract
+    then
+      Some (Emit_fatal.emit_fatal_runtimeomitframe pos
+        ("Cannot call abstract method " ^ class_name ^ "::" ^ original_name ^ "()"))
+    else None in
   let scope =
-    [Ast_scope.ScopeItem.Method ast_method;
-     Ast_scope.ScopeItem.Class ast_class] in
+    [ Ast_scope.ScopeItem.Method ast_method;
+      Ast_scope.ScopeItem.Class ast_class;
+    ] in
   let scope =
     if method_is_closure_body
     then Ast_scope.ScopeItem.Lambda (method_is_async, None) :: scope
@@ -151,38 +157,39 @@ let from_ast_wrapper : bool -> _ ->
   let closure_namespace = SMap.get class_name (Emit_env.get_closure_namespaces ()) in
   let namespace = Option.value closure_namespace ~default:namespace in
   let has_ref_params =
-    List.exists ast_method.Ast.m_params ~f:(fun p -> p.Ast.param_is_reference) in
+    List.exists ast_method.T.m_params ~f:(fun p -> p.T.param_is_reference) in
   let method_rx_level =
-    match Rx.rx_level_from_ast ast_method.Ast.m_user_attributes with
+    match Rx.rx_level_from_ast ast_method.T.m_user_attributes with
     | Some l -> l
     | None ->
       if method_is_closure_body
-        then Emit_env.get_lambda_rx_of_scope ast_class ast_method
-        else Rx.NonRx
-    in
-  let ast_body, is_rx_body, method_rx_disabled =
-    if method_rx_level <> Rx.NonRx then
-      match Rx.halves_of_is_enabled_body namespace ast_method.Ast.m_body with
+      then Emit_env.get_lambda_rx_of_scope ast_class ast_method
+      else Rx.NonRx in
+  let ast_body_block, is_rx_body, method_rx_disabled =
+    if method_rx_level <> Rx.NonRx
+    then
+      match Rx.halves_of_is_enabled_body namespace ast_method.T.m_body with
       | Some (enabled_body, disabled_body) ->
         if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options
         then enabled_body, true, false
         else disabled_body, false, true
-      | None -> ast_method.Ast.m_body, true, false
-    else ast_method.Ast.m_body, false, false in
+      | None -> ast_method.T.m_body.T.fb_ast, true, false
+    else ast_method.T.m_body.T.fb_ast, false, false in
   let method_body, method_is_generator, method_is_pair_generator =
-    if is_native_opcode_impl then
+    if is_native_opcode_impl
+    then
       Emit_native_opcode.emit_body
         scope
         namespace
-        ast_class.A.c_user_attributes
-        ast_method.Ast.m_name
-        ast_method.Ast.m_params
+        ast_class.T.c_user_attributes
+        ast_method.T.m_name
+        ast_method.T.m_params
         ret,
-      false,
-      false
+        false,
+        false
     else
       Emit_body.emit_body
-        ~pos:ast_method.Ast.m_span
+        ~pos:ast_method.T.m_span
         ~scope:scope
         ~is_closure_body:method_is_closure_body
         ~is_memoize
@@ -191,26 +198,25 @@ let from_ast_wrapper : bool -> _ ->
         ~is_rx_body
         ~debugger_modify_program:false
         ~deprecation_info
-        ~skipawaitable:(ast_method.Ast.m_fun_kind = Ast_defs.FAsync)
+        ~skipawaitable:(ast_method.T.m_fun_kind = Ast_defs.FAsync)
         ~default_dropthrough
         ~return_value:instr_null
         ~namespace
-        ~doc_comment:ast_method.Ast.m_doc_comment
-        ast_method.Ast.m_tparams
-        ast_method.Ast.m_params
+        ~doc_comment:ast_method.T.m_doc_comment
+        ast_method.T.m_tparams
+        ast_method.T.m_params
         ret
-        [Ast.Stmt (Pos.none, Ast.Block ast_body)]
-  in
+        [T.Stmt (Pos.none, T.Block ast_body_block)] in
   let method_id =
-    if has_inout_args && (method_is_closure_body || has_ref_params) then
-    original_method_id else renamed_method_id in
+    if has_inout_args && (method_is_closure_body || has_ref_params)
+    then original_method_id
+    else renamed_method_id in
   let method_is_interceptable =
     Interceptable.is_method_interceptable
       namespace ast_class original_method_id in
   let method_span =
     if is_native_opcode_impl then (0, 0)
-    else Hhas_pos.pos_to_span ast_method.Ast.m_span in
-
+    else Hhas_pos.pos_to_span ast_method.T.m_span in
   let normal_function =
     Hhas_method.make
       method_attributes
@@ -232,8 +238,7 @@ let from_ast_wrapper : bool -> _ ->
       method_is_interceptable
       is_memoize (*method_is_memoize_impl*)
       method_rx_level
-      method_rx_disabled
-  in
+      method_rx_disabled in
   let decl_vars = Hhas_body.decl_vars @@ Hhas_method.body normal_function in
   if has_inout_args && not (method_is_abstract && has_ref_params)
   then
@@ -243,22 +248,22 @@ let from_ast_wrapper : bool -> _ ->
         ~decl_vars
         ~original_id:original_method_id
         ~renamed_id:renamed_method_id
-        ast_class ast_method in
+        ast_class
+        ast_method in
       if method_is_closure_body || has_ref_params
       then [normal_function; wrapper]
       else [wrapper; normal_function]
   else [normal_function]
 
-
-let from_ast ast_class ast_method =
-  let is_memoize = Emit_attribute.ast_any_is_memoize ast_method.Ast.m_user_attributes in
+let from_ast class_ method_ =
+  let is_memoize =
+    Emit_attribute.ast_any_is_memoize method_.T.m_user_attributes in
   let make_name (_, name) =
     if is_memoize
     then Hhbc_id.Method.from_ast_name (name ^ Emit_memoize_helpers.memoize_suffix)
     else Hhbc_id.Method.from_ast_name name
   in
-  from_ast_wrapper is_memoize make_name ast_class ast_method
+  from_ast_wrapper is_memoize make_name class_ method_
 
-
-let from_asts ast_class ast_methods =
-  List.concat_map ast_methods ~f:(from_ast ast_class)
+let from_asts class_ methods =
+  List.concat_map methods ~f:(from_ast class_)

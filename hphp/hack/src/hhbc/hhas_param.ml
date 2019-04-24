@@ -8,13 +8,13 @@
 *)
 
 type t = {
-  param_name          : string;
-  param_is_reference  : bool;
-  param_is_variadic   : bool;
-  param_is_inout      : bool;
+  param_name           : string;
+  param_is_reference   : bool;
+  param_is_variadic    : bool;
+  param_is_inout       : bool;
   param_user_attributes: Hhas_attribute.t list;
-  param_type_info     : Hhas_type_info.t option;
-  param_default_value : (Label.t * Ast.expr) option
+  param_type_info      : Hhas_type_info.t option;
+  param_default_value  : (Label.t * Tast.expr) option
 }
 
 let make param_name param_is_reference param_is_variadic param_is_inout
@@ -35,7 +35,8 @@ let user_attributes p = p.param_user_attributes
 let type_info p = p.param_type_info
 let default_value p = p.param_default_value
 
-let without_type p = match p.param_type_info with
+let without_type p =
+  match p.param_type_info with
   | Some ti ->
     let ut = Hhas_type_info.user_type ti in
     let tc = Hhas_type_constraint.make None [] in

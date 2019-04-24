@@ -18,7 +18,7 @@ val emit_wrapper_function :
   (* Renamed identifier, used for the wrapped function *)
   renamed_id: Hhbc_id.Function.t ->
   (* Function definition in AST *)
-  Ast.fun_ ->
+  Tast.fun_ ->
   Hhas_function.t
 
 (* Emit wrapper function for functions with inout arguments *)
@@ -30,6 +30,6 @@ val emit_wrapper_method :
   (* Renamed identifier, used for the wrapped function *)
   renamed_id: Hhbc_id.Method.t ->
   (* Function definition in AST *)
-  Ast.class_ ->
-  Ast.method_ ->
+  Tast.class_ ->
+  Tast.method_ ->
   Hhas_method.t

@@ -23,69 +23,23 @@ let set_function_has_goto f = function_has_goto_ := f
 
 let rec collect_valid_target_labels_aux is_hh_file acc s =
   match snd s with
-  | A.Declare (_, _, block)
-  | A.Block block ->
+  | T.Declare (_, _, block)
+  | T.Unsafe_block block
+  | T.Block block ->
     collect_valid_target_labels_for_block_aux is_hh_file acc block
   (* can jump into the try block but not to finally *)
-  | A.Try (block, cl, _) ->
-    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc block in
-    List.fold_left cl
-      ~init:acc
-      ~f:(fun acc (_, _, block) ->
-        collect_valid_target_labels_for_block_aux is_hh_file acc block)
-  | A.GotoLabel (_, s) ->
-    SSet.add s acc
-  | A.If (_, then_block, else_block) ->
-    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc then_block in
-    collect_valid_target_labels_for_block_aux is_hh_file acc else_block
-  | A.Let _
-  | A.Unsafe
-  | A.Fallthrough
-  | A.Expr _
-  | A.Break _
-  | A.Continue _
-  | A.Throw _
-  | A.Return _
-  | A.Goto _
-  | A.Awaitall _
-  | A.Markup _
-  | A.Noop
-  | A.Foreach _
-  | A.Do _
-  | A.For _
-  | A.Def_inline _ -> acc
-  (* jump to while loops/switches/usings are disallowed in php files
-     and permitted in hh - assuming that they can only appear there
-     as a result of source to source transformation that has validated
-     correctness of the target *)
-  | A.While (_, block)
-  | A.Using { A.us_block = block; _ } ->
-    if is_hh_file
-    then collect_valid_target_labels_for_block_aux is_hh_file acc block
-    else acc
-  | A.Switch (_, cl) ->
-    if is_hh_file
-    then collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl
-    else acc
-
-and collect_valid_target_labels_aux_tast is_hh_file acc s =
-  match snd s with
-  | T.Declare (_, _, block)
-  | T.Block block ->
-    collect_valid_target_labels_for_block_aux_tast is_hh_file acc block
-  (* can jump into the try block but not to finally *)
   | T.Try (block, cl, _) ->
-    let acc = collect_valid_target_labels_for_block_aux_tast is_hh_file acc block in
+    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc block in
     List.fold_left
       cl
       ~init:acc
       ~f:(fun acc (_, _, block) ->
-        collect_valid_target_labels_for_block_aux_tast is_hh_file acc block)
+        collect_valid_target_labels_for_block_aux is_hh_file acc block)
   | T.GotoLabel (_, s) ->
     SSet.add s acc
   | T.If (_, then_block, else_block) ->
-    let acc = collect_valid_target_labels_for_block_aux_tast is_hh_file acc then_block in
-    collect_valid_target_labels_for_block_aux_tast is_hh_file acc else_block
+    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc then_block in
+    collect_valid_target_labels_for_block_aux is_hh_file acc else_block
   | T.Let _
   | T.Fallthrough
   | T.Expr _
@@ -110,68 +64,38 @@ and collect_valid_target_labels_aux_tast is_hh_file acc s =
   | T.While (_, block)
   | T.Using { T.us_block = block; _ } ->
     if is_hh_file
-    then collect_valid_target_labels_for_block_aux_tast is_hh_file acc block
+    then collect_valid_target_labels_for_block_aux is_hh_file acc block
     else acc
   | T.Switch (_, cl) ->
     if is_hh_file
-    then collect_valid_target_labels_for_switch_cases_aux_tast is_hh_file acc cl
+    then collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl
     else acc
-  | T.Unsafe_block block ->
-    let _ =
-      failwith "TODO: T41351393" in
-    collect_valid_target_labels_for_block_aux_tast is_hh_file acc block
 
 and collect_valid_target_labels_for_block_aux is_hh_file acc block =
   List.fold_left block ~init:acc ~f:(collect_valid_target_labels_aux is_hh_file)
 
-and collect_valid_target_labels_for_block_aux_tast is_hh_file acc block =
-  List.fold_left block ~init:acc ~f:(collect_valid_target_labels_aux_tast is_hh_file)
-
 and collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl =
   List.fold_left cl ~init:acc ~f:(fun acc s ->
     match s with
-    | A.Default block
-    | A.Case (_, block) -> collect_valid_target_labels_for_block_aux is_hh_file acc block)
-
-and collect_valid_target_labels_for_switch_cases_aux_tast is_hh_file acc cl =
-  List.fold_left cl ~init:acc ~f:(fun acc s ->
-    match s with
     | T.Default block
-    | T.Case (_, block) -> collect_valid_target_labels_for_block_aux_tast is_hh_file acc block)
+    | T.Case (_, block) -> collect_valid_target_labels_for_block_aux is_hh_file acc block)
 
 let rec collect_valid_target_labels_for_def_aux is_hh_file acc def =
   match def with
-  | A.Stmt s -> collect_valid_target_labels_aux is_hh_file acc s
-  | A.Namespace (_, defs) -> collect_valid_target_labels_for_defs_aux is_hh_file acc defs
-  | _ -> acc
-
-and collect_valid_target_labels_for_def_aux_tast is_hh_file acc def =
-  match def with
-  | T.Stmt s -> collect_valid_target_labels_aux_tast is_hh_file acc s
-  | T.Namespace (_, defs) -> collect_valid_target_labels_for_defs_aux_tast is_hh_file acc defs
+  | T.Stmt s -> collect_valid_target_labels_aux is_hh_file acc s
+  | T.Namespace (_, defs) -> collect_valid_target_labels_for_defs_aux is_hh_file acc defs
   | _ -> acc
 
 and collect_valid_target_labels_for_defs_aux is_hh_file acc defs =
   List.fold_left defs ~init:acc ~f:(collect_valid_target_labels_for_def_aux is_hh_file)
 
-and collect_valid_target_labels_for_defs_aux_tast is_hh_file acc defs =
-  List.fold_left defs ~init:acc ~f:(collect_valid_target_labels_for_def_aux_tast is_hh_file)
-
 let collect_valid_target_labels_for_stmt is_hh_file s =
   if not (!function_has_goto_) then SSet.empty
   else collect_valid_target_labels_aux is_hh_file SSet.empty s
 
-let collect_valid_target_labels_for_stmt_tast is_hh_file s =
-  if not (!function_has_goto_) then SSet.empty
-  else collect_valid_target_labels_aux_tast is_hh_file SSet.empty s
-
 let collect_valid_target_labels_for_defs is_hh_file defs =
   if not (!function_has_goto_) then SSet.empty
   else collect_valid_target_labels_for_defs_aux is_hh_file SSet.empty defs
-
-let collect_valid_target_labels_for_defs_tast is_hh_file defs =
-  if not (!function_has_goto_) then SSet.empty
-  else collect_valid_target_labels_for_defs_aux_tast is_hh_file SSet.empty defs
 
 let collect_valid_target_labels_for_switch_cases is_hh_file cl =
   if not (!function_has_goto_) then SSet.empty
@@ -304,12 +228,7 @@ let with_loop is_hh_file label_break label_continue iterator t s f =
   Loop ({ label_break; label_continue; iterator }, labels) :: t
   |> run_and_release_ids labels f s
 
-let with_loop_tast is_hh_file label_break label_continue iterator t s f =
-  let labels = collect_valid_target_labels_for_stmt_tast is_hh_file s in
-  Loop ({ label_break; label_continue; iterator }, labels) :: t
-  |> run_and_release_ids labels f s
-
-let with_switch is_hh_file end_label t cl f =
+let with_switch is_hh_file end_label t (cl : T.case list) f =
   let labels = collect_valid_target_labels_for_switch_cases is_hh_file cl in
   (* CONSIDER: now HHVM eagerly reserves state id for the switch end label
     which does not seem to be necessary - do it for now for HHVM compatibility *)
@@ -322,18 +241,13 @@ let with_try is_hh_file finally_label t s f =
   TryFinally (finally_label, labels) :: t
   |> run_and_release_ids labels f s
 
-let with_finally is_hh_file t s f =
+let with_finally is_hh_file t (s : T.stmt) f =
   let labels = collect_valid_target_labels_for_stmt is_hh_file s in
   Finally labels :: t
   |> run_and_release_ids labels f s
 
 let with_function is_hh_file t s f =
   let labels = collect_valid_target_labels_for_defs is_hh_file s in
-  Function labels :: t
-  |> run_and_release_ids labels f s
-
-let with_function_tast is_hh_file t s f =
-  let labels = collect_valid_target_labels_for_defs_tast is_hh_file s in
   (Function labels :: t)
   |> run_and_release_ids labels f s
 

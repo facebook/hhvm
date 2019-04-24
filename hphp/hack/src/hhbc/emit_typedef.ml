@@ -9,38 +9,40 @@
 
 open Core_kernel
 
-let kind_to_type_info ~tparams ~namespace k =
-  match k with
-  | Ast.Alias h | Ast.NewType h ->
-    let nullable = match snd h with Ast.Hoption _ -> true | _ -> false in
-    Emit_type_hint.(hint_to_type_info
-      ~kind:TypeDef ~skipawaitable:false ~nullable ~tparams ~namespace h)
+module T = Tast
 
-let kind_to_type_structure ~tparams ~namespace k =
-  match k with
-  | Ast.Alias h | Ast.NewType h ->
-    Emit_type_constant.hint_to_type_constant ~is_typedef:true ~tparams
-      ~namespace ~targ_map:SMap.empty h
+let kind_to_type_info ~tparams ~namespace h =
+  let nullable =
+    match snd h with
+    | Aast.Hoption _ -> true
+    | _ -> false in
+  Emit_type_hint.(hint_to_type_info
+    ~kind:TypeDef ~skipawaitable:false ~nullable ~tparams ~namespace h)
 
-let emit_typedef : Ast.typedef -> Hhas_typedef.t =
-  fun ast_typedef ->
-  let namespace = ast_typedef.Ast.t_namespace in
+let kind_to_type_structure ~tparams ~namespace h =
+  Emit_type_constant.hint_to_type_constant ~is_typedef:true ~tparams
+    ~namespace ~targ_map:SMap.empty h
+
+let emit_typedef ast_typedef : Hhas_typedef.t =
+  let namespace = ast_typedef.T.t_namespace in
   let typedef_name =
-    Hhbc_id.Class.elaborate_id namespace ast_typedef.Ast.t_id in
+    Hhbc_id.Class.elaborate_id namespace ast_typedef.T.t_name in
   let typedef_attributes =
-    Emit_attribute.from_asts namespace ast_typedef.Ast.t_user_attributes in
-  let tparams = Emit_body.tparams_to_strings ast_typedef.Ast.t_tparams in
+    Emit_attribute.from_asts namespace ast_typedef.T.t_user_attributes in
+  let tparams = Emit_body.tparams_to_strings ast_typedef.T.t_tparams in
   let typedef_type_info =
-    kind_to_type_info ~tparams ~namespace ast_typedef.Ast.t_kind in
+    kind_to_type_info ~tparams ~namespace ast_typedef.T.t_kind in
   let typedef_type_structure =
-    kind_to_type_structure ~tparams ~namespace ast_typedef.Ast.t_kind
-  in
+    kind_to_type_structure ~tparams ~namespace ast_typedef.T.t_kind in
   Hhas_typedef.make
     typedef_name
     typedef_attributes
     typedef_type_info
     (Some typedef_type_structure)
 
-let emit_typedefs_from_program ast =
-  List.filter_map ast
-  (fun d -> match d with Ast.Typedef td -> Some (emit_typedef td) | _ -> None)
+let emit_typedefs_from_program (ast : Tast.def list) =
+  let aux def =
+    match def with
+    | T.Typedef td -> Some (emit_typedef td)
+    | _ -> None in
+  List.filter_map ast ~f:aux

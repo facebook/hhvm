@@ -13,6 +13,7 @@ open Instruction_sequence
 
 module JT = Jump_targets
 module RGH = Reified_generics_helpers
+module T = Tast
 
 (* Collect list of Ret* and non rewritten Break/Continue instructions inside
    try body. *)
@@ -66,43 +67,48 @@ let emit_save_label_id id =
 let get_pos_for_error env =
   let aux_pos p =
     match p with
-      | None -> Pos.none
-      | Some p -> Pos.first_char_of_line p
-  in
-  let rec aux_scope = function
+    | None -> Pos.none
+    | Some p -> Pos.first_char_of_line p in
+  let rec aux_scope scope=
+    match scope with
     | Ast_scope.ScopeItem.Function fd :: _ ->
-      aux_pos @@ Some fd.Ast.f_span
+      aux_pos @@ Some fd.T.f_span
     (* For methods, it points to class not the method.. weird *)
     | Ast_scope.ScopeItem.Class cd :: _ ->
-      aux_pos @@ Some cd.Ast.c_span
+      aux_pos @@ Some cd.T.c_span
     | Ast_scope.ScopeItem.Method _ :: scope
     | Ast_scope.ScopeItem.Lambda _ :: scope
     | Ast_scope.ScopeItem.LongLambda _ :: scope -> aux_scope scope
-    | _ -> aux_pos None
-  in
+    | _ -> aux_pos None in
   aux_scope @@ Emit_env.get_scope env
 
 let fail_if_goto_from_try_to_finally try_block finally_block =
   let find_gotos_in block =
     let visitor =
-      object inherit [_] Ast_visitor.ast_visitor
-        method! on_goto goto_labels label = label :: goto_labels
+      let state = ref [] in
+      object
+        inherit [_] Tast.iter
+        method! on_Goto () label =
+          state := (label :: !state)
+        method state () = !state
       end in
-    visitor#on_block [] block in
+    let _ = visitor#on_block () block in
+    visitor#state () in
   let goto_labels = find_gotos_in try_block in
-  let fail_if_find_any_label_in block goto_labels =
+  let fail_if_find_any_label_in block =
     let visitor =
-      object inherit [_] A.iter
-        method! on_GotoLabel goto_labels (_, label) =
-          let label_opt = List.find goto_labels
-            (fun (_, label_in_list) -> label_in_list = label) in
+      object
+        inherit [_] Tast.iter
+        method! on_GotoLabel () (_, label) =
+          let label_opt = List.find ~f:(fun (_, l) -> l = label) goto_labels in
           match label_opt with
-          | Some (p, _label) -> Emit_fatal.raise_fatal_parse p
-            "'goto' into finally statement is disallowed"
+          | Some (p, _) ->
+            Emit_fatal.raise_fatal_parse p
+              "'goto' into finally statement is disallowed"
           | None -> ()
       end in
-    visitor#on_block goto_labels block in
-  fail_if_find_any_label_in finally_block goto_labels
+    visitor#on_block block in
+  fail_if_find_any_label_in () finally_block
 
 let emit_goto ~in_finally_epilogue env label =
   let err_pos = get_pos_for_error env in
@@ -117,50 +123,53 @@ let emit_goto ~in_finally_epilogue env label =
       scope. HHVM does not do this today, do the same for compatibility reasons *)
     let label_id = JT.get_id_for_label named_label in
     let jump_targets = Emit_env.get_jump_targets env in
-    begin match JT.find_goto_target jump_targets label with
-    | JT.ResolvedGoto_label iters ->
-      let preamble =
-        if not in_finally_epilogue then empty
-        else instr_unsetl @@ Local.get_label_id_local () in
-      gather [
-        preamble;
-        emit_jump_to_label named_label iters
-      ]
-    | JT.ResolvedGoto_finally {
-        JT.rgf_finally_start_label;
-        JT.rgf_iterators_to_release;
-      } ->
-      let preamble =
-        if in_finally_epilogue then empty
-        else emit_save_label_id label_id in
-      gather [
-        preamble;
-        emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
-        (* emit goto as an indicator for try/finally rewriter to generate
-          finally epilogue, try/finally rewriter will remove it. *)
-        instr_goto label;
-      ]
-    | JT.ResolvedGoto_goto_from_finally ->
-      Emit_fatal.raise_fatal_runtime
-        err_pos
-        "Goto to a label outside a finally block is not supported"
-    | JT.ResolvedGoto_goto_invalid_label ->
-      let message =
-        if in_using
-        then "'goto' into or across using statement is disallowed"
-        else "'goto' into loop or switch statement is disallowed" in
-      Emit_fatal.raise_fatal_parse err_pos message
+    begin
+      match JT.find_goto_target jump_targets label with
+      | JT.ResolvedGoto_label iters ->
+        let preamble =
+          if not in_finally_epilogue
+          then empty
+          else instr_unsetl @@ Local.get_label_id_local () in
+        gather [
+          preamble;
+          emit_jump_to_label named_label iters
+        ]
+      | JT.ResolvedGoto_finally {
+          JT.rgf_finally_start_label;
+          JT.rgf_iterators_to_release;
+        } ->
+        let preamble =
+          if in_finally_epilogue
+          then empty
+          else emit_save_label_id label_id in
+        gather [
+          preamble;
+          emit_jump_to_label rgf_finally_start_label rgf_iterators_to_release;
+          (* emit goto as an indicator for try/finally rewriter to generate
+            finally epilogue, try/finally rewriter will remove it. *)
+          instr_goto label;
+        ]
+      | JT.ResolvedGoto_goto_from_finally ->
+        Emit_fatal.raise_fatal_runtime
+          err_pos
+          "Goto to a label outside a finally block is not supported"
+      | JT.ResolvedGoto_goto_invalid_label ->
+        let message =
+          if in_using
+          then "'goto' into or across using statement is disallowed"
+          else "'goto' into loop or switch statement is disallowed" in
+        Emit_fatal.raise_fatal_parse err_pos message
     end
 
-let emit_return
-  ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
+let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
   (* check if there are try/finally region *)
   let jump_targets = Emit_env.get_jump_targets env in
-  begin match JT.get_closest_enclosing_finally_label jump_targets with
+  match JT.get_closest_enclosing_finally_label jump_targets with
   (* no finally blocks, but there might be some iterators that should be
       released before exit - do it *)
   | None ->
-    let verify_return_instr () = match verify_return with
+    let verify_return_instr () =
+      match verify_return with
       | None -> empty
       | Some h ->
         let h = RGH.convert_awaitable env h in
@@ -175,14 +184,12 @@ let emit_return
           ]
         | RGH.DefinitelyReified ->
           gather [
-            fst @@ Emit_expression.emit_reified_arg env ~isas:false  Pos.none h;
+            fst @@ Emit_expression.emit_reified_arg env ~isas:false Pos.none h;
             instr_verifyRetTypeTS
-          ]
-    in
+          ] in
     let release_iterators_instr =
       let iterators_to_release = JT.collect_iterators jump_targets in
-      gather @@ List.map iterators_to_release ~f:instr_iterfree
-    in
+      gather @@ List.map iterators_to_release ~f:instr_iterfree in
     if in_finally_epilogue
     then
       let load_retval_instr = instr_cgetl (Local.get_retval_local ()) in
@@ -193,28 +200,29 @@ let emit_return
         release_iterators_instr;
         if num_out <> 0 then instr_retm (num_out + 1) else instr_retc
       ]
-    else gather [
-      verify_return_instr ();
-      verify_out;
-      release_iterators_instr;
-      if num_out <> 0 then instr_retm (num_out + 1) else instr_retc
-    ]
+    else
+      gather [
+        verify_return_instr ();
+        verify_out;
+        release_iterators_instr;
+        if num_out <> 0 then instr_retm (num_out + 1) else instr_retc
+      ]
   (* ret is in finally block and there might be iterators to release -
     jump to finally block via Jmp/IterBreak *)
   | Some (target_label, iterators_to_release) ->
     let preamble =
-      if in_finally_epilogue then empty
+      if in_finally_epilogue
+      then empty
       else
-      let save_state = emit_save_label_id (JT.get_id_for_return ()) in
-      let save_retval = gather [
-        instr_setl (Local.get_retval_local ());
-        instr_popc;
-      ] in
-      gather [
-        save_state;
-        save_retval;
-      ]
-    in
+        let save_state = emit_save_label_id (JT.get_id_for_return ()) in
+        let save_retval = gather [
+          instr_setl (Local.get_retval_local ());
+          instr_popc;
+        ] in
+        gather [
+          save_state;
+          save_retval;
+        ] in
     gather [
       preamble;
       emit_jump_to_label target_label iterators_to_release;
@@ -222,7 +230,6 @@ let emit_return
         finally epilogue, try/finally rewriter will remove it. *)
       instr_retc;
     ]
-  end
 
 and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
   let jump_targets = Emit_env.get_jump_targets env in
@@ -230,9 +237,9 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
   | JT.NotFound -> Emit_fatal.emit_fatal_for_break_continue pos level
   | JT.ResolvedRegular (target_label, iterators_to_release) ->
     let preamble =
-      if in_finally_epilogue && level = 1 then instr_unsetl @@ Local.get_label_id_local ()
-      else empty
-    in
+      if in_finally_epilogue && level = 1
+      then instr_unsetl @@ Local.get_label_id_local ()
+      else empty in
     gather [
       preamble;
       Emit_pos.emit_pos pos;
@@ -246,19 +253,18 @@ and emit_break_or_continue ~is_break ~in_finally_epilogue env pos level =
     let preamble =
       if not in_finally_epilogue
       then emit_save_label_id (JT.get_id_for_label target_label)
-      else empty
-    in
+      else empty in
     gather [
       preamble;
       emit_jump_to_label finally_label iterators_to_release;
       Emit_pos.emit_pos pos;
       (* emit break/continue instr as an indicator for try/finally rewriter
          to generate finally epilogue - try/finally rewriter will remove it. *)
-      if is_break then instr_break adjusted_level else instr_continue adjusted_level
+      if is_break then instr_break adjusted_level else instr_continue adjusted_level;
     ]
 
 let emit_finally_epilogue
-  ~verify_return ~verify_out ~num_out env pos jump_instructions finally_end =
+  ~verify_return ~verify_out ~num_out (env : Emit_env.t) pos jump_instructions finally_end =
   let emit_instr i =
     match i with
     | IContFlow RetM _
@@ -330,6 +336,7 @@ let emit_finally_epilogue
       instr_cgetl (Local.get_label_id_local ());
       instr_switch labels;
       gather bodies ]
+
 (*
 TODO: This codegen is unnecessarily complex.  Basically we are generating
 

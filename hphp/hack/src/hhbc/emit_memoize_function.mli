@@ -16,5 +16,5 @@ val emit_wrapper_function :
   is_method: bool ->
   deprecation_info: (Typed_value.t list) option ->
   (* Function definition in AST *)
-  Ast.fun_ ->
+  Tast.fun_ ->
   Hhas_function.t

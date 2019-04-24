@@ -7,28 +7,38 @@
  *
 *)
 
-class generator_visitor = object
-  inherit [bool * bool] Ast_visitor.ast_visitor as _super
+module T = Tast
 
-  method! on_yield (_, is_pair_generator) field =
-    (* No need to call recursively on the field values as there cannot be
-     * nested yields *)
-    match field with
-    | Ast.AFvalue _ -> (true, is_pair_generator)
-    | Ast.AFkvalue (_, _) -> (true, true)
+let generator_visitor () =
+  (* is_generator, is_pair_generator *)
+  let state = ref (false, false) in
+  object (_)
+    inherit [_] T.iter
 
-  method! on_yield_break (_, is_pair_generator) =
-    (true, is_pair_generator)
+    method state () = !state
 
-  method! on_yield_from (_, is_pair_generator) _ =
-    (true, is_pair_generator)
+    method! on_Yield () afield =
+      match afield with
+      | T.AFvalue _ ->
+        let _, is_pair_generator = !state in
+        state := (true, is_pair_generator)
+      | T.AFkvalue (_, _) -> state := (true, true)
 
-  method! on_class_ acc _ = acc
-  method! on_fun_ acc _ = acc
+    method! on_Yield_break _ =
+      let _, is_pair_generator = !state in
+      state := (true, is_pair_generator)
 
+    method! on_Yield_from _ _ =
+      let _, is_pair_generator = !state in
+      state := (true, is_pair_generator)
+
+    method! on_class_ _ _ = ()
+
+    method! on_fun_ _ _ = ()
 end
 
 (* Returns a tuple of is_generator and is_pair_generator *)
 let is_function_generator b =
-  let visitor = new generator_visitor in
-  visitor#on_program (false, false) b
+  let visitor = generator_visitor () in
+  let _ = visitor#on_program () b in
+  visitor#state ()

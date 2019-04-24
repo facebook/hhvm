@@ -320,11 +320,15 @@ where
     }
 
     fn token_text(&self, token: &S::Token) -> &'a str {
-        unsafe {
-            std::str::from_utf8_unchecked(self.lexer().source().sub(
-                token.leading_start_offset() + token.leading_width(),
-                token.width(),
-            ))
+        match token.leading_start_offset() {
+            None => "", // unavailable for minimal tokens
+            Some(leading_start_offset) => unsafe {
+                std::str::from_utf8_unchecked(
+                    self.lexer()
+                        .source()
+                        .sub(leading_start_offset + token.leading_width(), token.width()),
+                )
+            },
         }
     }
 
@@ -767,10 +771,10 @@ where
                 the type argument list, it's associated with the formal
                 parameter list.  */
 
+                self.continue_from(parser1);
                 if list_kind != SeparatedListKind::ItemsOptional {
                     self.with_error(error.clone())
                 }
-                self.continue_from(parser1);
                 let item = S!(make_missing, self, self.pos());
                 let separator = S!(make_token, self, token);
                 let list_item = S!(make_list_item, self, item, separator);

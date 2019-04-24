@@ -56,8 +56,8 @@ impl LexableToken for MinimalToken {
         self.leading.iter().map(|x| x.width).sum()
     }
 
-    fn leading_start_offset(&self) -> usize {
-        0 /* Not available */
+    fn leading_start_offset(&self) -> Option<usize> {
+        None /* Not available */
     }
 
     fn leading(&self) -> &[Self::Trivia] {

@@ -881,7 +881,8 @@ where
                         }
                         _ => TokenKind::StringLiteralBody,
                     };
-                    let o = head.leading_start_offset();
+                    // this is incorrect for minimal tokens
+                    let o = head.leading_start_offset().unwrap_or(0);
                     let w = head.width() + token.width();
                     let l = head.leading().to_vec();
                     let t = token.trailing().to_vec();

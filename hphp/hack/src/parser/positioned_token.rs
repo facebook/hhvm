@@ -60,8 +60,8 @@ impl LexableToken for PositionedToken {
         self.0.kind
     }
 
-    fn leading_start_offset(&self) -> usize {
-        self.0.offset
+    fn leading_start_offset(&self) -> Option<usize> {
+        Some(self.0.offset)
     }
 
     fn width(&self) -> usize {
@@ -119,7 +119,7 @@ impl PositionedToken {
     }
 
     pub fn start_offset(&self) -> usize {
-        self.leading_start_offset() + self.leading_width()
+        self.offset() + self.leading_width()
     }
 
     pub fn end_offset(&self) -> usize {

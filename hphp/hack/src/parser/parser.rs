@@ -69,9 +69,10 @@ where
             self.sc_state.clone(),
         );
         let root = decl_parser.parse_script();
-        let (_, _, errors, sc_state) = decl_parser.into_parts();
+        let (lexer, _context, errors, sc_state) = decl_parser.into_parts();
         self.errors = errors;
         self.sc_state = sc_state;
+        self.lexer = lexer;
         root
     }
 
@@ -79,6 +80,7 @@ where
         let mut res = vec![];
         res.extend_from_slice(self.lexer.errors());
         res.extend(self.errors.clone());
+        res.reverse();
         res
     }
 }

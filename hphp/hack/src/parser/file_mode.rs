@@ -69,7 +69,9 @@ pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
                         + ltq.value.full_width
                         + name.leading_width();
 
-                    let language = text.sub_as_str(skip_length, name.width());
+                    let language = text
+                        .sub_as_str(skip_length, name.width())
+                        .to_ascii_lowercase();
                     if language == "php" {
                         Some(FileMode::Mphp)
                     } else if is_hhi {

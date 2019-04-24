@@ -968,9 +968,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 /* same logic as above, just for double quote */
                 if self.peek_char(0) == '\"' {
                     self.advance(1);
+                } else {
+                    self.with_error(Errors::missing_double_quote)
                 }
-            } else {
-                self.with_error(Errors::missing_double_quote)
             }
             name
         };
@@ -2301,8 +2301,10 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         we pack everything that follows __halt_compiler as
         separate opaque kind of trivia - it will be attached as a trailing trivia
         to the last_token and existing trailing trivia will be merged in. */
-        let start_offset =
-            last_token.leading_start_offset() + last_token.leading_width() + last_token.width();
+
+        // This is incorrect for minimal token
+        let leading_start_offset = last_token.leading_start_offset().unwrap_or(0);
+        let start_offset = leading_start_offset + last_token.leading_width() + last_token.width();
 
         let length = self.source.length();
         let trailing = Token::Trivia::make_after_halt_compiler(

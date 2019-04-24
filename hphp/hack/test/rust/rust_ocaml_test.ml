@@ -62,15 +62,31 @@ module WithParser(Parser : Parser_S with type r = Syntax.t) = struct
 
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 
+let rust_parse parse source_text env =
+  let mode, root, errors = parse source_text env in
+  SyntaxTree.create source_text root errors mode
+
 let ocaml_parse env source_text =
-  let tree = SyntaxTree.make ~env source_text in
-  SyntaxTree.(mode tree, root tree, errors tree)
+  SyntaxTree.make ~env source_text
+
+let syntax_tree_into_parts tree =
+  let mode, root, errors = SyntaxTree.(mode tree, root tree, errors tree) in
+  mode, root, errors
 
 let to_json x=
   Syntax.to_json ~with_value:true x |>
   Hh_json.json_to_string ~pretty:true
 
+let print_full_fidelity_error source_text error =
+  let text = SyntaxError.to_positioned_string
+    error (SourceText.offset_to_position source_text) in
+  Printf.printf "%s\n" text
+
 let reachable x = Obj.(x |> repr |> reachable_words)
+
+let mode_to_string = function
+  | None -> "None"
+  | Some mode ->FileInfo.string_of_mode mode
 
 let total = ref 0
 let correct = ref 0
@@ -85,7 +101,7 @@ let test args env path =
   let source_text = SourceText.from_file file in
 
   let from_rust = match args.mode with
-    | RUST | COMPARE -> Some (Parser.parse source_text env)
+    | RUST | COMPARE -> Some (rust_parse Parser.parse source_text env)
     | OCAML -> None
   in
   let from_ocaml = match args.mode with
@@ -95,8 +111,10 @@ let test args env path =
 
   match from_rust, from_ocaml with
   | Some from_rust, Some from_ocaml -> begin
-      let (_mode_from_rust, syntax_from_rust, _errors_from_rust) = from_rust in
-      let (_mode_from_ocaml, syntax_from_ocaml, _errors_from_ocaml) = from_ocaml in
+      let (mode_from_rust, syntax_from_rust, errors_from_rust)
+        = syntax_tree_into_parts from_rust in
+      let (mode_from_ocaml, syntax_from_ocaml, errors_from_ocaml)
+        = syntax_tree_into_parts from_ocaml in
       let rust_reachable_words = reachable syntax_from_rust  in
       let ocaml_reachable_words = reachable syntax_from_ocaml in
       if syntax_from_rust <> syntax_from_ocaml then begin
@@ -116,6 +134,19 @@ let test args env path =
       end else if args.check_sizes && rust_reachable_words <> ocaml_reachable_words  then begin
         Printf.printf "Sizes not equal: %s (%d vs %d)\n"
           path rust_reachable_words ocaml_reachable_words;
+        if not args.keep_going then exit 1
+      end else if mode_from_rust <> mode_from_ocaml then begin
+        Printf.printf "Modes not equal: %s (%s vs %s)\n" path
+          (mode_to_string mode_from_ocaml) (mode_to_string mode_from_rust);
+        if not args.keep_going then exit 1
+      end else if errors_from_rust <> errors_from_ocaml then begin
+        Printf.printf "Errors not equal: %s\n" path;
+        Printf.printf "---OCaml errors---\n";
+
+        List.iter ~f:(print_full_fidelity_error source_text) errors_from_ocaml;
+        Printf.printf "---Rust erors---\n";
+        List.iter ~f:(print_full_fidelity_error source_text) errors_from_rust;
+
         if not args.keep_going then exit 1
       end else begin
         incr correct

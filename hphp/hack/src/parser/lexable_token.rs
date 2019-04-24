@@ -19,7 +19,7 @@ pub trait LexableToken: Clone {
         trailing: Vec<Self::Trivia>,
     ) -> Self;
     fn kind(&self) -> TokenKind;
-    fn leading_start_offset(&self) -> usize;
+    fn leading_start_offset(&self) -> Option<usize>;
 
     fn width(&self) -> usize;
     fn leading_width(&self) -> usize;

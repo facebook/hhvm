@@ -262,8 +262,10 @@ where
             self.continue_from(parser1);
             Some(markup_section)
         } else {
-            // TODO(kasper): .hack files
-            self.with_error(Errors::error1001);
+            if self.lexer().source().length() > 0 {
+                // TODO(kasper): .hack files
+                self.with_error(Errors::error1001);
+            }
             None
         }
     }
@@ -1936,12 +1938,11 @@ where
                 /* ERROR RECOVERY: We expected either a block or a semicolon; we got
                 neither. Use the offending token as the body of the method.
                 TODO: Is this the right error recovery? */
-
+                self.continue_from(parser1);
                 self.with_error(Errors::error1041);
                 let token = S!(make_token, self, token);
                 let error = S!(make_error, self, token);
                 let missing = S!(make_missing, self, self.pos());
-                self.continue_from(parser1);
                 S!(
                     make_methodish_declaration,
                     self,

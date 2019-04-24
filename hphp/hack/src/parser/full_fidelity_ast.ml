@@ -202,6 +202,12 @@ let mode_annotation = function
   | FileInfo.Mphp -> FileInfo.Mdecl
   | m -> m
 
+let process_lifted_awaits lifted_awaits =
+  List.iter lifted_awaits.awaits
+    ~f:(fun (_, (pos, _)) -> assert (pos <> Pos.none));
+  List.sort lifted_awaits.awaits
+    ~compare:(fun (_, (pos1, _)) (_, (pos2, _)) -> Pos.compare pos1 pos2)
+
 let with_new_nonconcurrent_scope env f =
   let saved_lifted_awaits = env.lifted_awaits in
   env.lifted_awaits <- None;
@@ -217,7 +223,7 @@ let with_new_concurrent_scope env f =
   let result = Utils.try_finally
     ~f
     ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;) in
-  (lifted_awaits, result)
+  ((process_lifted_awaits lifted_awaits), result)
 
 let clear_statement_scope env f =
   match env.lifted_awaits with
@@ -229,23 +235,29 @@ let clear_statement_scope env f =
       ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;)
   | _ -> f ()
 
-let with_new_statement_scope env f =
-  match (ParserOptions.enable_await_as_an_expression env.parser_options), env.lifted_awaits with
-  | false, _
-  | true, Some { lift_kind = LiftedFromConcurrent; _ } ->
-    (None, f ())
-  | true, Some { lift_kind = LiftedFromStatement; _ }
-  | true, None ->
-    let lifted_awaits =
-      { awaits = []; name_counter = 1; lift_kind = LiftedFromStatement } in
-    let saved_lifted_awaits = env.lifted_awaits in
-    env.lifted_awaits <- Some lifted_awaits;
-    let result = Utils.try_finally
-      ~f
-      ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;) in
-    let lifted_awaits =
-      if List.is_empty lifted_awaits.awaits then None else Some lifted_awaits in
-    (lifted_awaits, result)
+let lift_awaits_in_statement env pos f =
+  let lifted_awaits, result =
+    (match (ParserOptions.enable_await_as_an_expression env.parser_options), env.lifted_awaits with
+    | false, _
+    | true, Some { lift_kind = LiftedFromConcurrent; _ } ->
+      (None, f ())
+    | true, Some { lift_kind = LiftedFromStatement; _ }
+    | true, None ->
+      let lifted_awaits =
+        { awaits = []; name_counter = 1; lift_kind = LiftedFromStatement } in
+      let saved_lifted_awaits = env.lifted_awaits in
+      env.lifted_awaits <- Some lifted_awaits;
+      let result = Utils.try_finally
+        ~f
+        ~finally:(fun () -> env.lifted_awaits <- saved_lifted_awaits;) in
+      let lifted_awaits =
+        if List.is_empty lifted_awaits.awaits then None else Some lifted_awaits in
+      (lifted_awaits, result)) in
+
+  match lifted_awaits with
+  | None -> result
+  | Some lifted_awaits ->
+    pos, Awaitall ((process_lifted_awaits lifted_awaits), [result])
 
 let syntax_to_list include_separators node  =
   let rec aux acc syntax_list =
@@ -2250,7 +2262,7 @@ and pStmt : stmt parser = fun node env ->
 
     let (lifted_awaits, stmt) =
       with_new_concurrent_scope env (fun () -> pStmt concurrent_stmt env) in
-    (* lifted awaits are accumulated in reverse *)
+
     let stmt = match stmt with
     | pos, Block stmts ->
       let body_stmts, assign_stmts, _ =
@@ -2276,7 +2288,7 @@ and pStmt : stmt parser = fun node env ->
       pos, Block (List.concat [List.rev body_stmts; List.rev assign_stmts])
     | _ -> failwith "Unexpected concurrent stmt structure" in
 
-    pos, Awaitall ((List.rev lifted_awaits.awaits), [stmt])
+    pos, Awaitall (lifted_awaits, [stmt])
   | MarkupSection _ -> pMarkup node env
   | _ when env.max_depth > 0 && env.codegen ->
     (* OCaml optimisers; Forgive them, for they know not what they do!
@@ -2302,16 +2314,6 @@ and pStmt : stmt parser = fun node env ->
   | _ -> missing_syntax ?fallback:(Some (Pos.none,Noop)) "statement" node env in
   pop_docblock ();
   result)
-
-and lift_awaits_in_statement env pos f =
-  let (lifted_awaits, result) =
-    with_new_statement_scope env f in
-
-  match lifted_awaits with
-  | None -> result
-  | Some lifted_awaits ->
-    (* lifted awaits are accumulated in reverse *)
-    pos, Awaitall ((List.rev lifted_awaits.awaits), [result])
 
 and is_simple_await_expression e =
   match syntax e with

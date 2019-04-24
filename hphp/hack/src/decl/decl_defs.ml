@@ -57,6 +57,14 @@ type mro_element = {
      first class in the linearization (the one which was linearized) will have
      an empty list here, even when it takes type parameters. *)
   mro_type_args : decl ty list;
+  (* True if this element referred to a class whose definition could not be
+     found. This is always indicative of an "Unbound name" error (emitted by
+     Naming), so one could imagine omitting elements with this flag set from the
+     linearization (since correct programs will not have them), but keeping
+     track of them helps reduce cascading errors in the event of a typo.
+     Additionally, it's helpful to do this (for now) to keep the behavior of
+     shallow_class_decl equivalent to legacy decl. *)
+  mro_class_not_found : bool;
   (* True if this element is included in the linearization because of a require
      extends or require implements relationship. *)
   mro_synthesized : bool;

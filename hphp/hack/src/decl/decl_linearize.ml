@@ -152,6 +152,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
   let child = {
     mro_name;
     mro_type_args = [];
+    mro_class_not_found = false;
     mro_synthesized = false;
     mro_xhp_attrs_only = false;
     mro_consts_only = false;
@@ -272,11 +273,30 @@ and get_linearization (env : env) (class_name : string) : linearization =
     | Some lin -> lin
     | None ->
       match Shallow_classes_heap.get class_name with
-      | None -> Sequence.empty
       | Some c ->
         let lin = linearize env c in
         LocalCache.add key lin;
         lin
+      | None ->
+        (* There is no known definition for the class with the given name. This
+           is always an "Unbound name" error, and we will emit one wherever this
+           class was specified as an ancestor. In order to suppress downstream
+           errors (and, historically, to support the now-removed assume_php
+           feature), we include this fake mro_element with the
+           mro_class_not_found flag set. This logic is largely here to ensure
+           that the behavior of shallow_class_decl is equivalent to legacy decl,
+           and we should look into removing it (along with
+           Typing_classes_heap.members_fully_known) after we have removed legacy
+           decl. *)
+        Sequence.singleton {
+          mro_name = class_name;
+          mro_type_args = [];
+          mro_class_not_found = true; (* This class is not known to exist! *)
+          mro_synthesized = false;
+          mro_xhp_attrs_only = false;
+          mro_consts_only = false;
+          mro_copy_private_members = false;
+        }
 
 let get_linearization ?(kind=Member_resolution) class_name =
   let decl_env = { Decl_env.

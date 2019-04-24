@@ -3176,10 +3176,6 @@ OPTBLD_INLINE TCA ret(PC& pc) {
   // in that case if necessary.
   frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retval);
 
-  if (isProfileRequest()) {
-    profileIncrementFuncCounter(vmfp()->func());
-  }
-
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
   Offset callOff = vmfp()->m_callOff;
@@ -3268,10 +3264,6 @@ OPTBLD_INLINE TCA iopRetM(PC& pc, uint32_t numRet) {
   frame_free_locals_inl(vmfp(), vmfp()->func()->numLocals(), &retvals[0]);
 
   assertx(!vmfp()->func()->isGenerator() && !vmfp()->func()->isAsync());
-
-  if (isProfileRequest()) {
-    profileIncrementFuncCounter(vmfp()->func());
-  }
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();

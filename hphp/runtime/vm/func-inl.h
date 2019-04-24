@@ -607,14 +607,6 @@ inline bool Func::isDynamicallyCallable() const {
   return m_attrs & AttrDynamicallyCallable;
 }
 
-inline bool Func::isHot() const {
-  return m_hot;
-}
-
-inline void Func::setHot() {
-  m_hot = true;
-}
-
 inline bool Func::isPhpLeafFn() const {
   return shared()->m_isPhpLeafFn;
 }

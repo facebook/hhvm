@@ -50,14 +50,8 @@ void profileWarmupStart();
 void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
-void profileSetHotFunc();
 
 int64_t requestCount();
-
-/*
- * Profiling for func hotness goes through this module.
- */
-void profileIncrementFuncCounter(const Func*);
 
 struct TypeProfileLocals {
   RequestKind requestKind = RequestKind::Warmup;

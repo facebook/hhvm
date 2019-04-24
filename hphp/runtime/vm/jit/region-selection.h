@@ -513,8 +513,8 @@ void optimizeGuards(RegionDesc& region, bool simple);
 
 /*
  * Returns the PGO region selector to be used for the given `func'.
- * This depends on the values of RuntimeOption::EvalJitPGORegionSelector
- * and RuntimeOption::EvalJitPGOCFGHotFuncOnly and the given `func'.
+ * This depends on the value of RuntimeOption::EvalJitPGORegionSelector
+ * and the given `func'.
  */
 PGORegionMode pgoRegionMode(const Func& func);
 

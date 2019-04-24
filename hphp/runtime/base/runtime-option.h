@@ -850,7 +850,6 @@ struct RuntimeOption {
   F(string,   JitPGORegionSelector,    "hotcfg")                        \
   F(uint64_t, JitPGOThreshold,         pgoThresholdDefault())           \
   F(bool,     JitPGOOnly,              false)                           \
-  F(bool,     JitPGOHotOnly,           false)                           \
   F(bool,     JitPGOUsePostConditions, true)                            \
   F(bool,     JitPGOUseAddrCountedCheck, false)                         \
   F(uint32_t, JitPGOUnlikelyIncRefCountedPercent, 2)                    \
@@ -876,7 +875,6 @@ struct RuntimeOption {
   F(bool,     JitPGORacyProfiling,     false)                           \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
-  F(uint32_t, HotFuncCount,            4100)                            \
   F(bool, RegionRelaxGuards,           true)                            \
   /* DumpBytecode =1 dumps user php, =2 dumps systemlib & user php */   \
   F(int32_t, DumpBytecode,             0)                               \

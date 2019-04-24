@@ -100,7 +100,6 @@ Func::Func(Unit& unit, const StringData* name, Attr attrs)
   , m_isPreFunc(false)
   , m_hasPrivateAncestor(false)
   , m_shouldSampleJit(StructuredLog::coinflip(RuntimeOption::EvalJitSampleRate))
-  , m_hot(false)
   , m_serialized(false)
   , m_hasForeignThis(false)
   , m_unit(&unit)
@@ -614,7 +613,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     if (isPhpLeafFn()) out << " (leaf)";
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
     if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
-    if (isHot()) out << " (hot)";
     if (cls() != nullptr) {
       out << ' ' << fullName()->data();
     } else {
@@ -626,7 +624,6 @@ void Func::prettyPrint(std::ostream& out, const PrintOpts& opts) const {
     if (isPhpLeafFn()) out << " (leaf)";
     if (isMemoizeWrapper()) out << " (memoize_wrapper)";
     if (isMemoizeWrapperLSB()) out << " (memoize_wrapper_lsb)";
-    if (isHot()) out << " (hot)";
     out << ' ' << m_name->data();
   }
 
@@ -1074,7 +1071,6 @@ void logFunc(const Func* func, StructuredLogEntry& ent) {
   if (func->isClosureBody()) attrSet.emplace("closure_body");
   if (func->isPairGenerator()) attrSet.emplace("pair_generator");
   if (func->hasVariadicCaptureParam()) attrSet.emplace("variadic_param");
-  if (func->isHot()) attrSet.emplace("hot");
   if (func->attrs() & AttrMayUseVV) attrSet.emplace("may_use_vv");
   if (func->attrs() & AttrRequiresThis) attrSet.emplace("must_have_this");
   if (func->isPhpLeafFn()) attrSet.emplace("leaf_function");

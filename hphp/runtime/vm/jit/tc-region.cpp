@@ -895,8 +895,6 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
   auto& args = env.args;
   auto const sk = args.sk;
 
-  profileSetHotFunc();
-
   std::unique_lock<SimpleMutex> codeLock;
   if (!optDst) {
     codeLock = lockCode();

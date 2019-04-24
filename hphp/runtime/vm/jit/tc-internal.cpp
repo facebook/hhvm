@@ -70,10 +70,7 @@ bool shouldPGOFunc(const Func* func) {
   // JITing pseudo-mains requires extra checks that blow the IR.  PGO
   // can significantly increase the size of the regions, so disable it for
   // pseudo-mains (so regions will be just tracelets).
-  if (func->isPseudoMain()) return false;
-
-  if (!RuntimeOption::EvalJitPGOHotOnly) return true;
-  return func->isHot();
+  return !func->isPseudoMain();
 }
 
 }

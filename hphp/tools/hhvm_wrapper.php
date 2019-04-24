@@ -157,7 +157,7 @@ function determine_flags(OptionMap $opts): string {
     'jit-gdb'         => '-v Eval.JitNoGdb=false ',
     'no-pgo'          => '-v Eval.JitPGO=false ',
     'hphpd'           => '-m debug ',
-    'server'          => '-v Eval.JitPGOHotOnly=0 -m server ',
+    'server'          => '-m server ',
     'hhjs'            => '-v Eval.EnableHHJS=1 ',
   };
 

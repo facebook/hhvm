@@ -58,7 +58,6 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
   auto const funcBody =
     SrcKey{func, func->getEntryForNumArgs(argc), SrcKey::PrologueTag{}};
 
-  profileSetHotFunc();
   auto codeView = code().view(kind);
   TCA mainOrig = codeView.main().frontier();
 

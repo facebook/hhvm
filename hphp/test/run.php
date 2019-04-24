@@ -823,8 +823,7 @@ function mode_cmd($options) {
     case 'pgo':
       return $jit_args.
         ' -vEval.JitPGO=1'.
-        ' -vEval.JitPGORegionSelector=hottrace'.
-        ' -vEval.JitPGOHotOnly=0';
+        ' -vEval.JitPGORegionSelector=hotcfg';
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     case 'interp,jit':
@@ -879,7 +878,6 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
     if (isset($options['relocate'])) {
       $args[] = '--count='.($options['relocate'] * 2);
       $args[] = '-vEval.JitAHotSize=6000000';
-      $args[] = '-vEval.HotFuncCount=0';
       $args[] = '-vEval.PerfRelocate='.$options['relocate'];
     }
 

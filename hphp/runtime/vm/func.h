@@ -966,12 +966,6 @@ struct Func final {
   bool isDynamicallyCallable() const;
 
   /*
-   * Has this function been determined to be hot by profiling?
-   */
-  bool isHot() const;
-  void setHot();
-
-  /*
    * Indicates that a function does not make any explicit calls to other PHP
    * functions.  It may still call other user-level functions via re-entry
    * (e.g., for destructors and autoload), and it may make calls to builtins
@@ -1392,7 +1386,6 @@ private:
   bool m_isPreFunc : 1;
   bool m_hasPrivateAncestor : 1;
   bool m_shouldSampleJit : 1;
-  bool m_hot : 1;
   bool m_serialized : 1;
   bool m_hasForeignThis : 1;
   int m_maxStackCells{0};

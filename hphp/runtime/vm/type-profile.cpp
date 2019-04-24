@@ -95,14 +95,6 @@ void setRelocateRequests(int32_t n) {
   relocateRequests.store(n);
 }
 
-namespace {
-AtomicVector<uint32_t> s_func_counters{0, 0};
-static InitFiniNode s_func_counters_reinit([]{
-  UnsafeReinitEmptyAtomicVector(
-    s_func_counters, RuntimeOption::EvalFuncCountHint);
-}, InitFiniNode::When::PostRuntimeOptions, "s_func_counters reinit");
-}
-
 void profileWarmupStart() {
   warmingUp = true;
 }
@@ -114,74 +106,6 @@ void profileWarmupEnd() {
 typedef std::pair<const Func*, uint32_t> FuncHotness;
 static bool comp(const FuncHotness& a, const FuncHotness& b) {
   return a.second > b.second;
-}
-
-/*
- * Set hot functions. Sort all functions by their profile count, and make the
- * top Eval.HotFuncCount functions hot.
- */
-static Mutex syncLock;
-void profileSetHotFunc() {
-  static bool synced = false;
-  if (LIKELY(synced)) return;
-
-  Lock lock(syncLock);
-  if (synced) return;
-
-  /*
-   * s_treadmill forces any Funcs that are being destroyed to go through a
-   * treadmill pass, to make sure we won't try to dereference something that's
-   * being pulled out from under us.
-   */
-  Func::s_treadmill = true;
-  SCOPE_EXIT {
-    Func::s_treadmill = false;
-  };
-
-  if (RuntimeOption::EvalHotFuncCount) {
-    std::priority_queue<FuncHotness,
-                        std::vector<FuncHotness>,
-                        bool(*)(const FuncHotness& a, const FuncHotness& b)>
-      queue(comp);
-
-    Func::getFuncVec().foreach([&](const Func* f) {
-      if (!f) return;
-      auto const profCounter = [&]() -> uint32_t {
-        auto const id = f->getFuncId();
-        if (id < s_func_counters.size()) {
-          return s_func_counters[id].load(std::memory_order_relaxed);
-        }
-        return 0;
-      }();
-      auto fh = FuncHotness(f, profCounter);
-      if (queue.size() >= RuntimeOption::EvalHotFuncCount) {
-        if (!comp(fh, queue.top())) return;
-        queue.pop();
-      }
-      queue.push(fh);
-    });
-
-    while (queue.size()) {
-      auto f = queue.top().first;
-      queue.pop();
-      const_cast<Func*>(f)->setHot();
-    }
-  }
-
-  // We won't need the counters anymore.  But there might be requests in flight
-  // that still thought they were profiling, so we need to clear it on the
-  // treadmill.
-  Treadmill::enqueue([&] {
-    s_func_counters.~AtomicVector<uint32_t>();
-    new (&s_func_counters) AtomicVector<uint32_t>{0, 0};
-  });
-
-  synced = true;
-}
-
-void profileIncrementFuncCounter(const Func* f) {
-  s_func_counters.ensureSize(f->getFuncId() + 1);
-  s_func_counters[f->getFuncId()].fetch_add(1, std::memory_order_relaxed);
 }
 
 int64_t requestCount() {

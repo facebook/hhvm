@@ -135,12 +135,6 @@ struct NameValueTable {
   TypedValue* set(const StringData* name, tv_rval val);
 
   /*
-   * Bind the slot for the supplied name to `val', allocating it and
-   * boxing it first if necessary.
-   */
-  TypedValue* bind(const StringData* name, tv_lval val);
-
-  /*
    * Remove an element from this table.  All elements added always
    * occupy storage, so this is done by setting the element to
    * KindOfUninit.

@@ -488,18 +488,6 @@ void VarEnv::set(const StringData* name, tv_rval tv) {
   m_nvTable.set(name, tv);
 }
 
-void VarEnv::bind(const StringData* name, tv_lval tv) {
-  m_nvTable.bind(name, tv);
-}
-
-void VarEnv::setWithRef(const StringData* name, TypedValue* tv) {
-  if (isRefType(tv->m_type)) {
-    bind(name, tv);
-  } else {
-    set(name, tv);
-  }
-}
-
 TypedValue* VarEnv::lookup(const StringData* name) {
   return m_nvTable.lookup(name);
 }

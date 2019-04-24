@@ -181,8 +181,6 @@ struct VarEnv {
   void exitFP(ActRec* fp);
 
   void set(const StringData* name, tv_rval tv);
-  void bind(const StringData* name, tv_lval tv);
-  void setWithRef(const StringData* name, TypedValue* tv);
   TypedValue* lookup(const StringData* name);
   TypedValue* lookupAdd(const StringData* name);
   bool unset(const StringData* name);

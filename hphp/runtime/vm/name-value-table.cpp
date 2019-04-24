@@ -155,12 +155,6 @@ TypedValue* NameValueTable::set(const StringData* name, tv_rval val) {
   return target;
 }
 
-TypedValue* NameValueTable::bind(const StringData* name, tv_lval val) {
-  TypedValue* target = findTypedValue(name);
-  tvSetRef(val, target);
-  return target;
-}
-
 void NameValueTable::unset(const StringData* name) {
   Elm* elm = findElm(name);
   if (!elm) return;

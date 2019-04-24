@@ -191,18 +191,26 @@ let autocomplete_member ~is_static env class_ cid id =
   (* class_ is ":nt:fb:text" and its attributes are in tc_props.       *)
   if is_auto_complete (snd id)
   then begin
+
+    (* Detect usage of "parent::|" which can use both static and instance *)
+    let match_both_static_and_instance = match cid with
+    | Some Nast.CIparent -> true
+    | _ -> false
+    in
+
     ac_env := Some env;
     autocomplete_identifier := Some id;
     argument_global_type := Some Acclass_get;
     let add kind (name, ty) = add_partial_result name (Phase.decl ty) kind (Some class_) in
-    if is_static then begin
+    if is_static || match_both_static_and_instance then begin
       Sequence.iter (get_class_elt_types env class_ cid (Cls.smethods class_)) ~f:(add Method_kind);
       Sequence.iter (get_class_elt_types env class_ cid (Cls.sprops class_)) ~f:(add Property_kind);
       Sequence.iter (Cls.consts class_) ~f:(fun (name, cc) -> add Class_constant_kind (name, cc.cc_type));
-    end else begin
+    end;
+    if (not is_static) || match_both_static_and_instance then begin
       Sequence.iter (get_class_elt_types env class_ cid (Cls.methods class_)) ~f:(add Method_kind);
       Sequence.iter (get_class_elt_types env class_ cid (Cls.props class_)) ~f:(add Property_kind);
-    end
+    end;
   end
 
 let autocomplete_lvar id env =

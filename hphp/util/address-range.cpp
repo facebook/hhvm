@@ -24,19 +24,6 @@
 
 namespace HPHP { namespace alloc {
 
-RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr)
-  : low_use(reinterpret_cast<char*>(lowAddr))
-  , low_map(reinterpret_cast<char*>(lowAddr))
-  , high_use(reinterpret_cast<char*>(highAddr))
-  , high_map(reinterpret_cast<char*>(highAddr))
-  , low_internal(reinterpret_cast<char*>(lowAddr))
-  , high_internal(reinterpret_cast<char*>(highAddr)) {
-  constexpr size_t size2m = 2u << 20;
-  always_assert((lowAddr <= highAddr) &&
-                !(lowAddr % size2m) && !(highAddr % size2m));
-  reserve();
-}
-
 void RangeState::reserve() {
   auto const base = low();
   auto const size = capacity();
@@ -58,6 +45,24 @@ void RangeState::reserve() {
     }
     throw std::runtime_error{msg};
   }
+}
+
+
+RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr, Reserved)
+  : low_use(reinterpret_cast<char*>(lowAddr))
+  , low_map(reinterpret_cast<char*>(lowAddr))
+  , high_use(reinterpret_cast<char*>(highAddr))
+  , high_map(reinterpret_cast<char*>(highAddr))
+  , low_internal(reinterpret_cast<char*>(lowAddr))
+  , high_internal(reinterpret_cast<char*>(highAddr)) {
+  constexpr size_t size2m = 2u << 20;
+  always_assert((lowAddr <= highAddr) &&
+                !(lowAddr % size2m) && !(highAddr % size2m));
+}
+
+RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr)
+  : RangeState(lowAddr, highAddr, Reserved{}) {
+  reserve();
 }
 
 }}

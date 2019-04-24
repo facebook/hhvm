@@ -54,6 +54,8 @@ enum class Direction : uint32_t {
   HighToLow
 };
 
+enum class Reserved {};
+
 struct RangeMapper;
 
 // An address range, supporting bump mapping and allocation from both ends.
@@ -61,7 +63,10 @@ struct alignas(64) RangeState {
   // Default constructor that does nothing.
   RangeState() = default;
 
-  // Constructor reserves the address range.
+  // Constructor that accepts an already reserved address range.
+  RangeState(uintptr_t lowAddr, uintptr_t highAddr, Reserved);
+
+  // Constructor that reserves the range and throws if reservation fails.
   RangeState(uintptr_t lowAddr, uintptr_t highAddr);
 
   RangeState(const RangeState&) = delete;

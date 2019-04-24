@@ -549,9 +549,9 @@ FOLD_OVER_CHILDREN
     }
 
     fn kind(&self) -> SyntaxKind  {
-        match self.syntax {
+        match &self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,
-            SyntaxVariant::Token (_) => SyntaxKind::Token,
+            SyntaxVariant::Token (t) => SyntaxKind::Token(t.kind()),
             SyntaxVariant::SyntaxList (_) => SyntaxKind::SyntaxList,
 TO_KIND        }
     }
@@ -1919,11 +1919,12 @@ module GenerateFFRustSyntaxKind = struct
       x.kind_name !tag
 
   let full_fidelity_syntax_kind_template = make_header CStyle "" ^ "
+use crate::token_kind::TokenKind;
 
 #[derive(Debug, Copy, Clone)]
 pub enum SyntaxKind {
     Missing,
-    Token,
+    Token(TokenKind),
     SyntaxList,
 TOKENS
 }
@@ -1933,14 +1934,14 @@ impl SyntaxKind {
         match self {
             SyntaxKind::SyntaxList => \"list\",
             SyntaxKind::Missing => \"missing\",
-            SyntaxKind::Token => \"token\",
+            SyntaxKind::Token(_) => \"token\",
 TO_STRING        }
     }
 
     pub fn ocaml_tag(&self) -> u8 {
         match self {
             SyntaxKind::Missing => 0,
-            SyntaxKind::Token => 0,
+            SyntaxKind::Token(_) => 0,
             SyntaxKind::SyntaxList => 1,
 OCAML_TAG        }
     }

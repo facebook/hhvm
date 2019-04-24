@@ -160,8 +160,9 @@ where
         let syntax = match &self.syntax {
             SyntaxVariant::Missing => u8_to_ocaml(SyntaxKind::Missing.ocaml_tag()),
             SyntaxVariant::Token(token) => {
+                let token_kind = token.kind();
                 let token = token.to_ocaml(context);
-                caml_block(SyntaxKind::Token.ocaml_tag(), &[token])
+                caml_block(SyntaxKind::Token(token_kind).ocaml_tag(), &[token])
             }
             SyntaxVariant::SyntaxList(l) => {
                 let l = to_list(l, context);

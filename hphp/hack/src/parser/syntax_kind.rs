@@ -16,11 +16,12 @@
  **
  *
  */
+use crate::token_kind::TokenKind;
 
 #[derive(Debug, Copy, Clone)]
 pub enum SyntaxKind {
     Missing,
-    Token,
+    Token(TokenKind),
     SyntaxList,
     EndOfFile,
     Script,
@@ -209,7 +210,7 @@ impl SyntaxKind {
         match self {
             SyntaxKind::SyntaxList => "list",
             SyntaxKind::Missing => "missing",
-            SyntaxKind::Token => "token",
+            SyntaxKind::Token(_) => "token",
             SyntaxKind::EndOfFile                         => "end_of_file",
             SyntaxKind::Script                            => "script",
             SyntaxKind::QualifiedName                     => "qualified_name",
@@ -395,7 +396,7 @@ impl SyntaxKind {
     pub fn ocaml_tag(&self) -> u8 {
         match self {
             SyntaxKind::Missing => 0,
-            SyntaxKind::Token => 0,
+            SyntaxKind::Token(_) => 0,
             SyntaxKind::SyntaxList => 1,
             SyntaxKind::EndOfFile => 2,
             SyntaxKind::Script => 3,

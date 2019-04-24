@@ -3266,9 +3266,9 @@ where
     }
 
     fn kind(&self) -> SyntaxKind  {
-        match self.syntax {
+        match &self.syntax {
             SyntaxVariant::Missing => SyntaxKind::Missing,
-            SyntaxVariant::Token (_) => SyntaxKind::Token,
+            SyntaxVariant::Token (t) => SyntaxKind::Token(t.kind()),
             SyntaxVariant::SyntaxList (_) => SyntaxKind::SyntaxList,
             SyntaxVariant::EndOfFile {..} => SyntaxKind::EndOfFile,
             SyntaxVariant::Script {..} => SyntaxKind::Script,

@@ -708,7 +708,7 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           break;
         case MergeKind::ReqDoc: {
           assertx(RuntimeOption::RepoAuthoritative);
-          void* name = u->lookupLitstrId(mergeable.second);
+          void* name = const_cast<StringData*>(lookupLitstr(mergeable.second));
           mi->mergeableObj(ix++) = (char*)name + (int)mergeable.first;
           break;
         }
@@ -716,8 +716,9 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
         case MergeKind::Global:
           assertx(RuntimeOption::RepoAuthoritative);
         case MergeKind::PersistentDefine: {
-          void* name = u->lookupLitstrId
-            (m_mergeableValues[mergeable.second].first);
+          void* name = const_cast<StringData*>(
+            lookupLitstr(m_mergeableValues[mergeable.second].first)
+          );
           mi->mergeableObj(ix++) = (char*)name + (int)mergeable.first;
           auto& tv = m_mergeableValues[mergeable.second].second;
           auto* tva = (TypedValueAux*)mi->mergeableData(ix);

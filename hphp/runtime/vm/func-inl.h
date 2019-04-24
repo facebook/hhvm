@@ -145,12 +145,16 @@ inline StrNR Func::nameStr() const {
 
 inline const StringData* Func::fullName() const {
   if (m_fullName == nullptr) return m_name;
+  if (UNLIKELY((intptr_t)m_fullName.get() == kNeedsFullName)) {
+    m_fullName = makeStaticString(
+      std::string(m_cls->name()->data()) + "::" + m_name->data());
+  }
   return m_fullName;
 }
 
 inline StrNR Func::fullNameStr() const {
   assertx(m_fullName != nullptr);
-  return StrNR(m_fullName);
+  return StrNR(fullName());
 }
 
 inline const StringData* Func::displayName() const {

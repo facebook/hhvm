@@ -471,7 +471,7 @@ void recordJump(TCA toSmash, SrcRec* sr) {
 
 void reclaimFunction(const Func* func) {
   clobberFuncGuards(func); // do this before func is freed
-  enqueueJob(FuncJob {func->fullName(), func->getFuncId()});
+  enqueueJob(FuncJob {func->name(), func->getFuncId()});
 }
 
 void reclaimTranslations(GrowableVector<TransLoc>&& trans) {

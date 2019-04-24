@@ -1353,6 +1353,7 @@ private:
   static const StringData* s___call;
   static const StringData* s___callStatic;
   static constexpr int kMagic = 0xba5eba11;
+  static constexpr intptr_t kNeedsFullName = 0x1;
 
 public:
   static std::atomic<bool>     s_treadmill;
@@ -1372,7 +1373,7 @@ private:
   AtomicLowPtr<uint8_t> m_funcBody;
   mutable rds::Link<LowPtr<Func>, rds::Mode::NonLocal> m_cachedFunc;
   FuncId m_funcId{InvalidFuncId};
-  LowStringPtr m_fullName{nullptr};
+  mutable AtomicLowPtr<const StringData> m_fullName{nullptr};
   LowStringPtr m_name{nullptr};
   // The first Class in the inheritance hierarchy that declared this method.
   // Note that this may be an abstract class that did not provide an

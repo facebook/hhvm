@@ -273,10 +273,9 @@ void Func::initPrologues(int numParams) {
 void Func::setFullName(int /*numParams*/) {
   assertx(m_name->isStatic());
   if (m_cls) {
-    m_fullName = makeStaticString(
-      std::string(m_cls->name()->data()) + "::" + m_name->data());
+    m_fullName = (StringData*)kNeedsFullName;
   } else {
-    m_fullName = m_name;
+    m_fullName = m_name.get();
 
     // A scoped closure may not have a `cls', but we still need to preserve its
     // `methodSlot', which refers to its slot in its `baseCls' (which still
@@ -286,9 +285,16 @@ void Func::setFullName(int /*numParams*/) {
     }
   }
 
-  if (!RuntimeOption::RepoAuthoritative &&
-      RuntimeOption::DynamicInvokeFunctions.count(m_fullName->data())) {
-    m_attrs = Attr(m_attrs | AttrInterceptable);
+  if (!RuntimeOption::RepoAuthoritative) {
+    std::string tmp;
+    const char* fn = [&] () -> const char* {
+      if (!m_cls) return m_name->data();
+      tmp = std::string(m_cls->name()->data()) + "::" + m_name->data();
+      return tmp.data();
+    }();
+    if (RuntimeOption::DynamicInvokeFunctions.count(fn)) {
+      m_attrs = Attr(m_attrs | AttrInterceptable);
+    }
   }
 }
 

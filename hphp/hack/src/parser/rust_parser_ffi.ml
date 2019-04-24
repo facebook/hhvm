@@ -7,6 +7,7 @@
  *
  *)
 module SourceText = Full_fidelity_source_text
+module SyntaxError = Full_fidelity_syntax_error
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module Env = Full_fidelity_parser_env
 module PositionedSyntax = Full_fidelity_positioned_syntax
@@ -47,10 +48,12 @@ let set_global_lexer_env env =
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
 
+type 'a parser_return = (FileInfo.mode option * 'a * SyntaxError.t list)
+
 external parse_minimal:
   SourceText.t ->
   parser_opts ->
-  MinimalSyntax.t = "parse_minimal"
+  (MinimalSyntax.t parser_return) = "parse_minimal"
 let parse_minimal text env =
   set_global_lexer_env env;
   parse_minimal text (env_to_opts env)
@@ -58,7 +61,8 @@ let parse_minimal text env =
 external parse_positioned:
   SourceText.t ->
   parser_opts ->
-  PositionedSyntax.t = "parse_positioned"
+  (PositionedSyntax.t parser_return) = "parse_positioned"
+
 let parse_positioned text env =
   set_global_lexer_env env;
   parse_positioned text (env_to_opts env)

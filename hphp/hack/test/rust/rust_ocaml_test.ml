@@ -16,6 +16,7 @@ module Printf = OcamlPrintf
 [@@@warning "-3"]
 
 module SourceText = Full_fidelity_source_text
+module SyntaxError = Full_fidelity_syntax_error
 module MinimalSyntax = Full_fidelity_minimal_syntax
 module PositionedSyntax = Full_fidelity_positioned_syntax
 module Env = Full_fidelity_parser_env
@@ -53,7 +54,7 @@ type args = {
 
 module type Parser_S = sig
   type r
-  val parse : SourceText.t -> Env.t -> r
+  val parse : SourceText.t -> Env.t -> (FileInfo.mode option * r * SyntaxError.t list)
 end
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
@@ -62,7 +63,8 @@ module WithParser(Parser : Parser_S with type r = Syntax.t) = struct
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 
 let ocaml_parse env source_text =
-  SyntaxTree.(make ~env source_text |> root)
+  let tree = SyntaxTree.make ~env source_text in
+  SyntaxTree.(mode tree, root tree, errors tree)
 
 let to_json x=
   Syntax.to_json ~with_value:true x |>
@@ -82,17 +84,19 @@ let test args env path =
   let file = Relative_path.(create Dummy (path)) in
   let source_text = SourceText.from_file file in
 
-  let syntax_from_rust = match args.mode with
+  let from_rust = match args.mode with
     | RUST | COMPARE -> Some (Parser.parse source_text env)
     | OCAML -> None
   in
-  let syntax_from_ocaml = match args.mode with
+  let from_ocaml = match args.mode with
     | OCAML | COMPARE -> Some (ocaml_parse env source_text)
     | RUST -> None
   in
 
-  match syntax_from_rust, syntax_from_ocaml with
-  | Some syntax_from_rust, Some syntax_from_ocaml -> begin
+  match from_rust, from_ocaml with
+  | Some from_rust, Some from_ocaml -> begin
+      let (_mode_from_rust, syntax_from_rust, _errors_from_rust) = from_rust in
+      let (_mode_from_ocaml, syntax_from_ocaml, _errors_from_ocaml) = from_ocaml in
       let rust_reachable_words = reachable syntax_from_rust  in
       let ocaml_reachable_words = reachable syntax_from_ocaml in
       if syntax_from_rust <> syntax_from_ocaml then begin

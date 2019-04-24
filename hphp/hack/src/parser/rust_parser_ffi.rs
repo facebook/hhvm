@@ -14,6 +14,7 @@ extern crate ocaml;
 pub mod rust_to_ocaml;
 use parser_rust as parser;
 
+use parser::file_mode::parse_mode;
 use parser::minimal_syntax::MinimalValue;
 use parser::minimal_token::MinimalToken;
 use parser::parser::Parser;
@@ -25,7 +26,7 @@ use parser::positioned_token::PositionedToken;
 use parser::smart_constructors::NoState;
 use parser::source_text::SourceText;
 use parser::syntax_smart_constructors::SyntaxSmartConstructors;
-use rust_to_ocaml::{SerializationContext, ToOcaml};
+use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
 
 type MinimalSyntaxParser<'a> =
     Parser<'a, SyntaxSmartConstructors<MinimalToken, MinimalValue>, NoState>;
@@ -70,17 +71,26 @@ macro_rules! parse {
                 php5_compat_mode,
             };
 
+            let mode = parse_mode(&source_text);
             let mut parser = $parser::make(&source_text, env);
             let root = parser.parse_script();
+            let errors = parser.errors();
             ocamlpool_enter();
 
             let context = SerializationContext::new(ocaml_source_text.0);
             let ocaml_root = root.to_ocaml(&context);
-            l = ocaml::Value::new(ocaml_root);
+            let ocaml_errors = to_list(&errors, &context);
+            let ocaml_mode = mode.to_ocaml(&context);
 
+            let res = caml_tuple(&[
+                ocaml_mode,
+                ocaml_root,
+                ocaml_errors
+            ]);
+            l = ocaml::Value::new(res);
             ocamlpool_leave();
         } -> l);
-    }
+    };
 }
 
 parse!(parse_minimal, MinimalSyntaxParser);

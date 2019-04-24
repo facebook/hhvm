@@ -16,6 +16,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::iter::Iterator;
 
+use parser::file_mode::FileMode;
 use parser::lexable_token::LexableToken;
 use parser::minimal_syntax::MinimalValue;
 use parser::minimal_token::MinimalToken;
@@ -25,6 +26,7 @@ use parser::positioned_token::PositionedToken;
 use parser::positioned_trivia::PositionedTrivia;
 use parser::syntax::SyntaxVariant;
 use parser::syntax::{Syntax, SyntaxValueType};
+use parser::syntax_error::SyntaxError;
 use parser::syntax_kind::SyntaxKind;
 use parser::syntax_type::SyntaxType;
 use parser::token_kind::TokenKind;
@@ -32,6 +34,7 @@ use parser::trivia_kind::TriviaKind;
 
 extern "C" {
     fn ocamlpool_reserve_block(tag: Tag, size: Size) -> Value;
+    fn ocamlpool_reserve_string(size: Size) -> Value;
 }
 
 /* Unsafe functions in this file should be called only:
@@ -291,5 +294,49 @@ impl ToOcaml for PositionedValue {
                 caml_block(MISSING_VALUE_VARIANT, &[context.source_text, offset])
             }
         }
+    }
+}
+
+impl ToOcaml for Option<FileMode> {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        match self {
+            None => usize_to_ocaml(0),
+            Some(x) => {
+                let tag: u8 = match x {
+                    FileMode::Mphp => 0,
+                    FileMode::Mdecl => 1,
+                    FileMode::Mstrict => 2,
+                    FileMode::Mpartial => 3,
+                    FileMode::Mexperimental => 4,
+                };
+                caml_tuple(&[u8_to_ocaml(tag)])
+            }
+        }
+    }
+}
+
+impl ToOcaml for SyntaxError {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        /*type error_type = ParseError | RuntimeError
+
+          type t = {
+            child        : t option;
+            start_offset : int;
+            end_offset   : int;
+            error_type   : error_type;
+            message      : string;
+        } */
+
+        let child = usize_to_ocaml(0); // None
+        let start_offset = usize_to_ocaml(self.start_offset);
+        let end_offset = usize_to_ocaml(self.end_offset);
+        let error_type = usize_to_ocaml(0); // ParseError
+
+        let m = self.message.as_bytes();
+        let message = ocamlpool_reserve_string(m.len());
+        let mut str_ = ocaml::Str::from(ocaml::Value::new(message));
+        str_.data_mut().copy_from_slice(m);
+
+        caml_tuple(&[child, start_offset, end_offset, error_type, message])
     }
 }

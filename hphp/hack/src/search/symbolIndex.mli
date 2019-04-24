@@ -16,10 +16,10 @@ val get_search_provider: unit -> SearchUtils.search_provider
 val set_search_provider: string -> unit
 
 (* This is the proper search function everyone should use *)
-val symbol_index_query :
-    string ->
-    int ->
-    SearchUtils.si_kind option ->
+val find_matching_symbols :
+    query_text:string ->
+    max_results:int ->
+    kind_filter:SearchUtils.si_kind option ->
     SearchUtils.si_results
 
 (* Legacy query interface that depends on multiworker *)

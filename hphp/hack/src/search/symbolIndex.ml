@@ -49,16 +49,16 @@ let set_search_provider (provider_str: string): unit =
  * - Can search for specific kinds or all kinds
  * - Goal is to route ALL searches through one function for consistency
  *)
-let symbol_index_query
-    (prefix: string)
-    (max_results: int)
-    (kind_opt: si_kind option): si_results =
+let find_matching_symbols
+    ~(query_text: string)
+    ~(max_results: int)
+    ~(kind_filter: si_kind option): si_results =
   let provider = get_search_provider () in
   (*
    * Nuclide often sends this exact request to verify that HH is working.
    * Let's capture it and avoid doing unnecessary work.
    *)
-  if prefix = "this_is_just_to_check_liveness_of_hh_server" then begin
+  if query_text = "this_is_just_to_check_liveness_of_hh_server" then begin
     [{
       si_name = "Yes_hh_server_is_alive";
       si_kind = SI_Unknown;
@@ -89,7 +89,7 @@ let symbol_index_query
       | SqliteIndex ->
         []
       | TrieIndex ->
-        HackSearchService.index_search prefix max_results kind_opt
+        HackSearchService.index_search query_text max_results kind_filter
     in
 
     (* Return a unified list *)

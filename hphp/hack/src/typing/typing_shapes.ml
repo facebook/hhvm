@@ -165,11 +165,7 @@ let make_idx_fake_super_shape field_name field_ty =
 let is_shape_field_required env field_name shape_ty =
   let field_ty = {
     sft_optional = false;
-    sft_ty =
-    if experiment_enabled env
-         TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields
-    then MakeType.nonnull Reason.Rnone
-    else MakeType.mixed Reason.Rnone
+    sft_ty = MakeType.mixed Reason.Rnone
   } in
   Typing_subtype.is_sub_type env
     shape_ty

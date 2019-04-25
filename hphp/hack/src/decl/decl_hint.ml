@@ -123,22 +123,14 @@ and hint_ p env = function
     let tyl = List.map hl (hint env) in
     Ttuple tyl
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
-    let optional_shape_fields_enabled =
-      not @@
-        TypecheckerOptions.experimental_feature_enabled
-          env.Decl_env.decl_tcopt
-          TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
-    let shape_fields_known =
-      match optional_shape_fields_enabled, nsi_allows_unknown_fields with
-        | _, true
-        | false, false ->
-          (* Fields are only partially known, because this shape type comes from
-           * type hint - shapes that contain listed fields can be passed here,
-           * but due to structural subtyping they can also contain other fields,
-           * that we don't know about. *)
-          FieldsPartiallyKnown ShapeMap.empty
-        | true, false ->
-          FieldsFullyKnown in
+    let shape_fields_known = if nsi_allows_unknown_fields
+      then
+        (* Fields are only partially known, because this shape type comes from
+         * type hint - shapes that contain listed fields can be passed here,
+         * but due to structural subtyping they can also contain other fields,
+         * that we don't know about. *)
+        FieldsPartiallyKnown ShapeMap.empty
+      else FieldsFullyKnown in
     let fdm =
       List.fold_left
         ~f:(fun acc i -> ShapeMap.add i.sfi_name (shape_field_info_to_shape_field_type env i) acc)

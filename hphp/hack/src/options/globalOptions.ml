@@ -108,25 +108,6 @@ let tco_experimental_coroutines =
   "coroutines"
 
 (**
- * Disables optional and unknown shape fields syntax and typechecking.
- *
- * Please see the public documentation at
- * http://hhvm.com/blog/2017/09/26/hhvm-3-22.html#nullable-vs-optional-fields-in-shapes
- * to learn more about optional and unknown shape fields.
- *
- * When enabled, this flag results in the following behavior:
- *
- *   1. Shape fields with a nullable type are allowed to be omitted.
- *   2. All shapes are considered to support unknown fields, whether or not
- *      their last declared field is '...'.
- *
- * This temporary flag exists for backwards-compatiblity purposes, and will be
- * removed in a future release.
- *)
-let tco_experimental_disable_optional_and_unknown_shape_fields =
-  "disable_optional_and_unknown_shape_fields"
-
-(**
  * Enforce no duplication of traits in a class hierarchy. There is some clean-up
  * involved, so it's behind a flag.
  *)
@@ -192,7 +173,6 @@ let tco_experimental_all =
      tco_experimental_forbid_nullable_cast;
      tco_experimental_coroutines;
      tco_experimental_disallow_static_memoized;
-     tco_experimental_disable_optional_and_unknown_shape_fields;
      tco_experimental_no_trait_reuse;
      tco_experimental_reified_generics;
      tco_experimental_type_param_shadowing;

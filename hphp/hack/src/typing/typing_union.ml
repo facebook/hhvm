@@ -11,7 +11,6 @@ open Core_kernel
 open Hh_core
 open Typing_defs
 
-module TO = TypecheckerOptions
 module Env = Typing_env
 module Reason = Typing_reason
 module TySet = Typing_set
@@ -352,9 +351,6 @@ and union_shapes env (fields_known1, fdm1, r1) (fields_known2, fdm2, r2) =
         (* key is present on one side but not the other *)
         | (_, Some { sft_ty; _ }, _), (fields_known_other, None, r)
         | (fields_known_other, None, r), (_, Some { sft_ty; _ }, _) ->
-          if TO.experimental_feature_enabled (Env.get_tcopt env)
-            TO.experimental_disable_optional_and_unknown_shape_fields
-          then raise Dont_unify;
           let fields_known = begin match fields_known with
             | FieldsPartiallyKnown unset_fields ->
               FieldsPartiallyKnown (Nast.ShapeMap.remove k unset_fields)

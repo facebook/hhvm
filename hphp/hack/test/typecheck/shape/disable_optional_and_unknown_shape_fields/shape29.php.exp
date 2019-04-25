@@ -1,5 +1,0 @@
-File "shape29.php", line 6, characters 3-13:
-  shape('bar' => bool, 'baz' => string, 'foo' => int, 'xyz' => float)
-File "shape29.php", line 7, characters 3-13:
-  shape('bar' => bool, 'baz' => string, 'foo' => int, 'xyz' => float)
-No errors

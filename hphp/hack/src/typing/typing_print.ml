@@ -468,18 +468,13 @@ module Full = struct
       end
     | Tobject -> text "object"
     | Tshape (fields_known, fdm) ->
-      let optional_shape_fields_enabled =
-        not @@
-          TypecheckerOptions.experimental_feature_enabled
-            (Env.get_tcopt env)
-            TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
       let fields =
         let f_field (shape_map_key, { sft_optional; sft_ty }) =
         let key_delim =
           match shape_map_key with Ast.SFlit_str _ -> text "'" | _ -> Nothing
         in
           Concat [
-            if optional_shape_fields_enabled && sft_optional then text "?" else Nothing;
+            if sft_optional then text "?" else Nothing;
             key_delim;
             to_doc (Env.get_shape_field_name shape_map_key);
             key_delim;

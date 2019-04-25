@@ -170,7 +170,6 @@ let parse_options () =
   let safe_vector_array = ref (Some false) in
   let forbid_nullable_cast = ref false in
   let deregister_attributes = ref None in
-  let disable_optional_and_unknown_shape_fields = ref false in
   let disallow_ambiguous_lambda = ref None in
   let disallow_array_typehint = ref None in
   let disallow_array_literal = ref None in
@@ -242,9 +241,6 @@ let parse_options () =
         " Search the concrete syntax tree of the given file using the pattern"^
         " given on stdin."^
         " (The pattern is a JSON object adhering to the search DSL.)";
-    "--disable_optional_and_unknown_shape_fields",
-      Arg.Set disable_optional_and_unknown_shape_fields,
-      "Disables optional and unknown shape fields syntax and typechecking.";
     "--dump-symbol-info",
       Arg.Unit (set_mode Dump_symbol_info),
       " Dump all symbol information";
@@ -472,8 +468,6 @@ let parse_options () =
       GlobalOptions.tco_experimental_features = SSet.filter begin fun x ->
         if x = GlobalOptions.tco_experimental_forbid_nullable_cast
         then !forbid_nullable_cast
-        else if x = GlobalOptions.tco_experimental_disable_optional_and_unknown_shape_fields
-        then !disable_optional_and_unknown_shape_fields
         else if x = GlobalOptions.tco_experimental_reified_generics
         then not (!disallow_reified_generics)
         else true

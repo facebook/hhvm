@@ -136,17 +136,7 @@ let rec is_option_non_mixed env ty =
       List.exists tyl (is_option_non_mixed env)
   | _ -> false
 
-let is_shape_field_optional env { sft_optional; sft_ty } =
-  let optional_shape_field_enabled =
-    not @@
-      TypecheckerOptions.experimental_feature_enabled
-        (Env.get_tcopt env)
-        TypecheckerOptions.experimental_disable_optional_and_unknown_shape_fields in
-
-  if optional_shape_field_enabled then
-    sft_optional
-  else
-    is_option env sft_ty || sft_optional
+let is_shape_field_optional { sft_optional; sft_ty = _ } = sft_optional
 
 let is_class ty = match snd ty with
   | Tclass _ -> true
@@ -471,7 +461,7 @@ let apply_shape
   end in
   ShapeMap.fold begin fun name shape_field_type_1 (env, acc) ->
     match ShapeMap.get name fdm2 with
-    | None when is_shape_field_optional env shape_field_type_1 ->
+    | None when is_shape_field_optional shape_field_type_1 ->
         let can_omit = match fields_known2 with
           | FieldsFullyKnown -> true
           | FieldsPartiallyKnown unset_fields ->

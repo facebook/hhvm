@@ -3114,10 +3114,10 @@ let private_override pos class_id id =
 
 let invalid_memoized_param pos ty_reason_msg =
   add_list (Typing.err_code Typing.InvalidMemoizedParam) (
-    ty_reason_msg @ [pos,
+    (pos,
       "Parameters to memoized function must be null, bool, int, float, string, \
       an object deriving IMemoizeParam, or a Container thereof. See also \
-      http://docs.hhvm.com/hack/attributes/special#__memoize"])
+      http://docs.hhvm.com/hack/attributes/special#__memoize") :: ty_reason_msg)
 
 let invalid_disposable_hint pos class_name =
   add (Typing.err_code Typing.InvalidDisposableHint) pos

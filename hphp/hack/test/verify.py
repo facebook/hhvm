@@ -10,7 +10,7 @@ import difflib
 import shlex
 from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 from hphp.hack.test.parse_errors import Error, parse_errors, sprint_errors
 
@@ -300,6 +300,25 @@ def record_results(results: List[Result], out_ext: str) -> None:
             f.write(bytes(result.output, 'UTF-8'))
 
 
+def find_in_ancestors(dir: str, path: str) -> str:
+    if path == "":
+        raise Exception('Could not find directory %s in ancestors.' % dir)
+    if os.path.basename(path) == dir:
+        return path
+    return find_in_ancestors(dir, os.path.dirname(path))
+
+
+def get_exp_out_dirs(test_file: str) -> Tuple[str, str]:
+    if os.environ.get('HACK_BUILD_ROOT') is not None \
+            and os.environ.get('HACK_SOURCE_ROOT') is not None:
+        exp_dir = os.environ['HACK_SOURCE_ROOT']
+        out_dir = os.environ['HACK_BUILD_ROOT']
+    else:
+        exp_dir = find_in_ancestors("hack", test_file)
+        out_dir = os.path.dirname(find_in_ancestors("test", test_file))
+    return exp_dir, out_dir
+
+
 def report_failures(total: int,
                     failures: List[Result],
                     out_extension: str,
@@ -313,7 +332,7 @@ def report_failures(total: int,
             print(f'\033[95m{failure.test_case.file_path}\033[0m')
             print(failure.output)
             print()
-    else:
+    elif failures != []:
         record_results(failures, out_extension)
         fnames = [failure.test_case.file_path for failure in failures]
         print("To review the failures, use the following command: ")
@@ -323,14 +342,10 @@ def report_failures(total: int,
         fallback_out_ext_var = ''
         if fallback_out_extension is not None:
             fallback_out_ext_var = "FALLBACK_OUT_EXT=%s " % fallback_out_extension
-        output_dir_var = ''
-        fname_map_var = lambda f: f
-        if os.environ.get('HACK_BUILD_ROOT') is not None and os.environ.get('HACK_SOURCE_ROOT') is not None:
-            output_dir_var = ("SOURCE_ROOT=%s OUTPUT_ROOT=%s " %
-                    (os.environ['HACK_SOURCE_ROOT'],
-                    os.environ['HACK_BUILD_ROOT']))
-            prefix = os.path.abspath(os.environ['HACK_BUILD_ROOT'])
-            fname_map_var = lambda f: "hphp/hack/"+os.path.relpath(f, prefix)
+        first_test_file = os.path.realpath(failures[0].test_case.file_path)
+        (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
+        output_dir_var = ("SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir))
+        fname_map_var = lambda f: "hphp/hack/"+os.path.relpath(f, out_dir)
         print("OUT_EXT=%s EXP_EXT=%s %s%s%sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
                 (out_extension,
                 expect_extension,

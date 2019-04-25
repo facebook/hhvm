@@ -447,7 +447,7 @@ bool Package::parseImpl(const std::string* fileName) {
   std::string content {
     std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>() };
 
-  auto const& options = RepoOptions::forFile(fileName->data());
+  auto const& options = RepoOptions::forFile(fullPath.data());
   auto const sha1 = SHA1{mangleUnitSha1(string_sha1(content),
                                         options)};
   if (RuntimeOption::RepoLocalPath.size() &&

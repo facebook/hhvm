@@ -59,23 +59,53 @@ struct OutOfMemoryException : Exception {
 
 #ifdef USE_JEMALLOC
 
-// Low arena uses ManagedArena if extent hooks are used, otherwise it is using
-// DSS. It should always be available for supported versions of jemalloc. High
-// arena is 0 if extent hook API isn't used, but mallocx/dallocx could use 0 as
-// flags and behave similarly to malloc/free. Low arena doesn't use tcache, but
-// we need tcache for the high arena, so the flags are thread-local.
+// When jemalloc 5 and above is used, we use the extent hooks to create the
+// following arenas, to gain detailed control over address space, huge page
+// mapping, and data layout.
+//
+// - low arena, lower arena, and low cold arena try to give addresses that fit
+//   in 32 bits. Use lower arena when 31-bit address is preferred, and when we
+//   want to make full use of the huge pages there (if present). low and low
+//   cold areans prefer addresses between 2G and 4G, to conserve space in the
+//   lower range. These are just preferences, all these arenas are able to use
+//   spare space in the 1G to 4G region, when the preferred range is used up. In
+//   LOWPTR builds, running out of space in any of the low arenas will cause a
+//   crash (we hope).
+//
+// - high arena and high cold arena span addresses from 4G to kHighArenaMaxAddr.
+//   It is currently used for some VM metadata and APC (the table, and all
+//   uncounted data). high_cold_arena can be used for global cold data. We don't
+//   expect to run out of memory in the high arenas.
+//
+// A cold arena shares an address range with its hotter counterparts, but
+// tries to give separte address ranges. This is done by allocating from higher
+// address downwards, while the hotter ones go from lower address upwards.
+//
+// Some prior experiments showed that high_arena needs tcache, due to spikiness
+// in APC-related memory allocation and deallocation behaviors. Other arenas
+// shouldn't need tcache.
+//
+// With earlier jemalloc versions, only the lower arena exists (using dss), and
+// low arena and low cold arena alias to lower arena. Allocations in the high
+// arenas are served using default malloc(), and no assumption about the
+// resulting address range can be made.
+
 extern unsigned low_arena;
 extern unsigned lower_arena;
+extern unsigned low_cold_arena;
 extern unsigned high_arena;
+extern unsigned high_cold_arena;
 extern int low_arena_flags;
 extern int lower_arena_flags;
+extern int low_cold_arena_flags;
+extern int high_cold_arena_flags;
 extern __thread int high_arena_flags;
 
 void setup_local_arenas();
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 
-// Explicit per-thread tcache for the huge arenas.
+// Explicit per-thread tcache for high arena.
 extern __thread int high_arena_tcache;
 
 /* Set up extent hooks to use 1g pages for jemalloc metadata. */
@@ -287,7 +317,6 @@ int jemalloc_pprof_enable();
 int jemalloc_pprof_disable();
 int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
-
 // For allocation of VM data.
 inline void* vm_malloc(size_t size) {
   return malloc_huge_internal(size);
@@ -299,6 +328,23 @@ inline void vm_free(void* ptr) {
 
 inline void vm_sized_free(void* ptr, size_t size) {
   return sized_free_huge_internal(ptr, size);
+}
+
+inline void* vm_cold_malloc(size_t size) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (!size) return nullptr;
+  return mallocx(size, high_cold_arena_flags);
+#else
+  return malloc(size);
+#endif
+}
+
+inline void vm_cold_free(void* ptr) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (ptr) dallocx(ptr, high_cold_arena_flags);
+#else
+  return free(ptr);
+#endif
 }
 
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
@@ -368,6 +414,23 @@ inline void* lower_malloc(size_t size) {
 inline void lower_free(void* ptr) {
 #if USE_JEMALLOC_EXTENT_HOOKS
   if (ptr) dallocx(ptr, lower_arena_flags);
+#else
+  return low_free(ptr);
+#endif
+}
+
+inline void* low_cold_malloc(size_t size) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (!size) return nullptr;
+  return mallocx(size, low_cold_arena_flags);
+#else
+  return low_malloc(size);
+#endif
+}
+
+inline void low_cold_free(void* ptr) {
+#if USE_JEMALLOC_EXTENT_HOOKS
+  if (ptr) dallocx(ptr, low_cold_arena_flags);
 #else
   return low_free(ptr);
 #endif
@@ -448,6 +511,43 @@ struct LowerAllocator {
 };
 
 template <class T>
+struct LowColdAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+
+  template <class U>
+  struct rebind { using other = LowColdAllocator<U>; };
+
+  LowColdAllocator() noexcept {}
+  template<class U>
+  explicit LowColdAllocator(const LowColdAllocator<U>&) noexcept {}
+  ~LowColdAllocator() noexcept {}
+
+  pointer allocate(size_t num) {
+    return (pointer)low_malloc(num * sizeof(T));
+  }
+  void deallocate(pointer p, size_t /*num*/) {
+    low_free((void*)p);
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  template<class U> bool operator==(const LowColdAllocator<U>&) const {
+    return true;
+  }
+  template<class U> bool operator!=(const LowColdAllocator<U>&) const {
+    return false;
+  }
+};
+
+template <class T>
 struct VMAllocator {
   using value_type = T;
   using pointer = T*;
@@ -481,6 +581,43 @@ struct VMAllocator {
     return true;
   }
   template<class U> bool operator!=(const VMAllocator<U>&) const {
+    return false;
+  }
+};
+
+template <class T>
+struct VMColdAllocator {
+  using value_type = T;
+  using pointer = T*;
+  using const_pointer = const T*;
+
+  template <class U>
+  struct rebind { using other = VMColdAllocator<U>; };
+
+  VMColdAllocator() noexcept {}
+  template<class U>
+  explicit VMColdAllocator(const VMColdAllocator<U>&) noexcept {}
+  ~VMColdAllocator() noexcept {}
+
+  pointer allocate(size_t num) {
+    return (pointer)vm_cold_malloc(num * sizeof(T));
+  }
+  void deallocate(pointer p, size_t num) {
+    vm_cold_free((void*)p);
+  }
+
+  template<class U, class... Args>
+  void construct(U* p, Args&&... args) {
+    ::new ((void*)p) U(std::forward<Args>(args)...);
+  }
+  void destroy(pointer p) {
+    p->~T();
+  }
+
+  template<class U> bool operator==(const VMColdAllocator<U>&) const {
+    return true;
+  }
+  template<class U> bool operator!=(const VMColdAllocator<U>&) const {
     return false;
   }
 };

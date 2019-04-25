@@ -85,10 +85,12 @@ static_assert(alignof(RangeArena) <= 64, "");
 using RangeArenaStorage = std::aligned_storage<sizeof(RangeArena), 64>::type;
 extern RangeArenaStorage g_lowerArena;
 extern RangeArenaStorage g_lowArena;
+extern RangeArenaStorage g_lowColdArena;
 extern RangeArenaStorage g_highArena;
+extern RangeArenaStorage g_coldArena;
 
 #ifndef MAX_MANAGED_ARENA_COUNT
-#define MAX_MANAGED_ARENA_COUNT 4
+#define MAX_MANAGED_ARENA_COUNT 16
 #endif
 static_assert(MAX_MANAGED_ARENA_COUNT >= 1, "");
 // All ManagedArena's represented as an array of pair<id, pointer>.  Each

@@ -182,10 +182,14 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 #ifdef USE_JEMALLOC
 unsigned low_arena = 0;
 unsigned lower_arena = 0;
+unsigned low_cold_arena = 0;
 unsigned high_arena = 0;
+unsigned high_cold_arena = 0;
 
 int low_arena_flags = 0;
 int lower_arena_flags = 0;
+int low_cold_arena_flags = 0;
+int high_cold_arena_flags = 0;
 __thread int high_arena_flags = 0;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -376,6 +380,14 @@ void setup_low_arena(unsigned n1GPages) {
   } else {
     low_2m_mapper = dynamic_cast<Bump2MMapper*>(lowMapper->next());
   }
+
+  auto veryLowColdMapper =
+    new BumpNormalMapper<Direction::HighToLow>(veryLowRange, 0, numa_node_set);
+  auto lowColdMapper =
+    new BumpNormalMapper<Direction::HighToLow>(lowRange, 0, numa_node_set);
+  veryLowRange.setHighMapper(veryLowColdMapper);
+  lowRange.setHighMapper(lowColdMapper);
+
   auto ma = LowArena::CreateAt(&g_lowArena);
   ma->appendMapper(lowMapper);
   ma->appendMapper(veryLowMapper);
@@ -389,20 +401,38 @@ void setup_low_arena(unsigned n1GPages) {
   set_arena_retain_grow_limit(ma->id());
   lower_arena = ma->id();
   lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
+
+  ma = LowArena::CreateAt(&g_lowColdArena);
+  ma->appendMapper(lowColdMapper);
+  ma->appendMapper(veryLowColdMapper);
+  low_cold_arena = ma->id();
+  low_cold_arena_flags = MALLOCX_ARENA(low_cold_arena) | MALLOCX_TCACHE_NONE;
 }
 
 void setup_high_arena(unsigned n1GPages) {
   auto& range = getRange(AddrRangeClass::Uncounted);
-  auto mapper = getMapperChain(range, n1GPages, true, num_numa_nodes() / 2 + 1);
+  auto mapper = getMapperChain(range, n1GPages, true,
+                                  num_numa_nodes() / 2 + 1);
   range.setLowMapper(mapper);
   if (n1GPages == 0) {
     high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);
+  } else {
+    high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper->next());
   }
-  auto ma = HighArena::CreateAt(&g_highArena);
-  ma->appendMapper(range.getLowMapper());
-  set_arena_retain_grow_limit(ma->id());
-  high_arena = ma->id();
+  auto coldMapper =
+    new BumpNormalMapper<Direction::HighToLow>(range, 0, numa_node_set);
+  range.setHighMapper(coldMapper);
+
+  auto arena = HighArena::CreateAt(&g_highArena);
+  arena->appendMapper(range.getLowMapper());
+  set_arena_retain_grow_limit(arena->id());
+  high_arena = arena->id();
   high_arena_tcache_create();           // set up high_arena_flags
+
+  auto coldArena = HighArena::CreateAt(&g_coldArena);
+  coldArena->appendMapper(range.getHighMapper());
+  high_cold_arena = coldArena->id();
+  high_cold_arena_flags = MALLOCX_ARENA(high_cold_arena) | MALLOCX_TCACHE_NONE;
 }
 
 // Set up extra arenas for use in non-VM threads, when we have short bursts of
@@ -610,6 +640,8 @@ struct JEMallocInitializer {
 #endif
     lower_arena = low_arena;
     lower_arena_flags = low_arena_flags;
+    low_cold_arena = low_arena;
+    low_cold_arena_flags = low_arena_flags;
 
     // We normally maintain the invariant that the region surrounding the
     // current brk is mapped huge, but we don't know yet whether huge pages

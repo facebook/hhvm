@@ -100,7 +100,7 @@ bool Bump2MMapper::addMappingImpl() {
   if (newPages == MAP_FAILED) return false;
   assertx(newPages == currFrontier);    // MAP_FIXED should work
 #ifdef HAVE_NUMA
-  if (m_interleaveMask) {
+  if (num_numa_nodes() > 1 && m_interleaveMask) {
     unsigned long mask = m_interleaveMask;
     mbind(newPages, hugeSize, MPOL_INTERLEAVE,
           &mask, 32 /* max node */, 0 /* flag */);
@@ -136,7 +136,7 @@ bool BumpNormalMapper<D>::addMappingImpl() {
   }
 
 #ifdef HAVE_NUMA
-  if (m_interleaveMask) {
+  if (num_numa_nodes() > 1 && m_interleaveMask) {
     unsigned long mask = m_interleaveMask;
     mbind(newPages, size, MPOL_INTERLEAVE,
           &mask, 32 /* max node */, 0 /* flag */);

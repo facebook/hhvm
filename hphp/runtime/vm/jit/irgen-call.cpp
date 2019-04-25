@@ -526,8 +526,10 @@ void fpushObjMethod(IRGS& env,
   };
 
   // If we know the class exactly without profiling, then we don't need PGO.
+  // If the method has reified generics, we can't burn the value in the JIT
   if (!RuntimeOption::RepoAuthoritative ||
-      (knownClass && !isInterface(knownClass))) {
+      (knownClass && !isInterface(knownClass)) ||
+      tsList) {
     emitFPush();
     return;
   }

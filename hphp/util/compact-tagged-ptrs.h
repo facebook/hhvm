@@ -44,8 +44,14 @@ namespace HPHP {
 template<class T, class TagType = uint16_t>
 struct CompactTaggedPtr {
   using Opaque = uintptr_t;
-  static_assert(sizeof(TagType) <= sizeof(int16_t),
-                "TagType must fit in 16 bits");
+  static constexpr size_t kMaxTagSize = 16;
+  static constexpr size_t kShiftAmount =
+    std::numeric_limits<Opaque>::digits - kMaxTagSize;
+  static_assert(
+    std::numeric_limits<typename std::make_unsigned<TagType>::type>::digits
+      <= kMaxTagSize,
+    "TagType must fit in 16 bits"
+  );
 
   CompactTaggedPtr() : m_data{makeOpaque(TagType{}, nullptr)} {}
   CompactTaggedPtr(TagType tag, T* ptr) : m_data{makeOpaque(tag, ptr)} {}
@@ -58,10 +64,10 @@ struct CompactTaggedPtr {
     m_data = makeOpaque(tag, ptr);
   }
 
-  TagType tag() const { return static_cast<TagType>(m_data >> 48); }
+  TagType tag() const { return static_cast<TagType>(m_data >> kShiftAmount); }
 
   T* ptr() const {
-    return reinterpret_cast<T*>(m_data & (-1ull >> 16));
+    return reinterpret_cast<T*>(m_data & (-1ull >> kMaxTagSize));
   }
 
   T* operator->() const {
@@ -79,8 +85,8 @@ private:
     auto const tag = static_cast<uint64_t>(ttag);
     auto const ptr_int = reinterpret_cast<uintptr_t>(ptr);
     assertx(tag <= 0xffffu);
-    assertx((ptr_int >> 48) == 0);
-    return ptr_int | (tag << 48);
+    assertx((ptr_int >> kShiftAmount) == 0);
+    return ptr_int | (tag << kShiftAmount);
   }
 };
 

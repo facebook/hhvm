@@ -4037,15 +4037,15 @@ Variant HHVM_FUNCTION(imagecolortransparent, const Resource& image,
   return gdImageGetTransparent(im);
 }
 
-Variant HHVM_FUNCTION(imageinterlace, int64_t argc, const Resource& image,
-    int64_t interlace /* = 0 */) {
+TypedValue HHVM_FUNCTION(imageinterlace, const Resource& image,
+                         TypedValue interlace /* = 0 */) {
   gdImagePtr im = get_valid_image_resource(image);
-  if (!im) return false;
-  if (argc > 1) {
+  if (!im) return make_tv<KindOfBoolean>(false);
+  if (!tvIsNull(interlace)) {
     // has interlace argument
-    gdImageInterlace(im, interlace);
+    gdImageInterlace(im, tvAssertInt(interlace));
   }
-  return gdImageGetInterlaced(im);
+  return make_tv<KindOfInt64>(gdImageGetInterlaced(im));
 }
 
 bool HHVM_FUNCTION(imagepolygon, const Resource& image,

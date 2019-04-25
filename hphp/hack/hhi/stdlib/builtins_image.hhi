@@ -169,7 +169,7 @@ function imagegrabscreen();
 <<__PHPStdLib>>
 function imagegrabwindow($window, $client_area = 0);
 <<__PHPStdLib>>
-function imageinterlace(resource $image, int $interlace = 0);
+function imageinterlace(resource $image, ?int $interlace = null);
 <<__PHPStdLib>>
 function imageistruecolor(resource $image);
 <<__PHPStdLib>>

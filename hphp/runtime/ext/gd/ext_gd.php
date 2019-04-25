@@ -697,9 +697,9 @@ function imagegif(resource $image,
  * is set and the image is used as a JPEG image, the image is created as a
  * progressive JPEG.
  */
-<<__Native("NumArgs")>>
+<<__Native>>
 function imageinterlace(resource $image,
-                        int $interlace = 0): mixed;
+                        ?int $interlace = null): mixed;
 
 /* imageistruecolor() finds whether the image image is a truecolor image.
  */

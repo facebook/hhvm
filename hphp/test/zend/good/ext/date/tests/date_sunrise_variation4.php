@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location 
+ * Description: Returns time of sunrise for a given day and location
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing date_sunrise() : usage variation ***\n";
@@ -11,8 +11,8 @@ echo "*** Testing date_sunrise() : usage variation ***\n";
 date_default_timezone_set("Asia/Calcutta");
 $time = mktime(8, 8, 8, 8, 8, 2008);
 $latitude = 38.4;
-$zenith = 90;
-$gmt_offset = 0;
+$zenith = 90.0;
+$gmt_offset = 0.0;
 
 //get an unset variable
 $unset_var = 10;

@@ -503,13 +503,13 @@ function date_sun_info(int $ts, float $latitude, float $longitude): darray;
  *   or FALSE on failure.
  *
  */
-<<__Native("NumArgs")>>
+<<__Native>>
 function date_sunrise(int $timestamp,
                       int $format = SUNFUNCS_RET_STRING,
-                      float $latitude = 0.0,
-                      float $longitude = 0.0,
-                      float $zenith = 0.0,
-                      float $gmt_offset = 0.0): mixed;
+                      ?float $latitude = null,
+                      ?float $longitude = null,
+                      ?float $zenith = null,
+                      ?float $gmt_offset = null): mixed;
 
 /**
  * date_sunset() returns the sunset time for a given day (specified as a
@@ -532,13 +532,13 @@ function date_sunrise(int $timestamp,
  *   FALSE on failure.
  *
  */
-<<__Native("NumArgs")>>
+<<__Native>>
 function date_sunset(int $timestamp,
                      int $format = SUNFUNCS_RET_STRING,
-                     float $latitude = 0.0,
-                     float $longitude = 0.0,
-                     float $zenith = 0.0,
-                     float $gmt_offset = 0.0): mixed;
+                     ?float $latitude = null,
+                     ?float $longitude = null,
+                     ?float $zenith = null,
+                     ?float $gmt_offset = null): mixed;
 
 function date_time_set(DateTime $datetime,
                        int $hour,
@@ -565,8 +565,8 @@ function date_timezone_set(DateTime $datetime, DateTimeZone $timezone): mixed {
  *   emitted.
  *
  */
-<<__Native("NumArgs")>>
-function date(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function date(string $format, ?int $timestamp = null): mixed;
 
 /**
  * Returns an associative array containing the date information of the
@@ -579,8 +579,8 @@ function date(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("NumArgs")>>
-function getdate(int $timestamp = -1): darray;
+<<__Native>>
+function getdate(?int $timestamp = null): darray;
 
 /**
  * This is an interface to gettimeofday(2). It returns an associative array
@@ -613,8 +613,8 @@ function gettimeofday(bool $return_float = false): mixed;
  *   emitted.
  *
  */
-<<__Native("NumArgs")>>
-function gmdate(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function gmdate(string $format, ?int $timestamp = null): mixed;
 
 /**
  * Identical to mktime() except the passed parameters represents a GMT date.
@@ -651,8 +651,8 @@ function gmmktime(int $hour = PHP_INT_MAX,
  *   respect the current locale set with setlocale().
  *
  */
-<<__Native("NumArgs")>>
-function gmstrftime(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function gmstrftime(string $format, ?int $timestamp = null): mixed;
 
 /**
  * Returns a number formatted according to the given format string using the
@@ -680,8 +680,8 @@ function gmstrftime(string $format, int $timestamp = -1): mixed;
  *   you would expect. See the example below.
  *
  */
-<<__Native("NumArgs")>>
-function idate(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function idate(string $format, ?int $timestamp = null): mixed;
 
 /**
  * The localtime() function returns an array identical to that of the
@@ -704,8 +704,8 @@ function idate(string $format, int $timestamp = -1): mixed;
  * @return array
  *
  */
-<<__Native("NumArgs")>>
-function localtime(int $timestamp = -1,
+<<__Native>>
+function localtime(?int $timestamp = null,
                    bool $is_associative = false): varray_or_darray;
 
 /**
@@ -776,8 +776,8 @@ function mktime(int $hour = PHP_INT_MAX,
  *   locale set with setlocale().
  *
  */
-<<__Native("NumArgs")>>
-function strftime(string $format, int $timestamp = -1): mixed;
+<<__Native>>
+function strftime(string $format, ?int $timestamp = null): mixed;
 
 /**
  * strptime() returns an array with the date parsed, or FALSE on error.  Month
@@ -812,8 +812,8 @@ function strptime(string $date, string $format): mixed;
  *   to PHP 5.1.0, this function would return -1 on failure.
  *
  */
-<<__Native("NumArgs")>>
-function strtotime(string $input, int $timestamp = -1): mixed;
+<<__Native>>
+function strtotime(string $input, ?int $timestamp = null): mixed;
 
 /**
  * Returns the current time measured in the number of seconds since the Unix

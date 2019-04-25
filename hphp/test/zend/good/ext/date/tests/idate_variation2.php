@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : int idate(string format [, int timestamp])
- * Description: Format a local time/date as integer 
+ * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing idate() : usage variation ***\n";
@@ -85,7 +85,18 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      try { var_dump( idate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+			if ($value === null) {
+				$without_timestamp = idate($format);
+				$with_timestamp = idate($format, $value);
+				// These is a risk that the time change right between these calls if so
+				// we do another try.
+				if ($with_timestamp !== $without_timestamp) {
+					$without_timestamp = idate($format);
+				}
+				var_dump($with_timestamp === $without_timestamp);
+			} else {
+      	try { var_dump( idate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+			}
 };
 
 echo "===DONE===\n";

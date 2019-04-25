@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time 
+ * Description: Format a GMT date/time
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmdate() : usage variation ***\n";
@@ -92,7 +92,18 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      try { var_dump( gmdate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+			if ($value === null) {
+				$without_timestamp = gmdate($format);
+				$with_timestamp = gmdate($format, $value);
+				// These is a risk that the time change right between these calls if so
+				// we do another try.
+				if ($with_timestamp !== $without_timestamp) {
+					$without_timestamp = gmdate($format);
+				}
+				var_dump($with_timestamp === $without_timestamp);
+			} else {
+      	try { var_dump( gmdate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+			}
 };
 
 echo "===DONE===\n";

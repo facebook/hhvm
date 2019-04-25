@@ -761,71 +761,73 @@ Variant HHVM_FUNCTION(gmmktime,
   return ts;
 }
 
-static Variant HHVM_FUNCTION(idate, int64_t argc,
-                             const String& fmt, int64_t timestamp) {
+static TypedValue HHVM_FUNCTION(idate,
+                                const String& fmt, TypedValue timestamp) {
   if (fmt.size() != 1) {
     throw_invalid_argument("format: %s", fmt.data());
-    return false;
+    return make_tv<KindOfBoolean>(false);
   }
-  if (argc < 2) {
-    timestamp = TimeStamp::Current();
-  }
-  int64_t ret = req::make<DateTime>(timestamp, false)->toInteger(*fmt.data());
-  if (ret == -1) return false;
-  return ret;
+  int64_t ret = req::make<DateTime>(
+    tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
+    false
+  )->toInteger(*fmt.data());
+  if (ret == -1) return make_tv<KindOfBoolean>(false);
+  return make_tv<KindOfInt64>(ret);
 }
 
 template<bool gmt>
-static Variant date_impl(int64_t argc,
-                         const String& format, int64_t timestamp) {
-  if (!gmt && format.empty()) return empty_string_variant();
-  if (argc < 2) timestamp = TimeStamp::Current();
-  String ret = req::make<DateTime>(timestamp, gmt)->toString(format, false);
-  if (ret.isNull()) return false;
-  return ret;
+static TypedValue date_impl(const String& format, TypedValue timestamp) {
+  if (!gmt && format.empty()) {
+    return tvReturn(empty_string());
+  }
+
+  String ret = req::make<DateTime>(
+    tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
+    gmt
+  )->toString(format, false);
+  if (ret.isNull()) return make_tv<KindOfBoolean>(false);
+  return tvReturn(ret);
 }
 
 template<bool gmt>
-static Variant strftime_impl(int64_t argc,
-                             const String& format, int64_t timestamp) {
-  if (argc < 2) timestamp = TimeStamp::Current();
-  String ret = req::make<DateTime>(timestamp, gmt)->toString(format, true);
-  if (ret.isNull()) return false;
-  return ret;
+static TypedValue strftime_impl(const String& format, TypedValue timestamp) {
+  String ret = req::make<DateTime>(
+    tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
+    gmt
+  )->toString(format, true);
+  if (ret.isNull()) return make_tv<KindOfBoolean>(false);
+  return tvReturn(ret);
 }
 
-static Variant HHVM_FUNCTION(strtotime, int64_t argc,
-                             const String& input, int64_t timestamp) {
+TypedValue HHVM_FUNCTION(strtotime,
+                         const String& input, TypedValue timestamp) {
   if (input.empty()) {
-    return false;
+    return make_tv<KindOfBoolean>(false);
   }
-  if (argc < 2) {
-    timestamp = TimeStamp::Current();
-  }
-  auto dt = req::make<DateTime>(timestamp);
+  auto dt = req::make<DateTime>(
+    tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp));
   if (!dt->fromString(input, req::ptr<TimeZone>(), nullptr, false)) {
-    return false;
+    return make_tv<KindOfBoolean>(false);
   }
   bool error;
-  return dt->toTimeStamp(error);
+  return make_tv<KindOfInt64>(dt->toTimeStamp(error));
 }
 
-static Array HHVM_FUNCTION(getdate, int64_t argc, int64_t timestamp) {
-  if (argc < 1) {
-    timestamp = TimeStamp::Current();
-  }
-  return req::make<DateTime>(timestamp, false)->
-           toArray(DateTime::ArrayFormat::TimeMap);
+static Array HHVM_FUNCTION(getdate, TypedValue timestamp) {
+  return req::make<DateTime>(
+    tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
+    false
+  )->toArray(DateTime::ArrayFormat::TimeMap);
 }
 
-static Variant HHVM_FUNCTION(localtime, int64_t argc,
-                           int64_t timestamp, bool is_assoc) {
-  if (argc < 1) {
-    timestamp = TimeStamp::Current();
-  }
+static Variant HHVM_FUNCTION(localtime,
+                             TypedValue timestamp, bool is_assoc) {
   auto format = is_assoc ? DateTime::ArrayFormat::TmMap
                          : DateTime::ArrayFormat::TmVector;
-  return req::make<DateTime>(timestamp, false)->toArray(format);
+  return req::make<DateTime>(
+    tvIsNull(timestamp) ? TimeStamp::Current() : tvAssertInt(timestamp),
+    false
+  )->toArray(format);
 }
 
 Variant HHVM_FUNCTION(strptime,
@@ -944,22 +946,26 @@ Array HHVM_FUNCTION(date_sun_info,
 }
 
 template<bool sunset>
-Variant date_sunrise_sunset(int64_t numArgs,
-                            int64_t timestamp, int64_t format,
-                            double latitude, double longitude,
-                            double zenith, double offset) {
-  /* Fill in dynamic args (3..6) as needed */
-  switch (numArgs) {
-    case 0: case 1: /* fallthrough */
-    case 2: latitude  = s_date_globals->default_latitude;
-    case 3: longitude = s_date_globals->default_longitude;
-    case 4: zenith = sunset ? s_date_globals->sunset_zenith
-                            : s_date_globals->sunrise_zenith;
-    case 5: offset = TimeZone::Current()->offset(0) / 3600;
-  }
-  return req::make<DateTime>(timestamp, false)->getSunInfo
-    (static_cast<DateTime::SunInfoFormat>(format), latitude, longitude,
-     zenith, offset, sunset);
+TypedValue date_sunrise_sunset(int64_t timestamp, int64_t format,
+                               TypedValue latitude, TypedValue longitude,
+                               TypedValue zenith, TypedValue offset) {
+  return tvReturn(req::make<DateTime>(timestamp, false)->getSunInfo(
+    static_cast<DateTime::SunInfoFormat>(format),
+    tvIsNull(latitude)
+      ? s_date_globals->default_latitude
+      : tvAssertDouble(latitude),
+    tvIsNull(longitude)
+      ? s_date_globals->default_longitude
+      : tvAssertDouble(longitude),
+    tvIsNull(zenith)
+      ? (sunset
+        ? s_date_globals->sunset_zenith
+        : s_date_globals->sunrise_zenith)
+      : tvAssertDouble(zenith),
+    tvIsNull(offset)
+      ? TimeZone::Current()->offset(0) / 3600
+      : tvAssertDouble(offset),
+    sunset));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -65,20 +65,14 @@ Warning: date_sunrise() expects parameter 4 to be double, array given in %s/zend
 Warning: date_sunrise() expects parameter 4 to be double, array given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --uppercase NULL--
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 
 --lowercase null--
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 
 --lowercase true--
 
@@ -177,18 +171,12 @@ Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zen
 Warning: date_sunrise() expects parameter 4 to be double, object given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
 
 --undefined var--
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 
 --unset var--
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 92
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 93
-
-Warning: date_sunrise() expects parameter 4 to be double, null given in %s/zend/good/ext/date/tests/date_sunrise_variation4.php on line 94
+string(5) "02:51"
+float(2.850%d)
+int(1218163860)
 ===DONE===

@@ -1419,6 +1419,7 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////
 
 SimpleMutex unitInitLock(false /* reentrant */, RankUnitInit);
+std::atomic<uint64_t> s_loadedUnits{0};
 
 void setGlobal(StringData* name, TypedValue *value) {
   g_context->m_globalVarEnv->set(name, value);
@@ -1463,6 +1464,17 @@ void Unit::initialMerge() {
   unitInitLock.assertOwnedBySelf();
   if (m_mergeState.load(std::memory_order_relaxed) != MergeState::Unmerged) {
     return;
+  }
+
+  auto const nrecord = RuntimeOption::EvalRecordFirstUnits;
+  if (s_loadedUnits.load(std::memory_order_relaxed) < nrecord) {
+    auto const index = s_loadedUnits.fetch_add(1, std::memory_order_relaxed);
+    if (index < nrecord) {
+      StructuredLogEntry ent;
+      ent.setStr("path", m_filepath->data());
+      ent.setInt("index", index);
+      StructuredLog::log("hhvm_first_units", ent);
+    }
   }
 
   this->m_cachedEntryPoint = findEntryPoint(this);

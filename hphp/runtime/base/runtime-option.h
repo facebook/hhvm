@@ -1121,6 +1121,8 @@ struct RuntimeOption {
   /* Sampling frequency for profiling packed array accesses. */         \
   F(uint32_t, ProfPackedArraySampleFreq, 0)                             \
   F(bool, UseXedAssembler, false)                                       \
+  /* Record the first N units loaded via StructuredLog::log()        */ \
+  F(uint64_t, RecordFirstUnits, 0)                                      \
   /* */
 
 private:

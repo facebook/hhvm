@@ -224,8 +224,21 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
 
 Variant HHVM_FUNCTION(get_parent_class,
                       const Variant& object /* = uninit_variant */) {
+  auto logOrThrow = [&](const Variant& object) {
+    if (RuntimeOption::EvalGetClassBadArgument == 0) return;
+    auto msg = folly::sformat(
+      "get_parent_class() was called with {}, expected object or string",
+      getDataTypeString(object.getType()));
+    if (RuntimeOption::EvalGetClassBadArgument == 1) {
+      raise_warning(msg);
+    } else {
+      SystemLib::throwRuntimeExceptionObject(msg);
+    }
+  };
+
   const Class* cls;
   if (object.isNull()) {
+    logOrThrow(object);
     cls = GetCallerClass();
     if (!cls) return false;
   } else {
@@ -235,6 +248,7 @@ Variant HHVM_FUNCTION(get_parent_class,
       cls = Unit::loadClass(object.toCStrRef().get());
       if (!cls) return false;
     } else {
+      logOrThrow(object);
       return false;
     }
   }

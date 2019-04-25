@@ -1,0 +1,16 @@
+
+(alias
+    (name json_output)
+    (deps %{exe:../../../../src/utils/bser/bser_main_test.exe}
+          %{project_root}/test/verify.py
+          %{project_root}/test/review.sh
+          (glob_files %{project_root}/test/utils/bser/json_output/*.bser)
+          (glob_files %{project_root}/test/utils/bser/json_output/*.exp))
+    (action (run %{project_root}/test/verify.py %{project_root}/test/utils/bser/json_output
+    --in-extension .bser
+    --program %{exe:../../../../src/utils/bser/bser_main_test.exe}
+    --flags --to_json)))
+
+(alias
+    (name runtest)
+    (deps (alias json_output)))

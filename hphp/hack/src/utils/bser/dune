@@ -1,0 +1,13 @@
+(library
+  (name bser)
+  (modules bser)
+  (wrapped false)
+  (libraries
+    hh_json
+    sys_utils))
+
+(executable
+  (name bser_main_test)
+  (modules bser_main_test)
+  (libraries
+    bser))

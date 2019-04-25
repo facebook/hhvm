@@ -68,7 +68,6 @@ let disallow_unset_on_varray = GlobalOptions.tco_disallow_unset_on_varray
 let disallow_scrutinee_case_value_type_mismatch =
   GlobalOptions.tco_disallow_scrutinee_case_value_type_mismatch
 let disallow_stringish_magic = GlobalOptions.tco_disallow_stringish_magic
-let disallow_anon_use_capture_by_ref = GlobalOptions.tco_disallow_anon_use_capture_by_ref
 let new_inference = GlobalOptions.tco_new_inference
 let new_inference_lambda = GlobalOptions.tco_new_inference_lambda
 let timeout = GlobalOptions.tco_timeout

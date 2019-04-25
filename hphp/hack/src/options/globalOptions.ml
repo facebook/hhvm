@@ -33,7 +33,6 @@ type t = {
   tco_disallow_unset_on_varray: bool;
   tco_disallow_scrutinee_case_value_type_mismatch : bool;
   tco_disallow_stringish_magic : bool;
-  tco_disallow_anon_use_capture_by_ref : bool;
   tco_new_inference : float;
   tco_new_inference_lambda : bool;
   tco_timeout : int;
@@ -218,7 +217,6 @@ let default = {
  tco_disallow_unset_on_varray = false;
  tco_disallow_scrutinee_case_value_type_mismatch = false;
  tco_disallow_stringish_magic = false;
- tco_disallow_anon_use_capture_by_ref = false;
  tco_new_inference = 0.0;
  tco_new_inference_lambda = false;
  tco_timeout = 0;
@@ -265,7 +263,6 @@ let make
   ?(tco_disallow_unset_on_varray = default.tco_disallow_unset_on_varray)
   ?(tco_disallow_scrutinee_case_value_type_mismatch = default.tco_disallow_scrutinee_case_value_type_mismatch)
   ?(tco_disallow_stringish_magic = default.tco_disallow_stringish_magic)
-  ?(tco_disallow_anon_use_capture_by_ref = default.tco_disallow_anon_use_capture_by_ref)
   ?(tco_new_inference = default.tco_new_inference)
   ?(tco_new_inference_lambda = default.tco_new_inference_lambda)
   ?(tco_timeout = default.tco_timeout)
@@ -314,7 +311,6 @@ let make
   tco_disallow_unset_on_varray;
   tco_disallow_scrutinee_case_value_type_mismatch;
   tco_disallow_stringish_magic;
-  tco_disallow_anon_use_capture_by_ref;
   tco_new_inference;
   tco_new_inference_lambda;
   tco_timeout;
@@ -364,7 +360,6 @@ let tco_disallow_unset_on_varray t = t.tco_disallow_unset_on_varray
 let tco_disallow_scrutinee_case_value_type_mismatch t =
   t.tco_disallow_scrutinee_case_value_type_mismatch
 let tco_disallow_stringish_magic t = t.tco_disallow_stringish_magic
-let tco_disallow_anon_use_capture_by_ref t = t.tco_disallow_anon_use_capture_by_ref
 let tco_new_inference t = t.tco_new_inference > 0.0
 let tco_new_inference_lambda t = t.tco_new_inference_lambda
 let tco_timeout t = t.tco_timeout

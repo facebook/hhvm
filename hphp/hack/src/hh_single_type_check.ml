@@ -177,7 +177,6 @@ let parse_options () =
   let no_fallback_in_namespaces = ref None in
   let dynamic_view = ref None in
   let allow_array_as_tuple = ref (Some false) in
-  let allow_anon_use_capture_by_ref = ref (Some false) in
   let allow_user_attributes = ref None in
   let disallow_unset_on_varray = ref None in
   let auto_namespace_map = ref None in
@@ -348,9 +347,6 @@ let parse_options () =
     "--allow-array-as-tuple",
         Arg.Unit (set_bool allow_array_as_tuple),
         " Allow tuples to be passed as untyped arrays and vice versa";
-    "--allow-anon-use-capture-by-ref",
-        Arg.Unit (set_bool allow_anon_use_capture_by_ref),
-        " Allow binding of local variables by reference in anonymous function use clauses";
     "--disallow-unset-on-varray",
         Arg.Unit (set_bool disallow_unset_on_varray),
         " Disallow unsetting indices from varrays";
@@ -441,7 +437,6 @@ let parse_options () =
     ?tco_disallow_array_literal:(!disallow_array_literal)
     ?tco_dynamic_view:(!dynamic_view)
     ?tco_disallow_array_as_tuple:(not_ !allow_array_as_tuple)
-    ?tco_disallow_anon_use_capture_by_ref:(not_ !allow_anon_use_capture_by_ref)
     ?tco_disallow_unset_on_varray:(!disallow_unset_on_varray)
     ?tco_disallow_stringish_magic:(!disallow_stringish_magic)
     ?tco_log_inference_constraints:(!log_inference_constraints)

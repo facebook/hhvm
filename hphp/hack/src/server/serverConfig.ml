@@ -267,8 +267,6 @@ let load config_filename options =
     ?tco_disallow_scrutinee_case_value_type_mismatch:
       (bool_opt "disallow_scrutinee_case_value_type_mismatch" config)
     ?tco_disallow_stringish_magic:(bool_opt "disallow_stringish_magic" config)
-    ?tco_disallow_anon_use_capture_by_ref:
-      (bool_opt "disallow_anon_use_capture_by_ref" config)
     ?tco_new_inference:(float_opt "new_inference" config)
     ?tco_new_inference_lambda:(bool_opt "new_inference_lambda" config)
     ?tco_timeout:(int_opt "timeout" config)

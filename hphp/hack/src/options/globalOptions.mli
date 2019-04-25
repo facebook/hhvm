@@ -144,12 +144,6 @@ type t = {
  tco_disallow_stringish_magic : bool;
 
  (*
-  * Flag to disallow capturing variables by reference in the use construct of
-  * PHP5-style anonymous function declarations
-  *)
- tco_disallow_anon_use_capture_by_ref : bool;
-
- (*
   * Constraint-based type inference
   * Apply to a sample of files based on name hashing:
   * 1.0 = always, 0.0 = never
@@ -246,7 +240,6 @@ val make :
   ?tco_disallow_unset_on_varray: bool ->
   ?tco_disallow_scrutinee_case_value_type_mismatch: bool ->
   ?tco_disallow_stringish_magic: bool ->
-  ?tco_disallow_anon_use_capture_by_ref: bool ->
   ?tco_new_inference: float ->
   ?tco_new_inference_lambda: bool ->
   ?tco_timeout: int ->
@@ -294,7 +287,6 @@ val tco_disallow_implicit_returns_in_non_void_functions : t -> bool
 val tco_disallow_unset_on_varray : t -> bool
 val tco_disallow_scrutinee_case_value_type_mismatch : t -> bool
 val tco_disallow_stringish_magic : t -> bool
-val tco_disallow_anon_use_capture_by_ref : t -> bool
 val tco_new_inference : t -> bool
 val tco_new_inference_lambda : t -> bool
 val tco_timeout : t -> int

@@ -6,6 +6,7 @@ class TestClass {
 
   const type TClassType = shape(
     self::ID => int,
+    /* HH_FIXME[4050] mixing literal and constant shape keys */
     'x' => int,
   );
 

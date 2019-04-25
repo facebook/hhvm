@@ -345,7 +345,8 @@ void VSDebugHook::tryEnterDebugger(
     // except for the case where we attached to an already-running script,
     // which behaves like server mode.
     bool scriptAttachMode = RuntimeOption::VSDebuggerListenPort > 0 ||
-                            !RuntimeOption::VSDebuggerDomainSocketPath.empty();
+      (!RuntimeOption::ServerExecutionMode() &&
+       !RuntimeOption::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
       if (!g_context.isNull()) {
         g_context->addStdoutHook(debugger->getStdoutHook());

@@ -14,7 +14,6 @@
 
 open Core_kernel
 open Typing_defs
-open Typing_ops
 
 module Env = Typing_env
 module Dep = Typing_deps.Dep
@@ -24,6 +23,7 @@ module Phase = Typing_phase
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
+module SubType = Typing_subtype
 
 (*****************************************************************************)
 (* Helpers *)
@@ -258,7 +258,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
           Errors.decl_override_missing_hint @@ Reason.to_pos (fst fty_child)
         | _, _ -> ()
       end;
-      unify_decl pos Typing_reason.URnone env fty_parent fty_child
+      Typing_ops.unify_decl pos Typing_reason.URnone env fty_parent fty_child
     )
     (fun errorl ->
       Errors.bad_method_override pos member_name errorl)
@@ -487,13 +487,13 @@ let tconst_subsumption env parent_typeconst child_typeconst =
   ignore @@ Option.map2
     child_cstr
     parent_typeconst.ttc_constraint
-    ~f:(sub_type_decl pos Reason.URsubsume_tconst_cstr env);
+    ~f:(Typing_ops.sub_type_decl pos Reason.URsubsume_tconst_cstr env);
 
   (* Check that the child's assigned type satisifies parent constraint *)
   ignore @@ Option.map2
     child_typeconst.ttc_type
     parent_typeconst.ttc_constraint
-    ~f:(sub_type_decl parent_pos Reason.URtypeconst_cstr env);
+    ~f:(Typing_ops.sub_type_decl parent_pos Reason.URtypeconst_cstr env);
 
   begin match child_typeconst.ttc_type, parent_typeconst.ttc_enforceable with
   | None, _ | _, (_, false) -> ()
@@ -506,8 +506,8 @@ let tconst_subsumption env parent_typeconst child_typeconst =
    * the child's assigned type is compatible with the parent's *)
   let check x y =
     if is_final
-    then unify_decl pos Reason.URsubsume_tconst_assign env x y
-    else sub_type_decl pos Reason.URsubsume_tconst_assign env y x in
+    then Typing_ops.unify_decl pos Reason.URsubsume_tconst_assign env x y
+    else Typing_ops.sub_type_decl pos Reason.URsubsume_tconst_assign env y x in
   ignore @@ Option.map2
     parent_typeconst.ttc_type
     child_typeconst.ttc_type

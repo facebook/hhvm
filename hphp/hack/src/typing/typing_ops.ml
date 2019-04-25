@@ -11,7 +11,6 @@ open Core_kernel
 
 module Reason  = Typing_reason
 module Env     = Typing_env
-module SubType = Typing_subtype
 module Phase   = Typing_phase
 module MakeType = Typing_make_type
 
@@ -28,7 +27,7 @@ let sub_type p ur env ty_sub ty_super =
         Log_type ("ty_super", ty_super)])]));
   let env = { env with Env.pos = p; Env.outer_pos = p; Env.outer_reason = ur } in
   Errors.try_add_err p (Reason.string_of_ureason ur)
-    (fun () -> SubType.sub_type env ty_sub ty_super)
+    (fun () -> Typing_utils.sub_type env ty_sub ty_super)
     (fun () -> env)
 
 let coerce_type ?sub_fn:(sub=sub_type) p ur env ty_have ty_expect =
@@ -116,8 +115,8 @@ module LeastUpperBound = struct
 
   (* @TODO expand this match to refine more types*)
   let pairwise_least_upper_bound env ~default ty1 ty2 =
-    if SubType.is_sub_type env ty1 ty2 then ty2
-    else if SubType.is_sub_type env ty2 ty1 then ty1
+    if Typing_utils.is_sub_type env ty1 ty2 then ty2
+    else if Typing_utils.is_sub_type env ty2 ty1 then ty1
     else default
 
   let rec full env types =

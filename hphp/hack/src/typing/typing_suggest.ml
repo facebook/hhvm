@@ -31,7 +31,6 @@ let string_of_kind = function
   | Kreturn -> "Kreturn"
 
 module Env = Typing_env
-module TUtils = Typing_utils
 
 (*****************************************************************************)
 (* List of functions or methods without return types  *)

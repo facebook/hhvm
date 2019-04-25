@@ -13,10 +13,8 @@ open Utils
 
 module Reason = Typing_reason
 module Env    = Typing_env
-module Inst   = Decl_instantiate
 module Subst = Decl_subst
 module TUtils = Typing_utils
-module TAccess = Typing_taccess
 module Phase  = Typing_phase
 module MakeType = Typing_make_type
 

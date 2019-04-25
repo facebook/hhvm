@@ -10,8 +10,6 @@
 open Nast
 open Nast_check_env
 
-module SN = Naming_special_names
-
 let check_variadic v =
   match v with
   | FVvariadicArg vparam when vparam.param_is_reference ->

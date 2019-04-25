@@ -9,7 +9,6 @@
 
 open Core_kernel
 module TUtils = Typing_utils
-module N = Nast
 module Reason = Typing_reason
 module Env = Typing_env
 open Typing_defs

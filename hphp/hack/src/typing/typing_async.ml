@@ -14,7 +14,6 @@ module Type   = Typing_ops
 module SubType = Typing_subtype
 module Env    = Typing_env
 module TUtils = Typing_utils
-module SN     = Naming_special_names
 module MakeType    = Typing_make_type
 
 (* If an expression e is of type `opt_ty_maybe`, then this function

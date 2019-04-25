@@ -10,8 +10,6 @@
 open Nast
 open Nast_check_env
 
-module SN = Naming_special_names
-
 let handler = object
   inherit Nast_visitor.handler_base
   method! at_stmt env s =

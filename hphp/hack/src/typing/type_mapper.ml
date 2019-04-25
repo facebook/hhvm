@@ -15,7 +15,6 @@ open Typing_defs
 
 module Env = Typing_env
 module Reason = Typing_reason
-module ShapeMap = Nast.ShapeMap
 
 (* Mapping environment threaded through all function calls:
  * - typing environment *)

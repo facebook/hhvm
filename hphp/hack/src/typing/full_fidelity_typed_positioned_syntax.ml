@@ -42,9 +42,6 @@
 open Core_kernel
 module SourceText = Full_fidelity_positioned_syntax.SourceText
 module Token = Full_fidelity_positioned_token
-module Trivia = Full_fidelity_positioned_trivia
-module SyntaxKind = Full_fidelity_syntax_kind
-module TokenKind = Full_fidelity_token_kind
 module SyntaxWithToken = Full_fidelity_syntax.WithToken(Token)
 
 

@@ -10,14 +10,8 @@
 open Core_kernel
 open Typing_defs
 
-module Reason  = Typing_reason
-module TUtils  = Typing_utils
 module Env     = Typing_env
-module Inst    = Decl_instantiate
-module Unify   = Typing_unify
-module TDef    = Typing_tdef
 module SubType = Typing_subtype
-module Phase   = Typing_phase
 
 (*
 * These are the main coercion functions.

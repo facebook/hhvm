@@ -10,10 +10,7 @@
 open Core_kernel
 
 module Reason  = Typing_reason
-module TUtils  = Typing_utils
 module Env     = Typing_env
-module Inst    = Decl_instantiate
-module TDef    = Typing_tdef
 module SubType = Typing_subtype
 module Phase   = Typing_phase
 module MakeType = Typing_make_type

@@ -15,7 +15,6 @@ open Typing_defs
 open ETast
 
 module C = Typing_continuations
-module Cont = Typing_lenv_cont
 module Env = Typing_env
 module Phase = Typing_phase
 

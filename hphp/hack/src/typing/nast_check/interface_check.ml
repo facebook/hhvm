@@ -10,8 +10,6 @@
 open Core_kernel
 open Nast
 
-module SN = Naming_special_names
-
 let enforce_no_body m =
   match m.m_body.fb_ast with
   | [] ->

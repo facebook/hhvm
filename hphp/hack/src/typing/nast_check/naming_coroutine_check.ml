@@ -11,8 +11,6 @@ open Core_kernel
 open Nast
 open Nast_check_env
 
-module SN = Naming_special_names
-
 let is_coroutine env =
   env.function_kind = Some Ast.FCoroutine
 

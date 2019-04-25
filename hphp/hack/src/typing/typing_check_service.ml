@@ -11,8 +11,6 @@ module Hack_bucket = Bucket
 open Core_kernel
 module Bucket = Hack_bucket
 
-module Env = Typing_env
-
 type file = Relative_path.t * FileInfo.names
 type progress = {
   checked_files: file list;

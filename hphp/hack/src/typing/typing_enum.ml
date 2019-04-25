@@ -17,7 +17,6 @@ open Core_kernel
 open Nast
 open Typing_defs
 
-module SN = Naming_special_names
 module Phase = Typing_phase
 module Cls = Decl_provider.Class
 

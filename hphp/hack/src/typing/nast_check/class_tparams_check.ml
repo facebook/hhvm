@@ -10,8 +10,6 @@
 open Core_kernel
 open Nast
 
-module SN = Naming_special_names
-
 type ctx = { class_tparams: Nast.tparam list }
 
 let visitor = object(_this)

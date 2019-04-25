@@ -10,8 +10,6 @@
 open Core_kernel
 open Typing_defs
 module Env = Typing_env
-module ShapeMap = Nast.ShapeMap
-
 
 (* Module checking if a type is generic, I like to use an exception for this sort
  * of things, the code is more readable (subjective :-), and the exception never

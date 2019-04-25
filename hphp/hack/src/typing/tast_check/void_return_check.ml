@@ -34,8 +34,6 @@ let visitor = object(this)
   | _ -> super#on_stmt env st
 end
 
-module Env = Tast_env
-
 let handler = object
   inherit Tast_visitor.handler_base
 

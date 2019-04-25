@@ -17,7 +17,6 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
-module ShapeMap = Nast.ShapeMap
 module MakeType = Typing_make_type
 
 (* Here is the general problem the delayed application of the phase solves.

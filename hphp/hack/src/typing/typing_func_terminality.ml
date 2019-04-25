@@ -12,7 +12,6 @@ open Nast
 open Typing_defs
 
 module Env = Typing_env
-module T = Tast
 module Cls = Decl_provider.Class
 
 (* Not adding a Typing_dep here because it will be added when the
@@ -41,8 +40,8 @@ let raise_exit_if_terminal f =
 let static_meth_is_noreturn env ci meth_id =
   let class_name = match ci with
     | CI (cls_id) -> Some (snd cls_id)
-    | CIself | CIstatic -> Some (Typing_env.get_self_id env)
-    | CIparent -> Some (Typing_env.get_parent_id env)
+    | CIself | CIstatic -> Some (Env.get_self_id env)
+    | CIparent -> Some (Env.get_parent_id env)
     | CIexpr _ -> None (* we declared the types, but didn't check the bodies yet
                        so can't tell anything here *)
   in

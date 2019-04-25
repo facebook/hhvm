@@ -15,7 +15,6 @@ open Type_mapper
 module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
-module ShapeMap = Nast.ShapeMap
 
 (* Mapper used by update_array* functions. It traverses Tunresolved and
  * modifies the type "inside" the Tvars - so it has side effects on the input

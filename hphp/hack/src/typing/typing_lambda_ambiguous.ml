@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Typing_defs
-module T = Tast
 module Env = Typing_env
 module Reason = Typing_reason
 module FL = FeatureLogging

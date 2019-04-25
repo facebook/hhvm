@@ -328,35 +328,20 @@ static void set_arena_retain_grow_limit(unsigned id) {
 using namespace alloc;
 static NEVER_INLINE
 RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
-                            bool use2MPages, short nextNode) {
-#ifdef HAVE_NUMA
-  const int max_node = numa_max_node();
-#else
-  constexpr int max_node = 0;
-#endif
+                            bool use2MPages, unsigned n2MPages,
+                            bool useNormalPages,
+                            int numaMask, short nextNode) {
   RangeMapper* head = nullptr;
   RangeMapper** ptail = &head;
-  if (max_node < 1) {
-    // We either don't have libnuma, or run on a single-socket CPU.  In either
-    // case, no need to worry about NUMA.
-    if (n1GPages) {
-      RangeMapper::append(ptail, new Bump1GMapper(range, n1GPages));
-    }
-    if (use2MPages) {
-      RangeMapper::append(ptail, new Bump2MMapper(range));
-    }
-    RangeMapper::append(ptail, new BumpNormalMapper(range));
-#ifdef HAVE_NUMA
-  } else {
-    if (n1GPages) {
-      RangeMapper::append(ptail, new Bump1GMapper(range, n1GPages,
-                                                  numa_node_set, nextNode));
-    }
-    if (use2MPages) {
-      RangeMapper::append(ptail, new Bump2MMapper(range, 0, numa_node_set));
-    }
-    RangeMapper::append(ptail, new BumpNormalMapper(range, 0, numa_node_set));
-#endif
+  if (n1GPages) {
+    RangeMapper::append(ptail,
+                        new Bump1GMapper(range, n1GPages, numaMask, nextNode));
+  }
+  if (use2MPages) {
+    RangeMapper::append(ptail, new Bump2MMapper(range, n2MPages, numaMask));
+  }
+  if (useNormalPages) {
+    RangeMapper::append(ptail, new BumpNormalMapper(range, 0, numaMask));
   }
   assertx(head);
   return head;
@@ -368,9 +353,17 @@ void setup_low_arena(unsigned n1GPages) {
   auto& veryLowRange = getRange(AddrRangeClass::VeryLow);
   auto& lowRange = getRange(AddrRangeClass::Low);
   auto veryLowMapper =
-    getMapperChain(veryLowRange, (n1GPages != 0) ? 1 : 0, true, 0);
+    getMapperChain(veryLowRange,
+                   (n1GPages != 0) ? 1 : 0,
+                   true, 0,                 // 2M
+                   true,                    // 4K
+                   numa_node_set, 0);
   auto lowMapper =
-    getMapperChain(lowRange, (n1GPages > 1) ? (n1GPages - 1) : 0, true, 1);
+    getMapperChain(lowRange,
+                   (n1GPages > 1) ? (n1GPages - 1) : 0,
+                   true, 0,             // 2M
+                   true,                // 4K
+                   numa_node_set, 1);
   veryLowRange.setLowMapper(veryLowMapper);
   lowRange.setLowMapper(lowMapper);
   if (n1GPages == 0) {
@@ -411,8 +404,11 @@ void setup_low_arena(unsigned n1GPages) {
 
 void setup_high_arena(unsigned n1GPages) {
   auto& range = getRange(AddrRangeClass::Uncounted);
-  auto mapper = getMapperChain(range, n1GPages, true,
-                                  num_numa_nodes() / 2 + 1);
+  auto mapper = getMapperChain(range, n1GPages,
+                               true, 0, // 2M pages can be added later
+                               true,    // use normal pages
+                               numa_node_set,
+                               num_numa_nodes() / 2 + 1);
   range.setLowMapper(mapper);
   if (n1GPages == 0) {
     high_2m_mapper = dynamic_cast<Bump2MMapper*>(mapper);

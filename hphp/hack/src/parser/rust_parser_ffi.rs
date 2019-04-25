@@ -24,14 +24,15 @@ use parser::positioned_syntax::PositionedValue;
 use parser::positioned_token::PositionedToken;
 
 use parser::smart_constructors::NoState;
+use parser::smart_constructors_wrappers::WithKind;
 use parser::source_text::SourceText;
 use parser::syntax_smart_constructors::SyntaxSmartConstructors;
 use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
 
 type MinimalSyntaxParser<'a> =
-    Parser<'a, SyntaxSmartConstructors<MinimalToken, MinimalValue>, NoState>;
+    Parser<'a, WithKind<SyntaxSmartConstructors<MinimalToken, MinimalValue>>, NoState>;
 type PositionedSyntaxParser<'a> =
-    Parser<'a, SyntaxSmartConstructors<PositionedToken, PositionedValue>, NoState>;
+    Parser<'a, WithKind<SyntaxSmartConstructors<PositionedToken, PositionedValue>>, NoState>;
 
 extern "C" {
     fn ocamlpool_enter();

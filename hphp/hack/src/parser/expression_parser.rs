@@ -47,6 +47,7 @@ impl<P> BinaryExpressionPrefixKind<P> {
 pub struct ExpressionParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
@@ -61,6 +62,7 @@ where
 impl<'a, S, T: Clone> std::clone::Clone for ExpressionParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn clone(&self) -> Self {
         Self {
@@ -79,6 +81,7 @@ where
 impl<'a, S, T: Clone> ParserTrait<'a, S, T> for ExpressionParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn make(
         lexer: Lexer<'a, S::Token>,
@@ -159,6 +162,7 @@ where
 impl<'a, S, T: Clone> ExpressionParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn allow_as_expressions(&self) -> bool {
         self.allow_as_expressions

@@ -87,6 +87,7 @@ impl<T> Context<T> {
 pub trait ParserTrait<'a, S, T: Clone>: Clone
 where
     S: SmartConstructors<T>,
+    <S as SmartConstructors<T>>::R: NodeType,
 {
     fn make(
         _: Lexer<'a, S::Token>,

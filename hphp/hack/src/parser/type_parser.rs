@@ -15,13 +15,14 @@ use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::Context;
 use crate::parser_trait::ParserTrait;
-use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::syntax_error::{self as Errors, SyntaxError};
 use crate::token_kind::TokenKind;
 
 pub struct TypeParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
@@ -34,6 +35,7 @@ where
 impl<'a, S, T: Clone> std::clone::Clone for TypeParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn clone(&self) -> Self {
         Self {
@@ -50,6 +52,7 @@ where
 impl<'a, S, T: Clone> ParserTrait<'a, S, T> for TypeParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn make(
         mut lexer: Lexer<'a, S::Token>,
@@ -131,6 +134,7 @@ where
 impl<'a, S, T: Clone> TypeParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn with_expression_parser<U>(&mut self, f: &Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {
         let mut lexer = self.lexer.clone();

@@ -18,11 +18,10 @@
  */
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
-use crate::smart_constructors::NodeType;
 
 pub trait SmartConstructors<State> {
     type Token: LexableToken;
-    type R: NodeType;
+    type R;
 
     fn initial_state(env: &ParserEnv) -> State;
 

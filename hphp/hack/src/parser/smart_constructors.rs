@@ -5,10 +5,13 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- */
+*/
 use crate::parser_env::ParserEnv;
+use crate::syntax_kind::SyntaxKind;
+use crate::token_kind::TokenKind;
 
 pub use crate::smart_constructors_generated::*;
+pub use crate::smart_constructors_wrappers::*;
 
 // Usage: sc_call(make_foo, parser, arg1, ...)  (in OCaml: Make.foo parser arg1 ...)
 // Corresponds to a call to Make.foo followed by sc_call in OCaml (see *{precedence,simple}_parser)
@@ -46,6 +49,8 @@ impl<R> StateType<R> for NoState {
 }
 
 pub trait NodeType {
+    type R;
+    fn extract(self) -> Self::R;
     fn is_missing(&self) -> bool;
     fn is_abstract(&self) -> bool;
     fn is_variable_expression(&self) -> bool;
@@ -60,4 +65,112 @@ pub trait NodeType {
     fn is_name(&self) -> bool;
     fn is_halt_compiler_expression(&self) -> bool;
     fn is_prefix_unary_expression(&self) -> bool;
+}
+
+impl<R> NodeType for (SyntaxKind, R) {
+    type R = R;
+
+    fn extract(self) -> Self::R {
+        self.1
+    }
+
+    fn is_missing(&self) -> bool {
+        match self.0 {
+            SyntaxKind::Missing => true,
+            _ => false,
+        }
+    }
+
+    fn is_abstract(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::Token(TokenKind::Abstract) => true,
+            _ => false,
+        }
+    }
+
+    fn is_name(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::Token(TokenKind::Name) => true,
+            _ => false,
+        }
+    }
+
+    // Note: we could generate ~150 methods like those below but most would be dead
+
+    fn is_variable_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::VariableExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_subscript_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::SubscriptExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_member_selection_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::MemberSelectionExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_scope_resolution_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::ScopeResolutionExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_object_creation_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::ObjectCreationExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_qualified_name(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::QualifiedName { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_safe_member_selection_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::SafeMemberSelectionExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_function_call_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::FunctionCallExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_list_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::ListExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_halt_compiler_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::HaltCompilerExpression { .. } => true,
+            _ => false,
+        }
+    }
+
+    fn is_prefix_unary_expression(&self) -> bool {
+        match &self.0 {
+            SyntaxKind::PrefixUnaryExpression { .. } => true,
+            _ => false,
+        }
+    }
 }

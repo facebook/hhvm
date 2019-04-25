@@ -851,11 +851,10 @@ module GenerateFFRustSmartConstructors = struct
   let full_fidelity_smart_constructors_template: string = make_header CStyle "" ^ "
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
-use crate::smart_constructors::NodeType;
 
 pub trait SmartConstructors<State> {
     type Token: LexableToken;
-    type R: NodeType;
+    type R;
 
     fn initial_state(env: &ParserEnv) -> State;
 
@@ -1386,6 +1385,87 @@ end (* SyntaxKind *)
     aggregate_transformations = [];
   }
 end (* GenerateFFSmartConstructorsWrappers *)
+
+module GenerateFFRustSmartConstructorsWrappers = struct
+  let to_constructor_methods x =
+    let params =
+      List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i ^ " : Self::R")
+    in
+    let params = String.concat ~sep:", " params in
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let raw_args =
+      map_and_concat_separated ", " (fun x -> x ^ ".1") args
+    in
+    sprintf "    fn make_%s(st: State, %s) -> (State, Self::R) {
+        compose(SyntaxKind::%s, S::make_%s(st, %s))
+    }\n"
+      x.type_name params x.kind_name x.type_name raw_args
+
+  let full_fidelity_smart_constructors_wrappers_template: string =
+  (make_header CStyle "") ^ "
+ // This module contains smart constructors implementation that can be used to
+ // build AST.
+" ^ "
+
+use crate::lexable_token::LexableToken;
+use crate::parser_env::ParserEnv;
+use crate::smart_constructors::SmartConstructors;
+use crate::syntax_kind::SyntaxKind;
+
+pub struct WithKind<S> {
+    phantom_s: std::marker::PhantomData<S>,
+}
+impl<S, State> SmartConstructors<State> for WithKind<S>
+where S: SmartConstructors<State> {
+    type Token = S::Token;
+    type R = (SyntaxKind, S::R);
+
+    fn initial_state(env: &ParserEnv) -> State {
+        S::initial_state(env)
+    }
+
+    fn make_token(st: State, token: Self::Token) -> (State, Self::R) {
+        compose(SyntaxKind::Token(token.kind()), S::make_token(st, token))
+    }
+
+    fn make_missing(st: State, p: usize) -> (State, Self::R) {
+        compose(SyntaxKind::Missing, S::make_missing(st, p))
+    }
+
+    fn make_list(st: State, items: Box<Vec<Self::R>>, p: usize) -> (State, Self::R) {
+        let kind = if items.is_empty() {
+            SyntaxKind::Missing
+        } else {
+            SyntaxKind::SyntaxList
+        };
+        compose(kind, S::make_list(st, Box::new(items.into_iter().map(|x| x.1).collect()), p))
+    }
+
+CONSTRUCTOR_METHODS
+}
+
+// TODO: will this always be inlined? If not, rewrite as macro
+fn compose<St, R>(kind: SyntaxKind, st_r: (St, R)) -> (St, (SyntaxKind, R)) {
+    let (st, r) = st_r;
+    (st, (kind, r))
+}
+"
+
+  let full_fidelity_smart_constructors_wrappers =
+  {
+    filename = full_fidelity_path_prefix ^
+      "smart_constructors_wrappers.rs";
+    template = full_fidelity_smart_constructors_wrappers_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFRustSmartConstructorsWrappers *)
 
 module GenerateFFSyntax = struct
   let to_to_kind x =
@@ -2906,4 +2986,7 @@ let () =
     GenerateFFParserSig.full_fidelity_parser_sig;
   generate_file
     GenerateFFSmartConstructorsWrappers
+      .full_fidelity_smart_constructors_wrappers;
+  generate_file
+    GenerateFFRustSmartConstructorsWrappers
       .full_fidelity_smart_constructors_wrappers

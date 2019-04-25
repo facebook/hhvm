@@ -5,13 +5,11 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the "hack" directory of this source tree.
  *
- */
+*/
 use crate::lexable_token::LexableToken;
-use crate::smart_constructors::NodeType;
 pub use crate::syntax_generated::*;
 use crate::syntax_kind::SyntaxKind;
 use crate::syntax_type::*;
-use crate::token_kind::TokenKind;
 
 use std::marker::Sized;
 
@@ -112,110 +110,6 @@ where
                 }
                 None
             }
-        }
-    }
-}
-
-impl<T, V> NodeType for Syntax<T, V>
-where
-    T: LexableToken,
-    V: SyntaxValueType<T>,
-{
-    fn is_missing(&self) -> bool {
-        match self.syntax {
-            SyntaxVariant::Missing => true,
-            _ => false,
-        }
-    }
-
-    fn is_abstract(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::Token(t) => t.kind() == TokenKind::Abstract,
-            _ => false,
-        }
-    }
-
-    fn is_name(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::Token(t) => t.kind() == TokenKind::Name,
-            _ => false,
-        }
-    }
-
-    fn is_variable_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::VariableExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_subscript_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::SubscriptExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_member_selection_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::MemberSelectionExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_scope_resolution_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::ScopeResolutionExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_object_creation_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::ObjectCreationExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_qualified_name(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::QualifiedName { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_safe_member_selection_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::SafeMemberSelectionExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_function_call_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::FunctionCallExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_list_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::ListExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_halt_compiler_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::HaltCompilerExpression { .. } => true,
-            _ => false,
-        }
-    }
-
-    fn is_prefix_unary_expression(&self) -> bool {
-        match &self.syntax {
-            SyntaxVariant::PrefixUnaryExpression { .. } => true,
-            _ => false,
         }
     }
 }

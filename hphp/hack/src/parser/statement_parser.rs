@@ -24,6 +24,7 @@ use crate::type_parser::TypeParser;
 pub struct StatementParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
     env: ParserEnv,
@@ -36,6 +37,7 @@ where
 impl<'a, S, T: Clone> std::clone::Clone for StatementParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn clone(&self) -> Self {
         Self {
@@ -52,6 +54,7 @@ where
 impl<'a, S, T: Clone> ParserTrait<'a, S, T> for StatementParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn make(
         lexer: Lexer<'a, S::Token>,
@@ -130,6 +133,7 @@ where
 impl<'a, S, T: Clone> StatementParser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     fn with_type_parser<U>(&mut self, f: &Fn(&mut TypeParser<'a, S, T>) -> U) -> U {
         let mut type_parser: TypeParser<S, T> = TypeParser::make(

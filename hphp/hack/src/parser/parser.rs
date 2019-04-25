@@ -12,13 +12,14 @@ use crate::declaration_parser::DeclarationParser;
 use crate::lexer::Lexer;
 use crate::parser_env::ParserEnv;
 use crate::parser_trait::{Context, ParserTrait};
-use crate::smart_constructors::SmartConstructors;
+use crate::smart_constructors::{NodeType, SmartConstructors};
 use crate::source_text::SourceText;
 use crate::syntax_error::SyntaxError;
 
 pub struct Parser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
     errors: Vec<SyntaxError>,
@@ -30,6 +31,7 @@ where
 impl<'a, S, T: Clone> Parser<'a, S, T>
 where
     S: SmartConstructors<T>,
+    S::R: NodeType,
 {
     pub fn make(source: &'a SourceText<'a>, env: ParserEnv) -> Self {
         let sc_state = S::initial_state(&env);
@@ -53,14 +55,19 @@ where
         (self.lexer, self.errors, self.env, self.sc_state)
     }
 
-    pub fn parse_header_only(env: ParserEnv, text: &'a SourceText<'a>) -> Option<S::R> {
+    pub fn parse_header_only(
+        env: ParserEnv,
+        text: &'a SourceText<'a>,
+    ) -> Option<<S::R as NodeType>::R> {
         let (lexer, errors, env, sc_state) = Self::make(text, env).into_parts();
         let mut decl_parser: DeclarationParser<S, T> =
             DeclarationParser::make(lexer, env, Context::empty(), errors, sc_state);
-        decl_parser.parse_leading_markup_section()
+        decl_parser
+            .parse_leading_markup_section()
+            .map(|r| r.extract())
     }
 
-    pub fn parse_script(&mut self) -> S::R {
+    pub fn parse_script(&mut self) -> <S::R as NodeType>::R {
         let mut decl_parser: DeclarationParser<S, T> = DeclarationParser::make(
             self.lexer.clone(),
             self.env.clone(),
@@ -68,7 +75,7 @@ where
             vec![],
             self.sc_state.clone(),
         );
-        let root = decl_parser.parse_script();
+        let root = decl_parser.parse_script().extract();
         let (lexer, _context, errors, sc_state) = decl_parser.into_parts();
         self.errors = errors;
         self.sc_state = sc_state;

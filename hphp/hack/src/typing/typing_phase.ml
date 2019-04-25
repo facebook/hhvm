@@ -520,3 +520,5 @@ let sub_type_decl env ty1 ty2 =
   let env, ty1 = localize_with_self env ty1 in
   let env, ty2 = localize_with_self env ty2 in
   ignore (TUtils.sub_type env ty1 ty2)
+
+let () = TUtils.localize_with_self_ref := localize_with_self

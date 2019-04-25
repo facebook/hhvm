@@ -11,7 +11,6 @@ open Core_kernel
 
 module Reason  = Typing_reason
 module Env     = Typing_env
-module Phase   = Typing_phase
 module MakeType = Typing_make_type
 
 (*****************************************************************************)
@@ -37,14 +36,14 @@ let can_coerce env ty_have ty_expect =
   Typing_coercion.can_coerce env ty_have ty_expect
 
 let sub_type_decl p ur env ty_sub ty_super =
-  let env, ty_super = Phase.localize_with_self env ty_super in
-  let env, ty_sub = Phase.localize_with_self env ty_sub in
+  let env, ty_super = Typing_utils.localize_with_self env ty_super in
+  let env, ty_sub = Typing_utils.localize_with_self env ty_sub in
   ignore (sub_type p ur env ty_sub ty_super)
 
 (* Ensure that types are equivalent i.e. subtypes of each other *)
 let unify_decl p ur env ty1 ty2 =
-  let env, ty1 = Phase.localize_with_self env ty1 in
-  let env, ty2 = Phase.localize_with_self env ty2 in
+  let env, ty1 = Typing_utils.localize_with_self env ty1 in
+  let env, ty2 = Typing_utils.localize_with_self env ty2 in
   ignore (sub_type p ur env ty2 ty1);
   ignore (sub_type p ur env ty1 ty2)
 

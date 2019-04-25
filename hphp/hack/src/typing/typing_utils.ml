@@ -109,6 +109,10 @@ type diff = locl ty -> locl ty -> locl ty
 let (diff_ref : diff ref) = ref not_implemented
 let diff x = !diff_ref x
 
+type localize_with_self = Env.env -> decl ty -> Env.env * locl ty
+let (localize_with_self_ref : localize_with_self ref) = ref not_implemented
+let localize_with_self x = !localize_with_self_ref x
+
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent (`this, []), Some ty)
 

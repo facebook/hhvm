@@ -76,18 +76,15 @@ let rec can_coerce ?seen:(seen=[]) env ty_have ty_expect =
   (* cannot coerce outside of subtyping *)
   | _ -> None
 
-(* this is to break circular dependency on typing_ops *)
-let sub_type _ _ env ty_have ty_expect = SubType.sub_type env ty_have ty_expect
-
 (* does coercion, including subtyping *)
-let coerce_type ?sub_fn:(sub=sub_type) p ur env ty_have ty_expect =
+let coerce_type p ?sub_fn:(sub=Typing_ops.sub_type) ur env ty_have ty_expect =
   match can_coerce env ty_have ty_expect with
   | Some e -> e
   | None -> sub p ur env ty_have ty_expect
 
 (* does coercion if possible, returning Some env with resultant coercion constraints
  * otherwise suppresses errors from attempted coercion and returns None *)
-let try_coerce ?sub_fn:(sub=sub_type) p ur env ty_have ty_expect =
+let try_coerce ?sub_fn:(sub=Typing_ops.sub_type) p ur env ty_have ty_expect =
   let f = !Errors.is_hh_fixme in
   Errors.is_hh_fixme := (fun _ _ -> false);
   let result =
@@ -96,3 +93,6 @@ let try_coerce ?sub_fn:(sub=sub_type) p ur env ty_have ty_expect =
       (fun _ -> None) in
   Errors.is_hh_fixme := f;
   result
+
+let () = Typing_utils.can_coerce_ref := can_coerce
+let () = Typing_utils.coerce_type_ref := coerce_type

@@ -113,6 +113,17 @@ type localize_with_self = Env.env -> decl ty -> Env.env * locl ty
 let (localize_with_self_ref : localize_with_self ref) = ref not_implemented
 let localize_with_self x = !localize_with_self_ref x
 
+type coerce_type =
+  Pos.t ->
+  ?sub_fn:(Pos.t -> Reason.ureason -> Env.env -> locl ty -> locl ty -> Env.env) ->
+  Reason.ureason -> Env.env -> locl ty -> locl ty -> Env.env
+let (coerce_type_ref : coerce_type ref) = ref not_implemented
+let coerce_type x = !coerce_type_ref x
+
+type can_coerce = Env.env -> locl ty -> locl ty -> Env.env option
+let (can_coerce_ref : can_coerce ref) = ref not_implemented
+let can_coerce x = !can_coerce_ref x
+
 (* Convenience function for creating `this` types *)
 let this_of ty = Tabstract (AKdependent (`this, []), Some ty)
 

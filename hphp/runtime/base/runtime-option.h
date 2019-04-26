@@ -941,7 +941,7 @@ struct RuntimeOption {
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
   F(string, PCRECacheType, std::string("static"))                       \
   F(bool, EnableCompactBacktrace, true)                                 \
-  F(bool, EnableNuma, ServerExecutionMode())                            \
+  F(bool, EnableNuma, (numa_num_nodes > 1) && ServerExecutionMode())    \
   /* Use 1G pages for jemalloc metadata. */                             \
   F(bool, EnableArenaMetadata1GPage, false)                             \
   /* Use 1G pages for jemalloc metadata (NUMA arenas if applicable). */ \

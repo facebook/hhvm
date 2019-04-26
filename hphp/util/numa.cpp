@@ -13,21 +13,25 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/util/numa.h"
 
 #ifdef HAVE_NUMA
-
-#include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 #include <folly/Bits.h>
-
 extern "C" {
 HHVM_ATTRIBUTE_WEAK extern void numa_init();
 }
+#endif
 
 namespace HPHP {
 
+// 1 NUMA node if HAVE_NUMA not defined. Otherwise, initNuma() will calculate it
+// while generating the masks.
+uint32_t numa_num_nodes = 1;
+
+#ifdef HAVE_NUMA
+
 uint32_t numa_node_set;
-uint32_t numa_num_nodes;
 uint32_t numa_node_mask;
 std::vector<bitmask*> node_to_cpu_mask;
 bool use_numa = false;
@@ -56,6 +60,7 @@ void initNuma() {
   bool ret = true;
   bitmask* run_nodes = numa_get_run_node_mask();
   bitmask* mem_nodes = numa_get_mems_allowed();
+  numa_num_nodes = 0;
   for (int i = 0; i <= max_node; i++) {
     if (!numa_bitmask_isbitset(run_nodes, i) ||
         !numa_bitmask_isbitset(mem_nodes, i)) {
@@ -100,6 +105,5 @@ void numa_bind_to(void* start, size_t size, int node) {
   numa_tonode_memory(start, size, node);
 }
 
-}
-
 #endif
+}

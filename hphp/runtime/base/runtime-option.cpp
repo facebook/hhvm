@@ -56,6 +56,7 @@
 #include "hphp/util/log-file-flusher.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/network.h"
+#include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
 #include "hphp/util/stack-trace.h"
@@ -1744,7 +1745,9 @@ void RuntimeOption::Load(
 #undef F
 
     if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
-    if (getenv("HHVM_DISABLE_NUMA")) EvalEnableNuma = false;
+    if (getenv("HHVM_DISABLE_NUMA") || (numa_num_nodes <= 1)) {
+      EvalEnableNuma = false;
+    }
 
     Config::Bind(ServerForkEnabled, ini, config,
                  "Server.Forking.Enabled", ServerForkEnabled);

@@ -281,15 +281,12 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       ex->m_arFuncPtr,
       ex->m_nativeFuncPtr
     );
-    ex->m_takesNumArgs = !!(nativeAttributes & Native::AttrTakesNumArgs);
 
     if (ex->m_nativeFuncPtr) {
       if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
         ex->m_returnByValue = true;
       }
-      int extra =
-        (nativeAttributes & Native::AttrTakesNumArgs ? 1 : 0) +
-        (isMethod() ? 1 : 0);
+      int extra = isMethod() ? 1 : 0;
       assertx(info.sig.args.size() == params.size() + extra);
       for (auto i = params.size(); i--; ) {
         switch (info.sig.args[extra + i]) {
@@ -489,7 +486,6 @@ static const StaticString
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
-  s_numargs("NumArgs"),
   s_opcodeimpl("OpCodeImpl");
 
 int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
@@ -512,8 +508,6 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         attrs_ |= AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;
-      } else if (userAttrStrVal.get()->isame(s_numargs.get())) {
-        ret |= Native::AttrTakesNumArgs;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {
         ret |= Native::AttrOpCodeImpl;
       }

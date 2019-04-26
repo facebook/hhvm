@@ -229,7 +229,6 @@ enum Attr {
   AttrNone         = 0,
   AttrActRec       = (1u << 0),
   AttrOpCodeImpl   = (1u << 1), //Methods whose implementation is in the emitter
-  AttrTakesNumArgs = (1u << 2), //Takes an additional "func_num_args()" arg
 };
 
 /**

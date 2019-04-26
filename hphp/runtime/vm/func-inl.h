@@ -462,10 +462,6 @@ inline bool Func::isCPPBuiltin() const {
   return UNLIKELY(!!ex) && ex->m_arFuncPtr;
 }
 
-inline bool Func::takesNumArgs() const {
-  return shared()->m_takesNumArgs;
-}
-
 inline ArFunction Func::arFuncPtr() const {
   if (auto const ex = extShared()) return ex->m_arFuncPtr;
   return nullptr;

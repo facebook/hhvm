@@ -180,10 +180,6 @@ void callFunc(const Func* func, void *ctx,
     GP_args[GP_count++] = (int64_t)ctx;
   }
 
-  if (func->takesNumArgs()) {
-    GP_args[GP_count++] = (int64_t)numNonDefault;
-  }
-
   if (usesDoubles) {
     populateArgs(func, args, numArgs,
                            GP_args, GP_count, SIMD_args, SIMD_count);
@@ -612,10 +608,6 @@ const char* checkTypeFunc(const NativeSig& sig,
     } else {
       if (ctxTy != T::This) return kNeedObjectContextMessage;
     }
-  }
-
-  if (nativeAttributes & Native::AttrTakesNumArgs) {
-    if (*argIt++ != T::Int64) return kInvalidNumArgsMessage;
   }
 
   for (auto const& pInfo : func->params) {

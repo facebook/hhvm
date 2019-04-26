@@ -744,12 +744,6 @@ struct Func final {
   bool isCPPBuiltin() const;
 
   /*
-   * This HNI method takes an additional "func_num_args()" value at the
-   * beginning of its signature (after Class* / ObjectData* for methods)
-   */
-  bool takesNumArgs() const;
-
-  /*
    * The function returned by arFuncPtr() takes an ActRec*, unpacks it,
    * and usually dispatches to a nativeFuncPtr() with a specific signature.
    *
@@ -1212,7 +1206,6 @@ private:
     bool m_isMemoizeWrapper : 1;
     bool m_isMemoizeWrapperLSB : 1;
     bool m_isPhpLeafFn : 1;
-    bool m_takesNumArgs : 1;
     bool m_hasReifiedGenerics : 1;
     bool m_isRxDisabled : 1;
     // Needing more than 2 class ref slots basically doesn't happen, so just use

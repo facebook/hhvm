@@ -346,17 +346,6 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     }
   }
 
-  // Add the func_num_args() value if needed.
-  if (callee->takesNumArgs()) {
-    // If `numNonDefault' is negative, this is passed as an src.
-    if (extra->numNonDefault >= 0) {
-      args.imm((int64_t)extra->numNonDefault);
-    } else {
-      args.ssa(srcNum);
-      ++srcNum;
-    }
-  }
-
   // Add the positional arguments.
   for (uint32_t i = 0; i < callee->numParams(); ++i, ++srcNum) {
     auto const& pi = callee->params()[i];

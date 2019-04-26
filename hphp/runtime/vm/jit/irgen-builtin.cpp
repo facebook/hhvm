@@ -1276,7 +1276,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   if (params.thiz) ret[argIdx++] = params.thiz;
   if (params.count) ret[argIdx++] = params.count;
 
-  assertx(!params.count || callee->takesNumArgs());
+  assertx(!params.count);
 
   auto const needDVCheck = [&](uint32_t param, const Type& ty) {
     if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
@@ -1698,7 +1698,7 @@ void emitNativeImpl(IRGS& env) {
         env,
         callee,
         thiz,
-        callee->takesNumArgs() ? numParams : nullptr,
+        nullptr,
         callee->numParams(),
         callee->numParams(),
         true,

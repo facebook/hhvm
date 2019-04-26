@@ -49,7 +49,7 @@
     clientMessages))
 
 (library
-  (name state_loader)
+  (name state_loader_stubs)
   (wrapped false)
   (modules
     state_loader

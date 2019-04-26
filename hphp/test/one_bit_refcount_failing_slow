@@ -2,6 +2,8 @@ slow/collection_classes/pair-clone.php
 slow/dict/ref-fail-leak.php
 slow/dv_array/ext_xenon/xenon_crash.php
 slow/dv_array_hack_arr/ext_xenon/xenon_crash.php
+slow/facebook/ext_base_soft_map/default_trim_type.php
+slow/facebook/ext_base_soft_map/trim_types.php
 slow/hack_arr_compat/parse-str.php
 slow/inline-nested-vm-stack.php
 slow/inline-trim-extra-args.php

@@ -124,7 +124,6 @@ struct Option {
 
   static std::string ProgramName;
 
-  static bool ParseTimeOpts;
   static bool EnableShortTags;
   static int ParserThreadCount;
 

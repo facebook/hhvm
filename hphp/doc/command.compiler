@@ -106,12 +106,6 @@ If this parameter is set, the compiler will first output to DIR, and then
 only copy over files that have changed to the output directory. This is to
 preserve their timestamps so that a make will not recompile unchanged files.
 
-= --optimize-level=INT (default: 1)
-
-This sets the severity of optimizations performed on the PHP code before
-being translated into C++. Currently, there are two levels of optimization.
-0 performs no optimizations, and 1 performs some optimizations.
-
 = --gen-stats=BOOL (default: false)
 
 If BOOL is true, then detected errors in the code and code statistics will

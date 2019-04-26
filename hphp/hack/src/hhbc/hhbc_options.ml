@@ -31,7 +31,6 @@ type t = {
   option_dynamic_invoke_functions         : SSet.t;
   option_repo_authoritative               : bool;
   option_jit_enable_rename_function       : bool;
-  option_can_inline_gen_functions         : bool;
   option_php7_int_semantics               : bool;
   option_enable_is_expr_primitive_migration : bool;
   option_enable_coroutines                : bool;
@@ -69,7 +68,7 @@ let default = {
   option_enable_hiphop_syntax = false;
   option_php7_scalar_types = false;
   option_enable_xhp = false;
-  option_constant_folding = false;
+  option_constant_folding = true;
   option_optimize_null_check = false;
   option_max_array_elem_size_on_the_stack = 64;
   option_aliased_namespaces = None;
@@ -87,7 +86,6 @@ let default = {
   option_dynamic_invoke_functions = SSet.empty;
   option_repo_authoritative = false;
   option_jit_enable_rename_function = false;
-  option_can_inline_gen_functions = true;
   option_php7_int_semantics = false;
   option_enable_is_expr_primitive_migration = true;
   option_enable_coroutines = true;
@@ -140,7 +138,6 @@ let hack_arr_dv_arrs o = o.option_hack_arr_dv_arrs
 let dynamic_invoke_functions o = o.option_dynamic_invoke_functions
 let repo_authoritative o = o.option_repo_authoritative
 let jit_enable_rename_function o = o.option_jit_enable_rename_function
-let can_inline_gen_functions o = o.option_can_inline_gen_functions
 let php7_int_semantics o = o.option_php7_int_semantics
 let enable_is_expr_primitive_migration o = o.option_enable_is_expr_primitive_migration
 let enable_coroutines o = o.option_enable_coroutines
@@ -201,7 +198,6 @@ let to_string o =
     ; Printf.sprintf "repo_authoritative: %B" @@ repo_authoritative o
     ; Printf.sprintf "jit_enable_rename_function: %B"
       @@ jit_enable_rename_function o
-    ; Printf.sprintf "can_inline_gen_functions: %B" @@ can_inline_gen_functions o
     ; Printf.sprintf "php7_int_semantics: %B" @@ php7_int_semantics o
     ; Printf.sprintf "enable_is_expr_primitive_migration: %B"
       @@ enable_is_expr_primitive_migration o
@@ -286,10 +282,6 @@ let set_option options name value =
     { options with option_repo_authoritative = as_bool value }
   | "eval.jitenablerenamefunction" ->
     { options with option_jit_enable_rename_function = as_bool value }
-  | "eval.disablehphpcopts" ->
-    let v = not (as_bool value) in
-    { options with option_constant_folding = v;
-                   option_can_inline_gen_functions = v}
   | "hhvm.php7.int_semantics" ->
     { options with option_php7_int_semantics = as_bool value }
   | "hack.lang.enableisexprprimitivemigration" ->
@@ -423,9 +415,6 @@ let value_setters = [
     fun opts v -> { opts with option_constant_folding = (v = 1) });
   (set_value "hack.compiler.optimize_null_checks" get_value_from_config_int @@
     fun opts v -> { opts with option_optimize_null_check = (v = 1) });
-  (set_value "hhvm.disable_hphpc_opts" get_value_from_config_int @@
-    fun opts v -> { opts with option_constant_folding = (v = 0);
-                              option_can_inline_gen_functions = (v = 0) });
   (set_value "eval.disassembler_source_mapping" get_value_from_config_int @@
     fun opts v -> { opts with option_source_mapping = (v = 1) });
   (set_value "hhvm.php7.uvs" get_value_from_config_int @@

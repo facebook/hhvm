@@ -81,7 +81,6 @@ bool Option::KeepStatementsWithNoEffect = false;
 
 std::string Option::ProgramName;
 
-bool Option::ParseTimeOpts = true;
 bool Option::EnableShortTags = true;
 int Option::ParserThreadCount = 0;
 

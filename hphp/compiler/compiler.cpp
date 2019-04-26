@@ -107,7 +107,6 @@ struct CompilerOptions {
   bool keepTempDir;
   int logLevel;
   bool force;
-  int optimizeLevel;
   std::string filecache;
   bool coredump;
   bool nofork;
@@ -274,8 +273,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "Files will be created in this directory first, then sync with output "
      "directory without overwriting identical files. Great for incremental "
      "compilation and build.")
-    ("optimize-level", value<int>(&po.optimizeLevel)->default_value(-1),
-     "optimization level")
     ("gen-stats", value<bool>(&po.genStats)->default_value(false),
      "whether to generate code errors")
     ("keep-tempdir,k", value<bool>(&po.keepTempDir)->default_value(false),
@@ -493,15 +490,6 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
   if (po.format.empty() && (po.target == "run" || po.target == "hhbc")) {
     po.format = "binary";
-  }
-
-  if (po.optimizeLevel == -1) {
-    po.optimizeLevel = RuntimeOption::EvalDisableHphpcOpts ? 0 : 1;
-  }
-
-  if (po.optimizeLevel == 0) {
-    // --optimize-level=0 is equivalent to --opts=none
-    Option::ParseTimeOpts = false;
   }
 
   return 0;

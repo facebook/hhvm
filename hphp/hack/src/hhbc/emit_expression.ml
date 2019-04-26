@@ -24,7 +24,6 @@ let can_inline_gen_functions () =
   let opts = !Opts.compiler_options in
   Emit_env.is_hh_syntax_enabled () &&
   (Opts.enable_hiphop_syntax opts) &&
-  (Opts.can_inline_gen_functions opts) &&
   not (Opts.jit_enable_rename_function opts)
 
 let max_array_elem_on_stack () =

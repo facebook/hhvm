@@ -110,7 +110,7 @@
            (Expr
               (([17:3-25], _),
                (Call (Cnormal,
-                  (([17:3-15], (function<Tv>(Container<nothing> $input, ?(function(nothing): bool) $callback): _)),
+                  (([17:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): _)),
                    (Id ([17:3-15], "\\array_filter"))),
                   [], [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))], 
                   [])))));
@@ -214,7 +214,7 @@
            (Expr
               (([26:3-29], _),
                (Call (Cnormal,
-                  (([26:3-15], (function<Tv>(Container<nothing> $input, ?(function(nothing): bool) $callback): _)),
+                  (([26:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): _)),
                    (Id ([26:3-15], "\\array_filter"))),
                   [],
                   [(([26:16-24], _), (Lvar ([26:16-24], $untyped)));

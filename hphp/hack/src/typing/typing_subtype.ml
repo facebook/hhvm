@@ -188,6 +188,18 @@ let is_final_and_not_contravariant env id =
   | Some class_ty -> TUtils.class_is_final_and_not_contravariant class_ty
   | None -> false
 
+(** Make all types appearing in the given type a Tany, e.g.
+- for A<B> return A<_>
+- for function(A): B return function (_): _
+*)
+let anyfy env r ty =
+  let anyfyer = object
+      inherit Type_mapper.deep_type_mapper as super
+      method! on_type env _ty = env, (r, Tany)
+      method go ty = let _, ty = super#on_type env ty in ty
+    end in
+  anyfyer#go ty
+
 (* Process the constraint proposition *)
 let rec process_simplify_subtype_result ~this_ty ~fail env prop =
   match prop with
@@ -996,8 +1008,27 @@ and simplify_subtype
       try_each tyl env
     else default ()
 
-  | _, Tany | Tany, _ ->
-    if new_inference && not no_top_bottom then valid () else default ()
+  | Tany, Tany ->
+    if not new_inference then default () else valid ()
+
+  (* If ty_sub contains other types, e.g. C<T>, make this a subtype assertion on
+  those inner types and `any`. For example transform the assertion
+    C<D> <: Tany
+  into
+    C<D> <: C<Tany>
+  which might become
+    D <: Tany
+  if say C is covariant.
+  *)
+  | _, Tany ->
+    if no_top_bottom || not new_inference then default () else
+    let ety_super = anyfy env (fst ety_super) ety_sub in
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ety_sub ety_super env
+
+  | Tany, _ ->
+    if no_top_bottom || not new_inference then default () else
+    let ety_sub = anyfy env (fst ety_sub) ety_super in
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ety_sub ety_super env
 
   (* If subtype and supertype are the same generic parameter, we're done *)
   | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)

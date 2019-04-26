@@ -3044,19 +3044,19 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
           | _ -> ());
       match cid with
         | CIparent ->
-          let ctor_fty =
+          let env, ctor_fty =
             match (fst (Cls.construct class_info)) with
             | Some {ce_type = lazy ty; _ } ->
               let ety_env = {
                 type_expansions = [];
-                substs = SMap.empty;
+                substs = Subst.make (Cls.tparams class_info) params;
                 this_ty = obj_ty;
                 from_class = None;
                 validate_dty = None;
               } in
-              let _, ctor_fty = Phase.localize ~ety_env env ty in
-              check_abstract_parent_meth SN.Members.__construct p ctor_fty
-            | None -> ctor_fty
+              let env, ctor_fty = Phase.localize ~ety_env env ty in
+              env, check_abstract_parent_meth SN.Members.__construct p ctor_fty
+            | None -> env, ctor_fty
           in
           gather env tel tuel ((obj_ty,ctor_fty)::res) classes
         | CIstatic | CI _ | CIself -> gather env tel tuel ((c_ty,ctor_fty)::res) classes

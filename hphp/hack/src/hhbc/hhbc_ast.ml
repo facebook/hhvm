@@ -383,8 +383,10 @@ type instruct_call =
   | FPushObjMethodRD of num_params * method_id * Ast.og_null_flavor
   | FPushClsMethod of num_params * classref_id * param_locations
   | FPushClsMethodD of num_params * method_id * class_id
+  | FPushClsMethodRD of num_params * method_id * class_id
   | FPushClsMethodS of num_params * SpecialClsRef.t
   | FPushClsMethodSD of num_params * SpecialClsRef.t * method_id
+  | FPushClsMethodSRD of num_params * SpecialClsRef.t * method_id
   | NewObj of classref_id * has_generics_op
   | NewObjD of class_id
   | NewObjS of SpecialClsRef.t

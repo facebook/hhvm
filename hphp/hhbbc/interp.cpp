@@ -3329,7 +3329,10 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
   );
 }
 
-void in(ISS& env, const bc::FPushClsMethodD& op) {
+namespace {
+
+template <typename Op>
+void implFPushClsMethodD(ISS& env, const Op& op, bool isRFlavor) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
   auto clsType = rcls ? clsExact(*rcls) : TCls;
   auto const rfun = env.index.resolve_method(
@@ -3337,11 +3340,30 @@ void in(ISS& env, const bc::FPushClsMethodD& op) {
     clsType,
     op.str2
   );
+  if (isRFlavor && !rfun.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushClsMethodD { op.arg1, op.str2, op.str3, op.has_unpack }
+    );
+  }
   if (fpiPush(env, ActRec { FPIKind::ClsMeth, clsType, rcls, rfun }, op.arg1,
               false)) {
+    assertx(!isRFlavor);
     return reduce(env);
   }
+  if (isRFlavor) popC(env);
   discardAR(env, op.arg1);
+}
+
+} // namespace
+
+void in(ISS& env, const bc::FPushClsMethodD& op) {
+  implFPushClsMethodD(env, op, false);
+}
+
+void in(ISS& env, const bc::FPushClsMethodRD& op) {
+  implFPushClsMethodD(env, op, true);
 }
 
 namespace {
@@ -3435,7 +3457,10 @@ void in(ISS& env, const bc::FPushClsMethodS& op) {
   discardAR(env, op.arg1);
 }
 
-void in(ISS& env, const bc::FPushClsMethodSD& op) {
+namespace {
+
+template <typename Op>
+void implFPushClsMethodSD(ISS& env, const Op& op, bool isRFlavor) {
   auto const cls = specialClsRefToCls(env, op.subop2);
 
   folly::Optional<res::Class> rcls;
@@ -3447,6 +3472,14 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
   }
 
   if (op.subop2 == SpecialClsRef::Static && rcls && exactCls) {
+    if (isRFlavor) {
+      return reduce(
+        env,
+        bc::FPushClsMethodRD {
+          op.arg1, op.str3, rcls->name(), op.has_unpack
+        }
+      );
+    }
     return reduce(
       env,
       bc::FPushClsMethodD {
@@ -3456,15 +3489,34 @@ void in(ISS& env, const bc::FPushClsMethodSD& op) {
   }
 
   auto const rfun = env.index.resolve_method(env.ctx, cls, op.str3);
+  if (isRFlavor && !rfun.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushClsMethodSD { op.arg1, op.subop2, op.str3, op.has_unpack  }
+    );
+  }
   if (fpiPush(env, ActRec {
                 FPIKind::ClsMeth,
                 ctxCls(env),
                 rcls,
                 rfun
               }, op.arg1, false)) {
+    assertx(!isRFlavor);
     return reduce(env);
   }
+  if (isRFlavor) popC(env);
   discardAR(env, op.arg1);
+}
+
+} // namespace
+
+void in(ISS& env, const bc::FPushClsMethodSD& op) {
+  implFPushClsMethodSD(env, op, false);
+}
+
+void in(ISS& env, const bc::FPushClsMethodSRD& op) {
+  implFPushClsMethodSD(env, op, true);
 }
 
 void in(ISS& env, const bc::NewObjD& op) {

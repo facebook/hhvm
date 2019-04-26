@@ -792,8 +792,10 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::FPushObjMethodD:
   case Op::FPushObjMethodRD:
   case Op::FPushClsMethod:
+  case Op::FPushClsMethodRD:
   case Op::FPushClsMethodS:
   case Op::FPushClsMethodSD:
+  case Op::FPushClsMethodSRD:
   case Op::FPushClsMethodD: {  // IVA..., FPUSH, FPUSH
     auto const numArgs = getImm(pc, 0).u_IVA;
     auto const numPops = instrNumPops(pc);
@@ -1779,8 +1781,10 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::FPushObjMethodRD:
     case Op::FPushClsMethod:
     case Op::FPushClsMethodD:
+    case Op::FPushClsMethodRD:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
+    case Op::FPushClsMethodSRD:
     case Op::FPushCtor:
     case Op::FCall:
     case Op::FCallBuiltin:

@@ -229,6 +229,11 @@ let instr_fcallclsmethodd fcall_args method_name class_name = gather [
     FPushClsMethodD ((num_args_of fcall_args), method_name, class_name)));
   instr (ICall (FCall (fcall_args)))
 ]
+let instr_fcallclsmethodrd fcall_args method_name class_name = gather [
+  instr (ICall (
+    FPushClsMethodRD ((num_args_of fcall_args), method_name, class_name)));
+  instr (ICall (FCall (fcall_args)))
+]
 let instr_fcallclsmethod fcall_args pl = gather [
   instr (ICall (
     FPushClsMethod ((num_args_of fcall_args), class_ref_rewrite_sentinel, pl)));
@@ -241,6 +246,11 @@ let instr_fcallclsmethods fcall_args scref = gather [
 let instr_fcallclsmethodsd fcall_args scref method_name = gather [
   instr (ICall (
     FPushClsMethodSD ((num_args_of fcall_args), scref, method_name)));
+  instr (ICall (FCall (fcall_args)))
+]
+let instr_fcallclsmethodsrd fcall_args scref method_name = gather [
+  instr (ICall (
+    FPushClsMethodSRD ((num_args_of fcall_args), scref, method_name)));
   instr (ICall (FCall (fcall_args)))
 ]
 let instr_fcallobjmethodd_nullthrows fcall_args method_ =

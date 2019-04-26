@@ -5121,7 +5121,8 @@ void pushClsMethodImpl(Class* cls,
                        StringData* name,
                        int numArgs,
                        bool forwarding,
-                       bool dynamic) {
+                       bool dynamic,
+                       folly::Optional<Array> tsList) {
   auto const ctx = liveClass();
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
@@ -5140,7 +5141,7 @@ void pushClsMethodImpl(Class* cls,
   }
   assertx(f);
   if (f->hasReifiedGenerics()) {
-    if (!isReifiedName(name)) {
+    if (!isReifiedName(name) && !tsList) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
     }
   }
@@ -5172,9 +5173,17 @@ void pushClsMethodImpl(Class* cls,
   }
 
   if (f->hasReifiedGenerics()) {
-    assertx(isReifiedName(name));
-    auto const reifiedGenerics =
-      getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
+    // As long as a tsList is passed, we'll use that over reading it from
+    // the name
+    auto reifiedGenerics = [&] {
+      if (!tsList) {
+        return getReifiedTypeList(stripClsOrFnNameFromReifiedName(name));
+      }
+      auto tsListAD = tsList->detach();
+      // The array-data passed on the stack may not be static
+      ArrayData::GetScalarArray(&tsListAD);
+      return tsListAD;
+    }();
     ar->setReifiedGenerics(reifiedGenerics);
   }
 }
@@ -5216,18 +5225,43 @@ OPTBLD_INLINE void iopFPushClsMethod(uint32_t numArgs, clsref_slot slot,
   // pushClsMethodImpl will take care of decReffing name
   vmStack().ndiscard(1);
   assertx(cls && name);
-  pushClsMethodImpl(cls, name, numArgs, false, true);
+  pushClsMethodImpl(cls, name, numArgs, false, true, folly::none);
 }
 
-OPTBLD_INLINE
-void iopFPushClsMethodD(uint32_t numArgs, const StringData* name, Id classId) {
+
+namespace {
+
+ALWAYS_INLINE
+void implFPushClsMethodD(
+  uint32_t numArgs,
+  const StringData* name,
+  Id classId,
+  folly::Optional<Array> tsList
+) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
   Class* cls = Unit::loadClass(nep.second, nep.first);
   if (cls == nullptr) {
     raise_error(Strings::UNKNOWN_CLASS, nep.first->data());
   }
-  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs, false, false);
+  pushClsMethodImpl(cls, const_cast<StringData*>(name), numArgs,
+                    false, false, tsList);
+}
+
+} // namespace
+
+OPTBLD_INLINE
+void iopFPushClsMethodD(uint32_t numArgs, const StringData* name, Id classId) {
+  implFPushClsMethodD(numArgs, name, classId, folly::none);
+}
+
+OPTBLD_INLINE
+void iopFPushClsMethodRD(uint32_t numArgs, const StringData* name, Id classId) {
+  auto const tsListCell = vmStack().topC();
+  assertx(tvIsVecOrVArray(tsListCell));
+  auto const tsList = Array::attach(tsListCell->m_data.parr);
+  vmStack().discard();
+  implFPushClsMethodD(numArgs, name, classId, tsList);
 }
 
 OPTBLD_INLINE void iopFPushClsMethodS(uint32_t numArgs, SpecialClsRef ref,
@@ -5251,7 +5285,8 @@ OPTBLD_INLINE void iopFPushClsMethodS(uint32_t numArgs, SpecialClsRef ref,
     name,
     numArgs,
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    true
+    true,
+    folly::none
   );
 }
 
@@ -5263,7 +5298,25 @@ OPTBLD_INLINE void iopFPushClsMethodSD(uint32_t numArgs,
     const_cast<StringData*>(name),
     numArgs,
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false
+    false,
+    folly::none
+  );
+}
+
+OPTBLD_INLINE void iopFPushClsMethodSRD(uint32_t numArgs,
+                                        SpecialClsRef ref,
+                                        const StringData* name) {
+  auto const tsListCell = vmStack().topC();
+  assertx(tvIsVecOrVArray(tsListCell));
+  auto const tsList = Array::attach(tsListCell->m_data.parr);
+  vmStack().discard();
+  pushClsMethodImpl(
+    specialClsRefToCls(ref),
+    const_cast<StringData*>(name),
+    numArgs,
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
+    false,
+    tsList
   );
 }
 

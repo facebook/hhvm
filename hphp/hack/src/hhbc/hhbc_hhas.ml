@@ -464,12 +464,21 @@ let string_of_call instruction =
     sep ["FPushClsMethodD";
       string_of_int n;
       string_of_method_id id; string_of_class_id cid]
+  | FPushClsMethodRD (n, id, cid) ->
+    sep ["FPushClsMethodRD";
+      string_of_int n;
+      string_of_method_id id; string_of_class_id cid]
   | FPushClsMethodS (n, r) ->
      sep ["FPushClsMethodS";
           string_of_int n;
           SpecialClsRef.to_string r]
   | FPushClsMethodSD (n, r, id) ->
      sep ["FPushClsMethodSD";
+          string_of_int n;
+          SpecialClsRef.to_string r;
+          string_of_method_id id]
+  | FPushClsMethodSRD (n, r, id) ->
+     sep ["FPushClsMethodSRD";
           string_of_int n;
           SpecialClsRef.to_string r;
           string_of_method_id id]

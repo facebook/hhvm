@@ -1730,8 +1730,10 @@ void dce(Env& env, const bc::FCall& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallBuiltin& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushClsMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushClsMethodD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FPushClsMethodRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushClsMethodS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushClsMethodSD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::FPushClsMethodSRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushCtor& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushFuncD& op) { no_dce(env, op); }

@@ -1947,20 +1947,26 @@ FPushClsMethod   <num params> <class-ref slot>
   [U U U C|V..C|V C]  ->  [C|V..C|V]
 FPushClsMethodD  <num params> <litstr id> <litstr id>
   [U U U C|V..C|V]    ->  [C|V..C|V]
+FPushClsMethodRD <num params> <litstr id> <litstr id>
+  [U U U C|V..C|V C]  ->  [C|V..C|V]
 FPushClsMethodS  <num params> <mode>
   [U U U C|V..C|V C]  ->  [C|V..C|V]
 FPushClsMethodSD <num params> <mode> <litstr id>
   [U U U C|V..C|V]    ->  [C|V..C|V]
+FPushClsMethodSRD <num params> <mode> <litstr id>
+  [U U U C|V..C|V C]  ->  [C|V..C|V]
 
   FPI push class-based method. First, these instructions load values into x and
   y as given by the following table:
 
-    instruction           x    y
-    -------------------+----+-----
-      FPushClsMethod   | %2 | $1
-      FPushClsMethodD  | %3 | %2
-      FPushClsMethodS  | %2 | $1
-      FPushClsMethodSD | %2 | %3
+    instruction            x    y
+    --------------------+----+-----
+      FPushClsMethod    | %2 | $1
+      FPushClsMethodD   | %3 | %2
+      FPushClsMethodRD  | %3 | %2
+      FPushClsMethodS   | %2 | $1
+      FPushClsMethodSD  | %2 | %3
+      FPushClsMethodSRD | %2 | %3
 
   When loading %3 into x, FPushClsMethodD will perform the work performed by
   the ClsRefGetC instruction to convert the name given by %3 into a classref.
@@ -1987,6 +1993,9 @@ FPushClsMethodSD <num params> <mode> <litstr id>
   If class x does not have an accessible method named y, and if a suitable
   __call method or a __callStatic method could not be found, this instruction
   throws a fatal error.
+
+  FPushClsMethodRD and FPushClsMethodSRD's $1 contains a list of reified
+  generics.
 
 FPushCtor <num params>  [C:Obj U U C|V..C|V]  ->  [C|V..C|V]
 

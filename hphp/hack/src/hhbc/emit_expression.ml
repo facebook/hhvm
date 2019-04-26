@@ -3249,10 +3249,8 @@ and emit_call_lhs_and_fcall
       else
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         gather [
-          reified_call_body method_id_string;
-          instr_string fq_cid_string;
-          instr_clsrefgetc;
-          instr_fcallclsmethod fcall_args []
+          emit_reified_targs env pos targs;
+          instr_fcallclsmethodrd fcall_args method_id fq_cid
         ]
     | Class_special clsref ->
       if does_not_have_non_tparam_generics then
@@ -3261,8 +3259,8 @@ and emit_call_lhs_and_fcall
       else
         gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
         gather [
-          reified_call_body method_id_string;
-          instr_fcallclsmethods fcall_args clsref
+          emit_reified_targs env pos targs;
+          instr_fcallclsmethodsrd fcall_args clsref method_id
         ]
     | Class_expr expr ->
       let emit_fcall instr_meth = gather [

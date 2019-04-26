@@ -297,6 +297,7 @@ bool shouldTrySingletonInline(const RegionDesc& region,
 
   // Bail early if this isn't a push.
   if (inst.op() != Op::FPushFuncD &&
+      inst.op() != Op::FPushClsMethodRD &&
       inst.op() != Op::FPushClsMethodD) {
     return false;
   }
@@ -319,7 +320,8 @@ bool tryTranslateSingletonInline(irgen::IRGS& irgs,
 
   // Make sure we have an acceptable FPush and non-null callee.
   assertx(ninst.op() == Op::FPushFuncD ||
-         ninst.op() == Op::FPushClsMethodD);
+          ninst.op() == Op::FPushClsMethodD ||
+          ninst.op() == Op::FPushClsMethodRD);
 
   auto fcall = ninst.nextSk();
 

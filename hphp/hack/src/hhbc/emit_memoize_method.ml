@@ -67,12 +67,6 @@ let make_info ast_class class_id ast_methods =
     memoize_class_id = class_id;
   }
 
-let reified_call_body method_id =
-  gather [
-    instr_cgetl (Local.Named R.reified_generics_local_name);
-    instr_reified_name (Hhbc_id.Method.to_raw_string method_id);
-  ]
-
 let call_cls_method info fcall_args method_id with_lsb is_reified =
   let method_id = Hhbc_id.Method.add_suffix method_id memoize_suffix in
   match info.memoize_is_trait || with_lsb, is_reified with
@@ -80,17 +74,15 @@ let call_cls_method info fcall_args method_id with_lsb is_reified =
     instr_fcallclsmethodsd fcall_args SpecialClsRef.Self method_id
   | true, true ->
     gather [
-      reified_call_body method_id;
-      instr_fcallclsmethods fcall_args SpecialClsRef.Self
+      instr_cgetl (Local.Named R.reified_generics_local_name);
+      instr_fcallclsmethodsrd fcall_args SpecialClsRef.Self method_id
     ]
   | false, false ->
     instr_fcallclsmethodd fcall_args method_id info.memoize_class_id
   | false, true ->
     gather [
-      reified_call_body method_id;
-      instr_string (Hhbc_id.Class.to_raw_string info.memoize_class_id);
-      instr_clsrefgetc;
-      instr_fcallclsmethod fcall_args []
+      instr_cgetl (Local.Named R.reified_generics_local_name);
+      instr_fcallclsmethodrd fcall_args method_id info.memoize_class_id
     ]
 
 let make_memoize_instance_method_no_params_code

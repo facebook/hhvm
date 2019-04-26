@@ -295,8 +295,12 @@ static const struct {
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethodSD,
                    {None,             FStack,       OutFDesc        }},
+  { OpFPushClsMethodSRD,
+                   {Stack1,           FStack,       OutFDesc        }},
   { OpFPushClsMethodD,
                    {None,             FStack,       OutFDesc        }},
+  { OpFPushClsMethodRD,
+                   {Stack1,           FStack,       OutFDesc        }},
   { OpFCall,       {FStack,           StackN,       OutUnknown      }},
   { OpFCallBuiltin,{BStackN|DontGuardAny,
                                       Stack1,       OutUnknown      }},
@@ -504,7 +508,9 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushClsMethod:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
+    case Op::FPushClsMethodSRD:
     case Op::FPushClsMethodD:
+    case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + countOperands(getInstrInfo(op).in) + 3;
 
     case Op::FCall: {
@@ -561,7 +567,9 @@ int64_t getStackPushed(PC pc) {
     case Op::FPushClsMethod:
     case Op::FPushClsMethodS:
     case Op::FPushClsMethodSD:
+    case Op::FPushClsMethodSRD:
     case Op::FPushClsMethodD:
+    case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall:
       return getImm(pc, 0).u_FCA.numRets;
@@ -956,9 +964,11 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::EmptyG:
   case Op::EmptyS:
   case Op::FPushClsMethodD:
+  case Op::FPushClsMethodRD:
   case Op::FPushClsMethod:
   case Op::FPushClsMethodS:
   case Op::FPushClsMethodSD:
+  case Op::FPushClsMethodSRD:
   case Op::FPushCtor:
   case Op::FPushFunc:
   case Op::FPushFuncD:

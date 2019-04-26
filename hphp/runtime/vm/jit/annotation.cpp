@@ -78,6 +78,7 @@ const void annotate(NormalizedInstruction* i,
   if (funcName->empty() && clsName->empty()) {
     switch (pushOp) {
       case Op::FPushClsMethodD:
+      case Op::FPushClsMethodRD:
         decode_iva(pc);
         funcName = decode_litstr();
         clsName = decode_litstr();
@@ -96,6 +97,7 @@ const void annotate(NormalizedInstruction* i,
   bool isExact = false;
   switch (pushOp) {
     case Op::FPushClsMethodD:
+    case Op::FPushClsMethodRD:
       isExact = true;
       isStatic = true;
       break;

@@ -1076,7 +1076,8 @@ bool fpushClsMethodKnown(IRGS& env,
                          bool exact,
                          bool check,
                          bool forward,
-                         bool dynamic) {
+                         bool dynamic,
+                         SSATmp* tsList) {
   auto magicCall = false;
   SSATmp* ctx = nullptr;
   auto funcTmp = lookupClsMethodKnown(env, methodName, ctxTmp, baseClass, exact,
@@ -1088,35 +1089,55 @@ bool fpushClsMethodKnown(IRGS& env,
              numParams,
              magicCall ? methodName : nullptr,
              dynamic,
-             nullptr);
+             tsList);
   return true;
 }
 
-void emitFPushClsMethodD(IRGS& env,
+void implFPushClsMethodD(IRGS& env,
                          uint32_t numParams,
                          const StringData* methodName,
-                         const StringData* className) {
+                         const StringData* className,
+                         SSATmp* tsList) {
+
   if (auto const baseClass =
       Unit::lookupUniqueClassInContext(className, curClass(env))) {
     if (fpushClsMethodKnown(env, numParams,
                             methodName, cns(env, baseClass), baseClass,
-                            true, true, false, false)) {
+                            true, true, false, false, tsList)) {
       return;
     }
   }
 
+  if (tsList) push(env, tsList);
+  env.irb->exceptionStackBoundary();
   auto const slowExit = makeExitSlow(env);
   auto const ne = NamedEntity::get(className);
   auto const data = ClsMethodData { className, methodName, ne };
   auto func = loadClsMethodUnknown(env, data, slowExit);
   auto const clsCtx = gen(env, LdClsMethodCacheCls, data);
+  auto const tsListSSA = tsList ? popC(env) : nullptr;
   fsetActRec(env,
              func,
              clsCtx,
              numParams,
              nullptr,
              false,
-             nullptr);
+             tsListSSA);
+}
+
+void emitFPushClsMethodD(IRGS& env,
+                         uint32_t numParams,
+                         const StringData* methodName,
+                         const StringData* className) {
+  implFPushClsMethodD(env, numParams, methodName, className, nullptr);
+}
+
+void emitFPushClsMethodRD(IRGS& env,
+                         uint32_t numParams,
+                         const StringData* methodName,
+                         const StringData* className) {
+  auto const tsList = popC(env);
+  implFPushClsMethodD(env, numParams, methodName, className, tsList);
 }
 
 const StaticString s_resolveMagicCall(
@@ -1213,7 +1234,8 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
                                         Take takeCls,
                                         Get getMeth,
                                         bool forward,
-                                        bool dynamic) {
+                                        bool dynamic,
+                                        SSATmp* tsList) {
   auto const clsVal = takeCls();
   auto const methVal = getMeth();
 
@@ -1229,7 +1251,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
       numParams,
       nullptr,
       dynamic,
-      nullptr
+      tsList
     );
 
     /*
@@ -1259,11 +1281,13 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   }
 
   if (cls && fpushClsMethodKnown(env, numParams, methodName, clsVal, cls,
-                                 exact, false, forward, dynamic)) {
+                                 exact, false, forward, dynamic, tsList)) {
     return;
   }
 
-  if (!RuntimeOption::RepoAuthoritative || clsVal->hasConstVal() || forward) {
+  // If the method has reified generics, we can't burn the value in the JIT
+  if (!RuntimeOption::RepoAuthoritative || clsVal->hasConstVal() || forward ||
+      tsList) {
     emitFPush();
     return;
   }
@@ -1285,7 +1309,8 @@ void emitFPushClsMethod(IRGS& env,
     [&] { return takeClsRefCls(env, slot); },
     [&] { return popC(env); },
     false,
-    true
+    true,
+    nullptr
   );
 }
 
@@ -1300,7 +1325,8 @@ void emitFPushClsMethodS(IRGS& env,
     [&] { return specialClsRefToCls(env, ref); },
     [&] { return popC(env); },
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    true
+    true,
+    nullptr
   );
 }
 
@@ -1314,7 +1340,24 @@ void emitFPushClsMethodSD(IRGS& env,
     [&] { return specialClsRefToCls(env, ref); },
     [&] { return cns(env, name); },
     ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
-    false
+    false,
+    nullptr
+  );
+}
+
+void emitFPushClsMethodSRD(IRGS& env,
+                           uint32_t numParams,
+                           SpecialClsRef ref,
+                           const StringData* name) {
+  auto const tsList = popC(env);
+  fpushClsMethodCommon(
+    env,
+    numParams,
+    [&] { return specialClsRefToCls(env, ref); },
+    [&] { return cns(env, name); },
+    ref == SpecialClsRef::Self || ref == SpecialClsRef::Parent,
+    false,
+    tsList
   );
 }
 

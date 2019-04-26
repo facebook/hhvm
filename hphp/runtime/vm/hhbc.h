@@ -646,7 +646,10 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushClsMethodSD,THREE(IVA,OA(SpecialClsRef),SA),                   \
                                        FPUSH(0, 0),     FPUSH,      PF) \
+  O(FPushClsMethodSRD,THREE(IVA,OA(SpecialClsRef),SA),                  \
+                                       FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), FPUSH(0, 0),     FPUSH,      PF) \
+  O(FPushClsMethodRD,THREE(IVA,SA,SA), FPUSH(1, 0),     FPUSH,      PF) \
   O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
@@ -1008,6 +1011,8 @@ constexpr bool isFPushClsMethod(Op opcode) {
     opcode == OpFPushClsMethod  ||
     opcode == OpFPushClsMethodS ||
     opcode == OpFPushClsMethodSD ||
+    opcode == OpFPushClsMethodSRD ||
+    opcode == OpFPushClsMethodRD ||
     opcode == OpFPushClsMethodD;
 }
 

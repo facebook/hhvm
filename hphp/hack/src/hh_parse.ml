@@ -70,6 +70,7 @@ module FullFidelityParseArgs = struct
     pocket_universes : bool;
     disable_unsafe_expr : bool;
     disable_unsafe_block : bool;
+    rust : bool;
   }
 
   let make
@@ -102,7 +103,9 @@ module FullFidelityParseArgs = struct
     disable_lval_as_an_expression
     pocket_universes
     disable_unsafe_expr
-    disable_unsafe_block = {
+    disable_unsafe_block
+    rust
+    = {
     full_fidelity_json;
     full_fidelity_dot;
     full_fidelity_dot_edges;
@@ -133,6 +136,7 @@ module FullFidelityParseArgs = struct
     pocket_universes;
     disable_unsafe_expr;
     disable_unsafe_block;
+    rust;
   }
 
   let parse_args () =
@@ -181,6 +185,7 @@ module FullFidelityParseArgs = struct
     let push_file file = files := file :: !files in
     let disable_unsafe_expr = ref false in
     let disable_unsafe_block = ref false in
+    let rust = ref false in
     let options =  [
       (* modes *)
       "--full-fidelity-json",
@@ -299,6 +304,9 @@ No errors are filtered out.";
       "--disable-unsafe-block",
         Arg.Set disable_unsafe_block,
         "Treat UNSAFE block comments as just comments, the typechecker will ignore them";
+      "--rust",
+        Arg.Set rust,
+        "Use the parser written in Rust instead of OCaml one";
       ] in
     Arg.parse options push_file usage;
     make
@@ -332,9 +340,14 @@ No errors are filtered out.";
       !pocket_universes
       !disable_unsafe_expr
       !disable_unsafe_block
+      !rust
 end
 
 open FullFidelityParseArgs
+
+let make_rust_positioned_syntax_tree ~env source_text : SyntaxTree.t =
+  let mode, root, errors = Rust_parser_ffi.parse_positioned source_text env in
+  SyntaxTree.create source_text root errors mode
 
 (* Prints a single FFP error. *)
 let print_full_fidelity_error source_text error =
@@ -364,7 +377,11 @@ let handle_existing_file args filename =
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
     ?mode () in
-  let syntax_tree = SyntaxTree.make ~env source_text in
+  let syntax_tree = if args.rust then
+    make_rust_positioned_syntax_tree ~env source_text
+  else
+    SyntaxTree.make ~env source_text
+  in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
 
   if args.show_file_name then begin

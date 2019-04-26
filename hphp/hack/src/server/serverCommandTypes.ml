@@ -27,9 +27,9 @@ end
 module Method_jumps = struct
   type result = {
     orig_name: string;
-    orig_pos: Pos.absolute;
+    orig_pos: Pos.t;
     dest_name: string;
-    dest_pos: Pos.absolute;
+    dest_pos: Pos.t;
     orig_p_name: string; (* Used for methods to find their parent class *)
     dest_p_name: string;
   }

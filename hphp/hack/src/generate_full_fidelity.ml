@@ -1292,6 +1292,72 @@ CONSTRUCTOR_METHODS}
   }
 end (* GenerateRustFlattenSmartConstructors *)
 
+module GenerateRustFactsSmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i)in
+    let args = String.concat ~sep:", " args in
+    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let fwd_args = String.concat ~sep:", " fwd_args in
+    sprintf "    fn make_%s(s: HasScriptContent<'a>, %s) -> (HasScriptContent<'a>, Self::R) {
+        <Self as FlattenSmartConstructors<HasScriptContent<'a>>>::make_%s(s, %s)
+    }\n\n"
+      x.type_name args x.type_name fwd_args
+
+  let facts_smart_constructors_template: string = (make_header CStyle "") ^ "
+use parser_rust as parser;
+
+use parser::flatten_smart_constructors::*;
+use parser::smart_constructors::SmartConstructors;
+use parser::source_text::SourceText;
+use parser::minimal_token::MinimalToken;
+use parser::parser_env::ParserEnv;
+
+use crate::facts_smart_constructors::*;
+
+const EMPTY_TEXT: &[u8] = &[];
+
+pub struct FactsSmartConstructors;
+impl<'a> SmartConstructors<HasScriptContent<'a>> for FactsSmartConstructors {
+    type Token = MinimalToken;
+    type R = Node;
+
+    fn initial_state(_: &ParserEnv) -> HasScriptContent<'a> {
+        (false, SourceText::make(EMPTY_TEXT))
+    }
+
+    fn make_missing(s: HasScriptContent<'a>, _: usize) -> (HasScriptContent<'a>, Self::R) {
+        (s, <Self as FlattenOp>::zero())
+    }
+
+    fn make_token(s: HasScriptContent<'a>, _: Self::Token) -> (HasScriptContent<'a>, Self::R) {
+        (s, <Self as FlattenOp>::zero())
+    }
+
+    fn make_list(
+        s: HasScriptContent<'a>,
+        _: Box<Vec<Self::R>>,
+        _: usize,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (s, <Self as FlattenOp>::zero())
+    }
+
+CONSTRUCTOR_METHODS}
+"
+  let facts_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^ "../facts/facts_smart_constructors_generated.rs";
+    template = facts_smart_constructors_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateRustFactsSmartConstructors *)
+
 module GenerateFFSmartConstructorsWrappers = struct
   let to_constructor_methods x =
     let fields = List.mapi x.fields ~f:(fun i _ -> "arg" ^ string_of_int i)
@@ -2982,6 +3048,8 @@ let () =
     GenerateFlattenSmartConstructors.flatten_smart_constructors;
   generate_file
     GenerateRustFlattenSmartConstructors.flatten_smart_constructors;
+  generate_file
+    GenerateRustFactsSmartConstructors.facts_smart_constructors;
   generate_file
     GenerateFFParserSig.full_fidelity_parser_sig;
   generate_file

@@ -15,24 +15,20 @@ pub mod rust_to_ocaml;
 use parser_rust as parser;
 
 use parser::file_mode::parse_mode;
-use parser::minimal_syntax::MinimalValue;
-use parser::minimal_token::MinimalToken;
-use parser::parser::Parser;
+use parser::minimal_parser::MinimalSyntaxParser;
 use parser::parser_env::ParserEnv;
 
-use parser::positioned_syntax::PositionedValue;
-use parser::positioned_token::PositionedToken;
-
-use parser::smart_constructors::NoState;
-use parser::smart_constructors_wrappers::WithKind;
 use parser::source_text::SourceText;
-use parser::syntax_smart_constructors::SyntaxSmartConstructors;
+
 use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
 
-type MinimalSyntaxParser<'a> =
-    Parser<'a, WithKind<SyntaxSmartConstructors<MinimalToken, MinimalValue>>, NoState>;
+use parser::positioned_smart_constructors::*;
+use parser::parser::Parser;
+use parser::smart_constructors::NoState;
+use parser::smart_constructors_wrappers::WithKind;
+
 type PositionedSyntaxParser<'a> =
-    Parser<'a, WithKind<SyntaxSmartConstructors<PositionedToken, PositionedValue>>, NoState>;
+    Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
 extern "C" {
     fn ocamlpool_enter();

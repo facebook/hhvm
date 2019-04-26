@@ -7,7 +7,6 @@
  *
 */
 use crate::lexable_token::LexableToken;
-use crate::parser::Parser;
 use crate::parser_env::ParserEnv;
 use crate::source_text::SourceText;
 use crate::syntax::{self, SyntaxVariant};
@@ -32,18 +31,11 @@ impl FileMode {
     }
 }
 
-use crate::minimal_syntax::MinimalValue;
-use crate::minimal_token::MinimalToken;
-use crate::smart_constructors::NoState;
-use crate::smart_constructors_wrappers::WithKind;
-use crate::syntax_smart_constructors::SyntaxSmartConstructors;
-
-type MinimalParser<'a> =
-    Parser<'a, WithKind<SyntaxSmartConstructors<MinimalToken, MinimalValue>>, NoState>;
+use crate::minimal_parser::MinimalSyntaxParser;
 
 pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
     let is_hhi = false; // TODO(kasper) : hhi files
-    let header = MinimalParser::parse_header_only(ParserEnv::default(), text);
+    let header = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text);
     match header {
         None => {
             Some(FileMode::Mstrict) /* no header - assume .hack file */

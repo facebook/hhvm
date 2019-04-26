@@ -42,12 +42,15 @@ pub mod expression_parser;
 pub mod statement_parser;
 pub mod type_parser;
 
+pub mod minimal_parser;
+mod minimal_smart_constructors;
 pub mod minimal_syntax;
 pub mod minimal_token;
 pub mod minimal_trivia;
 
 pub mod file_mode;
 
+pub mod positioned_smart_constructors;
 pub mod positioned_syntax;
 pub mod positioned_token;
 pub mod positioned_trivia;

@@ -19,6 +19,7 @@
 #endif
 
 #include "hphp/runtime/base/exceptions.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -89,9 +90,14 @@ ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
 }
 
 inline ObjectData* ObjectData::newInstance(Class* cls) {
+  assertx(cls);
   if (UNLIKELY(cls->attrs() &
                (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
     raiseAbstractClassError(cls);
+  }
+  if (cls->hasReifiedGenerics()) {
+    raise_error("Cannot create a new instance of a reified class without "
+                "the reified generics");
   }
   auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
     return new (NotNull{}, mem) ObjectData(cls);
@@ -100,6 +106,38 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
     // may incref obj
     throwable_init(obj);
     assertx(obj->checkCount());
+  }
+  if (cls->hasReifiedParent()) {
+    obj->setReifiedGenerics(cls, ArrayData::CreateVArray());
+  }
+  return obj;
+}
+
+inline ObjectData* ObjectData::newInstanceReified(Class* cls,
+                                                  ArrayData* reifiedTypes) {
+  assertx(cls);
+  if (UNLIKELY(cls->attrs() &
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+    raiseAbstractClassError(cls);
+  }
+  if (cls->hasReifiedGenerics()) {
+    assertx(reifiedTypes);
+    checkClassReifiedGenericMismatch(cls, reifiedTypes);
+  }
+  auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
+    return new (NotNull{}, mem) ObjectData(cls);
+  });
+  if (UNLIKELY(cls->needsInitThrowable())) {
+    // may incref obj
+    throwable_init(obj);
+    assertx(obj->checkCount());
+  }
+  if (cls->hasReifiedGenerics()) {
+    obj->setReifiedGenerics(cls, reifiedTypes);
+    return obj;
+  }
+  if (cls->hasReifiedParent()) {
+    obj->setReifiedGenerics(cls, ArrayData::CreateVArray());
   }
   return obj;
 }

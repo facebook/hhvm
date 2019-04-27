@@ -204,14 +204,25 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
   template <typename Init>
   static ObjectData* newInstanceImpl(Class*, Init);
 
+  void setReifiedGenerics(Class*, ArrayData*);
+
  public:
   /*
    * Call newInstance() to instantiate a PHP object. The initial ref-count will
-   * be greater than zero. Since this gives you a raw pointer, it is your
-   * responsibility to manage the ref-count yourself. Whenever possible, prefer
-   * using the Object class instead, which takes care of this for you.
+   * be greater than zero. Will raise if the class has reified generics; if
+   * the class may have reified generics, you must use newInstanceReified.
+   * Since this gives you a raw pointer, it is your responsibility to manage
+   * the ref-count yourself. Whenever possible, prefer using the Object class
+   * instead, which takes care of this for you.
    */
   static ObjectData* newInstance(Class*);
+
+  /*
+   * Same as newInstance, but classes with reified generics are allowed.
+   * If the class has reified generics, the second arg must be an array of
+   * type structures representing the reified types.
+   */
+  static ObjectData* newInstanceReified(Class*, ArrayData*);
 
   /*
    * Instantiate a new object without initializing its declared properties. The

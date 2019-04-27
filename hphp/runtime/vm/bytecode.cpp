@@ -5324,8 +5324,9 @@ namespace {
 
 void newObjImpl(Class* cls, ArrayData* reified_types) {
   // Replace input with uninitialized instance.
-  auto this_ = !reified_types ? newInstance(cls)
-                              : newInstanceReified(cls, reified_types);
+  auto this_ = reified_types
+    ? ObjectData::newInstanceReified(cls, reified_types)
+    : ObjectData::newInstance(cls);
   TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
   vmStack().pushObjectNoRc(this_);

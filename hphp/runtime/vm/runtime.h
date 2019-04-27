@@ -181,52 +181,6 @@ frame_free_args(TypedValue* args, int count) {
   for (auto i = count; i--; ) tvDecRefGen(*(args - i));
 }
 
-namespace {
-
-inline void setReifiedGenerics(
-  ObjectData* inst, Class* cls, ArrayData* reifiedTypes
-) {
-  auto const arg = RuntimeOption::EvalHackArrDVArrs
-    ? make_tv<KindOfVec>(reifiedTypes) : make_tv<KindOfArray>(reifiedTypes);
-  auto const meth = cls->lookupMethod(s_86reifiedinit.get());
-  assertx(meth != nullptr);
-  g_context->invokeMethod(inst, meth, InvokeArgs(&arg, 1));
-}
-
-inline ObjectData* newInstanceImpl(Class* cls) {
-  assertx(cls);
-  auto* inst = ObjectData::newInstance(cls);
-  assertx(inst->checkCount());
-  return inst;
-}
-
-} // namespace
-
-// Create a new class instance, and register it in the live object table if
-// necessary. The initial ref-count of the instance will be greater than zero.
-inline ObjectData* newInstance(Class* cls) {
-  auto* inst = newInstanceImpl(cls);
-  if (cls->hasReifiedGenerics()) {
-    raise_error("Cannot create a new instance of a reified class without "
-                "the reified generics");
-  }
-  if (cls->hasReifiedParent()) {
-    setReifiedGenerics(inst, cls, ArrayData::CreateVArray());
-  }
-  return inst;
-}
-
-// Does the same work as newInstance but also sets the reified generics on the
-// class denoted as `cls`.
-inline ObjectData* newInstanceReified(Class* cls, ArrayData* reifiedTypes) {
-  if (!cls->hasReifiedGenerics()) return newInstance(cls);
-  auto* inst = newInstanceImpl(cls);
-  assertx(reifiedTypes != nullptr);
-  checkClassReifiedGenericMismatch(cls, reifiedTypes);
-  setReifiedGenerics(inst, cls, reifiedTypes);
-  return inst;
-}
-
 // returns the number of things it put on sp
 int init_closure(ActRec* ar, TypedValue* sp);
 

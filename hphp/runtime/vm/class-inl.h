@@ -272,6 +272,14 @@ inline Slot Class::lookupReifiedInitProp() const {
   return m_declProperties.findIndex(s_86reified_prop.get());
 }
 
+inline bool Class::hasReifiedGenerics() const {
+  return m_hasReifiedGenerics;
+}
+
+inline bool Class::hasReifiedParent() const {
+  return m_hasReifiedParent;
+}
+
 inline RepoAuthType Class::declPropRepoAuthType(Slot index) const {
   return m_declProperties[index].repoAuthType;
 }

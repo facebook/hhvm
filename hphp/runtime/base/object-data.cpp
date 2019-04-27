@@ -1156,6 +1156,14 @@ void deepInitHelper(TypedValue* propVec, const TypedValueAux* propData,
   }
 }
 
+void ObjectData::setReifiedGenerics(Class* cls, ArrayData* reifiedTypes) {
+  auto const arg = RuntimeOption::EvalHackArrDVArrs
+    ? make_tv<KindOfVec>(reifiedTypes) : make_tv<KindOfArray>(reifiedTypes);
+  auto const meth = cls->lookupMethod(s_86reifiedinit.get());
+  assertx(meth != nullptr);
+  g_context->invokeMethod(this, meth, InvokeArgs(&arg, 1));
+}
+
 // called from jit code
 ObjectData* ObjectData::newInstanceRawSmall(Class* cls, size_t size,
                                             size_t index) {

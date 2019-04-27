@@ -1507,14 +1507,6 @@ void Class::setInstanceBitsImpl() {
   m_instanceBits = bits;
 }
 
-bool Class::hasReifiedGenerics() const {
-  return m_hasReifiedGenerics;
-}
-
-bool Class::hasReifiedParent() const {
-  return m_hasReifiedParent;
-}
-
 namespace {
 const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}};
 } // namespace

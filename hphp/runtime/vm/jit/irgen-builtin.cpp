@@ -1032,13 +1032,9 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
 struct CatchMaker {
   enum class Kind { NotInlining, Inlining };
 
-  explicit CatchMaker(IRGS& env,
-                      Kind kind,
-                      const Func* callee,
-                      const ParamPrep* params)
+  explicit CatchMaker(IRGS& env, Kind kind, const ParamPrep* params)
     : env(env)
     , m_kind(kind)
-    , m_callee(callee)
     , m_params(*params)
   {
     assertx(!m_params.thiz || m_params.forNativeImpl || inlining());
@@ -1091,18 +1087,8 @@ struct CatchMaker {
 
 private:
   void prepareForCatch() const {
-    if (inlining()) {
-      allocActRec(env);
-      fsetActRec(env,
-                 cns(env, m_callee),
-                 m_params.thiz ? m_params.thiz : cns(env, TNullptr),
-                 // Params are not on the stack.
-                 0,
-                 nullptr,
-                 /* This can be a lie, but we only care about the dynamic flag
-                  * in prologues, so its value doesn't matter here. */
-                 false,
-                 nullptr);
+    if (inlining() && m_params.thiz) {
+      decRef(env, m_params.thiz);
     }
     /*
      * We're potentially spilling to a different depth than the unwinder
@@ -1121,7 +1107,6 @@ private:
 private:
   IRGS& env;
   Kind const m_kind;
-  const Func* m_callee;
   const ParamPrep& m_params;
 };
 
@@ -1552,7 +1537,6 @@ void nativeImplInlined(IRGS& env) {
   auto const catcher = CatchMaker {
     env,
     CatchMaker::Kind::Inlining,
-    callee,
     &params
   };
 
@@ -1626,7 +1610,6 @@ void emitFCallBuiltin(IRGS& env,
   auto const catcher = CatchMaker {
     env,
     CatchMaker::Kind::NotInlining,
-    callee,
     &params
   };
 
@@ -1709,7 +1692,6 @@ void emitNativeImpl(IRGS& env) {
       auto const catcher = CatchMaker {
         env,
         CatchMaker::Kind::NotInlining,
-        callee,
         &params
       };
 

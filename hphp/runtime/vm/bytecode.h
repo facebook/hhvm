@@ -862,13 +862,16 @@ visitStackElems(const ActRec* const fp,
         ar = arAtOffset(fakePrevFP, -fe->m_fpOff);
       }
 
-      assertx(cursor <= reinterpret_cast<TypedValue*>(ar));
       while (cursor < reinterpret_cast<TypedValue*>(ar)) {
         tvFun(cursor++);
       }
-      arFun(ar, fe->m_fpushOff);
 
-      cursor += kNumActRecCells;
+      if (cursor == reinterpret_cast<TypedValue*>(ar)) {
+        arFun(ar, fe->m_fpushOff);
+        cursor += kNumActRecCells;
+      }
+
+      assertx(cursor >= reinterpret_cast<TypedValue*>(ar) + kNumActRecCells);
       if (fe->m_parentIndex == -1) break;
       fe = &fp->m_func->fpitab()[fe->m_parentIndex];
     }

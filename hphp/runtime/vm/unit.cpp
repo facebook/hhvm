@@ -43,6 +43,7 @@
 #include "hphp/util/struct-log.h"
 
 #include "hphp/runtime/base/attr.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
@@ -2265,4 +2266,20 @@ bool Unit::parseFatal(const StringData*& msg, int& line) const {
   auto kind_char = *pc;
   return kind_char == static_cast<uint8_t>(FatalOp::Parse);
 }
+
+std::string mangleReifiedGenericsName(const ArrayData* tsList) {
+  std::vector<std::string> l;
+  IterateV(
+    tsList,
+    [&](TypedValue v) {
+      assertx(tvIsDictOrDArray(v));
+      auto str =
+        TypeStructure::toStringForDisplay(ArrNR(v.m_data.parr)).toCppString();
+      str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
+      l.emplace_back(str);
+    }
+  );
+  return folly::sformat("<{}>", folly::join(",", l));
+}
+
 }

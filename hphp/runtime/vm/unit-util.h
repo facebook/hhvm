@@ -19,7 +19,6 @@
 
 #include <folly/Range.h>
 
-#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-structure.h"
@@ -117,20 +116,7 @@ inline String mangleInOutFuncName(const StringData* name,
   ));
 }
 
-inline std::string mangleReifiedGenericsName(const ArrayData* tsList) {
-  std::vector<std::string> l;
-  IterateV(
-    tsList,
-    [&](TypedValue v) {
-      assertx(tvIsDictOrDArray(v));
-      auto str =
-        TypeStructure::toStringForDisplay(ArrNR(v.m_data.parr)).toCppString();
-      str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
-      l.emplace_back(str);
-    }
-  );
-  return folly::sformat("<{}>", folly::join(",", l));
-}
+std::string mangleReifiedGenericsName(const ArrayData* tsList);
 
 inline StringData* mangleReifiedName(
   const StringData* name,

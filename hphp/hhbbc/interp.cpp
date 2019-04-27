@@ -5246,6 +5246,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   auto pops = 0;
 
   if (options.RemoveDeadBlocks) {
+    State temp{env.state, State::Compact{}};
     while (true) {
       auto const func = env.ctx.func;
       auto const targetBlk = func->blocks[target].get();
@@ -5264,22 +5265,21 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
 
       if (!ok) break;
 
-      State state{env.state, State::Compact{}};
-
       Interp interp {
-        env.index, env.ctx, env.collect, target, targetBlk, state
+        env.index, env.ctx, env.collect, target, targetBlk, temp
       };
 
+      auto const old_size = temp.stack.size();
       auto const new_target = speculate(interp);
       if (new_target == NoBlockId) break;
 
-      const ssize_t delta = env.state.stack.size() - state.stack.size();
+      const ssize_t delta = old_size - temp.stack.size();
       assertx(delta >= 0);
       if (delta && endsInControlFlow) break;
 
       pops += delta;
       target = new_target;
-      env.state.copy_from(std::move(state));
+      temp.stack.compact();
     }
   }
 
@@ -5306,7 +5306,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
   }
 
   while (pops--) {
-    record(env, bc::PopC {});
+    interpStep(env, bc::PopC {});
   }
 
   return target;

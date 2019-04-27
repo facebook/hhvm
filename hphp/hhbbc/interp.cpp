@@ -2940,7 +2940,7 @@ folly::Optional<std::pair<Type, LocalId>> moveToLocImpl(ISS& env,
     } else if (equivLoc == NoLocalId) {
       equivLoc = op.loc1;
     }
-    if (any(env.collect.opts & CollectionOpts::Inlining)) {
+    if (!any(env.collect.opts & CollectionOpts::Speculating)) {
       effect_free(env);
     }
   } else {
@@ -3111,7 +3111,11 @@ void in(ISS& env, const bc::UnsetL& op) {
   if (locRaw(env, op.loc1).subtypeOf(TUninit)) {
     return reduce(env);
   }
-  nothrow(env);
+  if (any(env.collect.opts & CollectionOpts::Speculating)) {
+    nothrow(env);
+  } else {
+    effect_free(env);
+  }
   setLocRaw(env, op.loc1, TUninit);
 }
 

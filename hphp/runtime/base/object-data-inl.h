@@ -55,23 +55,22 @@ inline size_t ObjectData::heapSize() const {
   return sizeForNProps(m_cls->numDeclProperties());
 }
 
-inline ObjectData* ObjectData::newInstance(Class* cls) {
-  Attr attrs = cls->attrs();
-  if (UNLIKELY(attrs &
-               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
-    raiseAbstractClassError(cls);
-  }
-  if (cls->needInitialization()) {
-    cls->initialize();
-  }
+template <typename Init>
+ALWAYS_INLINE
+ObjectData* ObjectData::newInstanceImpl(Class* cls, Init objConstruct) {
+  if (cls->needInitialization()) cls->initialize();
 
-  ObjectData* obj;
   if (auto const ctor = cls->instanceCtor()) {
-    obj = ctor(cls);
+    auto obj = ctor(cls);
     assertx(obj->checkCount());
     assertx(obj->hasInstanceDtor());
-  } else if (cls->hasMemoSlots()) {
+    return obj;
+  }
+
+  auto mem = [&](){
     auto const size = sizeForNProps(cls->numDeclProperties());
+    if (!cls->hasMemoSlots()) return tl_heap->objMalloc(size);
+
     auto const objOff = objOffFromMemoNode(cls);
     auto mem = tl_heap->objMalloc(size + objOff);
     new (NotNull{}, mem) MemoNode(objOff);
@@ -80,53 +79,37 @@ inline ObjectData* ObjectData::newInstance(Class* cls) {
       0,
       objOff - sizeof(MemoNode)
     );
-    obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
-      ObjectData(cls);
-    assertx(obj->hasExactlyOneRef());
-    assertx(!obj->hasInstanceDtor());
-  } else {
-    auto const size = sizeForNProps(cls->numDeclProperties());
-    auto& mm = *tl_heap;
-    obj = new (NotNull{}, mm.objMalloc(size)) ObjectData(cls);
-    assertx(obj->hasExactlyOneRef());
-    assertx(!obj->hasInstanceDtor());
-  }
+    return reinterpret_cast<void*>(reinterpret_cast<char*>(mem) + objOff);
+  }();
 
+  auto obj = objConstruct(mem);
+  assertx(obj->hasExactlyOneRef());
+  assertx(!obj->hasInstanceDtor());
+  return obj;
+}
+
+inline ObjectData* ObjectData::newInstance(Class* cls) {
+  if (UNLIKELY(cls->attrs() &
+               (AttrAbstract | AttrInterface | AttrTrait | AttrEnum))) {
+    raiseAbstractClassError(cls);
+  }
+  auto obj = ObjectData::newInstanceImpl(cls, [&](void* mem) {
+    return new (NotNull{}, mem) ObjectData(cls);
+  });
   if (UNLIKELY(cls->needsInitThrowable())) {
     // may incref obj
     throwable_init(obj);
     assertx(obj->checkCount());
   }
-
   return obj;
 }
 
 inline ObjectData* ObjectData::newInstanceNoPropInit(Class* cls) {
-  if (cls->needInitialization()) cls->initialize();
-
-  assertx(!cls->instanceCtor() &&
-         !(cls->attrs() &
-           (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
-
-  ObjectData* obj;
-  auto const size = sizeForNProps(cls->numDeclProperties());
-  if (cls->hasMemoSlots()) {
-    auto const objOff = objOffFromMemoNode(cls);
-    auto mem = tl_heap->objMalloc(size + objOff);
-    new (NotNull{}, mem) MemoNode(objOff);
-    std::memset(
-      reinterpret_cast<char*>(mem) + sizeof(MemoNode),
-      0,
-      objOff - sizeof(MemoNode)
-    );
-    obj = new (NotNull{}, reinterpret_cast<char*>(mem) + objOff)
-      ObjectData(cls, InitRaw{}, ObjectData::NoAttrs);
-  } else {
-    obj = new (NotNull{}, tl_heap->objMalloc(size))
-      ObjectData(cls, InitRaw{}, ObjectData::NoAttrs);
-  }
-  assertx(obj->hasExactlyOneRef());
-  return obj;
+  assertx(!(cls->attrs() &
+            (AttrAbstract | AttrInterface | AttrTrait | AttrEnum)));
+  return ObjectData::newInstanceImpl(cls, [&](void* mem) {
+    return new (NotNull{}, mem) ObjectData(cls, InitRaw{}, ObjectData::NoAttrs);
+  });
 }
 
 inline void ObjectData::instanceInit(Class* cls) {

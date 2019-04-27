@@ -55,7 +55,6 @@ APCObject::APCObject(ClassOrName cls, uint32_t propCount)
   , m_propCount{propCount}
   , m_persistent{0}
   , m_no_wakeup{0}
-  , m_fast_init{0}
   , m_no_verify_prop_types{0}
 {}
 
@@ -82,9 +81,6 @@ APCHandle::Pair APCObject::Construct(ObjectData* objectData) {
   // wakeup method, and whether or not we can use a fast path that avoids
   // default-initializing properties before setting them to their APC values.
   if (!cls->lookupMethod(s___wakeup.get())) apcObj->m_no_wakeup = 1;
-  if (!cls->instanceCtor()) {
-    apcObj->m_fast_init = 1;
-  }
 
   auto const apcPropVec = apcObj->persistentProps();
   auto const objPropVec = objectData->propVec();
@@ -267,36 +263,29 @@ Object APCObject::createObject() const {
   assertx(cls != nullptr);
 
   auto obj = Object::attach(
-    m_fast_init ? ObjectData::newInstanceNoPropInit(const_cast<Class*>(cls))
-                : ObjectData::newInstance(const_cast<Class*>(cls))
+    ObjectData::newInstanceNoPropInit(const_cast<Class*>(cls))
   );
 
   auto const numProps = cls->numDeclProperties();
   auto const objProp = obj->propVecForConstruct();
   auto const apcProp = persistentProps();
 
-  if (m_fast_init) {
-    // re-entry is possible while we're executing toLocal() on each
-    // property, so heap inspectors may see partially initid objects
-    // not yet exposed to PHP.
-    unsigned i = 0;
-    try {
-      obj->setHasUninitProps();
-      for (; i < numProps; ++i) {
-        new (objProp + i) Variant(apcProp[i]->toLocal());
-      }
-      obj->clearHasUninitProps();
-    } catch (...) {
-      for (; i < numProps; ++i) {
-        new (objProp + i) Variant();
-      }
-      obj->clearHasUninitProps();
-      throw;
+  // re-entry is possible while we're executing toLocal() on each
+  // property, so heap inspectors may see partially initid objects
+  // not yet exposed to PHP.
+  unsigned i = 0;
+  try {
+    obj->setHasUninitProps();
+    for (; i < numProps; ++i) {
+      new (objProp + i) Variant(apcProp[i]->toLocal());
     }
-  } else {
-    for (unsigned i = 0; i < numProps; ++i) {
-      tvAsVariant(&objProp[i]) = apcProp[i]->toLocal();
+    obj->clearHasUninitProps();
+  } catch (...) {
+    for (; i < numProps; ++i) {
+      new (objProp + i) Variant();
     }
+    obj->clearHasUninitProps();
+    throw;
   }
 
   // Make sure the unserialized values don't violate any type-hints if they

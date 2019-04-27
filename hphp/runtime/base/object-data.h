@@ -200,8 +200,11 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void setWeakRefed() { setAttribute(IsWeakRefed); }
 
-  public:
+ private:
+  template <typename Init>
+  static ObjectData* newInstanceImpl(Class*, Init);
 
+ public:
   /*
    * Call newInstance() to instantiate a PHP object. The initial ref-count will
    * be greater than zero. Since this gives you a raw pointer, it is your
@@ -212,8 +215,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   /*
    * Instantiate a new object without initializing its declared properties. The
-   * given Class must be a concrete, regular Class, without an instanceCtor or
-   * customInit.
+   * given Class must be a concrete, regular Class.
    */
   static ObjectData* newInstanceNoPropInit(Class*);
 

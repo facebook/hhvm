@@ -4926,7 +4926,6 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
   }
 
   auto retTy = memoizeImplRetType(env);
-  if (retTy.second) constprop(env);
 
   // MemoGet can raise if we give a non arr-key local, or if we're in a method
   // and $this isn't available.
@@ -4938,10 +4937,20 @@ bool memoGetImpl(ISS& env, const Op& op, Rebind&& rebind) {
       (!env.ctx.func->cls ||
        (env.ctx.func->attrs & AttrStatic) ||
        thisAvailable(env))) {
-    if (will_reduce(env) && retTy.first == TBottom) {
-      reduce(env);
-      jmp_setdest(env, op.target1);
-      return true;
+    if (will_reduce(env)) {
+      if (retTy.first.subtypeOf(BBottom)) {
+        reduce(env);
+        jmp_setdest(env, op.target1);
+        return true;
+      }
+      // deal with constprop manually; otherwise we will propagate the
+      // taken edge and *then* replace the MemoGet with a constant.
+      if (retTy.second) {
+        if (auto v = tv(retTy.first)) {
+          reduce(env, gen_constant(*v));
+          return true;
+        }
+      }
     }
     nothrow(env);
   }

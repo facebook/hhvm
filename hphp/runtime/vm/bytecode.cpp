@@ -5998,7 +5998,10 @@ OPTBLD_INLINE void iopCreateCl(uint32_t numArgs, uint32_t clsIx) {
   auto const c = Unit::defClosure(preCls);
 
   auto const cls = c->rescope(const_cast<Class*>(func->cls()));
-  auto obj = newInstance(cls);
+  assertx(!cls->needInitialization());
+  auto const ctor = cls->instanceCtor();
+  assertx(ctor);
+  auto obj = ctor(cls);
   c_Closure::fromObject(obj)->init(numArgs, vmfp(), vmStack().top());
   vmStack().ndiscard(numArgs);
   vmStack().pushObjectNoRc(obj);

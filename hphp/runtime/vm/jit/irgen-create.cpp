@@ -344,10 +344,11 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
   assertx(cls->attrs() & AttrUnique);
 
   cls = cls->rescope(const_cast<Class*>(curClass(env)));
+  assertx(!cls->needInitialization());
 
   auto const func = cls->getCachedInvoke();
 
-  auto const closure = allocObjFast(env, cls);
+  auto const closure = gen(env, ConstructInstance, ClassData(cls));
 
   auto const live_ctx = [&] {
     auto const ldctx = ldCtx(env);

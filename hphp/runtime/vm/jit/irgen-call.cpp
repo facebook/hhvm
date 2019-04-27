@@ -801,6 +801,27 @@ folly::Optional<int> specialClsReifiedPropSlot(IRGS& env, SpecialClsRef ref) {
   always_assert(false);
 }
 
+void emitDynamicConstructChecks(IRGS& env, SSATmp* cls) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (cls->hasConstVal()) {
+    if (cls->clsVal()->isDynamicallyConstructible()) return;
+    gen(env, RaiseForbiddenDynConstruct, cls);
+    return;
+  }
+
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto const dynConstructible = gen(env, IsClsDynConstructible, cls);
+      gen(env, JmpNZero, skip, dynConstructible);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseForbiddenDynConstruct, cls);
+    }
+  );
+}
+
 } // namespace
 
 void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
@@ -812,7 +833,7 @@ void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
    */
   if (HasGenericsOp::NoGenerics == op) {
     auto const cls  = takeClsRefCls(env, slot);
-    emitCallerDynamicConstructChecks(env, cls);
+    emitDynamicConstructChecks(env, cls);
     push(env, gen(env, AllocObj, cls));
     return;
   }
@@ -820,7 +841,7 @@ void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
   auto const clsref = takeClsRef(env, slot, HasGenericsOp::HasGenerics == op);
   auto const reified_generic = clsref.first;
   auto const cls  = clsref.second;
-  emitCallerDynamicConstructChecks(env, cls);
+  emitDynamicConstructChecks(env, cls);
   if (HasGenericsOp::HasGenerics == op) {
     push(env, gen(env, AllocObjReified, cls, reified_generic));
     return;
@@ -1464,27 +1485,6 @@ void emitCallerDynamicCallChecks(IRGS& env,
     [&] {
       hint(env, Block::Hint::Unlikely);
       gen(env, RaiseForbiddenDynCall, func);
-    }
-  );
-}
-
-void emitCallerDynamicConstructChecks(IRGS& env, SSATmp* cls) {
-  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
-  if (cls->hasConstVal()) {
-    if (cls->clsVal()->isDynamicallyConstructible()) return;
-    gen(env, RaiseForbiddenDynConstruct, cls);
-    return;
-  }
-
-  ifElse(
-    env,
-    [&] (Block* skip) {
-      auto const dynConstructible = gen(env, IsClsDynConstructible, cls);
-      gen(env, JmpNZero, skip, dynConstructible);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseForbiddenDynConstruct, cls);
     }
   );
 }

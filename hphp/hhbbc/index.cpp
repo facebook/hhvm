@@ -5519,7 +5519,7 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
 
   if (finfo->effectFree != fa.effectFree) {
     finfo->effectFree = fa.effectFree;
-    dep = Dep::InlineDepthLimit;
+    dep = Dep::InlineDepthLimit | Dep::ReturnTy;
   }
 
   if (dep != Dep{}) find_deps(*m_data, func, dep, deps);

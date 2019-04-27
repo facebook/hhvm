@@ -36,21 +36,9 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
+//////////////////////////////////////////////////////////////////////
+
 namespace {
-
-//////////////////////////////////////////////////////////////////////
-
-const StaticString s_self("self");
-const StaticString s_parent("parent");
-const StaticString s_static("static");
-
-//////////////////////////////////////////////////////////////////////
-
-bool canInstantiateClass(const Class* cls) {
-  return cls && isNormalClass(cls) && !isAbstract(cls);
-}
-
-//////////////////////////////////////////////////////////////////////
 
 // Pushing for object method when we don't know the Func* statically.
 IRSPRelOffset fpushObjMethodUnknown(
@@ -860,7 +848,7 @@ void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
 void emitNewObjD(IRGS& env, const StringData* className) {
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
-  bool const canInstantiate = canInstantiateClass(cls);
+  bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
   if (persistentCls && canInstantiate && !cls->hasNativePropHandler() &&
       !cls->hasReifiedGenerics() && !cls->hasReifiedParent()) {
     push(env, allocObjFast(env, cls));

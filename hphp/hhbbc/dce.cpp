@@ -403,6 +403,12 @@ struct DceState {
    * Flag to indicate local vs global dce.
    */
   bool isLocal{false};
+
+  /*
+   * When we do add elem opts, it can enable further optimization
+   * opportunities. Let the optimizer know...
+   */
+  bool didAddElemOpts{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1312,13 +1318,15 @@ void dce(Env& env, const bc::Array& op) {
       });
       env.dceState.replaceMap.emplace(env.id, std::move(bcs));
       ui.actions[env.id] = DceAction::Replace;
+      env.dceState.didAddElemOpts  = true;
       return PushFlags::MarkUnused;
     });
 }
 
 void dce(Env& env, const bc::NewMixedArray&) {
-  stack_ops(env,[] (const UseInfo& ui) {
+  stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        env.dceState.didAddElemOpts  = true;
         return PushFlags::MarkUnused;
       }
 
@@ -1327,8 +1335,9 @@ void dce(Env& env, const bc::NewMixedArray&) {
 }
 
 void dce(Env& env, const bc::NewDictArray&) {
-  stack_ops(env,[] (const UseInfo& ui) {
+  stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        env.dceState.didAddElemOpts  = true;
         return PushFlags::MarkUnused;
       }
 
@@ -1337,8 +1346,9 @@ void dce(Env& env, const bc::NewDictArray&) {
 }
 
 void dce(Env& env, const bc::NewDArray&) {
-  stack_ops(env,[] (const UseInfo& ui) {
+  stack_ops(env, [&] (const UseInfo& ui) {
       if (ui.usage == Use::AddElemC || allUnused(ui)) {
+        env.dceState.didAddElemOpts  = true;
         return PushFlags::MarkUnused;
       }
 
@@ -2311,6 +2321,7 @@ struct DceOptResult {
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
+  bool didAddElemOpts{false};
 };
 
 DceOptResult
@@ -2331,7 +2342,8 @@ optimize_dce(const Index& index,
     std::move(dceState->usedLocals),
     std::move(dceState->usedSlots),
     std::move(dceState->actionMap),
-    std::move(dceState->replaceMap)
+    std::move(dceState->replaceMap),
+    dceState->didAddElemOpts
   };
 }
 
@@ -2470,7 +2482,7 @@ void local_dce(const Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-void global_dce(const Index& index, const FuncAnalysis& ai) {
+bool global_dce(const Index& index, const FuncAnalysis& ai) {
   auto rpoId = [&] (BlockId blk) {
     return ai.bdata[blk].rpoId;
   };
@@ -2762,6 +2774,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
   std::bitset<kMaxTrackedClsRefSlots> usedSlots;
   DceActionMap actionMap;
   DceReplaceMap replaceMap;
+  bool didAddElemOpts = false;
   for (auto const bid : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", bid);
     auto ret = optimize_dce(
@@ -2772,6 +2785,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
       ai.bdata[bid].stateIn,
       blockStates[bid]
     );
+    didAddElemOpts = didAddElemOpts || ret.didAddElemOpts;
     usedLocals |= ret.usedLocals;
     usedSlots  |= ret.usedSlots;
     if (ret.actionMap.size()) {
@@ -2799,6 +2813,7 @@ void global_dce(const Index& index, const FuncAnalysis& ai) {
 
   FTRACE(1, "  used slots: {}\n", slot_bits_string(ai.ctx.func, usedSlots));
   remove_unused_clsref_slots(ai.ctx, usedSlots);
+  return didAddElemOpts;
 }
 
 //////////////////////////////////////////////////////////////////////

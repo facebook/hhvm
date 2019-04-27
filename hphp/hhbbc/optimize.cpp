@@ -1056,8 +1056,8 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
       visit_blocks("local DCE", index, ainfo, *collect, local_dce);
     }
     if (options.GlobalDCE) {
-      global_dce(index, ainfo);
-      again = control_flow_opts(ainfo);
+      if (global_dce(index, ainfo)) again = true;
+      if (control_flow_opts(ainfo)) again = true;
       assert(check(*ainfo.ctx.func));
       /*
        * Global DCE can change types of locals across blocks.  See

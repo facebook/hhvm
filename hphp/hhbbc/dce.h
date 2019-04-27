@@ -43,8 +43,10 @@ void local_dce(const Index&, const FuncAnalysis&, CollectedInfo& collect,
 /*
  * Eliminate dead code in a function, across basic blocks, based on
  * results from a previous analyze_func call.
+ *
+ * Returns true if we should re-run the optimizer.
  */
-void global_dce(const Index&, const FuncAnalysis&);
+bool global_dce(const Index&, const FuncAnalysis&);
 
 //////////////////////////////////////////////////////////////////////
 

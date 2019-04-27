@@ -606,12 +606,17 @@ struct ReqRetranslateData : IRExtraData {
  * Compile-time metadata about an ActRec allocation.
  */
 struct ActRecInfo : IRExtraData {
-  IRSPRelOffset spOffset;
-  int32_t numArgs;
+  explicit ActRecInfo(IRSPRelOffset spOffset, uint32_t numArgs)
+    : spOffset(spOffset)
+    , numArgs(numArgs)
+  {}
 
   std::string show() const {
     return folly::to<std::string>(spOffset.offset, ',', numArgs);
   }
+
+  IRSPRelOffset spOffset;
+  uint32_t numArgs;
 };
 
 /*

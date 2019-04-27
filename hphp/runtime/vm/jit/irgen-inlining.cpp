@@ -428,7 +428,7 @@ bool conjureBeginInlining(IRGS& env,
   };
 
   always_assert(isFPush(env.context.callerFPushOp));
-  auto const numParams = args.size();
+  auto const numParams = static_cast<uint32_t>(args.size());
 
   allocActRec(env);
   for (auto const argType : args) {
@@ -436,15 +436,13 @@ bool conjureBeginInlining(IRGS& env,
   }
 
   env.irb->fs().setFPushOverride(env.context.callerFPushOp);
-  fsetActRec(
-    env,
-    cns(env, func),
-    thisType != TBottom ? conjure(thisType) : nullptr,
-    numParams,
-    nullptr, /* invName */
-    false,
-    nullptr
-  );
+  auto const arInfo = ActRecInfo {
+    offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numParams)}),
+    numParams
+  };
+  gen(env, SpillFrame, arInfo, sp(env), cns(env, func),
+      thisType != TBottom ? conjure(thisType) : nullptr,
+      cns(env, TNullptr), cns(env, false), cns(env, TNullptr));
   assertx(!env.irb->fs().hasFPushOverride());
 
   return beginInlining(

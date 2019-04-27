@@ -37,16 +37,6 @@ struct IRGS;
 
 //////////////////////////////////////////////////////////////////////
 
-IRSPRelOffset fsetActRec(
-  IRGS& env,
-  SSATmp* func,
-  SSATmp* objOrClass,
-  uint32_t numArgs,
-  const StringData* invName,
-  bool dynamicCall,
-  SSATmp* tsList
-);
-
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);
 

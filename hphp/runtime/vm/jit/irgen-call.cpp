@@ -40,6 +40,37 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+IRSPRelOffset fsetActRec(
+  IRGS& env,
+  SSATmp* func,
+  SSATmp* objOrClass,
+  uint32_t numArgs,
+  const StringData* invName,
+  bool dynamicCall,
+  SSATmp* tsList
+) {
+  auto const info = ActRecInfo {
+    offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numArgs)}),
+    numArgs
+  };
+
+  gen(
+    env,
+    SpillFrame,
+    info,
+    sp(env),
+    func,
+    objOrClass,
+    invName ? cns(env, invName) : cns(env, TNullptr),
+    cns(env, dynamicCall),
+    tsList ? tsList : cns(env, TNullptr)
+  );
+
+  return info.spOffset;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 // Pushing for object method when we don't know the Func* statically.
 IRSPRelOffset fpushObjMethodUnknown(
   IRGS& env,
@@ -677,45 +708,6 @@ bool callNeedsCallerFrame(const NormalizedInstruction& inst,
 }
 
 //////////////////////////////////////////////////////////////////////
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
-IRSPRelOffset fsetActRec(
-  IRGS& env,
-  SSATmp* func,
-  SSATmp* objOrClass,
-  uint32_t numArgs,
-  const StringData* invName,
-  bool dynamicCall,
-  SSATmp* tsList
-) {
-  ActRecInfo info;
-  info.spOffset = offsetFromIRSP(
-    env,
-    BCSPRelOffset{static_cast<int32_t>(numArgs)}
-  );
-  info.numArgs = numArgs;
-
-  gen(
-    env,
-    SpillFrame,
-    info,
-    sp(env),
-    func,
-    objOrClass,
-    invName ? cns(env, invName) : cns(env, TNullptr),
-    cns(env, dynamicCall),
-    tsList ? tsList : cns(env, TNullptr)
-  );
-
-  return info.spOffset;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-namespace {
 
 SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   switch (ref) {

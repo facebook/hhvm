@@ -440,18 +440,18 @@ void in(ISS& env, const bc::Keyset& op) {
 }
 
 void in(ISS& env, const bc::NewArray& op) {
-  push(env, op.arg1 == 0 ?
-       effect_free(env), aempty() : some_aempty());
+  effect_free(env);
+  push(env, op.arg1 == 0 ? aempty() : some_aempty());
 }
 
 void in(ISS& env, const bc::NewDictArray& op) {
-  push(env, op.arg1 == 0 ?
-       effect_free(env), dict_empty() : some_dict_empty());
+  effect_free(env);
+  push(env, op.arg1 == 0 ? dict_empty() : some_dict_empty());
 }
 
 void in(ISS& env, const bc::NewMixedArray& op) {
-  push(env, op.arg1 == 0 ?
-       effect_free(env), aempty() : some_aempty());
+  effect_free(env);
+  push(env, op.arg1 == 0 ? aempty() : some_aempty());
 }
 
 void in(ISS& env, const bc::NewPackedArray& op) {
@@ -479,8 +479,8 @@ void in(ISS& env, const bc::NewVArray& op) {
 
 void in(ISS& env, const bc::NewDArray& op) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  push(env, op.arg1 == 0 ?
-       effect_free(env), aempty_darray() : some_aempty_darray());
+  effect_free(env);
+  push(env, op.arg1 == 0 ? aempty_darray() : some_aempty_darray());
 }
 
 void in(ISS& env, const bc::NewRecord& op) {
@@ -494,6 +494,7 @@ void in(ISS& env, const bc::NewStructArray& op) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
   push(env, arr_map(std::move(map)));
+  effect_free(env);
   constprop(env);
 }
 
@@ -504,6 +505,7 @@ void in(ISS& env, const bc::NewStructDArray& op) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
   push(env, arr_map_darray(std::move(map)));
+  effect_free(env);
   constprop(env);
 }
 
@@ -513,6 +515,7 @@ void in(ISS& env, const bc::NewStructDict& op) {
     map.emplace_front(make_tv<KindOfPersistentString>(*--it), popC(env));
   }
   push(env, dict_map(std::move(map)));
+  effect_free(env);
   constprop(env);
 }
 
@@ -633,12 +636,14 @@ void in(ISS& env, const bc::NewCol& op) {
   auto const type = static_cast<CollectionType>(op.subop1);
   auto const name = collections::typeToString(type);
   push(env, objExact(env.index.builtin_class(name)));
+  effect_free(env);
 }
 
 void in(ISS& env, const bc::NewPair& /*op*/) {
   popC(env); popC(env);
   auto const name = collections::typeToString(CollectionType::Pair);
   push(env, objExact(env.index.builtin_class(name)));
+  effect_free(env);
 }
 
 void in(ISS& env, const bc::ColFromArray& op) {

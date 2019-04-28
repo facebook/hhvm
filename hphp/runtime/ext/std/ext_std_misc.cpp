@@ -347,38 +347,8 @@ int64_t HHVM_FUNCTION(connection_timeout) {
 }
 
 static Class* getClassByName(const char* name, int len) {
-  Class* cls = nullptr;
-  // translate "self" or "parent"
-  if (len == 4 && !memcmp(name, "self", 4)) {
-    cls = GetCallerClassSkipCPPBuiltins();
-    if (!cls) {
-      raise_fatal_error("Cannot access self:: "
-                                "when no class scope is active");
-    }
-  } else if (len == 6 && !memcmp(name, "parent", 6)) {
-    auto const child = GetCallerClassSkipCPPBuiltins();
-    cls = child ? child->parent() : nullptr;
-    if (!cls) {
-      raise_fatal_error("Cannot access parent");
-    }
-  } else if (len == 6 && !memcmp(name, "static", 6)) {
-    auto const ar = GetCallerFrame();
-    if (ar && ar->func()->cls()) {
-      if (ar->hasThis()) {
-        cls = ar->getThis()->getVMClass();
-      } else {
-        cls = ar->getClass();
-      }
-    }
-    if (!cls) {
-      raise_fatal_error("Cannot access static:: "
-                                "when no class scope is active");
-    }
-  } else {
-    String className(name, len, CopyString);
-    cls = Unit::loadClass(className.get());
-  }
-  return cls;
+  String className(name, len, CopyString);
+  return Unit::loadClass(className.get());
 }
 
 Variant HHVM_FUNCTION(constant, const String& name) {

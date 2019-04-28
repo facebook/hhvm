@@ -149,14 +149,11 @@ std::vector<Context> all_function_contexts(const php::Program& program) {
   return ret;
 }
 
-std::vector<Context> const_pass_contexts(const php::Program& program,
-                                         php::Program::CInit ci) {
+std::vector<Context> const_pass_contexts(const php::Program& program) {
   std::vector<Context> ret;
   ret.reserve(program.constInits.size());
-  program.constInits.foreach([&](uintptr_t f) {
-      if (f & ci) {
-        auto const func = static_cast<php::Func*>(
-          reinterpret_cast<void*>(f & ~php::Program::ForAll));
+  program.constInits.foreach([&](auto func) {
+      if (func) {
         ret.push_back(Context { func->unit, func, func->cls });
       }
     });
@@ -170,7 +167,7 @@ std::vector<WorkItem> initial_work(const php::Program& program,
   std::vector<WorkItem> ret;
 
   if (mode == AnalyzeMode::ConstPass) {
-    auto const ctxs = const_pass_contexts(program, php::Program::ForAnalyze);
+    auto const ctxs = const_pass_contexts(program);
     std::transform(begin(ctxs), end(ctxs), std::back_inserter(ret),
       [&] (Context ctx) { return WorkItem { WorkType::Func, ctx }; }
     );

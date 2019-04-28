@@ -66,11 +66,11 @@ const StaticString s_class_alias("class_alias");
 
 //////////////////////////////////////////////////////////////////////
 
-void record_const_init(php::Program& prog, uintptr_t encoded_func) {
+void record_const_init(php::Program& prog, php::Func* func) {
   auto id = prog.nextConstInit.fetch_add(1, std::memory_order_relaxed);
   prog.constInits.ensureSize(id + 1);
 
-  DEBUG_ONLY auto const oldVal = prog.constInits.exchange(id, encoded_func);
+  DEBUG_ONLY auto const oldVal = prog.constInits.exchange(id, func);
   assert(oldVal == 0);
 }
 
@@ -125,7 +125,7 @@ struct ParseUnitState {
    * pinit and sinit functions are added to improve overall
    * performance.
    */
-  hphp_fast_map<php::Func*, int> constPassFuncs;
+  hphp_fast_set<php::Func*> constPassFuncs;
 
   /*
    * List of class aliases defined by this unit
@@ -358,7 +358,7 @@ void populate_block(ParseUnitState& puState,
   };
 
   auto defcns = [&] () {
-    puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
+    puState.constPassFuncs.insert(&func);
   };
   auto defcls = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefCls.arg1] = &func;
@@ -374,7 +374,7 @@ void populate_block(ParseUnitState& puState,
   };
   auto fpushfuncd = [&] (const Bytecode& b) {
     if (b.FPushFuncD.str2 == s_class_alias.get()) {
-      puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
+      puState.constPassFuncs.insert(&func);
     }
   };
   auto has_call_unpack = [&] {
@@ -870,13 +870,13 @@ void parse_methods(ParseUnitState& puState,
   for (auto& me : pce.methods()) {
     auto f = parse_func(puState, unit, ret, *me);
     if (f->name == s_86cinit.get()) {
-      puState.constPassFuncs[f.get()] |= php::Program::ForAnalyze;
+      puState.constPassFuncs.insert(f.get());
       cinit = std::move(f);
     } else {
       if (f->name == s_86pinit.get() ||
           f->name == s_86sinit.get() ||
           f->name == s_86linit.get()) {
-        puState.constPassFuncs[f.get()] |= php::Program::ForAnalyze;
+        puState.constPassFuncs.insert(f.get());
       }
       ret->methods.push_back(std::move(f));
     }
@@ -1162,8 +1162,7 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   find_additional_metadata(puState, ret.get());
 
   for (auto const item : puState.constPassFuncs) {
-    auto encoded_val = reinterpret_cast<uintptr_t>(item.first) | item.second;
-    record_const_init(prog, encoded_val);
+    record_const_init(prog, item);
   }
 
   assert(check(*ret));

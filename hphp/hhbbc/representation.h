@@ -611,25 +611,16 @@ struct Unit {
  * A php Program is a set of compilation units.
  */
 struct Program {
-  enum CInit {
-    ForAnalyze = 1,
-    ForOptimize = 2,
-    ForAll = ForAnalyze | ForOptimize,
-  };
-
   explicit Program(size_t numUnitsGuess) :
       nextFuncId(0),
       nextConstInit(0),
       constInits(100 + (numUnitsGuess / 4), 0) {
   }
-  static uintptr_t tagged_func(Func* f, CInit ci) {
-    return reinterpret_cast<uintptr_t>(f) | ci;
-  }
 
   std::vector<std::unique_ptr<Unit>> units;
   std::atomic<uint32_t> nextFuncId;
   std::atomic<size_t> nextConstInit;
-  AtomicVector<uintptr_t> constInits;
+  AtomicVector<php::Func*> constInits;
 };
 
 //////////////////////////////////////////////////////////////////////

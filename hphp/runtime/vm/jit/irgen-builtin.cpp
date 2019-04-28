@@ -67,7 +67,6 @@ struct ParamPrep {
   size_t size() const { return info.size(); }
 
   SSATmp* thiz{nullptr};       // may be null if call is not a method
-  SSATmp* count{nullptr};      // if non-null, the count of arguments
   jit::vector<Info> info;
   uint32_t numByAddr{0};
 
@@ -962,11 +961,10 @@ Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
 template <class LoadParam>
 ParamPrep
 prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
-               SSATmp* numArgsExpr, uint32_t numArgs, uint32_t numNonDefault,
-               bool forNativeImpl, LoadParam loadParam) {
+               uint32_t numArgs, uint32_t numNonDefault, bool forNativeImpl,
+               LoadParam loadParam) {
   auto ret = ParamPrep(numArgs);
   ret.thiz = thiz;
-  ret.count = numArgsExpr;
   ret.forNativeImpl = forNativeImpl;
 
   // Fill in in reverse order, since they may come from popC's (depending on
@@ -1253,15 +1251,12 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
                                     ParamPrep& params,
                                     const CatchMaker& maker) {
   auto const cbNumArgs = 2 + params.size() +
-    (params.thiz ? 1 : 0) + (params.count ? 1 : 0);
+    (params.thiz ? 1 : 0);
   auto ret = jit::vector<SSATmp*>(cbNumArgs);
   auto argIdx = uint32_t{0};
   ret[argIdx++] = fp(env);
   ret[argIdx++] = sp(env);
   if (params.thiz) ret[argIdx++] = params.thiz;
-  if (params.count) ret[argIdx++] = params.count;
-
-  assertx(!params.count);
 
   auto const needDVCheck = [&](uint32_t param, const Type& ty) {
     if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
@@ -1477,7 +1472,7 @@ SSATmp* builtinCall(IRGS& env,
     CallBuiltinData {
       spOffBCFromIRSP(env),
       callee,
-      params.count ? -1 : numNonDefault,
+      numNonDefault,
       funcNeedsCallerFrame(callee)
     },
     catchMaker.makeUnusualCatch(),
@@ -1523,7 +1518,6 @@ void nativeImplInlined(IRGS& env) {
     env,
     callee,
     paramThis,
-    nullptr,
     numArgs,
     numNonDefault,
     false,
@@ -1600,7 +1594,6 @@ void emitFCallBuiltin(IRGS& env,
   auto params = prepare_params(
     env, callee,
     nullptr, // no $this; FCallBuiltin never happens for methods
-    nullptr, // count is constant numNonDefault
     numArgs, numNonDefault, false, [&](uint32_t /*i*/, const Type ty) {
       auto specificity =
         ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
@@ -1681,7 +1674,6 @@ void emitNativeImpl(IRGS& env) {
         env,
         callee,
         thiz,
-        nullptr,
         callee->numParams(),
         callee->numParams(),
         true,

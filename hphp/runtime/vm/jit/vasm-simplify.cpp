@@ -1289,6 +1289,11 @@ bool implOrSimplify(
 
 } // namespace
 
+bool simplify(Env& env, const orwi& inst, Vlabel b, size_t i) {
+  auto const immed = inst.s0.w();
+  return implOrSimplify(env, inst, b, i, immed);
+}
+
 bool simplify(Env& env, const orli& inst, Vlabel b, size_t i) {
   auto const immed = inst.s0.l();
   return implOrSimplify(env, inst, b, i, immed);

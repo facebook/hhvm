@@ -186,6 +186,7 @@ struct Vunit;
   O(not, Inone, UH(s,d), DH(d,s))\
   O(orbim, I(s0) I(fl), UM(m), D(sf))\
   O(orwim, I(s0) I(fl), UM(m), D(sf))\
+  O(orwi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(orli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(orlim, I(s0) I(fl), UM(m), D(sf))\
   O(orq, I(fl), U(s0) U(s1), D(d) D(sf))\
@@ -1044,6 +1045,7 @@ struct not { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
 struct orbim { Immed s0; Vptr8 m; VregSF sf; Vflags fl; };
 struct orwim { Immed s0; Vptr16 m; VregSF sf; Vflags fl; };
+struct orwi { Immed s0; Vreg16 s1, d; VregSF sf; Vflags fl; };
 struct orli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct orlim { Immed s0; Vptr32 m; VregSF sf; Vflags fl; };
 struct orq { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };

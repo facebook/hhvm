@@ -756,7 +756,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
           Context { ctx.unit, f, ctx.cls },
           &clsAnalysis,
           nullptr,
-          CollectionOpts::TrackConstantArrays
+          CollectionOpts{}
         )
       );
     }
@@ -810,7 +810,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
           Context { ctx.unit, f.get(), ctx.cls },
           &clsAnalysis,
           nullptr,
-          CollectionOpts::TrackConstantArrays
+          CollectionOpts{}
         )
       );
     }
@@ -824,7 +824,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
             Context { ctx.unit, invoke, c },
             &clsAnalysis,
             nullptr,
-            CollectionOpts::TrackConstantArrays
+            CollectionOpts{}
           )
         );
       }
@@ -840,7 +840,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
           Context { m->unit, m, ctx.cls },
           &clsAnalysis,
           nullptr,
-          CollectionOpts::TrackConstantArrays
+          CollectionOpts{}
         );
       }
     }

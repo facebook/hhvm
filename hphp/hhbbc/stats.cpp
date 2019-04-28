@@ -426,8 +426,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
   if (!options.extendedStats) return;
 
   auto const ctx = Context { func.unit, &func, func.cls };
-  auto const fa  = analyze_func(index, ctx,
-                                CollectionOpts::TrackConstantArrays);
+  auto const fa  = analyze_func(index, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
     for (auto const bid : func.blockRange()) {

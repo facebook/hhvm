@@ -691,10 +691,8 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   if (outTy->first.subtypeOf(BBottom)) {
     unreachable(env);
   } else if (outTy->second == ThrowMode::None) {
-    nothrow(env);
-    if (any(env.collect.opts & CollectionOpts::TrackConstantArrays)) {
-      constprop(env);
-    }
+    effect_free(env);
+    constprop(env);
   }
   push(env, std::move(outTy->first));
 }
@@ -751,9 +749,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
   if (outTy->subtypeOf(BBottom)) {
     unreachable(env);
   } else {
-    if (any(env.collect.opts & CollectionOpts::TrackConstantArrays)) {
-      constprop(env);
-    }
+    constprop(env);
   }
   push(env, std::move(*outTy));
 }

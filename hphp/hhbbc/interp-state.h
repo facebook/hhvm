@@ -524,11 +524,10 @@ void merge_closure_use_vars_into(ClosureUseVarMap& dst,
 //////////////////////////////////////////////////////////////////////
 
 enum class CollectionOpts {
-  TrackConstantArrays = 1,
+  Speculating = 1,
   Inlining = 2,
   EffectFreeOnly = 4,
   Optimizing = 8,
-  Speculating = 16,
 };
 
 inline CollectionOpts operator|(CollectionOpts o1, CollectionOpts o2) {
@@ -571,7 +570,7 @@ struct CollectedInfo {
   bool effectFree{true};
   bool hasInvariantIterBase{false};
   bool readsUntrackedConstants{false};
-  CollectionOpts opts{CollectionOpts::TrackConstantArrays};
+  CollectionOpts opts{};
   bool (*propagate_constants)(const Bytecode& bc, State& state,
                               BytecodeVec& out) = nullptr;
   /*

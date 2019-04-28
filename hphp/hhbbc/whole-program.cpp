@@ -312,10 +312,7 @@ void analyze_iteratively(Index& index, php::Program& program,
           case WorkType::Func:
             ++total_funcs;
             return WorkResult {
-              analyze_func(index, wi.ctx,
-                           mode == AnalyzeMode::ConstPass ?
-                           CollectionOpts{} :
-                           CollectionOpts::TrackConstantArrays)
+              analyze_func(index, wi.ctx, CollectionOpts{})
             };
           case WorkType::Class:
             ++total_classes;
@@ -480,9 +477,7 @@ void final_pass(Index& index, php::Program& program) {
     all_function_contexts(program),
     [&] (Context ctx) {
       optimize_func(index,
-                    analyze_func(index,
-                                 ctx,
-                                 CollectionOpts::TrackConstantArrays),
+                    analyze_func(index, ctx, CollectionOpts{}),
                     true);
     }
   );

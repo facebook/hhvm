@@ -217,8 +217,7 @@ FuncAnalysis analyze_func_inline(const Index&,
                                  Context,
                                  const Type& thisType,
                                  const CompactVector<Type>& args,
-                                 CollectionOpts opts =
-                                 CollectionOpts::TrackConstantArrays);
+                                 CollectionOpts opts = {});
 
 /*
  * Perform an analysis for a whole php::Class at a time.

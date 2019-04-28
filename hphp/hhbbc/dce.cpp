@@ -2489,7 +2489,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
 
   auto collect = CollectedInfo {
     index, ai.ctx, nullptr,
-    CollectionOpts::TrackConstantArrays, &ai
+    CollectionOpts{}, &ai
   };
 
   FTRACE(1, "|---- global DCE analyze ({})\n", show(ai.ctx));

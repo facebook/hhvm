@@ -4882,7 +4882,6 @@ Type Index::lookup_foldable_return_type(Context ctx,
       Context { func->unit, const_cast<php::Func*>(func), func->cls },
       calleeCtx.context,
       calleeCtx.args,
-      CollectionOpts::TrackConstantArrays |
       CollectionOpts::EffectFreeOnly
     );
     return fa.effectFree ? fa.inferredReturn : TTop;

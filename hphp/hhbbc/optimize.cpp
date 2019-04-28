@@ -567,8 +567,7 @@ void first_pass(const Index& index,
       if (options.Peephole) {
         peephole.append(
           newBC,
-          !flags.wasPEI &&
-          !any(collect.opts & CollectionOpts::TrackConstantArrays),
+          !flags.wasPEI,
           srcStack, state.stack);
       } else {
         newBCs.push_back(newBC);
@@ -1030,12 +1029,10 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
   bool again;
   folly::Optional<CollectedInfo> collect;
-  auto collectionOpts = isFinal ?
-    CollectionOpts::TrackConstantArrays : CollectionOpts{};
 
   collect.emplace(
     index, ainfo.ctx, nullptr,
-    collectionOpts, &ainfo
+    CollectionOpts{}, &ainfo
   );
 
   update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates));
@@ -1066,11 +1063,11 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
        * We need to perform a final type analysis before we do
        * anything else.
        */
-      ainfo = analyze_func(index, ainfo.ctx, collectionOpts);
+      ainfo = analyze_func(index, ainfo.ctx, CollectionOpts{});
       update_bytecode(ainfo.ctx.func, std::move(ainfo.blockUpdates));
       collect.emplace(
         index, ainfo.ctx, nullptr,
-        collectionOpts, &ainfo
+        CollectionOpts{}, &ainfo
       );
     }
 

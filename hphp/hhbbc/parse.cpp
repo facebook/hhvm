@@ -360,9 +360,6 @@ void populate_block(ParseUnitState& puState,
   auto defcns = [&] () {
     puState.constPassFuncs[&func] |= php::Program::ForAnalyze;
   };
-  auto addelem = [&] () {
-    puState.constPassFuncs[&func] |= php::Program::ForOptimize;
-  };
   auto defcls = [&] (const Bytecode& b) {
     puState.defClsMap[b.DefCls.arg1] = &func;
   };
@@ -496,9 +493,7 @@ void populate_block(ParseUnitState& puState,
         return bc::opcode { IMM_ARG_##imms FLAGS_ARG_##flags };    \
       }();                                                         \
       b.srcLoc = srcLocIx;                                         \
-      if (Op::opcode == Op::DefCns) defcns();                      \
-      if (Op::opcode == Op::AddElemC ||                            \
-          Op::opcode == Op::AddNewElemC) addelem();                \
+      if (Op::opcode == Op::DefCns)      defcns();                 \
       if (Op::opcode == Op::DefCls)      defcls(b);                \
       if (Op::opcode == Op::DefClsNop)   defclsnop(b);             \
       if (Op::opcode == Op::AliasCls)    aliascls(b);              \

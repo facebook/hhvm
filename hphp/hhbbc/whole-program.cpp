@@ -429,21 +429,6 @@ void constant_pass(Index& index, php::Program& program) {
   if (!options.HardConstProp) return;
   index.use_class_dependencies(false);
   analyze_iteratively(index, program, AnalyzeMode::ConstPass);
-
-  auto save = options.InsertAssertions;
-  options.InsertAssertions = false;
-  index.freeze();
-
-  trace_time optimize_constants("optimize constants");
-  parallel::for_each(
-    const_pass_contexts(program, php::Program::ForAll),
-    [&] (Context ctx) {
-      optimize_func(index, analyze_func(index, ctx, CollectionOpts{}), false);
-    }
-  );
-
-  index.thaw();
-  options.InsertAssertions = save;
 }
 
 void mark_persistent_static_properties(const Index& index,

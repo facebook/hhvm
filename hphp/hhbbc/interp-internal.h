@@ -40,6 +40,14 @@ TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
+struct AddElemInfo {
+  AddElemInfo(uint32_t d, uint32_t i) : depth{d}, idx{i} {}
+  // stack depth of the AddElem we're tracking
+  uint32_t depth;
+  // bytecode index of the previous AddElem
+  uint32_t idx;
+};
+
 /*
  * Interpreter Step State.
  *
@@ -88,6 +96,7 @@ struct ISS {
   uint32_t unchangedBcs{0};
   // new bytecodes
   BytecodeVec replacedBcs;
+  CompactVector<AddElemInfo> addElems;
 };
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs);

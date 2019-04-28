@@ -90,6 +90,75 @@ void reprocess(ISS& env) {
   env.reprocess = true;
 }
 
+ArrayData*& add_elem_array(ISS& env) {
+  auto const idx = env.addElems.back().idx;
+  assertx(idx >= env.unchangedBcs);
+  auto& bc = env.replacedBcs[idx - env.unchangedBcs];
+  auto& arr = [&] () -> const ArrayData*& {
+    switch (bc.op) {
+      case Op::Array:  return bc.Array.arr1;
+      case Op::Dict:   return bc.Dict.arr1;
+      case Op::Keyset: return bc.Keyset.arr1;
+      case Op::Vec:    return bc.Vec.arr1;
+      default: not_reached();
+    }
+  }();
+  return const_cast<ArrayData*&>(arr);
+}
+
+bool start_add_elem(ISS& env, Type& ty, Op op) {
+  auto value = tvNonStatic(ty);
+  if (!value || !isArrayLikeType(value->m_type)) return false;
+
+  if (op == Op::AddElemC) {
+    reduce(env, bc::PopC {}, bc::PopC {}, bc::PopC {});
+  } else {
+    reduce(env, bc::PopC {}, bc::PopC {});
+  }
+  env.addElems.emplace_back(
+    env.state.stack.size(),
+    env.unchangedBcs + env.replacedBcs.size()
+  );
+
+  auto const arr = value->m_data.parr;
+  env.replacedBcs.push_back(
+    [&] () -> Bytecode {
+      if (arr->isKeyset()) {
+        return bc::Keyset { arr };
+      }
+      if (arr->isVecArray()) {
+        return bc::Vec { arr };
+      }
+      if (arr->isDict()) {
+        return bc::Dict { arr };
+      }
+      if (arr->isPHPArray()) {
+        return bc::Array { arr };
+      }
+
+      not_reached();
+    }()
+  );
+  env.replacedBcs.back().srcLoc = env.srcLoc;
+  ITRACE(2, "(addelem* -> {}\n",
+         show(env.ctx.func, env.replacedBcs.back()));
+  push(env, std::move(ty));
+  effect_free(env);
+  return true;
+}
+
+void finish_add_elem(ISS& env) {
+  auto& arr = add_elem_array(env);
+  env.addElems.pop_back();
+  ArrayData::GetScalarArray(&arr);
+}
+
+void finish_add_elems(ISS& env, size_t depth) {
+  while (!env.addElems.empty() && env.addElems.back().depth >= depth) {
+    finish_add_elem(env);
+  }
+}
+
 const Bytecode* last_op(ISS& env, int idx = 0) {
   if (!will_reduce(env)) return nullptr;
 
@@ -568,13 +637,12 @@ void in(ISS& env, const bc::NewLikeArrayL& op) {
 }
 
 void in(ISS& env, const bc::AddElemC& /*op*/) {
-  auto const v = popC(env);
-  auto const k = popC(env);
+  auto const v = topC(env, 0);
+  auto const k = topC(env, 1);
 
-  auto inTy = (env.state.stack.end() - 1).unspecialize();
-  popC(env);
+  auto inTy = (env.state.stack.end() - 3).unspecialize();
 
-  auto const outTy = [&] (Type ty) ->
+  auto outTy = [&] (Type ty) ->
     folly::Optional<std::pair<Type,ThrowMode>> {
     if (ty.subtypeOf(BArr)) {
       return array_set(std::move(ty), k, v);
@@ -584,6 +652,37 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
     }
     return folly::none;
   }(std::move(inTy));
+
+  if (outTy && outTy->second == ThrowMode::None && will_reduce(env)) {
+    if (!env.addElems.empty() &&
+        env.addElems.back().depth + 3 == env.state.stack.size()) {
+      auto const handled = [&] {
+        if (!k.subtypeOf(BArrKey)) return false;
+        auto ktv = tv(k);
+        if (!ktv) return false;
+        auto vtv = tv(v);
+        if (!vtv) return false;
+        auto& arr = add_elem_array(env);
+        arr = arr->set(*ktv, *vtv);
+        return true;
+      }();
+      if (handled) {
+        (env.state.stack.end() - 3)->type = std::move(outTy->first);
+        reduce(env, bc::PopC {}, bc::PopC {});
+        ITRACE(2, "(addelem* -> {}\n",
+               show(env.ctx.func,
+                    env.replacedBcs[env.addElems.back().idx - env.unchangedBcs]));
+        return;
+      }
+    } else {
+      if (start_add_elem(env, outTy->first, Op::AddElemC)) {
+        return;
+      }
+    }
+  }
+
+  discard(env, 3);
+  finish_add_elems(env, env.state.stack.size());
 
   if (!outTy) {
     return push(env, union_of(TArr, TDict));
@@ -601,11 +700,10 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
 }
 
 void in(ISS& env, const bc::AddNewElemC&) {
-  auto v = popC(env);
-  auto inTy = (env.state.stack.end() - 1).unspecialize();
-  popC(env);
+  auto v = topC(env);
+  auto inTy = (env.state.stack.end() - 2).unspecialize();
 
-  auto const outTy = [&] (Type ty) -> folly::Optional<Type> {
+  auto outTy = [&] (Type ty) -> folly::Optional<Type> {
     if (ty.subtypeOf(BArr)) {
       return array_newelem(std::move(ty), std::move(v)).first;
     }
@@ -617,6 +715,34 @@ void in(ISS& env, const bc::AddNewElemC&) {
     }
     return folly::none;
   }(std::move(inTy));
+
+  if (outTy && will_reduce(env)) {
+    if (!env.addElems.empty() &&
+        env.addElems.back().depth + 2 == env.state.stack.size()) {
+      auto const handled = [&] {
+        auto vtv = tv(v);
+        if (!vtv) return false;
+        auto& arr = add_elem_array(env);
+        arr = arr->append(*vtv);
+        return true;
+      }();
+      if (handled) {
+        (env.state.stack.end() - 2)->type = std::move(*outTy);
+        reduce(env, bc::PopC {});
+        ITRACE(2, "(addelem* -> {}\n",
+               show(env.ctx.func,
+                    env.replacedBcs[env.addElems.back().idx - env.unchangedBcs]));
+        return;
+      }
+    } else {
+      if (start_add_elem(env, *outTy, Op::AddNewElemC)) {
+        return;
+      }
+    }
+  }
+
+  discard(env, 2);
+  finish_add_elems(env, env.state.stack.size());
 
   if (!outTy) {
     return push(env, TInitCell);
@@ -5340,6 +5466,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
 
   while (true) {
     if (idx == size) {
+      finish_add_elems(env, 0);
       if (!env.reprocess) break;
       FTRACE(2, "  Reprocess mutated block {}\n", interp.bid);
       assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
@@ -5394,6 +5521,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       }();
       if (hasFallthrough) retryFallthrough = flags.jmpDest;
       if (env.reprocess) continue;
+      finish_add_elems(env, 0);
       auto const newDest = speculateHelper(env, flags.jmpDest, true);
       propagate(newDest, &interp.state);
       return finish(hasFallthrough ? newDest : NoBlockId);
@@ -5405,6 +5533,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
         continue;
       }
       FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
+      finish_add_elems(env, 0);
       return finish(NoBlockId);
     }
   }
@@ -5422,10 +5551,17 @@ StepFlags step(Interp& interp, const Bytecode& op) {
   ISS env { interp, noop };
   env.analyzeDepth++;
   dispatch(env, op);
+  assertx(env.addElems.empty());
   return env.flags;
 }
 
 void default_dispatch(ISS& env, const Bytecode& op) {
+  if (!env.addElems.empty()) {
+    auto const pops = numPop(op);
+    auto const depth = env.state.stack.size() - pops;
+    finish_add_elems(env, depth + (op.op == Op::AddElemC ||
+                                   op.op == Op::AddNewElemC ? 1 : 0));
+  }
   dispatch(env, op);
   if (instrFlags(op.op) & TF && env.flags.jmpDest == NoBlockId) {
     unreachable(env);

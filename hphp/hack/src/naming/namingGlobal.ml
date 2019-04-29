@@ -189,7 +189,10 @@ module Env = struct
 
   let new_cid cid_kind (p, name) =
     let validate canonical error =
-      let (p', _) = unsafe_opt @@ Naming_table.Types.get_pos canonical in
+      let (p', _) = match Naming_table.Types.get_pos canonical with
+        | Some x -> x
+        | None -> failwith ("Failed to get canonical pos for name " ^ name ^ " vs canonical " ^ canonical)
+      in
       if not @@ GEnv.compare_pos p' p
       then
       let p, name = GEnv.get_full_pos (p, name) in

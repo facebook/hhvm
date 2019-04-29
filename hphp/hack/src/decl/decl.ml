@@ -196,8 +196,7 @@ let get_class_parents_and_traits env shallow_class =
 
 let rec ifun_decl (f: Ast.fun_) =
   let f = Errors.ignore_ (fun () -> Naming.fun_ f) in
-  fun_decl f;
-  ()
+  fun_decl f
 
 and fun_decl f =
   let errors, ft = Errors.do_ begin fun () ->
@@ -212,7 +211,7 @@ and fun_decl f =
   let ft = { ft with ft_decl_errors = Some errors } in
   record_fun (snd f.f_name);
   Decl_heap.Funs.add (snd f.f_name) ft;
-  ()
+  ft
 
 and fun_decl_in_env env f =
   check_params env f.f_params;
@@ -276,13 +275,17 @@ let shallow_decl_enabled () =
 let rec class_decl_if_missing class_env c =
   let _, cid as c_name = c.Ast.c_name in
   if check_if_cyclic class_env c_name
-  then ()
+  then None
   else begin
-    if Decl_heap.Classes.mem cid then () else
+    match Decl_heap.Classes.get cid with
+    | Some _ as class_ ->
+      class_
+    | _ ->
       (* Class elements are in memory if and only if the class itself is there.
        * Exiting before class declaration is ready would break this invariant *)
       WorkerCancel.with_no_cancellations @@ fun () ->
-      class_naming_and_decl class_env cid c
+      let class_ = class_naming_and_decl class_env cid c in
+      Some class_
   end
 
 and class_naming_and_decl (class_env:class_env) cid c =
@@ -296,11 +299,15 @@ and class_naming_and_decl (class_env:class_env) cid c =
   let errors = Errors.merge shallow_class.sc_decl_errors errors in
   let name = snd shallow_class.sc_name in
   record_class name;
-  Decl_heap.Classes.add name { tc with dc_decl_errors = Some errors };
-  ()
+  let class_ = { tc with dc_decl_errors = Some errors } in
+  Decl_heap.Classes.add name class_;
+  class_
 
 and class_parents_decl class_env c =
-  let class_type = class_type_decl class_env in
+  let class_type class_ =
+    let _: class_type option = class_type_decl class_env class_ in
+    ()
+  in
   List.iter c.sc_extends class_type;
   List.iter c.sc_implements class_type;
   List.iter c.sc_uses class_type;
@@ -327,13 +334,16 @@ and class_type_decl class_env hint =
         (* We are supposed to redeclare the class *)
         let class_opt = Ast_provider.find_class_in_file fn cid in
         Errors.run_in_context fn Errors.Decl begin fun () ->
-          Option.iter class_opt (class_decl_if_missing class_env)
+          let open Option.Monad_infix in
+          class_opt
+          >>= class_decl_if_missing class_env
+          >>| Decl_class.to_class_type
         end
-      | _ -> ()
+      | _ -> None
     end
   | _ ->
     (* This class lives in PHP land *)
-    ()
+    None
 
 and class_is_abstract c =
   match c.sc_kind with
@@ -391,7 +401,7 @@ and class_decl c =
       (* Declare Stringish and parents if not already declared *)
       let class_env = { stack = SSet.empty } in
       let ty = (Reason.Rhint pos, Tapply ((pos, SN.Classes.cStringish), [])) in
-      class_type_decl class_env ty;
+      let _: Typing_defs.class_type option = class_type_decl class_env ty in
       ty :: impl
     | _ -> impl
   in
@@ -828,10 +838,9 @@ and method_pos ~is_static class_id meth  =
 
 let rec type_typedef_decl_if_missing typedef =
   let _, tid = typedef.Ast.t_id in
-  if Decl_heap.Typedefs.mem tid
-  then ()
-  else
-    type_typedef_naming_and_decl typedef
+  if not (Decl_heap.Typedefs.mem tid) then
+    let _: typedef_type = type_typedef_naming_and_decl typedef in
+    ()
 
 and typedef_decl tdef =
   let {
@@ -863,9 +872,9 @@ and type_typedef_naming_and_decl tdef =
   let tdef = Errors.ignore_ (fun () -> Naming.typedef tdef) in
   let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef) in
   record_typedef (snd tdef.t_name);
-  Decl_heap.Typedefs.add (snd tdef.t_name)
-    { tdecl with td_decl_errors = Some errors};
-  ()
+  let tdecl = { tdecl with td_decl_errors = Some errors} in
+  Decl_heap.Typedefs.add (snd tdef.t_name) tdecl;
+  tdecl
 
 (*****************************************************************************)
 (* Global constants *)
@@ -896,7 +905,7 @@ let iconst_decl cst =
   let errors, hint_ty = Errors.do_ (fun() -> const_decl cst) in
   record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
-  ()
+  (hint_ty, errors)
 
 (*****************************************************************************)
 
@@ -907,14 +916,19 @@ let rec name_and_declare_types_program prog =
     | Ast.NamespaceUse _ -> ()
     | Ast.SetNamespaceEnv _ -> ()
     | Ast.FileAttributes _ -> ()
-    | Ast.Fun f -> ifun_decl f
+    | Ast.Fun f ->
+      let _: decl fun_type = ifun_decl f in
+      ()
     | Ast.Class c ->
       let class_env = { stack = SSet.empty; } in
-      class_decl_if_missing class_env c
+      let _: decl_class_type option = class_decl_if_missing class_env c in
+      ()
     | Ast.Typedef typedef ->
       type_typedef_decl_if_missing typedef
     | Ast.Stmt _ -> ()
-    | Ast.Constant cst -> iconst_decl cst
+    | Ast.Constant cst ->
+      let _: decl ty * Errors.t = iconst_decl cst in
+      ()
   end
 
 let make_env fn =

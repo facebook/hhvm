@@ -68,7 +68,11 @@ let rec collect_class
         | None -> raise Exit
         | Some filename ->
           Hh_logger.log "Declaring %s class %s" kind cid;
-          Decl.declare_class_in_file filename cid;
+          (* NOTE: the following relies on the fact that declaring a class puts
+          the inheritance hierarchy into the shared memory heaps. When that
+          invariant no longer holds, the following will no longer work. *)
+          let _: Decl_defs.decl_class_type option =
+            Decl.declare_class_in_file filename cid in
           collect_class requested_classes cid decls ~fail_if_missing:true
       with Exit | Decl_not_found _ ->
         if not @@ SSet.mem requested_classes cid

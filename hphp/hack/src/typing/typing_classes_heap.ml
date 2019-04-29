@@ -73,11 +73,13 @@ module Classes = struct
             | Some (_, Naming_table.TTypedef) | None -> raise Exit
             | Some (pos, Naming_table.TClass) ->
               let file = FileInfo.get_pos_filename pos in
-              Errors.run_in_decl_mode file
-                (fun () -> Decl.declare_class_in_file file class_name);
-              match Decl_heap.Classes.get class_name with
-              | Some dc -> dc
-              | None -> raise Exit
+              let class_type = Errors.run_in_decl_mode file
+                (fun () -> Decl.declare_class_in_file file class_name) in
+              match class_type with
+              | Some class_type -> class_type
+              | None -> failwith (
+                  "No class returned for get_eager_class_type on " ^ class_name
+                )
         in
         (* We don't want to fetch the shallow_class if shallow_class_decl is not
            enabled--this would frequently involve a re-parse, which would result

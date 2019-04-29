@@ -40,9 +40,9 @@ let get_fun x =
     match Naming_table.Funs.get_pos x with
     | Some pos ->
       let filename = FileInfo.get_pos_filename pos in
-      Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_fun_in_file filename x);
-      Funs.get x
+      let ft = Errors.run_in_decl_mode filename
+        (fun () -> Decl.declare_fun_in_file filename x) in
+      Some ft
     | None -> None
 
 let get_gconst cst_name =
@@ -52,9 +52,9 @@ let get_gconst cst_name =
     match Naming_table.Consts.get_pos cst_name with
     | Some pos ->
         let filename = FileInfo.get_pos_filename pos in
-        Errors.run_in_decl_mode filename
-          (fun () -> Decl.declare_const_in_file filename cst_name);
-      GConsts.get cst_name
+        let gconst = Errors.run_in_decl_mode filename
+          (fun () -> Decl.declare_const_in_file filename cst_name) in
+        Some gconst
     | None -> None
 
 let get_typedef x =
@@ -63,7 +63,7 @@ let get_typedef x =
   | None ->
     match get_type_id_filename x Naming_table.TTypedef with
     | Some filename ->
-        Errors.run_in_decl_mode filename
-        (fun () -> Decl.declare_typedef_in_file filename x);
-      Typedefs.get x
-    | _ -> None
+      let tdecl = Errors.run_in_decl_mode filename
+        (fun () -> Decl.declare_typedef_in_file filename x) in
+      Some tdecl
+    | None -> None

@@ -91,6 +91,7 @@ type t =
   | Rlambda_use      of Pos.t
   | Rimplicit_upper_bound of Pos.t * string
   | Rtype_variable   of Pos.t
+  | Rtype_variable_generics   of Pos.t * string * string
   | Rsolve_fail      of Pos.t
   | Rcstr_on_generics of Pos.t * Nast.sid
 
@@ -232,6 +233,9 @@ let rec to_string prefix r =
         (to_string ("  via this generic " ^ generic_name) r_inst)
   | Rtype_variable p ->
       [(p, prefix ^ " because a type could not be determined here")]
+  | Rtype_variable_generics (p, tp_name, s) ->
+      [(p, prefix ^ " because type parameter " ^ tp_name ^ " of " ^ s ^
+      " could not be determined. Please add type parameters to " ^ s ^ ".")]
   | Rsolve_fail p ->
       [(p, prefix ^ " because a type could not be determined here")]
   | Rarray_filter (_, r) ->
@@ -372,6 +376,7 @@ and to_pos = function
   | Rbitwise_dynamic p -> p
   | Rincdec_dynamic p -> p
   | Rtype_variable p -> p
+  | Rtype_variable_generics (p, _, _) -> p
   | Rsolve_fail p -> p
   | Rcstr_on_generics (p, _) -> p
 
@@ -482,6 +487,7 @@ match r with
   | Rbitwise_dynamic _ -> "Rbitwise_dynamic"
   | Rincdec_dynamic _ -> "Rincdec_dynamic"
   | Rtype_variable _ -> "Rtype_variable"
+  | Rtype_variable_generics _ -> "Rtype_variable_generics"
   | Rsolve_fail _ -> "Rsolve_fail"
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
 

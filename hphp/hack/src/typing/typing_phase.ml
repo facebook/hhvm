@@ -78,6 +78,13 @@ let locl ty = LoclTy ty
 
 type env = expand_env
 
+type method_instantiation =
+{
+  use_pos: Pos.t;
+  use_name: string;
+  explicit_tparams: Nast.hint list;
+}
+
 let env_with_self env =
   let this_ty = Reason.none, TUtils.this_of (Env.get_self env) in
   {
@@ -174,7 +181,8 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       let env, lty = TUtils.union env (MakeType.dynamic r) ty in
       env, (ety_env, lty)
   | r, Tfun ft ->
-      let env, ft = localize_ft ~use_pos:ft.ft_pos ~ety_env env ft in
+      let env, ft = localize_ft ~ety_env
+        ~instantiation:{ use_pos = ft.ft_pos; use_name = "function"; explicit_tparams = []; } env ft in
       env, (ety_env, (r, Tfun ft))
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
       let env, argl = List.map_env env argl (localize ~ety_env) in
@@ -265,7 +273,7 @@ and localize_cstr_ty ~ety_env env ty tp_name =
  * 2) When the type arguments are explicitly specified, in which case we instantiate
  * the type parameters to the provided types.
  *)
-and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety_env env ft =
+and localize_ft ?(instantiation) ~ety_env env ft =
   (* set reactivity to Nonreactive to prevent occasional setting
      of condition types when expanding type constants *)
   let saved_r = Env.env_reactivity env in
@@ -277,16 +285,17 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
    *)
   let env, substs =
     let (tparams, _) = ft.ft_tparams in
-    if instantiate_tparams
-    then
+    match instantiation with
+    | Some { explicit_tparams; use_name; use_pos } ->
       let default () =
         List.map_env env tparams (fun env tparam ->
-          let reason = Reason.Rtype_variable use_pos in
+          let reason =
+            Reason.Rtype_variable_generics (use_pos, snd tparam.tp_name, use_name) in
           let env, tvar = TUtils.unresolved_tparam ~reason env in
           Typing_log.log_tparam_instantiation env use_pos tparam tvar;
           env, tvar) in
       let env, tvarl =
-        if List.length explicit_tparams = 0
+        if List.is_empty explicit_tparams
         then default ()
         else if List.length explicit_tparams <> List.length tparams
         then begin
@@ -303,7 +312,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
       in
       let ft_subst = Subst.make tparams tvarl in
       env, SMap.union ft_subst ety_env.substs
-    else
+    | None ->
       env, List.fold_left tparams ~f:begin fun subst t ->
         SMap.remove (snd t.tp_name) subst
       end ~init:ety_env.substs
@@ -357,7 +366,7 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
   let env, tparams = List.map_env env (fst ft.ft_tparams) localize_tparam in
   let ft_tparams = (
     tparams,
-    if instantiate_tparams then FTKinstantiated_targs else FTKtparams
+    if Option.is_some instantiation then FTKinstantiated_targs else FTKtparams
   ) in
 
   (* Localize the 'where' constraints *)
@@ -373,12 +382,13 @@ and localize_ft ~use_pos ?(instantiate_tparams=true) ?(explicit_tparams=[]) ~ety
    * substitution [ety_env.substs].
    *)
   let env =
-    if instantiate_tparams then
+    match instantiation with
+    | Some { use_pos; _ } ->
       let env = check_tparams_constraints ~use_pos ~ety_env env (fst ft.ft_tparams) in
       let env = check_where_constraints ~use_pos ~definition_pos:ft.ft_pos ~ety_env env
                   ft.ft_where_constraints in
       env
-    else env in
+    | None -> env in
 
   let env, arity = match ft.ft_arity with
     | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->

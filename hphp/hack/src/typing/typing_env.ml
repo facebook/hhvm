@@ -114,15 +114,18 @@ let add_current_tyvar env p v =
     | _ -> env
   else env
 
-let fresh_unresolved_type env p =
+let fresh_unresolved_type_reason env r =
   let v = Ident.tmp () in
   let env =
     if TypecheckerOptions.new_inference env.genv.tcopt
     then
       log_env_change "fresh_unresolved_type" env @@
-      add_current_tyvar env p v
+      add_current_tyvar env (Reason.to_pos r) v
     else add env v (Reason.Rnone, Tunresolved []) in
-  env, (Reason.Rtype_variable p, Tvar v)
+  env, (r, Tvar v)
+
+let fresh_unresolved_type env p =
+  fresh_unresolved_type_reason env (Reason.Rtype_variable p)
 
 let open_tyvars env p =
   { env with tyvars_stack = (p,[]) :: env.tyvars_stack }

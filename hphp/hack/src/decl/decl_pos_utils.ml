@@ -106,6 +106,7 @@ let rec reason = function
   | Rbitwise_dynamic p -> Rbitwise_dynamic (pos p)
   | Rincdec_dynamic p -> Rincdec_dynamic (pos p)
   | Rtype_variable p -> Rtype_variable (pos p)
+  | Rtype_variable_generics (p, t, s) -> Rtype_variable_generics (pos p, t, s)
   | Rsolve_fail p -> Rsolve_fail (pos p)
   | Rcstr_on_generics (p, sid) -> Rcstr_on_generics (pos p, string_id sid)
 

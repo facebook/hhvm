@@ -1,10 +1,10 @@
 File "function_apply_nothing.php", line 12, characters 39-40:
 Was expecting an object but type is unknown (Typing[4297])
-  File "function_apply_nothing.php", line 12, characters 14-16:
-  It is unknown because a type could not be determined here
-  File "function_apply_nothing.php", line 5, characters 48-48:
-    via this generic T
+File "function_apply_nothing.php", line 12, characters 14-16:
+It is unknown because type parameter T of Inv could not be determined. Please add type parameters to Inv.
+File "function_apply_nothing.php", line 5, characters 48-48:
+  via this generic T
 File "function_apply_nothing.php", line 12, characters 51-52:
 Was expecting an array or collection but type is unknown (Typing[4297])
-  File "function_apply_nothing.php", line 5, characters 48-48:
-  It is unknown because a type could not be determined here
+File "function_apply_nothing.php", line 5, characters 48-48:
+It is unknown because a type could not be determined here

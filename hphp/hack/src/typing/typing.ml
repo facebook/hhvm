@@ -1357,10 +1357,12 @@ and expr_
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
-  let compute_supertype ~expected ~reason p env tys =
+  let compute_supertype ~expected ~reason r env tys =
+    let p = Reason.to_pos r in
     let env, supertype =
       match expected with
-      | None -> Env.fresh_unresolved_type env p
+      | None ->
+        Env.fresh_unresolved_type_reason env r
       | Some (_, _, ty) -> env, ty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
@@ -1381,10 +1383,10 @@ and expr_
    * of all of the expressions' tys.
    *)
   let compute_exprs_and_supertype ~expected ?(reason = Reason.URarray_value)
-    p env l extract_expr_and_ty =
+    r env l extract_expr_and_ty =
     let env, exprs_and_tys = List.map_env env l (extract_expr_and_ty ~expected) in
     let exprs, tys = List.unzip exprs_and_tys in
-    let env, supertype = compute_supertype ~expected ~reason p env tys in
+    let env, supertype = compute_supertype ~expected ~reason r env tys in
     env, exprs, supertype in
 
   let forget_fake_members env p callexpr =
@@ -1439,7 +1441,8 @@ and expr_
             env, None in
         let env, tel, arraykind =
           let env, tel, value_ty =
-            compute_exprs_and_supertype ~expected:elem_expected p env l array_field_value in
+            compute_exprs_and_supertype ~expected:elem_expected
+              (Reason.Rtype_variable_generics (p, "T", "array")) env l array_field_value in
           env, tel, AKvec value_ty in
         make_result env p
           (T.Array (List.map tel (fun e -> T.AFvalue e)))
@@ -1460,7 +1463,8 @@ and expr_
           | _ ->
             env, None in
         let env, _value_exprs, value_ty =
-          compute_exprs_and_supertype ~expected:vexpected p env l array_field_value in
+          compute_exprs_and_supertype ~expected:vexpected
+          (Reason.Rtype_variable_generics (p, "T", "array")) env l array_field_value in
         make_result env p T.Any (Reason.Rwitness p, Tarraykind (AKvec value_ty))
       else
         (* Use expected type to determine expected element type *)
@@ -1474,9 +1478,11 @@ and expr_
           | _ ->
             env, None, None in
         let env, key_exprs, key_ty =
-          compute_exprs_and_supertype ~expected:kexpected p env l array_field_key in
+          compute_exprs_and_supertype ~expected:kexpected
+            (Reason.Rtype_variable_generics (p, "Tk", "array")) env l array_field_key in
         let env, value_exprs, value_ty =
-          compute_exprs_and_supertype ~expected:vexpected p env l array_field_value in
+          compute_exprs_and_supertype ~expected:vexpected
+            (Reason.Rtype_variable_generics (p, "Tv", "array")) env l array_field_value in
         make_result env p
           (T.Array (List.map (List.zip_exn key_exprs value_exprs)
             (fun (tek, tev) -> T.AFkvalue (tek, tev))))
@@ -1507,9 +1513,11 @@ and expr_
           end in
       let keys, values = List.unzip l in
       let env, value_exprs, value_ty =
-        compute_exprs_and_supertype ~expected:vexpected p env values array_value in
+        compute_exprs_and_supertype ~expected:vexpected
+        (Reason.Rtype_variable_generics (p, "Tv", "darray")) env values array_value in
       let env, key_exprs, key_ty =
-        compute_exprs_and_supertype ~expected:kexpected p env keys
+        compute_exprs_and_supertype ~expected:kexpected
+        (Reason.Rtype_variable_generics (p, "Tk", "darray")) env keys
           (arraykey_value p "darray") in
       let field_exprs = List.zip_exn key_exprs value_exprs in
       make_result env p
@@ -1535,7 +1543,8 @@ and expr_
           end
         in
       let env, value_exprs, value_ty =
-        compute_exprs_and_supertype ~expected:elem_expected p env values array_value in
+        compute_exprs_and_supertype ~expected:elem_expected
+        (Reason.Rtype_variable_generics (p, "T", "varray")) env values array_value in
       make_result env p
         (T.Varray (th, value_exprs))
         (Reason.Rwitness p, Tarraykind (AKvarray value_ty))
@@ -1567,7 +1576,7 @@ and expr_
 
       let env, tel, elem_ty =
         compute_exprs_and_supertype ~expected:elem_expected ~reason:Reason.URvector
-          p env el subtype_val in
+          (Reason.Rtype_variable_generics (p, "T", strip_ns class_name)) env el subtype_val in
       let ty = MakeType.class_type (Reason.Rwitness p) class_name [elem_ty] in
       make_result env p (T.ValCollection (kind, th, tel)) ty
   | KeyValCollection (kind, th, l) ->
@@ -1595,10 +1604,12 @@ and expr_
       let class_name = kvc_kind_to_name kind in
       let env, tkl, k =
         compute_exprs_and_supertype ~expected:kexpected ~reason:Reason.URkey
-          p env kl (arraykey_value p class_name) in
+          (Reason.Rtype_variable_generics (p, "Tk", strip_ns class_name))
+          env kl (arraykey_value p class_name) in
       let env, tvl, v =
         compute_exprs_and_supertype ~expected:vexpected ~reason:Reason.URvalue
-          p env vl array_value in
+          (Reason.Rtype_variable_generics (p, "Tv", strip_ns class_name))
+          env vl array_value in
       let ty = MakeType.class_type (Reason.Rwitness p) class_name [k; v] in
       make_result env p (T.KeyValCollection (kind, th, List.zip_exn tkl tvl)) ty
   | Clone e ->
@@ -1838,7 +1849,9 @@ and expr_
         match ty with
         | (r, Tfun ft) ->
           begin
-            let env, ft = Phase.localize_ft ~use_pos:p ~ety_env env ft in
+            let env, ft = Phase.(localize_ft
+              ~instantiation:Phase.{ use_name = strip_ns (snd meth); use_pos = p; explicit_tparams = [] }
+              ~ety_env env ft) in
             let ty = r, Tfun ft in
             check_deprecated p ft;
             match ce_visibility with
@@ -2332,7 +2345,9 @@ and expr_
        *)
       let ety_env =
         { (Phase.env_with_self env) with from_class = Some CIstatic } in
-      let env, declared_ft = Phase.localize_ft ~use_pos:p ~ety_env env declared_ft in
+      let env, declared_ft =
+        Phase.(localize_ft ~instantiation: {use_name="lambda"; use_pos=p; explicit_tparams=[]}
+        ~ety_env env declared_ft) in
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
       begin match declared_ft.ft_arity with
@@ -3003,7 +3018,8 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         | _ ->
           let env, params = List.map_env env (Cls.tparams class_info)
             (fun env tparam ->
-              let env, tvar = Env.fresh_unresolved_type env p in
+              let env, tvar = Env.fresh_unresolved_type_reason env
+                (Reason.Rtype_variable_generics (p, snd tparam.tp_name, strip_ns (snd cname))) in
               Typing_log.log_new_tvar_for_new_object env p tvar cname tparam;
               env, tvar) in
           begin match snd c_ty with
@@ -3885,7 +3901,9 @@ and is_abstract_ft fty = match fty with
           | _ -> fty.ft_params, fty.ft_ret in
         let fty = { fty with ft_params = params; ft_ret = ret } in
         let ety_env = Phase.env_with_self env in
-        let env, fty = Phase.localize_ft ~use_pos:p ~ety_env env fty in
+        let env, fty = Phase.(localize_ft
+          ~instantiation:{ use_pos=p; use_name="idx"; explicit_tparams=[]}
+          ~ety_env env fty) in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, tel, _tuel, ty = call ~expected p env tfun el [] in
         (* Remove double nullables. This shouldn't be necessary, and currently
@@ -4199,7 +4217,9 @@ and fun_type_of_id env x tal =
   | Some fty ->
       let ety_env = Phase.env_with_self env in
       let env, fty =
-        Phase.localize_ft ~use_pos:(fst x) ~explicit_tparams:tal ~ety_env env fty in
+        Phase.(localize_ft
+          ~instantiation: { use_name = strip_ns (snd x); use_pos = fst x; explicit_tparams = tal }
+          ~ety_env env fty) in
       env, (Reason.Rwitness fty.ft_pos, Tfun fty)
 
 (**
@@ -4322,7 +4342,9 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
                 let p_vis = Reason.to_pos r in
                 TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
                 let env, ft =
-                  Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft in
+                  Phase.(localize_ft
+                    ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_tparams }
+                    ~ety_env env ft) in
                 let arity_pos = match ft.ft_params with
                   | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
                   (* we should really assert here but this is not yet validated *)
@@ -4342,7 +4364,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
                 (* We special case Tfun here to allow passing in explicit tparams to localize_ft. *)
                 | r, Tfun ft ->
                   let env, ft =
-                    Phase.localize_ft ~use_pos:p ~ety_env ~explicit_tparams:explicit_tparams env ft
+                    Phase.(localize_ft ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_tparams }
+                      ~ety_env env ft)
                   in env, (r, Tfun ft)
                 | _ ->
                   Phase.localize ~ety_env env method_
@@ -4505,7 +4528,9 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
 
           (* the return type of __call can depend on the class params or be this *)
           let ety_env = mk_ety_env r class_info x exact paraml in
-          let env, ft = Phase.localize_ft ~use_pos:id_pos ~ety_env env ft in
+          let env, ft = Phase.(localize_ft
+            ~instantiation:{use_pos=id_pos; use_name=strip_ns id_str; explicit_tparams=[]}
+            ~ety_env env ft) in
 
           let arity_pos = match ft.ft_params with
           | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
@@ -4548,7 +4573,8 @@ and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
               (* We special case function types here to be able to pass explicit type
                * parameters. *)
               let env, ft =
-                Phase.localize_ft ~use_pos:id_pos ~explicit_tparams ~ety_env env ft in
+                Phase.(localize_ft ~instantiation:{ use_name=strip_ns id_str; use_pos=id_pos; explicit_tparams }
+                  ~ety_env env ft) in
               env, (r, Tfun ft)
             | _ ->
               Phase.localize ~ety_env env member_ty
@@ -4788,13 +4814,14 @@ and resolve_type_argument env hint =
      Env.fresh_unresolved_type env p
    | _ ->
      Phase.localize_hint_with_self env hint
-and resolve_type_arguments env p _class_id tparaml hintl =
+and resolve_type_arguments env p class_id tparaml hintl =
   let length_hintl = List.length hintl in
   let length_tparaml = List.length tparaml in
   if length_hintl <> length_tparaml
   then begin
     List.map_env env tparaml begin fun env tparam ->
-      let env, tvar = Env.fresh_unresolved_type env p in
+      let env, tvar = Env.fresh_unresolved_type_reason env
+        (Reason.Rtype_variable_generics (p, snd tparam.tp_name, strip_ns (snd class_id))) in
       Typing_log.log_tparam_instantiation env p tparam tvar;
       env, tvar end
   end

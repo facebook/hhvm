@@ -2121,7 +2121,8 @@ let empty_in_strict pos =
 let isset_in_strict pos =
   add (Typing.err_code Typing.IssetEmptyInStrict) pos
     ("isset cannot be used in a completely type safe way and so is banned in "
-     ^"strict mode; try using array_key_exists instead")
+     ^"strict mode; You can use `($array[$key] ?? null) is nonnull` but you "
+     ^"probably want C\\contains_key.")
 
 let unset_nonidx_in_strict pos msgs =
   add_list (Typing.err_code Typing.UnsetNonidxInStrict)

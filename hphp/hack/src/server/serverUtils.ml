@@ -139,8 +139,8 @@ let exit_on_exception (exn: exn) ~(stack: Utils.callstack) =
   | WorkerController.Worker_failed_to_send_job _ as e->
     Hh_logger.exc ~stack e;
     Exit_status.(exit Worker_failed_to_send_job)
-  | File_heap.File_heap_stale ->
-    Exit_status.(exit File_heap_stale)
+  | File_provider.File_provider_stale ->
+    Exit_status.(exit File_provider_stale)
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
   | Decl_defs.Decl_not_found _->

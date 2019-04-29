@@ -11,7 +11,6 @@ open Core_kernel
 open File_content
 open Option.Monad_infix
 open ServerEnv
-open File_heap
 
 let try_relativize_path x =
   Option.try_with (fun () -> Relative_path.(create Root x))
@@ -24,9 +23,9 @@ let get_file_content = function
   | ServerCommandTypes.FileContent s -> s
   | ServerCommandTypes.FileName path ->
     begin try_relativize_path path >>= fun path ->
-      match File_heap.FileHeap.get path with
-        | Some (Ide f) -> Some f
-        | Some (Disk c) -> Some c
+      match File_provider.get path with
+        | Some (File_provider.Ide f) -> Some f
+        | Some (File_provider.Disk c) -> Some c
         | None -> get_file_content_from_disk path
     end
       (* In case of errors, proceed with empty file contents *)
@@ -57,8 +56,8 @@ let open_file ~predeclare env path content =
     if predeclare && (not (Relative_path.Set.mem env.editor_open_files path)) then
       Decl.make_env path;
     let editor_open_files = Relative_path.Set.add env.editor_open_files path in
-    FileHeap.remove_batch (Relative_path.Set.singleton path);
-    FileHeap.add path (Ide content);
+    File_provider.remove_batch (Relative_path.Set.singleton path);
+    File_provider.provide_file path (File_provider.Ide content);
     let ide_needs_parsing, diag_subscribe =
       if content = prev_content && (env.full_check = Full_check_done) then begin
         (* Try to avoid telling the user that a check is needed when the file
@@ -84,11 +83,11 @@ let open_file ~predeclare env path content =
 
 let close_relative_path env path =
   let editor_open_files = Relative_path.Set.remove env.editor_open_files path in
-  let contents = (match (FileHeap.find_unsafe path) with
-  | Ide f -> f
+  let contents = (match File_provider.get_unsafe path with
+  | File_provider.Ide f -> f
   | _ -> assert false) in
-  FileHeap.remove_batch (Relative_path.Set.singleton path);
-  let new_contents = File_heap.get_contents path in
+  File_provider.remove_batch (Relative_path.Set.singleton path);
+  let new_contents = File_provider.get_contents path in
   let ide_needs_parsing =
     if new_contents = Some contents then env.ide_needs_parsing
     else Relative_path.Set.add env.ide_needs_parsing path in
@@ -109,9 +108,9 @@ let edit_file ~predeclare env path (edits: File_content.text_edit list) =
     if predeclare && (not (Relative_path.Set.mem env.editor_open_files path)) then
       Decl.make_env path;
     ServerBusyStatus.send env ServerCommandTypes.Needs_local_typecheck;
-    let fc = match FileHeap.get path with
-    | Some Ide f -> f
-    | Some Disk content -> content
+    let fc = match File_provider.get path with
+    | Some File_provider.Ide f -> f
+    | Some File_provider.Disk content -> content
     | None ->
         try Sys_utils.cat (Relative_path.to_absolute path) with _ -> "" in
     let edited_fc = match edit_file fc edits with
@@ -123,8 +122,8 @@ let edit_file ~predeclare env path (edits: File_content.text_edit list) =
     in
     let editor_open_files =
       Relative_path.Set.add env.editor_open_files path in
-    FileHeap.remove_batch (Relative_path.Set.singleton path);
-    FileHeap.add path (Ide edited_fc);
+    File_provider.remove_batch (Relative_path.Set.singleton path);
+    File_provider.provide_file path (File_provider.Ide edited_fc);
     let ide_needs_parsing =
       Relative_path.Set.add env.ide_needs_parsing path in
     let disk_needs_parsing =
@@ -150,8 +149,8 @@ let get_unsaved_changes env =
   Relative_path.Set.fold env.editor_open_files
     ~init:Relative_path.Map.empty
     ~f:begin fun path acc ->
-      match FileHeap.get path with
-      | Some Ide ide_contents ->
+      match File_provider.get path with
+      | Some File_provider.Ide ide_contents ->
         begin match get_file_content_from_disk path with
         | Some disk_contents when ide_contents <> disk_contents ->
           Relative_path.Map.add acc path (ide_contents, disk_contents)

@@ -14,7 +14,7 @@ let make_local_changes () =
   SharedMem.allow_hashtable_writes_by_current_process false;
   Fixmes.HH_FIXMES.LocalChanges.push_stack();
   Fixmes.DECL_HH_FIXMES.LocalChanges.push_stack();
-  File_heap.FileHeap.LocalChanges.push_stack();
+  File_provider.local_changes_push_stack();
   Ast_provider.local_changes_push_stack();
 
   Ide_parser_cache.activate ();
@@ -40,7 +40,7 @@ let revert_local_changes () =
   SharedMem.allow_hashtable_writes_by_current_process true;
   Fixmes.HH_FIXMES.LocalChanges.pop_stack();
   Fixmes.DECL_HH_FIXMES.LocalChanges.pop_stack();
-  File_heap.FileHeap.LocalChanges.pop_stack();
+  File_provider.local_changes_pop_stack();
   Ast_provider.local_changes_pop_stack();
 
   Ide_parser_cache.deactivate ();

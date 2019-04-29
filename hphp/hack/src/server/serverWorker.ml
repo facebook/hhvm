@@ -18,8 +18,8 @@ let catch_and_classify_exceptions: 'x 'b. ('x -> 'b) -> 'x -> 'b = fun f x ->
   try f x with
   | Decl_class.Decl_heap_elems_bug ->
     Exit_status.(exit Decl_heap_elems_bug)
-  | File_heap.File_heap_stale ->
-    Exit_status.(exit File_heap_stale)
+  | File_provider.File_provider_stale ->
+    Exit_status.(exit File_provider_stale)
   | Decl_defs.Decl_not_found x ->
     Hh_logger.log "Decl_not_found %s" x;
     Exit_status.(exit Decl_not_found)

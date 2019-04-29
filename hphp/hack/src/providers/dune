@@ -1,4 +1,14 @@
 (library
+  (name file_provider)
+  (wrapped false)
+  (modules file_provider)
+  (libraries
+    ast
+    heap_shared_mem
+    relative_path
+    sys_utils))
+
+(library
   (name ast_provider)
   (wrapped false)
   (modules ast_provider)

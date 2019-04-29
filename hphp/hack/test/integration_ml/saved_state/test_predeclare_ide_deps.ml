@@ -63,7 +63,7 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let foo_path = Relative_path.from_root "foo.php" in
 
   (* Check that we didn't pollute parser heaps with anything *)
-  assert (not @@ File_heap.FileHeap.mem foo_path);
+  assert ((File_provider.get foo_path) = None);
   assert (not @@ Ast_provider.has_for_test foo_path);
 
   (* Check that we did populate declaration heaps *)

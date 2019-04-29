@@ -120,7 +120,6 @@
   (name parser_heap)
   (wrapped false)
   (modules
-    file_heap
     fixmes
     full_fidelity_ast
     full_fidelity_ast_types
@@ -133,6 +132,7 @@
   (libraries
     ast
     core_kernel
+    file_provider
     heap_shared_mem
     parser
     parser_coroutine

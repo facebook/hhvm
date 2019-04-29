@@ -53,7 +53,10 @@ let get_from_local_cache ~full file_name =
             contents
           ).Parser_return.ast
     in
-    let ast = Option.value_map ~default:[] ~f (File_heap.get_contents file_name) in
+    let ast = Option.value_map
+      ~default:[]
+      ~f
+      (File_provider.get_contents file_name) in
     let ast =
       if (Relative_path.prefix file_name = Relative_path.Hhi)
       && ParserOptions.deregister_php_stdlib popt

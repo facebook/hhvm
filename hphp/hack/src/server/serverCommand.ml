@@ -169,7 +169,7 @@ let predeclare_ide_deps genv {FileInfo.n_funs; n_classes; n_types; n_consts} =
     Utils.try_finally ~f:begin fun () ->
       (* We only want to populate declaration heap, without wasting space in lower
        * heaps (similar to what Typing_check_service.check_files does) *)
-      File_heap.FileHeap.LocalChanges.push_stack ();
+      File_provider.local_changes_push_stack ();
       Ast_provider.local_changes_push_stack ();
       let iter: type a.
           (string -> bool) ->
@@ -193,7 +193,7 @@ let predeclare_ide_deps genv {FileInfo.n_funs; n_classes; n_types; n_consts} =
       iter Decl_heap.GConsts.mem Decl_provider.get_gconst n_consts
     end ~finally:begin fun () ->
       Ast_provider.local_changes_pop_stack ();
-      File_heap.FileHeap.LocalChanges.pop_stack ()
+      File_provider.local_changes_pop_stack ()
     end
   end
 

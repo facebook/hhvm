@@ -45,7 +45,10 @@ let process_parse_result
   && ParserOptions.deregister_php_stdlib popt
   then Ast_utils.deregister_ignored_attributes ast
   else ast in
-  let content = if ide then File_heap.Ide content else File_heap.Disk content in
+  let content =
+    if ide
+    then File_provider.Ide content
+    else File_provider.Disk content in
   if file_mode <> None then begin
     let funs, classes, typedefs, consts = Ast_utils.get_defs ast in
     (* If this file was parsed from a tmp directory,
@@ -55,7 +58,7 @@ let process_parse_result
     (* We only have to write to the disk heap on initialization, and only *)
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
     (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
-    if quick then File_heap.FileHeap.write_around fn content;
+    if quick then File_provider.provide_file_hint fn content;
     let mode = if quick then Ast_provider.Decl else Ast_provider.Full in
     Ast_provider.provide_ast_hint fn ast mode;
     let comments = None in
@@ -73,7 +76,7 @@ let process_parse_result
     acc, errorl, error_files
   end
   else begin
-    File_heap.FileHeap.write_around fn content;
+    File_provider.provide_file_hint fn content;
     let info = try !legacy_php_file_info fn with _ -> empty_file_info in
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build
@@ -154,7 +157,7 @@ let go ?(quick = false) workers files_set ~get_next popt ~trace =
   let fast, errorl, failed_parsing =
     Relative_path.Set.fold files_set ~init:acc ~f:(
       fun fn acc ->
-        let content = File_heap.get_ide_contents_unsafe fn in
+        let content = File_provider.get_ide_contents_unsafe fn in
         parse_sequential ~quick fn content acc popt
       ) in
   if trace then log_parsing_results fast;

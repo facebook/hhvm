@@ -14,7 +14,7 @@ let symbols_at (file, line, char) tcopt =
   let contents = match file with
     | ServerCommandTypes.FileName file_name ->
       let relative_path = Relative_path.(create Root file_name) in
-      File_heap.get_contents relative_path
+      File_provider.get_contents relative_path
     | ServerCommandTypes.FileContent content -> Some content
   in
   match contents with

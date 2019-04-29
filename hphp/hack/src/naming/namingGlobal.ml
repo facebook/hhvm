@@ -60,7 +60,7 @@ module GEnv = struct
       let fn = FileInfo.get_pos_filename pos in
       Hh_logger.log "File missing: %s" (Relative_path.to_absolute fn);
       Hh_logger.log "Name missing: %s" (name);
-      raise File_heap.File_heap_stale
+      raise File_provider.File_provider_stale
 
   let type_canon_name name = Naming_table.Types.get_canon_name (canon_key name)
   let type_pos name =

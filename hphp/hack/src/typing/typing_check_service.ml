@@ -112,7 +112,7 @@ let check_file dynamic_view_files opts errors (fn, file_infos) =
 
 let check_files dynamic_view_files opts errors progress ~memory_cap =
   SharedMem.invalidate_caches();
-  File_heap.FileHeap.LocalChanges.push_stack ();
+  File_provider.local_changes_push_stack ();
   Ast_provider.local_changes_push_stack ();
   let check_file =
     if !Utils.profile
@@ -156,7 +156,7 @@ let check_files dynamic_view_files opts errors progress ~memory_cap =
   let result = check_or_exit errors progress in
   TypingLogger.flush_buffers ();
   Ast_provider.local_changes_pop_stack ();
-  File_heap.FileHeap.LocalChanges.pop_stack ();
+  File_provider.local_changes_pop_stack ();
   result
 
 let load_and_check_files dynamic_view_files errors progress ~memory_cap =

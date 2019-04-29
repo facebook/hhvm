@@ -41,7 +41,7 @@ let get_docblock_for_member class_info member_name =
   | _, Typing_defs.Tfun ft ->
     let pos = ft.Typing_defs.ft_pos in
     let filename = Pos.filename pos in
-    File_heap.get_contents filename
+    File_provider.get_contents filename
     >>= begin fun contents ->
       ServerSymbolDefinition.get_definition_cst_node_from_pos
         SymbolDefinition.Method
@@ -117,7 +117,7 @@ let go_location env (filename, line, char) ~base_class_name ~basic_only =
   let open Option.Monad_infix in
   let ServerEnv.{ tcopt; _ } = env in
   let relative_path = Relative_path.create_detect_prefix filename in
-  File_heap.get_contents relative_path
+  File_provider.get_contents relative_path
   >>= begin fun contents ->
     let definitions =
       ServerIdentifyFunction.go contents line char tcopt

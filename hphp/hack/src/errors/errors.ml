@@ -319,7 +319,8 @@ let format_substring_underline (pos: Pos.absolute) (msg: string) (first_context_
   Printf.sprintf "%s %s%s"
     (line_margin None col_width)
     underline_padding
-    (Tty.apply_color color (underline ^ " " ^ msg))
+    (Tty.apply_color color
+       (if is_first then underline else (underline ^ " " ^ msg)))
 
 let format_filename (pos: Pos.absolute): string =
   let relative_path path =

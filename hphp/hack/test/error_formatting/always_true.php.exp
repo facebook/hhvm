@@ -3,5 +3,5 @@ Typing[4151] This expression is always true
   3 | function foo(array<int> $arg): void {
     |              ^^^^^^^^^^ This is an array (used like a vector) and cannot be null
   4 |   if (null !== $arg) {
-    |       ^^^^^^^^^^^^^ This expression is always true
+    |       ^^^^^^^^^^^^^
 

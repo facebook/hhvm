@@ -75,7 +75,7 @@ let wrap_awaitable env p rty =
     | Ast.FAsyncGenerator ->
       (Reason.Rnone, TUtils.terr env)
     | Ast.FAsync ->
-      MakeType.awaitable (Reason.Rwitness p) rty
+      MakeType.awaitable (Reason.Rret_fun_kind (p, Ast.FAsync)) rty
 
 let force_awaitable env p ty =
   let fun_kind = Env.get_fn_kind env in
@@ -88,8 +88,11 @@ let force_awaitable env p ty =
   | _ when fun_kind = Ast.FAsync ->
     let env, underlying_ty = Env.fresh_unresolved_type env p in
     let wrapped_ty = wrap_awaitable env p underlying_ty in
-    let env = Typing_subtype.sub_type env wrapped_ty ty in
-    env, wrapped_ty
+    Errors.try_add_err p (Reason.string_of_ureason Reason.URnone)
+      (fun () ->
+        let env = Typing_subtype.sub_type env wrapped_ty ty in
+        env, wrapped_ty)
+      (fun () -> env, (Reason.Rwitness p, TUtils.terr env))
   | _ ->
     env, ty
 

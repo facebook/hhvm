@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "async_anon_function_explicit_return_wrong_type.php", line 12, characters 17-19:
 This is an int
 File "async_anon_function_explicit_return_wrong_type.php", line 13, characters 8-43:
-It is incompatible with an object of type Awaitable
+It is incompatible with an object of type Awaitable (result of 'async function')

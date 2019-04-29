@@ -396,16 +396,7 @@ let list_contains_predicate p node =
     List.exists ~f:p lst
   | _ -> false
 
-(* test a node is a syntaxlist and that the list contains multiple elements
- * satisfying a given predicate *)
-let list_contains_multiple_predicate p node =
-  match syntax node with
-  | SyntaxList lst ->
-    let count_fun acc el = if p el then acc + 1 else acc in
-    (List.fold_left ~f:count_fun ~init:0 lst) > 1
-  | _ -> false
-
-let list_contains_duplicate node =
+let list_first_duplicate node : Syntax.t option =
   let module SyntaxMap = Caml.Map.Make (
     struct
       type t = Syntax.t
@@ -418,12 +409,12 @@ let list_contains_duplicate node =
   match syntax node with
   | SyntaxList lst ->
     let check_fun (tbl, acc) el =
-      if SyntaxMap.mem el tbl then (tbl, true)
+      if SyntaxMap.mem el tbl then (tbl, Some el)
       else (SyntaxMap.add el () tbl, acc)
     in
-    let (_, result) = List.fold_left ~f:check_fun ~init:(SyntaxMap.empty, false) lst in
+    let (_, result) = List.fold_left ~f:check_fun ~init:(SyntaxMap.empty, None) lst in
     result
-  | _ ->  false
+  | _ -> None
 
 let is_empty_list_or_missing node =
   match syntax node with
@@ -462,11 +453,6 @@ let methodish_modifier_contains_helper p node =
   get_modifiers_of_declaration node
     |> Option.exists ~f:(list_contains_predicate p)
 
-(* tests whether the methodish contains > 1 modifier that satisfies [p] *)
-let methodish_modifier_multiple_helper p node =
-  get_modifiers_of_declaration node
-    |> Option.value_map ~default:false ~f:(list_contains_multiple_predicate p)
-
 (* test the methodish node contains the Final keyword *)
 let methodish_contains_final node =
   methodish_modifier_contains_helper is_final node
@@ -498,10 +484,6 @@ let has_static node context f =
     (f label) &&
       context.active_methodish |> Option.exists ~f:methodish_contains_static
   | _ -> false
-
-(* checks if a methodish decl or property has multiple visibility modifiers *)
-let declaration_multiple_visibility node =
-  methodish_modifier_multiple_helper is_visibility node
 
 (* Given a function declaration header, confirm that it is a constructor
  * and that the methodish containing it has a static keyword *)
@@ -652,11 +634,6 @@ let clone_destruct_takes_no_arguments _method_name node _context =
     ((is_clone name) || (is_destruct name)) && num_params <> 0
   | _ -> false
 
-(* whether a methodish has duplicate modifiers *)
-let methodish_duplicate_modifier node =
-  get_modifiers_of_declaration node
-    |> Option.value_map ~default:false ~f:list_contains_duplicate
-
 (* whether a methodish decl has body *)
 let methodish_has_body node =
   match syntax node with
@@ -778,10 +755,24 @@ let xhp_errors env node errors =
       ~close_tag:(text xhp_close_name)) :: errors
   | _ -> errors
 
+(* error on 'public private function foo() *)
+let multiple_visibility_errors modifiers msg errors =
+  let modifiers = match syntax modifiers with
+    | SyntaxList lst -> lst
+    | _ -> []
+  in
+  let modifiers = List.filter modifiers is_visibility in
+  if (List.length modifiers > 1) then
+    make_error_from_node (List.last_exn modifiers) msg :: errors
+  else
+    errors
 
-
-let classish_duplicate_modifiers node =
-  list_contains_duplicate node
+(* error on 'final final function foo() *)
+let multiple_modifiers_errors modifiers msg errors =
+  match list_first_duplicate modifiers with
+  | Some duplicate ->
+     make_error_from_node duplicate msg :: errors
+  | None -> errors
 
 
 (* helper since there are so many kinds of errors *)
@@ -1477,11 +1468,9 @@ let methodish_errors env node errors =
       produce_error_for_header errors (clone_cannot_be_static) header_node env.context
       (SyntaxError.clone_cannot_be_static class_name method_name) modifiers in
     let errors =
-      produce_error errors declaration_multiple_visibility node
-      SyntaxError.error2017 modifiers in
+      multiple_visibility_errors modifiers SyntaxError.error2017 errors in
     let errors =
-      produce_error errors methodish_duplicate_modifier node
-      SyntaxError.error2013 modifiers in
+      multiple_modifiers_errors modifiers SyntaxError.error2013 errors in
     let errors =
       if methodish_contains_static node && (
         attribute_specification_contains method_attrs SN.UserAttributes.uaMutable ||
@@ -3195,9 +3184,8 @@ let classish_errors env node namespace_name names errors =
       | None ->
         errors in
     let errors =
-      produce_error errors
-      classish_duplicate_modifiers cd.classish_modifiers
-      SyntaxError.error2031 cd.classish_modifiers in
+      multiple_modifiers_errors cd.classish_modifiers
+        SyntaxError.error2031 errors in
     let errors =
       produce_error errors
       (classish_sealed_arg_not_classname env) ()
@@ -3676,9 +3664,14 @@ let class_property_visibility_errors env node errors =
     let first_parent_name = Option.value (first_parent_class_name env.context)
       ~default:"" in
     let errors =
-      produce_error errors
-        declaration_multiple_visibility node
-        (SyntaxError.property_has_multiple_visibilities first_parent_name) property_modifiers
+      multiple_modifiers_errors
+        property_modifiers
+        (SyntaxError.property_has_multiple_modifiers first_parent_name) errors
+    in
+    let errors =
+      multiple_visibility_errors
+        property_modifiers
+        (SyntaxError.property_has_multiple_visibilities first_parent_name) errors
     in
     let errors =
       produce_error errors

@@ -58,11 +58,6 @@ let extract_inout_or_ref_param_locations is_closure_or_func md =
 let has_kind m k = List.mem ~equal:(=) m.Ast.m_kind k
 
 let from_ast_wrapper privatize make_name ast_class ast_method =
-  (* Removed the following error check: Seems like a duplication of
-   * full_fidelity_parser_errors.ml *)
-  (* if not (has_valid_access_modifiers ast_method) then
-    Emit_fatal.raise_fatal_parse Pos.none
-      "Multiple access type modifiers are not allowed"; *)
   let pos, original_name = ast_method.T.m_name in
   let class_name =
     SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.T.c_name in

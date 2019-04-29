@@ -259,7 +259,7 @@ let vdarray_in_php = "varray and darray are only allowed in Hack files"
 let uppercase_kw text = "Keyword " ^ text ^ " must be written in lowercase"
 let using_st_function_scoped_top_level =
   "Using statement in function scoped form may only be used at the top " ^
-  "level of a function or a method"
+  "level of a function or a method" (**)
 let const_in_trait = "Traits cannot have constants"
 let const_visibility = "Class constants cannot have visibility modifiers in " ^
   "Hack files"
@@ -438,6 +438,8 @@ let final_property = "Properties cannot be declared final"
 let var_property = "Properties cannot be declared as var; a type is required"
 let property_has_multiple_visibilities name =
   "Multiple access type modifiers are not allowed: properties of " ^ name
+let property_has_multiple_modifiers name =
+  "Multiple modifiers are not allowed: properties of " ^ name
 let property_requires_visibility =
   "Property declarations require a visibility modifier " ^
   "such as public, private or protected."

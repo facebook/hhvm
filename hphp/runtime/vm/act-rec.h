@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/rx.h"
+#include "hphp/util/compact-tagged-ptrs.h"
+
 /*
  * These header dependencies need to stay as minimal as possible.
  */
@@ -36,6 +38,8 @@ struct ObjectData;
 struct StringData;
 struct Unit;
 struct VarEnv;
+
+using ReifiedGenericsPtr = CompactTaggedPtr<ArrayData,uint16_t>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,7 +88,9 @@ struct ActRec {
     VarEnv* m_varEnv;       // Variable environment when live
     ExtraArgs* m_extraArgs; // Lightweight extra args, when live
     StringData* m_invName;  // Invoked name, used for __call(), when pre-live
-    ArrayData* m_reifiedGenerics; // Used to store a pointer to reified generics
+    // Used to store a pointer to reified generics and a bit map of
+    // which generics are reified
+    ReifiedGenericsPtr m_reifiedGenerics{};
   };
 
   TYPE_SCAN_CUSTOM_FIELD(m_thisUnsafe) {

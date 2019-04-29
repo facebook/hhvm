@@ -275,6 +275,7 @@ bool canDCE(IRInstruction* inst) {
   case LdARReifiedGenerics:
   case KillARReifiedGenerics:
   case FuncSupportsAsyncEagerReturn:
+  case IsFunReifiedGenericsMatched:
   case IsFuncDynCallable:
   case IsClsDynConstructible:
   case LdFuncRxLevel:

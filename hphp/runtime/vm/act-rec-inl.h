@@ -229,16 +229,16 @@ inline void ActRec::trashThis() {
 
 inline void ActRec::setReifiedGenerics(ArrayData* rg) {
   m_numArgsAndFlags |= HasReifiedGenerics;
-  m_reifiedGenerics = rg;
+  m_reifiedGenerics.set(0, rg);
 }
 
 inline ArrayData* ActRec::getReifiedGenerics() const {
-  return m_reifiedGenerics;
+  return m_reifiedGenerics.ptr();
 }
 
 inline void ActRec::trashReifiedGenerics() {
   if (!debug) return;
-  m_reifiedGenerics = reinterpret_cast<ArrayData*>(kTrashedReifiedGenericsSlot);
+  m_reifiedGenerics = ReifiedGenericsPtr(kTrashedReifiedGenericsSlot);
 }
 /////////////////////////////////////////////////////////////////////////////
 

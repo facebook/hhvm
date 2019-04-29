@@ -1668,10 +1668,10 @@ To string conversions:
   instructions.
 
 | NewRecord<offset,keys...>, D(Record), S(RecType) S(StkPtr), PRc|CRc
-  
-  Allocate a new record, given the type S0 and N immediate keys 
-  and taking N elements off the stack given by S1, at `offset'. 
-  This instruction assumes it can take the values from the stack 
+
+  Allocate a new record, given the type S0 and N immediate keys
+  and taking N elements off the stack given by S1, at `offset'.
+  This instruction assumes it can take the values from the stack
   without increfing them.
 
 | NewStructArray<offset,keys...>, DArrMixed, S(StkPtr), PRc|CRc
@@ -2286,6 +2286,14 @@ To string conversions:
 
   Raises a runtime error unless whether each generic in S0 is reified or erased
   matches exactly to the expectations of the func.
+
+| IsFunReifiedGenericsMatched<func>, D(Bool), S(FramePtr), NF
+
+  Load the value of m_reifiedGenerics on the ActRec pointed to by the frame
+  pointer S0 and does the fast path for checking whether the number of generics
+  and whether erased versus reified parity match.
+  If the function has soft generics or the number of generics is greater than
+  ReifiedGenericsPtr::kMaxTagSize, returns false.
 
 | InitClsCns<className,constName>, DCns, NA, PRc
 

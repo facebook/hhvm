@@ -29,10 +29,12 @@
 #include "hphp/runtime/base/tv-variant.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-array.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -60,6 +62,48 @@ namespace HPHP { namespace jit { namespace irlower {
 TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+uint32_t getTSBitsImpl(const ArrayData* tsList) {
+  if (!tsList || tsList->size() > ReifiedGenericsPtr::kMaxTagSize) return 0;
+  auto bitmap = 0;
+  IterateV(
+    tsList,
+    [&](TypedValue v) {
+      assertx(isArrayLikeType(v.m_type));
+      bitmap = (bitmap << 1) | !isWildCard(v.m_data.parr);
+    }
+  );
+  return bitmap;
+}
+
+folly::Optional<Vreg> getTSBits(
+  IRLS& env,
+  const IRInstruction* inst,
+  SSATmp* tsList,
+  Vreg tsListReg
+) {
+  auto& v = vmain(env);
+  auto const tsListType = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+  if (tsList->isA(TNullptr) || !tsList->type().maybe(tsListType)) {
+    return folly::none;
+  }
+  if (tsList->hasConstVal(tsListType)) {
+    auto const bitmap =
+      getTSBitsImpl(RuntimeOption::EvalHackArrDVArrs ? tsList->vecVal()
+                                                     : tsList->arrVal());
+    return v.cns(bitmap);
+  }
+
+  auto const args = argGroup(env, inst).reg(tsListReg);
+  auto const dest = v.makeReg();
+  cgCallHelper(v, env, CallSpec::direct(getTSBitsImpl),
+               callDest(dest), SyncOptions::None, args);
+  return dest;
+}
+
+}
 
 void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   auto const sp = srcLoc(env, inst, 0).reg();
@@ -166,6 +210,22 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     }
   }
 
+  auto const createCompactReifiedPtr = [&] (Vout& v) {
+    auto const tsListReg = srcLoc(env, inst, 5).reg();
+    auto const bits = getTSBits(env, inst, tsListTmp, tsListReg);
+    if (!bits) return tsListReg;
+    auto const bits_shifted = v.makeReg();
+    auto const result = v.makeReg();
+    v << sarqi{
+      static_cast<int32_t>(ReifiedGenericsPtr::kShiftAmount),
+      *bits,
+      bits_shifted,
+      v.makeReg()
+    };
+    v << orq{bits_shifted, tsListReg, result, v.makeReg()};
+    return result;
+  };
+
   // Set flags
   auto flags = ActRec::Flags::None;
 
@@ -185,7 +245,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   }
 
   if (!tsListTmp->type().maybe(TNullptr)) {
-    auto const tsList = srcLoc(env, inst, 5).reg();
+    auto const tsList = createCompactReifiedPtr(v);
     v << store{tsList, ar + AROFF(m_reifiedGenerics)};
     flags =
       static_cast<ActRec::Flags>(flags | ActRec::Flags::HasReifiedGenerics);
@@ -230,7 +290,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
   }
 
   if (reifiedCheck) {
-    auto const tsList = srcLoc(env, inst, 5).reg();
+    auto const tsList = createCompactReifiedPtr(v);
     v << store{tsList, ar + AROFF(m_reifiedGenerics)};
     auto const sf = v.makeReg();
     auto const naaf2 = v.makeReg();
@@ -284,7 +344,34 @@ void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
 void cgLdARReifiedGenerics(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const fp = srcLoc(env, inst, 0).reg();
-  vmain(env) << load{fp[AROFF(m_reifiedGenerics)], dst};
+  auto& v = vmain(env);
+
+  auto const compactTSList = v.makeReg();
+  auto const imm = v.cns(-1ull >> ReifiedGenericsPtr::kMaxTagSize);
+  v << load{fp[AROFF(m_reifiedGenerics)], compactTSList};
+  v << andq{imm, compactTSList, dst, v.makeReg()};
+}
+
+void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const func = inst->extra<FuncData>()->func;
+  auto& v = vmain(env);
+
+  auto const info = func->getReifiedGenericsInfo();
+  if (!func->hasReifiedGenerics() ||
+      info.m_hasSoftGenerics ||
+      info.m_typeParamInfo.size() > ReifiedGenericsPtr::kMaxTagSize) {
+    v << copy{v.cns(0), dst};
+    return;
+  }
+  auto const tag = v.makeReg();
+  auto const ored = v.makeReg();
+  auto const sf = v.makeReg();
+  v << loadw{fp[AROFF(m_reifiedGenerics)], tag};
+  v << orwi{static_cast<int16_t>(info.m_bitmap), tag, ored, v.makeReg()};
+  v << cmpw{ored, tag, sf};
+  v << setcc{CC_Z, sf, dst};
 }
 
 void cgKillARReifiedGenerics(IRLS& env, const IRInstruction* inst) {

@@ -1607,6 +1607,7 @@ X(CheckClsReifiedGenericMismatch,
                                 ClassData);
 X(CheckFunReifiedGenericMismatch,
                                 FuncData);
+X(IsFunReifiedGenericsMatched,  FuncData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 ByteOffsetData);

@@ -569,7 +569,7 @@ void Func::resetFuncBody() {
 // Reified Generics
 
 namespace {
-const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, {}};
+const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, false, 0, {}};
 } // namespace
 
 const ReifiedGenericsInfo& Func::getReifiedGenericsInfo() const {

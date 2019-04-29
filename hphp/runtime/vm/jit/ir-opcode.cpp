@@ -782,6 +782,7 @@ bool opcodeMayRaise(Opcode opc) {
   case InterpOneCF:
   case IsCol:
   case IsDVArray:
+  case IsFunReifiedGenericsMatched:
   case IsFuncDynCallable:
   case IsClsDynConstructible:
   case IsReifiedName:

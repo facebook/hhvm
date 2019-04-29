@@ -126,6 +126,8 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
       auto const msg = folly::sformat(
         "Cannot call the reified function '{}' without the reified generics",
         func->fullName());
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
       gen(env, RaiseError, cns(env, makeStaticString(msg)));
     }
   );
@@ -141,19 +143,31 @@ void emitARHasReifiedGenericsCheck(IRGS& env) {
 }
 
 // Checks whether the reified generics matches the one we expect
-void emitCorrectNumOfReifiedGenericsCheck(IRGS& env) {
+void emitCorrectNumOfReifiedGenericsCheck(
+  IRGS& env, SSATmp* doesReifiedGenericsMatch
+) {
   auto const func = curFunc(env);
   if (!func->hasReifiedGenerics()) return;
-  // First local contains the reified generics
-  auto const reified_generics =
-    gen(
-      env,
-      LdLoc,
-      RuntimeOption::EvalHackArrDVArrs ? TVec : TArr,
-      LocalId{func->numParams()},
-      fp(env)
-    );
-  gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, reified_generics);
+  auto const finish = [&] {
+    // First local contains the reified generics
+    auto const reified_generics =
+      gen(
+        env,
+        LdLoc,
+        RuntimeOption::EvalHackArrDVArrs ? TVec : TArr,
+        LocalId{func->numParams()},
+        fp(env)
+      );
+    updateMarker(env);
+    env.irb->exceptionStackBoundary();
+    gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, reified_generics);
+  };
+  if (!doesReifiedGenericsMatch) return finish();
+  ifThen(
+    env,
+    [&] (Block* taken) { gen(env, JmpZero, taken, doesReifiedGenericsMatch); },
+    [&] { finish(); }
+  );
 }
 
 /*
@@ -169,11 +183,14 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
   constexpr auto kMaxParamsInitUnroll = 5;
 
   auto const nparams = func->numNonVariadicParams();
+  SSATmp* doesReifiedGenericsMatch = nullptr;
 
   if (func->hasReifiedGenerics()) {
     // Currently does not work with closures
     assertx(!func->isClosureBody());
     auto const reified_generics = emitLdARReifiedGenericsSafe(env);
+    doesReifiedGenericsMatch =
+      gen(env, IsFunReifiedGenericsMatched, FuncData { func }, fp(env));
     gen(env, KillARReifiedGenerics, fp(env));
     // $0ReifiedGenerics is the first local
     gen(env, StLoc, LocalId{func->numParams()}, fp(env), reified_generics);
@@ -202,6 +219,9 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
     env.irb->exceptionStackBoundary();
     gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));
   }
+
+  emitARHasReifiedGenericsCheck(env);
+  emitCorrectNumOfReifiedGenericsCheck(env, doesReifiedGenericsMatch);
 }
 
 /*
@@ -425,8 +445,6 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
     gen(env, CheckSurpriseFlagsEnter, FuncEntryData { func, argc }, fp(env));
   }
 
-  emitARHasReifiedGenericsCheck(env);
-  emitCorrectNumOfReifiedGenericsCheck(env);
   emitCalleeDynamicCallCheck(env);
   emitCallMCheck(env);
 

@@ -127,6 +127,12 @@ ALWAYS_INLINE bool isValidTSType(Cell c, bool error) {
   return true;
 }
 
+ALWAYS_INLINE bool isWildCard(const ArrayData* ts) {
+  return get_ts_kind(ts) == TypeStructure::Kind::T_typevar &&
+         ts->exists(s_name.get()) &&
+         get_ts_name(ts)->equal(s_wildcard.get());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

@@ -84,7 +84,8 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ActRec* ar) {
 ReifiedGenericsInfo
 extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   size_t len = 0, cur = 0, numReified = 0;
-  bool isReified = false, isSoft = false;
+  bool isReified = false, isSoft = false, hasAnySoft = false;
+  uint32_t bitmap = 0;
   std::vector<TypeParamInfo> tpList;
   IterateKV(
     arr,
@@ -97,11 +98,14 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
         if (k.m_data.num % 3 == 1) {
           // This is the reified generic index
           // Insert the non reified ones
-          tpList.insert(tpList.end(), v.m_data.num - cur, {});
+          auto const numErased = v.m_data.num - cur;
+          tpList.insert(tpList.end(), numErased, {});
+          bitmap = (bitmap << (numErased + 1)) | 1;
           cur = v.m_data.num;
           isReified = true;
         } else if (k.m_data.num % 3 == 2) {
           isSoft = (bool) v.m_data.num;
+          hasAnySoft |= isSoft;
         } else {
           // k.m_data.num % 3 == 0
           numReified++;
@@ -113,7 +117,8 @@ extractSizeAndPosFromReifiedAttribute(const ArrayData* arr) {
   );
   // Insert the non reified ones at the end
   tpList.insert(tpList.end(), len - cur, {});
-  return {numReified, tpList};
+  bitmap = bitmap << (len - cur);
+  return {numReified, hasAnySoft, bitmap, tpList};
 }
 
 // Raises a runtime error if the location of reified generics of f does not
@@ -139,13 +144,8 @@ void checkReifiedGenericMismatchHelper(
     [&](Cell k, TypedValue v) {
       assertx(isIntType(k.m_type));
       assertx(isArrayLikeType(v.m_type));
-      bool wildcard = false;
       auto const i = k.m_data.num;
-      if (get_ts_kind(v.m_data.parr) == TypeStructure::Kind::T_typevar &&
-          v.m_data.parr->exists(s_name.get())) {
-        wildcard = (get_ts_name(v.m_data.parr)->equal(s_wildcard.get()));
-      }
-      if (wildcard && it->m_isReified) {
+      if (isWildCard(v.m_data.parr) && it->m_isReified) {
         if (!it->m_isSoft) {
           raise_error("%s %s expects a reified generic at index %zu",
                       fun ? "Function" : "Class",

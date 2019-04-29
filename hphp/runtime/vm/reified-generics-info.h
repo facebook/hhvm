@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_REIFIEDGENERICSINFO_H_
 #define incl_HPHP_VM_REIFIEDGENERICSINFO_H_
 
+#include <stdint.h>
 #include <vector>
 
 namespace HPHP {
@@ -37,6 +38,11 @@ struct TypeParamInfo {
 struct ReifiedGenericsInfo {
   // Number of reified generics
   size_t m_numReifiedGenerics;
+  // Whether it has any soft generics
+  bool m_hasSoftGenerics;
+  // Bitmap used to compare whether generics match in terms of parity in the
+  // fast path of CheckFunReifiedGenericMismatch
+  uint32_t m_bitmap;
   // Information regarding each type parameter
   std::vector<TypeParamInfo> m_typeParamInfo;
 };

@@ -13,6 +13,14 @@ namespace HH {
     }
 
     <<__Rx>>
+    public static function at(
+      darray $shape,
+      arraykey $index,
+    ) {
+      return $shape[$index];
+    }
+
+    <<__Rx>>
     public static function keyExists(
       darray $shape,
       arraykey $index,

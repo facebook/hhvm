@@ -7,4 +7,8 @@ function one() {
 function main() {
   var_dump(one() % 0);
 }
-main();
+try {
+  main();
+} catch (DivisionByZeroException $e) {
+  echo $e->getMessage(), "\n";
+}

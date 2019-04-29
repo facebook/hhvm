@@ -43,10 +43,26 @@ print "\"5.5\" / 5 --> "; print "5.5" / 5; print "\n";
 print "5 / \"5.5\" --> "; print 5 / "5.5"; print "\n";
 print "5.5 / \"5\" --> "; print 5.5 / "5"; print "\n";
 print "\"5.5\" / \"5\" --> "; print "5.5" / "5"; print "\n";
-print "1 / 0 --> "; print 1 / 0;
-print "1.0 / 0 --> "; print 1.0 / 0;
-print "1 / 0.0 --> "; print 1 / 0.0;
-print "1.0 / 0.0 --> "; print 1.0 / 0.0;
+try {
+  print "1 / 0 --> "; print 1 / 0;
+} catch (DivisionByZeroException $e) {
+  print "Division by zero\n";
+}
+try {
+  print "1.0 / 0 --> "; print 1.0 / 0;
+} catch (DivisionByZeroException $e) {
+  print "Division by zero\n";
+}
+try {
+  print "1 / 0.0 --> "; print 1 / 0.0;
+} catch (DivisionByZeroException $e) {
+  print "Division by zero\n";
+}
+try {
+  print "1.0 / 0.0 --> "; print 1.0 / 0.0;
+} catch (DivisionByZeroException $e) {
+  print "Division by zero\n";
+}
 print "\n";
 
 for ($i = -10; $i <= 10; $i++) {
@@ -78,10 +94,26 @@ print "\"5.5\" % 5 --> "; print "5.5" % 5; print "\n";
 print "5 % \"5.5\" --> "; print 5 % "5.5"; print "\n";
 print "5.5 % \"5\" --> "; print 5.5 % "5"; print "\n";
 print "\"5.5\" % \"5\" --> "; print "5.5" % "5"; print "\n";
-print "1 % 0 --> "; print 1 % 0;
-print "1.0 % 0 --> "; print 1.0 % 0;
-print "1 % 0.0 --> "; print 1 % 0.0;
-print "1.0 % 0.0 --> "; print 1.0 % 0.0;
+try {
+  print "1 % 0 --> "; print 1 % 0;
+} catch (DivisionByZeroException $e) {
+  print "Mod by zero\n";
+}
+try {
+  print "1.0 % 0 --> "; print 1.0 % 0;
+} catch (DivisionByZeroException $e) {
+  print "Mod by zero\n";
+}
+try {
+  print "1 % 0.0 --> "; print 1 % 0.0;
+} catch (DivisionByZeroException $e) {
+  print "Mod by zero\n";
+}
+try {
+  print "1.0 % 0.0 --> "; print 1.0 % 0.0;
+} catch (DivisionByZeroException $e) {
+  print "Mod by zero\n";
+}
 print "\n";
 
 print "5 & 3 --> "; print 5 & 3; print "\n";

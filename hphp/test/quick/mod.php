@@ -9,7 +9,11 @@ function f() {
   $a []= "0";
   foreach ($a as $l) {
     foreach ($a as $r) {
-      var_dump($l % $r);
+      try {
+        var_dump($l % $r);
+      } catch (DivisionByZeroException $e) {
+        echo $e->getMessage(), "\n";
+      }
     }
   }
 }

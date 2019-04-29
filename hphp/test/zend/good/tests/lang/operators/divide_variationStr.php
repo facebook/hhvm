@@ -9,10 +9,14 @@ error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
-	   echo "--- testing: '$strVal' / '$otherVal' ---\n";   
-      var_dump($strVal/$otherVal);
+     echo "--- testing: '$strVal' / '$otherVal' ---\n";
+      try {
+        var_dump($strVal/$otherVal);
+      } catch (DivisionByZeroException $e) {
+        echo $e->getMessage(), "\n";
+      }
    }
 }
 
-   
+
 echo "===DONE===\n";

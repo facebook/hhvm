@@ -12,7 +12,9 @@ function main() {
 
   var_dump(foo() + zero());
   var_dump(foo() - zero());
-  var_dump(foo() / zero());
+  try {
+    var_dump(foo() / zero());
+  } catch (DivisionByZeroException $e) {}
   var_dump(foo() * zero());
 
   var_dump(twelve() + foo());
@@ -47,8 +49,10 @@ function setop_main() {
   $a[0] -= zero();
   var_dump($a[0]);
   $a = array(foo());
-  $a[0] /= zero();
-  var_dump($a[0]);
+  try {
+    $a[0] /= zero();
+    var_dump($a[0]);
+  } catch (DivisionByZeroException $e) {}
   $a = array(foo());
   $a[0] *= zero();
   var_dump($a[0]);

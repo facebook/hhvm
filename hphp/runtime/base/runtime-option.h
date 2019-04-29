@@ -1032,7 +1032,7 @@ struct RuntimeOption {
   F(bool, NoticeOnCollectionToBool, false)                              \
   F(bool, NoticeOnSimpleXMLBehavior, false)                             \
   F(bool, NoticeOnBadMethodStaticness, false)                           \
-  F(bool, ForbidDivisionByZero, false)                                  \
+  F(bool, ForbidDivisionByZero, true)                                  \
   F(bool, NoticeOnByRefArgumentTypehintViolation, false)                \
   /* Enables Hack records. */                                           \
   F(bool, HackRecords, false)                                           \

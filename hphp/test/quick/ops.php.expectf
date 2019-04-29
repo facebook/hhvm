@@ -35,14 +35,10 @@
 5 / "5.5" --> 0.90909090909091
 5.5 / "5" --> 1.1
 "5.5" / "5" --> 1.1
-1 / 0 --> 
-Warning: Division by zero in %s on line 46
-1.0 / 0 --> 
-Warning: Division by zero in %s on line 47
-1 / 0.0 --> 
-Warning: Division by zero in %s on line 48
-1.0 / 0.0 --> 
-Warning: Division by zero in %s on line 49
+1 / 0 --> Division by zero
+1.0 / 0 --> Division by zero
+1 / 0.0 --> Division by zero
+1.0 / 0.0 --> Division by zero
 
 -10 % 4 --> -2
 -9 % 4 --> -1
@@ -103,14 +99,10 @@ Warning: Division by zero in %s on line 49
 5 % "5.5" --> 0
 5.5 % "5" --> 0
 "5.5" % "5" --> 0
-1 % 0 --> 
-Warning: Division by zero in %s on line 81
-1.0 % 0 --> 
-Warning: Division by zero in %s on line 82
-1 % 0.0 --> 
-Warning: Division by zero in %s on line 83
-1.0 % 0.0 --> 
-Warning: Division by zero in %s on line 84
+1 % 0 --> Mod by zero
+1.0 % 0 --> Mod by zero
+1 % 0.0 --> Mod by zero
+1.0 % 0.0 --> Mod by zero
 
 5 & 3 --> 1
 5.0 & 3.0 --> 1
@@ -173,4 +165,3 @@ false || true
 
 (string)42 --> 42
 (string)"hi" --> hi
-

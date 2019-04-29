@@ -9,13 +9,9 @@ int(0)
   . string(2) "00"
 string(2) "00"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -109,13 +105,9 @@ int(0)
   . string(12) "0non-numeric"
 string(12) "0non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -161,13 +153,9 @@ int(0)
   . string(1) "0"
 string(1) "0"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -189,13 +177,9 @@ int(0)
   . string(4) "1230"
 string(4) "1230"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(123)
@@ -289,13 +273,9 @@ int(0)
   . string(14) "123non-numeric"
 string(14) "123non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(123)
@@ -341,13 +321,9 @@ int(0)
   . string(3) "123"
 string(3) "123"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(123)
@@ -369,13 +345,9 @@ int(0)
   . string(2) "10"
 string(2) "10"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(1)
@@ -469,13 +441,9 @@ int(0)
   . string(12) "1non-numeric"
 string(12) "1non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(1)
@@ -521,13 +489,9 @@ int(0)
   . string(1) "1"
 string(1) "1"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(1)
@@ -549,13 +513,9 @@ float(0)
   . string(8) "123.4560"
 string(8) "123.4560"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(123)
@@ -649,13 +609,9 @@ float(0)
   . string(18) "123.456non-numeric"
 string(18) "123.456non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(123)
@@ -701,13 +657,9 @@ float(0)
   . string(7) "123.456"
 string(7) "123.456"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(123)
@@ -729,13 +681,9 @@ int(0)
   . string(12) "non-numeric0"
 string(12) "non-numeric0"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -829,19 +777,15 @@ int(0)
   . string(22) "non-numericnon-numeric"
 string(22) "non-numericnon-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & string(11) "non-numeric"
 string(11) "non-numeric"
   | string(11) "non-numeric"
 string(11) "non-numeric"
-  ^ string(11) "%r\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00%r"
-string(11) "%r\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00%r"
+  ^ string(11) "           "
+string(11) "           "
   << int(0)
 int(0)
   >> int(0)
@@ -862,8 +806,8 @@ int(0)
 int(0)
   & string(3) "&(("
 string(3) "&(("
-  | string(11) "%r\x7f\x7f\x7f%r-numeric"
-string(11) "%r\x7f\x7f\x7f%r-numeric"
+  | string(11) "-numeric"
+string(11) "-numeric"
   ^ string(3) "YWW"
 string(3) "YWW"
   << int(0)
@@ -881,13 +825,9 @@ int(0)
   . string(11) "non-numeric"
 string(11) "non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -909,13 +849,9 @@ int(0)
   . string(4) "7890"
 string(4) "7890"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(789)
@@ -1009,17 +945,13 @@ int(0)
   . string(14) "789non-numeric"
 string(14) "789non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & string(3) "&(("
 string(3) "&(("
-  | string(11) "%r\x7f\x7f\x7f%r-numeric"
-string(11) "%r\x7f\x7f\x7f%r-numeric"
+  | string(11) "-numeric"
+string(11) "-numeric"
   ^ string(3) "YWW"
 string(3) "YWW"
   << int(789)
@@ -1044,8 +976,8 @@ int(0)
 string(3) "789"
   | string(3) "789"
 string(3) "789"
-  ^ string(3) "%r\x00\x00\x00%r"
-string(3) "%r\x00\x00\x00%r"
+  ^ string(3) "   "
+string(3) "   "
   << int(1654652928)
 int(1654652928)
   >> int(0)
@@ -1061,13 +993,9 @@ int(0)
   . string(3) "789"
 string(3) "789"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(789)
@@ -1089,13 +1017,9 @@ int(0)
   . string(1) "0"
 string(1) "0"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -1189,13 +1113,9 @@ int(0)
   . string(11) "non-numeric"
 string(11) "non-numeric"
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)
@@ -1241,13 +1161,9 @@ int(0)
   . string(0) ""
 string(0) ""
   / 
-Warning: Division by zero in %s on line 40
-bool(false)
-bool(false)
+Division by zero
   % 
-Warning: Division by zero in %s on line 45
-bool(false)
-bool(false)
+Division by zero
   & int(0)
 int(0)
   | int(0)

@@ -1,4 +1,2 @@
-
-Warning: Division by zero in %s/mod_001.php on line 6
-bool(false)
+Division by zero
 Done

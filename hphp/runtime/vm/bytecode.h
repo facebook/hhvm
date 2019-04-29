@@ -320,7 +320,7 @@ constexpr size_t clsRefCountToCells(size_t n) {
  *
  *   - delaying stack overflow checks on reentry
  */
-constexpr int kStackCheckLeafPadding = 20;
+constexpr int kStackCheckLeafPadding = 100;
 constexpr int kStackCheckReenterPadding = 9;
 constexpr int kStackCheckPadding = kStackCheckLeafPadding +
   kStackCheckReenterPadding;

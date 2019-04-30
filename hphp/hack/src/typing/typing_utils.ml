@@ -21,10 +21,15 @@ module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
 
 (* This can be useful to debug type which blow up in size *)
-let ty_size ty =
+let ty_size env ty =
   let ty_size_visitor = object
     inherit [int] Type_visitor.type_visitor as super
     method! on_type acc ty = 1 + super#on_type acc ty
+    method! on_tvar acc r v =
+      let _, ty = Env.expand_var env r v in
+      match ty with
+      | _, Tvar v' when v' = v -> acc
+      | _ -> super#on_type acc ty
     end in
   ty_size_visitor#on_type 0 ty
 

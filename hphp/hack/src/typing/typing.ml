@@ -217,13 +217,19 @@ let get_darray_inst ty =
   | (_, Tarraykind (AKdarray (kty, vty))) -> Some (kty, vty)
   | _ -> get_key_value_collection_inst ty
 
-let with_timeout opts fun_name ~(do_ : unit -> 'b): 'b option =
-  let timeout = opts.GlobalOptions.tco_timeout in
-  if timeout = 0 then Some (do_ ())
+let with_timeout env fun_name ~(do_ : Env.env -> 'b): 'b option =
+  let timeout = (Env.get_tcopt env).GlobalOptions.tco_timeout in
+  if timeout = 0 then Some (do_ env)
   else
+    let big_envs = ref [] in
+    let env = { env with Env.big_envs } in
     Timeout.with_timeout ~timeout
-      ~on_timeout:(fun _ -> Errors.typechecker_timeout fun_name timeout; None)
-      ~do_:(fun _ -> Some (do_ ()))
+      ~on_timeout:(fun _ ->
+        List.iter !big_envs (fun (p, env) ->
+          Typing_log.log_key "WARN: environment is too big."; Typing_log.hh_show_env p env);
+        Errors.typechecker_timeout fun_name timeout;
+        None)
+      ~do_:(fun _ -> Some (do_ env))
 
 (*****************************************************************************)
 (* Handling function/method arguments *)
@@ -466,12 +472,12 @@ and add_decl_errors = function
 (* Now we are actually checking stuff! *)
 (*****************************************************************************)
 and fun_def tcopt f : Tast.fun_def option =
-  with_timeout tcopt f.f_name ~do_:begin fun () ->
+  let env = EnvFromDef.fun_env tcopt f in
+  with_timeout env f.f_name ~do_:begin fun env ->
   (* reset the expression dependent display ids for each function body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst f.f_name in
   let nb = TNBody.func_body f in
-  let env = EnvFromDef.fun_env tcopt f in
   add_decl_errors (Option.map
     (Env.get_fun env (snd f.f_name))
     ~f:(fun x -> Option.value_exn x.ft_decl_errors)
@@ -700,6 +706,7 @@ and gather_defined_in_expr env e =
 
 and stmt env (pos, st) =
   let env, st = stmt_ env pos st in
+  Typing_debug.log_env_if_too_big pos env;
   env, (pos, st)
 
 and stmt_ env pos st =
@@ -6647,7 +6654,7 @@ and class_type_param env ct =
   }
 
 and method_def env m =
-  with_timeout (Env.get_tcopt env) m.m_name ~do_:begin fun () ->
+  with_timeout env m.m_name ~do_:begin fun env ->
   (* reset the expression dependent display ids for each method body *)
   Reason.expr_display_id_map := IMap.empty;
   let pos = fst m.m_name in

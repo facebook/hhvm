@@ -709,6 +709,7 @@ let empty tcopt file ~droot = {
   tvenv = IMap.empty;
   tyvars_stack = [];
   allow_wildcards = false;
+  big_envs = ref [];
 }
 
 let set_env_reactive env reactive =

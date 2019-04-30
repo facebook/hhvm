@@ -467,7 +467,9 @@ let env_as_value env =
     log_levels = _;
     tvenv;
     tyvars_stack;
-    allow_wildcards; } = env in
+    allow_wildcards;
+    big_envs = _;
+  } = env in
   make_map [
     "pos", pos_as_value pos;
     "outer_pos", pos_as_value outer_pos;

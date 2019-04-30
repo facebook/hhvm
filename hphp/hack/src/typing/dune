@@ -128,6 +128,7 @@
     typing_alias
     typing_array_access
     typing_attributes
+    typing_debug
     typing_disposable
     typing_enum
     typing_extends

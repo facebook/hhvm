@@ -113,6 +113,7 @@ module FakeMembers :
 val unbind : env -> locl ty -> env * locl ty
 val tany : env -> 'a ty_
 val next_cont_exn : env -> local_id_map
+val next_cont_opt : env -> local_id_map option
 val set_local : env -> Local_id.t -> locl ty -> env
 val is_using_var : env -> Local_id.t -> bool
 val set_using_var : env -> Local_id.t -> env

@@ -18,8 +18,9 @@
 #include <iostream>
 #include <sstream>
 
+#include "hphp/runtime/vm/method-lookup.h"
+
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit {
 

@@ -20,6 +20,7 @@ namespace HPHP {
 
 struct Func;
 struct Class;
+struct Unit;
 struct StringData;
 struct ObjectData;
 
@@ -53,9 +54,61 @@ LookupResult lookupClsMethod(const Func*& f,
                              ObjectData* this_,
                              const Class* ctx,
                              bool raise = false);
+
+/*
+ * This routine attempts to find the Func* that will be called for a given
+ * target Class and function name, when called from ctxFunc.  This function
+ * determines if a given Func* will be called in a request-insensitive way
+ * (i.e. suitable for burning into the TC as a pointer).
+ *
+ * If exactClass is true, the class we are targeting is assumed to be
+ * exactly `cls', and the returned Func* is definitely the one called.
+ *
+ * If exactClass is false, the class we are targeting may be a subclass of
+ * cls, and the returned Func* may be overridden in a subclass.
+ *
+ * Its the caller's responsibility to ensure that the Class* is usable -
+ * is AttrUnique, an instance of the ctx or guarded in some way.
+ *
+ * Returns nullptr if we can't determine the Func*.
+ */
+const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
+                                  bool& magicCall, bool staticLookup,
+                                  const Func* ctxFunc, bool exactClass);
+
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,
                               const Class* ctx,
                               bool raise = false);
+
+/*
+ * If possible find the constructor for cls that would be run from the
+ * context ctx if a new instance of cls were created there.  If the
+ * constructor is inaccessible from the given context this function
+ * will return nullptr. It is the caller's responsibility to ensure
+ * that cls is the right Class* (ie its AttrUnique or bound to the
+ * ctx, or otherwise guaranteed by guards).
+ */
+const Func* lookupImmutableCtor(const Class* cls, const Class* ctx);
+
+/*
+ * Find a function which always uniquely maps to the given name in the context
+ * of the given unit. A function so returned can be used directly in the TC as
+ * it will not change.
+ *
+ * This generally includes persistent functions, but can also include
+ * non-persistent functions in certain situations. Note that even if the
+ * function is immutable, the unit it is defined in may need loading. In that
+ * case, the function is safe to use, but you have to emit code to ensure the
+ * unit is loaded first.
+ */
+struct ImmutableFuncLookup {
+  const Func* func;
+  // Does any use of this function require a check to ensure its unit is loaded?
+  bool needsUnitLoad;
+};
+
+ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
+                                        const StringData* name);
 
 }

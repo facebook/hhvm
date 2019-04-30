@@ -17,11 +17,11 @@
 #include "hphp/runtime/vm/jit/annotation.h"
 
 #include "hphp/runtime/vm/hhbc-codec.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
-#include "hphp/runtime/vm/jit/translator-inline.h"
-#include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/repo.h"
+
+#include "hphp/runtime/vm/jit/normalized-instruction.h"
 
 namespace HPHP { namespace jit {
 

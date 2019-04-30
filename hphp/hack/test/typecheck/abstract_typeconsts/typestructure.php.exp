@@ -1,0 +1,12 @@
+File "typestructure.php", line 11, characters 28-30:
+Cannot reference abstract constant A::T directly (Typing[4129])
+File "typestructure.php", line 5, characters 23-23:
+Declaration is here
+File "typestructure.php", line 12, characters 28-30:
+Cannot reference abstract constant B::T directly (Typing[4129])
+File "typestructure.php", line 5, characters 23-23:
+Declaration is here
+File "typestructure.php", line 8, characters 7-7:
+This class must be declared abstract, or provide an implementation for the abstract type constant 'T' (Typing[4047])
+File "typestructure.php", line 5, characters 23-23:
+Declaration is here

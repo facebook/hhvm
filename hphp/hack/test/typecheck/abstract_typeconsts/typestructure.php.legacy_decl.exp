@@ -1,0 +1,4 @@
+File "typestructure.php", line 11, characters 28-30:
+Cannot reference abstract constant A::T directly (Typing[4129])
+File "typestructure.php", line 5, characters 23-23:
+Declaration is here

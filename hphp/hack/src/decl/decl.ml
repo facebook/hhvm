@@ -360,7 +360,12 @@ and synthesize_defaults k tc (typeconsts, consts) =
       ttc_constraint = None;
       ttc_type = Some default;
     } in
-    SMap.add k concrete typeconsts, consts
+    let typeconsts = SMap.add k concrete typeconsts in
+    (* OCaml 4.06 has an update method that makes this operation much more ergonomic *)
+    let constant = SMap.find_opt k consts in
+    let consts = Option.value_map constant ~default:consts
+      ~f:(fun c -> SMap.add k { c with cc_abstract = false } consts) in
+    typeconsts, consts
   | _ -> typeconsts, consts
 
 and class_decl c =
@@ -678,8 +683,11 @@ and typeconst_structure c stc =
   let r = Reason.Rwitness pos in
   let tsid = pos, SN.FB.cTypeStructure in
   let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [stc.stc_name])]) in
+  let abstract = match stc.stc_abstract with
+  | TCAbstract _ -> true
+  | _ -> false in
   {
-    cc_abstract    = Option.is_none stc.stc_type;
+    cc_abstract    = abstract;
     cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = ts_ty;

@@ -125,6 +125,7 @@ inline HighArena* highArena() {
 }
 
 using DefaultArena = alloc::ManagedArena<alloc::DefaultExtentAllocator>;
+using PreMappedArena = alloc::ManagedArena<alloc::RangeFallbackExtentAllocator>;
 
 /*
  * Make sure we have at least `count` extra arenas, with the same number of

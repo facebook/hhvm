@@ -24,6 +24,8 @@
 
 namespace HPHP { namespace alloc {
 
+extent_hooks_t* g_defaultHooks{nullptr};
+
 // Trivial jemalloc extent hooks.  If a hook always returns true (indicating
 // failure), setting it to NULL can be more efficient.
 
@@ -115,6 +117,82 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
   }
   not_reached();
   return nullptr;
+}
+
+extent_hooks_t RangeFallbackExtentAllocator::s_hooks {
+  RangeFallbackExtentAllocator::extent_alloc,
+  RangeFallbackExtentAllocator::extent_dalloc,
+  RangeFallbackExtentAllocator::extent_destroy,
+  RangeFallbackExtentAllocator::extent_commit,
+  RangeFallbackExtentAllocator::extent_decommit,
+  RangeFallbackExtentAllocator::extent_purge,
+  nullptr,                              // purge_forced
+  extent_split,                         // always split
+  extent_merge                          // always merge
+};
+
+
+void* RangeFallbackExtentAllocator::
+extent_alloc(extent_hooks_t* extent_hooks, void* addr,
+             size_t size, size_t alignment, bool* zero,
+             bool* commit, unsigned arena_ind) {
+  assertx(extent_hooks == &RangeFallbackExtentAllocator::s_hooks);
+  assertx(arena_ind != 0);
+  constexpr size_t kAlign = 1u << 16;
+  if (addr != nullptr || alignment > kAlign || (size % kAlign)) {
+    // Let the default hook handle weird cases.
+    return g_defaultHooks->alloc(extent_hooks, addr, size, alignment,
+                                 zero, commit, arena_ind);
+  }
+  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
+  if (auto addr = extAlloc->getLowMapper()->alloc(size)) return addr;
+  return g_defaultHooks->alloc(extent_hooks, addr, size, alignment,
+                               zero, commit, arena_ind);
+}
+
+bool RangeFallbackExtentAllocator::
+extent_dalloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
+              bool committed, unsigned arena_ind) {
+  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
+  if (extAlloc->inRange(addr)) return true;
+  return g_defaultHooks->dalloc(extent_hooks, addr, size, committed, arena_ind);
+}
+
+void RangeFallbackExtentAllocator::
+extent_destroy(extent_hooks_t* extent_hooks, void* addr, size_t size,
+               bool committed, unsigned arena_ind) {
+  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
+  if (extAlloc->inRange(addr)) return;
+  return g_defaultHooks->destroy(extent_hooks, addr, size,
+                                 committed, arena_ind);
+}
+
+bool RangeFallbackExtentAllocator::
+extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
+              size_t offset, size_t length, unsigned arena_ind) {
+  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
+  if (extAlloc->inRange(addr)) return false;
+  return g_defaultHooks->commit(extent_hooks, addr, size,
+                                offset, length, arena_ind);
+}
+
+bool RangeFallbackExtentAllocator::
+extent_decommit(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                size_t offset, size_t length, unsigned arena_ind) {
+  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
+  if (extAlloc->inRange(addr)) return true; // never decommit the fixed range
+  return g_defaultHooks->decommit(extent_hooks, addr, size, offset,
+                                  length, arena_ind);
+}
+
+bool RangeFallbackExtentAllocator::
+extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
+             size_t offset, size_t length, unsigned arena_ind) {
+  auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
+  if (extAlloc->inRange(addr)) return true; // never purge
+  if (g_defaultHooks->purge_lazy == nullptr) return true;
+  return g_defaultHooks->purge_lazy(extent_hooks, addr, size, offset,
+                                    length, arena_ind);
 }
 
 }}

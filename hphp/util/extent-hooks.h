@@ -68,6 +68,8 @@ template<typename T> struct extent_allocator_traits {
   }
 };
 
+extern extent_hooks_t* g_defaultHooks;
+
 /**
  * Default extent hooks used by jemalloc.
  */
@@ -104,6 +106,57 @@ struct MultiRangeExtentAllocator {
   static constexpr std::size_t kMaxMapperCount = 7u;
   std::array<RangeMapper*, kMaxMapperCount> m_mappers;
   std::atomic_size_t m_allocatedSize;
+};
+
+/*
+ * An extent allocator that initially allocates from a fixed range (probably
+ * backed by special mappings such as huge pages), and falls back to normal
+ * mappings when the initial range runs out. Pages in the range are never
+ * returned to the system, so be careful if memory is tight.
+ */
+struct RangeFallbackExtentAllocator : RangeState {
+  public:
+  // Only one range allowed, must initialize at the beginning.  Add mappers
+  // later.
+  template<typename... Args>
+  explicit RangeFallbackExtentAllocator(Args&&... args)
+    : RangeState(std::forward<Args>(args)...) {}
+
+  RangeFallbackExtentAllocator(const RangeFallbackExtentAllocator&) = delete;
+  RangeFallbackExtentAllocator&
+  operator=(const RangeFallbackExtentAllocator&) = delete;
+
+  static void*
+  extent_alloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
+               size_t alignment, bool* zero, bool* commit, unsigned arena_ind);
+  static bool
+  extent_dalloc(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                bool committed, unsigned arena_ind);
+  static void
+  extent_destroy(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                 bool committed, unsigned arena_ind);
+  static bool
+  extent_commit(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                size_t offset, size_t length, unsigned arena_ind);
+  static bool
+  extent_decommit(extent_hooks_t* extent_hooks, void* addr, size_t size,
+                  size_t offset, size_t length, unsigned arena_ind);
+  static bool
+  extent_purge(extent_hooks_t* extent_hooks, void* addr, size_t size,
+               size_t offset, size_t length, unsigned arena_ind);
+
+ private:
+  bool inRange(void* addr) {
+    // Use unsigned subtraction and comparison to save a branch. If addr is
+    // lower than base, it looks like a very big unsigned number in the
+    // comparison.
+    auto const p = static_cast<char*>(addr);
+    return p < high() && p >= low();
+  }
+
+ public:
+  // The hook passed to the underlying arena upon creation.
+  static extent_hooks_t s_hooks;
 };
 
 }}

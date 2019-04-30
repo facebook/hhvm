@@ -136,7 +136,9 @@ void ManagedArena<ExtentAllocator>::init() {
   char command[32];
   if (extent_hooks_t* hooks_ptr = Traits::get_hooks()) {
     std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
-    if (mallctl(command, nullptr, nullptr, &hooks_ptr, sizeof(hooks_ptr))) {
+    void* old = (g_defaultHooks == nullptr) ? &g_defaultHooks : nullptr;
+    size_t oldSize = sizeof(extent_hooks_t*);
+    if (mallctl(command, old, &oldSize, &hooks_ptr, sizeof(hooks_ptr))) {
       throw std::runtime_error{command};
     }
   }
@@ -168,6 +170,7 @@ template size_t ManagedArena<MultiRangeExtentAllocator>::unusedSize();
 template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats();
 
 template void ManagedArena<DefaultExtentAllocator>::init();
+template void ManagedArena<RangeFallbackExtentAllocator>::init();
 
 }}
 

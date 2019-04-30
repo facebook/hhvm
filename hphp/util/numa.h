@@ -18,8 +18,8 @@
 
 #include <atomic>
 
+#include <cstdlib>
 #ifdef HAVE_NUMA
-#include <cstdint>
 #include <vector>
 #include <numa.h>
 #endif

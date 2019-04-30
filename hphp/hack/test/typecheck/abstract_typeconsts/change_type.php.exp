@@ -1,0 +1,8 @@
+File "change_type.php", line 8, characters 7-8:
+This class must be declared abstract, or provide an implementation for the abstract type constant 'T' (Typing[4047])
+File "change_type.php", line 5, characters 23-23:
+Declaration is here
+File "change_type.php", line 14, characters 7-8:
+This class must be declared abstract, or provide an implementation for the abstract type constant 'T' (Typing[4047])
+File "change_type.php", line 11, characters 23-23:
+Declaration is here

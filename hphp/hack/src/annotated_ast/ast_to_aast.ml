@@ -518,13 +518,13 @@ struct
       (* abstract const type T;
        * abstract const type T as num; *)
       | true, _, None ->
-        (* Choice of tc.tconst_type based on the existing behavior, previously captured by the h, _ case
-         * TODO: Change to tc.tconst_constraint and merge these two cases *)
+        (* Choice of tc.tconst_type based on the existing behavior, previously captured by the h, _ case *)
         tc.tconst_type, Aast.TCAbstract (optional on_hint tc.tconst_type);
       (* abstract const type T = int;
        * abstract const type T as num = int; *)
       | true, _, Some _ ->
-        tc.tconst_constraint, Aast.TCAbstract (optional on_hint tc.tconst_type) in
+        (* This enforces that abstract type consts with defaults behave like old abstract type consts *)
+        None, Aast.TCAbstract (optional on_hint tc.tconst_type) in
 
     Aast.{
       c_tconst_abstract = abstract_kind;

@@ -350,6 +350,19 @@ and class_is_abstract c =
     | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
     | _ -> false
 
+(* When all type constants have been inherited and declared, this step synthesizes
+ * the defaults of abstract type constants into concrete type constants. *)
+and synthesize_defaults k tc (typeconsts, consts) =
+  match tc.ttc_abstract with
+  | TCAbstract (Some default) ->
+    let concrete = { tc with
+      ttc_abstract = TCConcrete;
+      ttc_constraint = None;
+      ttc_type = Some default;
+    } in
+    SMap.add k concrete typeconsts, consts
+  | _ -> typeconsts, consts
+
 and class_decl c =
   let is_abstract = class_is_abstract c in
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
@@ -378,6 +391,10 @@ and class_decl c =
   let typeconsts = inherited.Decl_inherit.ih_typeconsts in
   let typeconsts, consts = List.fold_left c.sc_typeconsts
       ~f:(typeconst_fold c) ~init:(typeconsts, consts) in
+  let typeconsts, consts =
+    if c.sc_kind = Ast.Cnormal
+    then SMap.fold synthesize_defaults typeconsts (typeconsts, consts)
+    else typeconsts, consts in
   let sclass_var = static_prop_decl c in
   let sprops = inherited.Decl_inherit.ih_sprops in
   let sprops = List.fold_left c.sc_sprops ~f:sclass_var ~init:sprops in

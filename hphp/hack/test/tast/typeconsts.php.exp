@@ -15,16 +15,13 @@
           c_tconst_name = ([5:23-26], "Tac");
           c_tconst_constraint = (Some ([5:30-33], (Hprim Tnum)));
           c_tconst_type = None; c_tconst_user_attributes = [] };
-        { c_tconst_abstract =
-          (TCAbstract (Some ([6:29-32], (Happly (([6:29-32], "int"), [])))));
+        { c_tconst_abstract = (TCAbstract (Some ([6:29-32], (Hprim Tint))));
           c_tconst_name = ([6:23-26], "Tad"); c_tconst_constraint = None;
           c_tconst_type = None; c_tconst_user_attributes = [] };
-        { c_tconst_abstract =
-          (TCAbstract (Some ([7:37-40], (Happly (([7:37-40], "int"), [])))));
+        { c_tconst_abstract = (TCAbstract (Some ([7:37-40], (Hprim Tint))));
           c_tconst_name = ([7:23-27], "Tacd");
           c_tconst_constraint = (Some ([7:31-34], (Hprim Tnum)));
-          c_tconst_type = (Some ([7:31-34], (Hprim Tnum)));
-          c_tconst_user_attributes = [] };
+          c_tconst_type = None; c_tconst_user_attributes = [] };
         { c_tconst_abstract = TCPartiallyAbstract;
           c_tconst_name = ([8:14-17], "Tpa");
           c_tconst_constraint = (Some ([8:21-24], (Hprim Tnum)));

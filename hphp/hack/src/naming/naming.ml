@@ -1564,19 +1564,23 @@ module Make (GetLocals : GetLocals) = struct
      * a const and type const with the same name
      *)
     Env.bind_class_const env t.Aast.c_tconst_name;
+    let abstract =
+      match t.Aast.c_tconst_abstract with
+      | Aast.TCAbstract (Some default) -> Aast.TCAbstract (Some (aast_hint env default))
+      | _ -> t.Aast.c_tconst_abstract in
     let constr = Option.map t.Aast.c_tconst_constraint (aast_hint env) in
     let type_ = Option.map t.Aast.c_tconst_type (aast_hint env) in
     let attrs = aast_user_attributes env t.Aast.c_tconst_user_attributes in
     if not (TypecheckerOptions.experimental_feature_enabled (fst env).tcopt
         TypecheckerOptions.experimental_type_const_attributes || List.is_empty attrs)
     then Errors.experimental_feature (fst t.Aast.c_tconst_name) "type constant attributes";
-    begin match t.Aast.c_tconst_abstract with
+    begin match abstract with
     | Aast.TCAbstract (Some _) when not (TypecheckerOptions.experimental_feature_enabled (fst env).tcopt
       TypecheckerOptions.experimental_abstract_type_const_with_default) ->
       Errors.experimental_feature (fst t.Aast.c_tconst_name) "abstract type constant with default"
     | _ -> () end;
     N.
-    { c_tconst_abstract = t.Aast.c_tconst_abstract
+    { c_tconst_abstract = abstract
     ; c_tconst_name = t.Aast.c_tconst_name
     ; c_tconst_constraint = constr
     ; c_tconst_type = type_

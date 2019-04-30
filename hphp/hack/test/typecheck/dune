@@ -74,6 +74,7 @@ let () =
              ; "--fallback-out-extension .out"
              ; "--flags"
              ; "--error-format raw"
+             ; "--out-extension .legacy.out"
              ] in
   let cmd = String.concat " " cmds in
   let typecheck_old_inference =
@@ -89,6 +90,7 @@ let () =
              ; "--fallback-expect-extension .exp"
              ; "--fallback-out-extension .out"
              ; "--flags"
+             ; "--out-extension .legacy_decl.out"
              ; "--new-inference"
              ; "--new-inference-lambda"
              ; "--error-format raw" ] in

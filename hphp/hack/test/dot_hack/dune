@@ -11,7 +11,7 @@
     --out-extension .legacy.out
     --in-extension .hack
     --batch
-    --flags --error-format raw)))
+    --flags --error-format raw --out-extension .legacy.out)))
 
 (alias
     (name runtest)

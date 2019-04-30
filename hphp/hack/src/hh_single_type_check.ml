@@ -79,6 +79,7 @@ type options = {
   all_errors : bool;
   tcopt : GlobalOptions.t;
   batch_mode : bool;
+  out_extension : string;
 }
 
 (* Canonical builtins from our hhi library *)
@@ -200,6 +201,7 @@ let parse_options () =
   let pocket_universes = ref false in
   let disallow_byref_prop_args = ref (Some false) in
   let shallow_class_decl = ref false in
+  let out_extension = ref ".out" in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -256,6 +258,9 @@ let parse_options () =
     "--no-builtins",
       Arg.Set no_builtins,
       " Don't use builtins (e.g. ConstSet)";
+    "--out-extension",
+      Arg.String (fun s -> out_extension := s),
+      "output file extension (default .out)";
     "--dump-deps",
       Arg.Unit (set_mode Dump_deps),
       " Print dependencies";
@@ -476,6 +481,7 @@ let parse_options () =
     error_format = !error_format;
     tcopt;
     batch_mode = !batch_mode;
+    out_extension = !out_extension;
   }
 
 let compute_least_type tcopt fn =
@@ -825,8 +831,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  all_errors error_format batch_mode =
-  let new_inference = GlobalOptions.tco_new_inference tcopt in
+  all_errors error_format batch_mode out_extension =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> Relative_path.from_root x
@@ -1119,11 +1124,10 @@ let handle_mode
     let results = ServerHighlightRefs.go (file, line, column) tcopt  in
     ClientHighlightRefs.go results ~output_json:false;
   | Errors when batch_mode ->
-    let ext = if new_inference then ".out" else ".legacy.out" in
     (* For each file in our batch, run typechecking serially.
       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
-      let oc = Out_channel.create (Filename.basename (filename ^ ext)) in
+      let oc = Out_channel.create (Filename.basename (filename ^ out_extension)) in
       let contents = Sys_utils.cat filename in
       (* This means builtins had errors, so lets just print those if we see them *)
       if parse_errors <> []
@@ -1241,6 +1245,7 @@ let decl_and_run_mode
     tcopt;
     all_errors;
     batch_mode;
+    out_extension;
   }
   popt
   repo_root =
@@ -1296,7 +1301,7 @@ let decl_and_run_mode
     parse_name_and_decl popt to_decl in
 
   handle_mode mode files tcopt popt builtins files_contents files_info
-    (Errors.get_error_list errors) all_errors error_format batch_mode
+    (Errors.get_error_list errors) all_errors error_format batch_mode out_extension
 
 let main_hack ({files; mode; tcopt; _} as opts) =
   (* TODO: We should have a per file config *)

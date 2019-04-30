@@ -871,6 +871,7 @@ struct RuntimeOption {
   F(double,   JitPGOCalledFuncThreshold, 90)                            \
   F(bool,     JitPGODumpCallGraph,     false)                           \
   F(bool,     JitPGORacyProfiling,     false)                           \
+  F(uint32_t, JitLiveThreshold,        1000)                            \
   F(uint64_t, FuncCountHint,           10000)                           \
   F(uint64_t, PGOFuncCountHint,        1000)                            \
   F(bool, RegionRelaxGuards,           true)                            \

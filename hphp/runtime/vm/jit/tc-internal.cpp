@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/tc.h"
 
+#include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -92,6 +93,15 @@ bool canTranslate() {
     RuntimeOption::EvalJitGlobalTranslationLimit;
 }
 
+static AtomicVector<uint32_t> s_func_counters{0, 0};
+static InitFiniNode s_func_counters_reinit(
+  [] {
+    UnsafeReinitEmptyAtomicVector(s_func_counters,
+                                  RuntimeOption::EvalFuncCountHint);
+  },
+  InitFiniNode::When::PostRuntimeOptions, "s_func_counters reinit"
+);
+
 bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (!canTranslate()) {
@@ -107,6 +117,17 @@ bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
   if (RuntimeOption::EvalJitPGOOnly &&
       (kind == TransKind::Live || kind == TransKind::LivePrologue)) {
     return false;
+  }
+
+  // Refuse to JIT Live translations for a function until Eval.JitLiveThreshold
+  // is hit.
+  if (kind == TransKind::Live || kind == TransKind::LivePrologue) {
+    auto const funcId = func->getFuncId();
+    s_func_counters.ensureSize(funcId + 1);
+    s_func_counters[funcId].fetch_add(1, std::memory_order_relaxed);
+    if (s_func_counters[funcId] < RuntimeOption::EvalJitLiveThreshold) {
+      return false;
+    }
   }
 
   return true;

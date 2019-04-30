@@ -58,6 +58,7 @@ let () =
   let cmds = [ "--flags"
              ; "--new-inference"
              ; "--new-inference-lambda"
+             ; "--shallow-class-decl"
              ; "--error-format raw"
              ] in
   let cmd = String.concat " " cmds in
@@ -82,6 +83,24 @@ let () =
     (name typecheck_old_inference)
     %s
     %s)" typecheck_deps (command true cmd) in
+  (* legacy decl *)
+  let cmds = [ "--out-extension .legacy_decl.out"
+             ; "--expect-extension .legacy_decl.exp"
+             ; "--fallback-expect-extension .exp"
+             ; "--fallback-out-extension .out"
+             ; "--flags"
+             ; "--new-inference"
+             ; "--new-inference-lambda"
+             ; "--error-format raw" ] in
+  let cmd = String.concat " " cmds in
+  let typecheck_legacy_decl =
+    Printf.sprintf "
+
+(alias
+      (name typecheck_legacy_decl)
+      %s
+      %s)" (deps files_tc)
+    (command true cmd) in
   (* decl_compare *)
   let decl_compare =
     Printf.sprintf "
@@ -113,8 +132,9 @@ let () =
 (alias
     (name runtest)
     (deps (alias typecheck) (alias typecheck_old_inference)
-      (alias decl_compare)))" in
+      (alias decl_compare) (alias typecheck_legacy_decl)))" in
 
-  let dune_file = typecheck ^ typecheck_old_inference ^ decl_compare ^
+  let dune_file = typecheck ^ typecheck_old_inference ^
+                  typecheck_legacy_decl ^ decl_compare ^
                   run_tests in
   Jbuild_plugin.V1.send dune_file

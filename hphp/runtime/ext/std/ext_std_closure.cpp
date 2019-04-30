@@ -133,15 +133,20 @@ static ObjectData* closureInstanceCtorRepoAuth(Class* cls) {
   assertx(!(cls->attrs() & (AttrAbstract|AttrInterface|AttrTrait|AttrEnum)));
   assertx(!cls->needInitialization());
   assertx(cls->parent() == c_Closure::classof() || cls == c_Closure::classof());
-  // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
-  (void)type_scan::getIndexForMalloc<c_Closure>();
-  (void)type_scan::getIndexForMalloc<ClosureHdr>();
   auto const nProps = cls->numDeclProperties();
   auto const size = sizeof(ClosureHdr) + ObjectData::sizeForNProps(nProps);
   auto hdr = new (tl_heap->objMalloc(size)) ClosureHdr(size);
   auto obj = new (hdr + 1) c_Closure(cls);
   assertx(obj->hasExactlyOneRef());
   return obj;
+}
+
+// should never be called
+ATTRIBUTE_USED ATTRIBUTE_UNUSED EXTERNALLY_VISIBLE
+static void closuseInstanceReference(void) {
+  // ensure c_Closure and ClosureHdr ptrs are scanned inside other types
+  (void)type_scan::getIndexForMalloc<c_Closure>();
+  (void)type_scan::getIndexForMalloc<ClosureHdr>();
 }
 
 static ObjectData* closureInstanceCtor(Class* cls) {

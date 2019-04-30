@@ -1,11 +1,11 @@
 <?php
 
-class foo {	
+class foo {
 	function __unset($a) {
 		print "unset\n";
 		var_dump($a);
 	}
-	
+
 	public function __call($a, $b) {
 		print "call\n";
 		var_dump($a);
@@ -13,10 +13,7 @@ class foo {
 	function __clone() {
 		print "clone\n";
 	}
-	static public function __callstatic($a, $b) {
-		print "callstatic\n";
-	}
-	
+
 	public function __tostring() {
 		return 'foo';
 	}
@@ -26,8 +23,6 @@ class foo {
 $a = new foo;
 
 $a->sdfdsa();
-
-$a::test();
 
 clone $a;
 

@@ -25,24 +25,3 @@ Calling instance method >123#$%<
 array(0) {
 }
 Inside Widget::sDoit
-Calling static method >sDoit<
-array(0) {
-}
-Calling static method >sMethod<
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  float(1.234)
-}
-string(5) "hello"
-Calling static method >sMethod<
-array(2) {
-  [0]=>
-  NULL
-  [1]=>
-  float(1.234)
-}
-Calling static method >[]{}<
-array(0) {
-}

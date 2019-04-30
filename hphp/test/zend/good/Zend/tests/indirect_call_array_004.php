@@ -8,10 +8,6 @@ class foo {
 		printf("From %s:\n", __METHOD__);
 		throw new Exception($a);
 	}
-	static public function __callStatic($a, $b) {
-		printf("From %s:\n", __METHOD__);
-		throw new Exception($a);
-	}
 }
 
 
@@ -23,16 +19,6 @@ try {
 catch (Exception $e) {
 	echo $e->getMessage(), "\n";
 }
-
-$arr = array('foo', '123');
-
-try {
-	$arr();
-}
-catch (Exception $e) {
-	echo $e->getMessage(), "\n";
-}
-
 
 echo "------\n";
 

@@ -8,11 +8,6 @@ class A {
     var_dump(is_varray($arguments));
   }
 
-  public static function __callStatic($name, $arguments) {
-    echo "================== A::__callStatic ===============\n";
-    var_dump($arguments);
-    var_dump(is_varray($arguments));
-  }
 }
 
 function variadic($a, ...$b) {
@@ -31,10 +26,6 @@ function test($x) {
   if (count($x) > 0) $a->foobaz(...$x);
   $a->foobaz(1, 2, ...$x);
   if (count($x) > 0) call_user_func_array([$a, 'foobaz'], $x);
-
-  if (count($x) > 0) A::foobaz(...$x);
-  A::foobaz(1, 2, ...$x);
-  if (count($x) > 0) call_user_func_array('A::foobaz', $x);
 }
 
 <<__EntryPoint>>

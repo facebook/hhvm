@@ -1,7 +1,6 @@
 const_get
 const_set
 const_call
-const_callstatic
 const_dim_get
 const_dim_set
 const_dim_isset

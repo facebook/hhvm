@@ -1,3 +1,0 @@
-a
-
-Fatal error: Call to protected Asd::heh() from invalid context in %s/slow/hhbbc/magic_call_005.php on line 18

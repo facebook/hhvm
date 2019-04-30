@@ -12,8 +12,6 @@ Notice: 'A::async_func' called dynamically in %s on line 175
 
 Notice: 'A::static_async_func' called dynamically in %s on line 176
 
-Notice: 'C::__callStatic' called dynamically in %s on line 177
-
 Notice: 'A::func' called dynamically in %s on line 178
 
 Notice: 'A::static_func' called dynamically in %s on line 179
@@ -21,8 +19,6 @@ Notice: 'A::static_func' called dynamically in %s on line 179
 Notice: 'A::async_func' called dynamically in %s on line 180
 
 Notice: 'A::static_async_func' called dynamically in %s on line 181
-
-Notice: 'C::__callStatic' called dynamically in %s on line 182
 
 Notice: 'A::func' called dynamically in %s on line 183
 
@@ -42,8 +38,6 @@ Notice: 'A::async_func' called dynamically in %s on line 190
 
 Notice: 'A::static_async_func' called dynamically in %s on line 191
 
-Notice: 'C::__callStatic' called dynamically in %s on line 192
-
 Notice: 'A::func' called dynamically in %s on line 193
 
 Notice: 'A::static_func' called dynamically in %s on line 194
@@ -51,8 +45,6 @@ Notice: 'A::static_func' called dynamically in %s on line 194
 Notice: 'A::async_func' called dynamically in %s on line 195
 
 Notice: 'A::static_async_func' called dynamically in %s on line 196
-
-Notice: 'C::__callStatic' called dynamically in %s on line 197
 
 Notice: 'A::func' called dynamically in %s on line 102
 
@@ -78,12 +70,6 @@ Notice: 'A::static_async_func' called dynamically in %s on line 118
 
 Notice: 'B::static_async_func' called dynamically in %s on line 119
 
-Notice: 'C::__callStatic' called dynamically in %s on line 24
-
-Notice: 'C::__callStatic' called dynamically in %s on line 25
-
-Notice: 'D::__callStatic' called dynamically in %s on line 26
-
 Notice: 'A' constructed dynamically in %s on line 202
 
 Notice: 'A::func' called dynamically in %s on line 203
@@ -102,13 +88,9 @@ Notice: 'A::func' called dynamically in %s on line 210
 
 Notice: 'A::static_func' called dynamically in %s on line 211
 
-Notice: 'C::__callStatic' called dynamically in %s on line 212
-
 Notice: 'A::func' called dynamically in %s on line 213
 
 Notice: 'A::static_func' called dynamically in %s on line 214
-
-Notice: 'C::__callStatic' called dynamically in %s on line 215
 
 Notice: 'A::func' called dynamically in %s on line 216
 
@@ -122,13 +104,9 @@ Notice: 'A::func' called dynamically in %s on line 222
 
 Notice: 'A::static_func' called dynamically in %s on line 223
 
-Notice: 'C::__callStatic' called dynamically in %s on line 224
-
 Notice: 'A::func' called dynamically in %s on line 225
 
 Notice: 'A::static_func' called dynamically in %s on line 226
-
-Notice: 'C::__callStatic' called dynamically in %s on line 227
 
 Notice: 'A::func' called dynamically in %s on line 228
 
@@ -142,13 +120,9 @@ Notice: 'A::func' called dynamically in %s on line 233
 
 Notice: 'A::static_func' called dynamically in %s on line 234
 
-Notice: 'C::__callStatic' called dynamically in %s on line 235
-
 Notice: 'A::func' called dynamically in %s on line 236
 
 Notice: 'A::static_func' called dynamically in %s on line 237
-
-Notice: 'C::__callStatic' called dynamically in %s on line 238
 
 Notice: 'A::func' called dynamically in %s on line 239
 
@@ -176,13 +150,9 @@ Notice: 'A::cmp' called dynamically in %s on line 252
 
 Notice: 'A::static_cmp' called dynamically in %s on line 253
 
-Notice: 'CCmp::__callStatic' called dynamically in %s on line 254
-
 Notice: 'A::cmp' called dynamically in %s on line 255
 
 Notice: 'A::static_cmp' called dynamically in %s on line 256
-
-Notice: 'CCmp::__callStatic' called dynamically in %s on line 257
 
 Notice: 'A::cmp' called dynamically in %s on line 258
 
@@ -197,12 +167,10 @@ Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically
 Exception: 'A::static_async_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically
 Exception: 'A::static_async_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically
@@ -212,12 +180,10 @@ Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically
 Exception: 'A::static_async_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'A::async_func' called dynamically
 Exception: 'A::static_async_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'B::func' called dynamically
@@ -230,9 +196,6 @@ Exception: 'B::async_func' called dynamically
 Exception: 'A::static_async_func' called dynamically
 Exception: 'A::static_async_func' called dynamically
 Exception: 'B::static_async_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
-Exception: 'C::__callStatic' called dynamically
-Exception: 'D::__callStatic' called dynamically
 Exception: 'A' constructed dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
@@ -242,30 +205,24 @@ Exception: 'C::__call' called dynamically
 Exception: 'func' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__call' called dynamically
-Exception: 'func' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
-Exception: 'A::func' called dynamically
-Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'C::__call' called dynamically
 Exception: 'func' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
-Exception: 'C::__callStatic' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'C::__call' called dynamically
+Exception: 'func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
+Exception: 'A::func' called dynamically
+Exception: 'A::static_func' called dynamically
 Exception: 'A::func' called dynamically
 Exception: 'A::static_func' called dynamically
 Exception: 'C::__call' called dynamically
@@ -279,10 +236,8 @@ Exception: 'A::static_func' called dynamically
 Exception: 'cmp' called dynamically
 Exception: 'A::cmp' called dynamically
 Exception: 'A::static_cmp' called dynamically
-Exception: 'CCmp::__callStatic' called dynamically
 Exception: 'A::cmp' called dynamically
 Exception: 'A::static_cmp' called dynamically
-Exception: 'CCmp::__callStatic' called dynamically
 Exception: 'A::cmp' called dynamically
 Exception: 'A::static_cmp' called dynamically
 Exception: 'CCmp::__call' called dynamically

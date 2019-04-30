@@ -32,15 +32,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-* C::__callStatic for stMagic
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 * C::__construct
 string(1) "a"
 string(1) "b"
@@ -101,15 +92,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-* C::__callStatic for stMagic
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 * C::__construct
 string(1) "a"
 string(1) "b"
@@ -172,17 +154,6 @@ array(3) {
   [1]=>
   string(1) "b"
   [2]=>
-  string(1) "c"
-}
-* C::__callStatic for stMagic
-array(4) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(1) "a"
-  [2]=>
-  string(1) "b"
-  [3]=>
   string(1) "c"
 }
 * C::__construct
@@ -276,19 +247,6 @@ array(4) {
   [2]=>
   string(1) "b"
   [3]=>
-  string(1) "c"
-}
-* C::__callStatic for stMagic
-array(5) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(21) "also passed regularly"
-  [2]=>
-  string(1) "a"
-  [3]=>
-  string(1) "b"
-  [4]=>
   string(1) "c"
 }
 * C::__construct
@@ -363,17 +321,6 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-* C::__callStatic for stMagic
-array(4) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(1) "a"
-  [2]=>
-  string(1) "b"
-  [3]=>
-  string(1) "c"
-}
 * C::__construct
 string(16) "passed regularly"
 string(1) "a"
@@ -465,19 +412,6 @@ array(4) {
   [2]=>
   string(1) "b"
   [3]=>
-  string(1) "c"
-}
-* C::__callStatic for stMagic
-array(5) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(21) "also passed regularly"
-  [2]=>
-  string(1) "a"
-  [3]=>
-  string(1) "b"
-  [4]=>
   string(1) "c"
 }
 * C::__construct

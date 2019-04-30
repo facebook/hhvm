@@ -7,21 +7,13 @@ class A {
     echo "================== A::__call =====================\n";
     var_dump($arguments);
   }
-
-  public static function __callStatic($name, $arguments) {
-    echo "================== A::__callStatic ===============\n";
-    var_dump($arguments);
-  }
 }
 
 function test($x) {
   $a = new A();
   $a->foobaz(1, 2, ...$x);
   $a->foobaz(...$x);
-  A::foobaz(1, 2, ...$x);
-  A::foobaz(...$x);
   call_user_func_array([$a, 'foobaz'], $x);
-  call_user_func_array('A::foobaz', $x);
 }
 
 <<__EntryPoint>>

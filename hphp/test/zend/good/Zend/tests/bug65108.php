@@ -1,17 +1,4 @@
 <?php
-class C {
-	private function f() {}
-	static function __callStatic($name, $args) {}
-}
-
-class B {
-	public function B() {
-		$isCallable = is_callable(array(new C, 'f'));
-		var_dump($isCallable);
-	}
-}
-
-new B();
 
 class E {
    private function f() {}

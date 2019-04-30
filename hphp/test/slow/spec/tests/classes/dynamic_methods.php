@@ -31,16 +31,6 @@ class Widget
         return 987;
     }
 //*/
-///*
-    public static function __callStatic($name, $arguments)
-//    public static function __callStatic(&$name, &$arguments)
-    {
-        echo "Calling static method >$name<\n";
-        var_dump($arguments);
-
-        return "hello";
-    }
-//*/
 }
 
 $obj = new Widget;
@@ -53,9 +43,3 @@ $obj->__call('iMethod', array(10, TRUE, "abc"));
 $obj->__call('123#$%', []);
 
 $v = Widget::sDoit();
-Widget::__callStatic('sDoit', []);
-
-$v = Widget::sMethod(NULL, 1.234);
-var_dump($v);
-Widget::__callStatic('sMethod', array(NULL, 1.234));
-Widget::__callStatic('[]{}', []);

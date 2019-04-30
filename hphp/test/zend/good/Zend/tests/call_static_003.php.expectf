@@ -4,7 +4,3 @@ nonstatic
 string(6) "foOBAr"
 nonstatic
 string(6) "fOOBAr"
-static
-string(3) "bAr"
-static
-string(3) "BAZ"

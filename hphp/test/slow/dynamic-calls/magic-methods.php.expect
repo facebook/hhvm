@@ -1,10 +1,7 @@
 =============== test_magic_call ====================
 A::__construct
 A::__call
-A::__callStatic
 A::__call
-A::__callStatic
-A::__callStatic
 =============== test_magic_props ===================
 A::__construct
 A::__set

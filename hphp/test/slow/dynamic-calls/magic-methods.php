@@ -5,7 +5,6 @@ class A {
   public function __construct() { echo "A::__construct\n"; }
 
   public function __call($a, $b) { echo "A::__call\n"; }
-  public static function __callStatic($a, $b) { echo "A::__callStatic\n"; }
 
   public function __set($a, $b) { echo "A::__set\n"; }
   public function __get($a) { echo "A::__get\n"; return 123; }
@@ -29,11 +28,8 @@ function test_magic_call() {
   echo "=============== test_magic_call ====================\n";
   $x = new A();
   $x->foo();
-  A::foo();
 
   $x->__call(1, 2);
-  A::__callStatic(1, 2);
-  $x->__callStatic(1, 2);
 }
 
 function test_magic_props() {

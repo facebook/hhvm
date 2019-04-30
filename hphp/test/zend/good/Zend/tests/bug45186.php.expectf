@@ -11,7 +11,5 @@ string(1) "y"
 __call:
 string(1) "y"
 ok
-__callstatic:
-string(3) "www"
 
-Warning: Invalid argument: function: class not found in %s/bug45186.php on line 31
+Warning: Invalid argument: function: class not found in %s/bug45186.php on line 26

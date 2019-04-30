@@ -1,7 +1,7 @@
 <?hh
 class C {
-  public static function __callStatic($fn, $args) {
-    var_dump($fn, $args);
+  public static function foo(...$args) {
+    var_dump(__FUNCTION__, $args);
   }
 }
 function main() {

@@ -1,18 +1,3 @@
-array(3) {
-  [0]=>
-  string(12) "__callStatic"
-  [1]=>
-  string(3) "bar"
-  [2]=>
-  array(3) {
-    [0]=>
-    string(1) "a"
-    [1]=>
-    string(1) "b"
-    [2]=>
-    string(1) "c"
-  }
-}
 array(4) {
   [0]=>
   string(8) "__invoke"

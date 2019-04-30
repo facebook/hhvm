@@ -16,11 +16,6 @@ class C {
     var_dump($a, $b, $c);
   }
 
-  public static function __callStatic($name, $args) {
-    echo '* ', __METHOD__, ' for ', $name, "\n";
-    var_dump($args);
-  }
-
   public function __call($name, $args) {
     echo '* ', __METHOD__, ' for ', $name, "\n";
     var_dump($args);
@@ -56,7 +51,6 @@ function test_call_array_equivalent($args) {
   variadic(...$args);
   C::stRegular(...$args);
   C::stVariadic(...$args);
-  C::stMagic(...$args);
   $inst = new C(...$args);
   $inst->regular(...$args);
   $inst->variadic(...$args);
@@ -95,7 +89,6 @@ function test_param_mix($args) {
   variadic($prefix, ...$args);
   C::stRegular($prefix, ...$args);
   C::stVariadic($prefix, ...$args);
-  C::stMagic($prefix, ...$args);
   $inst = new C($prefix, ...$args);
   $inst->regular($prefix, ...$args);
   $inst->variadic($prefix, ...$args);
@@ -111,7 +104,6 @@ function test_param_mix($args) {
   variadic($prefix, $prefix2, ...$args);
   C::stRegular($prefix, $prefix2, ...$args);
   C::stVariadic($prefix, $prefix2, ...$args);
-  C::stMagic($prefix, $prefix2, ...$args);
   $inst = new C($prefix, $prefix2, ...$args);
   $inst->regular($prefix, $prefix2, ...$args);
   $inst->variadic($prefix, $prefix2, ...$args);

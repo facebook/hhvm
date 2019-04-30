@@ -34,10 +34,6 @@ class CMagic {
     echo $name, ' called on instance', "\n";
     return intval(reset(&$args));
   }
-  public static function __callStatic($name, $args) {
-    echo $name, ' called statically', "\n";
-    return intval(reset(&$args));
-  }
 }
 
 
@@ -70,10 +66,7 @@ function test_invocation_syntaxes() {
   $call_instance = array($inst, 'inst_intval');
   $call_static_on_instance = array($inst, 'intval');
   $call_closure = function($x) {return C::intval($x);};
-  $call_magic_static_arr = array('CMagic', 'intval');
-  $call_magic_static_string = 'CMagic::intval';
   $call_magic_instance = array($inst_magic, 'inst_intval');
-  $call_magic_closure = function($x) {return CMagic::intval($x);};
   $call_invalid = array('C', 'noSuchMethod');
 
   echo "* call_user_func ********************\n";
@@ -84,9 +77,6 @@ function test_invocation_syntaxes() {
   var_dump(call_user_func($call_static_arr, $test));
   var_dump(call_user_func($call_instance, $test));
   var_dump(call_user_func($call_static_on_instance, $test));
-  var_dump(call_user_func($call_magic_closure, $test));
-  var_dump(call_user_func($call_magic_static_string, $test));
-  var_dump(call_user_func($call_magic_static_arr, $test));
   var_dump(call_user_func($call_magic_instance, $test));
 
   echo "* ()-invoke ********************\n";
@@ -96,8 +86,6 @@ function test_invocation_syntaxes() {
   var_dump($call_static_arr($test));
   var_dump($call_instance($test));
   var_dump($call_static_on_instance($test));
-  var_dump($call_magic_closure($test));
-  var_dump($call_magic_static_arr($test));
   var_dump($call_magic_instance($test));
 
   var_dump($call_invalid($test)); // fatals

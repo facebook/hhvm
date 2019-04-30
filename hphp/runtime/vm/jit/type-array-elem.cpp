@@ -319,27 +319,26 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
   return {type, false};
 }
 
-std::pair<Type, bool> vecFirstLastType(
-  Type arr, bool isFirst, const Class* ctx) {
-  // Relax for packed array
+std::pair<Type, bool> vecFirstLastType(Type arr,
+                                       bool isFirst,
+                                       const Class* ctx) {
   assertx(arr <= (TVec | Type::Array(ArrayData::kPackedKind)));
 
   if (arr.hasConstVal()) {
-    auto const val = arr.vecVal();
-    if (val->empty()) {
-      return {TBottom, false};
-    }
-    auto pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto const val = (arr <= TVec) ? arr.vecVal() : arr.arrVal();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
     return {Type::cns(val->atPos(pos)), true};
   }
 
-  auto type = (arr <= (TPersistentVec | TPersistentArr)) ?
-    TUncountedInit : TInitGen;
+  auto type = [&] {
+    if (arr <= TUncounted) return TUncountedInit;
+    if (arr <= TVec) return TInitCell;
+    return TInitGen;
+  }();
 
   auto const arrTy = arr.arrSpec().type();
-  if (!arrTy) {
-    return {type, false};
-  }
+  if (!arrTy) return {type, false};
 
   using E = RepoAuthType::Array::Empty;
   using T = RepoAuthType::Array::Tag;
@@ -348,15 +347,12 @@ std::pair<Type, bool> vecFirstLastType(
   switch (arrTy->tag()) {
     case T::Packed: {
       auto sz = arrTy->size();
-      if (sz == 0) {
-        return {TBottom, false};
-      }
+      if (sz == 0) return {TBottom, false};
       if (isFirst) {
         type &= typeFromRAT(arrTy->packedElem(0), ctx);
       } else {
         type &= typeFromRAT(arrTy->packedElem(sz - 1), ctx);
       }
-
       return {type, !maybeEmpty};
     }
     case T::PackedN: {
@@ -368,21 +364,21 @@ std::pair<Type, bool> vecFirstLastType(
 }
 
 std::pair<Type, bool> dictFirstLastType(Type arr, bool isFirst, bool isKey) {
-  // Relax for maxed array
   assertx(arr <= (TDict | Type::Array(ArrayData::kMixedKind)));
 
   if (arr.hasConstVal()) {
-    auto const val = arr.dictVal();
-    if (val->empty()) {
-      return {TBottom, false};
-    }
-    auto pos = isFirst ? val->iter_begin() : val->iter_end();
-    auto tv = isKey ? val->nvGetKey(pos) : val->atPos(pos);
+    auto const val = (arr <= TDict) ? arr.dictVal() : arr.arrVal();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
+    auto const tv = isKey ? val->nvGetKey(pos) : val->atPos(pos);
     return {Type::cns(tv), true};
   }
 
-  auto const type = (arr <= (TPersistentDict | TPersistentArr)) ?
-    TUncountedInit : TInitCell;
+  auto const type = [&] {
+    if (arr <= TUncounted) return TUncountedInit;
+    if (arr <= TDict) return TInitCell;
+    return TInitGen;
+  }();
   return {type, false};
 }
 
@@ -391,17 +387,13 @@ std::pair<Type, bool> keysetFirstLastType(Type arr, bool isFirst) {
 
   if (arr.hasConstVal()) {
     auto val = arr.keysetVal();
-    if (val->empty()) {
-      return {TBottom, false};
-    }
-    auto pos = isFirst ? val->iter_begin() : val->iter_end();
+    if (val->empty()) return {TBottom, false};
+    auto const pos = isFirst ? val->iter_begin() : val->iter_end();
     return {Type::cns(val->atPos(pos)), true};
   }
 
   auto type = TStr | TInt;
-  if (arr <= TPersistentKeyset) {
-    type &= TUncountedInit;
-  }
+  if (arr <= TUncounted) type &= TUncountedInit;
   return {type, false};
 }
 

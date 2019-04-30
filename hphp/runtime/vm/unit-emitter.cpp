@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/verifier/check.h"
 
+#include "hphp/util/alloc.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/read-only-arena.h"
 #include "hphp/util/sha1.h"
@@ -74,8 +75,9 @@ using MergeKind = Unit::MergeKind;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static ReadOnlyArena& get_readonly_arena() {
-  static ReadOnlyArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
+using BytecodeArena = ReadOnlyArena<VMColdAllocator<char>>;
+static BytecodeArena& get_readonly_arena() {
+  static BytecodeArena arena(RuntimeOption::EvalHHBCArenaChunkSize);
   return arena;
 }
 

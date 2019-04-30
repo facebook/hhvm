@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
@@ -184,10 +182,9 @@ where
                 S!(make_simple_type_specifier, self, token)
             }
             | TokenKind::This => self.parse_simple_type_or_type_constant(),
-            /* Any keyword-type could be a non-keyword type, because PHP, so check whether
-             * these have generics.
-             */
-            | TokenKind::Double /* TODO: Specification does not mention double; fix it. */
+            // Any keyword-type could be a non-keyword type, because PHP, so check whether
+            // these have generics.
+            | TokenKind::Double // TODO: Specification does not mention double; fix it.
             | TokenKind::Bool
             | TokenKind::Boolean
             | TokenKind::Binary
@@ -242,14 +239,13 @@ where
         }
     }
 
-    /* SPEC
-      type-constant-type-name:
-        name  ::  name
-        self  ::  name
-        this  ::  name
-        parent  ::  name
-        type-constant-type-name  ::  name
-    */
+    // SPEC
+    // type-constant-type-name:
+    //   name  ::  name
+    //   self  ::  name
+    //   this  ::  name
+    //   parent  ::  name
+    //   type-constant-type-name  ::  name
     fn parse_remaining_type_constant(&mut self, left: S::R) -> S::R {
         let separator = self.fetch_token();
         let mut parser1 = self.clone();
@@ -266,9 +262,9 @@ where
             }
         } else {
             self.continue_from(parser1);
-            /* ERROR RECOVERY: Assume that the thing following the ::
-            that is not a name belongs to the next thing to be
-            parsed; treat the name as missing. */
+            // ERROR RECOVERY: Assume that the thing following the ::
+            // that is not a name belongs to the next thing to be
+            // parsed; treat the name as missing.
             self.with_error(Errors::error1004);
             let missing = S!(make_missing, self, self.pos());
             S!(make_type_constant, self, left, separator, missing)
@@ -322,10 +318,9 @@ where
         }
     }
 
-    /* SPEC
-      class-interface-trait-specifier:
-        qualified-name generic-type-argument-listopt
-    */
+    // SPEC
+    // class-interface-trait-specifier:
+    //   qualified-name generic-type-argument-listopt
     pub fn parse_possible_generic_specifier(&mut self) -> S::R {
         let name = self.next_xhp_class_name_or_other();
         match self.peek_token_kind() {
@@ -337,20 +332,19 @@ where
         }
     }
 
-    /* SPEC
-        generic-type-constraint-list:
-          generic-type-constraint
-          generic-type-constraint generic-type-constraint-list
-
-        generic-type-constraint:
-          as type-specifier
-          super type-specifier
-
-        TODO: SPEC ISSUES:
-        https://github.com/hhvm/hack-langspec/issues/83
-
-        TODO: Do we also need to allow "= type-specifier" here?
-    */
+    // SPEC
+    // generic-type-constraint-list:
+    //   generic-type-constraint
+    //   generic-type-constraint generic-type-constraint-list
+    //
+    // generic-type-constraint:
+    //   as type-specifier
+    //   super type-specifier
+    //
+    // TODO: SPEC ISSUES:
+    // https://github.com/hhvm/hack-langspec/issues/83
+    //
+    // TODO: Do we also need to allow "= type-specifier" here?
     fn parse_generic_type_constraint_opt(&mut self) -> Option<S::R> {
         let mut parser1 = self.clone();
         let token = parser1.next_token();
@@ -374,20 +368,19 @@ where
         }
     }
 
-    /* SPEC
-      generic-type-parameter:
-        generic-type-parameter-reified-opt  generic-type-parameter-variance-opt
-          name  generic-type-constraint-list-opt
-
-      generic-type-parameter-variance:
-        +
-        -
-
-      TODO: SPEC ISSUE: We allow any number of type constraints, not just zero
-      or one as indicated in the spec.
-      https://github.com/hhvm/hack-langspec/issues/83
-      TODO: Update the spec with reified
-    */
+    // SPEC
+    // generic-type-parameter:
+    //   generic-type-parameter-reified-opt  generic-type-parameter-variance-opt
+    //     name  generic-type-constraint-list-opt
+    //
+    // generic-type-parameter-variance:
+    //   +
+    //   -
+    //
+    // TODO: SPEC ISSUE: We allow any number of type constraints, not just zero
+    // or one as indicated in the spec.
+    // https://github.com/hhvm/hack-langspec/issues/83
+    // TODO: Update the spec with reified
     fn parse_type_parameter(&mut self) -> S::R {
         let attributes = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
             x.parse_attribute_specification_opt()
@@ -408,14 +401,14 @@ where
         )
     }
 
-    /* SPEC
-      type-parameter-list:
-      < generic-type-parameters  ,-opt >
-
-      generic-type-parameters:
-        generic-type-parameter
-        generic-type-parameter  ,  generic-type-parameter
-    */
+    // SPEC
+    // type-parameter-list:
+    // < generic-type-parameters  ,-opt >
+    //
+    // generic-type-parameters:
+    //   generic-type-parameter
+    //   generic-type-parameter  ,  generic-type-parameter
+    //
 
     pub fn parse_generic_type_parameter_list(&mut self) -> S::R {
         let left = self.assert_left_angle_in_type_param_list_with_possible_attribute();
@@ -430,14 +423,13 @@ where
     }
 
     fn parse_type_list(&mut self, close_kind: TokenKind) -> S::R {
-        /* SPEC:
-          type-specifier-list:
-            type-specifiers  ,opt
-
-          type-specifiers:
-            type-specifier
-            type-specifiers  ,  type-specifier
-        */
+        // SPEC:
+        // type-specifier-list:
+        //   type-specifiers  ,opt
+        //
+        // type-specifiers:
+        //   type-specifier
+        //   type-specifiers  ,  type-specifier
         let (items, _) =
             self.parse_comma_list_allow_trailing(close_kind, Errors::error1007, &|x: &mut Self| {
                 x.parse_type_specifier(false)
@@ -445,14 +437,13 @@ where
         items
     }
 
-    /* SPEC
-
-      TODO: Add this to the specification.
-      (This work is tracked by task T22582676.)
-
-      call-convention:
-        inout
-    */
+    // SPEC
+    //
+    // TODO: Add this to the specification.
+    // (This work is tracked by task T22582676.)
+    //
+    // call-convention:
+    //   inout
 
     fn parse_call_convention_opt(&mut self) -> S::R {
         let mut parser1 = self.clone();
@@ -466,18 +457,17 @@ where
         }
     }
 
-    /* SPEC
-
-      TODO: Add this to the specification.
-      (This work is tracked by task T22582676.)
-
-      closure-param-type-specifier-list:
-        closure-param-type-specifiers  ,opt
-
-      closure-param-type-specifiers:
-        closure-param-type-specifier
-        closure-param-type-specifiers  ,  closure-param-type-specifier
-    */
+    // SPEC
+    //
+    // TODO: Add this to the specification.
+    // (This work is tracked by task T22582676.)
+    //
+    // closure-param-type-specifier-list:
+    //   closure-param-type-specifiers  ,opt
+    //
+    // closure-param-type-specifiers:
+    //   closure-param-type-specifier
+    //   closure-param-type-specifiers  ,  closure-param-type-specifier
 
     fn parse_closure_param_list(&mut self, close_kind: TokenKind) -> S::R {
         let (items, _) =
@@ -487,19 +477,18 @@ where
         items
     }
 
-    /* SPEC
-
-      TODO: Add this to the specification.
-      (This work is tracked by task T22582676.)
-
-      ERROR RECOVERY: Variadic params cannot be declared inout; this error is
-      caught in a later pass.
-
-      closure-param-type-specifier:
-        call-convention-opt  type-specifier
-        type-specifier  ...
-        ...
-    */
+    // SPEC
+    //
+    // TODO: Add this to the specification.
+    // (This work is tracked by task T22582676.)
+    //
+    // ERROR RECOVERY: Variadic params cannot be declared inout; this error is
+    // caught in a later pass.
+    //
+    // closure-param-type-specifier:
+    //   call-convention-opt  type-specifier
+    //   type-specifier  ...
+    //   ...
 
     fn parse_closure_param_type_or_ellipsis(&mut self) -> S::R {
         let mut parser1 = self.clone();
@@ -543,25 +532,24 @@ where
     }
 
     pub fn parse_generic_type_argument_list(&mut self) -> (S::R, bool) {
-        /* SPEC:
-          generic-type-argument-list:
-            <  generic-type-arguments  ,opt  >
-
-          generic-type-arguments:
-            generic-type-argument
-            generic-type-arguments  ,  generic-type-argument
-        */
-        /* TODO: SPEC ISSUE
-          https://github.com/hhvm/hack-langspec/issues/84
-          The specification indicates that "noreturn" is only syntactically valid
-          as a return type hint, but this is plainly wrong because
-          Awaitable<noreturn> is a legal type. Likely the correct rule will be to
-          allow noreturn as a type argument, and then a later semantic analysis
-          pass can determine when it is being used incorrectly.
-
-          For now, we extend the specification to allow return types, not just
-          ordinary types.
-        */
+        // SPEC:
+        // generic-type-argument-list:
+        //   <  generic-type-arguments  ,opt  >
+        //
+        // generic-type-arguments:
+        //   generic-type-argument
+        //   generic-type-arguments  ,  generic-type-argument
+        //
+        // TODO: SPEC ISSUE
+        // https://github.com/hhvm/hack-langspec/issues/84
+        // The specification indicates that "noreturn" is only syntactically valid
+        // as a return type hint, but this is plainly wrong because
+        // Awaitable<noreturn> is a legal type. Likely the correct rule will be to
+        // allow noreturn as a type argument, and then a later semantic analysis
+        // pass can determine when it is being used incorrectly.
+        //
+        // For now, we extend the specification to allow return types, not just
+        // ordinary types.
         let open_angle = self.fetch_token();
         let (args, no_arg_is_missing) = self.parse_comma_list_allow_trailing(
             TokenKind::GreaterThan,
@@ -576,9 +564,9 @@ where
             let result = S!(make_type_arguments, self, open_angle, args, close_angle);
             (result, no_arg_is_missing)
         } else {
-            /* ERROR RECOVERY: Don't eat the token that is in the place of the
-            missing > or ,.  TokenKind::Assume that it is the > that is missing and
-            try to parse whatever is coming after the type.  */
+            // ERROR RECOVERY: Don't eat the token that is in the place of the
+            // missing > or ,.  TokenKind::Assume that it is the > that is missing and
+            // try to parse whatever is coming after the type.
             self.with_error(Errors::error1014);
             let missing = S!(make_missing, self, self.pos());
             let result = S!(make_type_arguments, self, open_angle, args, missing);
@@ -587,22 +575,21 @@ where
     }
 
     fn parse_array_type_specifier(&mut self) -> S::R {
-        /* We allow
-           array
-           array<type>
-           array<type, type>
-           TODO: Put a proper reference to the specification in here.
-           TODO: in HHVM trailing comma is permitted only in the case with one
-           type argument: array<type, >
-           so now it is not really comma-separated list
-        */
+        // We allow
+        // array
+        // array<type>
+        // array<type, type>
+        // TODO: Put a proper reference to the specification in here.
+        // TODO: in HHVM trailing comma is permitted only in the case with one
+        // type argument: array<type, >
+        // so now it is not really comma-separated list
         let array_token = self.assert_token(TokenKind::Array);
         if self.peek_token_kind() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, array_token)
         } else {
             let left_angle = self.assert_token(TokenKind::LessThan);
-            /* ERROR RECOVERY: We could improve error recovery by detecting
-            array<,  and marking the key type as missing. */
+            // ERROR RECOVERY: We could improve error recovery by detecting
+            // array<,  and marking the key type as missing.
             let key_type = self.parse_type_specifier(false);
             let kind = self.peek_token_kind();
             if kind == TokenKind::GreaterThan {
@@ -635,7 +622,7 @@ where
                     right_angle,
                 )
             } else {
-                /* ERROR RECOVERY: TokenKind::Assume that the > is missing and keep going. */
+                // ERROR RECOVERY: TokenKind::Assume that the > is missing and keep going.
                 let right_angle = S!(make_missing, self, self.pos());
                 S!(
                     make_vector_array_type_specifier,
@@ -650,7 +637,7 @@ where
     }
 
     fn parse_darray_type_specifier(&mut self) -> S::R {
-        /* darray<type, type> */
+        // darray<type, type>
         let array_token = self.assert_token(TokenKind::Darray);
         if self.peek_token_kind() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, array_token)
@@ -676,7 +663,7 @@ where
     }
 
     fn parse_varray_type_specifier(&mut self) -> S::R {
-        /* varray<type> */
+        // varray<type>
         let array_token = self.assert_token(TokenKind::Varray);
         if self.peek_token_kind() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, array_token)
@@ -698,14 +685,12 @@ where
     }
 
     fn parse_vec_type_specifier(&mut self) -> S::R {
-        /*
-          vec < type-specifier >
-          TODO: Should we allow a trailing comma?
-          TODO: Add this to the specification
-          ERROR RECOVERY: If there is no type argument list then just make
-          this a simple type.  TODO: Should this be an error at parse time? what
-          about at type checking time?
-        */
+        // vec < type-specifier >
+        // TODO: Should we allow a trailing comma?
+        // TODO: Add this to the specification
+        // ERROR RECOVERY: If there is no type argument list then just make
+        // this a simple type.  TODO: Should this be an error at parse time? what
+        // about at type checking time?
         let keyword = self.assert_token(TokenKind::Vec);
         if self.peek_token_kind() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, keyword)
@@ -727,14 +712,12 @@ where
     }
 
     fn parse_keyset_type_specifier(&mut self) -> S::R {
-        /*
-          keyset < type-specifier >
-          TODO: Should we allow a trailing comma?
-          TODO: Add this to the specification
-          ERROR RECOVERY: If there is no type argument list then just make
-          this a simple type.  TODO: Should this be an error at parse time? what
-          about at type checking time?
-        */
+        // keyset < type-specifier >
+        // TODO: Should we allow a trailing comma?
+        // TODO: Add this to the specification
+        // ERROR RECOVERY: If there is no type argument list then just make
+        // this a simple type.  TODO: Should this be an error at parse time? what
+        // about at type checking time?
         let keyword = self.assert_token(TokenKind::Keyset);
         if self.peek_token_kind() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, keyword)
@@ -756,10 +739,8 @@ where
     }
 
     fn parse_tuple_type_explicit_specifier(&mut self) -> S::R {
-        /*
-          tuple < type-specifier-list >
-          TODO: Add this to the specification
-        */
+        // tuple < type-specifier-list >
+        // TODO: Add this to the specification
         let keyword = self.assert_token(TokenKind::Tuple);
         let left_angle = self.require_left_angle();
         let args = self.parse_type_list(TokenKind::GreaterThan);
@@ -777,9 +758,9 @@ where
                 token
             )
         } else {
-            /* ERROR RECOVERY: Don't eat the token that is in the place of the
-            missing > or ,.  TokenKind::Assume that it is the > that is missing and
-            try to parse whatever is coming after the type.  */
+            // ERROR RECOVERY: Don't eat the token that is in the place of the
+            // missing > or ,.  TokenKind::Assume that it is the > that is missing and
+            // try to parse whatever is coming after the type.
             self.with_error(Errors::error1022);
             let right_angle = S!(make_missing, self, self.pos());
             S!(
@@ -794,26 +775,24 @@ where
     }
 
     fn parse_dictionary_type_specifier(&mut self) -> S::R {
-        /*
-          dict < type-specifier , type-specifier >
-
-          TODO: Add this to the specification
-
-          Though we require there to be exactly two items, we actually parse
-          an arbitrary comma-separated list here.
-
-          TODO: Give an error in a later pass if there are not exactly two members.
-
-          ERROR RECOVERY: If there is no type argument list then just make this
-          a simple type.  TODO: Should this be an error at parse time?  what
-          about at type checking time?
-        */
+        // dict < type-specifier , type-specifier >
+        //
+        // TODO: Add this to the specification
+        //
+        // Though we require there to be exactly two items, we actually parse
+        // an arbitrary comma-separated list here.
+        //
+        // TODO: Give an error in a later pass if there are not exactly two members.
+        //
+        // ERROR RECOVERY: If there is no type argument list then just make this
+        // a simple type.  TODO: Should this be an error at parse time?  what
+        // about at type checking time?
         let keyword = self.assert_token(TokenKind::Dict);
         if self.peek_token_kind() != TokenKind::LessThan {
             S!(make_simple_type_specifier, self, keyword)
         } else {
-            /* TODO: This allows "noreturn" as a type argument. Should we
-            disallow that at parse time? */
+            // TODO: This allows "noreturn" as a type argument. Should we
+            // disallow that at parse time?
             let left = self.require_left_angle();
             let (arguments, _) = self.parse_comma_list_allow_trailing(
                 TokenKind::GreaterThan,
@@ -843,20 +822,20 @@ where
     }
 
     fn parse_closure_type_specifier(&mut self) -> S::R {
-        /* SPEC
-
-          TODO: Update the specification with closure-param-type-specifier-list-opt.
-          (This work is tracked by task T22582676.)
-
-          TODO: Update grammar for inout parameters.
-          (This work is tracked by task T22582715.)
-
-          closure-type-specifier:
-            ( coroutine-opt function ( \
-            closure-param-type-specifier-list-opt \
-            ) : type-specifier )
-        */
-        /* TODO: Error recovery is pretty weak here. We could be smarter. */
+        // SPEC
+        //
+        // TODO: Update the specification with closure-param-type-specifier-list-opt.
+        // (This work is tracked by task T22582676.)
+        //
+        // TODO: Update grammar for inout parameters.
+        // (This work is tracked by task T22582715.)
+        //
+        // closure-type-specifier:
+        //   ( coroutine-opt function ( \
+        //   closure-param-type-specifier-list-opt \
+        //   ) : type-specifier )
+        //
+        // TODO: Error recovery is pretty weak here. We could be smarter.
         let olp = self.fetch_token();
         let coroutine = self.optional_token(TokenKind::Coroutine);
         let fnc = self.fetch_token();
@@ -869,7 +848,7 @@ where
             let token = S!(make_token, self, token);
             (missing, token)
         } else {
-            /* TODO add second pass checking to ensure ellipsis is the last arg */
+            // TODO add second pass checking to ensure ellipsis is the last arg
             let pts = self.parse_closure_param_list(TokenKind::RightParen);
             let irp = self.require_right_paren();
             (pts, irp)
@@ -893,19 +872,18 @@ where
     }
 
     fn parse_tuple_type_specifier(&mut self) -> S::R {
-        /* SPEC
-            tuple-type-specifier:
-              ( type-specifier  ,  type-specifier-list  )
-            type-specifier-list:
-              type-specifiers  ,opt
-            type-specifiers
-              type-specifier
-              type-specifiers , type-specifier
-        */
+        // SPEC
+        // tuple-type-specifier:
+        //   ( type-specifier  ,  type-specifier-list  )
+        // type-specifier-list:
+        //   type-specifiers  ,opt
+        //   type-specifiers
+        //   type-specifier
+        //   type-specifiers , type-specifier
 
-        /* TODO: Here we parse a type list with one or more items, but the grammar
-        actually requires a type list with two or more items. Give an error in
-        a later pass if there is only one item here. */
+        // TODO: Here we parse a type list with one or more items, but the grammar
+        // actually requires a type list with two or more items. Give an error in
+        // a later pass if there is only one item here.
 
         let left_paren = self.assert_token(TokenKind::LeftParen);
         let args = self.parse_type_list(TokenKind::RightParen);
@@ -916,9 +894,9 @@ where
             let token = S!(make_token, self, right_paren);
             S!(make_tuple_type_specifier, self, left_paren, args, token)
         } else {
-            /* ERROR RECOVERY: Don't eat the token that is in the place of the
-            missing ) or ,.  Assume that it is the ) that is missing and
-            try to parse whatever is coming after the type.  */
+            // ERROR RECOVERY: Don't eat the token that is in the place of the
+            // missing ) or ,.  Assume that it is the ) that is missing and
+            // try to parse whatever is coming after the type.
             self.with_error(Errors::error1022);
             let missing = S!(make_missing, self, self.pos());
             S!(make_tuple_type_specifier, self, left_paren, args, missing)
@@ -926,63 +904,61 @@ where
     }
 
     fn parse_nullable_type_specifier(&mut self) -> S::R {
-        /* SPEC:
-          nullable-type-specifier:
-            ? type-specifier
-            mixed
-
-        * Note that we parse "mixed" as a simple type specifier, even though
-          technically it is classified as a nullable type specifier by the grammar.
-        * Note that it is perfectly legal to have trivia between the ? and the
-          underlying type. */
+        // SPEC:
+        // nullable-type-specifier:
+        //   ? type-specifier
+        //   mixed
+        //
+        // Note that we parse "mixed" as a simple type specifier, even though
+        // technically it is classified as a nullable type specifier by the grammar.
+        // Note that it is perfectly legal to have trivia between the ? and the
+        // underlying type.
         let question = self.assert_token(TokenKind::Question);
         let nullable_type = self.parse_type_specifier(false);
         S!(make_nullable_type_specifier, self, question, nullable_type)
     }
 
     fn parse_like_type_specifier(&mut self) -> S::R {
-        /* SPEC:
-          like-type-specifier:
-            ~ type-specifier
-
-        * Note that it is perfectly legal to have trivia between the ~ and the
-          underlying type. */
+        // SPEC:
+        // like-type-specifier:
+        //   ~ type-specifier
+        //
+        // Note that it is perfectly legal to have trivia between the ~ and the
+        // underlying type.
         let tilde = self.assert_token(TokenKind::Tilde);
         let like_type = self.parse_type_specifier(false);
         S!(make_like_type_specifier, self, tilde, like_type)
     }
 
     fn parse_soft_type_specifier(&mut self) -> S::R {
-        /* SPEC (Draft)
-          soft-type-specifier:
-            @ type-specifier
-
-          TODO: The spec does not mention this type grammar.  Work out where and
-          when it is legal, and what the exact semantics are, and put it in the spec.
-          Add an error pass if necessary to identify illegal usages of this type.
-
-          Note that it is legal for trivia to come between the @ and the type.
-        */
+        // SPEC (Draft)
+        // soft-type-specifier:
+        //   @ type-specifier
+        //
+        // TODO: The spec does not mention this type grammar.  Work out where and
+        // when it is legal, and what the exact semantics are, and put it in the spec.
+        // Add an error pass if necessary to identify illegal usages of this type.
+        //
+        // Note that it is legal for trivia to come between the @ and the type.
         let soft_at = self.assert_token(TokenKind::At);
         let soft_type = self.parse_type_specifier(false);
         S!(make_soft_type_specifier, self, soft_at, soft_type)
     }
 
     fn parse_classname_type_specifier(&mut self) -> S::R {
-        /* SPEC
-          classname-type-specifier:
-            classname
-            classname  <  qualified-name generic-type-argument-list-opt >
+        // SPEC
+        // classname-type-specifier:
+        //   classname
+        //   classname  <  qualified-name generic-type-argument-list-opt >
+        //
+        // TODO: We parse any type as the class name type; we should write an
+        // error detection pass later that determines when this is a bad type.
+        //
+        // TODO: Is this grammar correct?  In particular, can the name have a
+        // scope resolution operator (::) in it?  Find out and update the spec if
+        // this is permitted.
 
-            TODO: We parse any type as the class name type; we should write an
-            error detection pass later that determines when this is a bad type.
-
-            TODO: Is this grammar correct?  In particular, can the name have a
-            scope resolution operator (::) in it?  Find out and update the spec if
-            this is permitted.
-        */
-
-        /* TODO ERROR RECOVERY is unsophisticated here. */
+        // TODO ERROR RECOVERY is unsophisticated here.
         let classname = self.fetch_token();
         match self.peek_token_kind() {
             TokenKind::LessThan => {
@@ -1019,21 +995,20 @@ where
     }
 
     fn parse_field_specifier(&mut self) -> S::R {
-        /* SPEC
-          field-specifier:
-            ?-opt present-field-specifier
-          present-field-specifier:
-            single-quoted-string-literal  =>  type-specifier
-            qualified-name  =>  type-specifier
-            scope-resolution-expression  =>  type-specifier
-        */
+        // SPEC
+        // field-specifier:
+        //   ?-opt present-field-specifier
+        // present-field-specifier:
+        //   single-quoted-string-literal  =>  type-specifier
+        //   qualified-name  =>  type-specifier
+        //   scope-resolution-expression  =>  type-specifier
 
-        /* TODO: We require that it be either all literals or no literals in the
-        set of specifiers; make an error reporting pass that detects this. */
+        // TODO: We require that it be either all literals or no literals in the
+        // set of specifiers; make an error reporting pass that detects this.
 
-        /* ERROR RECOVERY: We allow any expression for the left-hand side.
-        TODO: Make an error-detecting pass that gives an error if the left-hand
-        side is not a literal or name. */
+        // ERROR RECOVERY: We allow any expression for the left-hand side.
+        // TODO: Make an error-detecting pass that gives an error if the left-hand
+        // side is not a literal or name.
         let question = if self.peek_token_kind() == TokenKind::Question {
             self.assert_token(TokenKind::Question)
         } else {
@@ -1053,17 +1028,17 @@ where
     }
 
     fn parse_shape_specifier(&mut self) -> S::R {
-        /* SPEC
-          shape-specifier:
-            shape ( field-specifier-list-opt )
-          field-specifier-list:
-            field-specifiers  ,  ...
-            field-specifiers  ,-opt
-          field-specifiers:
-            field-specifier
-            field-specifiers  ,  field-specifier
-        */
-        /* TODO: ERROR RECOVERY is not very sophisticated here. */
+        // SPEC
+        // shape-specifier:
+        //   shape ( field-specifier-list-opt )
+        // field-specifier-list:
+        //   field-specifiers  ,  ...
+        //   field-specifiers  ,-opt
+        // field-specifiers:
+        //   field-specifier
+        //   field-specifiers  ,  field-specifier
+        //
+        // TODO: ERROR RECOVERY is not very sophisticated here.
         let shape = self.fetch_token();
         let lparen = self.require_left_paren();
         let is_closing_token =
@@ -1091,12 +1066,11 @@ where
     }
 
     pub fn parse_type_constraint_opt(&mut self) -> S::R {
-        /* SPEC
-          type-constraint:
-            as  type-specifier
-          TODO: Is this correct? Or do we need to allow "super" as well?
-          TODO: What about = ?
-        */
+        // SPEC
+        // type-constraint:
+        //   as  type-specifier
+        // TODO: Is this correct? Or do we need to allow "super" as well?
+        // TODO: What about = ?
         let mut parser1 = self.clone();
         let constraint_as = parser1.next_token();
         if constraint_as.kind() == TokenKind::As {

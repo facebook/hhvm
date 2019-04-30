@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use crate::lexable_token::LexableToken;
 use crate::lexable_trivia::LexableTrivia;
 use crate::lexer::{self, Lexer};
@@ -106,8 +104,8 @@ where
 
     fn env(&self) -> &ParserEnv;
 
-    /** The state is never observably None; it is None only during a Smart Constructor call
-      (It is exposed as Option to avoid clone in SC calls.) */
+    // The state is never observably None; it is None only during a Smart Constructor call
+    // (It is exposed as Option to avoid clone in SC calls.)
     fn sc_state_mut(&mut self) -> &mut Option<T>;
 
     fn skipped_tokens(&self) -> &[S::Token];
@@ -140,12 +138,12 @@ where
         self.context_mut().pop_scope(expected)
     }
 
-    /* This function reports an error starting at the current location of the
-     * parser. Setting on_whole_token=false will report the error only on trivia,
-     * which is useful in cases such as when "a semicolon is expected here" before
-     * the current node. However, setting on_whole_token=true will report the error
-     * only on the non-trivia text of the next token parsed, which is useful
-     * in cases like "flagging an entire token as an extra". */
+    // This function reports an error starting at the current location of the
+    // parser. Setting on_whole_token=false will report the error only on trivia,
+    // which is useful in cases such as when "a semicolon is expected here" before
+    // the current node. However, setting on_whole_token=true will report the error
+    // only on the non-trivia text of the next token parsed, which is useful
+    // in cases like "flagging an entire token as an extra".
     fn with_error_impl(&mut self, on_whole_token: bool, message: Error) {
         let (start_offset, end_offset) = self.error_offsets(on_whole_token);
         let error = SyntaxError::make(start_offset, end_offset, message);
@@ -224,10 +222,10 @@ where
         }
     }
 
-    /* Used in conjunction with the following function. If you call next_token
-     * when the parser is at the <<<, it will scan the entire file looking for an
-     * ending to the heredoc, which could quickly get bad if there are many such
-     * declarations in a file. */
+    // Used in conjunction with the following function. If you call next_token
+    // when the parser is at the <<<, it will scan the entire file looking for an
+    // ending to the heredoc, which could quickly get bad if there are many such
+    // declarations in a file.
     fn peek_next_partial_token_is_left_angle(&self) -> bool {
         let mut lexer = self.lexer().clone();
         lexer.scan_leading_php_trivia();
@@ -235,11 +233,11 @@ where
         c == '<'
     }
 
-    /* In the case of attributes on generics, one could write
-     * function f<<<__Attr>> reify T, ...>
-     * The triple left angle is currently lexed as a HeredocStringLiteral,
-     * but we can get around this by manually advancing the lexer one token
-     * and returning a LeftAngle. Then, the next token will be a LeftAngleLeftAngle */
+    // In the case of attributes on generics, one could write
+    // function f<<<__Attr>> reify T, ...>
+    // The triple left angle is currently lexed as a HeredocStringLiteral,
+    // but we can get around this by manually advancing the lexer one token
+    // and returning a LeftAngle. Then, the next token will be a LeftAngleLeftAngle
     fn assert_left_angle_in_type_param_list_with_possible_attribute(&mut self) -> S::R {
         let parser1 = self.clone();
         let lexer = self.lexer_mut();
@@ -273,22 +271,21 @@ where
     }
 
     fn peek_token(&self) -> S::Token {
-        /* PERF ALERT!!! TODO (kasper, leoo):
-         * Almost entire parser is structured in a way equivalent to:
-         *  if self.peek_token() == X  {
-         *     ...
-         *     self.next_token()
-         *      ...
-         *  }
-         * Since peek_token is implemented in terms of next_token, we duplicate a lot of the work,
-         * on a very hot path. OCaml parser has an elegant solution for that (see next_token_cache
-         * in full_fidelity_lexer.ml), but it heavily relies on immutable lexers, OCaml memory
-         * representation and lack of multithreading. It does make the lexer ~2 faster though, so we
-         * need to do something here too. Good news is that while OCaml solution is very general,
-         * caching any consecutive calls to next_token on same lexer, in practice majority of cache
-         * hits are from values populated here, in peek_token function, so it might be enough to
-         * specialize it not to throw away the work it does (when cloned lexer is dropped).
-         **/
+        // PERF ALERT!!! TODO (kasper, leoo):
+        // Almost entire parser is structured in a way equivalent to:
+        //   if self.peek_token() == X  {
+        //     ...
+        //     self.next_token()
+        //     ...
+        //   }
+        // Since peek_token is implemented in terms of next_token, we duplicate a lot of the work,
+        // on a very hot path. OCaml parser has an elegant solution for that (see next_token_cache
+        // in full_fidelity_lexer.ml), but it heavily relies on immutable lexers, OCaml memory
+        // representation and lack of multithreading. It does make the lexer ~2 faster though, so we
+        // need to do something here too. Good news is that while OCaml solution is very general,
+        // caching any consecutive calls to next_token on same lexer, in practice majority of cache
+        // hits are from values populated here, in peek_token function, so it might be enough to
+        // specialize it not to throw away the work it does (when cloned lexer is dropped).
         self.peek_token_with_lookahead(0)
     }
 
@@ -336,12 +333,9 @@ where
     fn current_token_text(&self) -> &'a str {
         self.token_text(&self.peek_token())
     }
-
-    /**
-     * If the next token is a name or keyword, scan it as a name.
-     */
+    // If the next token is a name or keyword, scan it as a name.
     fn next_token_as_name(&mut self) -> S::Token {
-        /* TODO: This isn't right.  Pass flags to the lexer. */
+        // TODO: This isn't right.  Pass flags to the lexer.
         self.lexer_mut().next_token_as_name()
     }
 
@@ -367,38 +361,38 @@ where
             let token = parser1.next_token_as_name();
             match (name_opt.is_some(), token.kind()) {
                 (true, TokenKind::Backslash) => {
-                    /* found backslash, create item and recurse */
+                    // found backslash, create item and recurse
                     let token = S!(make_token, self, token);
                     self.continue_from(parser1);
                     let part = S!(make_list_item, self, name_opt.unwrap(), token);
-                    /* TODO(T25649779) */
+                    // TODO(T25649779)
                     parts.push(part);
                     has_backslash = true;
                     name_opt = None;
                 }
                 (false, TokenKind::Name) => {
-                    /* found a name, recurse to look for backslash */
+                    // found a name, recurse to look for backslash
                     self.continue_from(parser1);
                     let token = S!(make_token, self, token);
                     name_opt = Some(token);
                     has_backslash = false;
                 }
                 (true, _) if parts.is_empty() => {
-                    /* have not found anything - return [] to indicate failure */
+                    // have not found anything - return [] to indicate failure
                     return (parts, name_opt, false);
                 }
                 (true, _) => {
-                    /* next token is not part of qualified name but we've consume some
-                    part of the input - create part for name with missing backslash
-                    and return accumulated result */
+                    // next token is not part of qualified name but we've consume some
+                    // part of the input - create part for name with missing backslash
+                    // and return accumulated result
                     let missing = S!(make_missing, self, self.pos());
                     let part = S!(make_list_item, self, name_opt.unwrap(), missing);
-                    /* TODO(T25649779) */
+                    // TODO(T25649779)
                     parts.push(part);
                     return (parts, None, false);
                 }
                 _ => {
-                    /* next token is not part of qualified name - return accumulated result */
+                    // next token is not part of qualified name - return accumulated result
                     return (parts, name_opt, has_backslash);
                 }
             }
@@ -430,17 +424,14 @@ where
         let (name, _) = self.scan_qualified_name_extended(missing, backslash);
         name
     }
-
-    /**
-     * If the next token is a name or an non-reserved keyword, scan it as
-     * a name otherwise as a keyword.
-     *
-     * NB: A "reserved" keyword is in practice a keyword that cannot be used
-     * as a class name or function name, for example, control flow keywords or
-     * declaration keywords are reserved.
-     */
+    // If the next token is a name or an non-reserved keyword, scan it as
+    // a name otherwise as a keyword.
+    //
+    // NB: A "reserved" keyword is in practice a keyword that cannot be used
+    // as a class name or function name, for example, control flow keywords or
+    // declaration keywords are reserved.
     fn next_token_non_reserved_as_name(&mut self) -> S::Token {
-        /* TODO: This isn't right.  Pass flags to the lexer. */
+        // TODO: This isn't right.  Pass flags to the lexer.
         self.lexer_mut().next_token_non_reserved_as_name()
     }
 
@@ -632,8 +623,8 @@ where
                 S!(make_token, self, token)
             }
             _ => {
-                /* ERROR RECOVERY: Create a missing token for the expected token,
-                and continue on from the current token. Don't skip it. */
+                // ERROR RECOVERY: Create a missing token for the expected token,
+                // and continue on from the current token. Don't skip it.
                 self.with_error(error);
                 S!(make_missing, self, self.pos())
             }
@@ -664,8 +655,8 @@ where
             self.continue_from(parser1);
             S!(make_token, self, token)
         } else {
-            /* ERROR RECOVERY: Create a missing token for the expected token,
-            and continue on from the current token. Don't skip it. */
+            // ERROR RECOVERY: Create a missing token for the expected token,
+            // and continue on from the current token. Don't skip it.
             self.with_error(Errors::error1004);
             S!(make_missing, self, self.pos())
         }
@@ -675,9 +666,9 @@ where
         self.lexer_mut().next_xhp_category_name()
     }
 
-    /* We have a number of issues involving xhp class names, which begin with
-    a colon and may contain internal colons and dashes.  These are some
-    helper methods to deal with them. */
+    // We have a number of issues involving xhp class names, which begin with
+    // a colon and may contain internal colons and dashes.  These are some
+    // helper methods to deal with them.
     fn is_next_name(&mut self) -> bool {
         self.lexer().is_next_name()
     }
@@ -697,9 +688,9 @@ where
             let token = self.next_xhp_name();
             S!(make_token, self, token)
         } else {
-            /* ERROR RECOVERY: Create a missing token for the expected token,
-            and continue on from the current token. Don't skip it. */
-            /* TODO: Different error? */
+            // ERROR RECOVERY: Create a missing token for the expected token,
+            // and continue on from the current token. Don't skip it.
+            // TODO: Different error?
             self.with_error(Errors::error1004);
             S!(make_missing, self, self.pos())
         }
@@ -735,18 +726,18 @@ where
         let mut items = vec![];
 
         loop {
-            /* At this point we are expecting an item followed by a separator,
-            a close, or, if trailing separators are allowed, both */
+            // At this point we are expecting an item followed by a separator,
+            // a close, or, if trailing separators are allowed, both
             let mut parser1 = self.clone();
             let token = parser1.next_token();
             let kind = token.kind();
             if close_predicate(kind) || kind == TokenKind::EndOfFile {
-                /* ERROR RECOVERY: We expected an item but we found a close or
-                the end of the file. Make the item and separator both
-                "missing" and give an error.
-
-                If items are optional and we found a close, the last item was
-                omitted and there was no error. */
+                // ERROR RECOVERY: We expected an item but we found a close or
+                // the end of the file. Make the item and separator both
+                // "missing" and give an error.
+                //
+                // If items are optional and we found a close, the last item was
+                // omitted and there was no error.
 
                 if kind == TokenKind::EndOfFile || list_kind != SeparatedListKind::ItemsOptional {
                     self.with_error(error)
@@ -754,23 +745,23 @@ where
                 let missing1 = S!(make_missing, self, self.pos());
                 let missing2 = S!(make_missing, self, self.pos());
                 let list_item = S!(make_list_item, self, missing1, missing2);
-                /* TODO(T25649779) */
+                // TODO(T25649779)
                 items.push(list_item);
                 break;
             } else if kind == separator_kind {
-                /* ERROR RECOVERY: We expected an item but we got a separator.
-                 Assume the item was missing, eat the separator, and move on.
-
-                 If items are optional, there was no error, so eat the separator and
-                 continue.
-
-                 TODO: This could be poor recovery. For example:
-
-                      function bar (Foo< , int blah)
-
-                Plainly the type arg is missing, but the comma is not associated with
-                the type argument list, it's associated with the formal
-                parameter list.  */
+                // ERROR RECOVERY: We expected an item but we got a separator.
+                // Assume the item was missing, eat the separator, and move on.
+                //
+                // If items are optional, there was no error, so eat the separator and
+                // continue.
+                //
+                // TODO: This could be poor recovery. For example:
+                //
+                //     function bar (Foo< , int blah)
+                //
+                // Plainly the type arg is missing, but the comma is not associated with
+                // the type argument list, it's associated with the formal
+                // parameter list.
 
                 self.continue_from(parser1);
                 if list_kind != SeparatedListKind::ItemsOptional {
@@ -779,11 +770,11 @@ where
                 let item = S!(make_missing, self, self.pos());
                 let separator = S!(make_token, self, token);
                 let list_item = S!(make_list_item, self, item, separator);
-                /* TODO(T25649779) */
+                // TODO(T25649779)
                 items.push(list_item)
             } else {
-                /* We got neither a close nor a separator; hopefully we're going
-                to parse an item followed by a close or separator. */
+                // We got neither a close nor a separator; hopefully we're going
+                // to parse an item followed by a close or separator.
                 let item = parse_item(self);
                 let mut parser1 = self.clone();
                 let token = parser1.next_token();
@@ -792,7 +783,7 @@ where
                 if close_predicate(kind) {
                     let missing = S!(make_missing, self, self.pos());
                     let list_item = S!(make_list_item, self, item, missing);
-                    /* TODO(T25649779) */
+                    // TODO(T25649779)
                     items.push(list_item);
                     break;
                 } else if kind == separator_kind {
@@ -800,20 +791,20 @@ where
 
                     let separator = S!(make_token, self, token);
                     let list_item = S!(make_list_item, self, item, separator);
-                    /* TODO(T25649779) */
+                    // TODO(T25649779)
                     items.push(list_item);
                     let allow_trailing = list_kind != SeparatedListKind::NoTrailing;
-                    /* We got an item followed by a separator; what if the thing
-                    that comes next is a close? */
+                    // We got an item followed by a separator; what if the thing
+                    // that comes next is a close?
                     if allow_trailing && close_predicate(self.peek_token_kind()) {
                         break;
                     }
                 } else {
-                    /* ERROR RECOVERY: We were expecting a close or separator, but
-                    got neither. Bail out. Caller will give an error. */
+                    // ERROR RECOVERY: We were expecting a close or separator, but
+                    // got neither. Bail out. Caller will give an error.
                     let missing = S!(make_missing, self, self.pos());
                     let list_item = S!(make_list_item, self, item, missing);
-                    /* TODO(T25649779) */
+                    // TODO(T25649779)
                     items.push(list_item);
                     break;
                 }
@@ -834,7 +825,7 @@ where
                     let is_missing = item.is_missing();
                     acc.push(item);
                     if self.peek_token_kind() == TokenKind::EndOfFile ||
-                    /* exit if parser did not make any progress */
+                    // exit if parser did not make any progress
                         is_missing
                     {
                         break;
@@ -1117,7 +1108,7 @@ where
         (name)
     }
 
-    /* Parse with parse_item while a condition is met. */
+    // Parse with parse_item while a condition is met.
     fn parse_list_while(
         &mut self,
         parse_item: &Fn(&mut Self) -> S::R,
@@ -1131,23 +1122,22 @@ where
 
             let lexer_before = self.lexer().clone();
             let result = parse_item(self);
-            /* ERROR RECOVERY: If the item is was parsed as 'missing', then it means
-             * the parser bailed out of that scope. So, pass on whatever's been
-             * accumulated so far, but with a 'Missing' SyntaxNode prepended. */
+            // ERROR RECOVERY: If the item is was parsed as 'missing', then it means
+            // the parser bailed out of that scope. So, pass on whatever's been
+            // accumulated so far, but with a 'Missing' SyntaxNode prepended.
             if result.is_missing() {
                 items.push(result);
                 break;
             } else
-            /* INFINITE LOOP PREVENTION: If parse_item does not actually make
-             * progress, just bail
-             */
+            // INFINITE LOOP PREVENTION: If parse_item does not actually make
+            // progress, just bail
             if lexer_before.start() == self.lexer().start()
                 && lexer_before.offset() == self.lexer().offset()
             {
                 items.push(result);
                 break;
             } else
-            /* Or if nothing's wrong, continue. */
+            // Or if nothing's wrong, continue.
             {
                 items.push(result)
             }
@@ -1173,17 +1163,17 @@ where
         self.add_skipped_token(token)
     }
 
-    /* Returns true if the strings underlying two tokens are of the same length
-     * but with one character different. */
+    // Returns true if the strings underlying two tokens are of the same length
+    // but with one character different.
     fn one_character_different<'b>(str1: &'b [u8], str2: &'b [u8]) -> bool {
         if str1.len() != str2.len() {
             false
         } else {
-            /* both strings have same length */
+            // both strings have same length
             let str_len = str1.len();
             for i in 0..str_len {
                 if str1[i] != str2[i] {
-                    /* Allow only one mistake */
+                    // Allow only one mistake
                     return str1[i + 1..] == str2[i + 1..];
                 }
             }
@@ -1191,9 +1181,9 @@ where
         }
     }
 
-    /* Compare the text of the token we have in hand to the text of the
-     * anticipated kind. Note: this automatically returns false for any
-     * TokenKinds of length 1. */
+    // Compare the text of the token we have in hand to the text of the
+    // anticipated kind. Note: this automatically returns false for any
+    // TokenKinds of length 1.
     fn is_misspelled_kind<'b>(kind: TokenKind, token_str: &'b str) -> bool {
         let tokenkind_str = kind.to_string().as_bytes();
         let token_str = token_str.as_bytes();
@@ -1210,9 +1200,9 @@ where
             .any(|x| Self::is_misspelled_kind(*x, token_str))
     }
 
-    /* If token_str is a misspelling (by our narrow definition of misspelling)
-     * of a TokenKind from kind_list, return the TokenKind that token_str is a
-     * misspelling of. Otherwise, return None. */
+    // If token_str is a misspelling (by our narrow definition of misspelling)
+    // of a TokenKind from kind_list, return the TokenKind that token_str is a
+    // misspelling of. Otherwise, return None.
     fn suggested_kind_from(kind_list: &[TokenKind], token_str: &str) -> Option<TokenKind> {
         kind_list.iter().find_map(|x| {
             if Self::is_misspelled_kind(*x, token_str) {
@@ -1227,7 +1217,7 @@ where
         let received_str = &self.current_token_text();
         let required_str = required_kind.to_string();
         self.with_error_on_whole_token(Errors::error1058(received_str, required_str));
-        self.skip_and_log_unexpected_token(/*generate_error:*/ false)
+        self.skip_and_log_unexpected_token(/* generate_error:*/ false)
     }
 
     fn require_token_one_of(&mut self, kinds: &[TokenKind], error: Error) -> S::R {
@@ -1237,19 +1227,19 @@ where
             self.continue_from(parser1);
             S!(make_token, self, token)
         } else {
-            /* ERROR RECOVERY: Look at the next token after this. Is it the one we
-             * require? If so, process the current token as extra and return the next
-             * one. Otherwise, create a missing token for what we required,
-             * and continue on from the current token (don't skip it). */
+            // ERROR RECOVERY: Look at the next token after this. Is it the one we
+            // require? If so, process the current token as extra and return the next
+            // one. Otherwise, create a missing token for what we required,
+            // and continue on from the current token (don't skip it).
             let next_kind = self.peek_token_kind_with_lookahead(1);
             if kinds.iter().any(|x| *x == next_kind) {
                 self.skip_and_log_unexpected_token(true);
                 let token = self.next_token();
                 S!(make_token, self, token)
             } else {
-                /* ERROR RECOVERY: We know we didn't encounter an extra token.
-                 * So, as a second line of defense, check if the current token
-                 * is a misspelling, by our existing narrow definition of misspelling. */
+                // ERROR RECOVERY: We know we didn't encounter an extra token.
+                // So, as a second line of defense, check if the current token
+                // is a misspelling, by our existing narrow definition of misspelling.
                 let is_misspelling =
                     |k: &&TokenKind| Self::is_misspelled_kind(**k, &self.current_token_text());
                 let kind = kinds.iter().find(is_misspelling);
@@ -1268,26 +1258,26 @@ where
     }
 
     fn require_token(&mut self, kind: TokenKind, error: Error) -> S::R {
-        /* Must behave as `require_token_one_of parser [kind] error` */
+        // Must behave as `require_token_one_of parser [kind] error`
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         if token.kind() == kind {
             self.continue_from(parser1);
             S!(make_token, self, token)
         } else {
-            /* ERROR RECOVERY: Look at the next token after this. Is it the one we
-             * require? If so, process the current token as extra and return the next
-             * one. Otherwise, create a missing token for what we required,
-             * and continue on from the current token (don't skip it). */
+            // ERROR RECOVERY: Look at the next token after this. Is it the one we
+            // require? If so, process the current token as extra and return the next
+            // one. Otherwise, create a missing token for what we required,
+            // and continue on from the current token (don't skip it).
             let next_kind = self.peek_token_kind_with_lookahead(1);
             if next_kind == kind {
                 self.skip_and_log_unexpected_token(true);
                 let token = self.next_token();
                 S!(make_token, self, token)
             } else {
-                /* ERROR RECOVERY: We know we didn't encounter an extra token.
-                 * So, as a second line of defense, check if the current token
-                 * is a misspelling, by our existing narrow definition of misspelling. */
+                // ERROR RECOVERY: We know we didn't encounter an extra token.
+                // So, as a second line of defense, check if the current token
+                // is a misspelling, by our existing narrow definition of misspelling.
                 if Self::is_misspelled_kind(kind, &self.current_token_text()) {
                     self.skip_and_log_misspelled_token(kind);
                     S!(make_missing, self, self.pos())
@@ -1306,18 +1296,18 @@ where
             self.continue_from(parser1);
             Some(token)
         } else {
-            /* ERROR RECOVERY: Look at the next token after this. Is it the one we
-             * require? If so, process the current token as extra and return the next
-             * one. Otherwise, create a missing token for what we required,
-             * and continue on from the current token (don't skip it). */
+            // ERROR RECOVERY: Look at the next token after this. Is it the one we
+            // require? If so, process the current token as extra and return the next
+            // one. Otherwise, create a missing token for what we required,
+            // and continue on from the current token (don't skip it).
             let next_kind = self.peek_token_kind_with_lookahead(1);
             if next_kind == kind {
                 self.skip_and_log_unexpected_token(true);
                 Some(self.next_token())
             } else {
-                /* ERROR RECOVERY: We know we didn't encounter an extra token.
-                 * So, as a second line of defense, check if the current token
-                 * is a misspelling, by our existing narrow definition of misspelling. */
+                // ERROR RECOVERY: We know we didn't encounter an extra token.
+                // So, as a second line of defense, check if the current token
+                // is a misspelling, by our existing narrow definition of misspelling.
                 if Self::is_misspelled_kind(kind, &self.current_token_text()) {
                     self.skip_and_log_misspelled_token(kind);
                     None
@@ -1341,8 +1331,8 @@ where
             self.continue_from(parser1);
             S!(make_token, self, token)
         } else {
-            /* ERROR RECOVERY: Create a missing token for the expected token,
-            and continue on from the current token. Don't skip it. */
+            // ERROR RECOVERY: Create a missing token for the expected token,
+            // and continue on from the current token. Don't skip it.
             self.with_error(Errors::error1004);
             S!(make_missing, self, self.pos())
         }
@@ -1354,7 +1344,7 @@ where
 
     fn require_semicolon_token(&mut self) -> Option<S::Token> {
         match self.peek_token_kind() {
-            /* TODO: Kill PHPism; no semicolon required right before ?> */
+            // TODO: Kill PHPism; no semicolon required right before ?>
             TokenKind::QuestionGreaterThan => None,
             _ => self.require_and_return_token(TokenKind::Semicolon, Errors::error1010),
         }
@@ -1362,7 +1352,7 @@ where
 
     fn require_semicolon(&mut self) -> S::R {
         match self.peek_token_kind() {
-            /* TODO: Kill PHPism; no semicolon required right before ?> */
+            // TODO: Kill PHPism; no semicolon required right before ?>
             TokenKind::QuestionGreaterThan => S!(make_missing, self, self.pos()),
             _ => self.require_token(TokenKind::Semicolon, Errors::error1010),
         }

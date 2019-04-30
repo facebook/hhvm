@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 extern crate ocaml;
 use parser_rust as parser;
 
@@ -37,9 +35,9 @@ extern "C" {
     fn ocamlpool_reserve_string(size: Size) -> Value;
 }
 
-/* Unsafe functions in this file should be called only:
- * - while being called from OCaml process
- * - between ocamlpool_enter / ocamlpool_leave invocations */
+// Unsafe functions in this file should be called only:
+// - while being called from OCaml process
+// - between ocamlpool_enter / ocamlpool_leave invocations
 unsafe fn caml_block(tag: Tag, fields: &[Value]) -> Value {
     let result = ocamlpool_reserve_block(tag, fields.len());
     for (i, field) in fields.iter().enumerate() {
@@ -90,8 +88,8 @@ where
     res
 }
 
-/* Not implementing ToOcaml for integer types, because Value itself is an integer too and it makes
-* it too easy to accidentally treat a pointer to heap as integer and try double convert it */
+// Not implementing ToOcaml for integer types, because Value itself is an integer too and it makes
+// it too easy to accidentally treat a pointer to heap as integer and try double convert it
 fn usize_to_ocaml(x: usize) -> Value {
     (x << 1) + 1
 }
@@ -114,11 +112,11 @@ impl ToOcaml for TriviaKind {
 
 impl ToOcaml for MinimalTrivia {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
-        /* From full_fidelity_minimal_trivia.ml:
-        type t = {
-          kind: Full_fidelity_trivia_kind.t;
-          width: int
-        } */
+        // From full_fidelity_minimal_trivia.ml:
+        // type t = {
+        //   kind: Full_fidelity_trivia_kind.t;
+        //   width: int
+        // }
         let kind = self.kind.to_ocaml(context);
         let width = usize_to_ocaml(self.width);
         caml_tuple(&[kind, width])
@@ -132,21 +130,21 @@ impl ToOcaml for MinimalToken {
         let leading = to_list(&self.leading, context);
         let trailing = to_list(&self.trailing, context);
 
-        /* From full_fidelity_minimal_token.ml:
-        type t = {
-          kind: TokenKind.t;
-          width: int;
-          leading: Trivia.t list;
-          trailing: Trivia.t list
-        } */
+        // From full_fidelity_minimal_token.ml:
+        // type t = {
+        //   kind: TokenKind.t;
+        //   width: int;
+        //   leading: Trivia.t list;
+        //   trailing: Trivia.t list
+        // }
         caml_tuple(&[kind, width, leading, trailing])
     }
 }
 
 impl ToOcaml for MinimalValue {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        /* From full_fidelity_minimal_syntax.ml:
-         * type t = { full_width: int } */
+        // From full_fidelity_minimal_syntax.ml:
+        // type t = { full_width: int }
         let full_width = usize_to_ocaml(self.full_width);
         caml_tuple(&[full_width])
     }
@@ -317,15 +315,15 @@ impl ToOcaml for Option<FileMode> {
 
 impl ToOcaml for SyntaxError {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
-        /*type error_type = ParseError | RuntimeError
-
-          type t = {
-            child        : t option;
-            start_offset : int;
-            end_offset   : int;
-            error_type   : error_type;
-            message      : string;
-        } */
+        // type error_type = ParseError | RuntimeError
+        //
+        // type t = {
+        //   child        : t option;
+        //   start_offset : int;
+        //   end_offset   : int;
+        //   error_type   : error_type;
+        //   message      : string;
+        // }
 
         let child = usize_to_ocaml(0); // None
         let start_offset = usize_to_ocaml(self.start_offset);

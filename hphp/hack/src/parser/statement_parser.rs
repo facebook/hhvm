@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
@@ -181,7 +179,7 @@ where
     pub fn parse_statement(&mut self) -> S::R {
         match self.peek_token_kind() {
             TokenKind::Async | TokenKind::Coroutine | TokenKind::Function => {
-                self.parse_possible_php_function(/*toplevel:*/ false)
+                self.parse_possible_php_function(/* toplevel:*/ false)
             }
             TokenKind::Abstract
             | TokenKind::Final
@@ -223,15 +221,15 @@ where
             TokenKind::Unset => self.parse_unset_statement(),
             TokenKind::Case => {
                 let result = self.parse_case_label();
-                /* TODO: This puts the error in the wrong place. We should highlight
-                the entire label, not the trailing colon. */
+                // TODO: This puts the error in the wrong place. We should highlight
+                // the entire label, not the trailing colon.
                 self.with_error(Errors::error2003);
                 result
             }
             TokenKind::Default => {
                 let result = self.parse_default_label();
-                /* TODO: This puts the error in the wrong place. We should highlight
-                the entire label, not the trailing colon. */
+                // TODO: This puts the error in the wrong place. We should highlight
+                // the entire label, not the trailing colon.
                 self.with_error(Errors::error2004);
                 result
             }
@@ -240,10 +238,10 @@ where
             }
             TokenKind::Goto => self.parse_goto_statement(),
             TokenKind::Semicolon => self.parse_expression_statement(),
-            /* ERROR RECOVERY: when encountering a token that's invalid now but the
-             * context says is expected later, make the whole statement missing
-             * and continue on, starting at the unexpected token. */
-            /* TODO T20390825: Make sure this this won't cause premature recovery. */
+            // ERROR RECOVERY: when encountering a token that's invalid now but the
+            // context says is expected later, make the whole statement missing
+            // and continue on, starting at the unexpected token.
+            // TODO T20390825: Make sure this this won't cause premature recovery.
             kind if self.expects(kind) => S!(make_missing, self, self.pos()),
             _ => self.parse_expression_statement(),
         }
@@ -251,25 +249,25 @@ where
 
     pub fn parse_header(&mut self) -> (S::R, bool) {
         let prefix =
-            /* for markup section at the beginning of the file
-               treat ?> as a part of markup text */
-            /* The closing ?> tag is not legal hack, but accept it here and give an
-               error in a later pass */
+            // for markup section at the beginning of the file
+            // treat ?> as a part of markup text
+            // The closing ?> tag is not legal hack, but accept it here and give an
+            // error in a later pass
             S!(make_missing, self, self.pos());
         let (markup, suffix_opt) = self.lexer.scan_header();
         let markup = S!(make_token, self, markup);
         let (suffix, is_echo_tag, has_suffix) = match suffix_opt {
             Some((less_than_question, language_opt)) => {
                 let less_than_question_token = S!(make_token, self, less_than_question);
-                /* if markup section ends with <?= tag
-                then script section embedded between tags should be treated as if it
-                will be an argument to 'echo'. Technically it should be restricted to
-                expression but since it permits trailing semicolons we parse it as
-                expression statement.
-                TODO: consider making it even more loose and parse it as declaration
-                for better error recovery in cases when user
-                accidentally type '<?=' instead of '<?php' so declaration in script
-                section won't throw parser off the rails. */
+                // if markup section ends with <?= tag
+                // then script section embedded between tags should be treated as if it
+                // will be an argument to 'echo'. Technically it should be restricted to
+                // expression but since it permits trailing semicolons we parse it as
+                // expression statement.
+                // TODO: consider making it even more loose and parse it as declaration
+                // for better error recovery in cases when user
+                // accidentally type '<?=' instead of '<?php' so declaration in script
+                // section won't throw parser off the rails.
                 let (language, is_echo_tag) = match language_opt {
                     Some(language) => {
                         let is_echo_tag = language.kind() == TokenKind::Equal;
@@ -306,28 +304,26 @@ where
     }
 
     pub fn parse_possible_php_function(&mut self, toplevel: bool) -> S::R {
-        /* ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
-        (Hack only supports anonymous nested functions as expressions.)
-
-        If we have a statement beginning with function left-paren, then parse it
-        as a statement expression beginning with an anonymous function; it will
-        then have to end with a semicolon.
-
-        If it starts with something else, parse it as a function.
-
-        TODO: Give an error for nested nominal functions in a later pass.
-
-        */
+        // ERROR RECOVERY: PHP supports nested named functions, but Hack does not.
+        // (Hack only supports anonymous nested functions as expressions.)
+        //
+        // If we have a statement beginning with function left-paren, then parse it
+        // as a statement expression beginning with an anonymous function; it will
+        // then have to end with a semicolon.
+        //
+        // If it starts with something else, parse it as a function.
+        //
+        // TODO: Give an error for nested nominal functions in a later pass.
         let kind0 = self.peek_token_kind_with_lookahead(0);
         let kind1 = self.peek_token_kind_with_lookahead(1);
         match (kind0, kind1) {
             | (TokenKind::Async, TokenKind::Function) | (TokenKind::Coroutine, TokenKind::Function)
                 if self.peek_token_kind_with_lookahead(2) == TokenKind::LeftParen =>
                 self.parse_expression_statement(),
-            | (TokenKind::Function, TokenKind::LeftParen) /* Verbose-style lambda */
-            /* Async / coroutine, compact-style lambda */
+            | (TokenKind::Function, TokenKind::LeftParen) // Verbose-style lambda
+            // Async / coroutine, compact-style lambda
             | (TokenKind::Async, TokenKind::LeftParen)| (TokenKind::Coroutine, TokenKind::LeftParen)
-            | (TokenKind::Async, TokenKind::LeftBrace) /* Async block */
+            | (TokenKind::Async, TokenKind::LeftBrace) // Async block
                 => self.parse_expression_statement(),
             | _ => {
                 let missing = self.with_decl_parser(&|x: &mut DeclarationParser<'a, S, T>| {
@@ -342,7 +338,7 @@ where
         }
     }
 
-    /* Helper: parses ( expr ) */
+    // Helper: parses ( expr )
     fn parse_paren_expr(&mut self) -> (S::R, S::R, S::R) {
         let left_paren = self.require_left_paren();
         let expr_syntax = self.parse_expression();
@@ -351,20 +347,18 @@ where
     }
 
     fn parse_for_statement(&mut self) -> S::R {
-        /* SPEC
-        for-statement:
-          for   (   for-initializer-opt   ;   for-control-opt   ;    \
-            for-end-of-loop-opt   )   statement
-
-        Each clause is an optional, comma-separated list of expressions.
-        Note that unlike most such lists in Hack, it may *not* have a trailing
-        comma.
-        TODO: There is no compelling reason to not allow a trailing comma
-        from the grammatical point of view. Each clause unambiguously ends in
-        either a semi or a paren, so we can allow a trailing comma without
-        difficulty.
-
-        */
+        // SPEC
+        // for-statement:
+        //   for   (   for-initializer-opt   ;   for-control-opt   ;    \
+        //     for-end-of-loop-opt   )   statement
+        //
+        // Each clause is an optional, comma-separated list of expressions.
+        // Note that unlike most such lists in Hack, it may *not* have a trailing
+        // comma.
+        // TODO: There is no compelling reason to not allow a trailing comma
+        // from the grammatical point of view. Each clause unambiguously ends in
+        // either a semi or a paren, so we can allow a trailing comma without
+        // difficulty.
         let for_keyword_token = self.assert_token(TokenKind::For);
         let for_left_paren = self.require_left_paren();
         let for_initializer_expr =
@@ -500,11 +494,10 @@ where
         )
     }
 
-    /* SPEC:
-      let-statement:
-        let   name   =   expression   ;
-        let   name   :   type   =   expression   ;
-    */
+    // SPEC:
+    // let-statement:
+    //   let   name   =   expression   ;
+    //   let   name   :   type   =   expression   ;
     fn parse_let_statement(&mut self) -> S::R {
         let let_keyword_token = self.assert_token(TokenKind::Let);
         let name_token = self.require_name();
@@ -536,15 +529,14 @@ where
         )
     }
 
-    /* SPEC:
-     declare-statement:
-       declare   (   expression   )   ;
-       declare   (   expression   )   compound-statement
-
-       declare   (   expression   ):
-             compound-statement enddeclare;
-     TODO: Update the specification of the grammar
-    */
+    // SPEC:
+    // declare-statement:
+    //   declare   (   expression   )   ;
+    //   declare   (   expression   )   compound-statement
+    //
+    // declare   (   expression   ):
+    //   compound-statement enddeclare;
+    // TODO: Update the specification of the grammar
     fn parse_declare_statement(&mut self) -> S::R {
         let declare_keyword_token = self.assert_token(TokenKind::Declare);
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
@@ -588,24 +580,23 @@ where
         }
     }
 
-    /* SPEC:
-     using-statement:
-       await-opt   using   expression   ;
-       await-opt   using   (   expression-list   )   compound-statement
-
-     TODO: Update the specification of the grammar
-    */
+    // SPEC:
+    // using-statement:
+    //   await-opt   using   expression   ;
+    //   await-opt   using   (   expression-list   )   compound-statement
+    //
+    // TODO: Update the specification of the grammar
     fn parse_using_statement(&mut self, await_kw: S::R) -> S::R where {
         let using_kw = self.assert_token(TokenKind::Using);
-        /* Decision point - Are we at a function scope or a body scope */
+        // Decision point - Are we at a function scope or a body scope
         let token_kind = self.peek_token_kind();
-        /* if next token is left paren it can be either
-        - parenthesized expression followed by semicolon for function scoped using
-        - comma separated list of expressions wrapped in parens for blocks.
-          To distinguish between then try parse parenthesized expression and then
-          check next token. NOTE: we should not use 'parse_expression' here
-          since it might parse (expr) { smth() } as subscript expression $expr{$index}
-        */
+        // if next token is left paren it can be either
+        // - parenthesized expression followed by semicolon for function scoped using
+        // - comma separated list of expressions wrapped in parens for blocks.
+        // To distinguish between then try parse parenthesized expression and then
+        // check next token. NOTE: we should not use 'parse_expression' here
+        // since it might parse (expr) { smth() } as subscript expression $expr{$index}
+        //
         let mut parser1 = self.clone();
         let expr = if token_kind == TokenKind::LeftParen {
             parser1.with_expression_parser(&|p: &mut ExpressionParser<'a, S, T>| {
@@ -651,16 +642,14 @@ where
     }
 
     fn parse_unset_statement(&mut self) -> S::R {
-        /*
-        TODO: This is listed as unsupported in Hack in the spec; is that true?
-        TODO: If it is formally supported in Hack then update the spec; if not
-        TODO: then should we make it illegal in strict mode?
-        TODO: Can the list be comma-terminated?
-        TODO: Can the list be empty?
-        TODO: The list has to be expressions which evaluate as variables;
-              add an error checking pass.
-        TODO: TokenKind::Unset is case-insentive. Should non-lowercase be an error?
-        */
+        // TODO: This is listed as unsupported in Hack in the spec; is that true?
+        // TODO: If it is formally supported in Hack then update the spec; if not
+        // TODO: then should we make it illegal in strict mode?
+        // TODO: Can the list be comma-terminated?
+        // TODO: Can the list be empty?
+        // TODO: The list has to be expressions which evaluate as variables;
+        // add an error checking pass.
+        // TODO: TokenKind::Unset is case-insentive. Should non-lowercase be an error?
         let keyword = self.assert_token(TokenKind::Unset);
         let (left_paren, variables, right_paren) =
             self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| x.parse_expression());
@@ -676,8 +665,7 @@ where
         )
     }
 
-    /* parses the "( expr ) statement" segment of If, Elseif or Else clauses.
-     */
+    // parses the "( expr ) statement" segment of If, Elseif or Else clauses.
     fn parse_if_body_helper(&mut self) -> (S::R, S::R, S::R, S::Token, S::R) {
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
         let mut parser1 = self.clone();
@@ -740,7 +728,7 @@ where
         }
     }
 
-    /* do not eat token and return Missing if first token is not Else */
+    // do not eat token and return Missing if first token is not Else
     fn parse_else_opt(&mut self) -> S::R {
         let else_token = self.optional_token(TokenKind::Else);
         if else_token.is_missing() {
@@ -811,79 +799,77 @@ where
     }
 
     fn parse_switch_statement(&mut self) -> S::R {
-        /* SPEC:
-
-        The spec for switches is very simple:
-
-        switch-statement:
-          switch  (  expression  )  compound-statement
-        labeled-statement:
-          case-label
-          default-label
-        case-label:
-          case   expression  :  statement
-        default-label:
-          default  :  statement
-
-        where the compound statement, if not empty, must consist of only labeled
-        statements.
-
-        These rules give a nice simple parse but it has some unfortunate properties.
-        Consider:
-
-        switch (foo)
-        {
-          case 1:
-          case 2:
-            break;
-          default:
-            break;
-        }
-
-        What's the parse of the compound statement contents based on that grammar?
-
-        case 1:
-            case 2:
-                break;
-        default:
-            break;
-
-        That is, the second case is a child of the first. That makes it harder
-        to write analyzers, it makes it harder to write pretty printers, and so on.
-
-        What do we really want here? We want a switch to be a collection of
-        *sections* where each section has one or more *labels* and zero or more
-        *statements*.
-
-        switch-statement:
-          switch  (  expression  )  { switch-sections-opt }
-
-        switch-sections:
-          switch-section
-          switch-sections switch-section
-
-        switch-section:
-          section-labels
-          section-statements-opt
-          section-fallthrough-opt
-
-        section-fallthrough:
-          fallthrough  ;
-
-        section-labels:
-          section-label
-          section-labels section-label
-
-        section-statements:
-          statement
-          section-statements statement
-
-        The parsing of course has to be greedy; we never want to say that there
-        are zero statements *between* two sections.
-
-        TODO: Update the specification with these rules.
-
-        */
+        // SPEC:
+        //
+        // The spec for switches is very simple:
+        //
+        // switch-statement:
+        //   switch  (  expression  )  compound-statement
+        // labeled-statement:
+        //   case-label
+        //   default-label
+        // case-label:
+        //   case   expression  :  statement
+        // default-label:
+        //   default  :  statement
+        //
+        // where the compound statement, if not empty, must consist of only labeled
+        // statements.
+        //
+        // These rules give a nice simple parse but it has some unfortunate properties.
+        // Consider:
+        //
+        // switch (foo)
+        // {
+        //   case 1:
+        //   case 2:
+        //     break;
+        //   default:
+        //     break;
+        // }
+        //
+        // What's the parse of the compound statement contents based on that grammar?
+        //
+        // case 1:
+        //   case 2:
+        //     break;
+        // default:
+        //   break;
+        //
+        // That is, the second case is a child of the first. That makes it harder
+        // to write analyzers, it makes it harder to write pretty printers, and so on.
+        //
+        // What do we really want here? We want a switch to be a collection of
+        // *sections* where each section has one or more *labels* and zero or more
+        // *statements*.
+        //
+        // switch-statement:
+        //   switch  (  expression  )  { switch-sections-opt }
+        //
+        // switch-sections:
+        //   switch-section
+        //   switch-sections switch-section
+        //
+        // switch-section:
+        //   section-labels
+        //   section-statements-opt
+        //   section-fallthrough-opt
+        //
+        // section-fallthrough:
+        //   fallthrough  ;
+        //
+        // section-labels:
+        //   section-label
+        //   section-labels section-label
+        //
+        // section-statements:
+        //   statement
+        //   section-statements statement
+        //
+        // The parsing of course has to be greedy; we never want to say that there
+        // are zero statements *between* two sections.
+        //
+        // TODO: Update the specification with these rules.
 
         let switch_keyword_token = self.assert_token(TokenKind::Switch);
         let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
@@ -955,7 +941,7 @@ where
     }
 
     fn parse_switch_fallthrough(&mut self) -> S::R {
-        /* We don't get here unless we have fallthrough ; */
+        // We don't get here unless we have fallthrough ;
         let keyword = self.assert_token(TokenKind::Fallthrough);
         let semi = self.assert_token(TokenKind::Semicolon);
         S!(make_switch_fallthrough, self, keyword, semi)
@@ -965,31 +951,29 @@ where
         if self.is_switch_fallthrough() {
             self.parse_switch_fallthrough()
         } else {
-            /*
-             * As long as we have FALLTHROUGH comments, insert a faux-statement as if
-             * there was a fallthrough statement. For example, the code
-             *
-             * > case 22:
-             * >   $x = 0;
-             * >   // FALLTHROUGH because we want all the other functionality as well
-             * > case 42:
-             * >   foo($x);
-             * >   break;
-             *
-             * Should be parsed as if it were
-             *
-             * > case 22:
-             * >   $x = 0;
-             * >   // FALLTHROUGH because we want all the other functionality as well
-             * >   fallthrough;
-             * > case 43:
-             * >   foo($x);
-             * >   break;
-             *
-             * But since we have no actual occurrence (i.e. no position, no string) of
-             * that `fallthrough;` statement, we construct a `switch_fallthrough`, but
-             * fill it with `missing`.
-             */
+            // As long as we have FALLTHROUGH comments, insert a faux-statement as if
+            // there was a fallthrough statement. For example, the code
+            //
+            // > case 22:
+            // >   $x = 0;
+            // >   // FALLTHROUGH because we want all the other functionality as well
+            // > case 42:
+            // >   foo($x);
+            // >   break;
+            //
+            // Should be parsed as if it were
+            //
+            // > case 22:
+            // >   $x = 0;
+            // >   // FALLTHROUGH because we want all the other functionality as well
+            // >   fallthrough;
+            // > case 43:
+            // >   foo($x);
+            // >   break;
+            //
+            // But since we have no actual occurrence (i.e. no position, no string) of
+            // that `fallthrough;` statement, we construct a `switch_fallthrough`, but
+            // fill it with `missing`.
             let next = self.peek_token();
             let commented_fallthrough = next
                 .leading()
@@ -1006,7 +990,7 @@ where
     }
 
     fn parse_switch_section(&mut self) -> S::R {
-        /* See parse_switch_statement for grammar */
+        // See parse_switch_statement for grammar
         let labels = self.parse_list_until_none(&|x| x.parse_switch_section_label());
         if labels.is_missing() {
             self.with_error(Errors::error2008);
@@ -1035,7 +1019,7 @@ where
     }
 
     fn parse_switch_section_label(&mut self) -> Option<S::R> {
-        /* See the grammar under parse_switch_statement */
+        // See the grammar under parse_switch_statement
         match self.peek_token_kind() {
             TokenKind::Case => {
                 let label = self.parse_case_label();
@@ -1050,10 +1034,9 @@ where
     }
 
     fn parse_catch_clause_opt(&mut self) -> Option<S::R> {
-        /* SPEC
-          catch  (  type-specification-opt variable-name  )  compound-statement
-          catch  (  type-specification-opt name  )  compound-statement [experimental-mode]
-        */
+        // SPEC
+        // catch  (  type-specification-opt variable-name  )  compound-statement
+        // catch  (  type-specification-opt name  )  compound-statement [experimental-mode]
         if self.peek_token_kind() == TokenKind::Catch {
             let catch_token = self.assert_token(TokenKind::Catch);
             let left_paren = self.require_left_paren();
@@ -1089,10 +1072,9 @@ where
     }
 
     fn parse_finally_clause_opt(&mut self) -> S::R {
-        /* SPEC
-        finally-clause:
-          finally   compound-statement
-        */
+        // SPEC
+        // finally-clause:
+        //   finally   compound-statement
         if self.peek_token_kind() == TokenKind::Finally {
             let finally_token = self.assert_token(TokenKind::Finally);
             let compound_stmt = self.parse_compound_statement();
@@ -1103,18 +1085,17 @@ where
     }
 
     fn parse_try_statement(&mut self) -> S::R {
-        /* SPEC:
-        try-statement:
-          try  compound-statement   catch-clauses
-          try  compound-statement   finally-clause
-          try  compound-statement   catch-clauses   finally-clause
-        */
+        // SPEC:
+        // try-statement:
+        //   try  compound-statement   catch-clauses
+        //   try  compound-statement   finally-clause
+        //   try  compound-statement   catch-clauses   finally-clause
         let try_keyword_token = self.assert_token(TokenKind::Try);
         let try_compound_stmt = self.parse_compound_statement();
         let catch_clauses = self.parse_list_until_none(&|x| x.parse_catch_clause_opt());
         let finally_clause = self.parse_finally_clause_opt();
-        /* If the catch and finally are both missing then we give an error in
-        a later pass. */
+        // If the catch and finally are both missing then we give an error in
+        // a later pass.
         S!(
             make_try_statement,
             self,
@@ -1126,15 +1107,15 @@ where
     }
 
     fn parse_break_statement(&mut self) -> S::R {
-        /* SPEC
-        break-statement:
-          break  ;
+        // SPEC
+        // break-statement:
+        //   break  ;
+        //
+        // However, PHP allows an optional expression; though Hack does not have
+        // this feature, we allow it at parse time and produce an error later.
+        // TODO: Implement that error.
 
-        However, PHP allows an optional expression; though Hack does not have
-        this feature, we allow it at parse time and produce an error later.
-        TODO: Implement that error. */
-
-        /* We detect if we are not inside a switch or loop in a later pass. */
+        // We detect if we are not inside a switch or loop in a later pass.
         let break_token = self.assert_token(TokenKind::Break);
         let level = if self.peek_token_kind() == TokenKind::Semicolon {
             S!(make_missing, self, self.pos())
@@ -1146,15 +1127,15 @@ where
     }
 
     fn parse_continue_statement(&mut self) -> S::R {
-        /* SPEC
-        continue-statement:
-          continue  ;
+        // SPEC
+        // continue-statement:
+        //   continue  ;
+        //
+        // However, PHP allows an optional expression; though Hack does not have
+        // this feature, we allow it at parse time and produce an error later.
+        // TODO: Implement that error.
 
-        However, PHP allows an optional expression; though Hack does not have
-        this feature, we allow it at parse time and produce an error later.
-        TODO: Implement that error. */
-
-        /* We detect if we are not inside a loop in a later pass. */
+        // We detect if we are not inside a loop in a later pass.
         let continue_token = self.assert_token(TokenKind::Continue);
         let level = if self.peek_token_kind() == TokenKind::Semicolon {
             S!(make_missing, self, self.pos())
@@ -1215,16 +1196,15 @@ where
         S!(make_throw_statement, self, throw_token, expr, semi_token)
     }
     fn parse_default_label(&mut self) -> S::R {
-        /*
-        See comments under parse_switch_statement for the grammar.
-        TODO: Update the spec.
-        TODO: The spec is wrong; it implies that a statement must always follow
-              the default:, but in fact
-              switch($x) { default: }
-              is legal. Fix the spec.
-        TODO: PHP allows a default to end in a semi; Hack does not.  We allow a semi
-              here; add an error in a later pass.
-        */
+        //
+        // See comments under parse_switch_statement for the grammar.
+        // TODO: Update the spec.
+        // TODO: The spec is wrong; it implies that a statement must always follow
+        //       the default:, but in fact
+        //       switch($x) { default: }
+        //       is legal. Fix the spec.
+        // TODO: PHP allows a default to end in a semi; Hack does not.  We allow a semi
+        // here; add an error in a later pass.
         let default_token = self.assert_token(TokenKind::Default);
         let colon_token = {
             let mut parser1 = self.clone();
@@ -1239,15 +1219,14 @@ where
         S!(make_default_label, self, default_token, colon_token)
     }
     fn parse_case_label(&mut self) -> S::R {
-        /* SPEC:
-          See comments under parse_switch_statement for the grammar.
-        TODO: The spec is wrong; it implies that a statement must always follow
-              the case, but in fact
-              switch($x) { case 10: }
-              is legal. Fix the spec.
-        TODO: PHP allows a case to end in a semi; Hack does not.  We allow a semi
-              here; add an error in a later pass.
-              */
+        // SPEC:
+        // See comments under parse_switch_statement for the grammar.
+        // TODO: The spec is wrong; it implies that a statement must always follow
+        //       the case, but in fact
+        //       switch($x) { case 10: }
+        //       is legal. Fix the spec.
+        // TODO: PHP allows a case to end in a semi; Hack does not.  We allow a semi
+        // here; add an error in a later pass.
 
         let case_token = self.assert_token(TokenKind::Case);
         let expr = self.parse_expression();
@@ -1270,17 +1249,16 @@ where
         S!(make_concurrent_statement, self, keyword, statement)
     }
 
-    /* SPEC:
-    TODO: update the spec to reflect that echo and print must be a statement
-    echo-intrinsic:
-      echo  expression
-      echo  (  expression  )
-      echo  expression-list-two-or-more
-
-    expression-list-two-or-more:
-      expression  ,  expression
-      expression-list-two-or-more  ,  expression
-    */
+    // SPEC:
+    // TODO: update the spec to reflect that echo and print must be a statement
+    // echo-intrinsic:
+    //   echo  expression
+    //   echo  (  expression  )
+    //   echo  expression-list-two-or-more
+    //
+    // expression-list-two-or-more:
+    //   expression  ,  expression
+    //   expression-list-two-or-more  ,  expression
 
     fn parse_echo_statement(&mut self) -> S::R {
         let token = self.assert_token(TokenKind::Echo);

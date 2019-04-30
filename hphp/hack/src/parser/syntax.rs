@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use crate::lexable_token::LexableToken;
 pub use crate::syntax_generated::*;
 use crate::syntax_kind::SyntaxKind;
@@ -47,8 +45,8 @@ where
     }
 
     fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self {
-        /* An empty list is represented by Missing; everything else is a
-        SyntaxList, even if the list has only one item. */
+        // An empty list is represented by Missing; everything else is a
+        // SyntaxList, even if the list has only one item.
         if arg.is_empty() {
             Self::make_missing(offset)
         } else {

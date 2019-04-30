@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use std::marker::PhantomData;
 
 use crate::declaration_parser::DeclarationParser;
@@ -314,19 +312,19 @@ where
                 self.parse_name_or_collection_literal_expression(name)
             }
             kind if self.expects_here(kind) => {
-                /* ERROR RECOVERY: If we're encountering a token that matches a kind in
-                 * the previous scope of the expected stack, don't eat it--just mark the
-                 * name missing and continue parsing, starting from the offending token. */
+                // ERROR RECOVERY: If we're encountering a token that matches a kind in
+                // the previous scope of the expected stack, don't eat it--just mark the
+                // name missing and continue parsing, starting from the offending token.
                 self.with_error(Errors::error1015);
                 S!(make_missing, self, self.pos())
             }
             _ => {
                 self.continue_from(parser1);
-                /* ERROR RECOVERY: If we're encountering anything other than a TokenKind::Name
-                 * or the next expected kind, eat the offending token.
-                 * TODO: Increase the coverage of PrecedenceParser.expects_next, so that
-                 * we wind up eating fewer of the tokens that'll be needed by the outer
-                 * statement / declaration parsers. */
+                // ERROR RECOVERY: If we're encountering anything other than a TokenKind::Name
+                // or the next expected kind, eat the offending token.
+                // TODO: Increase the coverage of PrecedenceParser.expects_next, so that
+                // we wind up eating fewer of the tokens that'll be needed by the outer
+                // statement / declaration parsers.
                 self.with_error(Errors::error1015);
                 S!(make_token, self, token)
             }
@@ -352,8 +350,8 @@ where
                 S!(make_literal_expression, self, token)
             }
             | TokenKind::HeredocStringLiteral => {
-                /* We have a heredoc string literal but it might contain embedded
-                expressions. Start over. */
+                // We have a heredoc string literal but it might contain embedded
+                // expressions. Start over.
                 let (token, name) = self.next_docstring_header();
                 self.parse_heredoc_string(token, name)
             }
@@ -377,12 +375,12 @@ where
                 match str_maybe.kind() {
                     | TokenKind::SingleQuotedStringLiteral | TokenKind::NowdocStringLiteral
                     | TokenKind::HeredocStringLiteral | TokenKind::HeredocStringLiteralHead => {
-                        /* Treat as an attempt to prefix a non-double-quoted string */
+                        // Treat as an attempt to prefix a non-double-quoted string
                         self.with_error(Errors::prefixed_invalid_string_kind );
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
                     | TokenKind::DoubleQuotedStringLiteral => {
-                        /* This name prefixes a double-quoted string */
+                        // This name prefixes a double-quoted string
                         self.continue_from(parser1);
                         let str_ = S!(make_token, self, str_maybe);
                         let str_ = S!(make_literal_expression, self, str_);
@@ -390,13 +388,13 @@ where
                     }
                     | TokenKind::DoubleQuotedStringLiteralHead => {
                         self.continue_from(parser1);
-                        /* This name prefixes a double-quoted string containing embedded expressions */
+                        // This name prefixes a double-quoted string containing embedded expressions
                         let str_ = self.parse_double_quoted_like_string(
                         str_maybe, StringLiteralKind::LiteralDoubleQuoted);
                         S!(make_prefixed_string_expression, self, qualified_name, str_)
                     }
                     | _ => {
-                        /* Not a prefixed string or an attempt at one */
+                        // Not a prefixed string or an attempt at one
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
                 }
@@ -416,8 +414,8 @@ where
             | TokenKind::Yield => self.parse_yield_expression(),
             | TokenKind::Dollar => self.parse_dollar_expression(),
             | TokenKind::Suspend
-            /* TODO: The operand to a suspend is required to be a call to a
-            coroutine. Give an error in a later pass if this isn't the case. */
+            // TODO: The operand to a suspend is required to be a call to a
+            // coroutine. Give an error in a later pass if this isn't the case.
             | TokenKind::Exclamation
             | TokenKind::PlusPlus
             | TokenKind::MinusMinus
@@ -454,8 +452,8 @@ where
                 let token = S!(make_token, self, token);
                 S!(make_pipe_variable_expression, self, token)
             }
-            /* LessThanLessThan start attribute spec that is allowed on anonymous
-            functions or lambdas */
+            // LessThanLessThan start attribute spec that is allowed on anonymous
+            // functions or lambdas
             | TokenKind::LessThanLessThan
             | TokenKind::Async
             | TokenKind::Coroutine => self.parse_anon_or_lambda_or_awaitable(),
@@ -470,9 +468,9 @@ where
             | TokenKind::Eval => self.parse_eval_expression(),
             | TokenKind::ColonAt => self.parse_pocket_atom(),
             | kind if self.expects(kind) => {
-                /* ERROR RECOVERY: if we've prematurely found a token we're expecting
-                * later, mark the expression missing, throw an error, and do not advance
-                * the parser. */
+                // ERROR RECOVERY: if we've prematurely found a token we're expecting
+                // later, mark the expression missing, throw an error, and do not advance
+                // the parser.
                 self.with_error(Errors::error1015);
                 S!(make_missing, self, self.pos())
             }
@@ -482,16 +480,16 @@ where
     }
 
     fn parse_empty_expression(&mut self) -> S::R {
-        /* TODO: This is a PHP-ism. Open questions:
-          * Should we allow a trailing comma? it is not a function call and
-            never has more than one argument. See D4273242 for discussion.
-          * Is there any restriction on the kind of expression this can be?
-          * Should this be an error in strict mode?
-          * Should this be in the specification?
-          * Empty is case-insensitive; should use of non-lowercase be an error?
-        */
-        /* TODO: The original Hack and HHVM parsers accept "empty" as an
-        identifier, so we do too; consider whether it should be reserved. */
+        // TODO: This is a PHP-ism. Open questions:
+        // * Should we allow a trailing comma? it is not a function call and
+        //   never has more than one argument. See D4273242 for discussion.
+        // * Is there any restriction on the kind of expression this can be?
+        // * Should this be an error in strict mode?
+        // * Should this be in the specification?
+        // * Empty is case-insensitive; should use of non-lowercase be an error?
+        //
+        // TODO: The original Hack and HHVM parsers accept "empty" as an
+        // identifier, so we do too; consider whether it should be reserved.
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(TokenKind::Empty);
         if parser1.peek_token_kind() == TokenKind::LeftParen {
@@ -506,16 +504,16 @@ where
     }
 
     fn parse_eval_expression(&mut self) -> S::R {
-        /* TODO: This is a PHP-ism. Open questions:
-          * Should we allow a trailing comma? it is not a function call and
-            never has more than one argument. See D4273242 for discussion.
-          * Is there any restriction on the kind of expression this can be?
-          * Should this be an error in strict mode?
-          * Should this be in the specification?
-          * Eval is case-insensitive. Should use of non-lowercase be an error?
-        */
-        /* TODO: The original Hack and HHVM parsers accept "eval" as an
-        identifier, so we do too; consider whether it should be reserved. */
+        // TODO: This is a PHP-ism. Open questions:
+        // * Should we allow a trailing comma? it is not a function call and
+        //   never has more than one argument. See D4273242 for discussion.
+        // * Is there any restriction on the kind of expression this can be?
+        // * Should this be an error in strict mode?
+        // * Should this be in the specification?
+        // * Eval is case-insensitive. Should use of non-lowercase be an error?
+        //
+        // TODO: The original Hack and HHVM parsers accept "eval" as an
+        // identifier, so we do too; consider whether it should be reserved.
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(TokenKind::Eval);
         if parser1.peek_token_kind() == TokenKind::LeftParen {
@@ -530,17 +528,17 @@ where
     }
 
     fn parse_isset_expression(&mut self) -> S::R {
-        /* TODO: This is a PHP-ism. Open questions:
-          * Should we allow a trailing comma? See D4273242 for discussion.
-          * Is there any restriction on the kind of expression the arguments can be?
-          * Should this be an error in strict mode?
-          * Should this be in the specification?
-          * PHP requires that there be at least one argument; should we require
-            that? if so, should we give the error in the parser or a later pass?
-          * Isset is case-insensitive. Should use of non-lowercase be an error?
-        */
-        /* TODO: The original Hack and HHVM parsers accept "isset" as an
-        identifier, so we do too; consider whether it should be reserved. */
+        // TODO: This is a PHP-ism. Open questions:
+        // * Should we allow a trailing comma? See D4273242 for discussion.
+        // * Is there any restriction on the kind of expression the arguments can be?
+        // * Should this be an error in strict mode?
+        // * Should this be in the specification?
+        // * PHP requires that there be at least one argument; should we require
+        //   that? if so, should we give the error in the parser or a later pass?
+        // * Isset is case-insensitive. Should use of non-lowercase be an error?
+        //
+        // TODO: The original Hack and HHVM parsers accept "isset" as an
+        // identifier, so we do too; consider whether it should be reserved.
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(TokenKind::Isset);
         if parser1.peek_token_kind() == TokenKind::LeftParen {
@@ -553,19 +551,19 @@ where
     }
 
     fn parse_define_expression(&mut self) -> S::R {
-        /* TODO: This is a PHP-ism. Open questions:
-          * Should we allow a trailing comma? See D4273242 for discussion.
-          * Is there any restriction on the kind of expression the arguments can be?
-            They must be string, value, bool, but do they have to be compile-time
-            constants, for instance?
-          * Should this be an error in strict mode? You should use const instead.
-          * Should this be in the specification?
-          * PHP requires that there be at least two arguments; should we require
-            that? if so, should we give the error in the parser or a later pass?
-          * is define case-insensitive?
-        */
-        /* TODO: The original Hack and HHVM parsers accept "define" as an
-        identifier, so we do too; consider whether it should be reserved. */
+        // TODO: This is a PHP-ism. Open questions:
+        // * Should we allow a trailing comma? See D4273242 for discussion.
+        // * Is there any restriction on the kind of expression the arguments can be?
+        //   They must be string, value, bool, but do they have to be compile-time
+        //   constants, for instance?
+        // * Should this be an error in strict mode? You should use const instead.
+        // * Should this be in the specification?
+        // * PHP requires that there be at least two arguments; should we require
+        //   that? if so, should we give the error in the parser or a later pass?
+        //   is define case-insensitive?
+        //
+        // TODO: The original Hack and HHVM parsers accept "define" as an
+        // identifier, so we do too; consider whether it should be reserved.
         let mut parser1 = self.clone();
         let keyword = parser1.assert_token(TokenKind::Define);
         if parser1.peek_token_kind() == TokenKind::LeftParen {
@@ -619,28 +617,27 @@ where
         left_brace: S::Token,
         dollar_inside_braces: bool,
     ) -> S::R {
-        /*
-        We are parsing something like "abc{$x}def" or "abc${x}def", and we
-        are at the left brace.
-
-        We know that the left brace will not be preceded by trivia. However in the
-        second of the two cases mentioned above it is legal for there to be trivia
-        following the left brace. If we are in the first case, we've already
-        verified that there is no trailing trivia after the left brace.
-
-        The expression may be followed by arbitrary trivia, including
-        newlines and comments. That means that the closing brace may have
-        leading trivia. But under no circumstances does the closing brace have
-        trailing trivia.
-
-        It's an error for the closing brace to be missing.
-
-        Therefore we lex the left brace normally, parse the expression normally,
-        but require that there be a right brace. We do not lex the trailing trivia
-        on the right brace.
-
-        ERROR RECOVERY: If the right brace is missing, treat the remainder as
-        string text. */
+        // We are parsing something like "abc{$x}def" or "abc${x}def", and we
+        // are at the left brace.
+        //
+        // We know that the left brace will not be preceded by trivia. However in the
+        // second of the two cases mentioned above it is legal for there to be trivia
+        // following the left brace. If we are in the first case, we've already
+        // verified that there is no trailing trivia after the left brace.
+        //
+        // The expression may be followed by arbitrary trivia, including
+        // newlines and comments. That means that the closing brace may have
+        // leading trivia. But under no circumstances does the closing brace have
+        // trailing trivia.
+        //
+        // It's an error for the closing brace to be missing.
+        //
+        // Therefore we lex the left brace normally, parse the expression normally,
+        // but require that there be a right brace. We do not lex the trailing trivia
+        // on the right brace.
+        //
+        // ERROR RECOVERY: If the right brace is missing, treat the remainder as
+        // string text.
 
         let is_assignment_op = |token| Operator::trailing_from_token(token).is_assignment();
 
@@ -662,38 +659,38 @@ where
                     && name_or_keyword_as_name.leading().is_empty()
                     && name_or_keyword_as_name.trailing().is_empty() =>
             {
-                /* The case of "${x}" should be treated as if we were interpolating $x
-                (rather than interpolating the constant `x`).
-
-                But we can also put other expressions in between the braces, such as
-                "${foo()}". In that case, `foo()` is evaluated, and then the result is
-                used as the variable name to interpolate.
-
-                Considering that both start with `${ident`, how does the parser tell the
-                difference? It appears that PHP special-cases two forms to be treated as
-                direct variable interpolation:
-
-                 1) `${x}` is semantically the same as `{$x}`.
-
-                    No whitespace may come between `{` and `x`, or else the `x` is
-                    treated as a constant.
-
-                 2) `${x[expr()]}` should be treated as `{$x[expr()]}`. More than one
-                    subscript expression, such as `${x[expr1()][expr2()]}`, is illegal.
-
-                    No whitespace may come between either the `{` and `x` or the `x` and
-                    the `[`, or else the `x` is treated as a constant, and therefore
-                    arbitrary expressions are allowed in the curly braces. (This amounts
-                    to a variable-variable.)
-
-                This is very similar to the grammar detailed in the specification
-                discussed in `parse_string_literal` below, except that `${x=>y}` is not
-                valid; it appears to be treated the same as performing member access on
-                the constant `x` rather than the variable `$x`, which is not valid
-                syntax.
-
-                The first case can already be parsed successfully because `x` is a valid
-                expression, so we special-case only the second case here. */
+                // The case of "${x}" should be treated as if we were interpolating $x
+                // (rather than interpolating the constant `x`).
+                //
+                // But we can also put other expressions in between the braces, such as
+                // "${foo()}". In that case, `foo()` is evaluated, and then the result is
+                // used as the variable name to interpolate.
+                //
+                // Considering that both start with `${ident`, how does the parser tell the
+                // difference? It appears that PHP special-cases two forms to be treated as
+                // direct variable interpolation:
+                //
+                // 1) `${x}` is semantically the same as `{$x}`.
+                //
+                //    No whitespace may come between `{` and `x`, or else the `x` is
+                //    treated as a constant.
+                //
+                // 2) `${x[expr()]}` should be treated as `{$x[expr()]}`. More than one
+                //    subscript expression, such as `${x[expr1()][expr2()]}`, is illegal.
+                //
+                //    No whitespace may come between either the `{` and `x` or the `x` and
+                //    the `[`, or else the `x` is treated as a constant, and therefore
+                //    arbitrary expressions are allowed in the curly braces. (This amounts
+                //    to a variable-variable.)
+                //
+                // This is very similar to the grammar detailed in the specification
+                // discussed in `parse_string_literal` below, except that `${x=>y}` is not
+                // valid; it appears to be treated the same as performing member access on
+                // the constant `x` rather than the variable `$x`, which is not valid
+                // syntax.
+                //
+                // The first case can already be parsed successfully because `x` is a valid
+                // expression, so we special-case only the second case here.
                 self.continue_from(parser1);
                 let receiver = S!(make_token, self, name_or_keyword_as_name);
                 let left_bracket = S!(make_token, self, after_name);
@@ -720,10 +717,10 @@ where
                 (expr, right_brace)
             }
             (TokenKind::Name, maybe_assignment_op) if is_assignment_op(maybe_assignment_op) => {
-                /* PHP compatibility: expressions like `${x + 1}` are okay, but
-                expressions like `${x = 1}` are not okay, since `x` is parsed as if it
-                were a constant, and you can't use an assignment operator with a
-                constant. Flag the issue by reporting that a right brace is expected. */
+                // PHP compatibility: expressions like `${x + 1}` are okay, but
+                // expressions like `${x = 1}` are not okay, since `x` is parsed as if it
+                // were a constant, and you can't use an assignment operator with a
+                // constant. Flag the issue by reporting that a right brace is expected.
                 self.continue_from(parser1);
                 let expr = S!(make_token, self, name_or_keyword_as_name);
                 let mut parser1 = self.clone();
@@ -742,20 +739,20 @@ where
                 let expr = self.parse_expression_with_reset_precedence();
                 let end_offset = self.lexer().start();
 
-                /* PHP compatibility: only allow a handful of expression types in
-                {$...}-expressions. */
+                // PHP compatibility: only allow a handful of expression types in
+                // {$...}-expressions.
                 if dollar_inside_braces
                     && !(expr.is_function_call_expression()
                 || expr.is_subscript_expression()
                 || expr.is_member_selection_expression()
                 || expr.is_safe_member_selection_expression()
                 || expr.is_variable_expression()
-                /* This is actually checking to see if we have a
-                variable-variable, which is allowed here. Variable-variables are
-                parsed as prefix unary expressions with `$` as the operator. We
-                cannot directly check the operator in this prefix unary
-                expression, but we already know that `dollar_inside_braces` is
-                true, so that operator must have been `$`. */
+                // This is actually checking to see if we have a
+                // variable-variable, which is allowed here. Variable-variables are
+                // parsed as prefix unary expressions with `$` as the operator. We
+                // cannot directly check the operator in this prefix unary
+                // expression, but we already know that `dollar_inside_braces` is
+                // true, so that operator must have been `$`.
                 ||  expr.is_prefix_unary_expression())
                 {
                     let error = SyntaxError::make(
@@ -788,78 +785,78 @@ where
     }
 
     fn parse_string_literal(&mut self, head: S::Token, literal_kind: StringLiteralKind) -> S::R {
-        /* SPEC
-
-        Double-quoted string literals and heredoc string literals use basically
-        the same rules; here we have just the grammar for double-quoted string
-        literals.
-
-        string-variable::
-        variable-name   offset-or-property-opt
-
-        offset-or-property::
-        offset-in-string
-        property-in-string
-
-        offset-in-string::
-        [   name   ]
-        [   variable-name   ]
-        [   integer-literal   ]
-
-        property-in-string::
-        ->   name
-
-        TODO: What about ?->
-
-        The actual situation is considerably more complex than indicated
-        in the specification.
-
-        TODO: Consider updating the specification.
-
-        * The tokens in the grammar above have no leading or trailing trivia.
-
-        * An embedded variable expression may also be enclosed in curly braces;
-        however, the $ of the variable expression must follow immediately after
-        the left brace.
-
-        * An embedded variable expression inside braces allows trivia between
-        the tokens and before the right brace.
-
-        * An embedded variable expression inside braces can be a much more complex
-        expression than indicated by the grammar above.  For example,
-        {$c->x->y[0]} is good, and {$c[$x instanceof foo ? 0 : 1]} is good,
-        but {$c instanceof foo ? $x : $y} is not.  It is not clear to me what
-        the legal grammar here is; it seems best in this situation to simply
-        parse any expression and do an error pass later.
-
-        * Note that the braced expressions can include double-quoted strings.
-        {$c["abc"]} is good, for instance.
-
-        * ${ is illegal in strict mode. In non-strict mode, ${varname is treated
-        the same as {$varname, and may be an arbitrary expression.
-
-        * TODO: We need to produce errors if there are unbalanced brackets,
-        example: "$x[0" is illegal.
-
-        * TODO: Similarly for any non-valid thing following the left bracket,
-        including trivia. example: "$x[  0]" is illegal.
-
-        */
+        // SPEC
+        //
+        // Double-quoted string literals and heredoc string literals use basically
+        // the same rules; here we have just the grammar for double-quoted string
+        // literals.
+        //
+        // string-variable::
+        // variable-name   offset-or-property-opt
+        //
+        // offset-or-property::
+        // offset-in-string
+        // property-in-string
+        //
+        // offset-in-string::
+        // [   name   ]
+        // [   variable-name   ]
+        // [   integer-literal   ]
+        //
+        // property-in-string::
+        // ->   name
+        //
+        // TODO: What about ?->
+        //
+        // The actual situation is considerably more complex than indicated
+        // in the specification.
+        //
+        // TODO: Consider updating the specification.
+        //
+        // The tokens in the grammar above have no leading or trailing trivia.
+        //
+        // An embedded variable expression may also be enclosed in curly braces;
+        // however, the $ of the variable expression must follow immediately after
+        // the left brace.
+        //
+        // An embedded variable expression inside braces allows trivia between
+        // the tokens and before the right brace.
+        //
+        // An embedded variable expression inside braces can be a much more complex
+        // expression than indicated by the grammar above.  For example,
+        // {$c->x->y[0]} is good, and {$c[$x instanceof foo ? 0 : 1]} is good,
+        // but {$c instanceof foo ? $x : $y} is not.  It is not clear to me what
+        // the legal grammar here is; it seems best in this situation to simply
+        // parse any expression and do an error pass later.
+        //
+        // Note that the braced expressions can include double-quoted strings.
+        // {$c["abc"]} is good, for instance.
+        //
+        // ${ is illegal in strict mode. In non-strict mode, ${varname is treated
+        // the same as {$varname, and may be an arbitrary expression.
+        //
+        // TODO: We need to produce errors if there are unbalanced brackets,
+        // example: "$x[0" is illegal.
+        //
+        // TODO: Similarly for any non-valid thing following the left bracket,
+        // including trivia. example: "$x[  0]" is illegal.
+        //
+        //
 
         let merge = |token: S::Token, head: Option<S::Token>| {
-            /* TODO: Assert that new head has no leading trivia, old head has no
-            trailing trivia. */
-            /* Invariant: A token inside a list of string fragments is always a head,
-            body or tail. */
-            /* TODO: Is this invariant what we want? We could preserve the parse of
-            the string. That is, something like "a${b}c${d}e" is at present
-            represented as head, expr, body, expr, tail.  It could be instead
-            head, dollar, left brace, expr, right brace, body, dollar, left
-            brace, expr, right brace, tail. Is that better?
-
-            TODO: Similarly we might want to preserve the structure of
-            heredoc strings in the parse: that there is a header consisting of
-            an identifier, and so on, and then body text, etc. */
+            // TODO: Assert that new head has no leading trivia, old head has no
+            // trailing trivia.
+            // Invariant: A token inside a list of string fragments is always a head,
+            // body or tail.
+            // TODO: Is this invariant what we want? We could preserve the parse of
+            // the string. That is, something like "a${b}c${d}e" is at present
+            // represented as head, expr, body, expr, tail.  It could be instead
+            // head, dollar, left brace, expr, right brace, body, dollar, left
+            // brace, expr, right brace, tail. Is that better?
+            //
+            // TODO: Similarly we might want to preserve the structure of
+            // heredoc strings in the parse: that there is a header consisting of
+            // an identifier, and so on, and then body text, etc.
             match head {
                 Some(head) => {
                     let k = match (head.kind(), token.kind()) {
@@ -890,7 +887,7 @@ where
                     let w = head.width() + token.width();
                     let l = head.leading().to_vec();
                     let t = token.trailing().to_vec();
-                    /* TODO: Make a "position" type that is a tuple of source and offset. */
+                    // TODO: Make a "position" type that is a tuple of source and offset.
                     Some(S::Token::make(k, o, w, l, t))
                 }
                 None => {
@@ -987,9 +984,9 @@ where
                     )
                 }
                 (TokenKind::LeftBracket, _, _) => {
-                    /* PHP compatibility: throw an error if we encounter an
-                    insufficiently-simple expression for a string like "$b[<expr>]", or if
-                    the expression or closing bracket are missing. */
+                    // PHP compatibility: throw an error if we encounter an
+                    // insufficiently-simple expression for a string like "$b[<expr>]", or if
+                    // the expression or closing bracket are missing.
                     parser.continue_from(parser1);
                     let token1 = S!(make_token, parser, token1);
                     let token2 = S!(make_missing, parser, parser.pos());
@@ -1009,31 +1006,31 @@ where
         };
 
         let handle_left_brace = |parser: &mut Self, head: Option<S::Token>, acc: &mut Vec<S::R>| {
-            /* Note that here we use next_token_in_string because we need to know
-            whether there is trivia between the left brace and the $x which follows.*/
+            // Note that here we use next_token_in_string because we need to know
+            // whether there is trivia between the left brace and the $x which follows.
             let mut parser1 = parser.clone();
             let left_brace = parser1.next_token_in_string(&literal_kind);
             let mut parser2 = parser1.clone();
             let token = parser2.next_token_in_string(&literal_kind);
-            /* TODO: What about "{$$}" ? */
+            // TODO: What about "{$$}" ?
             match token.kind() {
                 TokenKind::Dollar | TokenKind::Variable => {
                     parser.continue_from(parser1);
                     put_opt(parser, head, acc); // TODO(leoo) check with kasper (was self)
                     let expr = parser.parse_braced_expression_in_string(
-                        left_brace, /*dollar_inside_braces:*/ true,
+                        left_brace, /* dollar_inside_braces:*/ true,
                     );
                     acc.push(expr);
                     None
                 }
                 _ => {
-                    /* We do not support {$ inside a string unless the $ begins a
-                    variable name. Append the { and start again on the $. */
-                    /* TODO: Is this right? Suppose we have "{${x}".  Is that the same
-                    as "{"."${x}" ? Double check this. */
-                    /* TODO: Give an error. */
-                    /* We got a { not followed by a $. Ignore it. */
-                    /* TODO: Give a warning? */
+                    // We do not support {$ inside a string unless the $ begins a
+                    // variable name. Append the { and start again on the $.
+                    // TODO: Is this right? Suppose we have "{${x}".  Is that the same
+                    // as "{"."${x}" ? Double check this.
+                    // TODO: Give an error.
+                    // We got a { not followed by a $. Ignore it.
+                    // TODO: Give a warning?
                     parser.continue_from(parser1);
                     merge(left_brace, head)
                 }
@@ -1042,25 +1039,25 @@ where
 
         let handle_dollar =
             |parser: &mut Self, dollar, head: Option<S::Token>, acc: &mut Vec<S::R>| {
-                /* We need to parse ${x} as though it was {$x} */
-                /* TODO: This should be an error in strict mode. */
-                /* We must not have trivia between the $ and the {, but we can have
-                trivia after the {. That's why we use next_token_in_string here. */
+                // We need to parse ${x} as though it was {$x}
+                // TODO: This should be an error in strict mode.
+                // We must not have trivia between the $ and the {, but we can have
+                // trivia after the {. That's why we use next_token_in_string here.
                 let mut parser1 = parser.clone();
                 let token = parser1.next_token_in_string(&literal_kind);
                 match token.kind() {
                     TokenKind::LeftBrace => {
-                        /* The thing in the braces has to be an expression that begins
-                        with a variable, and the variable does *not* begin with a $. It's
-                        just the word.
-
-                        Unlike the {$var} case, there *can* be trivia before the expression,
-                        which means that trivia is likely the trailing trivia of the brace,
-                        not leading trivia of the expression. */
-                        /* TODO: Enforce these rules by producing an error if they are
-                        violated. */
-                        /* TODO: Make the parse tree for the leading word in the expression
-                        a variable expression, not a qualified name expression. */
+                        // The thing in the braces has to be an expression that begins
+                        // with a variable, and the variable does *not* begin with a $. It's
+                        // just the word.
+                        //
+                        // Unlike the {$var} case, there *can* be trivia before the expression,
+                        // which means that trivia is likely the trailing trivia of the brace,
+                        // not leading trivia of the expression.
+                        // TODO: Enforce these rules by producing an error if they are
+                        // violated.
+                        // TODO: Make the parse tree for the leading word in the expression
+                        // a variable expression, not a qualified name expression.
                         parser.continue_from(parser1);
                         put_opt(parser, head, acc);
                         let dollar = S!(make_token, parser, dollar);
@@ -1072,8 +1069,8 @@ where
                         None
                     }
                     _ => {
-                        /* We got a $ not followed by a { or variable name. Ignore it. */
-                        /* TODO: Give a warning? */
+                        // We got a $ not followed by a { or variable name. Ignore it.
+                        // TODO: Give a warning?
                         merge(dollar, head)
                     }
                 }
@@ -1111,8 +1108,8 @@ where
             }
         }
 
-        /* If we've ended up with a single string literal with no internal
-        structure, do not represent that as a list with one item. */
+        // If we've ended up with a single string literal with no internal
+        // structure, do not represent that as a list with one item.
         let results = if acc.len() == 1 {
             acc.pop().unwrap()
         } else {
@@ -1122,37 +1119,36 @@ where
     }
 
     fn parse_inclusion_expression(&mut self) -> S::R {
-        /* SPEC:
-        inclusion-directive:
-          require-multiple-directive
-          require-once-directive
-
-        require-multiple-directive:
-          require  include-filename  ;
-
-        include-filename:
-          expression
-
-        require-once-directive:
-          require_once  include-filename  ;
-
-        In non-strict mode we allow an inclusion directive (without semi) to be
-        used as an expression. It is therefore easier to actually parse this as:
-
-        inclusion-directive:
-          inclusion-expression  ;
-
-        inclusion-expression:
-          require include-filename
-          require_once include-filename
-
-        TODO: We allow "include" and "include_once" as well, which are PHP-isms
-        specified as not supported in Hack. Do we need to produce an error in
-        strict mode?
-
-        TODO: Produce an error if this is used in an expression context
-        in strict mode.
-        */
+        // SPEC:
+        // inclusion-directive:
+        //   require-multiple-directive
+        //   require-once-directive
+        //
+        // require-multiple-directive:
+        //   require  include-filename  ;
+        //
+        // include-filename:
+        //   expression
+        //
+        // require-once-directive:
+        //   require_once  include-filename  ;
+        //
+        // In non-strict mode we allow an inclusion directive (without semi) to be
+        // used as an expression. It is therefore easier to actually parse this as:
+        //
+        // inclusion-directive:
+        //   inclusion-expression  ;
+        //
+        // inclusion-expression:
+        //   require include-filename
+        //   require_once include-filename
+        //
+        // TODO: We allow "include" and "include_once" as well, which are PHP-isms
+        // specified as not supported in Hack. Do we need to produce an error in
+        // strict mode?
+        //
+        // TODO: Produce an error if this is used in an expression context
+        // in strict mode.
         let require = self.next_token();
         let operator = Operator::prefix_unary_from_token(require.kind());
         let require = S!(make_token, self, require);
@@ -1197,7 +1193,7 @@ where
     fn do_parse_specified_function_call(&mut self, term: S::R, type_arguments: S::R) -> S::R {
         let result = match self.peek_token_kind() {
             TokenKind::ColonColon => {
-                /* handle a<type-args>::... case */
+                // handle a<type-args>::... case
                 let type_specifier = S!(make_generic_type_specifier, self, term, type_arguments);
                 self.parse_scope_resolution_expression(type_specifier)
             }
@@ -1232,27 +1228,25 @@ where
             || t.is_function_call_expression()
     }
 
-    /*detects if left_term and operator can be treated as a beginning of
-    assignment (respecting the precedence of operator on the left of
-    left term). Returns
-    - PrefixNone - either operator is not one of assignment operators or
-    precedence of the operator on the left is higher than precedence of
-    assignment.
-    - PrefixAssignment - left_term  and operator can be interpreted as a
-    prefix of assignment
-    - PrefixByrefAssignment - left_term and operator can be interpreted as a
-    prefix of byref assignment.
-    - Prefix:LessThan - is the start of a specified function call f<T>(...) */
+    // detects if left_term and operator can be treated as a beginning of
+    // assignment (respecting the precedence of operator on the left of
+    // left term). Returns
+    // - PrefixNone - either operator is not one of assignment operators or
+    // precedence of the operator on the left is higher than precedence of
+    // assignment.
+    // - PrefixAssignment - left_term  and operator can be interpreted as a
+    // prefix of assignment
+    // - PrefixByrefAssignment - left_term and operator can be interpreted as a
+    // prefix of byref assignment.
+    // - Prefix:LessThan - is the start of a specified function call f<T>(...)
     fn check_if_should_override_normal_precedence(
         &self,
         left_term: &S::R,
         operator: TokenKind,
         left_precedence: usize,
     ) -> BinaryExpressionPrefixKind<(S::R, Self)> {
-        /*
-          We need to override the precedence of the < operator in the case where it
-          is the start of a specified function call.
-        */
+        // We need to override the precedence of the < operator in the case where it
+        // is the start of a specified function call.
         let maybe_prefix = if operator == TokenKind::LessThan {
             match self.try_parse_specified_function_call(left_term) {
                 Some(r) => Some(BinaryExpressionPrefixKind::PrefixLessThan(r)),
@@ -1264,10 +1258,9 @@ where
         match maybe_prefix {
             Some(r) => r,
             None => {
-                /* in PHP precedence of assignment in expression is bumped up to
-                   recognize cases like !$x = ... or $a == $b || $c = ...
-                   which should be parsed as !($x = ...) and $a == $b || ($c = ...)
-                */
+                // in PHP precedence of assignment in expression is bumped up to
+                // recognize cases like !$x = ... or $a == $b || $c = ...
+                // which should be parsed as !($x = ...) and $a == $b || ($c = ...)
                 if left_precedence >= Operator::precedence_for_assignment_in_expressions() {
                     BinaryExpressionPrefixKind::PrefixNone
                 } else {
@@ -1316,12 +1309,12 @@ where
             Some(token) => {
                 let assignment_prefix_kind =
                     self.check_if_should_override_normal_precedence(&term, token, self.precedence);
-                /* stop parsing expression if:
-                - precedence of the operator is less than precedence of the operator
-                  on the left
-                AND
-                - <term> <operator> does not look like a prefix of
-                  some assignment expression*/
+                // stop parsing expression if:
+                // - precedence of the operator is less than precedence of the operator
+                // on the left
+                // AND
+                // - <term> <operator> does not look like a prefix of
+                // some assignment expression
                 match assignment_prefix_kind {
                     BinaryExpressionPrefixKind::PrefixLessThan((type_args, parser1)) => {
                         self.continue_from(parser1);
@@ -1333,8 +1326,8 @@ where
                         term
                     }
                     _ => match token {
-                        /* Binary operators */
-                        /* TODO Add an error if PHP style <> is used in Hack. */
+                        // Binary operators
+                        // TODO Add an error if PHP style <> is used in Hack.
                         TokenKind::And
                         | TokenKind::Or
                         | TokenKind::Xor
@@ -1416,28 +1409,26 @@ where
     }
 
     fn parse_member_selection_expression(&mut self, term: S::R) -> S::R {
-        /* SPEC:
-        member-selection-expression:
-          postfix-expression  =>  name
-          postfix-expression  =>  variable-name
-          postfix-expression  =>  xhp-class-name (DRAFT XHP SPEC)
-
-        null-safe-member-selection-expression:
-          postfix-expression  ?=>  name
-          postfix-expression  ?=>  variable-name
-          postfix-expression  ?=>  xhp-class-name (DRAFT XHP SPEC)
-
-        PHP allows $a=>{$b}; to be more compatible with PHP, and give
-        good errors, we allow that here as well.
-
-        TODO: Produce an error if the braced syntax is used in Hack.
-
-        */
+        // SPEC:
+        // member-selection-expression:
+        //   postfix-expression  =>  name
+        //   postfix-expression  =>  variable-name
+        //   postfix-expression  =>  xhp-class-name (DRAFT XHP SPEC)
+        //
+        // null-safe-member-selection-expression:
+        //   postfix-expression  ?=>  name
+        //   postfix-expression  ?=>  variable-name
+        //   postfix-expression  ?=>  xhp-class-name (DRAFT XHP SPEC)
+        //
+        // PHP allows $a=>{$b}; to be more compatible with PHP, and give
+        // good errors, we allow that here as well.
+        //
+        // TODO: Produce an error if the braced syntax is used in Hack.
         let token = self.next_token();
         let token_kind = token.kind();
         let op = S!(make_token, self, token);
-        /* TODO: We are putting the name / variable into the tree as a token
-        leaf, rather than as a name or variable expression. Is that right? */
+        // TODO: We are putting the name / variable into the tree as a token
+        // leaf, rather than as a name or variable expression. Is that right?
         let name = match self.peek_token_kind() {
             TokenKind::LeftBrace => self.parse_braced_expression(),
             TokenKind::Variable if self.env.php5_compat_mode => {
@@ -1454,23 +1445,22 @@ where
     }
 
     fn parse_variable_in_php5_compat_mode(&mut self) -> S::R {
-        /* PHP7 had a breaking change in parsing variables:
-        (https://wiki.php.net/rfc/uniform_variable_syntax).
-        Hack parser by default uses PHP7 compatible more which interprets
-        variables accesses left-to-right. It usually matches PHP5 behavior
-        except for cases with '$' operator, member accesses and scope resolution
-        operators:
-        $$a[1][2] => ($$a)[1][2]
-        $a=>$b[c] => ($a=>$b)[c]
-        X::$a[b]() => (X::$a)[b]()
-
-        In order to preserve backward compatibility we can parse
-        variable/subscript expressions and treat them as if
-        braced expressions to enfore PHP5 semantics
-        $$a[1][2] => ${$a[1][2]}
-        $a=>$b[c] => $a=>{$b[c]}
-        X::$a[b]() => X::{$a[b]}()
-        */
+        // PHP7 had a breaking change in parsing variables:
+        // (https://wiki.php.net/rfc/uniform_variable_syntax).
+        // Hack parser by default uses PHP7 compatible more which interprets
+        // variables accesses left-to-right. It usually matches PHP5 behavior
+        // except for cases with '$' operator, member accesses and scope resolution
+        // operators:
+        // $$a[1][2] => ($$a)[1][2]
+        // $a=>$b[c] => ($a=>$b)[c]
+        // X::$a[b]() => (X::$a)[b]()
+        //
+        // In order to preserve backward compatibility we can parse
+        // variable/subscript expressions and treat them as if
+        // braced expressions to enfore PHP5 semantics
+        // $$a[1][2] => ${$a[1][2]}
+        // $a=>$b[c] => $a=>{$b[c]}
+        // X::$a[b]() => X::{$a[b]}()
 
         let old_precedence = self.precedence;
         let precedence = Operator::IndexingOperator.precedence(&self.env);
@@ -1481,12 +1471,12 @@ where
     }
 
     fn parse_subscript(&mut self, term: S::R) -> S::R {
-        /* SPEC
-          subscript-expression:
-            postfix-expression  [  expression-opt  ]
-            postfix-expression  {  expression-opt  }   [Deprecated form]
-        */
-        /* TODO: Produce an error for brace case in a later pass */
+        // SPEC
+        // subscript-expression:
+        //   postfix-expression  [  expression-opt  ]
+        //   postfix-expression  {  expression-opt  }   [Deprecated form]
+        //
+        // TODO: Produce an error for brace case in a later pass
         let left = self.next_token();
         let mut parser1 = self.clone();
         let right = parser1.next_token();
@@ -1523,34 +1513,34 @@ where
     }
 
     fn parse_expression_list_opt(&mut self) -> (S::R, S::R, S::R) {
-        /* SPEC
-
-          TODO: This business of allowing ... does not appear in the spec. Add it.
-
-          TODO: Add call-convention-opt to the specification.
-          (This work is tracked by task T22582676.)
-
-          TODO: Update grammar for inout parameters.
-          (This work is tracked by task T22582715.)
-
-          ERROR RECOVERY: A ... expression can only appear at the end of a
-          formal parameter list. However, we parse it everywhere without error,
-          and detect the error in a later pass.
-
-          Note that it *is* legal for a ... expression be followed by a trailing
-          comma, even though it is not legal for such in a formal parameter list.
-
-          TODO: Can *any* expression appear after the ... ?
-
-          argument-expression-list:
-            argument-expressions   ,-opt
-          argument-expressions:
-            expression
-            ... expression
-            call-convention-opt  expression
-            argument-expressions  ,  expression
-        */
-        /* This function parses the parens as well. */
+        // SPEC
+        //
+        // TODO: This business of allowing ... does not appear in the spec. Add it.
+        //
+        // TODO: Add call-convention-opt to the specification.
+        // (This work is tracked by task T22582676.)
+        //
+        // TODO: Update grammar for inout parameters.
+        // (This work is tracked by task T22582715.)
+        //
+        // ERROR RECOVERY: A ... expression can only appear at the end of a
+        // formal parameter list. However, we parse it everywhere without error,
+        // and detect the error in a later pass.
+        //
+        // Note that it *is* legal for a ... expression be followed by a trailing
+        // comma, even though it is not legal for such in a formal parameter list.
+        //
+        // TODO: Can *any* expression appear after the ... ?
+        //
+        // argument-expression-list:
+        //   argument-expressions   ,-opt
+        // argument-expressions:
+        //   expression
+        //   ... expression
+        //   call-convention-opt  expression
+        //   argument-expressions  ,  expression
+        //
+        // This function parses the parens as well.
         self.parse_parenthesized_comma_list_opt_allow_trailing(&|x| {
             x.with_reset_precedence(&|x| x.parse_decorated_expression_opt())
         })
@@ -1583,22 +1573,21 @@ where
     }
 
     fn parse_designator(&mut self) -> S::R {
-        /* SPEC:
-            class-type-designator:
-              parent
-              self
-              static
-              member-selection-expression
-              null-safe-member-selection-expression
-              qualified-name
-              scope-resolution-expression
-              subscript-expression
-              variable-name
-
-        TODO: Update the spec to allow qualified-name < type arguments >
-        TODO: This will need to be fixed to allow situations where the qualified name
-          is also a non-reserved token.
-        */
+        // SPEC:
+        // class-type-designator:
+        //   parent
+        //   self
+        //   static
+        //   member-selection-expression
+        //   null-safe-member-selection-expression
+        //   qualified-name
+        //   scope-resolution-expression
+        //   subscript-expression
+        //   variable-name
+        //
+        // TODO: Update the spec to allow qualified-name < type arguments >
+        // TODO: This will need to be fixed to allow situations where the qualified name
+        // is also a non-reserved token.
         let default =
             |x: &mut Self| x.parse_expression_with_operator_precedence(Operator::NewOperator);
         let mut parser1 = self.clone();
@@ -1631,8 +1620,8 @@ where
             TokenKind::Name | TokenKind::Backslash => {
                 match parser1.parse_start_of_type_specifier(token) {
                     Some(name) => {
-                        /* We want to parse new C() and new C<int>() as types, but
-                        new C::$x() as an expression. */
+                        // We want to parse new C() and new C<int>() as types, but
+                        // new C::$x() as an expression.
                         self.continue_from(parser1);
                         self.parse_remaining_type_specifier(name)
                     }
@@ -1641,33 +1630,32 @@ where
             }
             _ => {
                 default(self)
-                /* TODO: We need to verify in a later pass that the expression is a
-                scope resolution (that does not end in class!), a member selection,
-                a name, a variable, a property, or an array subscript expression. */
+                // TODO: We need to verify in a later pass that the expression is a
+                // scope resolution (that does not end in class!), a member selection,
+                // a name, a variable, a property, or an array subscript expression.
             }
         }
     }
 
     fn parse_object_creation_expression(&mut self) -> S::R {
-        /* SPEC
-          object-creation-expression:
-            new object-creation-what
-        */
+        // SPEC
+        // object-creation-expression:
+        //   new object-creation-what
         let new_token = self.assert_token(TokenKind::New);
         let new_what = self.parse_constructor_call();
         S!(make_object_creation_expression, self, new_token, new_what)
     }
 
     pub fn parse_constructor_call(&mut self) -> S::R {
-        /* SPEC
-          constructor-call:
-            class-type-designator  (  argument-expression-list-opt  )
-        */
-        /* PHP allows the entire expression list to be omitted. */
-        /* TODO: SPEC ERROR: PHP allows the entire expression list to be omitted,
-         * but Hack disallows this behavior. (See /*SyntaxError.error2038*/.) However,
-         * the Hack spec still states that the argument expression list is optional.
-         * Update the spec to say that the argument expression list is required. */
+        // SPEC
+        // constructor-call:
+        //   class-type-designator  (  argument-expression-list-opt  )
+        //
+        // PHP allows the entire expression list to be omitted.
+        // TODO: SPEC ERROR: PHP allows the entire expression list to be omitted,
+        // but Hack disallows this behavior. (See SyntaxError.error2038) However,
+        // the Hack spec still states that the argument expression list is optional.
+        // Update the spec to say that the argument expression list is required.
         let designator = self.parse_designator();
         let (left, args, right) = if self.peek_token_kind() == TokenKind::LeftParen {
             self.parse_expression_list_opt()
@@ -1681,10 +1669,9 @@ where
     }
 
     fn parse_function_call(&mut self, receiver: S::R) -> S::R {
-        /* SPEC
-          function-call-expression:
-            postfix-expression  (  argument-expression-list-opt  )
-        */
+        // SPEC
+        // function-call-expression:
+        //   postfix-expression  (  argument-expression-list-opt  )
         let type_arguments = S!(make_missing, self, self.pos());
         let old_enabled = self.allow_as_expressions();
         self.allow_as_expressions = true;
@@ -1715,13 +1702,13 @@ where
     }
 
     fn parse_yield_expression(&mut self) -> S::R {
-        /* SPEC:
-          yield  array-element-initializer
-          TODO: Hack allows "yield break".
-          TODO: Should this be its own production, or can it be a yield expression?
-          TODO: Is this an expression or a statement?
-          TODO: Add it to the specification.
-        */
+        // SPEC:
+        // yield  array-element-initializer
+        // TODO: Hack allows "yield break".
+        // TODO: Should this be its own production, or can it be a yield expression?
+        // TODO: Is this an expression or a statement?
+        // TODO: Add it to the specification.
+        //
         let yield_kw = self.assert_token(TokenKind::Yield);
         match self.peek_token_kind() {
             TokenKind::From => {
@@ -1745,8 +1732,8 @@ where
     }
 
     pub fn parse_cast_or_parenthesized_or_lambda_expression(&mut self) -> S::R {
-        /* We need to disambiguate between casts, lambdas and ordinary
-        parenthesized expressions. */
+        // We need to disambiguate between casts, lambdas and ordinary
+        // parenthesized expressions.
         let mut parser1 = self.clone();
         match parser1.possible_cast_expression() {
             Some((left, cast_type, right)) => {
@@ -1774,33 +1761,33 @@ where
     }
 
     fn possible_cast_expression(&mut self) -> Option<(S::R, S::R, S::R)> {
-        /* SPEC:
-        cast-expression:
-          (  cast-type  ) unary-expression
-        cast-type:
-          array, bool, double, float, real, int, integer, object, string, binary,
-          unset
-
-        TODO: This implies that a cast "(name)" can only be a simple name, but
-        I would expect that (\Foo\Bar), (:foo), (array<int>), and the like
-        should also be legal casts. If we implement that then we will need
-        a sophisticated heuristic to determine whether this is a cast or a
-        parenthesized expression.
-
-        The cast expression introduces an ambiguity: (x)-y could be a
-        subtraction or a cast on top of a unary minus. We resolve this
-        ambiguity as follows:
-
-        * If the thing in parens is one of the keywords mentioned above, then
-          it's a cast.
-        * If the token which follows (x) is "as" or "instanceof" then
-          it's a parenthesized expression.
-        * PHP-ism extension: if the token is "and", "or" or "xor", then it's a
-          parenthesized expression.
-        * Otherwise, if the token which follows (x) is $$, @, ~, !, (, +, -,
-          any name, qualified name, variable name, literal, or keyword then
-          it's a cast.
-        * Otherwise, it's a parenthesized expression. */
+        // SPEC:
+        // cast-expression:
+        //   (  cast-type  ) unary-expression
+        // cast-type:
+        //   array, bool, double, float, real, int, integer, object, string, binary,
+        //   unset
+        //
+        // TODO: This implies that a cast "(name)" can only be a simple name, but
+        // I would expect that (\Foo\Bar), (:foo), (array<int>), and the like
+        // should also be legal casts. If we implement that then we will need
+        // a sophisticated heuristic to determine whether this is a cast or a
+        // parenthesized expression.
+        //
+        // The cast expression introduces an ambiguity: (x)-y could be a
+        // subtraction or a cast on top of a unary minus. We resolve this
+        // ambiguity as follows:
+        //
+        // * If the thing in parens is one of the keywords mentioned above, then
+        //   it's a cast.
+        // * If the token which follows (x) is "as" or "instanceof" then
+        //   it's a parenthesized expression.
+        // * PHP-ism extension: if the token is "and", "or" or "xor", then it's a
+        //   parenthesized expression.
+        // * Otherwise, if the token which follows (x) is $$, @, ~, !, (, +, -,
+        //   any name, qualified name, variable name, literal, or keyword then
+        //   it's a cast.
+        // * Otherwise, it's a parenthesized expression.
         let left_paren = self.assert_token(TokenKind::LeftParen);
         let type_token = self.next_token();
         let type_token_kind = type_token.kind();
@@ -1831,29 +1818,28 @@ where
     }
 
     fn possible_lambda_expression(&mut self) -> Option<(S::R, S::R, S::R, S::R)> {
-        /* We have a left paren in hand and we already know we're not in a cast.
-           We need to know whether this is a parenthesized expression or the
-           signature of a lambda.
-
-           There are a number of difficulties. For example, we cannot simply
-           check to see if a colon follows the expression:
-
-           $a = $b ? ($x) : ($y)              ($x) is parenthesized expression
-           $a = $b ? ($x) : int ==> 1 : ($y)  ($x) is lambda signature
-
-           ERROR RECOVERY:
-
-           What we'll do here is simply attempt to parse a lambda formal parameter
-           list. If we manage to do so *without error*, and the thing which follows
-           is ==>, then this is definitely a lambda. If those conditions are not
-           met then we assume we have a parenthesized expression in hand.
-
-           TODO: There could be situations where we have good evidence that a
-           lambda is intended but these conditions are not met. Consider
-           a more sophisticated recovery strategy.  For example, if we have
-           (x)==> then odds are pretty good that a lambda was intended and the
-           error should say that ($x)==> was expected.
-        */
+        // We have a left paren in hand and we already know we're not in a cast.
+        // We need to know whether this is a parenthesized expression or the
+        // signature of a lambda.
+        //
+        // There are a number of difficulties. For example, we cannot simply
+        // check to see if a colon follows the expression:
+        //
+        // $a = $b ? ($x) : ($y)              ($x) is parenthesized expression
+        // $a = $b ? ($x) : int ==> 1 : ($y)  ($x) is lambda signature
+        //
+        // ERROR RECOVERY:
+        //
+        // What we'll do here is simply attempt to parse a lambda formal parameter
+        // list. If we manage to do so *without error*, and the thing which follows
+        // is ==>, then this is definitely a lambda. If those conditions are not
+        // met then we assume we have a parenthesized expression in hand.
+        //
+        // TODO: There could be situations where we have good evidence that a
+        // lambda is intended but these conditions are not met. Consider
+        // a more sophisticated recovery strategy.  For example, if we have
+        // (x)==> then odds are pretty good that a lambda was intended and the
+        // error should say that ($x)==> was expected.
 
         let old_errors = self.errors.len();
 
@@ -1869,10 +1855,9 @@ where
     }
 
     fn parse_lambda_expression(&mut self, attribute_spec: S::R) -> S::R {
-        /* SPEC
-          lambda-expression:
-            async-opt  lambda-function-signature  ==>  lambda-body
-        */
+        // SPEC
+        // lambda-expression:
+        //   async-opt  lambda-function-signature  ==>  lambda-body
         let (async_, coroutine, signature) = self.parse_lambda_header();
         let arrow = self.require_lambda_arrow();
         let body = self.parse_lambda_body();
@@ -1895,8 +1880,8 @@ where
         coroutine: S::R,
         signature: S::R,
     ) -> S::R {
-        /* We had a signature with no async or coroutine, and we disambiguated it
-        from a cast. */
+        // We had a signature with no async or coroutine, and we disambiguated it
+        // from a cast.
         let arrow = self.require_lambda_arrow();
         let body = self.parse_lambda_body();
         S!(
@@ -1919,12 +1904,11 @@ where
     }
 
     fn parse_lambda_signature(&mut self) -> S::R {
-        /* SPEC:
-          lambda-function-signature:
-            variable-name
-            (  anonymous-function-parameter-declaration-list-opt  ) /
-              anonymous-function-return-opt
-        */
+        // SPEC:
+        // lambda-function-signature:
+        //   variable-name
+        //   (  anonymous-function-parameter-declaration-list-opt  ) /
+        //      anonymous-function-return-opt
         let mut parser1 = self.clone();
         let token = parser1.next_token();
         if token.kind() == TokenKind::Variable {
@@ -1946,11 +1930,10 @@ where
     }
 
     fn parse_lambda_body(&mut self) -> S::R {
-        /* SPEC:
-          lambda-body:
-            expression
-            compound-statement
-        */
+        // SPEC:
+        // lambda-body:
+        //   expression
+        //   compound-statement
         if self.peek_token_kind() == TokenKind::LeftBrace {
             self.parse_compound_statement()
         } else {
@@ -1960,7 +1943,7 @@ where
 
     fn parse_parenthesized_expression(&mut self) -> S::R {
         let left_paren = self.assert_token(TokenKind::LeftParen);
-        let expression = self.with_as_expressions(/*enabled:*/ true, &|p| {
+        let expression = self.with_as_expressions(/* enabled:*/ true, &|p| {
             p.with_reset_precedence(&|p| p.parse_expression())
         });
         let right_paren = self.require_right_paren();
@@ -1980,7 +1963,7 @@ where
     }
 
     fn parse_prefix_unary_expression(&mut self) -> S::R {
-        /* TODO: Operand to ++ and -- must be an lvalue. */
+        // TODO: Operand to ++ and -- must be an lvalue.
         let token = self.next_token();
         let kind = token.kind();
         let operator = Operator::prefix_unary_from_token(kind);
@@ -2015,95 +1998,95 @@ where
     }
 
     fn parse_instanceof_expression(&mut self, left: S::R) -> S::R {
-        /* SPEC:
-        instanceof-expression:
-          instanceof-subject  instanceof   instanceof-type-designator
-
-        instanceof-subject:
-          expression
-
-        instanceof-type-designator:
-          qualified-name
-          variable-name
-
-        TODO: The spec is plainly wrong here. This is a bit of a mess and there
-        are a number of issues.
-
-        The issues arise from the fact that the thing on the right can be either
-        a type, or an expression that evaluates to a string that names the type.
-
-        The grammar in the spec, above, says that the only things that can be
-        here are a qualified name -- in which case it names the type directly --
-        or a variable of classname type, which names the type.  But this is
-        not the grammar that is accepted by Hack / HHVM.  The accepted grammar
-        treats "instanceof" as a binary operator which takes expressions on
-        each side, and is of lower precedence than =>.  Thus
-
-        $x instanceof $y => z
-
-        must be parsed as ($x instanceof ($y => z)), and not, as the grammar
-        implies, (($x instanceof $y) => z).
-
-        But wait, it gets worse.
-
-        The less-than operator is of lower precedence than instanceof, so
-        "$x instanceof foo < 10" should be parsed as (($x instanceof foo) < 10).
-        But it seems plausible that we might want to parse
-        "$x instanceof foo<int>" someday, in which case now we have an ambiguity.
-        How do we know when we see the < whether we are attempting to parse a type?
-
-        Moreover: we need to be able to parse XHP class names on the right hand
-        side of the operator.  That is, we need to be able to say
-
-        $x instanceof :foo
-
-        However, we cannot simply say that the grammar is
-
-        instanceof-type-designator:
-          xhp-class-name
-          expression
-
-        Why not?   Because that then gives the wrong parse for:
-
-        class :foo { static $bar = "abc" }
-        class abc { }
-        ...
-        $x instanceof :foo :: $bar
-
-        We need to parse that as $x instanceof (:foo :: $bar).
-
-        The solution to all this is as follows.
-
-        First, an XHP class name must be a legal expression. I had thought that
-        it might be possible to say that an XHP class name is a legal type, or
-        legal in an expression context when immediately followed by ::, but
-        that's not the case. We need to be able to parse both
-
-        $x instanceof :foo :: $bar
-
-        and
-
-        $x instanceof :foo
-
-        so the most expedient way to do that is to parse any expression on the
-        right, and to make XHP class names into legal expressions.
-
-        So, with all this in mind, the grammar we will actually parse here is:
-
-        instanceof-type-designator:
-          expression
-
-        This has the unfortunate property that the common case, say,
-
-        $x instanceof C
-
-        creates a parse node for C as a name token, not as a name token wrapped
-        up as a simple type.
-
-        Should we ever need to parse both arbitrary expressions and arbitrary
-        types here, we'll have some tricky problems to solve.
-
-        */
+        // SPEC:
+        // instanceof-expression:
+        //   instanceof-subject  instanceof   instanceof-type-designator
+        //
+        // instanceof-subject:
+        //   expression
+        //
+        // instanceof-type-designator:
+        //   qualified-name
+        //   variable-name
+        //
+        // TODO: The spec is plainly wrong here. This is a bit of a mess and there
+        // are a number of issues.
+        //
+        // The issues arise from the fact that the thing on the right can be either
+        // a type, or an expression that evaluates to a string that names the type.
+        //
+        // The grammar in the spec, above, says that the only things that can be
+        // here are a qualified name -- in which case it names the type directly --
+        // or a variable of classname type, which names the type.  But this is
+        // not the grammar that is accepted by Hack / HHVM.  The accepted grammar
+        // treats "instanceof" as a binary operator which takes expressions on
+        // each side, and is of lower precedence than =>.  Thus
+        //
+        // $x instanceof $y => z
+        //
+        // must be parsed as ($x instanceof ($y => z)), and not, as the grammar
+        // implies, (($x instanceof $y) => z).
+        //
+        // But wait, it gets worse.
+        //
+        // The less-than operator is of lower precedence than instanceof, so
+        // "$x instanceof foo < 10" should be parsed as (($x instanceof foo) < 10).
+        // But it seems plausible that we might want to parse
+        // "$x instanceof foo<int>" someday, in which case now we have an ambiguity.
+        // How do we know when we see the < whether we are attempting to parse a type?
+        //
+        // Moreover: we need to be able to parse XHP class names on the right hand
+        // side of the operator.  That is, we need to be able to say
+        //
+        // $x instanceof :foo
+        //
+        // However, we cannot simply say that the grammar is
+        //
+        // instanceof-type-designator:
+        //   xhp-class-name
+        //   expression
+        //
+        // Why not?   Because that then gives the wrong parse for:
+        //
+        // class :foo { static $bar = "abc" }
+        // class abc { }
+        // ...
+        // $x instanceof :foo :: $bar
+        //
+        // We need to parse that as $x instanceof (:foo :: $bar).
+        //
+        // The solution to all this is as follows.
+        //
+        // First, an XHP class name must be a legal expression. I had thought that
+        // it might be possible to say that an XHP class name is a legal type, or
+        // legal in an expression context when immediately followed by ::, but
+        // that's not the case. We need to be able to parse both
+        //
+        // $x instanceof :foo :: $bar
+        //
+        // and
+        //
+        // $x instanceof :foo
+        //
+        // so the most expedient way to do that is to parse any expression on the
+        // right, and to make XHP class names into legal expressions.
+        //
+        // So, with all this in mind, the grammar we will actually parse here is:
+        //
+        // instanceof-type-designator:
+        //   expression
+        //
+        // This has the unfortunate property that the common case, say,
+        //
+        // $x instanceof C
+        //
+        // creates a parse node for C as a name token, not as a name token wrapped
+        // up as a simple type.
+        //
+        // Should we ever need to parse both arbitrary expressions and arbitrary
+        // types here, we'll have some tricky problems to solve.
+        //
+        //
         let op = self.assert_token(TokenKind::Instanceof);
         let precedence = Operator::InstanceofOperator.precedence(&self.env);
         let right_term = self.parse_term();
@@ -2126,13 +2109,12 @@ where
     }
 
     fn parse_is_expression(&mut self, left: S::R) -> S::R {
-        /* SPEC:
-        is-expression:
-          is-subject  is  type-specifier
-
-        is-subject:
-          expression
-        */
+        // SPEC:
+        // is-expression:
+        //   is-subject  is  type-specifier
+        //
+        // is-subject:
+        //   expression
         self.parse_is_as_helper(
             &|p, x, y, z| S!(make_is_expression, p, x, y, z),
             left,
@@ -2141,13 +2123,12 @@ where
     }
 
     fn parse_as_expression(&mut self, left: S::R) -> S::R {
-        /* SPEC:
-        as-expression:
-          as-subject  as  type-specifier
-
-        as-subject:
-          expression
-        */
+        // SPEC:
+        // as-expression:
+        //   as-subject  as  type-specifier
+        //
+        // as-subject:
+        //   expression
         self.parse_is_as_helper(
             &|p, x, y, z| S!(make_as_expression, p, x, y, z),
             left,
@@ -2156,10 +2137,9 @@ where
     }
 
     fn parse_nullable_as_expression(&mut self, left: S::R) -> S::R {
-        /* SPEC:
-        nullable-as-expression:
-          as-subject  ?as  type-specifier
-        */
+        // SPEC:
+        // nullable-as-expression:
+        //   as-subject  ?as  type-specifier
         self.parse_is_as_helper(
             &|p, x, y, z| S!(make_nullable_as_expression, p, x, y, z),
             left,
@@ -2172,44 +2152,43 @@ where
         left_term: S::R,
         assignment_prefix_kind: BinaryExpressionPrefixKind<(S::R, Self)>,
     ) -> S::R {
-        /* We have a left term. If we get here then we know that
-         * we have a binary operator to its right, and that furthermore,
-         * the binary operator is of equal or higher precedence than the
-         * whatever is going on in the left term.
-         *
-         * Here's how this works.  Suppose we have something like
-         *
-         *     A x B y C
-         *
-         * where A, B and C are terms, and x and y are operators.
-         * We must determine whether this parses as
-         *
-         *     (A x B) y C
-         *
-         * or
-         *
-         *     A x (B y C)
-         *
-         * We have the former if either x is higher precedence than y,
-         * or x and y are the same precedence and x is left associative.
-         * Otherwise, if x is lower precedence than y, or x is right
-         * associative, then we have the latter.
-         *
-         * How are we going to figure this out?
-         *
-         * We have the term A in hand; the precedence is low.
-         * We see that x follows A.
-         * We obtain the precedence of x. It is higher than the precedence of A,
-         * so we obtain B, and then we call a helper method that
-         * collects together everything to the right of B that is
-         * of higher precedence than x. (Or equal, and right-associative.)
-         *
-         * So, if x is of lower precedence than y (or equal and right-assoc)
-         * then the helper will construct (B y C) as the right term, and then
-         * we'll make A x (B y C), and we're done.  Otherwise, the helper
-         * will simply return B, we'll construct (A x B) and recurse with that
-         * as the left term.
-         */
+        // We have a left term. If we get here then we know that
+        // we have a binary operator to its right, and that furthermore,
+        // the binary operator is of equal or higher precedence than the
+        // whatever is going on in the left term.
+        //
+        // Here's how this works.  Suppose we have something like
+        //
+        //   A x B y C
+        //
+        // where A, B and C are terms, and x and y are operators.
+        // We must determine whether this parses as
+        //
+        //   (A x B) y C
+        //
+        // or
+        //
+        //   A x (B y C)
+        //
+        // We have the former if either x is higher precedence than y,
+        // or x and y are the same precedence and x is left associative.
+        // Otherwise, if x is lower precedence than y, or x is right
+        // associative, then we have the latter.
+        //
+        // How are we going to figure this out?
+        //
+        // We have the term A in hand; the precedence is low.
+        // We see that x follows A.
+        // We obtain the precedence of x. It is higher than the precedence of A,
+        // so we obtain B, and then we call a helper method that
+        // collects together everything to the right of B that is
+        // of higher precedence than x. (Or equal, and right-associative.)
+        //
+        // So, if x is of lower precedence than y (or equal and right-assoc)
+        // then the helper will construct (B y C) as the right term, and then
+        // we'll make A x (B y C), and we're done.  Otherwise, the helper
+        // will simply return B, we'll construct (A x B) and recurse with that
+        // as the left term.
         let is_rhs_of_assignment = !assignment_prefix_kind.is_none();
         assert!(!self.next_is_lower_precedence() || is_rhs_of_assignment);
 
@@ -2220,8 +2199,8 @@ where
             let precedence = operator.precedence(&parser.env);
             let token = S!(make_token, parser, token);
             let right_term = if is_rhs_of_assignment {
-                /* reset the current precedence to make sure that expression on
-                the right hand side of the assignment is fully consumed */
+                // reset the current precedence to make sure that expression on
+                // the right hand side of the assignment is fully consumed
                 parser.with_reset_precedence(&|p| p.parse_term())
             } else {
                 parser.parse_term()
@@ -2231,11 +2210,10 @@ where
             let term = S!(make_binary_expression, parser, left_term, token, right_term);
             parser.parse_remaining_expression(term)
         };
-        /*if we are on the right hand side of the assignment - peek if next
-        token is '&'. If it is - then parse next term. If overall next term is
-        '&'PHP variable then the overall expression should be parsed as
-        ... (left_term = & right_term) ...
-        */
+        // if we are on the right hand side of the assignment - peek if next
+        // token is '&'. If it is - then parse next term. If overall next term is
+        // '&'PHP variable then the overall expression should be parsed as
+        // ... (left_term = & right_term) ...
         if assignment_prefix_kind.is_byref_assignment()
             && self.peek_token_kind() == TokenKind::Ampersand
         {
@@ -2243,9 +2221,9 @@ where
             parser1.with_precedence(Operator::precedence_for_assignment_in_expressions());
             let _rigt_term = parser1.parse_term();
             if false
-            /* TODO(kasper) is_byref_assignment_source parser1 right_term */
+            // TODO(kasper) is_byref_assignment_source parser1 right_term
             {
-                /* We backtrack here to call smart constructors in the correct order. */
+                // We backtrack here to call smart constructors in the correct order.
                 let token = S!(make_token, self, token);
                 self.with_precedence(Operator::precedence_for_assignment_in_expressions());
                 let right_term = self.parse_term();
@@ -2266,14 +2244,14 @@ where
         right_term: S::R,
         left_precedence: usize,
     ) -> S::R {
-        /* This gathers up terms to the right of an operator that are
-        operands of operators of higher precedence than the
-        operator to the left. For instance, if we have
-        A + B * C / D + E and we just parsed A +, then we want to
-        gather up B * C / D into the right side of the +.
-        In this case "right term" would be B and "left precedence"
-        would be the precedence of +.
-        See comments above for more details. */
+        // This gathers up terms to the right of an operator that are
+        // operands of operators of higher precedence than the
+        // operator to the left. For instance, if we have
+        // A + B * C / D + E and we just parsed A +, then we want to
+        // gather up B * C / D into the right side of the +.
+        // In this case "right term" would be B and "left precedence"
+        // would be the precedence of +.
+        // See comments above for more details.
         let kind = self.peek_token_kind();
         if Operator::is_trailing_operator_token(kind)
             && (kind != TokenKind::As || self.allow_as_expressions())
@@ -2282,17 +2260,16 @@ where
             let right_precedence = right_operator.precedence(&self.env);
             let associativity = right_operator.associativity(&self.env);
             let is_parsable_as_assignment =
-              /* check if this is the case ... $a = ...
-                 where
-                   'left_precedence' - precedence of the operation on the left of $a
-                   'rigft_term' - $a
-                   'kind' - operator that follows right_term
-
-                in case if right_term is valid left hand side for the assignment
-                and token is assignment operator and left_precedence is less than
-                bumped priority fort the assignment we reset precedence before parsing
-                right hand side of the assignment to make sure it is consumed.
-                */
+              // check if this is the case ... $a = ...
+              // where
+              //   'left_precedence' - precedence of the operation on the left of $a
+              //   'rigft_term' - $a
+              //   'kind' - operator that follows right_term
+              //
+              // in case if right_term is valid left hand side for the assignment
+              // and token is assignment operator and left_precedence is less than
+              // bumped priority fort the assignment we reset precedence before parsing
+              // right hand side of the assignment to make sure it is consumed.
               !self.check_if_should_override_normal_precedence(
                 &right_term,
                 kind,
@@ -2303,25 +2280,25 @@ where
             {
                 let old_precedence = self.precedence;
                 let precedence = if is_parsable_as_assignment {
-                    /* if expression can be parsed as an assignment, keep track of
-                    the precedence on the left of the assignment (it is ok since
-                    we'll internally boost the precedence when parsing rhs of the
-                    assignment)
-                    This is necessary for cases like:
-                    ... + $a = &$b * $c + ...
-                    ^             ^
-                    #             $
-                    it should be parsed as
-                    (... + ($a = &$b) * $c) + ...
-                    when we are at position (#)
-                    - we will first consume byref assignment as a e1
-                    - check that precedence of '*' is greater than precedence of
-                    the '+' (left_precedence) and consume e1 * $c as $e2
-                    - check that precedence of '+' is less or equal than precedence
-                    of the '+' (left_precedence) and stop so the final result
-                    before we get to the point ($) will be
-                    (... + $e2)
-                    */
+                    // if expression can be parsed as an assignment, keep track of
+                    // the precedence on the left of the assignment (it is ok since
+                    // we'll internally boost the precedence when parsing rhs of the
+                    // assignment)
+                    // This is necessary for cases like:
+                    // ... + $a = &$b * $c + ...
+                    // ^             ^
+                    // #             $
+                    // it should be parsed as
+                    // (... + ($a = &$b) * $c) + ...
+                    // when we are at position (#)
+                    // - we will first consume byref assignment as a e1
+                    // - check that precedence of '*' is greater than precedence of
+                    // the '+' (left_precedence) and consume e1 * $c as $e2
+                    // - check that precedence of '+' is less or equal than precedence
+                    // of the '+' (left_precedence) and stop so the final result
+                    // before we get to the point ($) will be
+                    // (... + $e2)
+                    //
                     left_precedence
                 } else {
                     right_precedence
@@ -2339,37 +2316,34 @@ where
     }
 
     fn parse_conditional_expression(&mut self, test: S::R, question: S::R) -> S::R {
-        /* POSSIBLE SPEC PROBLEM
-             We allow any expression, including assignment expressions, to be in
-             the consequence and alternative of a conditional expression, even
-             though assignment is lower precedence than ?:.  This is legal:
-             $a ? $b = $c : $d = $e
-             Interestingly, this is illegal in C and Java, which require parens,
-             but legal in C
-        .
-          */
+        // POSSIBLE SPEC PROBLEM
+        // We allow any expression, including assignment expressions, to be in
+        // the consequence and alternative of a conditional expression, even
+        // though assignment is lower precedence than ?:.  This is legal:
+        // $a ? $b = $c : $d = $e
+        // Interestingly, this is illegal in C and Java, which require parens,
+        // but legal in C
         let kind = self.peek_token_kind();
-        /* ERROR RECOVERY
-           e1 ?: e2 is legal and we parse it as a binary expression. However,
-           it is possible to treat it degenerately as a conditional with no
-           consequence. This introduces an ambiguity
-              x ? :y::m : z
-           Is that
-              x   ?:   y::m   :   z    [1]
-           or
-              x   ?   :y::m   :   z    [2]
-
-           First consider a similar expression
-              x ? : y::m
-           If we assume XHP class names cannot have a space after the : , then
-           this only has one interpretation
-              x   ?:   y::m
-
-           The first example also resolves cleanly to [2]. To reduce confusion,
-           we report an error for the e1 ? : e2 construction in a later pass.
-
-           TODO: Add this to the XHP draft specification.
-        */
+        // ERROR RECOVERY
+        // e1 ?: e2 is legal and we parse it as a binary expression. However,
+        // it is possible to treat it degenerately as a conditional with no
+        // consequence. This introduces an ambiguity
+        //   x ? :y::m : z
+        // Is that
+        //   x   ?:   y::m   :   z    [1]
+        // or
+        //   x   ?   :y::m   :   z    [2]
+        //
+        // First consider a similar expression
+        //   x ? : y::m
+        // If we assume XHP class names cannot have a space after the : , then
+        // this only has one interpretation
+        //   x   ?:   y::m
+        //
+        // The first example also resolves cleanly to [2]. To reduce confusion,
+        // we report an error for the e1 ? : e2 construction in a later pass.
+        //
+        // TODO: Add this to the XHP draft specification.
         let missing_consequence = kind == TokenKind::Colon && !(self.is_next_xhp_class_name());
         let consequence = if missing_consequence {
             S!(make_missing, self, self.pos())
@@ -2416,36 +2390,35 @@ where
     }
 
     fn parse_collection_literal_expression(&mut self, name: S::R) -> S::R {
-        /* SPEC
-        collection-literal:
-          key-collection-class-type  {  cl-initializer-list-with-keys-opt  }
-          non-key-collection-class-type  {  cl-initializer-list-without-keys-opt  }
-          pair-type  {  cl-element-value  ,  cl-element-value  }
-
-          The types are grammatically qualified names; however the specification
-          states that they must be as follows:
-          * keyed collection type can be Map or ImmMap
-          * non-keyed collection type can be Vector, ImmVector, Set or ImmSet
-          * pair type can be Pair
-
-          We will not attempt to determine if the names give the name of an
-          appropriate type here. That's for the type checker.
-
-          The argumment lists are:
-
-          * for keyed, an optional comma-separated list of
-            expression => expression pairs
-          * for non-keyed, an optional comma-separated list of expressions
-          * for pairs, a comma-separated list of exactly two expressions
-
-          In all three cases, the lists may be comma-terminated.
-          TODO: This fact is not represented in the specification; it should be.
-          This work item is tracked by spec issue #109.
-        */
+        // SPEC
+        // collection-literal:
+        //   key-collection-class-type  {  cl-initializer-list-with-keys-opt  }
+        //   non-key-collection-class-type  {  cl-initializer-list-without-keys-opt  }
+        //   pair-type  {  cl-element-value  ,  cl-element-value  }
+        //
+        // The types are grammatically qualified names; however the specification
+        // states that they must be as follows:
+        //  * keyed collection type can be Map or ImmMap
+        //  * non-keyed collection type can be Vector, ImmVector, Set or ImmSet
+        //  * pair type can be Pair
+        //
+        // We will not attempt to determine if the names give the name of an
+        // appropriate type here. That's for the type checker.
+        //
+        // The argumment lists are:
+        //
+        //  * for keyed, an optional comma-separated list of
+        //    expression => expression pairs
+        //  * for non-keyed, an optional comma-separated list of expressions
+        //  * for pairs, a comma-separated list of exactly two expressions
+        //
+        // In all three cases, the lists may be comma-terminated.
+        // TODO: This fact is not represented in the specification; it should be.
+        // This work item is tracked by spec issue #109.
 
         let (left_brace, initialization_list, right_brace) =
             self.parse_braced_comma_list_opt_allow_trailing(&|p| p.parse_init_expression());
-        /* Validating the name is a collection type happens in a later phase */
+        // Validating the name is a collection type happens in a later phase
         S!(
             make_collection_literal_expression,
             self,
@@ -2457,12 +2430,11 @@ where
     }
 
     fn parse_init_expression(&mut self) -> S::R {
-        /* ERROR RECOVERY
-           We expect either a list of expr, expr, expr, ... or
-           expr => expr, expr => expr, expr => expr, ...
-           Rather than require at parse time that the list be all one or the other,
-           we allow both, and give an error in the type checker.
-        */
+        // ERROR RECOVERY
+        // We expect either a list of expr, expr, expr, ... or
+        // expr => expr, expr => expr, expr => expr, ...
+        // Rather than require at parse time that the list be all one or the other,
+        // we allow both, and give an error in the type checker.
         let expr1 = self.parse_expression_with_reset_precedence();
         let mut parser1 = self.clone();
         let token = parser1.next_token();
@@ -2484,24 +2456,23 @@ where
     }
 
     fn parse_list_expression(&mut self) -> S::R {
-        /* SPEC:
-        list-intrinsic:
-          list  (  expression-list-opt  )
-        expression-list:
-          expression-opt
-          expression-list , expression-opt
-
-        See https://github.com/hhvm/hack-langspec/issues/82
-
-        list-intrinsic must be used as the left-hand operand in a
-        simple-assignment-expression of which the right-hand operand
-        must be an expression that designates a vector-like array or
-        an instance of the class types Vector, ImmVector, or Pair
-        (the "source").
-
-        TODO: Produce an error later if the expressions in the list destructuring
-        are not lvalues.
-        */
+        // SPEC:
+        // list-intrinsic:
+        //   list  (  expression-list-opt  )
+        // expression-list:
+        //   expression-opt
+        //   expression-list , expression-opt
+        //
+        // See https://github.com/hhvm/hack-langspec/issues/82
+        //
+        // list-intrinsic must be used as the left-hand operand in a
+        // simple-assignment-expression of which the right-hand operand
+        // must be an expression that designates a vector-like array or
+        // an instance of the class types Vector, ImmVector, or Pair
+        // (the "source").
+        //
+        // TODO: Produce an error later if the expressions in the list destructuring
+        // are not lvalues.
         let keyword = self.assert_token(TokenKind::List);
         let (left, items, right) = self.parse_parenthesized_comma_list_opt_items_opt(&|p| {
             p.parse_expression_with_reset_precedence()
@@ -2509,9 +2480,8 @@ where
         S!(make_list_expression, self, keyword, left, items, right)
     }
 
-    /* grammar:
-     * array_intrinsic := array ( array-initializer-opt )
-     */
+    // grammar:
+    //   array_intrinsic := array ( array-initializer-opt )
     fn parse_array_intrinsic_expression(&mut self) -> S::R {
         let array_keyword = self.assert_token(TokenKind::Array);
         let (left_paren, members, right_paren) = self
@@ -2537,15 +2507,15 @@ where
         let explicit_type = match parser1.peek_token_kind() {
             TokenKind::LessThan => {
                 let (type_arguments, _) = parser1.parse_generic_type_arguments();
-                /* skip no_arg_is_missing check since there must only be 1 or 2 type arguments*/
+                // skip no_arg_is_missing check since there must only be 1 or 2 type arguments
                 type_arguments
             }
             _ => S!(make_missing, parser1, parser1.pos()),
         };
         let left_bracket = parser1.optional_token(TokenKind::LeftBracket);
         if left_bracket.is_missing() {
-            /* Fall back to dict being an ordinary name. Perhaps we're calling a
-            function whose name is indicated by the keyword_token, for example. */
+            // Fall back to dict being an ordinary name. Perhaps we're calling a
+            // function whose name is indicated by the keyword_token, for example.
             self.parse_as_name_or_error()
         } else {
             self.continue_from(parser1);
@@ -2567,7 +2537,7 @@ where
     }
 
     fn parse_darray_intrinsic_expression(&mut self) -> S::R {
-        /* TODO: Create the grammar and add it to the spec. */
+        // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Darray,
             &|p| p.parse_keyed_element_initializer(),
@@ -2576,8 +2546,8 @@ where
     }
 
     fn parse_dictionary_intrinsic_expression(&mut self) -> S::R {
-        /* TODO: Create the grammar and add it to the spec. */
-        /* TODO: Can the list have a trailing comma? */
+        // TODO: Create the grammar and add it to the spec.
+        // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Dict,
             &|p| p.parse_keyed_element_initializer(),
@@ -2594,7 +2564,7 @@ where
     }
 
     fn parse_varray_intrinsic_expression(&mut self) -> S::R {
-        /* TODO: Create the grammar and add it to the spec. */
+        // TODO: Create the grammar and add it to the spec.
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Varray,
             &|p| p.parse_expression_with_reset_precedence(),
@@ -2603,8 +2573,8 @@ where
     }
 
     fn parse_vector_intrinsic_expression(&mut self) -> S::R {
-        /* TODO: Create the grammar and add it to the spec. */
-        /* TODO: Can the list have a trailing comma? */
+        // TODO: Create the grammar and add it to the spec.
+        // TODO: Can the list have a trailing comma?
         self.parse_bracketed_collection_intrinsic_expression(
             TokenKind::Vec,
             &|p| p.parse_expression_with_reset_precedence(),
@@ -2612,14 +2582,13 @@ where
         )
     }
 
-    /* array_creation_expression :=
-         [ array-initializer-opt ]
-       array-initializer :=
-         array-initializer-list ,-opt
-       array-initializer-list :=
-          array-element-initializer
-          array-element-initializer , array-initializer-list
-    */
+    // array_creation_expression :=
+    //   [ array-initializer-opt ]
+    // array-initializer :=
+    //   array-initializer-list ,-opt
+    // array-initializer-list :=
+    //   array-element-initializer
+    //   array-element-initializer , array-initializer-list
     fn parse_array_creation_expression(&mut self) -> S::R {
         let (left_bracket, members, right_bracket) =
             self.parse_bracketted_comma_list_opt_allow_trailing(&|p| p.parse_array_element_init());
@@ -2632,10 +2601,9 @@ where
         )
     }
 
-    /* array-element-initializer :=
-     * expression
-     * expression => expression
-     */
+    // array-element-initializer :=
+    //   expression
+    //   expression => expression
     fn parse_array_element_init(&mut self) -> S::R {
         let expr1 = self.with_reset_precedence(&|p| p.parse_expression());
         let mut parser1 = self.clone();
@@ -2652,22 +2620,21 @@ where
     }
 
     fn parse_field_initializer(&mut self) -> S::R {
-        /* SPEC
-        field-initializer:
-          single-quoted-string-literal  =>  expression
-          double_quoted_string_literal  =>  expression
-          qualified-name  =>  expression
-          scope-resolution-expression  =>  expression
-          */
+        // SPEC
+        // field-initializer:
+        //   single-quoted-string-literal  =>  expression
+        //   double_quoted_string_literal  =>  expression
+        //   qualified-name  =>  expression
+        //   scope-resolution-expression  =>  expression
+        //
 
-        /* Specification is wrong, and fixing it is being tracked by
-         * https://github.com/hhvm/hack-langspec/issues/108
-         */
+        // Specification is wrong, and fixing it is being tracked by
+        // https://github.com/hhvm/hack-langspec/issues/108
+        //
 
-        /* ERROR RECOVERY: We allow any expression on the left-hand side,
-         * even though only some expressions are legal;
-         * we will give an error in a later pass
-         */
+        // ERROR RECOVERY: We allow any expression on the left-hand side,
+        // even though only some expressions are legal;
+        // we will give an error in a later pass
         let name = self.with_reset_precedence(&|p| p.parse_expression());
         let arrow = self.require_arrow();
         let value = self.with_reset_precedence(&|p| p.parse_expression());
@@ -2675,17 +2642,16 @@ where
     }
 
     fn parse_shape_expression(&mut self) -> S::R {
-        /* SPEC
-          shape-literal:
-            shape  (  field-initializer-list-opt  )
-
-          field-initializer-list:
-            field-initializers  ,-op
-
-          field-initializers:
-            field-initializer
-            field-initializers  ,  field-initializer
-        */
+        // SPEC
+        // shape-literal:
+        //   shape  (  field-initializer-list-opt  )
+        //
+        // field-initializer-list:
+        //   field-initializers  ,-op
+        //
+        // field-initializers:
+        //   field-initializer
+        //   field-initializers  ,  field-initializer
         let shape = self.assert_token(TokenKind::Shape);
         let (left_paren, fields, right_paren) = self
             .parse_parenthesized_comma_list_opt_allow_trailing(&|p| p.parse_field_initializer());
@@ -2700,17 +2666,16 @@ where
     }
 
     fn parse_tuple_expression(&mut self) -> S::R {
-        /* SPEC
-        tuple-literal:
-          tuple  (  expression-list-one-or-more  )
-
-        expression-list-one-or-more:
-          expression
-          expression-list-one-or-more  ,  expression
-
-        TODO: Can the list be comma-terminated? If so, update the spec.
-        TODO: We need to produce an error in a later pass if the list is empty.
-        */
+        // SPEC
+        // tuple-literal:
+        //   tuple  (  expression-list-one-or-more  )
+        //
+        // expression-list-one-or-more:
+        //   expression
+        //   expression-list-one-or-more  ,  expression
+        //
+        // TODO: Can the list be comma-terminated? If so, update the spec.
+        // TODO: We need to produce an error in a later pass if the list is empty.
         let keyword = self.assert_token(TokenKind::Tuple);
         let (left_paren, items, right_paren) = self
             .parse_parenthesized_comma_list_opt_allow_trailing(&|p| {
@@ -2736,11 +2701,11 @@ where
     }
 
     fn parse_anon_or_lambda_or_awaitable(&mut self) -> S::R {
-        /* TODO: The original Hack parser accepts "async" as an identifier, and
-        so we do too. We might consider making it reserved. */
-        /* Skip any async or coroutine declarations that may be present. When we
-        feed the original parser into the syntax parsers. they will take care of
-        them as appropriate. */
+        // TODO: The original Hack parser accepts "async" as an identifier, and
+        // so we do too. We might consider making it reserved.
+        // Skip any async or coroutine declarations that may be present. When we
+        // feed the original parser into the syntax parsers. they will take care of
+        // them as appropriate.
         let attribute_spec = self.with_decl_parser(&|p| p.parse_attribute_specification_opt());
         let mut parser1 = self.clone();
 
@@ -2761,13 +2726,11 @@ where
     }
 
     fn parse_async_block(&mut self, attribute_spec: S::R) -> S::R {
-        /*
-         * grammar:
-         *  awaitable-creation-expression :
-         *    async-opt  coroutine-opt  compound-statement
-         * TODO awaitable-creation-expression must not be used as the
-         *      anonymous-function-body in a lambda-expression
-         */
+        // grammar:
+        //   awaitable-creation-expression :
+        //     async-opt  coroutine-opt  compound-statement
+        // TODO awaitable-creation-expression must not be used as the
+        //      anonymous-function-body in a lambda-expression
         let async_ = self.optional_token(TokenKind::Async);
         let coroutine = self.optional_token(TokenKind::Coroutine);
         let stmt = self.parse_compound_statement();
@@ -2782,14 +2745,13 @@ where
     }
 
     fn parse_anon_use_opt(&mut self) -> S::R {
-        /* SPEC:
-          anonymous-function-use-clause:
-            use  (  use-variable-name-list  ,-opt  )
-
-          use-variable-name-list:
-            variable-name
-            use-variable-name-list  ,  variable-name
-        */
+        // SPEC:
+        // anonymous-function-use-clause:
+        //   use  (  use-variable-name-list  ,-opt  )
+        //
+        // use-variable-name-list:
+        //   variable-name
+        //   use-variable-name-list  ,  variable-name
         let use_token = self.optional_token(TokenKind::Use);
         if use_token.is_missing() {
             use_token
@@ -2808,7 +2770,7 @@ where
     }
 
     fn parse_optional_return(&mut self) -> (S::R, S::R) {
-        /* Parse an optional "colon-folowed-by-return-type" */
+        // Parse an optional "colon-folowed-by-return-type"
         let colon = self.optional_token(TokenKind::Colon);
         let return_type = if colon.is_missing() {
             S!(make_missing, self, self.pos())
@@ -2819,19 +2781,19 @@ where
     }
 
     fn parse_anon(&mut self, attribute_spec: S::R) -> S::R {
-        /* SPEC
-          anonymous-function-creation-expression:
-            static-opt async-opt coroutine-opt  function
-            ( anonymous-function-parameter-list-opt  )
-            anonymous-function-return-opt
-            anonymous-function-use-clauseopt
-            compound-statement
-        */
-        /* An anonymous function's formal parameter list is the same as a named
-        function's formal parameter list except that types are optional.
-        The "..." syntax and trailing commas are supported. We'll simply
-        parse an optional parameter list; it already takes care of making the
-        type annotations optional. */
+        // SPEC
+        // anonymous-function-creation-expression:
+        //   static-opt async-opt coroutine-opt  function
+        //     ( anonymous-function-parameter-list-opt  )
+        //     anonymous-function-return-opt
+        //     anonymous-function-use-clauseopt
+        //     compound-statement
+        //
+        // An anonymous function's formal parameter list is the same as a named
+        // function's formal parameter list except that types are optional.
+        // The "..." syntax and trailing commas are supported. We'll simply
+        // parse an optional parameter list; it already takes care of making the
+        // type annotations optional.
         let static_ = self.optional_token(TokenKind::Static);
         let async_ = self.optional_token(TokenKind::Async);
         let coroutine = self.optional_token(TokenKind::Coroutine);
@@ -2896,26 +2858,25 @@ where
     }
 
     fn require_right_brace_xhp(&mut self) -> S::R {
-        /* do not consume trailing trivia for the right brace
-        it should be accounted as XHP text */
+        // do not consume trailing trivia for the right brace
+        // it should be accounted as XHP text
         let mut parser1 = self.clone();
         let token = parser1.next_token_no_trailing();
         if token.kind() == TokenKind::RightBrace {
             self.continue_from(parser1);
             S!(make_token, self, token)
         } else {
-            /* ERROR RECOVERY: Create a missing token for the expected token,
-            and continue on from the current token. Don't skip it. */
+            // ERROR RECOVERY: Create a missing token for the expected token,
+            // and continue on from the current token. Don't skip it.
             self.with_error(Errors::error1006);
             S!(make_missing, self, self.pos())
         }
     }
 
     fn parse_xhp_body_braced_expression(&mut self) -> S::R {
-        /* The difference between a regular braced expression and an
-           XHP body braced expression is:
-           <foo bar={$x}/*this_is_a_comment*/>{$y}/*this_is_body_text!*/</foo>
-        */
+        // The difference between a regular braced expression and an
+        // XHP body braced expression is:
+        // <foo bar={$x}/*this_is_a_comment*/>{$y}/*this_is_body_text!*/</foo>
         let left_brace = self.assert_token(TokenKind::LeftBrace);
         let expression = self.parse_expression_with_reset_precedence();
         let right_brace = self.require_right_brace_xhp();
@@ -2968,8 +2929,8 @@ where
     }
 
     fn parse_xhp_simple_attribute(&mut self, name: S::R) -> Option<S::R> {
-        /* Parse the attribute name and then defensively check for well-formed
-         * attribute assignment */
+        // Parse the attribute name and then defensively check for well-formed
+        // attribute assignment
         let mut parser1 = self.clone();
         let (token, _) = parser1.next_xhp_element_token(false);
         if token.kind() != TokenKind::Equal {
@@ -2978,9 +2939,9 @@ where
             let missing1 = S!(make_missing, self, self.pos());
             let missing2 = S!(make_missing, self, self.pos());
             let node = S!(make_xhp_simple_attribute, self, name, missing1, missing2);
-            /* ERROR RECOVERY: The = is missing; assume that the name belongs
-            to the attribute, but that the remainder is missing, and start
-            looking for the next attribute. */
+            // ERROR RECOVERY: The = is missing; assume that the name belongs
+            // to the attribute, but that the remainder is missing, and start
+            // looking for the next attribute.
             Some(node)
         } else {
             let equal = S!(make_token, parser1, token);
@@ -3000,8 +2961,8 @@ where
                     Some(node)
                 }
                 _ => {
-                    /* ERROR RECOVERY: The expression is missing; assume that the "name ="
-                    belongs to the attribute and start looking for the next attribute. */
+                    // ERROR RECOVERY: The expression is missing; assume that the "name ="
+                    // belongs to the attribute and start looking for the next attribute.
                     self.continue_from(parser1);
                     self.with_error(Errors::error1017);
                     self.continue_from(parser2);
@@ -3027,17 +2988,17 @@ where
                 Some(expr)
             }
             TokenKind::RightBrace => {
-                /* If we find a free-floating right-brace in the middle of an XHP body
-                that's just fine. It's part of the text. However, it is also likely
-                to be a mis-edit, so we'll keep it as a right-brace token so that
-                tooling can flag it as suspicious. */
+                // If we find a free-floating right-brace in the middle of an XHP body
+                // that's just fine. It's part of the text. However, it is also likely
+                // to be a mis-edit, so we'll keep it as a right-brace token so that
+                // tooling can flag it as suspicious.
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 Some(token)
             }
             TokenKind::LessThan => {
                 self.continue_from(parser1);
-                let expr = self.parse_possible_xhp_expression(/*~in_xhp_body:*/ true, token);
+                let expr = self.parse_possible_xhp_expression(/* ~in_xhp_body:*/ true, token);
                 Some(expr)
             }
             _ => None,
@@ -3053,7 +3014,7 @@ where
             let (name, _name_text) = parser1.next_xhp_element_token(false);
             if name.kind() == TokenKind::XHPElementName {
                 let name_token = S!(make_token, parser1, name);
-                /* TODO: Check that the given and name_text are the same. */
+                // TODO: Check that the given and name_text are the same.
                 let mut parser2 = parser1.clone();
                 let (greater_than, _) = parser2.next_xhp_element_token(!consume_trailing_trivia);
                 if greater_than.kind() == TokenKind::GreaterThan {
@@ -3067,7 +3028,7 @@ where
                         greater_than_token
                     )
                 } else {
-                    /* ERROR RECOVERY: */
+                    // ERROR RECOVERY:
                     self.continue_from(parser1);
                     self.with_error(Errors::error1039);
                     let missing = S!(make_missing, self, self.pos());
@@ -3080,7 +3041,7 @@ where
                     )
                 }
             } else {
-                /* ERROR RECOVERY: */
+                // ERROR RECOVERY:
                 self.with_error(Errors::error1039);
                 let missing1 = S!(make_missing, self, self.pos());
                 let missing2 = S!(make_missing, self, self.pos());
@@ -3093,9 +3054,9 @@ where
                 )
             }
         } else {
-            /* ERROR RECOVERY: We probably got a < without a following / or name.
-            TODO: For now we'll just bail out. We could use a more
-            sophisticated strategy here. */
+            // ERROR RECOVERY: We probably got a < without a following / or name.
+            // TODO: For now we'll just bail out. We could use a more
+            // sophisticated strategy here.
             self.with_error(Errors::error1039);
             let missing1 = S!(make_missing, self, self.pos());
             let missing2 = S!(make_missing, self, self.pos());
@@ -3121,10 +3082,10 @@ where
         match token.kind() {
             TokenKind::SlashGreaterThan => {
                 let pos = self.pos();
-                /* We have determined that this is a self-closing XHP tag, so
-                `consume_trailing_trivia` needs to be propagated down. */
+                // We have determined that this is a self-closing XHP tag, so
+                // `consume_trailing_trivia` needs to be propagated down.
                 let (token, _) = // FIXME(kasper) parser1
-                    self.next_xhp_element_token(/*~no_trailing:*/ !consume_trailing_trivia);
+                    self.next_xhp_element_token(/* ~no_trailing:*/ !consume_trailing_trivia);
                 let token = S!(make_token, parser1, token);
                 let xhp_open = S!(make_xhp_open, parser1, left_angle, name, attrs, token);
                 let missing1 = S!(make_missing, parser1, pos);
@@ -3132,10 +3093,10 @@ where
                 S!(make_xhp_expression, self, xhp_open, missing1, missing2)
             }
             TokenKind::GreaterThan => {
-                /* This is not a self-closing tag, so we are now in an XHP body context.
-                We can use the GreaterThan token as-is (i.e., lexed above with
-                ~no_trailing:true), since we don't want to lex trailing trivia inside
-                XHP bodies. */
+                // This is not a self-closing tag, so we are now in an XHP body context.
+                // We can use the GreaterThan token as-is (i.e., lexed above with
+                // ~no_trailing:true), since we don't want to lex trailing trivia inside
+                // XHP bodies.
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, token);
@@ -3144,8 +3105,8 @@ where
                 S!(make_xhp_expression, self, xhp_open, xhp_body, xhp_close)
             }
             _ => {
-                /* ERROR RECOVERY: Assume the unexpected token belongs to whatever
-                comes next. */
+                // ERROR RECOVERY: Assume the unexpected token belongs to whatever
+                // comes next.
                 let missing = S!(make_missing, self, self.pos());
                 let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, missing);
                 let missing1 = S!(make_missing, parser1, self.pos());
@@ -3158,7 +3119,7 @@ where
     }
 
     fn parse_possible_xhp_expression(&mut self, in_xhp_body: bool, less_than: S::Token) -> S::R {
-        /* We got a < token where an expression was expected. */
+        // We got a < token where an expression was expected.
         //println!("assert_xhp_body_token start {}|", self.lexer().offset_as_string());
         let less_than = S!(make_token, self, less_than);
 
@@ -3171,15 +3132,15 @@ where
             let token = S!(make_token, self, name);
             self.parse_xhp_expression(!in_xhp_body, less_than, token)
         } else {
-            /* ERROR RECOVERY
-            In an expression context, it's hard to say what to do here. We are
-            expecting an expression, so we could simply produce an error for the < and
-            call that the expression. Or we could assume the the left side of an
-            inequality is missing, give a missing node for the left side, and parse
-            the remainder as the right side. We'll go for the former for now.
-
-            In an XHP body context, we certainly expect a name here, because the <
-            could only legally be the first token in another XHPExpression. */
+            // ERROR RECOVERY
+            // In an expression context, it's hard to say what to do here. We are
+            // expecting an expression, so we could simply produce an error for the < and
+            // call that the expression. Or we could assume the the left side of an
+            // inequality is missing, give a missing node for the left side, and parse
+            // the remainder as the right side. We'll go for the former for now.
+            //
+            // In an XHP body context, we certainly expect a name here, because the <
+            // could only legally be the first token in another XHPExpression.
             let error = if in_xhp_body {
                 Errors::error1004
             } else {
@@ -3191,23 +3152,23 @@ where
     }
 
     fn parse_anon_or_awaitable_or_scope_resolution_or_name(&mut self) -> S::R {
-        /* static is a legal identifier, if next token is scope resolution operatpr
-        - parse expresson as scope resolution operator, otherwise try to interpret
-        it as anonymous function (will fallback to name in case of failure) */
+        // static is a legal identifier, if next token is scope resolution operatpr
+        // - parse expresson as scope resolution operator, otherwise try to interpret
+        // it as anonymous function (will fallback to name in case of failure)
         if self.peek_token_kind_with_lookahead(1) == TokenKind::ColonColon {
             self.parse_scope_resolution_or_name()
         } else {
-            /* allow_attribute_spec since we end up here after seeing static */
+            // allow_attribute_spec since we end up here after seeing static
             self.parse_anon_or_lambda_or_awaitable()
         }
     }
 
     fn parse_scope_resolution_or_name(&mut self) -> S::R {
-        /* parent, self and static are legal identifiers. If the next
-        thing that follows is a scope resolution operator, parse them as
-        ordinary tokens, and then we'll pick them up as the operand to the
-        scope resolution operator when we call parse_remaining_expression.
-        Otherwise, parse them as ordinary names.  */
+        // parent, self and static are legal identifiers. If the next
+        // thing that follows is a scope resolution operator, parse them as
+        // ordinary tokens, and then we'll pick them up as the operand to the
+        // scope resolution operator when we call parse_remaining_expression.
+        // Otherwise, parse them as ordinary names.
         let mut parser1 = self.clone();
         let qualifier = parser1.next_token();
         if parser1.peek_token_kind() == TokenKind::ColonColon {
@@ -3220,25 +3181,25 @@ where
     }
 
     fn parse_scope_resolution_expression(&mut self, qualifier: S::R) -> S::R {
-        /* SPEC
-          scope-resolution-expression:
-            scope-resolution-qualifier  ::  name
-            scope-resolution-qualifier  ::  class
-
-          scope-resolution-qualifier:
-            qualified-name
-            variable-name
-            self
-            parent
-            static
-        */
-        /* TODO: The left hand side can in fact be any expression in this parser;
-        we need to add a later error pass to detect that the left hand side is
-        a valid qualifier. */
-        /* TODO: The right hand side, if a name or a variable, is treated as a
-        name or variable *token* and not a name or variable *expression*. Is
-        that the desired tree topology? Give this more thought; it might impact
-        rename refactoring semantics. */
+        // SPEC
+        // scope-resolution-expression:
+        //   scope-resolution-qualifier  ::  name
+        //   scope-resolution-qualifier  ::  class
+        //
+        // scope-resolution-qualifier:
+        //   qualified-name
+        //   variable-name
+        //   self
+        //   parent
+        //   static
+        //
+        // TODO: The left hand side can in fact be any expression in this parser;
+        // we need to add a later error pass to detect that the left hand side is
+        // a valid qualifier.
+        // TODO: The right hand side, if a name or a variable, is treated as a
+        // name or variabletoken* and not a name or variable *expression*. Is
+        // that the desired tree topology? Give this more thought; it might impact
+        // rename refactoring semantics.
         let op = self.require_coloncolon();
         let name = {
             let mut parser1 = self.clone();
@@ -3253,13 +3214,13 @@ where
                 TokenKind::Variable if self.env.php5_compat_mode => {
                     let mut parser1 = self.clone();
                     let e = parser1.parse_variable_in_php5_compat_mode();
-                    /* for :: only do PHP5 transform for call expressions
-                    in other cases fall back to the regular parsing logic */
+                    // for :: only do PHP5 transform for call expressions
+                    // in other cases fall back to the regular parsing logic
                     if parser1.peek_token_kind() == TokenKind::LeftParen &&
-                    /* make sure the left parenthesis means a call
-                       for the expression we are currently parsing, and
-                       are not for example for a constructor call whose
-                       name would be the result of this expression. */
+                    // make sure the left parenthesis means a call
+                    // for the expression we are currently parsing, and
+                    // are not for example for a constructor call whose
+                    // name would be the result of this expression.
                      !(self.operator_has_lower_precedence(TokenKind::LeftParen))
                     {
                         self.continue_from(parser1);
@@ -3275,18 +3236,18 @@ where
     }
 
     fn parse_pocket_identifier_expression(&mut self, qualifier: S::R) -> S::R {
-        /* SPEC
-          pocket-identifier-expression:
-            scope-resolution-qualifier  :@ name ::  name
-
-          scope-resolution-qualifier:
-            qualified-name
-            variable-name
-            self
-            parent
-            static
-        */
-        /* TODO: see TODO in parse_scope_resolution_expression */
+        // SPEC
+        // pocket-identifier-expression:
+        //   scope-resolution-qualifier  :@ name ::  name
+        //
+        // scope-resolution-qualifier:
+        //   qualified-name
+        //   variable-name
+        //   self
+        //   parent
+        //   static
+        //
+        // TODO: see TODO in parse_scope_resolution_expression
         let op_pu = self.require_colonat();
         let field_name = self.require_name();
         let op = self.require_coloncolon();

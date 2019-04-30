@@ -1,12 +1,11 @@
 #![allow(non_upper_case_globals)]
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+//
+
 use crate::token_kind::TokenKind;
 use std::borrow::Cow;
 
@@ -30,7 +29,7 @@ impl SyntaxError {
     }
 }
 
-/* Lexical errors */
+// Lexical errors
 pub const error0001: Error = Cow::Borrowed("A hexadecimal literal needs at least one digit.");
 pub const error0002: Error = Cow::Borrowed("A binary literal needs at least one digit.");
 pub const error0003: Error = Cow::Borrowed(concat!(
@@ -46,7 +45,7 @@ pub const error0012: Error = Cow::Borrowed("This string literal is not terminate
 pub const error0013: Error = Cow::Borrowed("This XHP body is not terminated.");
 pub const error0014: Error = Cow::Borrowed("This XHP comment is not terminated.");
 
-/* Syntactic errors */
+// Syntactic errors
 pub const error1001: Error = Cow::Borrowed("A .php file must begin with '<?hh'.");
 pub const error1003: Error = Cow::Borrowed("The 'function' keyword is expected here.");
 pub const error1004: Error = Cow::Borrowed("A name is expected here.");
@@ -65,7 +64,7 @@ pub const error1018: Error = Cow::Borrowed("The 'while' keyword is expected here
 pub const error1019: Error = Cow::Borrowed("A left parenthesis ('(') is expected here.");
 pub const error1020: Error = Cow::Borrowed("A colon (':') is expected here.");
 pub const error1021: Error = Cow::Borrowed("An opening angle bracket ('<') is expected here.");
-/* TODO: Remove this; redundant to 1009. */
+// TODO: Remove this; redundant to 1009.
 pub const error1022: Error =
     Cow::Borrowed("A right parenthesis ('>') or comma (',') is expected here.");
 pub const error1023: Error = Cow::Borrowed("An 'as' keyword is expected here.");
@@ -77,7 +76,7 @@ pub const error1029: Error =
 pub const error1031: Error =
     Cow::Borrowed("A comma (',') or a closing square bracket (']') is expected here.");
 pub const error1032: Error = Cow::Borrowed("A closing square bracket (']') is expected here.");
-/* TODO: Break this up according to classish type */
+// TODO: Break this up according to classish type
 pub const error1033: Error = Cow::Borrowed(concat!(
     "A class member, method, type, trait usage, trait require, ",
     "xhp attribute, xhp use, or xhp category is expected here."
@@ -107,7 +106,7 @@ pub const error1055: Error = Cow::Borrowed(concat!(
     "A fallthrough directive can only appear at the end of",
     " a switch section."
 ));
-/* TODO(20052790): use the specific token's text in the message body. */
+// TODO(20052790): use the specific token's text in the message body.
 pub const error1056: Error =
     Cow::Borrowed("This token is not valid as part of a function declaration.");
 pub fn error1057(text: &str) -> Error {
@@ -249,7 +248,7 @@ pub const error2063: Error = Cow::Borrowed("Expected integer or string literal."
 pub const error2064: Error = Cow::Borrowed("Reference methods are not allowed in strict mode.");
 pub const error2065: Error =
     Cow::Borrowed("A variadic parameter ('...') must not have a default value.");
-/* This was typing error 4077. */
+// This was typing error 4077.
 pub const error2066: Error = Cow::Borrowed(concat!(
     "A previous parameter has a default value. Remove all the ",
     "default values for the preceding parameters, or add a default value to ",

@@ -1,11 +1,9 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use crate::lexable_token::LexableToken;
 use crate::lexable_trivia::LexableTrivia;
 use crate::source_text::{SourceText, INVALID};
@@ -137,7 +135,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.source.text()
     }
 
-    /* Housekeeping */
+    // Housekeeping
 
     pub fn peek_char(&self, index: usize) -> char {
         self.source.get(self.offset() + index)
@@ -192,7 +190,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    /* Character classification */
+    // Character classification
 
     fn is_whitespace_no_newline(c: char) -> bool {
         match c {
@@ -239,7 +237,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             || ('\x7f' <= c)
     }
 
-    /* Lexing */
+    // Lexing
 
     fn skip_while_to_offset(&self, p: &Fn(char) -> bool) -> usize {
         let n = self.source.length();
@@ -438,25 +436,25 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let ch = self.peek_char(0);
         match ch {
             '.' =>
-            /* 0. */
+            // 0.
             {
                 self.scan_after_decimal_point()
             }
             'e' | 'E' =>
-            /* 0e */
+            // 0e
             {
                 self.scan_exponent()
             }
             _ if '0' <= ch && ch <= '9' => {
-                /* 05 */
+                // 05
                 let mut lexer_oct = self.clone();
                 lexer_oct.scan_octal_digits();
 
                 let mut lexer_dec = self.clone();
                 lexer_dec.scan_decimal_digits();
                 if (lexer_oct.width()) == (lexer_dec.width()) {
-                    /* Only octal digits. Could be an octal literal, or could
-                    be a float. */
+                    // Only octal digits. Could be an octal literal, or could
+                    // be a float.
                     let ch = lexer_oct.peek_char(0);
                     if ch == 'e' || ch == 'E' {
                         self.continue_from(lexer_oct);
@@ -465,17 +463,17 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         self.continue_from(lexer_oct);
                         self.scan_after_decimal_point()
                     } else {
-                        /* This is irritating - we only want to allow underscores for integer
-                        literals. Deferring the lexing with underscores here allows us to
-                        make sure we're not dealing with floats. */
+                        // This is irritating - we only want to allow underscores for integer
+                        // literals. Deferring the lexing with underscores here allows us to
+                        // make sure we're not dealing with floats.
                         self.continue_from(lexer_oct);
                         self.scan_octal_digits_with_underscores();
                         TokenKind::OctalLiteral
                     }
                 } else {
-                    /* We had decimal digits following a leading zero; this is either a
-                    float literal or an octal to be truncated at the first non-octal
-                    digit. */
+                    // We had decimal digits following a leading zero; this is either a
+                    // float literal or an octal to be truncated at the first non-octal
+                    // digit.
                     let ch = lexer_dec.peek_char(0);
                     if ch == 'e' || ch == 'E' {
                         self.continue_from(lexer_dec);
@@ -484,15 +482,15 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         self.continue_from(lexer_dec);
                         self.scan_after_decimal_point()
                     } else {
-                        /* an octal to be truncated at the first non-octal digit */
-                        /* Again we differ the lexing with underscores here */
+                        // an octal to be truncated at the first non-octal digit
+                        // Again we differ the lexing with underscores here
                         self.scan_decimal_digits_with_underscores();
                         TokenKind::OctalLiteral
                     }
                 }
             }
             _ =>
-            /* 0 is a decimal literal */
+            // 0 is a decimal literal
             {
                 TokenKind::DecimalLiteral
             }
@@ -500,7 +498,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_decimal_or_float(&mut self) -> TokenKind {
-        /* We've scanned a leading non-zero digit. */
+        // We've scanned a leading non-zero digit.
         let mut lexer_no_underscores = self.clone();
         lexer_no_underscores.scan_decimal_digits();
         let mut lexer_with_underscores = self.clone();
@@ -508,19 +506,19 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let ch = lexer_no_underscores.peek_char(0);
         match ch {
             '.' =>
-            /* 123. */
+            // 123.
             {
                 self.continue_from(lexer_no_underscores);
                 self.scan_after_decimal_point()
             }
             'e' | 'E' =>
-            /* 123e */
+            // 123e
             {
                 self.continue_from(lexer_no_underscores);
                 self.scan_exponent()
             }
             _ =>
-            /* 123 */
+            // 123
             {
                 self.continue_from(lexer_with_underscores);
                 TokenKind::DecimalLiteral
@@ -529,25 +527,23 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_single_quote_string_literal(&mut self) -> TokenKind {
-        /* TODO: What about newlines embedded? */
-        /* SPEC:
-        single-quoted-string-literal::
-          b-opt  ' sq-char-sequence-opt  '
-
-          TODO: What is this b-opt?  We don't lex an optional 'b' before a literal.
-
-        sq-char-sequence::
-          sq-char
-          sq-char-sequence   sq-char
-
-        sq-char::
-          sq-escape-sequence
-          \opt   any character except single-quote (') or backslash (\)
-
-        sq-escape-sequence:: one of
-          \'  \\
-
-        */
+        // TODO: What about newlines embedded?
+        // SPEC:
+        // single-quoted-string-literal::
+        //   b-opt  ' sq-char-sequence-opt  '
+        //
+        // TODO: What is this b-opt?  We don't lex an optional 'b' before a literal.
+        //
+        // sq-char-sequence::
+        //   sq-char
+        //   sq-char-sequence   sq-char
+        //
+        // sq-char::
+        //   sq-escape-sequence
+        //   \opt   any character except single-quote (') or backslash (\)
+        //
+        // sq-escape-sequence:: one of
+        //   \'  \\
         let n = self.source.length();
         let peek = |x| self.source.get(x);
 
@@ -588,11 +584,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let ch2 = self.peek_char(2);
         let ch3 = self.peek_char(3);
         if !(Self::is_hexadecimal_digit(ch2)) {
-            /* TODO: Consider producing an error for a malformed hex escape */
-            /* let lexer = with_error lexer SyntaxError.error0005 in */
+            // TODO: Consider producing an error for a malformed hex escape
+            // let lexer = with_error lexer SyntaxError.error0005 in
             self.advance(2);
         } else if !(Self::is_hexadecimal_digit(ch3)) {
-            /* let lexer = with_error lexer SyntaxError.error0005 in */
+            // let lexer = with_error lexer SyntaxError.error0005 in
             self.advance(3)
         } else {
             self.advance(4)
@@ -600,33 +596,33 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_unicode_escape(&mut self) {
-        /* At present the lexer is pointing at \u */
+        // At present the lexer is pointing at \u
         if self.peek_char(2) == '{' {
             if self.peek_char(3) == '$' {
-                /* We have a malformed unicode escape that contains a possible embedded
-                expression. Eat the \u and keep on processing the embedded expression. */
-                /* TODO: Consider producing a warning for a malformed unicode escape. */
+                // We have a malformed unicode escape that contains a possible embedded
+                // expression. Eat the \u and keep on processing the embedded expression.
+                // TODO: Consider producing a warning for a malformed unicode escape.
                 self.advance(2)
             } else {
-                /* We have a possibly well-formed escape sequence, and at least we know
-                that it is not an embedded expression. */
-                /* TODO: Consider producing an error if the digits are out of range
-                of legal Unicode characters. */
-                /* TODO: Consider producing an error if there are no digits. */
-                /* Skip over the slash, u and brace, and start lexing the number. */
+                // We have a possibly well-formed escape sequence, and at least we know
+                // that it is not an embedded expression.
+                // TODO: Consider producing an error if the digits are out of range
+                // of legal Unicode characters.
+                // TODO: Consider producing an error if there are no digits.
+                // Skip over the slash, u and brace, and start lexing the number.
                 self.advance(3);
                 self.scan_hexadecimal_digits();
                 let ch = self.peek_char(0);
                 if ch != '}' {
-                    /* TODO: Consider producing a warning for a malformed unicode escape. */
+                    // TODO: Consider producing a warning for a malformed unicode escape.
                     {}
                 } else {
                     self.advance(1)
                 }
             }
         } else {
-            /* We have a malformed unicode escape sequence. Bail out. */
-            /* TODO: Consider producing a warning for a malformed unicode escape. */
+            // We have a malformed unicode escape sequence. Bail out.
+            // TODO: Consider producing a warning for a malformed unicode escape.
             self.advance(2)
         }
     }
@@ -652,11 +648,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                     self.scan_binary_literal()
                 }
                 _ => {
-                    /* An integer literal starting with 0 in a string will actually
-                    always be treated as a string index in HHVM, and not as an octal.
-                    In such a case, HHVM actually scans all decimal digits to create the
-                    token. TODO: (kasper) T40381519 we may want to change this behavior to something more
-                    sensible */
+                    // An integer literal starting with 0 in a string will actually
+                    // always be treated as a string index in HHVM, and not as an octal.
+                    // In such a case, HHVM actually scans all decimal digits to create the
+                    // token. TODO: (kasper) T40381519 we may want to change this behavior to something more
+                    // sensible
                     self.scan_decimal_digits_with_underscores();
                     TokenKind::DecimalLiteral
                 }
@@ -672,14 +668,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let head_token_kind = TokenKind::DoubleQuotedStringLiteralHead;
         self.advance(1);
         loop {
-            /* If there's nothing interesting in this double-quoted string then
-            we can just hand it back as-is. */
+            // If there's nothing interesting in this double-quoted string then
+            // we can just hand it back as-is.
             self.skip_uninteresting_double_quote_like_string_characters(start_char);
             match self.peek_char(0) {
                 INVALID => {
-                    /* If the string is unterminated then give an error; if this is an
-                    embedded zero character then give an error and recurse; we might
-                    be able to make more progress. */
+                    // If the string is unterminated then give an error; if this is an
+                    // embedded zero character then give an error and recurse; we might
+                    // be able to make more progress.
                     if self.at_end() {
                         self.with_error(Errors::error0012);
                         break literal_token_kind;
@@ -689,12 +685,12 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                     }
                 }
                 '`' | '"' => {
-                    /* We made it to the end without finding a special character. */
+                    // We made it to the end without finding a special character.
                     self.advance(1);
                     break literal_token_kind;
                 }
                 _ =>
-                /* We've found a backslash, dollar or brace. */
+                // We've found a backslash, dollar or brace.
                 {
                     break head_token_kind;
                 }
@@ -703,28 +699,27 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn is_heredoc_tail(&self, name: &[u8]) -> bool {
-        /* A heredoc tail is the identifier immediately preceded by a newline
-        and immediately followed by an optional semi and then a newline.
-
-        Note that the newline and optional semi are not part of the literal;
-        the literal's lexeme ends at the end of the name. Either there is
-        no trivia and the next token is a semi-with-trailing-newline, or
-        the trailing trivia is a newline.
-
-        This odd rule is to ensure that both
-        $x = <<<HERE
-        something
-        HERE;
-
-        and
-
-        $x = <<<HERE
-        something
-        HERE
-        . "something else";
-
-        are legal.
-        */
+        // A heredoc tail is the identifier immediately preceded by a newline
+        // and immediately followed by an optional semi and then a newline.
+        //
+        // Note that the newline and optional semi are not part of the literal;
+        // the literal's lexeme ends at the end of the name. Either there is
+        // no trivia and the next token is a semi-with-trailing-newline, or
+        // the trailing trivia is a newline.
+        //
+        // This odd rule is to ensure that both
+        // $x = <<<HERE
+        // something
+        // HERE;
+        //
+        // and
+        //
+        // $x = <<<HERE
+        // something
+        // HERE
+        // . "something else";
+        //
+        // are legal.
         if !(Self::is_newline(self.peek_back(1))) {
             false
         } else {
@@ -801,11 +796,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 }
                 '\\' => {
                     match self.peek_char(1) {
-                        /* In these cases we just skip the escape sequence and
-                         keep on scanning for special characters. */
+                        // In these cases we just skip the escape sequence and
+                        // keep on scanning for special characters.
                         | '\\' | '"' | '$' | 'e' | 'f' | 'n' | 'r' | 't' | 'v' | '`'
-                        /* Same in these cases; there might be more octal characters following but
-                         if there are, we'll just eat them as normal characters. */
+                        // Same in these cases; there might be more octal characters following but
+                        // if there are, we'll just eat them as normal characters.
                         | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' => {
                             self.advance(2);
                             self.skip_uninteresting_double_quote_like_string_characters(start_char);
@@ -819,32 +814,31 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                             self.skip_uninteresting_double_quote_like_string_characters(start_char);
                             TokenKind::StringLiteralBody }
                         | '{' => {
-                            /* The rules for escaping open braces in Hack are bizarre. Suppose we
-                                have
-                            $x = 123;
-                            $y = 456;
-                            $z = "\{$x,$y\}";
-                            What is the value of $z?  Naively you would think that the backslash
-                            escapes the braces, and the variables are embedded, so {123,456}. But
-                            that's not what happens. Yes, the backslash makes the brace no longer
-                            the opening brace of an expression. But the backslash is still part
-                            of the string!  This is the string \{123,456\}.
-                            TODO: We might want to fix this because this is very strange. */
-                            /* Eat the backslash and the brace. */
+                            // The rules for escaping open braces in Hack are bizarre. Suppose we
+                            // have
+                            // $x = 123;
+                            // $y = 456;
+                            // $z = "\{$x,$y\}";
+                            // What is the value of $z?  Naively you would think that the backslash
+                            // escapes the braces, and the variables are embedded, so {123,456}. But
+                            // that's not what happens. Yes, the backslash makes the brace no longer
+                            // the opening brace of an expression. But the backslash is still part
+                            // of the string!  This is the string \{123,456\}.
+                            // TODO: We might want to fix this because this is very strange.
+                            // Eat the backslash and the brace.
                             self.advance(2);
                             TokenKind::StringLiteralBody
                         }
                     | _ => {
-                       /* TODO: A backslash followed by something other than an escape sequence
-                          is legal in hack, and treated as though it was just the backslash
-                          and the character. However we might consider making this a warning.
-                          It is particularly egregious when we have something like:
-                          $x = "abcdef \
-                                ghi";
-                          The author of the code likely means the backslash to mean line
-                          continuation but in fact it just means to put a backslash and newline
-                          in the string.
-                          */
+                       // TODO: A backslash followed by something other than an escape sequence
+                       // is legal in hack, and treated as though it was just the backslash
+                       // and the character. However we might consider making this a warning.
+                       // It is particularly egregious when we have something like:
+                       // $x = "abcdef \
+                       //       ghi";
+                       // The author of the code likely means the backslash to mean line
+                       // continuation but in fact it just means to put a backslash and newline
+                       // in the string.
                           self.advance(1);
                           self.skip_uninteresting_double_quote_like_string_characters(start_char);
                           TokenKind::StringLiteralBody
@@ -864,8 +858,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         self.advance(2);
                         TokenKind::MinusGreaterThan
                     } else {
-                        /* Nothing interesting here. Skip it and find the next
-                        interesting character. */
+                        // Nothing interesting here. Skip it and find the next
+                        // interesting character.
                         self.advance(1);
                         self.skip_uninteresting_double_quote_like_string_characters(start_char);
                         TokenKind::StringLiteralBody
@@ -879,14 +873,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         self.continue_from(lexer1);
                         literal
                     } else {
-                        /* If we failed to scan a literal, do not interpret the literal */
+                        // If we failed to scan a literal, do not interpret the literal
                         self.with_offset(lexer1.offset());
                         TokenKind::StringLiteralBody
                     }
                 }
                 _ => {
-                    /* Nothing interesting here. Skip it and find the next
-                    interesting character. */
+                    // Nothing interesting here. Skip it and find the next
+                    // interesting character.
                     self.advance(1);
                     self.skip_uninteresting_double_quote_like_string_characters(start_char);
                     TokenKind::StringLiteralBody
@@ -894,36 +888,33 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             }
         }
     }
-    /*  A heredoc string literal has the form
-
-    header
-    optional body
-    trailer
-
-    The header is:
-
-    <<< (optional whitespace) name (no whitespace) (newline)
-
-    The optional body is:
-
-    any characters whatsoever including newlines (newline)
-
-    The trailer is:
-
-    (no whitespace) name (no whitespace) (optional semi) (no whitespace) (newline)
-
-    The names must be identical.  The trailing semi and newline must be present.
-
-    The body is any and all characters, up to the first line that exactly matches
-    the trailer.
-
-    The body may contain embedded expressions.
-
-    A nowdoc string literal has the same form except that the first name is
-    enclosed in single quotes, and it may not contain embedded expressions.
-
-    */
-
+    // A heredoc string literal has the form
+    //
+    // header
+    // optional body
+    // trailer
+    //
+    // The header is:
+    //
+    // <<< (optional whitespace) name (no whitespace) (newline)
+    //
+    // The optional body is:
+    //
+    // any characters whatsoever including newlines (newline)
+    //
+    // The trailer is:
+    //
+    // (no whitespace) name (no whitespace) (optional semi) (no whitespace) (newline)
+    //
+    // The names must be identical.  The trailing semi and newline must be present.
+    //
+    // The body is any and all characters, up to the first line that exactly matches
+    // the trailer.
+    //
+    // The body may contain embedded expressions.
+    //
+    // A nowdoc string literal has the same form except that the first name is
+    // enclosed in single quotes, and it may not contain embedded expressions.
     fn scan_docstring_name_actual(&mut self) -> &'a [u8] {
         let ch = self.peek_char(0);
         if Self::is_name_nondigit(ch) {
@@ -958,14 +949,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 name
             }
         } else {
-            /* Starting with PHP 5.3.0, the opening Heredoc identifier
-            may optionally be enclosed in double quotes:*/
+            // Starting with PHP 5.3.0, the opening Heredoc identifier
+            // may optionally be enclosed in double quotes:
             if ch == '"' {
                 self.advance(1)
             };
             let name = self.scan_docstring_name_actual();
             if ch == '"' {
-                /* same logic as above, just for double quote */
+                // same logic as above, just for double quote
                 if self.peek_char(0) == '\"' {
                     self.advance(1);
                 } else {
@@ -979,7 +970,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn scan_docstring_header(&mut self) -> (&'a [u8], TokenKind) {
         let ch = self.peek_char(0);
-        /* Skip 3 for <<< or 4 for b<<< */
+        // Skip 3 for <<< or 4 for b<<<
         let skip_count = if ch == 'b' { 4 } else { 3 };
         self.advance(skip_count);
         let (name, kind) = self.scan_docstring_name();
@@ -1008,8 +999,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 if Self::is_newline(ch) {
                     self.skip_end_of_line()
                 } else {
-                    /* If we got here then we ran off the end of the file without
-                    finding a newline. Just bail. */
+                    // If we got here then we ran off the end of the file without
+                    // finding a newline. Just bail.
                     self.with_error(Errors::error0011);
                     break;
                 }
@@ -1024,15 +1015,15 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_xhp_label(&mut self) {
-        /* An XHP label has the same grammar as a Hack name. */
+        // An XHP label has the same grammar as a Hack name.
         let _: TokenKind = self.scan_name();
     }
 
     fn scan_xhp_element_name(&mut self, attribute: bool) -> TokenKind {
-        /* An XHP element name is a sequence of one or more XHP labels each separated
-        by a single : or -.  Note that it is possible for an XHP element name to be
-        followed immediately by a : or - that is the next token, so if we find
-        a : or - not followed by a label, we need to terminate the token. */
+        // An XHP element name is a sequence of one or more XHP labels each separated
+        // by a single : or -.  Note that it is possible for an XHP element name to be
+        // followed immediately by a : or - that is the next token, so if we find
+        // a : or - not followed by a label, we need to terminate the token.
         self.scan_xhp_label();
         let ch0 = self.peek_char(0);
         let ch1 = self.peek_char(1);
@@ -1044,13 +1035,13 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    /* Is the next token we're going to lex a possible xhp class name? */
+    // Is the next token we're going to lex a possible xhp class name?
     fn is_xhp_class_name(&self) -> bool {
         (self.peek_char(0) == ':') && (Self::is_name_nondigit(self.peek_char(1)))
     }
 
     fn scan_xhp_class_name(&mut self) -> TokenKind {
-        /* An XHP class name is a colon followed by an xhp name. */
+        // An XHP class name is a colon followed by an xhp name.
         if self.is_xhp_class_name() {
             self.advance(1);
             self.scan_xhp_element_name(false);
@@ -1063,8 +1054,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_xhp_string_literal(&mut self) -> TokenKind {
-        /* XHP string literals are just straight up "find the closing quote"
-        strings.  Embedded newlines are legal. */
+        // XHP string literals are just straight up "find the closing quote"
+        // strings.  Embedded newlines are legal.
         let mut offset: usize = 1;
         loop {
             match self.peek_char(offset) {
@@ -1087,11 +1078,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    /* Note that this does not scan an XHP body */
+    // Note that this does not scan an XHP body
     fn scan_xhp_token(&mut self) -> TokenKind {
-        /* TODO: HHVM requires that there be no trivia between < and name in an
-        opening tag, but does allow trivia between </ and name in a closing tag.
-        Consider allowing trivia in an opening tag. */
+        // TODO: HHVM requires that there be no trivia between < and name in an
+        // opening tag, but does allow trivia between </ and name in a closing tag.
+        // Consider allowing trivia in an opening tag.
         let ch0 = self.peek_char(0);
         if ch0 == INVALID && self.at_end() {
             TokenKind::EndOfFile
@@ -1161,21 +1152,20 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
     fn scan_xhp_body(&mut self) -> TokenKind {
-        /* Naively you might think that an XHP body is just a bunch of characters,
-           terminated by an embedded { } expression or a tag.  However, whitespace
-           and newlines are relevant in XHP bodies because they are "soft".
-           That is, any section of contiguous trivia has the same semantics as a
-           single space or newline -- just as in HTML.
-
-           Obviously this is of relevance to code formatters.
-
-           Therefore we detect whitespace and newlines within XHP bodies and treat
-           it as trivia surrounding the tokens within the body.
-
-           TODO: Is this also true of whitespace within XHP comments? If so then
-           we need to make XHP comments a sequence of tokens, rather than a
-           single token as they are now.
-        */
+        // Naively you might think that an XHP body is just a bunch of characters,
+        // terminated by an embedded { } expression or a tag.  However, whitespace
+        // and newlines are relevant in XHP bodies because they are "soft".
+        // That is, any section of contiguous trivia has the same semantics as a
+        // single space or newline -- just as in HTML.
+        //
+        // Obviously this is of relevance to code formatters.
+        //
+        // Therefore we detect whitespace and newlines within XHP bodies and treat
+        // it as trivia surrounding the tokens within the body.
+        //
+        // TODO: Is this also true of whitespace within XHP comments? If so then
+        // we need to make XHP comments a sequence of tokens, rather than a
+        // single token as they are now.
         let ch0 = self.peek_char(0);
 
         match ch0 {
@@ -1235,52 +1225,50 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_dollar_token(&mut self) -> TokenKind {
-        /*
-        We have a problem here.  We wish to be able to lexically analyze both
-        PHP and Hack, but the introduction of $$ to Hack makes them incompatible.
-        "$$x" and "$$ $x" are legal in PHP, but illegal in Hack.
-        The rule in PHP seems to be that $ is a prefix operator, it is a token,
-        it can be followed by trivia, but the next token has to be another $
-        operator, a variable $x, or a {.
+        // We have a problem here.  We wish to be able to lexically analyze both
+        // PHP and Hack, but the introduction of $$ to Hack makes them incompatible.
+        // "$$x" and "$$ $x" are legal in PHP, but illegal in Hack.
+        // The rule in PHP seems to be that $ is a prefix operator, it is a token,
+        // it can be followed by trivia, but the next token has to be another $
+        // operator, a variable $x, or a {.
+        //
+        // Here's a reasonable compromise.  (TODO: Review this decision.)
+        //
+        // $$x lexes as $ $x
+        // $$$x lexes as $ $ $x
+        // and so on.
+        //
+        // $$ followed by anything other than a name or a $ lexes as $$.
+        //
+        // This means that lexing a PHP program which contains "$$ $x" is different
+        // will fail at parse time, but I'm willing to live with that.
+        //
+        // This means that lexing a Hack program which contains
+        // "$x |> $$instanceof Foo" produces an error as well.
+        //
+        // If these decisions are unacceptable then we will need to make the lexer
+        // be aware of whether it is lexing PHP or Hack; thus far we have not had
+        // to make this distinction.
 
-        Here's a reasonable compromise.  (TODO: Review this decision.)
-
-        $$x lexes as $ $x
-        $$$x lexes as $ $ $x
-        and so on.
-
-        $$ followed by anything other than a name or a $ lexes as $$.
-
-        This means that lexing a PHP program which contains "$$ $x" is different
-        will fail at parse time, but I'm willing to live with that.
-
-        This means that lexing a Hack program which contains
-        "$x |> $$instanceof Foo" produces an error as well.
-
-        If these decisions are unacceptable then we will need to make the lexer
-        be aware of whether it is lexing PHP or Hack; thus far we have not had
-        to make this distinction.
-
-         */
-        /* We are already at $. */
+        // We are already at $.
         let ch1 = self.peek_char(1);
         match ch1 {
             '$' => {
                 let ch2 = self.peek_char(2);
                 if ch2 == '$' || ch2 == '{' || Self::is_name_nondigit(ch2) {
                     self.advance(1);
-                    TokenKind::Dollar /* $$x or $$$*/
+                    TokenKind::Dollar // $$x or $$$
                 } else {
                     self.advance(2);
-                    TokenKind::DollarDollar /* $$ */
+                    TokenKind::DollarDollar // $$
                 }
             }
             _ => {
                 if Self::is_name_nondigit(ch1) {
-                    self.scan_variable() /* $x */
+                    self.scan_variable() // $x
                 } else {
                     self.advance(1);
-                    TokenKind::Dollar /* $ */
+                    TokenKind::Dollar // $
                 }
             }
         }
@@ -1427,9 +1415,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                         self.advance(3);
                         TokenKind::LessThanLessThanEqual
                     }
-                    /* TODO: We lex and parse the spaceship operator.
-                    TODO: This is not in the spec at present.  We should either make it an
-                    TODO: error, or add it to the specification. */
+                    // TODO: We lex and parse the spaceship operator.
+                    // TODO: This is not in the spec at present.  We should either make it an
+                    // TODO: error, or add it to the specification.
                     ('=', '>') => {
                         self.advance(3);
                         TokenKind::LessThanEqualGreaterThan
@@ -1450,10 +1438,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             }
             '>' => {
                 match (self.peek_char(1), self.peek_char(2)) {
-                    /* If we are parsing a generic type argument list then we might be at the >>
-                     * in `List<List<int>>``, or at the >= of `let x:vec<int>=...`. In that case
-                     * we want to lex two >'s instead of >> / one > and one = instead of >=.
-                     */
+                    // If we are parsing a generic type argument list then we might be at the >>
+                    // in `List<List<int>>``, or at the >= of `let x:vec<int>=...`. In that case
+                    // we want to lex two >'s instead of >> / one > and one = instead of >=.
                     (ch, _) if (ch == '>' || ch == '=') && in_type => {
                         self.advance(1);
                         TokenKind::GreaterThan
@@ -1570,8 +1557,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 }
             },
             ':' => {
-                /* In experimental mode only: try to scan for a pocket universes atom
-                of the form `:@` */
+                // In experimental mode only: try to scan for a pocket universes atom
+                // of the form `:@`
                 let ch1 = self.peek_char(1);
 
                 if ch1 == ':' {
@@ -1626,7 +1613,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 self.advance(1);
                 self.scan_token(in_type)
             }
-            /* Names */
+            // Names
             _ => {
                 if ch0 == INVALID && self.at_end() {
                     TokenKind::EndOfFile
@@ -1649,24 +1636,23 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.scan_token(true)
     }
 
-    /* Lexing trivia */
+    // Lexing trivia
 
-    /* SPEC:
-     *
-     * white-space-character::
-     *     new-line
-     *     Space character (U+0020)
-     *     Horizontal-tab character (U+0009)
-     *
-     * single-line-comment::
-     *    //   input-characters-opt
-     *    #    input-characters-opt
-     *
-     *  new-line::
-     *   Carriage-return character (U+000D)
-     *   Line-feed character (U+000A)
-     *   Carriage-return character followed by line-feed character
-     */
+    // SPEC:
+    //
+    // white-space-character::
+    //   new-line
+    //   Space character (U+0020)
+    //   Horizontal-tab character (U+0009)
+    //
+    // single-line-comment::
+    //   //   input-characters-opt
+    //   #    input-characters-opt
+    //
+    // new-line::
+    //   Carriage-return character (U+000D)
+    //   Line-feed character (U+000A)
+    //   Carriage-return character followed by line-feed character
 
     fn str_scan_end_of_line(s: &[u8], i: usize) -> usize {
         match s.get(i).map(|x| *x as char) {
@@ -1701,12 +1687,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_single_line_comment(&mut self) -> Token::Trivia {
-        /* A fallthrough comment is two slashes, any amount of whitespace,
-          FALLTHROUGH, and any characters may follow.
-          An unsafe comment is two slashes, any amount of whitespace,
-          UNSAFE, and then any characters may follow.
-          TODO: Consider allowing lowercase fallthrough.
-        */
+        // A fallthrough comment is two slashes, any amount of whitespace,
+        // FALLTHROUGH, and any characters may follow.
+        // An unsafe comment is two slashes, any amount of whitespace,
+        // UNSAFE, and then any characters may follow.
+        // TODO: Consider allowing lowercase fallthrough.
 
         self.advance(2);
         self.skip_whitespace();
@@ -1735,8 +1720,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 if self.at_end() {
                     return self.with_error(Errors::error0007);
                 } else {
-                    /* TODO: Do we want to give a warning for an embedded zero char
-                    inside a comment? */
+                    // TODO: Do we want to give a warning for an embedded zero char
+                    // inside a comment?
                     offset = 1;
                 }
             } else if ch0 == '*' && (self.peek_char(offset + 1)) == '/' {
@@ -1748,20 +1733,20 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_delimited_comment(&mut self) -> Token::Trivia {
-        /* An unsafe expression comment is a delimited comment that begins with any
-        whitespace, followed by UNSAFE_EXPR, followed by any text.
-
-        The original lexer lexes a fixme / ignore error as:
-
-        slash star [whitespace]* HH_FIXME [whitespace or newline]* leftbracket
-        [whitespace or newline]* integer [any text]* star slash
-
-        Notice that the original lexer oddly enough does not verify that there
-        is a right bracket.
-
-        For our purposes we will just check for HH_FIXME / HH_IGNORE_ERROR;
-        a later pass can try to parse out the integer if there is one,
-        give a warning if there is not, and so on. */
+        // An unsafe expression comment is a delimited comment that begins with any
+        // whitespace, followed by UNSAFE_EXPR, followed by any text.
+        //
+        // The original lexer lexes a fixme / ignore error as:
+        //
+        // slash star [whitespace]* HH_FIXME [whitespace or newline]* leftbracket
+        // [whitespace or newline]* integer [any text]* star slash
+        //
+        // Notice that the original lexer oddly enough does not verify that there
+        // is a right bracket.
+        //
+        // For our purposes we will just check for HH_FIXME / HH_IGNORE_ERROR;
+        // a later pass can try to parse out the integer if there is one,
+        // give a warning if there is not, and so on.
 
         self.advance(2);
         self.skip_whitespace();
@@ -1781,20 +1766,19 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     fn scan_php_trivia(&mut self) -> Option<Token::Trivia> {
-        /* Hack does not support PHP style embedded markup:
-          <?php
-          if (x) {
-          ?>
-          <foo>bar</foo>
-          <?php
-          } else { ... }
-
-        However, ?> is never legal in Hack, so we can treat ?> ... any text ... <?php
-        as a comment, and then give an error saying that this feature is not supported
-        in Hack.
-
-        TODO: Give an error if this appears in a Hack program.
-        */
+        // Hack does not support PHP style embedded markup:
+        // <?php
+        // if (x) {
+        // ?>
+        // <foo>bar</foo>
+        // <?php
+        // } else { ... }
+        //
+        // However, ?> is never legal in Hack, so we can treat ?> ... any text ... <?php
+        // as a comment, and then give an error saying that this feature is not supported
+        // in Hack.
+        //
+        // TODO: Give an error if this appears in a Hack program.
         match self.peek_char(0) {
             '#' => {
                 self.start_new_lexeme();
@@ -1822,15 +1806,15 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             }
             _ => {
                 self.start_new_lexeme();
-                /* Not trivia */
+                // Not trivia
                 None
             }
         }
     }
 
     fn scan_xhp_trivia(&mut self) -> Option<Token::Trivia> {
-        /* TODO: Should XHP comments <!-- --> be their own thing, or a kind of
-        trivia associated with a token? Right now they are the former. */
+        // TODO: Should XHP comments <!-- --> be their own thing, or a kind of
+        // trivia associated with a token? Right now they are the former.
         let i = self.offset;
         let ch = self.peek_char(0);
         match ch {
@@ -1845,7 +1829,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 Some(Token::Trivia::make_eol(self.source, i, j - i))
             }
             _ =>
-            /* Not trivia */
+            // Not trivia
             {
                 self.start_new_lexeme();
                 None
@@ -1853,18 +1837,16 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    /*
-    We divide trivia into "leading" and "trailing" trivia of an associated
-    token. This means that we must find a dividing line between the trailing trivia
-    following one token and the leading trivia of the following token. Plainly
-    we need only find this line while scanning trailing trivia. The heuristics
-    we use are:
-    * The first newline trivia encountered is the last trailing trivia.
-    * The newline which follows a // or # comment is not part of the comment
-      but does terminate the trailing trivia.
-    * A pragma to turn checks off (HH_FIXME, HH_IGNORE_ERROR and UNSAFE_EXPR) is
-    * always a leading trivia.
-    */
+    // We divide trivia into "leading" and "trailing" trivia of an associated
+    // token. This means that we must find a dividing line between the trailing trivia
+    // following one token and the leading trivia of the following token. Plainly
+    // we need only find this line while scanning trailing trivia. The heuristics
+    // we use are:
+    // * The first newline trivia encountered is the last trailing trivia.
+    // * The newline which follows a // or # comment is not part of the comment
+    //   but does terminate the trailing trivia.
+    // * A pragma to turn checks off (HH_FIXME, HH_IGNORE_ERROR and UNSAFE_EXPR) is
+    //   always a leading trivia.
     fn scan_leading_trivia(
         &mut self,
         scanner: &Fn(&mut Self) -> Option<Token::Trivia>,
@@ -1993,9 +1975,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         scanner: &Fn(&mut Self) -> TokenKind,
         as_name: KwSet,
     ) -> (TokenKind, usize, Vec<Token::Trivia>) {
-        /* Get past the leading trivia */
+        // Get past the leading trivia
         let leading = self.scan_leading_php_trivia();
-        /* Remember where we were when we started this token */
+        // Remember where we were when we started this token
         self.start_new_lexeme();
         let kind = scanner(self);
         let kind = match as_name {
@@ -2019,7 +2001,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             TokenKind::DoubleQuotedStringLiteralHead => vec![],
             TokenKind::QuestionGreaterThan => {
                 if Self::is_newline(self.peek_char(0)) {
-                    /* consume only trailing EOL token after ?> as trailing trivia */
+                    // consume only trailing EOL token after ?> as trailing trivia
                     vec![self.scan_end_of_line()]
                 } else {
                     vec![]
@@ -2065,7 +2047,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.scan_next_token(scanner, KwSet::NonReservedKeywords)
     }
 
-    /* Entrypoints */
+    // Entrypoints
 
     pub fn next_token(&mut self) -> Token {
         if self.in_type {
@@ -2088,10 +2070,10 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     pub fn next_token_in_string(&mut self, literal_kind: &StringLiteralKind) -> Token {
         let token_start = self.offset;
         self.start_new_lexeme();
-        /* We're inside a string. Do not scan leading trivia. */
+        // We're inside a string. Do not scan leading trivia.
         let kind = self.scan_string_literal_in_progress(literal_kind);
         let w = self.width();
-        /* Only scan trailing trivia if we've finished the string. */
+        // Only scan trailing trivia if we've finished the string.
         let trailing = match kind {
             TokenKind::DoubleQuotedStringLiteralTail | TokenKind::HeredocStringLiteralTail => {
                 self.scan_trailing_php_trivia()
@@ -2102,8 +2084,8 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     pub fn next_docstring_header(&mut self) -> (Token, &'a [u8]) {
-        /* We're at the beginning of a heredoc string literal. Scan leading
-        trivia but not trailing trivia. */
+        // We're at the beginning of a heredoc string literal. Scan leading
+        // trivia but not trailing trivia.
         let token_start = self.offset;
         let leading = self.scan_leading_php_trivia();
         self.start_new_lexeme();
@@ -2128,14 +2110,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     pub fn next_xhp_element_token(&mut self, no_trailing: bool) -> (Token, &[u8]) {
-        /* XHP elements have whitespace, newlines and Hack comments. */
+        // XHP elements have whitespace, newlines and Hack comments.
         let tokenizer = |lexer: &mut Self| {
             let token_start = lexer.offset;
             let (kind, w, leading) =
                 lexer.scan_token_and_leading_trivia(&Self::scan_xhp_token, KwSet::AllKeywords);
-            /* We do not scan trivia after an XHPOpen's >. If that is the beginning of
-            an XHP body then we want any whitespace or newlines to be leading trivia
-            of the body token. */
+            // We do not scan trivia after an XHPOpen's >. If that is the beginning of
+            // an XHP body then we want any whitespace or newlines to be leading trivia
+            // of the body token.
             match kind {
                 TokenKind::GreaterThan | TokenKind::SlashGreaterThan if no_trailing => {
                     Token::make(kind, token_start, w, leading, vec![])
@@ -2162,11 +2144,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             let kind = lexer.scan_xhp_body();
             let w = lexer.width();
             let trailing =
-             /* Trivia (leading and trailing) is semantically
-                significant for XHPBody tokens. When we find elements or
-                braced expressions inside the body, the trivia should be
-                seen as leading the next token, but we should certainly
-                keep it trailing if this is an XHPBody token. */
+             // Trivia (leading and trailing) is semantically
+             // significant for XHPBody tokens. When we find elements or
+             // braced expressions inside the body, the trivia should be
+             // seen as leading the next token, but we should certainly
+             // keep it trailing if this is an XHPBody token.
              if kind == TokenKind::XHPBody
              { lexer.scan_trailing_xhp_trivia() }
              else  { vec!() };
@@ -2195,11 +2177,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         markup_text: Token,
         less_than_question_token: Token,
     ) -> (Token, Option<(Token, Option<Token>)>) {
-        /* skip name*/
+        // skip name
         self.advance(size);
-        /* single line comments that follow the language in leading markup_text
-        determine the file check mode, read the trailing trivia and attach it
-        to the language token */
+        // single line comments that follow the language in leading markup_text
+        // determine the file check mode, read the trailing trivia and attach it
+        // to the language token
         let trailing = self.scan_trailing_php_trivia();
         let name = Token::make(TokenKind::Name, name_token_offset, size, vec![], trailing);
         (markup_text, Some((less_than_question_token, Some(name))))
@@ -2209,7 +2191,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let markup_text = self.make_markup_token();
         let less_than_question_token =
             Token::make(TokenKind::LessThanQuestion, self.offset, 2, vec![], vec![]);
-        /* skip <? */
+        // skip <?
         self.advance(2);
         let name_token_offset = self.offset;
         let ch0 = self.peek_char(0).to_ascii_lowercase();
@@ -2226,7 +2208,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             }
             ('=', _, _) => {
                 self.set_is_hh_file(false);
-                /* skip = */
+                // skip =
                 self.advance(1);
                 let equal = Token::make(TokenKind::Equal, name_token_offset, 1, vec![], vec![]);
 
@@ -2241,7 +2223,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn skip_to_end_of_markup(&mut self) -> (Token, Option<(Token, Option<Token>)>) {
         let start_offset = {
-            /* if leading section starts with #! - it should span the entire line */
+            // if leading section starts with #! - it should span the entire line
             let index = self.offset;
             if index != 0 {
                 panic!("Should only try to lex header at start of document")
@@ -2249,10 +2231,10 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             if self.peek_def(index, INVALID) == '#' && self.peek_def(index + 1, INVALID) == '!' {
                 self.skip_while_to_offset(&Self::not_newline) + 1
             } else {
-                /* this should really just be `index` - but, skip whitespace as the FFP */
-                /* tests use magic comments in leading markup to set flags, but blank */
-                /* them out before parsing; the newlines are kept to provide correct line */
-                /* numbers in errors */
+                // this should really just be `index` - but, skip whitespace as the FFP
+                // tests use magic comments in leading markup to set flags, but blank
+                // them out before parsing; the newlines are kept to provide correct line
+                // numbers in errors
                 self.skip_while_to_offset(&|x| {
                     Self::is_newline(x) || Self::is_whitespace_no_newline(x)
                 })
@@ -2262,7 +2244,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             self.with_offset(start_offset);
             self.make_markup_and_suffix()
         } else {
-            self.set_is_hh_file(true); /* no header means it's a .hack file */
+            self.set_is_hh_file(true); // no header means it's a .hack file
             (self.make_markup_token(), None)
         }
     }
@@ -2275,7 +2257,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     pub fn is_next_xhp_category_name(&self) -> bool {
         let mut lexer = self.clone();
         let _ = lexer.scan_leading_php_trivia();
-        /* An XHP category is an xhp element name preceded by a %. */
+        // An XHP category is an xhp element name preceded by a %.
         let ch0 = lexer.peek_char(0);
         let ch1 = lexer.peek_char(1);
         ch0 == '%' && Self::is_name_nondigit(ch1)
@@ -2296,11 +2278,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
     }
 
     pub fn rescan_halt_compiler(&mut self, last_token: Token) -> Token {
-        /* __halt_compiler stops parsing of the file.
-        In order to preserve fill fidelity aspect of the parser
-        we pack everything that follows __halt_compiler as
-        separate opaque kind of trivia - it will be attached as a trailing trivia
-        to the last_token and existing trailing trivia will be merged in. */
+        // __halt_compiler stops parsing of the file.
+        // In order to preserve fill fidelity aspect of the parser
+        // we pack everything that follows __halt_compiler as
+        // separate opaque kind of trivia - it will be attached as a trailing trivia
+        // to the last_token and existing trailing trivia will be merged in.
 
         // This is incorrect for minimal token
         let leading_start_offset = last_token.leading_start_offset().unwrap_or(0);

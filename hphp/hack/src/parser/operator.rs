@@ -1,18 +1,16 @@
-/**
- * Copyright (c) 2019, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the "hack" directory of this source tree.
- *
-*/
+// Copyright (c) 2019, Facebook, Inc.
+// All rights reserved.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use crate::parser_env::ParserEnv;
 use crate::token_kind::TokenKind;
 
 pub enum Operator {
     DollarOperator,
-    /* TODO: Is there a better name? Operators should be named as what they do,
-    not how they look on the page. */
+    // TODO: Is there a better name? Operators should be named as what they do,
+    // not how they look on the page.
     IndexingOperator,
     FunctionCallOperator,
     AwaitOperator,
@@ -101,12 +99,12 @@ use self::Operator::*;
 
 impl Operator {
     pub fn precedence(&self, env: &ParserEnv) -> usize {
-        /* TODO: eval */
-        /* TODO: Comma */
-        /* TODO: elseif */
-        /* TODO: else */
-        /* TODO: endif */
-        /* TODO: variable operator $ */
+        // TODO: eval
+        // TODO: Comma
+        // TODO: elseif
+        // TODO: else
+        // TODO: endif
+        // TODO: variable operator $
         match self {
             | IncludeOperator | IncludeOnceOperator | RequireOperator
             | RequireOnceOperator => 1,
@@ -148,10 +146,10 @@ impl Operator {
             | PrefixIncrementOperator | PrefixDecrementOperator
             | ExponentOperator => 22,
             | PostfixIncrementOperator | PostfixDecrementOperator => 23,
-            | AwaitOperator /* implicit: when Env.enable_stronger_await_binding env */
+            | AwaitOperator // implicit: when Env.enable_stronger_await_binding env
                 => 23,
             | CloneOperator => 24,
-            /* value 25 is reserved for assignment that appear in expressions */
+            // value 25 is reserved for assignment that appear in expressions
             | ReferenceOperator => 26,
             | FunctionCallOperator => 27,
             | NewOperator => 28,
@@ -185,15 +183,15 @@ impl Operator {
             | IncludeOperator | IncludeOnceOperator | RequireOperator
             | RequireOnceOperator | PHPAndOperator | PHPOrOperator
             | PHPExclusiveOrOperator | IsOperator | AsOperator | NullableAsOperator
-                /* eval */
-                /* Comma */
-                /* elseif */
-                /* else */
-                /* endif */
+                // eval
+                // Comma
+                // elseif
+                // else
+                // endif
                 => Assoc::LeftAssociative,
             | CoalesceOperator | CoalesceAssignmentOperator | LogicalNotOperator | NotOperator | CastOperator
-            | DollarOperator | UnaryPlusOperator | UnaryMinusOperator  /* TODO: Correct? */
-            | ErrorControlOperator | ReferenceOperator /* TODO: Correct? */
+            | DollarOperator | UnaryPlusOperator | UnaryMinusOperator  // TODO: Correct?
+            | ErrorControlOperator | ReferenceOperator // TODO: Correct?
             | PostfixIncrementOperator | PostfixDecrementOperator
             | PrefixIncrementOperator | PrefixDecrementOperator | ExponentOperator
             | AssignmentOperator | AdditionAssignmentOperator
@@ -204,7 +202,7 @@ impl Operator {
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
             | PrintOperator | SuspendOperator => Assoc::RightAssociative,
-            | AwaitOperator /* implicitly: Env.enable_stronger_await_binding env*/
+            | AwaitOperator // implicitly: Env.enable_stronger_await_binding env
                 => Assoc::RightAssociative,
         }
     }
@@ -233,7 +231,7 @@ impl Operator {
         }
     }
 
-    /* Is this a token that can appear after an expression? */
+    // Is this a token that can appear after an expression?
     pub fn is_trailing_operator_token(token: TokenKind) -> bool {
         match token {
             TokenKind::And

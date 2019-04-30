@@ -27,6 +27,8 @@ pub mod operator;
 pub mod parser;
 pub mod parser_env;
 
+pub mod decl_mode_smart_constructors;
+mod decl_mode_smart_constructors_generated;
 pub mod flatten_smart_constructors;
 
 #[macro_use]

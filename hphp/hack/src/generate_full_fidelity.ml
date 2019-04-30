@@ -1313,6 +1313,73 @@ CONSTRUCTOR_METHODS}
   }
 end (* GenerateFFRustSyntaxSmartConstructors *)
 
+module GenerateFFRustDeclModeSmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i)in
+    let args = String.concat ~sep:", " args in
+    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let fwd_args = String.concat ~sep:", " fwd_args in
+    sprintf "    fn make_%s(s: Vec<bool>, %s) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, Token, Value, State<Self::R>>>::make_%s(s, %s)
+    }\n\n"
+      x.type_name args x.type_name fwd_args
+
+  let decl_mode_smart_constructors_template: string = (make_header CStyle "") ^ "
+use crate::decl_mode_smart_constructors::*;
+use crate::lexable_token::LexableToken;
+use crate::parser_env::ParserEnv;
+use crate::smart_constructors::{SmartConstructors, StateType};
+use crate::syntax::Syntax;
+use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+use crate::syntax::SyntaxValueType;
+
+impl<Token, Value>
+SmartConstructors<<State<Syntax<Token, Value>> as StateType<Syntax<Token, Value>>>::T>
+    for DeclModeSmartConstructors<Token, Value>
+where
+    Token: LexableToken,
+    Value: SyntaxValueType<Token>,
+{
+    type Token = Token;
+    type R = Syntax<Token, Value>;
+
+    fn initial_state(env: &ParserEnv) -> Vec<bool> {
+        <Self as SyntaxSmartConstructors<Self::R, Token, Value, State<Self::R>>>::initial_state(env)
+    }
+
+    fn make_missing(s: Vec<bool>, o: usize) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, Token, Value, State<Self::R>>>::make_missing(s, o)
+    }
+
+    fn make_token(s: Vec<bool>, token: Self::Token) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, Token, Value, State<Self::R>>>::make_token(s, token)
+    }
+
+    fn make_list(
+        s: Vec<bool>,
+        items: Box<Vec<Self::R>>,
+        offset: usize,
+    ) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, Token, Value, State<Self::R>>>::make_list(s, items, offset)
+    }
+
+CONSTRUCTOR_METHODS}
+"
+  let decl_mode_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^ "decl_mode_smart_constructors_generated.rs";
+    template = decl_mode_smart_constructors_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFRustDeclModeSmartConstructors *)
+
 module GenerateFlattenSmartConstructors = struct
   let to_constructor_methods x =
     let fields = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i)
@@ -3180,6 +3247,8 @@ let () =
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
   generate_file
     GenerateFFRustSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
+  generate_file
+    GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
   generate_file
     GenerateFlattenSmartConstructors.flatten_smart_constructors;
   generate_file

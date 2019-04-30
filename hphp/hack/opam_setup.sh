@@ -92,6 +92,7 @@ opam install \
   ppx_deriving.4.2.1 \
   ppx_gen_rec.1.0.0 \
   sedlex.1.99.4 \
+  sqlite3.4.4.1 \
   uchar.0.0.2 \
   visitors.20180513 \
   wtf8.1.0.1

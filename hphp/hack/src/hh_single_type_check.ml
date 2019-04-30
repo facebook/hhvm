@@ -447,6 +447,7 @@ let parse_options () =
     ?tco_log_inference_constraints:(!log_inference_constraints)
     ?tco_new_inference:(!new_inference)
     ?tco_new_inference_lambda:(!new_inference_lambda)
+    ?tco_timeout:(!timeout)
     ?tco_disallow_invalid_arraykey:(!disallow_invalid_arraykey)
     ?po_auto_namespace_map:(!auto_namespace_map)
     ?po_enable_concurrent:(!enable_concurrent)

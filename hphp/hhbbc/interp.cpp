@@ -390,6 +390,11 @@ void in(ISS& env, const bc::PopC&) {
       replace_last_op(env, bc::PopL { last->SetL.loc1 });
       return reduce(env);
     }
+    if (last->op == Op::CGetL2) {
+      auto loc = last->CGetL2.loc1;
+      rewind(env, 1);
+      return reduce(env, bc::PopC {}, bc::CGetL { loc });
+    }
   }
 
   effect_free(env);

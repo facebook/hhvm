@@ -12,3 +12,4 @@ array(5) {
 }
 string(9) "PHPSESSID"
 string(5) "name1"
+string(0) ""

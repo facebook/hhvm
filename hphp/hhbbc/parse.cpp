@@ -63,6 +63,8 @@ const StaticString s_Stringish("Stringish");
 const StaticString s_XHPChild("XHPChild");
 const StaticString s_attr_Deprecated("__Deprecated");
 const StaticString s_class_alias("class_alias");
+const StaticString s___NoContextSensitiveAnalysis(
+    "__NoContextSensitiveAnalysis");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -776,6 +778,8 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->isReified           = fe.userAttributes.find(s___Reified.get()) !=
                              fe.userAttributes.end();
   ret->isRxDisabled        = fe.isRxDisabled;
+  ret->noContextSensitiveAnalysis = fe.userAttributes.find(
+    s___NoContextSensitiveAnalysis.get()) != fe.userAttributes.end();
 
   add_frame_variables(*ret, fe);
 

@@ -3243,7 +3243,8 @@ Type context_sensitive_return_type(IndexData& data,
 
   // TODO(#3788877): more heuristics here would be useful.
   bool const tryContextSensitive = [&] {
-    if (finfo->func->params.empty() ||
+    if (finfo->func->noContextSensitiveAnalysis ||
+        finfo->func->params.empty() ||
         interp_nesting_level + 1 >= max_interp_nexting_level ||
         returnType == TBottom) {
       return false;

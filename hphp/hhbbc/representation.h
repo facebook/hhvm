@@ -388,6 +388,8 @@ struct Func : FuncBase {
 
   bool isRxDisabled: 1;
 
+  bool noContextSensitiveAnalysis: 1;
+
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type

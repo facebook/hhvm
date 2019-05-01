@@ -71,8 +71,6 @@ hphp/system/php/spl/iterators/RecursiveCachingIterator.php
 
 hphp/system/php/filter/filter_var_array.php
 
-hphp/system/php/sessions/SessionHandlerInterface.php
-
 hphp/system/php/redis/RedisException.php
 
 hphp/system/php/date/datetimeinterface.php
@@ -110,7 +108,6 @@ hphp/system/php/misc/fb_autoload_map.php
 hphp/system/php/misc/idx.php
 hphp/system/php/pdo/PDOException.php
 hphp/system/php/redis/Redis.php
-hphp/system/php/redis/RedisSessionModule.php
 hphp/system/php/rx/mutable.php
 hphp/system/php/shapes/Shapes.php
 hphp/system/php/soap/SoapFault.php

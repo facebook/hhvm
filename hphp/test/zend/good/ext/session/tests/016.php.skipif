@@ -1,4 +1,0 @@
-<?php
-if (!extension_loaded("session")) {
-    die("skip Session module not loaded");
-}

@@ -692,8 +692,6 @@ void ExecutionContext::onShutdownPreSend() {
   executeFunctions(ShutDown);
 }
 
-extern void ext_session_request_shutdown();
-
 void ExecutionContext::debuggerExecutePsps() {
   try {
     executeFunctions(PostSend);
@@ -731,13 +729,6 @@ void ExecutionContext::onShutdownPostSend() {
   } catch (...) {
     Logger::Error("unknown exception was thrown from psp");
   }
-
-  /*
-   * This has to happen before requestEventHandler shutdown hooks,
-   * because it can run user code which may need to access other
-   * RequestLocal objects (such as the stream registry).
-   */
-  ext_session_request_shutdown();
 
   ServerStats::SetThreadMode(ServerStats::ThreadMode::Idling);
 }

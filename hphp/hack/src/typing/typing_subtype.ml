@@ -2398,11 +2398,8 @@ let add_constraint
  *   covariant key and element types for tuples, arrays, and shapes
  *   covariant return type and contravariant parameter types for function types
  *   co- and contra-variant parameters to classish types and newtypes
- * Assert that the component is a subtype of the fresh variable (covariant) or
- * a supertype of the fresh variable (contravariant).
- *
  * Note that the variance of type variables is set explicitly to be invariant
- * because we only use this function on the lower bounds of an invariant
+ * because we only use this function on the lower or upper bounds of an invariant
  * type variable.
  *
  * Also note that freshening lifts through unions and nullables.
@@ -2410,113 +2407,101 @@ let add_constraint
  * Example 1: the type
  *   ?dict<t1,t2>
  * will be transformed to
- *   ?dict<tvar1,tvar2> with t1 <: tvar1 and t2 <: tvar2
+ *   ?dict<#1,#2>
  *
- * Example 2: the type
- *   Contra<t>
+ * Example 2: the contravariant/invariant type
+ *   ContraInv<t1,t2>
  * will be transformed to
- *   Contra<tvar1> with tvar1 <: t
+ *   Contra<#1,t2>
+ * leaving the invariant component alone.
  *)
-let rec freshen_inside_ty_wrt_variance env ((r, ty_) as ty) =
+let rec freshen_inside_ty env ((r, ty_) as ty) =
   let default () = env, ty in
   match ty_ with
   | Tany | Tnonnull | Terr | Tdynamic | Tobject | Tprim _ | Tanon _ | Tabstract(_, None) ->
     default ()
     (* Nullable is covariant *)
   | Toption ty ->
-    let env, ty = freshen_inside_ty_wrt_variance env ty in
+    let env, ty = freshen_inside_ty env ty in
     env, (r, Toption ty)
   | Tunresolved tyl ->
-    let env, tyl = List.map_env env tyl freshen_inside_ty_wrt_variance in
+    let env, tyl = List.map_env env tyl freshen_inside_ty in
     env, (r, Tunresolved tyl)
     (* Tuples are covariant *)
   | Ttuple tyl ->
-    let env, tyl = List.map_env env tyl (freshen_ty ~variance:Ast.Covariant) in
+    let env, tyl = List.map_env env tyl freshen_ty in
     env, (r, Ttuple tyl)
     (* Shape data is covariant *)
   | Tshape (known, fdm) ->
-    let env, fdm = ShapeFieldMap.map_env (freshen_ty ~variance:Ast.Covariant) env fdm in
+    let env, fdm = ShapeFieldMap.map_env freshen_ty env fdm in
     env, (r, Tshape (known, fdm))
     (* Functions are covariant in return type, contravariant in parameter types *)
   | Tfun ft ->
-    let env, ft_ret = freshen_ty ~variance:Ast.Covariant env ft.ft_ret in
+    let env, ft_ret = freshen_ty env ft.ft_ret in
     let env, ft_params = List.map_env env ft.ft_params
       (fun env p ->
-       let env, fp_type = freshen_ty ~variance:Ast.Contravariant env p.fp_type in
+       let env, fp_type = freshen_ty env p.fp_type in
        env, { p with fp_type = fp_type }) in
     env, (r, Tfun { ft with ft_ret = ft_ret; ft_params = ft_params })
-    (* Newtype definitions carry their own variance declarations *)
   | Tabstract (AKnewtype (name, tyl), tyopt) ->
     begin match Env.get_typedef env name with
     | None ->
       default ()
     | Some td ->
       let variancel = List.map td.td_tparams (fun t -> t.tp_variance) in
-      let env, tyl = freshen_tparams_wrt_variance env variancel tyl in
+      let env, tyl = freshen_tparams env variancel tyl in
       env, (r, Tabstract (AKnewtype (name, tyl), tyopt))
     end
   | Tabstract _ ->
     default ()
-    (* Classes carry their own variance declarations *)
   | Tclass ((p, cid), e, tyl) ->
     begin match Env.get_class env cid with
     | None ->
       default ()
     | Some cls ->
       let variancel = List.map (Cls.tparams cls) (fun t -> t.tp_variance) in
-      let env, tyl = freshen_tparams_wrt_variance env variancel tyl in
+      let env, tyl = freshen_tparams env variancel tyl in
       env, (r, Tclass((p, cid), e, tyl))
     end
-    (* Arrays are covariant in key and data types *)
   | Tarraykind ak ->
     begin match ak with
     | AKany | AKempty -> default ()
     | AKvarray ty ->
-      let env, ty = freshen_ty ~variance:Ast.Covariant env ty in
+      let env, ty = freshen_ty env ty in
       env, (r, Tarraykind (AKvarray ty))
     | AKvec ty ->
-      let env, ty = freshen_ty ~variance:Ast.Covariant env ty in
+      let env, ty = freshen_ty env ty in
       env, (r, Tarraykind (AKvec ty))
     | AKvarray_or_darray ty ->
-      let env, ty = freshen_ty ~variance:Ast.Covariant env ty in
+      let env, ty = freshen_ty env ty in
       env, (r, Tarraykind (AKvarray_or_darray ty))
     | AKdarray (ty1, ty2) ->
-      let env, ty1 = freshen_ty ~variance:Ast.Covariant env ty1 in
-      let env, ty2 = freshen_ty ~variance:Ast.Covariant env ty2 in
+      let env, ty1 = freshen_ty env ty1 in
+      let env, ty2 = freshen_ty env ty2 in
       env, (r, Tarraykind (AKdarray (ty1, ty2)))
     | AKmap (ty1, ty2) ->
-      let env, ty1 = freshen_ty ~variance:Ast.Covariant env ty1 in
-      let env, ty2 = freshen_ty ~variance:Ast.Covariant env ty2 in
+      let env, ty1 = freshen_ty env ty1 in
+      let env, ty2 = freshen_ty env ty2 in
       env, (r, Tarraykind (AKmap (ty1, ty2)))
     end
   | Tvar _ ->
     default ()
 
-and freshen_ty ~variance env ty =
-  match variance with
-  | Ast.Invariant -> env, ty
-  | Ast.Covariant | Ast.Contravariant ->
-    let v = Env.fresh () in
-    let env = Env.add_current_tyvar env (Reason.to_pos (fst ty)) v in
-    let env = Env.set_tyvar_appears_covariantly env v in
-    let env = Env.set_tyvar_appears_contravariantly env v in
-    let freshty = (fst ty, Tvar v) in
-    let env =
-      if variance = Ast.Covariant
-      then sub_type env ty freshty
-      else sub_type env freshty ty in
-    env, freshty
+and freshen_ty env ty =
+  Env.fresh_invariant_type_var env (Reason.to_pos (fst ty))
 
-and freshen_tparams_wrt_variance env variancel tyl =
-   match variancel, tyl with
-   | [], [] ->
-     env, []
-   | variance::variancel, ty::tyl ->
-     let env, tyl = freshen_tparams_wrt_variance env variancel tyl in
-     let env, ty = freshen_ty ~variance env ty in
-     env, ty::tyl
-   | _ ->
-     env, tyl
+and freshen_tparams env variancel tyl =
+    match variancel, tyl with
+    | [], [] ->
+      env, []
+    | variance::variancel, ty::tyl ->
+      let env, tyl = freshen_tparams env variancel tyl in
+      let env, ty =
+        if variance = Ast.Invariant then env,ty
+        else freshen_ty env ty in
+      env, ty::tyl
+    | _ ->
+      env, tyl
 
 let bind env var ty =
   Env.log_env_change "bind" env @@
@@ -2561,7 +2546,10 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
    *)
   let env, ty =
     if freshen
-    then freshen_inside_ty_wrt_variance env ty
+    then
+      let env, newty = freshen_inside_ty env ty in
+      let env = sub_type env ty newty in
+      env, newty
     else env, ty in
   (* If any of the components of the union are type variables, then remove
   * var from their upper bounds. Why? Because if we construct

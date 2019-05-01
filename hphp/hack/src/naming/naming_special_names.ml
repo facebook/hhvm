@@ -21,9 +21,9 @@ module Classes = struct
   let cAwaitable = "\\Awaitable"
   let cGenerator = "\\Generator"
   let cAsyncGenerator = "\\AsyncGenerator"
-  let is_format_string x = match x with
-    "\\FormatString" | "\\HH\\FormatString" -> true
-    | _ -> false
+  let cFormatString = "\\FormatString"
+  let cHHFormatString = "\\HH\\FormatString"
+  let is_format_string x = x = cFormatString || x = cHHFormatString
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 

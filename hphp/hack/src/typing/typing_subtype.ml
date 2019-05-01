@@ -2044,16 +2044,22 @@ let rec sub_string
     TypecheckerOptions.disallow_stringish_magic (Env.get_tcopt env) in
   (* Under constraint-based inference, we implement sub_string as a subtype test.
    * All the cases in the legacy implementation just fall out from subtyping rules.
-   * We test against ?(arraykey | bool | float | resource | object | dynamic)
+   * We test against ?(arraykey | bool | float | resource | object | dynamic |
+   * FormatString<T> | HH\FormatString<T>).
    *)
   if not allow_mixed && TypecheckerOptions.new_inference (Env.get_tcopt env)
   then
     let r = Reason.Rwitness p in
-    let tyl = [MakeType.arraykey r;
-               MakeType.bool r;
-               MakeType.float r;
-               MakeType.resource r;
-               MakeType.dynamic r] in
+    let env, formatter_tyvar = Env.fresh_invariant_type_var env p in
+    let tyl = [
+      MakeType.arraykey r;
+      MakeType.bool r;
+      MakeType.float r;
+      MakeType.resource r;
+      MakeType.dynamic r;
+      MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
+      MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
+    ] in
     let stringish =
       (Reason.Rwitness p, Tclass((p, SN.Classes.cStringish), Nonexact, [])) in
     let tyl =

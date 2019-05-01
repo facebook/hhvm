@@ -614,6 +614,7 @@ let class_constructor_destructor_has_non_void_type env node _context =
     (is_construct label || is_destruct label) &&
     not (is_missing || is_void)
   | _ -> false
+
 let async_magic_method node _context =
   match node with
   | FunctionDeclarationHeader node ->
@@ -626,6 +627,12 @@ let async_magic_method node _context =
     end
   | _ -> false
 
+let call_static_method node _context =
+  match node with
+  | FunctionDeclarationHeader node ->
+    let name = String.lowercase @@ text node.function_name in
+    name = String.lowercase SN.Members.__callStatic
+  | _ -> false
 
 let clone_destruct_takes_no_arguments _method_name node _context =
   match node with
@@ -1341,7 +1348,6 @@ let special_method_param_errors node context errors =
     let num_args_opt =
       match s with
       | _ when s = SN.Members.__call && len <> 2 -> Some 2
-      | _ when s = String.lowercase SN.Members.__callStatic && len <> 2 -> Some 2
       | _ when s = SN.Members.__get && len <> 1 -> Some 1
       | _ when s = SN.Members.__set && len <> 2 -> Some 2
       | _ when s = SN.Members.__isset && len <> 1 -> Some 1
@@ -1355,7 +1361,6 @@ let special_method_param_errors node context errors =
           node (SyntaxError.invalid_number_of_args full_name n) :: errors
     in
     let errors = if (s = SN.Members.__call
-                  || s = String.lowercase SN.Members.__callStatic
                   || s = SN.Members.__get
                   || s = SN.Members.__set
                   || s = SN.Members.__isset
@@ -1460,6 +1465,9 @@ let methodish_errors env node errors =
     let errors =
       produce_error_for_header errors async_magic_method header_node env.context
       (SyntaxError.async_magic_method ~name:method_name) modifiers in
+    let errors =
+      produce_error_for_header errors call_static_method header_node env.context
+      (SyntaxError.call_static_method) modifiers in
     let errors =
       produce_error_for_header errors
       (clone_destruct_takes_no_arguments method_name) header_node env.context
@@ -2063,7 +2071,6 @@ let is_in_unyieldable_magic_method context =
     begin match s with
     | _ when s = SN.Members.__call -> false
     | _ when s = SN.Members.__invoke -> false
-    | _ when s = String.lowercase SN.Members.__callStatic -> false
     | _ -> SSet.mem s SN.Members.as_lowercase_set
     end
 

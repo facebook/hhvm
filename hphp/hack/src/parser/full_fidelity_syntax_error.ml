@@ -360,6 +360,8 @@ let strict_types_first_statement =
   "strict_types declaration must be the very first statement in the script"
 let async_magic_method ~name =
   "cannot declare constructors, destructors, and magic methods such as '"^ name ^ "' async"
+let call_static_method =
+  "__callStatic methods are no longer supported"
 
 let reserved_keyword_as_class_name class_name =
   "Cannot use '" ^ class_name ^ "' as class name as it is reserved"

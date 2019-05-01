@@ -13,18 +13,10 @@ class Base {
   protected function __call(string $name, array $args): int {
     return 123;
   }
-
-  public static function __callStatic(string $name, array $args): string {
-    return "hello";
-  }
 }
 
 class Child extends Base {
   public function foo(): int {
     return $this->getFoo();
-  }
-
-  public static function bar(): string {
-    return Child::getFoo();
   }
 }

@@ -221,6 +221,7 @@ val reassign_this : string
 val this_in_static : string
 val strict_types_first_statement : string
 val async_magic_method : name:string -> string
+val call_static_method : string
 val reserved_keyword_as_class_name : string -> string
 val inout_param_in_async_generator : string
 val inout_param_in_generator : string

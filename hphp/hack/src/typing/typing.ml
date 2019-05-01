@@ -4340,29 +4340,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
           let smethod = Env.get_static_member is_method env class_ mid in
           match smethod with
           | None ->
-            (match Env.get_static_member is_method env class_
-              SN.Members.__callStatic with
-              | None ->
-                smember_not_found p ~is_const ~is_method class_ mid;
-                env, (Reason.Rnone, Typing_utils.terr env), None
-              | Some {ce_visibility = vis; ce_lsb = lsb; ce_type = lazy (r, Tfun ft); _} ->
-                let p_vis = Reason.to_pos r in
-                TVis.check_class_access p env (p_vis, vis, lsb) cid class_;
-                let env, ft =
-                  Phase.(localize_ft
-                    ~instantiation: { use_name=strip_ns mid; use_pos=p; explicit_tparams }
-                    ~ety_env env ft) in
-                let arity_pos = match ft.ft_params with
-                  | [_; { fp_pos; fp_kind = FPnormal; _ }] -> fp_pos
-                  (* we should really assert here but this is not yet validated *)
-                  | _ -> p_vis in
-                let ft = { ft with
-                  ft_arity = Fellipsis (0, arity_pos);
-                  ft_tparams = ([], FTKtparams); ft_params = [];
-                } in
-                let res_ty = (r, Tfun ft) in
-                env, res_ty, None
-              | _ -> assert false)
+            smember_not_found p ~is_const ~is_method class_ mid;
+            env, (Reason.Rnone, Typing_utils.terr env), None
           | Some { ce_visibility = vis; ce_lsb = lsb; ce_type = lazy method_; _ } ->
             let p_vis = Reason.to_pos (fst method_) in
             TVis.check_class_access p env (p_vis, vis, lsb) cid class_;

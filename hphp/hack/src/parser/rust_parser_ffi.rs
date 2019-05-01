@@ -33,18 +33,27 @@ extern "C" {
     fn ocamlpool_leave();
 }
 
+unsafe fn block_field(block: &ocaml::Value, field: usize) -> ocaml::Value {
+    ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field))
+}
+
 unsafe fn bool_field(block: &ocaml::Value, field: usize) -> bool {
     ocaml::Value::new(*ocaml::core::mlvalues::field(block.0, field)).i32_val() != 0
+}
+
+unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
+    ocaml::Str::from(ocaml::Value::new(*ocaml::core::mlvalues::field(
+        block.0, field,
+    )))
 }
 
 macro_rules! parse {
     ($name:ident, $parser:ident) => {
         caml!($name, |ocaml_source_text, opts|, <l>, {
-            let content = ocaml::Str::from(
-                ocaml::Value::new(*ocaml::core::mlvalues::field(ocaml_source_text.0, 2))
-            );
-            let data = content.data();
-            let source_text = SourceText::make(&data);
+            let relative_path = block_field(&ocaml_source_text, 0);
+            let file_path = str_field(&relative_path, 1);
+            let content = str_field(&ocaml_source_text, 2);
+            let source_text = SourceText::make(&file_path.as_str(), &content.data());
 
             let is_experimental_mode = bool_field(&opts, 0);
             let enable_stronger_await_binding = bool_field(&opts, 1);

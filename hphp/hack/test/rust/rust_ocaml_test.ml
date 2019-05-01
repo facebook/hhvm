@@ -161,7 +161,11 @@ end end
 let get_files_in_path path =
   let files = Find.find [Path.make path] in
   List.filter ~f:begin fun f ->
-    String_utils.string_ends_with f ".php" &&
+    (
+      String_utils.string_ends_with f ".php" ||
+      String_utils.string_ends_with f ".hhi" ||
+      String_utils.string_ends_with f ".hack"
+    ) &&
     (not @@ String_utils.string_ends_with f "memory_exhaust.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_concat_exp.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php") &&

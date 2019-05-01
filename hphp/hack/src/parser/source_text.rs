@@ -16,11 +16,17 @@ pub struct SourceText<'a> {
     // Using byte slice instead of &str looks ugly, but prevents us from constantly fighting
     // with compiler trying to guide us towards unicode semantics.
     text: &'a [u8],
+    // TODO(kasper) This eventually should be a RelativePath
+    file_path: &'a str,
 }
 
 impl<'a> SourceText<'a> {
-    pub fn make(text: &'a [u8]) -> Self {
-        Self { text }
+    pub fn make(file_path: &'a str, text: &'a [u8]) -> Self {
+        Self { file_path, text }
+    }
+
+    pub fn file_path(&self) -> &'a str {
+        self.file_path
     }
 
     pub fn text(&self) -> &'a [u8] {

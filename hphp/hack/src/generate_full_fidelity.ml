@@ -1521,7 +1521,7 @@ impl<'a> SmartConstructors<HasScriptContent<'a>> for FactsSmartConstructors {
     type R = Node;
 
     fn initial_state(_: &ParserEnv) -> HasScriptContent<'a> {
-        (false, SourceText::make(EMPTY_TEXT))
+        (false, SourceText::make(\"\", EMPTY_TEXT))
     }
 
     fn make_missing(s: HasScriptContent<'a>, _: usize) -> (HasScriptContent<'a>, Self::R) {

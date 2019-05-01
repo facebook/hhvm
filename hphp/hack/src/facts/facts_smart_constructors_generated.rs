@@ -17,6 +17,7 @@
  *
  */
 use parser_rust as parser;
+
 use parser::flatten_smart_constructors::*;
 use parser::smart_constructors::SmartConstructors;
 use parser::source_text::SourceText;
@@ -33,7 +34,7 @@ impl<'a> SmartConstructors<HasScriptContent<'a>> for FactsSmartConstructors {
     type R = Node;
 
     fn initial_state(_: &ParserEnv) -> HasScriptContent<'a> {
-        (false, SourceText::make(EMPTY_TEXT))
+        (false, SourceText::make("", EMPTY_TEXT))
     }
 
     fn make_missing(s: HasScriptContent<'a>, _: usize) -> (HasScriptContent<'a>, Self::R) {

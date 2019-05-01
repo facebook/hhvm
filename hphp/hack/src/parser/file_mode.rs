@@ -32,7 +32,7 @@ impl FileMode {
 use crate::minimal_parser::MinimalSyntaxParser;
 
 pub fn parse_mode(text: &SourceText) -> Option<FileMode> {
-    let is_hhi = false; // TODO(kasper) : hhi files
+    let is_hhi = text.file_path().ends_with(".hhi");
     let header = MinimalSyntaxParser::parse_header_only(ParserEnv::default(), text);
     match header {
         None => {

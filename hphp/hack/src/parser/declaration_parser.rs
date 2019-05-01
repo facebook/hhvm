@@ -264,8 +264,9 @@ where
             self.continue_from(parser1);
             Some(markup_section)
         } else {
-            if self.lexer().source().length() > 0 {
-                // TODO(kasper): .hack files
+            if self.lexer().source().length() > 0
+                && self.lexer().source().file_path().ends_with(".php")
+            {
                 self.with_error(Errors::error1001);
             }
             None

@@ -450,7 +450,10 @@ int computeTranslationCost(SrcKey at, Op callerFPushOp,
 }
 
 uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
-                             const RegionDesc& calleeRegion) {
+                             const RegionDesc& calleeRegion,
+                             uint32_t depth) {
+  auto const maxDepth = RuntimeOption::EvalHHIRInliningMaxDepth;
+  if (depth >= maxDepth) return 0;
   const auto baseVasmCost = RuntimeOption::EvalHHIRInliningVasmCostLimit;
   const auto baseProfCount = s_baseProfCount.load();
   if (baseProfCount == 0) return baseVasmCost;
@@ -463,6 +466,8 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
     adjustedCost *= std::pow((double)callerProfCount / calleeProfCount,
                              RuntimeOption::EvalHHIRInliningVasmCalleeExp);
   }
+  adjustedCost *= std::pow(1 - (double)depth / maxDepth,
+                           RuntimeOption::EvalHHIRInliningDepthExp);
   if (adjustedCost < RuntimeOption::EvalHHIRInliningMinVasmCostLimit) {
     adjustedCost = RuntimeOption::EvalHHIRInliningMinVasmCostLimit;
   }
@@ -472,18 +477,24 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
   if (calleeProfCount) {
     FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
            "(callerProfCount ({}) / baseProfCount ({})) ^ {} * "
-           "(callerProfCount ({}) / calleeProfCount ({})) ^ {}\n",
+           "(callerProfCount ({}) / calleeProfCount ({})) ^ {} * "
+           "(1 - depth ({}) / maxDepth ({})) ^ {}\n",
            adjustedCost, baseVasmCost,
            callerProfCount, baseProfCount,
            RuntimeOption::EvalHHIRInliningVasmCallerExp,
            callerProfCount, calleeProfCount,
-           RuntimeOption::EvalHHIRInliningVasmCalleeExp);
+           RuntimeOption::EvalHHIRInliningVasmCalleeExp,
+           depth, maxDepth,
+           RuntimeOption::EvalHHIRInliningDepthExp);
   } else {
     FTRACE(3, "adjustedMaxVasmCost: adjustedCost ({}) = baseVasmCost ({}) * "
-           "(callerProfCount ({}) / baseProfCount ({})) ^ {}\n",
+           "(callerProfCount ({}) / baseProfCount ({})) ^ {} * "
+           "(1 - depth ({}) / maxDepth ({})) ^ {}\n",
            adjustedCost, baseVasmCost,
            callerProfCount, baseProfCount,
-           RuntimeOption::EvalHHIRInliningVasmCallerExp);
+           RuntimeOption::EvalHHIRInliningVasmCallerExp,
+           depth, maxDepth,
+           RuntimeOption::EvalHHIRInliningDepthExp);
   }
   return adjustedCost;
 }
@@ -652,15 +663,18 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
     return accept(folly::sformat("cost={} within always-inline limit", cost));
   }
 
-  const int maxCost = maxTotalCost - m_cost;
+  int maxCost = maxTotalCost;
+  if (RuntimeOption::EvalHHIRInliningUseStackedCost) {
+    maxCost -= m_cost;
+  }
   const auto baseProfCount = s_baseProfCount.load();
   const auto callerProfCount = irgen::curProfCount(irgs);
   const auto calleeProfCount = irgen::calleeProfCount(irgs, region);
   if (cost > maxCost) {
     return refuse(folly::sformat(
-      "too expensive: cost={} : maxTotalCost={} : maxCost={} : "
-      "baseProfCount={} : callerProfCount={} : calleeProfCount={}", cost,
-      maxTotalCost, maxCost, baseProfCount, callerProfCount, calleeProfCount));
+      "too expensive: cost={} : maxCost={} : "
+      "baseProfCount={} : callerProfCount={} : calleeProfCount={} : depth={}",
+      cost, maxCost, baseProfCount, callerProfCount, calleeProfCount, depth()));
   }
 
   return accept(folly::sformat("small region with return: cost={} : "
@@ -884,6 +898,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   }
 
   const auto mode = RuntimeOption::EvalInlineRegionMode;
+  const auto depth = inl.depth();
 
   if (mode == "cfg" || mode == "both") {
     if (profData()) {
@@ -891,7 +906,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                     maxBCInstrs, annotationsPtr);
       if (region &&
           inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                           adjustedMaxVasmCost(irgs, *region), annotations)) {
+                           adjustedMaxVasmCost(irgs, *region, depth),
+                           annotations)) {
         return region;
       }
     }
@@ -909,7 +925,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
   if (region &&
       inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                       adjustedMaxVasmCost(irgs, *region), annotations)) {
+                       adjustedMaxVasmCost(irgs, *region, depth),
+                       annotations)) {
     return region;
   }
 

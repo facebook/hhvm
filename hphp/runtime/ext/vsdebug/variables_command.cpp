@@ -720,8 +720,15 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     }
 
     case KindOfPersistentString:
-    case KindOfString:
-      return VariableValue{variable.toCStrRef().toCppString()};
+    case KindOfString: {
+      std::string value {variable.toCStrRef().toCppString()};
+      int maxDisplayLength =
+        debugger->getDebuggerOptions().maxReturnedStringLength;
+      if (value.length() > maxDisplayLength) {
+        value = value.substr(0, maxDisplayLength) + std::string{"..."};
+      }
+      return VariableValue{value};
+    }
 
     case KindOfResource: {
       auto res = variable.toResource();

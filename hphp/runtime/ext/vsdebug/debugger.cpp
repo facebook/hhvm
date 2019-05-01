@@ -102,13 +102,15 @@ void Debugger::setDebuggerOptions(DebuggerOptions options) {
       "showDummyOnAsyncPause: %s\n"
       "warnOnInterceptedFunctions: %s\n"
       "notifyOnBpCalibration: %s\n"
-      "disableUniqueVarRef: %s\n",
-      "disableDummyPsPs: %s\n",
+      "disableUniqueVarRef: %s\n"
+      "disableDummyPsPs: %s\n"
+      "maxReturnedStringLength: %d\n",
     options.showDummyOnAsyncPause ? "YES" : "NO",
     options.warnOnInterceptedFunctions ? "YES" : "NO",
     options.notifyOnBpCalibration ? "YES" : "NO",
     options.disableUniqueVarRef ? "YES" : "NO",
-    options.disableDummyPsPs ? "YES" : "NO"
+    options.disableDummyPsPs ? "YES" : "NO",
+    options.maxReturnedStringLength
   );
 }
 

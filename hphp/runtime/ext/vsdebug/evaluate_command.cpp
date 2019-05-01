@@ -89,11 +89,15 @@ EvaluateCommand::EvaluateCommand(
   Debugger* debugger,
   folly::dynamic message
 ) : VSCommand(debugger, message),
-    m_frameId{0} {
+    m_frameId{0},
+    m_returnHhvmSerialization{false} {
 
   const folly::dynamic& args = tryGetObject(message, "arguments", s_emptyArgs);
   const int frameId = tryGetInt(args, "frameId", -1);
+  const bool returnHhvmSerialization = tryGetBool(
+    args, "returnHhvmSerialization", false);
   m_frameId = frameId;
+  m_returnHhvmSerialization = returnHhvmSerialization;
 }
 
 EvaluateCommand::~EvaluateCommand() {
@@ -185,20 +189,22 @@ bool EvaluateCommand::executeImpl(
   (*responseMsg)["body"] = folly::dynamic::object;
   folly::dynamic& body = (*responseMsg)["body"];
 
-  try {
-    VariableSerializer vs(
-      VariableSerializer::Type::DebuggerDump,
-      0,
-      2
-    );
-    body["serialized"] = vs.serialize(result.result, true).get()->data();
-  } catch (const StringBufferLimitException& e) {
-    // we will still return the structured serialized result if
-    // VariableSerializer fails, so the client can fall back on it
-    // (and for IDE's)
-  } catch (...) {
-    assertx(false);
-    throw;
+  if (m_returnHhvmSerialization) {
+    try {
+      VariableSerializer vs(
+        VariableSerializer::Type::DebuggerDump,
+        0,
+        2
+      );
+      body["serialized"] = vs.serialize(result.result, true).get()->data();
+    } catch (const StringBufferLimitException& e) {
+      // we will still return the structured serialized result if
+      // VariableSerializer fails, so the client can fall back on it
+      // (and for IDE's)
+    } catch (...) {
+      assertx(false);
+      throw;
+    }
   }
 
   body["result"] = serializedResult["value"];

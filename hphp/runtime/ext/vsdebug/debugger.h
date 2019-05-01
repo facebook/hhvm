@@ -192,6 +192,9 @@ struct DebuggerOptions {
 
   // Don't try to run PSPs after each eval command on the dummy.
   bool disableDummyPsPs;
+
+  // The maximum length of a string to return, for perf
+  int maxReturnedStringLength;
 };
 
 struct ClientInfo {

@@ -68,6 +68,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   const auto debuggerSessionAuthToken =
     tryGetString(args, "debuggerSessionAuthToken", emptyString);
 
+  auto maxReturnedStringLength =
+    tryGetInt(args, "maxReturnedStringLength", 32 * 1024);
+
   if (!logFilePath.empty()) {
     // Re-open logging using the file path specified by the client.
     int result = VSDebugLogger::InitializeLogging(logFilePath);
@@ -115,6 +118,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   options.notifyOnBpCalibration = notifyOnBpCalibration;
   options.disableUniqueVarRef = disableUniqueVarRef;
   options.disableDummyPsPs = disableDummyPsPs;
+  options.maxReturnedStringLength = maxReturnedStringLength;
   m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up

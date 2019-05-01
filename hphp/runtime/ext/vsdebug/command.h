@@ -580,6 +580,7 @@ private:
 
   FrameObject* getFrameObject(DebuggerSession* session);
   unsigned int m_frameId;
+  bool m_returnHhvmSerialization;
   FrameObject* m_frameObj {nullptr};
 };
 

@@ -88,4 +88,8 @@ where
         res.reverse();
         res
     }
+
+    pub fn sc_state(&self) -> &T {
+        &self.sc_state
+    }
 }

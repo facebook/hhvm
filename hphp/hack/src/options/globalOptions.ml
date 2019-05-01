@@ -52,6 +52,7 @@ type t = {
   tco_ignore_collection_expr_type_arguments : bool;
   tco_disallow_byref_prop_args : bool;
   tco_shallow_class_decl : bool;
+  po_rust : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -236,6 +237,7 @@ let default = {
  tco_ignore_collection_expr_type_arguments = false;
  tco_disallow_byref_prop_args = false;
  tco_shallow_class_decl = false;
+ po_rust = false;
 }
 
 let make
@@ -282,6 +284,7 @@ let make
   ?(tco_ignore_collection_expr_type_arguments = default.tco_ignore_collection_expr_type_arguments)
   ?(tco_disallow_byref_prop_args = default.tco_disallow_byref_prop_args)
   ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
+  ?(po_rust = default.po_rust)
   ()
 = {
   tco_safe_array;
@@ -328,6 +331,7 @@ let make
   tco_ignore_collection_expr_type_arguments;
   tco_disallow_byref_prop_args;
   tco_shallow_class_decl;
+  po_rust;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -378,6 +382,7 @@ let po_disable_unsafe_block t = t.po_disable_unsafe_block
 let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 let tco_disallow_byref_prop_args t = t.tco_disallow_byref_prop_args
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
+let po_rust t = t.po_rust
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
 let setup_pocket_universes env enabled =

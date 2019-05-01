@@ -29,6 +29,9 @@ let with_disable_lval_as_an_expression po b =
 let enable_stronger_await_binding = GlobalOptions.po_enable_stronger_await_binding
 let disable_lval_as_an_expression = GlobalOptions.po_disable_lval_as_an_expression
 let setup_pocket_universes = GlobalOptions.setup_pocket_universes
+let with_rust po b = { po with GlobalOptions.po_rust = b }
+let rust = GlobalOptions.po_rust
+
 let make
   ~auto_namespace_map
   ~enable_hh_syntax_for_hhvm
@@ -40,6 +43,7 @@ let make
   ~enable_stronger_await_binding
   ~disable_lval_as_an_expression
   ~disable_instanceof
+  ~rust
 = GlobalOptions.{
   default with
   po_auto_namespace_map = auto_namespace_map;
@@ -52,4 +56,5 @@ let make
   po_enable_stronger_await_binding = enable_stronger_await_binding;
   po_disable_lval_as_an_expression = disable_lval_as_an_expression;
   po_disable_instanceof = disable_instanceof;
+  po_rust = rust;
 }

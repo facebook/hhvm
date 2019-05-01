@@ -86,6 +86,8 @@ type t = {
   enable_reverse_naming_table_fallback : bool;
   (* Selects a search provider for autocomplete and symbol search *)
   symbolindex_search_provider : string;
+  (* Use rust parser *)
+  rust : bool;
 }
 
 let default = {
@@ -138,6 +140,7 @@ let default = {
   shallow_class_decl = false;
   enable_reverse_naming_table_fallback = false;
   symbolindex_search_provider = "TrieIndex";
+  rust = false;
 }
 
 let path =
@@ -274,6 +277,8 @@ let load_ fn ~silent config_overrides =
       ~default:default.enable_reverse_naming_table_fallback config in
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
       ~default:default.symbolindex_search_provider config in
+  let rust = bool_if_version "rust"
+      ~default:default.rust config in
   {
     use_watchman;
     watchman_init_timeout;
@@ -323,6 +328,7 @@ let load_ fn ~silent config_overrides =
     shallow_class_decl;
     enable_reverse_naming_table_fallback;
     symbolindex_search_provider;
+    rust;
   }
 
 let load ~silent config_overrides =

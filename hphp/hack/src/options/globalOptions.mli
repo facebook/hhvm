@@ -213,6 +213,9 @@ type t = {
  (* Look up class members lazily from shallow declarations instead of eagerly
     computing folded declarations representing the entire class type. *)
  tco_shallow_class_decl : bool;
+
+ (* Use Rust parser *)
+ po_rust : bool;
 } [@@deriving show]
 
 val make :
@@ -259,6 +262,7 @@ val make :
   ?tco_ignore_collection_expr_type_arguments: bool ->
   ?tco_disallow_byref_prop_args: bool ->
   ?tco_shallow_class_decl: bool ->
+  ?po_rust: bool ->
   unit ->
   t
 
@@ -331,3 +335,4 @@ val tco_typecheck_xhp_cvars : t -> bool
 val tco_ignore_collection_expr_type_arguments : t -> bool
 val tco_disallow_byref_prop_args : t -> bool
 val tco_shallow_class_decl : t -> bool
+val po_rust : t -> bool

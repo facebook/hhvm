@@ -3545,6 +3545,7 @@ let parse_text
           (GlobalOptions.po_disable_unsafe_expr env.parser_options)
         ~disable_unsafe_block:
           (GlobalOptions.po_disable_unsafe_block env.parser_options)
+        ~rust:(GlobalOptions.po_rust env.parser_options)
         ?mode
         ()
     in

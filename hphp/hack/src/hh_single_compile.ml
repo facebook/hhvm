@@ -481,6 +481,7 @@ let make_popt () =
     ~enable_stronger_await_binding:(enable_stronger_await_binding co)
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
     ~disable_instanceof:(phpism_disable_instanceof co)
+    ~rust:false
 
 let process_single_source_unit compiler_options
   handle_output handle_exception filename source_text source_root =

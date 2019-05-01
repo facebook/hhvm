@@ -199,53 +199,55 @@ void VSDebugHook::onNextBreak(const Unit* /*unit*/, int /*line*/) {
 }
 
 void VSDebugHook::onFileLoad(Unit* efile) {
-  BreakContext breakContext(true);
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return;
+  }
+
+  DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    return;
+  }
 
   // Resolve any unresolved breakpoints that may be in this compilation unit.
-  if (breakContext.m_debugger != nullptr &&
-      breakContext.m_requestInfo != nullptr) {
+  debugger->onCompilationUnitLoaded(
+    requestInfo,
+    efile
+  );
 
-    breakContext.m_debugger->onCompilationUnitLoaded(
-      breakContext.m_requestInfo,
-      efile
-    );
-
-    tryEnterDebugger(
-      breakContext.m_debugger,
-      breakContext.m_requestInfo,
-      true
-    );
+  if (requestInfo->m_flags.unresolvedBps) {
+    debugger->tryInstallBreakpoints(requestInfo);
   }
 }
 
 void VSDebugHook::onDefClass(const Class* cls) {
-  BreakContext breakContext(true);
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return;
+  }
+
+  DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    return;
+  }
+
 
   // Resolve any breakpoints that are set on functions in this class.
-  if (breakContext.m_debugger != nullptr &&
-      breakContext.m_requestInfo != nullptr) {
+  // Acquire semantics around reading requestInfo->m_flags lock-free.
+  std::atomic_thread_fence(std::memory_order_acquire);
 
-    // Acquire semantics around reading requestInfo->m_flags lock-free.
-    std::atomic_thread_fence(std::memory_order_acquire);
-
-    if (breakContext.m_requestInfo->m_flags.unresolvedBps) {
-      size_t methodCount = cls->numMethods();
-      for (unsigned int i = 0; i < methodCount; i++) {
-        auto func = cls->getMethod(i);
-        const std::string functionName(func->fullName()->data());
-        breakContext.m_debugger->onFunctionDefined(
-          breakContext.m_requestInfo,
-          func,
-          functionName
-        );
-      }
-
-      tryEnterDebugger(
-        breakContext.m_debugger,
-        breakContext.m_requestInfo,
-        true
+  if (requestInfo->m_flags.unresolvedBps) {
+    size_t methodCount = cls->numMethods();
+    for (unsigned int i = 0; i < methodCount; i++) {
+      auto func = cls->getMethod(i);
+      const std::string functionName(func->fullName()->data());
+      debugger->onFunctionDefined(
+        requestInfo,
+        func,
+        functionName
       );
     }
+    debugger->tryInstallBreakpoints(requestInfo);
   }
 }
 
@@ -266,30 +268,30 @@ void VSDebugHook::onRegisterFuncIntercept(const String& name) {
 }
 
 void VSDebugHook::onDefFunc(const Func* func) {
-  BreakContext breakContext(true);
+  Debugger* debugger = VSDebugExtension::getDebugger();
+  if (debugger == nullptr) {
+    return;
+  }
+
+  DebuggerRequestInfo* requestInfo = debugger->getRequestInfo();
+  if (requestInfo == nullptr) {
+    return;
+  }
 
   // Resolve any breakpoints that are set on entry of this function.
-  if (breakContext.m_debugger != nullptr &&
-      breakContext.m_requestInfo != nullptr) {
 
-    // Acquire semantics around reading requestInfo->m_flags lock-free.
-    std::atomic_thread_fence(std::memory_order_acquire);
+  // Acquire semantics around reading requestInfo->m_flags lock-free.
+  std::atomic_thread_fence(std::memory_order_acquire);
 
-    if (breakContext.m_requestInfo->m_flags.unresolvedBps) {
-      std::string funcName(func->fullName()->data());
-      breakContext.m_debugger->onFunctionDefined(
-        breakContext.m_requestInfo,
-        func,
-        funcName
-      );
-
-      tryEnterDebugger(
-        breakContext.m_debugger,
-        breakContext.m_requestInfo,
-        true
-      );
-    }
+  if (requestInfo->m_flags.unresolvedBps) {
+    std::string funcName(func->fullName()->data());
+    debugger->onFunctionDefined(
+      requestInfo,
+      func,
+      funcName
+    );
   }
+  debugger->tryInstallBreakpoints(requestInfo);
 }
 
 void VSDebugHook::tryEnterDebugger(

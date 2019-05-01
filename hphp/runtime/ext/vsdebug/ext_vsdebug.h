@@ -38,7 +38,10 @@ struct VSDebugExtension final : Extension {
   void threadShutdown() override;
   bool moduleEnabled() const override { return m_enabled; }
 
-  static Debugger* getDebugger() { return s_debugger; }
+  static Debugger* getDebugger() {
+    std::atomic_thread_fence(std::memory_order_acquire);
+    return s_debugger;
+  }
   static bool s_launchMode;
   static std::string getDomainSocketGroup();
 

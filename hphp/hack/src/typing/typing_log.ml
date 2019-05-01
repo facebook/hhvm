@@ -281,14 +281,14 @@ let log_subtype_prop ?(do_normalize = false) env message prop =
 
 let tenv_as_value env tenv =
   Map (IMap.fold (fun i x m ->
-    SMap.add (Printf.sprintf "#%d" i) (Atom (Typing_print.full env x)) m) tenv SMap.empty)
+    SMap.add (Printf.sprintf "#%d" i) (Atom (Typing_print.debug env x)) m) tenv SMap.empty)
 
 let subst_as_value subst =
   Map (IMap.fold (fun i x m ->
     SMap.add (Printf.sprintf "#%d" i) (Atom (Printf.sprintf "#%d" x)) m) subst SMap.empty)
 
 let tyset_as_value env tys =
-  Set (TySet.fold (fun t s -> SSet.add (Typing_print.full env t) s) tys SSet.empty)
+  Set (TySet.fold (fun t s -> SSet.add (Typing_print.debug env t) s) tys SSet.empty)
 let tyvar_info_as_value env tvinfo =
   let {
     tyvar_pos;

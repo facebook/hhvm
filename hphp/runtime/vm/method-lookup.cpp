@@ -31,7 +31,6 @@ namespace HPHP {
 
 const StaticString s___construct("__construct");
 const StaticString s___call("__call");
-const StaticString s___callStatic("__callStatic");
 
 // Look up the method specified by methodName from the class specified by cls
 // and enforce accessibility. Accessibility checks depend on the relationship
@@ -208,18 +207,11 @@ LookupResult lookupClsMethod(const Func*& f,
       f = obj->getVMClass()->lookupMethod(s___call.get());
     }
     if (!f) {
-      f = cls->lookupMethod(s___callStatic.get());
-      if (!f) {
-        if (raise) {
-          // Throw a fatal error
-          lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
-        }
-        return LookupResult::MethodNotFound;
+      if (raise) {
+        // Throw a fatal error
+        lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
       }
-      f->validate();
-      assertx(f);
-      assertx(f->attrs() & AttrStatic);
-      return LookupResult::MagicCallStaticFound;
+      return LookupResult::MethodNotFound;
     }
     assertx(f);
     assertx(obj);
@@ -252,27 +244,12 @@ const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
 
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MethodFoundNoThis ||
-          (staticLookup ?
-           res == LookupResult::MagicCallStaticFound :
-           res == LookupResult::MagicCallFound));
+          res == LookupResult::MagicCallFound);
 
-  magicCall =
-    res == LookupResult::MagicCallStaticFound ||
-    res == LookupResult::MagicCallFound;
+  magicCall = res == LookupResult::MagicCallFound;
+  assertx(!magicCall || !staticLookup);
 
-  if (staticLookup) {
-    if (magicCall) {
-      if (ctx && !ctxFunc->isStatic() &&
-          (ctx->classof(cls) || cls->classof(ctx))) {
-        // we might need to call __call instead
-        return nullptr;
-      }
-      if (!exactClass && !(cls->attrs() & AttrNoOverride)) {
-        // there might be a derived class which defines the method
-        return nullptr;
-      }
-    }
-  } else if (!exactClass && !(func->attrs() & AttrPrivate)) {
+  if (!staticLookup && !exactClass && !(func->attrs() & AttrPrivate)) {
     if (magicCall) {
       if (!(cls->attrs() & AttrNoOverride)) {
         return nullptr;

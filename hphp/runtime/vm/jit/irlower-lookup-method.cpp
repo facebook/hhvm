@@ -142,8 +142,7 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
 
     ar->m_func = f;
 
-    if (res == LookupResult::MethodFoundNoThis ||
-        res == LookupResult::MagicCallStaticFound) {
+    if (res == LookupResult::MethodFoundNoThis) {
       if (!f->isStaticInPrologue()) {
         raise_missing_this(f);
       }
@@ -163,8 +162,7 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
       ar->setThis(obj);
     }
 
-    if (res == LookupResult::MagicCallFound ||
-        res == LookupResult::MagicCallStaticFound) {
+    if (res == LookupResult::MagicCallFound) {
       ar->setMagicDispatch(meth);
       meth->incRefCount();
     }

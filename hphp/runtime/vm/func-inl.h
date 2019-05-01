@@ -544,16 +544,8 @@ inline bool Func::isGenerated() const {
   return shared()->m_isGenerated;
 }
 
-inline bool Func::isMagic() const {
-  return isMagicCallMethod() || isMagicCallStaticMethod();
-}
-
 inline bool Func::isMagicCallMethod() const {
   return m_name->isame(s___call);
-}
-
-inline bool Func::isMagicCallStaticMethod() const {
-  return m_name->isame(s___callStatic);
 }
 
 inline bool Func::isSpecial(const StringData* name) {

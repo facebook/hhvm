@@ -34,7 +34,6 @@ enum class LookupResult {
   MethodFoundWithThis,
   MethodFoundNoThis,
   MagicCallFound,
-  MagicCallStaticFound,
   MethodNotFound,
 };
 

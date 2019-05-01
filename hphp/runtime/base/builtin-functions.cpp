@@ -65,7 +65,6 @@ using std::string;
 const StaticString
   s_offsetExists("offsetExists"),
   s___call("__call"),
-  s___callStatic("__callStatic"),
   s___invoke("__invoke"),
   s_self("self"),
   s_parent("parent"),
@@ -304,12 +303,10 @@ const Func* vm_decode_func_from_name(
         assertx(!f || !(f->attrs() & AttrStatic));
       }
       if (!f && lookupType == CallType::ClsMethod) {
-        f = cls->lookupMethod(s___callStatic.get());
-        assertx(!f || (f->attrs() & AttrStatic));
         this_ = nullptr;
       }
       if (f && (cc == cls || cc->lookupMethod(f->name()))) {
-        // We found __call or __callStatic!
+        // We found __call!
         // Stash the original name into invName.
         invName = funcName.get();
         invName->incRefCount();

@@ -65,7 +65,6 @@ namespace HPHP {
 TRACE_SET_MOD(hhbc);
 
 const StringData*     Func::s___call       = makeStaticString("__call");
-const StringData*     Func::s___callStatic = makeStaticString("__callStatic");
 std::atomic<bool>     Func::s_treadmill;
 
 /*

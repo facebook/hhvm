@@ -81,7 +81,6 @@ const StaticString s_get("__get");
 const StaticString s_set("__set");
 const StaticString s_isset("__isset");
 const StaticString s_unset("__unset");
-const StaticString s_callStatic("__callStatic");
 const StaticString s_toBoolean("__toBoolean");
 const StaticString s_invoke("__invoke");
 const StaticString s_Closure("Closure");
@@ -579,7 +578,6 @@ struct ClassInfo {
   };
   MagicFnInfo
     magicCall,
-    magicCallStatic,
     magicGet,
     magicSet,
     magicIsset,
@@ -594,7 +592,6 @@ using MagicMapInfo = struct {
 
 const std::vector<std::pair<SString,MagicMapInfo>> magicMethodMap {
   { s_call.get(),       { &ClassInfo::magicCall,       AttrNone } },
-  { s_callStatic.get(), { &ClassInfo::magicCallStatic, AttrNone } },
   { s_toBoolean.get(),  { &ClassInfo::magicBool,       AttrNone } },
   { s_get.get(),        { &ClassInfo::magicGet,   AttrNoOverrideMagicGet } },
   { s_set.get(),        { &ClassInfo::magicSet,   AttrNoOverrideMagicSet } },
@@ -4414,12 +4411,12 @@ res::Func Index::resolve_method(Context ctx,
 
   switch (dcls.type) {
   case DCls::Exact:
-    if (cinfo->magicCall.thisHas || cinfo->magicCallStatic.thisHas) {
+    if (cinfo->magicCall.thisHas) {
       if (couldBeInaccessible()) return name_only();
     }
     return resolve();
   case DCls::Sub:
-    if (cinfo->magicCall.derivedHas || cinfo->magicCallStatic.derivedHas) {
+    if (cinfo->magicCall.derivedHas) {
       if (couldBeInaccessible()) return name_only();
     }
     if (methIt->second.attrs & AttrNoOverride) {

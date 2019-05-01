@@ -127,7 +127,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
       return refuse("callee has variadic capture with non-empty value");
     }
   }
-  if (callee->isMagic()) {
+  if (callee->isMagicCallMethod()) {
     return refuse("magic callee");
   }
   if (callee->isGenerator()) {

@@ -1015,15 +1015,15 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
                              bool exact,
                              bool check,
                              bool forward,
-                             bool& magicCall,
                              SSATmp*& calleeCtx) {
-  magicCall = false;
+  auto magicCall = false;
   auto const func = lookupImmutableMethod(baseClass,
                                           methodName,
                                           magicCall,
                                           true /* staticLookup */,
                                           curFunc(env),
                                           exact);
+  assertx(!magicCall);
   if (!func) return nullptr;
 
   auto const objOrCls = forward ?
@@ -1080,16 +1080,15 @@ bool fpushClsMethodKnown(IRGS& env,
                          bool forward,
                          bool dynamic,
                          SSATmp* tsList) {
-  auto magicCall = false;
   SSATmp* ctx = nullptr;
   auto funcTmp = lookupClsMethodKnown(env, methodName, ctxTmp, baseClass, exact,
-                                      check, forward, magicCall, ctx);
+                                      check, forward, ctx);
   if (!funcTmp) return false;
   fsetActRec(env,
              funcTmp,
              ctx,
              numParams,
-             magicCall ? methodName : nullptr,
+             nullptr,
              dynamic,
              tsList);
   return true;
@@ -1198,15 +1197,9 @@ void emitResolveClsMethod(IRGS& env) {
   SSATmp* funcTmp = nullptr;
   if (auto const baseClass =
       Unit::lookupUniqueClassInContext(className, curClass(env))) {
-    bool magicCall = false;
     SSATmp* ctx = nullptr;
     funcTmp = lookupClsMethodKnown(env, methodName, cns(env, baseClass),
-                                    baseClass, true, true, false, magicCall,
-                                    ctx);
-    if (magicCall) {
-      gen(env, ThrowInvalidOperation, cns(env, s_resolveClsMagicCall.get()));
-      return;
-    }
+                                    baseClass, true, true, false, ctx);
     // For clsmeth, we want to return the class user gave,
     // not the class where func is associated with.
     clsTmp = cns(env, baseClass);

@@ -1214,7 +1214,6 @@ int ExecutionContext::getLine() {
 }
 
 const StaticString s___call("__call");
-const StaticString s___callStatic("__callStatic");
 const StaticString s_call_user_func("call_user_func");
 const StaticString s_call_user_func_array("call_user_func_array");
 
@@ -1664,9 +1663,8 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
   assertx(IMPLIES(f->preClass(), thiz || cls));
   // If `f' is a static method, thiz must be null.
   assertx(IMPLIES(f->isStaticInPrologue(), !thiz));
-  // invName should only be non-null if we are calling __call or __callStatic.
-  assertx(IMPLIES(invName, f->name()->isame(s___call.get()) ||
-                          f->name()->isame(s___callStatic.get())));
+  // invName should only be non-null if we are calling __call.
+  assertx(IMPLIES(invName, f->name()->isame(s___call.get())));
 
   VMRegAnchor _;
   auto const reentrySP = vmStack().top();

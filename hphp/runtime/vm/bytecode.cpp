@@ -184,7 +184,6 @@ void frame_free_locals_no_hook(ActRec* fp) {
 }
 
 const StaticString s___call("__call");
-const StaticString s___callStatic("__callStatic");
 const StaticString s_file("file");
 const StaticString s_line("line");
 const StaticString s_construct("__construct");
@@ -1240,9 +1239,7 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
   assertx((stack.top() + nregular) == (void*) ar);
   assertx(isContainer(args));
   DEBUG_ONLY const Func* f = ar->m_func;
-  assertx(f &&
-         (f->name()->isame(s___call.get()) ||
-          f->name()->isame(s___callStatic.get())));
+  assertx(f && f->name()->isame(s___call.get()));
 
   // We'll need to make this the first argument
   auto const invName = ar->clearMagicDispatch();
@@ -5127,8 +5124,7 @@ void pushClsMethodImpl(Class* cls,
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
   auto const res = lookupClsMethod(f, cls, name, obj, ctx, true);
-  if (res == LookupResult::MethodFoundNoThis ||
-      res == LookupResult::MagicCallStaticFound) {
+  if (res == LookupResult::MethodFoundNoThis) {
     if (!f->isStaticInPrologue()) {
       raise_missing_this(f);
     }
@@ -5164,8 +5160,7 @@ void pushClsMethodImpl(Class* cls,
   }
   ar->initNumArgs(numArgs);
   if (dynamic) ar->setDynamicCall();
-  if (res == LookupResult::MagicCallFound ||
-      res == LookupResult::MagicCallStaticFound) {
+  if (res == LookupResult::MagicCallFound) {
     ar->setMagicDispatch(name);
   } else {
     ar->trashVarEnv();

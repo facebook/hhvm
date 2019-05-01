@@ -1982,17 +1982,14 @@ FPushClsMethodSRD <num params> <mode> <litstr id>
 
   If class x does not have an accessible method named y, this instruction
   checks if the current function's $this is non-null, if the class of $this is
-  the same or derived from class x, and if $this has a __call method. If no
-  suitable __call method is found, this instruction will check if class x has a
-  __callStatic method. If a suitable __call method or a __callStatic method is
-  found, this instruction pushes a new entry on the FPI stack, initializing it
-  with the number of parameters being passed (given by %1) and a reference to
-  the FPI structure for the __call or __callStatic method that was found, and
-  stores the original name y in the FPI stack entry.
+  the same or derived from class x, and if $this has a __call method. If a
+  suitable __call method is found, this instruction pushes a new entry on the
+  FPI stack, initializing it with the number of parameters being passed (given
+  by %1) and a reference to the FPI structure for the __call method that was
+  found, and stores the original name y in the FPI stack entry.
 
   If class x does not have an accessible method named y, and if a suitable
-  __call method or a __callStatic method could not be found, this instruction
-  throws a fatal error.
+  __call method could not be found, this instruction throws a fatal error.
 
   FPushClsMethodRD and FPushClsMethodSRD's $1 contains a list of reified
   generics.

@@ -873,16 +873,6 @@ struct Func final {
   bool isMagicCallMethod() const;
 
   /*
-   * Is this function __callStatic()?
-   */
-  bool isMagicCallStaticMethod() const;
-
-  /*
-   * Is this function any __call*()?
-   */
-  bool isMagic() const;
-
-  /*
    * Is `name' the name of a special initializer function?
    */
   static bool isSpecial(const StringData* name);
@@ -1338,7 +1328,6 @@ private:
 private:
   static constexpr int kBitsPerQword = 64;
   static const StringData* s___call;
-  static const StringData* s___callStatic;
   static constexpr int kMagic = 0xba5eba11;
   static constexpr intptr_t kNeedsFullName = 0x1;
 

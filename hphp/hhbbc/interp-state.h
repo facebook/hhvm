@@ -49,7 +49,7 @@ enum class FPIKind {
   Ctor,        // Definitely a constructor for an object.
   ObjMeth,     // Definitely a method on an object (possibly __call).
   ObjMethNS,   // ObjMeth, but allows obj to be null.
-  ClsMeth,     // Definitely a static method on a class (possibly__callStatic).
+  ClsMeth,     // Definitely a static method on a class.
   ObjInvoke,   // Closure invoke or __invoke on an object.
   Builtin,     // Resolved builtin call; we will convert params and FCall as
                // we go

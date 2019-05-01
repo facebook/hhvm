@@ -402,7 +402,7 @@ void emitPrologueEntry(IRGS& env, uint32_t argc) {
   auto const func = env.context.func;
 
   // Emit debug code.
-  if (Trace::moduleEnabled(Trace::ringbuffer) && !func->isMagic()) {
+  if (Trace::moduleEnabled(Trace::ringbuffer) && !func->isMagicCallMethod()) {
     auto msg = RBMsgData { Trace::RBTypeFuncPrologue, func->fullName() };
     gen(env, RBTraceMsg, msg);
   }
@@ -473,7 +473,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID) {
 
 void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
   DEBUG_ONLY auto const func = env.context.func;
-  assertx(func->isMagic());
+  assertx(func->isMagicCallMethod());
   assertx(func->numParams() == 2);
   assertx(!func->hasVariadicCaptureParam());
 
@@ -481,8 +481,8 @@ void emitMagicFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
 
   emitPrologueEntry(env, argc);
 
-  // If someone just called __call() or __callStatic() directly, branch to a
-  // normal non-magic prologue.
+  // If someone just called __call() directly, branch to a normal non-magic
+  // prologue.
   ifThen(
     env,
     [&] (Block* taken) {
@@ -548,7 +548,7 @@ void emitPrologueLocals(IRGS& env, uint32_t argc,
 }
 
 void emitFuncPrologue(IRGS& env, uint32_t argc, TransID transID) {
-  if (env.context.func->isMagic()) {
+  if (env.context.func->isMagicCallMethod()) {
     return emitMagicFuncPrologue(env, argc, transID);
   }
   emitPrologueEntry(env, argc);

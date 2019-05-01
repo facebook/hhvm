@@ -12,7 +12,7 @@
  * occurred, an empty array is returned when subject is an array or NULL
  * otherwise.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_filter(mixed $pattern,
                      mixed $replacement,
                      mixed $subject,
@@ -30,7 +30,7 @@ function preg_filter(mixed $pattern,
  * @return array - Returns an array indexed using the keys from the input
  *   array.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_grep(string $pattern,
                    varray_or_darray $input,
                    int $flags = 0): mixed;
@@ -44,7 +44,7 @@ function preg_grep(string $pattern,
  *   PREG_RECURSION_LIMIT_ERROR (see also pcre.recursion_limit)
  *   PREG_BAD_UTF8_ERROR PREG_BAD_UTF8_OFFSET_ERROR (since PHP 5.3.0)
  */
-<<__Native>>
+<<__Native, __NonRx('Reads from global')>>
 function preg_last_error(): int;
 
 /**
@@ -80,7 +80,7 @@ function preg_last_error(): int;
  * @return int - Returns the number of full pattern matches (which might
  *   be zero), or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_match_all(string $pattern,
                         string $subject,
                         ?array &$matches = null,
@@ -113,7 +113,7 @@ function preg_match_all(string $pattern,
  * @return int - preg_match() returns 1 if the pattern matches given
  *   subject, 0 if it does not, or FALSE if an error occurred.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_match(string $pattern,
                     string $subject,
                     ?array &$matches = null,
@@ -162,7 +162,7 @@ function preg_quote(string $str,
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_replace_callback(mixed $pattern,
                                mixed $callback,
                                mixed $subject,
@@ -199,7 +199,7 @@ function preg_replace_callback(mixed $pattern,
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
                                      int $limit = -1,
@@ -253,7 +253,7 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
  *   the new subject will be returned, otherwise subject will be returned
  *   unchanged or NULL if an error occurred.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_replace(mixed $pattern,
                       mixed $replacement,
                       mixed $subject,
@@ -283,7 +283,7 @@ function preg_replace(mixed $pattern,
  * @return array - Returns an array containing substrings of subject
  *   split along boundaries matched by pattern.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function preg_split(string $pattern,
                     string $subject,
                     mixed $limit = null,

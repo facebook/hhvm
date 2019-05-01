@@ -51,9 +51,9 @@ function quotemeta(string $str);
 function str_shuffle(string $str);
 <<__PHPStdLib, __Rx>>
 function strrev(string $str);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function strtolower(string $str);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function strtoupper(string $str);
 <<__PHPStdLib>>
 function ucfirst(string $str);

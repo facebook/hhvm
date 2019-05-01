@@ -49,7 +49,7 @@ function var_dump(<<__AcceptDisposable>> $expression, <<__AcceptDisposable>> ...
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
 <<__PHPStdLib, __Rx>>
 function serialize($value);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function unserialize(string $str, darray $options = darray[]);
 <<__PHPStdLib>>
 function import_request_variables(string $types, string $prefix = "");

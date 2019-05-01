@@ -19,26 +19,26 @@ function preg_grep(string $pattern, $input, int $flags = 0);
  *
  * This will eventually be fixed with more type inference magic.
  */
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_match(string $pattern, string $subject, &$matches = array(), int $flags = 0,
                     int $offset = 0): int;
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_match_all(string $pattern, string $subject, &$matches = array(), int $flags = 0,
                         int $offset = 0);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_replace($pattern, $replacement, $subject, int $limit = -1,
                       &$count = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_replace_callback($pattern, $callback, $subject, int $limit = -1,
                                &$count = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      int $limit = -1, &$count = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __Rx>>
 function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0);
 <<__PHPStdLib, __Rx>>
 function preg_quote(string $str, $delimiter = null);
-<<__PHPStdLib>>
+<<__PHPStdLib, __NonRx('Reads from global')>>
 function preg_last_error();
 <<__PHPStdLib>>
 function ereg_replace(string $pattern, string $replacement, string $str);

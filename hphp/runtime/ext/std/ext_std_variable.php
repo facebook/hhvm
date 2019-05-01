@@ -148,10 +148,10 @@ function debug_zval_dump(mixed $variable): void;
  * Calls to serialize are foldable because only objects can invoke user-defined
  * code.
  */
-<<__IsFoldable, __Native>>
+<<__IsFoldable, __Native, __Rx>>
 function serialize(mixed $value): string;
 
-<<__Native>>
+<<__Native, __Rx>>
 function unserialize(string $str,
                      darray $options = darray[]): mixed;
 

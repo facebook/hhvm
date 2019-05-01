@@ -170,7 +170,7 @@ function strrev(string $str): string;
  * @return string - Returns the lowercased string.
  *
  */
-<<__Native>>
+<<__Native, __Rx>>
 function strtolower(string $str): string;
 
 /**
@@ -183,7 +183,7 @@ function strtolower(string $str): string;
  * @return string - Returns the uppercased string.
  *
  */
-<<__Native>>
+<<__Native, __Rx>>
 function strtoupper(string $str): string;
 
 /**
@@ -1063,7 +1063,7 @@ function hebrevc(string $hebrew_text, int $max_chars_per_line = 0): string;
  *   running. It returns exactly what the system setlocale function returns.
  *
  */
-<<__Native>>
+<<__Native, __NonRx('Sets Global')>>
 function setlocale(int $category, mixed $locale, ...$argv): mixed;
 
 /**

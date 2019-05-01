@@ -32,7 +32,7 @@ interface JsonSerializable {
  *   TRUE, FALSE and NULL respectively. NULL is returned if the json cannot
  *   be decoded or if the encoded data is deeper than the recursion limit.
  */
-<<__Native>>
+<<__Native, __Rx>>
 function json_decode(string $json,
                      bool $assoc = false,
                      int $depth = 512,
@@ -52,7 +52,7 @@ function json_decode(string $json,
  *
  * @return mixed - Returns a JSON encoded string on success .
  */
-<<__Native>>
+<<__Native, __Rx>>
 function json_encode(mixed $value,
                      int $options = 0,
                      int $depth = 512): mixed;
@@ -63,7 +63,7 @@ function json_encode(mixed $value,
  * @return string - Returns the error message on success or NULL with
  *   wrong parameters.
  */
-<<__Native>>
+<<__Native, __NonRx('Reads from a global')>>
 function json_last_error_msg(): string;
 
 /**
@@ -83,5 +83,5 @@ function json_last_error_msg(): string;
  *   JSON_ERROR_UNSUPPORTED_TYPE A value of a type that cannot be encoded
  *   was given PHP 5.5.0
  */
-<<__Native>>
+<<__Native, __NonRx('Reads from a global')>>
 function json_last_error(): int;

@@ -198,9 +198,7 @@ bool EvaluateCommand::executeImpl(
       );
       body["serialized"] = vs.serialize(result.result, true).get()->data();
     } catch (const StringBufferLimitException& e) {
-      // we will still return the structured serialized result if
-      // VariableSerializer fails, so the client can fall back on it
-      // (and for IDE's)
+      body["serialized"] = "Serialization limit exceeded";
     } catch (...) {
       assertx(false);
       throw;

@@ -40,7 +40,7 @@ bool Bump1GMapper::addMappingImpl() {
 
   std::lock_guard<RangeState> _(m_state);
   auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
-  if (reinterpret_cast<uintptr_t>(currFrontier) % size1g != 0) return false;
+  if (currFrontier % size1g != 0) return false;
   auto const newFrontier = currFrontier + size1g;
   if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
     return false;
@@ -58,7 +58,7 @@ bool Bump1GMapper::addMappingImpl() {
         // Node not allowed, try next one.
         continue;
       }
-      if (mmap_1g(currFrontier, currNode, /* MAP_FIXED */ true)) {
+      if (mmap_1g((void*)currFrontier, currNode, /* MAP_FIXED */ true)) {
         ++m_currHugePages;
         m_state.low_map.store(newFrontier, std::memory_order_release);
         return true;
@@ -69,7 +69,7 @@ bool Bump1GMapper::addMappingImpl() {
 #endif
   // This covers cases when HAVE_NUMA is defined, and when `m_interleaveMask` is
   // set to 0 (on single-socket machines).
-  if (mmap_1g(currFrontier, -1, /* MAP_FIXED */ true)) {
+  if (mmap_1g((void*)currFrontier, -1, /* MAP_FIXED */ true)) {
     ++m_currHugePages;
     m_state.low_map.store(newFrontier, std::memory_order_release);
     return true;
@@ -86,19 +86,19 @@ bool Bump2MMapper::addMappingImpl() {
   std::lock_guard<RangeState> _(m_state);
   // Recheck the mapping frontiers after grabbing the lock
   auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
-  if (reinterpret_cast<uintptr_t>(currFrontier) % size2m != 0) return false;
+  if (currFrontier % size2m != 0) return false;
   auto const hugeSize = std::min(kChunkSize,
                                  size2m * (m_maxHugePages - m_currHugePages));
   auto const newFrontier = currFrontier + hugeSize;
   if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
     return false;
   }
-  void* newPages = mmap(currFrontier, hugeSize,
+  void* newPages = mmap((void*)currFrontier, hugeSize,
                         PROT_READ | PROT_WRITE,
                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED | MAP_HUGETLB,
                         -1, 0);
   if (newPages == MAP_FAILED) return false;
-  assertx(newPages == currFrontier);    // MAP_FIXED should work
+  assertx(newPages == (void*)currFrontier);    // MAP_FIXED should work
 #ifdef HAVE_NUMA
   if (num_numa_nodes() > 1 && m_interleaveMask) {
     unsigned long mask = m_interleaveMask;
@@ -122,14 +122,14 @@ bool BumpNormalMapper<D>::addMappingImpl() {
   auto const size = std::min(kChunkSize, maxSize);
 
   auto const newPageStart = (D == Direction::LowToHigh) ? low : high - size;
-  assertx(reinterpret_cast<uintptr_t>(newPageStart) % size4k == 0);
+  assertx(newPageStart % size4k == 0);
 
-  void* newPages = mmap(newPageStart, size,
+  void* newPages = mmap((void*)newPageStart, size,
                         PROT_READ | PROT_WRITE,
                         MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED,
                         -1, 0);
   if (newPages == MAP_FAILED) return false;
-  if (newPages != newPageStart) {
+  if (newPages != (void*)newPageStart) {
     assertx(false);                     // MAP_FIXED should've worked.
     munmap(newPages, size);
     return false;

@@ -147,10 +147,7 @@ struct RangeFallbackExtentAllocator : RangeState {
 
  private:
   bool inRange(void* addr) {
-    // Use unsigned subtraction and comparison to save a branch. If addr is
-    // lower than base, it looks like a very big unsigned number in the
-    // comparison.
-    auto const p = static_cast<char*>(addr);
+    auto const p = reinterpret_cast<uintptr_t>(addr);
     return p < high() && p >= low();
   }
 

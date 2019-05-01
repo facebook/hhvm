@@ -25,7 +25,7 @@
 namespace HPHP { namespace alloc {
 
 void RangeState::reserve() {
-  auto const base = low();
+  auto const base = reinterpret_cast<void*>(low());
   auto const size = capacity();
   auto ret = mmap(base, size, PROT_NONE,
                   MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
@@ -33,14 +33,14 @@ void RangeState::reserve() {
     char msg[128];
     if (ret == MAP_FAILED) {
       std::snprintf(msg, sizeof(msg),
-                    "failed to reserve address range 0x%p to 0x%p, "
-                    "errno = %d",
+                    "failed to reserve address range 0x%p to 0x%" PRIuPTR
+                    ", errno = %d",
                     base, high(), errno);
     } else {
       munmap(ret, capacity());
       std::snprintf(msg, sizeof(msg),
-                    "failed to reserve address range 0x%p to 0x%p, "
-                    "got 0x%p instead",
+                    "failed to reserve address range 0x%p to 0x%" PRIuPTR
+                    ", got 0x%p instead",
                     base, high(), ret);
     }
     throw std::runtime_error{msg};
@@ -49,10 +49,10 @@ void RangeState::reserve() {
 
 
 RangeState::RangeState(uintptr_t lowAddr, uintptr_t highAddr, Reserved)
-  : low_use(reinterpret_cast<char*>(lowAddr))
-  , low_map(reinterpret_cast<char*>(lowAddr))
-  , high_use(reinterpret_cast<char*>(highAddr))
-  , high_map(reinterpret_cast<char*>(highAddr))
+  : low_use(lowAddr)
+  , low_map(lowAddr)
+  , high_use(highAddr)
+  , high_map(highAddr)
   , low_internal(reinterpret_cast<char*>(lowAddr))
   , high_internal(reinterpret_cast<char*>(highAddr)) {
   constexpr size_t size2m = 2u << 20;

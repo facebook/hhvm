@@ -73,12 +73,12 @@ struct alignas(64) RangeState {
 
   RangeState& operator=(const RangeState&) = delete;
 
-  char* low() const {
-    return low_internal.get();
+  uintptr_t low() const {
+    return reinterpret_cast<uintptr_t>(low_internal.get());
   }
 
-  char* high() const {
-    return high_internal;
+  uintptr_t high() const {
+    return reinterpret_cast<uintptr_t>(high_internal);
   }
 
   size_t lowUsed() const {
@@ -120,23 +120,33 @@ struct alignas(64) RangeState {
 
   // Whether it is possible (but not guaranteed when multiple threads are
   // running) to allocate without adding new mappings.
-  bool trivial(size_t size, Direction d) const {
-    size_t available = 0;
+  bool trivial(size_t size, size_t align, Direction d) const {
+    auto const mask = align - 1;
+    assert((align & mask) == 0);
     if (d == Direction::LowToHigh) {
-      available = low_map.load(std::memory_order_acquire) -
-        low_use.load(std::memory_order_acquire);
+      auto const use = low_use.load(std::memory_order_acquire);
+      auto const aligned = (use + mask) & ~mask;
+      return aligned + size <= low_map.load(std::memory_order_acquire);
     } else {
-      available = high_use.load(std::memory_order_acquire) -
-        high_map.load(std::memory_order_acquire);
+      auto const use = high_use.load(std::memory_order_acquire);
+      auto const aligned = (use - size) & ~mask;
+      return aligned >= high_map.load(std::memory_order_acquire);
     }
-    return size <= available;
   }
 
   // Whether free space in this range is insufficient for the allocation.
-  bool infeasible(size_t size) const {
-    auto const available = high_use.load(std::memory_order_acquire) -
-      low_use.load(std::memory_order_acquire);
-    return size > available;
+  bool infeasible(size_t size, size_t align, Direction d) const {
+    auto const mask = align - 1;
+    assert((align & mask) == 0);
+    if (d == Direction::LowToHigh) {
+      auto const newUse =
+        ((low_use.load(std::memory_order_acquire) + mask) & ~mask) + size;
+      return newUse > high_map.load(std::memory_order_acquire);
+    } else {
+      auto const newUse =
+        (high_use.load(std::memory_order_acquire) - size) & ~mask;
+      return newUse < low_map.load(std::memory_order_acquire);
+    }
   }
 
   // Reserve address space, and throw upon failure.
@@ -159,46 +169,51 @@ struct alignas(64) RangeState {
   }
 
   // Try to bump allocate without adding new mappings.
-  void* tryAlloc(size_t size, Direction D) {
-    if (D == Direction::LowToHigh) return tryAllocLow(size);
-    return tryAllocHigh(size);
+  void* tryAlloc(size_t size, size_t align, Direction D) {
+    if (D == Direction::LowToHigh) return tryAllocLow(size, align);
+    return tryAllocHigh(size, align);
   }
 
   // Atomically move frontier, and return nullptr if more mappings are needed.
-  void* tryAllocLow(size_t size) {
+  void* tryAllocLow(size_t size, size_t align) {
     auto const mapFrontier = low_map.load(std::memory_order_acquire);
     auto oldUse = low_use.load(std::memory_order_acquire);
+    auto const mask = align - 1;
+    assert((align & mask) == 0);
     do {
-      auto const newUse = oldUse + size;
+      auto const aligned = (oldUse + mask) & ~mask;
+      auto const newUse = aligned + size;
       // Need to add more mapping.
       if (newUse > mapFrontier) return nullptr;
       if (low_use.compare_exchange_weak(oldUse, newUse,
                                         std::memory_order_release,
                                         std::memory_order_acquire)) {
-        return oldUse;
+        return reinterpret_cast<void*>(aligned);
       }
     } while (true);
   }
 
-  void* tryAllocHigh(size_t size) {
+  void* tryAllocHigh(size_t size, size_t align) {
     auto const mapFrontier = high_map.load(std::memory_order_acquire);
     auto oldUse = high_use.load(std::memory_order_acquire);
+    auto const mask = align - 1;
+    assert((align & mask) == 0);
     do {
+      auto const newUse = (oldUse - size) & ~mask;
       // Need to add more mapping.
-      if (mapFrontier + size > oldUse) return nullptr;
-      auto const newUse = oldUse - size;
+      if (newUse < mapFrontier) return nullptr;
       if (high_use.compare_exchange_weak(oldUse, newUse,
                                          std::memory_order_release,
                                          std::memory_order_acquire)) {
-        return newUse;
+        return reinterpret_cast<void*>(newUse);
       }
     } while (true);
   }
 
-  std::atomic<char*> low_use{nullptr};
-  std::atomic<char*> low_map{nullptr};
-  std::atomic<char*> high_use{nullptr};
-  std::atomic<char*> high_map{nullptr};
+  std::atomic<uintptr_t> low_use{0};
+  std::atomic<uintptr_t> low_map{0};
+  std::atomic<uintptr_t> high_use{0};
+  std::atomic<uintptr_t> high_map{0};
 
   // Use lower bits as a a small lock.  Call lock() before adding new mappings.
   LockFreePtrWrapper<char*> low_internal{nullptr};

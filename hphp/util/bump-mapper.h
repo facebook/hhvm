@@ -70,17 +70,17 @@ struct RangeMapper {
     return false;
   }
 
-  void* alloc(size_t size) {
+  void* alloc(size_t size, size_t align) {
     if (!m_failed) {
+      auto const d = direction();
       do {
-        auto const d = direction();
-        if (m_state.trivial(size, d)) {
-          if (auto r = m_state.tryAlloc(size, d)) return r;
+        if (m_state.trivial(size, align, d)) {
+          if (auto r = m_state.tryAlloc(size, align, d)) return r;
         }
-        if (m_state.infeasible(size)) return nullptr;
+        if (m_state.infeasible(size, align, d)) return nullptr;
       } while (addMapping());
     }
-    if (m_fallback) return m_fallback->alloc(size);
+    if (m_fallback) return m_fallback->alloc(size, align);
     return nullptr;
   }
 

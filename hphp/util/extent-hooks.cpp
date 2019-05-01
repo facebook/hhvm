@@ -99,18 +99,14 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
     return nullptr;
   }
   assert(folly::isPowTwo(alignment));
-  constexpr size_t size2m = (2u << 20);
-  if (auto rem = size % size2m) {
-    size += size2m - rem;               // round up to align at 2M
-  }
-  assertx(alignment <= size2m);
+  assertx(alignment <= (2u << 20));
 
   auto extAlloc = GetByArenaId<MultiRangeExtentAllocator>(arena_ind);
   for (auto rangeMapper : extAlloc->m_mappers) {
     if (!rangeMapper) return nullptr;
     // RangeMapper::addMappingImpl() holds the lock on RangeState when adding
     // new mappings, so no additional locking is needed here.
-    if (auto addr = rangeMapper->alloc(size)) {
+    if (auto addr = rangeMapper->alloc(size, alignment)) {
       extAlloc->m_allocatedSize.fetch_add(size, std::memory_order_relaxed);
       return addr;
     }
@@ -138,14 +134,14 @@ extent_alloc(extent_hooks_t* extent_hooks, void* addr,
              bool* commit, unsigned arena_ind) {
   assertx(extent_hooks == &RangeFallbackExtentAllocator::s_hooks);
   assertx(arena_ind != 0);
-  constexpr size_t kAlign = 1u << 16;
-  if (addr != nullptr || alignment > kAlign || (size % kAlign)) {
+  constexpr size_t kAlign = 2u << 20;
+  if (addr != nullptr || alignment > kAlign) {
     // Let the default hook handle weird cases.
     return g_defaultHooks->alloc(extent_hooks, addr, size, alignment,
                                  zero, commit, arena_ind);
   }
   auto extAlloc = GetByArenaId<RangeFallbackExtentAllocator>(arena_ind);
-  if (auto addr = extAlloc->getLowMapper()->alloc(size)) return addr;
+  if (auto addr = extAlloc->getLowMapper()->alloc(size, alignment)) return addr;
   return g_defaultHooks->alloc(extent_hooks, addr, size, alignment,
                                zero, commit, arena_ind);
 }

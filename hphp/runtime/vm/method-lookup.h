@@ -42,11 +42,35 @@ const Func* lookupMethodCtx(const Class* cls,
                             const Class* pctx,
                             CallType lookupType,
                             bool raise = false);
+
 LookupResult lookupObjMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
                              const Class* ctx,
                              bool raise = false);
+
+/*
+ * This routine attempts to find the Func* that will be called for an object
+ * of a given target Class and a function name, when called from ctxFunc.
+ *
+ * If exactClass is true, the class we are targeting is assumed to be
+ * exactly `cls', and the returned Func* is definitely the one called.
+ *
+ * If exactClass is false, the class we are targeting may be a subclass of
+ * `cls`, and the returned Func* may be overridden in a subclass.
+ *
+ * The returned Func* may be used in a request-insensitive way, i.e. it is
+ * suitable for burning into the TC as a pointer.
+ *
+ * It's the caller's responsibility to ensure that the Class* is usable -
+ * is AttrUnique, an instance of the ctx or guarded in some way.
+ *
+ * Returns nullptr if we can't determine the Func*.
+ */
+const Func* lookupImmutableObjMethod(const Class* cls, const StringData* name,
+                                    bool& magicCall, const Func* ctxFunc,
+                                    bool exactClass);
+
 LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
@@ -55,25 +79,25 @@ LookupResult lookupClsMethod(const Func*& f,
                              bool raise = false);
 
 /*
- * This routine attempts to find the Func* that will be called for a given
- * target Class and function name, when called from ctxFunc.  This function
- * determines if a given Func* will be called in a request-insensitive way
- * (i.e. suitable for burning into the TC as a pointer).
+ * This routine attempts to find the Func* that will be statically called for
+ * a given target Class and function name, when called from ctxFunc.
  *
  * If exactClass is true, the class we are targeting is assumed to be
  * exactly `cls', and the returned Func* is definitely the one called.
  *
  * If exactClass is false, the class we are targeting may be a subclass of
- * cls, and the returned Func* may be overridden in a subclass.
+ * `cls`, and the returned Func* may be overridden in a subclass.
  *
- * Its the caller's responsibility to ensure that the Class* is usable -
+ * The returned Func* may be used in a request-insensitive way, i.e. it is
+ * suitable for burning into the TC as a pointer.
+ *
+ * It's the caller's responsibility to ensure that the Class* is usable -
  * is AttrUnique, an instance of the ctx or guarded in some way.
  *
  * Returns nullptr if we can't determine the Func*.
  */
-const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup,
-                                  const Func* ctxFunc, bool exactClass);
+const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
+                                     const Func* ctxFunc, bool exactClass);
 
 LookupResult lookupCtorMethod(const Func*& f,
                               const Class* cls,

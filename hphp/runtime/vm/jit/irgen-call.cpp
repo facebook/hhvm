@@ -140,7 +140,7 @@ SSATmp* lookupObjMethodExactFunc(
   SSATmp*& objOrCls
 ) {
   /*
-   * lookupImmutableMethod will return Funcs from AttrUnique classes, but in
+   * lookupImmutableObjMethod will return Funcs from AttrUnique classes, but in
    * this case, we have an object, so there's no need to check that the class
    * exists.
    *
@@ -225,9 +225,8 @@ SSATmp* lookupObjMethodWithBaseClass(
   bool& magicCall
 ) {
   magicCall = false;
-  if (auto const func = lookupImmutableMethod(
-        baseClass, methodName, magicCall,
-        /* staticLookup: */ false, curFunc(env), exactClass)) {
+  if (auto const func = lookupImmutableObjMethod(
+        baseClass, methodName, magicCall, curFunc(env), exactClass)) {
     if (exactClass ||
         func->attrs() & AttrPrivate ||
         func->isImmutableFrom(baseClass)) {
@@ -1017,14 +1016,8 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
                              bool check,
                              bool forward,
                              SSATmp*& calleeCtx) {
-  auto magicCall = false;
-  auto const func = lookupImmutableMethod(baseClass,
-                                          methodName,
-                                          magicCall,
-                                          true /* staticLookup */,
-                                          curFunc(env),
-                                          exact);
-  assertx(!magicCall);
+  auto const func = lookupImmutableClsMethod(
+    baseClass, methodName, curFunc(env), exact);
   if (!func) return nullptr;
 
   auto const objOrCls = forward ?

@@ -195,6 +195,28 @@ LookupResult lookupObjMethod(const Func*& f,
   return LookupResult::MethodFoundWithThis;
 }
 
+const Func* lookupImmutableObjMethod(const Class* cls, const StringData* name,
+                                    bool& magicCall, const Func* ctxFunc,
+                                    bool exactClass) {
+  if (!cls) return nullptr;
+  if (cls->attrs() & AttrInterface) return nullptr;
+  auto ctx = ctxFunc->cls();
+  const Func* func;
+  LookupResult res = lookupObjMethod(func, cls, name, ctx, false);
+  if (res == LookupResult::MethodNotFound) return nullptr;
+  if (func->isAbstract() && exactClass) return nullptr;
+
+  assertx(res == LookupResult::MethodFoundWithThis ||
+          res == LookupResult::MethodFoundNoThis ||
+          res == LookupResult::MagicCallFound);
+
+  magicCall = res == LookupResult::MagicCallFound;
+  if (magicCall && !exactClass && !(cls->attrs() & AttrNoOverride)) {
+    return nullptr;
+  }
+  return func;
+}
+
 LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,
                              const StringData* methodName,
@@ -226,36 +248,18 @@ LookupResult lookupClsMethod(const Func*& f,
   return LookupResult::MethodFoundNoThis;
 }
 
-const Func* lookupImmutableMethod(const Class* cls, const StringData* name,
-                                  bool& magicCall, bool staticLookup,
-                                  const Func* ctxFunc,
-                                  bool exactClass) {
+const Func* lookupImmutableClsMethod(const Class* cls, const StringData* name,
+                                     const Func* ctxFunc, bool exactClass) {
   if (!cls) return nullptr;
   if (cls->attrs() & AttrInterface) return nullptr;
   auto ctx = ctxFunc->cls();
   const Func* func;
-  LookupResult res = staticLookup ?
-    lookupClsMethod(func, cls, name, nullptr, ctx, false) :
-    lookupObjMethod(func, cls, name, ctx, false);
-
+  LookupResult res = lookupClsMethod(func, cls, name, nullptr, ctx, false);
   if (res == LookupResult::MethodNotFound) return nullptr;
-
   if (func->isAbstract() && exactClass) return nullptr;
 
   assertx(res == LookupResult::MethodFoundWithThis ||
-          res == LookupResult::MethodFoundNoThis ||
-          res == LookupResult::MagicCallFound);
-
-  magicCall = res == LookupResult::MagicCallFound;
-  assertx(!magicCall || !staticLookup);
-
-  if (!staticLookup && !exactClass && !(func->attrs() & AttrPrivate)) {
-    if (magicCall) {
-      if (!(cls->attrs() & AttrNoOverride)) {
-        return nullptr;
-      }
-    }
-  }
+          res == LookupResult::MethodFoundNoThis);
   return func;
 }
 

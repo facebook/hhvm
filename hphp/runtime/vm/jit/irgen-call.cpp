@@ -73,7 +73,7 @@ IRSPRelOffset fsetActRec(
 //////////////////////////////////////////////////////////////////////
 
 // Pushing for object method when we don't know the Func* statically.
-IRSPRelOffset fpushObjMethodUnknown(
+void fpushObjMethodUnknown(
   IRGS& env,
   SSATmp* obj,
   const StringData* methodName,
@@ -102,7 +102,6 @@ IRSPRelOffset fpushObjMethodUnknown(
       LdObjMethodData { arOffset, methodName },
       objCls,
       sp(env));
-  return arOffset;
 }
 
 /*
@@ -249,7 +248,7 @@ SSATmp* lookupObjMethodWithBaseClass(
   return nullptr;
 }
 
-IRSPRelOffset fpushObjMethodWithBaseClass(
+void fpushObjMethodWithBaseClass(
   IRGS& env,
   SSATmp* obj,
   const Class* baseClass,
@@ -263,12 +262,12 @@ IRSPRelOffset fpushObjMethodWithBaseClass(
   if (auto func = lookupObjMethodWithBaseClass(
         env, obj, baseClass, methodName, exactClass,
         objOrCls, magicCall)) {
-    return fsetActRec(env, func, objOrCls, numParams,
-                      magicCall ? methodName : nullptr,
-                      false, ts);
+    fsetActRec(env, func, objOrCls, numParams, magicCall ? methodName : nullptr,
+               false, ts);
+    return;
   }
 
-  return fpushObjMethodUnknown(env, obj, methodName, numParams, ts);
+  fpushObjMethodUnknown(env, obj, methodName, numParams, ts);
 }
 
 const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
@@ -357,8 +356,10 @@ void optimizeProfiledPushMethod(IRGS& env,
   auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
                                             methProfileKey.get());
   if (!profile.optimizing()) {
-    auto const arOffset = emitFPush();
+    emitFPush();
     if (profile.profiling()) {
+      auto const arOffset =
+        offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numParams)});
       gen(
         env,
         ProfileMethod,
@@ -541,8 +542,8 @@ void fpushObjMethod(IRGS& env,
   }
 
   auto const emitFPush = [&] {
-    return fpushObjMethodWithBaseClass(env, obj, knownClass, methodName,
-                                       numParams, exactClass, tsList);
+    fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
+                                exactClass, tsList);
   };
 
   // If we know the class exactly without profiling, then we don't need PGO.
@@ -1259,7 +1260,6 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
     auto const lcmData = LookupClsMethodData { arOffset, forward };
     gen(env, LookupClsMethod, lcmData, clsVal, methVal, sp(env), fp(env));
     decRef(env, methVal);
-    return arOffset;
   };
 
   if (!methVal->hasConstVal()) {

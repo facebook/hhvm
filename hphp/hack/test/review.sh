@@ -23,8 +23,6 @@ ARROW="$(tput bold)$(tput setaf 6)==>$(tput setaf 7)"
 function reconstitute_full_path {
   TEST_PATH=$1
   ROOT=$2
-  EXT=$3
-  FALLBACK_EXT=$4
   if [ -n "${ROOT}" ]; then
     if [[ "$TEST_PATH" = "$SOURCE_ROOT"* ]]; then
       FULL_PATH="${ROOT}${TEST_PATH#"${SOURCE_ROOT}"}"
@@ -34,14 +32,7 @@ function reconstitute_full_path {
       FULL_PATH="${ROOT}/${TEST_PATH#"hphp/hack/"}"
     fi
   fi
-  if [ -e "$FULL_PATH$EXT" ]; then
-    FULL_PATH="$FULL_PATH$EXT"
-  elif [ -n "${FALLBACK_EXT+x}" ] && [ -e "$FULL_PATH$FALLBACK_EXT" ]; then
-    FULL_PATH="$FULL_PATH$FALLBACK_EXT"
-  else
-    FULL_PATH=/dev/null
-  fi
-  echo $FULL_PATH
+  echo "$FULL_PATH"
 }
 
 for f in "$@"; do
@@ -51,8 +42,21 @@ for f in "$@"; do
   nl -b a "$f"
   echo
 
-  OUT=$(reconstitute_full_path "$f" "$OUTPUT_ROOT" "$OUT_EXT" "$FALLBACK_OUT_EXT")
-  EXP=$(reconstitute_full_path "$f" "$SOURCE_ROOT" "$EXP_EXT" "$FALLBACK_EXP_EXT")
+  OUT_BASE=$(reconstitute_full_path "$f" "$OUTPUT_ROOT")
+  EXP_BASE=$(reconstitute_full_path "$f" "$SOURCE_ROOT")
+  if [ -e "$OUT_BASE$OUT_EXT" ]; then
+    OUT="$OUT_BASE$OUT_EXT"
+  else
+    OUT=/dev/null
+  fi
+  EXP_TO="$EXP_BASE$EXP_EXT"
+  if [ -e "$EXP_BASE$EXP_EXT" ]; then
+    EXP="$EXP_BASE$EXP_EXT"
+  elif [ -n "${FALLBACK_EXP_EXT+x}" ] && [ -e "$EXP_BASE$FALLBACK_EXP_EXT" ]; then
+    EXP="$EXP_BASE$FALLBACK_EXP_EXT"
+  else
+    EXP=/dev/null
+  fi
 
   echo "$ARROW Diff between $EXP and $(basename "$OUT") $(tput sgr0)"
 
@@ -78,7 +82,7 @@ for f in "$@"; do
   fi
   echo ""
   if [ "$REPLY" = "y" ] && [ "$NO_COPY" = false ]; then
-    cp "$OUT" "$EXP"
+    cp "$OUT" "$EXP_TO"
   elif [ "$REPLY" = "q" ]; then
     exit 0
   fi

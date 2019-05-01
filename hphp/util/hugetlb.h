@@ -68,8 +68,8 @@ int remap_interleaved_2m_pages(void* addr, size_t pages);
 
 // Information from /sys/devices/system/node/node*/hugepages/*hugepages
 struct HugePageInfo {
-  int nr_hugepages;                     // total number of pages reserved
-  int free_hugepages;                   // number of pages free
+  unsigned nr_hugepages;                // total number of pages reserved
+  unsigned free_hugepages;              // number of pages free
 };
 
 // Get the total/available number of huge pages on a node, -1 means all

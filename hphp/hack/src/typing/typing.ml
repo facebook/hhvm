@@ -1249,6 +1249,7 @@ and is_pseudo_function s =
   s = SN.PseudoFunctions.hh_show ||
   s = SN.PseudoFunctions.hh_show_env ||
   s = SN.PseudoFunctions.hh_log_level ||
+  s = SN.PseudoFunctions.hh_force_solve ||
   s = SN.PseudoFunctions.hh_loop_forever
 
 and loop_forever env =
@@ -1966,6 +1967,9 @@ and expr_
           | [(_, String key_str); (_, Int level_str)] ->
             Env.set_log_level env key_str (int_of_string level_str)
           | _ -> env
+        else
+        if s = SN.PseudoFunctions.hh_force_solve
+        then SubType.solve_all_unsolved_tyvars env
         else
         if s = SN.PseudoFunctions.hh_loop_forever then (loop_forever env; env)
         else env in

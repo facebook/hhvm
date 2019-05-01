@@ -98,6 +98,7 @@ let magic_builtins = [|
     "function hh_show(<<__AcceptDisposable>> $val) {}\n" ^
     "function hh_show_env() {}\n" ^
     "function hh_log_level($key, $level) {}\n" ^
+    "function hh_force_solve () {}" ^
     "}\n" ^
     "namespace HH\\Lib\\Tuple{\n" ^
     "function gen();\n" ^

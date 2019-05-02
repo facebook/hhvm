@@ -222,7 +222,8 @@ let prepare_ignored_fixme_codes config =
 let load config_filename options =
   let config_hash, config = Config_file.parse (Relative_path.to_absolute config_filename) in
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
-  let config = SMap.union config config_overrides in
+  (* Note that the order of arguments matters because SMap.union is left-biased by default. *)
+  let config = SMap.union config_overrides config in
   process_untrusted_mode config;
   let local_config = ServerLocalConfig.load ~silent:false config_overrides in
   let local_config =

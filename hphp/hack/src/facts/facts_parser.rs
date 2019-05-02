@@ -275,9 +275,7 @@ fn from_text(text: &str, opts: ExtractAsJsonOpts) -> Option<Facts> {
         enable_xhp: opts.enable_xhp,
         ..ParserEnv::default()
     };
-
-    // TODO(leoo) add filename once it's added to SourceText
-    let text = SourceText::make(text.as_bytes());
+    let text = SourceText::make(&opts.filename, text.as_bytes());
     let mut parser = FactsParser::make(&text, env);
     let root = parser.parse_script();
 

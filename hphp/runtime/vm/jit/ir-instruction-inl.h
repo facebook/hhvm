@@ -235,10 +235,16 @@ typename IRExtraDataType<opc>::type* IRInstruction::extra() {
   return static_cast<typename IRExtraDataType<opc>::type*>(m_extra);
 }
 
-template<class T>
+template<typename T>
 const T* IRInstruction::extra() const {
   if (debug) assert_opcode_extra<T>(op());
   return static_cast<const T*>(m_extra);
+}
+
+template<typename T>
+T* IRInstruction::extra() {
+  if (debug) assert_opcode_extra<T>(op());
+  return static_cast<T*>(m_extra);
 }
 
 inline const IRExtraData* IRInstruction::rawExtra() const {

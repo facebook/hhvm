@@ -1169,11 +1169,20 @@ struct MemoCacheStaticData : IRExtraData {
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
+    p->stackOffset = stackOffset;
     return p;
   }
 
   std::string show() const {
-    auto ret = folly::sformat("{},{}", func->fullName(), HPHP::show(keys));
+    std::string ret;
+    if (stackOffset) {
+      ret += folly::sformat(
+        "{},IRSPOff {}", func->fullName(), stackOffset->offset
+      );
+    } else {
+      ret += folly::sformat("{},{}", func->fullName(), HPHP::show(keys));
+    }
+
     if (keys.count > 0) {
       ret += ",<";
       for (auto i = 0; i < keys.count; ++i) {
@@ -1190,6 +1199,8 @@ struct MemoCacheStaticData : IRExtraData {
   const bool* types;
   folly::Optional<bool> asyncEager;
   bool loadAux;
+  // Should only be present if the frame is given by a StkPtr
+  folly::Optional<IRSPRelOffset> stackOffset;
 };
 
 struct MemoCacheInstanceData : IRExtraData {
@@ -1215,6 +1226,7 @@ struct MemoCacheInstanceData : IRExtraData {
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
+    p->stackOffset = stackOffset;
     return p;
   }
 
@@ -1223,7 +1235,9 @@ struct MemoCacheInstanceData : IRExtraData {
       "{},{},{},<{}>,{}",
       slot,
       func->fullName(),
-      HPHP::show(keys),
+      stackOffset
+        ? folly::sformat("IRSPOff {}", stackOffset->offset)
+        : HPHP::show(keys),
       [&]{
         using namespace folly::gen;
         return range<uint32_t>(0, keys.count)
@@ -1241,6 +1255,8 @@ struct MemoCacheInstanceData : IRExtraData {
   bool shared;
   folly::Optional<bool> asyncEager;
   bool loadAux;
+  // Should only be present if the frame is given by a StkPtr
+  folly::Optional<IRSPRelOffset> stackOffset;
 };
 
 struct MOpModeData : IRExtraData {

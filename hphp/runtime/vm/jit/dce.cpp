@@ -938,6 +938,17 @@ bool findWeakActRecUses(const BlockList& blocks,
     case HintLocInner:
       incWeak(inst, inst->src(0));
       break;
+
+    // These can be made stack relative if they haven't been already.
+    case MemoGetStaticCache:
+    case MemoSetStaticCache:
+    case MemoGetLSBCache:
+    case MemoSetLSBCache:
+    case MemoGetInstanceCache:
+    case MemoSetInstanceCache:
+      if (inst->src(0)->isA(TFramePtr)) incWeak(inst, inst->src(0));
+      break;
+
     // these can be rewritten to use an outer frame pointer
     case LdClsRefCls:
     case LdClsRefTS:
@@ -1001,14 +1012,10 @@ bool findWeakActRecUses(const BlockList& blocks,
  * Convert a localId in a callee frame into an SP relative offset in the caller
  * frame.
  */
-IRSPRelOffset locToStkOff(IRInstruction& inst) {
-  assertx(inst.is(LdLoc, StLoc, LdLocAddr, AssertLoc, CheckLoc, HintLocInner));
-
-  auto locId = inst.extra<LocalId>()->locId;
-  auto fpInst = inst.src(0)->inst();
+IRSPRelOffset locToStkOff(LocalId locId, const SSATmp* fp) {
+  auto const fpInst = fp->inst();
   assertx(fpInst->is(DefInlineFP));
-
-  return fpInst->extra<DefInlineFP>()->spOffset - locId - 1;
+  return fpInst->extra<DefInlineFP>()->spOffset - locId.locId - 1;
 }
 
 /*
@@ -1227,6 +1234,29 @@ void performActRecFixups(const BlockList& blocks,
         }
         break;
 
+      case MemoGetStaticCache:
+      case MemoGetLSBCache:
+      case MemoGetInstanceCache:
+        if (inst.src(0)->isA(TFramePtr) &&
+            state[inst.src(0)->inst()].isDead()) {
+          convertToStackInst(unit, inst);
+        }
+        break;
+      case MemoSetStaticCache:
+      case MemoSetLSBCache:
+      case MemoSetInstanceCache:
+        if (inst.src(0)->isA(TFramePtr) &&
+            state[inst.src(0)->inst()].isDead()) {
+          // For the same reason as above, we need to adjust the markers for
+          // re-entracy.
+          convertToStackInst(unit, inst);
+          if (adjustedMarkerFp) {
+            ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
+            inst.marker() = inst.marker().adjustSP(FPInvOffset{safeDepth});
+          }
+        }
+        break;
+
       default:
         break;
       }
@@ -1318,37 +1348,89 @@ IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
 }
 
 void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
-  assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner));
+  assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr, HintLocInner,
+                  MemoGetStaticCache, MemoSetStaticCache,
+                  MemoGetLSBCache, MemoSetLSBCache,
+                  MemoGetInstanceCache, MemoSetInstanceCache));
   assertx(inst.src(0)->inst()->is(DefInlineFP));
 
-  auto const data = IRSPRelOffsetData { locToStkOff(inst) };
   auto const mainSP = unit.mainSP();
 
   switch (inst.op()) {
     case StLoc:
-      unit.replace(&inst, StStk, data, mainSP, inst.src(1));
+      unit.replace(
+        &inst,
+        StStk,
+        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        mainSP,
+        inst.src(1)
+      );
       return;
     case LdLoc:
-      unit.replace(&inst, LdStk, data, inst.typeParam(), mainSP);
+      unit.replace(
+        &inst,
+        LdStk,
+        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        inst.typeParam(),
+        mainSP
+      );
       return;
     case LdLocAddr:
-      unit.replace(&inst, LdStkAddr, data, mainSP);
+      unit.replace(
+        &inst,
+        LdStkAddr,
+        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        mainSP
+      );
       retypeDests(&inst, &unit);
       return;
     case AssertLoc:
-      unit.replace(&inst, AssertStk, data, inst.typeParam(), mainSP);
+      unit.replace(
+        &inst,
+        AssertStk,
+        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        inst.typeParam(),
+        mainSP
+      );
       return;
     case CheckLoc: {
       auto next = inst.next();
-      unit.replace(&inst, CheckStk, data, inst.typeParam(),
-                   inst.taken(), mainSP);
+      unit.replace(
+        &inst,
+        CheckStk,
+        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        inst.typeParam(),
+        inst.taken(),
+        mainSP
+      );
       inst.setNext(next);
       return;
     }
     case HintLocInner:
-      unit.replace(&inst, HintStkInner, data, inst.typeParam(), mainSP);
+      unit.replace(
+        &inst,
+        HintStkInner,
+        IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
+        inst.typeParam(),
+        mainSP
+      );
       return;
-
+    case MemoGetStaticCache:
+    case MemoSetStaticCache:
+    case MemoGetLSBCache:
+    case MemoSetLSBCache: {
+      auto& extra = *inst.extra<MemoCacheStaticData>();
+      extra.stackOffset = locToStkOff(LocalId{extra.keys.first}, inst.src(0));
+      inst.setSrc(0, mainSP);
+      return;
+    }
+    case MemoGetInstanceCache:
+    case MemoSetInstanceCache: {
+      auto& extra = *inst.extra<MemoCacheInstanceData>();
+      extra.stackOffset = locToStkOff(LocalId{extra.keys.first}, inst.src(0));
+      inst.setSrc(0, mainSP);
+      return;
+    }
     default: break;
   }
   not_reached();

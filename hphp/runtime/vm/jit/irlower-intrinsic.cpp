@@ -326,7 +326,7 @@ void doMemoGetCache(
   IRLS& env,
   const IRInstruction* inst,
   const MemoCacheStaticData *extra,
-  Vreg fp,
+  Vreg fpOrSp,
   HandleT handle
 ) {
   auto& v = vmain(env);
@@ -342,15 +342,26 @@ void doMemoGetCache(
   auto const cachePtr = v.makeReg();
   v << load{getHandleAddr(handle), cachePtr};
 
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
+
   // Lookup the proper getter function and call it with the pointer to the
   // cache. The pointer to the cache may be null, but the getter function can
   // handle that.
   auto const valPtr = v.makeReg();
   if (auto const getter =
       memoCacheGetForKeyTypes(extra->types, extra->keys.count)) {
-    auto const args = argGroup(env, inst)
-      .reg(cachePtr)
-      .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1));
+
+    auto args = argGroup(env, inst).reg(cachePtr);
+    addKeysAddr(args);
+
     cgCallHelper(
       v,
       env,
@@ -360,10 +371,13 @@ void doMemoGetCache(
       args
     );
   } else {
-    auto const args = argGroup(env, inst)
+    auto args = argGroup(env, inst)
       .reg(cachePtr)
-      .imm(GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam())
-      .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1));
+      .imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    addKeysAddr(args);
+
     cgCallHelper(
       v,
       env,
@@ -386,7 +400,7 @@ void doMemoSetCache(
   IRLS& env,
   const IRInstruction* inst,
   const MemoCacheStaticData *extra,
-  Vreg fp,
+  Vreg fpOrSp,
   HandleT handle,
   uint32_t valIndex
 ) {
@@ -415,14 +429,24 @@ void doMemoSetCache(
       : AuxUnion{std::numeric_limits<uint32_t>::max()};
   }();
 
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
+
   // Lookup the setter and call it with the address of the cache pointer. The
   // setter will create the cache as needed and update the pointer.
   if (auto const setter =
       memoCacheSetForKeyTypes(extra->types, extra->keys.count)) {
-    auto const args = argGroup(env, inst)
-      .reg(handleAddr)
-      .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1))
-      .typedValue(valIndex, aux);
+    auto args = argGroup(env, inst).reg(handleAddr);
+    addKeysAddr(args);
+    args.typedValue(valIndex, aux);
+
     cgCallHelper(
       v,
       env,
@@ -432,11 +456,14 @@ void doMemoSetCache(
       args
     );
   } else {
-    auto const args = argGroup(env, inst)
+    auto args = argGroup(env, inst)
       .reg(handleAddr)
-      .imm(GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam())
-      .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1))
-      .typedValue(valIndex, aux);
+      .imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    addKeysAddr(args);
+    args.typedValue(valIndex, aux);
+
     cgCallHelper(
       v,
       env,
@@ -487,39 +514,43 @@ void cgMemoSetLSBValue(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const fpOrSp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetStaticCache>();
   auto const cache = rds::bindStaticMemoCache(extra->func);
   assertx(!extra->asyncEager);
-  doMemoGetCache(env, inst, extra, fp, cache.handle());
+  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+  doMemoGetCache(env, inst, extra, fpOrSp, cache.handle());
 }
 
 void cgMemoGetLSBCache(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const fpOrSp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetLSBCache>();
   auto const lsbCls = srcLoc(env, inst, 1).reg();
   auto const handle =
     getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
   assertx(!extra->asyncEager);
-  doMemoGetCache(env, inst, extra, fp, handle);
+  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+  doMemoGetCache(env, inst, extra, fpOrSp, handle);
 }
 
 void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const fpOrSp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetStaticCache>();
   auto const cache = rds::bindStaticMemoCache(extra->func);
   assertx(!extra->loadAux);
-  doMemoSetCache(env, inst, extra, fp, cache.handle(), 1);
+  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+  doMemoSetCache(env, inst, extra, fpOrSp, cache.handle(), 1);
 }
 
 void cgMemoSetLSBCache(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const fpOrSp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetLSBCache>();
   auto const lsbCls = srcLoc(env, inst, 1).reg();
   auto const handle =
     getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
   assertx(!extra->loadAux);
-  doMemoSetCache(env, inst, extra, fp, handle, 2);
+  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+  doMemoSetCache(env, inst, extra, fpOrSp, handle, 2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -615,9 +646,11 @@ void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
 
 void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const fpOrSp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetInstanceCache>();
   assertx(!extra->asyncEager);
+  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+
   // Unlike for the static case, we can have zero keys here (because of shared
   // caches).
   auto const obj = srcLoc(env, inst, 1).reg();
@@ -631,6 +664,16 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testq{cache, cache, sf};
   fwdJcc(v, env, CC_Z, sf, inst->taken());
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
 
   // Lookup the right getter function and call it with the pointer to the cache.
   auto const valPtr = v.makeReg();
@@ -651,14 +694,15 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
       auto const getter =
         sharedMemoCacheGetForKeyTypes(extra->types, extra->keys.count);
       auto const funcId = extra->func->getFuncId();
-      auto const args = argGroup(env, inst)
+      auto args = argGroup(env, inst)
         .reg(cache)
         .imm(
           getter
             ? funcId
             : GenericMemoId{funcId, extra->keys.count}.asParam()
-        )
-        .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1));
+        );
+      addKeysAddr(args);
+
       cgCallHelper(
         v,
         env,
@@ -684,7 +728,7 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
         GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
       );
     }
-    args.addr(fp, localOffset(extra->keys.first + extra->keys.count - 1));
+    addKeysAddr(args);
 
     cgCallHelper(
       v,
@@ -707,9 +751,11 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
 
 void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const fpOrSp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetInstanceCache>();
   assertx(!extra->loadAux);
+  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+
   // Unlike the static case, we can have zero keys here (because of shared
   // caches).
   auto const obj = srcLoc(env, inst, 1).reg();
@@ -737,6 +783,16 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
       : AuxUnion{std::numeric_limits<uint32_t>::max()};
   }();
 
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
+
   // Lookup the right setter and call it with the address of the pointer to the
   // cache. If the pointer is null, the setter will allocate a new cache and
   // update the pointer.
@@ -758,15 +814,16 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
       auto const setter =
         sharedMemoCacheSetForKeyTypes(extra->types, extra->keys.count);
       auto const funcId = extra->func->getFuncId();
-      auto const args = argGroup(env, inst)
+      auto args = argGroup(env, inst)
         .addr(obj, slotOff + TVOFF(m_data))
         .imm(
           setter
             ? funcId
             : GenericMemoId{funcId, extra->keys.count}.asParam()
-        )
-        .addr(fp, localOffset(extra->keys.first + extra->keys.count - 1))
-        .typedValue(2, aux);
+        );
+      addKeysAddr(args);
+      args.typedValue(2, aux);
+
       cgCallHelper(
         v,
         env,
@@ -790,7 +847,7 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
         GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
       );
     }
-    args.addr(fp, localOffset(extra->keys.first + extra->keys.count - 1));
+    addKeysAddr(args);
     args.typedValue(2, aux);
 
     cgCallHelper(

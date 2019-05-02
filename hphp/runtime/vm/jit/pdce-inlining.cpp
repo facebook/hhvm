@@ -433,6 +433,11 @@ bool replaceFP(Block* block, SSATmp* oldSrc, SSATmp* newSrc, FPUseMap& map) {
  * past them.
  */
 bool canConvertToStack(IRInstruction& inst) {
+  if (inst.is(MemoGetStaticCache, MemoSetStaticCache,
+              MemoGetLSBCache, MemoSetLSBCache,
+              MemoGetInstanceCache, MemoSetInstanceCache)) {
+    return inst.src(0)->isA(TFramePtr);
+  }
   return inst.is(LdLoc, StLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
 }
 

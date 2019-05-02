@@ -303,7 +303,8 @@ struct IRInstruction {
    * to be able to handle multiple opcode types that share the same kind of
    * extra data.
    */
-  template<class T> const T* extra() const;
+  template<typename T> const T* extra() const;
+  template<typename T> T* extra();
 
   /*
    * Return the raw ExtraData pointer, for pretty-printing.

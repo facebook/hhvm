@@ -1271,17 +1271,31 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // memo cache (which isn't modeled). The set can re-enter to run a
     // destructor.
     auto const extra = inst.extra<MemoCacheStaticData>();
-    auto const frame = AFrame {
-      inst.src(0),
-      AliasIdSet{
-        AliasIdSet::IdRange{
-          extra->keys.first,
-          extra->keys.first + extra->keys.count
-        }
+    auto const loc = [&] () -> AliasClass {
+      if (inst.src(0)->isA(TFramePtr)) {
+        return AFrame {
+          inst.src(0),
+          AliasIdSet{
+            AliasIdSet::IdRange{
+              extra->keys.first,
+              extra->keys.first + extra->keys.count
+            }
+          }
+        };
       }
-    };
-    auto effects = may_load_store(frame, AEmpty);
-    if (inst.op() == MemoSetStaticCache) effects = may_reenter(inst, effects);
+      assertx(inst.src(0)->isA(TStkPtr));
+      assertx(extra->stackOffset);
+      return AStack {
+        inst.src(0),
+        *extra->stackOffset,
+        static_cast<int32_t>(extra->keys.count)
+      };
+    }();
+
+    auto effects = may_load_store(loc, AEmpty);
+    if (inst.op() == MemoSetStaticCache || inst.op() == MemoSetLSBCache) {
+      effects = may_reenter(inst, effects);
+    }
     return effects;
   }
 
@@ -1290,20 +1304,30 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Reads some set of locals for keys, and reads/writes from the memo cache
     // (which isn't modeled). The set can re-enter to run a destructor.
     auto const extra = inst.extra<MemoCacheInstanceData>();
-    auto const frame = [&]() -> AliasClass {
+    auto const loc = [&]() -> AliasClass {
       // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
       if (extra->keys.count == 0) return AEmpty;
-      return AFrame {
-        inst.src(0),
-        AliasIdSet{
-          AliasIdSet::IdRange{
-            extra->keys.first,
-            extra->keys.first + extra->keys.count
+
+      if (inst.src(0)->isA(TFramePtr)) {
+        return AFrame {
+          inst.src(0),
+          AliasIdSet{
+            AliasIdSet::IdRange{
+              extra->keys.first,
+              extra->keys.first + extra->keys.count
+            }
           }
-        }
+        };
+      }
+      assertx(inst.src(0)->isA(TStkPtr));
+      assertx(extra->stackOffset);
+      return AStack {
+        inst.src(0),
+        *extra->stackOffset,
+        static_cast<int32_t>(extra->keys.count)
       };
     }();
-    auto effects = may_load_store(frame, AEmpty);
+    auto effects = may_load_store(loc, AEmpty);
     if (inst.op() == MemoSetInstanceCache) effects = may_reenter(inst, effects);
     return effects;
   }

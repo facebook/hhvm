@@ -1,8 +1,25 @@
 (library
-  (name ast_deps)
+  (name ast)
   (wrapped false)
+  (modules
+    ast
+    ast_defs
+    ast_defs_visitors_ancestors
+    ast_utils
+    ast_visitor)
   (libraries
+    file_info
+    namespace_env
+    naming_special_names)
+  (preprocess
+    (pps visitors.ppx ppx_deriving.std)))
+
+(library
+  (name namespace_env)
+  (wrapped false)
+  (modules
+    namespace_env)
+  (libraries
+    collections
     core_kernel
-    imported_core
-    pos)
-  (preprocess (pps ppx_deriving.std visitors.ppx)))
+    parser_options))

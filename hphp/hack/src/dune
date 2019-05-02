@@ -101,6 +101,7 @@
     global_config
     hackfmt
     nast
+    parser_ast_check
     parser_heap
     parser_syntax
     parser_syntax_transforms

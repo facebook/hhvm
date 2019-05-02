@@ -13,7 +13,7 @@ val set_fuzzy_search_enabled : bool -> unit
 
 (* Get or set the currently selected search provider *)
 val get_search_provider: unit -> SearchUtils.search_provider
-val set_search_provider: string -> unit
+val set_search_provider: ?quiet:bool -> string -> unit
 
 (* This is the proper search function everyone should use *)
 val find_matching_symbols :

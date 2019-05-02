@@ -26,14 +26,18 @@ let get_search_provider (): SearchUtils.search_provider =
 ;;
 
 (* Set the currently selected search provider *)
-let set_search_provider (provider_str: string): unit =
+let set_search_provider
+    ?(quiet=false)
+    (provider_str: string): unit =
   let provider = SearchUtils.provider_of_string provider_str in
   match !current_search_provider with
   | None ->
     current_search_provider := Some provider;
-    Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
-      (SearchUtils.descriptive_name_of_provider provider)
-      provider_str;
+    if not quiet then begin
+      Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
+        (SearchUtils.descriptive_name_of_provider provider)
+        provider_str;
+    end;
   | Some existing_provider ->
 
     (* We don't yet support changing providers on the fly *)

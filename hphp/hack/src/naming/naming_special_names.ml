@@ -430,7 +430,7 @@ module Superglobals = struct
 
   let all_superglobals =
     [globals ; "$_SERVER"; "$_GET"; "$_POST"; "$_FILES";
-     "$_COOKIE"; "$_SESSION"; "$_REQUEST"; "$_ENV"
+     "$_COOKIE"; "$_REQUEST"; "$_ENV"
     ]
 
   let is_superglobal =

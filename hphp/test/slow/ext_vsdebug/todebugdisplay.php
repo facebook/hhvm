@@ -84,7 +84,7 @@ checkObjEqualRecursively($msg, array(
         "name" => "Locals",
       ),
       array(
-        "namedVariables" => 9,
+        "namedVariables" => 8,
         "name" => "Superglobals",
       ),
       array(

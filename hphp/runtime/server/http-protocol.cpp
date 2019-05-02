@@ -121,7 +121,6 @@ const StaticString
   s__GET("_GET"),
   s__POST("_POST"),
   s__REQUEST("_REQUEST"),
-  s__SESSION("_SESSION"),
   s__ENV("_ENV"),
   s__COOKIE("_COOKIE"),
   s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA"),
@@ -162,10 +161,6 @@ static auto const s_arraysToClear = {
   s__REQUEST,
   s__ENV,
   s__COOKIE,
-};
-
-static auto const s_arraysToUnset = {
-  s__SESSION,
 };
 
 static void PrepareEnv(Array& env, Transport *transport) {
@@ -234,12 +229,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   auto const vhost = VirtualHost::GetCurrent();
   auto const g = get_global_variables()->asArrayData();
   Variant emptyArr(staticEmptyArray());
-  for (auto& key : s_arraysToClear) {
+  for (auto const& key : s_arraysToClear) {
     g->removeInPlace(key.get());
     g->setInPlace(key.get(), emptyArr);
-  }
-  for (auto& key : s_arraysToUnset) {
-    g->removeInPlace(key.get());
   }
 
   // according to doc if content type is multipart/form-data

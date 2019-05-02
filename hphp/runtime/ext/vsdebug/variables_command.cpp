@@ -498,7 +498,6 @@ const auto globalKeys = {
   StaticString{"_FILES"},
   StaticString{"_ENV"},
   StaticString{"_REQUEST"},
-  StaticString{"_SESSION"},
   StaticString{"GLOBALS"},
 };
 }

@@ -49,7 +49,6 @@ GlobalsArray::GlobalsArray(NameValueTable* tab)
   X(_FILES,               arr);
   X(_ENV,                 arr);
   X(_REQUEST,             arr);
-  X(_SESSION,             arr);
   X(HTTP_RAW_POST_DATA,   init_null_variant);
 #undef X
 

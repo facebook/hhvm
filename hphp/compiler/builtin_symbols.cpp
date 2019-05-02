@@ -47,7 +47,6 @@ const char *const BuiltinSymbols::GlobalNames[] = {
   "_POST",
   "_REQUEST",
   "_SERVER",
-  "_SESSION",
   "argc",
   "argv",
 };
@@ -70,7 +69,6 @@ void BuiltinSymbols::LoadSuperGlobals() {
     s_superGlobals.insert("_FILES");
     s_superGlobals.insert("_ENV");
     s_superGlobals.insert("_REQUEST");
-    s_superGlobals.insert("_SESSION");
   }
 }
 

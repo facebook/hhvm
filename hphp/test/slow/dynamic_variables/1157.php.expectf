@@ -1,7 +1,0 @@
-Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 8
-
-Warning: compact() is deprecated and subject to removal from the Hack language in %s on line 10
-array(1) {
-  ["a"]=>
-  int(100)
-}

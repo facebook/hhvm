@@ -6958,19 +6958,19 @@ TCA dispatchImpl() {
   bool collectCoverage = RID().getCoverage();
 
 #ifndef _MSC_VER
-  static const void *optabDirect[] = {
+  static const void* const optabDirect[] = {
 #define O(name, imm, push, pop, flags) \
     &&Label##name,
     OPCODES
 #undef O
   };
-  static const void *optabDbg[] = {
+  static const void* const optabDbg[] = {
 #define O(name, imm, push, pop, flags) \
     &&LabelDbg##name,
     OPCODES
 #undef O
   };
-  static const void *optabCover[] = {
+  static const void* const optabCover[] = {
 #define O(name, imm, push, pop, flags) \
     &&LabelCover##name,
     OPCODES
@@ -6978,7 +6978,7 @@ TCA dispatchImpl() {
   };
   assertx(sizeof(optabDirect) / sizeof(const void *) == Op_count);
   assertx(sizeof(optabDbg) / sizeof(const void *) == Op_count);
-  const void **optab = optabDirect;
+  const void* const* optab = optabDirect;
   if (collectCoverage) {
     optab = optabCover;
   }

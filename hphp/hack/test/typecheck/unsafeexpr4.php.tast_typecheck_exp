@@ -1,0 +1,56 @@
+[(Fun
+    { f_span = [12:1-28]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([12:21-25], (Hprim Tvoid)));
+      f_name = ([12:10-11], "\\f"); f_tparams = []; f_where_constraints = [];
+      f_variadic = FVnonVariadic;
+      f_params =
+      [{ param_annotation = ([12:16-18], int);
+         param_hint = (Some ([12:12-15], (Hprim Tint)));
+         param_is_reference = false; param_is_variadic = false;
+         param_pos = [12:16-18]; param_name = "$a"; param_expr = None;
+         param_callconv = None; param_user_attributes = [] }
+        ];
+      f_body =
+      { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>;
+      f_doc_comment =
+      (Some "/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */");
+      f_static = false });
+  (Fun
+     { f_span = [14:1-17:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret = (Some ([14:15-18], (Hprim Tint)));
+       f_name = ([14:10-11], "\\g"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body =
+       { fb_ast =
+         [([15:3-40],
+           (Expr
+              (([15:3-39], void),
+               (Call (Cnormal,
+                  (([15:3-4], (function(int $a): void)),
+                   (Id ([15:3-4], "\\f"))),
+                  [],
+                  [(([15:35-38], _),
+                    (Unsafe_expr (([15:35-38], _), (String "a"))))],
+                  [])))));
+           ([16:3-32],
+            (Return
+               (Some (([16:28-31], _),
+                      (Unsafe_expr (([16:28-31], _), (String "b")))))))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
+  ]
+Typing[4291] Unexpected type in TAST: expected string, got _
+   --> unsafeexpr4.php
+ 15 |   f(/* UNSAFE_EXPR - See #1337 */ "a");
+    |                                   ^^^
+
+Typing[4291] Unexpected type in TAST: expected string, got _
+   --> unsafeexpr4.php
+ 16 |   return /* UNSAFE_EXPR */ "b";
+    |                            ^^^
+

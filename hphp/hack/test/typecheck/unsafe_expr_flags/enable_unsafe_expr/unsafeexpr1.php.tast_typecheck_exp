@@ -1,0 +1,22 @@
+[(Fun
+    { f_span = [5:1-7:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret = (Some ([5:17-20], (Hprim Tint)));
+      f_name = ([5:10-13], "\\foo"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_body =
+      { fb_ast =
+        [([6:3-36],
+          (Return
+             (Some (([6:28-35], _),
+                    (Unsafe_expr (([6:28-35], _), (String "sheep")))))))
+          ];
+        fb_annotation = No unsafe blocks };
+      f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false })
+  ]
+Typing[4291] Unexpected type in TAST: expected string, got _
+   --> unsafeexpr1.php
+  6 |   return /* UNSAFE_EXPR */ "sheep";
+    |                            ^^^^^^^
+

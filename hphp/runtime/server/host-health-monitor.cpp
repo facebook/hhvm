@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/health-monitor-types.h"
 #include "hphp/util/logger.h"
@@ -104,6 +105,9 @@ void HostHealthMonitor::monitor() {
 }
 
 HealthLevel HostHealthMonitor::evaluate() {
+#ifdef USE_JEMALLOC
+  mallctl_epoch();
+#endif
   HealthLevel res = HealthLevel::Bold;
   std::lock_guard<std::mutex> g(m_lock);
   for (auto metric : m_metrics) {

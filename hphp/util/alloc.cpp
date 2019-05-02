@@ -192,6 +192,24 @@ int low_cold_arena_flags = 0;
 int high_cold_arena_flags = 0;
 __thread int high_arena_flags = 0;
 
+// jemalloc frequently used mibs
+size_t g_pactive_mib[4];                // "stats.arenas.<i>.pactive"
+size_t g_epoch_mib[1];                  // "epoch"
+
+void mallctl_epoch() {
+  uint64_t epoch = 1;
+  mallctlbymib(g_epoch_mib, 1, nullptr, nullptr, &epoch, sizeof(epoch));
+}
+
+size_t mallctl_pactive(unsigned arenaId) {
+  size_t mib[4] =
+    {g_pactive_mib[0], g_pactive_mib[1], arenaId, g_pactive_mib[3]};
+  size_t pactive = 0;
+  size_t sz = sizeof(pactive);
+  if (mallctlbymib(mib, 4, &pactive, &sz, nullptr, 0)) return 0;
+  return pactive;
+}
+
 #if USE_JEMALLOC_EXTENT_HOOKS
 // Keep track of the size of recently freed memory that might be in the high1g
 // arena when it is disabled, so that we know when to reenable it.
@@ -711,6 +729,11 @@ struct JEMallocInitializer {
     }
     setup_high_arena(high_1g_pages);
 #endif
+    // Initialize global mibs
+    size_t miblen = 1;
+    mallctlnametomib("epoch", g_epoch_mib, &miblen);
+    miblen = 4;
+    mallctlnametomib("stats.arenas.0.pactive", g_pactive_mib, &miblen);
 #endif
   }
 };

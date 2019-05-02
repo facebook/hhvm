@@ -882,11 +882,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #ifdef USE_JEMALLOC
     assertx(mallctlnametomib && mallctlbymib);
     if (cmd == "jemalloc-stats") {
-      // Force jemalloc to update stats cached for use by mallctl().
+      // jemalloc stats update is periodically triggered in the
+      // host-health-monitor thread.
       uint32_t error = 0;
-      if (mallctlWrite<uint64_t, true>("epoch", 1) != 0) {
-        error = 1;
-      }
 
       auto call_mallctl = [&](const char* statName) {
         size_t value = 0;

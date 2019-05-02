@@ -61,44 +61,8 @@ NEVER_INLINE RangeState& getRange(AddrRangeClass index) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-// jemalloc mibs that are frequently used, initialized early when there is only
-// one thread.
-size_t g_pactive_mib[4];                // "stats.arenas.<i>.pactive"
-size_t g_epoch_mib[1];                  // "epoch"
-bool g_mib_initialized = false;
-
-void initializeMibs() {
-  if (g_mib_initialized) return;
-  size_t miblen = 1;
-  mallctlnametomib("epoch", g_epoch_mib, &miblen);
-  miblen = 4;
-  mallctlnametomib("stats.arenas.0.pactive", g_pactive_mib, &miblen);
-  g_mib_initialized = true;
-}
-
-void mallctl_epoch() {
-  if (!g_mib_initialized) return;
-  uint64_t epoch = 1;
-  mallctlbymib(g_epoch_mib, 1, nullptr, nullptr, &epoch, sizeof(epoch));
-}
-
-size_t activeSize(unsigned arenaId) {
-  if (!g_mib_initialized) return 0;
-  size_t mib[4] =
-    {g_pactive_mib[0], g_pactive_mib[1], arenaId, g_pactive_mib[3]};
-  size_t pactive = 0;
-  size_t sz = sizeof(pactive);
-  if (mallctlbymib(mib, 4, &pactive, &sz, nullptr, 0)) return 0;
-  auto const activeSize = pactive * s_pageSize;
-  return activeSize;
-}
-
-}
-
 template<typename ExtentAllocator>
 std::string ManagedArena<ExtentAllocator>::reportStats() {
-  mallctl_epoch();
   char buffer[128];
   using Traits = extent_allocator_traits<ExtentAllocator>;
   std::snprintf(buffer, sizeof(buffer),
@@ -106,24 +70,19 @@ std::string ManagedArena<ExtentAllocator>::reportStats() {
                 id(),
                 ExtentAllocator::allocatedSize(),
                 ExtentAllocator::maxCapacity(),
-                activeSize(id()));
+                s_pageSize * mallctl_pactive(id()));
   return std::string{buffer};
 }
 
 template<typename ExtentAllocator>
 size_t ManagedArena<ExtentAllocator>::unusedSize() {
-  mallctl_epoch();
-  auto const active = activeSize(id());
+  auto const active = s_pageSize * mallctl_pactive(id());
   return ExtentAllocator::allocatedSize() - active;
 }
 
 template<typename ExtentAllocator>
 void ManagedArena<ExtentAllocator>::init() {
   using Traits = extent_allocator_traits<ExtentAllocator>;
-
-  if (!g_mib_initialized) {
-    initializeMibs();
-  }
   if (m_arenaId != 0) {
     // Shouldn't call init() multiple times for the same instance.
     not_reached();

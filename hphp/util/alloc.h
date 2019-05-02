@@ -103,6 +103,9 @@ extern __thread int high_arena_flags;
 
 void setup_local_arenas();
 
+void mallctl_epoch();
+size_t mallctl_pactive(unsigned arenaId);
+
 #if USE_JEMALLOC_EXTENT_HOOKS
 
 // Explicit per-thread tcache for high arena.

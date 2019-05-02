@@ -104,7 +104,6 @@ def get_test_flags(path: str) -> List[str]:
 def check_output(
     case,
     out_extension: str,
-    fallback_out_extension: Optional[str],
     default_expect_regex,
     ignore_error_text: bool,
     only_compare_error_lines: bool,
@@ -114,9 +113,6 @@ def check_output(
         return Result(test_case=case, output=out, is_failure=failed)
     else:
         out_path = case.file_path + out_extension
-        exists = os.path.isfile(out_path)
-        if not exists and fallback_out_extension is not None:
-            out_path = case.file_path + fallback_out_extension
         with open(out_path, "r") as f:
             output : str = f.read()
             return check_result(case, default_expect_regex,
@@ -129,7 +125,6 @@ def run_batch_tests(test_cases: List[TestCase],
                     ignore_error_text,
                     get_flags: Callable[[str], List[str]],
                     out_extension: str,
-                    fallback_out_extension: Optional[str],
                     only_compare_error_lines: bool = False,
                     ) -> List[Result]:
     """
@@ -172,7 +167,6 @@ def run_batch_tests(test_cases: List[TestCase],
             result = check_output(
                 case,
                 out_extension=out_extension,
-                fallback_out_extension=fallback_out_extension,
                 default_expect_regex=default_expect_regex,
                 ignore_error_text=ignore_error_text,
                 only_compare_error_lines=only_compare_error_lines)
@@ -322,7 +316,6 @@ def get_exp_out_dirs(test_file: str) -> Tuple[str, str]:
 def report_failures(total: int,
                     failures: List[Result],
                     out_extension: str,
-                    fallback_out_extension: Optional[str],
                     expect_extension: str,
                     fallback_expect_extension: Optional[str],
                     no_copy: bool = False,
@@ -339,17 +332,13 @@ def report_failures(total: int,
         fallback_expect_ext_var = ''
         if fallback_expect_extension is not None:
             fallback_expect_ext_var = "FALLBACK_EXP_EXT=%s " % fallback_expect_extension
-        fallback_out_ext_var = ''
-        if fallback_out_extension is not None:
-            fallback_out_ext_var = "FALLBACK_OUT_EXT=%s " % fallback_out_extension
         first_test_file = os.path.realpath(failures[0].test_case.file_path)
         (exp_dir, out_dir) = get_exp_out_dirs(first_test_file)
         output_dir_var = ("SOURCE_ROOT=%s OUTPUT_ROOT=%s " % (exp_dir, out_dir))
         fname_map_var = lambda f: "hphp/hack/"+os.path.relpath(f, out_dir)
-        print("OUT_EXT=%s EXP_EXT=%s %s%s%sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
+        print("OUT_EXT=%s EXP_EXT=%s %s%sNO_COPY=%s ./hphp/hack/test/review.sh %s" %
                 (out_extension,
                 expect_extension,
-                fallback_out_ext_var,
                 fallback_expect_ext_var,
                 output_dir_var,
                 "true" if no_copy else "false",
@@ -451,7 +440,6 @@ def run_tests(files: List[str],
               expected_extension: str,
               fallback_expect_extension: Optional[str],
               out_extension: str,
-              fallback_out_extension: Optional[str],
               use_stdin: str,
               program: str,
               default_expect_regex: Optional[str],
@@ -472,7 +460,7 @@ def run_tests(files: List[str],
     if batch_mode:
         results = run_batch_tests(test_cases, program, default_expect_regex,
             ignore_error_text, get_flags, out_extension,
-            fallback_out_extension, only_compare_error_lines)
+            only_compare_error_lines)
     else:
         results = run_test_program(test_cases, program, default_expect_regex,
             ignore_error_text, get_flags, timeout=timeout)
@@ -490,7 +478,6 @@ def run_tests(files: List[str],
             num_results,
             failures,
             args.out_extension,
-            args.fallback_out_extension,
             args.expect_extension,
             args.fallback_expect_extension,
             only_compare_error_lines=only_compare_error_lines)
@@ -503,7 +490,6 @@ def run_idempotence_tests(results: List[Result],
                           expected_extension: str,
                           fallback_expect_extension: Optional[str],
                           out_extension: str,
-                          fallback_out_extension: Optional[str],
                           program: str,
                           default_expect_regex,
                           get_flags: Callable[[str], List[str]]) -> None:
@@ -532,7 +518,6 @@ def run_idempotence_tests(results: List[Result],
             num_idempotence_results,
             idempotence_failures,
             out_extension + out_extension,  # e.g., *.out.out
-            fallback_out_extension,
             expected_extension,
             fallback_expect_extension,
             no_copy=True)
@@ -566,7 +551,6 @@ if __name__ == '__main__':
     parser.add_argument('--out-extension', type=str, default='.out')
     parser.add_argument('--expect-extension', type=str, default='.exp')
     parser.add_argument('--fallback-expect-extension', type=str)
-    parser.add_argument('--fallback-out-extension', type=str)
     parser.add_argument('--default-expect-regex', type=str)
     parser.add_argument('--in-extension', type=str, default='.php')
     parser.add_argument('--disabled-extension', type=str,
@@ -624,7 +608,6 @@ if __name__ == '__main__':
         args.expect_extension,
         args.fallback_expect_extension,
         args.out_extension,
-        args.fallback_out_extension,
         args.stdin,
         args.program,
         args.default_expect_regex,
@@ -643,7 +626,6 @@ if __name__ == '__main__':
             args.expect_extension,
             args.fallback_expect_extension,
             args.out_extension,
-            args.fallback_out_extension,
             args.program,
             args.default_expect_regex,
             get_flags)

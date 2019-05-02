@@ -372,8 +372,9 @@ bool nativeWrapperCheckArgs(ActRec* ar) {
       if (InvalidAbsoluteOffset == paramInfo[i].funcletOff) {
         // There's at least one non-default param which wasn't passed, throw a
         // RuntimeException
-        throw_wrong_arguments_nr(getInvokeName(ar)->data(),
-              numNonDefault, minNumArgs(ar), numArgs);
+        throw_wrong_arguments_nr(
+            getInvokeName(ar)->data(), numNonDefault, minNumArgs(ar),
+            func->hasVariadicCaptureParam() ? INT_MAX : numArgs);
       }
     }
   } else if (numNonDefault > numArgs && !func->hasVariadicCaptureParam()) {

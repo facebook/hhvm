@@ -1,7 +1,7 @@
 
 *** Testing Error Conditions ***
 
-Warning: min() expects exactly 1 parameter, 0 given in %s/min_error.php on line 10
+Warning: min() expects at least 1 parameter, 0 given in %s/min_error.php on line 10
 
 Warning: min(): When only one parameter is given, it must be an array in %s/min_error.php on line 11
 NULL

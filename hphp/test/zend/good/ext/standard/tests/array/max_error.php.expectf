@@ -1,7 +1,7 @@
 
 *** Testing Error Conditions ***
 
-Warning: max() expects exactly 1 parameter, 0 given in %s/max_error.php on line 10
+Warning: max() expects at least 1 parameter, 0 given in %s/max_error.php on line 10
 
 Warning: max(): When only one parameter is given, it must be an array in %s/max_error.php on line 11
 NULL

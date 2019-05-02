@@ -667,7 +667,7 @@ array(7) {
 }
 
 *** Testing error conditions ***
-Warning: array_merge() expects exactly 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
+Warning: array_merge() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
 
 Warning: Invalid operand type was used: %s in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 79
 NULL

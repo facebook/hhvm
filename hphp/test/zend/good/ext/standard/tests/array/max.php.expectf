@@ -1,5 +1,5 @@
 
-Warning: max() expects exactly 1 parameter, 0 given in %s/max.php on line 3
+Warning: max() expects at least 1 parameter, 0 given in %s/max.php on line 3
 
 Warning: max(): When only one parameter is given, it must be an array in %s/max.php on line 4
 NULL

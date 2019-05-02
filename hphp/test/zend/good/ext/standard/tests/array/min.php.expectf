@@ -1,5 +1,5 @@
 
-Warning: min() expects exactly 1 parameter, 0 given in %s/min.php on line 3
+Warning: min() expects at least 1 parameter, 0 given in %s/min.php on line 3
 
 Warning: min(): When only one parameter is given, it must be an array in %s/min.php on line 4
 NULL

@@ -1,7 +1,7 @@
 
 *** Testing Error Conditions ***
 
-Warning: array_push() expects exactly 2 parameters, 0 given in %s/array_push.php on line 36
+Warning: array_push() expects at least 2 parameters, 0 given in %s/array_push.php on line 36
 
 Warning: Invalid operand type was used: array_push expects array(s) or collection(s) in %s/array_push.php on line 39
 NULL

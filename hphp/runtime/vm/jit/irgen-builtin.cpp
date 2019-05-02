@@ -2458,6 +2458,7 @@ void memoSetImpl(IRGS& env, LocalRange keys, bool eager) {
       ldVal(DataTypeCountness),
       lsbCls
     );
+    return;
   }
 
   if (keys.count > 0) {

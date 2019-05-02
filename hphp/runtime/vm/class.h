@@ -87,6 +87,12 @@ struct StaticPropData {
   TypedValue val;
 };
 
+enum class ClsCnsLookup {
+  NoTypes,
+  IncludeTypes,
+  IncludeTypesPartial
+};
+
 using ClassPtr = AtomicSharedLowPtr<Class>;
 
 /*
@@ -877,7 +883,7 @@ public:
    * may, however, be KindOfString for a static string).
    */
   Cell clsCnsGet(const StringData* clsCnsName,
-                 bool includeTypeCns = false) const;
+                 ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
 
   /*
    * Look up a class constant's TypedValue if it doesn't require dynamic
@@ -893,7 +899,7 @@ public:
    */
   const Cell* cnsNameToTV(const StringData* clsCnsName,
                           Slot& clsCnsInd,
-                          bool includeTypeCns = false) const;
+                          ClsCnsLookup what = ClsCnsLookup::NoTypes) const;
 
   /*
    * Provide the current runtime type of this class constant.

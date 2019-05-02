@@ -1264,9 +1264,9 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
-Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
+Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
   Slot clsCnsInd;
-  auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, includeTypeCns);
+  auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, what);
   if (!cnsVal) return make_tv<KindOfUninit>();
 
   auto& cns = m_constants[clsCnsInd];
@@ -1287,6 +1287,9 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
         auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);
         assertx(resolved->isDictOrDArray());
         return make_persistent_array_like_tv(resolved);
+      }
+      if (what == ClsCnsLookup::IncludeTypesPartial) {
+        return make_tv<KindOfUninit>();
       }
     } else {
       return *cnsVal;
@@ -1340,6 +1343,9 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
 
   // Resolve type constant, if needed.
   if (cns.isType()) {
+    if (what == ClsCnsLookup::IncludeTypesPartial) {
+      return make_tv<KindOfUninit>();
+    }
     Array resolvedTS;
     bool persistent = true;
     try {
@@ -1409,7 +1415,7 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, bool includeTypeCns) const {
 
 const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
                                Slot& clsCnsInd,
-                               bool includeTypeCns) const {
+                               ClsCnsLookup what) const {
   clsCnsInd = m_constants.findIndex(clsCnsName);
   if (clsCnsInd == kInvalidSlot) {
     return nullptr;
@@ -1417,7 +1423,7 @@ const Cell* Class::cnsNameToTV(const StringData* clsCnsName,
   if (m_constants[clsCnsInd].isAbstract()) {
     return nullptr;
   }
-  if (!includeTypeCns && m_constants[clsCnsInd].isType()) {
+  if (what == ClsCnsLookup::NoTypes && m_constants[clsCnsInd].isType()) {
     return nullptr;
   }
   auto const ret = &m_constants[clsCnsInd].val;

@@ -571,7 +571,7 @@ Array HHVM_FUNCTION(type_structure,
   }
 
   auto const cls_sd = cls->name();
-  auto typeCns = cls->clsCnsGet(cns_sd, true);
+  auto typeCns = cls->clsCnsGet(cns_sd, ClsCnsLookup::IncludeTypes);
   if (typeCns.m_type == KindOfUninit) {
     if (cls->hasTypeConstant(cns_sd, true)) {
       raise_error("Type constant %s::%s is abstract",

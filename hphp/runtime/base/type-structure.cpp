@@ -773,7 +773,17 @@ Array resolveTS(TSEnv& env,
             clsName.data(),
             cnsName.data());
         }
-        auto tv = cls->clsCnsGet(cnsName.get(), /* includeTypeCns = */ true);
+        auto tv = cls->clsCnsGet(
+          cnsName.get(),
+          env.allow_partial ?
+          ClsCnsLookup::IncludeTypesPartial : ClsCnsLookup::IncludeTypes);
+        if (tv.m_type == KindOfUninit) {
+          assertx(env.allow_partial);
+          throw Exception(
+            "Failed to resolve a type constant: %s::%s",
+            cls->name()->data(), cnsName.get()->data()
+          );
+        }
         assertx(isArrayLikeType(tv.m_type));
         typeCnsVal = Array(tv.m_data.parr);
         assertx(typeCnsVal.isDictOrDArray());

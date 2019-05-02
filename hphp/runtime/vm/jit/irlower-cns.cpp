@@ -331,7 +331,7 @@ void cgLdTypeCns(IRLS& env, const IRInstruction* inst) {
 static ArrayData* loadClsTypeCnsHelper(
   const Class* cls, const StringData* name
 ) {
-  auto typeCns = cls->clsCnsGet(name, true);
+  auto typeCns = cls->clsCnsGet(name, ClsCnsLookup::IncludeTypes);
   if (typeCns.m_type == KindOfUninit) {
     if (cls->hasTypeConstant(name, true)) {
       raise_error("Type constant %s::%s is abstract",

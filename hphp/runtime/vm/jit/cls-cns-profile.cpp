@@ -44,7 +44,7 @@ Slot updateSlot(Slot curSlot, Slot newSlot) {
 const TypedValue* ClsCnsProfile::reportClsCns(const Class* cls,
                                               const StringData* cns) {
   Slot cnsSlot;
-  auto const tv = cls->cnsNameToTV(cns, cnsSlot, true);
+  auto const tv = cls->cnsNameToTV(cns, cnsSlot, ClsCnsLookup::IncludeTypes);
   if (cnsSlot == kInvalidSlot ||
       (tv &&
        (static_cast<const TypedValueAux*>(tv)->constModifiers().isType ||

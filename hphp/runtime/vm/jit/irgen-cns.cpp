@@ -207,7 +207,8 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
     implClsCns(env, cls, cnsNameStr, cls->name());
   } else {
     Slot cnsSlot;
-    auto const tv = cls->cnsNameToTV(cnsNameStr, cnsSlot, true);
+    auto const tv = cls->cnsNameToTV(cnsNameStr, cnsSlot,
+                                     ClsCnsLookup::IncludeTypes);
     if (cnsSlot != kInvalidSlot &&
         (!tv ||
          !static_cast<const TypedValueAux*>(tv)->constModifiers().isType)) {

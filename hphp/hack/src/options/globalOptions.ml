@@ -53,6 +53,7 @@ type t = {
   tco_disallow_byref_prop_args : bool;
   tco_shallow_class_decl : bool;
   po_rust : bool;
+  tco_like_types : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -144,11 +145,6 @@ let tco_experimental_decl_linearization = "decl_linearization"
 let tco_experimental_track_subtype_prop = "track_subtype_prop"
 
 (**
- * Enable like-types
- *)
-let tco_experimental_like_types = "like_types"
-
-(**
  * Enable support for the Pocket Universes
  *)
 let tco_experimental_pocket_universes = "pocket_universes"
@@ -181,7 +177,6 @@ let tco_experimental_all =
      tco_experimental_decl_linearization;
      tco_experimental_track_subtype_prop;
      tco_experimental_abstract_type_const_with_default;
-     tco_experimental_like_types;
    ]
 
 let tco_migration_flags_all =
@@ -238,6 +233,7 @@ let default = {
  tco_disallow_byref_prop_args = false;
  tco_shallow_class_decl = false;
  po_rust = false;
+ tco_like_types = false;
 }
 
 let make
@@ -285,6 +281,7 @@ let make
   ?(tco_disallow_byref_prop_args = default.tco_disallow_byref_prop_args)
   ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
   ?(po_rust = default.po_rust)
+  ?(tco_like_types = default.tco_like_types)
   ()
 = {
   tco_safe_array;
@@ -332,6 +329,7 @@ let make
   tco_disallow_byref_prop_args;
   tco_shallow_class_decl;
   po_rust;
+  tco_like_types;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -383,6 +381,7 @@ let tco_typecheck_xhp_cvars t = t.tco_typecheck_xhp_cvars
 let tco_disallow_byref_prop_args t = t.tco_disallow_byref_prop_args
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 let po_rust t = t.po_rust
+let tco_like_types t = t.tco_like_types
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
 let setup_pocket_universes env enabled =

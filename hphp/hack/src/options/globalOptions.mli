@@ -216,6 +216,9 @@ type t = {
 
  (* Use Rust parser *)
  po_rust : bool;
+
+ (* Enables deeper like types features *)
+ tco_like_types : bool
 } [@@deriving show]
 
 val make :
@@ -263,6 +266,7 @@ val make :
   ?tco_disallow_byref_prop_args: bool ->
   ?tco_shallow_class_decl: bool ->
   ?po_rust: bool ->
+  ?tco_like_types: bool ->
   unit ->
   t
 
@@ -318,7 +322,6 @@ val tco_experimental_trait_method_redeclarations : string
 val tco_experimental_type_const_attributes : string
 val tco_experimental_decl_linearization : string
 val tco_experimental_track_subtype_prop : string
-val tco_experimental_like_types : string
 val tco_experimental_pocket_universes : string
 val tco_experimental_abstract_type_const_with_default : string
 val tco_experimental_all : SSet.t
@@ -336,3 +339,4 @@ val tco_ignore_collection_expr_type_arguments : t -> bool
 val tco_disallow_byref_prop_args : t -> bool
 val tco_shallow_class_decl : t -> bool
 val po_rust : t -> bool
+val tco_like_types : t -> bool

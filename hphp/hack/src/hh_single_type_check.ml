@@ -203,6 +203,7 @@ let parse_options () =
   let disallow_byref_prop_args = ref (Some false) in
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
+  let like_types = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -425,7 +426,10 @@ let parse_options () =
       "Disallow passing properties by reference to functions";
     "--shallow-class-decl",
       Arg.Set shallow_class_decl,
-      "Look up class members lazily from shallow declarations"
+      "Look up class members lazily from shallow declarations";
+    "--like-types",
+      Arg.Set like_types,
+      "Allows deeper like types features like inferring trust"
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -462,6 +466,7 @@ let parse_options () =
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
     ?tco_disallow_byref_prop_args:(!disallow_byref_prop_args)
     ~tco_shallow_class_decl:(!shallow_class_decl)
+    ~tco_like_types:(!like_types)
     ~log_levels:(!log_levels)
     ()
   in

@@ -787,7 +787,8 @@ module Make (GetLocals : GetLocals) = struct
     let pu_enabled = TypecheckerOptions.experimental_feature_enabled
       tcopt GlobalOptions.tco_experimental_pocket_universes in
     let like_types_enabled = TypecheckerOptions.(
-      new_inference tcopt && experimental_feature_enabled tcopt experimental_like_types
+      new_inference tcopt &&
+      like_types tcopt
     ) in
     let aast_hint =
       aast_hint ~forbid_this ~allow_typedef ~allow_wildcard in

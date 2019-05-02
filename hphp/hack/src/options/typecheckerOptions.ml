@@ -56,8 +56,6 @@ let experimental_decl_linearization =
   GlobalOptions.tco_experimental_decl_linearization
 let experimental_track_subtype_prop =
   GlobalOptions.tco_experimental_track_subtype_prop
-let experimental_like_types =
-  GlobalOptions.tco_experimental_like_types
 let experimental_all = GlobalOptions.tco_experimental_all
 let migration_flags_all = GlobalOptions.tco_migration_flags_all
 let dynamic_view = GlobalOptions.tco_dynamic_view
@@ -80,3 +78,4 @@ let typecheck_xhp_cvars = GlobalOptions.tco_typecheck_xhp_cvars
 let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_expr_type_arguments
 let disallow_byref_prop_args = GlobalOptions.tco_disallow_byref_prop_args
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
+let like_types = GlobalOptions.tco_like_types

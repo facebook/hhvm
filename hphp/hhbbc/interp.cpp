@@ -1875,6 +1875,15 @@ void in(ISS& env, const bc::PushL& op) {
 }
 
 void in(ISS& env, const bc::CGetL2& op) {
+  if (auto const last = last_op(env)) {
+    if ((poppable(last->op) && !numPop(*last)) ||
+        (last->op == Op::CGetL && !peekLocCouldBeUninit(env, op.loc1))) {
+      auto const other = *last;
+      rewind(env, 1);
+      return reduce(env, bc::CGetL { op.loc1 }, other);
+    }
+  }
+
   if (!peekLocCouldBeUninit(env, op.loc1)) {
     auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
     if (minLocEquiv != NoLocalId) {

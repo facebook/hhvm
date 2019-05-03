@@ -999,6 +999,8 @@ struct RuntimeOption {
   /* Enable instrumentation and logging for tracking the source         \
    * of arrays that are serialized */                                   \
   F(bool, LogArrayProvenance, false)                                    \
+  /* Log only out out of this many array headers when serializing */    \
+  F(uint32_t, LogArrayProvenanceSampleRatio, 1000)                      \
   /* Warn if is expression are used with type aliases that cannot be    |
    * resolved */                                                        \
   F(bool, IsExprEnableUnresolvedWarning, false)                         \

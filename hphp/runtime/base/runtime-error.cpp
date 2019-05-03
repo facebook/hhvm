@@ -185,6 +185,37 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
   raise_notice("Hack Array Compat: Serializing %s", type);
 }
 
+void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
+  static auto const sampl_threshold =
+    RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
+  if (std::rand() >= sampl_threshold) return;
+
+  auto const dvarray = ([&](){
+    if (arr->isVArray()) return "varray";
+    if (arr->isDArray()) return "darray";
+    if (arr->isVecArray()) return "vec";
+    if (arr->isDict()) return "dict";
+    return "<weird array>";
+  })();
+
+  auto const bail = [&]() {
+    raise_notice("Serializing %s in %s from unknown location",
+                 dvarray, src);
+  };
+
+  assertx(RuntimeOption::EvalLogArrayProvenance);
+  auto const ann = arrprov::getTag(arr);
+  if (!ann) { bail(); return; }
+
+  auto const line = ann->line();
+  auto const name = ann->filename();
+
+  if (!name) { bail(); return; }
+
+  raise_notice("Serializing %s in %s from %s:%d",
+               dvarray, src, name->toCppString().c_str(), line);
+}
+
 void
 raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
   raise_notice("Hack Array Compat: Calling array producing function %s",

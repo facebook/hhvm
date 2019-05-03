@@ -47,7 +47,6 @@
 #include "hphp/hhbbc/index.h"
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/optimize.h"
-#include "hphp/hhbbc/peephole.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-builtins.h"
 #include "hphp/hhbbc/type-ops.h"
@@ -71,6 +70,31 @@ const StaticString s_byRefWarn("Only variables should be passed by reference");
 const StaticString s_byRefError("Only variables can be passed by reference");
 const StaticString s_trigger_error("trigger_error");
 const StaticString s_this("HH\\this");
+
+bool poppable(Op op) {
+  switch (op) {
+    case Op::Dup:
+    case Op::Null:
+    case Op::False:
+    case Op::True:
+    case Op::Int:
+    case Op::Double:
+    case Op::String:
+    case Op::Array:
+    case Op::Vec:
+    case Op::Dict:
+    case Op::Keyset:
+    case Op::NewArray:
+    case Op::NewDArray:
+    case Op::NewMixedArray:
+    case Op::NewDictArray:
+    case Op::NewLikeArrayL:
+    case Op::NewCol:
+      return true;
+    default:
+      return false;
+  }
+}
 
 void interpStep(ISS& env, const Bytecode& bc);
 void rewind(ISS& env, int n);
@@ -5694,7 +5718,6 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       continue;
     }
 
-    assertx(retryOffset >= env.unchangedBcs);
     auto const& bc = idx < retryOffset ?
       interp.blk->hhbcs[idx] : retryBcs[idx - retryOffset];
     ++idx;

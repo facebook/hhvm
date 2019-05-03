@@ -168,7 +168,6 @@ void parse_options(int argc, char** argv) {
     ("remove-dead-blocks",      po::value(&options.RemoveDeadBlocks))
     ("constant-prop",           po::value(&options.ConstantProp))
     ("constant-fold-builtins",  po::value(&options.ConstantFoldBuiltins))
-    ("peephole",                po::value(&options.Peephole))
     ("local-dce",               po::value(&options.LocalDCE))
     ("global-dce",              po::value(&options.GlobalDCE))
     ("remove-unused-locals",    po::value(&options.RemoveUnusedLocals))

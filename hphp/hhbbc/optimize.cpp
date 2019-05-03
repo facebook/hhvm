@@ -45,7 +45,6 @@
 #include "hphp/hhbbc/interp-state.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/options-util.h"
-#include "hphp/hhbbc/peephole.h"
 #include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 #include "hphp/hhbbc/unit-util.h"
@@ -529,126 +528,6 @@ BlockId make_fatal_block(FuncAnalysis& ainfo,
   return bid;
 }
 
-void first_pass(const Index& index,
-                FuncAnalysis& ainfo,
-                CollectedInfo& collect,
-                BlockId bid,
-                State state) {
-  auto const ctx = ainfo.ctx;
-
-  auto interp = Interp {
-    index, ctx, collect, bid, ctx.func->blocks[bid].get(), state
-  };
-
-  BytecodeVec newBCs;
-  newBCs.reserve(interp.blk->hhbcs.size());
-
-  if (options.ConstantProp) collect.propagate_constants = propagate_constants;
-
-  auto peephole = make_peephole(newBCs, index, ctx);
-  std::vector<PeepholeStackElem> srcStack(state.stack.size());
-
-  for (size_t idx = 0, end = interp.blk->hhbcs.size(); idx != end; ) {
-    // mutate can change blocks[bid], but that should only ever happen
-    // on the last bytecode.
-    assertx(interp.blk == ctx.func->blocks[bid].get());
-    auto const& op = interp.blk->hhbcs[idx++];
-    FTRACE(2, "  == {}\n", show(ctx.func, op));
-
-    if (options.Peephole) {
-      peephole.prestep(op, srcStack, state.stack);
-    }
-
-    auto const flags = step(interp, op);
-
-    auto gen = [&] (const Bytecode& bc) {
-      auto newBC = bc;
-      newBC.srcLoc = op.srcLoc;
-      FTRACE(2, "   + {}\n", show(ctx.func, newBC));
-      if (options.Peephole) {
-        peephole.append(
-          newBC,
-          !flags.wasPEI,
-          srcStack, state.stack);
-      } else {
-        newBCs.push_back(newBC);
-      }
-    };
-
-    // The peephole wants the old values of srcStack, so defer the update to the
-    // end of the loop.
-    SCOPE_EXIT {
-      // If we're on the last bytecode, there's no need to update
-      // srcStack, and some opcodes (eg MemoGet) push differently on
-      // the taken path vs the non-taken path.
-      if (idx == end) return;
-      if (op.op == Op::CGetL2) {
-        srcStack.emplace(srcStack.end() - 1,
-                         op.op, (state.stack.end() - 2)->type.subtypeOf(BStr));
-        // The CGetL was the last thing to write this too (even though
-        // it just copied it).
-        srcStack.back().op = op.op;
-      } else {
-        FTRACE(2, "   srcStack: pop {} push {}\n", op.numPop(), op.numPush());
-        for (int i = 0; i < op.numPop(); i++) {
-          srcStack.pop_back();
-        }
-        for (int i = 0; i < op.numPush(); i++) {
-          srcStack.emplace_back(
-            op.op, state.stack[srcStack.size()].type.subtypeOf(BStr));
-        }
-      }
-    };
-
-    auto genOut = [&] (const Bytecode* op) -> Op {
-      if (options.ConstantProp && flags.canConstProp) {
-        if (propagate_constants(*op, state, gen)) {
-          return Op::Nop;
-        }
-      }
-
-      gen(*op);
-      return op->op;
-    };
-
-    if (state.unreachable) {
-      // We should still perform the requested transformations; we
-      // might be part way through converting an FPush/FCall to an
-      // FCallBuiltin, for example
-      auto opc = genOut(&op);
-      if (interp.blk->fallthrough != NoBlockId) {
-        auto const blk = ctx.func->blocks[bid].mutate();
-        blk->fallthrough = NoBlockId;
-      }
-      if (!(instrFlags(opc) & TF)) {
-        gen(bc::BreakTraceHint {});
-        gen(bc::String { s_unreachable.get() });
-        gen(bc::Fatal { FatalOp::Runtime });
-      }
-      break;
-    }
-
-    genOut(&op);
-  }
-
-  if (options.Peephole) {
-    peephole.finalize();
-  }
-
-  if (ctx.func->blocks[bid]->hhbcs != newBCs) {
-    ctx.func->blocks[bid].mutate()->hhbcs = std::move(newBCs);
-  }
-  auto& fpiStack = ainfo.bdata[bid].stateIn.fpiStack;
-  auto it = std::remove_if(fpiStack.begin(), fpiStack.end(),
-                           [](const ActRec& ar) {
-                             return ar.kind == FPIKind::Builtin || ar.foldable;
-                           });
-
-  if (it != fpiStack.end()) {
-    fpiStack.erase(it, fpiStack.end());
-  }
-}
-
 //////////////////////////////////////////////////////////////////////
 
 template<class BlockContainer, class AInfo, class Fun>
@@ -1041,8 +920,6 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
 
   do {
     again = false;
-    visit_blocks_mutable("first pass", index, ainfo, *collect, first_pass);
-
     FTRACE(10, "{}", show(*ainfo.ctx.func));
     /*
      * Note: it's useful to do dead block removal before DCE, so it can remove

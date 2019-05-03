@@ -19,5 +19,6 @@ function getFiles(&$rdi,$depth=0) {
 
 <<__EntryPoint>>
 function main_1804() {
-getFiles(&new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir'));
+  $rdi = new RecursiveDirectoryIterator(__DIR__.'/../../sample_dir');
+  getFiles(&$rdi);
 }

@@ -97,5 +97,5 @@ function f6(C1 &$p1)
 
     var_dump($p1);
 }
-
-f6(&new C1);
+$x = new C1;
+f6(&$x);

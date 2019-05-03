@@ -2260,9 +2260,7 @@ let rec check_reference node errors =
     when token_kind prefix_unary_operator <> Some TokenKind.Dollar ->
     make_error_from_node node SyntaxError.nested_unary_reference :: errors
   | FunctionCallExpression _
-  | ListExpression _
   | MemberSelectionExpression _
-  | ObjectCreationExpression _
   | PipeVariableExpression _
   | SafeMemberSelectionExpression _
   | ScopeResolutionExpression _

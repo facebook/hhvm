@@ -102,7 +102,6 @@
   (name parser_heap)
   (wrapped false)
   (modules
-    fixmes
     full_fidelity_ast
     full_fidelity_ast_types
     full_fidelity_parser_errors
@@ -115,6 +114,7 @@
     ast
     core_kernel
     file_provider
+    fixme_provider
     heap_shared_mem
     parser
     parser_coroutine

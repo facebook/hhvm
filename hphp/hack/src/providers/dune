@@ -24,3 +24,13 @@
   (modules decl_provider)
   (libraries
     typing_heap))
+
+(library
+  (name fixme_provider)
+  (wrapped false)
+  (modules fixme_provider)
+  (libraries
+    collections
+    errors
+    heap_shared_mem
+    pos))

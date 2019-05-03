@@ -19,42 +19,56 @@ open Core_kernel
  *)
 (*****************************************************************************)
 
+type fixme_map = Pos.t IMap.t IMap.t
+
 module HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
-  type t = Pos.t IMap.t IMap.t
+  type t = fixme_map
   let prefix = Prefix.make()
   let description = "HH_FIXMES"
   end)
 
 module DECL_HH_FIXMES = SharedMem.WithCache (SharedMem.ProfiledImmediate) (Relative_path.S) (struct
-  type t = Pos.t IMap.t IMap.t
+  type t = fixme_map
   let prefix = Prefix.make()
   let description = "DECL_HH_FIXMES"
   end)
 
-let get_fixmes_from_heap filename =
+let get_fixmes filename =
   match HH_FIXMES.get filename with
   | None -> DECL_HH_FIXMES.get filename
   | Some x -> Some x
 
-(*****************************************************************************)
-(* We register the function that can look up a position and determine if
- * a given position is affected by an HH_FIXME. We use a reference to avoid
- * a cyclic dependency: everything depends on the Errors module (the module
- * defining all the errors), because of that making the Errors module call
- * into anything that isn't in the standard library is very unwise, because
- * that code won't be able to add errors.
- *)
-(*****************************************************************************)
-let () =
-  Errors.get_hh_fixme_pos := begin fun err_pos err_code ->
-    let filename = Pos.filename err_pos in
-    let err_line, _, _ = Pos.info_pos err_pos in
-    get_fixmes_from_heap filename
-    |> Option.value_map ~f:(IMap.get err_line) ~default:None
-    |> Option.value_map ~f:(IMap.get err_code) ~default:None
-    end;
-  Errors.is_hh_fixme := fun err_pos err_code ->
-    Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code)
+let get_hh_fixmes filename =
+  HH_FIXMES.get filename
+
+let get_decl_hh_fixmes filename =
+  DECL_HH_FIXMES.get filename
+
+let provide_hh_fixmes filename fixmes =
+  HH_FIXMES.add filename fixmes
+
+let provide_decl_hh_fixmes filename fixmes =
+  DECL_HH_FIXMES.add filename fixmes
+
+let remove_batch paths =
+  HH_FIXMES.remove_batch paths;
+  DECL_HH_FIXMES.remove_batch paths
+
+let local_changes_push_stack () =
+  HH_FIXMES.LocalChanges.push_stack ();
+  DECL_HH_FIXMES.LocalChanges.push_stack ()
+
+let local_changes_pop_stack () =
+  HH_FIXMES.LocalChanges.pop_stack ();
+  DECL_HH_FIXMES.LocalChanges.pop_stack ()
+
+let local_changes_commit_batch paths =
+  HH_FIXMES.LocalChanges.commit_batch paths;
+  DECL_HH_FIXMES.LocalChanges.commit_batch paths
+
+let local_changes_revert_batch paths =
+  HH_FIXMES.LocalChanges.revert_batch paths;
+  DECL_HH_FIXMES.LocalChanges.revert_batch paths
 
 let fixme_was_applied applied_fixmes fn err_line err_code =
   match Relative_path.Map.get applied_fixmes fn with
@@ -80,7 +94,7 @@ let add_applied_fixme applied_fixmes err_code fn err_line =
     (add_applied_fixme_file file_value err_code err_line)
 
 let get_unused_fixmes_for codes applied_fixme_map fn acc =
-  match get_fixmes_from_heap fn with
+  match get_fixmes fn with
   | None -> acc
   | Some fixme_map ->
     IMap.fold (fun line code_map acc ->
@@ -90,7 +104,7 @@ let get_unused_fixmes_for codes applied_fixme_map fn acc =
         then fixme_pos :: acc
         else acc) code_map acc) fixme_map acc
 
-let get_unused_fixmes codes applied_fixmes fold files_info  =
+let get_unused_fixmes ~codes ~applied_fixmes ~fold ~files_info  =
   let applied_fixme_map =
     List.fold_left applied_fixmes ~init:Relative_path.Map.empty
       ~f:begin fun acc (pos,code) ->
@@ -99,3 +113,23 @@ let get_unused_fixmes codes applied_fixmes fold files_info  =
       add_applied_fixme acc code fn line end in
   fold files_info ~init:[] ~f:(fun fn _ acc ->
     get_unused_fixmes_for codes applied_fixme_map fn acc)
+
+(*****************************************************************************)
+(* We register the function that can look up a position and determine if
+ * a given position is affected by an HH_FIXME. We use a reference to avoid
+ * a cyclic dependency: everything depends on the Errors module (the module
+ * defining all the errors), because of that making the Errors module call
+ * into anything that isn't in the standard library is very unwise, because
+ * that code won't be able to add errors.
+ *)
+(*****************************************************************************)
+let () =
+  Errors.get_hh_fixme_pos := begin fun err_pos err_code ->
+    let filename = Pos.filename err_pos in
+    let err_line, _, _ = Pos.info_pos err_pos in
+    get_fixmes filename
+    |> Option.value_map ~f:(IMap.get err_line) ~default:None
+    |> Option.value_map ~f:(IMap.get err_code) ~default:None
+    end;
+  Errors.is_hh_fixme := fun err_pos err_code ->
+    Option.is_some (!Errors.get_hh_fixme_pos err_pos err_code)

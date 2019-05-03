@@ -450,8 +450,7 @@ let post_saved_state_initialization
   let parsing_files =
     Relative_path.Set.filter dirty_files ~f:FindUtils.path_filter
   in
-  Fixmes.HH_FIXMES.remove_batch parsing_files;
-  Fixmes.DECL_HH_FIXMES.remove_batch parsing_files;
+  Fixme_provider.remove_batch parsing_files;
   let parsing_files_list = Relative_path.Set.elements parsing_files in
   let old_fast = Naming_table.saved_to_fast old_saved in
 

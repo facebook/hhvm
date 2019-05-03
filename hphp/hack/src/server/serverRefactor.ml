@@ -17,7 +17,11 @@ let maybe_add_dollar s =
 
 let get_fixme_patches codes (env: env) =
   let fixmelist = Errors.get_applied_fixmes env.errorl in
-  let poslist = Fixmes.get_unused_fixmes codes fixmelist Naming_table.fold env.naming_table in
+  let poslist = Fixme_provider.get_unused_fixmes
+    ~codes
+    ~applied_fixmes:fixmelist
+    ~fold:Naming_table.fold
+    ~files_info:env.naming_table in
   List.map ~f:(fun pos -> Remove (Pos.to_absolute pos)) poslist
 
 let get_lambda_parameter_rewrite_patches env files =

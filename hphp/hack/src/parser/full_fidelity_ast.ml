@@ -3567,9 +3567,9 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
       in
   let () = if env.keep_errors then
     if env.quick_mode then
-      Fixmes.DECL_HH_FIXMES.add env.file fixmes
+      Fixme_provider.provide_decl_hh_fixmes env.file fixmes
     else
-      Fixmes.HH_FIXMES.add env.file fixmes in
+      Fixme_provider.provide_hh_fixmes env.file fixmes in
   comments
 
 let flush_parsing_errors env =

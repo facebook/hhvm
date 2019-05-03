@@ -56,7 +56,14 @@ class count_getter fixme_map =
  * made permissive using TypecheckerOptions.make_permissive
  *)
 let accumulate_types tast check =
-  let cg = new count_getter (Fixmes.HH_FIXMES.find_unsafe check) in
+  let fixmes = match Fixme_provider.get_hh_fixmes check with
+    | Some fixmes ->
+      fixmes
+    | None ->
+      failwith
+        ("HH_FIXMEs not found for path " ^ (Relative_path.to_absolute check))
+  in
+  let cg = new count_getter fixmes in
   cg#go tast
 
 (* Create a trie for a single key. More complicated tries can then be built from

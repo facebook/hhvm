@@ -35,7 +35,7 @@ let with_ide_cache f =
   end ~finally:deactivate
 
 module IdeAstCache = SharedMem.FreqCache (StringKey) (struct
-  type value = Parser_return.t * Fixmes.HH_FIXMES.t * Errors.t
+  type value = Parser_return.t * Fixme_provider.fixme_map * Errors.t
   let capacity = 10
 end)
 
@@ -68,7 +68,7 @@ let get_ast tcopt path content =
   match IdeAstCache.get digest with
   | Some (ast, fixmes, errors) ->
     Errors.merge_into_current errors;
-    Fixmes.HH_FIXMES.add path fixmes;
+    Fixme_provider.provide_hh_fixmes path fixmes;
     ast
   | None ->
     let errors, ast =  Errors.do_ @@ fun () ->
@@ -82,7 +82,13 @@ let get_ast tcopt path content =
         content
     in
     Errors.merge_into_current errors;
-    let fixmes = Fixmes.HH_FIXMES.find_unsafe path in
+    let fixmes = match Fixme_provider.get_hh_fixmes path with
+      | Some fixmes ->
+        fixmes
+      | None ->
+        failwith
+          ("HH_FIXMEs not found for path " ^ (Relative_path.to_absolute path))
+    in
     IdeAstCache.add digest (ast, fixmes, errors);
     ast
 

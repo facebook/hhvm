@@ -130,12 +130,12 @@ let rec collect_class
       || Relative_path.Map.mem decls.decl_fixmes filename
       then decls
       else
-        match Fixmes.HH_FIXMES.get filename with
+        match Fixme_provider.get_hh_fixmes filename with
         | Some fixmes ->
           {decls with fixmes =
             Relative_path.Map.add decls.fixmes filename fixmes}
         | None ->
-          match Fixmes.DECL_HH_FIXMES.get filename with
+          match Fixme_provider.get_decl_hh_fixmes filename with
           | Some fixmes ->
             {decls with decl_fixmes =
               Relative_path.Map.add decls.decl_fixmes filename fixmes}
@@ -159,8 +159,8 @@ let restore_decls decls =
   CEKMap.iter meths Methods.add;
   CEKMap.iter smeths StaticMethods.add;
   SMap.iter cstrs Constructors.add;
-  Relative_path.Map.iter fixmes Fixmes.HH_FIXMES.add;
-  Relative_path.Map.iter decl_fixmes Fixmes.DECL_HH_FIXMES.add
+  Relative_path.Map.iter fixmes Fixme_provider.provide_hh_fixmes;
+  Relative_path.Map.iter decl_fixmes Fixme_provider.provide_decl_hh_fixmes
 
 let export_class_decls classes =
   collect_classes classes empty_decls classes

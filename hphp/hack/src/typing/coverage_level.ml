@@ -242,7 +242,14 @@ class level_getter fixme_map =
   end
 
 let get_levels tast check =
-  let lg = new level_getter (Fixmes.HH_FIXMES.find_unsafe check) in
+  let fixmes = match Fixme_provider.get_hh_fixmes check with
+    | Some fixmes ->
+      fixmes
+    | None ->
+      failwith
+        ("HH_FIXMEs not found for path " ^ (Relative_path.to_absolute check))
+  in
+  let lg = new level_getter fixmes in
   let pmap, cmap = lg#go tast in
   Pos.Map.fold (fun p ty xs ->
     ((Pos.to_absolute p, ty)) :: xs) pmap []

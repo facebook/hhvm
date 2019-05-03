@@ -2128,6 +2128,10 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2) ->
       let x1 = (p, Local_id.to_string lid) in
       N.Class_get (make_class_id env x1, N.CGstring x2)
+    | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
+      ensure_name_not_dynamic env x1
+        Errors.dynamic_class_name_in_strict_mode;
+      N.Any
     | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGexpr x2) ->
       ensure_name_not_dynamic env x1
         Errors.dynamic_class_name_in_strict_mode;

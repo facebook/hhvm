@@ -29,8 +29,8 @@ module Sqlite : sig
     ((int64 -> Relative_path.t -> FileInfo.t -> int) -> unit) ->
     unit
   val set_db_path : string -> unit
-  val get_type_pos : string -> (Relative_path.t * type_of_type) option
-  val get_fun_pos : string -> Relative_path.t option
+  val get_type_pos : string -> case_insensitive:bool -> (Relative_path.t * type_of_type) option
+  val get_fun_pos : string -> case_insensitive:bool -> Relative_path.t option
   val get_const_pos : string -> Relative_path.t option
 end = struct
   let check_rc rc =
@@ -117,8 +117,8 @@ end = struct
         INSERT INTO %s (HASH, CANON_HASH, FLAGS, FILE_INFO_PK) VALUES (?, ?, ?, ?);
       " table_name
 
-    let get_sqlite =
-      Str.global_replace (Str.regexp "{table_name}") table_name "
+    let (get_sqlite, get_sqlite_case_insensitive) =
+      let base = Str.global_replace (Str.regexp "{table_name}") table_name "
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
           NAMING_FILE_INFO.PATH_SUFFIX,
@@ -126,8 +126,10 @@ end = struct
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
           {table_name}.FILE_INFO_PK = NAMING_FILE_INFO.PRIMARY_KEY
-        WHERE {table_name}.HASH = ?
-      "
+        WHERE {table_name}.{hash} = ?"
+      in
+      (Str.global_replace (Str.regexp "{hash}") "HASH" base,
+        Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base)
 
     let insert db ~name ~flags ~file_info_pk =
       let hash = SharedMem.get_hash name in
@@ -146,8 +148,10 @@ end = struct
     let insert_typedef db ~name ~file_info_pk =
       insert db ~name ~flags:typedef_flag ~file_info_pk
 
-    let get db ~name =
+    let get db ~name ~case_insensitive =
+      let name = if case_insensitive then String.lowercase_ascii name else name in
       let hash = SharedMem.get_hash name in
+      let get_sqlite = if case_insensitive then get_sqlite_case_insensitive else get_sqlite in
       let get_stmt = Sqlite3.prepare db get_sqlite in
       Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
       match Sqlite3.step get_stmt with
@@ -179,16 +183,18 @@ end = struct
         INSERT INTO %s (HASH, CANON_HASH, FILE_INFO_PK) VALUES (?, ?, ?);
       " table_name
 
-    let get_sqlite =
-      Str.global_replace (Str.regexp "{table_name}") table_name "
+    let (get_sqlite, get_sqlite_case_insensitive) =
+      let base = Str.global_replace (Str.regexp "{table_name}") table_name "
         SELECT
           NAMING_FILE_INFO.PATH_PREFIX_TYPE,
           NAMING_FILE_INFO.PATH_SUFFIX
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
           {table_name}.FILE_INFO_PK = NAMING_FILE_INFO.PRIMARY_KEY
-        WHERE {table_name}.HASH = ?
-      "
+        WHERE {table_name}.{hash} = ?"
+      in
+      (Str.global_replace (Str.regexp "{hash}") "HASH" base,
+        Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base)
 
     let insert db ~name ~file_info_pk =
       let hash = SharedMem.get_hash name in
@@ -200,9 +206,11 @@ end = struct
       Sqlite3.step insert_stmt |> check_rc;
       Sqlite3.finalize insert_stmt |> check_rc
 
-    let get db ~name =
+    let get db ~name ~case_insensitive =
+      let name = if case_insensitive then String.lowercase_ascii name else name in
       let hash = SharedMem.get_hash name in
-      let get_stmt = Sqlite3.prepare db get_sqlite in
+      let get_sqlite = if case_insensitive then get_sqlite_case_insensitive else get_sqlite in
+      let get_stmt = Sqlite3.prepare db (get_sqlite) in
       Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
@@ -339,17 +347,17 @@ end = struct
 
   let set_db_path = DatabaseSettings.set_db_path
 
-  let get_type_pos name =
+  let get_type_pos name ~case_insensitive =
     match DatabaseSettings.get_db () with
     | None -> None
     | Some db ->
-      TypesTable.get db ~name
+      TypesTable.get db ~name ~case_insensitive
 
-  let get_fun_pos name =
+  let get_fun_pos name ~case_insensitive =
     match DatabaseSettings.get_db () with
     | None -> None
     | Some db ->
-      FunsTable.get db ~name
+      FunsTable.get db ~name ~case_insensitive
 
   let get_const_pos name =
     match DatabaseSettings.get_db () with
@@ -508,13 +516,32 @@ module Types = struct
     get_and_cache
       ~map_result
       ~get_func
-      ~fallback_get_func:Sqlite.get_type_pos
+      ~fallback_get_func:(Sqlite.get_type_pos ~case_insensitive:false)
       ~add_func:add
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~name:id
 
   let get_canon_name id =
-    TypeCanonHeap.get id
+    let open Core_kernel in
+    let map_result (path, entry_type) =
+      let _path_str = Relative_path.S.to_string path in
+      let id = match entry_type with
+        | TClass ->
+          let class_opt = Ast_provider.find_class_in_file ~case_insensitive:true path id in
+          (Option.value_exn class_opt).Ast.c_name
+        | TTypedef ->
+          let typedef_opt = Ast_provider.find_typedef_in_file ~case_insensitive:true path id in
+          (Option.value_exn typedef_opt).Ast.t_id
+      in
+      snd id
+    in
+    get_and_cache
+      ~map_result
+      ~get_func:TypeCanonHeap.get
+      ~fallback_get_func:(Sqlite.get_type_pos ~case_insensitive:true)
+      ~add_func:TypeCanonHeap.add
+      ~measure_name:"Canon naming table (types) cache hit rate"
+      ~name:id
 
   let remove_batch types =
     TypeCanonHeap.remove_batch (canonize_set types);
@@ -554,13 +581,24 @@ module Funs = struct
     get_and_cache
       ~map_result
       ~get_func:FunPosHeap.get
-      ~fallback_get_func:Sqlite.get_fun_pos
+      ~fallback_get_func:(Sqlite.get_fun_pos ~case_insensitive:false)
       ~add_func:add
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~name:id
 
   let get_canon_name name =
-    FunCanonHeap.get name
+    let open Core_kernel in
+    let map_result path =
+      let fun_opt = Ast_provider.find_fun_in_file ~case_insensitive:true path name in
+      snd (Option.value_exn fun_opt).Ast.f_name
+    in
+    get_and_cache
+      ~map_result
+      ~get_func:FunCanonHeap.get
+      ~fallback_get_func:(Sqlite.get_fun_pos ~case_insensitive:true)
+      ~add_func:FunCanonHeap.add
+      ~measure_name:"Canon naming table (functions) cache hit rate"
+      ~name
 
   let remove_batch funs =
     FunCanonHeap.remove_batch (canonize_set funs);

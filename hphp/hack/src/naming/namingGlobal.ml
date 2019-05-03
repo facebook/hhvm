@@ -115,18 +115,14 @@ module GEnv = struct
     | None -> None
 
 
-  let compare_pos p q =
+  let compare_pos p q name =
     let open FileInfo in
     match p, q with
     | Full p', Full q' -> Pos.compare p' q' = 0
-    | Full q', File(_, fn)
-    | File (_, fn), Full q' ->
-      let qf = Pos.filename q' in
-      if fn = qf then
-        assert_false_log_backtrace(
-          Some "Compared file with full pos in same file"
-        )
-      else false
+    | Full q', (File _ as p')
+    | (File _ as p'), Full q' ->
+      let p' = fst (get_full_pos (p', name)) in
+      Pos.compare p' q' = 0
     | File (x, fn1), File (y, fn2) ->
       fn1 = fn2 && x = y
 
@@ -175,7 +171,7 @@ module Env = struct
     match Naming_table.Funs.get_canon_name name_key with
     | Some canonical ->
       let p' = Option.value_exn (Naming_table.Funs.get_pos canonical) in
-      if not @@ GEnv.compare_pos p' p
+      if not @@ GEnv.compare_pos p' p canonical
       then
         let p, name = GEnv.get_full_pos (p, name) in
         let p', canonical = GEnv.get_full_pos (p', canonical) in
@@ -193,7 +189,7 @@ module Env = struct
         | Some x -> x
         | None -> failwith ("Failed to get canonical pos for name " ^ name ^ " vs canonical " ^ canonical)
       in
-      if not @@ GEnv.compare_pos p' p
+      if not @@ GEnv.compare_pos p' p canonical
       then
       let p, name = GEnv.get_full_pos (p, name) in
       let p', canonical = GEnv.get_full_pos (p', canonical) in
@@ -230,7 +226,7 @@ module Env = struct
   let new_global_const (p, x) =
     match Naming_table.Consts.get_pos x with
     | Some p' ->
-      if not @@ GEnv.compare_pos p' p
+      if not @@ GEnv.compare_pos p' p x
       then
       let p, x = GEnv.get_full_pos (p, x) in
       let p', x = GEnv.get_full_pos (p', x) in

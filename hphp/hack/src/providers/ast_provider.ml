@@ -66,31 +66,45 @@ let get_from_local_cache ~full file_name =
     let () = if full then LocalParserCache.add file_name ast in
     ast
 
-let get_class defs class_name =
+let get_class ?(case_insensitive = false) defs class_name =
+  let class_name =
+    if case_insensitive then Caml.String.lowercase_ascii class_name else class_name
+  in
   let rec get acc defs =
   List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
-    | Ast.Class c when snd c.Ast.c_name = class_name -> Some c
+    | Ast.Class c ->
+      let def_name = snd c.Ast.c_name in
+      let def_name = if case_insensitive then Caml.String.lowercase_ascii def_name else def_name in
+      if def_name = class_name then Some c else acc
     | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
   end in
   get None defs
 
-let get_fun defs fun_name =
+let get_fun ?(case_insensitive = false) defs fun_name =
+  let fun_name = if case_insensitive then Caml.String.lowercase_ascii fun_name else fun_name in
   let rec get acc defs =
   List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
-    | Ast.Fun f when snd f.Ast.f_name = fun_name -> Some f
+    | Ast.Fun f ->
+      let def_name = snd f.Ast.f_name in
+      let def_name = if case_insensitive then Caml.String.lowercase_ascii def_name else def_name in
+      if def_name = fun_name then Some f else acc
     | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
   end in
   get None defs
 
-let get_typedef defs name =
+let get_typedef ?(case_insensitive = false) defs name =
+  let name = if case_insensitive then Caml.String.lowercase_ascii name else name in
   let rec get acc defs =
   List.fold_left defs ~init:acc ~f:begin fun acc def ->
     match def with
-    | Ast.Typedef typedef when snd typedef.Ast.t_id = name -> Some typedef
+    | Ast.Typedef typedef ->
+      let def_name = snd typedef.Ast.t_id in
+      let def_name = if case_insensitive then Caml.String.lowercase_ascii def_name else def_name in
+      if def_name = name then Some typedef else acc
     | Ast.Namespace(_, defs) -> get acc defs
     | _ -> acc
   end in
@@ -122,14 +136,14 @@ let get_ast ?(full = false) file_name =
       ast
     | Some (defs, _) -> defs
 
-let find_class_in_file ?(full = false) file_name class_name =
-  get_class (get_ast ~full file_name) class_name
+let find_class_in_file ?(full = false) ?(case_insensitive=false) file_name class_name =
+  get_class (get_ast ~full file_name) ~case_insensitive class_name
 
-let find_fun_in_file ?(full = false) file_name fun_name =
-  get_fun (get_ast ~full file_name) fun_name
+let find_fun_in_file ?(full = false) ?(case_insensitive=false) file_name fun_name =
+  get_fun (get_ast ~full file_name) ~case_insensitive fun_name
 
-let find_typedef_in_file ?(full = false) file_name name =
-  get_typedef (get_ast ~full file_name) name
+let find_typedef_in_file ?(full = false) ?(case_insensitive=false) file_name name =
+  get_typedef (get_ast ~full file_name) ~case_insensitive name
 
 let find_gconst_in_file ?(full = false) file_name name =
   get_gconst (get_ast ~full file_name) name

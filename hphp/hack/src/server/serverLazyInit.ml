@@ -33,18 +33,19 @@ module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
-let lock_and_load_deptable (fn: string) ~(ignore_hh_version: bool) : unit =
+let lock_and_load_deptable (fn: string) ~(genv: ServerEnv.genv) : unit =
   (* The sql deptable must be loaded in the master process *)
   try
     (* Take a lock on the info file for the sql *)
     LoadScriptUtils.lock_saved_state fn;
     let read_deptable_time =
-      SharedMem.load_dep_table_sqlite fn ignore_hh_version
+      SharedMem.load_dep_table_sqlite fn (ServerArgs.ignore_hh_version genv.ServerEnv.options)
     in
     Hh_logger.log
       "Reading the dependency file took (sec): %d" read_deptable_time;
     HackEventLogger.load_deptable_end read_deptable_time;
-    Naming_table.set_sqlite_fallback_path fn
+    if genv.ServerEnv.local_config.SLC.enable_reverse_naming_table_fallback
+    then Naming_table.set_sqlite_fallback_path fn
   with
   | SharedMem.Sql_assertion_failure 11
   | SharedMem.Sql_assertion_failure 14 as e -> (* SQL_corrupt *)
@@ -89,7 +90,7 @@ let download_and_load_state_exn
   | Error error ->
     Error (Load_state_loader_failure error)
   | Ok result ->
-    lock_and_load_deptable result.State_loader.deptable_fn ~ignore_hh_version;
+    lock_and_load_deptable result.State_loader.deptable_fn ~genv;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
     let (old_saved, old_errors) =
       SaveStateService.load_saved_state result.State_loader.saved_state_fn
@@ -121,7 +122,6 @@ let use_precomputed_state_exn
     (genv: ServerEnv.genv)
     (info: ServerArgs.saved_state_target_info)
   : loaded_info =
-  let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let { ServerArgs.
         saved_state_fn;
         corresponding_base_revision;
@@ -129,7 +129,7 @@ let use_precomputed_state_exn
         changes;
         prechecked_changes;
       } = info in
-  lock_and_load_deptable deptable_fn ~ignore_hh_version;
+  lock_and_load_deptable deptable_fn ~genv;
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in

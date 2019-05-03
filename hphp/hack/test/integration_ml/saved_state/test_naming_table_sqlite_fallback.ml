@@ -84,4 +84,17 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     (get_fun_path "\\qux")
     "Basic test to get a function from disk";
 
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\Foo")
+    (Naming_table.Types.get_canon_name "\\foo")
+    "Basic test to get a canon name for a type defined in the saved state";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\bar")
+    (Naming_table.Funs.get_canon_name "\\bar")
+    "Basic test to get a canon name for a function defined in the saved state";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\qux")
+    (Naming_table.Funs.get_canon_name "\\qux")
+    "Basic test to get a canon name for a function defined only on disk";
+
   ()

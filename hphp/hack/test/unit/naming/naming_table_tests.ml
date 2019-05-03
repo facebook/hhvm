@@ -117,7 +117,26 @@ let test_get_pos () = run_naming_table_test begin fun () ->
     "Check for const"
 end
 
+let test_get_canon_name () = run_naming_table_test begin fun () ->
+  (* Since we're parsing but not naming, the canon heap must fall back to the
+     files on disk, which is the situation we'd be in when loading from a
+     saved state. *)
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\Foo")
+    (Naming_table.Types.get_canon_name "\\foo")
+    "Check for class canon name";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\bar")
+    (Naming_table.Funs.get_canon_name "\\bar")
+    "Check for function canon name";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\Baz")
+    (Naming_table.Types.get_canon_name "\\baz")
+    "Check for typedef canon name";
+end
+
 let () =
   Unit_test.run_all [
     ("test_get_pos", test_get_pos);
+    ("test_get_canon_name", test_get_canon_name);
   ]

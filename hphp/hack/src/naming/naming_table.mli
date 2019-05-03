@@ -30,6 +30,7 @@ val get_file_info_unsafe : t -> Relative_path.t -> FileInfo.t
 val has_file : t -> Relative_path.t -> bool
 val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
 val update : t -> Relative_path.t -> FileInfo.t  -> t
+val save : t -> string -> unit
 
 (* Converting between different types of forward naming tables. *)
 val from_saved : saved_state_info -> t
@@ -51,6 +52,7 @@ end
 type type_of_type =
   | TClass
   | TTypedef
+  [@@deriving enum]
 module Types : sig
   include ReverseNamingTable with type pos = FileInfo.pos * type_of_type
   val get_canon_name : string -> string option
@@ -63,6 +65,7 @@ end
 
 module Consts : ReverseNamingTable with type pos = FileInfo.pos
 
+val to_canon_name_key : string -> string
 val push_local_changes : unit -> unit
 val pop_local_changes : unit -> unit
 val has_local_changes : unit -> bool

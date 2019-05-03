@@ -11,6 +11,184 @@ type t = FileInfo.t Relative_path.Map.t
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
+(* The canon name (and assorted *Canon heaps) store the canonical name for a
+   symbol, keyed off of the lowercase version of its name. We use the canon
+   heaps to check for symbols which are redefined using different
+   capitalizations so we can throw proper Hack errors for them. *)
+let to_canon_name_key = String.lowercase_ascii
+let canonize_set = SSet.map to_canon_name_key
+
+
+module Sqlite : sig
+  val create_database :
+    string ->
+    ((int64 -> Relative_path.t -> FileInfo.t -> int) -> unit) ->
+    unit
+end = struct
+  let check_rc rc =
+    if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
+    then failwith (Printf.sprintf "SQLite operation failed: %s" (Sqlite3.Rc.to_string rc))
+
+  (* These are just done as modules to keep the SQLite for related tables close together. *)
+  module FileInfoTable = struct
+    let table_name = "NAMING_FILE_INFO"
+
+    let create_table_sqlite =
+      Printf.sprintf "
+      CREATE TABLE IF NOT EXISTS %s(
+        PRIMARY_KEY INTEGER PRIMARY KEY NOT NULL,
+        PATH_PREFIX_TYPE INTEGER NOT NULL,
+        PATH_SUFFIX TEXT NOT NULL
+      );
+      " table_name
+
+    let insert_sqlite =
+      Printf.sprintf "
+        INSERT INTO %s (PRIMARY_KEY, PATH_PREFIX_TYPE, PATH_SUFFIX) VALUES (?, ?, ?);
+      " table_name
+
+    let insert db primary_key relative_path =
+      let prefix_type = Relative_path.prefix_to_enum (Relative_path.prefix relative_path) in
+      let suffix = Relative_path.suffix relative_path in
+      let insert_stmt = Sqlite3.prepare db insert_sqlite in
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT primary_key) |> check_rc;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.TEXT suffix) |> check_rc;
+      Sqlite3.step insert_stmt |> check_rc;
+      Sqlite3.finalize insert_stmt |> check_rc
+  end
+
+  module TypesTable = struct
+    let table_name = "NAMING_TYPES"
+    let class_flag = Int64.zero
+    let typedef_flag = Int64.one
+
+    let create_table_sqlite =
+      Printf.sprintf "
+        CREATE TABLE IF NOT EXISTS %s(
+          HASH INTEGER PRIMARY KEY NOT NULL,
+          CANON_HASH INTEGER NOT NULL,
+          FLAGS INTEGER NOT NULL,
+          FILE_INFO_PK INTEGER NOT NULL
+        );
+      " table_name
+
+    let insert_sqlite =
+      Printf.sprintf "
+        INSERT INTO %s (HASH, CANON_HASH, FLAGS, FILE_INFO_PK) VALUES (?, ?, ?, ?);
+      " table_name
+
+    let insert db ~name ~flags ~file_info_pk =
+      let hash = SharedMem.get_hash name in
+      let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
+      let insert_stmt = Sqlite3.prepare db insert_sqlite in
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc;
+      Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_pk) |> check_rc;
+      Sqlite3.step insert_stmt |> check_rc;
+      Sqlite3.finalize insert_stmt |> check_rc
+
+    let insert_class db ~name ~file_info_pk =
+      insert db ~name ~flags:class_flag ~file_info_pk
+
+    let insert_typedef db ~name ~file_info_pk =
+      insert db ~name ~flags:typedef_flag ~file_info_pk
+  end
+
+  module FunsTable = struct
+    let table_name = "NAMING_FUNS"
+
+    let create_table_sqlite =
+      Printf.sprintf "
+        CREATE TABLE IF NOT EXISTS %s(
+          HASH INTEGER PRIMARY KEY NOT NULL,
+          CANON_HASH INTEGER NOT NULL,
+          FILE_INFO_PK INTEGER NOT NULL
+        );
+      " table_name
+
+    let insert_sqlite =
+      Printf.sprintf "
+        INSERT INTO %s (HASH, CANON_HASH, FILE_INFO_PK) VALUES (?, ?, ?);
+      " table_name
+
+    let insert db ~name ~file_info_pk =
+      let hash = SharedMem.get_hash name in
+      let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
+      let insert_stmt = Sqlite3.prepare db insert_sqlite in
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_pk) |> check_rc;
+      Sqlite3.step insert_stmt |> check_rc;
+      Sqlite3.finalize insert_stmt |> check_rc
+  end
+
+  module ConstsTable = struct
+    let table_name = "NAMING_CONSTS"
+
+    let create_table_sqlite =
+      Printf.sprintf "
+        CREATE TABLE IF NOT EXISTS %s(
+          HASH INTEGER PRIMARY KEY NOT NULL,
+          FILE_INFO_PK INTEGER NOT NULL
+        );
+      " table_name
+
+    let insert_sqlite =
+      Printf.sprintf "
+        INSERT INTO %s (HASH, FILE_INFO_PK) VALUES (?, ?);
+      " table_name
+
+    let insert db ~name ~file_info_pk =
+      let hash = SharedMem.get_hash name in
+      let insert_stmt = Sqlite3.prepare db insert_sqlite in
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_pk) |> check_rc;
+      Sqlite3.step insert_stmt |> check_rc;
+      Sqlite3.finalize insert_stmt |> check_rc
+  end
+
+  let save_file_info db file_info_pk relative_path file_info =
+    let open Core_kernel in
+    FileInfoTable.insert db file_info_pk relative_path;
+    let symbols_inserted = 0 in
+    let symbols_inserted = List.fold
+      ~init:symbols_inserted
+      ~f:(fun acc (_, name) -> FunsTable.insert db ~name ~file_info_pk; acc + 1)
+      file_info.FileInfo.funs
+    in
+    let symbols_inserted = List.fold
+      ~init:symbols_inserted
+      ~f:(fun acc (_, name) -> TypesTable.insert_class db ~name ~file_info_pk; acc + 1)
+      file_info.FileInfo.classes
+    in
+    let symbols_inserted = List.fold
+      ~init:symbols_inserted
+      ~f:(fun acc (_, name) -> TypesTable.insert_typedef db ~name ~file_info_pk; acc + 1)
+      file_info.FileInfo.typedefs
+    in
+    let symbols_inserted = List.fold
+      ~init:symbols_inserted
+      ~f:(fun acc (_, name) -> ConstsTable.insert db ~name ~file_info_pk; acc + 1)
+      file_info.FileInfo.consts
+    in
+    symbols_inserted
+
+
+  let create_database db_name f =
+    let db = Sqlite3.db_open db_name in
+    Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
+    Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc;
+    Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc;
+    Sqlite3.exec db TypesTable.create_table_sqlite |> check_rc;
+    Sqlite3.exec db FunsTable.create_table_sqlite |> check_rc;
+    let () = f (save_file_info db) in
+    Sqlite3.exec db "END TRANSACTION;" |> check_rc;
+    if not (Sqlite3.db_close db)
+    then failwith (Printf.sprintf "Could not close database '%s'" db_name)
+end
+
 
 (*****************************************************************************)
 (* Forward naming table functions *)
@@ -28,6 +206,28 @@ let get_file_info_unsafe = Relative_path.Map.find_unsafe
 let has_file = Relative_path.Map.mem
 let iter = Relative_path.Map.iter
 let update a key data = Relative_path.Map.add a ~key ~data
+
+let save naming_table db_name =
+  let t = Unix.gettimeofday() in
+  let files_added = ref 0 in
+  let symbols_added = ref 0 in
+  Sqlite.create_database db_name begin fun save_file_info ->
+    let get_next_file_info_primary_key () =
+      incr files_added;
+      !files_added
+    in
+    iter naming_table begin fun path file_info ->
+      let file_info_primary_key = Int64.of_int (get_next_file_info_primary_key ()) in
+      let new_symbol_count = save_file_info file_info_primary_key path file_info in
+      symbols_added := !symbols_added + new_symbol_count
+    end
+  end;
+  let _ : float =
+    Hh_logger.log_duration
+      (Printf.sprintf "Inserted %d files and %d symbols" !files_added !symbols_added)
+      t
+  in
+  ()
 
 
 (*****************************************************************************)
@@ -56,12 +256,6 @@ let saved_to_fast saved =
 (*****************************************************************************)
 
 
-(* The canon name (and assorted *Canon heaps) store the canonical name for a
-   symbol, keyed off of the lowercase version of its name. We use the canon
-   heaps to check for symbols which are redefined using different
-   capitalizations so we can throw proper Hack errors for them. *)
-let canon_name = String.lowercase_ascii
-let canonize_set = SSet.map canon_name
 let check_valid key pos =
   if FileInfo.get_pos_filename pos = Relative_path.default then begin
     Hh_logger.log
@@ -87,6 +281,7 @@ end
 type type_of_type =
   | TClass
   | TTypedef
+  [@@deriving enum]
 module Types = struct
   type pos = FileInfo.pos * type_of_type
 
@@ -110,7 +305,7 @@ module Types = struct
 
   let add id type_info =
     if not @@ TypePosHeap.LocalChanges.has_local_changes () then check_valid id (fst type_info);
-    TypeCanonHeap.add (canon_name id) id;
+    TypeCanonHeap.add (to_canon_name_key id) id;
     TypePosHeap.write_around id type_info
 
   let get_pos ?(bypass_cache=false) id =
@@ -151,7 +346,7 @@ module Funs = struct
 
   let add id pos =
     if not @@ FunPosHeap.LocalChanges.has_local_changes () then check_valid id pos;
-    FunCanonHeap.add (canon_name id) id;
+    FunCanonHeap.add (to_canon_name_key id) id;
     FunPosHeap.add id pos
 
   let get_pos ?bypass_cache:(_=false) id =

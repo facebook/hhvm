@@ -62,5 +62,6 @@
     nast
     parser_heap
     parser_namespaces
+    sqlite3
     typing_deps
     typechecker_options))

@@ -16,49 +16,6 @@ let get_errors_filename (filename: string) : string = filename ^ ".err"
 
 let get_decls_filename (filename: string) : string = filename ^ ".decls"
 
-(* Experimental: save the naming table ("file info") into the same SQLite
-    database that we save the dependency table into. The table's name is NAME_INFO *)
-let save_all_file_info_sqlite
-    (db_name: string)
-    (naming_table: Naming_table.t) : unit =
-  begin
-    SharedMem.save_file_info_init db_name;
-    Naming_table.iter naming_table (
-      fun path file_info ->
-        let funs = file_info.FileInfo.funs in
-        let classes = file_info.FileInfo.classes in
-        let typedefs = file_info.FileInfo.typedefs in
-        let consts = file_info.FileInfo.consts in
-
-        (* NOTE: uncompressing the path here seems to have a significant negative effect
-            on the size of the naming table in SQLite. This needs more work: TODO. *)
-        let path = Relative_path.S.to_string path in
-        begin
-          List.iter funs ~f:(fun (_pos, name) ->
-            SharedMem.save_file_info_sqlite ~hash:(
-              Naming_table.Funs.heap_string_of_key name
-            ) ~name:name `FuncK path
-          );
-          List.iter classes ~f:(fun (_pos, name) ->
-            SharedMem.save_file_info_sqlite ~hash:(
-              Naming_table.Types.heap_string_of_key name
-            ) ~name:name `ClassK path
-          );
-          List.iter typedefs ~f:(fun (_pos, name) ->
-            SharedMem.save_file_info_sqlite ~hash:(
-              Naming_table.Types.heap_string_of_key name
-            ) ~name:name `ClassK path
-          );
-          List.iter consts ~f:(fun (_pos, name) ->
-            SharedMem.save_file_info_sqlite ~hash:(
-              Naming_table.Consts.heap_string_of_key name
-            ) ~name:name `ConstantK path
-          )
-        end
-    );
-    SharedMem.save_file_info_free ()
-  end
-
 (* Gets a set of file paths out of saved state errors *)
 let fold_error_files (errors_in_phases: saved_state_errors) : Relative_path.Set.t =
   List.fold
@@ -246,7 +203,7 @@ let save_state
     dump_saved_state ~save_decls output_filename naming_table errors;
     let () = if enable_reverse_naming_table_fallback then begin
       Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
-      (save_all_file_info_sqlite db_name naming_table : unit)
+      (Naming_table.save naming_table db_name : unit)
     end in
     let dep_table_edges_added =
       SharedMem.save_dep_table_sqlite

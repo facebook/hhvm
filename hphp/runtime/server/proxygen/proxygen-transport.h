@@ -303,6 +303,11 @@ struct ProxygenTransport final
 
   void trySetMaxThreadCount(int max) override;
 
+  void setMaxPost(int64_t maxPost, int64_t maxBuffer) {
+    m_maxPost = maxPost;
+    m_bodyLengthPastLimit = maxBuffer;
+  }
+
  private:
   bool bufferRequest() const;
 
@@ -318,6 +323,8 @@ struct ProxygenTransport final
     notify();
   }
 
+  bool handlePOST(const proxygen::HTTPHeaders& headers);
+
   proxygen::HTTPTransaction* getTransaction(
     uint64_t id, proxygen::HTTPMessage **msg, bool newPushOk);
 
@@ -329,6 +336,7 @@ struct ProxygenTransport final
   std::string m_addressStr;
   std::unique_ptr<proxygen::HTTPMessage> m_request;
   size_t m_requestBodyLength{0};
+  int64_t m_bodyLengthPastLimit{128 * 1024};
 
   // There are two modes of operation for reading POST bodies.  When
   // RequestBodyReadLimit is set, the request is enqueued for a worker thread
@@ -361,6 +369,7 @@ struct ProxygenTransport final
   int64_t m_nextPushId{1};
   std::map<uint64_t, PushTxnHandler*> m_pushHandlers; // locked
   bool m_egressError{false};
+  int64_t m_maxPost{-1};
 
  public:
   // List of ProxygenTransport not yet handed to the server will sit

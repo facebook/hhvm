@@ -1,20 +1,24 @@
 #include <folly/portability/GTest.h>
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 #include <folly/io/async/HHWheelTimer.h>
+#include <limits>
 #include <ostream>
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/proxygen/proxygen-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 
 using namespace testing;
+using proxygen::HTTPCodec;
 using proxygen::HTTPException;
+using proxygen::HTTP_HEADER_EXPECT;
+using proxygen::HTTP_HEADER_CONTENT_LENGTH;
 using proxygen::HTTPMessage;
 using proxygen::HTTPMethod;
 using proxygen::HTTPTransaction;
 using proxygen::HTTPPushTransactionHandler;
 using proxygen::MockHTTPTransaction;
 using proxygen::TransportDirection;
-using proxygen::HTTPCodec;
 using proxygen::WheelTimerInstance;
 
 MATCHER_P(IsResponseStatusCode, statusCode, "") {
@@ -207,6 +211,123 @@ TEST_F(ProxygenTransportBasicTest, unsupported_method) {
   EXPECT_CALL(m_txn, sendEOM());
   m_transport->onHeadersComplete(std::move(req));
   m_transport->onEOM();
+}
+
+TEST_F(ProxygenTransportBasicTest, body_after_413) {
+  auto req = getRequest(HTTPMethod::POST);
+  m_transport->setMaxPost(RuntimeOption::MaxPostSize, 30);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize + 1);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  EXPECT_CALL(m_server, onRequestError(_));
+  // The WillOnces will call the non-mocked functions to move the state machine.
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(413)))
+  .WillOnce(Invoke(
+    [&](const HTTPMessage& m) {
+      m_txn.HTTPTransaction::sendHeaders(m);
+    }));
+  EXPECT_CALL(m_txn, sendEOM())
+  .WillOnce(Invoke(
+    [&]() {
+      m_txn.HTTPTransaction::sendEOM();
+    }));
+  EXPECT_CALL(m_txn, sendAbort());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->onBody(folly::IOBuf::copyBuffer("I still have so much to say"));
+  m_transport->onBody(folly::IOBuf::copyBuffer("I still have so much to say"));
+}
+
+TEST_F(ProxygenTransportBasicTest, invalid_expect) {
+  auto req = getRequest(HTTPMethod::POST);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  req->getHeaders().add(HTTP_HEADER_EXPECT, "105-stop");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(417)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, valid_expect) {
+  auto req = getRequest(HTTPMethod::POST);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(100)));
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, valid_expect_overlarge_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  auto length = folly::to<std::string>(RuntimeOption::MaxPostSize + 1);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  req->getHeaders().add(HTTP_HEADER_EXPECT, "100-continue");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(417)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, invalid_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "blarf");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, weird_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "25, 200");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, negative_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, "-500");
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(400)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, overflowed_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  std::string length(std::numeric_limits<long long>::digits10 + 1, '9');
+  req->getHeaders().add(HTTP_HEADER_CONTENT_LENGTH, length);
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(413)));
+  EXPECT_CALL(m_txn, sendEOM());
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, no_length) {
+  auto req = getRequest(HTTPMethod::POST);
+  m_transport->onHeadersComplete(std::move(req));
+}
+
+TEST_F(ProxygenTransportBasicTest, overlarge_body) {
+  auto req = getRequest(HTTPMethod::POST);
+  EXPECT_CALL(m_server, onRequestError(_));
+  EXPECT_CALL(m_txn, sendHeaders(IsResponseStatusCode(413)))
+  .WillOnce(Invoke(
+    [&](const HTTPMessage& m) {
+      m_txn.HTTPTransaction::sendHeaders(m);
+    }));
+  EXPECT_CALL(m_txn, sendEOM())
+  .WillOnce(Invoke(
+    [&]() {
+      m_txn.HTTPTransaction::sendEOM();
+    }));
+  EXPECT_CALL(m_txn, sendAbort());
+  m_transport->onHeadersComplete(std::move(req));
+  m_transport->setMaxPost(10, 5);
+  m_transport->onBody(folly::IOBuf::copyBuffer("More than 10 bytes"));
+  // Give it multiple bodies since realistically this can happen.
+  m_transport->onBody(folly::IOBuf::copyBuffer("Even more than 10 bytes"));
 }
 
 TEST_F(ProxygenTransportTest, push) {

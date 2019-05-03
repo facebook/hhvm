@@ -194,6 +194,68 @@ bool ProxygenTransport::bufferRequest() const {
           RuntimeOption::RequestBodyReadLimit <= 0);
 }
 
+bool ProxygenTransport::handlePOST(const proxygen::HTTPHeaders& headers) {
+  // Fail early if we have an unexpected Expect header.
+  // Note also that whether the client expects a 100 determines the error code:
+  // if they expect a 100 and we fail the request for any reason besides an
+  // invalid request, we need to return a 417 (Expectation Failed).
+  auto expectation = headers.getSingleOrEmpty(HTTP_HEADER_EXPECT);
+  bool expects_100 = false;
+  if (!expectation.empty() && !boost::iequals(expectation, "100-continue")) {
+    sendErrorResponse(417);
+    return false;
+  } else if (!expectation.empty()) {
+    expects_100 = true;
+  }
+
+  // Strictly parse the Content-Length, failing on either an overflowed
+  // value or an invalid positive numeric string.
+  int64_t content_length = -1;
+  if (headers.exists(HTTP_HEADER_CONTENT_LENGTH)) {
+    auto conv = folly::tryTo<int64_t>(
+      headers.getSingleOrEmpty(HTTP_HEADER_CONTENT_LENGTH));
+    if (conv.hasValue()) {
+      content_length = conv.value();
+    } else if (conv.error() == folly::ConversionCode::POSITIVE_OVERFLOW) {
+        Logger::Warning("Overflowed parsing Content-Length");
+        sendErrorResponse(expects_100 ? 417 : 413);
+        return false;
+    }
+    if (content_length < 0) {
+        Logger::Warning("Invalid Content-Length");
+        sendErrorResponse(400);
+        return false;
+    }
+  }
+
+  // fail fast if the post is too large, but only bother resolving host
+  // if content_length is larger than the minimum setting.
+  m_maxPost = RuntimeOption::LowestMaxPostSize;
+  if (content_length > m_maxPost) {
+    auto host = headers.getSingleOrEmpty(HTTP_HEADER_HOST);
+    if (auto vhost = VirtualHost::Resolve(host)) {
+      m_maxPost = vhost->getMaxPostSize();
+    } else {
+      m_maxPost = RuntimeOption::MaxPostSize;
+    }
+  }
+  if (content_length > m_maxPost) {
+    Logger::Warning("POST Content-Length of %" PRId64 " bytes exceeds "
+                    "the limit of %" PRId64 " bytes",
+                    content_length, m_maxPost);
+    sendErrorResponse(expects_100 ? 417 : 413);
+    return false;
+  }
+  if (expects_100) {
+    m_response.setStatusCode(100);
+    m_response.setStatusMessage(HTTPMessage::getDefaultReason(100));
+    m_response.setHTTPVersion(1, 1);
+    m_response.dumpMessage(4);
+    m_clientTxn->sendHeaders(m_response);
+  }
+  return true;
+}
+
 void ProxygenTransport::onHeadersComplete(
   unique_ptr<HTTPMessage> msg) noexcept {
 
@@ -232,60 +294,8 @@ void ProxygenTransport::onHeadersComplete(
     });
 
   if (m_method == Transport::Method::POST && m_request->isHTTP1_1()) {
-    // fail fast if the post is too large, but only bother resolving host
-    // if content_length is larger than the minimum setting.
-    auto clen_str = getHeader("Content-Length");
-    auto content_length = strtoll(clen_str.c_str(), nullptr, 10);
-    auto max_post = RuntimeOption::LowestMaxPostSize;
-    if (content_length > max_post) {
-      auto host = headers.getSingleOrEmpty(HTTP_HEADER_HOST);
-      if (auto vhost = VirtualHost::Resolve(host)) {
-        max_post = vhost->getMaxPostSize();
-      } else {
-        max_post = RuntimeOption::MaxPostSize;
-      }
-    }
-    auto post_too_big = false;
-    if (content_length < 0 || content_length > max_post) {
-      Logger::Warning("POST Content-Length of %lld bytes exceeds "
-                      "the limit of %" PRId64 " bytes",
-                      content_length, max_post);
-      post_too_big = true;
-    }
-    const std::string& expectation =
-      headers.getSingleOrEmpty(HTTP_HEADER_EXPECT);
-    if (!expectation.empty()) {
-      bool sendEom = false;
-      HTTPMessage response;
-      if (!boost::iequals(expectation, "100-continue")) {
-        response.setStatusCode(417);
-        response.setStatusMessage(HTTPMessage::getDefaultReason(417));
-        response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
-        sendEom = true;
-      } else if (post_too_big) {
-        // got expect 100-continue, but content_length is too big.
-        response.setStatusCode(413 /* Payload Too Large */);
-        response.setStatusMessage(HTTPMessage::getDefaultReason(413));
-        response.getHeaders().add(HTTP_HEADER_CONNECTION, "close");
-        sendEom = true;
-      } else {
-        response.setStatusCode(100);
-        response.setStatusMessage(HTTPMessage::getDefaultReason(100));
-      }
-      response.setHTTPVersion(1, 1);
-      response.dumpMessage(4);
-      m_clientTxn->sendHeaders(response);
-      if (sendEom) {
-        m_responseCode = response.getStatusCode();
-        m_responseCodeInfo = response.getStatusMessage();
-        m_server->onRequestError(this);
-        m_clientTxn->sendEOM();
-        // this object is no longer valid
-        return;
-      }
-    } else if (post_too_big) {
-      // did not receive "expect" header, but too much post data.
-      sendErrorResponse(413 /* Payload Too Large */);
+    if (!handlePOST(headers)) {
+      // We already fully responded.
       return;
     }
   }
@@ -301,9 +311,30 @@ void ProxygenTransport::onHeadersComplete(
 }
 
 void ProxygenTransport::onBody(std::unique_ptr<folly::IOBuf> chain) noexcept {
+  // If we've already sent a response, allow up to 128k of data to be received
+  // before just sending an abort. This gives the client an opportunity to
+  // process the response before receiving some form of a reset caused by the
+  // abort.
+  if (m_sendEnded && m_clientTxn->isEgressComplete()) {
+    m_bodyLengthPastLimit -= chain->computeChainDataLength();
+    if (m_bodyLengthPastLimit <= 0) {
+      Logger::Warning("Received body after a response has completed, aborting");
+      abort();
+    }
+    return;
+  }
+
   VLOG(4) << *m_clientTxn << "Recevied body len="
           << chain->computeChainDataLength();
   m_requestBodyLength += chain->computeChainDataLength();
+
+  if (m_maxPost >= 0 && m_requestBodyLength > m_maxPost) {
+    Logger::Warning("Request body length of %" PRId64 " now exceeds max POST of"
+                    "size %" PRId64 ".", m_requestBodyLength, m_maxPost);
+    sendErrorResponse(413);
+    return;
+  }
+
   if (bufferRequest()) {
     CHECK(!m_enqueued);
     if (m_reposting) {

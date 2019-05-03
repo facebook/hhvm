@@ -1,0 +1,32 @@
+vec(1) {
+  string(5) "hello"
+}
+string(%d) "%s/array-provenance.php:5"
+dict(1) {
+  [0]=>
+  string(5) "hello"
+}
+string(%d) "%s/array-provenance.php:5"
+dict(1) {
+  [42]=>
+  string(5) "hello"
+}
+string(%d) "%s/array-provenance.php:12"
+dict(1) {
+  ["blargh!"]=>
+  string(7) "goodbye"
+}
+string(%d) "%s/array-provenance.php:19"
+dict(1) {
+  [0]=>
+  int(15)
+}
+string(%d) "%s/array-provenance.php:33"
+vec(1) {
+  int(15)
+}
+string(%d) "%s/array-provenance.php:33"
+string(%d) "%s/array-provenance.php:48"
+string(%d) "%s/array-provenance.php:49"
+string(%d) "%s/array-provenance.php:54"
+string(%d) "%s/array-provenance.php:54"

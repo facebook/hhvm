@@ -309,6 +309,8 @@ bool PackedArray::CopyPackedHelper(const ArrayData* adIn, ArrayData* ad) {
   auto const size = adIn->m_size;
   static_assert(sizeof(ArrayData) == 16 && sizeof(TypedValue) == 16, "");
   memcpy16_inline(ad, adIn, (size + 1) * 16);
+  // Clear the provenance bit if we had one set
+  ad->m_aux16 &= ~ArrayData::kHasProvenanceData;
 
   // Copy counted types correctly, especially RefData.
   for (auto elm = packedData(ad), end = elm + size; elm < end; ++elm) {

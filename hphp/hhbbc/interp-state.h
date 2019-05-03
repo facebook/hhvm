@@ -205,6 +205,8 @@ struct Base {
 
 // An element on the eval stack
 struct StackElem {
+  static auto constexpr NoId = std::numeric_limits<uint32_t>::max();
+
   Type type;
   // A location which is known to have an equivalent value to this
   // stack value. This could be a valid LocalId, the special value
@@ -214,6 +216,7 @@ struct StackElem {
   // Note that the location may not match the stack value wrt Uninit.
   LocalId equivLoc;
   uint32_t index;
+  uint32_t id;
 };
 
 struct InterpStack {
@@ -258,6 +261,11 @@ private:
       (*this)->type = loosen_values(t);
       return t;
     }
+    StackElem* next_elem(ssize_t off) const {
+      const size_t i = owner->index[idx] + off;
+      if (i > owner->elems.size()) return nullptr;
+      return &owner->elems[i];
+    }
     template<typename T>
     bool operator==(const Iterator<T>& other) const {
       return owner == other.owner && idx == other.idx;
@@ -287,20 +295,26 @@ public:
   auto& operator[](size_t idx) const { return *const_iterator(this, idx); }
   auto& back() { return *iterator(this, index.size() - 1); }
   auto& back() const { return *const_iterator(this, index.size() - 1); }
-  void push_back(const StackElem& elm) {
+  void push_elem(const StackElem& elm) {
+    assertx(elm.index == index.size());
     index.push_back(elems.size());
     elems.push_back(elm);
-    elems.back().index = index.size() - 1;
   }
-  void push_back(StackElem&& elm) {
-    elm.index = index.size();
+  void push_elem(StackElem&& elm) {
+    assertx(elm.index == index.size());
     index.push_back(elems.size());
     elems.push_back(std::move(elm));
   }
-  void push_back(Type&& t, LocalId equivLoc) {
-    push_back({std::move(t), equivLoc});
+  void push_elem(const Type& t, LocalId equivLoc,
+                 uint32_t id = StackElem::NoId) {
+    uint32_t isize = index.size();
+    push_elem({t, equivLoc, isize, id});
   }
-  void pop_back() {
+  void push_elem(Type&& t, LocalId equivLoc, uint32_t id = StackElem::NoId) {
+    uint32_t isize = index.size();
+    push_elem({std::move(t), equivLoc, isize, id});
+  }
+  void pop_elem() {
     index.pop_back();
   }
   void erase(iterator i1, iterator i2) {
@@ -332,7 +346,11 @@ public:
   // pushed numPush items).
   void rewind(int numPop, int numPush);
   void peek(int numPop, const StackElem** values, int numPush) const;
+  void kill(int numPop, int numPush, uint32_t id);
+  void insert_after(int numPop, int numPush, const Type* types,
+                    uint32_t numInst, uint32_t id);
 private:
+  void refill(size_t elemIx, size_t indexLow, int numPop, int numPush);
   CompactVector<uint32_t> index;
   CompactVector<StackElem> elems;
 };
@@ -425,7 +443,7 @@ struct State : StateBase {
   enum class Compact {};
   State(const State& src, Compact) : StateBase(src) {
     for (auto const& elm : src.stack) {
-      stack.push_back(elm);
+      stack.push_elem(elm.type, elm.equivLoc);
     }
   }
 
@@ -448,7 +466,7 @@ struct State : StateBase {
     *static_cast<StateBase*>(this) = src;
     stack.clear();
     for (auto const& elm : src.stack) {
-      stack.push_back(elm);
+      stack.push_elem(elm.type, elm.equivLoc);
     }
   }
 

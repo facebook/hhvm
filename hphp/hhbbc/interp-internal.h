@@ -40,8 +40,8 @@ TRACE_SET_MOD(hhbbc);
 
 //////////////////////////////////////////////////////////////////////
 
-struct AddElemInfo {
-  AddElemInfo(uint32_t d, uint32_t i) : depth{d}, idx{i} {}
+struct TrackedElemInfo {
+  TrackedElemInfo(uint32_t d, uint32_t i) : depth{d}, idx{i} {}
   // stack depth of the AddElem we're tracking
   uint32_t depth;
   // bytecode index of the previous AddElem
@@ -96,7 +96,7 @@ struct ISS {
   uint32_t unchangedBcs{0};
   // new bytecodes
   BytecodeVec replacedBcs;
-  CompactVector<AddElemInfo> addElems;
+  CompactVector<TrackedElemInfo> trackedElems;
 };
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs);
@@ -266,7 +266,7 @@ Type popT(ISS& env) {
   auto const ret = env.state.stack.back().type;
   FTRACE(2, "    pop:  {}\n", show(ret));
   assert(ret.subtypeOf(BGen));
-  env.state.stack.pop_back();
+  env.state.stack.pop_elem();
   return ret;
 }
 
@@ -321,7 +321,8 @@ const Type& topV(ISS& env, uint32_t i = 0) {
 
 void push(ISS& env, Type t) {
   FTRACE(2, "    push: {}\n", show(t));
-  env.state.stack.push_back(std::move(t), NoLocalId);
+  env.state.stack.push_elem(std::move(t), NoLocalId,
+                            env.unchangedBcs + env.replacedBcs.size());
 }
 
 void push(ISS& env, Type t, LocalId l) {
@@ -333,7 +334,8 @@ void push(ISS& env, Type t, LocalId l) {
     assertx(!is_volatile_local(env.ctx.func, l)); // volatiles are TGen
   }
   FTRACE(2, "    push: {} (={})\n", show(t), local_string(*env.ctx.func, l));
-  env.state.stack.push_back(std::move(t), l);
+  env.state.stack.push_elem(std::move(t), l,
+                            env.unchangedBcs + env.replacedBcs.size());
 }
 
 void discardAR(ISS& env, uint32_t idx) {

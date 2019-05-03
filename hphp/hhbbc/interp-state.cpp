@@ -201,7 +201,7 @@ State with_throwable_only(const Index& index, const State& src) {
   ret.locals        = src.locals;
   ret.clsRefSlots   = src.clsRefSlots;
   ret.iters         = src.iters;
-  ret.stack.push_back(StackElem { std::move(throwable), NoLocalId });
+  ret.stack.push_elem(std::move(throwable), NoLocalId);
   return ret;
 }
 
@@ -435,30 +435,94 @@ bool widen_into(State& dst, const State& src) {
   return merge_impl(dst, src, widening_union);
 }
 
-void InterpStack::rewind(int numPop, int numPush) {
+void InterpStack::refill(size_t elemIx, size_t indexLow,
+                         int numPop, int numPush) {
   auto constexpr NoIndex =
     std::numeric_limits<decltype(index)::value_type>::max();
 
-  while (numPush) {
-    index.pop_back();
-    elems.pop_back();
-    numPush--;
+  if (numPush) {
+    index.erase(index.begin() + indexLow, index.begin() + indexLow + numPush);
+    elems.erase(elems.begin() + elemIx, elems.begin() + elemIx + numPush);
+    for (auto i = indexLow; i < index.size(); i++) {
+      if (index[i] >= elemIx) {
+        auto DEBUG_ONLY ii = index[i] -= numPush;
+        assertx(ii >= elemIx);
+      }
+    }
+  }
+
+  if (numPush != numPop) {
+    for (auto i = elemIx; i < elems.size(); i++) {
+      auto& elem = elems[i];
+      if (elem.index >= indexLow) {
+        elem.index += numPop - numPush;
+      }
+    }
   }
 
   if (!numPop) return;
 
-  auto const sz = index.size();
-  for (int i = 0; i < numPop; i++) {
-    index.push_back(NoIndex);
-  }
-
-  for (auto i = elems.size(); i--; ) {
+  auto const indexHigh = indexLow + numPop;
+  index.insert(index.begin() + indexLow, numPop, NoIndex);
+  for (auto i = elemIx; i--; ) {
     auto const& elm = elems[i];
-    if (elm.index >= sz &&
-        elm.index < index.size() &&
+    if (elm.index >= indexLow &&
+        elm.index < indexHigh &&
         index[elm.index] == NoIndex) {
       index[elm.index] = i;
       if (!--numPop) return;
+    }
+  }
+
+  always_assert(false);
+}
+
+void InterpStack::rewind(int numPop, int numPush) {
+  refill(elems.size() - numPush, index.size() - numPush, numPop, numPush);
+}
+
+void InterpStack::kill(int numPop, int numPush, uint32_t id) {
+  for (auto i = elems.size(); i--; ) {
+    auto const &elem = elems[i];
+    if (elem.id == id) {
+      for (auto j = 1; j < numPush; j++) {
+        if (!i || elems[--i].id != id) always_assert(false);
+      }
+      return refill(i, elems[i].index, numPop, numPush);
+    }
+  }
+
+  always_assert(false);
+}
+
+void InterpStack::insert_after(int numPop, int numPush, const Type* types,
+                               uint32_t numInst, uint32_t id) {
+  for (auto i = elems.size(); i--; ) {
+    auto const &elem = elems[i];
+    if (elem.id == id) {
+      auto const indexLow = elem.index + 1 - numPop;
+      index.erase(index.begin() + indexLow, index.begin() + indexLow + numPop);
+      auto const elemIx = i + 1;
+      elems.resize(elems.size() + numPush);
+      for (auto j = elems.size() - numPush; j-- > elemIx; ) {
+        auto& e = elems[j + numPush];
+        e = std::move(elems[j]);
+        e.index += numPush - numPop;
+        if (e.id != StackElem::NoId) e.id += numInst;
+      }
+      for (auto j = indexLow; j < index.size(); j++) {
+        index[j] += numPush;
+      }
+      index.insert(index.begin() + indexLow, numPush, uint32_t{});
+      for (auto j = 0; j < numPush; j++) {
+        auto& e = elems[elemIx + j];
+        e.type = types[j];
+        e.equivLoc = NoLocalId;
+        e.index = indexLow + j;
+        e.id = id + numInst;
+        index[indexLow + j] = elemIx + j;
+      }
+      return;
     }
   }
 

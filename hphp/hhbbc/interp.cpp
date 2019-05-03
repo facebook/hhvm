@@ -73,6 +73,25 @@ const StaticString s_trigger_error("trigger_error");
 const StaticString s_this("HH\\this");
 
 void interpStep(ISS& env, const Bytecode& bc);
+void rewind(ISS& env, int n);
+
+void record(ISS& env, const Bytecode& bc) {
+  if (bc.srcLoc != env.srcLoc) {
+    Bytecode tmp = bc;
+    tmp.srcLoc = env.srcLoc;
+    return record(env, tmp);
+  }
+
+  if (!env.replacedBcs.size() &&
+      env.unchangedBcs < env.blk.hhbcs.size() &&
+      bc == env.blk.hhbcs[env.unchangedBcs]) {
+    env.unchangedBcs++;
+    return;
+  }
+
+  ITRACE(2, "  => {}\n", show(env.ctx.func, bc));
+  env.replacedBcs.push_back(bc);
+}
 
 // The number of pops as seen by interp.
 uint32_t numPop(const Bytecode& bc) {
@@ -90,20 +109,26 @@ void reprocess(ISS& env) {
   env.reprocess = true;
 }
 
-ArrayData*& add_elem_array(ISS& env) {
-  auto const idx = env.addElems.back().idx;
+ArrayData** add_elem_array(ISS& env) {
+  auto const idx = env.trackedElems.back().idx;
+  if (idx < env.unchangedBcs) {
+    auto const DEBUG_ONLY& bc = env.blk.hhbcs[idx];
+    assertx(bc.op == Op::Concat);
+    return nullptr;
+  }
   assertx(idx >= env.unchangedBcs);
   auto& bc = env.replacedBcs[idx - env.unchangedBcs];
-  auto& arr = [&] () -> const ArrayData*& {
+  auto arr = [&] () -> const ArrayData** {
     switch (bc.op) {
-      case Op::Array:  return bc.Array.arr1;
-      case Op::Dict:   return bc.Dict.arr1;
-      case Op::Keyset: return bc.Keyset.arr1;
-      case Op::Vec:    return bc.Vec.arr1;
-      default: not_reached();
+      case Op::Array:   return &bc.Array.arr1;
+      case Op::Dict:    return &bc.Dict.arr1;
+      case Op::Keyset:  return &bc.Keyset.arr1;
+      case Op::Vec:     return &bc.Vec.arr1;
+      case Op::Concat: return nullptr;
+      default:          not_reached();
     }
   }();
-  return const_cast<ArrayData*&>(arr);
+  return const_cast<ArrayData**>(arr);
 }
 
 bool start_add_elem(ISS& env, Type& ty, Op op) {
@@ -115,7 +140,7 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
   } else {
     reduce(env, bc::PopC {}, bc::PopC {});
   }
-  env.addElems.emplace_back(
+  env.trackedElems.emplace_back(
     env.state.stack.size(),
     env.unchangedBcs + env.replacedBcs.size()
   );
@@ -147,16 +172,116 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
   return true;
 }
 
-void finish_add_elem(ISS& env) {
-  auto& arr = add_elem_array(env);
-  env.addElems.pop_back();
-  ArrayData::GetScalarArray(&arr);
+void finish_tracked_elem(ISS& env) {
+  auto const arr = add_elem_array(env);
+  env.trackedElems.pop_back();
+  if (arr) ArrayData::GetScalarArray(arr);
 }
 
-void finish_add_elems(ISS& env, size_t depth) {
-  while (!env.addElems.empty() && env.addElems.back().depth >= depth) {
-    finish_add_elem(env);
+void finish_tracked_elems(ISS& env, size_t depth) {
+  while (!env.trackedElems.empty() && env.trackedElems.back().depth >= depth) {
+    finish_tracked_elem(env);
   }
+}
+
+uint32_t id_from_slot(ISS& env, int slot) {
+  auto const id = (env.state.stack.end() - (slot + 1))->id;
+  assertx(id == StackElem::NoId ||
+          id < env.unchangedBcs + env.replacedBcs.size());
+  return id;
+}
+
+const Bytecode* op_from_slot(ISS& env, int slot) {
+  auto const id = (env.state.stack.end() - (slot + 1))->id;
+  if (id == StackElem::NoId) return nullptr;
+  if (id < env.unchangedBcs) return &env.blk.hhbcs[id];
+  auto const off = id - env.unchangedBcs;
+  assertx(off < env.replacedBcs.size());
+  return &env.replacedBcs[off];
+}
+
+void ensure_mutable(ISS& env, uint32_t id) {
+  if (id < env.unchangedBcs) {
+    auto const delta = env.unchangedBcs - id;
+    env.replacedBcs.resize(env.replacedBcs.size() + delta);
+    for (auto i = env.replacedBcs.size(); i-- > delta; ) {
+      env.replacedBcs[i] = std::move(env.replacedBcs[i - delta]);
+    }
+    for (auto i = 0; i < delta; i++) {
+      env.replacedBcs[i] = env.blk.hhbcs[id + i];
+    }
+    env.unchangedBcs = id;
+  }
+}
+
+/*
+ * Turn the instruction that wrote the slot'th element from the top of
+ * the stack into a Nop, adjusting the stack appropriately. If its the
+ * previous instruction, just rewind.
+ */
+int kill_by_slot(ISS& env, int slot) {
+  auto const id = id_from_slot(env, slot);
+  assertx(id != StackElem::NoId);
+  auto const sz = env.state.stack.size();
+  // if its the last bytecode we processed, we can rewind and avoid
+  // the reprocess overhead.
+  if (id == env.unchangedBcs + env.replacedBcs.size() - 1) {
+    rewind(env, 1);
+    return env.state.stack.size() - sz;
+  }
+  ensure_mutable(env, id);
+  auto& bc = env.replacedBcs[id - env.unchangedBcs];
+  auto const pop = numPop(bc);
+  auto const push = numPush(bc);
+  ITRACE(2, "kill_by_slot: slot={}, id={}, was {}\n",
+         slot, id, show(env.ctx.func, bc));
+  bc = bc_with_loc(bc.srcLoc, bc::Nop {});
+  env.state.stack.kill(pop, push, id);
+  reprocess(env);
+  return env.state.stack.size() - sz;
+}
+
+/*
+ * Check whether an instruction can be inserted immediately after the
+ * slot'th stack entry was written. This is only possible if slot was
+ * the last thing written by the instruction that wrote it (ie some
+ * bytecodes push more than one value - there's no way to insert a
+ * bytecode that will write *between* those values on the stack).
+ */
+bool can_insert_after_slot(ISS& env, int slot) {
+  auto const it = env.state.stack.end() - (slot + 1);
+  if (it->id == StackElem::NoId) return false;
+  if (auto const next = it.next_elem(1)) {
+    return next->id != it->id;
+  }
+  return true;
+}
+
+/*
+ * Insert a sequence of bytecodes after the instruction that wrote the
+ * slot'th element from the top of the stack.
+ *
+ * The entire sequence pops numPop, and pushes numPush stack
+ * elements. Only the last bytecode can push anything onto the stack,
+ * and the types it pushes are pointed to by types (if you have more
+ * than one bytecode that pushes, call this more than once).
+ */
+void insert_after_slot(ISS& env, int slot,
+                       int numPop, int numPush, const Type* types,
+                       const BytecodeVec& bcs) {
+  assertx(can_insert_after_slot(env, slot));
+  auto const id = id_from_slot(env, slot);
+  assertx(id != StackElem::NoId);
+  ensure_mutable(env, id + 1);
+  env.state.stack.insert_after(numPop, numPush, types, bcs.size(), id);
+  env.replacedBcs.insert(env.replacedBcs.begin() + (id + 1 - env.unchangedBcs),
+                         bcs.begin(), bcs.end());
+  using namespace folly::gen;
+  ITRACE(2, "insert_after_slot: slot={}, id={}  [{}]\n",
+         slot, id,
+         from(bcs) |
+         map([&] (const Bytecode& bc) { return show(env.ctx.func, bc); }) |
+         unsplit<std::string>(", "));
 }
 
 const Bytecode* last_op(ISS& env, int idx = 0) {
@@ -659,16 +784,17 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   }(std::move(inTy));
 
   if (outTy && outTy->second == ThrowMode::None && will_reduce(env)) {
-    if (!env.addElems.empty() &&
-        env.addElems.back().depth + 3 == env.state.stack.size()) {
+    if (!env.trackedElems.empty() &&
+        env.trackedElems.back().depth + 3 == env.state.stack.size()) {
       auto const handled = [&] {
         if (!k.subtypeOf(BArrKey)) return false;
         auto ktv = tv(k);
         if (!ktv) return false;
         auto vtv = tv(v);
         if (!vtv) return false;
-        auto& arr = add_elem_array(env);
-        arr = arr->set(*ktv, *vtv);
+        auto const arr = add_elem_array(env);
+        if (!arr) return false;
+        *arr = (*arr)->set(*ktv, *vtv);
         return true;
       }();
       if (handled) {
@@ -676,7 +802,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
         reduce(env, bc::PopC {}, bc::PopC {});
         ITRACE(2, "(addelem* -> {}\n",
                show(env.ctx.func,
-                    env.replacedBcs[env.addElems.back().idx - env.unchangedBcs]));
+                    env.replacedBcs[env.trackedElems.back().idx - env.unchangedBcs]));
         return;
       }
     } else {
@@ -687,7 +813,7 @@ void in(ISS& env, const bc::AddElemC& /*op*/) {
   }
 
   discard(env, 3);
-  finish_add_elems(env, env.state.stack.size());
+  finish_tracked_elems(env, env.state.stack.size());
 
   if (!outTy) {
     return push(env, union_of(TArr, TDict));
@@ -720,13 +846,14 @@ void in(ISS& env, const bc::AddNewElemC&) {
   }(std::move(inTy));
 
   if (outTy && will_reduce(env)) {
-    if (!env.addElems.empty() &&
-        env.addElems.back().depth + 2 == env.state.stack.size()) {
+    if (!env.trackedElems.empty() &&
+        env.trackedElems.back().depth + 2 == env.state.stack.size()) {
       auto const handled = [&] {
         auto vtv = tv(v);
         if (!vtv) return false;
-        auto& arr = add_elem_array(env);
-        arr = arr->append(*vtv);
+        auto const arr = add_elem_array(env);
+        if (!arr) return false;
+        *arr = (*arr)->append(*vtv);
         return true;
       }();
       if (handled) {
@@ -734,7 +861,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
         reduce(env, bc::PopC {});
         ITRACE(2, "(addelem* -> {}\n",
                show(env.ctx.func,
-                    env.replacedBcs[env.addElems.back().idx - env.unchangedBcs]));
+                    env.replacedBcs[env.trackedElems.back().idx - env.unchangedBcs]));
         return;
       }
     } else {
@@ -745,7 +872,7 @@ void in(ISS& env, const bc::AddNewElemC&) {
   }
 
   discard(env, 2);
-  finish_add_elems(env, env.state.stack.size());
+  finish_tracked_elems(env, env.state.stack.size());
 
   if (!outTy) {
     return push(env, TInitCell);
@@ -844,40 +971,132 @@ void in(ISS& env, const bc::ClsRefName& op) {
 }
 
 void concatHelper(ISS& env, uint32_t n) {
-  uint32_t i = 0;
-  StringData* result = nullptr;
-  while (i < n) {
-    auto const t = topC(env, i);
-    auto const v = tv(t);
-    if (!v) break;
-    if (!isStringType(v->m_type)   &&
-        v->m_type != KindOfNull    &&
-        v->m_type != KindOfBoolean &&
-        v->m_type != KindOfInt64   &&
-        v->m_type != KindOfDouble) {
-      break;
+  auto changed = false;
+  auto side_effects = false;
+  if (will_reduce(env)) {
+    auto litstr = [&] (SString next, uint32_t i) -> SString {
+      auto const t = topC(env, i);
+      auto const v = tv(t);
+      if (!v) return nullptr;
+      if (!isStringType(v->m_type)   &&
+          v->m_type != KindOfNull    &&
+          v->m_type != KindOfBoolean &&
+          v->m_type != KindOfInt64   &&
+          v->m_type != KindOfDouble) {
+        return nullptr;
+      }
+      auto const cell = eval_cell_value(
+        [&] {
+          auto const s = makeStaticString(
+            next ?
+            StringData::Make(tvAsCVarRef(&*v).toString().get(), next) :
+            tvAsCVarRef(&*v).toString().get());
+          return make_tv<KindOfString>(s);
+        }
+      );
+      if (!cell) return nullptr;
+      return cell->m_data.pstr;
+    };
+
+    auto fold = [&] (uint32_t slot, uint32_t num, SString result) {
+      auto const cell = make_tv<KindOfPersistentString>(result);
+      auto const ty = from_cell(cell);
+      BytecodeVec bcs{num, bc::PopC {}};
+      bcs.push_back(gen_constant(cell));
+      if (slot == 0) {
+        reduce(env, std::move(bcs));
+      } else {
+        insert_after_slot(env, slot, num, 1, &ty, bcs);
+        reprocess(env);
+      }
+      n -= num - 1;
+      changed = true;
+    };
+
+    for (auto i = 0; i < n; i++) {
+      if (topC(env, i).couldBe(BObj | BArrLike | BRes)) {
+        side_effects = true;
+        break;
+      }
     }
-    auto const cell = eval_cell_value([&] {
-        auto const s = makeStaticString(
-          result ?
-          StringData::Make(tvAsCVarRef(&*v).toString().get(), result) :
-          tvAsCVarRef(&*v).toString().get());
-        return make_tv<KindOfString>(s);
-      });
-    if (!cell) break;
-    result = cell->m_data.pstr;
-    i++;
-  }
-  if (result && i >= 2) {
-    BytecodeVec bcs(i, bc::PopC {});
-    bcs.push_back(gen_constant(make_tv<KindOfString>(result)));
-    if (i < n) {
-      bcs.push_back(bc::ConcatN { n - i + 1 });
+
+    if (!side_effects) {
+      for (auto i = 0; i < n; i++) {
+        auto const tracked = !env.trackedElems.empty() &&
+          env.trackedElems.back().depth + i + 1 == env.state.stack.size();
+        if (tracked) finish_tracked_elems(env, env.trackedElems.back().depth);
+        auto const prev = op_from_slot(env, i);
+        if (!prev) continue;
+        if ((prev->op == Op::Concat && tracked) || prev->op == Op::ConcatN) {
+          auto const extra = kill_by_slot(env, i);
+          changed = true;
+          n += extra;
+          i += extra;
+        }
+      }
     }
-    return reduce(env, std::move(bcs));
+
+    SString result = nullptr;
+    uint32_t i = 0;
+    uint32_t nlit = 0;
+    while (i < n) {
+      // In order to collapse literals, we need to be able to insert
+      // pops, and a constant after the sequence that generated the
+      // literals. We can always insert after the last instruction
+      // though, and we only need to check the first slot of a
+      // sequence.
+      auto const next = !i || result || can_insert_after_slot(env, i) ?
+        litstr(result, i) : nullptr;
+      if (!next) {
+        if (nlit > 1) {
+          fold(i - nlit, nlit, result);
+          i -= nlit - 1;
+        }
+        nlit = 0;
+      } else {
+        nlit++;
+      }
+      result = next;
+      i++;
+    }
+    if (nlit > 1) fold(i - nlit, nlit, result);
   }
-  discard(env, n);
-  push(env, TStr);
+
+  if (!changed) {
+    discard(env, n);
+    if (n == 2 && !side_effects && will_reduce(env)) {
+      env.trackedElems.emplace_back(
+        env.state.stack.size(),
+        env.unchangedBcs + env.replacedBcs.size()
+      );
+    }
+    push(env, TStr);
+    return;
+  }
+
+  reduce(env);
+  if (n == 1) return;
+  // We can't reduce the emitted concats, or we'll end up with
+  // infinite recursion.
+  env.flags.wasPEI = true;
+  env.flags.effectFree = false;
+  env.flags.canConstProp = false;
+
+  auto concat = [&] (uint32_t num) {
+    discard(env, num);
+    push(env, TStr);
+    if (num == 2) {
+      record(env, bc::Concat {});
+    } else {
+      record(env, bc::ConcatN { num });
+    }
+  };
+
+  while (n >= 4) {
+    concat(4);
+    n -= 3;
+  }
+  if (n > 1) concat(n);
 }
 
 void in(ISS& env, const bc::Concat& /*op*/) {
@@ -5196,26 +5415,10 @@ void dispatch(ISS& env, const Bytecode& op) {
 
 //////////////////////////////////////////////////////////////////////
 
-void record(ISS& env, const Bytecode& bc) {
-  if (bc.srcLoc != env.srcLoc) {
-    Bytecode tmp = bc;
-    tmp.srcLoc = env.srcLoc;
-    return record(env, tmp);
-  }
-
-  if (!env.replacedBcs.size() &&
-      env.unchangedBcs < env.blk.hhbcs.size() &&
-      bc == env.blk.hhbcs[env.unchangedBcs]) {
-    env.unchangedBcs++;
-    return;
-  }
-
-  ITRACE(2, "  => {}\n", show(env.ctx.func, bc));
-  env.replacedBcs.push_back(bc);
-}
-
 void interpStep(ISS& env, const Bytecode& bc) {
-  ITRACE(2, "  {}\n", show(env.ctx.func, bc));
+  ITRACE(2, "  {} ({})\n",
+         show(env.ctx.func, bc),
+         env.unchangedBcs + env.replacedBcs.size());
   Trace::Indent _;
 
   // If there are throw exit edges, make a copy of the state (except
@@ -5476,7 +5679,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
 
   while (true) {
     if (idx == size) {
-      finish_add_elems(env, 0);
+      finish_tracked_elems(env, 0);
       if (!env.reprocess) break;
       FTRACE(2, "  Reprocess mutated block {}\n", interp.bid);
       assertx(env.unchangedBcs < retryOffset || env.replacedBcs.size());
@@ -5491,6 +5694,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       continue;
     }
 
+    assertx(retryOffset >= env.unchangedBcs);
     auto const& bc = idx < retryOffset ?
       interp.blk->hhbcs[idx] : retryBcs[idx - retryOffset];
     ++idx;
@@ -5531,7 +5735,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
       }();
       if (hasFallthrough) retryFallthrough = flags.jmpDest;
       if (env.reprocess) continue;
-      finish_add_elems(env, 0);
+      finish_tracked_elems(env, 0);
       auto const newDest = speculateHelper(env, flags.jmpDest, true);
       propagate(newDest, &interp.state);
       return finish(hasFallthrough ? newDest : NoBlockId);
@@ -5543,7 +5747,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
         continue;
       }
       FTRACE(2, "  <bytecode fallthrough is unreachable>\n");
-      finish_add_elems(env, 0);
+      finish_tracked_elems(env, 0);
       return finish(NoBlockId);
     }
   }
@@ -5561,16 +5765,26 @@ StepFlags step(Interp& interp, const Bytecode& op) {
   ISS env { interp, noop };
   env.analyzeDepth++;
   dispatch(env, op);
-  assertx(env.addElems.empty());
+  assertx(env.trackedElems.empty());
   return env.flags;
 }
 
 void default_dispatch(ISS& env, const Bytecode& op) {
-  if (!env.addElems.empty()) {
-    auto const pops = numPop(op);
-    auto const depth = env.state.stack.size() - pops;
-    finish_add_elems(env, depth + (op.op == Op::AddElemC ||
-                                   op.op == Op::AddNewElemC ? 1 : 0));
+  if (!env.trackedElems.empty()) {
+    auto const pops = [&] () -> uint32_t {
+      switch (op.op) {
+        case Op::AddElemC:
+        case Op::AddNewElemC:
+          return numPop(op) - 1;
+        case Op::Concat:
+        case Op::ConcatN:
+          return 0;
+        default:
+          return numPop(op);
+      }
+    }();
+
+    finish_tracked_elems(env, env.state.stack.size() - pops);
   }
   dispatch(env, op);
   if (instrFlags(op.op) & TF && env.flags.jmpDest == NoBlockId) {

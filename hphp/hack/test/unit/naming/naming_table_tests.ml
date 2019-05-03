@@ -1,0 +1,123 @@
+(**
+ * Copyright (c) 2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *
+*)
+
+(* These are basically the same tests as in
+ * test/integration_ml/saved_state/test_naming_table_sqlite_fallback.ml, but
+ * as stripped down to just the basics as possible to make finding the root
+ * cause of test failures easier. *)
+
+open Core_kernel
+
+module Types_pos_asserter = Asserter.Make_asserter (struct
+  type t = Naming_table.Types.pos
+  let to_string (pos, type_of_type) =
+    Printf.sprintf "(%s, %d)"
+      (FileInfo.show_pos pos)
+      (Naming_table.type_of_type_to_enum type_of_type)
+  let is_equal = (=)
+end)
+module Pos_asserter = Asserter.Make_asserter (struct
+  type t = FileInfo.pos
+  let to_string pos =
+    Printf.sprintf "(%s)" (FileInfo.show_pos pos)
+  let is_equal = (=)
+end)
+
+let files = [
+  ("foo.php", {|<?hh
+    class Foo {}
+  |});
+  ("bar.php", {|<?hh
+    function bar(): void {}
+  |});
+  ("baz.php", {|<?hh
+    type Baz = Foo;
+  |});
+  ("qux.php", {|<?hh
+    const int Qux = 5;
+  |});
+]
+
+let write_and_parse_test_files () =
+  let files = List.map files ~f:(fun (fn, contents) -> (Relative_path.from_root fn, contents)) in
+  List.iter files ~f:begin fun (fn, contents) ->
+    let fn = Path.make (Relative_path.to_absolute fn) in
+    let dir = Path.dirname fn in
+    Disk.mkdir_p (Path.to_string dir);
+    Disk.write_file ~file:(Path.to_string fn) ~contents
+  end;
+  let (file_infos, errors, failed_parsing) = Parsing_service.go
+    None
+    Relative_path.Set.empty
+    ~get_next:(MultiWorker.next None (List.map files ~f:fst))
+    ParserOptions.default
+    ~trace:true
+  in
+  if not (Errors.is_empty errors) then begin
+    Errors.iter_error_list
+      begin fun e ->
+        List.iter (Errors.to_list e) ~f:begin fun (pos, msg) ->
+          eprintf "%s: %s\n" (Pos.string (Pos.to_absolute pos)) msg
+        end
+      end
+      errors;
+    failwith "Expected no errors from parsing."
+  end;
+  if failed_parsing <> Relative_path.Set.empty then failwith "Expected all files to pass parsing.";
+  Naming_table.create file_infos
+
+let run_naming_table_test f =
+  Tempfile.with_real_tempdir begin fun path ->
+    Relative_path.set_path_prefix Relative_path.Root (Path.concat path "root/");
+    let config = SharedMem.{
+      global_size = 1024;
+      heap_size = 1024 * 1024;
+      dep_table_pow = 16;
+      hash_table_pow = 10;
+      shm_dirs = [];
+      shm_min_avail = 0;
+      log_level = 0;
+      sample_rate = 0.0;
+    } in
+    let _ : SharedMem.handle = SharedMem.init config ~num_workers:0 in
+    let naming_table = write_and_parse_test_files () in
+    let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
+    Naming_table.save naming_table db_name;
+    Naming_table.set_sqlite_fallback_path db_name;
+    f ();
+    true
+  end
+
+
+let test_get_pos () = run_naming_table_test begin fun () ->
+  Types_pos_asserter.assert_option_equals
+    (Some (FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"), Naming_table.TClass))
+    (Naming_table.Types.get_pos "\\Foo")
+    "Check for class type";
+  Pos_asserter.assert_option_equals
+    (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
+    (Naming_table.Funs.get_pos "\\bar")
+    "Check for function";
+  Types_pos_asserter.assert_option_equals
+    (Some (
+      FileInfo.File (FileInfo.Typedef, Relative_path.from_root "baz.php"),
+      Naming_table.TTypedef))
+    (Naming_table.Types.get_pos "\\Baz")
+    "Check for typedef type";
+  Pos_asserter.assert_option_equals
+    (Some (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
+    (Naming_table.Consts.get_pos "\\Qux")
+    "Check for const"
+end
+
+let () =
+  Unit_test.run_all [
+    ("test_get_pos", test_get_pos);
+  ]

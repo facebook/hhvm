@@ -10,8 +10,11 @@
 
 open Integration_test_base_types
 
-val setup_server: ?custom_config:ServerConfig.t ->
-  ?hhi_files:(string * string) list -> unit -> ServerEnv.env
+val setup_server:
+  ?custom_config:ServerConfig.t ->
+  ?hhi_files:(string * string) list ->
+  unit ->
+  ServerEnv.env
 
 val setup_disk: ServerEnv.env -> disk_changes_type -> ServerEnv.env
 
@@ -23,6 +26,7 @@ val change_files:
 val save_state:
   ?load_hhi_files:bool ->
   ?store_decls_in_saved_state:bool ->
+  ?enable_reverse_naming_table_fallback:bool ->
   disk_changes_type ->
   string ->
   unit
@@ -43,6 +47,7 @@ val load_state:
   ?disable_conservative_redecl:bool ->
   ?predeclare_ide_deps:bool ->
   ?load_decls_from_saved_state:bool ->
+  ?enable_reverse_naming_table_fallback:bool ->
   disk_state:disk_changes_type ->
   string (* saved_state_dir *) ->
   ServerEnv.env

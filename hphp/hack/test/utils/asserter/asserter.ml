@@ -53,6 +53,12 @@ module Process_status_comparator = struct
     let is_equal exp actual = exp = actual
 end;;
 
+module Relative_path_comparator = struct
+  type t = Relative_path.t
+  let to_string = Relative_path.S.to_string
+  let is_equal = (=)
+end
+
 module type Pattern_substitutions = sig
   (** List of key-value pairs. We perform these key to value
    * substitutions in-order.
@@ -187,3 +193,4 @@ module Bool_asserter = Make_asserter (Bool_comparator);;
 module Hh_json_json_asserter = Make_asserter (Hh_json_json_comparator);;
 module Int_asserter = Make_asserter (Int_comparator);;
 module Process_status_asserter = Make_asserter (Process_status_comparator);;
+module Relative_path_asserter = Make_asserter (Relative_path_comparator);;

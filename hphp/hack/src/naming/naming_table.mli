@@ -18,6 +18,8 @@ type t
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 
+val set_sqlite_fallback_path : string -> unit
+
 (* Querying and updating forward naming tables. *)
 val combine : t -> t -> t
 val create : FileInfo.t Relative_path.Map.t -> t
@@ -53,6 +55,7 @@ type type_of_type =
   | TClass
   | TTypedef
   [@@deriving enum]
+
 module Types : sig
   include ReverseNamingTable with type pos = FileInfo.pos * type_of_type
   val get_canon_name : string -> string option

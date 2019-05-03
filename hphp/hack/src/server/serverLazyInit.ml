@@ -44,6 +44,7 @@ let lock_and_load_deptable (fn: string) ~(ignore_hh_version: bool) : unit =
     Hh_logger.log
       "Reading the dependency file took (sec): %d" read_deptable_time;
     HackEventLogger.load_deptable_end read_deptable_time;
+    Naming_table.set_sqlite_fallback_path fn
   with
   | SharedMem.Sql_assertion_failure 11
   | SharedMem.Sql_assertion_failure 14 as e -> (* SQL_corrupt *)
@@ -468,7 +469,13 @@ let post_saved_state_initialization
       not (Relative_path.Set.mem parsing_files k)
     ) in
 
-  let t = naming_with_fast old_hack_names t in
+  (* If we're falling back to SQLite we don't need to explicitly do a naming
+     pass. *)
+  let t =
+    if genv.local_config.SLC.enable_reverse_naming_table_fallback
+    then t
+    else naming_with_fast old_hack_names t
+  in
   (* Do global naming on all dirty files *)
   let env, t = naming env t in
 

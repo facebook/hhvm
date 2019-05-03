@@ -1352,28 +1352,26 @@ void emitConcatN(IRGS& env, uint32_t n) {
   auto const t1 = popC(env);
   auto const t2 = popC(env);
   auto const t3 = popC(env);
+  auto const t4 = n == 4 ? popC(env) : nullptr;
 
-  if (!(t1->type() <= TStr) ||
-      !(t2->type() <= TStr) ||
-      !(t3->type() <= TStr)) {
-    PUNT(ConcatN);
-  }
+  auto const s4 = !t4 || t4->isA(TStr) ? t4 : gen(env, ConvCellToStr, t4);
+  auto const s3 = t3->isA(TStr) ? t3 : gen(env, ConvCellToStr, t3);
+  auto const s2 = t2->isA(TStr) ? t2 : gen(env, ConvCellToStr, t2);
+  auto const s1 = t1->isA(TStr) ? t1 : gen(env, ConvCellToStr, t1);
 
   if (n == 3) {
-    push(env, gen(env, ConcatStr3, t3, t2, t1));
-    decRef(env, t2);
-    decRef(env, t1);
+    push(env, gen(env, ConcatStr3, s3, s2, s1));
+    decRef(env, s2);
+    decRef(env, s1);
     return;
   }
 
   always_assert(n == 4);
-  auto const t4 = popC(env);
-  if (!(t4->type() <= TStr)) PUNT(ConcatN);
 
-  push(env, gen(env, ConcatStr4, t4, t3, t2, t1));
-  decRef(env, t3);
-  decRef(env, t2);
-  decRef(env, t1);
+  push(env, gen(env, ConcatStr4, s4, s3, s2, s1));
+  decRef(env, s3);
+  decRef(env, s2);
+  decRef(env, s1);
 }
 
 void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {

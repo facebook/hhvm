@@ -73,8 +73,6 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                    inst->marker().func()->fullName()->slice());
   }
 
-  auto const mc_handler = tc::ustubs().handlePrimeCacheInitFatal;
-
   /*
    * The `mcprep' instruction here creates a smashable move, which serves as
    * the inline cache, or "prime cache" for the method lookup.
@@ -82,15 +80,15 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
    * On our first time through this codepath in the TC, we "prime" this cache
    * (which holds across /all/ requests) by smashing the mov immediate to hold
    * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
-   * not always possible (see handlePrimeCacheInitFatal() for details), in which
-   * case we smash an immediate with some low bits set, so that we always miss
-   * on the inline cache when comparing against our live Class*.
+   * not always possible (see MethodCache::handleSlowPath() for details), in
+   * which case we smash an immediate with some low bits set, so that we always
+   * miss on the inline cache when comparing against our live Class*.
    *
    * The inline cache is set up so that we always miss initially, and take the
-   * slow path to initialize it.  After initialization, we also smash the slow
-   * path call to point instead to a lookup routine for the out-of-line method
-   * cache (allocated above).  The inline cache is guaranteed to be set only
-   * once, but the one-way request-local method cache is updated on each miss.
+   * slow path to initialize it. After initialization, the slow path uses the
+   * out-of-line method cache (allocated above). The inline cache is set only
+   * during the first call(s) (usually once), but the one-way request-local
+   * method cache is updated on each miss.
    */
   auto func_class = v.makeReg();
   v << mcprep{func_class};
@@ -116,7 +114,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
         .immPtr(inst->marker().func()->cls())
         .reg(func_class);
 
-      cgCallHelper(v, env, CallSpec::smashable(mc_handler),
+      cgCallHelper(v, env, CallSpec::direct(tc::ustubs().lookupMethodSlow),
                    kVoidDest, SyncOptions::Sync, args);
     },
     [&] (Vout& v) { // else block (likely)

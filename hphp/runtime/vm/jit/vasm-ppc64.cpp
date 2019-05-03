@@ -723,7 +723,7 @@ void Vgen::emit(const mcprep& i) {
    *
    * We set the low bit for two reasons: the Class* will never be a valid
    * Class*, so we'll always miss the inline check before it's smashed, and
-   * handlePrimeCacheInitFatal can tell it's not been smashed yet
+   * MethodCache::handleSlowPath can tell it's not been smashed yet
    */
   auto const mov_addr = emitSmashableMovq(a.code(), env.meta, 0, r64(i.d));
   auto const imm = reinterpret_cast<uint64_t>(mov_addr);
@@ -838,8 +838,8 @@ void Vgen::emit(const callr& i) {
 }
 
 void Vgen::emit(const calls& i) {
-  // calls is used to call c++ function like handlePrimeCacheInitFatal so setup
-  // the r1 pointer to a valid frame in order to allow LR save by callee's
+  // calls is used to call c++ function like MethodCache::handleSlowPath so
+  // setup the r1 pointer to a valid frame in order to allow LR save by callee's
   // prologue.
   emitCallPrologue();
   a.std(rtoc(), rsfp()[AROFF(SAVED_TOC())]);

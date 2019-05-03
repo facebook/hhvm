@@ -253,12 +253,16 @@ struct CallSpec {
    */
   template<class Ret, class... Args>
   static CallSpec direct(Ret (*fp)(Args...), const FuncType* type) {
-    return CallSpec{Kind::Direct, reinterpret_cast<void*>(fp), type};
+    return CallSpec { Kind::Direct, reinterpret_cast<void*>(fp), type };
   }
 
   template<class F>
   static CallSpec direct(F f) {
     return direct(f, get_func_type(f));
+  }
+
+  static CallSpec direct(TCA fp) {
+    return CallSpec { Kind::Direct, fp };
   }
 
   /*

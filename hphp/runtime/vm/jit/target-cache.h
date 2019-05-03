@@ -120,13 +120,6 @@ struct Entry {
   const Func* m_value;
 };
 
-void handlePrimeCacheInit(rds::Handle mce_handle,
-                          ActRec* ar,
-                          StringData* name,
-                          Class* cls,
-                          Class* ctx,
-                          uintptr_t rawTarget);
-
 void handleSlowPath(rds::Handle mce_handle,
                     ActRec* ar,
                     StringData* name,

@@ -307,6 +307,47 @@ readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
   }
 }
 
+void smashImmediate(Entry* mce, TCA movAddr) {
+  // The inline cache is a 64-bit immediate, and we need to atomically
+  // set both the Func* and the Class*.  We also can only cache these
+  // values if the Func* and Class* can't be deallocated, so this is
+  // limited to:
+  //
+  //   - Both Func* and Class* must fit in 32-bit value (i.e. be
+  //     low-malloced).
+  //
+  //   - We must be in RepoAuthoritative mode.  It is ok to cache a
+  //     non-AttrPersistent class here, because if it isn't loaded in
+  //     the request we'll never hit the TC fast path.  But we can't
+  //     do it if the Class* or Func* might be freed.
+  //
+  //   - The call must not be magic or static.  The code path in
+  //     handleSlowPath currently assumes we've ruled this out.
+  //
+  // It's ok to store into the inline cache even if there are low bits
+  // set in mce->m_key.  In that case we'll always just miss the in-TC
+  // fast path.  We still need to clear the bit so handleSlowPath can
+  // tell it was smashed, though.
+  //
+  // If the situation is not cacheable, we just put a value into the
+  // immediate that will cause it to always call out to handleSlowPath.
+  auto const fval = reinterpret_cast<uintptr_t>(mce->m_value);
+  auto const cval = mce->m_key;
+  bool const cacheable =
+    RuntimeOption::RepoAuthoritative &&
+    cval && !(cval & 0x3) &&
+    fval < std::numeric_limits<uint32_t>::max() &&
+    cval < std::numeric_limits<uint32_t>::max();
+
+  uintptr_t imm = 0x2; /* not a Class, but clear low bit */
+  if (cacheable) {
+    assertx(!(mce->m_value->attrs() & AttrStatic));
+    imm = fval << 32 | cval;
+  }
+
+  smashMovq(movAddr, imm);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 
@@ -329,6 +370,14 @@ handleSlowPath(rds::Handle mce_handle,
   }
   assertx(IMPLIES(mce->m_key, mce->m_value));
 
+  // If the low bit is set in mcePrime, we have not yet smashed the immediate
+  // into the TC, so let's do it; mcePrime >> 1 is the smash target.
+  if (UNLIKELY(mcePrime & 0x1)) {
+    // First fill the request local method cache for this call.
+    lookup(mce, ar, name, cls, ctx);
+    return smashImmediate(mce, TCA(mcePrime >> 1));
+  }
+
   // Check for a hit in the request local cache---since we've failed
   // on the immediate smashed in the TC.
   auto const mceKey = mce->m_key;
@@ -341,17 +390,6 @@ handleSlowPath(rds::Handle mce_handle,
   // from the TC's mcePrime as a starting point.
   const Func* mceValue;
   if (UNLIKELY(!mceKey)) {
-    // If the low bit is set in mcePrime, we're in the middle of
-    // smashing immediates into the TC from the handlePrimeCacheInit,
-    // and the upper bits is not yet a valid Func*.
-    //
-    // We're assuming that writes to executable code may be seen out
-    // of order (i.e. it may call this function with the old
-    // immediate), so we check this bit to ensure we don't try to
-    // treat the immediate as a real Func* if it isn't yet.
-    if (mcePrime & 0x1) {
-      return lookup(mce, ar, name, cls, ctx);
-    }
     mceValue = reinterpret_cast<const Func*>(mcePrime >> 32);
     if (UNLIKELY(!mceValue)) {
       // The inline Func* might be null if it was uncacheable (not
@@ -457,103 +495,6 @@ handleSlowPath(rds::Handle mce_handle,
   }
 
   return lookup(mce, ar, name, cls, ctx);
-}
-
-EXTERNALLY_VISIBLE void
-handlePrimeCacheInit(rds::Handle mce_handle,
-                     ActRec* ar,
-                     StringData* name,
-                     Class* cls,
-                     Class* ctx,
-                     uintptr_t rawTarget) {
-  auto const mce = rds::handleToPtr<Entry, rds::Mode::Normal>(mce_handle);
-  if (!rds::isHandleInit(mce_handle, rds::NormalTag{})) {
-    mce->m_key = 0;
-    mce->m_value = nullptr;
-    rds::initHandle(mce_handle);
-  }
-
-  // If rawTarget doesn't have the flag bit we must have a smash in flight, but
-  // the call is still pointed at us.  Just do a lookup.
-  if (!(rawTarget & 0x1)) {
-    return lookup(mce, ar, name, cls, ctx);
-  }
-
-  // We should be able to use DECLARE_FRAME_POINTER here,
-  // but that fails inside templates.
-  // Fortunately, this code is very x86 specific anyway...
-#if defined(__x86_64__)
-  ActRec* framePtr;
-  asm volatile("mov %%rbp, %0" : "=r" (framePtr) ::);
-#elif defined(__powerpc64__)
-  ActRec* framePtr;
-  asm volatile("ld %0, 0(1)" : "=r" (framePtr) ::);
-#elif defined(__aarch64__)
-  ActRec* framePtr;
-  asm volatile("mov %0, x29" : "=r" (framePtr) ::);
-#else
-  ActRec* framePtr = ar;
-  always_assert(false);
-#endif
-
-  TCA callAddr = smashableCallFromRet(TCA(framePtr->m_savedRip));
-  TCA movAddr = TCA(rawTarget >> 1);
-
-  // First fill the request local method cache for this call.
-  lookup(mce, ar, name, cls, ctx);
-
-  auto smashMov = [&] (TCA addr, uintptr_t value) -> bool {
-    auto const imm = smashableMovqImm(addr);
-    if (!(imm & 1)) return false;
-
-    smashMovq(addr, value);
-    return true;
-  };
-
-  // The inline cache is a 64-bit immediate, and we need to atomically
-  // set both the Func* and the Class*.  We also can only cache these
-  // values if the Func* and Class* can't be deallocated, so this is
-  // limited to:
-  //
-  //   - Both Func* and Class* must fit in 32-bit value (i.e. be
-  //     low-malloced).
-  //
-  //   - We must be in RepoAuthoritative mode.  It is ok to cache a
-  //     non-AttrPersistent class here, because if it isn't loaded in
-  //     the request we'll never hit the TC fast path.  But we can't
-  //     do it if the Class* or Func* might be freed.
-  //
-  //   - The call must not be magic or static.  The code path in
-  //     handleSlowPath currently assumes we've ruled this out.
-  //
-  // It's ok to store into the inline cache even if there are low bits
-  // set in mce->m_key.  In that case we'll always just miss the in-TC
-  // fast path.  We still need to clear the bit so handleSlowPath can
-  // tell it was smashed, though.
-  //
-  // If the situation is not cacheable, we just put a value into the
-  // immediate that will cause it to always call out to handleSlowPath.
-  auto const fval = reinterpret_cast<uintptr_t>(mce->m_value);
-  auto const cval = mce->m_key;
-  bool const cacheable =
-    RuntimeOption::RepoAuthoritative &&
-    cval && !(cval & 0x3) &&
-    fval < std::numeric_limits<uint32_t>::max() &&
-    cval < std::numeric_limits<uint32_t>::max();
-
-  uintptr_t imm = 0x2; /* not a Class, but clear low bit */
-  if (cacheable) {
-    assertx(!(mce->m_value->attrs() & AttrStatic));
-    imm = fval << 32 | cval;
-  }
-  if (!smashMov(movAddr, imm)) {
-    // Someone beat us to it.  Bail early.
-    return;
-  }
-
-  // Regardless of whether the inline cache was populated, smash the
-  // call to start doing real dispatch.
-  smashCall(callAddr, tc::ustubs().handleSlowPathFatal);
 }
 
 } // namespace MethodCache

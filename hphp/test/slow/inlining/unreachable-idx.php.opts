@@ -1,2 +1,2 @@
--vEval.JitPGOThreshold=25 -vEval.JitPseudomain=0 -vEval.InlineRegionMode=cfg
+-vEval.JitPGOThreshold=25 -vEval.JitPseudomain=0
 -vEval.EnablePHP=1

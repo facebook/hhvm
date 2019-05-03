@@ -897,22 +897,17 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     argTypes.push_back(type);
   }
 
-  const auto mode = RuntimeOption::EvalInlineRegionMode;
   const auto depth = inl.depth();
-
-  if (mode == "cfg" || mode == "both") {
-    if (profData()) {
-      auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
-                                    maxBCInstrs, annotationsPtr);
-      if (region &&
-          inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                           adjustedMaxVasmCost(irgs, *region, depth),
-                           annotations)) {
-        return region;
-      }
+  if (profData()) {
+    auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
+                                  maxBCInstrs, annotationsPtr);
+    if (region &&
+        inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+                         adjustedMaxVasmCost(irgs, *region, depth),
+                         annotations)) {
+      return region;
     }
-
-    if (mode == "cfg") return nullptr;
+    return nullptr;
   }
 
   auto region = selectCalleeTracelet(

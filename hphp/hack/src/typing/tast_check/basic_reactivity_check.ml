@@ -35,6 +35,7 @@ let expr_is_valid_borrowed_arg env (e: expr): bool =
 let rec is_byval_collection_or_string_or_any_type env ty =
   let check t =
     match t with
+    | _, Toption inner -> is_byval_collection_or_string_or_any_type env inner
     | _, Tclass ((_, x), _, _) ->
       x = SN.Collections.cVec ||
       x = SN.Collections.cDict ||

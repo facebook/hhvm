@@ -12,7 +12,6 @@ open Core_kernel
 module MethodJumps = ServerCommandTypes.Method_jumps
 
 let pos_to_json pos =
-  let pos = Pos.to_absolute pos in
   let line, start, end_ = Pos.info_pos pos in
   Hh_json.JSON_Object [
     "file", Hh_json.JSON_String (Pos.filename pos);  (* we can't use Pos.json *)
@@ -47,24 +46,19 @@ let print_json res =
   print_endline (Hh_json.json_to_string (to_json res));
   ()
 
-let readable_place ?(test=false) name pos p_name =
-  let pos =
-    if test
-    then Pos.to_absolute_for_test pos
-    else Pos.to_absolute pos
-  in
+let readable_place name pos p_name =
   let readable = (Pos.string pos) in
   if String.length p_name <> 0
   then (readable^" "^(Utils.strip_ns p_name)^"::"^(Utils.strip_ns name))
   else (readable^" "^(Utils.strip_ns name))
 
-let print_readable ?(test=false) res ~find_children =
+let print_readable res ~find_children =
   List.iter res begin fun res ->
-    let origin_readable = readable_place ~test
+    let origin_readable = readable_place
         res.MethodJumps.orig_name
         res.MethodJumps.orig_pos
         res.MethodJumps.orig_p_name in
-    let dest_readable = readable_place ~test
+    let dest_readable = readable_place
         res.MethodJumps.dest_name
         res.MethodJumps.dest_pos
         res.MethodJumps.dest_p_name in

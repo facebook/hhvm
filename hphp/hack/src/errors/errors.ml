@@ -444,7 +444,12 @@ let to_contextual_string (error : Pos.absolute error_) : string =
 let to_absolute_for_test error =
   let code, msg_l = (get_code error), (to_list error) in
   let msg_l = List.map msg_l (fun (p, s) ->
-    Pos.to_absolute_for_test p, s) in
+    let path = Pos.filename p in
+    let path_without_prefix = Relative_path.suffix path in
+    let p = Pos.set_file
+      (Relative_path.create Relative_path.Dummy path_without_prefix)
+      p in
+    Pos.to_absolute p, s) in
   code, msg_l
 
 let to_string ?(indent=false) (error : Pos.absolute error_) : string =

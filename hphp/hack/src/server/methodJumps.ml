@@ -38,7 +38,7 @@ let get_overridden_methods origin_class get_or_method dest_class acc =
       match or_mthd with
       | Some or_mthd when or_mthd.ce_origin = origin_class ->
         let get_pos (lazy ty) =
-          ty |> fst |> Reason.to_pos in
+          ty |> fst |> Reason.to_pos |> Pos.to_absolute in
         {
           orig_name = m_name;
           orig_pos = get_pos or_mthd.ce_type;
@@ -63,9 +63,9 @@ let check_if_extends_class_and_find_methods target_class_name get_method
                       class_name
                       acc in {
           orig_name = target_class_name;
-          orig_pos = target_class_pos;
+          orig_pos = Pos.to_absolute target_class_pos;
           dest_name = (Cls.name c);
-          dest_pos = Cls.pos c;
+          dest_pos = Pos.to_absolute (Cls.pos c);
           orig_p_name = "";
           dest_p_name = "";
         } :: acc
@@ -139,9 +139,9 @@ let get_ancestor_classes_and_methods cls ~filter acc =
                           (Cls.name c)
                           acc in {
               orig_name = Utils.strip_ns (Cls.name cls);
-              orig_pos = Cls.pos cls;
+              orig_pos = Pos.to_absolute (Cls.pos cls);
               dest_name = Utils.strip_ns (Cls.name c);
-              dest_pos = Cls.pos c;
+              dest_pos = Pos.to_absolute (Cls.pos c);
               orig_p_name = "";
               dest_p_name = "";
             } :: acc

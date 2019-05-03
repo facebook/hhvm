@@ -552,27 +552,17 @@ let rec make_files = function
  * file boundary.
  * Takes the path to a single file, returns a map of filenames to file contents.
  *)
-let file_to_files ?(use_dummy_prefix=false) file content =
-  let dir = Filename.dirname file in
-  let concat_dir file =
-    if dir = "."
-    then file
-    else Filename.concat dir file
-  in
-  let file = Filename.basename file in
+let file_to_files file =
+  let abs_fn = Relative_path.to_absolute file in
+  let content = cat abs_fn in
   let delim = Str.regexp "////.*\n" in
   if Str.string_match delim content 0
   then
     let contentl = Str.full_split delim content in
     let files = make_files contentl in
     List.fold_left ~f: begin fun acc (sub_fn, content) ->
-      let file = file^"--"^sub_fn in
-      let file = concat_dir file in
       let file =
-        if use_dummy_prefix
-        then Relative_path.create Relative_path.Dummy file
-        else Relative_path.from_root file
-      in
+        Relative_path.create Relative_path.Dummy (abs_fn^"--"^sub_fn) in
       Relative_path.Map.add acc ~key:file ~data:content
     end ~init: Relative_path.Map.empty files
   else if string_starts_with content "// @directory " then
@@ -587,21 +577,11 @@ let file_to_files ?(use_dummy_prefix=false) file content =
       try
         Str.matched_group 3 first_line
       with
-        Caml.Not_found -> file in
-    let file =
-      if use_dummy_prefix
-      then Relative_path.create Relative_path.Dummy file_name
-      else Relative_path.from_root (dir ^ file_name)
-    in
+        Caml.Not_found -> abs_fn in
+    let file = Relative_path.create Relative_path.Dummy (dir ^ file_name) in
     let content = String.concat ~sep:"\n" (List.tl_exn contentl) in
     Relative_path.Map.singleton file content
   else
-    let file = concat_dir file in
-    let file =
-      if use_dummy_prefix
-      then Relative_path.create Relative_path.Dummy file
-      else Relative_path.from_root file
-    in
     Relative_path.Map.singleton file content
 
 (* Make readable test output *)
@@ -841,14 +821,10 @@ let handle_mode
   all_errors error_format batch_mode out_extension =
   let expect_single_file () : Relative_path.t =
     match filenames with
-    | [x] -> Relative_path.from_root x
+    | [x] -> x
     | _ -> die "Only single file expected" in
   let iter_over_files f : unit =
     List.iter filenames f in
-  let iter_over_relative_paths f : unit =
-    List.iter filenames (fun fn ->
-      f (Relative_path.from_root fn)
-    ) in
   match mode with
   | Ai _ -> ()
   | Autocomplete
@@ -875,7 +851,7 @@ let handle_mode
   | Ffp_autocomplete ->
       iter_over_files begin fun filename ->
         begin try
-          let file_text = cat filename in
+          let file_text = cat (Relative_path.to_absolute filename) in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
           let position = try
@@ -947,7 +923,7 @@ let handle_mode
       exit 1
     end
   | Dump_symbol_info ->
-    iter_over_relative_paths (fun filename ->
+    iter_over_files (fun filename ->
       begin match Relative_path.Map.get files_info filename with
         | Some fileinfo ->
             let raw_result =
@@ -970,7 +946,7 @@ let handle_mode
         let lint_errors = List.sort ~compare: begin fun x y ->
           Pos.compare (Lint.get_pos x) (Lint.get_pos y)
         end lint_errors in
-        let lint_errors = List.map ~f: Lint.to_absolute_for_test lint_errors in
+        let lint_errors = List.map ~f: Lint.to_absolute lint_errors in
         ServerLint.output_text stdout lint_errors error_format;
         exit 2
       end
@@ -998,9 +974,7 @@ let handle_mode
           let ancestors = MethodJumps.get_inheritance class_
             ~filter:No_filter ~find_children:false naming_table
             None in
-          ClientMethodJumps.print_readable ancestors
-            ~test:true
-            ~find_children:false;
+          ClientMethodJumps.print_readable ancestors ~find_children:false;
           Printf.printf "\n";
         end;
         Printf.printf "\n";
@@ -1009,9 +983,7 @@ let handle_mode
             class_;
           let children = MethodJumps.get_inheritance class_
             ~filter:No_filter ~find_children:true naming_table None in
-          ClientMethodJumps.print_readable children
-            ~test:true
-            ~find_children:true;
+          ClientMethodJumps.print_readable children ~find_children:true;
           Printf.printf "\n";
         end;
       end
@@ -1031,12 +1003,12 @@ let handle_mode
     List.iter result print
   | Outline ->
     iter_over_files (fun filename ->
-    let file = cat filename in
+    let file = cat (Relative_path.to_absolute filename) in
     let results = FileOutline.outline popt file in
     FileOutline.print ~short_pos:true results
     )
   | Dump_nast ->
-    iter_over_relative_paths (fun filename ->
+    iter_over_files (fun filename ->
     let nasts = create_nasts files_info in
     let nast = Relative_path.Map.find filename nasts in
     Printf.printf "%s\n" (Nast.show_program nast)
@@ -1055,7 +1027,7 @@ let handle_mode
     );
     print_tasts tasts tcopt
   | Check_tast ->
-    iter_over_relative_paths (fun filename ->
+    iter_over_files (fun filename ->
     let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
         k = filename) in
     let errors, tasts = compute_tasts_expand_types tcopt files_info
@@ -1071,7 +1043,7 @@ let handle_mode
       if tast_check_errors <> [] then exit 2
     )
   | Dump_typed_full_fidelity_json ->
-    iter_over_relative_paths (fun filename ->
+    iter_over_files (fun filename ->
     (*
       Ideally we'd reuse ServerTypedAst.go here. Unfortunately relative file
       paths are not compatible between hh_single_type_check and server modules.
@@ -1092,7 +1064,7 @@ let handle_mode
       Printf.printf "%s\n" (Hh_json.json_to_string result))
     )
   | Dump_stripped_tast ->
-    iter_over_relative_paths (fun filename ->
+    iter_over_files (fun filename ->
     let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
         k = filename) in
     let _, tasts = compute_tasts tcopt files_info files_contents in
@@ -1104,6 +1076,9 @@ let handle_mode
     let filename = expect_single_file () in
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
+    Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
+    Relative_path.set_path_prefix Relative_path.Hhi (Path.make "hhi");
+    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
     let genv = ServerEnvBuild.default_genv in
     let env = {(ServerEnvBuild.make_env genv.ServerEnv.config) with
       ServerEnv.naming_table;
@@ -1118,7 +1093,7 @@ let handle_mode
     let results = ServerFindRefs.(
       go_from_file (labelled_file, line, column) env >>= fun (name, action) ->
       go action include_defs genv env |>
-      map_env ~f:(to_ide ~test:true name) |>
+      map_env ~f:(to_ide name) |>
       snd |> function
         | Done r -> r
         | Retry -> failwith @@ "should only happen with prechecked files " ^
@@ -1134,8 +1109,7 @@ let handle_mode
     (* For each file in our batch, run typechecking serially.
       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
-      let oc = Out_channel.create (Filename.basename (filename ^ out_extension)) in
-      let contents = Sys_utils.cat filename in
+      let oc = Out_channel.create ((Relative_path.to_absolute filename) ^ out_extension) in
       (* This means builtins had errors, so lets just print those if we see them *)
       if parse_errors <> []
       then
@@ -1146,7 +1120,7 @@ let handle_mode
         begin
         Typing_log.out_channel := oc;
         ServerIdeUtils.make_local_changes ();
-        let files_contents = file_to_files filename contents in
+        let files_contents = file_to_files filename in
         let parse_errors, individual_file_info = parse_name_and_decl popt files_contents in
         let errors = check_file tcopt (Errors.get_error_list parse_errors) individual_file_info in
         (if all_errors then write_error_list error_format errors oc
@@ -1158,8 +1132,7 @@ let handle_mode
     (* For each file in our batch, run typechecking serially.
       Reset the heaps every time in between. *)
     iter_over_files (fun filename ->
-      let oc = Out_channel.create (filename ^ ".decl_out") in
-      let filename = Relative_path.from_root filename in
+      let oc = Out_channel.create ((Relative_path.to_absolute filename) ^ ".decl_out") in
       ServerIdeUtils.make_local_changes ();
       let files_contents = Relative_path.Map.filter files_contents ~f:(fun k _v ->
           k = filename) in
@@ -1184,7 +1157,7 @@ let handle_mode
       let errors = check_file tcopt parse_errors files_info in
       if mode = Infer_return_types
       then
-        iter_over_relative_paths (fun filename ->
+        iter_over_files (fun filename ->
         Option.iter ~f:(infer_return tcopt filename)
           (Relative_path.Map.get files_info filename)
         );
@@ -1197,7 +1170,7 @@ let handle_mode
     let filename = expect_single_file () in
     test_decl_compare filename popt builtins files_contents files_info
   | Least_upper_bound ->
-    iter_over_relative_paths (fun filename ->
+    iter_over_files (fun filename ->
       compute_least_type tcopt filename
     )
   | Linearization ->
@@ -1255,10 +1228,9 @@ let decl_and_run_mode
     out_extension;
   }
   popt
-  repo_root =
+  hhi_root =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
-
   let builtins =
     if no_builtins
     then Relative_path.Map.empty
@@ -1266,37 +1238,26 @@ let decl_and_run_mode
       (* Note that the regular `.hhi` files have already been written to disk
       with `Hhi.get_root ()` *)
       Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
-        let file_path = Path.concat repo_root file_name in
+        let file_path = Path.concat hhi_root file_name in
         let file = Path.to_string file_path in
         Sys_utils.try_touch ~follow_symlinks:true file;
         Sys_utils.write_file ~file file_contents
       );
-
       (* Take the builtins (file, contents) array and create relative paths *)
       Caml.Array.fold_left begin fun acc (f, src) ->
-        let f = Path.concat repo_root f |> Path.to_string in
+        let f = Path.concat hhi_root f |> Path.to_string in
         Relative_path.Map.add acc
           ~key:(Relative_path.create Relative_path.Hhi f)
           ~data:src
       end Relative_path.Map.empty (Array.append magic_builtins hhi_builtins)
     end
   in
-
+  let files = List.map ~f:(Relative_path.create Relative_path.Dummy) files in
   let files_contents = List.fold files
-    ~f:(fun acc filename ->
-      let contents = Sys_utils.cat filename in
-      let files_contents = file_to_files filename contents in
-      Relative_path.Map.union acc files_contents
-    ) ~init:Relative_path.Map.empty in
-  Relative_path.Map.iter files_contents ~f:(fun file_path file_contents ->
-    Sys_utils.mkdir_p (file_path
-      |> Relative_path.to_absolute
-      |> Filename.dirname);
-    let oc = Sys_utils.open_out_no_fail (Relative_path.to_absolute file_path) in
-    Out_channel.output_string oc file_contents;
-    Out_channel.close oc
-  );
-
+  ~f:(fun acc filename ->
+    let files_contents = file_to_files filename in
+    Relative_path.Map.union acc files_contents
+  ) ~init:Relative_path.Map.empty in
   (* Merge in builtins *)
   let files_contents_with_builtins = Relative_path.Map.fold builtins
     ~f:begin fun k src acc -> Relative_path.Map.add acc ~key:k ~data:src end
@@ -1317,25 +1278,21 @@ let main_hack ({files; mode; tcopt; _} as opts) =
   EventLogger.init ~exit_on_parent_exit EventLogger.Event_logger_fake 0.0;
   let handle = SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config in
   ignore (handle: SharedMem.handle);
-  Tempfile.with_tempdir (fun repo_root ->
-    Hhi.set_hhi_root_for_unit_test repo_root;
-    Relative_path.set_path_prefix Relative_path.Root repo_root;
-    Relative_path.set_path_prefix Relative_path.Tmp (Path.make "tmp");
+  Tempfile.with_tempdir (fun hhi_root ->
+    Hhi.set_hhi_root_for_unit_test hhi_root;
+    Relative_path.set_path_prefix Relative_path.Root (Path.make "/");
     GlobalParserOptions.set tcopt;
     GlobalNamingOptions.set tcopt;
     match mode with
     | Ai ai_options ->
       begin match files with
       | [filename] ->
-        let filecontents = file_to_files
-          ~use_dummy_prefix:true
-          filename
-          (cat filename) in
+        let filecontents = filename |> Relative_path.create Relative_path.Dummy |> file_to_files in
         Ai.do_ Typing_check_utils.type_file filecontents ai_options tcopt
       | _ -> die "Ai mode does not support multiple files"
       end
     | _ ->
-      decl_and_run_mode opts tcopt repo_root;
+      decl_and_run_mode opts tcopt hhi_root;
     TypingLogger.flush_buffers ()
   )
 

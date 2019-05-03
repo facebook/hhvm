@@ -112,14 +112,11 @@ let go action include_defs genv env =
   | LocalVar { filename; file_content; line; char } ->
       env, Done (search_localvar filename file_content line char env)
 
-let to_absolute ?(test=false) res =
-  List.map res (fun (r, pos) -> (r,
-    if test
-    then Pos.to_absolute_for_test pos
-    else Pos.to_absolute pos))
+let to_absolute res =
+  List.map res (fun (r, pos) -> (r, Pos.to_absolute pos))
 
-let to_ide ?(test=false) symbol_name res  =
-  Some (symbol_name, List.map ~f:snd (to_absolute ~test res))
+let to_ide symbol_name res  =
+  Some (symbol_name, List.map ~f:snd (to_absolute res))
 
 let get_action symbol (filename, file_content, line, char) =
   let name = symbol.SymbolOccurrence.name in

@@ -61,9 +61,6 @@ let add
 let to_absolute ({pos; _} as lint) =
   {lint with pos = Pos.to_absolute pos}
 
-let to_absolute_for_test ({pos; _} as lint) =
-  {lint with pos = Pos.to_absolute_for_test pos}
-
 let to_string lint =
   let code = Errors.error_code_to_string lint.code in
   Printf.sprintf "%s\n%s (%s)" (Pos.string lint.pos) lint.message code

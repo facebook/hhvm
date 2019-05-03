@@ -18,6 +18,6 @@ val go_from_file:
   ServerEnv.env ->
   (string * action) option
 
-val to_absolute: ?test:bool -> server_result -> result
+val to_absolute: server_result -> result
 
-val to_ide: ?test:bool -> string -> server_result -> ide_result
+val to_ide: string -> server_result -> ide_result

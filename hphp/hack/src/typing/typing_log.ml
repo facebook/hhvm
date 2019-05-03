@@ -269,7 +269,7 @@ let log_position p ?function_name f =
    * so let's not bother spewing to the log *)
   if n > 10000 then ()
   else
-    indentEnv ~color:(Bold Yellow) (Pos.string (Pos.to_absolute_for_test p)
+    indentEnv ~color:(Bold Yellow) (Pos.string (Pos.to_absolute p)
       ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")
       ^ (match function_name with None -> "" | Some n -> " {" ^ n ^ "}")) f
 

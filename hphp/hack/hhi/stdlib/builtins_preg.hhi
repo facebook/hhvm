@@ -19,19 +19,19 @@ function preg_grep(string $pattern, $input, int $flags = 0);
  *
  * This will eventually be fixed with more type inference magic.
  */
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function preg_match(string $pattern, string $subject, &$matches = array(), int $flags = 0,
                     int $offset = 0): int;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function preg_match_all(string $pattern, string $subject, &$matches = array(), int $flags = 0,
                         int $offset = 0);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function preg_replace($pattern, $replacement, $subject, int $limit = -1,
                       &$count = null);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function preg_replace_callback($pattern, $callback, $subject, int $limit = -1,
                                &$count = null);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      int $limit = -1, &$count = null);
 <<__PHPStdLib, __Rx>>

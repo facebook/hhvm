@@ -88,7 +88,6 @@ class TestFreshInit(common_tests.CommonTests, FreshInitTestDriver,
             out = f.read()
             self.assertEqual(out, """<?hh // strict
                 function foo(?string $s): void {
-                  /* HH_FIXME[4089] We need to keep this one */
                   /* HH_FIXME[4110] Keep errors discovered by new_inference */
                   if ($s) {
                     print "hello";

@@ -231,7 +231,12 @@ let check_call env method_info pos reason ft arg_types =
       | None -> false
       | Some l ->
         List.for_all l ~f:begin function
-        | { fp_rx_annotation = Some Param_rx_if_impl ty; _ }, arg_ty ->
+        | { fp_rx_annotation = Some Param_rx_if_impl ty; fp_type; _ }, arg_ty ->
+          let ty =
+            if Typing_utils.is_option env fp_type
+            then fst ty, Toption ty
+            else ty
+          in
           check_only_rx_if_impl env ~is_receiver:false ~is_self:false pos reason arg_ty ty
         (* | { fp_rx_condition = Some Param_rxfunc; fp_type; _ }, arg_ty ->
           check_only_rx_if_rx_func env pos reason caller_reactivity arg_ty fp_type *)

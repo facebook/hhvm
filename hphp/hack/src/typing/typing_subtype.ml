@@ -62,21 +62,26 @@ module ConditionTypes = struct
     (* if condition type is generic - we cannot specify type argument in attribute.
        For cases when we check if containing type is a subtype of condition type
        if condition type is generic instantiate it with TAny's *)
-    let ty =
-      match try_get_class_for_condition_type env ty with
-      | None -> ty
-      | Some (_, cls) when Cls.tparams cls = [] -> ty
-      | Some (((p, _) as sid), cls) ->
-      let params =
-        List.map (Cls.tparams cls)
-          ~f:(fun { tp_name = (p,x); _ } -> Reason.Rwitness p, Tgeneric x) in
-      let subst =
-        Decl_instantiate.make_subst (Cls.tparams cls) [] in
-      let ty = Reason.Rwitness p, (Tapply (sid, params)) in
-      Decl_instantiate.instantiate subst ty in
-    let ety_env = Phase.env_with_self env in
-    let _, t = Phase.localize ~ety_env env ty in
-    t
+    let do_localize ty =
+      let ty =
+        match try_get_class_for_condition_type env ty with
+        | None -> ty
+        | Some (_, cls) when Cls.tparams cls = [] -> ty
+        | Some (((p, _) as sid), cls) ->
+        let params =
+          List.map (Cls.tparams cls)
+            ~f:(fun { tp_name = (p,x); _ } -> Reason.Rwitness p, Tgeneric x) in
+        let subst =
+          Decl_instantiate.make_subst (Cls.tparams cls) [] in
+        let ty = Reason.Rwitness p, (Tapply (sid, params)) in
+        Decl_instantiate.instantiate subst ty in
+      let ety_env = Phase.env_with_self env in
+      let _, t = Phase.localize ~ety_env env ty in
+      t
+    in
+    match ty with
+    | r, Toption ty -> r, Toption (do_localize ty)
+    | ty -> do_localize ty
 end
 
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications

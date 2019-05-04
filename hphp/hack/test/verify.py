@@ -149,7 +149,7 @@ def run_batch_tests(test_cases: List[TestCase],
         test_dir = os.path.dirname(first_test.file_path)
         flags = get_flags(test_dir)
         test_flags = get_test_flags(first_test.file_path)
-        cmd = [program, "--batch-files"]
+        cmd = [program, "--batch-files", "--out-extension", out_extension]
         cmd += flags + test_flags
         cmd += [os.path.basename(case.file_path) for case in test_cases]
         if verbose:

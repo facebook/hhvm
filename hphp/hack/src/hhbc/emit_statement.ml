@@ -169,7 +169,11 @@ and emit_stmt env (pos, stmt) =
   | A.Expr (ann, A.Await e) ->
     begin match try_inline_genva_call env e GI_ignore_result with
     | Some r -> r
-    | None -> emit_awaitall_single_no_assign env (fst ann) e
+    | None ->
+      gather [
+        emit_await env (fst ann) e;
+        instr_popc;
+      ]
     end
   | A.Expr
     (_, A.Binop ((Ast.Eq None), ((_, A.List l) as e1), ((await_pos, _), A.Await e_await))) ->
@@ -193,7 +197,7 @@ and emit_stmt env (pos, stmt) =
       gather [ awaited_instrs; instr_popc ]
     end
   | A.Expr (_, A.Binop (Ast.Eq None, e_lhs, ((await_pos, _), A.Await e_await))) ->
-    emit_awaitall_single env await_pos e_lhs e_await
+    emit_await_assignment env await_pos e_lhs e_await
   | A.Expr (_, A.Yield_from e) ->
     gather [
       emit_yield_from_delegates env pos e;
@@ -325,30 +329,14 @@ and emit_if env pos condition consequence alternative =
       instr_label done_label;
     ]
 
-and emit_awaitall env pos el b =
-  Scope.with_unnamed_locals @@ fun () ->
-    let el = List.map el ~f:(fun (lvar, e) ->
-      let tmp = match lvar with
-      | None -> Local.get_unnamed_local ()
-      | Some (_, str) -> Local.init_unnamed_local_for_tempname (Local_id.get_name str) in
-      tmp, e
-    ) in
-
-    let before, inner = match el with
-    | [] ->
-      empty, empty
-    | (lvar, e) :: [] ->
-      (emit_awaitall_single_with_unnamed_local env pos lvar e), empty
-    | _ ->
-      emit_awaitall_ env pos el in
-    let inner = gather [ inner; emit_stmts env b ] in
-    let after = gather @@ List.map el ~f:(fun (l, _) -> instr_unsetl l) in
-    before, inner, after
-
-and emit_awaitall_single env pos lval e =
+and emit_await_assignment env pos lval e =
   match snd lval with
   | A.Lvar id when not (is_local_this env (snd id)) ->
-    emit_awaitall_single_with_unnamed_local env pos (get_local env (pos, Local_id.get_name (snd id))) e
+    gather [
+      emit_await env pos e;
+      emit_pos pos;
+      instr_popl (get_local env (pos, Local_id.get_name (snd id)))
+    ]
   | _ ->
     let awaited_instrs = emit_await env pos e in
     Scope.with_unnamed_local @@ fun temp ->
@@ -362,29 +350,43 @@ and emit_awaitall_single env pos lval e =
     (* after *)
     gather [ rhs; setop; instr_popc ]
 
-and emit_awaitall_single_with_unnamed_local env pos local e =
-  gather [
-    emit_await env pos e;
-    emit_pos pos;
-    instr_popl local
-  ]
+and emit_awaitall env pos el b =
+  match el with
+  | [] ->
+    empty
+  | (lvar, e) :: [] ->
+    emit_awaitall_single env pos lvar e b
+  | _ ->
+    emit_awaitall_multi env el b
 
-and emit_awaitall_single_no_assign env pos e =
-  gather [
-    emit_await env pos e;
-    instr_popc;
-  ]
+and emit_awaitall_single env pos lval e b =
+  Scope.with_unnamed_locals @@ fun () ->
+  let load_arg = emit_await env pos e in
+  let load, unset = match lval with
+  | Some (_, str) ->
+    let l = Local.init_unnamed_local_for_tempname (Local_id.get_name str) in
+    instr_popl l, instr_unsetl l
+  | None ->
+    instr_popc, empty in
+  gather [ load_arg; load ], (* before *)
+  emit_stmts env b,          (* inner *)
+  unset                      (* after *)
 
-and emit_awaitall_ env _pos el =
+and emit_awaitall_multi env el b =
+  Scope.with_unnamed_locals @@ fun () ->
   let load_args = gather @@ List.map el
     ~f:(fun (_, arg) -> emit_expr env arg) in
-  let tmp_locals = List.map el ~f:(fun (local, _) -> local) in
-  let init_locals = gather @@ List.rev_map tmp_locals ~f:instr_popl in
+  let locals = List.map el ~f:(fun (lvar, _) ->
+    match lvar with
+    | None -> Local.get_unnamed_local ()
+    | Some (_, str) -> Local.init_unnamed_local_for_tempname (Local_id.get_name str)
+  ) in
+  let init_locals = gather @@ List.rev_map locals ~f:instr_popl in
   let await_all = gather [
-    instr_awaitall_list tmp_locals;
+    instr_awaitall_list locals;
     instr_popc
   ] in
-  let unpack = gather @@ List.map tmp_locals ~f:begin fun l ->
+  let unpack = gather @@ List.map locals ~f:(fun l ->
     let label_done = Label.next_regular () in
     gather [
       instr_pushl l;
@@ -395,9 +397,12 @@ and emit_awaitall_ env _pos el =
       instr_label label_done;
       instr_popl l;
     ]
-  end in
-  gather [ load_args; init_locals ], (* before *)
-  gather [ await_all; unpack ]       (* inner *)
+  ) in
+  let block = emit_stmts env b in
+  let unset_locals = gather @@ List.map locals ~f:instr_unsetl in
+  gather [ load_args; init_locals ],    (* before *)
+  gather [ await_all; unpack; block ], (* inner *)
+  unset_locals                         (* after *)
 
 and emit_while env e b =
   let break_label = Label.next_regular () in

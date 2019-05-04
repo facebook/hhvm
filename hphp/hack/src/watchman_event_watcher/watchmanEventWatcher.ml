@@ -176,7 +176,6 @@ let process_changes changes env =
     end);
     { env with update_state = Entering; }
   | Watchman_pushed (State_enter (name, _json)) when name = "hg.transaction" ->
-    Hh_logger.log "State_enter hg.transaction";
     { env with transaction_state = Entering; }
   | Watchman_pushed (State_enter (name, _json))  ->
     Hh_logger.log "Ignoring State_enter %s" name;
@@ -192,7 +191,6 @@ let process_changes changes env =
     let () = notify_waiting_clients env in
     env
   | Watchman_pushed (State_leave (name, _json)) when name = "hg.transaction" ->
-    Hh_logger.log "State_leave hg.transaction";
     { env with transaction_state = Left; }
   | Watchman_pushed (State_leave (name, _json))  ->
     Hh_logger.log "Ignoring State_leave %s" name;

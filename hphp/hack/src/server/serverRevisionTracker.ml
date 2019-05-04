@@ -60,10 +60,8 @@ let add_query ~hg_rev root =
 let on_state_enter state_name =
   match state_name with
   | "hg.update" ->
-    Hh_logger.log "ServerRevisionTracker: entering hg.update";
     is_in_hg_update_state := true;
   | "hg.transaction" ->
-    Hh_logger.log "ServerRevisionTracker: entering hg.transaction";
     is_in_hg_transaction_state := true;
   | _ -> ()
 
@@ -80,7 +78,6 @@ let on_state_leave root state_name state_metadata =
         | _ -> add_query ~hg_rev root
       end
   | "hg.transaction" ->
-    Hh_logger.log "ServerRevisionTracker: leaving hg.transaction";
     is_in_hg_transaction_state := false
   | _ -> ()
 

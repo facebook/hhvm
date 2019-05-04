@@ -614,12 +614,10 @@ module Revision_tracker = struct
     | Watchman.Watchman_pushed (Watchman.State_enter (state, _))
         when state = "hg.transaction" ->
         env.is_in_hg_transaction_state := true;
-        Hh_logger.log "State_enter: hg.transaction";
         None
     | Watchman.Watchman_pushed (Watchman.State_leave (state, _))
         when state = "hg.transaction" ->
         env.is_in_hg_transaction_state := false;
-        Hh_logger.log "State_leave: hg.transaction";
         None
     | Watchman.Watchman_pushed (Watchman.Files_changed _)
     | Watchman.Watchman_pushed (Watchman.State_enter _)

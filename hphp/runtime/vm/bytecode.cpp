@@ -4921,7 +4921,6 @@ void fPushNullObjMethod(int numArgs) {
   ar->trashThis();
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
-  ar->setDynamicCall();
 }
 
 static void raise_resolve_non_object(const char* methodName,

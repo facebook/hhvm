@@ -36,6 +36,8 @@ function test() {
   $x = 'SplFixedArray'; new $x();
 
   $x = 'array_map'; $x($a ==> $a, []);
+
+  $x = null; $x?->foo();
 }
 
 <<__EntryPoint, __DynamicallyCallable>>

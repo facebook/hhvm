@@ -981,7 +981,7 @@ void implFPushObjMethodD(IRGS& env,
       cns(env, TNullptr),
       numParams,
       nullptr,
-      true,
+      false,
       tsList);
     return;
   }

@@ -4834,7 +4834,6 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       ar->trashThis();
     }
 
-    ar->setDynamicCall();
     return;
   }
 

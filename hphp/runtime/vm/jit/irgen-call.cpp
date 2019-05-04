@@ -604,7 +604,7 @@ void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
     cls,
     numParams,
     nullptr,
-    true,
+    false,
     nullptr
   );
 }

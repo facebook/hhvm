@@ -582,6 +582,9 @@ struct CollectedInfo {
      */
     Base base{};
 
+    bool noThrow{false};
+    bool extraPop{false};
+
     /*
      * Chains of member operations on array elements will affect the type of
      * something further back in the member instruction. This vector tracks the

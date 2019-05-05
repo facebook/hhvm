@@ -97,7 +97,6 @@ bool poppable(Op op) {
 }
 
 void interpStep(ISS& env, const Bytecode& bc);
-void rewind(ISS& env, int n);
 
 void record(ISS& env, const Bytecode& bc) {
   if (bc.srcLoc != env.srcLoc) {
@@ -308,20 +307,6 @@ void insert_after_slot(ISS& env, int slot,
          unsplit<std::string>(", "));
 }
 
-const Bytecode* last_op(ISS& env, int idx = 0) {
-  if (!will_reduce(env)) return nullptr;
-
-  if (env.replacedBcs.size() > idx) {
-    return &env.replacedBcs[env.replacedBcs.size() - idx - 1];
-  }
-
-  idx -= env.replacedBcs.size();
-  if (env.unchangedBcs > idx) {
-    return &env.blk.hhbcs[env.unchangedBcs - idx - 1];
-  }
-  return nullptr;
-}
-
 Bytecode& mutate_last_op(ISS& env) {
   assertx(will_reduce(env));
 
@@ -353,6 +338,24 @@ void replace_last_op(ISS& env, Bytecode&& bc) {
   ITRACE(2, "(replace: {}->{}\n",
          show(env.ctx.func, last), show(env.ctx.func, bc));
   last = bc_with_loc(last.srcLoc, bc);
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+const Bytecode* last_op(ISS& env, int idx /* = 0 */) {
+  if (!will_reduce(env)) return nullptr;
+
+  if (env.replacedBcs.size() > idx) {
+    return &env.replacedBcs[env.replacedBcs.size() - idx - 1];
+  }
+
+  idx -= env.replacedBcs.size();
+  if (env.unchangedBcs > idx) {
+    return &env.blk.hhbcs[env.unchangedBcs - idx - 1];
+  }
+  return nullptr;
 }
 
 /*
@@ -389,10 +392,6 @@ void rewind(ISS& env, int n) {
     rewind(env, env.blk.hhbcs[--env.unchangedBcs]);
   }
 }
-
-}
-
-//////////////////////////////////////////////////////////////////////
 
 void impl_vec(ISS& env, bool reduce, BytecodeVec&& bcs) {
   if (!will_reduce(env)) reduce = false;

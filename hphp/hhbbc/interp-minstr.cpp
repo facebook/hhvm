@@ -26,6 +26,7 @@
 #include "hphp/util/trace.h"
 
 #include "hphp/hhbbc/interp-internal.h"
+#include "hphp/hhbbc/optimize.h"
 #include "hphp/hhbbc/type-ops.h"
 
 namespace HPHP { namespace HHBBC {
@@ -444,6 +445,8 @@ void startBase(ISS& env, Base base) {
   assert(isInitialBaseLoc(base.loc));
   assert(!base.type.subtypeOf(TBottom));
 
+  oldState.noThrow = !env.flags.wasPEI;
+  oldState.extraPop = false;
   oldState.base = std::move(base);
   FTRACE(5, "    startBase: {}\n", show(*env.ctx.func, oldState.base));
 }
@@ -696,7 +699,45 @@ SString mStringKey(const Type& key) {
 }
 
 template<typename Op>
+auto update_mkey(const Op& op) { return false; }
+
+template<typename Op>
+auto update_mkey(Op& op) -> decltype(op.mkey, true) {
+  switch (op.mkey.mcode) {
+    case MEC: case MPC: {
+      op.mkey.idx++;
+      return true;
+    }
+    default:
+      return false;
+  }
+}
+
+template<typename Op>
+auto update_discard(const Op& op) { return false; }
+
+template<typename Op>
+auto update_discard(Op& op) -> decltype(op.arg1, true) {
+  op.arg1++;
+  return true;
+}
+
+/*
+ * Return the type of the key, or reduce op, and return folly::none.
+ * Note that when folly::none is returned, there is nothing further to
+ * do.
+ */
+template<typename Op>
 folly::Optional<Type> key_type_or_fixup(ISS& env, Op op) {
+  if (env.collect.mInstrState.extraPop) {
+    auto const mkey = update_mkey(op);
+    if (update_discard(op) || mkey) {
+      env.collect.mInstrState.extraPop = false;
+      reduce(env, op);
+      env.collect.mInstrState.extraPop = true;
+      return folly::none;
+    }
+  }
   auto fixup = [&] (Type ty, bool isProp) -> folly::Optional<Type> {
     if (auto const val = tv(ty)) {
       if (isStringType(val->m_type)) {
@@ -901,7 +942,10 @@ void miElem(ISS& env, MOpMode mode, Type key, LocalId keyLoc) {
       if (ty->subtypeOf(BBottom)) return unreachable(env);
       moveBase(
         env,
-        Base { std::move(*ty), BaseLoc::Elem, env.collect.mInstrState.base.type },
+        Base {
+          std::move(*ty), BaseLoc::Elem,
+          env.collect.mInstrState.base.type
+        },
         update,
         keyLoc
       );
@@ -1397,6 +1441,7 @@ void in(ISS& env, const bc::BaseC& op) {
   assert(op.arg1 < env.state.stack.size());
   auto ty = topC(env, op.arg1);
   if (ty.subtypeOf(BBottom)) return unreachable(env);
+  nothrow(env);
   startBase(
     env,
     Base {
@@ -1408,14 +1453,13 @@ void in(ISS& env, const bc::BaseC& op) {
       (uint32_t)env.state.stack.size() - op.arg1 - 1
     }
   );
-  nothrow(env);
 }
 
 void in(ISS& env, const bc::BaseH&) {
   auto const ty = thisTypeNonNull(env);
   if (ty.subtypeOf(BBottom)) return unreachable(env);
-  startBase(env, Base{ty, BaseLoc::This});
   nothrow(env);
+  startBase(env, Base{ty, BaseLoc::This});
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1431,6 +1475,39 @@ void in(ISS& env, const bc::Dim& op) {
     miElem(env, op.subop1, *key, keyLoc);
   } else {
     miNewElem(env);
+  }
+  if (env.flags.wasPEI) env.collect.mInstrState.noThrow = false;
+  if (env.collect.mInstrState.noThrow &&
+      (op.subop1 == MOpMode::None || op.subop1 == MOpMode::Warn) &&
+      will_reduce(env) &&
+      is_scalar(env.collect.mInstrState.base.type)) {
+    for (int i = 0; ; i++) {
+      auto const last = last_op(env, i);
+      if (!last) break;
+      if (isMemberBaseOp(last->op)) {
+        auto const base = *last;
+        rewind(env, i + 1);
+        auto const reuseStack =
+          [&] {
+            switch (base.op) {
+              case Op::BaseGC: return base.BaseGC.arg1 == 0;
+              case Op::BaseSC: return base.BaseSC.arg1 == 0;
+              case Op::BaseC:  return base.BaseC.arg1 == 0;
+              default: return false;
+            }
+          }();
+        assertx(!env.collect.mInstrState.extraPop || reuseStack);
+        auto const extraPop = !reuseStack || env.collect.mInstrState.extraPop;
+        env.collect.mInstrState.clear();
+        if (reuseStack) reduce(env, bc::PopC {});
+        auto const v = tv(env.collect.mInstrState.base.type);
+        assertx(v);
+        reduce(env, gen_constant(*v), bc::BaseC { 0, op.subop1 });
+        env.collect.mInstrState.extraPop = extraPop;
+        return;
+      }
+      if (!isMemberDimOp(last->op)) break;
+    }
   }
 }
 
@@ -1487,9 +1564,27 @@ void in(ISS& env, const bc::QueryM& op) {
                         });
         break;
     }
+    if (!env.flags.wasPEI &&
+        env.collect.mInstrState.noThrow &&
+        is_scalar(topC(env))) {
+      for (int i = 0; ; i++) {
+        auto const last = last_op(env, i);
+        if (!last) break;
+        if (isMemberBaseOp(last->op)) {
+          auto const v = tv(topC(env));
+          rewind(env, op);
+          rewind(env, i + 1);
+          env.collect.mInstrState.clear();
+          BytecodeVec bcs{nDiscard, bc::PopC{}};
+          bcs.push_back(gen_constant(*v));
+          return reduce(env, std::move(bcs));
+        }
+        if (!isMemberDimOp(last->op)) break;
+      }
+    }
   } else {
     // QueryMNewElem will always throw without doing any work.
-    discard(env, op.arg1);
+    discard(env, nDiscard);
     push(env, TInitCell);
   }
 

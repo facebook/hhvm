@@ -1294,18 +1294,24 @@ void implAdd(IRGS& env, Op op) {
 
 template<class PreDecRef>
 void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
-  auto const t1 = c1->type();
-  auto const t2 = c2->type();
+  auto cast =
+    [&] (SSATmp* s) {
+      if (s->isA(TStr)) return s;
+      auto const ret = gen(env, ConvCellToStr, s);
+      decRef(env, s);
+      return ret;
+    };
 
   /*
    * We have some special translations for common combinations that avoid extra
    * conversion calls.
    */
-  auto const str = [&] () -> SSATmp* {
-    if (t2 <= TInt && t1 <= TStr) return gen(env, ConcatIntStr, c2, c1);
-    if (t2 <= TStr && t1 <= TInt) return gen(env, ConcatStrInt, c2, c1);
-    return nullptr;
-  }();
+  auto const str =
+    [&] () -> SSATmp* {
+      if (c1->isA(TInt)) return gen(env, ConcatStrInt, cast(c2), c1);
+      if (c2->isA(TInt)) return gen(env, ConcatIntStr, c2, c1 = cast(c1));
+      return nullptr;
+    }();
 
   if (str) {
     preDecRef(str);
@@ -1319,21 +1325,18 @@ void implConcat(IRGS& env, SSATmp* c1, SSATmp* c2, PreDecRef preDecRef) {
    * Generic translation: convert both to strings, and then concatenate them.
    *
    * NB: the order we convert to strings is observable (because of __toString
-   * methods), and the order we run DecRefs of the input cells is also
-   * observable.
+   * methods).
    *
    * We don't want to convert to strings if either was already a string.  Note
    * that for the c2 string, failing to do this could change big-O program
    * behavior if refcount opts were off, since we'd COW strings that we
    * shouldn't (a ConvCellToStr of a Str will simplify into an IncRef).
    */
-  auto const s2 = t2 <= TStr ? c2 : gen(env, ConvCellToStr, c2);
-  auto const s1 = t1 <= TStr ? c1 : gen(env, ConvCellToStr, c1);
+  auto const s2 = cast(c2);
+  auto const s1 = cast(c1);
   auto const r  = gen(env, ConcatStrStr, s2, s1);  // consumes s2 reference
   preDecRef(r);
   decRef(env, s1);
-  if (s2 != c2) decRef(env, c2);
-  if (s1 != c1) decRef(env, c1);
 }
 
 //////////////////////////////////////////////////////////////////////

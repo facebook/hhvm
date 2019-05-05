@@ -619,7 +619,7 @@ std::string show(const php::Func& f, const Base& b) {
   not_reached();
 }
 
-std::string show(const php::Func& f, const State::MInstrState& s) {
+std::string show(const php::Func& f, const CollectedInfo::MInstrState& s) {
   if (s.arrayChain.empty()) return show(f, s.base);
   return folly::sformat(
     "{} ({})",
@@ -627,7 +627,7 @@ std::string show(const php::Func& f, const State::MInstrState& s) {
     [&]{
       using namespace folly::gen;
       return from(s.arrayChain)
-        | map([&] (const State::MInstrState::ArrayChainEnt& e) {
+        | map([&] (const CollectedInfo::MInstrState::ArrayChainEnt& e) {
             return folly::sformat("<{},{}>", show(e.key), show(e.base));
           })
         | unsplit<std::string>(" -> ");
@@ -686,8 +686,8 @@ std::string state_string(const php::Func& f, const State& st,
     ret += "\n";
   }
 
-  if (st.mInstrState.base.loc != BaseLoc::None) {
-    folly::format(&ret, "mInstrState   :: {}\n", show(f, st.mInstrState));
+  if (collect.mInstrState.base.loc != BaseLoc::None) {
+    folly::format(&ret, "mInstrState   :: {}\n", show(f, collect.mInstrState));
   }
 
   return ret;

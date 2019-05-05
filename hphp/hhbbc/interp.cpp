@@ -5561,12 +5561,14 @@ BlockId speculate(Interp& interp) {
 
     interpOne(env, bc);
     if (failed) {
+      env.collect.mInstrState.clear();
       FTRACE(3, "  Bailing from speculate because propagate was called\n");
       return NoBlockId;
     }
 
     auto const& flags = env.flags;
     if (!flags.effectFree) {
+      env.collect.mInstrState.clear();
       FTRACE(3, "  Bailing from speculate because not effect free\n");
       return NoBlockId;
     }
@@ -5727,6 +5729,7 @@ RunFlags run(Interp& interp, const State& in, PropagateFn propagate) {
     if (interp.collect.effectFree && !flags.effectFree) {
       interp.collect.effectFree = false;
       if (any(interp.collect.opts & CollectionOpts::EffectFreeOnly)) {
+        env.collect.mInstrState.clear();
         FTRACE(2, "  Bailing because not effect free\n");
         return finish(NoBlockId);
       }
@@ -5788,6 +5791,9 @@ StepFlags step(Interp& interp, const Bytecode& op) {
   ISS env { interp, noop };
   env.analyzeDepth++;
   dispatch(env, op);
+  if (env.state.unreachable) {
+    env.collect.mInstrState.clear();
+  }
   assertx(env.trackedElems.empty());
   return env.flags;
 }
@@ -5812,6 +5818,8 @@ void default_dispatch(ISS& env, const Bytecode& op) {
   dispatch(env, op);
   if (instrFlags(op.op) & TF && env.flags.jmpDest == NoBlockId) {
     unreachable(env);
+  } else if (env.state.unreachable) {
+    env.collect.mInstrState.clear();
   }
 }
 

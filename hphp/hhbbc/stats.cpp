@@ -443,6 +443,7 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
         ISS env { interp, noop };
         StatsSS sss { env, stats };
         dispatch(sss, bc);
+        if (state.unreachable) break;
       }
     }
   }

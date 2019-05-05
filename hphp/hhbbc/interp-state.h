@@ -404,29 +404,6 @@ struct StateBase {
   CompactVector<Type> clsRefSlots;
   CompactVector<ActRec> fpiStack;
 
-  struct MInstrState {
-    /*
-     * The current member base. Updated as we move through bytecodes
-     * representing the operation.
-     */
-    Base base{};
-
-    /*
-     * Chains of member operations on array elements will affect the type of
-     * something further back in the member instruction. This vector tracks the
-     * base,key type pair that was used at each stage. See
-     * interp-minstr.cpp:resolveArrayChain().
-     */
-    struct ArrayChainEnt {
-      Type base;
-      Type key;
-      LocalId keyLoc;
-    };
-    using ArrayChain = CompactVector<ArrayChainEnt>;
-    ArrayChain arrayChain;
-  };
-  MInstrState mInstrState;
-
   /*
    * Mapping of a local to other locals which are known to have
    * equivalent values. This equivalence ignores Uninit; users should
@@ -597,6 +574,34 @@ struct CollectedInfo {
   std::bitset<64> usedParams;
 
   PublicSPropMutations publicSPropMutations;
+
+  struct MInstrState {
+    /*
+     * The current member base. Updated as we move through bytecodes
+     * representing the operation.
+     */
+    Base base{};
+
+    /*
+     * Chains of member operations on array elements will affect the type of
+     * something further back in the member instruction. This vector tracks the
+     * base,key type pair that was used at each stage. See
+     * interp-minstr.cpp:resolveArrayChain().
+     */
+    struct ArrayChainEnt {
+      Type base;
+      Type key;
+      LocalId keyLoc;
+    };
+    using ArrayChain = CompactVector<ArrayChainEnt>;
+    ArrayChain arrayChain;
+
+    void clear() {
+      base.loc = BaseLoc::None;
+      arrayChain.clear();
+    }
+  };
+  MInstrState mInstrState;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -623,7 +628,7 @@ void widen_props(PropState&);
  */
 std::string show(const ActRec& a);
 std::string show(const php::Func&, const Base& b);
-std::string show(const php::Func&, const State::MInstrState&);
+std::string show(const php::Func&, const CollectedInfo::MInstrState&);
 std::string show(const php::Func&, const Iter&);
 std::string property_state_string(const PropertiesInfo&);
 std::string state_string(const php::Func&, const State&, const CollectedInfo&);

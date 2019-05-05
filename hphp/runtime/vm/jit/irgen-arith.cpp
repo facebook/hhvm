@@ -1361,17 +1361,19 @@ void emitConcatN(IRGS& env, uint32_t n) {
 
   if (n == 3) {
     push(env, gen(env, ConcatStr3, s3, s2, s1));
-    decRef(env, s2);
-    decRef(env, s1);
-    return;
+  } else {
+    always_assert(n == 4);
+
+    push(env, gen(env, ConcatStr4, s4, s3, s2, s1));
+    decRef(env, s3);
   }
-
-  always_assert(n == 4);
-
-  push(env, gen(env, ConcatStr4, s4, s3, s2, s1));
-  decRef(env, s3);
   decRef(env, s2);
   decRef(env, s1);
+
+  if (s1 != t1) decRef(env, t1);
+  if (s2 != t2) decRef(env, t2);
+  if (s3 != t3) decRef(env, t3);
+  if (s4 != t4) decRef(env, t4);
 }
 
 void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {

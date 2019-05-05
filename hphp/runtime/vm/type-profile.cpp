@@ -52,8 +52,7 @@ TRACE_SET_MOD(typeProfile);
  *
  * In cli mode, we only record samples if we're in recording to replay later.
  *
- * In server mode, we exclude warmup document requests from profiling, then
- * record samples for EvalJitProfileInterpRequests standard requests.
+ * In server mode, we exclude warmup document requests from profiling.
  */
 
 RDS_LOCAL_NO_CHECK(TypeProfileLocals, rl_typeProfileLocals)

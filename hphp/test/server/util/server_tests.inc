@@ -131,7 +131,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
   $cmd = "exec env MALLOC_CONF=junk:true TESTID={$serverId} " .
     "SERVERPORT={$serverPort} $hhvm" .
     ' --mode=server' . $serverConfig . $logFileConfig .
-    ' -vEval.JitProfileInterpRequests=0 -vServer.ExitOnBindFail=true' .
+    ' -vServer.ExitOnBindFail=true' .
     ' --instance-id=' . $test_run_id .
     ' -vPageletServer.ThreadCount=5' .
     $portConfig . $srcRootConfig .

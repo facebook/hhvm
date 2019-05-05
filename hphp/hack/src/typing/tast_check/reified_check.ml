@@ -99,12 +99,6 @@ let verify_call_targs env expr_pos decl_pos tparams targs =
     verify_targ_valid env tparam targ
   end |> ignore
 
-let check_no_memoize pos ua tparams =
-  if List.exists ua (fun { ua_name; _ } -> UA.uaMemoize = snd ua_name) &&
-    List.exists tparams (fun { Tast.tp_reified; _ } -> tp_reified <> Erased)
-  then
-    Errors.memoize_reified_generics pos
-
 let handler = object
   inherit Tast_visitor.handler_base
 
@@ -164,12 +158,6 @@ let handler = object
     (* Can't use Attributes.mem here because of a conflict between Nast.user_attributes and Tast.user_attributes *)
     if List.exists tparam.tp_user_attributes (fun { ua_name; _ } -> UA.uaNewable = snd ua_name) then
       verify_has_consistent_bound env tparam
-
-  method! at_fun_def _ { f_name = (pos, _); f_tparams = tparams; f_user_attributes = ua; _ } =
-    check_no_memoize pos ua tparams
-
-  method! at_method_ _ { m_name = (pos, _); m_tparams = tparams; m_user_attributes = ua; _ } =
-    check_no_memoize pos ua tparams
 
   method! at_class_ env { c_name = (pos, name); _ } =
     match Env.get_class env name with

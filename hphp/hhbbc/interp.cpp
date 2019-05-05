@@ -2049,6 +2049,15 @@ void in(ISS& env, const bc::CGetL& op) {
       return reduce(env, bc::BareThis { subop });
     }
   }
+  if (auto const last = last_op(env)) {
+    if (!is_pseudomain(env.ctx.func) && last->op == Op::PopL &&
+        op.loc1 == last->PopL.loc1) {
+      reprocess(env);
+      rewind(env, 1);
+      if (!locCouldBeRef(env, op.loc1)) setLocRaw(env, op.loc1, TCell);
+      return reduce(env, bc::SetL { op.loc1 });
+    }
+  }
   if (!peekLocCouldBeUninit(env, op.loc1)) {
     auto const minLocEquiv = findMinLocEquiv(env, op.loc1, false);
     if (minLocEquiv != NoLocalId) {

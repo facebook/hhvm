@@ -166,7 +166,7 @@ struct Repo::GlobalData {
    * Should we enforce that reffiness annotations are invaraint in overridden
    * methods?
    */
-  bool ReffinessInvariance = false;
+  uint32_t ReffinessInvariance = 0;
 
   /*
    * Should HHBBC do build time verification?

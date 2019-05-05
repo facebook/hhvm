@@ -1750,7 +1750,8 @@ inline void checkRefCompat(const char* kind, const Func* self,
     // When reffiness invariance is disabled we cannot create wrappers for ref
     // functions, as those wrappers would violate our invariance rules for inout
     // functions.
-    assertx(RuntimeOption::EvalReffinessInvariance || !self->isInOutWrapper());
+    assertx(RuntimeOption::EvalReffinessInvariance == 2 ||
+            !self->isInOutWrapper());
     return;
   }
 
@@ -1762,6 +1763,10 @@ inline void checkRefCompat(const char* kind, const Func* self,
   } else {
     if (!self->anyByRef() && !inherit->anyByRef()) return;
   }
+
+  auto const fatal =
+    RuntimeOption::EvalReffinessInvariance == 2 ||
+    (self->isInOutWrapper() || inherit->isInOutWrapper());
 
   auto const sname = self->fullDisplayName()->data();
   auto const iname = inherit->fullDisplayName()->data();
@@ -1779,19 +1784,25 @@ inline void checkRefCompat(const char* kind, const Func* self,
     auto const smode = self->byRef(i);
     auto const imode = inherit->byRef(i);
     if (smode != imode || (smode && !both_wrap)) {
-      if (smode && (!imode || self->isInOutWrapper() || both_wrap)) {
-        auto const sdecl = self->isInOutWrapper() ? "inout " : "'&' ";
-        auto const idecl = i >= inherit->numNonVariadicParams() ? "" : sdecl;
-        raise_error("Parameter %i on function %s was declared %sbut is not "
-                    "declared %son %s function %s", i + 1, sname, sdecl, idecl,
-                    kind, iname);
-      } else {
-        auto const idecl = inherit->isInOutWrapper() ? "inout " : "'&' ";
-        auto const sdecl = i >= self->numNonVariadicParams() ? "" : idecl;
-        raise_error("Parameter %i on function %s was not declared %sbut is "
-                    "declared %son %s function %s", i + 1, sname, sdecl, idecl,
-                    kind, iname);
-      }
+      auto const msg = [&] {
+        if (smode && (!imode || self->isInOutWrapper() || both_wrap)) {
+          auto const sdecl = self->isInOutWrapper() ? "inout " : "'&' ";
+          auto const idecl = i >= inherit->numNonVariadicParams() ? "" : sdecl;
+          return folly::sformat(
+            "Parameter {} on function {} was declared {}but is not "
+            "declared {}on {} function {}", i + 1, sname, sdecl, idecl,
+            kind, iname);
+        } else {
+          auto const idecl = inherit->isInOutWrapper() ? "inout " : "'&' ";
+          auto const sdecl = i >= self->numNonVariadicParams() ? "" : idecl;
+          return folly::sformat(
+            "Parameter {} on function {} was not declared {}but is "
+            "declared {}on {} function {}", i + 1, sname, sdecl, idecl,
+            kind, iname);
+        }
+      }();
+      if (fatal) raise_error(msg);
+      else       raise_warning(msg);
     }
   }
 }

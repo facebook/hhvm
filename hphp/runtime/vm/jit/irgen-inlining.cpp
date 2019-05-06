@@ -324,7 +324,7 @@ bool beginInlining(IRGS& env,
   gen(
     env,
     BeginInlining,
-    BeginInliningData{calleeAROff, target, cost},
+    BeginInliningData{calleeAROff - 1, target, cost},
     sp(env)
   );
 

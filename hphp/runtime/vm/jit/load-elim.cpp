@@ -628,6 +628,10 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
 
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
+    [&] (InlineEnterEffects m) { store(env, m.inlFrame, nullptr);
+                                 store(env, m.inlStack, nullptr); },
+    [&] (InlineExitEffects m) { store(env, m.inlFrame, nullptr);
+                                store(env, m.inlMeta, nullptr); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
     [&] (CallEffects x)     { flags = handle_call_effects(env, inst, x); }
   );

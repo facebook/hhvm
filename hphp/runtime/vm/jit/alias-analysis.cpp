@@ -63,7 +63,13 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (PureSpillFrame x)    { visit(x.stk);
                                     visit(x.ctx);
                                     visit(x.callee); },
-        [&] (ExitEffects x)       { visit(x.live); visit(x.kills); }
+        [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },
+        [&] (InlineEnterEffects x) { visit(x.inlFrame);
+                                     visit(x.inlStack);
+                                     visit(x.actrec); },
+        [&] (InlineExitEffects x) { visit(x.inlFrame);
+                                    visit(x.inlStack);
+                                    visit(x.inlMeta); }
       );
     }
   }

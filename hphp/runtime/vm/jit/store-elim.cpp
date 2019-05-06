@@ -590,6 +590,46 @@ void visit(Local& env, IRInstruction& inst) {
       kill(env, l.kills);
     },
 
+    [&] (InlineEnterEffects l) {
+      load(env, l.inlStack);
+      load(env, l.actrec);
+
+      // This is a lie, but we can't push StLoc instructions from the parent
+      // frame into the callee as the frame pointer has been updated. Ideally
+      // this wouldn't be an issue but the TFramePtr is still stored in a
+      // reserved register.
+      mayStore(env, AFrameAny);
+      mayStore(env, AClsRefSlotAny);
+    },
+
+    [&] (InlineExitEffects l) {
+      // These locations are dead, but it's unsafe to sync stores passed
+      // InlineReturn as they reference the callee safe. Kill sets are
+      // conservative so we must also indicate mayStore. In practice this value
+      // will generally be AMIStateAny | AClsRefSlotAny so this is fine.
+      mayStore(env, l.inlMeta);
+
+      // The same applies to the frame, but we're more likely to end up with
+      // sub-optimal code in the case that the kill-set cannot be expaneded so
+      // below we attempt to iterate the locals in the frame and kill them
+      // individually.
+      //
+      // Even if we're processing an InlineSuspend we've already created the
+      // AFWH and moved the frame to the heap.
+      if (auto const frame = l.inlFrame.is_frame()) {
+        auto const callee = inst.marker().func();
+        for (Id id = 0; id < callee->numLocals(); id++) {
+          if (frame->ids.test(id)) kill(env, AFrame { frame->fp, id });
+        }
+      } else {
+        mayStore(env, l.inlFrame);
+        kill(env, l.inlFrame);
+      }
+
+      kill(env, l.inlStack);
+      kill(env, l.inlMeta);
+    },
+
     /*
      * Call instructions can potentially read any heap location, but we can be
      * more precise about everything else.

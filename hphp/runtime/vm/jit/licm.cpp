@@ -350,6 +350,12 @@ void analyze_block(LoopEnv& env, Block* blk) {
 
       [&] (IrrelevantEffects) {},
 
+      [&] (InlineEnterEffects x) { kill(x.inlFrame);
+                                   kill(x.inlStack); },
+
+      [&] (InlineExitEffects x) { kill(x.inlFrame);
+                                  kill(x.inlMeta); },
+
       [&] (ReturnEffects)     { assertx(!"tried to return in a loop"); },
       [&] (ExitEffects)       { assertx(!"tried to exit in a loop"); }
     );
@@ -451,6 +457,8 @@ bool try_invariant_memory(LoopEnv& env,
     [&] (IrrelevantEffects) { return false; },
     [&] (ReturnEffects)     { return false; },
     [&] (ExitEffects)       { return false; },
+    [&] (InlineEnterEffects){ return false; },
+    [&] (InlineExitEffects) { return false; },
 
     [&] (GeneralEffects mem) {
       switch (inst.op()) {

@@ -1100,6 +1100,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
               },
               [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
               [&](ExitEffects) {}, [&](IrrelevantEffects) {},
+              [&](InlineEnterEffects) {}, [&](InlineExitEffects) {},
               [&](UnknownEffects) { pessimize_mbase(); });
 }
 

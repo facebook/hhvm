@@ -282,6 +282,21 @@ AliasClass actrec_func(SSATmp* base, IRSPRelOffset offset) {
   return AStack { base, offset + int32_t{kActRecFuncCellOff}, 1 };
 }
 
+InlineExitEffects inline_exit_effects(SSATmp* fp) {
+  fp = canonical(fp);
+  auto fpInst = fp->inst();
+  if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
+  assertx(fpInst && fpInst->is(DefInlineFP));
+  auto const func = fpInst->extra<DefInlineFP>()->target;
+  auto const frame = [&] () -> AliasClass {
+    if (!func->numLocals()) return AEmpty;
+    return AFrame {fp, AliasIdSet::IdRange(0, func->numLocals())};
+  }();
+  auto const stack = stack_below(fp, FPRelOffset{2});
+  AliasClass clsref = func->numClsRefSlots() ? AClsRefSlotAny : AEmpty;
+  return InlineExitEffects{ stack, frame, clsref | AMIStateAny };
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Determine an AliasClass representing any locals in the instruction's frame
@@ -713,25 +728,24 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * Right now it's just here because we need to think about and test it before
    * removing that set.
    */
-  case DefInlineFP:
-    return may_load_store(
-      /*
-       * We need to mark DefInlineFP as both loading and storing the entire
-       * stack below its frame because it may have been pushed. If DefInlineFP
-       * is not pushed these cells were marked as both stored and killed by
-       * BeginInlining so now actual stores should be aliased.
-       *
-       * Importantly, if we do sink DefInlineFP stack cells from above may
-       * alias locals within DefInlineFP, this confuses alias analysis, these
-       * stores must not be sunk past DefInlineFP where they could clobber a
-       * local.
-       */
-      AFrameAny | AClsRefSlotAny |
-        stack_below(inst.dst(), FPRelOffset{0}) |
-        inline_fp_frame(&inst),
-      AFrameAny | AClsRefSlotAny |
-        stack_below(inst.dst(), FPRelOffset{0})
-    );
+  case DefInlineFP: {
+    auto const func = inst.extra<DefInlineFP>()->target;
+    auto const nslots = func->numSlotsInFrame() - func->numLocals();
+    AliasClass stack = func->numLocals()
+      ? AStack{inst.dst(), FPRelOffset{-nslots}, func->numLocals()}
+      : AEmpty;
+    AliasClass frame = func->numLocals()
+      ? AFrame{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
+      : AEmpty;
+    AliasClass clsrefs = func->numClsRefSlots() ? AClsRefSlotAny : AEmpty;
+    /*
+     * Notice that the stack positions and frame locals described here are
+     * exactly the set of alias locations that are about to be overlapping
+     * inside the inlined frame. Likewise, ClsRefSlots from the caller and the
+     * callee are about to be jumbled.
+     */
+    return InlineEnterEffects{ stack, frame | clsrefs, inline_fp_frame(&inst) };
+  }
 
   /*
    * BeginInlining is similar to DefInlineFP, however, it must always be the
@@ -749,16 +763,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto inlineStackOff = inst.extra<BeginInlining>()->offset;
     return may_load_store_kill(
       AEmpty,
+      AEmpty,
       /*
        * This prevents stack slots from the caller from being sunk into the
        * callee. Note that some of these stack slots overlap with the frame
        * locals of the callee-- those slots are inacessible in the inlined
        * call as frame and stack locations may not alias.
-       */
-      stack_below(inst.src(0), inlineStackOff),
-      /*
-       * While not required for correctness adding these slots to the kill set
-       * will hopefully avoid some extra stores.
        */
       stack_below(inst.src(0), inlineStackOff)
     );
@@ -766,9 +776,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case InlineSuspend:
   case InlineReturn: {
-    auto const callee = stack_below(inst.src(0), FPRelOffset{2}) |
-                        AMIStateAny | AFrameAny | AClsRefSlotAny;
-    return may_load_store_kill(AEmpty, callee, callee);
+    return inline_exit_effects(inst.src(0));
   }
 
   case InlineReturnNoFrame: {
@@ -776,7 +784,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.extra<InlineReturnNoFrame>()->offset,
       std::numeric_limits<int32_t>::max()
     }) | AMIStateAny;
-    return may_load_store_kill(AEmpty, callee, callee);
+    return may_load_store_kill(AEmpty, AEmpty, callee);
   }
 
   case SyncReturnBC: {
@@ -926,12 +934,29 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateGen:
   case CreateAGen:
   case CreateAFWH:
-  case CreateAFWHNoVV:
+  case CreateAFWHNoVV: {
+    auto fpInst = inst.src(0)->inst();
+    if (fpInst->is(DefLabel)) fpInst = resolveFpDefLabel(inst.src(0));
+    auto const frame = [&] () -> AliasClass {
+      if (fpInst->is(DefFP)) return AFrameAny;
+      assertx(fpInst->is(DefInlineFP));
+      auto const nlocals = fpInst->extra<DefInlineFP>()->target->numLocals();
+      return nlocals
+        ? AFrame { inst.src(0), AliasIdSet::IdRange(0, nlocals)}
+        : AEmpty;
+    }();
+    auto const clsrefs = [&] () -> AliasClass {
+      if (fpInst->is(DefFP)) return AClsRefSlotAny;
+      assertx(fpInst->is(DefInlineFP));
+      auto const nrefs = fpInst->extra<DefInlineFP>()->target->numClsRefSlots();
+      return nrefs ? AClsRefSlotAny : AEmpty;
+    }();
     return may_load_store_move(
-      AFrameAny | AClsRefSlotAny,
+      frame | clsrefs,
       AHeapAny,
-      AFrameAny | AClsRefSlotAny
+      frame | clsrefs
     );
+  }
 
   // AGWH construction updates the AsyncGenerator object.
   case CreateAGWH:
@@ -2326,6 +2351,12 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
                                check(x.locals);
                                check(x.callee);
                                always_assert(x.callee <= x.stack); },
+    [&] (InlineEnterEffects x){ check(x.inlStack);
+                                check(x.inlFrame);
+                                check(x.actrec); },
+    [&] (InlineExitEffects x){ check(x.inlStack);
+                               check(x.inlFrame);
+                               check(x.inlMeta); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -2375,6 +2406,8 @@ MemEffects memory_effects(const IRInstruction& inst) {
       [&] (PureStore)          { return fail(); },
       [&] (PureSpillFrame)     { return fail(); },
       [&] (ExitEffects)        { return fail(); },
+      [&] (InlineExitEffects)  { return fail(); },
+      [&] (InlineEnterEffects) { return fail(); },
       [&] (IrrelevantEffects)  { return fail(); },
       [&] (ReturnEffects)      { return fail(); }
     );
@@ -2417,6 +2450,20 @@ MemEffects canonicalize(MemEffects me) {
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
     },
+    [&] (InlineEnterEffects x) -> R {
+      return InlineEnterEffects {
+        canonicalize(x.inlStack),
+        canonicalize(x.inlFrame),
+        canonicalize(x.actrec),
+      };
+    },
+    [&] (InlineExitEffects x) -> R {
+      return InlineExitEffects {
+        canonicalize(x.inlStack),
+        canonicalize(x.inlFrame),
+        canonicalize(x.inlMeta)
+      };
+    },
     [&] (CallEffects x) -> R {
       return CallEffects {
         canonicalize(x.kills),
@@ -2449,6 +2496,20 @@ std::string show(MemEffects effects) {
     },
     [&] (ExitEffects x) {
       return sformat("exit({} ; {})", show(x.live), show(x.kills));
+    },
+    [&] (InlineEnterEffects x) {
+      return sformat("inline_enter({} ; {} ; {})",
+        show(x.inlStack),
+        show(x.inlFrame),
+        show(x.actrec)
+      );
+    },
+    [&] (InlineExitEffects x) {
+      return sformat("inline_exit({} ; {} ; {})",
+        show(x.inlStack),
+        show(x.inlFrame),
+        show(x.inlMeta)
+      );
     },
     [&] (CallEffects x) {
       return sformat("call({} ; {} ; {} ; {})",

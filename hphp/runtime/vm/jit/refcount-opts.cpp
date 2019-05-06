@@ -976,6 +976,7 @@ void mrinfo_step_impl(Env& env,
     [&](ReturnEffects) {}, [&](GeneralEffects) {},
     [&](UnknownEffects) { kill(ALocBits{}.set()); },
     [&](PureStore x) { do_store(x.dst, x.value); },
+    [&] (InlineEnterEffects) {}, [&] (InlineExitEffects) {},
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1322,13 +1323,13 @@ bool irrelevant_inst(const IRInstruction& inst) {
     [&] (PureStore) { return true; },
     [&] (PureSpillFrame) { return true; },
     [&] (IrrelevantEffects) { return true; },
+    [&] (InlineEnterEffects) { return true; },
+    [&] (InlineExitEffects) { return true; },
 
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
     [&] (GeneralEffects g) {
       if (inst.is(BeginInlining,
-                  DefInlineFP,
-                  InlineReturn,
                   InlineReturnNoFrame,
                   SyncReturnBC
                  )) {
@@ -2090,6 +2091,8 @@ void analyze_mem_effects(Env& env,
   match<void>(
     effects,
     [&] (IrrelevantEffects) {},
+    [&] (InlineEnterEffects) {},
+    [&] (InlineExitEffects) {},
 
     [&] (GeneralEffects x)  {
       if (inst.is(CallBuiltin)) {
@@ -2108,8 +2111,6 @@ void analyze_mem_effects(Env& env,
       // prevent store sinking, but don't actually change any
       // refcounts, so we don't need to reduce lower bounds.
       auto const may_decref = !inst.is(BeginInlining,
-                                       DefInlineFP,
-                                       InlineReturn,
                                        InlineReturnNoFrame,
                                        SyncReturnBC
                                       );
@@ -2539,7 +2540,10 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     // these commonly occur along with type guards
     case LdLoc:
     case LdStk:
+    case BeginInlining:
+    case DefInlineFP:
     case InlineReturn:
+    case InlineSuspend:
     case InlineReturnNoFrame:
     case Nop:        return true;
 

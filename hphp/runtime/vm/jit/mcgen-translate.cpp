@@ -358,7 +358,7 @@ translate(TransArgs args, FPInvOffset spOff,
     env.unit = irGenRegion(*args.region, transContext,
                            env.pconds, env.annotations);
     if (env.unit) {
-      env.vunit = irlower::lowerUnit(*env.unit);
+      env.vunit = irlower::lowerUnit(*env.unit, &env.annotations);
     }
   }
 

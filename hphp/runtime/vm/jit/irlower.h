@@ -47,10 +47,11 @@ enum class SyncOptions {
  * and blocks.
  */
 struct IRLS {
-  explicit IRLS(const IRUnit& unit)
+  explicit IRLS(const IRUnit& unit, Annotations* annotations)
     : unit(unit)
     , labels(unit, Vlabel())
     , locs(unit, Vloc{})
+    , annotations(annotations)
   {}
 
   /*
@@ -76,6 +77,12 @@ struct IRLS {
    * Vlocs for each SSATmp used or defined in a reachable block.
    */
   StateVector<SSATmp,Vloc> locs;
+
+
+  /*
+   * Optional pointer to annotations to dump them if requested.
+   */
+  Annotations* annotations{nullptr};
 };
 
 /*
@@ -87,7 +94,9 @@ Vcost computeIRUnitCost(const IRUnit& unit);
  * Lower the given HHIR unit to a Vunit, then optimize, regalloc, and return
  * the Vunit. Returns nullptr on failure.
  */
-std::unique_ptr<Vunit> lowerUnit(const IRUnit&, CodeKind = CodeKind::Trace,
+std::unique_ptr<Vunit> lowerUnit(const IRUnit&,
+                                 Annotations* = nullptr,
+                                 CodeKind kind = CodeKind::Trace,
                                  bool regAlloc = true) noexcept;
 
 ///////////////////////////////////////////////////////////////////////////////

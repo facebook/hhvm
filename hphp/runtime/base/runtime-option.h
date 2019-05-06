@@ -891,6 +891,7 @@ struct RuntimeOption {
   /* DumpInlDecision 0=none ; 1=refuses ; 2=refuses+accepts */          \
   F(uint32_t, DumpInlDecision,         0)                               \
   F(uint32_t, DumpRegion,              0)                               \
+  F(bool,     DumpCallTargets,         false)                           \
   F(bool, DumpAst,                     false)                           \
   F(bool, DumpTargetProfiles,          false)                           \
   F(bool, MapTgtCacheHuge,             false)                           \

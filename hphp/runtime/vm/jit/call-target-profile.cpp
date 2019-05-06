@@ -154,12 +154,21 @@ const Func* CallTargetProfile::choose(double& probability) const {
 std::string CallTargetProfile::toString() const {
   if (!m_init) return std::string("uninitialized");
   std::ostringstream out;
+  uint64_t total = m_untracked;
   for (auto const& entry : m_entries) {
     if (entry.funcId != InvalidFuncId) {
-      out << folly::format("FuncId {}: {}, ", entry.funcId, entry.count);
+      total += entry.count;
     }
   }
-  out << folly::format("Untracked: {}", m_untracked);
+  for (auto const& entry : m_entries) {
+    if (entry.funcId != InvalidFuncId) {
+      out << folly::format("FuncId {}: {} ({:.1f}%), ",
+                           entry.funcId, entry.count,
+                           total == 0 ? 0 : 100.0 * entry.count / total);
+    }
+  }
+  out << folly::format("Untracked: {} ({:.1f}%)", m_untracked,
+                       total == 0 ? 0 : 100.0 * m_untracked / total);
   return out.str();
 }
 

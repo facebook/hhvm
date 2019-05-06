@@ -43,8 +43,7 @@
     full_fidelity_trivia_kind
     full_fidelity_token_kind
     lexable_token_sig
-    lexable_trivia_sig
-    syntax_sig)
+    lexable_trivia_sig)
   (libraries
     pos
     relative_path)
@@ -68,7 +67,8 @@
     full_fidelity_validated_syntax
     lexable_positioned_token_sig
     little_cache
-    positioned_syntax_sig)
+    positioned_syntax_sig
+    syntax_sig)
   (libraries
     core_kernel
     parser_env

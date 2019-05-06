@@ -20,7 +20,7 @@
     debug
     sof)
   (libraries
-    parser_sigs))
+    parser_syntax))
 
 (library
   (name hackc_parse_delegator)

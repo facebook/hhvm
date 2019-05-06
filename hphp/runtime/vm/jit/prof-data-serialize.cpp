@@ -1313,7 +1313,7 @@ ClsMethDataRef read_clsmeth(ProfDataDeserializer& ser) {
   ITRACE(2, "ClsMeth: {}, {}\n",
     cls ? cls->name() : staticEmptyString(),
     func ? func->fullName() : staticEmptyString());
-  return ClsMethDataRef(cls, func);
+  return ClsMethDataRef::create(cls, func);
 }
 
 std::string serializeProfData(const std::string& filename) {

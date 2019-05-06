@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/type-specialization.h"
 #include "hphp/util/bitset.h"
+#include "hphp/util/low-ptr.h"
 
 #include <folly/Optional.h>
 
@@ -337,6 +338,20 @@ constexpr bool operator>(Mem a, Mem b) {
 /*
  * This list should be in non-decreasing order of specificity.
  */
+#ifdef USE_LOWPTR
+#define UNCCOUNTED_INIT_UNION \
+        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecType|kClsMeth
+#else
+#define UNCCOUNTED_INIT_UNION \
+        kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecType
+#endif
+
+#ifdef USE_LOWPTR
+#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord
+#else
+#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kClsMeth
+#endif
+
 #define IRT_PHP_UNIONS(c)                                               \
   c(Null,                kUninit|kInitNull)                             \
   c(PersistentStr,       kStaticStr|kUncountedStr)                      \
@@ -354,9 +369,9 @@ constexpr bool operator>(Mem a, Mem b) {
   c(ArrLike,             kArr|kShape|kVec|kDict|kKeyset)                \
   c(NullableObj,         kObj|kInitNull|kUninit)                        \
   c(Persistent,          kPersistentStr|kPersistentArrLike)             \
-  c(UncountedInit,       kInitNull|kBool|kInt|kDbl|kPersistent|kFunc|kCls|kRecType) \
+  c(UncountedInit,       UNCCOUNTED_INIT_UNION)                         \
   c(Uncounted,           kUninit|kUncountedInit)                        \
-  c(InitCell,            kUncountedInit|kStr|kArrLike|kObj|kRes|kClsMeth|kRecord) \
+  c(InitCell,            INIT_CELL_UNION)                               \
   c(Cell,                kUninit|kInitCell)
 
 /*
@@ -383,6 +398,14 @@ constexpr bool operator>(Mem a, Mem b) {
  * because boxing them (e.g., BoxedGen, PtrToBoxedGen) would yield nonsense
  * types.
  */
+#ifdef USE_LOWPTR
+#define COUNTED_INIT_UNION \
+  kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord
+#else
+#define COUNTED_INIT_UNION \
+  kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kBoxedCell|kRecord|kClsMeth
+#endif
+
 #define IRT_SPECIAL                                           \
   /* Bottom and Top use IRTX to specify a custom Ptr kind */  \
   IRTX(Bottom,       Bottom, kBottom)                         \
@@ -395,7 +418,7 @@ constexpr bool operator>(Mem a, Mem b) {
   IRTX(AnyDict,      Top,    kAnyDict)                        \
   IRTX(AnyKeyset,    Top,    kAnyKeyset)                      \
   IRTX(AnyArrLike,   Top,    kAnyArrLike)                     \
-  IRT(Counted,               kCountedStr|kCountedArr|kCountedShape|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kBoxedCell|kClsMeth) \
+  IRT(Counted,               COUNTED_INIT_UNION)              \
   IRTP(PtrToCounted,  Ptr,    kCounted)                       \
   IRTL(LvalToCounted, Ptr,    kCounted)                       \
   IRTM(MemToCounted,  Ptr,    kCounted)                       \

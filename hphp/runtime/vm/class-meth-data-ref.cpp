@@ -20,6 +20,37 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP {
+namespace {
+  template<typename T>
+  T& val(T& obj) { return obj; }
+  template<typename T>
+  T& val(T* obj) { return *obj; }
+
+  template<typename T>
+  T* ptr(T& obj) { return &obj; }
+  template<typename T>
+  T* ptr(T* obj) { return obj; }
+}
+
+ClsMethData& ClsMethDataRef::operator*() {
+  return val(m_data);
+}
+
+const ClsMethData& ClsMethDataRef::operator*() const {
+  return val(m_data);
+}
+
+ClsMethData* ClsMethDataRef::operator->() {
+  return ptr(m_data);
+}
+
+const ClsMethData* ClsMethDataRef::operator->() const {
+  return ptr(m_data);
+}
+
+ClsMethDataRef ClsMethDataRef::create(Class* cls, Func* func) {
+  return ClsMethDataRef(cls, func);
+}
 
 void raiseClsMethToVecWarningHelper(const char* fn /* =nullptr */) {
   if (!RuntimeOption::EvalRaiseClsMethConversionWarning) return;

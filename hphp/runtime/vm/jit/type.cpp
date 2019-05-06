@@ -399,6 +399,9 @@ void Type::serialize(ProfDataSerializer& ser) const {
       return write_array(ser, t.m_arrVal);
     }
     if (t <= TCctx)      return write_class(ser, t.m_cctxVal.cls());
+    if (use_lowptr && (t <= TClsMeth)) {
+      return write_clsmeth(ser, t.m_clsmethVal);
+    }
     assertx(t.subtypeOfAny(TBool, TInt, TDbl));
     return write_raw(ser, t.m_extra);
   }
@@ -441,6 +444,10 @@ Type Type::deserialize(ProfDataDeserializer& ser) {
       }
       if (t <= TCctx) {
         t.m_cctxVal = ConstCctx::cctx(read_class(ser));
+        return t;
+      }
+      if (use_lowptr && (t <= TClsMeth)) {
+        t.m_clsmethVal = read_clsmeth(ser);
         return t;
       }
       read_raw(ser, t.m_extra);

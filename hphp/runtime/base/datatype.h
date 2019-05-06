@@ -25,6 +25,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/assertions.h"
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/portability.h"
 
 namespace HPHP {
@@ -77,9 +78,9 @@ namespace HPHP {
   DT(Int64,              6) \
   DT(Ref,                7) \
   DT(Double,             8) \
-  DT(ClsMeth,            9) \
   DT(Func,              10) \
   DT(Class,             12) \
+  DT(ClsMeth,           use_lowptr ? 14 : 9)
 
 enum class DataType : int8_t {
 #define DT(name, value) name = value,
@@ -118,9 +119,10 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
  * DataType limits.
  */
 auto constexpr kMinDataType = dt_t(KindOfPersistentArray);
-auto constexpr kMaxDataType = dt_t(KindOfClass);
+auto constexpr kMaxDataType = dt_t(use_lowptr ? KindOfClsMeth : KindOfClass);
 auto constexpr kMinRefCountedDataType = dt_t(KindOfArray);
-auto constexpr kMaxRefCountedDataType = dt_t(KindOfClsMeth);
+auto constexpr kMaxRefCountedDataType =
+  dt_t(use_lowptr ? KindOfRef : KindOfClsMeth);
 
 /*
  * A DataType is a refcounted type if and only if it has this bit set.

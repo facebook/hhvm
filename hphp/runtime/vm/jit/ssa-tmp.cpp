@@ -20,6 +20,7 @@
 
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/util/low-ptr.h"
 
 namespace HPHP { namespace jit {
 
@@ -111,6 +112,8 @@ Variant SSATmp::variantVal() const {
     case KindOfFunc:
       return Variant{funcVal()};
     case KindOfClsMeth:
+      if (use_lowptr) return Variant{clsmethVal()};
+      // fallthrough
     case KindOfString:
     case KindOfVec:
     case KindOfDict:

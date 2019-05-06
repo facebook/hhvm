@@ -67,9 +67,7 @@ inline bool cellToBool(Cell cell) {
       return funcToStringHelper(cell.m_data.pfunc)->toBoolean();
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toBoolean();
-    case KindOfClsMeth:
-      raiseClsMethConvertWarningHelper("bool");
-      return true;
+    case KindOfClsMeth:       return true;
   }
   not_reached();
 }

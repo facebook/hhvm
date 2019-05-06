@@ -21,29 +21,49 @@
 
 namespace HPHP {
 
+namespace {
+template <class T>
+static ClsMethData::low_storage_t to_low(T* px) {
+  ClsMethData::low_storage_t ones = ~0;
+  auto ptr = reinterpret_cast<uintptr_t>(px);
+  always_assert((ptr & ones) == ptr);
+  return (ClsMethData::low_storage_t)(ptr);
+}
+}
+
 ClsMethData::ClsMethData(Class* cls, Func* func)
-  : m_cls(cls)
-  , m_func(func) {
+  : m_cls{to_low(cls)}
+  , m_func{to_low(func)} {
   assertx(cls);
   assertx(func);
+#ifndef USE_LOWPTR
   initHeader_16(HeaderKind::ClsMeth, OneReference, 0);
+#endif
 };
 
-ClsMethData* ClsMethData::make(Class* cls, Func* func) {
-  return new (tl_heap->objMalloc(sizeof(ClsMethData)))
-    ClsMethData(cls, func);
+ClsMethData::cls_meth_t ClsMethData::make(Class* cls, Func* func) {
+#ifdef USE_LOWPTR
+  return ClsMethData(cls, func);
+#else
+  return new (tl_heap->objMalloc(sizeof(ClsMethData))) ClsMethData(cls, func);
+#endif
 }
 
 void ClsMethData::release() noexcept {
+#ifndef USE_LOWPTR
   assertx(validate());
   tl_heap->objFree(this, sizeof(ClsMethData));
   AARCH64_WALKABLE_FRAME();
+#endif
 }
 
 bool ClsMethData::validate() const {
-  m_cls->validate();
-  m_func->validate();
-  return m_kind == HeaderKind::ClsMeth;
+  getCls()->validate();
+  getFunc()->validate();
+#ifndef USE_LOWPTR
+  assertx(m_kind == HeaderKind::ClsMeth);
+#endif
+  return true;
 }
 
 } // namespace HPHP

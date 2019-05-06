@@ -27,34 +27,21 @@ struct Func;
 struct ClsMethDataRef {
   ClsMethDataRef() = default;
 
-  ClsMethDataRef(Class* cls, Func* func) : data(ClsMethData::make(cls, func)) {}
-
-  static ClsMethDataRef create(Class* cls, Func* func) {
-    return ClsMethDataRef(cls, func);
-  }
+  static ClsMethDataRef create(Class* cls, Func* func);
 
   static void Release(ClsMethDataRef clsMeth) noexcept {
     clsMeth->release();
   }
 
-  ClsMethData& operator*() {
-    return *data;
-  }
-
-  const ClsMethData& operator*() const {
-    return *data;
-  }
-
-  ClsMethData* operator->() {
-    return data;
-  }
-
-  const ClsMethData* operator->() const {
-    return data;
-  }
+  ClsMethData& operator*();
+  const ClsMethData& operator*() const;
+  ClsMethData* operator->();
+  const ClsMethData* operator->() const;
 
   bool operator==(ClsMethDataRef o) const {
-    return (data->getCls() == o->getCls()) && (data->getFunc() == o->getFunc());
+    auto const thiz = get();
+    return (thiz->getCls() == o->getCls()) &&
+           (thiz->getFunc() == o->getFunc());
   }
 
   const ClsMethData* get() const {
@@ -62,11 +49,27 @@ struct ClsMethDataRef {
   }
 
 private:
-  ClsMethData* data;
+  ClsMethDataRef(Class* cls, Func* func)
+    : m_data(ClsMethData::make(cls, func))
+    {}
+
+  ClsMethData::cls_meth_t m_data;
 };
 
 ALWAYS_INLINE void decRefClsMeth(ClsMethDataRef clsMeth) {
   clsMeth->decRefAndRelease();
+}
+
+ALWAYS_INLINE void incRefClsMeth(ClsMethDataRef clsMeth) {
+  clsMeth->incRef();
+}
+
+ALWAYS_INLINE bool checkCountClsMeth(ClsMethDataRef clsMeth) {
+  return clsMeth->checkRefCount();
+}
+
+ALWAYS_INLINE bool isRefCountedClsMeth(ClsMethDataRef clsMeth) {
+  return clsMeth->isRefCountedType();
 }
 
 void raiseClsMethToVecWarningHelper(const char* fn = nullptr);

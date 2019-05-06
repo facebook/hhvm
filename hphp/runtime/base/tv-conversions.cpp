@@ -1677,9 +1677,11 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfShape:
       case KindOfArray:
       case KindOfObject:
-      case KindOfClsMeth:
       case KindOfRecord:
         tvDecRefCountable(tv);
+        continue;
+      case KindOfClsMeth:
+        tvDecRefClsMeth(tv);
         continue;
       case KindOfResource:
         // no op, return

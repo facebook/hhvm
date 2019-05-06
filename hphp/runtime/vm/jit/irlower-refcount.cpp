@@ -49,6 +49,7 @@
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
 #include "hphp/util/asm-x64.h"
+#include "hphp/util/low-ptr.h"
 #include "hphp/util/trace.h"
 
 #include <folly/Format.h>
@@ -301,7 +302,7 @@ CallSpec getDtorCallSpec(DataType type) {
     case KindOfRef:
       return CallSpec::method(&RefData::release);
     case KindOfClsMeth:
-      return CallSpec::direct(ClsMethDataRef::Release);
+      if (!use_lowptr) return CallSpec::direct(ClsMethDataRef::Release);
     case KindOfRecord:
       return CallSpec::method(&RecordData::release);
     DT_UNCOUNTED_CASE:

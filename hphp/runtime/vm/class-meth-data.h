@@ -25,29 +25,32 @@ namespace HPHP {
 struct Class;
 struct Func;
 
-// TODO (T39025604) optimize this class for LOW_PTR build
-struct ClsMethData : Countable, type_scan::MarkScannableCollectable<ClsMethData>
+struct ClsMethData
+#ifndef USE_LOWPTR
+: Countable, type_scan::MarkScannableCollectable<ClsMethData>
+#endif
 {
+#ifdef USE_LOWPTR
+  using low_storage_t = uint32_t;
+  using cls_meth_t = ClsMethData;
+#else
+  using low_storage_t = uintptr_t;
+  using cls_meth_t = ClsMethData*;
+#endif
 
-  static ClsMethData* make(Class* cls, Func* func);
+  ClsMethData() = default;
 
+  static cls_meth_t make(Class* cls, Func* func);
   void release() noexcept;
-
-  ALWAYS_INLINE void decRefAndRelease() {
-    assertx(validate());
-    if (decReleaseCheck()) {
-      release();
-    }
-  }
 
   bool validate() const;
 
   Class* getCls() const {
-    return m_cls;
+    return reinterpret_cast<Class*>(m_cls);
   }
 
   Func* getFunc() const {
-    return m_func;
+    return reinterpret_cast<Func*>(m_func);
   }
 
   static constexpr ptrdiff_t clsOffset() {
@@ -58,11 +61,47 @@ struct ClsMethData : Countable, type_scan::MarkScannableCollectable<ClsMethData>
     return offsetof(ClsMethData, m_func);
   }
 
+  ALWAYS_INLINE bool isRefCountedType() {
+#ifdef USE_LOWPTR
+    return false;
+#else
+    return isRefCounted();
+#endif
+  }
+
+  ALWAYS_INLINE bool checkRefCount() {
+#ifdef USE_LOWPTR
+  return true;
+#else
+  return checkCount();
+#endif
+  }
+
+  ALWAYS_INLINE void incRef() {
+#ifndef USE_LOWPTR
+    incRefCount();
+#endif
+  }
+
+  ALWAYS_INLINE void decRefAndRelease() {
+#ifndef USE_LOWPTR
+    assertx(validate());
+    if (decReleaseCheck()) {
+      release();
+    }
+#endif
+  }
+
 private:
   ClsMethData(Class* cls, Func* func);
 
-  LowPtr<Class> m_cls;
-  LowPtr<Func> m_func;
+  low_storage_t m_cls;
+  low_storage_t m_func;
 };
 
+#ifdef USE_LOWPTR
+static_assert(sizeof(ClsMethData) == 8);
+static_assert(ClsMethData::clsOffset() == 0, "Class offset must be 0");
+static_assert(ClsMethData::funcOffset() == 4, "Func offset must be 4");
+#endif
 } // namespace HPHP

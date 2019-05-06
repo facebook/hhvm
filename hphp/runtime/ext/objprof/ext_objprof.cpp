@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/util/alloc.h"
+#include "hphp/util/low-ptr.h"
 
 namespace HPHP {
 size_t asio_object_size(const ObjectData*);
@@ -620,22 +621,27 @@ std::pair<int, double> tvGetSize(
       break;
     }
     case KindOfClsMeth: {
-      auto const clsmeth = tv.m_data.pclsmeth;
-      auto const sz = sizeof(*clsmeth);
-      size += sz;
-      if (clsmeth->isRefCounted()) {
-        auto ref_count = int{tvGetCount(tv)};
-        FTRACE(3, " ClsMeth tv: clsmeth at {} with ref count {}\n",
-              (void*)clsmeth.get(), ref_count);
-        if (one_bit_refcount) {
-          sized += sz;
-        } else {
-          assertx(ref_count > 0);
-          sized += (sz / (double)(ref_count));
-        }
-      } else {
+      if (use_lowptr) {
         FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
-              (void*)clsmeth.get());
+              (void*)tv.m_data.pclsmeth.get());
+      } else {
+        auto const clsmeth = tv.m_data.pclsmeth;
+        auto const sz = sizeof(*clsmeth);
+        size += sz;
+        if (isRefCountedClsMeth(clsmeth)) {
+          auto ref_count = int{tvGetCount(tv)};
+          FTRACE(3, " ClsMeth tv: clsmeth at {} with ref count {}\n",
+                (void*)clsmeth.get(), ref_count);
+          if (one_bit_refcount) {
+            sized += sz;
+          } else {
+            assertx(ref_count > 0);
+            sized += sz / (double)ref_count;
+          }
+        } else {
+          FTRACE(3, " ClsMeth tv: clsmeth at {} uncounted\n",
+                (void*)clsmeth.get());
+        }
       }
       break;
     }

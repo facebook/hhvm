@@ -41,6 +41,7 @@
 
 #include "hphp/util/abi-cxx.h"
 #include "hphp/util/logger.h"
+#include "hphp/util/low-ptr.h"
 
 #include <limits>
 #include <utility>
@@ -123,9 +124,11 @@ static_assert(typeToDestrIdx(KindOfString)   == 6, "String destruct index");
 static_assert(typeToDestrIdx(KindOfObject)   == 8, "Object destruct index");
 static_assert(typeToDestrIdx(KindOfResource) == 9, "Resource destruct index");
 static_assert(typeToDestrIdx(KindOfRef)      == 10, "Ref destruct index");
+#ifndef USE_LOWPTR
 static_assert(typeToDestrIdx(KindOfClsMeth)  == 11, "ClsMeth destruct index");
+#endif
 
-static_assert(kDestrTableSize == 12,
+static_assert(kDestrTableSize == (use_lowptr ? 11 : 12),
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
@@ -141,7 +144,9 @@ RawDestructor g_destructors[] = {
                                                       // KindOfObject
   (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
   (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
+#ifndef USE_LOWPTR
   (RawDestructor)&ClsMethDataRef::Release,            // KindOfClsMeth
+#endif
 };
 
 #define IMPLEMENT_SET(argType, setOp)                     \
@@ -450,9 +455,7 @@ bool Variant::toBooleanHelper() const {
       return funcToStringHelper(m_data.pfunc)->toBoolean();
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toBoolean();
-    case KindOfClsMeth:
-      raiseClsMethConvertWarningHelper("bool");
-      return true;
+    case KindOfClsMeth:       return true;
     case KindOfRef:           return m_data.pref->var()->toBoolean();
     case KindOfRecord:
       raise_convert_record_to_type("bool");

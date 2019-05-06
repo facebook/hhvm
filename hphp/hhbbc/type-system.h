@@ -23,6 +23,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/util/copy-ptr.h"
+#include "hphp/util/low-ptr.h"
 
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/repo-auth-type-array.h"
@@ -380,7 +381,9 @@ enum trep : uint64_t {
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
-  BInitPrim = BInitNull | BBool | BNum | BFunc | BCls,
+  BInitPrim = BInitNull | BBool | BNum | BFunc | BCls |
+              (use_lowptr ? BClsMeth : 0),
+
   BPrim     = BInitPrim | BUninit,
   BInitUnc  = BInitPrim | BSStr | BSArr | BSVec | BSDict | BSKeyset,
   BUnc      = BInitUnc | BUninit,

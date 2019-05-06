@@ -263,6 +263,9 @@ struct hasher_impl {
 template<typename T, typename S>
 struct hash_operand { const T& val; S type; };
 
+// this template isn't really needed. its a workaround for T44007494
+template<typename S> struct hash_operand<void*, S> { void* const val; S type; };
+
 /*
  * Hash T using H::operator() if it is compatible, else fall back to
  * hasher_impl (e.g., if H := hasher_default).
@@ -309,6 +312,11 @@ struct eq_default {};
  */
 template<typename T, typename S>
 struct eq_operand { const T& l; const T& r; S type; };
+
+// this template isn't really needed. its a workaround for T44007494
+template<typename S> struct eq_operand<void*, S> {
+  void* const l; void* const r; S type;
+};
 
 /*
  * Compare two values, using E::operator() if it exists, else the default

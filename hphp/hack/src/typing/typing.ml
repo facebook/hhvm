@@ -2296,7 +2296,7 @@ and expr_
       let env = Env.forget_members env p in
       make_result env p (T.New(tc, tal, tel, tuel, (p1, ctor_fty))) ty
   | Record _ ->
-    failwith "Record - not implemented"
+    expr_error env p (Reason.Rwitness p)
   | Cast ((_, Harray (None, None)), _)
     when Env.is_strict env
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->

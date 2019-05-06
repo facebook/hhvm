@@ -2963,28 +2963,46 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     end
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
-let check_repeated_properties full_name (errors, p_names) prop =
+let check_repeated_properties_tconst_const full_name (errors, p_names, c_names) prop =
+  let check errors sname names =
+    let name = text sname in
+    (* If the name is empty, then there was an earlier
+      parsing error that should supercede this one. *)
+    if name = "" 
+    then errors, names 
+    else
+      if SSet.mem name names
+      then make_error_from_node prop
+      (SyntaxError.redeclaration_error
+          ((Utils.strip_ns full_name) ^ "::" ^ name)) :: errors, names
+      else errors, SSet.add name names
+  in
   match syntax prop with
   | PropertyDeclaration { property_declarators; _} ->
     let declarators = syntax_to_list_no_separators property_declarators in
-      List.fold declarators ~init:(errors, p_names)
-        ~f:begin fun (errors, p_names) prop ->
+      List.fold declarators ~init:(errors, p_names, c_names)
+        ~f:begin fun (errors, p_names, c_names) prop ->
             match syntax prop with
-            | PropertyDeclarator {property_name; _} ->
-                let prop_name = text property_name in
-                (* If the property name is empty, then there was an earlier
-                  parsing error that should supercede this one. *)
-                if prop_name = "" then errors, p_names else
-                let errors, p_names =
-                  if SSet.mem prop_name p_names
-                  then make_error_from_node prop
-                  (SyntaxError.redeclaration_error
-                      ((Utils.strip_ns full_name) ^ "::" ^ prop_name)) :: errors, p_names
-                  else errors, SSet.add prop_name p_names in
-                errors, p_names
-            | _ -> errors, p_names
+            | PropertyDeclarator {property_name = name; _} ->
+              let errors, p_names = check errors name p_names in
+              errors, p_names, c_names
+            | _ -> errors, p_names, c_names
           end
-  | _ -> (errors, p_names)
+  | ConstDeclaration { const_declarators; _ } ->
+    let declarators = syntax_to_list_no_separators const_declarators in
+      List.fold declarators ~init:(errors, p_names, c_names)
+        ~f:begin fun (errors, p_names, c_names) prop ->
+            match syntax prop with
+            | ConstantDeclarator {constant_declarator_name = name; _} ->
+              let errors, c_names = check errors name c_names in
+              errors, p_names, c_names
+            | _ -> errors, p_names, c_names
+          end
+  | TypeConstDeclaration { type_const_name; _ } ->
+    let errors, c_names = check errors type_const_name c_names in
+    errors, p_names, c_names
+  | _ -> errors, p_names, c_names
+
 let require_errors _env node trait_use_clauses errors =
   match syntax node with
   | RequireClause p ->
@@ -3223,9 +3241,10 @@ let classish_errors env node namespace_name names errors =
         let declared_name_str =
           Option.value ~default:"" (Syntax.extract_text cd.classish_name) in
         let full_name = combine_names namespace_name declared_name_str in
-        let errors, _ =
-          List.fold methods ~f:(check_repeated_properties full_name)
-            ~init:(errors, SSet.empty) in
+        let errors, _, _ =
+          List.fold methods
+            ~f:(check_repeated_properties_tconst_const full_name)
+            ~init:(errors, SSet.empty, SSet.empty) in
         let has_abstract_fn =
           List.exists methods ~f:methodish_contains_abstract in
         let has_private_method =

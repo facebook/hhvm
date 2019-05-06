@@ -301,10 +301,11 @@ CallSpec getDtorCallSpec(DataType type) {
       return CallSpec::method(&ResourceHdr::release);
     case KindOfRef:
       return CallSpec::method(&RefData::release);
-    case KindOfClsMeth:
-      if (!use_lowptr) return CallSpec::direct(ClsMethDataRef::Release);
     case KindOfRecord:
       return CallSpec::method(&RecordData::release);
+    case KindOfClsMeth:
+      if (!use_lowptr) return CallSpec::direct(ClsMethDataRef::Release);
+      // fallthrough
     DT_UNCOUNTED_CASE:
       break;
   }

@@ -253,6 +253,57 @@ where
         )
     }
 
+    fn parse_record_field(&mut self) -> S::R {
+        // SPEC
+        //  record_field:
+        //    record-constant : type field-initializer-opt,
+        //  record-constant:
+        //    name
+        //  field-initializer:
+        //    = expression
+        let name = self.require_name_allow_non_reserved();
+        let colon = self.require_colon();
+        let field_type = self.parse_type_specifier(false);
+        let init = self.parse_simple_initializer_opt();
+        let comma = self.require_comma();
+        S!(
+            make_record_field,
+            self,
+            name,
+            colon,
+            field_type,
+            init,
+            comma
+        )
+    }
+
+    fn parse_record_fields(&mut self) -> S::R {
+        // SPEC
+        //  record-list:
+        //    record-field
+        //    record-list record-field
+        self.parse_terminated_list(&|x| x.parse_record_field(), TokenKind::RightBrace)
+    }
+
+    fn parse_record_declaration(&mut self, attrs: S::R) -> S::R {
+        // record-declaration:
+        //   record name { record-list }
+        let record = self.assert_token(TokenKind::RecordDec);
+        let name = self.require_name();
+        let (left_brace, record_fields, right_brace) =
+            self.parse_braced_list(&|x| x.parse_record_fields());
+        S!(
+            make_record_declaration,
+            self,
+            attrs,
+            record,
+            name,
+            left_brace,
+            record_fields,
+            right_brace
+        )
+    }
+
     pub fn parse_leading_markup_section(&mut self) -> Option<S::R> {
         let mut parser1 = self.clone();
         let (markup_section, has_suffix) =
@@ -605,7 +656,11 @@ where
                 let list_item = S!(make_list_item, self, item, comma);
                 (list_item, is_missing)
             }
-            TokenKind::Parent | TokenKind::Enum | TokenKind::Shape | TokenKind::SelfToken
+            TokenKind::Parent
+            | TokenKind::Enum
+            | TokenKind::RecordDec
+            | TokenKind::Shape
+            | TokenKind::SelfToken
                 if self.env.hhvm_compat_mode =>
             {
                 // HHVM allows these keywords here for some reason
@@ -1380,8 +1435,8 @@ where
         let name = self.require_name_allow_non_reserved();
         let generic_type_parameter_list = self.parse_generic_type_parameter_list_opt();
         let type_constraint = self.parse_type_constraint_opt();
-        let (equal_token, type_specifier) = if abstr.is_missing() {
-            let equal_token = self.require_equal();
+        let (equal_token, type_specifier) = if self.peek_token_kind() == TokenKind::Equal {
+            let equal_token = self.assert_token(TokenKind::Equal);
             let type_spec = self.parse_type_specifier(/* allow_var = */ false);
             (equal_token, type_spec)
         } else {
@@ -1971,6 +2026,10 @@ where
                 self.continue_from(parser1);
                 self.parse_enum_declaration(attribute_specification)
             }
+            TokenKind::RecordDec => {
+                self.continue_from(parser1);
+                self.parse_record_declaration(attribute_specification)
+            }
             TokenKind::Type | TokenKind::Newtype => {
                 self.continue_from(parser1);
 
@@ -2293,6 +2352,10 @@ where
             TokenKind::Enum => {
                 let missing = S!(make_missing, self, self.pos());
                 self.parse_enum_declaration(missing)
+            }
+            TokenKind::RecordDec => {
+                let missing = S!(make_missing, self, self.pos());
+                self.parse_record_declaration(missing)
             }
             // The keyword namespace before a name should be parsed as
             // "the current namespace we are in", essentially a no op.

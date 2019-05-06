@@ -27,7 +27,9 @@
 #include "hphp/util/string-vsnprintf.h"
 #include "hphp/util/struct-log.h"
 
+#include <folly/AtomicHashMap.h>
 #include <folly/logging/RateLimiter.h>
+#include <folly/Range.h>
 
 #ifdef ERROR
 # undef ERROR
@@ -185,6 +187,26 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
   raise_notice("Hack Array Compat: Serializing %s", type);
 }
 
+namespace {
+
+folly::Synchronized<
+  folly::F14FastSet<std::string>,
+  std::mutex
+  > g_previouslyRaisedNotices;
+
+template <typename... Args>
+void raise_dynamically_sampled_notice(folly::StringPiece fmt, Args&& ... args) {
+  auto const str = folly::sformat(fmt, std::move(args) ...);
+  {
+    auto notices = g_previouslyRaisedNotices.lock();
+    auto const inserted = notices->insert(str);
+    if (!inserted.second) return;
+  }
+  raise_notice(str);
+}
+
+}
+
 void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   static auto const sampl_threshold =
     RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
@@ -212,8 +234,8 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
 
   if (!name) { bail(); return; }
 
-  raise_notice("Serializing %s in %s from %s:%d",
-               dvarray, src, name->toCppString().c_str(), line);
+  raise_dynamically_sampled_notice("Serializing {} in {} from {}:{}",
+                                   dvarray, src, name->slice(), line);
 }
 
 void

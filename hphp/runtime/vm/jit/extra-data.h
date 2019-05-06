@@ -1555,6 +1555,7 @@ X(LIterInitK,                   IterInitData);
 X(LIterNext,                    IterData);
 X(LIterNextK,                   IterData);
 X(ConstructInstance,            ClassData);
+X(ConstructClosure,             ClassData);
 X(InitProps,                    ClassData);
 X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);

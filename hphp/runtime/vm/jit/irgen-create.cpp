@@ -348,7 +348,7 @@ void emitCreateCl(IRGS& env, uint32_t numParams, uint32_t clsIx) {
 
   auto const func = cls->getCachedInvoke();
 
-  auto const closure = gen(env, ConstructInstance, ClassData(cls));
+  auto const closure = gen(env, ConstructClosure, ClassData(cls));
 
   auto const live_ctx = [&] {
     auto const ldctx = ldCtx(env);

@@ -965,6 +965,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConstructInstance:
     return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
 
+  // Closures don't ever throw or reenter on construction
+  case ConstructClosure:
+    return IrrelevantEffects{};
+
   case CheckStackOverflow:
   case CheckSurpriseFlagsEnter:
   case CheckSurpriseAndStack:

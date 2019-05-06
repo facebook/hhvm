@@ -1608,6 +1608,10 @@ To string conversions:
 
   Call the custom instance constructor of an extension class.
 
+| ConstructClosure<class>, DAllocObj, NA, NF
+
+  Call the custom instance constructor of a Closure.
+
 | NewArray, D(Arr), C(Int), PRc
 
   Allocate a new array with the expected capacity S0.

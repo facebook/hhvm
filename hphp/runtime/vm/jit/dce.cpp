@@ -283,6 +283,7 @@ bool canDCE(IRInstruction* inst) {
   case GetMemoKeyScalar:
   case LookupSPropSlot:
   case MangleReifiedName:
+  case ConstructClosure:
     assertx(!inst->isControlFlow());
     return true;
 

@@ -102,6 +102,15 @@ void cgConstructInstance(IRLS& env, const IRInstruction* inst) {
                callDest(dst), SyncOptions::Sync, args);
 }
 
+void cgConstructClosure(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const cls = inst->extra<ConstructClosure>()->cls;
+
+  auto const args = argGroup(env, inst).immPtr(cls);
+  cgCallHelper(vmain(env), env, CallSpec::direct(cls->instanceCtor().get()),
+               callDest(dst), SyncOptions::None, args);
+}
+
 IMPL_OPCODE_CALL(Clone)
 
 ///////////////////////////////////////////////////////////////////////////////

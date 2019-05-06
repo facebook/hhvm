@@ -239,8 +239,9 @@ Type boxPtr(Type t) {
 
 Type allocObjReturn(const IRInstruction* inst) {
   switch (inst->op()) {
+    case ConstructClosure:
     case ConstructInstance:
-      return Type::ExactObj(inst->extra<ConstructInstance>()->cls);
+      return Type::ExactObj(inst->extra<ClassData>()->cls);
 
     case NewInstanceRaw:
       return Type::ExactObj(inst->extra<NewInstanceRaw>()->cls);

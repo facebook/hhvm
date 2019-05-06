@@ -17,7 +17,7 @@
  *
 * This module contains a signature which can be used to describe the public
 * surface area of a constructable syntax tree.
-  
+
  *)
 
 module TriviaKind = Full_fidelity_trivia_kind
@@ -1106,6 +1106,14 @@ module type Syntax_S = sig
     }
 
 
+  val rust_parse :
+    Full_fidelity_source_text.t ->
+    Full_fidelity_parser_env.t ->
+    unit * t * Full_fidelity_syntax_error.t list
+  val rust_parse_with_coroutine_sc :
+    Full_fidelity_source_text.t ->
+    Full_fidelity_parser_env.t ->
+    bool * t * Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
   val extract_text : t -> string option

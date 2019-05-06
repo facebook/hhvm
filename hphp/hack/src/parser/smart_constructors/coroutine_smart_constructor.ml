@@ -21,8 +21,13 @@ module WithSyntax(Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
     let next state _ = state
   end
 
-  module SyntaxSC = SyntaxSmartConstructors.WithSyntax(Syntax)
-  include SyntaxSC.WithState(State)
+  module SyntaxSC_ = SyntaxSmartConstructors.WithSyntax(Syntax)
+  module SyntaxSC = SyntaxSC_.WithState(State)
+  include SyntaxSC.WithRustParser(struct
+    type r = Syntax.t
+    type t = bool
+    let rust_parse = Syntax.rust_parse_with_coroutine_sc
+  end)
 
   let is_coroutine = Syntax.is_coroutine
 

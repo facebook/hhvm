@@ -5,6 +5,10 @@ module TokenKind = Full_fidelity_token_kind
 module ParserEnv = Full_fidelity_parser_env
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
+module WithRustParser(RustParser : SyntaxSmartConstructors.RustParser_S
+ with type t = bool list
+ with type r = Syntax.t
+) = struct
   module State = struct
     type r = Syntax.t [@@deriving show]
     type t = bool list [@@deriving show]
@@ -17,8 +21,9 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       res :: t
   end
 
-  module SyntaxSC = SyntaxSmartConstructors.WithSyntax(Syntax)
-  include SyntaxSC.WithState(State)
+  module SyntaxSC_ = SyntaxSmartConstructors.WithSyntax(Syntax)
+  module SyntaxSC = SyntaxSC_.WithState(State)
+  include SyntaxSC.WithRustParser(RustParser)
 
   let missing = Syntax.make_missing SourceText.empty 0
   let yield = Syntax.make_token @@ Syntax.Token.make TokenKind.Yield SourceText.empty 0 0 [] []
@@ -77,4 +82,5 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       false :: t, Syntax.make_function_declaration a1 a2 body
     | _ -> failwith "Invalid state"
 
+end (* WithRustParser *)
 end (* WithSyntax *)

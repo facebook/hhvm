@@ -255,3 +255,6 @@ let position (_file: Relative_path.t) (node: t) =
   Some (Value.position node.value)
 
 let offset node = Some (start_offset node)
+
+let rust_parse _ _ = failwith "not implemented"
+let rust_parse_with_coroutine_sc _ _ = failwith "not implemented"

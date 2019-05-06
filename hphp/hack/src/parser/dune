@@ -39,6 +39,7 @@
   (wrapped false)
   (modules
     full_fidelity_source_text
+    full_fidelity_syntax_error
     full_fidelity_syntax_kind
     full_fidelity_trivia_kind
     full_fidelity_token_kind
@@ -46,7 +47,8 @@
     lexable_trivia_sig)
   (libraries
     pos
-    relative_path)
+    relative_path
+    parser_env)
   (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library
@@ -62,7 +64,6 @@
     full_fidelity_positioned_trivia
     full_fidelity_positioned_syntax
     full_fidelity_syntax
-    full_fidelity_syntax_error
     full_fidelity_syntax_type
     full_fidelity_validated_syntax
     lexable_positioned_token_sig
@@ -177,7 +178,8 @@
     parser_ast_check
     parser_env
     parser_smart_constructor
-    parser_options)
+    parser_options
+    rust_parser_ffi_stubs)
   (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library

@@ -100,6 +100,8 @@ module SC = struct
     let flatten l = flatten l
     let zero = Ignored
   end)
+
+  let rust_parse _ _ = failwith "not implemented"
   let initial_state _ = false
 
   let make_token token st =

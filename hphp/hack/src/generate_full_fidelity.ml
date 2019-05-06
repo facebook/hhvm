@@ -702,6 +702,14 @@ module type Syntax_S = sig
   | SyntaxList                        of t list
 SYNTAX
 
+  val rust_parse :
+    Full_fidelity_source_text.t ->
+    Full_fidelity_parser_env.t ->
+    unit * t * Full_fidelity_syntax_error.t list
+  val rust_parse_with_coroutine_sc :
+    Full_fidelity_source_text.t ->
+    Full_fidelity_parser_env.t ->
+    bool * t * Full_fidelity_syntax_error.t list
   val has_leading_trivia : TriviaKind.t -> Token.t -> bool
   val to_json : ?with_value:bool -> t -> Hh_json.json
   val extract_text : t -> string option
@@ -800,6 +808,11 @@ module type SmartConstructors_S = sig
   module Token : Lexable_token_sig.LexableToken_S
   type t (* state *) [@@deriving show]
   type r (* smart constructor return type *) [@@deriving show]
+
+  val rust_parse :
+    Full_fidelity_source_text.t ->
+    ParserEnv.t ->
+    t * r * Full_fidelity_syntax_error.t list
 
   val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r
@@ -1199,11 +1212,26 @@ module type State_S = sig
   val next : t -> r list -> t
 end
 
+module type RustParser_S = sig
+  type t
+  type r
+  val rust_parse :
+    Full_fidelity_source_text.t ->
+    ParserEnv.t ->
+    t * r * Full_fidelity_syntax_error.t list
+end
+
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module WithState(State : State_S with type r = Syntax.t) = struct
+  module WithRustParser(RustParser : RustParser_S
+   with type t = State.t
+   with type r = Syntax.t
+  ) = struct
     module Token = Syntax.Token
     type t = State.t [@@deriving show]
     type r = Syntax.t [@@deriving show]
+
+    let rust_parse = RustParser.rust_parse
 
     let initial_state = State.initial
     let make_token token state = State.next state [], Syntax.make_token token
@@ -1213,6 +1241,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       then State.next state items, Syntax.make_list s o items
       else make_missing (s, o) state
 CONSTRUCTOR_METHODS
+  end (* WithRustParser *)
   end (* WithState *)
 
   include WithState(
@@ -1223,6 +1252,15 @@ CONSTRUCTOR_METHODS
       let next () _ = ()
     end
   )
+
+  include WithRustParser(
+    struct
+      type r = Syntax.t
+      type t = unit
+      let rust_parse = Syntax.rust_parse
+    end
+  )
+
 end (* WithSyntax *)
 "
 
@@ -1614,6 +1652,12 @@ module SyntaxKind(SC : SC_S)
   let kind_of (kind, _) = kind
   let compose : SK.t -> t * SC.r -> t * r = fun kind (state, res) ->
     state, (kind, res)
+
+  let rust_parse text env =
+    let state, res, errors = SC.rust_parse text env in
+    let state, res = compose SK.Script (state, res) in
+    state, res, errors
+
   let initial_state = SC.initial_state
 
   let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)

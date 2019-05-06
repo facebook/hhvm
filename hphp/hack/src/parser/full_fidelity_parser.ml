@@ -121,7 +121,14 @@ let parse_header_only env text =
   | Some result -> Some (SCWithToken.extract result)
   | None -> None
 
+let rust_parse_script parser =
+  let sc_state, root, errors = SCI.rust_parse
+    (parser.lexer |> Lexer.source) parser.env
+  in
+  { parser with errors; sc_state }, root
+
 let parse_script parser =
+  if Env.rust parser.env then rust_parse_script parser else
   let decl_parser =
     DeclParser.make
       parser.env
@@ -202,3 +209,5 @@ let parse_mode text =
         end
     | _ -> Some FileInfo.Mstrict
   end
+
+let () = Rust_parser_ffi.init ()

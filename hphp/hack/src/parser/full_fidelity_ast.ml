@@ -3499,7 +3499,12 @@ module ParserErrors_ = Full_fidelity_parser_errors.WithSyntax(PositionedSyntax)
 module ParserErrors = ParserErrors_.WithSmartConstructors(CoroutineSC)
 
 module SourceText = Full_fidelity_source_text
-module DeclModeSC = DeclModeSmartConstructors.WithSyntax(PositionedSyntax)
+module DeclModeSC_ = DeclModeSmartConstructors.WithSyntax(PositionedSyntax)
+module DeclModeSC = DeclModeSC_.WithRustParser(struct
+  type r = PositionedSyntax.t
+  type t = bool list
+  let rust_parse = Rust_parser_ffi.parse_positioned_with_decl_mode_sc
+end)
 module DeclModeParser_ = Full_fidelity_parser.WithSyntax(PositionedSyntax)
 module DeclModeParser = DeclModeParser_.WithSmartConstructors(DeclModeSC)
 module FromPositionedSyntax = WithPositionedSyntax(PositionedSyntax)

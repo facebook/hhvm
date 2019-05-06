@@ -344,11 +344,6 @@ No errors are filtered out.";
 end
 
 open FullFidelityParseArgs
-
-let make_rust_positioned_syntax_tree ~env source_text : SyntaxTree.t =
-  let mode, root, errors = Rust_parser_ffi.parse_positioned source_text env in
-  SyntaxTree.create source_text root errors mode
-
 (* Prints a single FFP error. *)
 let print_full_fidelity_error source_text error =
   let text = SyntaxError.to_positioned_string
@@ -365,6 +360,8 @@ let handle_existing_file args filename =
     (args.disable_lval_as_an_expression) in
   let popt = ParserOptions.setup_pocket_universes popt
     (args.pocket_universes) in
+  let popt = ParserOptions.with_rust popt args.rust in
+
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
@@ -376,12 +373,9 @@ let handle_existing_file args filename =
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
+    ~rust:args.rust
     ?mode () in
-  let syntax_tree = if args.rust then
-    make_rust_positioned_syntax_tree ~env source_text
-  else
-    SyntaxTree.make ~env source_text
-  in
+  let syntax_tree = SyntaxTree.make ~env source_text in
   let editable = SyntaxTransforms.editable_from_positioned syntax_tree in
 
   if args.show_file_name then begin

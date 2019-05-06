@@ -52,22 +52,9 @@ type args = {
    dir : string option;
 }
 
-module type Parser_S = sig
-  type r
-  val parse : SourceText.t -> Env.t -> (FileInfo.mode option * r * SyntaxError.t list)
-end
-
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
-module WithParser(Parser : Parser_S with type r = Syntax.t) = struct
 
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
-
-let rust_parse parse source_text env =
-  let mode, root, errors = parse source_text env in
-  SyntaxTree.create source_text root errors mode
-
-let ocaml_parse env source_text =
-  SyntaxTree.make ~env source_text
 
 let syntax_tree_into_parts tree =
   let mode, root, errors = SyntaxTree.(mode tree, root tree, errors tree) in
@@ -91,7 +78,7 @@ let mode_to_string = function
 let total = ref 0
 let correct = ref 0
 
-let test args env path =
+let test args ~ocaml_env ~rust_env path =
   if args.mode == COMPARE then Printf.printf "%d/%d\n" !correct !total;
   Printf.printf "%s\n" path;
   flush(stdout);
@@ -101,11 +88,11 @@ let test args env path =
   let source_text = SourceText.from_file file in
 
   let from_rust = match args.mode with
-    | RUST | COMPARE -> Some (rust_parse Parser.parse source_text env)
+    | RUST | COMPARE -> Some (SyntaxTree.make ~env:rust_env source_text)
     | OCAML -> None
   in
   let from_ocaml = match args.mode with
-    | OCAML | COMPARE -> Some (ocaml_parse env source_text)
+    | OCAML | COMPARE -> Some (SyntaxTree.make ~env:ocaml_env source_text)
     | RUST -> None
   in
 
@@ -154,9 +141,9 @@ let test args env path =
     end
   | _ -> ()
 
-let test_batch args env files =
-  List.iter files ~f:(test args env)
-end end
+let test_batch args ~ocaml_env ~rust_env files =
+  List.iter files ~f:(test args ~ocaml_env ~rust_env)
+end
 
 let get_files_in_path path =
   let files = Find.find [Path.make path] in
@@ -237,21 +224,8 @@ let parse_args () =
     dir = !dir;
   }
 
-module MinimalParser = struct
-  type r = MinimalSyntax.t
-  let parse = Rust_parser_ffi.parse_minimal
-end
-
-module PositionedParser = struct
-  type r = PositionedSyntax.t
-  let parse = Rust_parser_ffi.parse_positioned
-end
-
-module MinimalTest_ = WithSyntax(MinimalSyntax)
-module MinimalTest = MinimalTest_.WithParser(MinimalParser)
-
-module PositionedTest_ = WithSyntax(PositionedSyntax)
-module PositionedTest = PositionedTest_.WithParser(PositionedParser)
+module MinimalTest = WithSyntax(MinimalSyntax)
+module PositionedTest = WithSyntax(PositionedSyntax)
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
 
@@ -265,7 +239,7 @@ let () =
   Hh_logger.log "Starting...";
   let t = Unix.gettimeofday() in
   let mode = if args.is_experimental then Some (FileInfo.Mexperimental) else None in
-  let env = Full_fidelity_parser_env.make
+  let make_env = Full_fidelity_parser_env.make
     ~enable_stronger_await_binding:args.enable_stronger_await_binding
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
@@ -274,11 +248,12 @@ let () =
     ~hhvm_compat_mode:args.hhvm_compat_mode
     ~php5_compat_mode:args.php5_compat_mode
     ?mode
-    ()
   in
+  let ocaml_env = make_env () in
+  let rust_env = make_env ~rust:true () in
   begin match args.parser with
-    | MINIMAL -> MinimalTest.test_batch args env files
-    | POSITIONED -> PositionedTest.test_batch args env files
+    | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env  files
+    | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env  files
   end;
   let _ = Hh_logger.log_duration "Done:" t  in
   ()

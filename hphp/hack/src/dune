@@ -106,7 +106,6 @@
     parser_syntax
     parser_syntax_transforms
     parser_syntax_tree
-    rust_parser_ffi_stubs
     utils_core))
 
 (executable

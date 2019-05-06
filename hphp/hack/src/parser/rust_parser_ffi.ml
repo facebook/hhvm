@@ -48,12 +48,11 @@ let set_global_lexer_env env =
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
 
-type 'a parser_return = (FileInfo.mode option * 'a * SyntaxError.t list)
-
 external parse_minimal:
   SourceText.t ->
   parser_opts ->
-  (MinimalSyntax.t parser_return) = "parse_minimal"
+  unit * MinimalSyntax.t * SyntaxError.t list = "parse_minimal"
+
 let parse_minimal text env =
   set_global_lexer_env env;
   parse_minimal text (env_to_opts env)
@@ -61,8 +60,25 @@ let parse_minimal text env =
 external parse_positioned:
   SourceText.t ->
   parser_opts ->
-  (PositionedSyntax.t parser_return) = "parse_positioned"
+  unit * PositionedSyntax.t * SyntaxError.t list = "parse_positioned"
 
 let parse_positioned text env =
   set_global_lexer_env env;
   parse_positioned text (env_to_opts env)
+
+let parse_positioned_with_decl_mode_sc text env =
+  let (), root, errors = parse_positioned text env in
+  (* TODO(leoo) *)
+  [], root, errors
+
+let parse_positioned_with_coroutine_sc text env =
+  let (), root, errors = parse_positioned text env in
+  (* TODO(leoo) *)
+  false, root, errors
+
+let init () =
+  Full_fidelity_minimal_syntax.rust_parse_ref := parse_minimal;
+  Full_fidelity_positioned_syntax.rust_parse_ref := parse_positioned;
+  Full_fidelity_positioned_syntax.rust_parse_with_coroutine_sc_ref :=
+    parse_positioned_with_coroutine_sc;
+  ()

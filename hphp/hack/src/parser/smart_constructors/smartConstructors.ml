@@ -27,6 +27,11 @@ module type SmartConstructors_S = sig
   type t (* state *) [@@deriving show]
   type r (* smart constructor return type *) [@@deriving show]
 
+  val rust_parse :
+    Full_fidelity_source_text.t ->
+    ParserEnv.t ->
+    t * r * Full_fidelity_syntax_error.t list
+
   val initial_state : ParserEnv.t -> t
   val make_token : Token.t -> t -> t * r
   val make_missing : Full_fidelity_source_text.pos -> t -> t * r

@@ -317,3 +317,13 @@ let leading_trivia node =
   match token with
   | None -> []
   | Some t -> Token.leading t
+
+type 'a rust_parse_type = Full_fidelity_source_text.t -> Full_fidelity_parser_env.t
+  -> 'a * t * Full_fidelity_syntax_error.t list
+let rust_parse_ref : unit rust_parse_type ref =
+  ref (fun _  _ -> failwith "This should be lazily set in Rust_parser_ffi")
+let rust_parse text env = !rust_parse_ref text env
+
+let rust_parse_with_coroutine_sc_ref : bool rust_parse_type ref =
+  ref (fun _  _ -> failwith "This should be lazily set in Rust_parser_ffi")
+let rust_parse_with_coroutine_sc text env = !rust_parse_with_coroutine_sc_ref text env

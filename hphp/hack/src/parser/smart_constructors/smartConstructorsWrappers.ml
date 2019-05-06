@@ -230,6 +230,12 @@ module SyntaxKind(SC : SC_S)
   let kind_of (kind, _) = kind
   let compose : SK.t -> t * SC.r -> t * r = fun kind (state, res) ->
     state, (kind, res)
+
+  let rust_parse text env =
+    let state, res, errors = SC.rust_parse text env in
+    let state, res = compose SK.Script (state, res) in
+    state, res, errors
+
   let initial_state = SC.initial_state
 
   let make_token token state = compose (SK.Token (SC.Token.kind token)) (SC.make_token token state)

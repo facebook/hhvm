@@ -12,7 +12,6 @@ extern crate ocaml;
 pub mod rust_to_ocaml;
 use parser_rust as parser;
 
-use parser::file_mode::parse_mode;
 use parser::minimal_parser::MinimalSyntaxParser;
 use parser::parser_env::ParserEnv;
 
@@ -74,8 +73,6 @@ macro_rules! parse {
                 hhvm_compat_mode,
                 php5_compat_mode,
             };
-
-            let mode = parse_mode(&source_text);
             let mut parser = $parser::make(&source_text, env);
             let root = parser.parse_script();
             let errors = parser.errors();
@@ -84,10 +81,10 @@ macro_rules! parse {
             let context = SerializationContext::new(ocaml_source_text.0);
             let ocaml_root = root.to_ocaml(&context);
             let ocaml_errors = to_list(&errors, &context);
-            let ocaml_mode = mode.to_ocaml(&context);
+            let ocaml_state = ocaml::core::mlvalues::UNIT;
 
             let res = caml_tuple(&[
-                ocaml_mode,
+                ocaml_state,
                 ocaml_root,
                 ocaml_errors
             ]);

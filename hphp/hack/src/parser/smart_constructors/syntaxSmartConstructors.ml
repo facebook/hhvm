@@ -32,11 +32,26 @@ module type State_S = sig
   val next : t -> r list -> t
 end
 
+module type RustParser_S = sig
+  type t
+  type r
+  val rust_parse :
+    Full_fidelity_source_text.t ->
+    ParserEnv.t ->
+    t * r * Full_fidelity_syntax_error.t list
+end
+
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
   module WithState(State : State_S with type r = Syntax.t) = struct
+  module WithRustParser(RustParser : RustParser_S
+   with type t = State.t
+   with type r = Syntax.t
+  ) = struct
     module Token = Syntax.Token
     type t = State.t [@@deriving show]
     type r = Syntax.t [@@deriving show]
+
+    let rust_parse = RustParser.rust_parse
 
     let initial_state = State.initial
     let make_token token state = State.next state [], Syntax.make_token token
@@ -225,6 +240,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_pocket_mapping_id_declaration arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_pocket_mapping_id_declaration arg0 arg1
     let make_pocket_mapping_type_declaration arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_pocket_mapping_type_declaration arg0 arg1 arg2 arg3
 
+  end (* WithRustParser *)
   end (* WithState *)
 
   include WithState(
@@ -235,4 +251,13 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let next () _ = ()
     end
   )
+
+  include WithRustParser(
+    struct
+      type r = Syntax.t
+      type t = unit
+      let rust_parse = Syntax.rust_parse
+    end
+  )
+
 end (* WithSyntax *)

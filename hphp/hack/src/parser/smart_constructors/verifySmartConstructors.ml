@@ -17,7 +17,7 @@
  *
  * This module contains smart constructors implementation that can be used to
  * build AST.
- 
+
  *)
 
 open Core_kernel
@@ -53,6 +53,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     in
     List.iter2_exn ~f:equals params args
 
+  let rust_parse _ _ = failwith "not implemented"
+
   let initial_state _ = []
 
   let make_token token stack =
@@ -78,7 +80,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_end_of_file p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_script p0 stack =
     match stack with
     | a0 :: rem ->
@@ -86,7 +88,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_script p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_qualified_name p0 stack =
     match stack with
     | a0 :: rem ->
@@ -94,7 +96,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_qualified_name p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_simple_type_specifier p0 stack =
     match stack with
     | a0 :: rem ->
@@ -102,7 +104,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_simple_type_specifier p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_literal_expression p0 stack =
     match stack with
     | a0 :: rem ->
@@ -110,7 +112,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_literal_expression p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_prefixed_string_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -118,7 +120,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_prefixed_string_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_variable_expression p0 stack =
     match stack with
     | a0 :: rem ->
@@ -126,7 +128,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_variable_expression p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pipe_variable_expression p0 stack =
     match stack with
     | a0 :: rem ->
@@ -134,7 +136,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pipe_variable_expression p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_file_attribute_specification p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -142,7 +144,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_file_attribute_specification p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_enum_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 stack =
     match stack with
     | a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -150,7 +152,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_enum_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_enumerator p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -158,7 +160,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_enumerator p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_record_declaration p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -166,7 +168,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_record_declaration p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_record_field p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -174,7 +176,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_record_field p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_alias_declaration p0 p1 p2 p3 p4 p5 p6 p7 stack =
     match stack with
     | a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -182,7 +184,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_alias_declaration p0 p1 p2 p3 p4 p5 p6 p7 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_property_declaration p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -190,7 +192,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_property_declaration p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_property_declarator p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -198,7 +200,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_property_declarator p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_namespace_declaration p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -206,7 +208,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_namespace_declaration p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_namespace_body p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -214,7 +216,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_namespace_body p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_namespace_empty_body p0 stack =
     match stack with
     | a0 :: rem ->
@@ -222,7 +224,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_namespace_empty_body p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_namespace_use_declaration p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -230,7 +232,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_namespace_use_declaration p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_namespace_group_use_declaration p0 p1 p2 p3 p4 p5 p6 stack =
     match stack with
     | a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -238,7 +240,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_namespace_group_use_declaration p0 p1 p2 p3 p4 p5 p6 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_namespace_use_clause p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -246,7 +248,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_namespace_use_clause p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_function_declaration p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -254,7 +256,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_function_declaration p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_function_declaration_header p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
     | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -262,7 +264,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_function_declaration_header p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_where_clause p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -270,7 +272,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_where_clause p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_where_constraint p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -278,7 +280,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_where_constraint p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_methodish_declaration p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -286,7 +288,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_methodish_declaration p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_methodish_trait_resolution p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -294,7 +296,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_methodish_trait_resolution p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_classish_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
     | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -302,7 +304,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_classish_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_classish_body p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -310,7 +312,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_classish_body p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_trait_use_precedence_item p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -318,7 +320,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_trait_use_precedence_item p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_trait_use_alias_item p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -326,7 +328,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_trait_use_alias_item p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_trait_use_conflict_resolution p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -334,7 +336,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_trait_use_conflict_resolution p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_trait_use p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -342,7 +344,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_trait_use p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_require_clause p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -350,7 +352,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_require_clause p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_const_declaration p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -358,7 +360,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_const_declaration p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_constant_declarator p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -366,7 +368,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_constant_declarator p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_type_const_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
     | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -374,7 +376,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_type_const_declaration p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_decorated_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -382,7 +384,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_decorated_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_parameter_declaration p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -390,7 +392,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_parameter_declaration p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_variadic_parameter p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -398,7 +400,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_variadic_parameter p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_attribute_specification p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -406,7 +408,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_attribute_specification p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_inclusion_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -414,7 +416,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_inclusion_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_inclusion_directive p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -422,7 +424,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_inclusion_directive p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_compound_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -430,7 +432,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_compound_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_alternate_loop_statement p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -438,7 +440,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_alternate_loop_statement p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_expression_statement p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -446,7 +448,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_expression_statement p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_markup_section p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -454,7 +456,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_markup_section p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_markup_suffix p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -462,7 +464,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_markup_suffix p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_unset_statement p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -470,7 +472,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_unset_statement p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_let_statement p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -478,7 +480,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_let_statement p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_using_statement_block_scoped p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -486,7 +488,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_using_statement_block_scoped p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_using_statement_function_scoped p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -494,7 +496,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_using_statement_function_scoped p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_declare_directive_statement p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -502,7 +504,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_declare_directive_statement p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_declare_block_statement p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -510,7 +512,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_declare_block_statement p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_while_statement p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -518,7 +520,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_while_statement p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_if_statement p0 p1 p2 p3 p4 p5 p6 stack =
     match stack with
     | a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -526,7 +528,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_if_statement p0 p1 p2 p3 p4 p5 p6 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_elseif_clause p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -534,7 +536,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_elseif_clause p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_else_clause p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -542,7 +544,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_else_clause p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_alternate_if_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
     | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -550,7 +552,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_alternate_if_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_alternate_elseif_clause p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -558,7 +560,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_alternate_elseif_clause p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_alternate_else_clause p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -566,7 +568,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_alternate_else_clause p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_try_statement p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -574,7 +576,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_try_statement p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_catch_clause p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -582,7 +584,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_catch_clause p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_finally_clause p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -590,7 +592,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_finally_clause p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_do_statement p0 p1 p2 p3 p4 p5 p6 stack =
     match stack with
     | a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -598,7 +600,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_do_statement p0 p1 p2 p3 p4 p5 p6 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_for_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 stack =
     match stack with
     | a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -606,7 +608,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_for_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_foreach_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 stack =
     match stack with
     | a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -614,7 +616,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_foreach_statement p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_switch_statement p0 p1 p2 p3 p4 p5 p6 stack =
     match stack with
     | a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -622,7 +624,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_switch_statement p0 p1 p2 p3 p4 p5 p6 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_alternate_switch_statement p0 p1 p2 p3 p4 p5 p6 p7 stack =
     match stack with
     | a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -630,7 +632,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_alternate_switch_statement p0 p1 p2 p3 p4 p5 p6 p7 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_switch_section p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -638,7 +640,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_switch_section p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_switch_fallthrough p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -646,7 +648,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_switch_fallthrough p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_case_label p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -654,7 +656,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_case_label p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_default_label p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -662,7 +664,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_default_label p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_return_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -670,7 +672,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_return_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_goto_label p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -678,7 +680,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_goto_label p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_goto_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -686,7 +688,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_goto_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_throw_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -694,7 +696,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_throw_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_break_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -702,7 +704,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_break_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_continue_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -710,7 +712,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_continue_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_echo_statement p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -718,7 +720,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_echo_statement p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_concurrent_statement p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -726,7 +728,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_concurrent_statement p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_simple_initializer p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -734,7 +736,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_simple_initializer p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_anonymous_class p0 p1 p2 p3 p4 p5 p6 p7 p8 stack =
     match stack with
     | a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -742,7 +744,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_anonymous_class p0 p1 p2 p3 p4 p5 p6 p7 p8 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 stack =
     match stack with
     | a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -750,7 +752,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 stack =
     match stack with
     | a11 :: a10 :: a9 :: a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -758,7 +760,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_php7_anonymous_function p0 p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_anonymous_function_use_clause p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -766,7 +768,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_anonymous_function_use_clause p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_lambda_expression p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -774,7 +776,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_lambda_expression p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_lambda_signature p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -782,7 +784,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_lambda_signature p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_cast_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -790,7 +792,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_cast_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_scope_resolution_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -798,7 +800,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_scope_resolution_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_member_selection_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -806,7 +808,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_member_selection_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_safe_member_selection_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -814,7 +816,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_safe_member_selection_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_embedded_member_selection_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -822,7 +824,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_embedded_member_selection_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_yield_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -830,7 +832,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_yield_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_yield_from_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -838,7 +840,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_yield_from_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_prefix_unary_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -846,7 +848,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_prefix_unary_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_postfix_unary_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -854,7 +856,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_postfix_unary_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_binary_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -862,7 +864,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_binary_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_instanceof_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -870,7 +872,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_instanceof_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_is_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -878,7 +880,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_is_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_as_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -886,7 +888,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_as_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_nullable_as_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -894,7 +896,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_nullable_as_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_conditional_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -902,7 +904,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_conditional_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_eval_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -910,7 +912,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_eval_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_empty_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -918,7 +920,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_empty_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_define_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -926,7 +928,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_define_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_halt_compiler_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -934,7 +936,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_halt_compiler_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_isset_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -942,7 +944,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_isset_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_function_call_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -950,7 +952,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_function_call_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_parenthesized_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -958,7 +960,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_parenthesized_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_braced_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -966,7 +968,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_braced_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_embedded_braced_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -974,7 +976,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_embedded_braced_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_list_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -982,7 +984,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_list_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_collection_literal_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -990,7 +992,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_collection_literal_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_object_creation_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -998,7 +1000,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_object_creation_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_constructor_call p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1006,7 +1008,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_constructor_call p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_record_creation_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1014,7 +1016,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_record_creation_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_array_creation_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1022,7 +1024,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_array_creation_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_array_intrinsic_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1030,7 +1032,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_array_intrinsic_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_darray_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1038,7 +1040,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_darray_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_dictionary_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1046,7 +1048,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_dictionary_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_keyset_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1054,7 +1056,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_keyset_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_varray_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1062,7 +1064,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_varray_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_vector_intrinsic_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1070,7 +1072,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_vector_intrinsic_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_element_initializer p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1078,7 +1080,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_element_initializer p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_subscript_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1086,7 +1088,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_subscript_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_embedded_subscript_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1094,7 +1096,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_embedded_subscript_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_awaitable_creation_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1102,7 +1104,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_awaitable_creation_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_children_declaration p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1110,7 +1112,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_children_declaration p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_children_parenthesized_list p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1118,7 +1120,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_children_parenthesized_list p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_category_declaration p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1126,7 +1128,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_category_declaration p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_enum_type p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1134,7 +1136,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_enum_type p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_required p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1142,7 +1144,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_required p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_class_attribute_declaration p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1150,7 +1152,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_class_attribute_declaration p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_class_attribute p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1158,7 +1160,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_class_attribute p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_simple_class_attribute p0 stack =
     match stack with
     | a0 :: rem ->
@@ -1166,7 +1168,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_simple_class_attribute p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_simple_attribute p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1174,7 +1176,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_simple_attribute p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_spread_attribute p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1182,7 +1184,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_spread_attribute p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_open p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1190,7 +1192,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_open p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_expression p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1198,7 +1200,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_expression p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_xhp_close p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1206,7 +1208,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_xhp_close p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_type_constant p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1214,7 +1216,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_type_constant p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_vector_type_specifier p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1222,7 +1224,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_vector_type_specifier p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_keyset_type_specifier p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1230,7 +1232,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_keyset_type_specifier p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_tuple_type_explicit_specifier p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1238,7 +1240,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_tuple_type_explicit_specifier p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_varray_type_specifier p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1246,7 +1248,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_varray_type_specifier p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_vector_array_type_specifier p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1254,7 +1256,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_vector_array_type_specifier p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_type_parameter p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1262,7 +1264,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_type_parameter p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_type_constraint p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1270,7 +1272,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_type_constraint p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_darray_type_specifier p0 p1 p2 p3 p4 p5 p6 stack =
     match stack with
     | a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1278,7 +1280,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_darray_type_specifier p0 p1 p2 p3 p4 p5 p6 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_map_array_type_specifier p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1286,7 +1288,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_map_array_type_specifier p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_dictionary_type_specifier p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1294,7 +1296,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_dictionary_type_specifier p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_closure_type_specifier p0 p1 p2 p3 p4 p5 p6 p7 p8 stack =
     match stack with
     | a8 :: a7 :: a6 :: a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1302,7 +1304,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_closure_type_specifier p0 p1 p2 p3 p4 p5 p6 p7 p8 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_closure_parameter_type_specifier p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1310,7 +1312,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_closure_parameter_type_specifier p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_classname_type_specifier p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1318,7 +1320,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_classname_type_specifier p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_field_specifier p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1326,7 +1328,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_field_specifier p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_field_initializer p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1334,7 +1336,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_field_initializer p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_shape_type_specifier p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1342,7 +1344,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_shape_type_specifier p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_shape_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1350,7 +1352,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_shape_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_tuple_expression p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1358,7 +1360,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_tuple_expression p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_generic_type_specifier p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1366,7 +1368,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_generic_type_specifier p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_nullable_type_specifier p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1374,7 +1376,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_nullable_type_specifier p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_like_type_specifier p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1382,7 +1384,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_like_type_specifier p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_soft_type_specifier p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1390,7 +1392,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_soft_type_specifier p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_reified_type_argument p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1398,7 +1400,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_reified_type_argument p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_type_arguments p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1406,7 +1408,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_type_arguments p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_type_parameters p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1414,7 +1416,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_type_parameters p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_tuple_type_specifier p0 p1 p2 stack =
     match stack with
     | a2 :: a1 :: a0 :: rem ->
@@ -1422,7 +1424,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_tuple_type_specifier p0 p1 p2 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_error p0 stack =
     match stack with
     | a0 :: rem ->
@@ -1430,7 +1432,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_error p0 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_list_item p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1438,7 +1440,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_list_item p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_atom_expression p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1446,7 +1448,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_atom_expression p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_identifier_expression p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1454,7 +1456,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_identifier_expression p0 p1 p2 p3 p4 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_atom_mapping_declaration p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1462,7 +1464,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_atom_mapping_declaration p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_enum_declaration p0 p1 p2 p3 p4 p5 stack =
     match stack with
     | a5 :: a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1470,7 +1472,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_enum_declaration p0 p1 p2 p3 p4 p5 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_field_type_expr_declaration p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1478,7 +1480,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_field_type_expr_declaration p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_field_type_declaration p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1486,7 +1488,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_field_type_declaration p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_mapping_id_declaration p0 p1 stack =
     match stack with
     | a1 :: a0 :: rem ->
@@ -1494,7 +1496,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_mapping_id_declaration p0 p1 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
   let make_pocket_mapping_type_declaration p0 p1 p2 p3 stack =
     match stack with
     | a3 :: a2 :: a1 :: a0 :: rem ->
@@ -1502,5 +1504,5 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       let node = Syntax.make_pocket_mapping_type_declaration p0 p1 p2 p3 in
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
-    
+
 end (* WithSyntax *)

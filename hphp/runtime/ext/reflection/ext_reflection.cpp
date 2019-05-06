@@ -1407,7 +1407,7 @@ static Array HHVM_STATIC_METHOD(
 
   size_t numConsts = cls->numConstants();
   if (!numConsts) {
-    return Array::CreateDArray();
+    return empty_darray();
   }
 
   auto st = req::make<c_Set>();
@@ -1426,59 +1426,52 @@ static Array HHVM_STATIC_METHOD(
   return ai.toArray();
 }
 
-// helper for getAbstractConstantNames
+namespace {
+// helper for getOrdered*Constants
+template <typename Fn>
+static Array orderedConstantsHelper(const Class* cls, Fn filterFn) {
+  auto const numConsts = cls->numConstants();
+  if (!numConsts) {
+    return empty_darray();
+  }
+
+  auto st = KeysetInit{numConsts};
+  auto const consts = cls->constants();
+  for (size_t i = 0; i < numConsts; i++) {
+    auto const& konst = consts[i];
+    if (filterFn(konst)) {
+      st.add(make_tv<KindOfPersistentString>(konst.name.get()));
+    }
+  }
+
+  auto ret = st.create()->toDArray(false /*copy*/);
+  assertx(ret->size() <= numConsts);
+  return Array::attach(std::move(ret));
+}
+}
+
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getOrderedAbstractConstants,
-  const String& clsname) {
-  auto const cls = get_class_from_name(clsname);
-
-  size_t numConsts = cls->numConstants();
-  if (!numConsts) {
-    return Array::CreateDArray();
-  }
-
-  auto st = req::make<c_Set>();
-  st->reserve(numConsts);
-
-  const Class::Const* consts = cls->constants();
-  for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].isAbstract() && !consts[i].isType()) {
-      st->add(const_cast<StringData*>(consts[i].name.get()));
+  const String& clsname
+) {
+  return orderedConstantsHelper(
+    get_class_from_name(clsname),
+    [](Class::Const c) -> bool {
+      return c.isAbstract() && !c.isType();
     }
-  }
-
-  assertx(st->size() <= numConsts);
-
-  return st->toDArray();
+  );
 }
 
-
-
-// helper for getTypeConstants/hasTypeConstant
 static Array HHVM_STATIC_METHOD(
   ReflectionClass,
   getOrderedTypeConstants,
-  const String& clsname) {
-  auto const cls = get_class_from_name(clsname);
-
-  size_t numConsts = cls->numConstants();
-  if (!numConsts) {
-    return Array::Create();
-  }
-
-  auto st = req::make<c_Set>();
-  st->reserve(numConsts);
-
-  const Class::Const* consts = cls->constants();
-  for (size_t i = 0; i < numConsts; i++) {
-    if (consts[i].isType()) {
-      st->add(const_cast<StringData*>(consts[i].name.get()));
-    }
-  }
-
-  assertx(st->size() <= numConsts);
-  return st->toDArray();
+  const String& clsname
+) {
+  return orderedConstantsHelper(
+    get_class_from_name(clsname),
+    [](Class::Const c) -> bool { return c.isType(); }
+  );
 }
 
 static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {

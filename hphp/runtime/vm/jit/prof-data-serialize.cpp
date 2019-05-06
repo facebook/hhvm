@@ -339,6 +339,7 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
   if (ptr->kind() == TransKind::Profile) {
     write_raw(ser, ptr->lastBcOff());
     write_region_desc(ser, ptr->region().get());
+    write_raw(ser, ptr->asmSize());
   } else {
     write_raw(ser, ptr->prologueArgs());
 
@@ -353,6 +354,7 @@ void write_prof_trans_rec(ProfDataSerializer& ser,
     for (auto const caller : ptr->mainCallers()) addCaller(caller);
     for (auto const caller : ptr->guardCallers()) addCaller(caller);
     write_container(ser, callers, write_raw<TransID>);
+    write_raw(ser, ptr->asmSize());
   }
 }
 
@@ -366,16 +368,18 @@ std::unique_ptr<ProfTransRec> read_prof_trans_rec(ProfDataDeserializer& ser) {
   if (kind == TransKind::Profile) {
     auto const lastBcOff = read_raw<Offset>(ser);
     auto const region = read_region_desc(ser);
-    return std::make_unique<ProfTransRec>(lastBcOff, sk, region);
+    auto const asmSize = read_raw<uint32_t>(ser);
+    return std::make_unique<ProfTransRec>(lastBcOff, sk, region, asmSize);
   }
 
-  auto ret = std::make_unique<ProfTransRec>(sk, read_raw<int>(ser));
+  auto ret = std::make_unique<ProfTransRec>(sk, read_raw<int>(ser), 0);
 
   read_container(ser,
                  [&] {
                    ret->profCallers().push_back(read_raw<TransID>(ser));
                  });
-
+  auto const asmSize = read_raw<uint32_t>(ser);
+  ret->setAsmSize(asmSize);
   return ret;
 }
 

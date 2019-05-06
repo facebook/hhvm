@@ -141,20 +141,22 @@ struct ProfTransRec {
    * Construct a ProfTransRec attached to a RegionDescPtr (region must be
    * non-null), for a profiling translation.
    */
-  ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region);
+  ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region,
+               uint32_t asmSize);
 
   /*
    * Construct a ProfTransRec for a ProfPrologue.
    */
-  ProfTransRec(SrcKey sk, int nArgs);
+  ProfTransRec(SrcKey sk, int nArgs, uint32_t asmSize);
   ~ProfTransRec();
 
-  TransKind kind() const { return m_kind; }
-  SrcKey srcKey() const { return m_sk; }
-  FuncId funcId() const { return m_sk.funcID(); }
-  Func* func() const { return const_cast<Func*>(m_sk.func()); }
-  bool isProfile() const { return m_kind == TransKind::Profile; }
-  bool isProflogue() const { return m_kind == TransKind::ProfPrologue; }
+  TransKind kind()        const { return m_kind; }
+  SrcKey    srcKey()      const { return m_sk; }
+  FuncId    funcId()      const { return m_sk.funcID(); }
+  Func*     func()        const { return const_cast<Func*>(m_sk.func()); }
+  bool      isProfile()   const { return m_kind == TransKind::Profile; }
+  bool      isProflogue() const { return m_kind == TransKind::ProfPrologue; }
+  uint32_t  asmSize()     const { return m_asmSize; }
 
   /*
    * First BC offset in this translation.
@@ -274,6 +276,9 @@ struct ProfTransRec {
     m_callers->main.clear();
     m_callers->guard.clear();
   }
+
+  void setAsmSize(uint32_t asmSize) { m_asmSize = asmSize; }
+
 private:
   struct CallerRec {
     // main and guard are populated by profiling, and are used both to
@@ -306,6 +311,7 @@ private:
     RegionDescPtr   m_region; // for TransProfile translations
     CallerRecPtr    m_callers; // for TransProfPrologue translations
   };
+  uint32_t m_asmSize;  // size of the machine code
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -462,8 +468,9 @@ struct ProfData {
    * Record a profiling translation: creates a ProfTransRec and returns the
    * associated TransID.
    */
-  void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&);
-  void addTransProfPrologue(TransID, SrcKey, int);
+  void addTransProfile(TransID, const RegionDescPtr&, const PostConditions&,
+                       uint32_t);
+  void addTransProfPrologue(TransID, SrcKey, int, uint32_t);
 
   /*
    * Add a ProfTransRec. Only used when deserializing the profile data, and

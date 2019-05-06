@@ -60,8 +60,7 @@ createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
     for (auto transId : transIds) {
       const auto trec = pd->transRec(transId);
       assertx(trec->kind() == TransKind::Profile);
-      // TODO: maybe save the size of the machine code and use it here
-      size += trec->lastBcOff() - trec->startBcOff();
+      size += trec->asmSize();
     }
     const auto targetId = cg.addTarget(size);
     targetID[fid] = targetId;
@@ -185,7 +184,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
     print(cg, "/tmp/hotfuncs-pgo.txt", clusters, target2FuncId);
     if (serverMode) {
       Logger::Info("retranslateAll: saved sorted list of hot functions at "
-                   "/tmp/hotfuncs-pgo.dot");
+                   "/tmp/hotfuncs-pgo.txt");
     }
   }
 

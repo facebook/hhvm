@@ -78,7 +78,8 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
     if (kind == TransKind::ProfPrologue) {
       auto const profData = jit::profData();
       auto const id = profData->allocTransID();
-      profData->addTransProfPrologue(id, funcBody, paramIndex);
+      profData->addTransProfPrologue(id, funcBody, paramIndex,
+        0 /* asmSize: updated below after machine code is generated */);
       return id;
     }
     if (profData() && transdb::enabled()) {
@@ -90,6 +91,11 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
   info.start = genFuncPrologue(transID, kind, func, argc, codeView, fixups);
 
   loc = maker.markEnd().loc();
+
+  if (kind == TransKind::ProfPrologue) {
+    // Update the profiling prologue size now that we generated it.
+    profData()->transRec(transID)->setAsmSize(loc.mainSize());
+  }
 
   if (RuntimeOption::EvalEnableReusableTC) {
     TCA UNUSED ms = loc.mainStart(), me = loc.mainEnd(),

@@ -35,19 +35,22 @@ TRACE_SET_MOD(pgo);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ProfTransRec::ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region)
+ProfTransRec::ProfTransRec(Offset lastBcOff, SrcKey sk, RegionDescPtr region,
+                           uint32_t asmSize)
     : m_kind(TransKind::Profile)
     , m_lastBcOff(lastBcOff)
     , m_sk(sk)
-    , m_region(region) {
+    , m_region(region)
+    , m_asmSize(asmSize){
   assertx(region != nullptr && !region->empty() && region->start() == sk);
 }
 
-ProfTransRec::ProfTransRec(SrcKey sk, int nArgs)
+ProfTransRec::ProfTransRec(SrcKey sk, int nArgs, uint32_t asmSize)
     : m_kind(TransKind::ProfPrologue)
     , m_prologueArgs(nArgs)
     , m_sk(sk)
     , m_callers{}
+    , m_asmSize(asmSize)
 {
   m_callers = std::make_unique<CallerRec>();
 }
@@ -117,7 +120,8 @@ TransID ProfData::dvFuncletTransId(SrcKey sk) const {
 
 void ProfData::addTransProfile(TransID transID,
                                const RegionDescPtr& region,
-                               const PostConditions& pconds) {
+                               const PostConditions& pconds,
+                               uint32_t asmSize) {
   auto const lastBcOff = region->lastSrcKey().offset();
 
   assertx(region);
@@ -145,7 +149,8 @@ void ProfData::addTransProfile(TransID transID,
 
   {
     folly::SharedMutex::WriteHolder lock{m_transLock};
-    m_transRecs[transID].reset(new ProfTransRec(lastBcOff, startSk, region));
+    m_transRecs[transID].reset(new ProfTransRec(lastBcOff, startSk, region,
+                                                asmSize));
   }
 
   // Putting transID in m_funcProfTrans makes it visible to other threads, so
@@ -154,11 +159,12 @@ void ProfData::addTransProfile(TransID transID,
   m_funcProfTrans[funcId].push_back(transID);
 }
 
-void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs) {
+void ProfData::addTransProfPrologue(TransID transID, SrcKey sk, int nArgs,
+                                    uint32_t asmSize) {
   m_proflogueDB.emplace(PrologueID{sk.funcID(), nArgs}, transID);
 
   folly::SharedMutex::WriteHolder lock{m_transLock};
-  m_transRecs[transID].reset(new ProfTransRec(sk, nArgs));
+  m_transRecs[transID].reset(new ProfTransRec(sk, nArgs, asmSize));
 }
 
 void ProfData::addProfTrans(TransID transID,

@@ -942,7 +942,8 @@ folly::Optional<TransMetaInfo> emitTranslation(TransEnv env, OptView optDst) {
   if (args.kind == TransKind::Profile) {
     always_assert(args.region);
     auto metaLock = lockMetadata();
-    profData()->addTransProfile(env.transID, args.region, env.pconds);
+    profData()->addTransProfile(env.transID, args.region, env.pconds,
+                                range.main.size());
   }
 
   TransRec tr;

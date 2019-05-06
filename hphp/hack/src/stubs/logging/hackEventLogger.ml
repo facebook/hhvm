@@ -167,3 +167,13 @@ let init_watchman_failed _ = ()
 let restarting_watchman_subscription _ = ()
 let uncaught_exception _ = ()
 let processed_clients _ = ()
+
+let search_symbol_index
+    ~(query_text:string)
+    ~(max_results:int)
+    ~(results:int)
+    ~(kind_filter:string)
+    ~(duration:float)
+    ~(actype:string)
+    ~(caller:string)
+    ~(search_provider:string) = ()

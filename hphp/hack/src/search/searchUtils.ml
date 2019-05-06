@@ -21,6 +21,18 @@ type search_provider =
   | RipGrepIndex
   | SqliteIndex
   | TrieIndex
+[@@deriving show]
+
+(* The context in which autocomplete is being performed *)
+type autocomplete_type =
+  | Acid
+  | Acnew
+  | Actype
+  | Acclass_get
+  | Acprop
+  | Acshape_key
+  | Actrait_only
+[@@deriving show]
 
 (* Convert a string to a provider *)
 let provider_of_string (provider_str: string): search_provider =
@@ -102,6 +114,7 @@ type si_kind =
   | SI_Function
   | SI_Typedef
   | SI_GlobalConstant
+  [@@deriving show]
 
 (*
  * Convert the enum to an integer whose value will not change accidentally.

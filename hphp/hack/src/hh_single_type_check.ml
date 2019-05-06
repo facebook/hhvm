@@ -204,6 +204,7 @@ let parse_options () =
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
   let like_types = ref false in
+  let search_provider = ref "TrieIndex" in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -429,7 +430,10 @@ let parse_options () =
       "Look up class members lazily from shallow declarations";
     "--like-types",
       Arg.Set like_types,
-      "Allows deeper like types features like inferring trust"
+      "Allows deeper like types features like inferring trust";
+    "--search-provider",
+      Arg.String (fun str -> search_provider := str),
+      "Configure the symbol index search provider";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -481,6 +485,10 @@ let parse_options () =
       end tcopt.GlobalOptions.tco_experimental_features;
   } in
   let tcopt = GlobalOptions.setup_pocket_universes tcopt !pocket_universes in
+
+  (* Configure autocomplete search index with the selected search provider *)
+  SymbolIndex.set_search_provider !search_provider ~quiet:true;
+
   { files = fns;
     mode = !mode;
     no_builtins = !no_builtins;

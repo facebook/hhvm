@@ -15,6 +15,16 @@ val set_fuzzy_search_enabled : bool -> unit
 val get_search_provider: unit -> SearchUtils.search_provider
 val set_search_provider: ?quiet:bool -> string -> unit
 
+(* Log diagnostics for usage of autocomplete and symbol search *)
+val log_symbol_index_search:
+  query_text:string ->
+  max_results:int ->
+  results:int ->
+  kind_filter:SearchUtils.si_kind option ->
+  start_time:float ->
+  context:SearchUtils.autocomplete_type option ->
+  caller:string -> unit
+
 (* This is the proper search function everyone should use *)
 val find_matching_symbols :
     query_text:string ->
@@ -22,15 +32,15 @@ val find_matching_symbols :
     kind_filter:SearchUtils.si_kind option ->
     SearchUtils.si_results
 
-(* Legacy query interface that depends on multiworker *)
-val query :
+(* Legacy query interface for "Symbol Search", depends on multiworker *)
+val query_for_symbol_search :
   MultiWorker.worker list option ->
   string ->
   string ->
   fuzzy:bool ->
   (Pos.t, SearchUtils.search_result_type) SearchUtils.term list
 
-(* Legacy query interface that depends on filter-map *)
+(* Legacy query interface for LSP autocomplete, depends on filter-map *)
 val query_for_autocomplete :
   string ->
   limit:int option ->

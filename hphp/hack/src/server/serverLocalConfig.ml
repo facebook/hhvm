@@ -86,6 +86,7 @@ type t = {
   enable_reverse_naming_table_fallback : bool;
   (* Selects a search provider for autocomplete and symbol search *)
   symbolindex_search_provider : string;
+  symbolindex_quiet : bool;
   (* Use rust parser *)
   rust : bool;
 }
@@ -140,6 +141,7 @@ let default = {
   shallow_class_decl = false;
   enable_reverse_naming_table_fallback = false;
   symbolindex_search_provider = "TrieIndex";
+  symbolindex_quiet = false;
   rust = false;
 }
 
@@ -277,6 +279,8 @@ let load_ fn ~silent config_overrides =
       ~default:default.enable_reverse_naming_table_fallback config in
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
       ~default:default.symbolindex_search_provider config in
+  let symbolindex_quiet = bool_ "symbolindex_quiet"
+      ~default:default.symbolindex_quiet config in
   let rust = bool_if_version "rust"
       ~default:default.rust config in
   {
@@ -328,6 +332,7 @@ let load_ fn ~silent config_overrides =
     shallow_class_decl;
     enable_reverse_naming_table_fallback;
     symbolindex_search_provider;
+    symbolindex_quiet;
     rust;
   }
 

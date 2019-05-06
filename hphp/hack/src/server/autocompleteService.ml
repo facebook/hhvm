@@ -12,6 +12,7 @@ open Reordered_argument_collections
 open Typing_defs
 open Utils
 open String_utils
+open SearchUtils
 include AutocompleteTypes
 
 module Phase = Typing_phase
@@ -25,15 +26,6 @@ let autocomplete_is_complete : bool ref = ref true
 (* The position we're autocompleting at. This is used when computing completions
  * for global identifiers. *)
 let autocomplete_identifier: (Pos.t * string) option ref = ref None
-
-type autocomplete_type =
-  | Acid
-  | Acnew
-  | Actype
-  | Acclass_get
-  | Acprop
-  | Acshape_key
-  | Actrait_only
 
 (*
  * Take the results, look them up, and add file position information.
@@ -783,6 +775,9 @@ let go
   reset ();
   visitor#go tast;
   Errors.ignore_ begin fun () ->
+    let start_time = Unix.gettimeofday () in
+    let kind_filter_used = ref None in
+    let max_results_used = ref 100 in
     let completion_type = !argument_global_type in
     if completion_type = Some Acid ||
        completion_type = Some Acnew ||
@@ -811,8 +806,17 @@ let go
       | Partial res -> resolve_ty env autocomplete_context res ~delimit_on_namespaces
       | Complete res -> res
     in
-    {
+    let results = {
       With_complete_flag.is_complete = !autocomplete_is_complete;
       value = !autocomplete_results |> List.filter ~f:filter_results |> List.map ~f:resolve;
-    }
+    } in
+    SymbolIndex.log_symbol_index_search
+      ~start_time
+      ~query_text:!auto_complete_for_global
+      ~max_results:!max_results_used
+      ~kind_filter:!kind_filter_used
+      ~results:(List.length results.With_complete_flag.value)
+      ~context:completion_type
+      ~caller:"AutocompleteService.go";
+    results
   end

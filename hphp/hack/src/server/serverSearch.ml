@@ -61,6 +61,7 @@ let re_colon_colon = Str.regexp "::"
 
 let go workers query type_
   : SearchUtils.result =
+  let start_time = Unix.gettimeofday () in
   let fuzzy = SymbolIndex.fuzzy_search_enabled () in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)
@@ -68,7 +69,7 @@ let go workers query type_
     | [class_name_query; method_query] ->
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
-        SymbolIndex.query ~fuzzy workers class_name_query type_
+        SymbolIndex.query_for_symbol_search ~fuzzy workers class_name_query type_
         |> List.find ~f:begin fun result ->
           match result with
           | SearchUtils.{result_type = SearchUtils.Class _; _} -> true
@@ -84,7 +85,15 @@ let go workers query type_
         []
       end
     | _  ->
-      let temp_results = SymbolIndex.query ~fuzzy workers query type_ in
+      let temp_results = SymbolIndex.query_for_symbol_search ~fuzzy workers query type_ in
       List.map temp_results SearchUtils.to_absolute
   in
+  SymbolIndex.log_symbol_index_search
+    ~start_time
+    ~query_text:query
+    ~max_results:0
+    ~kind_filter:None
+    ~results:(List.length results)
+    ~context:None
+    ~caller:"ServerSearch.go";
   results

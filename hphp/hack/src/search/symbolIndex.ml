@@ -17,6 +17,9 @@ let set_fuzzy_search_enabled x = HackSearchService.fuzzy := x
 (* Keep track of current search provider in a global *)
 let current_search_provider = ref None
 
+(* If we are debugging locally, avoid logging anything - it makes tests fail *)
+let in_quiet_mode = ref false
+
 (* Fetch the currently selected search provider *)
 let get_search_provider (): SearchUtils.search_provider =
   match !current_search_provider with
@@ -37,6 +40,8 @@ let set_search_provider
       Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
         (SearchUtils.descriptive_name_of_provider provider)
         provider_str;
+    end else begin
+      in_quiet_mode := true;
     end;
   | Some existing_provider ->
 
@@ -46,6 +51,49 @@ let set_search_provider
     end;
 ;;
 
+(* Log information about calls to the symbol index service *)
+let log_symbol_index_search
+    ~(query_text: string)
+    ~(max_results: int)
+    ~(results: int)
+    ~(kind_filter: si_kind option)
+    ~(start_time: float)
+    ~(context: autocomplete_type option)
+    ~(caller: string): unit =
+
+  (* In quiet mode we don't log anything to either scuba or console *)
+  if !in_quiet_mode then begin
+    ()
+  end else begin
+
+    (* Calculate duration *)
+    let end_time = Unix.gettimeofday () in
+    let duration = end_time -. start_time in
+
+    (* Clean up strings *)
+    let kind_filter_str = match kind_filter with
+      | None -> "None"
+      | Some kind -> show_si_kind kind
+    in
+    let actype_str = match context with
+      | None -> "None"
+      | Some actype -> show_autocomplete_type actype
+    in
+    let search_provider = descriptive_name_of_provider (get_search_provider ()) in
+
+    (* Send information to remote logging system *)
+    HackEventLogger.search_symbol_index
+      ~query_text
+      ~max_results
+      ~results
+      ~kind_filter:kind_filter_str
+      ~duration
+      ~actype:actype_str
+      ~caller
+      ~search_provider;
+    ()
+  end
+;;
 
 (*
  * Core search function
@@ -96,7 +144,6 @@ let find_matching_symbols
         HackSearchService.index_search query_text max_results kind_filter
     in
 
-    (* Return a unified list *)
     (* TODO: Deduplicate any items where the global result duplicates the local result *)
     List.append local_results global_results
   end
@@ -106,7 +153,7 @@ let find_matching_symbols
  * Legacy API
  * Will be replaced in a future diff in this stack
  *)
-let query
+let query_for_symbol_search
     (worker_list_opt: MultiWorker.worker list option)
     (s1: string)
     (s2: string)

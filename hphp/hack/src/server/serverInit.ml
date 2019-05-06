@@ -147,6 +147,7 @@ let init
 
   (* Configure autocomplete search index with the selected search provider *)
   SymbolIndex.set_search_provider
+    ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
     genv.local_config.ServerLocalConfig.symbolindex_search_provider;
 
   run_search genv t;

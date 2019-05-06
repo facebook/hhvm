@@ -267,20 +267,22 @@ bool diamondIntoCmov(Vunit& unit, jcc& jcc_i,
 
 void optimizeJmps(Vunit& unit) {
   Timer timer(Timer::vasm_jumps);
+
   bool changed = false;
   bool ever_changed = false;
+
   // The number of incoming edges from (reachable) predecessors for each block.
-  // It is maintained as an upper bound of the actual value during the
-  // transformation.
   jit::vector<int> npreds(unit.blocks.size(), 0);
+
   do {
     if (changed) {
       std::fill(begin(npreds), end(npreds), 0);
+      changed = false;
     }
-    changed = false;
+
     PostorderWalker{unit}.dfs([&](Vlabel b) {
       for (auto s : succs(unit.blocks[b])) {
-        npreds[s]++;
+        ++npreds[s];
       }
     });
     // give entry an extra predecessor to prevent cloning it.
@@ -290,6 +292,7 @@ void optimizeJmps(Vunit& unit) {
       auto& block = unit.blocks[b];
       auto& code = block.code;
       assertx(!code.empty());
+
       if (code.back().op == Vinstr::jcc) {
         auto ss = succs(block);
         if (ss[0] == ss[1]) {
@@ -305,9 +308,16 @@ void optimizeJmps(Vunit& unit) {
                         {jcc_i.targets[1], jcc_i.targets[0]}};
           }
 
-          if (isOnly(unit, jcc_i.targets[1], Vinstr::fallback)) {
+          auto const taken = jcc_i.targets[1];
+
+          if (isOnly(unit, taken, Vinstr::fallback)) {
             // replace jcc with fallbackcc and jmp
-            const auto& fb_i = unit.blocks[jcc_i.targets[1]].code[0].fallback_;
+            FTRACE(
+              4, "vasm-jumps: Rewriting jcc ({}) -> fallback ({}) "
+                 "as fallbackcc\n",
+              b, taken
+            );
+            const auto& fb_i = unit.blocks[taken].code[0].fallback_;
             const auto t0 = jcc_i.targets[0];
             const auto jcc_irctx = code.back().irctx();
             code.pop_back();
@@ -317,12 +327,19 @@ void optimizeJmps(Vunit& unit) {
               jcc_irctx
             );
             code.emplace_back(jmp{t0}, jcc_irctx);
+
+            --npreds[taken];
+
             changed = true;
           }
 
-          if (isOnly(unit, jcc_i.targets[1], Vinstr::jmpi)) {
+          if (isOnly(unit, taken, Vinstr::jmpi)) {
             // Replace jcc with jcci if the taken branch is just a jmpi
-            auto const& jmpi = unit.blocks[jcc_i.targets[1]].code[0].jmpi_;
+            FTRACE(
+              4, "vasm-jumps: Rewriting jcc ({}) -> jmpi ({}) as jcci\n",
+              b, taken
+            );
+            auto const& jmpi = unit.blocks[taken].code[0].jmpi_;
             if (jmpi.args.empty()) {
               // We don't have a way to provide the jmpi's args in a jcci, so
               // only perform the optimization if there's none.
@@ -332,6 +349,8 @@ void optimizeJmps(Vunit& unit) {
                 jcci{jcc_i.cc, jcc_i.sf, jcc_i.targets[0], jmpi.target},
                 jcc_irctx
               );
+              --npreds[taken];
+
               changed = true;
             }
           }
@@ -342,6 +361,10 @@ void optimizeJmps(Vunit& unit) {
 
       for (auto& s : succs(block)) {
         if (isOnly(unit, s, Vinstr::jmp)) {
+          FTRACE(
+            4, "vasm-jumps: Skipping {} -> jmp ({})\n",
+            b, s
+          );
           // skip over s
           --npreds[s];
           s = unit.blocks[s].code.back().jmp_.target;
@@ -350,13 +373,18 @@ void optimizeJmps(Vunit& unit) {
         }
       }
 
-      // If the block starts with a phijmp, and only has one predecessor, turn
-      // the phijmp/phidef pair into a copy and then a jmp. The two blocks
-      // should then be combined with the below jmp optimization. Later on, copy
-      // propagation should eliminate the copies.
+      // If the block ends with a phijmp{} and is the only predecessor of its
+      // successor, turn the phijmp{}/phidef{} pair into a copy{} and then a
+      // jmp{}.  The two blocks should then be combined with the below jmp
+      // optimization.  Later on, copy propagation should eliminate the copies.
       if (code.back().op == Vinstr::phijmp) {
         auto const target = code.back().phijmp_.target;
         if (npreds[target] == 1) {
+          FTRACE(
+            4, "vasm-jumps: Rewriting phijmp ({}) -> phidef ({}) as jmp\n",
+            b, target
+          );
+
           assertx(unit.blocks[target].code.size() > 0 &&
                   unit.blocks[target].code[0].op == Vinstr::phidef);
           auto const& uses = code.back().phijmp_.uses;
@@ -369,6 +397,7 @@ void optimizeJmps(Vunit& unit) {
           code.emplace_back(jmp{target}, irctx);
 
           unit.blocks[target].code[0] = nop{};
+          --npreds[target];
 
           changed = true;
         }
@@ -377,6 +406,10 @@ void optimizeJmps(Vunit& unit) {
       if (code.back().op == Vinstr::jmp) {
         auto s = code.back().jmp_.target;
         if (npreds[s] == 1 || isOnly(unit, s, Vinstr::jcc)) {
+          FTRACE(
+            4, "vasm-jumps: Rewriting jmp (B{}) -> jcc (B{}) as jcc\n",
+            b, s
+          );
           // overwrite jmp with copy of s
           auto& code2 = unit.blocks[s].code;
           code.pop_back();

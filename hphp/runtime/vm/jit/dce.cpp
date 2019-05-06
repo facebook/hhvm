@@ -1163,6 +1163,8 @@ void performActRecFixups(const BlockList& blocks,
          safeDepth,
          outerFunc->maxStackCells());
 
+  bool needsReflow = false;
+
   for (auto block : blocks) {
     ITRACE(2, "Visiting block {}\n", block->id());
     Trace::Indent indenter;
@@ -1201,6 +1203,7 @@ void performActRecFixups(const BlockList& blocks,
       case HintLocInner:
         if (state[inst.src(0)->inst()].isDead()) {
           convertToStackInst(unit, inst);
+          needsReflow = true;
         }
         break;
 
@@ -1263,6 +1266,8 @@ void performActRecFixups(const BlockList& blocks,
       }
     }
   }
+
+  if (needsReflow) reflowTypes(unit);
 }
 
 /*

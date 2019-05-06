@@ -319,7 +319,8 @@ InlineAnalysis analyze(IRUnit& unit) {
                depth, inst, *fpInst->dst());
       } else if (inst.is(InlineSuspend)) {
         assertx(depth && fpInst->is(DefInlineFP));
-        assertx(fpInst == inst.src(0)->inst());
+        assertx(fpInst == inst.src(0)->inst() ||
+                inst.src(0)->inst()->is(DefLabel));
 
         // Note that even though this block isn't necessarily an exit, we treat
         // it as though it were an exit block for this FP, as we will need to
@@ -756,7 +757,7 @@ bool process(OptimizeContext& ctx, Block* pred, Block* succ,
   return cont;
 }
 
-void transformUses(OptimizeContext& ctx, InstructionSet& uses) {
+void transformUses(OptimizeContext& ctx, InstructionSet& uses, bool& reflow) {
   auto fp = ctx.deadFp;
   auto def = fp->inst();
   auto parentFp = ctx.deadFp->inst()->src(1);
@@ -782,6 +783,9 @@ void transformUses(OptimizeContext& ctx, InstructionSet& uses) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Converting to stack relative instruction: {}\n", *inst);
       convertToStackInst(*ctx.unit, *inst);
+
+      // We may have change the types of some pointers
+      reflow = true;
     } else if (canRewriteToParent(*inst)) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Converting to use parent frame for instruction: {}\n", *inst);
@@ -903,7 +907,7 @@ void syncCatchTraces(OptimizeContext& ctx, BlockSet& exitBlocks) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
+bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   ITRACE(2, "optimize(): InlineReturn = {}\n", *inlineReturn);
   Trace::Indent _i;
 
@@ -975,7 +979,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
 
   // Remaining references to the FP must be from nested DefInlineFP instructions
   // that were already moved off the main execution path
-  transformUses(ctx, uses);
+  transformUses(ctx, uses, reflow);
 
   // Update BC markers on the main trace to use the parentFP, parentFP relative
   // offsets, and the call SrcKey
@@ -1009,10 +1013,11 @@ void optimizeInlineReturns(IRUnit& unit) {
   ITRACE(2, "splitting critical edges\n");
   splitCriticalEdges(unit);
 
+  bool reflow = false;
   auto ia = analyze(unit);
   for (auto iret : ia.inlineReturns) {
     auto def = iret->src(0)->inst();
-    if (!optimize(ia, iret)) continue;
+    if (!optimize(ia, iret, reflow)) continue;
 
     /*
      * Killing the fp if there are still uses would be --bad--
@@ -1040,6 +1045,8 @@ void optimizeInlineReturns(IRUnit& unit) {
     ITRACE(2, "Removing dead DefInlineFP: {}\n", *def);
     def->block()->erase(def);
   }
+
+  if (reflow) reflowTypes(unit);
 }
 
 }}

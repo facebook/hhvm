@@ -1288,22 +1288,6 @@ void dce(Env& env, const bc::IsTypeL& op) {
     });
 }
 
-void dce(Env& env, const bc::IsLateBoundCls&) {
-  pushRemovableIfNoThrow(env);
-}
-
-void dce(Env& env, const bc::IsTypeStructC&) {
-  pushRemovableIfNoThrow(env);
-}
-
-void dce(Env& env, const bc::CombineAndResolveTypeStruct&) {
-  pushRemovableIfNoThrow(env);
-}
-
-void dce(Env& env, const bc::ReifiedName&) {
-  pushRemovableIfNoThrow(env);
-}
-
 void dce(Env& env, const bc::Array& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (allUnusedIfNotLastRef(ui)) return PushFlags::MarkUnused;
@@ -1608,32 +1592,56 @@ void dce(Env& env, const bc::SetOpL& op) {
     });
 }
 
-void dce(Env& env, const bc::ArrayIdx& op) {
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (!env.flags.wasPEI && allUnused(ui)) {
-        return PushFlags::MarkUnused;
-      }
-      return PushFlags::MarkLive;
-    });
+void dce(Env& env, const bc::Add&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::AddNewElemC&)      { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::AddO&)             { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::AKExists&)         { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ArrayIdx&)         { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::BitAnd&)           { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::BitNot&)           { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::BitOr&)            { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::BitXor&)           { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastArray&)        { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastBool&)         { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastDArray&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastDict&)         { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastDouble&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastInt&)          { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastKeyset&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastObject&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastString&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastVArray&)       { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CastVec&)          { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Cmp&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::CombineAndResolveTypeStruct&) {
+  pushRemovableIfNoThrow(env);
 }
-
-void dce(Env& env, const bc::Idx& op) {
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (!env.flags.wasPEI && allUnused(ui)) {
-        return PushFlags::MarkUnused;
-      }
-      return PushFlags::MarkLive;
-    });
-}
-
-void dce(Env& env, const bc::AKExists& op) {
-  stack_ops(env, [&] (UseInfo& ui) {
-      if (!env.flags.wasPEI && allUnused(ui)) {
-        return PushFlags::MarkUnused;
-      }
-      return PushFlags::MarkLive;
-    });
-}
+void dce(Env& env, const bc::Concat&)           { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ConcatN&)          { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::DblAsBits&)        { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Div&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Eq&)               { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Gt&)               { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Gte&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Idx&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::IsLateBoundCls&)   { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::IsTypeStructC&)    { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Lt&)               { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Lte&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Mod&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Mul&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::MulO&)             { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Neq&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Not&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::NSame&)            { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Pow&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::ReifiedName&)      { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Same&)             { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Shl&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Shr&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Sub&)              { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::SubO&)             { pushRemovableIfNoThrow(env); }
+void dce(Env& env, const bc::Xor&)              { pushRemovableIfNoThrow(env); }
 
 /*
  * Default implementation is conservative: assume we use all of our
@@ -1666,9 +1674,6 @@ void no_dce(Env& env, const Op& op) {
   dce_slot_default(env, op, true);
 }
 
-void dce(Env& env, const bc::Add& op) { no_dce(env, op); }
-void dce(Env& env, const bc::AddNewElemC& op) { no_dce(env, op); }
-void dce(Env& env, const bc::AddO& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AliasCls& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATStk& op) { no_dce(env, op); }
@@ -1678,22 +1683,7 @@ void dce(Env& env, const bc::AwaitAll& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseGL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseH& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseL& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BitAnd& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BitNot& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BitOr& op) { no_dce(env, op); }
-void dce(Env& env, const bc::BitXor& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BreakTraceHint& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastArray& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastBool& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastDArray& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastDict& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastDouble& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastInt& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastKeyset& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastObject& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastString& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastVArray& op) { no_dce(env, op); }
-void dce(Env& env, const bc::CastVec& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CGetQuietG& op) { no_dce(env, op); }
@@ -1707,10 +1697,7 @@ void dce(Env& env, const bc::Clone& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsCns& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsCnsD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsRefGetTS& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Cmp& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CnsE& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Concat& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ConcatN& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContAssignDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCheck& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCurrent& op) { no_dce(env, op); }
@@ -1723,18 +1710,15 @@ void dce(Env& env, const bc::ContUnsetDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContValid& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCont& op) { no_dce(env, op); }
-void dce(Env& env, const bc::DblAsBits& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefCls& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefClsNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefCns& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefRecord& op) { no_dce(env, op); }
 void dce(Env& env, const bc::DefTypeAlias& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Div& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EmptyG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EmptyL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EmptyS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::EntryNop& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Eq& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Eval& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCall& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FCallBuiltin& op) { no_dce(env, op); }
@@ -1752,8 +1736,6 @@ void dce(Env& env, const bc::FPushObjMethodD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FPushObjMethodRD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::FuncNumArgs& op) { no_dce(env, op); }
 void dce(Env& env, const bc::GetMemoKeyL& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Gt& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Gte& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::IncDecS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Incl& op) { no_dce(env, op); }
@@ -1779,28 +1761,19 @@ void dce(Env& env, const bc::LIterInit& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LIterInitK& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LIterNext& op) { no_dce(env, op); }
 void dce(Env& env, const bc::LIterNextK& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Lt& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Lte& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoGet& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoGetEager& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoSet& op) { no_dce(env, op); }
 void dce(Env& env, const bc::MemoSetEager& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Method& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Mod& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Mul& op) { no_dce(env, op); }
-void dce(Env& env, const bc::MulO& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NativeImpl& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Neq& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewLikeArrayL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObj& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewObjS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::NewRecord& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Nop& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Not& op) { no_dce(env, op); }
-void dce(Env& env, const bc::NSame& op) { no_dce(env, op); }
 void dce(Env& env, const bc::OODeclExists& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Pow& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Print& op) { no_dce(env, op); }
 void dce(Env& env, const bc::RecordReifiedGeneric& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Req& op) { no_dce(env, op); }
@@ -1810,19 +1783,14 @@ void dce(Env& env, const bc::ResolveClsMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveObjMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::RetM& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Same& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetRangeM& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetS& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Shl& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Shr& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Silence& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SSwitch& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Sub& op) { no_dce(env, op); }
-void dce(Env& env, const bc::SubO& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Switch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::This& op) { no_dce(env, op); }
 void dce(Env& env, const bc::UGetCUNop& op) { no_dce(env, op); }
@@ -1836,7 +1804,6 @@ void dce(Env& env, const bc::VerifyRetTypeTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VGetL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VGetS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::WHResult& op) { no_dce(env, op); }
-void dce(Env& env, const bc::Xor& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Yield& op) { no_dce(env, op); }
 void dce(Env& env, const bc::YieldFromDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::YieldK& op) { no_dce(env, op); }

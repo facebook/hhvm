@@ -205,6 +205,7 @@ let parse_options () =
   let out_extension = ref ".out" in
   let like_types = ref false in
   let search_provider = ref "TrieIndex" in
+  let rust = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -434,6 +435,9 @@ let parse_options () =
     "--search-provider",
       Arg.String (fun str -> search_provider := str),
       "Configure the symbol index search provider";
+    "--rust",
+      Arg.Set rust,
+      "Use rust parser";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -472,6 +476,7 @@ let parse_options () =
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)
     ~log_levels:(!log_levels)
+    ~po_rust:!rust
     ()
   in
   let tcopt = {

@@ -48,6 +48,9 @@ template<typename T> struct extent_allocator_traits {
   constexpr static ssize_t get_decay_ms() {
     return get_decay_ms_internal<T>(nullptr);
   }
+  constexpr static extent_hooks_t** get_fallback(T* extentAlloc) {
+    return get_fallback_internal<T>(extentAlloc, nullptr);
+  }
 
  private:
   template<typename A>
@@ -66,9 +69,16 @@ template<typename T> struct extent_allocator_traits {
   static constexpr ssize_t get_decay_ms_internal(...) {
     return 60 * 1000;                   // purge every minute by default
   }
+  template<typename A>
+  static constexpr extent_hooks_t**
+  get_fallback_internal(A* ea, decltype(A::m_fallback_hooks)) {
+    return &(ea->m_fallback_hooks);
+  }
+  template<typename A>
+  static constexpr extent_hooks_t** get_fallback_internal(...) {
+    return nullptr;
+  }
 };
-
-extern extent_hooks_t* g_defaultHooks;
 
 /**
  * Default extent hooks used by jemalloc.
@@ -115,7 +125,7 @@ struct MultiRangeExtentAllocator {
  * returned to the system, so be careful if memory is tight.
  */
 struct RangeFallbackExtentAllocator : RangeState {
-  public:
+ public:
   // Only one range allowed, must initialize at the beginning.  Add mappers
   // later.
   template<typename... Args>
@@ -154,6 +164,7 @@ struct RangeFallbackExtentAllocator : RangeState {
  public:
   // The hook passed to the underlying arena upon creation.
   static extent_hooks_t s_hooks;
+  extent_hooks_t* m_fallback_hooks{nullptr};
 };
 
 }}

@@ -81,55 +81,65 @@ size_t ManagedArena<ExtentAllocator>::unusedSize() {
 }
 
 template<typename ExtentAllocator>
-void ManagedArena<ExtentAllocator>::init() {
+void ManagedArena<ExtentAllocator>::create() {
   using Traits = extent_allocator_traits<ExtentAllocator>;
-  if (m_arenaId != 0) {
-    // Shouldn't call init() multiple times for the same instance.
-    not_reached();
-    return;
-  }
+  assertx(m_arenaId == kInvalidArena);
   size_t idSize = sizeof(m_arenaId);
   if (mallctl("arenas.create", &m_arenaId, &idSize, nullptr, 0)) {
     throw std::runtime_error{"arenas.create"};
   }
   char command[32];
-  if (extent_hooks_t* hooks_ptr = Traits::get_hooks()) {
-    std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
-    void* old = (g_defaultHooks == nullptr) ? &g_defaultHooks : nullptr;
-    size_t oldSize = sizeof(extent_hooks_t*);
-    if (mallctl(command, old, &oldSize, &hooks_ptr, sizeof(hooks_ptr))) {
-      throw std::runtime_error{command};
-    }
-  }
   ssize_t decay_ms = Traits::get_decay_ms();
   std::snprintf(command, sizeof(command),
                 "arena.%d.dirty_decay_ms", m_arenaId);
   if (mallctl(command, nullptr, nullptr, &decay_ms, sizeof(decay_ms))) {
     throw std::runtime_error{command};
   }
+}
 
-  if (Traits::get_hooks() != nullptr) {
-    // The only place where we need `GetByArenaId` is in custom extent hooks.
+
+template<typename ExtentAllocator>
+void ManagedArena<ExtentAllocator>::updateHook() {
+  using Traits = extent_allocator_traits<ExtentAllocator>;
+  if (auto hooks_ptr = Traits::get_hooks()) {
+    // We need to do `GetByArenaId()` in custom extent hooks, so register the
+    // arena in the global list. It is important that we do this before actually
+    // updating the hooks.
     assertx(GetByArenaId<ManagedArena>(m_arenaId) == nullptr);
+    bool registered = false;
     for (auto& i : g_arenas) {
-      if (!i.first) {
+      if (!i.second) {
         i.first = m_arenaId;
         i.second = this;
-        return;
+        registered = true;
+        break;
       }
     }
-    // Should never reached here, as there should be spare entries in g_arenas.
-    throw std::out_of_range{
-      "too many ManagedArena's, check MAX_MANAGED_ARENA_COUNT"};
+    if (!registered) {
+      throw std::out_of_range{
+        "too many ManagedArena's, check MAX_MANAGED_ARENA_COUNT"};
+    }
+
+    char command[32];
+    std::snprintf(command, sizeof(command), "arena.%d.extent_hooks", m_arenaId);
+    auto fallback = Traits::get_fallback(this);
+    size_t oldSize = sizeof(extent_hooks_t*);
+    if (mallctl(command, fallback, (fallback ? &oldSize : nullptr),
+                &hooks_ptr, sizeof(hooks_ptr))) {
+      throw std::runtime_error{command};
+    }
   }
 }
 
-template void ManagedArena<MultiRangeExtentAllocator>::init();
+template void ManagedArena<MultiRangeExtentAllocator>::create();
+template void ManagedArena<MultiRangeExtentAllocator>::updateHook();
 template size_t ManagedArena<MultiRangeExtentAllocator>::unusedSize();
 template std::string ManagedArena<MultiRangeExtentAllocator>::reportStats();
 
-template void ManagedArena<DefaultExtentAllocator>::init();
-template void ManagedArena<RangeFallbackExtentAllocator>::init();
+template void ManagedArena<DefaultExtentAllocator>::create();
+template void ManagedArena<DefaultExtentAllocator>::updateHook();
+template void ManagedArena<RangeFallbackExtentAllocator>::create();
+template void ManagedArena<RangeFallbackExtentAllocator>::updateHook();
 
 }}
 

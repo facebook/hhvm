@@ -20,6 +20,7 @@
 #include "hphp/util/alloc-defs.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/extent-hooks.h"
+#include <limits>
 #include <string>
 
 #if USE_JEMALLOC_EXTENT_HOOKS
@@ -41,15 +42,14 @@ namespace HPHP { namespace alloc {
 template <typename ExtentAllocator>
 struct ManagedArena : public ExtentAllocator {
  private:
-  // Constructor forwards all arguments.  The only correct way to create a
-  // ManagedArena is `CreateAt()` on preallocated memory.
+  // Constructor forwards all arguments. Use `CreateAt()` or `AttachTo()` to
+  // create instances.
   template<typename... Args>
   explicit ManagedArena(Args&&... args)
-    : ExtentAllocator(std::forward<Args>(args)...) {
-    init();
-  }
-  // Create the arena and set up hooks.
-  void init();
+    : ExtentAllocator(std::forward<Args>(args)...) {}
+
+  void create();
+  void updateHook();
 
   ManagedArena(const ManagedArena&) = delete;
   ManagedArena& operator=(const ManagedArena&) = delete;
@@ -71,11 +71,23 @@ struct ManagedArena : public ExtentAllocator {
 
   template<typename... Args>
   static ManagedArena* CreateAt(void* addr, Args&&... args) {
-    return new (addr) ManagedArena(std::forward<Args>(args)...);
+    auto arena = new (addr) ManagedArena(std::forward<Args>(args)...);
+    arena->create();
+    arena->updateHook();
+    return arena;
+  }
+
+  template<typename... Args>
+  static ManagedArena* AttachTo(void* addr, unsigned id, Args&&... args) {
+    auto arena = new (addr) ManagedArena(std::forward<Args>(args)...);
+    arena->m_arenaId = id;
+    arena->updateHook();
+    return arena;
   }
 
  protected:
-  unsigned m_arenaId{0};
+  static constexpr auto kInvalidArena = std::numeric_limits<unsigned>::max();
+  unsigned m_arenaId{kInvalidArena};
 };
 
 using RangeArena = alloc::ManagedArena<alloc::MultiRangeExtentAllocator>;

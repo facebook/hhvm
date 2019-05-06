@@ -753,11 +753,9 @@ bool AliasClass::maybeData(AliasClass o) const {
      * We can't tell if two objects could be the same from here in general, but
      * we can rule out simple cases based on type.  The props can't be the same
      * if they are at different offsets, though.
-     *
-     * For now we're ignoring the type information, and only using offset.
-     * TODO(#2939547) TODO(#2884927)
      */
     if (m_prop.offset != o.m_prop.offset) return false;
+    if (!m_prop.obj->type().maybe(o.m_prop.obj->type())) return false;
     return true;
 
   /*
@@ -767,9 +765,11 @@ bool AliasClass::maybeData(AliasClass o) const {
    */
   case STag::ElemI:
     if (m_elemI.idx != o.m_elemI.idx) return false;
+    if (!m_elemI.arr->type().maybe(o.m_elemI.arr->type())) return false;
     return true;
   case STag::ElemS:
     if (m_elemS.key != o.m_elemS.key) return false;
+    if (!m_elemS.arr->type().maybe(o.m_elemS.arr->type())) return false;
     return true;
 
   case STag::Stack:

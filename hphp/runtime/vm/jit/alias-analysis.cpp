@@ -18,6 +18,7 @@
 #include <utility>
 #include <sstream>
 
+#include "hphp/util/bitset-utils.h"
 #include "hphp/util/match.h"
 #include "hphp/runtime/base/perf-warning.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -264,6 +265,7 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
+  ret |= may_alias_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
   ret |= may_alias_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= may_alias_part(*this, acls, acls.iterBase(), AIterBaseAny,
@@ -319,6 +321,7 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
+  ret |= expand_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
   ret |= expand_part(*this, acls, acls.ref(), ARefAny, all_ref);
   ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
   ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
@@ -339,11 +342,14 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
    */
   auto conflict_prop_offset = jit::fast_map<uint32_t,ALocBits>{};
   auto conflict_array_index = jit::fast_map<int64_t,ALocBits>{};
+  auto conflict_array_key = jit::fast_map<const StringData*,ALocBits>{};
+  auto prop_array_map = jit::fast_map<int64_t,AliasClass>{};
 
   visit_locations(blocks, [&] (AliasClass acls) {
     if (auto const prop = acls.is_prop()) {
       if (auto const index = add_class(ret, acls)) {
         conflict_prop_offset[prop->offset].set(*index);
+        prop_array_map.emplace(*index, acls);
       }
       return;
     }
@@ -351,6 +357,15 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     if (auto const elemI = acls.is_elemI()) {
       if (auto const index = add_class(ret, acls)) {
         conflict_array_index[elemI->idx].set(*index);
+        prop_array_map.emplace(*index, acls);
+      }
+      return;
+    }
+
+    if (auto const elemS = acls.is_elemS()) {
+      if (auto const index = add_class(ret, acls)) {
+        conflict_array_key[elemS->key].set(*index);
+        prop_array_map.emplace(*index, acls);
       }
       return;
     }
@@ -439,18 +454,36 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     FTRACE(1, "max locations limit was reached\n");
   }
 
+  auto const maybe_set_conflicts =
+    [&] (ALocBits conflicts, ALocMeta& meta, const AliasClass& acls) {
+      bitset_for_each_set(
+        conflicts,
+        [&] (size_t i) {
+          auto const other_acls = folly::get_ptr(prop_array_map, i);
+          assertx(other_acls);
+          if (i != meta.index && acls.maybe(*other_acls)) {
+            meta.conflicts.set(i);
+          }
+        }
+      );
+    };
+
   auto make_conflict_set = [&] (AliasClass acls, ALocMeta& meta) {
     if (auto const prop = acls.is_prop()) {
-      meta.conflicts = conflict_prop_offset[prop->offset];
-      meta.conflicts.reset(meta.index);
+      maybe_set_conflicts(conflict_prop_offset[prop->offset], meta, acls);
       ret.all_props.set(meta.index);
       return;
     }
 
     if (auto const elemI = acls.is_elemI()) {
-      meta.conflicts = conflict_array_index[elemI->idx];
-      meta.conflicts.reset(meta.index);
+      maybe_set_conflicts(conflict_array_index[elemI->idx], meta, acls);
       ret.all_elemIs.set(meta.index);
+      return;
+    }
+
+    if (auto const elemS = acls.is_elemS()) {
+      maybe_set_conflicts(conflict_array_key[elemS->key], meta, acls);
+      ret.all_elemSs.set(meta.index);
       return;
     }
 
@@ -608,10 +641,12 @@ std::string show(const AliasAnalysis& ainfo) {
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
+      " {: <20}       : {}\n"
       " {: <20}       : {}\n",
 
       "all props",          show(ainfo.all_props),
       "all elemIs",         show(ainfo.all_elemIs),
+      "all elemSs",         show(ainfo.all_elemSs),
       "all refs",           show(ainfo.all_ref),
       "all iterPos",        show(ainfo.all_iterPos),
       "all iterBase",       show(ainfo.all_iterBase),

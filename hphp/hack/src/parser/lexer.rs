@@ -43,18 +43,19 @@ pub enum KwSet {
 }
 
 impl<'a, Token: LexableToken> Lexer<'a, Token> {
-    pub fn make(
+    pub fn make_at(
         source: &'a SourceText<'a>,
         is_experimental_mode: bool,
         disable_unsafe_expr: bool,
         disable_unsafe_block: bool,
         force_hh: bool,
         enable_xhp: bool,
+        offset: usize,
     ) -> Self {
         Self {
             source,
-            start: 0,
-            offset: 0,
+            start: offset,
+            offset,
             errors: vec![],
             is_hh_file: true,
             is_experimental_mode,
@@ -65,6 +66,25 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             in_type: false,
             _phantom: PhantomData,
         }
+    }
+
+    pub fn make(
+        source: &'a SourceText<'a>,
+        is_experimental_mode: bool,
+        disable_unsafe_expr: bool,
+        disable_unsafe_block: bool,
+        force_hh: bool,
+        enable_xhp: bool,
+    ) -> Self {
+        Self::make_at(
+            source,
+            is_experimental_mode,
+            disable_unsafe_expr,
+            disable_unsafe_block,
+            force_hh,
+            enable_xhp,
+            0,
+        )
     }
 
     fn continue_from(&mut self, l: Lexer<Token>) {
@@ -1864,7 +1884,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.scan_leading_trivia(&Self::scan_php_trivia)
     }
 
-    fn scan_leading_xhp_trivia(&mut self) -> Vec<Token::Trivia> {
+    pub fn scan_leading_xhp_trivia(&mut self) -> Vec<Token::Trivia> {
         self.scan_leading_trivia(&Self::scan_xhp_trivia)
     }
 
@@ -1898,11 +1918,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         }
     }
 
-    fn scan_trailing_php_trivia(&mut self) -> Vec<Token::Trivia> {
+    pub fn scan_trailing_php_trivia(&mut self) -> Vec<Token::Trivia> {
         self.scan_trailing_trivia(&Self::scan_php_trivia)
     }
 
-    fn scan_trailing_xhp_trivia(&mut self) -> Vec<Token::Trivia> {
+    pub fn scan_trailing_xhp_trivia(&mut self) -> Vec<Token::Trivia> {
         self.scan_trailing_trivia(&Self::scan_xhp_trivia)
     }
 

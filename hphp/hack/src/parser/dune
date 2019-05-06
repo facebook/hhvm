@@ -75,7 +75,8 @@
     parser_env
     parser_schema_def
     parser_sigs
-    parser_stats_container)
+    parser_stats_container
+    rust_parser_ffi_stubs)
   (preprocess (pps visitors.ppx ppx_deriving.std)))
 
 (library

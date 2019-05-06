@@ -20,13 +20,20 @@ module Env = struct
   let enable_unsafe_expr = ref true
   let enable_unsafe_block = ref true
   let set_is_hh_file b = is_hh_file := b
-  let set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block =
+  let is_rust = ref false
+  let set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block ~rust =
     force_hh_opt := force_hh;
     enable_xhp_opt := enable_xhp;
     enable_unsafe_expr := not disable_unsafe_expr;
-    enable_unsafe_block := not disable_unsafe_block
+    enable_unsafe_block := not disable_unsafe_block;
+    is_rust := rust
+
+  let is_rust () = !is_rust
+
   let is_hh () = !is_hh_file || !force_hh_opt
   let enable_xhp () = is_hh () || !enable_xhp_opt
+  let get () =
+    (is_hh (), enable_xhp (), not !enable_unsafe_expr, not !enable_unsafe_block)
 
 end
 
@@ -85,7 +92,7 @@ end = struct
     (* this can be overridden in scan_header, but we need to explicitly reset *)
     (* it, as `scan_header` is never called for `.hack` files *)
     if (force_hh) then Env.set_is_hh_file true;
-    Env.set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block;
+    Env.set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block ~rust:false;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start

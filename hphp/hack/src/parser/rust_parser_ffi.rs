@@ -14,6 +14,9 @@ use parser_rust as parser;
 
 use parser_rust::file_mode::parse_mode;
 use parser::minimal_parser::MinimalSyntaxParser;
+use parser::minimal_token::MinimalToken;
+use parser::minimal_trivia::MinimalTrivia;
+use parser::lexer::Lexer;
 use parser::parser_env::ParserEnv;
 
 use parser::source_text::SourceText;
@@ -112,3 +115,45 @@ caml!(rust_parse_mode, |ocaml_source_text|, <l>, {
     l = ocaml::Value::new(ocaml_mode);
     ocamlpool_leave();
 } -> l);
+
+macro_rules! scan_trivia {
+    ($name:ident) => {
+        caml!($name, |ocaml_source_text, opts, offset|, <l>, {
+            let relative_path = block_field(&ocaml_source_text, 0);
+            let file_path = str_field(&relative_path, 1);
+            let content = str_field(&ocaml_source_text, 2);
+            let source_text = SourceText::make(&file_path.as_str(), &content.data());
+
+            let offset = offset.usize_val();
+
+            let is_experimental_mode = false;
+            let force_hh = bool_field(&opts, 0);
+            let enable_xhp = bool_field(&opts, 1);
+            let disable_unsafe_expr = bool_field(&opts, 2);
+            let disable_unsafe_block = bool_field(&opts, 3);
+
+            let mut lexer : Lexer<MinimalToken> = Lexer::make_at(
+                &source_text,
+                is_experimental_mode,
+                disable_unsafe_expr,
+                disable_unsafe_block,
+                force_hh,
+                enable_xhp,
+                offset,
+            );
+
+            let res : Vec<MinimalTrivia> = lexer.$name();
+
+            ocamlpool_enter();
+            let context = SerializationContext::new(ocaml_source_text.0);
+            let trivia_list = to_list(&res, &context);
+            l = ocaml::Value::new(trivia_list);
+            ocamlpool_leave();
+        } -> l);
+    };
+}
+
+scan_trivia!(scan_leading_xhp_trivia);
+scan_trivia!(scan_trailing_xhp_trivia);
+scan_trivia!(scan_leading_php_trivia);
+scan_trivia!(scan_trailing_php_trivia);

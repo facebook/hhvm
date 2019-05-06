@@ -62,4 +62,5 @@
   (name rust_parser_ffi_stubs)
   (wrapped false)
   (modules
-    rust_parser_ffi))
+    rust_parser_ffi
+    rust_lazy_trivia_ffi))

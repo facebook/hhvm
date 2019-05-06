@@ -13,7 +13,10 @@ module Env : sig
     enable_xhp:bool ->
     disable_unsafe_expr:bool ->
     disable_unsafe_block:bool ->
+    rust:bool ->
     unit
+  val is_rust : unit -> bool
+  val get : unit -> (bool * bool * bool * bool)
 end
 
 module WithToken : functor (Token : Lexable_token_sig.LexableToken_S) -> sig

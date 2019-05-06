@@ -157,7 +157,8 @@ module Syntax = Full_fidelity_minimal_syntax
 module Parser = WithSyntax(Syntax)
 open Syntax
 
-let parse_mode text =
+let parse_mode ~rust text =
+  if rust then Rust_parser_ffi.parse_mode text else
   let suffix = Relative_path.suffix (SourceText.file_path text) in
   let is_hhi = String_utils.string_ends_with suffix ".hhi" in
   let header = Parser.parse_header_only (Env.make ()) text in

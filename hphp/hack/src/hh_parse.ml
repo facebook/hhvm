@@ -365,7 +365,7 @@ let handle_existing_file args filename =
   (* Parse with the full fidelity parser *)
   let file = Relative_path.create Relative_path.Dummy filename in
   let source_text = SourceText.from_file file in
-  let mode = Full_fidelity_parser.parse_mode source_text in
+  let mode = Full_fidelity_parser.parse_mode ~rust:args.rust source_text in
   let env = Full_fidelity_parser_env.make
     ~force_hh:args.enable_hh_syntax
     ~enable_xhp:args.enable_hh_syntax

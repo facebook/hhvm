@@ -322,7 +322,7 @@ let parse text_source =
     | Stdin _ ->
       SourceText.make Relative_path.default @@ read_stdin ()
   in
-  let mode = Full_fidelity_parser.parse_mode source_text in
+  let mode = Full_fidelity_parser.parse_mode ~rust:false source_text in
   let parser_env = Full_fidelity_parser_env.make ?mode () in
   let tree = SyntaxTree.make ~env:parser_env source_text in
   if List.is_empty (SyntaxTree.all_errors tree)

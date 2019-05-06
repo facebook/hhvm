@@ -81,7 +81,7 @@ let create text root errors mode state =
   build text root errors mode state
 
 let make_impl ?(env = Env.default) text =
-  let mode = Full_fidelity_parser.parse_mode text in
+  let mode = Full_fidelity_parser.parse_mode ~rust:(Env.rust env) text in
   let parser = Parser.make env text in
   let (parser, root) = Parser.parse_script parser in
   let errors = Parser.errors parser in

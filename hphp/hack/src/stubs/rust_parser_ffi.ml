@@ -8,6 +8,7 @@
  *)
 
 let init () = ()
+let parse_mode _ = failwith "not implemented"
 let parse_minimal _ _ = failwith "not implemented"
 let parse_positioned _ _ = failwith "not implemented"
 let parse_positioned_with_decl_mode_sc _ _ = failwith "not implemented"

@@ -12,6 +12,7 @@ extern crate ocaml;
 pub mod rust_to_ocaml;
 use parser_rust as parser;
 
+use parser_rust::file_mode::parse_mode;
 use parser::minimal_parser::MinimalSyntaxParser;
 use parser::parser_env::ParserEnv;
 
@@ -96,3 +97,18 @@ macro_rules! parse {
 
 parse!(parse_minimal, MinimalSyntaxParser);
 parse!(parse_positioned, PositionedSyntaxParser);
+
+caml!(rust_parse_mode, |ocaml_source_text|, <l>, {
+    let relative_path = block_field(&ocaml_source_text, 0);
+    let file_path = str_field(&relative_path, 1);
+    let content = str_field(&ocaml_source_text, 2);
+    let source_text = SourceText::make(&file_path.as_str(), &content.data());
+
+    let mode = parse_mode(&source_text);
+
+    ocamlpool_enter();
+    let context = SerializationContext::new(ocaml_source_text.0);
+    let ocaml_mode = mode.to_ocaml(&context);
+    l = ocaml::Value::new(ocaml_mode);
+    ocamlpool_leave();
+} -> l);

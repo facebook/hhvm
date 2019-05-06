@@ -17,7 +17,7 @@ exception MoreThanOneElementInTheState of Syntax.t list
 let verify ?(env = Env.default) text =
   let parser = VerifyParser.make env text in
   try
-    let mode = Full_fidelity_parser.parse_mode text in
+    let mode = Full_fidelity_parser.parse_mode ~rust:(Env.rust env) text in
     let (parser, root) = VerifyParser.parse_script parser in
     let sc_state = VerifyParser.sc_state parser in
     if List.length sc_state > 1 then

@@ -48,6 +48,8 @@ let set_global_lexer_env env =
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
 
+external parse_mode: SourceText.t -> FileInfo.mode option = "rust_parse_mode"
+
 external parse_minimal:
   SourceText.t ->
   parser_opts ->

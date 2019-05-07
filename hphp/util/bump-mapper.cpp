@@ -81,14 +81,16 @@ constexpr size_t kChunkSize = 4 * size2m;
 
 bool Bump2MMapper::addMappingImpl() {
   if (m_currHugePages >= m_maxHugePages) return false;
-  if (get_huge2m_info().free_hugepages <= 0) return false;
+  auto const freePages = get_huge2m_info().free_hugepages;
+  if (freePages <= 0) return false;
 
   std::lock_guard<RangeState> _(m_state);
   // Recheck the mapping frontiers after grabbing the lock
   auto const currFrontier = m_state.low_map.load(std::memory_order_relaxed);
   if (currFrontier % size2m != 0) return false;
-  auto const hugeSize = std::min(kChunkSize,
-                                 size2m * (m_maxHugePages - m_currHugePages));
+  auto nPages = std::min(m_maxHugePages - m_currHugePages, freePages);
+  if (nPages <= 0) return false;
+  auto const hugeSize = std::min(kChunkSize, size2m * nPages);
   auto const newFrontier = currFrontier + hugeSize;
   if (newFrontier > m_state.high_map.load(std::memory_order_relaxed)) {
     return false;
@@ -106,6 +108,15 @@ bool Bump2MMapper::addMappingImpl() {
           &mask, 32 /* max node */, 0 /* flag */);
   }
 #endif
+  // Make sure pages are faulted in.
+  for (auto addr = currFrontier; addr < newFrontier; addr += size2m) {
+    if (mlock(reinterpret_cast<void*>(addr), 1)) {
+      // Forget it. We don't really have enough page reserved. At this moment,
+      // we haven't committed to RangeState yet, so it is safe to bail out.
+      munmap((void*)currFrontier, hugeSize);
+      return false;
+    }
+  }
   m_currHugePages += hugeSize / size2m;
   m_state.low_map.store(newFrontier, std::memory_order_release);
   return true;

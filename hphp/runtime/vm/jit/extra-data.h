@@ -713,26 +713,22 @@ struct CallUnpackData : IRExtraData {
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
                            const Func* callee,
-                           int32_t numNonDefault,
-                           bool needsFrame)
+                           int32_t numNonDefault)
     : spOffset(spOffset)
     , callee{callee}
     , numNonDefault{numNonDefault}
-    , needsCallerFrame{needsFrame}
   {}
 
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',',
-      callee->fullName()->data(),
-      needsCallerFrame ? ",needsCallerFrame" : ""
+      callee->fullName()->data()
     );
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
   const Func* callee;
   int32_t numNonDefault;
-  bool needsCallerFrame;
 };
 
 struct CallData : IRExtraData {
@@ -741,14 +737,12 @@ struct CallData : IRExtraData {
                     uint32_t numOut,
                     Offset callOffset,
                     const Func* callee,
-                    bool needsFrame,
                     bool asyncEagerReturn)
     : spOffset(spOffset)
     , numParams(numParams)
     , numOut(numOut)
     , callOffset(callOffset)
     , callee(callee)
-    , needsCallerFrame(needsFrame)
     , asyncEagerReturn(asyncEagerReturn)
   {}
 
@@ -758,7 +752,6 @@ struct CallData : IRExtraData {
       callee
         ? folly::format(",{}", callee->fullName()).str()
         : std::string{},
-      needsCallerFrame ? ",needsCallerFrame" : "",
       asyncEagerReturn ? ",asyncEagerReturn" : ""
     );
   }
@@ -768,7 +761,6 @@ struct CallData : IRExtraData {
   uint32_t numOut;     // number of values returned via stack from the callee
   Offset callOffset;   // m_callOff style: offset from func->base()
   const Func* callee;  // nullptr if not statically known
-  bool needsCallerFrame;
   bool asyncEagerReturn;
 };
 

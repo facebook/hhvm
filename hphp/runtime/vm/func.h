@@ -1426,13 +1426,6 @@ struct PrologueID {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Could the function `callee` attempt to read the caller frame?
- *
- * This occurs, e.g., if `func' is is_callable().
- */
-bool funcNeedsCallerFrame(const Func*);
-
-/*
  * Log meta-information about func. Records attributes, number of locals,
  * parameters, static locals, class ref slots, frame cells, high watermark,
  * and iterators. Does not record function name or class.

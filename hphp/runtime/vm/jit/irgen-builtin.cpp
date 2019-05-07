@@ -1472,8 +1472,7 @@ SSATmp* builtinCall(IRGS& env,
     CallBuiltinData {
       spOffBCFromIRSP(env),
       callee,
-      numNonDefault,
-      funcNeedsCallerFrame(callee)
+      numNonDefault
     },
     catchMaker.makeUnusualCatch(),
     std::make_pair(realized.size(), decayedPtr)

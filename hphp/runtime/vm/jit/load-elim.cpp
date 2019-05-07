@@ -875,7 +875,6 @@ void resolve_call(Global& env,
     auto& extra = *inst.extra<Call>();
     assertx(extra.callee == nullptr);
     extra.callee = flags.callee;
-    extra.needsCallerFrame = funcNeedsCallerFrame(flags.callee);
     retypeDests(&inst, &env.unit);
     ++env.callsResolved;
     return;

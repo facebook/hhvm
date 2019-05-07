@@ -674,42 +674,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Could `inst' attempt to read the caller frame?
- *
- * This occurs, e.g., if `inst' is a call to is_callable().
- */
-bool callNeedsCallerFrame(const NormalizedInstruction& inst,
-                          const Func* caller) {
-  auto const  unit = caller->unit();
-  auto const checkTaintId = [&](Id id) {
-    auto const str = unit->lookupLitstrId(id);
-
-    // If the function was invoked dynamically, we can't be sure.
-    if (!str) return true;
-
-    // Only builtins can inspect the caller frame; we know these are all
-    // loaded ahead of time and unique/persistent.
-    auto const f = Unit::lookupBuiltin(str);
-    return f && funcNeedsCallerFrame(f);
-  };
-
-  if (inst.op() == OpFCallBuiltin) return checkTaintId(inst.imm[2].u_SA);
-  if (!isFCallStar(inst.op())) return false;
-
-  auto const fpi = caller->findFPI(inst.source.offset());
-  assertx(fpi != nullptr);
-  auto const fpushPC = unit->at(fpi->m_fpushOff);
-  auto const op = peek_op(fpushPC);
-
-  if (op == OpFPushFunc)  return true;
-  if (op == OpFPushFuncD) return checkTaintId(getImm(fpushPC, 1).u_SA);
-
-  return false;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 SSATmp* specialClsRefToCls(IRGS& env, SpecialClsRef ref) {
   switch (ref) {
     case SpecialClsRef::Static:
@@ -1510,12 +1474,6 @@ void emitFCall(IRGS& env,
     return;
   }
 
-  auto const needsCallerFrame = callee
-    ? funcNeedsCallerFrame(callee)
-    : callNeedsCallerFrame(
-      *env.currentNormalizedInstruction,
-      curFunc(env)
-    );
   auto const call = [&](bool asyncEagerReturn) {
     return gen(
       env,
@@ -1526,7 +1484,6 @@ void emitFCall(IRGS& env,
         fca.numRets - 1,
         bcOff(env) - curFunc(env)->base(),
         callee,
-        needsCallerFrame,
         asyncEagerReturn,
       },
       sp(env),
@@ -1621,7 +1578,6 @@ void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
       0,
       callBcOffset,
       callee,
-      funcNeedsCallerFrame(callee),
       false
     },
     sp(env),

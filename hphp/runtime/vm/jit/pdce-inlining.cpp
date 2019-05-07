@@ -134,11 +134,7 @@ LdLoc, StLoc, LdLocAddr, CheckLoc, HintLocInner, AssertLoc, LdClsRef, StClsRef,
 and KillClsRef.
 
 Currently only EagerSyncVMRegs, CallBuiltin, Call, LdClsRef, StClsRef, and
-KillClsRef can be adjusted to use the parent frame. For calls only those calls
-which are known to not access the caller frame can be modified in this
-manner. All C++ builtins can do this but many hot functions do not. A whitelist
-exists for builtin functions which are safe to call without a valid caller
-frame.
+KillClsRef can be adjusted to use the parent frame.
 
 A special list of instructions known to access the current frame without
 explicitly depending on it are also blacklisted.
@@ -458,22 +454,9 @@ bool canRewriteToParent(const IRInstruction& inst) {
  */
 bool canAdjustFrame(IRInstruction& inst) {
   switch (inst.op()) {
+  case Call:
+  case CallBuiltin:
   case EagerSyncVMRegs: return true;
-  /*
-   * Some builtin functions modify locals, read the varenv, or inspect the
-   * caller frame (e.g. for the value of m_thisOrClass). If these functions
-   * are called we cannot elide the inlined frame.
-   *
-   * TODO(#9876778): we should be able to support CallUnpack here as well.
-   */
-  case CallBuiltin: {
-    auto data = inst.extra<CallBuiltin>();
-    return !data->needsCallerFrame;
-  }
-  case Call: {
-    auto data = inst.extra<Call>();
-    return !data->needsCallerFrame;
-  }
   default: break;
   }
   return false;

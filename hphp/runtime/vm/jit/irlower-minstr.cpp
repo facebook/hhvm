@@ -421,10 +421,10 @@ void implProfileHackArrayOffset(IRLS& env, const IRInstruction* inst,
                                 const CallSpec& target) {
   auto& v = vmain(env);
 
-  auto const rprof = v.makeReg();
-  v << lea{rvmtl()[inst->extra<RDSHandleData>()->handle], rprof};
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1).reg(rprof);
+  auto const extra = inst->extra<ArrayAccessProfileData>();
+  auto args = argGroup(env, inst).ssa(0).ssa(1)
+              .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+              .imm(extra->cowCheck);
 
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
 }
@@ -482,11 +482,11 @@ void cgProfileMixedArrayOffset(IRLS& env, const IRInstruction* inst) {
               getKeyType(inst->src(1)));
   auto& v = vmain(env);
 
-  auto const rprof = v.makeReg();
-  v << lea{rvmtl()[inst->extra<ProfileMixedArrayOffset>()->handle], rprof};
-
+  auto const extra = inst->extra<ProfileMixedArrayOffset>();
   cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync,
-               argGroup(env, inst).ssa(0).ssa(1).reg(rprof));
+               argGroup(env, inst).ssa(0).ssa(1)
+               .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
+               .imm(extra->cowCheck));
 }
 
 void cgProfileDictOffset(IRLS& env, const IRInstruction* inst) {

@@ -33,6 +33,7 @@
 #include "hphp/util/safe-cast.h"
 
 #include <folly/Conv.h>
+#include <folly/Hash.h>
 #include <folly/Optional.h>
 #include <folly/gen/Base.h>
 #include <folly/gen/String.h>
@@ -393,6 +394,29 @@ struct RDSHandleData : IRExtraData {
 
   rds::Handle handle;
 };
+
+/*
+ * Array access profile.
+ */
+struct ArrayAccessProfileData : RDSHandleData {
+  ArrayAccessProfileData(rds::Handle handle, bool cowCheck)
+    : RDSHandleData(handle), cowCheck(cowCheck) {}
+
+  std::string show() const {
+    return folly::to<std::string>(handle, ",", cowCheck);
+  }
+
+  bool equals(ArrayAccessProfileData o) const {
+    return handle == o.handle && cowCheck == o.cowCheck;
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(std::hash<uint32_t>()(handle),
+                                     std::hash<bool>()(cowCheck));
+  }
+
+  bool cowCheck;
+};
+
 
 /*
  * Translation ID.
@@ -1653,9 +1677,9 @@ X(KeysetGetK,                   IndexData);
 X(ElemDictK,                    IndexData);
 X(ElemKeysetK,                  IndexData);
 X(ProfileArrayKind,             RDSHandleData);
-X(ProfileMixedArrayOffset,      RDSHandleData);
-X(ProfileDictOffset,            RDSHandleData);
-X(ProfileKeysetOffset,          RDSHandleData);
+X(ProfileMixedArrayOffset,      ArrayAccessProfileData);
+X(ProfileDictOffset,            ArrayAccessProfileData);
+X(ProfileKeysetOffset,          ArrayAccessProfileData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileFunc,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);

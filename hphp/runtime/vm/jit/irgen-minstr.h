@@ -78,7 +78,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
       is_dict ? ProfileDictOffset :
         is_keyset ? ProfileKeysetOffset :
         ProfileMixedArrayOffset,
-      RDSHandleData { profile.handle() },
+      ArrayAccessProfileData { profile.handle(), cow_check },
       arr,
       key
     );
@@ -122,7 +122,10 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
           return marr;
         },
         [&] (SSATmp* tmp) { return direct(tmp, key, *pos); },
-        [&] { return generic(key); }
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          return generic(key);
+        }
       );
     }
   }

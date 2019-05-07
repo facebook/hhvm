@@ -94,7 +94,13 @@ bool ArrayOffsetProfile::update(int32_t pos, uint32_t count) {
   return false;
 }
 
-void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i) {
+void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
+  // We shouldn't count accesses that would fail to be detected by the offset
+  // optimization.
+  if (cowCheck && ad->cowCheck()) {
+    update(-1, 1);
+    return;
+  }
   auto h = hash_int64(i);
   auto const pos =
     ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(i, h) :
@@ -103,11 +109,27 @@ void ArrayOffsetProfile::update(const ArrayData* ad, int64_t i) {
   update(pos, 1);
 }
 
-void ArrayOffsetProfile::update(const ArrayData* ad, const StringData* sd) {
-  auto const pos =
-    ad->hasMixedLayout() ? MixedArray::asMixed(ad)->find(sd, sd->hash()) :
-    ad->isKeyset() ? SetArray::asSet(ad)->find(sd, sd->hash()) :
-    -1;
+void ArrayOffsetProfile::update(const ArrayData* ad, const StringData* sd,
+                                bool cowCheck) {
+  // We shouldn't count accesses that would fail to be detected by the offset
+  // optimization.  These include cases that require a COW, and cases where we
+  // need to walk the string.
+  if (cowCheck && ad->cowCheck()) {
+    update(-1, 1);
+    return;
+  }
+  auto pos = -1;
+  if (ad->hasMixedLayout()) {
+    pos = MixedArray::asMixed(ad)->find(sd, sd->hash());
+    if (pos != -1 && MixedArray::asMixed(ad)->data()[pos].strKey() != sd) {
+      pos = -1;
+    }
+  } else if (ad->isKeyset()) {
+    pos = SetArray::asSet(ad)->find(sd, sd->hash());
+    if (pos != -1 && SetArray::asSet(ad)->data()[pos].strKey() != sd) {
+      pos = -1;
+    }
+  }
   update(pos, 1);
 }
 

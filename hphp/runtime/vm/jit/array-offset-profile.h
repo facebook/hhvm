@@ -43,8 +43,8 @@ struct ArrayOffsetProfile {
   /*
    * Update the profile to register an access at `key' in `ad'.
    */
-  void update(const ArrayData* ad, int64_t key);
-  void update(const ArrayData* ad, const StringData* key);
+  void update(const ArrayData* ad, int64_t key, bool cowCheck);
+  void update(const ArrayData* ad, const StringData* key, bool cowCheck);
 
   /*
    * Combine `l' and `r', retaining the kNumTrackedSamples with the highest

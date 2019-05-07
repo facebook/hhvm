@@ -370,13 +370,15 @@ ISSET_EMPTY_OBJ_PROP_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline void profileMixedArrayOffsetHelper(const ArrayData* ad, int64_t i,
-                                          ArrayOffsetProfile* prof) {
-  prof->update(ad, i);
+                                          ArrayOffsetProfile* prof,
+                                          bool cowCheck) {
+  prof->update(ad, i, cowCheck);
 }
 inline void profileMixedArrayOffsetHelper(const ArrayData* ad,
                                           const StringData* sd,
-                                          ArrayOffsetProfile* prof) {
-  prof->update(ad, sd);
+                                          ArrayOffsetProfile* prof,
+                                          bool cowCheck) {
+  prof->update(ad, sd, cowCheck);
 }
 
 #define PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(m)  \
@@ -384,11 +386,12 @@ inline void profileMixedArrayOffsetHelper(const ArrayData* ad,
   m(profileMixedArrayOffsetS,  KeyType::Str)        \
   m(profileMixedArrayOffsetI,  KeyType::Int)        \
 
-#define X(nm, keyType)                    \
-inline void nm(const ArrayData* a,        \
-               key_type<keyType> k,       \
-               ArrayOffsetProfile* p) {   \
-  profileMixedArrayOffsetHelper(a, k, p); \
+#define X(nm, keyType)                              \
+inline void nm(const ArrayData* a,                  \
+               key_type<keyType> k,                 \
+               ArrayOffsetProfile* p,               \
+               bool cowCheck) {                     \
+  profileMixedArrayOffsetHelper(a, k, p, cowCheck); \
 }
 PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
 #undef X
@@ -396,12 +399,14 @@ PROFILE_MIXED_ARRAY_OFFSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline void profileDictOffsetHelper(const ArrayData* ad, int64_t i,
-                                    ArrayOffsetProfile* prof) {
-  prof->update(ad, i);
+                                    ArrayOffsetProfile* prof,
+                                    bool cowCheck) {
+  prof->update(ad, i, cowCheck);
 }
 inline void profileDictOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                    ArrayOffsetProfile* prof) {
-  prof->update(ad, sd);
+                                    ArrayOffsetProfile* prof,
+                                    bool cowCheck) {
+  prof->update(ad, sd, cowCheck);
 }
 
 #define PROFILE_DICT_OFFSET_HELPER_TABLE(m)                 \
@@ -411,8 +416,8 @@ inline void profileDictOffsetHelper(const ArrayData* ad, const StringData* sd,
 
 #define X(nm, keyType)                                      \
 inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               ArrayOffsetProfile* p) {                     \
-  profileDictOffsetHelper(a, k, p);                         \
+               ArrayOffsetProfile* p, bool cowCheck) {      \
+  profileDictOffsetHelper(a, k, p, cowCheck);               \
 }
 PROFILE_DICT_OFFSET_HELPER_TABLE(X)
 #undef X
@@ -420,12 +425,14 @@ PROFILE_DICT_OFFSET_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 inline void profileKeysetOffsetHelper(const ArrayData* ad, int64_t i,
-                                      ArrayOffsetProfile* prof) {
-  prof->update(ad, i);
+                                      ArrayOffsetProfile* prof,
+                                      bool cowCheck) {
+  prof->update(ad, i, cowCheck);
 }
 inline void profileKeysetOffsetHelper(const ArrayData* ad, const StringData* sd,
-                                      ArrayOffsetProfile* prof) {
-  prof->update(ad, sd);
+                                      ArrayOffsetProfile* prof,
+                                      bool cowCheck) {
+  prof->update(ad, sd, cowCheck);
 }
 
 #define PROFILE_KEYSET_OFFSET_HELPER_TABLE(m)               \
@@ -435,8 +442,8 @@ inline void profileKeysetOffsetHelper(const ArrayData* ad, const StringData* sd,
 
 #define X(nm, keyType)                                      \
 inline void nm(const ArrayData* a, key_type<keyType> k,     \
-               ArrayOffsetProfile* p) {                     \
-  profileKeysetOffsetHelper(a, k, p);                       \
+               ArrayOffsetProfile* p, bool cowCheck) {      \
+  profileKeysetOffsetHelper(a, k, p, cowCheck);             \
 }
 PROFILE_KEYSET_OFFSET_HELPER_TABLE(X)
 #undef X

@@ -19,7 +19,7 @@ use crate::token_kind::TokenKind;
 
 pub struct TypeParser<'a, S, T>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -32,7 +32,7 @@ where
 
 impl<'a, S, T: Clone> std::clone::Clone for TypeParser<'a, S, T>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
     fn clone(&self) -> Self {
@@ -49,7 +49,7 @@ where
 
 impl<'a, S, T: Clone> ParserTrait<'a, S, T> for TypeParser<'a, S, T>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
     fn make(
@@ -131,7 +131,7 @@ where
 
 impl<'a, S, T: Clone> TypeParser<'a, S, T>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
     fn with_expression_parser<U>(&mut self, f: &Fn(&mut ExpressionParser<'a, S, T>) -> U) -> U {

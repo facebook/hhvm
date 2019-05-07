@@ -16,7 +16,7 @@ use crate::syntax_error::SyntaxError;
 
 pub struct Parser<'a, S, T>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
     lexer: Lexer<'a, S::Token>,
@@ -28,11 +28,11 @@ where
 
 impl<'a, S, T: Clone> Parser<'a, S, T>
 where
-    S: SmartConstructors<T>,
+    S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
     pub fn make(source: &'a SourceText<'a>, env: ParserEnv) -> Self {
-        let sc_state = S::initial_state(&env);
+        let sc_state = S::initial_state(&env, &source);
         Self {
             lexer: Lexer::make(
                 source,

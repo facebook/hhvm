@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::parser_env::ParserEnv;
+use crate::source_text::SourceText;
 use crate::syntax_kind::SyntaxKind;
 use crate::token_kind::TokenKind;
 
@@ -28,17 +29,17 @@ macro_rules! S {
     }}
 }
 
-pub trait StateType<R> {
+pub trait StateType<'a, R> {
     type T;
-    fn initial(env: &ParserEnv) -> Self::T;
+    fn initial<'b: 'a>(env: &ParserEnv, source_text: &'b SourceText<'b>) -> Self::T;
     fn next(t: Self::T, inputs: Vec<&R>) -> Self::T;
 }
 
 #[derive(Clone)]
 pub struct NoState; // zero-overhead placeholder when there is no state
-impl<R> StateType<R> for NoState {
+impl<'a, R> StateType<'a, R> for NoState {
     type T = NoState;
-    fn initial(_env: &ParserEnv) -> Self::T {
+    fn initial<'b: 'a>(_env: &ParserEnv, _: &'b SourceText<'b>) -> Self::T {
         NoState {}
     }
     fn next(t: Self::T, _inputs: Vec<&R>) -> Self::T {

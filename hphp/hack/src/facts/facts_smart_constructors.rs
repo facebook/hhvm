@@ -15,7 +15,7 @@ use parser::token_kind::TokenKind;
 
 pub use crate::facts_smart_constructors_generated::*;
 
-pub type HasScriptContent<'a> = (bool, SourceText<'a>);
+pub type HasScriptContent<'a> = (bool, &'a SourceText<'a>);
 
 // TODO(leoo) consider avoiding always materializing substrings using something like (hard):
 // type GetName<'a> = Box<Fn() -> &'a [u8]>;  // would require lifetime 'a param everywhere
@@ -117,7 +117,7 @@ impl FlattenOp for FactsSmartConstructors {
     }
 }
 
-impl<'a> FlattenSmartConstructors<HasScriptContent<'a>> for FactsSmartConstructors {
+impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors {
     fn make_token(st: HasScriptContent<'a>, token: Self::Token) -> (HasScriptContent<'a>, Self::R) {
         let token_text = || {
             st.1.sub(

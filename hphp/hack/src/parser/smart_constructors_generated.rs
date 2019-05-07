@@ -18,12 +18,13 @@
  */
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
+use crate::source_text::SourceText;
 
-pub trait SmartConstructors<State> {
+pub trait SmartConstructors<'a, State> {
     type Token: LexableToken;
     type R;
 
-    fn initial_state(env: &ParserEnv) -> State;
+    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State;
 
     fn make_missing(st: State, offset : usize) -> (State, Self::R);
     fn make_token(st: State, arg0: Self::Token) -> (State, Self::R);

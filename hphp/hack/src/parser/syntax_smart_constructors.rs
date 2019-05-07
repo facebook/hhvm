@@ -19,18 +19,19 @@
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors, StateType};
+use crate::source_text::SourceText;
 use crate::syntax::SyntaxValueType;
 use crate::syntax_type::*;
 
-pub trait SyntaxSmartConstructors<S: SyntaxType<Token, Value>, Token, Value, State = NoState>:
-    SmartConstructors<State::T, R=S, Token=Token>
+pub trait SyntaxSmartConstructors<'a, S: SyntaxType<Token, Value>, Token, Value, State = NoState>:
+    SmartConstructors<'a, State::T, R=S, Token=Token>
 where
-    State: StateType<S>,
+    State: StateType<'a, S>,
     Token: LexableToken,
     Value: SyntaxValueType<Token>
 {
-    fn initial_state(env: &ParserEnv) -> State::T {
-        State::initial(env)
+    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State::T {
+        State::initial(env, src)
     }
 
     fn make_missing(s: State::T, offset: usize) -> (State::T, Self::R) {

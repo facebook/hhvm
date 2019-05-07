@@ -23,18 +23,19 @@
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::SmartConstructors;
+use crate::source_text::SourceText;
 use crate::syntax_kind::SyntaxKind;
 
 pub struct WithKind<S> {
     phantom_s: std::marker::PhantomData<S>,
 }
-impl<S, State> SmartConstructors<State> for WithKind<S>
-where S: SmartConstructors<State> {
+impl<'a, S, State> SmartConstructors<'a, State> for WithKind<S>
+where S: SmartConstructors<'a, State> {
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
 
-    fn initial_state(env: &ParserEnv) -> State {
-        S::initial_state(env)
+    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State {
+        S::initial_state(env, src)
     }
 
     fn make_token(st: State, token: Self::Token) -> (State, Self::R) {

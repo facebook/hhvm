@@ -1691,11 +1691,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             '\r' => {
                 let w = if self.peek_char(1) == '\n' { 2 } else { 1 };
                 self.advance(w);
-                Token::Trivia::make_eol(&self.source, self.start, w)
+                Token::Trivia::make_eol(self.source(), self.start, w)
             }
             '\n' => {
                 self.advance(1);
-                Token::Trivia::make_eol(&self.source, self.start, 1)
+                Token::Trivia::make_eol(self.source(), self.start, 1)
             }
             _ => panic!("scan_end_of_line called while not on end of line!"),
         }
@@ -1703,7 +1703,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn scan_hash_comment(&mut self) -> Token::Trivia {
         self.skip_to_end_of_line();
-        Token::Trivia::make_single_line_comment(self.source, self.start, self.width())
+        Token::Trivia::make_single_line_comment(self.source(), self.start, self.width())
     }
 
     fn scan_single_line_comment(&mut self) -> Token::Trivia {
@@ -1720,14 +1720,14 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let w = self.width();
         let remainder = self.offset - lexer_ws.offset;
         if remainder >= 11 && lexer_ws.peek_string(11) == "FALLTHROUGH".as_bytes() {
-            Token::Trivia::make_fallthrough(self.source, self.start, w)
+            Token::Trivia::make_fallthrough(self.source(), self.start, w)
         } else if remainder >= 6
             && lexer_ws.peek_string(6) == "UNSAFE".as_bytes()
             && self.enable_unsafe_block
         {
-            Token::Trivia::make_unsafe(self.source, self.start, w)
+            Token::Trivia::make_unsafe(self.source(), self.start, w)
         } else {
-            Token::Trivia::make_single_line_comment(self.source, self.start, w)
+            Token::Trivia::make_single_line_comment(self.source(), self.start, w)
         }
     }
 
@@ -1775,13 +1775,13 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         self.skip_to_end_of_delimited_comment();
         let w = self.width();
         if self.enable_unsafe_expr && lexer_ws.match_string("UNSAFE_EXPR".as_bytes()) {
-            Token::Trivia::make_unsafe_expression(self.source, self.start, w)
+            Token::Trivia::make_unsafe_expression(self.source(), self.start, w)
         } else if lexer_ws.match_string("HH_FIXME".as_bytes()) {
-            Token::Trivia::make_fix_me(self.source, self.start, w)
+            Token::Trivia::make_fix_me(self.source(), self.start, w)
         } else if lexer_ws.match_string("HH_IGNORE_ERROR".as_bytes()) {
-            Token::Trivia::make_ignore_error(self.source, self.start, w)
+            Token::Trivia::make_ignore_error(self.source(), self.start, w)
         } else {
-            Token::Trivia::make_delimited_comment(self.source, self.start, w)
+            Token::Trivia::make_delimited_comment(self.source(), self.start, w)
         }
     }
 
@@ -1816,7 +1816,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 let new_end = Self::str_skip_whitespace(self.source_text_string(), self.offset);
                 let new_start = self.offset;
                 let new_trivia =
-                    Token::Trivia::make_whitespace(self.source, new_start, new_end - new_start);
+                    Token::Trivia::make_whitespace(self.source(), new_start, new_end - new_start);
                 self.with_start_offset(new_start, new_end);
                 Some(new_trivia)
             }
@@ -1841,12 +1841,12 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             ' ' | '\t' => {
                 let j = Self::str_skip_whitespace(self.source_text_string(), i);
                 self.with_start_offset(i, j);
-                Some(Token::Trivia::make_whitespace(self.source, i, j - i))
+                Some(Token::Trivia::make_whitespace(self.source(), i, j - i))
             }
             '\r' | '\n' => {
                 let j = Self::str_scan_end_of_line(self.source_text_string(), i);
                 self.with_start_offset(i, j);
-                Some(Token::Trivia::make_eol(self.source, i, j - i))
+                Some(Token::Trivia::make_eol(self.source(), i, j - i))
             }
             _ =>
             // Not trivia
@@ -2310,7 +2310,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
         let length = self.source.length();
         let trailing = Token::Trivia::make_after_halt_compiler(
-            self.source,
+            self.source(),
             start_offset,
             length - start_offset,
         );

@@ -9,6 +9,7 @@
 use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::StateType;
+use crate::source_text::SourceText;
 use crate::syntax::{CompoundStatementChildren, Syntax, SyntaxValueType, SyntaxVariant};
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
 use crate::syntax_type::*;
@@ -17,9 +18,9 @@ use crate::token_kind::TokenKind;
 pub struct State<S> {
     phantom_s: std::marker::PhantomData<S>,
 }
-impl<S> StateType<S> for State<S> {
+impl<'a, S> StateType<'a, S> for State<S> {
     type T = Vec<bool>;
-    fn initial(_: &ParserEnv) -> Self::T {
+    fn initial<'b: 'a>(_: &ParserEnv, _: &'b SourceText<'b>) -> Self::T {
         vec![]
     }
     fn next(mut st: Self::T, inputs: Vec<&S>) -> Self::T {
@@ -41,8 +42,8 @@ pub struct DeclModeSmartConstructors<Token, Value> {
     phantom_value: std::marker::PhantomData<Value>,
 }
 
-impl<Token, Value>
-    SyntaxSmartConstructors<Syntax<Token, Value>, Token, Value, State<Syntax<Token, Value>>>
+impl<'a, Token, Value>
+    SyntaxSmartConstructors<'a, Syntax<Token, Value>, Token, Value, State<Syntax<Token, Value>>>
     for DeclModeSmartConstructors<Token, Value>
 where
     Token: LexableToken,

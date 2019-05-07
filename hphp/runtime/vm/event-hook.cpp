@@ -225,7 +225,7 @@ static Array get_frame_args(const ActRec* ar, bool with_ref) {
   int numArgs = ar->numArgs();
 
   SuppressHACRefBindNotices _guard;
-  PackedArrayInit retArray(numArgs);
+  VArrayInit retArray(numArgs);
 
   auto local = reinterpret_cast<TypedValue*>(
     uintptr_t(ar) - sizeof(TypedValue)

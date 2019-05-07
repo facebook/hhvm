@@ -157,13 +157,22 @@ and classname_const class_id =
     class constant of the same name with type [TypeStructure<sometype>].
     Given a typeconst definition, this function returns the corresponding
     implicit class constant representing its reified type structure. *)
-let typeconst_structure class_name stc =
+let typeconst_structure mro class_name stc =
   let pos = fst stc.stc_name in
   let r = Reason.Rwitness pos in
   let tsid = pos, SN.FB.cTypeStructure in
   let ts_ty = r, Tapply (tsid, [r, Taccess ((r, Tthis), [stc.stc_name])]) in
+  let abstract =
+    match stc.stc_abstract with
+    | TCAbstract (Some _) when not mro.mro_passthrough_abstract_typeconst ->
+      false
+    | TCAbstract _ ->
+      true
+    | TCPartiallyAbstract
+    | TCConcrete ->
+      false in
   snd stc.stc_name, {
-    cc_abstract    = Option.is_none stc.stc_type;
+    cc_abstract    = abstract;
     cc_pos         = pos;
     cc_synthesized = true;
     cc_type        = ts_ty;
@@ -408,7 +417,7 @@ let consts child_class_name get_ancestor lin =
       let typeconst_structures =
         cls.sc_typeconsts
         |> Sequence.of_list
-        |> Sequence.map ~f:(typeconst_structure (snd cls.sc_name))
+        |> Sequence.map ~f:(typeconst_structure mro (snd cls.sc_name))
       in
       Sequence.append consts typeconst_structures
     end

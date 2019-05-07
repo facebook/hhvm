@@ -81,6 +81,16 @@ type mro_element = {
      private members of this element (on account of the runtime behavior where
      they are effectively copied into the linearized class). *)
   mro_copy_private_members : bool;
+  (* True if this element is included in the linearization via an unbroken chain
+     of abstract classes, and thus, abstract type constants with default values
+     are inherited unchanged. When this flag is not set, a concrete class was
+     present in the chain. Since we convert abstract type constants with
+     defaults to concrete ones when they are included in a concrete class, any
+     type constant which 1) is abstract, 2) has a default, and 3) was inherited
+     from an ancestor with this flag not set, should be inherited as a concrete
+     type constant instead. *)
+  mro_passthrough_abstract_typeconst : bool;
+
 } [@@deriving show]
 
 type linearization = mro_element Sequence.t

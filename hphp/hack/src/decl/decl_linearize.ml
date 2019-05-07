@@ -103,6 +103,7 @@ let from_parent (c : shallow_class) : decl ty list =
 let rec ancestor_linearization
     (env : env)
     (ancestor : string * decl ty list * source_type)
+    (child_class_abstract: bool)
   : linearization =
   let class_name, type_args, source = ancestor in
   Decl_env.add_extends_dependency env.decl_env class_name;
@@ -120,11 +121,14 @@ let rec ancestor_linearization
     let mro_xhp_attrs_only = c.mro_xhp_attrs_only || source = XHPAttr in
     let mro_consts_only = c.mro_consts_only || is_interface source in
     let mro_copy_private_members = c.mro_copy_private_members && source = Trait in
+    let mro_passthrough_abstract_typeconst = c.mro_passthrough_abstract_typeconst &&
+      child_class_abstract in
     { c with
       mro_synthesized;
       mro_xhp_attrs_only;
       mro_consts_only;
       mro_copy_private_members;
+      mro_passthrough_abstract_typeconst;
     }
   end in
   match Sequence.next lin with
@@ -157,6 +161,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
     mro_xhp_attrs_only = false;
     mro_consts_only = false;
     mro_copy_private_members = c.sc_kind = Ast.Ctrait;
+    mro_passthrough_abstract_typeconst = c.sc_kind = Ast.Cabstract;
   } in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
   let interfaces c     = get_ancestors Interface c.sc_implements in
@@ -207,17 +212,22 @@ and linearize (env : env) (c : shallow_class) : linearization =
         traits c;
       ]
   in
+  let child_class_abstract =
+    Shallow_classes_heap.get mro_name |>
+    Option.value_map ~default:false ~f:(fun sc -> sc.sc_kind = Ast.Cabstract) in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])
-    ~f:(next_state env mro_name)
+    ~f:(next_state env mro_name child_class_abstract)
   |> Sequence.memoize
 
-and next_state (env : env) (class_name : string) (state, ancestors, acc, synths) =
+and next_state (env : env) (class_name : string) (child_class_abstract: bool)
+(state, ancestors, acc, synths) =
+
   let open Sequence.Step in
   match state, ancestors with
   | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
   | Next_ancestor, ancestor::ancestors ->
-    Skip (Ancestor (ancestor_linearization env ancestor), ancestors, acc, synths)
+    Skip (Ancestor (ancestor_linearization env ancestor child_class_abstract), ancestors, acc, synths)
   | Ancestor lin, ancestors ->
     begin match Sequence.next lin with
     | None -> Skip (Next_ancestor, ancestors, acc, synths)
@@ -296,6 +306,7 @@ and get_linearization (env : env) (class_name : string) : linearization =
           mro_xhp_attrs_only = false;
           mro_consts_only = false;
           mro_copy_private_members = false;
+          mro_passthrough_abstract_typeconst = false;
         }
 
 let get_linearization ?(kind=Member_resolution) class_name =

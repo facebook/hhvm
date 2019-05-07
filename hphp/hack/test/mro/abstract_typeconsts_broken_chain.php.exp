@@ -1,0 +1,6 @@
+Linearization for class \A:
+[\A(passthrough_abstract_typeconst)]
+Linearization for class \B:
+[\B, \A]
+Linearization for class \C:
+[\C, \B, \A]

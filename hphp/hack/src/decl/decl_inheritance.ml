@@ -178,16 +178,31 @@ let shallow_typeconst_to_typeconst_type child_class mro subst stc =
   in
   let ty =
     if child_class = mro.mro_name then stc.stc_type else
-    Option.map stc.stc_type (Decl_instantiate.instantiate subst)
-  in
-  snd stc.stc_name, {
-    ttc_abstract = stc.stc_abstract;
-    ttc_name = stc.stc_name;
-    ttc_constraint = constraint_;
-    ttc_type = ty;
-    ttc_origin = mro.mro_name;
-    ttc_enforceable = stc.stc_enforceable;
-  }
+    Option.map stc.stc_type (Decl_instantiate.instantiate subst) in
+  let abstract = match stc.stc_abstract with
+  | TCAbstract default_opt when child_class <> mro.mro_name ->
+    TCAbstract (Option.map default_opt (Decl_instantiate.instantiate subst))
+  | _ -> stc.stc_abstract in
+  let typeconst = match abstract with
+  | TCAbstract (Some default) when not mro.mro_passthrough_abstract_typeconst ->
+    {
+      ttc_abstract = TCConcrete;
+      ttc_name = stc.stc_name;
+      ttc_constraint = None;
+      ttc_type = Some default;
+      ttc_origin = mro.mro_name;
+      ttc_enforceable = stc.stc_enforceable;
+    }
+  | _ ->
+    {
+      ttc_abstract = abstract;
+      ttc_name = stc.stc_name;
+      ttc_constraint = constraint_;
+      ttc_type = ty;
+      ttc_origin = mro.mro_name;
+      ttc_enforceable = stc.stc_enforceable;
+    } in
+  snd stc.stc_name, typeconst
 
 (** Given a linearization, pair each MRO element with its shallow class and its
     type parameter substitutions. Drop MRO elements for which we cannot find a

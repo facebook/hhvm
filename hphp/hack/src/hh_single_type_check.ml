@@ -1210,6 +1210,7 @@ let handle_mode
             ; if mro.mro_xhp_attrs_only then Some "xhp_attrs_only" else None
             ; if mro.mro_consts_only    then Some "consts_only"    else None
             ; if mro.mro_copy_private_members then Some "copy_private_members" else None
+            ; if mro.mro_passthrough_abstract_typeconst then Some "passthrough_abstract_typeconst" else None
             ]
             |> List.filter_map ~f:(fun x -> x)
             |> String.concat ~sep:", "

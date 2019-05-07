@@ -7,6 +7,138 @@
  *
  *)
 
+(**
+    +---------------------------------+
+    | Let's talk about naming tables! |
+    +---------------------------------+
+
+    Every typechecker or compiler that's more complicated than a toy project needs some way to look
+    up the location of a given symbol, especially one that operates at the same scale as Hack and
+    double especially as Hack moves towards generating data lazily on demand instead of generating
+    all of the data up front during strictly defined typechecking phases. In Hack, the data
+    structures that map from symbols to filenames and from filenames to symbol names are referred to
+    as the "naming table," with the "forward naming table" mapping from filenames to symbol names
+    and the "reverse naming table" mapping from symbol names to file names. We store the forward
+    naming table as a standard OCaml map since we only read and write it from the main process, and
+    we store the reverse naming table in shared memory since we want to allow rapid reads and writes
+    from worker processes.
+
+    So, to recap:
+      - Forward naming table: OCaml map, maps filename -> symbols in file
+      - Reverse naming table: shared memory, maps symbol name to filename it's defined in
+
+    Seems simple enough, right? Unfortunately, this is where the real world and all of its attendant
+    complexity comes in. The naming table (forward + reverse) is big. And not only is it big, its
+    size is on the order of O(repo). This conflicts with our goal of making Hack use a flat amount
+    of memory regardless of the amount of code we're actually typechecking, so it needs to go. In
+    this case, we've chosen to use our existing saved state infrastructure and dump the naming
+    table to a SQLite file which we can use to serve queries without having to store anything in
+    memory other than just the differences between what's in the saved state and what's on disk.
+
+    Right now, only the reverse naming table supports falling back to SQLite, so let's go through
+    each operation that the reverse naming table supports and cover how it handles falling back to
+    SQLite.
+
+
+    +---------------------------------+
+    | Reverse naming table operations |
+    +---------------------------------+
+
+    The reverse naming table supports three operations: [put], [get], and [delete]. [Put] is pretty
+    simple, conceptually, but there's some trickiness with [delete] that would benefit from being
+    covered in more detail, and that trickiness bleeds into how [get] works as well. One important
+    consideration is that *the SQLite database is read-only.* The general idea of these operations
+    is that shared memory stores only entries that have changed.
+
+    PUT:
+    [Put] is simple. Since the SQLite database is read-only and we use shared memory for storing any
+    changes, we just put the value in shared memory.
+
+                        +------------------+    +------------+
+                        |                  |    |            |
+                        |   Naming Heap    |    |   SQLite   |
+                        |                  |    |            |
+    [put key value] -----> [put key value] |    |            |
+                        |                  |    |            |
+                        +------------------+    +------------+
+
+    DELETE:
+    We're going to cover [delete] next because it's the only reason that [get] has any complexity
+    beyond "look for the value in shared memory and if it's not there look for it in SQLite." At
+    first glance, [delete] doesn't seem too difficult. Just delete the entry from shared memory,
+    right? Well, that's fine... unless that key also exists in SQLite. If the value is in SQLite,
+    then all that deleting it from shared memory does is make us start returning the stored SQLite
+    value! This is bad, because if we just deleted a key of course we want [get] operations for it
+    to return [None]. But okay, we can work around that. Instead of storing direct values in shared
+    memory, we'll store an enum of [[Added of 'a | Deleted]]. Easy peasy!
+
+    ...except what do we do if we want to delete a value in the main process, then add it again in a
+    worker process? That would require changing a key's value in shared memory, which is something
+    that we don't support due to data integrity concerns with multiple writers and readers. We could
+    remove and re-add, except removal can only be done by master because of the same integrity
+    concerns. So master would somehow need to know which entries will be added and prematurely
+    remove the [Deleted] sentinel from them. This is difficult enough as to be effectively
+    impossible.
+
+    So what we're left needing is some way to delete values which can be undone by child processes,
+    which means that undeleting a value needs to consist only of [add] operations to shared memory,
+    and have no dependency on [remove]. Enter: the blocked entries heap.
+
+    For each of the reverse naming table heaps (types, functions, and constants) we also create a
+    heap that only stores values of a single-case enum: [Blocked]. The crucial difference between
+    [Blocked] and [[Added of 'a | Deleted]] is that *we only check for [Blocked] if the value is
+    not in the shared memory naming heap.* This means that we can effectively undelete an entry by
+    using an only an [add] operation.  Exactly what we need! Thus, [delete] becomes:
+
+                        +-----------------+    +---------------------+    +------------+
+                        |                 |    |                     |    |            |
+                        |   Naming Heap   |    |   Blocked Entries   |    |   SQLite   |
+                        |                 |    |                     |    |            |
+    [delete key] --+-----> [delete key]   |    |                     |    |            |
+                   |    |                 |    |                     |    |            |
+                   +----------------------------> [add key Blocked]  |    |            |
+                        |                 |    |                     |    |            |
+                        +-----------------+    +---------------------+    +------------+
+
+    GET:
+    Wow, what a ride, huh? Now that we know how to add and remove entries, let's make this actually
+    useful and talk about how to read them! The general idea is that we first check to see if the
+    value is in the shared memory naming heap. If so, we can return that immediately. If it's not
+    in the naming heap, then we check to see if it's blocked. If it is, we immediately return
+    [None]. If it's not in the naming heap, and it's not in the blocked entries, then and only then
+    do we read the value from SQLite:
+
+                        +-----------------+    +---------------------+    +------------------+
+                        |                 |    |                     |    |                  |
+                        |   Naming Heap   |    |   Blocked Entries   |    |      SQLite      |
+                        |                 |    |                     |    |                  |
+    [get key] -----------> [get key] is:  |    |                     |    |                  |
+    [Some value] <---------- [Some value] |    |                     |    |                  |
+                        |    [None] -------+   |                     |    |                  |
+                        |                 | \  |                     |    |                  |
+                        |                 |  +--> [get key] is:      |    |                  |
+    [None] <--------------------------------------- [Some Blocked]   |    |                  |
+                        |                 |    |    [None] -----------+   |                  |
+                        |                 |    |                     | \  |                  |
+                        |                 |    |                     |  +--> [get key] is:   |
+    [Some value] <------------------------------------------------------------ [Some value]  |
+    [None] <------------------------------------------------------------------ [None]        |
+                        |                 |    |                     |    |                  |
+                        +-----------------+    +---------------------+    +------------------+
+
+    And we're done! I hope this was easy to understand and as fun to read as it was to write :)
+
+    MINUTIAE:
+    Q: When do we delete entries from the Blocked Entries heaps?
+    A: Never! Once an entry has been removed at least once we never want to retrieve the SQLite
+       version for the rest of the program execution.
+
+    Q: Won't we just end up with a heap full of [Blocked] entries now?
+    A: Not really. We only have to do deletions once to remove entries for dirty files, and after
+       that it's not a concern. Plus [Blocked] entries are incredibly small in shared memory
+       (although they do still occupy a hash slot).
+*)
+
 type t = FileInfo.t Relative_path.Map.t
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
@@ -29,6 +161,7 @@ module Sqlite : sig
     ((int64 -> Relative_path.t -> FileInfo.t -> int) -> unit) ->
     unit
   val set_db_path : string -> unit
+  val is_connected : unit -> bool
   val get_type_pos : string -> case_insensitive:bool -> (Relative_path.t * type_of_type) option
   val get_fun_pos : string -> case_insensitive:bool -> Relative_path.t option
   val get_const_pos : string -> Relative_path.t option
@@ -271,39 +404,47 @@ end = struct
   end
 
 
-  module DatabaseSettings : sig
+  module Database_handle : sig
     val set_db_path : string -> unit
+    val is_connected : unit -> bool
     val get_db : unit -> Sqlite3.db option
   end  = struct
-    include SharedMem.NoCache
+
+    module Shared_db_settings = SharedMem.NoCache
       (SharedMem.ProfiledImmediate)
       (StringKey)
       (struct
         type t = string
         let prefix = Prefix.make()
-        let description = "DatabaseSettings"
+        let description = "NamingTableDatabaseSettings"
       end)
 
     let check_table_sqlite =
       "SELECT NAME FROM SQLITE_MASTER WHERE TYPE='table' AND NAME='NAMING_FILE_INFO'"
 
     let open_db () =
-      match get "database_path" with
+      match Shared_db_settings.get "database_path" with
       | None -> None
       | Some path ->
         let db = Sqlite3.db_open path in
         let has_table = ref false in
         Sqlite3.exec db ~cb:(fun _ _ -> has_table := true) check_table_sqlite |> check_rc;
-        if !has_table then Some db else None
+        if !has_table
+        then Some db
+        else failwith @@ Printf.sprintf "Database %s does not have a naming table." path
 
     let db = ref (lazy (open_db ()))
 
     let set_db_path path =
-      add "database_path" path;
-      db := lazy (open_db ())
+      Shared_db_settings.add "database_path" path;
+      (* Force this immediately so that we can get validation errors in master. *)
+      db := Lazy.from_val (open_db ())
 
     let get_db () =
       Lazy.force !db
+
+    let is_connected () =
+      get_db () <> None
   end
 
 
@@ -335,6 +476,8 @@ end = struct
 
   let create_database db_name f =
     let db = Sqlite3.db_open db_name in
+    Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
+    Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
     Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
     Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc;
@@ -345,22 +488,23 @@ end = struct
     if not (Sqlite3.db_close db)
     then failwith (Printf.sprintf "Could not close database '%s'" db_name)
 
-  let set_db_path = DatabaseSettings.set_db_path
+  let set_db_path = Database_handle.set_db_path
+  let is_connected = Database_handle.is_connected
 
   let get_type_pos name ~case_insensitive =
-    match DatabaseSettings.get_db () with
+    match Database_handle.get_db () with
     | None -> None
     | Some db ->
       TypesTable.get db ~name ~case_insensitive
 
   let get_fun_pos name ~case_insensitive =
-    match DatabaseSettings.get_db () with
+    match Database_handle.get_db () with
     | None -> None
     | Some db ->
       FunsTable.get db ~name ~case_insensitive
 
   let get_const_pos name =
-    match DatabaseSettings.get_db () with
+    match Database_handle.get_db () with
     | None -> None
     | Some db ->
       ConstsTable.get db ~name
@@ -444,20 +588,52 @@ let check_valid key pos =
       (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100));
   end
 
-let get_and_cache ~map_result ~get_func ~fallback_get_func ~add_func ~measure_name ~name =
-  match get_func name with
+type blocked_entry = Blocked
+
+(** Gets an entry from shared memory, or falls back to SQLite if necessary. If data is returned by
+    SQLite, we also cache it back to shared memory.
+
+    @param map_result function that maps from the SQLite fallback value to the actual value type we
+      want to cache and return.
+    @param get_func function that retrieves a key from shared memory.
+    @param check_block_func function that checks if a key is blocked from falling back to SQLite.
+    @param fallback_get_func function to get a fallback value from SQLite.
+    @param add_func function to cache a value back into shared memory.
+    @param measure_name the name of the measure to use for tracking fallback stats. We write a 1.0
+      if the request could be resolved entirely from shared memory, and 0.0 if we had to go to
+      SQLite.
+    @param key the key to request.
+*)
+let get_and_cache
+  ~(map_result : 'fallback_value -> 'value)
+  ~(get_func : 'key -> 'value option)
+  ~(check_block_func : 'key -> blocked_entry option)
+  ~(fallback_get_func : 'key -> 'fallback_value option)
+  ~(add_func : 'key -> 'value -> unit)
+  ~(measure_name : string)
+  ~(key : 'key)
+: 'value option =
+  match get_func key with
   | Some v ->
     Measure.sample measure_name 1.0;
     Some v
   | None ->
-    Measure.sample measure_name 0.0;
-    begin match fallback_get_func name with
-    | Some res ->
-      let pos = map_result res in
-      add_func name pos;
-      Some pos
-    | None ->
+    if not (Sqlite.is_connected ()) then None else
+    begin match check_block_func key with
+    | Some Blocked ->
+      (* We sample 1.0 here even though we're returning None because we didn't go to SQLite. *)
+      Measure.sample measure_name 1.0;
       None
+    | None ->
+      Measure.sample measure_name 0.0;
+      begin match fallback_get_func key with
+      | Some res ->
+        let pos = map_result res in
+        add_func key pos;
+        Some pos
+      | None ->
+        None
+      end
     end
 
 
@@ -495,6 +671,15 @@ module Types = struct
       let description = "TypePos"
     end)
 
+  module BlockedEntries = SharedMem.WithCache
+    (SharedMem.ProfiledImmediate)
+    (StringKey)
+    (struct
+      type t = blocked_entry
+      let prefix = Prefix.make()
+      let description = "TypeBlocked"
+    end)
+
   let add id type_info =
     if not @@ TypePosHeap.LocalChanges.has_local_changes () then check_valid id (fst type_info);
     TypeCanonHeap.add (to_canon_name_key id) id;
@@ -516,10 +701,11 @@ module Types = struct
     get_and_cache
       ~map_result
       ~get_func
+      ~check_block_func:BlockedEntries.get
       ~fallback_get_func:(Sqlite.get_type_pos ~case_insensitive:false)
       ~add_func:add
       ~measure_name:"Reverse naming table (types) cache hit rate"
-      ~name:id
+      ~key:id
 
   let get_canon_name id =
     let open Core_kernel in
@@ -538,14 +724,18 @@ module Types = struct
     get_and_cache
       ~map_result
       ~get_func:TypeCanonHeap.get
+      ~check_block_func:BlockedEntries.get
       ~fallback_get_func:(Sqlite.get_type_pos ~case_insensitive:true)
       ~add_func:TypeCanonHeap.add
       ~measure_name:"Canon naming table (types) cache hit rate"
-      ~name:id
+      ~key:id
 
   let remove_batch types =
-    TypeCanonHeap.remove_batch (canonize_set types);
-    TypePosHeap.remove_batch types
+    let canon_key_types = canonize_set types in
+    TypeCanonHeap.remove_batch canon_key_types;
+    TypePosHeap.remove_batch types;
+    if Sqlite.is_connected ()
+    then SSet.iter (fun id -> BlockedEntries.add id Blocked) (SSet.union types canon_key_types)
 
   let heap_string_of_key = TypePosHeap.string_of_key
 end
@@ -571,6 +761,15 @@ module Funs = struct
       let description = "FunPos"
     end)
 
+  module BlockedEntries = SharedMem.NoCache
+    (SharedMem.ProfiledImmediate)
+    (StringKey)
+    (struct
+      type t = blocked_entry
+      let prefix = Prefix.make()
+      let description = "FunBlocked"
+    end)
+
   let add id pos =
     if not @@ FunPosHeap.LocalChanges.has_local_changes () then check_valid id pos;
     FunCanonHeap.add (to_canon_name_key id) id;
@@ -581,10 +780,11 @@ module Funs = struct
     get_and_cache
       ~map_result
       ~get_func:FunPosHeap.get
+      ~check_block_func:BlockedEntries.get
       ~fallback_get_func:(Sqlite.get_fun_pos ~case_insensitive:false)
       ~add_func:add
       ~measure_name:"Reverse naming table (functions) cache hit rate"
-      ~name:id
+      ~key:id
 
   let get_canon_name name =
     let open Core_kernel in
@@ -595,14 +795,18 @@ module Funs = struct
     get_and_cache
       ~map_result
       ~get_func:FunCanonHeap.get
+      ~check_block_func:BlockedEntries.get
       ~fallback_get_func:(Sqlite.get_fun_pos ~case_insensitive:true)
       ~add_func:FunCanonHeap.add
       ~measure_name:"Canon naming table (functions) cache hit rate"
-      ~name
+      ~key:name
 
   let remove_batch funs =
-    FunCanonHeap.remove_batch (canonize_set funs);
-    FunPosHeap.remove_batch funs
+    let canon_key_funs = canonize_set funs in
+    FunCanonHeap.remove_batch canon_key_funs;
+    FunPosHeap.remove_batch funs;
+    if Sqlite.is_connected ()
+    then SSet.iter (fun id -> BlockedEntries.add id Blocked) (SSet.union funs canon_key_funs)
 
   let heap_string_of_key = FunPosHeap.string_of_key
 end
@@ -619,6 +823,15 @@ module Consts = struct
       let description = "ConstPos"
     end)
 
+  module BlockedEntries = SharedMem.NoCache
+    (SharedMem.ProfiledImmediate)
+    (StringKey)
+    (struct
+      type t = blocked_entry
+      let prefix = Prefix.make()
+      let description = "ConstBlocked"
+    end)
+
   let add id pos =
     if not @@ ConstPosHeap.LocalChanges.has_local_changes () then check_valid id pos;
     ConstPosHeap.add id pos
@@ -628,13 +841,16 @@ module Consts = struct
     get_and_cache
       ~map_result
       ~get_func:ConstPosHeap.get
+      ~check_block_func:BlockedEntries.get
       ~fallback_get_func:Sqlite.get_const_pos
       ~add_func:add
       ~measure_name:"Reverse naming table (consts) cache hit rate"
-      ~name:id
+      ~key:id
 
   let remove_batch consts =
-    ConstPosHeap.remove_batch consts
+    ConstPosHeap.remove_batch consts;
+    if Sqlite.is_connected ()
+    then SSet.iter (fun id -> BlockedEntries.add id Blocked) consts
 
   let heap_string_of_key = ConstPosHeap.string_of_key
 end
@@ -642,20 +858,29 @@ end
 let push_local_changes () =
   Types.TypePosHeap.LocalChanges.push_stack ();
   Types.TypeCanonHeap.LocalChanges.push_stack ();
+  Types.BlockedEntries.LocalChanges.push_stack ();
   Funs.FunPosHeap.LocalChanges.push_stack ();
   Funs.FunCanonHeap.LocalChanges.push_stack ();
-  Consts.ConstPosHeap.LocalChanges.push_stack ()
+  Funs.BlockedEntries.LocalChanges.push_stack ();
+  Consts.ConstPosHeap.LocalChanges.push_stack ();
+  Consts.BlockedEntries.LocalChanges.push_stack ()
 
 let pop_local_changes () =
   Types.TypePosHeap.LocalChanges.pop_stack ();
   Types.TypeCanonHeap.LocalChanges.pop_stack ();
+  Types.BlockedEntries.LocalChanges.pop_stack ();
   Funs.FunPosHeap.LocalChanges.pop_stack ();
   Funs.FunCanonHeap.LocalChanges.pop_stack ();
-  Consts.ConstPosHeap.LocalChanges.pop_stack ()
+  Funs.BlockedEntries.LocalChanges.pop_stack ();
+  Consts.ConstPosHeap.LocalChanges.pop_stack ();
+  Consts.BlockedEntries.LocalChanges.pop_stack ()
 
 let has_local_changes () =
   Types.TypePosHeap.LocalChanges.has_local_changes ()
   || Types.TypeCanonHeap.LocalChanges.has_local_changes ()
+  || Types.BlockedEntries.LocalChanges.has_local_changes ()
   || Funs.FunPosHeap.LocalChanges.has_local_changes ()
   || Funs.FunCanonHeap.LocalChanges.has_local_changes ()
+  || Funs.BlockedEntries.LocalChanges.has_local_changes ()
   || Consts.ConstPosHeap.LocalChanges.has_local_changes ()
+  || Consts.BlockedEntries.LocalChanges.has_local_changes ()

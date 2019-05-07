@@ -73,6 +73,14 @@ class SavedStateHierarchyTests(
 class SavedStateTests(SavedStateTestDriver, unittest.TestCase):
     template_repo: Optional[str] = "hphp/hack/test/integration/data/simple_repo"
     bin_dir: Optional[str]
+    skip_incremental_generation_tests = False
+
+    def check_skip_incremental(self) -> None:
+        if self.skip_incremental_generation_tests:
+            raise unittest.SkipTest(
+                "Skipping incremental generation test because it's not "
+                "supported for these tests."
+            )
 
     def test_hhconfig_change(self) -> None:
         """
@@ -189,6 +197,7 @@ watchman_init_timeout = 1
     def test_incrementally_generated_saved_state_after_loaded_saved_state(self) -> None:
         # Same as the above test, except we begin the test by starting up
         # a Hack Server that loads a saved state.
+        self.check_skip_incremental()
         self.start_hh_server()
         # Hack server is now started with a saved state
         self.check_cmd(["No errors!"], assert_loaded_saved_state=True)
@@ -246,6 +255,7 @@ watchman_init_timeout = 1
         )
 
     def test_incrementally_generated_saved_state_with_errors(self) -> None:
+        self.check_skip_incremental()
         # Introduce an error in "master"
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -392,3 +402,42 @@ public static function foo () : %s {
             """
                 % (type, value)
             )
+
+
+class ReverseNamingTableFallbackTestDriver(SavedStateTestDriver):
+    enable_reverse_naming_table_fallback = True
+
+    def write_local_conf(self) -> None:
+        with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
+            f.write(
+                r"""
+# some comment
+use_mini_state = true
+use_watchman = true
+watchman_subscribe_v2 = true
+lazy_decl = true
+lazy_parse = true
+lazy_init2 = true
+enable_reverse_naming_table_fallback = true
+"""
+            )
+
+
+class ReverseNamingTableSavedStateCommonTests(
+    common_tests.CommonTests, ReverseNamingTableFallbackTestDriver, unittest.TestCase
+):
+    pass
+
+
+class ReverseNamingTableSavedStateHierarchyTests(
+    hierarchy_tests.HierarchyTests,
+    ReverseNamingTableFallbackTestDriver,
+    unittest.TestCase,
+):
+    pass
+
+
+class ReverseNamingTableSavedStateTests(
+    SavedStateTests, ReverseNamingTableFallbackTestDriver, unittest.TestCase
+):
+    skip_incremental_generation_tests = True

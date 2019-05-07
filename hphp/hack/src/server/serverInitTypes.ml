@@ -46,6 +46,7 @@ type files_changed_while_parsing = Relative_path.Set.t
 type loaded_info =
 {
   saved_state_fn : string;
+  deptable_fn : string;
   corresponding_rev : Hg.rev;
   mergebase_rev : Hg.global_rev option;
   (* Files changed between saved state revision and current public merge base *)

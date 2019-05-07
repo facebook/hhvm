@@ -43,9 +43,7 @@ let lock_and_load_deptable (fn: string) ~(genv: ServerEnv.genv) : unit =
     in
     Hh_logger.log
       "Reading the dependency file took (sec): %d" read_deptable_time;
-    HackEventLogger.load_deptable_end read_deptable_time;
-    if genv.ServerEnv.local_config.SLC.enable_reverse_naming_table_fallback
-    then Naming_table.set_sqlite_fallback_path fn
+    HackEventLogger.load_deptable_end read_deptable_time
   with
   | SharedMem.Sql_assertion_failure 11
   | SharedMem.Sql_assertion_failure 14 as e -> (* SQL_corrupt *)
@@ -108,6 +106,7 @@ let download_and_load_state_exn
         let dirty_local_files = list_to_set dirty_local_files in
         Ok {
           saved_state_fn = result.State_loader.saved_state_fn;
+          deptable_fn = result.State_loader.deptable_fn;
           corresponding_rev = result.State_loader.corresponding_rev;
           mergebase_rev = result.State_loader.mergebase_rev;
           dirty_master_files;
@@ -138,6 +137,7 @@ let use_precomputed_state_exn
   in
   {
     saved_state_fn;
+    deptable_fn;
     corresponding_rev = (Hg.Global_rev (int_of_string (corresponding_base_revision)));
     mergebase_rev  = None;
     dirty_master_files = prechecked_changes;
@@ -409,6 +409,7 @@ let post_saved_state_initialization
     old_saved;
     mergebase_rev;
     old_errors;
+    deptable_fn;
     _} = loaded_info in
 
   if hg_aware then Option.iter mergebase_rev ~f:ServerRevisionTracker.initialize;
@@ -464,17 +465,34 @@ let post_saved_state_initialization
   SearchServiceRunner.update_fileinfo_map env.naming_table;
 
   let t = update_files genv env.naming_table t in
-  (* Name all the files from the old fast (except the new ones we parsed) *)
-  let old_hack_names = Relative_path.Map.filter old_fast (fun k _v ->
-      not (Relative_path.Set.mem parsing_files k)
-    ) in
 
   (* If we're falling back to SQLite we don't need to explicitly do a naming
      pass. *)
   let t =
     if genv.local_config.SLC.enable_reverse_naming_table_fallback
-    then t
-    else naming_with_fast old_hack_names t
+    then begin
+      (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
+      any dirty files to make sure we properly handle file deletes. *)
+      Naming_table.set_sqlite_fallback_path deptable_fn;
+      Relative_path.Set.iter parsing_files begin fun k ->
+        match Relative_path.Map.get old_fast k with
+        | None ->
+          (* If we can't find the file in [old_fast] we don't consider that an error, since it
+             could be a new file that was added. *)
+          ()
+        | Some v ->
+          Naming_table.Types.remove_batch (v.FileInfo.n_classes);
+          Naming_table.Types.remove_batch (v.FileInfo.n_types);
+          Naming_table.Funs.remove_batch (v.FileInfo.n_funs);
+          Naming_table.Consts.remove_batch (v.FileInfo.n_consts)
+      end;
+      t
+    end else
+      (* Name all the files from the old fast (except the new ones we parsed) *)
+      let old_hack_names = Relative_path.Map.filter old_fast begin fun k _v ->
+          not (Relative_path.Set.mem parsing_files k)
+      end in
+      naming_with_fast old_hack_names t
   in
   (* Do global naming on all dirty files *)
   let env, t = naming env t in

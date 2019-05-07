@@ -177,9 +177,16 @@ let state_loader_timeouts_ ~default config =
 let load_ fn ~silent config_overrides =
   (* Print out the contents in our logs so we know what settings this server
    * was started with *)
-  let contents = Sys_utils.cat fn in
-  if not silent then Printf.eprintf "%s:\n%s\n" fn contents;
-  let config = Config_file.parse_contents contents in
+  let config =
+    try
+      let contents = Sys_utils.cat fn in
+      if not silent then Printf.eprintf "%s:\n%s\n" fn contents;
+      Config_file.parse_contents contents
+    with e ->
+      Hh_logger.log "Loading config exception: %s" (Printexc.to_string e);
+      Hh_logger.log "Could not load config at %s, using defaults" path;
+      SMap.empty
+  in
   let config = SMap.union config config_overrides in
   let use_watchman = bool_if_version "use_watchman"
       ~default:default.use_watchman config in
@@ -337,9 +344,4 @@ let load_ fn ~silent config_overrides =
   }
 
 let load ~silent config_overrides =
-  try
     load_ path ~silent config_overrides
-  with e ->
-    Hh_logger.log "Loading config exception: %s" (Printexc.to_string e);
-    Hh_logger.log "Could not load config at %s, using defaults" path;
-    default

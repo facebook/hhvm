@@ -168,11 +168,11 @@ let update_save_state
   if not (RealDisk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
   dump_saved_state ~save_decls output_filename naming_table errors;
-  let () = if enable_reverse_naming_table_fallback then begin
-    failwith "incrementally updating file info on disk not yet implemented"
-  end else begin
-    Hh_logger.log "skip writing file info to sqlite table"
-  end in
+  let () =
+    if enable_reverse_naming_table_fallback
+    then Hh_logger.log "incrementally updating file info on disk not yet implemented"
+    else Hh_logger.log "skip writing file info to sqlite table"
+  in
   let edges_added = SharedMem.update_dep_table_sqlite
     db_name
     Build_id.build_revision

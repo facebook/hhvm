@@ -175,10 +175,6 @@ enum Attr {
   // Set on classes to indicate that they have at least one immutable property.
   AttrHasImmutable         = (1u << 22), //    X  |          |         //
                                          //       |          |         //
-  // Indicates that the frame should be ignored when searching for context
-  // (e.g., array_map evalutates its callback in the context of the caller).
-  AttrSkipFrame            = (1u << 22), //       |          |    X    //
-                                         //       |          |         //
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
                                          //       |          |         //

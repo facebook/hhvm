@@ -580,7 +580,7 @@ inline bool Func::isNoInjection() const {
 }
 
 inline bool Func::isSkipFrame() const {
-  return m_attrs & AttrSkipFrame;
+  return isCPPBuiltin() || (isBuiltin() && !isMethod() && !isPseudoMain());
 }
 
 inline bool Func::isFoldable() const {

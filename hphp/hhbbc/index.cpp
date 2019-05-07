@@ -862,25 +862,6 @@ bool Func::isFoldable() const {
                      });
 }
 
-bool Func::mightBeSkipFrame() const {
-  return match<bool>(
-    val,
-    // Only builtins can be skip frame and non-method builtins are always
-    // uniquely resolvable unless renaming is involved.
-    [&](FuncName s) { return s.renamable; },
-    [&](MethodName) { return true; },
-    [&](FuncInfo* fi) { return fi->func->attrs & AttrSkipFrame; },
-    [&](const MethTabEntryPair* mte) {
-      return mte->second.func->attrs & AttrSkipFrame;
-    },
-    [&](FuncFamily* fa) {
-      for (auto const pf : fa->possibleFuncs()) {
-        if (pf->second.func->attrs & AttrSkipFrame) return true;
-      }
-      return false;
-    });
-}
-
 bool Func::couldHaveReifiedGenerics() const {
   return match<bool>(
     val,

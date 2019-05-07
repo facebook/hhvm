@@ -1403,10 +1403,6 @@ let function_attributes f =
     then "no_injection" :: attrs
     else attrs in
   let attrs =
-    if Hhas_attribute.has_native user_attrs
-    then "skip_frame" :: attrs
-    else attrs in
-  let attrs =
     if Hhas_attribute.has_foldable user_attrs
     then "foldable" :: attrs
     else attrs in
@@ -1469,7 +1465,6 @@ let method_attributes (m : Hhas_method.t) =
   let attrs = if is_systemlib && is_native then "unique" :: attrs else attrs in
   let attrs = if Hhas_method.inout_wrapper m then "inout_wrapper" :: attrs else attrs in
   let attrs = if Hhas_method.no_injection m then "no_injection" :: attrs else attrs in
-  let attrs = if is_systemlib && is_native then "skip_frame" :: attrs else attrs in
   let attrs =
     if Hhas_attribute.has_foldable user_attrs then "foldable" :: attrs else attrs in
   let attrs = if Hhas_method.is_abstract m then "abstract" :: attrs else attrs in

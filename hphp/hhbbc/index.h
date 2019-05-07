@@ -326,12 +326,6 @@ struct Func {
   bool isFoldable() const;
 
   /*
-   * Returns whether this resolved function could possibly be skipped when
-   * looking for a caller's frame.
-   */
-  bool mightBeSkipFrame() const;
-
-  /*
    * Whether this function could have reified generics
    */
   bool couldHaveReifiedGenerics() const;

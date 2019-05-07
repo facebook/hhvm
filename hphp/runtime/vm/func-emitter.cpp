@@ -112,9 +112,6 @@ void FuncEmitter::init(int l1, int l2, Offset base_, Attr attrs_, bool top_,
     if (!SystemLib::s_inited) {
       assertx(attrs & AttrBuiltin);
     }
-    if ((attrs & AttrBuiltin) && !pce()) {
-      attrs |= AttrSkipFrame;
-    }
   }
 }
 
@@ -683,7 +680,6 @@ void FuncRepoProxy::GetFuncsStmt
         if (preClassId < 0) {
           assertx(fe->attrs & AttrPersistent);
           assertx(fe->attrs & AttrUnique);
-          assertx(fe->attrs & AttrSkipFrame);
         }
       }
       fe->setEHTabIsSorted();

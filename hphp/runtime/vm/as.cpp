@@ -2599,7 +2599,7 @@ void check_native(AsmState& as, bool is_construct_or_destruct) {
 
     // set extra attributes for builtin native functions
     if (!SystemLib::s_inited) {
-      as.fe->attrs |= AttrBuiltin | AttrSkipFrame | AttrMayUseVV;
+      as.fe->attrs |= AttrBuiltin | AttrMayUseVV;
     }
 
     for (auto& pi : as.fe->params) {

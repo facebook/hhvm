@@ -57,6 +57,7 @@ val unexpected_eof : Pos.t -> unit
 val missing_field : Pos.t -> Pos.t -> string -> unit
 val violated_constraint :
   Pos.t -> (Pos.t * string) -> (Pos.t * string) list -> (Pos.t * string) list -> unit
+val method_variance : Pos.t -> unit
 val explain_constraint :
   use_pos:Pos.t -> definition_pos:Pos.t -> param_name:string -> error -> unit
 val explain_where_constraint : use_pos:Pos.t -> definition_pos:Pos.t -> error -> unit

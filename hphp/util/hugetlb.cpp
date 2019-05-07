@@ -496,9 +496,9 @@ int remap_interleaved_2m_pages(void* addr, size_t pages) {
   assert(reinterpret_cast<uintptr_t>(addr) % size2m == 0);
   assert(addr != nullptr);
   int count = 0;
-  std::atomic_int node{0};
+  std::atomic<uint32_t> node{0};
   while (pages > 0) {
-    int curr_node = next_numa_node(node);
+    auto const curr_node = next_numa_node(node);
     count += (remap_2m(addr, curr_node) != nullptr);
     addr = (char*)addr + size2m;
     --pages;

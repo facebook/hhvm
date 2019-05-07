@@ -466,7 +466,7 @@ bool setup_extra_arenas(unsigned count) {
   }
   // `count` needs to be a multiple of `num_numa_nodes()`, if it isn't, we round
   // it up to make it easy to balance across nodes.
-  const unsigned nNodes = std::max(1, num_numa_nodes());
+  auto const nNodes = std::max(1u, num_numa_nodes());
   s_extra_arena_per_node = (count + nNodes - 1) / nNodes;
   assert(s_extra_arena_per_node >= 1);
   s_extra_arenas.resize(nNodes);

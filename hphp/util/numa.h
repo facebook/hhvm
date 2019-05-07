@@ -40,11 +40,11 @@ void initNuma();
 /*
  * Determine the next NUMA node according to state maintained in `curr_node`.
  */
-int next_numa_node(std::atomic_int& curr_node);
+uint32_t next_numa_node(std::atomic<uint32_t>& curr_node);
 /*
  * The number of numa nodes in the system
  */
-inline int num_numa_nodes() {
+inline uint32_t num_numa_nodes() {
   return use_numa ? numa_num_nodes : 1;
 }
 /*
@@ -54,11 +54,11 @@ void numa_interleave(void* start, size_t size);
 /*
  * Allocate the specified address range on the given node
  */
-void numa_bind_to(void* start, size_t size, int node);
+void numa_bind_to(void* start, size_t size, uint32_t node);
 /*
  * Return true if node is part of the allowed set of numa nodes
  */
-inline bool numa_node_allowed(int node) {
+inline bool numa_node_allowed(uint32_t node) {
   if (numa_node_set == 0) return true;
   return numa_node_set & (1u << node);
 }
@@ -66,10 +66,12 @@ inline bool numa_node_allowed(int node) {
 #else // HAVE_NUMA undefined
 
 inline void initNuma() {}
-inline constexpr int next_numa_node(std::atomic_int& curr_node) { return 0; }
-inline constexpr int num_numa_nodes() { return 1; }
+inline constexpr uint32_t next_numa_node(std::atomic<uint32_t>& curr_node) {
+  return 0;
+}
+inline constexpr uint32_t num_numa_nodes() { return 1; }
 inline void numa_interleave(void* start, size_t size) {}
-inline void numa_bind_to(void* start, size_t size, int node) {}
+inline void numa_bind_to(void* start, size_t size, uint32_t node) {}
 inline constexpr bool numa_node_allowed(int node) { return true; }
 
 #endif

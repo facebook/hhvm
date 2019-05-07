@@ -756,7 +756,7 @@ private:
   std::atomic<int> m_maxThreadCount;
   const int m_maxQueueCount;    // not including the possible reaper
   int m_currThreadCountLimit;   // initial limit can be lower than max
-  std::atomic_int m_prevNode{-1};       // the NUMA node for last worker
+  std::atomic<uint32_t> m_prevNode{0};   // the NUMA node for last worker
   int m_hugeThreadCount{0};
   unsigned m_hugeStackKb;
   unsigned m_tlExtraKb;

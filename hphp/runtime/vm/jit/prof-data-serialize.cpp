@@ -819,7 +819,7 @@ void merge_loaded_units(int numWorkers) {
   // the first worker to finish.
   auto const batchSize{std::max(units.size() / numWorkers / 16, size_t(1))};
   std::atomic<size_t> index{0};
-  std::atomic_int curr_node{0};
+  std::atomic<uint32_t> curr_node{0};
   for (auto worker = 0; worker < numWorkers; ++worker) {
     WorkerSpec spec;
     spec.numaNode = next_numa_node(curr_node);

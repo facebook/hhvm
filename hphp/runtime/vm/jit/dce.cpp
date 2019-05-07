@@ -931,7 +931,11 @@ bool findWeakActRecUses(const BlockList& blocks,
 
     switch (inst->op()) {
     // these can be made stack relative
-    case StLoc:
+    case StLoc: {
+      auto const id = inst->marker().func()->lookupVarId(s_86metadata.get());
+      if (inst->extra<StLoc>()->locId != id) incWeak(inst, inst->src(0));
+      break;
+    }
     case LdLoc:
     case CheckLoc:
     case AssertLoc:

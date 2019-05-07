@@ -439,7 +439,11 @@ bool canConvertToStack(IRInstruction& inst) {
               MemoGetInstanceCache, MemoSetInstanceCache)) {
     return inst.src(0)->isA(TFramePtr);
   }
-  return inst.is(LdLoc, StLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
+  if (inst.is(StLoc)) {
+    auto const id = inst.marker().func()->lookupVarId(s_86metadata.get());
+    return inst.extra<StLoc>()->locId != id;
+  }
+  return inst.is(LdLoc, CheckLoc, AssertLoc, HintLocInner, LdLocAddr);
 }
 
 bool canRewriteToParent(const IRInstruction& inst) {

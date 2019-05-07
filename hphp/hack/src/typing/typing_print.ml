@@ -826,6 +826,10 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
       is_array false @
       ["fields_known", JSON_Bool fields_known] @
       fields (Nast.ShapeMap.elements fl)
+  | Tunresolved [] ->
+    if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
+    then obj @@ kind "nothing"
+    else obj @@ kind "union" @ args []
   | Tunresolved [ty] ->
     from_type env ty
   | Tunresolved tyl ->

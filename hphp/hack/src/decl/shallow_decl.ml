@@ -340,12 +340,14 @@ let class_ env c =
   }
 
 let class_ c =
-  let _, cls_name = c.c_name in
+  let cls_pos, cls_name = c.c_name in
   let class_dep = Dep.Class cls_name in
   let env = {
     Decl_env.mode = c.c_mode;
     droot = Some class_dep;
     decl_tcopt = GlobalNamingOptions.get ();
   } in
-  let errors, sc = Errors.do_ (fun () -> class_ env c) in
+  let errors, sc =
+    Errors.run_in_context (Pos.filename cls_pos) Errors.Decl
+      (fun () -> Errors.do_ (fun () -> class_ env c)) in
   { sc with sc_decl_errors = errors }

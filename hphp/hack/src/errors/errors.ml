@@ -110,6 +110,7 @@ let (error_map : error files_t ref) = ref Relative_path.Map.empty
 let accumulate_errors = ref false
 (* Some filename when declaring *)
 let in_lazy_decl = ref None
+let badpos_sentinel = "PRIMARY ERROR POSITION IS NOT IN CURRENT FILE: please fix"
 
 let try_with_result f1 f2 =
   let error_map_copy = !error_map in
@@ -128,7 +129,11 @@ let try_with_result f1 f2 =
   in
   match get_last errors with
   | None -> result
-  | Some l -> f2 result l
+  | Some (code,l) ->
+   (* Remove bad position sentinel if present: we might be about to add a new primary
+    * error position*)
+   let l = match l with (_, msg) :: l when msg = badpos_sentinel -> l | _ -> l in
+   f2 result (code,l)
 
 let do_ f =
   let error_map_copy = !error_map in
@@ -557,6 +562,14 @@ let add_ignored_fixme_code_error pos code =
 (* Errors accumulator. *)
 (*****************************************************************************)
 
+(* If primary position in error list isn't in current file, wrap with a sentinel error *)
+let check_pos_msg pos_msg_l =
+  let pos = fst (List.hd_exn pos_msg_l) in
+  let current_file = fst !current_context in
+  if current_file <> Relative_path.default && Pos.filename pos <> current_file
+  then (pos, badpos_sentinel) :: pos_msg_l
+  else pos_msg_l
+
 let rec add_applied_fixme code pos =
   if ServerLoadFlag.get_no_load () then
     let applied_fixmes_list = get_current_list !applied_fixmes in
@@ -564,13 +577,15 @@ let rec add_applied_fixme code pos =
   else ()
 
 and add code pos msg =
+  let pos_msg_l = check_pos_msg [pos, msg] in
   if not (is_ignored_fixme code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
-  else add_error (make_error code [pos, msg]);
+  else add_error (make_error code pos_msg_l);
   add_ignored_fixme_code_error pos code
 
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
+  let pos_msg_l = check_pos_msg pos_msg_l in
   if not (is_ignored_fixme code) && !is_hh_fixme pos code
   then add_applied_fixme code pos
   else add_error (make_error code pos_msg_l);

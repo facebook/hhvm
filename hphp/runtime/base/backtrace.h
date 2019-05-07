@@ -28,6 +28,7 @@ namespace HPHP {
 struct ActRec;
 struct Array;
 struct VMParserFrame;
+struct c_ResumableWaitHandle;
 struct c_WaitableWaitHandle;
 struct Class;
 struct Func;
@@ -225,6 +226,8 @@ const Func* GetCallerFuncSkipCPPBuiltins();
 Class* GetCallerClass();
 Class* GetCallerClassSkipBuiltins();
 Class* GetCallerClassSkipCPPBuiltins();
+c_ResumableWaitHandle* GetResumedWaitHandle();
+Array GetCallerInfo();
 
 } // HPHP
 

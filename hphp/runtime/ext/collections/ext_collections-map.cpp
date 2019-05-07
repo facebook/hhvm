@@ -427,7 +427,7 @@ BaseMap::php_differenceByKey(const Variant& it) {
 template<bool useKey>
 Object BaseMap::php_retain(const Variant& callback) {
   CallCtx ctx;
-  vm_decode_function(callback, nullptr, ctx);
+  vm_decode_function(callback, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");
@@ -585,7 +585,7 @@ typename std::enable_if<
   std::is_base_of<BaseMap, TMap>::value, Object>::type
 BaseMap::php_skipWhile(const Variant& fn) {
   CallCtx ctx;
-  vm_decode_function(fn, nullptr, ctx);
+  vm_decode_function(fn, ctx);
   if (!ctx.func) {
     SystemLib::throwInvalidArgumentExceptionObject(
                "Parameter must be a valid callback");

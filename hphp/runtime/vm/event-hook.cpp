@@ -269,14 +269,9 @@ static Variant call_intercept_handler(
   Variant& done,
   ActRec* ar
 ) {
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  CallerFrame cf;
-  StringData* invName = nullptr;
-  ArrayData* reifiedGenerics = nullptr;
-  bool dynamic = false;
-  auto f = vm_decode_function(function, cf(),
-                              obj, cls, invName, dynamic, reifiedGenerics);
+  CallCtx callCtx;
+  vm_decode_function(function, callCtx);
+  auto f = callCtx.func;
   if (!f) {
     return uninit_null();
   }
@@ -288,8 +283,8 @@ static Variant call_intercept_handler(
       if (!f->isMethod()) {
         f = Unit::lookupFunc(name.get());
       } else {
-        assertx(cls);
-        f = cls->lookupMethod(name.get());
+        assertx(callCtx.cls);
+        f = callCtx.cls->lookupMethod(name.get());
       }
       if (!f) {
         raise_error(
@@ -331,9 +326,10 @@ static Variant call_intercept_handler(
   }
 
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, intArgs, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeNormal,
-                          dynamic, false)
+    g_context->invokeFunc(f, intArgs, callCtx.this_, callCtx.cls,
+                          nullptr, callCtx.invName,
+                          ExecutionContext::InvokeNormal,
+                          callCtx.dynamic, false)
   );
 
   if (inout) {

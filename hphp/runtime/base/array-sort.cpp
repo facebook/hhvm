@@ -294,8 +294,7 @@ void PackedArray::Sort(ArrayData* ad, int sort_flags, bool ascending) {
   do {                                                          \
     if (!a->m_size) return true;                                \
     CallCtx ctx;                                                \
-    CallerFrame cf;                                             \
-    vm_decode_function(cmp_function, cf(), ctx);                \
+    vm_decode_function(cmp_function, ctx);                      \
     if (!ctx.func) {                                            \
       return false;                                             \
     }                                                           \
@@ -366,8 +365,7 @@ bool PackedArray::Usort(ArrayData* ad, const Variant& cmp_function) {
   assertx(!ad->hasMultipleRefs());
   ElmUCompare<TVAccessor> comp;
   CallCtx ctx;
-  CallerFrame cf;
-  vm_decode_function(cmp_function, cf(), ctx);
+  vm_decode_function(cmp_function, ctx);
   if (!ctx.func) {
     return false;
   }

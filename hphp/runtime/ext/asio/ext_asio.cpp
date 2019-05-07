@@ -54,14 +54,14 @@ Object HHVM_FUNCTION(asio_get_running_in_context, int ctx_idx) {
     auto fp = session->getContext(ctx_idx + 1)->getSavedFP();
     return Object{c_ResumableWaitHandle::getRunning(fp)};
   } else {
-    return Object{c_ResumableWaitHandle::getRunning(GetCallerFrameForArgs())};
+    return Object{GetResumedWaitHandle()};
   }
 }
 
 }
 
 Object HHVM_FUNCTION(asio_get_running) {
-  return Object{c_ResumableWaitHandle::getRunning(GetCallerFrameForArgs())};
+  return Object{GetResumedWaitHandle()};
 }
 
 Variant HHVM_FUNCTION(join, const Object& obj) {

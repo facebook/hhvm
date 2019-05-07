@@ -106,10 +106,9 @@ static UBool enumCharType_callback(CallCtx* ctx,
 
 void HHVM_STATIC_METHOD(IntlChar, enumCharTypes, const Variant& callback) {
   CallCtx ctx;
-  CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    vm_decode_function(callback, cf(), ctx);
+    vm_decode_function(callback, ctx);
   }
   if (!ctx.func) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,
@@ -178,10 +177,9 @@ void HHVM_STATIC_METHOD(IntlChar, enumCharNames,
   GETCP_VOID(vStart, start);
   GETCP_VOID(vLimit, limit);
   CallCtx ctx;
-  CallerFrame cf;
   ctx.func = nullptr;
   if (!callback.isNull()) {
-    vm_decode_function(callback, cf(), ctx);
+    vm_decode_function(callback, ctx);
   }
   if (!ctx.func) {
     s_intl_error->setError(U_INTERNAL_PROGRAM_ERROR,

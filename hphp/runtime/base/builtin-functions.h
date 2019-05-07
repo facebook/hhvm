@@ -200,12 +200,10 @@ vm_decode_function(const_variant_ref function,
 
 inline void
 vm_decode_function(const_variant_ref function,
-                   ActRec* ar,
                    CallCtx& ctx,
                    DecodeFlags flags = DecodeFlags::Warn) {
-  ArrayData* reifiedGenerics = nullptr;
-  ctx.func = vm_decode_function(function, ar, ctx.this_, ctx.cls,
-                                ctx.invName, ctx.dynamic, reifiedGenerics,
+  ctx.func = vm_decode_function(function, nullptr, ctx.this_, ctx.cls,
+                                ctx.invName, ctx.dynamic, ctx.reifiedGenerics,
                                 flags);
 }
 

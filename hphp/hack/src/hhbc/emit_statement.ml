@@ -77,7 +77,7 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
     if String.length s = 0
     then empty
     else
-      let hashbang, tail =
+      let tail =
         if check_for_hashbang
         then
           (* if markup text starts with #!
@@ -88,15 +88,11 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
           if Str.string_match r s 0
           then
             let cmd = Str.matched_string s in
-            let tail = String_utils.lstrip s cmd in
-            cmd, tail
-          else "", s
-        else "", s in
-      gather [
-        emit_ignored_call_for_non_empty_string
-          "__SystemLib\\print_hashbang" hashbang;
+            String_utils.lstrip s cmd
+          else s
+        else s in
         emit_ignored_call_for_non_empty_string SN.SpecialFunctions.echo tail
-      ] in
+      in
   let echo =
     match echo_expr_opt with
     | Some e -> emit_ignored_call_expr SN.SpecialFunctions.echo e

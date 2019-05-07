@@ -1205,55 +1205,6 @@ int ExecutionContext::getLine() {
 }
 
 const StaticString s___call("__call");
-const StaticString s_call_user_func("call_user_func");
-const StaticString s_call_user_func_array("call_user_func_array");
-
-Array ExecutionContext::getCallerInfo() {
-  VMRegAnchor _;
-  auto ar = vmfp();
-  if (ar->skipFrame()) {
-    ar = getPrevVMStateSkipFrame(ar);
-    if (!ar) return empty_array();
-  }
-  while (ar->func()->name()->isame(s_call_user_func.get())
-         || ar->func()->name()->isame(s_call_user_func_array.get())) {
-    ar = getPrevVMState(ar);
-    if (ar == nullptr) {
-      return empty_darray();
-    }
-  }
-
-  Offset pc = 0;
-  ar = getPrevVMState(ar, &pc);
-  while (ar != nullptr) {
-    if (!ar->func()->name()->isame(s_call_user_func.get())
-        && !ar->func()->name()->isame(s_call_user_func_array.get())) {
-      auto const unit = ar->func()->unit();
-      auto const path = ar->func()->originalFilename() ?
-        ar->func()->originalFilename() : unit->filepath();
-      int lineNumber;
-      if ((lineNumber = unit->getLineNumber(pc)) != -1) {
-        auto const cls = ar->func()->cls();
-        if (cls != nullptr && !ar->func()->isClosureBody()) {
-          return make_darray(
-            s_class, const_cast<StringData*>(cls->name()),
-            s_file, const_cast<StringData*>(path),
-            s_function, const_cast<StringData*>(ar->func()->name()),
-            s_line, lineNumber
-          );
-        } else {
-          return make_darray(
-            s_file, const_cast<StringData*>(path),
-            s_function, const_cast<StringData*>(ar->func()->name()),
-            s_line, lineNumber
-          );
-        }
-      }
-    }
-    ar = getPrevVMState(ar, &pc);
-  }
-  return empty_darray();
-}
 
 ActRec* ExecutionContext::getFrameAtDepth(int frame) {
   VMRegAnchor _;

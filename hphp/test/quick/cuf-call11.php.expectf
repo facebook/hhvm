@@ -1,5 +1,5 @@
-D1::foo true
-D1::foo true
+D1::foo false
+D1::foo false
 D2::foo false
 D2::foo false
 D3::foo false

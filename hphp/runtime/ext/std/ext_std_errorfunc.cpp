@@ -23,6 +23,7 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/execution-context.h"
@@ -74,7 +75,7 @@ ResourceHdr* debug_backtrace_fast() {
  * class name (if in class context) where the "caller" called the "callee".
  */
 Array HHVM_FUNCTION(hphp_debug_caller_info) {
-  return g_context->getCallerInfo();
+  return GetCallerInfo();
 }
 
 int64_t HHVM_FUNCTION(hphp_debug_backtrace_hash, int64_t options /* = 0 */) {

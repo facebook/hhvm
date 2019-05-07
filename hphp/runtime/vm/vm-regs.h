@@ -269,66 +269,6 @@ struct VMRegGuard {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace detail {
-
-inline ActRec* regAnchorFP(ActRec* cur, Offset* pc = nullptr) {
-  // In builtins, m_fp points to the caller's frame if called through
-  // FCallBuiltin, else it points to the builtin's frame, in which case,
-  // getPrevVMState() gets the caller's frame.  In addition, we need to skip
-  // over php-defined builtin functions in order to find the true context.
-  auto const context = g_context.getNoCheck();
-  if (pc) *pc = cur->m_func->unit()->offsetOf(vmpc());
-  if (cur && cur->skipFrame()) cur = context->getPrevVMStateSkipFrame(cur, pc);
-  return cur;
-}
-
-inline ActRec* regAnchorFPForArgs(ActRec* cur) {
-  // Like regAnchorFP, but only account for FCallBuiltin
-  if (cur && cur->m_func->isCPPBuiltin()) {
-    auto const context = g_context.getNoCheck();
-    cur = context->getPrevVMState(cur);
-  }
-  return cur;
-}
-
-}
-
-/*
- * VM helper to retrieve the current vm frame pointer without ensuring
- * the vm state is clean.
- *
- * This is a common need for extensions.
- */
-inline ActRec* GetCallerFrame() {
-  auto fp = tl_regState == VMRegState::CLEAN ? vmfp() : callerFrameHelper();
-  return detail::regAnchorFP(fp);
-}
-
-inline ActRec* GetCallerFrameForArgs() {
-  auto fp = tl_regState == VMRegState::CLEAN ? vmfp() : callerFrameHelper();
-  return detail::regAnchorFPForArgs(fp);
-}
-
-/*
- * VM helper to clean the vm state, and retrieve the current vm frame
- * pointer.
- *
- * This is a common need for extensions.
- */
-struct CallerFrame : public VMRegAnchor {
-  ActRec* operator()(Offset* pc = nullptr) {
-    return detail::regAnchorFP(vmfp(), pc);
-  }
-  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(vmfp()); }
-};
-
-struct EagerCallerFrame : public EagerVMRegAnchor {
-  ActRec* operator()() {
-    return detail::regAnchorFP(vmfp());
-  }
-  ActRec* actRecForArgs() { return detail::regAnchorFPForArgs(vmfp()); }
-};
-
 #define SYNC_VM_REGS_SCOPED() \
   HPHP::VMRegAnchor _anchorUnused
 

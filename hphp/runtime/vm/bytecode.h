@@ -298,6 +298,7 @@ struct CallCtx {
   Class* cls;
   StringData* invName;
   bool dynamic;
+  ArrayData* reifiedGenerics;
 };
 
 constexpr size_t kNumIterCells = sizeof(Iter) / sizeof(Cell);

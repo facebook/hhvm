@@ -643,6 +643,66 @@ Class* GetCallerClassSkipCPPBuiltins() {
   return nullptr;
 }
 
+const StaticString s_call_user_func("call_user_func");
+const StaticString s_call_user_func_array("call_user_func_array");
+
+Array GetCallerInfo() {
+  Array ret = empty_darray();
+  bool skipped = false;
+  walkStack([&] (const ActRec* fp, Offset pc) {
+    if (!skipped && fp->func()->isSkipFrame()) return false;
+    if (!skipped) {
+      skipped = true;
+      return false;
+    }
+    if (fp->func()->name()->isame(s_call_user_func.get())) return false;
+    if (fp->func()->name()->isame(s_call_user_func_array.get())) return false;
+    auto const line = fp->func()->unit()->getLineNumber(pc);
+    if (line == -1) return false;
+    auto const cls = fp->func()->cls();
+    auto const path = fp->func()->originalFilename() ?
+      fp->func()->originalFilename() : fp->func()->unit()->filepath();
+    if (cls && !fp->func()->isClosureBody()) {
+      ret = make_darray(
+        s_class, const_cast<StringData*>(cls->name()),
+        s_file, const_cast<StringData*>(path),
+        s_function, const_cast<StringData*>(fp->func()->name()),
+        s_line, line
+      );
+    } else {
+      ret = make_darray(
+        s_file, const_cast<StringData*>(path),
+        s_function, const_cast<StringData*>(fp->func()->name()),
+        s_line, line
+      );
+    }
+    return true;
+  }, false);
+  return ret;
+}
+
+c_ResumableWaitHandle* GetResumedWaitHandle() {
+  c_ResumableWaitHandle* ret = nullptr;
+  walkStack([&] (const ActRec* fp, Offset) {
+    if (fp->resumed() && fp->func()->isAsync()) {
+      if (fp->func()->isGenerator()) {
+        // async generator
+        auto generator = frame_async_generator(fp);
+        if (!generator->isEagerlyExecuted()) {
+          ret = generator->getWaitHandle();
+          return true;
+        }
+      } else {
+        // async function
+        ret = frame_afwh(fp);
+        return true;
+      }
+    }
+    return false;
+  }, true);
+  return ret;
+}
+
 int64_t createBacktraceHash(bool consider_metadata) {
   // Settings constants before looping
   uint64_t hash = 0x9e3779b9;

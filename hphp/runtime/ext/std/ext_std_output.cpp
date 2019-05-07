@@ -58,7 +58,7 @@ bool HHVM_FUNCTION(ob_start, const Variant& callback /* = null */,
 
   if (!callback.isNull()) {
     CallCtx ctx;
-    vm_decode_function(callback, nullptr, ctx);
+    vm_decode_function(callback, ctx);
     if (!ctx.func) {
       return false;
     }
@@ -255,19 +255,6 @@ void HHVM_FUNCTION(hphp_clear_hardware_events) {
   HardwareCounter::ClearPerfEvents();
 }
 
-// __SystemLib\print_hashbang
-void HHVM_FUNCTION(SystemLib_print_hashbang, const String& hashbang) {
-  auto const ar = GetCallerFrame();
-
-  if (ar->m_func->name()->empty() && (!RuntimeOption::ServerExecutionMode() ||
-      is_cli_mode())) {
-    // If run in cli mode, print nothing in the lowest pseudomain
-    if (!g_context->getPrevFunc(ar)) return;
-  }
-
-  g_context->write(hashbang);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initOutput() {
@@ -297,7 +284,6 @@ void StandardExtension::initOutput() {
   HHVM_FE(hphp_get_hardware_counters);
   HHVM_FE(hphp_set_hardware_events);
   HHVM_FE(hphp_clear_hardware_events);
-  HHVM_FALIAS(__SystemLib\\print_hashbang, SystemLib_print_hashbang);
 
   HHVM_RC_INT(PHP_OUTPUT_HANDLER_CONT, k_PHP_OUTPUT_HANDLER_CONT);
   HHVM_RC_INT(PHP_OUTPUT_HANDLER_WRITE, k_PHP_OUTPUT_HANDLER_WRITE);

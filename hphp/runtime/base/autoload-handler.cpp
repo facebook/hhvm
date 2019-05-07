@@ -86,22 +86,16 @@ Variant vm_call_decoded_handler(const AutoloadHandler::DecodedHandler& handler,
  * Helper method from converting between a PHP function and a DecodedHandler.
  */
 bool vm_decode_handler(const Variant& function, DecodedHandlerPtr& handler) {
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  StringData* name = nullptr;
-  ArrayData* reifiedGenerics = nullptr;
-  bool dynamic;
+  CallCtx ctx;
   // Don't warn here, let the caller decide what to do if the func is nullptr.
-  auto const func = vm_decode_function(function, GetCallerFrame(),
-                                       obj, cls, name, dynamic,
-                                       reifiedGenerics,
-                                       DecodeFlags::NoWarn);
-  if (func == nullptr) {
+  vm_decode_function(function, ctx, DecodeFlags::NoWarn);
+  if (ctx.func == nullptr) {
     return false;
   }
 
   handler = req::make_unique<AutoloadHandler::DecodedHandler>(
-    obj, obj ? nullptr : cls, func, name, dynamic);
+    ctx.this_, ctx.this_ ? nullptr : ctx.cls, ctx.func, ctx.invName,
+    ctx.dynamic);
   return true;
 }
 

@@ -1,7 +1,7 @@
 intercept1 DONE
 array(3) {
   [0]=>
-  array(7) {
+  array(6) {
     ["file"]=>
     string(%d) "%s/intercept/prolog.php"
     ["line"]=>
@@ -10,11 +10,8 @@ array(3) {
     string(10) "intercept2"
     ["class"]=>
     string(3) "Cls"
-    ["object"]=>
-    object(Cls) (0) {
-    }
     ["type"]=>
-    string(2) "->"
+    string(2) "::"
     ["args"]=>
     array(5) {
       [0]=>

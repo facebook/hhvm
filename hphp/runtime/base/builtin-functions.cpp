@@ -115,18 +115,13 @@ const StaticString
   s_colon2("::");
 
 bool is_callable(const Variant& v) {
-  ObjectData* obj = nullptr;
-  HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
-  ArrayData* reifiedGenerics = nullptr;
-  bool dynamic;
-  const HPHP::Func* f = vm_decode_function(v, GetCallerFrame(), obj, cls,
-                                           invName, dynamic, reifiedGenerics,
-                                           DecodeFlags::LookupOnly);
-  if (invName != nullptr) {
-    decRefStr(invName);
+  CallCtx ctx;
+  ctx.invName = nullptr;
+  vm_decode_function(v, ctx, DecodeFlags::LookupOnly);
+  if (ctx.invName != nullptr) {
+    decRefStr(ctx.invName);
   }
-  return f != nullptr && !f->isAbstract();
+  return ctx.func != nullptr && !ctx.func->isAbstract();
 }
 
 bool is_callable(const Variant& v, bool syntax_only, RefData* name) {
@@ -612,21 +607,15 @@ vm_decode_function(const_variant_ref function,
 
 Variant vm_call_user_func(const_variant_ref function, const Variant& params,
                           bool checkRef /* = false */) {
-  ObjectData* obj = nullptr;
-  Class* cls = nullptr;
-  CallerFrame cf;
-  StringData* invName = nullptr;
-  ArrayData* reifiedGenerics = nullptr;
-  bool dynamic;
-  const Func* f = vm_decode_function(function, cf(), obj, cls,
-                                     invName, dynamic, reifiedGenerics);
-  if (f == nullptr || (!isContainer(params) && !params.isNull())) {
+  CallCtx ctx;
+  vm_decode_function(function, ctx);
+  if (ctx.func == nullptr || (!isContainer(params) && !params.isNull())) {
     return uninit_null();
   }
   auto ret = Variant::attach(
-    g_context->invokeFunc(f, params, obj, cls,
-                          nullptr, invName, ExecutionContext::InvokeNormal,
-                          dynamic, checkRef)
+    g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
+                          nullptr, ctx.invName, ExecutionContext::InvokeNormal,
+                          ctx.dynamic, checkRef)
   );
   if (UNLIKELY(isRefType(ret.getRawType()))) {
     tvUnbox(*ret.asTypedValue());

@@ -8,7 +8,7 @@
  */
 
 class D1 {
-  private function foo() {
+  public function foo() {
     echo "D1::foo " . (isset($this) ? "true\n" : "false\n");
   }
   public function test() {
@@ -26,7 +26,7 @@ function main1() {
 main1();
 
 class D2 {
-  private function foo() {
+  public function foo() {
     echo "D2::foo " . (isset($this) ? "true\n" : "false\n");
   }
   public function test() {
@@ -47,7 +47,7 @@ main2();
 
 
 class D3 {
-  private function foo() {
+  public function foo() {
     echo "D3::foo " . (isset($this) ? "true\n" : "false\n");
   }
   public function test() {
@@ -56,7 +56,7 @@ class D3 {
   }
 }
 class X3 extends D3 {
-  private function foo() {
+  public function foo() {
     echo "X3::foo\n";
   }
 }
@@ -72,7 +72,7 @@ $e3->test(); // Outputs 'D3::foo false' (Zend outputs 'D3::foo true')
 main3();
 
 class D4 {
-  private function foo() {
+  public function foo() {
     echo "D4::foo " . (isset($this) ? "true\n" : "false\n");
   }
   public static function test() {
@@ -113,4 +113,3 @@ function main5() {
   $e5->test(); // Fatals
 }
 main5();
-

@@ -2,7 +2,7 @@
 
 // standard execution
 class C1 {
-  public function __invoke($a0, $a1) {
+  public static function __invoke($a0, $a1) {
     var_dump('C1');
     var_dump($a0, $a1);
   }
@@ -10,7 +10,7 @@ class C1 {
 class D1 extends C1 {
 }
 class E1 extends D1 {
-  public function __invoke($a0, $a1) {
+  public static function __invoke($a0, $a1) {
     var_dump('D2');
     var_dump($a0, $a1);
   }

@@ -40,7 +40,8 @@ class TestB extends TestA
 		echo __METHOD__ . "($i)\n";
 		$i++;
 		if ($i >= 5) return 5;
-		return call_user_func_array(array("TestA", "doSomething"), array($i));
+		$x = array("TestA", "doSomething");
+		return $x($i);
 	}
 
 	public function doSomethingThis($i)
@@ -48,7 +49,8 @@ class TestB extends TestA
 		echo __METHOD__ . "($i)\n";
 		$i++;
 		if ($i >= 5) return 5;
-		return call_user_func_array(array($this, "TestA::doSomethingThis"), array($i));
+		$x = array($this, "TestA::doSomethingThis");
+		return $x($i);
 	}
 
 	public function doSomethingParent($i)
@@ -56,7 +58,8 @@ class TestB extends TestA
 		echo __METHOD__ . "($i)\n";
 		$i++;
 		if ($i >= 5) return 5;
-		return call_user_func_array(array("parent", "doSomethingParent"), array($i));
+		$x = array("parent", "doSomethingParent");
+		return $x($i);
 	}
 
 	public function doSomethingParentThis($i)
@@ -64,7 +67,8 @@ class TestB extends TestA
 		echo __METHOD__ . "($i)\n";
 		$i++;
 		if ($i >= 5) return 5;
-		return call_user_func_array(array($this, "parent::doSomethingParentThis"), array($i));
+		$x = array($this, "parent::doSomethingParentThis");
+		return $x($i);
 	}
 
 	public static function doSomethingStatic($i)
@@ -72,7 +76,8 @@ class TestB extends TestA
 		echo __METHOD__ . "($i)\n";
 		$i++;
 		if ($i >= 5) return 5;
-		return call_user_func_array(array("TestA", "doSomethingStatic"), array($i));
+		$x = array("TestA", "doSomethingStatic");
+		return $x($i);
 	}
 }
 

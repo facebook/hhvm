@@ -8,11 +8,11 @@ class A {
 class B extends A {
     public static function testForward() {
         parent::test();
-        call_user_func("parent::test");
-        call_user_func(array("parent", "test"));
+        call_user_func(parent::class."::test");
+        call_user_func(array(parent::class, "test"));
         self::test();
-        call_user_func("self::test");
-        call_user_func(array("self", "test"));
+        call_user_func(self::class."::test");
+        call_user_func(array(self::class, "test"));
     }
     public static function testNoForward() {
         A::test();
@@ -30,4 +30,3 @@ class C extends B {
 
 C::testForward();
 C::testNoForward();
-

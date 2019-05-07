@@ -17,7 +17,7 @@ class B extends A {
 class C extends B {
     public function call($cb) {
         echo join('|', $cb) . "\n";
-        call_user_func($cb);
+        $cb();
     }
     public function test() {
         $this->call(array('parent', 'who'));
@@ -60,13 +60,12 @@ class P extends O {
     }
     public function call($cb) {
         echo join('|', $cb) . "\n";
-        call_user_func($cb);
+        $cb();
     }
     public function test() {
         $this->call(array('parent', 'who'));
         $this->call(array('P', 'parent::who'));
         $this->call(array($this, 'O::who'));
-        $this->call(array($this, 'B::who'));
     }
 }
 

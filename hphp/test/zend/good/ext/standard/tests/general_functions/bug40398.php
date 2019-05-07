@@ -12,7 +12,7 @@ class Derived_1 extends Base
 {
 	public function __construct(...$args)
 	{
-		call_user_func_array(array($this, 'Base::__construct'), $args);
+		$x = array($this, 'Base::__construct'); $x(...$args);
 	}
 }
 
@@ -20,7 +20,7 @@ class Derived_2 extends Base
 {
 	public function __construct(...$args)
 	{
-		call_user_func_array(array($this, 'parent::__construct'), $args);
+		$x = array($this, 'parent::__construct'); $x(...$args);
 	}
 }
 
@@ -28,7 +28,7 @@ class Derived_3 extends Base
 {
 	public function __construct(...$args)
 	{
-		call_user_func_array('Base::__construct', $args);
+		$x = 'Base::__construct'; $x(...$args);
 	}
 }
 
@@ -36,7 +36,7 @@ class Derived_4 extends Base
 {
 	public function __construct(...$args)
 	{
-		call_user_func_array('parent::__construct', $args);
+		$x = 'parent::__construct'; $x(...$args);
 	}
 }
 
@@ -44,7 +44,7 @@ class Derived_5 extends Base
 {
 	public function __construct(...$args)
 	{
-		call_user_func_array(array('Base', '__construct'), $args);
+		$x = array('Base', '__construct'); $x(...$args);
 	}
 }
 
@@ -52,7 +52,7 @@ class Derived_6 extends Base
 {
 	public function __construct(...$args)
 	{
-		call_user_func_array(array('parent', '__construct'), $args);
+		$x = array('parent', '__construct'); $x(...$args);
 	}
 }
 

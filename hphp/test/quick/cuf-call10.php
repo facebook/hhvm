@@ -20,26 +20,26 @@ function main1() {
 }
 main1();
 
-class C2 {
-  public function __call($fn, $args) {
-    echo "C2::__call\n";
-    var_dump(isset($this));
-    var_dump($fn, $args);
-    echo "\n";
-  }
-  public function test() {
-    call_user_func(array('C2', '__call'), "a", "b", "c", "d");
-    call_user_func(array('C2', 'foo'), "a", "b", "c", "d");
-    call_user_func(array('self', '__call'), "a", "b", "c", "d");
-    call_user_func(array('self', 'foo'), "a", "b", "c", "d");
-  }
-}
 
-function main2() {
-  $obj = new C2;
-  $obj->test();
-}
-main2();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class C3 {
   public function __call($fn, $args) {
@@ -52,7 +52,7 @@ class C3 {
     // FPushClsMethodD
     call_user_func(array('C3', 'foo'), "a", "b", "c", "d");
     // FPushClsMethodF
-    call_user_func(array('self', 'foo'), "a", "b", "c", "d");
+    call_user_func(array('C3', 'foo'), "a", "b", "c", "d");
   }
 }
 
@@ -127,8 +127,8 @@ class A7 {
 }
 class B7 extends A7 {
   public function test() {
-    call_user_func('A7::foo', 1, 2, 3);
-    call_user_func(array('A7', 'foo'), 1, 2, 3);
+    call_user_func(array($this, 'foo'), 1, 2, 3);
+    call_user_func(array($this, 'foo'), 1, 2, 3);
   }
 }
 class C7 extends B7 {
@@ -176,8 +176,8 @@ class E9 extends D9 {
   }
   public function test() {
     call_user_func(array($this, 'foo'));
-    call_user_func(array('D9', 'foo'));
-    call_user_func(array('E9', 'foo'));
+    call_user_func(array(new E9, 'foo'));
+    call_user_func(array(new E9, 'foo'));
   }
 }
 class F9 extends D9 {
@@ -194,4 +194,3 @@ function main9() {
   call_user_func(array('D9', 'foo'));
 }
 main9();
-

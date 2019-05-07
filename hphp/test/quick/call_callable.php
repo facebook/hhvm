@@ -9,8 +9,6 @@ class Functor {
 class Base {
   private function blah() { echo 'Base::blah', "\n"; }
   public function callInScope($x) {
-    call_user_func($x);
-    call_user_func_array($x, array());
     $x();
   }
 }

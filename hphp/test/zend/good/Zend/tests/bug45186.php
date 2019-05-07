@@ -8,10 +8,10 @@ class bar  {
 	public function test() {
 		self::ABC();
 		bar::ABC();
-		call_user_func(array('BAR', 'xyz'));
-		call_user_func('BAR::www');
-		call_user_func(array('self', 'y'));
-		call_user_func('self::y');
+		BAR::xyz();
+		BAR::www();
+		self::y();
+		self::y();
 	}
 	static function x() {
 		print "ok\n";
@@ -24,4 +24,3 @@ $x->test();
 
 call_user_func(array('BAR','x'));
 call_user_func('self::y');
-

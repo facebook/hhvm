@@ -1,7 +1,5 @@
  = test_inheritance =
 Base::blah
-Base::blah
-Base::blah
  = test_invocation_syntaxes =
 * call_user_func ********************
 int(10)

@@ -18,7 +18,7 @@ class A {
 	}
 	public function __call($func, array $args = array())
 	{
-		return call_user_func_array(array($this, $func), $args);
+		return $this->$func($args);
 	}
 }
 
@@ -27,4 +27,3 @@ echo $a->var1,"\n";
 echo $a->var2,"\n";
 echo $a->func1(),"\n";
 echo $a->func2(),"\n";
-

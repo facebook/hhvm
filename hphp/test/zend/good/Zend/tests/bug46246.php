@@ -5,12 +5,12 @@ class A
 	{
 		echo 'Hello from '.get_class($this)."\n";
 	}
-	
+
 	public function call($method, $args = array())
 	{
 		$this->Test();
 		$this->$method();
-		call_user_func(array($this, $method));
+		$this->$method();
 	}
 }
 

@@ -13,7 +13,8 @@ class B {
 class C extends B {
   public function g() {
     $obj = new B;
-    call_user_func(array('B', 'f1'));
+    $f = (array('B', 'f1'));
+    $f();
   }
 }
 $obj = new C;

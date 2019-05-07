@@ -2,16 +2,16 @@
 
 trait TraitFoo {
   public function testDoSomethingInTrait() {
-    return call_user_func(array($this, 'doSomethingInTrait'));
+    return $this->doSomethingInTrait();
   }
   public function testDoSomethingPublicInTrait() {
-    return call_user_func(array($this, 'doSomethingPublicInTrait'));
+    return $this->doSomethingPublicInTrait();
   }
 }
 class A {
   use TraitFoo;
   public function testDoSomething() {
-    return call_user_func(array($this, 'doSomething'));
+    return $this->doSomething();
   }
   public function __call($name, $args) {
     echo "**calling __call $name**";

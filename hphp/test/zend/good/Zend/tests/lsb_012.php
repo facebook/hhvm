@@ -5,7 +5,7 @@ class Test1 {
 		echo "bug";
 	}
 	static function test() {
-		call_user_func("static::ok");
+		call_user_func(static::class."::ok");
 	}
 }
 

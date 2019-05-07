@@ -2,8 +2,8 @@
 
 class Test1 {
 	static function test() {
-		var_dump(is_callable("static::ok"));
-		var_dump(is_callable(array("static","ok")));
+		var_dump(is_callable(static::class."::ok"));
+		var_dump(is_callable(array(static::class,"ok")));
 	}
 }
 

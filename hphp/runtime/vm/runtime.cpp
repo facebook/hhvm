@@ -246,6 +246,23 @@ void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {
     func->fullDisplayName()->data(), index, func->byRef(index)));
 }
 
+void raiseRxCallViolation(const ActRec* caller, const Func* callee) {
+  assertx(RuntimeOption::EvalRxEnforceCalls > 0);
+  auto const errMsg = folly::sformat(
+    "Call to {} '{}' from {} '{}' violates reactivity constraints.",
+    rxLevelToString(callee->rxLevel()),
+    callee->fullName()->data(),
+    rxLevelToString(caller->rxMinLevel()),
+    caller->func()->fullName()->data()
+  );
+
+  if (RuntimeOption::EvalRxEnforceCalls >= 2) {
+    SystemLib::throwBadMethodCallExceptionObject(errMsg);
+  } else {
+    raise_warning(errMsg);
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 int64_t zero_error_level() {

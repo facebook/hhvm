@@ -1313,22 +1313,22 @@ void emitCallerRxChecks(IRGS& env, const Func* callee,
 
   auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
   if (callee) {
-    // Let interpreter handle the bad call.
-    if (callee->rxLevel() < minReqCalleeLevel) PUNT(FCall-RxViolation);
+    if (callee->rxLevel() >= minReqCalleeLevel) return;
+    gen(env, RaiseRxCallViolation, fp(env), cns(env, callee));
     return;
   }
 
+  auto const func = ldPreLiveFunc(env, actRecOff);
   ifThen(
     env,
     [&] (Block* taken) {
-      auto const func = ldPreLiveFunc(env, actRecOff);
       auto const calleeLevel = gen(env, LdFuncRxLevel, func);
       auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
       gen(env, JmpNZero, taken, lt);
     },
     [&] {
       hint(env, Block::Hint::Unlikely);
-      gen(env, Jmp, makeExitSlow(env));
+      gen(env, RaiseRxCallViolation, fp(env), func);
     }
   );
 }

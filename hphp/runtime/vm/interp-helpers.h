@@ -103,21 +103,9 @@ inline void callerRxChecks(const ActRec* caller, const Func* callee) {
   if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
   // Conditional reactivity is not tracked yet, so assume the callee has maximum
   // possible level of reactivity.
-  if (callee->rxLevel() >= rxRequiredCalleeLevel(caller->rxMinLevel())) return;
-
-  auto const errMsg = folly::sformat(
-    "Call to {} '{}' from {} '{}' violates reactivity constraints.",
-    rxLevelToString(callee->rxLevel()),
-    callee->fullName()->data(),
-    rxLevelToString(caller->rxMinLevel()),
-    caller->func()->fullName()->data()
-  );
-
-  if (RuntimeOption::EvalRxEnforceCalls >= 2) {
-    SystemLib::throwBadMethodCallExceptionObject(errMsg);
-  } else {
-    raise_warning(errMsg);
-  }
+  auto const minReqCalleeLevel = rxRequiredCalleeLevel(caller->rxMinLevel());
+  if (LIKELY(callee->rxLevel() >= minReqCalleeLevel)) return;
+  raiseRxCallViolation(caller, callee);
 }
 
 inline void checkForRequiredCallM(const ActRec* ar) {

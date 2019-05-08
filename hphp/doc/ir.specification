@@ -2280,6 +2280,12 @@ To string conversions:
   raise a warning or throw an exception indicating that the class specified in
   S0 was constructed dynamically (and should not be).
 
+| RaiseRxCallViolation, ND, S(FramePtr) S(Func), NF
+
+  Depending on the setting of the `RxEnforceCalls` runtime option, either raise
+  a warning or throw an exception indicating that the caller specified by S0
+  was violating reactivity constraints when calling the callee specified by S1.
+
 | RaiseStrToClassNotice, ND, S(Str), NF
 
   Raise a notice if a string is implicitly converted to a class.

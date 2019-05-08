@@ -339,6 +339,8 @@ static CallMap s_callMap {
     {RaiseParamRefMismatchForFunc,
                          raiseParamRefMismatchForFunc, DNone, SSync,
                            {{SSA, 0}, extra(&ParamData::paramId)}},
+    {RaiseRxCallViolation, raiseRxCallViolation,
+                          DNone, SSync, {{SSA, 0}, {SSA, 1}}},
     {ThrowInvalidOperation, throw_invalid_operation_exception,
                           DNone, SSync, {{SSA, 0}}},
     {ThrowArithmeticError, throw_arithmetic_error,

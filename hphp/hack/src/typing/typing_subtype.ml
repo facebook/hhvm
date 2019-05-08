@@ -2605,7 +2605,63 @@ let bind_to_upper_bound env r var upper_bounds =
   (* For now, if there are multiple bounds, then don't solve. *)
   | _ -> env
 
-let bind_to_equal_bound env var =
+let tyvar_is_solved env var =
+  match snd @@ snd @@ Env.expand_type env (var_as_ty var) with
+  | Tvar var' when var' = var -> false
+  | _ -> true
+
+(* Is the outer skeleton of the types the same (everything that isn't a nested type)?
+ * e.g. C<string> same as  C<int>,
+ *      dict<string,bool> same as dict<int,string>
+ *      shape('a' => int) same as shape('a' => bool)
+ * but shape('a' => int) not same as shape('b' => int)
+ * shape(?'a' => int) not same as shape('a' => int)
+ *
+ * Expected invariant:
+ *   if ty_equal_shallow ty1 ty2
+ *   then freshen_inside_ty ty1 is identical to freshen_inside_ty ty2
+ *   up to a choice of fresh type variables.
+ * (Or: there is some instantiation of the fresh type variables that
+ * makes freshen_inside_ty ty1 and freshen_inside_ty ty2 the same.)
+ *)
+let ty_equal_shallow ty1 ty2 =
+  match snd ty1, snd ty2 with
+  | Tany, Tany
+  | Tnonnull, Tnonnull
+  | Terr, Terr
+  | Tdynamic, Tdynamic
+  | Tobject, Tobject
+  | Ttuple _, Ttuple _
+  | Tarraykind (AKvarray _), Tarraykind (AKvarray _)
+  | Tarraykind (AKvec _), Tarraykind (AKvec _)
+  | Tarraykind (AKvarray_or_darray _), Tarraykind (AKvarray_or_darray _)
+  | Tarraykind (AKdarray _), Tarraykind (AKdarray _)
+  | Tarraykind (AKmap _), Tarraykind (AKmap _)
+    -> true
+  | Tprim p1, Tprim p2 -> p1 = p2
+  | Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _) ->
+    snd x_sub = snd x_super && exact_sub = exact_super
+  | Tfun fty1, Tfun fty2 ->
+    fty1.ft_is_coroutine = fty2.ft_is_coroutine &&
+    fty1.ft_arity = fty2.ft_arity &&
+    fty1.ft_reactive = fty2.ft_reactive &&
+    fty1.ft_return_disposable = fty2.ft_return_disposable &&
+    fty1.ft_mutability = fty2.ft_mutability
+  | Tshape (known1, fdm1), Tshape (known2, fdm2) ->
+    known1 = known2 &&
+    List.compare (fun (k1,v1) (k2,v2) ->
+      match Ast.ShapeField.compare k1 k2 with
+      | 0 -> compare v1.sft_optional v2.sft_optional
+      | n -> n)
+      (ShapeFieldMap.elements fdm1) (ShapeFieldMap.elements fdm2) = 0
+  | Tabstract (AKnewtype(n1, _), _), Tabstract(AKnewtype(n2, _), _) ->
+    n1 = n2
+  | Tabstract (ak1, _), Tabstract (ak2, _) ->
+    ak1 = ak2
+  | _ -> false
+
+let bind_to_equal_bound ~freshen env var =
+  Env.log_env_change "bind_to_equal_bound" env @@
   let expand_all tyset = Typing_set.map
     (fun ty -> let _, ty = Env.expand_type env ty in ty) tyset in
   let tyvar_info = Env.get_tyvar_info env var in
@@ -2615,12 +2671,21 @@ let bind_to_equal_bound env var =
   let equal_bounds = Typing_set.remove (var_as_ty var) equal_bounds in
   match Typing_set.choose_opt equal_bounds with
   | Some ty -> bind env var ty
-  | None -> env
-
-let tyvar_is_solved env var =
-  match snd @@ snd @@ Env.expand_type env (var_as_ty var) with
-  | Tvar var' when var' = var -> false
-  | _ -> true
+  | None ->
+    if not freshen then env
+    else
+    Typing_set.fold (fun upper_bound env ->
+      Typing_set.fold (fun lower_bound env ->
+        if tyvar_is_solved env var
+        then env
+        else
+        if ty_equal_shallow lower_bound upper_bound
+        then
+          let env, ty = freshen_inside_ty env lower_bound in
+          let env = sub_type env lower_bound ty in
+          let env = sub_type env ty upper_bound in
+          bind env var ty
+        else env) lower_bounds env) upper_bounds env
 
 (* Use the variance information about a type variable to force a solution.
  *   (1) If the type variable is bounded by t1, ..., tn <: v and it appears only
@@ -2666,7 +2731,7 @@ let solve_tyvar ~freshen ~force_solve env r var =
      * appears both covariantly and contravariantly and there is a type that
      * is both a lower and upper bound, force to that type
      *)
-    let env = bind_to_equal_bound env var in
+    let env = bind_to_equal_bound ~freshen env var in
     if not (tyvar_is_solved env var) && force_solve
     then bind_to_lower_bound ~freshen env r var lower_bounds
     else env
@@ -2711,6 +2776,15 @@ let expand_type_and_solve env ~description_of_expected p ty =
       let env = Env.set_tyvar_eager_solve_fail env v in
       env, (Reason.Rsolve_fail p, TUtils.terr env)
     | _ -> env', ety
+  else Env.expand_type env ty
+
+let expand_type_and_solve_eq env ty =
+  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
+  if new_inference
+  then Typing_utils.simplify_unions env ty
+    ~on_tyvar:(fun env r v ->
+      let env = bind_to_equal_bound ~freshen:true env v in
+      Env.expand_var env r v)
   else Env.expand_type env ty
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`
@@ -2768,7 +2842,7 @@ let is_nothing env ty =
  * member access and array indexing.
  *)
 let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
-  let env, ty = Env.expand_type env ty in
+  let env, ty = expand_type_and_solve_eq env ty in
   if not (TypecheckerOptions.new_inference (Env.get_tcopt env))
   then env, ty
   else

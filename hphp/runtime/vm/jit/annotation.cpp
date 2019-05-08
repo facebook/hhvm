@@ -41,14 +41,18 @@ const Func* lookupDirectFunc(SrcKey const sk,
     auto const cls = Unit::lookupUniqueClassInContext(clsName,
                                                       sk.func()->cls());
     if (!cls || isInterface(cls)) return nullptr;
-    auto const func = isStatic
-      ? lookupImmutableClsMethod(cls, fname, sk.func(), isExact)
-      : lookupImmutableObjMethod(cls, fname, sk.func(), isExact).func;
-    if (func &&
-        !isExact &&
-        !func->isImmutableFrom(cls) &&
-        (isStatic || !(func->attrs() & AttrPrivate))) return nullptr;
-    return func;
+    if (isStatic) {
+      auto const f = lookupImmutableClsMethod(cls, fname, sk.func(), isExact);
+      if (f && !isExact && !f->isImmutableFrom(cls)) return nullptr;
+      return f;
+    } else {
+      auto const l = lookupImmutableObjMethod(cls, fname, sk.func(), isExact);
+      if (l.type == ImmutableObjMethodLookup::Type::Func ||
+          l.type == ImmutableObjMethodLookup::Type::MagicFunc) {
+        return l.func;
+      }
+      return nullptr;
+    }
   }
   return lookupImmutableFunc(sk.unit(), fname).func;
 }

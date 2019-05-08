@@ -35,27 +35,26 @@ const StaticString s___construct("__construct");
 const StaticString s___call("__call");
 
 /*
- * Looks for a Func named methodName in iface, or any of the interfaces it
- * implements. returns nullptr if none was found, or if its interface's
- * vtableSlot is kInvalidSlot.
+ * Looks for a Func named methodName in any of the interfaces cls implements,
+ * including cls if it is an interface. Returns nullptr if none was found,
+ * or if its interface's vtableSlot is kInvalidSlot.
  */
-const Func* findInterfaceMethod(const Class* iface,
-                                const StringData* methodName) {
+const Func* lookupIfaceMethod(const Class* cls, const StringData* methodName) {
 
-  auto checkOneInterface = [methodName](const Class* i) -> const Func* {
-    if (i->preClass()->ifaceVtableSlot() == kInvalidSlot) return nullptr;
+  auto checkOneInterface = [methodName](const Class* iface) -> const Func* {
+    if (iface->preClass()->ifaceVtableSlot() == kInvalidSlot) return nullptr;
 
-    const Func* func = i->lookupMethod(methodName);
-    always_assert(!func || func->cls() == i);
+    const Func* func = iface->lookupMethod(methodName);
+    always_assert(!func || func->cls() == iface);
     return func;
   };
 
-  if (auto const func = checkOneInterface(iface)) return func;
+  if (isInterface(cls)) {
+    if (auto const func = checkOneInterface(cls)) return func;
+  }
 
-  for (auto pface : iface->allInterfaces().range()) {
-    if (auto const func = checkOneInterface(pface)) {
-      return func;
-    }
+  for (auto pface : cls->allInterfaces().range()) {
+    if (auto const func = checkOneInterface(pface)) return func;
   }
 
   return nullptr;
@@ -236,8 +235,7 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
   exactClass |= cls->attrs() & AttrNoOverride;
 
   if (isInterface(cls)) {
-    if (!cls->isUnique()) return notFound;
-    if (auto const func = findInterfaceMethod(cls, name)) {
+    if (auto const func = lookupIfaceMethod(cls, name)) {
       return { ImmutableObjMethodLookup::Type::Interface, func };
     }
     return notFound;
@@ -245,7 +243,14 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
 
   const Func* func;
   LookupResult res = lookupObjMethod(func, cls, name, ctxFunc->cls(), false);
-  if (res == LookupResult::MethodNotFound) return notFound;
+  if (res == LookupResult::MethodNotFound) {
+    if (exactClass) return notFound;
+    if (auto const func = lookupIfaceMethod(cls, name)) {
+      return { ImmutableObjMethodLookup::Type::Interface, func };
+    }
+    return notFound;
+  }
+
   if (func->isAbstract() && exactClass) return notFound;
 
   assertx(res == LookupResult::MethodFoundWithThis ||

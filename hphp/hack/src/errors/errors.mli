@@ -124,9 +124,7 @@ val illegal_inst_meth : Pos.t -> unit
 val illegal_meth_caller : Pos.t -> unit
 val illegal_class_meth : Pos.t -> unit
 val assert_arity : Pos.t -> unit
-val gena_arity : Pos.t -> unit
 val genva_arity : Pos.t -> unit
-val gen_array_rec_arity : Pos.t -> unit
 val unexpected_ty_in_tast : Pos.t -> actual_ty:string -> expected_ty:string -> unit
 val uninstantiable_class : Pos.t -> Pos.t -> string -> (Pos.t * string) list -> unit
 val abstract_const_usage : Pos.t -> Pos.t -> string -> unit
@@ -240,7 +238,6 @@ val exact_class_final : Pos.t * string -> Pos.t -> error -> unit
 val tuple_arity_mismatch : Pos.t -> string -> Pos.t -> string -> unit
 val fun_arity_mismatch : Pos.t -> Pos.t -> unit
 val discarded_awaitable : Pos.t -> Pos.t -> unit
-val gena_expects_array : Pos.t -> Pos.t -> string -> unit
 val unify_error : (Pos.t * string) list -> (Pos.t * string) list -> unit
 val static_redeclared_as_dynamic :
   Pos.t -> Pos.t -> string -> elt_type:[`Method | `Property] -> unit

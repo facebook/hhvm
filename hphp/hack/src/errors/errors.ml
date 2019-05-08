@@ -1099,17 +1099,9 @@ let assert_arity pos =
   add (Naming.err_code Naming.AssertArity) pos
     "assert expects exactly one argument"
 
-let gena_arity pos =
-  add (Naming.err_code Naming.GenaArity) pos
-    "gena() expects exactly 1 argument"
-
 let genva_arity pos =
   add (Naming.err_code Naming.GenvaArity) pos
     "genva() expects at least 1 argument"
-
-let gen_array_rec_arity pos =
-  add (Naming.err_code Naming.GenArrayRecArity) pos
-    "gen_array_rec() expects exactly 1 argument"
 
 let unexpected_ty_in_tast pos ~actual_ty ~expected_ty =
   add (Typing.err_code Typing.UnexpectedTy) pos (
@@ -2748,12 +2740,6 @@ let discarded_awaitable pos1 pos2 =
   "either being discarded or used in a dangerous way before "^
   "being awaited";
   pos2, "This is why I think it is Awaitable"
-]
-
-let gena_expects_array pos1 pos2 ty_str =
-  add_list (Typing.err_code Typing.GenaExpectsArray) [
-  pos1, "gena expects an array";
-  pos2, "It is incompatible with " ^ ty_str;
 ]
 
 let unify_error left right =

@@ -32,9 +32,7 @@ struct
 
   and map_special_func menv sf =
     match sf with
-    | S.Gena e -> T.Gena (map_expr menv e)
     | S.Genva el -> T.Genva (map_exprl menv el)
-    | S.Gen_array_rec e -> T.Gen_array_rec (map_expr menv e)
 
   and map_class_id_ menv ci =
     match ci with

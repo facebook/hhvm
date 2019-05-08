@@ -2301,20 +2301,12 @@ module Make (GetLocals : GetLocals) = struct
           (* The above special cases (fun, inst_meth, meth_caller, class_meth,
            * and friends) are magical language constructs, which we should
            * check before calling fun_id and looking up the function and doing
-           * namespace normalization. However, gena, genva, etc are actual
+           * namespace normalization. However, genva, etc are actual
            * functions that actually exist, we just need to handle them
            * specially here, during naming. Note that most of the function
            * special cases, such as idx, are actually handled in typing, and
            * don't require naming magic. *)
-          if cn = SN.FB.fgena
-          then
-            begin
-              arg_unpack_unexpected uel;
-              match el with
-              | [e] -> N.Special_func (N.Gena (expr env e))
-              | _ -> Errors.gena_arity p; N.Any
-            end
-          else if (cn = SN.FB.fgenva)
+          if (cn = SN.FB.fgenva)
                    || (cn = SN.HH.asio_va)
                    || (cn = SN.HH.lib_tuple_gen)
                    || (cn = SN.HH.lib_tuple_from_async)
@@ -2324,14 +2316,6 @@ module Make (GetLocals : GetLocals) = struct
               if List.length el < 1
               then (Errors.genva_arity p; N.Any)
               else N.Special_func (N.Genva (exprl env el))
-            end
-          else if cn = SN.FB.fgen_array_rec
-          then
-            begin
-              arg_unpack_unexpected uel;
-              match el with
-              | [e] -> N.Special_func (N.Gen_array_rec (expr env e))
-              | _ -> Errors.gen_array_rec_arity p; N.Any
             end
           else
             N.Call (N.Cnormal, (p, N.Id qualified), targl env p tal,

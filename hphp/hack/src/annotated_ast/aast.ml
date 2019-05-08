@@ -224,9 +224,7 @@ and xhp_attribute =
   | Xhp_spread of expr
 
 and special_func =
-  | Gena of expr
   | Genva of expr list
-  | Gen_array_rec of expr
 
 and is_reference = bool
 and is_variadic = bool

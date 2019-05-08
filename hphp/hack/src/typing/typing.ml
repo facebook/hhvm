@@ -2930,18 +2930,10 @@ and anon_make tenv p f ft idl is_anon =
 
 and special_func env p func =
   let env, tfunc, ty = (match func with
-  | Gena e ->
-      let env, te, ety = expr env e in
-      let env, ty = Async.gena env p ety in
-      env, T.Gena te, ty
   | Genva el ->
       let env, tel, etyl = exprs env el in
       let env, ty = Async.genva env p etyl in
       env, T.Genva tel, ty
-  | Gen_array_rec e ->
-      let env, te, ety = expr env e in
-      let env, ty = Async.gen_array_rec env p ety in
-      env, T.Gen_array_rec te, ty
   ) in
   let result_ty = MakeType.awaitable (Reason.Rwitness p) ty in
   make_result env p (T.Special_func tfunc) result_ty

@@ -474,9 +474,6 @@ and expr_ env acc p e =
       acc
   | Expr_list el ->
       exprl acc el
-  | Special_func (Gena e)
-  | Special_func (Gen_array_rec e) ->
-      expr acc e
   | Special_func (Genva el) ->
       exprl acc el
   | New (_, _, el, uel, _) ->

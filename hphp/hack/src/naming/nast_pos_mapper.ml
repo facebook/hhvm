@@ -124,9 +124,7 @@ and pstring f (p, s) =
   f p, s
 
 and special_func f = function
-  | Gena e -> Gena (expr f e)
   | Genva el -> Genva (List.map el (expr f))
-  | Gen_array_rec e -> Gen_array_rec (expr f e)
 
 and class_id f (pos, ci) = f pos, class_id_ f ci
 

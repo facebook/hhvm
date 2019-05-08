@@ -326,8 +326,6 @@ module CheckFunctionBody = struct
     | (Ast.FSync | Ast.FAsync | Ast.FGenerator | Ast.FAsyncGenerator), Suspend _ -> ()
     | _, Special_func func ->
         (match func with
-          | Gena e
-          | Gen_array_rec e -> expr f_type env e
           | Genva el -> List.iter el (expr f_type env));
         ()
     | _, Xml (_, attrl, el) ->
@@ -753,9 +751,6 @@ and expr_ env _p = function
   | Yield_break -> ()
   | Special_func func ->
       (match func with
-        | Gena e
-        | Gen_array_rec e ->
-          expr env e
         | Genva el ->
           List.iter el (expr env));
       ()

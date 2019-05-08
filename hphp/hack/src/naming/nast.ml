@@ -641,8 +641,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     acc
 
   method on_special_func acc = function
-    | Gena e
-    | Gen_array_rec e -> this#on_expr acc e
     | Genva el -> List.fold_left el ~f:this#on_expr ~init:acc
 
   method on_yield_break acc = acc

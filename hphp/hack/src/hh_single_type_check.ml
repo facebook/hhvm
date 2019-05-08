@@ -92,9 +92,10 @@ let magic_builtins = [|
     "hh_single_type_check_magic.hhi",
     "<?hh\n" ^
     "namespace {\n" ^
-    "function gena();\n" ^
+    "async function gena<Tk as arraykey, Tv>(
+  KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
+): Awaitable<darray<Tk, Tv>>;\n" ^
     "function genva();\n" ^
-    "function gen_array_rec();\n" ^
     "function hh_show(<<__AcceptDisposable>> $val) {}\n" ^
     "function hh_show_env() {}\n" ^
     "function hh_log_level($key, $level) {}\n" ^

@@ -385,9 +385,7 @@ module FB = struct
   let cEnum                  = "\\Enum"
   let cUncheckedEnum         = "\\UncheckedEnum"
 
-  let fgena                  = "\\gena"
   let fgenva                 = "\\genva"
-  let fgen_array_rec         = "\\gen_array_rec"
 
   let idx                    = "\\idx"
 

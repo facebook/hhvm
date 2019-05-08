@@ -63,9 +63,9 @@ module Naming                               = struct
   | ExpectedCollection
   | ExpectedVariable
   | FdNameAlreadyBound
-  | GenArrayRecArity
+  | GenArrayRecArityDEPRECATED
   | GenArrayVaRecArityDEPRECATED
-  | GenaArity
+  | GenaArityDEPRECATED
   | GenericClassVar
   | GenvaArity
   | IllegalClass
@@ -288,7 +288,7 @@ module Typing                               = struct
   | FunTooManyArgs
   | FunUnexpectedNonvariadic
   | FunVariadicityHhVsPhp56
-  | GenaExpectsArray
+  | GenaExpectsArrayDEPRECATED
   | GenericArrayStrict
   | GenericStatic
   | ImplementAbstract

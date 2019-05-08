@@ -1,0 +1,2 @@
+File "concurrent_not_async.php", line 7, characters 3-64:
+await can only be used inside async functions (NastCheck[3003])

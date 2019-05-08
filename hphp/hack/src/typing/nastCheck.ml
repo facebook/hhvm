@@ -71,6 +71,7 @@ module CheckFunctionBody = struct
          | TempContinue _ | TempBreak _ | Unsafe_block _ ) -> ()
     | _, Awaitall (el, b) ->
         List.iter el (fun (_, y) ->
+          found_await f_type (fst y);
           expr f_type env y;
         );
         block f_type env b;

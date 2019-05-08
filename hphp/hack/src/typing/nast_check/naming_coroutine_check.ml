@@ -51,6 +51,10 @@ let handler = object
       if is_sync env then Errors.await_in_sync_function p
     | Return (Some _) when is_generator env ->
       Errors.return_in_gen (fst s)
+    | Awaitall _ ->
+      let p = fst s in
+      if is_coroutine env then Errors.await_in_coroutine p;
+      if is_sync env then Errors.await_in_sync_function p
     | _ -> ()
     end;
 

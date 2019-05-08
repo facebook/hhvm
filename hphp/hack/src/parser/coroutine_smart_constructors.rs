@@ -40,16 +40,10 @@ impl<'a, S> StateType<'a, S> for State<S> {
 
 pub use crate::coroutine_smart_constructors_generated::*;
 
-pub struct CoroutineSmartConstructors<S, Token, Value> {
+pub struct CoroutineSmartConstructors<S> {
     phantom_s: PhantomData<S>,
-    phantom_token: PhantomData<Token>,
-    phantom_value: PhantomData<Value>,
 }
-impl<S: SyntaxType<Token, Value>, Token, Value> CoroutineSmartConstructors<S, Token, Value>
-where
-    Token: LexableToken,
-    Value: SyntaxValueType<Token>,
-{
+impl<S: SyntaxType> CoroutineSmartConstructors<S> {
     fn is_coroutine(r: &S) -> bool {
         if let SyntaxKind::Token(TokenKind::Coroutine) = r.kind() {
             true
@@ -59,13 +53,7 @@ where
     }
 }
 
-impl<'a, S: SyntaxType<Token, Value>, Token, Value>
-    SyntaxSmartConstructors<'a, S, Token, Value, State<S>>
-    for CoroutineSmartConstructors<S, Token, Value>
-where
-    Token: LexableToken,
-    Value: SyntaxValueType<Token>,
-{
+impl<'a, S: SyntaxType> SyntaxSmartConstructors<'a, S, State<S>> for CoroutineSmartConstructors<S> {
     fn make_token(st: Bool<'a>, token: Self::Token) -> (Bool<'a>, Self::R) {
         let codegen = ENV_LOCAL.with(|env| env.borrow().codegen);
         let token = if codegen {

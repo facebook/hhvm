@@ -79,6 +79,7 @@ impl Flag {
     pub fn default() -> Flags {
         0
     }
+    #[allow(dead_code)]
     pub fn is_set(&self, flags: Flags) -> bool {
         (flags & (*self as Flags)) != 0
     }

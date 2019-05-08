@@ -42,7 +42,7 @@ pub struct DeclModeSmartConstructors<Token, Value> {
 }
 
 impl<'a, Token, Value>
-    SyntaxSmartConstructors<'a, Syntax<Token, Value>, Token, Value, State<Syntax<Token, Value>>>
+    SyntaxSmartConstructors<'a, Syntax<Token, Value>, State<Syntax<Token, Value>>>
     for DeclModeSmartConstructors<Token, Value>
 where
     Token: LexableToken,

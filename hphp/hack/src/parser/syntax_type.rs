@@ -16,14 +16,10 @@
  **
  *
  */
-use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-pub trait SyntaxType<T, V> : SyntaxTypeBase<T, V>
-where
-    T: LexableToken,
-    V: SyntaxValueType<T>,
+pub trait SyntaxType: SyntaxTypeBase
 {
     fn make_end_of_file(end_of_file_token: Self) -> Self;
     fn make_script(script_declarations: Self) -> Self;
@@ -209,7 +205,7 @@ where
     fn fold_over_children<'a, U>(
         f: &Fn(&'a Self, U) -> U,
         acc: U,
-        syntax: &'a SyntaxVariant<T, V>,
+        syntax: &'a SyntaxVariant<Self::Token, Self::Value>,
     ) -> U;
 
     fn kind(&self) -> SyntaxKind;

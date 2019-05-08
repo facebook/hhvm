@@ -16,18 +16,15 @@
  **
  *
  */
-use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors, StateType};
 use crate::source_text::SourceText;
 use crate::syntax::*;
 
-pub trait SyntaxSmartConstructors<'a, S: SyntaxType<Token, Value>, Token, Value, State = NoState>:
-    SmartConstructors<'a, State::T, R=S, Token=Token>
+pub trait SyntaxSmartConstructors<'a, S: SyntaxType, State = NoState>:
+    SmartConstructors<'a, State::T, R=S, Token=S::Token>
 where
     State: StateType<'a, S>,
-    Token: LexableToken,
-    Value: SyntaxValueType<Token>
 {
     fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> State::T {
         State::initial(env, src)

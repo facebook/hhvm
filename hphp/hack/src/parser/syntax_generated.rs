@@ -20,7 +20,7 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-impl<T, V> SyntaxType<T, V> for Syntax<T, V>
+impl<T, V> SyntaxType for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,

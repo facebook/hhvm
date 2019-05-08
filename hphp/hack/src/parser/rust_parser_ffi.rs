@@ -24,6 +24,7 @@ use parser::source_text::SourceText;
 use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
 
 use parser::positioned_smart_constructors::*;
+use parser::positioned_syntax::PositionedSyntax;
 use parser::parser::Parser;
 use parser::smart_constructors::{NoState, StateType};
 use parser::smart_constructors_wrappers::WithKind;
@@ -31,14 +32,11 @@ use parser::smart_constructors_wrappers::WithKind;
 type PositionedSyntaxParser<'a> =
     Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
-use parser::positioned_syntax::{PositionedSyntax, PositionedValue};
-use parser::positioned_token::PositionedToken;
-
 use parser::coroutine_smart_constructors::CoroutineSmartConstructors;
 use parser::coroutine_smart_constructors::State as CoroutineState;
 
 type CoroutineParser<'a> =
-    Parser<'a, WithKind<CoroutineSmartConstructors<PositionedSyntax, PositionedToken, PositionedValue>>,
+    Parser<'a, WithKind<CoroutineSmartConstructors<PositionedSyntax>>,
     <CoroutineState<PositionedSyntax> as StateType<'a, PositionedSyntax>>::T>;
 
 

@@ -31,9 +31,12 @@ pub struct Syntax<T, V> {
     pub value: V,
 }
 
-pub trait SyntaxTypeBase<T, V> {
+pub trait SyntaxTypeBase {
+    type Token: LexableToken;
+    type Value: SyntaxValueType<Self::Token>;
+
     fn make_missing(offset: usize) -> Self;
-    fn make_token(arg: T) -> Self;
+    fn make_token(arg: Self::Token) -> Self;
     fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self
     where
         Self: Sized;
@@ -46,14 +49,17 @@ pub trait SyntaxTypeBase<T, V> {
     /// or the node itself unless it is Ignored.
     fn fold_list<U, F: FnMut(U, &Self) -> U>(&self, init: U, f: F) -> U;
 
-    fn as_syntax(&self) -> &Syntax<T, V>;
+    fn as_syntax(&self) -> &Syntax<Self::Token, Self::Value>;
 }
 
-impl<T, V> SyntaxTypeBase<T, V> for Syntax<T, V>
+impl<T, V> SyntaxTypeBase for Syntax<T, V>
 where
     T: LexableToken,
     V: SyntaxValueType<T>,
 {
+    type Token = T;
+    type Value = V;
+
     fn make_missing(offset: usize) -> Self {
         let children: Vec<Self> = vec![];
         let value = V::from_children(SyntaxKind::Missing, offset, &children);

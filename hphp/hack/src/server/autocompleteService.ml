@@ -763,6 +763,81 @@ let reset () =
   autocomplete_results := [];
   autocomplete_is_complete := true
 
+let si_kind_to_autocomplete_kind
+  (kind: SearchUtils.si_kind): autocomplete_kind =
+  let open SearchUtils in
+  match kind with
+  | SI_Class -> Class_kind
+  | SI_Interface -> Interface_kind
+  | SI_Trait -> Trait_kind
+  | SI_Enum -> Enum_kind
+  | SI_Function -> Function_kind
+  (*
+   * Items below this line are included for completeness, although
+   * the global-index-builder does not currently generate them.
+   * Since this function is used to select an icon for display,
+   * including these is harmless.
+   *)
+  | SI_Mixed -> Variable_kind
+  | SI_GlobalConstant -> Literal_kind
+  | SI_Unknown -> Class_kind
+  | SI_Typedef -> Class_kind
+
+(* Find global autocomplete results *)
+let find_global_results
+  ~kind_filter
+  ~max_results
+  ~completion_type
+  ~tcopt
+  ~delimit_on_namespaces
+  ~autocomplete_context
+  ~content_funs
+  ~content_classes
+  ~basic_only
+  : unit =
+
+  (* Select the provider to use for symbol autocomplete *)
+  match SymbolIndex.get_search_provider () with
+
+  (* Legacy provider should match previous behavior *)
+  | TrieIndex ->
+    compute_complete_global
+      ~tcopt
+      ~delimit_on_namespaces
+      ~autocomplete_context
+      ~content_funs
+      ~content_classes
+      ~basic_only;
+
+  (* The new simpler providers *)
+  | _ ->
+    kind_filter := (match completion_type with
+    | Some Acnew -> Some SI_Class
+    | Some Actrait_only -> Some SI_Trait
+    | _ -> None);
+    let query_text = strip_suffix !auto_complete_for_global in
+
+    (* TODO: This needs to be replaced with REAL namespace processing *)
+    let query_text = Utils.strip_ns query_text in
+    let results = SymbolIndex.find_matching_symbols
+      ~query_text
+      ~max_results
+      ~kind_filter:!kind_filter
+    in
+    List.iter results ~f:(fun r ->
+      let open SearchUtils in
+      let ty = Typing_reason.Rnone, Typing_defs.Tany in
+      let partial = get_partial_result
+        r.si_name
+        (Phase.decl ty)
+        (si_kind_to_autocomplete_kind r.si_kind)
+        None
+      in
+      add_res partial;
+    );
+    autocomplete_is_complete := (List.length results < max_results)
+
+(* Main entry point for autocomplete *)
 let go
     ~tcopt
     ~delimit_on_namespaces
@@ -776,16 +851,26 @@ let go
   visitor#go tast;
   Errors.ignore_ begin fun () ->
     let start_time = Unix.gettimeofday () in
-    let kind_filter_used = ref None in
-    let max_results_used = ref 100 in
+    let max_results = 100 in
+    let kind_filter = ref None in
     let completion_type = !argument_global_type in
     if completion_type = Some Acid ||
        completion_type = Some Acnew ||
        completion_type = Some Actype ||
        completion_type = Some Actrait_only
-    then compute_complete_global
-      ~tcopt ~delimit_on_namespaces ~autocomplete_context ~content_funs ~content_classes
-      ~basic_only;
+    then begin
+      find_global_results
+        ~kind_filter
+        ~max_results
+        ~completion_type
+        ~tcopt
+        ~delimit_on_namespaces
+        ~autocomplete_context
+        ~content_funs
+        ~content_classes
+        ~basic_only;
+    end;
+
     if completion_type = Some Acprop then compute_complete_local tast;
     let env = match !ac_env with
       | Some e -> e
@@ -813,8 +898,8 @@ let go
     SymbolIndex.log_symbol_index_search
       ~start_time
       ~query_text:!auto_complete_for_global
-      ~max_results:!max_results_used
-      ~kind_filter:!kind_filter_used
+      ~max_results
+      ~kind_filter:!kind_filter
       ~results:(List.length results.With_complete_flag.value)
       ~context:completion_type
       ~caller:"AutocompleteService.go";

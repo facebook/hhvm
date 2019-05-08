@@ -60,9 +60,22 @@ module SearchServiceRunner = struct
 
   let update_full fn ast = Queue.enqueue queue (fn, SearchUtils.Full ast)
 
-  let should_run_completely genv =
-   chunk_size genv = 0
-   && ServerArgs.ai_mode genv.options = None
+  (* Return true if it's best to run all queue items in one go,
+   * false if we should run small chunks every few seconds *)
+  let should_run_completely
+      (genv: ServerEnv.genv)
+      (search_provider: SearchUtils.search_provider): bool =
+
+    (* If we are using a non-trie provider, no need to use chunks *)
+    if search_provider <> SearchUtils.TrieIndex then begin
+      true
+    end else begin
+      if (chunk_size genv) = 0 && (ServerArgs.ai_mode genv.options) = None then begin
+        true
+      end else begin
+        false
+      end
+    end
 
   let update_fileinfo_map fast =
     Naming_table.iter fast

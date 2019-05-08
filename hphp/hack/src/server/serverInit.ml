@@ -18,6 +18,7 @@ include ServerInitTypes
 
 let run_search (genv: ServerEnv.genv) (t: float) : unit =
   if SearchServiceRunner.should_run_completely genv
+    (SymbolIndex.get_search_provider ())
   then begin
     (* The duration is already logged by SearchServiceRunner *)
     SearchServiceRunner.run_completely genv;

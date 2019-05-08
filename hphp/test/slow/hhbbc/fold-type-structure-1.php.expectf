@@ -1,0 +1,8 @@
+Notice: Non-static method C::f() should not be called statically in %s/fold-type-structure-1.php on line 17
+array(1) {
+  ["kind"]=>
+  int(1)
+}
+string(1) "A"
+string(1) "A"
+string(1) "A"

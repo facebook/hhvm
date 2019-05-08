@@ -3102,7 +3102,7 @@ void clean_86reifiedinit_methods(IndexData& index) {
   // Add AttrNoReifiedInit to the base classes that do not need this method
   for (auto& cinfo : index.allClassInfos) {
     if (cinfo->parent == nullptr && needsinit.count(cinfo->cls) == 0) {
-      FTRACE(2, "Adding AttrNoReifiedInit on class {}", cinfo->cls->name);
+      FTRACE(2, "Adding AttrNoReifiedInit on class {}\n", cinfo->cls->name);
       attribute_setter(cinfo->cls->attrs, true, AttrNoReifiedInit);
     }
   }

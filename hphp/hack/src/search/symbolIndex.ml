@@ -34,7 +34,9 @@ let initialize_provider
     (savedstate_file_opt: string option): unit =
   let _ = savedstate_file_opt in
   match provider with
-  | SqliteIndex
+  | SqliteIndex ->
+    SqliteSearchService.sqlite_file_path := savedstate_file_opt;
+    SqliteSearchService.initialize ();
   | AllLocalIndex
   | GleanApiIndex
   | GrepIndex
@@ -153,9 +155,10 @@ let find_matching_symbols
       | GleanApiIndex
       | GrepIndex
       | NoIndex
-      | RipGrepIndex
-      | SqliteIndex ->
+      | RipGrepIndex ->
         []
+      | SqliteIndex ->
+        SqliteSearchService.sqlite_search query_text max_results kind_filter
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter
     in

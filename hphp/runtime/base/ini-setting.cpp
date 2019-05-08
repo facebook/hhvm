@@ -554,7 +554,11 @@ void mergeSettings(tv_lval curval, TypedValue v) {
   if (isArrayLikeType(cell.m_type) &&
       isArrayLikeType(cur_inner.type())) {
     for (auto i = ArrayIter(cell.m_data.parr); !i.end(); i.next()) {
-      mergeSettings(asArrRef(cur_inner).lvalAt(i.first()), i.secondVal());
+      auto& cur_inner_ref = asArrRef(cur_inner);
+      if (!cur_inner_ref.exists(i.first())) {
+        cur_inner_ref.set(i.first(), empty_array());
+      }
+      mergeSettings(cur_inner_ref.lvalAt(i.first()), i.secondVal());
     }
   } else {
     tvSet(tvToInitCell(v), curval);
@@ -564,7 +568,11 @@ void mergeSettings(tv_lval curval, TypedValue v) {
 
 void IniSettingMap::set(const String& key, const Variant& v) {
   assertx(this->isArray());
-  auto const curval = m_map.toArrRef().lvalAt(key);
+  auto& mapref = m_map.toArrRef();
+  if (!mapref.exists(key)) {
+    mapref.set(key, empty_array());
+  }
+  auto const curval = mapref.lvalAt(key);
   mergeSettings(curval, *v.asTypedValue());
 }
 

@@ -63,4 +63,4 @@ object(Y) (0) {
 }
 ====
 
-Fatal error: Call to undefined function W::non() in %s/test/slow/dynamic_methods/strings_with_colons.php on line 15
+Fatal error: Call to undefined function W::non() in %s/test/slow/dynamic_methods/strings_with_colons.php on line 18

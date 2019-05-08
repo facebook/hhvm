@@ -4,7 +4,7 @@
 
 class :fb:my:thing {
 
-  function doIt() {
+  static function doIt() {
     echo "doing my thing\n";
   }
 }

@@ -32,18 +32,18 @@ class A {
     try { $x = [new A, 'func3']; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = [new A, 'func3$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
 
-    try { $x = 'A'; $x::func2($v); } catch (Exception $e) { wrap($e); }
+
     try { $x = 'A'; $x::func3($v); } catch (Exception $e) { wrap($e); }
 
-    try { $x = 'func2'; A::$x($v); } catch (Exception $e) { wrap($e); }
-    try { $x = 'func2$memoize_impl'; A::$x($v); } catch (Exception $e) { wrap($e); }
+
+
     try { $x = 'func3'; A::$x($v); } catch (Exception $e) { wrap($e); }
     try { $x = 'func3$memoize_impl'; A::$x($v); } catch (Exception $e) { wrap($e); }
 
     try { $obj = new A; $x = 'func2'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
     try { $obj = new A; $x = 'func2$memoize_impl'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
-    try { $obj = new A; $x = 'func3'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
-    try { $obj = new A; $x = 'func3$memoize_impl'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
+
+
   }
 }
 
@@ -64,11 +64,11 @@ class B {
     try { $x = [new B, 'func5$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
     try { $x = [new B, 'func6$memoize_impl']; $x($v); } catch (Exception $e) { wrap($e); }
 
-    try { $x = 'func5$memoize_impl'; B::$x($v); } catch (Exception $e) { wrap($e); }
+
     try { $x = 'func6$memoize_impl'; B::$x($v); } catch (Exception $e) { wrap($e); }
 
     try { $obj = new B; $x = 'func5$memoize_impl'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
-    try { $obj = new B; $x = 'func6$memoize_impl'; $obj->$x($v); } catch (Exception $e) { wrap($e); }
+
   }
 
   public static function negative_tests() {
@@ -88,7 +88,7 @@ class B {
     $x = 'func6'; B::$x($v);
 
     $obj = new B; $x = 'func5'; $obj->$x($v);
-    $obj = new B; $x = 'func6'; $obj->$x($v);
+
   }
 }
 

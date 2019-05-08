@@ -1,7 +1,7 @@
 <?php
 
 class A {
- function fun() {
+ static function fun() {
  return 'A';
  }
  }

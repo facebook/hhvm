@@ -49,7 +49,7 @@ class K extends H {
 
 $c = new C;
   $c->__construct();
-  $c->sMeth();
+  $c::sMeth();
 $c = new D;
   $c->D();
 $c = new E;
@@ -74,7 +74,7 @@ $c = new K;
 
 $c = new C;
   $m = "__construct"; $c->$m();
-  $m = "sMeth"; $c->$m();
+  $m = "sMeth"; $c::$m();
 $c = new D;
   $m = "D"; $c->$m();
 $c = new E;

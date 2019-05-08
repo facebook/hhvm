@@ -66,7 +66,7 @@ var_dump($rf->isUserDefined());
 print "\n";
 
 print "--- export(\"f\") ---\n";
-var_dump($rf->export('f', true));
+var_dump(ReflectionFunction::export('f', true));
 print "\n";
 
 
@@ -97,7 +97,7 @@ var_dump($rg->invoke("a", "b"));
 print "\n";
 
 print "--- export(\"g\") ---\n";
-var_dump($rf->export('g', true));
+var_dump(ReflectionFunction::export('g', true));
 print "\n";
 
 #===============================================================================
@@ -146,7 +146,7 @@ class C {}
 $rb = new ReflectionClass("B");
 
 print "--- export() ---\n";
-var_dump($rb->export('B', true));
+var_dump(ReflectionClass::export('B', true));
 print "\n";
 
 print "--- getConstant() ---\n";

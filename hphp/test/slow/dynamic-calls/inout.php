@@ -37,20 +37,20 @@ function positive_tests() {
   try { $x = [new A, 'func3']; $x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = [new A, 'func3']; $x(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'A'; $x::func2(&$v); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A'; $x::func2(inout $v); } catch (Exception $e) { wrap($e); }
+
+
   try { $x = 'A'; $x::func3(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'A'; $x::func3(inout $v); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'func2'; A::$x(&$v); } catch (Exception $e) { wrap($e); }
-  try { $x = 'func2'; A::$x(inout $v); } catch (Exception $e) { wrap($e); }
+
+
   try { $x = 'func3'; A::$x(&$v); } catch (Exception $e) { wrap($e); }
   try { $x = 'func3'; A::$x(inout $v); } catch (Exception $e) { wrap($e); }
 
   try { $obj = new A; $x = 'func2'; $obj->$x(&$v); } catch (Exception $e) { wrap($e); }
   try { $obj = new A; $x = 'func2'; $obj->$x(inout $v); } catch (Exception $e) { wrap($e); }
-  try { $obj = new A; $x = 'func3'; $obj->$x(&$v); } catch (Exception $e) { wrap($e); }
-  try { $obj = new A; $x = 'func3'; $obj->$x(inout $v); } catch (Exception $e) { wrap($e); }
+
+
 }
 
 function negative_tests() {
@@ -78,8 +78,8 @@ function negative_tests() {
 
   $obj = new B; $x = 'func5'; $obj->$x(&$v);
   $obj = new B; $x = 'func5'; $obj->$x(inout $v);
-  $obj = new B; $x = 'func6'; $obj->$x(&$v);
-  $obj = new B; $x = 'func6'; $obj->$x(inout $v);
+
+
 }
 
 positive_tests();

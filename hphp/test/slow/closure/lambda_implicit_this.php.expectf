@@ -14,17 +14,6 @@ in parent function
 object(D) (0) {
 }
 
-nestedNoCapture:
-
-in C::bar: static::class: D, get_class($this): D
-
-in parent function
-object(D) (0) {
-}
-
-Notice: Undefined variable: this in %s/test/slow/closure/lambda_implicit_this.php on line 20
-in D::bar
-
 reflectionInfo:
 
 object(D) (0) {

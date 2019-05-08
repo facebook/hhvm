@@ -74,7 +74,6 @@ class P extends N
         P::gi();        // $this implicitly used (and passed)
         self::gi();     // $this implicitly used (and passed)
 
-        $this->gs();    // call to static method, so no $this passed
         P::gs();        // call to static method, so no $this passed
         self::gs();     // call to static method, so no $this passed
     }

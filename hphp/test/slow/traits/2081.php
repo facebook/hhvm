@@ -1,7 +1,7 @@
 <?php
 
 trait T1 {
- function foo() {
+ static function foo() {
  yield 1;
  }
  }
@@ -9,7 +9,7 @@ trait T2 {
   use T1 {
     foo as bar;
   }
-  function foo() {
+  static function foo() {
  return bar();
  }
 }

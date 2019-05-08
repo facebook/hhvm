@@ -12,8 +12,6 @@ Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 20
 
 Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 21
 
-Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 22
-
 Notice: 'HH\Vector::toArray' called dynamically in %s/builtins.php on line 23
 
 Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
@@ -67,14 +65,6 @@ Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line
 Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 33
 
 Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::fromArray' called dynamically in %s/builtins.php on line 34
-
-Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 34
-
-Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 34
-
-Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 34
 
 Notice: 'SplFixedArray::toArray' called dynamically in %s/builtins.php on line 35
 
@@ -97,8 +87,6 @@ Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 20
 
 Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 21
 
-Notice: 'HH\Vector::fromItems' called dynamically in %s/builtins.php on line 22
-
 Notice: 'HH\Vector::toArray' called dynamically in %s/builtins.php on line 23
 
 Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
@@ -152,14 +140,6 @@ Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line
 Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 33
 
 Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 33
-
-Notice: 'SplFixedArray::fromArray' called dynamically in %s/builtins.php on line 34
-
-Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 34
-
-Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 34
-
-Notice: 'SplFixedArray::offsetSet' called dynamically in %s/builtins.php on line 34
 
 Notice: 'SplFixedArray::toArray' called dynamically in %s/builtins.php on line 35
 

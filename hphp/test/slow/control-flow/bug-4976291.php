@@ -10,7 +10,7 @@ class Dlgt extends E {
 }
 
 class Dlgr {
-  function getDlgtObject($blah) {
+  static function getDlgtObject($blah) {
     return $blah ? new Dlgt($blah) : nullptr;
   }
 }
@@ -51,7 +51,7 @@ class D1 extends Dlgt {}
 class D1URILoader {}
 class F extends E {}
 class FURILoader extends Dlgr {
-  function getDlgtObject($blah) {
+  static function getDlgtObject($blah) {
     return new D1($blah);
   }
 }
@@ -60,7 +60,7 @@ class D2 extends Dlgt {}
 class D2URILoader {}
 class G extends E {}
 class GURILoader extends Dlgr {
-  function getDlgtObject($blah) {
+  static function getDlgtObject($blah) {
     return new D2($blah);
   }
 }

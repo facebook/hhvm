@@ -5,7 +5,6 @@ class TestClass
 	function __construct()
 	{
 		self::Test1();
-		$this->Test1();
 	}
 
 	static function Test1()

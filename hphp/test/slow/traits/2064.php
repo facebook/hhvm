@@ -1,10 +1,10 @@
 <?php
 
 trait T {
-  public function goo() {
+  public static function goo() {
     return static::class;
   }
-  public function foo() {
+  public static function foo() {
      return self::goo();
   }
 }

@@ -23,7 +23,3 @@ class Foo { use Too; }
 $f = new Foo;
 echo "Between\n";
 $f->bar();
-echo "Between\n";
-$f::bar();
-echo "Between\n";
-Foo::bar();

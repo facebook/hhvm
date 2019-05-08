@@ -4,7 +4,7 @@ echo "1..2\n";
 interface Bonk<T> {
 }
 class Foo<X> {
-  function beep() { echo "ok 1\n"; }
+  static function beep() { echo "ok 1\n"; }
 }
 class Bar<T> extends Foo<Bar<Foo<T>>> implements Bonk<T> {
 }

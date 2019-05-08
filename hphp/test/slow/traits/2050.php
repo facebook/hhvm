@@ -16,8 +16,6 @@ trait T2 {
 trait T3 {
  use T2;
  }
-$x = new D();
-$x->foo();
 C::foo();
 D::foo();
 T::foo();

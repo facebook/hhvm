@@ -8,14 +8,14 @@ final class HijriBirthday {
 
 
 class HijriConverter {
-  public function intPart($float) {
+  public static function intPart($float) {
     if ($float < -0.0000001) {
       return ceil($float - 0.0000001);
     }
     return floor($float + 0.0000001);
   }
 
-  public function gregorianToHijri($y, $m, $d) {
+  public static function gregorianToHijri($y, $m, $d) {
     if ($y > 1700) {
       if (($y > 1582) || (($y == 1582) && ($m > 10)) ||
           (($y == 1582) && ($m == 10) && ($d > 14))) {

@@ -12,8 +12,6 @@ class Foo {
   }
 }
 
-$a = new Foo();
+Foo::setZ(4);
 
-$a->setZ(4);
-
-var_dump($a->getZ());
+var_dump(Foo::getZ());

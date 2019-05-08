@@ -4,7 +4,7 @@
 // methods
 
 class A {
-  public function foo() {
+  public static function foo() {
     echo 'foo called';
   }
 }

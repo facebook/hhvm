@@ -1,7 +1,7 @@
 <?php
 
 class Foo {
-  function bar() {
+  static function bar() {
     $abc = 123;
     $a = function (...$args) use ($abc) {
       var_dump(count($args), $args);
@@ -10,7 +10,7 @@ class Foo {
     return $a;
   }
 
-  function baz($obj) {
+  static function baz($obj) {
     $abc = 456;
     $obj(789);
   }

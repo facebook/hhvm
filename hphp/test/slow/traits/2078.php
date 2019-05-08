@@ -1,7 +1,7 @@
 <?php
 
 trait T {
-  public function m() {
+  public static function m() {
  echo "original
 ";
  }
@@ -15,16 +15,13 @@ class B {
 
 <<__EntryPoint>>
 function main_2078() {
-$a1 = new A;
-$a1->m();
+A::m();
 fb_intercept("A::m", function() {
  echo "new
 ";
  }
 );
-$a2 = new A;
-$a2->m();
-$b1 = new B;
-$b1->m();
+A::m();
+B::m();
 T::m();
 }

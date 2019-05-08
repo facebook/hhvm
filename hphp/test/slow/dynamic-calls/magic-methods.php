@@ -83,7 +83,7 @@ function test_debug() {
   echo var_export($x, true) . "\n";
   var_dump($x);
 
-  $x->__set_state(1);
+
   A::__set_state(1);
   $x->__debugInfo();
 }

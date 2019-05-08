@@ -2,7 +2,7 @@
 
 class X {
   static $x = null;
-  static function a() {
+  function a() {
     self::$x->foo->bar = 2;
     return self::$x;
   }

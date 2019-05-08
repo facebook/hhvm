@@ -19,7 +19,7 @@ function test() {
   $x = [new Vector, 'toArray']; $x();
   $x = 'HH\Vector'; $x::fromItems([]);
   $x = 'fromItems'; Vector::$x([]);
-  $x = 'fromItems'; $obj = new Vector; $obj->$x([]);
+
   $x = 'toArray'; $obj = new Vector; $obj->$x();
   $x = 'HH\Vector'; new $x();
 
@@ -31,7 +31,7 @@ function test() {
   $x = [new SplFixedArray, 'toArray']; $x();
   $x = 'SplFixedArray'; $x::fromArray([1, 2, 3]);
   $x = 'fromArray'; SplFixedArray::$x([1, 2, 3]);
-  $x = 'fromArray'; $obj = new SplFixedArray; $obj->$x([1, 2, 3]);
+
   $x = 'toArray'; $obj = new SplFixedArray; $obj->$x();
   $x = 'SplFixedArray'; new $x();
 

@@ -81,7 +81,7 @@ class Date
         trace("__LINE__", __LINE__);
 
         $this->priv1();
-        $this->spf1();
+        $this::spf1();
     }
 
 // public vs. private doesn't matter

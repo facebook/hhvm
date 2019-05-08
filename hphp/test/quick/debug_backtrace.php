@@ -6,7 +6,7 @@ class A {
   }
 
   function bar($a, $b, $c = null) {
-    $this->foo();
+    self::foo();
   }
 }
 

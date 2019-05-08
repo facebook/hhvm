@@ -21,5 +21,4 @@ class Y extends X {
 function main_1879() {
 $y = new Y;
 $y->baz();
-Y::baz();
 }

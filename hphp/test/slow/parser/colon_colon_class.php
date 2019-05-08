@@ -3,7 +3,7 @@ namespace NS;
 
 class B {}
 class A extends B {
-  public function b() {
+  public static function b() {
     \var_dump(self::class);
     \var_dump(static::class);
     \var_dump(parent::class);
@@ -15,7 +15,7 @@ function c($c = A::class) {
 }
 
 trait C {
-  public function c() {
+  public static function c() {
     \var_dump(self::class);
     \var_dump(static::class);
     \var_dump(parent::class);

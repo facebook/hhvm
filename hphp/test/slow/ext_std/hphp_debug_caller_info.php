@@ -21,6 +21,4 @@ class Baz {
 $baz = new Baz();
 var_dump(bar());
 var_dump(Baz::smeth());
-var_dump(Baz::imeth());
-var_dump($baz->smeth());
 var_dump($baz->imeth());

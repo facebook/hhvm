@@ -39,8 +39,9 @@ class C {
     $this->th = 'th';
   }
   public static function isOdd($i) { return $i % 2 == 1;}
+  public function isOddInst($i) { return $i % 2 == 1;}
   public function filter($data)  {
-    $callback = inst_meth($this, 'isOdd');
+    $callback = inst_meth($this, 'isOddInst');
     return $data->filter($callback);
   }
 

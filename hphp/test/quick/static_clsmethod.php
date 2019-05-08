@@ -1,6 +1,6 @@
 <?hh
 class C {
-  public function className() {
+  public static function className() {
     return 'C';
   }
   public function __construct() {
@@ -21,7 +21,7 @@ class C {
 }
 
 class D extends C {
-  public function className() {
+  public static function className() {
     return 'D';
   }
   public function __construct() {
@@ -42,14 +42,11 @@ function main() {
   $c->foo();
   $d->foo();
   echo "**************\n";
-  $c->bar();
-  $d->bar();
-  echo "**************\n";
-  C::foo();
+  C::bar();
   D::bar();
   echo "**************\n";
+  $c->yar();
   $d->yar();
-  D::yar();
   echo "**************\n";
   static::foo();
 }

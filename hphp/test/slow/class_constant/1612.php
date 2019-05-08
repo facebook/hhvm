@@ -5,8 +5,8 @@ function __autoload($x) {
  }
 class X {
   public $foo = Y::FOO;
-  function foo() {
-    var_dump(__METHOD__, $this);
+  static function foo() {
+    var_dump(__METHOD__);
   }
 }
 

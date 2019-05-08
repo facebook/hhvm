@@ -4,7 +4,7 @@ class Foo {
   private int $bar = 0;
 
   <<__Rx, __MutableReturn>>
-  public function get(): Foo {
+  public static function get(): Foo {
     return new Foo();
   }
 

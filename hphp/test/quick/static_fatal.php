@@ -13,7 +13,7 @@ class three extends two {
 
 class doer {
   public function junk($x) {
-    $x->foo();
+    $x::foo();
   }
 }
 

@@ -6,7 +6,7 @@
  echo static::$a;
  }
     function g() {
- $this->f();
+ $this::f();
  }
   }
   $x = 1;

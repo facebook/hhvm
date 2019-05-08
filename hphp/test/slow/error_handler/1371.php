@@ -9,6 +9,5 @@ class C {
     set_exception_handler(array(__CLASS__, 'log'));
   }
 }
-$obj = new C;
-$obj->setup();
+C::setup();
 throw new Exception('test');

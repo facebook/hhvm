@@ -1,7 +1,7 @@
 <?php
 
 class Foo {
-  function bar() {
+  static function bar() {
     $a = function () {
  var_dump(__CLASS__, __FUNCTION__);
 }
@@ -12,5 +12,5 @@ class Foo {
 
 <<__EntryPoint>>
 function main_1928() {
-Foo::bar();
+  Foo::bar();
 }

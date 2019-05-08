@@ -48,7 +48,6 @@ object(P) (3) {
 }
 Inside static P::gs
 Inside static P::gs
-Inside static P::gs
 -----------------------------
   self::$psf returns red
 static::$psf returns red

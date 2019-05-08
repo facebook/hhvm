@@ -10,7 +10,7 @@ class E1 extends Exception {
     }
   }
 
-  function rethrow() {
+  static function rethrow() {
     $e = self::$e;
     self::$e = null;
     throw $e;

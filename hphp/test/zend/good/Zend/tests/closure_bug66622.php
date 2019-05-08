@@ -21,7 +21,6 @@ class B extends A {
 function test() {
     (new B)->foo();
     (new B)->bar();
-    (new B)->baz();
     B::baz();
 }
 test();

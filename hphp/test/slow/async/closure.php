@@ -21,7 +21,7 @@ async function inFunc() {
 
 
 class F {
-  async function inMeth() {
+  static async function inMeth() {
     $x = async function($a) { return $a; };
     $y = async function($a) { await block(); return $a; };
     $xval = await $x(3);

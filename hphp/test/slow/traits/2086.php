@@ -1,7 +1,7 @@
 <?php
 
 trait Too {
-  function bar() {
+  static function bar() {
     $a = function () {
  var_dump(__CLASS__, __FUNCTION__);
 }

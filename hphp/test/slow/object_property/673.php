@@ -2,7 +2,7 @@
 
 class A {
  static protected $foo = 11;
-   function foo() {
+   static function foo() {
  var_dump(A::$foo);
 }
 }

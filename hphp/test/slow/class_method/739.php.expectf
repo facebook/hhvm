@@ -1,0 +1,4 @@
+
+Notice: Non-static method Example::whatever() should not be called statically in %s on line 16
+string(22) "non-static method call"
+string(18) "static method call"

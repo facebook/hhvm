@@ -1,7 +1,7 @@
 <?php
 
 trait T {
-  function foo() {
+  static function foo() {
     var_dump(__METHOD__);
   }
 }

@@ -10,7 +10,7 @@ class Bar extends Foo {
 
 function main() {
   $bar = new Bar();
-  echo $bar->test();
+  echo $bar::test();
 }
 
 main();

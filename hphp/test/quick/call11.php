@@ -23,9 +23,7 @@ class C {
   }
 }
 
+<<__EntryPoint>>
 function main() {
-  $obj = new C;
-  $obj->test();
+  C::test();
 }
-
-main();

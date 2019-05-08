@@ -47,14 +47,14 @@ function main() {
   var_dump($im->getImageResolution());
   var_dump($im->getImageWhitePoint());
   var_dump($im->getPage());
-  var_dump($im->getQuantumDepth());
-  var_dump($im->getQuantumRange());
+  var_dump(Imagick::getQuantumDepth());
+  var_dump(Imagick::getQuantumRange());
   var_dump($im->getSamplingFactors());
   var_dump($im->getSize());
-  var_dump($im->getVersion());
+  var_dump(Imagick::getVersion());
   var_dump($im->identifyImage());
 
-  var_dump(is_varray($im->queryFonts()));
-  var_dump($im->queryFormats());
+  var_dump(is_varray(Imagick::queryFonts()));
+  var_dump(Imagick::queryFormats());
 
 }

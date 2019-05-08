@@ -1,7 +1,7 @@
 <?php
 
 trait T {
- function fruit() {
+ static function fruit() {
  yield 'apple';
  yield 'banana';
 }

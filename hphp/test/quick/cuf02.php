@@ -14,9 +14,9 @@ class E {
 
 
 function main() {
-  call_user_func('C::foo');
-  call_user_func('D::foo');
-  call_user_func('E::foo');
+  call_user_func(array(new C(), 'foo'));
+  call_user_func(array(new D(), 'foo'));
+  call_user_func(array(new E(), 'foo'));
 
   call_user_func('C::bar');
   call_user_func('D::bar');

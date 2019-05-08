@@ -11,10 +11,14 @@ protected aa::blah
 bool(false)
 protected aa::blah
 bool(true)
+
+Notice: Non-static method aa::func() should not be called statically in %s on line 15
 protected aa::blah
 
 Notice: Undefined variable: this in %s on line 11
 bool(true)
+
+Notice: Non-static method aa::func() should not be called statically in %s on line 16
 protected aa::blah
 
 Notice: Undefined variable: this in %s on line 11

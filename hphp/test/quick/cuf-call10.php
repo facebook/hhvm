@@ -58,7 +58,7 @@ class C3 {
 
 function main3() {
   $obj = new C3;
-  $obj->test();
+  $obj::test();
 }
 main3();
 

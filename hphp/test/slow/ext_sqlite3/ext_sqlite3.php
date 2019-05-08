@@ -33,7 +33,7 @@ VS($db->changes(), 1);
 VS($db->lasterrorcode(), 0);
 VS($db->lasterrormsg(), "not an error");
 
-VS($db->escapestring("'\""), "''\"");
+VS(SQLite3::escapestring("'\""), "''\"");
 VS($db->querysingle("SELECT * FROM foo"), "ABC");
 VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
 
@@ -93,8 +93,8 @@ VS($db->querysingle("SELECT * FROM foo", true), array("bar" => "ABC"));
 $stmt->close();
 
 // Since minor version can change frequently, just test the major version
-VS($db->version()['versionString'][0], "3");
-VERIFY((int)$db->version()['versionNumber'] > (int)3000000);
+VS(SQLite3::version()['versionString'][0], "3");
+VERIFY((int)SQLite3::version()['versionNumber'] > (int)3000000);
 
 $db->close();
 unlink(":memory:test");

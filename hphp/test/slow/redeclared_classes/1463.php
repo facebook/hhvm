@@ -59,7 +59,6 @@ function run() {
   test($base->baseVal, 'base', 'Base object member');
   test(base::$baseStatic, 'baseStat', 'Base static member');
   test(base::baseStatMeth(), 'Base static method', 'Base static method');
-  test($base->baseStatMeth(), 'Base static method', 'Base static method obj syntax');
   $child1 = new child1;
   test($child1->baseVal, 'base', 'dRedec inherited property');
   test($child1->child1Val, 'child1', 'dRedec property');
@@ -67,8 +66,6 @@ function run() {
   test($child1->childProp(), 'IamChild1', 'dRedec parent->child prop method');
   test(child1::child1StatMeth(), 'Child 1 static method', 'dRedec static method');
   test(child1::baseStatMeth(), 'Base static method', 'dRedec parent static method');
-  test($child1->child1StatMeth(), 'Child 1 static method', 'dRedec static method obj syntax');
-  test($child1->baseStatMeth(), 'Base static method', 'dRedec parent static method obj syntax');
   test(child1::$baseStatic, 'baseStat', 'dRedec parent static prop');
   test(child1::$child1Static, 'child1Stat', 'dRedec static prop');
   test($child1->parentChildMeth(), 'I am base', 'dRedec parent method');
@@ -82,9 +79,6 @@ function run() {
   test(child2::baseStatMeth(), 'Base static method', 'ddRedec grandparent static method');
   test(child2::child1StatMeth(), 'Child 1 static method', 'ddRedec parent static method');
   test(child2::child2StatMeth(), 'Child 2 static method', 'ddRedec static method');
-  test($child2->baseStatMeth(), 'Base static method', 'ddRedec grandparent static method obj syntax');
-  test($child2->child1StatMeth(), 'Child 1 static method', 'ddRedec parent static method obj syntax');
-  test($child2->child2StatMeth(), 'Child 2 static method', 'ddRedec static method obj syntax');
   test(child2::$baseStatic, 'baseStat', 'ddRedec grandparent static prop');
   test(child2::$child1Static, 'child1Stat', 'ddRedec parent static prop');
   test(child2::$child2Static, 'child2Stat', 'ddRedec static prop');
@@ -101,10 +95,6 @@ function run() {
   test(child3::child1StatMeth(), 'Child 1 static method', 'RddRedec grandparent static method');
   test(child3::child2StatMeth(), 'Child 2 static method', 'RddRedec parent static method');
   test(child3::child3StatMeth(), 'Child 3 static method', 'RddRedec static method');
-  test($child3->baseStatMeth(), 'Base static method', 'RddRedec greatgrandparent static method obj syntax');
-  test($child3->child1StatMeth(), 'Child 1 static method', 'RddRedec grandparent static method obj syntax');
-  test($child3->child2StatMeth(), 'Child 2 static method', 'RddRedec parent static method obj syntax');
-  test($child3->child3StatMeth(), 'Child 3 static method', 'RddRedec static method obj syntax');
   test(child3::$baseStatic, 'baseStat', 'RddRedec greatgrandparent static prop');
   test(child3::$child1Static, 'child1Stat', 'RddRedec grandparent static prop');
   test(child3::$child2Static, 'child2Stat', 'RddRedec parent static prop');

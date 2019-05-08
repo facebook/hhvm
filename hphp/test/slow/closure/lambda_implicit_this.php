@@ -33,14 +33,6 @@ class D extends C {
     }, [1]);
   }
 
-  protected function nestedNoCapture() {
-    echo "\nnestedNoCapture:\n\n";
-    array_map($x ==> { // captures $this
-      parent::bar();
-      (() ==> static::bar())(); // doesn't capture $this
-    }, [1]);
-  }
-
   protected function reflectionInfo() {
     echo "\nreflectionInfo:\n\n";
     $l1 = () ==> var_dump($this);
@@ -59,7 +51,6 @@ class D extends C {
   public static function test() {
     (new D())->direct();
     (new D())->nestedCapture();
-    (new D())->nestedNoCapture();
     (new D())->reflectionInfo();
   }
 }

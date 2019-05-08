@@ -4,7 +4,7 @@ class PEAR {
   static function f() {
  PEAR::g();
  }
-  function g() {
+  static function g() {
  echo 'This is g()';
  }
 }

@@ -17,7 +17,6 @@ function goo() {
 $obj = new A;
 $obj->foo();
 
-$obj->bar();
 A::bar();
 goo();
 unset($this);

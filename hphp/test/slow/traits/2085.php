@@ -1,7 +1,7 @@
 <?php
 
 trait Too {
-  function bar() {
+  static function bar() {
     $abc = 123;
     $a = function (...$args) use ($abc) {
       $n = count($args);
@@ -11,7 +11,7 @@ trait Too {
     return $a;
   }
 
-  function baz($obj) {
+  static function baz($obj) {
     $abc = 456;
     $obj(789);
   }

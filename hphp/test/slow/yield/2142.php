@@ -1,7 +1,7 @@
 <?php
 
 class F {
- function fruit() {
+ static function fruit() {
  yield 'apple';
  yield 'banana';
 }

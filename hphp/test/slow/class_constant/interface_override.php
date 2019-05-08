@@ -3,7 +3,7 @@
 interface I { const x = ''; }
 abstract class X implements I {
   abstract const int q;
-  function foo() {
+  static function foo() {
     return static::q;
   }
 }
@@ -14,5 +14,5 @@ class Y extends X {
 
 <<__EntryPoint>>
 function main_interface_override() {
-var_dump(Y::foo());
+  var_dump(Y::foo());
 }

@@ -7,7 +7,7 @@
           echo self::$p . "\n";
       }
   }
-  
+
   class B extends A
   {
       public $p = "B::p";
@@ -16,10 +16,10 @@
           echo $this->p . "\n";
       }
   }
-  
-  
+
+
   A::showA();
-  
+
   $b = new B;
-  $b->showA();
+  B::showA();
   $b->showB();

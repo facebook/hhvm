@@ -31,7 +31,7 @@ class Point
     {
         $this->x = $x;
         $this->y = $y;
-    }   
+    }
 
     public function translate($x, $y)
     {
@@ -68,7 +68,7 @@ var_dump($c);
 //*/
 
 var_dump($p1->piProp);  // okay to access instance property via instance
-var_dump($p1->psf());   // okay to access static method via instance
+//var_dump($p1->psf());     // not okay to access static method via instance
 //var_dump(($p1->psf)());   // doesn't parse
 //var_dump($p1->psf);       // so no surprise this won't work
 var_dump($p1->psProp);  // Not okay. Strict Standards: Accessing static property

@@ -1,8 +1,8 @@
 <?hh
 
 class F {
-  async function ret1() { return 1; }
-  async function await1() {
+  static async function ret1() { return 1; }
+  static async function await1() {
     $b = await F::ret1();
     return 1 + $b;
   }

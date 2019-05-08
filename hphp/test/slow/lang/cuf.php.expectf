@@ -2,34 +2,12 @@
 B D D
 C D D
 D D D
-F F
-G G
-H H
 B D D
 C D D
 D D D
 ****************
-B B
-C C
-D D
-F F
-G G
-H H
-B B
-C C
-D D
 ****************
-B B
-C C
-D D
-F F
-G G
-H H
-B B
-C C
-D D
 ****************
-B B
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
@@ -40,13 +18,6 @@ Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
-A A
-
-Warning: behavior of call_user_func(array('B', 'self::meth')) is undefined in %s on line %d
-B B
-
-Warning: behavior of call_user_func(array('B', 'static::meth')) is undefined in %s on line %d
-B B
 ****************
 B D D
 A D D
@@ -58,17 +29,8 @@ Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
-F F
-G G
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
-F F
-
-Warning: behavior of call_user_func(array('G', 'self::meth')) is undefined in %s on line %d
-G G
-
-Warning: behavior of call_user_func(array('G', 'static::meth')) is undefined in %s on line %d
-G G
 ****************
 F F
 G G
@@ -118,35 +80,8 @@ F G G
 G G G
 ****************
 ############# testMeth2 ##############
-B B
-C C
-D D
-F F
-G G
-H H
-B D
-C D
-D D
 ****************
-B B
-C C
-D D
-F F
-G G
-H H
-B B
-C C
-D D
 ****************
-B B
-C C
-D D
-F F
-G G
-H H
-B B
-C C
-D D
 ****************
 B B
 C C
@@ -158,7 +93,6 @@ B D
 C D
 D D
 ****************
-B B
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'C' in %s on line %d
 
@@ -169,13 +103,6 @@ Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'G' in %s on line %d
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'B' is not a subclass of 'H' in %s on line %d
-A A
-
-Warning: behavior of call_user_func(array('B', 'self::meth')) is undefined in %s on line %d
-B B
-
-Warning: behavior of call_user_func(array('B', 'static::meth')) is undefined in %s on line %d
-B B
 ****************
 B B
 A D
@@ -187,17 +114,8 @@ Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'C' in %s on line %d
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'D' in %s on line %d
-F F
-G G
 
 Warning: call_user_func expects parameter 1 to be a valid callback, class 'G' is not a subclass of 'H' in %s on line %d
-F F
-
-Warning: behavior of call_user_func(array('G', 'self::meth')) is undefined in %s on line %d
-G G
-
-Warning: behavior of call_user_func(array('G', 'static::meth')) is undefined in %s on line %d
-G G
 ****************
 F F
 G G
@@ -512,28 +430,18 @@ G G
 ############# doMeth ##############
 B B B
 B B B
-C C
-D D
-F F
-G G
-H H
 A B B
 B B B
 B B B
 ****************
 G G G
-B B
-C C
-D D
 F G G
 G G G
-H H
 F G G
 G G G
 G G G
 ****************
 ############# doStaticMeth ##############
-B B
 B B
 C C
 D D
@@ -544,7 +452,6 @@ A B
 B B
 B B
 ****************
-G G
 B B
 C C
 D D

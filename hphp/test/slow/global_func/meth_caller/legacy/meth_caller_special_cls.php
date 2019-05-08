@@ -23,4 +23,4 @@ class B extends A {
   }
 }
 
-new B()->specail_classes();
+B::specail_classes();

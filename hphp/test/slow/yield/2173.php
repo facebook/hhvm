@@ -5,9 +5,6 @@ class A {
     $class = static::class;
     yield $class;
   }
-  public static function sfoo() {
-    return self::gen();
-  }
   public function gen() {
     $class = static::class;
     yield $class;
@@ -27,13 +24,7 @@ function t($x) {
 <<__EntryPoint>>
 function main_2173() {
 t(B::sgen());
-t(B::sfoo());
 t(A::sgen());
-t(A::sfoo());
-t(B::gen());
-t(B::foo());
-t(A::gen());
-t(A::foo());
 $b = new B;
 t($b->gen());
 t($b->foo());

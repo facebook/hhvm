@@ -32,8 +32,5 @@ class A {
 }
 
 (new A)->b();
-A::b();
-(new A)->c();
 A::c();
-(new A)->d();
 A::d();

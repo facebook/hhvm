@@ -3,25 +3,25 @@ string(1) "C"
 C::foo
 string(1) "C"
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'D' in %s on line 19
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'D' in %s on line 23
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'E' in %s on line 20
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'E' in %s on line 24
 C::bar
 string(1) "C"
 C::bar
 string(1) "C"
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'D' in %s on line 24
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'D' in %s on line 28
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'E' in %s on line 25
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'C' is not a subclass of 'E' in %s on line 29
 D::foo
 string(1) "D"
 C::foo
-string(1) "C"
+string(1) "D"
 D::foo
 string(1) "D"
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'D' is not a subclass of 'E' in %s on line 30
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'D' is not a subclass of 'E' in %s on line 34
 D::bar
 string(1) "D"
 C::bar
@@ -29,20 +29,20 @@ string(1) "C"
 D::bar
 string(1) "D"
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'D' is not a subclass of 'E' in %s on line 35
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'D' is not a subclass of 'E' in %s on line 39
 E::foo
 string(1) "E"
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'C' in %s on line 38
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'C' in %s on line 42
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'D' in %s on line 39
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'D' in %s on line 43
 E::foo
 string(1) "E"
 E::bar
 string(1) "E"
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'C' in %s on line 43
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'C' in %s on line 47
 
-Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'D' in %s on line 44
+Warning: call_user_func expects parameter 1 to be a valid callback, class 'E' is not a subclass of 'D' in %s on line 48
 E::bar
 string(1) "E"

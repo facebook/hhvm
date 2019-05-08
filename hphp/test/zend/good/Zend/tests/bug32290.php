@@ -90,7 +90,5 @@ echo "\n===C===\n";
 var_dump($x->doSomethingParent(1));
 echo "\n===D===\n";
 var_dump($x->doSomethingParentThis(1));
-echo "\n===E===\n";
-var_dump($x->doSomethingStatic(1));
 
 echo "===DONE===\n";

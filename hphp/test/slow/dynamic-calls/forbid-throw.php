@@ -98,20 +98,20 @@ class A extends B {
   <<__DynamicallyCallable>> public static function static_cmp2($x, $y) { return $x <=> $y; }
 
   public static async function positive_test1() {
-    $x = 'func';
-    try { self::$x(); } catch (Exception $e) { wrap($e); }
-    try { static::$x(); } catch (Exception $e) { wrap($e); }
-    try { parent::$x(); } catch (Exception $e) { wrap($e); }
+
+
+
+
 
     $x = 'static_func';
     try { self::$x(); } catch (Exception $e) { wrap($e); }
     try { static::$x(); } catch (Exception $e) { wrap($e); }
     try { parent::$x(); } catch (Exception $e) { wrap($e); }
 
-    $x = 'async_func';
-    try { await self::$x(); } catch (Exception $e) { wrap($e); }
-    try { await static::$x(); } catch (Exception $e) { wrap($e); }
-    try { await parent::$x(); } catch (Exception $e) { wrap($e); }
+
+
+
+
 
     $x = 'static_async_func';
     try { await self::$x(); } catch (Exception $e) { wrap($e); }
@@ -120,17 +120,17 @@ class A extends B {
   }
 
   public static async function negative_test1() {
-    self::func();
-    static::func();
-    parent::func();
+
+
+
 
     self::static_func();
     static::static_func();
     parent::static_func();
 
-    await self::async_func();
-    await static::async_func();
-    await parent::async_func();
+
+
+
 
     await self::static_async_func();
     await static::static_async_func();
@@ -140,20 +140,20 @@ class A extends B {
     new static;
     new parent;
 
-    $x = 'func2';
-    self::$x();
-    static::$x();
-    parent::$x();
+
+
+
+
 
     $x = 'static_func2';
     self::$x();
     static::$x();
     parent::$x();
 
-    $x = 'async_func2';
-    await self::$x();
-    await static::$x();
-    await parent::$x();
+
+
+
+
 
     $x = 'static_async_func2';
     await self::$x();
@@ -184,14 +184,14 @@ async function positive_tests() {
   try { $x = [new A, 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
   try { $x = [new A, 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
   try { $x = [new C, 'foobar']; $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A'; $x::func(); } catch (Exception $e) { wrap($e); }
+
   try { $x = 'A'; $x::static_func(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A'; await $x::async_func(); } catch (Exception $e) { wrap($e); }
+
   try { $x = 'A'; await $x::static_async_func(); } catch (Exception $e) { wrap($e); }
 
-  try { $x = 'func'; A::$x(); } catch (Exception $e) { wrap($e); }
+
   try { $x = 'static_func'; A::$x(); } catch (Exception $e) { wrap($e); }
-  try { $x = 'async_func'; await A::$x(); } catch (Exception $e) { wrap($e); }
+
   try { $x = 'static_async_func'; await A::$x(); } catch (Exception $e) { wrap($e); }
 
 
@@ -200,9 +200,9 @@ async function positive_tests() {
 
   try { $x = 'A'; new $x(); } catch (Exception $e) { wrap($e); }
   try { $obj = new A; $x = 'func'; $obj->$x(); } catch (Exception $e) { wrap($e); }
-  try { $obj = new A; $x = 'static_func'; $obj->$x(); } catch (Exception $e) { wrap($e); }
+
   try { $obj = new A; $x = 'async_func'; await $obj->$x(); } catch (Exception $e) { wrap($e); }
-  try { $obj = new A; $x = 'static_async_func';  await $obj->$x(); } catch (Exception $e) { wrap($e); }
+
   try { $obj = new C; $x = 'foobar'; $obj->$x(); } catch (Exception $e) { wrap($e); }
 
   try { array_map('func', [true]); } catch (Exception $e) { wrap($e); }
@@ -218,10 +218,10 @@ async function positive_tests() {
 
   $x = Vector::fromItems([[]]);
   try { $x->map('func'); } catch (Exception $e) { wrap($e); }
-  try { $x->map('A::func'); } catch (Exception $e) { wrap($e); }
+
   try { $x->map('A::static_func'); } catch (Exception $e) { wrap($e); }
 
-  try { $x->map(['A', 'func']); } catch (Exception $e) { wrap($e); }
+
   try { $x->map(['A', 'static_func']); } catch (Exception $e) { wrap($e); }
 
   try { $x->map([new A, 'func']); } catch (Exception $e) { wrap($e); }
@@ -229,10 +229,10 @@ async function positive_tests() {
   try { $x->map([new C, 'foobar']); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func('func'); } catch (Exception $e) { wrap($e); }
-  try { call_user_func('A::func'); } catch (Exception $e) { wrap($e); }
+
   try { call_user_func('A::static_func'); } catch (Exception $e) { wrap($e); }
 
-  try { call_user_func(['A', 'func']); } catch (Exception $e) { wrap($e); }
+
   try { call_user_func(['A', 'static_func']); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func([new A, 'func']); } catch (Exception $e) { wrap($e); }
@@ -240,18 +240,18 @@ async function positive_tests() {
   try { call_user_func([new C, 'foobar']); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func_array('func', []); } catch (Exception $e) { wrap($e); }
-  try { call_user_func_array('A::func', []); } catch (Exception $e) { wrap($e); }
+
   try { call_user_func_array('A::static_func', []); } catch (Exception $e) { wrap($e); }
-  try { call_user_func_array(['A', 'func'], []); } catch (Exception $e) { wrap($e); }
+
   try { call_user_func_array(['A', 'static_func'], []); } catch (Exception $e) { wrap($e); }
   try { call_user_func_array([new A, 'func'], []); } catch (Exception $e) { wrap($e); }
   try { call_user_func_array([new A, 'static_func'], []); } catch (Exception $e) { wrap($e); }
 
   try { $x = 'cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = 'A::cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+
   try { $x = 'A::static_cmp'; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
 
-  try { $x = ['A', 'cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
+
   try { $x = ['A', 'static_cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
 
   try { $x = [new A, 'cmp']; $y = [2, 1]; usort(&$y, $x); } catch (Exception $e) { wrap($e); }
@@ -263,9 +263,9 @@ async function negative_tests() {
   func();
   count([]);
   await async_func();
-  A::func();
+
   A::static_func();
-  await A::async_func();
+
   await A::static_async_func();
 
   Vector::fromItems([]);
@@ -282,16 +282,16 @@ async function negative_tests() {
 
   $obj = new A;
   $obj->func();
-  $obj->static_func();
+
   await $obj->async_func();
-  await $obj->static_async_func();
+
 
   $obj = new C;
   $obj->foobar();
 
   $obj = new Vector;
   $obj->firstValue();
-  $obj->fromItems([]);
+
 
   array_map($k ==> {}, [true]);
   array_map(new Invokable, [true]);
@@ -319,7 +319,7 @@ async function negative_tests() {
   $x = [new Vector, 'firstValue']; $x();
   $x = 'HH\Vector'; $x::fromItems([]);
   $obj = new Vector; $x = 'firstValue'; $obj->$x();
-  $obj = new Vector; $x = 'fromItems'; $obj->$x([]);
+
   array_map('HH\Vector::fromItems', [[]]);
   array_map(['HH\Vector', 'fromItems'], [[]]);
   array_map([new Vector, 'fromItems'], [[]]);
@@ -360,22 +360,22 @@ async function negative_tests() {
   $x = [new A, 'async_func2']; await $x();
   $x = [new A, 'static_async_func2']; await $x();
   $x = [new E, 'foobar']; $x();
-  $x = 'A'; $x::func2();
+
   $x = 'A'; $x::static_func2();
-  $x = 'A'; await $x::async_func2();
+
   $x = 'A'; await $x::static_async_func2();
 
-  $x = 'func2'; A::$x();
+
   $x = 'static_func2'; A::$x();
-  $x = 'async_func2'; await A::$x();
+
   $x = 'static_async_func2'; await A::$x();
 
 
   $x = 'F'; new $x();
   $obj = new A; $x = 'func2'; $obj->$x();
-  $obj = new A; $x = 'static_func2'; $obj->$x();
+
   $obj = new A; $x = 'async_func2'; await $obj->$x();
-  $obj = new A; $x = 'static_async_func2';  await $obj->$x();
+
   $obj = new E; $x = 'foobar'; $obj->$x();
 
   array_map('func2', [true]);
@@ -391,10 +391,10 @@ async function negative_tests() {
 
   $x = Vector::fromItems([[]]);
   $x->map('func2');
-  $x->map('A::func2');
+
   $x->map('A::static_func2');
 
-  $x->map(['A', 'func2']);
+
   $x->map(['A', 'static_func2']);
 
   $x->map([new A, 'func2']);
@@ -402,10 +402,10 @@ async function negative_tests() {
   $x->map([new E, 'foobar']);
 
   call_user_func('func2');
-  call_user_func('A::func2');
+
   call_user_func('A::static_func2');
 
-  call_user_func(['A', 'func2']);
+
   call_user_func(['A', 'static_func2']);
 
   call_user_func([new A, 'func2']);
@@ -413,18 +413,18 @@ async function negative_tests() {
   call_user_func([new E, 'foobar']);
 
   call_user_func_array('func2', []);
-  call_user_func_array('A::func2', []);
+
   call_user_func_array('A::static_func2', []);
-  call_user_func_array(['A', 'func2'], []);
+
   call_user_func_array(['A', 'static_func2'], []);
   call_user_func_array([new A, 'func2'], []);
   call_user_func_array([new A, 'static_func2'], []);
 
   $x = 'cmp2'; $y = [2, 1]; usort(&$y, $x);
-  $x = 'A::cmp2'; $y = [2, 1]; usort(&$y, $x);
+
   $x = 'A::static_cmp2'; $y = [2, 1]; usort(&$y, $x);
 
-  $x = ['A', 'cmp2']; $y = [2, 1]; usort(&$y, $x);
+
   $x = ['A', 'static_cmp2']; $y = [2, 1]; usort(&$y, $x);
 
   $x = [new A, 'cmp2']; $y = [2, 1]; usort(&$y, $x);

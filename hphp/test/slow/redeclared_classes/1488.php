@@ -7,10 +7,10 @@ if (isset($g)) {
   include '1488-2.inc';
 }
 class Z extends Y {
-  function foo() {
+  static function foo() {
  var_dump(__METHOD__);
  }
-  function bar() {
+  static function bar() {
  X::foo();
  }
 }

@@ -9,5 +9,5 @@ class Derived extends Base {
   public static $x;
 }
 $a = new Derived();
-$a->foo();
+$a::foo();
 echo "Done\n";

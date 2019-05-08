@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  function bar(int $x, inout bool $y, inout string $z) {
+  static function bar(int $x, inout bool $y, inout string $z) {
     $y = false;
     $z = 'hello-world';
     return $x;

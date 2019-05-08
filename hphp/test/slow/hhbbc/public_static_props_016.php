@@ -3,7 +3,7 @@
 class X {
   static $y = array();
 
-  function z() {
+  static function z() {
     self::$y[] = 2;
     return self::$y;
   }

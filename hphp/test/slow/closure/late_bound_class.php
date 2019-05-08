@@ -28,21 +28,11 @@ function test() {
   $a = Y::foo();
   $a();
 
-  $a = X::bar();
-  $a();
-  $a = Y::bar();
-  $a();
-
   $x = new X;
   $a = $x->bar();
   $a();
   $x = new Y;
   $a = $x->bar();
-  $a();
-
-  $a = X::bar_nonstatic();
-  $a();
-  $a = Y::bar_nonstatic();
   $a();
 
   $x = new X;

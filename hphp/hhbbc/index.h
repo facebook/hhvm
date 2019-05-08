@@ -53,6 +53,7 @@ extern const Type TTop;
 
 namespace php {
 struct Class;
+struct Const;
 struct Func;
 struct Unit;
 struct Program;
@@ -626,8 +627,14 @@ struct Index {
    * Lookup what the best known Type for a class constant would be,
    * using a given Index and Context, if a class of that name were
    * loaded.
+   * If allow_tconst is not set, type constants will not be returned.
+   * lookup_class_const_ptr version returns the statically known version
+   * of the const if it can find it, otherwise returns nullptr.
    */
-  Type lookup_class_constant(Context, res::Class, SString cns) const;
+  Type lookup_class_constant(Context, res::Class, SString cns,
+                             bool allow_tconst) const;
+  const php::Const* lookup_class_const_ptr(Context, res::Class, SString cns,
+                                           bool allow_tconst) const;
 
   /*
    * Lookup what the best known Type for a constant would be, using a

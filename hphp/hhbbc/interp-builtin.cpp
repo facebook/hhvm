@@ -310,6 +310,42 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   always_assert(false);
 }
 
+bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
+  auto const fail = [&] {
+    unreachable(env);
+    popT(env);
+    popT(env);
+    push(env, TBottom);
+    return true;
+  };
+  if (op.arg1 != 2) return false;
+  auto const cns_name = tv(topT(env));
+  auto const cls_or_obj = tv(topT(env, 1));
+  if (!cns_name || !cls_or_obj || !tvIsString(&*cns_name)) return false;
+  auto const cns_sd = cns_name->m_data.pstr;
+  if (tvIsString(&*cls_or_obj)) {
+    auto const rcls = env.index.resolve_class(env.ctx, cls_or_obj->m_data.pstr);
+    if (!rcls || !rcls->resolved()) return false;
+    auto const cnst =
+      env.index.lookup_class_const_ptr(env.ctx, *rcls, cns_sd, true);
+    if (!cnst || !cnst->val || !cnst->isTypeconst) {
+      // Either the const does not exist, it is abstract or is not a type const
+      return fail();
+    }
+    auto const typeCns = cnst->val;
+    if (!tvIsDictOrDArray(&*typeCns)) return false;
+    auto const ts = resolveTSStatically(env, typeCns->m_data.parr, true);
+    if (!ts) return false;
+    reduce(env, bc::PopC {}, bc::PopC {});
+    RuntimeOption::EvalHackArrDVArrs
+      ? reduce(env, bc::Dict { *ts }) : reduce(env, bc::Array { *ts });
+    return true;
+  } else if (!tvIsObject(&*cls_or_obj) && !tvIsClass(&*cls_or_obj)) {
+    return fail();
+  }
+  return false;
+}
+
 #define SPECIAL_BUILTINS                                                \
   X(abs, abs)                                                           \
   X(ceil, ceil)                                                         \
@@ -327,6 +363,7 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   X(class_alias, class_alias)                                           \
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_list_like, HH\\is_list_like)                                     \
+  X(type_structure, HH\\type_structure)                                 \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

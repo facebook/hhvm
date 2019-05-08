@@ -4726,17 +4726,19 @@ bool Index::any_interceptable_functions() const {
   return m_data->any_interceptable_functions;
 }
 
-Type Index::lookup_class_constant(Context ctx,
-                                  res::Class rcls,
-                                  SString cnsName) const {
-  if (rcls.val.left()) return TInitCell;
+const php::Const* Index::lookup_class_const_ptr(Context ctx,
+                                                res::Class rcls,
+                                                SString cnsName,
+                                                bool allow_tconst) const {
+  if (rcls.val.left()) return nullptr;
   auto const cinfo = rcls.val.right();
 
   auto const it = cinfo->clsConstants.find(cnsName);
   if (it != end(cinfo->clsConstants)) {
-    if (!it->second->val.hasValue() || it->second->isTypeconst) {
+    if (!it->second->val.hasValue() ||
+        (!allow_tconst && it->second->isTypeconst)) {
       // This is an abstract class constant or typeconstant
-      return TInitCell;
+      return nullptr;
     }
     if (it->second->val.value().m_type == KindOfUninit) {
       // This is a class constant that needs an 86cinit to run.
@@ -4745,11 +4747,20 @@ Type Index::lookup_class_constant(Context ctx,
       auto const cinit = it->second->cls->methods.back().get();
       assert(cinit->name == s_86cinit.get());
       add_dependency(*m_data, cinit, ctx, Dep::ClsConst);
-      return TInitCell;
+      return nullptr;
     }
-    return from_cell(it->second->val.value());
+    return it->second;
   }
-  return TInitCell;
+  return nullptr;
+}
+
+Type Index::lookup_class_constant(Context ctx,
+                                  res::Class rcls,
+                                  SString cnsName,
+                                  bool allow_tconst) const {
+  auto const cnst = lookup_class_const_ptr(ctx, rcls, cnsName, allow_tconst);
+  if (!cnst) return TInitCell;
+  return from_cell(cnst->val.value());
 }
 
 folly::Optional<Type> Index::lookup_constant(Context ctx,

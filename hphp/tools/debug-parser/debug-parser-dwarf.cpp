@@ -1191,6 +1191,7 @@ Object TypeParserImpl::genObject(Dwarf_Die die,
 
   folly::Optional<std::size_t> size;
   bool incomplete = false;
+  folly::Optional<GlobalOff> definition_offset;
 
   m_dwarf.forEachAttribute(
     die,
@@ -1202,12 +1203,22 @@ Object TypeParserImpl::genObject(Dwarf_Die die,
         case DW_AT_declaration:
           incomplete = m_dwarf.getAttributeValueFlag(attr);
           break;
+        case DW_AT_signature:
+          definition_offset = m_dwarf.getAttributeValueRef(attr);
+          break;
         default:
           break;
       }
       return true;
     }
   );
+
+  if (definition_offset) {
+    return m_dwarf.onDIEAtOffset(
+      *definition_offset,
+      [&](Dwarf_Die die2) { return genObject(die2, name, key); }
+    );
+  }
 
   // No size was provided. This is expected for incomplete types or the strange
   // "other" types sometimes seen, but an error otherwise.

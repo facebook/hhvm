@@ -7,6 +7,7 @@
  *
 *)
 
+open Core_kernel
 open Hh_core
 module SS = SearchUtils
 module SUtils = SearchUtils
@@ -61,6 +62,7 @@ let re_colon_colon = Str.regexp "::"
 
 let go workers query type_
   : SearchUtils.result =
+  let max_results = 100 in
   let start_time = Unix.gettimeofday () in
   let fuzzy = SymbolIndex.fuzzy_search_enabled () in
   let results =
@@ -69,15 +71,27 @@ let go workers query type_
     | [class_name_query; method_query] ->
       (* Get the class with the most similar name to `class_name_query` *)
       let class_ =
-        SymbolIndex.query_for_symbol_search ~fuzzy workers class_name_query type_
-        |> List.find ~f:begin fun result ->
-          match result with
-          | SearchUtils.{result_type = SearchUtils.Class _; _} -> true
-          | _ -> false
-        end
+
+        (* Switch between old behavior and new *)
+        match SymbolIndex.get_search_provider () with
+        | SearchUtils.TrieIndex ->
+          SymbolIndex.query_for_symbol_search ~fuzzy workers class_name_query type_
+          |> List.find ~f:begin fun result ->
+            match result with
+            | SearchUtils.{result_type = SearchUtils.Class _; _} -> true
+            | _ -> false
+          end
+          |> Option.map ~f:(fun s -> s.SearchUtils.name)
+        | _ ->
+          SymbolIndex.find_matching_symbols
+            ~query_text:class_name_query
+            ~max_results:1
+            ~kind_filter:(Some SearchUtils.SI_Class)
+          |> List.hd
+          |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
       in
       begin match class_ with
-      | Some SearchUtils.{name; _} ->
+      | Some name ->
         ClassMethodSearch.query_class_methods name method_query
       | None ->
         (* When we can't find a class with a name similar to the given one,
@@ -85,13 +99,24 @@ let go workers query type_
         []
       end
     | _  ->
-      let temp_results = SymbolIndex.query_for_symbol_search ~fuzzy workers query type_ in
-      List.map temp_results SearchUtils.to_absolute
+
+      (* Switch between old behavior and new *)
+      match SymbolIndex.get_search_provider () with
+      | SearchUtils.TrieIndex ->
+        let temp_results = SymbolIndex.query_for_symbol_search ~fuzzy workers query type_ in
+        List.map temp_results SearchUtils.to_absolute
+      | _ ->
+        let temp_results = SymbolIndex.find_matching_symbols
+          ~query_text:query
+          ~max_results
+          ~kind_filter:None
+        in
+        AutocompleteService.add_position_to_results temp_results
   in
   SymbolIndex.log_symbol_index_search
     ~start_time
     ~query_text:query
-    ~max_results:0
+    ~max_results
     ~kind_filter:None
     ~results:(List.length results)
     ~context:None

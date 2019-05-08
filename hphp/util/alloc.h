@@ -109,6 +109,8 @@ struct PageSpec {
 void setup_local_arenas(PageSpec);
 unsigned get_local_arena(uint32_t node);
 
+void setup_arena0(PageSpec);
+
 void mallctl_epoch();
 size_t mallctl_pactive(unsigned arenaId);
 

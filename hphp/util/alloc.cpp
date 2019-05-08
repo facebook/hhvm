@@ -425,6 +425,29 @@ void setup_high_arena(unsigned n1GPages) {
   high_cold_arena_flags = MALLOCX_ARENA(high_cold_arena) | MALLOCX_TCACHE_NONE;
 }
 
+void setup_arena0(PageSpec s) {
+  size_t size = size1g * s.n1GPages + size2m * s.n2MPages;
+  if (size == 0) return;
+  // Give arena 0 some huge pages, starting at 2TB.
+  auto ret = mmap(reinterpret_cast<void*>(kArena0Base),
+                  size + size1g, PROT_NONE,
+                  MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
+                  -1, 0);
+  auto base = reinterpret_cast<uintptr_t>(ret);
+  if (auto r = base % size1g) {         // align to 1G boundary
+    base = base + size1g - r;
+  }
+  assertx(base % size1g == 0);
+
+  auto a0 = PreMappedArena::AttachTo(low_malloc(sizeof(PreMappedArena)), 0,
+                                     base, base + size, Reserved{});
+  auto mapper = getMapperChain(*a0, s.n1GPages,
+                               s.n2MPages, s.n2MPages,
+                               false,
+                               numa_node_set, 0);
+  a0->setLowMapper(mapper);
+}
+
 // Set up extra arenas for use in non-VM threads, when we have short bursts of
 // worker threads running, e.g., during deserialization of profile data.
 static std::vector<std::pair<std::vector<DefaultArena*>,
@@ -603,8 +626,6 @@ void setup_local_arenas(PageSpec spec) {
 
   s_req_heap_arenas.resize(num_numa_nodes(), 0);
   for (unsigned i = 0; i < num_numa_nodes(); ++i) {
-    constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
-    constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
     static_assert(kLocalArenaMinAddr % size1g == 0, "");
     auto const desiredBase = kLocalArenaMinAddr + i * kLocalArenaSizeLimit;
     // Try to get the desired address range, but don't use MAP_FIXED.

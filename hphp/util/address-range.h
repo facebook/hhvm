@@ -23,12 +23,14 @@
 
 namespace HPHP {
 
-// Address ranges for managed arenas. Low arena is in [1G, 4G), and high arena
-// in [4G, kUncountedMaxAddr) at most. LOW_PTR builds won't work if low arena
-// overflows. High arena overflow would result in a crash, so size it large
-// enough to make sure we run out of memory before it overflows. These constants
-// are only meaningful when addr_encodes_persistency is true. We make them
-// available for all modes to avoid having ifdefs everywhere.
+// Address ranges for managed arenas.
+
+// Low arenas are in [1G, 4G), and high arena are in [4G, kUncountedMaxAddr).
+// LOW_PTR builds won't work if low arena overflows. High arena overflow would
+// result in a crash, so size it large enough to make sure we run out of memory
+// before it overflows. These constants are only meaningful when
+// addr_encodes_persistency is true. We make them available for all modes to
+// avoid having ifdefs everywhere.
 constexpr uintptr_t kLowArenaMinAddr = 1ull << 30;
 constexpr uintptr_t kLowArenaMaxAddr = 1ull << 32;
 constexpr unsigned kUncountedMaxShift = 38;
@@ -36,6 +38,12 @@ constexpr uintptr_t kUncountedMaxAddr = 1ull << kUncountedMaxShift;
 constexpr uintptr_t kHighArenaMaxAddr = kUncountedMaxAddr;
 constexpr size_t kLowArenaMaxCap = kLowArenaMaxAddr - kLowArenaMinAddr;
 constexpr size_t kHighArenaMaxCap = kHighArenaMaxAddr - kLowArenaMaxAddr;
+
+// Areans for request heap starts at kLocalArenaMinAddr.
+constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
+constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
+// Extra pages for Arena 0
+constexpr uintptr_t kArena0Base = 2ull << 40;
 
 #if USE_JEMALLOC_EXTENT_HOOKS
 

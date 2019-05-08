@@ -557,7 +557,7 @@ inline SSATmp* unbox(IRGS& env, SSATmp* val, Block* exit) {
 // Other common helpers
 
 inline bool classIsUnique(const Class* cls) {
-  return cls && (cls->attrs() & AttrUnique);
+  return cls && cls->isUnique();
 }
 
 inline bool classIsUniqueNormalClass(const Class* cls) {

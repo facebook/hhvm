@@ -40,10 +40,10 @@ const Func* lookupDirectFunc(SrcKey const sk,
   if (clsName && !clsName->empty()) {
     auto const cls = Unit::lookupUniqueClassInContext(clsName,
                                                       sk.func()->cls());
-    bool magic = false;
+    if (!cls || isInterface(cls)) return nullptr;
     auto const func = isStatic
       ? lookupImmutableClsMethod(cls, fname, sk.func(), isExact)
-      : lookupImmutableObjMethod(cls, fname, magic, sk.func(), isExact);
+      : lookupImmutableObjMethod(cls, fname, sk.func(), isExact).func;
     if (func &&
         !isExact &&
         !func->isImmutableFrom(cls) &&

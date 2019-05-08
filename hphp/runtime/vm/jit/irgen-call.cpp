@@ -104,39 +104,11 @@ void fpushObjMethodUnknown(
       sp(env));
 }
 
-/*
- * Looks for a Func named methodName in iface, or any of the interfaces it
- * implements. returns nullptr if none was found, or if its interface's
- * vtableSlot is kInvalidSlot.
- */
-const Func* findInterfaceMethod(const Class* iface,
-                                const StringData* methodName) {
-
-  auto checkOneInterface = [methodName](const Class* i) -> const Func* {
-    if (i->preClass()->ifaceVtableSlot() == kInvalidSlot) return nullptr;
-
-    const Func* func = i->lookupMethod(methodName);
-    always_assert(!func || func->cls() == i);
-    return func;
-  };
-
-  if (auto const func = checkOneInterface(iface)) return func;
-
-  for (auto pface : iface->allInterfaces().range()) {
-    if (auto const func = checkOneInterface(pface)) {
-      return func;
-    }
-  }
-
-  return nullptr;
-}
-
 SSATmp* lookupObjMethodExactFunc(
   IRGS& env,
   SSATmp* obj,
   const Class* exactClass,
   const Func* func,
-  const StringData* methodName,
   SSATmp*& objOrCls
 ) {
   /*
@@ -163,15 +135,6 @@ SSATmp* lookupObjMethodExactFunc(
   return cns(env, func);
 }
 
-const Func*
-lookupInterfaceFuncForFPushObjMethod(IRGS& /*env*/, const Class* baseClass,
-                                     const StringData* methodName) {
-  if (!baseClass) return nullptr;
-  if (!classIsUniqueInterface(baseClass)) return nullptr;
-
-  return findInterfaceMethod(baseClass, methodName);
-}
-
 SSATmp* lookupObjMethodInterfaceFunc(
   IRGS& env,
   SSATmp* obj,
@@ -195,7 +158,6 @@ SSATmp* lookupObjMethodInterfaceFunc(
 }
 
 SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
-                                    const Class* /*baseClass*/,
                                     const Func* func,
                                     SSATmp*& objOrCls) {
   implIncStat(env, Stats::ObjMethod_methodslot);
@@ -224,27 +186,25 @@ SSATmp* lookupObjMethodWithBaseClass(
   SSATmp*& objOrCls,
   bool& magicCall
 ) {
-  magicCall = false;
-  if (auto const func = lookupImmutableObjMethod(
-        baseClass, methodName, magicCall, curFunc(env), exactClass)) {
-    if (exactClass ||
-        func->attrs() & AttrPrivate ||
-        func->isImmutableFrom(baseClass)) {
-      return lookupObjMethodExactFunc(env, obj,
-                                      exactClass ? baseClass : nullptr,
-                                      func,
-                                      magicCall ? methodName : nullptr,
-                                      objOrCls);
-    }
-    return lookupObjMethodNonExactFunc(env, obj, baseClass, func, objOrCls);
+  if (!baseClass) return nullptr;
+  auto const lookup = lookupImmutableObjMethod(
+    baseClass, methodName, curFunc(env), exactClass);
+  switch (lookup.type) {
+    case ImmutableObjMethodLookup::Type::NotFound:
+      return nullptr;
+    case ImmutableObjMethodLookup::Type::MagicFunc:
+      magicCall = true;
+      // fallthru
+    case ImmutableObjMethodLookup::Type::Func:
+      return lookupObjMethodExactFunc(
+        env, obj, exactClass ? baseClass : nullptr, lookup.func, objOrCls);
+    case ImmutableObjMethodLookup::Type::Class:
+      return lookupObjMethodNonExactFunc(env, obj, lookup.func, objOrCls);
+    case ImmutableObjMethodLookup::Type::Interface:
+      return lookupObjMethodInterfaceFunc(env, obj, lookup.func, objOrCls);
   }
 
-  if (auto const func =
-      lookupInterfaceFuncForFPushObjMethod(env, baseClass, methodName)) {
-    return lookupObjMethodInterfaceFunc(env, obj, func, objOrCls);
-  }
-
-  return nullptr;
+  not_reached();
 }
 
 void fpushObjMethodWithBaseClass(

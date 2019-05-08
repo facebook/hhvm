@@ -51,13 +51,15 @@ LookupResult lookupObjMethod(const Func*& f,
 
 /*
  * This routine attempts to find the Func* that will be called for an object
- * of a given target Class and a function name, when called from ctxFunc.
+ * of a given target Class (which may be an interface) and a function name,
+ * when called from ctxFunc.
  *
  * If exactClass is true, the class we are targeting is assumed to be
  * exactly `cls', and the returned Func* is definitely the one called.
  *
  * If exactClass is false, the class we are targeting may be a subclass of
- * `cls`, and the returned Func* may be overridden in a subclass.
+ * `cls` or a class implementing `cls`, and the returned Func* may be
+ * overridden in a subclass.
  *
  * The returned Func* may be used in a request-insensitive way, i.e. it is
  * suitable for burning into the TC as a pointer.
@@ -65,11 +67,24 @@ LookupResult lookupObjMethod(const Func*& f,
  * It's the caller's responsibility to ensure that the Class* is usable -
  * is AttrUnique, an instance of the ctx or guarded in some way.
  *
- * Returns nullptr if we can't determine the Func*.
+ * Returns (NotFound, nullptr) if we can't determine the Func*.
  */
-const Func* lookupImmutableObjMethod(const Class* cls, const StringData* name,
-                                    bool& magicCall, const Func* ctxFunc,
-                                    bool exactClass);
+struct ImmutableObjMethodLookup {
+  enum class Type {
+    NotFound,   // unable to determine suitable Func*
+    Func,       // the called func is returned
+    MagicFunc,  // call redirected to the returned magic func
+    Class,      // the called func may override the returned base class func
+    Interface,  // the called func implements the returned interface func
+  };
+
+  Type type;
+  const Func* func;
+};
+
+ImmutableObjMethodLookup
+lookupImmutableObjMethod(const Class* cls, const StringData* name,
+                         const Func* ctxFunc, bool exactClass);
 
 LookupResult lookupClsMethod(const Func*& f,
                              const Class* cls,

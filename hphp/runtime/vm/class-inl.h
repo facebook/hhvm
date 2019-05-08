@@ -168,6 +168,10 @@ inline void Class::initRTAttributes(uint8_t a) {
   m_RTAttrs |= a;
 }
 
+inline bool Class::isUnique() const {
+  return attrs() & AttrUnique;
+}
+
 inline bool Class::isPersistent() const {
   return attrs() & AttrPersistent;
 }

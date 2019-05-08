@@ -474,6 +474,14 @@ public:
   void initRTAttributes(uint8_t);
 
   /*
+   * Whether this class is uniquely named across the codebase.
+   *
+   * It's legal in PHP to define multiple classes in different pseudomains
+   * with the same name, so long as both are not required in the same request.
+   */
+  bool isUnique() const;
+
+  /*
    * Whether we can load this class once and persist it across requests.
    *
    * Persistence is possible when a Class is uniquely named and is defined in a
@@ -483,6 +491,7 @@ public:
    * if we had to allocate its RDS handle before we loaded the class.
    *
    * @see: classHasPersistentRDS()
+   * @implies: isUnique()
    */
   bool isPersistent() const;
 

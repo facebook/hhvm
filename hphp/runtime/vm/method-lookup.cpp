@@ -29,8 +29,39 @@
 
 namespace HPHP {
 
+namespace {
+
 const StaticString s___construct("__construct");
 const StaticString s___call("__call");
+
+/*
+ * Looks for a Func named methodName in iface, or any of the interfaces it
+ * implements. returns nullptr if none was found, or if its interface's
+ * vtableSlot is kInvalidSlot.
+ */
+const Func* findInterfaceMethod(const Class* iface,
+                                const StringData* methodName) {
+
+  auto checkOneInterface = [methodName](const Class* i) -> const Func* {
+    if (i->preClass()->ifaceVtableSlot() == kInvalidSlot) return nullptr;
+
+    const Func* func = i->lookupMethod(methodName);
+    always_assert(!func || func->cls() == i);
+    return func;
+  };
+
+  if (auto const func = checkOneInterface(iface)) return func;
+
+  for (auto pface : iface->allInterfaces().range()) {
+    if (auto const func = checkOneInterface(pface)) {
+      return func;
+    }
+  }
+
+  return nullptr;
+}
+
+} // namespace
 
 // Look up the method specified by methodName from the class specified by cls
 // and enforce accessibility. Accessibility checks depend on the relationship
@@ -195,26 +226,42 @@ LookupResult lookupObjMethod(const Func*& f,
   return LookupResult::MethodFoundWithThis;
 }
 
-const Func* lookupImmutableObjMethod(const Class* cls, const StringData* name,
-                                    bool& magicCall, const Func* ctxFunc,
-                                    bool exactClass) {
-  if (!cls) return nullptr;
-  if (cls->attrs() & AttrInterface) return nullptr;
-  auto ctx = ctxFunc->cls();
+ImmutableObjMethodLookup
+lookupImmutableObjMethod(const Class* cls, const StringData* name,
+                         const Func* ctxFunc, bool exactClass) {
+  auto constexpr notFound = ImmutableObjMethodLookup {
+    ImmutableObjMethodLookup::Type::NotFound,
+    nullptr
+  };
+  exactClass |= cls->attrs() & AttrNoOverride;
+
+  if (isInterface(cls)) {
+    if (!cls->isUnique()) return notFound;
+    if (auto const func = findInterfaceMethod(cls, name)) {
+      return { ImmutableObjMethodLookup::Type::Interface, func };
+    }
+    return notFound;
+  }
+
   const Func* func;
-  LookupResult res = lookupObjMethod(func, cls, name, ctx, false);
-  if (res == LookupResult::MethodNotFound) return nullptr;
-  if (func->isAbstract() && exactClass) return nullptr;
+  LookupResult res = lookupObjMethod(func, cls, name, ctxFunc->cls(), false);
+  if (res == LookupResult::MethodNotFound) return notFound;
+  if (func->isAbstract() && exactClass) return notFound;
 
   assertx(res == LookupResult::MethodFoundWithThis ||
           res == LookupResult::MethodFoundNoThis ||
           res == LookupResult::MagicCallFound);
 
-  magicCall = res == LookupResult::MagicCallFound;
-  if (magicCall && !exactClass && !(cls->attrs() & AttrNoOverride)) {
-    return nullptr;
+  if (res == LookupResult::MagicCallFound) {
+    if (exactClass) return { ImmutableObjMethodLookup::Type::MagicFunc, func };
+    return notFound;
   }
-  return func;
+
+  if (exactClass || func->attrs() & AttrPrivate || func->isImmutableFrom(cls)) {
+    return { ImmutableObjMethodLookup::Type::Func, func };
+  }
+
+  return { ImmutableObjMethodLookup::Type::Class, func };
 }
 
 LookupResult lookupClsMethod(const Func*& f,

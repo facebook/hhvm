@@ -16,7 +16,7 @@ pub mod lexable_trivia;
 pub mod syntax;
 mod syntax_generated;
 pub mod syntax_kind;
-pub mod syntax_type;
+mod syntax_type;
 
 pub mod syntax_error;
 
@@ -25,6 +25,8 @@ pub mod operator;
 pub mod parser;
 pub mod parser_env;
 
+pub mod coroutine_smart_constructors;
+mod coroutine_smart_constructors_generated;
 pub mod decl_mode_smart_constructors;
 mod decl_mode_smart_constructors_generated;
 pub mod flatten_smart_constructors;

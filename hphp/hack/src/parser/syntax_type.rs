@@ -20,12 +20,6 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-pub trait SyntaxTypeBase<T, V> {
-    fn make_missing(offset: usize) -> Self;
-    fn make_token(arg: T) -> Self;
-    fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self where Self : Sized;
-}
-
 pub trait SyntaxType<T, V> : SyntaxTypeBase<T, V>
 where
     T: LexableToken,
@@ -217,6 +211,6 @@ where
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
     ) -> U;
+
     fn kind(&self) -> SyntaxKind;
 }
-  

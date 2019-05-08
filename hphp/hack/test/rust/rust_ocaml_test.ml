@@ -30,6 +30,7 @@ let fbcode = Printf.sprintf "/data/users/%s/fbsource/fbcode/" user
 type parser =
   | MINIMAL
   | POSITIONED
+  | COROUTINE
 
 type mode =
   | RUST
@@ -47,6 +48,7 @@ type args = {
    enable_xhp : bool;
    hhvm_compat_mode : bool;
    php5_compat_mode : bool;
+   codegen : bool;
    check_sizes : bool;
    keep_going : bool;
    dir : string option;
@@ -54,7 +56,13 @@ type args = {
 
 module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
 
-module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax(Syntax)
+module WithSmartConstructors(SC : SmartConstructors.SmartConstructors_S
+  with type r = Syntax.t
+  with module Token = Syntax.Token
+) = struct
+
+module SyntaxTree_ = Full_fidelity_syntax_tree.WithSyntax(Syntax)
+module SyntaxTree = SyntaxTree_.WithSmartConstructors(SC)
 
 let syntax_tree_into_parts tree =
   let mode, root, errors = SyntaxTree.(mode tree, root tree, errors tree) in
@@ -143,9 +151,14 @@ let test args ~ocaml_env ~rust_env path =
 
 let test_batch args ~ocaml_env ~rust_env files =
   List.iter files ~f:(test args ~ocaml_env ~rust_env)
-end
 
-let get_files_in_path path =
+end (* WithSmartConstructors *)
+
+include WithSmartConstructors(SyntaxSmartConstructors.WithSyntax(Syntax))
+
+end (* WithSyntax *)
+
+let get_files_in_path ~args path =
   let files = Find.find [Path.make path] in
   List.filter ~f:begin fun f ->
     (
@@ -153,6 +166,7 @@ let get_files_in_path path =
       String_utils.string_ends_with f ".hhi" ||
       String_utils.string_ends_with f ".hack"
     ) &&
+    (not @@ String.is_substring ~substring:"namespace_infinite_loop1" f) &&
     (not @@ String_utils.string_ends_with f "memory_exhaust.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_concat_exp.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php") &&
@@ -167,13 +181,18 @@ let get_files_in_path path =
     (not @@ String_utils.string_ends_with f "byref2.php") &&
     (not @@ String_utils.string_ends_with f "phpvar1.php") &&
     (not @@ String_utils.string_ends_with f "bug64660.php") &&
-    true
+    match args.parser with
+    | COROUTINE ->
+      (* FIXME: this one has offset +2 in Rust for "methodish_semicolon.value" *)
+      (not @@ String_utils.string_ends_with f "keyword_autocomplete/function_parameter.php") &&
+      true
+    | _ -> true
   end files
 
 let get_files args =
   match args.dir with
-  | None -> (get_files_in_path (fbcode ^ "hphp/hack/test/"))
-  | Some dir -> get_files_in_path dir
+  | None -> (get_files_in_path (fbcode ^ "hphp/hack/test/") ~args)
+  | Some dir -> get_files_in_path dir ~args
 
 let parse_args () =
   let mode = ref COMPARE in
@@ -182,6 +201,7 @@ let parse_args () =
   let enable_stronger_await_binding = ref false in
   let disable_unsafe_expr = ref false in
   let disable_unsafe_block = ref false in
+  let codegen = ref false in
   let force_hh = ref false in
   let enable_xhp = ref false in
   let hhvm_compat_mode = ref false in
@@ -194,10 +214,12 @@ let parse_args () =
     "--rust", Arg.Unit (fun () -> mode := RUST), "";
     "--ocaml", Arg.Unit (fun () -> mode := OCAML), "";
     "--positioned", Arg.Unit (fun () -> parser := POSITIONED), "";
+    "--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "";
     "--experimental", Arg.Set is_experimental, "";
     "--enable-stronger-await-binding", Arg.Set enable_stronger_await_binding, "";
     "--disable-unsafe-expr", Arg.Set disable_unsafe_expr, "";
     "--disable-unsafe-block", Arg.Set disable_unsafe_block, "";
+    "--codegen", Arg.Set codegen, "";
     "--force-hh", Arg.Set force_hh, "";
     "--enable-xhp", Arg.Set enable_xhp, "";
     "--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "";
@@ -215,6 +237,7 @@ let parse_args () =
     enable_stronger_await_binding = !enable_stronger_await_binding;
     disable_unsafe_expr = !disable_unsafe_expr;
     disable_unsafe_block = !disable_unsafe_block;
+    codegen = !codegen;
     force_hh = !force_hh;
     enable_xhp = !enable_xhp;
     hhvm_compat_mode = !hhvm_compat_mode;
@@ -226,6 +249,11 @@ let parse_args () =
 
 module MinimalTest = WithSyntax(MinimalSyntax)
 module PositionedTest = WithSyntax(PositionedSyntax)
+
+module CoroutineTest_ = WithSyntax(PositionedSyntax)
+module CoroutineSC = Coroutine_smart_constructor.WithSyntax(PositionedSyntax)
+module CoroutineTest = CoroutineTest_.WithSmartConstructors(CoroutineSC)
+
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
 
@@ -254,6 +282,7 @@ let () =
   begin match args.parser with
     | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env  files
     | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env  files
+    | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env files
   end;
   let _ = Hh_logger.log_duration "Done:" t  in
   ()

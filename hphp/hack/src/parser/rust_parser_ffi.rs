@@ -25,11 +25,22 @@ use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
 
 use parser::positioned_smart_constructors::*;
 use parser::parser::Parser;
-use parser::smart_constructors::NoState;
+use parser::smart_constructors::{NoState, StateType};
 use parser::smart_constructors_wrappers::WithKind;
 
 type PositionedSyntaxParser<'a> =
     Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
+
+use parser::positioned_syntax::{PositionedSyntax, PositionedValue};
+use parser::positioned_token::PositionedToken;
+
+use parser::coroutine_smart_constructors::CoroutineSmartConstructors;
+use parser::coroutine_smart_constructors::State as CoroutineState;
+
+type CoroutineParser<'a> =
+    Parser<'a, WithKind<CoroutineSmartConstructors<PositionedSyntax, PositionedToken, PositionedValue>>,
+    <CoroutineState<PositionedSyntax> as StateType<'a, PositionedSyntax>>::T>;
+
 
 extern "C" {
     fn ocamlpool_enter();
@@ -66,6 +77,7 @@ macro_rules! parse {
             let enable_xhp = bool_field(&opts, 5);
             let hhvm_compat_mode = bool_field(&opts, 6);
             let php5_compat_mode = bool_field(&opts, 7);
+            let codegen = bool_field(&opts, 8);
 
             let env = ParserEnv {
                 is_experimental_mode,
@@ -76,6 +88,7 @@ macro_rules! parse {
                 enable_xhp,
                 hhvm_compat_mode,
                 php5_compat_mode,
+                codegen,
             };
             let mut parser = $parser::make(&source_text, env);
             let root = parser.parse_script();
@@ -100,6 +113,7 @@ macro_rules! parse {
 
 parse!(parse_minimal, MinimalSyntaxParser);
 parse!(parse_positioned, PositionedSyntaxParser);
+parse!(parse_positioned_with_coroutine_sc, CoroutineParser);
 
 caml!(rust_parse_mode, |ocaml_source_text|, <l>, {
     let relative_path = block_field(&ocaml_source_text, 0);

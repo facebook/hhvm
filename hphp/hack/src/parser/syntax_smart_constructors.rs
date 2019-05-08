@@ -20,8 +20,7 @@ use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors, StateType};
 use crate::source_text::SourceText;
-use crate::syntax::SyntaxValueType;
-use crate::syntax_type::*;
+use crate::syntax::*;
 
 pub trait SyntaxSmartConstructors<'a, S: SyntaxType<Token, Value>, Token, Value, State = NoState>:
     SmartConstructors<'a, State::T, R=S, Token=Token>

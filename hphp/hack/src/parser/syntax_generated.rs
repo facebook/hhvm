@@ -19,7 +19,6 @@
 use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
-use crate::syntax_type::SyntaxType;
 
 impl<T, V> SyntaxType<T, V> for Syntax<T, V>
 where

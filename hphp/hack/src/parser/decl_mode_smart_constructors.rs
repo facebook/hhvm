@@ -10,9 +10,8 @@ use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::StateType;
 use crate::source_text::SourceText;
-use crate::syntax::{CompoundStatementChildren, Syntax, SyntaxValueType, SyntaxVariant};
+use crate::syntax::*;
 use crate::syntax_smart_constructors::SyntaxSmartConstructors;
-use crate::syntax_type::*;
 use crate::token_kind::TokenKind;
 
 pub struct State<S> {

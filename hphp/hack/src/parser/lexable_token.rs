@@ -17,6 +17,9 @@ pub trait LexableToken: Clone {
         trailing: Vec<Self::Trivia>,
     ) -> Self;
     fn kind(&self) -> TokenKind;
+
+    /// Returns the leading offset if meaningful
+    /// (note: each implementor will either always return Some(offset) or always return None).
     fn leading_start_offset(&self) -> Option<usize>;
 
     fn width(&self) -> usize;

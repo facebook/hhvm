@@ -6,9 +6,8 @@
 
 use crate::lexable_token::LexableToken;
 use crate::minimal_token::MinimalToken;
-use crate::syntax::{Syntax, SyntaxValueType, SyntaxVariant};
+use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
-use crate::syntax_type::SyntaxType;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MinimalValue {
@@ -39,6 +38,10 @@ impl SyntaxValueType<MinimalToken> for MinimalValue {
         Self {
             full_width: token.full_width(),
         }
+    }
+
+    fn text_range(&self) -> Option<(usize, usize)> {
+        None
     }
 }
 

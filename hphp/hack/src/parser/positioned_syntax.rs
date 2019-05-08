@@ -8,9 +8,8 @@ use std::rc::Rc;
 
 use crate::lexable_token::LexableToken;
 use crate::positioned_token::PositionedToken;
-use crate::syntax::{Syntax, SyntaxValueType, SyntaxVariant};
+use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
-use crate::syntax_type::SyntaxType;
 use crate::token_kind::TokenKind;
 
 #[derive(Debug, Clone)]
@@ -35,6 +34,16 @@ impl PositionedValue {
                 (right.end_offset() - left.start_offset()) + 1
             }
             PositionedValue::Missing { .. } => 0,
+        }
+    }
+
+    fn start_offset(&self) -> usize {
+        use PositionedValue::*;
+        match &self {
+            TokenValue(t) | TokenSpan { left: t, .. } => t
+                .leading_start_offset()
+                .expect("invariant violation for Positioned Syntax"),
+            Missing { offset, .. } => *offset,
         }
     }
 
@@ -145,6 +154,11 @@ impl SyntaxValueType<PositionedToken> for PositionedValue {
         } else {
             PositionedValue::TokenValue(PositionedToken::clone_rc(token))
         }
+    }
+
+    fn text_range(&self) -> Option<(usize, usize)> {
+        let beg = self.start_offset();
+        Some((beg, beg + self.width()))
     }
 }
 

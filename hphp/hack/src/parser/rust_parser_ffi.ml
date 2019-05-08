@@ -22,7 +22,8 @@ type parser_opts = (
   bool * (* force_hh *)
   bool * (* enable_xhp *)
   bool * (* hhvm_compat_mode *)
-  bool   (* php5_compat_mode *)
+  bool * (* php5_compat_mode *)
+  bool   (* codegen *)
 )
 let env_to_opts env = (
   (Env.is_experimental_mode env),
@@ -32,7 +33,8 @@ let env_to_opts env = (
   (Env.force_hh env),
   (Env.enable_xhp env),
   (Env.hhvm_compat_mode env),
-  (Env.php5_compat_mode env)
+  (Env.php5_compat_mode env),
+  (Env.codegen env)
 )
 let set_global_lexer_env env =
   (* Parsing of file sets up global variables in lexer module. Those variables
@@ -74,10 +76,14 @@ let parse_positioned_with_decl_mode_sc text env =
   (* TODO(leoo) *)
   [], root, errors
 
+external parse_positioned_with_coroutine_sc:
+   SourceText.t ->
+   parser_opts ->
+   bool * PositionedSyntax.t * SyntaxError.t list = "parse_positioned_with_coroutine_sc"
+
 let parse_positioned_with_coroutine_sc text env =
-  let (), root, errors = parse_positioned text env in
-  (* TODO(leoo) *)
-  false, root, errors
+  set_global_lexer_env env;
+  parse_positioned_with_coroutine_sc text (env_to_opts env)
 
 let init () =
   Full_fidelity_minimal_syntax.rust_parse_ref := parse_minimal;

@@ -22,11 +22,9 @@ use parser::minimal_trivia::MinimalTrivia;
 use parser::positioned_syntax::PositionedValue;
 use parser::positioned_token::PositionedToken;
 use parser::positioned_trivia::PositionedTrivia;
-use parser::syntax::SyntaxVariant;
-use parser::syntax::{Syntax, SyntaxValueType};
+use parser::syntax::*;
 use parser::syntax_error::SyntaxError;
 use parser::syntax_kind::SyntaxKind;
-use parser::syntax_type::SyntaxType;
 use parser::token_kind::TokenKind;
 use parser::trivia_kind::TriviaKind;
 

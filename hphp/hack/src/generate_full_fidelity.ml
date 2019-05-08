@@ -522,7 +522,6 @@ module GenerateFFRustSyntax = struct
 use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
-use crate::syntax_type::SyntaxType;
 
 impl<T, V> SyntaxType<T, V> for Syntax<T, V>
 where
@@ -628,12 +627,6 @@ use crate::lexable_token::LexableToken;
 use crate::syntax::*;
 use crate::syntax_kind::SyntaxKind;
 
-pub trait SyntaxTypeBase<T, V> {
-    fn make_missing(offset: usize) -> Self;
-    fn make_token(arg: T) -> Self;
-    fn make_list(arg: Box<Vec<Self>>, offset: usize) -> Self where Self : Sized;
-}
-
 pub trait SyntaxType<T, V> : SyntaxTypeBase<T, V>
 where
     T: LexableToken,
@@ -646,9 +639,10 @@ SYNTAX_CONSTRUCTORS
         acc: U,
         syntax: &'a SyntaxVariant<T, V>,
     ) -> U;
+
     fn kind(&self) -> SyntaxKind;
 }
-  "
+"
   let full_fidelity_syntax =
   {
     filename = full_fidelity_path_prefix ^ "syntax_type.rs";
@@ -687,7 +681,7 @@ module GenerateFFSyntaxSig = struct
   let full_fidelity_syntax_template : string = (make_header MLStyle "
 * This module contains a signature which can be used to describe the public
 * surface area of a constructable syntax tree.
-  ") ^ "
+") ^ "
 
 module TriviaKind = Full_fidelity_trivia_kind
 module TokenKind = Full_fidelity_token_kind
@@ -1027,6 +1021,73 @@ CONSTRUCTOR_METHODS}
   }
 end (* GenerateFFRustPositionedSmartConstructors *)
 
+module GenerateFFRustCoroutineSmartConstructors = struct
+  let to_constructor_methods x =
+    let args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::R" i)in
+    let args = String.concat ~sep:", " args in
+    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
+    let fwd_args = String.concat ~sep:", " fwd_args in
+    sprintf "    fn make_%s(s: Bool<'a>, %s) -> (Bool<'a>, Self::R) {
+        <Self as SyntaxSmartConstructors<Self::R, Token, Value, State<Self::R>>>::make_%s(s, %s)
+    }\n\n"
+      x.type_name args x.type_name fwd_args
+
+  let coroutine_smart_constructors_template: string = (make_header CStyle "") ^ "
+use crate::coroutine_smart_constructors::*;
+use crate::lexable_token::LexableToken;
+use crate::parser_env::ParserEnv;
+use crate::smart_constructors::SmartConstructors;
+use crate::source_text::SourceText;
+use crate::syntax::*;
+use crate::syntax_smart_constructors::SyntaxSmartConstructors;
+
+impl<'a, S, Token, Value> SmartConstructors<'a, Bool<'a>>
+    for CoroutineSmartConstructors<S, Token, Value>
+where
+    Token: LexableToken,
+    Value: SyntaxValueType<Token>,
+    S: SyntaxType<Token, Value>,
+{
+    type Token = Token;
+    type R = S;
+
+    fn initial_state<'b: 'a>(env: &ParserEnv, src: &'b SourceText<'b>) -> Bool<'a> {
+        <Self as SyntaxSmartConstructors<'a, Self::R, Token, Value, State<Self::R>>>::initial_state(env, src)
+    }
+
+    fn make_missing(s: Bool<'a>, offset: usize) -> (Bool<'a>, Self::R) {
+       <Self as SyntaxSmartConstructors<'a, Self::R, Token, Value, State<Self::R>>>::make_missing(s, offset)
+    }
+
+    fn make_token(s: Bool<'a>, offset: Self::Token) -> (Bool<'a>, Self::R) {
+       <Self as SyntaxSmartConstructors<'a, Self::R, Token, Value, State<Self::R>>>::make_token(s, offset)
+    }
+
+    fn make_list(
+        s: Bool<'a>,
+        lst: Box<Vec<Self::R>>,
+        offset: usize,
+    ) -> (Bool<'a>, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, Self::R, Token, Value, State<Self::R>>>::make_list(s, lst, offset)
+    }
+
+CONSTRUCTOR_METHODS}
+"
+  let coroutine_smart_constructors =
+  {
+    filename = full_fidelity_path_prefix ^ "coroutine_smart_constructors_generated.rs";
+    template = coroutine_smart_constructors_template;
+    transformations = [
+      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+    ];
+    token_no_text_transformations = [];
+    token_given_text_transformations = [];
+    token_variable_text_transformations = [];
+    trivia_transformations = [];
+    aggregate_transformations = [];
+  }
+end (* GenerateFFRustCoroutineSmartConstructors *)
+
 module GenerateFFParserSig = struct
   let to_make_methods x =
     let args = map_and_concat_separated " -> " (fun _ -> "SC.r") x.fields in
@@ -1102,7 +1163,7 @@ module GenerateFFVerifySmartConstructors = struct
       let node = Syntax.make_%s %s in
       node :: rem, node
     | _ -> failwith \"Unexpected stack state\"
-    "
+"
     x.type_name
     (String.concat ~sep:" " params)
     (String.concat ~sep:" :: " (List.rev args))
@@ -1116,7 +1177,7 @@ module GenerateFFVerifySmartConstructors = struct
     (make_header MLStyle "
  * This module contains smart constructors implementation that can be used to
  * build AST.
- ") ^ "
+") ^ "
 
 open Core_kernel
 
@@ -1150,6 +1211,8 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
             )
     in
     List.iter2_exn ~f:equals params args
+
+  let rust_parse _ _ = failwith \"not implemented\"
 
   let initial_state _ = []
 
@@ -1303,8 +1366,7 @@ use crate::lexable_token::LexableToken;
 use crate::parser_env::ParserEnv;
 use crate::smart_constructors::{NoState, SmartConstructors, StateType};
 use crate::source_text::SourceText;
-use crate::syntax::SyntaxValueType;
-use crate::syntax_type::*;
+use crate::syntax::*;
 
 pub trait SyntaxSmartConstructors<'a, S: SyntaxType<Token, Value>, Token, Value, State = NoState>:
     SmartConstructors<'a, State::T, R=S, Token=Token>
@@ -1548,7 +1610,6 @@ module GenerateRustFactsSmartConstructors = struct
 
   let facts_smart_constructors_template: string = (make_header CStyle "") ^ "
 use parser_rust as parser;
-
 use parser::flatten_smart_constructors::*;
 use parser::smart_constructors::SmartConstructors;
 use parser::source_text::SourceText;
@@ -3296,6 +3357,8 @@ let () =
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
   generate_file
     GenerateFFRustSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
+  generate_file
+    GenerateFFRustCoroutineSmartConstructors.coroutine_smart_constructors;
   generate_file
     GenerateFFRustDeclModeSmartConstructors.decl_mode_smart_constructors;
   generate_file

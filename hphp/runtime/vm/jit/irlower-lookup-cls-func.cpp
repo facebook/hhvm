@@ -32,6 +32,7 @@
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/unit.h"
@@ -322,6 +323,9 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   if (UNLIKELY(func == nullptr)) {
     raise_error("Invalid callable (array)");
   }
+
+  assertx(preLiveAR->isDynamicCall());
+  callerDynamicCallChecks(func);
 
   preLiveAR->m_func = func;
   if (inst) {

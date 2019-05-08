@@ -4741,6 +4741,8 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       }
     }
 
+    callerDynamicCallChecks(func);
+
     vmStack().discard();
     auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
     if (thiz) {
@@ -4865,6 +4867,7 @@ void fPushObjMethodImpl(
   res = lookupObjMethod(
     f, cls, name, arGetContextClass(vmfp()), true);
   assertx(f);
+  if (dynamic) callerDynamicCallChecks(f);
   if (f->hasReifiedGenerics()) {
     if (!isReifiedName(name) && !tsList) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
@@ -5122,6 +5125,7 @@ void pushClsMethodImpl(Class* cls,
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
   auto const res = lookupClsMethod(f, cls, name, obj, ctx, true);
+  if (dynamic) callerDynamicCallChecks(f);
   if (res == LookupResult::MethodFoundNoThis) {
     if (!f->isStaticInPrologue()) {
       raise_missing_this(f);
@@ -5453,7 +5457,6 @@ void iopFCall(PC origpc, PC& pc, FCallArgs fca,
   );
   assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
   if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
-  if (ar->isDynamicCall()) callerDynamicCallChecks(func);
   if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
     callerRxChecks(vmfp(), func);
   }

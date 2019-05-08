@@ -42,9 +42,13 @@ inline void callerReffinessChecks(const Func* func, const FCallArgs& fca) {
   }
 }
 
-inline void callerDynamicCallChecks(const Func* func) {
-  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
-  if (func->isDynamicallyCallable()) return;
+/*
+ * Check if a dynamic call to `func` is allowed. Return true if it is, otherwise
+ * raise a notice and return false or raise an exception.
+ */
+inline bool callerDynamicCallChecks(const Func* func) {
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return true;
+  if (func->isDynamicallyCallable()) return true;
 
   if (RuntimeOption::EvalForbidDynamicCalls >= 2) {
     std::string msg;
@@ -59,6 +63,7 @@ inline void callerDynamicCallChecks(const Func* func) {
       Strings::FUNCTION_CALLED_DYNAMICALLY,
       func->fullDisplayName()->data()
     );
+    return false;
   }
 }
 

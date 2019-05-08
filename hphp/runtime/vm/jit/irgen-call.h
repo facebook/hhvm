@@ -40,9 +40,6 @@ struct IRGS;
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
                     SSATmp* const* const args);
 
-void emitCallerDynamicCallChecks(IRGS& env,
-                                 const Func* callee,
-                                 IRSPRelOffset actRecOff);
 void emitCallerRxChecks(IRGS& env, const Func* callee, IRSPRelOffset actRecOff);
 
 Type callReturnType(const Func* callee);

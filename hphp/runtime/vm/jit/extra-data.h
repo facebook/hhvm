@@ -1396,17 +1396,19 @@ struct CheckRefsData : IRExtraData {
 };
 
 struct LookupClsMethodData : IRExtraData {
-  explicit LookupClsMethodData(IRSPRelOffset offset, bool forward) :
-    calleeAROffset(offset), forward(forward) {}
+  explicit LookupClsMethodData(IRSPRelOffset offset, bool forward, bool dynamic)
+    : calleeAROffset(offset), forward(forward), dynamic(dynamic) {}
 
   std::string show() const {
     return folly::to<std::string>("IRSPOff ", calleeAROffset.offset,
-                                  forward ? " forwarded" : "");
+                                  forward ? " forwarded" : "",
+                                  dynamic ? " dynamic" : "");
   }
 
   // offset from caller SP to bottom of callee's ActRec
   IRSPRelOffset calleeAROffset;
   bool forward;
+  bool dynamic;
 };
 
 

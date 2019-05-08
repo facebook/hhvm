@@ -1378,7 +1378,7 @@ To string conversions:
   Load a Func* off of the class method table for S0, at offset S1 (in method
   slots).
 
-| LookupClsMethod<calleeAROffset,forward>,
+| LookupClsMethod<calleeAROffset,forward,dynamic>,
 |   ND,
 |   S(Cls) S(Str) S(StkPtr) S(FramePtr),
 |   NF
@@ -1387,7 +1387,9 @@ To string conversions:
   class, S1 is the method name, S2 is a stack pointer that has an activation
   record to modify at `spToActRecOffset', and S3 is a pointer to the current
   frame (used to get the context). `forward` indicates if we should forward the
-  current context. May throw or fatal if method is not accessible.
+  current context. `dynamic` indicates if the method is called dynamically.
+  Also perform caller checks (dynamic call). May throw or fatal if method
+  is not accessible or caller checks have failed.
 
 | LdPropAddr<T,offset>, DParam(LvalToPropGen), S(Obj), NF
 
@@ -1435,15 +1437,14 @@ To string conversions:
   Lookup the slot index of the static property with the name S1 on the class
   S0, returning -1 if not found.
 
-| LdObjMethod<offset,methodName,fatal>, ND, S(Cls) S(StkPtr), NF
+| LdObjMethod<offset,methodName>, ND, S(Cls) S(StkPtr), NF
 
   Stores a pointer to an object's method into an activation record. S0 points
   to the object's class, S1 has the pre-live activation record at `offset'.
-  Caches the mapping in the target cache. If `fatal' is true, raises a fatal if
-  the class does not have an accessible method with the given name and does not
-  have a __call method; otherwise (if `fatal' is false), raises a warning and
-  puts func that does nothing and returns null (SystemLib::s_nullFunc) on the
-  activation record.
+  Caches the mapping in the target cache. Raises a fatal if the class does not
+  have an accessible method with the given name and does not have a __call
+  method. Also responsible for performing caller checks (currently none as the
+  opcode is not used with dynamic calls).
 
 | LdObjInvoke, D(Func), S(Cls), B
 
@@ -1454,7 +1455,8 @@ To string conversions:
 
   Try to load an array as a function context. This is for use translating
   FPushFunc when the callee is an array. This instruction attempts to populate
-  a partially created ActRec pointed to by S1 + `offset' (in cells).
+  a partially created ActRec pointed to by S1 + `offset' (in cells). It is also
+  responsible for performing caller checks (dynamic call).
 
 | LdObjClass, DLdObjCls, S(Obj), NF
 
@@ -1466,10 +1468,11 @@ To string conversions:
 
 | LdFunc<offset>, ND, S(Str) S(StkPtr) S(FramePtr), NF
 
-  Loads the Func whose name is S0 into the partially constructed ActRec pointed
-  to by S1 + `offset` (in cells). Also populate the m_this/m_cls field if
-  necessary.  Fatal if the named function is not defined, and the autoloader
-  fails to define it.
+  Resolve the Func whose name is S0. Perform caller checks (dynamic call).
+  Then store the Func into the partially constructed ActRec pointed to by
+  S1 + `offset` (in cells). Also populate the m_this/m_cls field if necessary.
+  Fatal if the named function is not defined, and the autoloader fails to
+  define it.
 
 | LdFuncCached<funcName>, D(Func), NA, NF
 

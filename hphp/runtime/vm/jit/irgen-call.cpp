@@ -41,6 +41,29 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
+  assertx(callee);
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  if (callee->isDynamicallyCallable()) return;
+  gen(env, RaiseForbiddenDynCall, cns(env, callee));
+}
+
+void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
+  assertx(!callee->hasConstVal());
+  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
+  ifElse(
+    env,
+    [&] (Block* skip) {
+      auto const dynCallable = gen(env, IsFuncDynCallable, callee);
+      gen(env, JmpNZero, skip, dynCallable);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseForbiddenDynCall, callee);
+    }
+  );
+}
+
 IRSPRelOffset fsetActRec(
   IRGS& env,
   SSATmp* func,
@@ -72,6 +95,10 @@ void prepareToCallKnown(IRGS& env, const Func* callee, SSATmp* objOrClass,
                         uint32_t numArgs, const StringData* invName,
                         bool dynamicCall, SSATmp* tsList) {
   assertx(callee);
+
+  // Caller checks
+  if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
+
   auto const func = cns(env, callee);
   fsetActRec(env, func, objOrClass, numArgs, invName, dynamicCall, tsList);
 }
@@ -84,6 +111,9 @@ void prepareToCallUnknown(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
     return prepareToCallKnown(env, callee->funcVal(), objOrClass, numArgs,
                               invName, dynamicCall, tsList);
   }
+
+  // Caller checks
+  if (dynamicCall) emitCallerDynamicCallChecksUnknown(env, callee);
 
   fsetActRec(env, callee, objOrClass, numArgs, invName, dynamicCall, tsList);
 }
@@ -99,6 +129,9 @@ void prepareToCallCustom(IRGS& env, SSATmp* objOrClass, uint32_t numArgs,
   updateMarker(env);
   env.irb->exceptionStackBoundary();
 
+  // Responsible for:
+  // - performing caller checks
+  // - popualting missing ActRec fields (m_func at minimum)
   prepare(arOffset);
 }
 
@@ -1104,7 +1137,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
 
   auto const emitFPush = [&] {
     auto const prepare = [&] (IRSPRelOffset arOffset) {
-      auto const lcmData = LookupClsMethodData { arOffset, forward };
+      auto const lcmData = LookupClsMethodData { arOffset, forward, dynamic };
       gen(env, LookupClsMethod, lcmData, clsVal, methVal, sp(env), fp(env));
       decRef(env, methVal);
     };
@@ -1272,47 +1305,6 @@ bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
 
 }
 
-void emitCallerDynamicCallChecks(IRGS& env,
-                                 const Func* callee,
-                                 IRSPRelOffset actRecOff) {
-  if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
-  if (callee && callee->isDynamicallyCallable()) return;
-
-  SSATmp* func = nullptr;
-  ifElse(
-    env,
-    [&] (Block* skip) {
-      auto const dynamic = gen(
-        env,
-        LdARIsDynamic,
-        IRSPRelOffsetData { actRecOff },
-        sp(env)
-      );
-      gen(env, JmpZero, skip, dynamic);
-
-      // If we do have a callee, we already know its not dynamically callable
-      // (checked above).
-      if (!callee) {
-        func = gen(
-          env,
-          LdARFuncPtr,
-          TFunc,
-          IRSPRelOffsetData { actRecOff },
-          sp(env)
-        );
-        auto const dyncallable = gen(env, IsFuncDynCallable, func);
-        gen(env, JmpNZero, skip, dyncallable);
-      } else {
-        func = cns(env, callee);
-      }
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseForbiddenDynCall, func);
-    }
-  );
-}
-
 void emitCallerRxChecks(IRGS& env, const Func* callee,
                         IRSPRelOffset actRecOff) {
   if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
@@ -1352,7 +1344,6 @@ void emitFCall(IRGS& env,
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
 
   if (!emitCallerReffinessChecks(env, callee, fca, actRecOff)) return;
-  emitCallerDynamicCallChecks(env, callee, actRecOff);
   emitCallerRxChecks(env, callee, actRecOff);
 
   if (fca.hasUnpack()) {

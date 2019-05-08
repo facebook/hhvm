@@ -30,6 +30,7 @@
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/runtime/vm/unit-util.h"
@@ -87,6 +88,7 @@ void FuncCache::lookup(rds::Handle handle,
                        StringData* sd,
                        ActRec* ar,
                        ActRec* fp) {
+  assertx(ar->isDynamicCall());
   auto const thiz = rds::handleToPtr<FuncCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
     for (std::size_t i = 0; i < FuncCache::kNumLines; ++i) {
@@ -100,13 +102,16 @@ void FuncCache::lookup(rds::Handle handle,
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
     auto const* func = Unit::lookupFunc(sd);
-    if (UNLIKELY(!func)) {
-      ObjectData *this_ = nullptr;
-      Class* self_ = nullptr;
-      StringData* inv = nullptr;
-      ArrayData* reifiedGenerics = nullptr;
-      bool dynamic = false;
-      try {
+    bool noEffects;
+    try {
+      if (LIKELY(func != nullptr)) {
+        noEffects = callerDynamicCallChecks(func);
+      } else {
+        ObjectData *this_ = nullptr;
+        Class* self_ = nullptr;
+        StringData* inv = nullptr;
+        ArrayData* reifiedGenerics = nullptr;
+        bool dynamic = false;
         func = vm_decode_function(
           Variant{sd},
           fp,
@@ -120,27 +125,33 @@ void FuncCache::lookup(rds::Handle handle,
           raise_call_to_undefined(sd);
         }
         assertx(dynamic);
-      } catch (...) {
-        *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
-        throw;
-      }
+        noEffects = callerDynamicCallChecks(func);
 
-      if (this_) {
-        ar->m_func = func;
-        ar->setThis(this_);
-        this_->incRefCount();
-        if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-        return;
+        if (this_) {
+          ar->m_func = func;
+          ar->setThis(this_);
+          this_->incRefCount();
+          if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
+          return;
+        }
+        if (self_) {
+          ar->m_func = func;
+          ar->setClass(self_);
+          if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
+          return;
+        }
       }
-      if (self_) {
-        ar->m_func = func;
-        ar->setClass(self_);
-        if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-        return;
-      }
+    } catch (...) {
+      *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(sd);
+      throw;
     }
     assertx(!func->implCls());
     func->validate();
+    if (UNLIKELY(!noEffects)) {
+      ar->m_func = func;
+      ar->trashThis();
+      return;
+    }
     pair->m_key =
       const_cast<StringData*>(func->displayName()); // use a static name
     pair->m_value = func;
@@ -360,6 +371,7 @@ handleSlowPath(rds::Handle mce_handle,
                uintptr_t mcePrime) {
   assertx(ActRec::checkThis(ar->getThisUnsafe()));
   assertx(ar->getThisUnsafe()->getVMClass() == cls);
+  assertx(!ar->isDynamicCall());
   assertx(name->isStatic());
 
   auto const mce = &rds::handleToRef<Entry, rds::Mode::Normal>(mce_handle);

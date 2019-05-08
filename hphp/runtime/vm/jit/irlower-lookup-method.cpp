@@ -25,6 +25,7 @@
 
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
+#include "hphp/runtime/vm/interp-helpers.h"
 #include "hphp/runtime/vm/method-lookup.h"
 
 #include "hphp/runtime/vm/jit/types.h"
@@ -129,7 +130,7 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
 
 IMPL_OPCODE_CALL(LdClsCtor)
 
-template<bool forward>
+template<bool forward, bool dynamic>
 void lookupClsMethodHelper(Class* cls, StringData* meth,
                            ActRec* ar, ActRec* fp) {
   try {
@@ -137,6 +138,8 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
     auto const ctx = fp->m_func->cls();
     auto const obj = ctx && fp->hasThis() ? fp->getThis() : nullptr;
     auto const res = lookupClsMethod(f, cls, meth, obj, ctx, true);
+
+    if (dynamic) callerDynamicCallChecks(f);
 
     ar->m_func = f;
 
@@ -180,15 +183,16 @@ void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
     .addr(sp, cellsToBytes(extra->calleeAROffset.offset))
     .ssa(3);
 
-  if (extra->forward) {
-    cgCallHelper(vmain(env), env,
-                 CallSpec::direct(lookupClsMethodHelper<true>),
-                 callDest(env, inst), SyncOptions::Sync, args);
-  } else {
-    cgCallHelper(vmain(env), env,
-                 CallSpec::direct(lookupClsMethodHelper<false>),
-                 callDest(env, inst), SyncOptions::Sync, args);
-  }
+  auto const helper = extra->forward
+    ? extra->dynamic
+      ? lookupClsMethodHelper<true, true>
+      : lookupClsMethodHelper<true, false>
+    : extra->dynamic
+      ? lookupClsMethodHelper<false, true>
+      : lookupClsMethodHelper<false, false>;
+
+  cgCallHelper(vmain(env), env, CallSpec::direct(helper), callDest(env, inst),
+               SyncOptions::Sync, args);
 }
 
 void cgProfileMethod(IRLS& env, const IRInstruction* inst) {

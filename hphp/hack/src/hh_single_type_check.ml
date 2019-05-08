@@ -206,6 +206,7 @@ let parse_options () =
   let like_types = ref false in
   let search_provider = ref "TrieIndex" in
   let rust = ref false in
+  let symbolindex_file = ref None in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -438,6 +439,9 @@ let parse_options () =
     "--rust",
       Arg.Set rust,
       "Use rust parser";
+    "--symbolindex-file",
+      Arg.String (fun str -> symbolindex_file := Some str),
+      "Load the symbol index from this file";
   ] in
   let options = Arg.align ~limit:25 options in
   Arg.parse options (fun fn -> fn_ref := fn::(!fn_ref)) usage;
@@ -491,8 +495,11 @@ let parse_options () =
   } in
   let tcopt = GlobalOptions.setup_pocket_universes tcopt !pocket_universes in
 
-  (* Configure autocomplete search index with the selected search provider *)
-  SymbolIndex.set_search_provider !search_provider ~quiet:true;
+  (* Configure symbol index settings *)
+  SymbolIndex.set_search_provider
+    ~quiet:true
+    ~provider_name:!search_provider
+    ~savedstate_file_opt:!symbolindex_file;
 
   { files = fns;
     mode = !mode;

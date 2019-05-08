@@ -146,10 +146,11 @@ let init
   in
   let env, t = ServerAiInit.ai_check genv env.naming_table env t in
 
-  (* Configure autocomplete search index with the selected search provider *)
+  (* Configure symbol index settings *)
   SymbolIndex.set_search_provider
     ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
-    genv.local_config.ServerLocalConfig.symbolindex_search_provider;
+    ~provider_name:genv.local_config.ServerLocalConfig.symbolindex_search_provider
+    ~savedstate_file_opt:genv.local_config.ServerLocalConfig.symbolindex_file;
 
   run_search genv t;
   SharedMem.init_done ();

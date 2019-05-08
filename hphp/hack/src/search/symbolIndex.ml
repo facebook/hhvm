@@ -28,20 +28,36 @@ let get_search_provider (): SearchUtils.search_provider =
   | None -> failwith "Attempted to fetch search provider, but it is not yet set.";
 ;;
 
+(* If a provider requires initialization, put it here *)
+let initialize_provider
+    (provider: SearchUtils.search_provider)
+    (savedstate_file_opt: string option): unit =
+  let _ = savedstate_file_opt in
+  match provider with
+  | SqliteIndex
+  | AllLocalIndex
+  | GleanApiIndex
+  | GrepIndex
+  | NoIndex
+  | RipGrepIndex
+  | TrieIndex ->
+    ()
+
 (* Set the currently selected search provider *)
 let set_search_provider
-    ?(quiet=false)
-    (provider_str: string): unit =
-  let provider = SearchUtils.provider_of_string provider_str in
+    ~(quiet: bool)
+    ~(provider_name: string)
+    ~(savedstate_file_opt: string option): unit =
+  let provider = SearchUtils.provider_of_string provider_name in
   match !current_search_provider with
   | None ->
+    in_quiet_mode := quiet;
     current_search_provider := Some provider;
-    if not quiet then begin
+    initialize_provider provider savedstate_file_opt;
+    if not !in_quiet_mode then begin
       Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
         (SearchUtils.descriptive_name_of_provider provider)
-        provider_str;
-    end else begin
-      in_quiet_mode := true;
+        provider_name;
     end;
   | Some existing_provider ->
 

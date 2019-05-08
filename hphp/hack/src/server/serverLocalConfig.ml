@@ -87,6 +87,7 @@ type t = {
   (* Selects a search provider for autocomplete and symbol search *)
   symbolindex_search_provider : string;
   symbolindex_quiet : bool;
+  symbolindex_file : string option;
   (* Use rust parser *)
   rust : bool;
 }
@@ -142,6 +143,7 @@ let default = {
   enable_reverse_naming_table_fallback = false;
   symbolindex_search_provider = "TrieIndex";
   symbolindex_quiet = false;
+  symbolindex_file = None;
   rust = false;
 }
 
@@ -288,6 +290,7 @@ let load_ fn ~silent config_overrides =
       ~default:default.symbolindex_search_provider config in
   let symbolindex_quiet = bool_ "symbolindex_quiet"
       ~default:default.symbolindex_quiet config in
+  let symbolindex_file = string_opt "symbolindex_file" config in
   let rust = bool_if_version "rust"
       ~default:default.rust config in
   {
@@ -340,6 +343,7 @@ let load_ fn ~silent config_overrides =
     enable_reverse_naming_table_fallback;
     symbolindex_search_provider;
     symbolindex_quiet;
+    symbolindex_file;
     rust;
   }
 

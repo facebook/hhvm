@@ -49,9 +49,11 @@ let test_init_common ?(hhi_files = []) () =
     did_init := true;
   end;
 
-  (* Configure autocomplete search index with the selected search provider *)
+  (* Configure symbol index settings *)
   SymbolIndex.set_search_provider
-    !genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_search_provider;
+    ~quiet:true
+    ~provider_name:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_search_provider
+    ~savedstate_file_opt:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_file;
 
   Printexc.record_backtrace true;
   EventLogger.init EventLogger.Event_logger_fake 0.0;

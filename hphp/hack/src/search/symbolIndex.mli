@@ -13,7 +13,10 @@ val set_fuzzy_search_enabled : bool -> unit
 
 (* Get or set the currently selected search provider *)
 val get_search_provider: unit -> SearchUtils.search_provider
-val set_search_provider: ?quiet:bool -> string -> unit
+val set_search_provider:
+  quiet:bool ->
+  provider_name:string ->
+  savedstate_file_opt:string option -> unit
 
 (* Log diagnostics for usage of autocomplete and symbol search *)
 val log_symbol_index_search:

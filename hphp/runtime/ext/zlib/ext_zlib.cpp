@@ -647,10 +647,10 @@ struct ZlibExtension final : Extension {
                   HHVM_MN(ChunkedInflator, eof));
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, inflateChunk,
                   HHVM_MN(ChunkedInflator, inflateChunk));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, close,
+                  HHVM_MN(ChunkedInflator, close));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, eof,
                   HHVM_MN(ChunkedGunzipper, eof));
-    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, close,
-                  HHVM_MN(ChunkedGunzipper, close));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, inflateChunk,
                   HHVM_MN(ChunkedGunzipper, inflateChunk));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, close,

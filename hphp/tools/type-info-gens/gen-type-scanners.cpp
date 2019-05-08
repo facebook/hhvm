@@ -1006,12 +1006,20 @@ T Generator::extractFromMarkers(const C& types, F&& f) const {
   std::sort(objects.begin(), objects.end());
 
   T out;
-  std::transform(
+  auto ins = std::inserter(out, out.end());
+  std::string msg;
+  std::for_each(
     objects.begin(),
     std::unique(objects.begin(), objects.end()),
-    std::inserter(out, out.end()),
-    [&](const Object* o) { return f(*o); }
+    [&](const Object* o) {
+      try {
+        ins = f(*o);
+      } catch (Exception& e) {
+        folly::format(&msg, " => {}\n", e.what());
+      }
+    }
   );
+  if (!msg.empty()) throw Exception(msg);
   return out;
 }
 

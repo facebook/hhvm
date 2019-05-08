@@ -101,7 +101,13 @@ extern int low_cold_arena_flags;
 extern int high_cold_arena_flags;
 extern __thread int high_arena_flags;
 
-void setup_local_arenas();
+struct PageSpec {
+  unsigned n1GPages{0};
+  unsigned n2MPages{0};
+};
+
+void setup_local_arenas(PageSpec);
+unsigned get_local_arena(uint32_t node);
 
 void mallctl_epoch();
 size_t mallctl_pactive(unsigned arenaId);

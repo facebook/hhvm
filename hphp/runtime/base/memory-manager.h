@@ -551,8 +551,9 @@ struct SparseHeap {
   std::vector<SlabInfo> m_pooled_slabs;
   RadixMap<HeapObject*,kLgSmallSizeQuantum,8> m_bigs;
   MemBlock m_slab_range;
-  int64_t m_hugeBytes{0};             // compare with RequestHugeMaxBytes
+  int64_t m_hugeBytes{0};               // compare with RequestHugeMaxBytes
   SlabManager* m_slabManager{nullptr};
+  unsigned m_arenaFlag{0};              // contains assigned jemalloc arena
 };
 
 using HeapImpl = SparseHeap;

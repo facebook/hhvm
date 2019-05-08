@@ -25,6 +25,17 @@ TRACE_SET_MOD(mm);
 
 void SparseHeap::threadInit() {
   m_slabManager = SlabManager::get(s_numaNode);
+#ifdef USE_JEMALLOC
+  auto arena = get_local_arena(s_numaNode);
+  if (arena == 0) {
+    m_arenaFlag = 0;
+    return;
+  }
+  m_arenaFlag = MALLOCX_ARENA(arena);
+#ifdef MALLOCX_TCACHE_NONE
+  m_arenaFlag |= MALLOCX_TCACHE_NONE;
+#endif
+#endif
 }
 
 void SparseHeap::reset() {
@@ -38,10 +49,10 @@ void SparseHeap::reset() {
     });
   }
 #endif
-  auto const do_free = [](void* ptr, size_t size) {
+  auto const do_free = [this] (void* ptr, size_t size) {
 #ifdef USE_JEMALLOC
 #if JEMALLOC_VERSION_MAJOR >= 4
-    sdallocx(ptr, size, 0);
+    sdallocx(ptr, size, m_arenaFlag);
 #else
     dallocx(ptr, 0);
 #endif
@@ -101,8 +112,8 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
     }
   }
 #ifdef USE_JEMALLOC
-  void* slab = mallocx(kSlabSize, MALLOCX_ALIGN(kSlabAlign));
-  auto usable = sallocx(slab, 0);
+  void* slab = mallocx(kSlabSize, m_arenaFlag | MALLOCX_ALIGN(kSlabAlign));
+  auto usable = sallocx(slab, m_arenaFlag);
 #else
   auto slab = safe_aligned_alloc(kSlabAlign, kSlabSize);
   auto usable = kSlabSize;
@@ -115,9 +126,9 @@ HeapObject* SparseHeap::allocSlab(MemoryUsageStats& stats) {
 
 void* SparseHeap::allocBig(size_t bytes, bool zero, MemoryUsageStats& stats) {
 #ifdef USE_JEMALLOC
-  int flags = zero ? MALLOCX_ZERO : 0;
+  int flags = m_arenaFlag | (zero ? MALLOCX_ZERO : 0);
   auto n = static_cast<HeapObject*>(mallocx(bytes, flags));
-  auto cap = sallocx(n, 0);
+  auto cap = sallocx(n, m_arenaFlag);
 #else
   auto n = static_cast<MallocNode*>(
     zero ? safe_calloc(1, bytes) : safe_malloc(bytes)
@@ -147,9 +158,9 @@ void SparseHeap::freeBig(void* ptr, MemoryUsageStats& stats) {
   stats.mm_freed += cap;
   stats.malloc_cap -= cap;
 #ifdef USE_JEMALLOC
-  assertx(nallocx(cap, 0) == sallocx(ptr, 0));
+  assertx(nallocx(cap, m_arenaFlag) == sallocx(ptr, m_arenaFlag));
 #if JEMALLOC_VERSION_MAJOR >= 4
-  sdallocx(ptr, cap, 0);
+  sdallocx(ptr, cap, m_arenaFlag);
 #else
   dallocx(ptr, 0);
 #endif
@@ -164,9 +175,9 @@ void* SparseHeap::resizeBig(void* ptr, size_t new_size,
   auto old_cap = m_bigs.get(old);
 #ifdef USE_JEMALLOC
   auto const newNode = static_cast<HeapObject*>(
-    rallocx(ptr, new_size, 0)
+    rallocx(ptr, new_size, m_arenaFlag)
   );
-  auto new_cap = sallocx(newNode, 0);
+  auto new_cap = sallocx(newNode, m_arenaFlag);
 #else
   auto const newNode = static_cast<HeapObject*>(
     safe_realloc(ptr, new_size)

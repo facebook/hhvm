@@ -83,6 +83,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/abi-cxx.h"
+#include "hphp/util/alloc.h"
 #include "hphp/util/arch.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
@@ -1196,11 +1197,6 @@ static int start_server(const std::string &username, int xhprof) {
     enable_numa();
     BootStats::mark("enable_numa");
   }
-#ifdef USE_JEMALLOC
-  // Local arenas for worker threads, created even when NUMA isn't used.
-  setup_local_arenas();
-#endif
-
   HttpServer::CheckMemAndWait(true); // Final wait
   if (readaheadThread.get()) {
     readaheadThread->join();
@@ -1221,6 +1217,10 @@ static int start_server(const std::string &username, int xhprof) {
     BootStats::Block timer("waitForRetranslateAll", true);
     jit::mcgen::joinWorkerThreads();
   }
+#ifdef USE_JEMALLOC
+  setup_local_arenas({RuntimeOption::EvalNum1GPagesForReqHeap,
+                      RuntimeOption::EvalNum2MPagesForReqHeap});
+#endif
 
   HttpServer::Server->runOrExitProcess();
   HttpServer::Server.reset();

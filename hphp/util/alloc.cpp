@@ -240,30 +240,6 @@ __thread int high_arena_tcache = -1;
 
 static unsigned base_arena;
 
-// Create an arena per NUMA node for use by VM worker threads. This is done even
-// when there is only one socket, or when HAVE_NUMA isn't defined. Note that it
-// throws if arena creation fails.
-void setup_local_arenas() {
-  mallctlRead<unsigned>("arenas.narenas", &base_arena); // throw upon failure
-  for (int i = 0; i < num_numa_nodes(); i++) {
-    unsigned arena = 0;
-#if USE_JEMALLOC_EXTENT_HOOKS
-    if (jemallocMetadataCanUseHuge.load() && enableNumaArenaMetadata1GPage) {
-      size_t size = sizeof(unsigned);
-      extent_hooks_t *hooks = &huge_page_metadata_hooks;
-      if (mallctl(JEMALLOC_NEW_ARENA_CMD,
-                  &arena, &size, &hooks, sizeof(hooks))) {
-        throw std::runtime_error{JEMALLOC_NEW_ARENA_CMD " failed"};
-      }
-    } else
-#endif
-    {
-      mallctlRead<unsigned>(JEMALLOC_NEW_ARENA_CMD, &arena);
-    }
-    always_assert(arena == base_arena + i);
-  }
-}
-
 #ifdef HAVE_NUMA
 
 void enable_numa() {
@@ -605,6 +581,65 @@ void high_arena_tcache_destroy() {
 }
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
+
+std::vector<unsigned> s_req_heap_arenas; // keyed by numa node id
+void setup_local_arenas(PageSpec spec) {
+  mallctlRead<unsigned>("arenas.narenas", &base_arena); // throw upon failure
+  // The default one per node.
+  for (int i = 0; i < num_numa_nodes(); i++) {
+    unsigned arena = 0;
+    mallctlRead<unsigned>(JEMALLOC_NEW_ARENA_CMD, &arena);
+    always_assert(arena == base_arena + i);
+  }
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+  spec.n1GPages = std::min(spec.n1GPages, get_huge1g_info().nr_hugepages);
+  spec.n1GPages /= num_numa_nodes();
+  spec.n2MPages = std::min(spec.n2MPages, get_huge2m_info().nr_hugepages);
+  spec.n2MPages /= num_numa_nodes();
+  const size_t reserveSize =
+    spec.n1GPages * size1g + spec.n2MPages * size2m;
+  if (reserveSize == 0) return;
+
+  s_req_heap_arenas.resize(num_numa_nodes(), 0);
+  for (unsigned i = 0; i < num_numa_nodes(); ++i) {
+    constexpr uintptr_t kLocalArenaMinAddr = 1ull << 40;
+    constexpr size_t kLocalArenaSizeLimit = 64ull << 30;
+    static_assert(kLocalArenaMinAddr % size1g == 0, "");
+    auto const desiredBase = kLocalArenaMinAddr + i * kLocalArenaSizeLimit;
+    // Try to get the desired address range, but don't use MAP_FIXED.
+    auto ret = mmap(reinterpret_cast<void*>(desiredBase),
+                    reserveSize + size1g, PROT_NONE,
+                    MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE,
+                    -1, 0);
+    if (ret == MAP_FAILED) {
+      throw std::runtime_error{"mmap() failed to reserve address range"};
+    }
+    auto base = reinterpret_cast<uintptr_t>(ret);
+    if (base != desiredBase) {        // align to 1GB
+      base = (base + size1g - 1) & ~(size1g - 1);
+    }
+    assert(base % size1g == 0);
+    auto arena = PreMappedArena::CreateAt(low_malloc(sizeof(PreMappedArena)),
+                                          base, base + reserveSize, Reserved{});
+    auto mapper = getMapperChain(*arena,
+                                 spec.n1GPages,
+                                 (bool)spec.n2MPages,
+                                 spec.n2MPages,
+                                 false,       // don't use normal pages
+                                 1u << i,
+                                 i);
+    arena->setLowMapper(mapper);
+    s_req_heap_arenas[i] = arena->id();
+  }
+#endif
+}
+
+unsigned get_local_arena(uint32_t node) {
+  if (node >= s_req_heap_arenas.size()) return 0;
+  return s_req_heap_arenas[node];
+}
+
 #endif // USE_JEMALLOC
 
 struct JEMallocInitializer {

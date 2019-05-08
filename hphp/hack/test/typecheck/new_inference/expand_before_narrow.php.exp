@@ -1,0 +1,8 @@
+File "expand_before_narrow.php", line 7, characters 19-20:
+Was expecting an object but type is unknown (Typing[4297])
+File "expand_before_narrow.php", line 5, characters 8-16:
+It is unknown because type parameter T of Vector could not be determined. Please add type parameters to Vector.
+File "expand_before_narrow.php", line 7, characters 27-28:
+Was expecting an object but type is unknown (Typing[4297])
+File "expand_before_narrow.php", line 5, characters 8-16:
+It is unknown because a type could not be determined here

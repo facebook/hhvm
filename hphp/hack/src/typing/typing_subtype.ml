@@ -2768,8 +2768,9 @@ let is_nothing env ty =
  * member access and array indexing.
  *)
 let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty =
+  let env, ty = Env.expand_type env ty in
   if not (TypecheckerOptions.new_inference (Env.get_tcopt env))
-  then Env.expand_type env ty
+  then env, ty
   else
   (* Deconstruct the type into union elements (if it's a union). For variables,
    * take the lower bounds. If there are no variables, then we have a concrete

@@ -1725,7 +1725,7 @@ let parameter_rx_errors context errors node =
     | Some (TokenKind.Inout) -> true
     | _ -> false
 
-  type lval_type = LvalTypeNone | LvalTypeNonFinal | LvalTypeFinal
+  type lval_type = LvalTypeNone | LvalTypeNonFinal | LvalTypeFinal | LvalTypeNonFinalInout
 
   let node_lval_type node parents =
     let rec is_in_final_lval_position node parents =
@@ -1761,7 +1761,7 @@ let parameter_rx_errors context errors node =
           Some (call_expression, parents))
       | _ -> None
     in
-    let lval_ness_of_function_arg next_node next_parents =
+    let lval_ness_of_function_arg_for_inout next_node next_parents =
       (match get_arg_call_node_with_parents next_node next_parents with
       | None -> LvalTypeNone
       | Some (call_node, call_parents) ->
@@ -1776,8 +1776,8 @@ let parameter_rx_errors context errors node =
                    does_binop_create_write_on_left (token_kind token) ->
                if is_in_final_lval_position next_node next_parents
                 then LvalTypeFinal
-                else LvalTypeNonFinal
-            | _ -> LvalTypeNonFinal)
+                else LvalTypeNonFinalInout
+            | _ -> LvalTypeNonFinalInout)
       ) in
     match parents with
     | DecoratedExpression {
@@ -1786,7 +1786,7 @@ let parameter_rx_errors context errors node =
     } as next_node :: next_parents
       when phys_equal lval node &&
            does_decorator_create_write (token_kind token) ->
-      lval_ness_of_function_arg next_node next_parents
+      lval_ness_of_function_arg_for_inout next_node next_parents
 
     | PrefixUnaryExpression {
       prefix_unary_operator = token;
@@ -1835,6 +1835,7 @@ let parameter_rx_errors context errors node =
     let parents = List.map ~f:syntax parents in
     match node_lval_type node parents with
     | LvalTypeFinal
+    | LvalTypeNonFinalInout
     | LvalTypeNone -> errors
     | LvalTypeNonFinal ->
       make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors
@@ -2323,6 +2324,7 @@ let find_invalid_lval_usage errors nodes =
       let errors = match node_lval_type node parents with
       | LvalTypeFinal
       | LvalTypeNone -> errors
+      | LvalTypeNonFinalInout
       | LvalTypeNonFinal ->
         make_error_from_node syntax_node SyntaxError.lval_as_expression :: errors in
       errors, true
@@ -2968,8 +2970,8 @@ let check_repeated_properties_tconst_const full_name (errors, p_names, c_names) 
     let name = text sname in
     (* If the name is empty, then there was an earlier
       parsing error that should supercede this one. *)
-    if name = "" 
-    then errors, names 
+    if name = ""
+    then errors, names
     else
       if SSet.mem name names
       then make_error_from_node prop

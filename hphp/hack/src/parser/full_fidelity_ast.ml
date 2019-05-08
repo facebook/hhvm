@@ -23,23 +23,8 @@ type lifted_await_kind = LiftedFromStatement | LiftedFromConcurrent [@@deriving 
 
 type lifted_awaits = {
     mutable awaits: (id option * expr) list;
-    mutable name_counter: int;
     lift_kind: lifted_await_kind
 }[@@deriving show]
-
-let make_tmp_var_name c =
-  SN.SpecialIdents.tmp_var_prefix ^ (string_of_int c)
-
-let lift_await ((pos, _) as expr) awaits ~with_temp_local =
-    if (with_temp_local)
-    then
-      let name = make_tmp_var_name awaits.name_counter in
-      awaits.name_counter <- awaits.name_counter + 1;
-      awaits.awaits <- ((Some (pos, name)), expr) :: awaits.awaits;
-      Lvar (pos, name)
-    else
-      (awaits.awaits <- (None, expr) :: awaits.awaits;
-      Null)
 
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
 type env =
@@ -68,6 +53,7 @@ type env =
   ; mutable saw_yield        : bool   (* Information flowing back up *)
   ; mutable unsafes          : ISet.t (* Offsets of UNSAFE_EXPR in trivia *)
   ; mutable lifted_awaits    : lifted_awaits option
+  ; mutable tmp_var_counter  : int
   (* Whether we've seen COMPILER_HALT_OFFSET. The value of COMPILER_HALT_OFFSET
     defaults to 0 if HALT_COMPILER isn't called.
     None -> COMPILER_HALT_OFFSET isn't in the source file
@@ -150,6 +136,7 @@ let make_env
     ; in_static_method = ref false
     ; parent_maybe_reified = ref false
     ; lifted_awaits = None
+    ; tmp_var_counter = 1
     ; lowpri_errors = ref []
     }
 
@@ -202,6 +189,26 @@ let mode_annotation = function
   | FileInfo.Mphp -> FileInfo.Mdecl
   | m -> m
 
+let make_tmp_var_name env =
+  let name =
+    SN.SpecialIdents.tmp_var_prefix ^ (string_of_int env.tmp_var_counter) in
+  env.tmp_var_counter <- env.tmp_var_counter + 1;
+  name
+
+let lift_await ((pos, _) as expr) env ~with_temp_local =
+  let awaits = env.lifted_awaits in
+  match awaits with
+  | None -> Await expr
+  | Some awaits ->
+  if (with_temp_local)
+  then
+    let name = make_tmp_var_name env in
+    awaits.awaits <- ((Some (pos, name)), expr) :: awaits.awaits;
+    Lvar (pos, name)
+  else
+    (awaits.awaits <- (None, expr) :: awaits.awaits;
+    Null)
+
 let process_lifted_awaits lifted_awaits =
   List.iter lifted_awaits.awaits
     ~f:(fun (_, (pos, _)) -> assert (pos <> Pos.none));
@@ -217,7 +224,7 @@ let with_new_nonconcurrent_scope env f =
 
 let with_new_concurrent_scope env f =
   let lifted_awaits =
-    { awaits = []; name_counter = 1; lift_kind = LiftedFromConcurrent } in
+    { awaits = []; lift_kind = LiftedFromConcurrent } in
   let saved_lifted_awaits = env.lifted_awaits in
   env.lifted_awaits <- Some lifted_awaits;
   let result = Utils.try_finally
@@ -244,7 +251,7 @@ let lift_awaits_in_statement env pos f =
     | true, Some { lift_kind = LiftedFromStatement; _ }
     | true, None ->
       let lifted_awaits =
-        { awaits = []; name_counter = 1; lift_kind = LiftedFromStatement } in
+        { awaits = []; lift_kind = LiftedFromStatement } in
       let saved_lifted_awaits = env.lifted_awaits in
       env.lifted_awaits <- Some lifted_awaits;
       let result = Utils.try_finally
@@ -1483,11 +1490,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.At                      -> snd expr
         | Some TK.Inout                   -> Callconv (Pinout, expr)
         | Some TK.Await                   ->
-            begin match env.lifted_awaits with
-            | Some lifted_awaits ->
-                lift_await expr lifted_awaits ~with_temp_local:(location <> AsStatement)
-            | None -> Await expr
-            end
+            lift_await expr env ~with_temp_local:(location <> AsStatement)
         | Some TK.Suspend                 -> Suspend expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Print                   ->
@@ -2261,25 +2264,39 @@ and pStmt : stmt parser = fun node env ->
 
     let stmt = match stmt with
     | pos, Block stmts ->
+      (* Reuse tmp vars from lifted_awaits, this is safe because there will
+       * always be more awaits with tmp vars than statements with assignments *)
+      let tmp_vars_from_lifted_awaits =
+        List.fold_right ~init:[]
+          ~f:(fun lifted_await tmp_vars ->
+            match lifted_await with
+            | Some (_, tmp_var), _ -> tmp_var :: tmp_vars
+            | None, _ -> tmp_vars
+          ) lifted_awaits in
+
+      (* Final assignment transformation *)
       let body_stmts, assign_stmts, _ =
-        List.fold_left ~init:([], [], 1)
-          ~f:(fun (body_stmts, assign_stmts, i) n ->
+        List.fold_left ~init:([], [], tmp_vars_from_lifted_awaits)
+          ~f:(fun (body_stmts, assign_stmts, tmp_vars) n ->
             match n with
             | (p1, Expr (p2, Binop ((Eq op), e1, ((p3, _) as e2)))) ->
-              let name = make_tmp_var_name i in
-              let tmp_n = p3, Lvar (p3, name) in
-              let body_stmts =
-                match tmp_n, e2 with
-                | (_, Lvar (_, name1)), (_, Lvar (_, name2))
-                  when name1 = name2 ->
-                  body_stmts
-                | _ ->
-                  let new_n = (p1, Expr (p2, Binop ((Eq None), tmp_n, e2))) in
-                  new_n :: body_stmts in
+              (match tmp_vars with
+              | [] -> assert false
+              | first_tmp_var :: rest_tmp_vars ->
+                let tmp_n = p3, Lvar (p3, first_tmp_var) in
+                let body_stmts =
+                  match tmp_n, e2 with
+                  | (_, Lvar (_, name1)), (_, Lvar (_, name2))
+                    when name1 = name2 ->
+                    (* Optimize away useless assignment *)
+                    body_stmts
+                  | _ ->
+                    let new_n = (p1, Expr (p2, Binop ((Eq None), tmp_n, e2))) in
+                    new_n :: body_stmts in
 
-              let assign_stmt = (p1, Expr (p2, Binop ((Eq op), e1, tmp_n))) in
-              (body_stmts, assign_stmt :: assign_stmts, i + 1)
-            | _ -> (n :: body_stmts, assign_stmts, i)
+                let assign_stmt = (p1, Expr (p2, Binop ((Eq op), e1, tmp_n))) in
+                (body_stmts, assign_stmt :: assign_stmts, rest_tmp_vars))
+            | _ -> (n :: body_stmts, assign_stmts, tmp_vars)
           ) stmts in
       pos, Block (List.concat [List.rev body_stmts; List.rev assign_stmts])
     | _ -> failwith "Unexpected concurrent stmt structure" in

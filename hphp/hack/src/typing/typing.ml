@@ -3936,6 +3936,17 @@ and is_abstract_ft fty = match fty with
               (Some ((fst default), default_ty))
         | _ -> env, res
       end
+   (* Special function `Shapes::at` *)
+   | Class_const ((_, CI (_, shapes)) as class_id, ((_, at) as method_id))
+      when shapes = SN.Shapes.cShapes && at = SN.Shapes.at ->
+      check_class_function_in_suspend SN.Shapes.cShapes SN.Shapes.at;
+      overload_function p env class_id method_id el uel
+      begin fun env _fty res el -> match el with
+        | [shape; field] ->
+          let env, _te, shape_ty = expr env shape in
+          Typing_shapes.at env p shape_ty field
+        | _  -> env, res
+      end
    (* Special function `Shapes::keyExists` *)
    | Class_const ((_, CI (_, shapes)) as class_id, ((_, key_exists) as method_id))
       when shapes = SN.Shapes.cShapes && key_exists = SN.Shapes.keyExists ->

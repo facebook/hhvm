@@ -3525,9 +3525,9 @@ let shapes_key_exists_always_false pos1 name pos2 reason =
     pos2, shape_field_non_existence_reason name reason
   ]
 
-let shapes_idx_with_non_existent_field pos1 name pos2 reason =
-  add_list (Typing.err_code Typing.ShapesIdxWithNonExistentField) [
-    pos1, "You are calling Shapes::idx() on a field known to not exist";
+let shapes_method_access_with_non_existent_field pos1 name pos2 method_name reason =
+  add_list (Typing.err_code Typing.ShapesMethodAccessWithNonExistentField) [
+    pos1, "You are calling Shapes::" ^ method_name ^ "() on a field known to not exist";
     pos2, shape_field_non_existence_reason name reason
   ]
 

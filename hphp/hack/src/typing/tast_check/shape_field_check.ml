@@ -50,12 +50,12 @@ let trivial_shapes_key_exists_check pos1 env ((_, shape), _) field_name =
     Errors.shapes_key_exists_always_false pos1 (snd field_name) pos2 reason
   | `Unknown -> ()
 
-let shapes_idx_invalid_key_check pos1 env ((_, shape), _) field_name =
+let shapes_method_access_with_non_existent_field pos1 env method_name ((_, shape), _) field_name =
   match shapes_key_exists env shape (SFlit_str field_name) with
   | `DoesExist _ ->
     Lint.shape_idx_access_required_field pos1 (snd field_name)
   | `DoesNotExist (pos2, reason) ->
-    Errors.shapes_idx_with_non_existent_field pos1 (snd field_name) pos2 reason
+    Errors.shapes_method_access_with_non_existent_field pos1 (snd field_name) pos2 method_name reason
   | `Unknown -> ()
 
 let handler = object
@@ -72,7 +72,7 @@ let handler = object
     | (p, _), Call (Aast.Cnormal, (_, Class_const ((_, CI (_, class_name)), (_, method_name))), _, [shape; (pos, _), String field_name], [])
       when
         class_name = SN.Shapes.cShapes &&
-        method_name = SN.Shapes.idx ->
-      shapes_idx_invalid_key_check p env shape (pos, field_name)
+        (method_name = SN.Shapes.idx || method_name = SN.Shapes.at) ->
+      shapes_method_access_with_non_existent_field p env method_name shape (pos, field_name)
     | _ -> ()
 end

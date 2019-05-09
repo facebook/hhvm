@@ -1,0 +1,4 @@
+File "shape_at2.php", line 8, characters 8-43:
+You are calling Shapes::at() on a field known to not exist (Typing[4251])
+File "shape_at2.php", line 7, characters 15-25:
+The field 'missing' is not defined in this shape

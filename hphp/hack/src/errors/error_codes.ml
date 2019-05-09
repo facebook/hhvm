@@ -495,7 +495,7 @@ module Typing                               = struct
   | NonawaitedAwaitableInReactiveContext
   | ShapesKeyExistsAlwaysTrue
   | ShapesKeyExistsAlwaysFalse
-  | ShapesIdxWithNonExistentField
+  | ShapesMethodAccessWithNonExistentField
   | NonClassMember
   | PassingArrayCellByRef
   | CallSiteReactivityMismatch

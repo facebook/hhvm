@@ -220,6 +220,23 @@ let idx env p fty_pos shape_ty field default =
           res in
       env, res
 
+let at env p shape_ty field =
+  let env, shape_ty = Env.expand_type env shape_ty in
+  let env, res = Env.fresh_unresolved_type env p in
+  match TUtils.shape_field_name env field with
+   | None ->
+     env, (Reason.Rwitness (fst field), TUtils.tany env)
+   | Some field_name ->
+     let fake_super_shape_ty =
+       make_idx_fake_super_shape
+         field_name
+         {sft_optional = true; sft_ty = res} in
+     let env =
+       Type.sub_type (fst field) Reason.URparam env
+         shape_ty
+         fake_super_shape_ty in
+     env, res
+
 let remove_key p env shape_ty field  =
   match TUtils.shape_field_name env field with
    | None ->

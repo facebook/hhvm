@@ -66,4 +66,15 @@ abstract final class Shapes {
     T $shape
   ): dict<arraykey, mixed>;
 
+  /**
+   * Returns the value of the field $index of $shape,
+   * throws if the field is missing.
+   * Use this to access optional fields on shapes.
+   */
+  <<__Rx>>
+  public static function at<T as shape(...)>(
+    T $shape,
+    arraykey $index,
+  );
+
 }

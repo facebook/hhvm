@@ -6,10 +6,11 @@
     ast_provider
     file_info
     heap_shared_mem
+    index_builder
     logging
     naming
     parser_heap
     procs_procs
     pos
-    trie)
-  (preprocess (pps ppx_deriving.std)))
+    search_utils
+    trie))

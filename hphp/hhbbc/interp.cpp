@@ -1101,11 +1101,11 @@ void concatHelper(ISS& env, uint32_t n) {
       auto const cell = make_tv<KindOfPersistentString>(result);
       auto const ty = from_cell(cell);
       BytecodeVec bcs{num, bc::PopC {}};
-      bcs.push_back(gen_constant(cell));
+      if (num > 1) bcs.push_back(gen_constant(cell));
       if (slot == 0) {
         reduce(env, std::move(bcs));
       } else {
-        insert_after_slot(env, slot, num, 1, &ty, bcs);
+        insert_after_slot(env, slot, num, num > 1 ? 1 : 0, &ty, bcs);
         reprocess(env);
       }
       n -= num - 1;
@@ -1146,6 +1146,13 @@ void concatHelper(ISS& env, uint32_t n) {
       // sequence.
       auto const next = !i || result || can_insert_after_slot(env, i) ?
         litstr(result, i) : nullptr;
+      if (next == staticEmptyString()) {
+        if (n == 1) break;
+        assertx(nlit == 0);
+        fold(i, 1, next);
+        n--;
+        continue;
+      }
       if (!next) {
         if (nlit > 1) {
           fold(i - nlit, nlit, result);
@@ -1173,8 +1180,14 @@ void concatHelper(ISS& env, uint32_t n) {
     return;
   }
 
+  if (n == 1) {
+    if (!topC(env).subtypeOf(BStr)) {
+      return reduce(env, bc::CastString {});
+    }
+    return reduce(env);
+  }
+
   reduce(env);
-  if (n == 1) return;
   // We can't reduce the emitted concats, or we'll end up with
   // infinite recursion.
   env.flags.wasPEI = true;

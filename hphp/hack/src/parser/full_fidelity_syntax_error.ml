@@ -678,8 +678,9 @@ let invalid_non_rx_argument_for_declaration  =
 let nested_concurrent_blocks =
   "Concurrent blocks cannot be nested."
 
-let less_than_two_statements_in_concurrent_block =
-  "Less than 2 statements in concurrent block."
+let fewer_than_two_statements_in_concurrent_block =
+  "Expected 2 or more statements in concurrent block. Concurrent wrapping " ^
+  "nothing or a single statement is not useful or already implied."
 
 let invalid_syntax_concurrent_block =
   "Concurrent block must contain a compound statement of two or " ^

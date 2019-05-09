@@ -350,7 +350,7 @@ val mutably_owned_attribute_on_non_rx_function: string
 val invalid_non_rx_argument_for_lambda: string
 val invalid_non_rx_argument_for_declaration: string
 val nested_concurrent_blocks : string
-val less_than_two_statements_in_concurrent_block : string
+val fewer_than_two_statements_in_concurrent_block : string
 val invalid_syntax_concurrent_block : string
 val statement_without_await_in_concurrent_block : string
 val concurrent_is_disabled : string

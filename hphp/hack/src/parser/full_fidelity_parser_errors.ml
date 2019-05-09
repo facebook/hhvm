@@ -4224,7 +4224,7 @@ let find_syntax_errors env =
         let errors = (match statement_list with
         | _ :: _ :: _ -> errors
         | _ -> make_error_from_node node
-          SyntaxError.less_than_two_statements_in_concurrent_block :: errors
+          SyntaxError.fewer_than_two_statements_in_concurrent_block :: errors
         ) in
 
         let errors = List.fold_left ~init:errors ~f:(fun errors n ->

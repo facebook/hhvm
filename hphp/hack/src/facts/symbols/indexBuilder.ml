@@ -22,8 +22,8 @@ type index_builder_context = {
   text_filename: string option;
   json_filename: string option;
   json_chunk_size: int;
-  glean_service: string option;
-  glean_repo_name: string option;
+  custom_service: string option;
+  custom_repo_name: string option;
 }
 
 (* Combine two results *)
@@ -202,7 +202,7 @@ let go (ctxt: index_builder_context): unit =
       Printf.printf "Writing %d symbols to sqlite... %!"
         (List.length results);
       measure_time ~f:(fun () ->
-          SqliteIndexWriter.record_in_db filename results;
+          SqliteSymbolIndexWriter.record_in_db filename results;
         ) ~name:"";
   end;
 
@@ -215,7 +215,7 @@ let go (ctxt: index_builder_context): unit =
       Printf.printf "Writing %d symbols to text... %!"
         (List.length results);
       measure_time ~f:(fun () ->
-          TextIndexWriter.record_in_textfile filename results;
+          TextSymbolIndexWriter.record_in_textfile filename results;
         ) ~name:"";
   end;
 
@@ -228,25 +228,25 @@ let go (ctxt: index_builder_context): unit =
       Printf.printf "Writing %d symbols to json... %!"
         (List.length results);
       measure_time ~f:(fun () ->
-          JsonIndexWriter.record_in_jsonfiles
+          JsonSymbolIndexWriter.record_in_jsonfiles
             ctxt.json_chunk_size filename results;
         ) ~name:""
   in
 
-  (* Are we exporting to glean? *)
+  (* Are we exporting to a custom writer? *)
   begin
-    match (ctxt.glean_service, ctxt.glean_repo_name) with
+    match (ctxt.custom_service, ctxt.custom_repo_name) with
     | Some _, None
     | None, Some _ ->
-      print_endline "Glean requires both a service and a repo name.";
+      print_endline "API export requires both a service and a repo name.";
     | None, None ->
       ()
     | Some service, Some repo_name ->
-      Printf.printf "Exporting to glean [%s] [%s]...\n%!"
+      Printf.printf "Exporting to custom symbol index writer [%s] [%s]...\n%!"
         service repo_name;
       measure_time ~f:(fun () ->
-          GleanExporter.send_to_glean
+          CustomSymbolIndexWriter.send_to_custom_writer
             json_exported_files service repo_name globalrev;
-        ) ~name:"Finished writing to Glean: ";
+        ) ~name:"Finished writing to API: ";
   end
 ;;

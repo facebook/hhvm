@@ -12,7 +12,7 @@ open IndexBuilder
 (* Basic help text *)
 let usage =
   Printf.sprintf
-    "Usage: %s [--sqlite file] [--text file] [--json file] [repository]\n"
+    "Usage: %s [--sqlite file] [--text file] [--json file] [--custom] [repository]\n"
     Sys.argv.(0)
 ;;
 
@@ -22,8 +22,8 @@ let parse_options (): index_builder_context =
   let text_filename = ref None in
   let json_filename = ref None in
   let json_chunk_size = ref 500_000 in
-  let glean_service = ref None in
-  let glean_repo_name = ref None in
+  let custom_service = ref None in
+  let custom_repo_name = ref None in
   let repository = ref "." in
   let options = ref [
       "--sqlite",
@@ -42,13 +42,13 @@ let parse_options (): index_builder_context =
       Arg.Int (fun x -> json_chunk_size := x),
       "[number]    Split the JSON file into chunks of a specified size";
 
-      "--glean-service",
-      Arg.String (fun x -> glean_service := (Some x)),
-      "[service]  Use this specified glean service";
+      "--custom-service",
+      Arg.String (fun x -> custom_service := (Some x)),
+      "[service]  Use the custom symbol index writer";
 
-      "--glean-repo-name",
-      Arg.String (fun x -> glean_repo_name := (Some x)),
-      "[repo-name]  Use this specified glean repo name";
+      "--custom-repo-name",
+      Arg.String (fun x -> custom_repo_name := (Some x)),
+      "[repo-name]  Send this repo name to the custom symbol index writer";
 
     ] in
   Arg.parse_dynamic options (fun anonymous_arg -> repository := anonymous_arg) usage;
@@ -64,8 +64,8 @@ let parse_options (): index_builder_context =
     text_filename = !text_filename;
     json_filename = !json_filename;
     json_chunk_size = !json_chunk_size;
-    glean_service = !glean_service;
-    glean_repo_name = !glean_repo_name;
+    custom_service = !custom_service;
+    custom_repo_name = !custom_repo_name;
   }
 ;;
 

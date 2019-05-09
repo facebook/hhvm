@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $diriter = new RecursiveIteratorIterator( new RecursiveDirectoryIterator('.') );
 
 foreach ($diriter as $key => $file) {
@@ -9,3 +9,4 @@ foreach ($diriter as $key => $file) {
 }
 
 echo "===DONE===\n";
+}

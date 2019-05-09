@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $db = new pdo('sqlite::memory:');
 
 $db->beginTransaction();
@@ -17,4 +17,4 @@ var_dump($r->rowCount());
 
 
 $db->query('DROP TABLE foobar');
-
+}

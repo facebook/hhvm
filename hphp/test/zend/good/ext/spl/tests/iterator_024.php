@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ar = array(1, 2, array(31, 32, array(331)), 4);
 
 foreach(new RecursiveIteratorIterator(new ArrayObject($ar, 0, "RecursiveArrayIterator")) as $v) echo "$v\n";
@@ -24,3 +24,4 @@ foreach(new RecursiveIteratorIterator($it) as $v) echo "$v\n";
 
 
 echo "===DONE===\n";
+}

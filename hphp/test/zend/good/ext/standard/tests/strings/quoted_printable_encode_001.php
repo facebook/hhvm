@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(quoted_printable_encode()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(quoted_printable_encode(""));
 var_dump(quoted_printable_encode("test"));
@@ -11,3 +11,4 @@ var_dump(quoted_printable_encode('1'));
 var_dump(quoted_printable_encode(''));
 
 echo "Done\n";
+}

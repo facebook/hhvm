@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $d = 23.67;
 $s = "48484.22";
 $s1 = "test";
@@ -12,3 +12,4 @@ $s1 = ~$s2;
 var_dump(bin2hex($s1));
 
 echo "Done\n";
+}

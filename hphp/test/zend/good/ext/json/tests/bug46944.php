@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 for ($i = 1; $i <= 16; $i++) {
 	$first = 0xf0|($i >> 2);
 	$second = 0x8f|($i & 3) << 4;
@@ -9,3 +9,4 @@ for ($i = 1; $i <= 16; $i++) {
 
 
 echo "Done\n";
+}

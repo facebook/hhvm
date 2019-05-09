@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set("UTC");
 $tz = array("UTC", "Asia/Jerusalem", "America/Chicago", "Europe/London");
 $t = mktime(0, 0, 0, 6, 27, 2006);
@@ -21,3 +21,4 @@ foreach ($tz as $zone) {
 }
 
 echo "Done\n";
+}

@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $aDOM= new DOMDocument();
 $aDOM->appendChild($aDOM->createElementNS('urn::root','r:root'));
 
@@ -10,4 +10,4 @@ $data= $fromdom->documentElement;
 $aDOM->documentElement->appendChild($aDOM->importNode($data));
 
 echo $aDOM->saveXML();
-
+}

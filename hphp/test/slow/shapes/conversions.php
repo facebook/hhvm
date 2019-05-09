@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $s = shape('a' => 2, 'b' => 3);
 
 
@@ -28,3 +28,4 @@ var_dump(is_dict(dict($s)));
 var_dump(is_vec(vec($s)));
 
 var_dump(is_array((array)$s));
+}

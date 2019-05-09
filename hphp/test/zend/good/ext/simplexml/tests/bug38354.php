@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml = simplexml_load_string(
 '<code>
 	<a href="javascript:alert(\'1\');"><strong>Item Two</strong></a>
@@ -11,3 +11,4 @@ foreach ($xml->xpath("//*") as $element) {
 }
 
 echo "Done\n";
+}

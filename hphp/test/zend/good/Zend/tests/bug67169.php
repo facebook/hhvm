@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $array = array('a', 'b');
 array_splice(&$array, 0, 2);
 $array[] = 'c';
@@ -10,4 +10,4 @@ array_shift(&$array);
 array_shift(&$array);
 $array[] = 'c';
 var_dump($array);
-
+}

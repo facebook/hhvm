@@ -1,10 +1,10 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $notStr = 123;
 try {
-	sodium_increment(&$notStr);
+  sodium_increment(&$notStr);
 } catch (SodiumException $e) {
-	echo $e->getMessage(), "\n";
+  echo $e->getMessage(), "\n";
 }
 
 $str = "abc";
@@ -21,9 +21,9 @@ $addStr = "\2\0\0";
 
 $notStr = 123;
 try {
-	sodium_add(&$notStr, $addStr);
+  sodium_add(&$notStr, $addStr);
 } catch (SodiumException $e) {
-	echo $e->getMessage(), "\n";
+  echo $e->getMessage(), "\n";
 }
 
 $str = "abc";
@@ -35,4 +35,4 @@ $str = "ab" . ($x = "c");
 $str2 = $str;
 sodium_add(&$str, $addStr);
 var_dump($str, $str2);
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $array = array(
 	"127.0.0.1",
 	"10.0.0.1",
@@ -26,3 +26,4 @@ var_dump(long2ip(""));
 try { var_dump(long2ip(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

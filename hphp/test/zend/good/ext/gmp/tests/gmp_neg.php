@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_intval(gmp_neg(0)));
 var_dump(gmp_intval(gmp_neg(1)));
 var_dump(gmp_intval(gmp_neg(-1)));
@@ -17,3 +17,4 @@ try { var_dump(gmp_neg()); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 var_dump(gmp_neg(array()));
 
 echo "Done\n";
+}

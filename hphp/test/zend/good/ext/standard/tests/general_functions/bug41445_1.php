@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $file = dirname(__FILE__)."/bug41445_1.ini";
 
 $data = <<<DATA
@@ -21,3 +21,4 @@ var_dump(parse_ini_file($file));
 @unlink($file);
 
 echo "Done\n";
+}

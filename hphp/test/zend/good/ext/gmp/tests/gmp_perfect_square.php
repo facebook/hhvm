@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_perfect_square(0));
 var_dump(gmp_perfect_square("0"));
 var_dump(gmp_perfect_square(-1));
@@ -20,3 +20,4 @@ try { var_dump(gmp_perfect_square()); } catch (Exception $e) { echo "\n".'Warnin
 var_dump(gmp_perfect_square(array()));
 
 echo "Done\n";
+}

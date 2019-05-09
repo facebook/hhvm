@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $sockets = stream_socket_pair(STREAM_PF_UNIX, STREAM_SOCK_STREAM, 0);
 $tmp = tmpfile();
 
@@ -14,5 +14,4 @@ stream_copy_to_stream($sockets[1], $tmp);
 
 fseek($tmp, 0, SEEK_SET);
 var_dump(stream_get_contents($tmp));
-
-
+}

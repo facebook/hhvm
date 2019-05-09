@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ini_location = dirname(__FILE__) . '/bug48660.tmp';
 
 // Build ini data
@@ -20,3 +20,4 @@ var_dump(parse_ini_file($ini_location, true, INI_SCANNER_RAW));
 var_dump(parse_ini_file($ini_location, true, INI_SCANNER_NORMAL));
 error_reporting(0);
 @unlink(dirname(__FILE__) . '/bug48660.tmp');
+}

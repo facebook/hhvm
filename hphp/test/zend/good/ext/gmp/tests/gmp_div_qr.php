@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(gmp_div_qr()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_div_qr("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
@@ -22,3 +22,4 @@ var_dump(gmp_div_qr($fp, $fp));
 var_dump(gmp_div_qr(array(), array()));
 
 echo "Done\n";
+}

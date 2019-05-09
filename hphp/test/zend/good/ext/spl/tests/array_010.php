@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $obj = new ArrayObject(array('1st', 1, 2=>'3rd', '4th'=>4));
 
 var_dump($obj->getArrayCopy());
@@ -58,3 +58,4 @@ unset($obj['8th']);
 var_dump($obj->getArrayCopy());
 
 echo "===DONE===\n";
+}

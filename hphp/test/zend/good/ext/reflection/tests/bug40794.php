@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $obj = new stdClass();
 $obj->prop1 = '1';
 $obj->prop2 = '2';
@@ -16,3 +16,4 @@ foreach($reflect->getProperties() as $prop)
 var_dump($array);
 
 echo "Done\n";
+}

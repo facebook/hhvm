@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $arr = array(
 	0 => array(
 		"a",
@@ -49,3 +49,4 @@ foreach($it as $k => $v) {
 
 
 echo "===DONE===\n";
+}

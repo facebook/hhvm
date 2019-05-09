@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $im = imagecreate(10, 10);
 
 $tmp = imagerotate ($im, 5.0, -9999999);
@@ -13,4 +13,4 @@ if ($tmp) {
 if ($im) {
         imagedestroy($im);
 }
-
+}

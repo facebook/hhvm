@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump((array) 1);
 var_dump((array) NULL);
 var_dump((array) new stdclass);
@@ -19,4 +19,4 @@ $func = function(){ return 'just a test'; };
 
 array_splice(&$items, 0 , 4, $func);
 var_dump($items);
-
+}

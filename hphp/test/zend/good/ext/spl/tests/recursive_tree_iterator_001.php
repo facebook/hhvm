@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ary = array(
 	0 => array(
 		"a",
@@ -42,3 +42,4 @@ foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $
 }
 
 echo "===DONE===\n";
+}

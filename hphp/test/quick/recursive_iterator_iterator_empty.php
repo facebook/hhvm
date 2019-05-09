@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $array = array('k1' => array());
 
 $it = new RecursiveIteratorIterator(
@@ -15,3 +15,4 @@ for (true; $it->valid(); $it->next()) {
   );
 }
 print("\n===DONE===\n");
+}

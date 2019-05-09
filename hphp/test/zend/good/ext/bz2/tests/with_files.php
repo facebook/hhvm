@@ -1,5 +1,5 @@
 <?php // $Id$
-
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL);
 
 $filename = "with_files.bz2";
@@ -13,4 +13,4 @@ print bzread($bz, 10);
 print bzread($bz);
 bzclose($bz);
 unlink($filename);
-
+}

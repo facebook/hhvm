@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $data = 'data://,hello world';
 
 var_dump(file_get_contents($data));
@@ -10,3 +10,4 @@ unset($data);
 var_dump(stream_get_contents($file));
 
 echo "===DONE===\n";
+}

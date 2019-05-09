@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_powm(0,1,10)));
 var_dump(gmp_strval(gmp_powm(5,1,10)));
 var_dump(gmp_strval(gmp_powm(-5,1,-10)));
@@ -29,3 +29,4 @@ $n = gmp_init("0");
 var_dump(gmp_powm(10, $n, 10));
 
 echo "Done\n";
+}

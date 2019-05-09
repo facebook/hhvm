@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = "gzwrite_basic.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
@@ -14,3 +14,4 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 echo "===DONE===\n";
+}

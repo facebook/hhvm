@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $keys = array(
   1234,
   'foo',
@@ -7,3 +7,4 @@ $keys = array(
 );
 
 var_dump(array_fill_keys($keys, 'foo'));
+}

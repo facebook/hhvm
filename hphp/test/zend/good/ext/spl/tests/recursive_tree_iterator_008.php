@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ary = array(
 	"a" => array("b"),
 	"c" => array("d"),
@@ -25,3 +25,4 @@ try {
 	echo "OutOfRangeException thrown\n";
 }
 echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $resource = fopen(dirname(__FILE__).'/bug30362.txt', 'rb');
 
 for ($i = 0; ($i < 10) && !feof($resource); ++$i ) {
@@ -9,3 +9,4 @@ for ($i = 0; ($i < 10) && !feof($resource); ++$i ) {
 }
 fclose($resource);
         
+}

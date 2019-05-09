@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $x = true;
 
 if(!$x) {
@@ -7,4 +7,4 @@ if(!$x) {
 } else {
   echo "second!\n";
 }
-
+}

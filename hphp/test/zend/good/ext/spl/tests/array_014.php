@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $it = new ArrayIterator(range(0,10));
 var_dump($it->count());
 $it->seek(5);
@@ -34,3 +34,4 @@ foreach($it as $v)
 }
 
 echo "===DONE===\n";
+}

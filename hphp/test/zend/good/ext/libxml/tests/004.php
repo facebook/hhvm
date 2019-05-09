@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ctxs = array(
 	NULL,
 	'bogus',
@@ -19,4 +19,4 @@ foreach ($ctxs as $ctx) {
 }
 
 echo "Done\n";
-
+}

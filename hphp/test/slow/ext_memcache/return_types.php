@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $key = 'TEST_KEY_RETURN_TYPES';
 
 $memcache = new Memcache;
@@ -32,3 +32,4 @@ foreach ($testValueList as $value) {
 }
 
 $memcache->delete($key);
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $funcs = array(
 	'is_writable',
 	'is_readable',
@@ -23,4 +23,4 @@ foreach ($funcs as $test) {
 	echo gettype($bb)."\n";
 	clearstatcache();
 }
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 
 $interval = new DateInterval('PT2H1M');
@@ -27,4 +27,4 @@ $date2->sub($interval);
 
 echo 'Zone Type 3: ' . $date3->format('Y-m-d H:i:s T') . "\n";
 echo 'Zone Type 2: ' . $date2->format('Y-m-d H:i:s T') . "\n";
-
+}

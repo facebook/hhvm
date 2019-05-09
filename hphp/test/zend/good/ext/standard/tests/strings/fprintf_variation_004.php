@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $char_variation = array( 'a', "a", 67, -67, 99 );
 
 /* creating dumping file */
@@ -20,4 +20,4 @@ print_r(file_get_contents($data_file));
 echo "\nDone";
 
 unlink($data_file);
-
+}

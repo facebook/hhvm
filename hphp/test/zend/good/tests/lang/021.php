@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 for ($i=0; $i<=5; $i++)
 {
   echo "i=$i\n";
@@ -26,3 +26,4 @@ for ($i=0; $i<=5; $i++)
   }
 }
 echo "hi\n";
+}

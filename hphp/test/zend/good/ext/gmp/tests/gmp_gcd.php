@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_gcd(234,12387)));
 var_dump(gmp_strval(gmp_gcd(0,12387)));
 var_dump(gmp_strval(gmp_gcd(224,0)));
@@ -21,3 +21,4 @@ try { var_dump(gmp_gcd($n,array(),1)); } catch (Exception $e) { echo "\n".'Warni
 try { var_dump(gmp_gcd(array(),$n,1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $tests = array(
 	array( '9', 'af63b44c8601a894' ),
 	array( 'w', 'af63ea4c86020456' ),
@@ -316,4 +316,5 @@ foreach($tests as $test) {
 
 if($pass) {
 	echo "PASS";
+}
 }

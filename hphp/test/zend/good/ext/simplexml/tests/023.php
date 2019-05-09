@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE talks SYSTEM "nbsp.dtd" [
@@ -15,3 +15,4 @@ $sxe = simplexml_load_string($xml);
 var_dump($sxe);
 var_dump($sxe['attr']);
 echo "===DONE===\n";
+}

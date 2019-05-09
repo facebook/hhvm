@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $it = new ArrayObject(array("x"=>1, 1=>2, 3=>3, 4, "1"=>5));
 
 $ar = iterator_to_array($it);
@@ -14,3 +14,4 @@ foreach($ar as $v)
 }
 
 echo "===DONE===\n";
+}

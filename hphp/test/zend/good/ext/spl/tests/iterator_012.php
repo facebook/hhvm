@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "===Current===\n";
 
 $it = new NoRewindIterator(new ArrayIterator(array(0 => 'A', 1 => 'B', 2 => 'C')));
@@ -18,3 +18,4 @@ foreach($it as $key=>$val)
 }
 
 echo "===DONE===\n";
+}

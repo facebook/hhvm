@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $it = new EmptyIterator;
 
 var_dump($it->valid());
@@ -29,3 +29,4 @@ catch(BadMethodCallException $e)
 var_dump($it->valid());
 
 echo "===DONE===\n";
+}

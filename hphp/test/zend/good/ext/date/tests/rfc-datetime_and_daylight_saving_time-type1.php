@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 $date_format = 'Y-m-d H:i:s e';
 $interval_format = 'P%dDT%hH';
@@ -316,4 +316,4 @@ $interval_spec = 'P1D';
 $interval = new DateInterval($interval_spec);
 echo 'bs10 ' . $end->format($date_format) . " - $interval_spec = "
 	. $end->sub($interval)->format($date_format) . "\n";
-
+}

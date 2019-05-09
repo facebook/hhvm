@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $b = 3;
 $a = new SplFixedArray($b);
 
@@ -18,4 +18,4 @@ foreach ($a as $x) {
 }
 
 var_dump($a->getSize());
-
+}

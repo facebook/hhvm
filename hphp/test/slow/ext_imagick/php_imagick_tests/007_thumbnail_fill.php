@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $im = new Imagick("magick:logo");
 $im->setImageBackgroundColor("pink");
 $im->thumbnailImage(200, 200, true, true);
@@ -15,3 +15,4 @@ if ($color->isPixelSimilar("pink", 0.0))
   echo "Similar" . PHP_EOL;
 else
   var_dump ($color->getColorAsString());
+}

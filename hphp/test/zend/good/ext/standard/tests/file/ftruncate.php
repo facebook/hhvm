@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/ftruncate.dat";
 
 file_put_contents($filename, "some test data inside");
@@ -35,3 +35,4 @@ var_dump(file_get_contents($filename));
 
 @unlink($filename);
 echo "Done\n";
+}

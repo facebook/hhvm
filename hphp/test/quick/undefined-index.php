@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $arr = array();
 $a = $arr[123];
 echo $a;
@@ -7,3 +7,4 @@ echo $a;
 $obj = new stdclass;
 $a = $obj->flubb;
 echo $a;
+}

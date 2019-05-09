@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "Load document with preserveWhiteSpace on\n";
 $doc = new DOMDocument;
 $doc->load(dirname(__FILE__)."/book.xml");
@@ -11,4 +11,4 @@ $doc = new DOMDocument;
 $doc->preserveWhiteSpace = false;
 $doc->load(dirname(__FILE__)."/book.xml");
 echo $doc->saveXML();
-
+}

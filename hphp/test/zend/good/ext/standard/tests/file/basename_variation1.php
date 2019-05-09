@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $prefixes = array (
 	
     // drive letters
@@ -42,4 +42,4 @@ foreach ($prefixes as $prefix) {
 }
 
 echo "\ndone\n";
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_prob_prime(10));
 var_dump(gmp_prob_prime("7"));
 var_dump(gmp_prob_prime(17));
@@ -27,3 +27,4 @@ try { var_dump(gmp_prob_prime()); } catch (Exception $e) { echo "\n".'Warning: '
 var_dump(gmp_prob_prime(array()));
 
 echo "Done\n";
+}

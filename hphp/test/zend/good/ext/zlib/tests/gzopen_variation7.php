@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h1 = gzopen($f, 'r');
 $h2 = gzopen($f, 'r');
@@ -11,3 +11,4 @@ gzclose($h1);
 var_dump(gzread($h2, 50));
 // deliberately do not close $h2
 echo "===DONE===\n";
+}

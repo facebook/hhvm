@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $memc = new Memcached();
 
 $servers = [
@@ -10,3 +10,4 @@ $servers = [
 
 $memc->addServers($servers);
 var_dump($memc->getVersion());
+}

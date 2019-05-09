@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $e0 = new Exception('0');
 $e1 = new Exception('1');
 $e2 = new Exception('2');
@@ -26,3 +26,4 @@ while ($cur->getPrevious() !== null) {
 $result = $actual_order === $proper_order ? 'pass' : 'fail';
 
 echo "{$result}\n";
+}

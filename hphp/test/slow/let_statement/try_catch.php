@@ -1,5 +1,5 @@
 <?hh // experimental
-
+<<__EntryPoint>> function main(): void {
 let x = 42;
 try {
   var_dump(x);
@@ -10,4 +10,5 @@ try {
   var_dump(x);
 } finally {
   var_dump(x);
+}
 }

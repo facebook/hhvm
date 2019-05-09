@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "*** Testing octdec() : basic functionality ***\n";
 
 $values = array(01234567,
@@ -25,3 +25,4 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 echo "===Done===";
+}

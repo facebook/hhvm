@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $n = gmp_init(0);
 var_dump(gmp_testbit($n, -10));
 var_dump(gmp_testbit($n, 0));
@@ -31,3 +31,4 @@ var_dump(gmp_testbit($n, 5));
 var_dump(gmp_strval($n));
 
 echo "Done\n";
+}

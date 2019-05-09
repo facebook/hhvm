@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $tmp = tmpfile();
 fwrite($tmp, b'test');
 fseek($tmp, 0, SEEK_SET);
@@ -19,4 +19,4 @@ fpassthru($tmp);
 
 echo "\n";
 var_dump(stream_get_contents($tmp));
-
+}

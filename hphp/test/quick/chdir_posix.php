@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $origdir = getcwd();
 
 // Ugh. This (racy crap) is the 'recommended' way to fake tmpdir()
@@ -12,3 +12,4 @@ chdir($origdir);
 chmod($dirname, 0600);
 var_dump(chdir($dirname));
 rmdir($dirname);
+}

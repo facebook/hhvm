@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_cmp(123123,-123123));
 var_dump(gmp_cmp("12345678900987654321","12345678900987654321"));
 var_dump(gmp_cmp("12345678900987654321","123456789009876543211"));
@@ -18,3 +18,4 @@ try { var_dump(gmp_cmp(array())); } catch (Exception $e) { echo "\n".'Warning: '
 try { var_dump(gmp_cmp()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_or("111111", "2222222")));
 var_dump(gmp_strval(gmp_or(123123, 435234)));
 var_dump(gmp_strval(gmp_or(555, "2342341123")));
@@ -19,3 +19,4 @@ var_dump(gmp_or(1, array()));
 var_dump(gmp_or(array(), array()));
 
 echo "Done\n";
+}

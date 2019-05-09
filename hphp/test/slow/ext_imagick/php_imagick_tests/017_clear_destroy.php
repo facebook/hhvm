@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $im = new Imagick ();
 $im->clear ();
 $im->destroy ();
@@ -19,4 +19,4 @@ $im->clear ();
 $im->destroy ();
 
 echo 'success';
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $doubles = array(
         PHP_INT_MAX,
         PHP_INT_MAX + 1,
@@ -16,3 +16,4 @@ foreach ($doubles as $d) {
 }
 
 echo "Done\n";
+}

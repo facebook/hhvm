@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 for ($i = -1; $i < 10; $i++) {
 	var_dump(gmp_strval(gmp_jacobi(($i*$i)-1, 3)));
 }
@@ -24,3 +24,4 @@ try { var_dump(gmp_jacobi(array())); } catch (Exception $e) { echo "\n".'Warning
 try { var_dump(gmp_jacobi()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

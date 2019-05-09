@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $dirname = dirname(__FILE__) . '/';
 $arch = new ZipArchive;
 $arch->open($dirname.'foo.zip',ZIPARCHIVE::CREATE);
@@ -10,3 +10,4 @@ var_dump($arch->getStatusString());
 $arch->close();
 error_reporting(0);
 unlink($dirname.'foo.zip');
+}

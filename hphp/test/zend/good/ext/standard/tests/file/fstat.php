@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/fstat.dat";
 
 $fp = fopen($filename, "w");
@@ -9,3 +9,4 @@ var_dump(fstat($fp));
 
 @unlink($filename);
 echo "Done\n";
+}

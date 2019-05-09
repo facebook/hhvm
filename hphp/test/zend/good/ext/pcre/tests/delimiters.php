@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(preg_match('', ''));
 var_dump(preg_match('      ', ''));
 var_dump(preg_match('@@', ''));
@@ -9,4 +9,4 @@ var_dump(preg_match('~a', ''));
 var_dump(preg_match('@\@\@@', '@@'));
 var_dump(preg_match('//z', '@@'));
 var_dump(preg_match('{', ''));
-
+}

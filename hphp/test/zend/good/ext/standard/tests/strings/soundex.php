@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(soundex(""));
 var_dump(soundex('-1'));
 try { var_dump(soundex(array())); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -27,3 +27,4 @@ foreach ($array as $str) {
 }
 
 echo "Done\n";
+}

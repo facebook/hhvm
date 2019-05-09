@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "-- only two parameters --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/'),"\n";
 echo "-- using empty array --\n";
@@ -18,4 +18,4 @@ echo "-- putting oauth_signature inside by mistake --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/',array('oauth_signature'=>'hello world')),"\n";
 echo "-- merging url query and extra params --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/script?arg1=1',array('arg2' => '2')),"\n";
-
+}

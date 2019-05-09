@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $genFactory = function() {
     yield 1;
     yield 2;
@@ -9,4 +9,4 @@ $genFactory = function() {
 foreach ($genFactory() as $value) {
     var_dump($value);
 }
-
+}

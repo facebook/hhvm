@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 
 /* calculate the sunrise time for Lisbon, Portugal
@@ -17,3 +17,4 @@ error_reporting(E_ALL & ~E_STRICT);
 echo date("D M d Y") . ', sunrise time : ' . date_sunrise(time(), SUNFUNCS_RET_STRING, 38.4, -9.0, 90.0, 1.0) . "\n";
 echo date("D M d Y") . ', sunset time : ' . date_sunset(time(), SUNFUNCS_RET_STRING, 38.4, -9.0, 90.0, 1.0) . "\n";
 echo "===Done===";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $dirname = dirname(__FILE__) . '/';
 $zip = new ZipArchive;
 if (!$zip->open($dirname . 'test.zip')) {
@@ -11,4 +11,5 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 	echo "ok\n";
 } else {
 	echo "failed\n";
+}
 }

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $draw = new ImagickDraw;
 
 // clip
@@ -66,3 +66,4 @@ var_dump($draw->getTextEncoding());
 
 $draw->setTextUnderColor('cyan');
 var_dump($draw->getTextUnderColor()->getColor());
+}

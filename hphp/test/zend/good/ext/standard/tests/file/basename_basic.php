@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $file_paths = array (
   /* simple paths (forward slashes) */
   "bar",
@@ -52,4 +52,4 @@ $file_paths = array (
 foreach ($file_paths as $file_path) {
 	var_dump(basename($file_path));
 }
-
+}

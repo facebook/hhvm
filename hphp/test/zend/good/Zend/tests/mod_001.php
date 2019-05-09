@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = array(1,2,3);
 $b = array();
 
@@ -10,3 +10,4 @@ try {
 }
 
 echo "Done\n";
+}

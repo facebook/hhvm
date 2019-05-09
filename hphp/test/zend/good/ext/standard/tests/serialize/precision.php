@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $numbers = array(
 	"0000000000000000", //0
 	"2d431cebe2362a3f", //.0002
@@ -25,4 +25,5 @@ foreach ($numbers as $ns) {
 		echo "OK\n";
 	else
 		echo "mismatch\n\twas:    $ns\n\tbecame: $repr\n";
+}
 }

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/gzeof_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
@@ -12,3 +12,4 @@ gzclose($h);
 var_dump(gzeof($h));
 unlink($filename);
 echo "===DONE===\n";
+}

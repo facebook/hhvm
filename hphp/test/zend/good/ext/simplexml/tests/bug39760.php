@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml = '<?xml version="1.0" ?>
 <test>
     <level1>
@@ -18,3 +18,4 @@ $test3 = clone $test->level1->level2a;
 var_dump($test3);
 
 echo "Done\n";
+}

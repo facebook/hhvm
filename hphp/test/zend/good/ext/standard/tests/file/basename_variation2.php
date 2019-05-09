@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $paths = array (
 
 	"foo",
@@ -37,4 +37,4 @@ foreach ($paths as $path) {
 }
 
 echo "\ndone\n";
-
+}

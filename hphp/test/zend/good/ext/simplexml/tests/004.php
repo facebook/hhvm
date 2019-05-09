@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
@@ -27,3 +27,4 @@ $elem2 = $elem1->elem2;
 var_dump(trim((string)$elem2));
 
 echo "===DONE===\n";
+}

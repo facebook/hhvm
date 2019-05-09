@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml = simplexml_load_string('<root>
 	<first_node_no_ns />
 	<ns1:node1 xmlns:ns1="#ns1" />
@@ -25,3 +25,4 @@ foreach (array('', '#ns1', '#ns2', '#ns3') as $ns)
 	}
 }
 echo "===DONE===\n";
+}

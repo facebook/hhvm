@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $doubles = array(
         -9223372036854775808,
         -9223372036854775809,
@@ -14,3 +14,4 @@ foreach ($doubles as $d) {
 }
 
 echo "Done\n";
+}

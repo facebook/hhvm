@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "*** Testing addcslashes() for basic operations ***\n";
 /* checking normal operation of addcslashes */
 $string = "goodyear12345NULL\0truefalse\a\v\f\b\n\r\t";
@@ -27,4 +27,4 @@ foreach($charlist as $char) {
 }
 
 echo "Done\n"; 
-
+}

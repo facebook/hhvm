@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <foo>bar<baz/>bar</foo>
@@ -10,3 +10,4 @@ $sxe = simplexml_load_string($xml);
 var_dump((string)$sxe);
 
 echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 foreach (array(PREG_PATTERN_ORDER, PREG_SET_ORDER) as $flag) {
 	var_dump(preg_match_all('~
 		(?P<date>
@@ -10,4 +10,5 @@ foreach (array(PREG_PATTERN_ORDER, PREG_SET_ORDER) as $flag) {
 		'2006-05-13 e outra data: "12-Aug-37"', &$m, $flag));
 
 	var_dump($m);
+}
 }

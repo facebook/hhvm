@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 sscanf(":59:58","%s:%d:%f", &$a, &$b, &$c);
 echo "[$a][$b][$c]\n";
 
@@ -8,4 +8,4 @@ echo "[$a][$b][$c]\n";
 
 sscanf("15.1111::foo","%f:%d:%s", &$a, &$b, &$c);
 echo "[$a][$b][$c]\n";
-
+}

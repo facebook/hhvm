@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $doc = new DOMDocument();
 $doc->loadXML('<root/>');
 
@@ -31,3 +31,4 @@ try {
 }
 
 echo $doc->saveXML($root);
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml=<<<EOF
 <drinks xmlns:hot="http://www.example.com/hot">
  <hot:drink><hot:name>Coffee</hot:name></hot:drink>
@@ -20,3 +20,4 @@ foreach ($sxe->children('http://www.example.com/hot') as $element_name => $eleme
 }
 
 echo "===DONE===\n";
+}

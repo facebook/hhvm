@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $null = NULL;
 
 var_dump($null[1]);
@@ -20,3 +20,4 @@ $arr = array(1,2,3);
 var_dump($null[$arr]);
 
 echo "Done\n";
+}

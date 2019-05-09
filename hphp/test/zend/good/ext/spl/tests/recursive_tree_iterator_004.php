@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ary = array(
 	0 => array(
 		"a",
@@ -24,3 +24,4 @@ foreach($it as $k => $v) {
 	echo '[' . $it->key() . '] => ' . $it->getPrefix() . $it->getEntry() . $it->getPostfix() . "\n";
 }
 echo "===DONE===\n";
+}

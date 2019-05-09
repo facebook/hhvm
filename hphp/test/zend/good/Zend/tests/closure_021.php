@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $foo = function() {
 	try {
 		throw new Exception('test!');
@@ -13,4 +13,4 @@ try {
 } catch (Exception $e) {
 	var_dump($e->getMessage());
 }
-
+}

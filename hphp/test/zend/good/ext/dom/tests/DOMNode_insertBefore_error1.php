@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $doc1 = new DOMDocument();
 $doc2 = new DOMDocument();
 
@@ -11,4 +11,4 @@ try {
 } catch(DOMException $e) {
 	echo $e->getMessage();
 }
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $key = "TEST_KEY_COMPRESSION";
 $tmp_object = new stdClass;
 $tmp_object->str_attr = str_repeat("0", 100);
@@ -22,3 +22,4 @@ $memcache->addServer('localhost', 11211);
 $r = $memcache->get($key);
 var_dump($r);
 $memcache->delete($key);
+}

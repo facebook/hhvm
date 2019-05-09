@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 var_dump(defined('HHVM_VERSION'));
 var_dump(defined('HHVM_VERSION_ID'));
 var_dump(is_int(HHVM_VERSION_ID));
@@ -11,4 +11,5 @@ if (HHVM_VERSION_ID == $version_int) {
   echo "HHVM_VERSION matches HHVM_VERSION_ID\n";
 } else {
   echo "HHVM_VERSION does NOT match HHVM_VERSION_ID, please make sure update both of them\n";
+}
 }

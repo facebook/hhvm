@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = array(1,2,3);
 
 $o = new stdclass;
@@ -9,3 +9,4 @@ $c = $o + $a;
 var_dump($c);
 
 echo "Done\n";
+}

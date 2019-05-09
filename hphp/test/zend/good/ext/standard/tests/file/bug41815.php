@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/concur_rw.txt";
 
 @unlink($filename);
@@ -18,3 +18,4 @@ fclose($reader);
 @unlink($filename);
 
 echo "Done\n";
+}

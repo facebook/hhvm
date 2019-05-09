@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
@@ -49,3 +49,4 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 }
 
 echo "===DONE===\n";
+}

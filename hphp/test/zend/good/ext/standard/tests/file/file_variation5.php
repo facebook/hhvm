@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $script_directory = dirname(__FILE__);
 chdir($script_directory);
 $test_dirname = basename(__FILE__, ".php") . "testdir";
@@ -31,4 +31,4 @@ chdir($script_directory);
 chdir($script_directory);
 rmdir($test_dirname);
 unlink($filepath);
-
+}

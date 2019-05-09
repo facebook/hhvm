@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $str = 'asdd/?';
 $len = strlen($str);
 for ($i = 0; $i < $len; $i++) {
@@ -18,4 +18,4 @@ switch ($str[0]) {
 	default:
 		echo 'Default RAN!';
 }
-
+}

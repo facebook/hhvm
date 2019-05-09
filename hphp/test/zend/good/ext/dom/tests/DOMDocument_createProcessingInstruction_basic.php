@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $doc = new DOMDocument;
 
 $node = $doc->createElement("para");
@@ -14,4 +14,4 @@ $test_proc_inst1 =
 $node->appendChild($test_proc_inst1);
 
 echo $doc->saveXML();
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $list = array(
   'boolean_true' => true,
   'boolean_false' => false,
@@ -37,4 +37,5 @@ var_dump(count($res));
 
 foreach($res as $key => $value) {
   var_dump($value == $list[$key]);
+}
 }

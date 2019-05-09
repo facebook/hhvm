@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $string = "Life it seems, will fade away
 Drifting further everyday
 Getting lost within myself
@@ -31,3 +31,4 @@ var_dump(bzdecompress($data));
 var_dump(bzdecompress($data2));
 
 echo "Done\n";
+}

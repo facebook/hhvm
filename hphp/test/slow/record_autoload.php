@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 HH\autoload_set_paths(
   array(
     'record' => array(
@@ -12,3 +12,4 @@ HH\autoload_set_paths(
 $x = Foo['x'=>10];
 $y = $x['x'];
 var_dump($y);
+}

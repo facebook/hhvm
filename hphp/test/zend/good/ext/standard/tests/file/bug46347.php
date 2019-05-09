@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $str = <<< EOF
 [section]
 part1.*.part2 = 1
@@ -11,3 +11,4 @@ file_put_contents($file, $str);
 var_dump(parse_ini_file($file));
 error_reporting(0);
 unlink(__DIR__.'/bug46347.ini');
+}

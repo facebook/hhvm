@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $test = <<<"TEST"
 TEST;
 
@@ -28,5 +28,4 @@ $test = <<<"TEST"
 TEST;
 
 var_dump(strlen($test) == 2);
-
-
+}

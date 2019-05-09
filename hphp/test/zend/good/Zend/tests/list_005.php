@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = "foo";
 
 list($a, $b, $c) = $a;
@@ -29,4 +29,4 @@ $a = array(1, 2, 3);
 list($a, $b, $c) = $a;
 
 var_dump($a, $b, $c);
-
+}

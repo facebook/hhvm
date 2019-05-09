@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $image = imagecreatetruecolor(100, 100);
 
 $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
@@ -13,3 +13,4 @@ $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
+}

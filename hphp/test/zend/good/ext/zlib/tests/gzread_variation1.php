@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = "gzread_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
@@ -16,3 +16,4 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 echo "===DONE===\n";
+}

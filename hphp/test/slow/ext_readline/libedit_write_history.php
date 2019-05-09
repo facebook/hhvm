@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $name = tempnam('/tmp', 'readline.tmp');
 
 readline_add_history('foo');
@@ -16,4 +16,4 @@ readline_write_history($name);
 var_dump(file_get_contents($name));
 
 unlink($name);
-
+}

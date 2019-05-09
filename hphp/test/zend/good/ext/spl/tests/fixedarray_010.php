@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = new SplFixedArray(0);
 $a = new SplFixedArray(3);
 
@@ -36,4 +36,4 @@ $a->setSize(0);
 var_dump($a->getSize());
 
 print "ok\n";
-
+}

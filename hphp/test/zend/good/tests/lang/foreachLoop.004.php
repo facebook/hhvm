@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a=array("a", "b", "c");
 $v=array();
 foreach($a as $v[0]) {
@@ -16,3 +16,4 @@ foreach($a as $k=>$v[0]) {
 }
 var_dump($a);
 var_dump($k, $v);
+}

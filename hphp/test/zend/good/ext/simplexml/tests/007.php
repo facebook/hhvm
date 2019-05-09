@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
@@ -40,3 +40,4 @@ var_dump($a);
 $dummy = $sxe->elem1[$a];
 var_dump($a);
 echo "===Done===";
+}

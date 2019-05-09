@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try {
 
 	$dll = new SplQueue();
@@ -8,4 +8,4 @@ try {
 } catch (Exception $e) {
 	echo $e->getMessage();
 }
-
+}

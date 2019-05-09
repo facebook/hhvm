@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(array_slice(range(1, 3), 0, NULL, true));
 var_dump(array_slice(range(1, 3), 0, 0, true));
 var_dump(array_slice(range(1, 3), 0, NULL));
@@ -15,3 +15,4 @@ $a = 'foo';
 var_dump(array_slice(range(1, 3), 0, $a));
 var_dump(array_slice(range(1, 3), 0, $a));
 var_dump($a);
+}

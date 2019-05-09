@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $priorityQueue = new SplPriorityQueue();
 
 try {
@@ -7,4 +7,4 @@ try {
 } catch (RuntimeException $e) {
     echo "Exception: ".$e->getMessage().PHP_EOL;
 }
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $test_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
@@ -22,4 +22,4 @@ echo file_get_contents($test_file);
 // cleanup
 unlink($test_file);
 unlink($log_file);
-
+}

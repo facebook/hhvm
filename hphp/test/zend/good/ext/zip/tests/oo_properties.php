@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $dirname = dirname(__FILE__) . '/';
 $file = $dirname . '__property_test.zip';
 
@@ -24,3 +24,4 @@ printf("zip->comment (%d):\n\tempty(): %d\n\tisset(): %d\n", strlen($zip->commen
 
 unset($zip); //close the file before unlinking
 @unlink($file);
+}

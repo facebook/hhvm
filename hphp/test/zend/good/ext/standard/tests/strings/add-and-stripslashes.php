@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $input = '';
 for($i=0; $i<512; $i++) {
 	$input .= chr($i%256);
@@ -11,4 +11,4 @@ if($input === stripslashes(addslashes($input))) {
 } else {
 	echo "FAILED\n";
 }
-
+}

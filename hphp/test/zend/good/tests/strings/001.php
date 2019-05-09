@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 error_reporting(0);
 
 echo "Testing strtok: ";
@@ -200,4 +200,4 @@ if (strlen($ui1) == strlen($ui2) && strlen($ui1) == $len && $ui1 != $ui2) {
 } else {
 	echo("failed!\n");
 }
-
+}

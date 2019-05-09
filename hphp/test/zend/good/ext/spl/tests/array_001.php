@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ar = array(0=>0, 1=>1);
 $ar = new ArrayObject($ar);
 
@@ -30,3 +30,4 @@ $ar[] = 4;
 var_dump($ar);
 
 echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $array = array('foo', 'bar', 'baz');
 $iterator = new ArrayIterator($array);
 $regexIterator = new RegexIterator($iterator, "/f/");
@@ -17,4 +17,4 @@ var_dump($regexIterator->getMode() === RegexIterator::ALL_MATCHES);
 
 $regexIterator->setMode(RegexIterator::SPLIT);
 var_dump($regexIterator->getMode() === RegexIterator::SPLIT);
-
+}

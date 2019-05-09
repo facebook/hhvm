@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $memcache = new Memcache();
 $memcache->addServer('localhost', 11211);
 
@@ -15,3 +15,4 @@ foreach($keys as $k) {
 }
 $r = $memcache->get($keys);
 var_dump($r);
+}

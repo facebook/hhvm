@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <people>
 test
@@ -30,3 +30,4 @@ var_dump((object)$foo);
 var_dump((object)$people);
 
 echo "===DONE===\n";
+}

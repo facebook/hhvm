@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $root = simplexml_load_string(
 '<?xml version="1.0"?>
 <root>
@@ -14,4 +14,4 @@ echo $root->child[0], "\n";
 echo $root->child[1], "\n";
 echo $root->child[2], "\n";
 echo $root->child[3], "\n";
-
+}

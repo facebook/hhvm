@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(gmp_divexact(1, 1, 1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(gmp_divexact()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
@@ -27,3 +27,4 @@ $r = gmp_divexact($n1, $n);
 var_dump(gmp_strval($r));
 
 echo "Done\n";
+}

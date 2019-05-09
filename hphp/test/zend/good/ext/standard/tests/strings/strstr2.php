@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $email  = 'aexample.com';
 var_dump(strstr($email, '@'));
 var_dump(strstr($email, '@', true));
@@ -19,4 +19,4 @@ var_dump(strstr($email, 'E'));
 var_dump(strstr($email, 'E', true));
 
 var_dump(strstr('', ' ', false));
-
+}

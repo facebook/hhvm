@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $a = <<<A
 	A;
 ;
@@ -8,4 +8,4 @@ $a = <<<A
 A;
 
 var_dump(strlen($a) == 12);
-
+}

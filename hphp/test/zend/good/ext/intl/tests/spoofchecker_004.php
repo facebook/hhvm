@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $korean = "\xED\x95\x9C" . "\xEA\xB5\xAD" . "\xEB\xA7\x90";
 
 $x = new Spoofchecker();
@@ -13,3 +13,4 @@ $x->setChecks(Spoofchecker::MIXED_SCRIPT_CONFUSABLE |
   Spoofchecker::SINGLE_SCRIPT_CONFUSABLE);
 var_dump($x->areConfusable("HELLO", "H\xD0\x95LLO"));
 var_dump($x->areConfusable("hello", "h\xD0\xB5llo"));
+}

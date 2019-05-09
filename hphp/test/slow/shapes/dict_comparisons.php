@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 $s1 = shape('a' => 1, 'b' => 2);
 $s2 = dict['c' => 3, 'd' => 4];
 
@@ -51,4 +51,5 @@ try {
   var_dump($s2 <  $s1);
 } catch (Exception $e) {
   echo $e->getMessage(), "\n";
+}
 }

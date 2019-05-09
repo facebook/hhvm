@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $tempdir = tempnam(sys_get_temp_dir(), __FILE__);
 unlink($tempdir);
 mkdir($tempdir);
@@ -10,3 +10,4 @@ var_dump($zip->extractTo($tempdir, 'dir/file.txt'));
 var_dump($zip->close());
 
 var_dump(file_get_contents($tempdir.'/dir/file.txt'));
+}

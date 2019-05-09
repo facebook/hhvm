@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing array_keys() on various arrays ***";
 $arrays = array(
   array(), 
@@ -25,3 +25,4 @@ foreach ($arrays as $array) {
 }
 
 echo "Done\n";
+}

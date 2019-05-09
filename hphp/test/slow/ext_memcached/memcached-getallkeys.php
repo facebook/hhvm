@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $m = new Memcached();
 $m->addServer('localhost', 11211);
 
@@ -25,3 +25,4 @@ $m->set('array', array(11, 12));
 $m->set('object', $obj);
 
 var_dump($m->getAllKeys());
+}

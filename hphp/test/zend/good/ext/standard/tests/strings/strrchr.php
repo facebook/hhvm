@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(strrchr("", ""));
 var_dump(strrchr("abc", ""));
 var_dump(strrchr("", "abc"));
@@ -8,3 +8,4 @@ var_dump(strrchr("test ".chr(0)." test", " "));
 var_dump(strrchr("test".chr(0)."string", "t"));
 
 echo "Done\n";
+}

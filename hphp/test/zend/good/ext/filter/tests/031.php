@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $floats = array(
 '1.234   ',
 '   1.234',
@@ -29,4 +29,4 @@ foreach ($floats as $float => $dec) {
 	$out = filter_var($float, FILTER_VALIDATE_FLOAT, array("options"=>array('decimal' => $dec)));
 	var_dump($out);
 }
-
+}

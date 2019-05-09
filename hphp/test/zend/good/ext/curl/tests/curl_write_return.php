@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
 $fp = fopen($log_file, 'w+');
@@ -16,4 +16,4 @@ echo $result;
 
 // cleanup
 unlink($log_file);
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $array1 = array(
        'friends' => 5,
        'children' => array(
@@ -17,4 +17,4 @@ $array2 = array(
 $merged = array_merge_recursive($array1, $array2);
 
 var_dump($array1, $array2);
-
+}

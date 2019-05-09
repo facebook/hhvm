@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $file = __DIR__ . '/__tmp_rose.jpg';
 
 $imagick = new Imagick('magick:rose');
@@ -14,4 +14,4 @@ $imagick->readImageFile($handle);
 unlink($file);
 
 echo 'success';
-
+}

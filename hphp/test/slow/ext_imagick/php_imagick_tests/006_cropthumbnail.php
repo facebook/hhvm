@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $im = new Imagick("magick:rose");
 $im->cropThumbnailImage(200, 200);
 var_dump($im->getImageGeometry());
@@ -23,4 +23,4 @@ var_dump($im->getImageGeometry());
 $im = new Imagick("magick:rose");
 $im->cropThumbnailImage(200, 10);
 var_dump($im->getImageGeometry());
-
+}

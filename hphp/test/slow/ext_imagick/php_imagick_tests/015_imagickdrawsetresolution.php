@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $im = new Imagick();
 $im->newImage(1000,1000, "white","png");
 
@@ -16,4 +16,4 @@ $large = $im->queryFontMetrics($draw, "Hello World");
 var_dump($small['textWidth'] < $large['textWidth']);
 
 echo "OK\n";
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $arr = array("a" => 1, "b" => 2);
 foreach ($arr as $key => $val) {
 	unset($GLOBALS[$key]);
@@ -7,3 +7,4 @@ foreach ($arr as $key => $val) {
 
 var_dump($arr);
 echo "Done\n";
+}

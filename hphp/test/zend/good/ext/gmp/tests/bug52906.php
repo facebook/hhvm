@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $vals = array(
 	array(7, 3),
 	array(2, 7),
@@ -18,3 +18,4 @@ foreach($vals as $data) {
 	echo "\n";
 }
 echo "Done\n";
+}

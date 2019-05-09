@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $s = "123";
 $s1 = "test";
 $s2 = "45345some";
@@ -14,3 +14,4 @@ $s2 <<= 3;
 var_dump($s2);
 
 echo "Done\n";
+}

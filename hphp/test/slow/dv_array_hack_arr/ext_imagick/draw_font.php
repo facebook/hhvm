@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $draw = new ImagickDraw;
 
 $font_path = __DIR__.'/anonymous_pro_minus.ttf';
@@ -28,4 +28,5 @@ try {
   $draw->setFontWeight(1000);
 } catch (ImagickDrawException $ex) {
   var_dump($ex->getMessage());
+}
 }

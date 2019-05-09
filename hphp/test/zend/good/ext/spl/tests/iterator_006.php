@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $root = simplexml_load_string(b'<?xml version="1.0"?>
 <root>
  <child>Hello</child>
@@ -11,3 +11,4 @@ foreach (new IteratorIterator($root->child) as $child) {
 	echo $child."\n";
 }
 echo "===DONE===\n";
+}

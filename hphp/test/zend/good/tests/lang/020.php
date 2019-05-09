@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $i="abc";
 
 for ($j=0; $j<10; $j++) {
@@ -38,4 +38,5 @@ switch (1) {
   	echo "Hi, I'm default\n";
   	break;
  }
+}
 }

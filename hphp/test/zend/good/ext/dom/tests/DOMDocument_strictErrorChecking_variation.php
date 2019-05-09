@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "Load document\n";
 $doc = new DOMDocument;
 $doc->load(dirname(__FILE__)."/book.xml");
@@ -33,4 +33,4 @@ try {
 } catch (Exception $e) {
 	echo "OOPS. Other exception thrown\n";
 }
-
+}

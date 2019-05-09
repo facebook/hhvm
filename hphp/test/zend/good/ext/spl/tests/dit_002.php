@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $classes = array(
 	'DirectoryIterator' => 0,
 	'FilesystemIterator' => 1,
@@ -38,3 +38,4 @@ foreach ($classes as $class => $flags) {
 	}
 }
 echo "===DONE===\n";
+}

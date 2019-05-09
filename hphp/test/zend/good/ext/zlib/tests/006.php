@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(gzdeflate()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzdeflate("", 1000));
 var_dump(gzdeflate("", -1));
@@ -28,3 +28,4 @@ $data2{4} = 0;
 var_dump(gzinflate($data2));
 
 echo "Done\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $closure = function($a, $b = 0) { };
 
 $ro = new ReflectionObject($closure);
@@ -44,3 +44,4 @@ $rp = new ReflectionParameter($closure, 'b');
 var_dump($rp->isOptional());
 
 echo "===DONE===\n";
+}

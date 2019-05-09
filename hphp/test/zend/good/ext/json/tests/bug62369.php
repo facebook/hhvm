@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $array = array();
 for ($i=0; $i<550; $i++) {
     $array = array($array);
@@ -23,4 +23,5 @@ switch (json_last_error()) {
     case JSON_ERROR_DEPTH:
         echo 'ERROR'.PHP_EOL;
     break;
+}
 }

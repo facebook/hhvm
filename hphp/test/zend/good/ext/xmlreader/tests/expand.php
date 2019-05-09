@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $basexml = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book>base book</book></books>';
 
@@ -22,3 +22,4 @@ while ($reader->read()) {
 }
 $reader->close();
 echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $x = 4;
 
 $lambda1 = function () use ($x) {
@@ -11,3 +11,4 @@ $x++;
 $lambda1();
 
 echo "Done\n";
+}

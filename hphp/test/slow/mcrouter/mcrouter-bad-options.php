@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 try {
   $mcr = new MCRouter(array(
     'asynclog_disable' => 'purple',
@@ -8,4 +8,5 @@ try {
 } catch (MCRouterOptionException $e) {
   var_dump($e->getMessage());
   var_dump($e->getErrors());
+}
 }

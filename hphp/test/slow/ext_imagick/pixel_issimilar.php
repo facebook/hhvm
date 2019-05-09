@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $sqrt3 = sqrt(3.0);
 
 $pixel = new ImagickPixel('red');
@@ -18,3 +18,4 @@ var_dump($pixel->isPixelSimilar('#F12A86', 0.9 / 255));
 var_dump($pixel->isPixelSimilar('#F12A88', 1.1 / 255));
 
 echo "==DONE==\n";
+}

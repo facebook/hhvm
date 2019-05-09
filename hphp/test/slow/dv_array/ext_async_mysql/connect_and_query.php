@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 try {
   $options = new AsyncMysqlConnectionOptions();
   $options->setTotalTimeout(10);
@@ -28,3 +28,4 @@ try {
 }
 // walk the heap to make sure we haven't corrupted it
 heapgraph_create();
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $cipher_alg = MCRYPT_BLOWFISH;
 $skey = array(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
 $key='';
@@ -39,3 +39,4 @@ foreach ($data as $val) {
 mcrypt_module_close($td);
 
 echo "Done\n";
+}

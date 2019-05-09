@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $object = new ArrayIterator;
 $object->append(1);
 
@@ -9,3 +9,4 @@ foreach($object as $key => $value)
 }
 
 echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorexact($im, 255,0,255);
 $c2 = imagecolorexactalpha($im, 255,0,255, 100);
@@ -23,3 +23,4 @@ echo imagecolorexactalpha($im, 255,200,0,100) . "\n";
 echo imagecolorexact($im, 12,12,12) . "\n";
 
 imagedestroy($im);
+}

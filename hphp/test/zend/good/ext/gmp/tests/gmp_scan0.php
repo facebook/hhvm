@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_scan0("434234", -10));
 var_dump(gmp_scan0("434234", 1));
 var_dump(gmp_scan0(4096, 0));
@@ -14,3 +14,4 @@ try { var_dump(gmp_scan0(array())); } catch (Exception $e) { echo "\n".'Warning:
 try { var_dump(gmp_scan0()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

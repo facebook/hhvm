@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $empty_array = array();
 $number = 5;
 $str = "abc";
@@ -42,3 +42,4 @@ try { var_dump( array_pop(&$mixed_array1,$mixed_array[2]) ); } catch (Exception 
 var_dump( array_pop(&$empty_array) );
 
 echo"\nDone";
+}

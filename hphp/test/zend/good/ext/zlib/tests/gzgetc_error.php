@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 $extra_arg = 'nothing';
@@ -9,3 +9,4 @@ try { var_dump(gzgetc() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->ge
 
 gzclose($h);
 echo "===DONE===\n";
+}

@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 goto A;
 
 {
@@ -19,4 +19,4 @@ A:
 		print "Done!\n";
 	}
 }
-
+}

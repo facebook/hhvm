@@ -1,5 +1,5 @@
 <?php // $Id$
-
+<<__EntryPoint>> function main() {
 $x = 2;
 $x **= 3;
 
@@ -13,4 +13,4 @@ TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
  include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
-
+}

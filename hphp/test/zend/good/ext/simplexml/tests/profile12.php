@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope
@@ -25,3 +25,4 @@ var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);
 
 echo "===DONE===\n";
+}

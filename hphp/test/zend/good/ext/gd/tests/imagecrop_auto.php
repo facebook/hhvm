@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "TC IMG_CROP_DEFAULT\n";
 $im = imagecreatetruecolor(99, 99); 
 imagefilledrectangle($im, 20, 20, 30, 30, 0xff);
@@ -52,3 +52,4 @@ var_dump(imagesx($im_crop));
 var_dump(imagesy($im_crop));
 
 @unlink(__DIR__ . "/crop_threshold.png");
+}

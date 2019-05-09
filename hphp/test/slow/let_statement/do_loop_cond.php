@@ -1,5 +1,5 @@
 <?hh // experimental
-
+<<__EntryPoint>> function main(): void {
 let max = 10;
 $i = 0;
 do {
@@ -7,3 +7,4 @@ do {
   $i++;
   var_dump(twice);
 } while (twice < max);
+}

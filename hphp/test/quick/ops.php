@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 print "\"Hello\" . \" world!\" --> "; print "Hello" . " world!"; print "\n";
 print "\n";
 
@@ -206,3 +206,4 @@ print "\n";
 print "(string)42 --> "; print (string)42; print "\n";
 print "(string)\"hi\" --> "; print (string)"hi"; print "\n";
 print "\n";
+}

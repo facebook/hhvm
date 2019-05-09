@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $n = gmp_init(-1);
 gmp_setbit(&$n, 10, true);
 var_dump(gmp_strval($n));
@@ -35,3 +35,4 @@ $a = array();
 try { gmp_setbit(&$a,array()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

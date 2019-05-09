@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(gzcompress()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(gzcompress("", 1000));
 var_dump(gzcompress("", -1));
@@ -27,3 +27,4 @@ $data2{4} = 0;
 var_dump(gzuncompress($data2));
 
 echo "Done\n";
+}

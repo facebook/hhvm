@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 print "Test begin\n";
 
 # Get a key that doesn't exist in $GLOBALS.
@@ -23,3 +23,4 @@ if ($b[$k] == 43) {
 }
 
 print "Test end\n";
+}

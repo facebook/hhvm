@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try {
   $imagick = new Imagick(array (
               'magick:rose',
@@ -33,4 +33,4 @@ try {
 } catch (ImagickException $e) {
   echo 'Third OK'. PHP_EOL;
 }
-
+}

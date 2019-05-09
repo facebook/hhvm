@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $memc = new Memcached();
 $memc->addServer('localhost', '11211');
 
@@ -16,3 +16,4 @@ var_dump($memc->get($key));
 var_dump($memc->cas($cas, $key, 12, 60));
 
 var_dump($memc->get($key));
+}

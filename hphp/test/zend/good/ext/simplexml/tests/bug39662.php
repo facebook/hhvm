@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml = '<?xml version="1.0" encoding="utf-8" ?>
 <test>
 
@@ -12,3 +12,4 @@ var_dump($clone);
 var_dump($clone->asXML());
 
 echo "Done\n";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL);
 
 $filename = "bug51997.bz2";
@@ -14,4 +14,4 @@ print bzread($bz, 10);
 print bzread($bz);
 bzclose($bz);
 unlink($filename);
-
+}

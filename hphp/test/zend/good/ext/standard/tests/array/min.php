@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(min()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(min(1));
 var_dump(min(array()));
@@ -13,3 +13,4 @@ var_dump(min(1, true, false, true));
 var_dump(min(0, true, false, true));
 
 echo "Done\n";
+}

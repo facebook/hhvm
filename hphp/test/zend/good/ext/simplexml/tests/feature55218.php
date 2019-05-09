@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $x = new SimpleXMLElement(
 '<?xml version="1.0" standalone="yes"?>
 <people xmlns:p="http://example.org/p" >
@@ -40,3 +40,4 @@ var_dump( $x->person[0]->getDocNamespaces(false, false) );
 var_dump( $x->person[1]->getDocNamespaces(false, false) );
 
 echo "===DONE===\n";
+}

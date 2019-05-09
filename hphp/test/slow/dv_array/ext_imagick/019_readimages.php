@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 try {
   $imagick = new Imagick(varray [
               'magick:rose',
@@ -32,4 +32,5 @@ try {
   echo 'Fail' . PHP_EOL;
 } catch (ImagickException $e) {
   echo 'Third OK'. PHP_EOL;
+}
 }

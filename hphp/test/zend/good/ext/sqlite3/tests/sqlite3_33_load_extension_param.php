@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 
 try {
@@ -7,4 +7,4 @@ try {
 } catch (Extension $ex) {
   var_dump($ex->getMessage());
 }
-
+}

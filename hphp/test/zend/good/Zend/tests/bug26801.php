@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = '11';
 $b = $a[0];
 switch ($b) {
@@ -14,3 +14,4 @@ switch ($a[0]) {
 }
 
 echo "===DONE===\n";
+}

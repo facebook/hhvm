@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_pow(2,10)));
 var_dump(gmp_strval(gmp_pow(-2,10)));
 var_dump(gmp_strval(gmp_pow(-2,11)));
@@ -24,3 +24,4 @@ try { var_dump(gmp_pow(2,array())); } catch (Exception $e) { echo "\n".'Warning:
 var_dump(gmp_pow(array(),10));
 
 echo "Done\n";
+}

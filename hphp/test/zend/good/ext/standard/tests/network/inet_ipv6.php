@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = array(
 	'::1',
 	'::2',
@@ -18,3 +18,4 @@ foreach ($a as $address) {
 }
 
 echo "Done\n";
+}

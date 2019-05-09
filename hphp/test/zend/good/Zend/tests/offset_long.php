@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $long = 1;
 
 var_dump($long[1]);
@@ -20,3 +20,4 @@ $arr = array(1,2,3);
 var_dump($long[$arr]);
 
 echo "Done\n";
+}

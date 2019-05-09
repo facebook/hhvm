@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);
@@ -20,3 +20,4 @@ echo "Text Content: " . $textnode->data . "\n";
 echo "\n" . $document->saveXML();
 
 echo "===DONE===\n";
+}

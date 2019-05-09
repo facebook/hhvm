@@ -1,5 +1,5 @@
 <?hh // experimental
-
+<<__EntryPoint>> function main(): void {
 $b = true;
 let x = "x";
 while ($b) {
@@ -9,3 +9,4 @@ while ($b) {
   $b = false;
 }
 var_dump(x);
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = array(1,2,3);
 $b = array("str", "here");
 
@@ -25,3 +25,4 @@ $a += $a;
 var_dump($c);
 
 echo "Done\n";
+}

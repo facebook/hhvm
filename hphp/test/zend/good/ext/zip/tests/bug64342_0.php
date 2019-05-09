@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $zip = new ZipArchive;
 $res = $zip->open(dirname(__FILE__) . '/bug64342.zip', ZipArchive::CREATE);
 if ($res === TRUE) {
@@ -25,3 +25,4 @@ if ($res === TRUE) {
 echo "DONE\n";
 error_reporting(0);
 @unlink(dirname(__FILE__) . '/bug64342.zip');
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $array = array('a', 'b', 'c');
 $arrayIterator = new ArrayIterator($array);
 
@@ -22,3 +22,4 @@ try {
 }
 
 echo "===DONE===\n";
+}

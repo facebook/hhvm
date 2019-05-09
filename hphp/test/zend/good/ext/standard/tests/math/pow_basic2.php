@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $large_exp = 20000;
 
 echo "\n-- The following all result in INF --\n";
@@ -20,3 +20,4 @@ echo "\n\n-- The following all result in -INF --\n";
 var_dump(pow(-24, $large_exp+1));
 var_dump(pow(-0.24, -$large_exp+1));
 echo "===Done===";
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $str = 'rasmuslerdorf';
 $salt1 = 'rl';
 $res_1 = 'rl.3StKT.4T8M';
@@ -18,4 +18,4 @@ echo (CRYPT_BLOWFISH) ? ((crypt($str, $salt4) === $res_4) ? 'BLO' : 'BLO - ERROR
 var_dump(crypt($str));
 try { var_dump(crypt()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(crypt("", "", "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
+}

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml = <<< EOXML
 <?xml version="1.0" encoding="utf-8"?>
 <courses>
@@ -23,4 +23,4 @@ $result = file_get_contents($filename);
 var_dump($result == $dom->saveXML());
 
 unlink($filename);
-
+}

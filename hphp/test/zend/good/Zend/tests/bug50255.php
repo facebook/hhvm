@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $arr = array('foo' => 'bar');
 
 print "isset\n";
@@ -12,4 +12,4 @@ var_dump(empty($arr->foo));
 var_dump(empty($arr->bar));
 var_dump(empty($arr['foo']));
 var_dump(empty($arr['bar']));
-
+}

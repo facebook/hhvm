@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $dir = dirname(__FILE__);
 $file = '__tmp14962.txt';
 $fullpath = $dir . '/' . $file;
@@ -21,3 +21,4 @@ if (is_file($fullpath)) {
 	echo "Ok";
 }
 unlink($dir . '/' . '__14962.zip');
+}

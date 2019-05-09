@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 
 $base_time = 1204200000; // 28 Feb 2008 12:00:00
@@ -43,4 +43,5 @@ foreach ($offsets as $offset) {
 	foreach (array('+', '-') as $direction) {
 		echo "$direction$offset: " . date(DATE_ISO8601, strtotime("$direction$offset", $base_time)) . "\n";
 	}
+}
 }

@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $db = new pdo('sqlite::memory:');
 $db->query('CREATE TABLE IF NOT EXISTS foo (id INT AUTO INCREMENT, name TEXT)');
 $db->query('INSERT INTO foo VALUES (NULL, "PHP")');
@@ -9,4 +9,4 @@ var_dump($db->errorInfo());
 var_dump($db->lastInsertId());
 
 $db->query('DROP TABLE foo');
-
+}

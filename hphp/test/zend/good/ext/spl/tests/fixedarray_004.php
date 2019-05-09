@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $a = new SplFixedArray(10);
 
 try {
@@ -9,3 +9,4 @@ try {
 }
 
 echo "===DONE===\n";
+}

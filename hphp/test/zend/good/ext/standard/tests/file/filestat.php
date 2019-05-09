@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(fileinode("."));
 var_dump(fileowner("."));
 var_dump(filegroup("."));
@@ -25,3 +25,4 @@ var_dump(fileatime("/no/such/file/or/dir"));
 var_dump(filectime("/no/such/file/or/dir"));
 
 echo "Done\n";
+}

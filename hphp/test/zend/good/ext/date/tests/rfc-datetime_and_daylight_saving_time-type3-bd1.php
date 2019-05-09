@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 $date_format = 'Y-m-d H:i:s T e';
 $interval_format = 'P%dDT%hH';
@@ -34,3 +34,4 @@ echo 'bd7 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
 	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
 
 echo "\n";
+}

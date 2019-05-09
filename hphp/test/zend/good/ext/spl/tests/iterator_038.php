@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 foreach(new NoRewindIterator(new ArrayIterator(array('Hello'=>0, 'World'=>1))) as $k => $v)
 {
 	var_dump($v);
@@ -7,3 +7,4 @@ foreach(new NoRewindIterator(new ArrayIterator(array('Hello'=>0, 'World'=>1))) a
 }
 
 echo "===DONE===\n";
+}

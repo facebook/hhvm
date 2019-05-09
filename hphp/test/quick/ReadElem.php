@@ -1,5 +1,5 @@
 <?hh
-
+<<__EntryPoint>> function main(): void {
 error_reporting(0);
 
 $a = array(10, 20, 30);
@@ -17,3 +17,4 @@ print $s[2] . "\n";
 print $s[3];# . "\n";
 print $s["0"] . "\n";
 print $s["x"] . "\n";
+}

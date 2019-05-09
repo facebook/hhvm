@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(preg_grep(1,array(),3,4)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(preg_grep(1, 2)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(preg_grep('/+/', array()));
@@ -13,4 +13,4 @@ ini_set('pcre.recursion_limit', 1);
 var_dump(preg_last_error() == PREG_NO_ERROR);
 var_dump(preg_grep('@^[a-z]+@', $array));
 var_dump(preg_last_error() == PREG_RECURSION_LIMIT_ERROR);
-
+}

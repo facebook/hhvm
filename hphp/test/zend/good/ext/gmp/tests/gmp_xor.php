@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_xor("111111", "2222222")));
 var_dump(gmp_strval(gmp_xor(123123, 435234)));
 var_dump(gmp_strval(gmp_xor(555, "2342341123")));
@@ -19,3 +19,4 @@ var_dump(gmp_xor(1, array()));
 var_dump(gmp_xor(array(), array()));
 
 echo "Done\n";
+}

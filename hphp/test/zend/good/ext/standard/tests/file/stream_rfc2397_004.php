@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $streams = array(
 	'data://,;test',
 	'data://text/plain,test',
@@ -15,3 +15,4 @@ foreach($streams as $stream)
 }
 
 echo "===DONE===\n";
+}

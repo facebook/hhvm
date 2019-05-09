@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $doc = simplexml_load_string('<root><name attr="foo">bar</name></root>');
 print $doc->name["attr"];
 print "\n";
@@ -9,3 +9,4 @@ if ($doc->name["attr"] == "foo") {
          print "Error\n";
 }
 echo "===DONE===\n";
+}

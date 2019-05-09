@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $bool = TRUE;
 
 var_dump($bool[1]);
@@ -20,3 +20,4 @@ $arr = array(1,2,3);
 var_dump($bool[$arr]);
 
 echo "Done\n";
+}

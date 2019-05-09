@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $i = 0;
 while(100000 > $i++) {
 	$m0 = microtime(true);
@@ -14,3 +14,4 @@ while(100000 > $i++) {
 }
 echo "ok\n";
 echo "===DONE===\n";
+}

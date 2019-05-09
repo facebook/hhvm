@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $xml_str = <<<EOD
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <c_fpobel >
@@ -18,3 +18,4 @@ $zml->pos = ["act_idx" => $val];
 var_dump($val) ;
 
 echo "===DONE===\n";
+}

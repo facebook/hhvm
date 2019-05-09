@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $salts = array(b'32' => b'$2a$32$CCCCCCCCCCCCCCCCCCCCCC$',
                b'33' => b'$2a$33$CCCCCCCCCCCCCCCCCCCCCC$',
                b'34' => b'$2a$34$CCCCCCCCCCCCCCCCCCCCCC$',
@@ -16,4 +16,4 @@ foreach($salts as $i=>$salt) {
     echo "$i. Not OK\n";
   }
 }
-
+}

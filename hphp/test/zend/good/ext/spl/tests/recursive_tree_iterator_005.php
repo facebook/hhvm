@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $ary = array(
 	0 => array(
 		(binary) "binary",
@@ -34,3 +34,4 @@ foreach($it as $k => $v) {
 	var_dump($it->key(), $it->getEntry(), $it->current());
 }
 echo "===DONE===\n";
+}

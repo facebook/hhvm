@@ -1,5 +1,5 @@
 <?php 
-
+<<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
@@ -24,3 +24,4 @@ $copy = clone $sxe;
 var_dump($copy);
 
 echo "===DONE===\n";
+}

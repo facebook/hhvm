@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 iconv_set_encoding("internal_encoding", "UTF-8");
 iconv_set_encoding("output_encoding",   "UTF-8");
 iconv_set_encoding("input_encoding",    "UTF-8");
@@ -23,4 +23,4 @@ var_dump( iconv_get_encoding('input_encoding')    );
 var_dump( iconv_get_encoding('all')               );
 var_dump( iconv_get_encoding('foo')               );
 var_dump( iconv_get_encoding()                    );
-
+}

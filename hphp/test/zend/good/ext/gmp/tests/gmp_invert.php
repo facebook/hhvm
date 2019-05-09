@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_invert(123123,5467624)));
 var_dump(gmp_strval(gmp_invert(123123,"3333334345467624")));
 var_dump(gmp_strval(gmp_invert("12312323213123123",7624)));
@@ -21,3 +21,4 @@ var_dump(gmp_invert(1, array()));
 var_dump(gmp_invert(array(), array()));
 
 echo "Done\n";
+}

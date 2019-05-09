@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set("Europe/Oslo");
 $time = time();
 
@@ -21,4 +21,5 @@ $constants = array(
 foreach ($constants as $const) {
 	echo "$const:\t";
 	echo ((strtotime(date(constant($const), $time)) === $time) ? "OK" : "FAIL") . "\n";
+}
 }

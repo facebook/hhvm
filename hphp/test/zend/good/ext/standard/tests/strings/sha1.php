@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/sha1.dat";
 $a = array(
 	"abc",
@@ -24,3 +24,4 @@ var_dump(sha1_file($filename, true));
 sha1_file($filename);
 
 echo "Done\n";
+}

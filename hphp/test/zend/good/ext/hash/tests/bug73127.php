@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $test1 = str_repeat("\xFF", 40);
 $test2 = str_repeat("\x00", 40);
 echo hash('gost', $test1),
@@ -8,3 +8,4 @@ echo hash('gost', $test1),
      "\n",
      hash('gost', '')
     ;
+}

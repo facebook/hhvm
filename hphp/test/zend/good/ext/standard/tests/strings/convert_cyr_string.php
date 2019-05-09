@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 try { var_dump(convert_cyr_string()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(convert_cyr_string("")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(convert_cyr_string("", "")); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -15,3 +15,4 @@ var_dump(convert_cyr_string((binary)"[[[[[[", "i", "q"));
 var_dump(convert_cyr_string((binary)"", "d", "i"));
 
 echo "Done\n";
+}

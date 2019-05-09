@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $dom = new DOMDocument();
 
 $dom->loadXML('<root/>');
@@ -23,4 +23,4 @@ var_dump($dom->documentElement->hasChildNodes());
 echo "Document with 2 child nodes\n";
 $dom->loadXML('<root><a/><b/></root>');
 var_dump($dom->documentElement->hasChildNodes());
-
+}

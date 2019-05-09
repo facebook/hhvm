@@ -1,5 +1,5 @@
 <?hh // strict
-
+<<__EntryPoint>> function main(): void {
 $x = 1;
 
 (++$x) as int;
@@ -9,3 +9,4 @@ try {
   (++$x) as string;
 } catch (Exception $_) {}
 var_dump($x); // 3
+}

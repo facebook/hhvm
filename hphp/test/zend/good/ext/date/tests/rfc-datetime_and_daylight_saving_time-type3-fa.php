@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 $date_format = 'Y-m-d H:i:s T e';
 $interval_format = 'P%dDT%hH';
@@ -43,3 +43,4 @@ $interval_spec = 'P1D';
 $interval = new DateInterval($interval_spec);
 echo 'fa6 ' . $start->format($date_format) . " + $interval_spec = "
 	. $start->add($interval)->format($date_format) . "\n";
+}

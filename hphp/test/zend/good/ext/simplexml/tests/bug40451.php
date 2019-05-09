@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $string = <<<XML
 <?xml version="1.0"?>
 	<Host enable="true">
@@ -13,3 +13,4 @@ $add = $xml->addChild('Host');
 $add->Host->addAttribute('enable', 'true');
 
 echo "===DONE===\n";
+}

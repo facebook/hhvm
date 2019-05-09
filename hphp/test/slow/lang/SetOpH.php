@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 $lefts = array(
   0,
   123,
@@ -78,4 +78,5 @@ foreach ($lefts as $left) {
     var_dump($a >>= $right);
     var_dump($a);
   }
+}
 }

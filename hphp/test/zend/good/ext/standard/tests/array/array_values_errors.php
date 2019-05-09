@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing error conditions ***\n";
 /* Invalid number of args */
 try { var_dump( array_values() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero arguments
@@ -10,3 +10,4 @@ var_dump( array_values(100) );  // Integer
 var_dump( array_values(new stdclass) );  // object
 
 echo "Done\n";
+}

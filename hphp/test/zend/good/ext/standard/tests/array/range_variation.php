@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing range() with various low and high values ***";
 $low_arr = array( "ABCD", -10.5555, TRUE, NULL, FALSE, "", array(1,2));
 $high_arr = array( "ABCD", -10.5555, TRUE, NULL, FALSE, "", array(1,2));
@@ -16,3 +16,4 @@ var_dump( range( 1, 5, TRUE ) );
 var_dump( range( 1, 5, array(1, 2) ) );
 
 echo "Done\n";
+}

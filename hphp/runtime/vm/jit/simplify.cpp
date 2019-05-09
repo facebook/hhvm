@@ -1894,15 +1894,19 @@ SSATmp* simplifyMethodExists(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
+static auto concat_litstrs(State& env, SSATmp* s1, SSATmp* s2) {
+  auto const str1 = const_cast<StringData*>(s1->strVal());
+  auto const str2 = const_cast<StringData*>(s2->strVal());
+  auto const sval = String::attach(concat_ss(str1, str2));
+  return cns(env, makeStaticString(sval.get()));
+}
+
 SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
   if (src1->hasConstVal(TStaticStr) &&
       src2->hasConstVal(TStaticStr)) {
-    auto const str1 = const_cast<StringData*>(src1->strVal());
-    auto const str2 = const_cast<StringData*>(src2->strVal());
-    auto const sval = String::attach(concat_ss(str1, str2));
-    return cns(env, makeStaticString(sval.get()));
+    return concat_litstrs(env, src1, src2);
   }
 
   // ConcatStrStr consumes a reference to src1 and produces a reference, so
@@ -1915,6 +1919,85 @@ SSATmp* simplifyConcatStrStr(State& env, const IRInstruction* inst) {
   if (src2->hasConstVal(staticEmptyString())) {
     // Forward the reference on src1 from input to output.
     return src1;
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyConcatStr3(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+  auto const src3 = inst->src(2);
+
+  if (src2->hasConstVal(TStaticStr)) {
+    if (src1->hasConstVal(TStaticStr)) {
+      return gen(env, ConcatStrStr, inst->taken(),
+                 concat_litstrs(env, src1, src2), src3);
+    }
+    if (src3->hasConstVal(TStaticStr)) {
+      return gen(env, ConcatStrStr, inst->taken(),
+                 src1, concat_litstrs(env, src2, src3));
+    }
+    if (src2->hasConstVal(staticEmptyString())) {
+      return gen(env, ConcatStrStr, inst->taken(), src1, src3);
+    }
+  }
+
+  // ConcatStr3 consumes a reference to src1 and produces a reference, so
+  // anything we replace it with must do the same thing.
+  if (src1->hasConstVal(staticEmptyString())) {
+    // Compensate for ConcatStrStr consuming src2.
+    gen(env, IncRef, src2);
+    return gen(env, ConcatStrStr, inst->taken(), src2, src3);
+  }
+  if (src3->hasConstVal(staticEmptyString())) {
+    // ConcatStrStr also consumes a reference to src1
+    return gen(env, ConcatStrStr, inst->taken(), src1, src2);
+  }
+
+  return nullptr;
+}
+
+SSATmp* simplifyConcatStr4(State& env, const IRInstruction* inst) {
+  auto const src1 = inst->src(0);
+  auto const src2 = inst->src(1);
+  auto const src3 = inst->src(2);
+  auto const src4 = inst->src(3);
+
+  if (src2->hasConstVal(TStaticStr)) {
+    if (src1->hasConstVal(TStaticStr)) {
+      return gen(env, ConcatStr3, inst->taken(),
+                 concat_litstrs(env, src1, src2), src3, src4);
+    }
+    if (src3->hasConstVal(TStaticStr)) {
+      return gen(env, ConcatStr3, inst->taken(),
+                 src1, concat_litstrs(env, src2, src3), src4);
+    }
+    if (src2->hasConstVal(staticEmptyString())) {
+      return gen(env, ConcatStr3, inst->taken(), src1, src3, src4);
+    }
+  }
+
+  if (src3->hasConstVal(TStaticStr)) {
+    if (src4->hasConstVal(TStaticStr)) {
+      return gen(env, ConcatStr3, inst->taken(),
+                 src1, src2, concat_litstrs(env, src3, src4));
+    }
+    if (src3->hasConstVal(staticEmptyString())) {
+      return gen(env, ConcatStr3, inst->taken(), src1, src2, src4);
+    }
+  }
+
+  // ConcatStr4 consumes a reference to src1 and produces a reference, so
+  // anything we replace it with must do the same thing.
+  if (src1->hasConstVal(staticEmptyString())) {
+    // Compensate for ConcatStrStr consuming src2.
+    gen(env, IncRef, src2);
+    return gen(env, ConcatStr3, inst->taken(), src2, src3, src4);
+  }
+  if (src4->hasConstVal(staticEmptyString())) {
+    // ConcatStr3 also consumes a reference to src1
+    return gen(env, ConcatStr3, inst->taken(), src1, src2, src3);
   }
 
   return nullptr;
@@ -3741,6 +3824,8 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CoerceCellToDbl)
   X(CoerceCellToInt)
   X(ConcatStrStr)
+  X(ConcatStr3)
+  X(ConcatStr4)
   X(ConcatIntStr)
   X(ConcatStrInt)
   X(ConvArrToBool)

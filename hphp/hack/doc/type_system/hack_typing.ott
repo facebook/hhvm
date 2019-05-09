@@ -1490,6 +1490,14 @@ G ; K |- < e1 : shape ( ?sfn => t , vardots \ sfn1 , .., sfnm ) , e2 : t >
 -------------------------------------------------- :: shapes_idx_default
 G ; K |- `Shapes` :: `idx` ( e1 , sfn , e2 ) : t
 
+G ; K |- e : shape ( sfn => t , vardots \ sfn1 , .. , sfnm )
+-------------------------------------------------- :: shapes_at_required
+G ; K |- `Shapes` :: `at` ( e , sfn ) : t
+
+G ; K |- e : shape ( ?sfn => t , vardots \ sfn1 , .. , sfnm )
+-------------------------------------------------- :: shapes_at_optional
+G ; K |- `Shapes` :: `at` ( e , sfn ) : t
+
 G ; K |- e : shape ( sft1 , .. , sfti , ?sfn => t , sft1' , .. , sftj' )
 -------------------------------------------------- :: shapes_remove_key_closed
 G ; K |- `Shapes` :: `removeKey` ( e , sfn ) : shape( sft1 , .. , sfti , sft1' , .. , sftj' )

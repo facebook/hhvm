@@ -3194,7 +3194,7 @@ bool pre_apply(PreEnv& penv, bool incDec) {
                        bool removeDec, bool insertAtFront) {
       if (removeDec ? inst.is(DecRef, DecRefNZ) : inst.is(IncRef)) {
         auto const id = penv.env.asetMap[inst.src(0)];
-        if (del.test(id)) {
+        if (id >= 0 && del.test(id)) {
           if (!pre_insertions_for_delete(penv, &inst, insertAtFront)) {
             FTRACE(3, "No insertion for {} ({}) in B{}\n",
                    id, inst.toString(), blk->id());

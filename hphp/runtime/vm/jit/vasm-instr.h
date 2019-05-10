@@ -531,7 +531,7 @@ struct store { Vreg s; Vptr64 d; };
 /*
  * Method cache smashable prime data.
  *
- * @see: cgLdObjMethod()
+ * @see: cgLdSmashable()
  */
 struct mcprep { Vreg64 d; };
 

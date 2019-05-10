@@ -859,21 +859,6 @@ struct FuncNameData : IRExtraData {
   const StringData* name;
 };
 
-struct LdObjMethodData : IRExtraData {
-  explicit LdObjMethodData(IRSPRelOffset offset,
-                           const StringData* method)
-    : offset(offset)
-    , method(method)
-  {}
-
-  std::string show() const {
-    return folly::to<std::string>(offset.offset, ',', method->data());
-  }
-
-  IRSPRelOffset offset;
-  const StringData* method;
-};
-
 /*
  * Offset and stack deltas for InterpOne.
  */
@@ -1632,7 +1617,7 @@ X(CheckSubClsCns,               LdSubClsCnsData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);
 X(LookupFuncCached,             FuncNameData);
-X(LdObjMethod,                  LdObjMethodData);
+X(LdObjMethod,                  FuncNameData);
 X(RaiseMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncArgData);
 X(RaiseParamRefMismatchForFunc, ParamData);

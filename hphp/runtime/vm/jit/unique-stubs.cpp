@@ -1049,19 +1049,6 @@ TCA emitThrowSwitchMode(CodeBlock& cb, DataBlock& data) {
   });
 }
 
-template<class F>
-TCA emitHelperThunk(CodeCache& code, CodeBlock& cb, DataBlock& data, F* func) {
-  // we only emit these calls into hot, main and cold.
-  if (deltaFits(code.base() - (TCA)func, sz::dword) &&
-      deltaFits(code.frozen().base() - (TCA)func, sz::dword)) {
-    return (TCA)func;
-  }
-  alignJmpTarget(cb);
-  return vwrap(cb, data, [&] (Vout& v) {
-      v << jmpi{(TCA)func};
-  });
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1114,9 +1101,6 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   ADD(callToExit,         emitCallToExit(hot(), data, *this));
   ADD(throwSwitchMode,    emitThrowSwitchMode(frozen, data));
-
-  ADD(lookupMethodSlow,
-      emitHelperThunk(code, main, data, MethodCache::handleSlowPath));
 
 #undef ADD
 

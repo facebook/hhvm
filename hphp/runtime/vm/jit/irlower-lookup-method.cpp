@@ -56,15 +56,73 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+ * The `mcprep' instruction here creates a smashable move, which serves as
+ * the inline cache, or "prime cache" for the method lookup.
+ *
+ * On our first time through this codepath in the TC, we "prime" this cache
+ * (which holds across /all/ requests) by smashing the mov immediate to hold
+ * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
+ * not always possible (see MethodCache::handleSlowPath() for details), in
+ * which case we smash an immediate with some low bits set, so that we always
+ * miss on the inline cache when comparing against our live Class*.
+ *
+ * The inline cache is set up so that we always miss initially, and take the
+ * slow path to initialize it. After initialization, the slow path uses the
+ * out-of-line method cache (allocated above). The inline cache is set only
+ * during the first call(s) (usually once), but the one-way request-local
+ * method cache is updated on each miss.
+ */
+void cgLdSmashable(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << mcprep{dst};
+}
+
+void cgCheckSmashableClass(IRLS& env, const IRInstruction* inst) {
+  auto const smashable = srcLoc(env, inst, 0).reg();
+  auto const cls = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  auto const tmp = v.makeReg();
+  auto const smashableCls = v.makeReg();
+  v << movtql{smashable, tmp};
+  v << movzlq{tmp, smashableCls};
+
+  auto const sf = v.makeReg();
+  v << cmpq{smashableCls, cls, sf};
+  v << jcc{CC_NE, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+void cgLdSmashableFunc(IRLS& env, const IRInstruction* inst) {
+  auto const smashable = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  v << shrqi{32, smashable, dst, v.makeReg()};
+}
+
+void cgCheckFuncMMNonMagic(IRLS& env, const IRInstruction* inst) {
+  auto const funcmm = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const sf = v.makeReg();
+  v << testqi{0x1, funcmm, sf};
+  fwdJcc(v, env, CC_NZ, sf, inst->taken());
+  v << copy{funcmm, dst};
+}
+
+void cgLdFuncMFunc(IRLS& env, const IRInstruction* inst) {
+  auto const cls = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << decq{cls, dst, v.makeReg()};
+}
+
 void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
   assertx(inst->taken() && inst->taken()->isCatch()); // must have catch block
   using namespace MethodCache;
-
-  auto const cls = srcLoc(env, inst, 0).reg();
-  auto const fp = srcLoc(env, inst, 1).reg();
-  auto const extra = inst->extra<LdObjMethodData>();
-  auto& v = vmain(env);
-  auto& vc = vcold(env);
 
   // Allocate the request-local one-way method cache for this lookup.
   auto const handle =
@@ -74,56 +132,16 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
                    inst->marker().func()->fullName()->slice());
   }
 
-  /*
-   * The `mcprep' instruction here creates a smashable move, which serves as
-   * the inline cache, or "prime cache" for the method lookup.
-   *
-   * On our first time through this codepath in the TC, we "prime" this cache
-   * (which holds across /all/ requests) by smashing the mov immediate to hold
-   * a Func* in the upper 32 bits, and a Class* in the lower 32 bits.  This is
-   * not always possible (see MethodCache::handleSlowPath() for details), in
-   * which case we smash an immediate with some low bits set, so that we always
-   * miss on the inline cache when comparing against our live Class*.
-   *
-   * The inline cache is set up so that we always miss initially, and take the
-   * slow path to initialize it. After initialization, the slow path uses the
-   * out-of-line method cache (allocated above). The inline cache is set only
-   * during the first call(s) (usually once), but the one-way request-local
-   * method cache is updated on each miss.
-   */
-  auto func_class = v.makeReg();
-  v << mcprep{func_class};
+  auto const target = CallSpec::direct(MethodCache::handleSlowPath);
+  auto const args = argGroup(env, inst)
+    .ssa(0 /* cls */)
+    .immPtr(inst->extra<FuncNameData>()->name)
+    .immPtr(inst->marker().func()->cls())
+    .imm(safe_cast<int32_t>(handle))
+    .ssa(1 /* smashable */);
 
-  // Get the Class* part of the cache line.
-  auto tmp = v.makeReg();
-  auto classptr = v.makeReg();
-  v << movtql{func_class, tmp};
-  v << movzlq{tmp, classptr};
-
-  // Check the inline cache.
-  auto const sf = v.makeReg();
-  v << cmpq{classptr, cls, sf};
-
-  unlikelyIfThenElse(
-    v, vc, CC_NE, sf,
-    [&] (Vout& v) { // then block (unlikely)
-      auto const args = argGroup(env, inst)
-        .imm(safe_cast<int32_t>(handle))
-        .addr(fp, cellsToBytes(extra->offset.offset))
-        .immPtr(extra->method)
-        .ssa(0 /* cls */)
-        .immPtr(inst->marker().func()->cls())
-        .reg(func_class);
-
-      cgCallHelper(v, env, CallSpec::direct(tc::ustubs().lookupMethodSlow),
-                   kVoidDest, SyncOptions::Sync, args);
-    },
-    [&] (Vout& v) { // else block (likely)
-      auto const funcptr = v.makeReg();
-      v << shrqi{32, func_class, funcptr, v.makeReg()};
-      v << store{funcptr,
-                 fp[cellsToBytes(extra->offset.offset) + AROFF(m_func)]};
-    });
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

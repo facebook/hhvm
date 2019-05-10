@@ -94,6 +94,9 @@ bool is_pure_licmable(const IRInstruction* inst) {
   case LdCctx:
   case LdClsCtx:
   case LdClsCctx:
+  case LdFuncMFunc:
+  case LdSmashable:
+  case LdSmashableFunc:
   case LdStkAddr:
   case LdLocAddr:
   case LdPropAddr:

@@ -261,10 +261,6 @@ struct CallSpec {
     return direct(f, get_func_type(f));
   }
 
-  static CallSpec direct(TCA fp) {
-    return CallSpec { Kind::Direct, fp };
-  }
-
   /*
    * A Direct call to the /non-virtual/ C++ instance method function `fp'.
    *

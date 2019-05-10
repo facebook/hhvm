@@ -738,10 +738,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     writeToSpilledFrame(inst->extra<LookupClsMethod>()->calleeAROffset,
                         inst->src(2));
     break;
-  case LdObjMethod:
-    writeToSpilledFrame(inst->extra<LdObjMethod>()->offset,
-                        inst->src(1));
-    break;
   case LdArrFuncCtx:
   case LdFunc:
     writeToSpilledFrame(inst->extra<IRSPRelOffsetData>()->offset,

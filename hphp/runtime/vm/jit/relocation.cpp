@@ -229,7 +229,7 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     if (TCA adjusted = rel.adjustedAddressAfter(addrImm)) {
       updatedAI.insert(adjusted);
     } else if (TCA odd = rel.adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
-      // just for cgLdObjMethod
+      // just for LdSmashable
       updatedAI.insert((TCA)~uintptr_t(odd));
     } else {
       updatedAI.insert(addrImm);

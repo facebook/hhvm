@@ -390,7 +390,10 @@ constexpr bool operator>(Mem a, Mem b) {
   IRT(ABC,         bits_t::bit<kRuntime+7>()) /* AsioBlockableChain */  \
   IRT(RDSHandle,   bits_t::bit<kRuntime+8>()) /* rds::Handle */         \
   IRT(Nullptr,     bits_t::bit<kRuntime+9>())                           \
-  IRT(MIPropSPtr,  bits_t::bit<kRuntime+10>()) /* Ptr to MInstrPropState */
+  IRT(MIPropSPtr,  bits_t::bit<kRuntime+10>()) /* Ptr to MInstrPropState */ \
+  IRT(Smashable,   bits_t::bit<kRuntime+11>()) /* Smashable uint64_t */     \
+  IRT(FuncM,       bits_t::bit<kRuntime+12>()) /* Func* with the lowest */  \
+                                      /* bit set indicating magic call */
   /* bits above this are unused */
 
 /*
@@ -411,6 +414,7 @@ constexpr bool operator>(Mem a, Mem b) {
   IRTX(Bottom,       Bottom, kBottom)                         \
   IRTX(Top,          Top,    kTop)                            \
   IRT(Ctx,                   kObj|kCctx)                      \
+  IRT(FuncMM,                kFunc|kFuncM)                    \
   IRTX(AnyObj,       Top,    kAnyObj)                         \
   IRTX(AnyArr,       Top,    kAnyArr)                         \
   IRTX(AnyShape,     Top,    kAnyShape)                       \
@@ -487,7 +491,7 @@ struct Type {
 private:
   static constexpr size_t kBoxShift = 29;
   static constexpr size_t kRuntime = kBoxShift * 2;
-  static constexpr size_t numRuntime = 11;
+  static constexpr size_t numRuntime = 13;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:

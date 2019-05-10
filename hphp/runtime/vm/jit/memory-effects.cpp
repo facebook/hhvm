@@ -1762,6 +1762,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertNonNull:
   case CheckNonNull:
   case CheckNullptr:
+  case CheckFuncMMNonMagic:
+  case CheckSmashableClass:
   case Ceil:
   case Floor:
   case DefLabel:
@@ -1801,7 +1803,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case IsFunReifiedGenericsMatched:
   case IsFuncDynCallable:
   case IsClsDynConstructible:
+  case LdFuncMFunc:
   case LdFuncRxLevel:
+  case LdSmashable:
+  case LdSmashableFunc:
   case IsReifiedName:
   case LdARNumParams:
   case LdRDSAddr:
@@ -1967,6 +1972,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdGblAddrDef:
   case LdObjClass:
   case LdObjInvoke:
+  case LdObjMethod:
   case LdStrLen:
   case StringIsset:
   case LdSwitchDblIndex:
@@ -2037,13 +2043,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       AliasClass effects =
         actrec(inst.src(1), inst.extra<IRSPRelOffsetData>()->offset);
-      return may_load_store(effects, effects);
-    }
-
-  case LdObjMethod:    // can't autoload, but can decref $this right now
-    {
-      AliasClass effects =
-        actrec(inst.src(1), inst.extra<LdObjMethod>()->offset);
       return may_load_store(effects, effects);
     }
 

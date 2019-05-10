@@ -86,7 +86,7 @@ struct RelocationInfo {
       if (TCA adjusted = adjustedAddressAfter(addrImm)) {
         updatedAI.insert(adjusted);
       } else if (TCA odd = adjustedAddressAfter((TCA)~uintptr_t(addrImm))) {
-        // just for cgLdObjMethod
+        // just for LdSmashable
         updatedAI.insert((TCA)~uintptr_t(odd));
       }
     }

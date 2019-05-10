@@ -185,7 +185,7 @@ loaded, using a separate CheckRefInner instruction.
   If S0 is not a null pointer, branch to block B. This is used to check the
   return value of a native helper that returns a potentially null StringData*.
 
-| AssertType, DRefineS(0), S(Gen,Cls,Ctx), P
+| AssertType, DRefineS(0), S(Gen,Cls,Ctx,FuncMM), P
 
   Assert that the type of S0 is T, copying it to D.
 
@@ -333,6 +333,15 @@ exceptions depending on how coercion is implemented.
 | AssertARFunc<spOff>, ND, S(StkPtr) S(Func), NF
 
   Asserts that the ActRec at offset spOff from S0 contains function S1.
+
+| CheckFuncMMNonMagic, D(Func), S(FuncMM), B|P
+
+  Check that S0 is not a func pointer with magic bit set and if so copy it
+  to D, and fallthrough. If S0 has a magic bit set, branch to block B.
+
+| CheckSmashableClass, ND, S(Smashable) S(Cls), B
+
+  If the lower 32 bits of S0 does not match class pointer S1, branch to block B.
 
 2. Arithmetic
 
@@ -1217,6 +1226,20 @@ To string conversions:
   Loads into D the constructor of class S0. If the constructor cannot be called
   from the context in S1, raise an error.
 
+| LdFuncMFunc, D(Func), S(FuncM), NF
+
+  Loads into D the func pointer for the func pointer with magic bit set in S0.
+
+| LdSmashable, D(Smashable), NA, NF
+
+  Loads a smashable value. The initial value is set to (1 << addr) + 1, where
+  addr is a pointer pointing to the value in TC. The lowest bit is set for
+  convenience of checking whether the value was already smashed.
+
+| LdSmashableFunc, D(Func), S(Smashable), NF
+
+  Loads into D the func pointer stored in the higher 32 bits of S0.
+
 | LdRecCached, D(RecType), CStr, NF
 
   Loads the record named S0 via the RDS. Invokes autoload and may raise an error
@@ -1437,14 +1460,13 @@ To string conversions:
   Lookup the slot index of the static property with the name S1 on the class
   S0, returning -1 if not found.
 
-| LdObjMethod<offset,methodName>, ND, S(Cls) S(StkPtr), NF
+| LdObjMethod<methodName>, D(FuncMM), S(Cls) S(Smashable), NF
 
-  Stores a pointer to an object's method into an activation record. S0 points
-  to the object's class, S1 has the pre-live activation record at `offset'.
-  Caches the mapping in the target cache. Raises a fatal if the class does not
-  have an accessible method with the given name and does not have a __call
-  method. Also responsible for performing caller checks (currently none as the
-  opcode is not used with dynamic calls).
+  Loads a func pointer, maybe with a magic bit set, pointing to the instance
+  method that would be called if a `methodName` is invoked on an instance of S0.
+  Caches the mapping in the TC cache (using S1) and target cache. Raises a fatal
+  if the class does not have an accessible method with the given name and does
+  not have a __call method.
 
 | LdObjInvoke, D(Func), S(Cls), B
 

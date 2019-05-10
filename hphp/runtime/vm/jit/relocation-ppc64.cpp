@@ -110,7 +110,7 @@ size_t relocateImpl(RelocationInfo& rel,
           }
         } else {
           if (fixups.addressImmediates.count((TCA)~uintptr_t(src))) {
-            // Handle weird, encoded offset, used by cgLdObjMethod
+            // Handle weird, encoded offset, used by LdSmashable
             always_assert(imm == ((uintptr_t(src) << 1) | 1));
             bool DEBUG_ONLY success =
               d2.setImmediate(((uintptr_t)dest << 1) | 1);

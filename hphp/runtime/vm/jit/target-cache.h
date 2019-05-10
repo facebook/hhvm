@@ -110,22 +110,20 @@ namespace MethodCache {
  * One-way request-local cache for object method lookups.
  *
  * MethodCache entries cache the dispatch target for an object method call.
- * Each line consists of a Class* key (stored as a uintptr_t) and a Func*.  We
- * also pack bits into the key---the low bit is set if the function is a magic
- * call (in which case the cached Func* is, and the second lowest bit is set if
- * the cached Func has AttrStatic.
+ * Each line consists of a Class* key and a Func* (stored as a uintptr_t).
+ * We also pack a bit into the value -- the low bit is set if the function is
+ * a magic call.
  */
 struct Entry {
-  uintptr_t m_key;
-  const Func* m_value;
+  const Class* m_key;
+  uintptr_t m_value;
 };
 
-void handleSlowPath(rds::Handle mce_handle,
-                    ActRec* ar,
-                    StringData* name,
-                    Class* cls,
-                    Class* ctx,
-                    uintptr_t mcePrime);
+uintptr_t handleSlowPath(const Class* cls,
+                         const StringData* name,
+                         const Class* ctx,
+                         rds::Handle mce_handle,
+                         uintptr_t mcePrime);
 
 } // namespace MethodCache
 

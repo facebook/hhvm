@@ -146,12 +146,46 @@ void fpushObjMethodUnknown(
   SSATmp* ts
 ) {
   implIncStat(env, Stats::ObjMethod_cached);
-  auto const prepare = [&] (IRSPRelOffset arOffset) {
-    auto const objCls = gen(env, LdObjClass, obj);
-    auto const lomData = LdObjMethodData { arOffset, methodName };
-    gen(env, LdObjMethod, lomData, objCls, sp(env));
-  };
-  return prepareToCallCustom(env, obj, numParams, false, ts, prepare);
+
+  auto const regularCallBlock = defBlock(env, Block::Hint::Likely);
+  auto const magicCallBlock = defBlock(env, Block::Hint::Unlikely);
+  auto const slowCheckBlock = defBlock(env, Block::Hint::Unlikely);
+  auto const doneBlock = defBlock(env, Block::Hint::Likely);
+
+  // check for TC cache hit; go to slow check on miss
+  auto const cls = gen(env, LdObjClass, obj);
+  auto const tcCache = gen(env, LdSmashable);
+  gen(env, CheckSmashableClass, slowCheckBlock, tcCache, cls);
+
+  // fast path: load func from TC cache and proceed to regular call
+  auto const funcS = gen(env, LdSmashableFunc, tcCache);
+  gen(env, Jmp, regularCallBlock, funcS);
+
+  // slow path: run C++ helper to determine Func*, then check for magic call
+  env.irb->appendBlock(slowCheckBlock);
+  auto const fnData = FuncNameData { methodName };
+  auto const funcMM = gen(env, LdObjMethod, fnData, cls, tcCache);
+  auto const funcNM = gen(env, CheckFuncMMNonMagic, magicCallBlock, funcMM);
+  gen(env, Jmp, regularCallBlock, funcNM);
+
+  // prepare to do a regular (non-magic) call
+  env.irb->appendBlock(regularCallBlock);
+  auto const label = env.unit.defLabel(1, env.irb->nextBCContext());
+  regularCallBlock->push_back(label);
+  auto const funcWoM = label->dst(0);
+  funcWoM->setType(TFunc);
+  prepareToCallUnknown(env, funcWoM, obj, numParams, nullptr, false, ts);
+  gen(env, Jmp, doneBlock);
+
+  // prepare to do a magic call
+  env.irb->appendBlock(magicCallBlock);
+  auto const funcM = gen(env, AssertType, TFuncM, funcMM);
+  auto const funcWM = gen(env, LdFuncMFunc, funcM);
+  prepareToCallUnknown(env, funcWM, obj, numParams, methodName, false, ts);
+  gen(env, Jmp, doneBlock);
+
+  // done
+  env.irb->appendBlock(doneBlock);
 }
 
 SSATmp* lookupObjMethodExactFunc(IRGS& env, SSATmp* obj, const Func* func) {

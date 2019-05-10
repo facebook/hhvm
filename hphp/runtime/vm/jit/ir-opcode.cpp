@@ -595,6 +595,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckCtxThis:
   case CheckDArray:
   case CheckDictOffset:
+  case CheckFuncMMNonMagic:
   case CheckFuncStatic:
   case CheckInit:
   case CheckInitMem:
@@ -609,6 +610,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckRDSInitialized:
   case CheckRefInner:
   case CheckRefs:
+  case CheckSmashableClass:
   case CheckStk:
   case CheckSubClsCns:
   case CheckSurpriseFlags:
@@ -846,6 +848,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdCtx:
   case LdElem:
   case LdFuncFromClsMeth:
+  case LdFuncMFunc:
   case LdFuncNumParams:
   case LdFuncName:
   case LdFuncRxLevel:
@@ -872,6 +875,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdRef:
   case LdRetVal:
   case LdSSwitchDestFast:
+  case LdSmashable:
+  case LdSmashableFunc:
   case LdStk:
   case LdStkAddr:
   case LdStrLen:

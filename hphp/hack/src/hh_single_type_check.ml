@@ -211,7 +211,7 @@ let parse_options () =
   let options = [
     "--ai",
       Arg.String (set_ai),
-    " Run the abstract interpreter";
+    " Run the abstract interpreter (Zoncolan)";
     "--all-errors",
       Arg.Set all_errors,
       " List all errors not just the first one";

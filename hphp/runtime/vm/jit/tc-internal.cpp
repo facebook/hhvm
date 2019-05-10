@@ -119,13 +119,18 @@ bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
     return false;
   }
 
-  // Refuse to JIT Live translations for a function until Eval.JitLiveThreshold
-  // is hit.
-  if (kind == TransKind::Live || kind == TransKind::LivePrologue) {
+  // Refuse to JIT Live / Profile translations for a function until
+  // Eval.JitLiveThreshold / Eval.JitProfileThreshold is hit.
+  if (kind == TransKind::Live    || kind == TransKind::LivePrologue ||
+      kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
     auto const funcId = func->getFuncId();
     s_func_counters.ensureSize(funcId + 1);
     s_func_counters[funcId].fetch_add(1, std::memory_order_relaxed);
-    if (s_func_counters[funcId] < RuntimeOption::EvalJitLiveThreshold) {
+    auto const threshold =
+      (kind == TransKind::Live || kind == TransKind::LivePrologue)
+      ? RuntimeOption::EvalJitLiveThreshold
+      : RuntimeOption::EvalJitProfileThreshold;
+    if (s_func_counters[funcId] < threshold) {
       return false;
     }
   }

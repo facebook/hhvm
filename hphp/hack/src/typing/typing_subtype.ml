@@ -453,9 +453,13 @@ and simplify_subtype
 
   | Tabstract (AKdependent (`expr _, []), Some ty), Toption arg_ty_super ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
-    env |>
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super |||
-    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub arg_ty_super
+    if new_inference
+    then
+      env |>
+      simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super |||
+      simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub arg_ty_super
+    else
+      simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
 
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously

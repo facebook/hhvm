@@ -623,55 +623,41 @@ end = functor(CheckKind:CheckKindType) -> struct
         end
     end
 
-  let type_check_core genv env =
-    let env = if CheckKind.is_full
-      then { env with full_check = Full_check_started } else env in
-    let start_t = Unix.gettimeofday () in
-    let t = start_t in
-    (* Files in env.needs_decl contain declarations which were not finished.
-     * They were only oldified, but we didn't run phase2 redeclarations for them
-     * which would compute new versions, compare them with old ones and remove
-     * the old ones. We'll use oldified_defs sets to track what is in the old
-     * heap as we progress with redeclaration *)
-    let oldified_defs = get_oldified_defs env in
+  type parsing_result = {
+    parse_errors : Errors.t;
+    failed_parsing : Relative_path.Set.t;
+    fast_parsed : FileInfo.t Relative_path.Map.t;
+  }
 
-    let files_to_parse, stop_at_errors =
-      CheckKind.get_files_to_parse env in
-
-    let reparse_count = Relative_path.Set.cardinal files_to_parse in
-    Hh_logger.log "Files to recompute: %d" reparse_count;
-    if reparse_count = 1 then
-      files_to_parse |>
-      Relative_path.Set.choose |>
-      Relative_path.to_absolute |>
-      Hh_logger.log "Filename: %s";
-
-    (* PARSING *)
-
-    debug_print_path_set genv "files_to_parse" files_to_parse;
-    ServerProgress.send_progress_to_monitor "parsing %d files" reparse_count;
+  let do_parsing
+      (genv : genv)
+      (env : env)
+      ~(files_to_parse : Relative_path.Set.t)
+      ~(stop_at_errors : bool)
+      : parsing_result =
     let fast_parsed, errorl, failed_parsing =
       parsing genv env files_to_parse ~stop_at_errors in
-
     let errors = env.errorl in
     let errors =
       Errors.(incremental_update_set errors errorl files_to_parse Parsing) in
     let errors = clear_failed_parsing errors failed_parsing in
-    let hs = SharedMem.heap_size () in
-    Hh_logger.log "Heap size: %d" hs;
-    HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
-    let t = Hh_logger.log_duration "Parsing" t in
+    { parse_errors = errors; failed_parsing; fast_parsed }
 
-    (* UPDATE FILE INFO *)
-    let logstring = "Updating deps" in
-    Hh_logger.log "Begin %s" logstring;
-    let old_env = env in
-    let naming_table = update_naming_table env fast_parsed in
-    HackEventLogger.updating_deps_end t;
-    let t = Hh_logger.log_duration logstring t in
+  type naming_result = {
+    errors_after_naming : Errors.t;
+    failed_naming : Relative_path.Set.t;
+    fast : Naming_table.fast;
+  }
 
-    (* NAMING *)
-    ServerProgress.send_progress_to_monitor "resolving symbol references";
+  let do_naming
+      (env : env)
+      ~(errors : Errors.t)
+      ~(failed_parsing : Relative_path.Set.t)
+      ~(fast_parsed : FileInfo.t Relative_path.Map.t)
+      ~(naming_table : Naming_table.t)
+      ~(files_to_parse : Relative_path.Set.t)
+      ~(stop_at_errors : bool)
+      : naming_result =
     let errorl', failed_naming, fast = declare_names env fast_parsed in
     let errors = Errors.(incremental_update_map errors errorl' fast Naming) in
     (* failed_naming can be a superset of keys in fast - see comment in
@@ -679,19 +665,25 @@ end = functor(CheckKind:CheckKindType) -> struct
     let fast = extend_fast fast naming_table failed_naming in
 
     (* COMPUTES WHAT MUST BE REDECLARED  *)
-    let deptable_unlocked =
-      Typing_deps.allow_dependency_table_reads true in
     let failed_decl = CheckKind.get_defs_to_redecl files_to_parse env in
     let fast = extend_fast fast naming_table failed_decl in
     let fast = add_old_decls env.naming_table fast in
     let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
+    { errors_after_naming = errors; failed_naming; fast }
 
-    HackEventLogger.naming_end t;
-    let t = Hh_logger.log_duration "Naming" t in
-    ServerProgress.send_progress_to_monitor "determining changes";
+  type redecl_phase1_result = {
+    changes : Typing_deps.DepSet.t;
+    oldified_defs : FileInfo.names;
+    to_recheck1 : Relative_path.Set.t;
+    to_redecl_phase2_deps : Typing_deps.DepSet.t;
+  }
 
+  let do_redecl_phase1
+      (genv : genv)
+      ~(fast : FileInfo.names Relative_path.Map.t)
+      ~(oldified_defs : FileInfo.names)
+      : redecl_phase1_result =
     let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
-    debug_print_fast_keys genv "to_redecl_phase1" fast;
     let defs_to_redecl = get_defs fast in
     let _, changes, to_redecl_phase2_deps, to_recheck1 =
       Decl_redecl_service.redo_type_decl
@@ -702,30 +694,26 @@ end = functor(CheckKind:CheckKindType) -> struct
      * defs_ro_redecl from oldified_defs *)
     let oldified_defs =
       snd @@ Decl_utils.split_defs oldified_defs defs_to_redecl in
-    let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
     let to_recheck1 = Typing_deps.get_files to_recheck1 in
-    let hs = SharedMem.heap_size () in
-    Hh_logger.log "Heap size: %d" hs;
-    HackEventLogger.first_redecl_end t hs;
-    ServerRevisionTracker.decl_changed genv.ServerEnv.local_config
-      (Relative_path.Set.cardinal to_redecl_phase2);
-    let t = Hh_logger.log_duration "Determining changes" t in
+    { changes; oldified_defs; to_recheck1; to_redecl_phase2_deps }
 
-    (* DECLARING TYPES: Phase2 *)
-    let fast_redecl_phase2_now, lazy_decl_later =
-      CheckKind.get_defs_to_redecl_phase2 fast naming_table to_redecl_phase2 env
-    in
+  type redecl_phase2_result = {
+    errors_after_phase2 : Errors.t;
+    needs_phase2_redecl : Relative_path.Set.t;
+    to_recheck2 : Relative_path.Set.t;
+  }
 
-    let fast_redecl_phase2_now = remove_failed_parsing
-      fast_redecl_phase2_now stop_at_errors env failed_parsing in
-    let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
-    ServerProgress.send_progress_to_monitor "evaluating type declarations of %d files" count;
-    Hh_logger.log "Invalidate declarations in %d files"
-      (Relative_path.Map.cardinal lazy_decl_later);
-
-    debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
-    debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
-
+  let do_redecl_phase2
+      (genv : genv)
+      (env : env)
+      ~(errors : Errors.t)
+      ~(fast_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
+      ~(naming_table : Naming_table.t)
+      ~(lazy_decl_later : FileInfo.names Relative_path.Map.t)
+      ~(oldified_defs : FileInfo.names)
+      ~(to_redecl_phase2_deps : Typing_deps.DepSet.t)
+      : redecl_phase2_result =
+    let bucket_size = genv.local_config.SLC.type_decl_bucket_size in
     let get_classes path =
       match Naming_table.get_file_info naming_table path with
       | None -> SSet.empty
@@ -746,7 +734,7 @@ end = functor(CheckKind:CheckKindType) -> struct
       errorl' fast_redecl_phase2_now Decl) in
 
     let needs_phase2_redecl = diff_set_and_map_keys
-      (* Redaclaration delayed before and now. *)
+      (* Redeclaration delayed before and now. *)
       (union_set_and_map_keys env.needs_phase2_redecl lazy_decl_later)
       (* Redeclarations completed now. *)
       fast_redecl_phase2_now
@@ -755,45 +743,42 @@ end = functor(CheckKind:CheckKindType) -> struct
     let to_recheck2 = Typing_deps.get_files to_recheck2 in
     let to_recheck2 = Relative_path.Set.union to_recheck2
       (CheckKind.get_to_recheck2_approximation to_redecl_phase2_deps env) in
-    (* We have changed declarations, which means that typed ASTs could have
-     * changed too. *)
-    Ide_tast_cache.invalidate ();
+    { errors_after_phase2 = errors; needs_phase2_redecl; to_recheck2 }
 
-    (* DECLARING TYPES: merging results of the 2 phases *)
+  (** Merge the results of the two redecl phases. *)
+  let merge_redecl_results
+      ~(fast : FileInfo.names Relative_path.Map.t)
+      ~(fast_redecl_phase2_now : FileInfo.names Relative_path.Map.t)
+      ~(to_recheck1 : Relative_path.Set.t)
+      ~(to_recheck2 : Relative_path.Set.t)
+      ~(to_redecl_phase2 : Relative_path.Set.t)
+      : Naming_table.fast * Relative_path.Set.t =
     let fast = Relative_path.Map.union fast fast_redecl_phase2_now in
     let to_recheck = Relative_path.Set.union to_recheck1 to_recheck2 in
     let to_recheck = Relative_path.Set.union to_recheck to_redecl_phase2 in
-    let hs = SharedMem.heap_size () in
-    Hh_logger.log "Heap size: %d" hs;
-    HackEventLogger.second_redecl_end t hs;
-    ServerRevisionTracker.typing_changed genv.local_config
-      (Relative_path.Set.cardinal to_recheck);
-    let t = Hh_logger.log_duration "Type-decl" t in
-    let env = CheckKind.get_env_after_decl
-      ~old_env:env ~naming_table ~failed_naming in
-    Hh_logger.log "Begin evaluating prechecked changes";
-    let env = ServerPrecheckedFiles.update_after_local_changes genv env changes in
-    let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
+    fast, to_recheck
 
-    let _ : bool = Typing_deps.allow_dependency_table_reads
-      deptable_unlocked in
+  type type_checking_result = {
+    env : ServerEnv.env;
+    diag_subscribe : Diagnostic_subscription.t option;
+    errors : Errors.t;
+    fast : FileInfo.names Relative_path.Map.t;
+    full_check_done : bool;
+    needs_recheck : Relative_path.Set.t;
+    total_rechecked_count : int;
+  }
 
-    (* Checking this before starting typechecking because we want to attribtue
-     * big rechecks to rebases, even when restarting is disabled *)
-    if genv.local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold = 0 then
-      ServerRevisionTracker.check_blocking ();
-
-    (* TYPE CHECKING *)
-    let fast, lazy_check_later = CheckKind.get_defs_to_recheck
-      files_to_parse fast naming_table to_recheck env in
-    let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
-    let to_recheck_count = Relative_path.Map.cardinal fast in
-    ServerProgress.send_progress_to_monitor "typechecking %d files" to_recheck_count;
-    ServerCheckpoint.process_updates fast;
-    debug_print_fast_keys genv "to_recheck" fast;
-    debug_print_path_set genv "lazy_check_later" lazy_check_later;
+  let do_type_checking
+      (genv : genv)
+      (env : env)
+      ~(errors : Errors.t)
+      ~(fast : FileInfo.names Relative_path.Map.t)
+      ~(files_to_parse : Relative_path.Set.t)
+      ~(lazy_check_later : Relative_path.Set.t)
+      ~(old_env : env)
+      : type_checking_result =
     if Relative_path.(Map.mem fast default) then
-      Hh_logger.log "WARNING: recheking defintion in a dummy file";
+      Hh_logger.log "WARNING: rechecking defintion in a dummy file";
     let dynamic_view_files = if ServerDynamicView.dynamic_view_on ()
     then env.editor_open_files
     else Relative_path.Set.empty in
@@ -829,11 +814,260 @@ end = functor(CheckKind:CheckKindType) -> struct
     end in
 
     let total_rechecked_count = Relative_path.Map.cardinal fast in
+    {
+      env;
+      diag_subscribe;
+      errors;
+      fast;
+      full_check_done;
+      needs_recheck;
+      total_rechecked_count;
+    }
+
+  let type_check_core genv env =
+    let env = if CheckKind.is_full
+      then { env with full_check = Full_check_started } else env in
+
+    let start_t = Unix.gettimeofday () in
+    let t = start_t in
+
+    (* Files in env.needs_decl contain declarations which were not finished.
+     * They were only oldified, but we didn't run phase2 redeclarations for them
+     * which would compute new versions, compare them with old ones and remove
+     * the old ones. We'll use oldified_defs sets to track what is in the old
+     * heap as we progress with redeclaration *)
+    let oldified_defs = get_oldified_defs env in
+
+    let files_to_parse, stop_at_errors =
+      CheckKind.get_files_to_parse env in
+
+    let reparse_count = Relative_path.Set.cardinal files_to_parse in
+    if reparse_count = 1 then
+      files_to_parse |>
+      Relative_path.Set.choose |>
+      Relative_path.to_absolute |>
+      Hh_logger.log "Processing changes to 1 file: %s"
+    else
+      Hh_logger.log "Processing changes to %d files" reparse_count;
+
+    if CheckKind.is_full then begin
+      let redecl_count = Relative_path.Set.cardinal env.needs_phase2_redecl in
+      let check_count = Relative_path.Set.cardinal env.needs_recheck in
+      Hh_logger.log "Processing deferred type decl for %d file%s" redecl_count
+        (if redecl_count = 1 then "" else "s");
+      Hh_logger.log "Processing deferred typechecking for %d file%s" check_count
+        (if check_count = 1 then "" else "s");
+    end;
+
+    (* PARSING ***************************************************************)
+
+    debug_print_path_set genv "files_to_parse" files_to_parse;
+
+    ServerProgress.send_progress_to_monitor ~include_in_logs:false
+      "parsing %d files" reparse_count;
+    let logstring = Printf.sprintf "Parsing %d files" reparse_count in
+    Hh_logger.log "Begin %s" logstring;
+
+    (* Parse all changed files. *)
+    let { parse_errors = errors; failed_parsing; fast_parsed } =
+      do_parsing genv env ~files_to_parse ~stop_at_errors in
+
+    let hs = SharedMem.heap_size () in
+    HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
+    let t = Hh_logger.log_duration logstring t in
+    Hh_logger.log "Heap size: %d" hs;
+
+    (* UPDATE NAMING TABLES **************************************************)
+
+    let logstring = "Updating deps" in
+    Hh_logger.log "Begin %s" logstring;
+
+    (* Hold on to the original environment; it's used by do_type_checking. *)
+    let old_env = env in
+
+    (* Update the naming_table, which is a map from filename to the names of
+       toplevel symbols declared in that file. Also, update Typing_deps' table,
+       which is a map from toplevel symbol hash (Dep.t) to filename. *)
+    let naming_table = update_naming_table env fast_parsed in
+
+    HackEventLogger.updating_deps_end t;
+    let t = Hh_logger.log_duration logstring t in
+
+    (* NAMING ****************************************************************)
+
+    ServerProgress.send_progress_to_monitor ~include_in_logs:false
+      "resolving symbol references";
+    let logstring = "Naming" in
+    Hh_logger.log "Begin %s" logstring;
+
+    let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
+
+    (* Run NamingGlobal, updating the reverse naming table (which maps the names
+       of toplevel symbols to the files in which they were declared) in shared
+       memory. Does not run Naming itself (which converts an AST to a NAST by
+       assigning unique identifiers to locals, among other things). The Naming
+       module is something of a historical artifact and is slated for removal,
+       but for now, it is run immediately before typechecking. *)
+    let { errors_after_naming = errors; failed_naming; fast } =
+      do_naming env ~errors ~failed_parsing ~fast_parsed ~naming_table
+        ~files_to_parse ~stop_at_errors in
+
+    HackEventLogger.naming_end t;
+    let t = Hh_logger.log_duration logstring t in
+
+    (* REDECL PHASE 1 ********************************************************)
+
+    ServerProgress.send_progress_to_monitor ~include_in_logs:false
+      "determining changes";
+    let count = Relative_path.Map.cardinal fast in
+    let logstring =
+      Printf.sprintf "Type declaration (phase 1) for %d files" count in
+    Hh_logger.log "Begin %s" logstring;
+    Hh_logger.log
+      "(Recomputing type declarations in changed files \
+      and determining immediate typechecking fanout)";
+
+    debug_print_fast_keys genv "to_redecl_phase1" fast;
+
+    (* Do phase 1 of redeclaration. Here we compare the old and new versions of
+       the declarations defined in all changed files, and collect the set of
+       files which need to be re-typechecked as a consequence of those changes,
+       as well as the set of files whose folded class declarations must be
+       recomputed as a consequence of those changes (in phase 2). When
+       shallow_class_decl is enabled, we should no longer need to do phase 2. *)
+    let { changes; oldified_defs; to_recheck1; to_redecl_phase2_deps } =
+      do_redecl_phase1 genv ~fast ~oldified_defs in
+    let to_redecl_phase2 = Typing_deps.get_files to_redecl_phase2_deps in
+
+    let hs = SharedMem.heap_size () in
+    HackEventLogger.first_redecl_end t hs;
+    let t = Hh_logger.log_duration logstring t in
+    Hh_logger.log "Heap size: %d" hs;
+
+    ServerRevisionTracker.decl_changed genv.ServerEnv.local_config
+      (Relative_path.Set.cardinal to_redecl_phase2);
+
+    (* REDECL PHASE 2 ********************************************************)
+
+    (* For a full typecheck, we want to redeclare everything that needs
+       redeclaration (either because it was invalidated in phase 1, or because
+       it was invalidated by a previous lazy check). For a lazy check, we only
+       want to redeclare files open in the IDE, leaving everything else to be
+       lazily redeclared later. In either case, there's no need to attempt to
+       redeclare definitions in files with parse errors. *)
+    let fast_redecl_phase2_now, lazy_decl_later =
+      CheckKind.get_defs_to_redecl_phase2 fast naming_table to_redecl_phase2 env
+    in
+    let fast_redecl_phase2_now = remove_failed_parsing
+      fast_redecl_phase2_now stop_at_errors env failed_parsing in
+
+    let count = Relative_path.Map.cardinal fast_redecl_phase2_now in
+    ServerProgress.send_progress_to_monitor ~include_in_logs:false
+      "evaluating type declarations of %d files" count;
+    let logstring =
+      Printf.sprintf "Type declaration (phase 2) for %d files" count in
+    Hh_logger.log "Begin %s" logstring;
+    Hh_logger.log
+      "(Recomputing type declarations for descendants of changed classes \
+      and determining full typechecking fanout)";
+    Hh_logger.log
+      "Invalidating (but not recomputing) declarations in %d files"
+      (Relative_path.Map.cardinal lazy_decl_later);
+
+    debug_print_fast_keys genv "to_redecl_phase2" fast_redecl_phase2_now;
+    debug_print_fast_keys genv "lazy_decl_later" lazy_decl_later;
+
+    (* Redeclare the set of files whose folded class decls needed to be
+       recomputed as a result of phase 1. Collect the set of files which need to
+       be re-typechecked because of changes between the old and new
+       declarations. We need not collect a set of files to redeclare (again)
+       because our to_redecl set from phase 1 included the transitive children
+       of changed classes. *)
+    let { errors_after_phase2 = errors; needs_phase2_redecl; to_recheck2 } =
+      do_redecl_phase2 genv env ~errors ~fast_redecl_phase2_now ~naming_table
+        ~lazy_decl_later ~oldified_defs ~to_redecl_phase2_deps in
+
+    (* We have changed declarations, which means that typed ASTs could have
+     * changed too. *)
+    Ide_tast_cache.invalidate ();
+
+    let fast, to_recheck =
+      merge_redecl_results ~fast ~fast_redecl_phase2_now
+        ~to_recheck1 ~to_recheck2 ~to_redecl_phase2 in
+
+    let hs = SharedMem.heap_size () in
+    HackEventLogger.second_redecl_end t hs;
+    let t = Hh_logger.log_duration logstring t in
+    Hh_logger.log "Heap size: %d" hs;
+
+    ServerRevisionTracker.typing_changed genv.local_config
+      (Relative_path.Set.cardinal to_recheck);
+
+    let env = CheckKind.get_env_after_decl
+      ~old_env:env ~naming_table ~failed_naming in
+
+    (* HANDLE PRECHECKED FILES AFTER LOCAL CHANGES ***************************)
+
+    Hh_logger.log "Begin evaluating prechecked changes";
+    let env = ServerPrecheckedFiles.update_after_local_changes genv env changes in
+    let t = Hh_logger.log_duration "Evaluating prechecked changes" t in
+
+    let _ : bool = Typing_deps.allow_dependency_table_reads deptable_unlocked in
+
+    (* Checking this before starting typechecking because we want to attribtue
+     * big rechecks to rebases, even when restarting is disabled *)
+    if genv.local_config.ServerLocalConfig.hg_aware_recheck_restart_threshold = 0 then
+      ServerRevisionTracker.check_blocking ();
+
+    (* TYPE CHECKING *********************************************************)
+
+    (* For a full check, typecheck everything which may be affected by the
+       changes. For a lazy check, typecheck only the affected files which are
+       open in the IDE, leaving other affected files to be lazily checked later.
+       In either case, don't attempt to typecheck files with parse errors. *)
+    let fast, lazy_check_later = CheckKind.get_defs_to_recheck
+      files_to_parse fast naming_table to_recheck env in
+    let fast = remove_failed_parsing fast stop_at_errors env failed_parsing in
+
+    let to_recheck_count = Relative_path.Map.cardinal fast in
+    ServerProgress.send_progress_to_monitor ~include_in_logs:false
+      "typechecking %d files" to_recheck_count;
+    let logstring = Printf.sprintf "Typechecking %d files" in
+    Hh_logger.log "Begin %s" (logstring to_recheck_count);
+
+    debug_print_fast_keys genv "to_recheck" fast;
+    debug_print_path_set genv "lazy_check_later" lazy_check_later;
+
+    ServerCheckpoint.process_updates fast;
+
+    (* Typecheck all of the files we determined might need rechecking as a
+       consequence of the changes (or, in a lazy check, the subset of those
+       files which are open in an IDE buffer). *)
+    let {
+      env;
+      diag_subscribe;
+      errors;
+      fast;
+      full_check_done;
+      needs_recheck;
+      total_rechecked_count;
+    } =
+      do_type_checking genv env
+        ~errors ~fast ~files_to_parse ~lazy_check_later ~old_env
+    in
+
     HackEventLogger.type_check_end to_recheck_count total_rechecked_count t;
-    let log_string = Printf.sprintf "Typechecked %d files" total_rechecked_count in
-    let t = Hh_logger.log_duration log_string t in
+    let logstring = Printf.sprintf "Typechecked %d files" total_rechecked_count in
+    let t = Hh_logger.log_duration logstring t in
 
     Hh_logger.log "Total: %f\n%!" (t -. start_t);
+
+    let env =
+      CheckKind.get_env_after_typing env errors needs_phase2_redecl
+        needs_recheck diag_subscribe in
+
+    (* STATS LOGGING *********************************************************)
+
     if
       SharedMem.hh_log_level() > 0 ||
       GlobalOptions.tco_language_feature_logging env.tcopt
@@ -851,21 +1085,17 @@ end = functor(CheckKind:CheckKindType) -> struct
     end;
     ServerDebug.info genv "incremental_done";
 
-    let new_env = CheckKind.get_env_after_typing
-      env
-      errors
-      needs_phase2_redecl
-      needs_recheck
-      diag_subscribe
-    in
+    (* HANDLE PRECHECKED FILES AFTER RECHECK *********************************)
+
     let deptable_unlocked = Typing_deps.allow_dependency_table_reads true in
-    let new_env = ServerPrecheckedFiles.update_after_recheck genv new_env fast in
-    (* We might have completed a full check, which might mean that a rebase was
-     * successfully processed. *)
-    ServerRevisionTracker.check_non_blocking new_env;
+    let env = ServerPrecheckedFiles.update_after_recheck genv env fast in
     let _ : bool = Typing_deps.allow_dependency_table_reads deptable_unlocked in
 
-    new_env, {reparse_count; total_rechecked_count;}
+    (* We might have completed a full check, which might mean that a rebase was
+     * successfully processed. *)
+    ServerRevisionTracker.check_non_blocking env;
+
+    env, {reparse_count; total_rechecked_count}
 end
 
 let check_kind_to_string = function

@@ -1,1 +1,4 @@
-<?php if (!extension_loaded("spl")) die("skip no SPL extension");
+<?php
+<<__EntryPoint>> function main() {
+if (!extension_loaded("spl")) die("skip no SPL extension");
+}

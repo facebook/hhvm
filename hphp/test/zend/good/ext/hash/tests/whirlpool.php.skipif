@@ -1,1 +1,4 @@
-<?php extension_loaded('hash') or die('skip');
+<?php
+<<__EntryPoint>> function main() {
+extension_loaded('hash') or die('skip');
+}

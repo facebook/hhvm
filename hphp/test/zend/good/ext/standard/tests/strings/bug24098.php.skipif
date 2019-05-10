@@ -1,1 +1,4 @@
-<?php if (DIRECTORY_SEPARATOR == '\\') die("skip directory separator won't match expected output");
+<?php
+<<__EntryPoint>> function main() {
+if (DIRECTORY_SEPARATOR == '\\') die("skip directory separator won't match expected output");
+}

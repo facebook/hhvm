@@ -1,1 +1,4 @@
-<?php extension_loaded('reflection') or die('skip');
+<?php
+<<__EntryPoint>> function main() {
+extension_loaded('reflection') or die('skip');
+}

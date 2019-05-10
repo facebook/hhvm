@@ -1,3 +1,5 @@
 <?php
+<<__EntryPoint>> function main() {
 if (PHP_INT_MAX !== 9223372036854775807)
-	die("skip for 64-bit long systems only");
+  die("skip for 64-bit long systems only");
+}

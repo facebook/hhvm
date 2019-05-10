@@ -176,7 +176,6 @@ let get_files_in_path ~args path =
     (not @@ String_utils.string_ends_with f "byref-assignment3.php") &&
     (not @@ String_utils.string_ends_with f "byref-assignment2.php") &&
     (not @@ String_utils.string_ends_with f "byref-assignment1.php") &&
-    (not @@ String_utils.string_ends_with f "full_analysis/www_repro_2.php") &&
     (not @@ String_utils.string_ends_with f "byref1.php") &&
     (not @@ String_utils.string_ends_with f "byref2.php") &&
     (not @@ String_utils.string_ends_with f "phpvar1.php") &&

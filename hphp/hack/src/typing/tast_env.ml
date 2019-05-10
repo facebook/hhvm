@@ -128,7 +128,8 @@ let restore_saved_env env saved_env =
     Env.genv = {
       env.Env.genv with
         Env.tcopt = saved_env.Tast.tcopt;
-        Env.fun_mutable = saved_env.Tast.fun_mutable};
+        Env.fun_mutable = saved_env.Tast.fun_mutable;
+        Env.condition_types = saved_env.Tast.condition_types };
     Env.tenv = IMap.union env.Env.tenv saved_env.Tast.tenv;
     Env.subst = IMap.union env.Env.subst saved_env.Tast.subst;
     Env.global_tpenv = saved_env.Tast.tpenv;
@@ -213,3 +214,5 @@ let set_env_reactive = Typing_env.set_env_reactive
 let set_allow_wildcards env = { env with Typing_env.allow_wildcards = true }
 
 let get_allow_wildcards env = env.Typing_env.allow_wildcards
+
+let condition_type_matches = Typing_reactivity.condition_type_matches

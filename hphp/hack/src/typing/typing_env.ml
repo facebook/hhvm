@@ -1349,6 +1349,7 @@ let save local_tpenv env =
     Tast.reactivity = env_reactivity env;
     Tast.local_mutability = get_env_mutability env;
     Tast.fun_mutable = function_is_mutable env;
+    Tast.condition_types = env.genv.condition_types;
   }
 
 (* Compute the type variables appearing covariantly (positively)

@@ -252,3 +252,5 @@ val set_env_reactive: env -> Typing_defs.reactivity -> env
 
 val set_allow_wildcards: env -> env
 val get_allow_wildcards: env -> bool
+
+val condition_type_matches: is_self:bool -> env -> Tast.ty -> Tast.ty -> bool

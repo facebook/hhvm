@@ -17,12 +17,16 @@ open Core_kernel
  * identifiers.
  *)
 type ty = Typing_defs.locl Typing_defs.ty
+type decl_ty = Typing_defs.decl Typing_defs.ty
 type reactivity = Typing_defs.reactivity
 type mutability_env = Typing_mutability_env.mutability_env
 type type_param_mutability = Typing_defs.param_mutability
 
 let pp_ty fmt ty = Pp_type.pp_ty () fmt ty
 let show_ty ty = Pp_type.show_ty () ty
+
+let pp_decl_ty fmt ty = Pp_type.pp_ty () fmt ty
+let show_decl_ty ty = Pp_type.show_ty () ty
 
 let pp_reactivity fmt r = Pp_type.pp_reactivity fmt r
 let show_reactivity r = Pp_type.show_reactivity r
@@ -42,6 +46,7 @@ type saved_env = {
   reactivity : reactivity;
   local_mutability: mutability_env;
   fun_mutable: type_param_mutability option;
+  condition_types: decl_ty SMap.t;
 } [@@deriving show]
 
 let empty_saved_env tcopt : saved_env = {
@@ -52,6 +57,7 @@ let empty_saved_env tcopt : saved_env = {
   reactivity = Typing_defs.Nonreactive;
   local_mutability = Local_id.Map.empty;
   fun_mutable = None;
+  condition_types = SMap.empty;
 }
 
 (* Used when an env is needed in codegen.

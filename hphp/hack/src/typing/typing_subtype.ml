@@ -447,15 +447,15 @@ and simplify_subtype
     then simplify_subtype ~seen_generic_params ~deep ~this_ty bound_sub bound_super env
     else simplify_subtype ~seen_generic_params ~deep ~this_ty bound_sub ty_super env
 
-  (* This is sort of a hack because our handling of Toption is highly
-   * dependent on how the type is structured. When we see a bare
-   * dependent type we strip it off at this point since it shouldn't be
-   * relevant to subtyping any more.
-   *)
-
-  | Tabstract (AKdependent (`expr _, []), Some ty_sub), (Tclass _ | Toption _) ->
+  | Tabstract (AKdependent (`expr _, []), Some ty_sub), Tclass _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
+
+  | Tabstract (AKdependent (`expr _, []), Some ty), Toption arg_ty_super ->
+    let this_ty = Option.first_some this_ty (Some ety_sub) in
+    env |>
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super |||
+    simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub arg_ty_super
 
   (* If t1 <: ?t2 and t1 is an abstract type constrained as t1',
    * then t1 <: t2 or t1' <: ?t2.  The converse is obviously

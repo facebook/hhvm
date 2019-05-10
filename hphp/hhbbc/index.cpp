@@ -3215,9 +3215,7 @@ Type context_sensitive_return_type(IndexData& data,
       };
       auto t = loosen_dvarrayness(
         data.m_index->lookup_constraint(ctx, constraint));
-      if (!callCtx.args[i].moreRefined(t)) return true;
-      if (!callCtx.args[i].equivalentlyRefined(t)) return true;
-      return false;
+      return callCtx.args[i].strictlyMoreRefined(t);
     }
     return callCtx.args[i].strictSubtypeOf(TInitCell);
   };

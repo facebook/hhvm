@@ -34,6 +34,7 @@ type t = {
   extra_paths      : Path.t list;
   (* A list of regexps for paths to ignore for typechecking coroutines *)
   coroutine_whitelist_paths : string list;
+  warn_on_non_opt_build : bool
 }
 
 let filename = Relative_path.from_root Config_file.file_path_relative_to_repo_root
@@ -246,6 +247,7 @@ let load config_filename options =
   (* Since we use the unix alarm() for our timeouts, a timeout value of 0 means
    * to wait indefinitely *)
   let load_script_timeout = int_ "load_script_timeout" ~default:0 config in
+  let warn_on_non_opt_build = bool_ "warn_on_non_opt_build" ~default:false config in
   let formatter_override =
     Option.map (SMap.get config "formatter_override") maybe_relative_path in
   let global_opts = GlobalOptions.make
@@ -307,6 +309,7 @@ let load config_filename options =
     ignored_paths = ignored_paths;
     extra_paths = extra_paths;
     coroutine_whitelist_paths = coroutine_whitelist_paths;
+    warn_on_non_opt_build;
   }, local_config
 
 (* useful in testing code *)
@@ -322,6 +325,7 @@ let default_config = {
   ignored_paths = [];
   extra_paths = [];
   coroutine_whitelist_paths = [];
+  warn_on_non_opt_build = false;
 }
 
 let set_parser_options config popt = { config with parser_options = popt }
@@ -336,3 +340,4 @@ let ignored_paths config = config.ignored_paths
 let extra_paths config = config.extra_paths
 let coroutine_whitelist_paths config = config.coroutine_whitelist_paths
 let version config = config.version
+let warn_on_non_opt_build config = config.warn_on_non_opt_build

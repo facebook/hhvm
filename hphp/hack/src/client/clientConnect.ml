@@ -31,6 +31,7 @@ type env = {
   use_priority_pipe : bool;
   prechecked : bool option;
   config : (string * string) list;
+  allow_non_opt_build : bool;
 }
 
 type conn = {
@@ -271,6 +272,7 @@ let rec connect
                                      dynamic_view = false;
                                      prechecked = env.prechecked;
                                      config = env.config;
+                                     allow_non_opt_build = env.allow_non_opt_build;
                                    };
           connect env retries start_time
         end else begin

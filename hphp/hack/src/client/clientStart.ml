@@ -34,6 +34,7 @@ type env = {
   dynamic_view : bool;
   prechecked : bool option;
   config : (string * string) list;
+  allow_non_opt_build : bool;
 }
 
 let start_server env =
@@ -76,6 +77,7 @@ let start_server env =
       if env.prechecked = Some true then [| "--prechecked" |] else [||];
       if env.prechecked = Some false then [| "--no-prechecked" |] else [||];
       if env.config <> [] then serialize_config_overrides env.config else [||];
+      if env.allow_non_opt_build then [| "--allow-non-opt-build" |] else [||];
       match env.debug_port with
         | None -> [| |]
         | Some fd ->

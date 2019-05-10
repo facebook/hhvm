@@ -893,6 +893,7 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     interrupt_on_client;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
+    rust;
     _
   } = local_config in
   List.iter (ServerConfig.ignored_paths config) ~f:FilesToIgnore.ignore_path;
@@ -925,6 +926,22 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     Hh_logger.log "Refusing to run on %s: root is on NFS!" root_s;
     HackEventLogger.nfs_root ();
     Exit_status.(exit Nfs_root);
+  end;
+
+  if rust && ServerConfig.warn_on_non_opt_build config && (not Build_id.is_build_optimized) then begin
+    let msg = (Printf.sprintf
+      "hh_server binary was built in \"%s\" mode, " Build_id.build_mode) ^
+      "is running with Rust version of parser enabled, " ^
+      "and this repository's .hhconfig specifies warn_on_non_opt_build option. " ^
+      "Parsing with non-opt build will take significantly longer"
+    in
+    if ServerArgs.allow_non_opt_build options then begin
+      Hh_logger.log "Warning: %s. Initializing anyway due to --allow-non-opt-build option." msg
+    end else begin
+      Hh_logger.log "Error: %s. Recompile the server in opt or dbgo mode, or pass \
+      --allow-non-opt-build to continue anyway." msg;
+      Exit_status.(exit Build_error);
+    end
   end;
 
   Program.preinit ();

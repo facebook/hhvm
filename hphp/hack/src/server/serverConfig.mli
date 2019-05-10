@@ -28,5 +28,6 @@ val parser_options      : t -> ParserOptions.t
 val formatter_override  : t -> Path.t option
 val config_hash         : t -> string option
 val version             : t -> string option
+val warn_on_non_opt_build : t -> bool
 
 val convert_auto_namespace_to_map : string -> (string * string) list

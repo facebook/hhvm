@@ -48,6 +48,11 @@ module Common_argspecs = struct
     ("--watchman-debug-logging",
       Arg.Set value_ref,
       " Enable debug logging on Watchman client. This is very noisy")
+
+  let allow_non_opt_build value_ref =
+    ("--allow-non_opt-build",
+      Arg.Set value_ref,
+      " Override build mode check triggered by warn_on_non_opt_build .hhconfig option")
 end
 
 
@@ -106,6 +111,7 @@ let parse_check_args cmd =
   let timeout = ref None in
   let version = ref false in
   let watchman_debug_logging = ref false in
+  let allow_non_opt_build = ref false in
 
   (* custom behaviors *)
   let set_from x () = from := x in
@@ -503,6 +509,7 @@ let parse_check_args cmd =
       Arg.Set version,
       " (mode) show version and exit\n";
     Common_argspecs.watchman_debug_logging watchman_debug_logging;
+    Common_argspecs.allow_non_opt_build allow_non_opt_build;
   ] in
   let args = parse_without_command options usage "check" in
 
@@ -568,6 +575,7 @@ let parse_check_args cmd =
     sort_results = !sort_results;
     timeout = !timeout;
     watchman_debug_logging = !watchman_debug_logging;
+    allow_non_opt_build = !allow_non_opt_build;
   }
 
 let parse_start_env command =
@@ -587,6 +595,7 @@ let parse_start_env command =
   let prechecked = ref None in
   let from = ref "" in
   let config = ref [] in
+  let allow_non_opt_build = ref false in
   let wait_deprecation_msg () = Printf.eprintf
     "WARNING: --wait is deprecated, does nothing, and will be going away \
      soon!\n%!" in
@@ -611,6 +620,7 @@ let parse_start_env command =
     Common_argspecs.prechecked prechecked;
     Common_argspecs.no_prechecked prechecked;
     Common_argspecs.config config;
+    Common_argspecs.allow_non_opt_build allow_non_opt_build;
   ] in
   let args = parse_without_command options usage command in
   let root =
@@ -637,6 +647,7 @@ let parse_start_env command =
     root = root;
     silent = false;
     watchman_debug_logging = !watchman_debug_logging;
+    allow_non_opt_build = !allow_non_opt_build;
   }
 
 let parse_start_args () =

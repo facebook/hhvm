@@ -80,6 +80,7 @@ type client_check_env = {
   sort_results: bool;
   timeout: float option;
   watchman_debug_logging: bool;
+  allow_non_opt_build : bool;
 }
 
 let mode_to_string = function

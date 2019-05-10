@@ -57,6 +57,7 @@ module type S = sig
   val waiting_client: options -> Unix.file_descr option
   val watchman_debug_logging: options -> bool
   val with_saved_state: options -> saved_state_target option
+  val allow_non_opt_build: options -> bool
 
   (****************************************************************************)
   (* Setters *)

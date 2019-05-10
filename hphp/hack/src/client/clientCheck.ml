@@ -80,6 +80,7 @@ let connect ?(use_priority_pipe=false) args =
     use_priority_pipe;
     prechecked = args.prechecked;
     config = args.config;
+    allow_non_opt_build = args.allow_non_opt_build;
   }
 
 (* This is a function, because server closes the connection after each command,

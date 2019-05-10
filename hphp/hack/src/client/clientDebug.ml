@@ -33,6 +33,7 @@ let main (env : env) : Exit_status.t Lwt.t =
     use_priority_pipe = false;
     prechecked = None;
     config = [];
+    allow_non_opt_build = false;
   } in
   ServerCommandLwt.connect_debug oc;
   (* Exit this via ctrl-C *)

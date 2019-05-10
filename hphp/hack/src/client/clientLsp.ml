@@ -1679,6 +1679,7 @@ let rec connect_client
       use_priority_pipe = true;
       prechecked = None;
       config = [];
+      allow_non_opt_build = false;
     } in
   try%lwt
     let%lwt ClientConnect.{channels = ic, oc; server_finale_file; _} =
@@ -1778,6 +1779,7 @@ let start_server (root: Path.t) : unit =
       dynamic_view = !cached_toggle_state;
       prechecked = None;
       config = [];
+      allow_non_opt_build = false;
     } in
   let _exit_status = ClientStart.main env_start in
   ()

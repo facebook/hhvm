@@ -37,6 +37,7 @@ type options = {
   waiting_client: Unix.file_descr option;
   watchman_debug_logging: bool;
   with_saved_state: saved_state_target option;
+  allow_non_opt_build : bool;
 }
 
 (*****************************************************************************)
@@ -200,6 +201,7 @@ let parse_options () =
   let waiting_client= ref None in
   let watchman_debug_logging = ref false in
   let with_saved_state = ref None in
+  let allow_non_opt_build = ref false in
 
   let set_ai = fun s -> ai_mode := Some (Ai_options.prepare ~server:true s) in
   let set_max_procs = fun n -> max_procs := Some n in
@@ -248,6 +250,7 @@ let parse_options () =
       "--with-mini-state", Arg.String set_with_saved_state, Messages.with_saved_state;
       "-d", Arg.Set should_detach, Messages.daemon;
       "-s", Arg.String set_save_state, Messages.save_state;
+      "--allow-non-opt-build", Arg.Set allow_non_opt_build, "";
     ] in
   let options = Arg.align options in
   Arg.parse options (fun s -> root := s) usage;
@@ -304,6 +307,7 @@ let parse_options () =
     waiting_client = !waiting_client;
     watchman_debug_logging = !watchman_debug_logging;
     with_saved_state;
+    allow_non_opt_build = !allow_non_opt_build;
   }
 
 (* useful in testing code *)
@@ -330,6 +334,7 @@ let default_options ~root = {
   waiting_client = None;
   watchman_debug_logging = false;
   with_saved_state = None;
+  allow_non_opt_build = false;
 }
 
 (*****************************************************************************)
@@ -358,6 +363,7 @@ let should_detach options = options.should_detach
 let waiting_client options = options.waiting_client
 let watchman_debug_logging options = options.watchman_debug_logging
 let with_saved_state options = options.with_saved_state
+let allow_non_opt_build options = options.allow_non_opt_build
 
 (*****************************************************************************)
 (* Setters *)
@@ -402,6 +408,7 @@ let to_string
     waiting_client;
     watchman_debug_logging;
     with_saved_state;
+    allow_non_opt_build;
   } =
     let ai_mode_str = match ai_mode with
       | None -> "<>"
@@ -448,5 +455,6 @@ let to_string
         "waiting_client: "; waiting_client_str; ", ";
         "watchman_debug_logging: "; string_of_bool watchman_debug_logging; ", ";
         "with_saved_state: "; saved_state_str; ", ";
+        "allow_non_opt_build: "; string_of_bool allow_non_opt_build; ", ";
       "})"
     ] |> String.concat ~sep:"")

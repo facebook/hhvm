@@ -46,9 +46,6 @@ type genv = {
   (* various options that control the strictness of the typechecker *)
   tcopt: TypecheckerOptions.t;
 
-  (* are we in the body of a finally statement? *)
-  in_finally: bool;
-
   (* are we in a __PPL attributed class *)
   in_ppl: bool;
 
@@ -199,7 +196,6 @@ end = struct
   let make_class_genv tparams mode (cid, ckind) namespace is_ppl =
     { in_mode       = mode;
       tcopt         = GlobalNamingOptions.get ();
-      in_finally    = false;
       in_ppl        = is_ppl;
       type_params   = tparams;
       current_cls   = Some (cid, ckind);
@@ -239,7 +235,6 @@ end = struct
   let make_typedef_genv cstrs tdef_name tdef_namespace = {
     in_mode       = FileInfo.Mstrict;
     tcopt         = GlobalNamingOptions.get ();
-    in_finally    = false;
     in_ppl        = false;
     type_params   = cstrs;
     current_cls   = None;
@@ -257,7 +252,6 @@ end = struct
   let make_fun_genv params f_mode f_name f_namespace = {
     in_mode       = f_mode;
     tcopt         = GlobalNamingOptions.get ();
-    in_finally    = false;
     in_ppl        = false;
     type_params   = params;
     current_cls   = None;
@@ -273,7 +267,6 @@ end = struct
   let make_const_genv cst = {
     in_mode       = cst.Aast.cst_mode;
     tcopt         = GlobalNamingOptions.get ();
-    in_finally    = false;
     in_ppl        = false;
     type_params   = SMap.empty;
     current_cls   = None;
@@ -286,7 +279,6 @@ end = struct
   let make_top_level_genv () = {
     in_mode       = FileInfo.Mpartial;
     tcopt         = GlobalNamingOptions.get ();
-    in_finally    = false;
     in_ppl        = false;
     type_params   = SMap.empty;
     current_cls   = None;
@@ -306,7 +298,6 @@ end = struct
   {
     in_mode       = mode;
     tcopt         = GlobalNamingOptions.get ();
-    in_finally    = false;
     in_ppl        = false;
     type_params   = SMap.empty;
     current_cls   = None;
@@ -1925,12 +1916,8 @@ module Make (GetLocals : GetLocals) = struct
     Env.scope
       env
       (fun env ->
-        let genv, lenv = env in
-        (* isolate finally from the rest of the try-catch: if the first
-         * statement of the try is an uncaught exception, finally will
-         * still be executed *)
-        let fb = branch ({genv with in_finally = true}, lenv) fb in
-        let b = branch (genv, lenv) b in
+        let fb = branch env fb in
+        let b = branch env b in
         let cl = catchl env cl in
         N.Try (b, cl, fb))
 
@@ -1966,10 +1953,8 @@ module Make (GetLocals : GetLocals) = struct
    * The goto label is added to the local labels if it is not already there.
    * Otherwise, an error is produced.
    *
-   * An error is produced if this is called within a finally block.
    *)
-  and name_goto_label
-      ({ in_finally; _ }, _ as env) (label_pos, label_name as label) =
+  and name_goto_label env (label_pos, label_name as label) =
     (match Env.goto_label env label_name with
       | Some original_declaration_pos ->
         Errors.goto_label_already_defined
@@ -1977,8 +1962,6 @@ module Make (GetLocals : GetLocals) = struct
           label_pos
           original_declaration_pos
       | None -> Env.new_goto_label env label);
-    if in_finally then
-      Errors.goto_label_defined_in_finally label_pos;
     N.GotoLabel label
 
   (**
@@ -1986,12 +1969,9 @@ module Make (GetLocals : GetLocals) = struct
    *
    * The goto statement's target label is added to the local goto targets.
    *
-   * An error is produced if this is called within a finally block.
    *)
-  and name_goto
-      ({ in_finally; _ }, _ as env) (label_pos, _ as label) =
+  and name_goto env label =
     Env.new_goto_target env label;
-    if in_finally then Errors.goto_invoked_in_finally label_pos;
     N.Goto label
 
   and awaitall_stmt env el b =

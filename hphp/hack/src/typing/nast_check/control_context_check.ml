@@ -19,5 +19,9 @@ let handler = object
     | Continue, Toplevel -> Errors.toplevel_continue p
     | Continue, SwitchContext -> Errors.continue_in_switch p
     | Return _, _ when env.is_finally -> Errors.return_in_finally p
+    | GotoLabel (label_pos, _), _ when env.is_finally ->
+      Errors.goto_label_defined_in_finally label_pos
+    | Goto (label_pos, _), _ when env.is_finally ->
+      Errors.goto_invoked_in_finally label_pos;
     | _ -> ()
 end

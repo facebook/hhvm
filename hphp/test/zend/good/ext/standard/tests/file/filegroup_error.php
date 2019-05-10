@@ -2,7 +2,7 @@
 /* Prototype: int filegroup ( string $filename )
  *  Description: Returns the group ID of the file, or FALSE in case of an error.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing filegroup(): error conditions ***\n";
 
 /* Non-existing file or dir */
@@ -17,3 +17,4 @@ try { var_dump( filegroup() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 try { var_dump( filegroup("/no/such/file", "root") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 
 echo "\n*** Done ***\n";
+}

@@ -3,7 +3,7 @@
  * Description: Get date/time information 
  * Source code: ext/date/php_date.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing getdate() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -19,3 +19,4 @@ var_dump( getdate($timestamp) );
 var_dump( getdate() );
 
 echo "===DONE===\n";
+}

@@ -7,7 +7,7 @@
 /*
  * Test chdir() with variations of relative paths
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chdir() : usage variations ***\n";
 
 $base_dir_path = dirname(__FILE__);
@@ -60,3 +60,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level2_one/level2_two");
 rmdir("$file_path/level2_one");
+}

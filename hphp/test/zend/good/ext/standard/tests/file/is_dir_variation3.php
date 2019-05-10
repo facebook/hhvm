@@ -5,7 +5,7 @@
 */
 
 /* Passing invalid arguments to is_dir() */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_handle = opendir( $file_path );
 
@@ -31,3 +31,4 @@ foreach($dirnames as $dirname) {
 closedir($dir_handle);
 
 echo "\n*** Done ***";
+}

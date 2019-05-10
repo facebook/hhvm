@@ -2,7 +2,7 @@
 /* Prototype: float floatval( mixed $var );
  * Description: Returns the float value of var.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing floatval() and doubleval() : error conditions ***\n";
 
 
@@ -15,3 +15,4 @@ try { var_dump( floatval(10.5, FALSE) ); } catch (Exception $e) { echo "\n".'War
 try { var_dump( doubleval(10.5, FALSE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

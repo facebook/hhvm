@@ -4,7 +4,7 @@
 */
 
 /* Try deleting a file which is already deleted */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp file used
@@ -23,3 +23,4 @@ var_dump( file_exists($filename) );  // confirm file deleted
 var_dump( unlink($filename) );  // expected: false
 
 echo "Done\n";
+}

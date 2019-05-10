@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing xml_set_object() : error conditions ***\n";
 
 
@@ -25,3 +25,4 @@ echo "\n-- Testing xml_set_object() function with less than expected no. of argu
 try { var_dump( xml_set_object(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -7,7 +7,7 @@
 /*
  * Pass mb_strlen an incorrect number of arguments to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strlen() : error conditions ***\n";
 
 // Zero arguments
@@ -22,3 +22,4 @@ $extra_arg = 10;
 try { var_dump( mb_strlen($str, $encoding, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

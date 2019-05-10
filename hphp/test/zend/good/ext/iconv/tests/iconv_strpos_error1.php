@@ -7,7 +7,7 @@
 /*
  * Test how iconv_strpos behaves when passed an incorrect number of arguments
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strpos() : error conditions ***\n";
 
 
@@ -26,3 +26,4 @@ $haystack = 'string_val';
 try { var_dump( iconv_strpos($haystack) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

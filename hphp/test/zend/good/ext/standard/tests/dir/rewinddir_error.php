@@ -8,7 +8,7 @@
 /*
  * Pass incorrect number of arguments to rewinddir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rewinddir() : error conditions ***\n";
 
 
@@ -26,3 +26,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $dir_path = dirname(__FILE__) . "/rewinddir_error";
 rmdir($dir_path);
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/url.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing get_headers() : error conditions ***\n";
 
 // Zero arguments
@@ -19,3 +19,4 @@ $extra_arg = 10;
 try { var_dump( get_headers($url, $format, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

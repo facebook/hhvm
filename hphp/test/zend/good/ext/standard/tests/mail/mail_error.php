@@ -4,7 +4,7 @@
  * Source code: ext/standard/mail.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mail() : error conditions ***\n";
 
 
@@ -25,3 +25,4 @@ $subject = 'string_val';
 try { var_dump( mail($to, $subject) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

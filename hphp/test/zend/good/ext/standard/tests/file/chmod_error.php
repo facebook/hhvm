@@ -4,7 +4,7 @@
  * Source code: ext/standard/filestat.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chmod() : error conditions ***\n";
 
 
@@ -25,3 +25,4 @@ $filename = "___nonExisitingFile___";
 var_dump(chmod($filename, 0777));
 
 echo "===DONE===\n";
+}

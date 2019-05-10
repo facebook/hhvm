@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing timezone_identifiers_list() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -20,3 +20,4 @@ var_dump(in_array("America/New_York", $zones));
 var_dump(in_array("UTC", $zones));
 
 echo "===DONE===\n";
+}

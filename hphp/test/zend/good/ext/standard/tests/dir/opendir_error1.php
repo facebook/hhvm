@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to opendir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing opendir() : error conditions ***\n";
 
 // Zero arguments
@@ -26,3 +26,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $path = dirname(__FILE__) . "/opendir_error";
 rmdir($path);
+}

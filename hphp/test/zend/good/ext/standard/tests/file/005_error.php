@@ -16,7 +16,7 @@
    Description: Attempts to set the access and modification times of the file
      named in the filename parameter to the value given in time.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 
 echo "\n-- Testing with  Non-existing files --";
@@ -52,3 +52,4 @@ try { var_dump( filectime(__FILE__, TRUE) ); } catch (Exception $e) { echo "\n".
 try { var_dump( touch(__FILE__, 10, 100, 123) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\nDone";
+}

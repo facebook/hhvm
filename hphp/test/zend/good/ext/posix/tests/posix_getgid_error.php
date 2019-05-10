@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing posix_getgid() : error conditions ***\n";
 
 // One argument
@@ -13,3 +13,4 @@ $extra_arg = 10;
 try { var_dump( posix_getgid($extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -9,7 +9,7 @@
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 $x = new stdClass;
 var_dump(serialize(array($x, $x)));
 
@@ -29,3 +29,4 @@ $x = array();
 var_dump(serialize(array($x, $x)));
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rmdir() : variation ***\n";
 
 $workDir = "rmdirVar3.tmp";
@@ -56,3 +56,4 @@ foreach($dirs as $dir) {
 rmdir($workDir);
 
 echo "===DONE===\n";
+}

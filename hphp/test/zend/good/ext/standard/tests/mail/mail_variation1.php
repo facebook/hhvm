@@ -4,7 +4,7 @@
  * Source code: ext/standard/mail.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mail() : variation ***\n";
 
 // Initialise all required variables
@@ -13,3 +13,4 @@ $subject = 'Test Subject';
 $message = 'A Message';
 var_dump( mail($to, $subject, $message) );
 echo "===DONE===\n";
+}

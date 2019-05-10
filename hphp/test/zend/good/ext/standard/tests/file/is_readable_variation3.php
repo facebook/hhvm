@@ -4,7 +4,7 @@
 */
 
 /* test is_executable() with invalid arguments */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_readable(): usage variations ***\n";
 
 $file_handle = fopen(__FILE__, "r");
@@ -30,3 +30,4 @@ foreach( $misc_files as $misc_file ) {
 }
 
 echo "Done\n";
+}

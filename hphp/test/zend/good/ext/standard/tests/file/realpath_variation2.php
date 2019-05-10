@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing realpath() : variation ***\n";
 
 $paths = array('c:\\', 
@@ -25,3 +25,4 @@ foreach($paths as $path) {
 };
 
 echo "===DONE===\n";
+}

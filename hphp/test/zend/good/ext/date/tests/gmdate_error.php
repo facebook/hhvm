@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gmdate() : error conditions ***\n";
 
 // Initialise all required variables
@@ -22,3 +22,4 @@ $extra_arg = 10;
 try { var_dump( gmdate($format, $timestamp, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

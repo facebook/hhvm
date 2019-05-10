@@ -3,7 +3,7 @@
  * Description: Returns the user ID of the owner of the file, or
  *              FALSE in case of an error.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fileowner(): basic functionality ***\n"; 
 
 echo "-- Testing with the file or directory created by owner --\n";
@@ -31,3 +31,4 @@ $file_name = $file_path."/fileowner_basic.tmp";
 $dir_name = $file_path."/fileowner_basic";
 unlink($file_name);
 rmdir($dir_name);
+}

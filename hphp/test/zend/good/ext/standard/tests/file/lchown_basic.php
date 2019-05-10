@@ -4,7 +4,7 @@
  * Source code: ext/standard/filestat.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing lchown() : basic functionality ***\n";
 $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
 $symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
@@ -22,4 +22,4 @@ $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
 $symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
 unlink($filename);
 unlink($symlink);
-
+}

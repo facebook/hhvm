@@ -3,7 +3,7 @@
  * Description: Checks for uppercase character(s) 
  * Source code: ext/ctype/ctype.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_upper() : basic functionality ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -16,3 +16,4 @@ var_dump(ctype_upper($c2));
 
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

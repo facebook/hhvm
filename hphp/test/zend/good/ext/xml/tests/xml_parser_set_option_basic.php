@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "Simple testcase for xml_parser_get_option() function\n";
 
 $parser = xml_parser_create_ns();
@@ -30,3 +30,4 @@ var_dump(xml_parser_get_option($parser, XML_OPTION_TARGET_ENCODING));
 xml_parser_free( $parser );
 
 echo "Done\n";
+}

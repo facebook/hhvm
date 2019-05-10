@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing get_extension_funcs() : error conditions ***\n";
 
 echo "\n-- Too few arguments --\n";
@@ -18,3 +18,4 @@ echo "\n-- Invalid extension name --\n";
 var_dump(get_extension_funcs("foo"));
 
 echo "===DONE===\n";
+}

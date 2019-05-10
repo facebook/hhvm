@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing file() : variation ***\n";
 $mainDir = "fileVar8.dir";
 $subDir = "fileVar8Sub";
@@ -53,3 +53,4 @@ rmdir($absSubDir);
 rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+}

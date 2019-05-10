@@ -9,7 +9,7 @@
  * Source code: ext/standard/var.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "\n\nArray containing same object twice:\n";
 $obj = new stdclass;
 $a = array();
@@ -45,3 +45,4 @@ $ucontainer->a = "container->a.changed";
 var_dump($ucontainer);
 
 echo "Done";
+}

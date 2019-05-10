@@ -6,7 +6,7 @@
  */
 
 /* Creating unique files in various dirs by passing relative paths to $dir arg */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rename() with absolute and relative paths ***\n";
 $mainDir = "renameVar11";
 $subDir = "renameVar11Sub";
@@ -59,3 +59,4 @@ rmdir($absSubDir);
 rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+}

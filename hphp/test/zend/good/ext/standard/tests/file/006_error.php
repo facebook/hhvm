@@ -7,7 +7,7 @@
   Description: Attempts to change the mode of the file specified by
     filename to that given in mode
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions for fileperms(), chmod() ***\n";
 
 /* With standard files and dirs */
@@ -42,3 +42,4 @@ try { var_dump( fileperms("nofile", 0777) ); } catch (Exception $e) { echo "\n".
 echo "\n*** Done ***\n";
 error_reporting(0);
 unlink( dirname(__FILE__)."/006_error.tmp");
+}

@@ -9,7 +9,7 @@
  * Pass strings containing different character types to ctype_punct() to test
  * which are considered valid punctuation character only strings
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_punct() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -51,3 +51,4 @@ foreach($values as $value) {
 };
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

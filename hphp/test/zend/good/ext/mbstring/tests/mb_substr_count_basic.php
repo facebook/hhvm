@@ -7,7 +7,7 @@
 /*
  * Test Basic functionality of mb_substr_count
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_substr_count() : basic functionality ***\n";
 
 $string_ascii = 'This is an English string. 0123456789.';
@@ -25,3 +25,4 @@ var_dump(mb_substr_count($string_mb, $needle_mb1));
 var_dump(mb_substr_count($string_mb, $needle_mb2));
 
 echo "Done";
+}

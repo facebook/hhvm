@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing checkdate() : error conditions ***\n";
 
 //Set the default time zone 
@@ -23,3 +23,4 @@ try { var_dump (checkdate()); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 try { var_dump (checkdate($arg_0)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump (checkdate($arg_0, $arg_1)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE=== ";
+}

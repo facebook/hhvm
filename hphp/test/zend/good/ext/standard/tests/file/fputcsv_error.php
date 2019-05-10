@@ -4,7 +4,7 @@
  Description:fputcsv() formats a line (passed as a fields array) as CSV and write it to the specified file
    handle. Returns the length of the written string, or FALSE on failure.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 // zero argument
 echo "-- Testing fputcsv() with zero argument --\n";
@@ -37,3 +37,4 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
 }
 
 echo "Done\n";
+}

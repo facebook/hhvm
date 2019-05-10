@@ -4,7 +4,7 @@
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gzencode() : variation ***\n";
 
 $data = "A small string to encode\n";
@@ -15,3 +15,4 @@ var_dump(bin2hex(gzencode($data, -1, FORCE_GZIP)));
 var_dump(bin2hex(gzencode($data, -1, FORCE_DEFLATE)));
 
 echo "===DONE===\n";
+}

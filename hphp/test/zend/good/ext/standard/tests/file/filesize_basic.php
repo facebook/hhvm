@@ -5,7 +5,7 @@
  *              (and generates an error of level E_WARNING) in case of an error.
  */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing size of files and directories with filesize() ***\n"; 
 
 $file_path = dirname(__FILE__);
@@ -24,3 +24,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 $file_name = $file_path."/filesize_basic.tmp";
 unlink($file_name);
+}

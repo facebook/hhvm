@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 if ((1 << 31) < 0)
@@ -36,4 +36,5 @@ else
     var_dump(9223372036854775809);
     var_dump(9223372036854775810);
     var_dump(9223372036854775808888);
+}
 }

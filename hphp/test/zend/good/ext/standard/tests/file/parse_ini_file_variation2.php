@@ -4,7 +4,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing parse_ini_file() : variation ***\n";
 $output_file = __FILE__.".ini";
 $iniFile = <<<FILE
@@ -42,3 +42,4 @@ $a = parse_ini_file($output_file, true);
 var_dump($a);
 unlink($output_file);
 echo "===DONE===\n";
+}

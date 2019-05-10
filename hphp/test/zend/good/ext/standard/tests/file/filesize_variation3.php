@@ -4,7 +4,7 @@
  Description : Returns the size of the file in bytes, or FALSE 
    (and generates an error of level E_WARNING) in case of an error.
 */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 echo "*** Testing filesize(): usage variations ***\n"; 
@@ -29,3 +29,4 @@ echo "*** Done ***\n";
 error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation3.tmp");
+}

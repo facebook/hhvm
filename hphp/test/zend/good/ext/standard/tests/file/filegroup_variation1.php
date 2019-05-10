@@ -4,7 +4,7 @@
  */
 
 /* Creating soft and hard links to a file and applying filegroup() on links */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 fclose( fopen($file_path."/filegroup_variation1.tmp", "w") );
 
@@ -25,3 +25,4 @@ $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/filegroup_variation1_symlink.tmp");
 unlink($file_path."/filegroup_variation1_link.tmp");
 unlink($file_path."/filegroup_variation1.tmp");
+}

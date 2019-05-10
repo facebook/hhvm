@@ -7,7 +7,7 @@
 /*
  * Test mb_regex_encoding with one more than expected number of arguments
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_regex_encoding() : error conditions ***\n";
 
 
@@ -17,3 +17,4 @@ $extra_arg = 10;
 try { var_dump( mb_regex_encoding($encoding, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

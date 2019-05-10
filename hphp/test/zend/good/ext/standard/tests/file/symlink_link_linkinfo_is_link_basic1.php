@@ -11,7 +11,7 @@
    Prototype: int linkinfo ( string $path );
    Description: Gets information about a link
 */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp dir created in present working directory
@@ -78,3 +78,4 @@ $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = $file_path."/symlink_link_linkinfo_is_link_basic1";
 unlink("$dirname/symlink_link_linkinfo_is_link_basic1.tmp");
 rmdir($dirname);
+}

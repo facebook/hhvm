@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fopen() : variation ***\n";
 $absfile = __FILE__.'.tmp';
 $relfile = "fopen_variation6.tmp";
@@ -31,3 +31,4 @@ echo "\n";
 unlink($absfile);
 unlink($relfile);
 echo "===DONE===\n";
+}

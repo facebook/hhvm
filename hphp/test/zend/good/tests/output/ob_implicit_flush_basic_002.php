@@ -4,7 +4,7 @@
  * Source code: main/output.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ob_implicit_flush() : ensure implicit flushing does not apply to user buffers. ***\n";
 
 // Start a user buffer
@@ -20,3 +20,4 @@ echo "because implicit flushing affects only the top level buffer, not user buff
 ob_end_clean();
 
 echo "Done";
+}

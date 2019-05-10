@@ -1,6 +1,6 @@
 <?php 
 /* $Id$ */
-
+<<__EntryPoint>> function main() {
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book>test</book></books>';
 
@@ -19,3 +19,4 @@ echo $reader->readOuterXml();
 echo "\n";
 $reader->close();
 echo "===DONE===\n";
+}

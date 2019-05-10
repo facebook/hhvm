@@ -4,7 +4,7 @@
  * Source code: ext/standard/mail.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mail() : basic functionality ***\n";
 
 
@@ -18,3 +18,4 @@ echo "-- failure --\n";
 
 var_dump( mail($to, $subject, $message) );
 echo "===DONE===\n";
+}

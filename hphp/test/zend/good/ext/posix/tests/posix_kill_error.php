@@ -5,7 +5,7 @@
  * Alias to functions: 
  */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing posix_kill() : error conditions ***\n";
 
 
@@ -30,3 +30,4 @@ $sig = 9;
 var_dump( posix_kill($pid, 999) );
 
 echo "Done";
+}

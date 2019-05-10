@@ -4,9 +4,10 @@
  * Source code: ext/standard/image.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing getimagesize() : tiff_mm format ***\n";
 var_dump(getimagesize(dirname(__FILE__) . "/2x2mm.tif", &$arr));
 var_dump($arr);
 
 echo "===DONE===\n";
+}

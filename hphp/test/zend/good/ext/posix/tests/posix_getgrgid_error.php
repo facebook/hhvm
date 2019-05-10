@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing posix_getgrgid() : error conditions ***\n";
 
 // Zero arguments
@@ -23,3 +23,4 @@ $gid = -999;
 var_dump( posix_getgrgid($gid));
 
 echo "Done";
+}

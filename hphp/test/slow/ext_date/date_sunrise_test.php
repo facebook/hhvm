@@ -5,7 +5,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing date_sunrise() : usage variation ***\n";
 
 // GMT is zero for the timezone
@@ -53,3 +53,4 @@ var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP,
   $latitude, $longitude, $zenith, $gmt_offset) );
 
 echo "===DONE===\n";
+}

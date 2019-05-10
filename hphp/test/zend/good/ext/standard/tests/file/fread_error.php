@@ -6,7 +6,7 @@
    reached, (for network streams) when a packet becomes available, or (after
    opening userspace stream) when 8192 bytes have been read whichever comes first.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 $filename = __FILE__;
 $file_handle = fopen($filename, "r");
@@ -54,3 +54,4 @@ try { var_dump( fread(@$fp,10) ); } catch (Exception $e) { echo "\n".'Warning: '
 try { var_dump( fclose(@$fp) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

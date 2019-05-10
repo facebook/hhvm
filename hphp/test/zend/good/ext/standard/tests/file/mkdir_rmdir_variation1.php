@@ -2,7 +2,7 @@
 /*  Prototype: bool mkdir ( string $pathname [, int $mode [, bool $recursive [, resource $context]]] );
     Description: Makes directory
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 
 $context = stream_context_create();
@@ -18,3 +18,4 @@ for($mode = 0000; $mode <= 0777; $mode++) {
 }
 
 echo "Done\n";
+}

@@ -1,6 +1,6 @@
 <?php
 
-
+<<__EntryPoint>> function main() {
 echo "*** Test substituting argument 1 with unknown string values ***\n";
 
 
@@ -19,4 +19,5 @@ $variation_array = array(
 
 foreach ( $variation_array as $var ) {
   var_dump(get_cfg_var( $var  ) );
+}
 }

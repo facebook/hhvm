@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to scandir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing scandir() : error conditions ***\n";
 
 // Zero arguments
@@ -26,3 +26,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $directory = dirname(__FILE__) . '/scandir_error';
 rmdir($directory);
+}

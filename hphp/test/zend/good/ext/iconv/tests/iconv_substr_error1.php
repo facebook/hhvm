@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to iconv_substr() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_substr() : error conditions ***\n";
 
 //Test iconv_substr with one more than the expected number of arguments
@@ -25,3 +25,4 @@ $str = 'string_val';
 try { var_dump( iconv_substr($str) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

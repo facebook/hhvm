@@ -11,5 +11,6 @@
     for ($i = 0; $i < 100000; $i++) {
         md5((string)$x->x);
     }
-
+<<__EntryPoint>> function main() {
 echo "===DONE===\n";
+}

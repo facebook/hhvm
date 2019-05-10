@@ -4,7 +4,7 @@
  * Source code: ext/standard/syslog.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing closelog() : error conditions ***\n";
 
 // One argument
@@ -13,3 +13,4 @@ $extra_arg = 10;;
 try { var_dump( closelog($extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

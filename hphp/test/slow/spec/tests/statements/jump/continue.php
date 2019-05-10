@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 for ($i = 1; $i <= 5; ++$i)
@@ -82,3 +82,4 @@ for ($i = 10; $i <= 40; $i +=10)
     echo "\nJust beyond the switch";
 }
 echo "\n----------\n";
+}

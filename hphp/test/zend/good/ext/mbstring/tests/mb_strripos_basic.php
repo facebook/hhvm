@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of mb_strripos with ASCII and multibyte characters
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strripos() : basic functionality***\n";
 
 mb_internal_encoding('UTF-8');
@@ -88,3 +88,4 @@ foreach ($greek_needles as $needle) {
 }
 
 echo "Done";
+}

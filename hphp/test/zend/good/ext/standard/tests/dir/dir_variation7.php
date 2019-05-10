@@ -10,7 +10,7 @@
  *   1) remove write & execute permission from the 1st parent and test dir()
  *   2) remove execute permission from 2nd parent and test dir()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing dir() : remove execute permission from the parent dir ***\n";
 
 /* create the temporary directory :
@@ -60,3 +60,4 @@ chmod($child_dir_path, 0777);
 rmdir($child_dir_path);
 rmdir($sub_dir_path);
 rmdir($parent_dir_path);
+}

@@ -8,7 +8,7 @@
  * Pass strings containing different character types to ctype_xdigit() to test
  * which are considered valid hexadecimal 'digit' only strings
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C"); 
@@ -51,3 +51,4 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig); 
 echo "===DONE===\n";
+}

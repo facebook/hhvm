@@ -7,7 +7,7 @@
 /*
  * Pass mb_strrpos() an incorrect number of arguments
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strrpos() : error conditions ***\n";
 
 
@@ -26,3 +26,4 @@ $haystack = 'string_val';
 try { var_dump( mb_strrpos($haystack) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/gd/gd.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing imagecolorstotal() : basic functionality ***\n";
 
 // Palette image
@@ -25,3 +25,4 @@ var_dump( imagecolorstotal( $img ) );
 imagedestroy( $img );
 
 echo "===DONE===\n";
+}

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of getcwd()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing getcwd() : basic functionality ***\n";
 
 //create temporary directory for test, removed in CLEAN section
@@ -21,3 +21,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $directory = dirname(__FILE__) . "/getcwd_basic";
 rmdir($directory);
+}

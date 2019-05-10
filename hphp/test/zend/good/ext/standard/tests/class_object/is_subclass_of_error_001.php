@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_subclass_of() : error conditions ***\n";
 
 
@@ -31,3 +31,4 @@ $object = new stdclass();
 try { var_dump( is_subclass_of($object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

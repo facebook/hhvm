@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strftime() : error conditions ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -16,3 +16,4 @@ $extra_arg = 10;
 try { var_dump( strftime($format, $timestamp, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

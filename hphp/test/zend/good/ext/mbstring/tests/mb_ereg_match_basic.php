@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_ereg_match
  */
-
+<<__EntryPoint>> function main() {
 mb_internal_encoding('UTF-8');
 mb_regex_encoding('UTF-8');
 
@@ -32,3 +32,4 @@ $regex2 = base64_decode('5LiW55WM');
 var_dump(mb_ereg_match($regex2, $string_mb));
 
 echo "Done";
+}

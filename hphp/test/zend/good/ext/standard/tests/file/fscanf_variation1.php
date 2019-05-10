@@ -6,7 +6,7 @@
 */
 
 /* test fscanf() for its return type */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 echo "*** Testing fscanf(): for its return type without third argument ***\n";
@@ -32,3 +32,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation1.tmp";
 unlink($filename);
+}

@@ -7,7 +7,7 @@
 /* Prototype: int file_put_contents( string $filename, mixed $data[, int $flags[, resource $context]] )
  * Description: Write a string to a file
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 
 $file_path = dirname(__FILE__);
@@ -36,4 +36,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink($file_path."/file_put_contents.tmp");
 unlink($file_path."/file_put_contents1.tmp");
-
+}

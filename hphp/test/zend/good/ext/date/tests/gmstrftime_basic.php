@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gmstrftime() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -18,3 +18,4 @@ var_dump( gmstrftime($format, $timestamp) );
 var_dump( gmstrftime($format) );
 
 echo "===DONE===\n";
+}

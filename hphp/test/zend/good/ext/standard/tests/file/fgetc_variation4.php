@@ -6,7 +6,7 @@
 
 /* read from fie using fgetc, file opened using different
    read read modes */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetc() : usage variations ***\n";
 echo "-- Testing fgetc() with files opened with different read modes --\n";
 
@@ -47,3 +47,4 @@ foreach ($file_modes as $file_mode ) {
 }
 
 echo "Done\n";
+}

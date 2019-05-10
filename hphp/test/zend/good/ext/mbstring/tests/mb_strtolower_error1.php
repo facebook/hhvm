@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to mb_strtolower() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strtolower() : error conditions***\n";
 
 //Test mb_strtolower with one more than the expected number of arguments
@@ -22,3 +22,4 @@ echo "\n-- Testing mb_strtolower() function with zero arguments --\n";
 try { var_dump( mb_strtolower() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

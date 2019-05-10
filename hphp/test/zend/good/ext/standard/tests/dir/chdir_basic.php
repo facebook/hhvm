@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of chdir() with absolute and relative paths
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chdir() : basic functionality ***\n";
 $base_dir_path = dirname(__FILE__);
 
@@ -34,3 +34,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 rmdir("$file_path/level1_one/level1_two");
 rmdir("$file_path/level1_one");
+}

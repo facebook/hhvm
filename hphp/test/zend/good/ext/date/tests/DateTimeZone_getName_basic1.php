@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_name_get()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing DateTimeZone::getName() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -20,3 +20,4 @@ $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getName() );
 
 echo "===DONE===\n";
+}

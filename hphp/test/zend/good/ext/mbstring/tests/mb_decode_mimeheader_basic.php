@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_decode_mimeheader() : basic functionality ***\n";
 mb_internal_encoding('utf-8');
 
@@ -19,3 +19,4 @@ $b = mb_decode_mimeheader($a);
 var_dump(bin2hex($b));
 
 echo "===DONE===\n";
+}

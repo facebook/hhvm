@@ -2,7 +2,7 @@
 /* Prototype: int filegroup ( string $filename )
  * Description: Returns the group ID of the file, or FALSE in case of an error.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing filegroup(): basic functionality ***\n"; 
 
 echo "-- Testing with the file or directory created by owner --\n";
@@ -37,3 +37,4 @@ $file_name = $file_path."/filegroup_basic.tmp";
 $dir_name  = $file_path."/filegroup_basic";
 unlink($file_name);
 rmdir($dir_name);
+}

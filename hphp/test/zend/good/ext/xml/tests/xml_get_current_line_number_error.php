@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing xml_get_current_line_number() : error conditions ***\n";
 
 // Zero arguments
@@ -18,3 +18,4 @@ $extra_arg = 10;
 try { var_dump( xml_get_current_line_number(null, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

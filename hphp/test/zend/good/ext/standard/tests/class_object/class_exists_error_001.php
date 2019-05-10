@@ -8,7 +8,7 @@
 /**
  * Test wrong number of arguments
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing class_exists() : error conditions ***\n";
 
 // Zero arguments
@@ -23,3 +23,4 @@ $extra_arg = 10;
 try { var_dump( class_exists($classname, $autoload, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 $obj = new stdClass;
 var_dump(get_object_vars($obj));
 
@@ -16,3 +16,4 @@ var_dump($arr);
 $arr['val'] = 'changed.val';
 
 var_dump($arr, $obj);
+}

@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_substitute_character() : basic functionality ***\n";
 
 
@@ -19,3 +19,4 @@ var_dump( mb_substitute_character() );
 var_dump( mb_substitute_character("b") );
 
 echo "===DONE===\n";
+}

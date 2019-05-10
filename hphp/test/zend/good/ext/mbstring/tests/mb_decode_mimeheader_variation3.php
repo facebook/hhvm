@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_decode_mimeheader() : variation ***\n";
 mb_internal_encoding('iso-8859-7');
 
@@ -14,3 +14,4 @@ var_dump(bin2hex(mb_decode_mimeheader($encoded_word)));
 
 
 echo "===DONE===\n";
+}

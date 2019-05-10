@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing get_class_vars() : error conditions ***\n";
 
 
@@ -19,3 +19,4 @@ echo "\n-- Testing get_class_vars() function with less than expected no. of argu
 try { var_dump(get_class_vars()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

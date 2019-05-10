@@ -5,7 +5,7 @@
  * Source code: ext/hash/hash.c
  * Alias to functions:
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing hash_pbkdf2() : basic functionality ***\n";
 
 echo "sha1: " . hash_pbkdf2('sha1', 'password', 'salt', 1, 20)."\n";
@@ -19,3 +19,4 @@ echo "sha256(raw): " . bin2hex(hash_pbkdf2('sha256', 'password', 'salt', 1, 20, 
 echo "sha256(rounds): " . hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40)."\n";
 echo "sha256(rounds)(raw): " . bin2hex(hash_pbkdf2('sha256', 'passwordPASSWORDpassword', 'saltSALTsaltSALTsaltSALTsaltSALTsalt', 4096, 40, TRUE))."\n";
 echo "===Done===";
+}

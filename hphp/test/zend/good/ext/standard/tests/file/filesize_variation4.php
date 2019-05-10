@@ -6,7 +6,7 @@
 */
 
 /* Testing filesize() with data written using different file modes and by creating holes in file */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 echo "*** Testing filesize(): usage variations ***\n"; 
@@ -74,3 +74,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation4.tmp");
 unlink($file_path."/filesize_variation4_empty.tmp");
+}

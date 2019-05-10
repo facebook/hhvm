@@ -4,7 +4,7 @@
  * Source code: ext/standard/syslog.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing syslog() : error conditions ***\n";
 
 
@@ -21,3 +21,4 @@ $priority = 10;
 try { var_dump( syslog($priority) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

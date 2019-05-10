@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 echo "--------- test with full and omitted LHS vars -------------\n";
@@ -136,3 +136,4 @@ print_r($v);
 
 $v = list(,,) = array(0, 100, 67);
 print_r($v);
+}

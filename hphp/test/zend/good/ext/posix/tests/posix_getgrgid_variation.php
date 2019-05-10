@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing posix_getgrgid() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -74,3 +74,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

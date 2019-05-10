@@ -4,7 +4,7 @@
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gzopen() : error conditions ***\n";
 
 
@@ -22,3 +22,4 @@ $filename = 'string_val';
 try { var_dump( gzopen($filename) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

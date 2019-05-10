@@ -4,7 +4,7 @@
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gzopen() : variation ***\n";
 $absfile = __FILE__.'.tmp';
 $relfile = "gzopen_variation6.tmp";
@@ -30,3 +30,4 @@ echo "\n";
 unlink($absfile);
 unlink($relfile);
 echo "===DONE===\n";
+}

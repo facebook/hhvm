@@ -7,7 +7,7 @@
 /*
  * Open a file pointer using fopen and pass to readdir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing readdir() : usage variations ***\n";
 
 // get a resource variable
@@ -15,3 +15,4 @@ var_dump($fp = fopen(__FILE__, "r"));
 var_dump( readdir($fp) );
 
 echo "===DONE===\n";
+}

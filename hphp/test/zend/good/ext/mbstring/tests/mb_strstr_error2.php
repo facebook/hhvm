@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strstr() : error conditions ***\n";
 
 
@@ -16,3 +16,4 @@ $part = true;
 var_dump( mb_strstr($haystack, $needle, $part, $encoding) );
 
 echo "===DONE===\n";
+}

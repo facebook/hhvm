@@ -5,7 +5,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing localtime() : basic functionality ***\n";
 
 date_default_timezone_set("UTC");
@@ -24,3 +24,4 @@ var_dump( localtime($timestamp) );
 var_dump( localtime() );
 
 echo "===DONE===\n";
+}

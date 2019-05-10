@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gmdate() : usage variation ***\n";
 
 // Initialise all required variables
@@ -32,3 +32,4 @@ var_dump( gmdate('t') );
 var_dump( gmdate('t', $timestamp) );
 
 echo "===DONE===\n";
+}

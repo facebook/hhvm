@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to readdir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing readdir() : error conditions ***\n";
 
 
@@ -27,3 +27,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $path = dirname(__FILE__) . "/readdir_error";
 rmdir($path);
+}

@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() by reading a file containing a blank line */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetcsv() : reading the blank line ***\n";
 
 
@@ -65,3 +65,4 @@ $loop_counter = 1;
   } //end of mode loop 
 
 echo "Done\n";
+}

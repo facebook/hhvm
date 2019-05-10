@@ -8,7 +8,7 @@
    Testing fgetcsv() to read a file whose file pointer is pointing to end of file
    and fgetcsv() provided with only file handle in its argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetcsv() : with file handle as only argument and file pointer pointing at end of file ***\n";
 
 /* the array is with two elements in it. Each element should be read as 
@@ -81,3 +81,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

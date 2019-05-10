@@ -5,7 +5,7 @@
    Prototype: string realpath ( string $path );
    Description: Returns canonicalized absolute pathname
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing readlink() and realpath() : usage variations ***\n";
 $name_prefix = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // create temp dir
@@ -56,3 +56,4 @@ rmdir("$name_prefix/home/tests/link/");
 rmdir("$name_prefix/home/tests/");
 rmdir("$name_prefix/home/");
 rmdir("$name_prefix/");
+}

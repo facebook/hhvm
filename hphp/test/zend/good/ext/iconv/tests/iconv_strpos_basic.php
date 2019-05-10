@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv_strpos with ASCII and multibyte characters
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strpos() : basic functionality***\n";
 
 iconv_set_encoding("internal_encoding", "UTF-8");
@@ -31,3 +31,4 @@ $needle2 = base64_decode(b"44GT44KT44Gr44Gh44Gv44CB5LiW55WM");
 var_dump(iconv_strpos($string_mb, $needle2));
 
 echo "Done";
+}

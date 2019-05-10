@@ -2,7 +2,7 @@
 /* Prototype: bool is_null ( mixed $var );
  * Description: Finds whether the given variable is NULL 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_null() with valid null values ***\n";
 // different valid  null vlaues 
 $unset_array = array();
@@ -136,4 +136,4 @@ echo "Done\n";
 // close the resources used
 fclose($fp);
 closedir($dfp);
-
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/microtime.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gettimeofday() : error conditions ***\n";
 
 
@@ -15,3 +15,4 @@ $extra_arg = 10;
 try { var_dump( gettimeofday($get_as_float, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

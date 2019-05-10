@@ -4,7 +4,7 @@
  * Description : Returns the size of the file in bytes, or FALSE 
  *               (and generates an error of level E_WARNING) in case of an error.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing filesize(): error conditions ***";
 
 /* Non-existing file or dir */
@@ -19,3 +19,4 @@ try { var_dump( filesize(__FILE__, 2000) ); } catch (Exception $e) { echo "\n".'
 echo "\n";
 
 echo "*** Done ***\n";
+}

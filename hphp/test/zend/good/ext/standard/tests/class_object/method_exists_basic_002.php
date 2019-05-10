@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo " ---(Internal classes, using string class name)---\n";
 echo "Does exception::getmessage exist? ";
 var_dump(method_exists("exception", "getmessage"));
@@ -18,3 +18,4 @@ echo "Does stdclass::nonexistent exist? ";
 var_dump(method_exists(new stdclass, "nonexistent"));
 
 echo "Done";
+}

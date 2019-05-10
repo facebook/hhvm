@@ -4,7 +4,7 @@
  * Source code: main/output.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ob_flush() : basic functionality ***\n";
 
 // Zero arguments
@@ -20,4 +20,4 @@ $out = ob_flush();
 var_dump($out);
 
 echo "Done";
-
+}

@@ -4,7 +4,7 @@
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gzopen() : variation ***\n";
 
 $data = <<<EOT
@@ -24,3 +24,4 @@ gzclose($h);
 echo "\n";
 unlink($file);
 echo "===DONE===\n";
+}

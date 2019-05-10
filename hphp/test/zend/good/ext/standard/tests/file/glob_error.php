@@ -2,7 +2,7 @@
 /* Prototype: array glob ( string $pattern [, int $flags] );
    Description: Find pathnames matching a pattern
 */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 // temp dir created
@@ -27,3 +27,4 @@ error_reporting(0);
 unlink(dirname(__FILE__)."/glob_error/wonder12345");
 // temp dir deleted
 rmdir(dirname(__FILE__)."/glob_error");
+}

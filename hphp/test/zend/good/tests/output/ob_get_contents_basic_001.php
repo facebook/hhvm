@@ -5,7 +5,7 @@
  * Alias to functions: 
  */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ob_get_contents() : basic functionality ***\n";
 
 // Zero arguments
@@ -43,3 +43,4 @@ var_dump(ob_get_contents());
 
 
 echo "Done\n";
+}

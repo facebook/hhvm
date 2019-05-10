@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setISODate
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing date_isodate_set() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -26,3 +26,4 @@ date_isodate_set($datetime, 2008, 30, 3);
 echo "..same day last year was \"" . date_format($datetime, "D M j") . "\"\n";
 
 echo "===DONE===\n";
+}

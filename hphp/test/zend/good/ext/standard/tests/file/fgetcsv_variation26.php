@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() to read from files opened in write only mode */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetcsv() : reading the files opened in write only mode ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -72,3 +72,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

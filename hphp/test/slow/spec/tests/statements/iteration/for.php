@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 for ($i = 1; $i <= 10; ++$i)
@@ -37,4 +37,5 @@ for (;;)
 for ($a = 100, $i = 1; ++$i, $i <= 10; ++$i, $a -= 10)
 {
     echo "$i\t$a\n";
+}
 }

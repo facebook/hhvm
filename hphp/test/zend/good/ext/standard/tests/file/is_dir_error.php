@@ -3,7 +3,7 @@
  *  Description: Tells whether the filename is a regular file
  *               Returns TRUE if the filename exists and is a regular file
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_dir() error conditions ***";
 try { var_dump( is_dir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // Zero No. of args
 
@@ -19,3 +19,4 @@ echo "*** Done ***";
 error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 rmdir($file_path."/is_dir_error");
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing long2ip() : error conditions ***\n";
 
 // Zero arguments
@@ -18,3 +18,4 @@ $extra_arg = 10;
 try { var_dump( long2ip($proper_address, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

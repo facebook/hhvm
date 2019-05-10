@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing xml_set_start_namespace_decl_handler() : error conditions ***\n";
 
 
@@ -21,3 +21,4 @@ echo "\n-- Testing xml_set_start_namespace_decl_handler() function with less tha
 try { var_dump( xml_set_start_namespace_decl_handler(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

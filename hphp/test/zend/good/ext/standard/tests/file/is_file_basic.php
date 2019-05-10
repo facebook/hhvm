@@ -3,7 +3,7 @@
    Description: Tells whether the filename is a regular file
      Returns TRUE if the filename exists and is a regular file
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_file(): basic functionality ***\n";
 
 /* Checking with current file */
@@ -29,3 +29,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 $file_name = $file_path."/is_file_basic.tmp";
 unlink($file_name);
+}

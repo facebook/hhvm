@@ -4,7 +4,7 @@
  * Source code: ext/zlib/zlib.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gzopen() : basic functionality ***\n";
 
 
@@ -24,3 +24,4 @@ gzpassthru($h);
 gzclose($h);
 
 echo "===DONE===\n";
+}

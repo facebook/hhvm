@@ -7,7 +7,7 @@
 /*
  * Pass iconv_strrpos() an encoding that doesn't exist
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strrpos() : error conditions ***\n";
 
 $haystack = 'This is an English string. 0123456789.';
@@ -18,3 +18,4 @@ $encoding = 'unknown-encoding';
 var_dump(iconv_strrpos($haystack, $needle , $encoding));
 
 echo "Done";
+}

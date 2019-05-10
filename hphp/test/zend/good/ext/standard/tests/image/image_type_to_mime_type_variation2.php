@@ -3,7 +3,7 @@
  * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype 
  * Source code: ext/standard/image.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing image_type_to_mime_type() : usage variations ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);
@@ -35,3 +35,4 @@ foreach($values as $value) {
       $iterator++;
 };
 echo "===DONE===\n";
+}

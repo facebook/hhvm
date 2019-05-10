@@ -4,9 +4,10 @@
  * Source code: ext/standard/image.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing getimagesize() : xbm format ***\n";
 var_dump(getimagesize(dirname(__FILE__) . "/75x50.xbm", &$arr));
 var_dump($arr);
 
 echo "===DONE===\n";
+}

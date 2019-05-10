@@ -16,7 +16,7 @@
    Description: Attempts to set the access and modification times of the file
      named in the filename parameter to the value given in time.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing the basic functionality with file ***\n";
 print( @date('Y:M:D:H:i:s', fileatime(__FILE__)) )."\n";
 print( @date('Y:M:D:H:i:s', filemtime(__FILE__)) )."\n";
@@ -33,3 +33,4 @@ echo "\n*** Done ***\n";
 error_reporting(0);
 unlink(dirname(__FILE__)."/005_basic.tmp");
 unlink(dirname(__FILE__)."/005_basic");
+}

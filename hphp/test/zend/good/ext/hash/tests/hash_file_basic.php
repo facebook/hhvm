@@ -4,7 +4,7 @@
  * Source code: ext/hash/hash.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing hash_file() : basic functionality ***\n";
 
 // Set up file
@@ -22,4 +22,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $filename = 'hash_file_basic_example.txt';
 unlink( $filename );
-
+}

@@ -2,7 +2,7 @@
 /*  Prototype: bool mkdir ( string $pathname [, int $mode [, bool $recursive [, resource $context]]] );
     Description: Makes directory
 */
-
+<<__EntryPoint>> function main() {
 $context = stream_context_create();
 
 $file_path = dirname(__FILE__);
@@ -30,3 +30,4 @@ echo "Done\n";
 error_reporting(0);
 rmdir(dirname(__FILE__)."/mkdir_variation2/test/");
 rmdir(dirname(__FILE__)."/mkdir_variation2/");
+}

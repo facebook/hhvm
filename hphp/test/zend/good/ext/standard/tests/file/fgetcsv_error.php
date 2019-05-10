@@ -3,7 +3,7 @@
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure [, string $escape]]]] );
  Description: Gets line from file pointer and parse for CSV fields
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 // zero argument
 echo "-- Testing fgetcsv() with zero argument --\n";
@@ -37,3 +37,4 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
 }
 
 echo "Done\n";
+}

@@ -7,7 +7,7 @@
 /*
  * Test behaviour of mb_substr_count() function when passed an unknown encoding
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_substr_count() : error conditions ***\n";
 
 $haystack = 'Hello, World!';
@@ -18,3 +18,4 @@ echo "\n-- Testing mb_substr_count() function with an unknown encoding --\n";
 var_dump(mb_substr_count($haystack, $needle, $encoding));
 
 echo "Done";
+}

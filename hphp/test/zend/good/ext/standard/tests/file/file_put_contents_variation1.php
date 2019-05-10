@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing file_put_contents() : variation ***\n";
 
 $filename = "FilePutContentsVar1.tmp";
@@ -26,3 +26,4 @@ unlink($filename);
  
 
 echo "===DONE===\n";
+}

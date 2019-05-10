@@ -8,7 +8,7 @@
   Testing fgetcsv() to read from a file when provided with values of delimiter and
   enclosure that are not present in the line read by fgetcsv()
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetcsv() : with different delimiter and enclosure ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -89,3 +89,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

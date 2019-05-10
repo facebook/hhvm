@@ -5,7 +5,7 @@
  *               will return the number of bytes available on the corresponding
  *               filesystem or disk partition
  */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing with a directory ***\n";
@@ -54,3 +54,4 @@ echo"\n--- Done ---";
 error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 rmdir($file_path."/disk_free_space");
+}

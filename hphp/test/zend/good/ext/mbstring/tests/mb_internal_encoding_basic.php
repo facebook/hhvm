@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of mb_internal_encoding
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_internal_encoding() : basic functionality ***\n";
 
 var_dump(mb_internal_encoding());   //default internal encoding
@@ -19,3 +19,4 @@ var_dump(mb_internal_encoding());    //check internal encoding is now set to UTF
 
 
 echo "Done";
+}

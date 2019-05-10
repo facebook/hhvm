@@ -5,7 +5,7 @@
 */
 
 /* Testing fgetcsv() to rwad from a file with length argument equal to zero */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetcsv() : with length as 0 ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -84,3 +84,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

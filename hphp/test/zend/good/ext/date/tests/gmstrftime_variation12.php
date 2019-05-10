@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gmstrftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -18,3 +18,4 @@ var_dump( gmstrftime($format) );
 var_dump( gmstrftime($format, $timestamp) );
 
 echo "===DONE===\n";
+}

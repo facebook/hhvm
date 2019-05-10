@@ -7,7 +7,7 @@
 /*
  * Test mb_ereg_match by passing an incorrect number of arguments
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_ereg_match() : error conditions ***\n";
 
 
@@ -29,3 +29,4 @@ echo "\n-- Testing mb_ereg_match() function with zero arguments --\n";
 try { var_dump( mb_ereg_match() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

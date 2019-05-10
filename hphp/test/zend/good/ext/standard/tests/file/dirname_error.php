@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing dirname() : error conditions ***\n";
 
 // Zero arguments
@@ -18,3 +18,4 @@ $extra_arg = 10;
 try { var_dump( dirname($path, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

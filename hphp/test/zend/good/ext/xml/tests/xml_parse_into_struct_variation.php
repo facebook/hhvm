@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing xml_parse_into_struct() : variation ***\n";
 
 $simple = "<main><para><note>simple note</note></para><para><note>simple note</note></para></main>";
@@ -18,3 +18,4 @@ print_r($vals);
 
 
 echo "Done";
+}

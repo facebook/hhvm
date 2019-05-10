@@ -3,7 +3,7 @@
  * Description: Returns the user ID of the owner of the file, or
  *              FALSE in case of an error.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fileowner(): error conditions ***\n";
 /* Non-existing file or dir */
 var_dump( fileowner("/no/such/file/dir") );
@@ -17,3 +17,4 @@ try { var_dump( fileowner() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 try { var_dump( fileowner("/no/such/file", "root") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; } // args > expected
 
 echo "\n*** Done ***\n";
+}

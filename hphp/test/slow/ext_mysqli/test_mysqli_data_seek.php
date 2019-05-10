@@ -1,7 +1,7 @@
 <?php
 
 // Stemmed from https://github.com/facebook/hhvm/issues/5025
-
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 echo $nonexistent;
@@ -16,4 +16,5 @@ if (!$mysqli->connect_errno) {
     // query with 0 rows
     $res = $mysqli->query("SHOW VARIABLES LIKE '%hhvm_rocks%'");
     var_dump($res->data_seek(0));
+}
 }

@@ -6,7 +6,7 @@
 
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter
    of two chars is provided */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fputcsv() : with default enclosure & delimiter of two chars ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -69,3 +69,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

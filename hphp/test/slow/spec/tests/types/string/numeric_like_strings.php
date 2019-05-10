@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 echo "============== var_dump(numeric_like_string) ===================\n\n";
 
 var_dump("12345xxx");                   // string(...)
@@ -91,3 +91,4 @@ var_dump($s1--);
 var_dump($s2--);
 var_dump($s3--);
 var_dump($s4--);
+}

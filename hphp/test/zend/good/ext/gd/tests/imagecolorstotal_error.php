@@ -3,7 +3,7 @@
  * Description: Find out the number of colors in an image's palette
  * Source code: ext/gd/gd.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing imagecolorstotal() : error conditions ***\n";
 
 // Get a resource
@@ -21,3 +21,4 @@ var_dump( imagecolorstotal($im) );
 
 fclose($im); 
 echo "===DONE===\n";
+}

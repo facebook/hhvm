@@ -4,7 +4,7 @@
 */
 
 /* delete files with different file permission(0000 to 0777) */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp file used
@@ -24,3 +24,4 @@ for($mode = 0000; $mode <= 0777; $mode++ ) {
 }
 
 echo "Done\n";
+}

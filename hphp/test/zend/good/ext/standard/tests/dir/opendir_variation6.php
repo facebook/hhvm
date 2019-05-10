@@ -7,7 +7,7 @@
 /*
  * Pass paths containing wildcards to test if opendir() recognises them
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing opendir() : usage variations ***\n";
 // create the temporary directories
 $file_path = dirname(__FILE__);
@@ -34,3 +34,4 @@ $sub_dir_path = $dir_path . "/sub_dir1";
 
 rmdir($sub_dir_path);
 rmdir($dir_path);
+}

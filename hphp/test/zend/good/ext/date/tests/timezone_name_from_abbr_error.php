@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL | E_STRICT);
 
 //Set the default time zone 
@@ -23,3 +23,4 @@ $extra_arg = 10;
 try { var_dump( timezone_name_from_abbr($abbr, $gmtOffset, $isdst, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

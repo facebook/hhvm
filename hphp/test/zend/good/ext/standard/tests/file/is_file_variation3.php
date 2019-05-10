@@ -5,7 +5,7 @@
 */
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
 
@@ -36,3 +36,4 @@ echo "\n*** Done ***";
 error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/is_file_variation3.tmp");
+}

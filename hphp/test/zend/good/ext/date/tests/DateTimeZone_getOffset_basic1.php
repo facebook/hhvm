@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_offset_get()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing DateTimeZone::getOffset() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -21,3 +21,4 @@ $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getOffset($date) );
 
 echo "===DONE===\n";
+}

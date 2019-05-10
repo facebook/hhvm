@@ -4,7 +4,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing parse_ini_file() : variation ***\n";
 $mainDir = "parseIniFileVar6.dir";
 $subDir = "parseIniFileVar6Sub";
@@ -54,3 +54,4 @@ rmdir($absSubDir);
 rmdir($absMainDir);
 
 echo "\n*** Done ***\n";
+}

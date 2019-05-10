@@ -1,7 +1,7 @@
 <?php
 // note that gzclose is an alias to fclose. parameter checking tests will be
 // the same as fclose
-
+<<__EntryPoint>> function main() {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 gzread($h, 20);
@@ -19,3 +19,4 @@ gzread($h, 20);
 
 
 echo "===DONE===\n";
+}

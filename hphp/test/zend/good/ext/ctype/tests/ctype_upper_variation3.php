@@ -8,7 +8,7 @@
  * Pass strings containing different character types to ctype_upper() to test
  * which are considered valid uppercase character only strings
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_upper() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
@@ -50,3 +50,4 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

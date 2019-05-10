@@ -1,6 +1,6 @@
 <?php
 
-
+<<__EntryPoint>> function main() {
 $use_include_path = 0;
 
 
@@ -20,3 +20,4 @@ foreach ( $variation_array as $var ) {
   var_dump(gzfile( $var ,  $use_include_path ) );
 }
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/microtime.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gettimeofday() : basic functionality ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -25,3 +25,4 @@ $get_as_float = false;
 var_dump( gettimeofday($get_as_float) );
 
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/mcrypt/mcrypt.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mcrypt_encrypt() : error conditions ***\n";
 
 
@@ -26,3 +26,4 @@ $data = 'string_val';
 try { var_dump( mcrypt_encrypt($cipher, $key, $data) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

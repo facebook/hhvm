@@ -4,7 +4,7 @@
  * Source code: ext/standard/filestat.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing touch() : basic functionality ***\n";
 
 $filename = dirname(__FILE__)."/touch_basic.dat";
@@ -62,3 +62,4 @@ echo "atime=".$init_meta['atime']."\n";
 unlink($filename);
 
 echo "Done";
+}

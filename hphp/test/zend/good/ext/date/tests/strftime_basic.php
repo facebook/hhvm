@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strftime() : basic functionality ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -19,3 +19,4 @@ var_dump( strftime($format, $timestamp) );
 var_dump( strftime($format) );
 
 echo "===DONE===\n";
+}

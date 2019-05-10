@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing readfile() : variation ***\n";
 
 
@@ -33,3 +33,4 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 }
 
 echo "\n*** Done ***\n";
+}

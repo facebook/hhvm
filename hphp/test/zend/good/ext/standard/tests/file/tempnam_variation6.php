@@ -4,7 +4,7 @@
 */
 
 /* Trying to create unique files by passing previously created unique file name as prefix */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 echo "\n*** Test tempnam(): by passing previously created filenames ***\n";
@@ -36,3 +36,4 @@ for($i=1; $i<=3; $i++) {
 }
 
 echo "\n*** Done ***\n";
+}

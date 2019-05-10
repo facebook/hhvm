@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing idate() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -14,3 +14,4 @@ $format = 'Y';
 date_default_timezone_set("Asia/Calcutta");
 var_dump( idate($format) );
 echo "===DONE===\n";
+}

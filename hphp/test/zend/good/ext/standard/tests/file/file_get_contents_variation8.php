@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing file_get_contents() : variation ***\n";
 /* An array of filenames */ 
 $names_arr = array(
@@ -30,3 +30,4 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 }
 
 echo "\n*** Done ***\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing xml_parser_get_option() : error conditions ***\n";
 
 
@@ -20,3 +20,4 @@ echo "\n-- Testing xml_parser_get_option() function with less than expected no. 
 
 try { var_dump( xml_parser_get_option(null) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
+}

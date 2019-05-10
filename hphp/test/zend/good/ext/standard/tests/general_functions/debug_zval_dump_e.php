@@ -3,10 +3,11 @@
    Description: Dumps a string representation of an internal zend value 
                 to output.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 
 /* passing zero argument */
 try { debug_zval_dump(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

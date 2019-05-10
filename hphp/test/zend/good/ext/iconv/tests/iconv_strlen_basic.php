@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of iconv_strlen()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strlen() : basic functionality***\n";
 
 $string_ascii = b'abc def';
@@ -20,3 +20,4 @@ var_dump(iconv_strlen($string_ascii));
 echo "\n-- Multibyte String --\n";
 var_dump(iconv_strlen($string_mb, 'UTF-8'));
 echo "===DONE===\n";
+}

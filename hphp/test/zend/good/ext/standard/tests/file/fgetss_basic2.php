@@ -10,7 +10,7 @@
     x+, x+b, x+t
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetss() : basic operations ***\n";
 
 /* string with html and php tags */
@@ -64,3 +64,4 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 } // end of for - mode_counter
 
 echo "Done\n";
+}

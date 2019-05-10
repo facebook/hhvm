@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to chdir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chdir() : error conditions ***\n";
 
 // Zero arguments
@@ -20,3 +20,4 @@ $directory = __FILE__;
 $extra_arg = 10;
 try { var_dump( chdir($directory, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

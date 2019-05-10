@@ -6,7 +6,7 @@
 */
 
 /* test is_writable() & is_writeable() with invalid arguments */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_writable(): usage variations ***\n";
 
 echo "\n*** Testing is_writable() with invalid filenames ***\n";
@@ -30,3 +30,4 @@ foreach( $misc_files as $misc_file ) {
 }
 
 echo "Done\n";
+}

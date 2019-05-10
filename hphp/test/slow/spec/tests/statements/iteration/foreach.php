@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 $array = array();
@@ -74,4 +74,5 @@ foreach ($a as $key => list($v1, $v2))
     var_dump($key);
     var_dump($v1);
     var_dump($v2);
+}
 }

@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing idate() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -19,3 +19,4 @@ echo "\n-- Testing idate() function for 2 digit year having zero as starting num
 $timestamp = mktime(8, 8, 8, 8, 8, 2001);
 var_dump( idate($format, $timestamp) );
 echo "===DONE===\n";
+}

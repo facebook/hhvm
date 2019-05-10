@@ -3,7 +3,7 @@
    Description: Verify that the contents of a variable can be called as a function
                 In case of objects, $var = array($SomeObject, 'MethodName')
 */
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing error conditions ***\n";
 
 echo "\n-- Testing is_callable() function with less than expected no. of arguments --\n";
@@ -13,3 +13,4 @@ echo "\n-- Testing is_callable() function with more than expected no. of argumen
 try { var_dump( is_callable("string", TRUE, &$callable_name, "EXTRA") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

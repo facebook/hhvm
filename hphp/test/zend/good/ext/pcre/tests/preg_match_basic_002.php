@@ -3,9 +3,10 @@
  * Description: Perform a regular expression match
  * Source code: ext/pcre/php_pcre.c
  */
-
+<<__EntryPoint>> function main() {
 $string = "My\nName\nIs\nStrange";
 preg_match("/M(.*)/", $string, &$matches);
 
 var_dump($matches);
 echo "===Done===";
+}

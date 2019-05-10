@@ -7,7 +7,7 @@
 /*
  * Test mb_strlen when passed an unknown encoding
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strlen() : error ***\n";
 
 $string = 'abcdef';
@@ -17,3 +17,4 @@ $encoding = 'unknown-encoding';
 var_dump(mb_strlen($string, $encoding));
 
 echo "Done";
+}

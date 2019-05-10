@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_a() : error conditions ***\n";
 
 //Test is_a with one more than the expected number of arguments
@@ -27,3 +27,4 @@ $object = new stdclass();
 try { var_dump( is_a($object) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

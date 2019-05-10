@@ -4,7 +4,7 @@
  * Source code: Zend/zend_builtin_functions.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing property_exists() : error conditions ***\n";
 
 $object_or_class = "obj";
@@ -23,3 +23,4 @@ echo "\n-- Testing property_exists() function with incorrect arguments --\n";
 var_dump( property_exists(10, $property_name) );
 
 echo "===DONE===\n";
+}

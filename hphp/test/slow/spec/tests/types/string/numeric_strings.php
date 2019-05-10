@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 var_dump(setlocale(LC_ALL, 0));
@@ -40,3 +40,4 @@ var_dump($t);
 var_dump((string)INF);
 var_dump((string)-INF);
 var_dump((string)NAN);
+}

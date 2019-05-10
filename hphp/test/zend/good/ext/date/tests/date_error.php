@@ -3,7 +3,7 @@
  * Description: Format a local time/date.
  * Source code: ext/date/php_date.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing date() : error conditions ***\n";
 
 //Set the default time zone 
@@ -19,3 +19,4 @@ echo "\n-- Testing date function with more than expected no. of arguments --\n";
 $extra_arg = true;
 try { var_dump (checkdate($format, $timestamp, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE=== ";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strrchr() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -34,3 +34,4 @@ $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strrchr($string_mb, $needle2));
 
 echo "===DONE===\n";
+}

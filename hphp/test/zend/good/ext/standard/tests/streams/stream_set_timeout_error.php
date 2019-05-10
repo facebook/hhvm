@@ -4,7 +4,7 @@
  * Source code: ext/standard/streamsfuncs.c
  * Alias to functions: socket_set_timeout
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing stream_set_timeout() : error conditions ***\n";
 
 //Test stream_set_timeout with one more than the expected number of arguments
@@ -48,3 +48,4 @@ fclose($filestream);
 fclose($server);
 
 echo "Done";
+}

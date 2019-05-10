@@ -1,6 +1,6 @@
 <?php
 
-
+<<__EntryPoint>> function main() {
 $filename = $filename = dirname(__FILE__)."/004.txt.gz";
 
 
@@ -20,3 +20,4 @@ foreach ( $variation_array as $var ) {
   try { var_dump(readgzfile( $filename, $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 echo "===DONE===\n";
+}

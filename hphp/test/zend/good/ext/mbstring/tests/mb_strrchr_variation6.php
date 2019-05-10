@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strrchr() : variation ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -43,3 +43,4 @@ var_dump(mb_strrchr($string_mb, $needle_mb_mixed));
 
 
 echo "===DONE===\n";
+}

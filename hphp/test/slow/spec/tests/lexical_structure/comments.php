@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 /* this is a C-style comment
@@ -34,3 +34,4 @@ var_dump($k);
 
 $i = 2; $j = 3; $k = $i+++/*..*/++$j;   // comment separates tokens like whitespace
 var_dump($k);
+}

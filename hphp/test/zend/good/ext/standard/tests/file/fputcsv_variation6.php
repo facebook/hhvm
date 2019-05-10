@@ -8,7 +8,7 @@
    Testing fputcsv() to write to a file when delimiter are different from those
    present in the field to be written to the file
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fputcsv() : with different delimiter and enclosure ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -71,3 +71,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

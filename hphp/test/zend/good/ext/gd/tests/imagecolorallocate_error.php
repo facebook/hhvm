@@ -3,7 +3,7 @@
  * Description: Allocate a color for an image
  * Source code: ext/gd/gd.c
  */
-
+<<__EntryPoint>> function main() {
 $red = 10;
 $green = 10;
 $blue = 10;
@@ -21,3 +21,4 @@ echo "\n-- Testing imagecolorallocate() function with less than expected no. of 
 try { var_dump( imagecolorallocate() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( imagecolorallocate($im, $red, $green) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

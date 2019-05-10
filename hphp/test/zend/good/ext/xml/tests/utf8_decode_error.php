@@ -4,7 +4,7 @@
  * Source code: ext/xml/xml.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing utf8_decode() : error conditions ***\n";
 
 // Zero arguments
@@ -18,3 +18,4 @@ $extra_arg = 10;
 try { var_dump( utf8_decode($data, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

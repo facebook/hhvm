@@ -7,7 +7,7 @@
 /*
  * Pass an unknown encoding to mb_substr() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_substr() : error conditions ***\n";
 
 $str = 'Hello, world';
@@ -18,3 +18,4 @@ $encoding = 'unknown-encoding';
 var_dump( mb_substr($str, $start, $length, $encoding));
 
 echo "Done";
+}

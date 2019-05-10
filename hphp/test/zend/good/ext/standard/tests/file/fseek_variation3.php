@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions: gzseek
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fseek() : variation - beyond file boundaries ***\n";
 
 $outputfile = __FILE__.".tmp";
@@ -33,3 +33,4 @@ fclose($h);
 unlink($outputfile);
 
 echo "Done";
+}

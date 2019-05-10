@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to ctype_lower() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_lower() : error conditions ***\n";
 
 // Zero arguments
@@ -20,3 +20,4 @@ $c = 1;
 $extra_arg = 10;
 try { var_dump( ctype_lower($c, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

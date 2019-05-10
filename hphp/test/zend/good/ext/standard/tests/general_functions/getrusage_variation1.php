@@ -9,7 +9,7 @@
 /*
  * Pass different data types as $who argument to test behaviour of getrusage()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing getrusage() : usage variations ***\n";
 
 //get an unset variable
@@ -69,3 +69,4 @@ foreach($inputs as $input) {
   $iterator++;
 }
 echo "===DONE===\n";
+}

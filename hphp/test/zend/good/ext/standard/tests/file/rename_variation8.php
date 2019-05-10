@@ -2,7 +2,7 @@
 /* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
    Description: Renames a file or directory
 */
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing rename() on non-existing file ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
@@ -39,3 +39,4 @@ error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/rename_basic_new2.tmp");
 rmdir($file_path."/rename_basic_dir1");
+}

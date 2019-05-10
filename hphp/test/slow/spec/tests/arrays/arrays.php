@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 echo "================= array of zero elements is possible =================\n";
@@ -190,3 +190,4 @@ $v = array("red" => TRUE, 123, 9 => 34e12, "Hello");
 var_dump($v);
 unset($v[0], $v["red"]);
 var_dump($v);
+}

@@ -8,7 +8,7 @@
 /*
  * Pass incorrect number of arguments to closedir() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing closedir() : error conditions ***\n";
 
 
@@ -29,3 +29,4 @@ error_reporting(0);
 $base_dir = dirname(__FILE__);
 $dir_path = $base_dir . '\closedir_error';
 rmdir($dir_path);
+}

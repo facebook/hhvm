@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to ctype_space() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_space() : error conditions ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -24,3 +24,4 @@ try { var_dump( ctype_space($c, $extra_arg) ); } catch (Exception $e) { echo "\n
 
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

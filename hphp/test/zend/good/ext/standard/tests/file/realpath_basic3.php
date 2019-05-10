@@ -2,7 +2,7 @@
 /* Prototype: string realpath ( string $path );
    Description: Returns canonicalized absolute pathname
 */
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing basic functions of realpath() with files ***\n";
 
 /* creating directories and files */
@@ -53,3 +53,4 @@ unlink("$name_prefix/realpath_basic3.tmp");
 rmdir("$name_prefix/home/test/");
 rmdir("$name_prefix/home/");
 rmdir("$name_prefix/");
+}

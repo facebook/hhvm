@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing posix_strerror() : error conditions ***\n";
 
 echo "\n-- Testing posix_strerror() function with Zero arguments --\n";
@@ -20,3 +20,4 @@ $errno = -999;
 echo gettype( posix_strerror($errno) )."\n";
 
 echo "Done";
+}

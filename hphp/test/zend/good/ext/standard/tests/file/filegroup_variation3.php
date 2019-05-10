@@ -4,7 +4,7 @@
  */
 
 /* Passing file names with different notations, using slashes, wild-card chars */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing filegroup() with different notations of file names ***\n";
@@ -45,3 +45,4 @@ $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/filegroup_variation3";
 unlink($dir_name."/filegroup_variation3.tmp");
 rmdir($dir_name);
+}

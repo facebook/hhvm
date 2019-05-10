@@ -4,7 +4,7 @@
  * Description: Get the header name for an index
  * Source code: ext/exif/exif.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing exif_tagname() : error conditions ***\n";
 
 echo "\n-- Testing exif_tagname() function with no arguments --\n";
@@ -14,3 +14,4 @@ echo "\n-- Testing exif_tagname() function with more than expected no. of argume
 $extra_arg = 10;
 try { var_dump( exif_tagname(0x10E, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===Done===";
+}

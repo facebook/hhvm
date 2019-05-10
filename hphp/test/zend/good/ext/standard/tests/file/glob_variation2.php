@@ -2,7 +2,7 @@
 /* Prototype: array glob ( string $pattern [, int $flags] );
    Description: Find pathnames matching a pattern
 */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 // temp dirname used here
@@ -30,3 +30,4 @@ error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink("$file_path/glob_test/file.text");
 rmdir("$file_path/glob_test/");
+}

@@ -8,7 +8,7 @@
  * Check for child nodes of the <book>, <title> and This is the title
  *
 */
-
+<<__EntryPoint>> function main() {
 $doc = new DOMDocument();
 
 $root = $doc->createElement('book');
@@ -28,4 +28,4 @@ var_dump($title->hasChildNodes());
 
 echo "Text has child nodes: ";
 var_dump($text->hasChildNodes());
-
+}

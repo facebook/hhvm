@@ -1,6 +1,6 @@
 <?php
 
-
+<<__EntryPoint>> function main() {
 echo "*** Test substituting argument 1 with array values ***\n";
 
 
@@ -18,4 +18,5 @@ $variation_array = array(
 
 foreach ( $variation_array as $var ) {
   try { var_dump(get_cfg_var( $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}
 }

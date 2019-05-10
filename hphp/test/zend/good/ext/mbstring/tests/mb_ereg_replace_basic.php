@@ -8,7 +8,7 @@
 /*
  * Test Basic Functionality of mb_ereg_replace()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_ereg_replace() : basic functionality ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -36,3 +36,4 @@ $result_4 = mb_ereg_replace($regex2, b'_____', $string_mb);
 var_dump(bin2hex($result_4));
 
 echo "Done";
+}

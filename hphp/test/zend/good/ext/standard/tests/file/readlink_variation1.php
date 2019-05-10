@@ -3,7 +3,7 @@
    Description: Returns the target of a symbolic link */
 
 /* Testing readlink() with invalid arguments -int, float, bool, NULL, resource */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file_handle = fopen($file_path."/readlink_variation2.tmp", "w");
 
@@ -33,3 +33,4 @@ echo "\n*** Done ***";
 error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink($file_path."/readlink_variation2.tmp");
+}

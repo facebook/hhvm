@@ -2,7 +2,7 @@
 /**
  * @author Joshua Thijssen <jthijssen+php@noxlogic.nl>
  */
-
+<<__EntryPoint>> function main() {
 $it = new \ArrayIterator(array("foo", "bar", "baz"));
 $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH);
 print_r(iterator_to_array($it2));
@@ -14,4 +14,4 @@ $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH, \RegexIterator::U
 print_r(iterator_to_array($it2));
 $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH, \RegexIterator::USE_KEY | \RegexIterator::INVERT_MATCH);
 print_r(iterator_to_array($it2));
-
+}

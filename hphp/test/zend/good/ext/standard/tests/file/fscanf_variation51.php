@@ -6,7 +6,7 @@
 */
 
 /* Test fscanf() to scan a file for read when file is opened inwrite only mode */
-
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 
 echo "*** Test fscanf(): to read from a file opened in write only mode ***\n"; 
@@ -58,4 +58,5 @@ $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation51.tmp";
 if(file_exists($filename)) {
   unlink($filename);
+}
 }

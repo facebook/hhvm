@@ -9,7 +9,7 @@
  * it counts only the first occurrence or all other occurrences regardless whether they
  * were part of previous match
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_substr_count() : usage variations ***\n";
 
 
@@ -24,3 +24,4 @@ var_dump(mb_substr_count($string_mb, $needle_mb, 'utf-8'));
 
 
 echo "Done";
+}

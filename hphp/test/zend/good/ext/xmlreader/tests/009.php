@@ -1,6 +1,6 @@
 <?php 
 /* $Id$ */
-
+<<__EntryPoint>> function main() {
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book num="1"><test /></book><book num="2" /></books>';
 
@@ -17,3 +17,4 @@ echo " ";
 echo $reader->getAttribute('num');
 echo "\n";
 echo "===DONE===\n";
+}

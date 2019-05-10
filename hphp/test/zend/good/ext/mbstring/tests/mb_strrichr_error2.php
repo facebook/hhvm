@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strrichr() : error conditions ***\n";
 
 
@@ -16,3 +16,4 @@ $part = true;
 var_dump( mb_strrichr($haystack, $needle, $part, $encoding) );
 
 echo "===DONE===\n";
+}

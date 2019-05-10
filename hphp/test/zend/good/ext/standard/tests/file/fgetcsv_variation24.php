@@ -8,7 +8,7 @@
    Testing fgetcsv() to read from a file opened in various write modes and 
    enclosure argument with two characters
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fgetcsv() : with two chars as enclosure & delimiter ***\n";
 
 /* the array is with three elements in it. Each element should be read as 
@@ -86,3 +86,4 @@ foreach ($csv_lists as $csv_list) {
 } // end of foreach
 
 echo "Done\n";
+}

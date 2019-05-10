@@ -4,7 +4,7 @@
  * Source code: ext/standard/file.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing file_get_contents() : variation ***\n";
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $filename = $test_dir.'/fileGetContentsVar9.tmp';
@@ -36,3 +36,4 @@ unlink($hardlink);
 unlink($filename);
 
 echo "\n*** Done ***\n";
+}

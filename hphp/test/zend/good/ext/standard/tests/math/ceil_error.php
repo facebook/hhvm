@@ -3,7 +3,7 @@
  * Description: Round fractions up.
  * Source code: ext/standard/math.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ceil() :  error conditions ***\n";
 $arg_0 = 1.0;
 $extra_arg = 1;
@@ -14,3 +14,4 @@ try { var_dump(ceil($arg_0, $extra_arg)); } catch (Exception $e) { echo "\n".'Wa
 echo "\nToo few arguments\n";
 try { var_dump(ceil()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===Done===";
+}

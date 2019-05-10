@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_strlen()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strlen() : basic functionality***\n";
 
 $string_ascii = b'abc def';
@@ -21,3 +21,4 @@ echo "\n-- Multibyte String --\n";
 var_dump(mb_strlen($string_mb, 'UTF-8'));
 
 echo "\nDone";
+}

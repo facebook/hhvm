@@ -5,7 +5,7 @@
    | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
    +-------------------------------------------------------------+
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 $oper = array(0, -10, 100, -3.4e10, INF, -INF, NAN, TRUE, FALSE, NULL,
@@ -43,3 +43,4 @@ foreach ($oper as $e1)
 
 var_dump(10 + 5 . 12 . 100 - 50);
 var_dump((((10 + 5) . 12) . 100) - 50);
+}

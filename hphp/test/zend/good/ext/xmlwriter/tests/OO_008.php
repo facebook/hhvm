@@ -1,6 +1,6 @@
 <?php 
 /* $Id$ */
-
+<<__EntryPoint>> function main() {
 $xw = new XMLWriter();
 $xw->openMemory();
 $xw->setIndent(TRUE);
@@ -18,3 +18,4 @@ $xw->endDocument();
 // Force to write and empty the buffer
 $output = $xw->flush(true);
 print $output;
+}

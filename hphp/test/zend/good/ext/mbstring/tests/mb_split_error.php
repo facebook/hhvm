@@ -8,7 +8,7 @@
 /*
  * test too few and too many parameters
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_split() : error conditions ***\n";
 
 
@@ -26,3 +26,4 @@ $pattern = 'string_val';
 try { var_dump( mb_split($pattern) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

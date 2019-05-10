@@ -3,7 +3,7 @@
    Description: fnmatch() checks if the passed string would match
      the given shell wildcard pattern.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fnmatch() with file ***\n";
 $file = basename(__FILE__);
 
@@ -21,3 +21,4 @@ var_dump( fnmatch('1', '1') );
 var_dump( fnmatch('', '') );
 
 echo "\n*** Done ***\n";
+}

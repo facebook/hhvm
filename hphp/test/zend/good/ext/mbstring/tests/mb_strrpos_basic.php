@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of mb_strrpos()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strrpos() : basic ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -31,3 +31,4 @@ $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strrpos($string_mb, $needle2));
 
 echo "Done";
+}

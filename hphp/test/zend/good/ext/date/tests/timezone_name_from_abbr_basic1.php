@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing timezone_name_from_abbr() : basic functionality ***\n";
 
 //Set the default time zone 
@@ -37,3 +37,4 @@ echo "-- Tests with invalid offsets --\n";
 var_dump( timezone_name_from_abbr("", 5400) ); // offset = 1.5 hrs
 var_dump( timezone_name_from_abbr("", 62400) ); // offset = 24 hrs
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gmmktime() : usage variation ***\n";
 
 // Initialise all required variables
@@ -30,3 +30,4 @@ echo "\n-- Testing gmmktime() function with five optional argument --\n";
 var_dump( gmmktime($hour, $min, $sec, $mon, $day) );
 
 echo "===DONE===\n";
+}

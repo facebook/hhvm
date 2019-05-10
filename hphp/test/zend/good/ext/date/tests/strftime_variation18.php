@@ -4,7 +4,7 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strftime() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -17,3 +17,4 @@ $format = "%e";
 var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 echo "===DONE===\n";
+}

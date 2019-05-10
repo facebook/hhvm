@@ -4,7 +4,7 @@
  * Source code: ext/zlib/zlib.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gzopen() : variation ***\n";
 
 $modes = array('r+', 'rf', 'w+' , 'e');
@@ -22,3 +22,4 @@ foreach ($modes as $mode) {
     echo "\n";
 }
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/dns.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing gethostbynamel() : error conditions ***\n";
 
 // Zero arguments
@@ -17,3 +17,4 @@ $hostname = 'string_val';
 $extra_arg = 10;
 try { var_dump( gethostbynamel($hostname, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
+}

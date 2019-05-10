@@ -7,7 +7,7 @@
 /*
  * Test iconv_strlen when passed an unknown encoding
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strlen() : error ***\n";
 
 $string = 'abcdef';
@@ -17,3 +17,4 @@ $encoding = 'unknown-encoding';
 var_dump(iconv_strlen($string, $encoding));
 
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/posix/posix.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing posix_getpwuid() : error conditions ***\n";
 
 echo "\n-- Testing posix_getpwuid() function with Zero arguments --\n";
@@ -20,3 +20,4 @@ $uid = -99;
 var_dump( posix_getpwuid($uid) );
 
 echo "Done";
+}

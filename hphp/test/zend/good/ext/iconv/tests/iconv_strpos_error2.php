@@ -7,7 +7,7 @@
 /*
  * Pass an unknown encoding to iconv_strpos() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strpos() : error conditions ***\n";
 $haystack = 'Hello, world';
 $needle = 'world';
@@ -17,3 +17,4 @@ $encoding = 'unknown-encoding';
 var_dump( iconv_strpos($haystack, $needle, $offset, $encoding) );
 
 echo "Done";
+}

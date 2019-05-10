@@ -2,7 +2,7 @@
 /* Prototype: mixed pathinfo ( string $path [, int $options] );
    Description: Returns information about a file path
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing basic functions of pathinfo() ***\n";
 
 $file_path = dirname(__FILE__);
@@ -61,3 +61,4 @@ foreach($paths as $path) {
 }
 
 echo "Done\n";
+}

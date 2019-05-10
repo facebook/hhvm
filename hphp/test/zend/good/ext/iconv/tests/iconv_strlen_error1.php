@@ -7,7 +7,7 @@
 /*
  * Pass iconv_strlen an incorrect number of arguments to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strlen() : error conditions ***\n";
 
 // Zero arguments
@@ -21,3 +21,4 @@ $encoding = 'string_val';
 $extra_arg = 10;
 try { var_dump( iconv_strlen($str, $encoding, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

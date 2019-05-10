@@ -9,7 +9,7 @@
  * Passing a file as argument to dir() function instead of a directory 
  * and checking if proper warning message is generated.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing dir() : open a file instead of a directory ***\n";
 
 // open the file instead of directory
@@ -17,3 +17,4 @@ $d = dir(__FILE__);
 var_dump( $d );
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/mbstring/mbstring.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strstr() : variation ***\n";
 
 mb_internal_encoding('UTF-8');
@@ -39,3 +39,4 @@ else {
 
 
 echo "===DONE===\n";
+}

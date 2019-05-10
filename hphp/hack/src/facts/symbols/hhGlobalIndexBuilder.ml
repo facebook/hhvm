@@ -9,10 +9,10 @@
 *)
 open IndexBuilder
 
-(* Basic help text *)
+(* Basic help text - too many options to list all *)
 let usage =
   Printf.sprintf
-    "Usage: %s [--sqlite file] [--text file] [--json file] [--custom] [repository]\n"
+    "Usage: %s [opts] [repository]\n"
     Sys.argv.(0)
 ;;
 
@@ -32,14 +32,14 @@ let init_workers () =
 ;;
 
 (* Parse command line options *)
-let parse_options (): index_builder_context =
+let parse_options (): index_builder_context option =
   let sqlite_filename = ref None in
   let text_filename = ref None in
   let json_filename = ref None in
   let json_chunk_size = ref 500_000 in
   let custom_service = ref None in
   let custom_repo_name = ref None in
-  let repository = ref "." in
+  let repository = ref None in
   let options = ref [
       "--sqlite",
       Arg.String (fun x -> sqlite_filename := (Some x)),
@@ -66,22 +66,24 @@ let parse_options (): index_builder_context =
       "[repo-name]  Send this repo name to the custom symbol index writer";
 
     ] in
-  Arg.parse_dynamic options (fun anonymous_arg -> repository := anonymous_arg) usage;
-
-  (* Print what we're about to do *)
-  Printf.printf "Building global symbol index for [%s]\n%!"
-    !repository;
+  Arg.parse_dynamic options (fun anonymous_arg -> repository := (Some anonymous_arg)) usage;
 
   (* Parameters for this execution *)
-  {
-    repo_folder = !repository;
-    sqlite_filename = !sqlite_filename;
-    text_filename = !text_filename;
-    json_filename = !json_filename;
-    json_chunk_size = !json_chunk_size;
-    custom_service = !custom_service;
-    custom_repo_name = !custom_repo_name;
-  }
+  match !repository with
+  | None ->
+    Printf.printf "%s" usage;
+    None
+  | Some repo ->
+    Printf.printf "Building global symbol index for [%s]\n%!" repo;
+    Some {
+      repo_folder = repo;
+      sqlite_filename = !sqlite_filename;
+      text_filename = !text_filename;
+      json_filename = !json_filename;
+      json_chunk_size = !json_chunk_size;
+      custom_service = !custom_service;
+      custom_repo_name = !custom_repo_name;
+    }
 ;;
 
 (* Run the application *)
@@ -89,12 +91,16 @@ let main (): unit =
   Daemon.check_entry_point ();
   PidLog.init "/tmp/hh_server/global_index_builder.pids";
   PidLog.log ~reason:"main" (Unix.getpid ());
-  let ctxt = parse_options () in
-  let workers = Some (init_workers ()) in
-  IndexBuilder.go ctxt workers;
+  let ctxt_opt = parse_options () in
+  match ctxt_opt with
+  | None ->
+    ()
+  | Some ctxt ->
+    let workers = Some (init_workers ()) in
+    IndexBuilder.go ctxt workers;
 ;;
 
 (* Main entry point *)
 let () =
-  let _ = IndexBuilder.measure_time ~f:(fun () -> main ()) ~name:"\n\nGlobal Index Built successfully:" in
-  Printf.printf "Done%s" "";
+  main ();
+  Printf.printf "%s" "\n\n";

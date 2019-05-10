@@ -62,7 +62,7 @@ module CheckFunctionBody = struct
     | (Ast.FGenerator | Ast.FAsyncGenerator), Return _ -> ()
     | Ast.FCoroutine, Return e ->
         Option.iter e ~f:(expr f_type env)
-    | _, Throw (_, e) ->
+    | _, Throw e ->
         expr f_type env e
     | _, Expr e ->
         expr_allow_await_or_rx_move f_type env e;
@@ -602,7 +602,7 @@ and stmt_ env = function
   | TempContinue _
   | Continue -> ()
   | Return (Some e)
-  | Expr e | Throw (_, e) ->
+  | Expr e | Throw e ->
     expr env e
   | Awaitall (el, b) ->
       List.iter el (fun (_, y) ->

@@ -256,7 +256,7 @@ and emit_stmt env (pos, stmt) =
     emit_do env (pos, A.Block b) e
   | A.For (e1, e2, e3, b) ->
     emit_for env pos e1 e2 e3 (pos, A.Block b)
-  | A.Throw (_, (_, _ as expr)) ->
+  | A.Throw (_, _ as expr) ->
     gather [
       emit_expr env expr;
       Emit_pos.emit_pos pos;

@@ -218,7 +218,7 @@ class type ['a] visitor_type = object
   method on_stmt : 'a -> stmt -> 'a
   method on_stmt_ : 'a -> stmt_ -> 'a
   method on_switch : 'a -> expr -> case list -> 'a
-  method on_throw : 'a -> is_terminal -> expr -> 'a
+  method on_throw : 'a -> expr -> 'a
   method on_try : 'a -> block -> catch list -> block -> 'a
   method on_def_inline : 'a -> def -> 'a
   method on_let : 'a -> id -> hint option -> expr -> 'a
@@ -331,7 +331,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     let acc = this#on_expr acc e in
     this#on_block acc b
 
-  method on_throw acc _ e =
+  method on_throw acc e =
     let acc = this#on_expr acc e in
     acc
 
@@ -441,7 +441,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | TempBreak e             -> this#on_temp_break acc e
     | Continue                -> this#on_continue acc
     | TempContinue e          -> this#on_temp_continue acc e
-    | Throw   (is_term, e)    -> this#on_throw acc is_term e
+    | Throw e                 -> this#on_throw acc e
     | Return  eopt            -> this#on_return acc eopt
     | GotoLabel label         -> this#on_goto_label acc label
     | Goto label              -> this#on_goto acc label

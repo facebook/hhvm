@@ -970,7 +970,7 @@ and string_of_statement ~env ~indent (_p, stmt_) =
       "break", true
     | A.Continue ->
       "continue", true
-    | A.Throw (_, e) ->
+    | A.Throw e ->
       "throw " ^ (string_of_expression ~env e), true
     | A.Block block ->
       string_of_block_

@@ -237,7 +237,7 @@ struct
     | S.TempBreak e -> T.TempContinue (map_expr menv e)
     | S.Continue -> T.Continue
     | S.TempContinue e -> T.TempContinue (map_expr menv e)
-    | S.Throw (b, e) -> T.Throw (b, map_expr menv e)
+    | S.Throw e -> T.Throw (map_expr menv e)
     | S.Return oe -> T.Return (Option.map oe (map_expr menv))
     | S.GotoLabel label -> T.GotoLabel label
     | S.Goto label -> T.Goto label

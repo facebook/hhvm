@@ -46,9 +46,6 @@ type genv = {
   (* various options that control the strictness of the typechecker *)
   tcopt: TypecheckerOptions.t;
 
-  (* are we in the body of a try statement? *)
-  in_try: bool;
-
   (* are we in the body of a finally statement? *)
   in_finally: bool;
 
@@ -202,7 +199,6 @@ end = struct
   let make_class_genv tparams mode (cid, ckind) namespace is_ppl =
     { in_mode       = mode;
       tcopt         = GlobalNamingOptions.get ();
-      in_try        = false;
       in_finally    = false;
       in_ppl        = is_ppl;
       type_params   = tparams;
@@ -243,7 +239,6 @@ end = struct
   let make_typedef_genv cstrs tdef_name tdef_namespace = {
     in_mode       = FileInfo.Mstrict;
     tcopt         = GlobalNamingOptions.get ();
-    in_try        = false;
     in_finally    = false;
     in_ppl        = false;
     type_params   = cstrs;
@@ -262,7 +257,6 @@ end = struct
   let make_fun_genv params f_mode f_name f_namespace = {
     in_mode       = f_mode;
     tcopt         = GlobalNamingOptions.get ();
-    in_try        = false;
     in_finally    = false;
     in_ppl        = false;
     type_params   = params;
@@ -279,7 +273,6 @@ end = struct
   let make_const_genv cst = {
     in_mode       = cst.Aast.cst_mode;
     tcopt         = GlobalNamingOptions.get ();
-    in_try        = false;
     in_finally    = false;
     in_ppl        = false;
     type_params   = SMap.empty;
@@ -293,7 +286,6 @@ end = struct
   let make_top_level_genv () = {
     in_mode       = FileInfo.Mpartial;
     tcopt         = GlobalNamingOptions.get ();
-    in_try        = false;
     in_finally    = false;
     in_ppl        = false;
     type_params   = SMap.empty;
@@ -314,7 +306,6 @@ end = struct
   {
     in_mode       = mode;
     tcopt         = GlobalNamingOptions.get ();
-    in_try        = false;
     in_finally    = false;
     in_ppl        = false;
     type_params   = SMap.empty;
@@ -1767,9 +1758,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.TempContinue _ ->
       Errors.break_continue_n_not_supported pos;
       Aast.Continue
-    | Aast.Throw (_, e) ->
-      let terminal = not (fst env).in_try in
-      N.Throw (terminal, expr env e)
+    | Aast.Throw e -> N.Throw (expr env e)
     | Aast.Return e -> N.Return (Option.map e (expr env))
     | Aast.GotoLabel label -> name_goto_label env label
     | Aast.Goto label -> name_goto env label
@@ -1941,7 +1930,7 @@ module Make (GetLocals : GetLocals) = struct
          * statement of the try is an uncaught exception, finally will
          * still be executed *)
         let fb = branch ({genv with in_finally = true}, lenv) fb in
-        let b = branch ({genv with in_try = true}, lenv) b in
+        let b = branch (genv, lenv) b in
         let cl = catchl env cl in
         N.Try (b, cl, fb))
 

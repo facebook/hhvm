@@ -15,7 +15,7 @@
         [([4:3-6:4],
           (While ((([4:10-15], bool), (Lvar ([4:10-15], $cond))),
              [([5:5-40],
-               (Throw (true,
+               (Throw
                   (([5:11-39], Exception),
                    (New (
                       (([5:15-24], Exception),
@@ -23,8 +23,7 @@
                       [], [(([5:25-38], string), (String "DoWhileBody"))],
                       [],
                       ([5:15-24], (function(string $message, int $code, ?Exception $previous): _))
-                      )))
-                  )))
+                      )))))
                ]
              )))
           ];

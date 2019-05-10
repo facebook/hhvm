@@ -1203,9 +1203,9 @@ and convert_stmt (env : env) (st : state) (p, stmt_): _ * stmt =
     | Unsafe_block b ->
       let st, b = convert_block env st b in
       st, Unsafe_block b
-    | Throw (t, e) ->
+    | Throw e ->
       let st, e = convert_expr env st e in
-      st, Throw (t, e)
+      st, Throw e
     | Return (opt_e) ->
       let st, opt_e = convert_opt_expr env st opt_e in
       st, Return (opt_e)

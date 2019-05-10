@@ -954,12 +954,12 @@ and stmt_ env pos st =
     ) in
     let env, b = block env b in
     env, T.Awaitall (el, b)
-  | Throw (is_terminal, e) ->
+  | Throw e ->
     let p = fst e in
     let env, te, ty = expr env e in
     let env = exception_ty p env ty in
     let env = move_and_merge_next_in_catch env in
-    env, T.Throw(is_terminal, te)
+    env, T.Throw te
   | Continue ->
     let env = LEnv.move_and_merge_next_in_cont env C.Continue in
     env, T.Continue

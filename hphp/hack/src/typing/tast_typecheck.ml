@@ -159,7 +159,7 @@ let rec check_stmt env (stmt:ETast.stmt) (gamma:gamma) : delta =
   (* TempContinue is caught as a naming error in naming.ml *)
   | TempContinue _ ->
     empty_delta_with_cont C.Continue gamma
-  | Throw (_is_terminal, expr) ->
+  | Throw expr ->
     let gamma = check_expr expr gamma in
     empty_delta_with_cont C.Catch gamma
   | Return expropt ->

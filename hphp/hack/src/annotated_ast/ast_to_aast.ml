@@ -375,7 +375,7 @@ struct
     | Break None                -> Aast.Break
     | Continue (Some e)         -> Aast.TempContinue (on_expr e)
     | Continue None             -> Aast.Continue
-    | Throw e                   -> Aast.Throw (false, on_expr e)
+    | Throw e                   -> Aast.Throw (on_expr e)
     | Return e                  -> Aast.Return (optional on_expr e)
     | GotoLabel label           -> Aast.GotoLabel label
     | Goto label                -> Aast.Goto label

@@ -71,8 +71,7 @@ and stmt_ =
   | Continue
   (* Temporarily need to support `continue int` for codegen but not typecheck *)
   | TempContinue of expr
-  (* is_terminal is new *)
-  | Throw of is_terminal * expr
+  | Throw of expr
   | Return of expr option
   | GotoLabel of pstring
   | Goto of pstring

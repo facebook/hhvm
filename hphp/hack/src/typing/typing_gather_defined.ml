@@ -142,9 +142,9 @@ class gatherer env = object (self) inherit [_] Nast.reduce as parent
   method! on_Continue () =
     L.set C.Continue gamma L.empty
 
-  method! on_Throw () x e =
+  method! on_Throw () e =
     self#plus
-      (parent#on_Throw () x e)
+      (parent#on_Throw () e)
       (L.set C.Catch gamma L.empty)
 
   method! on_Return () e =

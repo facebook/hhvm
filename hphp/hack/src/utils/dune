@@ -218,16 +218,18 @@
   (libraries
     utils_core))
 
+(copy_files config/build-id.c)
+
 (library
   (name compiler_id)
   (wrapped false)
   (modules
     compiler_id)
   (c_names
-    compiler_id_impl)
+    compiler_id_impl
+    build-id)
   (c_flags (:standard
-    (:include ../dune_config/incl_hphp_parent.sexp)
-    (:include config/compiler-id-opt))))
+    (:include ../dune_config/incl_hphp_parent.sexp))))
 
 (library
   (name lsp)

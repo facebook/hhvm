@@ -11,7 +11,7 @@ object(mysqli_result) (%d) {
   bool(false)
 }
 
-Fatal error: %s
+Fatal error: Uncaught exception 'Exception' with message 'Argument to mysqli_result::__construct must be of type resource or mysqli' in %s/test_mysqli_constructor.php:15
 Stack trace:
-#0 %stest_mysqli_constructor.php(%s): mysqli_result->__construct()
-#1 {main}
+#0 %s/test_mysqli_constructor.php(15): mysqli_result->__construct()
+%A

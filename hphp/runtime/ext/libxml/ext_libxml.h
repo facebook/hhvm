@@ -191,7 +191,30 @@ using XMLNode = req::ptr<XMLNodeData>;
 inline XMLNode libxml_register_node(xmlNodePtr p) {
   if (!p) return nullptr;
   if (p->_private) {
-    return XMLNode(reinterpret_cast<XMLNodeData*>(p->_private));
+    // The problem this logic tries to solve:
+    // - _private points to a resource
+    // - We use DecRefNZ to get the reference count of the resource down to 0
+    //   but it hasn't been destructed or sweeped yet. But the GC could sweep it
+    //   at any moment.
+    // - Some code now call libxml_register_node() which without the refcount
+    //   check would return true or the object.
+    // - Because we know that if the sweep or destructor had run the pointer
+    //   would have been cleaned up so if we have a pointer it is safe to look
+    //   at the object.
+    // - So we look at the refcount of the object and make sure it is > 0.
+    auto node = reinterpret_cast<XMLNodeData*>(p->_private);
+    if (node->hdr()->checkCount()) {
+      return XMLNode(node);
+    }
+
+    // If the node has a ref count of 0 we need to do 2 things
+    // - First we need to reset the pointer from the resource to the libxml node
+    //   because otherwise when destructing the resource it will break.
+    // - Secondly we need to reset the pointer from the libxml node to the
+    //   resource. Otherwise we can't create a new resource using this libxml
+    //   node.
+    node->reset();
+    p->_private = nullptr;
   }
 
   if (p->type == XML_HTML_DOCUMENT_NODE ||

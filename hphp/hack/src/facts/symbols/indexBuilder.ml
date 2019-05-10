@@ -94,11 +94,11 @@ let parse_batch acc files =
         List.append res acc;
       with exn ->
         error_count := !error_count + 1;
-        Printf.fprintf stderr "exception: %s\nfailed to parse \"%s\"\n"
+        Hh_logger.log "IndexBuilder exception: %s. Failed to parse [%s]"
           (Caml.Printexc.to_string exn)
           file;
         acc
-    else (Printf.fprintf stderr "File %s does not exist.\n" file; acc)
+    else (Hh_logger.log "File [%s] does not exist." file; acc)
   end
 ;;
 
@@ -111,26 +111,6 @@ let parallel_parse ~workers files =
 ;;
 
 let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
-;;
-let init_workers () =
-  let nbr_procs = Sys_utils.nproc () in
-  let gc_control = GlobalConfig.gc_control in
-  let config = GlobalConfig.default_sharedmem_config in
-  let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
-  MultiWorker.make
-    ?call_wrapper:None
-    ~saved_state:()
-    ~entry
-    ~nbr_procs
-    ~gc_control
-    ~heap_handle
-;;
-
-(* Basic help text *)
-let usage =
-  Printf.sprintf
-    "Usage: %s [--sqlite file] [--text file] [--json file] [repository]\n"
-    Sys.argv.(0)
 ;;
 
 (* Let's use the unix find command which seems to be really quick at this sort of thing *)
@@ -155,12 +135,12 @@ let measure_time ~f ~(name: string) =
   let start_time = Unix.gettimeofday () in
   let result = f () in
   let end_time = Unix.gettimeofday () in
-  Printf.printf "%s [%0.1f secs]\n%!" name (end_time -. start_time);
+  Hh_logger.log "%s [%0.1f secs]" name (end_time -. start_time);
   result
 ;;
 
 (* Run the index builder project *)
-let go (ctxt: index_builder_context): unit =
+let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): unit =
 
   (* Figure out what global revision we are on *)
   let hg_process =
@@ -172,26 +152,25 @@ let go (ctxt: index_builder_context): unit =
     | Error _ ->
       "Unknown"
   in
-  Printf.printf "Repository [%s] is on globalrev [%s]\n%!"
+  Hh_logger.log "Repository [%s] is on globalrev [%s]"
     ctxt.repo_folder globalrev;
 
   (* Gather list of files *)
-  Printf.printf "Scanning repository %s... %!" ctxt.repo_folder;
-  let repo_files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name:"" in
+  let name = Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder in
+  let repo_files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name in
 
   (* Next, get the HHI root folder and add all HHI files from there *)
   let hhi_root_folder = Hhi.get_hhi_root () in
   let hhi_root_folder_path = Path.to_string hhi_root_folder in
-  Printf.printf "Scanning HHI folder %s... %!" hhi_root_folder_path;
-  let hhi_files = measure_time ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name:"" in
+  let name = Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path in
+  let hhi_files = measure_time ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name in
 
   (* Merge lists *)
   let files = List.append repo_files hhi_files in
 
   (* Spawn the parallel parser *)
-  Printf.printf "Parsing %d files... %!" (List.length files);
-  let workers = Some (init_workers ()) in
-  let results = measure_time ~f:(fun () -> parallel_parse ~workers files) ~name:"" in
+  let name = Printf.sprintf "Parsed %d files in " (List.length files) in
+  let results = measure_time ~f:(fun () -> parallel_parse ~workers files) ~name in
 
   (* Are we exporting a sqlite file? *)
   begin
@@ -199,11 +178,11 @@ let go (ctxt: index_builder_context): unit =
     | None ->
       ()
     | Some filename ->
-      Printf.printf "Writing %d symbols to sqlite... %!"
-        (List.length results);
+      let name = Printf.sprintf "Wrote %d symbols to sqlite in "
+        (List.length results) in
       measure_time ~f:(fun () ->
           SqliteSymbolIndexWriter.record_in_db filename results;
-        ) ~name:"";
+        ) ~name;
   end;
 
   (* Are we exporting a text file? *)
@@ -212,11 +191,11 @@ let go (ctxt: index_builder_context): unit =
     | None ->
       ()
     | Some filename ->
-      Printf.printf "Writing %d symbols to text... %!"
-        (List.length results);
+      let name = Printf.sprintf "Wrote %d symbols to text in "
+        (List.length results) in
       measure_time ~f:(fun () ->
           TextSymbolIndexWriter.record_in_textfile filename results;
-        ) ~name:"";
+        ) ~name;
   end;
 
   (* Are we exporting a json file? *)
@@ -225,12 +204,12 @@ let go (ctxt: index_builder_context): unit =
     | None ->
       []
     | Some filename ->
-      Printf.printf "Writing %d symbols to json... %!"
-        (List.length results);
+      let name = Printf.sprintf "Wrote %d symbols to json in "
+        (List.length results) in
       measure_time ~f:(fun () ->
           JsonSymbolIndexWriter.record_in_jsonfiles
             ctxt.json_chunk_size filename results;
-        ) ~name:""
+        ) ~name
   in
 
   (* Are we exporting to a custom writer? *)
@@ -242,11 +221,11 @@ let go (ctxt: index_builder_context): unit =
     | None, None ->
       ()
     | Some service, Some repo_name ->
-      Printf.printf "Exporting to custom symbol index writer [%s] [%s]...\n%!"
-        service repo_name;
+      let name = Printf.sprintf "Exported to custom symbol index writer [%s] [%s] in "
+        service repo_name in
       measure_time ~f:(fun () ->
           CustomSymbolIndexWriter.send_to_custom_writer
             json_exported_files service repo_name globalrev;
-        ) ~name:"Finished writing to API: ";
+        ) ~name;
   end
 ;;

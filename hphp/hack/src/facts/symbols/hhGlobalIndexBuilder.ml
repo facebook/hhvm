@@ -16,6 +16,21 @@ let usage =
     Sys.argv.(0)
 ;;
 
+(* Create one worker per cpu *)
+let init_workers () =
+  let nbr_procs = Sys_utils.nproc () in
+  let gc_control = GlobalConfig.gc_control in
+  let config = GlobalConfig.default_sharedmem_config in
+  let heap_handle = SharedMem.init config ~num_workers:nbr_procs in
+  MultiWorker.make
+    ?call_wrapper:None
+    ~saved_state:()
+    ~entry
+    ~nbr_procs
+    ~gc_control
+    ~heap_handle
+;;
+
 (* Parse command line options *)
 let parse_options (): index_builder_context =
   let sqlite_filename = ref None in
@@ -75,7 +90,8 @@ let main (): unit =
   PidLog.init "/tmp/hh_server/global_index_builder.pids";
   PidLog.log ~reason:"main" (Unix.getpid ());
   let ctxt = parse_options () in
-  IndexBuilder.go ctxt;
+  let workers = Some (init_workers ()) in
+  IndexBuilder.go ctxt workers;
 ;;
 
 (* Main entry point *)

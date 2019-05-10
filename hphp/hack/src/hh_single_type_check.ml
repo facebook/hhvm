@@ -500,7 +500,8 @@ let parse_options () =
   SymbolIndex.set_search_provider
     ~quiet:true
     ~provider_name:!search_provider
-    ~savedstate_file_opt:!symbolindex_file;
+    ~savedstate_file_opt:!symbolindex_file
+    ~workers:None;
 
   { files = fns;
     mode = !mode;

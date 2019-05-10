@@ -4,6 +4,7 @@
   (libraries
     ast
     ast_provider
+    facts
     file_info
     heap_shared_mem
     index_builder

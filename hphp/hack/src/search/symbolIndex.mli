@@ -16,7 +16,8 @@ val get_search_provider: unit -> SearchUtils.search_provider
 val set_search_provider:
   quiet:bool ->
   provider_name:string ->
-  savedstate_file_opt:string option -> unit
+  savedstate_file_opt:string option ->
+  workers:MultiWorker.worker list option -> unit
 
 (* Log diagnostics for usage of autocomplete and symbol search *)
 val log_symbol_index_search:

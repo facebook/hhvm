@@ -22,28 +22,51 @@ let sql_select_all_symbols =
 let sql_check_alive =
   "SELECT name FROM symbols LIMIT 1"
 
-(* Determine the correct filename to use for the db_path *)
-let determine_filename (): string =
+(* Determine the correct filename to use for the db_path or build it *)
+let find_or_build_sqlite_file
+    (workers: MultiWorker.worker list option): string =
   match !sqlite_file_path with
   | Some path -> path
   | None ->
-    Hh_logger.log "Sqlite saved state not specified, using default";
-    "/tmp/hh_server/autocomplete/www.autocomplete.db"
+    (* Launch index builder task *)
+    let repo_path = Relative_path.to_absolute
+      (Relative_path.from_root "/") in
+    let timestamp = string_of_int (int_of_float (Unix.gettimeofday ())) in
 
-(* Initialize the symbol index database on first use *)
-let symbolindex_db =
-  lazy (
-    let db_path = determine_filename () in
-    Sqlite3.db_open db_path
-  )
+    (* Clean the path string *)
+    let cleanpath = Path.slash_escaped_string_of_path (Path.make repo_path) in
+    let tempdir = (Path.make (Filename.get_temp_dir_name ())) in
+    let temppath =
+      Path.concat tempdir ("autocomplete." ^ cleanpath ^ "." ^ timestamp ^ ".db") in
+    let tempfilename = Path.to_string temppath in
+    Hh_logger.log "Sqlite saved state not specified, generating on the fly";
+    Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
+    let ctxt = {
+      IndexBuilder.repo_folder = repo_path;
+      IndexBuilder.sqlite_filename = Some tempfilename;
+      IndexBuilder.text_filename = None;
+      IndexBuilder.json_filename = None;
+      IndexBuilder.json_chunk_size = 0;
+      IndexBuilder.custom_service = None;
+      IndexBuilder.custom_repo_name = None;
+    } in
+    IndexBuilder.go ctxt workers;
+    tempfilename
+
+(* Symbolindex DB may be loaded or generated *)
+let symbolindex_db = ref None
 
 (*
  * Ensure the database is available.
  * If the database is stored remotely, this will trigger it being
- * pulled local.
+ * pulled local.  If no database is specified, this will generate
+ * it.
  *)
-let initialize (): unit =
-  let db = Lazy.force (symbolindex_db) in
+let initialize
+    (workers: MultiWorker.worker list option): unit =
+  let db_path = find_or_build_sqlite_file workers in
+  let db = Sqlite3.db_open db_path in
+  symbolindex_db := (Some db);
   let stmt = Sqlite3.prepare db sql_check_alive in
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
@@ -67,7 +90,7 @@ let prepare_or_reset_statement
       check_rc (Sqlite3.reset s);
       s
     | None ->
-      let db = Lazy.force symbolindex_db in
+      let db = Option.value_exn !symbolindex_db in
       let s = Sqlite3.prepare db sql_command_text in
       stmt_ref := Some s;
       s

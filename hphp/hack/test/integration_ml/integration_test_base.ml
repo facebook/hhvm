@@ -53,7 +53,8 @@ let test_init_common ?(hhi_files = []) () =
   SymbolIndex.set_search_provider
     ~quiet:true
     ~provider_name:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_search_provider
-    ~savedstate_file_opt:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_file;
+    ~savedstate_file_opt:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_file
+    ~workers:None;
 
   Printexc.record_backtrace true;
   EventLogger.init EventLogger.Event_logger_fake 0.0;

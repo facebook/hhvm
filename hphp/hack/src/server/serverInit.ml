@@ -150,7 +150,8 @@ let init
   SymbolIndex.set_search_provider
     ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
     ~provider_name:genv.local_config.ServerLocalConfig.symbolindex_search_provider
-    ~savedstate_file_opt:genv.local_config.ServerLocalConfig.symbolindex_file;
+    ~savedstate_file_opt:genv.local_config.ServerLocalConfig.symbolindex_file
+    ~workers:genv.workers;
 
   run_search genv t;
   SharedMem.init_done ();

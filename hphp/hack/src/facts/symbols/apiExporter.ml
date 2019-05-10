@@ -2,9 +2,12 @@
  * Copyright (c) 2019, Facebook, Inc.
  * All rights reserved.
  *
-*)
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the "hack" directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *)
 
-(* Implement this stub to enable code information to be sent to an API *)
+(* Export all information via an API stub *)
 let send_to_api
     (_files: string list)
     (_service: string)

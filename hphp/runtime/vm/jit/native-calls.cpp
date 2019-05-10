@@ -315,8 +315,6 @@ static CallMap s_callMap {
     {RaiseWarning,       raiseWarning, DNone, SSync, {{SSA, 0}}},
     {RaiseMissingThis,   raise_missing_this, DNone,
                            SSync, {{SSA, 0}}},
-    {RaiseHasThisNeedStatic, raise_has_this_need_static, DNone,
-                             SSync, {{SSA, 0}}},
     {FatalMissingThis,   raise_missing_this, DNone,
                            SSync, {{SSA, 0}}},
     {RaiseNotice,        raiseNotice, DNone, SSync, {{SSA, 0}}},
@@ -349,6 +347,8 @@ static CallMap s_callMap {
                           DNone, SSync, {{SSA, 0}}},
     {ThrowDivisionByZeroException, throw_division_by_zero_exception,
                           DNone, SSync, {}},
+    {ThrowHasThisNeedStatic, throw_has_this_need_static,
+                          DNone, SSync, {{SSA, 0}}},
     {HasToString,        &ObjectData::hasToString, DSSA, SSync,
                           {{SSA, 0}}},
 

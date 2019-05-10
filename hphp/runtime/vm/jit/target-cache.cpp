@@ -255,16 +255,7 @@ void lookup(Entry* mce, ActRec* ar, StringData* name, Class* cls, Class* ctx) {
   ar->m_func   = func;
 
   if (UNLIKELY(isStatic)) {
-    auto const obj = ar->getThis();
-    ar->setClass(cls);
-    decRefObj(obj);
-
-    if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
-      raise_notice(
-        "Static method %s should not be called on instance",
-        ar->func()->fullName()->data()
-      );
-    }
+    throw_has_this_need_static(ar->func());
   }
 }
 
@@ -291,31 +282,13 @@ void readMagicOrStatic(Entry* mce,
   }
 
   assertx(mceKey & 0x2u);
-  auto const obj = ar->getThis();
-  ar->setClass(cls);
-  decRefObj(obj);
-
-  if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
-    raise_notice(
-      "Static method %s should not be called on instance",
-      ar->func()->fullName()->data()
-    );
-  }
+  throw_has_this_need_static(ar->func());
 }
 
 NEVER_INLINE void
 readPublicStatic(Entry* mce, ActRec* ar, Class* cls, const Func* /*cand*/) {
   mce->m_key = reinterpret_cast<uintptr_t>(cls) | 0x2u;
-  auto const obj = ar->getThis();
-  ar->setClass(cls);
-  decRefObj(obj);
-
-  if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
-    raise_notice(
-      "Static method %s should not be called on instance",
-      ar->func()->fullName()->data()
-    );
-  }
+  throw_has_this_need_static(ar->func());
 }
 
 void smashImmediate(Entry* mce, TCA movAddr) {

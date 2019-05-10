@@ -501,7 +501,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
-  case RaiseHasThisNeedStatic:
   case RaiseMissingArg:
   case RaiseMissingThis:
   case RaiseNotice:
@@ -537,6 +536,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowArithmeticError:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
+  case ThrowHasThisNeedStatic:
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:

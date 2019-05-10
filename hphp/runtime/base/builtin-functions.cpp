@@ -714,12 +714,12 @@ void missing_this_check_helper(const Func* f, EF ef, NF nf) {
   }
 }
 
-void raise_has_this_need_static(const Func* f) {
-  auto constexpr msg =
-    "Static method %s should not be called on instance";
-  if (RuntimeOption::EvalNoticeOnBadMethodStaticness && f->isStatic()) {
-    raise_notice(msg, f->fullName()->data());
-  }
+void throw_has_this_need_static(const Func* f) {
+  auto const msg = folly::sformat(
+    "Static method {} cannot be called on instance",
+    f->fullName()->data()
+  );
+  SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
 void raise_missing_this(const Func* f) {

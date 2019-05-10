@@ -11,5 +11,9 @@ function main() {
   Foo::b();
 
   Foo::a();
-  (new Foo)->b();
+  try {
+    (new Foo)->b();
+  } catch (BadMethodCallException $e) {
+    var_dump($e->getMessage());
+  }
 }

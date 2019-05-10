@@ -4867,31 +4867,22 @@ void fPushObjMethodImpl(
   res = lookupObjMethod(
     f, cls, name, arGetContextClass(vmfp()), true);
   assertx(f);
+  if (res == LookupResult::MethodFoundNoThis) {
+    throw_has_this_need_static(f);
+  }
   if (dynamic) callerDynamicCallChecks(f);
   if (f->hasReifiedGenerics()) {
     if (!isReifiedName(name) && !tsList) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
     }
   }
+  assertx(res == LookupResult::MethodFoundWithThis ||
+          res == LookupResult::MagicCallFound);
   assertx(kNumActRecCells == 3);
   ActRec* ar = vmStack().indA(numArgs);
   ar->m_func = f;
-  if (res == LookupResult::MethodFoundNoThis) {
-    decRefObj(obj);
-    ar->setClass(cls);
-
-    if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
-      raise_notice(
-        "Static method %s should not be called on instance",
-        ar->func()->fullName()->data()
-      );
-    }
-  } else {
-    assertx(res == LookupResult::MethodFoundWithThis ||
-           res == LookupResult::MagicCallFound);
-    /* Transfer ownership of obj to the ActRec*/
-    ar->setThis(obj);
-  }
+  /* Transfer ownership of obj to the ActRec*/
+  ar->setThis(obj);
   ar->initNumArgs(numArgs);
   if (dynamic) ar->setDynamicCall();
   if (res == LookupResult::MagicCallFound) {

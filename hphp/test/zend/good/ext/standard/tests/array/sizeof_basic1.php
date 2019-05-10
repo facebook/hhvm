@@ -9,7 +9,7 @@
 /* Testing the sizeof() for some of the scalar types(integer, float) values 
  * in default, COUNT_NORMAL and COUNT_RECURSIVE modes.
  */ 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sizeof() : basic functionality ***\n";
 
 $intval = 10;
@@ -38,3 +38,4 @@ echo "COUNT_RECURSIVE mode: ";
 var_dump( sizeof($floatval, COUNT_RECURSIVE) );
 
 echo "Done";
+}

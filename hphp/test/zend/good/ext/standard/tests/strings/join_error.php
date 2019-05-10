@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias of function: implode()
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing join() : error conditions ***\n";
 
 // Zero argument
@@ -26,3 +26,4 @@ $glue = 'string_val';
 var_dump( join($glue));
 
 echo "Done\n";
+}

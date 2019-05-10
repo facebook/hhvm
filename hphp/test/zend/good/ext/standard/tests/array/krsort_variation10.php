@@ -11,7 +11,7 @@
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing krsort() : usage variations ***\n";
 
 // Different heredoc strings to be sorted
@@ -50,3 +50,4 @@ var_dump(krsort(&$temp_array, SORT_STRING) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias of function: implode()
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing join() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -30,3 +30,4 @@ $glue = '/';
 var_dump( join($glue, $pieces) );
 
 echo "Done\n";
+}

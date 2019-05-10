@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to array_merge() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_merge() : error conditions ***\n";
 
 // Testing array_merge with zero arguments
@@ -16,3 +16,4 @@ $arr1 = array(1, 2);
 try { var_dump( array_merge() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -12,7 +12,7 @@
  * 3. SORT_NUMERIC - compare items numerically
  * 4. SORT_STRING - compare items as strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing asort() : usage variations ***\n";
 
 // get an unset variable
@@ -81,3 +81,4 @@ for($index = 0; $index < count($unexpected_values); $index ++) {
 }
 
 echo "Done";
+}

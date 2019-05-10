@@ -5,7 +5,7 @@
   Description: Replace all occurrences of the search string with
                the replacement string
 */
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing str_replace() on basic operations ***\n";
 
 var_dump( str_replace("", "", "") );
@@ -28,3 +28,4 @@ var_dump( $fp_copy );
 fclose($fp);
 
 echo "===DONE===\n";
+}

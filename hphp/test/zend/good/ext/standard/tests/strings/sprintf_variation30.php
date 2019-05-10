@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : octal formats with resource values ***\n";
 
 // resource type variable
@@ -39,3 +39,4 @@ fclose($fp);
 closedir($dfp);
 
 echo "Done";
+}

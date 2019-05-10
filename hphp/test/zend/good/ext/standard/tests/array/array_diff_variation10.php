@@ -8,7 +8,7 @@
 /*
  * Test behaviour of array_diff() function with binary input
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff() : usage variations ***\n";
 
 
@@ -27,3 +27,4 @@ var_dump(array_diff($array1, $array2));
 var_dump(array_diff($array2, $array1));
 
 echo "Done";
+}

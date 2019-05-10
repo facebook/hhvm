@@ -7,7 +7,7 @@
 /* Test strrchr() function by passing heredoc string containing special chars for haystack
  * and with various needles 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $special_chars_str = <<<EOD
 Example of heredoc string contains
@@ -34,3 +34,4 @@ foreach($needles as $needle) {
   var_dump( strrchr($special_chars_str, $needle) );
 }
 echo "*** Done ***";
+}

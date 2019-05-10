@@ -4,7 +4,7 @@
  * Description: Parses input from a string according to a format
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sscanf() : basic functionality - using char format ***\n";
 
 $str = "X = A + B - C";
@@ -21,3 +21,4 @@ $res = sscanf($str, $format, &$arg1, &$arg2, &$arg3, &$arg4);
 var_dump($res, $arg1, $arg2, $arg3, $arg4);
 
 echo "===DONE===\n";
+}

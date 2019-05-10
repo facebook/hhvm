@@ -7,7 +7,7 @@
 /*
  * testing functionality of strip_tags() by giving double quoted strings as values for $str argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 $double_quote_string = array (
@@ -31,3 +31,4 @@ foreach($double_quote_string as $string_value)
 }
 
 echo "Done";
+}

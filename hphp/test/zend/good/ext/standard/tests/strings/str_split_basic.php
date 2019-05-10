@@ -6,7 +6,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing str_split() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -22,3 +22,4 @@ echo "-- With split_length as default argument --\n";
 var_dump( str_split($str) );
 
 echo "Done";
+}

@@ -8,7 +8,7 @@
  * Check that array_values is re-assigning keys according to the internal order of the array,
  * and is not dependent on the \$input argument's keys
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_values() : usage variations ***\n";
 
 // populate array with 'default' keys in reverse order
@@ -21,3 +21,4 @@ echo "\n-- Result of array_values() --\n";
 var_dump(array_values($input));
 
 echo "Done";
+}

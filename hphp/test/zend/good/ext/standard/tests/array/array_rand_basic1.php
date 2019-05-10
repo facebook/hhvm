@@ -7,7 +7,7 @@
 /*
  * Test array_rand() when array with default keys is passed to 'input' argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_rand() : array with default keys ***\n";
 
 
@@ -24,3 +24,4 @@ echo"\n-- with default argument --\n";
 var_dump( array_rand($input) );
 
 echo "Done";
+}

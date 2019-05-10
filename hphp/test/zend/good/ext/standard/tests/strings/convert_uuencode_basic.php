@@ -4,7 +4,7 @@
  * Description: Uuencode a string
  * Source code: ext/standard/uuencode.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing convert_uuencode() : basic functionality ***\n";
 
 // array with different values for $string
@@ -34,3 +34,4 @@ foreach($strings as $string) {
   $count ++;
 }
 echo "===DONE=== ";
+}

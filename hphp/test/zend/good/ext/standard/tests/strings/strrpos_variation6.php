@@ -7,7 +7,7 @@
 /* Test strrpos() function by passing heredoc string containing quotes for haystack 
  *  and with various needles & offsets
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrpos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing quote & slash chars --\n";
 $quote_char_str = <<<EOD
@@ -21,3 +21,4 @@ var_dump( strrpos($quote_char_str, 'things') );
 var_dump( strrpos($quote_char_str, 'things', 0) );
 var_dump( strrpos($quote_char_str, "things", 20) );
 echo "*** Done ***";
+}

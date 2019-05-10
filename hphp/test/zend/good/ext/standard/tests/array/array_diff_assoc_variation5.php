@@ -8,7 +8,7 @@
 /*
  * Test how array_diff_assoc compares integers, floats and string
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff_assoc() : usage variations ***\n";
 $arr_default_int = array(1, 2, 3, 'a');
 $arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 'b');
@@ -43,3 +43,4 @@ echo "-- Result of comparing more than two arrays: --\n";
 var_dump(array_diff_assoc($arr_default_int, $arr_float, $arr_string, $arr_string_float));
 
 echo "Done";
+}

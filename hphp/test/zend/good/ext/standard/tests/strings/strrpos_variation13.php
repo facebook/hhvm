@@ -7,7 +7,7 @@
 /* Test strrpos() function with null terminated strings for 'needle' argument 
  *  in order to check binary safe 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strrpos() function: binary safe ***\n";
 $haystack = "\0Hello\0World\0";
 
@@ -26,3 +26,4 @@ for($index = 0; $index < count($needles); $index++ ) {
   var_dump( strrpos($haystack, $needles[$index], $index) );
 }
 echo "*** Done ***";
+}

@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of array_key_exists()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_key_exists() : basic functionality ***\n";
 
 $key1 = 'key';
@@ -18,3 +18,4 @@ var_dump(array_key_exists($key1, $search));
 var_dump(array_key_exists($key2, $search));
 
 echo "Done";
+}

@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of array_diff
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff() : basic functionality ***\n";
 
 //Test indexed array with integers as elements
@@ -48,3 +48,4 @@ echo "-- Test array_diff with more than 2 arguments --\n";
 var_dump(array_diff($array_int1, $array_int2, $array_string1, $array_string2));
 
 echo "Done";
+}

@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : integer formats with arrays ***\n";
 
 // different arrays used to test the function
@@ -44,3 +44,4 @@ foreach($array_types as $arr) {
 };
 
 echo "Done";
+}

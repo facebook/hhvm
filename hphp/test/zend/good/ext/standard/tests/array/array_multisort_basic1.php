@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_multisort() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -25,3 +25,4 @@ var_dump($ar2);
 
 
 echo "===DONE===\n";
+}

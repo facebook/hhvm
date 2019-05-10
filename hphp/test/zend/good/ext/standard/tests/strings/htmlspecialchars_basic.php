@@ -3,7 +3,7 @@
  * Description: Convert special characters to HTML entities
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing htmlspecialchars() : basic functionality ***\n";
 
 $s1 = "abc<>\"&\n";
@@ -52,3 +52,4 @@ echo  "Test 28: " . htmlspecialchars ($s1, ENT_NOQUOTES, "ISO-8859-1", true);
 echo  "Test 29: " . htmlspecialchars ($s2, ENT_NOQUOTES, "ISO-8859-1", true);
 
 echo "===DONE===\n";
+}

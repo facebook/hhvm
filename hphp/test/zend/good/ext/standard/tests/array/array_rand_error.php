@@ -3,7 +3,7 @@
  * Description: Return key/keys for random entry/entries in the array 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_rand() : error conditions ***\n";
 
 // Zero arguments
@@ -18,3 +18,4 @@ $extra_arg = 10;
 try { var_dump( array_rand($input,$num_req, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

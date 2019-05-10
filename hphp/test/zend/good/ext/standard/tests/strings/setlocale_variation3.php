@@ -7,7 +7,7 @@
 */
 
 /* If locale is "0", the locale setting is not affected, only the current setting is returned */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing setlocale() : usage variations - setting system locale = 0 ***\n";
 $locale_info_before = array();
 $locale_info_after = array();
@@ -40,3 +40,4 @@ if($locale_info_before ==  $locale_info_after){
 }
 
 echo "\nDone\n";
+}

@@ -4,7 +4,7 @@
  * Description: Convert from one Cyrillic character set to another
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 $str = "hello";
 $from = "k";
 $to = "d";
@@ -30,3 +30,4 @@ var_dump(bin2hex( convert_cyr_string($str, $from, "?")) );
 echo "\n-- Testing convert_cyr_string() function with invalid 'from' and 'to' character set --\n";
 var_dump(bin2hex( convert_cyr_string($str, ">", "?")) );
 echo "===DONE===\n";
+}

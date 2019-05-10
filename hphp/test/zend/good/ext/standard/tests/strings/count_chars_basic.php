@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing count_chars() : basic functionality ***\n";
 
 $string = "Return information about characters used in a string";
@@ -19,3 +19,4 @@ var_dump(bin2hex(count_chars($string, 4)));
 
 
 echo "===DONE===\n";
+}

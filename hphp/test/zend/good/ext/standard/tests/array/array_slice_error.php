@@ -7,7 +7,7 @@
 /*
  * Pass an incorrect number of arguments to array_slice() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_slice() : error conditions ***\n";
 
 //Test array_slice with one more than the expected number of arguments
@@ -24,3 +24,4 @@ echo "\n-- Testing array_slice() function with less than expected no. of argumen
 try { var_dump( array_slice($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

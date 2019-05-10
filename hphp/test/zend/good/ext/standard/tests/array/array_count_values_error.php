@@ -8,7 +8,7 @@
 /*
  * Test for handling of incorrect parameters.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_count_values() : error conditions ***\n";
 
 // Zero arguments
@@ -26,3 +26,4 @@ echo "\n-- Testing array_count_values() function integer arguments --\n";
 var_dump( array_count_values(1 ));
 
 echo "Done";
+}

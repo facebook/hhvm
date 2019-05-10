@@ -4,7 +4,7 @@
  * Description: Quote meta characters
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing quotemeta() : error conditions ***\n";
 
 echo "\n-- Testing quotemeta() function with no arguments --\n";
@@ -15,3 +15,4 @@ $extra_arg = 10;
 try { var_dump(quotemeta("How are you ?", $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

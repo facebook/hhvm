@@ -4,7 +4,7 @@
  *              and the elements of the second as the corresponding values 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_combine() : basic functionality ***\n";
 
 /* Different arrays for $keys and $values arguments */
@@ -25,3 +25,4 @@ $values_array = array(3 => 'c', 4);
 var_dump( array_combine($keys_array, $values_array) );
 
 echo "Done";
+}

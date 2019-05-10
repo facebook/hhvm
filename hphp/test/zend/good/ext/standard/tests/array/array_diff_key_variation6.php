@@ -3,7 +3,7 @@
  * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
  * Source code: ext/standard/array.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -15,3 +15,4 @@ echo "\n-- Testing array_diff_key() function with boolean indexed array --\n";
 var_dump( array_diff_key($input_array, $boolean_indx_array) );
 var_dump( array_diff_key($boolean_indx_array, $input_array) );
 echo "===DONE===\n";
+}

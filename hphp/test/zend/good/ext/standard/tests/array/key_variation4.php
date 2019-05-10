@@ -7,7 +7,7 @@
 /*
  * Test how key() behaves with muti-dimensional and recursive arrays
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing key() : usage variations ***\n";
 
 echo "\n-- Two Dimensional Array --\n";
@@ -24,3 +24,4 @@ end(&$multi_array);
 var_dump(key(&$multi_array));
 
 echo "===DONE===\n";
+}

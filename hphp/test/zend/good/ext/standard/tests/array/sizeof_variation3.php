@@ -5,7 +5,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: count()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sizeof() : usage variations ***\n";
 
 echo "-- Testing sizeof() for infinite recursion with arrays as argument in COUNT_RECURSIVE mode --\n";
@@ -21,3 +21,4 @@ echo "\n";
 var_dump( sizeof($array4, COUNT_RECURSIVE) );
 
 echo "Done";
+}

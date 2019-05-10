@@ -3,7 +3,7 @@
  * Description: Finds the last occurrence of a character in a string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrchr() function: basic functionality ***\n";
 var_dump( strrchr("Hello, World", "H") ); //needle as single char
 var_dump( strrchr("Hello, World", "Hello") ); //needle as a first word of haystack
@@ -33,3 +33,4 @@ var_dump( strrchr("Hello, World", "ooo") );
 
 var_dump( strrchr("Hello, World", "Zzzz") ); //non-existent needle in haystack
 echo "*** Done ***";
+}

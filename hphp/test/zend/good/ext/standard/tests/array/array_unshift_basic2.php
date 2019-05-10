@@ -7,7 +7,7 @@
 /*
  * Testing array_unshift() by giving associative arrays for $array argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unshift() : basic functionality with associative array ***\n";
 
 // Initialise the array
@@ -32,3 +32,4 @@ var_dump( array_unshift(&$temp_array, 222, "hello", 12.33) );
 var_dump($temp_array);
 
 echo "Done";
+}

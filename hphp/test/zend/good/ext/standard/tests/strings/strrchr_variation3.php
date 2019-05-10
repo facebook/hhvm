@@ -7,7 +7,7 @@
 /* Test strrchr() function by passing multi-line heredoc string for haystack and
  *    with various needles
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $multi_line_str = <<<EOD
 Example of string
@@ -28,3 +28,4 @@ foreach($needles as $needle) {
 }
 
 echo "*** Done ***";
+}

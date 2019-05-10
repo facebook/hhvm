@@ -10,7 +10,7 @@
  *  1. flag value as defualt
  *  2. SORT_REGULAR - compare items normally
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ksort() : usage variations ***\n";
 
 // array with diff sub arrays to be sorted 
@@ -50,3 +50,4 @@ foreach ($various_arrays as $array) {
 }
 
 echo "Done\n";
+}

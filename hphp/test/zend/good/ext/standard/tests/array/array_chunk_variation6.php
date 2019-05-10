@@ -11,7 +11,7 @@
  *   2. associative array with duplicate keys
  *   3. array with one element 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
@@ -43,3 +43,4 @@ foreach ($input_arrays as $input_array){
 }
 
 echo "Done";
+}

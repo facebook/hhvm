@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of current()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing current() : basic functionality ***\n";
 
 $array = array ('zero', 'one', 'two', 'three' => 3);
@@ -19,3 +19,4 @@ var_dump(current(&$array));
 next(&$array);
 var_dump(current(&$array));
 echo "===DONE===\n";
+}

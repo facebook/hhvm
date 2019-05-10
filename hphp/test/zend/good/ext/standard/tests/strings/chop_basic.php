@@ -7,7 +7,7 @@
 /*
  * Testing chop(): basic functionality
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chop() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -24,3 +24,4 @@ var_dump( chop($str, $charlist) );
 var_dump( chop($str, '!') );
 
 echo "Done\n";
+}

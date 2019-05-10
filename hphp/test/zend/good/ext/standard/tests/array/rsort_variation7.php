@@ -7,7 +7,7 @@
 /*
  * Pass rsort() arrays of boolean values to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rsort() : variation ***\n";
 
 // bool value array
@@ -34,3 +34,4 @@ var_dump(rsort(&$temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done";
+}

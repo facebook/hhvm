@@ -7,7 +7,7 @@
 /*
  * Test array_rand() when associative array is passed to 'input' argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_rand() : with associative array ***\n";
 
 
@@ -29,3 +29,4 @@ echo"\n-- with default argument --\n";
 var_dump( array_rand($input) );
 
 echo "Done";
+}

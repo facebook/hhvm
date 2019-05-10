@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() function with null terminated strings and binary values passed to 'str1' & 'str2' */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strncasecmp() function: with null terminated strings and binary inputs ***\n";
 
 /* A binary function should not expect a null terminated string, and it should treat input as a raw stream of data */
@@ -16,3 +16,4 @@ var_dump( strncasecmp($str1, $str2, 12) );
 var_dump( strncasecmp($str3, "Hello,world", 12) );
 
 echo "*** Done ***\n";
+}

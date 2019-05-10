@@ -7,7 +7,7 @@
 /*
  * test get_html_translation_table() with unexpected value for argument $table
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing get_html_translation_table() : usage variations ***\n";
 // initialize all required variables
 $quote_style = ENT_COMPAT;
@@ -98,3 +98,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($fp);
 
 echo "Done\n";
+}

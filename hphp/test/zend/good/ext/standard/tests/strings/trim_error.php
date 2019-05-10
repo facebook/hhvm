@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing trim() : error conditions ***\n";
 
 echo "\n-- Testing trim() function with no arguments --\n";
@@ -24,3 +24,4 @@ var_dump(trim($hello, "z..a"));
 var_dump(trim($hello, "a..b..c"));
 
 echo "===DONE===\n";
+}

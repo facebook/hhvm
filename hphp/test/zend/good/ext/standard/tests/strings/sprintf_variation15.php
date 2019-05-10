@@ -4,7 +4,7 @@
  * Source code: ext/standard/formatted_print.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : string formats with string values ***\n";
 
 // defining different heredoc strings
@@ -72,3 +72,4 @@ foreach($string_values as $string_value) {
 };
 
 echo "Done";
+}

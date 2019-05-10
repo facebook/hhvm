@@ -9,7 +9,7 @@
  *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ksort() : usage variations ***\n";
 
 // bool value array
@@ -36,3 +36,4 @@ var_dump(ksort(&$temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done\n";
+}

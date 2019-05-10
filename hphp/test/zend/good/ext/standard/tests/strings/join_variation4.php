@@ -8,7 +8,7 @@
 /*
  * test join() by passing different glue arguments
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing join() : usage variations ***\n";
 
 $glues = array (
@@ -48,3 +48,4 @@ for($index = 0; $index < count($glues); $index ++) {
 }
 
 echo "Done\n";
+}

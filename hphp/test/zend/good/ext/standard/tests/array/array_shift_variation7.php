@@ -7,7 +7,7 @@
 /*
  * Test that the internal pointer is reset after calling array_shift()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_shift() : usage variations ***\n";
 
 $stack = array ('one' => 'un', 'two' => 'deux');
@@ -19,3 +19,4 @@ echo "\n-- Position of Internal Pointer in Passed Array: --\n";
 echo key(&$stack) . " => " . current (&$stack) . "\n";
 
 echo "Done";
+}

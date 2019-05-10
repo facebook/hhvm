@@ -8,7 +8,7 @@
 /*
  * check the working of join() when given binary input given
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing join() : usage variationsi - binary safe ***\n";
 
 $glues = array(
@@ -21,3 +21,4 @@ var_dump( join($glues[0], $pieces) );
 var_dump( join($glues[1], $pieces) );
  
 echo "Done\n";
+}

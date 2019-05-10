@@ -4,7 +4,7 @@
  * Description: Parses input from a string according to a format
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sscanf() : basic functionality -- using float format ***\n";
 
 $str = "Part: Widget Length: 111.53 Width: 22.345 Depth: 12.4";
@@ -21,3 +21,4 @@ $res = sscanf($str, $format, &$part, &$length, &$width, &$depth);
 var_dump($res, $part, $length, $width, $depth);
 
 echo "===DONE===\n";
+}

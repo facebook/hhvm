@@ -7,7 +7,7 @@
 /*
  *  Testing vprintf() : basic functionality - using integer format
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : basic functionality - using integer format ***\n";
 
 // Initialise all required variables
@@ -32,3 +32,4 @@ echo "\n";
 var_dump($result);
 
 echo "===DONE===\n";
+}

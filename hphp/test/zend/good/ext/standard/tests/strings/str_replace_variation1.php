@@ -6,7 +6,7 @@
                the replacement string
 */
 
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing str_replace() with various search values ***";
 $search_arr = array( TRUE, FALSE, 1, 0, -1, "1", "0", "-1",  NULL,
                      array(), "php", "");
@@ -22,3 +22,4 @@ foreach( $search_arr as $value ) {
 }
 
 echo "===DONE===\n";
+}

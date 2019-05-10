@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : octal formats with float values ***\n";
 
 // array of float values 
@@ -37,3 +37,4 @@ foreach($float_values as $float_value) {
 };
 
 echo "Done";
+}

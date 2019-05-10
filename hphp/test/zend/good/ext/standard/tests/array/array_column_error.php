@@ -5,7 +5,7 @@
  *  Returns an array containing all the values from
  *  the specified "column" in a two-dimensional array.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_column() : error conditions ***\n";
 
 echo "\n-- Testing array_column() function with Zero arguments --\n";
@@ -33,3 +33,4 @@ echo "\n-- Testing array_column() index key parameter should be a string or inte
 var_dump(array_column(array(), 'foo', array()));
 
 echo "Done\n";
+}

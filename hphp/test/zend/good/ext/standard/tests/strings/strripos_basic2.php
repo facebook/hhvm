@@ -3,7 +3,7 @@
  * Description: Find position of last occurrence of a case-insensitive 'needle' in a 'haystack'
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strripos() function: basic functionality ***\n";
 $heredoc_str = <<<EOD
 Hello, World
@@ -32,3 +32,4 @@ var_dump( strripos("Hello, World", "O", -1) );
 var_dump( strripos("Hello, World", "O", -5) );
 var_dump( strripos("Hello, World", "O",  -9) );
 echo "===DONE===\n";
+}

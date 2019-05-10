@@ -7,7 +7,7 @@
 /*
  * Testing chop() : error conditions
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chop() : error conditions ***\n";
 
 // Zero argument
@@ -24,3 +24,4 @@ try { var_dump( chop($str, $charlist, $extra_arg) ); } catch (Exception $e) { ec
 var_dump( $str );
 
 echo "Done\n";
+}

@@ -8,7 +8,7 @@
  * Pass different data types as keys in an array to array_slice()
  * to test how $preserve_keys treats them
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -106,3 +106,4 @@ foreach($inputs as $type => $input) {
 };
 
 echo "Done";
+}

@@ -8,7 +8,7 @@
 /*
  * Test basic functionality of each()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing each() : basic functionality ***\n";
 
 $arr = array ('one' => 1, 'zero', 'two' => 'deux', 20 => 'twenty');
@@ -26,3 +26,4 @@ echo "\n-- Passed the end of array: --\n";
 var_dump(each(&$arr));
 
 echo "Done";
+}

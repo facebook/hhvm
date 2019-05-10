@@ -12,7 +12,7 @@
  *   3. size value is zero
  *   4. Decimal size value
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
@@ -29,3 +29,4 @@ foreach ($sizes as $size){
   var_dump( array_chunk($input_array, (int)$size, false) );
 }
 echo "Done";
+}

@@ -8,7 +8,7 @@
 /*
  * testing functionality of strip_tags() by giving heredoc strings as values for $str argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // null here doc string
@@ -71,3 +71,4 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 }
 
 echo "Done\n";
+}

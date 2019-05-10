@@ -8,7 +8,7 @@
 /*
  * Pass an incorrect number of arguments to each() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing each() : error conditions ***\n";
 
 // Zero arguments
@@ -22,3 +22,4 @@ $extra_arg = 10;
 try { var_dump( each(&$arr, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

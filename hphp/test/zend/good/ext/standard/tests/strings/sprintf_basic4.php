@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : basic functionality - using bool format ***\n";
 
 
@@ -29,3 +29,4 @@ var_dump( sprintf($format2, $arg1, $arg2) );
 var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 
 echo "Done";
+}

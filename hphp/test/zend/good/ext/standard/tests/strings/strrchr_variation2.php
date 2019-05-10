@@ -5,7 +5,7 @@
 */
 
 /* Test strrchr() function by passing various single quoted strings to 'haystack' & 'needle' */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrchr() function: with various single quoted strings ***";
 $haystack = 'Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ';
 $needle = array(
@@ -77,3 +77,4 @@ for($index=0; $index<count($needle); $index++) {
   $count ++;
 }
 echo "*** Done ***";
+}

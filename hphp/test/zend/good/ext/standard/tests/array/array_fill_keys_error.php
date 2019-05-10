@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_fill_keys() : error conditions ***\n";
 
 $keys = array(1, 2);
@@ -21,3 +21,4 @@ echo "\n-- Testing array_fill_keys() function with no arguments --\n";
 try { var_dump( array_fill_keys() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_product() : variations - negative numbers***\n";
 
 echo "\n-- Testing array_product() function with one negative number --\n";
@@ -24,3 +24,4 @@ var_dump( array_product(array(-99999999.9, 99999999.1)));
 
 
 echo "===DONE===\n";
+}

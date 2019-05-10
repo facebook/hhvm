@@ -7,7 +7,7 @@
 /*
  *test wordwrap() with break arguments as single spaces
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing wordwrap() : usage variations ***\n";
 
 // Initialize all required variables
@@ -36,3 +36,4 @@ var_dump( wordwrap($str, $width, $break, $cut) );
 var_dump( wordwrap($str, $width, $break1, $cut) );
   
 echo "Done\n";
+}

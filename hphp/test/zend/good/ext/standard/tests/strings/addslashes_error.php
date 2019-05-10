@@ -7,7 +7,7 @@
 /*
  * Testing addslashes() for error conditions
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing addslashes() : error conditions ***\n";
 
 // Zero argument
@@ -23,3 +23,4 @@ try { var_dump( addslashes($str, $extra_arg) ); } catch (Exception $e) { echo "\
 var_dump( $str );
 
 echo "Done\n";
+}

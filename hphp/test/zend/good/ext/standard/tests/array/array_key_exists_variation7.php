@@ -8,7 +8,7 @@
 /*
  * Check the position of the internal array pointer after calling array_key_exists()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $input = array ('one' => 'un', 'two' => 'deux', 'three' => 'trois');
@@ -20,3 +20,4 @@ echo "\n-- Position of Internal Pointer in Original Array: --\n";
 echo key(&$input) . " => " . current (&$input) . "\n";
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Description: Parses input from a string according to a format
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sscanf() : basic functionality - - using hexadecimal format ***\n";
 
 $str = "129 12F 123B -123B 01ABC 1G";
@@ -26,3 +26,4 @@ $res = sscanf($str, $format2, &$arg1, &$arg2, &$arg3, &$arg4, &$arg5, &$arg6);
 var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
 echo "===DONE===\n";
+}

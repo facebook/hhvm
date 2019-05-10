@@ -8,7 +8,7 @@
 /*
  * Test errors for array_diff with too few\zero arguments
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff_assoc() : error conditions ***\n";
 
 // Zero arguments
@@ -22,3 +22,4 @@ try { var_dump( array_diff_assoc($arr1) ); } catch (Exception $e) { echo "\n".'W
 
 
 echo "Done";
+}

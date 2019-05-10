@@ -3,7 +3,7 @@
  * Description: Output a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : basic functionality - using unsigned format ***\n";
 
 // Initialise all required variables
@@ -27,3 +27,4 @@ $result = vprintf($format3,$arg3);
 echo "\n";
 var_dump($result);
 echo "===DONE===\n";
+}

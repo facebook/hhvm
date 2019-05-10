@@ -11,7 +11,7 @@
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing asort() :usage variations  ***\n";
 
 $value1 = 100;
@@ -36,3 +36,4 @@ var_dump( asort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
+}

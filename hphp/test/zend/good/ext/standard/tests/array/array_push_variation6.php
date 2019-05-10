@@ -7,7 +7,7 @@
 /*
  * Pass array_push arrays where the keys are different data types.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_push() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -101,3 +101,4 @@ foreach($inputs as $key => $input) {
 };
 
 echo "Done";
+}

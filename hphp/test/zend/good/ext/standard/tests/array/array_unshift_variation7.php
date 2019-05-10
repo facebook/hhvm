@@ -9,7 +9,7 @@
  * double quoted strings for $var argument that is prepended to the array
  * passed through $array argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unshift() : double quoted strings for \$var argument ***\n";
 
 // array to be passed to $array argument
@@ -50,3 +50,4 @@ foreach($vars as $var) {
 }
 
 echo "Done";
+}

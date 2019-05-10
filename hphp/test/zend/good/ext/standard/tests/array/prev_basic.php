@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of prev()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing prev() : basic functionality ***\n";
 
 $array = array('zero', 'one', 'two');
@@ -30,3 +30,4 @@ for ($i = $length; $i > 0; $i--) {
 }
 
 echo "===DONE===\n";
+}

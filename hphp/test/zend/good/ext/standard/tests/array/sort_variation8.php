@@ -10,7 +10,7 @@
  * flag value as defualt
  * SORT_REGULAR - compare items normally
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sort() : usage variations ***\n";
 
 // array of arrays
@@ -51,3 +51,4 @@ foreach ($various_arrays as $array) {
 }
 
 echo "Done\n";
+}

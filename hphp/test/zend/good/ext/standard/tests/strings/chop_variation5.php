@@ -7,7 +7,7 @@
 /*
  * Testing chop() : with miscellaneous arguments
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chop() : with miscellaneous arguments ***\n";
 
  var_dump ( chop("chop test   \t\0 ") );                       /* without second Argument */
@@ -20,3 +20,4 @@ echo "*** Testing chop() : with miscellaneous arguments ***\n";
  var_dump ( chop("chop test$#@", "#@$") );                     /* with some special characters as second Argument */
 
 echo "Done\n";
+}

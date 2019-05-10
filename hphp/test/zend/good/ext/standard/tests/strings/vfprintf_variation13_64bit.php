@@ -8,7 +8,7 @@
  * Test vfprintf() when different hexa formats and hexa values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : hexa formats with hexa values ***\n";
 
 // defining array of different hexa formats
@@ -58,3 +58,4 @@ echo "\n";
 unlink($data_file);
 
 echo "===DONE===\n";
+}

@@ -10,7 +10,7 @@
  * 1. Contain referenced variables
  * 2. Have been referenced to each other
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff() : usage variations ***\n";
 $a = 'a';
 
@@ -27,3 +27,4 @@ var_dump(array_diff($arr1, $arr2));
 var_dump(array_diff($arr2, $arr1));
 
 echo "Done";
+}

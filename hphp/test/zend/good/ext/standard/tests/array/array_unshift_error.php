@@ -3,7 +3,7 @@
  * Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unshift() : error conditions ***\n";
 
 // Zero arguments
@@ -15,3 +15,4 @@ echo "\n-- Testing array_unshift() function with less than expected no. of argum
 $array = array(1, 2);
 try { var_dump( array_unshift(&$array) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
+}

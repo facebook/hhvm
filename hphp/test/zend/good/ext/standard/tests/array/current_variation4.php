@@ -8,7 +8,7 @@
 /*
  * Test how current() behaves with muti-dimensional and recursive arrays
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing current() : usage variations ***\n";
 
 echo "\n-- Two Dimensional Array --\n";
@@ -25,3 +25,4 @@ end(&$multi_array);
 var_dump(current(&$multi_array));
 
 echo "===DONE===\n";
+}

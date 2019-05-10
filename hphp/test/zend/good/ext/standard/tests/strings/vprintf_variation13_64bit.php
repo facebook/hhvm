@@ -8,7 +8,7 @@
  * Test vprintf() when different hexa formats and hexa values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : hexa formats with hexa values ***\n";
 
 // defining array of different hexa formats
@@ -49,3 +49,4 @@ foreach($formats as $format) {
 }
 
 echo "===DONE===\n";
+}

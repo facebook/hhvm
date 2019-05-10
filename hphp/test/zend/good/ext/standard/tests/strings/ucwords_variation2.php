@@ -7,7 +7,7 @@
 /*
  * test ucwords() with different string prepared using heredoc
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // Null here doc string
@@ -65,3 +65,4 @@ for($index =0; $index < count($heredoc_strings); $index ++) {
 }
 
 echo "Done\n";
+}

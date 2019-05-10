@@ -7,7 +7,7 @@
 /*
  * testing functionality of strip_tags() by giving invalid values for $str and valid values for $allowable_tags argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // unexpected values for $string
@@ -39,3 +39,4 @@ foreach($strings as $string_value)
 }
 
 echo "Done";
+}

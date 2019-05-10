@@ -3,7 +3,7 @@
  * Description: Returns the entries of arr1 that have keys which are present in all the other arguments. 
  * Source code: ext/standard/array.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect_key() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -14,3 +14,4 @@ echo "\n-- Testing array_intersect_key() function with boolean indexed array --\
 var_dump( array_intersect_key($input_array, $boolean_indx_array) );
 var_dump( array_intersect_key($boolean_indx_array,$input_array ) );
 echo "===DONE===\n";
+}

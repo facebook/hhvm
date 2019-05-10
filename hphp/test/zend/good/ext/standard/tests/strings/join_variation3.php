@@ -8,7 +8,7 @@
 /*
  * test join() by giving different pieces values 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing join() : usage variations ***\n";
 
 $pieces_arrays = array (
@@ -50,3 +50,4 @@ for($index = 0; $index < count($pieces_arrays); $index ++) {
 }
  
 echo "Done\n";
+}

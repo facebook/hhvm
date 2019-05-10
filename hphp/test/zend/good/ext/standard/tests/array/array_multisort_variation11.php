@@ -4,10 +4,11 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_multisort() : Testing with empty array ***\n";
 
 $arr = array();
 var_dump(array_multisort(&$arr));
 
 echo "===DONE===\n";
+}

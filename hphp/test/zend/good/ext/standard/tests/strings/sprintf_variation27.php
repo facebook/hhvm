@@ -4,7 +4,7 @@
  * Source code: ext/standard/formatted_print.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : char formats with char values ***\n";
 
 // array of char values 
@@ -29,3 +29,4 @@ foreach($char_values as $char_value) {
 };
 
 echo "Done";
+}

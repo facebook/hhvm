@@ -7,7 +7,7 @@
 /* Test strripos() function by passing multi-line heredoc string for haystack and 
  *  with various needles & offsets
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing multi lines --\n";
 $multi_line_str = <<<EOD
@@ -33,3 +33,4 @@ var_dump( strripos($multi_line_str, "") );
 var_dump( strripos($multi_line_str, " ") );
 
 echo "===DONE===\n";
+}

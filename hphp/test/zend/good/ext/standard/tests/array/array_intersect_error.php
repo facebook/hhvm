@@ -3,7 +3,7 @@
  * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect() : error conditions ***\n";
 
 // Testing array_intersect() with zero arguments
@@ -16,3 +16,4 @@ $arr1 = array(1, 2);
 try { var_dump( array_intersect($arr1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

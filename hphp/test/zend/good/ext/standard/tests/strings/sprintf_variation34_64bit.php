@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : hexa formats with integer values ***\n";
 
 // array of integer values 
@@ -47,3 +47,4 @@ foreach($integer_values as $integer_value) {
 };
 
 echo "Done";
+}

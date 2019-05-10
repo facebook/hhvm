@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialise all required variables
@@ -38,3 +38,4 @@ var_dump( sprintf($format3, $arg1, $arg2, $arg3) );
 var_dump( sprintf($format33, $arg1, $arg2, $arg3) );
 
 echo "Done";
+}

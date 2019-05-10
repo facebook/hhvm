@@ -8,7 +8,7 @@
  * Test basic functionality of count() using an array as $var argument
  * and different values as $mode argument.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing count() : basic functionality ***\n";
 
 echo "\n-- One Dimensional Array: --\n";
@@ -27,3 +27,4 @@ echo "\$mode = 1:               ";
 var_dump(count($array_multi, 1));
 
 echo "Done";
+}

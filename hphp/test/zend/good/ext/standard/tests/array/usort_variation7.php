@@ -7,7 +7,7 @@
 /*
  * Pass an anonymous comparison function as $cmp_function argument to test behaviour()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing usort() : usage variation ***\n";
 
 $cmp_function = ($value1, $value2) ==> { if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;} };
@@ -25,3 +25,4 @@ echo "\n-- Anonymous 'cmp_function' with parameters passed by reference --\n";
 var_dump( usort(&$array_arg, $cmp_function_ref) );
 var_dump($array_arg);
 echo "===DONE===\n";
+}

@@ -7,7 +7,7 @@
 */
 
 /* Test in_array() with different possible haystack values */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing in_array() with different haystack values ***\n";
 $misc_array = array (
   'a',
@@ -45,3 +45,4 @@ foreach($array_type as $type) {
 }
 
 echo "Done\n";
+}

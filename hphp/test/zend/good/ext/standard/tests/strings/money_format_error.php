@@ -7,7 +7,7 @@
 // ===========================================================================================
 // = We do not test for exact return-values, as those might be different between OS-versions =
 // ===========================================================================================
-
+<<__EntryPoint>> function main() {
 $string = '%14#8.2n';
 $value = 1234.56;
 $extra_arg = 10;
@@ -25,3 +25,4 @@ echo "\n-- Testing money_format() function with more than expected no. of argume
 try { var_dump( money_format($string, $value, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

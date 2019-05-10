@@ -8,7 +8,7 @@
  * Test vsprintf() when different scientific formats and scientific values
  * are passed to the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : scientific formats and scientific values ***\n";
 
 // defining array of scientific formats
@@ -40,3 +40,4 @@ foreach($formats as $format) {
 }
 
 echo "Done";
+}

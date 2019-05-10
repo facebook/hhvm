@@ -3,7 +3,7 @@
  * Description: Inserts HTML line breaks before all newlines in a string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing nl2br() : error conditions ***\n";
 
 // Zero arguments
@@ -17,3 +17,4 @@ $extra_arg = 10;
 try { var_dump( nl2br($str, true, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

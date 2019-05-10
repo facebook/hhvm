@@ -8,7 +8,7 @@
  * Test vfprintf() when different int formats and non-int values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats
@@ -75,3 +75,4 @@ echo "\n";
 unlink($data_file);
 
 echo "===DONE===\n";
+}

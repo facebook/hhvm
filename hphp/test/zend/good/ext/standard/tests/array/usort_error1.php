@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to usort() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing usort() : error conditions ***\n";
 
 //Test usort with one more than the expected number of arguments
@@ -22,3 +22,4 @@ echo "\n-- Testing usort() function with less than expected no. of arguments --\
 $array_arg = array(1, 2);
 try { var_dump( usort(&$array_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

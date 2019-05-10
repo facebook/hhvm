@@ -7,7 +7,7 @@
 /* Test strrchr() function by passing heredoc string containing quote chars for haystack
  *  and with various needles
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrchr() function: with heredoc strings ***\n";
 $quote_char_str = <<<EOD
 "things" "in" "double" "quote"
@@ -28,3 +28,4 @@ foreach($needles as $needle) {
   var_dump( strrchr($quote_char_str, $needle) );
 }
 echo "*** Done ***";
+}

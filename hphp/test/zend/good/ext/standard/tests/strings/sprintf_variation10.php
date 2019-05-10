@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : float formats with integer values ***\n";
 
 // array of int type values
@@ -48,3 +48,4 @@ foreach($integer_values as $int_value) {
 };
 
 echo "Done";
+}

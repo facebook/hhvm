@@ -7,7 +7,7 @@
 // ===========================================================================================
 // = We do not test for exact return-values, as those might be different between OS-versions =
 // ===========================================================================================
-
+<<__EntryPoint>> function main() {
 echo "*** Testing money_format() : basic functionality***\n";
 
 $value = 1234.5678;
@@ -46,3 +46,4 @@ echo gettype(money_format('%=*!14#8.2n', $value))."\n";
 echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
 echo "===DONE===\n";
+}

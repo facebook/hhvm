@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_values()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_values() : basic functionality ***\n";
 
 
@@ -18,3 +18,4 @@ $input = array('zero', 'one', 'two', 'three' => 3, 10 => 'ten');
 var_dump( array_values($input) );
 
 echo "Done";
+}

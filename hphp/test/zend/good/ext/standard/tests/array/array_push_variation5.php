@@ -7,7 +7,7 @@
 /*
  * Check the position of the internal array pointer after calling array_push()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_push() : usage variations ***\n";
 
 $stack = array ('one' => 'un', 'two' => 'deux');
@@ -20,3 +20,4 @@ echo "\n-- Position of Internal Pointer in Original Array: --\n";
 echo key(&$stack) . " => " . current (&$stack) . "\n";
 
 echo "Done";
+}

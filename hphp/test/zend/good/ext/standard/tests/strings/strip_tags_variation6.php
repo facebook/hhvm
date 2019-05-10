@@ -7,7 +7,7 @@
 /*
  * testing whether strip_tags() is binary safe or not
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 //various string inputs
@@ -28,3 +28,4 @@ foreach($strings as $value)
 }
 
 echo "Done";
+}

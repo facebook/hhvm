@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : unsigned formats with string values ***\n";
 
 // array of string values 
@@ -50,3 +50,4 @@ foreach($string_values as $string_value) {
 };
 
 echo "Done";
+}

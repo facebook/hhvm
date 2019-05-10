@@ -4,7 +4,7 @@
  * Description: Split a string by string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing explode() : error conditions ***\n";
 
 echo "\n-- Testing explode() function with no arguments --\n";
@@ -17,3 +17,4 @@ $limit = 5;
 $extra_arg = 10;
 try { var_dump( explode($delimiter, $string, $limit, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===Done===";
+}

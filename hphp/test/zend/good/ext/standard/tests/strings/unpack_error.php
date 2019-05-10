@@ -4,7 +4,7 @@
  * Description: Unpack data from binary string
  * Source code: ext/standard/pack.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing unpack() : error conditions ***\n";
 
 echo "\n-- Testing unpack() function with no arguments --\n";
@@ -18,3 +18,4 @@ echo "\n-- Testing unpack() function with invalid format character --\n";
 $extra_arg = 10;
 var_dump(unpack("G", pack("I", 65534)));
 echo "===DONE===\n";
+}

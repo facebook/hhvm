@@ -9,7 +9,7 @@
  * Testing addslashes() with strings containing characters that can be prefixed with backslash 
  * by the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing addslashes() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -25,3 +25,4 @@ foreach( $str_array as $str )  {
 }
 
 echo "Done\n";
+}

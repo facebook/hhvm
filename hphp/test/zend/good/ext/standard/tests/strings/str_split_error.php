@@ -6,7 +6,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing str_split() : error conditions ***\n";
 
 // Zero arguments
@@ -21,3 +21,4 @@ $extra_arg = 10;
 try { var_dump( str_split( $str, $split_length, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

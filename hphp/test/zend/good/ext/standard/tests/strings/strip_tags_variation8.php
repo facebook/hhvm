@@ -7,7 +7,7 @@
 /*
  * testing functionality of strip_tags() by giving valid value for $str and invalid values for $allowable_tags argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 $strings = "<html>hello</html> \tworld... <p>strip_tags_test\v\f</p><?php hello\t wo\rrld?>";
@@ -33,3 +33,4 @@ foreach($quotes as $string_value)
 }
 
 echo "Done";
+}

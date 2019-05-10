@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to natcasesort() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing natcasesort() : error conditions ***\n";
 
 // Zero arguments
@@ -21,3 +21,4 @@ $extra_arg = 10;
 try { var_dump( natcasesort(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

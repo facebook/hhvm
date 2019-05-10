@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to array_values to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_values() : error conditions ***\n";
 
 // Zero arguments
@@ -21,3 +21,4 @@ $extra_arg = 10;
 try { var_dump( array_values($input, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

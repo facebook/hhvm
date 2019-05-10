@@ -8,7 +8,7 @@
  * Test vprintf() when different scientific formats and non-scientific values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
@@ -65,3 +65,4 @@ foreach($args_array as $args) {
 }
 
 echo "===DONE===\n";
+}

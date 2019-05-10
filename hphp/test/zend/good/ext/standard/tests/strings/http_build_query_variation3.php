@@ -3,7 +3,7 @@
  * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
  * Source code: ext/standard/http.c
 */
-
+<<__EntryPoint>> function main() {
 $oDimensional = array(
   "name" => "main page",
   "sort" => "desc,admin",
@@ -12,3 +12,4 @@ $oDimensional = array(
 
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC1738) . PHP_EOL;
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC3986);
+}

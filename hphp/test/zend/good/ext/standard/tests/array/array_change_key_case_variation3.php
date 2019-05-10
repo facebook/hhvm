@@ -8,7 +8,7 @@
  * Pass arrays with different data types as keys to array_change_key_case()
  * to test conversion
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 //get an unset variable
@@ -96,3 +96,4 @@ foreach($inputs as $key => $input) {
 };
 
 echo "Done";
+}

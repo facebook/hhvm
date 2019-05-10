@@ -3,7 +3,7 @@
  * Description: Output a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : basic functionality - using float format ***\n";
 
 // Initialise all required variables
@@ -45,3 +45,4 @@ echo "\n";
 var_dump($result);
 
 echo "===DONE===\n";
+}

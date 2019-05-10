@@ -7,7 +7,7 @@
 /*
  * Testing stripslashes() with quoted strings 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing stripslashes() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -29,3 +29,4 @@ foreach( $str_array as $str )  {
 }
 
 echo "Done\n";
+}

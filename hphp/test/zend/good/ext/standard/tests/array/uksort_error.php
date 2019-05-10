@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing uksort() : error conditions ***\n";
 
 echo "\n-- Testing uksort() function with more than expected no. of arguments --\n";
@@ -21,3 +21,4 @@ echo "\n-- Testing uksort() function with zero arguments --\n";
 try { var_dump( uksort() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

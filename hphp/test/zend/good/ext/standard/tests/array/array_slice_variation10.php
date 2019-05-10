@@ -7,7 +7,7 @@
 /*
  * Check position of internal array pointer after calling array_slice()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 $input = array ('one' => 'un', 'two' => 'deux', 23 => 'twenty-three', 'zero');
@@ -21,3 +21,4 @@ echo "\n-- Position of Internal Pointer in Original Array: --\n";
 echo key(&$input) . " => " . current (&$input) . "\n";
 
 echo "Done";
+}

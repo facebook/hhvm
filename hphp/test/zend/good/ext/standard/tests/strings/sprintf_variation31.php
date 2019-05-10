@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : octal formats with array values ***\n";
 
 // different arrays used to test the function 
@@ -42,3 +42,4 @@ foreach($array_values as $array_value) {
 };
 
 echo "Done";
+}

@@ -6,7 +6,7 @@
  */
 
 /* Testing with unexpected argument types */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_fill_keys() : parameter variations ***\n";
 
 $simpleStr = "simple";
@@ -27,3 +27,4 @@ var_dump( array_fill_keys($nullVal, $simpleStr) );
 
 fclose($fp);
 echo "Done";
+}

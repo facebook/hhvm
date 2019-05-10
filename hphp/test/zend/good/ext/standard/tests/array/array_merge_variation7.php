@@ -8,7 +8,7 @@
  * Pass array_merge() arrays with mixed keys to test how it attaches them to
  * existing arrays
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 //mixed keys
@@ -19,3 +19,4 @@ var_dump(array_merge($arr1, $arr2));
 var_dump(array_merge($arr2, $arr1));
 
 echo "Done";
+}

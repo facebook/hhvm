@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_multisort() : basic functionality - renumbering of numeric keys ***\n";
 
 // Initialise all required variables
@@ -19,3 +19,4 @@ var_dump( array_multisort(&$ar1, &$asc, &$regular, &$ar2, &$asc, &$numeric) );
 var_dump($ar1, $ar2);
 
 echo "===DONE===\n";
+}

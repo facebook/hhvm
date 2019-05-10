@@ -4,7 +4,7 @@
  * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise
  * Source Code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions of array_search() ***\n";
 /* zero argument */
 try { var_dump( array_search() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -20,3 +20,4 @@ var_dump( array_search("test", $var) );
 var_dump( array_search(1, 123) );
 
 echo "Done\n";
+}

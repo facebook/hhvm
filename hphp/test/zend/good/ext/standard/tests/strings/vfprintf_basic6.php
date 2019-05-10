@@ -4,7 +4,7 @@
  * Source code: ext/standard/formatted_print.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : basic functionality - using exponential format ***\n";
 
 // Initialise all required variables
@@ -36,3 +36,4 @@ print_r(file_get_contents($data_file));
 unlink($data_file);
 
 echo "===DONE===\n";
+}

@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to count() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing count() : error conditions ***\n";
 
 // Zero arguments
@@ -22,3 +22,4 @@ $extra_arg = 10;
 try { var_dump( count($var, $mode, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

@@ -9,7 +9,7 @@
  *   string containing various escape sequences for 'str' argument and
  *   corresponding translation pair of chars for 'from', 'to' & 'replace_pairs' arguments
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strtr() : string containing escape sequences for 'str' arg ***\n";
 /* definitions of required input variables */
 $count = 1;
@@ -61,3 +61,4 @@ for($index = 0; $index < count($str_arr); $index++) {
   $count++;
 }
 echo "*** Done ***";
+}

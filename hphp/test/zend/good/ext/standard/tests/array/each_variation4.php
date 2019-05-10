@@ -10,7 +10,7 @@
  * 1. Passed an array
  * 2. Passed an array as $arr argument by reference
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing each() : usage variations ***\n";
 
 $val1 = 'foo';
@@ -24,3 +24,4 @@ var_dump( each(&$arr1) );
 var_dump( each(&$arr1) );
 
 echo "Done";
+}

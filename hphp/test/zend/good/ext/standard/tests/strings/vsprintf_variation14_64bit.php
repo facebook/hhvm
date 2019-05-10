@@ -8,7 +8,7 @@
  * Test vsprintf() when different hexa formats and non-hexa values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
@@ -71,3 +71,4 @@ foreach($args_array as $args) {
 }
 
 echo "Done";
+}

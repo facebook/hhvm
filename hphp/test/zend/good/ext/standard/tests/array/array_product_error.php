@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions: 
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_product() : error conditions ***\n";
 
 // Zero arguments
@@ -21,3 +21,4 @@ echo "\n-- Testing array_product() function incorrect argument type --\n";
 var_dump( array_product("bob") );
 
 echo "===DONE===\n";
+}

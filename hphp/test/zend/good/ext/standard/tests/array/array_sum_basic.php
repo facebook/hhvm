@@ -3,7 +3,7 @@
  * Description: Returns the sum of the array entries 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_sum() : basic functionality ***\n";
 
 // array with integer values
@@ -22,3 +22,4 @@ echo "-- array_sum() with integer/float array entries --\n";
 var_dump( array_sum($input) );
 
 echo "Done";
+}

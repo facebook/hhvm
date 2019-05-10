@@ -8,7 +8,7 @@
 /*
  * test join() by passing pieces as array containing sub array(s)
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing implode() : usage variations - sub arrays ***\n";
 $sub_array = array(array(1,2,3,4), array(1 => "one", 2 => "two"), "PHP", 50);
 
@@ -26,3 +26,4 @@ var_dump( join(", ", $sub_array[0]) );
 var_dump( join(", ", $sub_array[1]) );
 
 echo "Done\n";
+}

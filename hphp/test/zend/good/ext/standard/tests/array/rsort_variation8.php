@@ -7,7 +7,7 @@
 /*
  * Pass rsort() multi-dimensional arrays to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rsort() : variation ***\n";
 
 // array of arrays
@@ -46,3 +46,4 @@ foreach ($various_arrays as $array) {
 }
 
 echo "Done";
+}

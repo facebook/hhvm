@@ -7,7 +7,7 @@
 /* Test strripos() function by passing heredoc string containing escape chars for haystack 
  *  and with various needles & offsets 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing escape characters --\n";
 $control_char_str = <<<EOD
@@ -20,3 +20,4 @@ var_dump( strripos($control_char_str, "\n", 12) );
 var_dump( strripos($control_char_str, "\t", 15) );
 
 echo "===DONE===\n";
+}

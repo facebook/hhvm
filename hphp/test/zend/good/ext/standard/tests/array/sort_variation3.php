@@ -13,7 +13,7 @@
  * 3. SORT_NUMERIC - compare items numerically
  * 4. SORT_STRING - compare items as strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sort() : usage variations ***\n";
 
 // group of various arrays
@@ -57,3 +57,4 @@ foreach ($various_arrays as $array) {
 } 
 
 echo "Done\n";
+}

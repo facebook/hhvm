@@ -12,7 +12,7 @@
  * 2. duplicate values
  * 3. duplicate key names
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff_assoc() : variation ***\n";
 
 $array_index = array('a', 'b', 'c', 0 => 'd', 'b');   //duplicate key (0), duplicate value (b)
@@ -26,3 +26,4 @@ var_dump(array_diff_assoc($array_index, $array_assoc));
 var_dump(array_diff_assoc($array_assoc, $array_index));
 
 echo "Done";
+}

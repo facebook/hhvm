@@ -5,7 +5,7 @@
 */
 
 /* Test strrchr() function: with binary values & null terminated strings passed to 'str1' & 'str2' */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strrchr() function: binary safe ***\n";
 $haystacks = array(
   "Hello".chr(0)."World",
@@ -24,3 +24,4 @@ for($index = 0; $index < count($haystacks); $index++ ) {
   var_dump( strrchr($haystacks[$index], NULL) );
 }
 echo "*** Done ***";
+}

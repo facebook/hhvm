@@ -5,7 +5,7 @@
  * Source code: ext/standard/basic_functions.c
  * Alias to functions: count()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sizeof() : usage variations ***\n";
 
 // get a resource variable
@@ -55,3 +55,4 @@ for($i = 0; $i < count($values); $i++)
 }
          
 echo "Done";
+}

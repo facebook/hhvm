@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of next()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing next() : basic functionality ***\n";
 
 $array = array('zero', 'one', 'two');
@@ -20,3 +20,4 @@ var_dump(next(&$array));
 echo key(&$array) . " => " . current(&$array) . "\n";
 var_dump(next(&$array));
 echo "===DONE===\n";
+}

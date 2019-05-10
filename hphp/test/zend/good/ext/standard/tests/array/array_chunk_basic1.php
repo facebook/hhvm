@@ -4,7 +4,7 @@
  *              Chunks an array into size  large chunks.
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_chunk() : basic functionality ***\n";
 $size = 2;
 
@@ -35,3 +35,4 @@ foreach ($input_arrays as $input_array){
 }
 
 echo "Done";
+}

@@ -3,7 +3,7 @@
  * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : basic functionality ***\n";
 
 // Calling strip_tags() with all possible arguments
@@ -32,3 +32,4 @@ foreach($allowed_tags_array as $tags)
 }
 
 echo "Done";
+}

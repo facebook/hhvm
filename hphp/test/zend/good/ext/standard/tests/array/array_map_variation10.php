@@ -7,7 +7,7 @@
 /*
  * Test array_map() by passing anoymous callback function with following variations
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_map() : anonymous callback function ***\n";
 
 $array1 = array(1, 2, 3);
@@ -29,3 +29,4 @@ echo "-- passing NULL as 'arr1' --\n";
 var_dump( array_map( $a ==> array($a), NULL));
 
 echo "Done";
+}

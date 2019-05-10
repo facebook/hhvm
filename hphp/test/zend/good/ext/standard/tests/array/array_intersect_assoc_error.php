@@ -4,7 +4,7 @@
  * Keys are used to do more restrictive check 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect_assoc() : error conditions ***\n";
 
 // Zero arguments
@@ -17,3 +17,4 @@ $arr1 = array(1, 2);
 try { var_dump( array_intersect_assoc($arr1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

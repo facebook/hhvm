@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ltrim() : error conditions ***\n";
 
 echo "\n-- Testing ltrim() function with no arguments --\n";
@@ -24,3 +24,4 @@ var_dump(ltrim($hello, "z..a"));
 var_dump(ltrim($hello, "a..b..c"));
 
 echo "===DONE===\n";
+}

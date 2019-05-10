@@ -5,7 +5,7 @@
 */
 
 /* Test strncmp() function with more/less number of args and invalid args */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strncmp() function: error conditions ***\n";
 $str1 = 'string_val';
 $str2 = 'string_val';
@@ -21,3 +21,4 @@ try { var_dump( strncmp($str1, $str2, $len, $extra_arg) ); } catch (Exception $e
 $len = -10;
 var_dump( strncmp($str1, $str2, $len) );
 echo "*** Done ***\n";
+}

@@ -9,7 +9,7 @@
  * heredoc strings for $var argument that is prepended to the array
  * passed through $array argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unshift() : heredoc strings for \$var argument ***\n";
 
 // heredoc with empty value
@@ -90,3 +90,4 @@ foreach($vars as $var) {
 }
 
 echo "Done";
+}

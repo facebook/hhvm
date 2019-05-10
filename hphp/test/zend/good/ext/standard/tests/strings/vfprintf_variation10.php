@@ -8,7 +8,7 @@
  * Test vfprintf() when different char formats and non-char values are passed to 
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : char formats and non-char values ***\n";
 
 // defining an array of various char formats
@@ -81,3 +81,4 @@ echo "\n";
 unlink($data_file);
 
 echo "===DONE===\n";
+}

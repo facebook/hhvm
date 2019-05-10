@@ -2,7 +2,7 @@
 /* Prototype: mixed array_shift(& array &array );
  * Description: Shifts the first value of the array off and returns it.
  */
-
+<<__EntryPoint>> function main() {
 $empty_array = array();
 $number = 5;
 $str = "abc";
@@ -76,3 +76,4 @@ echo "\nCurrent Element after shift operation is: ";
 var_dump( current(&$mixed_array1) );
 
 echo"Done";
+}

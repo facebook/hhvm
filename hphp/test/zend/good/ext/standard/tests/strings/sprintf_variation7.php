@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : integer formats with boolean values ***\n";
 
 // array of boolean type values
@@ -33,3 +33,4 @@ foreach($boolean_values as $boolean_value) {
 };
 
 echo "Done";
+}

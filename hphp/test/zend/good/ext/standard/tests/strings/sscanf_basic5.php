@@ -4,7 +4,7 @@
  * Description: Parses input from a string according to a format
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sscanf() : basic functionality -using exponential format ***\n";
 
 $str = "10.12345 10.12345E3 10.12345e3 -10.12345e4" ;
@@ -27,3 +27,4 @@ var_dump($res, $arg1, $arg2, $arg3, $arg4);
 
 
 echo "===DONE===\n";
+}

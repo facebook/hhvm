@@ -4,7 +4,7 @@
  *              and the elements of the second as the corresponding values 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_combine() : error conditions ***\n";
 
 // Zero arguments
@@ -24,3 +24,4 @@ $keys = array(1, 2);
 try { var_dump( array_combine($keys) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

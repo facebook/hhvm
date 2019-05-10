@@ -10,7 +10,7 @@
  * 2. a sub-array
  * as $array_arg argument.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing end() : usage variations ***\n";
 
 $array_arg = array ('a' => 'z', array(9, 8, 7));
@@ -19,3 +19,4 @@ echo "\n-- Pass a two-dimensional array as \$array_arg --\n";
 var_dump(end(&$array_arg));
 
 echo "===DONE===\n";
+}

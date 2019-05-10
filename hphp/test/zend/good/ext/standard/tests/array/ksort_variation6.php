@@ -10,7 +10,7 @@
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ksort() : usage variations ***\n";
 
 // an array containng unsorted hexadecimal values with keys
@@ -36,3 +36,4 @@ var_dump(ksort( &$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";
+}

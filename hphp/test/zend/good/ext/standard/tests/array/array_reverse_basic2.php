@@ -7,7 +7,7 @@
 /*
  * Testing array_reverse() with associative array for $array argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_reverse() : basic functionality ***\n";
 
 // Initialise the array
@@ -21,3 +21,4 @@ var_dump( array_reverse($array, true) );  // expects the keys to be preserved
 var_dump( array_reverse($array, false) );  // expects the keys not to be preserved
 
 echo "Done";
+}

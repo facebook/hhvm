@@ -7,7 +7,7 @@
 /*
  * testing wordwrap() by providing different values for str argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $width = 3;
@@ -98,3 +98,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($fp);
 
 echo "Done\n";
+}

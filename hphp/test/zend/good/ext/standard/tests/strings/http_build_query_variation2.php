@@ -3,7 +3,7 @@
  * Description: Generates a URL-encoded query string from the associative (or indexed) array provided. 
  * Source code: ext/standard/http.c
 */
-
+<<__EntryPoint>> function main() {
 $mDimensional = array(
   20, 
   5 => 13, 
@@ -28,3 +28,4 @@ $mDimensional = array(
 
 echo http_build_query($mDimensional) . PHP_EOL;
 echo http_build_query($mDimensional, 'prefix_');
+}

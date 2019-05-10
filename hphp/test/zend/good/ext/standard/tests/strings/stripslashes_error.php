@@ -7,7 +7,7 @@
 /*
  * Testing stripslashes() for error conditions
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing stripslashes() : error conditions ***\n";
 
 // Zero argument
@@ -23,3 +23,4 @@ try { var_dump( stripslashes($str, $extra_arg) ); } catch (Exception $e) { echo 
 var_dump( $str );
 
 echo "Done\n";
+}

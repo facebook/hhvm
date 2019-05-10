@@ -7,7 +7,7 @@
 /*
  * Pass incorrect number of arguments to key() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing key() : error conditions ***\n";
 
 // Zero arguments
@@ -20,3 +20,4 @@ $array_arg = array(1, 2);
 $extra_arg = 10;
 try { var_dump( key(&$array_arg, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

@@ -11,7 +11,7 @@
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing krsort() : usage variations ***\n";
 
 // an array containing unsorted octal values
@@ -36,3 +36,4 @@ var_dump( krsort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";
+}

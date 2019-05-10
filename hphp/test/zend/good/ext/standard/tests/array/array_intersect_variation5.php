@@ -9,7 +9,7 @@
  * associative arrays having different possible keys to $arr1 argument.
  * The $arr2 argument is a fixed array
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect() : assoc array with diff keys to \$arr1 argument ***\n";
 
 // get an unset variable
@@ -72,3 +72,4 @@ foreach($arrays as $arr1) {
 }
 
 echo "Done";
+}

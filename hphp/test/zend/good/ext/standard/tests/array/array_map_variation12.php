@@ -7,7 +7,7 @@
 /*
  * Test array_map() by passing buit-in function as callback function
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_map() : built-in function ***\n";
 
 $array1 = array(1, 2, 3);
@@ -23,3 +23,4 @@ echo "-- with language construct --\n";
 var_dump( array_map('echo', $array1));
 
 echo "Done";
+}

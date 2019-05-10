@@ -3,7 +3,7 @@
  * Description: Write a formatted string to a stream
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : with  white spaces in format strings ***\n";
 
 // initializing the format array
@@ -58,3 +58,4 @@ echo "\n";
 
 unlink($data_file); 
 echo "===DONE===\n";
+}

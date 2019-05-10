@@ -8,7 +8,7 @@
  * Test array_push when passed:
  * 1. an array as $var arg
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_push() : usage variations ***\n";
 
 echo "\n-- Pass array as \$var argument --\n";
@@ -19,3 +19,4 @@ var_dump(array_push(&$array, $sub_array));
 var_dump($array);
 
 echo "Done";
+}

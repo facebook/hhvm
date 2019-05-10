@@ -5,7 +5,7 @@
  */
 
 /* passing array_fill() as the 'val' argument in array_fill() function */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_fill() : variation ***\n";
 
 $start_key = 0;
@@ -39,3 +39,4 @@ for($i =0; $i < count($values); $i ++)
 }  
 
 echo "Done";
+}

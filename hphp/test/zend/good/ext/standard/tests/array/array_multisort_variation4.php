@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_multisort() : Testing  with multiple array arguments ***\n";
 
 $arr1 = array (4,3,3,3);
@@ -18,3 +18,4 @@ var_dump($arr2);
 var_dump($arr3);
 
 echo "===DONE===\n";
+}

@@ -3,7 +3,7 @@
  * Description: Uppercase the first character of each word in a string
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ucwords() : basic functionality ***\n";
 
 // lines with different whitespace charecter
@@ -37,3 +37,4 @@ for($index = 0; $index < count($str_array); $index++) {
 }
 
 echo "Done\n";
+}

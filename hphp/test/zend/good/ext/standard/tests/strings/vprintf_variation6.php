@@ -8,7 +8,7 @@
  * Test vprintf() when different float formats and non-float values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : float formats and non-float values ***\n";
 
 // defining array of float formats
@@ -65,3 +65,4 @@ foreach($args_array as $args) {
 }
 
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Description: Parses the string into variables
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing parse_str() : basic functionality ***\n";
 
 echo "\nBasic test WITH undefined var for result arg\n";
@@ -24,3 +24,4 @@ var_dump(parse_str($s1, &$res3_array));
 var_dump($res3_array);
 
 echo "===DONE===\n";
+}

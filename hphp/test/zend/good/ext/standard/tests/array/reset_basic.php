@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of reset()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing reset() : basic functionality ***\n";
 
 $array = array('zero', 'one', 200 => 'two');
@@ -24,3 +24,4 @@ echo key(&$array) . " => " . current(&$array) . "\n";
 echo "\n-- Call to reset() --\n";
 var_dump(reset(&$array));
 echo "===DONE===\n";
+}

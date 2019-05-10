@@ -5,7 +5,7 @@
 */
 
 /* test get_html_translation_table() when $table argument is specified as HTML_SPECIALCHARS */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing get_html_translation_table() : basic functionality ***\n";
 
 // $table as HTML_SEPCIALCHARS and different quote style
@@ -29,3 +29,4 @@ asort( &$tt );
 var_dump( $tt );
 
 echo "Done\n";
+}

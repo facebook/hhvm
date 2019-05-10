@@ -8,7 +8,7 @@
  * Test vsprintf() when different octal formats and octal values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : octal formats with octal values ***\n";
 
 // defining array of octal formats
@@ -47,3 +47,4 @@ foreach($formats as $format) {
 }
 
 echo "Done";
+}

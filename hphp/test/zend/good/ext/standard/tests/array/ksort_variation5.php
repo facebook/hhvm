@@ -11,7 +11,7 @@
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_STRING  - compare items as strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ksort() : usage variations ***\n";
 
 $various_arrays = array (
@@ -53,3 +53,4 @@ foreach ($various_arrays as $array) {
 }
 
 echo "Done\n";
+}

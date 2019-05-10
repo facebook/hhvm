@@ -5,7 +5,7 @@
 */
 
 /* Testing strrev() function with various double quoted strings for 'str' */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrev() : with various double quoted strings ***\n";
 $str = "Hiiii";
 
@@ -62,3 +62,4 @@ for( $index = 0; $index < count($strings); $index++ ) {
 }
 
 echo "*** Done ***";
+}

@@ -7,7 +7,7 @@
  */
 
 // Calling sizeof() with zero and more than expected arguments .
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sizeof() : error conditions ***\n";
 
 echo "-- Testing sizeof() with zero arguments --\n";
@@ -20,3 +20,4 @@ echo "-- Testing sizeof() function with more than two arguments under COUNT_RECU
 try { var_dump( sizeof($var, COUNT_RECURSIVE, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

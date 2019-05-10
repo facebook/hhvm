@@ -5,7 +5,7 @@
 */
 
 /* Test stripos() function by passing single quoted strings to 'haystack' & 'needle' arguments */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing stripos() function: with single quoted strings ***\n";
 $haystack = 'Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ';
 $needle = array(
@@ -79,3 +79,4 @@ for($index=0; $index<count($needle); $index++) {
   $count++;
 }
 echo "*** Done ***";
+}

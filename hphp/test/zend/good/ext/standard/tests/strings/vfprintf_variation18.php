@@ -8,7 +8,7 @@
  * Test vfprintf() when different scientific formats and non-scientific values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : scientific formats and non-scientific values ***\n";
 
 // defining array of non-scientific formats
@@ -73,3 +73,4 @@ echo "\n";
 
 unlink($data_file); 
 echo "===DONE===\n";
+}

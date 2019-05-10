@@ -7,7 +7,7 @@
 /*
  * Testing the functionality of array_merge_recursive() by passing an array having binary values.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_merge_recursive() : array with binary data for \$arr1 argument ***\n";
 
 // array with binary values
@@ -23,3 +23,4 @@ echo "-- With more arguments --\n";
 var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
+}

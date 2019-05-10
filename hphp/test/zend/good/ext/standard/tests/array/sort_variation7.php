@@ -10,7 +10,7 @@
  * flag  value as defualt
  * SORT_REGULAR - compare items normally
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sort() : usage variations ***\n";
 
 // bool value array
@@ -37,3 +37,4 @@ var_dump(sort(&$temp_array, SORT_STRING) );
 var_dump($temp_array);
 
 echo "Done\n";
+}

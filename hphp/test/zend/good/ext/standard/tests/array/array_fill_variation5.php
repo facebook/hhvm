@@ -7,7 +7,7 @@
 /*
  * testing array_fill() by passing different types of array  values for 'val' argument
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_fill() : usage variations ***\n";
 
 // Initialise function arguments not being substituted 
@@ -48,3 +48,4 @@ for($i = 0; $i < count($values); $i++)
 }
 
 echo "Done";
+}

@@ -7,7 +7,7 @@
 /* Test strripos() function by passing heredoc string containing special chars for haystack
  *  and with various needles & offets 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strripos() function: with heredoc strings ***\n";
 echo "-- With heredoc string containing special chars --\n";
 $special_chars_str = <<<EOD
@@ -24,3 +24,4 @@ var_dump( strripos($special_chars_str, "$*", 10) );
 var_dump( strripos($special_chars_str, "(speCIal)") );
 
 echo "===DONE===\n";
+}

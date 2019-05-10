@@ -8,7 +8,7 @@
  * Test vsprintf() when different int formats and int values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : int formats with int values ***\n";
 
 
@@ -48,3 +48,4 @@ foreach($formats as $format) {
 }
 
 echo "Done";
+}

@@ -4,7 +4,7 @@
  * Description: Push one or more elements onto the end of array
  and returns the new number of elements in the array.
  */
-
+<<__EntryPoint>> function main() {
 $empty_array = array();
 $number = 5;
 $str = "abc";
@@ -69,3 +69,4 @@ var_dump( array_push(&$mixed_array2, 22, 33, "44") );
 var_dump( $mixed_array2 );
 
 echo"\nDone";
+}

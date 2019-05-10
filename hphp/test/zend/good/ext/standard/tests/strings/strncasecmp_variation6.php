@@ -5,7 +5,7 @@
 */
 
 /* Test strncasecmp() function with binary values passed to 'str1' & 'str2' */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strncasecmp() function: with binary inputs ***\n";
 
 /* A binary function should work with all 256 characters that a character(8-bit) can take */
@@ -27,3 +27,4 @@ $str2 = decbin( ord( chr(256) ));
 var_dump( strncasecmp($str1, $str2, 8) );  //comparing all the 8-bits; expected: int(1)
 
 echo "\n*** Done ***\n";
+}

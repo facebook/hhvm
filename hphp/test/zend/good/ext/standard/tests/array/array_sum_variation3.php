@@ -7,7 +7,7 @@
 /*
  * sum of array containing different float values
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_sum() : array with different float values ***\n";
 
 // Simple float array
@@ -38,3 +38,4 @@ echo "-- Mixed float array --\n";
 var_dump( array_sum($float_input) );
                      
 echo "Done";
+}

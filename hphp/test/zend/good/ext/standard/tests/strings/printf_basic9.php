@@ -3,7 +3,7 @@
  * Description: Produces output according to format .
  * Source code: ext/standard/formatted_print.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing printf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialise all required variables
@@ -52,3 +52,4 @@ echo "\n";
 var_dump($result);
 
 echo "===DONE===\n";
+}

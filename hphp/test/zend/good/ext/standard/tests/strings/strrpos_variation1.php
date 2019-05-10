@@ -5,7 +5,7 @@
 */
 
 /* Test strrpos() function by passing double quoted strings for 'haystack' & 'needle' arguments */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrpos() function: with double quoted strings ***\n";
 $haystack = "Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ";
 $needle = array(
@@ -68,3 +68,4 @@ for($index=0; $index<count($needle); $index++) {
   $count++;
 }
 echo "*** Done ***";
+}

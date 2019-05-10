@@ -8,7 +8,7 @@
  * Test vprintf() when different string formats and non-string values are passed to
  * the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing vprintf() : string formats and non-string values ***\n";
@@ -68,3 +68,4 @@ foreach($args_array as $args) {
 }
 
 echo "===DONE===\n";
+}

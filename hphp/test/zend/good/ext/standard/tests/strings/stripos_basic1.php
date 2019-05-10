@@ -3,7 +3,7 @@
  * Description: Find position of first occurrence of a case-insensitive string
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing stripos() function: basic functionality ***\n";
 $heredoc_str = <<<Identifier
 Hello, World
@@ -28,3 +28,4 @@ var_dump( stripos($heredoc_str, $heredoc_str) );
 //non-existing needle in haystack
 var_dump( stripos("Hello, World", "ooo") );
 echo "*** Done ***";
+}

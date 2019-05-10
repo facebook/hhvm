@@ -8,7 +8,7 @@
  * Test array_map() by passing non-permmited built-in functions and language constructs i.e.
  *   echo(), array(), empty(), eval(), exit(), isset(), list(), print()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_map() : non-permmited built-in functions ***\n";
 
 // array to be passed as arguments
@@ -32,3 +32,4 @@ for($count = 0; $count < count($callback_names); $count++)
 }
 
 echo "Done";
+}

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of array_slice()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_slice() : basic functionality ***\n";
 
 
@@ -25,3 +25,4 @@ echo "\n-- Mandatory arguments --\n";
 var_dump( array_slice($input, $offset) );
 
 echo "Done";
+}

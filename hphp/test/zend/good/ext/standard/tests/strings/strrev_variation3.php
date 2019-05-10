@@ -5,7 +5,7 @@
 */
 
 /* Testing strrev() function with heredoc strings for 'str' */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrev() function: with heredoc strings ***\n";
 $multi_line_str = <<<EOD
 Example of string
@@ -55,3 +55,4 @@ for( $index = 0; $index < count($strings); $index++ ) {
 }
 
 echo "*** Done ***";
+}

@@ -7,7 +7,7 @@
 /*
  * Testing strtok() for error conditions
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strtok() : error conditions ***\n";
 
 // Zero argument
@@ -31,3 +31,4 @@ var_dump( strtok($str));
 var_dump( $str );
 
 echo "Done\n";
+}

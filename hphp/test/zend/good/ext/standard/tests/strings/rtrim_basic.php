@@ -4,7 +4,7 @@
  * Description: Strip whitespace (or other characters) from the end of a string.
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rtrim() : basic functionality ***\n";
 
 $text  = "---These are a few words---  \t\r\n\0\x0B  ";
@@ -30,3 +30,4 @@ echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(rtrim($binary, "\x00..\x1F"));
 
 echo "===DONE===\n";
+}

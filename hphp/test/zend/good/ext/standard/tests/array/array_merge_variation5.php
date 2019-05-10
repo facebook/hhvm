@@ -8,7 +8,7 @@
  * Pass array_merge() arrays with only numeric keys to test behaviour.
  * $arr2 contains a duplicate element to $arr1.
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 //numeric keys
@@ -19,3 +19,4 @@ var_dump(array_merge($arr1, $arr2));
 var_dump(array_merge($arr2, $arr1));
 
 echo "Done";
+}

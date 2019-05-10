@@ -4,7 +4,7 @@
  * Source code: ext/standard/array.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_fill() : error conditions ***\n";
 
 // Zero arguments
@@ -30,3 +30,4 @@ $num = -1;
 var_dump( array_fill($start_key,$num,$val) );
 
 echo "Done";
+}

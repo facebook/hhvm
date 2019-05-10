@@ -8,7 +8,7 @@
 /*
  * Pass incorrect number of arguments to array_key_exists() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_key_exists() : error conditions ***\n";
 
 //Test array_key_exists with one more than the expected number of arguments
@@ -24,3 +24,4 @@ $key = 1;
 try { var_dump( array_key_exists($key) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

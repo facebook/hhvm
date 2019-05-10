@@ -6,7 +6,7 @@
                the replacement string
 */
 
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing str_replace error conditions ***";
 /* Invalid arguments */
 try { var_dump( str_replace() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -16,3 +16,4 @@ try { var_dump( str_replace(1, 2) ); } catch (Exception $e) { echo "\n".'Warning
 try { var_dump( str_replace(1,2,3,&$var,5) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

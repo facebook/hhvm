@@ -7,7 +7,7 @@
 /*
  * Test how array_change_key_case() converts keys in multi-dimensional arrays
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_change_key_case() : usage variations ***\n";
 
 $input = array('English' => array('one' => 1, 'two' => 2, 'three' => 3),
@@ -21,3 +21,4 @@ echo "\n-- Pass a sub-arry as \$input argument --\n";
 var_dump(array_change_key_case($input['English'], CASE_UPPER));
 
 echo "Done";
+}

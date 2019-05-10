@@ -3,7 +3,7 @@
  * Description: Find position of last occurrence of 'needle' in 'haystack'
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrpos() function: basic functionality ***\n";
 $heredoc_str = <<<EOD
 Hello, World
@@ -28,3 +28,4 @@ var_dump( strrpos("Hello, World", "o", 3) );
 var_dump( strrpos("Hello, World", "o", 6) );
 var_dump( strrpos("Hello, World", "o", 10) );
 echo "*** Done ***";
+}

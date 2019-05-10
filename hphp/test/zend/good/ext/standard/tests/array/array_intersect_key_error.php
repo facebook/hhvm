@@ -3,7 +3,7 @@
  * Description: Returns the entries of arr1 that have keys which are present in all the other arguments. 
  * Source code: ext/standard/array.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect_key() : error conditions ***\n";
 
 //Initialise function arguments
@@ -17,3 +17,4 @@ try { var_dump( array_intersect_key($array1) ); } catch (Exception $e) { echo "\
 echo "\n-- Testing array_intersect_key() function with no arguments --\n";
 try { var_dump( array_intersect_key() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

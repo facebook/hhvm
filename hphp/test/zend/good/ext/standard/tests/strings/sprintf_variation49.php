@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sprintf() : scientific formats with array values ***\n";
 
 // array of array values 
@@ -44,3 +44,4 @@ foreach($array_values as $array_value) {
 };
 
 echo "Done";
+}

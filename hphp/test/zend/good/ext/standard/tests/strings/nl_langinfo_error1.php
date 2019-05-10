@@ -4,7 +4,7 @@
  * Description: Query language and locale information
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing nl_langinfo() : error conditions ***\n";
 
 echo "\n-- Testing nl_langinfo() function with no arguments --\n";
@@ -15,3 +15,4 @@ $extra_arg = 10;
 try { var_dump( nl_langinfo(ABDAY_2, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

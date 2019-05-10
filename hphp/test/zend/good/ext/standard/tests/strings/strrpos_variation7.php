@@ -7,7 +7,7 @@
 /* Test strrpos() function by passing empty heredoc string for haystack 
  *  and with various needles & offsets
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrpos() function: with heredoc strings ***\n";
 echo "-- With empty heredoc string --\n";
 $empty_string = <<<EOD
@@ -18,3 +18,4 @@ var_dump( strrpos($empty_string, FALSE) );
 var_dump( strrpos($empty_string, NULL) );
 
 echo "*** Done ***";
+}

@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of end()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing end() : basic functionality ***\n";
 
 $array = array('zero', 'one', 200 => 'two');
@@ -25,3 +25,4 @@ echo "\n-- Add a new element to array --\n";
 $array[2] = 'foo';
 var_dump(end(&$array));
 echo "===DONE===\n";
+}

@@ -5,7 +5,7 @@
  * Source code: ext/standard/string.c
 */
 
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rtrim() : error conditions ***\n";
 
 echo "\n-- Testing rtrim() function with no arguments --\n";
@@ -24,3 +24,4 @@ var_dump(rtrim($hello, "z..a"));
 var_dump(rtrim($hello, "a..b..c"));
 
 echo "===DONE===\n";
+}

@@ -4,7 +4,7 @@
  * Source code: ext/standard/string.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strpbrk() : basic functionality ***\n";
 
 // Initialise all required variables
@@ -23,3 +23,4 @@ var_dump( strpbrk($text, '     ') );
 var_dump( strpbrk('5', '5') );
 
 echo "===DONE===\n";
+}

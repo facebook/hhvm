@@ -11,7 +11,7 @@
  *  2. SORT_REGULAR - compare items normally
  *  3. SORT_NUMERIC - compare items numerically
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ksort() : usage variations ***\n";
 
 // diff. associative arrays to sort
@@ -53,3 +53,4 @@ foreach ($various_arrays as $array) {
 } 
 
 echo "Done\n";
+}

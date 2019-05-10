@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : basic functionality
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strtok() : basic functionality ***\n";
 
 // Initialize all required variables
@@ -27,3 +27,4 @@ for( $i = 2; $i <=7; $i++ )  {
 }
 
 echo "Done\n";
+}

@@ -7,7 +7,7 @@
 /*
  * test ucwords() with different string prepared using single quote
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ucwords() : usage variations ***\n";
 
 // different strings containing regular chars and special chars
@@ -52,3 +52,4 @@ for($index = 0; $index < count($str_array); $index++) {
 }
 
 echo "Done\n";
+}

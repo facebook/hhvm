@@ -7,7 +7,7 @@
 /*
  * Testing sscanf() : basic functionality
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sscanf() : basic functionality - using string format ***\n";
 
 $str = "Part: Widget Serial Number: 1234789 Stock: 25";
@@ -24,3 +24,4 @@ $res = sscanf($str, $format, &$part, &$number, &$stock);
 var_dump($res, $part, $number, $stock);
 
 echo "===DONE===\n";
+}

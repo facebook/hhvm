@@ -8,7 +8,7 @@
  * Pass an array with different data types as keys to test how array_merge 
  * adds it onto an existing array
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -103,3 +103,4 @@ foreach($inputs as $key => $input) {
 };
 
 echo "Done";
+}

@@ -3,7 +3,7 @@
  * Description: Uppercase the first character of each word in a string
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ucwords() : error conditions ***\n";
 
 // Zero argument
@@ -21,3 +21,4 @@ try { var_dump( ucwords($str, $extra_arg, $extra_arg) ); } catch (Exception $e) 
 var_dump($str);
 
 echo "Done\n";
+}

@@ -8,7 +8,7 @@
 /*
  * Pass each() arrays where the keys are different data types to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing each() : usage variations ***\n";
 
 //get an unset variable
@@ -99,3 +99,4 @@ foreach($inputs as $key => $input) {
 };
 
 echo "Done";
+}

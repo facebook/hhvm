@@ -8,7 +8,7 @@
 /*
  * Test how array_key_exists() behaves with multi-dimensional arrays
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $multi_array = array ('zero' => 'val1', 
@@ -23,3 +23,4 @@ echo "\n-- \$search arg points to sub-array --\n";
 var_dump(array_key_exists(0, $multi_array['sub1']));
 
 echo "Done";
+}

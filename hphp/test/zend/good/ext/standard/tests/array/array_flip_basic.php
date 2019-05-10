@@ -3,7 +3,7 @@
  * Description: Return array with key <-> value flipped 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_flip() : basic functionality ***\n";
 
 // array with default keys - numeric values
@@ -26,3 +26,4 @@ var_dump( array_flip($input) );
 $input = array(1 => 'one','two', 3 => 'three', 4, "five" => 5);
 var_dump( array_flip($input) );
 echo "Done";
+}

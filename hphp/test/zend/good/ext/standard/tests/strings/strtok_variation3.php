@@ -7,7 +7,7 @@
 /*
  * Testing strtok() : with heredoc strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strtok() : with heredoc strings ***\n";
 
 // defining different heredoc strings
@@ -63,3 +63,4 @@ foreach($heredoc_strings as $string)  {
 
 
 echo "Done\n";
+}

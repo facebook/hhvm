@@ -3,7 +3,7 @@
  * Description: Output a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vprintf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialising different format strings
@@ -41,3 +41,4 @@ echo "\n";
 var_dump($result);
 
 echo "===DONE===\n";
+}

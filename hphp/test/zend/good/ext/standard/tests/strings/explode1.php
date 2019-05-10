@@ -5,7 +5,7 @@
                 If limit is set, the returned array will contain a maximum of limit
                 elements with the last element containing the rest of string.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing explode() for basic operations ***\n";
 $delimiters = array (
   "",  // len=0
@@ -67,3 +67,4 @@ try { var_dump( explode(":", "array1:array2:array3", -1, -33) ); } catch (Except
 try { var_dump( explode(":") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

@@ -7,7 +7,7 @@
 /* Test strrpos() function with strings containing multiple occurrences of 'needle' in the 'haystack'
  *  and with various needles & offsets 
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrpos() function: strings repetitive chars ***\n";
 $haystack = "ababababAbaBa";
 $needle = "aba";
@@ -20,3 +20,4 @@ for($offset = -1; $offset <= strlen($haystack); $offset++ ) {
   $count++;
 }
 echo "*** Done ***";
+}

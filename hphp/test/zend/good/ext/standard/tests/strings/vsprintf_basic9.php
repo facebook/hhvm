@@ -3,7 +3,7 @@
  * Description: Return a formatted string 
  * Source code: ext/standard/formatted_print.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : basic functionality - using hexadecimal format ***\n";
 
 // Initialising different format strings
@@ -30,3 +30,4 @@ var_dump( vsprintf($format3,$arg3) );
 var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
+}

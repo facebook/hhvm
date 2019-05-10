@@ -3,7 +3,7 @@
  * Description: Produces output according to format .
  * Source code: ext/standard/formatted_print.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing printf() : basic functionality - using char format ***\n";
 
 
@@ -36,3 +36,4 @@ $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
 echo "===DONE===\n";
+}

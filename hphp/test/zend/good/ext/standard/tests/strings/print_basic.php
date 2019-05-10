@@ -5,7 +5,7 @@
  * Source code: n/a, print is a language construct not an extension function
  * Test based on php.net manual example.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing print() : basic functionality ***\n";
 
 echo "\n-- Iteration 1 --\n";
@@ -55,3 +55,4 @@ that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!\n
 END;
 echo "===DONE===\n";
+}

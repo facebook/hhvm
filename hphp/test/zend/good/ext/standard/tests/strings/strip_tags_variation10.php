@@ -7,7 +7,7 @@
 /*
  * testing functionality of strip_tags() by giving single quoted strings as values for $str argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 
@@ -32,3 +32,4 @@ foreach($single_quote_string as $string_value)
 }
 
 echo "Done";
+}

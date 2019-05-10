@@ -7,7 +7,7 @@
 /*
  * Pass rsort() an array containing octal values to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rsort() : variation ***\n";
 
 // an array containing unsorted octal values
@@ -29,3 +29,4 @@ var_dump(rsort(&$temp_array, SORT_NUMERIC) );
 var_dump($temp_array);
 
 echo "Done";
+}

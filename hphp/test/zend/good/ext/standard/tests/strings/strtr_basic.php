@@ -3,7 +3,7 @@
  * Description: Translates characters in str using given translation pairs
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strtr() : basic functionality ***\n";
 //definitions of required input variables
 $trans1_arr = array("t" => "T", "e" => "E", "st" => "ST");
@@ -33,3 +33,4 @@ var_dump( strtr("test strtr", $trans1_arr) );
 var_dump( strtr('test strtr', $trans2_arr) );
 var_dump( strtr($heredoc_str, $trans1_arr) );
 echo "*** Done ***";
+}

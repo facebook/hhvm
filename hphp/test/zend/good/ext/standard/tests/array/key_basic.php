@@ -7,7 +7,7 @@
 /*
  * Test basic functionality of key()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing key() : basic functionality ***\n";
 
 $array = array ('zero', 99 => 'one', 'two', 'three' => 3);
@@ -26,3 +26,4 @@ echo "\n-- Past end of the array --\n";
 next(&$array);
 var_dump(key(&$array));
 echo "===DONE===\n";
+}

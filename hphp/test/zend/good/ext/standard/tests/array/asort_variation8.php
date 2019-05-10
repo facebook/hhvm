@@ -11,7 +11,7 @@
  * SORT_REGULAR - compare items normally
  * Note: arrays are sorted based on total count of elements inside it, when all the elements are arrays
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing asort() : usage variations ***\n";
 
 // array of arrays
@@ -53,3 +53,4 @@ foreach ($various_arrays as $array) {
 }
 
 echo "Done\n";
+}

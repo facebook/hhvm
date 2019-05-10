@@ -3,7 +3,7 @@
  * Description: Split array into chunks 
  * Source code: ext/standard/array.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_chunk() : error conditions ***\n";
 
 // Zero arguments
@@ -22,3 +22,4 @@ $input = array(1, 2);
 try { var_dump( array_chunk($input) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

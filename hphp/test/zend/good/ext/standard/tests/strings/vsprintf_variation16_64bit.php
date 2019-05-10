@@ -8,7 +8,7 @@
  * Test vsprintf() when different unsigned formats and signed values and other types of values
  * are passed to the '$format' and '$args' arguments of the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : unsigned formats and signed & other types of values ***\n";
 
 // defining array of unsigned formats
@@ -63,3 +63,4 @@ foreach($args_array as $args) {
 }
 
 echo "Done";
+}

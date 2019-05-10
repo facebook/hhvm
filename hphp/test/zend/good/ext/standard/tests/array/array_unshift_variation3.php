@@ -8,7 +8,7 @@
  * Testing the behavior of array_unshift() by passing different types of arrays
  * to $array argument to which the $var arguments will be prepended
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unshift() : different arrays for \$array argument ***\n";
 
 // initialize $var argument
@@ -68,3 +68,4 @@ foreach($arrays as $array) {
 }
 
 echo "Done";
+}

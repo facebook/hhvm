@@ -188,3 +188,8 @@ type si_item = {
 (* Internal representation of a full list of results *)
 type si_results =
   si_item list
+
+(* Which system notified us of a file changed? *)
+type file_source =
+  | SavedState
+  | TypeChecker

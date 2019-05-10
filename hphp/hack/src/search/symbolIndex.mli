@@ -55,13 +55,13 @@ val query_for_autocomplete :
     'a option) ->
   'a list Utils.With_complete_flag.t
 
-(* Legacy update interface when new data is seen by the typechecker *)
-val update :
+(* Notify the search service that certain files have been updated locally *)
+val update_files :
   MultiWorker.worker list option ->
-  (Relative_path.t * SearchUtils.info) list ->
+  (Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
   unit
 
-  (* Legacy update interface when old data is being cleaned out by the typechecker *)
+(* Notify the search service that certain files have been removed locally *)
 val remove_files :
   Relative_path.Set.t ->
   unit

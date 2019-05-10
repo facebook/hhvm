@@ -253,18 +253,19 @@ let index_symbols_in_file (fn, info) =
 (* Method for importing data from the typechecker or saved-state *)
 let update_from_typechecker
     (worker_list_opt: MultiWorker.worker list option)
-    (files: (Relative_path.t * info) list): unit =
-  if List.length files < 100
-  then List.iter files index_symbols_in_file
+    (files: (Relative_path.t * info * SearchUtils.file_source) list): unit =
+  let mapped_files = List.map files ~f:(fun (a, b, _) -> (a, b)) in
+  if List.length mapped_files < 100
+  then List.iter mapped_files index_symbols_in_file
   else
     MultiWorker.call worker_list_opt
-      ~job:(fun () files -> List.iter files index_symbols_in_file)
+      ~job:(fun () mapped_files -> List.iter mapped_files index_symbols_in_file)
       ~neutral:()
       ~merge:(fun _ _ -> ())
-      ~next:(MultiWorker.next worker_list_opt files);
+      ~next:(MultiWorker.next worker_list_opt mapped_files);
   MasterApi.update_search_index
     ~fuzzy:!fuzzy
-    (List.map files fst)
+    (List.map mapped_files fst)
 
 (* Method for retrieving data that matches the symbolindex search *)
 let index_search

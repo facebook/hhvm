@@ -68,7 +68,8 @@ let init
   let trace = false in
   let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
   if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map env.naming_table;
+    SearchServiceRunner.update_fileinfo_map env.naming_table
+      SearchUtils.SavedState;
 
   let t = update_files genv env.naming_table t in
   let env, t = naming env t in

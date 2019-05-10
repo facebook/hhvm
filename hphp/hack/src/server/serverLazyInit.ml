@@ -180,10 +180,9 @@ let update_search (genv: ServerEnv.genv) (saved: Naming_table.saved_state_info) 
     (* Filter out non php files *)
     let fast = Relative_path.Map.filter fast
         ~f:(fun s _ -> FindUtils.path_filter s) in
-
     Relative_path.Map.iter fast
       ~f: (fun fn names ->
-          SearchServiceRunner.update (fn, (SearchUtils.Fast names));
+          SearchServiceRunner.internal_ssr_update fn (SearchUtils.Fast names) SearchUtils.SavedState;
         );
     HackEventLogger.update_search_end t;
     Hh_logger.log_duration "Loading search indices" t
@@ -386,7 +385,8 @@ let full_init
   let trace = false in
   let env, t = parsing ~lazy_parse genv env ~get_next t ~trace in
   if not (ServerArgs.check_mode genv.options) then
-    SearchServiceRunner.update_fileinfo_map env.naming_table;
+    SearchServiceRunner.update_fileinfo_map env.naming_table
+      SearchUtils.SavedState;
   let t = update_files genv env.naming_table t in
   let env, t = naming env t in
   let fast = Naming_table.to_fast env.naming_table in
@@ -462,7 +462,8 @@ let post_saved_state_initialization
   let next = MultiWorker.next genv.workers parsing_files_list in
   let env, t = parsing genv env ~lazy_parse:true ~get_next:next
       ~count:(List.length parsing_files_list) t ~trace in
-  SearchServiceRunner.update_fileinfo_map env.naming_table;
+  SearchServiceRunner.update_fileinfo_map env.naming_table
+    SearchUtils.TypeChecker;
 
   let t = update_files genv env.naming_table t in
 

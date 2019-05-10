@@ -29,7 +29,7 @@ module SearchServiceRunner = struct
         iter (x::acc) (n-1) in
     let fast = iter [] num_files in
 
-    SymbolIndex.update genv.workers fast;
+    SymbolIndex.update_files genv.workers fast;
 
     if (List.length fast > 0) then begin
       let str =
@@ -56,9 +56,11 @@ module SearchServiceRunner = struct
     end
     else ()
 
-  let update x = Queue.enqueue queue x
-
-  let update_full fn ast = Queue.enqueue queue (fn, SearchUtils.Full ast)
+  let internal_ssr_update
+      (fn: Relative_path.t)
+      (info: SearchUtils.info)
+      ~(source: SearchUtils.file_source) =
+    Queue.enqueue queue (fn, info, source)
 
   (* Return true if it's best to run all queue items in one go,
    * false if we should run small chunks every few seconds *)
@@ -77,10 +79,14 @@ module SearchServiceRunner = struct
       end
     end
 
-  let update_fileinfo_map fast =
+  let update_fileinfo_map
+    (fast: Naming_table.t)
+    ~(source: SearchUtils.file_source): unit =
+    let i = ref 0 in
     Naming_table.iter fast
     ~f: begin fun fn info ->
-      update_full fn info
+      internal_ssr_update fn (SearchUtils.Full info) source;
+      i := !i + 1
     end
 
 end

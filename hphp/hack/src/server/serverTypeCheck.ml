@@ -251,7 +251,8 @@ let parsing genv env to_check ~stop_at_errors =
   let (fast, errors, failed_parsing) as res =
     Parsing_service.go genv.workers ide_files ~get_next env.popt ~trace:true in
 
-  SearchServiceRunner.update_fileinfo_map (Naming_table.create fast);
+  SearchServiceRunner.update_fileinfo_map (Naming_table.create fast)
+    SearchUtils.TypeChecker;
   (* During integration tests, we want to pretend that search is run
     synchronously *)
   if SearchServiceRunner.should_run_completely genv

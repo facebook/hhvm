@@ -206,9 +206,9 @@ let query_for_autocomplete
  * or when the saved-state is fully loaded.  Any system that needs to cache
  * this information should capture it here.
  *)
-let update
+let update_files
     (worker_list_opt: MultiWorker.worker list option)
-    (files: (Relative_path.t * info) list): unit =
+    (paths: (Relative_path.t * info * file_source) list): unit =
   match get_search_provider () with
   | AllLocalIndex
   | GleanApiIndex
@@ -218,7 +218,7 @@ let update
   | SqliteIndex ->
     ()
   | TrieIndex ->
-    HackSearchService.update_from_typechecker worker_list_opt files
+    HackSearchService.update_from_typechecker worker_list_opt paths
 ;;
 
 (*

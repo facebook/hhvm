@@ -1,12 +1,8 @@
 <?hh // partial
 
-class C {
-  public ?int $foo;
-}
-
 function returnsTheStringFoo(): string { return 'foo'; }
 
-function test(C $c): void {
+function test(dynamic $c): void {
   $foo = 'foo';
   $c->foo;
   $c->$foo;

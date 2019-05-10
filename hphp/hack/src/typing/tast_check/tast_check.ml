@@ -33,7 +33,6 @@ let visitor = Tast_visitor.iter_with [
   Invalid_arraykey_check.index_handler;
   Basic_reactivity_check.handler;
   Pseudofunctions_check.handler;
-  Dynamic_method_call_check.handler;
   Reified_check.handler;
   Instantiability_check.handler;
   Static_memoized_check.handler;
@@ -42,6 +41,7 @@ let visitor = Tast_visitor.iter_with [
   Class_parent_check.handler;
   Method_type_param_check.handler;
   Foreach_collection_reactivity_check.handler;
+  Obj_get_check.handler;
 ]
 
 let program = visitor#go

@@ -58,7 +58,7 @@ module Naming                               = struct
   | DisallowedXhpType
   | DoubleInsteadOfFloatDEPRECATED
   | DynamicClassDEPRECATED
-  | DynamicMethodCall
+  | LvarInObjGet
   | ErrorNameAlreadyBound
   | ExpectedCollection
   | ExpectedVariable

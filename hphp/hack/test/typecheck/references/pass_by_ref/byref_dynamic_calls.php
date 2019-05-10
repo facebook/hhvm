@@ -20,19 +20,43 @@ function main(): void {
   // instance method calls
   $foo = new Foo();
   $foo->method(&$x);
-  $str = 'method';
-  $foo->$str(&$x);
   $foo = null;
   $foo?->method(&$x);
-  $foo?->$str(&$x);
 
   // static method calls
   Foo::staticMethod(&$x);
+}
+
+function dynamic1(): void {
+  $x = 1;
+  $dyn = new Foo();
+  $dyn as dynamic;
+  $str = 'method';
+  $dyn->$str(&$x);
+}
+
+function dynamic2(): void {
+  $x = 1;
+  $dyn = new Foo();
+  $dyn as dynamic;
+  $str = 'method';
+  $dyn?->$str(&$x);
+}
+
+function static_dynamic1(): void {
+  $x = 1;
   $str = 'Foo';
   $str::staticMethod(&$x);
-  $str = 'staticMethod';
-  Foo::$str(&$x);
+}
 
+function func_dynamic(): void {
+  $x = 1;
   $arr = vec[fun('func')];
   $arr[0](&$x);
+}
+
+function static_dynamic2(): void {
+  $x = 1;
+  $str = 'staticMethod';
+  Foo::$str(&$x);
 }

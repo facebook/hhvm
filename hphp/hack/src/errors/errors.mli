@@ -115,7 +115,6 @@ val naming_too_many_arguments : Pos.t -> unit
 val expected_collection : Pos.t -> string -> unit
 val illegal_CLASS : Pos.t -> unit
 val illegal_TRAIT : Pos.t -> unit
-val dynamic_method_call : Pos.t -> unit
 val nullsafe_property_write_context : Pos.t -> unit
 val illegal_fun : Pos.t -> unit
 val illegal_member_variable_class : Pos.t -> unit
@@ -469,6 +468,7 @@ val mutable_async_method : Pos.t -> unit
 val mutable_attribute_on_function : Pos.t -> unit
 val mutable_methods_must_be_reactive : Pos.t -> string -> unit
 val mutable_return_annotated_decls_must_be_reactive : string -> Pos.t -> string -> unit
+val lvar_in_obj_get : Pos.t -> unit
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit
 val invalid_freeze_use : Pos.t -> unit
 val freeze_in_nonreactive_context : Pos.t -> unit

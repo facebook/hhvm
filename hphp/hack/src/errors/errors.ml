@@ -1049,9 +1049,9 @@ let illegal_TRAIT pos =
   add (Naming.err_code Naming.IllegalTrait) pos
     "Using __TRAIT__ outside a trait"
 
-let dynamic_method_call pos =
-  add (Naming.err_code Naming.DynamicMethodCall) pos
-    "Method name must be an identifier, not an expression"
+let lvar_in_obj_get pos =
+  add (Naming.err_code Naming.LvarInObjGet) pos
+    "Dynamic method or attribute access is not allowed on a non-dynamic value."
 
 let nullsafe_property_write_context pos =
   add (Typing.err_code Typing.NullsafePropertyWriteContext) pos

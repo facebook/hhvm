@@ -58,7 +58,6 @@ async function test(
     $x = new K();
     Thrower::might_throw_s();
     $x = new L();
-    $t->$s;
     $x = new M();
     (string) $i;
     $x = new N();

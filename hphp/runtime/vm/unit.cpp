@@ -711,11 +711,23 @@ Func* Unit::loadFunc(const NamedEntity* ne, const StringData* name) {
 Func* Unit::loadFunc(const StringData* name) {
   String normStr;
   auto ne = NamedEntity::get(name, true, &normStr);
+
+  // Try to fetch from cache
+  Func* func_ = ne->getCachedFunc();
+  if (LIKELY(func_ != nullptr)) return func_;
+
+  // Normalize the namespace
   if (normStr) {
     name = normStr.get();
   }
-  auto func_ = loadFunc(ne, name);
-  if (LIKELY(func_ != nullptr) || !isReifiedName(name)) return func_;
+
+  // Autoload the function if not reified
+  if (LIKELY(!isReifiedName(name))) {
+    return AutoloadHandler::s_instance->autoloadFunc(
+        const_cast<StringData*>(name))
+      ? ne->getCachedFunc() : nullptr;
+  }
+
   // We are loading a reified function for the first time
   name = stripTypeFromReifiedName(name);
   auto generic_ne = NamedEntity::get(name, true, &normStr);

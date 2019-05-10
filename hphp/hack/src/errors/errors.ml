@@ -1819,7 +1819,8 @@ let violated_constraint p_cstr (p_tparam, tparam) left right =
 
 let method_variance pos =
   add (Typing.err_code Typing.MethodVariance) pos
-    "Covariance or contravariance is not allowed in method or function."
+    ("Covariance or contravariance is not allowed in type parameter of \
+      method or function.")
 
 let explain_constraint ~use_pos ~definition_pos ~param_name (error : error) =
   let inst_msg = "Some type constraint(s) here are violated" in

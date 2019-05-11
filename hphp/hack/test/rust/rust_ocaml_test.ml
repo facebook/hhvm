@@ -65,8 +65,8 @@ module SyntaxTree_ = Full_fidelity_syntax_tree.WithSyntax(Syntax)
 module SyntaxTree = SyntaxTree_.WithSmartConstructors(SC)
 
 let syntax_tree_into_parts tree =
-  let mode, root, errors = SyntaxTree.(mode tree, root tree, errors tree) in
-  mode, root, errors
+  let mode, root, errors, state = SyntaxTree.(mode tree, root tree, errors tree, sc_state tree) in
+  mode, root, errors, state
 
 let to_json x=
   Syntax.to_json ~with_value:true x |>
@@ -106,9 +106,9 @@ let test args ~ocaml_env ~rust_env path =
 
   match from_rust, from_ocaml with
   | Some from_rust, Some from_ocaml -> begin
-      let (mode_from_rust, syntax_from_rust, errors_from_rust)
+      let (mode_from_rust, syntax_from_rust, errors_from_rust, state_from_rust)
         = syntax_tree_into_parts from_rust in
-      let (mode_from_ocaml, syntax_from_ocaml, errors_from_ocaml)
+      let (mode_from_ocaml, syntax_from_ocaml, errors_from_ocaml, state_from_ocaml)
         = syntax_tree_into_parts from_ocaml in
       let rust_reachable_words = reachable syntax_from_rust  in
       let ocaml_reachable_words = reachable syntax_from_ocaml in
@@ -125,6 +125,9 @@ let test args ~ocaml_env ~rust_env path =
 
         Printf.printf "Not equal: %s\n" path;
         flush(stdout);
+        if not args.keep_going then exit 1
+      end else if state_from_rust <> state_from_ocaml then begin
+        Printf.printf "States not equal: %s\n" path;
         if not args.keep_going then exit 1
       end else if args.check_sizes && rust_reachable_words <> ocaml_reachable_words  then begin
         Printf.printf "Sizes not equal: %s (%d vs %d)\n"

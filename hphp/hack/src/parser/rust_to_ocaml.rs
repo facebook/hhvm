@@ -22,6 +22,8 @@ use parser::minimal_trivia::MinimalTrivia;
 use parser::positioned_syntax::PositionedValue;
 use parser::positioned_token::PositionedToken;
 use parser::positioned_trivia::PositionedTrivia;
+use parser::smart_constructors::NoState;
+use parser::source_text::SourceText;
 use parser::syntax::*;
 use parser::syntax_error::SyntaxError;
 use parser::syntax_kind::SyntaxKind;
@@ -94,6 +96,12 @@ fn usize_to_ocaml(x: usize) -> Value {
 
 fn u8_to_ocaml(x: u8) -> Value {
     usize_to_ocaml(x as usize)
+}
+
+impl ToOcaml for bool {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        usize_to_ocaml(*self as usize)
+    }
 }
 
 impl ToOcaml for TokenKind {
@@ -334,5 +342,23 @@ impl ToOcaml for SyntaxError {
         str_.data_mut().copy_from_slice(m);
 
         caml_tuple(&[child, start_offset, end_offset, error_type, message])
+    }
+}
+
+impl ToOcaml for NoState {
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        ocaml::core::mlvalues::UNIT
+    }
+}
+
+/// Blanket implementation for states of Smart Constructors that need to access SourceText;
+/// such SC by convention wrap their state into a pair (State, &SourceText).
+impl<'a, T> ToOcaml for (T, &'a SourceText<'a>)
+where
+    T: ToOcaml,
+{
+    unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
+        // don't serialize .1 (source text) as it is not part the real state we care about
+        self.0.to_ocaml(_context)
     }
 }

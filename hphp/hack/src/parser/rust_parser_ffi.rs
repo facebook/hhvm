@@ -96,7 +96,7 @@ macro_rules! parse {
             let context = SerializationContext::new(ocaml_source_text.0);
             let ocaml_root = root.to_ocaml(&context);
             let ocaml_errors = to_list(&errors, &context);
-            let ocaml_state = ocaml::core::mlvalues::UNIT;
+            let ocaml_state = parser.sc_state().to_ocaml(&context);
 
             let res = caml_tuple(&[
                 ocaml_state,

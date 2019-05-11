@@ -214,8 +214,7 @@ uint32_t id_from_slot(ISS& env, int slot) {
   return id;
 }
 
-const Bytecode* op_from_slot(ISS& env, int slot) {
-  auto const id = (env.state.stack.end() - (slot + 1))->id;
+const Bytecode* op_from_id(ISS& env, uint32_t id) {
   if (id == StackElem::NoId) return nullptr;
   if (id < env.unchangedBcs) return &env.blk.hhbcs[id];
   auto const off = id - env.unchangedBcs;
@@ -343,6 +342,14 @@ void replace_last_op(ISS& env, Bytecode&& bc) {
 }
 
 //////////////////////////////////////////////////////////////////////
+
+const Bytecode* op_from_slot(ISS& env, int slot, int prev /* = 0 */) {
+  if (!will_reduce(env)) return nullptr;
+  auto const id = id_from_slot(env, slot);
+  if (id == StackElem::NoId) return nullptr;
+  if (id < prev) return nullptr;
+  return op_from_id(env, id - prev);
+}
 
 const Bytecode* last_op(ISS& env, int idx /* = 0 */) {
   if (!will_reduce(env)) return nullptr;

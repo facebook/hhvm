@@ -318,20 +318,16 @@ bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
     push(env, TBottom);
     return true;
   };
-  if (op.arg1 != 2) return false;
-  auto const cns_name = tv(topT(env));
-  auto const cls_or_obj = tv(topT(env, 1));
-  if (!cns_name || !cls_or_obj || !tvIsString(&*cns_name)) return false;
-  auto const cns_sd = cns_name->m_data.pstr;
-  if (tvIsString(&*cls_or_obj)) {
-    auto const rcls = env.index.resolve_class(env.ctx, cls_or_obj->m_data.pstr);
-    if (!rcls || !rcls->resolved()) return false;
+  auto const result = [&](res::Class rcls, const StringData* cns,
+                          bool check_lsb) {
     auto const cnst =
-      env.index.lookup_class_const_ptr(env.ctx, *rcls, cns_sd, true);
+      env.index.lookup_class_const_ptr(env.ctx, rcls, cns, true);
     if (!cnst || !cnst->val || !cnst->isTypeconst) {
+      if (check_lsb && (!cnst || !cnst->val)) return false;
       // Either the const does not exist, it is abstract or is not a type const
       return fail();
     }
+    if (check_lsb && !cnst->isNoOverride) return false;
     auto const typeCns = cnst->val;
     if (!tvIsDictOrDArray(&*typeCns)) return false;
     auto const ts = resolveTSStatically(env, typeCns->m_data.parr, true);
@@ -340,6 +336,30 @@ bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
     RuntimeOption::EvalHackArrDVArrs
       ? reduce(env, bc::Dict { *ts }) : reduce(env, bc::Array { *ts });
     return true;
+  };
+  if (op.arg1 != 2) return false;
+  auto const cns_name = tv(topT(env));
+  auto const cls_or_obj = tv(topT(env, 1));
+  if (!cns_name || !tvIsString(&*cns_name)) return false;
+  auto const cns_sd = cns_name->m_data.pstr;
+  if (!cls_or_obj) {
+    if (auto const last = op_from_slot(env, 1)) {
+      if (last->op == Op::ClsRefName) {
+        if (auto const prev = op_from_slot(env, 1, 1)) {
+          if (prev->op == Op::LateBoundCls &&
+              last->ClsRefName.slot == prev->LateBoundCls.slot) {
+            if (!env.ctx.cls) fail();
+            return result(env.index.resolve_class(env.ctx.cls), cns_sd, true);
+          }
+        }
+      }
+    }
+    return false;
+  }
+  if (tvIsString(&*cls_or_obj)) {
+    auto const rcls = env.index.resolve_class(env.ctx, cls_or_obj->m_data.pstr);
+    if (!rcls || !rcls->resolved()) return false;
+    return result(*rcls, cns_sd, false);
   } else if (!tvIsObject(&*cls_or_obj) && !tvIsClass(&*cls_or_obj)) {
     return fail();
   }

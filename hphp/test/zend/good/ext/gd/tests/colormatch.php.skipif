@@ -1,2 +1,4 @@
 <?php
-        if (!function_exists('imagecolormatch')) die("skip gd extension not available\n");
+<<__EntryPoint>> function main() {
+if (!function_exists('imagecolormatch')) die("skip gd extension not available\n");
+}

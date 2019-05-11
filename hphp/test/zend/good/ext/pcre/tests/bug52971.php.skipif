@@ -1,1 +1,4 @@
-<?php if ((double)PCRE_VERSION < 8.1) die('skip PCRE_VERSION >= 8.1 is required!');
+<?php
+<<__EntryPoint>> function main() {
+if ((double)PCRE_VERSION < 8.1) die('skip PCRE_VERSION >= 8.1 is required!');
+}

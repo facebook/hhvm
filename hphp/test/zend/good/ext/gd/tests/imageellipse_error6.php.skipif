@@ -1,2 +1,4 @@
 <?php
+<<__EntryPoint>> function main() {
 if (!extension_loaded("gd")) die("skip GD not present");
+}

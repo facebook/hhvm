@@ -19,9 +19,11 @@
 
 #include "hphp/runtime/vm/hhbc.h"
 
+#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/srcdb.h"
 #include "hphp/runtime/vm/jit/stack-offsets.h"
 
 #include <string>
@@ -35,8 +37,6 @@ struct SrcKey;
 namespace Debug { struct DebugInfo; }
 
 namespace jit {
-
-struct CodeCache;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -433,8 +433,12 @@ struct UniqueStubs {
    * Utility for logging stub addresses during startup and registering the gdb
    * symbols.  It's often useful to know where they were when debugging.
    */
-  TCA add(const char* name, TCA start, const CodeCache& code,
-          Debug::DebugInfo& dbg);
+  void add(const char* name,
+           const CodeCache& code,
+           TCA start,
+           CodeCache::View view,
+           TransLoc loc,
+           Debug::DebugInfo& dbg);
 
   /*
    * If the given address is within one of the registered stubs, return a

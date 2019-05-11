@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/tc-internal.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -408,18 +409,34 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   auto view = code.view();
   auto& main = view.main();
   auto& cold = view.cold();
-  auto& hotBlock = code.view(TransKind::Optimize).main();
+  auto optView = code.view(TransKind::Optimize);
+  auto& hotBlock = optView.main();
   auto& data = view.data();
 
   auto const hot = [&]() -> CodeBlock& {
     return hotBlock.available() > 512 ? hotBlock : main;
   };
+  auto const hotView = [&]() -> CodeCache::View& {
+    return hotBlock.available() > 512 ? optView : view;
+  };
 
-#define ADD(name, stub) name = add(#name, (stub), code, dbg)
+#define EMIT(name, v_in, stub)                                     \
+  [&] {                                                            \
+    auto const& v = (v_in);                                        \
+    tc::TransLocMaker maker{v};                                    \
+    maker.markStart();                                             \
+    auto const start = (stub)();                                   \
+    add(name, code, start, v, maker.markEnd().loc(), dbg);         \
+    return start;                                                  \
+  }()
+
+#define ADD(name, v, stub) name = EMIT(#name, v, [&] { return (stub); })
   TCA inner_stub;
-  ADD(asyncSwitchCtrl,  emitAsyncSwitchCtrl(hot(), data, &inner_stub));
-  ADD(asyncFuncRet,     emitAsyncFuncRet(hot(), data, inner_stub));
-  ADD(asyncFuncRetSlow, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
+  ADD(asyncSwitchCtrl,
+      hotView(),
+      emitAsyncSwitchCtrl(hot(), data, &inner_stub));
+  ADD(asyncFuncRet,     hotView(), emitAsyncFuncRet(hot(), data, inner_stub));
+  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow(cold, data, asyncFuncRet));
 #undef ADD
 }
 

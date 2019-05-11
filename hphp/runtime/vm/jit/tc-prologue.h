@@ -62,6 +62,8 @@ TCA emitFuncBodyDispatchInternal(Func* func, const DVFuncletsVec& dvs,
                                  TransKind kind, CodeCache::View view);
 
 void publishFuncBodyDispatch(Func* func, TCA start, TCA end);
+void publishFuncBodyDispatch(Func* func, TCA start,
+                             CodeCache::View view, TransLoc loc);
 
 }
 

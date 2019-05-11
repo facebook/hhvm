@@ -995,6 +995,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   auto& constMap = pce.constMap();
   for (size_t idx = 0; idx < constMap.size(); ++idx) {
     auto& cconst = constMap[idx];
+    // Set all constants as NoOverride, we'll clear this while building
+    // the index
     ret->constants.push_back(
       php::Const {
         cconst.name(),
@@ -1002,7 +1004,8 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
         cconst.valOption(),
         cconst.phpCode(),
         cconst.typeConstraint(),
-        cconst.isTypeconst()
+        cconst.isTypeconst(),
+        true // NoOverride
       }
     );
   }

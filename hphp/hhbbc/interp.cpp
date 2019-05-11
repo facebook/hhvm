@@ -1031,10 +1031,14 @@ void in(ISS& env, const bc::ClsCns& op) {
   auto const& t1 = peekClsRefSlot(env, op.slot);
   if (is_specialized_cls(t1)) {
     auto const dcls = dcls_of(t1);
-    if (dcls.type == DCls::Exact) {
-      return reduce(env, bc::DiscardClsRef { op.slot },
-                         bc::ClsCnsD { op.str1, dcls.cls.name() });
-    }
+    auto const finish = [&] {
+      reduce(env, bc::DiscardClsRef { op.slot },
+                  bc::ClsCnsD { op.str1, dcls.cls.name() });
+    };
+    if (dcls.type == DCls::Exact) return finish();
+    auto const cnst = env.index.lookup_class_const_ptr(env.ctx, dcls.cls,
+                                                       op.str1, false);
+    if (cnst && cnst->isNoOverride) return finish();
   }
   takeClsRefSlot(env, op.slot);
   push(env, TInitCell);

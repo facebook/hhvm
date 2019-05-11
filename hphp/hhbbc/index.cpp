@@ -1339,6 +1339,11 @@ struct BuildClsInfo {
 bool build_class_constants(BuildClsInfo& info,
                            const ClassInfo* rparent,
                            bool fromTrait) {
+  auto const removeNoOverride = [&] (const php::Const* c) {
+    // During hhbbc/parse, all constants are pre-set to NoOverride
+    FTRACE(2, "Removing NoOverride on {}::{}\n", c->cls->name, c->name);
+    const_cast<php::Const*>(c)->isNoOverride = false;
+  };
   for (auto& c : rparent->cls->constants) {
     auto& cptr = info.rleaf->clsConstants[c.name];
     if (!cptr) {
@@ -1364,7 +1369,10 @@ bool build_class_constants(BuildClsInfo& info,
 
     if (cptr->val) {
       // Constants from interfaces implemented by traits silently lose
-      if (fromTrait) continue;
+      if (fromTrait) {
+        removeNoOverride(&c);
+        continue;
+      }
 
       // A constant from an interface collides with an existing constant.
       if (rparent->cls->attrs & AttrInterface) {
@@ -1377,6 +1385,7 @@ bool build_class_constants(BuildClsInfo& info,
       }
     }
 
+    removeNoOverride(cptr);
     cptr = &c;
   }
   return true;

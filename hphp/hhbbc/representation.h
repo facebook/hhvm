@@ -451,7 +451,8 @@ struct Const {
   LSString phpCode;
   LSString typeConstraint;
 
-  bool isTypeconst;
+  bool isTypeconst  : 1;
+  bool isNoOverride : 1;
 };
 
 /*

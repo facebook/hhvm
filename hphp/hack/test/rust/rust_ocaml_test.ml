@@ -51,6 +51,7 @@ type args = {
    codegen : bool;
    check_sizes : bool;
    keep_going : bool;
+   filter : string;
    dir : string option;
 }
 
@@ -85,27 +86,35 @@ let mode_to_string = function
 
 let total = ref 0
 let correct = ref 0
+let crashed = ref 0 (* not all parse modes are supposed to work with all test files *)
 
 let test args ~ocaml_env ~rust_env path =
-  if args.mode == COMPARE then Printf.printf "%d/%d\n" !correct !total;
-  Printf.printf "%s\n" path;
-  flush(stdout);
-  incr total;
-
   let file = Relative_path.(create Dummy (path)) in
   let source_text = SourceText.from_file file in
 
-  let from_rust = match args.mode with
-    | RUST | COMPARE -> Some (SyntaxTree.make ~env:rust_env source_text)
-    | OCAML -> None
+  let ok_ocaml, from_ocaml = match args.mode with
+    | OCAML | COMPARE ->
+      Printf.printf "CAML: %s\n" path;
+      (try true, Some (SyntaxTree.make ~env:ocaml_env source_text) with
+      | _ -> (false, None)
+      )
+    | RUST -> true, None
   in
-  let from_ocaml = match args.mode with
-    | OCAML | COMPARE -> Some (SyntaxTree.make ~env:ocaml_env source_text)
-    | RUST -> None
+  let ok_rust, from_rust = match args.mode with
+    | RUST | COMPARE ->
+      Printf.printf "RUST: %s\n" path;
+      flush(stdout); (* make sure OCaml output is shown before Rust output *)
+      (try true, Some (SyntaxTree.make ~env:rust_env source_text) with
+      | _ -> (false, None)
+      )
+    | OCAML -> true, None
   in
+  flush(stdout); (* ensure that Rust output precedes the rest of OCaml output *)
 
-  match from_rust, from_ocaml with
-  | Some from_rust, Some from_ocaml -> begin
+  let failed = ref false in
+  begin match from_rust, from_ocaml with
+  | Some from_rust, Some from_ocaml ->
+    begin
       let (mode_from_rust, syntax_from_rust, errors_from_rust, state_from_rust)
         = syntax_tree_into_parts from_rust in
       let (mode_from_ocaml, syntax_from_ocaml, errors_from_ocaml, state_from_ocaml)
@@ -113,6 +122,7 @@ let test args ~ocaml_env ~rust_env path =
       let rust_reachable_words = reachable syntax_from_rust  in
       let ocaml_reachable_words = reachable syntax_from_ocaml in
       if syntax_from_rust <> syntax_from_ocaml then begin
+        failed := true;
         let syntax_from_rust_as_json = to_json syntax_from_rust in
         let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
 
@@ -123,34 +133,56 @@ let test args ~ocaml_env ~rust_env path =
         Printf.fprintf oc "%s\n" syntax_from_ocaml_as_json;
         close_out oc;
 
-        Printf.printf "Not equal: %s\n" path;
-        flush(stdout);
-        if not args.keep_going then exit 1
-      end else if state_from_rust <> state_from_ocaml then begin
+        if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then
+          Printf.printf "JSONs not equal: %s\n" path
+        else
+          Printf.printf "Structurally not equal: %s\n" path;
+      end;
+      if state_from_rust <> state_from_ocaml then begin
+        failed := true;
         Printf.printf "States not equal: %s\n" path;
-        if not args.keep_going then exit 1
-      end else if args.check_sizes && rust_reachable_words <> ocaml_reachable_words  then begin
+      end;
+      if args.check_sizes && rust_reachable_words <> ocaml_reachable_words then begin
+        failed := true;
         Printf.printf "Sizes not equal: %s (%d vs %d)\n"
           path rust_reachable_words ocaml_reachable_words;
-        if not args.keep_going then exit 1
-      end else if mode_from_rust <> mode_from_ocaml then begin
+      end;
+      if mode_from_rust <> mode_from_ocaml then begin
+        failed := true;
         Printf.printf "Modes not equal: %s (%s vs %s)\n" path
           (mode_to_string mode_from_ocaml) (mode_to_string mode_from_rust);
-        if not args.keep_going then exit 1
-      end else if errors_from_rust <> errors_from_ocaml then begin
-        Printf.printf "Errors not equal: %s\n" path;
+      end;
+      (* Unlike other cases, errors make little sense when parse trees don't match *)
+      if not !failed && errors_from_rust <> errors_from_ocaml then begin
+        failed := true;
+        Printf.printf "Errors not equal: %s (counts: %d vs %d)\n"
+          path (List.length errors_from_rust) (List.length errors_from_ocaml);
         Printf.printf "---OCaml errors---\n";
-
         List.iter ~f:(print_full_fidelity_error source_text) errors_from_ocaml;
         Printf.printf "---Rust erors---\n";
         List.iter ~f:(print_full_fidelity_error source_text) errors_from_rust;
-
-        if not args.keep_going then exit 1
-      end else begin
-        incr correct
       end
     end
+  | _ when ok_rust <> ok_ocaml ->
+      (* some parsers other than positioned fail on some inputs; report failure if comparing *)
+      failed := (args.parser = POSITIONED || args.mode = COMPARE);
+      Printf.printf "Either crashed: %s (%b vs %b)\n" path (not ok_ocaml) (not ok_rust);
   | _ -> ()
+  end;
+  flush(stdout);
+
+  incr total;
+  if not ok_ocaml || not ok_rust then incr crashed
+  else if not !failed then incr correct
+  else Printf.printf "FAILED %s\n" path;
+
+  let is_compare = args.mode = COMPARE in
+  if is_compare || !crashed <> 0 then
+    Printf.printf "%s/%d (crashed=%d)\n"
+      (if is_compare then string_of_int !correct else "?")
+      !total
+      !crashed;
+  if !failed && not args.keep_going then exit 1
 
 let test_batch args ~ocaml_env ~rust_env files =
   List.iter files ~f:(test args ~ocaml_env ~rust_env)
@@ -163,13 +195,20 @@ end (* WithSyntax *)
 
 let get_files_in_path ~args path =
   let files = Find.find [Path.make path] in
+  let filter_re = Str.regexp args.filter in
+  let matches_filter f =
+    args.filter = "" || (
+      try Str.search_forward filter_re f 0 >= 0
+      with Not_found -> false
+    )
+  in
   List.filter ~f:begin fun f ->
     (
       String_utils.string_ends_with f ".php" ||
       String_utils.string_ends_with f ".hhi" ||
       String_utils.string_ends_with f ".hack"
     ) &&
-    (not @@ String.is_substring ~substring:"namespace_infinite_loop1" f) &&
+    matches_filter f &&
     (not @@ String_utils.string_ends_with f "memory_exhaust.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_concat_exp.php") &&
     (not @@ String_utils.string_ends_with f "parser_massive_add_exp.php") &&
@@ -185,8 +224,9 @@ let get_files_in_path ~args path =
     (not @@ String_utils.string_ends_with f "bug64660.php") &&
     match args.parser with
     | COROUTINE ->
-      (* FIXME: this one has offset +2 in Rust for "methodish_semicolon.value" *)
+      (* FIXME: this one has offset +2 & +4 in Rust for "methodish_semicolon.value" *)
       (not @@ String_utils.string_ends_with f "keyword_autocomplete/function_parameter.php") &&
+      (not @@ String_utils.string_ends_with f "namespace_infinite_loop1.php") &&
       true
     | _ -> true
   end files
@@ -210,6 +250,7 @@ let parse_args () =
   let php5_compat_mode = ref false in
   let check_sizes = ref false in
   let keep_going = ref false in
+  let filter = ref "" in
   let dir = ref None in
 
   let options =  [
@@ -228,6 +269,7 @@ let parse_args () =
     "--php5-compat-mode", Arg.Set php5_compat_mode, "";
     "--check-sizes", Arg.Set check_sizes, "";
     "--keep-going", Arg.Set keep_going, "";
+    "--filter", Arg.String (fun s -> filter := s), "";
     "--dir", Arg.String (fun s -> dir := Some (s)), "";
     "--hhvm-tests", Arg.Unit (fun () -> dir := Some (fbcode ^ "hphp/test/")), "";
   ] in
@@ -246,6 +288,7 @@ let parse_args () =
     php5_compat_mode = !php5_compat_mode;
     check_sizes = !check_sizes;
     keep_going = !keep_going;
+    filter = !filter;
     dir = !dir;
   }
 

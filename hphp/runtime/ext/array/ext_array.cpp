@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/array/ext_array.h"
 
 #include "hphp/runtime/base/actrec-args.h"
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
@@ -3028,20 +3027,6 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
   not_reached();
 }
 
-String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
-  if (!isArrayLikeType(in.getType())) return "";
-  if (!RuntimeOption::EvalLogArrayProvenance) return "";
-
-  auto const& arr = in.asCArrRef();
-  if (auto const ann = arrprov::getTag(arr.get())) {
-    return folly::sformat("{}:{}",
-                          ann->filename()->slice(),
-                          ann->line());
-  } else {
-    return "<none>";
-  }
-}
-
 Array HHVM_FUNCTION(merge_xhp_attr_declarations,
                     const Array& arr1,
                     const Array& arr2,
@@ -3204,7 +3189,6 @@ struct ArrayExtension final : Extension {
     HHVM_FALIAS(HH\\varray, HH_varray);
     HHVM_FALIAS(HH\\darray, HH_darray);
     HHVM_FALIAS(HH\\array_key_cast, HH_array_key_cast);
-    HHVM_FALIAS(HH\\get_provenance, HH_get_provenance);
     HHVM_FALIAS(__SystemLib\\merge_xhp_attr_declarations,
                 merge_xhp_attr_declarations);
 

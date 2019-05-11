@@ -20,7 +20,6 @@
 #include <algorithm>
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/fb/FBSerialize/FBSerialize.h"
 
@@ -241,17 +240,6 @@ struct VariantControllerImpl {
   static size_t stringLen(const StringType& str) { return str.size(); }
   static const char* stringData(const StringType& str) {
     return str.data();
-  }
-
-  /* called by FBSerializer before serializing each item,
-     useful to instrument the serialization process if needed */
-  ALWAYS_INLINE
-  static void traceSerialization(const_variant_ref thing) {
-    if (LIKELY(!RuntimeOption::EvalLogArrayProvenance)) return;
-
-    if (thing.isVecArray() || thing.isDict()) {
-      raise_array_serialization_notice("fb_serialize", thing.asCArrRef().get());
-    }
   }
 };
 

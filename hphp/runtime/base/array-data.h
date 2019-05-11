@@ -17,7 +17,6 @@
 #ifndef incl_HPHP_ARRAY_DATA_H_
 #define incl_HPHP_ARRAY_DATA_H_
 
-#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
@@ -119,12 +118,6 @@ struct ArrayData : MaybeCountable {
    * PHP-compatible) behaviors, including serialization
    */
   static auto constexpr kLegacyArray = 8;
-
-  /*
-   * Indicates that this array has provenance data available in a side table
-   * See array-provenance.h
-   */
-  static auto constexpr kHasProvenanceData = 16;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -309,16 +302,6 @@ public:
    * co-allocated APCTypedValue preceding this array.
    */
   bool hasApcTv() const;
-
-  /*
-   * Whether this ArrayData has provenance data stored in the
-   * side table--see array-provenance.h
-   */
-  bool hasProvenanceData() const;
-  /*
-   * Latches the provenance data bit to true
-   */
-  void markHasProvenanceData();
 
   /*
    * Whether the array has legacy behaviors enabled (this bit can only be set

@@ -1623,7 +1623,4 @@ namespace HH {
    */
   <<__Native, __IsFoldable, __Rx>>
   function array_key_cast(mixed $key): arraykey;
-
-  <<__Native>>
-  function get_provenance(mixed $key): string;
 }

@@ -309,18 +309,6 @@ inline bool ArrayData::IsValidKey(const StringData* k) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ALWAYS_INLINE
-bool ArrayData::hasProvenanceData() const {
-  return m_aux16 & kHasProvenanceData;
-}
-
-ALWAYS_INLINE
-void ArrayData::markHasProvenanceData() {
-  m_aux16 |= kHasProvenanceData;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 ALWAYS_INLINE void decRefArr(ArrayData* arr) {
   arr->decRefAndRelease();
 }

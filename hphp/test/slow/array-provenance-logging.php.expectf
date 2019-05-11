@@ -1,9 +1,0 @@
-
-Notice: Serializing vec in json_encode from %s/array-provenance-logging.php:6 in %s/array-provenance-logging.php on line 7
-string(9) "["hello"]"
-
-Notice: Serializing vec in serialize from %s/array-provenance-logging.php:6 in %s/array-provenance-logging.php on line 8
-string(18) "v:1:{s:5:"hello";}"
-
-Notice: Serializing vec in fb_serialize from %s/array-provenance-logging.php:6 in %s/array-provenance-logging.php on line 9
-string(11) "hello"

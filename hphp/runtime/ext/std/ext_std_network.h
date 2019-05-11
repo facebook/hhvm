@@ -26,7 +26,7 @@
 
 namespace HPHP {
 
-Variant HHVM_FUNCTION(gethostname);
+TypedValue HHVM_FUNCTION(gethostname);
 Variant HHVM_FUNCTION(gethostbyaddr, const String& ip_address);
 String HHVM_FUNCTION(gethostbyname, const String& hostname);
 Variant HHVM_FUNCTION(gethostbynamel, const String& hostname);

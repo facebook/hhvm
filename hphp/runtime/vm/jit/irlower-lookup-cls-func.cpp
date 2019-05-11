@@ -326,6 +326,7 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
 
   assertx(preLiveAR->isDynamicCall());
   callerDynamicCallChecks(func);
+  callerRxChecks(fp, func);
 
   preLiveAR->m_func = func;
   if (inst) {

@@ -4662,6 +4662,8 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
     }
 
+    callerRxChecks(vmfp(), func);
+
     vmStack().discard();
     ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
     if (func->isStaticInPrologue()) {
@@ -4742,6 +4744,7 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
     }
 
     callerDynamicCallChecks(func);
+    callerRxChecks(vmfp(), func);
 
     vmStack().discard();
     auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
@@ -4792,6 +4795,9 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       );
       if (func == nullptr) raise_call_to_undefined(func_name);
     }
+
+    callerRxChecks(vmfp(), func);
+
     vmStack().discard();
     auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
     ar->trashThis();
@@ -4826,6 +4832,9 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
       );
       if (func == nullptr) raise_call_to_undefined(func_name);
     }
+
+    callerRxChecks(vmfp(), func);
+
     vmStack().popC();
     auto const ar = fPushFuncImpl(func, numArgs, reifiedGenerics);
     if (thiz) {
@@ -4849,6 +4858,9 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
   if (func == nullptr) {
     raise_call_to_undefined(vmfp()->m_func->unit()->lookupLitstrId(id));
   }
+
+  callerRxChecks(vmfp(), func);
+
   ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
   ar->trashThis();
 }
@@ -4870,7 +4882,10 @@ void fPushObjMethodImpl(
   if (res == LookupResult::MethodFoundNoThis) {
     throw_has_this_need_static(f);
   }
+
   if (dynamic) callerDynamicCallChecks(f);
+  callerRxChecks(vmfp(), f);
+
   if (f->hasReifiedGenerics()) {
     if (!isReifiedName(name) && !tsList) {
       raise_error(Strings::REIFIED_GENERICS_NOT_GIVEN, f->fullName()->data());
@@ -5116,7 +5131,10 @@ void pushClsMethodImpl(Class* cls,
   auto obj = ctx && vmfp()->hasThis() ? vmfp()->getThis() : nullptr;
   const Func* f;
   auto const res = lookupClsMethod(f, cls, name, obj, ctx, true);
+
   if (dynamic) callerDynamicCallChecks(f);
+  callerRxChecks(vmfp(), f);
+
   if (res == LookupResult::MethodFoundNoThis) {
     if (!f->isStaticInPrologue()) {
       raise_missing_this(f);
@@ -5360,6 +5378,8 @@ OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
   assertx(res == LookupResult::MethodFoundWithThis);
 
+  callerRxChecks(vmfp(), func);
+
   // Write new activation record.
   assertx(kNumActRecCells == 3);
   auto ar = vmStack().indA(numArgs);
@@ -5448,9 +5468,6 @@ void iopFCall(PC origpc, PC& pc, FCallArgs fca,
   );
   assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
   if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
-  if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
-    callerRxChecks(vmfp(), func);
-  }
   checkStack(vmStack(), func, 0);
   if (fca.numRets != 1) ar->setFCallM();
   auto const asyncEagerReturn =
@@ -5470,9 +5487,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
 
-  if (rxEnforceCallsInLevel(vmfp()->rxMinLevel())) {
-    callerRxChecks(vmfp(), func);
-  }
+  callerRxChecks(vmfp(), func);
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;

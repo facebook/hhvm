@@ -99,13 +99,22 @@ inline void calleeDynamicCallChecks(const ActRec* ar) {
   }
 }
 
-inline void callerRxChecks(const ActRec* caller, const Func* callee) {
-  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
-  // Conditional reactivity is not tracked yet, so assume the callee has maximum
-  // possible level of reactivity.
-  auto const minReqCalleeLevel = rxRequiredCalleeLevel(caller->rxMinLevel());
-  if (LIKELY(callee->rxLevel() >= minReqCalleeLevel)) return;
+/*
+ * Check if a call from `caller` to `callee` satisfies reactivity constraints.
+ * Returns true if yes, otherwise raise a warning and return false or raise
+ * an exception.
+ */
+inline bool callerRxChecks(const ActRec* caller, const Func* callee) {
+  if (RuntimeOption::EvalRxEnforceCalls <= 0) return true;
+  // Conditional reactivity is not tracked yet, so assume the caller has minimum
+  // and the callee has maximum possible level of reactivity.
+  auto const callerLevel = caller->rxMinLevel();
+  if (!rxEnforceCallsInLevel(callerLevel)) return true;
+
+  auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
+  if (LIKELY(callee->rxLevel() >= minReqCalleeLevel)) return true;
   raiseRxCallViolation(caller, callee);
+  return false;
 }
 
 inline void checkForRequiredCallM(const ActRec* ar) {

@@ -102,10 +102,11 @@ void FuncCache::lookup(rds::Handle handle,
   if (!stringMatches(pairSd, sd)) {
     // Miss. Does it actually exist?
     auto const* func = Unit::lookupFunc(sd);
-    bool noEffects;
+    bool noEffects = true;
     try {
       if (LIKELY(func != nullptr)) {
-        noEffects = callerDynamicCallChecks(func);
+        noEffects &= callerDynamicCallChecks(func);
+        noEffects &= callerRxChecks(fp, func);
       } else {
         ObjectData *this_ = nullptr;
         Class* self_ = nullptr;
@@ -125,7 +126,8 @@ void FuncCache::lookup(rds::Handle handle,
           raise_call_to_undefined(sd);
         }
         assertx(dynamic);
-        noEffects = callerDynamicCallChecks(func);
+        noEffects &= callerDynamicCallChecks(func);
+        noEffects &= callerRxChecks(fp, func);
 
         if (this_) {
           ar->m_func = func;

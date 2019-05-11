@@ -252,8 +252,6 @@ bool beginInlining(IRGS& env,
   // parameter, so we need to add numParams to get to the ActRec
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + numParams;
 
-  emitCallerRxChecks(env, target, calleeAROff);
-
   auto ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {
       return nullptr;

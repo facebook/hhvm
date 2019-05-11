@@ -64,6 +64,42 @@ void emitCallerDynamicCallChecksUnknown(IRGS& env, SSATmp* callee) {
   );
 }
 
+} // namespace
+
+void emitCallerRxChecksKnown(IRGS& env, const Func* callee) {
+  assertx(callee);
+  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
+  auto const callerLevel = curRxLevel(env);
+  if (!rxEnforceCallsInLevel(callerLevel)) return;
+
+  auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
+  if (callee->rxLevel() >= minReqCalleeLevel) return;
+  gen(env, RaiseRxCallViolation, fp(env), cns(env, callee));
+}
+
+namespace {
+
+void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
+  assertx(!callee->hasConstVal());
+  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
+  auto const callerLevel = curRxLevel(env);
+  if (!rxEnforceCallsInLevel(callerLevel)) return;
+
+  ifThen(
+    env,
+    [&] (Block* taken) {
+      auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
+      auto const calleeLevel = gen(env, LdFuncRxLevel, callee);
+      auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
+      gen(env, JmpNZero, taken, lt);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      gen(env, RaiseRxCallViolation, fp(env), callee);
+    }
+  );
+}
+
 IRSPRelOffset fsetActRec(
   IRGS& env,
   SSATmp* func,
@@ -98,6 +134,7 @@ void prepareToCallKnown(IRGS& env, const Func* callee, SSATmp* objOrClass,
 
   // Caller checks
   if (dynamicCall) emitCallerDynamicCallChecksKnown(env, callee);
+  emitCallerRxChecksKnown(env, callee);
 
   auto const func = cns(env, callee);
   fsetActRec(env, func, objOrClass, numArgs, invName, dynamicCall, tsList);
@@ -114,6 +151,7 @@ void prepareToCallUnknown(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
 
   // Caller checks
   if (dynamicCall) emitCallerDynamicCallChecksUnknown(env, callee);
+  emitCallerRxChecksUnknown(env, callee);
 
   fsetActRec(env, callee, objOrClass, numArgs, invName, dynamicCall, tsList);
 }
@@ -1302,34 +1340,6 @@ bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
 
 }
 
-void emitCallerRxChecks(IRGS& env, const Func* callee,
-                        IRSPRelOffset actRecOff) {
-  if (RuntimeOption::EvalRxEnforceCalls <= 0) return;
-  auto const callerLevel = curRxLevel(env);
-  if (!rxEnforceCallsInLevel(callerLevel)) return;
-
-  auto const minReqCalleeLevel = rxRequiredCalleeLevel(callerLevel);
-  if (callee) {
-    if (callee->rxLevel() >= minReqCalleeLevel) return;
-    gen(env, RaiseRxCallViolation, fp(env), cns(env, callee));
-    return;
-  }
-
-  auto const func = ldPreLiveFunc(env, actRecOff);
-  ifThen(
-    env,
-    [&] (Block* taken) {
-      auto const calleeLevel = gen(env, LdFuncRxLevel, func);
-      auto const lt = gen(env, LtInt, calleeLevel, cns(env, minReqCalleeLevel));
-      gen(env, JmpNZero, taken, lt);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      gen(env, RaiseRxCallViolation, fp(env), func);
-    }
-  );
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void emitFCall(IRGS& env,
@@ -1341,7 +1351,6 @@ void emitFCall(IRGS& env,
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
 
   if (!emitCallerReffinessChecks(env, callee, fca, actRecOff)) return;
-  emitCallerRxChecks(env, callee, actRecOff);
 
   if (fca.hasUnpack()) {
     auto const data = CallUnpackData {

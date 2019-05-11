@@ -158,6 +158,7 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
     auto const res = lookupClsMethod(f, cls, meth, obj, ctx, true);
 
     if (dynamic) callerDynamicCallChecks(f);
+    callerRxChecks(fp, f);
 
     ar->m_func = f;
 

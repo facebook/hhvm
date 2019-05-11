@@ -1411,7 +1411,7 @@ To string conversions:
   record to modify at `spToActRecOffset', and S3 is a pointer to the current
   frame (used to get the context). `forward` indicates if we should forward the
   current context. `dynamic` indicates if the method is called dynamically.
-  Also perform caller checks (dynamic call). May throw or fatal if method
+  Also perform caller checks (dynamic call, rx). May throw or fatal if method
   is not accessible or caller checks have failed.
 
 | LdPropAddr<T,offset>, DParam(LvalToPropGen), S(Obj), NF
@@ -1478,7 +1478,7 @@ To string conversions:
   Try to load an array as a function context. This is for use translating
   FPushFunc when the callee is an array. This instruction attempts to populate
   a partially created ActRec pointed to by S1 + `offset' (in cells). It is also
-  responsible for performing caller checks (dynamic call).
+  responsible for performing caller checks (dynamic call, rx).
 
 | LdObjClass, DLdObjCls, S(Obj), NF
 
@@ -1490,7 +1490,7 @@ To string conversions:
 
 | LdFunc<offset>, ND, S(Str) S(StkPtr) S(FramePtr), NF
 
-  Resolve the Func whose name is S0. Perform caller checks (dynamic call).
+  Resolve the Func whose name is S0. Perform caller checks (dynamic call, rx).
   Then store the Func into the partially constructed ActRec pointed to by
   S1 + `offset` (in cells). Also populate the m_this/m_cls field if necessary.
   Fatal if the named function is not defined, and the autoloader fails to

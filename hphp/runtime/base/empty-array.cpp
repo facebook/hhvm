@@ -124,8 +124,8 @@ arr_lval EmptyArray::MakePackedInl(TypedValue tv) {
   );
   ad->m_sizeAndPos = 1; // size=1, pos=0
 
-  auto const elem = packedData(ad);
-  *elem = tv;
+  auto elem = PackedArray::LvalUncheckedInt(ad, 0);
+  tvCopy(tv, elem);
 
   assertx(ad->kind() == ArrayData::kPackedKind);
   assertx(ad->dvArray() == ArrayData::kNotDVArray);

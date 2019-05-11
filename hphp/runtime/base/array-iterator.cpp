@@ -524,7 +524,7 @@ int64_t new_iter_array(Iter* dest, ArrayData* ad, TypedValue* valOut) {
       static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
     assertx(aiter.m_itype == ArrayIter::TypeArray);
     assertx(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
-    cellDup(*tvToCell(packedData(ad)), *valOut);
+    cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     return 1;
   }
 
@@ -585,7 +585,7 @@ int64_t new_iter_array_key(Iter*       dest,
       static_cast<uint32_t>(IterNextIndex::ArrayPacked) << 16 | itypeU32;
     assertx(aiter.m_itype == ArrayIter::TypeArray);
     assertx(aiter.m_nextHelperIdx == IterNextIndex::ArrayPacked);
-    cellDup(*tvToCell(packedData(ad)), *valOut);
+    cellDup(*tvToCell(PackedArray::GetValueRef(ad, 0)), *valOut);
     keyOut->m_type = KindOfInt64;
     keyOut->m_data.num = 0;
     return 1;
@@ -916,7 +916,7 @@ int64_t iter_next_packed_impl(Iter* it,
       keyOut->m_data.pcnt->decRefCount();
     }
     iter.setPos(pos);
-    cellDup(*tvToCell(packedData(ad) + pos), *valOut);
+    cellDup(*tvToCell(PackedArray::GetValueRef(ad, pos)), *valOut);
     if (HasKey) {
       keyOut->m_data.num = pos;
       keyOut->m_type = KindOfInt64;

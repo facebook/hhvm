@@ -131,23 +131,22 @@ inline void PackedArray::scan(const ArrayData* a, type_scan::Scanner& scanner) {
 template <class F, bool inc>
 void PackedArray::IterateV(const ArrayData* arr, F fn) {
   assertx(checkInvariants(arr));
-  auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
-  for (auto i = arr->m_size; i--; elm++) {
-    if (ArrayData::call_helper(fn, *elm)) break;
+  auto const size = arr->m_size;
+  for (uint32_t i = 0; i < size; ++i) {
+    if (ArrayData::call_helper(fn, *GetValueRef(arr, i))) break;
   }
 }
 
 template <class F, bool inc>
 void PackedArray::IterateKV(const ArrayData* arr, F fn) {
   assertx(checkInvariants(arr));
-  auto elm = packedData(arr);
   if (inc) arr->incRefCount();
   SCOPE_EXIT { if (inc) decRefArr(const_cast<ArrayData*>(arr)); };
-  auto key = make_tv<KindOfInt64>(0);
-  for (auto i = arr->m_size; i--; key.m_data.num++, elm++) {
-    if (ArrayData::call_helper(fn, key, *elm)) break;
+  auto const size = arr->m_size;
+  for (auto k = make_tv<KindOfInt64>(0); val(k).num < size; ++val(k).num) {
+    if (ArrayData::call_helper(fn, k, *GetValueRef(arr, val(k).num))) break;
   }
 }
 

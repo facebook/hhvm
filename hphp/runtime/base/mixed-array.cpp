@@ -653,7 +653,7 @@ void MixedArray::ReleaseUncounted(ArrayData* in) {
           StringData::ReleaseUncounted(ptr->skey);
         }
       }
-      ReleaseUncountedTv(ptr->data);
+      ReleaseUncountedTv(&ptr->data);
     }
   }
   auto const extra = ad->hasApcTv() ? sizeof(APCTypedValue) : 0;

@@ -41,18 +41,22 @@ ALWAYS_INLINE void initElem(TypedValue& elem, Cell v) {
  * These functions all promote uninit null values to init null values, except
  * for setElemWithRef() which asserts that `v' is init instead.
  */
-ALWAYS_INLINE void setElemNoRef(Cell& elem, Cell v) {
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> setElemNoRef(C&& elem, Cell v) {
   if (UNLIKELY(v.m_type == KindOfUninit)) {
     v.m_type = KindOfNull;
   }
   cellSet(v, elem);
 }
-ALWAYS_INLINE void setElem(TypedValue& elem, Cell v) {
-  setElemNoRef(*tvToCell(&elem), v);
+
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> setElem(C&& elem, Cell v) {
+  setElemNoRef(tvToCell(elem), v);
 }
 
-ALWAYS_INLINE void setElemWithRef(TypedValue& elem, TypedValue v) {
-  assertx(UNLIKELY(v.m_type != KindOfUninit));
+template<typename C> ALWAYS_INLINE
+enable_if_lval_t<C&&, void> setElemWithRef(C&& elem, TypedValue v) {
+  assertx(LIKELY(v.m_type != KindOfUninit));
   tvSetWithRef(v, elem);
 }
 

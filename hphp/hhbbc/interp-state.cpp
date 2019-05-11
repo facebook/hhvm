@@ -165,11 +165,7 @@ bool operator==(const ActRec& a, const ActRec& b) {
     a.func.hasValue() != b.func.hasValue() ? false :
     a.func.hasValue() ? a.func->same(*b.func) :
     true;
-  auto const fsame2 =
-    a.fallbackFunc.hasValue() != b.fallbackFunc.hasValue() ? false :
-    a.fallbackFunc.hasValue() ? a.fallbackFunc->same(*b.fallbackFunc) :
-    true;
-  return a.kind == b.kind && fsame && fsame2 &&
+  return a.kind == b.kind && fsame &&
          equivalently_refined(a.context, b.context);
 }
 bool operator!=(const ActRec& a, const ActRec& b) { return !(a == b); }
@@ -573,7 +569,6 @@ std::string show(const ActRec& a) {
     a.cls ? show(*a.cls) : "",
     a.cls && a.func ? "::" : "",
     a.func ? show(*a.func) : "",
-    a.fallbackFunc ? show(*a.fallbackFunc) : "",
     a.foldable ? " (foldable)" : "",
     " ", show(a.context),
     " }"

@@ -441,7 +441,7 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
     if (nArgs < 0 ||
         ar.kind == FPIKind::Ctor ||
         ar.kind == FPIKind::Builtin ||
-        !ar.func || ar.fallbackFunc) {
+        !ar.func) {
       return false;
     }
     if (maybeDynamic && ar.func->mightCareAboutDynCalls()) return false;

@@ -4125,14 +4125,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     if (ar.kind == FPIKind::ObjMethNS) {
       ty = union_of(std::move(ty), TInitNull);
     }
-    if (!ar.fallbackFunc) {
-      return ty;
-    }
-    auto ty2 = fca.hasUnpack()
-      ? env.index.lookup_return_type(env.ctx, *ar.fallbackFunc)
-      : env.index.lookup_return_type(env.ctx, args, ar.context,
-                                     *ar.fallbackFunc);
-    return union_of(std::move(ty), std::move(ty2));
+    return ty;
   }();
 
   if (fca.asyncEagerTarget != NoBlockId && typeFromWH(returnType) == TBottom) {
@@ -4173,7 +4166,7 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
 void in(ISS& env, const bc::FCall& op) {
   auto const fca = op.fca;
   auto const ar = fpiTop(env);
-  if (ar.func && !ar.fallbackFunc) {
+  if (ar.func) {
     if (fca.enforceReffiness()) {
       bool match = true;
       for (auto i = 0; i < fca.numArgs; ++i) {

@@ -63,12 +63,10 @@ struct ActRec {
   explicit ActRec(FPIKind kind,
                   Type calledOn,
                   folly::Optional<res::Class> c = folly::none,
-                  folly::Optional<res::Func> f = folly::none,
-                  folly::Optional<res::Func> f2 = folly::none)
+                  folly::Optional<res::Func> f = folly::none)
     : kind(kind)
     , cls(std::move(c))
     , func(std::move(f))
-    , fallbackFunc(std::move(f2))
     , context(std::move(calledOn))
   {}
 
@@ -77,8 +75,6 @@ struct ActRec {
   BlockId pushBlk{NoBlockId};
   folly::Optional<res::Class> cls;
   folly::Optional<res::Func> func;
-  // Possible fallback func if we cannot determine which will be called.
-  folly::Optional<res::Func> fallbackFunc;
   // isCtx of context is whether it matches caller's context
   Type context;
 };

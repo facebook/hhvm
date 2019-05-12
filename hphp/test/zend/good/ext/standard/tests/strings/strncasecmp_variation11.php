@@ -6,6 +6,13 @@
 
 /* Test strncasecmp() function with the unexpected inputs for 'str2' */
 
+/* declaring a class */
+class sample  {
+  public function __toString() {
+  return "object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing strncasecmp() function: with unexpected values for 'str2' ***\n";
 /* get an unset variable */
 $unset_var = 'string_val';
@@ -13,13 +20,6 @@ unset($unset_var);
 
 /* get resource handle */
 $file_handle = fopen(__FILE__, "r");
-
-/* declaring a class */
-class sample  {
-  public function __toString() {
-  return "object";
-  }
-}
 
 
 /* array with different values */
@@ -29,7 +29,7 @@ $values =  array (
   1,
   12345,
   -2345,
- 
+
   /* float values */
   10.5,
   -10.5,
@@ -40,7 +40,7 @@ $values =  array (
   /* hexadecimal values */
   0x12,
   -0x12,
-  
+
   /* octal values */
   012,
   -012,
@@ -74,7 +74,7 @@ $values =  array (
   @$unset_var,
 
   /* resource */
-  $file_handle,  
+  $file_handle,
 
   /* object */
   new sample()
@@ -94,3 +94,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***\n";
+}

@@ -4,7 +4,7 @@
  * Description: Convert from one Cyrillic character set to another
  * Source code: ext/standard/string.c
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing convert_cyr_string() : basic functionality ***\n";
 
 $str = "Convert from one Cyrillic character set to another.";
@@ -17,8 +17,9 @@ var_dump(bin2hex(convert_cyr_string($str, 'w', 'i')));
 echo "\n-- Now try some of characters in 128-255 range --\n";
 
 for ($i = 128; $i < 256; $i++) {
-	$str = chr($i);
-	echo "$i: " . bin2hex(convert_cyr_string($str, 'w', 'k')) . "\n";
+    $str = chr($i);
+    echo "$i: " . bin2hex(convert_cyr_string($str, 'w', 'k')) . "\n";
 }
 
 echo "===DONE===\n";
+}

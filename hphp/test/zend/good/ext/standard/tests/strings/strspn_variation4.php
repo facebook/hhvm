@@ -6,6 +6,13 @@
  * Alias to functions: none
 */
 
+// declaring class
+class sample  {
+  public function __toString() {
+    return "object";
+  }
+}
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL & ~E_NOTICE);
 
 /*
@@ -22,13 +29,6 @@ $start = 0;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// declaring class
-class sample  {
-  public function __toString() {
-    return "object";
-  }
-}
 
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
@@ -93,3 +93,4 @@ foreach($values as $value) {
 fclose($file_handle);
 
 echo "Done";
+}

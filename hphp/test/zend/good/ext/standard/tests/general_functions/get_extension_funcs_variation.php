@@ -2,21 +2,21 @@
 /* Prototype  : array get_extension_funcs  ( string $module_name  )
  * Description: Returns an array with the names of the functions of a module.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***\n";
-
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //defining a class
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing get_extension_funcs() function: with unexpected inputs for 'module_name' argument ***\n";
+
+//get an unset variable
+$unset_var = 'string_val';
+unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -76,3 +76,4 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 echo "===DONE===\n";
+}

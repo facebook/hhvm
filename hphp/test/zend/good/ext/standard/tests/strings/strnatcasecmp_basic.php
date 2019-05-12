@@ -6,9 +6,9 @@
  */
 
 function str_dump($one, $two) {
-	var_dump(strnatcasecmp($one, $two));
+    var_dump(strnatcasecmp($one, $two));
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strnatcasecmp() : basic functionality ***\n";
 
 // Calling strnatcasecmp() with all possible arguments
@@ -27,3 +27,4 @@ str_dump('pIc 6', 'pic   7');
 str_dump((string)0xFFF, (string)0Xfff);
 
 echo "===DONE===\n";
+}

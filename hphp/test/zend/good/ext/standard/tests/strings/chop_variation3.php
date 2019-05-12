@@ -7,7 +7,7 @@
 /*
  * Testing chop() : with heredoc strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chop() : with heredoc strings ***\n";
 
 // defining different heredoc strings
@@ -43,10 +43,10 @@ $heredoc_strings = array(
                    $empty_heredoc,
                    $heredoc_with_newline,
                    $heredoc_with_characters,
- 		   $heredoc_with_newline_and_tabs,
- 		   $heredoc_with_alphanumerics,
-		   $heredoc_with_embedded_nulls
-		   );
+            $heredoc_with_newline_and_tabs,
+            $heredoc_with_alphanumerics,
+           $heredoc_with_embedded_nulls
+           );
 $count = 1;
 foreach($heredoc_strings as $string)  {
   echo "\n--- Iteration $count ---\n";
@@ -56,3 +56,4 @@ foreach($heredoc_strings as $string)  {
 }
 
 echo "Done\n";
+}

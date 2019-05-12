@@ -5,9 +5,9 @@
 */
 
 /*
- * Test addslashes() with various strings containing characters thats can be backslashed 
+ * Test addslashes() with various strings containing characters thats can be backslashed
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing addslashes() : with various strings containing characters to be backslashed ***\n";
 
 // initialising a heredoc string
@@ -18,21 +18,21 @@ EOT;
 
 $heredoc_null_string =<<<EOT
 EOT;
- 
+
 // initialising the string array
 
-$str_array = array( 
+$str_array = array(
                     // string without any characters that can be backslashed
                     'Hello world',
- 
+
                     // string with single quotes
-                    "how're you doing?", 
+                    "how're you doing?",
                     "don't disturb u'r neighbours",
                     "don't disturb u'r neighbours''",
                     '',
                     '\'',
                     "'",
-                    
+
                     // string with double quotes
                     'he said, "he will be on leave"',
                     'he said, ""he will be on leave"',
@@ -40,8 +40,8 @@ $str_array = array(
                     "",
                     "\"",
                     '"',
- 		    "hello\"",
-                         
+             "hello\"",
+
                     // string with backslash characters
                     'Is your name Ram\Krishna?',
                     '\\0.0.0.0',
@@ -62,7 +62,7 @@ $str_array = array(
                     '"c:\php\"'.chr(0)."'",
                     '"hello"'."'world'".chr(0).'//',
 
-		    // string with hexadecimal number
+            // string with hexadecimal number
                     "0xABCDEF0123456789",
                     "\x00",
                     '!@#$%&*@$%#&/;:,<>',
@@ -82,3 +82,4 @@ foreach( $str_array as $str )  {
 }
 
 echo "Done\n";
+}

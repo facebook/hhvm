@@ -6,21 +6,21 @@
 
 /* Test stripos() function with unexpected inputs for 'offset' argument */
 
+// defining a class
+class sample  {
+  public function __toString() {
+    return "object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing stripos() function with unexpected values for offset ***\n";
 
 // get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
 
-// defining a class
-class sample  {
-  public function __toString() {
-    return "object";
-  } 
-}
-
 //getting the resource
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 //definition of input args
 $haystack = "hello world";
@@ -80,3 +80,4 @@ for($index = 0; $index < count($offsets); $index ++) {
 }
 
 echo "*** Done ***";
+}

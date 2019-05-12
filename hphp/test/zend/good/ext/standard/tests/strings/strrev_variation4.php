@@ -1,20 +1,20 @@
 <?php
 /* Prototype  : string strrev(string $str);
- * Description: Reverse a string 
+ * Description: Reverse a string
  * Source code: ext/standard/string.c
 */
 
 /* Testing strrev() function with unexpected inputs for 'str' */
 
-echo "*** Testing strrev() : unexpected inputs for 'str' ***\n";
 //class declaration
 class sample {
   public function __toString(){
     return "object";
   }
 }
-
-//get the resource 
+<<__EntryPoint>> function main() {
+echo "*** Testing strrev() : unexpected inputs for 'str' ***\n";
+//get the resource
 $resource = fopen(__FILE__, "r");
 
 //get an unset variable
@@ -83,3 +83,4 @@ foreach($values as $value) {
 fclose($resource);  //closing the file handle
 
 echo "*** Done ***";
+}

@@ -8,6 +8,13 @@
  * Testing strtok() : with first argument as non-string
 */
 
+// declaring a class
+class sample  {
+  public function __toString() {
+  return "obj-ect";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing strtok() : with first argument as non-string ***\n";
 // initialize all required variables
 $token = '-';
@@ -15,13 +22,6 @@ $token = '-';
 // get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
-
-// declaring a class
-class sample  {
-  public function __toString() {
-  return "obj-ect";
-  }
-}
 
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
@@ -91,7 +91,8 @@ for($index = 0; $index < count($values); $index ++) {
   $counter ++;
 }
 
-//closing the resource 
+//closing the resource
 fclose($file_handle);
 
 echo "Done\n";
+}

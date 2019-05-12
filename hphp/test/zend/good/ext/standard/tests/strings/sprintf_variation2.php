@@ -1,9 +1,17 @@
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
+// declaring class
+class sample
+{
+  public function __toString() {
+    return "Object";
+  }
+}
+<<__EntryPoint>> function main() {
 error_reporting(E_ALL & ~E_NOTICE);
 
 echo "*** Testing sprintf() : with different types of values passed for arg1 argument ***\n";
@@ -15,14 +23,6 @@ $arg2 = 'third argument';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// declaring class
-class sample
-{
-  public function __toString() {
-    return "Object";
-  } 
-}
 
 // creating a file resource
 $file_handle = fopen(__FILE__, 'r');
@@ -86,17 +86,18 @@ $values = array(
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
-  
+
   // with two arguments
   var_dump( sprintf($format, $value) );
 
   // with three arguments
   var_dump( sprintf($format, $value, $arg2) );
-  
-  $count++;   
+
+  $count++;
 };
 
 // closing the resource
 fclose($file_handle);
 
 echo "Done";
+}

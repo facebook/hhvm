@@ -5,14 +5,14 @@
 */
 
 /* Test strrchr() function by passing various double quoted strings for 'haystack' & 'needle' */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strrchr() function: with various double quoted strings ***";
 $haystack = "Hello,\t\n\0\n  $&!#%\o,()*+-./:;<=>?@hello123456he \x234 \101 ";
 $needle = array(
   //regular strings
   "l",
   "L",
-  "HELLO", 
+  "HELLO",
   "hEllo",
 
   //escape characters
@@ -28,13 +28,13 @@ $needle = array(
   "\0",
   NULL,
   null,
-  
+
   //boolean false
   FALSE,
   false,
 
   //empty string
-  "",  
+  "",
 
   //special chars
   " ",
@@ -56,8 +56,8 @@ $needle = array(
   ">",
   "=>",
   "?",
-  "@", 
-  "@hEllo", 
+  "@",
+  "@hEllo",
 
   "12345", //decimal numeric string
   "\x23",  //hexadecimal numeric string
@@ -77,3 +77,4 @@ for($index=0; $index<count($needle); $index++) {
   $count++;
 }
 echo "*** Done ***";
+}

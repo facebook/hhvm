@@ -1,20 +1,20 @@
 <?php
 /* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream 
+ * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function writeAndDump($fp, $format, $args)
 {
-	ftruncate( $fp, 0 );
-	$length = vfprintf( $fp, $format, $args );
-	rewind( $fp );
-	$content = stream_get_contents( $fp );
-	var_dump( $content );
-	var_dump( $length );
+    ftruncate( $fp, 0 );
+    $length = vfprintf( $fp, $format, $args );
+    rewind( $fp );
+    $content = stream_get_contents( $fp );
+    var_dump( $content );
+    var_dump( $length );
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : basic functionality ***\n";
 
 // Open handle
@@ -38,4 +38,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $file = 'vfprintf_basic.phpt.txt';
 unlink( $file );
-
+}

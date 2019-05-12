@@ -1,19 +1,20 @@
 <?php
-class test { 
-	protected $foo;
-	private $bar;
-	public $test;
+class test {
+    protected $foo;
+    private $bar;
+    public $test;
 
-	function foo()
-	{
-		$this->bar = 'meuh';
-		$this->foo = 'lala';
-		$this->test = 'test';
+    function foo()
+    {
+        $this->bar = 'meuh';
+        $this->foo = 'lala';
+        $this->test = 'test';
 
-		var_dump(http_build_query($this));
-	}
+        var_dump(http_build_query($this));
+    }
 }
-
+<<__EntryPoint>> function main() {
 $obj = new test();
 $obj->foo();
 var_dump(http_build_query($obj));
+}

@@ -5,9 +5,16 @@
 */
 
 /*
- * Test addslashes() with non-string type argument such as int, float, etc 
+ * Test addslashes() with non-string type argument such as int, float, etc
 */
 
+// declaring a class
+class sample  {
+  public function __toString() {
+  return "obj'ct";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing addslashes() : with non-string type argument ***\n";
 // initialize all required variables
 
@@ -15,63 +22,56 @@ echo "*** Testing addslashes() : with non-string type argument ***\n";
 $unset_var = 'string_val';
 unset($unset_var);
 
-// declaring a class
-class sample  {
-  public function __toString() {
-  return "obj'ct";
-  } 
-}
-
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
 
 // array with different values
 $values =  array (
 
-		  // integer values
-/*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
-		
-		  // float values
-/*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
-		
-		  // array values
-/*10*/	  array(),
-		  array(0),
-		  array(1),
-		  array(1, 2),
-		  array('color' => 'red', 'item' => 'pen'),
-		
-		  // boolean values
-/*15*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // empty string
-/*19*/	  "",
-		  '',
-		
-		  // undefined variable
-/*21*/	  $undefined_var,
-		
-		  // unset variable
-/*22*/	  $unset_var,
-		  
-		  // objects
-/*23*/	  new sample(),
-		
-		  // resource
-/*24*/	  $file_handle,
-		 
-/*25*/	  NULL,
-		  null
+          // integer values
+/*1*/      0,
+          1,
+          12345,
+          -2345,
+
+          // float values
+/*5*/      10.5,
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
+
+          // array values
+/*10*/      array(),
+          array(0),
+          array(1),
+          array(1, 2),
+          array('color' => 'red', 'item' => 'pen'),
+
+          // boolean values
+/*15*/      true,
+          false,
+          TRUE,
+          FALSE,
+
+          // empty string
+/*19*/      "",
+          '',
+
+          // undefined variable
+/*21*/      $undefined_var,
+
+          // unset variable
+/*22*/      $unset_var,
+
+          // objects
+/*23*/      new sample(),
+
+          // resource
+/*24*/      $file_handle,
+
+/*25*/      NULL,
+          null
 );
 
 
@@ -92,3 +92,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($file_handle);
 
 echo "===DONE===\n";
+}

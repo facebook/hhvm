@@ -5,22 +5,22 @@
  * Source code: ext/standard/string.c
 */
 
-/* Test strtr() function: with unexpected inputs for 'replace_pairs' 
- *  and expected type for 'str' arguments 
+/* Test strtr() function: with unexpected inputs for 'replace_pairs'
+ *  and expected type for 'str' arguments
 */
-
-echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
-
-//get an unset variable
-$unset_var = 'string_val';
-unset($unset_var);
 
 //defining a class
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***\n";
+
+//get an unset variable
+$unset_var = 'string_val';
+unset($unset_var);
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -81,3 +81,4 @@ for($index = 0; $index < count($replace_pairs_arr); $index++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
+}

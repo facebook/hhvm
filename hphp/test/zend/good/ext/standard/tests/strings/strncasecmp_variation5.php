@@ -6,6 +6,13 @@
 
 /* Test strncasecmp() function with the unexpected values, and giving the same strings for 'str1' and 'str2' */
 
+/* declaring a class */
+class sample  {
+  public function __toString() {
+  return "object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Test strncasecmp() function: unexpected values for 'len' ***\n";
 
 /* definition of required variables */
@@ -18,13 +25,6 @@ unset($unset_var);
 
 /* get resource handle */
 $file_handle = fopen(__FILE__, "r");
-
-/* declaring a class */
-class sample  {
-  public function __toString() {
-  return "object";
-  }
-}
 
 
 /* array with different values */
@@ -88,3 +88,4 @@ for($index = 0; $index < count($lengths); $index ++) {
 fclose($file_handle);
 
 echo "*** Done ***\n";
+}

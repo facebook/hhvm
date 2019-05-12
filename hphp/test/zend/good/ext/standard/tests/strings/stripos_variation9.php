@@ -6,18 +6,18 @@
 
 /* Test stripos() function with unexpected inputs for haystack argument */
 
+// defining a class
+class sample  {
+  public function __toString() {
+    return "object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing stripos() function with unexpected values for haystack ***\n";
 
 // get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
-
-// defining a class
-class sample  {
-  public function __toString() {
-    return "object";
-  } 
-}
 
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
@@ -85,3 +85,4 @@ for($index = 0; $index < count($haystacks); $index ++) {
 fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
+}

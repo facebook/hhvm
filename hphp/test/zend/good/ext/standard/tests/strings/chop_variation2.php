@@ -8,6 +8,13 @@
  * Testing chop() : with different unexpected values for charlist argument passes to the function
 */
 
+// declaring class
+class sample  {
+  public function __toString()  {
+  return "@# $%12345";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing chop() : with different unexpected values for charlist argument ***\n";
 // initialize all required variables
 $str = 'hello world12345 ';
@@ -15,13 +22,6 @@ $str = 'hello world12345 ';
 // get an unset variable
 $unset_var = 'string_val';
 unset($unset_var);
-
-// declaring class
-class sample  {
-  public function __toString()  {
-  return "@# $%12345";
-  }
-}
 
 // defining a resource
 $file_handle = fopen(__FILE__, 'r');
@@ -68,13 +68,13 @@ $values =  array (
 
   // resource
   $file_handle,
-  
+
   // undefined variable
   $undefined_var,
 
   // unset variable
   $unset_var
-  
+
 );
 
 
@@ -96,3 +96,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($file_handle);
 
 echo "Done\n";
+}

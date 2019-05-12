@@ -3,7 +3,7 @@
  * Description: Calculate the soundex key of a string
  * Source code: ext/standard/string.c
 */
-		
+<<__EntryPoint>> function main() {
 echo "\n*** Testing soundex error conditions ***";
 
 echo "-- Testing soundex() function with Zero arguments --\n";
@@ -15,3 +15,4 @@ $extra_arg = 10;
 try { var_dump( soundex( $str, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

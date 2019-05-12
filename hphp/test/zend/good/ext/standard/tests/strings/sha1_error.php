@@ -4,7 +4,7 @@
 /* Prototype: string sha1  ( string $str  [, bool $raw_output  ] )
  * Description: Calculate the sha1 hash of a string
  */
- 
+<<__EntryPoint>> function main() {
 echo "*** Testing sha1() : error conditions ***\n";
 
 echo "\n-- Testing sha1() function with no arguments --\n";
@@ -16,3 +16,4 @@ try { var_dump( sha1("Hello World",  true, $extra_arg) ); } catch (Exception $e)
 
 
 echo "===DONE===\n";
+}

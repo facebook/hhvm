@@ -9,7 +9,7 @@
 * array_pad() behaves in an expected way with the other arguments passed to the function.
 * The $input and $pad_size arguments passed are fixed values.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_pad() : Passing 2-d array to \$pad_value argument ***\n";
 
 // initialize the $input and $pad_size argument
@@ -27,3 +27,4 @@ var_dump( array_pad($input, $pad_size, $pad_value) );  // positive 'pad_value'
 var_dump( array_pad($input, -$pad_size, $pad_value) );  // negative 'pad_value'
 
 echo "Done";
+}

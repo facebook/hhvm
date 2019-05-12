@@ -10,7 +10,7 @@
  * and test whether array_key_exists(() thinks they are equal and therefore
  * returns true when searching for them
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 $unset = 10;
@@ -24,18 +24,19 @@ $array = array ('null' => null,
 
 //iterate through original array
 foreach($array as $name => $input) {
-	$iterator = 1;
-	echo "\n-- Key in \$search array is : $name --\n";
+    $iterator = 1;
+    echo "\n-- Key in \$search array is : $name --\n";
   $search = array();
-	$search[$input] = 'test';
+    $search[$input] = 'test';
 
-	//iterate through array again to see which values are considered equal
-	foreach($array as $key) {
-		echo "Iteration $iterator:  ";
-		var_dump(array_key_exists($key, $search));
-		$iterator++;
-	}
-	$search = null;
+    //iterate through array again to see which values are considered equal
+    foreach($array as $key) {
+        echo "Iteration $iterator:  ";
+        var_dump(array_key_exists($key, $search));
+        $iterator++;
+    }
+    $search = null;
 }
 
 echo "Done";
+}

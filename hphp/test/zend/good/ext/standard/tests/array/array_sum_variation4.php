@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
 /*
-* Checking array_sum() with integer and float array containing duplicate values 
+* Checking array_sum() with integer and float array containing duplicate values
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_sum() : array with duplicate values ***\n";
 
 // integer array with duplicate values
@@ -21,3 +21,4 @@ echo "-- With float array --\n";
 var_dump( array_sum($float_input) );
 
 echo "Done";
+}

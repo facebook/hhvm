@@ -9,7 +9,7 @@
 * passing different single quoted strings for 'ending' arguments to chunk_split()
 * 'chunklen' is set to 9.2 for this testcase
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : different single quoted strings as 'ending' ***\n";
 
 
@@ -47,3 +47,4 @@ for($count = 0; $count < count($values); $count++) {
 }
 
 echo "Done";
+}

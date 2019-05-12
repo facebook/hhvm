@@ -8,7 +8,7 @@
 /*
 * Testing array_chunk() function with unexpected values for 'array' argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // Initialise function arguments
@@ -68,3 +68,4 @@ foreach($values as $value){
 }
 
 echo "Done";
+}

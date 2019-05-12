@@ -3,7 +3,7 @@
  * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
  * Source code: ext/standard/math.c
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing bindec() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -41,7 +41,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -51,7 +51,7 @@ $inputs = array(
 /*19*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*22*/ @$undefined_var,
 
@@ -65,9 +65,10 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of bindec()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(bindec($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(bindec($input));
+    $iterator++;
 };
 fclose($fp);
 echo "===Done===";
+}

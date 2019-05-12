@@ -9,7 +9,7 @@
 * passing different double quoted strings for 'ending' argument to chunk_split()
 * here 'chunklen' is set to 6.5
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : different strings for 'ending' ***\n";
 
 //Initializing variables
@@ -45,3 +45,4 @@ for($count = 0; $count < count($values); $count++) {
 }
 
 echo "Done";
+}

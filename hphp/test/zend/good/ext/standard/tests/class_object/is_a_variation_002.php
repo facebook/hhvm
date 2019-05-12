@@ -1,16 +1,16 @@
 <?php
 /* Prototype  : proto bool is_a(object object, string class_name)
- * Description: Returns true if the object is of this class or has this class as one of its parents 
+ * Description: Returns true if the object is of this class or has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 class C {
-	function __toString() {
-		return "C Instance";
-	}
+    function __toString() {
+        return "C Instance";
+    }
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -75,3 +75,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

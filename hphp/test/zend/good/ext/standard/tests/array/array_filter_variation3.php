@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -19,7 +19,7 @@ function always_true($input)
 {
   return true;
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_filter() : usage variations - different types of array for 'input' argument***\n";
 
 // different types of 'input' array
@@ -45,3 +45,4 @@ for($count = 0; $count < count($input_values); $count++)
 }
 
 echo "Done";
+}

@@ -7,7 +7,7 @@
 /*
  * Pass arrays where keys are different data types as $array_arg to key() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing key() : usage variations ***\n";
 
 //get an unset variable
@@ -94,9 +94,10 @@ $iterator = 1;
 foreach($inputs as $key => $input) {
   echo "\n-- Iteration $iterator : $key data --\n";
   while (key(&$input) !== NULL) {
-  	var_dump(key(&$input));
-  	next(&$input);
+      var_dump(key(&$input));
+      next(&$input);
   }
   $iterator++;
 };
 echo "===DONE===\n";
+}

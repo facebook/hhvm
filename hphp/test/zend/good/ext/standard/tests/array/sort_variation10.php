@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -9,10 +9,10 @@
  * testing sort() by providing different octal array for $array argument
  * with following flag values
  * 1.flag value as defualt
- * 2.SORT_REGULAR - compare items normally		
+ * 2.SORT_REGULAR - compare items normally
  * 3.SORT_NUMERIC - compare items numerically
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sort() : usage variations ***\n";
 
 // an array containing unsorted octal values
@@ -34,3 +34,4 @@ var_dump(sort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump($temp_array);
 
 echo "Done\n";
+}

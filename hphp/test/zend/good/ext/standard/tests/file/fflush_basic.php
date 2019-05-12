@@ -2,7 +2,7 @@
 /*  Prototype: bool fflush ( resource $handle );
     Description: Flushes the output to a file
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fflush(): writing to a file and reading the contents ***\n";
 $data = <<<EOD
 first line of string
@@ -19,7 +19,7 @@ if($file_handle == false)
   exit("Error:failed to open file $filename");
 
 if(substr(PHP_OS, 0, 3) == "WIN")  {
-	$data = str_replace("\r",'', $data);
+    $data = str_replace("\r",'', $data);
 }
 
 // writing data to the file
@@ -36,3 +36,4 @@ error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $filename = "$file_path/fflush_basic.tmp";
 unlink($filename);
+}

@@ -8,7 +8,7 @@
 * Test nl2br() function by passing html string inputs containing line breaks and
 *   new line chars for 'str'
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //array of html strings
@@ -24,3 +24,4 @@ foreach( $strings as $str ){
   var_dump(nl2br($str) );
 }
 echo "Done";
+}

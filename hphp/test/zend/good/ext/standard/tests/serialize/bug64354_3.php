@@ -13,11 +13,12 @@ class B implements Serializable {
     public function unserialize($data) {
     }
 }
-
+<<__EntryPoint>> function main() {
 $data = array(new A, new B);
 
 try {
     serialize($data);
-} catch (Exception $e) { 
+} catch (Exception $e) {
     var_dump($e->getMessage());
+}
 }

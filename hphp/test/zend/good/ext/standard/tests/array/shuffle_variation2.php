@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool shuffle(&array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
@@ -8,7 +8,7 @@
 * Test behaviour of shuffle() function when multi-dimensional array is
 * passed to 'array_arg' argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing shuffle() : with multi-dimensional array ***\n";
 
 // initialise the multi-dimensional array
@@ -23,10 +23,11 @@ $array_arg = array(
 
 );
 
-// calling shuffle() function with multi-dimensional array 
+// calling shuffle() function with multi-dimensional array
 var_dump( shuffle(&$array_arg) );
 echo "\nThe output array is:\n";
 var_dump( $array_arg );
 
 
 echo "Done";
+}

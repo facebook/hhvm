@@ -1,28 +1,28 @@
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing sort() by providing arrays with default keys and assoc arrays 
+ * Testing sort() by providing arrays with default keys and assoc arrays
  * to check the basic functionality with following flag values.
  *  flag value as defualt
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing sort() : basic functionality ***\n";
 
-// associative array containing unsorted string values  
+// associative array containing unsorted string values
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
- 
+
 // array with default keys containing unsorted numeric values
 $unsorted_numerics =  array( 100, 33, 555, 22 );
 
@@ -72,3 +72,4 @@ var_dump( sort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
+}

@@ -6,10 +6,10 @@
 */
 
 /*
-* Testing the behavior of array_intersect_assoc() by passing array with 
-* binary values for $arr1 and $arr2 argument. 
+* Testing the behavior of array_intersect_assoc() by passing array with
+* binary values for $arr1 and $arr2 argument.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect_assoc() : binary safe checking ***\n";
 
 // array with binary values
@@ -27,3 +27,4 @@ var_dump( array_intersect_assoc($arr_normal, $arr_binary) );
 var_dump( array_intersect_assoc($arr_binary, $arr_binary) );
 
 echo "Done";
+}

@@ -6,10 +6,10 @@
 */
 
 /*
-* Passing different types of arrays to both $keys and $values arguments and testing whether 
+* Passing different types of arrays to both $keys and $values arguments and testing whether
 * array_combine() behaves in an expected way with the arguments passed to the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_combine() : Passing different types of arrays to both \$keys and \$values argument ***\n";
 /* Different heredoc strings passed as argument to arrays */
 // heredoc with blank line
@@ -80,3 +80,4 @@ foreach($arrays as $array) {
 }
 
 echo "Done";
+}

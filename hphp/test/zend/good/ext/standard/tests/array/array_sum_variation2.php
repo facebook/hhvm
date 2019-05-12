@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed array_sum(array &input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
@@ -8,7 +8,7 @@
 * Testing array_sum() with different types of integer arrays containing data of following type:
 *  integer, octal, hexadecimal, maximum and minimum integer values & mixed of all integers
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_sum() : different integer array ***\n";
 
 // Int array
@@ -32,3 +32,4 @@ echo "-- Sum of mixed integer values --\n";
 var_dump( array_sum($mixed_int_value) );
 
 echo "Done";
+}

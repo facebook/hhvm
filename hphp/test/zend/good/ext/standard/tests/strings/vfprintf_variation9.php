@@ -7,7 +7,7 @@
 /*
 * Test vfprintf() for char formats with an array of chars passed to the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vfprintf() : char formats with char values ***\n";
 
 
@@ -56,5 +56,6 @@ print_r(file_get_contents($data_file));
 echo "\n";
 
 unlink($data_file);
- 
+
 echo "===DONE===\n";
+}

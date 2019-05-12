@@ -4,27 +4,27 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_multisort() : case-sensitive\n";
 
 $a = array(
-	'Second',
-	'First.1',
-	'First.2',
-	'First.3',
-	'Twentieth',
-	'Tenth',
-	'Third',
+    'Second',
+    'First.1',
+    'First.2',
+    'First.3',
+    'Twentieth',
+    'Tenth',
+    'Third',
 );
 
 $b = array(
-	'2 a',
-	'1 bb 1',
-	'1 bB 2',
-	'1 BB 3',
-	'20 c',
-	'10 d',
-	'3 e',
+    '2 a',
+    '1 bb 1',
+    '1 bB 2',
+    '1 BB 3',
+    '20 c',
+    '10 d',
+    '3 e',
 );
 
 $string = SORT_STRING;
@@ -33,3 +33,4 @@ array_multisort(&$b, &$string, &$a);
 var_dump($a, $b);
 
 echo "===DONE===\n";
+}

@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
-                If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars) 
+                If start or/and length is provided works like strspn(substr($s,$start,$len),$good_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -9,7 +9,7 @@
 /*
 * Testing strspn() : with heredoc string, varying start and len arguments
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strspn() : with different start and len values ***\n";
 
 // initialing required variables
@@ -60,41 +60,41 @@ $heredoc_strings = array(
 
 // defining array of different mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "f\n\\0htersti \l",
-		    "\t",
-		    "het\ ",
-		    "fel\th\ ",
+            "",
+            '',
+            "f\n\\0htersti \l",
+            "\t",
+            "het\ ",
+            "fel\th\ ",
                     "f\t\hiel\100\xaa"
                    );
 
 // defining array of different start values
 $start_array = array(
-		    0,
-		    1,
- 	            2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+                 2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
-		
+
 // defining array of different len values
 $len_array = array(
-		    0,
-		    1,
- 	            2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+                 2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
-		
+
 
 // loop through each element of the array for heredoc str, mask str , start values and len values
 
 $count = 1;
 
-foreach($heredoc_strings as $str)  { 
+foreach($heredoc_strings as $str)  {
   echo "\n-- Iteration $count --\n";
   foreach($mask_array as $mask)  {
     foreach($start_array as $start)  {
@@ -104,6 +104,7 @@ foreach($heredoc_strings as $str)  {
     }
   }
   $count++;
-}; 
+};
 
 echo "Done";
+}

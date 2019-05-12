@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool shuffle(&array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
@@ -10,7 +10,7 @@
 * changes in the input array by printing the input array
 * before and after shuffle() function is applied on it
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing shuffle() : with arrays having default keys ***\n";
 
 // Initialise the array with integers
@@ -46,3 +46,4 @@ echo "\n-- resultant array after shuffle() function is applied --\n";
 var_dump( $array_arg_strings );
 
 echo "Done";
+}

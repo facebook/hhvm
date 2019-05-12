@@ -7,7 +7,7 @@
 /*
 * Testing array_chunk() function with unexpected values for 'preserve_keys'
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_chunk() : usage variations ***\n";
 
 // input array
@@ -61,3 +61,4 @@ foreach($values as $value) {
 }
 
 echo "Done";
+}

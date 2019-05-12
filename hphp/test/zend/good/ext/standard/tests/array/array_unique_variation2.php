@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -8,7 +8,7 @@
 * Passing different arrays to $input argument and testing whether
 * array_unique() behaves in an expected way.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unique() : Passing different arrays to \$input argument ***\n";
 
 /* Different heredoc strings passed as argument to arrays */
@@ -74,5 +74,6 @@ foreach($inputs as $input) {
   var_dump( array_unique($input, SORT_STRING) );
   $iterator++;
 }
-  
+
 echo "Done";
+}

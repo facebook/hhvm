@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 /*
 * Test vsprintf() for char formats with an array of chars passed to the function
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing vsprintf() : char formats with char values ***\n";
 
 
@@ -41,9 +41,10 @@ $args_array = array(
 // and with char values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   var_dump( vsprintf($format, $args_array[$counter-1]) );
   $counter++;
 }
 
 echo "Done";
+}

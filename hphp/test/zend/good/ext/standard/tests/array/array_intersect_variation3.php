@@ -1,15 +1,15 @@
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
 /*
-* Passing different types of arrays to $arr1 argument and testing whether 
+* Passing different types of arrays to $arr1 argument and testing whether
 * array_intersect() behaves in expected way with the other arguments passed to the function
 * The $arr2 argument is a fixed array.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect() : Passing different types of arrays to \$arr1 argument ***\n";
 
 /* Different heredoc strings passed as argument to $arr1 */
@@ -96,3 +96,4 @@ foreach($arrays as $arr1) {
 }
 
 echo "Done";
+}

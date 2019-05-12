@@ -6,11 +6,11 @@
 
 function test_splice ($replacement)
 {
-	$input_array=array(0,1);
-	var_dump (array_splice (&$input_array,2,0,$replacement));
-	var_dump ($input_array);
+    $input_array=array(0,1);
+    var_dump (array_splice (&$input_array,2,0,$replacement));
+    var_dump ($input_array);
 }
-
+<<__EntryPoint>> function main() {
 test_splice (2);
 
 test_splice (2.1);
@@ -21,3 +21,4 @@ $file_handle = fopen(__FILE__, "r");
 
 test_splice ($file_handle);
 echo "Done\n";
+}

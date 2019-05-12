@@ -6,11 +6,11 @@
 */
 
 /*
-* Passing different types of arrays to $arr1 argument and testing whether 
+* Passing different types of arrays to $arr1 argument and testing whether
 * array_intersect_assoc() behaves in an expected way with the other arguments passed to the function
 * The $arr2 argument passed is a fixed array.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect_assoc() : Passing different types of arrays to \$arr1 argument ***\n";
 
 /* Different heredoc strings passed as argument to $arr1 */
@@ -97,3 +97,4 @@ foreach($arrays as $arr1) {
 }
 
 echo "Done";
+}

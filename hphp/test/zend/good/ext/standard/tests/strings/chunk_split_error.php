@@ -6,10 +6,10 @@
 */
 
 /*
-* Testing error conditions of chunk_split() with zero arguments 
-* and for more than expected number of arguments 
+* Testing error conditions of chunk_split() with zero arguments
+* and for more than expected number of arguments
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : error conditions ***\n";
 
 // Zero arguments
@@ -25,3 +25,4 @@ echo "-- Testing chunk_split() function with more than expected no. of arguments
 try { var_dump( chunk_split($str, $chunklen, $ending, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done";
+}

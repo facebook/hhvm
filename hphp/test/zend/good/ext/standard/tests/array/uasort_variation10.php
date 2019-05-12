@@ -28,7 +28,7 @@ function cmp_function($value1, $value2)
     return -1;
   }
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing uasort() : 'array_arg' with elements as reference ***\n";
 
 // different variables which are used as elements of 'array_arg'
@@ -50,3 +50,4 @@ var_dump( uasort(&$array_arg, 'cmp_function') );  // expecting: bool(true)
 var_dump($array_arg);
 
 echo "Done";
+}

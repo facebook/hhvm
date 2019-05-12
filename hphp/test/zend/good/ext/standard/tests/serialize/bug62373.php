@@ -1,7 +1,7 @@
 <?php
 class A {}
 class B {}
-
+<<__EntryPoint>> function main() {
 $size_of_ce = (((int)(log((float)PHP_INT_MAX) / log(2.0)) + 1 == 32 ? 368: 680) + 15) & ~15;
 $dummy = array();
 $b = new B();
@@ -17,3 +17,4 @@ for ($i = 0; $i < $period * 3; $i++) {
 }
 
 echo "OK\n";
+}

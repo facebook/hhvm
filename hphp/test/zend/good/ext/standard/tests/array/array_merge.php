@@ -2,16 +2,16 @@
 /* Prototype: array array_merge(array $array1 [, array $array2 [, array $...]]);
    Description: Merge one or more arrays
 */
-
+<<__EntryPoint>> function main() {
 echo "\n*** Testing array_merge() basic functionality ***";
 $begin_array = array(
   array(),
   array( 1 => "string"),
   array( "" => "string"),
   array( -2.44444 => 12),
-  array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,	"d" => -2.344),
+  array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344),
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344),
-  array( NULL, 1.23 => "Hi", "string" => "hello", 
+  array( NULL, 1.23 => "Hi", "string" => "hello",
   array("" => "World", "-2.34" => "a", "0" => "b"))
 );
 
@@ -21,8 +21,8 @@ $end_array   = array(
   array( "" => "string"),
   array( -2.44444 => 12),
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
-  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344), 
-  array( NULL, 1.23 => "Hi", "string" => "hello", 
+  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344),
+  array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
 
@@ -36,22 +36,22 @@ foreach($begin_array as $first) {
     $result = array_merge($first, $second);
     print_r($result);
     $count_inner++;
-  }			
+  }
   $count_outer++;
 }
 
 
 echo "\n*** Testing array_merge() with three or more arrays ***\n";
-var_dump( array_merge( $end_array[0], 
-                       $end_array[5], 
+var_dump( array_merge( $end_array[0],
+                       $end_array[5],
                        $end_array[4],
                        $end_array[6]
                      )
         );
 
-var_dump( array_merge( $end_array[0], 
-                       $end_array[5], 
-                       array("array on fly"), 
+var_dump( array_merge( $end_array[0],
+                       $end_array[5],
+                       array("array on fly"),
                        array("nullarray" => array())
                      )
         );
@@ -59,7 +59,7 @@ var_dump( array_merge( $end_array[0],
 
 echo "\n*** Testing single array argument ***\n";
 /* Empty array */
-var_dump(array_merge(array())); 
+var_dump(array_merge(array()));
 
 /* associative array with string keys, which will not be re-indexed */
 var_dump(array_merge($begin_array[4]));
@@ -81,3 +81,4 @@ var_dump(array_merge($begin_array[0], $begin_array[1], 100));
 var_dump(array_merge($begin_array[0], $begin_array[1], $arr4));
 
 echo "Done\n";
+}

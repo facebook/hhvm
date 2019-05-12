@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
 /*
  * Create directories with different permissions to test whether scandir() can access them
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing scandir() : usage variations ***\n";
 
 // create the temporary directory
@@ -34,22 +34,23 @@ $permission_values = array(
 
 $iterator = 1;
 foreach ($permission_values as $perm) {
-	echo "\n-- Iteration $iterator --\n";
-	
-	// Remove the directory if already exists
-	if (is_dir($dir_path)){
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    echo "\n-- Iteration $iterator --\n";
 
-	// change the dir permisson to test dir on it
-	var_dump( chmod($dir_path, $perm) );
-	
-	var_dump(scandir($dir_path));
-	$iterator++;
+    // Remove the directory if already exists
+    if (is_dir($dir_path)){
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
+
+    // change the dir permisson to test dir on it
+    var_dump( chmod($dir_path, $perm) );
+
+    var_dump(scandir($dir_path));
+    $iterator++;
 }
 echo "===DONE===\n";
 error_reporting(0);
 $dir_path = dirname(__FILE__) . "/scandir_variation7";
 rmdir($dir_path);
+}

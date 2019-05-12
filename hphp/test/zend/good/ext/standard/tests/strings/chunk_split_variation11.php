@@ -9,7 +9,7 @@
 * passing different strings for 'ending' and heredoc string as 'str' to chunk_split()
 * 'chunklen' is set to 6E0 for this testcase
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : different values for 'ending' with heredoc 'str'***\n";
 
 // Initializing required variables
@@ -39,3 +39,4 @@ for($count = 0; $count < count($values); $count++) {
 }
 
 echo "Done";
+}

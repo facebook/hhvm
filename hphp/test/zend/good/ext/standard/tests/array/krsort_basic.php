@@ -1,28 +1,28 @@
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation 			
+ * Description: Sort an array by key in reverse order, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing krsort() by providing array of integer/string values to check the basic functionality 
+ * Testing krsort() by providing array of integer/string values to check the basic functionality
  * with following flag values :
  *  1.flag value as defualt
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing krsort() : basic functionality ***\n";
 
-// an array containing unsorted string values with indices  
-$unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" ); 
+// an array containing unsorted string values with indices
+$unsorted_strings =   array( "lemon" => "l", "orange" => "o", "banana" => "b" );
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
-// an array containing unsorted numeric values with indices 
+// an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
 echo "\n-- Testing krsort() by supplying string array, 'flag' value is defualt --\n";
@@ -71,3 +71,4 @@ var_dump( krsort(&$temp_array, SORT_NUMERIC) ); // expecting : bool(true)
 var_dump( $temp_array);
 
 echo "Done\n";
+}

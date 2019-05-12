@@ -4,7 +4,7 @@
  */
 
 class foo {}
-
+<<__EntryPoint>> function main() {
 echo "*** Testing isset() : basic functionality ***\n";
 
 $i = 10;
@@ -36,3 +36,4 @@ var_dump(isset($var[1]));
 var_dump(isset($var, $var[1]));
 
 echo "===DONE===\n";
+}

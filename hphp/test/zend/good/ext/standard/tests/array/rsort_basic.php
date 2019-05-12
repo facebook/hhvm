@@ -7,14 +7,14 @@
 /*
  * Test basic functionality of rsort()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing rsort() : basic functionality ***\n";
 
 // associative array containing unsorted string values
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
 
 // array with default keys containing unsorted numeric values
@@ -66,3 +66,4 @@ var_dump( rsort(&$temp_array, SORT_NUMERIC) );
 var_dump( $temp_array);
 
 echo "Done";
+}

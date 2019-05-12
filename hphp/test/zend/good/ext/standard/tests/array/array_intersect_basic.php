@@ -1,14 +1,14 @@
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing the behavior of array_intersect() by passing different arrays for the arguments. 
+* Testing the behavior of array_intersect() by passing different arrays for the arguments.
 * Function is tested by passing associative array as well as array with default keys.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect() : basic functionality ***\n";
 
 // array with default keys
@@ -35,3 +35,4 @@ var_dump( array_intersect($arr_default_keys, $arr_associative, $arr3) );
 var_dump( array_intersect($arr_associative, $arr_default_keys, $arr3, $arr_associative) );
 
 echo "Done";
+}

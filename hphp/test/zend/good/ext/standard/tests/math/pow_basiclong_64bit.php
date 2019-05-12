@@ -1,10 +1,10 @@
 <?php
- 
+
 const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
-
+<<__EntryPoint>> function main() {
 $longVals = array(
     MAX_64Bit, MIN_64Bit, MAX_32Bit, MIN_32Bit, MAX_64Bit - MAX_32Bit, MIN_64Bit - MIN_32Bit,
     MAX_32Bit + 1, MIN_32Bit - 1, MAX_32Bit * 2, (MAX_32Bit * 2) + 1, (MAX_32Bit * 2) - 1,
@@ -16,9 +16,10 @@ $otherVals = array(0, 1, -1, 7, 9, 65, -44, MAX_32Bit, MIN_32Bit, MAX_64Bit, MIN
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	   echo "--- testing: $longVal, $otherVal ---\n";   
+       echo "--- testing: $longVal, $otherVal ---\n";
       var_dump(pow($longVal, $otherVal));
    }
 }
-   
+
 echo "===DONE===\n";
+}

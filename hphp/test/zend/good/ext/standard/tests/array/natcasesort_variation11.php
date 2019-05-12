@@ -7,7 +7,7 @@
 /*
  * Pass arrays where the keys are different data types to test behaviour of natcasesort()
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing natcasesort() : usage variations ***\n";
 
 //get an unset variable
@@ -100,10 +100,11 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of natcasesort()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( natcasesort(&$input) );
-	var_dump($input);
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( natcasesort(&$input) );
+    var_dump($input);
+    $iterator++;
 };
 
 echo "Done";
+}

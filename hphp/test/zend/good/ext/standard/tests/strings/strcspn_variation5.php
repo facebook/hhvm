@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
+                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -9,7 +9,7 @@
 /*
 * Testing strcspn() : with different heredoc strings as str argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing strcspn() : with heredoc strings ***\n";
 
 // initialing required variables
@@ -68,3 +68,4 @@ foreach($heredoc_strings as $str) {
 };
 
 echo "Done";
+}

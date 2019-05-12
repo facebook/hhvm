@@ -4,23 +4,23 @@
  * Source code: ext/standard/array.c
  * Alias to functions:
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_multisort() : natural sorting\n";
 
 $a = array(
-	'Second',
-	'First',
-	'Twentieth',
-	'Tenth',
-	'Third',
+    'Second',
+    'First',
+    'Twentieth',
+    'Tenth',
+    'Third',
 );
 
 $b = array(
-	'2 a',
-	'1 b',
-	'20 c',
-	'10 d',
-	'3 e',
+    '2 a',
+    '1 b',
+    '20 c',
+    '10 d',
+    '3 e',
 );
 
 $natural = SORT_NATURAL;
@@ -29,3 +29,4 @@ array_multisort(&$b, &$natural, &$a);
 var_dump($a, $b);
 
 echo "===DONE===\n";
+}

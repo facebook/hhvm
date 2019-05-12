@@ -2,13 +2,13 @@
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*
 * passing long string as 'str' and testing default value of chunklen which is 76
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : default 'chunklen' with long string 'str' ***\n";
 
 //Initializing variables
@@ -24,3 +24,4 @@ for($count = 0; $count < count($values); $count++) {
 }
 
 echo "Done";
+}

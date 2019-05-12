@@ -6,10 +6,10 @@
 */
 
 /*
-* Testing the behavior of array_combine() by passing array with 
-* binary values for $keys and $values argument. 
+* Testing the behavior of array_combine() by passing array with
+* binary values for $keys and $values argument.
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_combine() : binary safe checking ***\n";
 
 // array with binary values
@@ -26,3 +26,4 @@ var_dump( array_combine($arr_normal, $arr_binary) );
 var_dump( array_combine($arr_binary, $arr_normal) );
 
 echo "Done";
+}

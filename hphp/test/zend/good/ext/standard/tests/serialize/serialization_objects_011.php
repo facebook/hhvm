@@ -11,59 +11,59 @@
  */
 
 class A {
-	private $APriv = "A.APriv";
-	protected $AProt = "A.AProt";
-	public $APub = "A.APub";
+    private $APriv = "A.APriv";
+    protected $AProt = "A.AProt";
+    public $APub = "A.APub";
 
-	function audit() {
-		return isset($this->APriv, $this->AProt, $this->APub);
-	}
+    function audit() {
+        return isset($this->APriv, $this->AProt, $this->APub);
+    }
 }
 
 class B extends A {
-	private $BPriv = "B.BPriv";
-	protected $BProt = "B.BProt";
-	public $BPub = "B.BPub";
+    private $BPriv = "B.BPriv";
+    protected $BProt = "B.BProt";
+    public $BPub = "B.BPub";
 
-	function audit() {
-		return  parent::audit() && isset($this->AProt, $this->APub,
-					 $this->BPriv, $this->BProt, $this->BPub);
-	}
+    function audit() {
+        return  parent::audit() && isset($this->AProt, $this->APub,
+                     $this->BPriv, $this->BProt, $this->BPub);
+    }
 }
 
 class C extends B {
-	private $APriv = "C.APriv";
-	protected $AProt = "C.AProt";
-	public $APub = "C.APub";
+    private $APriv = "C.APriv";
+    protected $AProt = "C.AProt";
+    public $APub = "C.APub";
 
-	private $CPriv = "C.CPriv";
-	protected $CProt = "C.BProt";
-	public $CPub = "C.CPub";
+    private $CPriv = "C.CPriv";
+    protected $CProt = "C.BProt";
+    public $CPub = "C.CPub";
 
-	function audit() {
-		return parent::audit() && isset($this->APriv, $this->AProt, $this->APub,
-					 $this->BProt, $this->BPub,
-					 $this->CPriv, $this->CProt, $this->CPub);
-	}
+    function audit() {
+        return parent::audit() && isset($this->APriv, $this->AProt, $this->APub,
+                     $this->BProt, $this->BPub,
+                     $this->CPriv, $this->CProt, $this->CPub);
+    }
 }
 
 function prettyPrint($obj) {
-	echo "\n\nBefore serialization:\n";
-	var_dump($obj);
+    echo "\n\nBefore serialization:\n";
+    var_dump($obj);
 
-	echo "Serialized form:\n";
-	$ser = serialize($obj);
-	$serPrintable = str_replace("\0", '\0', $ser);
-	var_dump($serPrintable);
+    echo "Serialized form:\n";
+    $ser = serialize($obj);
+    $serPrintable = str_replace("\0", '\0', $ser);
+    var_dump($serPrintable);
 
-	echo "Unserialized:\n";
-	$uobj = unserialize($ser);
-	var_dump($uobj);
+    echo "Unserialized:\n";
+    $uobj = unserialize($ser);
+    var_dump($uobj);
 
-	echo "Sanity check: ";
-	var_dump($uobj->audit());
+    echo "Sanity check: ";
+    var_dump($uobj->audit());
 }
-
+<<__EntryPoint>> function main() {
 echo "-- Test instance of A --\n";
 prettyPrint(new A);
 echo "\n\n-- Test instance of B --\n";
@@ -72,3 +72,4 @@ echo "\n\n-- Test instance of C --\n";
 prettyPrint(new C);
 
 echo "Done";
+}

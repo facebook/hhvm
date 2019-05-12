@@ -33,7 +33,7 @@ function stat_fn( $filename ) {
   clearstatcache();
 
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // create files
@@ -165,4 +165,5 @@ if(file_exists($file_path."/005_variation_touch_fly.tmp")) {
 }
 if(file_exists($file_path."/005_variation_touch_new.tmp")) {
   unlink($file_path."/005_variation_touch_new.tmp");
+}
 }

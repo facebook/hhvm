@@ -29,7 +29,7 @@ function cmp_function($value1, $value2)
     return -1;
   }
 }
-
+<<__EntryPoint>> function main() {
 echo "*** Testing uasort() : different numeric arrays as 'array_arg' ***\n";
 
 // Int array
@@ -63,3 +63,4 @@ var_dump( uasort(&$empty_array, 'cmp_function') );  // expecting: bool(true)
 var_dump($empty_array);
 
 echo "Done";
+}

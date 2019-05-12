@@ -1,10 +1,10 @@
 <?php
 /* Prototype  : bool isset  ( mixed $var  [, mixed $var  [,  $...  ]] )
  * Description:  Determine if a variable is set and is not NULL
- */		
+ */
 
 class foo {}
-
+<<__EntryPoint>> function main() {
 echo "*** Testing isset() : basic functionality ***\n";
 
 $i = 10;
@@ -37,3 +37,4 @@ echo "Null test: " . (isset($n) ? "YES": "NO") . "\n";
 echo "Object test: " . (isset($obj) ? "YES": "NO") . "\n";
 echo "Resource test: " . (isset($res) ? "YES": "NO") . "\n";
 echo "===DONE===\n";
+}

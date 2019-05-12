@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_sum() with associative array as 'input' argument 
+* Testing array_sum() with associative array as 'input' argument
 */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing array_sum() : with associative array ***\n";
 
 // array with numeric keys
@@ -20,3 +20,4 @@ $input = array('a' => 20, "b" => 50, 'c' => 0, 'd' => -30, "e" => 100);
 echo "-- with string keys --\n";
 var_dump( array_sum($input) );
 echo "Done";
+}

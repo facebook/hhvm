@@ -3262,4 +3262,7 @@ function main($argv) {
   return $return_value;
 }
 
-exit(main($argv));
+<<__EntryPoint>>
+function run_main(): void {
+  exit(main($GLOBALS['argv']));
+}

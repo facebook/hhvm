@@ -13,7 +13,7 @@ function test2() : string {
   by_ref(&$int);
   return $int;
 }
-
+<<__EntryPoint>> function main() {
 var_dump(test1());
 var_dump(test2());
-
+}

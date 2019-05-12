@@ -94,7 +94,8 @@ class C extends B {
     new C();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 C::test();
 C::test();
 echo "DONE\n";
+}

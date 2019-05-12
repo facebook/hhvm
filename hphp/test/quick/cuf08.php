@@ -11,8 +11,9 @@ class Test {
   }
 
 }
-
+<<__EntryPoint>> function main(): void {
 $test = new Test();
 call_user_func_array(array($test, 'magic'), array('bur' => 'bar'));
 call_user_func_array(array($test, 'normal'), array('badum' => 'tss'));
 $test->hi('hello world!');
+}

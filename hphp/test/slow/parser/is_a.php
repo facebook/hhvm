@@ -12,7 +12,7 @@ interface CHILD {
 
 class A extends BASE implements CHILD {
 }
-
+<<__EntryPoint>> function main() {
 $a = new A;
 var_dump(is_a($a, "B1"));
 var_dump(is_a($a, "A"));
@@ -23,3 +23,4 @@ var_dump(is_subclass_of($a, "A"));
 var_dump(is_subclass_of($a, "BASE"));
 var_dump(is_subclass_of($a, "CHILD"));
 var_dump(is_subclass_of("X1", "X2"));
+}

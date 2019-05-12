@@ -19,7 +19,8 @@ trait Too {
   }
 }
 class Foo { use Too; }
-
+<<__EntryPoint>> function main(): void {
 $f = new Foo;
 echo "Between\n";
 $f->bar();
+}

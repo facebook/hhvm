@@ -13,5 +13,6 @@ function f<reify T1>() {
   };
   $x();
 }
-
+<<__EntryPoint>> function main(): void {
 f<C>();
+}

@@ -5,7 +5,7 @@ function test($magick) {
     printf("[%s] %sx%s.%s\n", $k, $v->width, $v->height, $v->format);
   }
 }
-
+<<__EntryPoint>> function main() {
 $img = varray[
   'magick:logo',
   __DIR__.'/facebook.png',
@@ -30,3 +30,4 @@ test($magick);
 $magick->setIteratorIndex(4);
 $magick->removeImage();
 test($magick);
+}

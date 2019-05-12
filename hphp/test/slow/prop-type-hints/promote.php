@@ -87,5 +87,6 @@ class B extends A {
     self::$j3->x += 123;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 (new B())->testObj();
+}

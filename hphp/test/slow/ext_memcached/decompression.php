@@ -3,7 +3,7 @@ const MEMC_SERIALIZED =          4;
 const MEMC_COMPRESSED =         16;
 const MEMC_COMPRESSION_ZLIB =   32;
 const MEMC_COMPRESSION_FASTLZ = 64;
-
+<<__EntryPoint>> function main() {
 $keys = array(
   'no_compression'   => array(
     'flag' => MEMC_SERIALIZED,
@@ -46,4 +46,5 @@ $mc = new Memcached;
 $mc->addServer('localhost', 11211);
 foreach($keys as $key => $value) {
   var_dump($mc->get($key));
+}
 }

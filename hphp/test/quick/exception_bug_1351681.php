@@ -6,9 +6,10 @@ function foo() {
   }
   try { echo "Hi\n"; } catch (Exception $ex) { echo "We should not reach here\n"; }
 }
-
+<<__EntryPoint>> function main(): void {
 try {
   foo();
 } catch (Exception $x) {
   echo "it's ok\n";
+}
 }

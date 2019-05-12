@@ -32,6 +32,7 @@ class B extends A {
     try { unset($this->z3); } catch (Exception $e) {}
   }
 }
-
+<<__EntryPoint>> function main(): void {
 set_error_handler('err');
 (new B())->test();
+}

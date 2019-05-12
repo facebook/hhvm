@@ -33,7 +33,7 @@ class B extends A {
   public function i(int     $i1 = null, integer $i2 = B::ibig,   int $i3 = D2, int $i4 = A::i0) {}
   public function s(string  $s1 = null, string  $s2 = "S", string $s3 = DABC, string $s4 = A::sabc) {}
 }
-
+<<__EntryPoint>> function main(): void {
 $b = new B();
 $b->a();
 $b->b();
@@ -44,3 +44,4 @@ $b->s();
 $b->f();
 
 echo "Pass\n";
+}

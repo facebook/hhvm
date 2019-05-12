@@ -4,7 +4,7 @@ class Foo {
   public $bar;
   public $bling;
 }
-
+<<__EntryPoint>> function main() {
 $data = [
   's:5:"Hello"',
   's:5:"Hello";',
@@ -20,4 +20,5 @@ $data = [
 
 foreach($data as $serialized) {
   var_dump(unserialize($serialized));
+}
 }

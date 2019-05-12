@@ -14,6 +14,7 @@ function main() {
   $x->asd++;
   var_dump($x);
 }
-
+<<__EntryPoint>> function main_entry() {
 main();
 echo "Done\n";
+}

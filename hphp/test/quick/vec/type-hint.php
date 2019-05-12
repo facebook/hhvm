@@ -121,7 +121,7 @@ function test_vec_hint($x) {
     |> takes_vec_or_dict3($$)
     |> var_dump($$);
 }
-
+<<__EntryPoint>> function main(): void {
 set_error_handler(
   (int $errno,
    string $errstr,
@@ -151,3 +151,4 @@ test_vec_hint(keyset[]);
 test_vec_hint(keyset['a', 1]);
 test_vec_hint(Vector{1, 2, 3});
 test_vec_hint(Map{1 => 'a', 2 => 'b'});
+}

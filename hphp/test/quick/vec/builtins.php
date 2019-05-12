@@ -101,10 +101,11 @@ function main($v) {
   echo "array_slice (1): ";
   var_dump(array_slice($v, 1));
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(vec[]);
 main(vec[1, 2, 3, 4, 5]);
 main(vec[5, 4, 3, 2, 1]);
 main(vec["a", "b", "c"]);
 main(vec["b", "a", "a", "b"]);
 main(vec[100]);
+}

@@ -1,7 +1,7 @@
 <?php
 
 class B { public function __wakeup() { var_dump('a'); } }
-
+<<__EntryPoint>> function main() {
 $serialized_strs = array(
   'O:1:"B":0:{}',
   'V:1:"B":0:{}',
@@ -13,4 +13,5 @@ $serialized_strs = array(
 foreach ($serialized_strs as $serialized_str) {
   var_dump(unserialize($serialized_str, array('allowed_classes' => false)));
   var_dump(unserialize($serialized_str));
+}
 }

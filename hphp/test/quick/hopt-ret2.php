@@ -6,6 +6,7 @@ class C {
     return $x + $this->y;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $o = new C;
 echo $o->foo(3) . "\n";
+}

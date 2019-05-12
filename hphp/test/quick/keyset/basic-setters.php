@@ -198,7 +198,8 @@ function test($v) {
   test_new_setop($v);
   test_unset($v);
 }
-
+<<__EntryPoint>> function main(): void {
 test(keyset[]);
 test(keyset[1, 2, 3, 4]);
 test(keyset['b', '3', 3, 10, 'e', 'f', 'g']);
+}

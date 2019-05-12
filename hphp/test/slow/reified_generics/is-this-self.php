@@ -22,10 +22,11 @@ class E {
     var_dump($x is T);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $d = new D();
 
 $d->f(shape('a' => 1, 'b' => 2));
 $d->f(shape('a' => 'string', 'b' => 2));
 $d->f(shape('a' => 1, 'b' => 'string'));
 $d->f(shape('a' => 'string', 'b' => 'string'));
+}

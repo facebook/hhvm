@@ -15,7 +15,7 @@ function postDec($x) {
 function preDec($x) {
   return --$x;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(postInc(2));
 var_dump(preInc(2));
 var_dump(postDec(2));
@@ -40,3 +40,4 @@ var_dump(postInc(null));
 var_dump(preInc(null));
 var_dump(postDec(null));
 var_dump(preDec(null));
+}

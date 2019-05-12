@@ -27,6 +27,7 @@ function foo($val, $a, $b, $c, $d, $e, $f, $g, $h, $i, $j, $k, $l, $m, $n, $o,
   $res = $prod + $sum;
   return $res;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo(500.5, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.1,
              12.2, 13.3, 14.4, 15.5, 16.6, 17.7));
+}

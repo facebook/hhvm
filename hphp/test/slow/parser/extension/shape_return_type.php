@@ -21,7 +21,7 @@ class F {
     'z' => int,
   )> {}
 }
-
+<<__EntryPoint>> function main(): void {
 $program = file_get_contents(__FILE__);
 $json = HH\ffp_parse_string($program);
 $a = HH\ExperimentalParserUtils\find_class_body($json, "A");
@@ -48,3 +48,4 @@ var_dump($description);
 $a = HH\ExperimentalParserUtils\find_class_body($json, "F");
 $shape = HH\ExperimentalParserUtils\find_class_method_shape_return_type($a, "j");
 var_dump(HH\ExperimentalParserUtils\extract_shape_comments($shape));
+}

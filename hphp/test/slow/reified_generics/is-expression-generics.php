@@ -1,7 +1,7 @@
 <?hh
 
 class C<reify Ta, reify Tb> {}
-
+<<__EntryPoint>> function main(): void {
 $x = new C<string, bool>();
 
 echo "-- Valid input of reified\n";
@@ -20,3 +20,4 @@ var_dump($x is C<int, bool, int>);
 var_dump($x is C<_, _, _>);
 var_dump($x is C<_>);
 var_dump($x is C<string>);
+}

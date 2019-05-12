@@ -11,10 +11,11 @@ class C {
     return inst_meth($this, 'private_meth');
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $pub = $c->getCallable();
 $c->caller($pub, 'created in C');
 
 $pri = inst_meth($c, 'private_meth');
 $c->caller($pri, 'created outside');
+}

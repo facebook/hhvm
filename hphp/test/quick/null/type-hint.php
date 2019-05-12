@@ -25,6 +25,7 @@ function main() {
   try_takes_null(false);
   try_takes_null(new StdClass());
 }
-
+<<__EntryPoint>> function main_entry(): void {
 set_error_handler('my_handler');
 main();
+}

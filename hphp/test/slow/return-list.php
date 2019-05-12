@@ -10,5 +10,6 @@ final class Test {
     return list(0, 1);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 Test::getCreateListError();
+}

@@ -12,6 +12,7 @@ function doAThing($followable, $comment_settings) {
 
   return $interaction_settings;
 }
-
+<<__EntryPoint>> function main(): void {
 doAThing(1, '2');
 echo "done\n";
+}

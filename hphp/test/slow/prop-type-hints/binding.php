@@ -33,5 +33,6 @@ class B extends A {
     by_ref(&self::$s);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 (new B())->test();
+}

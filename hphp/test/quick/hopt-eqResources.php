@@ -4,7 +4,7 @@ function foo($x, $y) {
   var_dump($x == $y);
   var_dump($x === $y);
 }
-
+<<__EntryPoint>> function main(): void {
 $x1 = new stdClass;
 $x2 = new stdClass;
 $y1 = curl_init();
@@ -29,4 +29,4 @@ foo($y2, $x1);
 foo($y2, $x2);
 foo($y2, $y1);
 foo($y2, $y2);
-
+}

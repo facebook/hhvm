@@ -12,7 +12,7 @@ abstract final class TestAsyncMysqlConn {
     } catch (Exception $_) {}
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $pool = new AsyncMysqlConnectionPool(darray['foo' => null]);
 var_dump($pool->getPoolStats());
 
@@ -26,4 +26,5 @@ $inputs = vec[
 
 foreach ($inputs as $i) {
   TestAsyncMysqlConn::testMultiQuery($i);
+}
 }

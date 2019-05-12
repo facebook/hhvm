@@ -13,7 +13,7 @@ function row_dump($row, $pixels) {
     printf("\n");
   }
 }
-
+<<__EntryPoint>> function main() {
 $magick = new Imagick(__DIR__.'/facebook.png');
 
 $iterators = array(
@@ -50,3 +50,4 @@ foreach ($iterators as $iterator) {
 }
 
 echo "==DONE==\n";
+}

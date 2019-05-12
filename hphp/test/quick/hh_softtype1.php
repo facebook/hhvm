@@ -8,5 +8,6 @@ function foo(@Bar $x) {
     $x->frob();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 foo(new Foo);
+}

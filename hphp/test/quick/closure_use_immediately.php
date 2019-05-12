@@ -9,5 +9,6 @@ function a() {
   };
   return $c();
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(a());
+}

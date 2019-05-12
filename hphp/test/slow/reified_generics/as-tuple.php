@@ -10,7 +10,8 @@ class C<reify T1> {
     }
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C<string>();
 $c->f<int>(tuple("hello", 1));
 $c->f<int>(tuple(1, "hello"));
+}

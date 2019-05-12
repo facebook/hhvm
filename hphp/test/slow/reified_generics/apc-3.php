@@ -7,7 +7,7 @@ class C<reify T> {
 }
 
 class D extends C<int> {}
-
+<<__EntryPoint>> function main(): void {
 $d = apc_fetch('d');
 if ($d === false) {
   echo "Not in APC\n";
@@ -18,3 +18,4 @@ if ($d === false) {
   echo "In APC\n";
 }
 $d->f();
+}

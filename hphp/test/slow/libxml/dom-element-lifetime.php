@@ -21,6 +21,7 @@ function two() {
 
   var_dump($root->C14N());
 }
-
+<<__EntryPoint>> function main() {
 one();
 two();
+}

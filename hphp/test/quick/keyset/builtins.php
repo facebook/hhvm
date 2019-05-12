@@ -91,10 +91,11 @@ function main($k) {
   echo "array_slice (1): ";
   var_dump(array_slice($k, 1));
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(keyset[]);
 main(keyset[1, 2, 3, 4, 5]);
 main(keyset[5, 4, 3, 2, 1]);
 main(keyset["a", "b", "c"]);
 main(keyset["b", "a", "a", "b"]);
 main(keyset[100]);
+}

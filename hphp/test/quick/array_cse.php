@@ -6,5 +6,6 @@ function array_cse() {
   $x = $a[2] + $a[2];
   return $x;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(array_cse());
+}

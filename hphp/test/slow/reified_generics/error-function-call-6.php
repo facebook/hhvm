@@ -5,5 +5,6 @@ class C {
     var_dump("hi");
   }
 }
-
+<<__EntryPoint>> function main(): void {
 C::f();
+}

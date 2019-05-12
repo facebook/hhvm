@@ -8,6 +8,7 @@ function f<reify T>(mixed $x) {
     var_dump("nope");
   }
 }
-
+<<__EntryPoint>> function main(): void {
 f<int>("hello");
 f<int>(1);
+}

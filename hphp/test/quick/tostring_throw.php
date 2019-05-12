@@ -10,10 +10,11 @@ function foo() {
   $x = new stringer();
   ignore(new dtor(),  "foo" . $x);
 }
-
+<<__EntryPoint>> function main() {
 try {
   foo();
 } catch (Exception $e) {
 }
 
 print "all ok\n";
+}

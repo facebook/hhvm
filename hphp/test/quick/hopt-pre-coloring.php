@@ -16,5 +16,6 @@ function foo($t0, $t1, $t2, $t3, $t4, $t5, $t6) {
     echo "concat = " . $concat . "\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 foo(1, 2, 3, 4, 5, 6, 7);
+}

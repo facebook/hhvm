@@ -5,7 +5,7 @@
 function escapeNewLine($string) {
   return str_replace(array("\n", "\r"), array('\n', '\r'), $string);
 }
-
+<<__EntryPoint>> function main(): void {
 $stringList = array(
   "Test\nString",
   "Test\rString",
@@ -19,4 +19,5 @@ $stringList = array(
 foreach ($stringList as $string) {
   var_dump(escapeNewLine(nl2br($string, true)));
   var_dump(escapeNewLine(nl2br($string, false)));
+}
 }

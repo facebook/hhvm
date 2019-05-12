@@ -4,5 +4,6 @@ class someClass {
     //do things
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $someClass = new someClass;
+}

@@ -24,5 +24,6 @@ function test($a) {
     var_dump($x);
   }
 }
-
+<<__EntryPoint>> function main() {
 test(42);
+}

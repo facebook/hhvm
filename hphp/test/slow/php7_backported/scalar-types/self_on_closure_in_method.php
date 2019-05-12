@@ -7,6 +7,6 @@ class A {
         };
     }
 }
-
+<<__EntryPoint>> function main() {
 var_dump(((new A)->test())());
-
+}

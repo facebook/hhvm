@@ -39,7 +39,7 @@ function foo9() {
 function foo10(double $a) {
   return $a - $a;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3());
@@ -50,3 +50,4 @@ var_dump(foo7());
 var_dump(foo8());
 var_dump(foo9());
 var_dump(foo10(NAN));
+}

@@ -3,7 +3,7 @@
 class B<reify Ta, reify Tb> {}
 
 class C<reify Ta, reify Tb> extends B<Ta, int> {}
-
+<<__EntryPoint>> function main(): void {
 $x = new C<string, bool>();
 
 echo "-- Valid input of reified\n";
@@ -21,3 +21,4 @@ var_dump($x is B<int, bool, int>);
 var_dump($x is B<_, _, _>);
 var_dump($x is B<_>);
 var_dump($x is B<string>);
+}

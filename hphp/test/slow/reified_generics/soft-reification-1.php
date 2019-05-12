@@ -7,5 +7,6 @@ function g<T>() {
   f<int, int, T, int>(); // warning
   f<int, int, T, T>(); // warning and then error
 }
-
+<<__EntryPoint>> function main(): void {
 g();
+}

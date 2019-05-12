@@ -163,7 +163,8 @@ function test($v) {
   test_new_setop($v);
   test_unset($v);
 }
-
+<<__EntryPoint>> function main(): void {
 test(vec[]);
 test(vec[1, 2, 3, 4]);
 test(vec['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']);
+}

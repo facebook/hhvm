@@ -15,7 +15,8 @@ function bar() {
   $y = count($b);
   var_dump($x - $y);
 }
-
+<<__EntryPoint>> function main(): void {
 foo();
 
 bar();
+}

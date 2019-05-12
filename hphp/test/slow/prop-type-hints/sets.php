@@ -26,5 +26,6 @@ class B extends A {
     self::$s4 += 123;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 (new B())->test();
+}

@@ -83,7 +83,7 @@ function setop_main() {
   $a[0] *= twelve();
   var_dump($a[0]);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 setop_main();
-
+}

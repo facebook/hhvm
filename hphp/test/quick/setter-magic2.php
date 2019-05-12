@@ -14,7 +14,8 @@ class Heh {
 function test() {
   SetterMagic2::$heh->prop = 3;
 }
-
+<<__EntryPoint>> function main(): void {
 SetterMagic2::$heh = new Heh;
 SetterMagic2::$heh->prop = 2;
 var_dump(SetterMagic2::$heh);
+}

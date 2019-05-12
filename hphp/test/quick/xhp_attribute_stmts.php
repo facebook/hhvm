@@ -52,7 +52,7 @@ function dump($arr) {
   }
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 dump(:node1::xhpAttributeDeclaration());
 dump(:node2::xhpAttributeDeclaration());
 
@@ -63,3 +63,4 @@ echo repr(array_key_exists("attr0", :base::xhpAttributeDeclaration())) . "\n";
 echo repr(array_key_exists("attr0", :node1::xhpAttributeDeclaration())) . "\n";
 echo repr(array_key_exists("attr0", :node2::xhpAttributeDeclaration())) . "\n";
 echo repr(array_key_exists("attr0", :node3::xhpAttributeDeclaration())) . "\n";
+}

@@ -9,7 +9,7 @@ function random_free_port() {
   }
   return 0;
 }
-
+<<__EntryPoint>> function main() {
 $port = random_free_port();
 $time = microtime(true);
 @stream_socket_client("tcp://172.0.0.1:$port", $errno, $errstr, 0.001);
@@ -19,4 +19,5 @@ if ($elapsed < 1) {
   print "SUCCESS";
 } else {
   print "FAILURE";
+}
 }

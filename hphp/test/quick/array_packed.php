@@ -9,6 +9,6 @@ function test($x) {
   $a = array(0,$x,0,0,0,0,0,0,0,0,0,12); var_dump($a);
   $a = array(1,1,$x,"a"=>$x); var_dump($a);
 }
-
+<<__EntryPoint>> function main(): void {
 test(42);
-
+}

@@ -7,5 +7,6 @@ class Foo {
 const BONK = "ok 4\n";
 const BEEP BOOP = "ok 5\n";
 const a<b<c,d>,e> BLEH = "ok 6\n";
-
+<<__EntryPoint>> function main(): void {
 echo "1..6\n", Foo::BONK, Foo::BOOP, Foo::BLEH, BONK, BOOP, BLEH;
+}

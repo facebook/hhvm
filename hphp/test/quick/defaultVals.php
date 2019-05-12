@@ -28,7 +28,7 @@ class B implements I {
   public function a(int   $a1 = null, int $z1 = 1, int $z2 = D2, int $z3 = 3, int $z4 = null) {}
   public function b(array $b1 = null, array $y = array(), int $z1 = 1, int $z2 = 2, double $z3 = 3.0, string $z4 = "abc") {}
 }
-
+<<__EntryPoint>> function main(): void {
 $a = new A();
 $a->a();
 $a->b();
@@ -46,3 +46,4 @@ $b->a();
 $b->b();
 
 print "Pass\n";
+}

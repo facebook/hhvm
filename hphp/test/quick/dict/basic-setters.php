@@ -163,7 +163,8 @@ function test($v) {
   test_new_setop($v);
   test_unset($v);
 }
-
+<<__EntryPoint>> function main(): void {
 test(dict[]);
 test(dict[0 => 1, 1 => 2, 2 => 3, 3 => 4]);
 test(dict["0" => 'a', "1" => 'b', "2" => 'c', "3" => 'd', "4" => 'e', "a" => 0]);
+}

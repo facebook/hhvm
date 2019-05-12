@@ -5,7 +5,8 @@ function run(&$a, &$b) {
   $a = 3;
   return $b;
 }
-
+<<__EntryPoint>> function main(): void {
 $a = 5;
 var_dump(run(&$a, &$a));
 var_dump($a);
+}

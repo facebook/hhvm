@@ -11,6 +11,7 @@ abstract class B {
 class C extends B {
   private function priv() { echo "C::priv\n"; }
 }
-
+<<__EntryPoint>> function main(): void {
 $obj = new C();
 $obj->func();
+}

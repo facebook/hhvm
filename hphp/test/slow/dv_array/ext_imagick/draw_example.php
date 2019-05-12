@@ -90,7 +90,7 @@ function test_shape(&$canvas) {
 
   $canvas->drawImage($draw);
 }
-
+<<__EntryPoint>> function main() {
 $canvas = new Imagick;
 $canvas->newImage(640, 480, 'white');
 
@@ -156,3 +156,4 @@ var_dump($same > $total * 0.92);
 var_dump($diff < $total * 0.04);
 var_dump($actual_iterator->valid());
 var_dump($expected_iterator->valid());
+}

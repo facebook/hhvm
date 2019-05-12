@@ -7,7 +7,7 @@ function bungle($s) {
 function prefix() {
   return "__rename_func_";
 }
-
+<<__EntryPoint>> function main(): void {
 $stub_name = prefix() . 'strtoupper';
 
 var_dump(strtoupper('tweet'));
@@ -25,3 +25,4 @@ $stub_name = prefix() . 'strtoupper';
 fb_rename_function('strtoupper', 'bungle');
 fb_rename_function($stub_name, 'strtoupper');
 var_dump(strtoupper('tweet'));
+}

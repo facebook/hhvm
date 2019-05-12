@@ -6,5 +6,6 @@ trait T {
     echo "Ok\n";
   }
 };
-
+<<__EntryPoint>> function main(): void {
 T::f();
+}

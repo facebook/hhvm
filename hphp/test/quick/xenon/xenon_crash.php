@@ -42,5 +42,6 @@ class A {
 function main($a) {
   return HH\Asio\join(A::genFoo($a));
 }
-
+<<__EntryPoint>> function main_entry(): void {
 var_dump(main(42));
+}

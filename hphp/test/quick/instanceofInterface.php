@@ -24,9 +24,9 @@ function array_some(array $array) {
   }
   return "Done";
 }
-
+<<__EntryPoint>> function main(): void {
 $a = new C1;
 
 var_dump( array_some(array_map(function($v) { return $v instanceof Interf2; },
                      array($a))) );
-
+}

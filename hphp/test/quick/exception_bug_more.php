@@ -11,7 +11,8 @@ function foo() {
     } catch (MyJunk $z) { echo "Not Here\n"; }
   }
 }
-
+<<__EntryPoint>> function main(): void {
 try {
   foo();
 } catch (Exception $x) { echo "done\n"; }
+}

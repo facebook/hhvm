@@ -15,6 +15,7 @@ class BobbleProvider {
     return 0;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $o = new BobbleProvider();
 $o->wub('hello');
+}

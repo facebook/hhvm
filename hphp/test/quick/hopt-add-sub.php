@@ -15,7 +15,7 @@ function foo3($a, $b) {
 function foo4($a, $b) {
   return ($a - 4) + ($b + 9);
 }
-
+<<__EntryPoint>> function main(): void {
 $vals = array(
   array(0, 0),
   array(1, 1),
@@ -30,4 +30,5 @@ foreach ($vals as list($a, $b)) {
   var_dump(foo2($a, $b));
   var_dump(foo3($a, $b));
   var_dump(foo4($a, $b));
+}
 }

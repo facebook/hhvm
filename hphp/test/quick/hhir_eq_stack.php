@@ -16,7 +16,8 @@ function wat() {
   $k = null;
   return $y;
 }
-
+<<__EntryPoint>> function main(): void {
 try { wat(); }
 catch (Exception $ex) { echo "Caught: " . $ex->getMessage() . "\n"; }
 echo "done\n";
+}

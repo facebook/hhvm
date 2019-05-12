@@ -12,8 +12,9 @@ function run($v, $k, $d) {
   do_print('var_export', $v, $k, $d);
   do_print('print_r', $v, $k, $d);
 }
-
+<<__EntryPoint>> function main(): void {
 run(vec['a', 'b', 'c'],
     keyset['a', 'b', 'c'],
     dict[0 => 'a', 1 => 'b', 2 => 'c']);
 run(vec[], keyset[], dict[]);
+}

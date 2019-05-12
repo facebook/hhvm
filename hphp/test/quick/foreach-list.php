@@ -56,9 +56,10 @@ function test_complex() {
     var_dump($b, $a, $d, $c, $f, $e, $h, $g);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 test_simple();
 test_nested();
 test_single();
 test_key();
 test_complex();
+}

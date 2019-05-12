@@ -6,9 +6,10 @@ class HasCall {
                          print_r($args, true)."\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $hc = new HasCall();
 $hc->CasePreserving(array(1=>2, 3=>15));
 
 $methName = "SnooZZZ";
 $hc->$methName("llberries");
+}

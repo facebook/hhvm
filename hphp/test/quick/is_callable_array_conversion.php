@@ -6,7 +6,8 @@ function myErrorHandler($errno, $errstr, $errfile, $errline)
 {
         echo "Notice: $errstr\n";
 }
-
+<<__EntryPoint>> function main(): void {
 set_error_handler("myErrorHandler");
 var_dump( is_callable( array(1,2,3), true, &$name ) );
 echo $name . "\n";
+}

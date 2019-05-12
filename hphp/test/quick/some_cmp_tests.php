@@ -11,7 +11,7 @@ function lt($x, $y) {
 function gt($x, $y) {
   var_dump($x > $y);
 }
-
+<<__EntryPoint>> function main(): void {
 echo "======\n";
 
 eq('Array', array(1,2));
@@ -56,3 +56,4 @@ lt(null, -1.0);
 echo "\n";
 gt(-1.0, null);
 gt(null, -1.0);
+}

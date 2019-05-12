@@ -18,6 +18,7 @@ class D<reify T1> {
     T2::$f<reify C>();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new D<C>();
 $c->f<C>();
+}

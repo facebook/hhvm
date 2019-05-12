@@ -9,7 +9,8 @@ class Glub extends Club {
     var_dump(property_exists($this, 'app_id'));
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $g = new Glub();
 $g->go();
 var_dump(property_exists($g, 'app_id'));
+}

@@ -6,5 +6,6 @@ class A {
 }
 
 class B extends A {}
-
+<<__EntryPoint>> function main(): void {
 hphp_set_static_property('B', 'x', 'abc', false);
+}

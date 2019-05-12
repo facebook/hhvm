@@ -13,5 +13,6 @@ interface Two extends One {
     public function b() : array;
     public function d() : int;
 }
-
+<<__EntryPoint>> function main() {
 echo "Done\n";
+}

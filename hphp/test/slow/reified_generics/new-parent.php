@@ -16,6 +16,7 @@ class D<reify T> extends C<bool> {
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $d = new D<int>();
 $d->h();
+}

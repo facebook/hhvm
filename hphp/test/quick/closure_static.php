@@ -30,7 +30,8 @@ class A {
     var_dump(array_map(function($a) { return $a; }, array(1,2,3)));
   }
 }
-
+<<__EntryPoint>> function main(): void {
 (new A)->b();
 A::c();
 A::d();
+}

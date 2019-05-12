@@ -9,7 +9,7 @@ function foo() {
   $b = "foo";
   $b .= $x;
 }
-
+<<__EntryPoint>> function main(): void {
 try {
   foo();
 } catch (Exception $e) {
@@ -17,3 +17,4 @@ try {
 }
 
 print "all ok\n";
+}

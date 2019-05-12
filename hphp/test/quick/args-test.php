@@ -450,7 +450,8 @@ function test($f, $a) {
     var_dump($e->getMessage());
   }
 }
-
+<<__EntryPoint>> function main(): void {
 test("f", range(0, 149));
 test("g", range(0, 149));
 test("gr", range(0, 149));
+}

@@ -11,5 +11,6 @@ class B extends A {
     var_dump(HH\meth_caller(self::class, "f")(new B(), 3));
   }
 }
-
+<<__EntryPoint>> function main(): void {
 new B()->specail_classes();
+}

@@ -25,7 +25,7 @@ function as_bar(mixed $x) {
     echo "not Bar: ".gettype($x)."\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 as_foo(1);
 as_foo('1'); // TODO(T29283057)
 as_foo(2);
@@ -45,3 +45,4 @@ as_bar(true);
 as_bar(null);
 as_bar(STDIN);
 as_bar(new stdClass());
+}

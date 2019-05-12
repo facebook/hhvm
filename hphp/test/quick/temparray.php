@@ -17,5 +17,6 @@ function dynArray($n) {
   }
   return $a;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(dynArray(2)[1]);
+}

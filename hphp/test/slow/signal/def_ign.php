@@ -4,7 +4,7 @@ function handler($signo) {
   echo "handler received signal $signo, will do SIG_IGN later\n";
   pcntl_signal($signo, SIG_IGN);
 }
-
+<<__EntryPoint>> function main() {
 pcntl_signal(SIGINT, "handler");
 
 $pid = posix_getpid();
@@ -20,3 +20,4 @@ posix_kill($pid, SIGINT);
 pcntl_signal_dispatch();
 
 echo "should not be printed\n";
+}

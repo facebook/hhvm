@@ -17,6 +17,7 @@ function foo($f, $ref) {
     echo "Catch: ", $e->getMessage(), "\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 foo('non', false);
 foo('ref', true);
+}

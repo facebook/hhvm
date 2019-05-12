@@ -6,9 +6,10 @@ class C<reify T> extends SimpleXMLElement {
     var_dump(HH\ReifiedGenerics\getType<T>());
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C<int>("<hi></hi>");
 $c->f();
 
 $d = clone($c);
 $d->f();
+}

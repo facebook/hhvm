@@ -15,5 +15,6 @@ function heh() {
 function main(Blah $l) {
   $l->{heh()}();
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(new Blah);
+}

@@ -28,7 +28,7 @@ class D extends C {
     C::yar();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 echo "**************\n";
 $c = new C;
 $d = new D;
@@ -41,3 +41,4 @@ D::bar();
 echo "**************\n";
 $c->yar();
 $d->yar();
+}

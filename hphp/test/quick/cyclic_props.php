@@ -22,6 +22,7 @@ function cyclic_prop_nondeclared_props() {
   var_dump($a);
   var_dump($a->x0->y1 = "ok");
 }
-
+<<__EntryPoint>> function main() {
 cyclic_prop_declared_props();
 cyclic_prop_nondeclared_props();
+}

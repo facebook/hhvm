@@ -12,7 +12,8 @@ class A {
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 $a = new A();
 foreach ($a->Gen() as $num) { var_dump($num); }
 foreach (A::SGen() as $num) { var_dump($num); }
+}

@@ -24,5 +24,6 @@ function f<reify T1, reify T2>() {
   };
   $x();
 }
-
+<<__EntryPoint>> function main(): void {
 f<C, B>();
+}

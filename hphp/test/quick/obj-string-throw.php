@@ -7,6 +7,7 @@ class foo {
 function main() {
   echo (string)(new foo());
 }
-
+<<__EntryPoint>> function main_entry() {
 try { main(); } catch (Exception $x) {}
 echo "done.\n";
+}

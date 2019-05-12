@@ -62,5 +62,6 @@ function main($a) {
   var_dump($result);
   fb_setprofile(null);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(42);
+}

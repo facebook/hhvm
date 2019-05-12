@@ -374,7 +374,8 @@ function fini($a) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 base(keyset[1, 2, '1']);
 dim([null, keyset[1, 2, '1', '']]);
 fini([null, keyset[1, 2, '1', '']]);
+}

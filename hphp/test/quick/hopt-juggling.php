@@ -62,7 +62,7 @@ function foo13() {
   $x = array(1,2,3);
   return (int)$x;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3());
@@ -76,3 +76,4 @@ var_dump(foo10(6));
 var_dump(foo11(4, true));
 var_dump(foo12());
 var_dump(foo13());
+}

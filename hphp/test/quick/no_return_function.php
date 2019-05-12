@@ -29,8 +29,9 @@ class Something {
     return 12;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 Something::blah();
 Something::blah("asd");
 
 Something::blah2();
+}

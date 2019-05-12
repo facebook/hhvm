@@ -5,7 +5,8 @@ class C {
     return 1;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C;
 $x = array('C', fun('var_dump'));
 $x();
+}

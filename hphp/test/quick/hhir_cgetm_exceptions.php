@@ -40,9 +40,10 @@ function main() {
   $k = new Unsetter;
   $k->useX(new Something());
 }
-
+<<__EntryPoint>> function main_entry() {
 try {
   main();
 } catch (Exception $x) {
   echo "out\n";
+}
 }

@@ -38,7 +38,7 @@ function foo($o){
   echo $o->incX();
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 $var = 3; // change to 4.0
 $c = new C($var);
 $c->test();
@@ -47,4 +47,4 @@ echo "var is $var\n";
 $var = 4;
 $c->setX(3);
 echo "var is $var\n";
-
+}

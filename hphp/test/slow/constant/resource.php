@@ -18,8 +18,9 @@ const BAR8 = dict[1 => STDIN, 'abc' => STDIN];
 // var_dump(BAR2);
 // var_dump(BAR3);
 // var_dump(BAR4);
-
+<<__EntryPoint>> function main(): void {
 var_dump(BAR5);
 var_dump(BAR6);
 var_dump(BAR7);
 var_dump(BAR8);
+}

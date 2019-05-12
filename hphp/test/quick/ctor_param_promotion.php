@@ -13,10 +13,10 @@ class A {
     return $this->a;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $a = new A('hi', 3, array());
 foreach ($a as $k => $v) {
   var_dump($k, $v);
 }
 var_dump($a->getA());
-
+}

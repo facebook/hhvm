@@ -15,7 +15,7 @@ class Ex2 extends Exception {
 function foo() {
   throw new Ex2();
 }
-
+<<__EntryPoint>> function main(): void {
 try {
   foo();
   echo "should not be here\n";
@@ -28,3 +28,4 @@ try {
 }
 
 echo "after exception\n";
+}

@@ -5,6 +5,7 @@ class C {
     var_dump("hi");
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->f();
+}

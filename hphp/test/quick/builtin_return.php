@@ -10,5 +10,6 @@ function foo(array $data) {
   }
   return $ret;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo(array()));
+}

@@ -1,7 +1,7 @@
 <?hh
 
 class C<reify Ta> {}
-
+<<__EntryPoint>> function main(): void {
 $c = new C<shape('a' => int, 'b' => string, ...)>();
 
 // just wildcard
@@ -26,3 +26,4 @@ var_dump($c is C<shape(?'a' => int, 'b' => string)>);
 
 // unknown fields
 var_dump($c is C<shape('a' => int, 'b' => string, ...)>);
+}

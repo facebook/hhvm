@@ -9,7 +9,8 @@ function foo() {
     echo "Error\n";
   }
 }
-
+<<__EntryPoint>> function main() {
 foo();
 
 echo "End\n";
+}

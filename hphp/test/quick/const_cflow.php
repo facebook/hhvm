@@ -11,5 +11,6 @@ function test($b, $c) {
   $x += true ? $b : $c;
   f(&$x);
 }
-
+<<__EntryPoint>> function main(): void {
 test(2, 3);
+}

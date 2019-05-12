@@ -20,7 +20,7 @@ class MostOfTheInterfaces implements IG {}
 
 // literally all of them. literally.
 class AllTheInterfaces extends MostOfTheInterfaces implements IC {}
-
+<<__EntryPoint>> function main(): void {
 echo "interfaces of Base:\n";
 $x = class_implements('Base');
 ksort(&$x);
@@ -45,3 +45,4 @@ echo "\ninterfaces of AllTheInterfaces:\n";
 $x = class_implements('AllTheInterfaces');
 ksort(&$x);
 var_dump($x);
+}

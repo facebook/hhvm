@@ -22,5 +22,6 @@ class B extends A {
     var_dump($x(new B(), 3));
   }
 }
-
+<<__EntryPoint>> function main(): void {
 B::specail_classes();
+}

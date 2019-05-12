@@ -11,7 +11,8 @@ class Foo {
     return Foo::$z;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 Foo::setZ(4);
 
 var_dump(Foo::getZ());
+}

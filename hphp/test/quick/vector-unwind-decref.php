@@ -67,7 +67,7 @@ function main() {
   $b->fake->anotherfake = 'ello';
   # exception!
 }
-
+<<__EntryPoint>> function main_entry() {
 try {
   echo "calling main\n";
   main();
@@ -76,3 +76,4 @@ try {
 }
 
 echo "last line\n";
+}

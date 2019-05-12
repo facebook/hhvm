@@ -20,9 +20,10 @@ class D<reify C1, reify C2> {
     $this->g<(C1, (C2, int), T1)>();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C<int, string>();
 $c->f<int>();
 
 $d = new D<int, string>();
 $d->f<int>();
+}

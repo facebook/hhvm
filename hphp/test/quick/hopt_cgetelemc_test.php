@@ -11,5 +11,6 @@ function foo($k) {
   echo $array[$idx];
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 foo(12);
+}

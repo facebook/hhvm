@@ -21,6 +21,7 @@ class B extends X {
     $a->foo();
   }
 };
-
+<<__EntryPoint>> function main(): void {
 $b = new B;
 $b->foo();
+}

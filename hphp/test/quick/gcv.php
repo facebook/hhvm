@@ -98,7 +98,7 @@ class SE extends SD {
   }
 }
 
-
+<<__EntryPoint>> function main(): void {
 echo ">>> testing instance variables from global scope\n";
 echo "accessing C\n";
 var_dump(get_class_vars('C'));
@@ -128,4 +128,4 @@ echo ">>> testing static variables from class scope\n";
 SC::show();
 SD::show();
 SE::show();
-
+}

@@ -9,6 +9,7 @@ function go($a) {
   if (isset($a[2]['hi'])) return true;
   return false;
 }
-
+<<__EntryPoint>> function main(): void {
 $a = array();
 var_dump(go($a));
+}

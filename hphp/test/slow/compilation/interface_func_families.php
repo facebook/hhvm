@@ -23,5 +23,6 @@ function g(X $x, int $i) {
   }
   return ~42;
 }
-
+<<__EntryPoint>> function main(): void {
 echo g(new Z, 42), "\n";
+}

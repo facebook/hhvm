@@ -13,7 +13,7 @@ class Test<reify T1> {
 function f<reify T>() {
   return new T();
 }
-
+<<__EntryPoint>> function main(): void {
 echo "function\n";
 
 var_dump(f<C>() is C);
@@ -28,3 +28,4 @@ var_dump($t->f<C>(false) is C);
 var_dump($t->f<D>(false) is C);
 var_dump($t->f<D>(true) is E);
 var_dump($t->f<D>(false) is E);
+}

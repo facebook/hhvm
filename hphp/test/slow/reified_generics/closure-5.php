@@ -26,6 +26,7 @@ class D<reify T> {
     $x();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $d = new D<B>();
 $d->f<C>();
+}

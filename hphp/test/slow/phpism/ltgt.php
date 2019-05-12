@@ -5,5 +5,6 @@ function f(?int $x): void {
     echo $x;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 f(1);
+}

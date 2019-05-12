@@ -14,6 +14,7 @@ class D<reify T1> {
     var_dump(T2::A);
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $d = new D<C1>();
 $d->f<C2>();
+}

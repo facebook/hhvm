@@ -98,7 +98,7 @@ function foo15() {
     return $e->getMessage();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3());
@@ -114,3 +114,4 @@ var_dump(foo12());
 var_dump(foo13());
 var_dump(foo14());
 var_dump(foo15());
+}

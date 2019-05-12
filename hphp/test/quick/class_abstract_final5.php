@@ -6,6 +6,7 @@ abstract final class Utils {
     echo 'Constructor!';
   }
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 echo 'Done', "\n";
+}

@@ -16,7 +16,8 @@ function go($c, $k) {
 
   var_dump($c);
 }
-
+<<__EntryPoint>> function main(): void {
 go(Vector {'zero', 'one'}, 2);
 go(Vector {'zero', 'one'}, -2);
 go(Pair {'zero', 'one'}, 2);
+}

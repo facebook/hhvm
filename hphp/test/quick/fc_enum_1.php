@@ -46,7 +46,7 @@ function do_case(@Bar $x): int {
 function welp(@Baz $x): void {
   var_dump($x);
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(test());
 lurr();
 var_dump(do_case(Bar::BAR));
@@ -60,3 +60,4 @@ welp(20);
 welp(20.0);
 
 //
+}

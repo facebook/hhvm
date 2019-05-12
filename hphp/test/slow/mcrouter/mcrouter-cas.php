@@ -26,7 +26,7 @@ async function set_get_cas_get_del(MCRouter $mcr, $fail): Awaitable<string> {
   await $mcr->del($key);
   return "Success";
 }
-
+<<__EntryPoint>> function main(): void {
 $servers = Vector { getenv('HPHP_TEST_MCROUTER') };
 $mcr = MCRouter::createSimple($servers);
 $wh = Vector {
@@ -36,4 +36,5 @@ $wh = Vector {
 $results = HH\Asio\join(HH\Asio\v($wh));
 foreach ($results as $result) {
   var_dump($result);
+}
 }

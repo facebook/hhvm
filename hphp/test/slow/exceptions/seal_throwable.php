@@ -13,7 +13,7 @@ class foo implements Throwable {
   function getPrevious() {}
   function __toString() {}
 }
-
+<<__EntryPoint>> function main() {
 try {
   try {
     throw new foo('try');
@@ -22,4 +22,5 @@ try {
   }
 } catch (Throwable $t) {
   var_dump($t->getMessage());
+}
 }

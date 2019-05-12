@@ -10,5 +10,6 @@ class someClass2 extends someClass1 {
     $this->someMethod();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $someClass2 = new someClass2;
+}

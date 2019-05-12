@@ -25,7 +25,7 @@ function is_bar(mixed $x) {
     echo "not Bar\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 is_foo(1);
 is_foo('1');
 is_foo(2);
@@ -45,3 +45,4 @@ is_bar(true);
 is_bar(null);
 is_bar(STDIN);
 is_bar(new stdClass());
+}

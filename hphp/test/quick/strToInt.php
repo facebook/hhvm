@@ -3,7 +3,7 @@
 function foo($x) {
   var_dump((int)$x);
 }
-
+<<__EntryPoint>> function main(): void {
 foo("1234");
 foo("1234.56");
 foo("123456789012345");
@@ -21,4 +21,4 @@ var_dump((int)"123456789123456789123456789");
 var_dump((int)"-65");
 var_dump((int)"");
 var_dump((int)"q123");
-
+}

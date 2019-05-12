@@ -19,6 +19,7 @@ function NewRedisTestInstance() {
   var_dump($authok);
   return $r;
 }
-
+<<__EntryPoint>> function main() {
 $r = NewRedisTestInstance();
 if ($r) echo true;
+}

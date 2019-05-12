@@ -5,7 +5,7 @@ class C<reify T> {}
 function f(mixed $x): C<int> {
   return $x;
 }
-
+<<__EntryPoint>> function main(): void {
 set_error_handler(
   (int $errno,
   string $errstr,
@@ -20,3 +20,4 @@ set_error_handler(
 
 f(new C<int>());
 f(new C<string>());
+}

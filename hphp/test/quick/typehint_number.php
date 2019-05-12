@@ -31,6 +31,7 @@ function main() {
   try_takes_num(new NumericallyStringable()); // nope: object
   try_takes_num(new StdClass()); // nope: object
 }
-
+<<__EntryPoint>> function main_entry(): void {
 set_error_handler('my_handler');
 main();
+}

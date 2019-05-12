@@ -8,6 +8,7 @@ class Bar implements Hey {
   public function wat($x) {
   }
 }
-
+<<__EntryPoint>> function main(): void {
 new Bar();
 echo "ok\n";
+}

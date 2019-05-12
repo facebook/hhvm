@@ -5,5 +5,6 @@ class A {
     return 'id';
   }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump((new A)->b());
+}

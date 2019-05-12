@@ -98,6 +98,7 @@ function main($v) {
   echo "array_slice (1): ";
   var_dump(array_slice($v, 1));
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(dict[]);
 main(dict[0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5]);
+}

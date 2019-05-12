@@ -10,10 +10,11 @@ class Fub {
     self::FLUB => array(123)
   );
 }
-
+<<__EntryPoint>> function main(): void {
 $f = new Fub;
 var_dump($f->dub);
 unset($f);
 
 $f = new Fub;
 var_dump($f->dub);
+}

@@ -24,7 +24,7 @@ function get_addresses($host) {
   }
   return $r;
 }
-
+<<__EntryPoint>> function main() {
 var_dump(gethostname() != false);
 
 var_dump(strpos(gethostbyaddr("127.0.0.1"), 'localhost'));
@@ -63,3 +63,4 @@ closelog();
 openlog("TestExtNetwork", LOG_ODELAY, LOG_USER);
 syslog(LOG_INFO, "testing");
 closelog();
+}

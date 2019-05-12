@@ -22,7 +22,7 @@ function test_num_args(string $type, array $extra_args, mixed ...$more_args) {
     )
   );
 }
-
+<<__EntryPoint>> function main(): void {
 $extra_args_set = array(
   array(),
   array('hello'),
@@ -33,4 +33,5 @@ foreach ($extra_args_set as $extra_args) {
   test_num_args('simple', $extra_args);
 
   test_num_args('arg', $extra_args, 'defined_arg');
+}
 }

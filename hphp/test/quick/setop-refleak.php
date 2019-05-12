@@ -11,6 +11,7 @@ function main() {
   $x->bug += 12;
   var_dump($x);
 }
-
+<<__EntryPoint>> function main_entry() {
 main();
 echo "done\n";
+}

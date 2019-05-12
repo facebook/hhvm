@@ -18,6 +18,7 @@ class D {
 class E {
   const string A = "from_E";
 }
-
+<<__EntryPoint>> function main(): void {
 f<D>();
 f<E>();
+}

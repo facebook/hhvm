@@ -39,7 +39,7 @@ function foo8($x, $y, $z) {
 function foo9($x, $y, $z) {
   return ($y | $x) & ($z | $x);
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
 var_dump(foo3(4));
@@ -49,3 +49,4 @@ var_dump(foo6(4,6,7));
 var_dump(foo7(4,6,7));
 var_dump(foo8(4,6,7));
 var_dump(foo9(4,6,7));
+}

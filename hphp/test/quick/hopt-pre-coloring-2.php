@@ -8,5 +8,6 @@ function foo($t0, $t1, $t2, $t3) {
   echo $t1;
   echo "\n";
 }
-
+<<__EntryPoint>> function main(): void {
 foo(1, 2, 3, 4);
+}

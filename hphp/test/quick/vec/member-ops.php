@@ -331,7 +331,8 @@ function fini($a) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 base(vec[null, ['a' => 100], ""]);
 dim([null, vec[null, ['a' => 100], ""]]);
 fini([null, vec[null, "abc", ""]]);
+}

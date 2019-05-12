@@ -4,6 +4,7 @@
 function toto(mixed $x, ...): int {
   return (int)$x;
 }
-
+<<__EntryPoint>> function main(): void {
 echo toto(1), "\n";
 echo toto("1"), "\n";
+}

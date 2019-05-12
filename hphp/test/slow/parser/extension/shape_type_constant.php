@@ -10,7 +10,7 @@ class C {
 class D extends C {
 
 }
-
+<<__EntryPoint>> function main(): void {
 $rd = new ReflectionClass("D");
 $program = file_get_contents($rd->getFileName());
 $json = HH\ffp_parse_string($program);
@@ -27,3 +27,4 @@ while ($rd !== false) {
 }
 invariant($description !== null);
 var_dump($description);
+}

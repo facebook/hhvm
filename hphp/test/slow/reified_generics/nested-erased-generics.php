@@ -8,6 +8,7 @@ class C<T> {
     return new A<B<T>>();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C<int>();
 var_dump($c->f());
+}

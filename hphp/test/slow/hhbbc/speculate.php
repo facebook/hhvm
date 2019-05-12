@@ -15,6 +15,7 @@ function test(?string $a, ?string $b) {
     return 24;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(test("a", null));
 var_dump(test(null, "b"));
+}

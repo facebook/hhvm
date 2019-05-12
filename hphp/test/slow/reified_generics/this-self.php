@@ -24,7 +24,8 @@ class E {
     var_dump(HH\ReifiedGenerics\getType<T>());
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $d = new D();
 
 $d->f();
+}

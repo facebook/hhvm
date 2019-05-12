@@ -26,5 +26,6 @@ function starts_with(
         )
       );
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(starts_with("foobar", "Foo", true));
+}

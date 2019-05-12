@@ -8,5 +8,6 @@ class C {
     self::f<int>();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 C::g();
+}

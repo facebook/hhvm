@@ -15,7 +15,7 @@ function main() {
   foo('hello');
   foo('world');
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main();
 
 $last = null;
@@ -29,4 +29,5 @@ foreach (xenon_get_data() as $sample) {
       }
     }
   }
+}
 }

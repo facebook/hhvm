@@ -3,7 +3,7 @@
 class C<reify T>{}
 
 function f(C<int> $c) {}
-
+<<__EntryPoint>> function main(): void {
 set_error_handler(
   (int $errno,
   string $errstr,
@@ -18,3 +18,4 @@ set_error_handler(
 
 $c = new C<string>();
 f($c);
+}

@@ -4,7 +4,7 @@ class Foo {
     print("In method: $a, $b, $c\n");
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $repro = new Foo();
 $a = 'hello';
 $b = 'world';
@@ -15,3 +15,4 @@ $repro->method(
   inout $c,
 );
 print("After method: $a, $b, $c\n");
+}

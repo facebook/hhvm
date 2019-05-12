@@ -11,5 +11,6 @@ function a<T>() {
   g(new C<string, T, int>);
   h(new C<string, T, string>);
 }
-
+<<__EntryPoint>> function main(): void {
 a();
+}

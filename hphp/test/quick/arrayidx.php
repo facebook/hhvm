@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
 
   $a = array('1' => '2', 'hello' => 'world', '' => 'empty');
   $b = null;
@@ -21,5 +21,3 @@ function main() {
   // should fatal
   var_dump(hphp_array_idx($b, 'not_reached', 14));
 }
-
-main();

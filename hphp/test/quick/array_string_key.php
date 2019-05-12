@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   // test CGetM
   $a = array();
   $a[0] = "one";
@@ -33,5 +33,3 @@ function main() {
   $a["0 "] = "and this";
   echo $a[0] . "\n";
 }
-
-main();

@@ -7,7 +7,7 @@ class A {
   public $z = 'abc';
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $a = new A();
   try {
     echo "============== store #1 =================\n";
@@ -33,5 +33,3 @@ function test() {
   }
 
 }
-
-test();

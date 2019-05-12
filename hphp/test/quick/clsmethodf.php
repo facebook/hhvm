@@ -49,8 +49,7 @@ class a extends aa {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = new a();
   $a->nons();
 }
-main();

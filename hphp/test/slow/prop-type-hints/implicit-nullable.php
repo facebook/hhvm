@@ -8,8 +8,7 @@ final class A {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = new A();
   echo "Done\n";
 }
-main();

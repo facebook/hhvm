@@ -1,6 +1,6 @@
 <?hh
 
-function f() {
+<<__EntryPoint>> function f(): void {
   $a = range(-3, 3);
   $a []= true;
   $a []= false;
@@ -17,6 +17,3 @@ function f() {
     }
   }
 }
-
-f();
-

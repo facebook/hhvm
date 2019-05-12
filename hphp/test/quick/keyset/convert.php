@@ -82,7 +82,7 @@ function convert_to($from) {
   echo "====================================================\n";
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   convert_to([]);
   convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
   convert_to([100, 200, 'a', 'b']);
@@ -137,5 +137,3 @@ function main() {
   convert_from(keyset['z', 'y', 'x']);
   convert_from(keyset[1, '1', 2, '2']);
 }
-
-main();

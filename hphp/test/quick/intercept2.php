@@ -29,7 +29,7 @@ function swizzle($name, $obj, $args, $data, &$done) {
   $done = false;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new C();
   for ($i = 0; $i < 3; $i++) {
     test();
@@ -41,6 +41,3 @@ function main() {
     }
   }
 }
-
-main();
-

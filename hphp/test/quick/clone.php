@@ -11,12 +11,12 @@ class A {
   public function __clone() {
     $this->x = ++self::$count;
   }
-};
+}
 
 class C {}
 function box(&$what) {}
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = new A;
   $a->y = "foo";
   $b = clone $a;
@@ -32,5 +32,3 @@ function main() {
   $e = clone $d;
   var_dump($d);  // the reference doesn't persist across the clone
 }
-main();
-

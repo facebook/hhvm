@@ -16,7 +16,7 @@ class ary implements ArrayAccess {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   $a = array(null, new ary(), array('cat' => 'meow', 'dog' => 'woof'));
   var_dump($a[0]['unused']);
   var_dump($a[1]['tick']);
@@ -31,5 +31,3 @@ function main() {
   var_dump($a[2]['cat']);
   var_dump($a[3]['unused']);
 }
-
-main();

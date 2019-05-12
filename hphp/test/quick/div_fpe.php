@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = -1;
   $y = -9223372036854775807;
   --$y;
@@ -11,5 +11,3 @@ function main() {
   --$y;
   var_dump($y % $x); // minimum int mod -1, shouldn't sigfpe
 }
-
-main();

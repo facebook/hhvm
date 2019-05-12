@@ -28,7 +28,7 @@ class doer {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $b = new one;
   $d = new two;
   $x = new doer;
@@ -41,5 +41,3 @@ function main() {
   $x->sjunk(new three);
   $x->sjunk($d);
 }
-
-main();

@@ -71,7 +71,7 @@ function is($x, $y) {
   var_dump($x == $y);
 }
 
-function cmpr() {
+<<__EntryPoint>> function cmpr(): void {
   $s = array(
     "",
     "123",
@@ -111,6 +111,3 @@ function cmpr() {
   print "----------\n0 == '-456'\n"; 
   var_dump(0 == "-456");
 }
-
-cmpr();
-

@@ -18,8 +18,7 @@ final class B {
   }
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $b = new B();
   var_dump($b->foo());
 }
-test();

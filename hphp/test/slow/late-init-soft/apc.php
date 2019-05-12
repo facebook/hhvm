@@ -11,7 +11,7 @@ class A {
   public $z = 'abc';
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   set_error_handler('error_handler');
 
   HH\set_soft_late_init_default(vec[]);
@@ -22,5 +22,3 @@ function test() {
   var_dump($a->y);
   apc_store('a-key2', $a);
 }
-
-test();

@@ -35,7 +35,7 @@ class D extends C {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new C;
   $d = new D;
   echo "**************\n";
@@ -50,5 +50,3 @@ function main() {
   echo "**************\n";
   static::foo();
 }
-
-main();

@@ -14,7 +14,7 @@ function create($a, $b, $c, $d) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   // These should succeed:
   var_dump(dict[]);
   var_dump(dict['a' => 1, 'b' => 2, 'c' => 3]);
@@ -53,5 +53,3 @@ function main() {
   create(false, 'first', null, 'second');
   create(vec[], 'first', dict[], 'second');
 }
-
-main();

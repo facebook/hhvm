@@ -18,7 +18,7 @@ class C {
   const VEC5 = vec["const1", "const2", "const3", "const4"];
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $v1 = vec[];
   $v2 = vec[1, 2, 3, 4, 5];
   $v3 = vec['a', 'b', 'c', 'd', 'e'];
@@ -31,5 +31,3 @@ function main() {
            C::$vec1, C::$vec2, C::$vec3, $c->vec4,
            $c::VEC5, (new ReflectionClass('C'))->getAttributes());
 }
-
-main();

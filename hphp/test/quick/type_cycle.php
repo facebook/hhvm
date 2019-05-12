@@ -1,7 +1,7 @@
 <?hh
 
 // A fun test for type inference.
-function foo() {
+<<__EntryPoint>> function foo(): void {
   $a1 = 0;
   $a2 = 0;
   $a3 = 0;
@@ -55,5 +55,3 @@ function foo() {
   if (is_int($a1)) echo "haha\n";
   echo $a1 . "\n";
 }
-
-foo();

@@ -7,9 +7,7 @@ function nonHphpArray( ) {
 function test1() {
   return f()[0];
 }
-function main() {
+<<__EntryPoint>> function main(): void {
   var_dump(test1());
   var_dump(nonHphpArray()[0]);
 }
-
-main();

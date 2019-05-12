@@ -44,11 +44,10 @@ function run_test($func) {
   $func($a);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   set_error_handler('error_handler');
 
   run_test('test_cast');
   run_test('test_iter');
   run_test('test_obj_prop_array');
 }
-main();

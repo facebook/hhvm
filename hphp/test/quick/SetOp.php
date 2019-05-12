@@ -2,7 +2,7 @@
 
 class C { public static $a; }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $y = 20;
   var_dump($y += 10);
 
@@ -12,4 +12,3 @@ function main() {
   C::$a = 20;
   var_dump(C::$a += 10);
 }
-main();

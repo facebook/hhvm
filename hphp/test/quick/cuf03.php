@@ -13,7 +13,7 @@ class E {
 }
 
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $obj = new C;
   call_user_func(array($obj, 'foo'));
   call_user_func(array($obj, 'C::foo'));
@@ -47,5 +47,3 @@ function main() {
   call_user_func(array($obj, 'D::bar'));
   call_user_func(array($obj, 'E::bar')); // warns and bails returning null
 }
-main();
-

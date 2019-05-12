@@ -165,10 +165,9 @@ function failures() {
   echo ">>> End of failure cases <<<\n";
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   test_string();
   test_primitive();
   test_vec();
   failures();
 }
-main();

@@ -6,11 +6,9 @@ class Foo {
   public $XYZ = vec["hello", "world", 1, 2];
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $f = new Foo;
   var_dump($f::ABC);
   var_dump($f->XYZ);
   var_dump((new ReflectionClass('Foo'))->getAttributes());
 }
-
-main();

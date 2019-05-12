@@ -30,7 +30,7 @@ function try_unserialize($val) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   roundtrip(keyset[]);
   roundtrip(keyset[1, 2, 3]);
   roundtrip(keyset['a', 'b', 'c']);
@@ -56,5 +56,3 @@ function main() {
   try_unserialize("a:2:{i:123;s:3:\"abc\";i:456;k:1:{R:2;}}");
   try_unserialize("a:2:{i:123;k:1:{i:731;}i:456;R:3;}");
 }
-
-main();

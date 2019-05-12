@@ -107,7 +107,7 @@ function test($v, $description) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   test(dict[], "empty");
   test(dict[0 => new stdclass(), 1 => new stdclass(), 2 => new stdclass()],
        "3 objects");
@@ -119,5 +119,3 @@ function main() {
   test(dict[0 => "val1", "key1" => 100, 1 => 200, "key2" => "val2"],
        "int/string mix");
 }
-
-main();

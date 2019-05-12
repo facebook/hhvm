@@ -17,12 +17,10 @@ function populateArray($max) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = f();
   echo "writing: "; echo ($a[1] = 66); echo "\n";
   echo "reading: "; echo $a[1]; echo "\n";
 
   populateArray(1000);
 }
-
-main();

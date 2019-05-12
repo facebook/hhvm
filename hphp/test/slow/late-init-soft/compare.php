@@ -10,7 +10,7 @@ class A {
   public $z = 'abc';
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   set_error_handler('error_handler');
   HH\set_soft_late_init_default(123);
 
@@ -78,5 +78,3 @@ function main() {
   var_dump($a);
   var_dump($b);
 }
-
-main();

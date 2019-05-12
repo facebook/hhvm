@@ -20,7 +20,7 @@ function manipulate($arr) {
   var_dump($arr);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $foo = keyset[
     __hhvm_intrinsics\launder_value('a'),
     __hhvm_intrinsics\launder_value('b'),
@@ -48,5 +48,3 @@ function main() {
   $arr = array('foo' => keyset[$foo[1], '2', 3]);
   manipulate($arr);
 }
-
-main();

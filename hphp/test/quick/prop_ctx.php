@@ -19,7 +19,7 @@ class b extends a {
   public $prop = 'I am public in b';
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $b = new b();
   $b::f($b);
   t::f($b);
@@ -31,4 +31,3 @@ function main() {
   $a::f($a);
   t::f($a);
 }
-main();

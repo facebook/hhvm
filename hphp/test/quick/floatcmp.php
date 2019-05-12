@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $nan = acos(1.01);
   $values = array(-0.0, 0.0, 0, 0.0001, $nan, 1.0);
   $cmps = array(
@@ -35,4 +35,3 @@ function main() {
     }
   }
 }
-main();

@@ -8,11 +8,10 @@ function test() {
     var_dump(0);
   }
 }
-function main() {
+<<__EntryPoint>> function main(): void {
   test();
   fb_rename_function('foo', 'baz');
   test();
   fb_rename_function('bar', 'foo');
   test();
 }
-main();

@@ -1,7 +1,5 @@
 <?hh
 
-function test() {
+<<__EntryPoint>> function test(): void {
   X::foo();
 }
-
-test();

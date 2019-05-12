@@ -23,7 +23,7 @@ function create($a, $b, $c, $d) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   // These should succeed:
   var_dump(vec[]);
   var_dump(vec['a', 'b', 'c']);
@@ -51,5 +51,3 @@ function main() {
     echo "Exception: " . $e->getMessage() . "\n";
   }
 }
-
-main();

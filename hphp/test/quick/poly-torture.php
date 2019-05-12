@@ -72,7 +72,7 @@ class MagicBox {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = array();
   for ($i = 0; $i < 5; $i++) {
     $m = new MagicBox(pRandObj());
@@ -88,5 +88,3 @@ function main() {
     } catch (Exception $e) { echo get_class($e), ": ", $e->getMessage(), "\n"; }
   }
 }
-
-main();

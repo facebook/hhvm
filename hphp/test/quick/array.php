@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = array();
   $x[4] = 43;
   print $x[4] . "\n";
@@ -10,4 +10,3 @@ function main() {
   $x[$i] = 'foo';
   var_dump(isset($x[131664776877370]));
 }
-main();

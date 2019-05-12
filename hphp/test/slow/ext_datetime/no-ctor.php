@@ -13,7 +13,7 @@ class MyDateInterval extends DateInterval {
   public function __construct() {}
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   try {
     $x = new MyDateTime();
     $y = clone $x;
@@ -38,4 +38,3 @@ function test() {
     echo $e->getMessage() . "\n";
   }
 }
-test();

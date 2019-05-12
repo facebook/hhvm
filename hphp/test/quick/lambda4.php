@@ -1,6 +1,6 @@
 <?hh
 
-function function_scope() {
+<<__EntryPoint>> function function_scope(): void {
   // Shouldn't try to capture $k
   $bar = () ==> {
     foreach (array(1,2,3,4) as $k) {
@@ -26,5 +26,3 @@ function function_scope() {
   echo "z in parent is now: $z\n";
   $quux(); // print NULL
 }
-
-function_scope();

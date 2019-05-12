@@ -6,9 +6,7 @@ class B {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $b = new B;
   $b->foo();
 }
-
-main();

@@ -17,10 +17,8 @@ class doer {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $d = new two;
   $x = new doer;
   $x->junk($d);
 }
-
-main();

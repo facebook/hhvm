@@ -26,12 +26,9 @@ class D {
   public static function test(self $a1)  { echo __CLASS__."\n"; }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new C;
   B::test($c);
   C::test($c);
   D::test($c);
 }
-
-main();
-

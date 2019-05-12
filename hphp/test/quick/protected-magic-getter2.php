@@ -6,10 +6,8 @@ class Whatever {
   public function __get($name) { var_dump($name); }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $l = new Whatever();
   $l->blah++;
   var_dump($l);
 }
-
-main();

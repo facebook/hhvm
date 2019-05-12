@@ -1,5 +1,5 @@
 <?hh
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = array('a' => 1);
   $y = array('b' => 2);
   var_dump($x <= $y);
@@ -15,4 +15,3 @@ function main() {
   var_dump($x !== $y);
   echo "\n";
 }
-main();

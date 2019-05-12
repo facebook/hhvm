@@ -183,7 +183,7 @@ class ComplexUnion {
   }
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $p = new DummyProtocol();
   $v1 = new ComplexUnion();
   $v1->set_stringValue('What is the answer?');
@@ -210,4 +210,3 @@ function test() {
   $p->getTransport()->buff[1] = pack('C', 0x42);
   var_dump(thrift_protocol_read_compact($p, 'ComplexUnion'));
 }
-test();

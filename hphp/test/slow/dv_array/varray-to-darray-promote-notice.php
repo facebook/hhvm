@@ -1,7 +1,6 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test() {
+<<__EntryPoint>> function test(): void {
   var_dump(dict(varray[1, 2, 3]));
 }
-test();

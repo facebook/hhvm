@@ -25,7 +25,7 @@ class c {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new c;
   $c->showProp();
   $c->setProp();
@@ -34,4 +34,3 @@ function main() {
   $c->showProp();
   $c->setProp();
 }
-main();

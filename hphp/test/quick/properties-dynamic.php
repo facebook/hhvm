@@ -18,7 +18,7 @@ function propset($o, $p, $v) {
   $o->$p = $v;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new c();
   var_dump(propget($c, 'prop'));
   propset($c, 'prop', 'new value');
@@ -27,4 +27,3 @@ function main() {
   var_dump(propget($c, 'fakeprop'));
   propset($c, 'fakeprop2', 'blah');
 }
-main();

@@ -10,8 +10,7 @@ class foo {
     $zzzzzz = function() {};
   }
 }
-function main() {
+<<__EntryPoint>> function main(): void {
   $l = new foo;
   $l->bar();
 }
-main();

@@ -26,9 +26,8 @@ class A {
   }
 }
 
-function foo() {
+<<__EntryPoint>> function foo(): void {
   $x = new A();
   $x->what();
   $x->what();
 }
-foo();

@@ -13,9 +13,8 @@ class c {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $o = new c;
   c::f($o);
   t::f($o);
 }
-main();

@@ -8,10 +8,9 @@ class C {
   }
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $c = new C();
   $c->add(0, 'z');
   $c->add(0, 'z');
   var_dump(__hhvm_intrinsics\launder_value('z'));
 }
-test();

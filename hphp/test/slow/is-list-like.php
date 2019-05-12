@@ -6,7 +6,7 @@ function test($x) {
   var_dump(HH\is_list_like($x));
 }
 
-function test_all() {
+<<__EntryPoint>> function test_all(): void {
   test(null);
   test(false);
   test(true);
@@ -35,4 +35,3 @@ function test_all() {
   test(dict['a' => 100, 'b' => 200]);
   test(keyset[0, 100]);
 }
-test_all();

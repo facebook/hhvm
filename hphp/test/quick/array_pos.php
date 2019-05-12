@@ -1,6 +1,6 @@
 <?hh
 // test manually created array
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = null;
   $a = array();
   $a[0] = 'zero';
@@ -13,4 +13,3 @@ function main() {
   $a = array('zero', ($x ? 'one' : 'one'));
   var_dump(current(&$a));
 }
-main();

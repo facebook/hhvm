@@ -18,7 +18,7 @@ class Interceptor {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   fb_intercept('meep', 'Interceptor::io_intercept', true);
   try {
     meep(1, 2);
@@ -26,4 +26,3 @@ function main() {
     echo $e->getMessage() . "\n";
   }
 }
-main();

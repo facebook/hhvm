@@ -4,9 +4,7 @@ class klass implements Countable {
   public function count() { return 123; }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $k = new klass;
   var_dump(count($k));
 }
-main();
-

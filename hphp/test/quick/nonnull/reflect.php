@@ -19,11 +19,9 @@ function dump($x) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   echo "\nReflectionMethod:\n";
   dump(new ReflectionMethod('Foo::bar'));
   echo "\nReflectionFunction:\n";
   dump(new ReflectionFunction('foobar'));
 }
-
-main();

@@ -37,8 +37,8 @@ function f(
   $f3(\HH\Rx\move($a));
 }
 
-<<__RxLocal>>
-function g() {
+<<__RxLocal, __EntryPoint>>
+function g(): void {
   rx(<<__Rx>>() ==> 1);
   local(<<__RxLocal>>() ==> 1);
   shallow(<<__RxShallow>>() ==> 1);
@@ -49,5 +49,3 @@ function g() {
     <<__Rx>>(<<__MaybeMutable>> A $a) ==> {},
     <<__Rx>>(<<__OwnedMutable>> A $a) ==> {});
 }
-
-g();

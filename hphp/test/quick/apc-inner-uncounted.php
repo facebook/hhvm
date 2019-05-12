@@ -8,7 +8,7 @@ function makeNonStatic($n) {
   return $s;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = array();
   // Insert an object to force $a to become ref-counted in APC.
   $a['obj'] = new stdClass;
@@ -21,5 +21,3 @@ function main() {
   // ...but the uncounted string inside must stay until end of this request.
   var_dump($unc);
 }
-
-main();

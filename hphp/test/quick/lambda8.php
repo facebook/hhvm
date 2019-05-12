@@ -17,7 +17,7 @@ class C {
     return () ==> () ==> $x->bar();
   }
 }
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = $y ==> $z ==> $y + $z;
   var_dump(($x(3))(4));
   $x = (int $y = 5): int ==> $y;
@@ -34,4 +34,3 @@ function main() {
          Vector<Vector<int>> ==> $v;
   var_dump($x instanceof Closure);
 }
-main();

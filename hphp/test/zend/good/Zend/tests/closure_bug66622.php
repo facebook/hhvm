@@ -18,10 +18,8 @@ class B extends A {
     static function name() { return 'B'; }
 }
 
-function test() {
+<<__EntryPoint>> function test() {
     (new B)->foo();
     (new B)->bar();
     B::baz();
 }
-test();
-

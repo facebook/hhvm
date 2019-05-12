@@ -6,7 +6,7 @@ function bare_break_continue() {
   continue;
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $three = array(1, 2, 3);
   $four  = array(1, 2, 3, 4);
 
@@ -38,5 +38,3 @@ function test() {
   }
   echo "\n";
 }
-
-test();

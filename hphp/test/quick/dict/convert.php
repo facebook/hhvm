@@ -88,7 +88,7 @@ function convert_to($from) {
   echo "====================================================\n";
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   convert_to([]);
   convert_to([100, 'val1', 'val2', 400, null, true, 1.234, new stdclass]);
   convert_to([1 => 10, 'key1' => 'val1', 5 => 'val2', 'key2' => 7,
@@ -130,5 +130,3 @@ function main() {
   convert_from(dict['12345' => 100, 12345 => 200]);
   convert_from(dict[1 => dict[5 => 10], 'a' => dict['b' => 'c']]);
 }
-
-main();

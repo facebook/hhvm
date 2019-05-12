@@ -1,6 +1,6 @@
 <?hh
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $a = 1;
   $b = 2;
   $c = 3;
@@ -15,5 +15,3 @@ function test() {
   __hhvm_intrinsics\launder_value($a);
   var_dump($a, $b, $c, $d, $e, $f, $g, $h, $i, $j, $k);
 }
-
-test();

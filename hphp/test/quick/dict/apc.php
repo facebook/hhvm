@@ -82,11 +82,10 @@ function write($count) {
   apc_store("val11", dict['abc' => new Sleep(123)]);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $count = get_count();
   echo "Count: $count\n";
   read();
   write($count);
   read();
 }
-main();

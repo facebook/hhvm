@@ -26,7 +26,7 @@ function test($a) {
   var_dump($a->get());
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   set_error_handler('error_handler');
 
   test(new A());
@@ -47,5 +47,3 @@ function main() {
   $a->set(789);
   test($a);
 }
-
-main();

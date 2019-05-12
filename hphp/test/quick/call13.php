@@ -22,13 +22,10 @@ class F extends D {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $obj = new E;
   $obj->test();
 
   $obj->foo();
   E::foo();
 }
-
-main();
-

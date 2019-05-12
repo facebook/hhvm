@@ -4,7 +4,7 @@ function breaker(&$x) {
   $x = (string)mt_rand();
 }
 
-function foo() {
+<<__EntryPoint>> function foo(): void {
   $x = "";
   breaker(&$x);
   // Bug #2240782: HHIR needs to think of $x as a BoxedStr, not a
@@ -13,5 +13,3 @@ function foo() {
   echo $x;
   echo "\n";
 }
-
-foo();

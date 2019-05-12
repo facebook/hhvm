@@ -83,7 +83,7 @@ function unserialize_test($s) {
   var_dump($a->y);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   set_error_handler('error_handler');
 
   run_serialize_tests('A');
@@ -94,5 +94,3 @@ function main() {
   unserialize_test('O:1:"A":3:{s:1:"x";i:123;s:1:"y";i:777;s:1:"z";s:3:"abc";}');
   unserialize_test('O:1:"A":2:{s:1:"x";i:123;s:1:"z";s:3:"abc";}');
 }
-
-main();

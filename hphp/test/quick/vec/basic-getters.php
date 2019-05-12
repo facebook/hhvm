@@ -107,7 +107,7 @@ function test($v, $description) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   test(vec[], "empty");
   test(vec[new stdclass(), new stdclass(), new stdclass()],
        "3 objects");
@@ -118,5 +118,3 @@ function main() {
        "9 strings");
   test(vec[1, 'a', 2, 'b'], "2 ints and 2 strings");
 }
-
-main();

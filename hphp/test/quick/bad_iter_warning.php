@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $arr = null;
   print "start iter loop\n";
   foreach ($arr as $x => $y) {
@@ -8,6 +8,3 @@ function main() {
   }
   print "end iter loop\n";
 }
-
-main();
-

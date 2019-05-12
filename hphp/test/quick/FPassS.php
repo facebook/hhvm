@@ -4,7 +4,7 @@ class NewClass {
   static public $a;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   print "Test begin\n";
 
   NewClass::$a = array(1,2,3);
@@ -15,5 +15,3 @@ function main() {
 
   print "Test end\n";
 }
-
-main();

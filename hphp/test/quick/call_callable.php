@@ -90,8 +90,7 @@ function test_invocation_syntaxes() {
   var_dump($call_static_string($test)); // fatals
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   test_inheritance();
   test_invocation_syntaxes();
 }
-main();

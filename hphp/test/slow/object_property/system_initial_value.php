@@ -25,12 +25,10 @@ function test() {
   return new X;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   for ($i = 1; $i < 100; $i++) {
     test();
   }
   $x = test();
   var_dump($x->getPub(), $x->getProt());
 }
-
-main();

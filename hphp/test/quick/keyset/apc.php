@@ -25,11 +25,10 @@ function write($count) {
   apc_store("val4", keyset[$count, $count+1]);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $count = get_count();
   echo "Count: $count\n";
   read();
   write($count);
   read();
 }
-main();

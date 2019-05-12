@@ -21,7 +21,7 @@ async function produce_awaitable() { return 1; }
 function produce_php_closure() { return function() { return 1; }; }
 function produce_hack_closure() { return () ==> {}; }
 
-function main() {
+<<__EntryPoint>> function main() {
   test('stdClass');
   test('native_data');
   test('collection');
@@ -29,5 +29,3 @@ function main() {
   test('php_closure');
   test('hack_closure');
 }
-
-main();

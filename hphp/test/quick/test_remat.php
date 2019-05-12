@@ -60,9 +60,8 @@ class KM {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $kc = new KM();
   $kc->getInfo();
   var_dump($kc->getKS());
 }
-main();

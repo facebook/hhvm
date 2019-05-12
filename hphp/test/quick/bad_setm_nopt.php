@@ -12,8 +12,6 @@ function foo($a, $b) {
   return $a ?: $b;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   test(array(array('foo'), array('bar'), array('baz')), null, 1, 2, 3);
 }
-
-main();

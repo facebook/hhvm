@@ -13,9 +13,7 @@ class B {
 class C extends B {
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $obj = new C;
   $obj->test();
 }
-main();
-

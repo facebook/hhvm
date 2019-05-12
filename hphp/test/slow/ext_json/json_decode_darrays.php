@@ -88,7 +88,7 @@ function is_equal($result1, $result2) {
   return true;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $tests = vec[
     // Scalar types tests from HHJsonDecodeTest.php
     dict[
@@ -281,5 +281,3 @@ function main() {
   }
   echo "Done\n";
 }
-
-main();

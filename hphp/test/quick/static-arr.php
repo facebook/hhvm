@@ -1,7 +1,7 @@
 <?hh
 
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = array();
   $x += array(1, 2, 3);
   var_dump($x);
@@ -10,4 +10,3 @@ function main() {
   $s .= '1234556';
   var_dump($s);
 }
-main();

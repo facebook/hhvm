@@ -55,7 +55,7 @@ function test($name, $a, $b) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = new A();
   $a->y = 'test';
   $b = new A();
@@ -70,5 +70,3 @@ function main() {
   $a->x = 456;
   test("short-circuit", $a, $b);
 }
-
-main();

@@ -5,7 +5,7 @@ function t($val) {
   var_dump($val[] = 1);
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $b = 4;
   $b[5] = 6;
   var_dump($b);
@@ -23,4 +23,3 @@ function main() {
   # t("nonempty"); # Causes fatal.
   t(true);
 }
-main();

@@ -5,7 +5,7 @@ function foo($s) {
   throw new Exception("foo exception");
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   print "Test begin\n";
 
   call_user_func_array("print_r", array("Hello!\n"));
@@ -21,5 +21,3 @@ function main() {
 
   print "Test end\n";
 }
-
-main();

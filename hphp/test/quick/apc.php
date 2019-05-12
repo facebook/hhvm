@@ -61,7 +61,7 @@ function testKeyTypes() {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   testApc(array(7, 4, 1776));
   testApc(array("sv0", "sv1"));
   testApc(array("sk0" => "sv0", "sk1" => "sv1"));
@@ -74,5 +74,3 @@ function main() {
 
   testKeyTypes();
 }
-
-main();

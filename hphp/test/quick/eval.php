@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   print "Test begin\n";
 
   $x = "Hello";
@@ -27,4 +27,3 @@ function main() {
 
   print "Test end\n";
 }
-main();

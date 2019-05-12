@@ -30,7 +30,7 @@ class T {
   public $prop = array(Set {'a'});
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $f = function ($x = Vector {}) {
     return $x;
   };
@@ -112,4 +112,3 @@ function main() {
   var_dump($obj1->prop[0]->contains('b'));
   var_dump($obj2->prop[0]->contains('b'));
 }
-main();

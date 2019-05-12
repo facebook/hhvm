@@ -13,8 +13,7 @@ class C {
     return $z = call_user_func(array($this,'bar'), $z);
   }
 }
-function bar() {
+<<__EntryPoint>> function bar() {
   $obj = new C;
   $obj->foo(123);
 }
-bar();

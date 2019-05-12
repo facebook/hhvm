@@ -19,7 +19,7 @@ function foo() {
   return $bar;
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $k = foo();
   var_dump($k instanceof Closure); // true
   $y = $k();
@@ -28,5 +28,3 @@ function main() {
   var_dump($z instanceof Closure); // true
   var_dump($z()); // 12
 }
-
-main();

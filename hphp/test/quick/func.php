@@ -1,7 +1,5 @@
 <?hh
 
-function hello() {
+<<__EntryPoint>> function hello(): void {
   print "Hello world!\n";
 }
-
-hello();

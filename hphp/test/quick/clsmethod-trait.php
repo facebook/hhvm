@@ -14,8 +14,7 @@ class a {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   a::f();
   t::f();
 }
-main();

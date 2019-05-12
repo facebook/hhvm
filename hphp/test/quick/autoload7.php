@@ -7,9 +7,7 @@ function __autoload($a) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = '\\A';
   new $a;
 }
-
-main();

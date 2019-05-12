@@ -5,7 +5,7 @@ function f() {
 function g() {
   echo "g() was called\n";
 }
-function main() {
+<<__EntryPoint>> function main() {
   $obj = null;
   $x = $obj?->foo(f())?->bar(g());
   var_dump($x);
@@ -13,4 +13,3 @@ function main() {
   $x = $obj?->foo(f())?->bar(g());
   var_dump($x);
 }
-main();

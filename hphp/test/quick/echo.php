@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   echo false;
   echo 'x';
   echo true;
@@ -14,4 +14,3 @@ function main() {
   echo "\n";
 
 }
-main();

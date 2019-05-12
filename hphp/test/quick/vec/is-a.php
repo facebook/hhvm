@@ -94,7 +94,7 @@ function test_is_vec($val) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $interfaces = [
     "HH\\Traversable",
     "HH\\KeyedTraversable",
@@ -125,4 +125,3 @@ function main() {
   test_is_vec($resource);
   imagedestroy($resource);
 }
-main();

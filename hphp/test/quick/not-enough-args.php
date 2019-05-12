@@ -8,9 +8,8 @@ function error_handler($errno, $errstr) {
   throw new Exception("$errno, $errstr");
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   one(1);
   try { two(1); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { three(1); } catch (Exception $e) { var_dump($e->getMessage()); }
 }
-main();

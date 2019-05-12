@@ -17,7 +17,7 @@ function no_warn() {
   var_dump((Map {13 => 'a', '013' => 'b'})->toArray());
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   echo "ALSO DON'T WARN\n";
   echo "-------------\n\n";
   should_not_warn();
@@ -26,5 +26,3 @@ function main() {
   echo "-------------\n\n";
   no_warn();
 }
-
-main();

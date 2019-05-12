@@ -20,7 +20,7 @@ class c extends one {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = new a;
   $b = new b;
   $c = new c;
@@ -31,5 +31,3 @@ function main() {
   $c->go($c);  // hit
   $c->go($a);  // would call, not attr public
 }
-
-main();

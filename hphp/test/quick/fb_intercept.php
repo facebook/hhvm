@@ -159,10 +159,8 @@ function test_methods() {
   $mc->blark('ho');
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   test_standard_function();
   test_variadic_function();
   test_methods();
 }
-
-main();

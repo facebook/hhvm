@@ -8,7 +8,7 @@ function foo($a, &$b, &$c, $d) {
   echo (__METHOD__."(): a: ".$a.", b: ".$b.", c: ".$c.", d: ".$d."\n");
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = 1;
   $b = 2;
   $c = 3;
@@ -20,5 +20,3 @@ function main() {
   sscanf("123", "%d", &$number);  // should not warn that $number is undefined
   var_dump($number);
 }
-
-main();

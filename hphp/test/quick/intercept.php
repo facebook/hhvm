@@ -6,7 +6,7 @@ function bar() {
   throw new Exception;
 }
 
-function boo() {
+<<__EntryPoint>> function boo(): void {
   fb_intercept('foo', 'bar', 'bar');
   try {
     foo();
@@ -14,5 +14,3 @@ function boo() {
     var_dump("caught:" . $e->getMessage());
   }
 }
-
-boo();

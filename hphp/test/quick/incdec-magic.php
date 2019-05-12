@@ -9,11 +9,8 @@ class Foo {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = new Foo;
   $x->asd++;
   var_dump($x);
 }
-
-main();
-

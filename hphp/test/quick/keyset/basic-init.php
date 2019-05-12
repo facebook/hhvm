@@ -17,7 +17,7 @@ function create($a, $b, $c) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   // These should succeed:
   var_dump(keyset[]);
   var_dump(keyset['a', 'b', 'c']);
@@ -52,5 +52,3 @@ function main() {
     echo "Exception: " . $e->getMessage() . "\n";
   }
 }
-
-main();

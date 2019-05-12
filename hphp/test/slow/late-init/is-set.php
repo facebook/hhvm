@@ -57,7 +57,7 @@ function run_tests($a) {
   A::test($a);
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   $a = new A();
   run_tests($a);
   $a->p1 = 123;
@@ -65,4 +65,3 @@ function test() {
   A::set($a);
   run_tests($a);
 }
-test();

@@ -92,7 +92,7 @@ function cmp1($x) {
   cmpC3($x);
 }
 
-function cmp() {
+<<__EntryPoint>> function cmp(): void {
   cmp1(true);
   cmp1(false);
   cmp1(0);
@@ -100,6 +100,3 @@ function cmp() {
   cmp1(2);
   cmp1(1234567);
 }
-
-cmp();
-

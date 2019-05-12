@@ -31,7 +31,7 @@ class IPAddressIsh {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   $x = new IPAddressIsh('x');
   $y = new IPAddressIsh('y');
   echo $x->inSubnetWithMask($y, "213");
@@ -42,4 +42,3 @@ function main() {
   $y->foobar();
   echo "after3\n";
 }
-main();

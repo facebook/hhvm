@@ -1,6 +1,6 @@
 <?hh
 
-function foo() {
+<<__EntryPoint>> function foo(): void {
   // Force all the types to be in so these don't get constant folded.
   if (isset($GLOBALS['a'])) $a = 1;
   if (isset($GLOBALS['b'])) $a = 1.2;
@@ -23,5 +23,3 @@ function foo() {
   echo "float:   ", is_float($a)   . "\n";
   echo "bool:    ", is_bool($a)    . "\n";
 }
-
-foo();

@@ -1,7 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function test() {
+<<__EntryPoint>> function test(): void {
   var_dump(DateTimeImmutable::createFromFormat('Y-m-d', "blahblah"));
 }
-test();

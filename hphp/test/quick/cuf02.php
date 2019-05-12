@@ -13,7 +13,7 @@ class E {
 }
 
 
-function main() {
+<<__EntryPoint>> function main() {
   call_user_func(array(new C(), 'foo'));
   call_user_func(array(new D(), 'foo'));
   call_user_func(array(new E(), 'foo'));
@@ -22,5 +22,3 @@ function main() {
   call_user_func('D::bar');
   call_user_func('E::bar');
 }
-main();
-

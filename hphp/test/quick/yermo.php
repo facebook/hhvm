@@ -18,9 +18,8 @@ class blah {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = new blah();
   $x->foo();
   $x->foo();
 }
-main();

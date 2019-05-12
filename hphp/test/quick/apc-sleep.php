@@ -16,7 +16,7 @@ class Foo {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   $foo1 = new Foo(1, 2);
   var_dump($foo1);
   apc_store('x', $foo1);
@@ -24,5 +24,3 @@ function main() {
   $foo2 = apc_fetch('x');
   var_dump($foo2);
 }
-
-main();

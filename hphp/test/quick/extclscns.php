@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   var_dump(Collator::SORT_NUMERIC);
   var_dump(DateTime::RFC822);
   var_dump(Memcached::HAVE_JSON);
@@ -11,5 +11,3 @@ function main() {
   var_dump(constant('Memcached::HAVE_JSON'));
   var_dump(constant('PDO::ERR_NONE'));
 }
-main();
-

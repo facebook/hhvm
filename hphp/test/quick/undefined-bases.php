@@ -5,7 +5,7 @@ function id($x) { return $x; }
 
 class c {}
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $name = 'varname';
 
   $x = $undef['foo'];
@@ -13,4 +13,3 @@ function main() {
   $x = $GLOBALS[$name]['foo'];
   $x = $GLOBALS[id($name)]['foo'];
 }
-main();

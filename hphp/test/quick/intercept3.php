@@ -8,7 +8,7 @@ function test($f, $x) {
   baz();
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $x = array(1);
   fb_intercept('bar', 'baz', 'fiz');
   for ($i = 0; $i < 10000; $i++) {
@@ -16,5 +16,3 @@ function main() {
   }
   var_dump('done');
 }
-
-main();

@@ -13,8 +13,7 @@ class A {
   }
 }
 
-function test() {
+<<__EntryPoint>> function test(): void {
   A::set();
   var_dump(A::get());
 }
-test();

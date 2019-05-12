@@ -22,7 +22,7 @@ function do_function($fn) {
                $fn, $str, $fn));
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   do_function('quote_default');
   do_function('clscns_default');
   do_function('zero_default');
@@ -32,4 +32,3 @@ function main() {
   do_function('float_default2');
   do_function('float_defaulte');
 }
-main();

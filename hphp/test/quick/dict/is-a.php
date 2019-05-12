@@ -94,7 +94,7 @@ function test_is_dict($val) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $interfaces = [
     "HH\\Traversable",
     "HH\\KeyedTraversable",
@@ -126,4 +126,3 @@ function main() {
   imagedestroy($resource);
 
 }
-main();

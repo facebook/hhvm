@@ -1,6 +1,6 @@
 <?hh
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $e = dict[];
   $one = dict[1 => "bar"];
   $two = dict[1 => "apple", "1" => "orange"];
@@ -15,5 +15,3 @@ function main() {
   unset($three['not-there']);
   var_dump($e, $one, $two, $three);
 }
-
-main();

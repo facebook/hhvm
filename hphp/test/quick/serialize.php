@@ -71,7 +71,7 @@ function test_serialization($obj, $class_whitelist) {
   echo "========================\n";
 }
 
-function main() {
+<<__EntryPoint>> function main() {
   test_serialization(new A, []);
   test_serialization(new B, array('A', 'B'));
   test_serialization(new C, array('C'));
@@ -85,5 +85,3 @@ function main() {
     array('abc' => 'A', 5 => 'C', 'E', 'B', 'F')
   );
 }
-
-main();

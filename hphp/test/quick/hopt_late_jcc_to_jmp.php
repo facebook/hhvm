@@ -16,8 +16,6 @@ function f() {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   f();
 }
-main();
-

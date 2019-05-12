@@ -7,8 +7,7 @@ class A {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   (new A())->readVar();
   var_dump(isset(A::$priv));
 }
-main();

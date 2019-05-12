@@ -18,7 +18,7 @@ class Base implements BaseOne {
 class Fancy implements Iface {
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $a = new Bob();
 
   // instanceof constant
@@ -44,4 +44,3 @@ function main() {
   $f = new Fancy();
   var_dump($f instanceof BaseTwo);
 }
-main();

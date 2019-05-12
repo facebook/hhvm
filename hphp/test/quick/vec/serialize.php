@@ -53,7 +53,7 @@ function try_unserialize($val) {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   roundtrip(vec[]);
   roundtrip(vec[1, 2, 3]);
   roundtrip(vec['a', 'b', 'c', 'd', 'e', 'f', 'g']);
@@ -92,5 +92,3 @@ function main() {
   try_serialize(vec[new SleepThrow]);
   try_unserialize("v:1:{O:11:\"WakeupThrow\":0:{}}");
 }
-
-main();

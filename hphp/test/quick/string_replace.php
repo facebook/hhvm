@@ -21,7 +21,7 @@ function replace_str_str($in) {
   var_dump(array($out, $count));
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   replace_array_str('a');
   replace_array_str('b');
   replace_array_str('ab');
@@ -37,4 +37,3 @@ function main() {
   replace_str_str('x');
   replace_str_str('xaxax');
 }
-main();

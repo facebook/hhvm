@@ -27,7 +27,7 @@ class D extends C {
   }
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $c = new C;
   $d = new D;
 
@@ -40,5 +40,3 @@ function main() {
   $c->yar();
   $d->yar();
 }
-
-main();

@@ -22,12 +22,10 @@ function strtolower_wrapper($str): string {
   return my_strtolower(stringish_cast($str));
 }
 
-function main() {
+<<__EntryPoint>> function main(): void {
   $obja = new A;
   $objb = new B;
   var_dump(strtolower_wrapper($obja));
   var_dump(strtolower_wrapper($objb));
   var_dump(strtolower_wrapper($objb));
 }
-
-main();

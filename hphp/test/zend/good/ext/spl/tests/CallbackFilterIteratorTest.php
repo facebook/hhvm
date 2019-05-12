@@ -13,15 +13,15 @@ class B {
 }
 
 function test($value, $key, $inner) {
-	printf("%s / %s / %d / %d\n"
-		, $value
-		, $key
-		, $value == $inner->current()
-		, $key == $inner->key()
-	);
-	return $value === 1 || $value === 4;
+    printf("%s / %s / %d / %d\n"
+        , $value
+        , $key
+        , $value == $inner->current()
+        , $key == $inner->key()
+    );
+    return $value === 1 || $value === 4;
 }
-
+<<__EntryPoint>> function main() {
 $tests = array(
     'instance method'    => function() { return array(new A, 'test'); },
     'static method'      => function() { return array('B', 'test'); },
@@ -42,7 +42,7 @@ foreach($tests as $name => $test) {
         echo "=> $value\n";
     }
 
-	// same test, with no reference to callback
+    // same test, with no reference to callback
 
     $it = new ArrayIterator(range(1, 5));
     $it = new CallbackFilterIterator($it, $test());
@@ -51,4 +51,5 @@ foreach($tests as $name => $test) {
     foreach($it as $value) {
         echo "=> $value\n";
     }
+}
 }

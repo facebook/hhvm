@@ -32,7 +32,7 @@ function unicode_info($cp) {
   echo "  charAge(): ", implode('.', IntlChar::charAge($cp)), "\n";
   echo "\n";
 }
-
+<<__EntryPoint>> function main() {
 printf("Codepoint range: %04x-%04x\n", IntlChar::CODEPOINT_MIN, IntlChar::CODEPOINT_MAX);
 $codepoints = array('P', 0xDF, 0x2603);
 foreach($codepoints as $cp) {
@@ -44,3 +44,4 @@ IntlChar::enumCharNames(0x2600, 0x2610, function($cp, $nc, $name) {
 });
 echo "RECYCLING SYMBOL FOR TYPE-1 PLASTICS => ";
 var_dump(IntlChar::charFromName("RECYCLING SYMBOL FOR TYPE-1 PLASTICS"));
+}

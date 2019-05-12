@@ -9,10 +9,10 @@ class XML_Parser
 {
 
     function PIHandler($parser, $target, $data)
-	{
-		echo "Target: " . $target. "\n";
-		echo "Data: " . $data . "\n";
-	}
+    {
+        echo "Target: " . $target. "\n";
+        echo "Data: " . $data . "\n";
+    }
 
     function parse($data)
     {
@@ -26,7 +26,7 @@ class XML_Parser
 
 
 }
-
+<<__EntryPoint>> function main() {
 $xml = <<<HERE
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <?xml-stylesheet href="default.xsl" type="text/xml"?>
@@ -36,3 +36,4 @@ echo "Simple test of xml_set_processing_instruction_handler() function\n";
 $p1 = new Xml_Parser();
 $p1->parse($xml);
 echo "Done\n";
+}

@@ -10,7 +10,7 @@ class Foo {
     return $this->str;
   }
 }
-
+<<__EntryPoint>> function main() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->setclass("Foo","Hello");
 
@@ -30,3 +30,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
+}

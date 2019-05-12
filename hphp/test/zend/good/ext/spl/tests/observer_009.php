@@ -1,6 +1,6 @@
 <?php
 class Foo {}
-
+<<__EntryPoint>> function main() {
 $storageA = new \SplObjectStorage();
 $storageA->attach(new \Foo);
 $storageA->attach(new \Foo);
@@ -19,3 +19,4 @@ foreach ($storageB as $object) {
 }
 echo "\n";
 echo "===DONE===\n";
+}

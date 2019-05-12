@@ -1,66 +1,67 @@
 <?php
 
 class noCtor {
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class publicCtorNew {
-	public function __construct() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    public function __construct() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class protectedCtorNew {
-	protected function __construct() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    protected function __construct() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class privateCtorNew {
-	private function __construct() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    private function __construct() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class publicCtorOld {
-	public function publicCtorOld() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    public function publicCtorOld() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class protectedCtorOld {
-	protected function protectedCtorOld() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    protected function protectedCtorOld() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
 class privateCtorOld {
-	private function privateCtorOld() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
+    private function privateCtorOld() {}
+    public static function reflectionObjectFactory() {
+        return new ReflectionObject(new self);
+    }
 }
 
-
+<<__EntryPoint>> function main() {
 $reflectionObjects = array(
-		noCtor::reflectionObjectFactory(),
-		publicCtorNew::reflectionObjectFactory(),
-		protectedCtorNew::reflectionObjectFactory(),
-		privateCtorNew::reflectionObjectFactory(),
-		publicCtorOld::reflectionObjectFactory(), 
-		protectedCtorOld::reflectionObjectFactory(),
-		privateCtorOld::reflectionObjectFactory()
-	);
+        noCtor::reflectionObjectFactory(),
+        publicCtorNew::reflectionObjectFactory(),
+        protectedCtorNew::reflectionObjectFactory(),
+        privateCtorNew::reflectionObjectFactory(),
+        publicCtorOld::reflectionObjectFactory(),
+        protectedCtorOld::reflectionObjectFactory(),
+        privateCtorOld::reflectionObjectFactory()
+    );
 
 foreach($reflectionObjects  as $reflectionObject ) {
-	$name = $reflectionObject->getName();
-	echo "Is $name instantiable? ";
-	var_dump($reflectionObject->IsInstantiable()); 
+    $name = $reflectionObject->getName();
+    echo "Is $name instantiable? ";
+    var_dump($reflectionObject->IsInstantiable());
+}
 }

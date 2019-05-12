@@ -1,5 +1,5 @@
 <?php
-    
+<<__EntryPoint>> function main() {
 $tests = array('"A JSON payload should be an object or array, not a string."',
                '["Unclosed array"',
                '{unquoted_key: "keys must be quoted}',
@@ -33,4 +33,4 @@ foreach ($tests as $test)
     echo "AS ARRAY\n";
     var_dump(json_decode($test, true));
 }
-
+}

@@ -1,5 +1,5 @@
 <?php
-    
+<<__EntryPoint>> function main() {
 $test = '[[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]';
 echo 'Testing: ' . $test . "\n";
 echo "DECODE: AS OBJECT\n";
@@ -22,4 +22,4 @@ var_dump($obj);
 echo "DECODE AGAIN: AS ARRAY\n";
 $arr = json_decode($arr_enc, true);
 var_dump($arr);
-
+}

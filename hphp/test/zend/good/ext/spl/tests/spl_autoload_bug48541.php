@@ -7,7 +7,7 @@ class X {
     };
   }
 }
-
+<<__EntryPoint>> function main() {
 $a = function ($class) {
     echo "a called\n";
 };
@@ -27,3 +27,4 @@ spl_autoload_register($c);
 spl_autoload_register($c2);
 $c = new foo;
 echo "===DONE===\n";
+}

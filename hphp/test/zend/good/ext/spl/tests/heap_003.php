@@ -11,7 +11,7 @@ class myHeap extends SplHeap {
         return $result;
     }
 }
-
+<<__EntryPoint>> function main() {
 $h = new myHeap;
 
 $in = range(0,10);
@@ -24,3 +24,4 @@ foreach ($h as $out) {
     echo $out."\n";
 }
 echo "===DONE===\n";
+}

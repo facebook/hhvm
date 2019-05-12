@@ -12,7 +12,7 @@ function valid ( ){}
 }
 
 class TestRegexIterator extends RegexIterator{}
-
+<<__EntryPoint>> function main() {
 $rege = '/^a/';
 
 
@@ -21,5 +21,4 @@ $r = new TestRegexIterator(new myIterator, $rege);
 $r->setPregFlags(PREG_OFFSET_CAPTURE);
 
 echo $r->getPregFlags();
-
-
+}

@@ -8,6 +8,6 @@ function gen() {
     yield []    => 4;
     yield new stdClass => 5;
 }
-
+<<__EntryPoint>> function main() {
 var_dump(iterator_to_array(gen()));
-
+}

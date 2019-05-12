@@ -2,7 +2,7 @@
 
 function aggregate_step ($var) { return $var; }
 function aggregate_final ($var) { return $var; }
-
+<<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 
 $db->createAggregate ('TESTAGGREGATE', 'aggregate_test_step', 'aggregate_final');
@@ -12,3 +12,4 @@ var_dump($db->createAggregate ('TESTAGGREGATE3', 'aggregate_step', 'aggregate_fi
 $db->close();
 
 echo "Done";
+}

@@ -1,9 +1,9 @@
 <?php
 
 class Test {
-	function __invoke($a, $b = 0) { }
+    function __invoke($a, $b = 0) { }
 }
-
+<<__EntryPoint>> function main() {
 $rm = new ReflectionMethod(new Test, '__invoke');
 var_dump($rm->getName());
 var_dump($rm->getNumberOfParameters());
@@ -16,3 +16,4 @@ $rp = new ReflectionParameter(array(new Test, '__invoke'), 1);
 var_dump($rp->isOptional());
 
 echo "===DONE===\n";
+}

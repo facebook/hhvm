@@ -22,7 +22,7 @@ class A extends SplFixedArray {
         return parent::next();
     }
 }
-
+<<__EntryPoint>> function main() {
 echo "==Direct instance==\n";
 $a = new SplFixedArray(5);
 $a[0] = "a";
@@ -44,3 +44,4 @@ foreach ($a as $k => $v) {
     echo "$k => $v\n";
 }
 echo "===DONE===\n";
+}

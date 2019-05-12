@@ -4,7 +4,7 @@ class myHeap extends SplHeap {
         throw new exception("foo");
     }
 }
-
+<<__EntryPoint>> function main() {
 $h = new myHeap;
 
 try {
@@ -50,3 +50,4 @@ try {
     echo "Exception: ".$e->getMessage()."\n";
 }
 echo "===DONE===\n";
+}

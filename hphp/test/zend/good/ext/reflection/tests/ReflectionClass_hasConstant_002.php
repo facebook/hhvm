@@ -1,8 +1,8 @@
 <?php
 class C {
-	const myConst = 1;
+    const myConst = 1;
 }
-
+<<__EntryPoint>> function main() {
 $rc = new ReflectionClass("C");
 echo "Check invalid params:\n";
 try { var_dump($rc->hasConstant()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -13,3 +13,4 @@ try { var_dump($rc->hasConstant(1.5)); } catch (Exception $e) { echo "\n".'Warni
 try { var_dump($rc->hasConstant(true)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump($rc->hasConstant(array(1,2,3))); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump($rc->hasConstant(new C)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

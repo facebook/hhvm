@@ -10,7 +10,7 @@ class A extends D {
 
 class C extends A {
 }
-
+<<__EntryPoint>> function main() {
 $ra = new ReflectionClass('A');
 $rc = new ReflectionClass('C');
 $rd = new ReflectionClass('D');
@@ -40,4 +40,4 @@ print("Is? A ". ($ra->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($
 print("Is? C ". ($rc->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($ce instanceof C) ? 'true' : 'false') ."\n");
 print("Is? D ". ($rd->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($ce instanceof D) ? 'true' : 'false') ."\n");
 print("Is? E ". ($re->isInstance($ce) ? 'true' : 'false') .", instanceof: ". (($ce instanceof E) ? 'true' : 'false') ."\n");
-
+}

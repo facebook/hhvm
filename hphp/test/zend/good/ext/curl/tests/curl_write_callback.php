@@ -2,10 +2,10 @@
 
 function curl_callback($curl_handle, $received_data)
 {
-	echo $received_data;
-	return strlen($received_data);
+    echo $received_data;
+    return strlen($received_data);
 }
-
+<<__EntryPoint>> function main() {
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 
 $fp = fopen($log_file, 'w+');
@@ -20,4 +20,4 @@ curl_close($ch);
 
 // cleanup
 unlink($log_file);
-
+}

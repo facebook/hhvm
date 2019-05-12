@@ -1,13 +1,13 @@
 <?php
 
 class A extends NumberFormatter {
-	function __construct() {}
+    function __construct() {}
 }
-
+<<__EntryPoint>> function main() {
 $a = new A;
 try {
-	$b = clone $a;
+    $b = clone $a;
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
-
+}

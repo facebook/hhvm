@@ -21,9 +21,10 @@ class SplFixedArray2 extends SplFixedArray {
         return parent::key();
     }
 }
-
+<<__EntryPoint>> function main() {
 $fa = new SplFixedArray2(3);
 foreach($fa as $k=>$v) {
     echo "$k=>";
     var_dump($v);
+}
 }

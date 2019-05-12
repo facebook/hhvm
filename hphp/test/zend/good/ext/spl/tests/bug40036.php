@@ -6,7 +6,7 @@ class View extends ArrayObject
         parent::__construct($array, ArrayObject::ARRAY_AS_PROPS);
     }
 }
-
+<<__EntryPoint>> function main() {
 $view = new View();
 $view->foo = false;
 $view->bar = null;
@@ -21,3 +21,4 @@ if (empty($view['baz']) || empty($view->baz)) {
     echo "View::baz empty\n";
 }
 echo "===DONE===\n";
+}

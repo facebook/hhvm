@@ -6,7 +6,8 @@ class DB extends mysqli {
         var_dump("DB::__construct() called");
     }
 }
-
+<<__EntryPoint>> function main() {
 $DB = new DB();
 
 echo "Done\n";
+}

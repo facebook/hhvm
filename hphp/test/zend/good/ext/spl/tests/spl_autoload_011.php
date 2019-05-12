@@ -5,7 +5,7 @@ class A {
         echo "var:".$this->var."\n";
     }
 }
-
+<<__EntryPoint>> function main() {
 $a = new A;
 $a->var = 2;
 
@@ -14,3 +14,4 @@ unset($a);
 
 var_dump(class_exists("C", true));
 echo "===DONE===\n";
+}

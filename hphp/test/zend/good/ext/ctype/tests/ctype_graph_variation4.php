@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : bool ctype_graph(mixed $c)
- * Description: Checks for any printable character(s) except space 
- * Source code: ext/ctype/ctype.c 
+ * Description: Checks for any printable character(s) except space
+ * Source code: ext/ctype/ctype.c
  */
 
 /*
  * Pass octal and hexadecimal values to ctype_graph() to test behaviour
  */
-
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_graph() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -18,18 +18,19 @@ $hex_values = array  (0x31, 0x32, 0x33, 0x34);
 echo "\n-- Octal Values --\n";
 $iterator = 1;
 foreach($octal_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_graph($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_graph($c));
+    $iterator++;
 }
 
 echo "\n-- Hexadecimal Values --\n";
 $iterator = 1;
 foreach($hex_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_graph($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_graph($c));
+    $iterator++;
 }
 
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

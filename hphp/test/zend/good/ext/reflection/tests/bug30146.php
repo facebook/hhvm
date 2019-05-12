@@ -2,7 +2,7 @@
 class test {
   static public $a = 1;
 }
-
+<<__EntryPoint>> function main() {
 $r = new ReflectionProperty('test', 'a');
 var_dump($r->getValue(null));
 
@@ -12,3 +12,4 @@ var_dump($r->getValue());
 $r->setValue(3);
 var_dump($r->getValue());
 echo "===DONE===\n";
+}

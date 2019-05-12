@@ -18,7 +18,7 @@ class TestClass {
     }
 }
 
-
+<<__EntryPoint>> function main() {
 $testClassInstance = new TestClass();
 $testClassInstance->prop = "Hello";
 
@@ -43,4 +43,4 @@ try {
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
-
+}

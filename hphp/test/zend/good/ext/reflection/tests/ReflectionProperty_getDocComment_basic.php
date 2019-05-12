@@ -25,7 +25,7 @@ class B extends A {
     /** A doc comment for $e */
     var $e;
 }
-
+<<__EntryPoint>> function main() {
 foreach(array('A', 'B') as $class) {
     $rc = new ReflectionClass($class);
     $rps = $rc->getProperties();
@@ -34,4 +34,4 @@ foreach(array('A', 'B') as $class) {
         var_dump($rp->getDocComment());
     }
 }
-
+}

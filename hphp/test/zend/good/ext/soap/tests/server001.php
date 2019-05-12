@@ -2,7 +2,7 @@
 function test() {
   return "Hello World";
 }
-
+<<__EntryPoint>> function main() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("test");
 
@@ -21,3 +21,4 @@ $HTTP_RAW_POST_DATA = <<<EOF
 EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
+}

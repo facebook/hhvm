@@ -15,7 +15,8 @@ final class myEnum extends enum {
            0 => 'No value',
        );
 }
-
+<<__EntryPoint>> function main() {
 $x = new myEnum();
 
 echo "Done\n";
+}

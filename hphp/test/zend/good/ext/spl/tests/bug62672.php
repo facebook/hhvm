@@ -20,7 +20,8 @@ class ObjB extends ObjA
         parent::__construct($keys->getIterator());
     }
 }
-
+<<__EntryPoint>> function main() {
 $obj = new ObjB(new ArrayObject());
 
 var_dump($obj == unserialize(serialize($obj)));
+}

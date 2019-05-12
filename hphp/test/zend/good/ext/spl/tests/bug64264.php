@@ -1,10 +1,10 @@
 <?php
-class MyFixedArray extends \SplFixedArray {                                                                                                                                 
-    protected $foo;                                                                                                                                                         
-    protected $bar;                                                                                                                                                         
-}                                                                                                                                                                           
-
-$myFixedArr = new MyFixedArray(1);                                                                                                                                          
+class MyFixedArray extends \SplFixedArray {
+    protected $foo;
+    protected $bar;
+}
+<<__EntryPoint>> function main() {
+$myFixedArr = new MyFixedArray(1);
 $myFixedArr[0] = 'foo';
 $myFixedArr->setSize(2);
 $myFixedArr[1] = 'bar';
@@ -17,3 +17,4 @@ unset($array[4]);
 $myFixedArr->setSize(2);
 
 print_r($myFixedArr->toArray());
+}

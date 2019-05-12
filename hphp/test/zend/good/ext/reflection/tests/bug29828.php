@@ -2,17 +2,17 @@
 
 interface Bla
 {
-	function bla();
+    function bla();
 }
 
 class BlaMore implements Bla
 {
-	function bla()
-	{
-		echo "Hello\n";
-	}
+    function bla()
+    {
+        echo "Hello\n";
+    }
 }
-
+<<__EntryPoint>> function main() {
 $r = new ReflectionClass('BlaMore');
 
 var_dump(count($r->getMethods()));
@@ -23,3 +23,4 @@ $o=new BlaMore;
 $o->bla();
 
 echo "===DONE===\n";
+}

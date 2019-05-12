@@ -15,9 +15,10 @@ class books extends domDocument {
     }
 
 }
-
+<<__EntryPoint>> function main() {
 $dom = new books;
 
 $dom->load(dirname(__FILE__)."/book.xml");
 $dom->addBook("PHP de Luxe", "Richard Samar, Christian Stocker");
 print $dom->saveXML();
+}

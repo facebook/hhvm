@@ -22,7 +22,7 @@ class JsonTest2 implements JsonSerializable {
     }
 }
 
-
+<<__EntryPoint>> function main() {
 $obj1 = new JsonTest1();
 var_dump(json_encode($obj1, JSON_PARTIAL_OUTPUT_ON_ERROR));
 
@@ -30,4 +30,4 @@ echo "==\n";
 
 $obj2 = new JsonTest2();
 var_dump(json_encode($obj2, JSON_PARTIAL_OUTPUT_ON_ERROR));
-
+}

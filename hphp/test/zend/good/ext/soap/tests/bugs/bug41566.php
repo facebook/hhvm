@@ -16,7 +16,7 @@ class User {
   /** @var string */
   public $sName;
 }
-
+<<__EntryPoint>> function main() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org", 'soap_version'=>SOAP_1_2));
 $server->addfunction("test");
 
@@ -51,3 +51,4 @@ EOF;
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ob_flush();
+}

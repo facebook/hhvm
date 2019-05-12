@@ -1,8 +1,8 @@
 <?php
 function test() {
-	return new SoapFault("MyFault","My fault string");
+    return new SoapFault("MyFault","My fault string");
 }
-
+<<__EntryPoint>> function main() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("test");
 
@@ -22,3 +22,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
+}

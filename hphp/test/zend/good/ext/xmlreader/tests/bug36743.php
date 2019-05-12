@@ -9,7 +9,8 @@ class Test extends XMLReader
         var_dump($this->testArr);
     }
 }
-
+<<__EntryPoint>> function main() {
 $t = new test;
 
 echo "Done\n";
+}

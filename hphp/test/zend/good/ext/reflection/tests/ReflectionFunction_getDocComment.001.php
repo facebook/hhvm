@@ -4,7 +4,7 @@
  * my doc comment
  */
 function foo () {
-	$d = 5;
+    $d = 5;
 }
 
 /***
@@ -14,11 +14,11 @@ function bar () {}
 
 
 function dumpFuncInfo($name) {
-	$funcInfo = new ReflectionFunction($name);
-	var_dump($funcInfo->getDocComment());
+    $funcInfo = new ReflectionFunction($name);
+    var_dump($funcInfo->getDocComment());
 }
-
+<<__EntryPoint>> function main() {
 dumpFuncInfo('foo');
 dumpFuncInfo('bar');
 dumpFuncInfo('array_pop');
-
+}

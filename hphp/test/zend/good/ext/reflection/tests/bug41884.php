@@ -2,12 +2,13 @@
 
 class Foo
 {
-	protected static $fooStatic = 'foo';
-	protected $foo = 'foo';
+    protected static $fooStatic = 'foo';
+    protected $foo = 'foo';
 }
-
+<<__EntryPoint>> function main() {
 $class = new ReflectionClass('Foo');
 
 var_dump($class->getDefaultProperties());
 
 echo "Done\n";
+}

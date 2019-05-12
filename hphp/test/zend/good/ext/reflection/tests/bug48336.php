@@ -19,7 +19,7 @@ class E extends D {
 class F extends E {
   static protected $prop;
 }
-
+<<__EntryPoint>> function main() {
 $class = 'A';
 for($class = 'A'; $class <= 'F'; $class ++) {
   print($class.' => ');
@@ -30,4 +30,5 @@ for($class = 'A'; $class <= 'F'; $class ++) {
     print('N/A');
   }
   print("\n");
+}
 }

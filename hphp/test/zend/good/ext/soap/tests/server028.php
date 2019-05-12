@@ -8,7 +8,7 @@ class Foo {
     }
   }
 }
-
+<<__EntryPoint>> function main() {
 $foo = new Foo();
 $server = new SoapServer(null,array('uri'=>"http://testuri.org"));
 $server->setObject($foo);
@@ -29,3 +29,4 @@ EOF;
 
 $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
+}

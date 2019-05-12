@@ -2,7 +2,7 @@
 function test() {
   return "Hello World";
 }
-
+<<__EntryPoint>> function main() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction("test");
 
@@ -21,3 +21,4 @@ $envelope = <<<EOF
 EOF;
 $server->handle($envelope);
 echo "ok\n";
+}

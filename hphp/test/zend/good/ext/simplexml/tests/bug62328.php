@@ -4,8 +4,9 @@ class UberSimpleXML extends SimpleXMLElement {
         return 'stringification';
     }
 }
-
+<<__EntryPoint>> function main() {
 $xml = new UberSimpleXML('<xml/>');
 
 var_dump((string) $xml);
 var_dump($xml->__toString());
+}

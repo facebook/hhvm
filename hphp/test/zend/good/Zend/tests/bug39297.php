@@ -14,20 +14,20 @@ class MyTree implements ArrayAccess {
     }
 
     public function offsetSet($offset, $value) {
-    	echo "offsetSet()\n";
+        echo "offsetSet()\n";
         $cannonicalName = strtolower($offset);
         $this->children[$cannonicalName] = $value;
         $value->parent = $this;
     }
 
     public function offsetGet($offset) {
-    	echo "offsetGet()\n";
+        echo "offsetGet()\n";
         $cannonicalName = strtolower($offset);
         return $this->children[$cannonicalName];
     }
 
 }
-
+<<__EntryPoint>> function main() {
 $id = 'Test';
 
 $root = new MyTree();
@@ -35,3 +35,4 @@ $child = new MyTree();
 $root[$id] = $child;
 
 var_dump(compareByRef(&$root,$id, &$child));
+}

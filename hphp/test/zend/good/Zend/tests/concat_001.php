@@ -1,11 +1,11 @@
 <?php
 
 class test {
-	function __toString() {
-		return "this is test object";
-	}
+    function __toString() {
+        return "this is test object";
+    }
 }
-
+<<__EntryPoint>> function main() {
 $a = array(1,2,3);
 $o = new test;
 $s = "some string";
@@ -43,3 +43,4 @@ var_dump($d.$i);
 var_dump($d.$d);
 
 echo "Done\n";
+}

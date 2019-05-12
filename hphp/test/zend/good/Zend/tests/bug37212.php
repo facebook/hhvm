@@ -24,7 +24,7 @@ class B extends A
     }
 }
 class C extends A {}
-
+<<__EntryPoint>> function main() {
 $B = new B("B");
 var_dump($B);
 $C = new C("C");
@@ -35,3 +35,4 @@ $B->copyValue($C);
 var_dump($B);
 
 echo "===DONE===\n";
+}

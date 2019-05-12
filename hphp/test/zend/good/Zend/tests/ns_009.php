@@ -1,6 +1,7 @@
 <?php
 class foo {
 }
-
-$x = __NAMESPACE__ . "\\foo"; 
+<<__EntryPoint>> function main() {
+$x = __NAMESPACE__ . "\\foo";
 echo get_class(new $x),"\n";
+}

@@ -3,33 +3,33 @@
 const MAX_LOOPS = 5;
 
 function withRefValue($elements, $transform) {
-	echo "\n---( Array with $elements element(s): )---\n";
-	//Build array:
-	$a = array();
-	for ($i=0; $i<$elements; $i++) {
-		$a[] = "v.$i";
-	}
-	$counter=0;
+    echo "\n---( Array with $elements element(s): )---\n";
+    //Build array:
+    $a = array();
+    for ($i=0; $i<$elements; $i++) {
+        $a[] = "v.$i";
+    }
+    $counter=0;
 
-	echo "--> State of array before loop:\n";
-	var_dump($a);
+    echo "--> State of array before loop:\n";
+    var_dump($a);
 
-	echo "--> Do loop:\n";
-	foreach ($a as $k=>$v) {
-		echo "     iteration $counter:  \$k=$k; \$v=$v\n";
-		eval($transform);
-		$counter++;
-		if ($counter>MAX_LOOPS) {
-			echo "  ** Stuck in a loop! **\n";
-			break;
-		}
-	}
+    echo "--> Do loop:\n";
+    foreach ($a as $k=>$v) {
+        echo "     iteration $counter:  \$k=$k; \$v=$v\n";
+        eval($transform);
+        $counter++;
+        if ($counter>MAX_LOOPS) {
+            echo "  ** Stuck in a loop! **\n";
+            break;
+        }
+    }
 
-	echo "--> State of array after loop:\n";
-	var_dump($a);
+    echo "--> State of array after loop:\n";
+    var_dump($a);
 }
 
-
+<<__EntryPoint>> function main() {
 echo "\nPopping elements off end of an unreferenced array";
 $transform = 'array_pop(&$a);';
 withRefValue(1, $transform);
@@ -64,3 +64,4 @@ withRefValue(1, $transform);
 withRefValue(2, $transform);
 withRefValue(3, $transform);
 withRefValue(4, $transform);
+}

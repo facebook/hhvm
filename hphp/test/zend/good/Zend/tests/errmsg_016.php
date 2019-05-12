@@ -1,8 +1,9 @@
 <?php
 
 class test {
-	function __isset() {
-	}
+    function __isset() {
+    }
 }
-
+<<__EntryPoint>> function main() {
 echo "Done\n";
+}

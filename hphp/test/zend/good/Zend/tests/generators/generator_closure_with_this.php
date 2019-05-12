@@ -7,9 +7,9 @@ class Test {
         };
     }
 }
-
+<<__EntryPoint>> function main() {
 $genFactory = (new Test)->getGenFactory();
 $gen = $genFactory();
 $gen->next();
 var_dump($gen->current());
-
+}

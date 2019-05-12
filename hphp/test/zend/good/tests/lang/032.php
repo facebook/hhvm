@@ -1,29 +1,30 @@
 <?php
 class A {
-	function foo() {}
+    function foo() {}
 }
 
 class B extends A {
-	function foo() {}
+    function foo() {}
 }
 
 class C extends B {
-	function foo() {}
+    function foo() {}
 }
 
 class D extends A {
 }
 
 class F extends D {
-	function foo() {}
+    function foo() {}
 }
 
 // Following class definition should fail, but cannot test
 /*
 class X {
-	function foo() {}
-	function foo() {}
+    function foo() {}
+    function foo() {}
 }
 */
-
+<<__EntryPoint>> function main() {
 echo "OK\n";
+}

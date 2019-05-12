@@ -2,7 +2,7 @@
 
 class Bar {
 }
-
+<<__EntryPoint>> function main() {
 $b = new Bar;
 
 var_dump($b == NULL);
@@ -23,3 +23,4 @@ var_dump($b == 1);
 
 
 echo "Done\n";
+}

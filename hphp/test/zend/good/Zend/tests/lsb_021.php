@@ -27,6 +27,7 @@ class B extends A {
 class C extends B {
 
 }
-
+<<__EntryPoint>> function main() {
 C::testForward();
 C::testNoForward();
+}

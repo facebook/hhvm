@@ -1,18 +1,19 @@
 <?php
 class foobar {
     public function __construct() {
-        switch (1) {            
+        switch (1) {
             default:
                 goto b;
                 a:
                     print "ok!\n";
-                    break;               
+                    break;
                 b:
                     print "ok!\n";
                     goto a;
-        }        
+        }
         print "ok!\n";
     }
 }
-
+<<__EntryPoint>> function main() {
 new foobar;
+}

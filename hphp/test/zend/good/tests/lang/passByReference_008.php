@@ -1,17 +1,17 @@
 <?php
 function valRef($x, &$y) {
-	var_dump($x, $y);
-	$x = 'changed.x';
-	$y = 'changed.y';
+    var_dump($x, $y);
+    $x = 'changed.x';
+    $y = 'changed.y';
 }
 
 function refVal(&$x, $y) {
-	var_dump($x, $y);
-	$x = 'changed.x';
-	$y = 'changed.y';
+    var_dump($x, $y);
+    $x = 'changed.x';
+    $y = 'changed.y';
 }
 
-
+<<__EntryPoint>> function main() {
 echo "\n\n-- Val, Ref --\n";
 $a = 'original.a';
 valRef($a, &$a);
@@ -21,3 +21,4 @@ echo "\n\n-- Ref, Val --\n";
 $b = 'original.b';
 refVal(&$b, $b);
 var_dump($b);
+}

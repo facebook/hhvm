@@ -1,8 +1,8 @@
 <?php
 function foo($x) {
-	var_dump($x);
+    var_dump($x);
 }
-
+<<__EntryPoint>> function main() {
 $str = "abc";
 var_dump($str[-1]);
 var_dump($str[0]);
@@ -19,3 +19,4 @@ foo($str[2]);
 foo($str[3]);
 foo($str[1][0]);
 foo($str[2][1]);
+}

@@ -1,21 +1,21 @@
 <?php
 
 class A {
-	private $x = 0;
+    private $x = 0;
 
-	function getClosureGetter () {
-		return function () {
-			return function () {
-				$this->x++;
-			};
-		};
-	}
+    function getClosureGetter () {
+        return function () {
+            return function () {
+                $this->x++;
+            };
+        };
+    }
 
-	function printX () {
-		echo $this->x."\n";
-	}
+    function printX () {
+        echo $this->x."\n";
+    }
 }
-
+<<__EntryPoint>> function main() {
 $a = new A;
 $a->printX();
 $getClosure = $a->getClosureGetter();
@@ -26,3 +26,4 @@ $closure();
 $a->printX();
 
 echo "Done\n";
+}

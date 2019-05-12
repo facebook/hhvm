@@ -5,7 +5,7 @@ function __autoload($class)
 
     throw new \Exception('abcd');
 }
-
+<<__EntryPoint>> function main() {
 try
 {
     \ns_test\test::go();
@@ -13,4 +13,5 @@ try
 catch (Exception $e)
 {
     echo 'caught';
+}
 }

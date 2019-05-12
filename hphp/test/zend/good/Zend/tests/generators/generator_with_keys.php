@@ -7,7 +7,7 @@ function reverse(array $array) {
         prev(&$array);
     }
 }
-
+<<__EntryPoint>> function main() {
 $array = [
     'foo' => 'bar',
     'bar' => 'foo',
@@ -16,4 +16,4 @@ $array = [
 foreach (reverse($array) as $key => $value) {
     echo $key, ' => ', $value, "\n";
 }
-
+}

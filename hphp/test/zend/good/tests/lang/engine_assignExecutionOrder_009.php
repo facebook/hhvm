@@ -1,9 +1,9 @@
 <?php
 function f($x) {
-	echo "f($x) ";
-	return $x;
+    echo "f($x) ";
+    return $x;
 }
-
+<<__EntryPoint>> function main() {
 echo "Function call args:\n";
 var_dump(f($i=0) < f(++$i));
 var_dump(f($i=0) <= f(++$i));
@@ -19,3 +19,4 @@ var_dump($a[$i=1][++$i] < $a[++$i][++$i]);
 var_dump($a[$i=1][++$i] <= $a[++$i][++$i]);
 var_dump($a[$i=1][++$i] > $a[++$i][++$i]);
 var_dump($a[$i=1][++$i] >= $a[++$i][++$i]);
+}

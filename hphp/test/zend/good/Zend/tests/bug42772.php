@@ -6,6 +6,7 @@ class Foo {
         return 'foo';
     }
 }
-
+<<__EntryPoint>> function main() {
 $foo = (string)new Foo();
 var_dump(Foo::$foo);
+}

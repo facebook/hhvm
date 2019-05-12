@@ -5,9 +5,9 @@ const A = 'b';
 
 
 class a {
-	const a = 'c';
-	const A = 'd';
+    const a = 'c';
+    const A = 'd';
 }
-
+<<__EntryPoint>> function main() {
 var_dump(a, A, a::a, a::A);
-
+}

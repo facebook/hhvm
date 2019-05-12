@@ -1,12 +1,12 @@
 <?php
 class test {
-	public $p1 = 1;
-	public $p2 = 2;
-	public $p3;
-	public function __clone() {
-	}
+    public $p1 = 1;
+    public $p2 = 2;
+    public $p3;
+    public function __clone() {
+    }
 };
-
+<<__EntryPoint>> function main() {
 $obj = new test;
 $obj->p2 = 'A';
 $obj->p3 = 'B';
@@ -17,3 +17,4 @@ var_dump($obj);
 echo "Clown\n";
 var_dump($copy);
 echo "Done\n";
+}

@@ -1,8 +1,9 @@
 <?php
 
 class test {
-	function __unset() {
-	}
+    function __unset() {
+    }
 }
-
+<<__EntryPoint>> function main() {
 echo "Done\n";
+}

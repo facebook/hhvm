@@ -9,6 +9,7 @@ class C {
     $this->val = $val;
   }
 }
-
+<<__EntryPoint>> function main() {
 $c = new C(0.0);
 var_dump($c);
+}

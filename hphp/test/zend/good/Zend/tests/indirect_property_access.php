@@ -1,13 +1,13 @@
 <?php
 
 class foo {
-	public $x = 1;
+    public $x = 1;
 }
 
 class bar {
-	public $y = 'foo';
+    public $y = 'foo';
 }
-
+<<__EntryPoint>> function main() {
 $x = 'bar';
 
 $bar = new bar;
@@ -15,4 +15,4 @@ $bar = new bar;
 var_dump((new bar)->y);     // foo
 var_dump((new $x)->y);      // foo
 var_dump((new $bar->y)->x); // 1
-
+}

@@ -12,7 +12,8 @@ class TestObject implements Iterator
     function rewind() {$this->n = 0;}
 }
 
-
+<<__EntryPoint>> function main() {
 $array_object = new TestObject();
 
 foreach ((true ? $array_object : $array_object) as $item) echo "$item\n";
+}

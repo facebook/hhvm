@@ -11,6 +11,7 @@ class test_class
         echo "ok\n";
     }
 }
-
+<<__EntryPoint>> function main() {
 $test3 = new test_class();
 $test3->a->b();
+}

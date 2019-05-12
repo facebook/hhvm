@@ -5,8 +5,9 @@ class foo {
         return $f;
     }
 }
-
+<<__EntryPoint>> function main() {
 $f = new foo();
 foreach($f->bar as $key => $value) {
     print "$key => $value\n";
+}
 }

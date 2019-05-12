@@ -1,16 +1,17 @@
 <?php
 
 class TestClass {
-	public static function createInstance() {
-		return new static();
-	}
+    public static function createInstance() {
+        return new static();
+    }
 }
 
 class ChildClass extends TestClass {}
-
+<<__EntryPoint>> function main() {
 $testClass = TestClass::createInstance();
 $childClass = ChildClass::createInstance();
 
 echo get_class($testClass) . "\n";
 echo get_class($childClass) . "\n";
 echo "==DONE==";
+}

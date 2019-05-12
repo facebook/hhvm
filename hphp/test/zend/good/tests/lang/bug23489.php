@@ -12,6 +12,7 @@ class Test {
     return 'success';
   }
 }
-
+<<__EntryPoint>> function main() {
 $t = new Test;
 echo "failure";
+}

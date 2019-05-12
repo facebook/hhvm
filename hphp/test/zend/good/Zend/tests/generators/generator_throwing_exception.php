@@ -5,7 +5,7 @@ function gen() {
     throw new Exception('test');
     yield 'bar';
 }
-
+<<__EntryPoint>> function main() {
 $gen = gen();
 $gen->next();
 var_dump($gen->current());
@@ -17,4 +17,4 @@ try {
 }
 
 var_dump($gen->current());
-
+}

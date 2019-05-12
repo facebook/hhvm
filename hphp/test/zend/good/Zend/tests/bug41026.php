@@ -2,17 +2,18 @@
 
 class try_class
 {
-	static public function main ()
-	{
-		register_shutdown_function (array ("self", "on_shutdown"));
-	}
+    static public function main ()
+    {
+        register_shutdown_function (array ("self", "on_shutdown"));
+    }
 
-	static public function on_shutdown ()
-	{
-		printf ("CHECKPOINT\n"); /* never reached */
-	}
+    static public function on_shutdown ()
+    {
+        printf ("CHECKPOINT\n"); /* never reached */
+    }
 }
-
+<<__EntryPoint>> function main() {
 try_class::main ();
 
 echo "Done\n";
+}

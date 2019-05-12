@@ -6,14 +6,15 @@ function foo ($throw = FALSE) {
         throw new Exception("ex");
      }
    } catch (Exception $e) {
-     echo "catch\n"; 
+     echo "catch\n";
    } finally {
      echo "finally\n";
    }
 
    echo "end\n";
 }
-
+<<__EntryPoint>> function main() {
 foo();
 echo "\n";
 foo(true);
+}

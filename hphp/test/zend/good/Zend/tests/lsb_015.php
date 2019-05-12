@@ -8,7 +8,7 @@ class C {
     }
     public static function getException() {
         return new Exception();
-         
+
     }
 }
 class A {
@@ -58,9 +58,10 @@ class B extends A {
     }
 
 }
-
+<<__EntryPoint>> function main() {
 echo "via A:\n";
 A::myCatch();
 echo "via B:\n";
 B::myCatch();
 echo "==DONE==";
+}

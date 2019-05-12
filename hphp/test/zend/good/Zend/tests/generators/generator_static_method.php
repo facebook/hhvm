@@ -12,8 +12,8 @@ class Test {
 
 class ExtendedTest extends Test {
 }
-
+<<__EntryPoint>> function main() {
 foreach (ExtendedTest::gen() as $i) {
     var_dump($i);
 }
-
+}

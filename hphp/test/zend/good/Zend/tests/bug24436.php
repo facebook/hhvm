@@ -7,5 +7,6 @@ class test {
                 if (!isset($this->test)) { print "test2\n";}
         }
 }
-
+<<__EntryPoint>> function main() {
 $test1 = new test();
+}

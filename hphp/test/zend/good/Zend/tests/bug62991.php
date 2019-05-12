@@ -17,7 +17,7 @@ function test2( array $array )
     };
     return $closure; // if you return the $closure and call it outside this function it works.
 }
-
+<<__EntryPoint>> function main() {
 $generator = test(array( 1, 2, 3 ) );
 foreach($generator as $something) {
 }
@@ -30,3 +30,4 @@ foreach($generator() as $something) {
 $generator = test2(array( 1, 2, 3 ) );
 
 echo "okey\n";
+}

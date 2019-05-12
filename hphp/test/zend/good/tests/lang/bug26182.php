@@ -8,8 +8,8 @@ class A {
         }
     }
 }
-
+<<__EntryPoint>> function main() {
 $t = new A ();
 
 print_r($t);
-
+}

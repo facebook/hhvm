@@ -1,19 +1,20 @@
 <?php
 
 class foo {
-	public function test() {
-		foo::ABC();
-		$this->ABC();
-		foo::XYZ();
-		self::WWW();
-		FOO::ABC();
-	}
-	function __call($a, $b) {
-		print "__call:\n";
-		var_dump($a);
-	}
+    public function test() {
+        foo::ABC();
+        $this->ABC();
+        foo::XYZ();
+        self::WWW();
+        FOO::ABC();
+    }
+    function __call($a, $b) {
+        print "__call:\n";
+        var_dump($a);
+    }
 }
-
+<<__EntryPoint>> function main() {
 $x = new foo;
 
 $x->test();
+}

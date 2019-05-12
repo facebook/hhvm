@@ -15,10 +15,10 @@ class B extends A
     parent::getFoo();
   }
 }
-
+<<__EntryPoint>> function main() {
 $a = new A();
 $a->getFoo();
 
 $b = new B();
 $b->getFoo();
-
+}

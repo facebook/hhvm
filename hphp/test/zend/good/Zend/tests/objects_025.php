@@ -1,11 +1,11 @@
 <?php
 
 class foo {
-	public function __call($a, $b) {
-		print "non-static - ok\n";
-	}
+    public function __call($a, $b) {
+        print "non-static - ok\n";
+    }
 }
-
+<<__EntryPoint>> function main() {
 $a = new foo;
 $a->foooo();
 
@@ -20,4 +20,4 @@ $a->$b();
 
 $b = NULL;
 $a->$b();
-
+}

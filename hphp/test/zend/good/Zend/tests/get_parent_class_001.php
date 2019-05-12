@@ -1,21 +1,21 @@
 <?php
 
 interface ITest {
-	function foo();	
+    function foo();
 }
 
 abstract class bar implements ITest {
-	public function foo() {
-		var_dump(get_parent_class());
-	}
+    public function foo() {
+        var_dump(get_parent_class());
+    }
 }
 
 class foo extends bar {
-	public function __construct() {
-		var_dump(get_parent_class());
-	}
+    public function __construct() {
+        var_dump(get_parent_class());
+    }
 }
-
+<<__EntryPoint>> function main() {
 $a = new foo;
 $a->foo();
-
+}

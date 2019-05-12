@@ -4,7 +4,7 @@ const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
-
+<<__EntryPoint>> function main() {
 $validLessThan = array (
 2147483646, array(MAX_32Bit, "2147483647", "2147483647.001", 2.147483647e9, 2147483647.9),
 MIN_32Bit, array(MIN_32Bit + 1, "-2147483647", "-2147483646.001", -2.1474836461e9, -2147483646.9),
@@ -47,3 +47,4 @@ if ($failed == false) {
 }
 
 echo "===DONE===\n";
+}

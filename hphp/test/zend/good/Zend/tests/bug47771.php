@@ -10,11 +10,12 @@ class Test {
   }
 
 }
-
+<<__EntryPoint>> function main() {
 try {
 
   $T =new Test(throw_exc());
 
 } catch( Exception $e) {
   echo 'Exception: ' . $e->getMessage() . "\n";
+}
 }

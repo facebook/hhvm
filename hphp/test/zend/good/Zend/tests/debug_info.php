@@ -17,9 +17,10 @@ class Bar {
     return null;
   }
 }
-
+<<__EntryPoint>> function main() {
 $f = new Foo;
 var_dump($f);
 
 $b = new Bar;
 var_dump($b);
+}

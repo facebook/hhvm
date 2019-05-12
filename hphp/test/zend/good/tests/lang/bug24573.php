@@ -8,10 +8,10 @@ class Foo {
     $this = $__this;
   }
 }
-
+<<__EntryPoint>> function main() {
 $f = new Foo;
 
 $f->Bar();
 
 echo "OK\n";
-
+}

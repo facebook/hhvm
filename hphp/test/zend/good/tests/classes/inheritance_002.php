@@ -38,7 +38,7 @@ class Child_mx2 extends Base_php5 {
     parent::__construct();
   }
 }
-
+<<__EntryPoint>> function main() {
 echo "### PHP 4 style\n";
 $c4= new Child_php4();
 
@@ -50,3 +50,4 @@ $cm= new Child_mx1();
 
 echo "### Mixed style 2\n";
 $cm= new Child_mx2();
+}

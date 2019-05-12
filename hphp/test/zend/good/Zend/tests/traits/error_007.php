@@ -1,7 +1,7 @@
 <?php
 
-trait abc { 
+trait abc {
 }
-
+<<__EntryPoint>> function main() {
 new abc;
-
+}

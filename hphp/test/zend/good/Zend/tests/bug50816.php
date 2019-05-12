@@ -13,7 +13,7 @@ class Foo {
 
   public static $mapWithoutConst = array(1 => 'one', 1 => 'two',);
 }
-
+<<__EntryPoint>> function main() {
 $mapWithConst = array(1 => 'one', 1 => 'two',);
 
 $mapWithoutConst = array(Foo::ONE => 'one', Foo::TWO => 'two',);
@@ -32,3 +32,4 @@ var_dump($mapWithoutConst0[1]);
 var_dump($mapWithoutConst1[1]);
 var_dump($mapWithoutConst2[1]);
 var_dump($mapWithoutConst3[1]);
+}

@@ -6,10 +6,10 @@ abstract final class TestStatics {
 
 function Test()
 {
-	echo TestStatics::$a . " ";
-	TestStatics::$a++;
-	if(TestStatics::$a<10): Test(); endif;
+    echo TestStatics::$a . " ";
+    TestStatics::$a++;
+    if(TestStatics::$a<10): Test(); endif;
 }
-
+<<__EntryPoint>> function main() {
 Test();
-
+}

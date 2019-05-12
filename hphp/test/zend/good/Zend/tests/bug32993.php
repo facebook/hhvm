@@ -9,7 +9,7 @@ class Test implements Iterator {
     public function next()      { return next(&$this->arr); }
     public function valid()     { return (current(&$this->arr) !== false); }
 }
-
+<<__EntryPoint>> function main() {
 $t = new Test();
 $t->arr =  array(1, 2, 3);
 
@@ -21,3 +21,4 @@ try {
     ; // handle exception
 }
 echo "ok\n";
+}

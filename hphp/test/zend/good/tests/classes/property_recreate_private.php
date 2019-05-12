@@ -1,20 +1,20 @@
 <?php
 class C {
-	private $p = 'test';
-	function unsetPrivate() {
-		unset($this->p);		
-	}
-	function setPrivate() {
-		$this->p = 'changed';		
-	}
+    private $p = 'test';
+    function unsetPrivate() {
+        unset($this->p);
+    }
+    function setPrivate() {
+        $this->p = 'changed';
+    }
 }
 
 class D extends C {
-	function setP() {
-		$this->p = 'changed in D';
-	}
+    function setP() {
+        $this->p = 'changed in D';
+    }
 }
-
+<<__EntryPoint>> function main() {
 echo "Unset and recreate a superclass's private property:\n";
 $d = new D;
 $d->unsetPrivate();
@@ -46,3 +46,4 @@ $c->unsetPrivate();
 $c->p = 'this will fail';
 var_dump($c);
 echo "==Done==";
+}

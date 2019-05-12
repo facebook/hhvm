@@ -1,20 +1,20 @@
 <?php
 
 function run () {
-	$x = 4;
+    $x = 4;
 
-	$lambda1 = function () use ($x) {
-		echo "$x\n";
-	};
+    $lambda1 = function () use ($x) {
+        echo "$x\n";
+    };
 
-	$lambda2 = function () use ($x) {
-		echo "$x\n";
-		$x++;
-	};
+    $lambda2 = function () use ($x) {
+        echo "$x\n";
+        $x++;
+    };
 
-	return array($lambda1, $lambda2);
+    return array($lambda1, $lambda2);
 }
-
+<<__EntryPoint>> function main() {
 list ($lambda1, $lambda2) = run();
 
 $lambda1();
@@ -23,3 +23,4 @@ $lambda1();
 $lambda2();
 
 echo "Done\n";
+}

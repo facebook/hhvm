@@ -13,10 +13,10 @@ class Faulty
 
     function NormalMethod($Args)
     {
-       echo "I heart me\n"; 
+       echo "I heart me\n";
     }
 }
-
+<<__EntryPoint>> function main() {
 $Faulty = new Faulty();
 $Array = array('Some junk','Some other junk');
 
@@ -25,3 +25,4 @@ $Failure = array_map(array($Faulty,'seg'),$Array);
 
 // This does not.
 $Failure = array_map(array($Faulty,'NormalMethod'),$Array);
+}

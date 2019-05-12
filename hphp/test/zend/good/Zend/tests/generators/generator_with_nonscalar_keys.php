@@ -8,8 +8,8 @@ function gen() {
     yield true => false;
     yield null => null;
 }
-
+<<__EntryPoint>> function main() {
 foreach (gen() as $k => $v) {
     var_dump($k, $v);
 }
-
+}

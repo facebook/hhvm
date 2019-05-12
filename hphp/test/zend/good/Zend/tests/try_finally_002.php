@@ -6,11 +6,12 @@ function foo () {
      throw new Exception("finally");
    }
 }
-
+<<__EntryPoint>> function main() {
 try {
   foo();
 } catch (Exception $e) {
   do {
     var_dump($e->getMessage());
   } while ($e = $e->getPrevious());
+}
 }

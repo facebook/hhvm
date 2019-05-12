@@ -15,14 +15,15 @@ class hariCow extends FIIFO {
                 } catch(Exception $e) {
                 }
         }
-        
+
         public function __toString() {
                 return "ok\n";
         }
 
 }
 
-
+<<__EntryPoint>> function main() {
 $db = new hariCow;
 
 echo $db;
+}

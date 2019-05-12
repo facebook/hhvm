@@ -14,11 +14,11 @@ class B extends A {
     public $b_var = 'foo';
 
 }
-
+<<__EntryPoint>> function main() {
 $a = new A;
 $b = new B;
 
 print_r($a);
 print_r($b->a_var);
 print_r($b->b_var);
-
+}

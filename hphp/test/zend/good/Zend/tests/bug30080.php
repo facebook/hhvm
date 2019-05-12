@@ -1,8 +1,9 @@
 <?php
-class foo { 	
-  function foo($arrayobj) { 
+class foo {
+  function foo($arrayobj) {
     var_dump($arrayobj);
-  } 
-} 
-
-new foo(array(new stdClass)); 
+  }
+}
+<<__EntryPoint>> function main() {
+new foo(array(new stdClass));
+}

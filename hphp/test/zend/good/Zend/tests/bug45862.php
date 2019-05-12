@@ -15,11 +15,11 @@ class Tester extends Ancestor {
 class Child extends Tester {
   function test() { var_dump(get_class_vars("Tester")); }
 }
-
+<<__EntryPoint>> function main() {
 echo "\n From parent scope\n";
 $parent = new Ancestor();
 $parent->test();
 echo "\n From child scope\n";
 $child = new Child();
 $child->test();
-
+}

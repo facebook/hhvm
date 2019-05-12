@@ -1,10 +1,10 @@
 <?php
- 
+
 const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;
 const MIN_64Bit = -9223372036854775807 - 1;
 const MIN_32Bit = -2147483647 - 1;
-
+<<__EntryPoint>> function main() {
 $invalidNotIdentical = array (
 MAX_32Bit, array(MAX_32Bit),
 MIN_32Bit, array(MIN_32Bit),
@@ -50,5 +50,6 @@ for ($i = 0; $i < count($invalidNotIdentical); $i +=2) {
 if ($failed == false) {
    echo "Test Passed\n";
 }
-   
+
 echo "===DONE===\n";
+}

@@ -1,8 +1,8 @@
 <?php
 class obj {
-	function method() {}
+    function method() {}
 }
-
+<<__EntryPoint>> function main() {
 $o->root=new obj();
 
 ob_start();
@@ -23,4 +23,5 @@ if ($x == $y) {
 x=$x
 y=$y
 ";
+}
 }

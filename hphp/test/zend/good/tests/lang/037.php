@@ -1,24 +1,24 @@
 <?php
 
 class par {
-	private $id="foo";
+    private $id="foo";
 
-	function displayMe()
-	{
-		$this->displayChild();
-	}
+    function displayMe()
+    {
+        $this->displayChild();
+    }
 };
 
 class chld extends par {
-	private $id = "bar";
+    private $id = "bar";
 
-	function displayChild()
-	{
-		print $this->id;
-	}
+    function displayChild()
+    {
+        print $this->id;
+    }
 };
 
-
+<<__EntryPoint>> function main() {
 $obj = new chld();
 $obj->displayMe();
-
+}

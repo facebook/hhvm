@@ -8,8 +8,8 @@ function gen() {
 function fn() {
     exit('Done');
 }
-
+<<__EntryPoint>> function main() {
 $gen = gen();
 $gen->next();
 $gen->current();
-
+}

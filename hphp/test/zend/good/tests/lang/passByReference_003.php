@@ -1,14 +1,14 @@
 <?php
 function passbyVal($val) {
-	echo "\nInside passbyVal call:\n";
-	var_dump($val);
+    echo "\nInside passbyVal call:\n";
+    var_dump($val);
 }
 
 function passbyRef(&$ref) {
-	echo "\nInside passbyRef call:\n";
-	var_dump($ref);
+    echo "\nInside passbyRef call:\n";
+    var_dump($ref);
 }
-
+<<__EntryPoint>> function main() {
 echo "\nPassing undefined by value\n";
 passbyVal($undef1[0]);
 echo "\nAfter call\n";
@@ -18,3 +18,4 @@ echo "\nPassing undefined by reference\n";
 passbyRef(&$undef2);
 echo "\nAfter call\n";
 var_dump($undef2);
+}

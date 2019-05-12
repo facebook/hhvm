@@ -18,7 +18,7 @@ function outerGen() {
     function_with_4_args(0, 1, 2, 3);
     yield; // force generator
 }
-
+<<__EntryPoint>> function main() {
 $outerGen = outerGen();
 $outerGen->rewind();
-
+}

@@ -16,14 +16,15 @@ class A
                 throw new Exception();
         }
 }
-
+<<__EntryPoint>> function main() {
 try
 {
 $a = new A();
 }
 catch(Exception $e)
 {
-	echo "Caught\n";
+    echo "Caught\n";
 }
 
 echo "===DONE===\n";
+}

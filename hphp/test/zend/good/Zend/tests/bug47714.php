@@ -12,10 +12,11 @@ function __autoload($class) {
 }
 
 //spl_autoload_register('au');
-
+<<__EntryPoint>> function main() {
 set_exception_handler(function($exception) {
         $h = new handler();
         $h->handle($exception);
 });
 
 throw new Exception('exception');
+}

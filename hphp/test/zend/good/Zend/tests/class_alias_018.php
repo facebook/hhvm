@@ -6,9 +6,9 @@ class foo {
 class_alias('foo', 'bar');
 
 
-class baz extends bar { 
+class baz extends bar {
 }
-
+<<__EntryPoint>> function main() {
 var_dump(is_subclass_of(new foo, 'foo'));
 var_dump(is_subclass_of(new foo, 'bar'));
 var_dump(is_subclass_of(new foo, 'baz'));
@@ -20,4 +20,4 @@ var_dump(is_subclass_of(new bar, 'baz'));
 var_dump(is_subclass_of(new baz, 'foo'));
 var_dump(is_subclass_of(new baz, 'bar'));
 var_dump(is_subclass_of(new baz, 'baz'));
-
+}

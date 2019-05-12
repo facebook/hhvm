@@ -1,9 +1,9 @@
 <?php
 class asserter {
-	public function call($function) {
-	}
+    public function call($function) {
+    }
 }
-
+<<__EntryPoint>> function main() {
 $asserter = new asserter();
 $function = 'md5';
 
@@ -30,3 +30,4 @@ $closure = function() use ($asserter, $function) {
 $closure();
 
 var_dump($function);
+}

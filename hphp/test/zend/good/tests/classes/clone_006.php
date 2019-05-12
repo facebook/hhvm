@@ -1,18 +1,18 @@
 <?php
 
 class MyCloneable {
-	static $id = 0;
+    static $id = 0;
 
-	function MyCloneable() {
-		$this->id = self::$id++;
-	}
+    function MyCloneable() {
+        $this->id = self::$id++;
+    }
 
-	function __clone() {
-		$this->address = "New York";
-		$this->id = self::$id++;
-	}
+    function __clone() {
+        $this->address = "New York";
+        $this->id = self::$id++;
+    }
 }
-
+<<__EntryPoint>> function main() {
 $original = new MyCloneable();
 
 $original->name = "Hello";
@@ -25,4 +25,4 @@ $clone = clone $original;
 echo $clone->id . "\n";
 echo $clone->name . "\n";
 echo $clone->address . "\n";
-
+}

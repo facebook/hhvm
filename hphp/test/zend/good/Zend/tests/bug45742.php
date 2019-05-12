@@ -11,5 +11,6 @@ class ArrayProperty {
         Constants::B => 42,
     );
 }
-
+<<__EntryPoint>> function main() {
 var_dump( ArrayProperty::$array );
+}

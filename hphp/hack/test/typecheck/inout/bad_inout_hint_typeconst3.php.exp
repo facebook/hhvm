@@ -8,4 +8,4 @@ Unable to satisfy constraint on this type constant
 File "bad_inout_hint_typeconst3.php", line 4, characters 44-46:
 This is an int
 File "bad_inout_hint_typeconst3.php", line 8, characters 34-36:
-It is incompatible with a num (int/float)
+It is incompatible with a num (int | float)

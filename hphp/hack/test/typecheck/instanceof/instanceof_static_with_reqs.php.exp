@@ -11,4 +11,4 @@ Invalid return type (Typing[4110])
 File "instanceof_static_with_reqs.php", line 7, characters 49-52:
 This is the expression dependent type this
 File "instanceof_static_with_reqs.php", line 23, characters 27-35:
-It is incompatible with an object of type INeedsFoo
+It is incompatible with an object of type INeedsFoo<T#1>

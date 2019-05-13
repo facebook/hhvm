@@ -8,4 +8,4 @@ Member f has the wrong type
 File "async_function_untyped4.php", line 4, characters 24-26:
 This is an int
 File "async_function_untyped4.php", line 8, characters 25-25:
-It is incompatible with an object of type Awaitable (result of 'async function')
+It is incompatible with an object of type Awaitable<_> (result of 'async function')

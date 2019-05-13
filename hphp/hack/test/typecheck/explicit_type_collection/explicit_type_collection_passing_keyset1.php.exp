@@ -5,4 +5,4 @@ Invalid argument (Typing[4110])
 File "explicit_type_collection_passing_keyset1.php", line 3, characters 21-23:
 This is an int
 File "explicit_type_collection_passing_keyset1.php", line 5, characters 15-22:
-It is incompatible with an array key (int/string)
+It is incompatible with an array key (int | string)

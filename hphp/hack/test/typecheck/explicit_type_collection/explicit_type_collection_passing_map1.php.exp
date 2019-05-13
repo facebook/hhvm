@@ -7,4 +7,4 @@ This is a string
 File "explicit_type_collection_passing_map1.php", line 3, characters 21-26:
 Considering that this type argument is invariant with respect to Map
 File "explicit_type_collection_passing_map1.php", line 5, characters 12-19:
-It is incompatible with an array key (int/string)
+It is incompatible with an array key (int | string)

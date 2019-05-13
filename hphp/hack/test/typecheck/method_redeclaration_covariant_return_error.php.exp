@@ -8,4 +8,4 @@ Member f has the wrong type
 File "method_redeclaration_covariant_return_error.php", line 12, characters 30-32:
 This is an int
 File "method_redeclaration_covariant_return_error.php", line 4, characters 30-32:
-It is incompatible with a num (int/float)
+It is incompatible with a num (int | float)

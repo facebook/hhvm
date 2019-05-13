@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "awaitable_yield_result_error.php", line 12, characters 24-26:
 This is an int
 File "awaitable_yield_result_error.php", line 13, characters 3-14:
-It is incompatible with an object of type Awaitable (result of 'async function')
+It is incompatible with an object of type Awaitable<null> (result of 'async function')

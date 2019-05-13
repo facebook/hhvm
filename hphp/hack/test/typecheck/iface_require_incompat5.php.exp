@@ -5,4 +5,4 @@ This is an int
 File "iface_require_incompat5.php", line 6, characters 25-27:
 Considering that this type argument is invariant with respect to Super
 File "iface_require_incompat5.php", line 10, characters 25-27:
-It is incompatible with a num (int/float)
+It is incompatible with a num (int | float)

@@ -3,4 +3,4 @@ Invalid assignment (Typing[4110])
 File "map_corner_case.php", line 13, characters 10-22:
 This is an undefined value because a type could not be determined here
 File "map_corner_case.php", line 13, characters 27-32:
-It is incompatible with an object of type Map
+It is incompatible with an object of type Map<[unresolved], [unresolved]>

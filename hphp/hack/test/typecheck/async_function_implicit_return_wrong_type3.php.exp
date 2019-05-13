@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "async_function_implicit_return_wrong_type3.php", line 14, characters 10-10:
 This is void because this function implicitly returns void
 File "async_function_implicit_return_wrong_type3.php", line 14, characters 53-67:
-It is incompatible with an object of type Awaitable
+It is incompatible with an object of type Awaitable<void>

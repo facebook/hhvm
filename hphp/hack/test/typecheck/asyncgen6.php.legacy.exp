@@ -1,0 +1,6 @@
+File "asyncgen6.php", line 13, characters 3-11:
+await can only operate on an Awaitable (Typing[4110])
+File "asyncgen6.php", line 13, characters 3-11:
+This is an object of type Awaitable<_>
+File "asyncgen6.php", line 7, characters 21-53:
+It is incompatible with an object of type AsyncGenerator<int, string, void>

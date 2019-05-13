@@ -26,161 +26,6 @@ let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
 (*****************************************************************************)
-(* Computes the string representing a type in an error message.
- * We generally don't want to show the whole type. If an error was due
- * because something is a Vector instead of an int, we don't want to show
- * the type Vector<Vector<array<int>>> because it could be misleading.
- * The error is due to the fact that it is a Vector, regardless of the
- * type parameters.
- *)
-(*****************************************************************************)
-
-module ErrorString = struct
-
-  module Env = Typing_env
-  let tprim = function
-    | Nast.Tnull       -> "null"
-    | Nast.Tvoid       -> "void"
-    | Nast.Tint        -> "an int"
-    | Nast.Tbool       -> "a bool"
-    | Nast.Tfloat      -> "a float"
-    | Nast.Tstring     -> "a string"
-    | Nast.Tnum        -> "a num (int/float)"
-    | Nast.Tresource   -> "a resource"
-    | Nast.Tarraykey   -> "an array key (int/string)"
-    | Nast.Tnoreturn   -> "noreturn (throws or exits)"
-
-  let varray = "a varray"
-  let darray = "a darray"
-  let varray_or_darray = "a varray_or_darray"
-
-  let rec type_: type a. a ty_ -> _ = function
-    | Tany               -> "an untyped value"
-    | Terr               -> "a type error"
-    | Tdynamic           -> "a dynamic value"
-    | Tnothing           -> "a missing value"
-    | Tunresolved l      -> unresolved l
-    | Tarray (x, y)      -> array (x, y)
-    | Tdarray (_, _)     -> darray
-    | Tvarray _          -> varray
-    | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
-    | Tvarray_or_darray _ -> varray_or_darray
-    | Tarraykind AKempty -> "an empty array"
-    | Tarraykind AKany   -> array (None, None)
-    | Tarraykind AKvarray _
-                         -> varray
-    | Tarraykind (AKvec x)
-                         -> array (Some x, None)
-    | Tarraykind AKdarray (_, _)
-                         -> darray
-    | Tarraykind (AKmap (x, y))
-                         -> array (Some x, Some y)
-    | Ttuple l           -> "a tuple of size " ^ string_of_int (List.length l)
-    | Tmixed             -> "a mixed value"
-    | Tnonnull           -> "a nonnull value"
-    | Toption (_, Tnonnull) -> "a mixed value"
-    | Toption _          -> "a nullable type"
-    | Tlike (_, x)            -> type_ x
-    | Tprim tp           -> tprim tp
-    | Tvar _             -> "some value"
-    | Tanon _    -> "a function"
-    | Tfun _     -> "a function"
-    | Tgeneric x    -> "a value of declared generic type " ^ x
-    | Tabstract (AKnewtype (x, _), _)
-        when x = SN.Classes.cClassname -> "a classname string"
-    | Tabstract (AKnewtype (x, _), _)
-        when x = SN.Classes.cTypename -> "a typename string"
-    | Tabstract (ak, cstr) -> abstract ak cstr
-    | Tclass ((_, x), Exact, _) ->
-      "an object of exactly the class " ^ strip_ns x
-    | Tclass ((_, x), _, _) ->
-      "an object of type " ^ strip_ns x
-    | Tapply ((_, x), _)
-        when x = SN.Classes.cClassname -> "a classname string"
-    | Tapply ((_, x), _)
-        when x = SN.Classes.cTypename -> "a typename string"
-    | Tapply ((_, x), _) -> "an object of type "^(strip_ns x)
-    | Tobject            -> "an object"
-    | Tshape _           -> "a shape"
-    | Taccess (root_ty, ids) -> tconst root_ty ids
-    | Tthis -> "the type 'this'"
-
-  and array: type a. a ty option * a ty option -> _ = function
-    | None, None     -> "an untyped array"
-    | Some _, None   -> "an array (used like a vector)"
-    | Some _, Some _ -> "an array (used like a hashtable)"
-    | _              -> assert false
-
-  and abstract ak cstr =
-    let x = strip_ns @@ AbstractKind.to_string ak in
-    match ak, cstr with
-    | AKnewtype (_, _), _ -> "an object of type "^x
-    | AKenum _, _ -> "a value of "^x
-    | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
-      "the expression dependent type "^s
-    | AKgeneric _, _ -> "a value of generic type "^x
-    | AKdependent (`cls c, []), Some (_, ty) ->
-        type_ ty^" (known to be exactly the class '"^strip_ns c^"')"
-    | AKdependent ((`this | `expr _), _), _ ->
-        "the expression dependent type "^x
-    | AKdependent (_, _::_), _ -> "the abstract type constant "^x
-    | AKdependent _, _ ->
-        "the type '"^x^"'"
-        ^Option.value_map cstr ~default:""
-          ~f:(fun (_, ty) -> "\n  that is compatible with "^type_ ty)
-
-  and unresolved l =
-    let l = List.map l snd in
-    let null, nonnull = List.partition_tf l (fun ty -> ty = Tprim Nast.Tnull) in
-    let l = List.map nonnull type_ in
-    let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
-    let l = SSet.elements s in
-    if null = [] then
-      unresolved_ l
-    else
-      "a nullable type"
-
-  and unresolved_ = function
-    | []      -> "an undefined value"
-    | [x]     -> x
-    | x :: rl -> x^" or "^unresolved_ rl
-
-  and tconst: type a. a ty -> _ -> _ = fun root_ty ids ->
-    let f x =
-      let x =
-        if String.contains x '<'
-        then "this"
-        else x
-      in
-      List.fold_left ~f:(fun acc (_, sid) -> acc^"::"^sid)
-        ~init:("the type constant "^strip_ns x) ids in
-    match snd root_ty with
-    | Tgeneric x -> f x
-    | Tapply ((_, x), _) -> f x
-    | Tclass ((_, x), _, _) -> f x
-    | Tabstract (ak, _) -> f @@ AbstractKind.to_string ak
-    | Taccess _ as x ->
-        List.fold_left ~f:(fun acc (_, sid) -> acc^"::"^sid)
-          ~init:(type_ x) ids
-     | _ ->
-         "a type constant"
-
-  and class_kind c_kind final =
-    let fs = if final then " final" else "" in
-    match c_kind with
-    | Ast.Cabstract -> "an abstract" ^ fs ^ " class"
-    | Ast.Cnormal -> "a" ^ fs ^ " class"
-    | Ast.Cinterface -> "an interface"
-    | Ast.Ctrait -> "a trait"
-    | Ast.Cenum -> "an enum"
-    | Ast.Crecord -> "a record"
-
-  and to_string env ty =
-    let _, ety = Env.expand_type env ty in
-    type_ (snd ety)
-end
-
-(*****************************************************************************)
 (* Module used to "suggest" types.
  * When a type is missing, it is nice to suggest a type to the user.
  * However, there are some cases where parts of the type is still unresolved.
@@ -290,7 +135,6 @@ module Full = struct
   let varmapping = ref IMap.empty
   let normalize_tvars = ref false
   let blank_tyvars = ref false
-
   let comma_sep = Concat [text ","; Space]
 
   let id x = x
@@ -388,7 +232,7 @@ module Full = struct
         if ISet.mem n' st
         then text "[rec]"
         else if !blank_tyvars
-        then text "#_"
+        then text "[unresolved]"
         else text ("#" ^ string_of_int normalized_n)
       | _ ->
         let prepend =
@@ -693,6 +537,134 @@ module Full = struct
     |> Libhackfmt.format_doc format_env
     |> String.strip
 
+end
+
+let with_blank_tyvars f =
+  Full.blank_tyvars := true;
+  let res = f () in
+  Full.blank_tyvars := false;
+  res
+
+(*****************************************************************************)
+(* Computes the string representing a type in an error message.
+ *)
+(*****************************************************************************)
+
+module ErrorString = struct
+
+  module Env = Typing_env
+  let tprim = function
+    | Nast.Tnull       -> "null"
+    | Nast.Tvoid       -> "void"
+    | Nast.Tint        -> "an int"
+    | Nast.Tbool       -> "a bool"
+    | Nast.Tfloat      -> "a float"
+    | Nast.Tstring     -> "a string"
+    | Nast.Tnum        -> "a num (int | float)"
+    | Nast.Tresource   -> "a resource"
+    | Nast.Tarraykey   -> "an array key (int | string)"
+    | Nast.Tnoreturn   -> "noreturn (throws or exits)"
+
+  let varray = "a varray"
+  let darray = "a darray"
+  let varray_or_darray = "a varray_or_darray"
+
+  let rec type_: _ -> locl ty_ -> _ = function env -> function
+    | Tany               -> "an untyped value"
+    | Terr               -> "a type error"
+    | Tdynamic           -> "a dynamic value"
+    | Tunresolved l      -> unresolved env l
+    | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
+    | Tarraykind AKempty -> "an empty array"
+    | Tarraykind AKany   -> array (None, None)
+    | Tarraykind AKvarray _
+                         -> varray
+    | Tarraykind (AKvec x)
+                         -> array (Some x, None)
+    | Tarraykind AKdarray (_, _)
+                         -> darray
+    | Tarraykind (AKmap (x, y))
+                         -> array (Some x, Some y)
+    | Ttuple l           -> "a tuple of size " ^ string_of_int (List.length l)
+    | Tnonnull           -> "a nonnull value"
+    | Toption (_, Tnonnull) -> "a mixed value"
+    | Toption _          -> "a nullable type"
+    | Tprim tp           -> tprim tp
+    | Tvar _             -> "some value"
+    | Tanon _    -> "a function"
+    | Tfun _     -> "a function"
+    | Tabstract (AKnewtype (x, _), _)
+        when x = SN.Classes.cClassname -> "a classname string"
+    | Tabstract (AKnewtype (x, _), _)
+        when x = SN.Classes.cTypename -> "a typename string"
+    | Tabstract (ak, cstr) -> abstract env ak cstr
+    | Tclass ((_, x), Exact, tyl) ->
+      "an object of exactly the class " ^ strip_ns x ^ inst env tyl
+    | Tclass ((_, x), Nonexact, tyl) ->
+      "an object of type " ^ strip_ns x ^ inst env tyl
+    | Tobject            -> "an object"
+    | Tshape _           -> "a shape"
+
+  and array: type a. a ty option * a ty option -> _ = function
+    | None, None     -> "an untyped array"
+    | Some _, None   -> "an array (used like a vector)"
+    | Some _, Some _ -> "an array (used like a hashtable)"
+    | _              -> assert false
+
+  and inst env tyl =
+    if List.is_empty tyl then ""
+    else
+    with_blank_tyvars (fun () ->
+    "<"
+    ^ String.concat ~sep:", " (List.map tyl ~f:(Full.to_string_strip_ns env))
+    ^ ">")
+
+  and abstract env ak cstr =
+    let x = strip_ns @@ AbstractKind.to_string ak in
+    match ak, cstr with
+    | AKnewtype (_, tyl), _ -> "an object of type " ^ x ^ inst env tyl
+    | AKenum _, _ -> "a value of "^x
+    | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
+      "the expression dependent type "^s
+    | AKgeneric _, _ -> "a value of generic type "^x
+    | AKdependent (`cls c, []), Some ty ->
+        to_string env ty^" (known to be exactly the class '"^strip_ns c^"')"
+    | AKdependent ((`this | `expr _), _), _ ->
+        "the expression dependent type "^x
+    | AKdependent (_, _::_), _ -> "the abstract type constant "^x
+    | AKdependent _, _ ->
+        "the type '"^x^"'"
+        ^Option.value_map cstr ~default:""
+          ~f:(fun ty -> "\n  that is compatible with " ^ to_string env ty)
+
+  and unresolved env l =
+    let null, nonnull = List.partition_tf l (fun ty -> snd ty = Tprim Nast.Tnull) in
+    let l = List.map nonnull (to_string env) in
+    let s = List.fold_right l ~f:SSet.add ~init:SSet.empty in
+    let l = SSet.elements s in
+    if null = [] then
+      unresolved_ l
+    else
+      "a nullable type"
+
+  and unresolved_ = function
+    | []      -> "an undefined value"
+    | [x]     -> x
+    | x :: rl -> x^" or "^unresolved_ rl
+
+  and class_kind c_kind final =
+    let fs = if final then " final" else "" in
+    match c_kind with
+    | Ast.Cabstract -> "an abstract" ^ fs ^ " class"
+    | Ast.Cnormal -> "a" ^ fs ^ " class"
+    | Ast.Cinterface -> "an interface"
+    | Ast.Ctrait -> "a trait"
+    | Ast.Cenum -> "an enum"
+    | Ast.Crecord -> "a record"
+
+  and to_string : _ -> locl ty -> _ = fun env ty ->
+    let _, ety = Env.expand_type env ty in
+    type_ env (snd ety)
 end
 
 module Json =
@@ -1602,12 +1574,6 @@ let debug env ty =
   let f_str = full_strip_ns env ty in
   Full.debug_mode := false;
   f_str
-let with_blank_tyvars f =
-  Full.blank_tyvars := true;
-  let res = f () in
-  Full.blank_tyvars := false;
-  res
-
 let class_ tcopt c = PrintClass.class_type tcopt c
 let gconst tcopt gc = Full.to_string_decl tcopt (fst gc)
 let fun_ tcopt f = PrintFun.fun_type tcopt f

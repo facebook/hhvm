@@ -8,4 +8,4 @@ Member foo has the wrong type
 File "bad_inout_hint_parent3.php", line 8, characters 39-44:
 This is a string
 File "bad_inout_hint_parent3.php", line 4, characters 39-46:
-It is incompatible with an array key (int/string)
+It is incompatible with an array key (int | string)

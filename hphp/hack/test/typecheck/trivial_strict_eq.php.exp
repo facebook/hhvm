@@ -3,4 +3,4 @@ This expression is always false (Typing[4118])
 File "trivial_strict_eq.php", line 14, characters 10-11:
 This is a string
 File "trivial_strict_eq.php", line 13, characters 8-13:
-This is a num (int/float) because it is the result of a division (/)
+This is a num (int | float) because it is the result of a division (/)

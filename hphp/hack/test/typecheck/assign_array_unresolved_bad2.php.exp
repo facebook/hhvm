@@ -3,4 +3,4 @@ Invalid assignment (Typing[4110])
 File "assign_array_unresolved_bad2.php", line 7, characters 15-19:
 This is a float
 File "assign_array_unresolved_bad2.php", line 8, characters 3-5:
-It is incompatible with a num (int/float)
+It is incompatible with a num (int | float)

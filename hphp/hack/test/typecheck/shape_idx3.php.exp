@@ -11,4 +11,4 @@ Invalid return type (Typing[4110])
 File "shape_idx3.php", line 13, characters 4-6:
 This is an int
 File "shape_idx3.php", line 11, characters 3-10:
-It is incompatible with an array key (int/string)
+It is incompatible with an array key (int | string)

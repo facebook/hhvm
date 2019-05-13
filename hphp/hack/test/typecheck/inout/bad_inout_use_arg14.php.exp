@@ -1,4 +1,4 @@
 File "bad_inout_use_arg14.php", line 7, characters 11-15:
 You cannot mutate this (Typing[4011])
 File "bad_inout_use_arg14.php", line 6, characters 8-30:
-This is an object of type Pair
+This is an object of type Pair<string, string>

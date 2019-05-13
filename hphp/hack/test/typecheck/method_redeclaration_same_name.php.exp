@@ -10,4 +10,4 @@ Member f has the wrong type
 File "method_redeclaration_same_name.php", line 10, characters 24-29:
 This is a string
 File "method_redeclaration_same_name.php", line 18, characters 24-31:
-It is incompatible with an array key (int/string)
+It is incompatible with an array key (int | string)

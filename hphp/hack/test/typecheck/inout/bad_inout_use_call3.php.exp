@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "bad_inout_use_call3.php", line 11, characters 35-37:
 This is an int
 File "bad_inout_use_call3.php", line 7, characters 18-25:
-It is incompatible with an array key (int/string)
+It is incompatible with an array key (int | string)

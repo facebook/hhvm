@@ -84,10 +84,12 @@ eval "$(opam env)"
 opam install \
   core_kernel.v0.11.1 \
   dtoa.0.3.1 \
-  dune.1.6.3 \
+  dune.1.9.3 \
   lwt.4.1.0 \
   lwt_log.1.1.0 \
   lwt_ppx.1.2.1 \
+  merlin.3.2.2 \
+  ocp-indent.1.7.0 \
   pcre.7.3.4 \
   ppx_deriving.4.2.1 \
   ppx_gen_rec.1.0.0 \
@@ -96,3 +98,8 @@ opam install \
   uchar.0.0.2 \
   visitors.20180513 \
   wtf8.1.0.1
+
+dune_version=$(dune --version)
+echo ""
+echo "opam switch correctly installed at $OPAMROOT"
+echo "dune version is $dune_version"

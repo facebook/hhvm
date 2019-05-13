@@ -23,6 +23,7 @@ type lazy_class_type = {
   ancestors: decl ty LSTable.t;
   parents_and_traits: unit LSTable.t;
   members_fully_known: bool Lazy.t;
+  req_ancestor_names: unit LSTable.t;
 }
 
 type class_type_variant =
@@ -34,6 +35,7 @@ let make_lazy_class_type class_name sc c =
     ancestors;
     parents_and_traits;
     members_fully_known;
+    req_ancestor_names;
   } = Decl_ancestors.make class_name in
   let get_ancestor = LSTable.get ancestors in
   let inherited_members = Decl_inheritance.make class_name get_ancestor in
@@ -44,6 +46,7 @@ let make_lazy_class_type class_name sc c =
     ancestors;
     parents_and_traits;
     members_fully_known;
+    req_ancestor_names;
   }
 
 let shallow_decl_enabled () =
@@ -232,7 +235,7 @@ module Api = struct
 
   let requires_ancestor t ancestor =
     match t with
-    | Lazy lc -> SSet.mem ancestor lc.c.tc_req_ancestors_extends
+    | Lazy lc -> LSTable.mem lc.req_ancestor_names ancestor
     | Eager c -> SSet.mem ancestor c.tc_req_ancestors_extends
 
   let extends t ancestor =
@@ -257,7 +260,7 @@ module Api = struct
 
   let all_ancestor_req_names t =
     match t with
-    | Lazy lc -> Sequence.of_list (SSet.elements lc.c.tc_req_ancestors_extends)
+    | Lazy lc -> LSTable.to_seq lc.req_ancestor_names |> Sequence.map ~f:fst
     | Eager c -> Sequence.of_list (SSet.elements c.tc_req_ancestors_extends)
 
   let all_extends_ancestors t =

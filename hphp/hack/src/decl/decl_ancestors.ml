@@ -20,6 +20,7 @@ type ancestor_caches = {
   ancestors : decl ty LSTable.t; (** Types of parents, interfaces, and traits *)
   parents_and_traits : unit LSTable.t; (** Names of parents and traits only *)
   members_fully_known : bool Lazy.t;
+  req_ancestor_names : unit LSTable.t;
 }
 
 let all_ancestors lin =
@@ -43,6 +44,11 @@ let parents_and_traits lin =
 let members_fully_known lin =
   lazy (Sequence.for_all lin ~f:(fun mro -> not mro.mro_class_not_found))
 
+let req_ancestor_names class_name =
+  Decl_linearize.get_linearization class_name
+  |> Sequence.filter ~f:(fun mro -> mro.mro_synthesized)
+  |> Sequence.map ~f:(fun mro -> mro.mro_name, ())
+
 let is_canonical _ = true
 let merge ~earlier ~later:_ = earlier
 
@@ -58,4 +64,6 @@ let make class_name =
     parents_and_traits =
       LSTable.make (parents_and_traits lin) ~is_canonical ~merge;
     members_fully_known = members_fully_known lin;
+    req_ancestor_names =
+      LSTable.make (req_ancestor_names class_name) ~is_canonical ~merge;
   }

@@ -421,26 +421,26 @@ function read_opts_file($file) {
 function rel_path($to) {
   $from     = explode('/', getcwd().'/');
   $to       = explode('/', $to);
-  $relPath  = $to;
+  $from_len = count($from);
+  $to_len   = count($to);
 
-  foreach ($from as $depth => $dir) {
-    // find first non-matching dir.
-    if ($dir === $to[$depth]) {
-      // ignore this directory.
-      array_shift(&$relPath);
-    } else {
-      // get number of remaining dirs to $from.
-      $remaining = count($from) - $depth;
-      if ($remaining > 1) {
-        // add traversals up to first matching dir.
-        $padLength = (count($relPath) + $remaining - 1) * -1;
-        $relPath = array_pad($relPath, $padLength, '..');
-        break;
-      } else {
-        $relPath[0] = './' . $relPath[0];
-      }
-    }
+  // find first non-matching dir.
+  for ($d = 0; $d < $from_len; ++$d) {
+    if ($d >= $to_len || $from[$d] !== $to[$d])
+      break;
   }
+
+  $relPath = vec[];
+
+  // get number of remaining dirs in $from.
+  $remaining = $from_len - $d - 1;
+  if ($remaining > 0) {
+    // add traversals up to first matching dir.
+    while ($remaining-- > 0) $relPath[] = '..';
+  } else {
+    $relPath[] = '.';
+  }
+  while ($d < $to_len) $relPath[] = $to[$d++];
   return implode('/', $relPath);
 }
 
@@ -1552,15 +1552,16 @@ class Status {
    * constants above), that argument will be given the indicated color.
    */
   public static function sayColor(...$args) {
-    while (count($args)) {
+    $n = count($args);
+    for ($i = 0; $i < $n;) {
       $color = null;
-      $str = array_shift(&$args);
+      $str = $args[$i++];
       if (is_integer($str)) {
         $color = $str;
         if (self::$use_color) {
           print "\033[0;${color}m";
         }
-        $str = array_shift(&$args);
+        $str = $args[$i++];
       }
 
       print $str;

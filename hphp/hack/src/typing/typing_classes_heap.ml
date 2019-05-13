@@ -166,11 +166,6 @@ module Api = struct
     | Lazy lc -> lc.sc.sc_is_xhp
     | Eager c -> c.tc_is_xhp
 
-  let is_disposable t =
-    match t with
-    | Lazy lc -> lc.c.tc_is_disposable
-    | Eager c -> c.tc_is_disposable
-
   let name t =
     match t with
     | Lazy lc -> snd lc.sc.sc_name
@@ -270,6 +265,19 @@ module Api = struct
     match t with
     | Lazy lc -> LSTable.to_seq lc.parents_and_traits |> Sequence.map ~f:fst
     | Eager c -> Sequence.of_list (SSet.elements c.tc_extends)
+
+  let is_disposable_class_name class_name =
+    class_name = SN.Classes.cIDisposable ||
+    class_name = SN.Classes.cIAsyncDisposable
+
+  let is_disposable t =
+    match t with
+    | Lazy _ ->
+      is_disposable_class_name (name t) ||
+      Sequence.exists (all_ancestor_names t) is_disposable_class_name ||
+      Sequence.exists (all_ancestor_req_names t) is_disposable_class_name
+    | Eager c ->
+      c.tc_is_disposable
 
   let get_const t id =
     match t with

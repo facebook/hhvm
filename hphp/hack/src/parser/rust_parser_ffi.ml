@@ -51,6 +51,8 @@ let set_global_lexer_env env =
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
     ~rust:true
 
+exception RustException of string
+
 external parse_mode: SourceText.t -> FileInfo.mode option = "rust_parse_mode"
 
 external parse_minimal:
@@ -86,6 +88,7 @@ let parse_positioned_with_coroutine_sc text env =
   parse_positioned_with_coroutine_sc text (env_to_opts env)
 
 let init () =
+  Callback.register_exception "rust exception" (RustException "");
   Full_fidelity_minimal_syntax.rust_parse_ref := parse_minimal;
   Full_fidelity_positioned_syntax.rust_parse_ref := parse_positioned;
   Full_fidelity_positioned_syntax.rust_parse_with_coroutine_sc_ref :=

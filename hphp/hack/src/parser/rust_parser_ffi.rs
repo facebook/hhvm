@@ -29,6 +29,8 @@ use parser::parser::Parser;
 use parser::smart_constructors::{NoState, StateType};
 use parser::smart_constructors_wrappers::WithKind;
 
+use std::panic;
+
 type PositionedSyntaxParser<'a> =
     Parser<'a, WithKind<PositionedSmartConstructors>, NoState>;
 
@@ -59,9 +61,41 @@ unsafe fn str_field(block: &ocaml::Value, field: usize) -> ocaml::Str {
     )))
 }
 
+macro_rules! caml_raise {
+    ($name:ident, |$($param:ident),*|, <$($local:ident),*>, $code:block -> $retval:ident) => {
+        caml!($name, |$($param),*|, <caml_raise_ret, $($local),*>, {
+            let result = panic::catch_unwind(
+                || {
+                    $code;
+                    return $retval;
+                }
+            );
+            match result {
+                Ok (value) => {
+                    caml_raise_ret = value;
+                },
+                Err (err) => {
+                    let msg: &str;
+                    if let Some (str) = err.downcast_ref::<&str>() {
+                        msg = str;
+                    } else if let Some (string) = err.downcast_ref::<String>() {
+                        msg = &string[..];
+                    } else {
+                        msg = "Unknown panic type, only support string type.";
+                    }
+                    ocaml::runtime::raise_with_string(
+                        &ocaml::named_value("rust exception").unwrap(),
+                        msg,
+                    );
+                },
+            };
+        } -> caml_raise_ret);
+    };
+}
+
 macro_rules! parse {
     ($name:ident, $parser:ident) => {
-        caml!($name, |ocaml_source_text, opts|, <l>, {
+        caml_raise!($name, |ocaml_source_text, opts|, <l>, {
             let relative_path = block_field(&ocaml_source_text, 0);
             let file_path = str_field(&relative_path, 1);
             let content = str_field(&ocaml_source_text, 2);
@@ -113,7 +147,7 @@ parse!(parse_minimal, MinimalSyntaxParser);
 parse!(parse_positioned, PositionedSyntaxParser);
 parse!(parse_positioned_with_coroutine_sc, CoroutineParser);
 
-caml!(rust_parse_mode, |ocaml_source_text|, <l>, {
+caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
     let relative_path = block_field(&ocaml_source_text, 0);
     let file_path = str_field(&relative_path, 1);
     let content = str_field(&ocaml_source_text, 2);
@@ -130,7 +164,7 @@ caml!(rust_parse_mode, |ocaml_source_text|, <l>, {
 
 macro_rules! scan_trivia {
     ($name:ident) => {
-        caml!($name, |ocaml_source_text, opts, offset|, <l>, {
+        caml_raise!($name, |ocaml_source_text, opts, offset|, <l>, {
             let relative_path = block_field(&ocaml_source_text, 0);
             let file_path = str_field(&relative_path, 1);
             let content = str_field(&ocaml_source_text, 2);

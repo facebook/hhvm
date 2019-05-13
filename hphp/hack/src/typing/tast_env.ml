@@ -99,14 +99,11 @@ let get_reified = Typing_env.get_reified
 let get_enforceable = Typing_env.get_enforceable
 let get_newable = Typing_env.get_newable
 
-let subtype env ty_sub ty_super =
-  Errors.ignore_ (fun () ->
-    Errors.try_
-      (fun () -> Typing_subtype.sub_type env ty_sub ty_super, true)
-      (fun _ -> env, false))
+let assert_subtype p reason env ty_have ty_expect =
+  Typing_ops.sub_type p reason env ty_have ty_expect
 
 let can_subtype env ty_sub ty_super =
-  snd (subtype env ty_sub ty_super)
+  Typing_subtype.is_sub_type env ty_sub ty_super
 
 let is_stringish ?allow_mixed env ty =
   Errors.ignore_ (fun () ->

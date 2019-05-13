@@ -86,7 +86,7 @@ let check_exhaustiveness env pos ty caselist =
   ignore (check_exhaustiveness_ env pos ty caselist false)
 
 let ensure_valid_switch_case_value_types env scrutinee_ty casel errorf =
-  let is_subtype ty_sub ty_super = snd (Env.subtype env ty_sub ty_super) in
+  let is_subtype ty_sub ty_super = Env.can_subtype env ty_sub ty_super in
   let ty_num = (Reason.Rnone, Tprim Nast.Tnum) in
   let ty_arraykey = (Reason.Rnone, Tprim Nast.Tarraykey) in
   let ty_mixed = MakeType.mixed Reason.Rnone in

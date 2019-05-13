@@ -167,10 +167,10 @@ val is_untyped: env -> Tast.ty -> bool
 (** Return {true} when the given type is {Tany}, {Tdynamic}, etc. See:
     {Typing_utils.is_any} and {Typing_utils.is_dynamic}. *)
 
-val subtype: env -> Tast.ty -> Tast.ty -> env * bool
-(** Return {true} when the first type can be considered a subtype of the second
-    type after resolving unbound type variables in both types (if any), and an
-    {!env} reflecting the new state of these type variables. *)
+val assert_subtype: Pos.t -> Typing_reason.ureason -> env -> Tast.ty -> Tast.ty -> env
+(** Assert that one type is a subtype of another, resolving unbound type
+    variables in both types (if any), with {!env} reflecting the new state of
+    these type variables. Produce an error if they cannot be subtypes. *)
 
 val can_subtype: env -> Tast.ty -> Tast.ty -> bool
 (** Return {true} when the first type can be considered a subtype of the second

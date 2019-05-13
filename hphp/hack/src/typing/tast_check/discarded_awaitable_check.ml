@@ -15,8 +15,7 @@ module MakeType = Typing_make_type
 let is_awaitable env ty =
   let mixed = MakeType.mixed Typing_reason.none in
   let awaitable_of_mixed = MakeType.awaitable Typing_reason.none mixed in
-  let _, is_ty_awaitable = Tast_env.subtype env ty awaitable_of_mixed in
-  is_ty_awaitable
+  Tast_env.can_subtype env ty awaitable_of_mixed
 
 let rec can_be_null env ty =
   let _, (_, ety) = Tast_env.expand_type env ty in

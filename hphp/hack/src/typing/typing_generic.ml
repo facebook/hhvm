@@ -59,7 +59,7 @@ end = struct
           List.iter tyl ty; ty_opt x
       | Ttuple tyl -> List.iter tyl ty
       | Tclass (_, _, tyl) -> List.iter tyl ty
-      | Tunresolved tyl -> List.iter tyl ty
+      | Tunion tyl -> List.iter tyl ty
       | Tobject -> ()
       | Tapply (_, tyl) -> List.iter tyl ty
       | Taccess (t, _) -> ty t

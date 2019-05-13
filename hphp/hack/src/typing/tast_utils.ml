@@ -28,7 +28,7 @@ let rec type_non_nullable env ty =
         | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tanon _ | Tobject
         | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)) -> true
   | _, Tabstract (_, Some ty) when type_non_nullable env ty -> true
-  | _, Tunresolved tyl when not (List.is_empty tyl) ->
+  | _, Tunion tyl when not (List.is_empty tyl) ->
     List.for_all tyl (type_non_nullable env)
   | _ -> false
 
@@ -106,7 +106,7 @@ let rec truthiness env ty =
   | Tprim Tnoreturn -> Unknown
   | Tprim (Tint | Tbool | Tfloat | Tstring | Tnum | Tarraykey) -> Possibly_falsy
 
-  | Tunresolved tyl ->
+  | Tunion tyl ->
     begin match List.map tyl (truthiness env) with
     | [] -> Unknown
     | hd :: tl -> List.fold tl ~init:hd ~f:fold_truthiness
@@ -166,7 +166,7 @@ let rec find_sketchy_types env acc ty =
         | Cnormal | Cabstract | Ctrait | Cenum | Crecord -> acc
     end
 
-  | Tunresolved tyl ->
+  | Tunion tyl ->
     List.fold tyl ~init:acc ~f:(find_sketchy_types env)
   | Tabstract _ ->
     let env, tyl = Env.get_concrete_supertypes env ty in

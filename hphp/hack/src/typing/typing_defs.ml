@@ -195,53 +195,34 @@ and _ ty_ =
    * Typing_env.env.genv.anons) *)
   | Tanon : locl fun_arity * Ident.t -> locl ty_
 
-  (* This is a kinda-union-type we use in order to defer picking which common
-   * ancestor for a type we should use until we hit a type annotation.
-   * For example:
+  (* Union type.
+   * This is needed for a few reasons:
+   * - Because hack variables are not scoped, some control flow statements can
+   *   make it such that the variables can have multiple types after the
+   *   statement, for example:
    *
-   * interface I {}
-   * class C implements I {}
-   * class D extends C {}
-   * function f(): I {
    *   if (...) {
    *     $x = new C();
    *   } else {
    *     $x = new D();
    *   }
-   *   return $x;
-   * }
+   *   // here $x has the union type (C | D)
    *
-   * What is the type of $x? We need to pick some common ancestor, but which
-   * one? Both C and I would be acceptable, which do we mean? This is where
-   * Tunresolved comes in -- after the if/else, the type of $x is
-   * Unresolved[C, D] -- it could be *either one*, and we defer the check until
-   * we hit an annotation. In particular, when we hit the "return", we make sure
-   * that it is compatible with both C and D, and then we know we've found the
-   * right supertype. Since we don't do global inference, we'll always either
-   * hit an annotation to check, or hit a place an annotation is missing in
-   * which case we can just throw away the type.
+   * - Some collections can be heterogeneous, for example:
    *
-   * Note that this is *not* really a union type -- most notably, it's allowed
-   * to grow as inference goes on, which union types don't. For example:
+   *   $v = vec[]
+   *   $v[] = new C()
+   *   $v[] = new D()
+   *   // $v is a vec<(C | D)>
    *
-   * function f(): Vector<num> {
-   *   $v = Vector {};
-   *   $v[] = 1;
-   *   $v[] = 3.14;
-   *   return $v;
-   * }
+   * - The union type might also be used as an inferred type for some generic classes:
    *
-   * (Eliding some Tvar for clarity) On the first line, $v is
-   * Vector<Unresolved[]>. On the second, Vector<Unresolved[int]>. On the third,
-   * Vector<Unresolved[int,float]> -- it grows! Then when we finally return $v,
-   * we see that int and float are both compatible with num, and we have found
-   * our suitable supertype.
-   *
-   * One final implication of this growing is that if an unresolved is used in
-   * a contravariant position, we must collapse it down to whatever is annotated
-   * right then, in order to be sound.
+   *   $x = new Box ()
+   *   $x->set(new C());
+   *   $x->set(new D());
+   *   // $x is a Box<(C | D)>
    *)
-  | Tunresolved : locl ty list -> locl ty_
+  | Tunion : locl ty list -> locl ty_
 
   (* Tobject is an object type compatible with all objects. This type is also
    * compatible with some string operations (since a class might implement
@@ -713,7 +694,7 @@ let ty_con_ordinal ty =
   | Tvar _ -> 9
   | Tabstract _ -> 10
   | Tanon _ -> 11
-  | Tunresolved _ -> 12
+  | Tunion _ -> 12
   | Tobject -> 13
   | Tclass _ -> 14
   | Tarraykind _ -> 15
@@ -744,7 +725,7 @@ let abstract_kind_con_ordinal ak =
  * But if ty_compare ty1 ty2 = 0, then the types must not be distinguishable
  * by any typing rules.
  *)
-let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
+let rec ty_compare ?(normalize_union = false) ty1 ty2 =
   let rec ty_compare ty1 ty2 =
     let ty_1, ty_2 = (snd ty1, snd ty2) in
     match  ty_1, ty_2 with
@@ -754,8 +735,8 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
         ty_compare ty ty2
       | Tfun fty, Tfun fty2 ->
         tfun_compare fty fty2
-      | Tunresolved tyl1, Tunresolved tyl2 ->
-        let (tyl1, tyl2) = if normalize_unresolved
+      | Tunion tyl1, Tunion tyl2 ->
+        let (tyl1, tyl2) = if normalize_union
           then (List.sort ty_compare tyl1, List.sort ty_compare tyl2)
           else (tyl1, tyl2) in
         tyl_compare tyl1 tyl2
@@ -852,12 +833,12 @@ let rec ty_compare ?(normalize_unresolved = false) ty1 ty2 =
     in
     ty_compare ty1 ty2
 
-and tyl_compare ?(normalize_unresolved = false) tyl1 tyl2 =
-  let ty_compare = ty_compare ~normalize_unresolved in
+and tyl_compare ?(normalize_union = false) tyl1 tyl2 =
+  let ty_compare = ty_compare ~normalize_union in
   List.compare ty_compare tyl1 tyl2
 
-and ft_params_compare ?(normalize_unresolved = false) params1 params2 =
-  let ty_compare = ty_compare ~normalize_unresolved in
+and ft_params_compare ?(normalize_union = false) params1 params2 =
+  let ty_compare = ty_compare ~normalize_union in
 
   let rec ft_params_compare params1 params2 =
     List.compare ft_param_compare params1 params2
@@ -873,8 +854,8 @@ and ft_params_compare ?(normalize_unresolved = false) params1 params2 =
   in
   ft_params_compare params1 params2
 
-and abstract_kind_compare ?(normalize_unresolved = false) t1 t2 =
-  let tyl_compare = tyl_compare ~normalize_unresolved in
+and abstract_kind_compare ?(normalize_union = false) t1 t2 =
+  let tyl_compare = tyl_compare ~normalize_union in
   match t1, t2 with
   | AKnewtype (id, tyl), AKnewtype (id2, tyl2) ->
     begin match String.compare id id2 with
@@ -889,8 +870,8 @@ and abstract_kind_compare ?(normalize_unresolved = false) t1 t2 =
   | _ ->
     abstract_kind_con_ordinal t1 - abstract_kind_con_ordinal t2
 
-let ty_equal ?(normalize_unresolved = false) ty1 ty2 =
-  ty_compare ~normalize_unresolved ty1 ty2 = 0
+let ty_equal ?(normalize_union = false) ty1 ty2 =
+  ty_compare ~normalize_union ty1 ty2 = 0
 
 let make_function_type_rxvar param_ty =
   match param_ty with

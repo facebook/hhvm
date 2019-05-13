@@ -33,7 +33,7 @@ let get_constant tc (seen, has_default) = function
     (seen, has_default)
 
 let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
-  (* If this check comes from an enum inside a Tunresolved, then
+  (* If this check comes from an enum inside a Tunion, then
      don't punish for having an extra default case *)
   let (seen, has_default) =
     List.fold_left ~f:(get_constant tc) ~init:(SMap.empty, false) caselist in
@@ -53,12 +53,12 @@ let check_enum_exhaustiveness pos tc caselist coming_from_unresolved =
 
 let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   (* Right now we only do exhaustiveness checking for enums. *)
-  (* This function has a built in hack where if Tunresolved has an enum
+  (* This function has a built in hack where if Tunion has an enum
      inside then it tells the enum exhaustiveness checker to
      not punish for extra default *)
   let env, (_, ty) = Env.expand_type env ty in
   match ty with
-    | Tunresolved tyl ->
+    | Tunion tyl ->
       let new_enum = enum_coming_from_unresolved ||
         (List.length tyl> 1 && List.exists tyl ~f:begin fun cur_ty ->
         let _, (_, cur_ty) = Env.expand_type env cur_ty in

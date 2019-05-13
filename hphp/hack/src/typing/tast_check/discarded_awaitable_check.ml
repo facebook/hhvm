@@ -21,7 +21,7 @@ let rec can_be_null env ty =
   let _, (_, ety) = Tast_env.expand_type env ty in
   match ety with
   | Toption _ | Tprim Nast.Tnull -> true
-  | Tunresolved tyl -> List.exists tyl (can_be_null env)
+  | Tunion tyl -> List.exists tyl (can_be_null env)
   | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
     | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
     | Tanon _ | Tobject | Tshape _ | Tdynamic -> false
@@ -29,7 +29,7 @@ let rec can_be_null env ty =
 let rec enforce_not_awaitable env p ty =
   let _, ety = Tast_env.expand_type env ty in
   match ety with
-  | _, Tunresolved tyl ->
+  | _, Tunion tyl ->
     List.iter tyl (enforce_not_awaitable env p)
   | r, Tclass ((_, awaitable), _, _) when
       awaitable = SN.Classes.cAwaitable ->

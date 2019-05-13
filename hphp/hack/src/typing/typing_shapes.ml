@@ -65,9 +65,9 @@ let rec refine_shape field_name pos env shape =
           | Some {sft_ty; _} -> sft_ty in
         refine_shape_field_type refined_sft_ty
     end
-  | r, Tunresolved tyl ->
+  | r, Tunion tyl ->
     let env, tyl = List.map_env env tyl (refine_shape field_name pos) in
-    env, (r, Tunresolved tyl)
+    env, (r, Tunion tyl)
   | _ -> env, shape
 
 (*****************************************************************************)
@@ -90,10 +90,10 @@ let rec shrink_shape ~seen_tyvars pos field_name env shape =
       let fields = ShapeMap.remove field_name fields in
       let result = Reason.Rwitness pos, Tshape (fields_known, fields) in
       env, result
-  | _, Tunresolved tyl ->
+  | _, Tunion tyl ->
       let env, tyl =
         List.map_env env tyl (shrink_shape ~seen_tyvars pos field_name) in
-      let result = Reason.Rwitness pos, Tunresolved tyl in
+      let result = Reason.Rwitness pos, Tunion tyl in
       env, result
   | x ->
       env, x
@@ -247,7 +247,7 @@ let remove_key p env shape_ty field  =
 let to_collection env shape_ty res return_type =
   let mapper = object
     inherit Type_mapper.shallow_type_mapper as super
-    inherit! Type_mapper.tunresolved_type_mapper
+    inherit! Type_mapper.tunion_type_mapper
     inherit! Type_mapper.tvar_expanding_type_mapper
 
     method! on_tshape env _r fields_known fdm =
@@ -277,7 +277,7 @@ let to_collection env shape_ty res return_type =
         env, res
 
     method! on_type env (r, ty) = match ty with
-      | Tvar _ | Tunresolved _ | Tshape _ ->  super#on_type env (r, ty)
+      | Tvar _ | Tunion _ | Tshape _ ->  super#on_type env (r, ty)
       | _ -> env, res
 
   end in

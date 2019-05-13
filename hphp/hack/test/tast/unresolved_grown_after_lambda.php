@@ -4,9 +4,9 @@ function test(int $i, string $s): int {
   $items = Vector { $i };
   $f = (): int ==> {
     // When this function is typechecked, we have
-    //   $item : Tunresolved [int]
+    //   $item : Tunion [int]
     // But in the TAST, we should have
-    //   $item : Tunresolved [int; string]
+    //   $item : Tunion [int; string]
     $item = $items[1];
     return $item;
   };

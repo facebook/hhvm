@@ -77,7 +77,7 @@ let save_type hint_kind env x arg =
         )
     | _, (Terr | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
-      | Tfun _ | Tunresolved _ | Tobject | Tshape _) -> ()
+      | Tfun _ | Tunion _ | Tobject | Tshape _) -> ()
   end
 
 let save_return env x arg = save_type Kreturn env x arg
@@ -158,24 +158,24 @@ let get_implements (_, x) =
  *)
 let rec normalize (r, ty) = r, normalize_ ty
 and normalize_ = function
-  | Tunresolved [x] -> snd (normalize x)
-  | Tunresolved tyl
+  | Tunion [x] -> snd (normalize x)
+  | Tunion tyl
     when List.exists tyl (function _, Toption _ -> true | _ -> false) ->
       let tyl = List.map tyl (function _, Toption ty -> ty | x -> x) in
-      normalize_ (Toption (Reason.Rnone, Tunresolved tyl))
-  | Tunresolved tyl
+      normalize_ (Toption (Reason.Rnone, Tunion tyl))
+  | Tunion tyl
     when List.exists tyl
-    (function _, (Tany | Tunresolved []) -> true | _ -> false) ->
+    (function _, (Tany | Tunion []) -> true | _ -> false) ->
       let tyl = List.filter tyl begin function
-        |  _, (Tany |  Tunresolved []) -> false
+        |  _, (Tany |  Tunion []) -> false
         | _, (Terr | Tnonnull | Tarraykind _ | Tprim _ | Toption _
           | Tvar _ | Tabstract _ | Tclass _ | Ttuple _
-          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject | Tshape _
+          | Tanon (_, _) | Tfun _ | Tunion _ | Tobject | Tshape _
           | Tdynamic
              ) -> true
       end in
-      normalize_ (Tunresolved tyl)
-  | Tunresolved ((_, Tclass (x, e, [])) :: rl) ->
+      normalize_ (Tunion tyl)
+  | Tunion ((_, Tclass (x, e, [])) :: rl) ->
       (* If we have A & B & C where all the elements are classes
        * we try to find a unique common ancestor.
        *)
@@ -183,7 +183,7 @@ and normalize_ = function
         | _, Tclass (x, _, []) -> x
         | _, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tdynamic
           | Toption _ | Tvar _ | Tabstract _ | Tclass _ | Ttuple _
-          | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+          | Tanon (_, _) | Tfun _ | Tunion _ | Tobject
           | Tshape _) -> raise Exit
       end in
       let x_imp = get_implements x in
@@ -194,9 +194,9 @@ and normalize_ = function
       if SSet.cardinal set = 1
       then Tclass ((Pos.none, SSet.choose set), e, [])
       else raise Exit
-  | Tunresolved (x :: (y :: _ as rl)) when compare_types x y = 0 ->
-      normalize_ (Tunresolved rl)
-  | Tunresolved _ | Tany -> raise Exit
+  | Tunion (x :: (y :: _ as rl)) when compare_types x y = 0 ->
+      normalize_ (Tunion rl)
+  | Tunion _ | Tany -> raise Exit
   | Tnonnull -> Tnonnull
   | Terr -> Terr
   | Tarraykind akind -> begin

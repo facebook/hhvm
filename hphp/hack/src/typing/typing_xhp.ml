@@ -43,7 +43,7 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
   | Tany
   | Terr
   | Tdynamic -> env, []
-  | Tunresolved tyl ->
+  | Tunion tyl ->
       (* If it's unresolved, make sure it can only be XHP and add every
        * possible class. *)
       let (env, acc), _ = List.map_env (env, []) tyl (fun (env, acc) ty ->

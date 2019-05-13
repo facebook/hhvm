@@ -265,7 +265,7 @@ and localize_cstr_ty ~ety_env env ty tp_name =
   env, ty
 
 (* For the majority of cases when we localize a function type we instantiate
- * the function's type parameters to be a Tunresolved wrapped in a Tvar so the
+ * the function's type parameters to be a Tunion wrapped in a Tvar so the
  * type can grow. There are two cases where we do not do this.
 
  * 1) In Typing_subtype.subtype_method. See the comment for that function for why

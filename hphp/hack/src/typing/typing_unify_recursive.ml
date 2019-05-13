@@ -45,7 +45,7 @@ let rec occurs env n rty =
     end
   | Terr | Tany | Tnonnull | Tanon _ | Tprim _ | Tobject | Tdynamic -> false
   | Toption t -> occurs env n t
-  | Ttuple ts | Tunresolved ts | Tclass(_,_,ts) -> occurs_list env n ts
+  | Ttuple ts | Tunion ts | Tclass(_,_,ts) -> occurs_list env n ts
   | Tabstract(ak,topt) -> occurs_ak env n ak || occurs_opt  env n topt
   | Tarraykind ak -> occurs_array env n ak
   | Tfun ft -> occurs_ft env n ft
@@ -80,7 +80,7 @@ and occurs_params env n p =
   List.exists p (fun { fp_type = t; _ } -> occurs env n t)
 
 (* Does variable [n] occur at top-level in [ty] or under any number
- * of Toption wrappers, eliding singleton Tunresolved?
+ * of Toption wrappers, eliding singleton Tunion?
  * Return Some k if it occurs under k levels of Toption,
  * or None otherwise.
  *)
@@ -98,7 +98,7 @@ let rec occursUnderOptions level env n ty =
       end
     end
   | Toption t -> occursUnderOptions (level+1) env n t
-  | Tunresolved [t] when level > 0 -> occursUnderOptions level env n t
+  | Tunion [t] when level > 0 -> occursUnderOptions level env n t
   | _ -> None
 
 (* Given a list of types [tyl], locate the first type that is
@@ -133,7 +133,7 @@ let occursTop env n rty =
   | None ->
     let _, (_, ty) = Env.expand_type env rty in
     match ty with
-    | Tunresolved ts ->
+    | Tunion ts ->
       begin match findFirstVarOrOptionVar env n ts with
       | None -> if occurs_list env n ts then DoesOccur else DoesNotOccur
       | Some (0, ts) ->
@@ -163,7 +163,7 @@ let add env x ty =
     let env, ty' = TUtils.unresolved env ty in
     match tyl with
     | [] -> env, snd ty'
-    | _ -> env, Tunresolved (ty'::tyl)
+    | _ -> env, Tunion (ty'::tyl)
   in
   let env, x' = Env.get_var env x in
   match occursTop env x' ty with

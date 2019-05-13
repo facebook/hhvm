@@ -170,7 +170,7 @@ and expand env ~as_tyvar_with_cnstr root =
             { env with
               dep_tys = (root_reason, dep_ty)::env.dep_tys } in
           expand env ty
-      | Tunresolved tyl ->
+      | Tunion tyl ->
           let env, tyl = List.map_env env tyl begin fun prev_env ty ->
             let env, ty = expand env ty in
             (* If ty here involves a type access, we have to use
@@ -180,7 +180,7 @@ and expand env ~as_tyvar_with_cnstr root =
             let tenv, ty = ExprDepTy.apply env.tenv env.dep_tys ty in
             { prev_env with tenv }, ty
           end in
-          { env with dep_tys = [] } , (root_reason, Tunresolved tyl)
+          { env with dep_tys = [] } , (root_reason, Tunion tyl)
       | Tvar n ->
           let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n head in
           expand { env with ids = tail; tenv } ty

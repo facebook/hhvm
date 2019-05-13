@@ -106,19 +106,19 @@ module ExprDepTy = struct
       end ~init:(env, ty) in
     let env, ety = Env.expand_type env ty in
     match ety with
-    | _, Tunresolved [x] when dep_tys = [] ->
+    | _, Tunion [x] when dep_tys = [] ->
        env, x
-    | r, Tunresolved tyl ->
+    | r, Tunion tyl ->
       let env, tyl = List.fold tyl ~f:(fun (env, acc) ty ->
         let env, ty = apply_single env dep_tys ty in
         env, ty::acc) ~init:(env, []) in
-      env, (r, Tunresolved tyl)
+      env, (r, Tunion tyl)
     | _, Tvar _ -> env, ty
     | _ -> apply_single env dep_tys ety
 
 
   (* We do not want to create a new expression dependent type if the type is
-   * already expression dependent. However if the type is Tunresolved that
+   * already expression dependent. However if the type is Tunion that
    * contains different expression dependent types then we will want to
    * generate a new dependent type. For example:
    *
@@ -127,7 +127,7 @@ module ExprDepTy = struct
    *  } else {
    *    $x = new B(); // Dependent type (`cls '\B')
    *  }
-   *  $x; // Tunresolved[(`cls '\A', `cls '\B')]
+   *  $x; // Tunion[(`cls '\A', `cls '\B')]
    *
    *  // When we call the function below, we need to generate
    *  // A new expression dependent type since
@@ -150,7 +150,7 @@ module ExprDepTy = struct
         should_apply env ty
     | Tabstract (AKdependent _, Some _) ->
         false
-    | Tunresolved tyl ->
+    | Tunion tyl ->
         List.exists tyl (should_apply env)
     | Tclass (_, Exact, _) ->
         false

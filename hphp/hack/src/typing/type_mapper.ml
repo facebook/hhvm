@@ -43,7 +43,7 @@ class type type_mapper_type = object
     env -> Reason.t -> locl ty -> locl ty -> result
   method on_tvarray_or_darray : env -> Reason.t -> locl ty -> result
   method on_ttuple : env -> Reason.t -> locl ty list -> result
-  method on_tunresolved : env -> Reason.t -> locl ty list -> result
+  method on_tunion : env -> Reason.t -> locl ty list -> result
   method on_toption : env -> Reason.t -> locl ty -> result
   method on_tfun : env -> Reason.t -> locl fun_type -> result
   method on_tabstract :
@@ -82,7 +82,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
   method on_tvarray_or_darray env r tv =
     env, (r, Tarraykind (AKvarray_or_darray tv))
   method on_ttuple env r tyl = env, (r, Ttuple tyl)
-  method on_tunresolved env r tyl = env, (r, Tunresolved tyl)
+  method on_tunion env r tyl = env, (r, Tunion tyl)
   method on_toption env r ty = env, (r, Toption ty)
   method on_tfun env r fun_type = env, (r, Tfun fun_type)
   method on_tabstract env r ak opt_ty = env, (r, Tabstract (ak, opt_ty))
@@ -106,7 +106,7 @@ class shallow_type_mapper: type_mapper_type = object(this)
     | Tarraykind (AKvarray_or_darray tv) ->
       this#on_tvarray_or_darray env r tv
     | Ttuple tyl -> this#on_ttuple env r tyl
-    | Tunresolved tyl -> this#on_tunresolved env r tyl
+    | Tunion tyl -> this#on_tunion env r tyl
     | Toption ty -> this#on_toption env r ty
     | Tfun fun_type -> this#on_tfun env r fun_type
     | Tabstract (ak, opt_ty) -> this#on_tabstract env r ak opt_ty
@@ -117,11 +117,11 @@ class shallow_type_mapper: type_mapper_type = object(this)
 end
 
 (* Mixin class - adding it to shallow type mapper creates a mapper that
- * traverses the type by going inside Tunresolved *)
-class virtual tunresolved_type_mapper = object(this)
-  method on_tunresolved env r tyl: result =
+ * traverses the type by going inside Tunion *)
+class virtual tunion_type_mapper = object(this)
+  method on_tunion env r tyl: result =
     let env, tyl = List.map_env env tyl (this#on_type) in
-    env, (r, Tunresolved tyl)
+    env, (r, Tunion tyl)
 
   method virtual on_type : env -> locl ty -> result
 end
@@ -132,7 +132,7 @@ end
  * below to specify how you want to treat type variables. *)
 class deep_type_mapper = object(this)
   inherit shallow_type_mapper
-  inherit! tunresolved_type_mapper
+  inherit! tunion_type_mapper
 
   method! on_tarraykind_akvec env r tv =
     let env, tv = this#on_type env tv in

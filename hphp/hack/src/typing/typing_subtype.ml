@@ -942,7 +942,7 @@ and simplify_subtype
     end
 
   (* ty_sub <: union{ty_super'} iff ty_sub <: ty_super' *)
-  | _, Tunresolved [ty_super'] when deep ->
+  | _, Tunion [ty_super'] when deep ->
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super' env
 
   (* t1 | ... | tn <: t
@@ -951,7 +951,7 @@ and simplify_subtype
    * We want this even if t is a type variable e.g. consider
    *   int | v <: v
    *)
-  | Tunresolved tyl, _->
+  | Tunion tyl, _->
     if new_inference
     then
       List.fold_left tyl ~init:(env, TL.valid) ~f:(fun res ty_sub ->
@@ -974,28 +974,28 @@ and simplify_subtype
    * on ty_sub not being a union e.g. consider num <: arraykey | float, so
    * we break out num first.
    *)
-  | Tprim Nast.Tnum, Tunresolved _ when new_inference ->
+  | Tprim Nast.Tnum, Tunion _ when new_inference ->
     let r = fst ty_sub in
     env |>
     simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.float r) ty_super &&&
     simplify_subtype ~seen_generic_params ~deep ~this_ty (MakeType.int r) ty_super
 
-  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunresolved [] ->
+  | Tabstract ((AKnewtype _ | AKdependent _), Some ty), Tunion [] ->
     if new_inference
     then simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
     else default ()
-  | Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunresolved [] ->
+  | Tabstract (AKgeneric name_sub, opt_sub_cstr), Tunion [] ->
     if new_inference
     then simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
     else default ()
   | (Tnonnull | Tdynamic | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tanon _ | Tobject | Tclass _ | Tarraykind _ | Tabstract (AKenum _, _)),
-    Tunresolved [] ->
+    Tunion [] ->
     if new_inference
     then invalid ()
     else default ()
 
-  | _, Tunresolved (_ :: _ as tyl) ->
+  | _, Tunion (_ :: _ as tyl) ->
     (* It's sound to reduce t <: t1 | t2 to (t <: t1) || (t <: t2). But
      * not complete e.g. consider (t1 | t3) <: (t1 | t2) | (t2 | t3).
      * But we deal with unions on the left first (see case above), so this
@@ -1866,22 +1866,22 @@ and sub_type_inner_helper env ~this_ty
   log_subtype ~this_ty ~function_name:"sub_type_inner_helper" env ty_sub ty_super;
   match ety_sub, ety_super with
 
-  | (_, Tunresolved _), _
+  | (_, Tunion _), _
     when TypecheckerOptions.new_inference (Env.get_tcopt env) ->
     assert false
 
-  | (_, Tunresolved _), (_, Tunresolved _) ->
+  | (_, Tunion _), (_, Tunion _) ->
     fst (Unify.unify env ty_super ty_sub)
 
 (****************************************************************************)
-(* ### Begin Tunresolved madness ###
+(* ### Begin Tunion madness ###
  * If the supertype is a
- * Tunresolved, we allow it to keep growing, which is the desired behavior for
+ * Tunion, we allow it to keep growing, which is the desired behavior for
  * e.g. figuring out the type of a generic, but if the subtype is a
- * Tunresolved, then we check that all the members are indeed subtypes of the
+ * Tunion, then we check that all the members are indeed subtypes of the
  * given supertype, which is the desired behavior for e.g. checking function
- * return values. In general, if a supertype is Tunresolved, then we
- * consider it to be "not yet finalized", but if a subtype is Tunresolved
+ * return values. In general, if a supertype is Tunion, then we
+ * consider it to be "not yet finalized", but if a subtype is Tunion
  * and the supertype isn't, we've probably hit a type annotation
  * and should consider the supertype to be definitive.
  *
@@ -1896,8 +1896,8 @@ and sub_type_inner_helper env ~this_ty
  * arguments had been swapped.
  *)
 (****************************************************************************)
-  | (r_sub, _), (_, Tunresolved _) ->
-      let ty_sub = (r_sub, Tunresolved [ty_sub]) in
+  | (r_sub, _), (_, Tunion _) ->
+      let ty_sub = (r_sub, Tunion [ty_sub]) in
       sub_type_inner env ~this_ty ty_sub ty_super
    (* This case is for when Tany comes from expanding an empty Tvar - it will
     * result in binding the type variable to the other type. *)
@@ -1909,7 +1909,7 @@ and sub_type_inner_helper env ~this_ty
      * any error using the position and reason information that was supplied
      * at the entry point to subtyping.
      *)
-  | (_, Tunresolved []), _
+  | (_, Tunion []), _
     when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
     begin match ty_sub with
     | (_, Tvar _) ->
@@ -1934,7 +1934,7 @@ and sub_type_inner_helper env ~this_ty
       env
     end
 
-  | (_, Tunresolved tyl), _ ->
+  | (_, Tunion tyl), _ ->
     let env =
       List.fold_left tyl ~f:begin fun env x ->
         sub_type_inner env ~this_ty
@@ -1943,7 +1943,7 @@ and sub_type_inner_helper env ~this_ty
     env
 
 (****************************************************************************)
-(* ### End Tunresolved madness ### *)
+(* ### End Tunion madness ### *)
 (****************************************************************************)
 
   | _, _ ->
@@ -2023,7 +2023,7 @@ and try_intersect env ty tyl =
  * Notes:
  * 1. It's acceptable to return [t;t1;...;tn] but the intention is that
  *    we simplify (as above) wherever practical.
- * 2. Do not use Tunresolved for a syntactic union - the caller can do that.
+ * 2. Do not use Tunion for a syntactic union - the caller can do that.
  * 3. It can be assumed that the original list contains no redundancy.
  * TODO: there are many more unions to implement yet.
  *)
@@ -2075,7 +2075,7 @@ let rec sub_string
       if stringish_deprecated
       then tyl
       else stringish::tyl in
-    let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunresolved tyl)) in
+    let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
     let error env ty_sub ty_super = match snd ty_sub with
       | _ when is_sub_type_alt ~no_top_bottom:true env ty_sub stringish = Some true &&
                stringish_deprecated ->
@@ -2094,7 +2094,7 @@ let rec sub_string
 
   match ety2 with
   | (_, Toption ty2) -> sub_string p env ty2
-  | (_, Tunresolved tyl) ->
+  | (_, Tunion tyl) ->
       List.fold_left tyl ~f:(sub_string p) ~init:env
   | (_, Tprim _) ->
       env
@@ -2439,9 +2439,9 @@ let rec freshen_inside_ty env ((r, ty_) as ty) =
   | Toption ty ->
     let env, ty = freshen_inside_ty env ty in
     env, (r, Toption ty)
-  | Tunresolved tyl ->
+  | Tunion tyl ->
     let env, tyl = List.map_env env tyl freshen_inside_ty in
-    env, (r, Tunresolved tyl)
+    env, (r, Tunion tyl)
     (* Tuples are covariant *)
   | Ttuple tyl ->
     let env, tyl = List.map_env env tyl freshen_ty in
@@ -2775,7 +2775,7 @@ let expand_type_and_solve env ~description_of_expected p ty =
         let env = solve_tyvar ~force_solve:true ~freshen:true env r v in
         Env.expand_var env r v) in
     match ty, ety with
-    | (r, Tvar v), (_, Tunresolved []) when Env.get_tyvar_appears_invariantly env v ->
+    | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
       Errors.unknown_type description_of_expected p (Reason.to_string "It is unknown" r);
       let env = Env.set_tyvar_eager_solve_fail env v in
       env, (Reason.Rsolve_fail p, TUtils.terr env)
@@ -2804,7 +2804,7 @@ let widen env widen_concrete_type ty =
   let rec widen env ty =
     let env, ty = Env.expand_type env ty in
     match ty with
-    | r, Tunresolved tyl ->
+    | r, Tunion tyl ->
       widen_all env r tyl
     | r, Toption ty ->
       widen_all env r [(r, Tprim Nast.Tnull); ty]
@@ -2819,7 +2819,7 @@ let widen env widen_concrete_type ty =
     | _ ->
       begin match widen_concrete_type env ty with
       | env, Some ty -> env, ty
-      | env, None -> env, (Reason.none, Tunresolved [])
+      | env, None -> env, (Reason.none, Tunion [])
       end
   and widen_all env r tyl =
     let env, tyl = List.fold_map tyl ~init:env ~f:widen in
@@ -2827,7 +2827,7 @@ let widen env widen_concrete_type ty =
   widen env ty
 
 let is_nothing env ty =
-  is_sub_type_alt env ty (Reason.none, Tunresolved []) ~no_top_bottom:true = Some true
+  is_sub_type_alt env ty (Reason.none, Tunion []) ~no_top_bottom:true = Some true
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.
@@ -2861,7 +2861,7 @@ let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty
   rid of all unsolved type variables in the union. *)
   let env, concretized_ty = Typing_union.simplify_unions env ty ~on_tyvar:(fun env r v ->
     has_tyvar := true;
-    if ISet.mem v !seen_tyvars then env, (r, Tunresolved []) else
+    if ISet.mem v !seen_tyvars then env, (r, Tunion []) else
     let () = seen_tyvars := ISet.add v !seen_tyvars in
     let lower_bounds = TySet.elements (Env.get_tyvar_lower_bounds env v) in
     Typing_union.union_list env r lower_bounds) in

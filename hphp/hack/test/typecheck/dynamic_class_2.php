@@ -5,7 +5,7 @@ class Foo {
 }
 
 function f(Foo $a): void {
-  // make $a into Tunresolved
+  // make $a into Tunion
   if (true) {
   }
   $a::bar(); // should still work

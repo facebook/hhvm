@@ -26,18 +26,18 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
   let r = Reason.Rwitness p in
   let env, e_opt_ty = SubType.expand_type_and_solve ~description_of_expected:"an Awaitable" env p opt_ty_maybe in
   (match e_opt_ty with
-  | _, Tunresolved tyl ->
+  | _, Tunion tyl ->
     (* If we cannot fold the union into a single type, we need to look at
      * all the types *)
     let env, rtyl = List.fold_right ~f:begin fun ty (env, rtyl) ->
       let env, rty = overload_extract_from_awaitable env p ty in
-      (* We have the invariant we'll never have Tunresolved[Tunresolved], but
+      (* We have the invariant we'll never have Tunion[Tunion], but
        * the recursive call above can remove a layer of Awaitable, so we need
-       * to flatten any Tunresolved that may have been inside. *)
+       * to flatten any Tunion that may have been inside. *)
       let env, rtyl = TUtils.flatten_unresolved env rty rtyl in
       env, rtyl
     end tyl ~init:(env, []) in
-    env, (r, Tunresolved rtyl)
+    env, (r, Tunion rtyl)
   | _, Toption ty ->
     (* We want to try to avoid easy double nullables here, so we handle Toption
      * with some special logic. *)
@@ -59,7 +59,7 @@ let rec overload_extract_from_awaitable env p opt_ty_maybe =
       | _, Tdynamic -> r, Tdynamic
       | _, (Tnonnull | Tarraykind _ | Tprim _ | Tvar _ | Tfun _
         | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
-        | Toption _ | Tunresolved _ | Tobject | Tshape _) -> type_var
+        | Toption _ | Tunion _ | Tobject | Tshape _) -> type_var
     in
     let env = Type.sub_type p Reason.URawait env opt_ty_maybe expected_type in
     env, return_type

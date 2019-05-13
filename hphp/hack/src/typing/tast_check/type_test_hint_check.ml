@@ -89,7 +89,7 @@ let visitor = object(this)
     | AKdependent _ -> update acc @@ Invalid (r, "an expression dependent type")
   method! on_tanon acc r _arity _id =
     update acc @@ Invalid (r, "a function type")
-  method! on_tunresolved acc r _tyl =
+  method! on_tunion acc r _tyl =
     update acc @@ Invalid (r, "a union")
   method! on_tobject acc r = update acc @@ Invalid (r, "the object type")
   method! on_tclass acc r cls _ tyl =

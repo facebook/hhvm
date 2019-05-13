@@ -2813,7 +2813,7 @@ and anon_make tenv p f ft idl is_anon =
             List.map ~f:(fun param -> param.fp_type) remaining_params
           in
           let r = Reason.Rvar_param (varg.param_pos) in
-          let union = Tunresolved (tyl @ remaining_types) in
+          let union = Tunion (tyl @ remaining_types) in
           let env, t_param = anon_bind_variadic env varg (r, union) in
           env, T.FVvariadicArg t_param
         in
@@ -2957,7 +2957,7 @@ and expand_expected env expected =
   | Some (p, ur, ty) ->
     let env, ty = Env.expand_type env ty in
     match ty with
-    | _, Tunresolved [ty] -> env, Some (p, ur, ty)
+    | _, Tunion [ty] -> env, Some (p, ur, ty)
     | _, Toption ty -> env, Some (p, ur, ty)
     | _ -> env, Some (p, ur, ty)
 
@@ -3005,7 +3005,7 @@ and new_object ~expected ~check_parent ~check_not_abstract ~is_using_clause p en
         | l ->
           let tyl, ctyl = List.unzip l in
           let r = Reason.Rwitness p in
-          finish env tcid tel tuel (r, Tunresolved tyl) (r, Tunresolved ctyl)
+          finish env tcid tel tuel (r, Tunion tyl) (r, Tunion ctyl)
       end
 
     | (cname, class_info, c_ty)::classes ->
@@ -3338,7 +3338,7 @@ and assign_ p ur env e1 ty2 =
       let env, ety2 = Env.expand_type env ty2 in
       let real_type_list =
         match exp_real_type with
-        | _, Tunresolved tyl -> tyl
+        | _, Tunion tyl -> tyl
         | ty -> [ty]
       in
       let env = List.fold_left real_type_list ~f:begin fun env real_type ->
@@ -3477,7 +3477,7 @@ and call_parent_construct pos env el uel =
             | None -> assert false)
         | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-              | Tabstract (_, _) | Tanon (_, _) | Tunresolved _ | Tobject
+              | Tabstract (_, _) | Tanon (_, _) | Tunion _ | Tobject
              ) ->
            Errors.parent_outside_class pos;
            let ty = (Reason.Rwitness pos, Typing_utils.terr env) in
@@ -3494,7 +3494,7 @@ and is_abstract_ft fty = match fty with
   | _r, Tfun { ft_abstract = true; _ } -> true
   | _r, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tvar _ | Tfun _ | Tclass _ | Tabstract _ | Ttuple _
-            | Tanon _ | Tunresolved _ | Tobject | Tshape _ | Tdynamic
+            | Tanon _ | Tunion _ | Tobject | Tshape _ | Tdynamic
         )
     -> false
 
@@ -3525,7 +3525,7 @@ and is_abstract_ft fty = match fty with
     (* returns
        - Some true if type is definitely a coroutine
        - Some false if type is definitely not a coroutine
-       - None if type is Tunresolved that contains
+       - None if type is Tunion that contains
          both coroutine and non-coroutine constituents *)
     (* TODO: replace the case analysis here with a subtyping check;
      * see T37483866 and the linked diff for discussion.
@@ -3538,7 +3538,7 @@ and is_abstract_ft fty = match fty with
         env, Some true
       | Tanon (_, id) ->
         env, Some (Option.value_map (Env.get_anonymous env id) ~default:false ~f:(fun (_,b,_,_,_) -> b))
-      | Tunresolved ts -> are_coroutines env ts
+      | Tunion ts -> are_coroutines env ts
       | _ ->
         env, Some false
     and are_coroutines env ts =
@@ -3664,9 +3664,9 @@ and is_abstract_ft fty = match fty with
         | (r, Tarraykind (AKvec tv | AKvarray tv)) ->
             let env, tv = get_value_type env tv in
             env, (r, Tarraykind (AKvec tv))
-        | (r, Tunresolved x) ->
+        | (r, Tunion x) ->
             let acc, x = List.map_env env x get_array_filter_return_type in
-            acc, (r, Tunresolved x)
+            acc, (r, Tunion x)
         | (r, Tany) ->
             env, (r, Typing_utils.tany env)
         | (r, Terr) ->
@@ -3817,9 +3817,9 @@ and is_abstract_ft fty = match fty with
                 env, (fun _ -> (r, Typing_utils.tany env))
               | (r, Terr) ->
                 env, (fun _ -> (r, Typing_utils.terr env))
-              | (r, Tunresolved x) ->
+              | (r, Tunion x) ->
                 let env, x = List.map_env env x build_output_container in
-                env, (fun tr -> (r, Tunresolved (List.map x (fun f -> f tr))))
+                env, (fun tr -> (r, Tunion (List.map x (fun f -> f tr))))
               | (r, _) ->
                 let env, tk = Env.fresh_unresolved_type env p in
                 let env, tv = Env.fresh_unresolved_type env p in
@@ -4064,7 +4064,7 @@ and is_abstract_ft fty = match fty with
             let fty =
               match !ftys with
               | [fty] -> fty
-              | l -> (Reason.none, Tunresolved l) in
+              | l -> (Reason.none, Tunion l) in
             make_call env (T.make_typed_expr fpos fty (T.Class_const (tcid, m)))
               tal [] [] method_
         else
@@ -4148,7 +4148,7 @@ and is_abstract_ft fty = match fty with
       let tfty =
         match !tftyl with
         | [fty] -> fty
-        | tftyl -> (Reason.none, Tunresolved tftyl)
+        | tftyl -> (Reason.none, Tunion tftyl)
       in
       make_call env (T.make_typed_expr fpos tfty (T.Fun_id m)) tal !tel !tuel ty
 
@@ -4177,7 +4177,7 @@ and is_abstract_ft fty = match fty with
       let tfty =
         match !tftyl with
         | [fty] -> fty
-        | tftyl -> (Reason.none, Tunresolved tftyl)
+        | tftyl -> (Reason.none, Tunion tftyl)
       in
       make_call env (T.make_typed_expr fpos tfty (T.Obj_get(te1,
         T.make_typed_expr pos_id tfty (T.Id m), nullflavor))) tal !tel !tuel ty
@@ -4278,7 +4278,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
   | r, Tany -> env, (r, Typing_utils.tany env), None
   | r, Terr -> env, err_witness env (Reason.to_pos r), None
   | _, Tdynamic -> env, cty, None
-  | _, Tunresolved tyl ->
+  | _, Tunion tyl ->
       let env, tyl =
         List.map_env env tyl begin fun env ty ->
         let env, ty, _ =
@@ -4454,7 +4454,7 @@ and obj_get_with_visibility ~is_method ~nullsafe ~valkind ~obj_pos ~pos_params
     cid id k (fun ty -> ty)
 
 (* We know that the receiver is a concrete class: not a generic with
- * bounds, or a Tunresolved. *)
+ * bounds, or a Tunion. *)
 and obj_get_concrete_ty ~is_method ~valkind ?(explicit_tparams=[])
     env concrete_ty class_id (id_pos, id_str) k_lhs =
   let default () = env, (Reason.Rwitness id_pos, Typing_utils.tany env), None in
@@ -4657,7 +4657,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
           );
         k (env, (fst ety1, Typing_utils.terr env), None) in
   match ety1 with
-  | _, Tunresolved tyl ->
+  | _, Tunion tyl ->
       let (env, vis), tyl = List.map_env (env, None) tyl
         begin fun (env, vis) ty ->
           let env, ty, vis' =
@@ -4719,7 +4719,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
   | r, Tprim Nast.Tnull ->
     let ty =
       if TypecheckerOptions.new_inference (Env.get_tcopt env)
-      then (r, Tunresolved [])
+      then (r, Tunion [])
       else (r, Tany) in
     nullable_obj_get ty
   (* We are trying to access a member through a value of unknown type *)
@@ -4738,7 +4738,7 @@ and class_id_for_new ~exact p env cid tal =
     | [] -> env, te, res
     | ty::tyl ->
       match snd ty with
-      | Tunresolved tyl' ->
+      | Tunion tyl' ->
         get_info res (tyl' @ tyl)
       | _ ->
         (* Instantiation on an abstract class (e.g. from classname<T>) is
@@ -4766,7 +4766,7 @@ and class_id_for_new ~exact p env cid tal =
           end
         | _, (Tany | Terr | Tnonnull | Tarraykind _ | Toption _
               | Tprim _ | Tvar _ | Tfun _ | Tabstract (_, _) | Ttuple _
-              | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _ | Tdynamic ) ->
+              | Tanon (_, _) | Tunion _ | Tobject | Tshape _ | Tdynamic ) ->
           get_info res tyl in
   get_info [] [cid_ty]
 
@@ -4901,7 +4901,7 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
           )
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tprim _
             | Tfun _ | Ttuple _ | Tshape _ | Tvar _ | Tdynamic
-            | Tanon (_, _) | Tunresolved _ | Tabstract (_, _) | Tobject
+            | Tanon (_, _) | Tunion _ | Tabstract (_, _) | Tobject
            ) ->
         let parent = Env.get_parent env in
         let parent_defined = snd parent <> Typing_utils.tany env in
@@ -4948,9 +4948,9 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
             classname = SN.Classes.cClassname -> resolve_ety env the_cls
         | _, Tabstract (AKgeneric _, _)
         | _, Tclass _ -> env, ty
-        | r, Tunresolved tyl ->
+        | r, Tunion tyl ->
           let env, tyl = List.map_env env tyl resolve_ety in
-          env, (r, Tunresolved tyl)
+          env, (r, Tunion tyl)
         | _, Tdynamic as ty -> env, ty
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
@@ -5062,7 +5062,7 @@ and inout_write_back env { fp_type; _ } (_, e) =
        * This matters because we want to:
        * (1) make sure we can write to the original argument
        *     (modifiable lvalue check)
-       * (2) allow for growing of locals / Tunresolveds (type side effect)
+       * (2) allow for growing of locals / Tunions (type side effect)
        *     but otherwise unify the argument type with the parameter hint
        *)
       let env, _te, _ty = assign_ (fst e1) Reason.URparam_inout env e1 fp_type in
@@ -5082,7 +5082,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
     let env, efty = SubType.expand_type_and_solve
       ~description_of_expected:"a function value" env pos fty in
     match efty with
-    | _, (Terr | Tany | Tunresolved [] | Tdynamic) ->
+    | _, (Terr | Tany | Tunion [] | Tdynamic) ->
       let el = el @ uel in
       let env, tel = List.map_env env el begin fun env elt ->
         let env, te, _ =
@@ -5107,13 +5107,13 @@ and call_ ~expected ~method_call_info pos env fty el uel =
         else (Reason.Rnone, Typing_utils.tany env)
       in
       env, tel, [], ty
-    | _, Tunresolved [ty] ->
+    | _, Tunion [ty] ->
       call ~expected pos env ty el uel
-    | r, Tunresolved tyl ->
+    | r, Tunion tyl ->
       let env, retl = List.map_env env tyl begin fun env ty ->
         let env, _, _, ty = call ~expected pos env ty el uel in env, ty
       end in
-      let env, ty = TUtils.in_var env (r, Tunresolved retl) in
+      let env, ty = TUtils.in_var env (r, Tunion retl) in
       env, [], [], ty
     | r2, Tfun ft ->
       (* Typing of format string functions. It is dependent on the arguments (el)
@@ -5155,7 +5155,7 @@ and call_ ~expected ~method_call_info pos env fty el uel =
           let rec set_params_variance env ty =
             let env, ty = Env.expand_type env ty in
             match ty with
-            | _, Tunresolved [ty] -> set_params_variance env ty
+            | _, Tunion [ty] -> set_params_variance env ty
             | _, Toption ty -> set_params_variance env ty
             | _, Tfun { ft_params; ft_ret; _ } ->
               let env = List.fold ~init:env ~f:(fun env param ->
@@ -5748,7 +5748,7 @@ and condition ?lhs_of_null_coalesce env tparamet
       | _, Tprim Tbool -> env
       | _, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
         | Tprim _ | Tvar _ | Tfun _ | Tabstract _ | Tclass _
-        | Ttuple _ | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _
+        | Ttuple _ | Tanon (_, _) | Tunion _ | Tobject | Tshape _
         ) ->
           condition_nullity ~nonnull:tparamet env te)
   | T.Binop ((Ast.Diff | Ast.Diff2 as op), e1, e2) ->
@@ -5812,7 +5812,7 @@ and condition ?lhs_of_null_coalesce env tparamet
         | r, Tabstract (AKgeneric s, _) when AbstractKind.is_generic_dep_ty s ->
           let upper_bounds = TySet.elements (Env.get_upper_bounds env s) in
           let env, tyl = List.map_env env upper_bounds resolve_obj in
-          env, (r, Tunresolved tyl)
+          env, (r, Tunion tyl)
         | _, Tabstract (AKgeneric name, _) ->
           if safe_instanceof_enabled
           then Errors.instanceof_generic_classname p name;
@@ -5848,9 +5848,9 @@ and condition ?lhs_of_null_coalesce env tparamet
               then safe_instanceof env p _c class_info ivar_pos x_ty obj_ty
               else env, obj_ty
           end
-        | r, Tunresolved tyl ->
+        | r, Tunion tyl ->
           let env, tyl = List.map_env env tyl resolve_obj in
-          env, (r, Tunresolved tyl)
+          env, (r, Tunion tyl)
         | _, (Terr | Tany | Tnonnull| Tarraykind _ | Tprim _ | Tvar _
             | Tfun _ | Tabstract ((AKenum _ | AKnewtype _ | AKdependent _), _)
             | Ttuple _ | Tanon (_, _) | Toption _ | Tobject | Tshape _
@@ -5907,7 +5907,7 @@ and safely_refine_type env p reason ivar_pos ivar_ty hint_ty =
       TUtils.non_null env p ivar_ty
     | _, (Tany | Tprim _ | Toption _ | Ttuple _
         | Tshape _ | Tvar _ | Tabstract _ | Tarraykind _ | Tanon _
-        | Tunresolved _ | Tobject | Terr | Tfun _  | Tdynamic) ->
+        | Tunion _ | Tobject | Terr | Tfun _  | Tdynamic) ->
       (* TODO(kunalm) Implement the type refinement for each type *)
       env, hint_ty
 

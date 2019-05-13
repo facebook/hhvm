@@ -27,7 +27,7 @@ let check_foreach_collection env p ty =
   let rec check ty =
     let env, ty = Env.expand_type env ty in
     match ty with
-    | _, Tunresolved l -> List.for_all l ~f:check
+    | _, Tunion l -> List.for_all l ~f:check
     | _ ->
       (* collection type should be subtype or conditioned to Rx\Traversable *)
       if not (Env.can_subtype env ty rxTraversableType ||

@@ -42,7 +42,7 @@ let test_occurs_under_options =
 
 let test_occurs_under_unresolved_options =
   let n = Ident.tmp () in
-  let ty = (Reason.none, Tunresolved [
+  let ty = (Reason.none, Tunion [
     Reason.none, Tprim Nast.Tint;
     Reason.none, Tprim Nast.Tstring;
     Reason.none, Toption (Reason.none, Tvar n);
@@ -55,7 +55,7 @@ let test_occurs_under_unresolved_options =
 
 let test_occurs_under_unresolved =
   let n = Ident.tmp () in
-  let ty = (Reason.none, Tunresolved [
+  let ty = (Reason.none, Tunion [
     Reason.none, Tprim Nast.Tint;
     Reason.none, Tprim Nast.Tstring;
     Reason.none, Tvar n;
@@ -83,17 +83,17 @@ let test_does_not_occur =
 
 let test_occurs_under_singleton_unresolved =
   let n = Ident.tmp () in
-  let ty = (Reason.none, Tunresolved [Reason.none, Tvar n]) in
+  let ty = (Reason.none, Tunion [Reason.none, Tvar n]) in
   test_occurs empty_env n ty ~expected:(DoesOccurUnderUnresolved [])
 
 let test_occurs_under_option_and_singleton_unresolved =
   let n = Ident.tmp () in
-  let ty = (Reason.none, Toption (Reason.none, Tunresolved [Reason.none, Tvar n])) in
+  let ty = (Reason.none, Toption (Reason.none, Tunion [Reason.none, Tvar n])) in
   test_occurs empty_env n ty ~expected:DoesOccurUnderOptions
 
 let test_occurs_under_singleton_unresolved_and_option =
   let n = Ident.tmp () in
-  let ty = (Reason.none, Tunresolved [Reason.none, Toption (Reason.none, Tvar n)]) in
+  let ty = (Reason.none, Tunion [Reason.none, Toption (Reason.none, Tvar n)]) in
   test_occurs empty_env n ty ~expected:(DoesOccurUnderUnresolvedOptions [])
 
 (* The unification of #1(int) and #2(#1(int)) should be (int) modulo
@@ -103,14 +103,14 @@ let test_unify_tvars () =
   let n1 = Ident.tmp () in
   let n2 = Ident.tmp () in
   let env = Typing_env.add env n1
-    (Reason.none, Tunresolved [Reason.none, Tprim Nast.Tint]) in
+    (Reason.none, Tunion [Reason.none, Tprim Nast.Tint]) in
   let env = Typing_env.add env n2
-    (Reason.none, Tunresolved [Reason.none, Tvar n1]) in
+    (Reason.none, Tunion [Reason.none, Tvar n1]) in
   let env, ty = Typing_unify.unify env
     (Reason.none, Tvar n1) (Reason.none, Tvar n2) in
   Typing_defs.ty_equal
     (Typing_expand.fully_expand env ty)
-    (Reason.none, Tunresolved [Reason.none, Tprim Nast.Tint])
+    (Reason.none, Tunion [Reason.none, Tprim Nast.Tint])
 
 let tests =
   [

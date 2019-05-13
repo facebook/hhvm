@@ -163,7 +163,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
         else
           Typing_ops.sub_type p reason env ty_have ty_expect in
   match ety1_ with
-  | Tunresolved tyl ->
+  | Tunion tyl ->
       let env, tyl = List.map_env env tyl begin fun env ty1 ->
         array_get ~array_pos ~expr_pos ~lhs_of_null_coalesce is_lvalue env ty1 e2 ty2
       end in
@@ -358,7 +358,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
   | Tprim Tnull ->
     let ty =
       if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-      then (Reason.Rnone, Tunresolved [])
+      then (Reason.Rnone, Tunion [])
       else (Reason.Rnone, Tany) in
     nullable_container_get env ty
   | Tobject ->
@@ -472,7 +472,7 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     if Env.is_strict env
     then error_assign_array_append env expr_pos ty1
     else env, (ty1, (Reason.Rwitness expr_pos, TUtils.tany env))
-  | r, Tunresolved ty1l ->
+  | r, Tunion ty1l ->
     let env, resl =
       List.map_env env ty1l
         (fun env ty1 -> assign_array_append ~expr_pos ~array_pos ur env ty1 ty2) in
@@ -579,7 +579,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       else Typing_ops.sub_type p reason env ty_have ty_expect in
   let error = env, (ety1, err_witness env expr_pos) in
   match ety1_ with
-  | Tunresolved ty1l ->
+  | Tunion ty1l ->
     let env, resl = List.map_env env ty1l (fun env ty1 ->
       assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2) in
     let (ty1l', tyl') = List.unzip resl in

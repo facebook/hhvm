@@ -169,8 +169,8 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit = fun fmt ty ->
     Format.fprintf fmt ",@ ";
     Ident.pp fmt a1;
     Format.fprintf fmt "@,))@]"
-  | Tunresolved a0 ->
-    Format.fprintf fmt "(@[<2>Tunresolved@ ";
+  | Tunion a0 ->
+    Format.fprintf fmt "(@[<2>Tunion@ ";
     Format.fprintf fmt "@[<2>[";
     ignore
       (List.fold_left

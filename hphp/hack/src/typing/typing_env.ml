@@ -121,7 +121,7 @@ let fresh_unresolved_type_reason env r =
     then
       log_env_change "fresh_unresolved_type" env @@
       add_current_tyvar env (Reason.to_pos r) v
-    else add env v (Reason.Rnone, Tunresolved []) in
+    else add env v (Reason.Rnone, Tunion []) in
   env, (r, Tvar v)
 
 let fresh_unresolved_type env p =
@@ -685,7 +685,7 @@ let empty tcopt file ~droot = {
     tcopt   = tcopt;
     return  = {
       (* Actually should get set straight away anyway *)
-      return_type = (Reason.Rnone, Tunresolved []);
+      return_type = (Reason.Rnone, Tunion []);
       return_disposable = false;
       return_mutable = false;
       return_explicit = false;
@@ -1055,9 +1055,9 @@ let rec lost_info fake_name env ty =
           let env = add env v ty in
           env, ty
       )
-  | r, Tunresolved tyl ->
+  | r, Tunion tyl ->
       let env, tyl = List.map_env env tyl (lost_info fake_name) in
-      env, (info r, Tunresolved tyl)
+      env, (info r, Tunion tyl)
   | r, ty ->
       env, (info r, ty)
 
@@ -1153,9 +1153,9 @@ let rec unbind seen env ty =
   else
     let seen = ty :: seen in
     match ty with
-    | r, Tunresolved tyl ->
+    | r, Tunion tyl ->
         let env, tyl = List.map_env env tyl (unbind seen) in
-        env, (r, Tunresolved tyl)
+        env, (r, Tunion tyl)
     | ty -> env, ty
 
 let unbind = unbind []
@@ -1177,7 +1177,7 @@ let next_cont_exn env = LEnvC.get_cont C.Next env.lenv.local_types
 let set_local env x new_type =
   let env, new_type = unbind env new_type in
   let new_type = match new_type with
-    | _, Tunresolved [ty] -> ty
+    | _, Tunion [ty] -> ty
     | _ -> new_type in
   match next_cont_opt env with
   | None -> env
@@ -1369,7 +1369,7 @@ let rec get_tyvars env ty =
     env, ISet.empty, ISet.empty
   | Toption ty ->
     get_tyvars env ty
-  | Ttuple tyl | Tunresolved tyl ->
+  | Ttuple tyl | Tunion tyl ->
     List.fold_left tyl ~init:(env, ISet.empty, ISet.empty) ~f:get_tyvars_union
   | Tshape (_, m) ->
     Nast.ShapeMap.fold

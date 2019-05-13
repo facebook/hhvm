@@ -56,7 +56,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       if (Env.can_subtype env ty_have (fst ty_have, Tdynamic)
       (* Terrible heuristic to agree with legacy: if we inferred `nothing` for
        * the key type of the array, just let it pass *)
-      || Env.can_subtype env ty_expect (fst ty_expect, Tunresolved []))
+      || Env.can_subtype env ty_expect (fst ty_expect, Tunion []))
       || Env.can_subtype env ty_have ty_expect
       (* If the key is not even an arraykey, we've already produced an error *)
       || not (Env.can_subtype env ty_have (Reason.Rnone, Tprim Tarraykey)) && should_enforce env
@@ -74,7 +74,7 @@ let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
       in
   let _, ety = Env.expand_type env array_ty in
   match snd ety with
-  | Tunresolved tyl ->
+  | Tunion tyl ->
     List.iter tyl (fun ty -> array_get ~array_pos ~expr_pos ~index_pos env ty index_ty)
   | Tarraykind (AKdarray (key_ty, _) | AKmap (key_ty, _)) ->
     type_index env index_ty key_ty Reason.index_array

@@ -89,7 +89,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
   let env, cstr_ty = Env.expand_type env cstr_ty in
   let rec flatten_unresolved_tys ty =
     match ty with
-    | _, Tunresolved tyl ->
+    | _, Tunion tyl ->
       List.fold tyl ~init: []
       ~f: (fun acc ty -> (flatten_unresolved_tys ty) @ acc)
     | _ ->

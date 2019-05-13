@@ -60,7 +60,7 @@ let rec can_coerce ?seen:(seen=[]) env ty_have ty_expect =
    * targets. We will also go further here and assume that t1 ~> ?t2 iff
    * t1 ~> t2, though this needn't actually be the case in the future *)
   | _, (_, Toption ty) -> can_coerce env ty_have ty
-  | _, (_, Tunresolved _) -> None
+  | _, (_, Tunion _) -> None
 
   (* We can also find coercion targets through generics, wherein all that
    * matters is that the lower bound is somewhere a valid coercion target *)

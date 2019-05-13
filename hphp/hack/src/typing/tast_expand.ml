@@ -34,7 +34,7 @@ let expand_ty env ty =
     let ety = match ety with
       | (_, (Tany | Tnonnull | Tprim _ | Tobject | Tdynamic)) -> ety
       | (p, Tclass(n, e, tyl)) -> (p, Tclass(n, e, exp_tys tyl))
-      | (p, Tunresolved tyl) -> (p, Tunresolved (exp_tys tyl))
+      | (p, Tunion tyl) -> (p, Tunion (exp_tys tyl))
       | (p, Toption ty) -> (p, Toption (exp_ty ty))
       | (p, Ttuple tyl) -> (p, Ttuple (exp_tys tyl))
       | (p, Tfun ft) -> (p, Tfun (exp_fun_type ft))

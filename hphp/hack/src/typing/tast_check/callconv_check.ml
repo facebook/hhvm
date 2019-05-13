@@ -26,7 +26,7 @@ let check_types env ((p, _), te) =
           when cn = SN.Collections.cDict
             || cn = SN.Collections.cKeyset
             || cn = SN.Collections.cVec -> true
-        | _, Tunresolved tyl -> List.for_all ~f:iter tyl
+        | _, Tunion tyl -> List.for_all ~f:iter tyl
         | _, Tabstract _ ->
           let _, tyl = Env.get_concrete_supertypes env ety1 in
           List.exists ~f:iter tyl

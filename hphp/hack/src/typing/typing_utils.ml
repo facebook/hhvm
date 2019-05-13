@@ -140,7 +140,7 @@ let rec is_option env ty =
   let _, ety = Env.expand_type env ty in
   match snd ety with
   | Toption _ -> true
-  | Tunresolved tyl ->
+  | Tunion tyl ->
       List.exists tyl (is_option env)
   | _ -> false
 
@@ -152,7 +152,7 @@ let rec is_option_non_mixed env ty =
   | Toption (_, Tnonnull) -> false
   | Toption _ -> true
   | Tprim Nast.Tnull -> true
-  | Tunresolved tyl ->
+  | Tunion tyl ->
       List.exists tyl (is_option_non_mixed env)
   | _ -> false
 
@@ -249,7 +249,7 @@ let rec find_dynamic env tyl =
     begin match Env.expand_type env ty with
     | (_, (_, Tdynamic)) ->
       Some ty
-    | (_, (_, Tunresolved tyl)) -> find_dynamic env (tys@tyl)
+    | (_, (_, Tunion tyl)) -> find_dynamic env (tys@tyl)
     | _ -> find_dynamic env tys end
 
 
@@ -267,7 +267,7 @@ let is_hack_collection env ty =
 let rec is_any env ty =
   match Env.expand_type env ty with
   | (_, (_, (Tany | Terr))) -> true
-  | (_, (_, Tunresolved tyl)) -> List.for_all tyl (is_any env)
+  | (_, (_, Tunion tyl)) -> List.for_all tyl (is_any env)
   | _ -> false
 
 (*****************************************************************************)
@@ -311,7 +311,7 @@ let get_class_ids env ty =
   let rec aux seen acc = function
     | _, Tclass ((_, cid), _, _) -> cid::acc
     | _, (Toption ty | Tabstract (_, Some ty)) -> aux seen acc ty
-    | _, Tunresolved tys -> List.fold tys ~init:acc ~f:(aux seen)
+    | _, Tunion tys -> List.fold tys ~init:acc ~f:(aux seen)
     | _, Tabstract (AKgeneric name, None) when not (List.mem ~equal:(=) seen name) ->
       let seen = name :: seen in
       let upper_bounds = Env.get_upper_bounds env name in
@@ -535,8 +535,8 @@ let shape_field_name env (p, field) =
 let flatten_unresolved env ty acc =
   let env, ety = Env.expand_type env ty in
   let res = match ety with
-    (* flatten Tunresolved[Tunresolved[...]] *)
-    | (_, Tunresolved tyl) -> tyl @ acc
+    (* flatten Tunion[Tunion[...]] *)
+    | (_, Tunion tyl) -> tyl @ acc
     | (_, Tany) -> acc
     | _ -> ty :: acc in
   env, res
@@ -589,10 +589,10 @@ let rec push_option_out pos env ty =
   | r, Tprim N.Tnull ->
     let ty =
       if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-      then (r, Tunresolved [])
+      then (r, Tunion [])
       else (r, Tany) in
     env, (r, Toption ty)
-  | r, Tunresolved tyl ->
+  | r, Tunion tyl ->
     let env, tyl = List.map_env env tyl (push_option_out pos) in
     if List.exists tyl is_option then
       let (env, tyl), r' =
@@ -601,13 +601,13 @@ let rec push_option_out pos env ty =
           | r', Toption ty' -> flatten_unresolved env ty' tyl, r'
           | _ -> flatten_unresolved env ty tyl, r
           end ~init:((env, []), r) in
-      env, (r', Toption (r, Tunresolved tyl))
+      env, (r', Toption (r, Tunion tyl))
     else
       let env, tyl =
         List.fold_right tyl ~f:begin fun ty (env, tyl) ->
           flatten_unresolved env ty tyl
           end ~init:(env, []) in
-      env, (r, Tunresolved tyl)
+      env, (r, Tunion tyl)
   | r, Tabstract (ak, _) ->
     begin match get_concrete_supertypes env ty with
     | env, [ty'] ->
@@ -663,7 +663,7 @@ let unresolved_tparam ~reason env =
     let v = Env.fresh () in
     let env = Env.add_current_tyvar env (Reason.to_pos reason) v in
     env, (reason, Tvar v)
-  else in_var env (reason, Tunresolved [])
+  else in_var env (reason, Tunion [])
 
 (*****************************************************************************)
 (*****************************************************************************)
@@ -672,14 +672,14 @@ let unresolved_tparam ~reason env =
 let rec fold_unresolved env ty =
   let env, ety = Env.expand_type env ty in
   match ety with
-  | r, Tunresolved [] -> env, (r, Tany)
-  | _, Tunresolved [x] -> fold_unresolved env x
+  | r, Tunion [] -> env, (r, Tany)
+  | _, Tunion [x] -> fold_unresolved env x
   (* We don't want to use unification if new_inference is set.
    * Just return the type unchanged: better would be to remove redundant
    * elements, but let's postpone that until we have an improved
    * representation of unions.
    *)
-  | _, Tunresolved (x :: rl)
+  | _, Tunion (x :: rl)
     when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
       (try
         let env, acc =
@@ -707,8 +707,8 @@ let unresolved env ty =
   else
     let env, ety = Env.expand_type env ty in
     match ety with
-    | _, Tunresolved _ -> in_var env ety
-    | _ -> in_var env (fst ty, Tunresolved [ty])
+    | _, Tunion _ -> in_var env ety
+    | _ -> in_var env (fst ty, Tunion [ty])
 
 let unwrap_class_hint = function
   | (_, N.Happly ((pos, class_name), type_parameters)) ->

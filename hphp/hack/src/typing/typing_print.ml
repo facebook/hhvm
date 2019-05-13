@@ -50,7 +50,7 @@ module Suggest = struct
     | Tarraykind _           -> "array"
     | Tdynamic               -> "dynamic"
     | Tthis                  -> SN.Typehints.this
-    | Tunresolved _          -> "..."
+    | Tunion _          -> "..."
     | Ttuple (l)             -> "("^list l^")"
     | Tany                   -> "..."
     | Terr                   -> "..."
@@ -281,11 +281,11 @@ module Full = struct
       | Some (Reactive _, false, _, _, _) -> text "[rx fun]"
       | _ -> text "[fun]"
       end
-    | Tunresolved [] ->
+    | Tunion [] ->
       if TypecheckerOptions.new_inference (Env.get_tcopt env)
       then text "nothing"
       else text "[unresolved]"
-    | Tunresolved tyl ->
+    | Tunion tyl ->
       let tyl = List.fold_right tyl ~init:Typing_set.empty
       ~f:Typing_set.add |> Typing_set.elements in
       let null, nonnull = List.partition_tf tyl ~f:(fun (_, t) -> t = Tprim Nast.Tnull) in
@@ -573,7 +573,7 @@ module ErrorString = struct
     | Tany               -> "an untyped value"
     | Terr               -> "a type error"
     | Tdynamic           -> "a dynamic value"
-    | Tunresolved l      -> unresolved env l
+    | Tunion l           -> unresolved env l
     | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
     | Tarraykind AKempty -> "an empty array"
     | Tarraykind AKany   -> array (None, None)
@@ -798,13 +798,13 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
       is_array false @
       ["fields_known", JSON_Bool fields_known] @
       fields (Nast.ShapeMap.elements fl)
-  | Tunresolved [] ->
+  | Tunion [] ->
     if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
     then obj @@ kind "nothing"
     else obj @@ kind "union" @ args []
-  | Tunresolved [ty] ->
+  | Tunion [ty] ->
     from_type env ty
-  | Tunresolved tyl ->
+  | Tunion tyl ->
     obj @@ kind "union" @ args tyl
   | Taccess (ty, ids) ->
     obj @@ kind "path" @ typ ty @ path (List.map ids snd)
@@ -1187,7 +1187,7 @@ let to_locl_ty
     | "union" ->
       get_array "args" (json, keytrace) >>= fun (args, keytrace) ->
       aux_args args ~keytrace >>= fun tyl ->
-      ty (Tunresolved tyl)
+      ty (Tunion tyl)
 
     | "function"
     | "coroutine" as kind ->

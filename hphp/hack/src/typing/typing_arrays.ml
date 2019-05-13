@@ -16,12 +16,12 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module Reason = Typing_reason
 
-(* Mapper used by update_array* functions. It traverses Tunresolved and
+(* Mapper used by update_array* functions. It traverses Tunion and
  * modifies the type "inside" the Tvars - so it has side effects on the input
  * type (the type variables inside env change)! *)
 class update_array_type_mapper: type_mapper_type = object
   inherit shallow_type_mapper
-  inherit! tunresolved_type_mapper
+  inherit! tunion_type_mapper
   inherit! tvar_substituting_type_mapper
 end
 

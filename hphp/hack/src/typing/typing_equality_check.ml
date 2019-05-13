@@ -75,7 +75,7 @@ let rec assert_nontrivial p bop env ty1 ty2 =
       assert_nontrivial p bop env ty1 ty2
   | (_, (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
     | Tvar _ | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
-    | Tanon (_, _) | Tunresolved _ | Tobject | Tshape _)
+    | Tanon (_, _) | Tunion _ | Tobject | Tshape _)
     ), _ -> ()
 
 let assert_nullable p bop env ty =

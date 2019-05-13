@@ -17,7 +17,7 @@ let check_xhp_children env pos ty =
   let _, ty = Env.expand_type env ty in
   let _, ty = Env.fold_unresolved env ty in
   let tys = match ty with
-    | _, Tunresolved ts -> ts
+    | _, Tunion ts -> ts
     | _ -> [ty] in
   if not @@ List.for_all ~f:(Env.is_xhp_child env pos) tys
   then

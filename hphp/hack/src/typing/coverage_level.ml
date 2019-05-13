@@ -158,8 +158,8 @@ type 'a trie =
 
 let rec is_tany ty = match ty with
   | r, (Tany | Terr) -> Some r
-  | _, Tunresolved [] -> None
-  | _, Tunresolved (h::tl) -> begin match is_tany h with
+  | _, Tunion [] -> None
+  | _, Tunion (h::tl) -> begin match is_tany h with
     | Some r when
       List.for_all tl (compose (Option.is_some) (is_tany)) -> Some r
     | _ -> None

@@ -84,4 +84,4 @@ let nullable r ty =
   | _, (Toption _ as ty_) -> (r, ty_)
   | _ -> (r, Toption ty)
 let nothing r =
-  (r, Tunresolved [])
+  (r, Tunion [])

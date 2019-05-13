@@ -41,8 +41,8 @@ let ty_equiv env ty1 ty2 ~are_ty_param =
   let env, ety1 = Env.expand_type env ty1 in
   let env, ety2 = Env.expand_type env ty2 in
   let ty = match (ety1, ty1), (ety2, ty2) with
-    | ((_, Tunresolved []), _), (_, ty)
-    | (_, ty), ((_, Tunresolved []), _) when are_ty_param -> ty
+    | ((_, Tunion []), _), (_, ty)
+    | (_, ty), ((_, Tunion []), _) when are_ty_param -> ty
     | _ when ty_equal ety1 ety2 ->
       begin match ty1 with
       | _, Tvar _ -> ty1
@@ -55,9 +55,9 @@ let make_union r tyl reason_nullable_opt ~discard_singletons =
   match discard_singletons, reason_nullable_opt, tyl with
   | _, Some null_r, [] ->  (null_r, Tprim Nast.Tnull)
   | true, None, [ty] -> ty
-  | _, None, tyl -> (r, Tunresolved tyl)
+  | _, None, tyl -> (r, Tunion tyl)
   | true, Some null_r, [ty] -> (null_r, Toption ty)
-  | _, Some null_r, tyl -> (null_r, Toption (r, Tunresolved tyl))
+  | _, Some null_r, tyl -> (null_r, Toption (r, Tunion tyl))
 
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
@@ -111,10 +111,10 @@ and union_ env ty1 ty2 r =
     let env, ty = union env ty1 ty2 in
     let env = URec.add env n' ty in
     env, (r, Tvar n')
-  | (_, Tunresolved tyl1), (_, Tunresolved tyl2) ->
+  | (_, Tunion tyl1), (_, Tunion tyl2) ->
     union_unresolved env tyl1 tyl2 r
-  | (r, Tunresolved tyl), ty2
-  | ty2, (r, Tunresolved tyl) ->
+  | (r, Tunion tyl), ty2
+  | ty2, (r, Tunion tyl) ->
     union_unresolved env tyl [ty2] r
   | (_, Tarraykind ak1), (_, Tarraykind ak2) ->
     let env, ak = union_arraykind env ak1 ak2 in
@@ -205,11 +205,11 @@ and union_ env ty1 ty2 r =
     with Not_equiv -> raise Dont_unify
   end
   with Dont_unify ->
-    env, (r, Tunresolved [ty1; ty2])
+    env, (r, Tunion [ty1; ty2])
 
 and try_union env ty1 ty2 =
   match union env ty1 ty2 with
-  | _, (_, Tunresolved _) -> env, None
+  | _, (_, Tunion _) -> env, None
   | env, ty -> env, Some ty
 
 and union_unresolved env tyl1 tyl2 r =
@@ -220,7 +220,7 @@ and union_unresolved env tyl1 tyl2 r =
       | ty1::tyl ->
         let env, ety1 = Env.expand_type env ty1 in
         begin match ety1 with
-        | _, Tunresolved tyl1 ->
+        | _, Tunion tyl1 ->
           go env (tyl1@tyl) ty2 missed res_is_opt
         | r, Toption ty ->
           go env (ty::tyl) ty2 missed (Some r)
@@ -240,7 +240,7 @@ and union_unresolved env tyl1 tyl2 r =
     | ty2::tyl2 ->
       let env, ety2 = Env.expand_type env ty2 in
       begin match ety2 with
-      | _, Tunresolved tyl ->
+      | _, Tunion tyl ->
         normalize_union env tyl1 (tyl@tyl2) res_is_opt
       | r, Toption ty ->
         normalize_union env tyl1 (ty::tyl2) (Some r)
@@ -415,7 +415,7 @@ let normalize_union env ?(on_tyvar = fun env r v -> env, (r, Tvar v)) tyl =
           normalize_union env [ty'] r_null r_union
         | (r, Tprim Nast.Tnull) -> normalize_union env [] (orr r_null r) r_union
         | (r, Toption ty) -> normalize_union env [ty] (orr r_null r) r_union
-        | (r, Tunresolved tyl') -> normalize_union env tyl' r_null (orr r_union r)
+        | (r, Tunion tyl') -> normalize_union env tyl' r_null (orr r_union r)
         | ty -> env, r_null, r_union, TySet.singleton ty in
       let env, r_null, r_union, tys = normalize_union env tyl r_null r_union in
       env, r_null,  r_union, TySet.union tys' tys in
@@ -453,8 +453,8 @@ let simplify_unions env ?on_tyvar (r, _ as ty) =
 let diff ty1 ty2 =
   let filter tyl = List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)) in
   match ty1 with
-  | r, Toption (r', Tunresolved tyl) -> r, Toption (r', Tunresolved (filter tyl))
-  | r, Tunresolved tyl -> r, Tunresolved (filter tyl)
+  | r, Toption (r', Tunion tyl) -> r, Toption (r', Tunion (filter tyl))
+  | r, Tunion tyl -> r, Tunion (filter tyl)
   | _ -> ty1
 
 let () = Typing_utils.union_ref := union

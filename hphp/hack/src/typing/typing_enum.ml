@@ -58,7 +58,7 @@ let check_valid_array_key_type f_fail ~allow_any:allow_any env p t =
     | Terr | Tany when allow_any -> ()
     | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
-      | Tfun _ | Tunresolved _ | Tobject | Tshape _ ->
+      | Tfun _ | Tunion _ | Tobject | Tshape _ ->
         f_fail p (Reason.to_pos r) (Typing_print.error env (r, t')) trail);
   env
 
@@ -108,7 +108,7 @@ let enum_class_check env tc consts const_types =
           | Tabstract (AKgeneric _, _) -> ()
           | Terr | Tany | Tarraykind _ | Tprim _ | Toption _ | Tvar _
             | Tabstract (_, _) | Tclass _ | Ttuple _ | Tanon (_, _)
-            | Tunresolved _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
+            | Tunion _ | Tobject | Tfun _ | Tshape _ | Tdynamic ->
               Errors.enum_type_bad (Reason.to_pos r)
                 (Typing_print.error env (r, ty_exp')) trail);
 

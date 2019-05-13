@@ -53,14 +53,14 @@ let rec unify ?(opts=TUtils.default_unify_opt) env ty1 ty2 =
     let env, ty = unify ~opts env ty1 ty2 in
     let env = TURecursive.add env n' ty in
     env, (r, Tvar n')
-  | (r1, Tunresolved tyl1), (r2, Tunresolved tyl2) ->
+  | (r1, Tunion tyl1), (r2, Tunion tyl2) ->
       let r = unify_reason r1 r2 in
       let env, tyl = TUtils.normalize_inter env tyl1 tyl2 in
-      env, (r, Tunresolved tyl)
-  | (Reason.Rnone, Tunresolved []), ty
-  | ty, (Reason.Rnone, Tunresolved []) -> env, ty
-  | (r, Tunresolved tyl), (_, ty_ as ty)
-  | (_, ty_ as ty), (r, Tunresolved tyl) ->
+      env, (r, Tunion tyl)
+  | (Reason.Rnone, Tunion []), ty
+  | ty, (Reason.Rnone, Tunion []) -> env, ty
+  | (r, Tunion tyl), (_, ty_ as ty)
+  | (_, ty_ as ty), (r, Tunion tyl) ->
       let r1 = TUtils.find_pos r tyl in
       let str_ty = Typing_print.error env ty in
       let r = Reason.Rcoerced (r1, env.Env.pos, str_ty) in
@@ -199,7 +199,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
                | Tclass ((_, y), _, _) -> y = x
                | Tany | Terr | Tnonnull | Tarraykind _ | Tprim _
                | Toption _ | Tvar _ | Tabstract (_, _) | Ttuple _
-               | Tanon (_, _) | Tfun _ | Tunresolved _ | Tobject
+               | Tanon (_, _) | Tfun _ | Tunion _ | Tobject
                | Tshape _ | Tdynamic -> false
              end
              ~do_: begin fun error ->
@@ -358,7 +358,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
 
   | (Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Toption _ | Tdynamic
       | Tvar _ | Tabstract _ | Tclass _ | Ttuple _ | Tanon _
-      | Tfun _ | Tunresolved _ | Tobject | Tshape _), _ ->
+      | Tfun _ | Tunion _ | Tobject | Tshape _), _ ->
         (* Make sure to add a dependency on any classes referenced here, even if
          * we're in an error state (i.e., where we are right now). The need for
          * this is extremely subtle. Consider this function:

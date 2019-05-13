@@ -6,7 +6,7 @@ enum MyEnum: string {
 }
 
 function f(MyEnum $e): void {
-  // Force to be Tvar/Tunresolved
+  // Force to be Tvar/Tunion
   if (true) {
     $e = MyEnum::A;
   }

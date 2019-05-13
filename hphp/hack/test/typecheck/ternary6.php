@@ -15,7 +15,7 @@ class Foo {
 function f($x, Foo $y) {
   if (true) {}
   /* We used to unify both branches of a ternary expression, then falling back
-   * to creating a Tunresolved if unification failed; this would hide errors
+   * to creating a Tunion if unification failed; this would hide errors
    * like the one below.
    */
   $a = $x ? array(g()) : $y->h();

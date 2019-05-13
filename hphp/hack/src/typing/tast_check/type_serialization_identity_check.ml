@@ -81,8 +81,8 @@ let rec strip_ty : type a. a ty -> a ty = fun ty ->
         | AKdependent _ -> abstract_kind
       in
       Tabstract (abstract_kind, strip_opt ty_opt)
-    | Tunresolved tyl ->
-      Tunresolved (strip_tyl tyl)
+    | Tunion tyl ->
+      Tunion (strip_tyl tyl)
     | Tclass (sid, exact, tyl) ->
       Tclass (sid, exact, strip_tyl tyl)
 

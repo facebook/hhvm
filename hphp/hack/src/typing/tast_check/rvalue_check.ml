@@ -33,7 +33,7 @@ let check_valid_rvalue p env ty =
           (Reason.to_string "A void function doesn't return a value" r);
         env
 
-      | _, Tunresolved tyl2 ->
+      | _, Tunion tyl2 ->
         iter_over_types env (tyl2 @ tyl)
 
       | _, _ ->

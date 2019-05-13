@@ -176,7 +176,7 @@ let add env x ty =
   | DoesOccur ->
     begin
       Errors.unification_cycle
-        (Reason.to_pos (fst ty)) (Typing_print.full_rec env x' ty);
+        (Reason.to_pos (fst ty)) Typing_print.(with_blank_tyvars (fun () -> full_rec env x' ty));
       Env.add env x (fst ty, Terr)
     end
 

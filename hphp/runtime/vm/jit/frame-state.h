@@ -356,6 +356,12 @@ struct FrameStateMgr final {
   void unpauseBlock(Block*);
 
   /*
+   * Reset the saved state associated with the given block `b' to match the out
+   * state of the given predecessor `pred', which must have been saved a priori.
+   */
+  void resetBlock(Block* b, Block* pred);
+
+  /*
    * Return the post-conditions associated with `exitBlock'.
    */
   const PostConditions& postConds(Block* exitBlock) const;

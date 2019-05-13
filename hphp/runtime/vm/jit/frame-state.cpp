@@ -1273,6 +1273,11 @@ void FrameStateMgr::unpauseBlock(Block* block) {
   m_stack = *m_states[block].paused;
 }
 
+void FrameStateMgr::resetBlock(Block* block, Block* pred) {
+  assertx(m_states[pred].out && !m_states[pred].out->empty());
+  m_states[block].in = *m_states[pred].out;
+}
+
 const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
   assertx(exitBlock->isExitNoThrow());
   auto it = m_exitPostConds.find(exitBlock);

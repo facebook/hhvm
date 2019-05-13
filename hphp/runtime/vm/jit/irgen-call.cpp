@@ -1503,8 +1503,10 @@ Type awaitedCallReturnType(const Func* callee) {
 //////////////////////////////////////////////////////////////////////
 
 const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
-                               IRInstruction*& checkInst) {
+                               IRInstruction*& checkInst,
+                               double& probability) {
   checkInst = nullptr;
+  probability = 0;
 
   if (!RuntimeOption::RepoAuthoritative) return nullptr;
 
@@ -1517,14 +1519,13 @@ const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
   if (!profile.optimizing()) return nullptr;
 
   auto const data = profile.data();
-  double probability = 0;
   auto profiledFunc = data.choose(probability);
 
   if (profiledFunc == nullptr) return nullptr;
 
   // Don't emit the check if the probability of it succeeding is below the
   // threshold.
-  if (probability * 100 < RuntimeOption::EvalJitPGOCalledFuncThreshold) {
+  if (probability * 100 < RuntimeOption::EvalJitPGOCalledFuncCheckThreshold) {
     return nullptr;
   }
 
@@ -1535,6 +1536,10 @@ const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
 
   auto profiledFuncTmp = cns(env, profiledFunc);
   auto const equal = gen(env, EqFunc, liveFuncTmp, profiledFuncTmp);
+
+  // Request that the out state of current block is saved.  We will need it if
+  // we decide to insert a call in the exit block.
+  env.irb->fs().setSaveOutState(env.irb->curBlock());
 
   auto sideExit = makeExit(env, bcOff(env));
   gen(env, JmpZero, sideExit, equal);

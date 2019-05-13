@@ -651,9 +651,11 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // If we're at a FCall and the topFunc is still unknown, we may have a
       // likely target based on profiling data.
       IRInstruction* profiledFuncCheck = nullptr;
+      double profiledFuncBias{0};
       if (topFunc == nullptr && sk.op() == Op::FCall) {
         auto const numArgs = inst.imm[0].u_FCA.numArgs;
-        topFunc = irgen::profiledCalledFunc(irgs, numArgs, profiledFuncCheck);
+        topFunc = irgen::profiledCalledFunc(irgs, numArgs, profiledFuncCheck,
+                                            profiledFuncBias);
         inst.funcd = topFunc;
       }
 
@@ -782,12 +784,44 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
 
-      // If we emitted a runtime check to obtain callee information but ended up
-      // not inlining the call, we drop the check to avoid the runtime cost.
-      if (profiledFuncCheck != nullptr && !skipTrans) {
+      // A runtime check was inserted to obtain the identity of the callee.  We
+      // handle 3 different cases here:
+      //   1) The call was not inlined, so drop the check.
+      //   2) The call was inlined and the check is strongly biased towards that
+      //      callee, so keep the side exit out of the region.
+      //   3) The call was inlined but it's not strongly biased, so emit a FCall
+      //      instead of exiting the region when the check fails.
+      if (profiledFuncCheck != nullptr) {
         assertx(sk.op() == Op::FCall);
-        irgen::dropCalledFuncCheck(irgs, profiledFuncCheck);
         inst.funcd = topFunc = nullptr;
+        if (skipTrans) {
+          if (profiledFuncBias * 100 <
+              RuntimeOption::EvalJitPGOCalledFuncExitThreshold) {
+            // Case 2) We inlined the call.  Emit FCall if not strongly biased.
+            //
+            // We first emit a jump to the next block.  NB: the FCall must be
+            // the last instruction in the block.
+            always_assert_flog(lastInstr,
+                               "FCall is not the last instruction in block");
+            irgen::endBlock(irgs, inst.nextSk().offset());
+
+            // We then emit the FCall on the check-failure path.
+            auto const failBlock = profiledFuncCheck->taken();
+            auto const predBlock = profiledFuncCheck->block();
+            irb.resetBlock(failBlock, predBlock);
+            const bool unprocPred = blockHasUnprocessedPred(region, blockId,
+                                                            processedBlocks);
+            if (!irb.startBlock(failBlock, unprocPred)) {
+              always_assert_flog(
+                  false, "profiledFuncCheck branches to unreachable block"
+              );
+            }
+            skipTrans = false; // so we translate the FCall
+          }
+        } else {
+          // Case 1) We didn't inline the call, so drop the check.
+          irgen::dropCalledFuncCheck(irgs, profiledFuncCheck);
+        }
       }
 
       if (!skipTrans && penultimateInst && isCmp(inst.op())) {

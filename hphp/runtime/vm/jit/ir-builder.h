@@ -216,6 +216,12 @@ struct IRBuilder {
   void setBlock(SrcKey sk, Block* block);
 
   /*
+   * Clear the instructions in `block' and reset its start to the out state of
+   * `pred', which must have been saved.
+   */
+  void resetBlock(Block* block, Block* pred);
+
+  /*
    * Clear the SrcKey-to-block map.
    */
   void resetOffsetMapping();

@@ -9,7 +9,6 @@
 
 open Core_kernel
 open Decl_defs
-open Shallow_decl_defs
 open Typing_defs
 
 module LSTable = Lazy_string_table
@@ -21,20 +20,15 @@ type ancestor_caches = {
   parents_and_traits : unit LSTable.t; (** Names of parents and traits only *)
   members_fully_known : bool Lazy.t;
   req_ancestor_names : unit LSTable.t;
+  all_requirements : (Pos.t * decl ty) list Lazy.t;
 }
 
+let type_of_mro_element mro =
+  let { mro_name; mro_type_args; mro_use_pos; mro_ty_pos; _ } = mro in
+  Reason.Rhint mro_ty_pos, Tapply ((mro_use_pos, mro_name), mro_type_args)
+
 let all_ancestors lin =
-  lin
-  |> Sequence.map ~f:begin fun mro ->
-    let { mro_name; mro_type_args; _ } = mro in
-    let pos =
-      match Shallow_classes_heap.get mro_name with
-      | None -> Pos.none
-      | Some c -> fst c.sc_name
-    in
-    let ty = Reason.Rhint pos, Tapply ((pos, mro_name), mro_type_args) in
-    mro_name, ty
-  end
+  Sequence.map lin ~f:(fun mro -> mro.mro_name, type_of_mro_element mro)
 
 let parents_and_traits lin =
   lin
@@ -48,6 +42,16 @@ let req_ancestor_names class_name =
   Decl_linearize.get_linearization class_name
   |> Sequence.filter ~f:(fun mro -> mro.mro_synthesized)
   |> Sequence.map ~f:(fun mro -> mro.mro_name, ())
+
+let all_requirements class_name =
+  lazy begin
+    Decl_linearize.get_linearization class_name
+    |> Sequence.filter ~f:(fun mro -> not mro.mro_xhp_attrs_only)
+    |> Sequence.filter_map ~f:(fun mro ->
+      Option.map mro.mro_required_at (fun pos -> pos, type_of_mro_element mro))
+    (* To behave a bit more like legacy decl, reverse the list. *)
+    |> Sequence.to_list_rev
+  end
 
 let is_canonical _ = true
 let merge ~earlier ~later:_ = earlier
@@ -66,4 +70,5 @@ let make class_name =
     members_fully_known = members_fully_known lin;
     req_ancestor_names =
       LSTable.make (req_ancestor_names class_name) ~is_canonical ~merge;
+    all_requirements = all_requirements class_name;
   }

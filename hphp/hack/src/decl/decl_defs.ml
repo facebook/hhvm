@@ -53,6 +53,12 @@ type source_type = Child | Parent | Trait | XHPAttr | Interface | ReqImpl | ReqE
 type mro_element = {
   (* The class's name *)
   mro_name : string;
+  (* The position at which this element was directly included in the hierarchy.
+     If C extends B extends A, the use_pos of A in C's linearization will be the
+     position of the class name A in the line "class B extends A". *)
+  mro_use_pos : Pos.t;
+  (* Like mro_use_pos, but includes type arguments (if any). *)
+  mro_ty_pos : Pos.t;
   (* The type arguments with which this ancestor class was instantiated. The
      first class in the linearization (the one which was linearized) will have
      an empty list here, even when it takes type parameters. *)
@@ -65,8 +71,14 @@ type mro_element = {
      Additionally, it's helpful to do this (for now) to keep the behavior of
      shallow_class_decl equivalent to legacy decl. *)
   mro_class_not_found : bool;
-  (* True if this element is included in the linearization because of a require
-     extends or require implements relationship. *)
+  (* If this element is included in the linearization because it was directly
+     required by some ancestor, this will be [Some], and the position will be
+     the location where this requirement was most recently included into the
+     hierarchy. *)
+  mro_required_at : Pos.t option;
+  (* True if this element is included in the linearization (directly or
+     indirectly) because of a require extends or require implements
+     relationship. *)
   mro_synthesized : bool;
   (* True if this element is included in the linearization because of any
      XHP-attribute-inclusion relationship, and thus, the linearized class

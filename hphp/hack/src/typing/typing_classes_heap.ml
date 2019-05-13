@@ -24,6 +24,7 @@ type lazy_class_type = {
   parents_and_traits: unit LSTable.t;
   members_fully_known: bool Lazy.t;
   req_ancestor_names: unit LSTable.t;
+  all_requirements: (Pos.t * decl ty) list Lazy.t;
 }
 
 type class_type_variant =
@@ -36,6 +37,7 @@ let make_lazy_class_type class_name sc c =
     parents_and_traits;
     members_fully_known;
     req_ancestor_names;
+    all_requirements;
   } = Decl_ancestors.make class_name in
   let get_ancestor = LSTable.get ancestors in
   let inherited_members = Decl_inheritance.make class_name get_ancestor in
@@ -47,6 +49,7 @@ let make_lazy_class_type class_name sc c =
     parents_and_traits;
     members_fully_known;
     req_ancestor_names;
+    all_requirements;
   }
 
 let shallow_decl_enabled () =
@@ -255,7 +258,7 @@ module Api = struct
 
   let all_ancestor_reqs t =
     match t with
-    | Lazy lc -> Sequence.of_list lc.c.tc_req_ancestors
+    | Lazy lc -> Sequence.of_list (Lazy.force lc.all_requirements)
     | Eager c -> Sequence.of_list c.tc_req_ancestors
 
   let all_ancestor_req_names t =

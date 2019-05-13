@@ -86,9 +86,10 @@ end)
 let ancestor_from_ty
     (source : source_type)
     (ty : decl ty)
-  : string * decl ty list * source_type =
-  let _, (_, class_name), type_args = Decl_utils.unwrap_class_type ty in
-  class_name, type_args, source
+  : Pos.t * (Pos.t * string) * decl ty list * source_type =
+  let r, class_name, type_args = Decl_utils.unwrap_class_type ty in
+  let ty_pos = Typing_reason.to_pos r in
+  ty_pos, class_name, type_args, source
 
 let from_parent (c : shallow_class) : decl ty list =
   (* In an abstract class or a trait, we assume the interfaces
@@ -100,12 +101,29 @@ let from_parent (c : shallow_class) : decl ty list =
   | Ast.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
   | _ -> c.sc_extends
 
+let normalize_for_comparison x =
+  if x.mro_use_pos = Pos.none
+  && x.mro_ty_pos = Pos.none
+  && x.mro_required_at = None
+  then x
+  else { x with
+    mro_use_pos = Pos.none;
+    mro_ty_pos = Pos.none;
+    mro_required_at = Option.map x.mro_required_at (fun _ -> Pos.none);
+  }
+
+let mro_elements_equal a =
+  let a = normalize_for_comparison a in
+  fun b ->
+  let b = normalize_for_comparison b in
+  a = b
+
 let rec ancestor_linearization
     (env : env)
-    (ancestor : string * decl ty list * source_type)
-    (child_class_abstract: bool)
+    (child_class_abstract : bool)
+    (ancestor : Pos.t * (Pos.t * string) * decl ty list * source_type)
   : linearization =
-  let class_name, type_args, source = ancestor in
+  let ty_pos, (use_pos, class_name), type_args, source = ancestor in
   Decl_env.add_extends_dependency env.decl_env class_name;
   let lin = get_linearization env class_name in
   let lin = Sequence.map lin ~f:begin fun c ->
@@ -117,6 +135,11 @@ let rec ancestor_linearization
       | Interface | ReqImpl -> true
       | Child | Parent | Trait | XHPAttr | ReqExtends -> false
     in
+    let mro_required_at =
+      if is_synthesized source
+      then Some use_pos
+      else Option.map c.mro_required_at ~f:(fun _ -> use_pos)
+    in
     let mro_synthesized = c.mro_synthesized || is_synthesized source in
     let mro_xhp_attrs_only = c.mro_xhp_attrs_only || source = XHPAttr in
     let mro_consts_only = c.mro_consts_only || is_interface source in
@@ -124,6 +147,7 @@ let rec ancestor_linearization
     let mro_passthrough_abstract_typeconst = c.mro_passthrough_abstract_typeconst &&
       child_class_abstract in
     { c with
+      mro_required_at;
       mro_synthesized;
       mro_xhp_attrs_only;
       mro_consts_only;
@@ -134,9 +158,14 @@ let rec ancestor_linearization
   match Sequence.next lin with
   | None -> Sequence.empty
   | Some (c, rest) ->
-    (* Fill in the type parameterization of the starting class *)
-    let c = { c with mro_type_args = type_args } in
-    (* Instantiate its linearization with those type parameters *)
+    (* Fill in the type arguments applied to the ancestor and the position where
+       it was included into the linearization of the child class. *)
+    let c = { c with
+      mro_type_args = type_args;
+      mro_use_pos = use_pos;
+      mro_ty_pos = ty_pos;
+    } in
+    (* Instantiate its linearization with those type arguments. *)
     let tparams =
       Shallow_classes_heap.get class_name
       |> Option.value_map ~default:[] ~f:(fun c -> c.sc_tparams)
@@ -155,8 +184,11 @@ and linearize (env : env) (c : shallow_class) : linearization =
   (* The first class doesn't have its type parameters filled in *)
   let child = {
     mro_name;
+    mro_use_pos = fst c.sc_name;
+    mro_ty_pos = fst c.sc_name;
     mro_type_args = [];
     mro_class_not_found = false;
+    mro_required_at = None;
     mro_synthesized = false;
     mro_xhp_attrs_only = false;
     mro_consts_only = false;
@@ -220,14 +252,17 @@ and linearize (env : env) (c : shallow_class) : linearization =
     ~f:(next_state env mro_name child_class_abstract)
   |> Sequence.memoize
 
-and next_state (env : env) (class_name : string) (child_class_abstract: bool)
-(state, ancestors, acc, synths) =
-
+and next_state
+    (env : env)
+    (class_name : string)
+    (child_class_abstract: bool)
+    (state, ancestors, acc, synths) =
   let open Sequence.Step in
   match state, ancestors with
   | Child child, _ -> Yield (child, (Next_ancestor, ancestors, child::acc, synths))
   | Next_ancestor, ancestor::ancestors ->
-    Skip (Ancestor (ancestor_linearization env ancestor child_class_abstract), ancestors, acc, synths)
+    let lin = ancestor_linearization env child_class_abstract ancestor in
+    Skip (Ancestor lin, ancestors, acc, synths)
   | Ancestor lin, ancestors ->
     begin match Sequence.next lin with
     | None -> Skip (Next_ancestor, ancestors, acc, synths)
@@ -242,7 +277,7 @@ and next_state (env : env) (class_name : string) (child_class_abstract: bool)
         | Member_resolution ->
           if next.mro_synthesized
           then true, next::synths
-          else List.mem acc next ~equal:(=), synths
+          else List.exists acc ~f:(mro_elements_equal next), synths
         | Ancestor_types ->
           (* For ancestor types, we don't care about require-extends or
              require-implements relationships, except for the fact that we want
@@ -262,7 +297,7 @@ and next_state (env : env) (class_name : string) (child_class_abstract: bool)
     let synths = List.rev synths in
     Skip (Synthesized_elts synths, ancestors, acc, synths)
   | Synthesized_elts (next::synths), ancestors ->
-    if List.mem acc next ~equal:(=)
+    if List.exists acc ~f:(mro_elements_equal next)
     then Skip (Synthesized_elts synths, ancestors, next::acc, synths)
     else Yield (next, (Synthesized_elts synths, ancestors, next::acc, synths))
   | Synthesized_elts [], _ ->
@@ -300,8 +335,11 @@ and get_linearization (env : env) (class_name : string) : linearization =
            decl. *)
         Sequence.singleton {
           mro_name = class_name;
+          mro_use_pos = Pos.none;
+          mro_ty_pos = Pos.none;
           mro_type_args = [];
           mro_class_not_found = true; (* This class is not known to exist! *)
+          mro_required_at = None;
           mro_synthesized = false;
           mro_xhp_attrs_only = false;
           mro_consts_only = false;

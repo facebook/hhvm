@@ -31,4 +31,25 @@ if ! hhvm_bin="$(get_hhvm_bin)"; then
     exit 1
 fi
 
-exec "$hhvm_bin" "$script_dir/run.php" "$@"
+# Try to find a cli config.
+function get_cli_config {
+  local -a candidates
+  candidates=(
+    "/usr/local/hphpi/cli.hdf"
+  )
+
+  for config in "${candidates[@]}"; do
+    if [[ ! -d "$config" && -r "$config" ]]; then
+      echo "$config"
+      return
+    fi
+  done
+
+  return 1
+}
+
+if hhvm_cfg="$(get_cli_config)"; then
+  exec "$hhvm_bin" -c "$hhvm_cfg" "$script_dir/run.php" "$@"
+else
+  exec "$hhvm_bin" "$script_dir/run.php" "$@"
+fi

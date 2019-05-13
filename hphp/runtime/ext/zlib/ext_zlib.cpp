@@ -471,8 +471,7 @@ struct ChunkedDecompressor {
     m_zstream.next_in = (Bytef*) chunk.data();
     m_zstream.avail_in = chunk.length();
     unsigned int offset = 0;
-    unsigned int base_length = chunk.length() * 8;
-    String result(base_length, ReserveString);
+    String result(1024 * 1024, ReserveString);
     int status;
     bool completed = false;
     for (int i = 0; i < 20; i++) {
@@ -480,7 +479,7 @@ struct ChunkedDecompressor {
       m_zstream.next_out = (Bytef*) raw;
       m_zstream.avail_out = result.capacity() - offset;
       status = inflate(&m_zstream, Z_SYNC_FLUSH);
-      if (status == Z_STREAM_END || status == Z_OK) {
+      if (status == Z_STREAM_END || status == Z_OK || status == Z_BUF_ERROR) {
         if (status == Z_STREAM_END) {
           m_eof = true;
         }
@@ -491,6 +490,9 @@ struct ChunkedDecompressor {
         // "if inflate returns Z_OK and with zero avail_out, it must be called
         // again after making room in the output buffer because there might be
         // more output pending"
+        // "... Note that Z_BUF_ERROR is not fatal, and inflate() can be
+        // called again with more input and more output space to continue
+        // decompressing"
         if (m_zstream.avail_out > 0) {
           completed = true;
           break;

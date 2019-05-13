@@ -1778,7 +1778,7 @@ function comp_line($l1, $l2, $is_reg) {
   }
 }
 
-function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2,
+function count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2, $cnt1, $cnt2,
                           $steps) {
   $equal = 0;
 
@@ -1794,7 +1794,7 @@ function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2,
     $st = $steps / 2;
 
     for ($ofs1 = $idx1 + 1; $ofs1 < $cnt1 && $st-- > 0; $ofs1++) {
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $w, $ofs1, $idx2, $cnt1,
+      $eq = @count_array_diff($ar1, $ar2, $is_reg, $ofs1, $idx2, $cnt1,
                               $cnt2, $st);
 
       if ($eq > $eq1) {
@@ -1806,7 +1806,7 @@ function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2,
     $st = $steps;
 
     for ($ofs2 = $idx2 + 1; $ofs2 < $cnt2 && $st-- > 0; $ofs2++) {
-      $eq = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $ofs2, $cnt1, $cnt2, $st);
+      $eq = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $ofs2, $cnt1, $cnt2, $st);
       if ($eq > $eq2) {
         $eq2 = $eq;
       }
@@ -1823,31 +1823,26 @@ function count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2, $cnt1, $cnt2,
 }
 
 function generate_array_diff($ar1, $ar2, $is_reg, $w) {
-  $idx1 = 0; $ofs1 = 0; $cnt1 = @count($ar1);
-  $idx2 = 0; $ofs2 = 0; $cnt2 = @count($ar2);
-  $diff = array();
+  $idx1 = 0; $cnt1 = @count($ar1);
+  $idx2 = 0; $cnt2 = @count($ar2);
   $old1 = array();
   $old2 = array();
 
   while ($idx1 < $cnt1 && $idx2 < $cnt2) {
-
     if (comp_line($ar1[$idx1], $ar2[$idx2], $is_reg)) {
       $idx1++;
       $idx2++;
       continue;
     } else {
-
-      $c1 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1+1, $idx2, $cnt1,
+      $c1 = @count_array_diff($ar1, $ar2, $is_reg, $idx1+1, $idx2, $cnt1,
                               $cnt2, 10);
-      $c2 = @count_array_diff($ar1, $ar2, $is_reg, $w, $idx1, $idx2+1, $cnt1,
+      $c2 = @count_array_diff($ar1, $ar2, $is_reg, $idx1, $idx2+1, $cnt1,
                               $cnt2, 10);
 
       if ($c1 > $c2) {
         $old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
-        $last = 1;
       } else if ($c2 > 0) {
         $old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
-        $last = 2;
       } else {
         $old1[$idx1] = sprintf("%03d- ", $idx1+1) . $w[$idx1++];
         $old2[$idx2] = sprintf("%03d+ ", $idx2+1) . $ar2[$idx2++];
@@ -1855,27 +1850,32 @@ function generate_array_diff($ar1, $ar2, $is_reg, $w) {
     }
   }
 
-  reset(&$old1); $k1 = key(&$old1); $l1 = -2;
-  reset(&$old2); $k2 = key(&$old2); $l2 = -2;
+  $diff = array();
+  $old1_keys = array_keys($old1);
+  $old2_keys = array_keys($old2);
+  $old1_values = array_values($old1);
+  $old2_values = array_values($old2);
+  // these start at -2 so $l1 + 1 and $l2 + 1 are not valid indices
+  $l1 = -2;
+  $l2 = -2;
+  $iter1 = 0; $end1 = count($old1);
+  $iter2 = 0; $end2 = count($old2);
 
-  while ($k1 !== null || $k2 !== null) {
-
+  while ($iter1 < $end1 || $iter2 < $end2) {
+    $k1 = $iter1 < $end1 ? $old1_keys[$iter1] : null;
+    $k2 = $iter2 < $end2 ? $old2_keys[$iter2] : null;
     if ($k1 == $l1 + 1 || $k2 === null) {
       $l1 = $k1;
-      $diff[] = current(&$old1);
-      $k1 = next(&$old1) ? key(&$old1) : null;
+      $diff[] = $old1_values[$iter1++];
     } else if ($k2 == $l2 + 1 || $k1 === null) {
       $l2 = $k2;
-      $diff[] = current(&$old2);
-      $k2 = next(&$old2) ? key(&$old2) : null;
+      $diff[] = $old2_values[$iter2++];
     } else if ($k1 < $k2) {
       $l1 = $k1;
-      $diff[] = current(&$old1);
-      $k1 = next(&$old1) ? key(&$old1) : null;
+      $diff[] = $old1_values[$iter1++];
     } else {
       $l2 = $k2;
-      $diff[] = current(&$old2);
-      $k2 = next(&$old2) ? key(&$old2) : null;
+      $diff[] = $old2_values[$iter2++];
     }
   }
 

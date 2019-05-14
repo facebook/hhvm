@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main() {
 $data = [
   'null',
   'false',
@@ -15,4 +15,5 @@ foreach($data as $str) {
   echo "JSON: $str\n";
   var_dump(json_decode($str));
   echo "Error: ", json_last_error(), "\n";
+}
 }

@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main() {
 $a = array(array('A'), array('B'), array('C'), array('D'));
 $b = array($a, $a, $a, $a);
 $c = array($b, $b, $b, $b);
@@ -12,3 +12,4 @@ var_dump(json_encode($e, 0, 7));
 var_dump(json_encode($e));
 $E = json_decode(json_encode($e));
 var_dump($E == $e);
+}

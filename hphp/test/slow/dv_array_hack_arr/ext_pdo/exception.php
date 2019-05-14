@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main() {
 try {
     new PDO('aoeu');
 } catch (PDOException $e) {
@@ -12,4 +12,5 @@ try {
     $db->exec('CREATE TABLE test_table (id INTEGER)');
 } catch (PDOException $ex) {
     var_dump($ex->errorInfo);
+}
 }

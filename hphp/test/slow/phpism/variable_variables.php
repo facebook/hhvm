@@ -1,3 +1,4 @@
-<?hh
-  $a = 'hello';
-  $$a = 'world';
+<?hh <<__EntryPoint>> function main() {
+$a = 'hello';
+$$a = 'world';
+}

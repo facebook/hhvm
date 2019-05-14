@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main() {
 try {
   is_null();
 } catch (Exception $e) {
@@ -40,4 +40,5 @@ try {
   strpos(null, null, null, null);
 } catch (Exception $e) {
   var_dump($e->getMessage());
+}
 }

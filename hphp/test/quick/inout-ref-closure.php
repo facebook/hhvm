@@ -1,4 +1,4 @@
-<?hh
+<?hh <<__EntryPoint>> function main() {
 $closure = (&$a, &$b, &$c) ==> {
   print("In closure: $a, $b, $c\n");
 };
@@ -13,3 +13,4 @@ $closure(
   inout $c,
 );
 print("After closure: $a, $b, $c\n");
+}

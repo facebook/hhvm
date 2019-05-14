@@ -1,0 +1,8 @@
+File "lambda_tyvar.php", line 7, characters 31-32:
+Was expecting an object but type is unknown (Typing[4297])
+File "lambda_tyvar.php", line 7, characters 24-25:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter
+File "lambda_tyvar.php", line 8, characters 42-43:
+Was expecting an object but type is unknown (Typing[4297])
+File "lambda_tyvar.php", line 8, characters 24-25:
+It is unknown because the type of the lambda parameter could not be determined. Please add a type hint to the parameter

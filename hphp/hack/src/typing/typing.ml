@@ -2711,6 +2711,7 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
         let env, t_param = bind_param env (h, param) in
         env, t_params @ [t_param]
       | None ->
+        let ty = (Reason.Rlambda_param (param.param_pos, fst ty), snd ty) in
         let env, t_param = bind_param env (ty, param) in
         env, t_params @ [t_param]
 

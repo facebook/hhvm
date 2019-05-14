@@ -109,6 +109,7 @@ let rec reason = function
   | Rtype_variable_generics (p, t, s) -> Rtype_variable_generics (pos p, t, s)
   | Rsolve_fail p -> Rsolve_fail (pos p)
   | Rcstr_on_generics (p, sid) -> Rcstr_on_generics (pos p, string_id sid)
+  | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
 
 let rec ty (p, x) =
   reason p, ty_ x

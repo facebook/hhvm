@@ -94,6 +94,7 @@ type t =
   | Rtype_variable_generics   of Pos.t * string * string
   | Rsolve_fail      of Pos.t
   | Rcstr_on_generics of Pos.t * Nast.sid
+  | Rlambda_param    of Pos.t * t
 
 and arg_position =
   | Aonly
@@ -235,7 +236,7 @@ let rec to_string prefix r =
       [(p, prefix ^ " because a type could not be determined here")]
   | Rtype_variable_generics (p, tp_name, s) ->
       [(p, prefix ^ " because type parameter " ^ tp_name ^ " of " ^ s ^
-      " could not be determined. Please add type parameters to " ^ s ^ ".")]
+      " could not be determined. Please add explicit type parameters to the invocation of " ^ s)]
   | Rsolve_fail p ->
       [(p, prefix ^ " because a type could not be determined here")]
   | Rarray_filter (_, r) ->
@@ -297,6 +298,14 @@ let rec to_string prefix r =
   | Rimplicit_upper_bound (_, cstr) ->
     [(p, prefix ^ " arising from an implicit 'as " ^ cstr ^ "' constraint on this type")]
   | Rcstr_on_generics _ -> [(p, prefix)]
+  (* If type originated with an unannotated lambda parameter with type variable type,
+   * suggested annotating the lambda parameter. Otherwise defer to original reason. *)
+  | Rlambda_param (p,
+      (Rsolve_fail _ | Rtype_variable_generics _ | Rtype_variable _ | Rinstantiate _)) ->
+    [(p, prefix ^" because the type of the lambda parameter could not be determined. \
+                   Please add a type hint to the parameter")]
+  | Rlambda_param (_, r_orig) ->
+    to_string prefix r_orig
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -379,6 +388,7 @@ and to_pos = function
   | Rtype_variable_generics (p, _, _) -> p
   | Rsolve_fail p -> p
   | Rcstr_on_generics (p, _) -> p
+  | Rlambda_param (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -490,6 +500,7 @@ match r with
   | Rtype_variable_generics _ -> "Rtype_variable_generics"
   | Rsolve_fail _ -> "Rsolve_fail"
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
+  | Rlambda_param _ -> "Rlambda_param"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

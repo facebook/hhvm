@@ -532,18 +532,13 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}}},
 
     /* MInstrTranslator helpers */
-    {SetNewElem, MInstrHelpers::setNewElem, DNone, SSync,
-                 {{SSA, 0}, {TV, 1}, {SSA, 2}}},
     {SetNewElemArray, MInstrHelpers::setNewElemArray, DNone, SSync,
                       {{SSA, 0}, {TV, 1}}},
-    {SetNewElemVec, MInstrHelpers::setNewElemVec, DNone, SSync,
-                    {{SSA, 0}, {TV, 1}}},
     {StringGet, MInstrHelpers::stringGetI, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
 
     {PairIsset, MInstrHelpers::pairIsset, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {VectorIsset, MInstrHelpers::vectorIsset, DSSA, SSync,
                   {{SSA, 0}, {SSA, 1}}},
-    {ElemVecD, MInstrHelpers::elemVecID, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ElemVecU, MInstrHelpers::elemVecIU, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ThrowOutOfBounds, throwOOBException, DNone, SSync, {{TV, 0}, {TV, 1}}},
     {ThrowInvalidArrayKey, invalidArrayKeyHelper, DNone, SSync,

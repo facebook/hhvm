@@ -488,19 +488,22 @@ ELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 #define ELEMD_HELPER_TABLE(m) \
-  /* name      keyType */     \
-  m(elemCD,    KeyType::Any)  \
-  m(elemID,    KeyType::Int)  \
-  m(elemSD,    KeyType::Str)  \
+  /* name      keyType        copyProv */ \
+  m(elemCDN,    KeyType::Any, false)      \
+  m(elemIDN,    KeyType::Int, false)      \
+  m(elemSDN,    KeyType::Str, false)      \
+  m(elemCDP,    KeyType::Any, true)       \
+  m(elemIDP,    KeyType::Int, true)       \
+  m(elemSDP,    KeyType::Str, true)       \
 
-#define X(nm, keyType)                              \
-inline tv_lval nm(tv_lval base,                     \
-                  key_type<keyType> key,            \
-                  TypedValue& tvRef,                \
-                  const MInstrPropState* pState) {  \
-  return ElemD<MOpMode::Define, false, keyType>(    \
-    tvRef, base, key, pState                        \
-  );                                                \
+#define X(nm, keyType, copyProv)                           \
+inline tv_lval nm(tv_lval base,                            \
+                  key_type<keyType> key,                   \
+                  TypedValue& tvRef,                       \
+                  const MInstrPropState* pState) {         \
+  return ElemD<MOpMode::Define, false, keyType, copyProv>( \
+    tvRef, base, key, pState                               \
+  );                                                       \
 }
 ELEMD_HELPER_TABLE(X)
 #undef X
@@ -620,16 +623,34 @@ ARRAYGET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-#define ELEM_DICT_D_HELPER_TABLE(m)  \
-  /* name           keyType */       \
-  m(elemDictSD,    KeyType::Str)     \
-  m(elemDictID,    KeyType::Int)     \
+#define ELEM_VEC_D_HELPER_TABLE(m) \
+  /* name          copyProv*/ \
+  m(elemVecIDN,    false)     \
+  m(elemVecIDP,    true)      \
 
-#define X(nm, keyType)                                                 \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) {               \
-  auto cbase = tvToCell(base);                                         \
-  assertx(isDictType(type(cbase)));                                    \
-  return ElemDDict<false, keyType>(cbase, key);                        \
+#define X(nm, copyProv) \
+inline tv_lval nm(tv_lval base, int64_t key) {                 \
+  auto cbase = tvToCell(base);                                 \
+  assertx(isVecType(type(cbase)));                             \
+  return ElemDVec<false, KeyType::Int, copyProv>(cbase, key);  \
+}
+ELEM_VEC_D_HELPER_TABLE(X)
+#undef X
+
+//////////////////////////////////////////////////////////////////////
+
+#define ELEM_DICT_D_HELPER_TABLE(m) \
+  /* name          keyType       copyProv*/ \
+  m(elemDictSDN,    KeyType::Str, false)    \
+  m(elemDictIDN,    KeyType::Int, false)    \
+  m(elemDictSDP,    KeyType::Str, true)     \
+  m(elemDictIDP,    KeyType::Int, true)     \
+
+#define X(nm, keyType, copyProv)                          \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) {  \
+  auto cbase = tvToCell(base);                            \
+  assertx(isDictType(type(cbase)));                       \
+  return ElemDDict<false, keyType, copyProv>(cbase, key); \
 }
 ELEM_DICT_D_HELPER_TABLE(X)
 #undef X
@@ -796,22 +817,38 @@ ARRAYSET_REF_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool setRef>
+template<bool setRef, bool copyProv>
 auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
   ArrayData* ret = PackedArray::SetIntVec(a, key, value);
+  if (copyProv && ret != a) arrprov::unchecked::copyTag(a, ret);
   return arrayRefShuffle<setRef, KindOfVec>(a, ret, ref);
 }
 
-inline ArrayData* vecSetI(ArrayData* a, int64_t key, Cell value) {
-  return vecSetImpl<false>(a, key, value, nullptr);
-}
+#define VECSET_HELPER_TABLE(m) \
+  /* name     copyProv */      \
+  m(vecSetIN, false)           \
+  m(vecSetIP, true)
 
-inline void vecSetIR(ArrayData* a, int64_t key, Cell value,
-                     RefData* ref) {
-  vecSetImpl<true>(a, key, value, ref->cell());
+#define X(nm, copyProv)                                     \
+inline ArrayData* nm(ArrayData* a, int64_t key, Cell val) { \
+  return vecSetImpl<false, copyProv>(a, key, val, nullptr); \
 }
+VECSET_HELPER_TABLE(X)
+#undef X
+
+#define VECSET_REF_HELPER_TABLE(m) \
+  /* name      copyProv*/       \
+  m(vecSetIRN, false) \
+  m(vecSetIRP, true)
+
+#define X(nm, copyProv)                                             \
+inline void nm(ArrayData* a, int64_t key, Cell val, RefData* ref) { \
+  vecSetImpl<true, copyProv>(a, key, val, ref->cell());             \
+}
+VECSET_REF_HELPER_TABLE(X)
+#undef X
 
 //////////////////////////////////////////////////////////////////////
 
@@ -822,41 +859,57 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, Cell val) {
   return MixedArray::SetStrDict(a, s, val);
 }
 
-template<KeyType keyType, bool setRef>
+template<KeyType keyType, bool setRef, bool copyProv>
 auto
 dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isDict());
   auto ret = dictSetImplPre(a, key, value);
+  if (copyProv && ret != a) arrprov::unchecked::copyTag(a, ret);
   return arrayRefShuffle<setRef, KindOfDict>(a, ret, ref);
 }
 
-#define DICTSET_HELPER_TABLE(m)    \
-  /* name       keyType     */     \
-  m(dictSetI,   KeyType::Int)      \
-  m(dictSetS,   KeyType::Str)
+#define DICTSET_HELPER_TABLE(m) \
+  /* name       keyType        copyProv */ \
+  m(dictSetIN,   KeyType::Int, false)      \
+  m(dictSetIP,   KeyType::Int, true)       \
+  m(dictSetSN,   KeyType::Str, false)      \
+  m(dictSetSP,   KeyType::Str, true)
 
-#define X(nm, keyType)                                                   \
-inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell val) {    \
-  return dictSetImpl<keyType, false>(a, key, val, nullptr);              \
+#define X(nm, keyType, copyProv)                                      \
+inline ArrayData* nm(ArrayData* a, key_type<keyType> key, Cell val) { \
+  return dictSetImpl<keyType, false, copyProv>(a, key, val, nullptr); \
 }
 DICTSET_HELPER_TABLE(X)
 #undef X
 
 #define DICTSET_REF_HELPER_TABLE(m) \
-  /* name       keyType    */       \
-  m(dictSetIR,  KeyType::Int)       \
-  m(dictSetSR,  KeyType::Str)
+  /* name       keyType       copyProv */ \
+  m(dictSetIRN,  KeyType::Int, false)     \
+  m(dictSetSRN,  KeyType::Str, false)     \
+  m(dictSetIRP,  KeyType::Int, true)      \
+  m(dictSetSRP,  KeyType::Str, true)
 
-#define X(nm, keyType)                                                  \
+#define X(nm, keyType, copyProv)                                        \
 inline                                                                  \
 void nm(ArrayData* a, key_type<keyType> key, Cell val, RefData* ref) {  \
-  dictSetImpl<keyType, true>(a, key, val, ref->cell());                 \
+  dictSetImpl<keyType, true, copyProv>(a, key, val, ref->cell());       \
 }
 DICTSET_REF_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
+
+template <bool copyProv>
+void setNewElem(tv_lval base, Cell val, const MInstrPropState* pState) {
+  HPHP::SetNewElem<false, copyProv>(base, &val, pState);
+}
+
+template <bool copyProv>
+void setNewElemVec(tv_lval base, Cell val) {
+  HPHP::SetNewElemVec<copyProv>(base, &val);
+}
+
 
 inline ArrayData* keysetSetNewElemImplPre(ArrayData* a, int64_t i) {
   return SetArray::AddToSet(a, i);
@@ -895,22 +948,25 @@ KEYSET_SETNEWELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType>
+template <KeyType keyType, bool copyProv>
 StringData* setElemImpl(tv_lval base, key_type<keyType> key,
                         Cell val, const MInstrPropState* pState) {
-  return HPHP::SetElem<false, keyType>(base, key, &val, pState);
+  return HPHP::SetElem<false, copyProv, keyType>(base, key, &val, pState);
 }
 
 #define SETELEM_HELPER_TABLE(m) \
-  /* name       keyType */      \
-  m(setElemC,   KeyType::Any)   \
-  m(setElemI,   KeyType::Int)   \
-  m(setElemS,   KeyType::Str)   \
+  /* name       keyType       copyProv*/ \
+  m(setElemCN,  KeyType::Any, false)     \
+  m(setElemIN,  KeyType::Int, false)     \
+  m(setElemSN,  KeyType::Str, false)     \
+  m(setElemCP,  KeyType::Any, true)      \
+  m(setElemIP,  KeyType::Int, true)      \
+  m(setElemSP,  KeyType::Str, true)      \
 
-#define X(nm, kt)                                                 \
-inline StringData* nm(tv_lval base, key_type<kt> key,             \
-                      Cell val, const MInstrPropState* pState) {  \
-  return setElemImpl<kt>(base, key, val, pState);                 \
+#define X(nm, kt, copyProv)                                      \
+inline StringData* nm(tv_lval base, key_type<kt> key,            \
+                      Cell val, const MInstrPropState* pState) { \
+  return setElemImpl<kt, copyProv>(base, key, val, pState);      \
 }
 SETELEM_HELPER_TABLE(X)
 #undef X

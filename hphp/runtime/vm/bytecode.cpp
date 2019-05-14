@@ -3635,13 +3635,23 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
       case MOpMode::InOut:
         return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
       case MOpMode::Define:
-        return reffy
-          ? ElemD<MOpMode::Define, true>(
+        if (RuntimeOption::EvalLogArrayProvenance) {
+          return reffy
+            ? ElemD<MOpMode::Define, true, KeyType::Any, true>(
               mstate.tvRef, b, key, &mstate.propState
             )
-          : ElemD<MOpMode::Define, false>(
+            : ElemD<MOpMode::Define, false, KeyType::Any, true>(
               mstate.tvRef, b, key, &mstate.propState
             );
+        } else {
+          return reffy
+            ? ElemD<MOpMode::Define, true, KeyType::Any, false>(
+              mstate.tvRef, b, key, &mstate.propState
+            )
+            : ElemD<MOpMode::Define, false, KeyType::Any, false>(
+              mstate.tvRef, b, key, &mstate.propState
+            );
+        }
       case MOpMode::Unset:
         return ElemU(mstate.tvRef, b, key);
     }
@@ -3777,13 +3787,18 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto const topC = vmStack().topC();
 
   if (mk.mcode == MW) {
-    SetNewElem<true>(mstate.base, topC, &mstate.propState);
+    if (RuntimeOption::EvalLogArrayProvenance) {
+      SetNewElem<true, true>(mstate.base, topC, &mstate.propState);
+    } else {
+      SetNewElem<true, false>(mstate.base, topC, &mstate.propState);
+    }
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
-      auto const result = SetElem<true>(
-        mstate.base, key, topC, &mstate.propState
-      );
+      auto const result = RuntimeOption::EvalLogArrayProvenance
+        ? SetElem<true, true>(mstate.base, key, topC, &mstate.propState)
+        : SetElem<true, false>(mstate.base, key, topC, &mstate.propState);
+
       if (result) {
         tvDecRefGen(topC);
         topC->m_type = KindOfString;

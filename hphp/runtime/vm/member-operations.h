@@ -716,7 +716,7 @@ inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is a Vec
  */
-template <bool reffy>
+template <bool reffy, bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = base.val().parr;
 
@@ -724,7 +724,7 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
 
   auto const lval = PackedArray::LvalIntVec(oldArr, key, oldArr->cowCheck());
   if (lval.arr != oldArr) {
-    arrprov::copyTag(oldArr, lval.arr);
+    if (copyProv) arrprov::unchecked::copyTag(oldArr, lval.arr);
     base.type() = KindOfVec;
     base.val().parr = lval.arr;
     assertx(cellIsPlausible(base.tv()));
@@ -733,24 +733,27 @@ inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   return lval;
 }
 
-template <bool reffy>
+template <bool reffy, bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, StringData* key) {
   throwInvalidArrayKeyException(key, base.val().parr);
 }
 
-template <bool reffy>
+template <bool reffy, bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
-  if (LIKELY(isIntType(dt))) return ElemDVecPre<reffy>(base, key.m_data.num);
-  if (isStringType(dt))      return ElemDVecPre<reffy>(base, key.m_data.pstr);
+  if (LIKELY(isIntType(dt))) {
+    return ElemDVecPre<reffy, copyProv>(base, key.m_data.num);
+  } else if (isStringType(dt)) {
+    return ElemDVecPre<reffy, copyProv>(base, key.m_data.pstr);
+  }
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <bool reffy, KeyType keyType>
+template <bool reffy, KeyType keyType, bool copyProv>
 inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(base.tv()));
-  auto const result = ElemDVecPre<reffy>(base, key);
+  auto const result = ElemDVecPre<reffy, copyProv>(base, key);
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(base.tv()));
 
@@ -761,7 +764,7 @@ inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
 /**
  * ElemD when base is a Dict
  */
-template <bool reffy>
+template <bool reffy, bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = base.val().parr;
 
@@ -776,7 +779,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   }
 
   if (lval.arr != oldArr) {
-    arrprov::copyTag(oldArr, lval.arr);
+    if (copyProv) arrprov::unchecked::copyTag(oldArr, lval.arr);
     base.type() = KindOfDict;
     base.val().parr = lval.arr;
     assertx(cellIsPlausible(base.tv()));
@@ -786,7 +789,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
   return lval;
 }
 
-template <bool reffy>
+template <bool reffy, bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   ArrayData* oldArr = base.val().parr;
 
@@ -801,7 +804,7 @@ inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   }
 
   if (lval.arr != oldArr) {
-    arrprov::copyTag(oldArr, lval.arr);
+    if (copyProv) arrprov::unchecked::copyTag(oldArr, lval.arr);
     base.type() = KindOfDict;
     base.val().parr = lval.arr;
     assertx(cellIsPlausible(base.tv()));
@@ -811,19 +814,22 @@ inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
   return lval;
 }
 
-template <bool reffy>
+template <bool reffy, bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt))    return ElemDDictPre<reffy>(base, key.m_data.num);
-  if (isStringType(dt)) return ElemDDictPre<reffy>(base, key.m_data.pstr);
+  if (isIntType(dt)) {
+    return ElemDDictPre<reffy, copyProv>(base, key.m_data.num);
+  } else if (isStringType(dt)) {
+    return ElemDDictPre<reffy, copyProv>(base, key.m_data.pstr);
+  }
   throwInvalidArrayKeyException(&key, base.val().parr);
 }
 
-template <bool reffy, KeyType keyType>
+template <bool reffy, KeyType keyType, bool copyProv>
 inline tv_lval ElemDDict(tv_lval base, key_type<keyType> key) {
   assertx(isDictType(base.type()));
   assertx(tvIsPlausible(base.tv()));
-  auto result = ElemDDictPre<reffy>(base, key);
+  auto result = ElemDDictPre<reffy, copyProv>(base, key);
   assertx(isDictType(base.type()));
   assertx(tvIsPlausible(base.tv()));
 
@@ -963,7 +969,8 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
  *
  * Returned pointer is not yet unboxed.  (I.e. it cannot point into a RefData.)
  */
-template<MOpMode mode, bool reffy, KeyType keyType = KeyType::Any>
+template<MOpMode mode, bool reffy, KeyType keyType = KeyType::Any,
+         bool copyProv>
 tv_lval ElemD(TypedValue& tvRef, tv_lval base,
               key_type<keyType> key, const MInstrPropState* pState) {
   assertx(mode == MOpMode::Define);
@@ -988,17 +995,17 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
       return ElemDString<mode, keyType>(base, key, pState);
     case KindOfPersistentVec:
     case KindOfVec:
-      return ElemDVec<reffy, keyType>(base, key);
+      return ElemDVec<reffy, keyType, copyProv>(base, key);
     case KindOfPersistentDict:
     case KindOfDict:
-      return ElemDDict<reffy, keyType>(base, key);
+      return ElemDDict<reffy, keyType, copyProv>(base, key);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return ElemDKeyset<reffy, keyType>(base, key);
     case KindOfPersistentShape:
     case KindOfShape:
       return RuntimeOption::EvalHackArrDVArrs ?
-        ElemDDict<reffy, keyType>(base, key) :
+        ElemDDict<reffy, keyType, copyProv>(base, key) :
         ElemDArray<mode, reffy, keyType>(base, key);
     case KindOfPersistentArray:
     case KindOfArray:
@@ -1584,8 +1591,6 @@ auto arrayRefShuffle(ArrayData* oldData, ArrayData* newData, tv_lval base) {
     return ShuffleReturn<setRef>::do_return(oldData);
   }
 
-  arrprov::copyTag(oldData, newData);
-
   if (setRef) {
     if (isArrayLikeType(type(base)) && val(base).parr == oldData) {
       type(base) = dt;
@@ -1711,7 +1716,7 @@ inline ArrayData* SetElemVecPre(ArrayData* a,
   throwInvalidArrayKeyException(&key, a);
 }
 
-template <bool setResult, KeyType keyType>
+template <bool setResult, KeyType keyType, bool copyProv>
 inline void SetElemVec(tv_lval base, key_type<keyType> key, Cell* value) {
   assertx(tvIsVec(base));
   assertx(tvIsPlausible(*base));
@@ -1720,6 +1725,9 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, Cell* value) {
   auto* newData = SetElemVecPre<setResult>(a, key, value);
   assertx(newData->isVecArray());
 
+  if (copyProv && a != newData) {
+    arrprov::unchecked::copyTag(a, newData);
+  }
   arrayRefShuffle<true, KindOfVec>(a, newData, base);
 }
 
@@ -1754,7 +1762,7 @@ inline ArrayData* SetElemDictPre(ArrayData* a,
   throwInvalidArrayKeyException(&key, a);
 }
 
-template <bool setResult, KeyType keyType>
+template <bool setResult, KeyType keyType, bool copyProv>
 inline void SetElemDict(tv_lval base, key_type<keyType> key,
                         Cell* value) {
   assertx(tvIsDictOrShape(base));
@@ -1764,6 +1772,9 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
   auto newData = SetElemDictPre<setResult>(a, key, value);
   assertx(newData->isDict());
 
+  if (copyProv && a != newData) {
+    arrprov::unchecked::copyTag(a, newData);
+  }
   arrayRefShuffle<true, KindOfDict>(a, newData, base);
 }
 
@@ -1772,7 +1783,7 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
  * SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
  * get around.
  */
-template <bool setResult, KeyType keyType>
+template <bool setResult, KeyType keyType, bool copyProv>
 NEVER_INLINE
 StringData* SetElemSlow(tv_lval base,
                         key_type<keyType> key,
@@ -1801,11 +1812,11 @@ StringData* SetElemSlow(tv_lval base,
       return SetElemString<setResult, keyType>(base, key, value, pState);
     case KindOfPersistentVec:
     case KindOfVec:
-      SetElemVec<setResult, keyType>(base, key, value);
+      SetElemVec<setResult, keyType, copyProv>(base, key, value);
       return nullptr;
     case KindOfPersistentDict:
     case KindOfDict:
-      SetElemDict<setResult, keyType>(base, key, value);
+      SetElemDict<setResult, keyType, copyProv>(base, key, value);
       return nullptr;
     case KindOfPersistentKeyset:
     case KindOfKeyset:
@@ -1813,7 +1824,7 @@ StringData* SetElemSlow(tv_lval base,
     case KindOfPersistentShape:
     case KindOfShape:
       if (RuntimeOption::EvalHackArrDVArrs) {
-        SetElemDict<setResult, keyType>(base, key, value);
+        SetElemDict<setResult, keyType, copyProv>(base, key, value);
       } else {
         SetElemArray<setResult, keyType>(base, key, value);
       }
@@ -1839,7 +1850,7 @@ StringData* SetElemSlow(tv_lval base,
 /**
  * Fast path for SetElem assuming base is an Array
  */
-template <bool setResult, KeyType keyType = KeyType::Any>
+template <bool setResult, bool copyProv, KeyType keyType = KeyType::Any>
 inline StringData* SetElem(tv_lval base, key_type<keyType> key,
                            Cell* value, const MInstrPropState* pState) {
   assertx(tvIsPlausible(*base));
@@ -1849,14 +1860,14 @@ inline StringData* SetElem(tv_lval base, key_type<keyType> key,
     return nullptr;
   }
   if (LIKELY(tvIsVec(base))) {
-    SetElemVec<setResult, keyType>(base, key, value);
+    SetElemVec<setResult, keyType, copyProv>(base, key, value);
     return nullptr;
   }
   if (LIKELY(tvIsDict(base))) {
-    SetElemDict<setResult, keyType>(base, key, value);
+    SetElemDict<setResult, keyType, copyProv>(base, key, value);
     return nullptr;
   }
-  return SetElemSlow<setResult, keyType>(base, key, value, pState);
+  return SetElemSlow<setResult, keyType, copyProv>(base, key, value, pState);
 }
 
 template<bool reverse>
@@ -1936,6 +1947,7 @@ inline void SetNewElemArray(tv_lval base, Cell* value) {
 /**
  * SetNewElem when base is a Vec
  */
+template <bool copyProv>
 inline void SetNewElemVec(tv_lval base, Cell* value) {
   base = tvToCell(base);
   assertx(tvIsVec(base));
@@ -1943,7 +1955,7 @@ inline void SetNewElemVec(tv_lval base, Cell* value) {
   auto a = val(base).parr;
   auto a2 = PackedArray::AppendVec(a, *value);
   if (a2 != a) {
-    arrprov::copyTag(a, a2);
+    if (copyProv) arrprov::unchecked::copyTag(a, a2);
     type(base) = KindOfVec;
     val(base).parr = a2;
     assertx(cellIsPlausible(*base));
@@ -1954,6 +1966,7 @@ inline void SetNewElemVec(tv_lval base, Cell* value) {
 /**
  * SetNewElem when base is a Dict
  */
+template <bool copyProv>
 inline void SetNewElemDict(tv_lval base, Cell* value) {
   base = tvToCell(base);
   assertx(tvIsDict(base));
@@ -1961,7 +1974,7 @@ inline void SetNewElemDict(tv_lval base, Cell* value) {
   auto a = val(base).parr;
   auto a2 = MixedArray::AppendDict(a, *value);
   if (a2 != a) {
-    arrprov::copyTag(a, a2);
+    if (copyProv) arrprov::unchecked::copyTag(a, a2);
     type(base) = KindOfDict;
     val(base).parr = a2;
     assertx(cellIsPlausible(*base));
@@ -2000,7 +2013,7 @@ inline void SetNewElemObject(tv_lval base, Cell* value) {
 /**
  * $base[] = ...
  */
-template <bool setResult>
+template <bool setResult, bool copyProv>
 inline void SetNewElem(tv_lval base,
                        Cell* value,
                        const MInstrPropState* pState) {
@@ -2024,17 +2037,17 @@ inline void SetNewElem(tv_lval base,
       return SetNewElemString(base, value, pState);
     case KindOfPersistentVec:
     case KindOfVec:
-      return SetNewElemVec(base, value);
+      return SetNewElemVec<copyProv>(base, value);
     case KindOfPersistentDict:
     case KindOfDict:
-      return SetNewElemDict(base, value);
+      return SetNewElemDict<copyProv>(base, value);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       return SetNewElemKeyset(base, value);
     case KindOfPersistentShape:
     case KindOfShape:
       return RuntimeOption::EvalHackArrDVArrs
-        ? SetNewElemDict(base, value)
+        ? SetNewElemDict<copyProv>(base, value)
         : SetNewElemArray(base, value);
     case KindOfPersistentArray:
     case KindOfArray:
@@ -2119,7 +2132,13 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 
     case KindOfPersistentVec:
     case KindOfVec: {
-      auto result = ElemDVec<false, KeyType::Any>(base, key);
+      auto result = [&]{
+        if (RuntimeOption::EvalLogArrayProvenance) {
+          return ElemDVec<false, KeyType::Any, true>(base, key);
+        } else {
+          return ElemDVec<false, KeyType::Any, false>(base, key);
+        }
+      }();
       result = tvAssertCell(result);
       setopBody(result, op, rhs);
       return result;
@@ -2127,7 +2146,13 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
 
     case KindOfPersistentDict:
     case KindOfDict: {
-      auto result = ElemDDict<false, KeyType::Any>(base, key);
+      auto result = [&]{
+        if (RuntimeOption::EvalLogArrayProvenance) {
+          return ElemDDict<false, KeyType::Any, true>(base, key);
+        } else {
+          return ElemDDict<false, KeyType::Any, false>(base, key);
+        }
+      }();
       result = tvAssertCell(result);
       setopBody(result, op, rhs);
       return result;
@@ -2140,7 +2165,13 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfPersistentShape:
     case KindOfShape: {
       if (RuntimeOption::EvalHackArrDVArrs) {
-        auto result = ElemDDict<false, KeyType::Any>(base, key);
+        auto result = [&]{
+          if (RuntimeOption::EvalLogArrayProvenance) {
+            return ElemDDict<false, KeyType::Any, true>(base, key);
+          } else {
+            return ElemDDict<false, KeyType::Any, false>(base, key);
+          }
+        }();
         result = tvAssertCell(result);
         setopBody(result, op, rhs);
         return result;
@@ -2383,13 +2414,25 @@ inline Cell IncDecElem(
 
     case KindOfPersistentVec:
     case KindOfVec: {
-      auto result = ElemDVec<false, KeyType::Any>(base, key);
+      auto result = [&]{
+        if (RuntimeOption::EvalLogArrayProvenance) {
+          return ElemDVec<false, KeyType::Any, true>(base, key);
+        } else {
+          return ElemDVec<false, KeyType::Any, false>(base, key);
+        }
+      }();
       return IncDecBody(op, tvAssertCell(result));
     }
 
     case KindOfPersistentDict:
     case KindOfDict: {
-      auto result = ElemDDict<false, KeyType::Any>(base, key);
+      auto result = [&]{
+        if (RuntimeOption::EvalLogArrayProvenance) {
+          return ElemDDict<false, KeyType::Any, true>(base, key);
+        } else {
+          return ElemDDict<false, KeyType::Any, false>(base, key);
+        }
+      }();
       return IncDecBody(op, tvAssertCell(result));
     }
 
@@ -2400,7 +2443,13 @@ inline Cell IncDecElem(
     case KindOfPersistentShape:
     case KindOfShape: {
       if (RuntimeOption::EvalHackArrDVArrs) {
-        auto result = ElemDDict<false, KeyType::Any>(base, key);
+        auto result = [&]{
+          if (RuntimeOption::EvalLogArrayProvenance) {
+            return ElemDDict<false, KeyType::Any, true>(base, key);
+          } else {
+            return ElemDDict<false, KeyType::Any, false>(base, key);
+          }
+        }();
         return IncDecBody(op, tvAssertCell(result));
       }
       // fallthrough

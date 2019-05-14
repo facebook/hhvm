@@ -1062,16 +1062,9 @@ void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key) {
 }
 
 namespace MInstrHelpers {
-void setNewElem(tv_lval base, Cell val, const MInstrPropState* pState) {
-  HPHP::SetNewElem<false>(base, &val, pState);
-}
 
 void setNewElemArray(tv_lval base, Cell val) {
   HPHP::SetNewElemArray(base, &val);
-}
-
-void setNewElemVec(tv_lval base, Cell val) {
-  HPHP::SetNewElemVec(base, &val);
 }
 
 TypedValue setOpElem(tv_lval base, TypedValue key,
@@ -1105,12 +1098,6 @@ TypedValue incDecElem(tv_lval base, TypedValue key,
   auto const result = HPHP::IncDecElem(op, base, key, pState);
   assertx(!isRefType(result.m_type));
   return result;
-}
-
-tv_lval elemVecID(tv_lval base, int64_t key) {
-  auto cbase = tvToCell(base);
-  assertx(isVecType(type(cbase)));
-  return ElemDVec<false, KeyType::Int>(cbase, key);
 }
 
 tv_lval elemVecIU(tv_lval base, int64_t key) {

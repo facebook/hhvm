@@ -298,7 +298,9 @@ void implElem(IRLS& env, const IRInstruction* inst) {
   auto const target = [&] {
     if (inst->is(ElemDX)) {
       assertx(mode == MOpMode::Define);
-      BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key));
+      BUILD_OPTAB(ELEMD_HELPER_TABLE,
+                  getKeyType(key),
+                  RuntimeOption::EvalLogArrayProvenance);
       args.ssa(3);
       return target;
     } else {
@@ -341,7 +343,9 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
 
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
-  BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(key));
+  BUILD_OPTAB(SETELEM_HELPER_TABLE,
+              getKeyType(key),
+              RuntimeOption::EvalLogArrayProvenance);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -363,7 +367,19 @@ void cgSetRangeRev(IRLS& env, const IRInstruction* inst) {
   cgSetRange(env, inst);
 }
 
-IMPL_OPCODE_CALL(SetNewElem);
+void cgSetNewElem(IRLS& env, const IRInstruction* inst) {
+  auto const target = RuntimeOption::EvalLogArrayProvenance
+    ? CallSpec::direct(MInstrHelpers::setNewElem<true>)
+    : CallSpec::direct(MInstrHelpers::setNewElem<false>);
+
+  auto args = argGroup(env, inst)
+    .ssa(0)
+    .typedValue(1)
+    .ssa(2);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
 
 void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
@@ -798,8 +814,10 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
 void implVecSet(IRLS& env, const IRInstruction* inst) {
   bool const setRef = inst->op() == VecSetRef;
 
-  auto const target = setRef ? CallSpec::direct(MInstrHelpers::vecSetIR)
-                             : CallSpec::direct(MInstrHelpers::vecSetI);
+  BUILD_OPTAB2(setRef,
+               VECSET_REF_HELPER_TABLE,
+               VECSET_HELPER_TABLE,
+               RuntimeOption::EvalLogArrayProvenance);
 
   auto args = argGroup(env, inst).
     ssa(0).
@@ -899,13 +917,33 @@ void cgLdPackedElem(IRLS& env, const IRInstruction* inst) {
   packedLayoutLoadImpl(env, inst);
 }
 
-IMPL_OPCODE_CALL(ElemVecD)
+void cgElemVecD(IRLS& env, const IRInstruction* inst) {
+  BUILD_OPTAB(ELEM_VEC_D_HELPER_TABLE, RuntimeOption::EvalLogArrayProvenance);
+
+  auto args = argGroup(env, inst).ssa(0).ssa(1);
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
+
 IMPL_OPCODE_CALL(ElemVecU)
 
 void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
 void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
 
-IMPL_OPCODE_CALL(SetNewElemVec);
+void cgSetNewElemVec(IRLS& env, const IRInstruction* inst) {
+  auto const target = RuntimeOption::EvalLogArrayProvenance
+    ? CallSpec::direct(MInstrHelpers::setNewElemVec<true>)
+    : CallSpec::direct(MInstrHelpers::setNewElemVec<false>);
+
+  auto args = argGroup(env, inst)
+    .ssa(0)
+    .typedValue(1);
+
+
+  auto& v = vmain(env);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
 
 void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
   static_assert(ArrayData::sizeofSize() == 4, "");
@@ -964,7 +1002,8 @@ void implDictSet(IRLS& env, const IRInstruction* inst) {
   BUILD_OPTAB2(setRef,
                DICTSET_REF_HELPER_TABLE,
                DICTSET_HELPER_TABLE,
-               getKeyType(inst->src(1)));
+               getKeyType(inst->src(1)),
+               RuntimeOption::EvalLogArrayProvenance);
 
   auto args = argGroup(env, inst).
     ssa(0).
@@ -1002,7 +1041,9 @@ void cgElemDictX(IRLS& env, const IRInstruction* inst) {
 
 void cgElemDictD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
-  BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE, getKeyType(key));
+  BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE,
+              getKeyType(key),
+              RuntimeOption::EvalLogArrayProvenance);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 

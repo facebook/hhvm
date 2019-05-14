@@ -541,6 +541,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
   } else {
     ad->m_aux16 &= ~kHasApcTv;
   }
+  ad->m_aux16 &= ~kHasProvenanceData;
   CopyHash(ad->hashTab(), a->hashTab(), scale);
 
   // Need to make sure keys and values are all uncounted.

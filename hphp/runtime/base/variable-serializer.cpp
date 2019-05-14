@@ -1715,6 +1715,18 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     }
   }
 
+  if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
+               (arr->isDict() || arr->isVecArray()))) {
+    auto const source = [&]() -> const char* {
+      switch (getType()) {
+      case VariableSerializer::Type::JSON:      return "json_encode";
+      case VariableSerializer::Type::Serialize: return "serialize";
+      default:                                  return nullptr;
+      }
+    }();
+    if (source) raise_array_serialization_notice(source, arr);
+  }
+
   if (arr->size() == 0) {
     auto const kind = getKind(arr);
     writeArrayHeader(0, arr->isVectorData(), kind);

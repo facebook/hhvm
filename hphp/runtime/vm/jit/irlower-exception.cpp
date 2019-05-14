@@ -158,7 +158,6 @@ IMPL_OPCODE_CALL(RaiseNotice)
 IMPL_OPCODE_CALL(RaiseUndefProp)
 IMPL_OPCODE_CALL(RaiseUninitLoc)
 IMPL_OPCODE_CALL(RaiseWarning)
-IMPL_OPCODE_CALL(RaiseParamRefMismatchForFunc)
 IMPL_OPCODE_CALL(RaiseRxCallViolation)
 IMPL_OPCODE_CALL(RaiseMissingThis)
 IMPL_OPCODE_CALL(FatalMissingThis)
@@ -169,6 +168,8 @@ IMPL_OPCODE_CALL(ThrowHasThisNeedStatic)
 IMPL_OPCODE_CALL(ThrowInvalidArrayKey)
 IMPL_OPCODE_CALL(ThrowInvalidOperation)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
+IMPL_OPCODE_CALL(ThrowParamRefMismatch)
+IMPL_OPCODE_CALL(ThrowParamRefMismatchRange)
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -2285,10 +2285,17 @@ To string conversions:
 
   Raises a Hack array compat notice with the text in S0 as its message.
 
-| RaiseParamRefMismatchForFunc<paramIndex>, ND, S(Func), T
+| ThrowParamRefMismatch<paramIndex>, ND, S(Func), T
 
-  Raise a warning or exception indicating that the reffiness of a parameter was
+  Throw an exception indicating that the reffiness of a parameter was
   incorrectly annotated at the callsite.
+
+| ThrowParamRefMismatchRange<firstBit,mask,vals>, ND, S(Func), T
+
+  Throw an exception indicating that the reffiness of at least one parameter
+  within a given range was incorrectly annotated at the callsite.
+
+  See CheckRefs for meaning of firstBit, mask and vals.
 
 | RaiseForbiddenDynCall, ND, S(Func), NF
 

@@ -1620,7 +1620,8 @@ X(LookupFuncCached,             FuncNameData);
 X(LdObjMethod,                  FuncNameData);
 X(RaiseMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncArgData);
-X(RaiseParamRefMismatchForFunc, ParamData);
+X(ThrowParamRefMismatch,        ParamData);
+X(ThrowParamRefMismatchRange,   CheckRefsData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
 X(CheckClsReifiedGenericMismatch,

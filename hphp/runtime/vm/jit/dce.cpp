@@ -546,7 +546,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
   case RaiseHackArrCompatNotice:
-  case RaiseParamRefMismatchForFunc:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseRxCallViolation:
@@ -716,6 +715,8 @@ bool canDCE(IRInstruction* inst) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
+  case ThrowParamRefMismatch:
+  case ThrowParamRefMismatchRange:
   case StMBase:
   case StMIPropState:
   case FinishMemberOp:

@@ -53,7 +53,9 @@ void raiseArrayIndexNotice(int64_t index, bool isInOut);
 void raiseArrayKeyNotice(const StringData* key, bool isInOut);
 std::string formatParamRefMismatch(const char* fname, uint32_t index,
                                    bool funcByRef);
-void raiseParamRefMismatchForFunc(const Func* func, uint32_t index);
+void throwParamRefMismatch(const Func* func, uint32_t index);
+void throwParamRefMismatchRange(const Func* func, unsigned firstBit,
+                                uint64_t mask, uint64_t vals);
 void raiseRxCallViolation(const ActRec* caller, const Func* callee);
 
 inline intptr_t frame_clsref_offset(const Func* f, uint32_t slot) {

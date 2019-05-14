@@ -1376,12 +1376,12 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       } else if (LIKELY(isRefType(from.m_type) &&
                         from.m_data.pref->hasMultipleRefs())) {
         if (checkRefAnnot && calledFromHH()) {
-          WRAP(raiseParamRefMismatchForFunc(f, i));
+          WRAP(throwParamRefMismatch(f, i));
         }
         refDup(from, *to);
       } else {
         if (checkRefAnnot && calledFromHH()) {
-          WRAP(raiseParamRefMismatchForFunc(f, i));
+          WRAP(throwParamRefMismatch(f, i));
         }
         cellDup(tvToCell(from), *to);
       }

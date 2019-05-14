@@ -504,7 +504,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseMissingArg:
   case RaiseMissingThis:
   case RaiseNotice:
-  case RaiseParamRefMismatchForFunc:
   case RaiseRxCallViolation:
   case RaiseStrToClassNotice:
   case RaiseTooManyArg:
@@ -541,6 +540,8 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:
   case ThrowOutOfBounds:
+  case ThrowParamRefMismatch:
+  case ThrowParamRefMismatchRange:
   case UnsetElem:
   case UnsetProp:
   case VecSet:

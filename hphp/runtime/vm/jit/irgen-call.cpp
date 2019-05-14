@@ -41,6 +41,58 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
+bool emitCallerReffinessChecksKnown(IRGS& env, const Func* callee,
+                                    const FCallArgs& fca) {
+  if (!fca.enforceReffiness()) return true;
+
+  for (auto i = 0; i < fca.numArgs; ++i) {
+    if (callee->byRef(i) != fca.byRef(i)) {
+      auto const func = cns(env, callee);
+      gen(env, ThrowParamRefMismatch, ParamData { i }, func);
+      return false;
+    }
+  }
+  return true;
+}
+
+void emitCallerReffinessChecksUnknown(IRGS& env, SSATmp* callee,
+                                      const FCallArgs& fca) {
+  if (!fca.enforceReffiness()) return;
+
+  SSATmp* numParams = nullptr;
+  for (uint32_t i = 0; i * 8 < fca.numArgs; i += 8) {
+    uint64_t vals = 0;
+    for (uint32_t j = 0; j < 8 && (i + j) * 8 < fca.numArgs; ++j) {
+      vals |= ((uint64_t)fca.byRefs[i + j]) << (8 * j);
+    }
+
+    uint64_t bits = fca.numArgs - i * 8;
+    uint64_t mask = bits >= 64
+      ? std::numeric_limits<uint64_t>::max()
+      : (1UL << bits) - 1;
+
+    // CheckRefs only needs to know the number of parameters when there are more
+    // than 64 args.
+    if (i == 0) {
+      numParams = cns(env, 64);
+    } else if (!numParams || numParams->hasConstVal()) {
+      numParams = gen(env, LdFuncNumParams, callee);
+    }
+
+    auto const crData = CheckRefsData { i * 8, mask, vals };
+    ifThen(
+      env,
+      [&] (Block* taken) {
+        gen(env, CheckRefs, taken, crData, callee, numParams);
+      },
+      [&] {
+        hint(env, Block::Hint::Unlikely);
+        gen(env, ThrowParamRefMismatchRange, crData, callee);
+      }
+    );
+  }
+}
+
 void emitCallerDynamicCallChecksKnown(IRGS& env, const Func* callee) {
   assertx(callee);
   if (RuntimeOption::EvalForbidDynamicCalls <= 0) return;
@@ -1291,57 +1343,6 @@ SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
-
-bool emitCallerReffinessChecks(IRGS& env, const Func* callee,
-                               const FCallArgs& fca, IRSPRelOffset actRecOff) {
-  if (!fca.enforceReffiness()) return true;
-
-  if (callee) {
-    for (auto i = 0; i < fca.numArgs; ++i) {
-      if (callee->byRef(i) != fca.byRef(i)) {
-        auto const func = cns(env, callee);
-        gen(env, RaiseParamRefMismatchForFunc, ParamData { i }, func);
-        return false;
-      }
-    }
-    return true;
-  }
-
-  auto const func = ldPreLiveFunc(env, actRecOff);
-  auto const exitSlow = makeExitSlow(env);
-
-  SSATmp* numParams = nullptr;
-  for (uint32_t i = 0; i * 8 < fca.numArgs; i += 8) {
-    uint64_t vals = 0;
-    for (uint32_t j = 0; j < 8 && (i + j) * 8 < fca.numArgs; ++j) {
-      vals |= ((uint64_t)fca.byRefs[i + j]) << (8 * j);
-    }
-
-    uint64_t bits = fca.numArgs - i * 8;
-    uint64_t mask = bits >= 64
-      ? std::numeric_limits<uint64_t>::max()
-      : (1UL << bits) - 1;
-
-    // CheckRefs only needs to know the number of parameters when there are more
-    // than 64 args.
-    if (i == 0) {
-      numParams = cns(env, 64);
-    } else if (!numParams || numParams->hasConstVal()) {
-      numParams = gen(env, LdFuncNumParams, func);
-    }
-
-    gen(env, CheckRefs, exitSlow, CheckRefsData { i * 8, mask, vals }, func,
-        numParams);
-  }
-
-  return true;
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void emitFCall(IRGS& env,
                FCallArgs fca,
                const StringData*,
@@ -1350,7 +1351,13 @@ void emitFCall(IRGS& env,
   auto const numStackInputs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
 
-  if (!emitCallerReffinessChecks(env, callee, fca, actRecOff)) return;
+  if (fca.numArgs) {
+    if (callee) {
+      if (!emitCallerReffinessChecksKnown(env, callee, fca)) return;
+    } else {
+      emitCallerReffinessChecksUnknown(env, ldPreLiveFunc(env, actRecOff), fca);
+    }
+  }
 
   if (fca.hasUnpack()) {
     auto const data = CallUnpackData {

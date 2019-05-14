@@ -241,9 +241,24 @@ std::string formatParamRefMismatch(const char* fname, uint32_t index,
   }
 }
 
-void raiseParamRefMismatchForFunc(const Func* func, uint32_t index) {
+void throwParamRefMismatch(const Func* func, uint32_t index) {
   SystemLib::throwInvalidArgumentExceptionObject(formatParamRefMismatch(
     func->fullDisplayName()->data(), index, func->byRef(index)));
+}
+
+void throwParamRefMismatchRange(const Func* func, unsigned firstVal,
+                                uint64_t mask, uint64_t vals) {
+  for (auto i = 0; i < 64; ++i) {
+    if (mask & (1UL << i)) {
+      bool byRef = vals & (1UL << i);
+      if (func->byRef(firstVal + i) != byRef) {
+        throwParamRefMismatch(func, firstVal + i);
+      }
+    }
+  }
+
+  // Caller guarantees at least one parameter with reffiness mismatch.
+  not_reached();
 }
 
 void raiseRxCallViolation(const ActRec* caller, const Func* callee) {

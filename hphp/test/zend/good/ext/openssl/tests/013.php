@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $data = "openssl_open() test";
 $pub_key = "file://" . dirname(__FILE__) . "/public.key";
 $priv_key = "file://" . dirname(__FILE__) . "/private.key";
@@ -13,3 +13,4 @@ openssl_open($sealed, &$output3, $ekeys[2], $priv_key);
 var_dump($output3);
 openssl_open($sealed, &$output4, $wrong, $priv_key);
 var_dump($output4);
+}

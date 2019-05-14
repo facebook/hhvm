@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml = <<< XML
 <?xml version="1.0" ?>
 <books>
@@ -23,3 +23,4 @@ var_dump($content);
 error_reporting(0);
 $output = dirname(__FILE__).'/DOMNode_C14NFile_basic.tmp';
 unlink($output);
+}

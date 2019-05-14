@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 error_reporting(E_ALL & ~E_USER_NOTICE & ~E_NOTICE);
 
 $it = new APCIterator('user', NULL, APC_ITER_ALL, 10);
@@ -13,3 +13,4 @@ ksort(&$vals);
 var_dump($vals);
 
 echo "===DONE===\n";
+}

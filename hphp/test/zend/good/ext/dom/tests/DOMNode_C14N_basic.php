@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml = <<< XML
 <?xml version="1.0" ?>
 <books>
@@ -17,3 +17,4 @@ $doc = new DOMDocument();
 $doc->loadXML($xml);
 $node = $doc->getElementsByTagName('title')->item(0);
 var_dump($node->C14N());
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $h = new SplMaxHeap();
 
 $h->insert(1);
@@ -17,3 +17,4 @@ while ($h->valid()) {
     $h->next();
 }
 echo "===DONE===\n";
+}

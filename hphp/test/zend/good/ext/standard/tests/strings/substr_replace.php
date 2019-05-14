@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $str = "try this";
 $repl = "bala ";
 $start = 2;
@@ -437,7 +437,4 @@ $len = array(-2,-3);
 echo str_replace("\n","","substr_replace(".var_export($str,true).", ".var_export($repl,true).",".var_export($start,true).", ".var_export($len,true).")")."\n";
 var_dump(substr_replace($str, $repl, $start, $len))."\n";
 echo "\n";
-
-
-
-
+}

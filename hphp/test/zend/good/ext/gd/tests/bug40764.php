@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $image=imagecreatetruecolor(400, 400);
 $white = imagecolorallocate($image, 255, 255, 255);
 $black = imagecolorallocate($image, 0, 0, 0);
@@ -18,4 +18,4 @@ imageline($image, 0, 200, 400, 200, $red);
 imageline($image, 0, 0, 392, 392, $red);
 print_r(imagecolorat($image, 195, 0));
 print_r(imagecolorat($image, 0, 195));
-
+}

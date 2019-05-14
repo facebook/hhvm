@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $date = new DateTime("2011-05-17T22:14:12");
 $date2 = DateTime::createFromFormat("D H i s", $date->format("D"). ' 0 00 00');
 echo $date->format("r"), "\n";
@@ -33,3 +33,4 @@ $date2 = new DateTime("Sat 19 November 2011");
 echo $date1->format('r'), "\n";
 echo $date2->format('r'), "\n";
 var_dump($date1->format('Y-m-d') == $date2->format('Y-m-d'));
+}

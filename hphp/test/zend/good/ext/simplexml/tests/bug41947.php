@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><root xmlns:myns="http://myns" />');
 $grandchild = $xml->addChild('child', '', 'http://myns')->addChild('grandchild', 'hello', '');
 
@@ -7,3 +7,4 @@ if (count($gchild) > 0) {
     echo $gchild[0]."\n";
 }
 echo "===DONE===\n";
+}

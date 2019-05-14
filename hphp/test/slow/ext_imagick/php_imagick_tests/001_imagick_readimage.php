@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 print "--- Catch exception with try/catch\n";
 $imagick = new Imagick();
 try {
@@ -6,4 +6,4 @@ try {
 } catch (ImagickException $e) {
   echo "got exception";
 }
-
+}

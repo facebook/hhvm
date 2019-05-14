@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $hex_shm_id = 0xff3;
 $write_d1 = "test #1 of the shmop() extension";
 $write_d2 = "test #2 append data to shared memory segment";
@@ -66,3 +66,4 @@ if (!shmop_delete($shm_id)) {
 }
 
 shmop_close($shm_id);
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $cwd = dirname(__FILE__);
 $font = "$cwd/Tuffy.ttf";
 $box = ImageFTBBox(14.0, 0.0, $font, "Text without line-break");
@@ -15,4 +15,4 @@ if ($with_line_break==$without_line_break) {
 } else {
   echo "with line break != without line break".PHP_EOL;
 }
-
+}

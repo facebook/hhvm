@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -12,3 +12,4 @@ $time = strtotime('2012-02-29 00:00:00 +0000');
 
 var_dump((float)$time*1000, $intlcal->getTime());
 echo "==DONE==";
+}

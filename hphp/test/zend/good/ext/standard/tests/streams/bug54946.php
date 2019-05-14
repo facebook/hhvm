@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $filename = tempnam(__DIR__, "phpbug");
 $stream = fopen($filename, "w"); // w or a
 $retval = stream_get_contents($stream, 1, 1);
@@ -27,3 +27,4 @@ var_dump($retval);
 fclose($stream);
 unlink($filename);
 echo "===DONE===\n";
+}

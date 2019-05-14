@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $list = new SplDoublyLinkedList();
 
 $list->push('o');
@@ -12,4 +12,5 @@ $list->rewind();
 while ($tmp = $list->current()) {
   echo $tmp;
   $list->next();
+}
 }

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml =<<<XML
 <xml xmlns:a="http://a">
     <data a:label="I am A" label="I am Nothing">test1</data>
@@ -20,3 +20,4 @@ echo $atts[0] . "\n";
 $atts = $x->xpath("/xml/data/@label");
 echo $atts[0] . "\n";
 echo "===DONE===\n";
+}

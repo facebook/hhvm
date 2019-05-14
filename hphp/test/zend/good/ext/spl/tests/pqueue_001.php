@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $pq = new SplPriorityQueue();
 
 // errors
@@ -56,3 +56,4 @@ foreach ($pq3 as $k=>$v) {
 }
 
 echo "===DONE===\n";
+}

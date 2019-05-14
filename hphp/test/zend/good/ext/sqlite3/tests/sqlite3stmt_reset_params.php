@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 echo "Creating Table\n";
 var_dump($db->exec('CREATE TABLE foobar (id INTEGER, name STRING)'));
@@ -20,3 +20,4 @@ $stmt = null;
 $result = null;
 var_dump($db->close());
 echo "Done\n";
+}

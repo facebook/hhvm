@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $thisdir = dirname(__FILE__);
 $src = $thisdir . "/bug8009.zip";
 $filename = $thisdir . "/tmp8009.zip";
@@ -14,4 +14,4 @@ $zip->close();
 unlink($filename);
 echo "status: " . $zip->status . "\n";
 echo "\n";
-
+}

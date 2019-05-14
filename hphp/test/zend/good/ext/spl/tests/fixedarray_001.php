@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = new SplFixedArray(0);
 // errors
 try {
@@ -38,3 +38,4 @@ $b = clone $a;
 $a[0] = "valueNew";
 var_dump($b[0]);
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = array(
     'a' => array(
         'A', 'B', 'C', 'D',
@@ -22,3 +22,4 @@ foreach($a as $k => $d)
 }
 // Alternatively $c = $a; and foreachloop removal will cause identical results.
 var_dump(key(&$ab));
+}

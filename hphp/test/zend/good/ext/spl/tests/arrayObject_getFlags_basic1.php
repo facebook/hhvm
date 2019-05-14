@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $ao = new ArrayObject(new ArrayObject(new stdClass));
 var_dump($ao->getFlags());
 
@@ -13,3 +13,4 @@ var_dump($ao->getFlags());
 
 $cao = clone $ao;
 var_dump($cao->getFlags());
+}

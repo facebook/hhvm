@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $key = sodium_crypto_kdf_keygen();
 try {
   $subkey = sodium_crypto_kdf_derive_from_key(10, 0, "context!", $key);
@@ -35,4 +35,4 @@ var_dump($subkey1 !== $subkey2);
 var_dump($subkey1 !== $subkey3);
 var_dump($subkey2 !== $subkey3);
 var_dump($subkey1 === $subkey4);
-
+}

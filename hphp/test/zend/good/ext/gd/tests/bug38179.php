@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $src = imagecreate(5,5);
 $c0 = imagecolorallocate($src, 255,255,255);
 $c1 = imagecolorallocatealpha($src, 255,0,0,70);
@@ -15,3 +15,4 @@ $p1 = imagecolorat($dst_tc, 3,3);
 printf("%X\n", $p1);
 
 imagedestroy($src); imagedestroy($dst_tc);
+}

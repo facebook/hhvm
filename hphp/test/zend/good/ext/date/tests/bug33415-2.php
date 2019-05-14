@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 date_default_timezone_set('Africa/Bujumbura');
 
 print "TZ=Africa/Bujumbura - *Note*: Unexpected, as does not appear to
@@ -203,4 +203,4 @@ print "tStamp=". date("l Y-m-d H:i:s T I", $tStamp). "\n";
 $strtotime_tstamp = strtotime("next Monday", $tStamp);
 print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:30:00\n\n";
-
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $prefix = __FILE__;
 
 touch($prefix . "_file");
@@ -31,4 +31,4 @@ unlink($prefix . "_link3");
 unlink($prefix . "_link2");
 unlink($prefix . "_link1");
 unlink($prefix . "_file");
-
+}

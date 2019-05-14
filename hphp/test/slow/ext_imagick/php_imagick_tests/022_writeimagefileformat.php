@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $jpeg_file = __DIR__."/imagick_test.jpg";
 $png_file = __DIR__."/imagick_test.png";
 
@@ -49,3 +49,4 @@ unlink ($png_file);
 unlink ($jpeg_file);
 
 echo 'done' . PHP_EOL;
+}

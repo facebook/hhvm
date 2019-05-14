@@ -1,4 +1,4 @@
-<?php 
+<?php <<__EntryPoint>> function main() {
 $xml =<<<EOF
 <people>
    <person name="Joe"></person>
@@ -23,3 +23,4 @@ var_dump($people->person[0]['age']);
 $people->person['age'] += 5;
 var_dump($people->person[0]['age']);
 echo "===DONE===\n";
+}

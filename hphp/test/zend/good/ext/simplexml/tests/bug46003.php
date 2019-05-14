@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml =<<<XML
 <r>
   <p>Test</p>
@@ -18,3 +18,4 @@ var_dump(isset($x->o->zz));
 var_dump(isset($x->o->text));
 var_dump(isset($x->o->xx));
 echo "===DONE===\n";
+}

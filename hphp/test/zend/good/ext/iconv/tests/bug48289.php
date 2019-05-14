@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $text = "\xE3\x83\x86\xE3\x82\xB9\xE3\x83\x88\xE3\x83\x86\xE3\x82\xB9\xE3\x83\x88";
 $options = array(
     'scheme' => 'Q',
@@ -8,3 +8,4 @@ $options = array(
 );
 
 echo iconv_mime_encode('Subject', $text, $options);
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $queue = new SplQueue();
 // errors
 try {
@@ -41,3 +41,4 @@ $queue_clone = clone $queue;
 $queue_clone->dequeue();
 echo count($queue)."\n";
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 var_dump(libxml_use_internal_errors(true));
 
 $xmlstr = <<< XML
@@ -16,3 +16,4 @@ simplexml_load_string($xmlstr);
 var_dump(libxml_use_internal_errors(false));
 
 echo "Done\n";
+}

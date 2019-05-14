@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml =<<<EOF
 <xml>
   <fieldset1>
@@ -29,3 +29,4 @@ foreach ($rit as $child) {
   echo count($ancestry) . ' steps: ' . $path . PHP_EOL;
 }
 echo "===DONE===\n";
+}

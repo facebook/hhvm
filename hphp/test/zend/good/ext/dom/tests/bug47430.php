@@ -1,4 +1,4 @@
-<?php 
+<?php <<__EntryPoint>> function main() {
 $xml = '<?xml
 version="1.0"?><html><p><i>Hello</i></p><p><i>World!</i></p></html>';
 $dom = new DOMDocument();
@@ -13,4 +13,4 @@ $arr = array();
 $arr[0] = 'Value';
 
 print_r($arr);
-
+}

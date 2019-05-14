@@ -1,6 +1,6 @@
-<?php 
+<?php <<__EntryPoint>> function main() {
 $xml =<<<EOF
-<root s:att1="b" att1="a" 
+<root s:att1="b" att1="a"
       xmlns:s="urn::test" xmlns:t="urn::test-t">
    <child1>test</child1>
    <child1>test 2</child1>
@@ -25,3 +25,4 @@ var_dump(isset($atts[0]));
 var_dump(isset($atts[TRUE]));
 
 echo "===DONE===\n";
+}

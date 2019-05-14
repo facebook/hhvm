@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
 if (!$socket) {
@@ -22,3 +22,4 @@ var_dump($retval_3["l_linger"] === $options["l_linger"]);
 var_dump((bool)$retval_3["l_onoff"] === (bool)$options["l_onoff"]);
 
 socket_close($socket);
+}

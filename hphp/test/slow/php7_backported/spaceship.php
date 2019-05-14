@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $valid_true = array(1, "1", "true", 1.0, array(1));
 $valid_false = array(0, "", 0.0, array(), NULL);
 
@@ -83,4 +83,5 @@ for ($i = 0; $i < count($toCompare); $i +=3) {
 }
 if ($failed == false) {
   echo "Test Passed\n";
+}
 }

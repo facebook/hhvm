@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $inputFileName = dirname(__FILE__)."/004.txt.gz";
 $srcFile = "file://$inputFileName";
 $compressedFile = "compress.zlib://$srcFile";
@@ -8,3 +8,4 @@ $h = fopen($compressedFile, 'r');
 fpassthru($h);
 fclose($h);
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $inputFileName = dirname(__FILE__)."/004.txt.gz";
 $outputFileName = __FILE__.'.tmp';
 
@@ -22,3 +22,4 @@ else {
 }
 unlink($outputFileName);
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dll = new SplDoublyLinkedList();
 $dll->push(2);
 $dll->push(3);
@@ -23,3 +23,4 @@ foreach ($dll as $k => $v) {
 var_dump($dll->count());
 
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 
 $aTzAbbr = timezone_abbreviations_list();
@@ -26,3 +26,4 @@ foreach ($aTz as $sTz) {
 }
 
 var_dump('this should be the only output');
+}

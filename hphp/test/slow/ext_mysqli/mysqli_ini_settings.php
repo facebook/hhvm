@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $host = getenv("MYSQL_TEST_HOST")   ? getenv("MYSQL_TEST_HOST") : "localhost";
 $port = null; // mysqli will use the default 3306
 ini_set("mysqli.default_user", "foobar");
@@ -27,3 +27,4 @@ var_dump(ini_get("mysqli.default_user"));
 var_dump(ini_get("mysqli.default_pw"));
 var_dump(ini_get("mysqli.reconnect"));
 var_dump(ini_get("mysqli.cache_size"));
+}

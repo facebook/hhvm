@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $descriptors = array(
     0 => array('pipe', 'r'),
     1 => array('pipe', 'w'),
@@ -13,4 +13,4 @@ sleep(1); // wait a bit to let the process finish
 var_dump(proc_get_status($process));
 
 echo "Done!\n";
-
+}

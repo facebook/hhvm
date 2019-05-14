@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $doc = new DOMDocument;
 $doc->loadXml(<<<EOF
 <?xml version="1.0" encoding="utf-8" ?>
@@ -19,4 +19,4 @@ foreach ($bbb->attributes as $attr)
 }
 
 echo $attr->parentNode->localName;
-
+}

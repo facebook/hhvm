@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = $b = $c = array(0,1,2,3,4,5);
 print_r($a);
 // this is ok:
@@ -20,3 +20,4 @@ echo 'print_r(array_splice($c,2,2147483646));'."\n";
 print_r(array_splice(&$c,2,2147483646));
 echo "\$c is :";
 print_r($c);
+}

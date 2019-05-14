@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__) . "/bug65701/";
 
 mkdir($file_path);
@@ -18,3 +18,4 @@ foreach (scandir($file_path) as $file) {
     }
 }
 rmdir($file_path);
+}

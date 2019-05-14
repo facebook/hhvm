@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $sockets = array();
 if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
     $domain = AF_INET;
@@ -11,3 +11,4 @@ $write  = null;
 $except = null;
 $time   = array();
 var_dump(socket_select(&$sockets, &$write, &$except, $time));
+}

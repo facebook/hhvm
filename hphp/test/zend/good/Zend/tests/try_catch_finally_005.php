@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 for ($i = 0;  $i < 100 ; $i ++) {
     try {
         break;
@@ -32,4 +32,4 @@ for ($i = 0;  $i < 3; $i ++) {
        var_dump("finally");
     }
 }
-
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -8,3 +8,4 @@ var_dump($intlcal->inDaylightTime());
 $intlcal->setTime(strtotime('2012-04-01') * 1000);
 var_dump(intlcal_in_daylight_time($intlcal));
 echo "==DONE==";
+}

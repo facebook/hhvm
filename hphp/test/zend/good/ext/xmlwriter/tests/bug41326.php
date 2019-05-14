@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml = new XmlWriter();
 $xml->openMemory();
 $xml->setIndent(true);
@@ -28,3 +28,4 @@ $xw->writeElementNS(null, 'bar', '', '');
 $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);
+}

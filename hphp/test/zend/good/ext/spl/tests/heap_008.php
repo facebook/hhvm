@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $h = new SplMaxHeap();
 
 $h->insert(1);
@@ -8,3 +8,4 @@ $h->insert(4);
 
 var_dump($h);
 echo "===DONE===\n";
+}

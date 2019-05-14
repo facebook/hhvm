@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $original = <<<EOD
 blah blah blah blah blah blah blah
 blah blah blah blah blah blah blah
@@ -37,4 +37,4 @@ unlink($filename);
 foreach ($lines as $line) {
     echo $line;
 }
-
+}

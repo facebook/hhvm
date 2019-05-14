@@ -1,4 +1,4 @@
-<?php 
+<?php <<__EntryPoint>> function main() {
 $file = dirname(__FILE__) . '/foo.html';
 file_put_contents($file, 'text 0<div class="tested">text 1</div>');
 $handle = fopen($file, 'r');
@@ -8,3 +8,4 @@ var_dump($object->fgetss());
 var_dump(fgetss($handle));
 error_reporting(0);
 unlink(dirname(__FILE__) . '/foo.html');
+}

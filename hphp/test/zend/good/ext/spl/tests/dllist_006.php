@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = new SplDoublyLinkedList();
 $a->push(1);
 $a->push(2);
@@ -42,3 +42,4 @@ try {
     echo "Exception: ".$e->getMessage()."\n";
 }
 echo "===DONE===\n";
+}

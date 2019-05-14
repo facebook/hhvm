@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("error_reporting", -1);
 ini_set("display_errors", 1);
@@ -15,3 +15,4 @@ var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_LONG_GMT));
 var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_SHORT_COMMONLY_USED));
 var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_GENERIC_LOCATION));
 echo "==DONE==";
+}

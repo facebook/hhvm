@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $small = imagecreatetruecolor(10, 10);
 $c1 = imagecolorallocatealpha($small, 255,0,0,50);
 imagecolortransparent($small, 0);
@@ -19,3 +19,4 @@ imagesavealpha($img, true);
 
 $c = imagecolorat($img, 0,0);
 printf("%X", $c);
+}

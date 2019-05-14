@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $image = imagecreatetruecolor(180, 30);
 
 // Writes the text and apply a gaussian blur on the image
@@ -11,3 +11,4 @@ $gaussian = array(
 );
 
 try { var_dump(imageconvolution($image, $gaussian, 16)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

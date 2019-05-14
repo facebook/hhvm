@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -26,3 +26,4 @@ var_dump($intlcal->getLocale(1));
 
 var_dump($intlcal->getType());
 echo "==DONE==";
+}

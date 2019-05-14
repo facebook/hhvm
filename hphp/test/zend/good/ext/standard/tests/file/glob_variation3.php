@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $path = dirname(__FILE__);
 
 ini_set('open_basedir', NULL);
@@ -12,3 +12,4 @@ var_dump(glob("$path/directly_not_exists"));
 
 var_dump(empty(ini_get('open_basedir')));
 echo "==DONE==";
+}

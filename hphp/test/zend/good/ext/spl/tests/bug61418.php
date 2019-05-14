@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $fileIterator = new FilesystemIterator(__DIR__, FilesystemIterator::KEY_AS_FILENAME);
 $regexpIterator = new RegexIterator($fileIterator, '#.*#');
 foreach ($fileIterator as $key => $file)
@@ -15,3 +15,4 @@ foreach ($dirIterator as $key => $file)
 unset($regexpIterator2);
 unset($dirIterator);
 echo "==DONE==";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 
 date_default_timezone_set('Europe/Amsterdam');
@@ -12,3 +12,4 @@ var_dump($intlcal->getTime(), (float)strtotime('2012-02-29 16:07:08') * 1000);
 
 var_dump($intlcal->getType());
 echo "==DONE==";
+}

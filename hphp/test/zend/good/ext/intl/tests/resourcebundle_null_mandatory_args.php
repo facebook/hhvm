@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 
 $r = new ResourceBundle('en_US', NULL);
@@ -10,3 +10,4 @@ $r = new ResourceBundle(NULL, NULL);
 $c = $r->get('calendar')->get('gregorian')->get('DateTimePatterns')->get(0);
 var_dump($c);
 echo "==DONE==";
+}

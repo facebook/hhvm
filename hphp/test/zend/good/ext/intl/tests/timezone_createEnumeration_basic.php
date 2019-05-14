@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 $tz = IntlTimeZone::createEnumeration();
 var_dump(get_class($tz));
@@ -10,3 +10,4 @@ var_dump(get_class($tz));
 $count2 = count(iterator_to_array($tz));
 var_dump($count == $count2);
 echo "==DONE==";
+}

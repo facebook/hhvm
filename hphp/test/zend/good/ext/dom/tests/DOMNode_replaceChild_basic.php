@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $document = new DOMDocument();
 $document->loadXML('<?xml version="1.0" encoding="utf-8"?>
 <root><foo><bar/><baz/></foo><spam><eggs/><eggs/></spam></root>');
@@ -21,3 +21,4 @@ $new_child = $document->getElementsByTagName('spam')->item(0);
 $parent = $document->getElementsByTagName('foo')->item(0);
 $parent->replaceChild($new_child, $parent->firstChild);
 echo "Children are inserted in order:\n" . $document->saveXML();
+}

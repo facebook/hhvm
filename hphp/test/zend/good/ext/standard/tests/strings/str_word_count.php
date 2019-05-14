@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 error_reporting(E_ALL);
 $str = "Hello friend, you're
     looking          good today!";
@@ -40,3 +40,4 @@ var_dump(str_word_count("-foo-", 2));
 var_dump(str_word_count("-foo-", 2, "-"));
 
 echo "Done\n";
+}

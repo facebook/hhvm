@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xmlstr = <<<XML
 <?xml version='1.0' standalone='yes'?>
 <movies>
@@ -34,3 +34,4 @@ for( $XX = 0; $XX < 2000; ++$XX )
 
 gc_collect_cycles( );
 echo "ok\n";
+}

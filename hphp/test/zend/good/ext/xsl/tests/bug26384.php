@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dom = new domDocument;
 $dom->load(dirname(__FILE__)."/area_name.xml");
 if(!$dom) {
@@ -22,4 +22,4 @@ print $proc->transformToXml($dom);
 
 //this segfaulted before
 print $dom->documentElement->firstChild->nextSibling->nodeName;
-
+}

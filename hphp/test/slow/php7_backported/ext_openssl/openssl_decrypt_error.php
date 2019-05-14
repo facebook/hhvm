@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $data = "openssl_decrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";
@@ -20,3 +20,4 @@ try { var_dump(openssl_decrypt($encrypted, $method, array())); } catch (Exceptio
 
 // invalid using of an authentication tag
 var_dump(openssl_encrypt($data, $method, $password, 0, $iv, &$wrong));
+}

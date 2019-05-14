@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $regex = '/(([0-9a-z]+)-([0-9]+))-(([0-9]+)-([0-9]+))/';
 
 $string= '1-2-3-4 a-2-3-4 1-a-3-4 1-2-a-4 1-2-3-a a-a-a-a 4-3-2-1 100-200-300-400-500-600-700-800';
@@ -25,3 +25,4 @@ $count = NULL;
 $string= 'Viagra V14GR4 Vicodin V1C0D1/\/ v1c0d1/|/';
 var_dump(preg_replace($regex, '...', $string, -1));
 var_dump($count);
+}

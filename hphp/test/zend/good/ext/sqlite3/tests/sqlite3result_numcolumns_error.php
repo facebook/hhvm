@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 echo 'Creating Table' . PHP_EOL;
 var_dump($db->exec('CREATE TABLE test (time INTEGER, id STRING)'));
@@ -11,4 +11,4 @@ $result = $db->query('SELECT id FROM test');
 try { var_dump($result->numColumns('time')); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo 'Done';
-
+}

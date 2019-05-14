@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = new stdClass();
 
 $array = array(array('z',$a),array('q','s'));
@@ -12,4 +12,5 @@ echo "Second:\n";
 $rai = new RecursiveArrayIterator($array);
 foreach (new RecursiveIteratorIterator($rai) as $t) {
     var_dump($t);
+}
 }

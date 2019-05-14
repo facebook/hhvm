@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $regexes = array('', '/', '345', 'b');
 
 foreach ($regexes as $regex) {
@@ -7,4 +7,5 @@ foreach ($regexes as $regex) {
     } catch (Exception $e) {
         printf("%s: %d\n", get_class($e), $e->getCode());
     }
+}
 }

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $im = imagecreate(64, 64);
 imagecolorallocate($im, 0, 0, 0);
 
@@ -11,3 +11,4 @@ printf("chunk size: %d\n", $header['chunk_size']);
 printf("x chunk count: %d\n", $header['x_count']);
 printf("y chunk count: %d\n", $header['y_count']);
 printf("file size: %d\n", strlen($buffer));
+}

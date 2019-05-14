@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -8,3 +8,4 @@ var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
 var_dump(intlcal_set($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH, 3));
 var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH));
 echo "==DONE==";
+}

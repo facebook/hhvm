@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $stack = new SplStack();
 // errors
 try {
@@ -41,3 +41,4 @@ $stack_clone = clone $stack;
 $stack_clone->pop();
 echo count($stack)."\n";
 echo "===DONE===\n";
+}

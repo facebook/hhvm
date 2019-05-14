@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 
@@ -18,3 +18,4 @@ RULES;
 $rbbi = new IntlRuleBasedBreakIterator($rules);
 var_dump(get_class($rbbi));
 echo "==DONE==";
+}

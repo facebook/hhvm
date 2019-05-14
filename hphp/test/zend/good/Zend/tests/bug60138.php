@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $category = array("f");
 $tree = array($category);
 
@@ -8,3 +8,4 @@ $iterator = new RecursiveIteratorIterator(
 );
 foreach($iterator as $file);
 echo "ok\n";
+}

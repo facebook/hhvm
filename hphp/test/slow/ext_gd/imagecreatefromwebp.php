@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__).'/imagecreatefromwebp.webp';
 
 if (!file_exists($filename))
@@ -22,3 +22,4 @@ echo preg_replace('/[[:^print:]]/', '?', $data);
 
 
 unlink("$filename.png");
+}

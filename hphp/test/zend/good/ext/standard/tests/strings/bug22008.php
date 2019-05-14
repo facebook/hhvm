@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $html = <<< HERE
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
@@ -13,3 +13,4 @@ $html = <<< HERE
 HERE;
 
 echo trim(strip_tags($html, '<b>'))."\n";
+}

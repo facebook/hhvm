@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $closure = function() { echo "Invoked!\n"; };
 
 $method = new ReflectionFunction ($closure);
@@ -27,3 +27,4 @@ $closure2 ();
 $closure2->__invoke ();
 
 echo "===DONE===\n";
+}

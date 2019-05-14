@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $index_array = array(1, 2, 3);
 $assoc_array = array(1 => 'one', 2 => 'two');
 
@@ -14,3 +14,4 @@ foreach ( $variation_array as $var ) {
   try { var_dump(fstat( $var  ) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 echo "===DONE===\n";
+}

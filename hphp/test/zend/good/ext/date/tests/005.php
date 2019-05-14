@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 
 $t = mktime(0,0,0, 6, 27, 2006);
@@ -15,3 +15,4 @@ var_dump(idate("[", $t));
 var_dump(idate("'"));
 
 echo "Done\n";
+}

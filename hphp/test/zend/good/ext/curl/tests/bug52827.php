@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $s = fopen('php://temp/maxmemory=1024','wb+');
 
 /* force conversion of inner stream to STDIO.
@@ -17,3 +17,4 @@ $handle=curl_init('http://www.example.com');
 curl_setopt($handle, CURLOPT_STDERR, $s);
 
 echo "Done.";
+}

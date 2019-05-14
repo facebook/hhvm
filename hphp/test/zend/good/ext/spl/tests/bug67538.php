@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $list = new SplDoublyLinkedList();
 $list->push('a');
 $list->push('b');
@@ -9,3 +9,4 @@ $list->push('b');
 $list->offsetUnset(0);
 $list->next();
 echo "okey";
+}

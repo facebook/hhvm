@@ -1,6 +1,6 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dom = new DOMDocument();
 
 $attr = $dom->createAttribute('string');
 echo get_class($attr);
-
+}

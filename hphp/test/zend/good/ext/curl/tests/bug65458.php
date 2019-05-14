@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $ch = curl_init();
 $init = memory_get_usage();
 for ($i = 0; $i < 10000; $i++) {
@@ -13,3 +13,4 @@ curl_close($ch);
 // the number of iterations in the loop, if we're wasting memory here, we
 // should have megs and megs of extra allocations.
 var_dump(($preclose - $init) < 10000);
+}

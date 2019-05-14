@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $data = "openssl_encrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";
@@ -13,3 +13,4 @@ try { var_dump(openssl_encrypt($data, $method, $object)); } catch (Exception $e)
 try { var_dump(openssl_encrypt($arr, $method, $object)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(openssl_encrypt($data, $arr, $object)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump(openssl_encrypt($data, $method, $arr)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

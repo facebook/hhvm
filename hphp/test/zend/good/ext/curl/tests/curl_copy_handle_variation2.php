@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 echo "*** Testing curl_copy_handle(): add options after copy ***\n";
 
 // create a new cURL resource
@@ -21,3 +21,4 @@ var_dump(curl_getinfo($ch) === curl_getinfo($ch2));
 curl_setopt($ch2, CURLOPT_URL, 'http://www.bar.com/');
 var_dump(curl_getinfo($ch) === curl_getinfo($ch2));
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 $db = new DateTime( '2008-01-01' );
 $de = new DateTime( '2008-12-31' );
@@ -15,4 +15,5 @@ $di = DateInterval::createFromDateString( 'last thursday of next month' );
 foreach ( new DatePeriod( $db, $di, $de, DatePeriod::EXCLUDE_START_DATE ) as $dt )
 {
     echo $dt->format( "l Y-m-d H:i:s\n" );
+}
 }

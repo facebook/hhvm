@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $wrong = $correct = 'abcdef';
 $x = array();
 $t = $x[] = 'x';
@@ -15,3 +15,4 @@ $wrong[1] = $wrong[3] = $wrong[5] = '*';
 
 var_dump($correct);
 var_dump($wrong);
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 date_default_timezone_set('Europe/London');
 
 $endOfWeek = new DateTime('2010-07-27 09:46:49');
@@ -11,3 +11,4 @@ echo $endOfWeek->format('U')."\n";
 echo $endOfWeek->getTimestamp()."\n";
 
 echo $endOfWeek->format('Y-m-d H:i:s')."\n";
+}

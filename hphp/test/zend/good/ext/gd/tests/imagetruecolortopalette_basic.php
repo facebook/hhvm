@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $image = imagecreatetruecolor(150, 150);
 
 $a = imagecolorallocate($image,255,0,255);
@@ -15,3 +15,4 @@ $img = ob_get_contents();
 ob_end_clean();
 
 echo md5(base64_encode($img));
+}

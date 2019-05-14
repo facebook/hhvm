@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $arr = array('exists' => 'foz');
 
 if (isset($arr['exists']['non_existent'])) {
@@ -56,3 +56,4 @@ if (empty($arr['exists'][1][0])) {
     var_dump($arr['exists'][1][0]);
 }
 echo "DONE";
+}

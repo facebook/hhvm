@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 //ini_set("intl.default_locale", "nl");
 ini_set('date.timezone', 'Europe/Lisbon');
@@ -9,3 +9,4 @@ $dt = $cal->toDateTime();
 
 var_dump($dt->format("c"), $dt->getTimeZone()->getName());
 echo "==DONE==";
+}

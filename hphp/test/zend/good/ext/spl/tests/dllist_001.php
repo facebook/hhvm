@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dll = new SplDoublyLinkedList();
 // errors
 try {
@@ -43,3 +43,4 @@ $dll_clone = clone $dll;
 $dll_clone->pop();
 echo count($dll)."\n";
 echo "===DONE===\n";
+}

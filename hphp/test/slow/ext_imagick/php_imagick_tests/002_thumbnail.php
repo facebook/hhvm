@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 echo "--- Source Image: 400x200, Imagick::thumbnailImage( 100, 0, false )\n";
 $imagick = new Imagick();
 $imagick->newImage( 400, 200, "white" );
@@ -77,4 +77,5 @@ try
 catch ( ImagickException $e )
 {
   echo $e->getMessage() . "\n";
+}
 }

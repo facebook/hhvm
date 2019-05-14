@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 date_default_timezone_set("Pacific/Kwajalein");
 $ts = date_create("Fri Aug 20 1993 23:59:59");
 echo date_format($ts, 'D, d M Y H:i:s T'), "\n";
@@ -15,3 +15,4 @@ $ts = date_create("Sun Oct 30 01:59:59 2005");
 echo date_format($ts, 'D, d M Y H:i:s T'), "\n";
 $ts->modify("+ 1 hour 1 second");
 echo date_format($ts, 'D, d M Y H:i:s T'), "\n";
+}

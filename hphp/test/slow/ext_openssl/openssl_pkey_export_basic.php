@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $key = openssl_pkey_get_private('file://' . dirname(__FILE__) . '/private_ec.key');
 var_dump($key);
 
@@ -32,3 +32,4 @@ var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
 
 // Clean the temporary file
 @unlink($tempname);
+}

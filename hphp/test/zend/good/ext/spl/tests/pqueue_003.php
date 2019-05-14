@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $h = new SplPriorityQueue();
 
 $h->insert(1, 1);
@@ -16,3 +16,4 @@ while ($h->valid()) {
     $h->next();
 }
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 
 $bi = IntlBreakIterator::createWordInstance('pt');
@@ -13,3 +13,4 @@ var_dump($bi->getText());
 var_dump($bi->next());
 var_dump($bi->setText('foo bar'));
 var_dump($bi->current());
+}

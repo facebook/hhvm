@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 error_reporting(E_ALL|E_STRICT);
 
 $num_increments = 100;
@@ -26,3 +26,4 @@ for ($i=0;$i<$num_repeats;$i++) {
   unset($evil);
 }
 echo "ok\n";
+}

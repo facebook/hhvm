@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 chdir(dirname(__FILE__). "/../../..");
 
 $pfx = str_repeat('../', substr_count($_SERVER['PHP_SELF'], '../'));
@@ -12,3 +12,4 @@ $fp = fopen("compress.zlib://". dirname(__FILE__). "/../../../ext/xsl/tests/xslt
 fclose($fp);
 
 echo "ok\n";
+}

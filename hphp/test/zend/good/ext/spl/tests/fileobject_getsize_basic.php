@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $file = __DIR__ ."/data.txt";
 file_put_contents($file, "foobar");
 
@@ -7,3 +7,4 @@ echo $s->getSize();
 error_reporting(0);
 $file = __DIR__ ."/data.txt";
 unlink($file);
+}

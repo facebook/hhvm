@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 print "--- Testing clone keyword\n";
 
 try {
@@ -13,4 +13,5 @@ try {
   }
 } catch (Exception $e) {
   echo "Cloning failed\n";
+}
 }

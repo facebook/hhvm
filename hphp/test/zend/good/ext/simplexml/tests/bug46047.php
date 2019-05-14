@@ -1,5 +1,5 @@
-<?php
-$xml = new SimpleXMLElement('<foo><bar><![CDATA[]]></bar><baz/></foo>', 
+<?php <<__EntryPoint>> function main() {
+$xml = new SimpleXMLElement('<foo><bar><![CDATA[]]></bar><baz/></foo>',
   LIBXML_NOCDATA);
 print_r($xml);
 
@@ -9,3 +9,4 @@ print_r($xml);
 $xml = new SimpleXMLElement('<foo><bar/><baz/></foo>');
 print_r($xml);
 echo "===DONE===\n";
+}

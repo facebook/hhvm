@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $ao = new ArrayObject();
 $swapIn = array();
 $cowRef = $swapIn; // create a copy-on-write ref to $swapIn
@@ -16,3 +16,4 @@ var_dump($cowRef);
 
 echo "\n--> ao:  ";
 var_dump($ao);
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "nl");
 
@@ -9,3 +9,4 @@ var_dump($intlcal->isSet(IntlCalendar::FIELD_MINUTE));
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 0);
 var_dump(intlcal_is_set($intlcal, IntlCalendar::FIELD_MINUTE));
 echo "==DONE==";
+}

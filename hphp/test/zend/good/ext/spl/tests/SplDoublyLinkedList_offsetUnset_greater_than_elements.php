@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $ll = new SplDoublyLinkedList();
 
 $ll->push('1');
@@ -14,4 +14,4 @@ var_dump($ll);
 } catch(Exception $e) {
 echo $e->getMessage();
 }
-
+}

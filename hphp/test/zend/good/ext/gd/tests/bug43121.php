@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $im = ImageCreate( 200, 100 );
 $black = ImageColorAllocate( $im, 0, 0, 0 );
 
@@ -9,3 +9,4 @@ ImageFill( $im, 0, 0, IMG_COLOR_TILED );
 ImageDestroy( $im );
 
 print "OK";
+}

@@ -540,21 +540,7 @@ void adjustFrame(IRUnit& unit,
 
 bool isCallCatch(Block* block) {
   assertx(block->back().is(EndCatch));
-  std::deque<Block*> workQ {block};
-  while (!workQ.empty()) {
-    block = workQ.front();
-    workQ.pop_front();
-    if (block->isCatch()) break;
-    for (auto& pred : block->preds()) {
-      workQ.emplace_back(pred.inst()->block());
-    }
-  }
-  for (auto& pred : block->preds()) {
-    if (pred.inst()->is(Call, CallUnpack)) {
-      return true;
-    }
-  }
-  return false;
+  return block->back().extra<EndCatch>()->mode == EndCatchData::SwitchMode;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

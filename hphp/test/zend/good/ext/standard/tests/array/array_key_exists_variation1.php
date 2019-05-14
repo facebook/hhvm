@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -9,6 +9,14 @@
  * Pass different data types as $key argument to array_key_exists() to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "key";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -17,14 +25,6 @@ $search = array ('zero', 'key' => 'val', 'two');
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "key";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -59,7 +59,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -69,7 +69,7 @@ $inputs = array(
 /*19*/ "key",
        'key',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -94,3 +94,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

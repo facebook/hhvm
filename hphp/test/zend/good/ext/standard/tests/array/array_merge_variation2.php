@@ -1,21 +1,12 @@
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array 
+ * Description: Merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
  */
 
 /*
  * Pass different data types as $arr2 argument to array_merge() to test behaviour
  */
-
-echo "*** Testing array_merge() : usage variations ***\n";
-
-// Initialise function arguments not being substituted
-$arr1 = array (1, 2);
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +15,15 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_merge() : usage variations ***\n";
+
+// Initialise function arguments not being substituted
+$arr1 = array (1, 2);
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -93,3 +93,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

@@ -8,12 +8,6 @@
  * Pass different data types as $number argument to abs() to test behaviour
  */
 
-echo "*** Testing abs() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -21,6 +15,12 @@ class classA
     return "abs";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing abs() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -42,7 +42,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -52,7 +52,7 @@ $inputs = array(
 /*19*/ "abs",
        'abs',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -69,10 +69,11 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of abs()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(abs($input) );
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(abs($input) );
+    $iterator++;
 };
 
 fclose($fp);
 echo "===Done===";
+}

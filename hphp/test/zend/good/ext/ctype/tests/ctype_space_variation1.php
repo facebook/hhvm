@@ -8,6 +8,14 @@
  * Pass different data types as $c argument to ctype_space() to test behaviour
  */
 
+// get a class
+class classA
+{
+    public function __toString() {
+        return "\n\t\r";
+    }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing ctype_space() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
@@ -15,14 +23,6 @@ $orig = setlocale(LC_CTYPE, "C");
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-	public function __toString() {
-		return "\n\t\r";
-	}
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "\n\t\r",
        ' ',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -84,12 +84,13 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of ctype_space()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( ctype_space($input) );
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( ctype_space($input) );
+    $iterator++;
 };
 
 fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

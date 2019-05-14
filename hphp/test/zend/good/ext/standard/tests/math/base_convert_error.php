@@ -4,12 +4,12 @@
  * Source code: ext/standard/math.c
  */
 
-echo "*** Testing base_convert() : error conditions ***\n";
-
 // get a class
 class classA
 {
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing base_convert() : error conditions ***\n";
 
 echo "Incorrect number of arguments\n";
 try { base_convert(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -20,4 +20,4 @@ base_convert(1234, 10, 37);
 
 echo "Incorrect input\n";
 base_convert(new classA(), 8, 10);
-
+}

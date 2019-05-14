@@ -8,12 +8,6 @@
  * Pass different data types as $stack argument to array_shift() to test behaviour
  */
 
-echo "*** Testing array_shift() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -21,6 +15,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_shift() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -89,3 +89,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

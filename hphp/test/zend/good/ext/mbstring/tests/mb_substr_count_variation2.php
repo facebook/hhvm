@@ -1,21 +1,12 @@
 <?php
 /* Prototype  : int mb_substr_count(string $haystack, string $needle [, string $encoding])
- * Description: Count the number of substring occurrences 
+ * Description: Count the number of substring occurrences
  * Source code: ext/mbstring/mbstring.c
  */
 
 /*
  * Pass different data types as $needle to mb_substr_count() to test behaviour
  */
-
-echo "*** Testing mb_substr_count() : usage variations ***\n";
-
-// Initialise function arguments not being substituted (if any)
-$haystack = 'hello, world';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +15,15 @@ class classA
     return "world";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing mb_substr_count() : usage variations ***\n";
+
+// Initialise function arguments not being substituted (if any)
+$haystack = 'hello, world';
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*18*/ "world",
        'world',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -92,3 +92,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

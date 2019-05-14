@@ -4,6 +4,11 @@
  * Source code: ext/standard/math.c
  */
 
+// get a class
+class classA
+{
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing decbin() : usage variations ***\n";
 //get an unset variable
 $unset_var = 10;
@@ -15,11 +20,6 @@ abc
 xyz
 EOT;
 
-// get a class
-class classA
-{
-}
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -29,8 +29,8 @@ $inputs = array(
        1,
        12345,
        -2345,
-       18446744073709551615,  // largest decimal  
-       18446744073709551616, 
+       18446744073709551615,  // largest decimal
+       18446744073709551616,
 
        // float data
 /*7*/  10.5,
@@ -48,7 +48,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*18*/ "",
        '',
@@ -60,8 +60,8 @@ $inputs = array(
        $heredoc,
 
        // object data
-/*24*/ new classA(),          
-       
+/*24*/ new classA(),
+
        // undefined data
 /*25*/ @$undefined_var,
 
@@ -75,9 +75,10 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of decbin()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(decbin($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(decbin($input));
+    $iterator++;
 };
 fclose($fp);
 echo "===Done===";
+}

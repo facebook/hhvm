@@ -4,15 +4,15 @@
  * Source code: ext/standard/math.c
  */
 
-echo "*** Testing ceil() : usage variations ***\n";
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing ceil() : usage variations ***\n";
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -34,7 +34,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /* 7*/ "",
        '',
@@ -44,7 +44,7 @@ $inputs = array(
 /*10*/ "abcxyz",
        'abcxyz}',
        $heredoc,
-       
+
        // object data
 /*13*/ new classA(),
 
@@ -61,9 +61,10 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of ceil()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(ceil($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(ceil($input));
+    $iterator++;
 };
 fclose($fp);
 echo "===Done===";
+}

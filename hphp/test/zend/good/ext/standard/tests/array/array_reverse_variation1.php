@@ -4,6 +4,14 @@
  * Source code: ext/standard/array.c
 */
 
+//get a class
+class classA
+{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_reverse() : usage variations - unexpected values for 'array' argument ***\n";
 
 //get an unset variable
@@ -12,14 +20,6 @@ unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
-
-//get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
 
 //get a heredoc string
 $heredoc_string = <<<EOT
@@ -55,12 +55,12 @@ $arrays = array (
        // empty data
 /*16*/ "",
        '',
-      
+
        // string data
        'Hello world',
        "Hello world",
        $heredoc_string,
-  
+
        // object data
 /*21*/ new classA(),
 
@@ -91,3 +91,4 @@ foreach($arrays as $array) {
 fclose($fp);
 
 echo "Done";
+}

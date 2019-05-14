@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array 
+ * Description: Merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
  */
 
@@ -9,6 +9,14 @@
  * onto an existing array
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_merge() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -17,14 +25,6 @@ $arr = array (1, 2);
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -39,7 +39,7 @@ $inputs = array(
 
        // int data
 /*1*/  'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345,
@@ -67,13 +67,13 @@ $inputs = array(
        TRUE,
        FALSE,
        ),
-       
+
        // empty data
 /*5*/ 'empty string' => array(
        "",
        '',
        ),
-       
+
 /*6*/ 'empty array' => array(
        ),
 
@@ -83,7 +83,7 @@ $inputs = array(
        'string',
        $heredoc,
        ),
-       
+
        // object data
 /*8*/ 'object' => array(
        new classA(),
@@ -117,3 +117,4 @@ foreach($inputs as $key => $input) {
 fclose($fp);
 
 echo "Done";
+}

@@ -8,13 +8,6 @@
  * Pass different data types to $sourcestring argument to test behaviour of mb_strtolower()
  */
 
-echo "*** Testing mb_strtolower() : usage variations ***\n";
-
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -22,6 +15,13 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing mb_strtolower() : usage variations ***\n";
+
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -56,7 +56,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -65,7 +65,7 @@ $inputs = array(
 /*18*/ "String",
        'String',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -90,3 +90,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

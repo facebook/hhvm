@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -8,6 +8,14 @@
  * Pass different data types as $str to mb_substr() to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_substr() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -17,14 +25,6 @@ $length = 5;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -59,7 +59,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -92,3 +92,4 @@ foreach($inputs as $input) {
 
 fclose($fp);
 echo "Done";
+}

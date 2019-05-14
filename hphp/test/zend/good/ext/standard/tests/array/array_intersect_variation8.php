@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -10,6 +10,14 @@
  * The $arr1 argument is a fixed array.
 */
 
+// get a class
+class classA
+{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect() : assoc array with diff values to \$arr2 argument ***\n";
 
 // get an unset variable
@@ -18,14 +26,6 @@ unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
-
-// get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
 
 // get a heredoc string
 $heredoc = <<<EOT
@@ -56,13 +56,13 @@ $arrays = array (
 /*10*/ array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp),
 
        // array with mixed values
-/*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit", 
-             'resource' => $fp, "int" => 133, "float" => 444.432, 
+/*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit",
+             'resource' => $fp, "int" => 133, "float" => 444.432,
              "unset" => @$unset_var, "heredoc" => $heredoc)
 );
 
 // array to be passsed to $arr1 argument
-$arr1 = array(1, 2, 1.2, 2.3333, "col\tor", '\v\fworld', $fp, 
+$arr1 = array(1, 2, 1.2, 2.3333, "col\tor", '\v\fworld', $fp,
               "Hello world", $heredoc, new classA(), 444.432, "fruit");
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect()
@@ -83,3 +83,4 @@ foreach($arrays as $arr2) {
 fclose($fp);
 
 echo "Done";
+}

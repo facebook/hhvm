@@ -1,10 +1,18 @@
 <?php
 /* Prototype  : proto array mb_split(string pattern, string string [, int limit])
- * Description: split multibyte string into array by regular expression 
+ * Description: split multibyte string into array by regular expression
  * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "UTF-8";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_split() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -14,14 +22,6 @@ $string = 'string_val';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "UTF-8";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -56,7 +56,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -65,7 +65,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -90,3 +90,4 @@ foreach($inputs as $input) {
 
 fclose($fp);
 echo "Done";
+}

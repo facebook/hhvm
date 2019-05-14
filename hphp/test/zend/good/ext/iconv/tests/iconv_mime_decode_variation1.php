@@ -8,6 +8,14 @@
  * Pass different data types to $str argument to see how iconv_mime_decode() behaves
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_mime_decode() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -19,14 +27,6 @@ $charset = 'ISO-8859-1';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,7 +70,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -95,3 +95,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

@@ -1,10 +1,18 @@
 <?php
 /* Prototype  : proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
- * Description: Replace regular expression for multibyte string 
+ * Description: Replace regular expression for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "UTF-8";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_ereg_replace() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -15,14 +23,6 @@ $option = '';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "UTF-8";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -54,7 +54,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -63,7 +63,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -85,3 +85,4 @@ foreach($inputs as $input) {
 };
 
 echo "Done";
+}

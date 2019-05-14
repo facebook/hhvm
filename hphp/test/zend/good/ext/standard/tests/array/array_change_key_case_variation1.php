@@ -1,18 +1,12 @@
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased] 
+ * Description: Retuns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
 /*
  * Pass different data types as $input argument to test behaviour of array_change_key_case()
  */
-
-echo "*** Testing array_change_key_case() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -21,6 +15,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_change_key_case() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -55,7 +55,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -65,7 +65,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -90,3 +90,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

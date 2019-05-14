@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)
- * Description: Returns a copy of input array padded with pad_value to size pad_size 
+ * Description: Returns a copy of input array padded with pad_value to size pad_size
  * Source code: ext/standard/array.c
 */
 
@@ -10,6 +10,14 @@
 * The $pad_size and $pad_value arguments passed are fixed values.
 */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_pad() : passing non array values to \$input argument ***\n";
 
 // Initialise $pad_size and $pad_value
@@ -19,14 +27,6 @@ $pad_value = 1;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -93,3 +93,4 @@ foreach($inputs as $input) {
 };
 
 echo "Done";
+}

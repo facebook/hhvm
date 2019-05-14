@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -8,6 +8,14 @@
  * Pass different data types as $preserve_keys argument to array_slice() to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_slice() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -18,14 +26,6 @@ $length = 3;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -87,3 +87,4 @@ foreach($inputs as $input) {
 };
 
 echo "Done";
+}

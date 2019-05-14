@@ -10,6 +10,14 @@
 * $input and $pad_size arguments take fixed value.
 */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_pad() : possible values for \$pad_value argument ***\n";
 
 // Initialise $input and $pad_size argument
@@ -19,14 +27,6 @@ $pad_size = 4;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -105,3 +105,4 @@ foreach($pad_values as $pad_value) {
 };
 
 echo "Done";
+}

@@ -1,21 +1,13 @@
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present 
- * in any of the others arguments but do additional checks whether the keys are equal 
- * Source code: ext/standard/array.c 
+ * Description: Returns the entries of arr1 that have values which are not present
+ * in any of the others arguments but do additional checks whether the keys are equal
+ * Source code: ext/standard/array.c
  */
 
 /*
  * pass array_diff_assoc arguments which are not arrays in place of $arr2
  */
-
-echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
-
-$array = array(1, 2, 3);
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +16,14 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
+
+$array = array(1, 2, 3);
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -33,7 +33,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-//array of unexpected values to be passed to $arr1 argument 
+//array of unexpected values to be passed to $arr1 argument
 $inputs = array(
 
        // int data
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,11 +67,11 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // binary data
 /*21*/ b"binary",
-	   (binary)"binary",
-	   
+       (binary)"binary",
+
        // object data
 /*23*/ new classA(),
 
@@ -94,3 +94,4 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 echo "Done";
+}

@@ -1,21 +1,13 @@
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present 
- * in any of the others arguments but do additional checks whether the keys are equal 
- * Source code: ext/standard/array.c 
+ * Description: Returns the entries of arr1 that have values which are not present
+ * in any of the others arguments but do additional checks whether the keys are equal
+ * Source code: ext/standard/array.c
  */
 
 /*
  * Test how array_diff_assoc() compares indexed arrays containing different data types
  */
- 
-echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
-
-$array = array(1, 2, 3);
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,26 +16,34 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "\n*** Testing array_diff_assoc() : usage variations ***\n";
+
+$array = array(1, 2, 3);
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
 hello world
 EOT;
 
-//array of different data types to be passed to $arr1 argument 
+//array of different data types to be passed to $arr1 argument
 $inputs = array(
 
        // int data
 /*1*/
-'int' => array(       
-	   0,
+'int' => array(
+       0,
        1,
        12345,
        -2345),
 
        // float data
 /*2*/
-'float' => array(       
+'float' => array(
        10.5,
        -10.5,
        12.3456789000e10,
@@ -63,7 +63,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE),
-       
+
        // empty data
 /*5*/
 'empty' => array(
@@ -76,13 +76,13 @@ $inputs = array(
        "string",
        'string',
        $heredoc),
-       
+
        // binary data
 /*7*/
 'binary' => array(
        b"binary",
-	   (binary)"binary"),
-	   
+       (binary)"binary"),
+
        // object data
 /*8*/
 'object' => array(
@@ -107,3 +107,4 @@ foreach($inputs as $key => $input) {
   $iterator++;
 };
 echo "Done";
+}

@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
@@ -10,6 +10,14 @@
  * that the function outputs proper warning messages wherever expected.
  */
 
+class classA
+{
+  public $var;
+  public function init() {
+    $this->var = 10;
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 
 // create the temporary directory
@@ -20,14 +28,6 @@ $directory = $file_path."/dir_variation2";
 // get an unset variable
 $unset_var = stream_context_create();
 unset($unset_var);
-
-class classA
-{
-  public $var;
-  public function init() {
-    $this->var = 10;
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -100,3 +100,4 @@ $file_path = dirname(__FILE__);
 $directory = $file_path."/dir_variation2";
 
 rmdir($directory);
+}

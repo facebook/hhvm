@@ -1,19 +1,13 @@
 <?php
 /* Prototype  : array each(&array $arr)
  * Description: Return the currently pointed key..value pair in the passed array,
- * and advance the pointer to the next element 
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
 /*
  * Pass arrays of different data types as $arr argument to each() to test behaviour
  */
-
-echo "*** Testing each() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -22,6 +16,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing each() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -36,7 +36,7 @@ $inputs = array(
 
        // int data
 /*1*/  'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345,
@@ -64,13 +64,13 @@ $inputs = array(
        TRUE,
        FALSE,
        ),
-       
+
        // empty data
 /*5*/ 'empty string' => array(
        "",
        '',
        ),
-       
+
 /*6*/ 'empty array' => array(
        ),
 
@@ -80,7 +80,7 @@ $inputs = array(
        'string',
        $heredoc,
        ),
-       
+
        // object data
 /*8*/ 'object' => array(
        new classA(),
@@ -113,3 +113,4 @@ foreach($inputs as $key => $input) {
 fclose($fp);
 
 echo "Done";
+}

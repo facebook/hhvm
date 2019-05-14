@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
- * Description: Strips HTML and PHP tags from a string 
+ * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
 */
 
@@ -8,6 +8,13 @@
  * testing functionality of strip_tags() by giving unexpected values for $allowable_tags argument
 */
 
+//get a class
+class classA{
+   public function __toString(){
+     return "Class A Object";
+   }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // Initialise function argument
@@ -19,13 +26,6 @@ unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
-
-//get a class
-class classA{
-   public function __toString(){
-     return "Class A Object";
-   }
-}
 
 //array of values to iterate over
 $values = array(
@@ -86,3 +86,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

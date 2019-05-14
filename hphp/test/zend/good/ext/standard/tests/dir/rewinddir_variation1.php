@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start 
+ * Description: Rewind dir_handle back to the start
  * Source code: ext/standard/dir.c
  * Alias to functions: rewind
  */
@@ -9,12 +9,6 @@
  * Pass different data types as $dir_handle argument to rewinddir() to test behaviour
  */
 
-echo "*** Testing rewinddir() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -22,6 +16,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing rewinddir() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -53,7 +53,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -63,7 +63,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -82,3 +82,4 @@ foreach($inputs as $input) {
   $iterator++;
 };
 echo "===DONE===\n";
+}

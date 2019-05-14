@@ -1,14 +1,22 @@
 <?php
 /* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of first occurrence of a string within another, case insensitive 
+ * Description: Finds position of first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
  * Pass mb_stripos different data types as $haystack arg to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_stripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -19,14 +27,6 @@ $encoding = 'utf-8';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,7 +70,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -95,3 +95,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

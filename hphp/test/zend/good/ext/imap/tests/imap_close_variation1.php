@@ -1,18 +1,12 @@
 <?php
 /* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream 
+ * Description: Close an IMAP stream
  * Source code: ext/imap/php_imap.c
  */
 
 /*
  * Pass different data types as $stream_id argument to test behaviour of imap_close()
  */
-
-echo "*** Testing imap_close() : usage variations ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -21,6 +15,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing imap_close() : usage variations ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -52,7 +52,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -62,7 +62,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -81,3 +81,4 @@ foreach($inputs as $input) {
   $iterator++;
 };
 echo "===DONE===\n";
+}

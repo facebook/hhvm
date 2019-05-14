@@ -1,21 +1,12 @@
 <?php
 /* Prototype  : string imap_fetchheader(resource $stream_id, int $msg_no [, int $options])
- * Description: Get the full unfiltered header for a message 
+ * Description: Get the full unfiltered header for a message
  * Source code: ext/imap/php_imap.c
  */
 
 /*
  * Pass different data types as $stream_id argument to test behaviour of imap_fetchheader()
  */
-
-echo "*** Testing imap_fetchheader() : usage variations ***\n";
-
-// Initialise function arguments not being substituted
-$msg_no = 1;
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +15,15 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing imap_fetchheader() : usage variations ***\n";
+
+// Initialise function arguments not being substituted
+$msg_no = 1;
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -71,14 +71,14 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // array data
 /*21*/ array(),
        $index_array,
        $assoc_array,
        array('foo', $index_array, $assoc_array),
-       
-       
+
+
        // object data
 /*25*/ new classA(),
 
@@ -97,3 +97,4 @@ foreach($inputs as $input) {
   $iterator++;
 };
 echo "===DONE===\n";
+}

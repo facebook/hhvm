@@ -8,6 +8,14 @@
  * testing the functionality of array_reverse() by giving unexpected values for $preserve_keys argument
 */
 
+//get a class
+class classA
+{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 // Initialise the array
@@ -19,14 +27,6 @@ unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
-
-//get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
 
 //array of values to iterate over
 $preserve_keys = array (
@@ -92,3 +92,4 @@ foreach($preserve_keys as $preserve_key) {
 fclose($fp);
 
 echo "Done";
+}

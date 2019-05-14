@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -9,6 +9,14 @@
  * associative arrays having different values to $input argument.
 */
 
+// get a class
+class classA
+{
+  public function __toString() {
+     return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_unique() : assoc. array with diff. values to \$input argument ***\n";
 
 // get an unset variable
@@ -17,14 +25,6 @@ unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
-
-// get a class
-class classA
-{
-  public function __toString() {
-     return "Class A object";
-  }
-}
 
 // get a heredoc string
 $heredoc = <<<EOT
@@ -59,5 +59,6 @@ foreach($inputs as $input) {
 }
 
 fclose($fp);
-  
+
 echo "Done";
+}

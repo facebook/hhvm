@@ -8,6 +8,14 @@
  * Pass different data types as $var argument to array_push to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_push() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -16,14 +24,6 @@ $stack = array (1, 2);
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -94,3 +94,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

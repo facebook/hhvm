@@ -8,12 +8,6 @@
  * Pass different data types as $array_arg argument to rsort() to test behaviour
  */
 
-echo "*** Testing rsort() : variation ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a class
 class classA
 {
@@ -21,6 +15,12 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing rsort() : variation ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -96,3 +96,4 @@ foreach ($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

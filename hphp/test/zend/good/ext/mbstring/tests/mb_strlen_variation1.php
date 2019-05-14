@@ -1,21 +1,12 @@
 <?php
 /* Prototype  : int mb_strlen(string $str [, string $encoding])
- * Description: Get character numbers of a string 
+ * Description: Get character numbers of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
 /*
  * Test mb_strlen by passing different data types as $str argument
  */
-
-echo "*** Testing mb_strlen() : usage variations ***\n";
-
-// Initialise function arguments not being substituted
-$encoding = 'utf-8';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +15,15 @@ class classA
     return b"Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing mb_strlen() : usage variations ***\n";
+
+// Initialise function arguments not being substituted
+$encoding = 'utf-8';
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = b<<<EOT
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -67,7 +67,7 @@ $inputs = array(
 /*18*/ b"string",
        b'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -92,3 +92,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

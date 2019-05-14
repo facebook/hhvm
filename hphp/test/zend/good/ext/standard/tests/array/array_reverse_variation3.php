@@ -9,6 +9,14 @@
  * different array values for $array argument
 */
 
+//get a class
+class classA
+{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_reverse() : usage variations ***\n";
 
 //get an unset variable
@@ -17,14 +25,6 @@ unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
-
-//get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
 
 // get a heredoc string
 $heredoc = <<<EOT
@@ -77,3 +77,4 @@ foreach($arrays as $array) {
 fclose($fp);
 
 echo "Done";
+}

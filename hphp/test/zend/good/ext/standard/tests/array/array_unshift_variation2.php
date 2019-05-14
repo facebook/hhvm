@@ -8,11 +8,6 @@
  * Testing array_unshift() by giving all the possible values for $var argument
 */
 
-echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
-
-// array to be passed to $array argument
-$array = array('f' => "first", "s" => 'second', 1, 2.222);
-
 // get a class
 class classA
 {
@@ -20,6 +15,11 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_unshift() : all possible values for \$var argument ***\n";
+
+// array to be passed to $array argument
+$array = array('f' => "first", "s" => 'second', 1, 2.222);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -117,3 +117,4 @@ foreach($vars as $var) {
 fclose($fp);
 
 echo "Done";
+}

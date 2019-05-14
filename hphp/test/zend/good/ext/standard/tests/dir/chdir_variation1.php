@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool chdir(string $directory)
- * Description: Change the current directory 
+ * Description: Change the current directory
  * Source code: ext/standard/dir.c
  */
 
@@ -8,6 +8,19 @@
  * Pass different data types as $directory argument to test behaviour
  */
 
+// get a class
+class classA {
+    var $dir_path;
+
+    function __construct($dir) {
+        $this->dir_path = $dir;
+    }
+
+    public function __toString() {
+        return "$this->dir_path";
+    }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing chdir() : usage variations ***\n";
 
 // create the temporary directory
@@ -18,19 +31,6 @@ $dir_path = $file_path."/chdir_basic";
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA {
-	var $dir_path;
-	
-	function __construct($dir) {
-		$this->dir_path = $dir;
-	}
-	
-	public function __toString() {
-		return "$this->dir_path";
-	}
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -65,7 +65,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -75,7 +75,7 @@ $inputs = array(
 /*19*/ "$dir_path",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA($dir_path),
 
@@ -105,3 +105,4 @@ $file_path = dirname(__FILE__);
 $dir_path = $file_path."/chdir_basic";
 
 rmdir($dir_path);
+}

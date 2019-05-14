@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters 
+ * Description: Convert special HTML entities back to characters
  * Source code: ext/standard/html.c
 */
 
@@ -8,15 +8,15 @@
  * testing htmlspecialchars_decode() with unexpected input values for $string argument
 */
 
-echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
-
 //get a class
-class classA 
+class classA
 {
   function __toString() {
     return "ClassAObject";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 //get a resource variable
 $file_handle=fopen(__FILE__, "r");
@@ -87,3 +87,4 @@ foreach($values as $value) {
 fclose($file_handle);
 
 echo "===DONE===\n";
+}

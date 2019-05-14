@@ -1,18 +1,12 @@
 <?php
 /* Prototype  : bool iconv_set_encoding(string type, string charset)
  * Description: Sets internal encoding and output encoding for ob_iconv_handler()
- * Source code: ext/iconv/iconv.c 
+ * Source code: ext/iconv/iconv.c
  */
 
 /*
  * Test Error functionality of iconv_get_encoding
  */
-
-echo "*** Testing iconv_set_encoding() : error functionality ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -21,6 +15,12 @@ class classA
     return "UTF-8";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing iconv_set_encoding() : error functionality ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -55,7 +55,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -64,7 +64,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -89,3 +89,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

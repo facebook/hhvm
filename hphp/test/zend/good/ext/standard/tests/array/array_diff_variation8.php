@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
  * Description: Returns the entries of $arr1 that have values which are
- * not present in any of the others arguments. 
+ * not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -9,6 +9,14 @@
  * Test array_diff() with associative arrays containing different data types as values
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+     return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff() : usage variations ***\n";
 
 $array = array('a' => '1', 'b' => '2', 'c' => '3');
@@ -19,14 +27,6 @@ unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
-
-// get a class
-class classA
-{
-  public function __toString() {
-     return "Class A object";
-  }
-}
 
 // get a heredoc string
 $heredoc = <<<EOT
@@ -64,3 +64,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

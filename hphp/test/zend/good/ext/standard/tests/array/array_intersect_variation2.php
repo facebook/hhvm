@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -10,6 +10,14 @@
 * The $arr1 argument is a fixed array.
 */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect() : Passing non-array values to \$arr2 argument ***\n";
 
 // array to be passsed to $arr1 as default argument
@@ -21,14 +29,6 @@ $arr3 = array(1, 2, "one" => 1, "two" => 2);
 // get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -67,7 +67,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -90,7 +90,7 @@ $arrays = array(
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
   echo "\n-- Iterator $iterator --";
-  
+
   // Calling array_intersect() with default arguments
   var_dump( array_intersect($arr1,$unexpected_value) );
 
@@ -104,3 +104,4 @@ foreach($arrays as $unexpected_value) {
 fclose($fp);
 
 echo "Done";
+}

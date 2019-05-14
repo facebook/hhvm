@@ -1,7 +1,7 @@
 <?php
 /* Prototype  : array array_combine(array $keys, array $values)
- * Description: Creates an array by using the elements of the first parameter as keys 
- *              and the elements of the second as the corresponding values 
+ * Description: Creates an array by using the elements of the first parameter as keys
+ *              and the elements of the second as the corresponding values
  * Source code: ext/standard/array.c
 */
 
@@ -11,6 +11,14 @@
 * The $keys argument passed is a fixed array.
 */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_combine() : Passing non-array values to \$values argument ***\n";
 
 // Initialize $keys array
@@ -19,14 +27,6 @@ $keys = array(1, 2);
 //get an unset variable
 $unset_var = 10;
 unset($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -93,3 +93,4 @@ foreach($values_passed as $values) {
 };
 
 echo "Done";
+}

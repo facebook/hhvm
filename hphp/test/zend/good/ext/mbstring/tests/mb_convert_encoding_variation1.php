@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : string mb_convert_encoding(string $str, string $to_encoding [, mixed $from_encoding])
- * Description: Returns converted string in desired encoding 
+ * Description: Returns converted string in desired encoding
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -9,6 +9,14 @@
  * Pass different data types to $to_encoding arg to test behaviour of mb_convert_encoding
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_convert_encoding() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -18,14 +26,6 @@ $sourcestring = b'hello, world';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -60,7 +60,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -69,7 +69,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -94,3 +94,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

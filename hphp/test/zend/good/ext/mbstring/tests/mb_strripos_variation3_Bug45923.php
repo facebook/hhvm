@@ -1,14 +1,22 @@
 <?php
 /* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive 
+ * Description: Finds position of last occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
  * Pass mb_strripos different data types as $offset arg to test behaviour
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return b"Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing mb_strripos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -19,14 +27,6 @@ $encoding = 'utf-8';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return b"Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = b<<<EOT
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -70,7 +70,7 @@ $inputs = array(
 /*18*/ b"string",
        b'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -95,3 +95,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

@@ -1,10 +1,15 @@
 <?php
 /* Prototype  : float log1p  ( float $arg  )
- * Description: Returns log(1 + number), computed in a way that is accurate even 
- *				when the value of number is close to zero
+ * Description: Returns log(1 + number), computed in a way that is accurate even
+ *                when the value of number is close to zero
  * Source code: ext/standard/math.c
  */
 
+// get a class
+class classA
+{
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing log1p() : usage variations ***\n";
 
 //get an unset variable
@@ -17,11 +22,6 @@ abc
 xyz
 EOT;
 
-// get a class
-class classA
-{
-}
-
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -30,7 +30,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
        2147483647,
        -2147483648,
 
@@ -50,7 +50,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*18*/ "",
        '',
@@ -60,10 +60,10 @@ $inputs = array(
 /*21*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // object data
-/*24*/ new classA(),       
-       
+/*24*/ new classA(),
+
        // undefined data
 /*25*/ @$undefined_var,
 
@@ -77,9 +77,10 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of log1p()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try { var_dump(log1p($input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try { var_dump(log1p($input)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+    $iterator++;
 };
 fclose($fp);
 echo "===Done===";
+}

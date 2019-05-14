@@ -11,6 +11,14 @@
  * The $arr2 argument passed is a fixed array
 */
 
+// get a class
+class classA
+{
+  public function __toString(){
+    return "Class A object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_intersect_assoc() : assoc array with diff values to \$arr1 argument ***\n";
 
 // get an unset variable
@@ -19,14 +27,6 @@ unset ($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
-
-// get a class
-class classA
-{
-  public function __toString(){
-    return "Class A object";
-  }
-}
 
 // get a heredoc string
 $heredoc = <<<EOT
@@ -57,15 +57,15 @@ $arrays = array (
 /*10*/ array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp),
 
        // array with mixed values
-/*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit", 
-             'resource' => $fp, "int" => 133, "float" => 444.432, 
+/*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit",
+             'resource' => $fp, "int" => 133, "float" => 444.432,
              "unset" => @$unset_var, "heredoc" => $heredoc)
 );
 
 // array to be passsed to $arr2 argument
-$arr2 = array(0 => "0", 1, "two" => 2, "float" => 2.3333, "f1" => 1.2, 
-              "f4" => 33333333.333, 111 => "\tHello", 3.3 => 'pen\n', '\v\fworld',  
-              "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp, 
+$arr2 = array(0 => "0", 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
+              "f4" => 33333333.333, 111 => "\tHello", 3.3 => 'pen\n', '\v\fworld',
+              "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp,
               "int" => 133, 222 => "fruit");
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
@@ -86,3 +86,4 @@ foreach($arrays as $arr1) {
 fclose($fp);
 
 echo "Done";
+}

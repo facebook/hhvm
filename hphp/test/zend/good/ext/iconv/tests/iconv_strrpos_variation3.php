@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : proto int iconv_strrpos(string haystack, string needle [, string charset])
- * Description: Find position of last occurrence of a string within another 
+ * Description: Find position of last occurrence of a string within another
  * Source code: ext/iconv/iconv.c
  */
 
@@ -9,6 +9,14 @@
  * Where possible 'UTF-8' has been entered as a string value
  */
 
+// get a class
+class classA
+{
+  public function __toString() {
+    return "UTF-8";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing iconv_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
@@ -18,14 +26,6 @@ $needle = b'world';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "UTF-8";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -60,7 +60,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -69,7 +69,7 @@ $inputs = array(
 /*18*/ "UTF-8",
        'UTF-8',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -94,3 +94,4 @@ foreach($inputs as $input) {
 fclose($fp);
 
 echo "Done";
+}

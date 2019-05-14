@@ -1,11 +1,15 @@
 <?php
 /* Prototype  : proto array array_fill_keys(array keys, mixed val)
- * Description: Create an array using the elements of the first parameter as keys each initialized to val 
+ * Description: Create an array using the elements of the first parameter as keys each initialized to val
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
+class classA {
+  public function __toString() { return "Class A object"; }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_fill_keys() : parameter variations ***\n";
 
 $nullVal = null;
@@ -15,11 +19,7 @@ $emptyArr = array();
 $bool = false;
 $float = 2.4;
 
-class classA {
-  public function __toString() { return "Class A object"; }
-}
 $obj = new classA();
-
 
 echo "\n-- Testing array_fill_keys() function with empty arguments --\n";
 var_dump( array_fill_keys($emptyArr, $nullVal) );
@@ -34,3 +34,4 @@ var_dump( array_fill_keys($mixedArray, $simpleStr) );
 
 fclose($fp);
 echo "Done";
+}

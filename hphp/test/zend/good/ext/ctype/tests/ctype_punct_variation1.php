@@ -1,21 +1,13 @@
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 
 /*
  * Pass different data types as $c argument to ctype_punt() to test behaviour
  */
-
-echo "*** Testing ctype_punct() : usage variations ***\n";
-
-$orig = setlocale(LC_CTYPE, "C"); 
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -24,6 +16,14 @@ class classA
     return ",<.>";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing ctype_punct() : usage variations ***\n";
+
+$orig = setlocale(LC_CTYPE, "C");
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -58,7 +58,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
 /*19*/ ";:'@",
        '#~/?',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -92,5 +92,6 @@ foreach($inputs as $input) {
 
 fclose($fp);
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

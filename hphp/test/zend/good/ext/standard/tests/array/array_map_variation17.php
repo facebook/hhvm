@@ -1,16 +1,12 @@
 <?php
 /* Prototype  : array array_map  ( callback $callback  , array $arr1  [, array $...  ] )
- * Description: Applies the callback to the elements of the given arrays 
+ * Description: Applies the callback to the elements of the given arrays
  * Source code: ext/standard/array.c
  */
 
 /*
  * Test array_map() by passing different scalar/nonscalar values in place of $callback
  */
-
-echo "*** Testing array_map() : unexpected values for 'callback' argument ***\n";
-
-$arr1 = array(1, 2, 3);
 
 // get a class
 class classA
@@ -19,6 +15,10 @@ class classA
     return "Class A object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_map() : unexpected values for 'callback' argument ***\n";
+
+$arr1 = array(1, 2, 3);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
@@ -44,7 +44,7 @@ $unexpected_callbacks = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*14*/ "",
        '',
@@ -69,3 +69,4 @@ for($count = 0; $count < count($unexpected_callbacks); $count++) {
 
 fclose($fp);
 echo "Done";
+}

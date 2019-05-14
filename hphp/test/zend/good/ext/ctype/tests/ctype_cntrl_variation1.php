@@ -1,20 +1,12 @@
 <?php
 /* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s) 
+ * Description: Checks for control character(s)
  * Source code: ext/ctype/ctype.c
  */
 
 /*
  * Pass different data types as $c argument to ctype_cntrl() to test behaviour
  */
-
-echo "*** Testing ctype_cntrl() : usage variations ***\n";
-
-$orig = setlocale(LC_CTYPE, "C");
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // get a class
 class classA
@@ -23,6 +15,14 @@ class classA
     return "\n\r\t";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing ctype_cntrl() : usage variations ***\n";
+
+$orig = setlocale(LC_CTYPE, "C");
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -68,7 +68,7 @@ $inputs = array(
        '
 ',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -94,3 +94,4 @@ fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
 echo "===DONE===\n";
+}

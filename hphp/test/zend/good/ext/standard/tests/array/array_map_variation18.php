@@ -8,12 +8,20 @@
  * Test array_map() by passing non array values in place of $arr1
  */
 
-echo "*** Testing array_map() : unexpected values for 'arr1' ***\n";
+// get a class
+class classA
+{
+  public function __toString() {
+    return "Class A object";
+  }
+}
 
 function callback($a)
 {
   return $a;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_map() : unexpected values for 'arr1' ***\n";
 
 //get an unset array variable
 $unset_var1 = array(1, 2);
@@ -22,14 +30,6 @@ unset ($unset_var1);
 // get an unset variable
 $unset_var2 = 10;
 unset ($unset_var2);
-
-// get a class
-class classA
-{
-  public function __toString() {
-    return "Class A object";
-  }
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -64,7 +64,7 @@ $unexpected_inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -73,7 +73,7 @@ $unexpected_inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -96,3 +96,4 @@ for($count = 0; $count < count($unexpected_inputs); $count++) {
 
 fclose($fp);
 echo "Done";
+}

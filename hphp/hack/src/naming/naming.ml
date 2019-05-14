@@ -1670,9 +1670,7 @@ module Make (GetLocals : GetLocals) = struct
       end in
     { genv with type_params = params }
 
-  and fun_ f = fun_impl_ f
-
-  and fun_impl_ f =
+  and fun_ f =
     let tparams = make_constraints f.Aast.f_tparams in
     let genv = Env.make_fun_decl_genv tparams f in
     let lenv = Env.empty_local None in
@@ -2849,7 +2847,7 @@ module Make (GetLocals : GetLocals) = struct
       if SN.PseudoConsts.is_pseudo_const (Utils.add_ns name) then
         Errors.name_is_reserved name pos
 
-  let global_const_impl cst =
+  let global_const cst =
     let env = Env.make_const_env cst in
     let hint = Option.map cst.Aast.cst_type (hint env) in
     let e =
@@ -2865,10 +2863,6 @@ module Make (GetLocals : GetLocals) = struct
       cst_span = cst.Aast.cst_span;
     }
 
-  let global_const cst =
-    let cst = Ast_to_nast.on_constant cst in
-    global_const_impl cst
-
   (**************************************************************************)
   (* The entry point to CHECK the program, and transform the program *)
   (**************************************************************************)
@@ -2878,13 +2872,13 @@ module Make (GetLocals : GetLocals) = struct
     let top_level_env = ref (Env.make_top_level_env ()) in
     let rec aux acc def =
       match def with
-      | Aast.Fun f -> (N.Fun (fun_impl_ f)) :: acc
+      | Aast.Fun f -> (N.Fun (fun_ f)) :: acc
       | Aast.Class c -> (N.Class (class_impl_ c)) :: acc
       | Aast.Stmt (_, Aast.Noop)
       | Aast.Stmt (_, Aast.Markup _) -> acc
       | Aast.Stmt s -> (N.Stmt (stmt !top_level_env s)) :: acc
       | Aast.Typedef t -> (N.Typedef (typedef_impl t)) :: acc
-      | Aast.Constant cst -> (N.Constant (global_const_impl cst)) :: acc
+      | Aast.Constant cst -> (N.Constant (global_const cst)) :: acc
       | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
       | Aast.NamespaceUse _ -> acc
       | Aast.SetNamespaceEnv nsenv ->

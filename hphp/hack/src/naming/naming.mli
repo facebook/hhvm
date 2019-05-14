@@ -25,7 +25,7 @@ val class_: Ast.class_ -> Nast.class_
 val typedef: Ast.typedef -> Nast.typedef
 
 (* Solves the local names in a global constant definition *)
-val global_const: Ast.gconst -> Nast.gconst
+val global_const: Nast.gconst -> Nast.gconst
 
 module type GetLocals = sig
   val lvalue : Namespace_env.env * Pos.t SMap.t ->

@@ -926,7 +926,7 @@ let const_decl cst =
       Reason.Rwitness cst_pos, Tany
 
 let iconst_decl cst =
-  let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in
+  let cst = Errors.ignore_ (fun () -> Naming.global_const (Ast_to_nast.on_constant cst)) in
   let errors, hint_ty = Errors.do_ (fun() -> const_decl cst) in
   record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);

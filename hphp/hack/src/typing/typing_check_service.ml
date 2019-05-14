@@ -71,7 +71,7 @@ let check_const opts fn x =
   match Ast_provider.find_gconst_in_file ~full:true fn x with
   | None -> None
   | Some cst ->
-    let cst = Naming.global_const cst in
+    let cst = Naming.global_const (Ast_to_nast.on_constant cst) in
     let def = Tast.Constant (Typing.gconst_def opts cst) in
     Tast_check.def def;
     Some def

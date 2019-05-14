@@ -111,7 +111,6 @@ let log_symbol_index_search
       ~actype:actype_str
       ~caller
       ~search_provider;
-    ()
   end
 ;;
 
@@ -148,8 +147,13 @@ let find_matching_symbols
       | RipGrepIndex
       | SqliteIndex
       | TrieIndex ->
-        [] (* This will be filled in by later commits *)
+        IndexBuilder.measure_time ~f:(fun () -> LocalSearchService.search_local_symbols
+          ~query_text
+          ~max_results
+          ~kind_filter
+          ~env:(LocalSearchService.get_env ())) ~name:"Local search";
     in
+    Hh_logger.log "Found %d local matches" (List.length local_results);
 
     (* Next search globals *)
     let global_results = match provider with
@@ -165,8 +169,17 @@ let find_matching_symbols
         HackSearchService.index_search query_text max_results kind_filter
     in
 
-    (* TODO: Deduplicate any items where the global result duplicates the local result *)
-    List.append local_results global_results
+    (* Merge and deduplicate results *)
+    let all_results = List.append local_results global_results in
+    let dedup_results = List.dedup_and_sort
+      ~compare:(fun a b ->
+        let int_compare_result = Int.compare (kind_to_int a.si_kind) (kind_to_int b.si_kind) in
+        if int_compare_result = 0 then
+          String.compare a.si_name b.si_name
+        else
+          int_compare_result
+      ) all_results in
+    List.take dedup_results max_results
   end
 ;;
 
@@ -216,7 +229,10 @@ let update_files
   | NoIndex
   | RipGrepIndex
   | SqliteIndex ->
-    ()
+    List.iter paths ~f:(fun (path, info, detector) ->
+      if detector = SearchUtils.TypeChecker then
+        LocalSearchService.update_file path info
+    );
   | TrieIndex ->
     HackSearchService.update_from_typechecker worker_list_opt paths
 ;;
@@ -233,7 +249,9 @@ let remove_files (paths: Relative_path.Set.t): unit =
   | NoIndex
   | RipGrepIndex
   | SqliteIndex ->
-    ()
+    Relative_path.Set.iter paths ~f:(fun path ->
+        LocalSearchService.remove_file path;
+      );
   | TrieIndex ->
     HackSearchService.MasterApi.clear_shared_memory paths
 ;;

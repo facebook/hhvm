@@ -37,7 +37,7 @@ let a_contents3_diagnostics =
 File \"/a.php\", line 4, characters 5-12:
 Typing error (Typing[4110])
 File \"/a.php\", line 4, characters 10-12:
-This is a num (int/float) because this is used in an arithmetic operation
+This is a num (int | float) because this is used in an arithmetic operation
 File \"/a.php\", line 4, characters 10-12:
 It is incompatible with a string"
 

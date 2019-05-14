@@ -159,6 +159,7 @@
     serverDynamicView
     serverEnvBuild
     serverError
+    serverFileDependencies
     serverFileSync
     serverFindRefs
     serverFormat

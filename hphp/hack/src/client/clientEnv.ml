@@ -55,6 +55,7 @@ type client_mode =
 | MODE_TYPED_FULL_FIDELITY_PARSE of string (* filename *)
 | MODE_FUN_DEPS_AT_POS_BATCH of string list
 | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH of string list
+| MODE_FILE_DEPENDENTS
 
 type client_check_env = {
   ai_mode: string option;
@@ -67,7 +68,7 @@ type client_check_env = {
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
   saved_state_ignore_hhconfig: bool;
-  lint_paths: string list;
+  paths: string list;
   log_inference_constraints: bool;
   mode: client_mode;
   no_load: bool;
@@ -130,3 +131,4 @@ let mode_to_string = function
   | MODE_TYPED_FULL_FIDELITY_PARSE _ -> "MODE_TYPED_FULL_FIDELITY_PARSE"
   | MODE_FUN_DEPS_AT_POS_BATCH _ -> "MODE_FUN_DEPS_AT_POS_BATCH"
   | MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH _ -> "MODE_FUN_IS_LOCALLABLE_AT_POS_BATCH"
+  | MODE_FILE_DEPENDENTS -> "MODE_FILE_LEVEL_DEPENDENCIES"

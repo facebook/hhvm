@@ -227,6 +227,11 @@ let parse_check_args cmd =
           | "context" -> error_format := Errors.Context
           | _ -> print_string "Warning: unrecognized error format.\n"),
       "<raw|context> Error formatting style";
+    "--file-dependents",
+      Arg.Unit (fun () ->
+        let () = prechecked := Some false in
+        set_mode MODE_FILE_DEPENDENTS ()),
+      " (mode) Given a list of filepaths, shows list of (possibly) dependent files";
     "--find-class-refs",
       Arg.String (fun x -> set_mode (MODE_FIND_CLASS_REFS x) ()),
       " (mode) finds references of the provided class name";
@@ -349,7 +354,7 @@ let parse_check_args cmd =
       Arg.Set output_json,
       " output json for machine consumption. (default: false)";
     "--lint",
-    Arg.Unit (set_mode MODE_LINT),
+      Arg.Unit (set_mode MODE_LINT),
       " (mode) lint the given list of files";
     "--lint-all",
       Arg.Int (fun x -> set_mode (MODE_LINT_ALL x) ()),
@@ -522,9 +527,10 @@ let parse_check_args cmd =
   let mode = Option.value !mode ~default:MODE_STATUS in
 
   (* fixups *)
-  let root, lint_paths =
+  let root, paths =
     match mode, args with
-    | MODE_LINT, _ -> ClientArgsUtils.get_root None, args
+    | MODE_LINT, _
+    | MODE_FILE_DEPENDENTS, _ -> ClientArgsUtils.get_root None, args
     | _, [] -> ClientArgsUtils.get_root None, []
     | _, [x] -> ClientArgsUtils.get_root (Some x), []
     | _, _ ->
@@ -559,7 +565,7 @@ let parse_check_args cmd =
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
     ignore_hh_version = !ignore_hh_version;
     saved_state_ignore_hhconfig = !saved_state_ignore_hhconfig;
-    lint_paths = lint_paths;
+    paths = paths;
     log_inference_constraints = !log_inference_constraints;
     mode = mode;
     no_load = !no_load || (

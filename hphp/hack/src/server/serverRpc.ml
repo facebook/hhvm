@@ -249,3 +249,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         env, ServerFunIsLocallableBatch.go genv.workers positions env
     | LIST_FILES_WITH_ERRORS ->
       env, ServerEnv.list_files env
+    | FILE_DEPENDENCIES filenames ->
+        let files = ServerFileDependencies.go genv env filenames in
+        env, files

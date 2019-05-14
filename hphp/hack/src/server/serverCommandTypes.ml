@@ -254,6 +254,7 @@ type _ t =
   | FUN_DEPS_BATCH : (string * int * int) list * bool -> string list t
   | FUN_IS_LOCALLABLE_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
+  | FILE_DEPENDENCIES : string list -> string list t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function

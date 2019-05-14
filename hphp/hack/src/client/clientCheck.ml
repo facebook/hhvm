@@ -28,6 +28,7 @@ let parse_function_or_method_id ~func_action ~meth_action name =
   with _ ->
     Printf.eprintf "Invalid input\n";
     raise Exit_status.(Exit_with Input_error)
+
 let print_all ic =
   try
     while true do
@@ -128,6 +129,14 @@ let parse_positions positions =
     Printf.eprintf "Invalid position\n";
     raise Exit_status.(Exit_with Input_error)
   end
+
+(* Filters and prints errors when a path is not a realpath *)
+let filter_real_paths paths =
+  List.filter_map paths
+    ~f:(fun fn -> match Sys_utils.realpath fn with
+      | Some path -> Some path
+      | None -> prerr_endlinef "Could not find file '%s'" fn; None)
+
 let main (args : client_check_env) : Exit_status.t Lwt.t =
   let mode_s = ClientEnv.mode_to_string args.mode in
   HackEventLogger.set_from args.from;
@@ -138,7 +147,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
   let%lwt exit_status =
     match args.mode with
     | MODE_LIST_FILES ->
-      let%lwt infol = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS  in
+      let%lwt infol = rpc args @@ Rpc.LIST_FILES_WITH_ERRORS in
       List.iter infol (Printf.printf "%s\n");
       Lwt.return Exit_status.No_error
     | MODE_COLORING file ->
@@ -408,13 +417,9 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       ClientSearch.go results args.output_json;
       Lwt.return Exit_status.No_error
     | MODE_LINT ->
-      let fnl = List.filter_map args.lint_paths
-        (fun fn -> match Sys_utils.realpath fn with
-          | Some path -> Some path
-          | None -> prerr_endlinef "Could not find file '%s'" fn; None)
-      in
+      let fnl = filter_real_paths args.paths in
       begin
-        match args.lint_paths with
+        match args.paths with
         | [] ->
            prerr_endline "No lint errors (0 files checked)!";
            prerr_endline "Note: --lint expects a list of filenames to check.";
@@ -576,6 +581,19 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       | Error error -> print_endline error;
         raise Exit_status.(Exit_with Input_error)
       end
+    | MODE_FILE_DEPENDENTS ->
+      let paths = filter_real_paths args.paths in
+      let%lwt responses =
+        rpc args @@ Rpc.FILE_DEPENDENCIES paths in
+      if args.output_json
+      then
+        let open Hh_json in
+        let json_path_list = List.map responses ~f:(fun path -> JSON_String path) in
+        let output = JSON_Object [("dependents", JSON_Array json_path_list)] in
+        print_endline @@ json_to_string output
+      else
+        List.iter responses ~f:(Printf.printf "%s\n");
+      Lwt.return Exit_status.No_error
   in
   HackEventLogger.client_check_finish exit_status;
   Lwt.return exit_status

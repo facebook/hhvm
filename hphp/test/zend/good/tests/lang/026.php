@@ -1,1 +1,4 @@
-<?php echo "\"\t\\'" . '\n\\\'a\\\b\\';
+<?php
+<<__EntryPoint>> function main() {
+echo "\"\t\\'" . '\n\\\'a\\\b\\';
+}

@@ -1,8 +1,6 @@
 <?hh
 // Copyright 2004-2015 Facebook. All Rights Reserved.
 
-echo "Starting\n";
-
 class C {
   public function foo() {
     echo "foo\n";
@@ -14,9 +12,11 @@ class C {
     }
   }
 }
-
+<<__EntryPoint>> function main(): void {
+echo "Starting\n";
 $c = new C;
 $val = $c->foo();
 echo $val;
 echo "\n";
 echo "Done\n";
+}

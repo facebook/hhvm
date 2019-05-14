@@ -3,6 +3,7 @@
 * proto bool shuffle ( array &$array )
 * Function is implemented in ext/standard/array.c
 */
+<<__EntryPoint>> function main() {
 $numbers = range(1, 20);
 echo "*** testing array_shuffle  \n";
 $a = array();
@@ -44,4 +45,5 @@ if (count($diffarray) < 350) {
     var_dump($bigarray);
 } else {
     echo "test passed \n";
+}
 }

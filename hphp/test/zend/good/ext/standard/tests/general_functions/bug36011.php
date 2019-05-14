@@ -2,27 +2,27 @@
 
 class TestClass
 {
-	static function test()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    static function test()
+    {
+        echo __METHOD__ . "()\n";
+    }
 
-	function whee()
-	{
-		array_map(array('TestClass', 'test'), array('array_value'));
-	}
+    function whee()
+    {
+        array_map(array('TestClass', 'test'), array('array_value'));
+    }
 
-	function whee4()
-	{
-		call_user_func(array('TestClass', 'test'));
-	}
+    function whee4()
+    {
+        call_user_func(array('TestClass', 'test'));
+    }
 
-	static function whee5()
-	{
-		call_user_func(array('TestClass', 'test'));
-	}
+    static function whee5()
+    {
+        call_user_func(array('TestClass', 'test'));
+    }
 }
-
+<<__EntryPoint>> function main() {
 TestClass::test();
 
 $a = new TestClass();
@@ -33,3 +33,4 @@ $a::whee5();
 TestClass::whee5();
 
 echo "===DONE===\n";
+}

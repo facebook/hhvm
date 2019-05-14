@@ -3,8 +3,8 @@
  * Description: Case insensitive string comparisons using a "natural order" algorithm
  * Source code: ext/standard/string.c
 */
+<<__EntryPoint>> function main() {
 echo "*** Testing strnatcasecmp() : error conditions ***\n";
-
 echo "-- Testing strnatcmp() function with Zero arguments --\n";
 try { var_dump( strnatcasecmp() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
@@ -14,3 +14,4 @@ $str2 = "ABC1";
 $extra_arg = 10;
 try { var_dump( strnatcasecmp( $str1, $str2, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
+}

@@ -6,14 +6,14 @@
  */
 
 function __autoload($className) {
-	echo "In __autoload($className)\n";
+    echo "In __autoload($className)\n";
 }
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
+<<__EntryPoint>> function main() {
 set_error_handler('test_error_handler');
-
 echo "*** Testing is_subclass_of() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -78,3 +78,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

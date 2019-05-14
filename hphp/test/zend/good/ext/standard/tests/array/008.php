@@ -1,5 +1,6 @@
 <?php
 //-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=- TEST 1 -=-=-=-=-
+<<__EntryPoint>> function main() {
 $a = array(1,"big"=>2,2,6,3,5,3,3,454,'some_string',3,3,3,3,3,3,3,3,17);
 $b = array(2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,17,25,'some_string',7,8,9,109,78,17);
 $c = array(-1,2,1,15,25,17);
@@ -77,3 +78,4 @@ var_dump(array_intersect($a,$b));
 
 echo 'array_intersect_assoc($a,$b);'."\n";
 var_dump(array_intersect_assoc($a,$b));
+}

@@ -2,46 +2,46 @@
 
 class MealIterator implements Iterator {
   public static $indent;
-	private $pos=0;
-	private $myContent=array("breakfast", "lunch", "dinner");
-	
-	public function valid() {
-		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
-		return $this->pos<3;
-	}
-	
-	public function next() {
+    private $pos=0;
+    private $myContent=array("breakfast", "lunch", "dinner");
 
-		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
-		return $this->myContent[$this->pos++];
-	}
-	
-	public function rewind() {
+    public function valid() {
+        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        return $this->pos<3;
+    }
 
-		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
-		$this->pos=0;
-	}
+    public function next() {
 
-	public function current() {
+        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        return $this->myContent[$this->pos++];
+    }
 
-		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
-		return $this->myContent[$this->pos];
-	}
-	
-	public function key() {
+    public function rewind() {
 
-		echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
-		return "meal " . $this->pos;
-	}
-	
+        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        $this->pos=0;
+    }
+
+    public function current() {
+
+        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        return $this->myContent[$this->pos];
+    }
+
+    public function key() {
+
+        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+        return "meal " . $this->pos;
+    }
+
 }
-
+<<__EntryPoint>> function main() {
 $f = new MealIterator;
 var_dump($f);
 
 echo "-----( Simple iteration: )-----\n";
 foreach ($f as $k=>$v) {
-	echo "$k => $v\n";	
+    echo "$k => $v\n";
 }
 
 $f->rewind();
@@ -51,14 +51,15 @@ MealIterator::$indent = " ";
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
-	echo "\nTop level "  .  $count++ . ": \n"; 
-	echo "$k => $v\n";
+    echo "\nTop level "  .  $count++ . ": \n";
+    echo "$k => $v\n";
   MealIterator::$indent = "     ";
-	foreach ($f as $k=>$v) {
-		echo "     $k => $v\n";	
-	}
+    foreach ($f as $k=>$v) {
+        echo "     $k => $v\n";
+    }
   MealIterator::$indent = " ";
-	
+
 }
 
 echo "===DONE===\n";
+}

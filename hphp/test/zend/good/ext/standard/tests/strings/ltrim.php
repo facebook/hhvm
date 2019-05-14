@@ -13,6 +13,7 @@
  try { var_dump( ltrim("", " ", 1) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* heredoc string */
+<<__EntryPoint>> function main() {
 $str = <<<EOD
 us
 ing heredoc string
@@ -34,4 +35,4 @@ var_dump( ltrim($str, "\nusi") );
  var_dump ( ltrim("@$#ltrim test", "#@$") );                     /* with some special characters as second Argument */
 
 echo "\nDone\n";
-
+}

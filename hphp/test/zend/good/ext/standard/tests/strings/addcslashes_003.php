@@ -1,6 +1,7 @@
 <?php
 
 /* Miscellaneous input */
+<<__EntryPoint>> function main() {
 echo "\n*** Testing addcslashes() with miscellaneous input arguments ***\n";
 var_dump( addcslashes("", "") );
 var_dump( addcslashes("", "burp") );
@@ -19,4 +20,4 @@ var_dump( addcslashes( " ", " ") );
 var_dump( addcslashes( "string\x00with\x00NULL", "\0") );
 
 echo "Done\n";
-
+}

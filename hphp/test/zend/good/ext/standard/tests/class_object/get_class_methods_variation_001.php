@@ -1,16 +1,16 @@
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
+<<__EntryPoint>> function main() {
 set_error_handler('test_error_handler');
-
 echo "*** Testing get_class_methods() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -78,3 +78,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

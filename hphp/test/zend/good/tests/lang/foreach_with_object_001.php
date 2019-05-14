@@ -6,9 +6,11 @@ class Test {
    }
 
 }
+<<__EntryPoint>> function main() {
 $obj = new Test();
 foreach ($obj->c()->a as $value) {
     print "$value\n";
 }
 
 echo "===DONE===\n";
+}

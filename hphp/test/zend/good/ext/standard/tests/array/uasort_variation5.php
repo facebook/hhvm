@@ -31,6 +31,7 @@ function cmp_function($value1, $value2)
 }
 
 // Different heredoc strings to be sorted
+<<__EntryPoint>> function main() {
 $empty_heredoc =<<<EOT
 EOT;
 
@@ -75,3 +76,4 @@ var_dump( uasort(&$heredoc_values, 'cmp_function') );  // expecting: bool(true)
 var_dump($heredoc_values);
 
 echo "Done";
+}

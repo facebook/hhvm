@@ -4,8 +4,8 @@
  * Description: Parses input from a string according to a format
  * Source code: ext/standard/string.c
 */
+<<__EntryPoint>> function main() {
 echo "*** Testing sscanf() : error conditions ***\n";
-
 $str = "Hello World";
 $format = "%s %s";
 
@@ -20,3 +20,4 @@ echo "\n-- Testing sscanf() function with more than expected no. of arguments --
 var_dump( sscanf($str, $format, &$str1, &$str2, &$extra_str) );
 
 echo "===DONE===\n";
+}

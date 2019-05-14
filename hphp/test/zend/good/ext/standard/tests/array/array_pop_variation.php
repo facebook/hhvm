@@ -1,6 +1,7 @@
 <?php
 
 /* Various combinations of arrays to be used for the test */
+<<__EntryPoint>> function main() {
 $mixed_array1 = array( 1,2,3,4,5,6,7,8,9 );
 $mixed_array = array(
   array(),
@@ -36,3 +37,4 @@ echo "\nCurrent Element after POP operation is: ";
 var_dump( current(&$mixed_array1) );
 
 echo"\nDone";
+}

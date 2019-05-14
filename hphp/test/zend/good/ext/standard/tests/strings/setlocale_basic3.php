@@ -9,7 +9,7 @@
 /* Test the setlocale() when multiple locales are provided as argument */
 
 /* Prototype  : array list_system_locales( void )
-   Description: To get the currently installed locle in this platform 
+   Description: To get the currently installed locle in this platform
    Arguments  : Nil
    Returns    : set of locale as array
 */
@@ -32,10 +32,10 @@ function list_system_locales() {
   return $system_locales;
 }
 
-/* Collect existing system locales and get three locales that can be use to 
+/* Collect existing system locales and get three locales that can be use to
    pass as argument to setlocale() */
+<<__EntryPoint>> function main() {
 echo "*** Testing setlocale() by passing multiple locales as argument ***\n";
-
 
 //set of currency symbol according to above list of locales
 $currency_symbol = array(
@@ -81,3 +81,4 @@ if( in_array("en_US.utf8",$all_system_locales) ||
 }
 
 echo "Done\n";
+}

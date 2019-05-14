@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/zend-strtod.h"
 
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
 
@@ -33,6 +32,8 @@
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/logger.h"
+
+#include "hphp/zend/zend-strtod.h"
 
 #ifndef _MSC_VER
 #include <glob.h>

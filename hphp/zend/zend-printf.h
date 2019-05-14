@@ -15,27 +15,32 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_STRTOD_H_
-#define incl_HPHP_ZEND_STRTOD_H_
+#ifndef incl_HPHP_ZEND_ZEND_PRINTF_H_
+#define incl_HPHP_ZEND_ZEND_PRINTF_H_
+
+#include <sys/types.h>
+#include <stdarg.h>
+
+// The "php_gcvt" and "php_conv_fp" functions assume that their "buf" argument
+// point to at least this many (minus 1 for the latter) bytes of memory.
+#define NUM_BUF_SIZE 500
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-void zend_freedtoa(char *s);
-char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign,
-                 char **rve);
-double zend_strtod(const char *s00, const char **se);
-double zend_hex_strtod(const char *str, const char **endptr);
-double zend_oct_strtod(const char *str, const char **endptr);
-double zend_bin_strtod(const char *str, const char **endptr);
+char *php_gcvt(double value, int ndigit, char dec_point, char exponent,
+               char *buf);
+char *php_conv_fp(char format, double num, bool add_dp, int precision,
+                  char dec_point, int *is_negative, char *buf, int *len);
 
-void zend_get_bigint_data();
+// XXX: vspprintf and spprintf have slightly different semantics and flags than
+// C99 printf (because PHP) so we can't annotate them with ATTRIBUTE_PRINTF
+
+int vspprintf(char **pbuf, size_t max_len, const char *format, ...);
+int vspprintf_ap(char **pbuf, size_t max_len, const char *format, va_list ap);
+int spprintf(char **pbuf, size_t max_len, const char *format, ...);
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-// These are actually implemented in EZC/php-src/Zend/zend_strtod.cpp
-extern "C" int zend_startup_strtod(void);
-extern "C" int zend_shutdown_strtod(void);
-
-#endif // incl_HPHP_ZEND_STRTOD_H_
+#endif // incl_HPHP_ZEND_ZEND_PRINTF_H_

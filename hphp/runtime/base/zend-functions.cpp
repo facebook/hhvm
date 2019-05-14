@@ -18,8 +18,8 @@
 #include "hphp/runtime/base/zend-functions.h"
 
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/util/fast_strtoll_base10.h"
+#include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
 

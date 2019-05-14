@@ -94,3 +94,5 @@ HPHP::s_cachedHash
 HPHP::jit::irgen::IRBuilder::optimizeInst(HPHP::jit::IRInstruction*, HPHP::jit::irgen::IRBuilder::CloneFlag, HPHP::jit::Block*)::instNest
 HPHP::Trace::dumpEntry(HPHP::Trace::RingBufferEntry const*)::indentDepth
 HPHP::high_arena_tcache # Only needed in lowptr builds.
+HPHP::s_bigint_data # hphp/zend/ is also used by Hack Native
+HPHP::s_bigint_data_guard # hphp/zend/ is also used by Hack Native

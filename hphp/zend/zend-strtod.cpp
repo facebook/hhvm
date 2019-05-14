@@ -89,9 +89,14 @@
  *  directly -- and assumed always to succeed.
  */
 
-#include "hphp/runtime/base/zend-strtod.h"
-#include "hphp/runtime/base/exceptions.h"
-#include "hphp/runtime/base/rds-local.h"
+#include "hphp/zend/zend-strtod.h"
+
+#include "hphp/util/assertions.h"
+
+#include <new>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -371,6 +376,8 @@ extern double rnd_prod(double, double), rnd_quot(double, double);
 
 #define Kmax 15
 
+namespace {
+
 struct Bigint {
   struct Bigint *next;
   int k, maxwds, sign, wds;
@@ -379,7 +386,11 @@ struct Bigint {
 
 typedef struct Bigint Bigint;
 
+} // namespace
+
 void destroy_freelist(Bigint** freelist);
+
+namespace {
 
 struct BigintData {
   BigintData() : p5s(nullptr) {
@@ -393,10 +404,30 @@ struct BigintData {
   Bigint **freelist;
   Bigint *p5s;
 };
-static RDS_LOCAL_NO_CHECK(BigintData, s_bigint_data);
 
+} // namespace
+
+static __thread BigintData* s_bigint_data;
+
+namespace {
+
+struct BigintDataGuard {
+  ~BigintDataGuard() {
+    delete s_bigint_data;
+    s_bigint_data = nullptr;
+  }
+};
+
+} // namespace
+
+static thread_local BigintDataGuard s_bigint_data_guard;
+
+// NOTE: If this has not been called, various functions in this file,
+// and in other files (e.g. "zend-printf.cpp"), will crash when called.
 void zend_get_bigint_data() {
-  s_bigint_data.getCheck();
+  if (s_bigint_data == nullptr) {
+    s_bigint_data = new BigintData;
+  }
 }
 
 static Bigint * Balloc(int k)
@@ -404,9 +435,7 @@ static Bigint * Balloc(int k)
   int x;
   Bigint *rv;
 
-  if (k > Kmax) {
-    raise_fatal_error("Balloc() allocation exceeds list boundary");
-  }
+  assertx(k <= Kmax);
 
   Bigint **&freelist = s_bigint_data->freelist;
   if ((rv = freelist[k])) {
@@ -414,9 +443,7 @@ static Bigint * Balloc(int k)
   } else {
     x = 1 << k;
     rv = (Bigint *)MALLOC(sizeof(Bigint) + (x-1)*sizeof(Long));
-    if (!rv) {
-      raise_fatal_error("Balloc() failed to allocate memory");
-    }
+    assertx(rv != nullptr);
     rv->k = k;
     rv->maxwds = x;
   }
@@ -2474,9 +2501,10 @@ ret:
     *se = (char *)s;
   result = sign ? -value(rv) : value(rv);
 
-  if (s_bigint_data.isNull()) {
+  if (s_bigint_data == nullptr) {
     return result;
   }
+
   Bigint *&p5s = s_bigint_data->p5s;
   while (p5s) {
     tmp = p5s;

@@ -30,7 +30,6 @@
 #include <folly/FileUtil.h>
 
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/server/source-root-info.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/repo.h"
@@ -44,6 +43,7 @@
 #include "hphp/util/sha1.h"
 #include "hphp/util/struct-log.h"
 #include "hphp/util/timer.h"
+#include "hphp/zend/zend-strtod.h"
 
 #include <iostream>
 

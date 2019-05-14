@@ -34,7 +34,6 @@
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/variable-serializer.h"
-#include "hphp/runtime/base/zend-strtod.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
@@ -47,6 +46,8 @@
 #include "hphp/runtime/vm/repo.h"
 
 #include "hphp/runtime/vm/jit/perf-counters.h"
+
+#include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
 

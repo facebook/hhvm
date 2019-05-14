@@ -33,8 +33,9 @@
 #include "hphp/runtime/base/zend-functions.h"
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/zend-strtod.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
+
+#include "hphp/zend/zend-strtod.h"
 
 namespace HPHP {
 

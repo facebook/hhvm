@@ -15,23 +15,23 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef incl_HPHP_ZEND_PRINTF_H_
-#define incl_HPHP_ZEND_PRINTF_H_
-
-// NOTE: See also "hphp/zend/zend-printf.*".
-
-#include "hphp/zend/zend-printf.h"
+#ifndef incl_HPHP_ZEND_ZEND_STRTOD_H_
+#define incl_HPHP_ZEND_ZEND_STRTOD_H_
 
 namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-struct String;
-struct Array;
+void zend_freedtoa(char *s);
+char * zend_dtoa(double _d, int mode, int ndigits, int *decpt, int *sign,
+                 char **rve);
+double zend_strtod(const char *s00, const char **se);
+double zend_hex_strtod(const char *str, const char **endptr);
+double zend_oct_strtod(const char *str, const char **endptr);
+double zend_bin_strtod(const char *str, const char **endptr);
 
-/**
- * How PHP formats a string. Called by ext/ext_string.cpp.
- */
-String string_printf(const char *format, int len, const Array& args);
+void zend_get_bigint_data();
 
+///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // incl_HPHP_ZEND_PRINTF_H_
+#endif // incl_HPHP_ZEND_ZEND_STRTOD_H_

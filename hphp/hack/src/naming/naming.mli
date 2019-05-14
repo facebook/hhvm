@@ -22,7 +22,7 @@ val fun_: Nast.fun_ -> Nast.fun_
 val class_: Ast.class_ -> Nast.class_
 
 (* Solves the local names in an typedef *)
-val typedef: Ast.typedef -> Nast.typedef
+val typedef: Nast.typedef -> Nast.typedef
 
 (* Solves the local names in a global constant definition *)
 val global_const: Nast.gconst -> Nast.gconst

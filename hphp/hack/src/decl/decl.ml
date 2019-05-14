@@ -894,7 +894,7 @@ and typedef_decl tdef =
   }
 
 and type_typedef_naming_and_decl tdef =
-  let tdef = Errors.ignore_ (fun () -> Naming.typedef tdef) in
+  let tdef = Errors.ignore_ (fun () -> Naming.typedef (Ast_to_nast.on_typedef tdef)) in
   let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef) in
   record_typedef (snd tdef.t_name);
   let tdecl = { tdecl with td_decl_errors = Some errors} in

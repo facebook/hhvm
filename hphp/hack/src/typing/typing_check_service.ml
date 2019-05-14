@@ -58,7 +58,7 @@ let type_class opts fn x =
 let check_typedef opts fn x =
   match Ast_provider.find_typedef_in_file ~full:true fn x with
   | Some t ->
-    let typedef = Naming.typedef t in
+    let typedef = Naming.typedef (Ast_to_nast.on_typedef t) in
     Nast_check.def (Nast.Typedef typedef);
     let ret = Typing.typedef_def opts typedef in
     Typing_variance.typedef opts x;

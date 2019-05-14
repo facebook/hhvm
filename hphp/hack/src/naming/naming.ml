@@ -2806,7 +2806,7 @@ module Make (GetLocals : GetLocals) = struct
   (* Typedefs *)
   (**************************************************************************)
 
-  let typedef_impl tdef =
+  let typedef tdef =
     let cstrs = make_constraints tdef.Aast.t_tparams in
     let env = Env.make_typedef_env cstrs tdef in
     let tconstraint = Option.map tdef.Aast.t_constraint (hint env) in
@@ -2824,10 +2824,6 @@ module Make (GetLocals : GetLocals) = struct
       t_namespace = tdef.Aast.t_namespace;
       t_vis = tdef.Aast.t_vis;
     }
-
-  let typedef tdef =
-    let tdef = Ast_to_nast.on_typedef tdef in
-    typedef_impl tdef
 
   (**************************************************************************)
   (* Global constants *)
@@ -2877,7 +2873,7 @@ module Make (GetLocals : GetLocals) = struct
       | Aast.Stmt (_, Aast.Noop)
       | Aast.Stmt (_, Aast.Markup _) -> acc
       | Aast.Stmt s -> (N.Stmt (stmt !top_level_env s)) :: acc
-      | Aast.Typedef t -> (N.Typedef (typedef_impl t)) :: acc
+      | Aast.Typedef t -> (N.Typedef (typedef t)) :: acc
       | Aast.Constant cst -> (N.Constant (global_const cst)) :: acc
       | Aast.Namespace (_ns, aast) -> List.fold_left ~f:aux ~init:[] aast @ acc
       | Aast.NamespaceUse _ -> acc

@@ -9,5 +9,7 @@ class MY_CLASS{
     var_dump(self::$x);
   }
 }
+<<__EntryPoint>> function main() {
 $o = new MY_CLASS;
 $o->printX();
+}

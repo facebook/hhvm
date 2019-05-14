@@ -23,7 +23,7 @@ class C4 {
  m2 as a2;
  }
  }
-
+<<__EntryPoint>> function main() {
 for ($c = "C1";
  $c <= "C4";
  $c++) {
@@ -31,4 +31,5 @@ for ($c = "C1";
     $r = new ReflectionClass($c);
     var_dump($r->getTraitAliases());
     echo "\n";
+}
 }

@@ -21,5 +21,6 @@ class C extends B1 {
     $this->params = $b2->params;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(new C(new B2));
+}

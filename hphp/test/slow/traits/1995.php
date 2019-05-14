@@ -21,4 +21,6 @@ abstract class MY_ABSTRCT_CLASS {
  }
 final class MY_FINAL_CLASS {
  }
+<<__EntryPoint>> function main() {
 var_dump(get_declared_user_traits());
+}

@@ -15,5 +15,7 @@ class C {
 class D extends C {
   use T;
 }
+<<__EntryPoint>> function main() {
 $x = new D();
 $x->foo();
+}

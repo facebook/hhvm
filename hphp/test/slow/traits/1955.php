@@ -13,5 +13,7 @@ trait B {
 class Talker {
   use B;
 }
+<<__EntryPoint>> function main() {
 $talker = new Talker();
 $talker->fala();
+}

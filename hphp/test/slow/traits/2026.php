@@ -10,7 +10,7 @@ class Bar {
     public function Bar() {
     }
 }
-
+<<__EntryPoint>> function main() {
 $rfoofoo = new ReflectionMethod('Foo::Foo');
 var_dump($rfoofoo->isConstructor());
 
@@ -19,3 +19,4 @@ var_dump($rbarfoo->isConstructor());
 
 $rbarbar = new ReflectionMethod('Bar::Bar');
 var_dump($rbarbar->isConstructor());
+}

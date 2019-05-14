@@ -16,6 +16,6 @@ class A {
 class B extends A {
   use TestTrait;
 }
-
+<<__EntryPoint>> function main() {
 echo B::test();
-
+}

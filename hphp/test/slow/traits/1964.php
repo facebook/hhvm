@@ -14,5 +14,7 @@ class C {
 class D {
   public $y = 4;
 }
+<<__EntryPoint>> function main() {
 $o = new C;
 $o->printY();
+}

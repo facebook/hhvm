@@ -13,8 +13,10 @@ trait T {
 class Cls extends Base {
  use T;
  }
+<<__EntryPoint>> function main() {
 $o = new Cls();
 $o->sayClass();
   // echo Cls
 $o->sayParent();
  // echos Base
+}

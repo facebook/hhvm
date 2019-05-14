@@ -14,5 +14,7 @@ trait MY_TRAIT2 {
 class MY_CLASS {
   use MY_TRAIT2;
 }
+<<__EntryPoint>> function main() {
 $o = new MY_CLASS;
 $o->sayHello();
+}

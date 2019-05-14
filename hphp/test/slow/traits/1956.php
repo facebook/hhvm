@@ -18,7 +18,9 @@ trait Italiano {
 class Talker {
   use Italiano;
 }
+<<__EntryPoint>> function main() {
 $talker = new Talker();
 $talker->say();
 $talker->fala();
 $talker->parla();
+}

@@ -13,5 +13,7 @@ class MY_CLASS extends MY_BASE {
     var_dump($this->x);
   }
 }
+<<__EntryPoint>> function main() {
 $o = new MY_CLASS;
 $o->printX();
+}

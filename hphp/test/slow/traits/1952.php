@@ -17,8 +17,10 @@ class MyHelloWorld{
     MY_TRAIT2::sayGoodbye as falaTchau;
   }
 }
+<<__EntryPoint>> function main() {
 $o = new MyHelloWorld();
 $o->falaOi();
 $o->falaTchau();
 $o->sayHello();
 $o->sayGoodbye();
+}

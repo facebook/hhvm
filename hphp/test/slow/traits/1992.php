@@ -10,5 +10,7 @@ class MY_CLASS {
     sayHello as falaOi;
   }
 }
+<<__EntryPoint>> function main() {
 $a = new MY_CLASS;
 $a->falaOi();
+}

@@ -18,4 +18,6 @@ class C {
     self::world();
   }
 }
+<<__EntryPoint>> function main() {
 C::p();
+}

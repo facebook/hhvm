@@ -13,5 +13,7 @@ class C {
     echo "BAR!\n";
   }
 }
+<<__EntryPoint>> function main() {
 $x = new C();
 $x->foo();
+}

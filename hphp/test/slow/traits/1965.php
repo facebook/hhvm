@@ -13,5 +13,7 @@ class C {
     var_dump($this->x);
   }
 }
+<<__EntryPoint>> function main() {
 $o = new C;
 $o->printProps();
+}

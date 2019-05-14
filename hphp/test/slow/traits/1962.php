@@ -17,4 +17,6 @@ class B extends A {
     echo "B: " . __CLASS__;
   }
 }
+<<__EntryPoint>> function main() {
 B::test();
+}

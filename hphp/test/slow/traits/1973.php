@@ -28,7 +28,9 @@ class Talker {
     B::bigTalk as bTalk;
   }
 }
+<<__EntryPoint>> function main() {
 $talker = new Talker();
 $talker->smallTalk();
 $talker->bigTalk(1);
 $talker->bTalk(2);
+}

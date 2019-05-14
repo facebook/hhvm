@@ -11,5 +11,6 @@ class A {
 }
 
 class B extends A {}
+<<__EntryPoint>> function main() {
 echo B::test();
-
+}

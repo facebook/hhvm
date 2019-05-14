@@ -129,7 +129,7 @@ let get_first_suggested_type_as_string file type_map node =
 
 let get_patches tcopt file =
   let ast = Ast_provider.get_ast ~full:true file in
-  let tast = Typing.nast_to_tast tcopt (Naming.program ast) in
+  let tast = Typing.nast_to_tast tcopt (Naming.program (Ast_to_nast.convert ast)) in
   let type_map = Tast_type_collector.collect_types tast in
   let source_text = Full_fidelity_source_text.from_file file in
   let positioned_tree = PositionedTree.make source_text in

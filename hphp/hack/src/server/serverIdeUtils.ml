@@ -113,7 +113,7 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
     Decl.name_and_declare_types_program ast;
 
     let make_tast () =
-      let nast = Naming.program ast in
+      let nast = Naming.program (Ast_to_nast.convert ast) in
       Typing.nast_to_tast tcopt nast
     in
 

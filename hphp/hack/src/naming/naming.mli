@@ -13,7 +13,7 @@ module Aast = Nast
  * Transform all the local names into a unique identifier
  *)
 
-val program: Ast.program -> Nast.program
+val program: Nast.program -> Nast.program
 
 (* Solves the local names within a function *)
 val fun_: Nast.fun_ -> Nast.fun_

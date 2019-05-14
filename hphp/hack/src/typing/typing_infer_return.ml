@@ -90,7 +90,7 @@ let process_types_and_funs ~process tcopt def =
 let get_inferred_types tcopt fnl ~process =
   List.iter fnl
     ~f:begin fun fn ->
-      List.iter (Naming.program (Ast_provider.get_ast fn))
+      List.iter (Naming.program (Ast_to_nast.convert (Ast_provider.get_ast fn)))
         (process_types_and_funs ~process tcopt)
     end
 

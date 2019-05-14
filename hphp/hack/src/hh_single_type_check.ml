@@ -634,7 +634,7 @@ let check_file opts errors files_info =
 let create_nasts files_info =
   let build_nast fn _ =
     let ast = Ast_provider.get_ast ~full:true fn in
-    Naming.program ast
+    Naming.program (Ast_to_nast.convert ast)
   in Relative_path.Map.mapi ~f:(build_nast) files_info
 
 let parse_name_and_decl popt files_contents =

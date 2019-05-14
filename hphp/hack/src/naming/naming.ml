@@ -2859,7 +2859,6 @@ module Make (GetLocals : GetLocals) = struct
   (**************************************************************************)
 
   let program ast =
-    let aast = Ast_to_nast.on_program ast in
     let top_level_env = ref (Env.make_top_level_env ()) in
     let rec aux acc def =
       match def with
@@ -2881,7 +2880,7 @@ module Make (GetLocals : GetLocals) = struct
     let on_program aast =
       let nast = List.fold_left ~f:aux ~init:[] aast in
       List.rev nast in
-    on_program aast
+    on_program ast
 
 end
 

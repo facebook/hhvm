@@ -450,12 +450,18 @@ let simplify_unions env ?on_tyvar (r, _ as ty) =
   let r = Option.value r_union ~default:r in
   env, make_union r tyl r_null ~discard_singletons:true
 
-let diff ty1 ty2 =
-  let filter tyl = List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)) in
+(* Only ever called with ty2 a type variable and ty1 a normalized union, so
+unless those conditions are met, this is an overapproximation. *)
+let rec diff ty1 ty2 =
   match ty1 with
-  | r, Toption (r', Tunion tyl) -> r, Toption (r', Tunion (filter tyl))
-  | r, Tunion tyl -> r, Tunion (filter tyl)
-  | _ -> ty1
+  | r, Toption ty ->
+    begin match diff ty ty2 with
+    | _, Tunion [] -> r, Tprim Nast.Tnull
+    | ty -> r, Toption ty
+    end
+  | r, Tunion tyl ->
+    r, Tunion (List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)))
+  | r, _ -> if ty_equal ty1 ty2 then r, Tunion [] else ty1
 
 let () = Typing_utils.union_ref := union
 let () = Typing_utils.union_list_ref := union_list

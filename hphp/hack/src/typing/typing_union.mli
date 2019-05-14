@@ -34,5 +34,6 @@ val simplify_unions:
   locl ty ->
   Env.env * locl ty
 (** A cheap type difference. If ty1 is a union, remove ty2 from this union.
-Assumes ty1 is a flattened union or an option of a flattened union. *)
+Assumes ty1 is a flattened union or an option of a flattened union,
+and ty2 is a type variable *)
 val diff: locl ty -> locl ty -> locl ty

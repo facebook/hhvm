@@ -1,6 +1,35 @@
 (library
-  (name watchman_event_watcher)
+  (name watchman_config)
   (wrapped false)
+  (modules watchmanEventWatcherConfig)
   (libraries
-    server_utils
+    injector_config
+    server_utils))
+
+(library
+  (name watchman_lib)
+  (wrapped false)
+  (modules watchmanEventWatcher)
+  (flags (:standard -unsafe-string))
+  (libraries
+    watchman_config
     watchman_utils))
+
+(executable
+  (name watcher_bin)
+  (modules watcher_bin)
+  (libraries
+    default_injector_config
+    watchman_config
+    watchman_lib))
+
+(library
+  (name watchman_client)
+  (wrapped false)
+  (flags (:standard -unsafe-string))
+  (modules
+    watchmanEventWatcherClient
+    watchmanEventWatcherClient_sig)
+  (libraries
+    watchman_config
+    server_utils))

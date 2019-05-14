@@ -235,6 +235,6 @@
     parent
     server
     state_loader
-    watchman_event_watcher)
+    watchman_client)
   (preprocess
     (pps lwt_ppx)))

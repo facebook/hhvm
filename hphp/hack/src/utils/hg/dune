@@ -5,6 +5,14 @@
     hg
     hg_sig)
   (libraries
+    injector_config
     process
     process_types
     future))
+
+(executable
+  (name hg_runner)
+  (modules hg_runner)
+  (libraries
+    hg
+    default_injector_config))

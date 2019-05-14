@@ -2311,7 +2311,7 @@ let does_binop_create_write_on_left = function
         | TokenKind.QuestionQuestionEqual) -> true
   | _ -> false
 
-let find_invalid_lval_usage errors nodes =
+let find_invalid_lval_usage nodes =
   let get_errors = rec_walk ~f:(fun errors syntax_node parents ->
     let node = syntax syntax_node in
     match node with
@@ -2331,7 +2331,7 @@ let find_invalid_lval_usage errors nodes =
   ) in
 
   List.fold_left
-    ~init:errors
+    ~init:[]
     ~f:(fun acc node -> get_errors ~init:acc node)
     nodes
 
@@ -2405,7 +2405,7 @@ let unop_allows_await t =
   | _ -> false
   ))
 
-let await_as_an_expression_errors await_node parents errors =
+let await_as_an_expression_errors await_node parents =
   let rec go parents node =
     let n, tail =
       match parents with
@@ -2418,21 +2418,22 @@ let await_as_an_expression_errors await_node parents errors =
     | ReturnStatement _
     | UnsetStatement _
     | EchoStatement _
-    | ThrowStatement _ -> errors
+    | ThrowStatement _
+    | LetStatement _ -> []
     | IfStatement { if_condition; _ }
-      when phys_equal node if_condition -> errors
+      when phys_equal node if_condition -> []
     | ForStatement { for_initializer; _ }
-      when phys_equal node for_initializer -> errors
+      when phys_equal node for_initializer -> []
     | SwitchStatement { switch_expression; _ }
-      when phys_equal node switch_expression -> errors
+      when phys_equal node switch_expression -> []
     | ForeachStatement { foreach_collection; _ }
-      when phys_equal node foreach_collection -> errors
+      when phys_equal node foreach_collection -> []
     | UsingStatementBlockScoped { using_block_expressions; _ }
-      when phys_equal node using_block_expressions -> errors
+      when phys_equal node using_block_expressions -> []
     | UsingStatementFunctionScoped { using_function_expression; _ }
-      when phys_equal node using_function_expression -> errors
+      when phys_equal node using_function_expression -> []
     | LambdaExpression { lambda_body; _ }
-      when phys_equal node lambda_body -> errors
+      when phys_equal node lambda_body -> []
 
     (* Unary based expressions have their own custom fanout *)
     | PrefixUnaryExpression { prefix_unary_operator = operator; _ }
@@ -2499,6 +2500,7 @@ let await_as_an_expression_errors await_node parents errors =
     | VectorIntrinsicExpression _
     | ElementInitializer _
     | FieldInitializer _
+    | SimpleInitializer _
     | SubscriptExpression _
     | EmbeddedSubscriptExpression _
     | YieldExpression _
@@ -2506,17 +2508,17 @@ let await_as_an_expression_errors await_node parents errors =
     | ListItem _ -> go tail n
     (* otherwise report error and bail out *)
     | _ ->
-      make_error_from_node
-        await_node SyntaxError.invalid_await_position :: errors
+      [make_error_from_node
+        await_node SyntaxError.invalid_await_position]
   in
 
-  let errors = go parents await_node in
+  let conditional_errors = go parents await_node in
   let is_in_concurrent = List.exists
     ~f:(fun parent -> match syntax parent with
       | ConcurrentStatement _ -> true
       | _ -> false
     ) parents in
-  let errors = if is_in_concurrent then errors else
+  let lval_errors = if is_in_concurrent then [] else
     let await_node_statement_parent = List.find
       ~f:(fun parent -> match syntax parent with
         | ExpressionStatement _
@@ -2531,11 +2533,11 @@ let await_as_an_expression_errors await_node parents errors =
         | _ -> false
       ) parents in
     match await_node_statement_parent with
-    | Some x -> find_invalid_lval_usage errors [x]
+    | Some x -> find_invalid_lval_usage [x]
     (* We must have already errored in "go" *)
-    | None -> errors
+    | None -> []
   in
-  errors
+  List.append lval_errors conditional_errors
 
 let node_has_await_child = rec_walk ~init:false ~f:(fun acc node _ ->
   let is_new_scope = match syntax node with
@@ -2913,7 +2915,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     check_collection_members initializers errors
   | PipeVariableExpression _
     when ParserOptions.enable_await_as_an_expression env.parser_options ->
-    let closest_pipe_operator = List.find_exn parents ~f:begin fun node ->
+    let closest_pipe_operator = List.find parents ~f:begin fun node ->
       match syntax node with
       | BinaryExpression { binary_operator; _ }
         when token_kind binary_operator = Some TokenKind.BarGreaterThan ->
@@ -2921,20 +2923,26 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       | _ -> false
       end in
 
+    (match closest_pipe_operator with
+    | None -> errors (* This will be another type of parser error *)
+    | Some closest_pipe_operator ->
     let closest_pipe_left_operand = match syntax closest_pipe_operator with
     | BinaryExpression { binary_left_operand; _ } -> binary_left_operand
     | _ -> failwith "Unexpected non-BinaryExpression" in
 
     (* If the left side of the pipe operation contains an await then we treat
        the $$ as an await *)
-    if node_has_await_child closest_pipe_left_operand
-    then await_as_an_expression_errors node parents errors
-    else errors
+    let aaae_errors = if node_has_await_child closest_pipe_left_operand
+    then await_as_an_expression_errors node parents
+    else [] in
+    List.append aaae_errors errors)
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
     if ParserOptions.enable_await_as_an_expression env.parser_options
-      then await_as_an_expression_errors node parents errors
+      then
+        let aaae_errors = await_as_an_expression_errors node parents in
+        List.append aaae_errors errors
       else
     begin match parents with
       | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
@@ -4236,7 +4244,7 @@ let find_syntax_errors env =
           | _ -> make_error_from_node n SyntaxError.invalid_syntax_concurrent_block :: errors
         ) statement_list in
 
-        find_invalid_lval_usage errors statement_list
+        List.append (find_invalid_lval_usage statement_list) errors
       | _ -> make_error_from_node node SyntaxError.invalid_syntax_concurrent_block :: errors) in
 
       (* adjust is_in_concurrent_block in accumulator to dive into the

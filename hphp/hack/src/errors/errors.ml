@@ -2271,13 +2271,17 @@ let constructor_no_args pos =
 let visibility p msg1 p_vis msg2 =
   add_list (Typing.err_code Typing.Visibility) [p, msg1; p_vis, msg2]
 
-let typing_too_many_args pos pos_def =
+let typing_too_many_args expected actual pos pos_def =
   add_list (Typing.err_code Typing.TypingTooManyArgs)
-    [pos, "Too many arguments"; pos_def, "Definition is here"]
+    [(pos,
+     Printf.sprintf "Too many arguments (expected %d but got %d)" expected actual);
+     (pos_def, "Definition is here")]
 
-let typing_too_few_args pos pos_def =
+let typing_too_few_args required actual pos pos_def =
   add_list (Typing.err_code Typing.TypingTooFewArgs)
-    [pos, "Too few arguments"; pos_def, "Definition is here"]
+    [(pos,
+      Printf.sprintf "Too few arguments (required %d but got %d)" required actual);
+     (pos_def, "Definition is here")]
 
 let anonymous_recursive_call pos =
   add (Typing.err_code Typing.AnonymousRecursiveCall) pos

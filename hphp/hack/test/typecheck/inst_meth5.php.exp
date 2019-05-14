@@ -1,4 +1,4 @@
 File "inst_meth5.php", line 20, characters 10-18:
-Too many arguments (Typing[4105])
+Too many arguments (expected 0 but got 1) (Typing[4105])
 File "inst_meth5.php", line 13, characters 19-20:
 Definition is here

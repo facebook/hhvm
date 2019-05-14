@@ -210,8 +210,8 @@ val parent_in_trait : Pos.t -> unit
 val parent_undefined : Pos.t -> unit
 val constructor_no_args : Pos.t -> unit
 val visibility : Pos.t -> string -> Pos.t -> string -> unit
-val typing_too_many_args : Pos.t -> Pos.t -> unit
-val typing_too_few_args : Pos.t -> Pos.t -> unit
+val typing_too_many_args : int -> int -> Pos.t -> Pos.t -> unit
+val typing_too_few_args : int -> int -> Pos.t -> Pos.t -> unit
 val anonymous_recursive_call : Pos.t -> unit
 val bad_call : Pos.t -> string -> unit
 val extend_final : Pos.t -> Pos.t -> string -> unit

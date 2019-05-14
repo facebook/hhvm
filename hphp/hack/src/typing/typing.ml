@@ -5000,12 +5000,12 @@ and call_construct p env class_ params el uel cid =
 and check_arity ?(did_unpack=false) pos pos_def (arity:int) exp_arity =
   let exp_min = (Typing_defs.arity_min exp_arity) in
   if arity < exp_min
-  then Errors.typing_too_few_args pos pos_def;
+  then Errors.typing_too_few_args exp_min arity pos pos_def;
   match exp_arity with
     | Fstandard (_, exp_max) ->
       let arity = if did_unpack then arity + 1 else arity in
       if arity > exp_max
-      then Errors.typing_too_many_args pos pos_def;
+      then Errors.typing_too_many_args exp_max arity pos pos_def;
     | Fvariadic _ | Fellipsis _ -> ()
 
 and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
@@ -5013,9 +5013,9 @@ and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
   match lambda_arity, expected_arity with
   | Fstandard (lambda_min, _), Fstandard _ ->
     if lambda_min < expected_min
-    then Errors.typing_too_few_args lambda_pos def_pos;
+    then Errors.typing_too_few_args expected_min lambda_min lambda_pos def_pos;
     if lambda_min > expected_min
-    then Errors.typing_too_many_args lambda_pos def_pos
+    then Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos
   | _, _ -> ()
 
 and check_deprecated p { ft_pos; ft_deprecated; _ } =

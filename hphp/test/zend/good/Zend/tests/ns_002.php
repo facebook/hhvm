@@ -10,9 +10,10 @@ class Foo {
 use test\ns1\Foo as Bar;
 use test\ns1 as ns2;
 use test\ns1;
-
+<<__EntryPoint>> function main() {
 Foo::bar();
 \test\ns1\Foo::bar();
 Bar::bar();
 ns2\Foo::bar();
 ns1\Foo::bar();
+}

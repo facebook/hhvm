@@ -1,7 +1,8 @@
 <?php
 function foo() {
-	return __FUNCTION__;
+    return __FUNCTION__;
 }
-
-$x = __NAMESPACE__ . "\\foo"; 
+<<__EntryPoint>> function main() {
+$x = __NAMESPACE__ . "\\foo";
 echo $x(),"\n";
+}

@@ -263,6 +263,11 @@ CodeCache::CodeCache()
   }
   m_threadLocalSize = thread_local_size;
 
+  AMaxUsage = maxUsage(ASize);
+  AProfMaxUsage = maxUsage(AProfSize);
+  AColdMaxUsage = maxUsage(AColdSize);
+  AFrozenMaxUsage = maxUsage(AFrozenSize);
+
   assertx(base - m_base <= allocationSize);
   assertx(base - m_base + 2 * kRoundUp > allocationSize);
   assertx(base - m_base <= (2ul << 30));

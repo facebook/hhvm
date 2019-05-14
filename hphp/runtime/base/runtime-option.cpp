@@ -1878,16 +1878,6 @@ void RuntimeOption::Load(
     Config::Bind(CodeCache::GlobalDataSize, ini, config,
                  "Eval.JitGlobalDataSize", CodeCache::ASize >> 2);
 
-    Config::Bind(CodeCache::AMaxUsage, ini, config, "Eval.JitAMaxUsage",
-                 CodeCache::maxUsage(CodeCache::ASize));
-    Config::Bind(CodeCache::AProfMaxUsage, ini, config, "Eval.JitAProfMaxUsage",
-                 CodeCache::maxUsage(CodeCache::AProfSize));
-    Config::Bind(CodeCache::AColdMaxUsage, ini, config, "Eval.JitAColdMaxUsage",
-                 CodeCache::maxUsage(CodeCache::AColdSize));
-    Config::Bind(CodeCache::AFrozenMaxUsage, ini, config,
-                 "Eval.JitAFrozenMaxUsage",
-                 CodeCache::maxUsage(CodeCache::AFrozenSize));
-
     Config::Bind(CodeCache::MapTCHuge, ini, config, "Eval.MapTCHuge",
                  hugePagesSoundNice());
 

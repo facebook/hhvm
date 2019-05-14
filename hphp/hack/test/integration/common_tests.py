@@ -756,6 +756,9 @@ class CommonTests(BarebonesTests):
         """
         Test --format
         """
+        if not self.run_hackfmt_check():
+            raise unittest.SkipTest("Hackfmt can't be found. Skipping.")
+
         self.start_hh_server()
         self.check_cmd_and_json_cmd([
             'function test1(int $x) {{',

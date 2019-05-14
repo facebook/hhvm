@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $file = md5('SplFileInfo::getExtension');
 $exts = array('.txt', '.extension', '..', '.', '');
 foreach ($exts as $ext) {
@@ -11,4 +11,5 @@ $file = md5('SplFileInfo::getExtension');
 $exts = array('.txt', '.extension', '..', '.', '');
 foreach ($exts as $ext) {
     unlink($file . $ext);
+}
 }

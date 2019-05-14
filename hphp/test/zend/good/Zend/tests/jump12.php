@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 a: print "ok!\n";
 goto c;
 declare (ticks=1) {
@@ -9,3 +9,4 @@ declare (ticks=1) {
 c:
     print "ok!\n";
     goto b;
+}

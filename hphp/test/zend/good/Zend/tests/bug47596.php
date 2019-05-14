@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 echo "ok\n";
 // comment comment comment comment comment comment comment comment comment
 // comment comment comment comment comment comment comment comment comment
@@ -55,3 +55,4 @@ echo "ok\n";
 // comment comment comment comment comment comment comment comment comment
 // comment comment comment comment comment comment comment comment comment
 // comment comment comm
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = new SplObjectStorage;
 $b = new SplObjectStorage;
 var_dump($a == $b);
@@ -9,3 +9,4 @@ var_dump($a == $b);
 $a[$b] = 3;
 var_dump($a == $b);
 echo "===DONE===\n";
+}

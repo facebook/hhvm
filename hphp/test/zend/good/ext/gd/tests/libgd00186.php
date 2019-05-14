@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $im = imagecreatetruecolor(10,10);
 $tile = imagecreate(10,10);
 $red   = imagecolorallocate($tile,0xff,0,0);
@@ -24,3 +24,4 @@ if ($arr['blue'] == 2) {
 imagedestroy($tile);
 imagedestroy($im);
 echo $r;
+}

@@ -1,3 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
 echo "ALIVE\n";
+}

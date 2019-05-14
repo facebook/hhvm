@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $s = simplexml_load_file(dirname(__FILE__)."/book.xml");
 if(!$s) {
   echo "Error while loading the document\n";
@@ -6,3 +6,4 @@ if(!$s) {
 }
 $dom = dom_import_simplexml($s);
 print $dom->ownerDocument->saveXML();
+}

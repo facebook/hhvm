@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = new DirectoryIterator(__DIR__);
 $b = clone $a;
 var_dump((string)$b == (string)$a);
@@ -10,3 +10,4 @@ $c = clone $a;
 var_dump((string)$c == (string)$a);
 var_dump($a->key(), $c->key());
 echo "===DONE===\n";
+}

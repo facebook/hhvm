@@ -1,3 +1,4 @@
-<?php
-$return = ob_get_status(true);                                                  
+<?php <<__EntryPoint>> function main() {
+$return = ob_get_status(true);
 var_dump($return);
+}

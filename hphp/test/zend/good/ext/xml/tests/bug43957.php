@@ -1,2 +1,3 @@
-<?php
-  echo utf8_decode('abc'.chr(0xe0));
+<?php <<__EntryPoint>> function main() {
+echo utf8_decode('abc'.chr(0xe0));
+}

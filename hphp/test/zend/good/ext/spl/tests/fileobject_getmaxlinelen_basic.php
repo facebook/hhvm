@@ -1,4 +1,5 @@
-<?php
-$s = new SplFileObject( __FILE__ ); 
-$s->setMaxLineLen( 7 );  
+<?php <<__EntryPoint>> function main() {
+$s = new SplFileObject( __FILE__ );
+$s->setMaxLineLen( 7 );
 echo $s->getMaxLineLen();
+}

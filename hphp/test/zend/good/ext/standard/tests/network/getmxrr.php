@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $domains = array( 'mx1.tests.php.net', 'mx2.tests.php.net' );
 foreach ( $domains as $domain )
 {
@@ -6,4 +6,5 @@ foreach ( $domains as $domain )
     {
         echo "Hosts: " . count( $hosts ) . ", weights: " . count( $weights ) . "\n";
     }
+}
 }

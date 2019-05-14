@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 echo "Testing NAN:\n";
 echo "NAN= ";
 var_dump(NAN);
@@ -14,3 +14,4 @@ var_dump(log10(-1.0) == log(-1.0));
 var_dump(log10(-1.0) != log10(-1.0));
 var_dump(is_finite(log10(-1.0)) == false);
 var_dump(NAN == NAN);
+}

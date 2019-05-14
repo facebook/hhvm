@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);
@@ -9,3 +9,4 @@ $title = $head->appendChild($title);
 $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
 try { $doc->saveHTMLFile(); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 @mkdir("$file_path/realpath_basic4/home/test", 0777, true);
 @symlink("$file_path/realpath_basic4/home", "$file_path/realpath_basic4/link1");
@@ -12,3 +12,4 @@ unlink("$file_path/realpath_basic4/link1");
 rmdir("$file_path/realpath_basic4/home/test");
 rmdir("$file_path/realpath_basic4/home");
 rmdir("$file_path/realpath_basic4");
+}

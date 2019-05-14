@@ -1,3 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $a = "aaa";
 $x = foo(&$a[1]);
+}

@@ -1,4 +1,4 @@
-<?php 
+<?php <<__EntryPoint>> function main() {
 var_dump(unserialize("s:-1:\"\";"));
 var_dump(unserialize("i:823"));
 var_dump(unserialize("O:8:\"stdClass :0:{}"));
@@ -13,3 +13,4 @@ var_dump(unserialize("s:3000:\"123"));
 var_dump(unserialize("s:3:\"123;"));
 var_dump(unserialize("s:0:\"123\";"));
 echo "===DONE===\n";
+}

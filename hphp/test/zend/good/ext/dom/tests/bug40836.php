@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dom = new DOMDocument("1.0", "UTF-8");
 $dom->preserveWhiteSpace = false;
 $xml = (binary)'<?xml version="1.0" encoding="utf-8"?>
@@ -18,3 +18,4 @@ $contentNode = $entry->getElementsByTagName("content")->item(0)->firstChild;
 $dateNode = $entry->getElementsByTagName("updated")->item(0)->firstChild;
 $contentNode->firstChild->insertBefore($dateNode);
 echo $dom->saveXML();
+}

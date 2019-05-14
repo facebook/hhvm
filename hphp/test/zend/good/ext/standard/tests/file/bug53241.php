@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $fn = __DIR__ . "/test.tmp";
 @unlink($fn);
 $fh = fopen($fn, 'xb');
@@ -8,3 +8,4 @@ echo "Done.\n";
 error_reporting(0);
 $fn = __DIR__ . "/test.tmp";
 @unlink($fn);
+}

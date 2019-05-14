@@ -1,4 +1,5 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 DateTime::createFromFormat('s', '0');
 $lastErrors = DateTime::getLastErrors();
 print_r($lastErrors['errors'][0]);
+}

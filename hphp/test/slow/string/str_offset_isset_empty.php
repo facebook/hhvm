@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $str = "ABCDEFGHIJK";
 $arr = array(null, false, true, 3, 4.0, 5.3, 6.7, -2, -2.5, 21, 22.5,
              PHP_INT_MAX, '', '8', '9a', 'foo', '1 ', ' 2', " \t2", " \n2",
@@ -10,4 +10,5 @@ foreach ($arr as $x) {
   var_dump(isset($str[$x]));
   var_dump(!empty($str[$x]));
   echo "\n";
+}
 }

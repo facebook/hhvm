@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dirname = 'DirectoryIterator_getGroup_basic';
 mkdir($dirname);
 $dir = new DirectoryIterator($dirname);
@@ -8,3 +8,4 @@ var_dump($expected == $actual);
 error_reporting(0);
 $dirname = 'DirectoryIterator_getGroup_basic';
 rmdir($dirname);
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 echo "M_E= ";
 var_dump(M_E);
 echo "M_LOG2E= ";
@@ -37,3 +37,4 @@ echo "INF= ";
 var_dump(INF);
 echo "NAN= ";
 var_dump(NAN);
+}

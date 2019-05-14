@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 ob_start();
 ReflectionExtension::export("reflection", true);
 $test = ob_get_clean();
@@ -9,3 +9,4 @@ ReflectionExtension::export("reflection", false);
 $test = ob_get_clean();
 var_dump(empty($test));
 echo "==DONE==";
+}

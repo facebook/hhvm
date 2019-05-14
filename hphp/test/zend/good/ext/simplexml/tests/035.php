@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $string = '<?xml version="1.0"?>
 <foo><bar>
    <p>Blah 1</p>
@@ -13,3 +13,4 @@ echo $p."\n";
 echo $p->__toString()."\n";
 echo $p."\n";
 echo "==Done==";
+}

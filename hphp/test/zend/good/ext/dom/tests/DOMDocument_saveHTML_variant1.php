@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);
@@ -10,3 +10,4 @@ $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
 echo $doc->saveHTML(NULL), "\n";
 echo $doc->saveHTML($title), "\n";
+}

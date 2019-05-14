@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $cwd = dirname(__FILE__);
 $font = "$cwd/Tuffy.ttf";
 $g = imagecreate(100, 50);
@@ -9,3 +9,4 @@ imagepng($g, "$cwd/bug48732.png");
 echo 'Left Bottom: (' . $bbox[0]  . ', ' . $bbox[1] . ')';
 error_reporting(0);
 @unlink(dirname(__FILE__) . '/bug48732.png');
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $filename = __DIR__ . "/SplFileInfo_getGroup_basic";
 touch($filename);
 $fileInfo = new SplFileInfo($filename);
@@ -8,3 +8,4 @@ var_dump($expected == $actual);
 error_reporting(0);
 $filename = __DIR__ . "/SplFileInfo_getGroup_basic";
 unlink($filename);
+}

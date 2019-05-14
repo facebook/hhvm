@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $filename = '';
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
@@ -10,3 +10,4 @@ $title = $head->appendChild($title);
 $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
 $bytes = $doc->saveHTMLFile($filename);
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/DOMDocument_saveHTMLFile_formatOutput".time().".html";
 $doc = new DOMDocument('1.0');
 $doc->formatOutput = true;
@@ -14,3 +14,4 @@ $bytes = $doc->saveHTMLFile($filename);
 var_dump($bytes);
 echo file_get_contents($filename);
 unlink($filename);
+}

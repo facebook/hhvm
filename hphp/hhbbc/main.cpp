@@ -302,6 +302,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   RuntimeOption::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
+  RuntimeOption::EvalLogArrayProvenance = gd.LogArrayProvenance;
   return {
     parallel::map(Repo::get().enumerateUnits(RepoIdCentral, true),
       [&] (const std::pair<std::string,SHA1>& kv) {
@@ -387,6 +388,7 @@ void write_global_data(
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
+  gd.LogArrayProvenance = RuntimeOption::EvalLogArrayProvenance;
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);
   }

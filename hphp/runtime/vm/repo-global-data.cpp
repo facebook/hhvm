@@ -58,6 +58,7 @@ std::string show(const Repo::GlobalData& gd) {
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
   SHOW(IsCompatibleClsMethType);
+  SHOW(LogArrayProvenance);
 #undef SHOW
   return out;
 }

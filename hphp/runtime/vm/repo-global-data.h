@@ -194,6 +194,9 @@ struct Repo::GlobalData {
   /* Skip ClsMeth type refinement when this is true. */
   bool IsCompatibleClsMethType = false;
 
+  /* Avoid optimizations that interfere with array provenance */
+  bool LogArrayProvenance = false;
+
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
@@ -232,6 +235,7 @@ struct Repo::GlobalData {
       (EmitClsMethPointers)
       (IsVecNotices)
       (IsCompatibleClsMethType)
+      (LogArrayProvenance)
       ;
   }
 };

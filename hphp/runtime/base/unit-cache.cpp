@@ -818,6 +818,7 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalIsCompatibleClsMethType ? '1' : '0')
     + (RuntimeOption::EvalNoticeOnByRefArgumentTypehintViolation ? '1' : '0')
     + (RuntimeOption::EvalHackRecords ? '1' : '0')
+    + (RuntimeOption::EvalLogArrayProvenance ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()
     + mangleUnitPHP7Options()

@@ -153,6 +153,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.ReffinessInvariance         = RuntimeOption::EvalReffinessInvariance;
   gd.ForbidDynamicCalls          = RuntimeOption::EvalForbidDynamicCalls;
   gd.EnableArgsInBacktraces      = RuntimeOption::EnableArgsInBacktraces;
+  gd.LogArrayProvenance          = RuntimeOption::EvalLogArrayProvenance;
   gd.NoticeOnBuiltinDynamicCalls =
     RuntimeOption::EvalNoticeOnBuiltinDynamicCalls;
   gd.InitialNamedEntityTableSize =

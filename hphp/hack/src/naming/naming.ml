@@ -1670,9 +1670,7 @@ module Make (GetLocals : GetLocals) = struct
       end in
     { genv with type_params = params }
 
-  and fun_ f =
-    let f = Ast_to_nast.on_fun f in
-    fun_impl_ f
+  and fun_ f = fun_impl_ f
 
   and fun_impl_ f =
     let tparams = make_constraints f.Aast.f_tparams in

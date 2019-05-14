@@ -16,7 +16,7 @@ module Aast = Nast
 val program: Ast.program -> Nast.program
 
 (* Solves the local names within a function *)
-val fun_: Ast.fun_ -> Nast.fun_
+val fun_: Nast.fun_ -> Nast.fun_
 
 (* Solves the local names of a class *)
 val class_: Ast.class_ -> Nast.class_

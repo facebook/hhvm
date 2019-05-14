@@ -26,4 +26,4 @@ let get_fun id =
     match Ast_provider.find_fun_in_file fn id with
     | None -> None
     | Some fun_ ->
-      Some (Naming.fun_ fun_)
+      Some (Naming.fun_ (Ast_to_nast.on_fun fun_))

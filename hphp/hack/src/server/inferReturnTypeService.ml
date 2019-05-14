@@ -42,7 +42,7 @@ let get_fun_return_ty tcopt fun_name =
     map file (fun file -> Ast_provider.find_fun_in_file file fun_name)
   in
   let f = join @@ map funopt (of_option ~error:"Could not find function") in
-  let f = map f Naming.fun_ in
+  let f = map f (fun f -> Naming.fun_ (Ast_to_nast.on_fun f)) in
   let args = to_tuple file f in
   bind args
     (fun (file, f) -> handle_return tcopt file (Fun f) f.f_name f.f_ret)

@@ -195,7 +195,7 @@ let get_class_parents_and_traits env shallow_class =
 (*****************************************************************************)
 
 let rec ifun_decl (f: Ast.fun_) =
-  let f = Errors.ignore_ (fun () -> Naming.fun_ f) in
+  let f = Errors.ignore_ (fun () -> Naming.fun_ (Ast_to_nast.on_fun f)) in
   fun_decl f
 
 and fun_decl f =

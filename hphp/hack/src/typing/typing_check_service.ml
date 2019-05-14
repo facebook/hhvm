@@ -34,7 +34,7 @@ let neutral = Errors.empty
 let type_fun opts fn x =
   match Ast_provider.find_fun_in_file ~full:true fn x with
   | Some f ->
-    let fun_ = Naming.fun_ f in
+    let fun_ = Naming.fun_ (Ast_to_nast.on_fun f) in
     Nast_check.def (Nast.Fun fun_);
     let def_opt = Typing.fun_def opts fun_
       |> Option.map ~f:(fun f -> Tast.Fun f) in

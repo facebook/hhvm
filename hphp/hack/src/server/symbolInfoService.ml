@@ -18,7 +18,7 @@ let recheck_naming filename_l =
       (* We only need to name to find references to locals *)
       List.iter (Ast_provider.get_ast file) begin function
         | Ast.Fun f ->
-            let _ = Naming.fun_ f in
+            let _ = Naming.fun_ (Ast_to_nast.on_fun f) in
             ()
         | Ast.Class c ->
             let _ = Naming.class_ c in

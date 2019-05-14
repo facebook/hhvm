@@ -517,7 +517,7 @@ let compute_least_type tcopt fn =
   let tenv = Typing_infer_return.typing_env_from_file tcopt fn in
   Option.iter (Ast_provider.find_fun_in_file fn "\\test")
     ~f:begin fun f ->
-      let f = Naming.fun_ f in
+      let f = Naming.fun_ (Ast_to_nast.on_fun f) in
       let { Nast.fb_ast; _} = Typing_naming_body.func_body f in
       let types =
         Nast.(List.fold fb_ast ~init:[]

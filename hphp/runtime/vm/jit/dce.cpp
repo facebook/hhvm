@@ -19,6 +19,7 @@
 #include <array>
 #include <folly/MapUtil.h>
 
+#include "hphp/util/match.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/runtime/vm/runtime.h"
@@ -28,6 +29,7 @@
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mutation.h"
+#include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/simple-propagation.h"
@@ -1357,6 +1359,148 @@ IRInstruction* resolveFpDefLabelImpl(
 
 //////////////////////////////////////////////////////////////////////
 
+void processCatchBlock(IRUnit& unit, Block* block,
+                       FPRelOffset stackTop, const UseCounts& uses) {
+  using Bits = std::bitset<64>;
+
+  auto const stackSize = (stackTop.offset < -64) ? 64 : -stackTop.offset;
+  if (stackSize == 0) return;
+  auto const stackBase = stackTop + stackSize;
+  // subtract 1 because we want the cells at offsets -1, -2, ... -stackSize
+  auto const stackRange = AStack { stackBase - 1, stackSize };
+
+  Bits usedLocations = {};
+  // stores that are only read by the EndCatch
+  jit::fast_set<IRInstruction*> candidateStores;
+  // Any IncRefs we see; if they correspond to stores above, we can
+  // replace the store with a store of Null, and kill the IncRef.
+  jit::fast_map<SSATmp*, std::vector<Block::iterator>> candidateIncRefs;
+
+  auto const range =
+    [&] (const AliasClass& cls) -> std::pair<int, int> {
+      if (!cls.maybe(stackRange)) return {};
+      auto const stk = cls.stack();
+      if (!stk) return { 0, stackSize };
+      if (stk->offset < stackTop) {
+        auto const delta = stackTop.offset - stk->offset.offset;
+        if (delta >= stk->size) return {};
+        return { 0, stk->size - delta };
+      }
+      auto const base = stk->offset.offset - stackTop.offset;
+      if (base >= stackSize) return {};
+      auto const end = base + stk->size < stackSize ?
+        base + stk->size : stackSize;
+      return { base, end };
+    };
+
+  auto const process_stack =
+    [&] (const AliasClass& cls) {
+      auto r = range(cls);
+      while (r.first < r.second) {
+        usedLocations.set(r.first++);
+      }
+      return false;
+    };
+
+  auto const do_store =
+    [&] (const AliasClass& cls, IRInstruction* store) {
+      if (!store->is(StStk)) return false;
+      auto const stk = cls.is_stack();
+      if (!stk) return process_stack(cls);
+      auto const r = range(cls);
+      if (r.first != r.second) {
+        assertx(r.second == r.first + 1);
+        if (!usedLocations.test(r.first)) {
+          usedLocations.set(r.first);
+          candidateStores.insert(store);
+        }
+      }
+      return false;
+    };
+
+  auto done = false;
+  for (auto inst = block->end(); inst != block->begin(); ) {
+    --inst;
+    if (inst->is(EndCatch)) {
+      continue;
+    }
+    if (inst->is(IncRef)) {
+      candidateIncRefs[inst->src(0)].push_back(inst);
+      continue;
+    }
+    if (done) continue;
+    auto const effects = canonicalize(memory_effects(*inst));
+    done = match<bool>(
+      effects,
+      [&] (IrrelevantEffects)    { return false; },
+      [&] (UnknownEffects)       { return true; },
+      [&] (ReturnEffects x)      { return true; },
+      [&] (CallEffects x)        { return true; },
+      [&] (GeneralEffects x)     {
+        return
+          process_stack(x.loads) ||
+          process_stack(x.stores) ||
+          process_stack(x.kills);
+      },
+      [&] (PureLoad x)           { return process_stack(x.src); },
+      [&] (PureStore x)          { return do_store(x.dst, &*inst); },
+      [&] (PureSpillFrame x)     { return process_stack(x.stk); },
+      [&] (ExitEffects x)        { return process_stack(x.live); },
+      [&] (InlineEnterEffects x) { return process_stack(x.inlStack); },
+      [&] (InlineExitEffects x)  { return process_stack(x.inlStack); }
+    );
+  }
+
+  for (auto store : candidateStores) {
+    auto const src = store->src(1);
+    auto const it = candidateIncRefs.find(src);
+    if (it != candidateIncRefs.end()) {
+      block->erase(it->second.back());
+      if (it->second.size() > 1) {
+        it->second.pop_back();
+      } else {
+        candidateIncRefs.erase(it);
+      }
+    } else {
+      auto const srcInst = src->inst();
+      if (!srcInst->producesReference() ||
+          !canDCE(srcInst) ||
+          uses[src] != 1) {
+        continue;
+      }
+      srcInst->block()->erase(srcInst);
+    }
+    store->setSrc(1, unit.cns(TInitNull));
+  }
+}
+
+/*
+ * A store to the stack which is post-dominated by the EndCatch and
+ * not otherwise read is only there to ensure the unwinder DecRefs the
+ * value it contains. If there's also an IncRef of the value in the
+ * catch trace we can just store InitNull to the stack location and
+ * drop the IncRef (and later, maybe adjust the sp of the
+ * catch-trace's owner so we don't even have to do the store).
+ */
+void optimizeCatchBlocks(const BlockList& blocks,
+                         DceState& state,
+                         IRUnit& unit,
+                         const UseCounts& uses) {
+
+  for (auto block : blocks) {
+    if (block->back().is(EndCatch) &&
+        block->back().extra<EndCatch>()->mode == EndCatchData::UnwindOnly &&
+        block->front().is(BeginCatch)) {
+      auto const astk = AStack {
+        block->back().src(1), block->back().extra<EndCatch>()->offset, 0
+      };
+      processCatchBlock(unit, block, astk.offset, uses);
+    }
+  }
+}
+
+//////////////////////////////////////////////////////////////////////
+
 } // anonymous namespace
 
 IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
@@ -1523,9 +1667,11 @@ void fullDCE(IRUnit& unit) {
         }
       }
 
-      if (srcInst->is(CreateSSWH)) {
+      if (srcInst->producesReference() && canDCE(srcInst)) {
         ++uses[src];
-        if (inst->is(DecRef)) decs[srcInst].emplace_back(inst);
+        if (srcInst->is(CreateSSWH) && inst->is(DecRef)) {
+          decs[srcInst].emplace_back(inst);
+        }
       }
 
       if (state[srcInst].isDead()) {
@@ -1548,6 +1694,8 @@ void fullDCE(IRUnit& unit) {
       else state[dec].setDead();
     }
   }
+
+  optimizeCatchBlocks(blocks, state, unit, uses);
 
   if (RuntimeOption::EvalHHIRInlineFrameOpts) {
     optimizeActRecs(blocks, state, unit, uses);

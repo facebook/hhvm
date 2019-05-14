@@ -1000,7 +1000,9 @@ inline void putClsRef(
  * Creates a catch block and calls body immediately as the catch block begins
  */
 template<class Body>
-Block* create_catch_block(IRGS& env, Body body) {
+Block* create_catch_block(
+    IRGS& env, Body body,
+    EndCatchData::CatchMode mode = EndCatchData::UnwindOnly) {
  auto const catchBlock = defBlock(env, Block::Hint::Unused);
  BlockPusher bp(*env.irb, env.irb->curMarker(), catchBlock);
 
@@ -1009,7 +1011,7 @@ Block* create_catch_block(IRGS& env, Body body) {
 
  gen(env, BeginCatch);
  body();
- gen(env, EndCatch, IRSPRelOffsetData { spOffBCFromIRSP(env) },
+ gen(env, EndCatch, EndCatchData { spOffBCFromIRSP(env), mode },
      fp(env), sp(env));
  return catchBlock;
 }

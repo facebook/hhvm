@@ -52,29 +52,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-struct ParamPrep {
-  explicit ParamPrep(size_t count) : info(count) {}
-
-  struct Info {
-    SSATmp* value{nullptr};
-    bool passByAddr{false};
-    bool needsConversion{false};
-    bool isOutputArg{false};
-  };
-
-  const Info& operator[](size_t idx) const { return info[idx]; }
-  Info& operator[](size_t idx) { return info[idx]; }
-  size_t size() const { return info.size(); }
-
-  SSATmp* thiz{nullptr};       // may be null if call is not a method
-  jit::vector<Info> info;
-  uint32_t numByAddr{0};
-
-  bool forNativeImpl{false};
-};
-
-//////////////////////////////////////////////////////////////////////
-
 const StaticString
   s_is_a("is_a"),
   s_is_subclass_of("is_subclass_of"),
@@ -105,7 +82,37 @@ const StaticString
   s_container_first_key("HH\\Lib\\_Private\\Native\\first_key"),
   s_container_last_key("HH\\Lib\\_Private\\Native\\last_key"),
   s_class_meth_get_class("HH\\class_meth_get_class"),
-  s_class_meth_get_method("HH\\class_meth_get_method");
+  s_class_meth_get_method("HH\\class_meth_get_method"),
+  s_vm_switch_mode("__VMSwitchMode");
+
+//////////////////////////////////////////////////////////////////////
+
+struct ParamPrep {
+  explicit ParamPrep(size_t count, const Func* callee) :
+      info{count},
+      vmSwitchMode{
+        callee->userAttributes().count(s_vm_switch_mode.get()) != 0
+      }
+  {}
+
+  struct Info {
+    SSATmp* value{nullptr};
+    bool passByAddr{false};
+    bool needsConversion{false};
+    bool isOutputArg{false};
+  };
+
+  const Info& operator[](size_t idx) const { return info[idx]; }
+  Info& operator[](size_t idx) { return info[idx]; }
+  size_t size() const { return info.size(); }
+
+  SSATmp* thiz{nullptr};       // may be null if call is not a method
+  jit::vector<Info> info;
+  uint32_t numByAddr{0};
+
+  bool vmSwitchMode{false};
+  bool forNativeImpl{false};
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -136,7 +143,7 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
     decRef(env, params[i].value);
   }
   gen(env, EndCatch,
-      IRSPRelOffsetData { spOffBCFromIRSP(env) },
+      EndCatchData { spOffBCFromIRSP(env), EndCatchData::UnwindOnly },
       fp(env), sp(env));
   return exit;
 }
@@ -963,7 +970,7 @@ ParamPrep
 prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
                uint32_t numArgs, uint32_t numNonDefault, bool forNativeImpl,
                LoadParam loadParam) {
-  auto ret = ParamPrep(numArgs);
+  auto ret = ParamPrep{numArgs, callee};
   ret.thiz = thiz;
   ret.forNativeImpl = forNativeImpl;
 
@@ -1055,8 +1062,13 @@ struct CatchMaker {
     gen(env, BeginCatch);
     decRefParams();
     prepareForCatch();
-    gen(env, EndCatch,
-        IRSPRelOffsetData { spOffBCFromIRSP(env) },
+    gen(env,
+        EndCatch,
+        EndCatchData {
+          spOffBCFromIRSP(env),
+          m_params.vmSwitchMode ?
+            EndCatchData::BuiltinSwitchMode : EndCatchData::UnwindOnly
+        },
         fp(env), sp(env));
     return exit;
   }

@@ -50,7 +50,7 @@ namespace {
    * @return bool - TRUE if the program successfully broke in (and has since
    *   resumed), FALSE if no debugger was attached.
    */
-  <<__HipHopSpecific, __Native("NoFCallBuiltin")>>
+  <<__HipHopSpecific, __Native("NoFCallBuiltin"), __VMSwitchMode>>
   function hphp_debug_break(bool $condition = true): bool;
 
   /* Customizes the behavior of the debugger by setting an option flag on or off

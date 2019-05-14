@@ -1518,7 +1518,31 @@ struct AssertReason : IRExtraData {
 
   Reason reason;
 };
+
 #define ASSERT_REASON AssertReason{Reason{__FILE__, __LINE__}}
+
+struct EndCatchData : IRSPRelOffsetData {
+  enum CatchMode {
+    UnwindOnly,
+    SwitchMode,
+    BuiltinSwitchMode,
+    SideExit
+  };
+
+  explicit EndCatchData(IRSPRelOffset offset, CatchMode mode) :
+      IRSPRelOffsetData{offset}, mode{mode} {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      IRSPRelOffsetData::show(), ",",
+      mode == UnwindOnly ? "UnwindOnly" :
+      mode == SwitchMode ? "SwitchMode" :
+      mode == BuiltinSwitchMode ?
+      "BuiltinSwitchMode" : "SideExit");
+  }
+
+  CatchMode mode;
+};
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1705,7 +1729,6 @@ X(AssertARFunc,                 IRSPRelOffsetData);
 X(LdARFuncPtr,                  IRSPRelOffsetData);
 X(LdARIsDynamic,                IRSPRelOffsetData);
 X(LdARCtx,                      IRSPRelOffsetData);
-X(EndCatch,                     IRSPRelOffsetData);
 X(EagerSyncVMRegs,              IRSPRelOffsetData);
 X(JmpSSwitchDest,               IRSPRelOffsetData);
 X(DbgTrashStk,                  IRSPRelOffsetData);
@@ -1738,6 +1761,7 @@ X(VerifyRetCls,                 ParamData);
 X(VerifyRetFail,                ParamData);
 X(VerifyRetFailHard,            ParamData);
 X(VerifyReifiedLocalType,       ParamData);
+X(EndCatch,                     EndCatchData);
 
 #undef X
 

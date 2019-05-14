@@ -1503,9 +1503,10 @@ void fullDCE(IRUnit& unit) {
   // work list; this will also mark reachable exit traces. All
   // other instructions marked dead.
   DceState state(unit, DceFlags());
+  WorkList wl = initInstructions(unit, blocks, state);
+
   UseCounts uses(unit, 0);
   jit::fast_map<IRInstruction*, jit::vector<IRInstruction*>> decs;
-  WorkList wl = initInstructions(unit, blocks, state);
 
   // process the worklist
   while (!wl.empty()) {
@@ -1534,7 +1535,7 @@ void fullDCE(IRUnit& unit) {
     }
   }
 
-  // If evert use of CreateSSWH is a DecRef, then it must be DecRef'd exactly
+  // If every use of CreateSSWH is a DecRef, then it must be DecRef'd exactly
   // once on every path to an exit from the region (otherwise we would have a
   // leak or double-free of the StaticWaitHandle). Since each of these DecRefs
   // destroy the SSWH they must also DecRef its src.

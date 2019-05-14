@@ -883,7 +883,7 @@ void syncCatchTraces(OptimizeContext& ctx, BlockSet& exitBlocks) {
       auto sync = ctx.unit->gen(
         EagerSyncVMRegs,
         endCatch.bcctx(),
-        *endCatch.extra<EndCatch>(),
+        IRSPRelOffsetData { endCatch.extra<EndCatch>()->offset },
         endCatch.src(0),
         endCatch.src(1)
       );

@@ -89,7 +89,15 @@ SSATmp* genInstruction(IRGS& env, IRInstruction* inst) {
      * information.
      */
     check_catch_stack_state(env, inst);
-    inst->setTaken(create_catch_block(env, []{}));
+    inst->setTaken(
+      create_catch_block(
+        env,
+        []{},
+        inst->is(Call) ||
+        inst->is(CallUnpack) ?
+        EndCatchData::SwitchMode : EndCatchData::UnwindOnly
+      )
+    );
   }
 
   if (inst->mayRaiseError()) {

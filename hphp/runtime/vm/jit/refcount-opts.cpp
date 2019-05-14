@@ -3293,7 +3293,7 @@ bool pre_apply(PreEnv& penv, bool incDec) {
                        bool removeDec, bool insertAtFront) {
       if (removeDec ? inst.is(DecRef, DecRefNZ) : inst.is(IncRef)) {
         auto const id = penv.env.asetMap[inst.src(0)];
-        if (del.test(id)) {
+        if (id >= 0 && del.test(id)) {
           FTRACE(3, "delete: {} = {}\n", id, inst.toString());
           remove_helper(penv.env.unit, &inst);
           del.reset(id);

@@ -45,7 +45,7 @@ let type_fun opts fn x =
 let type_class opts fn x =
   match Ast_provider.find_class_in_file ~full:true fn x with
   | Some cls ->
-    let class_ = Naming.class_ cls in
+    let class_ = Naming.class_ (Ast_to_nast.on_class cls) in
     Nast_check.def (Nast.Class class_);
     let def_opt =
       Typing.class_def opts class_

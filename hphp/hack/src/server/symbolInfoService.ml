@@ -21,7 +21,7 @@ let recheck_naming filename_l =
             let _ = Naming.fun_ (Ast_to_nast.on_fun f) in
             ()
         | Ast.Class c ->
-            let _ = Naming.class_ c in
+            let _ = Naming.class_ (Ast_to_nast.on_class c) in
             ()
         | _ -> ()
       end

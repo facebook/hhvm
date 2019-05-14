@@ -19,7 +19,7 @@ val program: Ast.program -> Nast.program
 val fun_: Nast.fun_ -> Nast.fun_
 
 (* Solves the local names of a class *)
-val class_: Ast.class_ -> Nast.class_
+val class_: Nast.class_ -> Nast.class_
 
 (* Solves the local names in an typedef *)
 val typedef: Nast.typedef -> Nast.typedef

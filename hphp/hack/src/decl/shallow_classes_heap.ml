@@ -20,7 +20,7 @@ let push_local_changes = Classes.LocalChanges.push_stack
 let pop_local_changes = Classes.LocalChanges.pop_stack
 
 let class_naming_and_decl c =
-  let c = Errors.ignore_ (fun () -> Naming.class_ c) in
+  let c = Errors.ignore_ (fun () -> Naming.class_ (Ast_to_nast.on_class c)) in
   Shallow_decl.class_ c
 
 let shallow_decl_enabled () =

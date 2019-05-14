@@ -59,7 +59,7 @@ let get_meth_return_ty tcopt class_name meth_name =
      map file (fun file -> Ast_provider.find_class_in_file file class_name)
   in
   let c = join @@ map classopt (of_option ~error:"Could not find class") in
-  let c = map c Naming.class_ in
+  let c = map c (fun c -> Naming.class_ (Ast_to_nast.on_class c)) in
   let meth_list =
     map c
       (fun c ->

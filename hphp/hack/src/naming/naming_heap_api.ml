@@ -16,7 +16,7 @@ let get_class id =
     match Ast_provider.find_class_in_file fn id with
     | None -> None
     | Some class_ ->
-      Some (Naming.class_ class_)
+      Some (Naming.class_ (Ast_to_nast.on_class class_))
 
 let get_fun id =
   match Naming_table.Funs.get_pos id with

@@ -1090,11 +1090,6 @@ module Make (GetLocals : GetLocals) = struct
 
   (* Naming of a class *)
   let rec class_ c =
-    let c = Ast_to_nast.on_class c in
-    class_impl_ c
-
-  (* Naming of a class (aast version) *)
-  and class_impl_ c =
     let constraints = make_constraints c.Aast.c_tparams.Aast.c_tparam_list in
     let env = Env.make_class_env constraints c in
     (* Checking for a code smell *)
@@ -2869,7 +2864,7 @@ module Make (GetLocals : GetLocals) = struct
     let rec aux acc def =
       match def with
       | Aast.Fun f -> (N.Fun (fun_ f)) :: acc
-      | Aast.Class c -> (N.Class (class_impl_ c)) :: acc
+      | Aast.Class c -> (N.Class (class_ c)) :: acc
       | Aast.Stmt (_, Aast.Noop)
       | Aast.Stmt (_, Aast.Markup _) -> acc
       | Aast.Stmt s -> (N.Stmt (stmt !top_level_env s)) :: acc

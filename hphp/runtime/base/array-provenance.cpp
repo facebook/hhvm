@@ -22,6 +22,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/util/type-scan.h"
 
+#include <folly/AtomicHashMap.h>
 #include <folly/container/F14Map.h>
 
 
@@ -30,6 +31,8 @@ namespace HPHP { namespace arrprov {
 namespace {
 
 RDS_LOCAL(ArrayProvenanceTable, rl_array_provenance);
+folly::F14FastMap<const ArrayData*, Tag> s_static_array_provenance;
+std::mutex s_static_provenance_lock;
 
 /*
  * Flush the table after each request since none of the ArrayData*s will be
@@ -45,7 +48,6 @@ InitFiniNode flushTable([]{
 namespace unchecked {
 
 bool arrayWantsTag(const ArrayData* ad) {
-  if (!ad->isRefCounted()) return false;
   auto const kind = ad->kind();
   return kind == ArrayData::ArrayKind::kVecKind ||
          kind == ArrayData::ArrayKind::kDictKind;
@@ -56,12 +58,22 @@ void setTag(ArrayData* ad, const Tag& tag) {
   assertx(!ad->empty());
   assertx(!getTag(ad));
   ad->markHasProvenanceData();
-  rl_array_provenance->tags[ad] = tag;
+  if (ad->isRefCounted()) {
+    rl_array_provenance->tags[ad] = tag;
+  } else {
+    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    s_static_array_provenance[ad] = tag;
+  }
 }
 
 folly::Optional<Tag> getTag(const ArrayData* ad) {
   if (!ad->hasProvenanceData()) return {};
-  return rl_array_provenance->tags[ad];
+  if (ad->isRefCounted()) {
+    return rl_array_provenance->tags[ad];
+  } else {
+    std::lock_guard<std::mutex> g{s_static_provenance_lock};
+    return s_static_array_provenance.find(ad)->second;
+  }
 }
 
 void clearTag(const ArrayData* ad) {

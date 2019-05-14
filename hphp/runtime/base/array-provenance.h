@@ -139,6 +139,12 @@ inline void clearTag(ArrayData* ad) {
   if (!RuntimeOption::EvalLogArrayProvenance) return;
   unchecked::clearTag(ad);
 }
+inline void copyTagStatic(const ArrayData* src, ArrayData* dest) {
+  if (!RuntimeOption::EvalLogArrayProvenance) return;
+  if (auto const tag = unchecked::getTag(src)) {
+    unchecked::setTag(dest, *tag);
+  }
+}
 
 } // inline namespace checked
 

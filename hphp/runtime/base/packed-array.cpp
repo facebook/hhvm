@@ -356,6 +356,8 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
     packSizeIndexAndAuxBits(sizeIndex, adIn->auxBits())
   );
 
+  arrprov::copyTagStatic(adIn, ad);
+
   assertx(ad->kind() == adIn->kind());
   assertx(ad->dvArray() == adIn->dvArray());
   assertx(capacity(ad) >= adIn->m_size);
@@ -386,6 +388,8 @@ ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
        pos = arr->iter_advance(pos), ++i) {
     tvDupWithRef(arr->atPos(pos), LvalUncheckedInt(ad, i), arr);
   }
+
+  arrprov::copyTagStatic(arr, ad);
 
   assertx(ad->isPacked());
   assertx(capacity(ad) >= arr->m_size);

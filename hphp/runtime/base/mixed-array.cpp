@@ -497,7 +497,9 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
 NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto a = asMixed(in);
   assertx(a->checkInvariants());
-  return CopyMixed(*a, AllocMode::Static, in->m_kind, in->dvArray());
+  auto ret = CopyMixed(*a, AllocMode::Static, in->m_kind, in->dvArray());
+  arrprov::copyTagStatic(in, ret);
+  return ret;
 }
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {

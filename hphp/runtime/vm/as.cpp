@@ -798,6 +798,18 @@ struct AsmState {
   bool emittedPseudoMain{false};
   bool emittedTopLevelFunc{false};
 
+  /*
+   * Map of adata identifiers to their serialized contents
+   * Needed because, when instrumenting array provenance, we're unable
+   * to initialize their static arrays until the adata is first referenced
+   *
+   * There's also some painful maneuvering around keeping either the serialized
+   * or unserialized array in request heap until it can be made static since
+   * this could potentially confusingly OOM a request that autoloads a large
+   * unit
+   */
+  std::unordered_map<std::string, std::vector<char>> adataDecls;
+
   // Map of adata identifiers to their associated static arrays and potential DV
   // overrides.
   std::map<
@@ -901,9 +913,9 @@ void StackDepth::setCurrentAbsolute(AsmState& as, int stackDepth) {
 }
 
 template<class F>
-void suppressOOM(F func) {
+decltype(auto) suppressOOM(F func) {
   MemoryManager::SuppressOOM so(*tl_heap);
-  func();
+  return func();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -976,6 +988,9 @@ std::vector<std::string> read_strvector(AsmState& as) {
   return ret;
 }
 
+Variant parse_php_serialized(folly::StringPiece,
+                             VariableSerializer::DVOverrides*);
+
 std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
   as.in.skipSpaceTab();
   if (as.in.getc() != '@') {
@@ -986,11 +1001,36 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
     as.error("expected name of .adata literal");
   }
 
-  auto const it = as.adataMap.find(name);
-  if (it == as.adataMap.end()) {
-    as.error("unknown array data literal name " + name);
-  }
-  return {it->second.first, std::move(name)};
+  auto adata = [&]() -> ArrayData* {
+    auto const it = as.adataMap.find(name);
+    if (it != as.adataMap.end()) return it->second.first;
+    auto const decl = as.adataDecls.find(name);
+    if (decl == as.adataDecls.end()) return nullptr;
+    auto& buf = decl->second;
+    return suppressOOM([&] {
+      VariableSerializer::DVOverrides overrides;
+      auto var = parse_php_serialized(
+        buf,
+        RuntimeOption::EvalHackArrDVArrs ? &overrides : nullptr
+      );
+      if (!var.isArray()) {
+        as.error(".adata only supports serialized arrays");
+      }
+
+      auto const line = as.srcLoc.line0;
+      auto const filename = as.ue->m_filepath;
+      auto data = var.detach().m_data.parr;
+      if (!data->empty()) arrprov::setTag(data, {filename, line});
+      ArrayData::GetScalarArray(&data);
+      as.adataMap[name] = std::make_pair(data, std::move(overrides));
+      as.adataDecls.erase(decl);
+      return data;
+    });
+  }();
+
+  if (!adata) as.error("unknown array data literal name " + name);
+
+  return {adata, std::move(name)};
 }
 
 RepoAuthType read_repo_auth_type(AsmState& as) {
@@ -1693,13 +1733,7 @@ struct Initializer {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * long-string-literal: <string>
- *
- * `long-string-literal' is a python-style longstring.  See
- * readLongString for more details.
- */
-String parse_long_string(AsmState& as) {
+std::vector<char> parse_long_string_raw(AsmState& as) {
   as.in.skipWhitespace();
 
   std::vector<char> buffer;
@@ -1713,6 +1747,18 @@ String parse_long_string(AsmState& as) {
   // String wants a null, and dereferences one past the size we give
   // it.
   buffer.push_back('\0');
+
+  return buffer;
+}
+
+/*
+ * long-string-literal: <string>
+ *
+ * `long-string-literal' is a python-style longstring.  See
+ * readLongString for more details.
+ */
+String parse_long_string(AsmState& as) {
+  auto buffer = parse_long_string_raw(as);
   return String(&buffer[0], buffer.size() - 1, CopyString);
 }
 
@@ -1779,10 +1825,9 @@ Variant checkSize(Variant val) {
  * caller to make sure it is a legal literal.
  */
 Variant parse_php_serialized(
-  AsmState& as,
+  folly::StringPiece str,
   VariableSerializer::DVOverrides* overrides = nullptr
 ) {
-  auto const str = parse_long_string(as);
   VariableUnserializer vu(
     str.data(),
     str.size(),
@@ -1801,6 +1846,14 @@ Variant parse_php_serialized(
       folly::sformat("AssemblerUnserializationError: {}", e.what());
     throw AssemblerUnserializationError(msg);
   }
+}
+
+Variant parse_php_serialized(
+  AsmState& as,
+  VariableSerializer::DVOverrides* overrides = nullptr
+) {
+  auto str = parse_long_string(as);
+  return parse_php_serialized(str.slice(), overrides);
 }
 
 /*
@@ -3283,21 +3336,7 @@ void parse_adata(AsmState& as) {
   }
 
   as.in.expectWs('=');
-
-  suppressOOM([&] {
-    VariableSerializer::DVOverrides overrides;
-    auto var = parse_php_serialized(
-      as,
-      RuntimeOption::EvalHackArrDVArrs ? &overrides : nullptr
-    );
-    if (!var.isArray()) {
-      as.error(".adata only supports serialized arrays");
-    }
-    auto const data = ArrayData::GetScalarArray(std::move(var));
-    as.ue->mergeArray(data);
-    as.adataMap[dataLabel] = std::make_pair(data, std::move(overrides));
-  });
-
+  as.adataDecls[dataLabel] = parse_long_string_raw(as);
   as.in.expectWs(';');
 }
 

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
@@ -76,6 +77,11 @@ struct ScalarHash {
       : ArrayData::ArrayKind::kMixedKind
     };
     ret |= (uint64_t{arr->dvArray()} << 32);
+
+    if (auto const tag = arrprov::getTag(arr)) {
+      ret = folly::hash::hash_combine(ret, tag->line());
+      ret = folly::hash::hash_combine(ret, tag->filename());
+    }
 
     IterateKV(
       arr,

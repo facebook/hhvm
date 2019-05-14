@@ -16,12 +16,15 @@ module SLC = ServerLocalConfig
 
 include ServerInitTypes
 
-let run_search (genv: ServerEnv.genv) (t: float) : unit =
+let run_search
+    (genv: ServerEnv.genv)
+    (t: float)
+    (env: SearchUtils.local_tracking_env ref): unit =
   if SearchServiceRunner.should_run_completely genv
     (SymbolIndex.get_search_provider ())
   then begin
     (* The duration is already logged by SearchServiceRunner *)
-    SearchServiceRunner.run_completely genv;
+    SearchServiceRunner.run_completely genv env;
     HackEventLogger.update_search_end t
   end
   else ()
@@ -153,7 +156,7 @@ let init
     ~savedstate_file_opt:genv.local_config.ServerLocalConfig.symbolindex_file
     ~workers:genv.workers;
 
-  run_search genv t;
+  run_search genv t env.ServerEnv.local_symbol_table;
   SharedMem.init_done ();
   ServerUtils.print_hash_stats ();
   env, init_result

@@ -34,6 +34,7 @@ val find_matching_symbols :
     query_text:string ->
     max_results:int ->
     kind_filter:SearchUtils.si_kind option ->
+    env:SearchUtils.local_tracking_env ->
     SearchUtils.si_results
 
 (* Legacy query interface for "Symbol Search", depends on multiworker *)
@@ -59,9 +60,11 @@ val query_for_autocomplete :
 val update_files :
   MultiWorker.worker list option ->
   (Relative_path.t * SearchUtils.info * SearchUtils.file_source) list ->
+  SearchUtils.local_tracking_env ref ->
   unit
 
 (* Notify the search service that certain files have been removed locally *)
 val remove_files :
   Relative_path.Set.t ->
+  SearchUtils.local_tracking_env ref ->
   unit

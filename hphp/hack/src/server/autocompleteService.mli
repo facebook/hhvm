@@ -22,5 +22,6 @@ val go :
   content_classes:Reordered_argument_collections.SSet.t ->
   autocomplete_context: AutocompleteTypes.legacy_autocomplete_context ->
   basic_only:bool ->
+  env:SearchUtils.local_tracking_env ->
   Tast.program ->
   AutocompleteTypes.complete_autocomplete_result list Utils.With_complete_flag.t

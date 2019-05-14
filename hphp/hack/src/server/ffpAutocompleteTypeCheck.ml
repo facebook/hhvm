@@ -33,6 +33,7 @@ let run
   ~(pos:File_content.position)
   ~(tcopt:TypecheckerOptions.t)
   ~(basic_only:bool)
+  ~(env:SearchUtils.local_tracking_env)
   : AutocompleteTypes.complete_autocomplete_result list =
   if local_variable_valid_in_context context stub ||
      should_complete_function context ||
@@ -40,7 +41,7 @@ let run
   then
     let ac_results = ServerAutoComplete.auto_complete_at_position
       ~is_manually_invoked:false ~delimit_on_namespaces:true ~file_content ~pos ~tcopt
-      ~basic_only
+      ~basic_only ~env
     in
     let open Utils.With_complete_flag in
     ac_results.value

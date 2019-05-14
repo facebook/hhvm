@@ -715,7 +715,7 @@ let main_hack opts =
   decl_and_run_mode opts
 
 (* command line driver *)
-let _ =
+let () =
   Printexc.record_backtrace true;
   try
     if ! Sys.interactive

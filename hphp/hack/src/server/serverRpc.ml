@@ -60,7 +60,12 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
           is_after_quote = false;
         } in (* feature not implemented here; it only works for LSP *)
         let result = ServerAutoComplete.auto_complete
-          ~tcopt:env.tcopt ~delimit_on_namespaces:false ~autocomplete_context ~basic_only content in
+          ~tcopt:env.tcopt
+          ~delimit_on_namespaces:false
+          ~autocomplete_context
+          ~basic_only
+          ~env:(!(env.ServerEnv.local_symbol_table))
+          content in
         env, result.With_complete_flag.value
     | IDENTIFY_FUNCTION (file_input, line, char) ->
         let content = ServerFileSync.get_file_content file_input in
@@ -127,7 +132,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       else
         env, Error "There are typecheck errors; cannot generate saved state."
     | SEARCH (query, type_) ->
-       env, ServerSearch.go genv.workers query type_
+      let lst = env.ServerEnv.local_symbol_table in
+       env, ServerSearch.go genv.workers query type_ !lst
     | COVERAGE_COUNTS path -> env, ServerCoverageMetric.go path genv env
     | LINT fnl -> env, ServerLint.go genv env fnl
     | LINT_STDIN { filename; contents } ->
@@ -167,7 +173,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let results = ServerAutoComplete.auto_complete_at_position
           ~delimit_on_namespaces ~is_manually_invoked ~file_content ~basic_only ~pos
-          ~tcopt:env.tcopt
+          ~tcopt:env.tcopt ~env:!(env.ServerEnv.local_symbol_table)
         in
         let completions = results.value in
         let is_complete = results.is_complete in
@@ -180,7 +186,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let basic_only = genv.local_config.ServerLocalConfig.basic_autocomplete_only in
         let result =
           FfpAutocompleteService.auto_complete env.tcopt content pos
-            ~basic_only ~filter_by_token:false
+            ~basic_only ~filter_by_token:false ~env:!(env.ServerEnv.local_symbol_table)
         in
         env, { AutocompleteTypes.completions = result; char_at_pos; is_complete = true; }
     | DISCONNECT ->

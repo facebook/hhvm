@@ -193,3 +193,9 @@ type si_results =
 type file_source =
   | SavedState
   | TypeChecker
+
+(* Represents files changed on disk *)
+type local_tracking_env = {
+  lte_fileinfos: FileInfo.t Relative_path.Map.t;
+  lte_filenames: FileInfo.names Relative_path.Map.t;
+}

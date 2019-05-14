@@ -788,15 +788,16 @@ let si_kind_to_autocomplete_kind
 
 (* Find global autocomplete results *)
 let find_global_results
-  ~kind_filter
-  ~max_results
-  ~completion_type
-  ~tcopt
-  ~delimit_on_namespaces
-  ~autocomplete_context
-  ~content_funs
-  ~content_classes
-  ~basic_only
+  ~(kind_filter: SearchUtils.si_kind option ref)
+  ~(max_results: int)
+  ~(completion_type: SearchUtils.autocomplete_type option)
+  ~(tcopt: TypecheckerOptions.t)
+  ~(delimit_on_namespaces: bool)
+  ~(content_funs: Reordered_argument_collections.SSet.t)
+  ~(content_classes: Reordered_argument_collections.SSet.t)
+  ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
+  ~(basic_only: bool)
+  ~(env: SearchUtils.local_tracking_env)
   : unit =
 
   (* Select the provider to use for symbol autocomplete *)
@@ -826,6 +827,7 @@ let find_global_results
       ~query_text
       ~max_results
       ~kind_filter:!kind_filter
+      ~env
     in
     List.iter results ~f:(fun r ->
       let open SearchUtils in
@@ -842,12 +844,13 @@ let find_global_results
 
 (* Main entry point for autocomplete *)
 let go
-    ~tcopt
-    ~delimit_on_namespaces
-    ~content_funs
-    ~content_classes
-    ~autocomplete_context
-    ~basic_only
+    ~(tcopt: TypecheckerOptions.t)
+    ~(delimit_on_namespaces: bool)
+    ~(content_funs: Reordered_argument_collections.SSet.t)
+    ~(content_classes: Reordered_argument_collections.SSet.t)
+    ~(autocomplete_context: AutocompleteTypes.legacy_autocomplete_context)
+    ~(basic_only: bool)
+    ~(env: SearchUtils.local_tracking_env)
     tast
   =
   reset ();
@@ -871,11 +874,12 @@ let go
         ~autocomplete_context
         ~content_funs
         ~content_classes
-        ~basic_only;
+        ~basic_only
+        ~env;
     end;
 
     if completion_type = Some Acprop then compute_complete_local tast;
-    let env = match !ac_env with
+    let tast_env = match !ac_env with
       | Some e -> e
       | None -> Tast_env.empty tcopt
     in
@@ -891,7 +895,7 @@ let go
     in
     let resolve (result: autocomplete_result) : complete_autocomplete_result =
       match result with
-      | Partial res -> resolve_ty env autocomplete_context res ~delimit_on_namespaces
+      | Partial res -> resolve_ty tast_env autocomplete_context res ~delimit_on_namespaces
       | Complete res -> res
     in
     let results = {

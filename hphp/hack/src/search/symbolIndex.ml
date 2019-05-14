@@ -123,7 +123,8 @@ let log_symbol_index_search
 let find_matching_symbols
     ~(query_text: string)
     ~(max_results: int)
-    ~(kind_filter: si_kind option): si_results =
+    ~(kind_filter: si_kind option)
+    ~(env: SearchUtils.local_tracking_env): si_results =
   let provider = get_search_provider () in
   (*
    * Nuclide often sends this exact request to verify that HH is working.
@@ -151,7 +152,8 @@ let find_matching_symbols
           ~query_text
           ~max_results
           ~kind_filter
-          ~env:(LocalSearchService.get_env ())) ~name:"Local search";
+          ~env)
+          ~name:"Local search";
     in
     Hh_logger.log "Found %d local matches" (List.length local_results);
 
@@ -221,7 +223,8 @@ let query_for_autocomplete
  *)
 let update_files
     (worker_list_opt: MultiWorker.worker list option)
-    (paths: (Relative_path.t * info * file_source) list): unit =
+    (paths: (Relative_path.t * info * file_source) list)
+    (env: SearchUtils.local_tracking_env ref): unit =
   match get_search_provider () with
   | AllLocalIndex
   | GleanApiIndex
@@ -231,7 +234,7 @@ let update_files
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
       if detector = SearchUtils.TypeChecker then
-        LocalSearchService.update_file path info
+        env := LocalSearchService.update_file path info !env;
     );
   | TrieIndex ->
     HackSearchService.update_from_typechecker worker_list_opt paths
@@ -241,7 +244,9 @@ let update_files
  * This method is called when the typechecker is about to re-check a file.
  * Any local caches should be cleared of values for this file.
  *)
-let remove_files (paths: Relative_path.Set.t): unit =
+let remove_files
+    (paths: Relative_path.Set.t)
+    (env: SearchUtils.local_tracking_env ref): unit =
   match get_search_provider () with
   | AllLocalIndex
   | GleanApiIndex
@@ -250,7 +255,7 @@ let remove_files (paths: Relative_path.Set.t): unit =
   | RipGrepIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->
-        LocalSearchService.remove_file path;
+        env := LocalSearchService.remove_file path !env;
       );
   | TrieIndex ->
     HackSearchService.MasterApi.clear_shared_memory paths

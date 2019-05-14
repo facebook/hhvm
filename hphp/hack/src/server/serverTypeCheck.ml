@@ -244,7 +244,7 @@ let parsing genv env to_check ~stop_at_errors =
   Ast_provider.remove_batch ide_files;
   Fixme_provider.remove_batch ide_files;
 
-  SymbolIndex.remove_files to_check;
+  SymbolIndex.remove_files to_check env.local_symbol_table;
   SharedMem.collect `gentle;
   let get_next = MultiWorker.next
     genv.workers (Relative_path.Set.elements disk_files) in
@@ -258,7 +258,7 @@ let parsing genv env to_check ~stop_at_errors =
   if SearchServiceRunner.should_run_completely genv
       (SymbolIndex.get_search_provider ())
   then
-    SearchServiceRunner.run_completely genv;
+    SearchServiceRunner.run_completely genv env.local_symbol_table;
 
   if stop_at_errors then begin
     (* Revert changes and ignore results for IDE files that failed parsing *)

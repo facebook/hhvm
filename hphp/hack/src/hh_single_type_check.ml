@@ -840,7 +840,7 @@ let typecheck_tasts tasts tcopt (filename:Relative_path.t) =
 
 let handle_mode
   mode filenames tcopt popt builtins files_contents files_info parse_errors
-  all_errors error_format batch_mode out_extension =
+  all_errors error_format batch_mode out_extension (env: SearchUtils.local_tracking_env) =
   let expect_single_file () : Relative_path.t =
     match filenames with
     | [x] -> x
@@ -864,7 +864,7 @@ let handle_mode
 
       let result = ServerAutoComplete.auto_complete_at_position
         ~tcopt ~pos ~is_manually_invoked ~delimit_on_namespaces:false ~file_content:file
-        ~basic_only:false
+        ~basic_only:false ~env
       in
       List.iter ~f: begin fun r ->
         let open AutocompleteTypes in
@@ -890,6 +890,7 @@ let handle_mode
             FfpAutocompleteService.auto_complete tcopt file_text position
             ~filter_by_token:true
             ~basic_only:false
+            ~env
           in
           match result with
           | [] -> Printf.printf "No result found\n"
@@ -1250,8 +1251,9 @@ let decl_and_run_mode
     batch_mode;
     out_extension;
   }
-  popt
-  hhi_root =
+  (popt: TypecheckerOptions.t)
+  (hhi_root: Path.t)
+  (env: SearchUtils.local_tracking_env): unit =
   if mode = Dump_deps then Typing_deps.debug_trace := true;
   Ident.track_names := true;
   let builtins =
@@ -1293,8 +1295,9 @@ let decl_and_run_mode
 
   handle_mode mode files tcopt popt builtins files_contents files_info
     (Errors.get_error_list errors) all_errors error_format batch_mode out_extension
+    env
 
-let main_hack ({files; mode; tcopt; _} as opts) =
+let main_hack ({files; mode; tcopt; _} as opts) (env: SearchUtils.local_tracking_env): unit =
   (* TODO: We should have a per file config *)
   Sys_utils.signal Sys.sigusr1
     (Sys.Signal_handle Typing.debug_print_last_pos);
@@ -1315,12 +1318,12 @@ let main_hack ({files; mode; tcopt; _} as opts) =
       | _ -> die "Ai mode does not support multiple files"
       end
     | _ ->
-      decl_and_run_mode opts tcopt hhi_root;
+      decl_and_run_mode opts tcopt hhi_root env;
     TypingLogger.flush_buffers ()
   )
 
 (* command line driver *)
-let _ =
+let () =
   if ! Sys.interactive
   then ()
   else (
@@ -1331,4 +1334,8 @@ let _ =
     Out_channel.set_binary_mode stdout true
   );
   let options = parse_options () in
-  Unix.handle_unix_error main_hack options
+  let env = {
+    SearchUtils.lte_fileinfos = Relative_path.Map.empty;
+    SearchUtils.lte_filenames = Relative_path.Map.empty;
+  } in
+  Unix.handle_unix_error main_hack options env

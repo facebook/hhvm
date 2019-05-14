@@ -40,10 +40,10 @@ end = struct
     let t = Unix.gettimeofday () in
     Hh_logger.log "Initializing Server (This might take some time)";
     (* note: we only run periodical tasks on the root, not extras *)
-    ServerIdle.init genv root;
-    Hh_logger.log "Init id: %s" init_id;
     let env = HackEventLogger.with_id ~stage:`Init init_id init_fun in
     Hh_logger.log "Server is partially ready";
+    ServerIdle.init genv env.local_symbol_table root;
+    Hh_logger.log "Init id: %s" init_id;
     let t' = Unix.gettimeofday () in
     Hh_logger.log "Took %f seconds." (t' -. t);
 

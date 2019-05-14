@@ -10,57 +10,43 @@ open Core_kernel
 open SearchUtils
 open Reordered_argument_collections
 
-type local_tracking_env = {
-  lte_fileinfos: FileInfo.t Relative_path.Map.t;
-  lte_filenames: FileInfo.names Relative_path.Map.t;
-}
-
-(* Track all changes here *)
-let locally_tracked_files: local_tracking_env ref = ref {
-    lte_fileinfos = Relative_path.Map.empty;
-    lte_filenames = Relative_path.Map.empty;
-  }
-
 (* How many locally changed files are in this env? *)
 let count_local_fileinfos (env: local_tracking_env): int =
   (Relative_path.Map.cardinal env.lte_fileinfos
    + Relative_path.Map.cardinal env.lte_filenames)
 ;;
 
-(* Fetch current environment *)
-let get_env (): local_tracking_env =
-  !locally_tracked_files
-;;
-
 (* Update files when they were discovered *)
 let update_file
     (path: Relative_path.t)
-    (info: SearchUtils.info): unit =
+    (info: SearchUtils.info)
+    (env: local_tracking_env): local_tracking_env =
   match info with
   | Full fileinfo_t ->
-    locally_tracked_files := {
+    {
       lte_fileinfos =
-        Relative_path.Map.add !locally_tracked_files.lte_fileinfos
+        Relative_path.Map.add env.lte_fileinfos
           ~key:path ~data:fileinfo_t;
-      lte_filenames = !locally_tracked_files.lte_filenames;
+      lte_filenames = env.lte_filenames;
     }
   | Fast fileinfo_names ->
-    locally_tracked_files := {
-      lte_fileinfos = !locally_tracked_files.lte_fileinfos;
+    {
+      lte_fileinfos = env.lte_fileinfos;
       lte_filenames =
-        Relative_path.Map.add !locally_tracked_files.lte_filenames
+        Relative_path.Map.add env.lte_filenames
           ~key:path ~data:fileinfo_names;
     }
 ;;
 
 (* Remove files from local when they are deleted *)
 let remove_file
-    (path: Relative_path.t): unit =
-  locally_tracked_files := {
+    (path: Relative_path.t)
+    (env: local_tracking_env): local_tracking_env =
+  {
     lte_fileinfos =
-      Relative_path.Map.remove !locally_tracked_files.lte_fileinfos path;
+      Relative_path.Map.remove env.lte_fileinfos path;
     lte_filenames =
-      Relative_path.Map.remove !locally_tracked_files.lte_filenames path;
+      Relative_path.Map.remove env.lte_filenames path;
   }
 ;;
 

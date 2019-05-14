@@ -157,6 +157,8 @@ type env = {
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;
+    (* Symbols for locally changed files *)
+    local_symbol_table : SearchUtils.local_tracking_env ref;
   }
 
 and dirty_deps = {

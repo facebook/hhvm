@@ -60,7 +60,7 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go workers query type_
+let go workers query type_ (env: SearchUtils.local_tracking_env)
   : SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
@@ -87,6 +87,7 @@ let go workers query type_
             ~query_text:class_name_query
             ~max_results:1
             ~kind_filter:(Some SearchUtils.SI_Class)
+            ~env
           |> List.hd
           |> Option.map ~f:(fun r -> r.SearchUtils.si_name)
       in
@@ -110,6 +111,7 @@ let go workers query type_
           ~query_text:query
           ~max_results
           ~kind_filter:None
+          ~env
         in
         AutocompleteService.add_position_to_results temp_results
   in

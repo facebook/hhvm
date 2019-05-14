@@ -20,7 +20,7 @@ module SearchServiceRunner = struct
   let queue = Queue.create ()
 
   (* Pops the first num_files from the queue *)
-  let update_search genv num_files =
+  let update_search genv num_files (env: SearchUtils.local_tracking_env ref) =
     let t = Unix.gettimeofday() in
     let rec iter acc n =
       if n <= 0 || Queue.is_empty queue then acc
@@ -29,7 +29,7 @@ module SearchServiceRunner = struct
         iter (x::acc) (n-1) in
     let fast = iter [] num_files in
 
-    SymbolIndex.update_files genv.workers fast;
+    SymbolIndex.update_files genv.workers fast env;
 
     if (List.length fast > 0) then begin
       let str =
@@ -43,16 +43,16 @@ module SearchServiceRunner = struct
     end
 
   (* Completely clears the queue *)
-  let run_completely genv =
-    update_search genv (Queue.length queue)
+  let run_completely genv (env: SearchUtils.local_tracking_env ref)=
+    update_search genv (Queue.length queue) env
 
-  let run genv () =
+  let run genv (env: SearchUtils.local_tracking_env ref) () =
     if ServerArgs.ai_mode genv.options = None then begin
       let size = if chunk_size genv = 0
         then Queue.length queue
         else chunk_size genv
       in
-      update_search genv size
+      update_search genv size env
     end
     else ()
 

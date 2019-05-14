@@ -245,4 +245,8 @@ let make_env config =
     };
     diag_subscribe = None;
     recent_recheck_loop_stats = empty_recheck_loop_stats;
+    local_symbol_table = ref {
+      SearchUtils.lte_fileinfos = Relative_path.Map.empty;
+      SearchUtils.lte_filenames = Relative_path.Map.empty;
+    };
   }

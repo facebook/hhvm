@@ -478,22 +478,28 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
       return check_nargs_in_range(func, nArgs);
     }
 
-    auto has_better_this = [&] {
-      if (!is_specialized_obj(env.state.thisType)) return false;
-      auto const dobj = dobj_of(env.state.thisType);
-      return dobj.type == DObj::Exact || dobj.cls.cls() != func->cls;
-    };
-
-    if (!(func->attrs & AttrStatic) && func->cls) {
-      return thisAvailable(env) &&
-        (has_better_this() ||
-         is_scalar(env.index.lookup_return_type_raw(func)));
+    // The function has no args. Check if it's effect free and returns
+    // a literal.
+    if (env.index.is_effect_free(*ar.func) &&
+        is_scalar(env.index.lookup_return_type_raw(func))) {
+      return true;
     }
 
-    // The function has no args. Just check that it's effect free
-    // and returns a literal.
-    return env.index.is_effect_free(*ar.func) &&
-      is_scalar(env.index.lookup_return_type_raw(func));
+    if (!(func->attrs & AttrStatic) && func->cls) {
+      // May be worth trying to fold if the method returns a scalar,
+      // assuming its only "effect" is checking for existence of $this.
+      if (is_scalar(env.index.lookup_return_type_raw(func))) return true;
+
+      // The method may be foldable if we know more about $this.
+      if (is_specialized_obj(ar.context)) {
+        auto const dobj = dobj_of(ar.context);
+        if (dobj.type == DObj::Exact || dobj.cls.cls() != func->cls) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }();
   ar.foldable = foldable;
   ar.pushBlk = env.bid;

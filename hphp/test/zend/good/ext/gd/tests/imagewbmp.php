@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $file = dirname(__FILE__) . '/im.wbmp';
 
 $im = imagecreatetruecolor(6,6);
@@ -11,10 +11,11 @@ echo 'test create wbmp: ';
 $c = imagecolorsforindex($im2, imagecolorat($im2, 3,3));
 $failed = false;
 foreach ($c as $v) {
-	if ($v != 0) {
-		$failed = true;
-	}
+    if ($v != 0) {
+        $failed = true;
+    }
 }
 echo !$failed ? 'ok' : 'failed';
 echo "\n";
 unlink($file);
+}

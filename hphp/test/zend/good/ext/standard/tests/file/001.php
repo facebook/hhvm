@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 chdir(dirname(__FILE__));
 @unlink('test.file');
 @unlink('test.link');
@@ -40,14 +40,14 @@ $s = stat ('test.file');
 $ls = lstat ('test.file');
 for ($i = 0; $i <= 12; $i++) {
     if ($ls[$i] != $s[$i]) {
-	echo "test.file lstat and stat differ at element $i\n";
+    echo "test.file lstat and stat differ at element $i\n";
     }
 }
 $s = stat ('test.link');
 $ls = lstat ('test.link');
 for ($i = 0; $i <= 11; $i++) {
     if ($ls[$i] != $s[$i]) {
-	if ($i != 6 && $i != 10 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
+    if ($i != 6 && $i != 10 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";
@@ -106,4 +106,5 @@ if (file_exists('test.file')) {
     echo "test.file exists\n";
 } else {
     echo "test.file does not exist\n";
+}
 }

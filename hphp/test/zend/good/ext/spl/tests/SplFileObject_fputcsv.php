@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
@@ -26,14 +26,14 @@ $list = array (
 );
 
 foreach ($list as $v) {
-	$fo->fputcsv(explode(',', $v));
+    $fo->fputcsv(explode(',', $v));
 }
 unset($fo);
 
 $res = file($file);
 foreach($res as $key => $val)
 {
-	$res[$key] = substr($val, 0, -1);
+    $res[$key] = substr($val, 0, -1);
 }
 echo '$list = ';var_export($res);echo ";\n";
 
@@ -41,10 +41,11 @@ $fp = fopen($file, "r");
 $res = array();
 while($l=fgetcsv($fp))
 {
-	$res[] = join(',',$l);
+    $res[] = join(',',$l);
 }
 fclose($fp);
 
 echo '$list = ';var_export($res);echo ";\n";
 
 echo "===DONE===\n";
+}

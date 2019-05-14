@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $values = array(
 'a@b.c',
 'abuse@example.com',
@@ -17,7 +17,8 @@ $values = array(
 'foo@bar.-'
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
+    var_dump(filter_var($value, FILTER_VALIDATE_EMAIL));
 }
 
 echo "Done\n";
+}

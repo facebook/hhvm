@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $dir = dirname(__FILE__);
 
 $im = imagecreatetruecolor(5,5);
@@ -10,9 +10,9 @@ $im_string = file_get_contents(dirname(__FILE__) . '/tc.png');
 $im = imagecreatefromstring($im_string);
 echo 'createfromstring truecolor png: ';
 if (imagecolorat($im, 3,3) != 0x0) {
-	echo 'failed';
+    echo 'failed';
 } else {
-	echo 'ok';
+    echo 'ok';
 }
 echo "\n";
 unlink($dir . '/tc.png');
@@ -34,9 +34,9 @@ echo'createfromstring palette png: ';
 $c = imagecolorsforindex($im, imagecolorat($im, 3,3));
 $failed = false;
 if ($c['red'] != 255 || $c['green'] != 0 || $c['blue'] != 0) {
-	echo 'failed';
+    echo 'failed';
 } else {
-	echo 'ok';
+    echo 'ok';
 }
 echo "\n";
 unlink($dir . '/p.png');
@@ -46,3 +46,4 @@ unlink($dir . '/p.png');
 $im = imagecreatefromstring('');
 //random string > 8
 $im = imagecreatefromstring(' asdf jklp');
+}

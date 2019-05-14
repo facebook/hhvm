@@ -1,4 +1,4 @@
-<?php 
+<?php <<__EntryPoint>> function main() {
 $xml =<<<EOF
 <people>
   <person name="Joe"/>
@@ -15,9 +15,10 @@ $people = simplexml_load_string($xml);
 
 foreach($people as $person)
 {
-	var_dump((string)$person['name']);
-	var_dump(count($people));
-	var_dump(count($person));
+    var_dump((string)$person['name']);
+    var_dump(count($people));
+    var_dump(count($person));
 }
 
 echo "===DONE===\n";
+}

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $m1 = 'message';
 $k1 = '0123456789ABCDEF';
 $h1 = sodium_crypto_shorthash($m1, $k1);
@@ -11,7 +11,8 @@ $h3 = sodium_crypto_shorthash($m2, $k2);
 echo bin2hex($h3) . "\n";
 
 try {
-	sodium_crypto_shorthash($m1, $k1 . $k2);
+    sodium_crypto_shorthash($m1, $k1 . $k2);
 } catch (SodiumException $ex) {
-	var_dump(true);
+    var_dump(true);
+}
 }

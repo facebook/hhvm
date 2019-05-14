@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 echo "Test 12: Using Associative Array of Parameters";
 
 $dom = new domDocument;
@@ -25,12 +25,13 @@ if(!$proc) {
 $proc->importStylesheet($xsl);
 
 $parameters = array(
-					'foo' => 'barbar',
-					'foo1' => 'test',
-					);
+                    'foo' => 'barbar',
+                    'foo1' => 'test',
+                    );
 
 $proc->setParameter( "", $parameters);
 
 print "\n";
 print $proc->transformToXml($dom);
 print "\n";
+}

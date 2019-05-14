@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $doc = new DOMDocument('1.0');
 $doc->formatOutput = true;
 
@@ -17,4 +17,5 @@ $temp_filename = dirname(__FILE__)."/DomDocument_save_basic.tmp";
 echo 'Wrote: ' . $doc->save($temp_filename) . ' bytes'; // Wrote: 72 bytes
 error_reporting(0);
 $temp_filename = dirname(__FILE__)."/DomDocument_save_basic.tmp";
-	unlink($temp_filename);
+    unlink($temp_filename);
+}

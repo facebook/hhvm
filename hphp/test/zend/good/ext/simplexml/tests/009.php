@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
 <!DOCTYPE sxe SYSTEM "notfound.dtd">
@@ -24,8 +24,9 @@ $sxe = simplexml_load_string(<<<EOF
 EOF
 );
 foreach($sxe->children() as $name=>$val) {
-	var_dump($name);
-	var_dump(get_class($val));
-	var_dump(trim((string)$val));
+    var_dump($name);
+    var_dump(get_class($val));
+    var_dump(trim((string)$val));
 }
 echo "===DONE===\n";
+}

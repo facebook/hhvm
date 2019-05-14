@@ -1,5 +1,6 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 goto L1;
 while (0) {
-	L1: echo "bug\n";
+    L1: echo "bug\n";
+}
 }

@@ -1,4 +1,4 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE courses [
@@ -40,11 +40,11 @@ $length = $nots->length;
 echo "Length: ".$length."\n";
 
 foreach ($nots as $key=>$node) {
-	echo "Key $key: ".$node->nodeName." (".$node->systemId.") (".$node->publicId.")\n";
+    echo "Key $key: ".$node->nodeName." (".$node->systemId.") (".$node->publicId.")\n";
 }
 print "\n";
 for($x=0; $x < $length; $x++) {
-	echo "Index $x: ".$nots->item($x)->nodeName." (".$nots->item($x)->systemId.") (".$nots->item($x)->publicId.")\n";
+    echo "Index $x: ".$nots->item($x)->nodeName." (".$nots->item($x)->systemId.") (".$nots->item($x)->publicId.")\n";
 }
 
 echo "\n";
@@ -59,21 +59,21 @@ echo "Length: ".$length."\n";
 
 $xkeys = array();
 foreach ($ents as $key=>$node) {
-	$xkeys[] = "Key: $key Name: ".$node->nodeName."\n";
+    $xkeys[] = "Key: $key Name: ".$node->nodeName."\n";
 }
 sort(&$xkeys);  // fix inconsistent output ordering (bug #61810)
 foreach ($xkeys as $key => $node) {
-	echo $node;
+    echo $node;
 }
 echo "\n";
 
 $xkeys = array();
 for($x=0; $x < $length; $x++) {
-	$xkeys[] = "Index: ".$ents->item($x)->nodeName."\n";
+    $xkeys[] = "Index: ".$ents->item($x)->nodeName."\n";
 }
 sort(&$xkeys);  // fix inconsistent output ordering (bug #61810)
 foreach ($xkeys as $key => $node) {
-	echo $node;
+    echo $node;
 }
 
 echo "\n";
@@ -81,3 +81,4 @@ $node = $ents->item(3);
 var_dump($node);
 $node = $ents->getNamedItem('xxx');
 var_dump($node);
+}

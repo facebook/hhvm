@@ -1,2 +1,3 @@
-<?php
-	var_dump(pathinfo("/dsds.asa"));
+<?php <<__EntryPoint>> function main() {
+var_dump(pathinfo("/dsds.asa"));
+}

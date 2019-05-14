@@ -1,2 +1,3 @@
-<?php
-	var_dump(gethostbyname(".toto.toto.toto"));
+<?php <<__EntryPoint>> function main() {
+var_dump(gethostbyname(".toto.toto.toto"));
+}

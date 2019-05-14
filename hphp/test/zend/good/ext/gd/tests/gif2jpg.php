@@ -1,8 +1,9 @@
-<?php
-	$cwd = dirname(__FILE__);
+<?php <<__EntryPoint>> function main() {
+$cwd = dirname(__FILE__);
 
-	echo "GIF to JPEG conversion: ";
-	echo imagejpeg(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.jpeg") ? 'ok' : 'failed';
-	echo "\n";
+echo "GIF to JPEG conversion: ";
+echo imagejpeg(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.jpeg") ? 'ok' : 'failed';
+echo "\n";
 
-	@unlink($cwd . "/test_gif.jpeg");
+@unlink($cwd . "/test_gif.jpeg");
+}

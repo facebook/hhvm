@@ -1,8 +1,8 @@
-<?php
+<?php <<__EntryPoint>> function main() {
 $configargs = array(
         "req_extensions" => "v3_req",
         "x509_extensions" => "usr_cert",
-		"config" => __DIR__."/openssl.cnf",
+        "config" => __DIR__."/openssl.cnf",
 );
 
 $dn = array(
@@ -21,9 +21,10 @@ $str = '';
 openssl_csr_export($csr, &$str, false);
 
 if (strpos($str, 'Requested Extensions:')) {
-	echo "Ok\n";
+    echo "Ok\n";
 }
 openssl_x509_export($crt, &$str, false);
 if (strpos($str, 'X509v3 extensions:')) {
-	echo "Ok\n";
+    echo "Ok\n";
+}
 }

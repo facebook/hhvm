@@ -1,4 +1,5 @@
-<?php
-    date_default_timezone_set("Europe/Oslo");
-    var_dump(strtotime("nextyear"));
-	echo "ALIVE\n";
+<?php <<__EntryPoint>> function main() {
+date_default_timezone_set("Europe/Oslo");
+var_dump(strtotime("nextyear"));
+echo "ALIVE\n";
+}

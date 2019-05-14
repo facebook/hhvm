@@ -1,4 +1,5 @@
-<?php
-	$f = fopen(__FILE__, 'r');
-	fclose($f);
-	var_dump(is_resource($f));
+<?php <<__EntryPoint>> function main() {
+$f = fopen(__FILE__, 'r');
+fclose($f);
+var_dump(is_resource($f));
+}

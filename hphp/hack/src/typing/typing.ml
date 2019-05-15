@@ -4958,11 +4958,13 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         | _, (Tany | Tprim Tstring | Tabstract (_, None) | Tobject)
               when not (Env.is_strict env) ->
           env, (Reason.Rwitness p, Typing_utils.tany env)
+        | _, Terr ->
+          env, (Reason.Rwitness p, Typing_utils.terr env)
         | r, Tvar _ ->
           Errors.unknown_type "an object" p (Reason.to_string "It is unknown" r);
           env, (Reason.Rwitness p, Typing_utils.terr env)
 
-        | (_, (Terr | Tany | Tnonnull | Tarraykind _ | Toption _
+        | (_, (Tany | Tnonnull | Tarraykind _ | Toption _
                  | Tprim _ | Tfun _ | Ttuple _
                  | Tabstract ((AKenum _ | AKdependent _ | AKnewtype _), _)
                  | Tanon (_, _) | Tobject | Tshape _)) as ty

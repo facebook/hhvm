@@ -377,8 +377,8 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
   assertx(callCtx->isA(TCls));
 
   auto gen_missing_this = [&] {
-    if (needs_missing_this_check(callee)) {
-      gen(env, RaiseMissingThis, cns(env, callee));
+    if (!callee->isStaticInPrologue()) {
+      gen(env, ThrowMissingThis, cns(env, callee));
     }
     return callCtx;
   };
@@ -693,7 +693,8 @@ SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
   }
 
   if (!hasThis(env)) {
-    gen(env, RaiseMissingThis, funcTmp);
+    assertx(!parentFunc->isStaticInPrologue());
+    gen(env, ThrowMissingThis, funcTmp);
     return ldCtx(env);
   }
 

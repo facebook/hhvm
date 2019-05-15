@@ -47,6 +47,9 @@ class G extends B {
   function f1($a) {
     return $a;
   }
+  static function sf1($a) {
+    return $a;
+  }
   // override
   function flongerthan8($a,$b,$c) {
     return $a+$b+$c+1;
@@ -96,7 +99,7 @@ class G extends B {
   // static call
 }
 class H {
-  function f($a) {
+  static function f($a) {
 
     ObjectMethod736::$trace="H::f,";
     return "";
@@ -196,7 +199,7 @@ echo "dynamic call \$g->'G::f' ".ObjectMethod736::$trace.", 21 == $res\n";
  // G::H::f better break
 
 // Test on static class, dynamic method name, static call
-$f = 'f1';
+$f = 'sf1';
 echo "31 == ",G::$f(31),"\n";
  // G::f exists
 $f = 'f3';

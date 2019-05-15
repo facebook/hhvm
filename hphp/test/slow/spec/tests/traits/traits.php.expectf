@@ -50,13 +50,6 @@ $v = 1
 Inside T6::f
 $v = 2
 ===================== Using a Trait without a Class =========================
-%AInside T7
-Inside T7
-Inside T7::f
-
-Notice: Undefined variable: this in %s/traits/traits.php on line 227
-NULL
--------
 Inside T7
 Inside T7
 Inside T7::g

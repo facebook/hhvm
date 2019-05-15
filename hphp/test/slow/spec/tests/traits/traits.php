@@ -235,9 +235,9 @@ trait T7
     }
 }
 
-T7::f();    // calls f like a static function with class name being the trait name
 
-echo "-------\n";
+
+
 T7::g();
 
 /*

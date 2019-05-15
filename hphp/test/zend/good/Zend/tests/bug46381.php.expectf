@@ -1,2 +1,0 @@
-
-Fatal error: Non-static method ArrayIterator::current() cannot be called statically in %s/bug46381.php on line 5

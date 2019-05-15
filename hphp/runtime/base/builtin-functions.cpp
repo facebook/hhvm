@@ -317,7 +317,7 @@ const Func* vm_decode_func_from_name(
   }
 
   if (!this_ && !f->isStaticInPrologue()) {
-    if (flags == DecodeFlags::Warn) raise_missing_this(f);
+    if (flags == DecodeFlags::Warn) throw_missing_this(f);
     if (flags != DecodeFlags::LookupOnly && f->attrs() & AttrRequiresThis) {
       return nullptr;
     }
@@ -704,11 +704,7 @@ void missing_this_check_helper(const Func* f, EF ef, NF nf) {
     return;
   }
 
-  auto const notices =
-    RuntimeOption::EvalNoticeOnBadMethodStaticness ||
-    RuntimeOption::EvalRaiseMissingThis;
-
-  if (notices && !f->isStatic()) {
+  if (!f->isStatic()) {
     nf();
     return;
   }
@@ -716,41 +712,18 @@ void missing_this_check_helper(const Func* f, EF ef, NF nf) {
 
 void throw_has_this_need_static(const Func* f) {
   auto const msg = folly::sformat(
-    "Static method {} cannot be called on instance",
+    "Static method {}() cannot be called on instance",
     f->fullName()->data()
   );
   SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
-void raise_missing_this(const Func* f) {
-  missing_this_check_helper(
-    f,
-    [&] {
-      raise_error("Non-static method %s() cannot be called statically",
-                  f->fullName()->data());
-    },
-    [&] {
-      auto constexpr msg =
-        "Non-static method %s() should not be called statically";
-
-      if (RuntimeOption::PHP7_DeprecationWarnings) {
-        raise_deprecated(msg, f->fullName()->data());
-      } else if (RuntimeOption::EvalNoticeOnBadMethodStaticness) {
-        raise_notice(msg, f->fullName()->data());
-      } else {
-        raise_strict_warning(msg, f->fullName()->data());
-      }
-    });
-}
-
-bool needs_missing_this_check(const Func* f) {
-  bool ret = false;
-  missing_this_check_helper(
-    f,
-    [&] { ret = true; },
-    [&] { ret = true; }
+void throw_missing_this(const Func* f) {
+  auto const msg = folly::sformat(
+    "Non-static method {}() cannot be called statically",
+    f->fullName()->data()
   );
-  return ret;
+  SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
 void NEVER_INLINE raise_null_object_prop() {

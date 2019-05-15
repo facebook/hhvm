@@ -1,1 +1,1 @@
-Catched: Error occuried: Non-static method TestClass::testMethod() should not be called statically
+Catched: Non-static method TestClass::testMethod() cannot be called statically

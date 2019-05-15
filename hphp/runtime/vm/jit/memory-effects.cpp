@@ -2075,8 +2075,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseError:
   case RaiseNotice:
   case RaiseWarning:
-  case RaiseMissingThis:
-  case FatalMissingThis:
   case RaiseHackArrCompatNotice:
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
@@ -2191,6 +2189,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
+  case ThrowMissingThis:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:
   case SetOpCell:

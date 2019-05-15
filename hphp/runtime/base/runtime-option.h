@@ -923,7 +923,6 @@ struct RuntimeOption {
   F(bool, TwoPhaseGC,                  false)                           \
   F(bool, EnableGC,                    enableGcDefault())               \
   /* End of GC Options */                                               \
-  F(bool, RaiseMissingThis,            !EnableHipHopSyntax)             \
   F(bool, QuoteEmptyShellArg,          !EnableHipHopSyntax)             \
   F(bool, Verify,                      (getenv("HHVM_VERIFY") ||        \
     !EvalHackCompilerCommand.empty()))                                  \

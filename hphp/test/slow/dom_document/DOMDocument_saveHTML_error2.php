@@ -8,5 +8,4 @@
 <<__EntryPoint>>
 function main_dom_document_save_htm_l_error2() {
 try { (new DOMDocument())->saveHTML(true); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-DOMDocument::saveHTML(new DOMNode());
 }

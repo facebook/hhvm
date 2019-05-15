@@ -345,22 +345,6 @@ SSATmp* simplifyLdFuncRxLevel(State& env, const IRInstruction* inst) {
     : nullptr;
 }
 
-SSATmp* simplifyRaiseMissingThis(State& env, const IRInstruction* inst) {
-  auto const funcTmp = inst->src(0);
-  if (funcTmp->hasConstVal()) {
-    auto const func = funcTmp->funcVal();
-    // Not requiresThisInBody, since this is done in the callee
-    // at FPush* time.
-    if (func->attrs() & AttrRequiresThis) {
-      return gen(env, FatalMissingThis, inst->taken(), funcTmp);
-    }
-    if (!needs_missing_this_check(func)) {
-      return gen(env, Nop);
-    }
-  }
-  return nullptr;
-}
-
 SSATmp* simplifyLdClsCtx(State& env, const IRInstruction* inst) {
   auto const ctx = inst->src(0);
 
@@ -3899,7 +3883,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsFuncDynCallable)
   X(IsClsDynConstructible)
   X(LdFuncRxLevel)
-  X(RaiseMissingThis)
   X(LdObjClass)
   X(LdObjInvoke)
   X(Mov)

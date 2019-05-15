@@ -543,8 +543,6 @@ bool canDCE(IRInstruction* inst) {
   case RaiseTooManyArg:
   case RaiseError:
   case RaiseWarning:
-  case RaiseMissingThis:
-  case FatalMissingThis:
   case RaiseNotice:
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
@@ -718,6 +716,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
+  case ThrowMissingThis:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:
   case StMBase:

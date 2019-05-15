@@ -2272,20 +2272,15 @@ To string conversions:
   Raises a notice that S0 is an undefined key for an array. The isInOut option
   indicates that the access was for an inout parameter.
 
-| RaiseMissingThis, ND, S(Func), NF
-
-  Raises an appropriate notice or fatal to indicate that Func was
-  called with null $this. In most cases its a notice, but for
-  builtins and special class methods its a fatal.
-
 | ThrowHasThisNeedStatic, ND, S(Func), T
 
   Throws a BadMethodCallException to indicate that func was called on an object
   but is a static method.
 
-| FatalMissingThis, ND, S(Func), T
+| ThrowMissingThis, ND, S(Func), T
 
-  Similar to RaiseMissingThis, but for cases where we know it will fatal.
+  Throws a BadMethodCallException to indicate that an instance method was called
+  with null $this.
 
 | RaiseHackArrCompatNotice, ND, S(Str), NF
 

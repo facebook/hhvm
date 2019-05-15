@@ -5152,7 +5152,7 @@ void pushClsMethodImpl(Class* cls,
 
   if (res == LookupResult::MethodFoundNoThis) {
     if (!f->isStaticInPrologue()) {
-      raise_missing_this(f);
+      throw_missing_this(f);
     }
     obj = nullptr;
   } else {

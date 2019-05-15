@@ -422,7 +422,6 @@ bool opcodeMayRaise(Opcode opc) {
   case EqDict:
   case EqObj:
   case EqVec:
-  case FatalMissingThis:
   case GetMemoKey:
   case GtArr:
   case GteArr:
@@ -503,7 +502,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseHackArrParamNotice:
   case RaiseHackArrPropNotice:
   case RaiseMissingArg:
-  case RaiseMissingThis:
   case RaiseNotice:
   case RaiseRxCallViolation:
   case RaiseStrToClassNotice:
@@ -540,6 +538,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowInvalidArrayKey:
   case ThrowInvalidOperation:
   case ThrowLateInitPropError:
+  case ThrowMissingThis:
   case ThrowOutOfBounds:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:

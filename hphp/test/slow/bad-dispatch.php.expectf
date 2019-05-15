@@ -1,3 +1,4 @@
-
-Notice: Non-static method Foo::a() should not be called statically in %s/bad-dispatch.php on line 13
-string(49) "Static method Foo::b cannot be called on instance"
+string(54) "Non-static method Foo::a() cannot be called statically"
+string(54) "Non-static method Foo::a() cannot be called statically"
+string(51) "Static method Foo::b() cannot be called on instance"
+string(51) "Static method Foo::b() cannot be called on instance"

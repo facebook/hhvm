@@ -350,11 +350,17 @@ inline const Class* Unit::lookupUniqueClassInContext(const StringData* name,
 inline Class* Unit::loadClass(const StringData* name) {
   String normStr;
   auto ne = NamedEntity::get(name, true, &normStr);
-  if (normStr) {
-    name = normStr.get();
-  }
-  auto class_ = loadClass(ne, name);
-  if (LIKELY(class_ != nullptr) || !isReifiedName(name)) return class_;
+
+  // Try to fetch from cache
+  Class* class_ = ne->getCachedClass();
+  if (LIKELY(class_ != nullptr)) return class_;
+
+  // Normalize the namespace
+  if (normStr) name = normStr.get();
+
+  // Autoload the class if not reified
+  if (LIKELY(!isReifiedName(name))) return loadClass(ne, name);
+
   // We are loading a reified class for the first time
   name = stripTypeFromReifiedName(name);
   auto generic_ne = NamedEntity::get(name, true, &normStr);

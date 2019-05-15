@@ -172,11 +172,10 @@ let load_and_check_files dynamic_view_files errors progress ~memory_cap =
     We don't really care about which files are left unchecked since we use
     (gasp) mutation to track that, so combine the errors but always return an
     empty list for the list of unchecked files. *)
-let merge files_to_check files_to_check_count files_in_progress files_checked
+let merge files_to_check files_to_check_count files_in_progress
     files_checked_count (errors, results) acc =
   files_to_check := results.unchecked_files @ !files_to_check;
   List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.checked_files;
-  files_checked := results.checked_files @ !files_checked;
   files_checked_count := (List.length results.checked_files) + !files_checked_count;
   ServerProgress.send_percentage_progress_to_monitor
     "typechecking" !files_checked_count files_to_check_count "files";
@@ -216,7 +215,6 @@ let parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
   TypeCheckStore.store opts;
   let files_to_check = ref fnl in
   let files_in_progress = Hash_set.Poly.create () in
-  let files_checked = ref [] in
   let files_checked_count = ref 0 in
   let num_jobs = List.length fnl in
   ServerProgress.send_percentage_progress_to_monitor
@@ -227,18 +225,12 @@ let parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
       workers
       ~job:(load_and_check_files dynamic_view_files ~memory_cap)
       ~neutral
-      ~merge:(merge files_to_check num_jobs files_in_progress files_checked files_checked_count)
+      ~merge:(merge files_to_check num_jobs files_in_progress files_checked_count)
       ~next
       ~on_cancelled:(on_cancelled next files_to_check files_in_progress)
       ~interrupt
   in
   TypeCheckStore.clear();
-  let sort =
-    List.sort ~compare:(fun (path1, _) (path2, _) -> Relative_path.S.compare path1 path2)
-  in
-  (* TODO: Remove this check and [files_checked] after we have more confidence
-  that the worker memory cap logic is well-formed. *)
-  if cancelled = [] && Option.is_some memory_cap then assert (sort fnl = sort !files_checked);
   errors, env, List.concat (cancelled |> List.map ~f:(fun progress -> progress.unchecked_files))
 
 type 'a job = Relative_path.t * 'a

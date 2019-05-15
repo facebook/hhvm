@@ -1,2 +1,3 @@
 -vEval.HackArrDVArrs=true
 -vEval.EnablePHP=1
+-vEval.EnableArgsInBacktraces=false

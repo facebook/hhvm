@@ -362,8 +362,8 @@ where
             match (name_opt.is_some(), token.kind()) {
                 (true, TokenKind::Backslash) => {
                     // found backslash, create item and recurse
-                    let token = S!(make_token, self, token);
                     self.continue_from(parser1);
+                    let token = S!(make_token, self, token);
                     let part = S!(make_list_item, self, name_opt.unwrap(), token);
                     // TODO(T25649779)
                     parts.push(part);

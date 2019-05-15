@@ -1275,7 +1275,7 @@ where
         let token = parser1.next_token();
         match token.kind() {
             TokenKind::Semicolon => {
-                let missing = S!(make_missing, self, self.pos());
+                let missing = S!(make_missing, parser1, self.pos());
                 self.continue_from(parser1);
                 let token = S!(make_token, self, token);
                 S!(make_expression_statement, self, missing, token)

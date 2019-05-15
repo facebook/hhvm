@@ -913,7 +913,7 @@ where
         let (token, optional) = match token.kind() {
             TokenKind::Question => {
                 let enum_token = parser1.next_token();
-                let token = S!(make_token, self, token);
+                let token = S!(make_token, parser1, token);
                 (enum_token, token)
             }
             _ => {
@@ -1929,8 +1929,9 @@ where
                 )
             }
             TokenKind::Semicolon => {
-                let missing = S!(make_missing, self, self.pos());
+                let pos = self.pos();
                 self.continue_from(parser1);
+                let missing = S!(make_missing, self, pos);
                 let semicolon = S!(make_token, self, token);
                 S!(
                     make_methodish_declaration,
@@ -1971,11 +1972,12 @@ where
                 // ERROR RECOVERY: We expected either a block or a semicolon; we got
                 // neither. Use the offending token as the body of the method.
                 // TODO: Is this the right error recovery?
+                let pos = self.pos();
                 self.continue_from(parser1);
                 self.with_error(Errors::error1041);
                 let token = S!(make_token, self, token);
                 let error = S!(make_error, self, token);
-                let missing = S!(make_missing, self, self.pos());
+                let missing = S!(make_missing, self, pos);
                 S!(
                     make_methodish_declaration,
                     self,
@@ -2216,8 +2218,8 @@ where
                 // modifier (or the "var" keyword), accept it here, but emit an error in a
                 // later pass.
                 let mut parser1 = self.clone();
-                let missing1 = S!(make_missing, self, self.pos());
-                let missing2 = S!(make_missing, self, self.pos());
+                let missing1 = S!(make_missing, parser1, self.pos());
+                let missing2 = S!(make_missing, parser1, self.pos());
                 let property = parser1.parse_property_declaration(missing1, missing2, false);
                 if self.errors.len() == parser1.errors.len() {
                     self.continue_from(parser1);

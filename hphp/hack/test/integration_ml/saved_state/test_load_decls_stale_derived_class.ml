@@ -95,8 +95,8 @@ let load_state
   let disk_state = hot_classes_file !hot_classes :: init_disk_state in
   Test.load_state saved_state_dir
     ~disk_state:(disk_state @ master_changes @ local_changes)
-    ~master_changes:(List.map master_changes fst)
-    ~local_changes:(List.map local_changes fst)
+    ~master_changes:(List.map master_changes ~f:fst)
+    ~local_changes:(List.map local_changes ~f:fst)
     ~use_precheked_files:true
     ~disable_conservative_redecl:true
     ~load_decls_from_saved_state:true

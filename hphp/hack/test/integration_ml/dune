@@ -1,0 +1,16 @@
+; As an exception, we directly use test_injector_config here to be sure
+; all the tests that depend on this lib are using the test stubs
+(library
+  (name integration_test_base)
+  (wrapped false)
+  (modules
+    integration_test_base
+    integration_test_base_types)
+  (libraries
+    client
+    hh_server_monitor
+    server
+    server_client_provider
+    server_command_types
+    server_env
+    test_injector_config))

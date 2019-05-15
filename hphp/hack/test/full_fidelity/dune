@@ -12,6 +12,7 @@
     (wrapped false)
     (modules callOrder)
     (libraries
+      default_injector_config
       full_fidelity_test_utils
       parser_syntax
       parser_syntax_tree))

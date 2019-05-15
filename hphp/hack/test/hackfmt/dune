@@ -2,6 +2,7 @@
   (name hackfmt_range_unit_test)
   (modules hackfmt_range_unit_test)
   (libraries
+    default_injector_config
     hackfmt
     ounit))
 
@@ -14,6 +15,7 @@
   (name hackfmt_node_unit_test)
   (modules hackfmt_node_unit_test)
   (libraries
+    default_injector_config
     hackfmt
     hackfmt_env
     ounit

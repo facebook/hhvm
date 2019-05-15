@@ -100,14 +100,14 @@ let default_loop_input = {
 let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
     (ServerEnv.env * (a, b) loop_outputs) = fun env inputs ->
   TestClientProvider.clear();
-  Option.iter inputs.new_client (function
+  Option.iter inputs.new_client ~f:(function
   | RequestResponse x ->
     TestClientProvider.mock_new_client_type Non_persistent;
     TestClientProvider.mock_client_request x
   | ConnectPersistent ->
     TestClientProvider.mock_new_client_type Persistent);
 
-  Option.iter inputs.persistent_client_request (function
+  Option.iter inputs.persistent_client_request ~f:(function
     | Request x ->
       TestClientProvider.mock_persistent_client_request x
     | UncleanDisconect x ->
@@ -118,17 +118,17 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
   let client_provider = ClientProvider.provider_for_test () in
 
   let disk_changes =
-    List.map inputs.disk_changes (fun (x, y) -> root ^ x, y) in
+    List.map inputs.disk_changes ~f:(fun (x, y) -> root ^ x, y) in
 
   List.iter disk_changes
-    (fun (path, contents) -> TestDisk.set path contents);
+    ~f:(fun (path, contents) -> TestDisk.set path contents);
 
   let did_read_disk_changes_ref = ref false in
 
   let notifier () =
     if not !did_read_disk_changes_ref then begin
       did_read_disk_changes_ref := true;
-      SSet.of_list (List.map disk_changes fst)
+      SSet.of_list (List.map disk_changes ~f:fst)
     end else SSet.empty
   in
 
@@ -491,13 +491,13 @@ let load_state
   let hhi_files = if load_hhi_files then real_hhi_files () else [] in
   test_init_common () ~hhi_files;
 
-  let disk_changes = List.map disk_state (fun (x, y) -> root ^ x, y) in
-  List.iter disk_changes (fun (path, contents) -> TestDisk.set path contents);
+  let disk_changes = List.map disk_state ~f:(fun (x, y) -> root ^ x, y) in
+  List.iter disk_changes ~f:(fun (path, contents) -> TestDisk.set path contents);
 
   let prechecked_changes = List.map master_changes
-    (fun x -> Relative_path.create_detect_prefix (root ^ x)) in
+    ~f:(fun x -> Relative_path.create_detect_prefix (root ^ x)) in
   let changes = List.map local_changes
-    (fun x -> Relative_path.create_detect_prefix (root ^ x)) in
+    ~f:(fun x -> Relative_path.create_detect_prefix (root ^ x)) in
 
   let saved_state_fn = saved_state_dir ^ "/" ^ saved_state_filename in
   let deptable_fn = saved_state_dir ^ "/" ^ saved_state_filename ^ ".sql" in
@@ -513,7 +513,10 @@ let load_state
   } in
   match ServerInit.init ~load_state_approach !genv with
   | env, ServerInit.Load_state_succeeded _ -> env
-  | _ -> assert false
+  | _env, ServerInit.Load_state_declined s ->
+    Printf.eprintf "> DECLINDED %s\n" s; assert false
+  | _env, ServerInit.Load_state_failed s ->
+    Printf.eprintf "> FAILED %s\n" s; assert false
 
 let diagnostics_to_string x =
   let buf = Buffer.create 1024 in
@@ -567,7 +570,7 @@ let assert_coverage_levels loop_output expected =
     ]
   in
   let results_as_string =
-    List.map results coverage_levels_to_str_helper
+    List.map results ~f:coverage_levels_to_str_helper
       |> List.sort ~compare |> List.append strings_of_stats
       |> list_to_string in
   let expected_as_string = list_to_string expected in
@@ -596,13 +599,13 @@ let assert_ide_autocomplete loop_output expected =
   assertEqual expected_as_string results_as_string
 
 let smap_to_str_list (f : 'a -> string) (m : 'a SMap.t) =
-  (m |> SMap.ordered_keys |> List.map) (fun s -> s^"< "^(m |> SMap.find s |> f)^">")
+  (m |> SMap.ordered_keys |> List.map) ~f:(fun s -> s^"< "^(m |> SMap.find s |> f)^">")
 
 let level_stats_to_str (ls : level_stats) =
   let lvls =
     [Ide_api_types.Checked; Ide_api_types.Partial; Ide_api_types.Unchecked] in
   let str_list = List.map lvls
-    (fun lvl ->
+    ~f:(fun lvl ->
       (string_of_level lvl)^"="^(string_of_int (CLMap.find lvl ls).count)) in
   list_to_string str_list
 
@@ -611,7 +614,7 @@ let rec trie_to_string (base : string) (f : 'a -> string) (t : 'a trie) =
   | Leaf a -> base^"( "^(f a)^")"
   | Node (_, smap_of_tr) -> (*TODO: figure out why the first of the pair is duplicated*)
     List.map (SMap.ordered_keys smap_of_tr)
-      (fun k -> trie_to_string (base^"/"^k) f (SMap.find k smap_of_tr))
+      ~f:(fun k -> trie_to_string (base^"/"^k) f (SMap.find k smap_of_tr))
       |> list_to_string
 
 let assert_coverage_counts loop_output expected =

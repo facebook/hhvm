@@ -1,0 +1,311 @@
+(executable
+  (name test_identify_symbol)
+  (modules test_identify_symbol)
+  (libraries integration_test_base))
+
+(alias
+  (name identify_symbol)
+  (deps test_identify_symbol.exe)
+  (action (run ./test_identify_symbol.exe)))
+
+(executable
+  (name test_ide_file_sync)
+  (modules test_ide_file_sync)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_file_sync)
+  (deps test_ide_file_sync.exe)
+  (action (run ./test_ide_file_sync.exe)))
+
+(executable
+  (name test_ide_consistency)
+  (modules test_ide_consistency)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_consistency)
+  (deps test_ide_consistency.exe)
+  (action (run ./test_ide_consistency.exe)))
+
+(executable
+  (name test_ide_disk)
+  (modules test_ide_disk)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_disk)
+  (deps test_ide_disk.exe)
+  (action (run ./test_ide_disk.exe)))
+
+(executable
+  (name test_ide_diagnostic_subscription)
+  (modules test_ide_diagnostic_subscription)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_diagnostic_subscription)
+  (deps test_ide_diagnostic_subscription.exe)
+  (action (run ./test_ide_diagnostic_subscription.exe)))
+
+(executable
+  (name test_ide_check)
+  (modules test_ide_check)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_check)
+  (deps test_ide_check.exe)
+  (action (run ./test_ide_check.exe)))
+
+(executable
+  (name test_ide_status)
+  (modules test_ide_status)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_status)
+  (deps test_ide_status.exe)
+  (action (run ./test_ide_status.exe)))
+
+(executable
+  (name test_ide_parsing_errors)
+  (modules test_ide_parsing_errors)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_parsing_errors)
+  (deps test_ide_parsing_errors.exe)
+  (action (run ./test_ide_parsing_errors.exe)))
+
+(executable
+  (name test_ide_close)
+  (modules test_ide_close)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_close)
+  (deps test_ide_close.exe)
+  (action (run ./test_ide_close.exe)))
+
+(executable
+  (name test_ide_utils)
+  (modules test_ide_utils)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_utils)
+  (deps test_ide_utils.exe)
+  (action (run ./test_ide_utils.exe)))
+
+(executable
+  (name test_ide_typing_deps)
+  (modules test_ide_typing_deps)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_typing_deps)
+  (deps test_ide_typing_deps.exe)
+  (action (run ./test_ide_typing_deps.exe)))
+
+(executable
+  (name test_added_parent)
+  (modules test_added_parent)
+  (libraries integration_test_base))
+
+(alias
+  (name added_parent)
+  (deps test_added_parent.exe)
+  (action (run ./test_added_parent.exe)))
+
+(executable
+  (name test_auto_ns_aliasing)
+  (modules test_auto_ns_aliasing)
+  (libraries integration_test_base))
+
+(alias
+  (name auto_ns_aliasing)
+  (deps test_auto_ns_aliasing.exe)
+  (action (run ./test_auto_ns_aliasing.exe)))
+
+(executable
+  (name test_remove_function)
+  (modules test_remove_function)
+  (libraries integration_test_base))
+
+(alias
+  (name remove_function)
+  (deps test_remove_function.exe)
+  (action (run ./test_remove_function.exe)))
+
+(executable
+  (name test_diagnostics_in_closed_file)
+  (modules test_diagnostics_in_closed_file)
+  (libraries integration_test_base))
+
+(alias
+  (name diagnostics_in_closed_file)
+  (deps test_diagnostics_in_closed_file.exe)
+  (action (run ./test_diagnostics_in_closed_file.exe)))
+
+(executable
+  (name test_error_throttling)
+  (modules test_error_throttling)
+  (libraries integration_test_base))
+
+(alias
+  (name error_throttling)
+  (deps test_error_throttling.exe)
+  (action (run ./test_error_throttling.exe)))
+
+(executable
+  (name test_naming_errors)
+  (modules test_naming_errors)
+  (libraries integration_test_base))
+
+(alias
+  (name naming_errors)
+  (deps test_naming_errors.exe)
+  (action (run ./test_naming_errors.exe)))
+
+(executable
+  (name test_override)
+  (modules test_override)
+  (libraries integration_test_base))
+
+(alias
+  (name override)
+  (deps test_override.exe)
+  (action (run ./test_override.exe)))
+
+(executable
+  (name test_remove_parent)
+  (modules test_remove_parent)
+  (libraries integration_test_base))
+
+(alias
+  (name remove_parent)
+  (deps test_remove_parent.exe)
+  (action (run ./test_remove_parent.exe)))
+
+(executable
+  (name test_failed_parsing)
+  (modules test_failed_parsing)
+  (libraries integration_test_base))
+
+(alias
+  (name failed_parsing)
+  (deps test_failed_parsing.exe)
+  (action (run ./test_failed_parsing.exe)))
+
+(executable
+  (name test_failed_naming)
+  (modules test_failed_naming)
+  (libraries integration_test_base))
+
+(alias
+  (name failed_naming)
+  (deps test_failed_naming.exe)
+  (action (run ./test_failed_naming.exe)))
+
+(executable
+  (name test_unsaved_changes)
+  (modules test_unsaved_changes)
+  (libraries integration_test_base))
+
+(alias
+  (name unsaved_changes)
+  (deps test_unsaved_changes.exe)
+  (action (run ./test_unsaved_changes.exe)))
+
+(executable
+  (name test_hhi_phpstdlib)
+  (modules test_hhi_phpstdlib)
+  (libraries integration_test_base))
+
+(alias
+  (name hhi_phpstdlib)
+  (deps test_hhi_phpstdlib.exe)
+  (action (run ./test_hhi_phpstdlib.exe)))
+
+(executable
+  (name test_ide_redecl)
+  (modules test_ide_redecl)
+  (libraries integration_test_base))
+
+(alias
+  (name ide_redecl)
+  (deps test_ide_redecl.exe)
+  (action (run ./test_ide_redecl.exe)))
+
+(executable
+  (name test_error_throttling_open_file)
+  (modules test_error_throttling_open_file)
+  (libraries integration_test_base))
+
+(alias
+  (name error_throttling_open_file)
+  (deps test_error_throttling_open_file.exe)
+  (action (run ./test_error_throttling_open_file.exe)))
+
+(executable
+  (name test_error_pos)
+  (modules test_error_pos)
+  (libraries integration_test_base))
+
+(alias
+  (name error_pos)
+  (deps test_error_pos.exe)
+  (action (run ./test_error_pos.exe)))
+
+(executable
+  (name test_exception_handling)
+  (modules test_exception_handling)
+  (libraries integration_test_base))
+
+(alias
+  (name exception_handling)
+  (deps test_exception_handling.exe)
+  (action (run ./test_exception_handling.exe)))
+
+(executable
+  (name test_status_single)
+  (modules test_status_single)
+  (libraries integration_test_base))
+
+(alias
+  (name status_single)
+  (deps test_status_single.exe)
+  (action (run ./test_status_single.exe)))
+
+(alias
+  (name runtest)
+  (deps
+   (alias identify_symbol)
+   (alias ide_file_sync)
+   (alias ide_consistency)
+   (alias ide_disk)
+   (alias ide_diagnostic_subscription)
+   (alias ide_check)
+   (alias ide_status)
+   (alias ide_parsing_errors)
+   (alias ide_close)
+   (alias ide_utils)
+   (alias ide_typing_deps)
+   (alias added_parent)
+   (alias auto_ns_aliasing)
+   (alias remove_function)
+   (alias diagnostics_in_closed_file)
+   (alias error_throttling)
+   (alias naming_errors)
+   (alias override)
+   (alias remove_parent)
+   (alias failed_parsing)
+   (alias failed_naming)
+   (alias unsaved_changes)
+   (alias hhi_phpstdlib)
+   (alias ide_redecl)
+   (alias error_throttling_open_file)
+   (alias error_pos)
+   (alias exception_handling)
+   (alias status_single)))

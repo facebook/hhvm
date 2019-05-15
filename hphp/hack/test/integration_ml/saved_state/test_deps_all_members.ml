@@ -25,7 +25,7 @@ function enum_user_%d(): void {
 }
 |}
 
-let enum_users = List.init 10 (fun n -> enum_user_name n, enum_user_contents n)
+let enum_users = List.init 10 ~f:(fun n -> enum_user_name n, enum_user_contents n)
 
 let enum_switch_name = "enum_switch.php"
 

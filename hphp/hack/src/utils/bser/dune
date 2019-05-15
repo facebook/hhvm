@@ -10,4 +10,5 @@
   (name bser_main_test)
   (modules bser_main_test)
   (libraries
-    bser))
+    bser
+    default_injector_config))

@@ -1,0 +1,43 @@
+(executable
+  (name test_early)
+  (modules test_early)
+  (libraries
+    heap_ident
+    test_injector_config))
+
+(alias
+  (name early)
+  (deps test_early.exe)
+  (action (run ./test_early.exe)))
+
+(executable
+  (name test_handoff)
+  (modules test_handoff)
+  (libraries
+    heap_ident
+    heap_shared_mem
+    test_injector_config))
+
+(alias
+  (name handoff)
+  (deps test_handoff.exe)
+  (action (run ./test_handoff.exe)))
+
+(executable
+  (name test_workers)
+  (modules test_workers)
+  (libraries
+    core_kernel
+    heap_ident
+    heap_shared_mem
+    procs_procs
+    test_injector_config))
+
+(alias
+  (name workers)
+  (deps test_workers.exe)
+  (action (ignore-stdout (run ./test_workers.exe))))
+
+(alias
+  (name runtest)
+  (deps (alias early) (alias handoff) (alias workers)))

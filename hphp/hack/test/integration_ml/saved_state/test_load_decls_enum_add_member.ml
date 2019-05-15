@@ -18,7 +18,7 @@ function enum_user_%d(): void {
   MyEnum::A;
 }"
 let enum_users =
-  List.init 300 (fun n -> enum_user_name n, enum_user_contents n)
+  List.init 300 ~f:(fun n -> enum_user_name n, enum_user_contents n)
 
 let enum_switch_name = Printf.sprintf "enum_switch_%d.php"
 let enum_switch_contents = Printf.sprintf "<?hh // strict
@@ -28,7 +28,7 @@ function enum_switch_%d(MyEnum $x) : void {
   }
 }"
 let enum_switches =
-  List.init 20 (fun n -> enum_switch_name n, enum_switch_contents n)
+  List.init 20 ~f:(fun n -> enum_switch_name n, enum_switch_contents n)
 
 let init_disk_state =
   [ "hack/hh_hot_classes.json", {|{"classes":[ "\\MyEnum" ]}|}
@@ -50,8 +50,8 @@ let load_state
     saved_state_dir =
   Test.load_state saved_state_dir
     ~disk_state:(init_disk_state @ master_changes @ local_changes)
-    ~master_changes:(List.map master_changes fst)
-    ~local_changes:(List.map local_changes fst)
+    ~master_changes:(List.map master_changes ~f:fst)
+    ~local_changes:(List.map local_changes ~f:fst)
     ~load_hhi_files:true
     ~use_precheked_files:true
     ~load_decls_from_saved_state:load_decls

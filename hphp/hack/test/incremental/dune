@@ -1,0 +1,38 @@
+(executable
+  (name test_method_override)
+  (modules test_method_override)
+  (libraries
+    integration_test_base))
+
+(alias
+  (name method_override)
+  (deps test_method_override.exe)
+  (action (run ./test_method_override.exe)))
+
+(executable
+  (name test_inconsistent_state)
+  (modules test_inconsistent_state)
+  (libraries
+    integration_test_base))
+
+(alias
+  (name inconsistent_state)
+  (deps test_inconsistent_state.exe)
+  (action (run ./test_inconsistent_state.exe)))
+
+(executable
+  (name test_enum_exhaustiveness)
+  (modules test_enum_exhaustiveness)
+  (libraries
+    integration_test_base))
+
+(alias
+  (name enum_exhaustiveness)
+  (deps test_enum_exhaustiveness.exe)
+  (action (run ./test_enum_exhaustiveness.exe)))
+
+(alias
+  (name runtest)
+  (deps (alias method_override)
+    (alias inconsistent_state)
+    (alias enum_exhaustiveness)))

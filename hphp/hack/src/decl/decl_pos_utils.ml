@@ -110,6 +110,7 @@ let rec reason = function
   | Rsolve_fail p -> Rsolve_fail (pos p)
   | Rcstr_on_generics (p, sid) -> Rcstr_on_generics (pos p, string_id sid)
   | Rlambda_param (p, r) -> Rlambda_param (pos p, reason r)
+  | Rshape (p, fun_name) -> Rshape (pos p, fun_name)
 
 let rec ty (p, x) =
   reason p, ty_ x

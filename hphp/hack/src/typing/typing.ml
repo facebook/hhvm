@@ -3928,12 +3928,13 @@ and is_abstract_ft fty = match fty with
       begin fun env fty res el -> match el with
         | [shape; field] ->
           let env, _ts, shape_ty = expr env shape in
-          Typing_shapes.idx env p (fst fty) shape_ty field None
+          Typing_shapes.idx env shape_ty field None
+            ~expr_pos:p ~fun_pos:(fst fty) ~shape_pos:(fst shape)
         | [shape; field; default] ->
-            let env, _ts, shape_ty = expr env shape in
-            let env, _td, default_ty = expr env default in
-            Typing_shapes.idx env p (fst fty) shape_ty field
-              (Some ((fst default), default_ty))
+          let env, _ts, shape_ty = expr env shape in
+          let env, _td, default_ty = expr env default in
+          Typing_shapes.idx env  shape_ty field (Some (fst default, default_ty))
+            ~expr_pos:p ~fun_pos:(fst fty) ~shape_pos:(fst shape)
         | _ -> env, res
       end
    (* Special function `Shapes::at` *)
@@ -3944,7 +3945,7 @@ and is_abstract_ft fty = match fty with
       begin fun env _fty res el -> match el with
         | [shape; field] ->
           let env, _te, shape_ty = expr env shape in
-          Typing_shapes.at env p shape_ty field
+          Typing_shapes.at env ~expr_pos:p ~shape_pos:(fst shape) shape_ty field
         | _  -> env, res
       end
    (* Special function `Shapes::keyExists` *)
@@ -3958,7 +3959,8 @@ and is_abstract_ft fty = match fty with
           (* try accessing the field, to verify existence, but ignore
            * the returned type and keep the one coming from function
            * return type hint *)
-          let env, _ = Typing_shapes.idx env p (fst fty) shape_ty field None in
+          let env, _ = Typing_shapes.idx env shape_ty field None
+            ~expr_pos:p ~fun_pos:(fst fty) ~shape_pos:(fst shape) in
           env, res
         | _  -> env, res
       end

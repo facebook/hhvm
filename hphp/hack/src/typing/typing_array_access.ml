@@ -320,7 +320,8 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
          can be treated as if it evaluated to null instead of
          throwing an exception if the field 'x' doesn't exist in $s.
        *)
-      Typing_shapes.idx env expr_pos Reason.Rnone ty1 e2 None
+      Typing_shapes.idx env ty1 e2 None
+        ~expr_pos ~fun_pos:Reason.Rnone ~shape_pos:array_pos
     else
       let p = fst e2 in
       begin match TUtils.shape_field_name env e2 with

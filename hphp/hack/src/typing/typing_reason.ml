@@ -95,6 +95,7 @@ type t =
   | Rsolve_fail      of Pos.t
   | Rcstr_on_generics of Pos.t * Nast.sid
   | Rlambda_param    of Pos.t * t
+  | Rshape of Pos.t * string
 
 and arg_position =
   | Aonly
@@ -306,6 +307,7 @@ let rec to_string prefix r =
                    Please add a type hint to the parameter")]
   | Rlambda_param (_, r_orig) ->
     to_string prefix r_orig
+  | Rshape (p, fun_name) -> [(p, prefix ^ " because " ^ fun_name ^ " expects a shape")]
 
 and to_pos = function
   | Rnone     -> Pos.none
@@ -389,6 +391,7 @@ and to_pos = function
   | Rsolve_fail p -> p
   | Rcstr_on_generics (p, _) -> p
   | Rlambda_param (p, _) -> p
+  | Rshape (p, _) -> p
 
 (* This is a mapping from internal expression ids to a standardized int.
  * Used for outputting cleaner error messages to users
@@ -501,6 +504,7 @@ match r with
   | Rsolve_fail _ -> "Rsolve_fail"
   | Rcstr_on_generics _ -> "Rcstr_on_generics"
   | Rlambda_param _ -> "Rlambda_param"
+  | Rshape _ -> "Rshape"
 
 let pp fmt r =
   Format.pp_print_string fmt @@ to_constructor_string r

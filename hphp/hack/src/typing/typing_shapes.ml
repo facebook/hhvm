@@ -143,8 +143,8 @@ let experiment_enabled env experiment =
     (Env.get_tcopt env)
     experiment
 
-let make_idx_fake_super_shape field_name field_ty =
-  Reason.Rnone,
+let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
+  Reason.Rshape (shape_pos, fun_name),
   Tshape
     (FieldsPartiallyKnown Nast.ShapeMap.empty,
      Nast.ShapeMap.singleton field_name field_ty)
@@ -162,14 +162,14 @@ let make_idx_fake_super_shape field_name field_ty =
  * (e.g., hidden behind a newtype or given by a constrained
  * generic parameter or type constant).
  *)
-let is_shape_field_required env field_name shape_ty =
+let is_shape_field_required env shape_pos fun_name field_name shape_ty =
   let field_ty = {
     sft_optional = false;
     sft_ty = MakeType.mixed Reason.Rnone
   } in
   Typing_subtype.is_sub_type env
     shape_ty
-    (make_idx_fake_super_shape field_name field_ty)
+    (make_idx_fake_super_shape shape_pos fun_name field_name field_ty)
 
 (* Typing rules for Shapes::idx
  *
@@ -187,31 +187,33 @@ let is_shape_field_required env field_name shape_ty =
  *     Shapes::idx(e1, sfn, e2) : t
  *
  *)
-let idx env p fty_pos shape_ty field default =
+let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res = Env.fresh_unresolved_type env p in
+  let env, res = Env.fresh_unresolved_type env expr_pos in
   match TUtils.shape_field_name env field with
   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
     let fake_super_shape_ty =
       make_idx_fake_super_shape
+        shape_pos
+        "Shapes::idx"
         field_name
         {sft_optional = true; sft_ty = res} in
     match default with
     | None ->
       let env =
-        Type.sub_type (fst field) Reason.URparam env
+        Type.sub_type shape_pos Reason.URparam env
           shape_ty
           fake_super_shape_ty in
       env,
       (if experiment_enabled env
            TypecheckerOptions.experimental_stronger_shape_idx_ret &&
-         is_shape_field_required env field_name shape_ty
+         is_shape_field_required env shape_pos "Shapes::idx" field_name shape_ty
       then res
-      else TUtils.ensure_option env fty_pos res)
+      else TUtils.ensure_option env fun_pos res)
     | Some (default_pos, default_ty) ->
       let env =
-        Type.sub_type (fst field) Reason.URparam env
+        Type.sub_type shape_pos Reason.URparam env
           shape_ty
           fake_super_shape_ty in
       let env =
@@ -220,19 +222,21 @@ let idx env p fty_pos shape_ty field default =
           res in
       env, res
 
-let at env p shape_ty field =
+let at env ~expr_pos ~shape_pos shape_ty field =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res = Env.fresh_unresolved_type env p in
+  let env, res = Env.fresh_unresolved_type env expr_pos in
   match TUtils.shape_field_name env field with
    | None ->
      env, (Reason.Rwitness (fst field), TUtils.tany env)
    | Some field_name ->
      let fake_super_shape_ty =
        make_idx_fake_super_shape
+         shape_pos
+         "Shapes::at"
          field_name
          {sft_optional = true; sft_ty = res} in
      let env =
-       Type.sub_type (fst field) Reason.URparam env
+       Type.sub_type shape_pos Reason.URparam env
          shape_ty
          fake_super_shape_ty in
      env, res

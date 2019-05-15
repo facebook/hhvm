@@ -50,7 +50,7 @@ struct GetMemOp {
   template<class T> void imm (T) {}
   template<class T> void def (T) {}
   template<class T> void use (T) {}
-  void def (Vptr mem) {
+  void use (Vptr mem) {
     if (rv != ResValid::Empty) {
       rv = ResValid::Invalid;
     } else {
@@ -58,10 +58,10 @@ struct GetMemOp {
       rv = ResValid::Valid;
     }
   }
-  void use (Vptr mem) { def(mem); }
   template<class T> void across (T) {}
   template<class T, class H> void useHint(T,H) {}
   template<class T, class H> void defHint(T,H) {}
+  template<Width w> void use(Vp<w> m) { use(static_cast<Vptr>(m)); }
 
   bool isValid() { return rv == ResValid::Valid;}
 
@@ -1542,6 +1542,45 @@ bool simplify(Env& env, const pop& inst, Vlabel b, size_t i) {
     v << lea{reg::rsp[8], reg::rsp};
     return 1;
   });
+}
+
+bool simplify(Env& env, const orlim& vorlim, Vlabel b, size_t i) {
+  auto const orinst = env.unit.blocks[b].code[i];
+  auto orOperand = orinst.orlim_.s0.l();
+  const Vptr32 orDest = orinst.orlim_.m;
+  for (int x = i - 1; x >= 0; --x) {
+    auto xinst = env.unit.blocks[b].code[x];
+    if (Vinstr::storeli == xinst.op) {
+      const Vptr32 stDest = xinst.storeli_.m;
+      if (stDest == orDest) {
+        for (auto j = x+1; j < i; ++j) {
+          if (!cannot_alias_write(env.unit.blocks[b].code[j],xinst)) {
+            return false;
+          }
+        }
+        const auto stOperand = xinst.storeli_.s.l();
+        auto newOp = stOperand | orOperand;
+        return simplify_impl(env, b, i, storeli { newOp, stDest });
+      }
+    } else if (Vinstr::storel == xinst.op) {
+        const auto srcReg = xinst.storel_.s;
+        const auto it = env.unit.regToConst.find(srcReg);
+        if (it != env.unit.regToConst.end()) {
+          const Vptr32 stDest = xinst.storel_.m;
+          if (orDest == stDest) {
+            for (auto j = x + 1; j < i; ++j) {
+              if (!cannot_alias_write(env.unit.blocks[b].code[j],xinst)) {
+                return false;
+              }
+            }
+            const auto stOperand = it->second.val;
+            const int newOp = stOperand | orOperand;
+            return simplify_impl(env, b, i, storeli { newOp, stDest });
+          }
+        }
+    }
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -273,10 +273,10 @@ let log_position p ?function_name f =
       ^ (if n = 1 then "" else "[" ^ string_of_int n ^ "]")
       ^ (match function_name with None -> "" | Some n -> " {" ^ n ^ "}")) f
 
-let log_subtype_prop ?(do_normalize = false) env message prop =
+let log_subtype_prop env message prop =
   lprintf (Tty.Bold Tty.Green) "%s: " message;
   lprintf (Tty.Normal Tty.Green) "%s"
-    (Typing_print.subtype_prop ~do_normalize env prop);
+    (Typing_print.subtype_prop env prop);
   lnewline ()
 
 let tenv_as_value env tenv =
@@ -401,7 +401,7 @@ let lenv_as_value env lenv =
   ]
 
 let subtype_prop_as_value env prop =
-  Atom (Typing_print.subtype_prop ~do_normalize:false env prop)
+  Atom (Typing_print.subtype_prop env prop)
 
 let todo_as_value todo =
   Atom (Printf.sprintf "%d" (List.length todo))
@@ -547,9 +547,9 @@ let log_types p env items =
             lnewline ()) in
       go items)
 
-let log_prop ?(do_normalize = false) level p message env prop =
+let log_prop level p message env prop =
   log_with_level env "prop" level (fun () ->
-    log_position p (fun () -> log_subtype_prop ~do_normalize env message prop))
+    log_position p (fun () -> log_subtype_prop env message prop))
 
 let log_new_tvar env p tvar message =
   log_with_level env "prop" 2 (fun () ->

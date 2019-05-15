@@ -2905,7 +2905,7 @@ let log_prop env =
   if TypecheckerOptions.new_inference (Env.get_tcopt env) &&
     not (Errors.currently_has_errors ()) &&
     not (TL.is_valid prop)
-  then Typing_log.log_prop ~do_normalize:true 1 env.Env.pos
+  then Typing_log.log_prop 1 env.Env.pos
     "There are remaining unsolved constraints!" env prop
 
 (*****************************************************************************)

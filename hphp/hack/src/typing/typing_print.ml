@@ -132,8 +132,6 @@ module Full = struct
 
   let debug_mode = ref false
   let show_verbose env = Env.get_log_level env "show" > 1
-  let varmapping = ref IMap.empty
-  let normalize_tvars = ref false
   let blank_tyvars = ref false
   let comma_sep = Concat [text ","; Space]
 
@@ -218,14 +216,6 @@ module Full = struct
     | Tvar n ->
       let _, n' = Env.get_var env n in
       let _, ety = Env.expand_type env (Reason.Rnone, x) in
-      let normalized_n = if !normalize_tvars
-        then match IMap.find_opt n !varmapping with
-          | Some n' -> n'
-          | None ->
-            let n' = IMap.cardinal !varmapping in
-            varmapping := IMap.add n n' !varmapping;
-            n'
-        else n in
       begin match ety with
         (* For unsolved type variables, always show the type variable *)
       | (_, Tvar _) ->
@@ -233,13 +223,13 @@ module Full = struct
         then text "[rec]"
         else if !blank_tyvars
         then text "[unresolved]"
-        else text ("#" ^ string_of_int normalized_n)
+        else text ("#" ^ string_of_int n)
       | _ ->
         let prepend =
           if ISet.mem n' st then text "[rec]"
           else
           (* For hh_show_env we further show the type variable number *)
-          if show_verbose env then (text ("#" ^ (string_of_int normalized_n)))
+          if show_verbose env then (text ("#" ^ (string_of_int n)))
           else Nothing in
         let st = ISet.add n' st in
         Concat [prepend; ty to_doc st env ety]
@@ -1583,7 +1573,7 @@ let constraints_for_type env ty =
   |> Option.map ~f:(Libhackfmt.format_doc_unbroken Full.format_env)
   |> Option.map ~f:String.strip
 let class_kind c_kind final = ErrorString.class_kind c_kind final
-let subtype_prop ?(do_normalize = false) env prop =
+let subtype_prop env prop =
   let rec subtype_prop = function
     | Unsat _ -> "UNSAT"
     | Conj [] -> "TRUE"
@@ -1596,9 +1586,5 @@ let subtype_prop ?(do_normalize = false) env prop =
       debug env ty1 ^ " <: " ^ debug env ty2
     | IsEqual (ty1, ty2) ->
       debug env ty1 ^ " = " ^ debug env ty2 in
-  if do_normalize then
-    Full.varmapping := IMap.empty;
-    Full.normalize_tvars := true;
   let p_str = subtype_prop prop in
-  Full.normalize_tvars := false;
   p_str

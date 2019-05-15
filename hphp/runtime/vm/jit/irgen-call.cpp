@@ -684,38 +684,22 @@ void fpushFuncClsMeth(IRGS& env, uint32_t numParams) {
   prepareToCallUnknown(env, func, cls, numParams, nullptr, false, nullptr);
 }
 
-SSATmp* forwardCtx(IRGS& env, SSATmp* ctx, SSATmp* funcTmp) {
-  assertx(ctx->type() <= TCtx);
+SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
+  assertx(!parentFunc->isClosureBody());
   assertx(funcTmp->type() <= TFunc);
 
-  auto forwardDynamicCallee = [&] {
-    if (!hasThis(env)) {
-      gen(env, RaiseMissingThis, funcTmp);
-      return ctx;
-    }
-
-    auto const obj = castCtxThis(env, ctx);
-    gen(env, IncRef, obj);
-    return obj;
-  };
-
-  if (funcTmp->hasConstVal()) {
-    assertx(!funcTmp->funcVal()->isClosureBody());
-    if (funcTmp->funcVal()->isStatic()) {
-      return gen(env, FwdCtxStaticCall, ctx);
-    } else {
-      return forwardDynamicCallee();
-    }
+  if (parentFunc->isStatic()) {
+    return gen(env, FwdCtxStaticCall, ldCtx(env));
   }
 
-  return cond(env,
-              [&](Block* target) {
-                gen(env, CheckFuncStatic, target, funcTmp);
-              },
-              forwardDynamicCallee,
-              [&] {
-                return gen(env, FwdCtxStaticCall, ctx);
-              });
+  if (!hasThis(env)) {
+    gen(env, RaiseMissingThis, funcTmp);
+    return ldCtx(env);
+  }
+
+  auto const obj = castCtxThis(env, ldCtx(env));
+  gen(env, IncRef, obj);
+  return obj;
 }
 
 } // namespace
@@ -1023,10 +1007,6 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
     baseClass, methodName, curFunc(env), exact);
   if (!func) return nullptr;
 
-  auto const objOrCls = forward ?
-                        ldCtx(env) :
-                        ldCtxForClsMethod(env, func, callerCtx, baseClass,
-                                          exact);
   if (check) {
     assertx(exact);
     if (!classIsPersistentOrCtxParent(env, baseClass)) {
@@ -1037,9 +1017,9 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
     cns(env, func) :
     gen(env, LdClsMethod, callerCtx, cns(env, -(func->methodSlot() + 1)));
 
-  calleeCtx = forward ?
-              forwardCtx(env, objOrCls, funcTmp) :
-              objOrCls;
+  calleeCtx = forward
+    ? forwardCtx(env, func, funcTmp)
+    : ldCtxForClsMethod(env, func, callerCtx, baseClass, exact);
   return funcTmp;
 }
 

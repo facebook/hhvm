@@ -598,7 +598,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckDArray:
   case CheckDictOffset:
   case CheckFuncMMNonMagic:
-  case CheckFuncStatic:
   case CheckInit:
   case CheckInitMem:
   case CheckKeysetOffset:

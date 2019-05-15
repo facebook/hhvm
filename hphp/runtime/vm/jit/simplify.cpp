@@ -288,8 +288,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckDictOffset,
                    CheckKeysetOffset,
                    CheckRefInner,
-                   CheckCtxThis,
-                   CheckFuncStatic));
+                   CheckCtxThis));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
     return gen(env, Jmp, inst->next());
   }
@@ -315,18 +314,6 @@ SSATmp* simplifyEqFunc(State& env, const IRInstruction* inst) {
     return cns(env, src0->funcVal() == src1->funcVal());
   }
   return nullptr;
-}
-
-SSATmp* simplifyCheckFuncStatic(State& env, const IRInstruction* inst) {
-  auto const funcTmp = inst->src(0);
-  if (funcTmp->hasConstVal()) {
-    if (funcTmp->funcVal()->isStatic()) {
-      return gen(env, Jmp, inst->taken());
-    }
-    return gen(env, Nop);
-  }
-
-  return mergeBranchDests(env, inst);
 }
 
 SSATmp* simplifyFuncSupportsAsyncEagerReturn(State& env,
@@ -3908,7 +3895,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(LdPackedElem)
   X(MethodExists)
   X(CheckCtxThis)
-  X(CheckFuncStatic)
   X(FuncSupportsAsyncEagerReturn)
   X(IsFuncDynCallable)
   X(IsClsDynConstructible)

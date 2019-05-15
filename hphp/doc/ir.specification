@@ -1367,12 +1367,6 @@ To string conversions:
   indicating that a more complete lookup path should be taken. May throw if the
   method does not exist.
 
-| CheckFuncStatic, ND, S(Func), B
-
-  Tests to see if Func::m_attrs & AttrStatic, and if so branch to B.
-  This instruction is intended to be used in forwarding calls, where we know
-  that Func is not a closure.
-
 | FwdCtxStaticCall, D(Cctx), S(Ctx), NF
 
   If S0 is an object, this opcode returns S0's class with the low bit set

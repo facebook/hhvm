@@ -358,19 +358,6 @@ void cgLdClsMethodFCacheFunc(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgCheckFuncStatic(IRLS& env, const IRInstruction* inst) {
-  auto const funcPtrReg = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << testlim{
-    static_cast<int32_t>(AttrStatic),
-    funcPtrReg[Func::attrsOff()],
-    sf
-  };
-  v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
-}
-
 void cgFwdCtxStaticCall(IRLS& env, const IRInstruction* inst) {
   auto const dstCtx = dstLoc(env, inst, 0).reg();
   auto const srcCtx = srcLoc(env, inst, 0).reg();

@@ -12,5 +12,5 @@ let send_to_custom_writer
     (_files: string list)
     (_service: string)
     (_repo_name: string)
-    (_globalrev: string): unit =
+    (_repo_folder: string): unit =
   ()

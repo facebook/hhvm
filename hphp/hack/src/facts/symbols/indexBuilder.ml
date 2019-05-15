@@ -142,19 +142,6 @@ let measure_time ~f ~(name: string) =
 (* Run the index builder project *)
 let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): unit =
 
-  (* Figure out what global revision we are on *)
-  let hg_process =
-    Process.exec ~cwd:(ctxt.repo_folder) "hg" ["log";"-r";".";"-T";"{globalrev}"] in
-  let globalrev =
-    match Process.read_and_wait_pid ~timeout:30 hg_process with
-    | Ok { Process_types.stdout; _ } ->
-      stdout
-    | Error _ ->
-      "Unknown"
-  in
-  Hh_logger.log "Repository [%s] is on globalrev [%s]"
-    ctxt.repo_folder globalrev;
-
   (* Gather list of files *)
   let name = Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder in
   let repo_files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name in
@@ -225,7 +212,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
         service repo_name in
       measure_time ~f:(fun () ->
           CustomSymbolIndexWriter.send_to_custom_writer
-            json_exported_files service repo_name globalrev;
+            json_exported_files service repo_name ctxt.repo_folder;
         ) ~name;
   end
 ;;

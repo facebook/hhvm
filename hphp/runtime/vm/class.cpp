@@ -1264,6 +1264,8 @@ bool Class::IsPropAccessible(const Prop& prop, Class* ctx) {
 ///////////////////////////////////////////////////////////////////////////////
 // Constants.
 
+const StaticString s_classname("classname");
+
 Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
   Slot clsCnsInd;
   auto cnsVal = cnsNameToTV(clsCnsName, clsCnsInd, what);
@@ -1371,9 +1373,15 @@ Cell Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) const {
 
       // Multiple threads might create and store the resolved type structure
       // here, but that's fine since they'll all store the same thing thanks to
-      // GetScalarArray(). We could avoid a little duplicated work during
-      // warmup with more complexity but it's not worth it.
-      const_cast<TypedValueAux&>(cns.val).m_data.parr = taggedData;
+      // GetScalarArray(). Ditto for the pointed class.
+      // We could avoid a little duplicated work during warmup with more
+      // complexity but it's not worth it.
+      auto& cns_nc = const_cast<Const&>(cns);
+      auto const classname_field = ad->rval(s_classname.get());
+      if (classname_field != nullptr && isStringType(classname_field.type())) {
+        cns_nc.setPointedClsName(classname_field.val().pstr);
+      }
+      cns_nc.val.m_data.parr = taggedData;
       return make_persistent_array_like_tv(ad);
     }
 

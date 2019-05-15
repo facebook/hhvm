@@ -305,15 +305,16 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   for (unsigned i = 0; i < m_constMap.size(); ++i) {
     const Const& const_ = m_constMap[i];
     TypedValueAux tvaux;
+    tvaux.constModifiers() = {};
     if (const_.isAbstract()) {
       tvWriteUninit(tvaux);
-      tvaux.constModifiers().isAbstract = true;
+      tvaux.constModifiers().setIsAbstract(true);
     } else {
       tvCopy(const_.val(), tvaux);
-      tvaux.constModifiers().isAbstract = false;
+      tvaux.constModifiers().setIsAbstract(false);
     }
 
-    tvaux.constModifiers().isType = const_.isTypeconst();
+    tvaux.constModifiers().setIsType(const_.isTypeconst());
 
     constBuild.add(const_.name(), PreClass::Const(const_.name(),
                                                   tvaux,
@@ -323,7 +324,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
     for (auto cnsMap : *nativeConsts) {
       TypedValueAux tvaux;
       tvCopy(cnsMap.second, tvaux);
-      tvaux.constModifiers() = { false, false };
+      tvaux.constModifiers() = {};
       constBuild.add(cnsMap.first, PreClass::Const(cnsMap.first,
                                                    tvaux,
                                                    staticEmptyString()));

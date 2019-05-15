@@ -203,9 +203,28 @@ struct Class : AtomicCountable {
     LowPtr<const Class> cls;
     LowStringPtr name;
     TypedValueAux val;
+#ifndef USE_LOWPTR
+    StringData* pointedClsName;
+#endif
 
-    bool isAbstract() const { return val.constModifiers().isAbstract; }
-    bool isType()     const { return val.constModifiers().isType; }
+    bool isAbstract() const { return val.constModifiers().isAbstract(); }
+    bool isType()     const { return val.constModifiers().isType(); }
+
+    StringData* getPointedClsName() const {
+#ifndef USE_LOWPTR
+      return pointedClsName;
+#else
+      return val.constModifiers().getPointedClsName();
+#endif
+    }
+
+    void setPointedClsName(StringData* pClsName) {
+#ifndef USE_LOWPTR
+      pointedClsName = pClsName;
+#else
+      val.constModifiers().setPointedClsName(pClsName);
+#endif
+    }
   };
 
   /*

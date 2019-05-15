@@ -1015,7 +1015,7 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
       for (auto const& cnsMap : *nativeConsts) {
         TypedValueAux tvaux;
         tvCopy(cnsMap.second, tvaux);
-        tvaux.constModifiers() = { false, false };
+        tvaux.constModifiers() = {};
         ret->constants.push_back(
           php::Const {
             cnsMap.first,

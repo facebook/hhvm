@@ -211,7 +211,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr, uint32_t clsRefSlot) {
                                      ClsCnsLookup::IncludeTypes);
     if (cnsSlot != kInvalidSlot &&
         (!tv ||
-         !static_cast<const TypedValueAux*>(tv)->constModifiers().isType)) {
+         !static_cast<const TypedValueAux*>(tv)->constModifiers().isType())) {
       auto const data = LdSubClsCnsData { cnsNameStr, cnsSlot };
       clsCnsHelper(env, gen(env, LdSubClsCns, data, clsTmp), clsRefSlot);
       return;

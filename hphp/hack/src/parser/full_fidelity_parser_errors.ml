@@ -2088,14 +2088,14 @@ let function_call_argument_errors ~in_constructor_call node errors =
     ; decorated_expression_expression = expression
     } when Token.kind token = TokenKind.Inout ->
       let result =
-        if in_constructor_call then Some (true, SyntaxError.inout_param_in_construct) else
+        if in_constructor_call then Some SyntaxError.inout_param_in_construct else
         match syntax expression with
         | BinaryExpression _ ->
-          Some (true, SyntaxError.fun_arg_inout_set)
+          Some SyntaxError.fun_arg_inout_set
         | QualifiedName _ ->
-          Some (true, SyntaxError.fun_arg_inout_const)
+          Some SyntaxError.fun_arg_inout_const
         | Token _ when is_name expression ->
-          Some (true, SyntaxError.fun_arg_inout_const)
+          Some SyntaxError.fun_arg_inout_const
         (* TODO: Maybe be more descriptive in error messages *)
         | ScopeResolutionExpression _
         | FunctionCallExpression _
@@ -2106,18 +2106,15 @@ let function_call_argument_errors ~in_constructor_call node errors =
             syntax =
               (MemberSelectionExpression _ | ScopeResolutionExpression _)
               ; _
-            }; _ } -> Some (true, SyntaxError.fun_arg_invalid_arg)
+            }; _ } -> Some SyntaxError.fun_arg_invalid_arg
         | SubscriptExpression { subscript_receiver; _ }
           when SN.Superglobals.is_superglobal @@ text subscript_receiver ->
-            Some (false, SyntaxError.fun_arg_inout_containers)
+            Some SyntaxError.fun_arg_inout_containers
         | _ -> None
       in
       begin match result with
       | None -> errors
-      | Some (is_parse_error, e) ->
-        let error_type = if is_parse_error then
-          SyntaxError.ParseError else SyntaxError.RuntimeError in
-        make_error_from_node ~error_type node e :: errors
+      | Some e -> make_error_from_node node e :: errors
       end
   | _ -> errors
 

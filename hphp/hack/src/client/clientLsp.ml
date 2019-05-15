@@ -860,8 +860,7 @@ let do_hover
   in
   (* We pull the position from the SymbolOccurrence.t record, so I would be
      surprised if there were any different ones in here. Just take the first
-     non-None one.
-     -wipi *)
+     non-None one. *)
   let range =
     infos
     |> List.filter_map ~f:(fun { HoverService.pos; _ } -> pos)

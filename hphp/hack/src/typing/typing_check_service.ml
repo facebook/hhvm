@@ -236,8 +236,8 @@ let parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap =
   let sort =
     List.sort ~compare:(fun (path1, _) (path2, _) -> Relative_path.S.compare path1 path2)
   in
-  (* TODO: (wipi) Remove this check and [files_checked] after we have more
-  confidence that the worker memory cap logic is well-formed. *)
+  (* TODO: Remove this check and [files_checked] after we have more confidence
+  that the worker memory cap logic is well-formed. *)
   if cancelled = [] && Option.is_some memory_cap then assert (sort fnl = sort !files_checked);
   errors, env, List.concat (cancelled |> List.map ~f:(fun progress -> progress.unchecked_files))
 

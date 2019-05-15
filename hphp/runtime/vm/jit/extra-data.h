@@ -1637,6 +1637,7 @@ X(LdIfaceMethod,                IfaceMethodData);
 X(LdClsCns,                     ClsCnsName);
 X(InitClsCns,                   ClsCnsName);
 X(LdSubClsCns,                  LdSubClsCnsData);
+X(LdSubClsCnsClsName,           LdSubClsCnsData);
 X(CheckSubClsCns,               LdSubClsCnsData);
 X(ProfileSubClsCns,             ProfileSubClsCnsData);
 X(LdFuncCached,                 FuncNameData);

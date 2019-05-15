@@ -2313,6 +2313,9 @@ void Class::setConstants() {
       assertx(idx != -1);
       cns.val = preConsts[idx].val();
     }
+#ifndef USE_LOWPTR
+    cns.pointedClsName = nullptr;
+#endif
   }
 
   m_constants.create(builder);

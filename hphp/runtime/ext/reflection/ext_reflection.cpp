@@ -527,16 +527,11 @@ void HHVM_FUNCTION(hphp_set_static_property, const String& cls,
   tvAsVariant(lookup.val) = value;
 }
 
-/*
- * cls_or_obj: the name of a class or an instance of the class;
- * cns_name: the name of the type constant of the class;
- *
- * If the type constant exists and is not abstract, this function
- * returns the shape representing the type associated with the type
- * constant.
- */
-Array HHVM_FUNCTION(type_structure,
-                    const Variant& cls_or_obj, const Variant& cns_name) {
+namespace {
+
+const StaticString s_classname("classname");
+
+Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
   auto const cns_sd = cns_name.getStringDataOrNull();
   if (!cns_sd) {
     auto name = cls_or_obj.toString();
@@ -586,6 +581,27 @@ Array HHVM_FUNCTION(type_structure,
   assertx(typeCns.m_data.parr->isDictOrDArray());
   assertx(typeCns.m_data.parr->isStatic());
   return Array::attach(typeCns.m_data.parr);
+}
+
+} // namespace
+
+/*
+ * cls_or_obj: the name of a class or an instance of the class;
+ * cns_name: the name of the type constant of the class;
+ *
+ * If the type constant exists and is not abstract, this function
+ * returns the shape representing the type associated with the type
+ * constant.
+ */
+Array HHVM_FUNCTION(type_structure,
+                    const Variant& cls_or_obj, const Variant& cns_name) {
+  return implTypeStructure(cls_or_obj, cns_name);
+}
+
+String HHVM_FUNCTION(type_structure_classname,
+                     const Variant& cls_or_obj, const Variant& cns_name) {
+  auto const ts = implTypeStructure(cls_or_obj, cns_name);
+  return ts[s_classname].toCStrRef();
 }
 
 [[noreturn]]
@@ -2050,6 +2066,7 @@ struct ReflectionExtension final : Extension {
     HHVM_FE(hphp_set_property);
     HHVM_FE(hphp_set_static_property);
     HHVM_FALIAS(HH\\type_structure, type_structure);
+    HHVM_FALIAS(HH\\type_structure_classname, type_structure_classname);
 
     HHVM_ME(ReflectionFunctionAbstract, getName);
     HHVM_ME(ReflectionFunctionAbstract, isHack);

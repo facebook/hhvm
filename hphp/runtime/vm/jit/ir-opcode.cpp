@@ -455,6 +455,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsPropAddrOrRaise:
   case LdReifiedGeneric:
   case LdClsTypeCns:
+  case LdClsTypeCnsClsName:
   case LdFunc:
   case LdFuncCached:
   case LdRecCached:
@@ -882,6 +883,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdStkAddr:
   case LdStrLen:
   case LdSubClsCns:
+  case LdSubClsCnsClsName:
   case LdSwitchDblIndex:
   case LdSwitchStrIndex:
   case LdTVAux:

@@ -310,37 +310,40 @@ bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   always_assert(false);
 }
 
-bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
+/*
+ * This function optimizes type_structure{,_classname} statically.
+ * Does not modify stack or locals.
+ * Sets will_fail to true if we statically determined that this function
+ * will throw.
+ * If the resulting darray/dict is statically determined, it returns it.
+ * Otherwise returns nullptr.
+ */
+ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
+                                    bool& will_fail) {
   auto const fail = [&] {
-    unreachable(env);
-    popT(env);
-    popT(env);
-    push(env, TBottom);
-    return true;
+    will_fail = true;
+    return nullptr;
   };
   auto const result = [&](res::Class rcls, const StringData* cns,
-                          bool check_lsb) {
+                          bool check_lsb) -> ArrayData* {
     auto const cnst =
       env.index.lookup_class_const_ptr(env.ctx, rcls, cns, true);
     if (!cnst || !cnst->val || !cnst->isTypeconst) {
-      if (check_lsb && (!cnst || !cnst->val)) return false;
+      if (check_lsb && (!cnst || !cnst->val)) return nullptr;
       // Either the const does not exist, it is abstract or is not a type const
       return fail();
     }
-    if (check_lsb && !cnst->isNoOverride) return false;
+    if (check_lsb && !cnst->isNoOverride) return nullptr;
     auto const typeCns = cnst->val;
-    if (!tvIsDictOrDArray(&*typeCns)) return false;
-    auto const ts = resolveTSStatically(env, typeCns->m_data.parr, true);
-    if (!ts) return false;
-    reduce(env, bc::PopC {}, bc::PopC {});
-    RuntimeOption::EvalHackArrDVArrs
-      ? reduce(env, bc::Dict { *ts }) : reduce(env, bc::Array { *ts });
-    return true;
+    if (!tvIsDictOrDArray(&*typeCns)) return nullptr;
+    auto const opt_ts = resolveTSStatically(env, typeCns->m_data.parr, true);
+    if (!opt_ts) return nullptr;
+    return *opt_ts;
   };
-  if (op.arg1 != 2) return false;
+  if (op.arg1 != 2) return nullptr;
   auto const cns_name = tv(topT(env));
   auto const cls_or_obj = tv(topT(env, 1));
-  if (!cns_name || !tvIsString(&*cns_name)) return false;
+  if (!cns_name || !tvIsString(&*cns_name)) return nullptr;
   auto const cns_sd = cns_name->m_data.pstr;
   if (!cls_or_obj) {
     if (auto const last = op_from_slot(env, 1)) {
@@ -348,22 +351,65 @@ bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
         if (auto const prev = op_from_slot(env, 1, 1)) {
           if (prev->op == Op::LateBoundCls &&
               last->ClsRefName.slot == prev->LateBoundCls.slot) {
-            if (!env.ctx.cls) fail();
+            if (!env.ctx.cls) return fail();
             return result(env.index.resolve_class(env.ctx.cls), cns_sd, true);
           }
         }
       }
     }
-    return false;
+    return nullptr;
   }
   if (tvIsString(&*cls_or_obj)) {
     auto const rcls = env.index.resolve_class(env.ctx, cls_or_obj->m_data.pstr);
-    if (!rcls || !rcls->resolved()) return false;
+    if (!rcls || !rcls->resolved()) return nullptr;
     return result(*rcls, cns_sd, false);
   } else if (!tvIsObject(&*cls_or_obj) && !tvIsClass(&*cls_or_obj)) {
     return fail();
   }
-  return false;
+  return nullptr;
+}
+
+bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
+  bool fail = false;
+  auto const ts = impl_type_structure_opts(env, op, fail);
+  if (fail) {
+    unreachable(env);
+    popT(env);
+    popT(env);
+    push(env, TBottom);
+    return true;
+  }
+  if (!ts) return false;
+  reduce(env, bc::PopC {}, bc::PopC {});
+  RuntimeOption::EvalHackArrDVArrs
+    ? reduce(env, bc::Dict { ts }) : reduce(env, bc::Array { ts });
+  return true;
+}
+
+const StaticString s_classname("classname");
+
+bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
+  bool fail = false;
+  auto const ts = impl_type_structure_opts(env, op, fail);
+  if (fail) {
+    unreachable(env);
+    popT(env);
+    popT(env);
+    push(env, TBottom);
+    return true;
+  }
+  if (ts) {
+    auto const classname_field = ts->rval(s_classname.get());
+    if (classname_field != nullptr && isStringType(classname_field.type())) {
+      reduce(env, bc::PopC {}, bc::PopC {},
+             bc::String { classname_field.val().pstr });
+      return true;
+    }
+  }
+  popT(env);
+  popT(env);
+  push(env, TSStr);
+  return true;
 }
 
 #define SPECIAL_BUILTINS                                                \
@@ -384,6 +430,7 @@ bool builtin_type_structure(ISS& env, const bc::FCallBuiltin& op) {
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \
+  X(type_structure_classname, HH\\type_structure_classname)             \
 
 #define X(x, y)    const StaticString s_##x(#y);
   SPECIAL_BUILTINS

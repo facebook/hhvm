@@ -1393,4 +1393,12 @@ namespace HH {
    */
   <<__Native, __Rx>>
   function type_structure(mixed $cls_or_obj, ?string $cns_name = null): darray;
+
+  /**
+   * Retrieves the classname on the the TypeStructure pointed by a type
+   * constant or a type alias.
+   */
+  <<__Native, __Rx>>
+  function type_structure_classname(mixed $cls_or_obj,
+                                    ?string $cns_name = null): string;
 }

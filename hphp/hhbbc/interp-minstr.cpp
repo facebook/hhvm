@@ -1514,6 +1514,10 @@ void in(ISS& env, const bc::Dim& op) {
 //////////////////////////////////////////////////////////////////////
 // Final operations
 
+const StaticString s_classname("classname");
+const StaticString s_type_structure("HH\\type_structure");
+const StaticString s_type_structure_classname("HH\\type_structure_classname");
+
 void in(ISS& env, const bc::QueryM& op) {
   auto const key = key_type_or_fixup(env, op);
   if (!key) return;
@@ -1580,6 +1584,37 @@ void in(ISS& env, const bc::QueryM& op) {
           return reduce(env, std::move(bcs));
         }
         if (!isMemberDimOp(last->op)) break;
+      }
+    }
+
+    // Try to detect type_structure(cls_name, cns_name)['classname'] and
+    // reduce this to type_structure_classname(cls_name, cns_name)
+    if (op.subop2 == QueryMOp::CGet &&
+        nDiscard == 1 &&
+        op.mkey.mcode == MemberCode::MET &&
+        op.mkey.litstr->isame(s_classname.get())) {
+      if (auto const last = last_op(env, 0)) {
+        if (last->op == Op::BaseC) {
+          if (auto const prev = last_op(env, 1)) {
+            if (prev->op == Op::FCallBuiltin &&
+                prev->FCallBuiltin.str3->isame(s_type_structure.get()) &&
+                prev->FCallBuiltin.arg1 == 2) {
+              auto const params = prev->FCallBuiltin.arg1;
+              auto const passed_params = prev->FCallBuiltin.arg2;
+              rewind(env, op); // querym
+              rewind(env, 2);  // basec + fcallbuiltin
+              env.collect.mInstrState.clear();
+              return reduce(
+                env,
+                bc::FCallBuiltin {
+                  params,
+                  passed_params,
+                  s_type_structure_classname.get()
+                }
+              );
+            }
+          }
+        }
       }
     }
   } else {

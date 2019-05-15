@@ -248,6 +248,29 @@ void cgLdSubClsCns(IRLS& env, const IRInstruction* inst) {
   v << lea{tmp[slot * sizeof(Class::Const) + offsetof(Class::Const, val)], dst};
 }
 
+void cgLdSubClsCnsClsName(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<LdSubClsCnsClsName>();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  auto const slot = extra->slot;
+  auto const tmp = v.makeReg();
+  v << load{srcLoc(env, inst, 0).reg()[Class::constantsVecOff()], tmp};
+#ifndef USE_LOWPTR
+  auto const offset = tmp[slot * sizeof(Class::Const) +
+                          offsetof(Class::Const, pointedClsName)];
+  v << load{offset, dst};
+#else
+  auto const rawData = v.makeReg();
+  auto const offset = tmp[slot * sizeof(Class::Const) +
+                          offsetof(Class::Const, val) +
+                          offsetof(TypedValue, m_aux)];
+  v << loadzlq{offset, rawData};
+  v << andqi{static_cast<int32_t>(ConstModifiers::kMask), rawData,
+             dst, v.makeReg()};
+#endif
+}
+
 void cgCheckSubClsCns(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<CheckSubClsCns>();
   auto& v = vmain(env);
@@ -348,9 +371,28 @@ static ArrayData* loadClsTypeCnsHelper(
   return typeCns.m_data.parr;
 }
 
+const StaticString s_classname("classname");
+
+static StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
+                                              const StringData* name) {
+  auto const ts = loadClsTypeCnsHelper(cls, name);
+  if (auto const classname_field = ts->rval(s_classname.get())) {
+    assertx(isStringType(classname_field.type()));
+    return classname_field.val().pstr;
+  }
+  raise_error("Type constant %s::%s does not have a 'classname' field",
+              cls->name()->data(), name->data());
+}
+
 void cgLdClsTypeCns(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst).ssa(0).ssa(1);
   cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsHelper),
+               callDest(env, inst), SyncOptions::Sync, args);
+}
+
+void cgLdClsTypeCnsClsName(IRLS& env, const IRInstruction* inst) {
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
+  cgCallHelper(vmain(env), env, CallSpec::direct(loadClsTypeCnsClsNameHelper),
                callDest(env, inst), SyncOptions::Sync, args);
 }
 

@@ -1793,6 +1793,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdPairBase:
   case LdClsCns:
   case LdSubClsCns:
+  case LdSubClsCnsClsName:
   case LdTypeCns:
   case CheckSubClsCns:
   case LdClsCnsVecLen:
@@ -1963,6 +1964,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodCacheFunc:
   case LdClsMethodFCacheFunc:
   case LdClsTypeCns:
+  case LdClsTypeCnsClsName:
   case FwdCtxStaticCall:
   case ProfileArrayKind:
   case ProfileSwitchDest:

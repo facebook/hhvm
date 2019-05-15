@@ -74,6 +74,7 @@ const StaticString
   s_chr("chr"),
   s_array_key_cast("hh\\array_key_cast"),
   s_type_structure("hh\\type_structure"),
+  s_type_structure_classname("hh\\type_structure_classname"),
   s_is_list_like("hh\\is_list_like"),
   s_one("1"),
   s_empty(""),
@@ -515,7 +516,8 @@ SSATmp* opt_array_key_cast(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
-SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
+SSATmp* impl_opt_type_structure(IRGS& env, const ParamPrep& params,
+                                bool getName) {
   if (params.size() != 2) return nullptr;
   auto const clsNameTmp = params[0].value;
   auto const cnsNameTmp = params[1].value;
@@ -538,20 +540,46 @@ SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
   if (cnsSlot == kInvalidSlot) return nullptr;
 
   auto const data = LdSubClsCnsData { cnsName, cnsSlot };
-  auto const ptr = gen(env, LdSubClsCns, data, clsTmp);
+  if (!getName) {
+    auto const ptr = gen(env, LdSubClsCns, data, clsTmp);
+    return cond(
+      env,
+      [&] (Block* taken) {
+        gen(env, CheckTypeMem, TUncountedInit, taken, ptr);
+        return gen(env, LdTypeCns, taken, gen(env, LdMem, TUncountedInit, ptr));
+      },
+      [&] (SSATmp* cns) { return cns; },
+      [&] /* taken */ {
+        return gen(
+          env, LdClsTypeCns, make_opt_catch(env, params), clsTmp, cnsNameTmp
+        );
+      }
+    );
+  }
   return cond(
     env,
     [&] (Block* taken) {
-      gen(env, CheckTypeMem, TUncountedInit, taken, ptr);
-      return gen(env, LdTypeCns, taken, gen(env, LdMem, TUncountedInit, ptr));
+      auto const clsNameFromTS = gen(env, LdSubClsCnsClsName, data, clsTmp);
+      return gen(env, CheckNonNull, taken, clsNameFromTS);
     },
-    [&] (SSATmp* cns) { return cns; },
-    [&] /* taken */ {
+    [&] (SSATmp* s) { return s; },
+    [&] {
       return gen(
-        env, LdClsTypeCns, make_opt_catch(env, params), clsTmp, cnsNameTmp
+        env,
+        LdClsTypeCnsClsName,
+        make_opt_catch(env, params),
+        clsTmp,
+        cnsNameTmp
       );
     }
   );
+}
+
+SSATmp* opt_type_structure(IRGS& env, const ParamPrep& params) {
+  return impl_opt_type_structure(env, params, false);
+}
+SSATmp* opt_type_structure_classname(IRGS& env, const ParamPrep& params) {
+  return impl_opt_type_structure(env, params, true);
 }
 
 SSATmp* opt_is_list_like(IRGS& env, const ParamPrep& params) {
@@ -898,6 +926,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(min2)
     X(array_key_cast)
     X(type_structure)
+    X(type_structure_classname)
     X(is_list_like)
     X(container_first)
     X(container_last)

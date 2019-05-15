@@ -1314,6 +1314,12 @@ To string conversions:
   UncountedInit, its value should not be used, and a fallback method should be
   called.
 
+| LdSubClsCnsClsName<constantName,slot>, D(StaticStr|Nullptr), S(Cls), NF
+
+  Loads the name of the class pointed by the constant 'constantName' for the
+  class S0. The constant is known to be in the given slot. Returns nullptr if
+  constant is abstract, not type constant or does not point to a class.
+
 | CheckSubClsCns<constantName,slot>, ND, S(Cls), B
 
   Check that the constant 'constantName' lives in the given slot for the class
@@ -1332,6 +1338,12 @@ To string conversions:
 
   Loads type constant S1 of class S0 or raises an error if no such constant
   could be found, or if S0::S1 is not a type constant.
+
+| LdClsTypeCnsClsName, D(StaticStr), S(Cls) S(Str), NF
+
+  Loads the name of the class pointed by the type constant S1 of class S0 or
+  raises an error if no such constant could be found, or if S0::S1 is not a
+  type constant.
 
 | ProfileSubClsCns<constantName,handle>, D(PtrToGen), S(Cls), NF
 

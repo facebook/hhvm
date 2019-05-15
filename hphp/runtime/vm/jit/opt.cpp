@@ -244,7 +244,7 @@ void optimize(IRUnit& unit, TransKind kind) {
   doPass(unit, fixBlockHints, DCE::None);
 
   if (kind == TransKind::Optimize) {
-    doPass(unit, selectiveDecRefNZ, DCE::None);
+    doPass(unit, selectiveWeakenDecRefs, DCE::None);
   }
   printUnit(6, unit, " after optimize ");
 }

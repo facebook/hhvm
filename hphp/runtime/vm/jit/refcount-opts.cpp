@@ -3477,7 +3477,7 @@ void optimizeRefcounts(IRUnit& unit) {
  * can be more aggressive because they don't hold internal references to other
  * objects, so a separate threshold is used in that case.
  */
-void selectiveDecRefNZ(IRUnit& unit) {
+void selectiveWeakenDecRefs(IRUnit& unit) {
   auto blocks = poSortCfg(unit);
 
   // Union of types that cannot trigger Copy-On-Write for inner elements in case
@@ -3490,12 +3490,21 @@ void selectiveDecRefNZ(IRUnit& unit) {
         const auto profile = decRefProfile(unit.context(), &inst);
         if (profile.optimizing()) {
           const auto data = profile.data();
-          const auto destroyPct = data.percent(data.destroyed());
-          double pctLimit = inst.src(0)->type() <= cowFree
-            ? RuntimeOption::EvalJitPGODecRefNZReleasePercent
-            : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
-          if (destroyPct < pctLimit) {
-            inst.setOpcode(DecRefNZ);
+          const auto decrefdPct = data.percent(data.destroyed()) +
+                                  data.percent(data.survived());
+          double decrefdPctLimit = inst.src(0)->type() <= cowFree
+            ? RuntimeOption::EvalJitPGODecRefNopDecPercent
+            : RuntimeOption::EvalJitPGODecRefNopDecPercentCOW;
+          if (decrefdPct < decrefdPctLimit) {
+            inst.convertToNop();
+          } else {
+            const auto destroyPct = data.percent(data.destroyed());
+            double destroyPctLimit = inst.src(0)->type() <= cowFree
+              ? RuntimeOption::EvalJitPGODecRefNZReleasePercent
+              : RuntimeOption::EvalJitPGODecRefNZReleasePercentCOW;
+            if (destroyPct < destroyPctLimit) {
+              inst.setOpcode(DecRefNZ);
+            }
           }
         }
       }

@@ -7,6 +7,7 @@
  *
 *)
 open SearchUtils
+open Core_kernel
 
 (* Some SQL commands we'll need *)
 let sql_begin_transaction =
@@ -47,46 +48,46 @@ let sql_create_indexes =
   "CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);" ^
   "CREATE INDEX IF NOT EXISTS ix_symbols_kindname ON symbols (kind, name);"
 
-(* Gather a database and prepared statement into a tuple *)
-let prepare_or_reset_statement (db) (stmt_ref) (sql_command_text) =
-  let stmt = match !stmt_ref with
-    | Some s ->
-      let _ = Sqlite3.reset s in
-      s
-    | None ->
-      let s = Sqlite3.prepare db sql_command_text in
-      stmt_ref := Some s;
-      s
-  in
-  stmt
-;;
+(* Capture results from sqlite and crash if database fails *)
+let check_rc (rc: Sqlite3.Rc.t): unit =
+  if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
+  then failwith (Printf.sprintf "SQLite operation failed: %s" (Sqlite3.Rc.to_string rc))
 
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db
     (filename: string)
     (symbols: si_results): unit =
 
+  (* If the file exists, remove it before starting over *)
+  if Sys.file_exists filename then begin
+    Unix.unlink filename;
+  end;
+
   (* Open the database and do basic prep *)
   let db = Sqlite3.db_open filename in
-  let _ = Sqlite3.exec db sql_create_symbols_table in
-  let _ = Sqlite3.exec db sql_create_indexes in
-  let _ = Sqlite3.exec db sql_create_kinds_table in
-  let _ = Sqlite3.exec db sql_insert_kinds in
-  let _ = Sqlite3.exec db sql_begin_transaction in
+  Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
+  Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
+  Sqlite3.exec db sql_create_symbols_table |> check_rc;
+  Sqlite3.exec db sql_create_indexes |> check_rc;
+  Sqlite3.exec db sql_create_kinds_table |> check_rc;
+  Sqlite3.exec db sql_insert_kinds |> check_rc;
+  Sqlite3.exec db sql_begin_transaction |> check_rc;
 
   (* Insert records *)
-  let insert_symbol_stmt = ref None in
-  Core_kernel.List.iter symbols ~f:(fun symbol -> begin
-        let stmt = prepare_or_reset_statement db insert_symbol_stmt sql_insert_symbol in
-        let _ = Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT symbol.si_name) in
-        let _ = Sqlite3.bind stmt 2 (Sqlite3.Data.INT
-                                       (Int64.of_int (kind_to_int symbol.si_kind))) in
-        let _ = Sqlite3.step stmt in
-        ()
-      end);
+  begin
+    let stmt = Sqlite3.prepare db sql_insert_symbol in
+    List.iter symbols ~f:(fun symbol -> begin
+          Sqlite3.reset stmt |> check_rc;
+          Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT symbol.si_name) |> check_rc;
+          Sqlite3.bind stmt 2 (Sqlite3.Data.INT
+            (Int64.of_int (kind_to_int symbol.si_kind))) |> check_rc;
+          Sqlite3.step stmt |> check_rc;
+        end);
+    Sqlite3.finalize stmt |> check_rc;
+  end;
 
   (* Finish up *)
-  let _ = Sqlite3.exec db sql_commit_transaction in
-  let _ = Sqlite3.db_close db in
-  ()
+  Sqlite3.exec db sql_commit_transaction |> check_rc;
+  if not (Sqlite3.db_close db) then
+    failwith ("Unable to close database " ^ filename)
 ;;

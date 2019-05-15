@@ -2583,12 +2583,14 @@ let bind_to_lower_bound ~freshen env r var lower_bounds =
   (* Now actually make the assignment var := ty, and remove var from tvenv *)
   bind env var ty
 
+let is_not_union_with_tvar env var ty =
+  let _env, ty = TUtils.simplify_unions env ty in
+  ty_equal ty (TUtils.diff ty (var_as_ty var)) ~normalize_union:true
+
 let bind_to_upper_bound env r var upper_bounds =
   Env.log_env_change "bind_to_upper_bound" env @@
   (* Remove bounds which are the union of var and something else *)
-  let upper_bounds = TySet.filter (fun bound ->
-    is_sub_type_alt env (var_as_ty var) bound ~no_top_bottom:true <> Some true)
-    upper_bounds in
+  let upper_bounds = TySet.filter (is_not_union_with_tvar env var) upper_bounds in
   match Typing_set.elements upper_bounds with
   | [] -> bind env var (MakeType.mixed r)
   | [ty] ->
@@ -2672,7 +2674,7 @@ let bind_to_equal_bound ~freshen env var =
   let lower_bounds = expand_all tyvar_info.Env.lower_bounds in
   let upper_bounds = expand_all tyvar_info.Env.upper_bounds in
   let equal_bounds = Typing_set.inter lower_bounds upper_bounds in
-  let equal_bounds = Typing_set.remove (var_as_ty var) equal_bounds in
+  let equal_bounds = TySet.filter (is_not_union_with_tvar env var) equal_bounds in
   match Typing_set.choose_opt equal_bounds with
   | Some ty -> bind env var ty
   | None ->

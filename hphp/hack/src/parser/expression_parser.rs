@@ -3117,11 +3117,11 @@ where
                 let pos = self.pos();
                 // We have determined that this is a self-closing XHP tag, so
                 // `consume_trailing_trivia` needs to be propagated down.
-                let (token, _) = // FIXME(kasper) parser1
+                let (token, _) =
                     self.next_xhp_element_token(/* ~no_trailing:*/ !consume_trailing_trivia);
-                let token = S!(make_token, parser1, token);
-                let xhp_open = S!(make_xhp_open, parser1, left_angle, name, attrs, token);
-                let missing1 = S!(make_missing, parser1, pos);
+                let token = S!(make_token, self, token);
+                let xhp_open = S!(make_xhp_open, self, left_angle, name, attrs, token);
+                let missing1 = S!(make_missing, self, pos);
                 let missing2 = S!(make_missing, self, pos);
                 S!(make_xhp_expression, self, xhp_open, missing1, missing2)
             }

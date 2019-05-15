@@ -40,7 +40,7 @@ where
 
     fn make_list(s: State::T, items: Box<Vec<Self::R>>, offset: usize) -> (State::T, Self::R) {
         if items.is_empty() {
-            (s, Self::R::make_missing(offset))
+            <Self as SyntaxSmartConstructors<'a, S, State>>::make_missing(s, offset)
         } else {
             let mut item_refs = Vec::with_capacity((*items).len());
             for item in items.iter() {

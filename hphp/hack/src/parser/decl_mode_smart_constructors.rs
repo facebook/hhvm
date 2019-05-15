@@ -150,7 +150,8 @@ where
         body: Self::R,
         r3: Self::R,
     ) -> (Vec<bool>, Self::R) {
-        let (saw_yield, st) = pop_n(st, 4);
+        let (_, st) = pop_n(st, 1);
+        let (saw_yield, st) = pop_n(st, 3);
         let body = replace_body(body, saw_yield);
         (
             push(st, false),

@@ -310,6 +310,11 @@ class DOMDocumentFragment extends DOMNode {
 
 }
 
+class DOMComment extends DOMCharacterData {
+  // Methods
+  public function __construct(?string $value = null);
+}
+
 <<__PHPStdLib>>
 function dom_import_simplexml(SimpleXMLElement $node): ?DOMElement;
 <<__PHPStdLib>>

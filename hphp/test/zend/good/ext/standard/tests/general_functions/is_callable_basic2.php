@@ -25,7 +25,6 @@ function check_iscallable_objects( $methods ) {
   }
 }
 
-echo "\n*** Testing is_callable() on objects ***\n";
 class object_class
 {
   public $value = 100;
@@ -70,10 +69,11 @@ class contains_object_class
      $this->no_member_class_object = new no_member_class();
    }
 }
+
+echo "\n*** Testing is_callable() on objects ***\n";
 /* objects of different classes */
 $obj = new contains_object_class;
 $temp_class_obj = new object_class();
-
 /* object which is unset */
 $unset_obj = new object_class();
 unset($unset_obj);

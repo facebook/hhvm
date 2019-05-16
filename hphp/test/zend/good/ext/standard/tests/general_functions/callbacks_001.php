@@ -42,9 +42,6 @@ class E extends D {
     }
 }
 
-$o = new C;
-$o->test();
-
 class O {
     public function who() {
         echo "O\n";
@@ -68,6 +65,9 @@ class P extends O {
         $this->call(array($this, 'O::who'));
     }
 }
+<<__EntryPoint>> function main() {
+$o = new C;
+$o->test();
 
 echo "===FOREIGN===\n";
 
@@ -75,3 +75,4 @@ $o = new P;
 $o->test();
 
 echo "===DONE===\n";
+}

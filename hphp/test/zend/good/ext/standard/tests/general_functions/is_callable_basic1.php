@@ -23,7 +23,6 @@ function check_iscallable( $functions ) {
   }
 }
 
-echo "\n*** Testing is_callable() on defined functions ***\n";
 /* function name with simple string */
 function someFunction() {
 }
@@ -43,7 +42,8 @@ function false() {
 /* function name with string and special character */
 function Hello_World() {
 }
-
+<<__EntryPoint>> function main() {
+echo "\n*** Testing is_callable() on defined functions ***\n";
 $defined_functions = array (
   $functionVar1 = 'someFunction',
   $functionVar2 = 'x123',
@@ -57,3 +57,4 @@ $defined_functions = array (
 check_iscallable($defined_functions);
 
 echo "===DONE===\n";
+}

@@ -1,10 +1,14 @@
 <?php
 /* Prototype: bool is_float ( mixed $var );
- * Description: Finds whether the given variable is a float 
- */ 
-
+ * Description: Finds whether the given variable is a float
+ */
+class foo
+{
+  var $array = array(10.5);
+};
+<<__EntryPoint>> function main() {
 echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
-// different valid  float vlaues 
+// different valid  float vlaues
 $floats = array(
   -2147483649, // float value
   2147483648,  // float value
@@ -56,16 +60,12 @@ $dfp = opendir ( dirname(__FILE__) );
 $unset_var = 10;
 unset ($unset_var);
 
-// non_scalar values, objects, arrays, resources and boolean 
-class foo
-{
-  var $array = array(10.5);
-};
+// non_scalar values, objects, arrays, resources and boolean
 $object = new foo();
 
 $not_floats = array (
   new foo, //object
-  $object,  
+  $object,
 
   $fp,  // resource
   $dfp,
@@ -83,7 +83,7 @@ $not_floats = array (
   TRUE,
   false,
   FALSE,
-  
+
   "",  // strings
   '',
   "0",
@@ -96,7 +96,7 @@ $not_floats = array (
   '1e5',
   '1.5e6_string',
   "1.5e6_string",
- 
+
   1,  // integers, hex and octal
   -1,
   0,
@@ -105,11 +105,11 @@ $not_floats = array (
   -0x673,
   0123,
   -0123,
-   
+
   @$unset_var,  // unset variable
   @$undefined_var
 );
-/* loop through the $not_floats to see working of 
+/* loop through the $not_floats to see working of
    is_float(), is_double() & is_real() on objects,
     arrays, boolean and others */
 $loop_counter = 1;
@@ -126,9 +126,10 @@ try { var_dump( is_float() ); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 try { var_dump( is_double() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( is_real() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-//arguments more than expected 
+//arguments more than expected
 try { var_dump( is_float( $floats[0], $floats[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( is_double( $floats[0], $floats[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( is_real( $floats[0], $floats[1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
- 
+
 echo "Done\n";
+}

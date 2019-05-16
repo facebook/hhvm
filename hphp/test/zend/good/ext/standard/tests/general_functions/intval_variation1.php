@@ -1,19 +1,31 @@
 <?php
 /* Prototype  : int intval(mixed var [, int base])
- * Description: Get the integer value of a variable using the optional base for the conversion 
+ * Description: Get the integer value of a variable using the optional base for the conversion
  * Source code: ext/standard/type.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-echo "*** Testing intval() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() != 0) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing intval() : usage variation ***\n";
 set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
@@ -22,18 +34,6 @@ $base = 10;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -105,3 +105,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

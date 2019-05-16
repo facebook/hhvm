@@ -18,6 +18,7 @@ let sql_commit_transaction =
 
 let sql_create_symbols_table =
   "CREATE TABLE IF NOT EXISTS symbols ( " ^
+  "    namespace_id INTEGER NOT NULL, " ^
   "    name TEXT NOT NULL, " ^
   "    kind INTEGER NOT NULL " ^
   ");"
@@ -26,6 +27,12 @@ let sql_create_kinds_table =
   "CREATE TABLE IF NOT EXISTS kinds ( " ^
   "    id INTEGER NOT NULL, " ^
   "    description TEXT NOT NULL " ^
+  ");"
+
+let sql_create_namespaces_table =
+  "CREATE TABLE IF NOT EXISTS namespaces ( " ^
+  "    namespace_id INTEGER NOT NULL, " ^
+  "    namespace TEXT NOT NULL " ^
   ");"
 
 let sql_insert_kinds =
@@ -40,7 +47,13 @@ let sql_insert_kinds =
 
 let sql_insert_symbol =
   "INSERT INTO symbols " ^
-  " (name, kind)" ^
+  " (namespace_id, name, kind)" ^
+  " VALUES" ^
+  " (?, ?, ?);"
+
+let sql_insert_namespace =
+  "INSERT INTO namespaces " ^
+  " (namespace_id, namespace)" ^
   " VALUES" ^
   " (?, ?);"
 
@@ -70,19 +83,52 @@ let record_in_db
   Sqlite3.exec db sql_create_symbols_table |> check_rc;
   Sqlite3.exec db sql_create_indexes |> check_rc;
   Sqlite3.exec db sql_create_kinds_table |> check_rc;
+  Sqlite3.exec db sql_create_namespaces_table |> check_rc;
   Sqlite3.exec db sql_insert_kinds |> check_rc;
   Sqlite3.exec db sql_begin_transaction |> check_rc;
 
-  (* Insert records *)
+  (* Keep track of namespaces as we observe them *)
+  let namespace_tbl = Caml.Hashtbl.create 0 in
+  let ns_id = ref 1 in
+
+  (* Insert symbols and link them to namespaces *)
   begin
     let stmt = Sqlite3.prepare db sql_insert_symbol in
     List.iter symbols ~f:(fun symbol -> begin
-          Sqlite3.reset stmt |> check_rc;
-          Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT symbol.si_name) |> check_rc;
-          Sqlite3.bind stmt 2 (Sqlite3.Data.INT
-            (Int64.of_int (kind_to_int symbol.si_kind))) |> check_rc;
-          Sqlite3.step stmt |> check_rc;
-        end);
+
+      (* Determine the namespace of this symbol, if any *)
+      let (namespace, _name) = Utils.split_ns_from_name symbol.si_name in
+      let nsid_opt = Caml.Hashtbl.find_opt namespace_tbl namespace in
+      let nsid = match nsid_opt with
+      | Some id -> id
+      | None ->
+        let id = !ns_id in
+        Caml.Hashtbl.add namespace_tbl namespace id;
+        incr ns_id;
+        id
+      in
+
+      (* Insert this symbol *)
+      Sqlite3.reset stmt |> check_rc;
+      Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int nsid)) |> check_rc;
+      Sqlite3.bind stmt 2 (Sqlite3.Data.TEXT symbol.si_name) |> check_rc;
+      Sqlite3.bind stmt 3 (Sqlite3.Data.INT
+        (Int64.of_int (kind_to_int symbol.si_kind))) |> check_rc;
+      Sqlite3.step stmt |> check_rc;
+    end);
+    Sqlite3.finalize stmt |> check_rc;
+  end;
+
+  (* We've seen all namespaces, now insert them and their IDs *)
+  begin
+    let stmt = Sqlite3.prepare db sql_insert_namespace in
+    Caml.Hashtbl.iter (fun ns id -> begin
+      Caml.Hashtbl.add namespace_tbl ns id;
+      Sqlite3.reset stmt |> check_rc;
+      Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int id)) |> check_rc;
+      Sqlite3.bind stmt 2 (Sqlite3.Data.TEXT ns) |> check_rc;
+      Sqlite3.step stmt |> check_rc;
+    end) namespace_tbl;
     Sqlite3.finalize stmt |> check_rc;
   end;
 

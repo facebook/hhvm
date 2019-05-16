@@ -280,13 +280,9 @@ bool HHVM_FUNCTION(trigger_error, const String& error_msg,
     return true;
   }
 
-  ActRec* fp = g_context->getStackFrame();
+  auto const f = GetCallerFunc();
 
-  if (fp->m_func->nativeFuncPtr() ==
-      reinterpret_cast<NativeFunction>(HHVM_FN(trigger_error))) {
-    fp = g_context->getOuterVMFrame(fp);
-  }
-  if (fp && fp->m_func->isBuiltin()) {
+  if (f && f->isBuiltin()) {
     if (error_type == (int)ErrorMode::ERROR) {
       raise_error_without_first_frame(msg);
       return true;

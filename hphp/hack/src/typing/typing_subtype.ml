@@ -2518,6 +2518,16 @@ and freshen_tparams env variancel tyl =
     | _ ->
       env, tyl
 
+let var_occurs_in_ty env var ty =
+  let finder = object
+    inherit [Env.env * bool] Type_visitor.type_visitor
+    method! on_tvar (env, occurs) _r v =
+      if occurs then env, occurs else
+      let env, v = Env.get_var env v in
+      env, v = var
+    end in
+  finder#on_type (env, false) ty
+
 let bind env var ty =
   Env.log_env_change "bind" env @@
 
@@ -2533,7 +2543,14 @@ let bind env var ty =
   let env = Env.update_variance_after_bind env var ty in
 
   (* Unify the variable *)
-  let env = Typing_unify_recursive.add env var ty in
+  let env, var_occurs_in_ty = var_occurs_in_ty env var ty in
+  let env = if var_occurs_in_ty then begin
+    Errors.unification_cycle
+      (Reason.to_pos (fst ty)) Typing_print.(with_blank_tyvars (fun () -> full_rec env var ty));
+    Env.add env var (fst ty, Terr)
+  end else
+    Env.add env var ty in
+
   (* Remove the variable from the environment *)
   let env = Env.remove_tyvar env var in
   env

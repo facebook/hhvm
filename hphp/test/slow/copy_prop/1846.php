@@ -8,3 +8,4 @@
     $this->parents = $parents;
   }
 }
+<<__EntryPoint>> function main() {}

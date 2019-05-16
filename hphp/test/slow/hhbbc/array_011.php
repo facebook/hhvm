@@ -7,3 +7,4 @@ function bar(bool $k) {
     if ($k) return $x;
   }
 }
+<<__EntryPoint>> function main() {}

@@ -8,3 +8,4 @@ trait SomeTrait implements SomeInterface {}
 trait SomeTrait2 {
   use SomeTrait;
 }
+<<__EntryPoint>> function main(): void {}

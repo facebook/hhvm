@@ -17,3 +17,4 @@ final class MyMockClass2 implements MyInterface {}
 
 <<__MockClass>>
 final class MyMockClass3 { use MyTrait; }
+<<__EntryPoint>> function main(): void {}

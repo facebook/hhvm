@@ -10,3 +10,4 @@ class X {
   function bar() {
 }
 }
+<<__EntryPoint>> function main() {}

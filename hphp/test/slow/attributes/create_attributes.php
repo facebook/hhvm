@@ -23,3 +23,4 @@ class CC {
 
 <<T>>
 type tt = int;
+<<__EntryPoint>> function main(): void {}

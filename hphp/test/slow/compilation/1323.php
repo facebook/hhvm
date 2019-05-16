@@ -13,3 +13,4 @@ class X {
     return $x;
   }
 }
+<<__EntryPoint>> function main() {}

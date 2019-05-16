@@ -4,3 +4,4 @@ function test($a = 0) {
  $b = $a;
  $c = $b[$a];
 }
+<<__EntryPoint>> function main() {}

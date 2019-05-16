@@ -8,3 +8,4 @@ class A {
  print 'foo';
 }
 }
+<<__EntryPoint>> function main() {}

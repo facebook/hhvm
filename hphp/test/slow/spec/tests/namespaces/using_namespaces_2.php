@@ -17,4 +17,5 @@ namespace another\bar
 {
     use my\space\MyClass, xx\xxx as XX, yy\yyy as YY;
     use my\space\AnotherClass;
+<<__EntryPoint>> function main() {}
 }

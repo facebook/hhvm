@@ -6,3 +6,4 @@ function str() {
  function test() {
  var_dump(str() - $a);
 }
+<<__EntryPoint>> function main() {}

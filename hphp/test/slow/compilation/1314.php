@@ -25,3 +25,4 @@ function bar($values, $parent_fields) {
   }
   $body .= '</table>';
 }
+<<__EntryPoint>> function main() {}

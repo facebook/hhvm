@@ -11,3 +11,4 @@ class X {
     return $this->__array[$offset];
   }
 }
+<<__EntryPoint>> function main() {}

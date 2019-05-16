@@ -31,6 +31,7 @@ type parser =
   | MINIMAL
   | POSITIONED
   | COROUTINE
+  | DECL_MODE
 
 type mode =
   | RUST
@@ -50,6 +51,7 @@ type args = {
    php5_compat_mode : bool;
    codegen : bool;
    check_sizes : bool;
+   check_json_equal_only : bool;
    keep_going : bool;
    filter : string;
    dir : string option;
@@ -122,7 +124,6 @@ let test args ~ocaml_env ~rust_env path =
       let rust_reachable_words = reachable syntax_from_rust  in
       let ocaml_reachable_words = reachable syntax_from_ocaml in
       if syntax_from_rust <> syntax_from_ocaml then begin
-        failed := true;
         let syntax_from_rust_as_json = to_json syntax_from_rust in
         let syntax_from_ocaml_as_json = to_json syntax_from_ocaml in
 
@@ -133,10 +134,12 @@ let test args ~ocaml_env ~rust_env path =
         Printf.fprintf oc "%s\n" syntax_from_ocaml_as_json;
         close_out oc;
 
-        if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then
-          Printf.printf "JSONs not equal: %s\n" path
-        else
+        if syntax_from_rust_as_json <> syntax_from_ocaml_as_json then begin
+          Printf.printf "JSONs not equal: %s\n" path;
+          failed := true
+        end else
           Printf.printf "Structurally not equal: %s\n" path;
+          failed := not @@ args.check_json_equal_only;
       end;
       if state_from_rust <> state_from_ocaml then begin
         failed := true;
@@ -218,15 +221,43 @@ let get_files_in_path ~args path =
     (not @@ String_utils.string_ends_with f "byref-assignment3.php") &&
     (not @@ String_utils.string_ends_with f "byref-assignment2.php") &&
     (not @@ String_utils.string_ends_with f "byref-assignment1.php") &&
-    (not @@ String_utils.string_ends_with f "byref1.php") &&
-    (not @@ String_utils.string_ends_with f "byref2.php") &&
     (not @@ String_utils.string_ends_with f "phpvar1.php") &&
     (not @@ String_utils.string_ends_with f "bug64660.php") &&
     match args.parser with
     | COROUTINE ->
-      (* FIXME: this one has offset +2 & +4 in Rust for "methodish_semicolon.value" *)
-      (not @@ String_utils.string_ends_with f "keyword_autocomplete/function_parameter.php") &&
-      (not @@ String_utils.string_ends_with f "namespace_infinite_loop1.php") &&
+        true
+    | DECL_MODE ->
+      (* Note: these crash in both OCaml and Rust version of positioned DeclMode parser *)
+      (not @@ String_utils.string_ends_with f "ffp/yield_bad1.php") &&
+      (not @@ String_utils.string_ends_with f "ffp/yield_from_bad1.php") &&
+      (not @@ String_utils.string_ends_with f "let/let_closure.php") &&
+      (not @@ String_utils.string_ends_with f "let/let_lambda.php") &&
+      (not @@ String_utils.string_ends_with f "test_variadic_type_hint.php") &&
+      (not @@ String_utils.string_ends_with f "namespace_group_use_decl.php") &&
+      (* FIXME: These ones crashes during Rust parse but in OCaml code with: *)
+      (not @@ String_utils.string_ends_with f "nullsafe_call_on_expr_dep.php") &&
+      (not @@ String_utils.string_ends_with f "await_as_an_expression_simple.php") &&
+      (not @@ String_utils.string_ends_with f "compile_test_yield_erling.php") &&
+      (not @@ String_utils.string_ends_with f "compile_test_yield.php") &&
+      (not @@ String_utils.string_ends_with f "functional_generator.php") &&
+      (not @@ String_utils.string_ends_with f "typecheck/yield_from3.php") &&
+      (not @@ String_utils.string_ends_with f "yield_wait_for_result_bad2.php") &&
+      (not @@ String_utils.string_ends_with f "await_as_an_expression_simple.php") &&
+      (not @@ String_utils.string_ends_with f "/ai/backwards_analysis/yield.php") &&
+      (not @@ String_utils.string_ends_with f "/ai/forward_analysis/yield.php") &&
+      (not @@ String_utils.string_ends_with f "/unreachable/yield.php") &&
+      (not @@ String_utils.string_ends_with f "/lint/dead_statement.php") &&
+      (not @@ String_utils.string_ends_with f "/emitter/generator.php") &&
+      (*
+Uncaught exception:
+
+  (Invalid_argument "index out of bounds")
+
+Raised by primitive operation at file "$HOME/fbsource/fbcode/hphp/hack/src/utils/line_break_map.ml", line 60, characters 19-41
+Called from file "$HOME/fbsource/fbcode/hphp/hack/src/utils/line_break_map.ml", line 67, characters 4-43
+Called from file "$HOME/fbsource/fbcode/hphp/hack/src/parser/full_fidelity_source_text.ml" (inlined), line 83, characters 2-60
+Called from file "$HOME/fbsource/fbcode/hphp/hack/src/parser/full_fidelity_positioned_token.ml" (inlined), line 317, characters 2-72
+      *)
       true
     | _ -> true
   end files
@@ -249,6 +280,7 @@ let parse_args () =
   let hhvm_compat_mode = ref false in
   let php5_compat_mode = ref false in
   let check_sizes = ref false in
+  let check_json_equal_only = ref false in
   let keep_going = ref false in
   let filter = ref "" in
   let dir = ref None in
@@ -258,6 +290,7 @@ let parse_args () =
     "--ocaml", Arg.Unit (fun () -> mode := OCAML), "";
     "--positioned", Arg.Unit (fun () -> parser := POSITIONED), "";
     "--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "";
+    "--decl-mode", Arg.Unit (fun () -> (parser := DECL_MODE; check_json_equal_only := true)), "";
     "--experimental", Arg.Set is_experimental, "";
     "--enable-stronger-await-binding", Arg.Set enable_stronger_await_binding, "";
     "--disable-unsafe-expr", Arg.Set disable_unsafe_expr, "";
@@ -268,6 +301,7 @@ let parse_args () =
     "--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "";
     "--php5-compat-mode", Arg.Set php5_compat_mode, "";
     "--check-sizes", Arg.Set check_sizes, "";
+    "--check-json-equal-only", Arg.Set check_json_equal_only, "";
     "--keep-going", Arg.Set keep_going, "";
     "--filter", Arg.String (fun s -> filter := s), "";
     "--dir", Arg.String (fun s -> dir := Some (s)), "";
@@ -287,6 +321,7 @@ let parse_args () =
     hhvm_compat_mode = !hhvm_compat_mode;
     php5_compat_mode = !php5_compat_mode;
     check_sizes = !check_sizes;
+    check_json_equal_only = !check_json_equal_only;
     keep_going = !keep_going;
     filter = !filter;
     dir = !dir;
@@ -298,6 +333,10 @@ module PositionedTest = WithSyntax(PositionedSyntax)
 module CoroutineTest_ = WithSyntax(PositionedSyntax)
 module CoroutineSC = Coroutine_smart_constructor.WithSyntax(PositionedSyntax)
 module CoroutineTest = CoroutineTest_.WithSmartConstructors(CoroutineSC)
+
+module DeclModeTest_ = WithSyntax(PositionedSyntax)
+module DeclModeSC = DeclModeSmartConstructors.WithSyntax(PositionedSyntax)
+module DeclModeTest = DeclModeTest_.WithSmartConstructors(DeclModeSC)
 
 (*
 Tool comparing outputs of Rust and OCaml parsers. Example usage:
@@ -328,6 +367,7 @@ let () =
     | MINIMAL -> MinimalTest.test_batch args ~ocaml_env ~rust_env  files
     | POSITIONED -> PositionedTest.test_batch args ~ocaml_env ~rust_env  files
     | COROUTINE -> CoroutineTest.test_batch args ~ocaml_env ~rust_env files
+    | DECL_MODE -> DeclModeTest.test_batch args ~ocaml_env ~rust_env files
   end;
   let _ = Hh_logger.log_duration "Done:" t  in
   ()

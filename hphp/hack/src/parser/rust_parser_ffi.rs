@@ -23,9 +23,10 @@ use parser::source_text::SourceText;
 
 use rust_to_ocaml::{caml_tuple, to_list, SerializationContext, ToOcaml};
 
-use parser::positioned_smart_constructors::*;
-use parser::positioned_syntax::PositionedSyntax;
 use parser::parser::Parser;
+use parser::positioned_smart_constructors::*;
+use parser::positioned_syntax::{PositionedSyntax, PositionedValue};
+use parser::positioned_token::PositionedToken;
 use parser::smart_constructors::{NoState, StateType};
 use parser::smart_constructors_wrappers::WithKind;
 
@@ -40,6 +41,13 @@ use parser::coroutine_smart_constructors::State as CoroutineState;
 type CoroutineParser<'a> =
     Parser<'a, WithKind<CoroutineSmartConstructors<PositionedSyntax>>,
     <CoroutineState<PositionedSyntax> as StateType<'a, PositionedSyntax>>::T>;
+
+use parser::decl_mode_smart_constructors::DeclModeSmartConstructors;
+use parser::decl_mode_smart_constructors::State as DeclModeState;
+
+type DeclModeParser<'a> =
+    Parser<'a, WithKind<DeclModeSmartConstructors<PositionedToken, PositionedValue>>,
+    <DeclModeState<PositionedSyntax> as StateType<'a, PositionedSyntax>>::T>;
 
 
 extern "C" {
@@ -146,6 +154,7 @@ macro_rules! parse {
 parse!(parse_minimal, MinimalSyntaxParser);
 parse!(parse_positioned, PositionedSyntaxParser);
 parse!(parse_positioned_with_coroutine_sc, CoroutineParser);
+parse!(parse_positioned_with_decl_mode_sc, DeclModeParser);
 
 caml_raise!(rust_parse_mode, |ocaml_source_text|, <l>, {
     let relative_path = block_field(&ocaml_source_text, 0);

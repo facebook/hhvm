@@ -83,4 +83,14 @@ module WithRustParser(RustParser : SyntaxSmartConstructors.RustParser_S
     | _ -> failwith "Invalid state"
 
 end (* WithRustParser *)
+
+
+include WithRustParser(
+  struct
+    type r = Syntax.t
+    type t = bool list
+    let rust_parse = Syntax.rust_parse_with_decl_mode_sc
+  end
+)
+
 end (* WithSyntax *)

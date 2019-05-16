@@ -117,3 +117,4 @@ let rust_parse_ref : rust_parse_type ref =
 let rust_parse text env = !rust_parse_ref text env
 
 let rust_parse_with_coroutine_sc _ _ = failwith "not implemented"
+let rust_parse_with_decl_mode_sc _ _ = failwith "not implemented"

@@ -104,6 +104,12 @@ impl ToOcaml for bool {
     }
 }
 
+impl ToOcaml for Vec<bool> {
+    unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {
+        to_list(&self, context)
+    }
+}
+
 impl ToOcaml for TokenKind {
     unsafe fn to_ocaml(&self, _context: &SerializationContext) -> Value {
         u8_to_ocaml(self.ocaml_tag())

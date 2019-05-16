@@ -73,10 +73,14 @@ let parse_positioned text env =
   set_global_lexer_env env;
   parse_positioned text (env_to_opts env)
 
+external parse_positioned_with_decl_mode_sc:
+  SourceText.t ->
+  parser_opts ->
+  bool list * PositionedSyntax.t * SyntaxError.t list = "parse_positioned_with_decl_mode_sc"
+
 let parse_positioned_with_decl_mode_sc text env =
-  let (), root, errors = parse_positioned text env in
-  (* TODO(leoo) *)
-  [], root, errors
+  set_global_lexer_env env;
+  parse_positioned_with_decl_mode_sc text (env_to_opts env)
 
 external parse_positioned_with_coroutine_sc:
    SourceText.t ->
@@ -93,4 +97,6 @@ let init () =
   Full_fidelity_positioned_syntax.rust_parse_ref := parse_positioned;
   Full_fidelity_positioned_syntax.rust_parse_with_coroutine_sc_ref :=
     parse_positioned_with_coroutine_sc;
+  Full_fidelity_positioned_syntax.rust_parse_with_decl_mode_sc_ref :=
+    parse_positioned_with_decl_mode_sc;
   ()

@@ -266,8 +266,14 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
 
 function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 
-
-  @list($path, $post, $headers) = (array)$path;
+  if (is_array($path)) {
+    $headers = $path[2] ?? null;
+    $post = $path[1] ?? null;
+    $path = $path[0];
+  } else {
+    $headers = null;
+    $post = null;
+  }
   if ($post) {
     $post = http_build_query($post);
     $post = '--data-urlencode='.urlencode($post);;
@@ -296,7 +302,7 @@ function requestAll(array $requests, $customArgs = '', $repoArgs = '') {
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {
-        list($r) = (array)$request;
+        $r = is_array($request) ? $request[0] : $request;
         echo "Requesting '$r'\n";
         var_dump(request(php_uname('n'), $serverPort, $request));
       }

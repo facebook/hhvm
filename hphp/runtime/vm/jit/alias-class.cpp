@@ -25,6 +25,7 @@
 #include "hphp/util/safe-cast.h"
 
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/analysis.h"
@@ -115,21 +116,37 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
 
 template<class T>
 size_t framelike_hash(size_t hash, T t) {
-  return folly::hash::hash_combine(hash, t.fp, t.id);
+  return folly::hash::hash_combine(hash, t.base.offset, t.id);
 }
 
 template<class T>
 void framelike_checkInvariants(T t) {
-  assertx(t.fp->type() <= TFramePtr);
+  assertx(t.base.offset <= 0);
 }
 
 template<class T, class U>
 bool framelike_equal(T a, U b) {
-  return a.fp == b.fp && a.id == b.id;
+  return a.base == b.base && a.id == b.id;
 }
 
 //////////////////////////////////////////////////////////////////////
 
+}
+
+namespace detail {
+FPRelOffset frame_base_offset(SSATmp* fp) {
+  always_assert(fp->isA(TFramePtr));
+
+  fp = canonical(fp);
+  auto fpInst = fp->inst();
+  if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
+  if (fpInst->is(DefFP)) return FPRelOffset{0};
+  always_assert(fpInst->is(DefInlineFP));
+  auto const offsetOfSp = fpInst->src(0)->inst()->extra<DefSP>()->offset;
+
+  // FP-relative offset of the inlined frame.
+  return fpInst->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(offsetOfSp);
+}
 }
 
 AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
@@ -138,7 +155,9 @@ AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
 {
   always_assert(fp->isA(TFramePtr));
 
-  auto const defInlineFP = fp->inst();
+  fp = canonical(fp);
+  auto defInlineFP = fp->inst();
+  if (UNLIKELY(defInlineFP->is(DefLabel))) defInlineFP = resolveFpDefLabel(fp);
   if (!defInlineFP->is(DefInlineFP)) return;
   auto const sp = defInlineFP->src(0)->inst();
 
@@ -184,15 +203,15 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
 
   case STag::Frame:
     return folly::hash::hash_combine(hash,
-                                     acls.m_frame.fp,
+                                     acls.m_frame.base.offset,
                                      acls.m_frame.ids.raw());
   case STag::ClsRefClsSlot:
     return folly::hash::hash_combine(hash,
-                                     acls.m_clsRefClsSlot.fp,
+                                     acls.m_clsRefClsSlot.base.offset,
                                      acls.m_clsRefClsSlot.ids.raw());
   case STag::ClsRefTSSlot:
    return folly::hash::hash_combine(hash,
-                                    acls.m_clsRefTSSlot.fp,
+                                    acls.m_clsRefTSSlot.base.offset,
                                     acls.m_clsRefTSSlot.ids.raw());
   case STag::Prop:
     return folly::hash::hash_combine(hash,
@@ -273,7 +292,7 @@ X(Rds, rds)
     if (m_stag == STag::IterBoth) {                         \
       auto const ui = asUIter();                            \
       assertx(ui.hasValue());                               \
-      return A##What { ui->fp, ui->id };                    \
+      return A##What { ui->base, ui->id };                  \
     }                                                       \
     return folly::none;                                     \
   }
@@ -323,15 +342,15 @@ bool AliasClass::checkInvariants() const {
   case STag::Prop:           break;
   case STag::ElemI:          break;
   case STag::Frame:
-    assertx(m_frame.fp->isA(TFramePtr));
+    assertx(m_frame.base.offset <= 0);
     assertx(!m_frame.ids.empty());
     break;
   case STag::ClsRefClsSlot:
-    assertx(m_clsRefClsSlot.fp->isA(TFramePtr));
+    assertx(m_clsRefClsSlot.base.offset <= 0);
     assertx(!m_clsRefClsSlot.ids.empty());
     break;
   case STag::ClsRefTSSlot:
-    assertx(m_clsRefTSSlot.fp->isA(TFramePtr));
+    assertx(m_clsRefTSSlot.base.offset <= 0);
     assertx(!m_clsRefTSSlot.ids.empty());
     break;
   case STag::Stack:
@@ -357,12 +376,14 @@ bool AliasClass::equivData(AliasClass o) const {
   assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:     return true;
-  case STag::Frame:    return m_frame.fp == o.m_frame.fp &&
+  case STag::Frame:    return m_frame.base == o.m_frame.base &&
                               m_frame.ids == o.m_frame.ids;
-  case STag::ClsRefClsSlot: return m_clsRefClsSlot.fp == o.m_clsRefClsSlot.fp &&
-                                m_clsRefClsSlot.ids == o.m_clsRefClsSlot.ids;
-  case STag::ClsRefTSSlot: return m_clsRefTSSlot.fp == o.m_clsRefTSSlot.fp &&
-                                m_clsRefTSSlot.ids == o.m_clsRefTSSlot.ids;
+  case STag::ClsRefClsSlot:
+    return m_clsRefClsSlot.base == o.m_clsRefClsSlot.base &&
+           m_clsRefClsSlot.ids == o.m_clsRefClsSlot.ids;
+  case STag::ClsRefTSSlot:
+    return m_clsRefTSSlot.base == o.m_clsRefTSSlot.base &&
+           m_clsRefTSSlot.ids == o.m_clsRefTSSlot.ids;
   case STag::IterPos:  return framelike_equal(m_iterPos, o.m_iterPos);
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
@@ -406,13 +427,13 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto ret = AliasClass{newBits};
       auto const frmA = a.m_frame;
       auto const frmB = b.m_frame;
-      if (frmA.fp != frmB.fp) return ret;
+      if (frmA.base != frmB.base) return ret;
 
       auto const newIds = frmA.ids | frmB.ids;
       // Even when newIds.isAny(), we still know it won't alias locals in other
       // frames, so keep the specialization tag.
       ret.m_stag = STag::Frame;
-      ret.m_frame = AFrame { frmA.fp, newIds };
+      ret.m_frame = AFrame { frmA.base, newIds };
       assertx(ret.checkInvariants());
       assertx(a <= ret && b <= ret);
       return ret;
@@ -423,13 +444,13 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto ret = AliasClass{newBits};
       auto const slotA = a.m_clsRefClsSlot;
       auto const slotB = b.m_clsRefClsSlot;
-      if (slotA.fp != slotB.fp) return ret;
+      if (slotA.base != slotB.base) return ret;
 
       auto const newIds = slotA.ids | slotB.ids;
       // Even when newIds.isAny(), we still know it won't alias class-ref slots
       // in other frames, so keep the specialization tag.
       ret.m_stag = STag::ClsRefClsSlot;
-      ret.m_clsRefClsSlot = AClsRefClsSlot { slotA.fp, newIds };
+      ret.m_clsRefClsSlot = AClsRefClsSlot { slotA.base, newIds };
       assertx(ret.checkInvariants());
       assertx(a <= ret && b <= ret);
       return ret;
@@ -440,13 +461,13 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
       auto ret = AliasClass{newBits};
       auto const slotA = a.m_clsRefTSSlot;
       auto const slotB = b.m_clsRefTSSlot;
-      if (slotA.fp != slotB.fp) return ret;
+      if (slotA.base != slotB.base) return ret;
 
       auto const newIds = slotA.ids | slotB.ids;
       // Even when newIds.isAny(), we still know it won't alias class-ref slots
       // in other frames, so keep the specialization tag.
       ret.m_stag = STag::ClsRefTSSlot;
-      ret.m_clsRefTSSlot = AClsRefTSSlot { slotA.fp, newIds };
+      ret.m_clsRefTSSlot = AClsRefTSSlot { slotA.base, newIds };
       assertx(ret.checkInvariants());
       assertx(a <= ret && b <= ret);
       return ret;
@@ -615,12 +636,12 @@ bool AliasClass::subclassData(AliasClass o) const {
   case STag::Rds:
     return equivData(o);
   case STag::Frame:
-    return m_frame.fp == o.m_frame.fp && m_frame.ids <= o.m_frame.ids;
+    return m_frame.base == o.m_frame.base && m_frame.ids <= o.m_frame.ids;
   case STag::ClsRefClsSlot:
-    return m_clsRefClsSlot.fp == o.m_clsRefClsSlot.fp &&
+    return m_clsRefClsSlot.base == o.m_clsRefClsSlot.base &&
            m_clsRefClsSlot.ids <= o.m_clsRefClsSlot.ids;
   case STag::ClsRefTSSlot:
-    return m_clsRefTSSlot.fp == o.m_clsRefTSSlot.fp &&
+    return m_clsRefTSSlot.base == o.m_clsRefTSSlot.base &&
            m_clsRefTSSlot.ids <= o.m_clsRefTSSlot.ids;
   case STag::Stack:
     return m_stack.offset <= o.m_stack.offset &&
@@ -642,8 +663,8 @@ folly::Optional<AliasClass::UIterBoth> AliasClass::asUIter() const {
   case STag::ClsRefClsSlot:
   case STag::ClsRefTSSlot:
     return folly::none;
-  case STag::IterPos:   return UIterBoth { m_iterPos.fp, m_iterPos.id };
-  case STag::IterBase:  return UIterBoth { m_iterBase.fp, m_iterBase.id };
+  case STag::IterPos:   return UIterBoth { m_iterPos.base, m_iterPos.id };
+  case STag::IterBase:  return UIterBoth { m_iterBase.base, m_iterBase.id };
   case STag::IterBoth:  return m_iterBoth;
   }
   not_reached();
@@ -741,12 +762,12 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::IterBase: return framelike_equal(m_iterBase, o.m_iterBase);
   case STag::IterBoth: return framelike_equal(m_iterBoth, o.m_iterBoth);
   case STag::Frame:
-    return m_frame.fp == o.m_frame.fp && m_frame.ids.maybe(o.m_frame.ids);
+    return m_frame.base == o.m_frame.base && m_frame.ids.maybe(o.m_frame.ids);
   case STag::ClsRefClsSlot:
-    return m_clsRefClsSlot.fp == o.m_clsRefClsSlot.fp &&
+    return m_clsRefClsSlot.base == o.m_clsRefClsSlot.base &&
            m_clsRefClsSlot.ids.maybe(o.m_clsRefClsSlot.ids);
   case STag::ClsRefTSSlot:
-    return m_clsRefTSSlot.fp == o.m_clsRefTSSlot.fp &&
+    return m_clsRefTSSlot.base == o.m_clsRefTSSlot.base &&
             m_clsRefTSSlot.ids.maybe(o.m_clsRefTSSlot.ids);
   case STag::Prop:
     /*
@@ -906,27 +927,27 @@ std::string show(AliasClass acls) {
   case A::STag::None:
     break;
   case A::STag::Frame:
-    folly::format(&ret, "Fr t{}:{}", acls.m_frame.fp->id(),
+    folly::format(&ret, "Fr {}:{}", acls.m_frame.base.offset,
                   show(acls.m_frame.ids));
     break;
   case A::STag::ClsRefClsSlot:
-    folly::format(&ret, "ClsC t{}:{}", acls.m_clsRefClsSlot.fp->id(),
+    folly::format(&ret, "ClsC {}:{}", acls.m_clsRefClsSlot.base.offset,
                   show(acls.m_clsRefClsSlot.ids));
     break;
   case A::STag::ClsRefTSSlot:
-    folly::format(&ret, "ClsTS t{}:{}", acls.m_clsRefTSSlot.fp->id(),
+    folly::format(&ret, "ClsTS {}:{}", acls.m_clsRefTSSlot.base.offset,
                   show(acls.m_clsRefTSSlot.ids));
     break;
   case A::STag::IterPos:
-    folly::format(&ret, "ItP t{}:{}", acls.m_iterPos.fp->id(),
+    folly::format(&ret, "ItP {}:{}", acls.m_iterPos.base.offset,
       acls.m_iterPos.id);
     break;
   case A::STag::IterBase:
-    folly::format(&ret, "ItB t{}:{}", acls.m_iterBase.fp->id(),
+    folly::format(&ret, "ItB {}:{}", acls.m_iterBase.base.offset,
       acls.m_iterBase.id);
     break;
   case A::STag::IterBoth:
-    folly::format(&ret, "It* t{}:{}", acls.m_iterBoth.fp->id(),
+    folly::format(&ret, "It* {}:{}", acls.m_iterBoth.base.offset,
       acls.m_iterBoth.id);
     break;
   case A::STag::Prop:

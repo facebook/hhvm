@@ -198,7 +198,7 @@ bool collect_component(AliasAnalysis& aa,
       if (loc->ids.size() <= kMaxExpandedSize) {
         for (uint32_t id = 0; id < AliasIdSet::BitsetMax; ++id) {
           if (loc->ids.test(id)) {
-            if (auto const index = add_class(aa, T { loc->fp, id })) {
+            if (auto const index = add_class(aa, T { loc->base, id })) {
               range.set(*index);
             } else {
               complete = false;

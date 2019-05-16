@@ -94,10 +94,23 @@ struct AliasClass;
 
 //////////////////////////////////////////////////////////////////////
 
+namespace detail {
+FPRelOffset frame_base_offset(SSATmp* fp);
+}
+
+#define FRAME_RELATIVE(Name, T2, name2)                                       \
+  struct Name {                                                               \
+    Name(SSATmp* fp, T2 v) : base{detail::frame_base_offset(fp)}, name2{v} {} \
+    Name(FPRelOffset off, T2 v) : base{off}, name2{v} {}                      \
+    FPRelOffset base;                                                         \
+    T2 name2;                                                                 \
+  }
+
+
 /*
  * Special data for locations known to be a set of locals on the frame `fp'.
  */
-struct AFrame { SSATmp* fp; AliasIdSet ids; };
+FRAME_RELATIVE(AFrame, AliasIdSet, ids);
 
 /*
  * Iterator state. Note that iterator slots can contain different kinds of data
@@ -110,7 +123,7 @@ struct AFrame { SSATmp* fp; AliasIdSet ids; };
 /*
  * A specific php iterator's position value (m_pos).
  */
-struct AIterPos  { SSATmp* fp; uint32_t id; };
+FRAME_RELATIVE(AIterPos, uint32_t, id);
 
 /*
  * A specific php iterator's base and initialization state, for non-mutable
@@ -121,7 +134,7 @@ struct AIterPos  { SSATmp* fp; uint32_t id; };
  * helper)---the reason for this is that nothing may load/store the
  * initialization state if it isn't also going to load/store the base pointer.
  */
-struct AIterBase { SSATmp* fp; uint32_t id; };
+FRAME_RELATIVE(AIterBase, uint32_t, id);
 
 /*
  * A location inside of an object property, with base `obj' and byte offset
@@ -185,8 +198,8 @@ struct ARef { SSATmp* boxed; };
 /*
  * A set of class-ref slots in the given frame.
  */
-struct AClsRefClsSlot { SSATmp* fp; AliasIdSet ids; };
-struct AClsRefTSSlot { SSATmp* fp; AliasIdSet ids; };
+FRAME_RELATIVE(AClsRefClsSlot, AliasIdSet, ids);
+FRAME_RELATIVE(AClsRefTSSlot, AliasIdSet, ids);
 
 /*
  * A TypedValue stored in rds.
@@ -195,6 +208,8 @@ struct AClsRefTSSlot { SSATmp* fp; AliasIdSet ids; };
  * not required that the tv is at the start of the rds storage.
  */
 struct ARds { rds::Handle handle; };
+
+#undef FRAME_RELATIVE
 
 //////////////////////////////////////////////////////////////////////
 
@@ -368,7 +383,7 @@ private:
 
     IterBoth,  // A union of base and pos for the same iter.
   };
-  struct UIterBoth   { SSATmp* fp; uint32_t id; };
+  struct UIterBoth   { FPRelOffset base; uint32_t id; };
 private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);

@@ -326,7 +326,7 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
     // considered a heap effect, so we can ignore it.
     auto const local = func->lookupVarId(s_86metadata.get());
     if (local == kInvalidId) return ac;
-    return ac | AFrame { inst.marker().fp(), local };
+    return ac | AFrame { inst.marker().fp(), (uint32_t)local };
   };
 
   auto ac = AEmpty;
@@ -730,9 +730,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    */
   case DefInlineFP: {
     auto const func = inst.extra<DefInlineFP>()->target;
-    auto const nslots = func->numSlotsInFrame() - func->numLocals();
     AliasClass stack = func->numLocals()
-      ? AStack{inst.dst(), FPRelOffset{-nslots}, func->numLocals()}
+      ? AStack{inst.dst(), FPRelOffset{-1}, func->numLocals()}
       : AEmpty;
     AliasClass frame = func->numLocals()
       ? AFrame{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
@@ -820,12 +819,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // throwing.
   case VerifyParamFail: {
     auto const localId = inst.src(0)->intVal();
-    auto const stores = AHeapAny | AFrame{inst.marker().fp(), localId};
+    assertx(localId >= 0);
+    auto const stores =
+      AHeapAny | AFrame{inst.marker().fp(), safe_cast<uint32_t>(localId)};
     return may_load_store(AUnknown, stores);
   }
   case VerifyReifiedLocalType: {
     auto const extra = inst.extra<ParamData>();
-    auto const stores = AHeapAny | AFrame{inst.marker().fp(), extra->paramId};
+    assertx(extra->paramId >= 0);
+    auto const stores =
+      AHeapAny | AFrame{inst.marker().fp(),safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   // However the following ones can't read locals from our frame on the way
@@ -935,14 +938,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAGen:
   case CreateAFWH:
   case CreateAFWHNoVV: {
-    auto fpInst = inst.src(0)->inst();
-    if (fpInst->is(DefLabel)) fpInst = resolveFpDefLabel(inst.src(0));
+    auto const fp = canonical(inst.src(0));
+    auto fpInst = fp->inst();
+    if (fpInst->is(DefLabel)) fpInst = resolveFpDefLabel(fp);
     auto const frame = [&] () -> AliasClass {
       if (fpInst->is(DefFP)) return AFrameAny;
       assertx(fpInst->is(DefInlineFP));
       auto const nlocals = fpInst->extra<DefInlineFP>()->target->numLocals();
       return nlocals
-        ? AFrame { inst.src(0), AliasIdSet::IdRange(0, nlocals)}
+        ? AFrame { fp, AliasIdSet::IdRange(0, nlocals)}
         : AEmpty;
     }();
     auto const clsrefs = [&] () -> AliasClass {
@@ -2288,10 +2292,10 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     return folly::sformat("  inst: {}\n  effects: {}\n", inst, show(me));
   };
 
-  auto check_fp = [&] (SSATmp* fp) {
+  auto check_fp = [&] (FPRelOffset base) {
     always_assert_flog(
-      fp->type() <= TFramePtr,
-      "Non frame pointer in memory effects"
+      base.offset <= 0,
+      "frame offset is above base frame"
     );
   };
 
@@ -2303,9 +2307,9 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   };
 
   auto check = [&] (AliasClass a) {
-    if (auto const fr = a.frame()) check_fp(fr->fp);
-    if (auto const sl = a.clsRefClsSlot()) check_fp(sl->fp);
-    if (auto const sl = a.clsRefTSSlot()) check_fp(sl->fp);
+    if (auto const fr = a.frame()) check_fp(fr->base);
+    if (auto const sl = a.clsRefClsSlot()) check_fp(sl->base);
+    if (auto const sl = a.clsRefTSSlot()) check_fp(sl->base);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 

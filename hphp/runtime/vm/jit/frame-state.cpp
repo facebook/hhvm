@@ -1000,7 +1000,7 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
   }
 
   if (base.maybe(AFrameAny) && !isPM) {
-    for (auto i = 0; i < cur().locals.size(); ++i) {
+    for (uint32_t i = 0; i < cur().locals.size(); ++i) {
       if (base.maybe(AFrame { fp(), i })) {
         apply(loc(i));
       }
@@ -1055,7 +1055,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
     auto updated = false;
 
     if (base.maybe(AFrameAny) && stores.maybe(AFrameAny)) {
-      for (auto i = 0; i < cur().locals.size(); ++i) {
+      for (uint32_t i = 0; i < cur().locals.size(); ++i) {
         auto const aloc = AFrame { fp(), i };
         if (base.maybe(aloc) && stores.maybe(aloc)) {
           if (!updated) {

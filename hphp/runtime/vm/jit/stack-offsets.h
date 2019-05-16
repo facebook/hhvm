@@ -243,6 +243,7 @@ struct FPRelOffset {
    * A "lower" FPInvOffset means "farther from fp" (i.e., lower address).
    */
   bool operator==(FPRelOffset o) const { return offset == o.offset; }
+  bool operator!=(FPRelOffset o) const { return offset != o.offset; }
   bool operator< (FPRelOffset o) const { return offset <  o.offset; }
   bool operator<=(FPRelOffset o) const { return offset <= o.offset; }
   bool operator> (FPRelOffset o) const { return offset >  o.offset; }

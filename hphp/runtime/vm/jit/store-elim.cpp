@@ -618,8 +618,9 @@ void visit(Local& env, IRInstruction& inst) {
       // AFWH and moved the frame to the heap.
       if (auto const frame = l.inlFrame.is_frame()) {
         auto const callee = inst.marker().func();
-        for (Id id = 0; id < callee->numLocals(); id++) {
-          if (frame->ids.test(id)) kill(env, AFrame { frame->fp, id });
+        for (uint32_t id = 0; id < callee->numLocals(); id++) {
+          auto const acls = AFrame { frame->base, id };
+          if (frame->ids.test(id)) kill(env, canonicalize(acls));
         }
       } else {
         mayStore(env, l.inlFrame);

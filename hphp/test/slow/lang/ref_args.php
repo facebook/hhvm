@@ -2,12 +2,6 @@
 // Similar case, but for a builtin (array_multisort).
 function blarg2(&$a1, &$a2) {}
 
-// sscanf is a builtin that takes all additional args by ref.
-function main3() {
-  sscanf("foo 12 bar", "%s %d %s", &$a, &$b, &$c);
-  echo "Foo: $a $b $c\n";
-}
-
 // array_multisort is weird.  Some arguments are literals.
 function main4() {
   $x = array(1, 54, 3, 23, 5, 2);
@@ -33,7 +27,6 @@ function main5() {
 <<__EntryPoint>>
 function main_ref_args() {
 error_reporting(0);
-main3();
 main4();
 main5();
 }

@@ -5,11 +5,4 @@ string(1) "X"
 string(1) "A"
 string(1) "B"
 string(1) "C"
-
--- Try sccanf() WITH optional args --
-int(4)
-string(1) "X"
-string(1) "A"
-string(1) "B"
-string(1) "C"
 ===DONE===

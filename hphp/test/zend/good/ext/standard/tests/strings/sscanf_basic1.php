@@ -18,10 +18,5 @@ echo "\n-- Try sccanf() WITHOUT optional args --\n";
 list($part, $number, $stock) = sscanf($str, $format);
 var_dump($part, $number, $stock);
 
-echo "\n-- Try sccanf() WITH optional args --\n";
-// extract details using long  format
-$res = sscanf($str, $format, &$part, &$number, &$stock);
-var_dump($res, $part, $number, $stock);
-
 echo "===DONE===\n";
 }

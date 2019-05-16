@@ -101,19 +101,11 @@ string(1) "%r\x01%r"
 
 Warning: Invalid argument: Invalid format type %r\xf4%r in %s/test/slow/invalid_argument/1381.php on line %d
 bool(false)
-
-Warning: Invalid argument: format: Variable is not assigned by any conversion specifiers in %s/test/slow/invalid_argument/1381.php on line %d
-int(-1)
-
-Warning: Invalid argument: Bad scan conversion character "z" in %s/test/slow/invalid_argument/1381.php on line %d
-int(-1)
-
-Warning: Invalid argument: format: Different numbers of variable names and field specifiers in %s/test/slow/invalid_argument/1381.php on line %d
-int(-1)
 NULL
 
-Warning: Invalid argument: format: Variable is not assigned by any conversion specifiers in %s/test/slow/invalid_argument/1381.php on line %d
-int(-1)
+Warning: Invalid argument: Bad scan conversion character "z" in %s/test/slow/invalid_argument/1381.php on line %d
+NULL
+NULL
 NULL
 
 Warning: Invalid argument: argnum: must be greater than zero in %s/test/slow/invalid_argument/1381.php on line %d

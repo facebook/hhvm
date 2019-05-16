@@ -23,12 +23,7 @@ var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'),                        array
 var_dump(substr_replace(array('ABCDEFGH:/MNRPQR/'),                        array('bob'), array(0,1)));
 var_dump(substr_replace('abc', 'xyz', 3, 0));
 var_dump(sscanf("SN/2350001", "SN/%d"));
-var_dump(sscanf("SN/2350001", "SN/%d", &$out));
-var_dump($out);
-var_dump(sscanf("SN/abc", "SN/%d", &$out));
-var_dump($out);
-var_dump(sscanf("30", "%da", &$out));
-var_dump($out);
-var_dump(sscanf("-", "%da", &$out));
-var_dump($out);
+var_dump(sscanf("SN/abc", "SN/%d"));
+var_dump(sscanf("30", "%da"));
+var_dump(sscanf("-", "%da"));
 }

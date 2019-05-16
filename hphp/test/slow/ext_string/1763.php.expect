@@ -31,11 +31,9 @@ array(1) {
   [0]=>
   int(2350001)
 }
-int(1)
-int(2350001)
-int(0)
-int(2350001)
-int(1)
-int(30)
-int(-1)
-int(30)
+NULL
+array(1) {
+  [0]=>
+  int(30)
+}
+NULL

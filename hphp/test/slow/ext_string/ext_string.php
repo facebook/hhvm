@@ -293,9 +293,6 @@ var_dump(vsprintf("A%sB%dC", array("test", 10)));
 
 var_dump(sscanf("SN/2350001", "SN/%d"));
 
-var_dump(sscanf("SN/2350001", "SN/%d", &$out));
-var_dump($out);
-
 var_dump(chr(92));
 
 var_dump(ord("\\"));

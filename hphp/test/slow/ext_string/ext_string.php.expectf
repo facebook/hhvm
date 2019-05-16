@@ -150,8 +150,6 @@ array(1) {
   [0]=>
   int(2350001)
 }
-int(1)
-int(2350001)
 string(1) "\"
 int(92)
 string(7) "1234.56"
@@ -212,7 +210,7 @@ int(0)
 int(7)
 bool(false)
 
-Warning: Empty delimiter in %s on line 382
+Warning: Empty delimiter in %s on line 379
 bool(false)
 int(7)
 int(7)

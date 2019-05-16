@@ -1,14 +1,11 @@
 <?php <<__EntryPoint>> function main() {
 $foo = "ABC = DEF";
 $fmt = "%s = %s %n";
-$res_a0 = null;
-$res_a1 = null;
-$res_a2 = null;
 
 /* $res_a[2] is supposed to be a integer value that
  * represents the number of characters consumed so far
  */
-sscanf($foo, $fmt, &$res_a0, &$res_a1, &$res_a2);
+list($res_a0, $res_a1, $res_a2) = sscanf($foo, $fmt);
 
 $res_b = sscanf($foo, $fmt);
 

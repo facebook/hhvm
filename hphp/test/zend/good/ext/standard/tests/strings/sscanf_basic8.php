@@ -18,12 +18,5 @@ var_dump($arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 list($arg1, $arg2, $arg3, $arg4, $arg5, $arg6) = sscanf($str, $format2);
 var_dump($arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
-echo "\n-- Try sccanf() WITH optional args --\n";
-// extract details using long  format
-$res = sscanf($str, $format1, &$arg1, &$arg2, &$arg3, &$arg4, &$arg5, &$arg6);
-var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
-$res = sscanf($str, $format2, &$arg1, &$arg2, &$arg3, &$arg4, &$arg5, &$arg6);
-var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
-
 echo "===DONE===\n";
 }

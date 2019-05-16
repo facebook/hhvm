@@ -960,42 +960,12 @@ String HHVM_FUNCTION(str_repeat,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant sscanfImpl(const String& str,
-                   const String& format,
-                   const req::vector<Variant*>& args) {
+Variant HHVM_FUNCTION(sscanf, const String& str, const String& format) {
   Variant ret;
   int result;
-  result = string_sscanf(str.c_str(), format.c_str(), args.size(), ret);
+  result = string_sscanf(str.c_str(), format.c_str(), 0, ret);
   if (SCAN_ERROR_WRONG_PARAM_COUNT == result) return init_null();
-  if (args.empty()) return ret;
-
-  if (ret.isArray()) {
-    auto& retArray = ret.toArrRef();
-    for (int i = 0; i < retArray.size(); i++) {
-      auto var = args.at(i);
-      if (var) {
-        *var->getRefData() = retArray[i];
-      }
-    }
-    return retArray.size();
-  }
-  if (ret.isNull()) return 0;
   return ret;
-}
-
-TypedValue* HHVM_FN(sscanf)(ActRec* ar) {
-  String str{getArg<KindOfString>(ar, 0)};
-  if (ar->numArgs() < 1) {
-    return arReturn(ar, init_null());
-  }
-  String format{getArg<KindOfString>(ar, 1)};
-
-  req::vector<Variant*> args;
-  if (ar->numArgs() > 2) args.reserve(ar->numArgs() - 2);
-  for (int i = 2; i < ar->numArgs(); ++i) {
-    args.push_back(getArg<KindOfRef>(ar, i));
-  }
-  return arReturn(ar, sscanfImpl(str, format, args));
 }
 
 String HHVM_FUNCTION(chr, const Variant& ascii) {

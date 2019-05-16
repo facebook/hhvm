@@ -235,10 +235,9 @@ Variant f_vsprintf(const String& format,
                    const Array& args);
 
 
-Variant sscanfImpl(const String& str,
-                   const String& format,
-                   const req::vector<Variant*>& args);
-TypedValue* HHVM_FN(sscanf)(ActRec* ar);
+Variant HHVM_FUNCTION(sscanf,
+                      const String& str,
+                      const String& format);
 String HHVM_FUNCTION(chr, const Variant& ascii);
 int64_t HHVM_FUNCTION(ord,
                       const String& str);

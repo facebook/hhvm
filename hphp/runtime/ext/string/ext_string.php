@@ -1111,8 +1111,8 @@ function nl_langinfo(int $item): mixed;
  *   values. The optional parameters must be passed by reference.
  *
  */
-<<__Native("ActRec", "VariadicByRef")>>
-function sscanf(string $str, string $format, ...): mixed;
+<<__Native>>
+function sscanf(string $str, string $format): mixed;
 
 /**
  * Returns a one-character string containing the character specified by ascii.

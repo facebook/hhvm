@@ -448,8 +448,7 @@ Variant HHVM_FUNCTION(fscanf,
   if (line.length() == 0) {
     return false;
   }
-  req::vector<Variant*> args;
-  return sscanfImpl(line, format, args);
+  return HHVM_FN(sscanf)(line, format);
 }
 
 Variant HHVM_FUNCTION(fpassthru,

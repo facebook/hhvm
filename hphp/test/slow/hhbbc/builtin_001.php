@@ -3,7 +3,7 @@
 function heh() { return 'sscanf'; }
 function foo(string $s) {
   $fn = heh();
-  $fn($s, "%d", &$i);
+  list($i) = $fn($s, "%d");
   echo $i;
   echo "\n";
 }

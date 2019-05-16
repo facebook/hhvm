@@ -19,6 +19,7 @@ let sql_commit_transaction =
 let sql_create_symbols_table =
   "CREATE TABLE IF NOT EXISTS symbols ( " ^
   "    namespace_id INTEGER NOT NULL, " ^
+  "    filename_hash INTEGER NOT NULL, " ^
   "    name TEXT NOT NULL, " ^
   "    kind INTEGER NOT NULL " ^
   ");"
@@ -47,9 +48,9 @@ let sql_insert_kinds =
 
 let sql_insert_symbol =
   "INSERT INTO symbols " ^
-  " (namespace_id, name, kind)" ^
+  " (namespace_id, filename_hash, name, kind)" ^
   " VALUES" ^
-  " (?, ?, ?);"
+  " (?, ?, ?, ?);"
 
 let sql_insert_namespace =
   "INSERT INTO namespaces " ^
@@ -59,9 +60,10 @@ let sql_insert_namespace =
 
 let sql_create_indexes =
   "CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);" ^
-  "CREATE INDEX IF NOT EXISTS ix_symbols_kindname ON symbols (kind, name);"
+  "CREATE INDEX IF NOT EXISTS ix_symbols_kindname ON symbols (kind, name);" ^
+  "CREATE INDEX IF NOT EXISTS ix_symbols_namespace ON symbols (namespace_id, name);"
 
-(* Capture results from sqlite and crash if database fails *)
+(* Capture responses and crash if database fails *)
 let check_rc (rc: Sqlite3.Rc.t): unit =
   if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
   then failwith (Printf.sprintf "SQLite operation failed: %s" (Sqlite3.Rc.to_string rc))
@@ -69,7 +71,7 @@ let check_rc (rc: Sqlite3.Rc.t): unit =
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db
     (filename: string)
-    (symbols: si_results): unit =
+    (symbols: sic_results): unit =
 
   (* If the file exists, remove it before starting over *)
   if Sys.file_exists filename then begin
@@ -87,7 +89,7 @@ let record_in_db
   Sqlite3.exec db sql_insert_kinds |> check_rc;
   Sqlite3.exec db sql_begin_transaction |> check_rc;
 
-  (* Keep track of namespaces as we observe them *)
+  (* Insert namespaces into the database and construct a map to their IDs *)
   let namespace_tbl = Caml.Hashtbl.create 0 in
   let ns_id = ref 1 in
 
@@ -97,7 +99,7 @@ let record_in_db
     List.iter symbols ~f:(fun symbol -> begin
 
       (* Determine the namespace of this symbol, if any *)
-      let (namespace, _name) = Utils.split_ns_from_name symbol.si_name in
+      let (namespace, _name) = Utils.split_ns_from_name symbol.sic_name in
       let nsid_opt = Caml.Hashtbl.find_opt namespace_tbl namespace in
       let nsid = match nsid_opt with
       | Some id -> id
@@ -111,9 +113,10 @@ let record_in_db
       (* Insert this symbol *)
       Sqlite3.reset stmt |> check_rc;
       Sqlite3.bind stmt 1 (Sqlite3.Data.INT (Int64.of_int nsid)) |> check_rc;
-      Sqlite3.bind stmt 2 (Sqlite3.Data.TEXT symbol.si_name) |> check_rc;
-      Sqlite3.bind stmt 3 (Sqlite3.Data.INT
-        (Int64.of_int (kind_to_int symbol.si_kind))) |> check_rc;
+      Sqlite3.bind stmt 2 (Sqlite3.Data.INT symbol.sic_filehash) |> check_rc;
+      Sqlite3.bind stmt 3 (Sqlite3.Data.TEXT symbol.sic_name) |> check_rc;
+      Sqlite3.bind stmt 4 (Sqlite3.Data.INT
+        (Int64.of_int (kind_to_int symbol.sic_kind))) |> check_rc;
       Sqlite3.step stmt |> check_rc;
     end);
     Sqlite3.finalize stmt |> check_rc;

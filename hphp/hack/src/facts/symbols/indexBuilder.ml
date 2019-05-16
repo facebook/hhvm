@@ -26,12 +26,16 @@ type index_builder_context = {
   custom_repo_name: string option;
 }
 
-(* Combine two results *)
 (* Parse one single file and capture information about it *)
-let parse_file (filename: string): si_results =
+let parse_file
+    (ctxt: index_builder_context)
+    (filename: string): sic_results =
   if Sys.is_directory filename then begin
     []
   end else begin
+    let rel_path_str = String.substr_replace_first
+      filename ~pattern:ctxt.repo_folder ~with_:"" in
+    let path_hash = SharedMem.get_hash rel_path_str in
     let text = Core_kernel.In_channel.read_all filename in
     let enable_hh_syntax =
       Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
@@ -65,15 +69,17 @@ let parse_file (filename: string): si_results =
                   end
               end in
               {
-                si_name = key;
-                si_kind = kind;
+                sic_name = key;
+                sic_kind = kind;
+                sic_filehash = path_hash;
               }
             end) in
 
         (* Identify all functions in the file *)
         let functions_mapped = Core_kernel.List.map facts.functions ~f:(fun funcname -> {
-              si_name = funcname;
-              si_kind = SI_Function;
+              sic_name = funcname;
+              sic_kind = SI_Function;
+              sic_filehash = path_hash;
             }) in
 
         (* Return unified results *)
@@ -86,11 +92,14 @@ let parse_file (filename: string): si_results =
   end
 ;;
 
-let parse_batch acc files =
+let parse_batch
+    (ctxt: index_builder_context)
+    (acc: sic_results)
+    (files: string list): sic_results =
   List.fold files ~init:acc ~f:begin fun acc file ->
     if Path.file_exists (Path.make file) then
       try
-        let res = parse_file file in
+        let res = (parse_file ctxt) file in
         List.append res acc;
       with exn ->
         error_count := !error_count + 1;
@@ -102,9 +111,12 @@ let parse_batch acc files =
   end
 ;;
 
-let parallel_parse ~workers files =
+let parallel_parse
+    ~(workers: MultiWorker.worker list option)
+    (files: string list)
+    (ctxt: index_builder_context): sic_results =
   MultiWorker.call workers
-    ~job:parse_batch
+    ~job:(parse_batch ctxt)
     ~neutral:[]
     ~merge:(List.append)
     ~next:(MultiWorker.next workers files)
@@ -115,7 +127,10 @@ let entry = WorkerController.register_entry_point ~restore:(fun () -> ())
 
 (* Let's use the unix find command which seems to be really quick at this sort of thing *)
 let gather_file_list (path: string): string list =
-  let cmdline = Printf.sprintf "find %s \\( -name \"*.php\" -o -name \"*.hhi\" \\)" path in
+  let cmdline = Printf.sprintf
+    "find %s \\( \\( -name \"*.php\" -o -name \"*.hhi\" \\) -and -not -path \"*/.hg/*\" \\)"
+    path
+  in
   let channel = Unix.open_process_in cmdline in
   let result = ref [] in
   (try
@@ -157,7 +172,7 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
 
   (* Spawn the parallel parser *)
   let name = Printf.sprintf "Parsed %d files in " (List.length files) in
-  let results = measure_time ~f:(fun () -> parallel_parse ~workers files) ~name in
+  let results = measure_time ~f:(fun () -> parallel_parse ~workers files ctxt) ~name in
 
   (* Are we exporting a sqlite file? *)
   begin

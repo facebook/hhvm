@@ -460,8 +460,12 @@ let rec diff ty1 ty2 =
     | ty -> r, Toption ty
     end
   | r, Tunion tyl ->
-    r, Tunion (List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)))
-  | r, _ -> if ty_equal ty1 ty2 then r, Tunion [] else ty1
+    begin match List.filter tyl ~f:(fun ty -> not (ty_equal ty ty2)) with
+    | [ty] -> ty
+    | tyl -> r, Tunion tyl
+    end
+  | r, _ ->
+    if ty_equal ty1 ty2 then r, Tunion [] else ty1
 
 let () = Typing_utils.union_ref := union
 let () = Typing_utils.union_list_ref := union_list

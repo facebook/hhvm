@@ -67,10 +67,12 @@ let initialize
   let db_path = find_or_build_sqlite_file workers in
   let db = Sqlite3.db_open db_path in
   symbolindex_db := (Some db);
+
+  (* Query the database to verify that it is functioning *)
   let stmt = Sqlite3.prepare db sql_check_alive in
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do
-    let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
-    Hh_logger.log "Sqlite database initialized: [%s]" name;
+    let _name: string = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
+    Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path;
   done
 
 (* Ensure that sqlite gave a valid response to an operation *)
@@ -87,7 +89,7 @@ let prepare_or_reset_statement
     (sql_command_text: string) =
   let stmt = match !stmt_ref with
     | Some s ->
-      check_rc (Sqlite3.reset s);
+      Sqlite3.reset s |> check_rc;
       s
     | None ->
       let db = Option.value_exn !symbolindex_db in
@@ -117,9 +119,9 @@ let search_symbols_by_kind
   : si_results =
   let results = ref [] in
   let stmt = prepare_or_reset_statement select_symbols_by_kind_stmt sql_select_symbols_by_kind in
-  check_rc (Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")));
-  check_rc (Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))));
-  check_rc (Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)));
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))) |> check_rc;
+  Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
     results := {
@@ -137,8 +139,8 @@ let search_all_symbols
     (max_results: int): si_results =
   let results = ref [] in
   let stmt = prepare_or_reset_statement select_symbols_stmt sql_select_all_symbols in
-  check_rc (Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")));
-  check_rc (Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)));
+  Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
+  Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
     let kindnum = to_int (Sqlite3.column stmt 1) in

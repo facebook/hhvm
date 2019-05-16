@@ -5,6 +5,7 @@
     ast
     ast_provider
     facts
+    fetcher
     file_info
     heap_shared_mem
     index_builder

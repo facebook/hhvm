@@ -28,30 +28,27 @@ let find_or_build_sqlite_file
   match !sqlite_file_path with
   | Some path -> path
   | None ->
-    (* Launch index builder task *)
-    let repo_path = Relative_path.to_absolute
-      (Relative_path.from_root "/") in
-    let timestamp = string_of_int (int_of_float (Unix.gettimeofday ())) in
-
-    (* Clean the path string *)
-    let cleanpath = Path.slash_escaped_string_of_path (Path.make repo_path) in
-    let tempdir = (Path.make (Filename.get_temp_dir_name ())) in
-    let temppath =
-      Path.concat tempdir ("autocomplete." ^ cleanpath ^ "." ^ timestamp ^ ".db") in
-    let tempfilename = Path.to_string temppath in
-    Hh_logger.log "Sqlite saved state not specified, generating on the fly";
-    Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
-    let ctxt = {
-      IndexBuilder.repo_folder = repo_path;
-      IndexBuilder.sqlite_filename = Some tempfilename;
-      IndexBuilder.text_filename = None;
-      IndexBuilder.json_filename = None;
-      IndexBuilder.json_chunk_size = 0;
-      IndexBuilder.custom_service = None;
-      IndexBuilder.custom_repo_name = None;
-    } in
-    IndexBuilder.go ctxt workers;
-    tempfilename
+    (* Can we get one from the saved state fetcher? *)
+    match SavedStateFetcher.find_saved_symbolindex () with
+    | Ok filename -> filename
+    | Error errmsg ->
+      let repo_path = Relative_path.to_absolute
+        (Relative_path.from_root "/") in
+      Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
+      let tempfilename = SavedStateFetcher.get_filename_for_symbol_index ".db" in
+      Hh_logger.log "Sqlite saved state not specified, generating on the fly";
+      Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
+      let ctxt = {
+        IndexBuilder.repo_folder = repo_path;
+        IndexBuilder.sqlite_filename = Some tempfilename;
+        IndexBuilder.text_filename = None;
+        IndexBuilder.json_filename = None;
+        IndexBuilder.json_chunk_size = 0;
+        IndexBuilder.custom_service = None;
+        IndexBuilder.custom_repo_name = None;
+      } in
+      IndexBuilder.go ctxt workers;
+      tempfilename
 
 (* Symbolindex DB may be loaded or generated *)
 let symbolindex_db = ref None

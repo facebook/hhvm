@@ -1,0 +1,11 @@
+(library
+  (name fetcher)
+  (wrapped false)
+  (libraries
+    facts
+    file_info
+    logging
+    naming
+    parser_heap
+    procs_procs
+    pos))

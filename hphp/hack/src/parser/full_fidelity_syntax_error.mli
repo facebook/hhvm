@@ -245,7 +245,6 @@ val strict_types_in_declare_block_mode : string
 val invalid_number_of_args : string -> int -> string
 val invalid_args_by_ref : string -> string
 val redeclaration_error : string -> string
-val reference_to_static_scope_resolution : string
 val class_with_abstract_method : string -> string
 val interface_has_private_method : string
 val redeclaration_of_function : name:string -> loc:string -> string

@@ -63,14 +63,12 @@ class A {
   public function empty3() { return empty(A::$p3); }
   public function incdec3() { return ++A::$p3; }
   public function setop3() { return A::$p3 += 1000; }
-  public function vget3() { return by_ref(&A::$p3); }
 
   public function get4() { return A::$p4; }
   public function isset4() { return isset(A::$p4); }
   public function empty4() { return empty(A::$p4); }
   public function incdec4() { return ++A::$p4; }
   public function setop4() { return A::$p4 += 1000; }
-  public function vget4() { return by_ref(&A::$p4); }
 
   public function get5() { return A::$p5->p9->p10; }
   public function get6() { return A::$p6->p9->p10; }
@@ -157,14 +155,12 @@ class B {
   public function empty3() { return empty(B::$p3); }
   public function incdec3() { return ++B::$p3; }
   public function setop3() { return B::$p3 += 1000; }
-  public function vget3() { return by_ref(&B::$p3); }
 
   public function get4() { return B::$p4; }
   public function isset4() { return isset(B::$p4); }
   public function empty4() { return empty(B::$p4); }
   public function incdec4() { return ++B::$p4; }
   public function setop4() { return B::$p4 += 1000; }
-  public function vget4() { return by_ref(&B::$p4); }
 
   public function get5() { return B::$p5->{B::prop(9)}->{B::prop(10)}; }
   public function get6() { return B::$p6->{B::prop(9)}->{B::prop(10)}; }
@@ -205,13 +201,11 @@ const TESTS = vec[
   'empty3',
   'incdec3',
   'setop3',
-  'vget3',
   'get4',
   'isset4',
   'empty4',
   'incdec4',
   'setop4',
-  'vget4',
   'get5',
   'get6',
   'get7',

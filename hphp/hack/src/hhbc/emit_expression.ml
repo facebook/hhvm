@@ -1060,14 +1060,14 @@ and emit_class_expr env (cexpr : Ast_class_expr.class_expr) (prop : A.class_get_
       load_prop (), emit_load_class_ref env pos cexpr
     end
 
-and emit_class_get env qop need_ref (cid : A.class_id) (prop : A.class_get_expr) =
+and emit_class_get env qop (cid : A.class_id) (prop : A.class_get_expr) =
   let cexpr = class_id_to_class_expr ~resolve_self:false
     (Emit_env.get_scope env) cid
   in
   gather [
     of_pair @@ emit_class_expr env cexpr prop;
     match qop with
-    | QueryOp.CGet -> if need_ref then instr_vgets else instr_cgets
+    | QueryOp.CGet -> instr_cgets
     | QueryOp.CGetQuiet -> failwith "emit_class_get: CGetQuiet"
     | QueryOp.Isset -> instr_issets
     | QueryOp.Empty -> instr_emptys
@@ -1256,7 +1256,7 @@ and emit_call_isset_expr env outer_pos (expr : A.expr) =
   | A.Array_get (base_expr, opt_elem_expr) ->
     fst (emit_array_get env pos QueryOp.Isset base_expr opt_elem_expr)
   | A.Class_get (cid, id)  ->
-    emit_class_get env QueryOp.Isset false cid id
+    emit_class_get env QueryOp.Isset cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.Isset expr prop nullflavor)
   | A.Lvar (_, n) when SN.Superglobals.is_superglobal (Local_id.get_name n) ->
@@ -1297,7 +1297,7 @@ and emit_call_empty_expr env outer_pos (annot, expr_ as expr) =
   | A.Array_get(base_expr, opt_elem_expr) ->
     fst (emit_array_get env pos QueryOp.Empty base_expr opt_elem_expr)
   | A.Class_get (cid, id) ->
-    emit_class_get env QueryOp.Empty false cid id
+    emit_class_get env QueryOp.Empty cid id
   | A.Obj_get (expr, prop, nullflavor) ->
     fst (emit_obj_get env pos QueryOp.Empty expr prop nullflavor)
   | A.Lvar(_, id) when SN.Superglobals.is_superglobal (Local_id.get_name id) ->
@@ -1783,7 +1783,7 @@ and emit_expr (env : Emit_env.t) (expr: A.expr) =
   | A.Efun (fundef, ids) ->
     emit_pos_then pos @@ emit_lambda env fundef ids
   | A.Class_get (cid, id)  ->
-    emit_class_get env QueryOp.CGet false cid id
+    emit_class_get env QueryOp.CGet cid id
   | A.String2 es ->
     emit_string2 env pos es
   | A.BracedExpr e -> emit_expr env e
@@ -3123,7 +3123,7 @@ and emit_args_and_inout_setters env (args: A.expr list) =
           "references of subscript expressions should not parse"
       | A.Class_get (cid, id) ->
         let env = { env with Emit_env.env_allows_array_append = true } in
-        emit_class_get env QueryOp.CGet true cid id
+        emit_class_get env QueryOp.CGet cid id
       | A.Lvar id ->
         emit_pos_then pos @@
         emit_local ~notice:Notice ~need_ref:true env id

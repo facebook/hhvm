@@ -11,6 +11,7 @@
 (9,7)-(9,13) Only variables, members, and the results of function calls can be used as references
 (10,6)-(10,13) References are only allowed as function call arguments
 (11,6)-(11,24) References are only allowed as function call arguments
+(11,7)-(11,24) Only variables, members, and the results of function calls can be used as references
 (12,6)-(12,9) References are only allowed as function call arguments
 (13,6)-(13,13) References are only allowed as function call arguments
 (13,7)-(13,13) Only variables, members, and the results of function calls can be used as references

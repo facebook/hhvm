@@ -1,0 +1,1 @@
+Fatal error: Only variables, members, and the results of function calls can be used as references in %s/hphp/test/quick/vgets.php on line 26

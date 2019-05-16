@@ -8,12 +8,16 @@ abstract final class PushStackStatics {
 function push_stack(){
 
   $val = PushStackStatics::$index++;
-  array_push(&PushStackStatics::$stack, $val);
+  $stack = PushStackStatics::$stack;
+  array_push(&$stack, $val);
+  PushStackStatics::$stack = $stack;
 }
 function pop_stack(){
 
   if (PushStackStatics::$stack) {
-    array_pop(&PushStackStatics::$stack);
+    $stack = PushStackStatics::$stack;
+    array_pop(&$stack);
+    PushStackStatics::$stack = $stack;
   }
 }
 push_stack();

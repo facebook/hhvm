@@ -19,7 +19,7 @@ class A {
   public FakeType2<int> $z2;
   public FakeType3<bool> $z3;
 
-  public static int $s;
+
 }
 
 class B extends A {
@@ -30,7 +30,7 @@ class B extends A {
     by_ref(&$this->z1);
     by_ref(&$this->z2);
     by_ref(&$this->z3);
-    by_ref(&self::$s);
+
   }
 }
 <<__EntryPoint>> function main(): void {

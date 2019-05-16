@@ -1373,45 +1373,41 @@ class Status {
   }
 
   public static function pass($test, $detail, $time, $stime, $etime) {
-    array_push(&self::$results, array('name' => $test,
-                                     'status' => 'passed',
-                                     'start_time' => $stime,
-                                     'end_time' => $etime,
-                                     'time' => $time));
+    self::$results[] = array('name' => $test,
+                             'status' => 'passed',
+                             'start_time' => $stime,
+                             'end_time' => $etime,
+                             'time' => $time);
     $how = $detail === 'pass-server' ? self::PASS_SERVER :
       ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
     self::send(self::MSG_TEST_PASS, array($test, $how, $time, $stime, $etime));
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
-    if (self::getMode() === self::MODE_TESTPILOT) {
+    self::$results[] = array(
+      'name' => $test,
       /* testpilot needs a positive response for every test run, report
        * that this test isn't relevant so it can silently drop. */
-      array_push(&self::$results, array('name' => $test,
-                                       'status' => 'not_relevant',
-                                       'start_time' => $stime,
-                                       'end_time' => $etime,
-                                       'time' => $time));
-    } else {
-      array_push(&self::$results, array('name' => $test,
-                                       'status' => 'skipped',
-                                       'start_time' => $stime,
-                                       'end_time' => $etime,
-                                       'time' => $time));
-    }
+      'status' => self::getMode() === self::MODE_TESTPILOT
+        ? 'not_relevant'
+        : 'skipped',
+      'start_time' => $stime,
+      'end_time' => $etime,
+      'time' => $time,
+    );
     self::send(self::MSG_TEST_SKIP,
                array($test, $reason, $time, $stime, $etime));
   }
 
   public static function fail($test, $time, $stime, $etime, $diff) {
-    array_push(&self::$results, array(
+    self::$results[] = array(
       'name' => $test,
       'status' => 'failed',
       'details' => self::utf8Sanitize($diff),
       'start_time' => $stime,
       'end_time' => $etime,
       'time' => $time
-    ));
+    );
     self::send(self::MSG_TEST_FAIL, array($test, $time, $stime, $etime));
   }
 
@@ -2557,7 +2553,9 @@ function msg_loop($num_tests, $queue) {
     print "\033[2K\033[1G";
     if (Status::$skipped > 0) {
       print Status::$skipped ." tests \033[1;33mskipped\033[0m\n";
-      arsort(&Status::$skip_reasons);
+      $reasons = Status::$skip_reasons;
+      arsort(&$reasons);
+      Status::$skip_reasons = $reasons;
       foreach (Status::$skip_reasons as $reason => $count) {
         printf("%12s: %d\n", $reason, $count);
       }

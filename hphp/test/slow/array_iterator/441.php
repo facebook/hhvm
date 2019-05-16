@@ -1,6 +1,5 @@
-<?php
+<?hh
 
-ArrayIterator441::$arr = array('bar', 'bar', 'bar', 'bar', 'bar', 'bar', 'foo');
 function foo() {
   var_dump(__FUNCTION__);
 
@@ -9,12 +8,23 @@ function foo() {
 function bar() {
  var_dump(__FUNCTION__);
  }
-reset(&ArrayIterator441::$arr);
-while ($func = each(&ArrayIterator441::$arr)) {
- $f = $func[1];
- $f();
- }
+
+<<__EntryPoint>>
+function array_iterator_441() {
+  $arr = ArrayIterator441::$arr;
+  reset(&$arr);
+  while (true) {
+    $arr = ArrayIterator441::$arr;
+    $func = each(&$arr);
+    if (!$func) {
+      break;
+    }
+    ArrayIterator441::$arr = $arr;
+   $f = $func[1];
+   $f();
+  }
+}
 
 abstract final class ArrayIterator441 {
-  public static $arr;
+  public static $arr = array('bar', 'bar', 'bar', 'bar', 'bar', 'bar', 'foo');
 }

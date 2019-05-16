@@ -17,7 +17,9 @@ class B extends IDunno {
 function go(IDunno $idunno) {
   var_dump(is_string(Foo::$y));
   if ($idunno is A) {
-    $idunno->x(&Foo::$y);
+    $y = Foo::$y;
+    $idunno->x(&$y);
+    Foo::$y = $y;
   } else {
     $idunno->x(Foo::$y);
   }

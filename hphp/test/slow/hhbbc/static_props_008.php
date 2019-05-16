@@ -11,7 +11,9 @@ class Foob {
     $y->bummer(self::$maybe_boxed);
   }
   public static function b($y) {
-    $y->bummer(&self::$maybe_boxed);
+    $maybe_boxed = self::$maybe_boxed;
+    $y->bummer(&$maybe_boxed);
+    self::$maybe_boxed = $maybe_boxed;
   }
   public static function get() { return self::$maybe_boxed; }
   public static function ok() { return self::$ok; }
@@ -19,6 +21,7 @@ class Foob {
 
 function ok() { return Foob::ok(); }
 
+<<__EntryPoint>>
 function main() {
   var_dump(Foob::get());
   Foob::a(new A());
@@ -27,10 +30,4 @@ function main() {
   var_dump(Foob::get());
   var_dump(Foob::ok());
   var_dump(ok());
-}
-
-
-<<__EntryPoint>>
-function main_static_props_008() {
-main();
 }

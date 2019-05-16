@@ -6,6 +6,8 @@ function set_ref(&$ref, $val) { $ref = $val; }
 
 <<__EntryPoint>>
 function main_public_static_props_011() {
-  set_ref(&X::$y, 'asd');
+  $y = X::$y;
+  set_ref(&$y, 'asd');
+  X::$y = $y;
   k();
 }

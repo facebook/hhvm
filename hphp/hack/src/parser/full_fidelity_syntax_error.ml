@@ -419,8 +419,6 @@ let invalid_args_by_ref name =
   "Method " ^ name ^ " cannot take arguments by reference"
 let redeclaration_error name =
   "Cannot redeclare " ^ name
-let reference_to_static_scope_resolution =
-  "Cannot take a reference to a static scope resolution expression"
 let class_with_abstract_method name =
   "Class " ^ name ^ " contains an abstract method and must " ^
   "therefore be declared abstract"

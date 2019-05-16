@@ -66,9 +66,6 @@ const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
 const StaticString s_Closure("Closure");
-const StaticString s_byRefWarn("Only variables should be passed by reference");
-const StaticString s_byRefError("Only variables can be passed by reference");
-const StaticString s_trigger_error("trigger_error");
 const StaticString s_this("HH\\this");
 
 bool poppable(Op op) {

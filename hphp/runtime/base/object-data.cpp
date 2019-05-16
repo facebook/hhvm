@@ -162,24 +162,41 @@ static void freeDynPropArray(ObjectData* inst) {
   table.erase(it);
 }
 
+NEVER_INLINE
+void ObjectData::slowDestroyCases() {
+  assertx(slowDestroyCheck());
+
+  if (getAttribute(UsedMemoCache)) {
+    assertx(m_cls->hasMemoSlots());
+    auto const nSlots = m_cls->numMemoSlots();
+    for (Slot i = 0; i < nSlots; ++i) {
+      auto slot = memoSlot(i);
+      if (slot->isCache()) {
+        if (auto cache = slot->getCache()) req::destroy_raw(cache);
+      } else {
+        tvDecRefGen(*slot->getValue());
+      }
+    }
+  }
+
+  if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
+  if (UNLIKELY(getAttribute(IsWeakRefed))) {
+    WeakRefData::invalidateWeakRef((uintptr_t)this);
+  }
+}
+
 // Single check for a couple different unlikely actions during destruction.
 inline bool ObjectData::slowDestroyCheck() const {
   return m_aux16 & (HasDynPropArr | IsWeakRefed | UsedMemoCache);
 }
 
 NEVER_INLINE
-void ObjectData::release() noexcept {
-  assertx(kindIsValid());
-
-  auto const cls = getVMClass();
-
-  // Note: Don't put any cleanup code above this hasInstanceDtor short-circuit
-  // check. The jit checks hasInstanceDtor and calls instanceDtor directly if
-  // it returns true, so cleanups need to be below this check in this function
-  // and/or in the instanceDtors.
-  if (UNLIKELY(hasInstanceDtor())) {
-    return cls->instanceDtor()(this, cls);
-  }
+void ObjectData::release(ObjectData* obj, const Class* cls) noexcept {
+  assertx(obj->kindIsValid());
+  assertx(!obj->hasInstanceDtor());
+  assertx(!obj->hasNativeData());
+  assertx(obj->getVMClass() == cls);
+  assertx(cls->releaseFunc() == &ObjectData::release);
 
   // Note: cleanups done in this function are only run for classes without an
   // instanceDtor. Some of these cleanups are duplicated in ~ObjectData, and
@@ -194,51 +211,33 @@ void ObjectData::release() noexcept {
   // in this function or the instanceDtor will be run when the object is
   // collected by GC.
 
-  // `this' is being torn down now---be careful about where/how you dereference
-  // this from here on.
+  // `obj' is being torn down now---be careful about where/how you dereference
+  // it from here on.
 
   auto const nProps = size_t{cls->numDeclProperties()};
-  auto prop = reinterpret_cast<TypedValue*>(this + 1);
+  auto prop = reinterpret_cast<TypedValue*>(obj + 1);
   auto const stop = prop + nProps;
   for (; prop != stop; ++prop) {
     tvDecRefGen(prop);
   }
 
-  if (UNLIKELY(slowDestroyCheck())) {
-    if (getAttribute(UsedMemoCache)) {
-      assertx(m_cls->hasMemoSlots());
-      auto const nSlots = cls->numMemoSlots();
-      for (Slot i = 0; i < nSlots; ++i) {
-        auto slot = memoSlot(i);
-        if (slot->isCache()) {
-          if (auto cache = slot->getCache()) req::destroy_raw(cache);
-        } else {
-          tvDecRefGen(*slot->getValue());
-        }
-      }
-    }
-
-    if (UNLIKELY(getAttribute(HasDynPropArr))) freeDynPropArray(this);
-    if (UNLIKELY(getAttribute(IsWeakRefed))) {
-      WeakRefData::invalidateWeakRef((uintptr_t)this);
-    }
-  }
+  if (UNLIKELY(obj->slowDestroyCheck())) obj->slowDestroyCases();
 
   auto const size =
-    reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(this);
+    reinterpret_cast<char*>(stop) - reinterpret_cast<char*>(obj);
   assertx(size == sizeForNProps(nProps));
 
-  if (m_cls->hasMemoSlots()) {
-    auto const memoSize = objOffFromMemoNode(m_cls);
+  if (cls->hasMemoSlots()) {
+    auto const memoSize = objOffFromMemoNode(cls);
     assertx(
       reinterpret_cast<const MemoNode*>(
-        reinterpret_cast<const char*>(this) - memoSize
+        reinterpret_cast<const char*>(obj) - memoSize
       )->objOff() == memoSize
     );
-    tl_heap->objFree(reinterpret_cast<char*>(this) - memoSize,
+    tl_heap->objFree(reinterpret_cast<char*>(obj) - memoSize,
                      size + memoSize);
   } else {
-    tl_heap->objFree(this, size);
+    tl_heap->objFree(obj, size);
   }
   AARCH64_WALKABLE_FRAME();
 }

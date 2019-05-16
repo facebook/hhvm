@@ -100,6 +100,7 @@ struct CollectionsExtension : Extension {
     cls->allocExtraData();
     cls->m_extra.raw()->m_instanceCtor = T::instanceCtor;
     cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+    cls->m_release = T::instanceDtor;
     cls->initRTAttributes(
         Class::UseGet |
         Class::UseSet |

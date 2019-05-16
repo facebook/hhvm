@@ -95,6 +95,10 @@ enum class ClsCnsLookup {
 
 using ClassPtr = AtomicSharedLowPtr<Class>;
 
+// Since native instance dtors can be release functions, they have to have
+// compatible signatures.
+using ObjReleaseFunc = BuiltinDtorFunction;
+
 /*
  * Class represents the full definition of a user class in a given request
  * context.
@@ -624,6 +628,14 @@ public:
    */
   static void getMethodNames(const Class* cls, const Class* ctx, Array& out);
 
+  /////////////////////////////////////////////////////////////////////////////
+  // Object release.
+  //
+  // Every class has a static release function responsible for destroying and
+  // freeing object instances of this class. This might be ObjectData::release,
+  // or a custom native instance dtor.
+
+  ObjReleaseFunc releaseFunc() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Property metadata.                                                 [const]
@@ -1192,6 +1204,7 @@ public:
   OFF(vtableVec)
   OFF(funcVecLen)
   OFF(RTAttrs)
+  OFF(release)
 #undef OFF
 
   static constexpr ptrdiff_t constantsVecOff() {
@@ -1590,6 +1603,11 @@ private:
    * Cache of m_preClass->attrs().
    */
   unsigned m_attrCopy;
+
+  /*
+   * Function to release object instances of this class type.
+   */
+  ObjReleaseFunc m_release;
 
   /*
    * Vector of Class pointers that encodes the inheritance hierarchy, including

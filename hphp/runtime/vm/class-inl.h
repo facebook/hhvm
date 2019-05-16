@@ -219,6 +219,13 @@ inline BuiltinDtorFunction Class::instanceDtor() const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Object release.
+
+inline ObjReleaseFunc Class::releaseFunc() const {
+  return m_release;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Methods.
 
 inline size_t Class::numMethods() const {

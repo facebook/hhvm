@@ -387,8 +387,9 @@ void emitDecRefWorkObj(Vout& v, Vreg obj, Reason reason) {
     v, CC_E, shouldRelease,
     [&] (Vout& v) {
       // Put fn inside vcall{} triggers a compiler internal error (gcc 4.4.7)
-      auto const fn = CallSpec::method(&ObjectData::release);
-      v << vcall{fn, v.makeVcallArgs({{obj}}), v.makeTuple({})};
+      auto const cls = emitLdObjClass(v, obj, v.makeReg());
+      auto const fn = CallSpec::objDestruct(cls);
+      v << vcall{fn, v.makeVcallArgs({{obj, cls}}), v.makeTuple({})};
     },
     [&] (Vout& v) {
       emitDecRef(v, obj, reason);
@@ -429,6 +430,17 @@ void emitCall(Vout& v, CallSpec target, RegSet args) {
     case K::Destructor: {
       auto dtor = lookupDestructor(v, target.reg());
       v << callm{dtor, args};
+    } return;
+
+    case K::ObjDestructor: {
+      auto const func = v.makeReg();
+      emitLdLowPtr(
+        v,
+        target.reg()[Class::releaseOff()],
+        func,
+        sizeof(ObjReleaseFunc)
+      );
+      v << callr{func, args};
     } return;
 
     case K::Stub:

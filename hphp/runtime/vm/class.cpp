@@ -204,9 +204,9 @@ struct assert_sizeof_class {
   // If this static_assert fails, the compiler error will have the real value
   // of sizeof_Class in it since it's in this struct's type.
 #ifndef NDEBUG
-  static_assert(sz == (use_lowptr ? 268 : 304), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 272 : 312), "Change this only on purpose");
 #else
-  static_assert(sz == (use_lowptr ? 260 : 296), "Change this only on purpose");
+  static_assert(sz == (use_lowptr ? 264 : 304), "Change this only on purpose");
 #endif
 };
 template struct assert_sizeof_class<sizeof_Class>;
@@ -1577,6 +1577,8 @@ void Class::setParent() {
     allocExtraData();
     m_extra.raw()->m_instanceCtor = m_parent->m_extra->m_instanceCtor;
     m_extra.raw()->m_instanceDtor = m_parent->m_extra->m_instanceDtor;
+    assertx(m_parent->m_release == m_parent->m_extra->m_instanceDtor);
+    m_release = m_parent->m_extra->m_instanceDtor;
     // XXX: should this be copying over the clsInfo also?  Might be broken...
   }
 }
@@ -1930,6 +1932,8 @@ Class::Class(PreClass* preClass, Class* parent,
   , m_classVecLen(always_safe_cast<decltype(m_classVecLen)>(classVecLen))
   , m_funcVecLen(always_safe_cast<decltype(m_funcVecLen)>(funcVecLen))
   , m_serialized(false)
+    // Will be overwritten if the class has a native dtor
+  , m_release{ObjectData::release}
 {
   if (usedTraits.size()) {
     allocExtraData();
@@ -3611,6 +3615,7 @@ void Class::setNativeDataInfo() {
       m_extra.raw()->m_nativeDataInfo = ndi;
       m_extra.raw()->m_instanceCtor = Native::nativeDataInstanceCtor;
       m_extra.raw()->m_instanceDtor = Native::nativeDataInstanceDtor;
+      m_release = Native::nativeDataInstanceDtor;
       m_RTAttrs |= ndi->rt_attrs;
       break;
     }

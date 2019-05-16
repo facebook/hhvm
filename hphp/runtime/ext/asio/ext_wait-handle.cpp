@@ -154,6 +154,7 @@ finish_class() {
   assertx(!cls->m_extra->m_instanceDtor);
   cls->m_extra.raw()->m_instanceCtor = asioInstanceCtor;
   cls->m_extra.raw()->m_instanceDtor = T::instanceDtor;
+  cls->m_release = T::instanceDtor;
 }
 
 void AsioExtension::finishClasses() {

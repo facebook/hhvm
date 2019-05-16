@@ -112,6 +112,9 @@ struct FormatVisitor {
     case CallSpec::Kind::Destructor:
       str << sep() << folly::format("destructor({})", show(call.reg()));
       break;
+    case CallSpec::Kind::ObjDestructor:
+      str << sep() << folly::format("obj-destructor({})", show(call.reg()));
+      break;
     case CallSpec::Kind::Stub:
       return imm(call.stubAddr());
     }

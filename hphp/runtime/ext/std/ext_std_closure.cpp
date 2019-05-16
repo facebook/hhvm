@@ -212,6 +212,7 @@ void StandardExtension::initClosure() {
     RuntimeOption::RepoAuthoritative
       ? closureInstanceCtorRepoAuth : closureInstanceCtor;
   c_Closure::cls_Closure->m_extra.raw()->m_instanceDtor = closureInstanceDtor;
+  c_Closure::cls_Closure->m_release = closureInstanceDtor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -114,6 +114,15 @@ Variant::Variant(const_variant_ref v) noexcept {
  * ResourceHdr, and RefData classes.
  */
 
+namespace {
+
+void objReleaseWrapper(ObjectData* obj) noexcept {
+  auto const cls = obj->getVMClass();
+  cls->releaseFunc()(obj, cls);
+}
+
+}
+
 static_assert(typeToDestrIdx(KindOfArray)    == 0, "Array destruct index");
 static_assert(typeToDestrIdx(KindOfShape)    == 1, "Shape destruct index");
 static_assert(typeToDestrIdx(KindOfKeyset)   == 2, "Keyset destruct index");
@@ -140,8 +149,7 @@ RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&RecordData::release),  // KindOfRecord
   (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
   nullptr, // hole
-  (RawDestructor)getMethodPtr(&ObjectData::release),  // may replace at runtime
-                                                      // KindOfObject
+  (RawDestructor)&objReleaseWrapper,                  // KindOfObject
   (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
   (RawDestructor)getMethodPtr(&RefData::release),     // KindOfRef
 #ifndef USE_LOWPTR

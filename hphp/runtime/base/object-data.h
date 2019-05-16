@@ -190,7 +190,10 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
  public:
   ALWAYS_INLINE void decRefAndRelease() {
     assertx(kindIsValid());
-    if (decReleaseCheck()) release();
+    if (decReleaseCheck()) {
+      auto const cls = getVMClass();
+      return cls->releaseFunc()(this, cls);
+    }
   }
   bool kindIsValid() const { return isObjectKind(headerKind()); }
 
@@ -251,7 +254,7 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
                                              size_t index, size_t objoff);
   static ObjectData* newInstanceRawMemoBig(Class*, size_t size, size_t objoff);
 
-  void release() noexcept;
+  static void release(ObjectData* obj, const Class* cls) noexcept;
 
   Class* getVMClass() const;
   void setVMClass(Class* cls);
@@ -561,6 +564,7 @@ private:
   double toDoubleImpl() const noexcept;
 
   bool slowDestroyCheck() const;
+  void slowDestroyCases();
 
   bool assertTypeHint(tv_rval, Slot) const;
 

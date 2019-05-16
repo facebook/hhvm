@@ -281,7 +281,7 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
   return data.percent(data.destroyed());
 }
 
-CallSpec getDtorCallSpec(DataType type) {
+CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
   switch (type) {
     case KindOfString:
       return CallSpec::method(&StringData::release);
@@ -295,8 +295,11 @@ CallSpec getDtorCallSpec(DataType type) {
       return CallSpec::direct(MixedArray::Release);
     case KindOfKeyset:
       return CallSpec::direct(SetArray::Release);
-    case KindOfObject:
-      return CallSpec::method(&ObjectData::release);
+    case KindOfObject: {
+      auto const cls = emitLdObjClass(v, obj, v.makeReg());
+      args.reg(cls);
+      return CallSpec::objDestruct(cls);
+    }
     case KindOfResource:
       return CallSpec::method(&ResourceHdr::release);
     case KindOfRef:
@@ -312,7 +315,7 @@ CallSpec getDtorCallSpec(DataType type) {
   always_assert(false);
 }
 
-CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
+CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
   static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
   static auto const TMixedArr = Type::Array(ArrayData::kMixedKind);
   static auto const TAPCArr = Type::Array(ArrayData::kApcKind);
@@ -324,17 +327,15 @@ CallSpec makeDtorCall(Type ty, Vloc loc, ArgGroup& args) {
 
   if (ty <= TObj && ty.clsSpec().cls()) {
     auto const cls = ty.clsSpec().cls();
-
-    // These conditions must match the ones which cause us to call
-    // cls->instanceDtor() in ObjectData::release().
-    if ((cls->attrs() & AttrNoOverride) && cls->instanceDtor()) {
+    if (ty.clsSpec().exact() || (cls->attrs() & AttrNoOverride)) {
       args.immPtr(cls);
-      return CallSpec::direct(cls->instanceDtor().get());
+      return CallSpec::direct(cls->releaseFunc().get());
     }
   }
 
-  return ty.isKnownDataType() ? getDtorCallSpec(ty.toDataType())
-                              : CallSpec::destruct(loc.reg(1));
+  return ty.isKnownDataType()
+    ? getDtorCallSpec(v, loc.reg(0), ty.toDataType(), args)
+    : CallSpec::destruct(loc.reg(1));
 }
 
 void implDecRefProf(Vout& v, IRLS& env,
@@ -346,7 +347,7 @@ void implDecRefProf(Vout& v, IRLS& env,
   auto const destroy = [&] (Vout& v) {
     incrementProfile(v, profile, incr, offsetof(DecRefProfile, released));
     auto args = argGroup(env, inst).reg(base);
-    auto const dtor = makeDtorCall(ty, srcLoc(env, inst, 0), args);
+    auto const dtor = makeDtorCall(v, ty, srcLoc(env, inst, 0), args);
     cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::Sync, args);
   };
 
@@ -534,7 +535,7 @@ void implDecRef(Vout& v, IRLS& env,
 
   auto const destroy = [&] (Vout& v) {
     auto args = argGroup(env, inst).reg(base);
-    auto const dtor = makeDtorCall(ty, srcLoc(env, inst, 0), args);
+    auto const dtor = makeDtorCall(v, ty, srcLoc(env, inst, 0), args);
     cgCallHelper(v, env, dtor, kVoidDest, SyncOptions::Sync, args);
   };
 

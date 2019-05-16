@@ -1,59 +1,59 @@
 *** Testing readdir() : usage variations ***
 
 -- Iteration 1 --
-resource(4) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 2 --
-resource(5) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 3 --
-resource(6) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 4 --
-resource(7) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 5 --
-resource(8) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 6 --
-resource(9) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 7 --
-resource(10) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 8 --
-resource(11) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 9 --
-resource(12) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 10 --
-resource(13) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 11 --
-resource(14) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 12 --
-resource(15) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 13 --
-resource(16) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Iteration 14 --
-resource(17) of type (stream)
+resource(%d) of type (stream)
 string(56) "fwrite() expects parameter 2 to be string, integer given"
 
 -- Call to readdir() --

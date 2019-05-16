@@ -248,5 +248,6 @@ let make_env config =
     local_symbol_table = ref {
       SearchUtils.lte_fileinfos = Relative_path.Map.empty;
       SearchUtils.lte_filenames = Relative_path.Map.empty;
+      SearchUtils.lte_tombstones = SearchUtils.Tombstone_set.empty;
     };
   }

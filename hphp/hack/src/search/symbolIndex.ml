@@ -38,11 +38,8 @@ let initialize_provider
   | SqliteIndex ->
     SqliteSearchService.sqlite_file_path := savedstate_file_opt;
     SqliteSearchService.initialize workers;
-  | AllLocalIndex
   | GleanApiIndex
-  | GrepIndex
   | NoIndex
-  | RipGrepIndex
   | TrieIndex ->
     ()
 
@@ -141,29 +138,22 @@ let find_matching_symbols
      * Search it first for matches, then search global and add any elements
      * that we haven't seen before *)
     let local_results = match provider with
-      | AllLocalIndex
-      | GleanApiIndex
-      | GrepIndex
       | NoIndex
-      | RipGrepIndex
-      | SqliteIndex
       | TrieIndex ->
-        IndexBuilder.measure_time ~f:(fun () -> LocalSearchService.search_local_symbols
+        []
+      | GleanApiIndex
+      | SqliteIndex ->
+        LocalSearchService.search_local_symbols
           ~query_text
           ~max_results
           ~kind_filter
-          ~env)
-          ~name:"Local search";
+          ~env;
     in
-    Hh_logger.log "Found %d local matches" (List.length local_results);
 
     (* Next search globals *)
     let global_results = match provider with
-      | AllLocalIndex
       | GleanApiIndex
-      | GrepIndex
-      | NoIndex
-      | RipGrepIndex ->
+      | NoIndex ->
         []
       | SqliteIndex ->
         SqliteSearchService.sqlite_search query_text max_results kind_filter
@@ -174,13 +164,7 @@ let find_matching_symbols
     (* Merge and deduplicate results *)
     let all_results = List.append local_results global_results in
     let dedup_results = List.dedup_and_sort
-      ~compare:(fun a b ->
-        let int_compare_result = Int.compare (kind_to_int a.si_kind) (kind_to_int b.si_kind) in
-        if int_compare_result = 0 then
-          String.compare a.si_name b.si_name
-        else
-          int_compare_result
-      ) all_results in
+      ~compare:(fun a b -> String.compare a.si_name b.si_name) all_results in
     List.take dedup_results max_results
   end
 ;;
@@ -226,11 +210,8 @@ let update_files
     (paths: (Relative_path.t * info * file_source) list)
     (env: SearchUtils.local_tracking_env ref): unit =
   match get_search_provider () with
-  | AllLocalIndex
   | GleanApiIndex
-  | GrepIndex
   | NoIndex
-  | RipGrepIndex
   | SqliteIndex ->
     List.iter paths ~f:(fun (path, info, detector) ->
       if detector = SearchUtils.TypeChecker then
@@ -248,11 +229,8 @@ let remove_files
     (paths: Relative_path.Set.t)
     (env: SearchUtils.local_tracking_env ref): unit =
   match get_search_provider () with
-  | AllLocalIndex
   | GleanApiIndex
-  | GrepIndex
   | NoIndex
-  | RipGrepIndex
   | SqliteIndex ->
     Relative_path.Set.iter paths ~f:(fun path ->
         env := LocalSearchService.remove_file path !env;

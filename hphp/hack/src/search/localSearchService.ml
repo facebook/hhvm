@@ -16,11 +16,19 @@ let count_local_fileinfos (env: local_tracking_env): int =
    + Relative_path.Map.cardinal env.lte_filenames)
 ;;
 
+(* Determine a tombstone for a file path *)
+let get_tombstone (path: Relative_path.t): int64 =
+  let rel_path_str = Relative_path.suffix path in
+  let path_hash = SharedMem.get_hash rel_path_str in
+  path_hash
+;;
+
 (* Update files when they were discovered *)
 let update_file
     (path: Relative_path.t)
     (info: SearchUtils.info)
     (env: local_tracking_env): local_tracking_env =
+  let tombstone = get_tombstone path in
   match info with
   | Full fileinfo_t ->
     {
@@ -28,6 +36,8 @@ let update_file
         Relative_path.Map.add env.lte_fileinfos
           ~key:path ~data:fileinfo_t;
       lte_filenames = env.lte_filenames;
+      lte_tombstones =
+        Tombstone_set.remove env.lte_tombstones tombstone;
     }
   | Fast fileinfo_names ->
     {
@@ -35,6 +45,8 @@ let update_file
       lte_filenames =
         Relative_path.Map.add env.lte_filenames
           ~key:path ~data:fileinfo_names;
+      lte_tombstones =
+        Tombstone_set.remove env.lte_tombstones tombstone;
     }
 ;;
 
@@ -42,11 +54,14 @@ let update_file
 let remove_file
     (path: Relative_path.t)
     (env: local_tracking_env): local_tracking_env =
+  let tombstone = get_tombstone path in
   {
     lte_fileinfos =
       Relative_path.Map.remove env.lte_fileinfos path;
     lte_filenames =
       Relative_path.Map.remove env.lte_filenames path;
+    lte_tombstones =
+      Tombstone_set.add env.lte_tombstones tombstone;
   }
 ;;
 

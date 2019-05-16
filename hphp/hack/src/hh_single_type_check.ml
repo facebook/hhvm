@@ -1337,5 +1337,6 @@ let () =
   let env = {
     SearchUtils.lte_fileinfos = Relative_path.Map.empty;
     SearchUtils.lte_filenames = Relative_path.Map.empty;
+    SearchUtils.lte_tombstones = SearchUtils.Tombstone_set.empty;
   } in
   Unix.handle_unix_error main_hack options env

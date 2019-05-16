@@ -6,19 +6,17 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
+open Reordered_argument_collections
 
 (* Known search providers *)
 type search_provider =
-  | AllLocalIndex
   (*
    * This is called the GleanApiIndex rather than GleanIndex since it
    * actually calls a thrift API for all answers.  All other providers
-   * get their answers locally.
+   * get their answers from data on the local devserver.
    *)
   | GleanApiIndex
-  | GrepIndex
   | NoIndex
-  | RipGrepIndex
   | SqliteIndex
   | TrieIndex
 [@@deriving show]
@@ -38,10 +36,7 @@ type autocomplete_type =
 let provider_of_string (provider_str: string): search_provider =
   match provider_str with
   | "SqliteIndex" -> SqliteIndex
-  | "GrepIndex" -> GrepIndex
-  | "RipGrepIndex" -> RipGrepIndex
   | "NoIndex" -> NoIndex
-  | "AllLocalIndex" -> AllLocalIndex
   | "GleanApiIndex" -> GleanApiIndex
   | "TrieIndex" -> TrieIndex
   | _ -> TrieIndex
@@ -50,11 +45,8 @@ let provider_of_string (provider_str: string): search_provider =
 (* Convert a string to a human readable description of the provider *)
 let descriptive_name_of_provider (provider: search_provider): string =
   match provider with
-  | AllLocalIndex -> "All Local Memory"
   | GleanApiIndex -> "Glean API"
-  | GrepIndex -> "Grep"
   | NoIndex -> "Symbol index disabled"
-  | RipGrepIndex -> "RipGrep"
   | SqliteIndex -> "Sqlite"
   | TrieIndex -> "SharedMem/Trie"
 ;;
@@ -205,8 +197,22 @@ type file_source =
   | SavedState
   | TypeChecker
 
+(* Keep track of file hash tombstones *)
+module Tombstone = struct
+  type t = int64
+
+  let compare = Pervasives.compare
+
+  let to_string = Int64.to_string
+end
+
+module Tombstone_set = struct
+  include Reordered_argument_set(Set.Make(Tombstone))
+end
+
 (* Represents files changed on disk *)
 type local_tracking_env = {
   lte_fileinfos: FileInfo.t Relative_path.Map.t;
   lte_filenames: FileInfo.names Relative_path.Map.t;
+  lte_tombstones: Tombstone_set.t;
 }

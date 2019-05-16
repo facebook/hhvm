@@ -59,10 +59,12 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
     auto const dstData = dstLoc(env, inst, 0).reg(0);
     auto const dstType = dstLoc(env, inst, 0).reg(1);
 
-    if (dst->isA(TBool) && !src->isA(TBool)) {
-      v << movtqb{srcData, dstData};
-    } else {
-      v << copy{srcData, dstData};
+    if (dstData != InvalidReg) {
+      if (dst->isA(TBool) && !src->isA(TBool)) {
+        v << movtqb{srcData, dstData};
+      } else {
+        v << copy{srcData, dstData};
+      }
     }
     if (dstType == InvalidReg) return;
     if (srcType != InvalidReg) {

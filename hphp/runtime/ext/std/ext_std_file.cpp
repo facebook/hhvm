@@ -440,32 +440,16 @@ Variant HHVM_FUNCTION(fgetss,
   return ret;
 }
 
-Variant fscanfImpl(const Resource& handle,
-                   const String& format,
-                   const req::vector<Variant*>& args) {
+Variant HHVM_FUNCTION(fscanf,
+                      const Resource& handle,
+                      const String& format) {
   CHECK_HANDLE(handle, f);
   String line = f->readLine();
   if (line.length() == 0) {
     return false;
   }
-  return sscanfImpl(line, format, args);
-}
-
-TypedValue* HHVM_FN(fscanf)(ActRec* ar) {
-  Resource handle{getArg<KindOfResource>(ar, 0)};
-  if (ar->numArgs() < 1) {
-    return arReturn(ar, init_null());
-  }
-  String format{getArg<KindOfString>(ar, 1)};
-  if (ar->numArgs() < 2) {
-    return arReturn(ar, false);
-  }
   req::vector<Variant*> args;
-  args.reserve(ar->numArgs() - 2);
-  for (int i = 2; i < ar->numArgs(); ++i) {
-    args.push_back(getArg<KindOfRef>(ar, i));
-  }
-  return arReturn(ar, fscanfImpl(handle, format, args));
+  return sscanfImpl(line, format, args);
 }
 
 Variant HHVM_FUNCTION(fpassthru,

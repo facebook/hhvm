@@ -19,8 +19,8 @@ Warning: fgetc() expects parameter 1 to be resource, boolean given in %s/hphp/te
 Warning: fgets() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 18
 
 Warning: fgetss() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 19
-string(6) "fscanf"
-bool(false)
+
+Warning: fscanf() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 20
 
 Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s/hphp/test/slow/ext_file/param_coerce_mode.php on line 21
 

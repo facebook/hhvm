@@ -107,7 +107,9 @@ Variant HHVM_FUNCTION(fgetss,
                       const Resource& handle,
                       int64_t length = 0,
                       const String& allowable_tags = null_string);
-TypedValue* HHVM_FN(fscanf)(ActRec* ar);
+Variant HHVM_FUNCTION(fscanf,
+                      const Resource& handle,
+                      const String& format);
 Variant HHVM_FUNCTION(fpassthru,
                       const Resource& handle);
 Variant HHVM_FUNCTION(fwrite,

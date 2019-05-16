@@ -150,7 +150,7 @@ class SplFileObject extends SplFileInfo
     string $enclosure = '"',
   ): int;
   public function fread(int $length): string;
-  public function fscanf(string $format, ... ): mixed;
+  public function fscanf(string $format): varray;
   public function fseek(int $offset, int $whence = SEEK_SET): int;
   /* HH_IGNORE_ERROR[2071] */
   public function fstat(): darray;

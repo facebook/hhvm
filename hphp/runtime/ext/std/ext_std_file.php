@@ -220,14 +220,11 @@ function fgetss(resource $handle,
  * @param string $format - The specified format as described in the sprintf()
  *   documentation.
  *
- * @return mixed - If only two parameters were passed to this function, the
- *   values parsed will be returned as an array. Otherwise, if optional
- *   parameters are passed, the function will return the number of assigned
- *   values. The optional parameters must be passed by reference.
+ * @return mixed - false on EOF, otherwise varray of parsed values
  *
  */
-<<__Native("ActRec", "VariadicByRef")>>
-function fscanf(resource $handle, string $format, ...): mixed;
+<<__Native>>
+function fscanf(resource $handle, string $format): mixed;
 
 /**
  * Reads to EOF on the given file pointer from the current position and writes

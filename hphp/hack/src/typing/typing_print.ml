@@ -210,6 +210,12 @@ module Full = struct
           ~f:(fun acc (_, sid) -> acc ^ "::" ^ sid) ~init:"")
       ]
     | Toption (_, Tnonnull) -> text "mixed"
+    | Toption (r, Tunion tyl)
+      when TypecheckerOptions.like_types (Env.get_tcopt env) &&
+           List.exists ~f:(fun (_, ty) -> ty = Tdynamic) tyl ->
+      (* Unions with null become Toption, which leads to the awkward ?~...
+       * The Tunion case can better handle this *)
+      k (r, Tunion ((r, Tprim Nast.Tnull) :: tyl))
     | Toption x -> Concat [text "?"; k x]
     | Tlike x -> Concat [text "~"; k x]
     | Tprim x -> text @@ prim x
@@ -275,6 +281,49 @@ module Full = struct
       if TypecheckerOptions.new_inference (Env.get_tcopt env)
       then text "nothing"
       else text "[unresolved]"
+    | Tunion tyl when TypecheckerOptions.like_types (Env.get_tcopt env) ->
+      let tyl = List.fold_right tyl ~init:Typing_set.empty
+      ~f:Typing_set.add |> Typing_set.elements in
+      let dynamic, null, nonnull = List.partition3_map tyl ~f:(fun t ->
+        match t with
+        | _, Tdynamic -> `Fst t
+        | _, Tprim Nast.Tnull -> `Snd t
+        | _ -> `Trd t
+      ) in
+      begin match dynamic, null, nonnull with
+      (* type isn't nullable or dynamic *)
+      | [], [], [ty] ->
+        if show_verbose env then Concat [text "("; k ty; text ")"] else k ty
+      | [], [], _ ->
+        delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+      (* Type only is null *)
+      | [], _, [] ->
+        if show_verbose env then text "(null)" else text "null"
+      (* Type only is dynamic *)
+      | _, [], [] ->
+        if show_verbose env then text "(dynamic)" else text "dynamic"
+      (* Type is nullable single type *)
+      | [], _, [ty] ->
+        if show_verbose env
+          then Concat [text "(null |"; k ty; text ")"]
+          else Concat [text "?"; k ty]
+      (* Type is like single type *)
+      | _, [], [ty] ->
+        if show_verbose env
+          then Concat [text "(dynamic |"; k ty; text ")"]
+          else Concat [text "~"; k ty]
+      (* Type is like nullable single type *)
+      | _, _, [ty] ->
+        if show_verbose env
+          then Concat [text "(dynamic | null |"; k ty; text ")"]
+          else Concat [text "~?"; k ty]
+      | _, _, _ ->
+        Concat [
+        text "~";
+        text "?";
+        delimited_list (Space ^^ text "|" ^^ Space) "(" k nonnull ")"
+        ]
+      end
     | Tunion tyl ->
       let tyl = List.fold_right tyl ~init:Typing_set.empty
       ~f:Typing_set.add |> Typing_set.elements in

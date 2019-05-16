@@ -173,6 +173,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
+  gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
+
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));
   }

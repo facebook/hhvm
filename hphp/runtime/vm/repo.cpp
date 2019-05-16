@@ -241,6 +241,7 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EnableArgsInBacktraces = s_globalData.EnableArgsInBacktraces;
     RuntimeOption::EvalAbortBuildOnVerifyError =
       s_globalData.AbortBuildOnVerifyError;
+    RuntimeOption::StrictArrayFillKeys      = s_globalData.StrictArrayFillKeys;
     if (s_globalData.HardReturnTypeHints) {
       RuntimeOption::EvalCheckReturnTypeHints = 3;
     }

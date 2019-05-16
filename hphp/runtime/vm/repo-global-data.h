@@ -197,6 +197,11 @@ struct Repo::GlobalData {
   /* Avoid optimizations that interfere with array provenance */
   bool LogArrayProvenance = false;
 
+  /*
+   * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
+   */
+  HackStrictOption StrictArrayFillKeys = HackStrictOption::OFF;
+
   std::vector<const StringData*> APCProfile;
 
   std::vector<std::pair<std::string,Cell>> ConstantFunctions;
@@ -236,6 +241,7 @@ struct Repo::GlobalData {
       (IsVecNotices)
       (IsCompatibleClsMethType)
       (LogArrayProvenance)
+      (StrictArrayFillKeys)
       ;
   }
 };

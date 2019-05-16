@@ -19,6 +19,8 @@
 
 #include "hphp/util/hdf.h"
 
+#include <folly/Format.h>
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 struct Variant;
@@ -331,4 +333,25 @@ struct Config {
 
 }
 
+namespace folly {
+
+template<> class FormatValue<HPHP::HackStrictOption> {
+ public:
+  explicit FormatValue(HPHP::HackStrictOption opt) : m_opt(opt) {}
+
+  template<typename Callback> void format(FormatArg& arg, Callback& cb) const {
+    format_value::formatString(
+      (m_opt == HPHP::HackStrictOption::WARN)
+        ? "warn"
+        : (m_opt == HPHP::HackStrictOption::ON) ? "on" : "off",
+      arg,
+      cb
+    );
+  }
+
+ private:
+  HPHP::HackStrictOption m_opt;
+};
+
+}
 #endif /* incl_HPHP_CONFIG_H_ */

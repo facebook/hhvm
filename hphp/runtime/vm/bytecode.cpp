@@ -5495,14 +5495,16 @@ void iopFCall(PC origpc, PC& pc, FCallArgs fca,
 
 OPTBLD_FLT_INLINE
 void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
-  const NamedEntity* ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
-  Func* func = Unit::lookupFunc(ne);
-  if (func == nullptr) {
+  auto const ne = vmfp()->m_func->unit()->lookupNamedEntityId(id);
+  auto const func = ne->uniqueFunc();
+  if (func == nullptr || !func->isBuiltin()) {
     raise_error("Call to undefined function %s()",
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
 
   callerRxChecks(vmfp(), func);
+  assertx(!func->isMethod() || (func->isStatic() && func->cls()));
+  auto const ctx = func->isStatic() ? func->cls() : nullptr;
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
@@ -5516,7 +5518,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
         : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
     );
   }
-  Native::callFunc<true>(func, nullptr, args, numNonDefault, ret);
+  Native::callFunc<true>(func, ctx, args, numNonDefault, ret);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);

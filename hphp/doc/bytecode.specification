@@ -2074,6 +2074,10 @@ FCallBuiltin  <total params> <passed params> <litstr id> [C|V|U..C|V|U]  -> [C]
   level code. When the callee returns, it will transfer the return value onto
   the caller's evaluation stack using the C flavor.
 
+  FCallBuiltin supports standalone methods and static methods for which the
+  class name is statically known. For static methods, the litstr id will be a
+  fully-qualified cls::fn name (e.g. "HH\Map::fromItems").
+
 
 9. Member operations
 --------------------

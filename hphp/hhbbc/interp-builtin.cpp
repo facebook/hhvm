@@ -506,7 +506,7 @@ bool can_emit_builtin(const php::Func* func,
                       int numArgs, bool hasUnpack) {
   if (func->attrs & (AttrInterceptable | AttrNoFCallBuiltin |
                      AttrTakesInOutParams) ||
-      func->cls ||
+      (func->cls && !(func->attrs & AttrStatic))  ||
       !func->nativeInfo ||
       func->params.size() >= Native::maxFCallBuiltinArgs() ||
       !RuntimeOption::EvalEnableCallBuiltin) {
@@ -605,10 +605,15 @@ void finish_builtin(ISS& env,
 
   assert(numArgs <= func->params.size());
 
-  repl.emplace_back(
-    bc::FCallBuiltin {
-      static_cast<uint32_t>(func->params.size()), numArgs, func->name }
-  );
+  auto const numParams = static_cast<uint32_t>(func->params.size());
+  if (func->cls == nullptr) {
+    repl.emplace_back(bc::FCallBuiltin { numParams, numArgs, func->name });
+  } else {
+    assertx(func->attrs & AttrStatic);
+    auto const fullname =
+      makeStaticString(folly::sformat("{}::{}", func->cls->name, func->name));
+    repl.emplace_back(bc::FCallBuiltin { numParams, numArgs, fullname });
+  }
   repl.emplace_back(bc::PopU2 {});
   repl.emplace_back(bc::PopU2 {});
   repl.emplace_back(bc::PopU2 {});

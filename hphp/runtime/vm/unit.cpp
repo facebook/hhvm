@@ -852,6 +852,17 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
   nameList->m_cachedClass.bind(
     isPersistent ? rds::Mode::Persistent : rds::Mode::Normal);
 
+  if (newClass->isBuiltin()) {
+    assertx(newClass->isUnique());
+    for (auto i = newClass->numMethods(); i--;) {
+      auto const func = newClass->getMethod(i);
+      if (func->isCPPBuiltin() && func->isStatic()) {
+        assertx(func->isUnique());
+        NamedEntity::get(func->fullName())->setUniqueFunc(func);
+      }
+    }
+  }
+
   newClass->setClassHandle(nameList->m_cachedClass);
   newClass->incAtomicCount();
 

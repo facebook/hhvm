@@ -96,6 +96,16 @@ struct ParamPrep {
       }
   {}
 
+  void decRefParams(IRGS& env) const {
+    if (forNativeImpl) return;
+    if (ctx && ctx->type() <= TObj) {
+      decRef(env, ctx);
+    }
+    for (auto i = size(); i--;) {
+      decRef(env, info[i].value);
+    }
+  }
+
   struct Info {
     SSATmp* value{nullptr};
     bool passByAddr{false};
@@ -107,7 +117,8 @@ struct ParamPrep {
   Info& operator[](size_t idx) { return info[idx]; }
   size_t size() const { return info.size(); }
 
-  SSATmp* thiz{nullptr};       // may be null if call is not a method
+  // For free/class/instance methods, ctx is null/Class*/Object* respectively.
+  SSATmp* ctx{nullptr};
   jit::vector<Info> info;
   uint32_t numByAddr{0};
 
@@ -140,9 +151,7 @@ Block* make_opt_catch(IRGS& env, const ParamPrep& params) {
   auto const exit = defBlock(env, Block::Hint::Unlikely);
   BlockPusher bp(*env.irb, makeMarker(env, nextBcOff(env)), exit);
   gen(env, BeginCatch);
-  for (auto i = params.size(); i--; ) {
-    decRef(env, params[i].value);
-  }
+  params.decRefParams(env);
   gen(env, EndCatch,
       EndCatchData { spOffBCFromIRSP(env), EndCatchData::UnwindOnly },
       fp(env), sp(env));
@@ -605,8 +614,8 @@ SSATmp* opt_foldable(IRGS& env,
 
   const Class* cls = nullptr;
   if (func->isMethod()) {
-    if (!params.thiz || !func->isStatic()) return nullptr;
-    cls = params.thiz->type().clsSpec().exactCls();
+    if (!params.ctx || !func->isStatic()) return nullptr;
+    cls = params.ctx->type().clsSpec().exactCls();
     if (!cls) return nullptr;
   }
 
@@ -941,19 +950,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
   }();
 
   if (result == nullptr) return nullptr;
-
-  // NativeImpl will do a RetC
-  if (!params.forNativeImpl) {
-    if (params.thiz && params.thiz->type() <= TObj) {
-      decRef(env, params.thiz);
-    }
-
-    // Decref and free args
-    for (int i = numNonDefault - 1; i >= 0; --i) {
-      decRef(env, params[i].value);
-    }
-  }
-
+  params.decRefParams(env);
   return result;
 }
 
@@ -996,11 +993,11 @@ Type param_coerce_type(const Func* callee, uint32_t paramIdx) {
  */
 template <class LoadParam>
 ParamPrep
-prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* thiz,
+prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
                uint32_t numArgs, uint32_t numNonDefault, bool forNativeImpl,
                LoadParam loadParam) {
   auto ret = ParamPrep{numArgs, callee};
-  ret.thiz = thiz;
+  ret.ctx = ctx;
   ret.forNativeImpl = forNativeImpl;
 
   // Fill in in reverse order, since they may come from popC's (depending on
@@ -1071,7 +1068,12 @@ struct CatchMaker {
     , m_kind(kind)
     , m_params(*params)
   {
-    assertx(!m_params.thiz || m_params.forNativeImpl || inlining());
+    // Native instance method calls are allowed from NativeImpl or in inlining.
+    // Native static method calls are *additionally* allowed from FCallBuiltin.
+    if (m_params.ctx == nullptr) return;
+    DEBUG_ONLY auto const this_type = m_params.ctx->type();
+    assertx(this_type <= TCls || this_type <= TObj);
+    assertx(this_type <= TCls || m_params.forNativeImpl || inlining());
   }
 
   CatchMaker(const CatchMaker&) = delete;
@@ -1126,8 +1128,8 @@ struct CatchMaker {
 
 private:
   void prepareForCatch() const {
-    if (inlining() && m_params.thiz) {
-      decRef(env, m_params.thiz);
+    if (inlining() && m_params.ctx) {
+      decRef(env, m_params.ctx);
     }
     /*
      * We're potentially spilling to a different depth than the unwinder
@@ -1291,13 +1293,12 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
                                     const Func* callee,
                                     ParamPrep& params,
                                     const CatchMaker& maker) {
-  auto const cbNumArgs = 2 + params.size() +
-    (params.thiz ? 1 : 0);
+  auto const cbNumArgs = 2 + params.size() + (params.ctx ? 1 : 0);
   auto ret = jit::vector<SSATmp*>(cbNumArgs);
   auto argIdx = uint32_t{0};
   ret[argIdx++] = fp(env);
   ret[argIdx++] = sp(env);
-  if (params.thiz) ret[argIdx++] = params.thiz;
+  if (params.ctx) ret[argIdx++] = params.ctx;
 
   auto const needDVCheck = [&](uint32_t param, const Type& ty) {
     if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
@@ -1520,8 +1521,8 @@ SSATmp* builtinCall(IRGS& env,
   );
 
   if (!params.forNativeImpl) {
-    if (params.thiz && params.thiz->type() <= TObj) {
-      decRef(env, params.thiz);
+    if (params.ctx && params.ctx->type() <= TObj) {
+      decRef(env, params.ctx);
     }
     catchMaker.decRefParams();
   }
@@ -1627,13 +1628,14 @@ void emitFCallBuiltin(IRGS& env,
                       uint32_t numNonDefault,
                       const StringData* funcName) {
   auto const callee = Unit::lookupBuiltin(funcName);
-
   if (!callee) PUNT(Missing-builtin);
+
   emitCallerRxChecksKnown(env, callee);
+  assertx(!callee->isMethod() || (callee->isStatic() && callee->cls()));
+  auto const ctx = callee->isStatic() ? cns(env, callee->cls()) : nullptr;
 
   auto params = prepare_params(
-    env, callee,
-    nullptr, // no $this; FCallBuiltin never happens for methods
+    env, callee, ctx,
     numArgs, numNonDefault, false, [&](uint32_t /*i*/, const Type ty) {
       auto specificity =
         ty == TBottom ? DataTypeGeneric : DataTypeSpecific;
@@ -1666,17 +1668,17 @@ void emitNativeImpl(IRGS& env) {
     return;
   }
 
-  auto thiz = callee->isMethod() ? ldCtx(env) : nullptr;
+  auto ctx = callee->isMethod() ? ldCtx(env) : nullptr;
   auto const numParams = gen(env, LdARNumParams, fp(env));
 
   ifThenElse(
     env,
     [&] (Block* fallback) {
-      if (thiz) {
+      if (ctx) {
         if (!hasThis(env)) {
-          thiz = gen(env, LdClsCtx, thiz);
+          ctx = gen(env, LdClsCtx, ctx);
         } else {
-          thiz = castCtxThis(env, thiz);
+          ctx = castCtxThis(env, ctx);
         }
       }
 
@@ -1713,7 +1715,7 @@ void emitNativeImpl(IRGS& env) {
       auto params = prepare_params(
         env,
         callee,
-        thiz,
+        ctx,
         callee->numParams(),
         callee->numParams(),
         true,

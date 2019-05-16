@@ -3757,12 +3757,25 @@ namespace {
 template <typename Op>
 void implFPushClsMethodD(ISS& env, const Op& op, bool isRFlavor) {
   auto const rcls = env.index.resolve_class(env.ctx, op.str3);
-  auto clsType = rcls ? clsExact(*rcls) : TCls;
-  auto const rfun = env.index.resolve_method(
-    env.ctx,
-    clsType,
-    op.str2
-  );
+  auto const clsType = rcls ? clsExact(*rcls) : TCls;
+  auto const rfun = env.index.resolve_method(env.ctx, clsType, op.str2);
+  if (!isRFlavor && !any(env.collect.opts & CollectionOpts::Speculating)) {
+    if (auto const func = rfun.exactFunc()) {
+      // When we use FCallBuiltin to call a static method, the litstr method
+      // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
+      //
+      // As a result, we can only do this optimization if the name of the
+      // builtin function's class matches this op's class name immediate.
+      if (will_reduce(env) && can_emit_builtin(func, op.arg1, op.has_unpack) &&
+          func->cls != nullptr && func->cls->name->same(op.str3)) {
+        fpiPushNoFold(
+          env,
+          ActRec { FPIKind::Builtin, TBottom, folly::none, rfun }
+        );
+        return reduce(env);
+      }
+    }
+  }
   if (isRFlavor && !rfun.couldHaveReifiedGenerics()) {
     return reduce(
       env,

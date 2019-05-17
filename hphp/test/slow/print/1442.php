@@ -27,7 +27,7 @@ echo((bool)array("\0" => "\0"));
 echo((boolean)array("\0" => "\0"));
 echo((float)array("\0" => "\0"));
 echo((double)array("\0" => "\0"));
-echo((real)array("\0" => "\0"));
+echo((float)array("\0" => "\0"));
 echo((string)array("\0" => "\0"));
 $a = "0x10";
 echo($a);

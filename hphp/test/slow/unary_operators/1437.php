@@ -27,7 +27,7 @@ var_dump((bool)array("\0" => "\0"));
 var_dump((boolean)array("\0" => "\0"));
 var_dump((float)array("\0" => "\0"));
 var_dump((double)array("\0" => "\0"));
-var_dump((real)array("\0" => "\0"));
+var_dump((float)array("\0" => "\0"));
 var_dump((string)array("\0" => "\0"));
 $a = "0x10";
 var_dump($a);

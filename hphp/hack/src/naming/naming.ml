@@ -883,7 +883,6 @@ module Make (GetLocals : GetLocals) = struct
           || x = ("\\"^SN.Typehints.integer)
           || x = ("\\"^SN.Typehints.boolean)
           || x = ("\\"^SN.Typehints.double)
-          || x = ("\\"^SN.Typehints.real)
           ) ->
           Errors.primitive_toplevel p;
           N.Hany
@@ -1003,7 +1002,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.boolean ->
         Errors.primitive_invalid_alias p nm SN.Typehints.bool;
         Some (N.Hprim N.Tbool)
-      | nm when nm = SN.Typehints.double || nm = SN.Typehints.real ->
+      | nm when nm = SN.Typehints.double ->
         Errors.primitive_invalid_alias p nm SN.Typehints.float;
         Some (N.Hprim N.Tfloat)
       | _ -> None

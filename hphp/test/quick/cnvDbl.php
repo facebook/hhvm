@@ -14,7 +14,7 @@ var_dump(foo(array(123)));
 class C { public $foo = "bar"; }
 var_dump(foo(new C));
 
-function bar($i) {
+function real($i) {
   $v1 = "undefined";
   $v2 = "undefined";
   $v3 = "undefined";
@@ -52,7 +52,7 @@ function bar($i) {
   var_dump((double)$v11);
 }
 
-bar(1);
+real(1);
 
 function baz($i) {
   if ($i >= 1) {

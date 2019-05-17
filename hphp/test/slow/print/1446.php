@@ -27,7 +27,7 @@ print_r((bool)array("\0" => "\0"));
 print_r((boolean)array("\0" => "\0"));
 print_r((float)array("\0" => "\0"));
 print_r((double)array("\0" => "\0"));
-print_r((real)array("\0" => "\0"));
+print_r((float)array("\0" => "\0"));
 print_r((string)array("\0" => "\0"));
 $a = "0x10";
 print_r($a);

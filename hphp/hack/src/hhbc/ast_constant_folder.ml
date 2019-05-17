@@ -393,8 +393,7 @@ let cast_value hint v =
     else
     if id = SN.Typehints.string
     then TV.cast_to_string v
-    else if id = SN.Typehints.real ||
-            id = SN.Typehints.double ||
+    else if id = SN.Typehints.double ||
             id = SN.Typehints.float
     then TV.cast_to_float v
     else None

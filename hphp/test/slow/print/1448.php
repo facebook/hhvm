@@ -27,7 +27,7 @@ serialize((bool)array("\0" => "\0"));
 serialize((boolean)array("\0" => "\0"));
 serialize((float)array("\0" => "\0"));
 serialize((double)array("\0" => "\0"));
-serialize((real)array("\0" => "\0"));
+serialize((float)array("\0" => "\0"));
 serialize((string)array("\0" => "\0"));
 $a = "0x10";
 serialize($a);

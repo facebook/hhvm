@@ -27,7 +27,7 @@ var_export((bool)array("\0" => "\0"));
 var_export((boolean)array("\0" => "\0"));
 var_export((float)array("\0" => "\0"));
 var_export((double)array("\0" => "\0"));
-var_export((real)array("\0" => "\0"));
+var_export((float)array("\0" => "\0"));
 var_export((string)array("\0" => "\0"));
 $a = "0x10";
 var_export($a);

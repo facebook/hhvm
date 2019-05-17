@@ -320,7 +320,6 @@ module Typehints = struct
   let integer = "integer"
   let boolean = "boolean"
   let double  = "double"
-  let real    = "real"
   let callable = "callable"
 
   let object_cast = "object"
@@ -336,7 +335,7 @@ module Typehints = struct
     let x = String.lowercase x in
     x = void     || x = noreturn || x = int      || x = bool     || x = float ||
     x = num      || x = string   || x = resource || x = mixed    || x = array ||
-    x = arraykey || x = integer  || x = boolean  || x = double   || x = real  ||
+    x = arraykey || x = integer  || x = boolean  || x = double   ||
     x = dynamic  || x = wildcard || x = nonnull  || x = nothing
 
   let is_namespace_with_reserved_hh_name x =

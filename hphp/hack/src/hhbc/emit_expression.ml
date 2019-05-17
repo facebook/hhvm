@@ -721,8 +721,7 @@ and emit_cast env pos hint expr =
                id = "binary" -> instr (IOp CastString)
       | _ when id = SN.Typehints.object_cast -> instr (IOp CastObject)
       | _ when id = SN.Typehints.array -> instr (IOp CastArray)
-      | _ when id = SN.Typehints.real
-            || id = SN.Typehints.double
+      | _ when id = SN.Typehints.double
             || id = SN.Typehints.float -> instr (IOp CastDouble)
       | _ when id = "unset" -> gather [ instr_popc; instr_null ]
       | _ -> Emit_fatal.raise_fatal_parse pos ("Invalid cast type: " ^ id)

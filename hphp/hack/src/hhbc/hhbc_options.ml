@@ -63,6 +63,7 @@ type t = {
   option_disable_lval_as_an_expression    : bool;
   option_enable_pocket_universes          : bool;
   option_notice_on_byref_argument_typehint_violation : bool;
+  option_log_array_provenance             : bool;
 }
 
 let default = {
@@ -119,6 +120,7 @@ let default = {
   option_disable_lval_as_an_expression = false;
   option_enable_pocket_universes = false;
   option_notice_on_byref_argument_typehint_violation = false;
+  option_log_array_provenance = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -172,6 +174,7 @@ let enable_stronger_await_binding o = o.option_enable_stronger_await_binding
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 let enable_pocket_universes o = o.option_enable_pocket_universes
 let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_argument_typehint_violation
+let log_array_provenance o = o.option_log_array_provenance
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -228,6 +231,7 @@ let to_string o =
     ; Printf.sprintf "disable_lval_as_an_expression: %B" @@ disable_lval_as_an_expression o
     ; Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o
     ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
+    ; Printf.sprintf "log_array_provenance: %B" @@ log_array_provenance o
     ]
 
 let as_bool s =
@@ -347,6 +351,8 @@ let set_option options name value =
     { options with option_enable_pocket_universes = as_bool value }
   | "hhvm.notice_on_by_ref_argument_typehint_violation" ->
     { options with option_notice_on_byref_argument_typehint_violation = as_bool value }
+  | "hhvm.log_array_provenance" ->
+    { options with option_log_array_provenance = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -505,6 +511,8 @@ let value_setters = [
      fun opts v -> { opts with option_emit_inst_meth_pointers = (v > 0) });
   (set_value "hhvm.rx_is_enabled" get_value_from_config_int @@
      fun opts v -> { opts with option_rx_is_enabled = (v > 0) });
+  (set_value "hhvm.log_array_provenance" get_value_from_config_int @@
+     fun opts v -> { opts with option_log_array_provenance = (v > 0) });
 ]
 
 let extract_config_options_from_json ~init config_json =

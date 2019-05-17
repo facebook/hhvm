@@ -539,6 +539,10 @@ struct SimpleParser {
           tv.m_type = KindOfInt64;
           tv.m_data.pstr->release();
           tv.m_data.num = num;
+        } else if (auto sstr = lookupStaticString(tv.m_data.pstr)){
+          tv.m_type = KindOfPersistentString;
+          tv.m_data.pstr->release();
+          tv.m_data.pstr = sstr;
         }
         // TODO(14491721): Precompute and save hash to avoid deref in MakeMixed.
         if (!matchSeparator(':')) return false;

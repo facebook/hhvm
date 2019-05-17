@@ -313,7 +313,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   auto const data = ad->data();
   for (uint32_t i = 0; i < size; i++) {
     auto& kTv = kvs[i * 2];
-    if (kTv.m_type == KindOfString) {
+    if (isStringType(kTv.m_type)) {
       auto k = kTv.m_data.pstr;
       auto h = k->hash();
       auto ei = ad->findForInsertUpdate(k, h);

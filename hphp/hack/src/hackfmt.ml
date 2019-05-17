@@ -10,6 +10,7 @@
 open Core_kernel
 module SyntaxTree = Full_fidelity_syntax_tree
 module SourceText = Full_fidelity_source_text
+module SyntaxError = Full_fidelity_syntax_error
 module Logger = HackfmtEventLogger
 module FEnv = Format_env
 
@@ -314,6 +315,11 @@ let read_stdin () =
   with End_of_file ->
     Buffer.contents buf
 
+let print_error source_text error =
+  let text = SyntaxError.to_positioned_string
+    error (SourceText.offset_to_position source_text) in
+  Printf.eprintf "%s\n" text
+
 let parse text_source =
   let source_text =
     match text_source with
@@ -327,7 +333,9 @@ let parse text_source =
   let tree = SyntaxTree.make ~env:parser_env source_text in
   if List.is_empty (SyntaxTree.all_errors tree)
     then tree
-    else raise Hackfmt_error.InvalidSyntax
+    else
+      (List.iter (SyntaxTree.all_errors tree) (print_error source_text);
+      raise Hackfmt_error.InvalidSyntax)
 
 let logging_time_taken env logger thunk =
   let start_t = Unix.gettimeofday () in

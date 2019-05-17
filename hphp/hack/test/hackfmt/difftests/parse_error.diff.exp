@@ -1,3 +1,4 @@
+(4,15)-(5,1) A semicolon (';') is expected here.
 Parse error in file: parse_error.php
 *** fibonacci.php
 <?hh // strict

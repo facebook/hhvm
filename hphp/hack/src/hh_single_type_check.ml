@@ -677,7 +677,7 @@ let parse_name_and_decl popt files_contents =
 
     Relative_path.Map.iter parsed_files begin fun fn parsed_file ->
       Errors.run_in_context fn Errors.Decl begin fun () ->
-        Decl.name_and_declare_types_program parsed_file.Parser_return.ast
+        Decl.name_and_declare_types_program (Ast_to_nast.convert parsed_file.Parser_return.ast)
       end
     end;
 

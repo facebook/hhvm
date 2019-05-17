@@ -17,8 +17,7 @@
  * about classes, functions, typedefs, respectively in the globals
  * in Typing_env.Class, Typing_env.Fun, and Typing_env.Typedef.
  *)
-val name_and_declare_types_program:
-  Ast.program -> unit
+val name_and_declare_types_program: Nast.program -> unit
 
 val make_env: Relative_path.t -> unit
 

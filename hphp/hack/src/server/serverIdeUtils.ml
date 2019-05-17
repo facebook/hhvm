@@ -110,10 +110,11 @@ let declare_and_check_ast ?(path=path) ?content ~make_ast ~f tcopt =
     (* Decl is not necessary to run typing, since typing would get
      * whatever it needs using lazy decl, but we run it anyway in order to
      * ensure that hooks attached to decl phase are executed. *)
-    Decl.name_and_declare_types_program ast;
+    let nast = Ast_to_nast.convert ast in
+    Decl.name_and_declare_types_program nast;
 
     let make_tast () =
-      let nast = Naming.program (Ast_to_nast.convert ast) in
+      let nast = Naming.program nast in
       Typing.nast_to_tast tcopt nast
     in
 

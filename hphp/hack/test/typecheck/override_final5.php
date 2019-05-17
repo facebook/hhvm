@@ -10,7 +10,7 @@
  */
 
 trait T {
-  final static function f(): void {}
+  final public static function f(): void {}
 }
 
 class ParentClass {

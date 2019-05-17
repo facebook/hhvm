@@ -930,15 +930,10 @@ let iconst_decl cst =
   (hint_ty, errors)
 
 (*****************************************************************************)
-
 let rec name_and_declare_types_program prog =
-  let prog = Errors.ignore_ (fun() -> Ast_to_nast.convert prog) in
-  name_and_declare_types_program_aast prog
-
-and name_and_declare_types_program_aast prog =
   List.iter prog begin fun def ->
     match def with
-    | Namespace (_, prog) -> name_and_declare_types_program_aast prog
+    | Namespace (_, prog) -> name_and_declare_types_program prog
     | NamespaceUse _ -> ()
     | SetNamespaceEnv _ -> ()
     | FileAttributes _ -> ()
@@ -960,7 +955,7 @@ and name_and_declare_types_program_aast prog =
 
 let make_env fn =
   let ast = Ast_provider.get_ast fn in
-  name_and_declare_types_program ast
+  name_and_declare_types_program (Ast_to_nast.convert ast)
 
 let err_not_found file name =
   let err_str =

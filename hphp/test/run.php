@@ -455,6 +455,7 @@ function get_options($argv) {
     'include-pattern:' => 'I:',
     '*repo' => 'r',
     '*repo-single' => '',
+    '*repo-separate' => '',
     '*repo-threads:' => '',
     '*hhbbc2' => '',
     '*mode:' => 'm:',
@@ -541,8 +542,23 @@ function get_options($argv) {
 
   $GLOBALS['recorded_options'] = $recorded;
 
+  if (isset($options['hhbbc2'])) {
+    $options['repo-separate'] = true;
+    if (isset($options['repo']) || isset($options['repo-single'])) {
+      echo "repo-single/repo and hhbbc2 are mutually exclusive options\n";
+      exit(1);
+    }
+  }
+
+  if (isset($options['repo-single']) || isset($options['repo-separate'])) {
+    $options['repo'] = true;
+  } else if (isset($options['repo'])) {
+    // if only repo was set, then it means repo single
+    $options['repo-single'] = true;
+  }
+
   if (isset($options['jit-serialize'])) {
-    if (!isset($options['repo']) && !isset($options['repo-single'])) {
+    if (!isset($options['repo'])) {
       echo "jit-serialize only works in repo mode\n";
       exit(1);
     }
@@ -565,14 +581,6 @@ function get_options($argv) {
     echo "The options\n -", implode("\n -", $multi_request_modes),
          "\nare mutually exclusive options\n";
     exit(1);
-  }
-
-  if (isset($options['hhbbc2']) || isset($options['repo-single'])) {
-    if (isset($options['hhbbc2']) && isset($options['repo-single'])) {
-      echo "repo-single and hhbbc2 are mutually exclusive options\n";
-      exit(1);
-    }
-    $options['repo'] = true;
   }
 
   return array($options, $files);
@@ -921,8 +929,9 @@ function hhvm_cmd_impl($options, $config, ...$extra_args) {
   return $cmds[0];
 }
 
-function repo_single($options, $test) {
-  return isset($options['repo-single']) && !file_exists($test . ".hhbbc_opts");
+function repo_separate($options, $test) {
+  return isset($options['repo-separate']) &&
+         !file_exists($test . ".hhbbc_opts");
 }
 
 // Return the command and the env to run it in.
@@ -984,7 +993,7 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
   }
 
   if (isset($options['repo'])) {
-    $repo_suffix = repo_single($options, $test) ? 'hhbc' : 'hhbbc';
+    $repo_suffix = repo_separate($options, $test) ? 'hhbbc' : 'hhbc';
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
     $hhbbc_repo = "\"$test.repo/$program.$repo_suffix\"";
@@ -1074,7 +1083,7 @@ function hphp_cmd($options, $test, $program) {
   return implode(" ", array(
     hhvm_path(),
     '--hphp',
-    '-vUseHHBBC='. (repo_single($options, $test) ? 'true' : 'false'),
+    '-vUseHHBBC='. (repo_separate($options, $test) ? 'false' : 'true'),
     '--config',
     find_test_ext($test, 'ini', 'hphp_config'),
     '-vRuntime.ResourceLimit.CoreFileSize=0',
@@ -1175,7 +1184,7 @@ function exec_with_stack($cmd) {
 function repo_mode_compile($options, $test, $program) {
   $hphp = hphp_cmd($options, $test, $program);
   $result = exec_with_stack($hphp);
-  if ($result === true && !repo_single($options, $test)) {
+  if ($result === true && repo_separate($options, $test)) {
     $hhbbc = hhbbc_cmd($options, $test, $program);
     $result = exec_with_stack($hhbbc);
   }
@@ -2342,7 +2351,7 @@ function run_test($options, $test) {
 
     if (file_exists($test . '.hhbbc_assert')) {
       $hhvm = hphp_cmd($options, $test, $program);
-      if (!repo_single($options, $test)) {
+      if (repo_separate($options, $test)) {
         $result = exec_with_stack($hhvm);
         if ($result !== true) return false;
         $hhvm = hhbbc_cmd($options, $test, $program);
@@ -2462,7 +2471,7 @@ function print_commands($tests, $options) {
     // How to run it with hhbbc:
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
     $hhbbc_cmds = hphp_cmd($options, $test, $program)."\n";
-    if (!repo_single($options, $test)) {
+    if (repo_separate($options, $test)) {
       $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       if (isset($options['hhbbc2'])) {

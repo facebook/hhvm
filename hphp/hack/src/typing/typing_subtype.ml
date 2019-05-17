@@ -2700,7 +2700,11 @@ let bind_to_equal_bound ~freshen env var =
     Typing_set.fold (fun upper_bound env ->
       Typing_set.fold (fun lower_bound env ->
         if tyvar_is_solved env var
-        then env
+        then
+          let env, ty = Env.expand_type env (var_as_ty var) in
+          let env = sub_type env lower_bound ty in
+          let env = sub_type env ty upper_bound in
+          env
         else
         if ty_equal_shallow lower_bound upper_bound
         then

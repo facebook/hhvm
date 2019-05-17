@@ -1,0 +1,6 @@
+File "tuple_index_2.php", line 12, characters 10-138:
+Invalid return type (Typing[4110])
+File "tuple_index_2.php", line 11, characters 22-24:
+This is an int
+File "tuple_index_2.php", line 15, characters 13-17:
+It is incompatible with a string

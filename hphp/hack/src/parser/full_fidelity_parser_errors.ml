@@ -2255,7 +2255,6 @@ let rec check_reference node errors =
     make_error_from_node node SyntaxError.nested_unary_reference :: errors
   | FunctionCallExpression _
   | MemberSelectionExpression _
-  | PipeVariableExpression _
   | SafeMemberSelectionExpression _
   | VariableExpression _ -> errors
   | Token token when Token.kind token = TokenKind.Variable -> errors

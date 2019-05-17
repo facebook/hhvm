@@ -8,7 +8,7 @@
 (rule
   (targets build-id-opt)
   (action
-    (write-file build-id-opt -DHH_BUILD_ID=%{read:build-id})))
+    (write-file build-id-opt -DHH_BUILD_BANNER=%{read:build-id})))
 
 (rule
   (targets build-timestamp-opt)

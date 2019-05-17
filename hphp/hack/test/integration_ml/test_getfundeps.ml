@@ -261,4 +261,4 @@ let () =
         (String.concat "\n" result) in
       Test.fail msg
     end in
-  List.iter tests do_test
+  List.iter tests ~f:do_test

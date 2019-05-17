@@ -11,3 +11,5 @@ class A {
     var_dump('A');
   }
 }
+
+<<__EntryPoint>> function main() {}

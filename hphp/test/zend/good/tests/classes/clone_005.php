@@ -11,3 +11,4 @@ class test extends base {
   public function __clone() {}
 }
 
+<<__EntryPoint>> function main() {}

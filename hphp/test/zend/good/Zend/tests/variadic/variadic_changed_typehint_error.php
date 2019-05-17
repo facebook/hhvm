@@ -8,3 +8,4 @@ class MySQL implements DB {
     public function query($query, int ...$params) { }
 }
 
+<<__EntryPoint>> function main() {}

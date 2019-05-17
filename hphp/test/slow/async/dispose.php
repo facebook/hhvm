@@ -5,3 +5,5 @@ class foo {
     await foo();
   }
 }
+
+<<__EntryPoint>> function main(): void {}

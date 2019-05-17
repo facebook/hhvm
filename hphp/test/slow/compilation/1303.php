@@ -9,3 +9,5 @@ function checker($x) {
   $x = @$x['b'];
   return $a - $b + $x;
 }
+
+<<__EntryPoint>> function main() {}

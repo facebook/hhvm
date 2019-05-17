@@ -1,6 +1,7 @@
 <?php
 
 interface if_a {
-	function err() {};
+    function err() {};
 }
 
+<<__EntryPoint>> function main() {}

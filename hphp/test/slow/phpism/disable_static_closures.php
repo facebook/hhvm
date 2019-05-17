@@ -23,3 +23,5 @@ class StaticClosureTest {
     return $f;
   }
 }
+
+<<__EntryPoint>> function main(): void {}

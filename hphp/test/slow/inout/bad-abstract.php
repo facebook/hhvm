@@ -7,3 +7,5 @@ abstract class A {
 class C extends A {
   function foo(&$x) {}
 }
+
+<<__EntryPoint>> function main(): void {}

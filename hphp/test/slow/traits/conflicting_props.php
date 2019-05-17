@@ -8,3 +8,5 @@ class C {
   use T;
   protected static $prop = 2;
 }
+
+<<__EntryPoint>> function main() {}

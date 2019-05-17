@@ -8,3 +8,4 @@ class A {
   public function __construct(protected $c) {}
 }
 
+<<__EntryPoint>> function main(): void {}

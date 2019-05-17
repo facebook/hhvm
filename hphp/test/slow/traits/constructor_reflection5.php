@@ -11,3 +11,5 @@ class A {
     var_dump('__construct');
   }
 }
+
+<<__EntryPoint>> function main() {}

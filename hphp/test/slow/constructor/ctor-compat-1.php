@@ -6,3 +6,5 @@ abstract class C {
 class D extends C {
   public function __construct(array $x) {}
 }
+
+<<__EntryPoint>> function main() {}

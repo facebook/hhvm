@@ -6,3 +6,5 @@ function f(): void {
     123 => 4
   );
 }
+
+<<__EntryPoint>> function main(): void {}

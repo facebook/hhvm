@@ -10,3 +10,5 @@ class C {
   public async function a() = T::a;
   public function b() = T::b;
 }
+
+<<__EntryPoint>> function main(): void {}

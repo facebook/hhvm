@@ -7,3 +7,5 @@ class C<reify Ta, reify Tb> {
     new A<Ta>();
   }
 }
+
+<<__EntryPoint>> function main(): void {}

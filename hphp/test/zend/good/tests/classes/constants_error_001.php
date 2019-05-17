@@ -1,6 +1,8 @@
 <?php
-  class myclass
-  {
-      const myConst = "hello";
-      const myConst = "hello again";
-  }
+class myclass
+{
+    const myConst = "hello";
+    const myConst = "hello again";
+}
+
+<<__EntryPoint>> function main() {}

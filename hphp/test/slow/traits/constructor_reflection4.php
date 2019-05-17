@@ -11,3 +11,5 @@ trait B {
 class A {
   use B;
 }
+
+<<__EntryPoint>> function main() {}

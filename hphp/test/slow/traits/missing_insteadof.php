@@ -10,3 +10,5 @@ class C {
     T1::foo insteadof T2;
   }
 }
+
+<<__EntryPoint>> function main() {}

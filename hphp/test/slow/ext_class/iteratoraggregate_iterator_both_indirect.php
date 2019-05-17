@@ -4,3 +4,5 @@ class IA implements IteratorAggregate {
 }
 
 class Fatal extends IA implements Iterator {}
+
+<<__EntryPoint>> function main() {}

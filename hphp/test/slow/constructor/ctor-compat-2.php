@@ -6,3 +6,5 @@ interface I {
 class D implements I {
   public function __construct(array $x) {}
 }
+
+<<__EntryPoint>> function main() {}

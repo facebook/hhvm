@@ -7,3 +7,5 @@ class foo {
         return $this->value;
     }
 }
+
+<<__EntryPoint>> function main() {}

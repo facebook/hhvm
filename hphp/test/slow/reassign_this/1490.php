@@ -8,3 +8,5 @@ class Foo {
     $this = $__this;
   }
  }
+
+<<__EntryPoint>> function main() {}

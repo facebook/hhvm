@@ -18,3 +18,5 @@ class D extends C {
   public function foo($bar) {
   }
 }
+
+<<__EntryPoint>> function main() {}

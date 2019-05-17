@@ -1,10 +1,12 @@
 <?php
-  function __autoload($name)
-  {
-      echo "In autoload: ";
-      var_dump($name);
-  }
-  
-  class C extends UndefBase
-  {
-  }
+function __autoload($name)
+{
+    echo "In autoload: ";
+    var_dump($name);
+}
+
+class C extends UndefBase
+{
+}
+
+<<__EntryPoint>> function main() {}

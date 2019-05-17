@@ -5,3 +5,5 @@ interface I {
     echo 'This is illegal';
   }
 }
+
+<<__EntryPoint>> function main(): void {}

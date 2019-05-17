@@ -25,3 +25,5 @@ interface UserOfA1 {
 class ActualUserOfA1 implements UserOfA1 {
   public function someMethod(B1 $a) { }
 }
+
+<<__EntryPoint>> function main() {}

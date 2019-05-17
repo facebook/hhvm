@@ -10,3 +10,5 @@ function bar($a) {
   baz(foo($a)[1]);
   foo($a)->bar = 1;
 }
+
+<<__EntryPoint>> function main() {}

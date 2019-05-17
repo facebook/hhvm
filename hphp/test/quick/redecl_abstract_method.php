@@ -7,3 +7,5 @@ abstract class A {
 abstract class B extends A {
   abstract function f();
 }
+
+<<__EntryPoint>> function main(): void {}

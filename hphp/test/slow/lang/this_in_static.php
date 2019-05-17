@@ -6,3 +6,5 @@ class foo {
     var_dump($this);
   }
 }
+
+<<__EntryPoint>> function main(): void {}

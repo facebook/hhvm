@@ -15,3 +15,5 @@ class C implements I {
 abstract class D extends C {
   abstract const X; // fatal!
 }
+
+<<__EntryPoint>> function main(): void {}

@@ -11,3 +11,5 @@ interface I {
 class C implements I {
   use T;
 }
+
+<<__EntryPoint>> function main(): void {}

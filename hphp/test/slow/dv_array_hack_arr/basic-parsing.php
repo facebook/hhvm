@@ -53,3 +53,5 @@ class A {
   public darray<int,darray<int,int>> $prop11;
   public darray<int,array<int>> $prop12;
 }
+
+<<__EntryPoint>> function main(): void {}

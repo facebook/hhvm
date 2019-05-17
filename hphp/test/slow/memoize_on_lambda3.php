@@ -5,3 +5,5 @@ function f() {
     return 1;
   };
 }
+
+<<__EntryPoint>> function main(): void {}

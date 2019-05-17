@@ -11,3 +11,5 @@ interface B extends A {
 class C implements B {
   const FOO = 'DOH';
 }
+
+<<__EntryPoint>> function main(): void {}

@@ -5,3 +5,5 @@ class C<reify Ta, reify Tb> {
     new Ta();
   }
 }
+
+<<__EntryPoint>> function main(): void {}

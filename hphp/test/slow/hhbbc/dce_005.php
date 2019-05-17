@@ -6,3 +6,5 @@ function foo($x = 0, $y, $z) {
   $y = 2;
   for (;;) { continue; }
 }
+
+<<__EntryPoint>> function main() {}

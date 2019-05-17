@@ -10,3 +10,5 @@ class C {
   public static function a() = T::a;
   public static function b() = T::b;
 }
+
+<<__EntryPoint>> function main(): void {}

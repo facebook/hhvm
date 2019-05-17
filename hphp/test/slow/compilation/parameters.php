@@ -14,3 +14,5 @@ class Y {
     return $this;
   }
 }
+
+<<__EntryPoint>> function main() {}

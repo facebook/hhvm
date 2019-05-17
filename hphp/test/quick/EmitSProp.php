@@ -38,3 +38,4 @@ function g() {
   f(c::$x->prop[0]);
 }
 
+<<__EntryPoint>> function main(): void {}

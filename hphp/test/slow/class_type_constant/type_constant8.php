@@ -13,3 +13,5 @@ class Incompat implements I {
   // require implementers to provide a type hint
   public function foo($t): void {}
 }
+
+<<__EntryPoint>> function main(): void {}

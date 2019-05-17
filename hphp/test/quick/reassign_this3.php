@@ -4,3 +4,5 @@ class Foo {
   static function x($this){} // allow
   public function y($this){} // error
 }
+
+<<__EntryPoint>> function main(): void {}

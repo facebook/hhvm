@@ -1,9 +1,10 @@
 <?php
 
-class abc { 
+class abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
+<<__EntryPoint>> function main() {}

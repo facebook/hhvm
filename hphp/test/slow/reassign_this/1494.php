@@ -5,3 +5,5 @@ class Foo {
  }
  $this = new Foo();
  echo "You should not see this";
+
+<<__EntryPoint>> function main() {}

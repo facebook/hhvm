@@ -4,3 +4,5 @@
 class A {
   public self $x;
 }
+
+<<__EntryPoint>> function main(): void {}

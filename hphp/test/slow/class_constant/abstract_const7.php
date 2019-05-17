@@ -9,3 +9,5 @@ trait Tr1 implements I {}
 trait Tr2 {
   abstract const X;
 }
+
+<<__EntryPoint>> function main(): void {}

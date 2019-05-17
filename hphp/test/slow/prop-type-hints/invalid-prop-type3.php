@@ -4,3 +4,5 @@
 class A {
   public callable $x;
 }
+
+<<__EntryPoint>> function main(): void {}

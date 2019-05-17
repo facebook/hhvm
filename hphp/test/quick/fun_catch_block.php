@@ -39,3 +39,5 @@ class FunFunclet {
     return null;
   }
 }
+
+<<__EntryPoint>> function main(): void {}

@@ -7,3 +7,5 @@ class C {
 
   static $x = "foo" |> f($$);
 }
+
+<<__EntryPoint>> function main() {}

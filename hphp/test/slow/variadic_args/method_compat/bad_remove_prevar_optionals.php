@@ -7,3 +7,5 @@ interface DB {
 class MySQL implements DB {
   public function query(...$params) { }
 }
+
+<<__EntryPoint>> function main(): void {}

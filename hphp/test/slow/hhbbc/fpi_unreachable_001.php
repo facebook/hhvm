@@ -18,3 +18,5 @@ abstract class X {
 
   abstract protected static function heh(): array<string>;
 }
+
+<<__EntryPoint>> function main(): void {}

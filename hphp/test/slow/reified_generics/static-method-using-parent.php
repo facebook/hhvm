@@ -7,3 +7,5 @@ class C<reify Ta, reify Tb> extends A<int> {
     new parent();
   }
 }
+
+<<__EntryPoint>> function main(): void {}

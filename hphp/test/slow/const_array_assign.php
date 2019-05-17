@@ -7,3 +7,5 @@ class ConstArrayAssign {
     self::MyData[0] = $x;
   }
 }
+
+<<__EntryPoint>> function main(): void {}

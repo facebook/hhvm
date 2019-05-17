@@ -469,7 +469,7 @@ void DateTime::setTimezone(req::ptr<TimeZone> timezone) {
     return;
   }
 
-  assert(m_tz->isValid());
+  assertx(m_tz->isValid());
 
   switch (m_tz->type()) {
     case TIMELIB_ZONETYPE_ID:

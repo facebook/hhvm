@@ -247,7 +247,7 @@ inline bool ArrayData::hasApcTv() const { return m_aux16 & kHasApcTv; }
 inline bool ArrayData::isLegacyArray() const { return m_aux16 & kLegacyArray; }
 
 inline void ArrayData::setLegacyArray(bool legacy) {
-  assert(!legacy || kind() == kDictKind || kind() == kVecKind);
+  assertx(!legacy || kind() == kDictKind || kind() == kVecKind);
   m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
 }
 

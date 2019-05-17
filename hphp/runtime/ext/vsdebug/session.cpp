@@ -75,7 +75,7 @@ void DebuggerSession::startDummyRequest(
 }
 
 std::string DebuggerSession::getDebuggerSessionAuth() {
-  assert(m_debugger->getCurrentThreadId() == Debugger::kDummyTheadId);
+  assertx(m_debugger->getCurrentThreadId() == Debugger::kDummyTheadId);
   return m_debuggerSessionAuth;
 }
 

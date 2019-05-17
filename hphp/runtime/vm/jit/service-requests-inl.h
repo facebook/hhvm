@@ -138,7 +138,7 @@ TCA emit_persistent(CodeBlock& cb,
   CGMeta dummy;
   SCOPE_EXIT {
     dummy.addressImmediates.clear();
-    assert(dummy.empty());
+    assertx(dummy.empty());
   };
   return emit_persistent(cb, data, dummy, spOff, sr, args...);
 }
@@ -152,7 +152,7 @@ TCA emit_ephemeral(CodeBlock& cb,
   CGMeta dummy;
   SCOPE_EXIT {
     dummy.addressImmediates.clear();
-    assert(dummy.empty());
+    assertx(dummy.empty());
   };
   return emit_ephemeral(cb, data, dummy, start, spOff, sr, args...);
 }

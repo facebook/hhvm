@@ -676,9 +676,9 @@ void registerNativeFunc(Native::FuncTable& nativeFuncs,
 
 void FuncTable::insert(const StringData* name,
                        const NativeFunctionInfo& info) {
-  assert(name->isStatic());
+  assertx(name->isStatic());
   DEBUG_ONLY auto it = m_infos.insert(std::make_pair(name, info));
-  assert(it.second || it.first->second == info);
+  assertx(it.second || it.first->second == info);
 }
 
 NativeFunctionInfo FuncTable::get(const StringData* name) const {

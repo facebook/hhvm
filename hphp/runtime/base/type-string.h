@@ -525,7 +525,7 @@ ALWAYS_INLINE String& asStrRef(tv_lval tv) {
 }
 
 ALWAYS_INLINE const String& asCStrRef(tv_rval tv) {
-  assert(cellIsPlausible(*tv));
+  assertx(cellIsPlausible(*tv));
   assertx(isStringType(type(tv)));
   return reinterpret_cast<const String&>(val(tv).pstr);
 }

@@ -143,7 +143,7 @@ void PreClass::enforceInMaybeSealedParentWhitelist(
     return;
   }
   const UserAttributeMap& parent_attrs = parentPreClass->userAttributes();
-  assert(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
+  assertx(parent_attrs.find(s___Sealed.get()) != parent_attrs.end());
   const auto& parent_sealed_attr = parent_attrs.find(s___Sealed.get())->second;
   bool in_sealed_whitelist = false;
   IterateV(parent_sealed_attr.m_data.parr,

@@ -620,7 +620,7 @@ Object HHVM_FUNCTION(curl_multi_await, const Resource& mh,
   try {
     return Object{ev->getWaitHandle()};
   } catch (...) {
-    assert(false);
+    assertx(false);
     ev->abandon();
     throw;
   }

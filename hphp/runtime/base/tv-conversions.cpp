@@ -514,7 +514,7 @@ StringData* tvCastToStringData(TypedValue tv) {
 }
 
 StringData* cellCastToStringData(Cell tv) {
-  assert(tv.m_type != KindOfRef);
+  assertx(tv.m_type != KindOfRef);
 
   switch (tv.m_type) {
     case KindOfUninit:

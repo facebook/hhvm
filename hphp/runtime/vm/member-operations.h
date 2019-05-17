@@ -1510,7 +1510,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
   }
 
   // Create and save the result.
-  assert(x >= 0); // x < 0 is handled above.
+  assertx(x >= 0); // x < 0 is handled above.
   auto const oldp = val(base).pstr;
   if (x < baseLen && !oldp->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the

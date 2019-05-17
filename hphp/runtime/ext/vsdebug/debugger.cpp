@@ -823,7 +823,7 @@ DebuggerRequestInfo* Debugger::createRequestInfo() {
     return nullptr;
   }
 
-  assert(requestInfo->m_allFlags == 0);
+  assertx(requestInfo->m_allFlags == 0);
 
   requestInfo->m_breakpointInfo = new RequestBreakpointInfo();
   if (requestInfo->m_breakpointInfo == nullptr) {
@@ -1259,7 +1259,7 @@ void Debugger::dispatchCommandToRequest(
     auto it = m_requestIdMap.find(requestId);
     if (it != m_requestIdMap.end()) {
       const auto request = m_requests.find(it->second);
-      assert(request != m_requests.end());
+      assertx(request != m_requests.end());
       ri = request->second;
     }
   }
@@ -1645,7 +1645,7 @@ bool Debugger::tryResolveBreakpoint(
       }
     }
   } else {
-    assert(bp->m_type == BreakpointType::Function);
+    assertx(bp->m_type == BreakpointType::Function);
 
     const HPHP::String functionName(bp->m_function);
     Func* func = Unit::lookupFunc(functionName.get());
@@ -1974,8 +1974,8 @@ void Debugger::onBreakpointHit(
       if (type == BreakpointType::Source) {
         phpRemoveBreakPointLine(compilationUnit, line);
       } else {
-        assert(type == BreakpointType::Function);
-        assert(func != nullptr);
+        assertx(type == BreakpointType::Function);
+        assertx(func != nullptr);
         phpRemoveBreakPointFuncEntry(func);
       }
     };

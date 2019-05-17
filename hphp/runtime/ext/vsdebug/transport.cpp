@@ -259,8 +259,8 @@ void DebugTransport::processOutgoingMessages() {
           return;
         } else {
           // TransportFD hangup or error.
-          assert((pollFds[transportIdx].revents &
-                 (POLLERR | POLLHUP | g_platformPollFlags)) != 0);
+          assertx((pollFds[transportIdx].revents &
+                  (POLLERR | POLLHUP | g_platformPollFlags)) != 0);
           VSDebugLogger::Log(
             VSDebugLogger::LogLevelInfo,
             "Transport write thread: error event on fd."

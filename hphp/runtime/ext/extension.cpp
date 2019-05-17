@@ -89,7 +89,7 @@ void Extension::CompileSystemlib(const std::string &slib,
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  assert(!name.empty());
+  assertx(!name.empty());
 #ifdef _MSC_VER
   std::string section("ext_");
 #else

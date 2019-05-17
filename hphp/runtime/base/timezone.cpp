@@ -311,7 +311,7 @@ req::ptr<TimeZone> TimeZone::cloneTimeZone() const {
   tz->m_offset = m_offset;
   tz->m_dst = m_dst;
   tz->m_abbr = m_abbr;
-  assert(tz->isValid() == isValid() && "incomplete TimeZone copy");
+  assertx(tz->isValid() == isValid() && "incomplete TimeZone copy");
   return tz;
 }
 

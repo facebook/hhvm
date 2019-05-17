@@ -32,6 +32,7 @@ Array
             [function] => backtrace_print
             [args] => Array
                 (
+                    [0] => 
                 )
 
         )

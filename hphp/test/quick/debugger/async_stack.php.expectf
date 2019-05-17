@@ -48,7 +48,7 @@ w
     at %s/async_stack.php:%d
 #1  genBar (43)
     at %s/async_stack.php:%d
-#2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+#2  genList ()
     at %s/async_stack.php:%d
 #3  genFoo (43)
 #4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
@@ -67,7 +67,7 @@ w
     at %s/async_stack.php:%d
 #1  genBar (44)
     at %s/async_stack.php:%d
-#2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+#2  genList ()
     at %s/async_stack.php:%d
 #3  genFoo (43)
 #4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
@@ -86,7 +86,7 @@ w
     at %s/async_stack.php:%d
 #1  gen2 (45)
     at %s/async_stack.php:%d
-#2  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+#2  genList ()
     at %s/async_stack.php:%d
 #3  genFoo (43)
 #4  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
@@ -108,7 +108,7 @@ w
     at %s/async_stack.php:%d
 #2  gen2 (45)
     at %s/async_stack.php:%d
-#3  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+#3  genList ()
     at %s/async_stack.php:%d
 #4  genFoo (43)
 #5  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")
@@ -129,7 +129,7 @@ w
     at %s/async_stack.php:%d
 #3  gen2 (45)
     at %s/async_stack.php:%d
-#4  genList ("HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle", "HH\\AsyncFunctionWaitHandle")
+#4  genList ()
     at %s/async_stack.php:%d
 #5  genFoo (43)
 #6  HH\Asio\join ("HH\\AsyncFunctionWaitHandle")

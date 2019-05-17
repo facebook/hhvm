@@ -4,7 +4,7 @@
 class Cls {
   function func() { echo "func called\n"; }
   static function intercept1() { return false; }
-  static function intercept2() {
+  static function intercept2($a, $b, $c, $d, $e) {
     var_dump(debug_backtrace());
     return false;
   }

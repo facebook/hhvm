@@ -136,6 +136,10 @@ let get_ast ?(full = false) file_name =
       ast
     | Some (defs, _) -> defs
 
+let get_nast ?(full = false) file_name =
+  let ast = get_ast ~full file_name in
+  Ast_to_nast.convert ast
+
 let find_class_in_file ?(full = false) ?(case_insensitive=false) file_name class_name =
   get_class (get_ast ~full file_name) ~case_insensitive class_name
 
@@ -147,6 +151,22 @@ let find_typedef_in_file ?(full = false) ?(case_insensitive=false) file_name nam
 
 let find_gconst_in_file ?(full = false) file_name name =
   get_gconst (get_ast ~full file_name) name
+
+let find_class_in_file_nast ?(full = false) ?(case_insensitive=false) file_name class_name =
+  let cls = find_class_in_file ~full ~case_insensitive file_name class_name in
+  Option.map cls Ast_to_nast.on_class
+
+let find_fun_in_file_nast ?(full = false) ?(case_insensitive=false) file_name fun_name =
+  let f = find_fun_in_file ~full ~case_insensitive file_name fun_name in
+  Option.map f Ast_to_nast.on_fun
+
+let find_typedef_in_file_nast ?(full = false) ?(case_insensitive=false) file_name name =
+  let t = find_typedef_in_file ~full ~case_insensitive file_name name in
+  Option.map t Ast_to_nast.on_typedef
+
+let find_gconst_in_file_nast ?(full = false) file_name name =
+  let cst = find_gconst_in_file ~full file_name name in
+  Option.map cst Ast_to_nast.on_constant
 
 let local_changes_push_stack () =
   ParserHeap.LocalChanges.push_stack ()

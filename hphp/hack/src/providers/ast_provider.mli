@@ -9,14 +9,23 @@
 
 val find_class_in_file :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Ast.class_ option
+val find_class_in_file_nast :
+  ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.class_ option
 val find_fun_in_file :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Ast.fun_ option
+val find_fun_in_file_nast :
+  ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.fun_ option
 val find_typedef_in_file :
   ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Ast.typedef option
+val find_typedef_in_file_nast :
+  ?full:bool -> ?case_insensitive:bool -> Relative_path.t -> string -> Nast.typedef option
 val find_gconst_in_file :
   ?full:bool -> Relative_path.t -> string -> Ast.gconst option
+val find_gconst_in_file_nast :
+  ?full:bool -> Relative_path.t -> string -> Nast.gconst option
 
 val get_ast : ?full:bool -> Relative_path.t -> Ast.program
+val get_nast : ?full:bool -> Relative_path.t -> Nast.program
 
 val local_changes_push_stack : unit -> unit
 val local_changes_pop_stack : unit -> unit

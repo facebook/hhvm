@@ -15,6 +15,7 @@
   (libraries
     ast
     heap_shared_mem
+    nast
     parser_heap
     relative_path))
 

@@ -520,7 +520,14 @@ SString getNameFromType(const Type& t) {
 
 folly::Optional<ArrayData*>
 resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
-  auto const finish = [&] (ArrayData* result) {
+  auto const addModifiers = [&](ArrayData* result) {
+    auto a = Array::attach(result);
+    if (is_ts_like_type(ts)) a.set(s_like, true_varNR.tv());
+    if (is_ts_nullable(ts))  a.set(s_nullable, true_varNR.tv());
+    if (is_ts_soft(ts))      a.set(s_soft, true_varNR.tv());
+    return a.detach();
+  };
+  auto const finish = [&](ArrayData* result) {
     ArrayData::GetScalarArray(&result);
     return result;
   };
@@ -576,7 +583,38 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
       return finish(result->setInPlace(s_kind.get(),
                                        Variant(static_cast<uint8_t>(kind))));
     }
-    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_typeaccess: {
+      auto const accList = get_access_list(ts);
+      auto const size = accList->size();
+      auto clsName = get_ts_root_name(ts);
+      ArrayData* typeCnsVal = nullptr;
+      for (auto i = 0; i < size; i++) {
+        auto const rcls = env.index.resolve_class(env.ctx, clsName);
+        if (!rcls || !rcls->resolved()) return folly::none;
+        auto const cnsName = accList->at(i);
+        if (!tvIsString(&cnsName)) return folly::none;
+        auto const cnst = env.index.lookup_class_const_ptr(env.ctx, *rcls,
+                                                           cnsName.m_data.pstr,
+                                                           true);
+        if (!cnst || !cnst->val || !cnst->isTypeconst ||
+            !tvIsDictOrDArray(&*cnst->val)) {
+          return folly::none;
+        }
+        auto const optTypeCnsVal =
+          resolveTSStatically(env, cnst->val->m_data.parr, check_arrays);
+        if (!optTypeCnsVal) return folly::none;
+        typeCnsVal = *optTypeCnsVal;
+        if (i == size - 1) break;
+        auto const kind = get_ts_kind(typeCnsVal);
+        if (kind != TypeStructure::Kind::T_class &&
+            kind != TypeStructure::Kind::T_interface) {
+          return folly::none;
+        }
+        clsName = get_ts_classname(typeCnsVal);
+      }
+      if (!typeCnsVal) return folly::none;
+      return finish(addModifiers(typeCnsVal->copy()));
+    }
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:

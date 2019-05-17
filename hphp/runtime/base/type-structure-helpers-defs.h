@@ -34,6 +34,8 @@ const StaticString s_wildcard("_");
 const StaticString s_name("name");
 const StaticString s_generic_types("generic_types");
 const StaticString s_is_cls_cns("is_cls_cns");
+const StaticString s_access_list("access_list");
+const StaticString s_root_name("root_name");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -131,6 +133,18 @@ ALWAYS_INLINE bool isWildCard(const ArrayData* ts) {
   return get_ts_kind(ts) == TypeStructure::Kind::T_typevar &&
          ts->exists(s_name.get()) &&
          get_ts_name(ts)->equal(s_wildcard.get());
+}
+
+ALWAYS_INLINE const ArrayData* get_access_list(const ArrayData* ts) {
+  auto const field = ts->rval(s_access_list.get());
+  assertx(field != nullptr && isVecOrArrayType(field.type()));
+  return field.val().parr;
+}
+
+ALWAYS_INLINE const StringData* get_ts_root_name(const ArrayData* ts) {
+  auto const field = ts->rval(s_root_name.get());
+  assertx(field != nullptr && isStringType(field.type()));
+  return field.val().pstr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

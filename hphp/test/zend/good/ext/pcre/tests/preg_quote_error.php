@@ -1,8 +1,8 @@
 <?php
 /*
 * proto string preg_quote(string str [, string delim_char])
-* Function is implemented in ext/pcre/php_pcre.c
-*/
+* Function is implemented in ext/pcre/php_pcre.c */
+<<__EntryPoint>> function main() {
 echo "*** Testing preg_quote() : error conditions ***\n";
 // Zero arguments
 echo "\n-- Testing preg_quote() function with Zero arguments --\n";
@@ -14,3 +14,4 @@ $delim_char = '/';
 $extra_arg = 10;
 try { var_dump(preg_quote($str, $delim_char, $extra_arg)); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "Done";
+}

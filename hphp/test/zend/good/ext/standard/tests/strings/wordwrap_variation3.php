@@ -5,8 +5,8 @@
 */
 
 /*
- * test wordwrap by passing different values for break argument 
-*/
+ * test wordwrap by passing different values for break argument */
+<<__EntryPoint>> function main() {
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $str = 'testing wordwrap function';
@@ -85,7 +85,7 @@ for($index = 0; $index < count($values); $index ++) {
   $cut = false;
   try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
-  // $cut as true 
+  // $cut as true
   $cut = true;
   try { var_dump( wordwrap($str, $width, $break, $cut) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
@@ -96,3 +96,4 @@ for($index = 0; $index < count($values); $index ++) {
 fclose($fp);
 
 echo "Done\n";
+}

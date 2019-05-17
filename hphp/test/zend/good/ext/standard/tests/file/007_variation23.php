@@ -14,9 +14,9 @@
 /* Test fopen() and fclose(): Opening the file in "xb" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
-   checking for the warning msg when trying to open an existing file in "xb" mode,  
-   and fclose function
-*/
+   checking for the warning msg when trying to open an existing file in "xb" mode,
+   and fclose function */
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 $string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation23.tmp";
@@ -30,10 +30,11 @@ var_dump( fwrite($file_handle, $string) );  //Check for write operation; passes;
 var_dump( ftell($file_handle) );  //File pointer position after write operation, expected at the end of the file
 rewind($file_handle);
 var_dump( fread($file_handle, 100) );  //Check for read operation; fails; expected: empty string
-var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the beginning of the file 
+var_dump( ftell($file_handle) );  //File pointer position after read operation, expected at the beginning of the file
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 $file_handle = fopen($file, "xb");  //Opening the existing data file in 'xb' mode to check for the warning message
 echo "*** Done ***\n";
 error_reporting(0);
 unlink(dirname(__FILE__)."/007_variation23.tmp");
+}

@@ -14,9 +14,9 @@
 /* Test fopen() and fclose(): Opening the file in "x+t" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
-   checking for the warning msg when trying to open an existing file in "x+t" mode,  
-   and fclose function
-*/
+   checking for the warning msg when trying to open an existing file in "x+t" mode,
+   and fclose function */
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 $string = "abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
 $file = $file_path."/007_variation16.tmp";
@@ -37,3 +37,4 @@ $file_handle = fopen($file, "x+t");  //Opening the existing data file in "x+t" m
 echo "*** Done ***\n";
 error_reporting(0);
 unlink(dirname(__FILE__)."/007_variation16.tmp");
+}

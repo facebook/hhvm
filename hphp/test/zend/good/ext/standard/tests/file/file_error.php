@@ -2,8 +2,8 @@
 /*
    Prototype: array file ( string filename [,int use-include_path [,resource context]] );
    Description: Reads entire file into an array
-                Returns the  file in an array
-*/
+                Returns the  file in an array */
+<<__EntryPoint>> function main() {
 $file_path = dirname(__FILE__);
 echo "\n*** Testing error conditions ***";
 $file_handle = fopen($file_path."/file.tmp", "w");
@@ -22,3 +22,4 @@ echo "\n--- Done ---";
 error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink($file_path."/file.tmp");
+}

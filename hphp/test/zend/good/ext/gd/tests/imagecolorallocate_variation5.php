@@ -1,8 +1,8 @@
 <?php
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
  * Description:  Allocate a color for an image
- * Source code: ext/gd/gd.c
- */
+ * Source code: ext/gd/gd.c  */
+<<__EntryPoint>> function main() {
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $im = imagecreatetruecolor(200, 200);
@@ -16,7 +16,7 @@ $values = array(
       "Octal 012" => 012,
       "Octal -012" => -012,
       "Octal 0377" => 0377,
-     
+
       // hexa-decimal integer data
       "Hexa-decimal 0x0" => 0x0,
       "Hexa-decimal 0xA" => 0xA,
@@ -32,3 +32,4 @@ foreach($values as $key => $value) {
       var_dump( imagecolorallocate($im, $red, $green, $value) );
 };
 echo "===DONE===\n";
+}

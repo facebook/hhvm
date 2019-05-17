@@ -3,8 +3,8 @@
    Description: Returns a one-character string containing the character specified by ascii.
 
    Prototype: int ord ( string $string );
-   Description: Returns the ASCII value of the first character of string
-*/
+   Description: Returns the ASCII value of the first character of string */
+<<__EntryPoint>> function main() {
 echo "*** Testing ord() & chr() basic operations ***\n";
 for($i=0; $i<256; $i++) echo !ord(chr($i)) == $i;
 
@@ -61,3 +61,4 @@ try { var_dump( ord() );  } catch (Exception $e) { echo "\n".'Warning: '.$e->get
 try { var_dump( ord($arr_test[0], $arr_test[1]) );  } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "Done\n";
+}

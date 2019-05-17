@@ -332,13 +332,11 @@ and class_type_decl class_env hint =
       | Some (pos, Naming_table.TClass) when not (Decl_heap.Classes.mem cid) ->
         let fn = FileInfo.get_pos_filename pos in
         (* We are supposed to redeclare the class *)
-        let class_opt = Ast_provider.find_class_in_file fn cid in
+        let class_opt = Ast_provider.find_class_in_file_nast fn cid in
         Errors.run_in_context fn Errors.Decl begin fun () ->
           let open Option.Monad_infix in
           class_opt
-          >>= (fun cls ->
-            class_decl_if_missing class_env (Errors.ignore_ (fun () -> Ast_to_nast.on_class cls))
-          )
+          >>= class_decl_if_missing class_env
           >>| Decl_class.to_class_type
         end
       | _ -> None
@@ -838,10 +836,14 @@ and method_pos ~is_static class_id meth  =
       match Naming_table.Types.get_pos class_id with
       | Some (pos, Naming_table.TClass) ->
         let fn = FileInfo.get_pos_filename pos in
-        begin match Ast_provider.find_class_in_file fn class_id with
+        begin match Ast_provider.find_class_in_file_nast fn class_id with
           | None -> raise Caml.Not_found
-          | Some c ->
-            let cls = Errors.ignore_ (fun () -> Ast_to_nast.on_class c) in
+          | Some cls ->
+
+
+
+
+
             let { c_methods; _ } = cls in
             let m_opt = List.find c_methods ~f:(fun m -> (snd m.m_name) = meth && m.m_static) in
             begin match m_opt with
@@ -954,8 +956,8 @@ let rec name_and_declare_types_program prog =
 
 
 let make_env fn =
-  let ast = Ast_provider.get_ast fn in
-  name_and_declare_types_program (Ast_to_nast.convert ast)
+  let ast = Ast_provider.get_nast fn in
+  name_and_declare_types_program ast
 
 let err_not_found file name =
   let err_str =
@@ -963,27 +965,27 @@ let err_not_found file name =
 raise (Decl_not_found err_str)
 
 let declare_class_in_file file name =
-  match Ast_provider.find_class_in_file file name with
+  match Ast_provider.find_class_in_file_nast file name with
   | Some cls ->
     let class_env = { stack = SSet.empty; } in
-    class_decl_if_missing class_env (Ast_to_nast.on_class cls)
+    class_decl_if_missing class_env cls
   | None ->
     err_not_found file name
 
 let declare_fun_in_file file name =
-  match Ast_provider.find_fun_in_file file name with
-  | Some f -> ifun_decl (Ast_to_nast.on_fun f)
+  match Ast_provider.find_fun_in_file_nast file name with
+  | Some f -> ifun_decl f
   | None ->
     err_not_found file name
 
 let declare_typedef_in_file file name =
-  match Ast_provider.find_typedef_in_file file name with
-  | Some t -> type_typedef_naming_and_decl (Ast_to_nast.on_typedef t)
+  match Ast_provider.find_typedef_in_file_nast file name with
+  | Some t -> type_typedef_naming_and_decl t
   | None ->
     err_not_found file name
 
 let declare_const_in_file file name =
-  match Ast_provider.find_gconst_in_file file name with
-  | Some cst -> iconst_decl (Ast_to_nast.on_constant cst)
+  match Ast_provider.find_gconst_in_file_nast file name with
+  | Some cst -> iconst_decl cst
   | None ->
     err_not_found file name

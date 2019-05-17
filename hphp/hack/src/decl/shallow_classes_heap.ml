@@ -51,8 +51,8 @@ let err_not_found file name =
   raise (Decl_defs.Decl_not_found err_str)
 
 let declare_class_in_file file name =
-  match Ast_provider.find_class_in_file file name with
-  | Some cls -> class_decl_if_missing (Errors.ignore_ (fun() -> Ast_to_nast.on_class cls))
+  match Ast_provider.find_class_in_file_nast file name with
+  | Some cls -> class_decl_if_missing cls
   | None -> err_not_found file name
 
 let get_class_filename x =

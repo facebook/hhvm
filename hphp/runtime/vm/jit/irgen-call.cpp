@@ -152,6 +152,8 @@ void emitCallerRxChecksUnknown(IRGS& env, SSATmp* callee) {
   );
 }
 
+//////////////////////////////////////////////////////////////////////
+
 IRSPRelOffset fsetActRec(
   IRGS& env,
   SSATmp* func,
@@ -178,6 +180,102 @@ IRSPRelOffset fsetActRec(
 
   return arOffset;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+void callUnpack(IRGS& env, const Func* callee, const FCallArgs& fca) {
+  auto const data = CallUnpackData {
+    spOffBCFromIRSP(env),
+    fca.numArgs + 1,
+    fca.numRets - 1,
+    bcOff(env),
+    callee,
+  };
+  push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
+}
+
+SSATmp* callImpl(IRGS& env, const Func* callee, const FCallArgs& fca,
+                 bool asyncEagerReturn) {
+  auto const data = CallData {
+    spOffBCFromIRSP(env),
+    fca.numArgs,
+    fca.numRets - 1,
+    bcOff(env) - curFunc(env)->base(),
+    callee,
+    asyncEagerReturn,
+  };
+  return gen(env, Call, data, sp(env), fp(env));
+}
+
+void callRegular(IRGS& env, const Func* callee, const FCallArgs& fca) {
+  push(env, callImpl(env, callee, fca, false));
+}
+
+void callWithAsyncEagerReturn(IRGS& env, const Func* callee,
+                              const FCallArgs& fca) {
+  auto const retVal = callImpl(env, callee, fca, true);
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const aux = gen(env, LdTVAux, LdTVAuxData {}, retVal);
+      auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
+      gen(env, JmpNZero, taken, tst);
+    },
+    [&] {
+      auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
+      push(env, gen(env, AssertType, ty, retVal));
+      jmpImpl(env, bcOff(env) + fca.asyncEagerOffset);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const ty = callee ? callReturnType(callee) : TInitCell;
+      push(env, gen(env, AssertType, ty, retVal));
+    }
+  );
+}
+
+void callKnown(IRGS& env, const Func* callee, const FCallArgs& fca) {
+  assertx(callee);
+  if (fca.hasUnpack()) return callUnpack(env, callee, fca);
+
+  if (fca.asyncEagerOffset != kInvalidOffset &&
+      callee->supportsAsyncEagerReturn()) {
+    return callWithAsyncEagerReturn(env, callee, fca);
+  }
+
+  return callRegular(env, callee, fca);
+}
+
+void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca) {
+  assertx(!callee->hasConstVal());
+  if (fca.hasUnpack()) return callUnpack(env, nullptr, fca);
+
+  if (fca.asyncEagerOffset == kInvalidOffset) {
+    return callRegular(env, nullptr, fca);
+  }
+
+  if (fca.supportsAsyncEagerReturn()) {
+    return callWithAsyncEagerReturn(env, nullptr, fca);
+  }
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const supportsAER = gen(env, FuncSupportsAsyncEagerReturn, callee);
+      gen(env, JmpNZero, taken, supportsAER);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      callRegular(env, nullptr, fca);
+    },
+    [&] {
+      callWithAsyncEagerReturn(env, nullptr, fca);
+    }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
 
 void prepareToCallKnown(IRGS& env, const Func* callee, SSATmp* objOrClass,
                         uint32_t numArgs, const StringData* invName,
@@ -1312,6 +1410,10 @@ void emitFPushClsMethodSRD(IRGS& env,
 namespace {
 
 SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
+  if (env.currentNormalizedInstruction->funcd) {
+    return cns(env, env.currentNormalizedInstruction->funcd);
+  }
+
   auto const& fpiStack = env.irb->fs().fpiStack();
   if (!fpiStack.empty() && fpiStack.back().func) {
     return cns(env, fpiStack.back().func);
@@ -1320,107 +1422,21 @@ SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
   return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));
 }
 
-}
+} // namespace
 
-//////////////////////////////////////////////////////////////////////
-
-void emitFCall(IRGS& env,
-               FCallArgs fca,
-               const StringData*,
-               const StringData*) {
-  auto const callee = env.currentNormalizedInstruction->funcd;
+void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
   auto const numStackInputs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
+  auto const callee = ldPreLiveFunc(env, actRecOff);
 
-  if (fca.numArgs) {
-    if (callee) {
-      if (!emitCallerReffinessChecksKnown(env, callee, fca)) return;
-    } else {
-      emitCallerReffinessChecksUnknown(env, ldPreLiveFunc(env, actRecOff), fca);
-    }
+  if (callee->hasConstVal()) {
+    if (!emitCallerReffinessChecksKnown(env, callee->funcVal(), fca)) return;
+    callKnown(env, callee->funcVal(), fca);
+  } else {
+    emitCallerReffinessChecksUnknown(env, callee, fca);
+    callUnknown(env, callee, fca);
   }
 
-  if (fca.hasUnpack()) {
-    auto const data = CallUnpackData {
-      spOffBCFromIRSP(env),
-      fca.numArgs + 1,
-      fca.numRets - 1,
-      bcOff(env),
-      callee,
-    };
-    push(env, gen(env, CallUnpack, data, sp(env), fp(env)));
-    return;
-  }
-
-  auto const call = [&](bool asyncEagerReturn) {
-    return gen(
-      env,
-      Call,
-      CallData {
-        spOffBCFromIRSP(env),
-        fca.numArgs,
-        fca.numRets - 1,
-        bcOff(env) - curFunc(env)->base(),
-        callee,
-        asyncEagerReturn,
-      },
-      sp(env),
-      fp(env)
-    );
-  };
-
-  auto const emitCallWithoutAsyncEagerReturn = [&] {
-    push(env, call(false));
-  };
-  auto const emitCallWithAsyncEagerReturn = [&] {
-    auto const retVal = call(true);
-
-    ifThenElse(
-      env,
-      [&] (Block* taken) {
-        auto const aux = gen(env, LdTVAux, LdTVAuxData {}, retVal);
-        auto const tst = gen(env, AndInt, aux, cns(env, 1u << 31));
-        gen(env, JmpNZero, taken, tst);
-      },
-      [&] {
-        auto const ty = callee ? awaitedCallReturnType(callee) : TInitCell;
-        push(env, gen(env, AssertType, ty, retVal));
-        jmpImpl(env, bcOff(env) + fca.asyncEagerOffset);
-      },
-      [&] {
-        hint(env, Block::Hint::Unlikely);
-        auto const ty = callee ? callReturnType(callee) : TInitCell;
-        push(env, gen(env, AssertType, ty, retVal));
-      }
-    );
-  };
-
-  if (fca.asyncEagerOffset == kInvalidOffset ||
-      (callee && !callee->supportsAsyncEagerReturn())) {
-    return emitCallWithoutAsyncEagerReturn();
-  }
-
-  if (fca.supportsAsyncEagerReturn() ||
-      (callee && callee->supportsAsyncEagerReturn())) {
-    assertx(!callee || callee->supportsAsyncEagerReturn());
-    return emitCallWithAsyncEagerReturn();
-  }
-
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const supportsAsyncEagerReturn =
-        gen(env, FuncSupportsAsyncEagerReturn, ldPreLiveFunc(env, actRecOff));
-      gen(env, JmpNZero, taken, supportsAsyncEagerReturn);
-    },
-    [&] {
-      hint(env, Block::Hint::Unlikely);
-      emitCallWithoutAsyncEagerReturn();
-    },
-    [&] {
-      emitCallWithAsyncEagerReturn();
-    }
-  );
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,

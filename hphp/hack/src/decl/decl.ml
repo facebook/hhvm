@@ -194,8 +194,8 @@ let get_class_parents_and_traits env shallow_class =
 (* Section declaring the type of a function *)
 (*****************************************************************************)
 
-let rec ifun_decl (f: Ast.fun_) =
-  let f = Errors.ignore_ (fun () -> Naming.fun_ (Ast_to_nast.on_fun f)) in
+let rec ifun_decl (f: Nast.fun_) =
+  let f = Errors.ignore_ (fun () -> Naming.fun_ f) in
   fun_decl f
 
 and fun_decl f =
@@ -272,8 +272,8 @@ let check_if_cyclic class_env (pos, cid) =
 let shallow_decl_enabled () =
   TypecheckerOptions.shallow_class_decl (GlobalNamingOptions.get ())
 
-let rec class_decl_if_missing class_env c =
-  let _, cid as c_name = c.Ast.c_name in
+let rec class_decl_if_missing class_env (c: class_) =
+  let _, cid as c_name = c.c_name in
   if check_if_cyclic class_env c_name
   then None
   else begin
@@ -336,7 +336,9 @@ and class_type_decl class_env hint =
         Errors.run_in_context fn Errors.Decl begin fun () ->
           let open Option.Monad_infix in
           class_opt
-          >>= class_decl_if_missing class_env
+          >>= (fun cls ->
+            class_decl_if_missing class_env (Errors.ignore_ (fun () -> Ast_to_nast.on_class cls))
+          )
           >>| Decl_class.to_class_type
         end
       | _ -> None
@@ -838,18 +840,13 @@ and method_pos ~is_static class_id meth  =
         let fn = FileInfo.get_pos_filename pos in
         begin match Ast_provider.find_class_in_file fn class_id with
           | None -> raise Caml.Not_found
-          | Some { Ast.c_body; _ } ->
-            let elt = List.find ~f:begin fun x ->
-              match x with
-              | Ast.Method {Ast.m_name = (_, name); m_kind; _ }
-                when name = meth && is_static = List.mem m_kind Ast.Static ~equal:(=) ->
-                true
-              | _ -> false
-            end c_body
-            in
-            begin match elt with
-              | Some (Ast.Method { Ast.m_name = (pos, _); _ }) -> pos
-              | _ -> raise Caml.Not_found
+          | Some c ->
+            let cls = Errors.ignore_ (fun () -> Ast_to_nast.on_class c) in
+            let { c_methods; _ } = cls in
+            let m_opt = List.find c_methods ~f:(fun m -> (snd m.m_name) = meth && m.m_static) in
+            begin match m_opt with
+            | Some { m_name = (pos, _); _ } -> pos
+            | _ -> raise Caml.Not_found
             end
         end
       | _ -> raise Caml.Not_found
@@ -862,8 +859,8 @@ and method_pos ~is_static class_id meth  =
 (*****************************************************************************)
 
 let rec type_typedef_decl_if_missing typedef =
-  let _, tid = typedef.Ast.t_id in
-  if not (Decl_heap.Typedefs.mem tid) then
+  let (_, name) = typedef.t_name in
+  if not (Decl_heap.Typedefs.mem name) then
     let _: typedef_type = type_typedef_naming_and_decl typedef in
     ()
 
@@ -894,7 +891,7 @@ and typedef_decl tdef =
   }
 
 and type_typedef_naming_and_decl tdef =
-  let tdef = Errors.ignore_ (fun () -> Naming.typedef (Ast_to_nast.on_typedef tdef)) in
+  let tdef = Errors.ignore_ (fun () -> Naming.typedef tdef) in
   let errors, tdecl = Errors.do_ (fun () -> typedef_decl tdef) in
   record_typedef (snd tdef.t_name);
   let tdecl = { tdecl with td_decl_errors = Some errors} in
@@ -926,7 +923,7 @@ let const_decl cst =
       Reason.Rwitness cst_pos, Tany
 
 let iconst_decl cst =
-  let cst = Errors.ignore_ (fun () -> Naming.global_const (Ast_to_nast.on_constant cst)) in
+  let cst = Errors.ignore_ (fun () -> Naming.global_const cst) in
   let errors, hint_ty = Errors.do_ (fun() -> const_decl cst) in
   record_const (snd cst.cst_name);
   Decl_heap.GConsts.add (snd cst.cst_name) (hint_ty, errors);
@@ -935,26 +932,31 @@ let iconst_decl cst =
 (*****************************************************************************)
 
 let rec name_and_declare_types_program prog =
+  let prog = Errors.ignore_ (fun() -> Ast_to_nast.convert prog) in
+  name_and_declare_types_program_aast prog
+
+and name_and_declare_types_program_aast prog =
   List.iter prog begin fun def ->
     match def with
-    | Ast.Namespace (_, prog) -> name_and_declare_types_program prog
-    | Ast.NamespaceUse _ -> ()
-    | Ast.SetNamespaceEnv _ -> ()
-    | Ast.FileAttributes _ -> ()
-    | Ast.Fun f ->
+    | Namespace (_, prog) -> name_and_declare_types_program_aast prog
+    | NamespaceUse _ -> ()
+    | SetNamespaceEnv _ -> ()
+    | FileAttributes _ -> ()
+    | Fun f ->
       let _: decl fun_type = ifun_decl f in
       ()
-    | Ast.Class c ->
+    | Class c ->
       let class_env = { stack = SSet.empty; } in
       let _: decl_class_type option = class_decl_if_missing class_env c in
       ()
-    | Ast.Typedef typedef ->
+    | Typedef typedef ->
       type_typedef_decl_if_missing typedef
-    | Ast.Stmt _ -> ()
-    | Ast.Constant cst ->
+    | Stmt _ -> ()
+    | Constant cst ->
       let _: decl ty * Errors.t = iconst_decl cst in
       ()
   end
+
 
 let make_env fn =
   let ast = Ast_provider.get_ast fn in
@@ -969,24 +971,24 @@ let declare_class_in_file file name =
   match Ast_provider.find_class_in_file file name with
   | Some cls ->
     let class_env = { stack = SSet.empty; } in
-    class_decl_if_missing class_env cls
+    class_decl_if_missing class_env (Ast_to_nast.on_class cls)
   | None ->
     err_not_found file name
 
 let declare_fun_in_file file name =
   match Ast_provider.find_fun_in_file file name with
-  | Some f -> ifun_decl f
+  | Some f -> ifun_decl (Ast_to_nast.on_fun f)
   | None ->
     err_not_found file name
 
 let declare_typedef_in_file file name =
   match Ast_provider.find_typedef_in_file file name with
-  | Some t -> type_typedef_naming_and_decl t
+  | Some t -> type_typedef_naming_and_decl (Ast_to_nast.on_typedef t)
   | None ->
     err_not_found file name
 
 let declare_const_in_file file name =
   match Ast_provider.find_gconst_in_file file name with
-  | Some cst -> iconst_decl cst
+  | Some cst -> iconst_decl (Ast_to_nast.on_constant cst)
   | None ->
     err_not_found file name

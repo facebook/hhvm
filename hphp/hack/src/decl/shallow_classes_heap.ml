@@ -20,7 +20,7 @@ let push_local_changes = Classes.LocalChanges.push_stack
 let pop_local_changes = Classes.LocalChanges.pop_stack
 
 let class_naming_and_decl c =
-  let c = Errors.ignore_ (fun () -> Naming.class_ (Ast_to_nast.on_class c)) in
+  let c = Errors.ignore_ (fun () -> Naming.class_ c) in
   Shallow_decl.class_ c
 
 let shallow_decl_enabled () =
@@ -36,8 +36,8 @@ let add_to_store cid c =
   then Classes.add cid c
   else failwith "shallow_class_decl not enabled"
 
-let class_decl_if_missing c =
-  let _, cid = c.Ast.c_name in
+let class_decl_if_missing (c: Nast.class_) =
+  let _, cid = c.Nast.c_name in
   match get_from_store cid with
   | Some c -> c
   | None ->
@@ -52,7 +52,7 @@ let err_not_found file name =
 
 let declare_class_in_file file name =
   match Ast_provider.find_class_in_file file name with
-  | Some cls -> class_decl_if_missing cls
+  | Some cls -> class_decl_if_missing (Errors.ignore_ (fun() -> Ast_to_nast.on_class cls))
   | None -> err_not_found file name
 
 let get_class_filename x =

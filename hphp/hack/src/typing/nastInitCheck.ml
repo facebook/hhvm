@@ -169,13 +169,6 @@ let is_whitelisted = function
   | x when x = SN.StdlibFunctions.get_class -> true
   | _ -> false
 
-let save_initialized_members_for_suggest cname initialized_props =
-  let props_to_save = match initialized_props with
-  | S.Top -> SSet.empty (* Constructor always throws *)
-  | S.Set s -> s in
-  Typing_suggest.save_initialized_members cname props_to_save
-
-
 let rec class_ tenv c =
   if c.c_mode = FileInfo.Mdecl then () else
   let c_constructor, _, _ = split_methods c in
@@ -212,7 +205,6 @@ let rec class_ tenv c =
       | S.Set inits ->
         check_inits inits in
 
-    save_initialized_members_for_suggest (snd c.c_name) inits;
     if c.c_kind = Ast.Ctrait || c.c_kind = Ast.Cabstract
     then begin
       let has_constructor = match c_constructor with

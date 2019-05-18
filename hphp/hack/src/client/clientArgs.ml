@@ -299,9 +299,6 @@ let parse_check_args cmd =
     "--in-memory-dep-table-size",
       Arg.Unit (set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
       " number of entries in the in-memory dependency table";
-    "--infer-return-type",
-      Arg.String (fun s -> set_mode (MODE_INFER_RETURN_TYPE s) ()),
-       " (mode) infers return type of given function or method\n";
     "--inheritance-ancestor-classes",
       Arg.String
       (fun x -> set_mode (MODE_METHOD_JUMP_ANCESTORS (x, "Class")) ()),

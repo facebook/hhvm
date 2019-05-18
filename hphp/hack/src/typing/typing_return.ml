@@ -119,7 +119,6 @@ let async_suggest_return fkind hint pos =
     | _ -> e_func pos
 
 let implicit_return env pos ~expected ~actual =
-  Typing_suggest.save_return env expected actual;
   let env =
     if TypecheckerOptions.disallow_implicit_returns_in_non_void_functions (Env.get_tcopt env)
     then Typing_ops.sub_type pos Reason.URreturn env expected actual

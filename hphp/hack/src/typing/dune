@@ -134,7 +134,6 @@
     typing_extends
     typing_exts
     typing_gather_defined
-    typing_infer_return
     typing_inheritance
     typing_lambda_ambiguous
     typing_lenv
@@ -143,7 +142,6 @@
     typing_requirements
     typing_return
     typing_sequencing
-    typing_suggest
     typing_shapes
     typing_structure
     typing_try

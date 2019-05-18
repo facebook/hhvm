@@ -73,7 +73,6 @@ let rpc_command_needs_full_check : type a. a t -> bool =
   | UNSUBSCRIBE_DIAGNOSTIC _ -> false
   | OUTLINE _ -> false
   | IDE_IDLE -> false
-  | INFER_RETURN_TYPE _ -> false
   | RAGE -> false
   | DYNAMIC_VIEW _ -> false
   | CST_SEARCH _ -> false

@@ -215,16 +215,6 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       env, ServerRage.go genv env
     | DYNAMIC_VIEW toggle ->
       ServerFileSync.toggle_dynamic_view env toggle, ()
-    | INFER_RETURN_TYPE id_info ->
-      let open ServerCommandTypes.Infer_return_type in
-      begin match id_info with
-      | Function fun_name ->
-        env, InferReturnTypeService.get_fun_return_ty
-          env.tcopt fun_name
-      | Method (class_name, meth_name) ->
-        env, InferReturnTypeService.get_meth_return_ty
-          env.tcopt class_name meth_name
-      end
     | CST_SEARCH { sort_results; input; files_to_search }->
       begin try
         env, CstSearchService.go genv env ~sort_results ~files_to_search input

@@ -1,3 +1,0 @@
-\f : void, null try mixed
-\g : \Awaitable<void>, \Awaitable<null> try \Awaitable<mixed>
-No errors

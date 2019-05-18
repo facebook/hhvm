@@ -244,8 +244,6 @@ type _ t =
   | UNSUBSCRIBE_DIAGNOSTIC : int -> unit t
   | OUTLINE : string -> Outline.outline t
   | IDE_IDLE : unit t
-  | INFER_RETURN_TYPE : Infer_return_type.t ->
-      Infer_return_type.result t
   | RAGE : ServerRageTypes.result t
   | DYNAMIC_VIEW: bool -> unit t
   | CST_SEARCH: cst_search_input -> (Hh_json.json, string) result t

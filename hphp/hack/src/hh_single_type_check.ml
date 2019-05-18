@@ -67,8 +67,6 @@ type mode =
   | Find_refs of int * int
   | Highlight_refs of int * int
   | Decl_compare
-  | Infer_return_types
-  | Least_upper_bound
   | Linearization
 
 type options = {
@@ -346,12 +344,6 @@ let parse_options () =
     "--no-fallback-in-namespaces",
       Arg.Unit (set_bool no_fallback_in_namespaces),
       " Treat foo() as namespace\\foo() and MY_CONST as namespace\\MY_CONST.";
-    "--infer-return-types",
-      Arg.Unit (set_mode Infer_return_types),
-      " Infers return types of functions and methods.";
-    "--least-upper-bound",
-        Arg.Unit (set_mode Least_upper_bound),
-        " Gets the least upper bound of a list of types.";
     "--dynamic-view",
         Arg.Unit (set_bool dynamic_view),
         " Turns on dynamic view, replacing Tany with dynamic";
@@ -512,45 +504,6 @@ let parse_options () =
     batch_mode = !batch_mode;
     out_extension = !out_extension;
   }
-
-let compute_least_type tcopt fn =
-  let tenv = Typing_infer_return.typing_env_from_file tcopt fn in
-  Option.iter (Ast_provider.find_fun_in_file fn "\\test")
-    ~f:begin fun f ->
-      let f = Naming.fun_ (Ast_to_nast.on_fun f) in
-      let { Nast.fb_ast; _} = Typing_naming_body.func_body f in
-      let types =
-        Nast.(List.fold fb_ast ~init:[]
-          ~f:begin fun acc stmt ->
-            match snd stmt with
-            | Expr (_, New ((_, CI (_, "\\least_upper_bound")), tal, _, _, _)) ->
-              (List.map tal
-                (fun h -> snd (Typing_infer_return.type_from_hint tcopt fn h)))
-              :: acc
-            | _ -> acc
-          end)
-      in
-      let types = List.rev types in
-      List.iter types
-        ~f:(begin fun tys ->
-          let tyop = Typing_ops.LeastUpperBound.full tenv tys in
-          let least_ty =
-            Option.value_map tyop ~default:""
-              ~f:(Typing_infer_return.print_type_locl tenv)
-          in
-          let str_tys =
-            Typing_infer_return.(print_list ~f:(print_type_locl tenv) tys)
-          in
-          Printf.printf "Least upper bound of %s is %s \n" str_tys least_ty
-        end)
-      end
-
-let infer_return tcopt fn info  =
-  let names = FileInfo.simplify info in
-  let fast = Relative_path.Map.singleton fn names in
-  let keys map = Relative_path.Map.fold map ~init:[] ~f:(fun x _ y -> x :: y) in
-  let files = keys fast in
-  Typing_infer_return.(get_inferred_types tcopt files ~process:format_types)
 
 (* This allows one to fake having multiple files in one file. This
  * is used only in unit test files.
@@ -1170,7 +1123,6 @@ let handle_mode
       ServerIdeUtils.revert_local_changes ();
       Out_channel.close oc
     )
-  | Infer_return_types
   | Errors ->
       (* Don't typecheck builtins *)
       let files_info = if all_errors then files_info else
@@ -1178,12 +1130,6 @@ let handle_mode
         ~f:begin fun k _ acc -> Relative_path.Map.remove acc k end
         ~init:files_info in
       let errors = check_file tcopt parse_errors files_info in
-      if mode = Infer_return_types
-      then
-        iter_over_files (fun filename ->
-        Option.iter ~f:(infer_return tcopt filename)
-          (Relative_path.Map.get files_info filename)
-        );
       (if all_errors then
         print_error_list error_format errors
       else
@@ -1192,10 +1138,6 @@ let handle_mode
   | Decl_compare ->
     let filename = expect_single_file () in
     test_decl_compare filename popt builtins files_contents files_info
-  | Least_upper_bound ->
-    iter_over_files (fun filename ->
-      compute_least_type tcopt filename
-    )
   | Linearization ->
     if parse_errors <> [] then (print_error error_format (List.hd_exn parse_errors); exit 2);
     let files_info = Relative_path.Map.fold builtins

@@ -116,7 +116,6 @@
     fileOutline
     findRefsService
     identifySymbolService
-    inferReturnTypeService
     methodJumps
     saveStateService
     serverSymbolDefinition

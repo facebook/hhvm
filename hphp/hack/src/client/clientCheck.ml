@@ -545,27 +545,6 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
       let schema = Full_fidelity_schema.schema_as_json() in
       print_string schema;
       Lwt.return Exit_status.No_error
-    | MODE_INFER_RETURN_TYPE name ->
-      let open ServerCommandTypes.Infer_return_type in
-      let action =
-        parse_function_or_method_id
-          ~func_action:(fun fun_name -> Function fun_name)
-          ~meth_action:(fun class_name meth_name ->
-            Method (class_name, meth_name))
-          name
-      in
-      let%lwt result = rpc args @@ Rpc.INFER_RETURN_TYPE action in
-      begin match result with
-      | Error error_str ->
-        Printf.eprintf "%s\n" error_str;
-        raise Exit_status.(Exit_with Input_error)
-      | Ok ty ->
-        if args.output_json then
-          print_endline Hh_json.(json_to_string (JSON_String ty))
-        else
-          print_endline ty;
-        Lwt.return Exit_status.No_error
-      end
     | MODE_CST_SEARCH files_to_search ->
       let sort_results = args.sort_results in
       let input = Sys_utils.read_stdin_to_string () |> Hh_json.json_of_string in

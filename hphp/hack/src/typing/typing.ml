@@ -389,12 +389,10 @@ let rec bind_param env (ty1, param) =
   let env, param_te, ty1 =
     match param.param_expr with
     | None ->
-        Typing_suggest.save_param (param.param_name) env ty1 (Reason.none, Tany);
         env, None, ty1
     | Some e ->
         let env, te, ty2 = expr ~expected:(param.param_pos, Reason.URparam, ty1) env e in
         Typing_sequencing.sequence_check_expr e;
-        Typing_suggest.save_param (param.param_name) env ty1 ty2;
         let env, ty1 =
           if Option.is_none param.param_hint
           (* In this case ty1 must be Tany, so just union it with the type of
@@ -538,7 +536,7 @@ and fun_def tcopt f : Tast.fun_def option =
       begin match f.f_ret with
         | None when Env.is_strict env ->
           Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
-        | None -> Typing_suggest.save_fun_or_method f.f_name
+        | None -> ()
         | Some hint ->
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
@@ -792,7 +790,6 @@ and stmt_ env pos st =
       let return_type = TR.strip_condition_type_in_return env return_type in
       let env, rty = Env.unbind env rty in
       let rty = Typing_return.wrap_awaitable env pos rty in
-      Typing_suggest.save_return env return_type rty;
       let env = Type.coerce_type expr_pos Reason.URreturn env rty return_type in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (Some te)
@@ -3310,8 +3307,6 @@ and assign_ p ur env e1 ty2 =
       begin match obj with
       | _, This ->
          let env, local = Env.FakeMembers.make p env obj member_name in
-         let env, exp_real_type = Env.expand_type env result in
-         Typing_suggest.save_member member_name env exp_real_type ty2;
          let env, ty = set_valid_rvalue p env local ty2 in
          env, te1, ty
       | _, Lvar _ ->
@@ -3347,11 +3342,6 @@ and assign_ p ur env e1 ty2 =
       end ~init:env in
       let env, local = Env.FakeMembers.make_static p env x y in
       let env, ty3 = set_valid_rvalue p env local ty2 in
-      (match x with
-       | CIself
-       | CIstatic ->
-         Typing_suggest.save_member y env exp_real_type ty2;
-       | _ -> ());
       env, te1, ty3
   | pos, Array_get (e1, None) ->
     let env, te1, ty1 = update_array_type pos env e1 None `lvalue in
@@ -5354,10 +5344,6 @@ and call_ ~expected ~method_call_info pos env fty el uel =
     env, [], [], err_witness env pos
 
 and call_param env param ((pos, _ as e), arg_ty) ~is_variadic =
-  (match param.fp_name with
-  | None -> ()
-  | Some name -> Typing_suggest.save_param name env param.fp_type arg_ty
-  );
   param_modes ~is_variadic param e;
 
   (* When checking params the type 'x' may be expression dependent. Since
@@ -6307,7 +6293,7 @@ and class_def_ env c tc =
   let env = List.fold c.c_method_redeclarations ~init:env ~f:(supertype_redeclared_method tc) in
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
-  let typed_vars = List.map vars (class_var_def env ~is_static:false c) in
+  let typed_vars = List.map vars (class_var_def env ~is_static:false) in
   let typed_method_redeclarations = [] in
   let typed_methods = List.filter_map methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
@@ -6317,7 +6303,7 @@ and class_def_ env c tc =
   let typed_constructor = class_constr_def env constructor in
   let env = Env.set_static env in
   let typed_static_vars =
-    List.map static_vars (class_var_def env ~is_static:true c) in
+    List.map static_vars (class_var_def env ~is_static:true) in
   let typed_static_methods = List.filter_map static_methods (method_def env) in
   let filename = Pos.filename (fst c.c_name) in
   let droot = env.Env.decl_env.Decl_env.droot in
@@ -6485,7 +6471,7 @@ and class_implements_type env c1 removals ctype2 =
   ()
 
 (* Type-check a property declaration, with optional initializer *)
-and class_var_def env ~is_static c cv =
+and class_var_def env ~is_static cv =
   (* First pick up and localize the hint if it exists *)
   let env, expected =
     match cv.cv_type with
@@ -6507,11 +6493,10 @@ and class_var_def env ~is_static c cv =
       let env, cty = Phase.localize_with_self env cty in
       env, Some (p, Reason.URhint, cty) in
   (* Next check the expression, passing in expected type if present *)
-  let env, typed_cv_expr, ty =
+  let env, typed_cv_expr =
     match cv.cv_expr with
     | None ->
-      let env, ty = Env.fresh_type env (fst cv.cv_id) in
-      env, None, ty
+      env, None
     | Some e ->
       let env, te, ty = expr ?expected env e in
       (* Check that the inferred type is a subtype of the expected type.
@@ -6521,7 +6506,7 @@ and class_var_def env ~is_static c cv =
         match expected with
         | None -> env
         | Some (p, ur, cty) -> Type.coerce_type p ur env ty cty in
-      env, Some te, ty in
+      env, Some te in
   let env =
     if is_static
     then Typing_attributes.check_def env new_object
@@ -6529,18 +6514,8 @@ and class_var_def env ~is_static c cv =
     else Typing_attributes.check_def env new_object
       SN.AttributeKinds.instProperty cv.cv_user_attributes in
   begin
-    if Option.is_none cv.cv_type
-    then begin
-      if Env.is_strict env
-      then Errors.add_a_typehint (fst cv.cv_id)
-      else
-        let pos, name = cv.cv_id in
-        let name = if is_static then "$" ^ name else name in
-        let var_type = Reason.Rwitness pos, Typing_utils.tany env in
-        if Option.is_none cv.cv_expr
-        then Typing_suggest.uninitialized_member (snd c.c_name) name env var_type ty
-        else Typing_suggest.save_member name env var_type ty
-      end;
+    if Option.is_none cv.cv_type && Env.is_strict env
+    then Errors.add_a_typehint (fst cv.cv_id);
     {
       T.cv_final = cv.cv_final;
       T.cv_is_xhp = cv.cv_is_xhp;
@@ -6731,10 +6706,7 @@ and method_def env m =
       Some (pos, Happly((pos, "void"), []))
     | None when Env.is_strict env ->
       Typing_return.suggest_return env pos return.Typing_env_return_info.return_type; None
-    | None -> let (pos, id) = m.m_name in
-              let id = (Env.get_self_id env) ^ "::" ^ id in
-              Typing_suggest.save_fun_or_method (pos, id);
-              m.m_ret
+    | None -> m.m_ret
     | Some hint ->
       Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
   let m = { m with m_ret = m_ret; } in

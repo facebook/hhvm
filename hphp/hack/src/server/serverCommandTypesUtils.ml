@@ -47,7 +47,6 @@ let debug_describe_t : type a. a t -> string = function
   | UNSUBSCRIBE_DIAGNOSTIC   _ -> "UNSUBSCRIBE_DIAGNOSTIC"
   | OUTLINE                  _ -> "OUTLINE"
   | IDE_IDLE                   -> "IDE_IDLE"
-  | INFER_RETURN_TYPE        _ -> "INFER_RETURN_TYPE"
   | RAGE                       -> "RAGE"
   | DYNAMIC_VIEW             _ -> "DYNAMIC_VIEW"
   | CST_SEARCH               _ -> "CST_SEARCH"

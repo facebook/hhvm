@@ -4346,13 +4346,17 @@ let parse_errors_impl env =
   Typical: suppress cascading errors; give second pass errors always.
   Maximum: all errors
   *)
-  let errors1 = match env.level with
-  | Maximum -> SyntaxTree.all_errors env.syntax_tree
-  | _ -> SyntaxTree.errors env.syntax_tree in
-  let errors2 =
-    if env.level = Minimum && errors1 <> [] then []
-    else find_syntax_errors env in
-  List.sort SyntaxError.compare (List.append errors1 errors2)
+  try
+    let errors1 = match env.level with
+    | Maximum -> SyntaxTree.all_errors env.syntax_tree
+    | _ -> SyntaxTree.errors env.syntax_tree in
+    let errors2 =
+      if env.level = Minimum && errors1 <> [] then []
+      else find_syntax_errors env in
+    List.sort SyntaxError.compare (List.append errors1 errors2)
+  with e ->
+    let error_msg = "UNEXPECTED_ERROR: " ^ (Exn.to_string e) in
+    [make_error_from_node (SyntaxTree.root env.syntax_tree) error_msg]
 
 let parse_errors env =
   Stats_container.wrap_nullary_fn_timing

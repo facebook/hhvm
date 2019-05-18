@@ -2426,6 +2426,12 @@ let await_as_an_expression_errors await_node parents =
     | LambdaExpression { lambda_body; _ }
       when phys_equal node lambda_body -> []
 
+    (* Dependent awaits are not allowed currently *)
+    | PrefixUnaryExpression { prefix_unary_operator = op; _ }
+      when token_kind op = Some TokenKind.Await ->
+      [make_error_from_node
+        await_node SyntaxError.invalid_await_position_dependent]
+
     (* Unary based expressions have their own custom fanout *)
     | PrefixUnaryExpression { prefix_unary_operator = operator; _ }
     | PostfixUnaryExpression { postfix_unary_operator = operator; _ }

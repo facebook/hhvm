@@ -355,6 +355,7 @@ val statement_without_await_in_concurrent_block : string
 val concurrent_is_disabled : string
 val static_closures_are_disabled : string
 val invalid_await_position : string
+val invalid_await_position_dependent : string
 val misplaced_reactivity_annotation : string
 val mutability_annotation_on_static_method : string
 val mutability_annotation_on_inout_parameter : string

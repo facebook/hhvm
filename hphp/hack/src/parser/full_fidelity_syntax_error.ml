@@ -696,6 +696,10 @@ let static_closures_are_disabled =
 let invalid_await_position = "Await cannot be used as an expression in this " ^
   "location because it's conditionally executed."
 
+let invalid_await_position_dependent =
+  "Await cannot be used as an expression inside another await expression. " ^
+  "Pull the inner await out into it's own statement."
+
 let misplaced_reactivity_annotation =
   "Reactive annotations are not allowed on classes, interfaces or traits."
 

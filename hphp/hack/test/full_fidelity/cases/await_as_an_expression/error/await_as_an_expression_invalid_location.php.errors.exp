@@ -22,19 +22,21 @@
 (25,7)-(25,18) Await cannot be used as an expression in this location because it's conditionally executed.
 (26,7)-(26,18) Await cannot be used as an expression in this location because it's conditionally executed.
 (27,11)-(27,22) Await cannot be used as an expression in this location because it's conditionally executed.
-(28,34)-(28,35) Await cannot be used as an expression inside another await expression. Pull the inner await out into it's own statement.
-(29,16)-(29,27) Await cannot be used as an expression inside another await expression. Pull the inner await out into it's own statement.
-(30,17)-(30,28) Await cannot be used as an expression in this location because it's conditionally executed.
-(31,21)-(31,32) Await cannot be used as an expression in this location because it's conditionally executed.
-(32,10)-(32,21) Await cannot be used as an expression in this location because it's conditionally executed.
-(33,16)-(33,27) Await cannot be used as an expression in this location because it's conditionally executed.
-(34,12)-(34,23) Await cannot be used as an expression in this location because it's conditionally executed.
-(35,17)-(35,28) Await cannot be used as an expression in this location because it's conditionally executed.
+(28,16)-(28,26) Await cannot be used as an expression in this location because it's conditionally executed.
+(29,16)-(29,23) Await cannot be used as an expression in this location because it's conditionally executed.
+(30,17)-(30,27) Await cannot be used as an expression in this location because it's conditionally executed.
+(31,16)-(31,27) Await cannot be used as an expression inside another await expression. Pull the inner await out into it's own statement.
+(32,17)-(32,28) Await cannot be used as an expression in this location because it's conditionally executed.
+(33,21)-(33,32) Await cannot be used as an expression in this location because it's conditionally executed.
+(34,10)-(34,21) Await cannot be used as an expression in this location because it's conditionally executed.
+(35,16)-(35,27) Await cannot be used as an expression in this location because it's conditionally executed.
 (36,12)-(36,23) Await cannot be used as an expression in this location because it's conditionally executed.
 (37,17)-(37,28) Await cannot be used as an expression in this location because it's conditionally executed.
-(38,9)-(38,20) Await cannot be used as an expression in this location because it's conditionally executed.
-(39,9)-(39,20) Await cannot be used as an expression in this location because it's conditionally executed.
-(40,14)-(40,25) Await cannot be used as an expression in this location because it's conditionally executed.
-(40,14)-(40,25) Unary expression is not allowed in write context
-(41,9)-(41,26) Only variables, members, and the results of function calls can be used as references
-(41,13)-(41,24) Await cannot be used as an expression in this location because it's conditionally executed.
+(38,12)-(38,23) Await cannot be used as an expression in this location because it's conditionally executed.
+(39,17)-(39,28) Await cannot be used as an expression in this location because it's conditionally executed.
+(40,9)-(40,20) Await cannot be used as an expression in this location because it's conditionally executed.
+(41,9)-(41,20) Await cannot be used as an expression in this location because it's conditionally executed.
+(42,14)-(42,25) Await cannot be used as an expression in this location because it's conditionally executed.
+(42,14)-(42,25) Unary expression is not allowed in write context
+(43,9)-(43,26) Only variables, members, and the results of function calls can be used as references
+(43,13)-(43,24) Await cannot be used as an expression in this location because it's conditionally executed.

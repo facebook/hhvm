@@ -68,8 +68,6 @@ async function foo(): Awaitable<void> {
   $x = (await genx()) % (await geny());
   $x = (await genx()) ^ (await geny());
   $x = (await genx()) |> f($$);
-  $x = 42 |> f(await $$);
-  $x = (await genx()) |> (await f(42)) + $$;
 
   +(await genx());
   -(await genx());

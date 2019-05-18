@@ -2341,7 +2341,8 @@ let get_positions_binop_allows_await t =
   | TokenKind.BarBar
   | TokenKind.AmpersandAmpersand
   | TokenKind.QuestionColon
-  | TokenKind.QuestionQuestion -> BinopAllowAwaitLeft
+  | TokenKind.QuestionQuestion
+  | TokenKind.BarGreaterThan -> BinopAllowAwaitLeft
   | TokenKind.Equal
   | TokenKind.BarEqual
   | TokenKind.PlusEqual
@@ -2372,7 +2373,6 @@ let get_positions_binop_allows_await t =
   | TokenKind.LessThanEqual
   | TokenKind.LessThanEqualGreaterThan
   | TokenKind.GreaterThanEqual
-  | TokenKind.BarGreaterThan (* Custom handling *)
   | TokenKind.Ampersand
   | TokenKind.Bar
   | TokenKind.LessThanLessThan
@@ -2910,29 +2910,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
       e :: errors
     end in
     check_collection_members initializers errors
-  | PipeVariableExpression _
-    when ParserOptions.enable_await_as_an_expression env.parser_options ->
-    let closest_pipe_operator = List.find parents ~f:begin fun node ->
-      match syntax node with
-      | BinaryExpression { binary_operator; _ }
-        when token_kind binary_operator = Some TokenKind.BarGreaterThan ->
-        true
-      | _ -> false
-      end in
-
-    (match closest_pipe_operator with
-    | None -> errors (* This will be another type of parser error *)
-    | Some closest_pipe_operator ->
-    let closest_pipe_left_operand = match syntax closest_pipe_operator with
-    | BinaryExpression { binary_left_operand; _ } -> binary_left_operand
-    | _ -> failwith "Unexpected non-BinaryExpression" in
-
-    (* If the left side of the pipe operation contains an await then we treat
-       the $$ as an await *)
-    let aaae_errors = if node_has_await_child closest_pipe_left_operand
-    then await_as_an_expression_errors node parents
-    else [] in
-    List.append aaae_errors errors)
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->

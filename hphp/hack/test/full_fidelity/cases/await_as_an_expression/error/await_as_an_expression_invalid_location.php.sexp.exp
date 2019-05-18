@@ -1,10 +1,10 @@
-((script 1176
-  ((list 1176
+((script 1227
+  ((list 1227
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 1170
+     (function_declaration 1221
       ((missing 0 ())
        (function_declaration_header 37
         ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
@@ -19,9 +19,9 @@
                 ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
              (() > 1 ((whitespace 1)))))))
          (missing 0 ())))
-       (compound_statement 1132
+       (compound_statement 1183
         ((() { 1 ((end_of_line 1)))
-         (list 1126
+         (list 1177
           ((expression_statement 28
             ((binary_expression 27
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -422,19 +422,12 @@
                      (missing 0 ()) (() ")" 1 ())))))
                  (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 35
-            ((binary_expression 34
+           (expression_statement 25
+            ((binary_expression 24
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
                (() = 1 ((whitespace 1)))
-               (binary_expression 29
-                ((parenthesized_expression 14
-                  ((() "(" 1 ())
-                   (prefix_unary_expression 12
-                    ((() await 5 ((whitespace 1)))
-                     (function_call_expression 6
-                      ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
-                       (missing 0 ()) (() ")" 1 ())))))
-                   (() ")" 1 ((whitespace 1)))))
+               (binary_expression 19
+                ((literal 4 ((() boolean_literal 4 ((whitespace 1)))))
                  (() |> 2 ((whitespace 1)))
                  (prefix_unary_expression 11
                   ((() await 5 ((whitespace 1)))
@@ -444,6 +437,46 @@
                       ((list_item 2
                         ((pipe_variable 2 ((() $$ 2 ()))) (missing 0 ())))))
                      (() ")" 1 ())))))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 23
+            ((binary_expression 22
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (binary_expression 17
+                ((literal 2 ((() decimal_literal 2 ((whitespace 1)))))
+                 (() |> 2 ((whitespace 1)))
+                 (function_call_expression 11
+                  ((() name 1 ()) (missing 0 ()) (() "(" 1 ())
+                   (list 8
+                    ((list_item 8
+                      ((prefix_unary_expression 8
+                        ((() await 5 ((whitespace 1)))
+                         (pipe_variable 2 ((() $$ 2 ())))))
+                       (missing 0 ())))))
+                   (() ")" 1 ())))))))
+             (() ";" 1 ((end_of_line 1)))))
+           (expression_statement 32
+            ((binary_expression 31
+              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
+               (() = 1 ((whitespace 1)))
+               (binary_expression 26
+                ((literal 4 ((() boolean_literal 4 ((whitespace 1)))))
+                 (() |> 2 ((whitespace 1)))
+                 (binary_expression 18
+                  ((parenthesized_expression 13
+                    ((() "(" 1 ())
+                     (prefix_unary_expression 11
+                      ((() await 5 ((whitespace 1)))
+                       (function_call_expression 5
+                        ((() name 1 ()) (missing 0 ()) (() "(" 1 ())
+                         (list 2
+                          ((list_item 2
+                            ((literal 2 ((() decimal_literal 2 ())))
+                             (missing 0 ())))))
+                         (() ")" 1 ())))))
+                     (() ")" 1 ((whitespace 1)))))
+                   (() + 1 ((whitespace 1)))
+                   (pipe_variable 2 ((() $$ 2 ())))))))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 28
             ((binary_expression 27

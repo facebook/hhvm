@@ -527,9 +527,10 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
     if (is_ts_soft(ts))      a.set(s_soft, true_varNR.tv());
     return a.detach();
   };
-  auto const finish = [&](ArrayData* result) {
-    ArrayData::GetScalarArray(&result);
-    return result;
+  auto const finish = [&](const ArrayData* result) {
+    auto r = const_cast<ArrayData*>(result);
+    ArrayData::GetScalarArray(&r);
+    return r;
   };
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
@@ -545,13 +546,13 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
-      return finish(ts->copy());
+      return finish(ts);
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-      if (!check_arrays || isTSAllWildcards(ts)) return finish(ts->copy());
+      if (!check_arrays || isTSAllWildcards(ts)) return finish(ts);
       return folly::none;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
@@ -559,7 +560,7 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
     case TypeStructure::Kind::T_enum:
       // TODO(T31677864): We can optimize this further if generics also don't
       // need resolving
-      if (isTSAllWildcards(ts)) return finish(ts->copy());
+      if (isTSAllWildcards(ts)) return finish(ts);
       return folly::none;
     case TypeStructure::Kind::T_tuple:
     case TypeStructure::Kind::T_shape:
@@ -579,9 +580,9 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
         if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
         return TypeStructure::Kind::T_class;
       }();
-      auto result = ts->copy();
-      return finish(result->setInPlace(s_kind.get(),
-                                       Variant(static_cast<uint8_t>(kind))));
+      auto result = const_cast<ArrayData*>(ts);
+      return finish(result->set(s_kind.get(),
+                                Variant(static_cast<uint8_t>(kind))));
     }
     case TypeStructure::Kind::T_typeaccess: {
       auto const accList = get_access_list(ts);
@@ -613,7 +614,7 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
         clsName = get_ts_classname(typeCnsVal);
       }
       if (!typeCnsVal) return folly::none;
-      return finish(addModifiers(typeCnsVal->copy()));
+      return finish(addModifiers(typeCnsVal));
     }
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:

@@ -1010,7 +1010,7 @@ bool FuncChecker::checkFCall(State* cur, PC pc) {
   FpiState& fpi = cur->fpi[cur->fpilen - 1];
   --cur->fpilen;
   auto const fca = getImm(pc, 0).u_FCA;
-  int call_params = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  int call_params = fca.numArgsInclUnpack();
   int push_params = getImmIva(at(fpi.fpush));
   if (call_params != push_params) {
     error("FCall* param_count (%d) doesn't match FPush* (%d)\n",

@@ -1425,7 +1425,7 @@ SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
 } // namespace
 
 void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
-  auto const numStackInputs = fca.numArgs + (fca.hasUnpack() ? 1 : 0);
+  auto const numStackInputs = fca.numArgsInclUnpack();
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
   auto const callee = ldPreLiveFunc(env, actRecOff);
 

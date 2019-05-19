@@ -618,13 +618,12 @@ namespace imm {
                     }
 
 #define POP_FCALL   uint32_t numPop() const {                                  \
-                      return fca.numArgs + (fca.hasUnpack() ? 1 : 0) +         \
-                             fca.numRets - 1;                                  \
+                      return fca.numArgsInclUnpack() + fca.numRets - 1;        \
                     }                                                          \
                     Flavor popFlavor(uint32_t i) const {                       \
                       assert(i < numPop());                                    \
                       if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
-                      auto const cv = fca.numArgs + (fca.hasUnpack() ? 1 : 0); \
+                      auto const cv = fca.numArgsInclUnpack();                 \
                       return i < cv ? Flavor::CV : Flavor::U;                  \
                     }
 

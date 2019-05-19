@@ -4155,14 +4155,14 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     }
     fpiNotFoldable(env);
     fpiPop(env);
-    discard(env, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+    discard(env, fca.numArgsInclUnpack());
     for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TBottom);
     return folly::none;
   }
 
   auto returnType = [&] {
     CompactVector<Type> args(fca.numArgs);
-    auto const firstArgPos = fca.numArgs + (fca.hasUnpack() ? 1 : 0) - 1;
+    auto const firstArgPos = fca.numArgsInclUnpack() - 1;
     for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
       args[i] = topCV(env, firstArgPos - i);
     }
@@ -4222,7 +4222,7 @@ void in(ISS& env, const bc::FCall& op) {
         if (ar.foldable && kind != PrepKind::Val) {
           fpiNotFoldable(env);
           fpiPop(env);
-          discard(env, fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+          discard(env, fca.numArgsInclUnpack());
           for (auto j = uint32_t{0}; j < fca.numRets; ++j) push(env, TBottom);
           return;
         }

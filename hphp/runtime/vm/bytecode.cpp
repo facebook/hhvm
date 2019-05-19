@@ -5470,7 +5470,7 @@ bool doFCallUnpackTC(PC origpc, int32_t numArgsInclUnpack, void* retAddr) {
 OPTBLD_FLT_INLINE
 void iopFCall(PC origpc, PC& pc, FCallArgs fca,
               const StringData* /*clsName*/, const StringData* funcName) {
-  auto const ar = arFromSp(fca.numArgs + (fca.hasUnpack() ? 1 : 0));
+  auto const ar = arFromSp(fca.numArgsInclUnpack());
   auto const func = ar->func();
   assertx(
     funcName->empty() ||
@@ -5481,7 +5481,7 @@ void iopFCall(PC origpc, PC& pc, FCallArgs fca,
       func == func->cls()->getCtor()
     )
   );
-  assertx(fca.numArgs + (fca.hasUnpack() ? 1 : 0) == ar->numArgs());
+  assertx(fca.numArgsInclUnpack() == ar->numArgs());
   if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
   checkStack(vmStack(), func, 0);
   if (fca.numRets != 1) ar->setFCallM();

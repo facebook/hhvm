@@ -88,6 +88,7 @@ struct FCallArgsBase {
     assertx(!(flags & ~kInternalFlags));
   }
   bool hasUnpack() const { return flags & Flags::HasUnpack; }
+  uint32_t numArgsInclUnpack() const { return numArgs + (hasUnpack() ? 1 : 0); }
   bool supportsAsyncEagerReturn() const {
     return flags & Flags::SupportsAsyncEagerReturn;
   }

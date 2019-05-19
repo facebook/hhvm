@@ -164,6 +164,17 @@ module SyntaxKind = Full_fidelity_syntax_kind
 module TK = Full_fidelity_token_kind
 module SourceText = Trivia.SourceText
 
+type expr_location =
+  | TopLevel
+  | MemberSelect
+  | InDoubleQuotedString
+  | InBacktickedString
+  | AsStatement
+  | RightOfAssignment
+  | RightOfAssignmentInUsingStatement
+  | RightOfReturn
+  | UsingStatement
+
 let is_hack (env : env) = env.is_hh_file || env.enable_hh_syntax
 let is_typechecker env =
   is_hack env && (not env.codegen)
@@ -195,12 +206,13 @@ let make_tmp_var_name env =
   env.tmp_var_counter <- env.tmp_var_counter + 1;
   name
 
-let lift_await ((pos, _) as expr) env ~with_temp_local =
-  let awaits = env.lifted_awaits in
-  match awaits with
-  | None -> Await expr
-  | Some awaits ->
-  if (with_temp_local)
+let lift_await ((pos, _) as expr) env location =
+  match env.lifted_awaits, location with
+  | _, UsingStatement
+  | _, RightOfAssignmentInUsingStatement
+  | None, _ -> Await expr
+  | Some awaits, _ ->
+  if (location <> AsStatement)
   then
     let name = make_tmp_var_name env in
     awaits.awaits <- ((Some (pos, name)), expr) :: awaits.awaits;
@@ -418,15 +430,6 @@ let mpYielding : ('a, ('a * bool)) metaparser = fun p node env ->
   let result = result, env.saw_yield in
   let () = env.saw_yield <- outer_saw_yield in
   result
-
-type expr_location =
-  | TopLevel
-  | MemberSelect
-  | InDoubleQuotedString
-  | InBacktickedString
-  | AsStatement
-  | RightOfAssignment
-  | RightOfReturn
 
 let in_string l =
   l = InDoubleQuotedString || l = InBacktickedString
@@ -1180,8 +1183,8 @@ and pString2: expr_location -> node list -> env -> expr list =
     | x::xs -> aux loc xs env ((pExpr ~location:loc x env)::acc)
   in
   fun loc l env -> aux loc l env []
-and pExprL node env =
-  (pPos node env, Expr_list (couldMap ~f:pExpr node env))
+and pExprL ?location:(location=TopLevel) : expr parser = fun node env ->
+  (pPos node env, Expr_list (couldMap ~f:(pExpr ~location) node env))
 
 (* TODO: this function is a hotspot, deep recursion on huge files, attempt more optimization *)
 and pMember node env =
@@ -1490,7 +1493,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         | Some TK.At                      -> snd expr
         | Some TK.Inout                   -> Callconv (Pinout, expr)
         | Some TK.Await                   ->
-            lift_await expr env ~with_temp_local:(location <> AsStatement)
+            lift_await expr env location
         | Some TK.Suspend                 -> Suspend expr
         | Some TK.Clone                   -> Clone expr
         | Some TK.Print                   ->
@@ -1515,8 +1518,14 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ->
         let bop_ast_node =
           let rlocation =
-            if location = AsStatement && token_kind binary_operator = Some TK.Equal
-            then RightOfAssignment else TopLevel in
+            if token_kind binary_operator = Some TK.Equal
+            then
+              (match location with
+              | AsStatement -> RightOfAssignment
+              | UsingStatement -> RightOfAssignmentInUsingStatement
+              | _ -> TopLevel)
+            else
+              TopLevel in
           pBop binary_operator env
             (pExpr binary_left_operand  env)
             (pExpr binary_right_operand ~location:rlocation env)
@@ -1540,13 +1549,18 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       | MemberSelect, _
       | TopLevel, _
       | AsStatement, _
+      | UsingStatement, _
       | RightOfAssignment, _
+      | RightOfAssignmentInUsingStatement, _
       | RightOfReturn, _ -> Id (pos_name node env)
       )
 
     | YieldExpression { yield_operand; _ } ->
       env.saw_yield <- true;
-      if location <> AsStatement && location <> RightOfAssignment
+      if
+        location <> AsStatement &&
+        location <> RightOfAssignment &&
+        location <> RightOfAssignmentInUsingStatement
       then raise_parsing_error env (`Node node) SyntaxError.invalid_yield;
       if text yield_operand = "break"
       then Yield_break
@@ -1557,7 +1571,11 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
 
     | YieldFromExpression { yield_from_operand; _ } ->
       env.saw_yield <- true;
-      if location <> AsStatement && location <> RightOfAssignment && location <> RightOfReturn
+      if
+        location <> AsStatement &&
+        location <> RightOfAssignment &&
+        location <> RightOfAssignmentInUsingStatement &&
+        location <> RightOfReturn
       then raise_parsing_error env (`Node node) SyntaxError.invalid_yield_from;
       Yield_from (pExpr yield_from_operand env)
 
@@ -2139,12 +2157,13 @@ and pStmt : stmt parser = fun node env ->
     ; using_block_expressions
     ; using_block_body
     ; _ } ->
-    pos, Using {
-      us_is_block_scoped = true;
-      us_has_await = not (is_missing using_block_await_keyword);
-      us_expr = pExprL using_block_expressions env;
-      us_block = pBlock using_block_body env;
-    }
+    lift_awaits_in_statement env pos (fun () ->
+      pos, Using {
+        us_is_block_scoped = true;
+        us_has_await = not (is_missing using_block_await_keyword);
+        us_expr = pExprL ~location:UsingStatement using_block_expressions env;
+        us_block = pBlock using_block_body env;
+      })
   | UsingStatementFunctionScoped
     { using_function_await_keyword
     ; using_function_expression
@@ -2153,12 +2172,13 @@ and pStmt : stmt parser = fun node env ->
      * be rewritten by this point
      * If this gets run, it means that this using statement is the only one
      * in the block, hence it is not in a compound statement *)
-     pos, Using {
-       us_is_block_scoped = false;
-       us_has_await = not (is_missing using_function_await_keyword);
-       us_expr = pExpr using_function_expression env;
-       us_block = [Pos.none, Noop];
-     }
+     lift_awaits_in_statement env pos (fun () ->
+       pos, Using {
+         us_is_block_scoped = false;
+         us_has_await = not (is_missing using_function_await_keyword);
+         us_expr = pExpr ~location:UsingStatement using_function_expression env;
+         us_block = [Pos.none, Noop];
+       })
   | LetStatement
     { let_statement_name; let_statement_type; let_statement_initializer; _ } ->
     lift_awaits_in_statement env pos (fun () ->
@@ -2564,12 +2584,14 @@ and handle_loop_body pos stmts tail env =
         ; _ }
       ; _ } :: rest ->
       let body = conv [] rest in
-      let using = Using {
-        us_is_block_scoped = false;
-        us_has_await = not (is_missing await_kw);
-        us_expr = pExprL expression env;
-        us_block = body; } in
-      List.concat @@ List.rev ([pos, using] :: acc)
+      let using = lift_awaits_in_statement env pos (fun () ->
+        pos, Using {
+          us_is_block_scoped = false;
+          us_has_await = not (is_missing await_kw);
+          us_expr = pExprL ~location:UsingStatement expression env;
+          us_block = body;
+        }) in
+      List.concat @@ List.rev ([using] :: acc)
     | h :: rest ->
       let h = pStmtUnsafe h env in
       conv (h :: acc) rest

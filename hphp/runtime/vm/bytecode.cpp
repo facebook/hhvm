@@ -4625,6 +4625,47 @@ OPTBLD_INLINE void iopUnsetG() {
   vmStack().popC();
 }
 
+bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
+  TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
+        vmfp()->unit()->entry(),
+        int(vmfp()->func()->base()));
+
+  if (unpack) {
+    Cell* c1 = vmStack().topC();
+    if (UNLIKELY(!isContainer(*c1))) {
+      Cell tmp = *c1;
+      // argument_unpacking RFC dictates "containers and Traversables"
+      raise_warning_unsampled("Only containers may be unpacked");
+      *c1 = make_persistent_array_like_tv(staticEmptyVArray());
+      tvDecRefGen(&tmp);
+    }
+
+    Cell args = *c1;
+    vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
+    SCOPE_EXIT { tvDecRefGen(&args); };
+    checkStack(vmStack(), ar->func(), 0);
+
+    assertx(!ar->resumed());
+    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numArgs,
+                                       nullptr, /* check ref annot */ true);
+    if (UNLIKELY(!prepResult)) {
+      vmStack().pushNull(); // return value is null if args are invalid
+      return false;
+    }
+  }
+
+  prepareFuncEntry(
+    ar,
+    unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
+  if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
+    return false;
+  }
+  checkForReifiedGenericsErrors(ar);
+  calleeDynamicCallChecks(ar);
+  checkForRequiredCallM(ar);
+  return true;
+}
+
 OPTBLD_INLINE ActRec* fPushFuncImpl(
   const Func* func, int numArgs, ArrayData* reifiedGenerics
 ) {
@@ -5402,47 +5443,6 @@ OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
   ar->setThis(obj);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
-}
-
-bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
-  TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
-        vmfp()->unit()->entry(),
-        int(vmfp()->func()->base()));
-
-  if (unpack) {
-    Cell* c1 = vmStack().topC();
-    if (UNLIKELY(!isContainer(*c1))) {
-      Cell tmp = *c1;
-      // argument_unpacking RFC dictates "containers and Traversables"
-      raise_warning_unsampled("Only containers may be unpacked");
-      *c1 = make_persistent_array_like_tv(staticEmptyVArray());
-      tvDecRefGen(&tmp);
-    }
-
-    Cell args = *c1;
-    vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
-    SCOPE_EXIT { tvDecRefGen(&args); };
-    checkStack(vmStack(), ar->func(), 0);
-
-    assertx(!ar->resumed());
-    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numArgs,
-                                       nullptr, /* check ref annot */ true);
-    if (UNLIKELY(!prepResult)) {
-      vmStack().pushNull(); // return value is null if args are invalid
-      return false;
-    }
-  }
-
-  prepareFuncEntry(
-    ar,
-    unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
-  if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
-    return false;
-  }
-  checkForReifiedGenericsErrors(ar);
-  calleeDynamicCallChecks(ar);
-  checkForRequiredCallM(ar);
-  return true;
 }
 
 namespace {

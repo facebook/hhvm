@@ -1,11 +1,11 @@
 <?php
 $g_lang = 'tr_TR';
-putenv("LANG=$g_lang"); 
+putenv("LANG=$g_lang");
 setlocale(LC_ALL, $g_lang);
 
 class InfoBlob {
    var $foo;
-   function InfoBlob() {
+   function __construct() {
       $this->foo = "Foo";
    }
 }

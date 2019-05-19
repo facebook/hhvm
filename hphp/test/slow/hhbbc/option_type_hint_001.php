@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-  public function foo(?Foo $x) {
+  public function __construct(?Foo $x) {
     var_dump($x);
   }
 }

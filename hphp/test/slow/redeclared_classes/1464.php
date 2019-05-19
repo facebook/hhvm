@@ -11,6 +11,6 @@ if ($i == 1) {
   include '1464-2.inc';
 }
 $t = new foo();
-$t->foo();
+$t->__construct();
 $t->bar();
 }

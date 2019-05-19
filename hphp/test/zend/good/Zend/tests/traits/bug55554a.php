@@ -14,15 +14,5 @@ class NewConstructor {
 	}
 }
 
-class LegacyConstructor {
-    use TConstructor {
-        constructor as LegacyConstructor;
-    }
-}
-
 echo "New constructor: ";
 $o = new NewConstructor;
-
-echo "Legacy constructor: ";
-$o = new LegacyConstructor;
-

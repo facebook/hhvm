@@ -1,7 +1,7 @@
 <?php
 
 trait B {
-  public function A() {
+  public function __construct() {
     var_dump('A');
   }
 }

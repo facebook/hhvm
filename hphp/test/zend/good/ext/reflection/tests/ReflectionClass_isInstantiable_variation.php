@@ -1,4 +1,5 @@
 <?php
+
 class noCtor {
 }
 
@@ -14,25 +15,13 @@ class privateCtorNew {
     private function __construct() {}
 }
 
-class publicCtorOld {
-    public function publicCtorOld() {}
-}
+<<__EntryPoint>>
+function main() {
+  $classes = array("noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew");
 
-class protectedCtorOld {
-    protected function protectedCtorOld() {}
-}
-
-class privateCtorOld {
-    private function privateCtorOld() {}
-}
-
-<<__EntryPoint>> function main() {
-$classes = array("noCtor", "publicCtorNew", "protectedCtorNew", "privateCtorNew",
-                     "publicCtorOld", "protectedCtorOld", "privateCtorOld");
-
-foreach($classes  as $class ) {
+  foreach($classes  as $class ) {
     $reflectionClass = new ReflectionClass($class);
     echo "Is $class instantiable?  ";
     var_dump($reflectionClass->IsInstantiable());
-}
+  }
 }

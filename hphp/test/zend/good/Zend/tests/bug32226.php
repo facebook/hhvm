@@ -2,7 +2,7 @@
 
 class A
 {
-        public function A()
+        public function __construct()
         {
                 set_exception_handler(array($this, 'EH'));
 

@@ -1,37 +1,39 @@
 <?php
 
 class MyException extends Exception {
-    function MyException($_errno, $_errmsg) {
-        $this->errno = $_errno;
-        $this->errmsg = $_errmsg;
-    }
+  function __construct($_errno, $_errmsg) {
+    $this->errno = $_errno;
+    $this->errmsg = $_errmsg;
+  }
 
-    function getErrno() {
-        return $this->errno;
-    }
+  function getErrno() {
+    return $this->errno;
+  }
 
-    function getErrmsg() {
-        return $this->errmsg;
-    }
+  function getErrmsg() {
+    return $this->errmsg;
+  }
 }
 
 function ErrorsToExceptions($errno, $errmsg) {
-    throw new MyException($errno, $errmsg);
+  throw new MyException($errno, $errmsg);
 }
-<<__EntryPoint>> function main() {
-set_error_handler("ErrorsToExceptions");
 
-// make sure it isn't catching exceptions that weren't
-// thrown...
+<<__EntryPoint>>
+function main() {
+  set_error_handler("ErrorsToExceptions");
 
-try {
-} catch (MyException $exception) {
+  // make sure it isn't catching exceptions that weren't
+  // thrown...
+
+  try {
+  } catch (MyException $exception) {
     echo "There was an exception: " . $exception->getErrno() . ", '" . $exception->getErrmsg() . "'\n";
-}
+  }
 
-try {
+  try {
     trigger_error("I will become an exception", E_USER_ERROR);
-} catch (MyException $exception) {
+  } catch (MyException $exception) {
     echo "There was an exception: " . $exception->getErrno() . ", '" . $exception->getErrmsg() . "'\n";
-}
+  }
 }

@@ -2,7 +2,7 @@
 class Foo {
   private $str = "";
 
-  function Foo($str) {
+  function __construct($str) {
     $this->str = $str . " World";
   }
 

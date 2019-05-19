@@ -5,7 +5,7 @@ function bar() {
 }
 class foo {
   public $functions = array();
-  function foo() {
+  function __construct() {
     $function = 'bar';
     print($function);
     print($function());

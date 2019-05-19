@@ -1,6 +1,6 @@
 <?php
 class Test {
-  function Test() {
+  function __construct() {
     ob_start(
       array(
         $this, 'transform'

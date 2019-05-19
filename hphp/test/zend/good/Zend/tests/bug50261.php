@@ -1,7 +1,7 @@
 <?php
 
 class testClass {
-	function testClass($x) {
+	function __construct($x) {
 		echo __METHOD__, " (". $x . ")\n";
 	}
 }
@@ -20,7 +20,6 @@ class testClass2 extends testClass {
 			testclass::__construct(2);
 			parent::__construct(3);
 			testclass::__construct(4);
-			testclass::testclass(5);
 		}
 	}
 }

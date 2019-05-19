@@ -1,7 +1,7 @@
 <?php
 
       class goo {
-        function goo() {
+        function __construct() {
           echo "goo called\n";
         }
       }

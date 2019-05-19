@@ -1,7 +1,7 @@
 <?php
 
 class A {
-  function A() { echo "I'm A"; }
+  function __construct() { echo "I'm A"; }
 }
 
 class B extends A {

@@ -6,7 +6,7 @@ class foo {
 
     public $functions = array();
 
-    function foo()
+    function __construct()
     {
         $function = () ==> "FOO\n";
         print($function());

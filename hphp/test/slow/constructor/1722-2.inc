@@ -1,7 +1,7 @@
 <?php
 
 class X {
-  function X() {
+  function __construct() {
     var_dump(__METHOD__);
   }
 }

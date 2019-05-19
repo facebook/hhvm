@@ -1,18 +1,20 @@
 <?php
 
 class Foo {
-    public $name;
+  public $name;
 
-    function Foo() {
-        $this->name = "I'm Foo!\n";
-    }
+  function __construct() {
+    $this->name = "I'm Foo!\n";
+  }
 }
-<<__EntryPoint>> function main() {
-$foo = new Foo;
-echo $foo->name;
-$bar = $foo;
-$bar->name = "I'm Bar!\n";
 
-// In ZE1, we would expect "I'm Foo!"
-echo $foo->name;
+<<__EntryPoint>>
+function main() {
+  $foo = new Foo;
+  echo $foo->name;
+  $bar = $foo;
+  $bar->name = "I'm Bar!\n";
+
+  // In ZE1, we would expect "I'm Foo!"
+  echo $foo->name;
 }

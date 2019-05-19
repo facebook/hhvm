@@ -1,7 +1,7 @@
-<?php 
+<?php
 class t
 {
-	function t()
+	function __construct()
 	{
 		$this->a = 'hello';
 	}
@@ -10,7 +10,7 @@ class t
 	{
 		echo "__sleep called\n";
 		return array('a','b');
-	}	
+	}
 }
 
 $t = new t();

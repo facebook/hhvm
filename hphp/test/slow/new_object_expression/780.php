@@ -1,7 +1,7 @@
 <?php
 
 class A1 {
-  public function A1($id) {
+  public function __construct($id) {
     $this->id = $id;
   }
 }

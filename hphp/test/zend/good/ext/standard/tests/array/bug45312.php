@@ -1,7 +1,7 @@
 <?php
 class cr {
     private $priv_member;
-    function cr($val) {
+    function __construct($val) {
         $this->priv_member = $val;
     }
     static function comp_func_cr($a, $b) {

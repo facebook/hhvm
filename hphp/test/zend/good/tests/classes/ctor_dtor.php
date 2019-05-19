@@ -1,7 +1,7 @@
 <?php
 
 class early {
-	function early() {
+	function __construct() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 	}
 }
@@ -13,7 +13,7 @@ class late {
 }
 
 $t = new early();
-$t->early();
+$t->__construct();
 unset($t);
 $t = new late();
 //unset($t); delay to end of script

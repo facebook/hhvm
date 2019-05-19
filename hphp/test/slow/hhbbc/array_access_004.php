@@ -6,7 +6,7 @@ class X implements ArrayAccess {
   function offsetSet($offset, $value) { return 1; }
   function offsetUnset($offset) { return; }
 
-  public function x() {
+  public function __construct() {
     $y = ($this[new stdclass] = 2);
     var_dump(is_int($y));
     var_dump($y);
@@ -14,7 +14,7 @@ class X implements ArrayAccess {
 }
 
 function foo() {
-  (new X)->x();
+  (new X)->__construct();
 }
 
 

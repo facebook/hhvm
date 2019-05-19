@@ -1,9 +1,12 @@
 <?php
+
 class foo {
-  function foo($arrayobj) {
+  function __construct($arrayobj) {
     var_dump($arrayobj);
   }
 }
-<<__EntryPoint>> function main() {
-new foo(array(new stdClass));
+
+<<__EntryPoint>>
+function main() {
+  new foo(array(new stdClass));
 }

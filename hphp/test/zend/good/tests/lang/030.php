@@ -1,6 +1,6 @@
 <?php
 class foo {
-	function foo($name) {
+	function __construct($name) {
      	$GLOBALS['List']= $this;
      	$this->Name = $name;
 		$GLOBALS['List']->echoName();

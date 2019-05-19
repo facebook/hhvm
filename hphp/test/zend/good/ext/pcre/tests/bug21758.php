@@ -1,6 +1,7 @@
 <?php
+
 class Foo {
-  function foo() {
+  function __construct() {
     $s = 'preg_replace() is broken';
     var_dump(preg_replace_callback(
                '/broken/',
@@ -14,6 +15,7 @@ class Foo {
   }
 }
 
-<<__EntryPoint>> function main() {
-$o = new Foo;
+<<__EntryPoint>>
+function main() {
+  $o = new Foo;
 }

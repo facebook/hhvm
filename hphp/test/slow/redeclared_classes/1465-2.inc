@@ -1,7 +1,7 @@
 <?php
 
   class foo {
-    function foo() {
+    function __construct() {
       echo "foo 2";
     }
     function bar() {

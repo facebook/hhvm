@@ -3005,7 +3005,9 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
 }
 
 template<bool asExpression>
-void isAsTypeStructImpl(ISS& env, SArray ts) {
+void isAsTypeStructImpl(ISS& env, SArray inputTS) {
+  auto const resolvedTS = resolveTSStatically(env, inputTS, env.ctx.cls, true);
+  auto const ts = resolvedTS ? *resolvedTS : inputTS;
   auto const t = topC(env, 1); // operand to is/as
 
   bool may_raise = true;
@@ -4961,6 +4963,23 @@ void in(ISS& env, const bc::VerifyParamTypeTS& op) {
       !env.index.could_have_reified_type(constraint)) {
     return reduce(env, bc::PopC {}, bc::VerifyParamType { op.loc1 });
   }
+
+  if (auto const inputTS = tv(a)) {
+    if (!isValidTSType(*inputTS, false)) {
+      unreachable(env);
+      popC(env);
+      return;
+    }
+    auto const resolvedTS =
+      resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls, true);
+    if (resolvedTS && *resolvedTS != inputTS->m_data.parr) {
+      reduce(env, bc::PopC {});
+      RuntimeOption::EvalHackArrDVArrs ? reduce(env, bc::Dict { *resolvedTS })
+                                       : reduce(env, bc::Array { *resolvedTS });
+      reduce(env, bc::VerifyParamTypeTS { op.loc1 });
+      return;
+    }
+  }
   popC(env);
 }
 
@@ -5103,6 +5122,22 @@ void in(ISS& env, const bc::VerifyRetTypeTS& /*op*/) {
       (!env.ctx.cls || !env.ctx.cls->hasReifiedGenerics) &&
       !env.index.could_have_reified_type(constraint)) {
     return reduce(env, bc::PopC {}, bc::VerifyRetTypeC {});
+  }
+  if (auto const inputTS = tv(a)) {
+    if (!isValidTSType(*inputTS, false)) {
+      unreachable(env);
+      popC(env);
+      return;
+    }
+    auto const resolvedTS =
+      resolveTSStatically(env, inputTS->m_data.parr, env.ctx.cls, true);
+    if (resolvedTS && *resolvedTS != inputTS->m_data.parr) {
+      reduce(env, bc::PopC {});
+      RuntimeOption::EvalHackArrDVArrs ? reduce(env, bc::Dict { *resolvedTS })
+                                       : reduce(env, bc::Array { *resolvedTS });
+      reduce(env, bc::VerifyRetTypeTS {});
+      return;
+    }
   }
   verifyRetImpl(env, constraint, true, true);
 }

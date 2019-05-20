@@ -1669,7 +1669,7 @@ void fullDCE(IRUnit& unit) {
 
       if (srcInst->producesReference() && canDCE(srcInst)) {
         ++uses[src];
-        if (srcInst->is(CreateSSWH) && inst->is(DecRef)) {
+        if (inst->is(DecRef)) {
           decs[srcInst].emplace_back(inst);
         }
       }
@@ -1681,18 +1681,42 @@ void fullDCE(IRUnit& unit) {
     }
   }
 
-  // If every use of CreateSSWH is a DecRef, then it must be DecRef'd exactly
-  // once on every path to an exit from the region (otherwise we would have a
-  // leak or double-free of the StaticWaitHandle). Since each of these DecRefs
-  // destroy the SSWH they must also DecRef its src.
+  // If every use of a dce-able PRc instruction is a DecRef, then we
+  // can kill it, and DecRef any of its consumesReference inputs.
   for (auto& pair : decs) {
     if (uses[pair.first->dst()] != pair.second.size()) continue;
-    state[pair.first].setDead();
-    auto const need_dec = pair.first->src(0)->type().maybe(TCounted);
     for (auto dec : pair.second) {
-      if (need_dec) dec->setSrc(0, pair.first->src(0));
-      else state[dec].setDead();
+      auto replaced = false;
+      if (pair.first->consumesReferences()) {
+        auto srcIx = 0;
+        for (auto src : pair.first->srcs()) {
+          if (pair.first->consumesReference(srcIx++) &&
+              src->type().maybe(TCounted)) {
+            if (!replaced) {
+              FTRACE(3, "Converting {} to ", dec->toString());
+              dec->setSrc(0, src);
+              FTRACE(3, "{} for {}\n",
+                     dec->toString(), pair.first->toString());
+              replaced = true;
+            } else {
+              auto const blk = dec->block();
+              auto const ins = unit.gen(DecRef, dec->bcctx(),
+                                        DecRefData{}, src);
+              blk->insert(blk->iteratorTo(dec), ins);
+              FTRACE(3, "Inserting {} before {} for {}\n",
+                     ins->toString(), dec->toString(), pair.first->toString());
+              state[ins].setLive();
+            }
+          }
+        }
+      }
+      if (!replaced) {
+        FTRACE(3, "Killing {} for {}\n",
+               dec->toString(), pair.first->toString());
+        state[dec].setDead();
+      }
     }
+    state[pair.first].setDead();
   }
 
   optimizeCatchBlocks(blocks, state, unit, uses);

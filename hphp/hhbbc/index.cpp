@@ -396,7 +396,7 @@ struct res::Func::FuncFamily {
   struct Holder {
     Holder(const Holder& o) : bits{o.bits} {}
     explicit Holder(PFuncVec&& o) : v{std::move(o)} {}
-    explicit Holder(uintptr_t b) : bits{b & ~3} {}
+    explicit Holder(uintptr_t b) : bits{b & ~1} {}
     Holder& operator=(const Holder&) = delete;
     ~Holder() {}
     const PFuncVec* operator->() const { return &v; }
@@ -410,24 +410,21 @@ struct res::Func::FuncFamily {
     };
   };
 
-  FuncFamily(PFuncVec&& v,
-             bool containsInterceptables,
-             bool isCtor) : m_raw{Holder{std::move(v)}.val()} {
+  FuncFamily(PFuncVec&& v, bool containsInterceptables)
+    : m_raw{Holder{std::move(v)}.val()} {
     if (containsInterceptables) m_raw |= 1;
-    if (isCtor) m_raw |= 2;
   }
   FuncFamily(FuncFamily&& o) noexcept : m_raw(o.m_raw) {
     o.m_raw = 0;
   }
   ~FuncFamily() {
-    Holder{m_raw & ~3}->~PFuncVec();
+    Holder{m_raw & ~1}->~PFuncVec();
   }
   FuncFamily& operator=(const FuncFamily&) = delete;
 
   bool containsInterceptables() const { return m_raw & 1; };
-  bool isCtor() const { return m_raw & 2; }
   const Holder possibleFuncs() const {
-    return Holder{m_raw & ~3};
+    return Holder{m_raw & ~1};
   };
 private:
   uintptr_t m_raw;
@@ -502,11 +499,6 @@ struct ClassInfo {
    * AttrPrivate will not have an entry in this map.
    */
   ISStringToOneFastT<FuncFamily> methodFamilies;
-
-  /*
-   * The constructor for this class, if we know what it is.
-   */
-  const MethTabEntryPair* ctor = nullptr;
 
   /*
    * Subclasses of this class, including this class itself.
@@ -812,7 +804,6 @@ SString Func::name() const {
     [&] (FuncInfo* fi) { return fi->func->name; },
     [&] (const MethTabEntryPair* mte) { return mte->first; },
     [&] (FuncFamily* fa) -> SString {
-      if (fa->isCtor()) return s_construct.get();
       auto const name = fa->possibleFuncs()->front()->first;
       if (debug) {
         for (DEBUG_ONLY auto const f : fa->possibleFuncs()) {
@@ -1714,34 +1705,6 @@ bool enforce_in_maybe_sealed_parent_whitelist(
   return in_sealed_whitelist;
 }
 
-bool find_constructor(ClassInfo* cinfo) {
-  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) {
-    return true;
-  }
-
-  auto const construct = [&] () -> const MethTabEntryPair* {
-    auto const cit = cinfo->methods.find(s_construct.get());
-    if (cit != end(cinfo->methods) && cit->second.topLevel) {
-      return mteFromIt(cit);
-    }
-    return nullptr;
-  }();
-
-  if (construct) {
-    cinfo->ctor = construct;
-    return true;
-  }
-
-  // Parent class constructor if it exists
-  if (cinfo->parent && cinfo->parent->ctor) {
-    cinfo->ctor = cinfo->parent->ctor;
-    return true;
-  }
-
-  // We'll use SystemLib::s_nullfunc, but thats equivalent to no constructor
-  return true;
-}
-
 /*
  * Note: a cyclic inheritance chain will blow this up, but right now
  * we'll never get here in that case because hphpc currently just
@@ -1753,7 +1716,6 @@ bool find_constructor(ClassInfo* cinfo) {
 bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
   auto info = BuildClsInfo{ index, cinfo };
   if (!build_cls_info_rec(info, cinfo, false)) return false;
-  if (!find_constructor(cinfo)) return false;
   return true;
 }
 
@@ -2506,20 +2468,14 @@ void compute_subclass_list(IndexData& index) {
 }
 
 bool define_func_family(IndexData& index, ClassInfo* cinfo,
-                        SString name, bool isCtor,
-                        const php::Func* func = nullptr) {
+                        SString name, const php::Func* func = nullptr) {
   FuncFamily::PFuncVec funcs{};
   auto containsInterceptables = false;
   for (auto const cleaf : cinfo->subclassList) {
     auto const leafFn = [&] () -> const MethTabEntryPair* {
-      if (isCtor) return cleaf->ctor;
       auto const leafFnIt = cleaf->methods.find(name);
       if (leafFnIt == end(cleaf->methods)) return nullptr;
-      auto const mte = mteFromIt(leafFnIt);
-      if (cleaf->ctor == mte) {
-        return nullptr;
-      }
-      return mte;
+      return mteFromIt(leafFnIt);
     }();
     if (!leafFn) continue;
     if (leafFn->second.func->attrs & AttrInterceptable) {
@@ -2573,9 +2529,7 @@ bool define_func_family(IndexData& index, ClassInfo* cinfo,
   cinfo->methodFamilies.emplace(
     std::piecewise_construct,
     std::forward_as_tuple(name),
-    std::forward_as_tuple(std::move(funcs),
-                          containsInterceptables,
-                          isCtor)
+    std::forward_as_tuple(std::move(funcs), containsInterceptables)
   );
 
   return true;
@@ -2639,7 +2593,7 @@ void build_abstract_func_families(IndexData& data, ClassInfo* cinfo) {
   hphp_fast_set<SString> added;
 
   for (auto name : extras) {
-    if (define_func_family(data, cinfo, name, false) &&
+    if (define_func_family(data, cinfo, name) &&
         (cinfo->cls->attrs & AttrInterface)) {
       added.emplace(name);
     }
@@ -2667,26 +2621,21 @@ void define_func_families(IndexData& index) {
       if (cinfo->cls->attrs & AttrTrait) return;
       FTRACE(4, "Defining func families for {}\n", cinfo->cls->name);
       if (!(cinfo->cls->attrs & AttrInterface)) {
-        auto didCtor = false;
         for (auto& kv : cinfo->methods) {
           auto const mte = mteFromElm(kv);
 
           if (mte->second.attrs & AttrNoOverride) continue;
-          if (mte == cinfo->ctor) {
-            define_func_family(index, cinfo.get(), s_construct.get(),
-                               true, mte->second.func);
-            didCtor = true;
-            continue;
-          }
-          if (mte->second.attrs & AttrPrivate) continue;
           if (is_special_method_name(mte->first)) continue;
 
-          define_func_family(index, cinfo.get(), mte->first,
-                             false, mte->second.func);
-        }
-        if (cinfo->ctor && !didCtor) {
-          define_func_family(index, cinfo.get(), s_construct.get(),
-                             true, cinfo->ctor->second.func);
+          // We need function family for constructor even if it is private,
+          // as `new static()` may still call a non-private constructor from
+          // subclass.
+          if (!mte->first->isame(s_construct.get()) &&
+              mte->second.attrs & AttrPrivate) {
+            continue;
+          }
+
+          define_func_family(index, cinfo.get(), mte->first, mte->second.func);
         }
       }
       if (cinfo->cls->attrs & (AttrInterface | AttrAbstract)) {
@@ -3031,16 +2980,10 @@ void mark_no_override_methods(IndexData& index) {
       };
 
       for (auto& derivedMethod : cinfo->methods) {
-        if (&derivedMethod == cinfo->ctor) {
-          if (ancestor->ctor && ancestor->ctor != cinfo->ctor) {
-            removeNoOverride(ancestor->ctor);
-          }
-        } else {
-          auto const it = ancestor->methods.find(derivedMethod.first);
-          if (it == end(ancestor->methods)) continue;
-          if (it->second.func != derivedMethod.second.func) {
-            removeNoOverride(it);
-          }
+        auto const it = ancestor->methods.find(derivedMethod.first);
+        if (it == end(ancestor->methods)) continue;
+        if (it->second.func != derivedMethod.second.func) {
+          removeNoOverride(it);
         }
       }
     }
@@ -3110,10 +3053,6 @@ void check_invariants(const ClassInfo* cinfo) {
       auto const it = cinfo->methods.find(m->name);
       always_assert(it != cinfo->methods.end());
       if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
-      if (cinfo->ctor && m.get() == cinfo->ctor->second.func) {
-        always_assert(cinfo->methodFamilies.count(s_construct.get()));
-        continue;
-      }
       if (is_special_method_name(m->name)) continue;
       always_assert(cinfo->methodFamilies.count(m->name));
     }
@@ -3152,7 +3091,6 @@ void check_invariants(const ClassInfo* cinfo) {
   // name (unless its a family of ctors).
   for (auto const& mfam: cinfo->methodFamilies) {
     always_assert(!mfam.second.possibleFuncs()->empty());
-    if (mfam.second.isCtor()) continue;
     auto const name = mfam.second.possibleFuncs()->front()->first;
     for (auto const pf : mfam.second.possibleFuncs()) {
       always_assert(pf->first->isame(name));
@@ -4409,11 +4347,17 @@ res::Func Index::resolve_method(Context ctx,
 folly::Optional<res::Func>
 Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
   auto const cinfo = rcls.val.right();
-  if (!cinfo || !cinfo->ctor) return folly::none;
-  if (exact || cinfo->ctor->second.attrs & AttrNoOverride) {
-    if (cinfo->ctor->second.attrs & AttrInterceptable) return folly::none;
-    create_func_info(*m_data, cinfo->ctor->second.func);
-    return res::Func { this, cinfo->ctor };
+  if (!cinfo) return folly::none;
+  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) return folly::none;
+
+  auto const cit = cinfo->methods.find(s_construct.get());
+  if (cit == end(cinfo->methods)) return folly::none;
+
+  auto const ctor = mteFromIt(cit);
+  if (exact || ctor->second.attrs & AttrNoOverride) {
+    if (ctor->second.attrs & AttrInterceptable) return folly::none;
+    create_func_info(*m_data, ctor->second.func);
+    return res::Func { this, ctor };
   }
 
   if (!options.FuncFamilies) return folly::none;

@@ -189,7 +189,10 @@ let load_ fn ~silent config_overrides =
       Hh_logger.log "Could not load config at %s, using defaults" path;
       SMap.empty
   in
-  let config = SMap.union config config_overrides in
+
+  (* In order for orverrides to take precedence over config values, they
+   * must be passed in "override-first" order to SMap.union *)
+  let config = SMap.union config_overrides config in
   let use_watchman = bool_if_version "use_watchman"
       ~default:default.use_watchman config in
   let use_saved_state = bool_if_version "use_mini_state"

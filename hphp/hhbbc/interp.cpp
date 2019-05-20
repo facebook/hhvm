@@ -539,7 +539,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
                     bool checkArrays) {
   auto const addModifiers = [&](ArrayData* result) {
     auto a = Array::attach(result);
-    if (is_ts_like_type(ts)) a.set(s_like, true_varNR.tv());
+    if (is_ts_like(ts))      a.set(s_like, true_varNR.tv());
     if (is_ts_nullable(ts))  a.set(s_nullable, true_varNR.tv());
     if (is_ts_soft(ts))      a.set(s_soft, true_varNR.tv());
     return a.detach();
@@ -601,7 +601,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
       assertx(ts->exists(s_classname));
       auto result = const_cast<ArrayData*>(ts);
       if (ts->exists(s_generic_types)) {
-        auto const generics = get_generic_types(ts);
+        auto const generics = get_ts_generic_types(ts);
         auto rgenerics =
           resolveTSListStatically(env, generics, declaringCls, checkArrays);
         if (!rgenerics) return folly::none;
@@ -620,7 +620,7 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
                                 Variant(static_cast<uint8_t>(kind))));
     }
     case TypeStructure::Kind::T_typeaccess: {
-      auto const accList = get_access_list(ts);
+      auto const accList = get_ts_access_list(ts);
       auto const size = accList->size();
       auto clsName = get_ts_root_name(ts);
       auto checkNoOverrideOnFirst = false;
@@ -3252,7 +3252,7 @@ bool canReduceToDontResolve(SArray ts) {
             result = false;
             return true; // short circuit
           }
-          result &= canReduceToDontResolve(get_ts_value_field(arr));
+          result &= canReduceToDontResolve(get_ts_value(arr));
            // when result is false, we can short circuit
           return !result;
         }

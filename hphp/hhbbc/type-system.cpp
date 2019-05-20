@@ -3128,7 +3128,7 @@ folly::Optional<Type> type_of_type_structure(SArray ts) {
         auto const wrapper = fields->getValue(i).getArrayData();
         // Optional fields are hard to represent as a type
         if (is_optional_ts_shape_field(wrapper)) return folly::none;
-        auto t = type_of_type_structure(get_ts_value_field(wrapper));
+        auto t = type_of_type_structure(get_ts_value(wrapper));
         if (!t) return folly::none;
         map.emplace_back(
           make_tv<KindOfPersistentString>(key), std::move(t.value()));

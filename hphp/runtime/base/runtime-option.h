@@ -86,6 +86,7 @@ struct RepoOptions {
   H(bool,           Hacksperimental,                false)            \
   H(bool,           EnableReifiedGenerics,          true)             \
   H(bool,           DisableLvalAsAnExpression,      false)            \
+  H(bool,           HackCompilerUseRustParser,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \
   E(std::string,    HHJSAdditionalTransform,        "")               \
   E(bool,           HHJSNoBabel,                    false)            \

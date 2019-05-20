@@ -61,6 +61,7 @@ type t = {
   option_enable_pocket_universes          : bool;
   option_notice_on_byref_argument_typehint_violation : bool;
   option_log_array_provenance             : bool;
+  option_use_rust_parser                  : bool;
 }
 
 let default = {
@@ -115,6 +116,7 @@ let default = {
   option_enable_pocket_universes = false;
   option_notice_on_byref_argument_typehint_violation = false;
   option_log_array_provenance = false;
+  option_use_rust_parser = false;
 }
 
 let enable_hiphop_syntax o = o.option_enable_hiphop_syntax
@@ -166,6 +168,7 @@ let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 let enable_pocket_universes o = o.option_enable_pocket_universes
 let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_argument_typehint_violation
 let log_array_provenance o = o.option_log_array_provenance
+let use_rust_parser o = o.option_use_rust_parser
 let to_string o =
   let dynamic_invokes =
     String.concat ~sep:", " (SSet.elements (dynamic_invoke_functions o)) in
@@ -220,6 +223,7 @@ let to_string o =
     ; Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o
     ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
     ; Printf.sprintf "log_array_provenance: %B" @@ log_array_provenance o
+    ; Printf.sprintf "use_rust_parser: %B" @@ use_rust_parser o
     ]
 
 let as_bool s =
@@ -489,6 +493,8 @@ let value_setters = [
      fun opts v -> { opts with option_rx_is_enabled = (v > 0) });
   (set_value "hhvm.log_array_provenance" get_value_from_config_int @@
      fun opts v -> { opts with option_log_array_provenance = (v > 0) });
+  (set_value "hhvm.hack.lang.hack_compiler_use_rust_parser" get_value_from_config_int @@
+     fun opts v -> { opts with option_use_rust_parser = (v > 0) });
 ]
 
 let extract_config_options_from_json ~init config_json =

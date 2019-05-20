@@ -226,8 +226,8 @@ char *GzipCompressor::compress(const char *data, int &len, bool trailer) {
   /* add gzip file header */
   bool header = m_header;
   if (header) {
-    s2[0] = gz_magic[0];
-    s2[1] = gz_magic[1];
+    s2[0] = (char)gz_magic[0];
+    s2[1] = (char)gz_magic[1];
     s2[2] = Z_DEFLATED;
     s2[3] = s2[4] = s2[5] = s2[6] = s2[7] = s2[8] = 0; /* time set to 0 */
     s2[9] = 0x03; // OS_CODE
@@ -303,8 +303,8 @@ char *gzencode(const char *data, int &len, int level, int encoding_mode) {
     return nullptr;
   }
   /* add gzip file header */
-  s2[0] = gz_magic[0];
-  s2[1] = gz_magic[1];
+  s2[0] = (char)gz_magic[0];
+  s2[1] = (char)gz_magic[1];
   s2[2] = Z_DEFLATED;
   s2[3] = s2[4] = s2[5] = s2[6] = s2[7] = s2[8] = 0; /* time set to 0 */
   s2[9] = 0x03; // OS_CODE

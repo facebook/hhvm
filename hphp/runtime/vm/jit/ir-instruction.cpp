@@ -146,6 +146,10 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case StContArKey:
       return srcNo == 1;
 
+    case StARInvName:
+    case InitCtx:
+      return srcNo == 1;
+
     case AFWHBlockOn:
       // Consume the value being stored, not the thing it's being stored into
       return srcNo == 1;
@@ -159,15 +163,27 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case AddNewElem:
     case AddNewElemKeyset:
     case AddNewElemVec:
+    case AddElemStrKey:
+    case AddElemIntKey:
+    case DictAddElemStrKey:
+    case DictAddElemIntKey:
       // Only consumes the reference to its input array
+      return !move && srcNo == 0;
+
+    case LdSwitchStrIndex:
+    case LdSwitchObjIndex:
+      // consumes the switch input
       return !move && srcNo == 0;
 
     case CreateAFWH:
     case CreateAFWHNoVV:
-      return !move && srcNo == 4;
+      return srcNo == 4;
 
     case CreateAGWH:
-      return !move && srcNo == 3;
+      return srcNo == 3;
+
+    case CreateSSWH:
+      return srcNo == 0;
 
     case InitPackedLayoutArray:
       return srcNo == 1;

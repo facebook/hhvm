@@ -309,6 +309,19 @@ No errors are filtered out.";
         "Use the parser written in Rust instead of OCaml one";
       ] in
     Arg.parse options push_file usage;
+    let modes = [
+      !full_fidelity_json ;
+      !full_fidelity_text_json ;
+      !full_fidelity_dot ;
+      !full_fidelity_dot_edges ;
+      !full_fidelity_errors ;
+      !full_fidelity_errors_all ;
+      !full_fidelity_s_expr ;
+      !full_fidelity_ast_s_expr ;
+      !program_text ;
+      !pretty_print ;
+      !schema] in
+    if not (List.exists (fun x -> x) modes) then full_fidelity_errors_all := true;
     make
       !full_fidelity_json
       !full_fidelity_text_json

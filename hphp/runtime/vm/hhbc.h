@@ -651,7 +651,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushClsMethodD, THREE(IVA,SA,SA), FPUSH(0, 0),     FPUSH,      PF) \
   O(FPushClsMethodRD,THREE(IVA,SA,SA), FPUSH(1, 0),     FPUSH,      PF) \
-  O(FCall,           THREE(FCA,SA,SA), FCALL,           FCALL,      CF) \
+  O(FCall,           THREE(FCA,SA,SA), FCALLO,          FCALL,      CF) \
   O(FCallBuiltin,    THREE(IVA,IVA,SA),CVUMANY,         ONE(CV),    NF) \
   O(IterInit,        THREE(IA,BA,LA),  ONE(CV),         NOV,        CF) \
   O(LIterInit,       FOUR(IA,LA,BA,LA),NOV,             NOV,        CF) \

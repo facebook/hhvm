@@ -412,7 +412,8 @@ int instrNumPops(PC pc) {
 #define CUMANY -3
 #define CVUMANY -3
 #define FPUSH(nin, nobj) C_MFINAL(nin + 3)
-#define FCALL -4
+#define FCALL(nin, nobj) -20 - (nin)
+#define FCALLO -4
 #define CMANY -3
 #define SMANY -1
 #define O(name, imm, pop, push, flags) pop,
@@ -429,6 +430,7 @@ int instrNumPops(PC pc) {
 #undef CVUMANY
 #undef FPUSH
 #undef FCALL
+#undef FCALLO
 #undef CMANY
 #undef SMANY
 #undef O
@@ -445,6 +447,13 @@ int instrNumPops(PC pc) {
   if (n == -4) {
     auto const fca = getImm(pc, 0).u_FCA;
     return fca.numArgsInclUnpack() + fca.numRets - 1;
+  }
+  // FCall* opcodes pop number of opcode specific inputs, unpack, numArgs,
+  // 3 cells/uninits reserved for ActRec and (numRets - 1) uninit values.
+  if (n <= -20) {
+    auto const fca = getImm(pc, 0).u_FCA;
+    auto const nin = -n - 20;
+    return nin + fca.numArgsInclUnpack() + 2 + fca.numRets;
   }
   // Other final member operations pop their first immediate + n
   if (n <= -10) return getImm(pc, 0).u_IVA - n - 10;
@@ -521,7 +530,20 @@ FlavorDesc fpushFlavor(PC op, uint32_t i) {
   return nobj ? CV : UV;
 }
 
+template<int nin, int nobj>
 FlavorDesc fcallFlavor(PC op, uint32_t i) {
+  always_assert(i < uint32_t(instrNumPops(op)));
+  auto const fca = getImm(op, 0).u_FCA;
+  if (i < nin) return CV;
+  i -= nin;
+  if (i == 0 && fca.hasUnpack()) return CV;
+  if (i < fca.numArgsInclUnpack()) return CVV;
+  i -= fca.numArgsInclUnpack();
+  if (i == 2 && nobj) return CV;
+  return UV;
+}
+
+FlavorDesc fcallOldFlavor(PC op, uint32_t i) {
   always_assert(i < uint32_t(instrNumPops(op)));
   auto const fca = getImm(op, 0).u_FCA;
   if (i == 0 && fca.hasUnpack()) return CV;
@@ -545,7 +567,8 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #define CUMANY return manyFlavor(op, idx, CUV);
 #define CVUMANY return manyFlavor(op, idx, CVUV);
 #define FPUSH(nin, nobj) return fpushFlavor<nin, nobj>(op, idx);
-#define FCALL return fcallFlavor(op, idx);
+#define FCALL(nin, nobj) return fcallFlavor<nin, nobj>(op, idx);
+#define FCALLO return fcallOldFlavor(op, idx);
 #define CMANY return manyFlavor(op, idx, CV);
 #define SMANY return manyFlavor(op, idx, CV);
 #define O(name, imm, pop, push, flags) case Op::name: pop
@@ -565,6 +588,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 #undef CVUMANY
 #undef FPUSH
 #undef FCALL
+#undef FCALLO
 #undef CMANY
 #undef SMANY
 #undef O

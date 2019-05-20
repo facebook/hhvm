@@ -617,7 +617,22 @@ namespace imm {
                       return nobj ? Flavor::C : Flavor::U;                     \
                     }
 
-#define POP_FCALL   uint32_t numPop() const {                                  \
+#define POP_FCALL(nin, nobj)                                                   \
+                    uint32_t numPop() const {                                  \
+                      return nin + fca.numArgsInclUnpack() + 2 + fca.numRets;  \
+                    }                                                          \
+                    Flavor popFlavor(uint32_t i) const {                       \
+                      assert(i < numPop());                                    \
+                      if (i < nin) return Flavor::C;                           \
+                      i -= nin;                                                \
+                      if (i == 0 && fca.hasUnpack()) return Flavor::C;         \
+                      if (i < fca.numArgsInclUnpack()) return Flavor::CV;      \
+                      i -= fca.numArgsInclUnpack();                            \
+                      if (i == 2 && nobj) return Flavor::C;                    \
+                      return Flavor::U;                                        \
+                    }
+
+#define POP_FCALLO  uint32_t numPop() const {                                  \
                       return fca.numArgsInclUnpack() + fca.numRets - 1;        \
                     }                                                          \
                     Flavor popFlavor(uint32_t i) const {                       \
@@ -757,6 +772,7 @@ OPCODES
 #undef POP_CVUMANY
 #undef POP_FPUSH
 #undef POP_FCALL
+#undef POP_FCALLO
 
 #undef IMM_TY_MA
 #undef IMM_TY_BLA

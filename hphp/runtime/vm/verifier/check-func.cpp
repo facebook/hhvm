@@ -745,7 +745,8 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #define CUMANY { },
   #define CVUMANY { },
   #define FPUSH(nin, nobj) { nobj ? CV : UV },
-  #define FCALL { },
+  #define FCALL(nin, nobj) { nobj ? CV : UV },
+  #define FCALLO { },
   #define CMANY { },
   #define SMANY { },
   #define ONE(a) { a },
@@ -764,6 +765,7 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   #undef CVUMANY
   #undef FPUSH
   #undef FCALL
+  #undef FCALLO
   #undef CMANY
   #undef SMANY
   #undef FIVE
@@ -808,7 +810,22 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
     while (idx < numPops) m_tmp_sig[idx++] = CV;
     return m_tmp_sig;
   }
-  case Op::FCall: {      // THREE(FCA,SA,SA), FCALL, FCALL
+  /*case Op::FCallFuture: {  // FCA..., FCALL, FCALL
+    auto const fca = getImm(pc, 0).u_FCA;
+    auto const numPops = instrNumPops(pc);
+    assertx(fca.numRets != 0);
+    auto idx = 0;
+    for (int i = 0; i < fca.numRets - 1; ++i) m_tmp_sig[idx++] = UV;
+    m_tmp_sig[idx++] = inputSigs[size_t(peek_op(pc))][0];
+    m_tmp_sig[idx++] = UV;
+    m_tmp_sig[idx++] = UV;
+    for (int i = 0; i < fca.numArgs; ++i) m_tmp_sig[idx++] = CVV;
+    if (fca.hasUnpack()) m_tmp_sig[idx++] = CV;
+    assertx(idx == numPops || idx + 1 == numPops);
+    while (idx < numPops) m_tmp_sig[idx++] = CV;
+    return m_tmp_sig;
+  }*/
+  case Op::FCall: {      // THREE(FCA,SA,SA), FCALLO, FCALL
     auto const fca = getImm(pc, 0).u_FCA;
     assertx(fca.numRets != 0);
     auto idx = 0;

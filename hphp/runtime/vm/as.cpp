@@ -1576,7 +1576,9 @@ std::map<std::string,ParserFunc> opcode_parsers;
 #define NUM_POP_CUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_CVUMANY immIVA[0] /* number of arguments */
 #define NUM_POP_FPUSH(nin, nobj) (immIVA[0] + nin + 3)
-#define NUM_POP_FCALL (immFCA.numArgsInclUnpack() + immFCA.numRets - 1)
+#define NUM_POP_FCALL(nin, nobj) \
+  (nin + immFCA.numArgsInclUnpack() + 2 + immFCA.numRets)
+#define NUM_POP_FCALLO (immFCA.numArgsInclUnpack() + immFCA.numRets - 1)
 #define NUM_POP_CMANY immIVA[0] /* number of arguments */
 #define NUM_POP_SMANY vecImmStackValues
 
@@ -1716,6 +1718,7 @@ OPCODES
 #undef NUM_POP_CVUMANY
 #undef NUM_POP_FPUSH
 #undef NUM_POP_FCALL
+#undef NUM_POP_FCALLO
 #undef NUM_POP_CMANY
 #undef NUM_POP_SMANY
 

@@ -369,7 +369,7 @@ module AstToTast = Ast_to_aast.MapAstToAast(AstToTastEnv)
  * to produce valid bytecode. These errors are caught during the conversion
  * so as to match legacy behavior.
  *)
-let convert_to_tast options popt filename is_hh_file ast =
+let convert_to_tast ast =
   let errors, tast =
     let convert () = AstToTast.convert ast in
     Errors.do_ convert in
@@ -384,28 +384,17 @@ let convert_to_tast options popt filename is_hh_file ast =
       if acc = None
       then
         let msg = snd (List.hd_exn (Errors.to_list error)) in
-        let fatal_program =
-          Emit_program.emit_fatal_program
-            ~ignore_message:false
-            Hhbc_ast.FatalOp.Parse
-            (Errors.get_pos error)
-            msg in
-        Some fatal_program
+        Some (Errors.get_pos error, msg)
       else acc in
   let result = Errors.fold_errors ~init:None ~f:handle_error errors in
   match result with
-  | Some error -> error
-  | None ->
-    Emit_program.from_ast
-      ~is_hh_file
-      ~is_evaled:(is_file_path_for_evaled_code filename)
-      ~for_debugger_eval:(options.for_debugger_eval)
-      ~popt
-      tast
+  | Some error -> Error error
+  | None -> Ok tast
 
 let do_compile filename compiler_options popt fail_or_ast debug_time =
   let t = Unix.gettimeofday () in
   let t = add_to_time_ref debug_time.parsing_t t in
+  let is_js_file = Filename.check_suffix (Relative_path.to_absolute filename) "js" in
   let hhas_prog =
     match fail_or_ast with
     | `ParseFailure (e, pos) ->
@@ -421,7 +410,17 @@ let do_compile filename compiler_options popt fail_or_ast debug_time =
         (fun e -> P.eprintf "%s\n%!" (Errors.to_string (Errors.to_absolute e)));
       if Errors.is_empty errors
       then
-        convert_to_tast compiler_options popt filename is_hh_file ast
+        begin match convert_to_tast ast with
+        | Ok tast ->
+          Emit_program.from_ast ~is_hh_file ~is_js_file
+            ~is_evaled:(is_file_path_for_evaled_code filename)
+            ~for_debugger_eval:(compiler_options.for_debugger_eval)
+            ~popt
+            tast
+        | Error (pos, msg) ->
+          Emit_program.emit_fatal_program ~ignore_message:false
+            Hhbc_ast.FatalOp.Parse pos msg
+        end
       else
         Emit_program.emit_fatal_program ~ignore_message:true
           Hhbc_ast.FatalOp.Parse Pos.none "Syntax error" in

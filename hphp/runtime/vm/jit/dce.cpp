@@ -289,52 +289,30 @@ bool canDCE(IRInstruction* inst) {
   case LookupSPropSlot:
   case MangleReifiedName:
   case ConstructClosure:
+  case Box:
+  case AllocPackedArray:
+  case AllocVArray:
+  case AllocVecArray:
     assertx(!inst->isControlFlow());
     return true;
 
-  case DbgTraceCall:
-  case AKExistsObj:
-  case StStk:
-  case StOutValue:
-  case SpillFrame:
-  case CheckType:
-  case CheckNullptr:
-  case CheckTypeMem:
-  case CheckVArray:
-  case CheckDArray:
-  case CheckFuncMMNonMagic:
-  case CheckSmashableClass:
-  case HintLocInner:
-  case HintStkInner:
-  case HintMBaseInner:
-  case CheckLoc:
-  case CheckStk:
-  case CheckMBase:
-  case AssertLoc:
-  case AssertStk:
-  case AssertMBase:
-  case AssertARFunc:
-  case CoerceStk:
-  case CoerceMem:
-  case CoerceCellToBool:
-  case CoerceCellToInt:
-  case CoerceStrToInt:
-  case CoerceCellToDbl:
-  case CoerceStrToDbl:
-  case CheckInit:
-  case CheckInitMem:
-  case CheckCold:
-  case CheckRefs:
-  case EndGuards:
-  case CheckNonNull:
-  case DivDbl:
-  case DivInt:
-  case AddIntO:
-  case SubIntO:
-  case MulIntO:
+  // These may raise oom, but its still ok to delete them if the
+  // result is unused
+  case ConcatIntStr:
+  case ConcatStrInt:
+  case ConcatStrStr:
+  case ConcatStr3:
+  case ConcatStr4:
+  case AddElemStrKey:
+  case AddElemIntKey:
+  case AddNewElem:
+  case AddNewElemKeyset:
+  case AddNewElemVec:
+  case DictAddElemStrKey:
+  case DictAddElemIntKey:
+    return true;
 
-    // These conversion functions either can run arbitrary PHP code, or decref
-    // their inputs.
+  // Some of these conversion functions can run arbitrary PHP code.
   case ConvObjToArr:
   case ConvCellToArr:
   case ConvStrToArr:
@@ -380,6 +358,49 @@ bool canDCE(IRInstruction* inst) {
   case ConvShapeToDArr:
   case ConvKeysetToDArr:
   case ConvObjToDArr:
+    return !opcodeMayRaise(inst->op()) &&
+      (!inst->consumesReferences() || inst->producesReference());
+
+  case DbgTraceCall:
+  case AKExistsObj:
+  case StStk:
+  case StOutValue:
+  case SpillFrame:
+  case CheckType:
+  case CheckNullptr:
+  case CheckTypeMem:
+  case CheckVArray:
+  case CheckDArray:
+  case CheckFuncMMNonMagic:
+  case CheckSmashableClass:
+  case HintLocInner:
+  case HintStkInner:
+  case HintMBaseInner:
+  case CheckLoc:
+  case CheckStk:
+  case CheckMBase:
+  case AssertLoc:
+  case AssertStk:
+  case AssertMBase:
+  case AssertARFunc:
+  case CoerceStk:
+  case CoerceMem:
+  case CoerceCellToBool:
+  case CoerceCellToInt:
+  case CoerceStrToInt:
+  case CoerceCellToDbl:
+  case CoerceStrToDbl:
+  case CheckInit:
+  case CheckInitMem:
+  case CheckCold:
+  case CheckRefs:
+  case EndGuards:
+  case CheckNonNull:
+  case DivDbl:
+  case DivInt:
+  case AddIntO:
+  case SubIntO:
+  case MulIntO:
 
   case GtObj:
   case GteObj:
@@ -429,7 +450,6 @@ bool canDCE(IRInstruction* inst) {
   case Unreachable:
   case Jmp:
   case DefLabel:
-  case Box:
   case LdLocPseudoMain:
   case LdVectorBase:
   case LdPairBase:
@@ -479,9 +499,6 @@ bool canDCE(IRInstruction* inst) {
   case DebugBacktraceFast:
   case InitThrowableFileAndLine:
   case ConstructInstance:
-  case AllocPackedArray:
-  case AllocVArray:
-  case AllocVecArray:
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:
   case NewKeysetArray:
@@ -556,18 +573,6 @@ bool canDCE(IRInstruction* inst) {
   case PrintStr:
   case PrintInt:
   case PrintBool:
-  case ConcatIntStr:
-  case ConcatStrInt:
-  case ConcatStrStr:
-  case ConcatStr3:
-  case ConcatStr4:
-  case AddElemStrKey:
-  case AddElemIntKey:
-  case AddNewElem:
-  case AddNewElemKeyset:
-  case AddNewElemVec:
-  case DictAddElemStrKey:
-  case DictAddElemIntKey:
   case ArrayAdd:
   case GetMemoKey:
   case LdSwitchObjIndex:
@@ -837,20 +842,31 @@ typedef StateVector<SSATmp, uint32_t> UseCounts;
 typedef jit::vector<IRInstruction*> WorkList;
 
 void removeDeadInstructions(IRUnit& unit, const DceState& state) {
-  postorderWalk(unit, [&](Block* block) {
-    block->remove_if([&] (const IRInstruction& inst) {
-      ONTRACE(4,
-              if (state[inst].isDead()) {
-                FTRACE(1, "Removing dead instruction {}\n", inst.toString());
-              });
+  postorderWalk(
+    unit,
+    [&](Block* block) {
+      auto const next = block->next();
+      auto const bcctx = block->back().bcctx();
+      block->remove_if(
+        [&] (const IRInstruction& inst) {
+          ONTRACE(
+            4,
+            if (state[inst].isDead()) {
+              FTRACE(1, "Removing dead instruction {}\n", inst.toString());
+            }
+          );
 
-      // For now, all control flow instructions are essential. If we ever
-      // change this, we'll need to be careful about unlinking dead CF
-      // instructions here.
-      assertx(IMPLIES(inst.isControlFlow(), !state[inst].isDead()));
-      return state[inst].isDead();
-    });
-  });
+          auto const dead = state[inst].isDead();
+          assertx(!dead || !inst.taken() || inst.taken()->isCatch());
+          return dead;
+        }
+      );
+      if (block->empty() || !block->back().isBlockEnd()) {
+        assertx(next);
+        block->push_back(unit.gen(Jmp, bcctx, next));
+      }
+    }
+  );
 }
 
 // removeUnreachable erases unreachable blocks from unit, and returns
@@ -1359,7 +1375,7 @@ IRInstruction* resolveFpDefLabelImpl(
 
 //////////////////////////////////////////////////////////////////////
 
-void processCatchBlock(IRUnit& unit, Block* block,
+void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
                        FPRelOffset stackTop, const UseCounts& uses) {
   using Bits = std::bitset<64>;
 
@@ -1455,6 +1471,8 @@ void processCatchBlock(IRUnit& unit, Block* block,
     auto const src = store->src(1);
     auto const it = candidateIncRefs.find(src);
     if (it != candidateIncRefs.end()) {
+      FTRACE(3, "Erasing {} for {}\n",
+             it->second.back()->toString(), store->toString());
       block->erase(it->second.back());
       if (it->second.size() > 1) {
         it->second.pop_back();
@@ -1468,7 +1486,9 @@ void processCatchBlock(IRUnit& unit, Block* block,
           uses[src] != 1) {
         continue;
       }
-      srcInst->block()->erase(srcInst);
+      FTRACE(3, "Erasing {} for {}\n",
+             srcInst->toString(), store->toString());
+      state[srcInst].setDead();
     }
     store->setSrc(1, unit.cns(TInitNull));
   }
@@ -1494,7 +1514,7 @@ void optimizeCatchBlocks(const BlockList& blocks,
       auto const astk = AStack {
         block->back().src(1), block->back().extra<EndCatch>()->offset, 0
       };
-      processCatchBlock(unit, block, astk.offset, uses);
+      processCatchBlock(unit, state, block, astk.offset, uses);
     }
   }
 }

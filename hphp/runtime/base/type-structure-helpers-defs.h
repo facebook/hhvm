@@ -68,13 +68,14 @@ ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {
 
 ALWAYS_INLINE const ArrayData* get_ts_elem_types(const ArrayData* ts) {
   auto const elem_types_field = ts->rval(s_elem_types.get());
-  assertx(elem_types_field != nullptr && isArrayType(elem_types_field.type()));
+  assertx(elem_types_field != nullptr &&
+          isVecOrArrayType(elem_types_field.type()));
   return elem_types_field.val().parr;
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_fields(const ArrayData* ts) {
   auto const fields_field = ts->rval(s_fields.get());
-  assertx(fields_field != nullptr && isArrayType(fields_field.type()));
+  assertx(fields_field != nullptr && isVecOrArrayType(fields_field.type()));
   return fields_field.val().parr;
 }
 
@@ -98,7 +99,7 @@ ALWAYS_INLINE const bool is_optional_ts_shape_field(const ArrayData* ts) {
 
 ALWAYS_INLINE const ArrayData* get_ts_value_field(const ArrayData* ts) {
   auto const value_field = ts->rval(s_value.get());
-  assertx(value_field != nullptr && isArrayType(value_field.type()));
+  assertx(value_field != nullptr && isVecOrArrayType(value_field.type()));
   return value_field.val().parr;
 }
 
@@ -145,6 +146,12 @@ ALWAYS_INLINE const StringData* get_ts_root_name(const ArrayData* ts) {
   auto const field = ts->rval(s_root_name.get());
   assertx(field != nullptr && isStringType(field.type()));
   return field.val().pstr;
+}
+
+ALWAYS_INLINE const ArrayData* get_generic_types(const ArrayData* ts) {
+  auto const field = ts->rval(s_generic_types.get());
+  assertx(field != nullptr && isVecOrArrayType(field.type()));
+  return field.val().parr;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

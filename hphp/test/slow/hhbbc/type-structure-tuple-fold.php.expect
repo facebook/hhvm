@@ -1,0 +1,28 @@
+array(2) {
+  ["kind"]=>
+  int(10)
+  ["elem_types"]=>
+  array(3) {
+    [0]=>
+    array(2) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+    }
+    [1]=>
+    array(2) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+    }
+    [2]=>
+    array(2) {
+      ["kind"]=>
+      int(15)
+      ["classname"]=>
+      string(1) "A"
+    }
+  }
+}

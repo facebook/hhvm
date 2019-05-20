@@ -517,8 +517,26 @@ SString getNameFromType(const Type& t) {
 
 //////////////////////////////////////////////////////////////////////
 
+namespace {
+
 folly::Optional<ArrayData*>
-resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
+resolveTSListStatically(ISS& env, SArray tsList, const php::Class* declaringCls,
+                        bool checkArrays) {
+  auto arr = Array::attach(const_cast<ArrayData*>(tsList));
+  for (auto i = 0; i < arr.size(); i++) {
+    auto elemArr = arr[i].getArrayData();
+    auto elem = resolveTSStatically(env, elemArr, declaringCls, checkArrays);
+    if (!elem) return folly::none;
+    arr.set(i, Variant(*elem));
+  }
+  return arr.detach();
+}
+
+} // namespace
+
+folly::Optional<ArrayData*>
+resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
+                    bool checkArrays) {
   auto const addModifiers = [&](ArrayData* result) {
     auto a = Array::attach(result);
     if (is_ts_like_type(ts)) a.set(s_like, true_varNR.tv());
@@ -546,29 +564,48 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_resource:
       return finish(ts);
+    case TypeStructure::Kind::T_typevar:
+      if (ts->exists(s_name.get()) &&
+          get_ts_name(ts)->equal(s_wildcard.get())) {
+        return finish(ts);
+      }
+      return folly::none;
     case TypeStructure::Kind::T_dict:
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-      if (!check_arrays || isTSAllWildcards(ts)) return finish(ts);
+      if (!checkArrays || isTSAllWildcards(ts)) return finish(ts);
       return folly::none;
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp:
     case TypeStructure::Kind::T_enum:
-      // TODO(T31677864): We can optimize this further if generics also don't
-      // need resolving
-      if (isTSAllWildcards(ts)) return finish(ts);
-      return folly::none;
-    case TypeStructure::Kind::T_tuple:
+      // Generics for these must have been resolved already as we'd never set
+      // the TS Kind to be one of these until resolution
+      return finish(ts);
+    case TypeStructure::Kind::T_tuple: {
+      auto const elems = get_ts_elem_types(ts);
+      auto relems =
+        resolveTSListStatically(env, elems, declaringCls, checkArrays);
+      if (!relems) return folly::none;
+      auto result = const_cast<ArrayData*>(ts);
+      return finish(result->set(s_elem_types.get(), Variant(*relems)));
+    }
     case TypeStructure::Kind::T_shape:
-      // TODO(T31677864): We can also optimize these
+      // TODO(T31677864): We can also optimize this but shapes could have
+      // optional fields or they could allow unknown fields, so this one is
+      // slightly more tricky
       return folly::none;
     case TypeStructure::Kind::T_unresolved: {
-      // TODO(T31677864): We can also try to resolve the generics statically
-      if (ts->exists(s_generic_types) || !ts->exists(s_classname)) {
-        return folly::none;
+      assertx(ts->exists(s_classname));
+      auto result = const_cast<ArrayData*>(ts);
+      if (ts->exists(s_generic_types)) {
+        auto const generics = get_generic_types(ts);
+        auto rgenerics =
+          resolveTSListStatically(env, generics, declaringCls, checkArrays);
+        if (!rgenerics) return folly::none;
+        result = result->set(s_generic_types.get(), Variant(*rgenerics));
       }
       auto const rcls = env.index.resolve_class(env.ctx, get_ts_classname(ts));
       if (!rcls || !rcls->resolved()) return folly::none;
@@ -579,7 +616,6 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
         if (attrs & AttrInterface) return TypeStructure::Kind::T_interface;
         return TypeStructure::Kind::T_class;
       }();
-      auto result = const_cast<ArrayData*>(ts);
       return finish(result->set(s_kind.get(),
                                 Variant(static_cast<uint8_t>(kind))));
     }
@@ -587,6 +623,17 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
       auto const accList = get_access_list(ts);
       auto const size = accList->size();
       auto clsName = get_ts_root_name(ts);
+      auto checkNoOverrideOnFirst = false;
+      if (declaringCls) {
+        if (clsName->isame(s_self.get())) {
+          clsName = declaringCls->name;
+        } else if (clsName->isame(s_parent.get()) && declaringCls->parentName) {
+          clsName = declaringCls->parentName;
+        } else if (clsName->isame(s_this.get())) {
+          clsName = declaringCls->name;
+          checkNoOverrideOnFirst = true;
+        }
+      }
       ArrayData* typeCnsVal = nullptr;
       for (auto i = 0; i < size; i++) {
         auto const rcls = env.index.resolve_class(env.ctx, clsName);
@@ -600,8 +647,12 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
             !tvIsDictOrDArray(&*cnst->val)) {
           return folly::none;
         }
+        if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {
+          return folly::none;
+        }
         auto const optTypeCnsVal =
-          resolveTSStatically(env, cnst->val->m_data.parr, check_arrays);
+          resolveTSStatically(env, cnst->val->m_data.parr, cnst->cls,
+                              checkArrays);
         if (!optTypeCnsVal) return folly::none;
         typeCnsVal = *optTypeCnsVal;
         if (i == size - 1) break;
@@ -621,7 +672,6 @@ resolveTSStatically(ISS& env, SArray ts, bool check_arrays) {
     case TypeStructure::Kind::T_varray_or_darray:
     case TypeStructure::Kind::T_reifiedtype:
     case TypeStructure::Kind::T_fun:
-    case TypeStructure::Kind::T_typevar:
     case TypeStructure::Kind::T_trait:
       return folly::none;
   }
@@ -3287,7 +3337,8 @@ void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {
     // Optimize single input that does not need any combination
     if (op.arg1 == 1) {
       if (canReduceToDontResolve(ts)) return reduce(env);
-      if (auto const resolved = resolveTSStatically(env, ts, false)) {
+      if (auto const resolved = resolveTSStatically(env, ts, env.ctx.cls,
+                                                    false)) {
         return RuntimeOption::EvalHackArrDVArrs
           ? reduce(env, bc::PopC {}, bc::Dict  { *resolved })
           : reduce(env, bc::PopC {}, bc::Array { *resolved });

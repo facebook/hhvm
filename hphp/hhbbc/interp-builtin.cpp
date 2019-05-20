@@ -336,7 +336,8 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
     if (check_lsb && !cnst->isNoOverride) return nullptr;
     auto const typeCns = cnst->val;
     if (!tvIsDictOrDArray(&*typeCns)) return nullptr;
-    auto const opt_ts = resolveTSStatically(env, typeCns->m_data.parr, true);
+    auto const opt_ts = resolveTSStatically(env, typeCns->m_data.parr,
+                                            env.ctx.cls, true);
     if (!opt_ts) return nullptr;
     return *opt_ts;
   };

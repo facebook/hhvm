@@ -17,8 +17,6 @@ function function_exists(string $function_name, bool $autoload = true): bool;
 function is_callable($v, bool $syntax = false, &$name = null): bool;
 function call_user_func_array<T>($function, Container<T> $params);
 function call_user_func($function, ...);
-<<__Deprecated('Will be removed in future version of Hack')>>
-function func_num_args(): int;
 <<__PHPStdLib>>
 function register_postsend_function($function, ...);
 <<__PHPStdLib>>

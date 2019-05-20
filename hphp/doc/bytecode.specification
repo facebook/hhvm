@@ -3405,10 +3405,6 @@ InitThisLoc <local variable id>    []  ->  []
   variable. If the current instance is null, or if this bytecode appears in a
   function body that is not a class method, this instruction does nothing.
 
-FuncNumArgs   []   ->   [C:Int]
-
-  Push the number of arguments the current function was called with.
-
 ChainFaults    [C C]  ->  [C]
 
   Chain exception objects. If either $1 or $2 is not an object that implements

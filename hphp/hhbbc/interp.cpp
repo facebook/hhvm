@@ -4799,11 +4799,6 @@ void in(ISS& env, const bc::InitThisLoc& op) {
   }
 }
 
-void in(ISS& env, const bc::FuncNumArgs& op) {
-  mayUseVV(env);
-  push(env, TInt);
-}
-
 /*
  * Amongst other things, we use this to mark units non-persistent.
  */

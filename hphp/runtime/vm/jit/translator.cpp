@@ -340,7 +340,6 @@ static const struct {
   { OpCheckThis,   {This,             None,         OutNone         }},
   { OpInitThisLoc,
                    {None,             Local,        OutUnknown      }},
-  { OpFuncNumArgs, {None,             Stack1,       OutInt64        }},
   { OpChainFaults, {StackTop2,        Stack1,       OutObject       }},
   { OpVerifyParamType,
                    {Local,            Local,        OutUnknown      }},
@@ -972,7 +971,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushFuncD:
   case Op::FPushObjMethodD:
   case Op::FPushObjMethodRD:
-  case Op::FuncNumArgs:
   case Op::ResolveFunc:
   case Op::ResolveClsMethod:
   case Op::ResolveObjMethod:

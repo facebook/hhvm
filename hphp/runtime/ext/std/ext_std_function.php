@@ -49,18 +49,6 @@ function call_user_func(mixed $callback,
                         ...$parameters): mixed;
 
 /**
- * Returns the number of arguments passed to the function
- *
- * @return int - Returns the number of arguments passed into the current
- *   user-defined function.
- */
-function func_num_args(): int {
-  throw new InvalidArgumentException(
-    "Unsupported dynamic call of func_num_args()",
-  );
-}
-
-/**
  * Return TRUE if the given function has been defined
  *
  * @param string $function_name - The function name, as a string.

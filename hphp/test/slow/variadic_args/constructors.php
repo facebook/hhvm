@@ -5,7 +5,6 @@ class CVarSome {
   public $v;
   public function __construct($x, ...$v) {
     echo "\n", '* ', __METHOD__, "\n";
-    var_dump(func_num_args());
     var_dump(isset($x));
     var_dump(is_array($v));
     var_dump($v);
@@ -18,7 +17,6 @@ class CVarSome {
 class CVarMod {
   public function __construct(public $x, public ...$v) {
     echo "\n", '* ', __METHOD__, "\n";
-    var_dump(func_num_args());
     var_dump(isset($x));
     var_dump(is_array($v));
     var_dump($v);

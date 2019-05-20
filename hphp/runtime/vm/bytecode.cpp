@@ -5848,17 +5848,6 @@ OPTBLD_INLINE void iopInitThisLoc(local_var thisLoc) {
   }
 }
 
-OPTBLD_INLINE void iopFuncNumArgs() {
-  if (vmfp()->func()->isPseudoMain()) {
-    raise_warning(
-      "func_num_args():  Called from the global scope - no function context"
-    );
-    vmStack().pushInt(-1);
-  } else {
-    vmStack().pushInt(vmfp()->numArgs());
-  }
-}
-
 OPTBLD_INLINE void iopChainFaults() {
   auto const current = *vmStack().indC(1);
   auto const prev = *vmStack().indC(0);

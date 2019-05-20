@@ -303,11 +303,6 @@ void emitBareThis(IRGS& env, BareThisOp subop) {
   pushIncRef(env, castCtxThis(env, ctx));
 }
 
-void emitFuncNumArgs(IRGS& env) {
-  if (curFunc(env)->isPseudoMain()) PUNT(FuncNumArgs-PseudoMain);
-  push(env, gen(env, LdARNumParams, fp(env)));
-}
-
 void emitClone(IRGS& env) {
   if (!topC(env)->isA(TObj)) PUNT(Clone-NonObj);
   auto const obj        = popC(env);

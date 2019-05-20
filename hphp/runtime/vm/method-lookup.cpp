@@ -31,7 +31,6 @@ namespace HPHP {
 
 namespace {
 
-const StaticString s___construct("__construct");
 const StaticString s___call("__call");
 
 /*
@@ -99,13 +98,7 @@ const Func* lookupMethodCtx(const Class* cls,
       methodName = stripTypeFromReifiedName(methodName);
     }
     method = cls->lookupMethod(methodName);
-    while (!method) {
-      if (UNLIKELY(methodName->isame(s___construct.get()))) {
-        // We were looking up __construct and failed to find it. Fall back
-        // to old-style constructor: same as class name.
-        method = cls->getCtor();
-        if (!Func::isSpecial(method->name())) break;
-      }
+    if (!method) {
       // We didn't find any methods with the specified name in cls's method
       // table, handle the failure as appropriate.
       if (raise) {

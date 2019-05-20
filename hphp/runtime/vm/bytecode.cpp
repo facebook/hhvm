@@ -186,7 +186,6 @@ void frame_free_locals_no_hook(ActRec* fp) {
 const StaticString s___call("__call");
 const StaticString s_file("file");
 const StaticString s_line("line");
-const StaticString s_construct("__construct");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -5476,10 +5475,7 @@ void iopFCall(PC origpc, PC& pc, FCallArgs fca,
     funcName->empty() ||
     RuntimeOption::EvalJitEnableRenameFunction ||
     (func->attrs() & AttrInterceptable) ||
-    func->name()->isame(funcName) || (
-      funcName == s_construct.get() &&
-      func == func->cls()->getCtor()
-    )
+    func->name()->isame(funcName)
   );
   assertx(fca.numArgsInclUnpack() == ar->numArgs());
   if (fca.enforceReffiness()) callerReffinessChecks(func, fca);

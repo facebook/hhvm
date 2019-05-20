@@ -61,7 +61,6 @@ namespace HPHP { namespace HHBBC {
 
 namespace {
 
-const StaticString s_construct("__construct");
 const StaticString s_PHP_Incomplete_Class("__PHP_Incomplete_Class");
 const StaticString s_IMemoizeParam("HH\\IMemoizeParam");
 const StaticString s_getInstanceKey("getInstanceKey");
@@ -4335,15 +4334,6 @@ void in(ISS& env, const bc::FCall& op) {
         env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
     case FPIKind::Ctor:
       assertx(fca.numRets == 1);
-      /*
-       * Need to be wary of old-style ctors. We could get into the situation
-       * where we're constructing class D extends B, and B has an old-style
-       * ctor but D::B also exists.  (So in this case we'll skip the
-       * fcallKnownImpl stuff.)
-       */
-      if (!ar.func->name()->isame(s_construct.get())) {
-        break;
-      }
       // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:

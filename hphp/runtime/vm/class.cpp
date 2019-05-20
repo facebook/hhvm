@@ -1639,61 +1639,16 @@ void Class::setSpecial() {
     m_invoke = nullptr;
   }
 
-  auto matchedClassOrIsTrait = [this](const StringData* sd) {
-    auto func = lookupMethod(sd);
-    if (func && func->cls() == this) {
-      if (func->takesInOutParams() || func->isInOutWrapper()) {
-        raise_error("Parameters may not be marked inout on constructors");
-      }
-
-      m_ctor = func;
-      return true;
-    }
-    return false;
-  };
-
   // Look for __construct() declared in either this class or a trait
-  if (matchedClassOrIsTrait(s_construct.get())) {
-    auto func = lookupMethod(m_preClass->name());
-    if (func && func->cls() == this &&
-        (func->preClass()->attrs() & AttrTrait ||
-         m_ctor->preClass()->attrs() & AttrTrait)) {
-      throw Exception(
-        "%s has colliding constructor definitions coming from traits",
-        m_preClass->name()->data()
-      );
+  auto const func = lookupMethod(s_construct.get());
+  if (func && func->cls() == this) {
+    if (func->takesInOutParams() || func->isInOutWrapper()) {
+      raise_error("Parameters may not be marked inout on constructors");
     }
-    return;
-  }
 
-  if (!(attrs() & (AttrTrait | AttrInterface))) {
-    // Look for Foo::Foo() (old style constructor) declared in this class
-    // and deprecate warning if we are in PHP 7 mode
-    if (matchedClassOrIsTrait(m_preClass->name())) {
-      // https://wiki.php.net/rfc/remove_php4_constructors
-      // Check for PHP 4 style constructors. For PHP 7 support, in certain
-      // scenarios, we throw a deprecation warning and then for PHP 8+ support
-      // we will not support them at all.
-      // We know we Foo:Foo() since we are in this if statement
-      // Now, if the PHP 7 runtime option is set and the class:
-      //   1. does not have an explicit constructor with __construct
-      //   2. is not in a namespace (namespaced classes treat methods with the
-      //      same name as the class as just normal methods, not a constructor)
-      // then we give the deprecation warning.
-      if (
-        RuntimeOption::PHP7_DeprecationWarnings && // In PHP 7 mode
-        !this->instanceCtor() && // No explicit __construct
-        this->name()->toCppString().find("\\") == std::string::npos // no NS
-      ) {
-        const char *deprecated_msg =
-          "Methods with the same name as their class will not be "
-          "constructors in a future version of PHP; %s has a deprecated "
-          "constructor";
-        raise_deprecated(deprecated_msg, this->name()->toCppString().c_str());
-      }
-      return;
-    }
-  }
+    m_ctor = func;
+    return;
+  };
 
   // Look for parent constructor.
   if (m_parent.get() != nullptr && m_parent->m_ctor) {

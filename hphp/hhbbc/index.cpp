@@ -1719,37 +1719,16 @@ bool find_constructor(ClassInfo* cinfo) {
     return true;
   }
 
-  auto find_toplevel = [&] (SString name) -> const MethTabEntryPair* {
-    auto const cit = cinfo->methods.find(name);
+  auto const construct = [&] () -> const MethTabEntryPair* {
+    auto const cit = cinfo->methods.find(s_construct.get());
     if (cit != end(cinfo->methods) && cit->second.topLevel) {
       return mteFromIt(cit);
     }
     return nullptr;
-  };
-
-  auto const construct       = find_toplevel(s_construct.get());
-  auto const named_construct = find_toplevel(cinfo->cls->name);
+  }();
 
   if (construct) {
-    if (named_construct) {
-      // If both constructors exist, and at least one came
-      // from a trait we'll fatal at runtime.
-      if (named_construct->second.func->cls->attrs & AttrTrait ||
-          construct->second.func->cls->attrs & AttrTrait) {
-        ITRACE(2,
-               "find_constructor failed for `{}' due to colliding constructors"
-               "from traits: {} and {}\n",
-               named_construct->second.func->cls->name,
-               construct->second.func->cls->name);
-        return false;
-      }
-    }
     cinfo->ctor = construct;
-    return true;
-  }
-
-  if (named_construct) {
-    cinfo->ctor = named_construct;
     return true;
   }
 

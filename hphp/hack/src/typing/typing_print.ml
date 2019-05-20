@@ -77,7 +77,7 @@ module Suggest = struct
     | Tclass ((_, cid), _, l) -> (Utils.strip_ns cid)^"<"^list l^">"
     | Tabstract (AKnewtype (cid, l), _)   ->
         (Utils.strip_ns cid)^"<"^list l^">"
-    | Tabstract (AKdependent (_, _), _) -> "..."
+    | Tabstract (AKdependent _, _) -> "..."
     | Tobject                -> "..."
     | Tshape _               -> "..."
     | Taccess (root_ty, ids) ->
@@ -666,11 +666,10 @@ module ErrorString = struct
     | AKgeneric s, _ when AbstractKind.is_generic_dep_ty s ->
       "the expression dependent type "^s
     | AKgeneric _, _ -> "a value of generic type "^x
-    | AKdependent (`cls c, []), Some ty ->
+    | AKdependent (`cls c), Some ty ->
         to_string env ty^" (known to be exactly the class '"^strip_ns c^"')"
-    | AKdependent ((`this | `expr _), _), _ ->
+    | AKdependent (`this | `expr _), _ ->
         "the expression dependent type "^x
-    | AKdependent (_, _::_), _ -> "the abstract type constant "^x
     | AKdependent _, _ ->
         "the type '"^x^"'"
         ^Option.value_map cstr ~default:""
@@ -801,15 +800,15 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
     obj @@ kind "enum" @ name s @ as_type opt_ty
   | Tabstract (AKnewtype (s, tys), opt_ty) ->
     obj @@ kind "newtype" @ name s @ args tys @ as_type opt_ty
-  | Tabstract (AKdependent (`cls c, ids), opt_ty) ->
+  | Tabstract (AKdependent (`cls c), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "class" @ name c @ args []]
-      @ path ids @ as_type opt_ty
-  | Tabstract (AKdependent (`expr _, ids), opt_ty) ->
+      @ as_type opt_ty
+  | Tabstract (AKdependent (`expr _), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "expr"]
-      @ path ids @ as_type opt_ty
-  | Tabstract (AKdependent (`this, ids), opt_ty) ->
+      @ as_type opt_ty
+  | Tabstract (AKdependent (`this), opt_ty) ->
     obj @@ kind "path" @ ["type", obj @@ kind "this"]
-      @ path ids @ as_type opt_ty
+      @ as_type opt_ty
   | Toption (_, Tnonnull) ->
     obj @@ kind "mixed"
   | Toption ty ->
@@ -992,14 +991,14 @@ let to_locl_ty
               ~message:"Expected a string"
               ~keytrace
         ) in
-      ids >>= fun ids ->
+      ids >>= fun _ids ->
 
       begin match path_kind with
       | "class" ->
         get_string "name" (type_json, type_keytrace)
           >>= fun (class_name, _class_name_keytrace) ->
         aux_as json ~keytrace >>= fun as_opt ->
-        ty (Tabstract (AKdependent (`cls class_name, ids), as_opt))
+        ty (Tabstract (AKdependent (`cls class_name), as_opt))
 
       | "expr" ->
         not_supported
@@ -1008,7 +1007,7 @@ let to_locl_ty
 
       | "this" ->
         aux_as json ~keytrace >>= fun as_opt ->
-        ty (Tabstract (AKdependent (`this, ids), as_opt))
+        ty (Tabstract (AKdependent `this, as_opt))
 
       | path_kind ->
         deserialization_error

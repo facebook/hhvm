@@ -178,7 +178,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
         | Some (env, cstr) -> env, Some cstr in
       env, Tabstract (ak1, tcstr)
 
-  | Tabstract (AKdependent (expr_dep, _),
+  | Tabstract (AKdependent expr_dep,
       Some (_, Tclass ((_, x) as id, _, _) as ty)), _ ->
     let class_ = Env.get_class env x in
       (* For final class C, there is no difference between abstract<X> and X.
@@ -211,7 +211,7 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
           );
           env, Terr
         )
-  | _, Tabstract (AKdependent (_, _), Some (_, Tclass _)) ->
+  | _, Tabstract (AKdependent _, Some (_, Tclass _)) ->
       unify_ env r2 ty2 r1 ty1
 
   | Tarraykind AKany, (Ttuple _ as ty)

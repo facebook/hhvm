@@ -5808,7 +5808,7 @@ and condition ?lhs_of_null_coalesce env tparamet
           if safe_instanceof_enabled
           then Errors.instanceof_generic_classname p name;
           env, obj_ty
-        | _, Tabstract (AKdependent (`this, []), Some (_, Tclass _)) ->
+        | _, Tabstract (AKdependent (`this), Some (_, Tclass _)) ->
           env, obj_ty
         | _, Tabstract ((AKdependent _ | AKnewtype _), Some ty) ->
           resolve_obj env ty

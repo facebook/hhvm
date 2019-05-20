@@ -15,7 +15,9 @@ module ExprDepTy = struct
   module Env = Typing_env
   module TUtils = Typing_utils
 
-  let to_string dt = AbstractKind.to_string (AKdependent dt)
+  let to_string (dt, ids) =
+    let dt = AbstractKind.to_string (AKdependent dt) in
+    String.concat ~sep:"::" (dt::ids)
 
   let new_() =
     let eid = Ident.tmp() in
@@ -74,7 +76,7 @@ module ExprDepTy = struct
           (* Always represent exact types without an access path as Tclass(_,Exact,_) *)
         | (`cls _, []), (_, Tclass (c, _, tyl)) ->
           env, (r, Tclass (c, Exact, tyl))
-        | (_, []), _ ->
+        | (dep_ty, []), _ ->
           env, (r, Tabstract (AKdependent dep_ty, Some ty))
         | _ ->
           begin match ty with

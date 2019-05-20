@@ -447,11 +447,11 @@ and simplify_subtype
     then simplify_subtype ~seen_generic_params ~deep ~this_ty bound_sub bound_super env
     else simplify_subtype ~seen_generic_params ~deep ~this_ty bound_sub ty_super env
 
-  | Tabstract (AKdependent (`expr _, []), Some ty_sub), Tclass _ ->
+  | Tabstract (AKdependent (`expr _), Some ty_sub), Tclass _ ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty_super env
 
-  | Tabstract (AKdependent (`expr _, []), Some ty), Toption arg_ty_super ->
+  | Tabstract (AKdependent (`expr _), Some ty), Toption arg_ty_super ->
     let this_ty = Option.first_some this_ty (Some ety_sub) in
     if new_inference
     then
@@ -637,7 +637,7 @@ and simplify_subtype
   (* Primitives and other concrete types cannot be subtypes of dependent types *)
   | (Tnonnull | Tdynamic | Tprim _ | Tfun _ | Ttuple _ | Tshape _ |
      Tabstract (AKenum _, None) | Tanon _ | Tclass _ | Tobject | Tarraykind _),
-    Tabstract (AKdependent (expr_dep, _), tyopt) ->
+    Tabstract (AKdependent expr_dep, tyopt) ->
     (* If the bound is the same class try and show more explanation of the error *)
     begin match snd ty_sub, tyopt with
     | Tclass ((_, y), _, _), Some (_, (Tclass ((_, x) as id, _, _))) when y = x ->
@@ -2834,7 +2834,7 @@ let widen env widen_concrete_type ty =
     (* Don't widen the `this` type, because the field type changes up the hierarchy
      * so we lose precision
      *)
-    | _, Tabstract (AKdependent (`this, _), _) ->
+    | _, Tabstract (AKdependent `this, _) ->
       env, ty
     (* For other abstract types, just widen to the bound, if possible *)
     | _, Tabstract (_, Some ty) ->

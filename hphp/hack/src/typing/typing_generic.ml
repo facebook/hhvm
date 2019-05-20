@@ -26,7 +26,7 @@ end = struct
   let ty : type a . a ty -> _ = fun x ->
     let rec ty : type a. a ty -> _ = fun (r, t) ->
       match t with
-      | Tabstract ((AKdependent (_, _) | AKenum _), cstr) -> ty_opt cstr
+      | Tabstract ((AKdependent _ | AKenum _), cstr) -> ty_opt cstr
       | Tabstract (AKgeneric x, cstr) when AbstractKind.is_generic_dep_ty x ->
         ty_opt cstr
       | Tabstract (AKgeneric x, _) -> raise (Found (r, x))

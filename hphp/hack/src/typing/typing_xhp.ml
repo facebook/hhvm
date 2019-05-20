@@ -51,7 +51,7 @@ let rec walk_and_gather_xhp_ ~env ~ureason ~pos cty =
         (env, acc' @ acc), ty)
       in
       env, acc
-  | Tabstract (AKdependent (`this, _), _) ->
+  | Tabstract (AKdependent (`this), _) ->
       (* This is unsound, but we want to do best-effort checking
        * of attribute spreads even on XHP classes not marked `final`. We should
        * implement <<__ConsistentAttributes>> as a way to make this hacky

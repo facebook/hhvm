@@ -28,7 +28,7 @@ type env = {
   (* A trail of all the type constants we have expanded. Used primarily for
    * error reporting
    *)
-  trail : dependent_type list;
+  trail : (dependent_type * string list) list;
 
   (* A list of dependent we have encountered while expanding a type constant.
    * After expanding a type constant we can choose either the assigned type or
@@ -36,7 +36,7 @@ type env = {
    * be expression dependent so this list will be set to empty. However, if it
    * is the constrained type then the final type will also be a dependent type.
    *)
-  dep_tys : (Reason.t * dependent_type) list;
+  dep_tys : (Reason.t * (dependent_type * string list)) list;
   (* The remaining type constants we need to expand *)
   ids : Nast.sid list;
 
@@ -85,7 +85,7 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
        for the receiver - check if condition type has type constant at the same path.
        If yes - attach a condition type ROOTCOND_TY::ID to a result type *)
        begin match root, ids, TR.condition_type_from_reactivity (Env.env_reactivity tenv) with
-       | (_, Tabstract (AKdependent (`this, []), _)),
+       | (_, Tabstract (AKdependent (`this), _)),
          [_, id],
          Some cond_ty ->
          begin match CT.try_get_class_for_condition_type tenv cond_ty with
@@ -121,7 +121,7 @@ and expand env ~as_tyvar_with_cnstr root =
       env, root
   | head::tail -> begin match root_ty with
       | Tany | Terr -> env, root
-      | Tabstract (AKdependent (`cls _, []), Some ty)
+      | Tabstract (AKdependent (`cls _), Some ty)
       | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand env ty
       | Tclass ((class_pos, class_name), _, tyl) ->
           (* Legacy behaviour is to preserve exactness only on `this`
@@ -168,7 +168,7 @@ and expand env ~as_tyvar_with_cnstr root =
       | Tabstract (AKdependent dep_ty, Some ty) ->
           let env =
             { env with
-              dep_tys = (root_reason, dep_ty)::env.dep_tys } in
+              dep_tys = (root_reason, (dep_ty, []))::env.dep_tys } in
           expand env ty
       | Tunion tyl ->
           let env, tyl = List.map_env env tyl begin fun prev_env ty ->

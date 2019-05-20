@@ -307,7 +307,7 @@ and dependent_type =
    *  The expression $x->foo() would have a different one
    *)
   | `expr of Ident.t
-  ] * string list
+  ]
 
 and taccess_type = decl ty * Nast.sid list
 
@@ -622,7 +622,7 @@ module AbstractKind = struct
     | AKnewtype (name, _) -> name
     | AKgeneric name -> name
     | AKenum name -> Utils.strip_ns name
-    | AKdependent (dt, ids) ->
+    | AKdependent dt ->
        let dt =
          match dt with
          | `this -> SN.Typehints.this
@@ -630,7 +630,7 @@ module AbstractKind = struct
          | `expr i ->
              let display_id = Reason.get_expr_display_id i in
              "<expr#"^string_of_int display_id^">" in
-       String.concat ~sep:"::" (dt::ids)
+       dt
 
   let is_generic_dep_ty s = String_utils.is_substring "::" s
 end

@@ -272,7 +272,7 @@ and show_abstract_kind : abstract_kind -> string = fun x ->
   Format.asprintf "%a" pp_abstract_kind x
 
 and pp_dependent_type : Format.formatter -> dependent_type -> unit =
-fun fmt (a0,a1) ->
+fun fmt a0 ->
   Format.fprintf fmt "(@[";
   (match a0 with
   | `this -> Format.pp_print_string fmt "`this"
@@ -284,19 +284,7 @@ fun fmt (a0,a1) ->
     Format.fprintf fmt "`expr (@[<hov>";
     Ident.pp fmt x;
     Format.fprintf fmt "@])"
-  );
-  Format.fprintf fmt ",@ ";
-  Format.fprintf fmt "@[<2>[";
-  ignore
-    (List.fold_left
-      ~f:(fun sep x ->
-        if sep then Format.fprintf fmt ";@ ";
-        (Format.fprintf fmt "%S") x;
-        true)
-      ~init:false
-      a1);
-  Format.fprintf fmt "@,]@]";
-  Format.fprintf fmt "@])"
+  )
 
 and show_dependent_type : dependent_type -> string = fun x ->
   Format.asprintf "%a" pp_dependent_type x

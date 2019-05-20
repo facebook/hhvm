@@ -1635,11 +1635,11 @@ To string conversions:
 
   Initializes properties of object S0.
 
-| ConstructInstance<class>, DAllocObj, NA, NF
+| ConstructInstance<class>, DAllocObj, NA, PRc
 
   Call the custom instance constructor of an extension class.
 
-| ConstructClosure<class>, DAllocObj, NA, NF
+| ConstructClosure<class>, DAllocObj, NA, PRc
 
   Call the custom instance constructor of a Closure.
 

@@ -42,7 +42,6 @@ type args = {
    mode : mode;
    parser : parser;
    is_experimental : bool;
-   enable_stronger_await_binding : bool;
    disable_unsafe_expr : bool;
    disable_unsafe_block  : bool;
    force_hh : bool;
@@ -271,7 +270,6 @@ let parse_args () =
   let mode = ref COMPARE in
   let parser = ref MINIMAL in
   let is_experimental = ref false in
-  let enable_stronger_await_binding = ref false in
   let disable_unsafe_expr = ref false in
   let disable_unsafe_block = ref false in
   let codegen = ref false in
@@ -292,7 +290,6 @@ let parse_args () =
     "--coroutine", Arg.Unit (fun () -> parser := COROUTINE), "";
     "--decl-mode", Arg.Unit (fun () -> (parser := DECL_MODE; check_json_equal_only := true)), "";
     "--experimental", Arg.Set is_experimental, "";
-    "--enable-stronger-await-binding", Arg.Set enable_stronger_await_binding, "";
     "--disable-unsafe-expr", Arg.Set disable_unsafe_expr, "";
     "--disable-unsafe-block", Arg.Set disable_unsafe_block, "";
     "--codegen", Arg.Set codegen, "";
@@ -312,7 +309,6 @@ let parse_args () =
     mode = !mode;
     parser = !parser;
     is_experimental = !is_experimental;
-    enable_stronger_await_binding = !enable_stronger_await_binding;
     disable_unsafe_expr = !disable_unsafe_expr;
     disable_unsafe_block = !disable_unsafe_block;
     codegen = !codegen;
@@ -352,7 +348,6 @@ let () =
   let t = Unix.gettimeofday() in
   let mode = if args.is_experimental then Some (FileInfo.Mexperimental) else None in
   let make_env = Full_fidelity_parser_env.make
-    ~enable_stronger_await_binding:args.enable_stronger_await_binding
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
     ~force_hh:args.force_hh

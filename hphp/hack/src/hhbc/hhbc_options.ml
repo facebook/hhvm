@@ -48,8 +48,6 @@ type t = {
   option_hhjs_unique_filenames            : bool;
   option_hhjs_babel_transform             : string;
   option_hhjs_node_modules                : SSet.t;
-  option_enable_concurrent                : bool;
-  option_enable_await_as_an_expression    : bool;
   option_phpism_disallow_execution_operator: bool;
   option_phpism_disable_nontoplevel_declarations : bool;
   option_phpism_disable_static_closures : bool;
@@ -59,7 +57,6 @@ type t = {
   option_emit_inst_meth_pointers          : bool;
   option_emit_meth_caller_func_pointers   : bool;
   option_rx_is_enabled                    : bool;
-  option_enable_stronger_await_binding    : bool;
   option_disable_lval_as_an_expression    : bool;
   option_enable_pocket_universes          : bool;
   option_notice_on_byref_argument_typehint_violation : bool;
@@ -105,8 +102,6 @@ let default = {
   option_hhjs_unique_filenames = true;
   option_hhjs_babel_transform = "";
   option_hhjs_node_modules = SSet.empty;
-  option_enable_concurrent = true;
-  option_enable_await_as_an_expression = true;
   option_phpism_disallow_execution_operator = false;
   option_phpism_disable_nontoplevel_declarations = false;
   option_phpism_disable_static_closures = false;
@@ -116,7 +111,6 @@ let default = {
   option_emit_inst_meth_pointers = true;
   option_emit_meth_caller_func_pointers = true;
   option_rx_is_enabled = false;
-  option_enable_stronger_await_binding = false;
   option_disable_lval_as_an_expression = false;
   option_enable_pocket_universes = false;
   option_notice_on_byref_argument_typehint_violation = false;
@@ -159,8 +153,6 @@ let hhjs_no_babel o = o.option_hhjs_no_babel
 let hhjs_unique_filenames o = o.option_hhjs_unique_filenames
 let hhjs_babel_transform o = o.option_hhjs_babel_transform
 let hhjs_node_modules o = o.option_hhjs_node_modules
-let enable_concurrent o = o.option_enable_concurrent
-let enable_await_as_an_expression o = o.option_enable_await_as_an_expression
 let phpism_disallow_execution_operator o = o.option_phpism_disallow_execution_operator
 let phpism_disable_nontoplevel_declarations o = o.option_phpism_disable_nontoplevel_declarations
 let phpism_disable_static_closures o = o.option_phpism_disable_static_closures
@@ -170,7 +162,6 @@ let emit_cls_meth_pointers o = o.option_emit_cls_meth_pointers
 let emit_inst_meth_pointers o = o.option_emit_inst_meth_pointers
 let emit_meth_caller_func_pointers o = o.option_emit_meth_caller_func_pointers
 let rx_is_enabled o = o.option_rx_is_enabled
-let enable_stronger_await_binding o = o.option_enable_stronger_await_binding
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
 let enable_pocket_universes o = o.option_enable_pocket_universes
 let notice_on_byref_argument_typehint_violation o = o.option_notice_on_byref_argument_typehint_violation
@@ -215,8 +206,6 @@ let to_string o =
     ; Printf.sprintf "enable_perf_logging: %B" @@ enable_perf_logging o
     ; Printf.sprintf "enable_intrinsics_extension: %B" @@ enable_intrinsics_extension o
     ; Printf.sprintf "enable_hhjs: %B" @@ enable_hhjs o
-    ; Printf.sprintf "enable_concurrent: %B" @@ enable_concurrent o
-    ; Printf.sprintf "enable_await_as_an_expression: %B" @@ enable_await_as_an_expression o
     ; Printf.sprintf "phpism_disallow_execution_operator %B" @@ phpism_disallow_execution_operator o
     ; Printf.sprintf "phpism_disable_nontoplevel_declarations %B"
       @@ phpism_disable_nontoplevel_declarations o
@@ -227,7 +216,6 @@ let to_string o =
     ; Printf.sprintf "emit_cls_meth_pointers: %B" @@ emit_cls_meth_pointers o
     ; Printf.sprintf "emit_inst_meth_pointers: %B" @@ emit_inst_meth_pointers o
     ; Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o
-    ; Printf.sprintf "enable_stronger_await_binding: %B" @@ enable_stronger_await_binding o
     ; Printf.sprintf "disable_lval_as_an_expression: %B" @@ disable_lval_as_an_expression o
     ; Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o
     ; Printf.sprintf "notice_on_byref_argument_typehint_violation: %B" @@ notice_on_byref_argument_typehint_violation o
@@ -329,8 +317,6 @@ let set_option options name value =
     { options with option_phpism_disable_static_closures = as_bool value }
   | "hack.lang.phpism.disableinstanceof" ->
     { options with option_phpism_disable_instanceof = as_bool value }
-  | "hack.lang.enableconcurrent" ->
-    { options with option_enable_concurrent = as_bool value }
   | "hhvm.emit_func_pointers" ->
     { options with option_emit_func_pointers = int_of_string value > 0 }
   | "hhvm.emit_cls_meth_pointers" ->
@@ -341,10 +327,6 @@ let set_option options name value =
     { options with option_emit_meth_caller_func_pointers = int_of_string value > 0 }
   | "hhvm.rx_is_enabled" ->
     { options with option_rx_is_enabled = int_of_string value > 0 }
-  | "hack.lang.enableawaitasanexpression" ->
-    { options with option_enable_await_as_an_expression = as_bool value }
-  | "hack.lang.enable_stronger_await_binding" ->
-    { options with option_enable_stronger_await_binding = as_bool value }
   | "hack.lang.disable_lval_as_an_expression" ->
     { options with option_disable_lval_as_an_expression = as_bool value }
   | "hack.lang.enablepocketuniverses" ->
@@ -457,12 +439,6 @@ let value_setters = [
     fun opts v -> { opts with option_hacksperimental = (v = 1) });
   (set_value "hhvm.hack.lang.enable_reified_generics" get_value_from_config_int @@
     fun opts v -> { opts with option_enable_reified_generics = (v = 1) });
-  (set_value "hhvm.hack.lang.enable_concurrent" get_value_from_config_int @@
-    fun opts v -> { opts with option_enable_concurrent = (v = 1) });
-  (set_value "hhvm.hack.lang.enable_await_as_an_expression" get_value_from_config_int @@
-    fun opts v -> { opts with option_enable_await_as_an_expression = (v = 1) });
-  (set_value "hhvm.hack.lang.enable_stronger_await_binding" get_value_from_config_int @@
-    fun opts v -> { opts with option_enable_stronger_await_binding = (v = 1) });
   (set_value "hhvm.hack.lang.disable_lval_as_an_expression" get_value_from_config_int @@
     fun opts v -> { opts with option_disable_lval_as_an_expression = (v = 1) });
   (set_value "hhvm.hack.lang.enable_pocket_universes" get_value_from_config_int @@

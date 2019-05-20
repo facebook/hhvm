@@ -8,7 +8,6 @@
  *)
 
 module TokenKind = Full_fidelity_token_kind
-module Env = Full_fidelity_parser_env
 
 type t =
 | DollarOperator
@@ -95,7 +94,7 @@ type assoc =
 | RightAssociative
 | NotAssociative
 
-let precedence env operator =
+let precedence _env operator =
   (* TODO: eval *)
   (* TODO: Comma *)
   (* TODO: elseif *)
@@ -105,7 +104,6 @@ let precedence env operator =
   match operator with
   | IncludeOperator | IncludeOnceOperator | RequireOperator
   | RequireOnceOperator -> 1
-  | AwaitOperator when not (Env.enable_stronger_await_binding env) -> 1
   | PHPOrOperator -> 2
   | PHPExclusiveOrOperator -> 3
   | PHPAndOperator -> 4
@@ -143,8 +141,7 @@ let precedence env operator =
   | PrefixIncrementOperator | PrefixDecrementOperator
   | ExponentOperator -> 22
   | PostfixIncrementOperator | PostfixDecrementOperator -> 23
-  | AwaitOperator (* implicit: when Env.enable_stronger_await_binding env *)
-    -> 23
+  | AwaitOperator -> 23
   | CloneOperator -> 24
   (* value 25 is reserved for assignment that appear in expressions *)
   | ReferenceOperator -> 26
@@ -157,15 +154,12 @@ let precedence env operator =
 
 let precedence_for_assignment_in_expressions = 25
 
-let associativity env operator =
+let associativity _env operator =
   match operator with
   | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
   | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
   | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
   | NewOperator | CloneOperator | SpaceshipOperator -> NotAssociative
-
-  | AwaitOperator when not (Env.enable_stronger_await_binding env)
-    -> NotAssociative
 
   | DegenerateConditionalOperator
   | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
@@ -198,8 +192,7 @@ let associativity env operator =
   | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
   | PrintOperator | SuspendOperator -> RightAssociative
 
-  | AwaitOperator (* implicitly: Env.enable_stronger_await_binding env*)
-    -> RightAssociative
+  | AwaitOperator -> RightAssociative
 
 let prefix_unary_from_token token =
   match token with

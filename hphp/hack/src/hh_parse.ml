@@ -60,12 +60,10 @@ module FullFidelityParseArgs = struct
     quick_mode : bool;
     lower_coroutines : bool;
     enable_hh_syntax : bool;
-    enable_await_as_an_expression : bool;
     fail_open : bool;
     (* Defining the input *)
     files : string list;
     dump_nast : bool;
-    enable_stronger_await_binding : bool;
     disable_lval_as_an_expression : bool;
     pocket_universes : bool;
     disable_unsafe_expr : bool;
@@ -94,12 +92,10 @@ module FullFidelityParseArgs = struct
     quick_mode
     lower_coroutines
     enable_hh_syntax
-    enable_await_as_an_expression
     fail_open
     show_file_name
     files
     dump_nast
-    enable_stronger_await_binding
     disable_lval_as_an_expression
     pocket_universes
     disable_unsafe_expr
@@ -126,12 +122,10 @@ module FullFidelityParseArgs = struct
     quick_mode;
     lower_coroutines;
     enable_hh_syntax;
-    enable_await_as_an_expression;
     fail_open;
     show_file_name;
     files;
     dump_nast;
-    enable_stronger_await_binding;
     disable_lval_as_an_expression;
     pocket_universes;
     disable_unsafe_expr;
@@ -173,11 +167,9 @@ module FullFidelityParseArgs = struct
     let quick_mode = ref false in
     let lower_coroutines = ref true in
     let enable_hh_syntax = ref false in
-    let enable_await_as_an_expression = ref false in
     let fail_open = ref true in
     let show_file_name = ref false in
     let dump_nast = ref false in
-    let enable_stronger_await_binding = ref false in
     let disable_lval_as_an_expression = ref false in
     let set_show_file_name () = show_file_name := true in
     let pocket_universes = ref false in
@@ -280,18 +272,12 @@ No errors are filtered out.";
       "--force-hh-syntax",
         Arg.Set enable_hh_syntax,
         "Force hh syntax for the parser.";
-      "--enable-await-as-an-expression",
-        Arg.Set enable_await_as_an_expression,
-        "Enable await-as-an-expression";
       "--show-file-name",
         Arg.Unit set_show_file_name,
         "Displays the file name.";
       "--dump-nast",
         Arg.Set dump_nast,
         "Converts the legacy AST to a NAST and prints it.";
-      "--stronger-await-binding",
-        Arg.Set enable_stronger_await_binding,
-        "Increases precedence of await during parsing.";
       "--disable-lval-as-an-expression",
         Arg.Set disable_lval_as_an_expression,
         "Disable lval as an expression.";
@@ -343,12 +329,10 @@ No errors are filtered out.";
       !quick_mode
       !lower_coroutines
       !enable_hh_syntax
-      !enable_await_as_an_expression
       !fail_open
       !show_file_name
       (List.rev !files)
       !dump_nast
-      !enable_stronger_await_binding
       !disable_lval_as_an_expression
       !pocket_universes
       !disable_unsafe_expr
@@ -367,8 +351,6 @@ let handle_existing_file args filename =
   let popt = ParserOptions.default in
   let popt = ParserOptions.with_hh_syntax_for_hhvm popt
     (args.codegen && args.enable_hh_syntax) in
-  let popt = ParserOptions.with_enable_await_as_an_expression popt
-    (args.enable_await_as_an_expression) in
   let popt = ParserOptions.with_disable_lval_as_an_expression popt
     (args.disable_lval_as_an_expression) in
   let popt = ParserOptions.setup_pocket_universes popt
@@ -382,7 +364,6 @@ let handle_existing_file args filename =
   let env = Full_fidelity_parser_env.make
     ~force_hh:args.enable_hh_syntax
     ~enable_xhp:args.enable_hh_syntax
-    ~enable_stronger_await_binding:args.enable_stronger_await_binding
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
@@ -415,10 +396,6 @@ let handle_existing_file args filename =
   in
   let dump_needed = args.full_fidelity_ast_s_expr || args.dump_nast in
   let lowered = if dump_needed || print_errors then begin
-    let popt =
-      if args.dump_nast
-      then { popt with GlobalOptions.po_enable_concurrent = true }
-      else popt in
     let popt =
       GlobalOptions.setup_pocket_universes popt args.pocket_universes in
     let env =

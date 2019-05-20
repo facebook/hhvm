@@ -14,24 +14,24 @@
         ((() { 1 ((end_of_line 1)))
          (list 32
           ((expression_statement 32
-            ((prefix_unary_expression 31
-              ((((whitespace 2)) await 5 ((whitespace 1)))
-               (binary_expression 25
-                ((variable 2 ((() variable 2 ((whitespace 1)))))
-                 (() . 1 ((whitespace 1)))
-                 (array_intrinsic_expression 20
-                  ((() array 5 ((whitespace 1))) (() "(" 1 ())
-                   (list 12
-                    ((list_item 12
-                      ((element_initializer 12
-                        ((variable 2 ((() variable 2 ((whitespace 1)))))
-                         (() => 2 ((whitespace 1)))
-                         (binary_expression 6
-                          ((() name 1 ((whitespace 1)))
-                           (() *= 2 ((whitespace 1)))
-                           (literal 1 ((() decimal_literal 1 ())))))))
-                       (missing 0 ())))))
-                   (() ")" 1 ())))))))
+            ((binary_expression 31
+              ((prefix_unary_expression 8
+                ((((whitespace 2)) await 5 ((whitespace 1)))
+                 (variable 2 ((() variable 2 ((whitespace 1)))))))
+               (() . 1 ((whitespace 1)))
+               (array_intrinsic_expression 20
+                ((() array 5 ((whitespace 1))) (() "(" 1 ())
+                 (list 12
+                  ((list_item 12
+                    ((element_initializer 12
+                      ((variable 2 ((() variable 2 ((whitespace 1)))))
+                       (() => 2 ((whitespace 1)))
+                       (binary_expression 6
+                        ((() name 1 ((whitespace 1)))
+                         (() *= 2 ((whitespace 1)))
+                         (literal 1 ((() decimal_literal 1 ())))))))
+                     (missing 0 ())))))
+                 (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

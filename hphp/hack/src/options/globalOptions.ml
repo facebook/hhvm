@@ -21,8 +21,6 @@ type t = {
   po_disable_nontoplevel_declarations : bool;
   po_disable_static_closures : bool;
   po_allow_goto: bool;
-  po_enable_concurrent : bool;
-  po_enable_await_as_an_expression : bool;
   tco_log_inference_constraints : bool;
   tco_disallow_ambiguous_lambda : bool;
   tco_disallow_array_typehint: bool;
@@ -44,7 +42,6 @@ type t = {
   ignored_fixme_codes : ISet.t;
   ignored_fixme_regex : string option;
   log_levels : int SMap.t;
-  po_enable_stronger_await_binding : bool;
   po_disable_lval_as_an_expression : bool;
   po_disable_unsafe_expr : bool;
   po_disable_unsafe_block : bool;
@@ -201,8 +198,6 @@ let default = {
  po_disable_nontoplevel_declarations = false;
  po_disable_static_closures = false;
  po_allow_goto = true;
- po_enable_concurrent = false;
- po_enable_await_as_an_expression = false;
  tco_log_inference_constraints = false;
  tco_disallow_ambiguous_lambda = false;
  tco_disallow_array_typehint = false;
@@ -224,7 +219,6 @@ let default = {
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
  ignored_fixme_regex = None;
  log_levels = SMap.empty;
- po_enable_stronger_await_binding = false;
  po_disable_lval_as_an_expression = false;
  po_disable_unsafe_expr = false;
  po_disable_unsafe_block = false;
@@ -244,8 +238,6 @@ let make
   ?(po_disable_nontoplevel_declarations = default.po_disable_nontoplevel_declarations)
   ?(po_disable_static_closures = default.po_disable_static_closures)
   ?(po_allow_goto = default.po_allow_goto)
-  ?(po_enable_concurrent = default.po_enable_concurrent)
-  ?(po_enable_await_as_an_expression = default.po_enable_await_as_an_expression)
   ?(tco_log_inference_constraints = default.tco_log_inference_constraints)
   ?(tco_experimental_features = default.tco_experimental_features)
   ?(tco_migration_flags = default.tco_migration_flags)
@@ -272,7 +264,6 @@ let make
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
   ?ignored_fixme_regex
   ?(log_levels = default.log_levels)
-  ?(po_enable_stronger_await_binding = default.po_enable_stronger_await_binding)
   ?(po_disable_lval_as_an_expression = default.po_disable_lval_as_an_expression)
   ?(po_disable_unsafe_expr = default.po_disable_unsafe_expr)
   ?(po_disable_unsafe_block = default.po_disable_unsafe_block)
@@ -299,8 +290,6 @@ let make
   po_disable_nontoplevel_declarations;
   po_disable_static_closures;
   po_allow_goto;
-  po_enable_concurrent;
-  po_enable_await_as_an_expression;
   tco_log_inference_constraints;
   tco_disallow_ambiguous_lambda;
   tco_disallow_array_typehint;
@@ -320,7 +309,6 @@ let make
   tco_disallow_byref_dynamic_calls;
   po_disable_instanceof;
   log_levels;
-  po_enable_stronger_await_binding;
   po_disable_lval_as_an_expression;
   po_disable_unsafe_expr;
   po_disable_unsafe_block;
@@ -346,8 +334,6 @@ let po_deregister_php_stdlib t = t.po_deregister_php_stdlib
 let po_disable_nontoplevel_declarations t = t.po_disable_nontoplevel_declarations
 let po_disable_static_closures t = t.po_disable_static_closures
 let po_allow_goto t = t.po_allow_goto
-let po_enable_concurrent t = t.po_enable_concurrent
-let po_enable_await_as_an_expression t = t.po_enable_await_as_an_expression
 let tco_log_inference_constraints t = t.tco_log_inference_constraints
 let po_enable_hh_syntax_for_hhvm t = t.po_enable_hh_syntax_for_hhvm
 let po_disallow_execution_operator t = t.po_disallow_execution_operator
@@ -373,7 +359,6 @@ let po_disable_instanceof t = t.po_disable_instanceof
 let ignored_fixme_codes t = t.ignored_fixme_codes
 let ignored_fixme_regex t = t.ignored_fixme_regex
 let log_levels t = t.log_levels
-let po_enable_stronger_await_binding t = t.po_enable_stronger_await_binding
 let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let po_disable_unsafe_expr t = t.po_disable_unsafe_expr
 let po_disable_unsafe_block t = t.po_disable_unsafe_block

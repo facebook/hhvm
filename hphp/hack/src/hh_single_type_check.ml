@@ -182,15 +182,12 @@ let parse_options () =
   let disallow_unset_on_varray = ref None in
   let auto_namespace_map = ref None in
   let unsafe_rx = ref (Some false) in
-  let enable_concurrent = ref None in
-  let enable_await_as_an_expression = ref None in
   let disallow_stringish_magic = ref None in
   let log_inference_constraints = ref None in
   let new_inference = ref None in
   let new_inference_lambda = ref (Some false) in
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
-  let enable_stronger_await_binding = ref None in
   let typecheck_xhp_cvars = ref (Some false) in
   let ignore_collection_expr_type_arguments = ref (Some false) in
   let allow_ref_param_on_constructor = ref (Some false) in
@@ -353,12 +350,6 @@ let parse_options () =
     "--disallow-unset-on-varray",
         Arg.Unit (set_bool disallow_unset_on_varray),
         " Disallow unsetting indices from varrays";
-    "--enable-concurrent",
-      Arg.Unit (set_bool enable_concurrent),
-      " Enable the concurrent feature";
-    "--enable-await-as-an-expression",
-      Arg.Unit (set_bool enable_await_as_an_expression),
-      " Enable the await-as-an-expression feature";
     "--unsafe-rx",
         Arg.Unit (set_bool unsafe_rx),
         " Disables reactivity related errors";
@@ -392,9 +383,6 @@ let parse_options () =
     "--disallow-invalid-arraykey",
       Arg.Unit (set_bool disallow_invalid_arraykey),
         " Disallow using values that get casted to arraykey at runtime as array keys";
-    "--stronger-await-binding",
-      Arg.Unit (set_bool enable_stronger_await_binding),
-      "Increases precedence of await during parsing.";
     "--disable-unsafe-expr",
       Arg.Unit (set_bool disable_unsafe_expr),
       "Treat UNSAFE_EXPR comments as just comments, the typechecker will ignore them";
@@ -460,9 +448,6 @@ let parse_options () =
     ?tco_timeout:(!timeout)
     ?tco_disallow_invalid_arraykey:(!disallow_invalid_arraykey)
     ?po_auto_namespace_map:(!auto_namespace_map)
-    ?po_enable_concurrent:(!enable_concurrent)
-    ?po_enable_await_as_an_expression:(!enable_await_as_an_expression)
-    ?po_enable_stronger_await_binding:(!enable_stronger_await_binding)
     ?po_disable_unsafe_expr:(!disable_unsafe_expr)
     ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)

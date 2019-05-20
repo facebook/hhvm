@@ -84,9 +84,6 @@ struct RepoOptions {
   H(bool,           EnableIsExprPrimitiveMigration, true)             \
   H(bool,           EnableCoroutines,               true)             \
   H(bool,           Hacksperimental,                false)            \
-  H(bool,           EnableConcurrent,               false)            \
-  H(bool,           EnableAwaitAsAnExpression,      false)            \
-  H(bool,           EnableStrongerAwaitBinding,     false)            \
   H(bool,           EnableReifiedGenerics,          true)             \
   H(bool,           DisableLvalAsAnExpression,      false)            \
   E(bool,           CreateInOutWrapperFunctions,    true)             \

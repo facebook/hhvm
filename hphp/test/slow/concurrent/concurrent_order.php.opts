@@ -1,3 +1,1 @@
--vHack.Lang.EnableConcurrent=1
--vHack.Lang.EnableAwaitAsAnExpression=1
 -vEval.EnablePHP=1

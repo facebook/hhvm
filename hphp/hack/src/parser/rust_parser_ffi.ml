@@ -16,7 +16,6 @@ module PositionedSyntax = Full_fidelity_positioned_syntax
  * synchronize on the boundary between Rust and OCaml, the better. *)
 type parser_opts = (
   bool * (* is_experimental mode *)
-  bool * (* enable_stronger_await_binding *)
   bool * (* disable_unsafe_expr *)
   bool * (* enable_unsafe_block *)
   bool * (* force_hh *)
@@ -27,7 +26,6 @@ type parser_opts = (
 )
 let env_to_opts env = (
   (Env.is_experimental_mode env),
-  (Env.enable_stronger_await_binding env),
   (Env.disable_unsafe_expr env),
   (Env.disable_unsafe_block env),
   (Env.force_hh env),

@@ -256,12 +256,11 @@ let clear_statement_scope env f =
 
 let lift_awaits_in_statement env pos f =
   let lifted_awaits, result =
-    (match (ParserOptions.enable_await_as_an_expression env.parser_options), env.lifted_awaits with
-    | false, _
-    | true, Some { lift_kind = LiftedFromConcurrent; _ } ->
+    (match env.lifted_awaits with
+    | Some { lift_kind = LiftedFromConcurrent; _ } ->
       (None, f ())
-    | true, Some { lift_kind = LiftedFromStatement; _ }
-    | true, None ->
+    | Some { lift_kind = LiftedFromStatement; _ }
+    | None ->
       let lifted_awaits =
         { awaits = []; lift_kind = LiftedFromStatement } in
       let saved_lifted_awaits = env.lifted_awaits in
@@ -2277,9 +2276,6 @@ and pStmt : stmt parser = fun node env ->
   | ContinueStatement { continue_level=level; _ } ->
     pos, Continue (pBreak_or_continue_level env level)
   | ConcurrentStatement { concurrent_statement=concurrent_stmt; _ } ->
-    if not (ParserOptions.enable_concurrent env.parser_options) then
-      raise_parsing_error env (`Node node) SyntaxError.concurrent_is_disabled;
-
     let (lifted_awaits, stmt) =
       with_new_concurrent_scope env (fun () -> pStmt concurrent_stmt env) in
 
@@ -3583,8 +3579,6 @@ let parse_text
         ~force_hh:env.enable_hh_syntax
         ~enable_xhp:env.enable_xhp
         ~php5_compat_mode:env.php5_compat_mode
-        ~enable_stronger_await_binding:
-          (GlobalOptions.po_enable_stronger_await_binding env.parser_options)
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
         ~disable_unsafe_expr:

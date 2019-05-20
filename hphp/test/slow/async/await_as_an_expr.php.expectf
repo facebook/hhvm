@@ -1,2 +1,1 @@
-
-Fatal error: Await cannot be used as an expression in %s/await_as_an_expr.php on line 5
+int(1)

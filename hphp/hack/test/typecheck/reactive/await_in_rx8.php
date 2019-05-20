@@ -8,5 +8,5 @@ async function f(int $x): Awaitable<int> {
 <<__Rx>>
 async function g(): Awaitable<void> {
   // OK
-  $a = await 10 |> f($$);
+  $a = await (10 |> f($$));
 }

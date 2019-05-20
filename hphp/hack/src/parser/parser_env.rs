@@ -8,7 +8,6 @@
 pub struct ParserEnv {
     pub codegen: bool,
     pub is_experimental_mode: bool,
-    pub enable_stronger_await_binding: bool,
     pub disable_unsafe_expr: bool,
     pub disable_unsafe_block: bool,
     pub force_hh: bool,

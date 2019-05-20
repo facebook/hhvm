@@ -98,7 +98,7 @@ pub enum Assoc {
 use self::Operator::*;
 
 impl Operator {
-    pub fn precedence(&self, env: &ParserEnv) -> usize {
+    pub fn precedence(&self, _env: &ParserEnv) -> usize {
         // TODO: eval
         // TODO: Comma
         // TODO: elseif
@@ -108,7 +108,6 @@ impl Operator {
         match self {
             | IncludeOperator | IncludeOnceOperator | RequireOperator
             | RequireOnceOperator => 1,
-            | AwaitOperator if !env.enable_stronger_await_binding => 1,
             | PHPOrOperator => 2,
             | PHPExclusiveOrOperator => 3,
             | PHPAndOperator => 4,
@@ -145,9 +144,7 @@ impl Operator {
             | ErrorControlOperator
             | PrefixIncrementOperator | PrefixDecrementOperator
             | ExponentOperator => 22,
-            | PostfixIncrementOperator | PostfixDecrementOperator => 23,
-            | AwaitOperator // implicit: when Env.enable_stronger_await_binding env
-                => 23,
+            | PostfixIncrementOperator | PostfixDecrementOperator | AwaitOperator => 23,
             | CloneOperator => 24,
             // value 25 is reserved for assignment that appear in expressions
             | ReferenceOperator => 26,
@@ -164,14 +161,12 @@ impl Operator {
         25
     }
 
-    pub fn associativity(&self, env: &ParserEnv) -> Assoc {
+    pub fn associativity(&self, _env: &ParserEnv) -> Assoc {
         match self {
             | EqualOperator | StrictEqualOperator | NotEqualOperator | PhpNotEqualOperator
             | StrictNotEqualOperator | LessThanOperator | LessThanOrEqualOperator
             | GreaterThanOperator | GreaterThanOrEqualOperator | InstanceofOperator
             | NewOperator | CloneOperator | SpaceshipOperator => Assoc::NotAssociative,
-            | AwaitOperator if !env.enable_stronger_await_binding
-                => Assoc::NotAssociative,
             | DegenerateConditionalOperator
             | PipeOperator | ConditionalQuestionOperator | ConditionalColonOperator
             | LogicalOrOperator | ExclusiveOrOperator | LogicalAndOperator
@@ -201,9 +196,7 @@ impl Operator {
             | RemainderAssignmentOperator | AndAssignmentOperator
             | OrAssignmentOperator | ExclusiveOrAssignmentOperator
             | LeftShiftAssignmentOperator | RightShiftAssignmentOperator
-            | PrintOperator | SuspendOperator => Assoc::RightAssociative,
-            | AwaitOperator // implicitly: Env.enable_stronger_await_binding env
-                => Assoc::RightAssociative,
+            | PrintOperator | SuspendOperator | AwaitOperator => Assoc::RightAssociative,
         }
     }
 

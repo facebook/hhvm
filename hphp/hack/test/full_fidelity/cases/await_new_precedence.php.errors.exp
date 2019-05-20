@@ -1,6 +1,3 @@
-(8,3)-(8,10) Await cannot be used as an expression
-(9,9)-(9,16) Await cannot be used as an expression
-(11,3)-(11,19) Await cannot be used as an expression
-(12,3)-(12,10) Await cannot be used as an expression
-(13,3)-(13,10) Await cannot be used as an expression
-(14,3)-(14,10) Await cannot be used as an expression
+(5,9)-(5,10) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(7,11)-(7,12) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(9,9)-(9,16) Await cannot be used as an expression inside another await expression. Pull the inner await out into it's own statement.

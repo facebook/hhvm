@@ -110,7 +110,6 @@ macro_rules! parse {
             let source_text = SourceText::make(&file_path.as_str(), &content.data());
 
             let is_experimental_mode = bool_field(&opts, 0);
-            let enable_stronger_await_binding = bool_field(&opts, 1);
             let disable_unsafe_expr = bool_field(&opts, 2);
             let disable_unsafe_block = bool_field(&opts, 3);
             let force_hh = bool_field(&opts, 4);
@@ -121,7 +120,6 @@ macro_rules! parse {
 
             let env = ParserEnv {
                 is_experimental_mode,
-                enable_stronger_await_binding,
                 disable_unsafe_expr,
                 disable_unsafe_block,
                 force_hh,

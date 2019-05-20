@@ -16,12 +16,12 @@ async function gen_filter_with_key<Tk as arraykey, Tv>(
   KeyedContainer<Tk, Tv> $traversable,
   <<__AtMostRxAsFunc>>(function(Tk, Tv): Awaitable<bool>) $predicate,
 ): Awaitable<dict<Tk, Tv>> {
-  $tests = await $traversable
+  $tests = await ($traversable
     |> map_with_key(
       $$,
       <<__RxOfScope>> async ($k, $v) ==> await $predicate($k, $v),
     )
-    |> gen($$);
+    |> gen($$));
   $result = dict[];
   return $result;
 }

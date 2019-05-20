@@ -81,12 +81,6 @@ type t = {
  (* Flag to enable PHP's `goto` operator *)
  po_allow_goto: bool;
 
- (* Flag to enable concurrent *)
- po_enable_concurrent : bool;
-
- (* Flag to enable await-as-an-expression *)
- po_enable_await_as_an_expression : bool;
-
  (** Print types of size bigger than 1000 after performing a type union. *)
  tco_log_inference_constraints : bool;
 
@@ -189,9 +183,6 @@ type t = {
  (* Initial hh_log_level settings *)
  log_levels : int SMap.t;
 
- (* Flag to change the precedence and associativity of await. *)
- po_enable_stronger_await_binding : bool;
-
  (* Flag to disable using lvals as expressions. *)
  po_disable_lval_as_an_expression : bool;
 
@@ -229,8 +220,6 @@ val make :
   ?po_disable_nontoplevel_declarations: bool ->
   ?po_disable_static_closures: bool ->
   ?po_allow_goto: bool ->
-  ?po_enable_concurrent: bool ->
-  ?po_enable_await_as_an_expression: bool ->
   ?tco_log_inference_constraints : bool ->
   ?tco_experimental_features: SSet.t ->
   ?tco_migration_flags: SSet.t ->
@@ -257,7 +246,6 @@ val make :
   ?ignored_fixme_codes: ISet.t ->
   ?ignored_fixme_regex: string ->
   ?log_levels: int SMap.t ->
-  ?po_enable_stronger_await_binding: bool ->
   ?po_disable_lval_as_an_expression: bool ->
   ?po_disable_unsafe_expr: bool ->
   ?po_disable_unsafe_block: bool ->
@@ -282,8 +270,6 @@ val po_disallow_execution_operator : t -> bool
 val po_disable_nontoplevel_declarations : t -> bool
 val po_disable_static_closures : t -> bool
 val po_allow_goto : t -> bool
-val po_enable_concurrent : t -> bool
-val po_enable_await_as_an_expression : t -> bool
 val po_enable_hh_syntax_for_hhvm : t -> bool
 val tco_log_inference_constraints : t -> bool
 val tco_disallow_ambiguous_lambda : t -> bool
@@ -329,7 +315,6 @@ val tco_migration_flags_all : SSet.t
 val ignored_fixme_codes : t -> ISet.t
 val ignored_fixme_regex : t -> string option
 val log_levels : t -> int SMap.t
-val po_enable_stronger_await_binding : t -> bool
 val po_disable_lval_as_an_expression : t -> bool
 val po_disable_unsafe_expr : t -> bool
 val po_disable_unsafe_block : t -> bool

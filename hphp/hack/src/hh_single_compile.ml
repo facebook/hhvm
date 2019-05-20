@@ -138,7 +138,6 @@ let parse_options () =
       ("-v"
           , Arg.String (fun str -> config_list := str :: !config_list)
             , " Configuration: Eval.EnableHipHopSyntax=<value> "
-              ^ "or Hack.Lang.EnableConcurrent=<value>"
               ^ "\n"
               ^ "\t\tAllows overriding config options passed on a file"
       );
@@ -472,12 +471,9 @@ let make_popt () =
   ParserOptions.make
     ~auto_namespace_map:(aliased_namespaces co)
     ~disallow_execution_operator:(phpism_disallow_execution_operator co)
-    ~enable_concurrent:(enable_concurrent co)
-    ~enable_await_as_an_expression:(enable_await_as_an_expression co)
     ~disable_nontoplevel_declarations:(phpism_disable_nontoplevel_declarations co)
     ~disable_static_closures:(phpism_disable_static_closures co)
     ~enable_hh_syntax_for_hhvm:(enable_hiphop_syntax co)
-    ~enable_stronger_await_binding:(enable_stronger_await_binding co)
     ~disable_lval_as_an_expression:(disable_lval_as_an_expression co)
     ~disable_instanceof:(phpism_disable_instanceof co)
     ~rust:false

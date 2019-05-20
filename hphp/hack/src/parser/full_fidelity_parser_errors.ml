@@ -2171,12 +2171,6 @@ let no_memoize_attribute_on_lambda node errors =
     end
   | _ -> errors
 
-let is_assignment node =
-  match syntax node with
-  | BinaryExpression { binary_operator = { syntax = Token token; _ }; _ } ->
-    Token.kind token = TokenKind.Equal
-  | _ -> false
-
 let is_good_scope_resolution_qualifier node =
   match syntax node with
   | QualifiedName _ -> true
@@ -2913,38 +2907,8 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
-    if ParserOptions.enable_await_as_an_expression env.parser_options
-      then
-        let aaae_errors = await_as_an_expression_errors node parents in
-        List.append aaae_errors errors
-      else
-    begin match parents with
-      | si :: le :: _ when is_simple_initializer si && is_let_statement le ->
-        errors
-      | le :: _ when is_lambda_expression le -> errors
-      | rs :: _ when is_return_statement rs -> errors
-      | es :: _ when is_expression_statement es -> errors
-      | be :: es :: _
-        when is_binary_expression be && is_assignment be &&
-          is_expression_statement es -> errors
-      | li :: l :: us :: _
-        when is_list_item li && is_list l &&
-          (is_using_statement_block_scoped us ||
-           is_using_statement_function_scoped us) -> errors
-      | be :: li :: l :: us :: _
-        when is_binary_expression be && is_assignment be &&
-          is_list_item li && is_list l &&
-          (is_using_statement_block_scoped us ||
-           is_using_statement_function_scoped us) -> errors
-      | be :: us :: _
-         when is_binary_expression be && is_assignment be &&
-           (is_using_statement_block_scoped us ||
-            is_using_statement_function_scoped us) -> errors
-      | us :: _
-         when (is_using_statement_block_scoped us ||
-               is_using_statement_function_scoped us) -> errors
-      | _ -> make_error_from_node node SyntaxError.invalid_await_use :: errors
-    end
+    let aaae_errors = await_as_an_expression_errors node parents in
+    List.append aaae_errors errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 
 let check_repeated_properties_tconst_const full_name (errors, p_names, c_names) prop =

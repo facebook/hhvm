@@ -6293,7 +6293,7 @@ and class_def_ env c tc =
   let env = List.fold c.c_method_redeclarations ~init:env ~f:(supertype_redeclared_method tc) in
   if (Cls.is_disposable tc)
     then List.iter (c.c_extends @ c.c_uses) (Typing_disposable.enforce_is_disposable env);
-  let typed_vars = List.map vars (class_var_def env ~is_static:false) in
+  let env, typed_vars = List.map_env env vars (class_var_def ~is_static:false) in
   let typed_method_redeclarations = [] in
   let typed_methods = List.filter_map methods (method_def env) in
   let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
@@ -6302,8 +6302,8 @@ and class_def_ env c tc =
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   let typed_constructor = class_constr_def env constructor in
   let env = Env.set_static env in
-  let typed_static_vars =
-    List.map static_vars (class_var_def env ~is_static:true) in
+  let env, typed_static_vars =
+    List.map_env env static_vars (class_var_def ~is_static:true) in
   let typed_static_methods = List.filter_map static_methods (method_def env) in
   let filename = Pos.filename (fst c.c_name) in
   let droot = env.Env.decl_env.Decl_env.droot in
@@ -6471,7 +6471,9 @@ and class_implements_type env c1 removals ctype2 =
   ()
 
 (* Type-check a property declaration, with optional initializer *)
-and class_var_def env ~is_static cv =
+and class_var_def ~is_static env cv =
+  let env = Env.open_tyvars env (fst cv.cv_id) in
+  (fun (env, tcv) -> SubType.close_tyvars_and_solve env, tcv) @@
   (* First pick up and localize the hint if it exists *)
   let env, expected =
     match cv.cv_type with
@@ -6516,6 +6518,7 @@ and class_var_def env ~is_static cv =
   begin
     if Option.is_none cv.cv_type && Env.is_strict env
     then Errors.add_a_typehint (fst cv.cv_id);
+    env,
     {
       T.cv_final = cv.cv_final;
       T.cv_is_xhp = cv.cv_is_xhp;

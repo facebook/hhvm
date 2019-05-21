@@ -539,9 +539,15 @@ resolveTSStatically(ISS& env, SArray ts, const php::Class* declaringCls,
                     bool checkArrays) {
   auto const addModifiers = [&](ArrayData* result) {
     auto a = Array::attach(result);
-    if (is_ts_like(ts))      a.set(s_like, true_varNR.tv());
-    if (is_ts_nullable(ts))  a.set(s_nullable, true_varNR.tv());
-    if (is_ts_soft(ts))      a.set(s_soft, true_varNR.tv());
+    if (is_ts_like(ts) && !is_ts_like(a.get())) {
+      a.set(s_like, true_varNR.tv());
+    }
+    if (is_ts_nullable(ts) && !is_ts_nullable(a.get())) {
+      a.set(s_nullable, true_varNR.tv());
+    }
+    if (is_ts_soft(ts) && !is_ts_soft(a.get())) {
+      a.set(s_soft, true_varNR.tv());
+    }
     return a.detach();
   };
   auto const finish = [&](const ArrayData* result) {

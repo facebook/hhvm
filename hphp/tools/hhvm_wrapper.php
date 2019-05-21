@@ -22,6 +22,7 @@ function my_option_map(): OptionInfoMap {
 'compile'         => Pair { 'c', 'Compile with hphpc; run RepoAuthoritative' },
 'create-repo'     => Pair { 'C', 'Compile unoptimized repo named hhvm.hhbc' },
 'repo:'           => Pair { 'R', 'Use an already-compiled repo' },
+'retranslate-all:'=> Pair { 'r', 'Emit optimized code after n profiling runs' },
 'php7'            => Pair { '7', 'Enable PHP7 mode' },
 'jit-gdb'         => Pair { '',  'Enable JIT symbols in GDB' },
 'print-command'   => Pair { '',  'Just print the command, don\'t run it' },
@@ -71,13 +72,13 @@ function get_paths(OptionMap $opts): Map<string,string> {
   if ($root === $buck) {
     return Map {
       'hhvm' => $root.'/hhvm/hhvm/hhvm',
-      'hphp' => $root.'/hhvm/symlinks=hphp/hphp',
+      'hphp' => $root.'/hhvm/hhvm/hhvm --hphp',
     };
   }
 
   return Map {
     'hhvm' => $root.'/hhvm/hhvm',
-    'hphp' => $root.'/hhvm/hphp',
+    'hphp' => $root.'/hhvm/hhvm --hphp',
   };
 }
 
@@ -125,6 +126,14 @@ function determine_flags(OptionMap $opts): string {
     $flags .=
       '-v Eval.Jit=1 '.
       '';
+  }
+
+  if ($opts->containsKey('retranslate-all')) {
+    $times = (int)$opts['retranslate-all'];
+    $flags .=
+        '--count='.($times + 1).' '.
+        '-v Eval.JitRetranslateAllRequest='.$times.' '.
+        '';
   }
 
   if ($opts->containsKey('region-mode')) {
@@ -224,7 +233,9 @@ function compile_a_repo(bool $unoptimized, OptionMap $opts): string {
   $echo_command = $opts->containsKey('print-command');
   echo "Compiling with hphp...";
   $runtime_flags = determine_flags($opts);
-  $hphpc_flags = preg_replace("/-v\s*/", "-vRuntime.", $runtime_flags);
+  $hphpc_flags = $runtime_flags
+    |> preg_replace("/-v\s*/", "-vRuntime.", $$)
+    |> preg_replace("/--count=[0-9]+\s*/", "", $$);
   $hphp_out='/tmp/hphp_out'.posix_getpid();
   $cmd = get_paths($opts)['hphp'].' '.
     '-v EnableHipHopSyntax=1 '.

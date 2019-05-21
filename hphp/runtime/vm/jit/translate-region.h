@@ -43,6 +43,11 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
                                     Annotations& annotations) noexcept;
 
 /*
+ * Try to inline a FCall.
+ */
+bool irGenTryInlineFCall(irgen::IRGS& irgs, NormalizedInstruction& inst);
+
+/*
  * Generate an IRUnit which simulates the inlining of region. This unit should
  * not be used to emit machine code, but may be used to generate a Vunit.
  *

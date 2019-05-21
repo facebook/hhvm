@@ -647,17 +647,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       initNormalizedInstruction(inst, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
-      // If we're at a FCall and the topFunc is still unknown, we may have a
-      // likely target based on profiling data.
-      IRInstruction* profiledFuncCheck = nullptr;
-      double profiledFuncBias{0};
-      if (topFunc == nullptr && sk.op() == Op::FCall) {
-        auto const numArgs = inst.imm[0].u_FCA.numArgs;
-        topFunc = irgen::profiledCalledFunc(irgs, numArgs, profiledFuncCheck,
-                                            profiledFuncBias);
-        inst.funcd = topFunc;
-      }
-
       // Singleton inlining optimization.
       if (RuntimeOption::EvalHHIRInlineSingletons && !lastInstr &&
           shouldTrySingletonInline(region, inst, i, irgs.transFlags) &&
@@ -676,131 +665,64 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
 
-      int calleeCost{0};
-      RegionDescPtr calleeRegion{nullptr};
-      // See if we have a callee region we can inline---but only if the
-      // singleton inliner isn't actively inlining.
-      if (!skipTrans) {
-        calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, irgs,
-                                                calleeCost, irgs.annotations);
-      }
+      // Call inlining and profiling logic.
+      if (!skipTrans && sk.op() == Op::FCall) {
+        // If we're at a FCall and the topFunc is still unknown, we may have a
+        // likely target based on profiling data.
+        IRInstruction* profiledFuncCheck = nullptr;
+        double profiledFuncBias{0};
+        if (topFunc == nullptr) {
+          auto const numArgs = inst.imm[0].u_FCA.numArgs;
+          topFunc = irgen::profiledCalledFunc(irgs, numArgs, profiledFuncCheck,
+                                              profiledFuncBias);
+          inst.funcd = topFunc;
+        }
 
-      if (calleeRegion) {
-        always_assert(inst.op() == Op::FCall);
-        auto const* callee = inst.funcd;
-        auto const numArgs = inst.imm[0].u_FCA.numArgs;
-
-        // We shouldn't be inlining profiling translations.
-        assertx(irgs.context.kind != TransKind::Profile);
-
-        assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs);
-
-        FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
-               "and stack:\n{}\n",
-               block.func()->fullName()->data(),
-               callee->fullName()->data(),
-               numArgs,
-               show(irgs));
-
-        auto returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
-        auto suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
-        auto asyncEagerOffset = callee->supportsAsyncEagerReturn()
-          ? inst.imm[0].u_FCA.asyncEagerOffset : kInvalidOffset;
-        auto returnTarget = InlineReturnTarget {
-          returnBlock, suspendRetBlock, asyncEagerOffset
-        };
-        auto callFuncOff = inst.offset() - block.func()->base();
-
-        if (irgen::beginInlining(irgs, numArgs, callee,
-                                 calleeRegion->start(),
-                                 callFuncOff,
-                                 returnTarget,
-                                 calleeCost,
-                                 false)) {
-          SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
-            { return show(*calleeRegion); };
-
-          // Calculate the profFactor for the callee as the weight of
-          // the caller block over the weight of the entry block of
-          // the callee region.
-          double calleeProfFactor = irgen::curProfCount(irgs);
-          auto const calleeEntryBID = calleeRegion->entry()->id();
-          if (hasTransID(calleeEntryBID)) {
-            assertx(profData());
-            auto const calleeTID = getTransID(calleeEntryBID);
-            auto calleeProfCount = calleeRegion->blockProfCount(calleeTID);
-            if (calleeProfCount == 0) calleeProfCount = 1; // avoid div by zero
-            calleeProfFactor /= calleeProfCount;
-            assert_flog(calleeProfFactor >= 0, "calleeProfFactor = {:.5}\n",
-                        calleeProfFactor);
-          }
-
-          auto result = irGenRegionImpl(irgs, *calleeRegion, calleeProfFactor);
-          assertx(irgs.budgetBCInstrs >= 0);
-
-          if (result == TranslateResult::Retry) {
-            // Generating the inlined call failed, bailout
+        if (inst.funcd) {
+          try {
+            skipTrans = irGenTryInlineFCall(irgs, inst);
+          } catch (const RetryIRGen& e) {
             return TranslateResult::Retry;
           }
-          assertx(result == TranslateResult::Success);
+        }
 
-          // Native calls end inlining before CallBuiltin
-          if (!callee->isCPPBuiltin()) {
-            // If the inlined region failed to contain any returns then the
-            // rest of this block is dead- we could continue but there's no
-            // benefit to inlining this call if it ends in a ReqRetranslate or
-            // ReqBind* so instead we mark it as uninlinable and retry.
-            if (!irgen::endInlining(irgs, *calleeRegion)) {
-              irgs.retryContext->inlineBlacklist.insert(psk);
-              return TranslateResult::Retry;
+        // A runtime check was inserted to obtain the identity of the callee.
+        // We handle 3 different cases here:
+        //   1) The call was not inlined, so drop the check.
+        //   2) The call was inlined and the check is strongly biased towards
+        //      that callee, so keep the side exit out of the region.
+        //   3) The call was inlined but it's not strongly biased, so emit
+        //      a FCall instead of exiting the region when the check fails.
+        if (profiledFuncCheck != nullptr) {
+          inst.funcd = topFunc = nullptr;
+          if (skipTrans) {
+            if (profiledFuncBias * 100 <
+                RuntimeOption::EvalJitPGOCalledFuncExitThreshold) {
+              // Case 2) We inlined the call. Emit FCall if not strongly biased.
+              //
+              // We first emit a jump to the next block.  NB: the FCall must be
+              // the last instruction in the block.
+              always_assert_flog(lastInstr,
+                                 "FCall is not the last instruction in block");
+              irgen::endBlock(irgs, inst.nextSk().offset());
+
+              // We then emit the FCall on the check-failure path.
+              auto const failBlock = profiledFuncCheck->taken();
+              auto const predBlock = profiledFuncCheck->block();
+              irb.resetBlock(failBlock, predBlock);
+              const bool unprocPred = blockHasUnprocessedPred(region, blockId,
+                                                              processedBlocks);
+              if (!irb.startBlock(failBlock, unprocPred)) {
+                always_assert_flog(
+                    false, "profiledFuncCheck branches to unreachable block"
+                );
+              }
+              skipTrans = false; // so we translate the FCall
             }
           } else {
-            // For native calls we don't use a return block
-            assertx(returnBlock->empty());
+            // Case 1) We didn't inline the call, so drop the check.
+            irgen::dropCalledFuncCheck(irgs, profiledFuncCheck);
           }
-
-          // Don't emit the FCall
-          skipTrans = true;
-        }
-      }
-
-      // A runtime check was inserted to obtain the identity of the callee.  We
-      // handle 3 different cases here:
-      //   1) The call was not inlined, so drop the check.
-      //   2) The call was inlined and the check is strongly biased towards that
-      //      callee, so keep the side exit out of the region.
-      //   3) The call was inlined but it's not strongly biased, so emit a FCall
-      //      instead of exiting the region when the check fails.
-      if (profiledFuncCheck != nullptr) {
-        assertx(sk.op() == Op::FCall);
-        inst.funcd = topFunc = nullptr;
-        if (skipTrans) {
-          if (profiledFuncBias * 100 <
-              RuntimeOption::EvalJitPGOCalledFuncExitThreshold) {
-            // Case 2) We inlined the call.  Emit FCall if not strongly biased.
-            //
-            // We first emit a jump to the next block.  NB: the FCall must be
-            // the last instruction in the block.
-            always_assert_flog(lastInstr,
-                               "FCall is not the last instruction in block");
-            irgen::endBlock(irgs, inst.nextSk().offset());
-
-            // We then emit the FCall on the check-failure path.
-            auto const failBlock = profiledFuncCheck->taken();
-            auto const predBlock = profiledFuncCheck->block();
-            irb.resetBlock(failBlock, predBlock);
-            const bool unprocPred = blockHasUnprocessedPred(region, blockId,
-                                                            processedBlocks);
-            if (!irb.startBlock(failBlock, unprocPred)) {
-              always_assert_flog(
-                  false, "profiledFuncCheck branches to unreachable block"
-              );
-            }
-            skipTrans = false; // so we translate the FCall
-          }
-        } else {
-          // Case 1) We didn't inline the call, so drop the check.
-          irgen::dropCalledFuncCheck(irgs, profiledFuncCheck);
         }
       }
 
@@ -964,6 +886,96 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
   finishPass(" after optimizing ", kOptLevel);
 
   return unit;
+}
+
+bool irGenTryInlineFCall(irgen::IRGS& irgs, NormalizedInstruction& inst) {
+  assertx(inst.op() == Op::FCall);
+  assertx(inst.funcd);
+
+  auto const callee = inst.funcd;
+  auto const psk = ProfSrcKey { irgs.profTransID, inst.source };
+  int calleeCost{0};
+
+  // See if we have a callee region we can inline.
+  auto const calleeRegion = getInlinableCalleeRegion(
+    psk, callee, irgs, calleeCost, irgs.annotations);
+  if (!calleeRegion) return false;
+
+  // We shouldn't be inlining profiling translations.
+  assertx(irgs.context.kind != TransKind::Profile);
+  assertx(calleeRegion->instrSize() <= irgs.budgetBCInstrs);
+
+  auto const& fca = inst.imm[0].u_FCA;
+
+  FTRACE(1, "\nstarting inlined call from {} to {} with {} args "
+         "and stack:\n{}\n",
+         inst.func()->fullName()->data(),
+         callee->fullName()->data(),
+         fca.numArgs,
+         show(irgs));
+
+  auto const& irb = *irgs.irb;
+  auto const returnBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
+  auto const suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
+  auto const asyncEagerOffset = callee->supportsAsyncEagerReturn()
+    ? fca.asyncEagerOffset : kInvalidOffset;
+  auto const returnTarget = InlineReturnTarget {
+    returnBlock, suspendRetBlock, asyncEagerOffset
+  };
+  auto callFuncOff = inst.offset() - inst.func()->base();
+
+  if (!irgen::beginInlining(irgs, fca.numArgs, callee,
+                            calleeRegion->start(),
+                            callFuncOff,
+                            returnTarget,
+                            calleeCost,
+                            false)) {
+    return false;
+  }
+
+  SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
+    { return show(*calleeRegion); };
+
+  // Calculate the profFactor for the callee as the weight of
+  // the caller block over the weight of the entry block of
+  // the callee region.
+  double calleeProfFactor = irgen::curProfCount(irgs);
+  auto const calleeEntryBID = calleeRegion->entry()->id();
+  if (hasTransID(calleeEntryBID)) {
+    assertx(profData());
+    auto const calleeTID = getTransID(calleeEntryBID);
+    auto calleeProfCount = calleeRegion->blockProfCount(calleeTID);
+    if (calleeProfCount == 0) calleeProfCount = 1; // avoid div by zero
+    calleeProfFactor /= calleeProfCount;
+    assert_flog(calleeProfFactor >= 0, "calleeProfFactor = {:.5}\n",
+                calleeProfFactor);
+  }
+
+  auto result = irGenRegionImpl(irgs, *calleeRegion, calleeProfFactor);
+  assertx(irgs.budgetBCInstrs >= 0);
+
+  if (result != TranslateResult::Success) {
+    assertx(result == TranslateResult::Retry);
+    throw RetryIRGen("inline-propagate-retry");
+  }
+
+  // Native calls end inlining before CallBuiltin
+  if (!callee->isCPPBuiltin()) {
+    // If the inlined region failed to contain any returns then the
+    // rest of this block is dead- we could continue but there's no
+    // benefit to inlining this call if it ends in a ReqRetranslate or
+    // ReqBind* so instead we mark it as uninlinable and retry.
+    if (!irgen::endInlining(irgs, *calleeRegion)) {
+      irgs.retryContext->inlineBlacklist.insert(psk);
+      throw RetryIRGen("inline-failed");
+    }
+  } else {
+    // For native calls we don't use a return block
+    assertx(returnBlock->empty());
+  }
+
+  // Success.
+  return true;
 }
 
 std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,

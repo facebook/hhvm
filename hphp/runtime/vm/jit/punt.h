@@ -41,6 +41,10 @@ struct FailedTraceGen : std::runtime_error {
   FailedTraceGen(const char* file, int line, const char* why);
 };
 
+struct RetryIRGen : std::runtime_error {
+  explicit RetryIRGen(const char* why);
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define SPUNT(instr) do {                           \

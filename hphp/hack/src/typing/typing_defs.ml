@@ -390,6 +390,8 @@ and 'phase fun_type = {
   ft_where_constraints : 'phase where_constraint list  ;
   ft_params     : 'phase fun_params   ;
   ft_ret        : 'phase ty           ;
+  (* Carries through the sync/async information from the aast *)
+  ft_fun_kind   : Ast.fun_kind        ;
   ft_reactive   : reactivity          ;
   ft_return_disposable : bool         ;
   (* mutability of the receiver *)

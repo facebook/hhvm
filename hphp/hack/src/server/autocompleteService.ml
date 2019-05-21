@@ -245,10 +245,26 @@ let get_constructor_ty c =
           | _ -> (* how can a constructor not be a function? *) assert false
         end
     | None ->
-        (* Nothing defined, so we need to fake the entire constructor *)
+      (* Nothing defined, so we need to fake the entire constructor *)
       reason,
-      Typing_defs.Tfun
-        (Typing_env.make_ft pos Nonreactive (*is_coroutine*)false [] return_ty)
+      Typing_defs.Tfun {
+        ft_pos      = pos;
+        ft_deprecated = None;
+        ft_abstract = false;
+        ft_is_coroutine = false;
+        ft_arity    = Fstandard (0, 0);
+        ft_tparams  = ([], FTKtparams);
+        ft_where_constraints = [];
+        ft_params   = [];
+        ft_ret      = return_ty;
+        ft_fun_kind = Ast.FSync;
+        ft_reactive = Nonreactive;
+        ft_return_disposable = false;
+        ft_returns_mutable = false;
+        ft_mutability = None;
+        ft_decl_errors = None;
+        ft_returns_void_to_rx = false;
+      }
 
 (* Global identifier autocomplete uses search service to find matching names *)
 let search_funs_and_classes input ~limit ~on_class ~on_function =

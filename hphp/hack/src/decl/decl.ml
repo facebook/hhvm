@@ -245,6 +245,7 @@ and fun_decl_in_env env f =
     ft_where_constraints = where_constraints;
     ft_params      = params;
     ft_ret         = ret_ty;
+    ft_fun_kind    = f.f_fun_kind;
     ft_reactive    = reactivity;
     ft_mutability     = None; (* Functions can't be mutable because they don't have "this" *)
     ft_returns_mutable = returns_mutable;

@@ -1802,6 +1802,7 @@ and expr_
               ft_where_constraints = fty.ft_where_constraints;
               ft_params = fty.ft_params;
               ft_ret = fty.ft_ret;
+              ft_fun_kind = fty.ft_fun_kind;
               ft_reactive = fty.ft_reactive;
               ft_mutability = fty.ft_mutability;
               ft_returns_mutable = fty.ft_returns_mutable;
@@ -3766,6 +3767,7 @@ and is_abstract_ft fty = match fty with
                 ft_where_constraints = [];
                 ft_params = List.map vars TUtils.default_fun_param;
                 ft_ret = tr;
+                ft_fun_kind = fty.ft_fun_kind;
                 ft_reactive = fty.ft_reactive;
                 ft_mutability = fty.ft_mutability;
                 ft_returns_mutable = fty.ft_returns_mutable;
@@ -5319,6 +5321,8 @@ and call_ ~expected ~method_call_info pos env fty el uel =
               ft_params = tyl;
               ft_ret = ty;
               ft_reactive = reactivity;
+              (* TODO: record proper async lambda information *)
+              ft_fun_kind = Ast.FSync;
               ft_return_disposable = false;
               ft_mutability = None;
               ft_returns_mutable = false;

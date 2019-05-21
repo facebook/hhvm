@@ -392,6 +392,7 @@ let default_constructor_ce class_ =
              ft_where_constraints = [];
              ft_params   = [];
              ft_ret      = MakeType.void r;
+             ft_fun_kind = Ast.FSync;
              ft_reactive = Nonreactive;
              ft_mutability = None;
              ft_returns_mutable = false;

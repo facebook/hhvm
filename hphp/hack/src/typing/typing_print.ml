@@ -1279,6 +1279,7 @@ let to_locl_ty
         ft_arity = Fstandard (0, 0);
         ft_tparams = ([], FTKtparams);
         ft_where_constraints = [];
+        ft_fun_kind = Ast.FSync;
         ft_reactive = Nonreactive;
         ft_return_disposable = false;
         ft_mutability = None;

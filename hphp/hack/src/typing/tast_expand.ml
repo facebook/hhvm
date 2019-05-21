@@ -55,12 +55,12 @@ let expand_ty env ty =
   and exp_tys tyl = List.map ~f:exp_ty tyl
 
   and exp_fun_type { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_tparams;
-                     ft_where_constraints; ft_ret; ft_params;
+                     ft_where_constraints; ft_ret; ft_fun_kind; ft_params;
                      ft_reactive; ft_return_disposable;
                      ft_mutability; ft_returns_mutable;
                      ft_is_coroutine; ft_decl_errors;
                      ft_returns_void_to_rx } =
-  { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_reactive; ft_is_coroutine;
+  { ft_pos; ft_deprecated; ft_arity; ft_abstract; ft_fun_kind; ft_reactive; ft_is_coroutine;
     ft_return_disposable; ft_mutability; ft_returns_mutable;
     ft_tparams = Tuple.T2.map_fst ~f:(List.map ~f:exp_tparam) ft_tparams;
     ft_where_constraints = List.map ~f:exp_where_constraint ft_where_constraints;

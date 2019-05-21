@@ -190,6 +190,7 @@ let method_type env m =
     ft_mutability = mut;
     ft_returns_mutable = returns_mutable;
     ft_return_disposable = return_disposable;
+    ft_fun_kind = m.m_fun_kind;
     ft_decl_errors = None;
     ft_returns_void_to_rx = returns_void_to_rx;
   }
@@ -225,6 +226,7 @@ let method_redeclaration_type env m =
     ft_reactive = Nonreactive;
     ft_mutability = None;
     ft_returns_mutable = false;
+    ft_fun_kind = m.mt_fun_kind;
     ft_return_disposable = false;
     ft_decl_errors = None;
     ft_returns_void_to_rx = false;

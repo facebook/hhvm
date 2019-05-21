@@ -182,26 +182,6 @@ let expand_type env x =
   | r, Tvar x -> expand_var env r x
   | x -> env, x
 
-let make_ft p reactivity is_coroutine params ret_ty =
-  let arity = List.length params in
-  {
-    ft_pos      = p;
-    ft_deprecated = None;
-    ft_abstract = false;
-    ft_is_coroutine = is_coroutine;
-    ft_arity    = Fstandard (arity, arity);
-    ft_tparams  = ([], FTKtparams);
-    ft_where_constraints = [];
-    ft_params   = params;
-    ft_ret      = ret_ty;
-    ft_reactive = reactivity;
-    ft_return_disposable = false;
-    ft_returns_mutable = false;
-    ft_mutability = None;
-    ft_decl_errors = None;
-    ft_returns_void_to_rx = false;
-  }
-
 let get_shape_field_name = function
   | Ast.SFlit_int (_, s)
   | Ast.SFlit_str (_, s) -> s

@@ -101,6 +101,7 @@ and hint_ p env = function
       ft_where_constraints = [];
       ft_params = paraml;
       ft_ret = ret;
+      ft_fun_kind = Ast.FSync;
       ft_reactive = reactivity;
       ft_return_disposable = false;
       ft_mutability = None;

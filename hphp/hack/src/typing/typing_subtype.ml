@@ -970,6 +970,19 @@ and simplify_subtype
   | Tvar _, _ | _, Tvar _ ->
     default ()
 
+  (* If subtype and supertype are the same generic parameter, we're done *)
+  | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)
+    when name_sub = name_super ->
+    valid ()
+
+  (* When decomposing subtypes for the purpose of adding bounds on generic
+   * parameters to the context, (so seen_generic_params = None), leave
+   * subtype so that the bounds get added *)
+  | Tabstract (AKgeneric _, _), _
+  | _, Tabstract (AKgeneric _, _)
+    when Option.is_none seen_generic_params ->
+    default ()
+
   (* Num is not atomic: it is equivalent to int|float. The rule below relies
    * on ty_sub not being a union e.g. consider num <: arraykey | float, so
    * we break out num first.
@@ -1007,8 +1020,17 @@ and simplify_subtype
     let rec try_each tys env =
       match tys with
       | [] ->
-        invalid ()
-
+        (* If type on left might have an explicit upper bound (e.g. generic parameters, new type)
+         * then we'd better check this too. e.g. consider foo<T as ~int> and T <: ~num
+         *)
+        begin match snd ty_sub with
+        | Tabstract ((AKnewtype _ | AKdependent _), Some ty) ->
+          simplify_subtype ~seen_generic_params ~deep ~this_ty ty ty_super env
+        | Tabstract (AKgeneric name_sub, opt_sub_cstr) ->
+          simplify_subtype_generic_sub name_sub opt_sub_cstr ty_super env
+        | _ ->
+          invalid ()
+        end
       | ty::tys ->
         env |>
         simplify_subtype ~seen_generic_params ~deep ~this_ty ty_sub ty
@@ -1038,11 +1060,6 @@ and simplify_subtype
     if no_top_bottom || not new_inference then default () else
     let ety_sub = anyfy env (fst ety_sub) ety_super in
     simplify_subtype ~seen_generic_params ~deep ~this_ty ety_sub ety_super env
-
-  (* If subtype and supertype are the same generic parameter, we're done *)
-  | Tabstract (AKgeneric name_sub, _), Tabstract (AKgeneric name_super, _)
-       when name_sub = name_super
-    -> valid ()
 
   (* Supertype is generic parameter *and* subtype is a newtype with bound.
    * We need to make this a special case because there is a *choice*
@@ -2275,6 +2292,9 @@ let decompose_subtype_add_bound
   let env, ty_super = Env.expand_type env ty_super in
   let env, ty_sub = Env.expand_type env ty_sub in
   match ty_sub, ty_super with
+  | _, (_, Tany) ->
+    env
+
   (* name_sub <: ty_super so add an upper bound on name_sub *)
   | (_, Tabstract (AKgeneric name_sub, _)), _ when not (phys_equal ty_sub ty_super) ->
     log_subtype ~this_ty:None ~function_name:"decompose_subtype_add_bound" env ty_sub ty_super;

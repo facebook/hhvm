@@ -132,7 +132,7 @@ let gen_Members field pos fields =
  let mems =
    List.map ~f:(fun x -> (AFvalue (pos, (String x)))) members
  in Method {
-   m_kind = [Final; Public; Static ];
+   m_kind = [ Public; Static ];
    m_tparams = [];
    m_constrs = [];
    m_name = (pos, gen_fun_name field "Members");

@@ -31,7 +31,7 @@
     VerifyRetTypeC
     RetC
   }
-  .method [public static final] <"HH\\mixed" N  > Field##Members() {
+  .method [public static] <"HH\\mixed" N  > Field##Members() {
     .declvars $mems;
     Vec @A_0
     ColFromArray ImmVector

@@ -420,6 +420,72 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 //////////////////////////////////////////////////////////////////////
 // fpi
 
+bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
+             Type context, bool maybeDynamic) {
+  auto const func = rfunc.exactFunc();
+  if (!func) return false;
+  if (maybeDynamic && (
+      (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls &&
+       (func->attrs & AttrBuiltin)) ||
+      (RuntimeOption::EvalForbidDynamicCalls > 0 &&
+       !(func->attrs & AttrDynamicallyCallable)))) {
+    return false;
+  }
+
+  // Reified functions may have a mismatch of arity or reified generics
+  // so we cannot fold them
+  // TODO(T31677864): Detect the arity mismatch at HHBBC and enable them to
+  // be foldable
+  if (func->isReified) return false;
+  if (func->attrs & AttrTakesInOutParams) return false;
+
+  // Foldable builtins are always worth trying
+  if (func->attrs & AttrIsFoldable) return true;
+
+  // Any native functions at this point are known to be
+  // non-foldable, but other builtins might be, even if they
+  // don't have the __Foldable attribute.
+  if (func->nativeInfo) return false;
+
+  // Don't try to fold functions which aren't guaranteed to be accessible at
+  // this call site.
+  if (func->attrs & AttrPrivate) {
+    if (env.ctx.cls != func->cls) return false;
+  } else if (func->attrs & AttrProtected) {
+    if (!env.ctx.cls) return false;
+    if (!env.index.must_be_derived_from(env.ctx.cls, func->cls) &&
+        !env.index.must_be_derived_from(func->cls, env.ctx.cls)) return false;
+  }
+
+  if (func->params.size()) {
+    // Not worth trying if we're going to warn due to missing args
+    return check_nargs_in_range(func, nArgs);
+  }
+
+  // The function has no args. Check if it's effect free and returns
+  // a literal.
+  if (env.index.is_effect_free(rfunc) &&
+      is_scalar(env.index.lookup_return_type_raw(func))) {
+    return true;
+  }
+
+  if (!(func->attrs & AttrStatic) && func->cls) {
+    // May be worth trying to fold if the method returns a scalar,
+    // assuming its only "effect" is checking for existence of $this.
+    if (is_scalar(env.index.lookup_return_type_raw(func))) return true;
+
+    // The method may be foldable if we know more about $this.
+    if (is_specialized_obj(context)) {
+      auto const dobj = dobj_of(context);
+      if (dobj.type == DObj::Exact || dobj.cls.cls() != func->cls) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 /*
  * Push an ActRec.
  *
@@ -445,62 +511,14 @@ bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
         !ar.func) {
       return false;
     }
-    if (maybeDynamic && ar.func->mightCareAboutDynCalls()) return false;
-    // Reified functions may have a mismatch of arity or reified generics
-    // so we cannot fold them
-    // TODO(T31677864): Detect the arity mismatch at HHBBC and enable them to
-    // be foldable
-    if (ar.func->couldHaveReifiedGenerics()) return false;
+    if (!canFold(env, *ar.func, nArgs, ar.context, maybeDynamic)) return false;
+
     auto const func = ar.func->exactFunc();
-    if (!func) return false;
-    if (func->attrs & AttrTakesInOutParams) return false;
     if (env.collect.unfoldableFuncs.count(std::make_pair(func, env.bid))) {
       return false;
     }
-    // Foldable builtins are always worth trying
-    if (ar.func->isFoldable()) return true;
-    // Any native functions at this point are known to be
-    // non-foldable, but other builtins might be, even if they
-    // don't have the __Foldable attribute.
-    if (func->nativeInfo) return false;
 
-    // Don't try to fold functions which aren't guaranteed to be accessible at
-    // this call site.
-    if (func->attrs & AttrPrivate) {
-      if (env.ctx.cls != func->cls) return false;
-    } else if (func->attrs & AttrProtected) {
-      if (!env.ctx.cls) return false;
-      if (!env.index.must_be_derived_from(env.ctx.cls, func->cls) &&
-          !env.index.must_be_derived_from(func->cls, env.ctx.cls)) return false;
-    }
-
-    if (func->params.size()) {
-      // Not worth trying if we're going to warn due to missing args
-      return check_nargs_in_range(func, nArgs);
-    }
-
-    // The function has no args. Check if it's effect free and returns
-    // a literal.
-    if (env.index.is_effect_free(*ar.func) &&
-        is_scalar(env.index.lookup_return_type_raw(func))) {
-      return true;
-    }
-
-    if (!(func->attrs & AttrStatic) && func->cls) {
-      // May be worth trying to fold if the method returns a scalar,
-      // assuming its only "effect" is checking for existence of $this.
-      if (is_scalar(env.index.lookup_return_type_raw(func))) return true;
-
-      // The method may be foldable if we know more about $this.
-      if (is_specialized_obj(ar.context)) {
-        auto const dobj = dobj_of(ar.context);
-        if (dobj.type == DObj::Exact || dobj.cls.cls() != func->cls) {
-          return true;
-        }
-      }
-    }
-
-    return false;
+    return true;
   }();
   ar.foldable = foldable;
   ar.pushBlk = env.bid;

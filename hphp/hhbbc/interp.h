@@ -218,7 +218,7 @@ void finish_builtin(ISS& env,
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp);
 
 folly::Optional<Type>
-const_fold(ISS& env, uint32_t nArgs, const res::Func& rfunc);
+const_fold(ISS& env, uint32_t nArgs, const php::Func& phpFunc);
 
 folly::Optional<Type> thisType(const Index& index, Context ctx);
 

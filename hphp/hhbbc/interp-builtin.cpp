@@ -456,7 +456,8 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
   auto const func = env.index.resolve_func(env.ctx, name);
 
   if (options.ConstantFoldBuiltins && func.isFoldable()) {
-    if (auto val = const_fold(env, op.arg1, func)) {
+    assertx(func.exactFunc());
+    if (auto val = const_fold(env, op.arg1, *func.exactFunc())) {
       constprop(env);
       discard(env, op.arg1);
       return push(env, std::move(*val));
@@ -647,8 +648,8 @@ bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {
 
 folly::Optional<Type> const_fold(ISS& env,
                                  uint32_t nArgs,
-                                 const res::Func& rfunc) {
-  assert(rfunc.isFoldable());
+                                 const php::Func& phpFunc) {
+  assert(phpFunc.attrs & AttrIsFoldable);
 
   std::vector<Cell> args(nArgs);
   for (auto i = uint32_t{0}; i < nArgs; ++i) {
@@ -657,19 +658,16 @@ folly::Optional<Type> const_fold(ISS& env,
     args[nArgs - i - 1] = *val;
   }
 
-  auto phpFunc = rfunc.exactFunc();
-  assertx(phpFunc);
-
   Class* cls = nullptr;
   auto const func = [&] () -> HPHP::Func* {
-    if (phpFunc->cls) {
-      cls = Unit::lookupClass(phpFunc->cls->name);
+    if (phpFunc.cls) {
+      cls = Unit::lookupClass(phpFunc.cls->name);
       if (!cls || !(cls->attrs() & AttrBuiltin)) return nullptr;
-      auto const f = cls->lookupMethod(phpFunc->name);
+      auto const f = cls->lookupMethod(phpFunc.name);
       if (!f->isStatic()) return nullptr;
       return f;
     }
-    return Unit::lookupBuiltin(phpFunc->name);
+    return Unit::lookupBuiltin(phpFunc.name);
   }();
 
   if (!func) return folly::none;

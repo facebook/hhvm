@@ -3644,14 +3644,15 @@ template<class FCallWithFCA>
 bool fcallOptimizeChecks(
   ISS& env,
   const FCallArgs& fca,
+  const res::Func& func,
   FCallWithFCA fcallWithFCA,
-  const ActRec& ar
+  const ActRec* legacyAR = nullptr
 ) {
   if (fca.enforceReffiness()) {
     bool match = true;
     for (auto i = 0; i < fca.numArgs; ++i) {
-      auto const kind = env.index.lookup_param_prep(env.ctx, *ar.func, i);
-      if (ar.foldable && kind != PrepKind::Val) {
+      auto const kind = env.index.lookup_param_prep(env.ctx, func, i);
+      if (legacyAR && legacyAR->foldable && kind != PrepKind::Val) {
         fpiNotFoldable(env);
         fpiPop(env);
         discard(env, fca.numArgsInclUnpack());
@@ -3668,7 +3669,7 @@ bool fcallOptimizeChecks(
         // Reffiness mismatch
         auto const exCls = makeStaticString("InvalidArgumentException");
         auto const err = makeStaticString(formatParamRefMismatch(
-          ar.func->name()->data(), i, !fca.byRef(i)));
+          func.name()->data(), i, !fca.byRef(i)));
 
         reduce(
           env,
@@ -3698,7 +3699,7 @@ bool fcallOptimizeChecks(
   // Infer whether the callee supports async eager return.
   if (fca.asyncEagerTarget != NoBlockId &&
       !fca.supportsAsyncEagerReturn()) {
-    auto const status = env.index.supports_async_eager_return(*ar.func);
+    auto const status = env.index.supports_async_eager_return(func);
     if (status) {
       auto newFCA = fca;
       if (*status) {
@@ -3765,55 +3766,75 @@ void pushCallReturnType(ISS& env, Type&& ty, const FCallArgs& fca) {
 const StaticString s_defined { "defined" };
 const StaticString s_function_exists { "function_exists" };
 
-folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
-  auto const ar = fpiTop(env);
-  always_assert(ar.func.hasValue());
-
-  if (options.ConstantFoldBuiltins && ar.foldable) {
-    if (!fca.hasUnpack() && fca.numRets == 1) {
-      auto ty = [&] () {
-        auto const func = ar.func->exactFunc();
-        assertx(func);
-        if (func->attrs & AttrBuiltin && func->attrs & AttrIsFoldable) {
-          auto ret = const_fold(env, fca.numArgs, *ar.func);
-          return ret ? *ret : TBottom;
-        }
-        CompactVector<Type> args(fca.numArgs);
-        for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
-          auto const& arg = topT(env, i);
-          auto const argNum = fca.numArgs - i - 1;
-          auto const isScalar = is_scalar(arg);
-          if (!isScalar &&
-              (env.index.func_depends_on_arg(func, argNum) ||
-               !arg.subtypeOf(BInitCell))) {
-            return TBottom;
-          }
-          args[argNum] = isScalar ? scalarize(arg) : arg;
-        }
-
-        return env.index.lookup_foldable_return_type(
-          env.ctx, func, ar.context, std::move(args));
-      }();
-      if (auto v = tv(ty)) {
-        BytecodeVec repl { fca.numArgs, bc::PopC {} };
-        repl.push_back(bc::PopU {});
-        repl.push_back(bc::PopU {});
-        if (ar.kind == FPIKind::ObjMeth || ar.kind == FPIKind::ObjMethNS) {
-          repl.push_back(bc::PopC {});
-        } else {
-          repl.push_back(bc::PopU {});
-        }
-        repl.push_back(gen_constant(*v));
-        fpiPop(env);
-        reduce(env, std::move(repl));
-        return folly::none;
-      }
+template<class FCallWithFCA>
+void fcallKnownImpl(
+  ISS& env,
+  const FCallArgs& fca,
+  const res::Func& func,
+  Type context,
+  bool nullsafe,
+  bool maybeDynamic,
+  FCallWithFCA fcallWithFCA,
+  const ActRec* legacyAR = nullptr
+) {
+  auto const foldableFunc = [&] () -> const php::Func* {
+    if (!options.ConstantFoldBuiltins) return nullptr;
+    if (fca.hasUnpack() || fca.numRets != 1) return nullptr;
+    auto const exFunc = func.exactFunc();
+    if (legacyAR) {
+      assertx(!legacyAR->foldable || exFunc);
+      return legacyAR->foldable ? exFunc : nullptr;
     }
+    return canFold(env, func, fca.numArgs, context, maybeDynamic)
+      ? exFunc : nullptr;
+  }();
+
+  if (foldableFunc) {
+    auto ty = [&] () {
+      if (foldableFunc->attrs & AttrBuiltin &&
+          foldableFunc->attrs & AttrIsFoldable) {
+        auto ret = const_fold(env, fca.numArgs, *foldableFunc);
+        return ret ? *ret : TBottom;
+      }
+      CompactVector<Type> args(fca.numArgs);
+      for (auto i = uint32_t{0}; i < fca.numArgs; ++i) {
+        auto const& arg = topT(env, i);
+        auto const argNum = fca.numArgs - i - 1;
+        auto const isScalar = is_scalar(arg);
+        if (!isScalar &&
+            (env.index.func_depends_on_arg(foldableFunc, argNum) ||
+             !arg.subtypeOf(BInitCell))) {
+          return TBottom;
+        }
+        args[argNum] = isScalar ? scalarize(arg) : arg;
+      }
+
+      return env.index.lookup_foldable_return_type(
+        env.ctx, foldableFunc, context, std::move(args));
+    }();
+    if (auto v = tv(ty)) {
+      BytecodeVec repl { fca.numArgs, bc::PopC {} };
+      repl.push_back(bc::PopU {});
+      repl.push_back(bc::PopU {});
+      if (topT(env, fca.numArgs + 2).subtypeOf(TInitCell)) {
+        repl.push_back(bc::PopC {});
+      } else {
+        assertx(topT(env, fca.numArgs + 2).subtypeOf(TUninit));
+        repl.push_back(bc::PopU {});
+      }
+      repl.push_back(gen_constant(*v));
+      if (legacyAR) fpiPop(env);
+      reduce(env, std::move(repl));
+      return;
+    }
+  }
+
+  if (legacyAR && legacyAR->foldable) {
     fpiNotFoldable(env);
     fpiPop(env);
     discard(env, fca.numArgsInclUnpack());
     for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TBottom);
-    return folly::none;
+    return;
   }
 
   auto returnType = [&] {
@@ -3824,9 +3845,9 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     }
 
     auto ty = fca.hasUnpack()
-      ? env.index.lookup_return_type(env.ctx, *ar.func)
-      : env.index.lookup_return_type(env.ctx, args, ar.context, *ar.func);
-    if (ar.kind == FPIKind::ObjMethNS) {
+      ? env.index.lookup_return_type(env.ctx, func)
+      : env.index.lookup_return_type(env.ctx, args, context, func);
+    if (nullsafe) {
       ty = union_of(std::move(ty), TInitNull);
     }
     return ty;
@@ -3838,19 +3859,18 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
     newFCA.asyncEagerTarget = NoBlockId;
     newFCA.flags = static_cast<FCallArgs::Flags>(
       newFCA.flags & ~FCallArgs::SupportsAsyncEagerReturn);
-    return newFCA;
+    reduce(env, fcallWithFCA(std::move(newFCA)));
+    return;
   }
 
-  fpiPop(env);
-
-  if (!fca.hasUnpack() && ar.func->name()->isame(s_function_exists.get())) {
+  if (!fca.hasUnpack() && func.name()->isame(s_function_exists.get())) {
     handle_function_exists(env, fca.numArgs, false);
   }
 
   if (options.HardConstProp &&
       fca.numArgs == 1 &&
       !fca.hasUnpack() &&
-      ar.func->name()->isame(s_defined.get())) {
+      func.name()->isame(s_defined.get())) {
     // If someone calls defined('foo') they probably want foo to be
     // defined normally; ie not a persistent constant.
     if (auto const v = tv(topCV(env))) {
@@ -3863,14 +3883,26 @@ folly::Optional<FCallArgs> fcallKnownImpl(ISS& env, const FCallArgs& fca) {
 
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
+  if (legacyAR) {
+    fpiPop(env);
+  } else {
+    popU(env);
+    popU(env);
+    popCU(env);
+  }
   pushCallReturnType(env, std::move(returnType), fca);
-  return folly::none;
 }
 
-void fcallUnknownImpl(ISS& env, const FCallArgs& fca) {
+void fcallUnknownImpl(ISS& env, const FCallArgs& fca, bool legacy = false) {
   if (fca.hasUnpack()) popC(env);
   for (auto i = uint32_t{0}; i < fca.numArgs; ++i) popCV(env);
-  fpiPop(env);
+  if (legacy) {
+    fpiPop(env);
+  } else {
+    popU(env);
+    popU(env);
+    popCU(env);
+  }
   if (fca.asyncEagerTarget != NoBlockId) {
     assertx(fca.numRets == 1);
     push(env, TInitCell);
@@ -4369,7 +4401,7 @@ void in(ISS& env, const bc::FCall& op) {
       return bc::FCall { std::move(fca), op.str2, op.str3 };
     };
 
-    if (fcallOptimizeChecks(env, fca, updateFCA, ar)) return;
+    if (fcallOptimizeChecks(env, fca, *ar.func, updateFCA, &ar)) return;
 
     switch (ar.kind) {
     case FPIKind::Unknown:
@@ -4383,9 +4415,8 @@ void in(ISS& env, const bc::FCall& op) {
         return reduce(env, bc::FCall {
           fca, staticEmptyString(), ar.func->name() });
       }
-      if (auto const newFCA = fcallKnownImpl(env, fca)) {
-        return reduce(env, bc::FCall { *newFCA, op.str2, op.str3 });
-      }
+      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */,
+                     false /* unused */, updateFCA, &ar);
       return;
     case FPIKind::Builtin:
       assertx(fca.numRets == 1);
@@ -4403,18 +4434,19 @@ void in(ISS& env, const bc::FCall& op) {
         return reduce(env, bc::FCall {
           fca, ar.cls->name(), ar.func->name() });
       }
-      // fallthrough
-    case FPIKind::ObjMethNS:
       // If we didn't return a reduce above, we still can compute a
       // partially-known FCall effect with our res::Func.
-      if (auto const newFCA = fcallKnownImpl(env, fca)) {
-        return reduce(env, bc::FCall { *newFCA, op.str2, op.str3 });
-      }
+      fcallKnownImpl(env, fca, *ar.func, ar.context, false /* nullsafe */,
+                     false /* unused */, updateFCA, &ar);
+      return;
+    case FPIKind::ObjMethNS:
+      fcallKnownImpl(env, fca, *ar.func, ar.context, true /* nullsafe */,
+                     false /* unused */, updateFCA, &ar);
       return;
     }
   }
 
-  fcallUnknownImpl(env, fca);
+  fcallUnknownImpl(env, fca, /* legacy */ true);
 }
 
 namespace {

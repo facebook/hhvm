@@ -65,35 +65,6 @@ struct InliningDecider {
   explicit InliningDecider(const Func* func) : m_topFunc(func) {}
 
   /////////////////////////////////////////////////////////////////////////////
-  // Getters and setters.
-
-  /*
-   * Disable an inlining context.
-   *
-   * This should be used for the regions passed to shouldInline().
-   */
-  InliningDecider& disable() {
-    m_disabled = true;
-    return *this;
-  }
-
-  /*
-   * Reset inlining state.
-   *
-   * Forget all current information about inlining cost and depth, preserving
-   * only m_topFunc and m_disabled.
-   */
-  void resetState() {
-    m_cost = m_stackDepth = 0;
-    m_costStack.clear();
-  }
-
-  /*
-   * Getters for depth and disabled status.
-   */
-  bool disabled() const { return m_disabled; }
-
-  /////////////////////////////////////////////////////////////////////////////
   // Core API.
 
   /*
@@ -123,51 +94,24 @@ struct InliningDecider {
    * being used correctly) that it is safe and possible to inline the callee;
    * moreover, based on global inlining heuristics, we submit that the tracelet
    * selector /ought/ to do so.
-   *
-   * If inlining is not performed when true is returned, registerEndInlining()
-   * must be called immediately to correctly reset the internal inlining costs.
    */
   bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, Op callerFPushOp,
                     const Func* callee, const RegionDesc& region,
                     uint32_t maxTotalCost, Annotations& annotations);
 
   /*
-   * Update our context to account for the beginning of an inlined call.
+   * Return the cost of inlining the given callee.
    */
-  int accountForInlining(SrcKey callerSk,
-                         Op callerFPushOp,
-                         const Func* callee,
-                         const RegionDesc& region,
-                         const irgen::IRGS& irgs,
-                         Annotations& annotations);
-
-  /*
-   * Update context to begin inlining of callee with cost zero.
-   */
-  void initWithCallee(const Func* callee);
-
-  /*
-   * Update internal state for when an inlining event ends.
-   *
-   * This just "pops" the call and stack depths---it should be called whenever
-   * the tracelet selector is finished transcluding the blocks of an inlined
-   * function (even if it's nested in another inlined function).
-   */
-  void registerEndInlining(const Func* callee);
+  int costOfInlining(SrcKey callerSk,
+                     Op callerFPushOp,
+                     const Func* callee,
+                     const RegionDesc& region,
+                     const irgen::IRGS& irgs,
+                     Annotations& annotations);
 
 private:
   // The function being inlined into.
   const Func* const m_topFunc;
-
-  // If set, the decider will always refuse inlining.
-  bool m_disabled{false};
-
-  // Costs associated with inlining.
-  int m_cost{0};
-  int m_stackDepth{0};
-
-  // Stack of costs, popped in registerEndInlining().
-  std::vector<int> m_costStack;
 };
 
 /*

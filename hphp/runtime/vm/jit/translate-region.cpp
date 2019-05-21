@@ -451,6 +451,9 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   if (psk.srcKey.op() != Op::FCall) {
     return nullptr;
   }
+  if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
+    return nullptr;
+  }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         &annotations : nullptr;
   if (!inl.canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
@@ -478,8 +481,8 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  calleeCost = inl.accountForInlining(psk.srcKey, info.fpushOpc, callee,
-                                      *calleeRegion, irgs, annotations);
+  calleeCost = inl.costOfInlining(psk.srcKey, info.fpushOpc, callee,
+                                  *calleeRegion, irgs, annotations);
   return calleeRegion;
 }
 
@@ -745,8 +748,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                         annotations);
           assertx(budgetBCInstrs >= 0);
 
-          inl.registerEndInlining(callee);
-
           if (result != TranslateResult::Success) {
             // If we failed to generate the callee don't fail the caller,
             // instead retry without the callee
@@ -774,8 +775,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
           // Don't emit the FCall
           skipTrans = true;
-        } else {
-          inl.registerEndInlining(callee);
         }
       }
 
@@ -923,7 +922,6 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
     // Set up inlining context, but disable it for profiling mode.
     InliningDecider inl(region.entry()->func());
-    if (context.kind == TransKind::Profile) inl.disable();
 
     // Set the profCount of the IRUnit's entry block, which is created a
     // priori.
@@ -999,6 +997,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   while (result == TranslateResult::Retry) {
     unit = std::make_unique<IRUnit>(ctx);
     irgen::IRGS irgs{*unit, &region};
+    irgs.inlineState.conjure = true;
     if (hasTransID(entryBID)) irgs.profTransID = getTransID(entryBID);
 
     auto& irb = *irgs.irb;
@@ -1007,8 +1006,6 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     auto const ctxType = region.inlineCtxType();
 
     auto const func = region.entry()->func();
-    inl.initWithCallee(func);
-    inl.disable();
 
     auto const entry = irb.unit().entry();
     auto returnBlock = irb.unit().defBlock();

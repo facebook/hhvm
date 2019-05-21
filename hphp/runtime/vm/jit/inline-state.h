@@ -54,6 +54,22 @@ struct InlineState {
   uint16_t depth{0};
 
   /*
+   * Translating a unit just to compute the cost of inlining.
+   */
+  bool conjure{false};
+
+  /*
+   * Costs associated with inlining.
+   */
+  int cost{0};
+  int stackDepth{0};
+
+  /*
+   * A stack of saved costs.
+   */
+  std::vector<int> costStack;
+
+  /*
    * Return-to-caller block targets for inlined functions.  The last target is
    * for the current inlining frame.
    */

@@ -202,9 +202,6 @@ bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
                                   Annotations* annotations) const {
   assertx(callSK.op() == Op::FCall);
 
-  if (m_disabled) {
-    return traceRefusal(callSK, callee, "m_disabled", annotations);
-  }
   if (!callee) {
     return traceRefusal(callSK, callee, "unknown callee", annotations);
   }
@@ -503,33 +500,22 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
 }
 
 /*
- * Update context for start of inlining.
+ * Return the cost of inlining the given callee.
  */
-int InliningDecider::accountForInlining(SrcKey callerSk,
-                                        Op callerFPushOp,
-                                        const Func* callee,
-                                        const RegionDesc& region,
-                                        const irgen::IRGS& irgs,
-                                        Annotations& annotations) {
+int InliningDecider::costOfInlining(SrcKey callerSk,
+                                    Op callerFPushOp,
+                                    const Func* callee,
+                                    const RegionDesc& region,
+                                    const irgen::IRGS& irgs,
+                                    Annotations& annotations) {
   auto const alwaysInl =
     !RuntimeOption::EvalHHIRInliningIgnoreHints &&
     callee->userAttributes().count(s_AlwaysInline.get());
 
   // Functions marked as always inline don't contribute to overall cost
-  int cost = alwaysInl
+  return alwaysInl
     ? 0
     : computeTranslationCost(callerSk, callerFPushOp, region, annotations);
-
-  m_costStack.push_back(cost);
-  m_cost       += cost;
-  m_stackDepth += callee->maxStackCells();
-
-  return cost;
-}
-
-void InliningDecider::initWithCallee(const Func* callee) {
-  m_costStack.push_back(0);
-  m_stackDepth += callee->maxStackCells();
 }
 
 bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
@@ -565,7 +551,8 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
     return true;
   };
 
-  if (m_stackDepth + callee->maxStackCells() >= kStackCheckLeafPadding) {
+  auto const stackDepth = irgs.inlineState.stackDepth;
+  if (stackDepth + callee->maxStackCells() >= kStackCheckLeafPadding) {
     return refuse("inlining stack depth limit exceeded");
   }
 
@@ -663,7 +650,7 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
 
   int maxCost = maxTotalCost;
   if (RuntimeOption::EvalHHIRInliningUseStackedCost) {
-    maxCost -= m_cost;
+    maxCost -= irgs.inlineState.cost;
   }
   const auto baseProfCount = s_baseProfCount.load();
   const auto callerProfCount = irgen::curProfCount(irgs);
@@ -684,14 +671,6 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void InliningDecider::registerEndInlining(const Func* callee) {
-  auto cost = m_costStack.back();
-  m_costStack.pop_back();
-
-  m_cost -= cost;
-  m_stackDepth -= callee->maxStackCells();
-}
 
 namespace {
 RegionDescPtr selectCalleeTracelet(const Func* callee,

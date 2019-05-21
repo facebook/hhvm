@@ -343,8 +343,11 @@ bool beginInlining(IRGS& env,
           startSk.resumeMode() == ResumeMode::None);
 
   env.inlineState.depth++;
+  env.inlineState.costStack.emplace_back(env.inlineState.cost);
   env.inlineState.returnTarget.emplace_back(returnTarget);
   env.inlineState.bcStateStack.emplace_back(env.bcState);
+  env.inlineState.cost += cost;
+  env.inlineState.stackDepth += target->maxStackCells();
   env.bcState = startSk;
   updateMarker(env);
 
@@ -477,6 +480,9 @@ InlineFrame popInlineFrame(IRGS& env) {
   // Pop the inlined frame in our IRGS.  Be careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
   env.inlineState.depth--;
+  env.inlineState.cost = env.inlineState.costStack.back();
+  env.inlineState.costStack.pop_back();
+  env.inlineState.stackDepth -= inlineFrame.bcState.func()->maxStackCells();
   env.inlineState.returnTarget.pop_back();
   env.bcState = env.inlineState.bcStateStack.back();
   env.inlineState.bcStateStack.pop_back();
@@ -486,9 +492,13 @@ InlineFrame popInlineFrame(IRGS& env) {
 }
 
 void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
+  // No need to preserve and update cost, as we are not going to recursively
+  // inline anything during a single Jmp opcode we are restoring the state for.
   env.inlineState.depth++;
-  env.inlineState.returnTarget.push_back(inlineFrame.target);
-  env.inlineState.bcStateStack.push_back(env.bcState);
+  env.inlineState.costStack.emplace_back(env.inlineState.cost);
+  env.inlineState.returnTarget.emplace_back(inlineFrame.target);
+  env.inlineState.bcStateStack.emplace_back(env.bcState);
+  env.inlineState.stackDepth += inlineFrame.bcState.func()->maxStackCells();
   env.bcState = inlineFrame.bcState;
   updateMarker(env);
 }

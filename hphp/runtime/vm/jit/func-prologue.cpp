@@ -76,7 +76,7 @@ TCA genFuncPrologue(TransID transID, TransKind kind, Func* func, int argc,
   auto context = prologue_context(transID, kind, func,
                                   func->getEntryForNumArgs(argc));
   IRUnit unit{context};
-  irgen::IRGS env{unit, nullptr};
+  irgen::IRGS env{unit, nullptr, 0, nullptr};
 
   irgen::emitFuncPrologue(env, argc, transID);
   irgen::sealUnit(env);
@@ -106,7 +106,7 @@ TCA genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
                         TransKind kind, CodeCache::View code) {
   auto context = prologue_context(kInvalidTransID, kind, func, func->base());
   IRUnit unit{context};
-  irgen::IRGS env{unit, nullptr};
+  irgen::IRGS env{unit, nullptr, 0, nullptr};
 
   irgen::emitFuncBodyDispatch(env, dvs);
   irgen::sealUnit(env);

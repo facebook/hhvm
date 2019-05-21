@@ -505,7 +505,6 @@ int costOfInlining(SrcKey callerSk,
                    Op callerFPushOp,
                    const Func* callee,
                    const RegionDesc& region,
-                   const irgen::IRGS& irgs,
                    Annotations& annotations) {
   auto const alwaysInl =
     !RuntimeOption::EvalHHIRInliningIgnoreHints &&
@@ -530,6 +529,7 @@ bool shouldInline(const irgen::IRGS& irgs,
 
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         &annotations : nullptr;
+
   // Tracing return lambdas.
   auto refuse = [&] (const std::string& why) {
     FTRACE(2, "shouldInline: rejecting callee region: {}", show(region));
@@ -825,7 +825,6 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
-                                 int32_t maxBCInstrs,
                                  Annotations& annotations) {
   assertx(sk.op() == OpFCall);
   auto const numArgs = getImm(sk.pc(), 0).u_FCA.numArgs;
@@ -835,7 +834,8 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   auto ctx = fpiInfo.ctxType;
 
   auto kind = irgs.context.kind;
-  auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ? &annotations : nullptr;
+  auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ?
+                        &annotations : nullptr;
 
   if (ctx == TBottom) {
     traceRefusal(sk, callee, "ctx is TBottom", annotationsPtr);
@@ -881,28 +881,21 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   const auto depth = inlineDepth(irgs);
   if (profData()) {
     auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
-                                  maxBCInstrs, annotationsPtr);
+                                  irgs.budgetBCInstrs, annotationsPtr);
     if (region &&
         shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                     adjustedMaxVasmCost(irgs, *region, depth),
-                     annotations)) {
+                     adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
       return region;
     }
     return nullptr;
   }
 
-  auto region = selectCalleeTracelet(
-    callee,
-    numArgs,
-    ctx,
-    argTypes,
-    maxBCInstrs
-  );
+  auto region = selectCalleeTracelet(callee, numArgs, ctx, argTypes,
+                                     irgs.budgetBCInstrs);
 
   if (region &&
       shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                   adjustedMaxVasmCost(irgs, *region, depth),
-                   annotations)) {
+                   adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
     return region;
   }
 

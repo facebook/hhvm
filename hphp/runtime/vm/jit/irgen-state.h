@@ -28,11 +28,13 @@
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/translator.h"
+#include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP { namespace jit {
 
 struct NormalizedInstruction;
 struct SSATmp;
+struct TranslateRetryContext;
 
 namespace irgen {
 
@@ -49,7 +51,8 @@ namespace irgen {
  * required to determine high-level compilation strategy.
  */
 struct IRGS {
-  explicit IRGS(IRUnit& unit, const RegionDesc* region);
+  explicit IRGS(IRUnit& unit, const RegionDesc* region, int32_t budgetBCInstrs,
+                TranslateRetryContext* retryContext);
 
   TransContext context;
   TransFlags transFlags;
@@ -101,6 +104,21 @@ struct IRGS {
    * profile-translation counters in PGO mode.
    */
   double profFactor{1};
+
+  /*
+   * The remaining bytecode instruction budget for this region translation.
+   */
+  int32_t budgetBCInstrs{0};
+
+  /*
+   * Context for translation retries.
+   */
+  TranslateRetryContext* retryContext;
+
+  /*
+   * Annotations.
+   */
+  Annotations annotations;
 };
 
 //////////////////////////////////////////////////////////////////////

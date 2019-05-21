@@ -92,7 +92,7 @@ bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations);
  */
 bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, Op callerFPushOp,
                   const Func* callee, const RegionDesc& region,
-                  uint32_t maxTotalCost, Annotations& annotations);
+                  uint32_t maxTotalCost);
 
 /*
  * Return the cost of inlining the given callee.
@@ -101,7 +101,6 @@ int costOfInlining(SrcKey callerSk,
                    Op callerFPushOp,
                    const Func* callee,
                    const RegionDesc& region,
-                   const irgen::IRGS& irgs,
                    Annotations& annotations);
 
 /*
@@ -110,7 +109,6 @@ int costOfInlining(SrcKey callerSk,
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
-                                 int32_t maxBCInstrs,
                                  Annotations& annotations);
 
 void setBaseInliningProfCount(uint64_t value);

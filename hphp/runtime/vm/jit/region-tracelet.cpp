@@ -74,7 +74,7 @@ struct Env {
     // translation will use.
     , unit(TransContext{kInvalidTransID, kind, TransFlags{},
                         sk, ctx.spOffset, 0})
-    , irgs(unit, nullptr)
+    , irgs(unit, nullptr, 0, nullptr)
     , arState()
     , numJmps(0)
     , numBCInstrs(maxBCInstrs)

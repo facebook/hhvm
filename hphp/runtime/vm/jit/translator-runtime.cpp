@@ -1021,14 +1021,15 @@ bool isTypeStructHelper(ArrayData* a, Cell c) {
   return checkTypeStructureMatchesCell(ts, c);
 }
 
-void asTypeStructHelper(ArrayData* a, Cell c) {
+void throwAsTypeStructExceptionHelper(ArrayData* a, Cell c) {
   std::string givenType, expectedType, errorKey;
   auto const ts = ArrNR(a);
-  if (!checkTypeStructureMatchesCell(
-    ts, c, givenType, expectedType, errorKey)) {
+  if (!checkTypeStructureMatchesCell(ts, c, givenType, expectedType,
+                                     errorKey)) {
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
+  raise_error("Invalid bytecode sequence: Instruction must throw");
 }
 
 StringData* recordReifiedGenericsAndGetName(ArrayData* tsList) {

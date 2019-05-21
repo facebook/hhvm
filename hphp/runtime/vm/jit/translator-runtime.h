@@ -219,7 +219,7 @@ ArrayData* resolveTypeStructHelper(
   bool isOrAsOp
 );
 bool isTypeStructHelper(ArrayData*, Cell);
-void asTypeStructHelper(ArrayData*, Cell);
+[[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, Cell);
 
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array

@@ -3315,24 +3315,11 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
   isAsTypeStructImpl<false>(env, a->m_data.parr);
 }
 
-void in(ISS& env, const bc::AsTypeStructC& op) {
-  auto const requiredTSType = RuntimeOption::EvalHackArrDVArrs ? BDict : BDArr;
-  if (!topC(env).couldBe(requiredTSType)) {
-    popC(env);
-    popC(env);
-    return unreachable(env);
-  }
-  auto const a = tv(topC(env));
-  if (!a || !isValidTSType(*a, false)) {
-    popC(env);
-    push(env, popC(env));
-    return;
-  }
-  if (op.subop1 == TypeStructResolveOp::Resolve &&
-      canReduceToDontResolve(a->m_data.parr)) {
-    return reduce(env, bc::AsTypeStructC { TypeStructResolveOp::DontResolve });
-  }
-  isAsTypeStructImpl<true>(env, a->m_data.parr);
+void in(ISS& env, const bc::ThrowAsTypeStructException& op) {
+  popC(env);
+  popC(env);
+  unreachable(env);
+  return;
 }
 
 void in(ISS& env, const bc::CombineAndResolveTypeStruct& op) {

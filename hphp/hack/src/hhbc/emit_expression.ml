@@ -654,35 +654,27 @@ and emit_as env pos e h is_nullable = Local.scope @@ fun () ->
   let ts_instrs, is_static = emit_reified_arg env ~isas:true pos h in
   let then_label = Label.next_regular () in
   let done_label = Label.next_regular () in
-  let push_typestructc_args_block = gather [
-    instr_pushl arg_local;
-    instr_pushl type_struct_local ] in
+  let main_block ts_instrs resolve = gather [
+    ts_instrs;
+    instr_setl type_struct_local;
+    instr_istypestructc resolve;
+    instr_jmpnz then_label;
+    if is_nullable then gather [ instr_null; instr_jmp done_label ] else
+    gather [
+      instr_pushl arg_local;
+      instr_pushl type_struct_local;
+      instr_throwastypestructexception
+    ]
+  ] in
   (* Set aside the argument value. *)
   gather [
     emit_expr env e;
     instr_setl arg_local;
     (* Store type struct in a variable and reuse it. *)
     if is_static then
-      gather [
-        get_type_structure_for_hint env ~targ_map:SMap.empty h;
-        instr_setl type_struct_local;
-        instr_istypestructc Resolve;
-        instr_jmpnz then_label;
-        if is_nullable then instr_null
-        else
-          gather [push_typestructc_args_block; instr_astypestructc Resolve]
-      ]
+      main_block (get_type_structure_for_hint env ~targ_map:SMap.empty h) Resolve
     else
-      gather [
-        ts_instrs;
-        instr_setl type_struct_local;
-        instr_istypestructc DontResolve;
-        instr_jmpnz then_label;
-        if is_nullable then instr_null
-        else
-          gather [push_typestructc_args_block; instr_astypestructc DontResolve]
-      ];
-    instr_jmp done_label;
+      main_block ts_instrs DontResolve;
     instr_label then_label;
     instr_pushl arg_local;
     instr_unsetl type_struct_local;

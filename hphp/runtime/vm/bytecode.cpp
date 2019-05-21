@@ -2636,16 +2636,18 @@ OPTBLD_INLINE void iopIsTypeStructC(TypeStructResolveOp op) {
   vmStack().replaceC<KindOfBoolean>(b);
 }
 
-OPTBLD_INLINE void iopAsTypeStructC(TypeStructResolveOp op) {
+OPTBLD_INLINE void iopThrowAsTypeStructException() {
   auto const c = vmStack().indC(1);
-  auto const ts = maybeResolveAndErrorOnTypeStructure(op, false);
+  auto const ts =
+    maybeResolveAndErrorOnTypeStructure(TypeStructResolveOp::Resolve, false);
   std::string givenType, expectedType, errorKey;
-  if (!checkTypeStructureMatchesCell(
-        ArrNR(ts), *c, givenType, expectedType, errorKey)) {
+  if (!checkTypeStructureMatchesCell(ArrNR(ts), *c, givenType, expectedType,
+                                     errorKey)) {
+    vmStack().popC(); // pop ts
     throwTypeStructureDoesNotMatchCellException(
       givenType, expectedType, errorKey);
   }
-  vmStack().popC(); // pop ts
+  raise_error("Invalid bytecode sequence: Instruction must throw");
 }
 
 OPTBLD_INLINE void iopCombineAndResolveTypeStruct(uint32_t n) {

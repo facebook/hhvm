@@ -2198,7 +2198,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowParamRefMismatchRange:
   case SetOpCell:
   case SetOpCellVerify:
-  case AsTypeStruct:
+  case ThrowAsTypeStructException:
   case PropTypeRedefineCheck: // Can raise and autoload
   case HandleRequestSurprise:
     return may_load_store(AHeapAny, AHeapAny);

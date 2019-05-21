@@ -192,7 +192,8 @@ static const struct {
   { OpInstanceOfD, {Stack1,           Stack1,       OutPredBool     }},
   { OpIsLateBoundCls,{Stack1,         Stack1,       OutBoolean      }},
   { OpIsTypeStructC,{StackTop2,       Stack1,       OutBoolean      }},
-  { OpAsTypeStructC,{StackTop2,       Stack1,       OutSameAsInput2 }},
+  { OpThrowAsTypeStructException,
+                   {StackTop2,        None,         OutNone         }},
   { OpCombineAndResolveTypeStruct,
                    {StackN,           Stack1,       OutDArray       }},
   { OpSelect,      {StackTop3,        Stack1,       OutUnknown      }},
@@ -983,7 +984,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::InstanceOfD:
   case Op::IsLateBoundCls:
   case Op::IsTypeStructC:
-  case Op::AsTypeStructC:
   case Op::Int:
   case Op::IssetG:
   case Op::IssetL:
@@ -1035,6 +1035,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::String:
   case Op::This:
   case Op::Throw:
+  case Op::ThrowAsTypeStructException:
   case Op::True:
   case Op::UnsetL:
   case Op::VGetL:

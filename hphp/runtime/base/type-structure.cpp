@@ -556,8 +556,11 @@ Array resolveShape(TSEnv& env,
           clsName.c_str(), cnsName.c_str());
       }
     }
-    assertx(wrapper.exists(s_value));
-    auto valueArr = wrapper[s_value].toArray();
+
+    // If the TS was resolved before then value field no longer exists, the
+    // value is instead flattened.
+    auto valueArr =
+      wrapper.exists(s_value) ? wrapper[s_value].toArray() : wrapper;
     auto value = resolveTS(env, valueArr, typeCns, typeCnsCls, generics);
 
     if (wrapper.exists(s_optional_shape_field)) {

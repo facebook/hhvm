@@ -245,7 +245,6 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::InstanceOfD:
   case Op::IsLateBoundCls:
   case Op::IsTypeStructC:
-  case Op::AsTypeStructC:
   case Op::CombineAndResolveTypeStruct:
   case Op::RecordReifiedGeneric:
   case Op::ReifiedName:

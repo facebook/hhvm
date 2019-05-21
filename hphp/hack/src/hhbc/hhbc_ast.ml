@@ -247,7 +247,7 @@ type instruct_operator =
   | InstanceOfD of class_id
   | IsLateBoundCls
   | IsTypeStructC of typestruct_resolve_op
-  | AsTypeStructC of typestruct_resolve_op
+  | ThrowAsTypeStructException
   | CombineAndResolveTypeStruct of int
   | Print
   | Clone

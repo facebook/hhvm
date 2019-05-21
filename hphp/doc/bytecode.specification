@@ -1341,14 +1341,11 @@ IsTypeStructC <type struct resolve op>  [C C]  ->  [C:Bool]
   If the type struct resolve op is DontResolve and the given type structure is
   unresolved, then this instruction raises an error.
 
-AsTypeStructC <type struct resolve op>    [C C]  ->  [C]
+ThrowAsTypeStructException [C C]  ->  []
 
-  If $1 matches the type structure of a defined type and $2 is a subtype of $1,
-  this instruction pushes $1 onto the stack, otherwise it throws an exception.
-  If the type struct resolve op is Resolve, then resolves the type structure in
-  $1 before performing the subtype check.
-  If the type struct resolve op is DontResolve and the given type structure is
-  unresolved, then this instruction raises an error.
+  Throws a user catchable type assertion exception that indicates what the
+  given type of $2 is, what the expected type is (given on $1) and which key
+  it failed at, if applicable.
 
 CombineAndResolveTypeStruct <num type structures> [C..C] -> [C]
 

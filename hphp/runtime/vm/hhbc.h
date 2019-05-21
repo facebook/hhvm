@@ -563,8 +563,8 @@ constexpr uint32_t kMaxConcatN = 4;
   O(IsLateBoundCls,  NA,               ONE(CV),         ONE(CV),    NF) \
   O(IsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
                                        TWO(CV,CV),      ONE(CV),    NF) \
-  O(AsTypeStructC,   ONE(OA(TypeStructResolveOp)),                      \
-                                       TWO(CV,CV),      ONE(CV),    NF) \
+  O(ThrowAsTypeStructException,                                         \
+                     NA,               TWO(CV,CV),      NOV,        TF) \
   O(CombineAndResolveTypeStruct,                                        \
                      ONE(IVA),         CMANY,           ONE(CV),    NF) \
   O(Select,          NA,               THREE(CV,CV,CV), ONE(CV),    NF) \

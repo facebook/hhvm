@@ -565,7 +565,8 @@ static CallMap s_callMap {
 
     /* is/as expressions */
     {IsTypeStruct, isTypeStructHelper, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
-    {AsTypeStruct, asTypeStructHelper, DSSA, SSync, {{SSA, 0}, {TV, 1}}},
+    {ThrowAsTypeStructException, throwAsTypeStructExceptionHelper, DNone, SSync,
+                                   {{SSA, 0}, {TV, 1}}},
 
     /* surprise flag support */
     {SuspendHookAwaitEF, &EventHook::onFunctionSuspendAwaitEF, DNone,

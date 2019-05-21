@@ -332,7 +332,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ArrayGet:
   case ArraySet:
   case ArraySetRef:
-  case AsTypeStruct:
   case BaseG:
   case Call:
   case CallBuiltin:
@@ -532,6 +531,7 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookCreateCont:
   case SuspendHookYield:
   case ThrowArithmeticError:
+  case ThrowAsTypeStructException:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:

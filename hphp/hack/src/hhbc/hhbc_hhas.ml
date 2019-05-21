@@ -186,8 +186,7 @@ let string_of_operator instruction =
     | IsLateBoundCls -> "IsLateBoundCls"
     | IsTypeStructC op ->
       sep ["IsTypeStructC"; string_of_typestruct_resolve_op op]
-    | AsTypeStructC op ->
-      sep ["AsTypeStructC"; string_of_typestruct_resolve_op op]
+    | ThrowAsTypeStructException -> "ThrowAsTypeStructException"
     | CombineAndResolveTypeStruct n ->
       sep ["CombineAndResolveTypeStruct"; string_of_int n]
     | Print -> "Print"

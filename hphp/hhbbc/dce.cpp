@@ -1677,7 +1677,6 @@ void no_dce(Env& env, const Op& op) {
 void dce(Env& env, const bc::AliasCls& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATL& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AssertRATStk& op) { no_dce(env, op); }
-void dce(Env& env, const bc::AsTypeStructC& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Await& op) { no_dce(env, op); }
 void dce(Env& env, const bc::AwaitAll& op) { no_dce(env, op); }
 void dce(Env& env, const bc::BaseGL& op) { no_dce(env, op); }
@@ -1792,6 +1791,9 @@ void dce(Env& env, const bc::Silence& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SSwitch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Switch& op) { no_dce(env, op); }
 void dce(Env& env, const bc::This& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ThrowAsTypeStructException& op) {
+  no_dce(env, op);
+}
 void dce(Env& env, const bc::UGetCUNop& op) { no_dce(env, op); }
 void dce(Env& env, const bc::UnsetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyOutType& op) { no_dce(env, op); }

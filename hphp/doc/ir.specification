@@ -923,16 +923,16 @@ To string conversions:
   If there is an error during type structure resolution, this instruction raises
   an error. If suppress is set, this error is demoted to a warning.
 
-| IsTypeStruct,                        D(Bool), SDArr S(Cell),           NF
+| IsTypeStruct, D(Bool), SDArr S(Cell), NF
 
   Returns whether S1 matches the type structure of a defined type in S0 and S1
   is a subtype of S0. The input type structure (S0) must be resolved.
 
-| AsTypeStruct,                        ND, SDArr S(Cell),                NF
+| ThrowAsTypeStructException, ND, SDArr S(Cell), T
 
-  Throws an exception if S1 does not match the type structure of a defined
-  type in S0 or S1 is not a subtype of S0. The input type structure (S0) must
-  be resolved.
+  Throws an exception indicating why S1 does not match the type structure of a
+  defined type in S0 or why S1 is not a subtype of S0. The input type structure
+  (S0) must be resolved.
 
 | HasToString, D(Bool), S(Obj), NF
 

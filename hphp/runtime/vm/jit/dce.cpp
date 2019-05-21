@@ -753,7 +753,7 @@ bool canDCE(IRInstruction* inst) {
   case KillClsRefCls:
   case KillClsRefTS:
   case BoxPtr:
-  case AsTypeStruct:
+  case ThrowAsTypeStructException:
   case RecordReifiedGenericsAndGetName:
   case RecordReifiedGenericsAndGetTSList:
   case ResolveTypeStruct:

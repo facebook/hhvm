@@ -209,7 +209,11 @@ type t = {
  po_rust : bool;
 
  (* Enables deeper like types features *)
- tco_like_types : bool
+ tco_like_types : bool;
+
+ (* This tells the type checker to rewrite unenforceable as like types
+    i.e. vec<string> => vec<~string> *)
+ tco_pessimize_types : bool
 } [@@deriving show]
 
 val make :
@@ -255,6 +259,7 @@ val make :
   ?tco_shallow_class_decl: bool ->
   ?po_rust: bool ->
   ?tco_like_types: bool ->
+  ?tco_pessimize_types: bool ->
   unit ->
   t
 
@@ -325,3 +330,4 @@ val tco_disallow_byref_prop_args : t -> bool
 val tco_shallow_class_decl : t -> bool
 val po_rust : t -> bool
 val tco_like_types : t -> bool
+val tco_pessimize_types : t -> bool

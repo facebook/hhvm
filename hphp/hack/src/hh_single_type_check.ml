@@ -200,6 +200,7 @@ let parse_options () =
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
   let like_types = ref false in
+  let pessimize_types = ref false in
   let search_provider = ref "TrieIndex" in
   let rust = ref false in
   let symbolindex_file = ref None in
@@ -414,6 +415,9 @@ let parse_options () =
     "--like-types",
       Arg.Set like_types,
       "Allows deeper like types features like inferring trust";
+    "--pessimize-types",
+      Arg.Set pessimize_types,
+      "When unenforceable types are encountered, convert them to like types";
     "--search-provider",
       Arg.String (fun str -> search_provider := str),
       "Configure the symbol index search provider";
@@ -457,6 +461,7 @@ let parse_options () =
     ?tco_disallow_byref_prop_args:(!disallow_byref_prop_args)
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)
+    ~tco_pessimize_types:(!pessimize_types)
     ~log_levels:(!log_levels)
     ~po_rust:!rust
     ()

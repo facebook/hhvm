@@ -290,6 +290,8 @@ let load config_filename options =
     ?tco_disallow_byref_prop_args:(bool_opt "disallow_byref_prop_args" config)
     ~tco_shallow_class_decl:(local_config.ServerLocalConfig.shallow_class_decl)
     ~po_rust:(local_config.ServerLocalConfig.rust)
+    ?tco_like_types:(bool_opt "like_types" config)
+    ?tco_pessimize_types:(bool_opt "disable_instanceof" config)
     ()
   in
   Errors.ignored_fixme_codes :=

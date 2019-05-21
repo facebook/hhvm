@@ -79,3 +79,4 @@ let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_
 let disallow_byref_prop_args = GlobalOptions.tco_disallow_byref_prop_args
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 let like_types = GlobalOptions.tco_like_types
+let pessimize_types = GlobalOptions.tco_pessimize_types

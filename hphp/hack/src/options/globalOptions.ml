@@ -51,6 +51,7 @@ type t = {
   tco_shallow_class_decl : bool;
   po_rust : bool;
   tco_like_types : bool;
+  tco_pessimize_types : bool;
 } [@@deriving show]
 
 let tco_experimental_instanceof = "instanceof"
@@ -228,6 +229,7 @@ let default = {
  tco_shallow_class_decl = false;
  po_rust = false;
  tco_like_types = false;
+ tco_pessimize_types = false;
 }
 
 let make
@@ -273,6 +275,7 @@ let make
   ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
   ?(po_rust = default.po_rust)
   ?(tco_like_types = default.tco_like_types)
+  ?(tco_pessimize_types = default.tco_pessimize_types)
   ()
 = {
   tco_safe_array;
@@ -318,6 +321,7 @@ let make
   tco_shallow_class_decl;
   po_rust;
   tco_like_types;
+  tco_pessimize_types;
 }
 let tco_safe_array t = t.tco_safe_array
 let tco_safe_vector_array t = t.tco_safe_vector_array
@@ -367,6 +371,7 @@ let tco_disallow_byref_prop_args t = t.tco_disallow_byref_prop_args
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 let po_rust t = t.po_rust
 let tco_like_types t = t.tco_like_types
+let tco_pessimize_types t = t.tco_pessimize_types
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments
 let setup_pocket_universes env enabled =

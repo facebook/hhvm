@@ -6,18 +6,25 @@ abstract class B {
 
 class C1 extends B {
   const string NAME = 'S1';
+  public static $prop = 'S2';
 }
 
-function test(dict $x, $c) {
+function test_clscns(dict $x, $c) {
   return idx($x, $c::NAME, "");
+}
+
+function test_cgets(dict $x, $c) {
+  return idx($x, $c::$prop, "");
 }
 
 <<__EntryPoint>>
 function main() {
-  $d = dict['a' => 1, 'S1' => 2];
+  $d = dict['a' => 1, 'S1' => 2, 'S2' => 3];
   $c1 = new C1();
   for ($i = 0; $i < 10; $i++) {
-    test($d, $c1);
+    test_clscns($d, $c1);
+    test_cgets($d, $c1);
   }
-  var_dump(test($d, $c1));
+  var_dump(test_clscns($d, $c1));
+  var_dump(test_cgets($d, $c1));
 }

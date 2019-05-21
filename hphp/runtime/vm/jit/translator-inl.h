@@ -106,7 +106,7 @@ inline bool opcodeChangesPC(const Op op) {
 }
 
 inline bool opcodeBreaksBB(const Op op, bool inlining) {
-  if (op == Op::ClsCns) {
+  if (op == Op::ClsCns || op == Op::CGetS) {
     // side exits if it misses in the RDS, and may produce an overly
     // specific type without guarding if the class comes from an
     // object (during form_region, the class will appear to be a

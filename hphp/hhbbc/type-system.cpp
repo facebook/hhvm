@@ -795,9 +795,7 @@ struct DualDispatchEqImpl {
     return false;
   }
   bool operator()(const DReifiedName& a, const SString b) const {
-    if (!isReifiedName(b)) return false;
-    auto const name = stripTypeFromReifiedName(b);
-    return name->isame(a.name);
+    return false;
   }
 };
 

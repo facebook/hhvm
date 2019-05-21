@@ -222,11 +222,6 @@ struct IRBuilder {
   void resetBlock(Block* block, Block* pred);
 
   /*
-   * Clear the SrcKey-to-block map.
-   */
-  void resetOffsetMapping();
-
-  /*
    * Append `block' to the unit.
    *
    * This is used by irgen in IR-level control-flow helpers.  In certain cases,
@@ -239,6 +234,17 @@ struct IRBuilder {
    * `pred' is ignored.
    */
   void appendBlock(Block* block, Block* pred = nullptr);
+
+  /*
+   * Clear the SrcKey-to-block map.
+   */
+  void resetOffsetMapping();
+
+  /*
+   * Save and restore the SrcKey-to-block map.
+   */
+  jit::flat_map<SrcKey, Block*> saveAndClearOffsetMapping();
+  void restoreOffsetMapping(jit::flat_map<SrcKey, Block*>&& offsetMapping);
 
   /*
    * Get, set, or null out the block to branch to in case of a guard failure.

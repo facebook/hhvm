@@ -942,10 +942,6 @@ Block* IRBuilder::makeBlock(SrcKey sk, uint64_t profCount) {
   return it->second;
 }
 
-void IRBuilder::resetOffsetMapping() {
-  m_skToBlockMap.clear();
-}
-
 bool IRBuilder::hasBlock(SrcKey sk) const {
   return m_skToBlockMap.count(sk);
 }
@@ -967,6 +963,20 @@ void IRBuilder::appendBlock(Block* block, Block* pred) {
 void IRBuilder::resetBlock(Block* block, Block* pred) {
   block->instrs().clear();
   m_state.resetBlock(block, pred);
+}
+
+void IRBuilder::resetOffsetMapping() {
+  m_skToBlockMap.clear();
+}
+
+jit::flat_map<SrcKey, Block*> IRBuilder::saveAndClearOffsetMapping() {
+  return std::move(m_skToBlockMap);
+}
+
+void IRBuilder::restoreOffsetMapping(
+  jit::flat_map<SrcKey, Block*>&& offsetMapping
+) {
+  m_skToBlockMap = std::move(offsetMapping);
 }
 
 Block* IRBuilder::guardFailBlock() const {

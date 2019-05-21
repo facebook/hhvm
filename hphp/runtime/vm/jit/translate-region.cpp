@@ -509,13 +509,18 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 double profFactor,
                                 Annotations& annotations) {
   const Timer irGenTimer(Timer::irGenRegionAttempt);
+  auto& irb = *irgs.irb;
   auto prevRegion      = irgs.region;      irgs.region      = &region;
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
   auto prevProfTransID = irgs.profTransID; irgs.profTransID = kInvalidTransID;
+  auto prevOffsetMapping = irb.saveAndClearOffsetMapping();
+  auto prevGuardFailBlock = irb.guardFailBlock(); irb.resetGuardFailBlock();
   SCOPE_EXIT {
     irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
     irgs.profTransID = prevProfTransID;
+    irb.restoreOffsetMapping(std::move(prevOffsetMapping));
+    irb.setGuardFailBlock(prevGuardFailBlock);
   };
 
   FTRACE(1, "translateRegion (mode={}, profFactor={:.2}) starting with:\n{}\n",
@@ -528,8 +533,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
   std::string errorMsg;
   always_assert_flog(check(region, errorMsg), "{}", errorMsg);
-
-  auto& irb = *irgs.irb;
 
   auto regionSize = region.instrSize();
   always_assert(regionSize <= budgetBCInstrs);
@@ -722,10 +725,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
           SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
             { return show(*calleeRegion); };
 
-          // Reset block state before reentering irGenRegionImpl
-          irb.resetOffsetMapping();
-          irb.resetGuardFailBlock();
-
           // Calculate the profFactor for the callee as the weight of
           // the caller block over the weight of the entry block of
           // the callee region.
@@ -757,10 +756,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
             // Generating the inlined call failed, bailout
             return TranslateResult::Retry;
           }
-
-          // Recursive calls to irGenRegionImpl will reset the successor block
-          // mapping
-          setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 
           // Native calls end inlining before CallBuiltin
           if (!callee->isCPPBuiltin()) {

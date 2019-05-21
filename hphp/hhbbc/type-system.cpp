@@ -1885,7 +1885,41 @@ size_t Type::hash() const {
   using U2 = std::underlying_type<decltype(m_dataTag)>::type;
   auto const rawBits = U1{m_bits};
   auto const rawTag  = static_cast<U2>(m_dataTag);
-  return folly::hash::hash_combine(rawBits, rawTag);
+
+  auto const data =
+    [&] () -> uintptr_t {
+      switch (m_dataTag) {
+        case DataTag::None:
+          return 0;
+        case DataTag::Obj:
+          return (uintptr_t)m_data.dobj.cls.name();
+        case DataTag::Cls:
+          return (uintptr_t)m_data.dcls.cls.name();
+        case DataTag::RefInner:
+          return 0;
+        case DataTag::Str:
+          return (uintptr_t)m_data.sval;
+        case DataTag::Int:
+          return m_data.ival;
+        case DataTag::Dbl:
+          return m_data.dval;
+        case DataTag::ArrLikeVal:
+          return (uintptr_t)m_data.aval;
+        case DataTag::ReifiedName:
+          return (uintptr_t)m_data.rname.name;
+        case DataTag::ArrLikePacked:
+          return m_data.packed->elems.size();
+        case DataTag::ArrLikePackedN:
+          return 0;
+        case DataTag::ArrLikeMap:
+          return m_data.map->map.size();
+        case DataTag::ArrLikeMapN:
+          return 0;
+      }
+      not_reached();
+    }();
+
+  return folly::hash::hash_combine(rawBits, rawTag, data);
 }
 
 template<bool contextSensitive>

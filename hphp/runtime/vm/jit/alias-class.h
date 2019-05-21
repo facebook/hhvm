@@ -157,10 +157,25 @@ struct AElemS { SSATmp* arr; const StringData* key; };
 /*
  * A range of the stack, starting at `offset' from the outermost frame pointer,
  * and extending `size' slots deeper into the stack (toward lower memory
- * addresses).  The frame pointer is the same for all stack ranges in the IR
- * unit, and thus is not stored here.  The reason ranges extend downward is
- * that it is common to need to refer to the class of all stack locations below
- * some depth (this can be done by putting INT32_MAX in the size).
+ * addresses).  As an example, `acls = AStack { fp, FPRelOffset{-1}, 3 }`
+ * represents the following:
+ *
+ *         ___________________
+ *        | (i am an actrec)  |
+ *  high  |___________________| ___...fp points here        __
+ *    ^   |   local 0         |                               \
+ *    |   |___________________| ___...start counting here: 1  |
+ *    |   |   local 1         |                               | acls
+ *    |   |___________________| ___...2                       |
+ *    |   |   local 2         |                               |
+ *   low  |___________________| ___...3; we're done         __/
+ *        |   local 3         |
+ *        |___________________|
+ *
+ * The frame pointer is the same for all stack ranges in the IR unit, and thus
+ * is not stored here.  The reason ranges extend downward is that it is common
+ * to need to refer to the class of all stack locations below some depth (this
+ * can be done by putting INT32_MAX in the size).
  *
  * Some notes on how the evaluation stack is treated for alias analysis:
  *

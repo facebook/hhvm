@@ -40,7 +40,7 @@ IRGS::IRGS(IRUnit& unit, const RegionDesc* region)
   , region(region)
   , unit(unit)
   , irb(new IRBuilder(unit, initial_marker(context)))
-  , bcStateStack { context.srcKey() }
+  , bcState(context.srcKey())
 {
   updateMarker(*this);
   auto const frame = gen(*this, DefFP);

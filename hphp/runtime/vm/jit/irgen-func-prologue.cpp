@@ -198,7 +198,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
 
   if (argc < nparams) {
     // Too few arguments; set everything else to Uninit.
-    if (nparams - argc <= kMaxParamsInitUnroll || env.inlineLevel) {
+    if (nparams - argc <= kMaxParamsInitUnroll || isInlining(env)) {
       for (auto i = argc; i < nparams; ++i) {
         gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
       }
@@ -214,7 +214,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
         cns(env, staticEmptyVArray()));
   }
 
-  if (!env.inlineLevel) {
+  if (!isInlining(env)) {
     // Null out or initialize the frame's ExtraArgs.
     env.irb->exceptionStackBoundary();
     gen(env, InitExtraArgs, FuncEntryData{func, argc}, fp(env));

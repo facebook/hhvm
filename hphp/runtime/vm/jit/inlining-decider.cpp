@@ -522,7 +522,6 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
 
   m_costStack.push_back(cost);
   m_cost       += cost;
-  m_callDepth  += 1;
   m_stackDepth += callee->maxStackCells();
 
   return cost;
@@ -530,7 +529,6 @@ int InliningDecider::accountForInlining(SrcKey callerSk,
 
 void InliningDecider::initWithCallee(const Func* callee) {
   m_costStack.push_back(0);
-  m_callDepth  += 1;
   m_stackDepth += callee->maxStackCells();
 }
 
@@ -671,10 +669,11 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
   const auto callerProfCount = irgen::curProfCount(irgs);
   const auto calleeProfCount = irgen::calleeProfCount(irgs, region);
   if (cost > maxCost) {
+    auto const depth = inlineDepth(irgs);
     return refuse(folly::sformat(
       "too expensive: cost={} : maxCost={} : "
       "baseProfCount={} : callerProfCount={} : calleeProfCount={} : depth={}",
-      cost, maxCost, baseProfCount, callerProfCount, calleeProfCount, depth()));
+      cost, maxCost, baseProfCount, callerProfCount, calleeProfCount, depth));
   }
 
   return accept(folly::sformat("small region with return: cost={} : "
@@ -691,7 +690,6 @@ void InliningDecider::registerEndInlining(const Func* callee) {
   m_costStack.pop_back();
 
   m_cost -= cost;
-  m_callDepth -= 1;
   m_stackDepth -= callee->maxStackCells();
 }
 
@@ -897,7 +895,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     argTypes.push_back(type);
   }
 
-  const auto depth = inl.depth();
+  const auto depth = inlineDepth(irgs);
   if (profData()) {
     auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
                                   maxBCInstrs, annotationsPtr);

@@ -254,14 +254,11 @@ void prepareForNextHHBC(IRGS& env,
     "Inlining while still at the first region instruction."
   );
 
-  always_assert(env.bcStateStack.size() >= env.inlineLevel + 1);
-  auto pops = env.bcStateStack.size() - 1 - env.inlineLevel;
-  while (pops--) env.bcStateStack.pop_back();
-
-  always_assert_flog(env.bcStateStack.back().func() == newSk.func(),
+  always_assert(env.inlineState.bcStateStack.size() == inlineDepth(env));
+  always_assert_flog(curFunc(env) == newSk.func(),
                      "Tried to update current SrcKey with a different func");
 
-  env.bcStateStack.back().setOffset(newSk.offset());
+  env.bcState.setOffset(newSk.offset());
   updateMarker(env);
   env.lastBcInst = lastBcInst;
   env.irb->exceptionStackBoundary();

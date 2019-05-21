@@ -24,6 +24,7 @@
 #include <functional>
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/inline-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -36,24 +37,6 @@ struct SSATmp;
 namespace irgen {
 
 //////////////////////////////////////////////////////////////////////
-
-struct ReturnTarget {
-  /*
-   * Block that will serve as a branch target for returning to the caller.
-   */
-  Block* callerTarget;
-
-  /*
-   * Block that will suspend the inlined frame and optionally contain the
-   * InlineSuspend instruction.
-   */
-  Block* suspendTarget;
-
-  /*
-   * Offset from FCall to return control to if the callee finished eagerly.
-   */
-  Offset asyncEagerOffset;
-};
 
 /*
  * IR-Generation State.
@@ -76,20 +59,14 @@ struct IRGS {
 
   /*
    * Tracks information about the current bytecode offset and which function we
-   * are in. We push and pop as we deal with inlined calls.
+   * are in.
    */
-  std::vector<SrcKey> bcStateStack;
+  SrcKey bcState;
 
   /*
-   * The current inlining level.  0 means we're not inlining.
+   * Tracks information about the state of inlining.
    */
-  uint16_t inlineLevel{0};
-
-  /*
-   * Return-to-caller block targets for inlined functions.  The last target is
-   * for the current inlining frame.
-   */
-  std::vector<ReturnTarget> inlineReturnTarget;
+  InlineState inlineState;
 
   /*
    * The id of the profiling translation for the code we're currently

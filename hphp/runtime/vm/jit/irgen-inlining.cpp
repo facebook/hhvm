@@ -203,7 +203,11 @@ Outer:                                 | Inner:
 namespace HPHP { namespace jit { namespace irgen {
 
 bool isInlining(const IRGS& env) {
-  return env.inlineLevel > 0;
+  return env.inlineState.depth > 0;
+}
+
+uint16_t inlineDepth(const IRGS& env) {
+  return env.inlineState.depth;
 }
 
 bool beginInlining(IRGS& env,
@@ -211,7 +215,7 @@ bool beginInlining(IRGS& env,
                    const Func* target,
                    SrcKey startSk,
                    Offset callBcOffset,
-                   ReturnTarget returnTarget,
+                   InlineReturnTarget returnTarget,
                    int cost,
                    bool conjure) {
   auto const& fpiStack = env.irb->fs().fpiStack();
@@ -338,9 +342,10 @@ bool beginInlining(IRGS& env,
           startSk.offset() == target->getEntryForNumArgs(numParams) &&
           startSk.resumeMode() == ResumeMode::None);
 
-  env.bcStateStack.emplace_back(startSk);
-  env.inlineReturnTarget.emplace_back(returnTarget);
-  env.inlineLevel++;
+  env.inlineState.depth++;
+  env.inlineState.returnTarget.emplace_back(returnTarget);
+  env.inlineState.bcStateStack.emplace_back(env.bcState);
+  env.bcState = startSk;
   updateMarker(env);
 
   auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, fp(env));
@@ -366,9 +371,8 @@ bool beginInlining(IRGS& env,
   } else if (data.ctx && !data.ctx->type().maybe(TObj)) {
     assertx(!startSk.hasThis());
   } else if (target->cls()) {
-    auto const psk =
+    env.bcState =
       SrcKey{startSk.func(), startSk.offset(), SrcKey::PrologueTag{}};
-    env.bcStateStack.back() = psk;
     updateMarker(env);
 
     auto sideExit = [&] (bool hasThis) {
@@ -407,7 +411,7 @@ bool beginInlining(IRGS& env,
       }
     );
 
-    env.bcStateStack.back() = startSk;
+    env.bcState = startSk;
     updateMarker(env);
   }
 
@@ -419,7 +423,7 @@ bool conjureBeginInlining(IRGS& env,
                           SrcKey startSk,
                           Type thisType,
                           const std::vector<Type>& args,
-                          ReturnTarget returnTarget) {
+                          InlineReturnTarget returnTarget) {
   auto conjure = [&](Type t) {
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
@@ -455,36 +459,41 @@ bool conjureBeginInlining(IRGS& env,
 }
 
 namespace {
-struct InlineState {
+struct InlineFrame {
   SrcKey bcState;
-  ReturnTarget target;
+  InlineReturnTarget target;
 };
 
-InlineState popInlineState(IRGS& env) {
-  always_assert(env.inlineLevel > 0);
+InlineFrame popInlineFrame(IRGS& env) {
+  always_assert(env.inlineState.depth > 0);
+  always_assert(env.inlineState.returnTarget.size() > 0);
+  always_assert(env.inlineState.bcStateStack.size() > 0);
 
-  InlineState is {env.bcStateStack.back(), env.inlineReturnTarget.back()};
+  InlineFrame inlineFrame {
+    env.bcState,
+    env.inlineState.returnTarget.back()
+  };
 
   // Pop the inlined frame in our IRGS.  Be careful between here and the
   // updateMarker() below, where the caller state isn't entirely set up.
-  env.inlineLevel--;
-  env.bcStateStack.pop_back();
-  env.inlineReturnTarget.pop_back();
-  always_assert(env.bcStateStack.size() > 0);
-
+  env.inlineState.depth--;
+  env.inlineState.returnTarget.pop_back();
+  env.bcState = env.inlineState.bcStateStack.back();
+  env.inlineState.bcStateStack.pop_back();
   updateMarker(env);
 
-  return is;
+  return inlineFrame;
 }
 
-void pushInlineState(IRGS& env, const InlineState& is) {
-  env.inlineLevel++;
-  env.bcStateStack.push_back(is.bcState);
-  env.inlineReturnTarget.push_back(is.target);
+void pushInlineFrame(IRGS& env, const InlineFrame& inlineFrame) {
+  env.inlineState.depth++;
+  env.inlineState.returnTarget.push_back(inlineFrame.target);
+  env.inlineState.bcStateStack.push_back(env.bcState);
+  env.bcState = inlineFrame.bcState;
   updateMarker(env);
 }
 
-InlineState implInlineReturn(IRGS& env, bool suspend) {
+InlineFrame implInlineReturn(IRGS& env, bool suspend) {
   assertx(!curFunc(env)->isPseudoMain());
   assertx(resumeMode(env) == ResumeMode::None);
 
@@ -504,18 +513,18 @@ InlineState implInlineReturn(IRGS& env, bool suspend) {
     gen(env, InlineReturn, FPRelOffsetData { callerFPOff }, fp(env));
   }
 
-  return popInlineState(env);
+  return popInlineFrame(env);
 }
 
 void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
-  auto const rt = env.inlineReturnTarget.back();
+  auto const rt = env.inlineState.returnTarget.back();
 
   // The IR instructions should be associated with one of the return bytecodes,
   // which should be one of the predecessors of this block.
   auto const curBlock = env.irb->curBlock();
   always_assert(curBlock && !curBlock->preds().empty());
   auto const bcContext = curBlock->preds().front().inst()->bcctx();
-  env.bcStateStack.back().setOffset(bcContext.marker.sk().offset());
+  env.bcState.setOffset(bcContext.marker.sk().offset());
 
   // At this point, env.profTransID and env.region are already set with the
   // caller's information.  We temporarily reset both of these with the callee's
@@ -561,7 +570,7 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
 }
 
 bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
-  auto const rt = env.inlineReturnTarget.back();
+  auto const rt = env.inlineState.returnTarget.back();
   // Start a new IR block to hold the remainder of this block.
   auto const did_start = env.irb->startBlock(rt.suspendTarget, false);
   if (!did_start) return false;
@@ -575,8 +584,8 @@ bool implSuspendBlock(IRGS& env, bool exitOnAwait) {
   rt.suspendTarget->push_back(label);
   retypeDests(label, &env.unit);
 
-  auto const is = implInlineReturn(env, exitOnAwait);
-  SCOPE_EXIT { if (exitOnAwait) pushInlineState(env, is); };
+  auto const inlineFrame = implInlineReturn(env, exitOnAwait);
+  SCOPE_EXIT { if (exitOnAwait) pushInlineFrame(env, inlineFrame); };
 
   push(env, wh);
   if (exitOnAwait) {
@@ -597,7 +606,7 @@ void implInlineReturn(IRGS& env) {
 }
 
 bool endInlining(IRGS& env, const RegionDesc& calleeRegion) {
-  auto const rt = env.inlineReturnTarget.back();
+  auto const rt = env.inlineState.returnTarget.back();
 
   if (env.irb->canStartBlock(rt.callerTarget)) {
     implSuspendBlock(env, true);
@@ -625,11 +634,11 @@ bool conjureEndInlining(IRGS& env, const RegionDesc& calleeRegion,
 }
 
 void retFromInlined(IRGS& env) {
-  gen(env, Jmp, env.inlineReturnTarget.back().callerTarget);
+  gen(env, Jmp, env.inlineState.returnTarget.back().callerTarget);
 }
 
 void suspendFromInlined(IRGS& env, SSATmp* waitHandle) {
-  gen(env, Jmp, env.inlineReturnTarget.back().suspendTarget, waitHandle);
+  gen(env, Jmp, env.inlineState.returnTarget.back().suspendTarget, waitHandle);
 }
 
 //////////////////////////////////////////////////////////////////////

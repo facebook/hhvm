@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/srckey.h"
 
 #include "hphp/runtime/vm/jit/bc-marker.h"
+#include "hphp/runtime/vm/jit/inline-state.h"
 #include "hphp/runtime/vm/jit/ir-builder.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
@@ -206,6 +207,11 @@ void sealUnit(IRGS&);
 bool isInlining(const IRGS& env);
 
 /*
+ * Returns the current depth of inlining in `env`.
+ */
+uint16_t inlineDepth(const IRGS& env);
+
+/*
  * Attempt to begin inlining, and return whether or not we succeeded.
  *
  * When doing gen-time inlining, we set up a series of IR instructions that
@@ -234,7 +240,7 @@ bool beginInlining(IRGS& env,
                    const Func* target,
                    SrcKey startSk,
                    Offset callBcOffset,
-                   ReturnTarget returnTarget,
+                   InlineReturnTarget returnTarget,
                    int cost,
                    bool conjure);
 
@@ -261,7 +267,7 @@ bool conjureBeginInlining(IRGS& env,
                           SrcKey startSk,
                           Type thisType,
                           const std::vector<Type>& args,
-                          ReturnTarget returnTarget);
+                          InlineReturnTarget returnTarget);
 
 /*
  * Close an inlined function inserted using conjureBeginInlining; returns false

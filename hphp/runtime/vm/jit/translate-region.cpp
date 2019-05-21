@@ -539,9 +539,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   budgetBCInstrs -= regionSize;
 
   // Create a map from region blocks to their corresponding initial IR blocks.
+  auto const inlining = isInlining(irgs);
   auto blockIdToIRBlock = createBlockMap(irgs, region);
 
-  if (!inl.inlining()) {
+  if (!inlining) {
     // Prepare to start translation of the first region block.
     auto const entry = irb.unit().entry();
     irb.startBlock(entry, false /* hasUnprocPred */);
@@ -580,8 +581,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     const Func* topFunc = nullptr;
     irgs.profTransID = hasTransID(blockId) ? getTransID(blockId)
                                            : kInvalidTransID;
-    irgs.inlineLevel = inl.depth();
-    irgs.firstBcInst = inEntryRetransChain(blockId, region) && !inl.inlining();
+    irgs.firstBcInst = inEntryRetransChain(blockId, region) && !inlining;
     irgen::prepareForNextHHBC(irgs, nullptr, sk, false);
 
     // Prepare to start translating this region block.  This loads the
@@ -607,7 +607,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // optimizations that can benefit from it are enabled, and only if we're
     // not inlining. The inlining decision could be smarter but this is enough
     // for now since we never emit guards in inlined functions (t7385908).
-    const bool emitExitPlaceholder = irgs.inlineLevel == 0 &&
+    const bool emitExitPlaceholder = !inlining &&
       (RuntimeOption::EvalHHIRLICM && hasUnprocPred);
     if (emitExitPlaceholder) irgen::makeExitPlaceholder(irgs);
 
@@ -615,7 +615,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // the first instruction in the region, we check inner type eagerly, insert
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
-    auto const isEntry = &block == region.entry().get() && !inl.inlining();
+    auto const isEntry = &block == region.entry().get() && !inlining;
     auto const checkOuterTypeOnly = !irb.guardFailBlock() &&
       (!isEntry || irgs.context.kind != TransKind::Profile);
     emitPredictionsAndPreConditions(irgs, region, block, isEntry,
@@ -711,7 +711,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         auto suspendRetBlock = irb.unit().defBlock(irgen::curProfCount(irgs));
         auto asyncEagerOffset = callee->supportsAsyncEagerReturn()
           ? inst.imm[0].u_FCA.asyncEagerOffset : kInvalidOffset;
-        auto returnTarget = irgen::ReturnTarget {
+        auto returnTarget = InlineReturnTarget {
           returnBlock, suspendRetBlock, asyncEagerOffset
         };
         auto callFuncOff = inst.offset() - block.func()->base();
@@ -875,7 +875,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // to be translated.
       if (lastInstr) {
         if (region.isExit(blockId)) {
-          if (!inl.inlining() || !isReturnish(inst.op())) {
+          if (!inlining || !isReturnish(inst.op())) {
             irgen::endRegion(irgs);
           }
         } else if (instrAllowsFallThru(inst.op())) {
@@ -889,7 +889,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     assertx(!knownFuncs.hasNext());
   }
 
-  if (!inl.inlining()) {
+  if (!inlining) {
     irgen::sealUnit(irgs);
   }
 
@@ -947,6 +947,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     FTRACE(1, "translateRegion: final budgetBCInstrs = {}\n", budgetBCInstrs);
 
     if (result == TranslateResult::Success) {
+      assertx(!isInlining(irgs));
       // For profiling translations, grab the postconditions to be used for
       // region selection whenever we decide to retranslate.
       assertx(pConds.changed.empty() && pConds.refined.empty());
@@ -1012,7 +1013,7 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     auto const entry = irb.unit().entry();
     auto returnBlock = irb.unit().defBlock();
     auto suspendRetBlock = irb.unit().defBlock();
-    auto returnTarget = irgen::ReturnTarget {
+    auto returnTarget = InlineReturnTarget {
       returnBlock, suspendRetBlock, kInvalidOffset
     };
 

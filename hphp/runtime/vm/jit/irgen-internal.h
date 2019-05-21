@@ -47,19 +47,19 @@ inline SSATmp* fp(const IRGS& env) { return env.irb->fs().fp(); }
 inline SSATmp* sp(const IRGS& env) { return env.irb->fs().sp(); }
 
 inline Offset bcOff(const IRGS& env) {
-  return env.bcStateStack.back().offset();
+  return env.bcState.offset();
 }
 
 inline bool hasThis(const IRGS& env) {
-  return env.bcStateStack.back().hasThis();
+  return env.bcState.hasThis();
 }
 
 inline ResumeMode resumeMode(const IRGS& env) {
-  return env.bcStateStack.back().resumeMode();
+  return env.bcState.resumeMode();
 }
 
 inline const Func* curFunc(const IRGS& env) {
-  return env.bcStateStack.back().func();
+  return env.bcState.func();
 }
 
 inline const Unit* curUnit(const IRGS& env) {
@@ -71,7 +71,7 @@ inline const Class* curClass(const IRGS& env) {
 }
 
 inline SrcKey curSrcKey(const IRGS& env) {
-  return env.bcStateStack.back();
+  return env.bcState;
 }
 
 inline SrcKey nextSrcKey(const IRGS& env) {

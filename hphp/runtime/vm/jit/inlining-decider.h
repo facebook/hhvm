@@ -84,7 +84,7 @@ struct InliningDecider {
    * only m_topFunc and m_disabled.
    */
   void resetState() {
-    m_cost = m_callDepth = m_stackDepth = 0;
+    m_cost = m_stackDepth = 0;
     m_costStack.clear();
   }
 
@@ -92,8 +92,6 @@ struct InliningDecider {
    * Getters for depth and disabled status.
    */
   bool disabled() const { return m_disabled; }
-  int  depth()    const { return m_callDepth; }
-  bool inlining() const { return depth() != 0; }
 
   /////////////////////////////////////////////////////////////////////////////
   // Core API.
@@ -166,7 +164,6 @@ private:
 
   // Costs associated with inlining.
   int m_cost{0};
-  int m_callDepth{0};
   int m_stackDepth{0};
 
   // Stack of costs, popped in registerEndInlining().

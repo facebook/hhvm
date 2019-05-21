@@ -104,8 +104,7 @@ void rewind(ISS& env, const Bytecode&);
 void rewind(ISS& env, int);
 const Bytecode* last_op(ISS& env, int idx = 0);
 const Bytecode* op_from_slot(ISS& env, int, int prev = 0);
-folly::Optional<ArrayData*>
-resolveTSStatically(ISS& env, SArray, const php::Class*, bool);
+ArrayData* resolveTSStatically(ISS& env, SArray, const php::Class*, bool);
 
 //////////////////////////////////////////////////////////////////////
 

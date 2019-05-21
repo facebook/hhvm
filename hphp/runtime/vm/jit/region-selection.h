@@ -452,7 +452,7 @@ RegionDescPtr selectHotRegion(TransID transId);
  * information to translate at least one instruction.
  *
  * The `allowInlining' flag should be disabled when we are selecting a tracelet
- * whose shape will be analyzed by the InliningDecider.
+ * whose shape will be analyzed by the inlining decider.
  */
 RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
                              int32_t maxBCInstrs, bool inlining = false);

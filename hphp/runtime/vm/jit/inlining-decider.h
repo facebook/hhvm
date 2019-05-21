@@ -41,8 +41,8 @@ namespace irgen { struct IRGS; }
 /*
  * Inlining decision-making mechanism.
  *
- * The intended client of an InliningDecider is an arbitrary tracelet selector
- * that wishes to support inlining.  Correct usage of an InliningDecider
+ * The intended client of the inlining decider is an arbitrary tracelet selector
+ * that wishes to support inlining.  Correct usage of the inlining decider
  * produces a guarantee (or a refusal to guarantee) that a callee's region can
  * be correctly transcluded and translated within the caller's region.
  *
@@ -53,66 +53,56 @@ namespace irgen { struct IRGS; }
  *    - If the check succeeds, the client produces a region for the callee at
  *      the appropriate entrypoint for the call.  How this region is selected
  *      is a policy decision left up to the client---however, the region must
- *      not itself contain inlined blocks.  (The decider has a `disabled' flag
- *      for this purpose.)
+ *      not itself contain inlined blocks.
  *
  *    - The client passes this region to shouldInline() to determine whether it
  *      is inlinable.  If so, the client can mark the region as such and/or
  *      perform inlining translations as appropriate.
  */
-struct InliningDecider {
 
-  explicit InliningDecider(const Func* func) : m_topFunc(func) {}
+/////////////////////////////////////////////////////////////////////////////
+// Core API.
 
-  /////////////////////////////////////////////////////////////////////////////
-  // Core API.
+/*
+ * Can we perform inlining of `callee' at `callSK' from within `region'?
+ *
+ * This is a shallow check---it asks whether `callSK' is an FCall with an
+ * appropriate FPush* in the same region, and verifies that the call does not
+ * block inlining (e.g., due to missing arguments, recursion, resumable
+ * callee, etc.).  It does not peek into the callee's bytecode or regions,
+ * and it is insensitive to inlining costs.
+ *
+ * This function assumes that region is fully-formed up to and including
+ * `inst', because we reach backwards through the region to find the
+ * corresponding FPush and validate the FPI region.
+ *
+ * NOTE: Inlining will fail during translation if the FPush was interpreted.
+ * It is up to the client to ensure that this is not the case.
+ */
+bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations);
 
-  /*
-   * Can we perform inlining of `callee' at `callSK' from within `region'?
-   *
-   * This is a shallow check---it asks whether `callSK' is an FCall with an
-   * appropriate FPush* in the same region, and verifies that the call does not
-   * block inlining (e.g., due to missing arguments, recursion, resumable
-   * callee, etc.).  It does not peek into the callee's bytecode or regions,
-   * and it is insensitive to inlining costs.
-   *
-   * This function assumes that region is fully-formed up to and including
-   * `inst', because we reach backwards through the region to find the
-   * corresponding FPush and validate the FPI region.
-   *
-   * NOTE: Inlining will fail during translation if the FPush was interpreted.
-   * It is up to the client to ensure that this is not the case.
-   */
-  bool canInlineAt(SrcKey callSK, const Func* callee,
-                  Annotations* annotations) const;
+/*
+ * Check that `region' of `callee' can be inlined (possibly via other inlined
+ * callees) into the current function.
+ *
+ * If this function returns true, we guarantee (contingent on inlining decider
+ * being used correctly) that it is safe and possible to inline the callee;
+ * moreover, based on global inlining heuristics, we submit that the tracelet
+ * selector /ought/ to do so.
+ */
+bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, Op callerFPushOp,
+                  const Func* callee, const RegionDesc& region,
+                  uint32_t maxTotalCost, Annotations& annotations);
 
-  /*
-   * Check that `region' of `callee' can be inlined (possibly via other inlined
-   * callees) into m_topFunc.
-   *
-   * If this function returns true, we guarantee (contingent on InliningDecider
-   * being used correctly) that it is safe and possible to inline the callee;
-   * moreover, based on global inlining heuristics, we submit that the tracelet
-   * selector /ought/ to do so.
-   */
-  bool shouldInline(const irgen::IRGS& irgs, SrcKey callerSk, Op callerFPushOp,
-                    const Func* callee, const RegionDesc& region,
-                    uint32_t maxTotalCost, Annotations& annotations);
-
-  /*
-   * Return the cost of inlining the given callee.
-   */
-  int costOfInlining(SrcKey callerSk,
-                     Op callerFPushOp,
-                     const Func* callee,
-                     const RegionDesc& region,
-                     const irgen::IRGS& irgs,
-                     Annotations& annotations);
-
-private:
-  // The function being inlined into.
-  const Func* const m_topFunc;
-};
+/*
+ * Return the cost of inlining the given callee.
+ */
+int costOfInlining(SrcKey callerSk,
+                   Op callerFPushOp,
+                   const Func* callee,
+                   const RegionDesc& region,
+                   const irgen::IRGS& irgs,
+                   Annotations& annotations);
 
 /*
  * Select an inlining region for the call to `callee' at `sk'.
@@ -120,7 +110,6 @@ private:
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
-                                 InliningDecider& inl,
                                  int32_t maxBCInstrs,
                                  Annotations& annotations);
 

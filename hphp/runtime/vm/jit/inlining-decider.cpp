@@ -70,7 +70,7 @@ bool traceRefusal(SrcKey callerSk, const Func* callee, std::string why,
   }
   if (Trace::enabled) {
     assertx(caller);
-    FTRACE(2, "InliningDecider: refusing {}() <- {}{}\t<reason: {}>\n",
+    FTRACE(2, "Inlining decider: refusing {}() <- {}{}\t<reason: {}>\n",
            caller->fullName()->data(), calleeName, callee ? "()" : "", why);
   }
   if (caller->shouldSampleJit() || (callee && callee->shouldSampleJit())) {
@@ -198,8 +198,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-bool InliningDecider::canInlineAt(SrcKey callSK, const Func* callee,
-                                  Annotations* annotations) const {
+bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations) {
   assertx(callSK.op() == Op::FCall);
 
   if (!callee) {
@@ -502,12 +501,12 @@ uint64_t adjustedMaxVasmCost(const irgen::IRGS& env,
 /*
  * Return the cost of inlining the given callee.
  */
-int InliningDecider::costOfInlining(SrcKey callerSk,
-                                    Op callerFPushOp,
-                                    const Func* callee,
-                                    const RegionDesc& region,
-                                    const irgen::IRGS& irgs,
-                                    Annotations& annotations) {
+int costOfInlining(SrcKey callerSk,
+                   Op callerFPushOp,
+                   const Func* callee,
+                   const RegionDesc& region,
+                   const irgen::IRGS& irgs,
+                   Annotations& annotations) {
   auto const alwaysInl =
     !RuntimeOption::EvalHHIRInliningIgnoreHints &&
     callee->userAttributes().count(s_AlwaysInline.get());
@@ -518,13 +517,13 @@ int InliningDecider::costOfInlining(SrcKey callerSk,
     : computeTranslationCost(callerSk, callerFPushOp, region, annotations);
 }
 
-bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
-                                   SrcKey callerSk,
-                                   Op callerFPushOp,
-                                   const Func* callee,
-                                   const RegionDesc& region,
-                                   uint32_t maxTotalCost,
-                                   Annotations& annotations) {
+bool shouldInline(const irgen::IRGS& irgs,
+                  SrcKey callerSk,
+                  Op callerFPushOp,
+                  const Func* callee,
+                  const RegionDesc& region,
+                  uint32_t maxTotalCost,
+                  Annotations& annotations) {
   auto sk = region.empty() ? SrcKey() : region.start();
   assertx(callee);
   assertx(sk.func() == callee);
@@ -537,7 +536,7 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
     return traceRefusal(callerSk, callee, why, annotationsPtr);
   };
 
-  auto accept = [&, this] (std::string why) {
+  auto accept = [&] (std::string why) {
     if (annotationsPtr && RuntimeOption::EvalDumpInlDecision >= 2) {
       auto str = nameAndReason(callerSk.offset(),
                                callerSk.func()->fullName()->data(),
@@ -546,8 +545,14 @@ bool InliningDecider::shouldInline(const irgen::IRGS& irgs,
       annotationsPtr->emplace_back("DoInline", str);
     }
 
-    FTRACE(2, "InliningDecider: inlining {}() <- {}()\t<reason: {}>\n",
-           m_topFunc->fullName()->data(), callee->fullName()->data(), why);
+    UNUSED auto const topFunc = [&] {
+      return irgs.inlineState.bcStateStack.empty()
+        ? irgs.bcState.func()
+        : irgs.inlineState.bcStateStack[0].func();
+    };
+
+    FTRACE(2, "Inlining decider: inlining {}() <- {}()\t<reason: {}>\n",
+           topFunc()->fullName()->data(), callee->fullName()->data(), why);
     return true;
   };
 
@@ -820,7 +825,6 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
 RegionDescPtr selectCalleeRegion(const SrcKey& sk,
                                  const Func* callee,
                                  const irgen::IRGS& irgs,
-                                 InliningDecider& inl,
                                  int32_t maxBCInstrs,
                                  Annotations& annotations) {
   assertx(sk.op() == OpFCall);
@@ -879,9 +883,9 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
     auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
                                   maxBCInstrs, annotationsPtr);
     if (region &&
-        inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                         adjustedMaxVasmCost(irgs, *region, depth),
-                         annotations)) {
+        shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+                     adjustedMaxVasmCost(irgs, *region, depth),
+                     annotations)) {
       return region;
     }
     return nullptr;
@@ -896,9 +900,9 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   );
 
   if (region &&
-      inl.shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
-                       adjustedMaxVasmCost(irgs, *region, depth),
-                       annotations)) {
+      shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+                   adjustedMaxVasmCost(irgs, *region, depth),
+                   annotations)) {
     return region;
   }
 

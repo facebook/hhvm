@@ -443,7 +443,6 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
 RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                                        const Func* callee,
                                        TranslateRetryContext& retry,
-                                       InliningDecider& inl,
                                        const irgen::IRGS& irgs,
                                        int32_t maxBCInstrs,
                                        int& calleeCost,
@@ -456,7 +455,7 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
   }
   auto annotationsPtr = mcgen::dumpTCAnnotation(irgs.context.kind) ?
                         &annotations : nullptr;
-  if (!inl.canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
+  if (!canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
 
   auto const& fpiStack = irgs.irb->fs().fpiStack();
   // Make sure the FPushOp was in the region
@@ -475,14 +474,14 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
     return nullptr;
   }
 
-  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, inl,
+  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs,
                                          maxBCInstrs, annotations);
   if (!calleeRegion || calleeRegion->instrSize() > maxBCInstrs) {
     return nullptr;
   }
 
-  calleeCost = inl.costOfInlining(psk.srcKey, info.fpushOpc, callee,
-                                  *calleeRegion, irgs, annotations);
+  calleeCost = costOfInlining(psk.srcKey, info.fpushOpc, callee,
+                              *calleeRegion, irgs, annotations);
   return calleeRegion;
 }
 
@@ -507,7 +506,6 @@ static bool isCmp(Op op) {
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 TranslateRetryContext& retry,
-                                InliningDecider& inl,
                                 int32_t& budgetBCInstrs,
                                 double profFactor,
                                 Annotations& annotations) {
@@ -688,7 +686,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       // See if we have a callee region we can inline---but only if the
       // singleton inliner isn't actively inlining.
       if (!skipTrans) {
-        calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry, inl,
+        calleeRegion = getInlinableCalleeRegion(psk, inst.funcd, retry,
                                                 irgs, budgetBCInstrs,
                                                 calleeCost, annotations);
       }
@@ -743,7 +741,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                         calleeProfFactor);
           }
 
-          auto result = irGenRegionImpl(irgs, *calleeRegion, retry, inl,
+          auto result = irGenRegionImpl(irgs, *calleeRegion, retry,
                                         budgetBCInstrs, calleeProfFactor,
                                         annotations);
           assertx(budgetBCInstrs >= 0);
@@ -920,9 +918,6 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     irgen::IRGS irgs{*unit, &region};
     tries++;
 
-    // Set up inlining context, but disable it for profiling mode.
-    InliningDecider inl(region.entry()->func());
-
     // Set the profCount of the IRUnit's entry block, which is created a
     // priori.
     if (context.kind == TransKind::Optimize) {
@@ -936,7 +931,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
     int32_t budgetBCInstrs = RuntimeOption::EvalJitMaxRegionInstrs;
     try {
-      result = irGenRegionImpl(irgs, region, retry, inl,
+      result = irGenRegionImpl(irgs, region, retry,
                                budgetBCInstrs, 1, annotations);
     } catch (const FailedTraceGen& e) {
       always_assert_flog(false, "irGenRegion failed with {}\n", e.what());
@@ -991,7 +986,6 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
   std::unique_ptr<IRUnit> unit;
   TranslateRetryContext retry;
   auto result = TranslateResult::Retry;
-  auto caller = ctx.srcKey().func();
   auto const entryBID = region.entry()->id();
 
   while (result == TranslateResult::Retry) {
@@ -1001,7 +995,6 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     if (hasTransID(entryBID)) irgs.profTransID = getTransID(entryBID);
 
     auto& irb = *irgs.irb;
-    InliningDecider inl{caller};
     auto const& argTypes = region.inlineInputTypes();
     auto const ctxType = region.inlineCtxType();
 
@@ -1031,7 +1024,6 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
         irgs,
         region,
         retry,
-        inl,
         budgetBcInstrs,
         1 /* profFactor */,
         annotations

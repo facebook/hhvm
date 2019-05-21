@@ -278,22 +278,19 @@ AGGREGATE_VALIDATORS
 VALIDATE_FUNCTIONS
 end (* Make *)
 "
-  let full_fidelity_validated_syntax =
-  {
-    filename = full_fidelity_path_prefix ^ "full_fidelity_validated_syntax.ml";
-    template = full_fidelity_validated_syntax_template;
-    transformations = [
+  let full_fidelity_validated_syntax = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "VALIDATE_FUNCTIONS"; func = to_validate_functions };
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [
-      { aggregate_pattern = "AGGREGATE_VALIDATORS"; aggregate_func = to_aggregate_validation };
-    ];
-  }
-
+    ]
+    ~aggregate_transformations: [
+      {
+        aggregate_pattern = "AGGREGATE_VALIDATORS";
+        aggregate_func = to_aggregate_validation
+      };
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "full_fidelity_validated_syntax.ml")
+    ~template: full_fidelity_validated_syntax_template
+    ()
 end (* ValidatedSyntax *)
 
 module GenerateFFSyntaxType = struct
@@ -444,23 +441,17 @@ AGGREGATE_TYPESVALIDATED_SYNTAX
 end (* MakeValidated *)
 "
 
-  let full_fidelity_syntax_type =
-  {
-    filename = full_fidelity_path_prefix ^ "full_fidelity_syntax_type.ml";
-    template = full_fidelity_syntax_template;
-    transformations = [
+  let full_fidelity_syntax_type = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "PARSE_TREE"; func = to_parse_tree };
       { pattern = "SYNTAX"; func = to_syntax };
-      { pattern = "VALIDATED_SYNTAX"; func = to_validated_syntax };
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [
-      { aggregate_pattern = "AGGREGATE_TYPES"; aggregate_func = to_aggregate_type };
-    ];
-  }
+      { pattern = "VALIDATED_SYNTAX"; func = to_validated_syntax };]
+    ~aggregate_transformations: [
+      { aggregate_pattern = "AGGREGATE_TYPES";
+      aggregate_func = to_aggregate_type };]
+    ~filename: (full_fidelity_path_prefix ^ "full_fidelity_syntax_type.ml")
+    ~template: full_fidelity_syntax_template
+    ()
 end (* GenerateFFSyntaxType *)
 
 
@@ -564,24 +555,17 @@ pub enum SyntaxVariant<T, V> {
     SyntaxList(Box<Vec<Syntax<T, V>>>),
 SYNTAX_VARIANT}
 "
-  let full_fidelity_syntax =
-  {
-    filename = full_fidelity_path_prefix ^ "syntax_generated.rs";
-    template = full_fidelity_syntax_template;
-    transformations = [
+  let full_fidelity_syntax = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "SYNTAX_VARIANT"; func = to_syntax_variant };
       { pattern = "SYNTAX_CHILDREN"; func = to_syntax_variant_children };
       { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
       { pattern = "FOLD_OVER_CHILDREN"; func = fold_over};
       { pattern = "TO_KIND"; func = to_kind };
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
-
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "syntax_generated.rs")
+    ~template: full_fidelity_syntax_template
+    ()
 end (* GenerateFFRustSyntax *)
 
 module GenerateFFRustSyntaxType = struct
@@ -639,20 +623,13 @@ SYNTAX_CONSTRUCTORS
     fn kind(&self) -> SyntaxKind;
 }
 "
-  let full_fidelity_syntax =
-  {
-    filename = full_fidelity_path_prefix ^ "syntax_type.rs";
-    template = full_fidelity_syntax_template;
-    transformations = [
+  let full_fidelity_syntax = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "SYNTAX_CONSTRUCTORS"; func = to_syntax_constructors };
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
-
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "syntax_type.rs")
+    ~template: full_fidelity_syntax_template
+    ()
 end (* GenerateFFRustSyntaxType *)
 
 module GenerateFFSyntaxSig = struct
@@ -760,21 +737,15 @@ TYPE_TESTS
 end (* Syntax_S *)
 "
 
-  let full_fidelity_syntax_sig =
-  {
-    filename = full_fidelity_path_prefix ^ "syntax_sig.ml";
-    template = full_fidelity_syntax_template;
-    transformations = [
+  let full_fidelity_syntax_sig = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "SYNTAX"; func = to_syntax };
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
       { pattern = "TYPE_TESTS"; func = to_type_tests };
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "syntax_sig.ml")
+    ~template: full_fidelity_syntax_template
+    ()
 end (* GenerateFFSyntaxSig *)
 
 module GenerateFFSmartConstructors = struct
@@ -832,21 +803,15 @@ MAKE_METHODS
 end (* ParserWrapper *)
 "
 
-  let full_fidelity_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^
-      "smart_constructors/smartConstructors.ml";
-    template = full_fidelity_smart_constructors_template;
-    transformations = [
+  let full_fidelity_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
       { pattern = "MAKE_METHODS"; func = to_make_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+       "smart_constructors/smartConstructors.ml")
+    ~template: full_fidelity_smart_constructors_template
+    ()
 end (* GenerateFFSmartConstructors *)
 
 module GenerateFFRustSmartConstructors = struct
@@ -872,20 +837,13 @@ pub trait SmartConstructors<'a, State> {
 MAKE_METHODS
 }
 "
-  let full_fidelity_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^
-      "smart_constructors_generated.rs";
-    template = full_fidelity_smart_constructors_template;
-    transformations = [
+  let full_fidelity_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "MAKE_METHODS"; func = to_make_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "smart_constructors_generated.rs")
+    ~template: full_fidelity_smart_constructors_template
+    ()
 end (* GenerateFFRustSmartConstructors *)
 
 module GenerateFFRustMinimalSmartConstructors = struct
@@ -936,19 +894,13 @@ impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
 
 CONSTRUCTOR_METHODS}
 "
-  let minimal_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "minimal_smart_constructors.rs";
-    template = minimal_smart_constructors_template;
-    transformations = [
+  let minimal_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "minimal_smart_constructors.rs")
+    ~template: minimal_smart_constructors_template
+    ()
 end (* GenerateFFRustMinimalSmartConstructors *)
 
 module GenerateFFRustPositionedSmartConstructors = struct
@@ -1006,19 +958,13 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
 
 CONSTRUCTOR_METHODS}
 "
-  let positioned_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "positioned_smart_constructors.rs";
-    template = positioned_smart_constructors_template;
-    transformations = [
+  let positioned_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "positioned_smart_constructors.rs")
+    ~template: positioned_smart_constructors_template
+    ()
 end (* GenerateFFRustPositionedSmartConstructors *)
 
 module GenerateFFRustCoroutineSmartConstructors = struct
@@ -1073,19 +1019,14 @@ where
 
 CONSTRUCTOR_METHODS}
 "
-  let coroutine_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "coroutine_smart_constructors_generated.rs";
-    template = coroutine_smart_constructors_template;
-    transformations = [
+  let coroutine_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+      "coroutine_smart_constructors_generated.rs")
+    ~template: coroutine_smart_constructors_template
+    ()
 end (* GenerateFFRustCoroutineSmartConstructors *)
 
 module GenerateFFParserSig = struct
@@ -1136,19 +1077,13 @@ MAKE_METHODS
 end (* WithSyntax *)
 "
 
-  let full_fidelity_parser_sig =
-  {
-    filename = full_fidelity_path_prefix ^ "parserSig.ml";
-    template = full_fidelity_parser_sig_template;
-    transformations = [
+  let full_fidelity_parser_sig = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "MAKE_METHODS"; func = to_make_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "parserSig.ml")
+    ~template: full_fidelity_parser_sig_template
+    ()
 end (* GenerateFFParserSig *)
 
 module GenerateFFVerifySmartConstructors = struct
@@ -1236,19 +1171,14 @@ end (* WithSyntax *)
 "
 
   let full_fidelity_verify_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^
-      "smart_constructors/verifySmartConstructors.ml";
-    template = full_fidelity_verify_smart_constructors_template;
-    transformations = [
-      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    Full_fidelity_schema.make_template_file
+      ~transformations: [
+        { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+      ]
+      ~filename: (full_fidelity_path_prefix ^
+        "smart_constructors/verifySmartConstructors.ml")
+      ~template: full_fidelity_verify_smart_constructors_template
+      ()
 end (* GenerateFFVerifySmartConstructors *)
 
 module GenerateFFSyntaxSmartConstructors = struct
@@ -1331,19 +1261,14 @@ end (* WithSyntax *)
 "
 
   let full_fidelity_syntax_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^
-      "smart_constructors/syntaxSmartConstructors.ml";
-    template = full_fidelity_syntax_smart_constructors_template;
-    transformations = [
+  Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+      "smart_constructors/syntaxSmartConstructors.ml")
+    ~template: full_fidelity_syntax_smart_constructors_template
+    ()
 end (* GenerateFFSyntaxSmartConstructors *)
 
 module GenerateFFRustSyntaxSmartConstructors = struct
@@ -1400,18 +1325,13 @@ where
 CONSTRUCTOR_METHODS}
 "
   let full_fidelity_syntax_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "syntax_smart_constructors.rs";
-    template = full_fidelity_syntax_smart_constructors_template;
-    transformations = [
-      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    Full_fidelity_schema.make_template_file
+      ~transformations: [
+        { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+      ]
+      ~filename: (full_fidelity_path_prefix ^ "syntax_smart_constructors.rs")
+      ~template: full_fidelity_syntax_smart_constructors_template
+      ()
 end (* GenerateFFRustSyntaxSmartConstructors *)
 
 module GenerateFFRustDeclModeSmartConstructors = struct
@@ -1467,19 +1387,14 @@ where
 
 CONSTRUCTOR_METHODS}
 "
-  let decl_mode_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "decl_mode_smart_constructors_generated.rs";
-    template = decl_mode_smart_constructors_template;
-    transformations = [
+  let decl_mode_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+      "decl_mode_smart_constructors_generated.rs")
+    ~template: decl_mode_smart_constructors_template
+    ()
 end (* GenerateFFRustDeclModeSmartConstructors *)
 
 module GenerateFlattenSmartConstructors = struct
@@ -1520,19 +1435,13 @@ CONSTRUCTOR_METHODS
 end (* WithSyntax *)
 "
 
-  let flatten_smart_constructors =
-  {
-    filename = facts_path_prefix ^ "flatten_smart_constructors.ml";
-    template = flatten_smart_constructors_template;
-    transformations = [
+  let flatten_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (facts_path_prefix ^ "flatten_smart_constructors.ml")
+    ~template: flatten_smart_constructors_template
+    ()
 end (* GenerateFlattenSmartConstructors *)
 
 module GenerateRustFlattenSmartConstructors = struct
@@ -1579,19 +1488,13 @@ pub trait FlattenSmartConstructors<'a, State>
 
 CONSTRUCTOR_METHODS}
 "
-  let flatten_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "flatten_smart_constructors.rs";
-    template = flatten_smart_constructors_template;
-    transformations = [
+  let flatten_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "flatten_smart_constructors.rs")
+    ~template: flatten_smart_constructors_template
+    ()
 end (* GenerateRustFlattenSmartConstructors *)
 
 module GenerateRustFactsSmartConstructors = struct
@@ -1642,19 +1545,14 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
 
 CONSTRUCTOR_METHODS}
 "
-  let facts_smart_constructors =
-  {
-    filename = full_fidelity_path_prefix ^ "../facts/facts_smart_constructors_generated.rs";
-    template = facts_smart_constructors_template;
-    transformations = [
+  let facts_smart_constructors = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+      "../facts/facts_smart_constructors_generated.rs")
+    ~template: facts_smart_constructors_template
+    ()
 end (* GenerateRustFactsSmartConstructors *)
 
 module GenerateFFSmartConstructorsWrappers = struct
@@ -1740,21 +1638,16 @@ end (* SyntaxKind *)
 "
 
   let full_fidelity_smart_constructors_wrappers =
-  {
-    filename = full_fidelity_path_prefix ^
-      "smart_constructors/smartConstructorsWrappers.ml";
-    template = full_fidelity_smart_constructors_wrappers_template;
-    transformations = [
-      { pattern = "TYPE_TESTS_SIG"; func = to_type_tests_sig };
-      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
-      { pattern = "TYPE_TESTS"; func = to_type_tests }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    Full_fidelity_schema.make_template_file
+      ~transformations: [
+        { pattern = "TYPE_TESTS_SIG"; func = to_type_tests_sig };
+        { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
+        { pattern = "TYPE_TESTS"; func = to_type_tests }
+      ]
+      ~filename: (full_fidelity_path_prefix ^
+        "smart_constructors/smartConstructorsWrappers.ml")
+      ~template: full_fidelity_smart_constructors_wrappers_template
+      ()
 end (* GenerateFFSmartConstructorsWrappers *)
 
 module GenerateFFRustSmartConstructorsWrappers = struct
@@ -1824,19 +1717,13 @@ fn compose<St, R>(kind: SyntaxKind, st_r: (St, R)) -> (St, (SyntaxKind, R)) {
 "
 
   let full_fidelity_smart_constructors_wrappers =
-  {
-    filename = full_fidelity_path_prefix ^
-      "smart_constructors_wrappers.rs";
-    template = full_fidelity_smart_constructors_wrappers_template;
-    transformations = [
-      { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
+    Full_fidelity_schema.make_template_file
+      ~transformations: [
+        { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }
+      ]
+      ~filename: (full_fidelity_path_prefix ^ "smart_constructors_wrappers.rs")
+      ~template: full_fidelity_smart_constructors_wrappers_template
+      ()
 end (* GenerateFFRustSmartConstructorsWrappers *)
 
 module GenerateFFSyntax = struct
@@ -2200,11 +2087,8 @@ GET_METHODS
 end (* WithToken *)
 "
 
-  let full_fidelity_syntax =
-  {
-    filename = full_fidelity_path_prefix ^ "full_fidelity_syntax.ml";
-    template = full_fidelity_syntax_template;
-    transformations = [
+  let full_fidelity_syntax = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "TO_KIND"; func = to_to_kind };
       { pattern = "TYPE_TESTS"; func = to_type_tests };
       { pattern = "CHILDREN"; func = to_children };
@@ -2214,14 +2098,10 @@ end (* WithToken *)
       { pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods };
       { pattern = "FROM_METHODS"; func = to_from_methods };
       { pattern = "GET_METHODS"; func = to_get_methods };
-    ];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
-
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "full_fidelity_syntax.ml")
+    ~template: full_fidelity_syntax_template
+    ()
 end (* GenerateFFSyntax *)
 
 module GenerateFFTriviaKind = struct
@@ -2243,22 +2123,16 @@ let to_string kind =
   match kind with
 TO_STRING"
 
-let full_fidelity_trivia_kind =
-{
-  filename = full_fidelity_path_prefix ^ "/full_fidelity_trivia_kind.ml";
-  template = full_fidelity_trivia_kind_template;
-  transformations = [];
-  token_no_text_transformations = [];
-  token_given_text_transformations = [];
-  token_variable_text_transformations = [];
-  trivia_transformations = [
+let full_fidelity_trivia_kind = Full_fidelity_schema.make_template_file
+  ~trivia_transformations: [
     { trivia_pattern = "TRIVIA";
       trivia_func = map_and_concat to_trivia };
     { trivia_pattern = "TO_STRING";
-      trivia_func = map_and_concat to_to_string }];
-  aggregate_transformations = [];
-}
-
+      trivia_func = map_and_concat to_to_string }
+    ]
+  ~filename: (full_fidelity_path_prefix ^ "/full_fidelity_trivia_kind.ml")
+  ~template: full_fidelity_trivia_kind_template
+  ()
 end (* GenerateFFSyntaxKind *)
 
 module GenerateFFRustTriviaKind = struct
@@ -2294,24 +2168,18 @@ OCAML_TAG        }
     }
 }
 "
-  let full_fidelity_trivia_kind =
-  {
-    filename = full_fidelity_path_prefix ^ "trivia_kind.rs";
-    template = full_fidelity_trivia_kind_template;
-    transformations = [];
-    token_no_text_transformations = [];
-    token_given_text_transformations = [];
-    token_variable_text_transformations = [];
-    trivia_transformations = [
+  let full_fidelity_trivia_kind = Full_fidelity_schema.make_template_file
+    ~trivia_transformations: [
       { trivia_pattern = "TRIVIA";
         trivia_func = map_and_concat to_trivia };
       { trivia_pattern = "TO_STRING";
         trivia_func = map_and_concat to_to_string };
       { trivia_pattern = "OCAML_TAG";
-        trivia_func = map_and_concat to_ocaml_tag };];
-    aggregate_transformations = [];
-  }
-
+        trivia_func = map_and_concat to_ocaml_tag };
+      ]
+    ~filename: (full_fidelity_path_prefix ^ "trivia_kind.rs")
+    ~template: full_fidelity_trivia_kind_template
+    ()
 end (* GenerateFFRustTriviaKind *)
 
 module GenerateFFSyntaxKind = struct
@@ -2339,21 +2207,14 @@ let to_string kind =
   | SyntaxList                        -> \"list\"
 TO_STRING"
 
-let full_fidelity_syntax_kind =
-{
-  filename = full_fidelity_path_prefix ^ "full_fidelity_syntax_kind.ml";
-  template = full_fidelity_syntax_kind_template;
-  transformations = [
+let full_fidelity_syntax_kind = Full_fidelity_schema.make_template_file
+  ~transformations: [
     { pattern = "TOKENS"; func = to_tokens };
     { pattern = "TO_STRING"; func = to_to_string };
-  ];
-  token_no_text_transformations = [];
-  token_given_text_transformations = [];
-  token_variable_text_transformations = [];
-  trivia_transformations = [];
-  aggregate_transformations = [];
-}
-
+  ]
+  ~filename: (full_fidelity_path_prefix ^ "full_fidelity_syntax_kind.ml")
+  ~template: full_fidelity_syntax_kind_template
+  ()
 end (* GenerateFFTriviaKind *)
 
 module GenerateFFRustSyntaxKind = struct
@@ -2400,22 +2261,15 @@ OCAML_TAG        }
 }
 "
 
-let full_fidelity_syntax_kind =
-{
-  filename = full_fidelity_path_prefix ^ "syntax_kind.rs";
-  template = full_fidelity_syntax_kind_template;
-  transformations = [
+let full_fidelity_syntax_kind = Full_fidelity_schema.make_template_file
+  ~transformations: [
     { pattern = "TOKENS"; func = to_tokens };
     { pattern = "TO_STRING"; func = to_to_string };
     { pattern = "OCAML_TAG"; func = to_ocaml_tag };
-  ];
-  token_no_text_transformations = [];
-  token_given_text_transformations = [];
-  token_variable_text_transformations = [];
-  trivia_transformations = [];
-  aggregate_transformations = [];
-}
-
+  ]
+  ~filename: (full_fidelity_path_prefix ^ "syntax_kind.rs")
+  ~template: full_fidelity_syntax_kind_template
+  ()
 end (* GenerateFFRustSyntaxKind *)
 
 
@@ -3057,37 +2911,37 @@ exports.EditableTrivia = EditableTrivia;
 EXPORTS_TRIVIA
 EXPORTS_SYNTAX"
 
-  let full_fidelity_javascript =
-  {
-    filename = full_fidelity_path_prefix ^ "js/full_fidelity_editable.js";
-    template = full_fidelity_javascript_template;
-    transformations = [
+  let full_fidelity_javascript = Full_fidelity_schema.make_template_file
+    ~transformations: [
       { pattern = "FROM_JSON_SYNTAX"; func = to_from_json };
       { pattern = "EDITABLE_SYNTAX"; func = to_editable_syntax };
       { pattern = "EXPORTS_SYNTAX"; func = to_exports_syntax };
-    ];
-    token_no_text_transformations = [
+    ]
+    ~token_no_text_transformations: [
       { token_pattern = "EDITABLE_NO_TEXT_TOKENS";
         token_func = map_and_concat to_editable_no_text };
       { token_pattern = "FACTORY_NO_TEXT_TOKENS";
         token_func = map_and_concat to_factory_no_text };
       { token_pattern = "EXPORTS_NO_TEXT_TOKENS";
-        token_func = map_and_concat to_export_token }];
-    token_given_text_transformations = [
+        token_func = map_and_concat to_export_token }
+      ]
+    ~token_given_text_transformations: [
       { token_pattern = "EDITABLE_GIVEN_TEXT_TOKENS";
         token_func = map_and_concat to_editable_given_text };
       { token_pattern = "FACTORY_GIVEN_TEXT_TOKENS";
         token_func = map_and_concat to_factory_given_text };
       { token_pattern = "EXPORTS_GIVEN_TEXT_TOKENS";
-        token_func = map_and_concat to_export_token }];
-    token_variable_text_transformations = [
+        token_func = map_and_concat to_export_token }
+      ]
+    ~token_variable_text_transformations: [
       { token_pattern = "EDITABLE_VARIABLE_TEXT_TOKENS";
         token_func = map_and_concat to_editable_variable_text };
       { token_pattern = "FACTORY_VARIABLE_TEXT_TOKENS";
         token_func = map_and_concat to_factory_variable_text };
       { token_pattern = "EXPORTS_VARIABLE_TEXT_TOKENS";
-        token_func = map_and_concat to_export_token }];
-    trivia_transformations = [
+        token_func = map_and_concat to_export_token }
+      ]
+    ~trivia_transformations: [
       { trivia_pattern = "FROM_JSON_TRIVIA";
         trivia_func = map_and_concat trivia_from_json };
       { trivia_pattern = "STATIC_FROM_JSON_TRIVIA";
@@ -3096,10 +2950,10 @@ EXPORTS_SYNTAX"
         trivia_func = map_and_concat trivia_classes };
       { trivia_pattern = "EXPORTS_TRIVIA";
         trivia_func = map_and_concat to_export_trivia }
-    ];
-    aggregate_transformations = [];
-  }
-
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "js/full_fidelity_editable.js")
+    ~template: full_fidelity_javascript_template
+    ()
 end (* GenerateFFJavaScript *)
 
 
@@ -3180,34 +3034,32 @@ let is_variable_text kind =
   match kind with
 IS_VARIABLE_TEXT_VARIABLE_TEXT  | _ -> false
 "
-  let full_fidelity_token_kind =
-  {
-    filename = full_fidelity_path_prefix ^ "full_fidelity_token_kind.ml";
-    template = full_fidelity_token_kind_template;
-    transformations = [];
-    token_no_text_transformations = [
+  let full_fidelity_token_kind = Full_fidelity_schema.make_template_file
+    ~token_no_text_transformations: [
       { token_pattern = "KIND_DECLARATIONS_NO_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_NO_TEXT";
-        token_func = map_and_concat to_to_string }];
-    token_given_text_transformations = [
+        token_func = map_and_concat to_to_string };
+      ]
+    ~token_given_text_transformations: [
       { token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "FROM_STRING_GIVEN_TEXT";
         token_func = map_and_concat to_from_string };
       { token_pattern = "TO_STRING_GIVEN_TEXT";
-        token_func = map_and_concat to_to_string }];
-    token_variable_text_transformations = [
+        token_func = map_and_concat to_to_string };
+      ]
+    ~token_variable_text_transformations: [
       { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_VARIABLE_TEXT";
         token_func = map_and_concat to_to_string };
       { token_pattern = "IS_VARIABLE_TEXT_VARIABLE_TEXT";
-        token_func = map_and_concat to_is_variable_text }];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
-
+        token_func = map_and_concat to_is_variable_text };
+      ]
+    ~filename: (full_fidelity_path_prefix ^ "full_fidelity_token_kind.ml")
+    ~template: full_fidelity_token_kind_template
+    ()
 end (* GenerateFFTokenKind *)
 
 module GenerateFFRustTokenKind = struct
@@ -3287,21 +3139,16 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
 }
 "
 
-  let full_fidelity_token_kind =
-  {
-    filename = full_fidelity_path_prefix ^ "token_kind.rs";
-    template = full_fidelity_rust_token_kind_template;
-    transformations = [];
-
-    token_no_text_transformations = [
+  let full_fidelity_token_kind = Full_fidelity_schema.make_template_file
+    ~token_no_text_transformations: [
       { token_pattern = "KIND_DECLARATIONS_NO_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_NO_TEXT";
         token_func = map_and_concat to_to_string };
       { token_pattern = "OCAML_TAG_NO_TEXT";
         token_func = map_and_concat to_ocaml_tag };
-    ];
-    token_given_text_transformations = [
+    ]
+    ~token_given_text_transformations: [
       { token_pattern = "KIND_DECLARATIONS_GIVEN_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "FROM_STRING_GIVEN_TEXT";
@@ -3310,22 +3157,70 @@ OCAML_TAG_NO_TEXTOCAML_TAG_GIVEN_TEXTOCAML_TAG_VARIABLE_TEXT        }
         token_func = map_and_concat to_to_string };
       { token_pattern = "OCAML_TAG_GIVEN_TEXT";
         token_func = map_and_concat to_ocaml_tag };
-    ];
-    token_variable_text_transformations = [
+    ]
+    ~token_variable_text_transformations: [
       { token_pattern = "KIND_DECLARATIONS_VARIABLE_TEXT";
         token_func = map_and_concat to_kind_declaration };
       { token_pattern = "TO_STRING_VARIABLE_TEXT";
         token_func = map_and_concat to_to_string };
       { token_pattern = "OCAML_TAG_VARIABLE_TEXT";
         token_func = map_and_concat to_ocaml_tag };
-    ];
-    trivia_transformations = [];
-    aggregate_transformations = [];
-  }
-
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "token_kind.rs")
+    ~template: full_fidelity_rust_token_kind_template
+    ()
 end (* GenerateFFTRustTokenKind *)
 
+module GenerateFFOperatorRust = struct
+  let template = make_header CStyle "" ^ "
+pub enum Operator {
+OPERATORS}
+"
+  let full_fidelity_operators = Full_fidelity_schema.make_template_file
+    ~operator_transformations: [
+      { operator_pattern = "OPERATORS";
+        operator_func = map_and_concat
+          (fun op -> sprintf "    %sOperator,\n" op.name);
+      };
+    ]
+    ~filename: (full_fidelity_path_prefix ^ "operator_generated.rs")
+    ~template: template
+    ()
+end (* GenerateFFOperatorRust *)
+
+module GenerateFFOperator = struct
+
+  let template = make_header MLStyle "" ^ "
+module type Sig = sig
+  type t =
+OPERATOR_DECL_SIGend
+
+module Impl : Sig = struct
+  type t =
+OPERATOR_DECL_IMPLend
+"
+
+  let op_pattern prefix op = sprintf "%s| %sOperator\n" prefix op.name
+
+  let transform pattern = {
+    operator_pattern = pattern;
+    operator_func = map_and_concat (op_pattern "  ");
+  }
+
+  let full_fidelity_operator = Full_fidelity_schema.make_template_file
+    ~operator_transformations: [
+      transform "OPERATOR_DECL_SIG";
+      transform "OPERATOR_DECL_IMPL";
+    ]
+    ~filename: (full_fidelity_path_prefix ^
+      "full_fidelity_operator_generated.ml")
+    ~template: template
+    ()
+end
+
 let () =
+  generate_file GenerateFFOperatorRust.full_fidelity_operators;
+  generate_file GenerateFFOperator.full_fidelity_operator;
   generate_file GenerateFFSyntaxType.full_fidelity_syntax_type;
   generate_file GenerateFFSyntaxSig.full_fidelity_syntax_sig;
   generate_file GenerateFFValidatedSyntax.full_fidelity_validated_syntax;

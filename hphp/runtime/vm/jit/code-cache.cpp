@@ -54,6 +54,7 @@ uint32_t CodeCache::AFrozenMaxUsage = 0;
 bool CodeCache::MapTCHuge = false;
 uint32_t CodeCache::AutoTCShift = 0;
 uint32_t CodeCache::TCNumHugeHotMB = 0;
+uint32_t CodeCache::TCNumHugeMainMB = 0;
 uint32_t CodeCache::TCNumHugeColdMB = 0;
 
 static size_t ru(size_t sz) { return sz + (-sz & (kRoundUp - 1)); }
@@ -220,14 +221,16 @@ CodeCache::CodeCache()
   if (kAHotSize) {
     FTRACE(1, "init ahot @{}, size = {}\n", base, kAHotSize);
     m_hot.init(base, kAHotSize, "hot");
-    enhugen(base, kAHotSize >> 20);
+    const uint32_t hugeMBs = std::min(CodeCache::TCNumHugeHotMB,
+                                      uint32_t(kAHotSize >> 20));
+    enhugen(base, hugeMBs);
     base += kAHotSize;
   }
 
   TRACE(1, "init a @%p\n", base);
 
   m_main.init(base, kASize, "main");
-  enhugen(base, CodeCache::TCNumHugeHotMB);
+  enhugen(base, CodeCache::TCNumHugeMainMB);
   base += kASize;
 
   TRACE(1, "init aprof @%p\n", base);

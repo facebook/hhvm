@@ -1881,7 +1881,9 @@ void RuntimeOption::Load(
                  hugePagesSoundNice());
 
     Config::Bind(CodeCache::TCNumHugeHotMB, ini, config,
-                 "Eval.TCNumHugeHotMB", 16);
+                 "Eval.TCNumHugeHotMB", 64);
+    Config::Bind(CodeCache::TCNumHugeMainMB, ini, config,
+                 "Eval.TCNumHugeMainMB", 16);
     Config::Bind(CodeCache::TCNumHugeColdMB, ini, config,
                  "Eval.TCNumHugeColdMB", 4);
 

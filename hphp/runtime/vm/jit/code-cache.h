@@ -68,6 +68,7 @@ struct CodeCache {
   static uint32_t AutoTCShift;
 
   static uint32_t TCNumHugeHotMB;
+  static uint32_t TCNumHugeMainMB;
   static uint32_t TCNumHugeColdMB;
 
   CodeCache();

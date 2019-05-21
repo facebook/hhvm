@@ -74,6 +74,7 @@ let parsing
   let fast, errorl, _=
     Parsing_service.go
       ~quick
+      ~show_all_errors:true
       genv.workers
       Relative_path.Set.empty
       ~get_next

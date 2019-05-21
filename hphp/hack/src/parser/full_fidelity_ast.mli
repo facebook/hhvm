@@ -29,6 +29,7 @@ val make_env
   -> ?keep_errors:bool
   -> ?ignore_pos:bool
   -> ?quick_mode:bool
+  -> ?show_all_errors:bool
   -> ?lower_coroutines:bool
   -> ?enable_hh_syntax:bool
   -> ?enable_xhp:bool
@@ -88,6 +89,7 @@ val from_file_with_legacy : env -> Parser_return.t
 val defensive_program :
   ?hacksperimental:bool ->
   ?quick:bool ->
+  ?show_all_errors:bool ->
   ?fail_open:bool ->
   ?keep_errors:bool ->
   ?elaborate_namespaces:bool ->
@@ -97,12 +99,13 @@ val defensive_program :
   string -> Parser_return.t
 
 val defensive_from_file_with_default_popt :
-  ?quick:bool -> Relative_path.t -> Parser_return.t
+  ?quick:bool -> ?show_all_errors:bool -> Relative_path.t -> Parser_return.t
 val defensive_from_file :
-  ?quick:bool -> ParserOptions.t -> Relative_path.t -> Parser_return.t
+  ?quick:bool -> ?show_all_errors:bool -> ParserOptions.t -> Relative_path.t -> Parser_return.t
 val defensive_program_with_default_popt :
   ?hacksperimental:bool ->
   ?quick:bool ->
+  ?show_all_errors:bool ->
   ?fail_open:bool ->
   ?elaborate_namespaces:bool ->
   Relative_path.t ->

@@ -10,6 +10,7 @@ val empty_file_info: FileInfo.t
 
 val go:
   ?quick: bool ->
+  ?show_all_errors: bool ->
   MultiWorker.worker list option ->
   Relative_path.Set.t ->
   get_next: Relative_path.t list Bucket.next ->

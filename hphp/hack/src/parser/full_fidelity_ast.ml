@@ -36,6 +36,10 @@ type env =
   ; include_line_comments    : bool
   ; keep_errors              : bool
   ; quick_mode               : bool
+  (* Show errors even in quick mode. Does not override keep_errors. Hotfix
+   * until we can properly set up saved states to surface parse errors during
+   * typechecking properly. *)
+  ; show_all_errors          : bool
   ; lower_coroutines         : bool
   ; enable_hh_syntax         : bool
   ; enable_xhp               : bool
@@ -84,6 +88,7 @@ let make_env
   ?(keep_errors              = true                    )
   ?(ignore_pos               = false                   )
   ?(quick_mode               = false                   )
+  ?(show_all_errors          = false                   )
   ?(lower_coroutines         = true                    )
   ?(enable_hh_syntax         = false                   )
   ?enable_xhp
@@ -115,6 +120,7 @@ let make_env
          | FileInfo.Mphp -> true
          | _ -> quick_mode
          )
+    ; show_all_errors
     ; lower_coroutines
     ; enable_hh_syntax
     ; enable_xhp
@@ -139,6 +145,11 @@ let make_env
     ; tmp_var_counter = 1
     ; lowpri_errors = ref []
     }
+
+let should_surface_errors env =
+  (* env.show_all_errors is a hotfix until we can retool how saved states handle
+   * parse errors. *)
+  (not env.quick_mode || env.show_all_errors) && env.keep_errors
 
 type result =
   { fi_mode  : FileInfo.mode
@@ -306,7 +317,7 @@ let pPos : Pos.t parser = fun node env ->
   else Option.value ~default:Pos.none (position_exclusive env.file node)
 
 let raise_parsing_error env node_or_pos msg =
-  if not env.quick_mode && env.keep_errors then
+  if should_surface_errors env then
     let p = match node_or_pos with
       | `Pos pos -> pos
       | `Node node -> pPos node env
@@ -3615,7 +3626,7 @@ let scour_comments_and_add_fixmes (env : env) source_text script =
 let flush_parsing_errors env =
   let lowpri_errors = List.rev !(env.lowpri_errors) in
   env.lowpri_errors := [];
-  if not env.quick_mode && env.keep_errors then
+  if should_surface_errors env then
     List.iter ~f:Errors.parsing_error lowpri_errors
   else if env.codegen && not env.lower_coroutines then
     match lowpri_errors with
@@ -3759,6 +3770,7 @@ let from_file_with_legacy env = legacy (from_file env)
 let defensive_program
   ?(hacksperimental=false)
   ?(quick=false)
+  ?(show_all_errors=false)
   ?(fail_open=false)
   ?(keep_errors=false)
   ?(elaborate_namespaces=true)
@@ -3770,6 +3782,7 @@ let defensive_program
     let env = make_env
       ~fail_open
       ~quick_mode:quick
+      ~show_all_errors
       ~elaborate_namespaces
       ~keep_errors:(keep_errors || (not fail_open))
       ~parser_options
@@ -3799,22 +3812,24 @@ let defensive_program
     ; Parser_return.is_hh_file = mode <> None
     }
 
-let defensive_from_file ?quick popt fn =
+let defensive_from_file ?quick ?show_all_errors popt fn =
   let content = try Sys_utils.cat (Relative_path.to_absolute fn) with _ -> "" in
-  defensive_program ?quick popt fn content
+  defensive_program ?quick ?show_all_errors popt fn content
 
-let defensive_from_file_with_default_popt ?quick fn =
-  defensive_from_file ?quick ParserOptions.default fn
+let defensive_from_file_with_default_popt ?quick ?show_all_errors fn =
+  defensive_from_file ?quick ?show_all_errors ParserOptions.default fn
 
 let defensive_program_with_default_popt
   ?hacksperimental
   ?quick
+  ?show_all_errors
   ?fail_open
   ?elaborate_namespaces
   fn content =
   defensive_program
     ?hacksperimental
     ?quick
+    ?show_all_errors
     ?fail_open
     ?elaborate_namespaces
     (ParserOptions.default) fn content

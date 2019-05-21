@@ -85,10 +85,10 @@ let process_parse_result
     acc, errorl, error_files
   end
 
-let parse ~quick popt acc fn =
+let parse ~quick ~show_all_errors popt acc fn =
   if not @@ FindUtils.path_filter fn then acc else
   let res = Errors.do_with_context fn Errors.Parsing @@
-    fun () -> Full_fidelity_ast.defensive_from_file ~quick popt fn
+    fun () -> Full_fidelity_ast.defensive_from_file ~quick ~show_all_errors popt fn
   in
   process_parse_result ~quick acc fn res popt
 
@@ -100,29 +100,29 @@ let merge_parse
   Errors.merge status1 status2,
   Relative_path.Set.union files1 files2
 
-let parse_files ?(quick = false) popt acc fnl =
+let parse_files ?(quick = false) ?(show_all_errors = false) popt acc fnl =
   let parse =
     if !Utils.profile
     then (fun acc fn ->
       let t = Unix.gettimeofday () in
-      let result = parse ~quick popt acc fn in
+      let result = parse ~quick ~show_all_errors popt acc fn in
       let t' = Unix.gettimeofday () in
       let msg =
         Printf.sprintf "%f %s [parsing]" (t' -. t) (Relative_path.suffix fn) in
       !Utils.log msg;
       result)
-    else parse ~quick popt in
+    else parse ~quick ~show_all_errors popt in
   List.fold_left fnl ~init:acc ~f:parse
 
-let parse_parallel ?(quick = false) workers get_next popt =
+let parse_parallel ?(quick = false) ?(show_all_errors = false) workers get_next popt =
   MultiWorker.call
       workers
-      ~job:(parse_files ~quick popt)
+      ~job:(parse_files ~quick ~show_all_errors popt)
       ~neutral:neutral
       ~merge:merge_parse
       ~next:get_next
 
-let parse_sequential ~quick fn content acc popt =
+let parse_sequential ~quick ~show_all_errors fn content acc popt =
   if not @@ FindUtils.path_filter fn then acc else
   let res =
     Errors.do_with_context fn Errors.Parsing begin fun () ->
@@ -138,7 +138,7 @@ let parse_sequential ~quick fn content acc popt =
         else
           content
       in
-        Full_fidelity_ast.defensive_program ~quick popt fn content
+        Full_fidelity_ast.defensive_program ~quick ~show_all_errors popt fn content
     end
   in
   process_parse_result ~ide:true ~quick acc fn res popt
@@ -152,13 +152,13 @@ let log_parsing_results fast =
 (* Main entry points *)
 (*****************************************************************************)
 
-let go ?(quick = false) workers files_set ~get_next popt ~trace =
-  let acc = parse_parallel ~quick workers get_next popt in
+let go ?(quick = false) ?(show_all_errors = false) workers files_set ~get_next popt ~trace =
+  let acc = parse_parallel ~quick ~show_all_errors workers get_next popt in
   let fast, errorl, failed_parsing =
     Relative_path.Set.fold files_set ~init:acc ~f:(
       fun fn acc ->
         let content = File_provider.get_ide_contents_unsafe fn in
-        parse_sequential ~quick fn content acc popt
+        parse_sequential ~quick ~show_all_errors fn content acc popt
       ) in
   if trace then log_parsing_results fast;
   fast, errorl, failed_parsing

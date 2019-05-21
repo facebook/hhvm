@@ -1705,13 +1705,39 @@ void fullDCE(IRUnit& unit) {
   // can kill it, and DecRef any of its consumesReference inputs.
   for (auto& pair : decs) {
     if (uses[pair.first->dst()] != pair.second.size()) continue;
+    auto anyRemaining = false;
+    if (pair.first->consumesReferences()) {
+      // ConsumesReference inputs that are definitely not moved can
+      // simply be decreffed as a replacement for the dead consumesref
+      // instruction
+      auto srcIx = 0;
+      for (auto src : pair.first->srcs()) {
+        auto const ix = srcIx++;
+        if (pair.first->consumesReference(ix) &&
+            src->type().maybe(TCounted)) {
+          if (pair.first->mayMoveReference(ix)) {
+            anyRemaining = true;
+            continue;
+          }
+          auto const blk = pair.first->block();
+          auto const ins = unit.gen(DecRef, pair.first->bcctx(),
+                                    DecRefData{}, src);
+          blk->insert(blk->iteratorTo(pair.first), ins);
+          FTRACE(3, "Inserting {} to replace {}\n",
+                 ins->toString(), pair.first->toString());
+          state[ins].setLive();
+        }
+      }
+    }
     for (auto dec : pair.second) {
       auto replaced = false;
-      if (pair.first->consumesReferences()) {
-        auto srcIx = 0;
+      auto srcIx = 0;
+      if (anyRemaining) {
+        // The remaining inputs might be moved, so may need to survive
+        // until this instruction is decreffed
         for (auto src : pair.first->srcs()) {
-          if (pair.first->consumesReference(srcIx++) &&
-              src->type().maybe(TCounted)) {
+          if (pair.first->mayMoveReference(srcIx++) &&
+              src->type().maybe(TCounted) ) {
             if (!replaced) {
               FTRACE(3, "Converting {} to ", dec->toString());
               dec->setSrc(0, src);

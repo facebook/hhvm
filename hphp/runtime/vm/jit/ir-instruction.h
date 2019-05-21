@@ -132,11 +132,35 @@ struct IRInstruction {
   bool isPassthrough() const;
 
   /*
-   * Whether the src numbered srcNo consumes a reference, or the dest produces
-   * a reference.
+   * consumesReference covers two similar conditions. Either it decRefs
+   * the input, or it transfers ownership of the input to a new location.
    */
   bool consumesReference(int srcNo) const;
+
+  /*
+   * mayMoveReference implies consumesReference. When
+   * consumesReference is true, and mayMoveReference is false, this
+   * instruction will definitely decRef its input. This is used by dce
+   * to determine where it needs to insert DecRefs after killing a
+   * consumesReference instruction.
+   */
+  bool mayMoveReference(int srcNo) const;
+
+  /*
+   * movesReference implies mayMoveReference, and guarantees that there
+   * is no change to the refCount as a result of this instruction. Since
+   * the new owner of the location is not specified, you can only assume
+   * it lives until the next thing that might modify refcounts in an
+   * unknown way. This is used by refcount opts to preserve the lower
+   * bound of an aset across such an instruction (using an
+   * unsupportedRef, which will be killed at the next instruction that
+   * modifies refcounts in an untracked way).
+   */
   bool movesReference(int srcNo) const;
+
+  /*
+   * Whether the dest produces a reference.
+   */
   bool producesReference() const;
 
   /*

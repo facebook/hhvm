@@ -126,7 +126,13 @@ void IRInstruction::become(IRUnit& unit, const IRInstruction* other) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-template<bool move>
+enum MoveKind {
+  Consume,
+  MustMove,
+  MayMove,
+};
+
+template<MoveKind move>
 bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
   if (!inst->consumesReferences()) {
     return false;
@@ -138,7 +144,7 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case ConcatStr3:
     case ConcatStr4:
       // Call a helper that decrefs the first argument
-      return !move && srcNo == 0;
+      return move == Consume && srcNo == 0;
 
     case StClosureArg:
     case StClosureCtx:
@@ -168,12 +174,12 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
     case DictAddElemStrKey:
     case DictAddElemIntKey:
       // Only consumes the reference to its input array
-      return !move && srcNo == 0;
+      return move == Consume && srcNo == 0;
 
     case LdSwitchStrIndex:
     case LdSwitchObjIndex:
       // consumes the switch input
-      return !move && srcNo == 0;
+      return move == Consume && srcNo == 0;
 
     case CreateAFWH:
     case CreateAFWHNoVV:
@@ -196,16 +202,20 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       return true;
 
     default:
-      return !move;
+      return move != MustMove;
   }
 }
 
 bool IRInstruction::consumesReference(int srcNo) const {
-  return consumesRefImpl<false>(this, srcNo);
+  return consumesRefImpl<Consume>(this, srcNo);
 }
 
 bool IRInstruction::movesReference(int srcNo) const {
-  return consumesRefImpl<true>(this, srcNo);
+  return consumesRefImpl<MustMove>(this, srcNo);
+}
+
+bool IRInstruction::mayMoveReference(int srcNo) const {
+  return consumesRefImpl<MayMove>(this, srcNo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

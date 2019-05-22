@@ -1195,10 +1195,6 @@ void mergeEachSelfPropRaw(ISS& env, MapFn fn) {
   }
 }
 
-void boxSelfProp(ISS& env, SString name) {
-  mergeSelfProp(env, name, TRef);
-}
-
 /*
  * Forces non-ref static properties up to TCell.  This is used when
  * an operation affects an unknown static property on self::, but

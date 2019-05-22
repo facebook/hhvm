@@ -290,7 +290,6 @@ type instruct_get =
   | CGetQuietG
   | CGetS of classref_id
   | VGetL of local_id
-  | VGetS of classref_id
   | ClsRefGetC of classref_id
   | ClsRefGetTS of classref_id
 

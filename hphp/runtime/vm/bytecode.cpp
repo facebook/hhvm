@@ -3437,37 +3437,14 @@ SpropState::~SpropState() {
   tvDecRefGen(oldNameCell);
 }
 
-template<bool box> void getS(clsref_slot slot) {
+OPTBLD_INLINE void iopCGetS(clsref_slot slot) {
   SpropState ss(vmStack(), slot, false);
   if (!(ss.visible && ss.accessible)) {
     raise_error("Invalid static property access: %s::%s",
                 ss.cls->name()->data(),
                 ss.name->data());
   }
-  if (box) {
-    if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-      auto const& sprop = ss.cls->staticProperties()[ss.slot];
-      auto const& tc = sprop.typeConstraint;
-      if (!tc.isMixedResolved()) {
-        raise_property_typehint_binding_error(
-          sprop.cls,
-          sprop.name,
-          true,
-          tc.isSoft()
-        );
-      }
-    }
-    if (!isRefType(ss.val->m_type)) {
-      tvBox(*ss.val);
-    }
-    refDup(*ss.val, *ss.output);
-  } else {
-    cellDup(*tvToCell(ss.val), *ss.output);
-  }
-}
-
-OPTBLD_INLINE void iopCGetS(clsref_slot slot) {
-  getS<false>(slot);
+  cellDup(*tvToCell(ss.val), *ss.output);
 }
 
 static inline MInstrState& initMState() {
@@ -4152,10 +4129,6 @@ static inline void vgetl_body(TypedValue* fr, TypedValue* to) {
 OPTBLD_INLINE void iopVGetL(local_var fr) {
   Ref* to = vmStack().allocV();
   vgetl_body(fr.ptr, to);
-}
-
-OPTBLD_INLINE void iopVGetS(clsref_slot slot) {
-  getS<true>(slot);
 }
 
 OPTBLD_INLINE void iopIssetG() {

@@ -1547,13 +1547,6 @@ VGetL <local variable id>    []  ->  [V]
   is not defined, this instruction defines it, sets it to null, boxes it, and
   pushes a the value of the local variable onto the stack as a ref.
 
-VGetS <class-ref slot>    [C]  ->  [V]
-
-  Get static property as ref. This instruction first checks if class %1 has a
-  visible and accessible static property named (string)$1. If it doesn't, this
-  instruction throws a fatal error. Otherwise, this instruction boxes the
-  static property and pushes it onto the stack as a ref.
-
 ClsRefGetC  <class-ref slot>                        [C]  ->  []
 ClsRefGetTS <class-ref slot>                        [C]  ->  []
 

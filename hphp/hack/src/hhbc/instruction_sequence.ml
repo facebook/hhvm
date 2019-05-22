@@ -131,8 +131,6 @@ let instr_emptyg = instr (IIsset EmptyG)
 let instr_emptyl local = instr (IIsset (EmptyL local))
 let instr_cgets =
   instr (IGet (CGetS class_ref_rewrite_sentinel))
-let instr_vgets =
-  instr (IGet (VGetS class_ref_rewrite_sentinel))
 let instr_cgetg = instr (IGet CGetG)
 let instr_cgetl local = instr (IGet (CGetL local))
 let instr_cugetl local = instr (IGet (CUGetL local))
@@ -499,7 +497,6 @@ let rewrite_class_refs_instr num stack = function
 | IMisc (ClsRefName _) -> (num - 1, stack, IMisc (ClsRefName num))
 | ILitConst (ClsCns (id, _)) -> (num - 1, stack, ILitConst (ClsCns (id, num)))
 | IGet (CGetS _) -> (num - 1, stack, IGet (CGetS num))
-| IGet (VGetS _) -> (num - 1, stack, IGet (VGetS num))
 | IMutator (SetS _) -> (num - 1, stack, IMutator (SetS num))
 | IMutator (SetOpS (o, _)) -> (num - 1, stack, IMutator (SetOpS (o, num)))
 | IMutator (IncDecS (o, _)) -> (num - 1, stack, IMutator (IncDecS (o, num)))

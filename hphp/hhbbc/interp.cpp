@@ -2400,27 +2400,6 @@ void in(ISS& env, const bc::VGetL& op) {
   push(env, TRef);
 }
 
-void in(ISS& env, const bc::VGetS& op) {
-  auto const tcls  = takeClsRefSlot(env, op.slot);
-  auto const tname = popC(env);
-  auto const vname = tv(tname);
-  auto const self  = selfCls(env);
-
-  if (!self || tcls.couldBe(*self)) {
-    if (vname && vname->m_type == KindOfPersistentString) {
-      boxSelfProp(env, vname->m_data.pstr);
-    } else {
-      killSelfProps(env);
-    }
-  }
-
-  env.collect.publicSPropMutations.merge(
-    env.index, env.ctx, tcls, tname, TRef
-  );
-
-  push(env, TRef);
-}
-
 void clsRefGetImpl(ISS& env, Type t1, ClsRefSlotId slot) {
   auto cls = [&]{
     if (auto const clsname = getNameFromType(t1)) {

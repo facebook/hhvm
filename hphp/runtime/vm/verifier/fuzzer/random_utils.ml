@@ -251,7 +251,6 @@ let all_instrs (fn : IS.t) : lazy_instruct list =
        (fun () -> IMisc (LateBoundCls (Random.int cls_ref_slts)));
        (fun () -> IMutator (SetOpS (random_eq_op (), Random.int cls_ref_slts)));
        (fun () -> IGet (CGetS (Random.int cls_ref_slts)));
-       (fun () -> IGet (VGetS (Random.int cls_ref_slts)));
        (fun () -> ILitConst (ClsCns ((Const.from_raw_string ""),
                                       Random.int cls_ref_slts)));
        (fun () -> IMutator (SetS (Random.int cls_ref_slts)));

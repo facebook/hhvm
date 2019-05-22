@@ -97,7 +97,6 @@ let stk_data : instruct -> stack_sig = function
   | IBasic PopV                            -> ["V"], []
   | IGet CGetL2 _
   | IBasic Dup                             -> ["C"], ["C"; "C"]
-  | IGet VGetS _                           -> ["C"], ["V"]
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]
   | IGet VGetL _                           -> [], ["V"]

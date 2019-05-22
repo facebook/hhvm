@@ -289,7 +289,6 @@ let mut_imms (is : IS.t) : IS.t =
     | PushL       id     -> PushL      (mutate_local_id id !mag)
     | CGetS       i      -> CGetS      (mutate_int      i  !mag)
     | VGetL       id     -> VGetL      (mutate_local_id id !mag)
-    | VGetS       i      -> VGetS      (mutate_int      i  !mag)
     | ClsRefGetC  i      -> ClsRefGetC (mutate_int      i  !mag)
     | _ -> s in  (*TODO: in general it might be worthwhile to get rid of wild
                    card cases like this. It would make the code more verbose,

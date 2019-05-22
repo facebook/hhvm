@@ -16,26 +16,28 @@
 */
 
 #include "hphp/runtime/ext/hash/ext_hash.h"
-#include <algorithm>
-#include <memory>
+
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/hash/hash_md.h"
-#include "hphp/runtime/ext/hash/hash_sha.h"
-#include "hphp/runtime/ext/hash/hash_ripemd.h"
-#include "hphp/runtime/ext/hash/hash_whirlpool.h"
-#include "hphp/runtime/ext/hash/hash_tiger.h"
-#include "hphp/runtime/ext/hash/hash_snefru.h"
-#include "hphp/runtime/ext/hash/hash_gost.h"
 #include "hphp/runtime/ext/hash/hash_adler32.h"
 #include "hphp/runtime/ext/hash/hash_crc32.h"
-#include "hphp/runtime/ext/hash/hash_haval.h"
 #include "hphp/runtime/ext/hash/hash_fnv1.h"
 #include "hphp/runtime/ext/hash/hash_furc.h"
-#include "hphp/runtime/ext/hash/hash_murmur.h"
-#include "hphp/runtime/ext/hash/hash_keccak.h"
+#include "hphp/runtime/ext/hash/hash_gost.h"
+#include "hphp/runtime/ext/hash/hash_haval.h"
 #include "hphp/runtime/ext/hash/hash_joaat.h"
+#include "hphp/runtime/ext/hash/hash_keccak.h"
+#include "hphp/runtime/ext/hash/hash_md.h"
+#include "hphp/runtime/ext/hash/hash_murmur.h"
+#include "hphp/runtime/ext/hash/hash_ripemd.h"
+#include "hphp/runtime/ext/hash/hash_sha.h"
+#include "hphp/runtime/ext/hash/hash_snefru.h"
+#include "hphp/runtime/ext/hash/hash_tiger.h"
+#include "hphp/runtime/ext/hash/hash_whirlpool.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
+#include "hphp/runtime/ext/string/ext_string.h"
+
+#include <algorithm>
+#include <memory>
 
 #if defined(HPHP_OSS)
 #define furc_hash(a, b, c) furc_hash_internal(                          \
@@ -150,11 +152,11 @@ struct HashContext : SweepableResourceData {
     assertx(ctx->ops);
     assertx(ctx->ops->context_size >= 0);
     ops = ctx->ops;
-    context = malloc(ops->context_size);
+    context = req::malloc_noptrs(ops->context_size);
     ops->hash_copy(context, ctx->context);
     options = ctx->options;
     if (ctx->key) {
-      key = static_cast<char*>(malloc(ops->block_size));
+      key = static_cast<char*>(req::malloc_noptrs(ops->block_size));
       memcpy(key, ctx->key, ops->block_size);
     } else {
       key = nullptr;
@@ -168,10 +170,10 @@ struct HashContext : SweepableResourceData {
       unsigned char* dummy = (unsigned char*)alloca(
         sizeof(unsigned char) * ops->digest_size);
       ops->hash_final(dummy, context);
-      free(context);
+      req::free(context);
     }
 
-    free(key);
+    req::free(key);
   }
 
   bool isInvalid() const override {
@@ -246,7 +248,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
     }
   }
 
-  void *context = malloc(ops->context_size);
+  void *context = req::malloc_noptrs(ops->context_size);
   ops->hash_init(context);
 
   if (isfilename) {
@@ -263,7 +265,7 @@ static Variant php_hash_do_hash(const String& algo, const String& data,
   String raw = String(ops->digest_size, ReserveString);
   char *digest = raw.mutableData();
   ops->hash_final((unsigned char *)digest, context);
-  free(context);
+  req::free(context);
 
   raw.setSize(ops->digest_size);
   if (raw_output) {
@@ -290,7 +292,7 @@ Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
 
 static char *prepare_hmac_key(HashEnginePtr ops, void *context,
                               const String& key) {
-  char *K = (char*)malloc(ops->block_size);
+  char *K = (char*)req::malloc_noptrs(ops->block_size);
   memset(K, 0, ops->block_size);
   if (key.size() > ops->block_size) {
     /* Reduce the key first */
@@ -325,7 +327,7 @@ static void finalize_hmac_key(char *K, HashEnginePtr ops, void *context,
 
   /* Zero the key */
   memset(K, 0, ops->block_size);
-  free(K);
+  req::free(K);
 }
 
 Variant HHVM_FUNCTION(hash_init, const String& algo,
@@ -342,7 +344,7 @@ Variant HHVM_FUNCTION(hash_init, const String& algo,
     return false;
   }
 
-  void *context = malloc(ops->context_size);
+  void *context = req::malloc_noptrs(ops->context_size);
   ops->hash_init(context);
 
   const auto hash = req::make<HashContext>(ops, context, options);
@@ -376,7 +378,7 @@ Variant HHVM_FUNCTION(hash_final, const Resource& context,
     finalize_hmac_key(hash->key, hash->ops, hash->context, digest);
     hash->key = NULL;
   }
-  free(hash->context);
+  req::free(hash->context);
   hash->context = NULL;
 
   raw.setSize(hash->ops->digest_size);

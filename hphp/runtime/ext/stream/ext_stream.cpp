@@ -17,27 +17,27 @@
 
 #include "hphp/runtime/ext/stream/ext_stream.h"
 
-#include "hphp/runtime/ext/sockets/ext_sockets.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/socket.h"
-#include "hphp/runtime/base/unit-cache.h"
-#include "hphp/runtime/base/plain-file.h"
-#include "hphp/runtime/base/string-buffer.h"
-#include "hphp/runtime/base/zend-printf.h"
-#include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-await.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/file.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/socket.h"
 #include "hphp/runtime/base/ssl-socket.h"
-#include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/unit-cache.h"
+#include "hphp/runtime/ext/sockets/ext_sockets.h"
+#include "hphp/runtime/server/server-stats.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/util/network.h"
+
+#include <algorithm>
 #include <memory>
-#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -46,7 +46,6 @@
 
 #if defined(AF_UNIX)
 #include <sys/un.h>
-#include <algorithm>
 #endif
 
 #define PHP_STREAM_COPY_ALL     (-1)
@@ -597,16 +596,16 @@ static Variant socket_accept_impl(
 
 static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
   char abuf[256];
-  char *buf = NULL;
-  char *textaddr = NULL;
-  long textaddrlen = 0;
+  char* buf = nullptr;
+  char textaddr[1024] = {'\0'};
+  int textaddrlen = 0;
 
   switch (sa->sa_family) {
   case AF_INET:
     buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
     if (buf) {
-      textaddrlen = spprintf(&textaddr, 0, "%s:%d",
-      buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
+      textaddrlen = snprintf(textaddr, sizeof(textaddr), "%s:%d",
+                             buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
     }
     break;
 
@@ -615,42 +614,34 @@ static String get_sockaddr_name(struct sockaddr *sa, socklen_t sl) {
                            &((struct sockaddr_in6*)sa)->sin6_addr,
                            (char *)&abuf, sizeof(abuf));
     if (buf) {
-      textaddrlen = spprintf(&textaddr, 0, "%s:%d",
-      buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
+      textaddrlen = snprintf(textaddr, sizeof(textaddr), "%s:%d",
+                             buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
     }
     break;
 
-   case AF_UNIX:
-     {
-#ifdef _MSC_VER
-       always_assert(false);
-#else
-       struct sockaddr_un *ua = (struct sockaddr_un*)sa;
+   case AF_UNIX: {
+     auto ua = (struct sockaddr_un*)sa;
 
-       if (sl == sizeof(sa_family_t)) {
-         /* unnamed socket. no text name. */
-       } else if (ua->sun_path[0] == '\0') {
-         /* abstract name. name is an arbitrary sequence of bytes. */
-         int len = sl - sizeof(sa_family_t);
-         textaddrlen = len;
-         textaddr = (char *)malloc(len);
-         memcpy(textaddr, ua->sun_path, len);
-       } else {
-         /* normal name. */
-         textaddrlen = strlen(ua->sun_path);
-         textaddr = strndup(ua->sun_path, textaddrlen);
-       }
-       break;
-#endif
-    }
+     if (sl == sizeof(sa_family_t)) {
+       /* unnamed socket. no text name. */
+     } else if (ua->sun_path[0] == '\0') {
+       /* abstract name. name is an arbitrary sequence of bytes. */
+       int len = sl - sizeof(sa_family_t);
+       textaddrlen = std::min(len, (int)sizeof(textaddr) - 1);
+       memcpy(textaddr, ua->sun_path, textaddrlen);
+     } else {
+       /* normal name. */
+       textaddrlen = std::min(sizeof(textaddr), strlen(ua->sun_path));
+       memcpy(textaddr, ua->sun_path, textaddrlen);
+     }
+     break;
+   }
 
   default:
     break;
   }
 
-  if (textaddrlen) {
-    return String(textaddr, textaddrlen, AttachString);
-  }
+  if (textaddrlen) return String(textaddr, textaddrlen, CopyString);
   return String();
 }
 

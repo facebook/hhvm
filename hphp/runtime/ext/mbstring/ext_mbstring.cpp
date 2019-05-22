@@ -16,18 +16,19 @@
 */
 
 #include "hphp/runtime/ext/mbstring/ext_mbstring.h"
+
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/execution-context.h"
-#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/rds-local.h"
+#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/base/string-buffer.h"
+#include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/mbstring/php_unicode.h"
 #include "hphp/runtime/ext/mbstring/unicode_data.h"
-#include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
-#include "hphp/runtime/base/array-init.h"
-#include "hphp/runtime/base/zend-url.h"
-#include "hphp/runtime/base/zend-string.h"
-#include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/request-event-handler.h"
+#include "hphp/runtime/ext/string/ext_string.h"
 
 #include <map>
 
@@ -247,13 +248,13 @@ struct MBGlobals final : RequestEventHandler {
 
     if (detect_order_list && detect_order_list_size > 0) {
       n = detect_order_list_size;
-      entry = (mbfl_encoding **)malloc(n * sizeof(mbfl_encoding*));
+      entry = (mbfl_encoding **)req::malloc_noptrs(n * sizeof(mbfl_encoding*));
       std::copy(detect_order_list,
                 detect_order_list + (n * sizeof(mbfl_encoding*)), entry);
     } else {
       mbfl_no_encoding *src = default_detect_order_list;
       n = default_detect_order_list_size;
-      entry = (mbfl_encoding **)malloc(n * sizeof(mbfl_encoding*));
+      entry = (mbfl_encoding **)req::malloc_noptrs(n * sizeof(mbfl_encoding*));
       for (int i = 0; i < n; i++) {
         entry[i] = (mbfl_encoding*) mbfl_no2encoding(src[i]);
       }
@@ -265,7 +266,7 @@ struct MBGlobals final : RequestEventHandler {
 
   void requestShutdown() override {
     if (current_detect_order_list != nullptr) {
-      free(current_detect_order_list);
+      req::free(current_detect_order_list);
       current_detect_order_list = nullptr;
       current_detect_order_list_size = 0;
     }
@@ -578,7 +579,7 @@ static int php_mb_parse_encoding_list(const char* value, int value_length,
     }
     size = n + identify_list_size;
     /* make list */
-    list = (mbfl_encoding **)calloc(size, sizeof(mbfl_encoding*));
+    list = (mbfl_encoding **)req::calloc_noptrs(size, sizeof(mbfl_encoding*));
     if (list != nullptr) {
       entry = list;
       n = 0;
@@ -625,10 +626,10 @@ static int php_mb_parse_encoding_list(const char* value, int value_length,
         if (return_list) {
           *return_list = list;
         } else {
-          free(list);
+          req::free(list);
         }
       } else {
-        free(list);
+        req::free(list);
         if (return_list) {
           *return_list = nullptr;
         }
@@ -716,7 +717,7 @@ static char *php_mb_convert_encoding(const char *input, size_t length,
       raise_warning("Illegal character encoding specified");
     }
     if (list != nullptr) {
-      free((void *)list);
+      req::free(list);
     }
   }
 
@@ -836,7 +837,7 @@ php_mb_parse_encoding_array(const Array& array, mbfl_encoding*** return_list,
   int identify_list_size = MBSTRG(default_detect_order_list_size);
 
   size = array.size() + identify_list_size;
-  list = (mbfl_encoding **)calloc(size, sizeof(mbfl_encoding*));
+  list = (mbfl_encoding **)req::calloc_noptrs(size, sizeof(mbfl_encoding*));
   if (list != nullptr) {
     entry = list;
     bauto = 0;
@@ -867,10 +868,10 @@ php_mb_parse_encoding_array(const Array& array, mbfl_encoding*** return_list,
       if (return_list) {
         *return_list = list;
       } else {
-        free(list);
+        req::free(list);
       }
     } else {
-      free(list);
+      req::free(list);
       if (return_list) {
         *return_list = nullptr;
       }
@@ -1446,7 +1447,7 @@ Variant HHVM_FUNCTION(mb_convert_variables,
     }
   }
   if (elist != nullptr) {
-    free((void *)elist);
+    req::free(elist);
   }
 
   /* create converter */
@@ -1538,7 +1539,7 @@ static Variant php_mb_numericentity_exec(const String& str,
     Array convs = convmap.toArray();
     mapsize = convs.size();
     if (mapsize > 0) {
-      iconvmap = (int*)malloc(mapsize * sizeof(int));
+      iconvmap = (int*)req::malloc_noptrs(mapsize * sizeof(int));
       int *mapelm = iconvmap;
       for (ArrayIter iter(convs); iter; ++iter) {
         *mapelm++ = iter.second().toInt32();
@@ -1551,7 +1552,7 @@ static Variant php_mb_numericentity_exec(const String& str,
   mapsize /= 4;
 
   ret = mbfl_html_numeric_entity(&string, &result, iconvmap, mapsize, type);
-  free(iconvmap);
+  req::free(iconvmap);
   if (ret != nullptr) {
     if (ret->len > StringData::MaxSize) {
       raise_warning("String too long, max is %d", StringData::MaxSize);
@@ -1604,9 +1605,7 @@ Variant HHVM_FUNCTION(mb_detect_encoding,
   ret = (mbfl_encoding*) mbfl_identify_encoding2(&string,
                                                  (const mbfl_encoding**) elist,
                                                  size, nstrict);
-  if (list != nullptr) {
-    free(list);
-  }
+  req::free(list);
   if (ret != nullptr) {
     return String(ret->name, CopyString);
   }
@@ -1640,7 +1639,7 @@ Variant HHVM_FUNCTION(mb_detect_order,
     return false;
   }
   if (MBSTRG(current_detect_order_list)) {
-    free(MBSTRG(current_detect_order_list));
+    req::free(MBSTRG(current_detect_order_list));
   }
   MBSTRG(current_detect_order_list) = list;
   MBSTRG(current_detect_order_list_size) = size;
@@ -2131,8 +2130,8 @@ static mbfl_encoding* _php_mb_encoding_handler_ex
   }
   num *= 2; /* need space for variable name and value */
 
-  val_list = (char **)calloc(num, sizeof(char *));
-  len_list = (int *)calloc(num, sizeof(int));
+  val_list = (char **)req::calloc_noptrs(num, sizeof(char *));
+  len_list = (int *)req::calloc_noptrs(num, sizeof(int));
 
   /* split and decode the query */
   n = 0;
@@ -2251,10 +2250,10 @@ out:
     mbfl_buffer_converter_delete(convd);
   }
   if (val_list != nullptr) {
-    free((void *)val_list);
+    req::free((void *)val_list);
   }
   if (len_list != nullptr) {
-    free((void *)len_list);
+    req::free((void *)len_list);
   }
 
   return from_encoding;

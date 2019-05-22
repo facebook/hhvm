@@ -17,11 +17,11 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/ext/bz2/bz2-file.h"
-#include "hphp/runtime/ext/std/ext_std_file.h"
-#include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
 #include "hphp/runtime/base/file-util.h"
+#include "hphp/runtime/base/stream-wrapper.h"
+#include "hphp/runtime/ext/bz2/bz2-file.h"
+#include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/util/alloc.h"
 #include <folly/String.h>
@@ -178,27 +178,21 @@ Variant HHVM_FUNCTION(bzerrno, const Resource& bz) {
 
 Variant HHVM_FUNCTION(bzcompress, const String& source, int blocksize /* = 4 */,
                                   int workfactor /* = 0 */) {
-  char *dest = NULL;
-  int error;
   unsigned int source_len, dest_len;
 
   source_len = source.length();
-  dest_len = source.length() + (0.01*source.length()) + 600;
+  dest_len = source.length() + source.length() / 64 + 601;
 
-  if (!(dest = (char *)malloc(dest_len + 1))) {
-    return BZ_MEM_ERROR;
-  }
+  auto ret = String(dest_len, ReserveString);
 
-  error = BZ2_bzBuffToBuffCompress(dest, &dest_len, (char *) source.c_str(),
-                                   source_len, blocksize, 0, workfactor);
+  int error = BZ2_bzBuffToBuffCompress(ret.mutableData(), &dest_len,
+                                   (char*)source.c_str(), source_len,
+                                   blocksize, 0, workfactor);
   if (error != BZ_OK) {
-    free(dest);
     return error;
   } else {
-    // this is to shrink the allocation, since we probably over allocated
-    dest = (char *)realloc(dest, dest_len + 1);
-    dest[dest_len] = '\0';
-    String ret = String(dest, dest_len, AttachString);
+    ret.setSize(dest_len);
+    ret.shrink(dest_len);
     return ret;
   }
 }

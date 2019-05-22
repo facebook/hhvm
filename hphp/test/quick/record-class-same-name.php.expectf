@@ -1,0 +1,1 @@
+Fatal error: Cannot declare record with the same (Foo) as an existing class in %s/record-class-same-name.php on line 6

@@ -846,6 +846,18 @@ struct FrameRestore : private VMRegAnchor {
   PC      m_pc;
 };
 
+template<class T>
+const char* checkSameName(NamedEntity* nameList) {
+  if (!std::is_same<T, TypeAlias>::value && nameList->getCachedTypeAlias()) {
+    return "type";
+  } else if (!std::is_same<T, Record>::value && nameList->getCachedRecord()) {
+    return "record";
+  } else if (!std::is_same<T, PreClass>::value && nameList->getCachedClass()) {
+    return "class";
+  }
+  return nullptr;
+}
+
 void setupClass(Class* newClass, NamedEntity* nameList) {
   bool const isPersistent =
     (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
@@ -895,10 +907,11 @@ Class* Unit::defClass(const PreClass* preClass,
    * Raise a fatal unless the existing class definition is identical to the
    * one this invocation would create.
    */
-  if (auto current = nameList->getCachedTypeAlias()) {
+  auto existingKind = checkSameName<PreClass>(nameList);
+  if (existingKind) {
     FrameRestore fr(preClass);
     raise_error("Cannot declare class with the same name (%s) as an "
-                "existing type", current->name->data());
+                "existing %s", preClass->name()->data(), existingKind);
     return nullptr;
   }
 
@@ -1083,10 +1096,14 @@ bool Unit::classExists(const StringData* name, bool autoload, ClassKind kind) {
 Record* Unit::defRecord(Record* record,
                      bool failIsFatal /* = true */) {
   auto const nameList = record->namedEntity();
-  if (auto const current = nameList->getCachedTypeAlias()) {
+
+  // Error out if there is already a different type
+  // with the same name in the request
+  auto existingKind = checkSameName<Record>(nameList);
+  if (existingKind) {
     FrameRestore fr(record->unit(), Op::DefRecord, record->id());
     raise_error("Cannot declare record with the same (%s) as an "
-                "existing type", current->name->data());
+                "existing %s", record->name()->data(), existingKind);
     return nullptr;
   }
 
@@ -1400,11 +1417,12 @@ bool Unit::defTypeAlias(Id id) {
     return false;
   }
 
-  // There might also be a class with this name already.
-  if (nameList->getCachedClass()) {
+  // There might also be a class or record with this name already.
+  auto existingKind = checkSameName<TypeAlias>(nameList);
+  if (existingKind) {
     FrameRestore _(this, Op::DefTypeAlias, id);
-    raise_error("The name %s is already defined as a class",
-                thisType->name->data());
+    raise_error("The name %s is already defined as a %s",
+                thisType->name->data(), existingKind);
     not_reached();
   }
 

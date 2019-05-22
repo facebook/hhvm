@@ -1216,7 +1216,7 @@ SSATmp* handleIsResolutionAndCommonOpts(
       return resolveTypeStructImpl(env, true, true, 1, true);
     }
     shouldDecRef = false;
-    return popC(env);
+    return gen(env, RaiseErrorOnInvalidIsAsExpressionType, popC(env));
   }
   auto const ts =
     RuntimeOption::EvalHackArrDVArrs ? a->dictVal() : a->arrVal();
@@ -1238,7 +1238,11 @@ SSATmp* handleIsResolutionAndCommonOpts(
       env, typeStructureCouldBeNonStatic(ArrNR(ts)), true, 1, true);
   }
   popC(env);
-  return cns(env, maybe_resolved);
+  auto const result = cns(env, maybe_resolved);
+  if (op == TypeStructResolveOp::DontResolve) {
+    return gen(env, RaiseErrorOnInvalidIsAsExpressionType, result);
+  }
+  return result;
 }
 
 } // namespace

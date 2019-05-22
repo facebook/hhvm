@@ -220,6 +220,7 @@ ArrayData* resolveTypeStructHelper(
 );
 bool isTypeStructHelper(ArrayData*, Cell);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, Cell);
+ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 
 /* Reified generics helpers
  * Both functions decref the input array by turning it into a static array

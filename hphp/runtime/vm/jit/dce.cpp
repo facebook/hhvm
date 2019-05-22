@@ -559,6 +559,7 @@ bool canDCE(IRInstruction* inst) {
   case RaiseMissingArg:
   case RaiseTooManyArg:
   case RaiseError:
+  case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseWarning:
   case RaiseNotice:
   case RaiseArrayIndexNotice:

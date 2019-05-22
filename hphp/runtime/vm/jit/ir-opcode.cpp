@@ -495,6 +495,7 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseArrayIndexNotice:
   case RaiseArrayKeyNotice:
   case RaiseError:
+  case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseHackArrCompatNotice:

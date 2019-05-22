@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/repo-auth-type-array.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/runtime.h"
 
@@ -3756,6 +3757,23 @@ SSATmp* simplifyStrictlyIntegerConv(State& env, const IRInstruction* inst) {
   return src;
 }
 
+SSATmp* simplifyRaiseErrorOnInvalidIsAsExpressionType(
+  State& env,
+  const IRInstruction* inst
+) {
+  auto const ts = inst->src(0);
+  if (!ts->hasConstVal(RuntimeOption::EvalHackArrDVArrs ? TDict : TArr)) {
+    return nullptr;
+  }
+  auto const tsVal = RuntimeOption::EvalHackArrDVArrs ? ts->dictVal()
+                                                      : ts->arrVal();
+  if (errorOnIsAsExpressionInvalidTypes(ArrNR(tsVal), true)) {
+    gen(env, Unreachable, ASSERT_REASON);
+    return cns(env, TBottom);
+  }
+  return ts;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
@@ -4020,6 +4038,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(GetMemoKey)
   X(GetMemoKeyScalar)
   X(StrictlyIntegerConv)
+  X(RaiseErrorOnInvalidIsAsExpressionType)
   default: break;
   }
 #undef X

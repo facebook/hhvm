@@ -2622,7 +2622,7 @@ ALWAYS_INLINE ArrayData* maybeResolveAndErrorOnTypeStructure(
     return resolveAndVerifyTypeStructureHelper(1, vmStack().topC(),
                                                suppress, true);
   }
-  errorOnIsAsExpressionInvalidTypes(ArrNR(a->m_data.parr));
+  errorOnIsAsExpressionInvalidTypes(ArrNR(a->m_data.parr), false);
   return a->m_data.parr;
 }
 

@@ -901,7 +901,9 @@ bool checkTypeStructureMatchesCell(
 }
 
 ALWAYS_INLINE
-void errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields) {
+bool errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields,
+                                           bool dryrun, bool allowWildcard) {
+  bool willError = false;
   IterateV(
     tsFields,
     [&](TypedValue v) {
@@ -912,12 +914,23 @@ void errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields) {
         assertx(isArrayType(value_field.type()));
         arr = value_field.val().parr;
       }
-      errorOnIsAsExpressionInvalidTypes(ArrNR(arr));
+      if (!errorOnIsAsExpressionInvalidTypes(ArrNR(arr), dryrun,
+                                             allowWildcard)) {
+        return false;
+      }
+      willError = true;
+      return true; // short-circuit
     }
   );
+  return willError;
 }
 
-void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
+bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
+                                       bool allowWildcard) {
+  auto const err = [&](const char* errMsg) {
+    if (dryrun) return true;
+    raise_error("\"is\" and \"as\" operators cannot be used with %s", errMsg);
+  };
   assertx(ts.exists(s_kind));
   auto ts_kind = static_cast<TypeStructure::Kind>(ts[s_kind].toInt64Val());
   switch (ts_kind) {
@@ -933,9 +946,6 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
     case TypeStructure::Kind::T_arraylike:
-    case TypeStructure::Kind::T_enum:
-    case TypeStructure::Kind::T_class:
-    case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_null:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_nothing:
@@ -945,33 +955,41 @@ void errorOnIsAsExpressionInvalidTypes(const Array& ts) {
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_xhp:
-      return;
+      return false;
+    case TypeStructure::Kind::T_enum:
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+      if (ts.exists(s_generic_types)) {
+        auto genericsArr = ts[s_generic_types].getArrayData();
+        return errorOnIsAsExpressionInvalidTypesList(genericsArr, dryrun,
+                                                     true);
+      }
+      return false;
     case TypeStructure::Kind::T_array:
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-      raise_error("\"is\" and \"as\" operators cannot be used with an array");
+      return err("an array");
     case TypeStructure::Kind::T_fun:
-      raise_error("\"is\" and \"as\" operators cannot be used with a function");
+      return err("a function");
     case TypeStructure::Kind::T_typevar:
-      raise_error(
-        "\"is\" and \"as\" operators cannot be used with a generic type");
+      if (allowWildcard && isWildCard(ts.get())) return false;
+      return err("a generic type");
     case TypeStructure::Kind::T_trait:
-      raise_error("\"is\" and \"as\" operators cannot be used with a trait");
+      return err("a trait");
     case TypeStructure::Kind::T_reifiedtype:
-      raise_error("\"is\" and \"as\" operators cannot be used with "
-                  "incomplete type structures");
+      return err("incomplete type structures");
     case TypeStructure::Kind::T_tuple: {
       assertx(ts.exists(s_elem_types));
       auto const elemsArr = ts[s_elem_types].getArrayData();
-      errorOnIsAsExpressionInvalidTypesList(elemsArr);
-      return;
+      return errorOnIsAsExpressionInvalidTypesList(elemsArr, dryrun,
+                                                   allowWildcard);
     }
     case TypeStructure::Kind::T_shape: {
       assertx(ts.exists(s_fields));
       auto const tsFields = ts[s_fields].getArrayData();
-      errorOnIsAsExpressionInvalidTypesList(tsFields);
-      return;
+      return errorOnIsAsExpressionInvalidTypesList(tsFields, dryrun,
+                                                   allowWildcard);
     }
   }
   not_reached();
@@ -1059,7 +1077,7 @@ Array resolveAndVerifyTypeStructure(
   }
   assertx(!resolved.empty());
   assertx(resolved.isDictOrDArray());
-  if (IsOrAsOp) errorOnIsAsExpressionInvalidTypes(resolved);
+  if (IsOrAsOp) errorOnIsAsExpressionInvalidTypes(resolved, false);
   return resolved;
 }
 

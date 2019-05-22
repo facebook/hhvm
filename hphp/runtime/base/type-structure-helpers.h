@@ -85,9 +85,13 @@ Array resolveAndVerifyTypeStructure(
 );
 
 /*
- * Errors when the type structure contains invalid types for is/as expressions
+ * Raises an error if the type hint for is/as expression contains an invalid
+ * type such as callables, erased type variables and trait type hints
+ * If dryrun is set, it does not actually raise the error
+ * If allowWildcard is set, then it does not error on wildcards
  */
-void errorOnIsAsExpressionInvalidTypes(const Array& ts);
+bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
+                                       bool allowWildcard = false);
 
 /**
  * Returns whether the type structure may not be able to be resolved statically,

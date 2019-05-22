@@ -934,6 +934,12 @@ To string conversions:
   defined type in S0 or why S1 is not a subtype of S0. The input type structure
   (S0) must be resolved.
 
+| RaiseErrorOnInvalidIsAsExpressionType, DDArr, SDArr, NF
+
+  Raises an error if the type hint for is/as expression contains an invalid
+  type such as callables, erased type variables and trait type hints.
+  The input type structure (S0) must be resolved.
+
 | HasToString, D(Bool), S(Obj), NF
 
   Returns whether the object S0 has a toString method.

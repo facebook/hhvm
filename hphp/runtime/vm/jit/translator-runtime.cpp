@@ -1032,6 +1032,11 @@ void throwAsTypeStructExceptionHelper(ArrayData* a, Cell c) {
   raise_error("Invalid bytecode sequence: Instruction must throw");
 }
 
+ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData* a) {
+  errorOnIsAsExpressionInvalidTypes(ArrNR(a), false);
+  return a;
+}
+
 StringData* recordReifiedGenericsAndGetName(ArrayData* tsList) {
   auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
   bool didAdd = false;

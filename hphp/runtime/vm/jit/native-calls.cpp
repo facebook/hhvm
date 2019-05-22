@@ -615,6 +615,8 @@ static CallMap s_callMap {
                                       DSSA, SSync, {{SSA, 0}}},
     {RecordReifiedGenericsAndGetTSList, recordReifiedGenericsAndGetTSList,
                                         DSSA, SSync, {{SSA, 0}}},
+    {RaiseErrorOnInvalidIsAsExpressionType,
+      errorOnIsAsExpressionInvalidTypesHelper, DSSA, SSync, {{SSA, 0}}},
 };
 
 CallMap::CallMap(CallInfoList infos) {

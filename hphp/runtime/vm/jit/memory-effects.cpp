@@ -2077,6 +2077,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseMissingArg:
   case RaiseTooManyArg:
   case RaiseError:
+  case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseNotice:
   case RaiseWarning:
   case RaiseHackArrCompatNotice:

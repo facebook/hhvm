@@ -56,7 +56,6 @@ let () =
   (* typecheck and typecheck_old_inference *)
   let typecheck_deps = deps files_tc in
   let cmds = [ "--flags"
-             ; "--new-inference"
              ; "--new-inference-lambda"
              ; "--shallow-class-decl"
              ; "--error-format raw"
@@ -72,6 +71,7 @@ let () =
              ; "--expect-extension .legacy.exp"
              ; "--fallback-expect-extension .exp"
              ; "--flags"
+             ; "--old-inference"
              ; "--error-format raw"
              ; "--out-extension .legacy.out"
              ] in
@@ -89,7 +89,6 @@ let () =
              ; "--fallback-expect-extension .exp"
              ; "--flags"
              ; "--out-extension .legacy_decl.out"
-             ; "--new-inference"
              ; "--new-inference-lambda"
              ; "--error-format raw" ] in
   let cmd = String.concat " " cmds in

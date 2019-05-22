@@ -8,7 +8,7 @@
           (glob_files %{project_root}/test/dumpsymbolinfo/*.exp))
     (action (run %{project_root}/test/verify.py %{project_root}/test/dumpsymbolinfo
     --program %{exe:../../src/hh_single_type_check.exe}
-    --flags --new-inference --new-inference-lambda)))
+    --flags --new-inference-lambda)))
 
 (alias
     (name runtest)

@@ -184,7 +184,7 @@ let parse_options () =
   let unsafe_rx = ref (Some false) in
   let disallow_stringish_magic = ref None in
   let log_inference_constraints = ref None in
-  let new_inference = ref None in
+  let new_inference = ref (Some 1.0) in
   let new_inference_lambda = ref (Some false) in
   let timeout = ref None in
   let disallow_invalid_arraykey = ref None in
@@ -363,9 +363,9 @@ let parse_options () =
     "--log-inference-constraints",
         Arg.Unit (set_bool log_inference_constraints),
         " Log inference constraints to Scuba.";
-    "--new-inference",
-        Arg.Unit (fun () -> new_inference := Some 1.0),
-        " Type inference by constraint generation.";
+    "--old-inference",
+        Arg.Unit (fun () -> new_inference := Some 0.0),
+        " Legacy type inference by unification.";
     "--new-inference-lambda",
         Arg.Unit (set_bool new_inference_lambda),
         " Type inference of unannotated lambdas by constraint generation.";

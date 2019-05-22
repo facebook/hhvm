@@ -221,16 +221,18 @@ CodeCache::CodeCache()
   if (kAHotSize) {
     FTRACE(1, "init ahot @{}, size = {}\n", base, kAHotSize);
     m_hot.init(base, kAHotSize, "hot");
-    const uint32_t hugeMBs = std::min(CodeCache::TCNumHugeHotMB,
-                                      uint32_t(kAHotSize >> 20));
-    enhugen(base, hugeMBs);
+    const uint32_t hugeHotMBs = std::min(CodeCache::TCNumHugeHotMB,
+                                         uint32_t(kAHotSize >> 20));
+    enhugen(base, hugeHotMBs);
     base += kAHotSize;
   }
 
   TRACE(1, "init a @%p\n", base);
 
   m_main.init(base, kASize, "main");
-  enhugen(base, CodeCache::TCNumHugeMainMB);
+  const uint32_t hugeMainMBs = std::min(CodeCache::TCNumHugeMainMB,
+                                        uint32_t(kASize >> 20));
+  enhugen(base, hugeMainMBs);
   base += kASize;
 
   TRACE(1, "init aprof @%p\n", base);
@@ -239,7 +241,9 @@ CodeCache::CodeCache()
 
   TRACE(1, "init acold @%p\n", base);
   m_cold.init(base, kAColdSize, "cold");
-  enhugen(base, CodeCache::TCNumHugeColdMB);
+  const uint32_t hugeColdMBs = std::min(CodeCache::TCNumHugeColdMB,
+                                        uint32_t(kAColdSize >> 20));
+  enhugen(base, hugeColdMBs);
   base += kAColdSize;
 
   TRACE(1, "init thread_local @%p\n", base);

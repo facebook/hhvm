@@ -56,4 +56,6 @@ function main($f) {
     var_dump($e->getMessage());
   }
 }
+<<__EntryPoint>> function main_entry(): void {
 main(2.241987);
+}

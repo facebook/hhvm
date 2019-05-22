@@ -20,4 +20,6 @@ class C extends B {
     echo parent::MYCONST . "\n";
   }
 }
+<<__EntryPoint>> function main(): void {
 C::test();
+}

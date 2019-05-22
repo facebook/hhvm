@@ -22,9 +22,10 @@ class C {
     };
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C;
 $b = $c->b();
 var_dump($b());
 $d = $c->d();
 var_dump($d());
+}

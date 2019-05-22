@@ -6,4 +6,6 @@ function foo(&$cls) {
   $cls = "Hey";
   echo $cls::$x;
 }
+<<__EntryPoint>> function main(): void {
 foo(&$boxer);
+}

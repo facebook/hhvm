@@ -53,4 +53,6 @@ abstract class F<T1, T2> {
 class G<T2, T1> extends F<T1, T2> {
   public function f1(T2 $x, T1 $y) { }
 }
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

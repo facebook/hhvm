@@ -4,4 +4,6 @@ class X {
     var_dump($s);
   }
 }
+<<__EntryPoint>> function main(): void {
 X::test("hello");
+}

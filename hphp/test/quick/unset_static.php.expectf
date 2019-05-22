@@ -1,2 +1,2 @@
 
-Fatal error: Attempt to unset static property Foo::$baz in %s on line 5
+Fatal error: Attempt to unset static property Foo::$baz in %s on line 6

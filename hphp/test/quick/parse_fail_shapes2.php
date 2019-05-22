@@ -6,4 +6,4 @@ type BadPoint = shape(
   '124' => int,
 );
 
-
+<<__EntryPoint>> function main(): void {}

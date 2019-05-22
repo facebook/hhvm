@@ -12,4 +12,6 @@ class B<T as I, Tu super T as J> {
 }
 // Same with functions
 function bar<T1, Tu super T1 as B<T1,Tu>>(T1 $x, Tu $y) {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

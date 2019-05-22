@@ -19,5 +19,6 @@ function main($a) {
   $result = HH\Asio\join(gen($a));
   var_dump($result);
 }
-
+<<__EntryPoint>> function main_entry(): void {
 main(array(42));
+}

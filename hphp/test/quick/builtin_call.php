@@ -11,4 +11,6 @@ function foo($a) {
   }
   var_dump((string)strtoupper($a));
 }
+<<__EntryPoint>> function main(): void {
 foo("bar");
+}

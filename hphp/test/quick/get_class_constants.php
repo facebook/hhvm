@@ -7,4 +7,6 @@ class Blah {
   const FP_VAL = 3.14;
   const NULL_VAL = null;
 }
+<<__EntryPoint>> function main(): void {
 var_dump(get_class_constants("Blah"));
+}

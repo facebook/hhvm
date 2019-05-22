@@ -13,4 +13,6 @@ function main($num, $zero) {
     echo $e->getMessage(), "\n";
   }
 }
+<<__EntryPoint>> function main_entry(): void {
 main(123, 0);
+}

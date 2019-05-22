@@ -30,4 +30,6 @@ function main5() {
   $e5 = new E5;
   $e5->test(); // Fatals
 }
+<<__EntryPoint>> function main(): void {
 main5();
+}

@@ -84,6 +84,7 @@ const StaticString
   s_container_last_key("HH\\Lib\\_Private\\Native\\last_key"),
   s_class_meth_get_class("HH\\class_meth_get_class"),
   s_class_meth_get_method("HH\\class_meth_get_method"),
+  s_shapes_idx("HH\\Shapes::idx"),
   s_vm_switch_mode("__VMSwitchMode");
 
 //////////////////////////////////////////////////////////////////////
@@ -898,6 +899,55 @@ SSATmp* opt_class_meth_get_method(IRGS& env, const ParamPrep& params) {
   return nullptr;
 }
 
+SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
+  // We first check the number and types of each argument. If any check fails,
+  // we'll fall back to the native code which will raise an appropriate error.
+  auto const nparams = params.size();
+  if (nparams != 2 && nparams != 3) return nullptr;
+
+  // params[0] is a darray, which may be a Dict or an Arr based on options.
+  // If the Hack typehint check flag is on, then we fall back to the native
+  // implementation of this method, which checks the DVArray bit in ArrayData.
+  bool is_dict;
+  auto const arrType = params[0].value->type();
+  if (RuntimeOption::EvalHackArrDVArrs && arrType <= TDict) {
+    is_dict = true;
+  } else if (!RuntimeOption::EvalHackArrDVArrs && arrType <= TArr) {
+    if (RuntimeOption::EvalHackArrCompatTypeHintNotices) return nullptr;
+    is_dict = false;
+  } else {
+    return nullptr;
+  }
+
+  // params[1] is an arraykey. We only optimize if it's narrowed to int or str.
+  auto const keyType = params[1].value->type();
+  if (!(keyType <= TInt || keyType <= TStr)) return nullptr;
+
+  // params[2] is an optional argument. If it's uninit, we convert it to null.
+  // We only optimize if we can distinguish between uninit and other types.
+  auto const defType = nparams == 3 ? params[2].value->type() : TUninit;
+  if (!(defType <= TUninit) && defType.maybe(TUninit)) return nullptr;
+  auto const def = defType <= TUninit ? cns(env, TInitNull) : params[2].value;
+
+  // Do the array access, using array offset profiling to optimize it.
+  auto const arr = params[0].value;
+  auto const key = params[1].value;
+  auto const elm = profiledArrayAccess(env, arr, key,
+    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
+      auto const op = is_dict ? DictGetK : MixedArrayGetK;
+      return gen(env, op, IndexData { pos }, arr, key);
+    },
+    [&] (SSATmp* key) {
+      auto const op = is_dict ? DictIdx : ArrayIdx;
+      auto const taken = hasEdges(op) ? make_opt_catch(env, params) : nullptr;
+      return gen(env, op, taken, arr, key, def);
+    }
+  );
+  auto const cell = is_dict ? elm : unbox(env, elm, nullptr);
+  gen(env, IncRef, cell);
+  return cell;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* optimizedFCallBuiltin(IRGS& env,
@@ -943,6 +993,7 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
     X(container_last_key)
     X(class_meth_get_class)
     X(class_meth_get_method)
+    X(shapes_idx)
 
 #undef X
 

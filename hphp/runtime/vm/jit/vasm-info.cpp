@@ -164,6 +164,8 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::addsd:
     case Vinstr::andb:
     case Vinstr::andbi:
+    case Vinstr::andw:
+    case Vinstr::andwi:
     case Vinstr::andl:
     case Vinstr::andli:
     case Vinstr::andq:

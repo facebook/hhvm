@@ -975,6 +975,7 @@ bool simplify(Env& env, const andqi& vandqi, Vlabel b, size_t i) {
 /*
  * Simplify masking values with -1 in andXi{}:
  *  andbi{0xff, s, d} -> copy{s, d}
+ *  andwi{0xffff, s, d} -> copy{s, d}
  *  andli{0xffffffff, s, d} -> copy{s, d}
  */
 template<Vinstr::Opcode test, typename testi, typename andi>
@@ -987,6 +988,10 @@ bool simplify_andi(Env& env, const andi& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const andbi& andbi, Vlabel b, size_t i) {
   return simplify_andi<Vinstr::testb, testbi>(env, andbi, b, i);
+}
+
+bool simplify(Env& env, const andwi& andwi, Vlabel b, size_t i) {
+  return simplify_andi<Vinstr::testw, testwi>(env, andwi, b, i);
 }
 
 bool simplify(Env& env, const andli& andli, Vlabel b, size_t i) {

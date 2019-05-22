@@ -267,6 +267,8 @@ Width width(Vinstr::Opcode op) {
       return Width::Byte;
 
     case Vinstr::addwm:
+    case Vinstr::andw:
+    case Vinstr::andwi:
     case Vinstr::incw:
     case Vinstr::incwm:
     case Vinstr::orwim:

@@ -285,6 +285,8 @@ struct Vgen {
   void emit(const addsd& i) { a->Fadd(D(i.d), D(i.s1), D(i.s0)); }
   void emit(const andb& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andbi& i) { a->And(W(i.d), W(i.s1), i.s0.ub(), UF(i.fl)); }
+  void emit(const andw& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
+  void emit(const andwi& i) { a->And(W(i.d), W(i.s1), i.s0.uw(), UF(i.fl)); }
   void emit(const andl& i) { a->And(W(i.d), W(i.s1), W(i.s0), UF(i.fl)); }
   void emit(const andli& i) { a->And(W(i.d), W(i.s1), i.s0.l(), UF(i.fl)); }
   void emit(const andq& i) { a->And(X(i.d), X(i.s1), X(i.s0), UF(i.fl)); }

@@ -190,6 +190,10 @@ struct Vgen {
     a.and(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
     copyCR0toCR1(a, rAsm);
   }
+  void emit(const andw& i) {
+    a.and(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
+    copyCR0toCR1(a, rAsm);
+  }
   void emit(const andl& i) {
     a.and(Reg64(i.d), Reg64(i.s0), Reg64(i.s1), true);
     copyCR0toCR1(a, rAsm);
@@ -1187,6 +1191,7 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 }
 
 X(andbi,  andqi,  ONE_R64(d))
+X(andwi,  andqi,  ONE_R64(d))
 X(andli,  andqi,  ONE_R64(d))
 
 #undef X

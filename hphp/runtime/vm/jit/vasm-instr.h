@@ -162,6 +162,8 @@ struct Vunit;
   O(andb, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andbim, I(s) I(fl), UM(m), D(sf)) \
+  O(andw, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andwi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andl, I(fl), U(s0) U(s1), D(d) D(sf)) \
   O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
@@ -1015,6 +1017,8 @@ struct addsd  { VregDbl s0, s1, d; };
 struct andb  { Vreg8 s0, s1, d; VregSF sf; Vflags fl; };
 struct andbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
 struct andbim { Immed s; Vptr8 m; VregSF sf; Vflags fl; };
+struct andw  { Vreg16 s0, s1, d; VregSF sf; Vflags fl; };
+struct andwi { Immed s0; Vreg16 s1, d; VregSF sf; Vflags fl; };
 struct andl  { Vreg32 s0, s1, d; VregSF sf; Vflags fl; };
 struct andli { Immed s0; Vreg32 s1, d; VregSF sf; Vflags fl; };
 struct andq  { Vreg64 s0, s1, d; VregSF sf; Vflags fl; };

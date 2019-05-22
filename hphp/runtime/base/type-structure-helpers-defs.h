@@ -41,21 +41,21 @@ const StaticString s_root_name("root_name");
 
 namespace detail {
 
-ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const StaticString s) {
+ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const String& s) {
   auto const field = ts->rval(s.get());
   assertx(!field.is_set() || (isBoolType(field.type()) && field.val().num));
   return field.is_set();
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_array(const ArrayData* ts,
-                                            const StaticString s) {
+                                            const String& s) {
   auto const field = ts->rval(s.get());
   assertx(field != nullptr && isVecOrArrayType(field.type()));
   return field.val().parr;
 }
 
 ALWAYS_INLINE const StringData* get_ts_string(const ArrayData* ts,
-                                              const StaticString s) {
+                                              const String& s) {
   auto const field = ts->rval(s.get());
   assertx(field != nullptr && isStringType(field.type()));
   return field.val().pstr;

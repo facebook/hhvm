@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 HH\autoload_set_paths(
   array(
-    'record' => array(
+    'class' => array(
       'foo' => 'autoload_record_foo.inc',
     ),
   ),

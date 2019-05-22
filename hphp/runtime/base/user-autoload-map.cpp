@@ -28,7 +28,6 @@ const StaticString
   s_function("function"),
   s_constant("constant"),
   s_type("type"),
-  s_record("record"),
   s_failure("failure");
 
 const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
@@ -39,8 +38,6 @@ const StaticString& getStringRepr(AutoloadMap::KindOf kind) {
       return s_function;
     case AutoloadMap::KindOf::Constant:
       return s_constant;
-    case AutoloadMap::KindOf::Record:
-      return s_record;
     case AutoloadMap::KindOf::TypeAlias:
       return s_type;
   }
@@ -63,7 +60,6 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
   auto typeFile = getSubMapFromMap(fullMap, s_class);
   auto functionFile = getSubMapFromMap(fullMap, s_function);
   auto constantFile = getSubMapFromMap(fullMap, s_constant);
-  auto recordFile = getSubMapFromMap(fullMap, s_record);
   auto typeAliasFile = getSubMapFromMap(fullMap, s_type);
   auto failFunc = fullMap[s_failure];
 
@@ -71,7 +67,6 @@ UserAutoloadMap UserAutoloadMap::fromFullMap(const Array& fullMap,
       std::move(typeFile),
       std::move(functionFile),
       std::move(constantFile),
-      std::move(recordFile),
       std::move(typeAliasFile),
       std::move(failFunc)};
 }
@@ -89,11 +84,6 @@ folly::Optional<String> UserAutoloadMap::getFunctionFile(
 folly::Optional<String> UserAutoloadMap::getConstantFile(
   const String& constName) const {
   return getFileFromMap(m_constantFile, constName);
-}
-
-folly::Optional<String> UserAutoloadMap::getRecordFile(
-  const String& recordName) const {
-  return getFileFromMap(m_recordFile, recordName);
 }
 
 folly::Optional<String> UserAutoloadMap::getTypeAliasFile(

@@ -45,7 +45,6 @@ struct AutoloadMap {
     Type,
     Function,
     Constant,
-    Record,
     TypeAlias,
   };
 
@@ -75,8 +74,6 @@ struct AutoloadMap {
         return getFunctionFile(typeName);
       case AutoloadMap::KindOf::Constant:
         return getConstantFile(typeName);
-      case AutoloadMap::KindOf::Record:
-        return getRecordFile(typeName);
       case AutoloadMap::KindOf::TypeAlias:
         return getTypeAliasFile(typeName);
     }
@@ -91,8 +88,6 @@ struct AutoloadMap {
   virtual folly::Optional<String> getFunctionFile(
       const String& functionName) const = 0;
   virtual folly::Optional<String> getConstantFile(
-      const String& constantName) const = 0;
-  virtual folly::Optional<String> getRecordFile(
       const String& constantName) const = 0;
   virtual folly::Optional<String> getTypeAliasFile(
       const String& typeAliasName) const = 0;

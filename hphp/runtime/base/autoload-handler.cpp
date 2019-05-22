@@ -41,7 +41,6 @@ const StaticString
   s_function("function"),
   s_constant("constant"),
   s_type("type"),
-  s_record("record"),
   s_failure("failure"),
   s_autoload("__autoload"),
   s_exception("exception"),
@@ -369,7 +368,7 @@ bool AutoloadHandler::autoloadClass(const String& clsName,
 bool AutoloadHandler::autoloadRecord(const String& recName) {
   if (recName.empty()) return false;
   return m_map &&
-         loadFromMap(recName, AutoloadMap::KindOf::Record,
+         loadFromMap(recName, AutoloadMap::KindOf::Type,
                      true, RecordExistsChecker(recName)) !=
          AutoloadMap::Result::Failure;
 }
@@ -480,26 +479,28 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
   const String& className = normalizeNS(clsName);
   if (m_map) {
     ClassOrTypeExistsChecker cte(className);
-    bool tryClass = true, tryType = true;
-    AutoloadMap::Result classRes = AutoloadMap::Result::RetryAutoloading;
-    AutoloadMap::Result typeRes = AutoloadMap::Result::RetryAutoloading;
+    bool tryType = true, tryTypeAlias = true;
+    AutoloadMap::Result typeRes = AutoloadMap::Result::RetryAutoloading,
+                        typeAliasRes = AutoloadMap::Result::RetryAutoloading;
     while (true) {
-      Variant classErr{Variant::NullInit()};
-      if (tryClass) {
-        // Try consulting the 'class' map first, but don't call the failure
-        // callback unless there was an uncaught exception or a fatal error
-        // during the include operation.
-        classRes = loadFromMapPartial(className, AutoloadMap::KindOf::Type,
-                                      true, cte, classErr);
-        if (classRes == AutoloadMap::Result::Success) return true;
-      }
       Variant typeErr{Variant::NullInit()};
       if (tryType) {
-        // Next, try consulting the 'type' map. Again, don't call the failure
-        // callback unless there was an uncaught exception or fatal error.
-        typeRes = loadFromMapPartial(className, AutoloadMap::KindOf::TypeAlias,
+        // Try consulting the 'type' map first, but don't call the failure
+        // callback unless there was an uncaught exception or a fatal error
+        // during the include operation.
+        typeRes = loadFromMapPartial(className, AutoloadMap::KindOf::Type,
                                      true, cte, typeErr);
         if (typeRes == AutoloadMap::Result::Success) return true;
+      }
+      Variant typeAliasErr{Variant::NullInit()};
+      if (tryTypeAlias) {
+        // Next, try consulting the 'type alias' map. Again, don't call the
+        // failure callback unless there was an uncaught exception
+        // or fatal error.
+        typeAliasRes = loadFromMapPartial(className,
+                                          AutoloadMap::KindOf::TypeAlias,
+                                          true, cte, typeAliasErr);
+        if (typeAliasRes == AutoloadMap::Result::Success) return true;
       }
       // If we reach this point, then for each map either nothing was found
       // or the file we included didn't define a class or type alias with the
@@ -508,33 +509,34 @@ bool AutoloadHandler::autoloadClassOrType(const String& clsName) {
       if (m_map->canHandleFailure()) {
         // First, call the failure callback for 'class' if we didn't do so
         // above
-        if (classRes == AutoloadMap::Result::Failure) {
-          assertx(tryClass);
-          classRes = m_map->handleFailure(AutoloadMap::KindOf::Type,
-                                          className, classErr);
-          // The failure callback may have defined a class or type alias for
-          // us, in which case we're done.
-          if (cte()) return true;
-        }
-        // Next, call the failure callback for 'type' if we didn't do so above
         if (typeRes == AutoloadMap::Result::Failure) {
           assertx(tryType);
-          typeRes = m_map->handleFailure(AutoloadMap::KindOf::TypeAlias,
+          typeRes = m_map->handleFailure(AutoloadMap::KindOf::Type,
                                          className, typeErr);
+          // The failure callback may have defined a class or record for
+          // us, in which case we're done.
+          if (cte()) return true;
+        }
+        // Next, call the failure callback for 'type alias'
+        // if we didn't do so above
+        if (typeAliasRes == AutoloadMap::Result::Failure) {
+          assertx(tryTypeAlias);
+          typeAliasRes = m_map->handleFailure(AutoloadMap::KindOf::TypeAlias,
+                                              className, typeAliasErr);
           // The failure callback may have defined a class or type alias for
           // us, in which case we're done.
           if (cte()) return true;
         }
-        assertx(classRes != AutoloadMap::Result::Failure &&
-                typeRes != AutoloadMap::Result::Failure);
-        tryClass = (classRes == AutoloadMap::Result::RetryAutoloading);
+        assertx(typeRes != AutoloadMap::Result::Failure &&
+                typeAliasRes != AutoloadMap::Result::Failure);
         tryType = (typeRes == AutoloadMap::Result::RetryAutoloading);
-        // If the failure callback requested a retry for 'class' or 'type'
-        // or both, jump back to the top to try again.
-        if (tryClass || tryType) {
+        tryTypeAlias = (typeAliasRes == AutoloadMap::Result::RetryAutoloading);
+        // If the failure callback requested a retry for 'class', 'type', or
+        // 'record', jump back to the top to try again.
+        if (tryType || tryTypeAlias) {
           continue;
         }
-        if (classRes == AutoloadMap::Result::StopAutoloading) {
+        if (typeRes == AutoloadMap::Result::StopAutoloading) {
           // If the failure callback requested that we stop autoloading for
           // 'class', then return false here so we don't fall through to the
           // PHP5 autoload impl below.

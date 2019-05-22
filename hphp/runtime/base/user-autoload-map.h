@@ -38,7 +38,6 @@ struct UserAutoloadMap : AutoloadMap {
   Array m_typeFile;
   Array m_functionFile;
   Array m_constantFile;
-  Array m_recordFile;
   Array m_typeAliasFile;
   Variant m_failFunc;
 
@@ -46,14 +45,12 @@ struct UserAutoloadMap : AutoloadMap {
                   Array typeFile,
                   Array functionFile,
                   Array constantFile,
-                  Array recordFile,
                   Array typeAliasFile,
                   Variant failFunc)
       : m_root{std::move(root)},
         m_typeFile{std::move(typeFile)},
         m_functionFile{std::move(functionFile)},
         m_constantFile{std::move(constantFile)},
-        m_recordFile{std::move(recordFile)},
         m_typeAliasFile{std::move(typeAliasFile)},
         m_failFunc(std::move(failFunc)) {}
 
@@ -62,7 +59,6 @@ struct UserAutoloadMap : AutoloadMap {
     m_typeFile.detach();
     m_functionFile.detach();
     m_constantFile.detach();
-    m_recordFile.detach();
     m_typeAliasFile.detach();
     m_failFunc.setNull();
   }
@@ -76,8 +72,6 @@ struct UserAutoloadMap : AutoloadMap {
       const String& functionName) const override;
   virtual folly::Optional<String> getConstantFile(
       const String& constantName) const override;
-  virtual folly::Optional<String> getRecordFile(
-      const String& recordName) const override;
   virtual folly::Optional<String> getTypeAliasFile(
       const String& typeAliasName) const override;
 

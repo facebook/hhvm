@@ -46,7 +46,64 @@ class DummyTransport {
 }
 
 class TestStruct {
-  static $_TSPEC;
+  const SPEC = array(
+    -1 => array(
+      'var' => 'aBool',
+      'type' => TType::BOOL,
+    ),
+    1 => array(
+      'var' => 'anInt',
+      'type' => TType::I32,
+    ),
+    2 => array(
+      'var' => 'aString',
+      'type' => TType::STRING,
+    ),
+    3 => array(
+      'var' => 'aDouble',
+      'type' => TType::DOUBLE,
+    ),
+    4 => array(
+      'var' => 'anInt64',
+      'type' => TType::I64,
+    ),
+    5 => array(
+      'var' => 'aList',
+      'type' => TType::LST,
+      'etype' => TType::DOUBLE,
+      'elem' => array(
+        'type' => TType::DOUBLE,
+      ),
+    ),
+    6 => array(
+      'var' => 'aMap',
+      'type' => TType::MAP,
+      'ktype' => TType::I32,
+      'vtype' => TType::DOUBLE,
+      'key' => array(
+        'type' => TType::I32,
+      ),
+      'val' => array(
+        'type' => TType::DOUBLE,
+      ),
+    ),
+    7 => array(
+      'var' => 'aSet',
+      'type' => TType::SET,
+      'etype' => TType::I32,
+      'elem' => array(
+        'type' => TType::I32,
+      ),
+    ),
+    8 => array(
+      'var' => 'anByte',
+      'type' => TType::BYTE,
+    ),
+    9 => array(
+      'var' => 'anI16',
+      'type' => TType::I16,
+    ),
+  );
   public $aBool = null;
   public $anInt = null;
   public $aString = null;
@@ -57,68 +114,7 @@ class TestStruct {
   public $aSet = null;
   public $anByte = null;
   public $anI16 = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(
-        -1 => array(
-          'var' => 'aBool',
-          'type' => TType::BOOL,
-        ),
-        1 => array(
-          'var' => 'anInt',
-          'type' => TType::I32,
-        ),
-        2 => array(
-          'var' => 'aString',
-          'type' => TType::STRING,
-        ),
-        3 => array(
-          'var' => 'aDouble',
-          'type' => TType::DOUBLE,
-        ),
-        4 => array(
-          'var' => 'anInt64',
-          'type' => TType::I64,
-        ),
-        5 => array(
-          'var' => 'aList',
-          'type' => TType::LST,
-          'etype' => TType::DOUBLE,
-          'elem' => array(
-            'type' => TType::DOUBLE,
-          ),
-        ),
-        6 => array(
-          'var' => 'aMap',
-          'type' => TType::MAP,
-          'ktype' => TType::I32,
-          'vtype' => TType::DOUBLE,
-          'key' => array(
-            'type' => TType::I32,
-          ),
-          'val' => array(
-            'type' => TType::DOUBLE,
-          ),
-        ),
-        7 => array(
-          'var' => 'aSet',
-          'type' => TType::SET,
-          'etype' => TType::I32,
-          'elem' => array(
-            'type' => TType::I32,
-          ),
-        ),
-        8 => array(
-          'var' => 'anByte',
-          'type' => TType::BYTE,
-        ),
-        9 => array(
-          'var' => 'anI16',
-          'type' => TType::I16,
-        ),
-      );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 
 function test() {

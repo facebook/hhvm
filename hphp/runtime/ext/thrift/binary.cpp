@@ -63,7 +63,7 @@ const StaticString
   s_format("format"),
   s_collection("collection"),
   s_harray("harray"),
-  s_TSPEC("_TSPEC"),
+  s_SPEC("SPEC"),
   s_TProtocolException("TProtocolException"),
   s_TApplicationException("TApplicationException");
 

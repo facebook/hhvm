@@ -35,7 +35,7 @@ class TestStruct {
   public $anI16 = null;
   public $map = null;
 
-  static $_TSPEC = array(
+  const SPEC = array(
     1 => array(
       'var' => 'anI32',
       'type' => TType::I32,

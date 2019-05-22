@@ -40,7 +40,7 @@ class TType {
 }
 
 class TestStruct {
-  static $_TSPEC = [
+  const SPEC = [
     5 => [
       'var' => 'aList',
       'format' => 'collection',

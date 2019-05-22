@@ -51,49 +51,41 @@ class DummyTransport {
   }
 }
 class OldStruct {
-  static $_TSPEC;
+  const SPEC = array(
+    1 => array(
+      'var' => 'features',
+      'type' => TType::MAP,
+      'ktype' => TType::I16,
+      'vtype' => TType::DOUBLE,
+      'key' => array(
+        'type' => TType::I16,
+      ),
+      'val' => array(
+        'type' => TType::DOUBLE,
+      ),
+    ),
+  );
   public $features = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(
-        1 => array(
-          'var' => 'features',
-          'type' => TType::MAP,
-          'ktype' => TType::I16,
-          'vtype' => TType::DOUBLE,
-          'key' => array(
-            'type' => TType::I16,
-              ),
-                'val' => array(
-                      'type' => TType::DOUBLE,
-              ),
-          ),
-      );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 
 class NewStruct {
-  static $_TSPEC;
+  const SPEC = array(
+    1 => array(
+      'var' => 'features',
+      'type' => TType::MAP,
+      'ktype' => TType::I32,
+      'vtype' => TType::FLOAT,
+      'key' => array(
+        'type' => TType::I32,
+      ),
+      'val' => array(
+        'type' => TType::FLOAT,
+      ),
+    ),
+  );
   public $features = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(
-        1 => array(
-          'var' => 'features',
-          'type' => TType::MAP,
-          'ktype' => TType::I32,
-          'vtype' => TType::FLOAT,
-          'key' => array(
-            'type' => TType::I32,
-              ),
-                'val' => array(
-                      'type' => TType::FLOAT,
-                        ),
-              ),
-      );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 
 class TProtocolException extends Exception {}

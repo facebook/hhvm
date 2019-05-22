@@ -49,10 +49,10 @@ class DummyTransport {
 }
 
 class DummyStruct {
-  public static $_TSPEC = vec[];
+  const SPEC = vec[];
 };
 class DummyStruct2 {
-  public static $_TSPEC = vec[];
+  const SPEC = vec[];
 };
 
 class TestStruct1 {
@@ -67,7 +67,7 @@ class TestStruct1 {
     $this->p5 = new DummyStruct();
   }
 
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict['var' => 'p1',
          'type' => TType::BOOL],
     dict['var' => 'p2',
@@ -96,7 +96,7 @@ class TestStruct2 {
     $this->p5 = new DummyStruct2();
   }
 
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict['var' => 'p1',
          'type' => TType::I32],
     dict['var' => 'p2',
@@ -118,7 +118,7 @@ class TestStruct3 {
   public function __construct() {
     $this->p1 = new DummyStruct();
   }
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict['var' => 'p1',
          'class' => 'DoesntExist',
          'type' => TType::STRUCT]
@@ -132,7 +132,7 @@ enum ComplexUnionEnum: int {
 }
 
 class TestStruct4 {
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict[
       'var' => 'intValue',
       'union' => true,
@@ -150,7 +150,7 @@ class TestStruct4 {
 }
 
 class TestStruct5 {
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict[
       'var' => 'intValue',
       'union' => true,
@@ -180,7 +180,7 @@ class TestStruct6 {
   public Vector $p8 = Vector{};
   public Set $p9 = Set{};
 
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict['var' => 'p1',
          'ktype' => TType::I32,
          'vtype' => TType::STRING,
@@ -245,7 +245,7 @@ class TestStruct7 {
   public array $p8 = [];
   public array $p9 = [];
 
-  public static $_TSPEC = vec[
+  const SPEC = vec[
     dict['var' => 'p1',
          'ktype' => TType::I32,
          'vtype' => TType::STRING,

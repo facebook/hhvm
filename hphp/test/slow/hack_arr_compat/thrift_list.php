@@ -47,7 +47,7 @@ class DummyTransport {
 }
 
 class Listish {
-  public static darray<int, darray<string, mixed>> $_TSPEC = darray[
+  const darray<int, darray<string, mixed>> SPEC = darray[
     1 => darray[
       'var' => 'extraData',
       'type' => TType::LIST,

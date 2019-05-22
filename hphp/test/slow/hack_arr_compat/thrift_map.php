@@ -47,7 +47,7 @@ class DummyTransport {
 }
 
 class Mappish {
-  public static darray<int, darray<string, mixed>> $_TSPEC = darray[
+  const darray<int, darray<string, mixed>> SPEC = darray[
     1 => darray[
       'var' => 'extraData',
       'type' => TType::MAP,
@@ -65,19 +65,19 @@ class Mappish {
 }
 
 class TestStruct {
-  public static $_TSPEC = darray[
-        0 => darray[
-          'var' => 'success',
-          'type' => TType::STRUCT,
-          'class' => 'Config'
-        ],
-      ];
+  const SPEC = darray[
+    0 => darray[
+      'var' => 'success',
+      'type' => TType::STRUCT,
+      'class' => 'Config'
+    ],
+  ];
 
   const int STRUCTURAL_ID = 957977401221134810;
 }
 
 function test() {
-  //var_dump(TestStruct::$_TSPEC);
+  //var_dump(TestStruct::SPEC);
   $p = new DummyProtocol();
   $v1 = new Mappish();
   $v1->extraData = Map {"1" => 2};

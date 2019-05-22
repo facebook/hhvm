@@ -24,19 +24,14 @@
 namespace HPHP { namespace thrift {
 
 Array get_tspec(const Class* cls) {
-  /*
-    passing in cls will short-circuit the accessibility checks,
-    but does mean we'll allow a private or protected s_TSPEC.
-    passing in nullptr would do the correct checks. Not sure it matters
-  */
-  auto lookup = cls->getSProp(cls, s_TSPEC.get());
-  if (!lookup.val) {
+  auto lookup = cls->clsCnsGet(s_SPEC.get());
+  if (lookup.m_type == KindOfUninit) {
     thrift_error(
       folly::sformat("Class {} does not have a property named {}",
-                     cls->name(), s_TSPEC),
+                     cls->name(), s_SPEC),
       ERR_INVALID_DATA);
   }
-  Variant structSpec = tvAsVariant(lookup.val);
+  Variant structSpec = tvAsVariant(&lookup);
   if (!structSpec.isArray()) {
     thrift_error("invalid type of spec", ERR_INVALID_DATA);
   }

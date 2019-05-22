@@ -47,18 +47,14 @@ class DummyTransport {
 }
 
 class TestStruct {
-  static $_TSPEC;
+  const SPEC = array(
+    1 => array(
+      'var' => 'aString',
+      'type' => TType::STRING,
+    ),
+  );
   public $aString = null;
-  public function __construct($vals=null) {
-    if (!isset(self::$_TSPEC)) {
-      self::$_TSPEC = array(
-        1 => array(
-          'var' => 'aString',
-          'type' => TType::STRING,
-        ),
-      );
-    }
-  }
+  public function __construct($vals=null) {}
 }
 
 function test() {

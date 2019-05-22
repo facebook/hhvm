@@ -66,7 +66,7 @@ class DummyTransport {
 }
 
 class NodeObject {
-  static $_TSPEC = array(
+  const SPEC = array(
     1 => array(
       'var' => 'fbid',
       'type' => TType::I64,
@@ -118,7 +118,7 @@ class NodeObject {
 }
 
 class EdgeObject {
-  static $_TSPEC = array(
+  const SPEC = array(
     1 => array(
       'var' => 'source',
       'type' => TType::STRUCT,
@@ -207,12 +207,32 @@ class EdgeObject {
   public static function __set_state($vals) {
     return new EdgeObject($vals);
   }
-
 }
 
-function testBadSpec($ok, $bad) {
-  EdgeObject::$_TSPEC = $ok;
+class EdgeObjectWithBadSpec1 extends EdgeObject {
+  const SPEC = array(
+    7 => array(
+      'var' => 'appId',
+      'type' => TType::STRING,
+    ),
+  );
+}
 
+class EdgeObjectWithBadSpec2 extends EdgeObject {
+  const SPEC = array();
+}
+
+class EdgeObjectWithBadSpec3 extends EdgeObject {
+  const SPEC = 42;
+}
+
+class EdgeObjectWithBadSpec4 extends EdgeObject {
+  const SPEC = array(
+    'foo' => 'bar',
+  );
+}
+
+function testBadSpec($bad) {
   $p = new DummyProtocol();
   $v1 = new EdgeObject();
   $v1->appId = 1234;
@@ -226,11 +246,9 @@ function testBadSpec($ok, $bad) {
   $p->getTransport()->pos = 0;
   var_dump(thrift_protocol_read_compact($p, 'EdgeObject'));
 
-  EdgeObject::$_TSPEC = $bad;
-
   $p->getTransport()->pos = 0;
   try {
-    var_dump(thrift_protocol_read_compact($p, 'EdgeObject'));
+    var_dump(thrift_protocol_read_compact($p, $bad));
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }
@@ -238,9 +256,8 @@ function testBadSpec($ok, $bad) {
 
 <<__EntryPoint>>
 function main_bad_spec() {
-$ok = EdgeObject::$_TSPEC;
-testBadSpec($ok, array(7 => array('var' => 'appId', 'type' => TType::STRING)));
-testBadSpec($ok, array());
-testBadSpec($ok, 42);
-testBadSpec($ok, array('foo' => 'bar'));
+  testBadSpec('EdgeObjectWithBadSpec1');
+  testBadSpec('EdgeObjectWithBadSpec2');
+  testBadSpec('EdgeObjectWithBadSpec3');
+  testBadSpec('EdgeObjectWithBadSpec4');
 }

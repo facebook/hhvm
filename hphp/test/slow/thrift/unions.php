@@ -53,7 +53,7 @@ enum ComplexUnionEnum: int {
   stringValue = 2;
 }
 class ComplexUnion {
-  public static array $_TSPEC = array(
+  const array SPEC = array(
     1 => array(
       'var' => 'intValue',
       'union' => true,
@@ -131,7 +131,7 @@ class ComplexUnion {
       if (!$fid && $fname !== null) {
         $fid = (int) self::$_TFIELDMAP->get($fname);
         if ($fid !== 0) {
-          $ftype = self::$_TSPEC[$fid]['type'];
+          $ftype = self::SPEC[$fid]['type'];
         }
       }
       switch ($fid)

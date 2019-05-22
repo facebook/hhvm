@@ -196,7 +196,6 @@ let parse_options () =
   let disable_unsafe_expr = ref None in
   let disable_unsafe_block = ref None in
   let pocket_universes = ref false in
-  let disallow_byref_prop_args = ref (Some false) in
   let shallow_class_decl = ref false in
   let out_extension = ref ".out" in
   let like_types = ref false in
@@ -406,9 +405,6 @@ let parse_options () =
     "--pocket-universes",
       Arg.Set pocket_universes,
       "Enables support for Pocket Universes";
-    "--disallow-byref-prop-args",
-      Arg.Unit (set_bool disallow_byref_prop_args),
-      "Disallow passing properties by reference to functions";
     "--shallow-class-decl",
       Arg.Set shallow_class_decl,
       "Look up class members lazily from shallow declarations";
@@ -457,7 +453,6 @@ let parse_options () =
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
-    ?tco_disallow_byref_prop_args:(!disallow_byref_prop_args)
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)
     ~tco_pessimize_types:(!pessimize_types)

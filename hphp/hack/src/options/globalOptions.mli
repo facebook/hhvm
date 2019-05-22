@@ -195,9 +195,6 @@ type t = {
  (* Flag to ignore the string in vec<string>[...] *)
  tco_ignore_collection_expr_type_arguments : bool;
 
- (* Flag to disallow passing properties by ref *)
- tco_disallow_byref_prop_args : bool;
-
  (* Look up class members lazily from shallow declarations instead of eagerly
     computing folded declarations representing the entire class type. *)
  tco_shallow_class_decl : bool;
@@ -251,7 +248,6 @@ val make :
   ?po_disable_unsafe_block: bool ->
   ?tco_typecheck_xhp_cvars: bool ->
   ?tco_ignore_collection_expr_type_arguments: bool ->
-  ?tco_disallow_byref_prop_args: bool ->
   ?tco_shallow_class_decl: bool ->
   ?po_rust: bool ->
   ?tco_like_types: bool ->
@@ -321,7 +317,6 @@ val po_disable_unsafe_block : t -> bool
 val setup_pocket_universes : t -> bool -> t
 val tco_typecheck_xhp_cvars : t -> bool
 val tco_ignore_collection_expr_type_arguments : t -> bool
-val tco_disallow_byref_prop_args : t -> bool
 val tco_shallow_class_decl : t -> bool
 val po_rust : t -> bool
 val tco_like_types : t -> bool

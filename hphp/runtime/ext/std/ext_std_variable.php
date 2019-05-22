@@ -268,6 +268,13 @@ namespace HH {
    */
   <<__Native>>
   function global_keys(): keyset<string>;
+
+  /*
+   * Does the key exist in the globals array shared between runtime
+   * and code.
+   */
+  <<__Native>>
+  function global_key_exists(string $key): bool;
 }
 
 namespace HH\Lib\_Private\Native {

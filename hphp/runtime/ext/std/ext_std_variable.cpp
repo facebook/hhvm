@@ -692,6 +692,10 @@ Array HHVM_FUNCTION(HH_global_keys) {
   return Array(get_global_variables()->keys());
 }
 
+bool HHVM_FUNCTION(HH_global_key_exists, StringArg key) {
+  return get_global_variables()->keyExists(key.get());
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
 void StandardExtension::initVariable() {
@@ -740,6 +744,7 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_late_init_prop_init, HH_is_late_init_prop_init);
   HHVM_FALIAS(HH\\is_late_init_sprop_init, HH_is_late_init_sprop_init);
   HHVM_FALIAS(HH\\global_keys, HH_global_keys);
+  HHVM_FALIAS(HH\\global_key_exists, HH_global_key_exists);
 
   if (RuntimeOption::EnableIntrinsicsExtension) {
     HHVM_FALIAS(__hhvm_intrinsics\\serialize_keep_dvarrays,

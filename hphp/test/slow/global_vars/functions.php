@@ -58,6 +58,13 @@ function test_global_keys() {
   var_dump(array_key_exists(__FUNCTION__, HH\global_keys()));
 }
 
+function test_global_key_exists() {
+  var_dump(HH\global_key_exists(__FUNCTION__));
+  $GLOBALS[__FUNCTION__] = null;
+  var_dump(array_key_exists(__FUNCTION__, $GLOBALS));
+  var_dump(HH\global_key_exists(__FUNCTION__));
+}
+
 <<__EntryPoint>>
 function main() {
   test_normal();
@@ -69,4 +76,5 @@ function main() {
   test_get_safe();
   test_unset();
   test_global_keys();
+  test_global_key_exists();
 }

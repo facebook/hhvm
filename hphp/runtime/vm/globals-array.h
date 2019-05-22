@@ -66,6 +66,7 @@ struct GlobalsArray final : ArrayData,
 
 public:
   ArrayData* keys();
+  bool keyExists(const StringData*);
 
   static void Release(ArrayData*) {}
   static ArrayData* Copy(const ArrayData* ad) {

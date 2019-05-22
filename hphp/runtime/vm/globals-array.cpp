@@ -99,6 +99,10 @@ ArrayData* GlobalsArray::keys() {
   return ret.create();
 }
 
+bool GlobalsArray::keyExists(const StringData* k) {
+  return this->m_tab->lookup(k) != nullptr;
+}
+
 Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {
   auto a = asGlobals(ad);
   NameValueTable::Iterator iter(a->m_tab, pos);

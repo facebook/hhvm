@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/type-array.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/ext/vsdebug/server_object.h"
+#include "hphp/runtime/vm/bytecode.h"
 
 #include <folly/dynamic.h>
 #include <folly/json.h>
@@ -579,6 +580,7 @@ public:
 private:
 
   FrameObject* getFrameObject(DebuggerSession* session);
+  static VarEnv* varEnvForFrame(FrameObject *frame);
   unsigned int m_frameId;
   bool m_returnHhvmSerialization;
   FrameObject* m_frameObj {nullptr};

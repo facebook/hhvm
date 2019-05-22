@@ -122,7 +122,7 @@ and expand env ~as_tyvar_with_cnstr root =
   | head::tail -> begin match root_ty with
       | Tany | Terr -> env, root
       | Tabstract (AKdependent (`cls _), Some ty)
-      | Tabstract (AKnewtype (_, _), Some ty) | Toption ty -> expand env ty
+      | Tabstract (AKnewtype (_, _), Some ty) -> expand env ty
       | Tclass ((class_pos, class_name), _, tyl) ->
           (* Legacy behaviour is to preserve exactness only on `this`
            * and not through `this::T` *)
@@ -185,7 +185,7 @@ and expand env ~as_tyvar_with_cnstr root =
           let tenv, ty = Typing_subtype_tconst.get_tyvar_type_const env.tenv n head in
           expand { env with ids = tail; tenv } ty
       | Tanon _ | Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _
-      | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic ->
+      | Tarraykind _ | Tfun _ | Tabstract (_, _)  | Tdynamic | Toption _ ->
           let pos, tconst = head in
           let ty = Typing_print.error env.tenv root in
           Errors.non_object_member tconst (Reason.to_pos root_reason) ty pos;

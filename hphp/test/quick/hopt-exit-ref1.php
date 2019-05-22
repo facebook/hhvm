@@ -14,4 +14,6 @@ function foo() {
   if ($x) return 1;
 }
 
+<<__EntryPoint>> function main() {
 foo();
+}

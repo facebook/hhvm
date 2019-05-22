@@ -6,6 +6,8 @@
    +-------------------------------------------------------------+
 */
 
+function f($a) { echo "inside f($a)\n"; return 0;}
+<<__EntryPoint>> function main() {
 error_reporting(-1);
 
 // check for even integer values by inspecting the low-order bit
@@ -45,8 +47,6 @@ var_dump($a);
 
 // sequence point
 
-function f($a) { echo "inside f($a)\n"; return 0;}
-
 $i = 5;
 $i++ ? f($i) : f(++$i);
 $i = 0;
@@ -70,3 +70,4 @@ $a = (TRUE ? -1 : TRUE) ? 10 : 20;
 var_dump($a);
 $a = TRUE ? -1 : (TRUE ? 10 : 20);
 var_dump($a);
+}

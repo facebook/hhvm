@@ -1,8 +1,5 @@
 <?hh
 
-// disable array -> "Array" conversion notice
-error_reporting(error_reporting() & ~E_NOTICE);
-
 function main() {
   $s = "a" . "b";
   print $s."\n";
@@ -34,5 +31,8 @@ function main() {
   print $s."\n";
 }
 
+<<__EntryPoint>> function main_entry(): void {
+// disable array -> "Array" conversion notice
+error_reporting(error_reporting() & ~E_NOTICE);
 main();
-
+}

@@ -1,7 +1,5 @@
 <?php
 
-error_reporting(E_ALL);
-
 trait Hello {
    public function sayHello() {
      echo 'Hello ';
@@ -21,7 +19,10 @@ trait HelloWorld {
 class MyHelloWorld {
    use HelloWorld;
 }
+<<__EntryPoint>> function main() {
+error_reporting(E_ALL);
 
 $o = new MyHelloWorld();
 $o->sayHello();
 $o->sayWorld();
+}

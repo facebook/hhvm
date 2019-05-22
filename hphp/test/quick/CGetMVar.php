@@ -8,5 +8,7 @@ function values() {
   return $VALUES;
 }
 function foo() { var_dump(values()['X']); }
+<<__EntryPoint>> function main(): void {
 foo();
 foo();
+}

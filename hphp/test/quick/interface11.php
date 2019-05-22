@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 class A {}
 interface I {
   public function a($x, array $a = array());
@@ -21,5 +19,7 @@ class C implements I {
   public function c($x, A $a1=null, A $a2, A $a3=null, $y, $z=0) {}
   public function d(array $a = null, $x, $y) {}
 }
-
+<<__EntryPoint>> function main(): void {
+print "Test begin\n";
 print "Test end\n";
+}

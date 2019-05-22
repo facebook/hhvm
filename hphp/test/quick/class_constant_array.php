@@ -15,16 +15,6 @@ class Cls1 {
   const ARRAY9 = [BOOLCNS ? Cls1::ARRAY2 : Cls1::ARRAY3];
 };
 
-var_dump(Cls1::ARRAY1);
-var_dump(Cls1::ARRAY2);
-var_dump(Cls1::ARRAY3);
-var_dump(Cls1::ARRAY4);
-var_dump(Cls1::ARRAY5);
-var_dump(Cls1::ARRAY6);
-var_dump(Cls1::ARRAY7);
-var_dump(Cls1::ARRAY8);
-var_dump(Cls1::ARRAY9);
-
 class Cls2 {
   const VEC1 = vec[];
   const VEC2 = vec[1, 2, 3, 4];
@@ -36,16 +26,6 @@ class Cls2 {
   const VEC8 = vec[Cls2::VEC2, Cls2::VEC2];
   const VEC9 = vec[BOOLCNS ? Cls2::VEC2 : Cls2::VEC3];
 };
-
-var_dump(Cls2::VEC1);
-var_dump(Cls2::VEC2);
-var_dump(Cls2::VEC3);
-var_dump(Cls2::VEC4);
-var_dump(Cls2::VEC5);
-var_dump(Cls2::VEC6);
-var_dump(Cls2::VEC7);
-var_dump(Cls2::VEC8);
-var_dump(Cls2::VEC9);
 
 class Cls3 {
   const DICT1 = dict[];
@@ -67,6 +47,36 @@ class Cls3 {
   const DICT13 = dict[100 => BOOLCNS ? Cls3::DICT2 : Cls3::DICT3];
 };
 
+class Cls4 {
+  const KEYSET1 = keyset[];
+  const KEYSET2 = keyset[1, 2, 3, 4];
+  const KEYSET3 = keyset['a', 'b', 'c'];
+  const KEYSET4 = keyset[1, '1', 2, '2'];
+  const KEYSET5 = Cls4::KEYSET1;
+  const KEYSET6 = keyset[BOOLCNS ? 'a' : 1];
+};
+
+<<__EntryPoint>> function main(): void {
+var_dump(Cls1::ARRAY1);
+var_dump(Cls1::ARRAY2);
+var_dump(Cls1::ARRAY3);
+var_dump(Cls1::ARRAY4);
+var_dump(Cls1::ARRAY5);
+var_dump(Cls1::ARRAY6);
+var_dump(Cls1::ARRAY7);
+var_dump(Cls1::ARRAY8);
+var_dump(Cls1::ARRAY9);
+
+var_dump(Cls2::VEC1);
+var_dump(Cls2::VEC2);
+var_dump(Cls2::VEC3);
+var_dump(Cls2::VEC4);
+var_dump(Cls2::VEC5);
+var_dump(Cls2::VEC6);
+var_dump(Cls2::VEC7);
+var_dump(Cls2::VEC8);
+var_dump(Cls2::VEC9);
+
 var_dump(Cls3::DICT1);
 var_dump(Cls3::DICT2);
 var_dump(Cls3::DICT3);
@@ -81,18 +91,10 @@ var_dump(Cls3::DICT11);
 var_dump(Cls3::DICT12);
 var_dump(Cls3::DICT13);
 
-class Cls4 {
-  const KEYSET1 = keyset[];
-  const KEYSET2 = keyset[1, 2, 3, 4];
-  const KEYSET3 = keyset['a', 'b', 'c'];
-  const KEYSET4 = keyset[1, '1', 2, '2'];
-  const KEYSET5 = Cls4::KEYSET1;
-  const KEYSET6 = keyset[BOOLCNS ? 'a' : 1];
-};
-
 var_dump(Cls4::KEYSET1);
 var_dump(Cls4::KEYSET2);
 var_dump(Cls4::KEYSET3);
 var_dump(Cls4::KEYSET4);
 var_dump(Cls4::KEYSET5);
 var_dump(Cls4::KEYSET6);
+}

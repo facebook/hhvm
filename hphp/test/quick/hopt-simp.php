@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(error_reporting() & ~E_NOTICE);
-
 function foo1() {
   $x = true;
   return !($x < false);
@@ -57,6 +55,9 @@ function foo11() {
   return (string)$x;
 }
 
+<<__EntryPoint>> function main(): void {
+error_reporting(error_reporting() & ~E_NOTICE);
+
 var_dump(foo1());
 var_dump(foo2(5, 6));
 var_dump(foo3());
@@ -68,3 +69,4 @@ var_dump(foo8());
 var_dump(foo9());
 var_dump(foo10());
 var_dump(foo11());
+}

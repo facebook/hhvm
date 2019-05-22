@@ -10,5 +10,7 @@ function f($a, $b, $c) {
   }
   return f($x+0, $y+0, $z+0);
 }
+<<__EntryPoint>> function main(): void {
 echo f(12,7,5);
 echo "\n";
+}

@@ -11,8 +11,10 @@ class A {
     return 91;
   }
 }
+<<__EntryPoint>> function main(): void {
 $a = new A;
 $b = $a->b();
 $first = $b();
 $second = $first();
 var_dump($second);
+}

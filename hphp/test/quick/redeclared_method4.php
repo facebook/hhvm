@@ -8,5 +8,7 @@ abstract class B implements I {
 class C extends B {
   public function foo($x){ echo "$x\n";}
 }
+<<__EntryPoint>> function main(): void {
 $obj = new C;
 $obj->foo(1);
+}

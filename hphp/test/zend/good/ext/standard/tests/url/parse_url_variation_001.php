@@ -6,10 +6,10 @@
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }
+<<__EntryPoint>> function main() {
 set_error_handler('test_error_handler');
-
 echo "*** Testing parse_url() : usage variations ***\n";
 
 //get an unset variable
@@ -71,3 +71,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

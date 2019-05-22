@@ -5,4 +5,6 @@ class foo {
 
 class bar extends foo {
 }
+<<__EntryPoint>> function main() {
 ReflectionClass::export("bar");
+}

@@ -1,15 +1,15 @@
-<?php 
+<?php
 
 interface a {
-	function b();
+    function b();
 }
 
 interface b {
-	function b();
+    function b();
 }
 
 interface c extends a, b {
 }
-
+<<__EntryPoint>> function main() {
 echo "done!\n";
-
+}

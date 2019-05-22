@@ -8,5 +8,6 @@ class C {
         Typo::fooMethod as tf;
     }
 }
-
+<<__EntryPoint>> function main() {
 echo "okey";
+}

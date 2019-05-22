@@ -1,8 +1,8 @@
 <?php
 
 /* creating directory */
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
 $src_dirs = array (
@@ -29,7 +29,7 @@ foreach($src_dirs as $src_dir) {
   mkdir("$file_path/rename_variation1/");
   // rename the src dir to a new dir in dest dir
   var_dump( rename($src_dir, $dest_dir."/new_dir") );
-  // ensure that dir was renamed 
+  // ensure that dir was renamed
   var_dump( file_exists($src_dir) );  // expecting false
   var_dump( file_exists($dest_dir."/new_dir") ); // expecting true
 
@@ -42,3 +42,4 @@ echo "Done\n";
 error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 rmdir($file_path."/rename_variation1_dir");
+}

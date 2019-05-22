@@ -1,6 +1,6 @@
-<?php 
+<?php
 /* $Id$ */
-
+<<__EntryPoint>> function main() {
 $xmlstring =<<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <foo bar=""/>
@@ -21,7 +21,7 @@ EOF;
 
 $xmlstring = str_replace('012.dtd', dirname(__FILE__).'/012.dtd', $xmlstring);
 if (DIRECTORY_SEPARATOR == '\\') {
-	$xmlstring = str_replace('\\',"/", $xmlstring);
+    $xmlstring = str_replace('\\',"/", $xmlstring);
 }
 $reader = new XMLReader();
 $reader->XML($xmlstring);
@@ -35,7 +35,7 @@ echo "\nUsing URI:\n";
 $reader = new XMLReader();
 $file = dirname(__FILE__) . '/012.xml';
 if (DIRECTORY_SEPARATOR == '\\') {
-	$file = str_replace('\\',"/", $file);
+    $file = str_replace('\\',"/", $file);
 }
 
 $reader->open($file);
@@ -55,3 +55,4 @@ var_dump($reader->getAttribute('baz'));
 $reader->close();
 
 echo "===DONE===\n";
+}

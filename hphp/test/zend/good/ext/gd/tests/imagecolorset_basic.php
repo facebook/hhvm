@@ -1,7 +1,7 @@
 <?php
 // Create a 300x100 image
+<<__EntryPoint>> function main() {
 $im = imagecreate(300, 100);
-
 // Set the background to be red
 imagecolorallocate($im, 255, 0, 0);
 
@@ -18,3 +18,4 @@ $result_image = ob_get_contents();
 ob_end_clean();
 echo md5(base64_encode($result_image));
 imagedestroy($im);
+}

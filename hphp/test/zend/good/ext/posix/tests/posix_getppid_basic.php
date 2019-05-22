@@ -1,7 +1,9 @@
-<?php 
-  echo "Basic test of POSIX getppid function\n"; 
-  	
+<?php
+  echo "Basic test of POSIX getppid function\n";
+
   $ppid = posix_getppid();
-  
+
   var_dump($ppid);
+<<__EntryPoint>> function main() {
 echo "===DONE====";
+}

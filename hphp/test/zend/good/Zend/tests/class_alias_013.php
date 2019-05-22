@@ -4,7 +4,7 @@ namespace test\baz;
 
 class foo {
 }
-
+<<__EntryPoint>> function main() {
 new foo;
 
 $alias1 = __NAMESPACE__ .'\T';
@@ -14,4 +14,4 @@ $alias2 = $alias1 .'\BAR';
 \class_alias($alias1, $alias2);
 
 \var_dump(new \test\baz\foo, new \test\baz\T\BAR);
-
+}

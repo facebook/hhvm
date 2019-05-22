@@ -2,18 +2,19 @@
 
 trait TestTrait
 {
-	public static function testStaticFunction()
-	{
-		return __CLASS__;
-	}
+    public static function testStaticFunction()
+    {
+        return __CLASS__;
+    }
 }
 class Tester
 {
-	use TestTrait;
+    use TestTrait;
 }
-
+<<__EntryPoint>> function main() {
 $foo = Tester::testStaticFunction();
 get_defined_constants();
 get_defined_constants(true);
 
 echo $foo;
+}

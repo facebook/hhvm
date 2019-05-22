@@ -1,18 +1,18 @@
 <?php
 
 trait foo {
-	public function a() {
-	}
+    public function a() {
+    }
 }
 
 interface baz {
-	public function abc();
+    public function abc();
 }
 
 class bar implements baz {
-	use foo;
+    use foo;
 
 }
-
+<<__EntryPoint>> function main() {
 new bar;
-
+}

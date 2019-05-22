@@ -1,5 +1,7 @@
 <?php
-	// Create a new Doubly Linked List
-	$dll = new SplDoublyLinkedList();
-	
-	var_dump($dll->isEmpty());
+    // Create a new Doubly Linked List
+    $dll = new SplDoublyLinkedList();
+
+    var_dump($dll->isEmpty());
+
+<<__EntryPoint>> function main() {}

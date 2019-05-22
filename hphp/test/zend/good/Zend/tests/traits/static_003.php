@@ -1,19 +1,20 @@
 <?php
 
-	trait TestTrait {
-		public static function test() {
-			return static::$test;
-		}
-	}
+    trait TestTrait {
+        public static function test() {
+            return static::$test;
+        }
+    }
 
-	class A {
-		use TestTrait;
-		protected static $test = "Test A";
-	}
+    class A {
+        use TestTrait;
+        protected static $test = "Test A";
+    }
 
-	class B extends A {
-		protected static $test = "Test B";
-	}
+    class B extends A {
+        protected static $test = "Test B";
+    }
 
-	echo B::test();
+    echo B::test();
 
+<<__EntryPoint>> function main() {}

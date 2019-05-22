@@ -1,8 +1,8 @@
 <?php
 
-    $a = (object) 'a'; 
-    $b = (object) 'b'; 
-    $c = (object) 'c'; 
+    $a = (object) 'a';
+    $b = (object) 'b';
+    $c = (object) 'c';
 
    $foo = new SplObjectStorage;
     $foo->attach($a);
@@ -16,3 +16,4 @@
     var_dump($foo->contains($a));
     var_dump($foo->contains($b));
 
+<<__EntryPoint>> function main() {}

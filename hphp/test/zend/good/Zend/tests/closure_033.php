@@ -1,20 +1,21 @@
 <?php
 
 class Test {
-	public $func;
-	function __construct() {
-		$this->func = function() {
-			echo __METHOD__ . "()\n";
-		};
-	}
-	private function func() {
-		echo __METHOD__ . "()\n";
-	}
+    public $func;
+    function __construct() {
+        $this->func = function() {
+            echo __METHOD__ . "()\n";
+        };
+    }
+    private function func() {
+        echo __METHOD__ . "()\n";
+    }
 }
-
+<<__EntryPoint>> function main() {
 $o = new Test;
 $f = $o->func;
 $f();
 $o->func();
 
 echo "===DONE===\n";
+}

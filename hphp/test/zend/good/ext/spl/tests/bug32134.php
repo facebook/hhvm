@@ -1,5 +1,5 @@
 <?php
-	
+
 class myArray extends ArrayIterator
 {
 
@@ -24,7 +24,7 @@ class myArray extends ArrayIterator
     }
 
 }
-
+<<__EntryPoint>> function main() {
 $myArray = new myArray();
 
 $myArray->offsetSet('one', 'one');
@@ -34,3 +34,4 @@ $myArray['two'] = 'two';
 var_dump($myArray['two']);
 
 echo "===DONE===\n";
+}

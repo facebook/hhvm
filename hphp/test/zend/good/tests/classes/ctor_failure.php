@@ -7,7 +7,7 @@ class Test
         throw new Exception($msg);
     }
 }
-
+<<__EntryPoint>> function main() {
 try
 {
     $o = new Test('Hello');
@@ -19,3 +19,4 @@ catch (Exception $e)
 }
 
 echo "===DONE===\n";
+}

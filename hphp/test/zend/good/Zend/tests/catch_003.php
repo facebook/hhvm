@@ -2,25 +2,26 @@
 
 class MyObject
 {
-	function fail()
-	{
-		throw new Exception();
-	}
+    function fail()
+    {
+        throw new Exception();
+    }
 
-	function __construct()
-	{
-		self::fail();
-		echo __METHOD__ . "() Must not be reached\n";
-	}
+    function __construct()
+    {
+        self::fail();
+        echo __METHOD__ . "() Must not be reached\n";
+    }
 }
-
+<<__EntryPoint>> function main() {
 try
 {
-	new MyObject();
+    new MyObject();
 }
 catch(Exception $e)
 {
-	echo "Caught\n";
+    echo "Caught\n";
 }
 
 echo "===DONE===\n";
+}

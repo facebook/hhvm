@@ -11,12 +11,13 @@ trait TConstructor {
 
 class OverridingIsSilent1 {
     use TConstructor {
-	    foo as __construct;
-	}
+        foo as __construct;
+    }
 
-	public function __construct() {
-	    echo "OverridingIsSilent1 __construct\n";
-	}
+    public function __construct() {
+        echo "OverridingIsSilent1 __construct\n";
+    }
 }
-
+<<__EntryPoint>> function main() {
 $o = new OverridingIsSilent1;
+}

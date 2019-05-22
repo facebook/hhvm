@@ -15,11 +15,10 @@ trait TC2 {
 }
 
 class ReportCollision {
-	use TC1, TC2;
+    use TC1, TC2;
 }
 
-
+<<__EntryPoint>> function main() {
 echo "ReportCollision: ";
 $o = new ReportCollision;
-
-
+}

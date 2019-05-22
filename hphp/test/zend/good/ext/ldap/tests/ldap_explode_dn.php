@@ -1,8 +1,8 @@
 <?php
 
 /* Explode with attributes */
+<<__EntryPoint>> function main() {
 var_dump(ldap_explode_dn("cn=bob,dc=example,dc=com", 0));
-
 /* Explode with attributes */
 var_dump(ldap_explode_dn("cn=bob,ou=users,dc=example,dc=com", 0));
 
@@ -31,4 +31,4 @@ var_dump(ldap_explode_dn("bob,dc=example,dc=com", 0));
 var_dump(ldap_explode_dn("bob,dc=example,dc=com", 1));
 
 echo "Done\n";
-
+}

@@ -1,8 +1,8 @@
 <?php
 
 /* Convert valid DN */
+<<__EntryPoint>> function main() {
 var_dump(ldap_dn2ufn("cn=bob,dc=example,dc=com"));
-
 /* Convert valid DN */
 var_dump(ldap_dn2ufn("cn=bob,ou=users,dc=example,dc=com"));
 
@@ -16,4 +16,4 @@ try { ldap_dn2ufn("cn=bob,dc=example,dc=com", 1); } catch (Exception $e) { echo 
 var_dump(ldap_dn2ufn("bob,dc=example,dc=com"));
 
 echo "Done\n";
-
+}

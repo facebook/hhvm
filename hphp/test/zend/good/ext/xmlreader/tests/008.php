@@ -1,6 +1,6 @@
-<?php 
+<?php
 /* $Id$ */
-
+<<__EntryPoint>> function main() {
 $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE LIST SYSTEM "dtdexample.dtd">
 <LIST>
@@ -17,7 +17,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </MOVIE>
 </LIST>';
 
-$dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd'; 
+$dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd';
 $file = dirname(__FILE__) . '/_008.xml';
 file_put_contents($file, $xmlstring);
 
@@ -28,7 +28,7 @@ $reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
 $reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
-	echo "file DTD: ok\n";
+    echo "file DTD: ok\n";
 }
 $reader->close();
 unlink($file);
@@ -56,6 +56,7 @@ $reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
 $reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
-	echo "string DTD: ok\n";
+    echo "string DTD: ok\n";
 }
 echo "===DONE===\n";
+}

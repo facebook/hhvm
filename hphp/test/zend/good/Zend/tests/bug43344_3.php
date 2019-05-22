@@ -1,6 +1,8 @@
 <?php
 namespace Foo;
 function f($a=Foo::bar) {
-	return $a;
+    return $a;
 }
+<<__EntryPoint>> function main() {
 echo f()."\n";
+}

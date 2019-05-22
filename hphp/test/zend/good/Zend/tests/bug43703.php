@@ -14,4 +14,6 @@ class Read extends Pointcut
     {
     }
 }
+<<__EntryPoint>> function main() {
 echo "DONE";
+}

@@ -15,3 +15,5 @@
   const K = "nasty";
 
   var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
+
+<<__EntryPoint>> function main() {}

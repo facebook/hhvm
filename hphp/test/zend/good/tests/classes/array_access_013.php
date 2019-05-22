@@ -7,12 +7,12 @@ class Test implements ArrayAccess
         public function offsetSet($offset, $data ) { throw new Exception(__METHOD__); }
         public function offsetUnset($offset)       { throw new Exception(__METHOD__); }
 }
-
+<<__EntryPoint>> function main() {
 $t = new Test;
 
 try
 {
-	echo isset($t[0]);
+    echo isset($t[0]);
 }
 catch(Exception $e)
 {
@@ -21,7 +21,7 @@ catch(Exception $e)
 
 try
 {
-	echo $t[0];
+    echo $t[0];
 }
 catch(Exception $e)
 {
@@ -30,7 +30,7 @@ catch(Exception $e)
 
 try
 {
-	$t[0] = 1;
+    $t[0] = 1;
 }
 catch(Exception $e)
 {
@@ -39,10 +39,11 @@ catch(Exception $e)
 
 try
 {
-	unset($t[0]);
+    unset($t[0]);
 }
 catch(Exception $e)
 {
     echo "Caught in " . $e->getMessage() . "()\n";
 }
 echo "===DONE===\n";
+}

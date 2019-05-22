@@ -1,8 +1,8 @@
 <?php
 
-//Set the default time zone 
+//Set the default time zone
+<<__EntryPoint>> function main() {
 date_default_timezone_set('Europe/London');
-
 echo "*** Testing clone on DateTime objects ***\n";
 
 // Create a DateTime object..
@@ -18,3 +18,4 @@ echo "Format method: " . $orig->format("D., M. j, Y g:iA") . "\n";
 echo "createFromFormat method: " . $fromFormat->format("D., M. j, Y g:iA") . "\n";
 
 echo "===DONE===\n";
+}

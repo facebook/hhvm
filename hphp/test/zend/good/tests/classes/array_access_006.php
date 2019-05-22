@@ -1,30 +1,31 @@
-<?php 
+<?php
 
 class OverloadedArray implements ArrayAccess {
-	public $realArray;
-	
-	function __construct() {
-		$this->realArray = array(1,2,3);
-	}
+    public $realArray;
 
-	function offsetExists($index) {
-		return array_key_exists($this->realArray, $index);
-	}
+    function __construct() {
+        $this->realArray = array(1,2,3);
+    }
 
-	function offsetGet($index) {
-		return $this->realArray[$index];
-	}
+    function offsetExists($index) {
+        return array_key_exists($this->realArray, $index);
+    }
 
-	function offsetSet($index, $value) {
-		$this->realArray[$index] = $value;
-	}
+    function offsetGet($index) {
+        return $this->realArray[$index];
+    }
 
-	function offsetUnset($index) {
-		unset($this->realArray[$index]);
-	}
+    function offsetSet($index, $value) {
+        $this->realArray[$index] = $value;
+    }
+
+    function offsetUnset($index) {
+        unset($this->realArray[$index]);
+    }
 }
-
+<<__EntryPoint>> function main() {
 $a = new OverloadedArray;
 $a[1] += 10;
 var_dump($a[1]);
 echo "---Done---\n";
+}

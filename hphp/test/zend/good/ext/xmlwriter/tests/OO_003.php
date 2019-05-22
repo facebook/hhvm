@@ -1,6 +1,6 @@
-<?php 
+<?php
 /* $Id$ */
-
+<<__EntryPoint>> function main() {
 $xw = new XMLWriter();
 $xw->openMemory();
 $xw->startDocument('1.0', 'UTF-8');
@@ -17,11 +17,12 @@ $xw->endAttribute();
 $xw->text("Test text for tag1");
 $res = $xw->startElement('tag2');
 if ($res < 1) {
-	echo "StartElement context validation failed\n";
-	exit();
+    echo "StartElement context validation failed\n";
+    exit();
 }
 $xw->endDocument();
 
 // Force to write and empty the buffer
 echo $xw->flush(true);
 echo "===DONE===\n";
+}

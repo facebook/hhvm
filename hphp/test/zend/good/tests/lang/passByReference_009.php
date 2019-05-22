@@ -16,3 +16,5 @@
 
     foo2($x, &$x, $x = 1);
     echo $x; // 2
+
+<<__EntryPoint>> function main() {}

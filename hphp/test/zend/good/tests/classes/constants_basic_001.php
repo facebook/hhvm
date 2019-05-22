@@ -48,3 +48,5 @@
   var_dump(C::c19);
 
   echo "\nYou should not see this.";
+
+<<__EntryPoint>> function main() {}

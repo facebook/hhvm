@@ -9,10 +9,11 @@ trait TConstructor {
 }
 
 class NewConstructor {
-	use TConstructor {
-	    constructor as __construct;
-	}
+    use TConstructor {
+        constructor as __construct;
+    }
 }
-
+<<__EntryPoint>> function main() {
 echo "New constructor: ";
 $o = new NewConstructor;
+}

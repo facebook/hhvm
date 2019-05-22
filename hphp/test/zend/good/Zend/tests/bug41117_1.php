@@ -4,4 +4,6 @@ class foo {
     echo $this."\n";
   }
 }
+<<__EntryPoint>> function main() {
 $obj = new foo("Hello world");
+}

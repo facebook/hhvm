@@ -2,85 +2,85 @@
 
 class TestA
 {
-	public function doSomething($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomething($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public function doSomethingThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomethingThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public function doSomethingParent($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomethingParent($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public function doSomethingParentThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomethingParentThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public static function doSomethingStatic($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public static function doSomethingStatic($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 }
 
 class TestB extends TestA
 {
-	public function doSomething($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		$x = array("TestA", "doSomething");
-		return $x($i);
-	}
+    public function doSomething($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        $x = array("TestA", "doSomething");
+        return $x($i);
+    }
 
-	public function doSomethingThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		$x = array($this, "TestA::doSomethingThis");
-		return $x($i);
-	}
+    public function doSomethingThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        $x = array($this, "TestA::doSomethingThis");
+        return $x($i);
+    }
 
-	public function doSomethingParent($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		$x = array("parent", "doSomethingParent");
-		return $x($i);
-	}
+    public function doSomethingParent($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        $x = array("parent", "doSomethingParent");
+        return $x($i);
+    }
 
-	public function doSomethingParentThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		$x = array($this, "parent::doSomethingParentThis");
-		return $x($i);
-	}
+    public function doSomethingParentThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        $x = array($this, "parent::doSomethingParentThis");
+        return $x($i);
+    }
 
-	public static function doSomethingStatic($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		$x = array("TestA", "doSomethingStatic");
-		return $x($i);
-	}
+    public static function doSomethingStatic($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        $x = array("TestA", "doSomethingStatic");
+        return $x($i);
+    }
 }
-
+<<__EntryPoint>> function main() {
 $x = new TestB();
 echo "===A===\n";
 var_dump($x->doSomething(1));
@@ -92,3 +92,4 @@ echo "\n===D===\n";
 var_dump($x->doSomethingParentThis(1));
 
 echo "===DONE===\n";
+}

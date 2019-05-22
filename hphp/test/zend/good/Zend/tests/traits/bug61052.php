@@ -10,4 +10,6 @@ class C {
     T1::foo insteadof T1;
   }
 }
+<<__EntryPoint>> function main() {
 C::foo();
+}

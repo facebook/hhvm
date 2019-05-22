@@ -4,10 +4,10 @@
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::format
  */
- 
-//Set the default time zone 
-date_default_timezone_set("Europe/London");
 
+//Set the default time zone
+<<__EntryPoint>> function main() {
+date_default_timezone_set("Europe/London");
 echo "*** Testing date_format() : error conditions ***\n";
 
 echo "\n-- Testing date_create() function with zero arguments --\n";
@@ -25,10 +25,11 @@ try { var_dump( date_format($date, $format, $extra_arg) ); } catch (Exception $e
 
 echo "\n-- Testing date_create() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( date_format($invalid_obj, $format) );  
+var_dump( date_format($invalid_obj, $format) );
 $invalid_obj = 10;
 try { var_dump( date_format($invalid_obj, $format) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 $invalid_obj = null;
 try { var_dump( date_format($invalid_obj, $format) );     } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "===DONE===\n";
+}

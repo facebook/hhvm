@@ -6,8 +6,8 @@
  */
 
 // start testing
+<<__EntryPoint>> function main() {
 echo "*** Testing curl_multi_init(void); ***\n";
-
 //create the multiple cURL handle
 $mh = curl_multi_init();
 var_dump($mh);
@@ -15,3 +15,4 @@ var_dump($mh);
 curl_multi_close($mh);
 var_dump($mh);
 echo "===DONE===\n";
+}

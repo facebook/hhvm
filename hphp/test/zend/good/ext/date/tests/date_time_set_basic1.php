@@ -1,13 +1,13 @@
 <?php
 /* Prototype  : DateTime date_time_set  ( DateTime $object  , int $hour  , int $minute  [, int $second  ] )
- * Description: Resets the current time of the DateTime object to a different time. 
+ * Description: Resets the current time of the DateTime object to a different time.
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTime::setTime
  */
- 
- //Set the default time zone 
-date_default_timezone_set("Europe/London");
 
+ //Set the default time zone
+<<__EntryPoint>> function main() {
+date_default_timezone_set("Europe/London");
 echo "*** Testing date_time_set() : basic functionality ***\n";
 
 // Create a DateTime object
@@ -31,3 +31,4 @@ date_time_set($datetime, 54, 25);
 echo "After modification5 " . date_format($datetime, DATE_RFC2822) . "\n";
 
 echo "===DONE===\n";
+}

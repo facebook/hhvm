@@ -5,4 +5,6 @@ class foo {
         $func();
     }
 }
+<<__EntryPoint>> function main() {
 foo::bar();
+}

@@ -1,22 +1,22 @@
-<?php 
+<?php
 
 class foo {
-	static $bar = array();
-	
-	public function __set($a, $b) {
-		self::$bar[] = $b;
-	}
-	
-	public function __get($a) {
-		/* last */
-		return self::$bar[count(self::$bar)-1];
-	}
+    static $bar = array();
+
+    public function __set($a, $b) {
+        self::$bar[] = $b;
+    }
+
+    public function __get($a) {
+        /* last */
+        return self::$bar[count(self::$bar)-1];
+    }
 }
 
 function test() {
-	return new foo;
+    return new foo;
 }
-
+<<__EntryPoint>> function main() {
 $a = test()->bar = 1;
 var_dump($a, count(foo::$bar), test()->whatever);
 
@@ -31,4 +31,4 @@ $a = test()->bar = test();
 var_dump($a, count(foo::$bar), test()->whatever);
 
 print "\n";
-
+}

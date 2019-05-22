@@ -23,7 +23,8 @@ class first_class
 {
     use second_trait;
 }
-
+<<__EntryPoint>> function main() {
 $obj = new first_class();
 $obj->first_function();
 $obj->second_function();
+}

@@ -4,7 +4,7 @@
       echo "In autoload: ";
       var_dump($name);
   }
-  
+
   function f()
   {
       throw new Exception();
@@ -18,3 +18,5 @@
   catch (Exception $e) {
       echo "In Exception catch block. Autoload should not have been triggered.\n";
   }
+
+<<__EntryPoint>> function main() {}

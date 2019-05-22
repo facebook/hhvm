@@ -1,5 +1,7 @@
 <?php
 class Foo {
-	const A = self::B;
+    const A = self::B;
 }
+<<__EntryPoint>> function main() {
 echo Foo::A."\n";
+}

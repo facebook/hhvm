@@ -13,8 +13,8 @@ class Test implements TestInterface {
         echo __METHOD__, "\n";
     }
 }
-
+<<__EntryPoint>> function main() {
 $obj = new Test;
 $obj->foo();
 $obj->bar([]);
-
+}

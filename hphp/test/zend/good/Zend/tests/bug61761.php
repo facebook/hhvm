@@ -9,4 +9,6 @@ class B extends A
 {
         private static function test($a, $b) { }
 }
+<<__EntryPoint>> function main() {
 echo "==DONE==";
+}

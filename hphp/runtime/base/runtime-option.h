@@ -856,10 +856,13 @@ struct RuntimeOption {
   F(uint32_t, JitPGOUnlikelyDecRefPersistPercent, 5)                    \
   F(uint32_t, JitPGOUnlikelyDecRefSurvivePercent, 5)                    \
   F(uint32_t, JitPGOUnlikelyDecRefDecrementPercent, 5)                  \
-  F(double,   JitPGODecRefNZReleasePercentCOW, 0.5)                     \
-  F(double,   JitPGODecRefNZReleasePercent, 5)                          \
-  F(double,   JitPGODecRefNopDecPercentCOW, 0.5)                        \
-  F(double,   JitPGODecRefNopDecPercent, 5)                             \
+  F(double,   JitPGODecRefNZReleasePercentCOW,                          \
+                                       ServerExecutionMode() ? 0.5 : 0) \
+  F(double,   JitPGODecRefNZReleasePercent,                             \
+                                         ServerExecutionMode() ? 5 : 0) \
+  F(double,   JitPGODecRefNopDecPercentCOW,                             \
+                                       ServerExecutionMode() ? 0.5 : 0) \
+  F(double,   JitPGODecRefNopDecPercent, ServerExecutionMode() ? 5 : 0) \
   F(uint32_t, JitPGOReleaseVVMinPercent, 8)                             \
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(double,   JitPGOMinBlockCountPercent, 0.05)                         \

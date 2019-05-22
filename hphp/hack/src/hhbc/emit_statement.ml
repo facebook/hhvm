@@ -235,8 +235,6 @@ and emit_stmt env (pos, stmt) =
     emit_if env pos condition consequence alternative
   | A.While (e, b) ->
     emit_while env e (pos, A.Block b)
-  | A.Declare (is_block, e, b) ->
-    emit_declare env is_block e b
   | A.Using A.{
       us_has_await = has_await;
       us_expr = e;
@@ -421,17 +419,6 @@ and emit_while env e b =
     get_instrs @@ emit_jmpnz env (fst e) (snd e) start_label;
     instr_label break_label;
   ]
-
-and emit_declare env is_block ((p, _), e) b =
-  (* TODO: We are ignoring the directive (e) here?? *)
-  let errors =
-    match e with
-    | A.Binop (Ast.Eq None, (_, A.Id (_, "strict_types")), _) when is_block ->
-      Emit_fatal.emit_fatal_runtime
-        p "strict_types declaration must not use block mode"
-    | _ -> empty
-  in
-  gather [ errors; emit_stmts env b ]
 
 and emit_using (env : Emit_env.t) pos is_block_scoped has_await (e : Tast.expr) b =
   match snd e with

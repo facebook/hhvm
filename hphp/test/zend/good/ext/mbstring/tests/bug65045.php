@@ -1,6 +1,5 @@
 <?php
 
-//declare(encoding = 'UTF-8');
 mb_internal_encoding('UTF-8');
 
 $str = "\xF0\xA4\xAD".  "\xF0\xA4\xAD\xA2"."\xF0\xA4\xAD\xA2";

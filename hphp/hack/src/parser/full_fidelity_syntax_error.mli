@@ -219,7 +219,6 @@ val not_allowed_in_write : string -> string
 val references_not_allowed : string
 val reassign_this : string
 val this_in_static : string
-val strict_types_first_statement : string
 val async_magic_method : name:string -> string
 val call_static_method : string
 val reserved_keyword_as_class_name : string -> string
@@ -241,7 +240,6 @@ val halt_compiler_top_level_only : string
 val trait_alias_rule_allows_only_final_and_visibility_modifiers : string
 val namespace_decl_first_statement : string
 val code_outside_namespace : string
-val strict_types_in_declare_block_mode : string
 val invalid_number_of_args : string -> int -> string
 val invalid_args_by_ref : string -> string
 val redeclaration_error : string -> string

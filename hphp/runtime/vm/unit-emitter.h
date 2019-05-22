@@ -419,7 +419,6 @@ public:
   bool m_mergeOnly{false};
   bool m_isHHFile{false};
   bool m_useStrictTypes{false};
-  bool m_useStrictTypesForBuiltins{false};
   bool m_returnSeen{false};
   bool m_ICE{false}; // internal compiler error
   bool m_useGlobalIds{0};

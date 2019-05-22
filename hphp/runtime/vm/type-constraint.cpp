@@ -974,7 +974,7 @@ bool call_uses_strict_types(const Func* callee) {
   }
 
   if (callee->isBuiltin()) {
-    return caller->unit()->useStrictTypesForBuiltins();
+    return false;
   }
 
   if (LIKELY(RuntimeOption::EnableHipHopSyntax)) {

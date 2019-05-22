@@ -711,34 +711,6 @@ let schema : schema_node list =
       ; "semicolon", Token
       ]
     }
-  ; { kind_name   = "DeclareDirectiveStatement"
-    ; type_name   = "declare_directive_statement"
-    ; func_name   = "declare_directive_statement"
-    ; description = "declare_directive_statement"
-    ; prefix      = "declare_directive"
-    ; aggregates  = [ TopLevelDeclaration; Statement ]
-    ; fields =
-      [ "keyword", Token
-      ; "left_paren", Token
-      ; "expression", Aggregate Expression
-      ; "right_paren", Token
-      ; "semicolon", Token
-      ]
-    }
-  ; { kind_name   = "DeclareBlockStatement"
-    ; type_name   = "declare_block_statement"
-    ; func_name   = "declare_block_statement"
-    ; description = "declare_block_statement"
-    ; prefix      = "declare_block"
-    ; aggregates  = [ TopLevelDeclaration; Statement ]
-    ; fields =
-      [ "keyword", Token
-      ; "left_paren", Token
-      ; "expression", Aggregate Expression
-      ; "right_paren", Token
-      ; "body", Aggregate Statement
-      ]
-    }
   ; { kind_name   = "WhileStatement"
     ; type_name   = "while_statement"
     ; func_name   = "while_statement"

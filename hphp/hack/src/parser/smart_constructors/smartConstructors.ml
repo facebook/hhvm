@@ -89,8 +89,6 @@ module type SmartConstructors_S = sig
   val make_let_statement : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_using_statement_block_scoped : r -> r -> r -> r -> r -> r -> t -> t * r
   val make_using_statement_function_scoped : r -> r -> r -> r -> t -> t * r
-  val make_declare_directive_statement : r -> r -> r -> r -> r -> t -> t * r
-  val make_declare_block_statement : r -> r -> r -> r -> r -> t -> t * r
   val make_while_statement : r -> r -> r -> r -> r -> t -> t * r
   val make_if_statement : r -> r -> r -> r -> r -> r -> r -> t -> t * r
   val make_elseif_clause : r -> r -> r -> r -> r -> t -> t * r
@@ -283,8 +281,6 @@ end) = struct
     let let_statement parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_let_statement arg0 arg1 arg2 arg3 arg4 arg5)
     let using_statement_block_scoped parser arg0 arg1 arg2 arg3 arg4 arg5 = call parser (SCI.make_using_statement_block_scoped arg0 arg1 arg2 arg3 arg4 arg5)
     let using_statement_function_scoped parser arg0 arg1 arg2 arg3 = call parser (SCI.make_using_statement_function_scoped arg0 arg1 arg2 arg3)
-    let declare_directive_statement parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_declare_directive_statement arg0 arg1 arg2 arg3 arg4)
-    let declare_block_statement parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_declare_block_statement arg0 arg1 arg2 arg3 arg4)
     let while_statement parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_while_statement arg0 arg1 arg2 arg3 arg4)
     let if_statement parser arg0 arg1 arg2 arg3 arg4 arg5 arg6 = call parser (SCI.make_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6)
     let elseif_clause parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_elseif_clause arg0 arg1 arg2 arg3 arg4)

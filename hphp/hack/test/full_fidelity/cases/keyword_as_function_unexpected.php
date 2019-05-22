@@ -14,7 +14,6 @@ function class() {}
 function clone() {}
 function const() {}
 function continue() {}
-function declare() {}
 function default() {}
 function do() {}
 function echo() {}
@@ -22,7 +21,6 @@ function else() {}
 function elseif() {}
 function endfor() {}
 function endforeach() {}
-function enddeclare() {}
 function endif() {}
 function endswitch() {}
 function endwhile() {}

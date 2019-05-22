@@ -29,7 +29,6 @@ type hoist_kind =
 type convert_result = {
   ast_defs: (hoist_kind * def) list;
   global_state: Emit_env.global_state;
-  strict_types: bool option;
 }
 
 type variables = {
@@ -109,7 +108,6 @@ type state = {
   (* maps name of function that has at least one goto statement
      to labels in function (bool value denotes whether label appear in using) *)
   function_to_labels_map: (bool SMap.t) SMap.t;
-  seen_strict_types: bool option;
   (* most recent definition of lexical-scoped `let` variables *)
   let_vars: int SMap.t;
   (* maps unique name of lambda to Rx level of the declaring scope *)
@@ -148,7 +146,6 @@ let initial_state popt =
   current_function_state = empty_per_function_state;
   functions_with_finally = SSet.empty;
   function_to_labels_map = SMap.empty;
-  seen_strict_types = None;
   let_vars = SMap.empty;
   lambda_rx_of_scope = SMap.empty;
 }
@@ -1272,12 +1269,6 @@ and convert_stmt (env : env) (st : state) (p, stmt_): _ * stmt =
       (* record the fact that function has goto *)
        let st = set_has_goto st in
        st, stmt_
-    | Declare (_, (_, Binop (Ast.Eq None, (_, Id (_, "strict_types")), (_, Int v))), _) ->
-      let st = { st with seen_strict_types = Some (v = "1") } in
-      st, stmt_
-    | Declare (true, _, b) ->
-      let st, _ = convert_block env st b in
-      st, stmt_
     | Let ((_, var), _hint, e) ->
       let an = Tast_annotate.with_pos p in
       let st, e = convert_expr env st e in
@@ -1291,8 +1282,7 @@ and convert_stmt (env : env) (st : state) (p, stmt_): _ * stmt =
     | TempBreak _
     | Continue
     | TempContinue _
-    | Markup _
-    | Declare _ -> st, stmt_ in
+    | Markup _ -> st, stmt_ in
   st, (p, stmt_)
 
 and convert_block ?(scope=true) env st stmts =
@@ -1628,5 +1618,4 @@ let convert_toplevel_prog ~popt defs =
   {
     ast_defs;
     global_state;
-    strict_types = st.seen_strict_types;
   }

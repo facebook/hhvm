@@ -52,7 +52,7 @@ let emit_fatal_program ~ignore_message op pos message =
     None (* env *)
   in
   Hhas_program.make
-    true [] [] [] [] [] body Emit_symbol_refs.empty_symbol_refs None
+    true [] [] [] [] [] body Emit_symbol_refs.empty_symbol_refs
 
 let debugger_eval_should_modify ast =
   (* The AST currently always starts with a Markup statement, so a length of 2
@@ -77,16 +77,8 @@ let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~po
       Emit_env.set_is_js_file is_js_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)
-      let { ast_defs = closed_ast; global_state = global_state; strict_types = strict_types; } =
+      let { ast_defs = closed_ast; global_state = global_state; } =
         convert_toplevel_prog ~popt tast in
-      let strict_types =
-        (* is scalar_types is set - always assume strict_types to have value *)
-        if Hhbc_options.php7_scalar_types !(Hhbc_options.compiler_options)
-        then begin match strict_types with
-          | None -> Some false
-          | _ -> strict_types
-          end
-        else None in
       Emit_env.set_global_state global_state;
       let flat_closed_ast = List.map ~f:snd closed_ast in
       let debugger_modify_program = for_debugger_eval && debugger_eval_should_modify tast in
@@ -99,7 +91,7 @@ let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~po
       let symbol_refs = Emit_symbol_refs.get_symbol_refs () in
       let hhas = Hhas_program.make is_hh_file adata compiled_funs
         compiled_classes compiled_typedefs compiled_file_attributes
-        compiled_defs symbol_refs strict_types in
+        compiled_defs symbol_refs in
       hhas
     with Emit_fatal.IncludeTimeFatalException (op, pos, message) ->
       emit_fatal_program ~ignore_message:false op pos message

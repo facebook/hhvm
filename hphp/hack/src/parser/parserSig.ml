@@ -102,8 +102,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val let_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val using_statement_block_scoped : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val using_statement_function_scoped : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val declare_directive_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val declare_block_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val while_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val if_statement : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val elseif_clause : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

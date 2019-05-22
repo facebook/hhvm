@@ -1,5 +1,5 @@
-((script 2033
-  ((list 2033
+((script 1986
+  ((list 1986
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -127,15 +127,6 @@
       ((missing 0 ())
        (function_declaration_header 18
         ((missing 0 ()) (() function 8 ((whitespace 1)))
-         (error 7 ((() declare 7 ()))) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-         (missing 0 ()) (missing 0 ())))
-       (compound_statement 2
-        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (function_declaration 21
-      ((missing 0 ())
-       (function_declaration_header 18
-        ((missing 0 ()) (() function 8 ((whitespace 1)))
          (error 7 ((() default 7 ()))) (missing 0 ()) (() "(" 1 ())
          (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
          (missing 0 ()) (missing 0 ())))
@@ -191,15 +182,6 @@
        (function_declaration_header 21
         ((missing 0 ()) (() function 8 ((whitespace 1)))
          (error 10 ((() endforeach 10 ()))) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-         (missing 0 ()) (missing 0 ())))
-       (compound_statement 2
-        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (function_declaration 24
-      ((missing 0 ())
-       (function_declaration_header 21
-        ((missing 0 ()) (() function 8 ((whitespace 1)))
-         (error 10 ((() enddeclare 10 ()))) (missing 0 ()) (() "(" 1 ())
          (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
          (missing 0 ()) (missing 0 ())))
        (compound_statement 2
@@ -646,7 +628,7 @@
            (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 8 ((() continue 8 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 7 ((() declare 7 ()))) (error 1 ((() "(" 1 ())))
+           (error 7 ((() name 7 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 7 ((() default 7 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
@@ -662,7 +644,7 @@
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 10 ((() endforeach 10 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 10 ((() enddeclare 10 ()))) (error 1 ((() "(" 1 ())))
+           (error 10 ((() name 10 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 5 ((() endif 5 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))

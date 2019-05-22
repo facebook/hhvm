@@ -263,7 +263,6 @@ struct
     | S.Let(x, h, e) -> T.Let(x, h, map_expr menv e)
     | S.Block b -> T.Block (map_block menv b)
     | S.Markup (s, eopt) -> T.Markup (s, Option.map eopt (map_expr menv))
-    | S.Declare (is_block, e, b) -> T.Declare(is_block, map_expr menv e, map_block menv b)
 
   and map_block menv sl = List.map sl (map_stmt menv)
 

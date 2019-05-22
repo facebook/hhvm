@@ -497,22 +497,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
       node :: rem, node
     | _ -> failwith "Unexpected stack state"
 
-  let make_declare_directive_statement p0 p1 p2 p3 p4 stack =
-    match stack with
-    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "declare_directive_statement" in
-      let node = Syntax.make_declare_directive_statement p0 p1 p2 p3 p4 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
-  let make_declare_block_statement p0 p1 p2 p3 p4 stack =
-    match stack with
-    | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->
-      let () = verify ~stack [p0; p1; p2; p3; p4] [a0; a1; a2; a3; a4] "declare_block_statement" in
-      let node = Syntax.make_declare_block_statement p0 p1 p2 p3 p4 in
-      node :: rem, node
-    | _ -> failwith "Unexpected stack state"
-
   let make_while_statement p0 p1 p2 p3 p4 stack =
     match stack with
     | a4 :: a3 :: a2 :: a1 :: a0 :: rem ->

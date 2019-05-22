@@ -46,7 +46,6 @@ type t =
   | Continue
   | Coroutine
   | Darray
-  | Declare
   | Default
   | Define
   | Destruct
@@ -59,7 +58,6 @@ type t =
   | Empty
   | Endfor
   | Endforeach
-  | Enddeclare
   | Endif
   | Endswitch
   | Endwhile
@@ -268,7 +266,6 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "continue"                                                           -> Some Continue
   | "coroutine"       when is_hack                &&   not only_reserved -> Some Coroutine
   | "darray"          when is_hack                &&   not only_reserved -> Some Darray
-  | "declare"                                                            -> Some Declare
   | "default"                                                            -> Some Default
   | "define"                                      when not only_reserved -> Some Define
   | "__destruct"                                                         -> Some Destruct
@@ -281,7 +278,6 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "empty"                                                              -> Some Empty
   | "endfor"                                                             -> Some Endfor
   | "endforeach"                                                         -> Some Endforeach
-  | "enddeclare"                                                         -> Some Enddeclare
   | "endif"                                                              -> Some Endif
   | "endswitch"                                                          -> Some Endswitch
   | "endwhile"                                                           -> Some Endwhile
@@ -464,7 +460,6 @@ let to_string kind =
   | Continue                      -> "continue"
   | Coroutine                     -> "coroutine"
   | Darray                        -> "darray"
-  | Declare                       -> "declare"
   | Default                       -> "default"
   | Define                        -> "define"
   | Destruct                      -> "__destruct"
@@ -477,7 +472,6 @@ let to_string kind =
   | Empty                         -> "empty"
   | Endfor                        -> "endfor"
   | Endforeach                    -> "endforeach"
-  | Enddeclare                    -> "enddeclare"
   | Endif                         -> "endif"
   | Endswitch                     -> "endswitch"
   | Endwhile                      -> "endwhile"

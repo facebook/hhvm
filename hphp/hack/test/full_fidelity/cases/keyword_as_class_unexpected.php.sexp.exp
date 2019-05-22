@@ -1,5 +1,5 @@
-((script 1983
-  ((list 1983
+((script 1946
+  ((list 1946
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -90,13 +90,6 @@
        (classish_body 2
         ((((extra_token_error 7) (whitespace 1)) { 1 ()) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 16
-      ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
-       (classish_body 2
-        ((((extra_token_error 7) (whitespace 1)) { 1 ()) (missing 0 ())
-         (() } 1 ((end_of_line 1)))))))
      (classish_declaration 11
       ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -138,13 +131,6 @@
        (missing 0 ()) (missing 0 ())
        (classish_body 2
         ((((extra_token_error 6) (whitespace 1)) { 1 ()) (missing 0 ())
-         (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 19
-      ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ())
-       (classish_body 2
-        ((((extra_token_error 10) (whitespace 1)) { 1 ()) (missing 0 ())
          (() } 1 ((end_of_line 1)))))))
      (classish_declaration 19
       ((missing 0 ()) (missing 0 ()) (() class 5 ((whitespace 1)))
@@ -537,7 +523,8 @@
       ((object_creation_expression 13
         ((() new 3 ((whitespace 1)))
          (constructor_call 9
-          ((() declare 7 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+          ((simple_type_specifier 7 ((() name 7 ()))) (() "(" 1 ())
+           (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 14
       ((object_creation_expression 13
@@ -593,7 +580,8 @@
       ((object_creation_expression 16
         ((() new 3 ((whitespace 1)))
          (constructor_call 12
-          ((() enddeclare 10 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
+          ((simple_type_specifier 10 ((() name 10 ()))) (() "(" 1 ())
+           (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 12
       ((object_creation_expression 11

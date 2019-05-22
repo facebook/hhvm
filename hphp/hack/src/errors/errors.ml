@@ -1999,9 +1999,6 @@ let too_many_type_arguments p =
   add (Naming.err_code Naming.TooManyTypeArguments) p
     ("Too many type arguments for this type")
 
-let declare_statement_in_hack p =
-  add (Naming.err_code Naming.DeclareStatement) p
-    ("Declare statements are disallowed in Hack code.")
 let return_in_void pos1 pos2 =
   add_list (Typing.err_code Typing.ReturnInVoid) [
   pos1,

@@ -602,30 +602,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_declare_directive_statement(declare_directive_keyword: Self, declare_directive_left_paren: Self, declare_directive_expression: Self, declare_directive_right_paren: Self, declare_directive_semicolon: Self) -> Self {
-        let syntax = SyntaxVariant::DeclareDirectiveStatement(Box::new(DeclareDirectiveStatementChildren {
-            declare_directive_keyword,
-            declare_directive_left_paren,
-            declare_directive_expression,
-            declare_directive_right_paren,
-            declare_directive_semicolon,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
-    fn make_declare_block_statement(declare_block_keyword: Self, declare_block_left_paren: Self, declare_block_expression: Self, declare_block_right_paren: Self, declare_block_body: Self) -> Self {
-        let syntax = SyntaxVariant::DeclareBlockStatement(Box::new(DeclareBlockStatementChildren {
-            declare_block_keyword,
-            declare_block_left_paren,
-            declare_block_expression,
-            declare_block_right_paren,
-            declare_block_body,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_while_statement(while_keyword: Self, while_left_paren: Self, while_condition: Self, while_right_paren: Self, while_body: Self) -> Self {
         let syntax = SyntaxVariant::WhileStatement(Box::new(WhileStatementChildren {
             while_keyword,
@@ -2373,22 +2349,6 @@ where
                 let acc = f(&x.using_function_semicolon, acc);
                 acc
             },
-            SyntaxVariant::DeclareDirectiveStatement(x) => {
-                let acc = f(&x.declare_directive_keyword, acc);
-                let acc = f(&x.declare_directive_left_paren, acc);
-                let acc = f(&x.declare_directive_expression, acc);
-                let acc = f(&x.declare_directive_right_paren, acc);
-                let acc = f(&x.declare_directive_semicolon, acc);
-                acc
-            },
-            SyntaxVariant::DeclareBlockStatement(x) => {
-                let acc = f(&x.declare_block_keyword, acc);
-                let acc = f(&x.declare_block_left_paren, acc);
-                let acc = f(&x.declare_block_expression, acc);
-                let acc = f(&x.declare_block_right_paren, acc);
-                let acc = f(&x.declare_block_body, acc);
-                acc
-            },
             SyntaxVariant::WhileStatement(x) => {
                 let acc = f(&x.while_keyword, acc);
                 let acc = f(&x.while_left_paren, acc);
@@ -3322,8 +3282,6 @@ where
             SyntaxVariant::LetStatement {..} => SyntaxKind::LetStatement,
             SyntaxVariant::UsingStatementBlockScoped {..} => SyntaxKind::UsingStatementBlockScoped,
             SyntaxVariant::UsingStatementFunctionScoped {..} => SyntaxKind::UsingStatementFunctionScoped,
-            SyntaxVariant::DeclareDirectiveStatement {..} => SyntaxKind::DeclareDirectiveStatement,
-            SyntaxVariant::DeclareBlockStatement {..} => SyntaxKind::DeclareBlockStatement,
             SyntaxVariant::WhileStatement {..} => SyntaxKind::WhileStatement,
             SyntaxVariant::IfStatement {..} => SyntaxKind::IfStatement,
             SyntaxVariant::ElseifClause {..} => SyntaxKind::ElseifClause,
@@ -3868,24 +3826,6 @@ pub struct UsingStatementFunctionScopedChildren<T, V> {
     pub using_function_using_keyword: Syntax<T, V>,
     pub using_function_expression: Syntax<T, V>,
     pub using_function_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct DeclareDirectiveStatementChildren<T, V> {
-    pub declare_directive_keyword: Syntax<T, V>,
-    pub declare_directive_left_paren: Syntax<T, V>,
-    pub declare_directive_expression: Syntax<T, V>,
-    pub declare_directive_right_paren: Syntax<T, V>,
-    pub declare_directive_semicolon: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
-pub struct DeclareBlockStatementChildren<T, V> {
-    pub declare_block_keyword: Syntax<T, V>,
-    pub declare_block_left_paren: Syntax<T, V>,
-    pub declare_block_expression: Syntax<T, V>,
-    pub declare_block_right_paren: Syntax<T, V>,
-    pub declare_block_body: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -4942,8 +4882,6 @@ pub enum SyntaxVariant<T, V> {
     LetStatement(Box<LetStatementChildren<T, V>>),
     UsingStatementBlockScoped(Box<UsingStatementBlockScopedChildren<T, V>>),
     UsingStatementFunctionScoped(Box<UsingStatementFunctionScopedChildren<T, V>>),
-    DeclareDirectiveStatement(Box<DeclareDirectiveStatementChildren<T, V>>),
-    DeclareBlockStatement(Box<DeclareBlockStatementChildren<T, V>>),
     WhileStatement(Box<WhileStatementChildren<T, V>>),
     IfStatement(Box<IfStatementChildren<T, V>>),
     ElseifClause(Box<ElseifClauseChildren<T, V>>),

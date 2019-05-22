@@ -80,7 +80,6 @@ and terminal_ nsenv ~in_try st =
   | Aast.Let _
   | Aast.Do _
   | Aast.While _
-  | Aast.Declare _
   | Aast.For _
   | Aast.Foreach _
   | Aast.Def_inline _
@@ -280,7 +279,6 @@ let rec stmt (acc:(Namespace_env.env * Pos.t SMap.t)) st =
         let acc = expr acc v in
         acc
     end
-  | Aast.Declare _
   | Aast.Return _
   | Aast.Goto _
   | Aast.GotoLabel _

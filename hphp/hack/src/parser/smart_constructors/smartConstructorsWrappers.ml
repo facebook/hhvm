@@ -86,8 +86,6 @@ module type SyntaxKind_S = sig
   val is_let_statement : r -> bool
   val is_using_statement_block_scoped : r -> bool
   val is_using_statement_function_scoped : r -> bool
-  val is_declare_directive_statement : r -> bool
-  val is_declare_block_statement : r -> bool
   val is_while_statement : r -> bool
   val is_if_statement : r -> bool
   val is_elseif_clause : r -> bool
@@ -296,8 +294,6 @@ module SyntaxKind(SC : SC_S)
   let make_let_statement arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.LetStatement (SC.make_let_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_using_statement_block_scoped arg0 arg1 arg2 arg3 arg4 arg5 state = compose SK.UsingStatementBlockScoped (SC.make_using_statement_block_scoped (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) state)
   let make_using_statement_function_scoped arg0 arg1 arg2 arg3 state = compose SK.UsingStatementFunctionScoped (SC.make_using_statement_function_scoped (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
-  let make_declare_directive_statement arg0 arg1 arg2 arg3 arg4 state = compose SK.DeclareDirectiveStatement (SC.make_declare_directive_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
-  let make_declare_block_statement arg0 arg1 arg2 arg3 arg4 state = compose SK.DeclareBlockStatement (SC.make_declare_block_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_while_statement arg0 arg1 arg2 arg3 arg4 state = compose SK.WhileStatement (SC.make_while_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_if_statement arg0 arg1 arg2 arg3 arg4 arg5 arg6 state = compose SK.IfStatement (SC.make_if_statement (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) (snd arg5) (snd arg6) state)
   let make_elseif_clause arg0 arg1 arg2 arg3 arg4 state = compose SK.ElseifClause (SC.make_elseif_clause (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
@@ -482,8 +478,6 @@ module SyntaxKind(SC : SC_S)
   let is_let_statement                        = has_kind SK.LetStatement
   let is_using_statement_block_scoped         = has_kind SK.UsingStatementBlockScoped
   let is_using_statement_function_scoped      = has_kind SK.UsingStatementFunctionScoped
-  let is_declare_directive_statement          = has_kind SK.DeclareDirectiveStatement
-  let is_declare_block_statement              = has_kind SK.DeclareBlockStatement
   let is_while_statement                      = has_kind SK.WhileStatement
   let is_if_statement                         = has_kind SK.IfStatement
   let is_elseif_clause                        = has_kind SK.ElseifClause

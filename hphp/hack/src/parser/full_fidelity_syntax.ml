@@ -113,8 +113,6 @@ module WithToken(Token: TokenType) = struct
       | LetStatement                      _ -> SyntaxKind.LetStatement
       | UsingStatementBlockScoped         _ -> SyntaxKind.UsingStatementBlockScoped
       | UsingStatementFunctionScoped      _ -> SyntaxKind.UsingStatementFunctionScoped
-      | DeclareDirectiveStatement         _ -> SyntaxKind.DeclareDirectiveStatement
-      | DeclareBlockStatement             _ -> SyntaxKind.DeclareBlockStatement
       | WhileStatement                    _ -> SyntaxKind.WhileStatement
       | IfStatement                       _ -> SyntaxKind.IfStatement
       | ElseifClause                      _ -> SyntaxKind.ElseifClause
@@ -306,8 +304,6 @@ module WithToken(Token: TokenType) = struct
     let is_let_statement                        = has_kind SyntaxKind.LetStatement
     let is_using_statement_block_scoped         = has_kind SyntaxKind.UsingStatementBlockScoped
     let is_using_statement_function_scoped      = has_kind SyntaxKind.UsingStatementFunctionScoped
-    let is_declare_directive_statement          = has_kind SyntaxKind.DeclareDirectiveStatement
-    let is_declare_block_statement              = has_kind SyntaxKind.DeclareBlockStatement
     let is_while_statement                      = has_kind SyntaxKind.WhileStatement
     let is_if_statement                         = has_kind SyntaxKind.IfStatement
     let is_elseif_clause                        = has_kind SyntaxKind.ElseifClause
@@ -1080,32 +1076,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc using_function_using_keyword in
          let acc = f acc using_function_expression in
          let acc = f acc using_function_semicolon in
-         acc
-      | DeclareDirectiveStatement {
-        declare_directive_keyword;
-        declare_directive_left_paren;
-        declare_directive_expression;
-        declare_directive_right_paren;
-        declare_directive_semicolon;
-      } ->
-         let acc = f acc declare_directive_keyword in
-         let acc = f acc declare_directive_left_paren in
-         let acc = f acc declare_directive_expression in
-         let acc = f acc declare_directive_right_paren in
-         let acc = f acc declare_directive_semicolon in
-         acc
-      | DeclareBlockStatement {
-        declare_block_keyword;
-        declare_block_left_paren;
-        declare_block_expression;
-        declare_block_right_paren;
-        declare_block_body;
-      } ->
-         let acc = f acc declare_block_keyword in
-         let acc = f acc declare_block_left_paren in
-         let acc = f acc declare_block_expression in
-         let acc = f acc declare_block_right_paren in
-         let acc = f acc declare_block_body in
          acc
       | WhileStatement {
         while_keyword;
@@ -3057,32 +3027,6 @@ module WithToken(Token: TokenType) = struct
         using_function_expression;
         using_function_semicolon;
       ]
-      | DeclareDirectiveStatement {
-        declare_directive_keyword;
-        declare_directive_left_paren;
-        declare_directive_expression;
-        declare_directive_right_paren;
-        declare_directive_semicolon;
-      } -> [
-        declare_directive_keyword;
-        declare_directive_left_paren;
-        declare_directive_expression;
-        declare_directive_right_paren;
-        declare_directive_semicolon;
-      ]
-      | DeclareBlockStatement {
-        declare_block_keyword;
-        declare_block_left_paren;
-        declare_block_expression;
-        declare_block_right_paren;
-        declare_block_body;
-      } -> [
-        declare_block_keyword;
-        declare_block_left_paren;
-        declare_block_expression;
-        declare_block_right_paren;
-        declare_block_body;
-      ]
       | WhileStatement {
         while_keyword;
         while_left_paren;
@@ -5033,32 +4977,6 @@ module WithToken(Token: TokenType) = struct
         "using_function_using_keyword";
         "using_function_expression";
         "using_function_semicolon";
-      ]
-      | DeclareDirectiveStatement {
-        declare_directive_keyword;
-        declare_directive_left_paren;
-        declare_directive_expression;
-        declare_directive_right_paren;
-        declare_directive_semicolon;
-      } -> [
-        "declare_directive_keyword";
-        "declare_directive_left_paren";
-        "declare_directive_expression";
-        "declare_directive_right_paren";
-        "declare_directive_semicolon";
-      ]
-      | DeclareBlockStatement {
-        declare_block_keyword;
-        declare_block_left_paren;
-        declare_block_expression;
-        declare_block_right_paren;
-        declare_block_body;
-      } -> [
-        "declare_block_keyword";
-        "declare_block_left_paren";
-        "declare_block_expression";
-        "declare_block_right_paren";
-        "declare_block_body";
       ]
       | WhileStatement {
         while_keyword;
@@ -7118,34 +7036,6 @@ module WithToken(Token: TokenType) = struct
           using_function_using_keyword;
           using_function_expression;
           using_function_semicolon;
-        }
-      | (SyntaxKind.DeclareDirectiveStatement, [
-          declare_directive_keyword;
-          declare_directive_left_paren;
-          declare_directive_expression;
-          declare_directive_right_paren;
-          declare_directive_semicolon;
-        ]) ->
-        DeclareDirectiveStatement {
-          declare_directive_keyword;
-          declare_directive_left_paren;
-          declare_directive_expression;
-          declare_directive_right_paren;
-          declare_directive_semicolon;
-        }
-      | (SyntaxKind.DeclareBlockStatement, [
-          declare_block_keyword;
-          declare_block_left_paren;
-          declare_block_expression;
-          declare_block_right_paren;
-          declare_block_body;
-        ]) ->
-        DeclareBlockStatement {
-          declare_block_keyword;
-          declare_block_left_paren;
-          declare_block_expression;
-          declare_block_right_paren;
-          declare_block_body;
         }
       | (SyntaxKind.WhileStatement, [
           while_keyword;
@@ -9469,40 +9359,6 @@ module WithToken(Token: TokenType) = struct
           using_function_using_keyword;
           using_function_expression;
           using_function_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_declare_directive_statement
-        declare_directive_keyword
-        declare_directive_left_paren
-        declare_directive_expression
-        declare_directive_right_paren
-        declare_directive_semicolon
-      =
-        let syntax = DeclareDirectiveStatement {
-          declare_directive_keyword;
-          declare_directive_left_paren;
-          declare_directive_expression;
-          declare_directive_right_paren;
-          declare_directive_semicolon;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_declare_block_statement
-        declare_block_keyword
-        declare_block_left_paren
-        declare_block_expression
-        declare_block_right_paren
-        declare_block_body
-      =
-        let syntax = DeclareBlockStatement {
-          declare_block_keyword;
-          declare_block_left_paren;
-          declare_block_expression;
-          declare_block_right_paren;
-          declare_block_body;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

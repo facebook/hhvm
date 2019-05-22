@@ -464,22 +464,6 @@ pub trait FlattenSmartConstructors<'a, State>
         }
     }
 
-    fn make_declare_directive_statement(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State, Self::R) {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
-          (s, Self::zero())
-        } else {
-          (s, Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4)))
-        }
-    }
-
-    fn make_declare_block_statement(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State, Self::R) {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
-          (s, Self::zero())
-        } else {
-          (s, Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4)))
-        }
-    }
-
     fn make_while_statement(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State, Self::R) {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           (s, Self::zero())

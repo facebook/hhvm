@@ -23,7 +23,6 @@ let set_function_has_goto f = function_has_goto_ := f
 
 let rec collect_valid_target_labels_aux is_hh_file acc s =
   match snd s with
-  | T.Declare (_, _, block)
   | T.Unsafe_block block
   | T.Block block ->
     collect_valid_target_labels_for_block_aux is_hh_file acc block

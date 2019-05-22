@@ -74,8 +74,6 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_let_statement(let_statement_keyword: Self, let_statement_name: Self, let_statement_colon: Self, let_statement_type: Self, let_statement_initializer: Self, let_statement_semicolon: Self) -> Self;
     fn make_using_statement_block_scoped(using_block_await_keyword: Self, using_block_using_keyword: Self, using_block_left_paren: Self, using_block_expressions: Self, using_block_right_paren: Self, using_block_body: Self) -> Self;
     fn make_using_statement_function_scoped(using_function_await_keyword: Self, using_function_using_keyword: Self, using_function_expression: Self, using_function_semicolon: Self) -> Self;
-    fn make_declare_directive_statement(declare_directive_keyword: Self, declare_directive_left_paren: Self, declare_directive_expression: Self, declare_directive_right_paren: Self, declare_directive_semicolon: Self) -> Self;
-    fn make_declare_block_statement(declare_block_keyword: Self, declare_block_left_paren: Self, declare_block_expression: Self, declare_block_right_paren: Self, declare_block_body: Self) -> Self;
     fn make_while_statement(while_keyword: Self, while_left_paren: Self, while_condition: Self, while_right_paren: Self, while_body: Self) -> Self;
     fn make_if_statement(if_keyword: Self, if_left_paren: Self, if_condition: Self, if_right_paren: Self, if_statement: Self, if_elseif_clauses: Self, if_else_clause: Self) -> Self;
     fn make_elseif_clause(elseif_keyword: Self, elseif_left_paren: Self, elseif_condition: Self, elseif_right_paren: Self, elseif_statement: Self) -> Self;

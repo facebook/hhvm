@@ -50,7 +50,6 @@ type env =
   ; stats                    : Stats_container.t option
   ; hacksperimental          : bool
   ; top_level_statements     : bool (* Whether we are (still) considering TLSs*)
-  ; inside_declare           : bool (* Whether we're inside a declare directive. *)
   (* Changing parts; should disappear in future. `mutable` saves allocations. *)
   ; mutable ignore_pos       : bool
   ; mutable max_depth        : int    (* Filthy hack around OCaml bug *)
@@ -131,7 +130,6 @@ let make_env
     ; stats
     ; hacksperimental
     ; top_level_statements = true
-    ; inside_declare = false
     ; ignore_pos
     ; max_depth = 42
     ; saw_yield = false
@@ -1540,8 +1538,8 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
             (pExpr binary_left_operand  env)
             (pExpr binary_right_operand ~location:rlocation env)
         in
-        begin match env.inside_declare, bop_ast_node with
-        | false, Binop (Eq _, lhs, _) ->
+        begin match bop_ast_node with
+        | Binop (Eq _, lhs, _) ->
           Ast_check.check_lvalue (fun pos error -> raise_parsing_error env (`Pos pos) error) lhs
         | _ -> ()
         end;
@@ -2156,12 +2154,6 @@ and pStmt : stmt parser = fun node env ->
     pos, Do (pBlock do_body env, pExpr do_condition env)
   | WhileStatement { while_condition; while_body; _ } ->
     pos, While (pExpr while_condition env, unwrap_extra_block @@ pStmtUnsafe while_body env)
-  | DeclareDirectiveStatement { declare_directive_expression; _ } ->
-    pos, Declare (false, pExpr declare_directive_expression { env with inside_declare = true }, [])
-  | DeclareBlockStatement { declare_block_expression; declare_block_body; _ } ->
-    let env = { env with inside_declare = true } in
-    pos, Declare (true, pExpr declare_block_expression env,
-             unwrap_extra_block @@ pStmtUnsafe declare_block_body env)
   | UsingStatementBlockScoped
     { using_block_await_keyword
     ; using_block_expressions

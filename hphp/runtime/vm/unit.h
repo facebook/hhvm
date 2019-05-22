@@ -873,13 +873,6 @@ public:
    */
   bool useStrictTypes() const;
 
-  /*
-   * Should calls from this unit to builtins use strict types?
-   *
-   * This is true for PHP7 files with declare(strict_types=1), but not for Hack
-   * files or force_hh */
-  bool useStrictTypesForBuiltins() const;
-
   UserAttributeMap metaData() const;
 
   // Return true, and set the m_serialized flag, iff this Unit hasn't
@@ -931,7 +924,6 @@ private:
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
   bool m_useStrictTypes : 1;
-  bool m_useStrictTypesForBuiltins : 1;
   bool m_extended : 1;
   bool m_serialized : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error

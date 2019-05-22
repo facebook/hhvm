@@ -138,7 +138,6 @@ module WithExpressionAndDeclAndTypeParser
     | Foreach -> parse_foreach_statement parser
     | Do -> parse_do_statement parser
     | While -> parse_while_statement parser
-    | Declare -> parse_declare_statement parser
     | Let when Env.is_experimental_mode (env parser) -> parse_let_statement parser
     | Using ->
       let (parser, missing) = Make.missing parser (pos parser) in
@@ -442,51 +441,6 @@ module WithExpressionAndDeclAndTypeParser
       type_token
       init_node
       semi_token
-
-  (* SPEC:
-    declare-statement:
-      declare   (   expression   )   ;
-      declare   (   expression   )   compound-statement
-
-      declare   (   expression   ):
-            compound-statement enddeclare;
-    TODO: Update the specification of the grammar
-   *)
-  and parse_declare_statement parser =
-    let (parser, declare_keyword_token) =
-      assert_token parser Declare in
-    let (parser, left_paren_token, expr_node, right_paren_token) =
-      parse_paren_expr parser in
-    match peek_token_kind parser with
-    | Semicolon ->
-      let (parser, semi) = assert_token parser Semicolon in
-      Make.declare_directive_statement
-        parser
-        declare_keyword_token
-        left_paren_token
-        expr_node
-        right_paren_token
-        semi
-    | Colon ->
-      let (parser, statement_node) =
-        parse_alternate_loop_statement parser ~terminator:Enddeclare
-      in
-      Make.declare_block_statement
-        parser
-        declare_keyword_token
-        left_paren_token
-        expr_node
-        right_paren_token
-        statement_node
-    | _ ->
-      let (parser, statement_node) = parse_statement parser in
-      Make.declare_block_statement
-        parser
-        declare_keyword_token
-        left_paren_token
-        expr_node
-        right_paren_token
-        statement_node
 
   (* SPEC:
     using-statement:

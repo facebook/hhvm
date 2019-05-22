@@ -301,7 +301,6 @@ class type ['a] visitor_type = object
   method on_program: 'a -> program -> 'a
 
   method on_markup: 'a -> pstring -> expr option -> 'a
-  method on_declare: 'a -> bool -> expr -> block -> 'a
 
   method on_pu_atom : 'a -> string -> 'a
   method on_pu_identifier : 'a -> class_id -> pstring -> pstring -> 'a
@@ -326,10 +325,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
   method on_markup acc _ eopt = match eopt with
   | Some e -> this#on_expr acc e
   | None -> acc
-
-  method on_declare acc _ e b =
-    let acc = this#on_expr acc e in
-    this#on_block acc b
 
   method on_throw acc e =
     let acc = this#on_expr acc e in
@@ -461,7 +456,6 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
     | Let     (x, h, e)       -> this#on_let acc x h e
     | Block b                 -> this#on_block acc b
     | Markup (s, e)           -> this#on_markup acc s e
-    | Declare (is_blk, e, b)  -> this#on_declare acc is_blk e b
 
   method on_expr acc (_, e) =
     this#on_expr_ acc e

@@ -1,6 +1,5 @@
 <?php
 
-//declare(encoding = 'UTF-8');
 mb_internal_encoding('UTF-8');
 
 header('Content-Type: text/plain; charset=UTF-32LE');

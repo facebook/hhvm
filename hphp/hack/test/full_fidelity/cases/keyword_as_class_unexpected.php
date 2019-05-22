@@ -12,7 +12,6 @@ class class {}
 class clone {}
 class const {}
 class continue {}
-class declare {}
 class default {}
 class do {}
 class echo {}
@@ -21,7 +20,6 @@ class elseif {}
 class empty {}
 class endfor {}
 class endforeach {}
-class enddeclare {}
 class endif {}
 class endswitch {}
 class endwhile {}

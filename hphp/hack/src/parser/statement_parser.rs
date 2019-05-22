@@ -197,7 +197,6 @@ where
             TokenKind::Foreach => self.parse_foreach_statement(),
             TokenKind::Do => self.parse_do_statement(),
             TokenKind::While => self.parse_while_statement(),
-            TokenKind::Declare => self.parse_declare_statement(),
             TokenKind::Let if self.env.is_experimental_mode => self.parse_let_statement(),
             TokenKind::Using => {
                 let missing = S!(make_missing, self, self.pos());
@@ -527,57 +526,6 @@ where
             init_node,
             semi_token,
         )
-    }
-
-    // SPEC:
-    // declare-statement:
-    //   declare   (   expression   )   ;
-    //   declare   (   expression   )   compound-statement
-    //
-    // declare   (   expression   ):
-    //   compound-statement enddeclare;
-    // TODO: Update the specification of the grammar
-    fn parse_declare_statement(&mut self) -> S::R {
-        let declare_keyword_token = self.assert_token(TokenKind::Declare);
-        let (left_paren_token, expr_node, right_paren_token) = self.parse_paren_expr();
-        match self.peek_token_kind() {
-            TokenKind::Semicolon => {
-                let semi = self.assert_token(TokenKind::Semicolon);
-                S!(
-                    make_declare_directive_statement,
-                    self,
-                    declare_keyword_token,
-                    left_paren_token,
-                    expr_node,
-                    right_paren_token,
-                    semi,
-                )
-            }
-            TokenKind::Colon => {
-                let statement_node = self.parse_alternate_loop_statement(TokenKind::Enddeclare);
-                S!(
-                    make_declare_block_statement,
-                    self,
-                    declare_keyword_token,
-                    left_paren_token,
-                    expr_node,
-                    right_paren_token,
-                    statement_node,
-                )
-            }
-            _ => {
-                let statement_node = self.parse_statement();
-                S!(
-                    make_declare_block_statement,
-                    self,
-                    declare_keyword_token,
-                    left_paren_token,
-                    expr_node,
-                    right_paren_token,
-                    statement_node,
-                )
-            }
-        }
     }
 
     // SPEC:

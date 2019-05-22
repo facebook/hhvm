@@ -269,14 +269,6 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_using_statement_function_scoped(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_declare_directive_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_declare_directive_statement(s, arg0, arg1, arg2, arg3, arg4)
-    }
-
-    fn make_declare_block_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_declare_block_statement(s, arg0, arg1, arg2, arg3, arg4)
-    }
-
     fn make_while_statement(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_while_statement(s, arg0, arg1, arg2, arg3, arg4)
     }

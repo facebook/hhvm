@@ -90,7 +90,6 @@ and stmt_ =
   | Noop
   | Block of block
   | Markup of pstring * expr option
-  | Declare of (* is_block *) bool * expr * block
 
 and using_stmt = {
   us_is_block_scoped: bool;

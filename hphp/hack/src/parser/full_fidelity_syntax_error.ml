@@ -356,8 +356,6 @@ let reassign_this =
   "Cannot re-assign $this"
 let this_in_static =
   "Don't use $this in a static method, use static:: instead"
-let strict_types_first_statement =
-  "strict_types declaration must be the very first statement in the script"
 let async_magic_method ~name =
   "cannot declare constructors, destructors, and magic methods such as '"^ name ^ "' async"
 let call_static_method =
@@ -411,8 +409,6 @@ let namespace_decl_first_statement =
   "Namespace declaration statement has to be the very first statement in the script"
 let code_outside_namespace =
   "No code may exist outside of namespace {}"
-let strict_types_in_declare_block_mode =
-  "strict_types declaration must not use block mode"
 let invalid_number_of_args name n =
   "Method " ^ name ^ " must take exactly " ^ (string_of_int n) ^ " arguments"
 let invalid_args_by_ref name =

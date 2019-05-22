@@ -343,20 +343,6 @@ module type Syntax_S = sig
     ; using_function_expression                          : t
     ; using_function_semicolon                           : t
     }
-  | DeclareDirectiveStatement         of
-    { declare_directive_keyword                          : t
-    ; declare_directive_left_paren                       : t
-    ; declare_directive_expression                       : t
-    ; declare_directive_right_paren                      : t
-    ; declare_directive_semicolon                        : t
-    }
-  | DeclareBlockStatement             of
-    { declare_block_keyword                              : t
-    ; declare_block_left_paren                           : t
-    ; declare_block_expression                           : t
-    ; declare_block_right_paren                          : t
-    ; declare_block_body                                 : t
-    }
   | WhileStatement                    of
     { while_keyword                                      : t
     ; while_left_paren                                   : t
@@ -1192,8 +1178,6 @@ module type Syntax_S = sig
   val make_let_statement : t -> t -> t -> t -> t -> t -> t
   val make_using_statement_block_scoped : t -> t -> t -> t -> t -> t -> t
   val make_using_statement_function_scoped : t -> t -> t -> t -> t
-  val make_declare_directive_statement : t -> t -> t -> t -> t -> t
-  val make_declare_block_statement : t -> t -> t -> t -> t -> t
   val make_while_statement : t -> t -> t -> t -> t -> t
   val make_if_statement : t -> t -> t -> t -> t -> t -> t -> t
   val make_elseif_clause : t -> t -> t -> t -> t -> t
@@ -1377,8 +1361,6 @@ module type Syntax_S = sig
   val is_let_statement : t -> bool
   val is_using_statement_block_scoped : t -> bool
   val is_using_statement_function_scoped : t -> bool
-  val is_declare_directive_statement : t -> bool
-  val is_declare_block_statement : t -> bool
   val is_while_statement : t -> bool
   val is_if_statement : t -> bool
   val is_elseif_clause : t -> bool

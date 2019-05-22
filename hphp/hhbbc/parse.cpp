@@ -1121,7 +1121,6 @@ std::unique_ptr<php::Unit> parse_unit(php::Program& prog,
   ret->filename = ue.m_filepath;
   ret->isHHFile = ue.m_isHHFile;
   ret->useStrictTypes = ue.m_useStrictTypes;
-  ret->useStrictTypesForBuiltins = ue.m_useStrictTypesForBuiltins;
   ret->metaData = ue.m_metaData;
   ret->fileAttributes = ue.m_fileAttributes;
 

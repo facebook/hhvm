@@ -1,12 +1,14 @@
-<?php <<__EntryPoint>> function main() {
-a: print "ok!\n";
-goto c;
-declare (ticks=1) {
-    b:
-        print "ok!\n";
-        exit;
-}
-c:
-    print "ok!\n";
-    goto b;
+<?php
+
+<<__EntryPoint>>
+function main() {
+ a:
+  print "ok!\n";
+  goto c;
+ b:
+  print "ok!\n";
+  exit;
+ c:
+  print "ok!\n";
+  goto b;
 }

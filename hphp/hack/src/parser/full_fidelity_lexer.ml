@@ -1441,8 +1441,8 @@ let as_case_insensitive_keyword text =
   match lower with
   | "__halt_compiler" | "abstract" | "and" | "array" | "as" | "bool" | "boolean" | "break"
   | "callable"
-  | "case" | "catch" | "class" | "clone" | "const" | "continue" | "declare" | "default"
-  | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "enddeclare" | "endfor"
+  | "case" | "catch" | "class" | "clone" | "const" | "continue" | "default"
+  | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "endfor"
   | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false"
   | "final" | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
   | "implements" | "include" | "include_once" | "instanceof" | "insteadof" | "int" | "integer"

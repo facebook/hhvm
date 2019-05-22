@@ -383,7 +383,6 @@ struct
     | If (e, b1, b2)            -> Aast.If (on_expr e, on_block b1, on_block b2)
     | Do (b, e)                 -> Aast.Do (on_block b, on_expr e)
     | While (e, b)              -> Aast.While (on_expr e, on_block b)
-    | Declare (is_blk, e, b)    -> Aast.Declare (is_blk, on_expr e, on_block b)
     | Using s ->
       Aast.Using Aast.{
         us_expr = on_expr s.us_expr;

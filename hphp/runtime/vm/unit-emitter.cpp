@@ -641,7 +641,6 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
   u->m_mergeOnly = m_mergeOnly;
   u->m_isHHFile = m_isHHFile;
   u->m_useStrictTypes = m_useStrictTypes;
-  u->m_useStrictTypesForBuiltins = m_useStrictTypesForBuiltins;
   u->m_dirpath = makeStaticString(FileUtil::dirname(StrNR{m_filepath}));
   u->m_sha1 = m_sha1;
   u->m_arrays = m_arrays;
@@ -826,7 +825,6 @@ void UnitEmitter::serdeMetaData(SerDe& sd) {
     (m_isHHFile)
     (m_typeAliases)
     (m_useStrictTypes)
-    (m_useStrictTypesForBuiltins)
     (m_metaData)
     (m_fileAttributes)
     (m_symbol_refs)

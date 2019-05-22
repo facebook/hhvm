@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2019-04-03-0001",
+  "version" : "2019-05-20-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -75,8 +75,6 @@
       "token_text" : "coroutine" },
     { "token_kind" : "Darray",
       "token_text" : "darray" },
-    { "token_kind" : "Declare",
-      "token_text" : "declare" },
     { "token_kind" : "Default",
       "token_text" : "default" },
     { "token_kind" : "Define",
@@ -101,8 +99,6 @@
       "token_text" : "endfor" },
     { "token_kind" : "Endforeach",
       "token_text" : "endforeach" },
-    { "token_kind" : "Enddeclare",
-      "token_text" : "enddeclare" },
     { "token_kind" : "Endif",
       "token_text" : "endif" },
     { "token_kind" : "Endswitch",
@@ -981,28 +977,6 @@
         { "field_name" : "using_keyword" },
         { "field_name" : "expression" },
         { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "DeclareDirectiveStatement",
-      "type_name" : "declare_directive_statement",
-      "description" : "declare_directive_statement",
-      "prefix" : "declare_directive",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "expression" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "semicolon" }
-      ] },
-    { "kind_name" : "DeclareBlockStatement",
-      "type_name" : "declare_block_statement",
-      "description" : "declare_block_statement",
-      "prefix" : "declare_block",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "expression" },
-        { "field_name" : "right_paren" },
-        { "field_name" : "body" }
       ] },
     { "kind_name" : "WhileStatement",
       "type_name" : "while_statement",

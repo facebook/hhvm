@@ -74,8 +74,6 @@ type t =
   | LetStatement
   | UsingStatementBlockScoped
   | UsingStatementFunctionScoped
-  | DeclareDirectiveStatement
-  | DeclareBlockStatement
   | WhileStatement
   | IfStatement
   | ElseifClause
@@ -261,8 +259,6 @@ let to_string kind =
   | LetStatement                      -> "let_statement"
   | UsingStatementBlockScoped         -> "using_statement_block_scoped"
   | UsingStatementFunctionScoped      -> "using_statement_function_scoped"
-  | DeclareDirectiveStatement         -> "declare_directive_statement"
-  | DeclareBlockStatement             -> "declare_block_statement"
   | WhileStatement                    -> "while_statement"
   | IfStatement                       -> "if_statement"
   | ElseifClause                      -> "elseif_clause"

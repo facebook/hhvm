@@ -597,7 +597,6 @@ struct Unit {
   LSString filename;
   bool isHHFile{false};
   bool useStrictTypes{false};
-  bool useStrictTypesForBuiltins{false};
   std::atomic<bool> persistent{true};
   std::unique_ptr<Func> pseudomain;
   CompactVector<std::unique_ptr<Func>> funcs;

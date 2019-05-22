@@ -316,16 +316,6 @@ where
         (s, Self::R::make_using_statement_function_scoped(arg0, arg1, arg2, arg3))
     }
 
-    fn make_declare_directive_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4]);
-        (s, Self::R::make_declare_directive_statement(arg0, arg1, arg2, arg3, arg4))
-    }
-
-    fn make_declare_block_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4]);
-        (s, Self::R::make_declare_block_statement(arg0, arg1, arg2, arg3, arg4))
-    }
-
     fn make_while_statement(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3, &arg4]);
         (s, Self::R::make_while_statement(arg0, arg1, arg2, arg3, arg4))

@@ -3423,37 +3423,6 @@ void parse_hh_file(AsmState& as) {
 }
 
 /*
- * directive-strict : '1' ';'
- *                  | '0' ';'
- *                  ;
- */
-void parse_strict(AsmState& as) {
-  as.in.skipWhitespace();
-  std::string word;
-  if (!as.in.readword(word)) {
-    as.error(".strict must have a value");
-  }
-  if (!RuntimeOption::PHP7_ScalarTypes) {
-    as.error("Cannot set .strict without PHP7 ScalarTypes");
-  }
-
-  as.ue->m_useStrictTypesForBuiltins = word == "1";
-
-  if (!as.ue->m_useStrictTypesForBuiltins && word != "0") {
-    as.error("Strict types must be either 1 or 0");
-  }
-
-  if (as.ue->m_useStrictTypesForBuiltins
-    || as.ue->m_isHHFile
-    || RuntimeOption::EnableHipHopSyntax
-  ) {
-    as.ue->m_useStrictTypes = true;
-  }
-
-  as.in.expectWs(';');
-}
-
-/*
  * directive-symbols : '{' identifier identifier* '}'
  */
 void parse_symbol_refs(AsmState& as, SymbolRef symbol_kind) {
@@ -3553,7 +3522,6 @@ void parse_file_attributes(AsmState& as) {
  *         |    ".adata"            directive-adata
  *         |    ".class"            directive-class
  *         |    ".alias"            directive-alias
- *         |    ".strict"           directive-strict
  *         |    ".hh_file"          directive-hh-file
  *         |    ".includes"         directive-filepaths
  *         |    ".constant_refs"    directive-symbols
@@ -3575,7 +3543,6 @@ void parse(AsmState& as) {
     if (directive == ".class")         { parse_class(as)         ; continue; }
     if (directive == ".record")        { parse_record(as)        ; continue; }
     if (directive == ".alias")         { parse_alias(as)         ; continue; }
-    if (directive == ".strict")        { parse_strict(as)        ; continue; }
     if (directive == ".hh_file")       { parse_hh_file(as)       ; continue; }
     if (directive == ".includes")      { parse_includes(as)      ; continue; }
     if (directive == ".constant_refs") { parse_constant_refs(as) ; continue; }

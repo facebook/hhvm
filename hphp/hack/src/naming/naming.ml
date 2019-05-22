@@ -1748,9 +1748,6 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Do (b, e) -> do_stmt env b e
     | Aast.While (e, b) ->
       N.While (expr env e, block env b)
-    | Aast.Declare (_, (p, _), _) ->
-      Errors.declare_statement_in_hack p;
-      N.Expr (p, N.Any)
     | Aast.Using s -> using_stmt env s.Aast.us_has_await s.Aast.us_expr s.Aast.us_block
     | Aast.For (st1, e, st2, b) -> for_stmt env st1 e st2 b
     | Aast.Switch (e, cl) -> switch_stmt env e cl

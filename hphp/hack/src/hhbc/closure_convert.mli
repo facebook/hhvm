@@ -12,7 +12,6 @@ type hoist_kind = TopLevel | Hoisted
 type convert_result = {
   ast_defs: (hoist_kind * Tast.def) list;
   global_state: Emit_env.global_state;
-  strict_types: bool option;
 }
 
 (* Convert entire program *)

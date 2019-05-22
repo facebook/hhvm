@@ -832,12 +832,6 @@ void print_alias(Output& out, const TypeAlias& alias) {
             escaped_long(alias.typeStructure.get()));
 }
 
-void print_unit_strict_types(Output& out, const Unit* unit) {
-  if (!RuntimeOption::PHP7_ScalarTypes) return;
-  if (unit->useStrictTypesForBuiltins()) out.fmtln(".strict 1;");
-  else out.fmtln(".strict 0;");
-}
-
 void print_hh_file(Output& out, const Unit* unit) {
   out.nl();
   if (unit->isHHFile()) out.fmtln(".hh_file 1;");
@@ -875,7 +869,6 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 void print_unit(Output& out, const Unit* unit) {
   out.fmtln("# {} starts here", unit->filepath());
   out.nl();
-  print_unit_strict_types(out, unit);
   print_unit_metadata(out, unit);
   for (auto* func : unit->funcs())        print_func(out, func);
   for (auto& cls : unit->preclasses())    print_cls(out, cls.get());

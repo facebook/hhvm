@@ -124,9 +124,6 @@ module CheckFunctionBody = struct
         ()
     | _, Block b -> block f_type env b;
     | _, Markup (_, eopt) -> (match eopt with Some e -> expr f_type env e | None -> ())
-    | _, Declare (_, e, b) ->
-      expr f_type env e;
-      block f_type env b;
 
   and found_await ftype p =
     match ftype with
@@ -655,9 +652,6 @@ and stmt_ env = function
       ()
   | Block b -> block env b;
   | Markup (_, eopt) -> (match eopt with Some e -> expr env e | None -> ())
-  | Declare (_, e, b) ->
-    expr env e;
-    block env b;
 
 and as_expr env = function
   | As_v e

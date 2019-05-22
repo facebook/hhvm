@@ -1,2 +1,0 @@
--d hhvm.php7.scalar_types=true -d hhvm.force_hh=false
--vEval.EnablePHP=1

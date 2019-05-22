@@ -998,8 +998,7 @@ and stmt_ env pos st =
     in
     env, T.Let (id, h, t_rhs)
   | Block _
-  | Markup _
-  | Declare _ ->
+  | Markup _ ->
     failwith "Unexpected nodes in AST. These nodes should have been removed in naming."
 
 and finally_cont fb env ctx =

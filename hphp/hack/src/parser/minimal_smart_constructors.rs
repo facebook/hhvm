@@ -262,14 +262,6 @@ impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_using_statement_function_scoped(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_declare_directive_statement(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (NoState, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_declare_directive_statement(s, arg0, arg1, arg2, arg3, arg4)
-    }
-
-    fn make_declare_block_statement(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (NoState, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_declare_block_statement(s, arg0, arg1, arg2, arg3, arg4)
-    }
-
     fn make_while_statement(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> (NoState, Self::R) {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_while_statement(s, arg0, arg1, arg2, arg3, arg4)
     }

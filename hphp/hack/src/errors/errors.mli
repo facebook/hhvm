@@ -566,7 +566,6 @@ val reference_in_rx : Pos.t -> unit
 val reassign_mutable_this : in_collection:bool -> is_maybe_mutable:bool -> Pos.t -> unit
 val mutable_expression_as_multiple_mutable_arguments : Pos.t -> string -> Pos.t -> string -> unit
 val invalid_unset_target_rx : Pos.t -> unit
-val declare_statement_in_hack : Pos.t -> unit
 val misplaced_rx_of_scope : Pos.t -> unit
 val rx_of_scope_and_explicit_rx : Pos.t -> unit
 val lateinit_with_default : Pos.t -> unit

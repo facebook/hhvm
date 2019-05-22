@@ -352,9 +352,6 @@ and stmt env acc st =
       | Some e -> expr acc e
       | None -> acc
       )
-    | Declare (_, e, b) ->
-      let acc = expr acc e in
-      block acc b
 
 and toplevel env acc l =
   try List.fold_left ~f:(stmt env) ~init:acc l

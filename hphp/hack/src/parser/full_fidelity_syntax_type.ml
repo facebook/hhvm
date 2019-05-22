@@ -456,20 +456,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; using_function_expression                          : t
     ; using_function_semicolon                           : t
     }
-  | DeclareDirectiveStatement         of
-    { declare_directive_keyword                          : t
-    ; declare_directive_left_paren                       : t
-    ; declare_directive_expression                       : t
-    ; declare_directive_right_paren                      : t
-    ; declare_directive_semicolon                        : t
-    }
-  | DeclareBlockStatement             of
-    { declare_block_keyword                              : t
-    ; declare_block_left_paren                           : t
-    ; declare_block_expression                           : t
-    ; declare_block_right_paren                          : t
-    ; declare_block_body                                 : t
-    }
   | WhileStatement                    of
     { while_keyword                                      : t
     ; while_left_paren                                   : t
@@ -1251,8 +1237,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDLet                          of let_statement
   | TLDUsingStatementBlockScoped    of using_statement_block_scoped
   | TLDUsingStatementFunctionScoped of using_statement_function_scoped
-  | TLDDeclareDirective             of declare_directive_statement
-  | TLDDeclareBlock                 of declare_block_statement
   | TLDWhile                        of while_statement
   | TLDIf                           of if_statement
   | TLDAlternateIf                  of alternate_if_statement
@@ -1370,8 +1354,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | StmtLet                          of let_statement
   | StmtUsingStatementBlockScoped    of using_statement_block_scoped
   | StmtUsingStatementFunctionScoped of using_statement_function_scoped
-  | StmtDeclareDirective             of declare_directive_statement
-  | StmtDeclareBlock                 of declare_block_statement
   | StmtWhile                        of while_statement
   | StmtIf                           of if_statement
   | StmtAlternateIf                  of alternate_if_statement
@@ -1833,20 +1815,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; using_function_using_keyword: Token.t value
     ; using_function_expression: expression value
     ; using_function_semicolon: Token.t value
-    }
-  and declare_directive_statement =
-    { declare_directive_keyword: Token.t value
-    ; declare_directive_left_paren: Token.t value
-    ; declare_directive_expression: expression value
-    ; declare_directive_right_paren: Token.t value
-    ; declare_directive_semicolon: Token.t value
-    }
-  and declare_block_statement =
-    { declare_block_keyword: Token.t value
-    ; declare_block_left_paren: Token.t value
-    ; declare_block_expression: expression value
-    ; declare_block_right_paren: Token.t value
-    ; declare_block_body: statement value
     }
   and while_statement =
     { while_keyword: Token.t value

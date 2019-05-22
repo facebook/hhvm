@@ -214,12 +214,6 @@ where S: SmartConstructors<'a, State> {
     fn make_using_statement_function_scoped(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::UsingStatementFunctionScoped, S::make_using_statement_function_scoped(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_declare_directive_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::DeclareDirectiveStatement, S::make_declare_directive_statement(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
-    }
-    fn make_declare_block_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::DeclareBlockStatement, S::make_declare_block_statement(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
-    }
     fn make_while_statement(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::WhileStatement, S::make_while_statement(st, arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
     }

@@ -1877,21 +1877,15 @@ let add_program_content ?path dump_symbol_refs buf hhas_prog =
     add_symbol_ref_regions buf symbol_refs
 
 let add_program ?path dump_symbol_refs buf hhas_prog =
-  let strict_types =
-    match Hhas_program.strict_types hhas_prog with
-    | Some true -> ".strict 1;\n\n"
-    | Some false -> ".strict 0;\n\n"
-    | None -> "" in
   match path with
   | Some p ->
     let p = Php_escaping.escape @@ Relative_path.to_absolute p in
     Acc.add buf
-      (Printf.sprintf "# %s starts here\n\n%s.filepath \"%s\";\n" p strict_types p);
+      (Printf.sprintf "# %s starts here\n\n.filepath \"%s\";\n" p p);
     add_program_content ~path:p dump_symbol_refs buf hhas_prog;
     Acc.add buf (Printf.sprintf "\n# %s ends here\n" p)
   | None ->
     Acc.add buf "#starts here\n";
-    Acc.add buf strict_types;
     add_program_content dump_symbol_refs buf hhas_prog;
     Acc.add buf "\n#ends here\n"
 

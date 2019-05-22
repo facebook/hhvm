@@ -190,10 +190,6 @@ class EditableSyntax
       return UsingStatementBlockScoped.from_json(json, position, source);
     case 'using_statement_function_scoped':
       return UsingStatementFunctionScoped.from_json(json, position, source);
-    case 'declare_directive_statement':
-      return DeclareDirectiveStatement.from_json(json, position, source);
-    case 'declare_block_statement':
-      return DeclareBlockStatement.from_json(json, position, source);
     case 'while_statement':
       return WhileStatement.from_json(json, position, source);
     case 'if_statement':
@@ -781,8 +777,6 @@ class EditableToken extends EditableSyntax
        return new CoroutineToken(leading, trailing);
     case 'darray':
        return new DarrayToken(leading, trailing);
-    case 'declare':
-       return new DeclareToken(leading, trailing);
     case 'default':
        return new DefaultToken(leading, trailing);
     case 'define':
@@ -807,8 +801,6 @@ class EditableToken extends EditableSyntax
        return new EndforToken(leading, trailing);
     case 'endforeach':
        return new EndforeachToken(leading, trailing);
-    case 'enddeclare':
-       return new EnddeclareToken(leading, trailing);
     case 'endif':
        return new EndifToken(leading, trailing);
     case 'endswitch':
@@ -1399,13 +1391,6 @@ class DarrayToken extends EditableToken
     super('darray', leading, trailing, 'darray');
   }
 }
-class DeclareToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('declare', leading, trailing, 'declare');
-  }
-}
 class DefaultToken extends EditableToken
 {
   constructor(leading, trailing)
@@ -1488,13 +1473,6 @@ class EndforeachToken extends EditableToken
   constructor(leading, trailing)
   {
     super('endforeach', leading, trailing, 'endforeach');
-  }
-}
-class EnddeclareToken extends EditableToken
-{
-  constructor(leading, trailing)
-  {
-    super('enddeclare', leading, trailing, 'enddeclare');
   }
 }
 class EndifToken extends EditableToken
@@ -8708,260 +8686,6 @@ class UsingStatementFunctionScoped extends EditableSyntax
         'expression',
         'semicolon'];
     return UsingStatementFunctionScoped._children_keys;
-  }
-}
-class DeclareDirectiveStatement extends EditableSyntax
-{
-  constructor(
-    keyword,
-    left_paren,
-    expression,
-    right_paren,
-    semicolon)
-  {
-    super('declare_directive_statement', {
-      keyword: keyword,
-      left_paren: left_paren,
-      expression: expression,
-      right_paren: right_paren,
-      semicolon: semicolon });
-  }
-  get keyword() { return this.children.keyword; }
-  get left_paren() { return this.children.left_paren; }
-  get expression() { return this.children.expression; }
-  get right_paren() { return this.children.right_paren; }
-  get semicolon() { return this.children.semicolon; }
-  with_keyword(keyword){
-    return new DeclareDirectiveStatement(
-      keyword,
-      this.left_paren,
-      this.expression,
-      this.right_paren,
-      this.semicolon);
-  }
-  with_left_paren(left_paren){
-    return new DeclareDirectiveStatement(
-      this.keyword,
-      left_paren,
-      this.expression,
-      this.right_paren,
-      this.semicolon);
-  }
-  with_expression(expression){
-    return new DeclareDirectiveStatement(
-      this.keyword,
-      this.left_paren,
-      expression,
-      this.right_paren,
-      this.semicolon);
-  }
-  with_right_paren(right_paren){
-    return new DeclareDirectiveStatement(
-      this.keyword,
-      this.left_paren,
-      this.expression,
-      right_paren,
-      this.semicolon);
-  }
-  with_semicolon(semicolon){
-    return new DeclareDirectiveStatement(
-      this.keyword,
-      this.left_paren,
-      this.expression,
-      this.right_paren,
-      semicolon);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
-    var expression = this.expression.rewrite(rewriter, new_parents);
-    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
-    var semicolon = this.semicolon.rewrite(rewriter, new_parents);
-    if (
-      keyword === this.keyword &&
-      left_paren === this.left_paren &&
-      expression === this.expression &&
-      right_paren === this.right_paren &&
-      semicolon === this.semicolon)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new DeclareDirectiveStatement(
-        keyword,
-        left_paren,
-        expression,
-        right_paren,
-        semicolon), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let keyword = EditableSyntax.from_json(
-      json.declare_directive_keyword, position, source);
-    position += keyword.width;
-    let left_paren = EditableSyntax.from_json(
-      json.declare_directive_left_paren, position, source);
-    position += left_paren.width;
-    let expression = EditableSyntax.from_json(
-      json.declare_directive_expression, position, source);
-    position += expression.width;
-    let right_paren = EditableSyntax.from_json(
-      json.declare_directive_right_paren, position, source);
-    position += right_paren.width;
-    let semicolon = EditableSyntax.from_json(
-      json.declare_directive_semicolon, position, source);
-    position += semicolon.width;
-    return new DeclareDirectiveStatement(
-        keyword,
-        left_paren,
-        expression,
-        right_paren,
-        semicolon);
-  }
-  get children_keys()
-  {
-    if (DeclareDirectiveStatement._children_keys == null)
-      DeclareDirectiveStatement._children_keys = [
-        'keyword',
-        'left_paren',
-        'expression',
-        'right_paren',
-        'semicolon'];
-    return DeclareDirectiveStatement._children_keys;
-  }
-}
-class DeclareBlockStatement extends EditableSyntax
-{
-  constructor(
-    keyword,
-    left_paren,
-    expression,
-    right_paren,
-    body)
-  {
-    super('declare_block_statement', {
-      keyword: keyword,
-      left_paren: left_paren,
-      expression: expression,
-      right_paren: right_paren,
-      body: body });
-  }
-  get keyword() { return this.children.keyword; }
-  get left_paren() { return this.children.left_paren; }
-  get expression() { return this.children.expression; }
-  get right_paren() { return this.children.right_paren; }
-  get body() { return this.children.body; }
-  with_keyword(keyword){
-    return new DeclareBlockStatement(
-      keyword,
-      this.left_paren,
-      this.expression,
-      this.right_paren,
-      this.body);
-  }
-  with_left_paren(left_paren){
-    return new DeclareBlockStatement(
-      this.keyword,
-      left_paren,
-      this.expression,
-      this.right_paren,
-      this.body);
-  }
-  with_expression(expression){
-    return new DeclareBlockStatement(
-      this.keyword,
-      this.left_paren,
-      expression,
-      this.right_paren,
-      this.body);
-  }
-  with_right_paren(right_paren){
-    return new DeclareBlockStatement(
-      this.keyword,
-      this.left_paren,
-      this.expression,
-      right_paren,
-      this.body);
-  }
-  with_body(body){
-    return new DeclareBlockStatement(
-      this.keyword,
-      this.left_paren,
-      this.expression,
-      this.right_paren,
-      body);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
-    var expression = this.expression.rewrite(rewriter, new_parents);
-    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
-    var body = this.body.rewrite(rewriter, new_parents);
-    if (
-      keyword === this.keyword &&
-      left_paren === this.left_paren &&
-      expression === this.expression &&
-      right_paren === this.right_paren &&
-      body === this.body)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new DeclareBlockStatement(
-        keyword,
-        left_paren,
-        expression,
-        right_paren,
-        body), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let keyword = EditableSyntax.from_json(
-      json.declare_block_keyword, position, source);
-    position += keyword.width;
-    let left_paren = EditableSyntax.from_json(
-      json.declare_block_left_paren, position, source);
-    position += left_paren.width;
-    let expression = EditableSyntax.from_json(
-      json.declare_block_expression, position, source);
-    position += expression.width;
-    let right_paren = EditableSyntax.from_json(
-      json.declare_block_right_paren, position, source);
-    position += right_paren.width;
-    let body = EditableSyntax.from_json(
-      json.declare_block_body, position, source);
-    position += body.width;
-    return new DeclareBlockStatement(
-        keyword,
-        left_paren,
-        expression,
-        right_paren,
-        body);
-  }
-  get children_keys()
-  {
-    if (DeclareBlockStatement._children_keys == null)
-      DeclareBlockStatement._children_keys = [
-        'keyword',
-        'left_paren',
-        'expression',
-        'right_paren',
-        'body'];
-    return DeclareBlockStatement._children_keys;
   }
 }
 class WhileStatement extends EditableSyntax
@@ -22475,7 +22199,6 @@ exports.ConstructToken = ConstructToken;
 exports.ContinueToken = ContinueToken;
 exports.CoroutineToken = CoroutineToken;
 exports.DarrayToken = DarrayToken;
-exports.DeclareToken = DeclareToken;
 exports.DefaultToken = DefaultToken;
 exports.DefineToken = DefineToken;
 exports.DestructToken = DestructToken;
@@ -22488,7 +22211,6 @@ exports.ElseifToken = ElseifToken;
 exports.EmptyToken = EmptyToken;
 exports.EndforToken = EndforToken;
 exports.EndforeachToken = EndforeachToken;
-exports.EnddeclareToken = EnddeclareToken;
 exports.EndifToken = EndifToken;
 exports.EndswitchToken = EndswitchToken;
 exports.EndwhileToken = EndwhileToken;
@@ -22732,8 +22454,6 @@ exports.UnsetStatement = UnsetStatement;
 exports.LetStatement = LetStatement;
 exports.UsingStatementBlockScoped = UsingStatementBlockScoped;
 exports.UsingStatementFunctionScoped = UsingStatementFunctionScoped;
-exports.DeclareDirectiveStatement = DeclareDirectiveStatement;
-exports.DeclareBlockStatement = DeclareBlockStatement;
 exports.WhileStatement = WhileStatement;
 exports.IfStatement = IfStatement;
 exports.ElseifClause = ElseifClause;

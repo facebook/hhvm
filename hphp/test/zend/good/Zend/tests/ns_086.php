@@ -1,5 +1,4 @@
 <?php
-declare(encoding='utf-8');
 namespace foo {
 use \foo;
 class bar {

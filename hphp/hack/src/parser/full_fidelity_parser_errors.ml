@@ -3699,9 +3699,7 @@ let mixed_namespace_errors env node parents namespace_type errors =
           | { syntax = MarkupSection {markup_text; _}; _} :: rest
             when width markup_text = 0 || is_hashbang markup_text ->
             is_first rest
-          | { syntax = ( DeclareDirectiveStatement _
-                       | DeclareBlockStatement _
-                       | NamespaceUseDeclaration _
+          | { syntax = ( NamespaceUseDeclaration _
                        | FileAttributeSpecification _
                        ); _} :: rest ->
             is_first rest
@@ -3715,8 +3713,6 @@ let mixed_namespace_errors env node parents namespace_type errors =
                            when width markup_text = 0
                              || is_hashbang markup_text -> false
                          | { syntax = NamespaceDeclaration _; _}
-                         | { syntax = DeclareDirectiveStatement _; _}
-                         | { syntax = DeclareBlockStatement _; _}
                          | { syntax = ExpressionStatement {
                             expression_statement_expression =
                             { syntax = HaltCompilerExpression _; _}; _}; _}
@@ -3881,46 +3877,6 @@ let assignment_errors _env node errors =
     check_lvalue k @@ check_lvalue v errors
   | _ -> errors
 
-
-let declare_errors _env node parents errors =
-  match syntax node with
-  | DeclareDirectiveStatement { declare_directive_expression = expr; _}
-  | DeclareBlockStatement { declare_block_expression = expr; _} ->
-    let errors =
-      match syntax expr with
-      | BinaryExpression { binary_right_operand = r; _ } ->
-        check_constant_expression errors r
-      | _ -> errors in
-    let errors =
-      match syntax expr with
-      | BinaryExpression
-        { binary_left_operand = loper
-        ; binary_operator = op
-        ; _} when token_kind op = Some TokenKind.Equal
-             && String.lowercase @@ text loper = "strict_types" ->
-        (* Checks if there are only other declares nodes
-         * in front of the node in question *)
-        let rec is_only_declares_nodes = function
-          | ({ syntax = DeclareDirectiveStatement _; _} as e) :: es
-          | ({ syntax = DeclareBlockStatement _; _} as e) :: es ->
-            phys_equal e node || is_only_declares_nodes es
-          | _ -> false
-        in
-        let errors =
-          match parents with
-          | [{ syntax = SyntaxList (
-               { syntax = MarkupSection {markup_text; _}; _} :: items); _} ; _]
-            when width markup_text = 0 && is_only_declares_nodes items ->
-            errors
-          | _ ->
-            make_error_from_node
-              node SyntaxError.strict_types_first_statement :: errors
-        in
-        errors
-      | _ -> errors
-    in
-    errors
-  | _ -> errors
 
 let dynamic_method_call_errors node errors =
   match syntax node with
@@ -4112,10 +4068,6 @@ let find_syntax_errors env =
       | BinaryExpression _
       | ForeachStatement _ ->
         let errors = assignment_errors env node errors in
-        trait_require_clauses, names, errors
-      | DeclareDirectiveStatement _
-      | DeclareBlockStatement _ ->
-        let errors = declare_errors env node parents errors in
         trait_require_clauses, names, errors
       | XHPEnumType _
       | XHPExpression _ ->

@@ -1670,12 +1670,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       actrec_func(inst.src(0), inst.extra<LdARFuncPtr>()->offset)
     };
 
-  case LdARIsDynamic:
-    return may_load_store(
-      actrec(inst.src(0), inst.extra<LdARIsDynamic>()->offset),
-      AEmpty
-    );
-
   case DbgAssertARFunc:
     return may_load_store(
       actrec_func(inst.src(0), inst.extra<DbgAssertARFunc>()->offset),

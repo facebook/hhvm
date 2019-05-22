@@ -1530,11 +1530,6 @@ To string conversions:
   Loads the m_this/m_cls member of an ActRec. S0 is the base address, with
   `offset' cells to the ActRec.
 
-| LdARIsDynamic<offset>, D(Bool), S(StkPtr), NF
-
-  Loads the dynamic call flag of a pre-live ActRec. S0 is the base address,
-  with `offset' cells to the ActRec.
-
 | LdARNumParams, D(Int), S(FramePtr), NF
 
   Loads the number of params from an ActRec. S0 is the address of the ActRec

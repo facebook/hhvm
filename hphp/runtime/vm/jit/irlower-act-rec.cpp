@@ -320,20 +320,6 @@ void cgLdARFuncPtr(IRLS& env, const IRInstruction* inst) {
   vmain(env) << load{sp[off + AROFF(m_func)], dst};
 }
 
-void cgLdARIsDynamic(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const sp = srcLoc(env, inst, 0).reg();
-  auto const off = cellsToBytes(inst->extra<LdARIsDynamic>()->offset.offset);
-
-  auto& v = vmain(env);
-  auto const sf = v.makeReg();
-  v << testlim{
-    static_cast<int32_t>(ActRec::Flags::DynamicCall),
-    sp[off + AROFF(m_numArgsAndFlags)], sf
-  };
-  v << setcc{CC_NZ, sf, dst};
-}
-
 void cgLdARCtx(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const sp = srcLoc(env, inst, 0).reg();

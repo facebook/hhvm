@@ -335,22 +335,6 @@ SSATmp* IRBuilder::preOptimizeLdARFuncPtr(IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* IRBuilder::preOptimizeLdARIsDynamic(IRInstruction* inst) {
-  auto const& fpiStack = fs().fpiStack();
-  auto const arOff = inst->extra<LdARIsDynamic>()->offset;
-  auto const invOff = arOff.to<FPInvOffset>(fs().irSPOff()) - kNumActRecCells;
-
-  for (auto i = fpiStack.size(); i--; ) {
-    auto const& info = fpiStack[i];
-    if (info.returnSP == inst->src(0) &&
-        info.returnSPOff == invOff) {
-      return info.dynamicCall;
-    }
-  }
-
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
   auto const func = inst->marker().func();
   if (!func->mayHaveThis()) {
@@ -481,7 +465,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdClsRefCls)
   X(CoerceStk)
   X(LdARFuncPtr)
-  X(LdARIsDynamic)
   X(CheckCtxThis)
   X(LdCtx)
   X(LdCctx)

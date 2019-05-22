@@ -816,7 +816,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdARCtx:
   case LdARFuncPtr:
   case LdARInvName:
-  case LdARIsDynamic:
   case LdARNumArgsAndFlags:
   case LdARNumParams:
   case LdARReifiedGenerics:

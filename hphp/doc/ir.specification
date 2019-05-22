@@ -1522,8 +1522,8 @@ To string conversions:
 
 | LdARFuncPtr<offset>, DParam(Func), S(StkPtr), NF
 
-  Loads the m_func member of an ActRec. S0 is the base address, with `offset'
-  cells to the ActRec.
+  Loads the m_func member of a pre-live ActRec. S0 is the base address, with
+  `offset' cells to the ActRec.
 
 | LdARCtx<T,offset>, DParam(Ctx), S(StkPtr), NF
 

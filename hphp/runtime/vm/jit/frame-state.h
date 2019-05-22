@@ -51,11 +51,6 @@ struct FPIInfo {
   SSATmp* returnSP;
 
   /*
-   * BCSP offset after the call returns.
-   */
-  FPInvOffset returnSPOff;
-
-  /*
    * Offset relative to IR SP where this frame is located.
    */
   IRSPRelOffset irSPOff;

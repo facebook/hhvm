@@ -244,7 +244,6 @@ bool beginInlining(IRGS& env,
   always_assert(isFPush(info.fpushOpc) && info.inlineEligible);
 
   auto const prevSP = fpiStack.back().returnSP;
-  auto const prevBCSPOff = fpiStack.back().returnSPOff;
   auto const calleeSP = sp(env);
 
   always_assert_flog(
@@ -333,7 +332,7 @@ bool beginInlining(IRGS& env,
   data.target        = target;
   data.callBCOff     = callBcOffset;
   data.ctx           = target->isClosureBody() ? nullptr : ctx;
-  data.retSPOff      = prevBCSPOff;
+  data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
   data.spOffset      = calleeAROff;
   data.numNonDefault = numParams;
   data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;

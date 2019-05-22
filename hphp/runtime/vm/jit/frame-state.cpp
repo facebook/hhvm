@@ -166,7 +166,6 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     auto const& srcInfo = src.fpiStack[i];
 
     always_assert(dstInfo.returnSP == srcInfo.returnSP);
-    always_assert(dstInfo.returnSPOff == srcInfo.returnSPOff);
     always_assert(isFPush(dstInfo.fpushOpc) &&
                   dstInfo.fpushOpc == srcInfo.fpushOpc);
 
@@ -749,7 +748,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     auto const& extra = *inst->extra<InterpOneData>();
     if (isFPush(extra.opcode)) {
       cur().fpiStack.push_back(FPIInfo { cur().spValue,
-                                         cur().bcSPOff - extra.cellsPopped,
                                          extra.spOffset,
                                          TCtx,
                                          nullptr,
@@ -1866,7 +1864,6 @@ static const Func* getSpillFrameKnownCallee(const IRInstruction* inst) {
 void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
   assertx(inst->is(SpillFrame));
   auto const extra = inst->extra<SpillFrame>();
-  auto const retOffset = extra->spOffset + kNumActRecCells;
 
   for (auto i = uint32_t{0}; i < kNumActRecCells; ++i) {
     setValue(stk(extra->spOffset + i), nullptr);
@@ -1888,7 +1885,6 @@ void FrameStateMgr::spillFrameStack(const IRInstruction* inst) {
 
   cur().fpiStack.push_back(FPIInfo {
     cur().spValue,
-    retOffset.to<FPInvOffset>(irSPOff()),
     extra->spOffset,
     ctx ? ctx->type() : TCtx,
     ctx,

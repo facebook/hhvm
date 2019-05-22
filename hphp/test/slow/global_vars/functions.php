@@ -52,6 +52,12 @@ function test_get_safe() {
   var_dump((HH\global_get_safe(__FUNCTION__) ?? 'unset') === __FILE__);
 }
 
+function test_global_keys() {
+  $GLOBALS[__FUNCTION__] = null;
+  var_dump(HH\global_keys() == keyset(array_keys($GLOBALS)));
+  var_dump(array_key_exists(__FUNCTION__, HH\global_keys()));
+}
+
 <<__EntryPoint>>
 function main() {
   test_normal();
@@ -62,4 +68,5 @@ function main() {
   test_bogus_args();
   test_get_safe();
   test_unset();
+  test_global_keys();
 }

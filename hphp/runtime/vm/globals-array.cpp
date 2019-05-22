@@ -15,6 +15,8 @@
 */
 #include "hphp/runtime/vm/globals-array.h"
 
+#include <algorithm>
+
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/rds-local.h"
@@ -80,6 +82,21 @@ size_t GlobalsArray::Vsize(const ArrayData* ad) {
     ++count;
   }
   return count;
+}
+
+ArrayData* GlobalsArray::keys() {
+  auto iter = NameValueTable::Iterator::getEnd(this->m_tab);
+  KeysetInit ret(iter.toInteger());
+  for (iter.prev(); iter.valid(); iter.prev()) {
+    auto const& k = iter.curKey();
+    if (k->isRefCounted()) {
+      k->rawIncRefCount();
+      ret.add(make_tv<KindOfString>(const_cast<StringData*>(k)));
+    } else {
+      ret.add(make_tv<KindOfPersistentString>(k));
+    }
+  }
+  return ret.create();
 }
 
 Cell GlobalsArray::NvGetKey(const ArrayData* ad, ssize_t pos) {

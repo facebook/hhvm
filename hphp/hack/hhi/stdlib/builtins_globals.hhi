@@ -14,6 +14,7 @@ namespace HH {
   function global_get(string $key): mixed;
   function global_get_safe(string $key): mixed;
   function global_isset(string $key): bool;
+  function global_keys(): keyset<string>;
   function global_set(string $key, mixed $value): void;
   function global_unset(string $key): void;
 

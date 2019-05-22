@@ -40,7 +40,7 @@ namespace HPHP {
  *   - Non-string keys are not really supported.  (Integers are converted to
  *     strings.)
  *
- *   - size() is an O(N) operation.  (This is because of kNamedLocalDataType
+ *   - keys(),size() are O(N) operation. (This is because of kNamedLocalDataType
  *     support in the underlying NameValueTable.)
  *
  *   - Append/prepend operations are not supported.
@@ -65,6 +65,8 @@ struct GlobalsArray final : ArrayData,
   const ArrayData* asArrayData() const { return this; }
 
 public:
+  ArrayData* keys();
+
   static void Release(ArrayData*) {}
   static ArrayData* Copy(const ArrayData* ad) {
     return const_cast<ArrayData*>(ad);

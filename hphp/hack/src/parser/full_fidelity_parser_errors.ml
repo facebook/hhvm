@@ -2390,7 +2390,7 @@ let unop_allows_await t =
   | _ -> false
   ))
 
-let await_as_an_expression_errors await_node parents =
+let await_as_an_expression_errors env await_node parents =
   let rec go parents node =
     let n, tail =
       match parents with
@@ -2497,6 +2497,10 @@ let await_as_an_expression_errors await_node parents =
     | YieldExpression _
     | SyntaxList _
     | ListItem _ -> go tail n
+    | XHPExpression _
+    | XHPOpen _
+    | XHPSimpleAttribute _
+    | XHPSpreadAttribute _ when not (is_typechecker env) -> go tail n
     (* otherwise report error and bail out *)
     | _ ->
       [make_error_from_node
@@ -2907,7 +2911,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | DecoratedExpression { decorated_expression_decorator = op; _ }
   | PrefixUnaryExpression { prefix_unary_operator = op; _ }
     when token_kind op = Some TokenKind.Await ->
-    let aaae_errors = await_as_an_expression_errors node parents in
+    let aaae_errors = await_as_an_expression_errors env node parents in
     List.append aaae_errors errors
   | _ -> errors (* Other kinds of expressions currently produce no expr errors. *)
 

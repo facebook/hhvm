@@ -239,15 +239,9 @@ void endBlock(IRGS& env, Offset next) {
 
 void prepareForNextHHBC(IRGS& env,
                         const NormalizedInstruction* ni,
-                        SrcKey newSk,
-                        bool lastBcInst) {
+                        SrcKey newSk) {
   FTRACE(1, "------------------- prepareForNextHHBC ------------------\n");
   env.currentNormalizedInstruction = ni;
-
-  always_assert_flog(
-    IMPLIES(isInlining(env), !env.lastBcInst),
-    "Tried to end trace while inlining."
-  );
 
   always_assert_flog(
     IMPLIES(isInlining(env), !env.firstBcInst),
@@ -260,7 +254,6 @@ void prepareForNextHHBC(IRGS& env,
 
   env.bcState.setOffset(newSk.offset());
   updateMarker(env);
-  env.lastBcInst = lastBcInst;
   env.irb->exceptionStackBoundary();
   env.irb->resetCurIROff();
 }

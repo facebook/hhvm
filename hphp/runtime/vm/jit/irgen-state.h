@@ -94,12 +94,6 @@ struct IRGS {
   bool firstBcInst{true};
 
   /*
-   * True if we're on the last HHBC instruction that will be emitted
-   * for this region.
-   */
-  bool lastBcInst{false};
-
-  /*
    * Profile-weight factor, to be multiplied by the region blocks'
    * profile-translation counters in PGO mode.
    */

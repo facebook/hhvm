@@ -217,7 +217,7 @@ bool prepareInstruction(Env& env) {
   env.inst.endsRegion = breaksBB ||
     (dontGuardAnyInputs(env.inst) && opcodeChangesPC(env.inst.op()));
   env.inst.funcd = env.arState.knownFunc();
-  irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk, false);
+  irgen::prepareForNextHHBC(env.irgs, &env.inst, env.sk);
 
   auto const inputInfos = getInputs(env.inst, env.irgs.irb->fs().bcSPOff());
 

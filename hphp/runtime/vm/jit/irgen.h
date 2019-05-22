@@ -171,12 +171,8 @@ void interpOne(IRGS&, const NormalizedInstruction&);
  * Before translating/processing each bytecode instruction, the driver
  * of the irgen module calls this function to move to the next
  * bytecode instruction (`newSk') to translate.
- *
- * The flag `lastBcInst' should be set if this is the last bytecode in
- * a region that's being translated.
  */
-void prepareForNextHHBC(IRGS&, const NormalizedInstruction*,
-                        SrcKey newSk, bool lastBcInst);
+void prepareForNextHHBC(IRGS&, const NormalizedInstruction*, SrcKey newSk);
 
 /*
  * After translating each bytecode instruction, the driver of the
@@ -287,31 +283,6 @@ bool conjureEndInlining(IRGS& env,
  * decisions.
  */
 void inlSingletonSProp(IRGS&, const Func*, PC clsOp, PC propOp);
-
-/*
- * In PGO mode, we use profiling to try to determine the most likely target
- * function at each call site.  profiledCalledFunc() returns the most likely
- * called function based on profiling, as long as it was seen at least
- * Eval.JitPGOCalledFuncCheckThreshold percent of the times during profiling.
- * When a callee satisfies this condition, profiledCalledFunc() returns such
- * callee and it also returns in checkInst a pointer to the runtime check that
- * is inserted in HHIR and the probability of seeing that callee.  The following
- * code sequence is emitted in the HHIR unit:
- *
- *   t1 = LdARFuncPtr <CalleeFrame>
- *   t2 = EqFunc t1, <ProfiledFunc>
- *   JmpZero t2, <SideExit>               <== checkInst points here
- *   AssertARFunc <CalleeFrame>, <ProfiledFunc>
- *
- * If this check is later regarded as not profitable, because it didn't enable
- * inlining the callee, it can be removed by calling dropCalledFuncCheck()
- * passing that same checkInst.
- */
-const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
-                               IRInstruction*& checkInst,
-                               double& probability);
-
-void dropCalledFuncCheck(IRGS& env, IRInstruction* checkInst);
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

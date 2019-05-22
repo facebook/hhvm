@@ -1211,12 +1211,7 @@ Type flavorToType(FlavorDesc f) {
 void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
                     bool /*checkOuterTypeOnly*/, bool /*firstInst*/
                     ) {
-  irgen::prepareForNextHHBC(
-    irgs,
-    &ni,
-    ni.source,
-    ni.endsRegion && !irgen::isInlining(irgs)
-  );
+  irgen::prepareForNextHHBC(irgs, &ni, ni.source);
 
   const Func* builtinFunc = nullptr;
   if (ni.op() == OpFCallBuiltin) {

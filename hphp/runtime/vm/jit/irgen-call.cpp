@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/normalized-instruction.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
+#include "hphp/runtime/vm/jit/translate-region.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/irgen-basic.h"
@@ -271,6 +272,76 @@ void callUnknown(IRGS& env, SSATmp* callee, const FCallArgs& fca) {
     },
     [&] {
       callWithAsyncEagerReturn(env, nullptr, fca);
+    }
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * In PGO mode, we use profiling to try to determine the most likely target
+ * function at each call site.  profiledCalledFunc() returns the most likely
+ * called function based on profiling, as long as it was seen at least
+ * Eval.JitPGOCalledFuncCheckThreshold percent of the times during profiling.
+ * When a callee satisfies this condition, profiledCalledFunc() returns such
+ * callee and it also returns the probability of seeing that callee.
+ */
+const Func* profiledCalledFunc(IRGS& env, double& probability) {
+  probability = 0;
+  if (!RuntimeOption::RepoAuthoritative) return nullptr;
+
+  auto profile = TargetProfile<CallTargetProfile>(
+    env.unit.context(), env.irb->curMarker(), callTargetProfileKey());
+
+  // NB: the profiling used here is shared and done in getCallTarget() in
+  // irlower-call.cpp, so we only handle the optimization phase here.
+  if (!profile.optimizing()) return nullptr;
+
+  auto const data = profile.data();
+  auto profiledFunc = data.choose(probability);
+
+  if (profiledFunc == nullptr) return nullptr;
+
+  // Don't emit the check if the probability of it succeeding is below the
+  // threshold.
+  if (probability * 100 < RuntimeOption::EvalJitPGOCalledFuncCheckThreshold) {
+    return nullptr;
+  }
+
+  return profiledFunc;
+}
+
+template<class TMakeSideExit, class TKnown, class TUnknown>
+void profileCalledFunc(IRGS& env, SSATmp* callee, TMakeSideExit makeSideExit,
+                       TKnown callKnown, TUnknown callUnknown) {
+  double profiledFuncBias{0};
+  auto const profiledFunc = profiledCalledFunc(env, profiledFuncBias);
+  if (!profiledFunc) return callUnknown();
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const equal = gen(env, EqFunc, callee, cns(env, profiledFunc));
+      gen(env, JmpZero, taken, equal);
+    },
+    [&] {
+      callKnown(profiledFunc);
+    },
+    [&] {
+      // Current marker's SP points to the wrong place after callKnown() above.
+      updateMarker(env);
+      env.irb->exceptionStackBoundary();
+
+      auto const unlikely = profiledFuncBias * 100 >=
+        RuntimeOption::EvalJitPGOCalledFuncExitThreshold;
+      if (unlikely) {
+        hint(env, Block::Hint::Unlikely);
+        IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+        callUnknown();
+        makeSideExit();
+      } else {
+        callUnknown();
+      }
     }
   );
 }
@@ -1429,14 +1500,29 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
   auto const callee = ldPreLiveFunc(env, actRecOff);
 
-  if (callee->hasConstVal()) {
-    if (!emitCallerReffinessChecksKnown(env, callee->funcVal(), fca)) return;
-    callKnown(env, callee->funcVal(), fca);
-  } else {
+  auto const doCallKnown = [&] (const Func* knownCallee) {
+    if (!callee->hasConstVal()) {
+      auto const data = IRSPRelOffsetData{ actRecOff };
+      gen(env, AssertARFunc, data, sp(env), cns(env, knownCallee));
+    }
+    if (!emitCallerReffinessChecksKnown(env, knownCallee, fca)) return;
+
+    if (irGenTryInlineFCall(env, knownCallee, fca)) return;
+    callKnown(env, knownCallee, fca);
+  };
+
+  if (callee->hasConstVal()) return doCallKnown(callee->funcVal());
+
+  auto const doCallUnknown = [&] {
     emitCallerReffinessChecksUnknown(env, callee, fca);
     callUnknown(env, callee, fca);
-  }
+  };
 
+  auto const makeSideExit = [&] {
+    gen(env, Jmp, makeExit(env, nextBcOff(env)));
+  };
+
+  profileCalledFunc(env, callee, makeSideExit, doCallKnown, doCallUnknown);
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,
@@ -1502,78 +1588,6 @@ Type awaitedCallReturnType(const Func* callee) {
   }
 
   return typeFromRAT(callee->repoAwaitedReturnType(), callee->cls());
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const Func* profiledCalledFunc(IRGS& env, uint32_t numArgs,
-                               IRInstruction*& checkInst,
-                               double& probability) {
-  checkInst = nullptr;
-  probability = 0;
-
-  if (!RuntimeOption::RepoAuthoritative) return nullptr;
-
-  auto profile = TargetProfile<CallTargetProfile>(env.unit.context(),
-                                                  env.irb->curMarker(),
-                                                  callTargetProfileKey());
-
-  // NB: the profiling used here is shared and done in getCallTarget() in
-  // irlower-call.cpp, so we only handle the optimization phase here.
-  if (!profile.optimizing()) return nullptr;
-
-  auto const data = profile.data();
-  auto profiledFunc = data.choose(probability);
-
-  if (profiledFunc == nullptr) return nullptr;
-
-  // Don't emit the check if the probability of it succeeding is below the
-  // threshold.
-  if (probability * 100 < RuntimeOption::EvalJitPGOCalledFuncCheckThreshold) {
-    return nullptr;
-  }
-
-  auto const spOff = spOffBCFromIRSP(env);
-  auto const calleeAROff = spOff + numArgs;
-  auto liveFuncTmp = gen(env, LdARFuncPtr, TFunc,
-                         IRSPRelOffsetData{calleeAROff}, sp(env));
-
-  auto profiledFuncTmp = cns(env, profiledFunc);
-  auto const equal = gen(env, EqFunc, liveFuncTmp, profiledFuncTmp);
-
-  // Request that the out state of current block is saved.  We will need it if
-  // we decide to insert a call in the exit block.
-  env.irb->fs().setSaveOutState(env.irb->curBlock());
-
-  auto sideExit = makeExit(env, bcOff(env));
-  gen(env, JmpZero, sideExit, equal);
-
-  auto curBlock = env.irb->curBlock();
-  checkInst = &(curBlock->back());
-  always_assert_flog(checkInst->op() == JmpZero, "checkInst = {}\n",
-                     *checkInst);
-  gen(env, AssertARFunc, IRSPRelOffsetData{calleeAROff}, sp(env),
-      profiledFuncTmp);
-
-  return profiledFunc;
-}
-
-void dropCalledFuncCheck(IRGS& env, IRInstruction* checkInst) {
-  always_assert_flog(checkInst && checkInst->op() == JmpZero,
-                     "checkInst: {}\n", *checkInst);
-
-  // Turn the AssertARFunc following checkInst into a Nop.
-  auto assertInst = checkInst->next()->skipHeader();
-  assertx(assertInst->op() == AssertARFunc);
-  assertInst->convertToNop();
-
-  // Make both directions of the JmpZero jump to it's fall-through block.
-  // Later, optimizations will eliminate this instruction, and also the EqFunc
-  // and LdARFuncPtr above it.
-  checkInst->setTaken(checkInst->next());
-
-  // Clear the information about the top function in FrameState.
-  env.irb->fs().clearTopFunc();;
 }
 
 //////////////////////////////////////////////////////////////////////

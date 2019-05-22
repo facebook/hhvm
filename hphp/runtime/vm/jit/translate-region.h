@@ -45,7 +45,8 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 /*
  * Try to inline a FCall.
  */
-bool irGenTryInlineFCall(irgen::IRGS& irgs, NormalizedInstruction& inst);
+bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
+                         const FCallArgs& fca);
 
 /*
  * Generate an IRUnit which simulates the inlining of region. This unit should

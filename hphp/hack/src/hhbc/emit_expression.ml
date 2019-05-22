@@ -373,10 +373,7 @@ let istype_op lower_fq_id =
   | "hh\\is_class_meth" -> Some OpClsMeth
   | _ -> None
 
-(* T29079834: Using this for the is expressions migration *)
 let is_isexp_op lower_fq_id: Aast.hint option =
-  if not (Hhbc_options.enable_is_expr_primitive_migration !Hhbc_options.compiler_options)
-  then None else
   let h n = Pos.none, Aast.Happly ((Pos.none, n), []) in
   match lower_fq_id with
   | "is_int" | "is_integer" | "is_long" -> Some (h "int")
@@ -3580,8 +3577,6 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
   | _ ->
     begin match args, istype_op lower_fq_name, is_isexp_op lower_fq_name with
     | [arg_expr], _, Some h when Emit_env.is_hh_syntax_enabled () ->
-      (* T29079834:
-       * Using this as a migration from is_{int,bool,etc} to is expressions *)
       Some (gather [
         emit_expr env arg_expr;
         emit_is env pos h

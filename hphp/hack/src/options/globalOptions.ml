@@ -36,7 +36,6 @@ type t = {
   tco_timeout : int;
   tco_disallow_invalid_arraykey : bool;
   tco_disable_instanceof_refinement : bool;
-  tco_disallow_ref_param_on_constructor : bool;
   tco_disallow_byref_dynamic_calls : bool;
   po_disable_instanceof : bool;
   ignored_fixme_codes : ISet.t;
@@ -214,7 +213,6 @@ let default = {
  tco_timeout = 0;
  tco_disallow_invalid_arraykey = false;
  tco_disable_instanceof_refinement = false;
- tco_disallow_ref_param_on_constructor = false;
  tco_disallow_byref_dynamic_calls = false;
  po_disable_instanceof = false;
  ignored_fixme_codes = Errors.default_ignored_fixme_codes;
@@ -260,7 +258,6 @@ let make
   ?(tco_timeout = default.tco_timeout)
   ?(tco_disallow_invalid_arraykey = default.tco_disallow_invalid_arraykey)
   ?(tco_disable_instanceof_refinement = default.tco_disable_instanceof_refinement)
-  ?(tco_disallow_ref_param_on_constructor = default.tco_disallow_ref_param_on_constructor)
   ?(tco_disallow_byref_dynamic_calls = default.tco_disallow_byref_dynamic_calls)
   ?(po_disable_instanceof = default.po_disable_instanceof)
   ?(ignored_fixme_codes = default.ignored_fixme_codes)
@@ -308,7 +305,6 @@ let make
   tco_timeout;
   tco_disallow_invalid_arraykey;
   tco_disable_instanceof_refinement;
-  tco_disallow_ref_param_on_constructor;
   tco_disallow_byref_dynamic_calls;
   po_disable_instanceof;
   log_levels;
@@ -357,7 +353,6 @@ let tco_new_inference_lambda t = t.tco_new_inference_lambda
 let tco_timeout t = t.tco_timeout
 let tco_disallow_invalid_arraykey t = t.tco_disallow_invalid_arraykey
 let tco_disable_instanceof_refinement t = t.tco_disable_instanceof_refinement
-let tco_disallow_ref_param_on_constructor t = t.tco_disallow_ref_param_on_constructor
 let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
 let po_disable_instanceof t = t.po_disable_instanceof
 let ignored_fixme_codes t = t.ignored_fixme_codes

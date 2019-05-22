@@ -456,7 +456,6 @@ let parse_options () =
     ?po_disable_unsafe_block:(!disable_unsafe_block)
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
-    ?tco_disallow_ref_param_on_constructor:(not_ !allow_ref_param_on_constructor)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
     ?tco_disallow_byref_prop_args:(!disallow_byref_prop_args)
     ~tco_shallow_class_decl:(!shallow_class_decl)

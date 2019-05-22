@@ -13,7 +13,7 @@ open Nast_check_env
 
 module SN = Naming_special_names
 
-let check_param env params p user_attributes f_type name =
+let check_param _env params p user_attributes f_type name =
   let byref = List.find params (fun x -> x.param_is_reference) in
   List.iter params begin fun param ->
     match param.param_callconv with
@@ -24,9 +24,7 @@ let check_param env params p user_attributes f_type name =
       Option.iter byref ~f:(fun p ->
         Errors.inout_params_mix_byref pos p.param_pos)
     | None when param.param_is_reference && name = SN.Members.__construct ->
-      if TypecheckerOptions.disallow_ref_param_on_constructor
-        env.tcopt
-      then Errors.byref_on_construct param.param_pos
+      Errors.byref_on_construct param.param_pos
     | None -> ()
   end;
   let inout = List.find params (fun x -> x.param_callconv = Some Ast.Pinout) in

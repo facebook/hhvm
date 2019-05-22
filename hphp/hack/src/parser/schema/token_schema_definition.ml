@@ -280,10 +280,6 @@ let given_text_tokens = [
     ~allowed_as_identifier:true
     ();
   make_token_node
-    "Declare"
-    "declare"
-    ();
-  make_token_node
     "Default"
     "default"
     ();
@@ -333,10 +329,6 @@ let given_text_tokens = [
   make_token_node
     "Endforeach"
     "endforeach"
-    ();
-  make_token_node
-    "Enddeclare"
-    "enddeclare"
     ();
   make_token_node
     "Endif"

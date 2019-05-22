@@ -24,8 +24,9 @@ class C {
   use T, R;
   public function f() = T::f;
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->f();
 $c->g();
 $c->k();
+}

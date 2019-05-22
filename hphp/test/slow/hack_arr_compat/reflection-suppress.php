@@ -11,6 +11,7 @@ function foobar(
   $_b = BarEnum::FOO,
 ) {
 }
-
+<<__EntryPoint>> function main(): void {
 new ReflectionFunction('foobar') |> $$->getParameters();
 echo "DONE\n";
+}

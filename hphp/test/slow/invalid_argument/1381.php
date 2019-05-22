@@ -1,8 +1,8 @@
 <?php
 
 // disable array -> "Array" conversion notice
+<<__EntryPoint>> function main() {
 error_reporting(error_reporting() & ~E_NOTICE);
-
 $ch = curl_init();
 var_dump(curl_setopt($ch, -1337, 'http://www.example.com/'));
 curl_close($ch);
@@ -81,3 +81,4 @@ var_dump(wordwrap('', 75, '', true));
 var_dump(wordwrap('', 75, '', true));
 var_dump(wordwrap('abc', 75, '', true));
 var_dump(wordwrap('abc', 0, '', true));
+}

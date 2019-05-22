@@ -31,10 +31,11 @@ type X = shape(
   'star_comment' => int,
   ...
 );
-
+<<__EntryPoint>> function main(): void {
 $program = file_get_contents(__FILE__);
 $json = HH\ffp_parse_string($program);
 $result = HH\ExperimentalParserUtils\find_single_shape_type_alias($json, "x"); // case insensitive
 invariant($result !== null, "Failed to find shape type alias");
 list($real_name, $shape) = $result;
 var_dump(HH\ExperimentalParserUtils\extract_shape_comments($shape));
+}

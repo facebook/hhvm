@@ -21,7 +21,7 @@ class C {
     return 1;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $m = class_meth(C::class, 'mth');
 var_dump($m());
 
@@ -33,3 +33,4 @@ var_dump($tr());
 
 $pri = class_meth(C::class, 'private_meth');
 C::caller($pri, 'created outside');
+}

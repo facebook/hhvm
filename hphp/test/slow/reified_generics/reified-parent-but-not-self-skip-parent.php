@@ -18,7 +18,8 @@ class C extends D {
     parent::f();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 
 $c->f();
+}

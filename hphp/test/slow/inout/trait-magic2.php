@@ -13,5 +13,6 @@ class c {
 function test($a) {
   c::g(inout $a);
 }
-
+<<__EntryPoint>> function main(): void {
 test(42);
+}

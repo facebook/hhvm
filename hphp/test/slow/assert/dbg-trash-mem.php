@@ -10,5 +10,6 @@ class C {
     return $this->prop;
   }
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump((new C())->go());
+}

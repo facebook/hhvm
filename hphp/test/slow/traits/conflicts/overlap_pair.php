@@ -17,7 +17,8 @@ class C {
   public function f() = R::g;
   public function g() = T::f;
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->f();
 $c->g();
+}

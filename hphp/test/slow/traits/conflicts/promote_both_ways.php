@@ -12,8 +12,9 @@ class C {
     $this->f();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->exposer();
 $c->g();
 $c->f();
+}

@@ -17,7 +17,7 @@ function is_shape(mixed $x): void {
     echo "not shape\n";
   }
 }
-
+<<__EntryPoint>> function main(): void {
 is_shape(shape());
 echo "\n";
 is_shape(shape(E::A => 1));
@@ -29,3 +29,4 @@ is_shape(shape('foo' => 1));
 is_shape(shape('foo' => 1, 'bar' => 1));
 is_shape(shape('foo' => true));
 is_shape(shape('foo' => 1, 'bar' => true));
+}

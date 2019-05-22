@@ -21,7 +21,8 @@ class C<reify T1, reify T2> extends D<(int, (T1, string)), T1> {
     parent::f();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C<(int, string), string>();
 
 $c->f();
+}

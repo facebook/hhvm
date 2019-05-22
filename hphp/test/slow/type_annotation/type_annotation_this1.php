@@ -8,7 +8,7 @@ class Base {
 
 class Child extends Base {
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(type_structure(Base::class, 'T'));
 var_dump(type_structure(Child::class, 'T'));
 
@@ -17,3 +17,4 @@ var_dump(type_structure(Child::class, 'U'));
 
 var_dump(type_structure(Base::class, 'U'));
 var_dump(type_structure(Child::class, 'V'));
+}

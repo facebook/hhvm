@@ -6,7 +6,8 @@ class C {
   use T1;
   public function g() = T1::f;
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->g();
 $c->f();
+}

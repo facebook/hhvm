@@ -37,5 +37,6 @@ type MyType6 = shape(
     MyClass::ANOTHER_CONST => int,
   ),
 );
-
+<<__EntryPoint>> function main(): void {
 echo "done.\n";
+}

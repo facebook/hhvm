@@ -22,10 +22,11 @@ class C {
   const type T5 = MyClass<MyEnum>;
   const type T6 = MyClass<this>;
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(type_structure(C::class, 'T1'));
 var_dump(type_structure(C::class, 'T2'));
 var_dump(type_structure(C::class, 'T3'));
 var_dump(type_structure(C::class, 'T4'));
 var_dump(type_structure(C::class, 'T5'));
 var_dump(type_structure(C::class, 'T6'));
+}

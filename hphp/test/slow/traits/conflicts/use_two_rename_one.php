@@ -9,7 +9,8 @@ class C {
   public function f() = T1::f;
   public function g() = T2::f;
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 $c->f();
 $c->g();
+}

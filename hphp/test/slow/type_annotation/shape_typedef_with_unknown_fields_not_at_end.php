@@ -7,7 +7,8 @@ class Base {
     'b' => int,
   );
 }
-
+<<__EntryPoint>> function main(): void {
 $type = new ReflectionTypeConstant('Base', 'ShapeWithUnknownFieldsNotAtEnd');
 var_dump($type->getAssignedTypeText());
 var_dump($type->getTypeStructure());
+}

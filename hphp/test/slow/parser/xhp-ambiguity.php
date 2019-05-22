@@ -178,4 +178,6 @@ function bar3(:foo $x): ?:foo {}
 function bar4(?:foo $x): :foo {}
 function bar5(?:foo $x):?:foo {}
 function bar6(?:foo $x): ?:foo {}
+<<__EntryPoint>> function main(): void {
 echo "Done\n";
+}

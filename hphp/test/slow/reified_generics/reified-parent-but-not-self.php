@@ -20,7 +20,8 @@ class C extends D<(int, (int, string)), int> {
     parent::f();
   }
 }
-
+<<__EntryPoint>> function main(): void {
 $c = new C();
 
 $c->f();
+}

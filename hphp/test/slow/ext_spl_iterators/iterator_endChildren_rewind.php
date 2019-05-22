@@ -18,7 +18,7 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator
   }
 
 }
-
+<<__EntryPoint>> function main() {
 $arr = array("a",
       array("ca"));
 $obj = new RecursiveArrayIterator($arr);
@@ -30,3 +30,4 @@ $rit->next();
 $rit->next();
 
 echo "===DONE===\n";
+}

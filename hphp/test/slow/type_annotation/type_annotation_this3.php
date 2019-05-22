@@ -18,8 +18,9 @@ class Child extends Base implements IChild {
 
 class GrandChild extends Child {
 }
-
+<<__EntryPoint>> function main(): void {
 var_dump(type_structure(GrandChild::class, 'T'));
 var_dump(type_structure(IChild::class, 'T'));
 var_dump(type_structure(GrandChild::class, 'U'));
 var_dump(type_structure(GrandChild::class, 'V'));
+}

@@ -5,4 +5,6 @@ class C<reify T> {
 }
 
 // As long as it does not use T in f it is fine
+<<__EntryPoint>> function main(): void {
 echo "done\n";
+}

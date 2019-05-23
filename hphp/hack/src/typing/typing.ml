@@ -4254,17 +4254,10 @@ and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
       this_for_method env cid cty
     else
       env, cty in
-  let ety_env = {
-    type_expansions = [];
-    this_ty = this_ty;
-    substs = SMap.empty;
-    from_class = Some cid;
-    validate_dty = None;
-  } in
-  class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+  class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
              env cid cty (p, mid)
 
-and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
+and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
                ?(incl_tc=false) env cid cty
 (p, mid) =
   let env, cty = Env.expand_type env cty in
@@ -4280,9 +4273,8 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
             this_for_method env cid ty
           else
             env, ty in
-        let ety_env = {ety_env with this_ty = this_ty} in
         let env, ty, _ =
-          class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+          class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
                      env cid ty (p, mid)
             in env, ty
         end in
@@ -4290,11 +4282,11 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       let env, method_ = TUtils.in_var env ty in
       env, method_, None
   | _, Tabstract (_, Some ty) ->
-      class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+      class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
         env cid ty (p, mid)
   | _, Tabstract (_, None) ->
       let resl = TUtils.try_over_concrete_supertypes env cty (fun env ty ->
-        class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
+        class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
           env cid ty (p, mid)) in
       begin match resl with
       | [] ->
@@ -4319,9 +4311,13 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       | None -> env, (Reason.Rwitness p, Typing_utils.tany env), None
       | Some class_ ->
         (* We need to instantiate generic parameters in the method signature *)
-        let ety_env =
-          { ety_env with
-            substs = Subst.make (Cls.tparams class_) paraml } in
+        let ety_env = {
+          type_expansions = [];
+          this_ty = this_ty;
+          substs = Subst.make (Cls.tparams class_) paraml;
+          from_class = Some cid;
+          validate_dty = None;
+        } in
         if is_const then begin
           let const =
             if incl_tc then Env.get_const env class_ mid else

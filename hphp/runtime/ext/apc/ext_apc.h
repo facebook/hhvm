@@ -35,14 +35,7 @@ struct apcExtension final : Extension {
   static std::string PrimeLibrary;
   static int LoadThread;
   static std::set<std::string> CompletionKeys;
-  enum class TableTypes {
-    ConcurrentTable
-  };
-  static TableTypes TableType;
   static bool EnableApcSerialize;
-  static int64_t KeyMaturityThreshold;
-  static int64_t MaximumCapacity;
-  static int KeyFrequencyUpdatePeriod;
   static bool ExpireOnSets;
   static int PurgeFrequency;
   static int PurgeRate;
@@ -61,7 +54,6 @@ struct apcExtension final : Extension {
   static int FileStorageAdviseOutPeriod;
   static std::string FileStorageFlagKey;
   static bool FileStorageKeepFileLinked;
-  static std::vector<std::string> NoTTLPrefix;
   static bool UseUncounted;
   static bool ShareUncounted;
   static bool Stat;

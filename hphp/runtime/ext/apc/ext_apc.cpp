@@ -141,13 +141,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(PrimeLibrary, ini, config, "Server.APC.PrimeLibrary");
   Config::Bind(LoadThread, ini, config, "Server.APC.LoadThread", 15);
   Config::Bind(CompletionKeys, ini, config, "Server.APC.CompletionKeys");
-  std::string tblType = Config::GetString(ini, config, "Server.APC.TableType",
-                                          "concurrent");
-  if (strcasecmp(tblType.c_str(), "concurrent") == 0) {
-    TableType = TableTypes::ConcurrentTable;
-  } else {
-    throw std::runtime_error("invalid apc table type");
-  }
   Config::Bind(EnableApcSerialize, ini, config, "Server.APC.EnableApcSerialize",
                true);
   Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
@@ -182,14 +175,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
                "Server.APC.FileStorage.AdviseOutPeriod", 1800);
   Config::Bind(FileStorageKeepFileLinked, ini, config,
                "Server.APC.FileStorage.KeepFileLinked");
-
-  Config::Bind(KeyMaturityThreshold, ini, config,
-               "Server.APC.KeyMaturityThreshold", 20);
-  Config::Bind(MaximumCapacity, ini, config, "Server.APC.MaximumCapacity", 0);
-  Config::Bind(KeyFrequencyUpdatePeriod, ini, config,
-               "Server.APC.KeyFrequencyUpdatePeriod", 1000);
-
-  Config::Bind(NoTTLPrefix, ini, config, "Server.APC.NoTTLPrefix");
 
 #ifdef NO_M_DATA
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill", true);
@@ -275,12 +260,7 @@ bool apcExtension::ForceConstLoadToAPC = true;
 std::string apcExtension::PrimeLibrary;
 int apcExtension::LoadThread = 15;
 std::set<std::string> apcExtension::CompletionKeys;
-apcExtension::TableTypes apcExtension::TableType =
-  TableTypes::ConcurrentTable;
 bool apcExtension::EnableApcSerialize = true;
-int64_t apcExtension::KeyMaturityThreshold = 20;
-int64_t apcExtension::MaximumCapacity = 0;
-int apcExtension::KeyFrequencyUpdatePeriod = 1000;
 bool apcExtension::ExpireOnSets = false;
 int apcExtension::PurgeFrequency = 4096;
 int apcExtension::PurgeRate = -1;
@@ -299,7 +279,6 @@ std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";
 int apcExtension::FileStorageAdviseOutPeriod = 1800;
 std::string apcExtension::FileStorageFlagKey = "_madvise_out";
 bool apcExtension::FileStorageKeepFileLinked = false;
-std::vector<std::string> apcExtension::NoTTLPrefix;
 #ifdef NO_M_DATA
 bool apcExtension::UseUncounted = true;
 #else

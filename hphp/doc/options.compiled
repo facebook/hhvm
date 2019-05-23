@@ -258,13 +258,6 @@ through PrimeLibrary option. The loading can be done in parallel with
 LoadThread count of threads. Once loading is done, it can write to APC with
 some specified keys in CompletionKeys to tell web application about priming.
 
-      TableType = concurrent (default)
-
-- TableType
-
-Recommend to use "concurrent", the fastest with least locking, and since its
-the only implemented table type.  (The option remains for future use if we
-add other apc implementations).
 
       ExpireOnSets = false
       PurgeFrequency = 4096
@@ -274,21 +267,6 @@ add other apc implementations).
 ExpireOnSets turns on item purging on expiration, and it's only done once per
 PurgeFrequency of sets.
 
-      KeyMaturityThreshold = 20
-      MaximumCapacity = 0
-      KeyFrequencyUpdatePeriod = 1000  # in number of accesses
-
-- KeyMaturityThreshold, MaximumCapacity, KeyFrequencyUpdatePeriod
-
-These are experimental LFU settings.
-
-    }
-
-    # DNS cache
-    DnsCache {
-      Enable = false
-      TTL = 600   # in seconds
-    }
 
     # Light process has very little forking cost, because they are pre-forked
     # Recommend to turn it on for faster shell command execution.

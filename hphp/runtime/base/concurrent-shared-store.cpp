@@ -50,17 +50,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-bool check_noTTL(const char* key, size_t keyLen) {
-  for (auto& listElem : apcExtension::NoTTLPrefix) {
-    auto const prefix = listElem.c_str();
-    auto const prefixLen = listElem.size();
-    if (keyLen >= prefixLen && memcmp(key, prefix, prefixLen) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 #ifdef HPHP_TRACE
 std::string show(const StoreValue& sval) {
   return sval.data().left() ?
@@ -907,8 +896,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
     }
 
     int64_t adjustedTtl = adjust_ttl(ttl, overwritePrime || !limit_ttl);
-    if (adjustedTtl > apcExtension::TTLMaxFinite ||
-        check_noTTL(key.data(), key.size())) {
+    if (adjustedTtl > apcExtension::TTLMaxFinite) {
       adjustedTtl = 0;
     }
 

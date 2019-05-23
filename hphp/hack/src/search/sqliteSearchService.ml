@@ -7,8 +7,9 @@
  *
 *)
 
-open SearchUtils
 open Core_kernel
+open SearchUtils
+open Sqlite_utils
 
 let select_symbols_stmt = ref None
 let select_symbols_by_kind_stmt = ref None
@@ -72,39 +73,6 @@ let initialize
     Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path;
   done
 
-(* Ensure that sqlite gave a valid response to an operation *)
-let check_rc (rc: Sqlite3.Rc.t): unit =
-  if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
-  then begin
-    failwith (Printf.sprintf "SQLite operation failed: %s"
-                (Sqlite3.Rc.to_string rc))
-  end
-
-(* Gather a database and prepared statement into a tuple *)
-let prepare_or_reset_statement
-    (stmt_ref: Sqlite3.stmt option ref)
-    (sql_command_text: string) =
-  let stmt = match !stmt_ref with
-    | Some s ->
-      Sqlite3.reset s |> check_rc;
-      s
-    | None ->
-      let db = Option.value_exn !symbolindex_db in
-      let s = Sqlite3.prepare db sql_command_text in
-      stmt_ref := Some s;
-      s
-  in
-  stmt
-
-(* This method should have been included in the sqlite3 package, but wasn't *)
-let to_int = function
-  | Sqlite3.Data.INT i ->
-    begin
-      match Int64.to_int i with
-      | Some num -> num
-      | None -> 0
-    end
-  | _ -> 0
 
 (*
  * Symbol search for a specific kind.
@@ -115,7 +83,8 @@ let search_symbols_by_kind
     (kind_filter: si_kind)
   : si_results =
   let results = ref [] in
-  let stmt = prepare_or_reset_statement select_symbols_by_kind_stmt sql_select_symbols_by_kind in
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_symbols_by_kind_stmt sql_select_symbols_by_kind in
   Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
   Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int (kind_to_int kind_filter))) |> check_rc;
   Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
@@ -135,7 +104,8 @@ let search_all_symbols
     (query_text: string)
     (max_results: int): si_results =
   let results = ref [] in
-  let stmt = prepare_or_reset_statement select_symbols_stmt sql_select_all_symbols in
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_symbols_stmt sql_select_all_symbols in
   Sqlite3.bind stmt 1 (Sqlite3.Data.TEXT (query_text ^ "%")) |> check_rc;
   Sqlite3.bind stmt 2 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do

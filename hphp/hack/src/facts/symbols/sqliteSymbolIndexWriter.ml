@@ -6,8 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
-open SearchUtils
 open Core_kernel
+open SearchUtils
+open Sqlite_utils
 
 (* Some SQL commands we'll need *)
 let sql_begin_transaction =
@@ -62,11 +63,6 @@ let sql_create_indexes =
   "CREATE INDEX IF NOT EXISTS ix_symbols_name ON symbols (name);" ^
   "CREATE INDEX IF NOT EXISTS ix_symbols_kindname ON symbols (kind, name);" ^
   "CREATE INDEX IF NOT EXISTS ix_symbols_namespace ON symbols (namespace_id, name);"
-
-(* Capture responses and crash if database fails *)
-let check_rc (rc: Sqlite3.Rc.t): unit =
-  if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
-  then failwith (Printf.sprintf "SQLite operation failed: %s" (Sqlite3.Rc.to_string rc))
 
 (* Begin the work of creating an SQLite index DB *)
 let record_in_db

@@ -10,4 +10,5 @@
     process
     process_types
     search_utils
+    sqlite_utils
     utils_hash))

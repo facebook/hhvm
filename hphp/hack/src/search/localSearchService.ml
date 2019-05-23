@@ -83,11 +83,13 @@ let search_local_symbols
   let check_substring_and_add_to_accumulator_and_break_if_max_reached
       ~(acc: si_results)
       ~(symbol: string)
-      ~(kind: si_kind): si_results =
+      ~(kind: si_kind)
+      ~(path: Relative_path.t): si_results =
     if Str.string_match query_text_regex_case_insensitive query_text 0 then begin
       let acc_new = {
         si_name = (Utils.strip_ns symbol);
         si_kind = kind;
+        si_filehash = (get_tombstone path);
       } :: acc in
       if (List.length acc_new) >= max_results then
         raise (BreakOutOfScan acc_new)
@@ -99,12 +101,13 @@ let search_local_symbols
   let check_string_sset_using_kind_filter
       (symbols: SSet.t)
       (kind: si_kind)
+      (path: Relative_path.t)
       (acc: si_results): si_results =
     if kind_filter = None || kind_filter = Some kind then begin
       SSet.fold symbols ~init:acc
         ~f:(fun symbol acc ->
           check_substring_and_add_to_accumulator_and_break_if_max_reached
-          ~acc ~symbol ~kind)
+          ~acc ~symbol ~kind ~path)
     end else acc
   in
 
@@ -112,33 +115,34 @@ let search_local_symbols
   let check_id_tuple_list_using_kind_filter
       (ids: FileInfo.id list)
       (kind: si_kind)
+      (path: Relative_path.t)
       (acc: si_results): si_results =
     if kind_filter = None || kind_filter = Some kind then begin
       List.fold ids ~init:acc
         ~f:(fun acc (_, symbol) ->
           check_substring_and_add_to_accumulator_and_break_if_max_reached
-          ~acc ~symbol ~kind)
+          ~acc ~symbol ~kind ~path)
     end else acc
   in
 
   try
     let acc = Relative_path.Map.fold env.lte_fileinfos
         ~init:[]
-        ~f:(fun _ info acc ->
+        ~f:(fun path info acc ->
             acc
-            |> check_id_tuple_list_using_kind_filter info.FileInfo.classes SI_Class
-            |> check_id_tuple_list_using_kind_filter info.FileInfo.funs SI_Function
-            |> check_id_tuple_list_using_kind_filter info.FileInfo.typedefs SI_Typedef
-            |> check_id_tuple_list_using_kind_filter info.FileInfo.consts SI_GlobalConstant
+            |> check_id_tuple_list_using_kind_filter info.FileInfo.classes SI_Class path
+            |> check_id_tuple_list_using_kind_filter info.FileInfo.funs SI_Function path
+            |> check_id_tuple_list_using_kind_filter info.FileInfo.typedefs SI_Typedef path
+            |> check_id_tuple_list_using_kind_filter info.FileInfo.consts SI_GlobalConstant path
           ) in
     let acc = Relative_path.Map.fold env.lte_filenames
         ~init:acc
-        ~f:(fun _ names acc ->
+        ~f:(fun path names acc ->
             acc
-            |> check_string_sset_using_kind_filter names.FileInfo.n_classes SI_Class
-            |> check_string_sset_using_kind_filter names.FileInfo.n_funs SI_Function
-            |> check_string_sset_using_kind_filter names.FileInfo.n_types SI_Typedef
-            |> check_string_sset_using_kind_filter names.FileInfo.n_consts SI_GlobalConstant
+            |> check_string_sset_using_kind_filter names.FileInfo.n_classes SI_Class path
+            |> check_string_sset_using_kind_filter names.FileInfo.n_funs SI_Function path
+            |> check_string_sset_using_kind_filter names.FileInfo.n_types SI_Typedef path
+            |> check_string_sset_using_kind_filter names.FileInfo.n_consts SI_GlobalConstant path
           ) in
     acc
   with BreakOutOfScan acc -> acc

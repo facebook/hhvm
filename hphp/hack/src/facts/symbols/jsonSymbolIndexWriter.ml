@@ -40,7 +40,7 @@ let record_one_jsonfile
 let record_in_jsonfiles
     (chunk_size: int)
     (filename_prefix: string)
-    (symbols: sic_results) =
+    (symbols: si_results) =
 
   (* Note that glean elements must start with high ID numbers *)
   let json_element_id = ref 500_000 in
@@ -48,10 +48,10 @@ let record_in_jsonfiles
   (* Create an array of all JSON elements *)
   let json_array = List.map symbols ~f:(fun symbol -> begin
         json_element_id := !json_element_id + 1;
-        let kind_int = kind_to_int symbol.sic_kind in
+        let kind_int = kind_to_int symbol.si_kind in
         JSON_Object [ ("key", JSON_Object [
             ("kind", JSON_Number (string_of_int kind_int));
-            ("name", JSON_String symbol.sic_name);
+            ("name", JSON_String symbol.si_name);
           ]);
             ("id", JSON_Number (string_of_int !json_element_id));
           ]

@@ -10,7 +10,7 @@ open SearchUtils
 
 let record_in_textfile
     (filename: string)
-    (symbols: sic_results): unit =
+    (symbols: si_results): unit =
 
   (* Open a temporary file *)
   let open Core_kernel in
@@ -19,8 +19,8 @@ let record_in_textfile
 
   (* Write lines to file *)
   List.iter symbols ~f:(fun symbol -> begin
-    let kindstr = Printf.sprintf "%d" (kind_to_int symbol.sic_kind) in
-      Out_channel.output_string channel symbol.sic_name;
+    let kindstr = Printf.sprintf "%d" (kind_to_int symbol.si_kind) in
+      Out_channel.output_string channel symbol.si_name;
       Out_channel.output_string channel " ";
       Out_channel.output_string channel kindstr;
       Out_channel.output_string channel "\n";

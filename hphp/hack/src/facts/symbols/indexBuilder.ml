@@ -29,7 +29,7 @@ type index_builder_context = {
 (* Parse one single file and capture information about it *)
 let parse_file
     (ctxt: index_builder_context)
-    (filename: string): sic_results =
+    (filename: string): si_results =
   if Sys.is_directory filename then begin
     []
   end else begin
@@ -69,17 +69,17 @@ let parse_file
                   end
               end in
               {
-                sic_name = key;
-                sic_kind = kind;
-                sic_filehash = path_hash;
+                si_name = key;
+                si_kind = kind;
+                si_filehash = path_hash;
               }
             end) in
 
         (* Identify all functions in the file *)
         let functions_mapped = Core_kernel.List.map facts.functions ~f:(fun funcname -> {
-              sic_name = funcname;
-              sic_kind = SI_Function;
-              sic_filehash = path_hash;
+              si_name = funcname;
+              si_kind = SI_Function;
+              si_filehash = path_hash;
             }) in
 
         (* Return unified results *)
@@ -94,8 +94,8 @@ let parse_file
 
 let parse_batch
     (ctxt: index_builder_context)
-    (acc: sic_results)
-    (files: string list): sic_results =
+    (acc: si_results)
+    (files: string list): si_results =
   List.fold files ~init:acc ~f:begin fun acc file ->
     if Path.file_exists (Path.make file) then
       try
@@ -114,7 +114,7 @@ let parse_batch
 let parallel_parse
     ~(workers: MultiWorker.worker list option)
     (files: string list)
-    (ctxt: index_builder_context): sic_results =
+    (ctxt: index_builder_context): si_results =
   MultiWorker.call workers
     ~job:(parse_batch ctxt)
     ~neutral:[]

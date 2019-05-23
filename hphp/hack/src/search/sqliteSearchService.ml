@@ -17,9 +17,9 @@ let sqlite_file_path = ref None
 
 (* SQL statements used by the autocomplete system *)
 let sql_select_symbols_by_kind =
-  "SELECT name FROM symbols WHERE name LIKE ? AND kind = ? LIMIT ?"
+  "SELECT name, filename_hash FROM symbols WHERE name LIKE ? AND kind = ? LIMIT ?"
 let sql_select_all_symbols =
-  "SELECT name, kind FROM symbols WHERE name LIKE ? LIMIT ?"
+  "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? LIMIT ?"
 let sql_check_alive =
   "SELECT name FROM symbols LIMIT 1"
 
@@ -73,7 +73,6 @@ let initialize
     Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path;
   done
 
-
 (*
  * Symbol search for a specific kind.
  *)
@@ -90,9 +89,11 @@ let search_symbols_by_kind
   Sqlite3.bind stmt 3 (Sqlite3.Data.INT (Int64.of_int max_results)) |> check_rc;
   while Sqlite3.step stmt = Sqlite3.Rc.ROW do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
+    let filehash = to_int64 (Sqlite3.column stmt 1) in
     results := {
       si_name = name;
       si_kind = kind_filter;
+      si_filehash = filehash;
     } :: !results;
   done;
   !results
@@ -112,9 +113,11 @@ let search_all_symbols
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
     let kindnum = to_int (Sqlite3.column stmt 1) in
     let kind = int_to_kind kindnum in
+    let filehash = to_int64 (Sqlite3.column stmt 2) in
     results := {
       si_name = name;
       si_kind = kind;
+      si_filehash = filehash;
     } :: !results;
   done;
   !results

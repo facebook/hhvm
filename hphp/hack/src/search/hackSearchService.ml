@@ -293,6 +293,7 @@ let index_search
               Some {
                 si_kind = kind;
                 si_name = name;
+                si_filehash = 0L;
               }
             end else begin
               None

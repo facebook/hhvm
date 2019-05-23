@@ -175,22 +175,12 @@ let result_to_kind (result: search_result_type): si_kind =
 type si_item = {
   si_name: string;
   si_kind: si_kind;
-}
-
-(* Only used by the index builder; includes file hash *)
-type si_capture = {
-  sic_name: string;
-  sic_kind: si_kind;
-  sic_filehash: int64;
+  si_filehash: int64;
 }
 
 (* Internal representation of a full list of results *)
 type si_results =
   si_item list
-
-(* Internal representation of a full list of results *)
-type sic_results =
-  si_capture list
 
 (* Which system notified us of a file changed? *)
 type file_source =

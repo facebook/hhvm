@@ -4078,7 +4078,7 @@ and is_abstract_ft fty = match fty with
       let env, te1, ty1 = static_class_id ~check_constraints:true pid env [] e1 in
       let env, fty, _ =
         class_get ~is_method:true ~is_const:false ~explicit_tparams:tal
-        ~pos_params:el env ty1 m e1 in
+        env ty1 m e1 in
       let () = match e1 with
         | CIself when is_abstract_ft fty ->
           begin match Env.get_self env with
@@ -4248,7 +4248,7 @@ and class_contains_smethod env cty (_pos, mid) =
   List.exists tyl ~f:lookup_member
 
 and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
-              ?(pos_params : expr list option) env cty (p, mid) cid =
+              env cty (p, mid) cid =
   let env, this_ty =
     if is_method then
       this_for_method env cid cty
@@ -4262,10 +4262,10 @@ and class_get ~is_method ~is_const ?(explicit_tparams=[]) ?(incl_tc=false)
     validate_dty = None;
   } in
   class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
-             ~pos_params env cid cty (p, mid)
+             env cid cty (p, mid)
 
 and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
-               ?(incl_tc=false) ~pos_params env cid cty
+               ?(incl_tc=false) env cid cty
 (p, mid) =
   let env, cty = Env.expand_type env cty in
   match cty with
@@ -4283,7 +4283,7 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
         let ety_env = {ety_env with this_ty = this_ty} in
         let env, ty, _ =
           class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
-                     ~pos_params env cid ty (p, mid)
+                     env cid ty (p, mid)
             in env, ty
         end in
       let env, ty = Union.union_list env (fst cty) tyl in
@@ -4291,11 +4291,11 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
       env, method_, None
   | _, Tabstract (_, Some ty) ->
       class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
-        ~pos_params env cid ty (p, mid)
+        env cid ty (p, mid)
   | _, Tabstract (_, None) ->
       let resl = TUtils.try_over_concrete_supertypes env cty (fun env ty ->
         class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
-          ~pos_params env cid ty (p, mid)) in
+          env cid ty (p, mid)) in
       begin match resl with
       | [] ->
         Errors.non_class_member

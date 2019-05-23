@@ -19,7 +19,7 @@
     get_build_id
     get_build_id_gen)
   (c_flags (:standard
-    (:include ../dune_config/incl_hphp_parent.sexp)
+    -I%{env:CMAKE_SOURCE_DIR=xxx}
     (:include config/build-id-opt)
     (:include config/build-timestamp-opt)))
   (libraries
@@ -228,8 +228,7 @@
   (c_names
     compiler_id_impl
     build-id)
-  (c_flags (:standard
-    (:include ../dune_config/incl_hphp_parent.sexp))))
+  (c_flags (:standard -I%{env:CMAKE_SOURCE_DIR=xxx})))
 
 (library
   (name lsp)

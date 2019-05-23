@@ -4,10 +4,5 @@
     dune.configurator))
 
 (rule
-  (targets hphp_parent ld-opts.sexp)
+  (targets ld-opts.sexp)
   (action (run ./discover.exe)))
-
-(rule
-  (targets incl_hphp_parent.sexp)
-  (action
-    (write-file incl_hphp_parent.sexp -I%{read:hphp_parent})))

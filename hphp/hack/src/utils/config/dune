@@ -2,7 +2,7 @@
   (targets build-id build-id.c)
   (action
     (progn
-      (write-file generate-build-id.sh "INSTALL_DIR=$PWD FBCODE_DIR=%{read-lines:../../dune_config/hphp_parent} %{read-lines:../../dune_config/hphp_parent}hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src")
+      (write-file generate-build-id.sh "INSTALL_DIR=$PWD FBCODE_DIR=%{env:CMAKE_SOURCE_DIR=xxx} %{env:CMAKE_SOURCE_DIR=yyy}/hphp/tools/generate-build-id.sh IGNORED IGNORED hh hphp/hack/src")
       (system "chmod +x generate-build-id.sh && ./generate-build-id.sh"))))
 
 (rule

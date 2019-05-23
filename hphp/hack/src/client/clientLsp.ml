@@ -840,14 +840,9 @@ let do_didChange
   let command = ServerCommandTypes.EDIT_FILE (filename, changes) in
   rpc conn ref_unblocked_time command
 
-let do_hover
-    (conn: server_conn)
-    (ref_unblocked_time: float ref)
-    (params: Hover.params)
-  : Hover.result Lwt.t =
-  let (file, line, column) = lsp_file_position_to_hack params in
-  let command = ServerCommandTypes.IDE_HOVER (ServerCommandTypes.FileName file, line, column) in
-  let%lwt infos = rpc conn ref_unblocked_time command in
+let do_hover_common
+    (infos: HoverService.hover_info list)
+  : Hover.result =
   let contents =
     infos
     |> List.map ~f:begin fun hoverInfo ->
@@ -870,8 +865,31 @@ let do_hover
     |> Option.map ~f:hack_pos_to_lsp_range
   in
   if contents = []
-  then Lwt.return None
-  else Lwt.return (Some { Hover.contents; range; })
+  then None
+  else Some { Hover.contents; range; }
+
+let do_hover
+    (conn: server_conn)
+    (ref_unblocked_time: float ref)
+    (params: Hover.params)
+  : Hover.result Lwt.t =
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command = ServerCommandTypes.IDE_HOVER (ServerCommandTypes.FileName file, line, column) in
+  let%lwt infos = rpc conn ref_unblocked_time command in
+  Lwt.return (do_hover_common infos)
+
+let do_hover_local
+    (ide_service: ClientIdeService.t)
+    (params: Hover.params)
+  : Hover.result Lwt.t =
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let%lwt infos = ClientIdeService.hover
+    ide_service
+    (ServerCommandTypes.FileName file, line, column)
+  in
+  match infos with
+  | None -> Lwt.return None
+  | Some infos -> Lwt.return (do_hover_common infos)
 
 let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
   : Definition.result Lwt.t =
@@ -2276,6 +2294,7 @@ let handle_event
           file_edits = ImmQueue.push ienv.file_edits c.json
         };
         Lwt.return_unit
+
       | _ ->
         raise (Error.RequestCancelled (Hh_server_initializing |> hh_server_state_to_string))
         (* We deny all other requests. Operation_cancelled is the only *)
@@ -2335,6 +2354,14 @@ let handle_event
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_hover c.params
       |> do_hover menv.conn ref_unblocked_time
+    in
+    result |> print_hover |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
+  | _, Client_message c when c.method_ = "textDocument/hover" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_hover c.params
+      |> do_hover_local !ide_service
     in
     result |> print_hover |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit

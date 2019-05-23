@@ -255,7 +255,7 @@ class type ['a] visitor_type = object
   method on_using : 'a -> using_stmt -> 'a
   method on_as_expr : 'a -> as_expr -> 'a
   method on_array : 'a -> afield list -> 'a
-  method on_shape : 'a -> (Ast.shape_field_name * expr) list -> 'a
+  method on_shape : 'a -> (Ast_defs.shape_field_name * expr) list -> 'a
   method on_valCollection : 'a -> vc_kind -> targ option -> expr list -> 'a
   method on_keyValCollection : 'a -> kvc_kind -> (targ * targ) option -> field list -> 'a
   method on_collection : 'a -> collection_targ option -> afield list -> 'a
@@ -290,8 +290,8 @@ class type ['a] visitor_type = object
   method on_pair : 'a -> expr -> expr -> 'a
   method on_expr_list : 'a -> expr list -> 'a
   method on_cast : 'a -> hint -> expr -> 'a
-  method on_unop : 'a -> Ast.uop -> expr -> 'a
-  method on_binop : 'a -> Ast.bop -> expr -> expr -> 'a
+  method on_unop : 'a -> Ast_defs.uop -> expr -> 'a
+  method on_binop : 'a -> Ast_defs.bop -> expr -> expr -> 'a
   method on_pipe : 'a -> id -> expr -> expr -> 'a
   method on_eif : 'a -> expr -> expr option -> expr -> 'a
   method on_typename : 'a -> sid -> 'a
@@ -305,9 +305,9 @@ class type ['a] visitor_type = object
   method on_efun : 'a -> fun_ -> id list -> 'a
   method on_lfun : 'a -> fun_ -> id list -> 'a
   method on_xml : 'a -> sid -> xhp_attribute list -> expr list -> 'a
-  method on_param_kind : 'a -> Ast.param_kind -> 'a
+  method on_param_kind : 'a -> Ast_defs.param_kind -> 'a
   method on_unsafe_expr : 'a -> expr -> 'a
-  method on_callconv : 'a -> Ast.param_kind -> expr -> 'a
+  method on_callconv : 'a -> Ast_defs.param_kind -> expr -> 'a
   method on_assert : 'a -> assert_expr -> 'a
   method on_clone : 'a -> expr -> 'a
   method on_field: 'a -> field -> 'a

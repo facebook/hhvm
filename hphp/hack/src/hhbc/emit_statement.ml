@@ -104,12 +104,12 @@ let emit_markup env s echo_expr_opt ~check_for_hashbang =
 
 let get_level p op e =
   match A.get_break_continue_level e with
-  | Ast_utils.Level_ok (Some i) -> i
-  | Ast_utils.Level_ok None -> 1
-  | Ast_utils.Level_non_positive ->
+  | A.Level_ok (Some i) -> i
+  | A.Level_ok None -> 1
+  | A.Level_non_positive ->
     Emit_fatal.raise_fatal_parse
       p ("'" ^ op ^ "' operator accepts only positive numbers")
-  | Ast_utils.Level_non_literal ->
+  | A.Level_non_literal ->
     Emit_fatal.raise_fatal_parse
       p ("'" ^ op ^ "' with non-constant operand is not supported")
 

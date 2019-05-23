@@ -121,7 +121,7 @@ and expr_ =
   | Array of afield list
   | Darray of (targ * targ) option * (expr * expr) list
   | Varray of targ option * expr list
-  | Shape of (Ast.shape_field_name * expr) list
+  | Shape of (Ast_defs.shape_field_name * expr) list
     (* TODO: T38184446 Consolidate collections in AAST *)
   | ValCollection of vc_kind * targ option * expr list
     (* TODO: T38184446 Consolidate collections in AAST *)
@@ -158,8 +158,8 @@ and expr_ =
   | List of expr list
   | Expr_list of expr list
   | Cast of hint * expr
-  | Unop of Ast.uop * expr
-  | Binop of Ast.bop * expr * expr
+  | Unop of Ast_defs.uop * expr
+  | Binop of Ast_defs.bop * expr * expr
   (** The ID of the $$ that is implicitly declared by this pipe. *)
   | Pipe of lid * expr * expr
   | Eif of expr * expr option * expr
@@ -172,7 +172,7 @@ and expr_ =
   | Lfun of fun_ * lid list
   | Xml of sid * xhp_attribute list * expr list
   | Unsafe_expr of expr
-  | Callconv of Ast.param_kind * expr
+  | Callconv of Ast_defs.param_kind * expr
   | Import of import_flavor * expr
   (* TODO: T38184446 Consolidate collections in AAST *)
   | Collection of sid * collection_targ option * afield list
@@ -234,7 +234,7 @@ and fun_param = {
   param_pos : pos;
   param_name : string;
   param_expr : expr option;
-  param_callconv : Ast.param_kind option;
+  param_callconv : Ast_defs.param_kind option;
   param_user_attributes : user_attribute list;
 }
 
@@ -254,7 +254,7 @@ and fun_ = {
   f_variadic : fun_variadicity;
   f_params   : fun_param list;
   f_body     : func_body;
-  f_fun_kind : Ast.fun_kind;
+  f_fun_kind : Ast_defs.fun_kind;
   f_user_attributes : user_attribute list;
   f_file_attributes : file_attribute list;
   f_external : bool;  (* true if this declaration has no body because it is an
@@ -288,9 +288,9 @@ and file_attribute = {
 }
 
 and tparam = {
-  tp_variance: Ast.variance;
+  tp_variance: Ast_defs.variance;
   tp_name: sid;
-  tp_constraints: (Ast.constraint_kind * hint) list;
+  tp_constraints: (Ast_defs.constraint_kind * hint) list;
   tp_reified: reify_kind;
   tp_user_attributes: user_attribute list
 }
@@ -300,7 +300,7 @@ and class_tparams = {
   (* TODO: remove this and use tp_constraints *)
   (* keeping around the ast version of the constraint only
    * for the purposes of Naming.class_meth_bodies *)
-  c_tparam_constraints: (reify_kind * (Ast.constraint_kind * hint) list) SMap.t [@opaque]
+  c_tparam_constraints: (reify_kind * (Ast_defs.constraint_kind * hint) list) SMap.t [@opaque]
 }
 
 and use_as_alias = sid option * pstring * sid option * use_as_visibility list
@@ -313,7 +313,7 @@ and class_ = {
   c_mode           : FileInfo.mode [@opaque];
   c_final          : bool             ;
   c_is_xhp         : bool;
-  c_kind           : Ast.class_kind   ;
+  c_kind           : Ast_defs.class_kind   ;
   c_name           : sid              ;
   (* The type parameters of a class A<T> (T is the parameter) *)
   c_tparams        : class_tparams    ;
@@ -406,7 +406,7 @@ and method_ = {
   m_variadic        : fun_variadicity     ;
   m_params          : fun_param list      ;
   m_body            : func_body           ;
-  m_fun_kind        : Ast.fun_kind        ;
+  m_fun_kind        : Ast_defs.fun_kind        ;
   m_user_attributes : user_attribute list ;
   m_ret             : hint option         ;
   m_external        : bool                ;  (* see f_external above for context *)
@@ -423,7 +423,7 @@ and method_redeclaration = {
   mt_where_constraints : where_constraint list;
   mt_variadic        : fun_variadicity     ;
   mt_params          : fun_param list      ;
-  mt_fun_kind        : Ast.fun_kind        ;
+  mt_fun_kind        : Ast_defs.fun_kind        ;
   mt_ret             : hint option         ;
   mt_trait           : hint                ;
   mt_method          : pstring             ;
@@ -629,14 +629,19 @@ let split_reqs class_ =
       class_.c_reqs in
   List.rev extends, List.rev implements
 
+type break_continue_level =
+  | Level_ok of int option
+  | Level_non_literal
+  | Level_non_positive
+
 let get_break_continue_level level_opt =
   match level_opt with
   | (_, Int s) ->
     let i = int_of_string s in
     if i <= 0
-    then Ast_utils.Level_non_positive
-    else Ast_utils.Level_ok (Some i)
-  | _ -> Ast_utils.Level_non_literal
-  | exception _ -> Ast_utils.Level_non_literal
+    then Level_non_positive
+    else Level_ok (Some i)
+  | _ -> Level_non_literal
+  | exception _ -> Level_non_literal
 
 end (* of AnnotatedAST functor *)

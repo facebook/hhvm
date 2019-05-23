@@ -133,21 +133,6 @@ end
 let get_class_elts ast =
   List.rev ((new ast_get_class_elts_visitor)#on_program [] ast)
 
-type break_continue_level =
-  | Level_ok of int option
-  | Level_non_literal
-  | Level_non_positive
-
-let get_break_continue_level level_opt =
-  match level_opt with
-  | None -> Level_ok None
-  | Some (_, Ast.Int s) ->
-    let i = int_of_string s in
-    if i <= 0 then Level_non_positive
-    else Level_ok (Some i)
-  | _ -> Level_non_literal
-  | exception _ -> Level_non_literal
-
 (* Helpers for XHP attributes *)
 let map_xhp_attr (f: id -> id) (g: expr -> expr) = function
   | Xhp_simple (id, e) -> Xhp_simple (f id, g e)

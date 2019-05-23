@@ -7,10 +7,10 @@
  *
  *)
 
-module SM = Ast.ShapeMap
+module SM = Ast_defs.ShapeMap
 
 class ['self] iter_defs_base = object (self : 'self)
-  inherit [_] Ast.iter_defs
+  inherit [_] Ast_defs.iter_defs
   method private on_shape_map
     : 'a . ('env -> 'a -> unit) -> 'env -> 'a SM.t -> unit
     = fun f env x -> SM.iter (self#on_shape_map_entry f env) x
@@ -22,7 +22,7 @@ class ['self] iter_defs_base = object (self : 'self)
 end
 
 class virtual ['self] reduce_defs_base = object (self : 'self)
-  inherit [_] Ast.reduce_defs
+  inherit [_] Ast_defs.reduce_defs
   method private on_shape_map
     : 'a . ('env -> 'a -> 'acc) -> 'env -> 'a SM.t -> 'acc
     = fun f env x ->
@@ -35,7 +35,7 @@ class virtual ['self] reduce_defs_base = object (self : 'self)
 end
 
 class ['self] map_defs_base = object (self : 'self)
-  inherit [_] Ast.map_defs
+  inherit [_] Ast_defs.map_defs
   method private on_shape_map
     : 'a 'b . ('env -> 'a -> 'b) -> 'env -> 'a SM.t -> 'b SM.t
     = fun f env x ->
@@ -48,7 +48,7 @@ class ['self] map_defs_base = object (self : 'self)
 end
 
 class ['self] endo_defs_base = object (self : 'self)
-  inherit [_] Ast.endo_defs
+  inherit [_] Ast_defs.endo_defs
   method private on_shape_map
     : 'a 'b . ('env -> 'a -> 'b) -> 'env -> 'a SM.t -> 'b SM.t
     = fun f env x ->

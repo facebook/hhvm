@@ -9,15 +9,15 @@
 
 include Aast_defs_visitors_ancestors
 
-module ShapeMap = Ast.ShapeMap
+module ShapeMap = Ast_defs.ShapeMap
 
 type 'a shape_map = 'a ShapeMap.t [@@deriving show]
 
-type pos = Ast.pos [@@deriving show]
+type pos = Ast_defs.pos [@@deriving show]
 
 type local_id = Local_id.t [@visitors.opaque]
 and lid = pos * local_id
-and sid = Ast.id
+and sid = Ast_defs.id
 
 and is_terminal = bool
 and is_reified = bool
@@ -58,7 +58,7 @@ and variadic_hint =
 and hint_ =
   | Hoption of hint
   | Hlike of hint
-  | Hfun of func_reactive * is_coroutine * hint list * Ast.param_kind option list *
+  | Hfun of func_reactive * is_coroutine * hint list * Ast_defs.param_kind option list *
     param_mutability option list * variadic_hint * hint * mutable_return
   | Htuple of hint list
   | Happly of sid * hint list
@@ -114,7 +114,7 @@ and tprim =
 and shape_field_info = {
   sfi_optional: bool;
   sfi_hint : hint;
-  sfi_name : Ast.shape_field_name;
+  sfi_name : Ast_defs.shape_field_name;
 }
 
 and nast_shape_info = {
@@ -158,7 +158,7 @@ and enum_ = {
   e_constraint : hint option;
 }
 
-and where_constraint = hint * Ast.constraint_kind * hint
+and where_constraint = hint * Ast_defs.constraint_kind * hint
 [@@deriving
   show { with_path = false },
   visitors {
@@ -204,9 +204,9 @@ let string_of_use_as_visibility vis =
   | UseAsFinal -> "final"
 
 type id = lid [@@deriving show]
-type pstring = Ast.pstring [@@deriving show]
+type pstring = Ast_defs.pstring [@@deriving show]
 
-type og_null_flavor = Ast.og_null_flavor =
+type og_null_flavor = Ast_defs.og_null_flavor =
   | OG_nullthrows
   | OG_nullsafe
 

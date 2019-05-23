@@ -822,38 +822,36 @@ RegionDescPtr selectCalleeCFG(SrcKey callerSk, const Func* callee,
 }
 }
 
-RegionDescPtr selectCalleeRegion(const SrcKey& sk,
+RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
-                                 const irgen::IRGS& irgs,
+                                 const FCallArgs& fca,
+                                 Type ctxType,
+                                 Op writeArOpc,
+                                 const SrcKey& sk,
                                  Annotations& annotations) {
   assertx(sk.op() == OpFCall);
-  auto const numArgs = getImm(sk.pc(), 0).u_FCA.numArgs;
-  auto const& fpiStack = irgs.irb->fs().fpiStack();
-  assertx(!fpiStack.empty());
-  auto const& fpiInfo = fpiStack.back();
-  auto ctx = fpiInfo.ctxType;
 
   auto kind = irgs.context.kind;
   auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ?
                         &annotations : nullptr;
 
-  if (ctx == TBottom) {
+  if (ctxType == TBottom) {
     traceRefusal(sk, callee, "ctx is TBottom", annotationsPtr);
     return nullptr;
   }
   if (callee->isClosureBody()) {
     if (!callee->cls()) {
-      ctx = TNullptr;
+      ctxType = TNullptr;
     } else if (callee->mayHaveThis()) {
-      ctx = TCtx;
+      ctxType = TCtx;
     } else {
-      ctx = TCctx;
+      ctxType = TCctx;
     }
   } else {
     // Bail out if calling a static methods with an object ctx.
-    if (ctx.maybe(TObj) &&
+    if (ctxType.maybe(TObj) &&
         (callee->isStaticInPrologue() ||
-         (!sk.hasThis() && isFPushClsMethod(fpiInfo.fpushOpc)))) {
+         (!sk.hasThis() && isFPushClsMethod(writeArOpc)))) {
       traceRefusal(sk, callee, "calling static method with an object",
                    annotationsPtr);
       return nullptr;
@@ -861,7 +859,7 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
   }
 
   std::vector<Type> argTypes;
-  for (int i = numArgs - 1; i >= 0; --i) {
+  for (int i = fca.numArgs - 1; i >= 0; --i) {
     // DataTypeGeneric is used because we're just passing the locals into the
     // callee.  It's up to the callee to constrain further if needed.
     auto type = irgen::publicTopType(irgs, BCSPRelOffset{i});
@@ -880,21 +878,21 @@ RegionDescPtr selectCalleeRegion(const SrcKey& sk,
 
   const auto depth = inlineDepth(irgs);
   if (profData()) {
-    auto region = selectCalleeCFG(sk, callee, numArgs, ctx, argTypes,
+    auto region = selectCalleeCFG(sk, callee, fca.numArgs, ctxType, argTypes,
                                   irgs.budgetBCInstrs, annotationsPtr);
     if (region &&
-        shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+        shouldInline(irgs, sk, writeArOpc, callee, *region,
                      adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
       return region;
     }
     return nullptr;
   }
 
-  auto region = selectCalleeTracelet(callee, numArgs, ctx, argTypes,
+  auto region = selectCalleeTracelet(callee, fca.numArgs, ctxType, argTypes,
                                      irgs.budgetBCInstrs);
 
   if (region &&
-      shouldInline(irgs, sk, fpiInfo.fpushOpc, callee, *region,
+      shouldInline(irgs, sk, writeArOpc, callee, *region,
                    adjustedMaxVasmCost(irgs, *region, depth), annotations)) {
     return region;
   }

@@ -106,9 +106,12 @@ int costOfInlining(SrcKey callerSk,
 /*
  * Select an inlining region for the call to `callee' at `sk'.
  */
-RegionDescPtr selectCalleeRegion(const SrcKey& sk,
+RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  const Func* callee,
-                                 const irgen::IRGS& irgs,
+                                 const FCallArgs& fca,
+                                 Type ctxType,
+                                 Op writeArOpc,
+                                 const SrcKey& sk,
                                  Annotations& annotations);
 
 void setBaseInliningProfCount(uint64_t value);

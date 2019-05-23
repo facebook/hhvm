@@ -440,9 +440,12 @@ bool inEntryRetransChain(RegionDesc::BlockId bid, const RegionDesc& region) {
  * Otherwise, select a region for `callee' if one is not already present in
  * `retry'.  Update `inl' and return the region if it's inlinable.
  */
-RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
+RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
                                        const Func* callee,
-                                       const irgen::IRGS& irgs,
+                                       const FCallArgs& fca,
+                                       Type ctxType,
+                                       Op writeArOpc,
+                                       const ProfSrcKey& psk,
                                        int& calleeCost,
                                        Annotations& annotations) {
   if (psk.srcKey.op() != Op::FCall) {
@@ -458,30 +461,18 @@ RegionDescPtr getInlinableCalleeRegion(const ProfSrcKey& psk,
                         &annotations : nullptr;
   if (!canInlineAt(psk.srcKey, callee, annotationsPtr)) return nullptr;
 
-  auto const& fpiStack = irgs.irb->fs().fpiStack();
-  // Make sure the FPushOp was in the region
-  if (fpiStack.empty()) {
-    return nullptr;
-  }
-
-  // Make sure the FPushOp wasn't interpreted, based on a spanned another call,
-  // or marked as not eligible for inlining by frame-state.
-  auto const& info = fpiStack.back();
-  if (!info.inlineEligible || info.spansCall) {
-    return nullptr;
-  }
-
   auto const& inlineBlacklist = irgs.retryContext->inlineBlacklist;
   if (inlineBlacklist.find(psk) != inlineBlacklist.end()) {
     return nullptr;
   }
 
-  auto calleeRegion = selectCalleeRegion(psk.srcKey, callee, irgs, annotations);
+  auto calleeRegion = selectCalleeRegion(
+    irgs, callee, fca, ctxType, writeArOpc, psk.srcKey, annotations);
   if (!calleeRegion || calleeRegion->instrSize() > irgs.budgetBCInstrs) {
     return nullptr;
   }
 
-  calleeCost = costOfInlining(psk.srcKey, info.fpushOpc, callee,
+  calleeCost = costOfInlining(psk.srcKey, writeArOpc, callee,
                               *calleeRegion, annotations);
   return calleeRegion;
 }
@@ -833,13 +824,14 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 }
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
-                         const FCallArgs& fca) {
+                         const FCallArgs& fca, SSATmp* ctx, Type ctxType,
+                         Op writeArOpc) {
   auto const psk = ProfSrcKey { irgs.profTransID, curSrcKey(irgs) };
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
   auto const calleeRegion = getInlinableCalleeRegion(
-    psk, callee, irgs, calleeCost, irgs.annotations);
+    irgs, callee, fca, ctxType, writeArOpc, psk, calleeCost, irgs.annotations);
   if (!calleeRegion) return false;
 
   // We shouldn't be inlining profiling translations.
@@ -863,14 +855,12 @@ bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
   };
   auto callFuncOff = bcOff(irgs) - curFunc(irgs)->base();
 
-  if (!irgen::beginInlining(irgs, fca.numArgs, callee,
-                            calleeRegion->start(),
-                            callFuncOff,
-                            returnTarget,
-                            calleeCost,
-                            false)) {
-    return false;
-  }
+  irgen::beginInlining(irgs, callee, fca, ctx, ctxType, writeArOpc,
+                       calleeRegion->start(),
+                       callFuncOff,
+                       returnTarget,
+                       calleeCost,
+                       false);
 
   SCOPE_ASSERT_DETAIL("Inlined-RegionDesc")
     { return show(*calleeRegion); };
@@ -952,10 +942,8 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
 
     SCOPE_ASSERT_DETAIL("Inline-IRUnit") { return show(*unit); };
     irb.startBlock(entry, false /* hasUnprocPred */);
-    if (!irgen::conjureBeginInlining(irgs, func, region.start(),
-                                     ctxType, argTypes, returnTarget)) {
-      return nullptr;
-    }
+    irgen::conjureBeginInlining(irgs, func, region.start(),
+                                ctxType, argTypes, returnTarget);
 
     try {
       auto const result = irGenRegionImpl(irgs, region, 1 /* profFactor */);

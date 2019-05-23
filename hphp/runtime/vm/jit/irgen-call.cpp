@@ -312,8 +312,8 @@ const Func* profiledCalledFunc(IRGS& env, double& probability) {
 }
 
 template<class TMakeSideExit, class TKnown, class TUnknown>
-void profileCalledFunc(IRGS& env, SSATmp* callee, TMakeSideExit makeSideExit,
-                       TKnown callKnown, TUnknown callUnknown) {
+void callProfiledFunc(IRGS& env, SSATmp* callee, TMakeSideExit makeSideExit,
+                      TKnown callKnown, TUnknown callUnknown) {
   double profiledFuncBias{0};
   auto const profiledFunc = profiledCalledFunc(env, profiledFuncBias);
   if (!profiledFunc) return callUnknown();
@@ -1500,6 +1500,28 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
   auto const actRecOff = spOffBCFromIRSP(env) + numStackInputs;
   auto const callee = ldPreLiveFunc(env, actRecOff);
 
+  auto const tryInline = [&] (const Func* knownCallee) {
+    // Make sure the FPushOp was in the region.
+    auto const& fpiStack = env.irb->fs().fpiStack();
+    if (fpiStack.empty()) return false;
+
+    // Make sure the FPushOp wasn't interpreted, based on a spanned another
+    // call, or marked as not eligible for inlining by frame-state.
+    auto const& info = fpiStack.back();
+    if (!info.inlineEligible || info.spansCall) return false;
+
+    // Its possible that we have an "FCall T2 meth" guarded by eg an
+    // InstanceOfD T2, and that we know the object has type T1, and we
+    // also know that T1::meth exists. The FCall is actually
+    // unreachable, but we might not have figured that out yet - so we
+    // could be trying to inline T1::meth while the fpiStack has
+    // T2::meth.
+    if (info.func && info.func != knownCallee) return false;
+
+    return irGenTryInlineFCall(env, knownCallee, fca, info.ctx, info.ctxType,
+                               info.fpushOpc);
+  };
+
   auto const doCallKnown = [&] (const Func* knownCallee) {
     if (!callee->hasConstVal()) {
       auto const data = IRSPRelOffsetData{ actRecOff };
@@ -1507,7 +1529,7 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
     }
     if (!emitCallerReffinessChecksKnown(env, knownCallee, fca)) return;
 
-    if (irGenTryInlineFCall(env, knownCallee, fca)) return;
+    if (tryInline(knownCallee)) return;
     callKnown(env, knownCallee, fca);
   };
 
@@ -1522,7 +1544,7 @@ void emitFCall(IRGS& env, FCallArgs fca, const StringData*, const StringData*) {
     gen(env, Jmp, makeExit(env, nextBcOff(env)));
   };
 
-  profileCalledFunc(env, callee, makeSideExit, doCallKnown, doCallUnknown);
+  callProfiledFunc(env, callee, makeSideExit, doCallKnown, doCallUnknown);
 }
 
 void emitDirectCall(IRGS& env, Func* callee, uint32_t numParams,

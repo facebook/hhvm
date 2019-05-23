@@ -208,7 +208,7 @@ bool isInlining(const IRGS& env);
 uint16_t inlineDepth(const IRGS& env);
 
 /*
- * Attempt to begin inlining, and return whether or not we succeeded.
+ * Begin inlining. Always succeeds.
  *
  * When doing gen-time inlining, we set up a series of IR instructions that
  * looks like this:
@@ -231,9 +231,12 @@ uint16_t inlineDepth(const IRGS& env);
  * In DCE we attempt to remove the InlineReturn and DefInlineFP instructions if
  * they aren't needed.
  */
-bool beginInlining(IRGS& env,
-                   unsigned numParams,
+void beginInlining(IRGS& env,
                    const Func* target,
+                   const FCallArgs& fca,
+                   SSATmp* ctx,
+                   Type ctxType,
+                   Op writeArOpc,
                    SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
@@ -255,10 +258,8 @@ bool endInlining(IRGS& env, const RegionDesc& calleeRegion);
  *
  * Simulating the inlining measures the cost of pushing a dummy frame (or not if
  * we are able to elide it) and any effects that may have on alias analysis.
- *
- * Returns false if the inlined region would be invalid for inlining
  */
-bool conjureBeginInlining(IRGS& env,
+void conjureBeginInlining(IRGS& env,
                           const Func* func,
                           SrcKey startSk,
                           Type thisType,

@@ -210,18 +210,17 @@ uint16_t inlineDepth(const IRGS& env) {
   return env.inlineState.depth;
 }
 
-bool beginInlining(IRGS& env,
-                   unsigned numParams,
+void beginInlining(IRGS& env,
                    const Func* target,
+                   const FCallArgs& fca,
+                   SSATmp* ctx,
+                   Type ctxType,
+                   Op writeArOpc,
                    SrcKey startSk,
                    Offset callBcOffset,
                    InlineReturnTarget returnTarget,
                    int cost,
                    bool conjure) {
-  auto const& fpiStack = env.irb->fs().fpiStack();
-
-  assertx(!fpiStack.empty() &&
-    "Inlining does not support calls with the FPush* in a different Tracelet");
   assertx(callBcOffset >= 0 && "callBcOffset before beginning of caller");
   // curFunc is null when called from conjureBeginInlining
   assertx((!curFunc(env) ||
@@ -230,40 +229,20 @@ bool beginInlining(IRGS& env,
 
   FTRACE(1, "[[[ begin inlining: {}\n", target->fullName()->data());
 
-  auto const& info = fpiStack.back();
-  if (info.func && info.func != target) {
-    // Its possible that we have an "FCall T2 meth" guarded by eg an
-    // InstanceOfD T2, and that we know the object has type T1, and we
-    // also know that T1::meth exists. The FCall is actually
-    // unreachable, but we might not have figured that out yet - so we
-    // could be trying to inline T1::meth while the fpiStack has
-    // T2::meth.
-    return false;
-  }
-
-  always_assert(isFPush(info.fpushOpc) && info.inlineEligible);
-
-  auto const prevSP = fpiStack.back().returnSP;
-  auto const calleeSP = sp(env);
-
-  always_assert_flog(
-    prevSP == calleeSP,
-    "FPI stack pointer and callee stack pointer didn't match in beginInlining"
-  );
-
   // The VM stack-pointer is conceptually pointing to the last
-  // parameter, so we need to add numParams to get to the ActRec
-  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + numParams;
+  // parameter, so we need to add numArgs to get to the ActRec
+  assertx(!fca.hasUnpack());
+  IRSPRelOffset calleeAROff = spOffBCFromIRSP(env) + fca.numArgs;
 
-  auto ctx = [&] () -> SSATmp* {
+  ctx = [&] () -> SSATmp* {
     if (!target->implCls()) {
       return nullptr;
     }
-    auto ty = info.ctxType;
+    auto ty = ctxType;
     if (!target->isClosureBody()) {
       if (target->isStaticInPrologue() ||
           (!hasThis(env) &&
-           isFPushClsMethod(info.fpushOpc))) {
+           isFPushClsMethod(writeArOpc))) {
         assertx(!ty.maybe(TObj));
         if (ty.hasConstVal(TCctx)) {
           ty = Type::ExactCls(ty.cctxVal().cls());
@@ -273,21 +252,21 @@ bool beginInlining(IRGS& env,
         }
       } else {
         if (target->attrs() & AttrRequiresThis ||
-            isFPushObjMethod(info.fpushOpc) ||
+            isFPushObjMethod(writeArOpc) ||
             ty <= TObj) {
           ty &= thisTypeFromFunc(target);
         }
       }
     }
-    if (info.ctx && !info.ctx->isA(TNullptr)) {
-      if (info.ctx->type() <= ty) {
-        return info.ctx;
+    if (ctx && !ctx->isA(TNullptr)) {
+      if (ctx->type() <= ty) {
+        return ctx;
       }
-      if (info.ctx->type().maybe(ty)) {
-        return gen(env, AssertType, ty, info.ctx);
+      if (ctx->type().maybe(ty)) {
+        return gen(env, AssertType, ty, ctx);
       }
-      if (info.ctx->type() <= TCctx && ty <= TCls) {
-        return gen(env, AssertType, ty, gen(env, LdClsCctx, info.ctx));
+      if (ctx->type() <= TCctx && ty <= TCls) {
+        return gen(env, AssertType, ty, gen(env, LdClsCctx, ctx));
       }
     }
     if (ty <= TObj) {
@@ -305,9 +284,9 @@ bool beginInlining(IRGS& env,
   // will be a TCtx (= TObj | TCctx) read from the stack
   assertx(!ctx || (ctx->type() <= (TCtx | TCls) && target->implCls()));
 
-  jit::vector<SSATmp*> params{numParams};
-  for (unsigned i = 0; i < numParams; ++i) {
-    params[numParams - i - 1] = popF(env);
+  jit::vector<SSATmp*> params{fca.numArgs};
+  for (unsigned i = 0; i < fca.numArgs; ++i) {
+    params[fca.numArgs - i - 1] = popF(env);
   }
 
   // NB: Now that we've popped the callee's arguments off the stack
@@ -334,11 +313,11 @@ bool beginInlining(IRGS& env,
   data.ctx           = target->isClosureBody() ? nullptr : ctx;
   data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
   data.spOffset      = calleeAROff;
-  data.numNonDefault = numParams;
+  data.numNonDefault = fca.numArgs;
   data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
 
   assertx(startSk.func() == target &&
-          startSk.offset() == target->getEntryForNumArgs(numParams) &&
+          startSk.offset() == target->getEntryForNumArgs(fca.numArgs) &&
           startSk.resumeMode() == ResumeMode::None);
 
   env.inlineState.depth++;
@@ -350,12 +329,12 @@ bool beginInlining(IRGS& env,
   env.bcState = startSk;
   updateMarker(env);
 
-  auto const calleeFP = gen(env, DefInlineFP, data, calleeSP, fp(env));
+  auto const calleeFP = gen(env, DefInlineFP, data, sp(env), fp(env));
 
-  for (unsigned i = 0; i < numParams; ++i) {
+  for (unsigned i = 0; i < fca.numArgs; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
   }
-  emitPrologueLocals(env, numParams, target, ctx);
+  emitPrologueLocals(env, fca.numArgs, target, ctx);
 
   // "Kill" all the class-ref slots initially. This normally won't do anything
   // (the class-ref slots should be unoccupied at this point), but in debugging
@@ -416,11 +395,9 @@ bool beginInlining(IRGS& env,
     env.bcState = startSk;
     updateMarker(env);
   }
-
-  return true;
 }
 
-bool conjureBeginInlining(IRGS& env,
+void conjureBeginInlining(IRGS& env,
                           const Func* func,
                           SrcKey startSk,
                           Type thisType,
@@ -437,21 +414,24 @@ bool conjureBeginInlining(IRGS& env,
   for (auto const argType : args) {
     push(env, conjure(argType));
   }
+  auto const ctx = thisType != TBottom ? conjure(thisType) : nullptr;
 
   env.irb->fs().setFPushOverride(env.context.callerFPushOp);
   auto const arInfo = ActRecInfo {
     offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numParams)}),
     numParams
   };
-  gen(env, SpillFrame, arInfo, sp(env), cns(env, func),
-      thisType != TBottom ? conjure(thisType) : nullptr,
+  gen(env, SpillFrame, arInfo, sp(env), cns(env, func), ctx,
       cns(env, TNullptr), cns(env, false), cns(env, TNullptr));
   assertx(!env.irb->fs().hasFPushOverride());
 
-  return beginInlining(
+  beginInlining(
     env,
-    numParams,
     func,
+    FCallArgs { FCallArgs::Flags::None, numParams, 1, nullptr, kInvalidOffset },
+    ctx,
+    ctx ? ctx->type() : TCtx,
+    env.context.callerFPushOp,
     startSk,
     0 /* callBcOffset */,
     returnTarget,

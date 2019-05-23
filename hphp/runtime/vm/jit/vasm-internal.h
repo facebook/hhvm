@@ -41,13 +41,11 @@ struct Venv {
    * Patch data collected at emit-time for post-processing.
    */
   struct LabelPatch { CodeAddress instr; Vlabel target; };
+  struct AddrPatch { CodeAddress instr; Vaddr target; };
   struct SvcReqPatch { CodeAddress jmp, jcc; Vinstr svcreq; };
+  struct VaddrBind { Vaddr vaddr; Vlabel target; };
 
-  Venv(Vunit& unit, Vtext& text, CGMeta& meta)
-    : unit(unit)
-    , text(text)
-    , meta(meta)
-  {}
+  Venv(Vunit& unit, Vtext& text, CGMeta& meta);
 
   void record_inline_stack(TCA);
 
@@ -66,6 +64,9 @@ struct Venv {
   const IRInstruction* origin;
 
   jit::vector<CodeAddress> addrs;
+  jit::vector<CodeAddress> vaddrs;
+  jit::vector<VaddrBind> pending_vaddrs;
+  jit::vector<AddrPatch> leas;
   jit::vector<LabelPatch> jmps, jccs;
   jit::vector<LabelPatch> catches;
   jit::vector<std::pair<TCA,IStack>> stacks;

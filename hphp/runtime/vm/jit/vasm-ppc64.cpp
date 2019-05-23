@@ -97,13 +97,17 @@ struct Vgen {
   static void emitVeneers(Venv& env) {}
   static void handleLiterals(Venv& env) {}
   static void patch(Venv& env) {
-    for (auto& p : env.jmps) {
+    for (auto const& p : env.jmps) {
       assertx(env.addrs[p.target]);
       Assembler::patchBranch(toReal(env, p.instr), env.addrs[p.target]);
     }
-    for (auto& p : env.jccs) {
+    for (auto const& p : env.jccs) {
       assertx(env.addrs[p.target]);
       Assembler::patchBranch(toReal(env, p.instr), env.addrs[p.target]);
+    }
+    for (auto const& p : env.leas) {
+      (void)p;
+      not_implemented();
     }
   }
 
@@ -475,6 +479,7 @@ struct Vgen {
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
   void emit(const lea&);
+  void emit(const leav&);
   void emit(const leavetc&);
   void emit(const load& i);
   void emit(const loadqd& i);
@@ -806,6 +811,12 @@ void Vgen::emit(const lea& i) {
       a.addi(i.d, p.base, p.disp);
     }
   }
+}
+
+void Vgen::emit(const leav& i) {
+  auto const addr = a.frontier();
+  emit(leap{reg::rip[0xdeadbeef], i.d});
+  env.leas.push_back({addr, i.s});
 }
 
 void Vgen::emit(const testqi& i) {
@@ -1193,6 +1204,15 @@ void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
 X(andbi,  andqi,  ONE_R64(d))
 X(andwi,  andqi,  ONE_R64(d))
 X(andli,  andqi,  ONE_R64(d))
+
+#undef X
+
+#define X(vasm_src, vasm_dst, operands)                                 \
+void lowerForPPC64(const VLS& e, Vout& v, vasm_src& inst) {             \
+  v << vasm_dst{inst.s0, Reg64(inst.s1), operands inst.sf};             \
+}
+
+X(orbi, orqi, ONE_R64(d))
 
 #undef X
 

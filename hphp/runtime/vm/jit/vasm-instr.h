@@ -77,6 +77,7 @@ struct Vunit;
   O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
+  O(movqs, I(s) I(addr), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) UW(d), Dn)\
   O(mcprep, Inone, Un, D(d))\
@@ -186,6 +187,7 @@ struct Vunit;
   O(neg, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(notb, Inone, UH(s,d), DH(d,s))\
   O(not, Inone, UH(s,d), DH(d,s))\
+  O(orbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(orbim, I(s0) I(fl), UM(m), D(sf))\
   O(orwim, I(s0) I(fl), UM(m), D(sf))\
   O(orwi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
@@ -257,6 +259,7 @@ struct Vunit;
   /* load effective address */\
   O(lea, Inone, U(s), D(d))\
   O(leap, I(s), Un, D(d))\
+  O(leav, I(s), Un, D(d))\
   O(lead, I(s), Un, D(d))\
   /* copies */\
   O(movb, Inone, UH(s,d), DH(d,s))\
@@ -306,6 +309,7 @@ struct Vunit;
   O(jcc, I(cc), U(sf), Dn)\
   O(jcci, I(cc), U(sf), Dn)\
   O(jmp, Inone, Un, Dn)\
+  O(jmps, I(jmp_addr) I(taken_addr), Un, Dn)\
   O(jmpr, Inone, U(target) U(args), Dn)\
   O(jmpm, Inone, U(target) U(args), Dn)\
   O(jmpi, I(target), U(args), Dn)\
@@ -525,6 +529,11 @@ struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
 
 /*
+ * Load a smashable immediate value without mutating status flags.
+ */
+struct movqs { Immed64 s; Vreg64 d; Vaddr addr; };
+
+/*
  * Memory operand load and store.
  */
 struct load { Vptr64 s; Vreg d; };
@@ -588,12 +597,14 @@ struct ssaalias { Vreg s; Vreg d; };
 
 /*
  * Emit a function prologue guard.
+ *
  * *watch will be set to the address following the guard.
  */
 struct funcguard { const Func* func; TCA* watch; };
 
 /*
  * Emit a smashable jmp to realCode.
+ *
  * *watch will be set to the address of the smashable.
  */
 struct debugguardjmp { TCA realCode; TCA* watch; };
@@ -1047,6 +1058,7 @@ struct neg { Vreg64 s, d; VregSF sf; Vflags fl; };
 struct notb { Vreg8 s, d; };
 struct not { Vreg64 s, d; };
 // or: s0 | {s1|m} => {d|m}, sf
+struct orbi { Immed s0; Vreg8 s1, d; VregSF sf; Vflags fl; };
 struct orbim { Immed s0; Vptr8 m; VregSF sf; Vflags fl; };
 struct orwim { Immed s0; Vptr16 m; VregSF sf; Vflags fl; };
 struct orwi { Immed s0; Vreg16 s1, d; VregSF sf; Vflags fl; };
@@ -1135,6 +1147,8 @@ struct setcc { ConditionCode cc; VregSF sf; Vreg8 d; };
  */
 struct lea { Vptr s; Vreg64 d; };
 struct leap { RIPRelativeRef s; Vreg64 d; };
+// rip-relative lea of a Vaddr
+struct leav { Vaddr s; Vreg64 d; };
 struct lead { VdataPtr<void> s; Vreg64 d; };
 
 /*
@@ -1204,6 +1218,10 @@ struct storesd { VregDbl s; Vptr64 m; };
 struct jcc { ConditionCode cc; VregSF sf; Vlabel targets[2]; StringTag tag; };
 struct jcci { ConditionCode cc; VregSF sf; Vlabel target; TCA taken; };
 struct jmp { Vlabel target; };
+// jmps{} is a smashable jump to target[0].  It admits a second target which
+// represents an in-Vunit smash target.  All possible such targets need to be
+// accounted for here so that vasm optimizations are aware of control flow.
+struct jmps { Vlabel targets[2]; Vaddr jmp_addr; Vaddr taken_addr; };
 struct jmpr { Vreg64 target; RegSet args; };
 struct jmpm { Vptr target; RegSet args; };
 struct jmpi { TCA target; RegSet args; };

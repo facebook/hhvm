@@ -113,8 +113,10 @@ bool emit(Venv& env, const bindaddr& i);
 bool emit(Venv& env, const fallback& i);
 bool emit(Venv& env, const fallbackcc& i);
 bool emit(Venv& env, const retransopt& i);
+bool emit(Venv& env, const movqs& i);
 bool emit(Venv& env, const funcguard& i);
 bool emit(Venv& env, const debugguardjmp& i);
+bool emit(Venv& env, const jmps& i);
 
 inline bool emit(Venv& env, const pushframe&) {
   if (env.frame == -1) return true; // unreachable block
@@ -226,6 +228,14 @@ void computeFrames(Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+inline Venv::Venv(Vunit& unit, Vtext& text, CGMeta& meta)
+  : unit(unit)
+  , text(text)
+  , meta(meta)
+{
+  vaddrs.resize(unit.next_vaddr);
+}
+
 inline void Venv::record_inline_stack(TCA addr) {
   uint32_t callOff = 0;
   auto const func = unit.frames[frame].func;
@@ -319,6 +329,12 @@ void vasm_emit(Vunit& unit, Vtext& text, CGMeta& fixups,
 
   // Emit service request stubs and register patch points.
   for (auto& p : env.stubs) emit_svcreq_stub(env, p);
+
+  // Bind any Vaddrs that correspond to Vlabels.
+  for (auto const& p : env.pending_vaddrs) {
+    assertx(env.addrs[p.target]);
+    env.vaddrs[p.vaddr] = env.addrs[p.target];
+  }
 
   // Patch up jump targets and friends.
   Vemit::patch(env);

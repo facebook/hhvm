@@ -191,6 +191,7 @@ struct Vgen {
   void emit(const jmpi& i);
   void emit(const lea& i);
   void emit(const leap& i) { a.lea(i.s, i.d); }
+  void emit(const leav& i);
   void emit(const lead& i) { a.lea(rip[(intptr_t)i.s.get()], i.d); }
   void emit(const loadups& i) { a.movups(i.s, i.d); }
   void emit(const loadtqb& i) { a.loadb(i.s, i.d); }
@@ -219,6 +220,7 @@ struct Vgen {
   void emit(const nop& /*i*/) { a.nop(); }
   void emit(not i) { unary(i); a.not(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
+  void emit(orbi i) { binary(i); a.orb(i.s0, i.d); }
   void emit(const orbim& i) { a.orb(i.s0, i.m); }
   void emit(const orwim& i) { a.orw(i.s0, i.m); }
   void emit(const orlim& i) { a.orl(i.s0, i.m); }
@@ -466,14 +468,14 @@ void retargetJumps(Venv& env,
 
 template<class X64Asm>
 void Vgen<X64Asm>::patch(Venv& env) {
-  for (auto& p : env.jmps) {
+  for (auto const& p : env.jmps) {
     assertx(env.addrs[p.target]);
     X64Asm::patchJmp(toReal(env, p.instr), p.instr, env.addrs[p.target]);
   }
 
   auto const optLevel = RuntimeOption::EvalJitRetargetJumps;
   jit::hash_map<TCA, jit::vector<TCA>> jccs;
-  for (auto& p : env.jccs) {
+  for (auto const& p : env.jccs) {
     assertx(env.addrs[p.target]);
     X64Asm::patchJcc(toReal(env, p.instr), p.instr, env.addrs[p.target]);
     if (optLevel >= 2 ||
@@ -483,6 +485,13 @@ void Vgen<X64Asm>::patch(Venv& env) {
   }
 
   if (!jccs.empty()) retargetJumps(env, jccs);
+
+  for (auto const& p : env.leas) {
+    assertx(env.vaddrs[p.target]);
+    DecodedInstruction di(toReal(env, p.instr), p.instr);
+    assertx(di.hasPicOffset());
+    di.setPicAddress(env.vaddrs[p.target]);
+  }
 }
 
 template<class X64Asm>
@@ -872,6 +881,13 @@ void Vgen<X64Asm>::emit(const lea& i) {
   } else {
     a.lea(i.s, i.d);
   }
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const leav& i) {
+  auto const addr = a.frontier();
+  emit(leap{reg::rip[0xdeadbeef], i.d});
+  env.leas.push_back({addr, i.s});
 }
 
 template<class X64Asm>

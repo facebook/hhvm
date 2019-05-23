@@ -47,6 +47,10 @@ inline Vreg Vout::makeReg() {
   return m_unit.makeReg();
 }
 
+inline Vaddr Vout::makeAddr() {
+  return m_unit.makeAddr();
+}
+
 inline Vtuple Vout::makeTuple(const VregList& regs) const {
   return m_unit.makeTuple(regs);
 }

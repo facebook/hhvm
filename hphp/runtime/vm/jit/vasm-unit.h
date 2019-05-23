@@ -206,6 +206,7 @@ struct Vunit {
    * Make various Vunit-managed vasm structures.
    */
   Vreg makeReg() { return Vreg{next_vr++}; }
+  Vaddr makeAddr() { return Vaddr{next_vaddr++}; }
   Vtuple makeTuple(VregList&& regs);
   Vtuple makeTuple(const VregList& regs);
   VcallArgsId makeVcallArgs(VcallArgs&& args);
@@ -256,6 +257,7 @@ struct Vunit {
   jit::vector<VregList> tuples;
   jit::vector<VcallArgs> vcallArgs;
   jit::vector<VdataBlock> dataBlocks;
+  unsigned next_vaddr{0};
   uint16_t cur_voff{0};  // current instruction index managed by Vout
   bool padding{false};
   bool profiling{false};

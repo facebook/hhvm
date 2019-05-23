@@ -134,8 +134,7 @@ struct CGMeta {
   /*
    * Address immediates in the generated code.
    *
-   * Also contains the addresses of any mcprep{} smashable movq instructions
-   * that were emitted.
+   * Also contains the addresses of any mcprep{} instructions that were emitted.
    */
   std::set<TCA> addressImmediates;
 

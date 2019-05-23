@@ -330,6 +330,7 @@ struct Vgen {
   void emit(const jmpr& i) { a->Br(X(i.target)); }
   void emit(const lea& i);
   void emit(const leap& i);
+  void emit(const leav& i);
   void emit(const lead& i);
   void emit(const loadb& i) { a->Ldrb(W(i.d), M(i.s)); }
   void emit(const loadl& i) { a->Ldr(W(i.d), M(i.s)); }
@@ -360,6 +361,7 @@ struct Vgen {
   void emit(const nop& /*i*/) { a->Nop(); }
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
   void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
+  void emit(const orbi& i);
   void emit(const orq& i);
   void emit(const orwi& i);
   void emit(const orli& i);
@@ -620,7 +622,7 @@ void Vgen::patch(Venv& env) {
     patchTarget32(targetAddr, target);
   };
 
-  for (auto& p : env.jmps) {
+  for (auto const& p : env.jmps) {
     auto addr = toReal(env, p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
@@ -632,7 +634,7 @@ void Vgen::patch(Venv& env) {
     // Patch the address we are jumping to.
     patch(addr, target);
   }
-  for (auto& p : env.jccs) {
+  for (auto const& p : env.jccs) {
     auto addr = toReal(env, p.instr);
     auto const target = env.addrs[p.target];
     assertx(target);
@@ -647,6 +649,10 @@ void Vgen::patch(Venv& env) {
       addr += kInstructionSize;
     }
     patch(addr, target);
+  }
+  for (auto const& p : env.leas) {
+    (void)p;
+    not_implemented();
   }
 }
 
@@ -1040,6 +1046,12 @@ void Vgen::emit(const lea& i) {
   }
 }
 
+void Vgen::emit(const leav& i) {
+  auto const addr = a->frontier();
+  emit(leap{reg::rip[0xdeadbeef], i.d});
+  env.leas.push_back({addr, i.s});
+}
+
 void Vgen::emit(const leap& i) {
   vixl::Label imm_data;
   vixl::Label after_data;
@@ -1094,6 +1106,7 @@ void Vgen::emit(const vasm_opc& i) {                  \
   }                                                   \
 }
 
+Y(orbi, Orr, W, i.s0.ub(), wzr);
 Y(orwi, Orr, W, i.s0.uw(), xzr);
 Y(orli, Orr, W, i.s0.l(), xzr);
 Y(orqi, Orr, X, i.s0.q(), xzr);

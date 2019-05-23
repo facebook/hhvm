@@ -40,13 +40,13 @@ struct Vtext;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DECLARE_VNUM(Vnum, check, prefix)                 \
+#define DECLARE_VNUM(Vnum, type, check, prefix)           \
 struct Vnum {                                             \
   Vnum() {}                                               \
-  explicit Vnum(size_t n) : n(safe_cast<uint32_t>(n)) {}  \
+  explicit Vnum(size_t n) : n(safe_cast<type>(n)) {}      \
                                                           \
   /* implicit */ operator size_t() const {                \
-    if (check) assertx(n != kInvalidId);                   \
+    if (check) assertx(n != kInvalidId);                  \
     return n;                                             \
   }                                                       \
                                                           \
@@ -60,24 +60,30 @@ struct Vnum {                                             \
   }                                                       \
                                                           \
 private:                                                  \
-  static constexpr uint32_t kInvalidId = 0xffffffff;      \
-  uint32_t n{kInvalidId};                                 \
+  static constexpr type kInvalidId =                      \
+    static_cast<type>(0xffffffff);                        \
+  type n{kInvalidId};                                     \
 }
 
 /*
  * Vlabel wraps a block number.
  */
-DECLARE_VNUM(Vlabel, true, "B");
+DECLARE_VNUM(Vlabel, uint32_t, true, "B");
+
+/*
+ * Vaddr is a reference to an address in the instruction stream.
+ */
+DECLARE_VNUM(Vaddr, uint32_t, false, "A");
 
 /*
  * Vtuple is an index to a tuple in Vunit::tuples.
  */
-DECLARE_VNUM(Vtuple, true, "T");
+DECLARE_VNUM(Vtuple, uint32_t, true, "T");
 
 /*
  * VcallArgsId is an index to a VcallArgs in Vunit::vcallArgs.
  */
-DECLARE_VNUM(VcallArgsId, true, "V");
+DECLARE_VNUM(VcallArgsId, uint32_t, true, "V");
 
 #undef DECLARE_VNUM
 

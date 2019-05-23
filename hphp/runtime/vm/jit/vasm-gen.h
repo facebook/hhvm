@@ -99,6 +99,7 @@ struct Vout {
    * Vunit delegations.
    */
   Vreg makeReg();
+  Vaddr makeAddr();
   Vtuple makeTuple(const VregList& regs) const;
   Vtuple makeTuple(VregList&& regs) const;
   VcallArgsId makeVcallArgs(VcallArgs&& args) const;

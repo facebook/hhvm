@@ -35,12 +35,11 @@
     state_queue
     subchunk)
   (libraries
+    common
     diff
+    full_fidelity
     hackfmt_doc
     hackfmt_env
     hackfmt_error
     logging
-    parser_rewriter
-    parser_syntax_transforms
-    parser_syntax_tree
     utils_www_root))

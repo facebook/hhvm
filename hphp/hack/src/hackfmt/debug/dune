@@ -4,5 +4,4 @@
   (libraries
     debug
     hackfmt
-    parser_syntax
-    parser_syntax_tree))
+    full_fidelity))

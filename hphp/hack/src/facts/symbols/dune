@@ -7,7 +7,6 @@
     hhbc
     hhi
     parser
-    parser_syntax
     process
     process_types
     search_utils

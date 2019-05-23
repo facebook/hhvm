@@ -28,7 +28,7 @@
     debug
     sof)
   (libraries
-    parser_syntax))
+    full_fidelity))
 
 (library
   (name hackc_parse_delegator)

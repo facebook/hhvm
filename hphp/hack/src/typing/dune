@@ -99,7 +99,7 @@
     tast_type_collector)
   (libraries
     core_kernel
-    parser_syntax
+    full_fidelity
     tast)
   (preprocess (pps ppx_deriving.std)))
 
@@ -113,8 +113,8 @@
   (libraries
     ast
     core_kernel
+    full_fidelity
     nast
-    parser_namespaces
     tast
     typing_defs))
 
@@ -209,8 +209,7 @@
     typedSyntaxTransforms)
   (libraries
     core_kernel
-    parser_syntax
-    parser_syntax_tree
+    full_fidelity
     typed_positioned_syntax))
 
 (library

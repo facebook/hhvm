@@ -3,11 +3,11 @@
   (wrapped false)
   (libraries
     ast_provider
+    full_fidelity
     heap_global_storage
     naming
     naming_attributes
     nast_pos_mapper
-    parser_heap
     procs_procs
     typing_defs)
   (preprocess (pps ppx_deriving.std)))

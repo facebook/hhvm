@@ -16,7 +16,6 @@
     hhi
     nast
     parent
-    parser_syntax
     server
     server_env
     sys_utils
@@ -89,7 +88,6 @@
     heap_ident
     logging
     naming
-    parser_syntax_tree
     pocket_universes
     typing)
   (ocamlc_flags (:standard -custom))
@@ -106,11 +104,7 @@
     global_config
     hackfmt
     nast
-    parser_ast_check
-    parser_heap
-    parser_syntax
-    parser_syntax_transforms
-    parser_syntax_tree
+    parser
     utils_core))
 
 (executable
@@ -136,10 +130,7 @@
     global_config
     hackfmt
     nast
-    parser_heap
-    parser_syntax
-    parser_syntax_transforms
-    parser_syntax_tree))
+    parser))
 
 (executable
   (name generate_full_fidelity)
@@ -150,5 +141,4 @@
     procs_procs_lwt
     core_kernel
     str
-    parser_schema
     collections))

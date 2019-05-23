@@ -7,11 +7,11 @@
     facts
     fetcher
     file_info
+    full_fidelity
     heap_shared_mem
     index_builder
     logging
     naming
-    parser_heap
     procs_procs
     pos
     search_utils

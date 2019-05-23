@@ -4,8 +4,8 @@
   (libraries
     facts
     file_info
+    full_fidelity
     logging
     naming
-    parser_heap
     procs_procs
     pos))

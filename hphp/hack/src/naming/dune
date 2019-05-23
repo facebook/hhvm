@@ -58,9 +58,10 @@
     ast
     ast_provider
     common
+    file_provider
+    full_fidelity
     naming_attributes
     nast
-    parser_namespaces
     sqlite3
     typing_deps
     typechecker_options)

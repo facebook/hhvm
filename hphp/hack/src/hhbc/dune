@@ -5,7 +5,7 @@
     annotated_ast
     ast
     core_kernel
+    full_fidelity
     mutable_accumulator
-    parser_heap
     tast
     utils_php_escape))

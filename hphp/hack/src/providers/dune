@@ -14,10 +14,12 @@
   (modules ast_provider)
   (libraries
     ast
+    file_provider
     heap_shared_mem
     nast
-    parser_heap
-    relative_path))
+    parser
+    relative_path
+    utils_find))
 
 (library
   (name decl_provider)

@@ -4,7 +4,7 @@
   (libraries
     ast
     naming
-    parser_heap
+    full_fidelity
     parser_options
     procs_procs
     typing_deps))

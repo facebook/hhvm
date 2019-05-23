@@ -132,7 +132,7 @@
     ast
     decl
     heap_shared_mem
-    parser_docblock_finder
+    parser
     server_command_types
     server_env
     sys_utils

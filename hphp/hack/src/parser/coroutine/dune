@@ -1,7 +1,4 @@
 (library
   (name parser_coroutine)
   (wrapped false)
-  (libraries
-    parser_editable_positioned_syntax
-    parser_lambda_analyzer
-    parser_rewriter))
+  (libraries full_fidelity))

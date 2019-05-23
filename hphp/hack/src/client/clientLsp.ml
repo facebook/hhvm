@@ -18,6 +18,7 @@ open Hh_json_helpers
 type env = {
   from: string; (* The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   use_ffp_autocomplete: bool; (* Flag to turn on the (experimental) FFP based autocomplete *)
+  use_serverless_ide: bool; (* Flag to provide IDE services from `hh_client` *)
 }
 
 (* We cache the state of the typecoverageToggle button, so that when Hack restarts,
@@ -2365,7 +2366,9 @@ let handle_event
     result |> print_hover |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
 
-  | _, Client_message c when c.method_ = "textDocument/hover" ->
+  | _, Client_message c
+    when env.use_serverless_ide
+      && c.method_ = "textDocument/hover" ->
     let%lwt () = cancel_if_stale client c short_timeout in
     let%lwt result = parse_hover c.params
       |> do_hover_local !ide_service
@@ -2577,13 +2580,17 @@ let handle_event
   Lwt.return_unit
 
 let run_ide_service
+    (env: env)
     (ide_service: ClientIdeService.t ref)
     : unit Lwt.t =
-  let%lwt root = get_root_wait () in
-  let%lwt ide_service' =
-    ClientIdeService.make_from_saved_state ~root in
-  ide_service := ide_service';
-  Lwt.return_unit
+  if env.use_serverless_ide then begin
+    let%lwt root = get_root_wait () in
+    let%lwt ide_service' =
+      ClientIdeService.make_from_saved_state ~root in
+    ide_service := ide_service';
+    Lwt.return_unit
+  end else
+    Lwt.return_unit
 
 let shutdown_ide_service (ide_service: ClientIdeService.t ref): unit Lwt.t =
   Hh_logger.log "Shutting down IDE service process...";
@@ -2751,5 +2758,5 @@ let main (env: env) : Exit_status.t Lwt.t =
     main_loop ();
     tick_showStatus state;
   ]
-  and () = run_ide_service ide_service in
+  and () = run_ide_service env ide_service in
   Lwt.return Exit_status.No_error

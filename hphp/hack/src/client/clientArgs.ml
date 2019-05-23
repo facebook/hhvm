@@ -689,20 +689,25 @@ let parse_lsp_args () =
   let from = ref "" in
   let use_ffp_autocomplete = ref false in
   let noop_enhanced_hover  = ref false in
+  let use_serverless_ide = ref false in
   let options = [
     Common_argspecs.from from;
     "--ffp-autocomplete",
     Arg.Set use_ffp_autocomplete,
-    " [experimental] (mode) use the full-fidelity parser based autocomplete ";
+    " [experimental] use the full-fidelity parser based autocomplete ";
     "--enhanced-hover",
     Arg.Set noop_enhanced_hover,
     " [legacy] no-op";
+    "--serverless-ide",
+    Arg.Set use_serverless_ide,
+    " [experimental] provide IDE services from hh_client instead of hh_server";
   ] in
   let args = parse_without_command options usage "lsp" in
   match args with
-  | [] -> CLsp {
-      ClientLsp.from = !from;
-      ClientLsp.use_ffp_autocomplete = !use_ffp_autocomplete;
+  | [] -> CLsp { ClientLsp.
+      from = !from;
+      use_ffp_autocomplete = !use_ffp_autocomplete;
+      use_serverless_ide = !use_serverless_ide;
     }
   | _ -> Printf.printf "%s\n" usage; exit 2
 

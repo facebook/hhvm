@@ -888,8 +888,11 @@ let do_hover_local
     (ServerCommandTypes.FileName file, line, column)
   in
   match infos with
-  | None -> Lwt.return None
-  | Some infos -> Lwt.return (do_hover_common infos)
+  | Ok infos ->
+    let infos = do_hover_common infos in
+    Lwt.return infos
+  | Error error_message ->
+    failwith (Printf.sprintf "Local hover failed: %s" error_message)
 
 let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
   : Definition.result Lwt.t =
@@ -2216,7 +2219,6 @@ let handle_event
   : unit Lwt.t =
   let open Jsonrpc in
   let open Main_env in
-  let _: ClientIdeService.t = !ide_service in (* TODO: use *)
   let%lwt () = (* make sure to wrap any exceptions below in the promise *)
   match !state, event with
   (* response *)

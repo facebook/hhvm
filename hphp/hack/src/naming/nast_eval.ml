@@ -14,7 +14,7 @@ open Nast
 exception Not_static_exn of Pos.t
 
 let rec static_string_exn = function
-  | _, Binop (Ast.Dot, s1, s2) ->
+  | _, Binop (Ast_defs.Dot, s1, s2) ->
     let s1 = static_string_exn s1 in
     let s2 = static_string_exn s2 in
     s1 ^ s2

@@ -354,7 +354,7 @@ let log_fail compiler_options filename exc ~stack =
  * Used to produce a Tast for unsafe code without inferring types for it. *)
 module AstToTastEnv = struct
   module AastAnnotations = Tast.Annotations
-  let get_expr_annotation (p: Ast.pos) = p, (Typing_reason.Rnone, Typing_defs.Tany)
+  let get_expr_annotation (p: Ast_defs.pos) = p, (Typing_reason.Rnone, Typing_defs.Tany)
   let env_annotation = Tast.dummy_saved_env
   let funcbody_annotation = Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
 end

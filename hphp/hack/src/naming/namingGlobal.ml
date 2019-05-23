@@ -29,20 +29,20 @@ module GEnv = struct
     match pos with
       | FileInfo.Full p -> p, name
       | FileInfo.File (FileInfo.Class, fn) ->
-        let res = unsafe_opt (Ast_provider.find_class_in_file fn name) in
-        let (p', _) = res.Ast.c_name in
+        let res = unsafe_opt (Ast_provider.find_class_in_file_nast fn name) in
+        let (p', _) = res.Nast.c_name in
         p', name
       | FileInfo.File (FileInfo.Typedef, fn) ->
-        let res = unsafe_opt (Ast_provider.find_typedef_in_file fn name) in
-        let (p', _) = res.Ast.t_id in
+        let res = unsafe_opt (Ast_provider.find_typedef_in_file_nast fn name) in
+        let (p', _) = res.Nast.t_name in
         p', name
       | FileInfo.File (FileInfo.Const, fn) ->
-        let res = unsafe_opt (Ast_provider.find_gconst_in_file fn name) in
-        let (p', _) = res.Ast.cst_name in
+        let res = unsafe_opt (Ast_provider.find_gconst_in_file_nast fn name) in
+        let (p', _) = res.Nast.cst_name in
         p', name
       | FileInfo.File (FileInfo.Fun, fn) ->
-        let res = unsafe_opt (Ast_provider.find_fun_in_file fn name) in
-        let (p', _) = res.Ast.f_name in
+        let res = unsafe_opt (Ast_provider.find_fun_in_file_nast fn name) in
+        let (p', _) = res.Nast.f_name in
         p', name
     with Invalid_argument _ ->
       (* We looked for a file in the file heap, but it was deleted

@@ -10,7 +10,7 @@
 
 module AstToNastEnv = struct
  module AastAnnotations = Nast.Annotations
- let get_expr_annotation (p: Ast.pos) = p
+ let get_expr_annotation (p: Ast_defs.pos) = p
  let env_annotation = ()
  let funcbody_annotation = Nast.BodyNamingAnnotation.NamedWithUnsafeBlocks
 end

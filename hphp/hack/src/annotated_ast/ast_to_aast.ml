@@ -11,7 +11,7 @@ open Core_kernel
 
 module type AstToAastEnvType = sig
   module AastAnnotations : Aast.ASTAnnotationTypes
-  val get_expr_annotation : pos -> AastAnnotations.ExprAnnotation.t
+  val get_expr_annotation : Ast_defs.pos -> AastAnnotations.ExprAnnotation.t
   val env_annotation : AastAnnotations.EnvAnnotation.t
   val funcbody_annotation : AastAnnotations.FuncBodyAnnotation.t
 end

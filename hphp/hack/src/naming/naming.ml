@@ -36,7 +36,7 @@ module GEnv = NamingGlobal.GEnv
 type positioned_ident = (Pos.t * Local_id.t)
 
 (* <T as A>, A is a type constraint *)
-type type_constraint = N.reify_kind * (Ast.constraint_kind * Aast.hint) list
+type type_constraint = N.reify_kind * (Ast_defs.constraint_kind * Aast.hint) list
 
 type genv = {
 
@@ -55,7 +55,7 @@ type genv = {
   type_params: type_constraint SMap.t;
 
   (* The current class, None if we are in a function *)
-  current_cls: (Ast.id * Ast.class_kind) option;
+  current_cls: (Ast_defs.id * Ast_defs.class_kind) option;
 
   class_consts: (string, Pos.t) Caml.Hashtbl.t;
 
@@ -82,7 +82,7 @@ module Env : sig
   val make_class_genv :
     type_constraint SMap.t ->
     FileInfo.mode ->
-    Ast.id * Ast.class_kind -> Namespace_env.env -> bool -> genv
+    Ast_defs.id * Ast_defs.class_kind -> Namespace_env.env -> bool -> genv
   val make_class_env :
     type_constraint SMap.t -> Aast.class_ -> genv * lenv
   val make_typedef_env :
@@ -105,18 +105,18 @@ module Env : sig
   val in_ppl : genv * lenv -> bool
   val set_ppl : genv * lenv -> bool -> genv * lenv
 
-  val add_lvar : genv * lenv -> Ast.id -> positioned_ident -> unit
+  val add_lvar : genv * lenv -> Ast_defs.id -> positioned_ident -> unit
   val add_param : genv * lenv -> N.fun_param -> genv * lenv
-  val new_lvar : genv * lenv -> Ast.id -> positioned_ident
-  val new_let_local : genv * lenv -> Ast.id -> positioned_ident
+  val new_lvar : genv * lenv -> Ast_defs.id -> positioned_ident
+  val new_let_local : genv * lenv -> Ast_defs.id -> positioned_ident
   val found_dollardollar : genv * lenv -> Pos.t -> Local_id.t
   val inside_pipe : genv * lenv -> bool
-  val lvar : genv * lenv -> Ast.id -> positioned_ident
-  val let_local : genv * lenv -> Ast.id -> positioned_ident option
-  val global_const : genv * lenv -> Ast.id -> Ast.id
-  val type_name : genv * lenv -> Ast.id -> allow_typedef:bool -> allow_generics:bool -> Ast.id
-  val fun_id : genv * lenv -> Ast.id -> Ast.id
-  val bind_class_const : genv * lenv -> Ast.id -> unit
+  val lvar : genv * lenv -> Ast_defs.id -> positioned_ident
+  val let_local : genv * lenv -> Ast_defs.id -> positioned_ident option
+  val global_const : genv * lenv -> Ast_defs.id -> Ast_defs.id
+  val type_name : genv * lenv -> Ast_defs.id -> allow_typedef:bool -> allow_generics:bool -> Ast_defs.id
+  val fun_id : genv * lenv -> Ast_defs.id -> Ast_defs.id
+  val bind_class_const : genv * lenv -> Ast_defs.id -> unit
   val goto_label : genv * lenv -> string -> Pos.t option
   val new_goto_label : genv * lenv -> Aast.pstring -> unit
   val new_goto_target : genv * lenv -> Aast.pstring -> unit
@@ -125,7 +125,7 @@ module Env : sig
 
   val scope : genv * lenv -> (genv * lenv -> 'a) -> 'a
   val scope_lexical : genv * lenv -> (genv * lenv -> 'a) -> 'a
-  val remove_locals : genv * lenv -> Ast.id list -> unit
+  val remove_locals : genv * lenv -> Ast_defs.id list -> unit
   val pipe_scope : genv * lenv -> (genv * lenv -> N.expr) -> Local_id.t * N.expr
 end = struct
 
@@ -620,16 +620,16 @@ let check_repetition s param =
   else s
 
 let convert_shape_name env = function
-  | Ast.SFlit_int (pos, s) -> (pos, Ast.SFlit_int (pos, s))
-  | Ast.SFlit_str (pos, s) -> (pos, Ast.SFlit_str (pos, s))
-  | Ast.SFclass_const (x, (pos, y)) ->
+  | Ast_defs.SFlit_int (pos, s) -> (pos, Ast_defs.SFlit_int (pos, s))
+  | Ast_defs.SFlit_str (pos, s) -> (pos, Ast_defs.SFlit_str (pos, s))
+  | Ast_defs.SFclass_const (x, (pos, y)) ->
     let class_name =
       if (snd x) = SN.Classes.cSelf then
         match (fst env).current_cls with
         | Some (cid, _) -> cid
         | None -> Errors.self_outside_class pos; (pos, SN.Classes.cUnknown)
       else Env.type_name env x ~allow_typedef:false ~allow_generics:false in
-    (pos, Ast.SFclass_const (class_name, (pos, y)))
+    (pos, Ast_defs.SFclass_const (class_name, (pos, y)))
 
 let arg_unpack_unexpected = function
   | [] -> ()
@@ -674,9 +674,9 @@ module Make (GetLocals : GetLocals) = struct
   (* Naming of type hints *)
   (************************************************************************)
   (**
-   * The existing hint function goes from Ast.hint -> Nast.hint
+   * The existing hint function goes from Ast_defs.hint -> Nast.hint
    * This hint function goes from Aast.hint -> Nast.hint
-   * Used with with Ast_to_nast to go from Ast.hint -> Nast.hint
+   * Used with with Ast_to_nast to go from Ast_defs.hint -> Nast.hint
    *)
   let rec hint
       ?(forbid_this=false)
@@ -1042,7 +1042,7 @@ module Make (GetLocals : GetLocals) = struct
   let add_abstractl methods = List.map methods add_abstract
 
   let interface c constructor methods smethods =
-    if c.Aast.c_kind <> Ast.Cinterface
+    if c.Aast.c_kind <> Ast_defs.Cinterface
     then constructor, methods, smethods
     else
       let constructor = Option.map constructor add_abstract in
@@ -1111,7 +1111,7 @@ module Make (GetLocals : GetLocals) = struct
       match c.Aast.c_kind with
       (* Make enums implicitly extend the BuiltinEnum class in order to provide
        * utility methods. *)
-      | Ast.Cenum ->
+      | Ast_defs.Cenum ->
         let pos = fst name in
         let enum_type = pos, N.Happly (name, []) in
         let parent =
@@ -1127,15 +1127,15 @@ module Make (GetLocals : GetLocals) = struct
     let xhp_attr_uses =
       List.map ~f:(hint ~allow_typedef:false env) c.Aast.c_xhp_attr_uses in
     let c_req_extends, c_req_implements = Aast.split_reqs c in
-    if c_req_implements <> [] && c.Aast.c_kind <> Ast.Ctrait
+    if c_req_implements <> [] && c.Aast.c_kind <> Ast_defs.Ctrait
     then Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
     let req_implements =
       List.map ~f:(hint ~allow_typedef:false env) c_req_implements in
     let req_implements =
       List.map ~f:(fun h -> (h, false)) req_implements in
     if c_req_extends <> [] &&
-       c.Aast.c_kind <> Ast.Ctrait &&
-       c.Aast.c_kind <> Ast.Cinterface
+       c.Aast.c_kind <> Ast_defs.Ctrait &&
+       c.Aast.c_kind <> Ast_defs.Cinterface
     then Errors.invalid_req_extends (fst (List.hd_exn c_req_extends));
     let req_extends =
       List.map ~f:(hint ~allow_typedef:false env) c_req_extends in
@@ -1443,13 +1443,13 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.String _ -> ()
     | Aast.Class_const ((_, Aast.CIexpr (_, cls)), _)
       when (match cls with Aast.Id (_, "static") -> false | _ -> true) -> ()
-    | Aast.Unop ((Ast.Uplus| Ast.Uminus | Ast.Utild | Ast.Unot), e) ->
+    | Aast.Unop ((Ast_defs.Uplus| Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e) ->
       check_constant_expr env e
     | Aast.Binop (op, e1, e2) ->
       (* Only assignment is invalid *)
       begin
         match op with
-        | Ast.Eq _ -> Errors.illegal_constant pos
+        | Ast_defs.Eq _ -> Errors.illegal_constant pos
         | _ ->
           check_constant_expr env e1;
           check_constant_expr env e2
@@ -1717,7 +1717,7 @@ module Make (GetLocals : GetLocals) = struct
     | Aast.Expr_list using_clauses ->
       List.concat_map using_clauses get_using_vars
       (* Simple assignment to local of form `$lvar = e` *)
-    | Aast.Binop (Ast.Eq None, (_, Aast.Lvar (p, lid)), _) ->
+    | Aast.Binop (Ast_defs.Eq None, (_, Aast.Lvar (p, lid)), _) ->
       [ (p, Local_id.get_name lid) ]
       (* Arbitrary expression. This will be assigned to a temporary *)
     | _ -> []
@@ -1780,7 +1780,7 @@ module Make (GetLocals : GetLocals) = struct
             if cond <> Aast.False
             then
               let b1, b2 = [cp, Aast.Expr violation], [Pos.none, Aast.Noop] in
-              let cond = (cond_p, Aast.Unop (Ast.Unot, (cond_p, cond))) in
+              let cond = (cond_p, Aast.Unop (Ast_defs.Unot, (cond_p, cond))) in
               if_stmt env cond b1 b2
             else (* a false <condition> means unconditional invariant_violation *)
               N.Expr (expr env violation)
@@ -2328,7 +2328,7 @@ module Make (GetLocals : GetLocals) = struct
           end in
       N.Cast (ty, expr env e2)
     | Aast.Unop (uop, e) -> N.Unop (uop, expr env e)
-    | Aast.Binop (Ast.Eq None as op, lv, e2) ->
+    | Aast.Binop (Ast_defs.Eq None as op, lv, e2) ->
       if Env.inside_pipe env then
         Errors.unimplemented_feature p "Assignment within pipe expressions";
       let e2 = expr env e2 in
@@ -2337,7 +2337,7 @@ module Make (GetLocals : GetLocals) = struct
         GetLocals.lvalue (nsenv, SMap.empty) lv in
       SMap.iter (fun x p -> ignore (Env.new_lvar env (p, x))) vars;
       N.Binop (op, expr env lv, e2)
-    | Aast.Binop (Ast.Eq _ as bop, e1, e2) ->
+    | Aast.Binop (Ast_defs.Eq _ as bop, e1, e2) ->
       if Env.inside_pipe env
       then Errors.unimplemented_feature p "Assignment within pipe expressions";
       N.Binop (bop, expr env e1, expr env e2)
@@ -2458,12 +2458,12 @@ module Make (GetLocals : GetLocals) = struct
       N.Xml (Env.type_name env x ~allow_typedef:false ~allow_generics:false, attrl env al,
         exprl env el)
     | Aast.Shape fdl ->
-      let (shp, _) = begin List.fold_left fdl ~init:([], Ast.ShapeSet.empty)
+      let (shp, _) = begin List.fold_left fdl ~init:([], Ast_defs.ShapeSet.empty)
         ~f:begin fun (fdm, set) (pname, value) ->
           let pos, name = convert_shape_name env pname in
-          if Ast.ShapeSet.mem name set
+          if Ast_defs.ShapeSet.mem name set
           then Errors.fd_name_already_bound pos;
-          (name, (expr env value)) :: fdm, Ast.ShapeSet.add name set
+          (name, (expr env value)) :: fdm, Ast_defs.ShapeSet.add name set
         end
       end in
       N.Shape (List.rev shp)
@@ -2563,8 +2563,8 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.SpecialIdents.this -> N.CIexpr (p, N.This)
       | x when x = SN.SpecialIdents.dollardollar ->
           (* We won't reach here for "new $$" because the parser creates a
-           * proper Ast.Dollardollar node, so make_class_id won't be called with
-           * that node. In fact, the parser creates an Ast.Dollardollar for all
+           * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
+           * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
            * "$$" except in positions where a classname is expected, like in
            * static member access. So, we only reach here for things
            * like "$$::someMethod()". *)
@@ -2631,11 +2631,11 @@ module Make (GetLocals : GetLocals) = struct
 
   and class_pu_enum env pu_enum =
     let make_tparam sid def = Aast.{
-      tp_variance = Ast.Invariant;
+      tp_variance = Ast_defs.Invariant;
       tp_name = sid;
       tp_constraints = (match def with
           | None -> []
-          | Some hint -> [Ast.Constraint_eq, hint]);
+          | Some hint -> [Ast_defs.Constraint_eq, hint]);
       tp_reified = Erased;
       tp_user_attributes = []
     } in

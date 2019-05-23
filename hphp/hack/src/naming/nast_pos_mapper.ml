@@ -115,10 +115,10 @@ and shape f sm =
   |> List.rev
 
 and shape_field f = function
-  | Ast.SFlit_int pstr -> Ast.SFlit_int (pstring f pstr)
-  | Ast.SFlit_str pstr -> Ast.SFlit_str (pstring f pstr)
-  | Ast.SFclass_const (sid, pstr) ->
-    Ast.SFclass_const (pstring f sid, pstring f pstr)
+  | Ast_defs.SFlit_int pstr -> Ast_defs.SFlit_int (pstring f pstr)
+  | Ast_defs.SFlit_str pstr -> Ast_defs.SFlit_str (pstring f pstr)
+  | Ast_defs.SFclass_const (sid, pstr) ->
+    Ast_defs.SFclass_const (pstring f sid, pstring f pstr)
 
 and pstring f (p, s) =
   f p, s

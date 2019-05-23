@@ -16,8 +16,8 @@ val autoimport_funcs : string list
 
 val elaborate_id : ?autoimport:bool -> Namespace_env.env ->
                    elaborate_kind ->
-                   Ast.id ->
-                   Ast.id
+                   Ast_defs.id ->
+                   Ast_defs.id
 
 val elaborate_id_impl : autoimport:bool -> Namespace_env.env ->
                    elaborate_kind ->

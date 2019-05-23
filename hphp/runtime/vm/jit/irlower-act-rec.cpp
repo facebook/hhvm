@@ -66,8 +66,8 @@ TRACE_SET_MOD(irlower);
 namespace {
 
 uint32_t getTSBitsImpl(const ArrayData* tsList) {
-  if (!tsList || tsList->size() > ReifiedGenericsPtr::kMaxTagSize) return 0;
-  auto bitmap = 0;
+  if (!tsList || tsList->size() > 15) return 0;
+  auto bitmap = 1;
   IterateV(
     tsList,
     [&](TypedValue v) {
@@ -216,7 +216,7 @@ void cgSpillFrame(IRLS& env, const IRInstruction* inst) {
     if (!bits) return tsListReg;
     auto const bits_shifted = v.makeReg();
     auto const result = v.makeReg();
-    v << sarqi{
+    v << shlqi{
       static_cast<int32_t>(ReifiedGenericsPtr::kShiftAmount),
       *bits,
       bits_shifted,
@@ -347,16 +347,27 @@ void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
   auto const info = func->getReifiedGenericsInfo();
   if (!func->hasReifiedGenerics() ||
       info.m_hasSoftGenerics ||
-      info.m_typeParamInfo.size() > ReifiedGenericsPtr::kMaxTagSize) {
+      info.m_typeParamInfo.size() > 15) {
     v << copy{v.cns(0), dst};
     return;
   }
-  auto const tag = v.makeReg();
-  auto const ored = v.makeReg();
   auto const sf = v.makeReg();
-  v << loadw{fp[AROFF(m_reifiedGenerics)], tag};
-  v << orwi{static_cast<int16_t>(info.m_bitmap), tag, ored, v.makeReg()};
-  v << cmpw{ored, tag, sf};
+  // Higher order 16 bits contain the tag in a compact tagged pointer
+  // Tag contains ((1 << number-of-parameters) | bitmap)
+  auto const tagAddress = fp[AROFF(m_reifiedGenerics) + 6];
+  auto const bitmapImmed = static_cast<int16_t>(info.m_bitmap);
+  auto const topBit = 1u << info.m_typeParamInfo.size();
+
+  if (bitmapImmed == topBit - 1) {
+    v << cmpwim{static_cast<int16_t>(bitmapImmed | topBit), tagAddress, sf};
+  } else {
+    auto const tag = v.makeReg();
+    auto const anded = v.makeReg();
+    v << loadw{tagAddress, tag};
+    v << andwi{static_cast<int16_t>(bitmapImmed | -topBit),
+               tag, anded, v.makeReg()};
+    v << cmpwi{static_cast<int16_t>(bitmapImmed | topBit), anded, sf};
+  }
   v << setcc{CC_Z, sf, dst};
 }
 

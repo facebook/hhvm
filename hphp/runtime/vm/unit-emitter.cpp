@@ -489,16 +489,13 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       auto const arr_str = internal_serialize(
         VarNR(const_cast<ArrayData*>(m_arrays[i]))
       ).toCppString();
-      auto const prov_line = [&]() -> folly::Optional<int> {
-        if (auto const tag = arrprov::getTag(m_arrays[i])) {
-          assertx(tag->filename() == m_filepath);
-          return tag->line();
-        } else {
-          return folly::none;
-        }
-      }();
+      auto const tag = arrprov::getTag(m_arrays[i]);
+      auto const line = tag ? folly::make_optional(tag->line()) : folly::none;
+      auto const file = (tag && tag->filename() != m_filepath)
+        ? tag->filename()
+        : nullptr;
       urp.insertUnitArray[repoId].insert(
-        txn, usn, i, arr_str, prov_line
+        txn, usn, i, arr_str, line, file
       );
     }
     urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, *this);
@@ -870,7 +867,8 @@ void UnitRepoProxy::createSchema(int repoId, RepoTxn& txn) {
   {
     auto createQuery = folly::sformat(
       "CREATE TABLE {} "
-      "(unitSn INTEGER, arrayId INTEGER, array BLOB, provenanceLine INTEGER,"
+      "(unitSn INTEGER, arrayId INTEGER, array BLOB, "
+      " provenanceLine INTEGER, provenanceFile TEXT, "
       " PRIMARY KEY (unitSn, arrayId));",
       m_repo.table(repoId, "UnitArray"));
     txn.exec(createQuery);
@@ -1133,10 +1131,12 @@ void UnitRepoProxy::GetUnitArrayTypeTableStmt
 void UnitRepoProxy::InsertUnitArrayStmt
                   ::insert(RepoTxn& txn, int64_t unitSn, Id arrayId,
                            const std::string& array,
-                           folly::Optional<int> provenanceLine) {
+                           folly::Optional<int> provenanceLine,
+                           const StringData* provenanceFile) {
   if (!prepared()) {
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array, @provenanceLine);",
+      "INSERT INTO {} VALUES(@unitSn, @arrayId, @array, "
+      "@provenanceLine, @provenanceFile);",
       m_repo.table(m_repoId, "UnitArray"));
     txn.prepare(*this, insertQuery);
   }
@@ -1145,9 +1145,14 @@ void UnitRepoProxy::InsertUnitArrayStmt
   query.bindId("@arrayId", arrayId);
   query.bindStdString("@array", array);
   if (provenanceLine) {
-    query.bindInt("@provenanceLine", provenanceLine.value());
+    query.bindInt("@provenanceLine", *provenanceLine);
   } else {
     query.bindNull("@provenanceLine");
+  }
+  if (provenanceFile) {
+    query.bindStaticString("@provenanceFile", provenanceFile);
+  } else {
+    query.bindNull("@provenanceFile");
   }
   query.exec();
 }

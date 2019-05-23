@@ -2228,8 +2228,6 @@ static void on_timeout(int sig, siginfo_t* info, void* /*context*/) {
     auto data = (RequestTimer*)info->si_value.sival_ptr;
     if (data) {
       data->onTimeout();
-    } else {
-      Xenon::getInstance().onTimer();
     }
   }
 }

@@ -57,6 +57,11 @@ void *s_waitThread(void *arg) {
   return nullptr;
 }
 
+// Invoked every time the Xenon timer fires
+void s_xenonTimerFunc(union sigval sv) {
+  Xenon::getInstance().onTimer();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Data that is kept per request and is only valid per request.
@@ -192,9 +197,9 @@ void Xenon::start(uint64_t msec) {
           fSec, fNsec);
 
     sigevent sev={};
-    sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGVTALRM;
-    sev.sigev_value.sival_ptr = nullptr; // null for Xenon signals
+    sev.sigev_notify = SIGEV_THREAD;
+    sev.sigev_notify_function = s_xenonTimerFunc;
+    sev.sigev_notify_attributes = nullptr;
     timer_create(CLOCK_REALTIME, &sev, &m_timerid);
 
     itimerspec ts={};

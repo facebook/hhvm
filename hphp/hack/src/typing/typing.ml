@@ -4275,6 +4275,12 @@ and class_get_ ~is_method ~is_const ~ety_env ?(explicit_tparams=[])
   | _, Tunion tyl ->
       let env, tyl =
         List.map_env env tyl begin fun env ty ->
+        let env, this_ty =
+          if is_method then
+            this_for_method env cid ty
+          else
+            env, ty in
+        let ety_env = {ety_env with this_ty = this_ty} in
         let env, ty, _ =
           class_get_ ~is_method ~is_const ~ety_env ~explicit_tparams ~incl_tc
                      ~pos_params env cid ty (p, mid)

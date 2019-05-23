@@ -1513,34 +1513,34 @@ use parser_rust as parser;
 use parser::flatten_smart_constructors::*;
 use parser::smart_constructors::SmartConstructors;
 use parser::source_text::SourceText;
-use parser::minimal_token::MinimalToken;
 use parser::parser_env::ParserEnv;
+use parser::positioned_token::PositionedToken;
 
 use crate::facts_smart_constructors::*;
 
 pub struct FactsSmartConstructors;
 impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors {
-    type Token = MinimalToken;
+    type Token = PositionedToken;
     type R = Node;
 
     fn initial_state<'b: 'a>(_: &ParserEnv, src: &'b SourceText<'b>) -> HasScriptContent<'a> {
         (false, src)
     }
 
-    fn make_missing(s: HasScriptContent<'a>, _: usize) -> (HasScriptContent<'a>, Self::R) {
-        (s, <Self as FlattenOp>::zero())
+    fn make_missing(s: HasScriptContent<'a>, offset: usize) -> (HasScriptContent<'a>, Self::R) {
+        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_missing(s, offset)
     }
 
-    fn make_token(s: HasScriptContent<'a>, _: Self::Token) -> (HasScriptContent<'a>, Self::R) {
-        (s, <Self as FlattenOp>::zero())
+    fn make_token(s: HasScriptContent<'a>, token: Self::Token) -> (HasScriptContent<'a>, Self::R) {
+        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_token(s, token)
     }
 
     fn make_list(
         s: HasScriptContent<'a>,
-        _: Box<Vec<Self::R>>,
-        _: usize,
+        items: Box<Vec<Self::R>>,
+        offset: usize,
     ) -> (HasScriptContent<'a>, Self::R) {
-        (s, <Self as FlattenOp>::zero())
+        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_list(s, items, offset)
     }
 
 CONSTRUCTOR_METHODS}

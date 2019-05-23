@@ -39,6 +39,7 @@ pub struct TypeFacts {
 pub type TypeFactsByName = BTreeMap<String, TypeFacts>;
 
 #[derive(Default, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Facts {
     #[serde(serialize_with = "types_to_json")]
     pub types: TypeFactsByName,
@@ -53,11 +54,11 @@ impl Facts {
         json.as_object_mut().map(|m| {
             m.insert(
                 String::from("md5sum0"),
-                json!(hex_number_to_u64(&md5sum[0..16])),
+                json!(hex_number_to_i64(&md5sum[0..16])),
             );
             m.insert(
                 String::from("md5sum1"),
-                json!(hex_number_to_u64(&md5sum[16..32])),
+                json!(hex_number_to_i64(&md5sum[16..32])),
             );
             m.insert(String::from("sha1sum"), json!(sha1sum));
         });
@@ -145,8 +146,8 @@ fn hash_and_hexify<D: Digest>(mut digest: D, text: &str) -> String {
     digest.result_str()
 }
 
-fn hex_number_to_u64(s: &str) -> u64 {
-    u64::from_str_radix(s, 16).unwrap()
+fn hex_number_to_i64(s: &str) -> i64 {
+    u64::from_str_radix(s, 16).unwrap() as i64
 }
 
 // inline tests (so stuff can remain hidden) - compiled only when tests are run (no overhead)
@@ -164,7 +165,8 @@ mod tests {
 
     #[test]
     fn hex_number_to_json() {
-        assert_eq!(hex_number_to_u64("23"), 35);
+        assert_eq!(hex_number_to_i64("23"), 35);
+        assert_eq!(hex_number_to_i64("fffffffffffffffe"), -2);
     }
 
     #[test]
@@ -271,7 +273,7 @@ mod tests {
   "md5sum0": 6137880507793904006,
   "md5sum1": 8711019000949709763,
   "sha1sum": "37aa63c77398d954473262e1a0057c1e632eda77",
-  "type_aliases": [
+  "typeAliases": [
     "my_type_alias"
   ],
   "types": [

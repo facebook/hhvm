@@ -21,7 +21,7 @@ pub type HasScriptContent<'a> = (bool, &'a SourceText<'a>);
 // type GetName<'a> = Box<Fn() -> &'a [u8]>;  // would require lifetime 'a param everywhere
 type GetName = Vec<u8>;
 
-#[allow(dead_code)]
+#[derive(Debug)]
 pub enum Node {
     List(Vec<Node>),
     Ignored,
@@ -55,7 +55,7 @@ pub enum Node {
     EmptyBody,
 }
 
-#[allow(dead_code)]
+#[derive(Debug)]
 pub struct ClassDeclChildren {
     pub modifiers: Node,
     pub kind: Node,
@@ -241,6 +241,26 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         )
     }
 
+    fn make_alias_declaration(
+        st: HasScriptContent<'a>,
+        _attributes: Self::R,
+        _keyword: Self::R,
+        name: Self::R,
+        _generic_params: Self::R,
+        _constraint: Self::R,
+        _equal: Self::R,
+        _type: Self::R,
+        _semicolon: Self::R,
+    ) -> (HasScriptContent<'a>, Self::R) {
+        (
+            st,
+            match name {
+                Node::Ignored => Node::Ignored,
+                _ => Node::TypeAliasDecl(Box::new(name)),
+            },
+        )
+    }
+
     fn make_define_expression(
         st: HasScriptContent<'a>,
         _keyword: Self::R,
@@ -412,7 +432,7 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
     ) -> (HasScriptContent<'a>, Self::R) {
         (
             st,
-            match body {
+            match name {
                 Node::Ignored => Node::Ignored,
                 _ => Node::ClassDecl(Box::new(ClassDeclChildren {
                     modifiers,

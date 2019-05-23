@@ -42,8 +42,8 @@ fn qualified_name(namespace: &str, name: Node) -> Option<String> {
                 Name(name) => qualified_name.push_str(&String::from_utf8_lossy(name.as_slice())),
                 Backslash if index == 0 => leading_backslash = true,
                 ListItem(box (Name(name), Backslash)) => {
-                    qualified_name.push_str("\\");
                     qualified_name.push_str(&String::from_utf8_lossy(name.as_slice()));
+                    qualified_name.push_str("\\");
                 }
                 _ => return None,
             }

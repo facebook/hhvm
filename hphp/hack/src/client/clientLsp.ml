@@ -752,6 +752,8 @@ let do_rage (state: state) (ref_unblocked_time: float ref): Rage.result Lwt.t =
         add_fn ((ServerFiles.monitor_log_link root) ^ ".old");
         add_fn (ServerFiles.client_lsp_log root);
         add_fn ((ServerFiles.client_lsp_log root) ^ ".old");
+        add_fn (ServerFiles.client_ide_log root);
+        add_fn ((ServerFiles.client_ide_log root) ^ ".old");
         try
           let pids = PidLog.get_pids (ServerFiles.pids_file root) in
           let is_interesting (_, reason) = not (String_utils.string_starts_with reason "slave") in
@@ -2547,8 +2549,6 @@ let run_ide_service
   let%lwt ide_service' =
     ClientIdeService.make_from_saved_state ~root in
   ide_service := ide_service';
-
-  let%lwt () = ClientIdeService.serve !ide_service in
   Lwt.return_unit
 
 (* main: this is the main loop for processing incoming Lsp client requests,
@@ -2710,7 +2710,8 @@ let main (env: env) : Exit_status.t Lwt.t =
   in
   let%lwt () = Lwt.pick [
     main_loop ();
-    run_ide_service ide_service;
     tick_showStatus state;
-  ] in
+  ]
+  and () = run_ide_service ide_service
+  in
   Lwt.return Exit_status.No_error

@@ -934,6 +934,12 @@ struct Func final {
   bool isSkipFrame() const;
 
   /*
+   * Whether this function's frame should be skipped with searching for a
+   * context for array provenance
+   */
+  bool isProvenanceSkipFrame() const;
+
+  /*
    * Whether the function can be constant-folded at callsites where it is
    * passed constant arguments.
    */

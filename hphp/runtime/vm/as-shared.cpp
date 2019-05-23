@@ -64,6 +64,7 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrNoOverrideMagicIsset,     C,       "nov_isset");            \
   X(AttrNoOverrideMagicUnset,     C,       "nov_unset");            \
   X(AttrDynamicallyConstructible, C,       "dyn_constructible");    \
+  X(AttrProvenanceSkipFrame,      F,       "prov_skip_frame");      \
   X(AttrIsFoldable,               F,       "foldable");             \
   X(AttrNoInjection,              F,       "no_injection");         \
   X(AttrIsInOutWrapper,           F,       "inout_wrapper");        \

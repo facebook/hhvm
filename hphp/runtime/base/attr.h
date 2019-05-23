@@ -192,6 +192,10 @@ enum Attr {
   // Does this function have a `...' parameter?   |          |         //
   AttrVariadicParam        = (1u << 28), //       |          |    X    //
                                          //       |          |         //
+  // Indicates that the frame should be ignored when searching for a
+  // context to store in the provenance tag
+  AttrProvenanceSkipFrame  = (1u << 29), //       |          |    X    //
+                                         //       |          |         //
   // Indicates that this function wraps either a function taking inout or ref
   // parameters.                         //       |          |         //
   AttrIsInOutWrapper       = (1u << 31), //       |          |    X    //

@@ -86,10 +86,18 @@ void clearTag(const ArrayData* ad) {
 
 Tag tagFromProgramCounter() {
   VMRegAnchor _;
-  auto const unit = vmfp()->m_func->unit();
-  auto const pc = vmpc();
+
+  auto frame = vmfp();
+  auto offset  = frame->unit()->offsetOf(vmpc());
+  while (UNLIKELY(frame &&
+                  frame->func()->isProvenanceSkipFrame())) {
+    frame = g_context->getPrevVMState(frame, &offset);
+  }
+
+  auto const unit = frame->unit();
   auto const filename = unit->filepath();
-  auto const line = unit->getLineNumber(unit->offsetOf(pc));
+  auto const line = unit->getLineNumber(offset);
+
   return Tag{filename, line};
 }
 

@@ -1401,6 +1401,10 @@ let function_attributes f =
     then "no_injection" :: attrs
     else attrs in
   let attrs =
+    if Hhas_attribute.has_provenance_skip_frame user_attrs
+    then "prov_skip_frame" :: attrs
+    else attrs in
+  let attrs =
     if Hhas_attribute.has_foldable user_attrs
     then "foldable" :: attrs
     else attrs in

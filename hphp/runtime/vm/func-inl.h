@@ -583,6 +583,10 @@ inline bool Func::isSkipFrame() const {
   return isCPPBuiltin() || (isBuiltin() && !isMethod() && !isPseudoMain());
 }
 
+inline bool Func::isProvenanceSkipFrame() const {
+  return m_attrs & AttrProvenanceSkipFrame;
+}
+
 inline bool Func::isFoldable() const {
   return m_attrs & AttrIsFoldable;
 }

@@ -7,7 +7,7 @@ function my_handler() {
   throw new Exception('whoops');
 }
 
-set_error_handler('my_handler');
+
 
 function main() {
   echo "Entering try\n";
@@ -25,6 +25,9 @@ function main() {
   }
   echo "Returning from main\n";
 }
+<<__EntryPoint>> function main_entry() {
+set_error_handler('my_handler');
 echo "Calling main()\n";
 main();
 echo "Back from main()\n";
+}

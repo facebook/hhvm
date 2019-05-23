@@ -3,16 +3,16 @@
 function foo($v) {
   return (int)$v;
 }
-
-var_dump(foo(null));
-var_dump(foo(true));
-var_dump(foo(1));
-var_dump(foo(9007199254740992));
-var_dump(foo(1.1));
-var_dump(foo("abc"));
-var_dump(foo(array(123)));
+function foo2(): void {
+  var_dump(foo(null));
+  var_dump(foo(true));
+  var_dump(foo(1));
+  var_dump(foo(9007199254740992));
+  var_dump(foo(1.1));
+  var_dump(foo("abc"));
+  var_dump(foo(array(123)));
+}
 class C { public $foo = "bar"; }
-var_dump(foo(new C));
 
 function bar($i) {
   $v1 = "undefined";
@@ -52,7 +52,7 @@ function bar($i) {
   var_dump((int)$v11);
 }
 
-bar(1);
+
 
 function baz($i) {
   if ($i >= 1) {
@@ -62,5 +62,9 @@ function baz($i) {
   var_dump((int)$s1);
   var_dump((int)$s2);
 }
-
+<<__EntryPoint>> function main(): void {
+foo2();
+var_dump(foo(new C));
+bar(1);
 baz(1);
+}

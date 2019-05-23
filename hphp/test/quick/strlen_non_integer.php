@@ -1,7 +1,7 @@
 <?hh
 
 function none() {}
-set_error_handler('none');
+
 
 class Foo {
 }
@@ -24,8 +24,8 @@ function main() {
     } catch (Exception $e) {}
   }
 }
-main();
-main();
+
+
 
 function main2() {
   try {
@@ -49,6 +49,12 @@ function main2() {
     var_dump($e->getMessage());
   }
 }
+<<__EntryPoint>> function main_entry(): void {
+set_error_handler('none');
+
+main();
+main();
 main2();
 
 echo "done\n";
+}

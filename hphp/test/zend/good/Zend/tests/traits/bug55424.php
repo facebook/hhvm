@@ -1,31 +1,30 @@
 <?php
 
-    trait ATrait
+trait ATrait
+{
+    function setRequired()
     {
-        function setRequired()
-        {
-            $this->setAttribute();
-        }
-
-        abstract function setAttribute();
+        $this->setAttribute();
     }
 
-    class Base
-    {
-        function setAttribute() { }
-    }
+    abstract function setAttribute();
+}
 
-    class MyClass extends Base
-    {
-        use ATrait;
-    }
+class Base
+{
+    function setAttribute() { }
+}
 
-    $i = new Base();
-    $i->setAttribute();
+class MyClass extends Base
+{
+    use ATrait;
+}
+<<__EntryPoint>> function main() {
+$i = new Base();
+$i->setAttribute();
 
-    $t = new MyClass();
-    /* setAttribute used to disappear for no good reason. */
-    $t->setRequired();
-    echo 'DONE';
-
-<<__EntryPoint>> function main() {}
+$t = new MyClass();
+/* setAttribute used to disappear for no good reason. */
+$t->setRequired();
+echo 'DONE';
+}

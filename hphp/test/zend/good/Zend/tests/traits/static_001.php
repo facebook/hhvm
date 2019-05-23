@@ -1,15 +1,14 @@
 <?php
 
-    trait TestTrait {
-        public static function test() {
-            return 'Test';
-        }
+trait TestTrait {
+    public static function test() {
+        return 'Test';
     }
+}
 
-    class A {
-        use TestTrait;
-    }
-
-    echo A::test();
-
-<<__EntryPoint>> function main() {}
+class A {
+    use TestTrait;
+}
+<<__EntryPoint>> function main() {
+echo A::test();
+}

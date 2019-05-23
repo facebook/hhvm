@@ -1,6 +1,6 @@
 <?hh
-
 # Static arrays.
+<<__EntryPoint>> function main(): void {
 $a = array();
 var_dump($a);
 
@@ -93,4 +93,4 @@ var_dump($a);
 
 $a = array(NAN => 0);
 var_dump($a);
-
+}

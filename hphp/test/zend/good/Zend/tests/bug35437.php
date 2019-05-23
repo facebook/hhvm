@@ -1,21 +1,23 @@
 <?php
+
 function err2exception($errno, $errstr)
 {
-	throw new Exception("Error occuried: " . $errstr);
+    throw new Exception("Error occuried: " . $errstr);
 }
-
-set_error_handler('err2exception');
 
 class TestClass
 {
-	function testMethod()
-	{
-		$GLOBALS['t'] = new stdClass;
-	}
+    function testMethod()
+    {
+        $GLOBALS['t'] = new stdClass;
+    }
 }
+<<__EntryPoint>> function main() {
+set_error_handler('err2exception');
 
 try {
-	TestClass::testMethod();
+    TestClass::testMethod();
 } catch (Exception $e) {
-	echo "Catched: ".$e->getMessage()."\n";
+    echo "Catched: ".$e->getMessage()."\n";
+}
 }

@@ -2,10 +2,8 @@
 
 function err($errno, $errstr, $errfile, $errline)
 {
-	    throw new Exception($errstr);
+        throw new Exception($errstr);
 }
-
-set_error_handler("err");
 
 class test {
     function foo() {
@@ -13,6 +11,8 @@ class test {
         var_dump($this->blah);
     }
 }
+<<__EntryPoint>> function main() {
+set_error_handler("err");
 
 $t = new test;
 try {
@@ -22,3 +22,4 @@ try {
 }
 
 echo "Done\n";
+}

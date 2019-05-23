@@ -1,8 +1,8 @@
 <?php
 function error_handler($num, $msg, $file, $line, $vars) {
-	echo $line,"\n";
+    echo $line,"\n";
 }
-set_error_handler('error_handler');
+<<__EntryPoint>> function main() { set_error_handler('error_handler');
 trigger_error("line", E_USER_ERROR);
 $x = <<<EOF
 EOF;
@@ -43,3 +43,4 @@ EOF;
 var_dump($x);
 trigger_error("line", E_USER_ERROR);
 echo "ok\n";
+}

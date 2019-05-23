@@ -1,6 +1,7 @@
 <?php
-$a = 1;
 class It { public $n = 0; }
+<<__EntryPoint>> function main() {
+$a = 1;
 $it = new It;
 $x = function ($x) use ($a, $it) {
   $it->n++;
@@ -10,3 +11,4 @@ $x = function ($x) use ($a, $it) {
 $x(1);
 $x(2);
 $x(3);
+}

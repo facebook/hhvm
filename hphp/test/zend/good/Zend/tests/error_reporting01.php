@@ -1,19 +1,20 @@
 <?php
 
-error_reporting(E_ALL);
-
 function foo($arg) {
 }
 
 function bar() {
-	throw new Exception("test");
+    throw new Exception("test");
 }
-	
+<<__EntryPoint>> function main() {
+error_reporting(E_ALL);
+
 try {
-	@foo(@bar());
+    @foo(@bar());
 } catch (Exception $e) {
 }
 
 var_dump(error_reporting());
 
 echo "Done\n";
+}

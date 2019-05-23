@@ -130,6 +130,35 @@ let get_xhp_attr_expr = function
 let get_simple_xhp_attrs =
   List.filter_map ~f:(function Xhp_simple (id, e) -> Some (id, e) | Xhp_spread _ -> None)
 
+(* Given a Nast.program, give me the list of entities it defines *)
+let get_defs ast =
+  (* fold_right traverses the file from top to bottom, and as such gives nicer
+   * error messages than fold_left. E.g. in the case where a function is
+   * declared twice in the same file, the error will say that the declaration
+   * with the larger line number is a duplicate. *)
+  let rec get_defs ast acc =
+  List.fold_right ast ~init:acc
+    ~f:begin fun def (acc1, acc2, acc3, acc4 as acc) ->
+      match def with
+      | Fun f ->
+        (FileInfo.pos_full f.f_name) :: acc1, acc2, acc3, acc4
+      | Class c ->
+        acc1, (FileInfo.pos_full c.c_name) :: acc2, acc3, acc4
+      | Typedef t ->
+        acc1, acc2, (FileInfo.pos_full t.t_name) :: acc3, acc4
+      | Constant cst ->
+        acc1, acc2, acc3, (FileInfo.pos_full cst.cst_name) :: acc4
+      | Namespace(_, defs) ->
+        get_defs defs acc
+      | NamespaceUse _ | SetNamespaceEnv _ ->
+        acc
+       (* toplevel statements are ignored *)
+      | FileAttributes _
+      | Stmt _ -> acc
+    end
+in
+  get_defs ast ([],[],[],[])
+
 (*****************************************************************************)
 (** This module defines a visitor class on the Nast data structure.
     To use it you must inherit the generic object and redefine the appropriate

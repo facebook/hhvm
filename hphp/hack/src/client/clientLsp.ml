@@ -2108,7 +2108,7 @@ let cancel_if_stale
   end else
     Lwt.return_unit
 
-let tick_showStatus (type a) ~(state: state ref): a Lwt.t =
+let tick_showStatus ~(state: state ref): unit Lwt.t =
   let open Main_env in
   let open Lost_env in
   let open ShowStatus in
@@ -2172,7 +2172,7 @@ let tick_showStatus (type a) ~(state: state ref): a Lwt.t =
     end;
     Lwt.return_unit
   in
-  let rec loop(): a Lwt.t =
+  let rec loop(): unit Lwt.t =
     let%lwt () = show_status () in
     loop ()
   in
@@ -2190,11 +2190,13 @@ let handle_event
     ~(env: env)
     ~(state: state ref)
     ~(client: Jsonrpc.queue)
+    ~(ide_service: ClientIdeService.t ref)
     ~(event: event)
     ~(ref_unblocked_time: float ref)
   : unit Lwt.t =
   let open Jsonrpc in
   let open Main_env in
+  let _: ClientIdeService.t = !ide_service in (* TODO: use *)
   let%lwt () = (* make sure to wrap any exceptions below in the promise *)
   match !state, event with
   (* response *)
@@ -2538,13 +2540,26 @@ let handle_event
   in
   Lwt.return_unit
 
+let run_ide_service
+    (ide_service: ClientIdeService.t ref)
+    : unit Lwt.t =
+  let%lwt root = get_root_wait () in
+  let%lwt ide_service' =
+    ClientIdeService.make_from_saved_state ~root in
+  ide_service := ide_service';
+
+  let%lwt () = ClientIdeService.serve !ide_service in
+  Lwt.return_unit
+
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
-let main (type a) (env: env) : a Lwt.t =
+let main (env: env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
   ref_from := env.from;
+
   HackEventLogger.set_from env.from;
   let client = Jsonrpc.make_queue () in
+  let ide_service = ref ClientIdeService.uninitialized in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in
   let ref_event = ref None in
@@ -2583,7 +2598,14 @@ let main (type a) (env: env) : a Lwt.t =
 
       (* this is the main handler for each message*)
       Jsonrpc.clear_last_sent ();
-      let%lwt () = handle_event ~env ~state ~client ~event ~ref_unblocked_time in
+      let%lwt () = handle_event
+        ~env
+        ~state
+        ~client
+        ~ide_service
+        ~event
+        ~ref_unblocked_time
+      in
       let response = Jsonrpc.last_sent () in
       (* for LSP requests and notifications, we keep a log of what+when we responded *)
       log_response_if_necessary event response !ref_unblocked_time;
@@ -2682,8 +2704,13 @@ let main (type a) (env: env) : a Lwt.t =
       Lwt.return_unit
   in
 
-  let rec main_loop (): a Lwt.t =
+  let rec main_loop (): unit Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  Lwt.pick [main_loop (); tick_showStatus state]
+  let%lwt () = Lwt.pick [
+    main_loop ();
+    run_ide_service ide_service;
+    tick_showStatus state;
+  ] in
+  Lwt.return Exit_status.No_error

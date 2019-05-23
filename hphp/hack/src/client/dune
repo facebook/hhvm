@@ -5,6 +5,7 @@
     (:standard
       \ clientLogCommand))
   (libraries
+    client_ide_service
     hh_server_monitor
     logging
     lwt

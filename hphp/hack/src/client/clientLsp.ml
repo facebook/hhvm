@@ -699,7 +699,10 @@ let hack_errors_to_lsp_diagnostic
 (** Protocol                                                           **)
 (************************************************************************)
 
-let do_shutdown (state: state) (ref_unblocked_time: float ref): state Lwt.t =
+let do_shutdown
+    (state: state)
+    (ide_service: ClientIdeService.t)
+    (ref_unblocked_time: float ref): state Lwt.t =
   Hh_logger.log "Received shutdown request";
   let state = dismiss_ui state in
   let%lwt () =
@@ -724,6 +727,8 @@ let do_shutdown (state: state) (ref_unblocked_time: float ref): state Lwt.t =
       (* No other states have a 'conn' to send any disconnect messages over.    *)
       Lwt.return_unit
     end
+  and () =
+    ClientIdeService.destroy ide_service
   in
   Lwt.return Post_shutdown
 
@@ -2245,7 +2250,7 @@ let handle_event
 
   (* shutdown request *)
   | _, Client_message c when c.method_ = "shutdown" ->
-    let%lwt new_state = do_shutdown !state ref_unblocked_time in
+    let%lwt new_state = do_shutdown !state !ide_service ref_unblocked_time in
     state := new_state;
     print_shutdown () |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
@@ -2580,6 +2585,11 @@ let run_ide_service
   ide_service := ide_service';
   Lwt.return_unit
 
+let shutdown_ide_service (ide_service: ClientIdeService.t ref): unit Lwt.t =
+  Hh_logger.log "Shutting down IDE service process...";
+  let%lwt () = ClientIdeService.destroy !ide_service in
+  Lwt.return_unit
+
 (* main: this is the main loop for processing incoming Lsp client requests,
    and incoming server notifications. Never returns. *)
 let main (env: env) : Exit_status.t Lwt.t =
@@ -2741,6 +2751,5 @@ let main (env: env) : Exit_status.t Lwt.t =
     main_loop ();
     tick_showStatus state;
   ]
-  and () = run_ide_service ide_service
-  in
+  and () = run_ide_service ide_service in
   Lwt.return Exit_status.No_error

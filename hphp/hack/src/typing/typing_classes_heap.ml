@@ -135,7 +135,7 @@ module Api = struct
     match t with
     | Lazy lc ->
       begin match lc.sc.sc_kind with
-      | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
+      | Ast_defs.Cabstract | Ast_defs.Cinterface | Ast_defs.Ctrait | Ast_defs.Cenum -> true
       | _ -> false
       end
     | Eager c ->

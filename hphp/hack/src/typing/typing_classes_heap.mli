@@ -33,7 +33,7 @@ module Api : sig
   (** To be used only when {!ServerLocalConfig.shallow_class_decl} is not enabled.
       Raises [Failure] if used when shallow_class_decl is enabled. *)
 
-  val kind                  : t -> Ast.class_kind
+  val kind                  : t -> Ast_defs.class_kind
   val is_xhp                : t -> bool
   val is_disposable         : t -> bool
   val name                  : t -> string

@@ -502,7 +502,7 @@ and class_type = {
   (* When a class is abstract (or in a trait) the initialization of
    * a protected member can be delayed *)
   tc_deferred_init_members : SSet.t;
-  tc_kind                : Ast.class_kind;
+  tc_kind                : Ast_defs.class_kind;
   tc_is_xhp              : bool;
   tc_is_disposable       : bool;
   tc_name                : string ;

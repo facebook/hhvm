@@ -43,7 +43,7 @@ type t =
   | Rstmt            of Pos.t
   | Rno_return       of Pos.t
   | Rno_return_async of Pos.t
-  | Rret_fun_kind    of Pos.t * Ast.fun_kind
+  | Rret_fun_kind    of Pos.t * Ast_defs.fun_kind
   | Rhint            of Pos.t
   | Rnull_check      of Pos.t
   | Rnot_in_cstr     of Pos.t

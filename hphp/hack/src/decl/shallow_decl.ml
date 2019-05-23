@@ -20,15 +20,15 @@ module Attrs = Attributes
 let class_const env c (h, name, e) =
   let pos = fst name in
   match c.c_kind with
-  | Ast.Ctrait ->
+  | Ast_defs.Ctrait ->
       let kind = match c.c_kind with
-        | Ast.Ctrait -> `trait
-        | Ast.Cenum -> `enum
-        | Ast.Crecord -> `record
+        | Ast_defs.Ctrait -> `trait
+        | Ast_defs.Cenum -> `enum
+        | Ast_defs.Crecord -> `record
         | _ -> assert false in
       Errors.cannot_declare_constant kind pos c.c_name;
       None
-  | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface | Ast.Cenum | Ast.Crecord ->
+  | Ast_defs.Cnormal | Ast_defs.Cabstract | Ast_defs.Cinterface | Ast_defs.Cenum | Ast_defs.Crecord ->
     let ty, abstract =
       (* Optional hint h, optional expression e *)
       match h, e with
@@ -40,7 +40,7 @@ let class_const env c (h, name, e) =
           begin match Decl_utils.infer_const e with
             | Some ty -> ty, false
             | None ->
-              if FileInfo.is_strict c.c_mode && c.c_kind <> Ast.Cenum
+              if FileInfo.is_strict c.c_mode && c.c_kind <> Ast_defs.Cenum
               then Errors.missing_typehint pos;
               (Reason.Rwitness pos, Tany), false
           end
@@ -63,15 +63,15 @@ let typeconst_abstract_kind env = function
 
 let typeconst env c tc =
   match c.c_kind with
-  | Ast.Ctrait | Ast.Cenum | Ast.Crecord->
+  | Ast_defs.Ctrait | Ast_defs.Cenum | Ast_defs.Crecord->
       let kind = match c.c_kind with
-        | Ast.Ctrait -> `trait
-        | Ast.Cenum -> `enum
-        | Ast.Crecord -> `record
+        | Ast_defs.Ctrait -> `trait
+        | Ast_defs.Cenum -> `enum
+        | Ast_defs.Crecord -> `record
         | _ -> assert false in
       Errors.cannot_declare_constant kind (fst tc.c_tconst_name) c.c_name;
       None
-  | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
+  | Ast_defs.Cinterface | Ast_defs.Cabstract | Ast_defs.Cnormal ->
       let constr = Option.map tc.c_tconst_constraint (Decl_hint.hint env) in
       let ty = Option.map tc.c_tconst_type (Decl_hint.hint env) in
       let enforceable =
@@ -180,7 +180,7 @@ let method_type env m =
     ft_deprecated =
       Attrs.deprecated ~kind:"method" m.m_name m.m_user_attributes;
     ft_abstract = m.m_abstract;
-    ft_is_coroutine = m.m_fun_kind = Ast.FCoroutine;
+    ft_is_coroutine = m.m_fun_kind = Ast_defs.FCoroutine;
     ft_arity    = arity;
     ft_tparams  = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
@@ -217,7 +217,7 @@ let method_redeclaration_type env m =
     ft_pos      = fst m.mt_name;
     ft_deprecated = None;
     ft_abstract = m.mt_abstract;
-    ft_is_coroutine = m.mt_fun_kind = Ast.FCoroutine;
+    ft_is_coroutine = m.mt_fun_kind = Ast_defs.FCoroutine;
     ft_arity    = arity;
     ft_tparams  = (tparams, FTKtparams);
     ft_where_constraints = where_constraints;
@@ -302,8 +302,8 @@ let class_ env c =
        will be implemented in the future, so we take them as
        part of the class (as requested by dependency injection implementers) *)
     match c.c_kind with
-    | Ast.Cabstract -> sc_implements
-    | Ast.Ctrait -> sc_implements @ sc_req_implements
+    | Ast_defs.Cabstract -> sc_implements
+    | Ast_defs.Ctrait -> sc_implements @ sc_req_implements
     | _ -> []
   in
   let add_cstr_dep ty =

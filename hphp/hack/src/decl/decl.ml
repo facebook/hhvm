@@ -76,15 +76,15 @@ let stop_tracking () =
 let check_extend_kind parent_pos parent_kind child_pos child_kind =
   match parent_kind, child_kind with
     (* What is allowed *)
-  | (Ast.Cabstract | Ast.Cnormal), (Ast.Cabstract | Ast.Cnormal)
-  | Ast.Cabstract, Ast.Cenum (* enums extend BuiltinEnum under the hood *)
-  | Ast.Ctrait, Ast.Ctrait
-  | Ast.Cinterface, Ast.Cinterface ->
+  | (Ast_defs.Cabstract | Ast_defs.Cnormal), (Ast_defs.Cabstract | Ast_defs.Cnormal)
+  | Ast_defs.Cabstract, Ast_defs.Cenum (* enums extend BuiltinEnum under the hood *)
+  | Ast_defs.Ctrait, Ast_defs.Ctrait
+  | Ast_defs.Cinterface, Ast_defs.Cinterface ->
       ()
   | _ ->
       (* What is disallowed *)
-      let parent = Ast.string_of_class_kind parent_kind in
-      let child  = Ast.string_of_class_kind child_kind in
+      let parent = Ast_defs.string_of_class_kind parent_kind in
+      let child  = Ast_defs.string_of_class_kind child_kind in
       Errors.wrong_extend_kind child_pos child parent_pos parent
 
 (*****************************************************************************)
@@ -153,7 +153,7 @@ let add_grand_parents_or_traits no_trait_reuse parent_pos shallow_class acc pare
 let get_class_parent_or_trait env shallow_class (parents, is_complete, pass) ty =
   (* See comment on check_no_duplicate_traits for reasoning here *)
   let no_trait_reuse = experimental_no_trait_reuse_enabled env
-    && pass <> `Xhp_pass && shallow_class.sc_kind <> Ast.Cinterface
+    && pass <> `Xhp_pass && shallow_class.sc_kind <> Ast_defs.Cinterface
   in
   let _, (parent_pos, parent), _ = Decl_utils.unwrap_class_type ty in
   (* If we already had this exact trait, we need to flag trait reuse *)
@@ -238,7 +238,7 @@ and fun_decl_in_env env f =
     ft_pos         = fst f.f_name;
     ft_deprecated  =
       Attributes.deprecated ~kind:"function" f.f_name f.f_user_attributes;
-    ft_is_coroutine = f.f_fun_kind = Ast.FCoroutine;
+    ft_is_coroutine = f.f_fun_kind = Ast_defs.FCoroutine;
     ft_abstract    = false;
     ft_arity       = arity;
     ft_tparams     = (tparams, FTKtparams);
@@ -348,7 +348,7 @@ and class_type_decl class_env hint =
 
 and class_is_abstract c =
   match c.sc_kind with
-    | Ast.Cabstract | Ast.Cinterface | Ast.Ctrait | Ast.Cenum -> true
+    | Ast_defs.Cabstract | Ast_defs.Cinterface | Ast_defs.Ctrait | Ast_defs.Cenum -> true
     | _ -> false
 
 (* When all type constants have been inherited and declared, this step synthesizes
@@ -398,7 +398,7 @@ and class_decl c =
   let typeconsts, consts = List.fold_left c.sc_typeconsts
       ~f:(typeconst_fold c) ~init:(typeconsts, consts) in
   let typeconsts, consts =
-    if c.sc_kind = Ast.Cnormal
+    if c.sc_kind = Ast_defs.Cnormal
     then SMap.fold synthesize_defaults typeconsts (typeconsts, consts)
     else typeconsts, consts in
   let sclass_var = static_prop_decl c in
@@ -498,7 +498,7 @@ and class_decl c =
     dc_decl_errors = None;
     dc_condition_types = condition_types;
   } in
-  if Ast.Cnormal = c.sc_kind then
+  if Ast_defs.Cnormal = c.sc_kind then
     begin
       SMap.iter (
         method_check_trait_overrides ~is_static:false c
@@ -698,8 +698,8 @@ and typeconst_structure c stc =
 
 and typeconst_fold c ((typeconsts, consts) as acc) stc =
   match c.sc_kind with
-  | Ast.Ctrait | Ast.Cenum | Ast.Crecord -> acc
-  | Ast.Cinterface | Ast.Cabstract | Ast.Cnormal ->
+  | Ast_defs.Ctrait | Ast_defs.Cenum | Ast_defs.Crecord -> acc
+  | Ast_defs.Cinterface | Ast_defs.Cabstract | Ast_defs.Cnormal ->
     let name = (snd stc.stc_name) in
     let c_name = (snd c.sc_name) in
     let ts = typeconst_structure c stc in
@@ -729,7 +729,7 @@ and method_check_override c m acc  =
   let override = m.sm_override in
   match SMap.get id acc with
   | Some _ -> false (* overriding final methods is handled in typing *)
-  | None when override && c.sc_kind = Ast.Ctrait -> true
+  | None when override && c.sc_kind = Ast_defs.Ctrait -> true
   | None when override ->
     Errors.should_be_override pos class_id id;
     false

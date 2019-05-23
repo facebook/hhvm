@@ -110,17 +110,17 @@ let make_param_ty env param =
 let ret_from_fun_kind pos kind =
   let ty_any = (Reason.Rwitness pos, Tany) in
   match kind with
-    | Ast.FGenerator ->
+    | Ast_defs.FGenerator ->
       let r = Reason.Rret_fun_kind (pos, kind) in
       r, Tapply ((pos, SN.Classes.cGenerator), [ty_any ; ty_any ; ty_any])
-    | Ast.FAsyncGenerator ->
+    | Ast_defs.FAsyncGenerator ->
       let r = Reason.Rret_fun_kind (pos, kind) in
       r, Tapply ((pos, SN.Classes.cAsyncGenerator), [ty_any ; ty_any ; ty_any])
-    | Ast.FAsync ->
+    | Ast_defs.FAsync ->
       let r = Reason.Rret_fun_kind (pos, kind) in
       r, Tapply ((pos, SN.Classes.cAwaitable), [ty_any])
-    | Ast.FSync
-    | Ast.FCoroutine -> ty_any
+    | Ast_defs.FSync
+    | Ast_defs.FCoroutine -> ty_any
 
 let type_param env (t: Nast.tparam) =
 {

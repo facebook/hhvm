@@ -97,8 +97,8 @@ let from_parent (c : shallow_class) : decl ty list =
    * part of the class (as requested by dependency injection implementers)
    *)
   match c.sc_kind with
-  | Ast.Cabstract -> c.sc_implements @ c.sc_extends
-  | Ast.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+  | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
+  | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
   | _ -> c.sc_extends
 
 let normalize_for_comparison x =
@@ -192,8 +192,8 @@ and linearize (env : env) (c : shallow_class) : linearization =
     mro_synthesized = false;
     mro_xhp_attrs_only = false;
     mro_consts_only = false;
-    mro_copy_private_members = c.sc_kind = Ast.Ctrait;
-    mro_passthrough_abstract_typeconst = c.sc_kind = Ast.Cabstract;
+    mro_copy_private_members = c.sc_kind = Ast_defs.Ctrait;
+    mro_passthrough_abstract_typeconst = c.sc_kind = Ast_defs.Cabstract;
   } in
   let get_ancestors kind = List.map ~f:(ancestor_from_ty kind) in
   let interfaces c     = get_ancestors Interface c.sc_implements in
@@ -246,7 +246,7 @@ and linearize (env : env) (c : shallow_class) : linearization =
   in
   let child_class_abstract =
     Shallow_classes_heap.get mro_name |>
-    Option.value_map ~default:false ~f:(fun sc -> sc.sc_kind = Ast.Cabstract) in
+    Option.value_map ~default:false ~f:(fun sc -> sc.sc_kind = Ast_defs.Cabstract) in
   Sequence.unfold_step
     ~init:(Child child, ancestors, [], [])
     ~f:(next_state env mro_name child_class_abstract)

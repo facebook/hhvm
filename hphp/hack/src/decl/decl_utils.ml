@@ -72,7 +72,7 @@ let rec infer_const (p, expr_) =
   | False -> Reason.Rwitness p, Tprim Tbool
   | Int _ -> Reason.Rwitness p, Tprim Tint
   | Float _ -> Reason.Rwitness p, Tprim Tfloat
-  | Unop ((Ast.Uminus | Ast.Uplus | Ast.Utild | Ast.Unot), e2) ->
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus | Ast_defs.Utild | Ast_defs.Unot), e2) ->
     infer_const e2
   | _ ->
     (* We can't infer the type of everything here. Notably, if you

@@ -46,15 +46,15 @@ let flatten_parent_class_reqs env shallow_class
           parent_pos, ty
         end in
     match shallow_class.sc_kind with
-    | Ast.Cnormal | Ast.Cabstract ->
+    | Ast_defs.Cnormal | Ast_defs.Cabstract ->
       (* not necessary to accumulate req_ancestors_extends for classes --
        * it's not used *)
       req_ancestors, SSet.empty
-    | Ast.Ctrait | Ast.Cinterface ->
+    | Ast_defs.Ctrait | Ast_defs.Cinterface ->
       let req_ancestors_extends = SSet.union
         parent_type.dc_req_ancestors_extends req_ancestors_extends in
       req_ancestors, req_ancestors_extends
-    | Ast.Cenum | Ast.Crecord -> assert false
+    | Ast_defs.Cenum | Ast_defs.Crecord -> assert false
 
 let declared_class_req env (requirements, req_extends) req_ty =
   let _, (req_pos, req_name), _ = Decl_utils.unwrap_class_type req_ty in
@@ -125,7 +125,7 @@ let get_class_requirements env shallow_class =
       ~init:acc shallow_class.sc_uses in
   let acc =
     List.fold_left ~f:(flatten_parent_class_reqs env shallow_class)
-      ~init:acc (if shallow_class.sc_kind = Ast.Cinterface then
+      ~init:acc (if shallow_class.sc_kind = Ast_defs.Cinterface then
           shallow_class.sc_extends else shallow_class.sc_implements) in
   let req_extends, req_ancestors_extends = acc in
   let req_extends = naive_dedup req_extends in

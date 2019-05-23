@@ -116,7 +116,7 @@ type decl_class_type = {
   dc_const               : bool;
   dc_ppl                 : bool;
   dc_deferred_init_members : SSet.t;
-  dc_kind                : Ast.class_kind;
+  dc_kind                : Ast_defs.class_kind;
   dc_is_xhp              : bool;
   dc_name                : string ;
   dc_pos                 : Pos.t ;

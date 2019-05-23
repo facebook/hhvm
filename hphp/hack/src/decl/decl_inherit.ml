@@ -304,12 +304,12 @@ let inherit_hack_class env c p class_name class_type argl =
   let subst = make_substitution p class_name class_type argl in
   let class_type =
     match class_type.dc_kind with
-    | Ast.Ctrait ->
+    | Ast_defs.Ctrait ->
         (* Change the private visibility to point to the inheriting class *)
         chown_privates (snd c.sc_name) class_type
-    | Ast.Cnormal | Ast.Cabstract | Ast.Cinterface ->
+    | Ast_defs.Cnormal | Ast_defs.Cabstract | Ast_defs.Cinterface ->
         filter_privates class_type
-    | Ast.Cenum | Ast.Crecord -> class_type
+    | Ast_defs.Cenum | Ast_defs.Crecord -> class_type
   in
   let typeconsts = SMap.map (Inst.instantiate_typeconst subst)
     class_type.dc_typeconsts in
@@ -404,8 +404,8 @@ let from_parent env c =
      * part of the class (as requested by dependency injection implementers)
      *)
     match c.sc_kind with
-      | Ast.Cabstract -> c.sc_implements @ c.sc_extends
-      | Ast.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
+      | Ast_defs.Cabstract -> c.sc_implements @ c.sc_extends
+      | Ast_defs.Ctrait -> c.sc_implements @ c.sc_extends @ c.sc_req_implements
       | _ -> c.sc_extends
   in
   let inherited_l = List.map extends (from_class env c) in

@@ -391,7 +391,7 @@ and 'phase fun_type = {
   ft_params     : 'phase fun_params   ;
   ft_ret        : 'phase ty           ;
   (* Carries through the sync/async information from the aast *)
-  ft_fun_kind   : Ast.fun_kind        ;
+  ft_fun_kind   : Ast_defs.fun_kind        ;
   ft_reactive   : reactivity          ;
   ft_return_disposable : bool         ;
   (* mutability of the receiver *)
@@ -555,15 +555,15 @@ and typedef_type = {
 }
 
 and 'phase tparam = {
-  tp_variance: Ast.variance;
-  tp_name: Ast.id;
-  tp_constraints: (Ast.constraint_kind * 'phase ty) list;
+  tp_variance: Ast_defs.variance;
+  tp_name: Ast_defs.id;
+  tp_constraints: (Ast_defs.constraint_kind * 'phase ty) list;
   tp_reified: Nast.reify_kind;
   tp_user_attributes: Nast.user_attribute list;
 }
 
 and 'phase where_constraint =
-  'phase ty * Ast.constraint_kind * 'phase ty
+  'phase ty * Ast_defs.constraint_kind * 'phase ty
 
 type phase_ty =
   | DeclTy of decl ty
@@ -615,7 +615,7 @@ let arity_min ft_arity : int = match ft_arity with
 let get_param_mode ~is_ref callconv =
   (* If a param has both & and inout, this should have errored in parsing. *)
   match callconv with
-  | Some Ast.Pinout -> FPinout
+  | Some Ast_defs.Pinout -> FPinout
   | None when is_ref -> FPref
   | None -> FPnormal
 
@@ -771,7 +771,7 @@ let rec ty_compare ?(normalize_union = false) ty1 ty2 =
         begin match shape_fields_known_compare known1 known2 with
         | 0 ->
           List.compare (fun (k1,v1) (k2,v2) ->
-            match Ast.ShapeField.compare k1 k2 with
+            match Ast_defs.ShapeField.compare k1 k2 with
             | 0 -> shape_field_type_compare v1 v2
             | n -> n)
             (Nast.ShapeMap.elements fields1) (Nast.ShapeMap.elements fields2)
@@ -790,7 +790,7 @@ let rec ty_compare ?(normalize_union = false) ty1 ty2 =
       | FieldsFullyKnown, FieldsPartiallyKnown _ -> -1
       | FieldsPartiallyKnown _, FieldsFullyKnown -> 1
       | FieldsPartiallyKnown f1, FieldsPartiallyKnown f2 ->
-        List.compare Ast.ShapeField.compare
+        List.compare Ast_defs.ShapeField.compare
           (Nast.ShapeMap.keys f1) (Nast.ShapeMap.keys f2)
 
     and shape_field_type_compare sft1 sft2 =

@@ -35,7 +35,7 @@ let add_parent_construct decl_env c props parent_ty =
 let parent decl_env c acc =
   if c.sc_mode = FileInfo.Mdecl then acc
   else
-    if c.sc_kind = Ast.Ctrait
+    if c.sc_kind = Ast_defs.Ctrait
     then List.fold_left c.sc_req_extends
       ~f:(add_parent_construct decl_env c) ~init:acc
     else match c.sc_extends with
@@ -97,7 +97,7 @@ let trait_props decl_env c props =
          * If the curr. class does not have its own constructor, only fold in
          * the trait members if it would not have had its own constructor when
          * defining `dc_deferred_init_members`. See logic in `class_` for
-         * Ast.Cabstract to see where this deviated for traits.
+         * Ast_defs.Cabstract to see where this deviated for traits.
          *)
         begin match fst cstr with
           | None -> SSet.union members acc
@@ -129,12 +129,12 @@ let get_deferred_init_props decl_env c =
 
 let class_ ~has_own_cstr decl_env c =
   match c.sc_kind with
-  | Ast.Cabstract when not has_own_cstr ->
+  | Ast_defs.Cabstract when not has_own_cstr ->
     let priv_props, props = get_deferred_init_props decl_env c in
     if priv_props <> SSet.empty then
       (* XXX: should priv_props be checked for a trait?
        * see chown_privates in typing_inherit *)
       Errors.constructor_required c.sc_name priv_props;
     props
-  | Ast.Ctrait -> snd (get_deferred_init_props decl_env c)
+  | Ast_defs.Ctrait -> snd (get_deferred_init_props decl_env c)
   | _ -> SSet.empty

@@ -3394,10 +3394,6 @@ fields of that struct for holding intermediate values.
 
   Profile the Func in the ActRec that was just pushed onto the stack.
 
-| ProfileFunc<rdsHandle,spOff>, ND, S(StkPtr), NF
-
-  Profile the Func in the ActRec that was just pushed onto the stack.
-
 | CheckPackedArrayDataBounds, ND, S(AK(Packed),Vec) S(Int), B
 
   Checks that the index in S1 is within the bounds of the packed array or

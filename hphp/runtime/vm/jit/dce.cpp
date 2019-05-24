@@ -692,7 +692,6 @@ bool canDCE(IRInstruction* inst) {
   case EmptyElem:
   case ProfileArrayKind:
   case ProfileType:
-  case ProfileFunc:
   case ProfileMethod:
   case ProfileSubClsCns:
   case CheckPackedArrayDataBounds:

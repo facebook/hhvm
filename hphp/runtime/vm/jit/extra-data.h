@@ -1686,7 +1686,6 @@ X(ProfileMixedArrayOffset,      ArrayAccessProfileData);
 X(ProfileDictOffset,            ArrayAccessProfileData);
 X(ProfileKeysetOffset,          ArrayAccessProfileData);
 X(ProfileType,                  RDSHandleData);
-X(ProfileFunc,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);
 X(LdRDSAddr,                    RDSHandleData);
 X(CheckRDSInitialized,          RDSHandleData);

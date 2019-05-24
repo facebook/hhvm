@@ -2052,7 +2052,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return may_load_store(effects, effects);
     }
 
-  case ProfileFunc:
   case ProfileMethod:
     {
       AliasClass effects =

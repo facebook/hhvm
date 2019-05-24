@@ -967,7 +967,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileDictOffset:
   case ProfileInstanceCheck:
   case ProfileKeysetOffset:
-  case ProfileFunc:
   case ProfileMethod:
   case ProfileMixedArrayOffset:
   case ProfileSubClsCns:

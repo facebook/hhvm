@@ -5,7 +5,7 @@ class X {
 function test() {
   $x = new X;
   $foo = 'foo';
-  if (isset($x->$foo) || empty($x->$foo) ||      isset($x->{
+  if (isset($x->$foo) || !($x->$foo ?? false) ||      isset($x->{
 'bar'}
 )) {
     unset($x->$foo);

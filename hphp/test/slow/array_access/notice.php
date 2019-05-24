@@ -30,7 +30,6 @@ function test($o, $f) {
   $f($o);
   array_key_exists(0, $o);
   isset($o[0]);
-  empty($o[0]);
   var_dump($o[0]);
   try {
     unset($o[0]);

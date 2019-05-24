@@ -17,5 +17,5 @@ constant("a");
 VERIFY(defined("a") != true);
 __halt_compiler();
 ignore_user_abort("a");
-VERIFY(empty(uniqid()) != true);
+VERIFY((!(uniqid() ?? false)) != true);
 VS(count(sys_getloadavg()), 3);

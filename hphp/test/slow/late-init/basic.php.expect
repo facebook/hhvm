@@ -2,8 +2,6 @@
 Accessing <<__LateInit>> property 'A::p1' before initialization
 === isset1 ===
 bool(false)
-=== empty1 ===
-bool(true)
 === incdec1 ===
 Accessing <<__LateInit>> property 'A::p1' before initialization
 === setop1 ===
@@ -14,8 +12,6 @@ Accessing <<__LateInit>> property 'A::p1' before initialization
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === isset2 ===
 bool(false)
-=== empty2 ===
-bool(true)
 === incdec2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === setop2 ===
@@ -26,8 +22,6 @@ Accessing <<__LateInit>> property 'A::p2' before initialization
 Accessing <<__LateInit>> static property 'A::p3' before initialization
 === isset3 ===
 bool(false)
-=== empty3 ===
-bool(true)
 === incdec3 ===
 Accessing <<__LateInit>> static property 'A::p3' before initialization
 === setop3 ===
@@ -36,8 +30,6 @@ Accessing <<__LateInit>> static property 'A::p3' before initialization
 Accessing <<__LateInit>> static property 'A::p4' before initialization
 === isset4 ===
 bool(false)
-=== empty4 ===
-bool(true)
 === incdec4 ===
 Accessing <<__LateInit>> static property 'A::p4' before initialization
 === setop4 ===
@@ -66,21 +58,11 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-=== empty5 ===
-bool(true)
-=== empty6 ===
-bool(true)
-=== empty7 ===
-bool(true)
-=== empty8 ===
-bool(true)
 ============= setting ================
 === get1 ===
 int(123)
 === isset1 ===
 bool(true)
-=== empty1 ===
-bool(false)
 === incdec1 ===
 int(124)
 === setop1 ===
@@ -91,8 +73,6 @@ int(1124)
 int(123)
 === isset2 ===
 bool(true)
-=== empty2 ===
-bool(false)
 === incdec2 ===
 int(124)
 === setop2 ===
@@ -103,8 +83,6 @@ int(1124)
 int(123)
 === isset3 ===
 bool(true)
-=== empty3 ===
-bool(false)
 === incdec3 ===
 int(124)
 === setop3 ===
@@ -113,8 +91,6 @@ int(1124)
 int(123)
 === isset4 ===
 bool(true)
-=== empty4 ===
-bool(false)
 === incdec4 ===
 int(124)
 === setop4 ===
@@ -143,21 +119,11 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-=== empty5 ===
-bool(true)
-=== empty6 ===
-bool(true)
-=== empty7 ===
-bool(true)
-=== empty8 ===
-bool(true)
 ============= unsetting ==============
 === get1 ===
 Accessing <<__LateInit>> property 'A::p1' before initialization
 === isset1 ===
 bool(false)
-=== empty1 ===
-bool(true)
 === incdec1 ===
 Accessing <<__LateInit>> property 'A::p1' before initialization
 === setop1 ===
@@ -168,8 +134,6 @@ Accessing <<__LateInit>> property 'A::p1' before initialization
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === isset2 ===
 bool(false)
-=== empty2 ===
-bool(true)
 === incdec2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === setop2 ===
@@ -180,8 +144,6 @@ Accessing <<__LateInit>> property 'A::p2' before initialization
 int(1124)
 === isset3 ===
 bool(true)
-=== empty3 ===
-bool(false)
 === incdec3 ===
 int(1125)
 === setop3 ===
@@ -190,8 +152,6 @@ int(2125)
 int(1124)
 === isset4 ===
 bool(true)
-=== empty4 ===
-bool(false)
 === incdec4 ===
 int(1125)
 === setop4 ===
@@ -220,20 +180,10 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-=== empty5 ===
-bool(true)
-=== empty6 ===
-bool(true)
-=== empty7 ===
-bool(true)
-=== empty8 ===
-bool(true)
 === get1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === isset1 ===
 bool(false)
-=== empty1 ===
-bool(true)
 === incdec1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === setop1 ===
@@ -244,8 +194,6 @@ Accessing <<__LateInit>> property 'B::p1' before initialization
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === isset2 ===
 bool(false)
-=== empty2 ===
-bool(true)
 === incdec2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === setop2 ===
@@ -256,8 +204,6 @@ Accessing <<__LateInit>> property 'B::p2' before initialization
 Accessing <<__LateInit>> static property 'B::p3' before initialization
 === isset3 ===
 bool(false)
-=== empty3 ===
-bool(true)
 === incdec3 ===
 Accessing <<__LateInit>> static property 'B::p3' before initialization
 === setop3 ===
@@ -266,8 +212,6 @@ Accessing <<__LateInit>> static property 'B::p3' before initialization
 Accessing <<__LateInit>> static property 'B::p4' before initialization
 === isset4 ===
 bool(false)
-=== empty4 ===
-bool(true)
 === incdec4 ===
 Accessing <<__LateInit>> static property 'B::p4' before initialization
 === setop4 ===
@@ -296,21 +240,11 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-=== empty5 ===
-bool(true)
-=== empty6 ===
-bool(true)
-=== empty7 ===
-bool(true)
-=== empty8 ===
-bool(true)
 ============= setting ================
 === get1 ===
 int(123)
 === isset1 ===
 bool(true)
-=== empty1 ===
-bool(false)
 === incdec1 ===
 int(124)
 === setop1 ===
@@ -321,8 +255,6 @@ int(1124)
 int(123)
 === isset2 ===
 bool(true)
-=== empty2 ===
-bool(false)
 === incdec2 ===
 int(124)
 === setop2 ===
@@ -333,8 +265,6 @@ int(1124)
 int(123)
 === isset3 ===
 bool(true)
-=== empty3 ===
-bool(false)
 === incdec3 ===
 int(124)
 === setop3 ===
@@ -343,8 +273,6 @@ int(1124)
 int(123)
 === isset4 ===
 bool(true)
-=== empty4 ===
-bool(false)
 === incdec4 ===
 int(124)
 === setop4 ===
@@ -373,21 +301,11 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-=== empty5 ===
-bool(true)
-=== empty6 ===
-bool(true)
-=== empty7 ===
-bool(true)
-=== empty8 ===
-bool(true)
 ============= unsetting ==============
 === get1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === isset1 ===
 bool(false)
-=== empty1 ===
-bool(true)
 === incdec1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === setop1 ===
@@ -398,8 +316,6 @@ Accessing <<__LateInit>> property 'B::p1' before initialization
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === isset2 ===
 bool(false)
-=== empty2 ===
-bool(true)
 === incdec2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === setop2 ===
@@ -410,8 +326,6 @@ Accessing <<__LateInit>> property 'B::p2' before initialization
 int(1124)
 === isset3 ===
 bool(true)
-=== empty3 ===
-bool(false)
 === incdec3 ===
 int(1125)
 === setop3 ===
@@ -420,8 +334,6 @@ int(2125)
 int(1124)
 === isset4 ===
 bool(true)
-=== empty4 ===
-bool(false)
 === incdec4 ===
 int(1125)
 === setop4 ===
@@ -450,11 +362,3 @@ bool(false)
 bool(false)
 === isset8 ===
 bool(false)
-=== empty5 ===
-bool(true)
-=== empty6 ===
-bool(true)
-=== empty7 ===
-bool(true)
-=== empty8 ===
-bool(true)

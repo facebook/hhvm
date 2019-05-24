@@ -94,7 +94,7 @@ function issetProp() {
 function emptyProp() {
   echo "= ".__FUNCTION__.":\n\n";
   $x = null;
-  var_dump(empty($x?->foo)); // true
+  var_dump(!($x?->foo ?? false)); // true
   var_dump($x); // null
   echo "\n";
 }

@@ -10,7 +10,7 @@ class x {
     for ($i = 0; $i < 10; ++$i) {
       self::$set = $i; // enough to fool hphpc into leaving the
                        // IssetS,EmptyS opcodes
-      var_dump(empty(self::$set));
+      var_dump(!(self::$set ?? false));
       var_dump(isset(self::$set));
     }
   }

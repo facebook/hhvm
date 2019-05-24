@@ -18,7 +18,7 @@ function basic_getters($arr, $keys) {
   foreach ($keys as $key) { array_key_exists($key, $arr); }
 
   echo "======================== empty ===============================\n";
-  foreach ($keys as $key) { empty($arr[$key]); }
+  foreach ($keys as $key) { !($arr[$key] ?? false); }
 }
 
 function basic_setters($arr, $keys) {
@@ -73,7 +73,7 @@ function member_ops($arr, $keys) {
   foreach ($keys as $key) { isset($arr[0][1][$key]); }
 
   echo "======================== fini-empty ==========================\n";
-  foreach ($keys as $key) { empty($arr[0][1][$key]); }
+  foreach ($keys as $key) { !($arr[0][1][$key] ?? false); }
 
   echo "======================== fini-set ============================\n";
   foreach ($keys as $key) { $arr[0][1][$key] = 123; }

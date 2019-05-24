@@ -45,7 +45,7 @@ function fb_cs_test_impl($v) {
   var_dump($s_ is string);
   var_dump(hexdump($s_));
   $ss_ = $s_;
-  var_dump(!empty($ss_));
+  var_dump((bool)($ss_ ?? false));
   /* check high bit of first character always set */
   var_dump(preg_match("/^[\x80-\xff]/", $ss_));
   $compact_unserialize_result = fb_compact_unserialize($s_, &$ret);

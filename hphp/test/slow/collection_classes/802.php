@@ -8,8 +8,8 @@ function main() {
     var_dump($vec[$k]);
     var_dump(isset($v));
     var_dump(isset($vec[$k]));
-    var_dump(empty($v));
-    var_dump(empty($vec[$k]));
+    var_dump(!($v ?? false));
+    var_dump(!($vec[$k] ?? false));
     echo "\n";
   }
   echo "------------------------\n\n";
@@ -17,7 +17,7 @@ function main() {
   foreach ($arr as $k => $v) {
     var_dump($mp[$k]);
     var_dump(isset($mp[$k]));
-    var_dump(empty($mp[$k]));
+    var_dump(!($mp[$k] ?? false));
 
     echo "\n";
   }

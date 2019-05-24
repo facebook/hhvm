@@ -2,4 +2,4 @@
 require_once('connect.inc');
 
 $conn = mysql_connect($host, $user, $passwd);
-var_dump(!empty(mysql_stat()));
+var_dump(mysql_stat() ?? false);

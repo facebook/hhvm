@@ -8,7 +8,6 @@ foreach ($arr as $x) {
   var_dump($x);
   var_dump($str[$x]);
   var_dump(isset($str[$x]));
-  var_dump(!empty($str[$x]));
   echo "\n";
 }
 }

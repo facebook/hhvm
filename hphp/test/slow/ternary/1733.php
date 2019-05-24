@@ -1,7 +1,7 @@
 <?php
 
 function add_cssclass($add, $class) {
-  $class = empty($class) ? $add : $class .= ' ' . $add;
+  $class = (!($class ?? false)) ? $add : $class .= ' ' . $add;
   return $class;
 }
 <<__EntryPoint>> function main() {

@@ -11,10 +11,6 @@ function main() {
   var_dump((int)$config);
   var_dump((double)$config);
 
-  // empty()
-  var_dump(empty($config->prepare));
-  var_dump(empty($config->does_not_exist));
-
   // iterator
   foreach ($config as $c) {
     var_dump($c);

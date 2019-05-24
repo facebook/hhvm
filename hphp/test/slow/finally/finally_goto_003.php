@@ -20,7 +20,7 @@ function blah() {
             goto after;
             echo "after goto after\n";
           }
-          if (empty($flag) && $x == 3 && $y == 2) {
+          if ((!($flag ?? false)) && $x == 3 && $y == 2) {
             echo "before goto before\n";
             $flag = 1;
             goto before;

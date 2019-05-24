@@ -5,7 +5,7 @@ function test() {
   $x = $GLOBALS['_GET'];            // CGetG
   $x = $GLOBALS['WAT'] ?? false;    // CGetQuietG
   $x = isset($GLOBALS['WAT']);      // IssetG
-  $x = empty($GLOBALS['WAT']);      // EmptyG
+  $x = !($GLOBALS['WAT'] ?? false);      // EmptyG
 
   $GLOBALS['WAT'] = 1;              // SetG
   $GLOBALS['WAT'] *= 2;             // SetOpG

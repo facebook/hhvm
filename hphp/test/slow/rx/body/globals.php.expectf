@@ -4,7 +4,7 @@ Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals ar
 
 Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: IssetG
 
-Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: EmptyG
+Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: CGetQuietG
 
 Verification Error (unit %s/test/slow/rx/body/globals.php func test): globals are forbidden in Rx functions: SetG
 

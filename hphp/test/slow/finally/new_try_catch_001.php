@@ -20,9 +20,9 @@ function blah() {
       }
     }
   } catch (Exception $e) {
-    echo empty($x) ? "bbb\n" : "5\n";
-    echo empty($y) ? "ccc\n" : "6\n";
-    echo empty($z) ? "ddd\n" : "7\n";
+    echo (!($x ?? false)) ? "bbb\n" : "5\n";
+    echo (!($y ?? false)) ? "ccc\n" : "6\n";
+    echo (!($z ?? false)) ? "ddd\n" : "7\n";
     echo "8\n";
   }
   return 9;

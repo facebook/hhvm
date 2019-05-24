@@ -25,13 +25,6 @@ var_dump(isset($x->buz));
 var_dump(isset($x->pub_var));
 var_dump(isset($x->pub_set));
 var_dump(isset($x->priv_var));
-var_dump(empty($x->foo));
-var_dump(empty($x->baz));
-var_dump(empty($x->buz));
-var_dump(empty($x->pub_var));
-var_dump(empty($x->pub_set));
-var_dump(empty($x->priv_var));
 unset($x->pub_var);
 var_dump(isset($x->pub_var));
-var_dump(empty($x->pub_var));
 }

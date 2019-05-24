@@ -2,7 +2,7 @@ Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): stat
 
 Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: IssetS
 
-Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: EmptyS
+Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: CGetS
 
 Verification Error (unit %s/test/slow/rx/body/class-statics.php func test): statics are forbidden in Rx functions: SetS
 

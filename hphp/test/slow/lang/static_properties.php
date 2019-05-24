@@ -121,10 +121,8 @@ function main() {
   $c->cFunc();
 
   print "isset(C::\$h): ".(isset(C::$h)?"true":"false")."\n";
-  print "empty(C::\$h): ".(empty(C::$h)?"true":"false")."\n";
 
   print "isset(C::\$i): ".(isset(C::$i)?"true":"false")."\n";
-  print "empty(C::\$i): ".(empty(C::$i)?"true":"false")."\n";
 
   print "C::\$h: ".C::$h."\n";
 
@@ -165,10 +163,8 @@ class D {
     $c->cFunc();
 
     print "isset(C::\$h): ".(isset(C::$h)?"true":"false")."\n";
-    print "empty(C::\$h): ".(empty(C::$h)?"true":"false")."\n";
 
     print "isset(C::\$i): ".(isset(C::$i)?"true":"false")."\n";
-    print "empty(C::\$i): ".(empty(C::$i)?"true":"false")."\n";
 
     print "C::\$h: ".C::$h."\n";
 

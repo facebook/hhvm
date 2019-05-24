@@ -1,4 +1,3 @@
-
 Notice: SimpleXMLElement to boolean cast in %s/notices.php on line 9
 bool(true)
 
@@ -17,29 +16,23 @@ int(0)
 Notice: SimpleXMLElement to double cast in %s/notices.php on line 12
 float(0)
 
-Notice: SimpleXMLElement empty() property check in %s/notices.php on line 15
-bool(true)
+Notice: SimpleXMLElement used as iterator in %s/notices.php on line 15
 
-Notice: SimpleXMLElement empty() property check in %s/notices.php on line 16
-bool(true)
-
-Notice: SimpleXMLElement used as iterator in %s/notices.php on line 19
-
-Notice: SimpleXMLElement to array cast in %s/notices.php on line 20
+Notice: SimpleXMLElement to array cast in %s/notices.php on line 16
 object(SimpleXMLElement) (0) {
 }
 
-Notice: SimpleXMLElement comparison in %s/notices.php on line 24
+Notice: SimpleXMLElement comparison in %s/notices.php on line 20
 bool(false)
 
-Notice: SimpleXMLElement comparison in %s/notices.php on line 25
+Notice: SimpleXMLElement comparison in %s/notices.php on line 21
 bool(false)
 
-Notice: SimpleXMLElement comparison in %s/notices.php on line 26
+Notice: SimpleXMLElement comparison in %s/notices.php on line 22
 bool(false)
 
-Notice: SimpleXMLElement comparison in %s/notices.php on line 27
+Notice: SimpleXMLElement comparison in %s/notices.php on line 23
 bool(false)
 
-Notice: SimpleXMLElement equality comparison in %s/notices.php on line 30
+Notice: SimpleXMLElement equality comparison in %s/notices.php on line 26
 bool(false)

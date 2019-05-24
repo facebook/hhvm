@@ -7,7 +7,7 @@ function test() {
   $x = C::$p;        // CGetS
                      // CGetQuietS does not exist
   $x = isset(C::$p); // IssetS
-  $x = empty(C::$p); // EmptyS
+  $x = !(C::$p ?? false); // EmptyS
 
   C::$p = 1;         // SetS
   C::$p *= 2;        // SetOpS

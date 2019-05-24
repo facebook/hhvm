@@ -24,9 +24,6 @@ $obj = new A();
 if (!isset($obj['a'])) {
   $obj['a'] = 'test';
 }
-if (!empty($obj['a'])) {
-  $obj['a'] = 'test2';
-}
 var_dump($obj['a']);
 unset($obj['a']);
 var_dump($obj['a']);

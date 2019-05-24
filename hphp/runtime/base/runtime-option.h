@@ -824,7 +824,6 @@ struct RuntimeOption {
   F(bool,     HHIRInliningUseStackedCost, true)                         \
   F(bool, HHIRInlineFrameOpts,         true)                            \
   F(bool, HHIRPartialInlineFrameOpts,  true)                            \
-  F(bool, HHIRInlineSingletons,        true)                            \
   F(bool, HHIRGenerateAsserts,         false)                           \
   F(bool, HHIRDeadCodeElim,            true)                            \
   F(bool, HHIRGlobalValueNumbering,    true)                            \

@@ -136,7 +136,6 @@ struct FormatVisitor {
     }
   }
   void imm(TransFlags f) {
-    if (f.noinlineSingleton) str << sep() << "noinlineSingleton";
   }
   void imm(DestType dt) {
     str << sep() << destTypeName(dt);

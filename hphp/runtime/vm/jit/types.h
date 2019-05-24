@@ -153,7 +153,6 @@ struct TransFlags {
 
   union {
     struct {
-      bool noinlineSingleton : 1;
     };
     uint64_t packed;
   };

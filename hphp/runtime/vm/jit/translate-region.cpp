@@ -282,115 +282,6 @@ void initNormalizedInstruction(
   inst.interp = toInterp;
 }
 
-bool shouldTrySingletonInline(const RegionDesc& region,
-                              const NormalizedInstruction& inst,
-                              unsigned /*instIdx*/, TransFlags trflags) {
-  if (!RuntimeOption::RepoAuthoritative) return false;
-
-  // I don't really want to inline PPC64, yet.
-  if (arch() == Arch::PPC64) return false;
-
-  // Don't inline if we're retranslating due to a side-exit from an
-  // inlined call.
-  auto const startSk = region.start();
-  if (trflags.noinlineSingleton && startSk == inst.source) return false;
-
-  // Bail early if this isn't a push.
-  if (inst.op() != Op::FPushFuncD &&
-      inst.op() != Op::FPushClsMethodRD &&
-      inst.op() != Op::FPushClsMethodD) {
-    return false;
-  }
-
-  return true;
-}
-
-/*
- * Check if `i' is an FPush{Func,ClsMethod}D followed by an FCall to a
- * function with a singleton pattern, and if so, inline it.  Returns true if
- * this succeeds, else false.
- */
-bool tryTranslateSingletonInline(irgen::IRGS& irgs,
-                                 const NormalizedInstruction& ninst,
-                                 const Func* funcd) {
-  using Atom = BCPattern::Atom;
-  using Captures = BCPattern::CaptureVec;
-
-  if (!funcd) return false;
-
-  // Make sure we have an acceptable FPush and non-null callee.
-  assertx(ninst.op() == Op::FPushFuncD ||
-          ninst.op() == Op::FPushClsMethodD ||
-          ninst.op() == Op::FPushClsMethodRD);
-
-  auto fcall = ninst.nextSk();
-
-  // Check if the next instruction is an acceptable FCall.
-  if (fcall.op() != Op::FCall || funcd->isResumable()) {
-    return false;
-  }
-
-  // Check for the static property pattern.
-  auto retc  = Atom(Op::RetC);
-
-  // Factory for String atoms that are required to match another captured
-  // String opcode.
-  auto same_string_as = [&] (int i) {
-    return Atom(Op::String).onlyif([=] (PC pc, const Captures& captures) {
-      auto string1 = pc;
-      auto string2 = captures[i];
-      assertx(peek_op(string1) == Op::String);
-      assertx(peek_op(string2) == Op::String);
-
-      auto const unit = funcd->unit();
-      auto sd1 = unit->lookupLitstrId(getImmPtr(string1, 0)->u_SA);
-      auto sd2 = unit->lookupLitstrId(getImmPtr(string2, 0)->u_SA);
-
-      return (sd1 && sd1 == sd2);
-    });
-  };
-
-  auto stringProp = same_string_as(0);
-  auto stringCls  = same_string_as(1);
-  auto agetc = Atom(Op::ClsRefGetC);
-  auto cgets = Atom(Op::CGetS);
-
-  // Look for a class static singleton pattern.
-  auto result = BCPattern {
-    Atom(Op::String).capture(),
-    Atom(Op::String).capture(),
-    Atom(Op::ClsRefGetC),
-    Atom(Op::CGetS),
-    Atom(Op::IsTypeC),
-    Atom::alt(
-      Atom(Op::JmpZ).taken({stringProp, stringCls, agetc, cgets, retc}),
-      Atom::seq(Atom(Op::JmpNZ), stringProp, stringCls, agetc, cgets, retc)
-    )
-  }.ignore(
-    {Op::AssertRATL, Op::AssertRATStk}
-  ).matchAnchored(funcd);
-
-  if (result.found()) {
-    try {
-      irgen::prepareForNextHHBC(irgs, nullptr, ninst.source);
-      irgen::inlSingletonSProp(
-        irgs,
-        funcd,
-        result.getCapture(1),
-        result.getCapture(0)
-      );
-    } catch (const FailedIRGen& e) {
-      return false;
-    }
-    TRACE(1, "[singleton-sprop] %s <- %s\n",
-        funcd->fullName()->data(),
-        fcall.func()->fullName()->data());
-    return true;
-  }
-
-  return false;
-}
-
 /*
  * Returns the id of the next region block in workQ whose
  * corresponding IR block is currently reachable from the IR unit's
@@ -563,7 +454,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
     auto knownFuncs    = makeMapWalker(block.knownFuncs());
-    auto skipTrans     = false;
     bool emitedSurpriseCheck = false;
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
@@ -641,25 +531,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       initNormalizedInstruction(inst, irgs, region, blockId,
                                 topFunc, lastInstr, toInterpInst);
 
-      // Singleton inlining optimization.
-      if (RuntimeOption::EvalHHIRInlineSingletons && !lastInstr &&
-          shouldTrySingletonInline(region, inst, i, irgs.transFlags) &&
-          knownFuncs.hasNext(inst.nextSk())) {
-
-        // This is safe to do even if singleton inlining fails; we just won't
-        // change topFunc in the next pass since hasNext() will return false.
-        topFunc = knownFuncs.next();
-
-        if (tryTranslateSingletonInline(irgs, inst, topFunc)) {
-          // Skip the translation of this instruction (the FPush) -and- the
-          // next instruction (the FCall) if singleton inlining succeeds.
-          // We still want the fallthrough and prediction logic, though.
-          skipTrans = true;
-          continue;
-        }
-      }
-
-      if (!skipTrans && penultimateInst && isCmp(inst.op())) {
+      if (penultimateInst && isCmp(inst.op())) {
           SrcKey nextSk = inst.nextSk();
           Op nextOp = nextSk.op();
           auto const backwards = [&]{
@@ -676,22 +548,20 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
       // Emit IR for the body of the instruction.
       try {
-        if (!skipTrans) {
-          const bool firstInstr = isEntry && i == 0;
-          auto const backwards = [&]{
-            auto const offsets = instrJumpOffsets(inst.pc());
-            return std::any_of(
-              offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
-            );
-          };
-          if (lastInstr && !emitedSurpriseCheck &&
-              needsSurpriseCheck(inst.op()) &&
-              backwards()) {
-            emitedSurpriseCheck = true;
-            inst.forceSurpriseCheck = true;
-          }
-          translateInstr(irgs, inst, checkOuterTypeOnly, firstInstr);
+        const bool firstInstr = isEntry && i == 0;
+        auto const backwards = [&]{
+          auto const offsets = instrJumpOffsets(inst.pc());
+          return std::any_of(
+            offsets.begin(), offsets.end(), [] (Offset o) { return o < 0; }
+          );
+        };
+        if (lastInstr && !emitedSurpriseCheck &&
+            needsSurpriseCheck(inst.op()) &&
+            backwards()) {
+          emitedSurpriseCheck = true;
+          inst.forceSurpriseCheck = true;
         }
+        translateInstr(irgs, inst, checkOuterTypeOnly, firstInstr);
       } catch (const RetryIRGen& e) {
         return TranslateResult::Retry;
       } catch (const FailedIRGen& exn) {
@@ -706,8 +576,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       }
 
       irgen::finishHHBC(irgs);
-
-      skipTrans = false;
 
       // If this is the last instruction, handle block transitions.
       // If the block ends the region, then call irgen::endRegion to

@@ -411,162 +411,27 @@ inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
   SystemLib::throwRuntimeExceptionObject(msg);
 }
 
-void builtinCoercionWarningHelper(DataType ty, DataType expKind,
-                                  const Func* callee, int64_t arg_num) {
-  if (!equivDataTypes(ty, expKind)) {
-    coerceCellFail(expKind, ty, arg_num, callee);
-  }
-}
-
 bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
-
-  tvCoerceIfStrict(tv, argNum, func);
-
-  DataType type = tv.m_type;
-  if (isArrayLikeType(type) || type == KindOfObject || type == KindOfResource) {
-    coerceCellFail(KindOfBoolean, type, argNum, func);
-  }
-
-  builtinCoercionWarningHelper(tv.m_type, KindOfBoolean, func, argNum);
-
-  return cellToBool(tv);
+  coerceCellFail(KindOfBoolean, tv.m_type, argNum, func);
 }
 
 double coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
-  DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
-
-  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
-    auto tv = make_tv<KindOfString>(sd);
-
-    // In strict mode this will always fail, in weak mode it will be a noop
-    tvCoerceIfStrict(tv, argNum, func);
-  }
-  if (type != KindOfDouble && type != KindOfInt64) {
-    coerceCellFail(KindOfDouble, KindOfString, argNum, func);
-  }
-
-  builtinCoercionWarningHelper(KindOfString, KindOfDouble, func, argNum);
-
-  return sd->toDouble();
+  coerceCellFail(KindOfDouble, KindOfString, argNum, func);
 }
 
 double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
-
-  tvCoerceIfStrict(tv, argNum, func);
-
-  switch (tv.m_type) {
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-      builtinCoercionWarningHelper(tv.m_type, KindOfDouble, func, argNum);
-      return convCellToDblHelper(tv);
-
-    case KindOfFunc: {
-      auto s = funcToStringHelper(tv.m_data.pfunc);
-      return coerceStrToDblHelper(const_cast<StringData*>(s), argNum, func);
-    }
-    case KindOfClass: {
-      auto s = classToStringHelper(tv.m_data.pclass);
-      return coerceStrToDblHelper(const_cast<StringData*>(s), argNum, func);
-    }
-    case KindOfPersistentString:
-    case KindOfString:
-      return coerceStrToDblHelper(tv.m_data.pstr, argNum, func);
-
-    case KindOfUninit:
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
-    case KindOfPersistentArray:
-    case KindOfArray:
-    case KindOfClsMeth:
-    case KindOfObject:
-    case KindOfResource:
-    case KindOfRecord:
-      coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
-      break;
-
-    case KindOfRef:
-      break;
-  }
-  not_reached();
+  coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
 }
 
 int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
-  DataType type = is_numeric_string(sd->data(), sd->size(), nullptr, nullptr);
-
-  if (UNLIKELY(RuntimeOption::PHP7_ScalarTypes)) {
-    auto tv = make_tv<KindOfString>(sd);
-
-    // In strict mode this will always fail, in weak mode it will be a noop
-    tvCoerceIfStrict(tv, argNum, func);
-  }
-  if (type != KindOfDouble && type != KindOfInt64) {
-    coerceCellFail(KindOfInt64, KindOfString, argNum, func);
-  }
-
-  builtinCoercionWarningHelper(KindOfString, KindOfInt64, func, argNum);
-
-  return sd->toInt64();
+  coerceCellFail(KindOfInt64, KindOfString, argNum, func);
 }
 
 int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
   assertx(cellIsPlausible(tv));
-
-  tvCoerceIfStrict(tv, argNum, func);
-
-  switch (tv.m_type) {
-    case KindOfNull:
-    case KindOfBoolean:
-    case KindOfInt64:
-    case KindOfDouble:
-      builtinCoercionWarningHelper(tv.m_type, KindOfInt64, func, argNum);
-      return cellToInt(tv);
-
-    case KindOfFunc: {
-      auto s = funcToStringHelper(tv.m_data.pfunc);
-      return coerceStrToIntHelper(const_cast<StringData*>(s), argNum, func);
-    }
-
-    case KindOfClass: {
-      auto s = classToStringHelper(tv.m_data.pclass);
-      return coerceStrToIntHelper(const_cast<StringData*>(s), argNum, func);
-    }
-
-    case KindOfPersistentString:
-    case KindOfString:
-      return coerceStrToIntHelper(tv.m_data.pstr, argNum, func);
-
-    case KindOfUninit:
-    case KindOfPersistentVec:
-    case KindOfVec:
-    case KindOfPersistentDict:
-    case KindOfDict:
-    case KindOfPersistentKeyset:
-    case KindOfKeyset:
-    case KindOfPersistentShape:
-    case KindOfShape:
-    case KindOfPersistentArray:
-    case KindOfArray:
-    case KindOfClsMeth:
-    case KindOfObject:
-    case KindOfResource:
-    case KindOfRecord:
-      coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
-      break;
-
-    case KindOfRef:
-      break;
-  }
-  not_reached();
+  coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
 }
 
 void raiseUndefProp(ObjectData* base, const StringData* name) {
@@ -1118,23 +983,6 @@ tv_lval elemVecIU(tv_lval base, int64_t key) {
 
 uintptr_t tlsBaseNoInline() {
   return tlsBase();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func) {
-  if (LIKELY(!RuntimeOption::PHP7_ScalarTypes ||
-             RuntimeOption::EnableHipHopSyntax)) {
-    return;
-  }
-
-  VMRegAnchor _;
-  if (!call_uses_strict_types(func)) {
-    return;
-  }
-
-  auto const& tc = func->params()[argNum - 1].typeConstraint;
-  tc.verifyParam(&tv, func, argNum - 1);
 }
 
 //////////////////////////////////////////////////////////////////////

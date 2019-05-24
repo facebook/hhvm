@@ -49,10 +49,6 @@ TRACE_SET_MOD(irlower);
 void tvCoerceParamTo##kind##OrThrow(TypedValue* tv,                   \
                                     const Func* callee,               \
                                     unsigned int arg_num) {           \
-  tvCoerceIfStrict(*tv, arg_num, callee);                             \
-  if (equivDataTypes(tv->m_type, KindOf##kind)) {                     \
-    return;                                                           \
-  }                                                                   \
   auto msg = param_type_error_message(callee->displayName()->data(),  \
                                       arg_num, KindOf##kind,          \
                                       tv->m_type);                    \

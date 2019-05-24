@@ -257,18 +257,6 @@ uintptr_t tlsBaseNoInline();
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * If the current builtin function `func' was called in a strict context,
- * verify that `tv' is the correct type for `argNum' or attempt to convert it
- * to the correct type, fataling on failure.
- *
- * If PHP7_ScalarType is false or EnableHipHopSyntax is true, this call does
- * nothing.
- */
-void tvCoerceIfStrict(TypedValue& tv, int64_t argNum, const Func* func);
-
-//////////////////////////////////////////////////////////////////////
-
 }}
 
 #endif

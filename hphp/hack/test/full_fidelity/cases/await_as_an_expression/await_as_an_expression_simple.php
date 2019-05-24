@@ -12,7 +12,6 @@ async function foo(): Awaitable<void> {
   $x = (await genx()) is int;
   $x = (await genx()) as int;
   $x = (await genx()) ?as int;
-  $x = empty(await genx());
   $x = isset(array()[await genx()]);
   $x = Map { (await genx()) => (await geny()) };
   $x = Vector { (await genx()) };

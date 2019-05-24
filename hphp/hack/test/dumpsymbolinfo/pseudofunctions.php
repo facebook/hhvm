@@ -22,7 +22,6 @@ function test(C $c): void {
   inst_meth($c, 'instanceFoo')();
   meth_caller(C::class, 'instanceFoo')($c);
 
-  empty($c);
   isset($c);
   unset($c);
 

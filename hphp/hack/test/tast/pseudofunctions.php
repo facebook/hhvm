@@ -14,7 +14,6 @@ function test(C $c): void {
   inst_meth($c, 'instanceFoo');
   meth_caller(C::class, 'instanceFoo');
 
-  empty($c);
   isset($c);
   unset($c);
 

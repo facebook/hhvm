@@ -99,13 +99,13 @@
     {
       "name":"invariant_violation",
       "type":"Function",
-      "pos":{"filename":"pseudofunctions.php","line":30,"char_start":3,"char_end":11},
+      "pos":{"filename":"pseudofunctions.php","line":29,"char_start":3,"char_end":11},
       "caller":"test"
     },
     {
       "name":"invariant_violation",
       "type":"Function",
-      "pos":{"filename":"pseudofunctions.php","line":31,"char_start":3,"char_end":21},
+      "pos":{"filename":"pseudofunctions.php","line":30,"char_start":3,"char_end":21},
       "caller":"test"
     }
   ],
@@ -142,11 +142,6 @@
     },
     {
       "pos":{"filename":"pseudofunctions.php","line":26,"char_start":9,"char_end":10},
-      "type":"C",
-      "ident":0
-    },
-    {
-      "pos":{"filename":"pseudofunctions.php","line":27,"char_start":9,"char_end":10},
       "type":"C",
       "ident":0
     }

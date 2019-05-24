@@ -33,8 +33,6 @@ function test(): void {
 
   $foo = array(1, 2, 3);
   /* HH_FIXME[4016] */
-  var_dump(empty($foo[1]));
-  /* HH_FIXME[4016] */
   var_dump(isset($foo[1]));
   unset($foo[1]);
   /* HH_FIXME[4016] */

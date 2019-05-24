@@ -1,10 +1,10 @@
-((script 3127
-  ((list 3127
+((script 3099
+  ((list 3099
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
        (missing 0 ())))
-     (function_declaration 3071
+     (function_declaration 3043
       ((missing 0 ())
        (function_declaration_header 37
         ((list 5 ((((end_of_line 1)) async 5 ((whitespace 1)))))
@@ -19,9 +19,9 @@
                 ((simple_type_specifier 4 ((() void 4 ()))) (missing 0 ())))))
              (() > 1 ((whitespace 1)))))))
          (missing 0 ())))
-       (compound_statement 3033
+       (compound_statement 3005
         ((() { 1 ((end_of_line 1)))
-         (list 3027
+         (list 2999
           ((expression_statement 28
             ((binary_expression 27
               ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
@@ -212,19 +212,6 @@
                    (() ")" 1 ((whitespace 1)))))
                  (() ?as 3 ((whitespace 1)))
                  (simple_type_specifier 3 ((() int 3 ())))))))
-             (() ";" 1 ((end_of_line 1)))))
-           (expression_statement 25
-            ((binary_expression 24
-              ((variable 2 ((((whitespace 2)) variable 2 ((whitespace 1)))))
-               (() = 1 ((whitespace 1)))
-               (empty_expression 19
-                ((() empty 5 ()) (() "(" 1 ())
-                 (prefix_unary_expression 12
-                  ((() await 5 ((whitespace 1)))
-                   (function_call_expression 6
-                    ((() name 4 ()) (missing 0 ()) (() "(" 1 ())
-                     (missing 0 ()) (() ")" 1 ())))))
-                 (() ")" 1 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (expression_statement 34
             ((binary_expression 33

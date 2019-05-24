@@ -29,7 +29,3 @@
 (alias
   (name all-hack)
   (deps (alias exe) (alias debug)))
-
-;; ignore facebook sub-directory as it contains the dune binary, which must
-;; not be considered as a dune file
-(data_only_dirs facebook)

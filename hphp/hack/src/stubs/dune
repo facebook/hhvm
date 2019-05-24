@@ -31,7 +31,7 @@
     full_fidelity))
 
 (library
-  (name hackc_parse_delegator)
+  (name hackc_parse_delegator_stubs)
   (wrapped false)
   (modules
     hackc_parse_delegator))

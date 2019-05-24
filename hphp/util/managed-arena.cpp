@@ -128,7 +128,18 @@ void ManagedArena<ExtentAllocator>::updateHook() {
                 &hooks_ptr, sizeof(hooks_ptr))) {
       throw std::runtime_error{command};
     }
+#if (JEMALLOC_VERSION_MAJOR > 5) || \
+  ((JEMALLOC_VERSION_MAJOR == 5) && (JEMALLOC_VERSION_MINOR >= 1))
+    // Avoid asking excessive memory through the hook, in order to make better
+    // use of preallocated pages.
+    std::snprintf(command, sizeof(command),
+                  "arena.%d.retain_grow_limit", m_arenaId);
+    size_t limit = 16ull << 20;
+    if (mallctl(command, nullptr, nullptr, &limit, sizeof(limit))) {
+      throw std::runtime_error{command};
+    }
   }
+#endif
 }
 
 template void ManagedArena<MultiRangeExtentAllocator>::create();

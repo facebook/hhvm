@@ -306,19 +306,6 @@ void* mallocx_on_node(size_t size, int node, size_t align) {
 #endif // HAVE_NUMA
 
 #if USE_JEMALLOC_EXTENT_HOOKS
-static void set_arena_retain_grow_limit(unsigned id) {
-  size_t mib[3];
-  size_t miblen = sizeof(mib) / sizeof(size_t);
-
-  if (mallctlnametomib("arena.0.retain_grow_limit", mib, &miblen) == 0) {
-    // Limit grow_retained to reduce fragmentation on 1g pages.
-    size_t grow_retained_limit = size2m;
-    mib[1] = id;
-    mallctlbymib(mib, miblen, nullptr, nullptr, &grow_retained_limit,
-                 sizeof(grow_retained_limit));
-  }
-}
-
 using namespace alloc;
 static NEVER_INLINE
 RangeMapper* getMapperChain(RangeState& range, unsigned n1GPages,
@@ -378,14 +365,12 @@ void setup_low_arena(unsigned n1GPages) {
   auto ma = LowArena::CreateAt(&g_lowArena);
   ma->appendMapper(lowMapper);
   ma->appendMapper(veryLowMapper);
-  set_arena_retain_grow_limit(ma->id());
   low_arena = ma->id();
   low_arena_flags = MALLOCX_ARENA(low_arena) | MALLOCX_TCACHE_NONE;
 
   ma = LowArena::CreateAt(&g_lowerArena);
   ma->appendMapper(veryLowMapper);
   ma->appendMapper(lowMapper);
-  set_arena_retain_grow_limit(ma->id());
   lower_arena = ma->id();
   lower_arena_flags = MALLOCX_ARENA(lower_arena) | MALLOCX_TCACHE_NONE;
 
@@ -415,7 +400,6 @@ void setup_high_arena(unsigned n1GPages) {
 
   auto arena = HighArena::CreateAt(&g_highArena);
   arena->appendMapper(range.getLowMapper());
-  set_arena_retain_grow_limit(arena->id());
   high_arena = arena->id();
   high_arena_tcache_create();           // set up high_arena_flags
 

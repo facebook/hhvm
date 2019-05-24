@@ -33,5 +33,5 @@ let record_in_textfile
   let cmdline = Printf.sprintf "sort -f \"%s\" -o \"%s\""
     temp_filename filename in
   let _ = Unix.system cmdline in
-  Sys.remove filename;
+  Sys.remove temp_filename;
 ;;

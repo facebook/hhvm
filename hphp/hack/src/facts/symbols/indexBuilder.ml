@@ -24,6 +24,7 @@ type index_builder_context = {
   json_chunk_size: int;
   custom_service: string option;
   custom_repo_name: string option;
+  include_builtins: bool;
 }
 
 (* Parse one single file and capture information about it *)
@@ -159,16 +160,19 @@ let go (ctxt: index_builder_context) (workers: MultiWorker.worker list option): 
 
   (* Gather list of files *)
   let name = Printf.sprintf "Scanned repository folder [%s] in " ctxt.repo_folder in
-  let repo_files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name in
+  let files = measure_time ~f:(fun () -> gather_file_list ctxt.repo_folder) ~name in
 
-  (* Next, get the HHI root folder and add all HHI files from there *)
-  let hhi_root_folder = Hhi.get_hhi_root () in
-  let hhi_root_folder_path = Path.to_string hhi_root_folder in
-  let name = Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path in
-  let hhi_files = measure_time ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name in
+  (* If desired, get the HHI root folder and add all HHI files from there *)
+  let files = if ctxt.include_builtins then begin
+    let hhi_root_folder = Hhi.get_hhi_root () in
+    let hhi_root_folder_path = Path.to_string hhi_root_folder in
+    let name = Printf.sprintf "Scanned HHI folder [%s] in " hhi_root_folder_path in
+    let hhi_files = measure_time ~f:(fun () -> gather_file_list hhi_root_folder_path) ~name in
 
-  (* Merge lists *)
-  let files = List.append repo_files hhi_files in
+    (* Merge lists *)
+    List.append files hhi_files
+  end else files
+  in
 
   (* Spawn the parallel parser *)
   let name = Printf.sprintf "Parsed %d files in " (List.length files) in

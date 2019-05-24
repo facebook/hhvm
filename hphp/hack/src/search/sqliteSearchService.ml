@@ -34,19 +34,20 @@ let find_or_build_sqlite_file
     | Ok filename -> filename
     | Error errmsg ->
       let repo_path = Relative_path.to_absolute
-        (Relative_path.from_root "/") in
+        (Relative_path.from_root "") in
       Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
       let tempfilename = SavedStateFetcher.get_filename_for_symbol_index ".db" in
       Hh_logger.log "Sqlite saved state not specified, generating on the fly";
       Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
-      let ctxt = {
-        IndexBuilder.repo_folder = repo_path;
-        IndexBuilder.sqlite_filename = Some tempfilename;
-        IndexBuilder.text_filename = None;
-        IndexBuilder.json_filename = None;
-        IndexBuilder.json_chunk_size = 0;
-        IndexBuilder.custom_service = None;
-        IndexBuilder.custom_repo_name = None;
+      let ctxt = { IndexBuilder.
+        repo_folder = repo_path;
+        sqlite_filename = Some tempfilename;
+        text_filename = None;
+        json_filename = None;
+        json_chunk_size = 0;
+        custom_service = None;
+        custom_repo_name = None;
+        include_builtins = true;
       } in
       IndexBuilder.go ctxt workers;
       tempfilename

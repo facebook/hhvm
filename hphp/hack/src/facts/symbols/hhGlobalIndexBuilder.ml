@@ -40,6 +40,7 @@ let parse_options (): index_builder_context option =
   let custom_service = ref None in
   let custom_repo_name = ref None in
   let repository = ref None in
+  let include_builtins = ref true in
   let options = ref [
       "--sqlite",
       Arg.String (fun x -> sqlite_filename := (Some x)),
@@ -65,6 +66,10 @@ let parse_options (): index_builder_context option =
       Arg.String (fun x -> custom_repo_name := (Some x)),
       "[repo-name]  Send this repo name to the custom symbol index writer";
 
+      "--no-builtins",
+      Arg.Unit (fun () -> include_builtins := false),
+      "Disable processing of built-in HHI files"
+
     ] in
   Arg.parse_dynamic options (fun anonymous_arg -> repository := (Some anonymous_arg)) usage;
 
@@ -83,6 +88,7 @@ let parse_options (): index_builder_context option =
       json_chunk_size = !json_chunk_size;
       custom_service = !custom_service;
       custom_repo_name = !custom_repo_name;
+      include_builtins = !include_builtins;
     }
 ;;
 

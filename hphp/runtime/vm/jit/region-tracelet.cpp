@@ -566,6 +566,16 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
+    if (isFPush(env.inst.op())) {
+      // We may have inferred the target of the call based on type specialized
+      // type information that won't be available when the region is
+      // translated.  If we allow the FCall to specialize using this
+      // information it may cause use to emit a narrower type to the stack than
+      // will be available when the region is translated. This can cause us to
+      // erroneously prevent the the region from breaking on an unknown type.
+      if (!env.arState.knownFunc()) env.irgs.irb->fs().clearTopFunc();
+    }
+
     irgen::finishHHBC(env.irgs);
 
     if (!instrAllowsFallThru(env.inst.op())) {

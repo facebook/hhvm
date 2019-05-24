@@ -124,7 +124,6 @@ type t =
   | NullableAsExpression
   | ConditionalExpression
   | EvalExpression
-  | EmptyExpression
   | DefineExpression
   | HaltCompilerExpression
   | IssetExpression
@@ -309,7 +308,6 @@ let to_string kind =
   | NullableAsExpression              -> "nullable_as_expression"
   | ConditionalExpression             -> "conditional_expression"
   | EvalExpression                    -> "eval_expression"
-  | EmptyExpression                   -> "empty_expression"
   | DefineExpression                  -> "define_expression"
   | HaltCompilerExpression            -> "halt_compiler_expression"
   | IssetExpression                   -> "isset_expression"

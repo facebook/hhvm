@@ -260,7 +260,6 @@ end
 
 module PseudoFunctions = struct
 
-  let empty = "\\empty"
   let isset = "\\isset"
   let unset = "\\unset"
   let hh_show = "\\hh_show"
@@ -270,7 +269,6 @@ module PseudoFunctions = struct
   let hh_loop_forever = "\\hh_loop_forever"
 
   let all_pseudo_functions = [
-    empty;
     isset;
     unset;
     hh_show;

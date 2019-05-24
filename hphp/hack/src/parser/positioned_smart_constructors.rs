@@ -469,10 +469,6 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_eval_expression(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_empty_expression(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State::T, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_empty_expression(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_define_expression(s: State::T, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_define_expression(s, arg0, arg1, arg2, arg3)
     }

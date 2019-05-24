@@ -163,7 +163,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_nullable_as_expression arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_nullable_as_expression arg0 arg1 arg2
     let make_conditional_expression arg0 arg1 arg2 arg3 arg4 state = State.next state [arg0; arg1; arg2; arg3; arg4], Syntax.make_conditional_expression arg0 arg1 arg2 arg3 arg4
     let make_eval_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_eval_expression arg0 arg1 arg2 arg3
-    let make_empty_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_empty_expression arg0 arg1 arg2 arg3
     let make_define_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_define_expression arg0 arg1 arg2 arg3
     let make_halt_compiler_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_halt_compiler_expression arg0 arg1 arg2 arg3
     let make_isset_expression arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_isset_expression arg0 arg1 arg2 arg3

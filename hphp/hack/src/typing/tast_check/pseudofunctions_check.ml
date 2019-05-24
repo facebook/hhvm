@@ -20,7 +20,5 @@ let handler = object
     match x with
     | Id (_, pseudo_func) when pseudo_func = SN.PseudoFunctions.isset ->
       Errors.isset_in_strict p
-    | Id (_, pseudo_func) when pseudo_func = SN.PseudoFunctions.empty ->
-      Errors.empty_in_strict p
     | _ -> ()
 end

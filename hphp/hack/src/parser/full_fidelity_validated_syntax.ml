@@ -210,7 +210,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> ExprNullableAs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> ExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> ExprEval x) x
-    | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> ExprEmpty x) x
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> ExprDefine x) x
     | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> ExprHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> ExprIsset x) x
@@ -266,7 +265,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | ExprNullableAs                   thing -> invalidate_nullable_as_expression         (value, thing)
     | ExprConditional                  thing -> invalidate_conditional_expression         (value, thing)
     | ExprEval                         thing -> invalidate_eval_expression                (value, thing)
-    | ExprEmpty                        thing -> invalidate_empty_expression               (value, thing)
     | ExprDefine                       thing -> invalidate_define_expression              (value, thing)
     | ExprHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | ExprIsset                        thing -> invalidate_isset_expression               (value, thing)
@@ -477,7 +475,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> LambdaNullableAs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> LambdaConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> LambdaEval x) x
-    | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> LambdaEmpty x) x
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> LambdaDefine x) x
     | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> LambdaHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> LambdaIsset x) x
@@ -533,7 +530,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | LambdaNullableAs                   thing -> invalidate_nullable_as_expression         (value, thing)
     | LambdaConditional                  thing -> invalidate_conditional_expression         (value, thing)
     | LambdaEval                         thing -> invalidate_eval_expression                (value, thing)
-    | LambdaEmpty                        thing -> invalidate_empty_expression               (value, thing)
     | LambdaDefine                       thing -> invalidate_define_expression              (value, thing)
     | LambdaHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | LambdaIsset                        thing -> invalidate_isset_expression               (value, thing)
@@ -587,7 +583,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.NullableAsExpression _ -> tag validate_nullable_as_expression (fun x -> CExprNullableAs x) x
     | Syntax.ConditionalExpression _ -> tag validate_conditional_expression (fun x -> CExprConditional x) x
     | Syntax.EvalExpression _ -> tag validate_eval_expression (fun x -> CExprEval x) x
-    | Syntax.EmptyExpression _ -> tag validate_empty_expression (fun x -> CExprEmpty x) x
     | Syntax.DefineExpression _ -> tag validate_define_expression (fun x -> CExprDefine x) x
     | Syntax.HaltCompilerExpression _ -> tag validate_halt_compiler_expression (fun x -> CExprHaltCompiler x) x
     | Syntax.IssetExpression _ -> tag validate_isset_expression (fun x -> CExprIsset x) x
@@ -643,7 +638,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | CExprNullableAs                   thing -> invalidate_nullable_as_expression         (value, thing)
     | CExprConditional                  thing -> invalidate_conditional_expression         (value, thing)
     | CExprEval                         thing -> invalidate_eval_expression                (value, thing)
-    | CExprEmpty                        thing -> invalidate_empty_expression               (value, thing)
     | CExprDefine                       thing -> invalidate_define_expression              (value, thing)
     | CExprHaltCompiler                 thing -> invalidate_halt_compiler_expression       (value, thing)
     | CExprIsset                        thing -> invalidate_isset_expression               (value, thing)
@@ -2616,24 +2610,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       ; eval_left_paren = invalidate_token x.eval_left_paren
       ; eval_argument = invalidate_expression x.eval_argument
       ; eval_right_paren = invalidate_token x.eval_right_paren
-      }
-    ; Syntax.value = v
-    }
-  and validate_empty_expression : empty_expression validator = function
-  | { Syntax.syntax = Syntax.EmptyExpression x; value = v } -> v,
-    { empty_right_paren = validate_token x.empty_right_paren
-    ; empty_argument = validate_expression x.empty_argument
-    ; empty_left_paren = validate_token x.empty_left_paren
-    ; empty_keyword = validate_token x.empty_keyword
-    }
-  | s -> validation_fail (Some SyntaxKind.EmptyExpression) s
-  and invalidate_empty_expression : empty_expression invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.EmptyExpression
-      { empty_keyword = invalidate_token x.empty_keyword
-      ; empty_left_paren = invalidate_token x.empty_left_paren
-      ; empty_argument = invalidate_expression x.empty_argument
-      ; empty_right_paren = invalidate_token x.empty_right_paren
       }
     ; Syntax.value = v
     }

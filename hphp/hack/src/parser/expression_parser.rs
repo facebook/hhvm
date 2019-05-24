@@ -461,7 +461,6 @@ where
             | TokenKind::Include_once
             | TokenKind::Require
             | TokenKind::Require_once => self.parse_inclusion_expression(),
-            | TokenKind::Empty => self.parse_empty_expression(),
             | TokenKind::Isset => self.parse_isset_expression(),
             | TokenKind::Define => self.parse_define_expression(),
             | TokenKind::HaltCompiler => self.parse_halt_compiler_expression(),
@@ -476,30 +475,6 @@ where
             }
             | TokenKind::EndOfFile
             | _ => self.parse_as_name_or_error(),
-        }
-    }
-
-    fn parse_empty_expression(&mut self) -> S::R {
-        // TODO: This is a PHP-ism. Open questions:
-        // * Should we allow a trailing comma? it is not a function call and
-        //   never has more than one argument. See D4273242 for discussion.
-        // * Is there any restriction on the kind of expression this can be?
-        // * Should this be an error in strict mode?
-        // * Should this be in the specification?
-        // * Empty is case-insensitive; should use of non-lowercase be an error?
-        //
-        // TODO: The original Hack and HHVM parsers accept "empty" as an
-        // identifier, so we do too; consider whether it should be reserved.
-        let mut parser1 = self.clone();
-        let keyword = parser1.assert_token(TokenKind::Empty);
-        if parser1.peek_token_kind() == TokenKind::LeftParen {
-            self.continue_from(parser1);
-            let left = self.assert_token(TokenKind::LeftParen);
-            let arg = self.parse_expression_with_reset_precedence();
-            let right = self.require_right_paren();
-            S!(make_empty_expression, self, keyword, left, arg, right)
-        } else {
-            self.parse_as_name_or_error()
         }
     }
 

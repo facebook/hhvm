@@ -1383,19 +1383,6 @@ let schema : schema_node list =
       ; "right_paren", Token
       ]
     }
-  ; { kind_name   = "EmptyExpression"
-    ; type_name   = "empty_expression"
-    ; func_name   = "empty_expression"
-    ; description = "empty_expression"
-    ; prefix      = "empty"
-    ; aggregates  = [ Expression; ConstructorExpression; LambdaBody ]
-    ; fields =
-      [ "keyword", Token
-      ; "left_paren", Token
-      ; "argument", Aggregate Expression
-      ; "right_paren", Token
-      ]
-    }
   ; { kind_name   = "DefineExpression"
     ; type_name   = "define_expression"
     ; func_name   = "define_expression"

@@ -1548,15 +1548,6 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
       t env kw;
       transform_braced_item env left_p arg right_p;
     ]
-  | Syntax.EmptyExpression {
-      empty_keyword = kw;
-      empty_left_paren = left_p;
-      empty_argument = arg;
-      empty_right_paren = right_p; } ->
-    Concat [
-      t env kw;
-      transform_braced_item env left_p arg right_p;
-    ]
   | Syntax.IssetExpression {
       isset_keyword = kw;
       isset_left_paren = left_p;

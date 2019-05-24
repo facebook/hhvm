@@ -2127,11 +2127,6 @@ let static_synthetic_method cname meth_name call_pos decl_pos =
     decl_pos, "Declaration is here"
   ]
 
-let empty_in_strict pos =
-  add (Typing.err_code Typing.IssetEmptyInStrict) pos
-    ("empty cannot be used in a completely type safe way and so is banned in "
-     ^"strict mode")
-
 let isset_in_strict pos =
   add (Typing.err_code Typing.IssetEmptyInStrict) pos
     ("isset cannot be used in a completely type safe way and so is banned in "

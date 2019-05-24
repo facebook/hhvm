@@ -467,10 +467,6 @@ where
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_eval_expression(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_empty_expression(s: Vec<bool>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (Vec<bool>, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_empty_expression(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_define_expression(s: Vec<bool>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (Vec<bool>, Self::R) {
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_define_expression(s, arg0, arg1, arg2, arg3)
     }

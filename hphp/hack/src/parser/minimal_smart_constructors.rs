@@ -462,10 +462,6 @@ impl<'a> SmartConstructors<'a, NoState> for MinimalSmartConstructors {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_eval_expression(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_empty_expression(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (NoState, Self::R) {
-        <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_empty_expression(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_define_expression(s: NoState, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (NoState, Self::R) {
         <Self as SyntaxSmartConstructors<'a, MinimalSyntax, NoState>>::make_define_expression(s, arg0, arg1, arg2, arg3)
     }

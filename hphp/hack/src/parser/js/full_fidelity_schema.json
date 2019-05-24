@@ -1500,16 +1500,6 @@
         { "field_name" : "argument" },
         { "field_name" : "right_paren" }
       ] },
-    { "kind_name" : "EmptyExpression",
-      "type_name" : "empty_expression",
-      "description" : "empty_expression",
-      "prefix" : "empty",
-      "fields" : [
-        { "field_name" : "keyword" },
-        { "field_name" : "left_paren" },
-        { "field_name" : "argument" },
-        { "field_name" : "right_paren" }
-      ] },
     { "kind_name" : "DefineExpression",
       "type_name" : "define_expression",
       "description" : "define_expression",

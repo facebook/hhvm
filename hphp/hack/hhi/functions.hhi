@@ -14,13 +14,11 @@
  * YOU SHOULD NEVER INCLUDE THIS FILE ANYWHERE!!!
  */
 
-// isset, empty, and unset only look like functions to static analysis, but
+// isset, and unset only look like functions to static analysis, but
 // in fact act as special expression subtypes within the runtime
 namespace {
 <<__Rx>>
 function isset(<<__MaybeMutable>> $x): bool;
-<<__Rx>>
-function empty(<<__MaybeMutable>> $x): bool;
 <<__Rx>>
 function unset(<<__MaybeMutable>> $x): void;
 //

@@ -566,11 +566,6 @@ where
         (s, Self::R::make_eval_expression(arg0, arg1, arg2, arg3))
     }
 
-    fn make_empty_expression(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State::T, Self::R) {
-        let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3]);
-        (s, Self::R::make_empty_expression(arg0, arg1, arg2, arg3))
-    }
-
     fn make_define_expression(s: State::T, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1, &arg2, &arg3]);
         (s, Self::R::make_define_expression(arg0, arg1, arg2, arg3))

@@ -466,10 +466,6 @@ where
         <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_eval_expression(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_empty_expression(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (Bool<'a>, Self::R) {
-        <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_empty_expression(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_define_expression(s: Bool<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (Bool<'a>, Self::R) {
         <Self as SyntaxSmartConstructors<Self::R, State<Self::R>>>::make_define_expression(s, arg0, arg1, arg2, arg3)
     }

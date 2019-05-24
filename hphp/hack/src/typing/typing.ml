@@ -3571,13 +3571,6 @@ and is_abstract_ft fty = match fty with
       check_function_in_suspend SN.SpecialFunctions.echo;
       let env, tel, _ = exprs ~accept_using_var:true env el in
       make_call_special env id tel (MakeType.void (Reason.Rwitness p))
-  (* Special function `empty` *)
-  | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.empty ->
-    check_function_in_suspend SN.PseudoFunctions.empty;
-    let env, tel, _ = exprs ~accept_using_var:true env el in
-    if uel <> [] then
-      Errors.unpacking_disallowed_builtin_function p pseudo_func;
-    make_call_special_from_def env id tel (Tprim Tbool)
   (* Special function `isset` *)
   | Id ((_, pseudo_func) as id) when pseudo_func = SN.PseudoFunctions.isset ->
     check_function_in_suspend SN.PseudoFunctions.isset;

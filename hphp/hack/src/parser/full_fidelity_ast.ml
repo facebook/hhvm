@@ -1338,7 +1338,6 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       List (couldMap ~f:pBinderOrIgnore members env)
 
     | EvalExpression  { eval_keyword  = recv; eval_argument       = args; _ }
-    | EmptyExpression { empty_keyword = recv; empty_argument      = args; _ }
     | IssetExpression { isset_keyword = recv; isset_argument_list = args; _ }
     | TupleExpression
       { tuple_expression_keyword = recv

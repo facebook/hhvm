@@ -124,7 +124,6 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_nullable_as_expression(nullable_as_left_operand: Self, nullable_as_operator: Self, nullable_as_right_operand: Self) -> Self;
     fn make_conditional_expression(conditional_test: Self, conditional_question: Self, conditional_consequence: Self, conditional_colon: Self, conditional_alternative: Self) -> Self;
     fn make_eval_expression(eval_keyword: Self, eval_left_paren: Self, eval_argument: Self, eval_right_paren: Self) -> Self;
-    fn make_empty_expression(empty_keyword: Self, empty_left_paren: Self, empty_argument: Self, empty_right_paren: Self) -> Self;
     fn make_define_expression(define_keyword: Self, define_left_paren: Self, define_argument_list: Self, define_right_paren: Self) -> Self;
     fn make_halt_compiler_expression(halt_compiler_keyword: Self, halt_compiler_left_paren: Self, halt_compiler_argument_list: Self, halt_compiler_right_paren: Self) -> Self;
     fn make_isset_expression(isset_keyword: Self, isset_left_paren: Self, isset_argument_list: Self, isset_right_paren: Self) -> Self;

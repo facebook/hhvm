@@ -364,9 +364,6 @@ where S: SmartConstructors<'a, State> {
     fn make_eval_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::EvalExpression, S::make_eval_expression(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_empty_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
-        compose(SyntaxKind::EmptyExpression, S::make_empty_expression(st, arg0.1, arg1.1, arg2.1, arg3.1))
-    }
     fn make_define_expression(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R) {
         compose(SyntaxKind::DefineExpression, S::make_define_expression(st, arg0.1, arg1.1, arg2.1, arg3.1))
     }

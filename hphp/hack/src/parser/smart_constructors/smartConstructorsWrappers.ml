@@ -136,7 +136,6 @@ module type SyntaxKind_S = sig
   val is_nullable_as_expression : r -> bool
   val is_conditional_expression : r -> bool
   val is_eval_expression : r -> bool
-  val is_empty_expression : r -> bool
   val is_define_expression : r -> bool
   val is_halt_compiler_expression : r -> bool
   val is_isset_expression : r -> bool
@@ -344,7 +343,6 @@ module SyntaxKind(SC : SC_S)
   let make_nullable_as_expression arg0 arg1 arg2 state = compose SK.NullableAsExpression (SC.make_nullable_as_expression (snd arg0) (snd arg1) (snd arg2) state)
   let make_conditional_expression arg0 arg1 arg2 arg3 arg4 state = compose SK.ConditionalExpression (SC.make_conditional_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
   let make_eval_expression arg0 arg1 arg2 arg3 state = compose SK.EvalExpression (SC.make_eval_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
-  let make_empty_expression arg0 arg1 arg2 arg3 state = compose SK.EmptyExpression (SC.make_empty_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_define_expression arg0 arg1 arg2 arg3 state = compose SK.DefineExpression (SC.make_define_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_halt_compiler_expression arg0 arg1 arg2 arg3 state = compose SK.HaltCompilerExpression (SC.make_halt_compiler_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
   let make_isset_expression arg0 arg1 arg2 arg3 state = compose SK.IssetExpression (SC.make_isset_expression (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
@@ -528,7 +526,6 @@ module SyntaxKind(SC : SC_S)
   let is_nullable_as_expression               = has_kind SK.NullableAsExpression
   let is_conditional_expression               = has_kind SK.ConditionalExpression
   let is_eval_expression                      = has_kind SK.EvalExpression
-  let is_empty_expression                     = has_kind SK.EmptyExpression
   let is_define_expression                    = has_kind SK.DefineExpression
   let is_halt_compiler_expression             = has_kind SK.HaltCompilerExpression
   let is_isset_expression                     = has_kind SK.IssetExpression

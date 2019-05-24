@@ -1174,17 +1174,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_empty_expression(empty_keyword: Self, empty_left_paren: Self, empty_argument: Self, empty_right_paren: Self) -> Self {
-        let syntax = SyntaxVariant::EmptyExpression(Box::new(EmptyExpressionChildren {
-            empty_keyword,
-            empty_left_paren,
-            empty_argument,
-            empty_right_paren,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_define_expression(define_keyword: Self, define_left_paren: Self, define_argument_list: Self, define_right_paren: Self) -> Self {
         let syntax = SyntaxVariant::DefineExpression(Box::new(DefineExpressionChildren {
             define_keyword,
@@ -2721,13 +2710,6 @@ where
                 let acc = f(&x.eval_right_paren, acc);
                 acc
             },
-            SyntaxVariant::EmptyExpression(x) => {
-                let acc = f(&x.empty_keyword, acc);
-                let acc = f(&x.empty_left_paren, acc);
-                let acc = f(&x.empty_argument, acc);
-                let acc = f(&x.empty_right_paren, acc);
-                acc
-            },
             SyntaxVariant::DefineExpression(x) => {
                 let acc = f(&x.define_keyword, acc);
                 let acc = f(&x.define_left_paren, acc);
@@ -3332,7 +3314,6 @@ where
             SyntaxVariant::NullableAsExpression {..} => SyntaxKind::NullableAsExpression,
             SyntaxVariant::ConditionalExpression {..} => SyntaxKind::ConditionalExpression,
             SyntaxVariant::EvalExpression {..} => SyntaxKind::EvalExpression,
-            SyntaxVariant::EmptyExpression {..} => SyntaxKind::EmptyExpression,
             SyntaxVariant::DefineExpression {..} => SyntaxKind::DefineExpression,
             SyntaxVariant::HaltCompilerExpression {..} => SyntaxKind::HaltCompilerExpression,
             SyntaxVariant::IssetExpression {..} => SyntaxKind::IssetExpression,
@@ -4251,14 +4232,6 @@ pub struct EvalExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct EmptyExpressionChildren<T, V> {
-    pub empty_keyword: Syntax<T, V>,
-    pub empty_left_paren: Syntax<T, V>,
-    pub empty_argument: Syntax<T, V>,
-    pub empty_right_paren: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct DefineExpressionChildren<T, V> {
     pub define_keyword: Syntax<T, V>,
     pub define_left_paren: Syntax<T, V>,
@@ -4932,7 +4905,6 @@ pub enum SyntaxVariant<T, V> {
     NullableAsExpression(Box<NullableAsExpressionChildren<T, V>>),
     ConditionalExpression(Box<ConditionalExpressionChildren<T, V>>),
     EvalExpression(Box<EvalExpressionChildren<T, V>>),
-    EmptyExpression(Box<EmptyExpressionChildren<T, V>>),
     DefineExpression(Box<DefineExpressionChildren<T, V>>),
     HaltCompilerExpression(Box<HaltCompilerExpressionChildren<T, V>>),
     IssetExpression(Box<IssetExpressionChildren<T, V>>),

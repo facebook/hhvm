@@ -163,7 +163,6 @@ module WithToken(Token: TokenType) = struct
       | NullableAsExpression              _ -> SyntaxKind.NullableAsExpression
       | ConditionalExpression             _ -> SyntaxKind.ConditionalExpression
       | EvalExpression                    _ -> SyntaxKind.EvalExpression
-      | EmptyExpression                   _ -> SyntaxKind.EmptyExpression
       | DefineExpression                  _ -> SyntaxKind.DefineExpression
       | HaltCompilerExpression            _ -> SyntaxKind.HaltCompilerExpression
       | IssetExpression                   _ -> SyntaxKind.IssetExpression
@@ -354,7 +353,6 @@ module WithToken(Token: TokenType) = struct
     let is_nullable_as_expression               = has_kind SyntaxKind.NullableAsExpression
     let is_conditional_expression               = has_kind SyntaxKind.ConditionalExpression
     let is_eval_expression                      = has_kind SyntaxKind.EvalExpression
-    let is_empty_expression                     = has_kind SyntaxKind.EmptyExpression
     let is_define_expression                    = has_kind SyntaxKind.DefineExpression
     let is_halt_compiler_expression             = has_kind SyntaxKind.HaltCompilerExpression
     let is_isset_expression                     = has_kind SyntaxKind.IssetExpression
@@ -1670,17 +1668,6 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc eval_left_paren in
          let acc = f acc eval_argument in
          let acc = f acc eval_right_paren in
-         acc
-      | EmptyExpression {
-        empty_keyword;
-        empty_left_paren;
-        empty_argument;
-        empty_right_paren;
-      } ->
-         let acc = f acc empty_keyword in
-         let acc = f acc empty_left_paren in
-         let acc = f acc empty_argument in
-         let acc = f acc empty_right_paren in
          acc
       | DefineExpression {
         define_keyword;
@@ -3621,17 +3608,6 @@ module WithToken(Token: TokenType) = struct
         eval_argument;
         eval_right_paren;
       ]
-      | EmptyExpression {
-        empty_keyword;
-        empty_left_paren;
-        empty_argument;
-        empty_right_paren;
-      } -> [
-        empty_keyword;
-        empty_left_paren;
-        empty_argument;
-        empty_right_paren;
-      ]
       | DefineExpression {
         define_keyword;
         define_left_paren;
@@ -5571,17 +5547,6 @@ module WithToken(Token: TokenType) = struct
         "eval_left_paren";
         "eval_argument";
         "eval_right_paren";
-      ]
-      | EmptyExpression {
-        empty_keyword;
-        empty_left_paren;
-        empty_argument;
-        empty_right_paren;
-      } -> [
-        "empty_keyword";
-        "empty_left_paren";
-        "empty_argument";
-        "empty_right_paren";
       ]
       | DefineExpression {
         define_keyword;
@@ -7680,18 +7645,6 @@ module WithToken(Token: TokenType) = struct
           eval_left_paren;
           eval_argument;
           eval_right_paren;
-        }
-      | (SyntaxKind.EmptyExpression, [
-          empty_keyword;
-          empty_left_paren;
-          empty_argument;
-          empty_right_paren;
-        ]) ->
-        EmptyExpression {
-          empty_keyword;
-          empty_left_paren;
-          empty_argument;
-          empty_right_paren;
         }
       | (SyntaxKind.DefineExpression, [
           define_keyword;
@@ -10153,21 +10106,6 @@ module WithToken(Token: TokenType) = struct
           eval_left_paren;
           eval_argument;
           eval_right_paren;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_empty_expression
-        empty_keyword
-        empty_left_paren
-        empty_argument
-        empty_right_paren
-      =
-        let syntax = EmptyExpression {
-          empty_keyword;
-          empty_left_paren;
-          empty_argument;
-          empty_right_paren;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

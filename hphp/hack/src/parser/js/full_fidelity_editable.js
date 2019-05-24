@@ -290,8 +290,6 @@ class EditableSyntax
       return ConditionalExpression.from_json(json, position, source);
     case 'eval_expression':
       return EvalExpression.from_json(json, position, source);
-    case 'empty_expression':
-      return EmptyExpression.from_json(json, position, source);
     case 'define_expression':
       return DefineExpression.from_json(json, position, source);
     case 'halt_compiler_expression':
@@ -14740,110 +14738,6 @@ class EvalExpression extends EditableSyntax
     return EvalExpression._children_keys;
   }
 }
-class EmptyExpression extends EditableSyntax
-{
-  constructor(
-    keyword,
-    left_paren,
-    argument,
-    right_paren)
-  {
-    super('empty_expression', {
-      keyword: keyword,
-      left_paren: left_paren,
-      argument: argument,
-      right_paren: right_paren });
-  }
-  get keyword() { return this.children.keyword; }
-  get left_paren() { return this.children.left_paren; }
-  get argument() { return this.children.argument; }
-  get right_paren() { return this.children.right_paren; }
-  with_keyword(keyword){
-    return new EmptyExpression(
-      keyword,
-      this.left_paren,
-      this.argument,
-      this.right_paren);
-  }
-  with_left_paren(left_paren){
-    return new EmptyExpression(
-      this.keyword,
-      left_paren,
-      this.argument,
-      this.right_paren);
-  }
-  with_argument(argument){
-    return new EmptyExpression(
-      this.keyword,
-      this.left_paren,
-      argument,
-      this.right_paren);
-  }
-  with_right_paren(right_paren){
-    return new EmptyExpression(
-      this.keyword,
-      this.left_paren,
-      this.argument,
-      right_paren);
-  }
-  rewrite(rewriter, parents)
-  {
-    if (parents == undefined)
-      parents = [];
-    let new_parents = parents.slice();
-    new_parents.push(this);
-    var keyword = this.keyword.rewrite(rewriter, new_parents);
-    var left_paren = this.left_paren.rewrite(rewriter, new_parents);
-    var argument = this.argument.rewrite(rewriter, new_parents);
-    var right_paren = this.right_paren.rewrite(rewriter, new_parents);
-    if (
-      keyword === this.keyword &&
-      left_paren === this.left_paren &&
-      argument === this.argument &&
-      right_paren === this.right_paren)
-    {
-      return rewriter(this, parents);
-    }
-    else
-    {
-      return rewriter(new EmptyExpression(
-        keyword,
-        left_paren,
-        argument,
-        right_paren), parents);
-    }
-  }
-  static from_json(json, position, source)
-  {
-    let keyword = EditableSyntax.from_json(
-      json.empty_keyword, position, source);
-    position += keyword.width;
-    let left_paren = EditableSyntax.from_json(
-      json.empty_left_paren, position, source);
-    position += left_paren.width;
-    let argument = EditableSyntax.from_json(
-      json.empty_argument, position, source);
-    position += argument.width;
-    let right_paren = EditableSyntax.from_json(
-      json.empty_right_paren, position, source);
-    position += right_paren.width;
-    return new EmptyExpression(
-        keyword,
-        left_paren,
-        argument,
-        right_paren);
-  }
-  get children_keys()
-  {
-    if (EmptyExpression._children_keys == null)
-      EmptyExpression._children_keys = [
-        'keyword',
-        'left_paren',
-        'argument',
-        'right_paren'];
-    return EmptyExpression._children_keys;
-  }
-}
 class DefineExpression extends EditableSyntax
 {
   constructor(
@@ -22504,7 +22398,6 @@ exports.AsExpression = AsExpression;
 exports.NullableAsExpression = NullableAsExpression;
 exports.ConditionalExpression = ConditionalExpression;
 exports.EvalExpression = EvalExpression;
-exports.EmptyExpression = EmptyExpression;
 exports.DefineExpression = DefineExpression;
 exports.HaltCompilerExpression = HaltCompilerExpression;
 exports.IssetExpression = IssetExpression;

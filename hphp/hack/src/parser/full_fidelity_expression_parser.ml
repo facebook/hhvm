@@ -301,7 +301,6 @@ module WithStatementAndDeclAndTypeParser
     | Include_once
     | Require
     | Require_once -> parse_inclusion_expression parser
-    | Empty -> parse_empty_expression parser
     | Isset -> parse_isset_expression parser
     | Define -> parse_define_expression parser
     | HaltCompiler -> parse_halt_compiler_expression parser
@@ -315,26 +314,6 @@ module WithStatementAndDeclAndTypeParser
       Make.missing parser (pos parser)
     | TokenKind.EndOfFile
     | _ -> parse_as_name_or_error parser
-
-  and parse_empty_expression parser =
-    (* TODO: This is a PHP-ism. Open questions:
-      * Should we allow a trailing comma? it is not a function call and
-        never has more than one argument. See D4273242 for discussion.
-      * Is there any restriction on the kind of expression this can be?
-      * Should this be an error in strict mode?
-      * Should this be in the specification?
-      * Empty is case-insensitive; should use of non-lowercase be an error?
-    *)
-    (* TODO: The original Hack and HHVM parsers accept "empty" as an
-    identifier, so we do too; consider whether it should be reserved. *)
-    let (parser1, keyword) = assert_token parser Empty in
-    if peek_token_kind parser1 = LeftParen then
-      let (parser, left) = assert_token parser1 LeftParen in
-      let (parser, arg) = parse_expression_with_reset_precedence parser in
-      let (parser, right) = require_right_paren parser in
-      Make.empty_expression parser keyword left arg right
-    else
-      parse_as_name_or_error parser
 
   and parse_eval_expression parser =
     (* TODO: This is a PHP-ism. Open questions:

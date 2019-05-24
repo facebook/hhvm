@@ -486,8 +486,9 @@
          (() ")" 1 ())))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 8
-      ((empty_expression 7
-        ((() empty 5 ()) (() "(" 1 ()) (() ")" 1 ()) (missing 0 ())))
+      ((function_call_expression 7
+        ((() empty 5 ()) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
+         (() ")" 1 ())))
        (() ";" 1 ((end_of_line 1)))))
      (enum_declaration 290
       ((missing 0 ()) (() enum 4 ()) (missing 0 ()) (missing 0 ())

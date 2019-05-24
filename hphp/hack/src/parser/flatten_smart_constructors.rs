@@ -864,14 +864,6 @@ pub trait FlattenSmartConstructors<'a, State>
         }
     }
 
-    fn make_empty_expression(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State, Self::R) {
-        if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
-          (s, Self::zero())
-        } else {
-          (s, Self::flatten(vec!(arg0, arg1, arg2, arg3)))
-        }
-    }
-
     fn make_define_expression(s: State, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (State, Self::R) {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           (s, Self::zero())

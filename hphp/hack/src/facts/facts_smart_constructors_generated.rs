@@ -462,10 +462,6 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_eval_expression(s, arg0, arg1, arg2, arg3)
     }
 
-    fn make_empty_expression(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (HasScriptContent<'a>, Self::R) {
-        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_empty_expression(s, arg0, arg1, arg2, arg3)
-    }
-
     fn make_define_expression(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_define_expression(s, arg0, arg1, arg2, arg3)
     }

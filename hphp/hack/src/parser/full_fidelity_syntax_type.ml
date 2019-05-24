@@ -778,12 +778,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; eval_argument                                      : t
     ; eval_right_paren                                   : t
     }
-  | EmptyExpression                   of
-    { empty_keyword                                      : t
-    ; empty_left_paren                                   : t
-    ; empty_argument                                     : t
-    ; empty_right_paren                                  : t
-    }
   | DefineExpression                  of
     { define_keyword                                     : t
     ; define_left_paren                                  : t
@@ -1278,7 +1272,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | ExprNullableAs                   of nullable_as_expression
   | ExprConditional                  of conditional_expression
   | ExprEval                         of eval_expression
-  | ExprEmpty                        of empty_expression
   | ExprDefine                       of define_expression
   | ExprHaltCompiler                 of halt_compiler_expression
   | ExprIsset                        of isset_expression
@@ -1403,7 +1396,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | LambdaNullableAs                   of nullable_as_expression
   | LambdaConditional                  of conditional_expression
   | LambdaEval                         of eval_expression
-  | LambdaEmpty                        of empty_expression
   | LambdaDefine                       of define_expression
   | LambdaHaltCompiler                 of halt_compiler_expression
   | LambdaIsset                        of isset_expression
@@ -1456,7 +1448,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | CExprNullableAs                   of nullable_as_expression
   | CExprConditional                  of conditional_expression
   | CExprEval                         of eval_expression
-  | CExprEmpty                        of empty_expression
   | CExprDefine                       of define_expression
   | CExprHaltCompiler                 of halt_compiler_expression
   | CExprIsset                        of isset_expression
@@ -2137,12 +2128,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; eval_left_paren: Token.t value
     ; eval_argument: expression value
     ; eval_right_paren: Token.t value
-    }
-  and empty_expression =
-    { empty_keyword: Token.t value
-    ; empty_left_paren: Token.t value
-    ; empty_argument: expression value
-    ; empty_right_paren: Token.t value
     }
   and define_expression =
     { define_keyword: Token.t value

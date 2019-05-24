@@ -665,12 +665,6 @@ module type Syntax_S = sig
     ; eval_argument                                      : t
     ; eval_right_paren                                   : t
     }
-  | EmptyExpression                   of
-    { empty_keyword                                      : t
-    ; empty_left_paren                                   : t
-    ; empty_argument                                     : t
-    ; empty_right_paren                                  : t
-    }
   | DefineExpression                  of
     { define_keyword                                     : t
     ; define_left_paren                                  : t
@@ -1228,7 +1222,6 @@ module type Syntax_S = sig
   val make_nullable_as_expression : t -> t -> t -> t
   val make_conditional_expression : t -> t -> t -> t -> t -> t
   val make_eval_expression : t -> t -> t -> t -> t
-  val make_empty_expression : t -> t -> t -> t -> t
   val make_define_expression : t -> t -> t -> t -> t
   val make_halt_compiler_expression : t -> t -> t -> t -> t
   val make_isset_expression : t -> t -> t -> t -> t
@@ -1411,7 +1404,6 @@ module type Syntax_S = sig
   val is_nullable_as_expression : t -> bool
   val is_conditional_expression : t -> bool
   val is_eval_expression : t -> bool
-  val is_empty_expression : t -> bool
   val is_define_expression : t -> bool
   val is_halt_compiler_expression : t -> bool
   val is_isset_expression : t -> bool

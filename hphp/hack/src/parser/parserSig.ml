@@ -152,7 +152,6 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val nullable_as_expression : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val conditional_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val eval_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
-        val empty_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val define_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val halt_compiler_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
         val isset_expression : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

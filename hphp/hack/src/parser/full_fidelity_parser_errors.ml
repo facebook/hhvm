@@ -2472,7 +2472,6 @@ let await_as_an_expression_errors env await_node parents =
     | IsExpression _
     | AsExpression _
     | NullableAsExpression _
-    | EmptyExpression _
     | IssetExpression _
     | ParenthesizedExpression _
     | BracedExpression _

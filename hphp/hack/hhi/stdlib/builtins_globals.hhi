@@ -10,7 +10,6 @@
 
 namespace HH {
 
-  function global_empty(string $key): bool;
   function global_get(string $key): mixed;
   function global_get_safe(string $key): mixed;
   function global_isset(string $key): bool;

@@ -62,6 +62,7 @@
     full_fidelity
     naming_attributes
     nast
+    partial_provider
     sqlite3
     typing_deps
     typechecker_options)

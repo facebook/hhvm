@@ -23,6 +23,7 @@ module Aast = Nast
 module N = Nast
 module SN = Naming_special_names
 module NS = Namespaces
+module Partial = Partial_provider
 
 module GEnv = NamingGlobal.GEnv
 
@@ -974,7 +975,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.darray ->
         Some (match hl with
           | [] ->
-              if FileInfo.is_strict (fst env).in_mode then
+              if Partial.should_check_error ((fst env).in_mode) 2071 then
                 Errors.too_few_type_arguments p;
               N.Hdarray ((p, N.Hany), (p, N.Hany))
           | [_] -> Errors.too_few_type_arguments p; N.Hany
@@ -983,7 +984,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.varray ->
         Some (match hl with
           | [] ->
-              if FileInfo.is_strict (fst env).in_mode then
+              if Partial.should_check_error ((fst env).in_mode) 2071 then
                 Errors.too_few_type_arguments p;
               N.Hvarray (p, N.Hany)
           | [val_] -> N.Hvarray (hint env val_)
@@ -991,7 +992,7 @@ module Make (GetLocals : GetLocals) = struct
       | nm when nm = SN.Typehints.varray_or_darray ->
         Some (match hl with
           | [] ->
-              if FileInfo.is_strict (fst env).in_mode then
+              if Partial.should_check_error ((fst env).in_mode) 2071 then
                 Errors.too_few_type_arguments p;
               N.Hvarray_or_darray (p, N.Hany)
           | [val_] -> N.Hvarray_or_darray (hint env val_)
@@ -1080,12 +1081,12 @@ module Make (GetLocals : GetLocals) = struct
   let check_tparams_shadow class_tparam_names methods =
     List.iter methods (check_method_tparams class_tparam_names)
 
-  let ensure_name_not_dynamic env e err =
+  let ensure_name_not_dynamic env e =
     match e with
     | (_, (Aast.Id _ | Aast.Lvar _)) -> ()
     | (p, _) ->
-      if FileInfo.is_strict (fst env).in_mode
-      then err p
+      if Partial.should_check_error ((fst env).in_mode) 2078
+      then Errors.dynamic_class_name_in_strict_mode p
 
   (* Naming of a class *)
   let rec class_ c =
@@ -1632,7 +1633,7 @@ module Make (GetLocals : GetLocals) = struct
     Env.add_lvar env (p, name) (p, ident);
     let ty = Option.map param.Aast.param_hint (hint env) in
     let eopt = Option.map param.Aast.param_expr (expr env) in
-    if param.Aast.param_is_reference && FileInfo.is_strict (fst env).in_mode
+    if param.Aast.param_is_reference && Partial.should_check_error ((fst env).in_mode) 2087
     then Errors.reference_in_strict_mode p;
     { N.param_annotation = p;
       param_hint = ty;
@@ -2085,14 +2086,11 @@ module Make (GetLocals : GetLocals) = struct
       let x1 = (p, Local_id.to_string lid) in
       N.Class_get (make_class_id env x1, N.CGstring x2)
     | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
-      ensure_name_not_dynamic env x1
-        Errors.dynamic_class_name_in_strict_mode;
+      ensure_name_not_dynamic env x1;
       N.Any
     | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGexpr x2) ->
-      ensure_name_not_dynamic env x1
-        Errors.dynamic_class_name_in_strict_mode;
-      ensure_name_not_dynamic env x2
-        Errors.dynamic_class_name_in_strict_mode;
+      ensure_name_not_dynamic env x1;
+      ensure_name_not_dynamic env x2;
       N.Any
     | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
     | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), x2) ->
@@ -2311,7 +2309,7 @@ module Make (GetLocals : GetLocals) = struct
             match x with
             | x when x = SN.Typehints.object_cast ->
               (* (object) is a valid cast but not a valid type annotation *)
-              if FileInfo.is_strict (fst env).in_mode then Errors.object_cast p None;
+              if Partial.should_check_error ((fst env).in_mode) 2055 then Errors.object_cast p None;
               p, N.Hany
             | x when x = SN.Typehints.void ->
               Errors.void_cast p;
@@ -2402,7 +2400,7 @@ module Make (GetLocals : GetLocals) = struct
         exprl env uel,
         p)
     | Aast.New ((_, Aast.CIexpr(p, _e)), tal, el, uel, _) ->
-      if FileInfo.is_strict (fst env).in_mode
+      if Partial.should_check_error ((fst env).in_mode) 2060
       then Errors.dynamic_new_in_strict_mode p;
       N.New (make_class_id env (p, SN.Classes.cUnknown),
         targl env p tal,
@@ -2822,7 +2820,7 @@ module Make (GetLocals : GetLocals) = struct
 
   let check_constant_hint cst =
     match cst.Aast.cst_type with
-    | None when FileInfo.is_strict cst.Aast.cst_mode ->
+    | None when Partial.should_check_error cst.Aast.cst_mode 2001 ->
         Errors.add_a_typehint (fst cst.Aast.cst_name)
     | None
     | Some _ -> ()

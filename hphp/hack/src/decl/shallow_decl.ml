@@ -16,6 +16,7 @@ open Typing_deps
 open Typing_defs
 
 module Attrs = Attributes
+module Partial = Partial_provider
 
 let class_const env c (h, name, e) =
   let pos = fst name in
@@ -40,12 +41,12 @@ let class_const env c (h, name, e) =
           begin match Decl_utils.infer_const e with
             | Some ty -> ty, false
             | None ->
-              if FileInfo.is_strict c.c_mode && c.c_kind <> Ast_defs.Cenum
+              if Partial.should_check_error c.c_mode 2035 && c.c_kind <> Ast_defs.Cenum
               then Errors.missing_typehint pos;
               (Reason.Rwitness pos, Tany), false
           end
         | None, None ->
-          if FileInfo.is_strict c.c_mode then Errors.missing_typehint pos;
+          if Partial.should_check_error c.c_mode 2035 then Errors.missing_typehint pos;
           let r = Reason.Rwitness pos in
           (r, Tany), true
     in

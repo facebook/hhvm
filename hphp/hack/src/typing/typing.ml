@@ -498,15 +498,15 @@ and fun_def tcopt f : Tast.fun_def option =
       let env = add_constraints pos env constraints in
       let env =
         Phase.localize_where_constraints ~ety_env env f.f_where_constraints in
-      let env, ty =
-        match f.f_ret with
+      let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
+      let env, locl_ty =
+        match decl_ty with
         | None ->
           env, (Reason.Rwitness pos, Typing_utils.tany env)
-        | Some ret ->
-          let ty = Decl_hint.hint env.Env.decl_env ret in
+        | Some ty ->
           Phase.localize_with_self env ty in
       let return = Typing_return.make_info f.f_fun_kind f.f_user_attributes env
-        ~is_explicit:(Option.is_some f.f_ret) ty in
+        ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
       let env, param_tys =
         List.map_env env f.f_params make_param_local_ty in
       if Env.is_strict env then
@@ -767,7 +767,7 @@ and stmt_ env pos st =
       let env = check_inout_return env in
       let expr_pos = fst e in
       let Typing_env_return_info.{
-        return_type; return_disposable; return_mutable; return_explicit;
+        return_type; return_type_decl = _; return_disposable; return_mutable; return_explicit;
         return_void_to_rx } = Env.get_return env in
       let expected =
         if return_explicit
@@ -2852,8 +2852,9 @@ and anon_make tenv p f ft idl is_anon =
             iter ft.ft_params x;
             wfold_left2 inout_write_back env ft.ft_params x in
         let env = Env.set_fn_kind env f.f_fun_kind in
+        let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) f.f_ret in
         let env, hret =
-          match f.f_ret with
+          match decl_ty with
           | None ->
             (* Do we have a contextual return type? *)
             begin match ret_ty with
@@ -2864,8 +2865,7 @@ and anon_make tenv p f ft idl is_anon =
               (* We might need to force it to be Awaitable if it is a type variable *)
               Typing_return.force_awaitable env p ret_ty
             end
-          | Some x ->
-            let ret = Decl_hint.hint env.Env.decl_env x in
+          | Some ret ->
             (* If a 'this' type appears it needs to be compatible with the
              * late static type
              *)
@@ -2876,7 +2876,7 @@ and anon_make tenv p f ft idl is_anon =
         let env = Env.set_return env
           (Typing_return.make_info f.f_fun_kind [] env
             ~is_explicit:(Option.is_some ret_ty)
-            hret) in
+            hret decl_ty) in
         let local_tpenv = env.Env.lenv.Env.tpenv in
         let env, tb = block env nb.fb_ast in
         let implicit_return = LEnv.has_next env in
@@ -6659,11 +6659,11 @@ and method_def env m =
       then Env.set_using_var env this
       else env in
   let env = Env.clear_params env in
-  let env, ty = match m.m_ret with
+  let decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) m.m_ret in
+  let env, locl_ty = match decl_ty with
     | None ->
       env, Typing_return.make_default_return env m.m_name
     | Some ret ->
-      let ret = Decl_hint.hint env.Env.decl_env ret in
       (* If a 'this' type appears it needs to be compatible with the
        * late static type
        *)
@@ -6672,7 +6672,7 @@ and method_def env m =
           from_class = Some CIstatic } in
       Phase.localize ~ety_env env ret in
   let return = Typing_return.make_info m.m_fun_kind m.m_user_attributes env
-    ~is_explicit:(Option.is_some m.m_ret) ty in
+    ~is_explicit:(Option.is_some m.m_ret) locl_ty decl_ty in
   let env, param_tys =
     List.map_env env m.m_params make_param_local_ty in
   if Env.is_strict env then begin

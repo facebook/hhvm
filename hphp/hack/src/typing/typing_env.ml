@@ -666,6 +666,7 @@ let empty tcopt file ~droot = {
     return  = {
       (* Actually should get set straight away anyway *)
       return_type = (Reason.Rnone, Tunion []);
+      return_type_decl = None;
       return_disposable = false;
       return_mutable = false;
       return_explicit = false;

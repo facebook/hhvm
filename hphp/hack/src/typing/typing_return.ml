@@ -50,14 +50,15 @@ let has_return_void_to_rx_attribute attrs =
   has_attribute SN.UserAttributes.uaReturnsVoidToRx attrs
 
 
-let make_info fun_kind attributes env ~is_explicit ty =
+let make_info fun_kind attributes env ~is_explicit locl_ty decl_ty =
   let return_disposable = has_return_disposable_attribute attributes in
   let return_mutable = has_mutable_return_attribute attributes in
   let return_void_to_rx = has_return_void_to_rx_attribute attributes in
   if not return_disposable
-  then enforce_return_not_disposable fun_kind env ty;
+  then enforce_return_not_disposable fun_kind env locl_ty;
   {
-    return_type = ty;
+    return_type = locl_ty;
+    return_type_decl = decl_ty;
     return_disposable;
     return_mutable;
     return_explicit = is_explicit;

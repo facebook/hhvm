@@ -1,4 +1,5 @@
 <?php
+<<__EntryPoint>> function main() {
 if (substr(PHP_OS, 0, 3) != 'WIN') {
   // Skip if being run by root (files are always readable, writeable and executable)
   $filename = dirname(__FILE__)."/is_writable_root_check.tmp";
@@ -9,4 +10,5 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
         die('skip cannot be run as root');
   }
   unlink($filename);
+}
 }

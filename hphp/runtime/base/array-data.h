@@ -528,7 +528,7 @@ public:
   ArrayData* setWithRefInPlace(int64_t k, TypedValue v);
 
   /*
-   * Remove the value at key `k'. remove() will make a copy first if necesary;
+   * Remove the value at key `k'. remove() will make a copy first if necessary;
    * removeInPlace() will never copy, but may escalate.
    *
    * Return `this' if copy/escalation are not needed, or a copied/escalated

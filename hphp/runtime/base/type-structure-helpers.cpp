@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/enum-util.h"
+#include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -233,21 +234,27 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_vec:
     case TypeStructure::Kind::T_keyset:
     case TypeStructure::Kind::T_vec_or_dict:
-    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_arraylike: {
       if (is_ts_nullable(type)) {
         auto const inputT = get_ts_kind(input);
         return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
       }
-      if (!type->equal(input, true)) {
-        if (is_ts_soft(type)) {
-          auto ts = type->copy();
-          // Let's try once again without the soft annotation
-          auto const newType = ts->remove(s_soft.get());
-          return newType->equal(input, true);
+      auto const soft = is_ts_soft(type);
+      auto const alias = type->exists(s_alias);
+      if (type->size() != input->size() + soft + alias) return false;
+      bool result = true;
+      IterateKV(
+        input,
+        [&](Cell k, TypedValue v1) {
+          assertx(tvIsString(k));
+          auto const v2 = type->rval(k.m_data.pstr);
+          if (v2.is_set() && cellEqual(v1, v2.tv())) return false;
+          result = false;
+          return true; // short circuit
         }
-        return false;
-      }
-      return true;
+      );
+      return result;
+    }
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {

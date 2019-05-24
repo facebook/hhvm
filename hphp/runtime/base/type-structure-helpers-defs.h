@@ -36,6 +36,7 @@ const StaticString s_generic_types("generic_types");
 const StaticString s_is_cls_cns("is_cls_cns");
 const StaticString s_access_list("access_list");
 const StaticString s_root_name("root_name");
+const StaticString s_alias("alias");
 
 ///////////////////////////////////////////////////////////////////////////////
 

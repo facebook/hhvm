@@ -24,7 +24,7 @@ let run_hh_check
     (repo_path: string): unit =
     let hh_client_process = Process.exec
         hh_client_path
-        ["check"; repo_path]
+        ["check"; repo_path; "--config"; "symbolindex_search_provider=SqliteIndex"]
     in
     let open Process_types in
     match Process.read_and_wait_pid ~timeout:75
@@ -46,7 +46,7 @@ let run_autocomplete
     (context: string): string =
   let hh_client_process = Process.exec
       hh_client_path ~input:context
-      [repo_path; "--auto-complete"]
+      [repo_path; "--auto-complete"; "--config"; "symbolindex_search_provider=SqliteIndex"]
   in
   let open Process_types in
   let results = match Process.read_and_wait_pid ~timeout:75

@@ -23,7 +23,7 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 TEST(ReadOnlyArena, simpleTest) {
-  ReadOnlyArena arena(4096 * 10);
+  ReadOnlyArena<std::allocator<char>> arena(4096 * 10);
 
   const char foo[] = "abc";
   auto strP = static_cast<const char*>(

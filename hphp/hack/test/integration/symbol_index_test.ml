@@ -1,5 +1,24 @@
 module Args = Test_harness_common_args
 
+(* Autocomplete snippets *)
+let acnew_context_snippet =
+  "<?hh function f() { $x = new UsesAUTO332"
+let actrait_context_snippet =
+  "<?hh final class EntFoo extends Ent { use NoBigTrAUTO332"
+let acid_context_snippet =
+  "<?hh function f() { some_long_AUTO332"
+let actype_context_snippet =
+  "<?hh function f(ClassToBeAUTO332"
+;;
+
+let copy_file
+    (source_path: string)
+    (dest_path: string): unit =
+  let command = Printf.sprintf "cp %s %s" source_path dest_path in
+  let retcode = Sys.command command in
+  Asserter.Int_asserter.assert_equals 0 retcode "Failed to copy file repo";
+;;
+
 let run_hh_check
     (hh_client_path: string)
     (repo_path: string): unit =
@@ -48,7 +67,6 @@ let run_autocomplete
 let test_basic_results (harness: Test_harness.t): bool =
   let open Test_harness in
   let hh_client_path = harness.hh_client_path in
-  let hh_server_path = harness.hh_client_path in
   let repo_path = Path.to_string harness.repo_dir in
 
   (* Launch hh for a one time check *)
@@ -56,32 +74,91 @@ let test_basic_results (harness: Test_harness.t): bool =
   Printf.printf "HH Check finished [%s]\n%!" repo_path;
 
   (* Request autocomplete of type "Acnew" *)
-  let context_string = "<?hh function f() { $x = new UsesAUTO332" in
-  let results = run_autocomplete hh_client_path repo_path context_string in
+  let results = run_autocomplete hh_client_path repo_path acnew_context_snippet in
   Asserter.String_asserter.assert_equals "UsesA class\n" results
     "Should be able to find autocomplete for 'UsesA'";
 
   (* Request autocomplete of type "Actrait_only" *)
-  let context_string = "<?hh final class EntFoo extends Ent { use NoBigTrAUTO332" in
-  let results = run_autocomplete hh_client_path repo_path context_string in
+  let results = run_autocomplete hh_client_path repo_path actrait_context_snippet in
   Asserter.String_asserter.assert_equals "NoBigTrait trait\n" results
     "Should be able to find autocomplete for 'NoBigTrait'";
 
   (* Request autocomplete of type "Acid" *)
-  let context_string = "<?hh function f() { some_long_AUTO332" in
-  let results = run_autocomplete hh_client_path repo_path context_string in
+  let results = run_autocomplete hh_client_path repo_path acid_context_snippet in
   Asserter.String_asserter.assert_equals "some_long_function_name _\n" results
     "Should be able to find autocomplete for 'some_long_function_name'";
 
   (* Request autocomplete of type "Actype" *)
-  let context_string = "<?hh function f(ClassToBeAUTO332" in
-  let results = run_autocomplete hh_client_path repo_path context_string in
+  let results = run_autocomplete hh_client_path repo_path actype_context_snippet in
+  Asserter.String_asserter.assert_equals "ClassToBeIdentified class\n" results
+    "Should be able to find autocomplete for 'ClassToBeIdentified'";
+
+  (* Now, let's remove a few files and try again - assertions should change *)
+  (* contains NoBigTrait *)
+  let bar1path = (Path.to_string (Path.concat harness.repo_dir "bar_1.php")) in
+  let tempbar1path = Filename.temp_file "bar_1" "php" in
+  copy_file bar1path tempbar1path;
+  Unix.unlink bar1path;
+  (* contains some_long_function_name *)
+  let foo3path = (Path.to_string (Path.concat harness.repo_dir "foo_3.php")) in
+  let tempfoo3path = Filename.temp_file "foo_3" "php" in
+  copy_file foo3path tempfoo3path;
+  Unix.unlink foo3path;
+
+  (* Launch hh for a one time check *)
+  run_hh_check hh_client_path repo_path;
+  Printf.printf "HH Check finished [%s]\n%!" repo_path;
+
+  (* Request autocomplete of type "Acnew" *)
+  let results = run_autocomplete hh_client_path repo_path acnew_context_snippet in
+  Asserter.String_asserter.assert_equals "UsesA class\n" results
+    "Still able to find autocomplete for 'UsesA'";
+
+  (* Request autocomplete of type "Actrait_only" *)
+  let results = run_autocomplete hh_client_path repo_path actrait_context_snippet in
+  Asserter.String_asserter.assert_equals "" results
+    "File containing 'NoBigTrait' has been removed";
+
+  (* Request autocomplete of type "Acid" *)
+  let results = run_autocomplete hh_client_path repo_path acid_context_snippet in
+  Asserter.String_asserter.assert_equals "" results
+    "File containing 'some_long_function_name' has been removed";
+
+  (* Request autocomplete of type "Actype" *)
+  let results = run_autocomplete hh_client_path repo_path actype_context_snippet in
+  Asserter.String_asserter.assert_equals "ClassToBeIdentified class\n" results
+    "Still able to find autocomplete for 'ClassToBeIdentified'";
+
+  (* Add the files back and test a third time *)
+  copy_file tempbar1path bar1path;
+  copy_file tempfoo3path foo3path;
+
+  (* Launch hh for a one time check *)
+  run_hh_check hh_client_path repo_path;
+  Printf.printf "HH Check finished [%s]\n%!" repo_path;
+
+  (* Request autocomplete of type "Acnew" *)
+  let results = run_autocomplete hh_client_path repo_path acnew_context_snippet in
+  Asserter.String_asserter.assert_equals "UsesA class\n" results
+    "Should be able to find autocomplete for 'UsesA'";
+
+  (* Request autocomplete of type "Actrait_only" *)
+  let results = run_autocomplete hh_client_path repo_path actrait_context_snippet in
+  Asserter.String_asserter.assert_equals "NoBigTrait trait\n" results
+    "Should be able to find autocomplete for 'NoBigTrait'";
+
+  (* Request autocomplete of type "Acid" *)
+  let results = run_autocomplete hh_client_path repo_path acid_context_snippet in
+  Asserter.String_asserter.assert_equals "some_long_function_name _\n" results
+    "Should be able to find autocomplete for 'some_long_function_name'";
+
+  (* Request autocomplete of type "Actype" *)
+  let results = run_autocomplete hh_client_path repo_path actype_context_snippet in
   Asserter.String_asserter.assert_equals "ClassToBeIdentified class\n" results
     "Should be able to find autocomplete for 'ClassToBeIdentified'";
 
   (* If we got here, all is well *)
   true
-
 ;;
 
 let tests args =

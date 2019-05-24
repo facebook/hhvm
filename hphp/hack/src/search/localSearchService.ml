@@ -37,7 +37,7 @@ let update_file
           ~key:path ~data:fileinfo_t;
       lte_filenames = env.lte_filenames;
       lte_tombstones =
-        Tombstone_set.remove env.lte_tombstones tombstone;
+        Tombstone_set.add env.lte_tombstones tombstone;
     }
   | Fast fileinfo_names ->
     {
@@ -46,7 +46,7 @@ let update_file
         Relative_path.Map.add env.lte_filenames
           ~key:path ~data:fileinfo_names;
       lte_tombstones =
-        Tombstone_set.remove env.lte_tombstones tombstone;
+        Tombstone_set.add env.lte_tombstones tombstone;
     }
 ;;
 
@@ -77,18 +77,31 @@ let search_local_symbols
     ~(kind_filter: si_kind option)
     ~(env: local_tracking_env): si_results =
 
-  (* case insensitive search *)
-  let query_text_regex_case_insensitive = Str.regexp_case_fold query_text in
+  (* case insensitive search, must include namespace, escaped for regex *)
+  let query_text_regex_case_insensitive =
+    Str.regexp_case_fold ("\\\\" ^ query_text) in
 
+  (* In fileinfo.t, we only know that a thing is a "class," but it could
+   * actually be a trait or something else.  Let's map that knowledge. *)
+  let fixed_kind_filter = match kind_filter with
+  | Some SI_Interface
+  | Some SI_Trait -> Some SI_Class
+  | other_filter -> other_filter
+  in
+
+  (* case insensitive search *)
   let check_substring_and_add_to_accumulator_and_break_if_max_reached
       ~(acc: si_results)
       ~(symbol: string)
       ~(kind: si_kind)
       ~(path: Relative_path.t): si_results =
-    if Str.string_match query_text_regex_case_insensitive query_text 0 then begin
+    if Str.string_partial_match query_text_regex_case_insensitive symbol 0 then begin
       let acc_new = {
         si_name = (Utils.strip_ns symbol);
-        si_kind = kind;
+        si_kind = (match kind, kind_filter with
+        | SI_Class, Some SI_Trait -> SI_Trait
+        | SI_Class, Some SI_Interface -> SI_Interface
+        | _ -> kind);
         si_filehash = (get_tombstone path);
       } :: acc in
       if (List.length acc_new) >= max_results then
@@ -103,7 +116,7 @@ let search_local_symbols
       (kind: si_kind)
       (path: Relative_path.t)
       (acc: si_results): si_results =
-    if kind_filter = None || kind_filter = Some kind then begin
+    if fixed_kind_filter = None || fixed_kind_filter = Some kind then begin
       SSet.fold symbols ~init:acc
         ~f:(fun symbol acc ->
           check_substring_and_add_to_accumulator_and_break_if_max_reached
@@ -117,7 +130,7 @@ let search_local_symbols
       (kind: si_kind)
       (path: Relative_path.t)
       (acc: si_results): si_results =
-    if kind_filter = None || kind_filter = Some kind then begin
+    if fixed_kind_filter = None || fixed_kind_filter = Some kind then begin
       List.fold ids ~init:acc
         ~f:(fun acc (_, symbol) ->
           check_substring_and_add_to_accumulator_and_break_if_max_reached

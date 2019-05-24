@@ -84,10 +84,10 @@ rds::Handle FuncCache::alloc() {
   return link.handle();
 }
 
-void FuncCache::lookup(rds::Handle handle,
-                       StringData* sd,
-                       ActRec* ar,
-                       ActRec* fp) {
+const Func* FuncCache::lookup(rds::Handle handle,
+                              StringData* sd,
+                              ActRec* ar,
+                              ActRec* fp) {
   assertx(ar->isDynamicCall());
   auto const thiz = rds::handleToPtr<FuncCache, rds::Mode::Normal>(handle);
   if (!rds::isHandleInit(handle, rds::NormalTag{})) {
@@ -134,13 +134,13 @@ void FuncCache::lookup(rds::Handle handle,
           ar->setThis(this_);
           this_->incRefCount();
           if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-          return;
+          return func;
         }
         if (self_) {
           ar->m_func = func;
           ar->setClass(self_);
           if (UNLIKELY(inv != nullptr)) ar->setMagicDispatch(inv);
-          return;
+          return func;
         }
       }
     } catch (...) {
@@ -152,7 +152,7 @@ void FuncCache::lookup(rds::Handle handle,
     if (UNLIKELY(!noEffects)) {
       ar->m_func = func;
       ar->trashThis();
-      return;
+      return func;
     }
     pair->m_key =
       const_cast<StringData*>(func->displayName()); // use a static name
@@ -162,6 +162,7 @@ void FuncCache::lookup(rds::Handle handle,
   ar->trashThis();
   assertx(stringMatches(pair->m_key, pair->m_value->displayName()));
   pair->m_value->validate();
+  return pair->m_value;
 }
 
 void invalidateForRenameFunction(const StringData* name) {

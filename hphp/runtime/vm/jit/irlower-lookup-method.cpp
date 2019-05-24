@@ -149,8 +149,8 @@ void cgLdObjMethod(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(LdClsCtor)
 
 template<bool forward, bool dynamic>
-void lookupClsMethodHelper(Class* cls, StringData* meth,
-                           ActRec* ar, ActRec* fp) {
+const Func* lookupClsMethodHelper(Class* cls, StringData* meth,
+                                  ActRec* ar, ActRec* fp) {
   try {
     const Func* f;
     auto const ctx = fp->m_func->cls();
@@ -186,6 +186,8 @@ void lookupClsMethodHelper(Class* cls, StringData* meth,
       ar->setMagicDispatch(meth);
       meth->incRefCount();
     }
+
+    return f;
   } catch (...) {
     *arPreliveOverwriteCells(ar) = make_tv<KindOfString>(meth);
     throw;

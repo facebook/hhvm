@@ -302,7 +302,7 @@ IMPL_OPCODE_CALL(LookupClsRDS)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
+const Func* loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   ObjectData* inst = nullptr;
   Class* cls = nullptr;
   StringData* invName = nullptr;
@@ -343,11 +343,13 @@ void loadFuncContextImpl(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   if (func->hasReifiedGenerics()) {
     preLiveAR->setReifiedGenerics(reifiedGenerics);
   }
+  return func;
 }
 
-void loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
+const Func*
+loadArrayFunctionContext(ArrayData* arr, ActRec* preLiveAR, ActRec* fp) {
   try {
-    loadFuncContextImpl(arr, preLiveAR, fp);
+    return loadFuncContextImpl(arr, preLiveAR, fp);
   } catch (...) {
     *arPreliveOverwriteCells(preLiveAR) = make_array_like_tv(arr);
     throw;

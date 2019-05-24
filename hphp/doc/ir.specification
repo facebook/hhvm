@@ -1414,7 +1414,7 @@ To string conversions:
   slots).
 
 | LookupClsMethod<calleeAROffset,forward,dynamic>,
-|   ND,
+|   D(Func),
 |   S(Cls) S(Str) S(StkPtr) S(FramePtr),
 |   NF
 
@@ -1485,7 +1485,7 @@ To string conversions:
   Try to load a cached non-static __invoke Func from the Class in S0, or branch
   to block B if it is not present.
 
-| LdArrFuncCtx<offset>, ND, S(Arr,Vec) S(StkPtr) S(FramePtr), NF
+| LdArrFuncCtx<offset>, D(Func), S(Arr,Vec) S(StkPtr) S(FramePtr), NF
 
   Try to load an array as a function context. This is for use translating
   FPushFunc when the callee is an array. This instruction attempts to populate
@@ -1500,7 +1500,7 @@ To string conversions:
 
   Load the name of the Class* in S0.
 
-| LdFunc<offset>, ND, S(Str) S(StkPtr) S(FramePtr), NF
+| LdFunc<offset>, D(Func), S(Str) S(StkPtr) S(FramePtr), NF
 
   Resolve the Func whose name is S0. Perform caller checks (dynamic call, rx).
   Then store the Func into the partially constructed ActRec pointed to by

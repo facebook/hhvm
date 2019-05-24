@@ -378,8 +378,8 @@ void prepareToCallUnknown(IRGS& env, SSATmp* callee, SSATmp* objOrClass,
 }
 
 template<class Fn>
-void prepareToCallCustom(IRGS& env, SSATmp* objOrClass, uint32_t numArgs,
-                         bool dynamicCall, SSATmp* tsList, Fn prepare) {
+SSATmp* prepareToCallCustom(IRGS& env, SSATmp* objOrClass, uint32_t numArgs,
+                            bool dynamicCall, SSATmp* tsList, Fn prepare) {
   auto const arOffset = fsetActRec(
     env, cns(env, TNullptr), objOrClass, numArgs, nullptr, dynamicCall, tsList);
 
@@ -390,8 +390,9 @@ void prepareToCallCustom(IRGS& env, SSATmp* objOrClass, uint32_t numArgs,
 
   // Responsible for:
   // - performing caller checks
-  // - popualting missing ActRec fields (m_func at minimum)
-  prepare(arOffset);
+  // - populating missing ActRec fields (m_func at minimum)
+  // - returning SSATmp* of the resolved func pointer
+  return prepare(arOffset);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -839,9 +840,10 @@ void fpushFuncObj(IRGS& env, uint32_t numParams) {
 void fpushFuncArr(IRGS& env, uint32_t numParams) {
   auto const arr = popC(env);
   auto const prepare = [&] (IRSPRelOffset arOffset) {
-    gen(env, LdArrFuncCtx, IRSPRelOffsetData { arOffset }, arr,
-        sp(env), fp(env));
+    auto const func = gen(env, LdArrFuncCtx, IRSPRelOffsetData { arOffset },
+                          arr, sp(env), fp(env));
     decRef(env, arr);
+    return func;
   };
   prepareToCallCustom(env, nullptr, numParams, true, nullptr, prepare);
 }
@@ -1104,8 +1106,10 @@ void emitFPushFunc(IRGS& env, uint32_t numParams, const ImmVector& v) {
   popC(env);
 
   auto const prepare = [&] (IRSPRelOffset arOffset) {
-    gen(env, LdFunc, IRSPRelOffsetData { arOffset }, callee, sp(env), fp(env));
+    auto const func = gen(env, LdFunc, IRSPRelOffsetData { arOffset }, callee,
+                          sp(env), fp(env));
     decRef(env, callee);
+    return func;
   };
   auto const tsList = getReifiedGenerics(env, callee);
   prepareToCallCustom(env, nullptr, numParams, true, tsList, prepare);
@@ -1375,8 +1379,10 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
   auto const emitFPush = [&] {
     auto const prepare = [&] (IRSPRelOffset arOffset) {
       auto const lcmData = LookupClsMethodData { arOffset, forward, dynamic };
-      gen(env, LookupClsMethod, lcmData, clsVal, methVal, sp(env), fp(env));
+      auto const func = gen(env, LookupClsMethod, lcmData, clsVal, methVal,
+                            sp(env), fp(env));
       decRef(env, methVal);
+      return func;
     };
 
     prepareToCallCustom(env, nullptr, numParams, dynamic, tsList, prepare);

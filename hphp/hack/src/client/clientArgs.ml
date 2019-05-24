@@ -527,9 +527,9 @@ let parse_check_args cmd =
   let root, paths =
     match mode, args with
     | MODE_LINT, _
-    | MODE_FILE_DEPENDENTS, _ -> ClientArgsUtils.get_root None, args
-    | _, [] -> ClientArgsUtils.get_root None, []
-    | _, [x] -> ClientArgsUtils.get_root (Some x), []
+    | MODE_FILE_DEPENDENTS, _ -> Wwwroot.get None, args
+    | _, [] -> Wwwroot.get None, []
+    | _, [x] -> Wwwroot.get (Some x), []
     | _, _ ->
            Printf.fprintf stderr
              "Error: please provide at most one www directory\n%!";
@@ -628,8 +628,8 @@ let parse_start_env command =
   let args = parse_without_command options usage command in
   let root =
     match args with
-    | [] -> ClientArgsUtils.get_root None
-    | [x] -> ClientArgsUtils.get_root (Some x)
+    | [] -> Wwwroot.get None
+    | [x] -> Wwwroot.get (Some x)
     | _ ->
         Printf.fprintf stderr
           "Error: please provide at most one www directory\n%!";
@@ -673,8 +673,8 @@ let parse_stop_args () =
   let args = parse_without_command options usage "stop" in
   let root =
     match args with
-    | [] -> ClientArgsUtils.get_root None
-    | [x] -> ClientArgsUtils.get_root (Some x)
+    | [] -> Wwwroot.get None
+    | [x] -> Wwwroot.get (Some x)
     | _ ->
         Printf.fprintf stderr
           "Error: please provide at most one www directory\n%!";
@@ -721,8 +721,8 @@ let parse_debug_args () =
   let args = parse_without_command options usage "debug" in
   let root =
     match args with
-    | [] -> ClientArgsUtils.get_root None
-    | [x] -> ClientArgsUtils.get_root (Some x)
+    | [] -> Wwwroot.get None
+    | [x] -> Wwwroot.get (Some x)
     | _ -> Printf.printf "%s\n" usage; exit 2 in
   CDebug { ClientDebug.
     root;

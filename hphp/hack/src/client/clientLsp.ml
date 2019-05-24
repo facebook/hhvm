@@ -256,13 +256,13 @@ let get_root_opt () : Path.t option =
     None (* haven't yet received initialize so we don't know *)
   | Some initialize_params ->
     let path = Some (Lsp_helpers.get_root initialize_params) in
-    Some (ClientArgsUtils.get_root path)
+    Some (Wwwroot.get path)
 
 
 let get_root_wait () : Path.t Lwt.t =
   let%lwt initialize_params = initialize_params_promise in
   let path = Lsp_helpers.get_root initialize_params in
-  Lwt.return (ClientArgsUtils.get_root (Some path))
+  Lwt.return (Wwwroot.get (Some path))
 
 
 let read_hhconfig_version () : string =

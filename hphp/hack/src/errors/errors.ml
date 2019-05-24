@@ -526,6 +526,8 @@ end
 (* HH_FIXMEs hook *)
 (*****************************************************************************)
 
+let error_codes_treated_strictly = ref (ISet.of_list [])
+let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 
 let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidIsAsExpressionHint;

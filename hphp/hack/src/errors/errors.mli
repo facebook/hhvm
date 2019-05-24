@@ -34,6 +34,9 @@ module Typing : Error_category
 val default_ignored_fixme_codes : ISet.t
 (* Error codes that cannot be suppressed with a FIXME based on configuration. *)
 val ignored_fixme_codes : ISet.t ref
+(* Error codes that should be treated strictly, regardless of their file mode. *)
+val error_codes_treated_strictly : ISet.t ref
+val is_strict_code : int -> bool
 
 val set_allow_errors_in_default_path : bool -> unit
 

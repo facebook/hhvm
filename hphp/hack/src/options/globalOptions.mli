@@ -207,7 +207,10 @@ type t = {
 
  (* This tells the type checker to rewrite unenforceable as like types
     i.e. vec<string> => vec<~string> *)
- tco_pessimize_types : bool
+ tco_pessimize_types : bool;
+
+ (* Set of codes to be treated as if they were in strict mode files *)
+ error_codes_treated_strictly : ISet.t;
 } [@@deriving show]
 
 val make :
@@ -252,6 +255,7 @@ val make :
   ?po_rust: bool ->
   ?tco_like_types: bool ->
   ?tco_pessimize_types: bool ->
+  ?error_codes_treated_strictly: ISet.t ->
   unit ->
   t
 
@@ -321,3 +325,4 @@ val tco_shallow_class_decl : t -> bool
 val po_rust : t -> bool
 val tco_like_types : t -> bool
 val tco_pessimize_types : t -> bool
+val error_codes_treated_strictly : t -> ISet.t

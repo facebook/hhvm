@@ -37,3 +37,11 @@
     errors
     heap_shared_mem
     pos))
+
+(library
+  (name partial_provider)
+  (wrapped false)
+  (modules partial_provider)
+  (libraries
+    errors
+    file_info))

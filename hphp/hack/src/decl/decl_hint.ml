@@ -13,6 +13,7 @@
 open Core_kernel
 open Nast
 open Typing_defs
+module Partial = Partial_provider
 
 (* Unpacking a hint for typing *)
 let rec hint env (p, h) =
@@ -30,7 +31,8 @@ and hint_ p env = function
   | Hdynamic -> Tdynamic
   | Hnothing -> Tnothing
   | Harray (h1, h2) ->
-    if FileInfo.is_strict env.Decl_env.mode && h1 = None
+    if (Partial.should_check_error env.Decl_env.mode 4045)
+      && h1 = None
     then Errors.generic_array_strict p;
     let h1 = Option.map h1 (hint env) in
     let h2 = Option.map h2 (hint env) in

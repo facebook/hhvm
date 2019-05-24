@@ -220,6 +220,12 @@ let prepare_ignored_fixme_codes config =
   |> List.map ~f:int_of_string
   |> List.fold_right ~init:Errors.default_ignored_fixme_codes ~f:ISet.add
 
+let prepare_error_codes_treated_strictly config =
+  SMap.get config "error_codes_treated_strictly"
+  |> Option.value_map ~f:(Str.split config_list_regexp) ~default:[]
+  |> List.map ~f:int_of_string
+  |> List.fold_right ~init:(ISet.of_list []) ~f:ISet.add
+
 let load config_filename options =
   let config_hash, config = Config_file.parse (Relative_path.to_absolute config_filename) in
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
@@ -290,10 +296,13 @@ let load config_filename options =
     ~po_rust:(local_config.ServerLocalConfig.rust)
     ?tco_like_types:(bool_opt "like_types" config)
     ?tco_pessimize_types:(bool_opt "disable_instanceof" config)
+    ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)
     ()
   in
   Errors.ignored_fixme_codes :=
     (GlobalOptions.ignored_fixme_codes global_opts);
+  Errors.error_codes_treated_strictly :=
+    (GlobalOptions.error_codes_treated_strictly global_opts);
   {
     version = version;
     load_script_timeout = load_script_timeout;

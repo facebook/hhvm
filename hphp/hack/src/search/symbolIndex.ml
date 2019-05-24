@@ -157,7 +157,8 @@ let find_matching_symbols
       | NoIndex ->
         []
       | SqliteIndex ->
-        SqliteSearchService.sqlite_search query_text max_results kind_filter
+        let r = SqliteSearchService.sqlite_search query_text max_results kind_filter in
+        LocalSearchService.extract_dead_results ~env ~results:r
       | TrieIndex ->
         HackSearchService.index_search query_text max_results kind_filter
     in

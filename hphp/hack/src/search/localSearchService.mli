@@ -28,3 +28,9 @@ val search_local_symbols:
   kind_filter:SearchUtils.si_kind option ->
   env:SearchUtils.local_tracking_env ->
   SearchUtils.si_results
+
+(* Filter out anything that's been removed locally *)
+val extract_dead_results:
+  env:SearchUtils.local_tracking_env ->
+  results:SearchUtils.si_results ->
+  SearchUtils.si_results

@@ -147,3 +147,13 @@ let search_local_symbols
     acc
   with BreakOutOfScan acc -> acc
 ;;
+
+(* Filter the results to extract any dead objects *)
+let extract_dead_results
+    ~(env: SearchUtils.local_tracking_env)
+    ~(results: SearchUtils.si_results): si_results =
+  List.filter results ~f:(fun r ->
+    let is_valid_result = not (Tombstone_set.mem env.lte_tombstones r.si_filehash) in
+    is_valid_result
+  )
+;;

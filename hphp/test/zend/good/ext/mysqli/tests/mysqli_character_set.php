@@ -12,7 +12,7 @@
 	$tmp = mysqli_fetch_assoc($res);
 	mysqli_free_result($res);
 	$version = explode('.', $tmp['server_version']);
-	if (empty($version))
+	if (!($version ?? false))
 		printf("[003] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
 
 	if ($version[0] <= 4 && $version[1] < 1)

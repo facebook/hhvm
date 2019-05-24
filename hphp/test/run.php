@@ -733,32 +733,32 @@ function find_tests($files, array $options = null) {
   }
   asort(&$tests);
   $tests = array_filter($tests);
-  if (!empty($options['exclude'])) {
+  if ($options['exclude'] ?? false) {
     $exclude = $options['exclude'];
     $tests = array_filter($tests, function($test) use ($exclude) {
       return (false === strpos($test, $exclude));
     });
   }
-  if (!empty($options['exclude-pattern'])) {
+  if ($options['exclude-pattern'] ?? false) {
     $exclude = $options['exclude-pattern'];
     $tests = array_filter($tests, function($test) use ($exclude) {
       return !preg_match($exclude, $test);
     });
   }
-  if (!empty($options['exclude-recorded-failures'])) {
+  if ($options['exclude-recorded-failures'] ?? false) {
     $exclude_file = $options['exclude-recorded-failures'];
     $exclude = file($exclude_file, FILE_IGNORE_NEW_LINES);
     $tests = array_filter($tests, function($test) use ($exclude) {
       return (false === in_array(canonical_path($test), $exclude));
     });
   }
-  if (!empty($options['include'])) {
+  if ($options['include'] ?? false) {
     $include = $options['include'];
     $tests = array_filter($tests, function($test) use ($include) {
       return (false !== strpos($test, $include));
     });
   }
-  if (!empty($options['include-pattern'])) {
+  if ($options['include-pattern'] ?? false) {
     $include = $options['include-pattern'];
     $tests = array_filter($tests, function($test) use ($include) {
       return preg_match($include, $test);
@@ -2576,7 +2576,7 @@ function print_success($tests, $results, $options) {
   // We didn't run any tests, not even skipped. Clowntown!
   if (!$tests) {
     print "\nCLOWNTOWN: No tests!\n";
-    if (empty($options['no-fun'])) {
+    if (!($options['no-fun'] ?? false)) {
       print <<<CLOWN
             _
            {_}
@@ -2608,7 +2608,7 @@ CLOWN
   // We just had skipped tests
   if (!$ran_tests) {
     print "\nSKIP-ALOO: Only skipped tests!\n";
-    if (empty($options['no-fun'])) {
+    if (!($options['no-fun'] ?? false)) {
       print <<<SKIPPER
                         .".
                          /  |
@@ -2637,7 +2637,7 @@ SKIPPER
     return;
   }
   print "\nAll tests passed.\n";
-  if (empty($options['no-fun'])) {
+  if (!($options['no-fun'] ?? false)) {
     print <<<SHIP
               |    |    |
              )_)  )_)  )_)
@@ -2651,7 +2651,7 @@ SKIPPER
 SHIP
       ."\n";
   }
-  if (!empty($options['failure-file'])) {
+  if ($options['failure-file'] ?? false) {
     @unlink($options['failure-file']);
   }
   if (isset($options['verbose'])) {
@@ -2713,7 +2713,7 @@ function print_failure($argv, $results, $options) {
   }
   asort(&$failed);
   print "\n".count($failed)." tests failed\n";
-  if (empty($options['no-fun'])) {
+  if (!($options['no-fun'] ?? false)) {
     // Unicode for table-flipping emoticon
     print "(\u{256F}\u{00B0}\u{25A1}\u{00B0}\u{FF09}\u{256F}\u{FE35} \u{253B}";
     print "\u{2501}\u{253B}\n";
@@ -2731,15 +2731,15 @@ function print_failure($argv, $results, $options) {
         function($test) { return 'cat '.$test.'.diff'; },
       $failed))."\n";
 
-    $failing_tests_file = !empty($options['failure-file'])
+    $failing_tests_file = ($options['failure-file'] ?? false)
       ? $options['failure-file']
       : tempnam('/tmp', 'test-failures');
     file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
     print make_header('For xargs, list of failures is available using:').
       'cat '.$failing_tests_file."\n";
 
-    if (!empty($passed)) {
-      $passing_tests_file = !empty($options['success-file'])
+    if ($passed ?? false) {
+      $passing_tests_file = ($options['success-file'] ?? false)
         ? $options['success-file']
         : tempnam('/tmp', 'tests-passed');
       file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
@@ -2916,7 +2916,7 @@ function get_num_threads($options, $tests) {
 
 function runner_precheck() {
   // basic checking for runner.
-  if (empty($_SERVER) || empty($_ENV)) {
+  if (!((bool)$_SERVER ?? false) || !((bool)$_ENV ?? false)) {
     echo "Warning: \$_SERVER/\$_ENV variables not available, please check \n" .
          "your ini setting: variables_order, it should have both 'E' and 'S'\n";
   }

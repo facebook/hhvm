@@ -112,7 +112,7 @@ class IntlCalendar {
     if (!($dateTime is DateTime)) {
       $dateTime = new DateTime($dateTime);
     }
-    if (empty($locale)) {
+    if (!($locale ?? false)) {
       $locale = ini_get("intl.default_locale");
     }
     $cal = IntlCalendar::createInstance($dateTime->getTimeZone(), $locale);

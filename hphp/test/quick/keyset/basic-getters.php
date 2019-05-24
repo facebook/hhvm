@@ -83,7 +83,7 @@ function test($k, $description) {
   foreach ($tests as $str => $key) {
     try {
       echo "   empty(\$keyset[$str]) => ";
-      $res = empty($k[$key]);
+      $res = !($k[$key] ?? false);
       var_dump($res);
     } catch (Exception $e) {
       echo "<Exception: \"", $e->getMessage(), "\">\n";

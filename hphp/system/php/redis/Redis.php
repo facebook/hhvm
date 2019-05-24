@@ -481,11 +481,11 @@ class Redis {
       $args[] = $limit_start;
       $args[] = $limit_end;
     }
-    if (!empty($opts['withscores'])) {
+    if ($opts['withscores'] ?? false) {
       $args[] = 'WITHSCORES';
     }
     $this->processArrayCommand($cmd, $args);
-    if (!empty($opts['withscores'])) {
+    if ($opts['withscores'] ?? false) {
       return $this->processMapResponse(true, false);
     }
     return $this->processVectorResponse(true);
@@ -737,7 +737,7 @@ class Redis {
           return false;
         }
         $script = $args[0];
-        if (!is_string($script) or empty($script)) {
+        if (!is_string($script) or !($script ?? false)) {
           return false;
         }
         $this->processCommand('SCRIPT', 'load', $script);
@@ -1583,7 +1583,7 @@ class Redis {
     }
 
     // Normalize record
-    if (!empty($func['alias'])) {
+    if ($func['alias'] ?? false) {
       if (isset(self::$map[$func['alias']])) {
         $fname = $func['alias'];
         $func = self::$map[$fname];
@@ -1591,17 +1591,17 @@ class Redis {
         return call_user_func_array([$this,$func['alias']],$args);
       }
     }
-    if (empty($func['format'])) {
+    if (!($func['format'] ?? false)) {
       $func['format'] = isset($func['vararg']) ? '...' : '';
     }
-    if (empty($func['cmd'])) {
+    if (!($func['cmd'] ?? false)) {
       $func['cmd'] = strtoupper($fname);
     }
-    if (empty($func['handler'])) {
-      $func['handler'] = empty($func['return'])
+    if (!($func['handler'] ?? false)) {
+      $func['handler'] = !($func['return'] ?? false)
                        ? null : "process{$func['return']}Response";
     }
-    if (empty($func['retargs'])) {
+    if (!($func['retargs'] ?? false)) {
       $func['retargs'] = [];
     }
 
@@ -1611,7 +1611,7 @@ class Redis {
     if ($format == '...') {
       $args = $this->translateVarArgs($args, $func['vararg']);
       $this->processArrayCommand($func['cmd'], $args);
-      if (empty($func['handler'])) {
+      if (!($func['handler'] ?? false)) {
         return null;
       }
       return call_user_func_array([$this, $func['handler']], $func['retargs']);
@@ -1659,7 +1659,7 @@ class Redis {
       $args[2] = $tmp;
     }
     $this->processArrayCommand($func['cmd'], $args);
-    if (empty($func['handler'])) {
+    if (!($func['handler'] ?? false)) {
       return null;
     }
     return call_user_func_array([$this, $func['handler']], $func['retargs']);
@@ -1690,7 +1690,7 @@ class Redis {
     }
 
     if ($persistent) {
-      if (!empty($persistent_id)) {
+      if ($persistent_id ?? false) {
         $pid     = array('id' => array('persistent_id' => $persistent_id));
         $context = stream_context_create($pid);
         $sok     = $host;

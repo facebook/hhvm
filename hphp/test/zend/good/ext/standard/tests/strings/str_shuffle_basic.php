@@ -30,7 +30,7 @@ for ($i = 0; $i < $trys; $i++) {
     }
 
     // Combination already hit ?
-    if (empty($a[$op])) {
+    if (!($a[$op] ?? false)) {
         // No first time init
          $a[$op] = 0;
     }

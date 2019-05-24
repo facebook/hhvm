@@ -83,7 +83,7 @@ function test($v, $description) {
   foreach ($tests as $str => $key) {
     try {
       echo "   empty(\$dict[$str]) => ";
-      $res = empty($v[$key]);
+      $res = !($v[$key] ?? false);
       var_dump($res);
     } catch (Exception $e) {
       echo "<Exception: \"", $e->getMessage(), "\">\n";

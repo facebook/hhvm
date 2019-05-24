@@ -24,7 +24,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator {
    * @path       mixed   The path of the directory to traverse.
    */
   public function __construct($path) {
-    if (empty($path)) {
+    if (!($path ?? false)) {
       throw new RuntimeException("Directory name must not be empty.");
     }
     $this->dir = @opendir($path);

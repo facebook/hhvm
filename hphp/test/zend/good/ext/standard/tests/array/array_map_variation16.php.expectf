@@ -1,34 +1,30 @@
 *** Testing array_map() : non-permmited built-in functions ***
 -- Iteration 1 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 -- Iteration 2 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 -- Iteration 3 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 -- Iteration 4 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 -- Iteration 5 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 -- Iteration 6 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 -- Iteration 7 --
 
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
-NULL
--- Iteration 8 --
-
-Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 31
+Warning: array_map() expects parameter 1 to be a valid callback in %s/array_map_variation16.php on line 30
 NULL
 Done

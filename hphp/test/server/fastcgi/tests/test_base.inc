@@ -33,7 +33,7 @@ function request($host, $port, $path, $post = [], $headers = [], $extra_args = [
 
     $args = array_merge(array(
       'GATEWAY_INTERFACE' => 'FastCGI/1.0',
-      'REQUEST_METHOD' => empty($post) ? 'GET' : 'POST',
+      'REQUEST_METHOD' => (!($post ?? false)) ? 'GET' : 'POST',
       'SERVER_SOFTWARE' => 'php/fcgiclient',
       'SERVER_PROTOCOL' => 'HTTP/1.1',
       'CONTENT_LENGTH' => strlen($content)

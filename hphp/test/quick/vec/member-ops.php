@@ -189,7 +189,7 @@ function fini_cget($a, $k) {
 
 function fini_empty($a, $k) {
   try {
-    var_dump(empty($a[1][$k]));
+    var_dump(!($a[1][$k] ?? false));
   } catch (Exception $e) {
     echo "Exception: \"" . $e->getMessage() . "\"\n";
   }

@@ -433,7 +433,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess,
    * @return     mixed   The unserialized ArrayObject.
    */
   public function unserialize($serialized) {
-    if (empty($serialized)) {
+    if (!($serialized ?? false)) {
       throw new UnexpectedValueException(
         'Empty serialized string cannot be empty'
       );

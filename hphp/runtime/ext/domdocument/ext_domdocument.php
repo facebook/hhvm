@@ -625,7 +625,7 @@ class DOMDocument extends DOMNode {
    */
   <<__AllowStatic>>
   public function load($filename, $options = 0): mixed {
-    if (empty($this)) {
+    if (!($this ?? false)) {
       $ret = new DOMDocument();
       if (!$ret->_load($filename, $options, true)) {
         return null;
@@ -652,7 +652,7 @@ class DOMDocument extends DOMNode {
    */
   <<__AllowStatic>>
   public function loadHTML($source, $options = 0): mixed {
-    if (empty($this)) {
+    if (!($this ?? false)) {
       $ret = new DOMDocument();
       if (!$ret->_loadHTML($source, $options, false)) {
         return null;
@@ -681,7 +681,7 @@ class DOMDocument extends DOMNode {
    */
   <<__AllowStatic>>
   public function loadHTMLFile($filename, $options = 0): mixed {
-    if (empty($this)) {
+    if (!($this ?? false)) {
       $ret = new DOMDocument();
       if (!$ret->_loadHTML($filename, $options, true)) {
         return null;
@@ -706,7 +706,7 @@ class DOMDocument extends DOMNode {
    */
   <<__AllowStatic>>
   public function loadXML($source, $options = 0): mixed {
-    if (empty($this)) {
+    if (!($this ?? false)) {
       $ret = new DOMDocument();
       if (!$ret->_load($source, $options, false)) {
         return null;

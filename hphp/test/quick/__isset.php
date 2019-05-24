@@ -13,11 +13,10 @@ class B {
 }
 $o = new B();
 var_dump(isset($o->priv));
-var_dump(empty($o->priv));
 var_dump(isset($o->p));
-var_dump(empty($o->p));
+var_dump(!($o->p ?? false));
 var_dump(isset($o->q));
-var_dump(empty($o->q));
+var_dump(!($o->q ?? false));
 
 print "--- class C ---\n";
 class C {
@@ -26,11 +25,10 @@ class C {
 }
 $o = new C();
 var_dump(isset($o->priv));
-var_dump(empty($o->priv));
 var_dump(isset($o->p));
-var_dump(empty($o->p));
+var_dump(!($o->p ?? false));
 var_dump(isset($o->q));
-var_dump(empty($o->q));
+var_dump(!($o->q ?? false));
 
 print "--- class D ---\n";
 class D {
@@ -47,13 +45,12 @@ class D {
 }
 $o = new D();
 var_dump(isset($o->priv));
-var_dump(empty($o->priv));
 var_dump(isset($o->p));
-var_dump(empty($o->p));
+var_dump(!($o->p ?? false));
 var_dump(isset($o->q));
-var_dump(empty($o->q));
+var_dump(!($o->q ?? false));
 var_dump(isset($o->r));
-var_dump(empty($o->r));
+var_dump(!($o->r ?? false));
 
 print "--- class E ---\n";
 class E {
@@ -74,12 +71,11 @@ class E {
 }
 $o = new E();
 var_dump(isset($o->priv));
-var_dump(empty($o->priv));
 var_dump(isset($o->p));
-var_dump(empty($o->p));
+var_dump(!($o->p ?? false));
 var_dump(isset($o->q));
-var_dump(empty($o->q));
+var_dump(!($o->q ?? false));
 var_dump(isset($o->r));
-var_dump(empty($o->r));
+var_dump(!($o->r ?? false));
 
 print "Test end\n";

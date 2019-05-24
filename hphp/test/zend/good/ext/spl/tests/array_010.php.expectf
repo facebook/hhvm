@@ -8,13 +8,6 @@ array(4) {
   ["4th"]=>
   int(4)
 }
-===EMPTY===
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(true)
-bool(true)
 ===isset===
 bool(true)
 bool(true)

@@ -2,7 +2,7 @@
 function custom_readfunction($oCurl, $hReadHandle, $iMaxOut)
 {
   $sData = fread($hReadHandle,$iMaxOut-10); # -10 to have space to add "custom:"
-  if (!empty($sData))
+  if ($sData ?? false)
   {
     $sData = "custom:".$sData;
   }

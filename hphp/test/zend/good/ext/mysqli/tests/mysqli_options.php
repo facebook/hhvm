@@ -32,7 +32,7 @@
 	var_dump("MYSQLI_OPT_LOCAL_INFILE",		mysqli_options($link, MYSQLI_OPT_LOCAL_INFILE, 1));
 	var_dump("MYSQLI_INIT_COMMAND",			mysqli_options($link, MYSQLI_INIT_COMMAND, array('SET AUTOCOMMIT=0', 'SET AUTOCOMMIT=1')));
 
-	
+
 	if (!$link2 = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[006] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
@@ -42,7 +42,7 @@
 	$tmp = mysqli_fetch_assoc($res);
 	mysqli_free_result($res);
 	$version = explode('.', $tmp['server_version']);
-	if (empty($version))
+	if (!($version ?? false))
 		printf("[008] Cannot determine server version, need MySQL Server 4.1+ for the test!\n");
 
 	if ($version[0] <= 4 && $version[1] < 1)
@@ -78,7 +78,7 @@
 
 	/* mysqli_real_connect() */
 	var_dump("MYSQLI_CLIENT_SSL",			mysqli_options($link, MYSQLI_CLIENT_SSL, 'not a mysqli_option'));
-	
+
 	mysqli_close($link);
 
 	echo "Link closed";

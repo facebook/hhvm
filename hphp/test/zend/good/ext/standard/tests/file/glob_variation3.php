@@ -10,6 +10,6 @@ var_dump(glob("$path/*/nothere"));
 var_dump(glob("$path/[aoeu]*.none"));
 var_dump(glob("$path/directly_not_exists"));
 
-var_dump(empty(ini_get('open_basedir')));
+var_dump(!(ini_get('open_basedir') ?? false));
 echo "==DONE==";
 }

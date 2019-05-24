@@ -51,7 +51,7 @@ class SplFileObject extends SplFileInfo
   public function __construct($filename, $open_mode = 'r',
                               $use_include_path = false,
                               $context = null) {
-    if (is_string($filename) && empty($filename)) {
+    if (is_string($filename) && !($filename ?? false)) {
       throw new RuntimeException(
         __METHOD__."({$filename}): Filename cannot be empty"
       );

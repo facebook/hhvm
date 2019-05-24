@@ -97,7 +97,7 @@ class HHVMDocExtension {
             $pn = trim((string)$param->parameter);
             $pa = $param->parameter->attributes();
             $prole = (string)$pa->role;
-            if (empty($pn)) continue;
+            if (!($pn ?? false)) continue;
             $arg = [
               'type' => strtolower((string)$param->type),
               'name' => $pn,
@@ -112,7 +112,7 @@ class HHVMDocExtension {
       } elseif ($attr->role == "parameters") {
         foreach ($sect->para->variablelist->varlistentry as $entry) {
           $name = trim((string)$entry->term->parameter);
-          if (empty($f['args'][strtolower($name)])) continue;
+          if (!($f['args'][strtolower($name)] ?? false)) continue;
           $f['args'][strtolower($name)]['desc'] =
                      self::GetDescription($entry->listitem);
         }
@@ -120,9 +120,9 @@ class HHVMDocExtension {
         $f['return']['desc'] = self::GetDescription($sect);
       }
     }
-    if (!empty($f['name'])) {
+    if (($f['name'] ?? false)) {
       $f['desc'] = (string)$sxe->refnamediv->refpurpose;
-      if (empty($f['class'])) {
+      if (!($f['class'] ?? false)) {
         $this->functions[strtolower($f['name'])] = $f;
       } else {
         $this->classes[strtolower($f['class'])]
@@ -150,14 +150,14 @@ class HHVMDocExtension {
         $this->classes[strtolower($name)]['intro'] =
                self::GetDescription($sect);
       } elseif (substr($xmlattrs->id, -9) == '.synopsis' &&
-                !empty($sect->classsynopsis)) {
+                ($sect->classsynopsis ?? false)) {
         $name = substr($xmlattrs->id, 0, -9);
         $synopsis = $sect->classsynopsis;
         $this->classes[strtolower($name)]['name'] = ucfirst($name);
         foreach($synopsis->ooclass as $ooclass) {
           $modifier = (string)$ooclass->modifier;
           $cn = (string)$ooclass->classname;
-          if (empty($modifier)) {
+          if (!($modifier ?? false)) {
             $this->classes[strtolower($name)]['name'] = $cn;
           } elseif ($modifier == 'extends') {
             $this->classes[strtolower($name)]['extends'] = $cn;
@@ -166,7 +166,7 @@ class HHVMDocExtension {
           }
         }
       } elseif (substr($xmlattrs->id, -6) == '.props' &&
-                !empty($sect->variablelist)) {
+                ($sect->variablelist ?? false)) {
         $name = substr($xmlattrs->id, 0, -6);
         foreach ($sect->variablelist->varlistentry as $field) {
           $propname = (string)$field->term->varname;
@@ -181,8 +181,8 @@ class HHVMDocExtension {
 
   protected function fixupClasses(): void {
     foreach ($this->classes as $k => $class) {
-      if (!empty($class['functions']) &&
-           empty($class['name'])) {
+      if (($class['functions'] ?? false) &&
+           !($class['name'] ?? false)) {
         foreach($class['functions'] as $func) {
           $this->classes[$k]['name'] = $func['class'];
           break;
@@ -229,4 +229,3 @@ class HHVMDocExtension {
     return $this;
   }
 }
-

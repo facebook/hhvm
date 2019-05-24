@@ -15,7 +15,7 @@ class myclass
     }
 
     function __get($var) {
-        var_dump(empty($this->_data[$var]));
+        var_dump(!($this->_data[$var] ?? false));
         return $this->_data[$var];
     }
 }
@@ -26,7 +26,7 @@ $myclass = new myclass($arr) ;
 
 echo (isset($myclass->foo)) ? 'isset' : 'not isset';
 echo "\n";
-echo (empty($myclass->foo)) ? 'empty' : 'not empty';
+echo (!($myclass->foo) ?? false) ? 'empty' : 'not empty';
 echo "\n";
 echo ($myclass->foo) ? 'not empty' : 'empty';
 echo "\n";

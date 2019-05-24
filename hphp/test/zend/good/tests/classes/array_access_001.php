@@ -25,14 +25,6 @@ $obj = new Object;
 
 var_dump($obj->a);
 
-echo "===EMPTY===\n";
-var_dump(empty($obj[0]));
-var_dump(empty($obj[1]));
-var_dump(empty($obj[2]));
-var_dump(empty($obj['4th']));
-var_dump(empty($obj['5th']));
-var_dump(empty($obj[6]));
-
 echo "===isset===\n";
 var_dump(isset($obj[0]));
 var_dump(isset($obj[1]));

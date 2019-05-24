@@ -16,7 +16,7 @@ function array_some(array $array) {
   foreach ($array as $value) {
     if ($value) {
       echo "Empty: ";
-      echo empty($value);
+      echo !($value ?? false);
       echo "\nBool: ";
       echo $value ? "true" : "false";
       echo "\n";

@@ -54,7 +54,7 @@ function main($k) {
   var_dump(count($k));
 
   echo "empty: ";
-  var_dump(empty($k));
+  var_dump(!($k ?? false));
 
   echo "in_array (3): ";
   var_dump(in_array(3, $k));

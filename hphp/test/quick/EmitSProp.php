@@ -29,9 +29,9 @@ function g() {
   isset(c::$x[0]);
   isset(c::$x->prop[0]);
 
-  empty(c::$x);
-  empty(c::$x[0]);
-  empty(c::$x->prop[0]);
+  !(c::$x ?? false);
+  !(c::$x[0] ?? false);
+  !(c::$x->prop[0] ?? false);
 
   f(c::$x);
   f(c::$x[0]);

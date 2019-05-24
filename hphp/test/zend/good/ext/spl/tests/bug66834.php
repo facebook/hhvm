@@ -50,27 +50,27 @@ $values = ['foo' => '', 'bar' => null, 'baz' => 42];
 
 echo "==== class with offsetExists() and offsetGet() ====\n";
 $object = new ArrayObjectBoth($values);
-var_dump($object->offsetExists('foo'), isset($object['foo']), empty($object['foo']));
-var_dump($object->offsetExists('bar'), isset($object['bar']), empty($object['bar']));
-var_dump($object->offsetexists('baz'), isset($object['baz']), empty($object['baz']));
-var_dump($object->offsetexists('qux'), isset($object['qux']), empty($object['qux']));
+var_dump($object->offsetExists('foo'), isset($object['foo']));
+var_dump($object->offsetExists('bar'), isset($object['bar']));
+var_dump($object->offsetexists('baz'), isset($object['baz']));
+var_dump($object->offsetexists('qux'), isset($object['qux']));
 
 echo "==== class with offsetExists() ====\n";
 $object = new ArrayObjectExists($values);
-var_dump($object->offsetExists('foo'), isset($object['foo']), empty($object['foo']));
-var_dump($object->offsetExists('bar'), isset($object['bar']), empty($object['bar']));
-var_dump($object->offsetexists('baz'), isset($object['baz']), empty($object['baz']));
-var_dump($object->offsetexists('qux'), isset($object['qux']), empty($object['qux']));
+var_dump($object->offsetExists('foo'), isset($object['foo']));
+var_dump($object->offsetExists('bar'), isset($object['bar']));
+var_dump($object->offsetexists('baz'), isset($object['baz']));
+var_dump($object->offsetexists('qux'), isset($object['qux']));
 
 echo "==== class with offsetGet() ====\n";
 $object = new ArrayObjectGet($values);
-var_dump($object->offsetExists('foo'), isset($object['foo']), empty($object['foo']));
-var_dump($object->offsetExists('bar'), isset($object['bar']), empty($object['bar']));
-var_dump($object->offsetexists('baz'), isset($object['baz']), empty($object['baz']));
-var_dump($object->offsetexists('qux'), isset($object['qux']), empty($object['qux']));
+var_dump($object->offsetExists('foo'), isset($object['foo']));
+var_dump($object->offsetExists('bar'), isset($object['bar']));
+var_dump($object->offsetexists('baz'), isset($object['baz']));
+var_dump($object->offsetexists('qux'), isset($object['qux']));
 
 echo "==== class with offsetGet() and offsetSet() ====\n";
 $object = new ArrayObjectGetSet;
 $object['foo'] = 42;
-var_dump($object->offsetExists('foo'), $object->offsetExists('sbb'), isset($object['foo']), isset($object['sbb']), empty($object['sbb']));
+var_dump($object->offsetExists('foo'), $object->offsetExists('sbb'), isset($object['foo']), isset($object['sbb']));
 }

@@ -48,7 +48,7 @@ for ($i = 0; $i < 0x2710; $i++) {
     }
 }
 
-if (!empty($table)) {
+if (($table ?? false)) {
     echo "Not matched entities: ";
     var_dump($table);
 }

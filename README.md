@@ -46,16 +46,9 @@ The [Hack typechecker](hphp/hack) is licensed under the MIT [License](hphp/hack/
 
 See [Reporting Crashes](https://github.com/facebook/hhvm/wiki/Reporting-Crashes) for helpful tips on how to report crashes in an actionable manner.
 
-## Reporting and Fixing Security Issues
+## Security
 
-Please do not open GitHub issues or pull requests - this makes the problem
-immediately visible to everyone, including malicious actors. Security issues in
-HHVM can be safely reported via HHVM's Whitehat Bug Bounty program:
-
-[https://www.facebook.com/whitehat](https://www.facebook.com/whitehat)
-
-Facebook's security team will triage your report and determine whether or not
-is it eligible for a bounty under our program.
+For information on reporting security vulnerabilities in HHVM, see [SECURITY.md](SECURITY.md).
 
 ## FAQ
 

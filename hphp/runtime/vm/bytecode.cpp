@@ -42,6 +42,7 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
@@ -2048,11 +2049,14 @@ OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
 }
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
-  if (capacity == 0) {
-    vmStack().pushDictNoRc(staticEmptyDictArray());
-  } else {
-    vmStack().pushDictNoRc(MixedArray::MakeReserveDict(capacity));
+  auto const ad = capacity == 0
+    ? staticEmptyDictArray()
+    : MixedArray::MakeReserveDict(capacity);
+
+  if (RuntimeOption::EvalLogArrayProvenance) {
+    arrprov::unchecked::setTag(ad, arrprov::tagFromProgramCounter());
   }
+  vmStack().pushDictNoRc(ad);
 }
 
 OPTBLD_INLINE
@@ -2114,7 +2118,10 @@ OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
 
 OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = PackedArray::MakeVec(n, vmStack().topC());
+  auto const a = PackedArray::MakeVec(n, vmStack().topC());
+  if (RuntimeOption::EvalLogArrayProvenance) {
+    arrprov::unchecked::setTag(a, arrprov::tagFromProgramCounter());
+  }
   vmStack().ndiscard(n);
   vmStack().pushVecNoRc(a);
 }

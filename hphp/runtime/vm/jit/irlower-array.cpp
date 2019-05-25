@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/array-data.h"
+#include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
@@ -241,19 +242,34 @@ void cgAKExistsObj(IRLS& env, const IRInstruction* inst) {
 
 namespace {
 
-template<typename Fn>
-void implNewArray(IRLS& env, const IRInstruction* inst, Fn target) {
+using MakeArrayFn = ArrayData*(uint32_t);
+
+void implNewArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
+                  SyncOptions sync = SyncOptions::None) {
   cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
-               SyncOptions::None, argGroup(env, inst).ssa(0));
+               sync, argGroup(env, inst).ssa(0));
 }
 
-template<typename Fn>
-void implAllocArray(IRLS& env, const IRInstruction* inst, Fn target) {
+void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
+                    SyncOptions sync = SyncOptions::None) {
   auto const extra = inst->extra<PackedArrayData>();
   cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
-               SyncOptions::None, argGroup(env, inst).imm(extra->size));
+               sync, argGroup(env, inst).imm(extra->size));
 }
 
+}
+
+template<MakeArrayFn make>
+ArrayData* with_prov(uint32_t size) {
+  using namespace arrprov;
+  assertx(RuntimeOption::EvalLogArrayProvenance);
+
+  auto ad = make(size);
+  assertx(ad->hasExactlyOneRef());
+  assertx(unchecked::arrayWantsTag(ad));
+
+  setTag(ad, tagFromProgramCounter());
+  return ad;
 }
 
 void cgNewArray(IRLS& env, const IRInstruction* inst) {
@@ -263,7 +279,12 @@ void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveMixed);
 }
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
-  implNewArray(env, inst, MixedArray::MakeReserveDict);
+  if (RuntimeOption::EvalLogArrayProvenance) {
+    implNewArray(env, inst, with_prov<MixedArray::MakeReserveDict>,
+                 SyncOptions::Sync);
+  } else {
+    implNewArray(env, inst, MixedArray::MakeReserveDict);
+  }
 }
 void cgNewDArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDArray);
@@ -273,7 +294,12 @@ void cgAllocPackedArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitialized);
 }
 void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
-  implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
+  if (RuntimeOption::EvalLogArrayProvenance) {
+    implAllocArray(env, inst, with_prov<PackedArray::MakeUninitializedVec>,
+                   SyncOptions::Sync);
+  } else {
+    implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
+  }
 }
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVArray);

@@ -54,4 +54,9 @@ function main() {
   $b[42][42] = "fasdf";
   var_dump(HH\get_provenance($b));
   var_dump(HH\get_provenance($b[42]));
+
+  $c = __hhvm_intrinsics\launder_value(dict[42 => vec[rand()]]);
+  $c[42][] = rand();
+  var_dump(HH\get_provenance($c));
+  var_dump(HH\get_provenance($c[42]));
 }

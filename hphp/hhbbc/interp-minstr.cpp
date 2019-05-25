@@ -1062,7 +1062,7 @@ void miFinalVGetProp(ISS& env, int32_t nDiscard,
 
 void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
-  auto const t1 = popC(env);
+  auto const t1 = unctx(popC(env));
 
   auto const finish = [&](Type ty) {
     endBase(env);

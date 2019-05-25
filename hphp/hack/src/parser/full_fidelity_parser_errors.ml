@@ -3055,10 +3055,15 @@ let class_reified_param_errors env node errors =
         syntax_to_list_no_separators classish_body_elements
         |> List.fold_right ~init:errors ~f:check_method
       | _ -> errors in
-    let errors = if is_token_kind cd.classish_keyword TokenKind.Interface &&
-       not @@ SSet.is_empty reified_params then
-         make_error_from_node node SyntaxError.reified_in_interface :: errors
-       else errors in
+    let errors = if not @@ SSet.is_empty reified_params then begin
+      if is_token_kind cd.classish_keyword TokenKind.Interface then
+        make_error_from_node node
+         (SyntaxError.reified_in_invalid_classish "an interface") :: errors
+      else if is_token_kind cd.classish_keyword TokenKind.Trait then
+        make_error_from_node node
+          (SyntaxError.reified_in_invalid_classish "a trait") :: errors
+      else errors
+      end else errors in
     errors
   | PropertyDeclaration _ ->
     if methodish_contains_static node && is_in_reified_class env.context then

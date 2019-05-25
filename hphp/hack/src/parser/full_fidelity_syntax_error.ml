@@ -587,8 +587,8 @@ let toplevel_statements =
   "Toplevel statements besides requires are not allowed in strict files"
 let invalid_reified =
   "Reify keyword can only appear at function or class type parameter position"
-let reified_in_interface =
-  "Invalid to use a reified type within an interface's type parameters"
+let reified_in_invalid_classish s =
+  "Invalid to use a reified type within " ^ s ^ "'s type parameters"
 let shadowing_reified =
   "You may not shadow a reified parameter"
 let static_property_in_reified_class =

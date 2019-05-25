@@ -5500,6 +5500,11 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);
+
+  if (RuntimeOption::EvalLogArrayProvenance &&
+      !func->isProvenanceSkipFrame()) {
+    ret = arrprov::unchecked::tagTV(ret);
+  }
   tvCopy(ret, *vmStack().allocTV());
 }
 
@@ -5937,12 +5942,13 @@ OPTBLD_INLINE void iopVerifyRetNonNullC() {
 
 OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   auto const jitReturn = jitReturnPre(vmfp());
-  auto const func = vmfp()->func()->arFuncPtr();
-  assertx(func);
+  auto const func = vmfp()->func();
+  auto const native = func->arFuncPtr();
+  assertx(native != nullptr);
   // Actually call the native implementation. This will handle freeing the
   // locals in the normal case. In the case of an exception, the VM unwinder
   // will take care of it.
-  func(vmfp());
+  native(vmfp());
 
   // Grab caller info from ActRec.
   ActRec* sfp = vmfp()->sfp();
@@ -5950,12 +5956,22 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
 
   // Adjust the stack; the native implementation put the return value in the
   // right place for us already
-  vmStack().ndiscard(vmfp()->func()->numSlotsInFrame());
+  vmStack().ndiscard(func->numSlotsInFrame());
   vmStack().ret();
+
+  auto const retval = vmStack().topTV();
 
   // Return control to the caller.
   returnToCaller(pc, sfp, callOff);
 
+  if (RuntimeOption::EvalLogArrayProvenance &&
+      !func->isProvenanceSkipFrame()) {
+    auto const origPC = vmpc();
+    SCOPE_EXIT { vmpc() = origPC; };
+
+    vmpc() = pc;
+    *retval = arrprov::unchecked::tagTV(*retval);
+  }
   return jitReturnPost(jitReturn);
 }
 

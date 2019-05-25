@@ -64,6 +64,11 @@ Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
   return Array::Create();
 }
 
+Array HHVM_FUNCTION(dummy_dict_builtin, const Array& arr) {
+  if (arr.isDict()) return arr;
+  return Array::CreateDict();
+}
+
 String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
                      int64_t format) {
   if (format > static_cast<int64_t>(VariableSerializer::Type::Last)) {
@@ -171,6 +176,7 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
               dummy_arraylike_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
+  HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
 
   HHVM_FALIAS(__hhvm_intrinsics\\serialize_with_format, serialize_with_format);
 

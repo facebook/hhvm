@@ -192,8 +192,9 @@ enum Attr {
   // Does this function have a `...' parameter?   |          |         //
   AttrVariadicParam        = (1u << 28), //       |          |    X    //
                                          //       |          |         //
-  // Indicates that the frame should be ignored when searching for a
-  // context to store in the provenance tag
+  // Indicates that the frame should be ignored when searching for a context to
+  // store in the provenance tag.  (For HNI builtins, indicates that we should
+  // skip tagging the return value with the builtin's callsite.)
   AttrProvenanceSkipFrame  = (1u << 29), //       |          |    X    //
                                          //       |          |         //
   // Indicates that this function wraps either a function taking inout or ref

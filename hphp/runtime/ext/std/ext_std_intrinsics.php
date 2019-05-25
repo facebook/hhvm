@@ -14,7 +14,7 @@ function trigger_oom(bool $oom): void;
  * Return the given value. This function is purposefully not optimized. It can
  * be used to hide information about values from the optimizer for unit testing.
  */
-<<__Native, __HipHopSyntax>>
+<<__Native, __HipHopSyntax, __ProvenanceSkipFrame>>
 function launder_value(mixed $value): mixed;
 
 /*
@@ -34,6 +34,9 @@ function dummy_arraylike_builtin(arraylike $x): arraylike;
 
 <<__Native, __HipHopSyntax>>
 function dummy_array_builtin(array $x): array;
+
+<<__Native, __HipHopSyntax>>
+function dummy_dict_builtin(dict $x): dict;
 
 <<__Native, __HipHopSyntax>>
 function create_class_pointer(string $name): mixed;

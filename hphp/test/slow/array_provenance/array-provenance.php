@@ -59,4 +59,11 @@ function main() {
   $c[42][] = rand();
   var_dump(HH\get_provenance($c));
   var_dump(HH\get_provenance($c[42]));
+
+  $d = __hhvm_intrinsics\launder_value(
+    __hhvm_intrinsics\dummy_dict_builtin(dict[42 => vec[]])
+  );
+  $d[42][] = rand();
+  var_dump(HH\get_provenance($d));
+  var_dump(HH\get_provenance($d[42]));
 }

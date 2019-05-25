@@ -129,6 +129,16 @@ auto constexpr kMaxRefCountedDataType =
  */
 constexpr int kRefCountedBit = 0x1;
 
+/*
+ * Return `dt` with or without the refcount bit set.
+ */
+constexpr DataType dt_with_rc(DataType dt) {
+  return static_cast<DataType>(dt_t(dt) | kRefCountedBit);
+}
+constexpr DataType dt_with_persistence(DataType dt) {
+  return static_cast<DataType>(dt_t(dt) & ~kRefCountedBit);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  * Optional DataType.

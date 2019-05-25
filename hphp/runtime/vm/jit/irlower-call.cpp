@@ -292,8 +292,14 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   auto const funcReturnType = callee->hniReturnType();
   auto const returnByValue = callee->isReturnByValue();
 
+  auto& v = vmain(env);
+
+  // We don't write to the true dst registers until the very end of the
+  // instruction sequence, in case we have to perform option-dependent fixups.
   auto const dstData = dstLoc(env, inst, 0).reg(0);
   auto const dstType = dstLoc(env, inst, 0).reg(1);
+  auto const tmpData = v.makeReg();
+  auto const tmpType = v.makeReg();
 
   auto returnType = inst->dst()->type();
   // Subtract out the null possibility from the return type if it would be a
@@ -305,8 +311,6 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       returnType -= TNull;
     }
   }
-
-  auto& v = vmain(env);
 
   // Whether `t' is passed in/out of C++ as String&/Array&/Object&.
   auto const isReqPtrRef = [] (MaybeDataType t) {
@@ -387,10 +391,43 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     }
     return callDest(env, inst);
   }();
+  if (dest.reg0.isValid()) dest.reg0 = tmpData;
+  if (dest.reg1.isValid()) dest.reg1 = tmpType;
 
   auto const isInlined = env.unit.context().func != callee;
   if (isInlined) v << inlinestart{callee, 0};
-  auto const end = [&] (Vout& v) { if (isInlined) v << inlineend{}; };
+
+  // Call epilogue: handle array provenance and inlining accounting.
+  auto const end = [&] (Vout& v) {
+    if (RuntimeOption::EvalLogArrayProvenance &&
+        !callee->isProvenanceSkipFrame()) {
+      if (dstType.isValid()) {
+        v << vcall{
+          CallSpec::direct(arrprov::unchecked::tagTV, nullptr),
+          v.makeVcallArgs({{tmpData, tmpType}}),
+          v.makeTuple({dstData, dstType}),
+          makeFixup(inst->marker(), SyncOptions::Sync),
+          DestType::TV
+        };
+      } else {
+        assertx(funcReturnType);
+        v << vcall{
+          CallSpec::direct(arrprov::unchecked::tagTV, nullptr),
+          v.makeVcallArgs({{
+            tmpData,
+            v.cns(static_cast<int64_t>(*funcReturnType))
+          }}),
+          v.makeTuple({dstData}),
+          makeFixup(inst->marker(), SyncOptions::Sync),
+          DestType::SSA
+        };
+      }
+    } else {
+      v << copy{tmpData, dstData};
+      if (dstType.isValid()) v << copy{tmpType, dstType};
+    }
+    if (isInlined) v << inlineend{};
+  };
 
   cgCallHelper(v, env, CallSpec::direct(callee->nativeFuncPtr(), nullptr),
                dest, SyncOptions::Sync, args);
@@ -407,14 +444,14 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     // The return type is String, Array, or Object; fold nullptr to KindOfNull.
     assertx(isBuiltinByRef(funcReturnType) && isReqPtrRef(funcReturnType));
 
-    v << load{rvmtl()[returnOffset], dstData};
+    v << load{rvmtl()[returnOffset], tmpData};
 
     if (dstType.isValid()) {
       auto const sf = v.makeReg();
       auto const rtype = v.cns(returnType.toDataType());
       auto const nulltype = v.cns(KindOfNull);
-      v << testq{dstData, dstData, sf};
-      v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
+      v << testq{tmpData, tmpData, sf};
+      v << cmovb{CC_Z, sf, rtype, nulltype, tmpType};
     }
     return end(v);
   }
@@ -425,7 +462,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
     static_assert(KindOfUninit == static_cast<DataType>(0),
                   "KindOfUninit must be 0 for test");
 
-    v << load{rvmtl()[returnOffset + TVOFF(m_data)], dstData};
+    v << load{rvmtl()[returnOffset + TVOFF(m_data)], tmpData};
 
     if (dstType.isValid()) {
       auto const rtype = v.makeReg();
@@ -436,7 +473,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       static_assert(KindOfUninit == static_cast<DataType>(0),
                     "Codegen assumes KindOfUninit == 0");
       v << testb{rtype, rtype, sf};
-      v << cmovb{CC_Z, sf, rtype, nulltype, dstType};
+      v << cmovb{CC_Z, sf, rtype, nulltype, tmpType};
     }
     return end(v);
   }
@@ -451,6 +488,13 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
 
   auto const func = inst->marker().func();
 
+  auto const arr_prov = RuntimeOption::EvalLogArrayProvenance &&
+                        !func->isProvenanceSkipFrame();
+
+  auto const next = arr_prov
+    ? Vlabel(v.makeBlock())
+    : label(env, inst->next());
+
   if (FixupMap::eagerRecord(func)) {
     emitEagerSyncPoint(v, func->getEntry(), rvmtl(), fp, sp);
   }
@@ -458,9 +502,33 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     CallSpec::direct(func->arFuncPtr(), nullptr),
     v.makeVcallArgs({{fp}}),
     v.makeTuple({}),
-    {label(env, inst->next()), label(env, inst->taken())},
+    {next, label(env, inst->taken())},
     makeFixup(inst->marker(), SyncOptions::Sync)
   };
+  if (arr_prov) {
+    v = next;
+    auto const data_loc = fp[kArRetOff] + TVOFF(m_data);
+    auto const type_loc = fp[kArRetOff] + TVOFF(m_type);
+
+    auto const in_data = v.makeReg();
+    auto const in_type = v.makeReg();
+    v << load{data_loc, in_data};
+    v << load{type_loc, in_type};
+
+    auto const out_data = v.makeReg();
+    auto const out_type = v.makeReg();
+    v << vcall{
+      CallSpec::direct(arrprov::unchecked::tagTV, nullptr),
+      v.makeVcallArgs({{in_data, in_type}}),
+      v.makeTuple({out_data, out_type}),
+      makeFixup(inst->marker(), SyncOptions::Sync),
+      DestType::TV
+    };
+
+    v << store{out_data, data_loc};
+    v << store{out_type, type_loc};
+    v << jmp{label(env, inst->next())};
+  }
 }
 
 static void traceCallback(ActRec* fp, Cell* sp, Offset bcOff) {

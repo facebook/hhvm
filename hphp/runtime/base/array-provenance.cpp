@@ -20,13 +20,15 @@
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/vm/vm-regs.h"
+
 #include "hphp/util/type-scan.h"
 
 #include <folly/AtomicHashMap.h>
 #include <folly/container/F14Map.h>
 
-
 namespace HPHP { namespace arrprov {
+
+///////////////////////////////////////////////////////////////////////////////
 
 namespace {
 
@@ -44,6 +46,8 @@ InitFiniNode flushTable([]{
   }, InitFiniNode::When::RequestFini);
 
 } // anonymous namespace
+
+///////////////////////////////////////////////////////////////////////////////
 
 namespace unchecked {
 
@@ -82,7 +86,27 @@ void clearTag(const ArrayData* ad) {
   rl_array_provenance->tags.erase(ad);
 }
 
+TypedValue tagTV(TypedValue tv) {
+  using namespace arrprov;
+
+  assertx(RuntimeOption::EvalLogArrayProvenance);
+  if (!unchecked::tvWantsTag(tv)) return tv;
+
+  auto ad = val(tv).parr;
+  if (!!unchecked::getTag(ad)) return tv;
+
+  if (!ad->hasExactlyOneRef()) {
+    ad = ad->copy();
+    type(tv) = dt_with_rc(type(tv));
+    val(tv).parr = ad;
+  }
+  unchecked::setTag(ad, tagFromProgramCounter());
+  return tv;
 }
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 Tag tagFromProgramCounter() {
   VMRegAnchor _;
@@ -100,5 +124,7 @@ Tag tagFromProgramCounter() {
 
   return Tag{filename, line};
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 }} // namespace HPHP::arrprov

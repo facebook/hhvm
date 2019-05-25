@@ -21,7 +21,10 @@
 #include "hphp/runtime/base/rds-local.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/types.h"
+
 #include "hphp/util/low-ptr.h"
+
+#include <folly/Optional.h>
 
 namespace HPHP {
 
@@ -72,8 +75,9 @@ struct ArrayProvenanceTable {
 };
 
 /*
- * Create a tag based on the current VMPC and unit.
- * Requires VM regs to be synced or for a sync point to be available
+ * Create a tag based on the current PC and unit.
+ *
+ * Requires VM regs to be synced or for a sync point to be available.
  */
 Tag tagFromProgramCounter();
 
@@ -85,69 +89,68 @@ Tag tagFromProgramCounter();
  * those can be accessed merely as HPHP::arrprov::whatever
  */
 
+///////////////////////////////////////////////////////////////////////////////
+
 namespace unchecked {
 
+/*
+ * Whether `ad` or `tv` admits a provenance tag---i.e., whether it's either a
+ * vec or a dict.
+ */
 bool arrayWantsTag(const ArrayData* ad);
+bool tvWantsTag(TypedValue tv);
 
 /*
- * Get the provenance tag for a given array--regardless of if it is
- * static or not.
+ * Get the provenance tag for `ad`.
  */
 folly::Optional<Tag> getTag(const ArrayData* ad);
 
 /*
- * Create a tag based on the current VMPC and unit.
- * Requires VM regs to be synced or for a sync point to be available
+ * Set the provnenance tag for `ad` to `tag`.
  */
 void setTag(ArrayData* ad, const Tag& tag);
 
-inline void copyTag(const ArrayData* src, ArrayData* dest) {
-  if (auto const tag = getTag(src)) {
-    setTag(dest, *tag);
-  } else {
-    setTag(dest, tagFromProgramCounter());
-  }
-}
+/*
+ * Copy the provenance tag from `src` to `dest`.
+ */
+void copyTag(const ArrayData* src, ArrayData* dest);
 
 /*
- * Clear a tag for a released array--only call this if the array
- * is henceforth unreachable
+ * Clear a tag for a released array---only call this if the array is henceforth
+ * unreachable.
  */
 void clearTag(const ArrayData* ad);
 
+/*
+ * Tag `tv` with provenance for the current PC and unit (if it admits a tag and
+ * doesn't already have one).
+ */
+TypedValue tagTV(TypedValue tv);
+
 } // namespace unchecked
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
- * See the note above (on namespace unchecked)
- * for why this namespace exists and is inline
+ * See the note above (on namespace unchecked) for why this namespace exists
+ * and is inline.
  */
 inline namespace checked {
 
-inline folly::Optional<Tag> getTag(const ArrayData* ad) {
-  if (!RuntimeOption::EvalLogArrayProvenance) return {};
-  return unchecked::getTag(ad);
-}
-inline void setTag(ArrayData* ad, const Tag& tag) {
-  if (!RuntimeOption::EvalLogArrayProvenance) return;
-  unchecked::setTag(ad, tag);
-}
-inline void copyTag(const ArrayData* src, ArrayData* dest) {
-  if (!RuntimeOption::EvalLogArrayProvenance) return;
-  unchecked::copyTag(src, dest);
-}
-inline void clearTag(ArrayData* ad) {
-  if (!RuntimeOption::EvalLogArrayProvenance) return;
-  unchecked::clearTag(ad);
-}
-inline void copyTagStatic(const ArrayData* src, ArrayData* dest) {
-  if (!RuntimeOption::EvalLogArrayProvenance) return;
-  if (auto const tag = unchecked::getTag(src)) {
-    unchecked::setTag(dest, *tag);
-  }
-}
+folly::Optional<Tag> getTag(const ArrayData* ad);
+void setTag(ArrayData* ad, const Tag& tag);
+void copyTag(const ArrayData* src, ArrayData* dest);
+void clearTag(ArrayData* ad);
+void copyTagStatic(const ArrayData* src, ArrayData* dest);
 
 } // inline namespace checked
 
+///////////////////////////////////////////////////////////////////////////////
+
 }} // namespace HPHP::arrprov
+
+#define incl_HPHP_ARRAY_PROVENANCE_INL_H_
+#include "hphp/runtime/base/array-provenance-inl.h"
+#undef incl_HPHP_ARRAY_PROVENANCE_INL_H_
 
 #endif // HPHP_ARRAY_PROVENANCE_H

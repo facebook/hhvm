@@ -423,17 +423,6 @@ SSATmp* IRBuilder::preOptimizeLdClsRefCls(IRInstruction* inst) {
   );
 }
 
-SSATmp* IRBuilder::preOptimizeCoerceStk(IRInstruction* inst) {
-  auto const off = inst->extra<CoerceStk>()->offset;
-  auto const curType = stack(off, DataTypeGeneric).type;
-
-  if (curType <= inst->typeParam()) {
-    inst->convertToNop();
-    return nullptr;
-  }
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeLdMBase(IRInstruction* inst) {
   if (auto ptr = m_state.mbr().ptr) return ptr;
 
@@ -456,7 +445,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdLoc)
   X(LdStk)
   X(LdClsRefCls)
-  X(CoerceStk)
   X(LdARFuncPtr)
   X(CheckCtxThis)
   X(LdCtx)

@@ -2476,76 +2476,6 @@ SSATmp* simplifyDblAsBits(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-namespace {
-
-ALWAYS_INLINE bool isSimplifyOkay(const IRInstruction* inst) {
-  // We want to be able to simplify the coerce calls away if possible.
-  // These serve as heuristics to help remove CoerceCell* IT ops.
-  // We will let tvCoerceIfStrict handle the exact checking at runtime.
-  auto const f = inst->marker().func();
-
-  return !RuntimeOption::PHP7_ScalarTypes ||
-         (f && !f->unit()->useStrictTypes());
-}
-
-}
-
-SSATmp* simplifyCoerceCellToBool(State& env, const IRInstruction* inst) {
-  auto const src     = inst->src(0);
-  auto const srcType = src->type();
-
-  if (srcType <= TBool) return gen(env, Mov, src);
-
-  if (isSimplifyOkay(inst) &&
-      srcType.subtypeOfAny(TNull, TDbl, TInt, TStr)) {
-    return nullptr;
-  }
-
-  // We actually know that any other type will fail causing us to side exit
-  // but there's no easy way to optimize for that
-
-  return nullptr;
-}
-
-SSATmp* simplifyCoerceCellToInt(State& env, const IRInstruction* inst) {
-  auto const src      = inst->src(0);
-  auto const srcType  = src->type();
-
-  if (srcType <= TInt) return gen(env, Mov, src);
-
-  if (isSimplifyOkay(inst) && srcType.subtypeOfAny(TBool, TNull, TDbl)) {
-    return nullptr;
-  }
-
-  if (srcType <= TStr) return gen(env, CoerceStrToInt, inst->taken(),
-                                       *inst->extra<CoerceCellToInt>(), src);
-
-  // We actually know that any other type will fail causing us to side exit
-  // but there's no easy way to optimize for that
-
-  return nullptr;
-}
-
-SSATmp* simplifyCoerceCellToDbl(State& env, const IRInstruction* inst) {
-  auto const src      = inst->src(0);
-  auto const srcType  = src->type();
-
-  if (srcType <= TDbl) return gen(env, Mov, src);
-
-  if (isSimplifyOkay(inst) &&
-      srcType.subtypeOfAny(TBool, TNull, TInt)) {
-    return nullptr;
-  }
-
-  if (srcType <= TStr) return gen(env, CoerceStrToDbl, inst->taken(),
-                                       *inst->extra<CoerceCellToDbl>(), src);
-
-  // We actually know that any other type will fail causing us to side exit
-  // but there's no easy way to optimize for that
-
-  return nullptr;
-}
-
 SSATmp* roundImpl(State& env, const IRInstruction* inst, double (*op)(double)) {
   auto const src  = inst->src(0);
 
@@ -3810,9 +3740,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckNonNull)
   X(CheckPackedArrayDataBounds)
   X(ReservePackedArrayDataNewElem)
-  X(CoerceCellToBool)
-  X(CoerceCellToDbl)
-  X(CoerceCellToInt)
   X(ConcatStrStr)
   X(ConcatStr3)
   X(ConcatStr4)

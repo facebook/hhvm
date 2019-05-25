@@ -349,13 +349,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CmpShape:
   case CmpObj:
   case CmpVec:
-  case CoerceCellToBool:
-  case CoerceCellToDbl:
-  case CoerceCellToInt:
-  case CoerceMem:
-  case CoerceStk:
-  case CoerceStrToDbl:
-  case CoerceStrToInt:
   case ConcatIntStr:
   case ConcatStr3:
   case ConcatStr4:

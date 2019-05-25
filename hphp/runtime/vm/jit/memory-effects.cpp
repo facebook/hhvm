@@ -1643,24 +1643,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AEmpty
     );
 
-  // The following may re-enter, and also deal with a stack slot.
-  case CoerceStk:
-    {
-      auto const stk = AStack {
-        inst.src(0), inst.extra<CoerceStk>()->offset, 1
-      };
-      return may_load_store(stk, stk);
-    }
-
-  case CoerceMem:
-    {
-      auto aInst = inst.src(0)->inst();
-      if (aInst->is(LdLocAddr)) {
-        return may_load_store(AFrameAny, AFrameAny);
-      }
-      return may_load_store(AUnknown, AUnknown);
-    }
-
   case LdARCtx:
     return PureLoad {
       actrec_ctx(inst.src(0), inst.extra<LdARCtx>()->offset)
@@ -2163,11 +2145,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdSSwitchDestSlow:
   case ConvObjToDbl:
   case ConvObjToInt:
-  case CoerceStrToInt:
-  case CoerceStrToDbl:
-  case CoerceCellToDbl:
-  case CoerceCellToInt:
-  case CoerceCellToBool:
   case ConvCellToInt:
   case ConvResToStr:
   case ConcatStr3:

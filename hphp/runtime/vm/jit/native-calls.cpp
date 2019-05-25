@@ -228,23 +228,6 @@ static CallMap s_callMap {
     {ConvCellToStr,      cellCastToStringData, DSSA, SSync,
                            {{TV, 0}}},
 
-    {CoerceStrToInt,     coerceStrToIntHelper, DSSA, SSync,
-                           {{SSA, 0}, extra(&FuncArgData::argNum),
-                            extra(&FuncArgData::func)}},
-    {CoerceStrToDbl,     coerceStrToDblHelper, DSSA, SSync,
-                           {{SSA, 0}, extra(&FuncArgData::argNum),
-                            extra(&FuncArgData::func)}},
-
-    {CoerceCellToInt,    coerceCellToIntHelper, DSSA, SSync,
-                           {{TV, 0}, extra(&FuncArgData::argNum),
-                            extra(&FuncArgData::func)}},
-    {CoerceCellToDbl,    coerceCellToDblHelper, DSSA, SSync,
-                           {{TV, 0}, extra(&FuncArgData::argNum),
-                            extra(&FuncArgData::func)}},
-    {CoerceCellToBool,   coerceCellToBoolHelper, DSSA, SSync,
-                           {{TV, 0}, extra(&FuncArgData::argNum),
-                            extra(&FuncArgData::func)}},
-
     {ConcatStrStr,       concat_ss, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ConcatStrInt,       concat_si, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
     {ConcatIntStr,       concat_is, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},

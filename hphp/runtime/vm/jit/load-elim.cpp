@@ -450,22 +450,6 @@ Flags handle_general_effects(Local& env,
     if (auto flags = handleCheck(TInitGen)) return *flags;
     break;
 
-  case CoerceStk:
-    {
-      auto const stkOffset = inst.extra<CoerceStk>()->offset;
-      auto const stk =
-        canonicalize(AliasClass { AStack { inst.src(0), stkOffset, 1 } });
-      always_assert(stk <= canonicalize(m.loads));
-
-      auto const meta = env.global.ainfo.find(stk);
-      auto const tloc = find_tracked(env, meta);
-      if (!tloc) break;
-      if (tloc->knownType <= inst.typeParam()) {
-        return FJmpNext{};
-      }
-    }
-    break;
-
   case InitSProps: {
     auto const handle = inst.extra<ClassData>()->cls->sPropInitHandle();
     if (env.state.initRDS.count(handle) > 0) return FJmpNext{};

@@ -982,36 +982,6 @@ struct InterpOneData : IRExtraData {
   }
 };
 
-struct CoerceStkData : IRExtraData {
-  explicit CoerceStkData(IRSPRelOffset off, const Func* f, int64_t arg_num)
-    : offset(off), callee(f), argNum(arg_num) {}
-
-  std::string show() const {
-    return folly::sformat(
-      "IRSP {},{},{}",
-      offset.offset,
-      callee->name(),
-      argNum
-    );
-  }
-
-  IRSPRelOffset offset;
-  const Func* callee;
-  int32_t argNum;
-};
-
-struct CoerceMemData : IRExtraData {
-  explicit CoerceMemData(const Func* f, int64_t arg_num)
-    : callee(f), argNum(arg_num) {}
-
-  std::string show() const {
-    return folly::sformat("{},{}", callee->name(), argNum);
-  }
-
-  const Func* callee;
-  int32_t argNum;
-};
-
 struct RBEntryData : IRExtraData {
   RBEntryData(Trace::RingBufferType t, SrcKey sk)
     : type(t)
@@ -1615,13 +1585,6 @@ X(CheckStk,                     IRSPRelOffsetData);
 X(HintStkInner,                 IRSPRelOffsetData);
 X(StStk,                        IRSPRelOffsetData);
 X(StOutValue,                   IndexData);
-X(CoerceStk,                    CoerceStkData);
-X(CoerceMem,                    CoerceMemData);
-X(CoerceCellToInt,              FuncArgData);
-X(CoerceCellToDbl,              FuncArgData);
-X(CoerceCellToBool,             FuncArgData);
-X(CoerceStrToInt,               FuncArgData);
-X(CoerceStrToDbl,               FuncArgData);
 X(AssertStk,                    IRSPRelOffsetData);
 X(DefSP,                        FPInvOffsetData);
 X(LdStk,                        IRSPRelOffsetData);

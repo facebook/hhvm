@@ -400,40 +400,6 @@ StringData* convResToStrHelper(ResourceHdr* r) {
   return r->data()->o_toString().detach();
 }
 
-[[noreturn]]
-inline void coerceCellFail(DataType expected, DataType actual, int64_t argNum,
-                           const Func* func) {
-  auto msg = param_type_error_message(func->displayName()->data(),
-                                      argNum, expected, actual);
-  if (RuntimeOption::PHP7_EngineExceptions) {
-    SystemLib::throwTypeErrorObject(msg);
-  }
-  SystemLib::throwRuntimeExceptionObject(msg);
-}
-
-bool coerceCellToBoolHelper(TypedValue tv, int64_t argNum, const Func* func) {
-  assertx(cellIsPlausible(tv));
-  coerceCellFail(KindOfBoolean, tv.m_type, argNum, func);
-}
-
-double coerceStrToDblHelper(StringData* sd, int64_t argNum, const Func* func) {
-  coerceCellFail(KindOfDouble, KindOfString, argNum, func);
-}
-
-double coerceCellToDblHelper(Cell tv, int64_t argNum, const Func* func) {
-  assertx(cellIsPlausible(tv));
-  coerceCellFail(KindOfDouble, tv.m_type, argNum, func);
-}
-
-int64_t coerceStrToIntHelper(StringData* sd, int64_t argNum, const Func* func) {
-  coerceCellFail(KindOfInt64, KindOfString, argNum, func);
-}
-
-int64_t coerceCellToIntHelper(TypedValue tv, int64_t argNum, const Func* func) {
-  assertx(cellIsPlausible(tv));
-  coerceCellFail(KindOfInt64, tv.m_type, argNum, func);
-}
-
 void raiseUndefProp(ObjectData* base, const StringData* name) {
   base->raiseUndefProp(name);
 }

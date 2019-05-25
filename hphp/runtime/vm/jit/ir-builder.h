@@ -335,8 +335,7 @@ private:
   SSATmp* preOptimizeLdLoc(IRInstruction*);
   SSATmp* preOptimizeLdStk(IRInstruction*);
   SSATmp* preOptimizeLdClsRefCls(IRInstruction*);
-  SSATmp* preOptimizeCoerceStk(IRInstruction*);
-  SSATmp* preOptimizeLdMBase(IRInstruction*);
+    SSATmp* preOptimizeLdMBase(IRInstruction*);
   SSATmp* preOptimize(IRInstruction*);
 
   void appendInstruction(IRInstruction* inst);

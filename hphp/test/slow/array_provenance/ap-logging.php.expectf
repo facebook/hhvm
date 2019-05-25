@@ -1,0 +1,9 @@
+
+Notice: Serializing vec in json_encode from %s/ap-logging.php:6 in %s/ap-logging.php on line 7
+string(9) "["hello"]"
+
+Notice: Serializing vec in serialize from %s/ap-logging.php:6 in %s/ap-logging.php on line 8
+string(18) "v:1:{s:5:"hello";}"
+
+Notice: Serializing vec in fb_serialize from %s/ap-logging.php:6 in %s/ap-logging.php on line 9
+string(11) "hello"

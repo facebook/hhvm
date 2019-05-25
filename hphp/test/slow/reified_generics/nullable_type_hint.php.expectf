@@ -4,4 +4,4 @@ NULL
 object(C) (0) {
 }
 
-Catchable fatal error: Value returned from function f() must be of type ?C, D given in %s on line 14
+Catchable fatal error: Value returned from function f() must be of type C, D given in %s on line 14

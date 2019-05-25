@@ -7,6 +7,7 @@
  *
 *)
 open Core_kernel
+open Instruction_sequence
 module A = Ast
 module T = Tast
 
@@ -93,3 +94,19 @@ let rec remove_awaitable (pos, h_ as h) =
 let convert_awaitable env h =
   if Ast_scope.Scope.is_in_async (Emit_env.get_scope env)
   then remove_awaitable h else h
+
+let simplify_verify_type env pos check hint verify_instr =
+  let get_ts hint =
+    fst @@ Emit_expression.emit_reified_arg env pos ~isas:false hint in
+  match hint with
+  | _, Aast.Hoption hint ->
+    let done_label = Label.next_regular () in
+    gather [
+      check;
+      instr_jmpnz done_label;
+      get_ts hint;
+      verify_instr;
+      instr_label done_label;
+    ]
+  | _ ->
+    gather [ get_ts hint; verify_instr ]

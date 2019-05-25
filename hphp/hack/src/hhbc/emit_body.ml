@@ -45,11 +45,12 @@ let emit_method_prolog ~env ~pos ~params ~ast_params ~should_emit_init_this =
           instr (IMisc (VerifyParamTypeTS param_name))
         ])
       | RGH.DefinitelyReified ->
-        Some (gather [
-          fst @@ Emit_expression.emit_reified_arg env pos ~isas:false
-            @@ Option.value_exn ast_param.A.param_hint;
-          instr (IMisc (VerifyParamTypeTS param_name))
-        ]) in
+        let check =
+          instr_istypel (Local.Named (Hhas_param.name param)) OpNull in
+        let hint = Option.value_exn ast_param.A.param_hint in
+        let verify_instr = instr (IMisc (VerifyParamTypeTS param_name)) in
+        Some (RGH.simplify_verify_type env pos check hint verify_instr)
+  in
   let param_instr =
     List.filter_map
       ~f:make_param_instr

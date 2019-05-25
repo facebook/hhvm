@@ -183,10 +183,9 @@ let emit_return ~verify_return ~verify_out ~num_out ~in_finally_epilogue env =
             instr_verifyRetTypeTS
           ]
         | RGH.DefinitelyReified ->
-          gather [
-            fst @@ Emit_expression.emit_reified_arg env ~isas:false Pos.none h;
-            instr_verifyRetTypeTS
-          ] in
+          let check = gather [ instr_dup; instr_istypec OpNull ] in
+          RGH.simplify_verify_type env Pos.none check h instr_verifyRetTypeTS
+    in
     let release_iterators_instr =
       let iterators_to_release = JT.collect_iterators jump_targets in
       gather @@ List.map iterators_to_release ~f:instr_iterfree in

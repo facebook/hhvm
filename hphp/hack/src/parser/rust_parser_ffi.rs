@@ -110,13 +110,13 @@ macro_rules! parse {
             let source_text = SourceText::make(&file_path.as_str(), &content.data());
 
             let is_experimental_mode = bool_field(&opts, 0);
-            let disable_unsafe_expr = bool_field(&opts, 2);
-            let disable_unsafe_block = bool_field(&opts, 3);
-            let force_hh = bool_field(&opts, 4);
-            let enable_xhp = bool_field(&opts, 5);
-            let hhvm_compat_mode = bool_field(&opts, 6);
-            let php5_compat_mode = bool_field(&opts, 7);
-            let codegen = bool_field(&opts, 8);
+            let disable_unsafe_expr = bool_field(&opts, 1);
+            let disable_unsafe_block = bool_field(&opts, 2);
+            let force_hh = bool_field(&opts, 3);
+            let enable_xhp = bool_field(&opts, 4);
+            let hhvm_compat_mode = bool_field(&opts, 5);
+            let php5_compat_mode = bool_field(&opts, 6);
+            let codegen = bool_field(&opts, 7);
 
             let env = ParserEnv {
                 is_experimental_mode,

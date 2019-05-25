@@ -354,6 +354,7 @@ let () =
     ~enable_xhp:args.enable_xhp
     ~hhvm_compat_mode:args.hhvm_compat_mode
     ~php5_compat_mode:args.php5_compat_mode
+    ~codegen:args.codegen
     ?mode
   in
   let ocaml_env = make_env () in

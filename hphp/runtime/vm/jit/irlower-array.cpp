@@ -239,34 +239,50 @@ void cgAKExistsObj(IRLS& env, const IRInstruction* inst) {
 ///////////////////////////////////////////////////////////////////////////////
 // Array creation.
 
-IMPL_OPCODE_CALL(NewArray)
-IMPL_OPCODE_CALL(NewMixedArray)
-IMPL_OPCODE_CALL(NewLikeArray)
-IMPL_OPCODE_CALL(NewDictArray)
-IMPL_OPCODE_CALL(AllocPackedArray)
-IMPL_OPCODE_CALL(AllocVecArray)
+namespace {
 
-void cgNewDArray(IRLS& env, const IRInstruction* inst) {
-  cgCallHelper(
-    vmain(env),
-    env,
-    CallSpec::direct(MixedArray::MakeReserveDArray),
-    callDest(env, inst),
-    SyncOptions::None,
-    argGroup(env, inst).ssa(0)
-  );
+template<typename Fn>
+void implNewArray(IRLS& env, const IRInstruction* inst, Fn target) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
+               SyncOptions::None, argGroup(env, inst).ssa(0));
 }
 
-void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
+template<typename Fn>
+void implAllocArray(IRLS& env, const IRInstruction* inst, Fn target) {
   auto const extra = inst->extra<PackedArrayData>();
-  cgCallHelper(
-    vmain(env),
-    env,
-    CallSpec::direct(PackedArray::MakeUninitializedVArray),
-    callDest(env, inst),
-    SyncOptions::None,
-    argGroup(env, inst).imm(extra->size)
-  );
+  cgCallHelper(vmain(env), env, CallSpec::direct(target), callDest(env, inst),
+               SyncOptions::None, argGroup(env, inst).imm(extra->size));
+}
+
+}
+
+void cgNewArray(IRLS& env, const IRInstruction* inst) {
+  implNewArray(env, inst, PackedArray::MakeReserve);
+}
+void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
+  implNewArray(env, inst, MixedArray::MakeReserveMixed);
+}
+void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
+  implNewArray(env, inst, MixedArray::MakeReserveDict);
+}
+void cgNewDArray(IRLS& env, const IRInstruction* inst) {
+  implNewArray(env, inst, MixedArray::MakeReserveDArray);
+}
+
+void cgAllocPackedArray(IRLS& env, const IRInstruction* inst) {
+  implAllocArray(env, inst, PackedArray::MakeUninitialized);
+}
+void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
+  implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
+}
+void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
+  implAllocArray(env, inst, PackedArray::MakeUninitializedVArray);
+}
+
+void cgNewLikeArray(IRLS& env, const IRInstruction* inst) {
+  cgCallHelper(vmain(env), env, CallSpec::direct(MixedArray::MakeReserveLike),
+               callDest(env, inst), SyncOptions::None,
+               argGroup(env, inst).ssa(0).ssa(1));
 }
 
 namespace {

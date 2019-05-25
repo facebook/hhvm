@@ -3382,6 +3382,11 @@ fields of that struct for holding intermediate values.
   property. S0 is the class the property was declared on. S1 is the property
   name. S2 is true if its a static property, false otherwise.
 
+| ThrowParameterWrongType<expectedType, func, argNum>, ND, S(Gen), T
+
+  Throws a RuntimeException if calling a function with an argument that has the
+  wrong type
+
 | ProfileArrayKind, ND, S(Arr), NF
 
   Profile the array kind of S0.

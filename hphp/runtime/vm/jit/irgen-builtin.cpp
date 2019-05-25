@@ -1204,75 +1204,6 @@ private:
 
 //////////////////////////////////////////////////////////////////////
 
-SSATmp* coerce_value(IRGS& env,
-                     const Type& ty,
-                     const Func* callee,
-                     SSATmp* oldVal,
-                     uint32_t paramIdx,
-                     const CatchMaker& maker) {
-  auto const result = [&] () -> SSATmp* {
-    if (ty <= TInt) {
-      return gen(env,
-                 CoerceCellToInt,
-                 FuncArgData(callee, paramIdx + 1),
-                 maker.makeUnusualCatch(),
-                 oldVal);
-    }
-    if (ty <= TDbl) {
-      return gen(env,
-                 CoerceCellToDbl,
-                 FuncArgData(callee, paramIdx + 1),
-                 maker.makeUnusualCatch(),
-                 oldVal);
-    }
-    if (ty <= TBool) {
-      return gen(env,
-                 CoerceCellToBool,
-                 FuncArgData(callee, paramIdx + 1),
-                 maker.makeUnusualCatch(),
-                 oldVal);
-    }
-
-    return nullptr;
-  }();
-
-  if (result) {
-    decRef(env, oldVal);
-    return result;
-  }
-
-  always_assert(ty.subtypeOfAny(TArr, TStr, TObj, TRes, TDict, TKeyset, TVec) &&
-                callee->params()[paramIdx].nativeArg);
-  auto const misAddr = gen(env, LdMIStateAddr,
-                           cns(env, offsetof(MInstrState, tvBuiltinReturn)));
-  gen(env, StMem, misAddr, oldVal);
-  gen(env, CoerceMem, ty,
-      CoerceMemData { callee, paramIdx + 1 },
-      maker.makeUnusualCatch(), misAddr);
-  return gen(env, LdMem, ty, misAddr);
-}
-
-void coerce_stack(IRGS& env,
-                  const Type& ty,
-                  const Func* callee,
-                  uint32_t paramIdx,
-                  BCSPRelOffset offset,
-                  const CatchMaker& maker) {
-  always_assert(ty.isKnownDataType());
-  gen(env,
-      CoerceStk,
-      ty,
-      CoerceStkData { offsetFromIRSP(env, offset), callee, paramIdx + 1 },
-      maker.makeUnusualCatch(),
-      sp(env));
-
-  /*
-   * We can throw after writing to the stack above; inform IRBuilder about it.
-   * This is basically just for assertions right now.
-   */
-  env.irb->exceptionStackBoundary();
-}
-
 /*
  * Take the value in param, apply any needed conversions
  * and return the value to be passed to CallBuiltin.
@@ -1411,8 +1342,11 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           if (param.isOutputArg) {
             return cns(env, TNullptr);
           }
-          gen(env, CoerceMem, ty, CoerceMemData { callee, paramIdx + 1 },
-              maker.makeUnusualCatch(), param.value);
+          auto val = gen(env, LdMem, TCell, param.value);
+          assertx(ty.isKnownDataType());
+          gen(env, ThrowParameterWrongType,
+              FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
+              maker.makeUnusualCatch(), val);
           return nullptr;
         },
         [&] {
@@ -1440,9 +1374,14 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           if (needDVCheck(paramIdx, ty)) dvCheck(paramIdx, ret);
           return ret;
         },
-        [&] (const Type& ty) {
+        [&] (const Type& ty) -> SSATmp* {
+          hint(env, Block::Hint::Unlikely);
           if (param.isOutputArg) return cns(env, TNullptr);
-          return coerce_value(env, ty, callee, oldVal, paramIdx, maker);
+          assert(ty.isKnownDataType());
+          gen(env, ThrowParameterWrongType,
+              FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
+              maker.makeUnusualCatch(), oldVal);
+          return cns(env, TInitNull);
         },
         [&] {
           /*
@@ -1495,7 +1434,14 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         return nullptr;
       },
       [&] (const Type& ty) -> SSATmp* {
-        coerce_stack(env, ty, callee, paramIdx, offset, maker);
+        always_assert(ty.isKnownDataType());
+        hint(env, Block::Hint::Unlikely);
+        auto const tv = gen(env, LdStk, TCell,
+                            IRSPRelOffsetData{ offsetFromIRSP(env, offset) },
+                            sp(env));
+        gen(env, ThrowParameterWrongType,
+            FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
+            maker.makeUnusualCatch(), tv);
         return nullptr;
       },
       [&] {

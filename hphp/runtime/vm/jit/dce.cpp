@@ -721,6 +721,7 @@ bool canDCE(IRInstruction* inst) {
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
   case ThrowMissingThis:
+  case ThrowParameterWrongType:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:
   case StMBase:

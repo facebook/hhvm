@@ -541,6 +541,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ThrowLateInitPropError:
   case ThrowMissingThis:
   case ThrowOutOfBounds:
+  case ThrowParameterWrongType:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:
   case UnsetElem:

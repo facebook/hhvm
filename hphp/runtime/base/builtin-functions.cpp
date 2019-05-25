@@ -41,6 +41,7 @@
 #include "hphp/runtime/vm/method-lookup.h"
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/type-constraint.h"
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/unit.h"
 
@@ -858,6 +859,21 @@ void throw_late_init_prop(const Class* cls,
       propName
     )
   );
+}
+
+NEVER_INLINE
+void throw_parameter_wrong_type(TypedValue tv,
+                                const Func* callee,
+                                unsigned int arg_num,
+                                DataType expected_type) {
+  auto msg = param_type_error_message(
+    callee->displayName()->data(), arg_num, expected_type,
+    type(tv));
+
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    SystemLib::throwTypeErrorObject(msg);
+  }
+  SystemLib::throwRuntimeExceptionObject(msg);
 }
 
 void raise_soft_late_init_prop(const Class* cls,

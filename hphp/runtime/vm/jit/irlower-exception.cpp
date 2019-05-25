@@ -169,6 +169,7 @@ IMPL_OPCODE_CALL(ThrowInvalidArrayKey)
 IMPL_OPCODE_CALL(ThrowInvalidOperation)
 IMPL_OPCODE_CALL(ThrowMissingThis)
 IMPL_OPCODE_CALL(ThrowOutOfBounds)
+IMPL_OPCODE_CALL(ThrowParameterWrongType)
 IMPL_OPCODE_CALL(ThrowParamRefMismatch)
 IMPL_OPCODE_CALL(ThrowParamRefMismatchRange)
 

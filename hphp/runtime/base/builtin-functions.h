@@ -256,6 +256,10 @@ void throw_instance_method_fatal(const char *name);
 [[noreturn]] void throw_late_init_prop(const Class* cls,
                                        const StringData* propName,
                                        bool isSProp);
+[[noreturn]] void throw_parameter_wrong_type(TypedValue tv,
+                                             const Func* callee,
+                                             unsigned int arg_num,
+                                             DataType type);
 
 void raise_soft_late_init_prop(const Class* cls,
                                const StringData* propName,

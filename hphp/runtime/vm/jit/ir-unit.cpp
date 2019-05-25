@@ -135,6 +135,7 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case ThrowLateInitPropError:
     case ThrowMissingThis:
     case ThrowOutOfBounds:
+    case ThrowParameterWrongType:
     case ThrowParamRefMismatch:
     case ThrowParamRefMismatchRange:
     case VerifyParamFailHard:

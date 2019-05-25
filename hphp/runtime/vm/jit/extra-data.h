@@ -297,6 +297,25 @@ struct FuncArgData : IRExtraData {
 };
 
 /*
+ * Func with argument index and expected type.
+ */
+struct FuncArgTypeData : IRExtraData {
+  explicit FuncArgTypeData(const Func* f, int64_t arg, DataType t)
+    : func(f)
+    , argNum(arg)
+    , type(t)
+  {}
+
+  std::string show() const {
+    return folly::format("{},{},{}", func->name(), argNum, type).str();
+  }
+
+  const Func* func;
+  int64_t argNum;
+  DataType type;
+};
+
+/*
  * Local variable ID.
  */
 struct LocalId : IRExtraData {
@@ -1649,6 +1668,7 @@ X(ThrowParamRefMismatch,        ParamData);
 X(ThrowParamRefMismatchRange,   CheckRefsData);
 X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
 X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
+X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);
 X(CheckFunReifiedGenericMismatch,

@@ -2188,6 +2188,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ThrowHasThisNeedStatic:
   case ThrowLateInitPropError:
   case ThrowMissingThis:
+  case ThrowParameterWrongType:
   case ThrowParamRefMismatch:
   case ThrowParamRefMismatchRange:
   case SetOpCell:

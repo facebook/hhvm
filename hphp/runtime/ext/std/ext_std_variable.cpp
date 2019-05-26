@@ -60,6 +60,10 @@ String HHVM_FUNCTION(gettype, const Variant& v) {
   if (v.isNull()) {
     return s_NULL;
   }
+  if (RuntimeOption::EvalLogArrayProvenance &&
+      (v.isVecArray() || v.isDict())) {
+    raise_array_serialization_notice("gettype", v.getArrayData());
+  }
   return getDataTypeString(v.getType());
 }
 

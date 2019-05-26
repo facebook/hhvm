@@ -7,4 +7,5 @@ function main() {
   var_dump(json_encode($a));
   var_dump(serialize($a));
   var_dump(fb_serialize($a, FB_SERIALIZE_HACK_ARRAYS));
+  var_dump(gettype($a));
 }

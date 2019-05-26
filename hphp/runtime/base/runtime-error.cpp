@@ -221,7 +221,7 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
   })();
 
   auto const bail = [&]() {
-    raise_notice("Serializing %s in %s from unknown location",
+    raise_notice("Observing %s in %s from unknown location",
                  dvarray, src);
   };
 
@@ -234,7 +234,7 @@ void raise_array_serialization_notice(const char* src, const ArrayData* arr) {
 
   if (!name) { bail(); return; }
 
-  raise_dynamically_sampled_notice("Serializing {} in {} from {}:{}",
+  raise_dynamically_sampled_notice("Observing {} in {} from {}:{}",
                                    dvarray, src, name->slice(), line);
 }
 

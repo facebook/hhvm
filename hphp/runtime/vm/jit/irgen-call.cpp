@@ -448,7 +448,7 @@ void fpushObjMethodUnknown(
   env.irb->appendBlock(doneBlock);
 }
 
-SSATmp* lookupObjMethodExactFunc(IRGS& env, SSATmp* obj, const Func* func) {
+void lookupObjMethodExactFunc(IRGS& env, SSATmp* obj, const Func* func) {
   /*
    * Static function: throw an exception; obj will be decref'd via stack.
    *
@@ -461,7 +461,6 @@ SSATmp* lookupObjMethodExactFunc(IRGS& env, SSATmp* obj, const Func* func) {
   if (func->isStaticInPrologue()) {
     gen(env, ThrowHasThisNeedStatic, cns(env, func));
   }
-  return cns(env, func);
 }
 
 SSATmp* lookupObjMethodInterfaceFunc(IRGS& env, SSATmp* obj,
@@ -489,51 +488,42 @@ SSATmp* lookupObjMethodNonExactFunc(IRGS& env, SSATmp* obj,
   return func;
 }
 
-SSATmp* lookupObjMethodWithBaseClass(
-  IRGS& env,
-  SSATmp* obj,
-  const Class* baseClass,
-  const StringData* methodName,
-  bool exactClass,
-  bool& magicCall
-) {
-  if (!baseClass) return nullptr;
-  auto const lookup = lookupImmutableObjMethod(
-    baseClass, methodName, curFunc(env), exactClass);
-  switch (lookup.type) {
-    case ImmutableObjMethodLookup::Type::NotFound:
-      return nullptr;
-    case ImmutableObjMethodLookup::Type::MagicFunc:
-      magicCall = true;
-      // fallthru
-    case ImmutableObjMethodLookup::Type::Func:
-      return lookupObjMethodExactFunc(env, obj, lookup.func);
-    case ImmutableObjMethodLookup::Type::Class:
-      return lookupObjMethodNonExactFunc(env, obj, lookup.func);
-    case ImmutableObjMethodLookup::Type::Interface:
-      return lookupObjMethodInterfaceFunc(env, obj, lookup.func);
-  }
-
-  not_reached();
-}
-
 void fpushObjMethodWithBaseClass(
   IRGS& env,
   SSATmp* obj,
   const Class* baseClass,
   const StringData* methodName,
-  uint32_t numParams,
+  uint32_t numArgs,
   bool exactClass,
   SSATmp* ts
 ) {
-  bool magicCall = false;
-  if (auto func = lookupObjMethodWithBaseClass(
-        env, obj, baseClass, methodName, exactClass, magicCall)) {
-    prepareToCallUnknown(env, func, obj, numParams,
-                         magicCall ? methodName : nullptr, false, ts);
-  } else {
-    fpushObjMethodUnknown(env, obj, methodName, numParams, ts);
+  auto const lookup = lookupImmutableObjMethod(
+    baseClass, methodName, curFunc(env), exactClass);
+  switch (lookup.type) {
+    case ImmutableObjMethodLookup::Type::NotFound:
+      fpushObjMethodUnknown(env, obj, methodName, numArgs, ts);
+      return;
+    case ImmutableObjMethodLookup::Type::MagicFunc:
+      lookupObjMethodExactFunc(env, obj, lookup.func);
+      prepareToCallKnown(env, lookup.func, obj, numArgs, methodName, false, ts);
+      return;
+    case ImmutableObjMethodLookup::Type::Func:
+      lookupObjMethodExactFunc(env, obj, lookup.func);
+      prepareToCallKnown(env, lookup.func, obj, numArgs, nullptr, false, ts);
+      return;
+    case ImmutableObjMethodLookup::Type::Class: {
+      auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
+      prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, ts);
+      return;
+    }
+    case ImmutableObjMethodLookup::Type::Interface: {
+      auto const func = lookupObjMethodInterfaceFunc(env, obj, lookup.func);
+      prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, ts);
+      return;
+    }
   }
+
+  not_reached();
 }
 
 const StaticString methProfileKey{ "MethProfile-FPushObjMethod" };
@@ -1297,23 +1287,36 @@ void emitResolveObjMethod(IRGS& env) {
   auto const exactClass = obj->type().clsSpec().exact() ||
                     cls->attrs() & AttrNoOverride;
   auto const methodName = name->strVal();
-  bool magicCall = false;
-  if (auto funcTmp = lookupObjMethodWithBaseClass(
-        env, obj, cls, methodName, exactClass, magicCall)) {
-    if (magicCall) {
+
+  SSATmp* func = nullptr;
+  auto const lookup = lookupImmutableObjMethod(
+    cls, methodName, curFunc(env), exactClass);
+  switch (lookup.type) {
+    case ImmutableObjMethodLookup::Type::NotFound:
+      PUNT(ResolveObjMethod-unknownObjMethod);
+    case ImmutableObjMethodLookup::Type::MagicFunc:
       gen(env, ThrowInvalidOperation, cns(env, s_resolveMagicCall.get()));
       return;
-    }
-    auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
-    gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, obj);
-    gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, funcTmp);
-    decRef(env, name);
-    popC(env);
-    popC(env);
-    push(env, methPair);
-    return;
+    case ImmutableObjMethodLookup::Type::Func:
+      lookupObjMethodExactFunc(env, obj, lookup.func);
+      func = cns(env, lookup.func);
+      break;
+    case ImmutableObjMethodLookup::Type::Class:
+      func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
+      break;
+    case ImmutableObjMethodLookup::Type::Interface:
+      func = lookupObjMethodInterfaceFunc(env, obj, lookup.func);
+      break;
   }
-  PUNT(ResolveObjMethod-unknownObjMethod);
+
+  assertx(func);
+  auto methPair = gen(env, AllocVArray, PackedArrayData { 2 });
+  gen(env, InitPackedLayoutArray, IndexData { 0 }, methPair, obj);
+  gen(env, InitPackedLayoutArray, IndexData { 1 }, methPair, func);
+  decRef(env, name);
+  popC(env);
+  popC(env);
+  push(env, methPair);
 }
 
 

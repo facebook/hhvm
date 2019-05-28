@@ -225,6 +225,7 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
     ImmutableObjMethodLookup::Type::NotFound,
     nullptr
   };
+  if (!cls) return notFound;
   exactClass |= cls->attrs() & AttrNoOverride;
 
   if (isInterface(cls)) {

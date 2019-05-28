@@ -55,6 +55,7 @@
 #ifdef __linux__
 void DisableFork() __attribute__((__weak__));
 void EnableForkLogging() __attribute__((__weak__));
+extern "C" void __gcov_flush() __attribute__((__weak__));
 #endif
 
 namespace HPHP {
@@ -465,6 +466,10 @@ void HttpServer::waitForServers() {
 
 void HttpServer::stop(const char* stopReason) {
   if (m_stopping.exchange(true)) return;
+
+  #ifdef __linux__
+  if (__gcov_flush) __gcov_flush();
+  #endif
 
   // Let all worker threads know that the server is shutting down. If some
   // request installed a PHP-level signal handler through `pcntl_signal(SIGTERM,

@@ -22,39 +22,11 @@
 
 namespace HPHP { namespace jit { namespace irgen {
 
-namespace {
-
 //////////////////////////////////////////////////////////////////////
 
-/*
- * This function returns the offset of instruction i's branch target,
- * which is the offset corresponding to the branch being taken.
- */
-Offset iterBranchTarget(const NormalizedInstruction& i) {
-  assertx(instrJumpOffsets(i.pc()).size() == 1);
-  switch (i.op()) {
-    case OpIterInit:
-    case OpIterInitK:
-    case OpIterNext:
-    case OpIterNextK:
-      return i.offset() + i.imm[1].u_BA;
-    case OpLIterInit:
-    case OpLIterInitK:
-    case OpLIterNext:
-    case OpLIterNextK:
-      return i.offset() + i.imm[2].u_BA;
-    default:
-      always_assert(false);
-  }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-}
-
-void emitIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
+void emitIterInit(IRGS& env, int32_t iterId, Offset relOffset,
                   int32_t valLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInit);
   auto const res = gen(
@@ -68,9 +40,9 @@ void emitIterInit(IRGS& env, int32_t iterId, Offset /*relOffset*/,
   implCondJmp(env, targetOffset, true, res);
 }
 
-void emitIterInitK(IRGS& env, int32_t iterId, Offset /*relOffset*/,
+void emitIterInitK(IRGS& env, int32_t iterId, Offset relOffset,
                    int32_t valLocalId, int32_t keyLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
   auto const src = popC(env);
   if (!src->type().subtypeOfAny(TArrLike, TObj)) PUNT(IterInitK);
   auto const res = gen(
@@ -111,7 +83,7 @@ void emitIterNext(IRGS& env,
                   int32_t iterId,
                   Offset relOffset,
                   int32_t valLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
   auto const res = gen(
     env,
     IterNext,
@@ -127,7 +99,7 @@ void emitIterNextK(IRGS& env,
                    Offset relOffset,
                    int32_t valLocalId,
                    int32_t keyLocalId) {
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
   auto const res = gen(
     env,
     IterNextK,
@@ -145,7 +117,7 @@ void emitLIterInit(IRGS& env,
                    int32_t valLocalId) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInit-pseudomain);
 
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInit);
@@ -170,7 +142,7 @@ void emitLIterInitK(IRGS& env,
                     int32_t keyLocalId) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterInitK-pseudomain);
 
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   if (!base->type().subtypeOfAny(TArrLike, TObj)) PUNT(LIterInitK);
@@ -194,7 +166,7 @@ void emitLIterNext(IRGS& env,
                    int32_t valLocalId) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNext-pseudomain);
 
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const res = [&]{
@@ -228,7 +200,7 @@ void emitLIterNextK(IRGS& env,
                     int32_t keyLocalId) {
   if (curFunc(env)->isPseudoMain()) PUNT(LIterNextK-pseudomain);
 
-  auto const targetOffset = iterBranchTarget(*env.currentNormalizedInstruction);
+  auto const targetOffset = bcOff(env) + relOffset;
 
   auto const base = ldLoc(env, baseLocalId, nullptr, DataTypeSpecific);
   auto const res = [&]{

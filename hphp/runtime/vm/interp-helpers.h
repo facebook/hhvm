@@ -161,5 +161,46 @@ void checkStack(Stack& stk, const Func* f, int32_t extraCells) {
   raise_error("Stack overflow");
 }
 
+/*
+ * Only use in case of extreme shadiness.
+ *
+ * FCall* opcodes that do not use FPI regions write a pre-live ActRec
+ * on the stack and then call a doFCall() helper that performs various
+ * checks and may throw. In the absence of FPI regions the unwinder does
+ * not expect an ActRec on the stack, so we overwrite it with TypedValues.
+ *
+ * There are also a few cases in the JIT where we allocate a pre-live
+ * ActRec on the stack, and then call a helper that may re-enter the
+ * VM (e.g. for autoload) to do the rest of the work filling it out.
+ * Examples are FuncCache::lookup() or loadArrayFunctionContext().
+ *
+ * In these situations, we set up a "strange marker" by calling
+ * updateMarker() before the instruction is done (but after the
+ * pre-live ActRec is pushed).  This marker will have a lower SP than
+ * the start of the instruction, but the PC will still point at the
+ * instruction.  This is done so that if we need to re-enter from the
+ * C++ helper we don't clobber the pre-live ActRec.
+ *
+ * However, if we throw, the unwinder won't think we're in the FPI
+ * region yet.  So in the case that the helper throws an exception,
+ * the unwinder will believe it has to decref three normal stack slots
+ * (where the pre-live ActRec is).  We need the unwinder to ignore the
+ * half-built ActRec allocated on the stack and certainly to avoid
+ * attempting to decref its contents.  We achieve this by overwriting
+ * the ActRec cells with nulls.
+ *
+ * A TypedValue* is also returned here to allow the CPP helper to
+ * write whatever it needs to be decref'd into one of the eval cells,
+ * to ensure that the unwinder leaves state the same as it was before
+ * the call into FPush bytecode that threw.
+ */
+inline TypedValue* arPreliveOverwriteCells(ActRec *preLiveAR) {
+  auto actRecCell = reinterpret_cast<TypedValue*>(preLiveAR);
+  for (size_t ar_cell = 0; ar_cell < HPHP::kNumActRecCells; ++ar_cell) {
+    tvWriteNull(*(actRecCell + ar_cell));
+  }
+  return actRecCell + HPHP::kNumActRecCells - 1;
+}
+
 }
 #endif

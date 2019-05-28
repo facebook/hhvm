@@ -4,8 +4,7 @@
     (modules full_fidelity_test_utils)
     (libraries
       jdep
-      parser_rewriter
-      parser_syntax_transforms))
+      full_fidelity))
 
 (library
     (name call_order)
@@ -14,5 +13,4 @@
     (libraries
       default_injector_config
       full_fidelity_test_utils
-      parser_syntax
-      parser_syntax_tree))
+      full_fidelity))

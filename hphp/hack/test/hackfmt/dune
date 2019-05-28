@@ -19,9 +19,7 @@
     hackfmt
     hackfmt_env
     ounit
-    parser_syntax
-    parser_syntax_transforms
-    parser_syntax_tree))
+    full_fidelity))
 
 (alias
   (name node)

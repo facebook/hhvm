@@ -11,12 +11,13 @@ open Tast
 
 module Env = Tast_env
 module SN  = Naming_special_names
+module Partial = Partial_provider
 
 let handler = object
   inherit Tast_visitor.handler_base
 
   method! at_expr env ((p, _), x) =
-    if Env.is_strict env then
+    if Partial.should_check_error (Env.get_mode env) 4016 then
     match x with
     | Id (_, pseudo_func) when pseudo_func = SN.PseudoFunctions.isset ->
       Errors.isset_in_strict p

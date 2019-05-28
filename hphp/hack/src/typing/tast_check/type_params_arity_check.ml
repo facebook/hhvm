@@ -14,6 +14,7 @@ open Tast
 module Env = Tast_env
 module Cls = Decl_provider.Class
 module ShapeMap = Aast.ShapeMap
+module Partial = Partial_provider
 
 let rec check_hint env (pos, hint) =
   match hint with
@@ -65,9 +66,8 @@ and check_tparams env p x tparams hl =
   List.iter hl (check_hint env)
 
 and check_arity env pos tname arity size =
-  let tenv = Env.tast_env_as_typing_env env in
   if size = arity then () else
-  if size = 0 && not (Typing_env.is_strict tenv)
+  if size = 0 && not (Partial.should_check_error (Env.get_mode env) 4101)
   && not (TypecheckerOptions.experimental_feature_enabled (Env.get_tcopt env)
   TypecheckerOptions.experimental_generics_arity)
   then ()

@@ -76,6 +76,7 @@
     parser_options
     parser_schema
     parser_schema_def
+    partial_provider
     relative_path
     rust_parser_ffi_stubs ; temp stub, to be replaced by rust_to_ocaml
   )
@@ -84,7 +85,7 @@
 (library
   (name parser)
   (wrapped false)
-  (modules 
+  (modules
     ast_check
     docblock_finder
     full_fidelity_ast
@@ -109,6 +110,7 @@
     logging
     namespace_env
     parser_ppl
+    partial_provider
     utils_lint
     utils_php_escape))
 

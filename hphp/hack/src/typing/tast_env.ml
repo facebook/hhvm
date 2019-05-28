@@ -58,6 +58,7 @@ let set_tyvar_variance env ty = Typing_env.set_tyvar_variance env ty
 let get_class = Typing_env.get_class
 let is_static = Typing_env.is_static
 let is_strict = Typing_env.is_strict
+let get_mode = Typing_env.get_mode
 let get_tcopt = Typing_env.get_tcopt
 let expand_type = Typing_env.expand_type
 let set_static = Typing_env.set_static

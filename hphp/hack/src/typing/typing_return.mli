@@ -22,7 +22,8 @@ val make_info:
 val suggest_return:
   Env.env ->
   Ast_defs.pos ->
-  Typing_defs.locl Typing_defs.ty -> unit
+  Typing_defs.locl Typing_defs.ty ->
+  (int -> bool) -> unit
 
 val async_suggest_return:
   Ast_defs.fun_kind ->

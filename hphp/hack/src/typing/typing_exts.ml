@@ -35,6 +35,7 @@ module Env = Typing_env
 module Reason = Typing_reason
 module Print = Typing_print
 module SN = Naming_special_names
+module Partial = Partial_provider
 
 let magic_method_name input =
   match input with
@@ -152,7 +153,7 @@ let retype_magic_func (env:Env.env) (ft:locl fun_type) (el:Nast.expr list) : Env
                     parse_printf_string env str (fst arg) type_arg in
                   env, Some ({ fp with fp_type = (why, Tprim Nast.Tstring) } :: argl)
              |  env, Left pos ->
-                  if Env.is_strict env
+                  if Partial.should_check_error (Env.get_mode env) 4027
                   then Errors.expected_literal_format_string pos;
                   env, None)
       | (param::params), (_::args) ->

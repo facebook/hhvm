@@ -23,6 +23,7 @@ module TL = Typing_logic
 module Cls = Decl_provider.Class
 module TySet = Typing_set
 module MakeType = Typing_make_type
+module Partial = Partial_provider
 
 type reactivity_extra_info = {
   method_info: ((* method_name *) string * (* is_static *) bool) option;
@@ -702,7 +703,7 @@ and simplify_subtype
     invalid ()
   (* Match what's done in unify for non-strict code *)
   | Tobject, Tclass _ ->
-    if Env.is_strict env then invalid () else valid ()
+    if Partial.should_check_error (Env.get_mode env) 4110 then invalid () else valid ()
   | Tclass (x_sub, exact_sub, tyl_sub), Tclass (x_super, exact_super, tyl_super) ->
     let exact_match =
       match exact_sub, exact_super with
@@ -724,11 +725,13 @@ and simplify_subtype
       else
       (* We handle the case where a generic A<T> is used as A *)
       let tyl_super =
-        if List.is_empty tyl_super && not (Env.is_strict env)
+        if List.is_empty tyl_super &&
+          not (Partial.should_check_error (Env.get_mode env) 4101)
         then List.map tyl_sub (fun _ -> (p_super, Tany))
         else tyl_super in
       let tyl_sub =
-        if List.is_empty tyl_sub && not (Env.is_strict env)
+        if List.is_empty tyl_sub &&
+          not (Partial.should_check_error (Env.get_mode env) 4101)
         then List.map tyl_super (fun _ -> (p_super, Tany))
         else tyl_sub in
       if List.length tyl_sub <> List.length tyl_super
@@ -768,7 +771,8 @@ and simplify_subtype
       | Some class_sub ->
         (* We handle the case where a generic A<T> is used as A *)
         let tyl_sub =
-          if List.is_empty tyl_sub && not (Env.is_strict env)
+          if List.is_empty tyl_sub &&
+            not (Partial.should_check_error (Env.get_mode env) 4029)
           then List.map (Cls.tparams class_sub) (fun _ -> (p_sub, Tany))
           else tyl_sub in
         if List.length (Cls.tparams class_sub) <> List.length tyl_sub

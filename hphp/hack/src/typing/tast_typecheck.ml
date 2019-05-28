@@ -17,6 +17,7 @@ open ETast
 module C = Typing_continuations
 module Env = Typing_env
 module Phase = Typing_phase
+module Partial = Partial_provider
 
 (** This happens, for example, when there are unsafe blocks, or gotos *)
 exception Cant_check
@@ -239,7 +240,7 @@ let gamma_from_params env (params:ETast.fun_param list) =
   List.fold ~init:empty_gamma ~f:add_param_to_gamma params
 
 let check_fun env (f:ETast.fun_def) =
-  if not (FileInfo.is_strict f.f_mode) then () else
+  if not (Partial.should_check_error f.f_mode 4291) then () else
   let gamma = gamma_from_params env f.f_params in
   if f.f_tparams <> []
     || f.f_where_constraints <> []

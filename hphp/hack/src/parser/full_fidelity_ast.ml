@@ -14,6 +14,7 @@ open Prim_defs
 (* What we are lowering to *)
 open Ast
 
+module Partial = Partial_provider
 (* Don't allow expressions to nest deeper than this to avoid stack overflow *)
 let recursion_limit = 30000
 
@@ -3328,7 +3329,7 @@ let pProgram : program parser = fun node env  ->
     (* Toplevel statements not allowed in strict mode *)
     | (Stmt (p, _) as e)::el
       when (env.keep_errors) && (not env.codegen) &&
-           FileInfo.is_strict env.fi_mode ->
+           Partial.should_check_error env.fi_mode 1002 ->
       (* We've already lowered at this point, so raise_parsing_error doesn't
         really fit. This is only a typechecker error anyway, so do it anyway *)
       raise_parsing_error env (`Pos p) SyntaxError.toplevel_statements;

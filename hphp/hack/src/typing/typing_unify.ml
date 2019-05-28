@@ -15,6 +15,7 @@ module Env = Typing_env
 module TUtils = Typing_utils
 module TURecursive = Typing_unify_recursive
 module MakeType = Typing_make_type
+module Partial = Partial_provider
 
 (* If result is (env', ty) then env' extends env,
  * and ty1 <: ty and ty2 <: ty under env'
@@ -127,12 +128,12 @@ and unify_ ?(opts=TUtils.default_unify_opt) env r1 ty1 r2 ty2 =
       | _, _ -> Nonexact in
         (* We handle the case where a generic A<T> is used as A *)
         let argl1 =
-          if argl1 = [] && not (Env.is_strict env)
+          if argl1 = [] && not (Partial.should_check_error (Env.get_mode env) 4110)
           then List.map argl2 (fun _ -> (r1, Tany))
           else argl1
         in
         let argl2 =
-          if argl2 = [] && not (Env.is_strict env)
+          if argl2 = [] && not (Partial.should_check_error (Env.get_mode env) 4110)
           then List.map argl1 (fun _ -> (r1, Tany))
           else argl2
         in

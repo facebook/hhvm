@@ -28,6 +28,8 @@ module TokenKind = Full_fidelity_token_kind
 
 module SN = Naming_special_names
 
+module Partial = Partial_provider
+
 type location = {
   start_offset: int;
   end_offset: int
@@ -146,6 +148,11 @@ let is_hh_file env = env.is_hh_file
 
 let is_typechecker env =
   is_hack env && (not env.codegen)
+
+let file_mode env =
+  match SyntaxTree.mode env.syntax_tree with
+  | Some mode -> mode
+  | None -> FileInfo.Mstrict
 
 let is_strict env =
   match SyntaxTree.mode env.syntax_tree with
@@ -1501,10 +1508,11 @@ let methodish_errors env node errors =
       methodish_abstract_conflict_with_final
       node (SyntaxError.error2019 class_name method_name) modifiers in
     let errors =
-      if not (is_strict env && is_typechecker env) then errors else
+      if (Partial.should_check_error (file_mode env) 2045 && is_typechecker env) then
       produce_error errors
       (methodish_abstract_inside_interface env.context)
-      node SyntaxError.error2045 modifiers in
+      node SyntaxError.error2045 modifiers
+      else errors in
     let errors =
       methodish_memoize_lsb_on_non_static node errors in
     let errors =

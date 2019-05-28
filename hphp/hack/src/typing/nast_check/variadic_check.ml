@@ -10,6 +10,8 @@
 open Nast
 open Nast_check_env
 
+module Partial = Partial_provider
+
 let check_variadic v =
   match v with
   | FVvariadicArg vparam when vparam.param_is_reference ->
@@ -26,7 +28,7 @@ let handler = object
   method! at_hint env (p, h) =
     match h with
     | Hfun (_, _, _hl, _, _, Hvariadic None, _, _)
-      when FileInfo.is_strict env.file_mode ->
+      when Partial.should_check_error env.file_mode 4223 ->
       Errors.ellipsis_strict_mode ~require:`Type p
     | _ -> ()
 end

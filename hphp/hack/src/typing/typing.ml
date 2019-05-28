@@ -47,6 +47,7 @@ module TR           = Typing_reactivity
 module FL           = FeatureLogging
 module MakeType     = Typing_make_type
 module Cls          = Decl_provider.Class
+module Partial      = Partial_provider
 
 (* Maps a Nast to a Tast where every type is Tany.
    Used to produce a Tast for unsafe code without inferring types for it. *)
@@ -96,11 +97,12 @@ let with_expr_hook hook f = with_context
 (* Helpers *)
 (*****************************************************************************)
 
-let suggest env p ty =
+let suggest env p ty is_code_error =
   let ty = Typing_expand.fully_expand env ty in
   (match Typing_print.suggest ty with
-  | "..." -> Errors.expecting_type_hint p
-  | ty -> Errors.expecting_type_hint_suggest p ty
+  | "..." when is_code_error 4032 -> Errors.expecting_type_hint p
+  | ty when is_code_error 4033 -> Errors.expecting_type_hint_suggest p ty
+  | _ -> ()
   )
 
 let err_witness env p = Reason.Rwitness p, Typing_utils.terr env
@@ -444,14 +446,15 @@ let rec bind_param env (ty1, param) =
 
 (* In strict mode, we force you to give a type declaration on a parameter *)
 (* But the type checker is nice: it makes a suggestion :-) *)
-and check_param env param ty =
-  let env = Typing_attributes.check_def env new_object
-    SN.AttributeKinds.parameter param.param_user_attributes in
+and check_param env param ty is_code_error =
+  let env = if is_code_error 4231 then Typing_attributes.check_def env new_object
+    SN.AttributeKinds.parameter param.param_user_attributes else env in
   match param.param_hint with
-  | None -> suggest env param.param_pos ty
-  | Some _ ->
+  | None -> suggest env param.param_pos ty is_code_error
+  | Some _ when is_code_error 4010 ->
     (* We do not permit hints to implement IDisposable or IAsyncDisposable *)
     enforce_param_not_disposable env param ty
+  | _ -> ()
 
 and check_inout_return env =
   let params = Local_id.Map.elements (Env.get_params env) in
@@ -516,20 +519,20 @@ and fun_def tcopt f : Tast.fun_def option =
         ~is_explicit:(Option.is_some f.f_ret) locl_ty decl_ty in
       let env, param_tys =
         List.map_env env f.f_params make_param_local_ty in
-      if Env.is_strict env then
-        List.iter2_exn ~f:(check_param env) f.f_params param_tys;
+      let partial_callback = Partial.should_check_error (Env.get_mode env) in
+      let param_fn = fun p t -> (check_param env p t partial_callback) in
+      List.iter2_exn ~f:(param_fn) f.f_params param_tys;
       Typing_memoize.check_function env f;
       let env, typed_params = List.map_env env (List.zip_exn param_tys f.f_params)
         bind_param in
       let env, t_variadic = match f.f_variadic with
         | FVvariadicArg vparam ->
           let env, ty = make_param_local_ty env vparam in
-          if Env.is_strict env then
-            check_param env vparam ty;
+            check_param env vparam ty partial_callback;
           let env, t_vparam = bind_param env (ty, vparam) in
           env, T.FVvariadicArg t_vparam
         | FVellipsis p ->
-          if Env.is_strict env then
+          if Partial.should_check_error (Env.get_mode env) 4223 then
             Errors.ellipsis_strict_mode ~require:`Type_and_param_name pos;
           env, T.FVellipsis p
         | FVnonVariadic -> env, T.FVnonVariadic in
@@ -541,9 +544,8 @@ and fun_def tcopt f : Tast.fun_def option =
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
       begin match f.f_ret with
-        | None when Env.is_strict env ->
-          Typing_return.suggest_return env pos return.Typing_env_return_info.return_type
-        | None -> ()
+        | None ->
+          Typing_return.suggest_return env pos return.Typing_env_return_info.return_type partial_callback
         | Some hint ->
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
@@ -1730,7 +1732,7 @@ and expr_
       make_result env p (T.Fun_id x) fty
   | Id ((cst_pos, cst_name) as id) ->
       (match Env.get_gconst env cst_name with
-      | None when Env.is_strict env ->
+      | None when Partial.should_check_error (Env.get_mode env) 4106 ->
           Errors.unbound_global cst_pos;
           let ty = (Reason.Rwitness cst_pos, Typing_utils.terr env) in
           make_result env cst_pos (T.Id id) ty
@@ -2322,7 +2324,7 @@ and expr_
   | Record _ ->
     expr_error env p (Reason.Rwitness p)
   | Cast ((_, Harray (None, None)), _)
-    when Env.is_strict env
+    when Partial.should_check_error (Env.get_mode env) 4007
     || TCO.migration_flag_enabled (Env.get_tcopt env) "array_cast" ->
       Errors.array_cast p;
       expr_error env p (Reason.Rwitness p)
@@ -2386,7 +2388,7 @@ and expr_
       List.iter idl (check_escaping_var env);
       (* Ensure lambda arity is not Fellipsis in strict mode *)
       begin match declared_ft.ft_arity with
-      | Fellipsis _ when Env.is_strict env ->
+      | Fellipsis _ when Partial.should_check_error (Env.get_mode env) 4223 ->
         Errors.ellipsis_strict_mode ~require:`Param_name p
       | _ -> ()
       end;
@@ -2491,7 +2493,7 @@ and expr_
           | Some _ ->
             (* If the expected type is something concrete but not a function
              * then we should reject in strict mode. Check body anyway *)
-            if Env.is_strict env
+            if Partial.should_check_error (Env.get_mode env) 4224
             then Errors.untyped_lambda_strict_mode p;
             Typing_log.increment_feature_count env FL.Lambda.non_function_typed_context;
             check_body_under_known_params env declared_ft
@@ -3633,12 +3635,19 @@ and is_abstract_ft fty = match fty with
      let disallow_varray =
        TypecheckerOptions.disallow_unset_on_varray (Env.get_tcopt env) in
      let unset_error = if disallow_varray then
-        Errors.unset_nonidx_in_strict_no_varray
-      else
-        Errors.unset_nonidx_in_strict in
-     let env = if Env.is_strict env then
+          Errors.unset_nonidx_in_strict_no_varray
+        else
+          Errors.unset_nonidx_in_strict in
+     let checked_unset_error =
+        if Partial.should_check_error (Env.get_mode env) 4135 then
+          unset_error
+        else
+          fun _ _ -> ()
+     in
+     let env =
        (match el, uel with
-         | [(_, Array_get ((_, Class_const _), Some _))], [] ->
+         | [(_, Array_get ((_, Class_const _), Some _))], [] when
+           Partial.should_check_error (Env.get_mode env) 4011 ->
            Errors.const_mutation p Pos.none "";
            env
          | [(_, Array_get (ea, Some _))], [] ->
@@ -3652,13 +3661,13 @@ and is_abstract_ft fty = match fty with
              else (Reason.Rnone, Tarraykind AKany);
            ] then env
            else begin
-               unset_error
+               checked_unset_error
                p
                (Reason.to_string ("This is " ^ Typing_print.error env ty) (fst ty));
              env
            end
-         | _ -> unset_error p []; env)
-       else env in
+         | _ -> checked_unset_error p []; env)
+       in
       (match el with
         | [(p, Obj_get (_, _, OG_nullsafe))] ->
           begin
@@ -5376,7 +5385,7 @@ and call_ ~(expected: expected_ty option) ~method_call_info pos env fty el uel =
             }) in
           ftys := TUtils.add_function_type env fty !ftys;
           env, tel, tuel, ty)
-    | _, Tarraykind _ when not (Env.is_strict env) ->
+    | _, Tarraykind _ when not (Partial.should_check_error (Env.get_mode env) 4009) ->
       (* Relaxing call_user_func to work with an array in partial mode *)
       let env = call_untyped_unpack env uel in
       env, [], [], (Reason.Rnone, Typing_utils.tany env)
@@ -6569,7 +6578,7 @@ and class_var_def ~is_static env cv =
     else Typing_attributes.check_def env new_object
       SN.AttributeKinds.instProperty cv.cv_user_attributes in
   begin
-    if Option.is_none cv.cv_type && Env.is_strict env
+    if Option.is_none cv.cv_type && Partial.should_check_error (Env.get_mode env) 2001
     then Errors.add_a_typehint (fst cv.cv_id);
     env,
     {
@@ -6730,17 +6739,16 @@ and method_def env m =
     ~is_explicit:(Option.is_some m.m_ret) locl_ty decl_ty in
   let env, param_tys =
     List.map_env env m.m_params make_param_local_ty in
-  if Env.is_strict env then begin
-    List.iter2_exn ~f:(check_param env) m.m_params param_tys;
-  end;
+  let partial_callback = Partial.should_check_error (Env.get_mode env) in
+  let param_fn = fun p t -> (check_param env p t partial_callback) in
+  List.iter2_exn ~f:(param_fn) m.m_params param_tys;
   Typing_memoize.check_method env m;
   let env, typed_params =
     List.map_env env (List.zip_exn param_tys m.m_params) bind_param in
   let env, t_variadic = match m.m_variadic with
     | FVvariadicArg vparam ->
       let env, ty = make_param_local_ty env vparam in
-      if Env.is_strict env then
-        check_param env vparam ty;
+        check_param env vparam ty partial_callback;
       let env, t_variadic = bind_param env (ty, vparam) in
       env, (T.FVvariadicArg t_variadic)
     | FVellipsis p -> env, T.FVellipsis p
@@ -6760,9 +6768,13 @@ and method_def env m =
          snd m.m_name = SN.Members.__destruct
       || snd m.m_name = SN.Members.__construct ->
       Some (pos, Happly((pos, "void"), []))
-    | None when Env.is_strict env ->
-      Typing_return.suggest_return env pos return.Typing_env_return_info.return_type; None
-    | None -> m.m_ret
+    | None ->
+      Typing_return.suggest_return
+        env
+        pos
+        return.Typing_env_return_info.return_type
+        partial_callback;
+      None
     | Some hint ->
       Typing_return.async_suggest_return (m.m_fun_kind) hint (fst m.m_name); m.m_ret in
   let m = { m with m_ret = m_ret; } in

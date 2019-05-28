@@ -18,6 +18,7 @@ module Reason = Typing_reason
 module Union = Typing_union
 module MakeType = Typing_make_type
 module SubType = Typing_subtype
+module Partial = Partial_provider
 
 let err_witness env p = Reason.Rwitness p, TUtils.terr env
 
@@ -363,7 +364,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
       else (Reason.Rnone, Tany) in
     nullable_container_get env ty
   | Tobject ->
-      if Env.is_strict env
+      if Partial.should_check_error (Env.get_mode env) 4005
       then error_array env expr_pos ety1
       else env, (Reason.Rwitness expr_pos, TUtils.tany env)
   | Tabstract (AKnewtype (ts, [ty]), Some (r, Tshape (fk, fields)))
@@ -470,7 +471,7 @@ let rec assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
     env, ((r, Tarraykind (AKvarray tv')), tv')
   | r, Tdynamic -> env, (ty1, (r, Tdynamic))
   | _, Tobject ->
-    if Env.is_strict env
+    if Partial.should_check_error (Env.get_mode env) 4006
     then error_assign_array_append env expr_pos ty1
     else env, (ty1, (Reason.Rwitness expr_pos, TUtils.tany env))
   | r, Tunion ty1l ->
@@ -697,7 +698,7 @@ let rec assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       env, ((fst ety1, Tshape (fields_known', fdm')), ty2)
     end
   | Tobject ->
-    if Env.is_strict env
+    if Partial.should_check_error (Env.get_mode env) 4005
     then
       (Errors.array_access expr_pos (Reason.to_pos r) (Typing_print.error env ety1);
       error)

@@ -103,11 +103,12 @@ let make_default_return env name =
   then MakeType.void (Reason.Rwitness (fst name))
   else (Reason.Rwitness (fst name), Typing_utils.tany env)
 
-let suggest_return env p ty =
+let suggest_return env p ty is_code_error =
   let ty = Typing_expand.fully_expand env ty in
   (match Typing_print.suggest ty with
-  | "..." -> Errors.expecting_return_type_hint p
-  | ty -> Errors.expecting_return_type_hint_suggest p ty
+  | "..." when is_code_error 4030-> Errors.expecting_return_type_hint p
+  | ty when is_code_error 4031 -> Errors.expecting_return_type_hint_suggest p ty
+  | _ -> ()
 )
 
 let async_suggest_return fkind hint pos =

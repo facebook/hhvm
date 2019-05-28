@@ -13,6 +13,7 @@ open Tast
 
 module Env = Tast_env
 module SN = Naming_special_names
+module Partial = Partial_provider
 
 let rec truthiness_test env ((p, ty), e) =
   match e with
@@ -48,7 +49,7 @@ let handler = object
   inherit Tast_visitor.handler_base
 
   method! at_expr env x =
-    if Env.is_strict env then
+    if Partial.should_check_error (Env.get_mode env) 4276 then
     match snd x with
     | Unop (Unot, e)
     | Eif (e, _, _)
@@ -60,7 +61,7 @@ let handler = object
     | _ -> ()
 
   method! at_stmt env x =
-    if Env.is_strict env then
+    if Partial.should_check_error (Env.get_mode env) 4276 then
     match snd x with
     | If (e, _, _)
     | Do (_, e)

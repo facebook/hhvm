@@ -73,10 +73,6 @@ checkObjEqualRecursively($msg,
     "message" => "Breakpoint has invalid line number.",
     "request_seq" => $seq));
 
-// An error is displayed to the user.
-checkForOutput($testProcess, "Breakpoint has invalid line number.", "stderr",
-              true);
-
 // Remove all breakpoints.
 $seq = sendVsCommand(array(
   "command" => "setBreakpoints",

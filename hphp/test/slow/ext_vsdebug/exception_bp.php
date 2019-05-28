@@ -89,15 +89,6 @@ $exnBpCommand = array(
   ));
 sendVsCommand($exnBpCommand);
 
-$msg = json_decode(getNextVsDebugMessage(), true);
-checkObjEqualRecursively($msg, array(
-  "type" => "event",
-  "event" => "output",
-  "body" => array(
-    "category" => "stderr",
-    "output" => "Invalid exception break mode specified.",
-  )));
-
 $exnBpResp = array(
   "type" => "response",
   "command" => "setExceptionBreakpoints",

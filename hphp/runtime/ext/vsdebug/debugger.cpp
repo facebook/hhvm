@@ -1117,8 +1117,7 @@ void Debugger::reportClientMessageError(
       DebugTransport::MessageTypeResponse
     );
 
-    // Print an error to the debugger console to inform the user as well.
-    sendUserMessage(errorMessage, DebugTransport::OutputLevelError);
+
   } catch (...) {
     // We tried.
     VSDebugLogger::Log(

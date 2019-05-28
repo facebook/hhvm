@@ -95,4 +95,8 @@ const StringData* Record::mangleFieldName(const StringData* recordName,
 Slot Record::lookupField(const StringData* fieldName) const {
   return m_fields.findIndex(fieldName);
 }
+
+const Record::Field& Record::field(const StringData* fieldName) const {
+  return m_fields[lookupField(fieldName)];
+}
 }

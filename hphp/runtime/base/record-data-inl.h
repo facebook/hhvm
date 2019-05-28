@@ -31,7 +31,7 @@ inline size_t RecordData::heapSize() const {
   return sizeWithFields(m_record);
 }
 
-inline const Record* RecordData::getRecord() const {
+inline const Record* RecordData::record() const {
   return m_record;
 }
 

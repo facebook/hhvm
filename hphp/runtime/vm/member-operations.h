@@ -532,7 +532,7 @@ inline tv_rval ElemObject(TypedValue& tvRef,
 template <KeyType keyType>
 inline tv_rval ElemRecord(RecordData* base, key_type<keyType> key) {
   auto const keyStr = tvCastToStringData(initScratchKey(key));
-  auto const ret =  base->getFieldRval(keyStr);
+  auto const ret =  base->fieldRval(keyStr);
   decRefStr(keyStr);
   return ret;
 }
@@ -1563,7 +1563,7 @@ template <KeyType keyType>
 inline void SetElemRecord(tv_lval base, key_type<keyType> key,
                           Cell* value) {
   auto const keyStr = tvCastToStringData(initScratchKey(key));
-  auto const tv = val(base).prec->getFieldLval(keyStr);
+  auto const tv = val(base).prec->fieldLval(keyStr);
   tvSet(*value, tv);
   decRefStr(keyStr);
 }

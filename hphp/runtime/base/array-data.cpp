@@ -1183,7 +1183,7 @@ std::string describeKeyType(const TypedValue* tv) {
     return tv->m_data.pobj->getClassName().get()->toCppString();
 
   case KindOfRecord:
-    return tv->m_data.prec->getRecord()->name()->toCppString();
+    return tv->m_data.prec->record()->name()->toCppString();
 
   case KindOfFunc:            return "func";
   case KindOfClass:           return "class";

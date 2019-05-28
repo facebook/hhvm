@@ -33,13 +33,12 @@ RecordData* RecordData::newRecord(const Record* rec,
                                   const StringData* const *keys,
                                   const TypedValue* values) {
   auto const size = sizeWithFields(rec);
-  auto recdata = new (NotNull{}, tl_heap->objMalloc(size)) RecordData(rec);
+  auto const recdata =
+    new (NotNull{}, tl_heap->objMalloc(size)) RecordData(rec);
   assertx(recdata->hasExactlyOneRef());
   for (auto i = 0; i < initSize; ++i) {
-    auto const tv = recdata->getFieldLval(keys[i]);
-    // TODO(arnabde): Type check
-    // TODO(arnabde): What if there is an initial value?
-    // Its refcount needs to be decremented.
+    auto const& tv = recdata->fieldLval(keys[i]);
+    // TODO (T41489986): Handle default values
     tvCopy(values[initSize - i - 1], tv);
   }
   return recdata;
@@ -57,12 +56,12 @@ void RecordData::release() noexcept {
   AARCH64_WALKABLE_FRAME();
 }
 
-tv_rval RecordData::getFieldRval(const StringData* fieldName) const {
+tv_rval RecordData::fieldRval(const StringData* fieldName) const {
   auto const idx = m_record->lookupField(fieldName);
   return tv_rval(&fieldVec()[idx]);
 }
 
-tv_lval RecordData::getFieldLval(const StringData* fieldName) const {
+tv_lval RecordData::fieldLval(const StringData* fieldName) {
   auto const idx = m_record->lookupField(fieldName);
   return tv_lval(const_cast<TypedValue*>(&fieldVec()[idx]));
 }

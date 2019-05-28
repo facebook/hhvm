@@ -858,7 +858,7 @@ static std::string toStringElm(const TypedValue* tv) {
       os << tv->m_data.prec;
       print_count();
       os << ":Record("
-         << tv->m_data.prec->getRecord()->name()->data()
+         << tv->m_data.prec->record()->name()->data()
          << ")";
       continue;
     case KindOfResource:

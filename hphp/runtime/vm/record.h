@@ -108,6 +108,7 @@ public:
     return FieldRange(m_fields.accessList(), m_fields.size());
   }
   Slot lookupField(const StringData*) const;
+  const Field& field(const StringData*) const;
 
   AtomicLowPtr<Record> m_next{nullptr}; // used by NamedEntity
 

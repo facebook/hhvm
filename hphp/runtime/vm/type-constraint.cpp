@@ -944,7 +944,7 @@ std::string describe_actual_type(tv_rval val, bool isHHType) {
     case KindOfClass:         return "class";
     case KindOfClsMeth:       return "clsmeth";
     case KindOfRecord:
-      return val.val().prec->getRecord()->name()->data();
+      return val.val().prec->record()->name()->data();
     case KindOfRef:
       break;
     case KindOfObject: {

@@ -73,7 +73,7 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
       break;
     case HeaderKind::Record:
       out << ":" <<
-        static_cast<const RecordData*>(h)->getRecord()->name()->data();
+        static_cast<const RecordData*>(h)->record()->name()->data();
     case HeaderKind::Vector:
     case HeaderKind::Map:
     case HeaderKind::Set:

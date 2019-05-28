@@ -30,15 +30,15 @@ struct StringData;
 
 struct RecordData : Countable, type_scan::MarkCollectable<RecordData> {
   explicit RecordData(const Record*);
-  const Record* getRecord() const;
+  const Record* record() const;
 
   size_t heapSize() const;
   bool kindIsValid() const;
 
   void scan(type_scan::Scanner&) const;
 
-  tv_rval getFieldRval(const StringData*) const;
-  tv_lval getFieldLval(const StringData*) const;
+  tv_rval fieldRval(const StringData*) const;
+  tv_lval fieldLval(const StringData*);
 
   /* Given a Record type, an array of keys and an array of corresponding
    * initial values, return a fully initialized instance of that Record.

@@ -119,7 +119,7 @@ bool RecordEmitter::addField(const StringData* n,
                              const TypedValue* val,
                              RepoAuthType repoAuthType,
                              UserAttributeMap userAttributes) {
-  assertx(typeConstraint.validForField());
+  assertx(typeConstraint.validForRecField());
   FieldMap::Builder::const_iterator it = m_fieldMap.find(n);
   if (it != m_fieldMap.end()) {
     return false;

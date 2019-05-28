@@ -30,7 +30,7 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void MethProfile::reportMethHelper(const Class* cls, const Func* meth) {
+void MethProfile::reportMeth(const Class* cls, const Func* meth) {
   auto val = methValue();
   if (!val) {
     assertx(cls);
@@ -93,7 +93,7 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
       continue;
     }
     assertx(cls);
-    a.reportMethHelper(cls, fromValue(bMethVal));
+    a.reportMeth(cls, fromValue(bMethVal));
     return;
   }
 
@@ -114,7 +114,7 @@ void MethProfile::reduce(MethProfile& a, const MethProfile& b) {
     return;
   }
 
-  a.reportMethHelper(nullptr, meth);
+  a.reportMeth(nullptr, meth);
   if (a.curTag() == Tag::UniqueMeth && toTag(bMethVal) == Tag::BaseMeth) {
     a.setMeth(meth, Tag::BaseMeth);
   }

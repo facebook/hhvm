@@ -398,12 +398,14 @@ SSATmp* prepareToCallCustom(IRGS& env, SSATmp* objOrClass, uint32_t numArgs,
 //////////////////////////////////////////////////////////////////////
 
 // Pushing for object method when we don't know the Func* statically.
+template<class TProfile>
 void fpushObjMethodUnknown(
   IRGS& env,
   SSATmp* obj,
   const StringData* methodName,
   uint32_t numParams,
-  SSATmp* ts
+  SSATmp* ts,
+  TProfile profileMethod
 ) {
   implIncStat(env, Stats::ObjMethod_cached);
 
@@ -435,6 +437,7 @@ void fpushObjMethodUnknown(
   auto const funcWoM = label->dst(0);
   funcWoM->setType(TFunc);
   prepareToCallUnknown(env, funcWoM, obj, numParams, nullptr, false, ts);
+  profileMethod(funcWoM);
   gen(env, Jmp, doneBlock);
 
   // prepare to do a magic call
@@ -442,6 +445,7 @@ void fpushObjMethodUnknown(
   auto const funcM = gen(env, AssertType, TFuncM, funcMM);
   auto const funcWM = gen(env, LdFuncMFunc, funcM);
   prepareToCallUnknown(env, funcWM, obj, numParams, methodName, false, ts);
+  profileMethod(funcWM);
   gen(env, Jmp, doneBlock);
 
   // done
@@ -495,23 +499,36 @@ void fpushObjMethodWithBaseClass(
   const StringData* methodName,
   uint32_t numArgs,
   bool exactClass,
-  SSATmp* ts
+  SSATmp* ts,
+  TargetProfile<MethProfile>* profile
 ) {
+  assertx(!profile || !baseClass || isInterface(baseClass));
+
+  auto const profileMethod = [&] (SSATmp* callee) {
+    if (!profile || !profile->profiling()) return;
+    auto const cls = gen(env, LdObjClass, obj);
+    auto const pctData = ProfileCallTargetData { profile->handle() };
+    gen(env, ProfileMethod, pctData, cls, callee);
+  };
+
   auto const lookup = lookupImmutableObjMethod(
     baseClass, methodName, curFunc(env), exactClass);
   switch (lookup.type) {
     case ImmutableObjMethodLookup::Type::NotFound:
-      fpushObjMethodUnknown(env, obj, methodName, numArgs, ts);
+      fpushObjMethodUnknown(env, obj, methodName, numArgs, ts, profileMethod);
       return;
     case ImmutableObjMethodLookup::Type::MagicFunc:
+      assertx(!profile);
       lookupObjMethodExactFunc(env, obj, lookup.func);
       prepareToCallKnown(env, lookup.func, obj, numArgs, methodName, false, ts);
       return;
     case ImmutableObjMethodLookup::Type::Func:
+      assertx(!profile);
       lookupObjMethodExactFunc(env, obj, lookup.func);
       prepareToCallKnown(env, lookup.func, obj, numArgs, nullptr, false, ts);
       return;
     case ImmutableObjMethodLookup::Type::Class: {
+      assertx(!profile);
       auto const func = lookupObjMethodNonExactFunc(env, obj, lookup.func);
       prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, ts);
       return;
@@ -519,6 +536,7 @@ void fpushObjMethodWithBaseClass(
     case ImmutableObjMethodLookup::Type::Interface: {
       auto const func = lookupObjMethodInterfaceFunc(env, obj, lookup.func);
       prepareToCallUnknown(env, func, obj, numArgs, nullptr, false, ts);
+      profileMethod(func);
       return;
     }
   }
@@ -612,18 +630,7 @@ void optimizeProfiledPushMethod(IRGS& env,
   auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
                                             methProfileKey.get());
   if (!profile.optimizing()) {
-    emitFPush();
-    if (profile.profiling()) {
-      auto const arOffset =
-        offsetFromIRSP(env, BCSPRelOffset{static_cast<int32_t>(numParams)});
-      gen(
-        env,
-        ProfileMethod,
-        ProfileCallTargetData { arOffset, profile.handle() },
-        sp(env),
-        isStaticCall ? objOrCls : cns(env, TNullptr)
-      );
-    }
+    emitFPush(&profile);
     return;
   }
 
@@ -799,9 +806,9 @@ void fpushObjMethod(IRGS& env,
     }
   }
 
-  auto const emitFPush = [&] {
+  auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
     fpushObjMethodWithBaseClass(env, obj, knownClass, methodName, numParams,
-                                exactClass, tsList);
+                                exactClass, tsList, profile);
   };
 
   // If we know the class exactly without profiling, then we don't need PGO.
@@ -1379,7 +1386,7 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
     PUNT(FPushClsMethod-unknownType);
   }
 
-  auto const emitFPush = [&] {
+  auto const emitFPush = [&] (TargetProfile<MethProfile>* profile = nullptr) {
     auto const prepare = [&] (IRSPRelOffset arOffset) {
       auto const lcmData = LookupClsMethodData { arOffset, forward, dynamic };
       auto const func = gen(env, LookupClsMethod, lcmData, clsVal, methVal,
@@ -1388,7 +1395,13 @@ ALWAYS_INLINE void fpushClsMethodCommon(IRGS& env,
       return func;
     };
 
-    prepareToCallCustom(env, nullptr, numParams, dynamic, tsList, prepare);
+    auto const func = prepareToCallCustom(
+      env, nullptr, numParams, dynamic, tsList, prepare);
+
+    if (profile && profile->profiling()) {
+      auto const pctData = ProfileCallTargetData { profile->handle() };
+      gen(env, ProfileMethod, pctData, clsVal, func);
+    }
   };
 
   if (!methVal->hasConstVal()) {

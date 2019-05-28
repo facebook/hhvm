@@ -1387,16 +1387,14 @@ struct LookupClsMethodData : IRExtraData {
 
 
 struct ProfileCallTargetData : IRExtraData {
-  ProfileCallTargetData(IRSPRelOffset bcSPOff, rds::Handle handle)
-    : bcSPOff(bcSPOff)
-    , handle(handle)
+  explicit ProfileCallTargetData(rds::Handle handle)
+    : handle(handle)
   {}
 
   std::string show() const {
-    return folly::to<std::string>(bcSPOff.offset, ",", handle);
+    return folly::to<std::string>(handle);
   }
 
-  IRSPRelOffset bcSPOff;
   rds::Handle handle;
 };
 

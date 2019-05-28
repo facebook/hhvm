@@ -218,11 +218,10 @@ void cgLookupClsMethod(IRLS& env, const IRInstruction* inst) {
 
 void cgProfileMethod(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<ProfileCallTargetData>();
-  auto const sp = srcLoc(env, inst, 0).reg();
 
   auto const args = argGroup(env, inst)
     .addr(rvmtl(), safe_cast<int32_t>(extra->handle))
-    .addr(sp, cellsToBytes(extra->bcSPOff.offset))
+    .ssa(0)
     .ssa(1);
 
   cgCallHelper(vmain(env), env, CallSpec::method(&MethProfile::reportMeth),

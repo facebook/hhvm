@@ -3366,9 +3366,9 @@ fields of that struct for holding intermediate values.
 
   Profile the type of S0.
 
-| ProfileMethod<rdsHandle,spOff>, ND, S(StkPtr) S(Cls,Nullptr), NF
+| ProfileMethod<rdsHandle>, ND, S(Cls) S(Func), NF
 
-  Profile the Func in the ActRec that was just pushed onto the stack.
+  Profile the method S1 called with class context S0.
 
 | CheckPackedArrayDataBounds, ND, S(AK(Packed),Vec) S(Int), B
 

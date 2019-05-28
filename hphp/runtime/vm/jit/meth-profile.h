@@ -79,13 +79,7 @@ struct MethProfile {
    * If `cls' is not provided (when it's not known statically), we peek in `ar'
    * for the class context.
    */
-  void reportMeth(const ActRec* ar, const Class* cls) {
-    auto const meth = ar->func();
-    if (!cls && meth->isMethod()) {
-      cls = ar->hasThis() ? ar->getThis()->getVMClass() : ar->getClass();
-    }
-    reportMethHelper(cls, meth);
-  }
+  void reportMeth(const Class* cls, const Func* meth);
 
   /*
    * Aggregate two MethProfiles.
@@ -98,8 +92,6 @@ struct MethProfile {
   /////////////////////////////////////////////////////////////////////////////
 
 private:
-  void reportMethHelper(const Class* cls, const Func* meth);
-
   /*
    * m_curMeth munging.
    */

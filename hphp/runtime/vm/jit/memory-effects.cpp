@@ -1968,6 +1968,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case PackMagicArgs:
   case StrictlyIntegerConv:
   case DbgAssertFunc:
+  case ProfileMethod:
     return may_load_store(AEmpty, AEmpty);
 
   // Some that touch memory we might care about later, but currently don't:
@@ -2032,13 +2033,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       AliasClass effects =
         actrec(inst.src(2), inst.extra<LookupClsMethod>()->calleeAROffset);
       return may_load_store(effects, effects);
-    }
-
-  case ProfileMethod:
-    {
-      AliasClass effects =
-        actrec(inst.src(0), inst.extra<ProfileCallTargetData>()->bcSPOff);
-      return may_load_store(effects, AEmpty);
     }
 
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload

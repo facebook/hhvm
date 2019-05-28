@@ -19,11 +19,14 @@
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
 
+#include "hphp/util/compression-ctx-pool.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-ZstdCompressor::ZstdCompressor(int compression_level)
-    : compression_level_(compression_level) {}
+ZstdCompressor::ContextPool ZstdCompressor::streaming_cctx_pool{};
+
+ZstdCompressor::ContextPool ZstdCompressor::single_shot_cctx_pool{};
 
 void ZstdCompressor::zstd_cctx_deleter(ZSTD_CCtx* ctx) {
   size_t err = ZSTD_freeCCtx(ctx);
@@ -33,8 +36,11 @@ void ZstdCompressor::zstd_cctx_deleter(ZSTD_CCtx* ctx) {
   }
 }
 
-ZstdCompressor::ZSTD_CCtx_Ptr ZstdCompressor::make_zstd_cctx() {
-  auto ptr = ZSTD_CCtx_Ptr(ZSTD_createCCtx());
+ZstdCompressor::ZstdCompressor(int compression_level)
+    : compression_level_(compression_level) {}
+
+ZstdCompressor::ContextPool::Ref ZstdCompressor::make_zstd_cctx(bool last) {
+  auto ptr = (last ? single_shot_cctx_pool : streaming_cctx_pool).get();
   if (!ptr) {
     throw std::runtime_error("Error allocating ZSTD_CCtx");
   }
@@ -48,14 +54,16 @@ const char* ZstdCompressor::compress(const void* data,
   auto out = std::make_unique<char[]>(outSize);
 
   if (!ctx_) {
+    ctx_ = make_zstd_cctx(last);
     if (last) {
-      // optimize single segment (avoid copying into intermediate buffers)
-      auto ret = ZSTD_compress(out.get(), outSize, data, len, compression_level_);
+      // optimize single segment (avoid copying into intermediate buffers
+      auto ret = ZSTD_compressCCtx(
+          ctx_.get(), out.get(), outSize, data, len, compression_level_);
       if (ZSTD_isError(ret)) return nullptr;
       len = ret;
+      ctx_.reset();
       return out.release();
     } else {
-      ctx_ = make_zstd_cctx();
       ZSTD_initCStream(ctx_.get(), compression_level_);
     }
   }

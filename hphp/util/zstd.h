@@ -24,6 +24,8 @@
 
 #include <zstd.h>
 
+#include "hphp/util/compression-ctx-pool.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -38,14 +40,21 @@ struct ZstdCompressor {
  private:
   static void zstd_cctx_deleter(ZSTD_CCtx* ctx);
 
-  using ZSTD_CCtx_Ptr = std::unique_ptr<
-      ZSTD_CCtx,
-      folly::static_function_deleter<ZSTD_CCtx, zstd_cctx_deleter>>;
+  using ContextPool = CompressionContextPool<
+      ZSTD_CCtx, ZSTD_createCCtx, zstd_cctx_deleter>;
 
-  static ZSTD_CCtx_Ptr make_zstd_cctx();
+  // we use two context pools because the streaming contexts will always use
+  // exactly the same params, which lets us avoid resetting the internal
+  // tables, whereas the singleshot pools will churn through different params.
+
+  static ContextPool streaming_cctx_pool;
+
+  static ContextPool single_shot_cctx_pool;
+
+  static ContextPool::Ref make_zstd_cctx(bool last);
 
   int compression_level_;
-  ZSTD_CCtx_Ptr ctx_;
+  ContextPool::Ref ctx_;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -6317,8 +6317,8 @@ and class_def_ env c tc =
   let typed_method_redeclarations = [] in
   let typed_methods = List.filter_map methods (method_def env) in
   let env, typed_typeconsts = List.map_env env c.c_typeconsts typeconst_def in
-  let typed_consts, const_types =
-    List.unzip (List.map c.c_consts (class_const_def env)) in
+  let env, consts = List.map_env env c.c_consts class_const_def in
+  let typed_consts, const_types = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   let typed_constructor = class_constr_def env constructor in
   let env = Env.set_static env in
@@ -6476,10 +6476,10 @@ and class_const_def env (h, id, e) =
   match e with
     | Some e ->
       let env, te, ty' = expr ?expected:opt_expected env e in
-      ignore (Type.coerce_type (fst id) Reason.URhint env ty' ty);
-      (h, id, Some te), ty'
+      let env = Type.coerce_type (fst id) Reason.URhint env ty' ty in
+      env, ((h, id, Some te), ty')
     | None ->
-      (h, id, None), ty
+      env, ((h, id, None), ty)
 
 and class_constr_def env constructor =
   let env = { env with Env.inside_constructor = true } in

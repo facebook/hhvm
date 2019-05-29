@@ -6325,6 +6325,8 @@ and class_def_ env c tc =
     match typed_constructor with
     | None -> typed_static_methods @ typed_methods
     | Some m -> m :: typed_static_methods @ typed_methods in
+  let env = SubType.solve_all_unsolved_tyvars env in
+  Typing_subtype.log_prop env;
   {
     T.c_span = c.c_span;
     T.c_annotation = Env.save env.Env.lenv.Env.tpenv env;
@@ -6484,8 +6486,6 @@ and class_implements_type env c1 removals ctype2 =
 
 (* Type-check a property declaration, with optional initializer *)
 and class_var_def ~is_static env cv =
-  let env = Env.open_tyvars env (fst cv.cv_id) in
-  (fun (env, tcv) -> SubType.close_tyvars_and_solve env, tcv) @@
   (* First pick up and localize the hint if it exists *)
   let env, expected =
     match cv.cv_type with

@@ -9,4 +9,5 @@ abstract final class C {
     'a' => A::class,
     'b' => B::class,
   ];
+  private static $s = Set {'foo'};
 }

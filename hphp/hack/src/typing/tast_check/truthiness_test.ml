@@ -43,7 +43,8 @@ let rec truthiness_test env ((p, ty), e) =
     end;
     match truthiness env ty with
     | Always_truthy -> Errors.invalid_truthiness_test p (Env.print_ty env ty)
-    | Possibly_falsy | Always_falsy | Unknown -> ()
+    | Always_falsy -> Errors.invalid_truthiness_test_falsy p (Env.print_ty env ty)
+    | Possibly_falsy | Unknown -> ()
 
 let handler = object
   inherit Tast_visitor.handler_base

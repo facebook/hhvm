@@ -3560,6 +3560,11 @@ let invalid_truthiness_test pos ty =
     Printf.sprintf
       "Invalid condition: a value of type %s will always be truthy" ty
 
+let invalid_truthiness_test_falsy pos ty =
+  add (Typing.err_code Typing.InvalidTruthinessTest) pos @@
+    Printf.sprintf
+      "Invalid condition: a value of type %s will always be falsy" ty
+
 let sketchy_truthiness_test pos ty truthiness =
   add (Typing.err_code Typing.SketchyTruthinessTest) pos @@
     match truthiness with

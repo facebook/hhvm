@@ -235,18 +235,6 @@ let get_files_in_path ~args path =
       (not @@ String_utils.string_ends_with f "namespace_group_use_decl.php") &&
       (* FIXME: These ones crashes during Rust parse but in OCaml code with: *)
       (not @@ String_utils.string_ends_with f "nullsafe_call_on_expr_dep.php") &&
-      (not @@ String_utils.string_ends_with f "await_as_an_expression_simple.php") &&
-      (not @@ String_utils.string_ends_with f "compile_test_yield_erling.php") &&
-      (not @@ String_utils.string_ends_with f "compile_test_yield.php") &&
-      (not @@ String_utils.string_ends_with f "functional_generator.php") &&
-      (not @@ String_utils.string_ends_with f "typecheck/yield_from3.php") &&
-      (not @@ String_utils.string_ends_with f "yield_wait_for_result_bad2.php") &&
-      (not @@ String_utils.string_ends_with f "await_as_an_expression_simple.php") &&
-      (not @@ String_utils.string_ends_with f "/ai/backwards_analysis/yield.php") &&
-      (not @@ String_utils.string_ends_with f "/ai/forward_analysis/yield.php") &&
-      (not @@ String_utils.string_ends_with f "/unreachable/yield.php") &&
-      (not @@ String_utils.string_ends_with f "/lint/dead_statement.php") &&
-      (not @@ String_utils.string_ends_with f "/emitter/generator.php") &&
       (*
 Uncaught exception:
 

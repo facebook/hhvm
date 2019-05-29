@@ -133,6 +133,11 @@ let record_in_db
 
   (* Finish up *)
   Sqlite3.exec db sql_commit_transaction |> check_rc;
+
+  (* Reduces database size by 10% even when we have only one transaction *)
+  Sqlite3.exec db "VACUUM;" |> check_rc;
+
+  (* We are done *)
   if not (Sqlite3.db_close db) then
     failwith ("Unable to close database " ^ filename)
 ;;

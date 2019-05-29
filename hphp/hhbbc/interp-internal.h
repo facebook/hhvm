@@ -421,6 +421,14 @@ folly::Optional<Type> parentClsExact(ISS& env) {
 
 bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
              Type context, bool maybeDynamic) {
+  if (!options.ConstantFoldBuiltins ||
+      !will_reduce(env) ||
+      any(env.collect.opts & CollectionOpts::Speculating) ||
+      (!env.collect.propagate_constants &&
+       any(env.collect.opts & CollectionOpts::Optimizing))) {
+    return false;
+  }
+
   auto const func = rfunc.exactFunc();
   if (!func) return false;
   if (maybeDynamic && (
@@ -497,13 +505,6 @@ bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
  */
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   auto foldable = [&] {
-    if (!options.ConstantFoldBuiltins ||
-        !will_reduce(env) ||
-        any(env.collect.opts & CollectionOpts::Speculating) ||
-        (!env.collect.propagate_constants &&
-         any(env.collect.opts & CollectionOpts::Optimizing))) {
-      return false;
-    }
     if (nArgs < 0 ||
         ar.kind == FPIKind::Ctor ||
         ar.kind == FPIKind::Builtin ||

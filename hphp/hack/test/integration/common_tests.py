@@ -1046,7 +1046,7 @@ function test2(int $x) { $x = $x*x + 3; return f($x); }
     def test_interrupt(self):
         # filesystem interruptions are only triggered by Watchman
         with open(os.path.join(self.repo_dir, '.watchmanconfig'), 'w') as f:
-            f.write("\n")
+            f.write("{}")
         with open(os.path.join(self.repo_dir, 'hh.conf'), 'a') as f:
             f.write("use_watchman = true\n" +
                     "interrupt_on_watchman = true\n" +

@@ -72,7 +72,7 @@ let check_param : Env.env -> Nast.fun_param -> unit =
     | r, Tclass _ ->
       let p = Reason.to_pos r in
       let env = Env.open_tyvars env p in
-      let env, type_param = Env.fresh_unresolved_type env p in
+      let env, type_param = Env.fresh_type env p in
       let container_type = MakeType.container Reason.none type_param in
       let env, is_container =
         Errors.try_

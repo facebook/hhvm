@@ -189,7 +189,7 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
  *)
 let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res = Env.fresh_unresolved_type env expr_pos in
+  let env, res = Env.fresh_type env expr_pos in
   match TUtils.shape_field_name env field with
   | None -> env, (Reason.Rwitness (fst field), TUtils.tany env)
   | Some field_name ->
@@ -224,7 +224,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
 
 let at env ~expr_pos ~shape_pos shape_ty field =
   let env, shape_ty = Env.expand_type env shape_ty in
-  let env, res = Env.fresh_unresolved_type env expr_pos in
+  let env, res = Env.fresh_type env expr_pos in
   match TUtils.shape_field_name env field with
    | None ->
      env, (Reason.Rwitness (fst field), TUtils.tany env)

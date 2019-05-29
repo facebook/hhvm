@@ -87,7 +87,7 @@ let force_awaitable env p ty =
   | env, (_, Tany) when fun_kind = Ast.FAsync ->
     env, wrap_awaitable env p ty
   | _ when fun_kind = Ast.FAsync ->
-    let env, underlying_ty = Env.fresh_unresolved_type env p in
+    let env, underlying_ty = Env.fresh_type env p in
     let wrapped_ty = wrap_awaitable env p underlying_ty in
     Errors.try_add_err p (Reason.string_of_ureason Reason.URnone)
       (fun () ->

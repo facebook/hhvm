@@ -378,7 +378,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
    * Tk does not appear in the result of the call)
    *)
   | Tvar _ ->
-    let env, value = Env.fresh_unresolved_type env expr_pos in
+    let env, value = Env.fresh_type env expr_pos in
     let keyed_container = MakeType.keyed_container r ty2 value in
     let env = SubType.sub_type env ty1 keyed_container in
     env, value

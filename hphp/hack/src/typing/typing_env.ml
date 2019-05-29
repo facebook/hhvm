@@ -111,15 +111,15 @@ let add_current_tyvar env p v =
     { env with tyvars_stack = (expr_pos, (v :: tyvars)) :: rest }
   | _ -> env
 
-let fresh_unresolved_type_reason env r =
+let fresh_type_reason env r =
   let v = Ident.tmp () in
   let env =
-    log_env_change "fresh_unresolved_type" env @@
+    log_env_change "fresh_type" env @@
     add_current_tyvar env (Reason.to_pos r) v in
   env, (r, Tvar v)
 
-let fresh_unresolved_type env p =
-  fresh_unresolved_type_reason env (Reason.Rtype_variable p)
+let fresh_type env p =
+  fresh_type_reason env (Reason.Rtype_variable p)
 
 let open_tyvars env p =
   { env with tyvars_stack = (p,[]) :: env.tyvars_stack }
@@ -133,13 +133,6 @@ let get_current_tyvars env =
   match env.tyvars_stack with
   | [] -> []
   | (_,tyvars)::_ -> tyvars
-
-let fresh_type env p =
-  let v = Ident.tmp () in
-  let env =
-    log_env_change "fresh_type" env @@
-    add_current_tyvar env p v in
-  env, (Reason.Rtype_variable p, Tvar v)
 
 let get_type env x_reason x =
   let env, x = get_var env x in

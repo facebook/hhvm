@@ -1326,8 +1326,8 @@ static NEVER_INLINE void shuffleMagicArrayArgs(ActRec* ar, const Cell args,
 // contents of args are to be added; for call_user_func_array, this is
 // always 0; for unpacked arguments, it may be greater if normally passed
 // params precede the unpack.
-bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
-                      int nregular, TypedValue* retval, bool checkRefAnnot) {
+void prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
+                      int nregular, bool checkRefAnnot) {
   assertx(!cellIsNull(&args));
   assertx(nregular >= 0);
   assertx((stack.top() + nregular) == (void*) ar);
@@ -1338,7 +1338,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
   int const nargs = nregular + getContainerSize(args);
   if (UNLIKELY(ar->magicDispatch())) {
     shuffleMagicArrayArgs(ar, args, stack, nregular);
-    return true;
+    return;
   }
 
 #define WRAP(e)                                                        \
@@ -1349,7 +1349,6 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
      * uninitialized value(s) at the top of the eval stack so that the
      * unwinder doesn't choke */                                       \
     stack.discard();                                                   \
-    if (retval) { tvWriteNull(*retval); }                              \
     throw;                                                             \
   }
 
@@ -1399,7 +1398,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
       if (!debug || (ar->func()->attrs() & AttrMayUseVV)) {
         ar->setVarEnv(nullptr);
       }
-      return true;
+      return;
     }
   }
 
@@ -1420,7 +1419,7 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     // the extra args are not used in the function; no reason to add them
     // to the stack
     ar->setNumArgs(f->numParams());
-    return true;
+    return;
   }
 
   auto const hasVarParam = f->hasVariadicCaptureParam();
@@ -1509,7 +1508,6 @@ bool prepareArrayArgs(ActRec* ar, const Cell args, Stack& stack,
     }
     ar->setNumArgs(f->numParams());
   }
-  return true;
 }
 
 static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
@@ -4627,12 +4625,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
     checkStack(vmStack(), ar->func(), 0);
 
     assertx(!ar->resumed());
-    auto prepResult = prepareArrayArgs(ar, args, vmStack(), numArgs,
-                                       nullptr, /* check ref annot */ true);
-    if (UNLIKELY(!prepResult)) {
-      vmStack().pushNull(); // return value is null if args are invalid
-      return false;
-    }
+    prepareArrayArgs(ar, args, vmStack(), numArgs, /* check ref annot */ true);
   }
 
   prepareFuncEntry(

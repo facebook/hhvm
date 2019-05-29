@@ -1582,9 +1582,8 @@ void ExecutionContext::requestExit() {
 /*
  * Shared implementation for invokeFunc{,Few}().
  *
- * The `doCheckStack' and `doInitArgs' callbacks should return truthy in order
- * to short-circuit the rest of invokeFuncImpl() and return early, else they
- * should return falsey.
+ * The `doCheckStack' callback should return truthy in order to short-circuit
+ * the rest of invokeFuncImpl() and return early, else it should return falsey.
  *
  * The `doInitArgs' and `doEnterVM' callbacks take an ActRec* argument
  * corresponding to the reentry frame.
@@ -1659,7 +1658,7 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
 #endif
 
   try {
-    if (doInitArgs(ar, retval)) return retval;
+    doInitArgs(ar);
   } catch (...) {
     while (vmStack().top() != (void*)ar) {
       vmStack().popTV();
@@ -1699,13 +1698,13 @@ TypedValue ExecutionContext::invokeFuncImpl(const Func* f,
         vmStack().popC();
       }
       auto arr = varr.toArray();
-      retval = make_array_like_tv(arr.detach());
+      return make_array_like_tv(arr.detach());
     } else {
       tvCopy(*vmStack().topTV(), retval);
       vmStack().discard();
+      return retval;
     }
   }
-  return retval;
 }
 
 /**
@@ -1785,19 +1784,13 @@ TypedValue ExecutionContext::invokeFunc(const Func* f,
     return false;
   };
 
-  auto const doInitArgs = [&] (ActRec* ar, TypedValue& retval) {
+  auto const doInitArgs = [&] (ActRec* ar) {
     if (!varEnv) {
       auto const& prepArgs = cellIsNull(&args)
         ? make_array_like_tv(staticEmptyVArray())
         : args;
-      auto prepResult = prepareArrayArgs(ar, prepArgs, vmStack(), 0,
-                                         &retval, checkRefAnnot);
-      if (UNLIKELY(!prepResult)) {
-        assertx(KindOfNull == retval.m_type);
-        return true;
-      }
+      prepareArrayArgs(ar, prepArgs, vmStack(), 0, checkRefAnnot);
     }
-    return false;
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {
@@ -1832,7 +1825,7 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
     return false;
   };
 
-  auto const doInitArgs = [&](ActRec* /*ar*/, TypedValue&) {
+  auto const doInitArgs = [&](ActRec* /*ar*/) {
     for (ssize_t i = 0; i < argc; ++i) {
       const TypedValue *from = &argv[i];
       TypedValue *to = vmStack().allocTV();
@@ -1842,7 +1835,6 @@ TypedValue ExecutionContext::invokeFuncFew(const Func* f,
         refDup(*from, *to);
       }
     }
-    return false;
   };
 
   auto const doEnterVM = [&] (ActRec* ar) {

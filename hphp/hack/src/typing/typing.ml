@@ -414,6 +414,8 @@ let rec bind_param env (ty1, param) =
             env, ty1 in
         env, Some te, ty1
   in
+  let env, user_attributes =
+    List.map_env env param.param_user_attributes user_attribute in
   let tparam = {
     T.param_annotation = T.make_expr_annotation param.param_pos ty1;
     T.param_hint = param.param_hint;
@@ -423,7 +425,7 @@ let rec bind_param env (ty1, param) =
     T.param_name = param.param_name;
     T.param_expr = param_te;
     T.param_callconv = param.param_callconv;
-    T.param_user_attributes = List.map param.param_user_attributes (user_attribute env);
+    T.param_user_attributes = user_attributes;
   } in
   let mode = get_param_mode param.param_is_reference param.param_callconv in
   let id = Local_id.make_unscoped param.param_name in
@@ -538,8 +540,6 @@ and fun_def tcopt f : Tast.fun_def option =
         | FVnonVariadic -> env, T.FVnonVariadic in
       let local_tpenv = env.Env.lenv.Env.tpenv in
       let env, tb = fun_ env return pos nb f.f_fun_kind in
-      let env = SubType.solve_all_unsolved_tyvars env in
-      Typing_subtype.log_prop env;
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
       begin match f.f_ret with
@@ -548,22 +548,26 @@ and fun_def tcopt f : Tast.fun_def option =
         | Some hint ->
           Typing_return.async_suggest_return (f.f_fun_kind) hint pos
       end;
-      let filename = Pos.filename (fst f.f_name) in
-      let droot = env.Env.decl_env.Decl_env.droot in
-      let file_attrs = file_attributes tcopt filename f.f_mode droot f.f_file_attributes in
+      let env, file_attrs = file_attributes env f.f_file_attributes in
+      let env, tparams =
+        List.map_env env f.f_tparams type_param in
+      let env, user_attributes =
+        List.map_env env f.f_user_attributes user_attribute in
+      let env = SubType.solve_all_unsolved_tyvars env in
+      Typing_subtype.log_prop env;
       let fundef = {
         T.f_annotation = Env.save local_tpenv env;
         T.f_span = f.f_span;
         T.f_mode = f.f_mode;
         T.f_ret = f.f_ret;
         T.f_name = f.f_name;
-        T.f_tparams = List.map f.f_tparams (type_param env);
+        T.f_tparams = tparams;
         T.f_where_constraints = f.f_where_constraints;
         T.f_variadic = t_variadic;
         T.f_params = typed_params;
         T.f_fun_kind = f.f_fun_kind;
         T.f_file_attributes = file_attrs;
-        T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
+        T.f_user_attributes = user_attributes;
         T.f_body = { T.fb_ast = tb; fb_annotation = map_funcbody_annotation nb.fb_annotation };
         T.f_external = f.f_external;
         T.f_namespace = f.f_namespace;
@@ -2906,17 +2910,21 @@ and anon_make tenv p f ft idl is_anon =
           if Nast.named_body_is_unsafe nb
           then Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
           else Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks in
+        let env, tparams =
+          List.map_env env f.f_tparams type_param in
+        let env, user_attributes =
+          List.map_env env f.f_user_attributes user_attribute in
         let tfun_ = {
           T.f_annotation = Env.save local_tpenv env;
           T.f_span = f.f_span;
           T.f_mode = f.f_mode;
           T.f_ret = f.f_ret;
           T.f_name = f.f_name;
-          T.f_tparams = List.map f.f_tparams (type_param env);
+          T.f_tparams = tparams;
           T.f_where_constraints = f.f_where_constraints;
           T.f_fun_kind = f.f_fun_kind;
           T.f_file_attributes = [];
-          T.f_user_attributes = List.map f.f_user_attributes (user_attribute env);
+          T.f_user_attributes = user_attributes;
           T.f_body = { T.fb_ast = tb; fb_annotation = annotation };
           T.f_params = t_params;
           T.f_variadic = t_variadic; (* TODO TAST: Variadic efuns *)
@@ -6308,7 +6316,7 @@ and class_def_ env c tc =
   let env, typed_vars = List.map_env env vars (class_var_def ~is_static:false) in
   let typed_method_redeclarations = [] in
   let typed_methods = List.filter_map methods (method_def env) in
-  let typed_typeconsts = List.map c.c_typeconsts (typeconst_def env) in
+  let env, typed_typeconsts = List.map_env env c.c_typeconsts typeconst_def in
   let typed_consts, const_types =
     List.unzip (List.map c.c_consts (class_const_def env)) in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
@@ -6317,14 +6325,14 @@ and class_def_ env c tc =
   let env, typed_static_vars =
     List.map_env env static_vars (class_var_def ~is_static:true) in
   let typed_static_methods = List.filter_map static_methods (method_def env) in
-  let filename = Pos.filename (fst c.c_name) in
-  let droot = env.Env.decl_env.Decl_env.droot in
-  let file_attrs =
-    file_attributes (Env.get_tcopt env) filename c.c_mode droot c.c_file_attributes in
+  let env, file_attrs = file_attributes env c.c_file_attributes in
   let methods =
     match typed_constructor with
     | None -> typed_static_methods @ typed_methods
     | Some m -> m :: typed_static_methods @ typed_methods in
+  let env, tparams = class_type_param env c.c_tparams in
+  let env, user_attributes =
+    List.map_env env c.c_user_attributes user_attribute in
   let env = SubType.solve_all_unsolved_tyvars env in
   Typing_subtype.log_prop env;
   {
@@ -6335,7 +6343,7 @@ and class_def_ env c tc =
     T.c_is_xhp = c.c_is_xhp;
     T.c_kind = c.c_kind;
     T.c_name = c.c_name;
-    T.c_tparams = class_type_param env c.c_tparams;
+    T.c_tparams = tparams;
     T.c_extends = c.c_extends;
     T.c_uses = c.c_uses;
     (* c_use_as_alias and c_insteadof_alias are PHP features not supported
@@ -6353,7 +6361,7 @@ and class_def_ env c tc =
     T.c_vars = typed_static_vars @ typed_vars;
     T.c_methods = methods;
     T.c_file_attributes = file_attrs;
-    T.c_user_attributes = List.map c.c_user_attributes (user_attribute env);
+    T.c_user_attributes = user_attributes;
     T.c_namespace = c.c_namespace;
     T.c_enum = c.c_enum;
     T.c_doc_comment = c.c_doc_comment;
@@ -6444,12 +6452,15 @@ and typeconst_def env {
   end in
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.typeconst c_tconst_user_attributes in
+  let env, user_attributes =
+    List.map_env env c_tconst_user_attributes user_attribute in
+  env,
   {
     T.c_tconst_abstract = typeconst_abstract_kind c_tconst_abstract;
     T.c_tconst_name = id;
     T.c_tconst_constraint = c_tconst_constraint;
     T.c_tconst_type = hint;
-    T.c_tconst_user_attributes = List.map c_tconst_user_attributes (user_attribute env);
+    T.c_tconst_user_attributes = user_attributes;
   }
 
 and class_const_def env (h, id, e) =
@@ -6531,6 +6542,8 @@ and class_var_def ~is_static env cv =
       SN.AttributeKinds.staticProperty cv.cv_user_attributes
     else Typing_attributes.check_def env new_object
       SN.AttributeKinds.instProperty cv.cv_user_attributes in
+  let env, user_attributes =
+    List.map_env env cv.cv_user_attributes user_attribute in
   begin
     if Option.is_none cv.cv_type && Partial.should_check_error (Env.get_mode env) 2001
     then Errors.add_a_typehint (fst cv.cv_id);
@@ -6542,7 +6555,7 @@ and class_var_def ~is_static env cv =
       T.cv_type = cv.cv_type;
       T.cv_id = cv.cv_id;
       T.cv_expr = typed_cv_expr;
-      T.cv_user_attributes = List.map cv.cv_user_attributes (user_attribute env);
+      T.cv_user_attributes = user_attributes;
       T.cv_is_promoted_variadic = cv.cv_is_promoted_variadic;
       T.cv_doc_comment = cv.cv_doc_comment; (* Can make None to save space *)
       T.cv_is_static = is_static
@@ -6593,22 +6606,24 @@ and supertype_redeclared_method tc env m =
     | _ -> ()
   end); env
 
-and file_attributes tcopt file mode droot file_attrs =
-  let env = Env.empty tcopt file ~droot in
-  let env = Env.set_mode env mode in
+and file_attributes env file_attrs =
   let uas = List.concat_map ~f:(fun fa -> fa.fa_user_attributes) file_attrs in
   let env =
     Typing_attributes.check_def env new_object SN.AttributeKinds.file uas in
-  List.map
-    ~f:(fun fa ->
-      { T.fa_user_attributes = List.map ~f:(user_attribute env) fa.fa_user_attributes;
+  List.map_env env file_attrs
+    (fun env fa ->
+      let env, user_attributes =
+        List.map_env env fa.fa_user_attributes user_attribute in
+      env,
+      { T.fa_user_attributes = user_attributes;
         T.fa_namespace = fa.fa_namespace;
       })
-    file_attrs
 
 and user_attribute env ua =
-  let typed_ua_params =
-    List.map ua.ua_params (fun e -> let _env, te, _ty = expr env e in te) in
+  let env, typed_ua_params =
+    List.map_env env ua.ua_params
+      (fun env e -> let env, te, _ = expr env e in env, te) in
+  env,
   {
     T.ua_name = ua.ua_name;
     T.ua_params = typed_ua_params;
@@ -6623,17 +6638,22 @@ and reify_kind = function
 and type_param env t =
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.typeparam t.tp_user_attributes in
+  let env, user_attributes =
+    List.map_env env t.tp_user_attributes user_attribute in
+  env,
   {
     T.tp_variance = t.tp_variance;
     T.tp_name = t.tp_name;
     T.tp_constraints = t.tp_constraints;
     T.tp_reified = reify_kind t.tp_reified;
-    T.tp_user_attributes = List.map t.tp_user_attributes (user_attribute env);
+    T.tp_user_attributes = user_attributes;
   }
 
 and class_type_param env ct =
+  let env, tparam_list = List.map_env env ct.c_tparam_list type_param in
+  env,
   {
-    T.c_tparam_list = List.map ~f:(type_param env) ct.c_tparam_list;
+    T.c_tparam_list = tparam_list;
     T.c_tparam_constraints = SMap.map (Tuple.T2.map_fst ~f:reify_kind) ct.c_tparam_constraints;
   }
 
@@ -6711,8 +6731,6 @@ and method_def env m =
   let local_tpenv = env.Env.lenv.Env.tpenv in
   let env, tb =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
-  let env = SubType.solve_all_unsolved_tyvars env in
-  Typing_subtype.log_prop env;
   (* restore original method reactivity  *)
   let env = Env.set_env_reactive env reactive in
   let m_ret =
@@ -6735,6 +6753,12 @@ and method_def env m =
     if Nast.named_body_is_unsafe nb
     then Tast.Annotations.FuncBodyAnnotation.HasUnsafeBlocks
     else Tast.Annotations.FuncBodyAnnotation.NoUnsafeBlocks in
+  let env, tparams =
+    List.map_env env m.m_tparams type_param in
+  let env, user_attributes =
+    List.map_env env m.m_user_attributes user_attribute in
+  let env = SubType.solve_all_unsolved_tyvars env in
+  Typing_subtype.log_prop env;
   let method_def = {
     T.m_annotation = Env.save local_tpenv env;
     T.m_span = m.m_span;
@@ -6743,12 +6767,12 @@ and method_def env m =
     T.m_abstract = m.m_abstract;
     T.m_visibility = m.m_visibility;
     T.m_name = m.m_name;
-    T.m_tparams = List.map m.m_tparams (type_param env);
+    T.m_tparams = tparams;
     T.m_where_constraints = m.m_where_constraints;
     T.m_variadic = t_variadic;
     T.m_params = typed_params;
     T.m_fun_kind = m.m_fun_kind;
-    T.m_user_attributes = List.map m.m_user_attributes (user_attribute env);
+    T.m_user_attributes = user_attributes;
     T.m_ret = m.m_ret;
     T.m_body = { T.fb_ast = tb; fb_annotation = annotation };
     T.m_external = m.m_external;
@@ -6794,15 +6818,19 @@ and typedef_def tcopt typedef  =
   end in
   let env = Typing_attributes.check_def env new_object
     SN.AttributeKinds.typealias typedef.t_user_attributes in
+  let env, tparams =
+    List.map_env env typedef.t_tparams type_param in
+  let env, user_attributes =
+    List.map_env env typedef.t_user_attributes user_attribute in
   {
     T.t_annotation = Env.save env.Env.lenv.Env.tpenv env;
     T.t_name = typedef.t_name;
     T.t_mode = typedef.t_mode;
     T.t_vis = typedef.t_vis;
-    T.t_user_attributes = List.map typedef.t_user_attributes (user_attribute env);
+    T.t_user_attributes = user_attributes;
     T.t_constraint = typedef.t_constraint;
     T.t_kind = typedef.t_kind;
-    T.t_tparams = List.map typedef.t_tparams (type_param env);
+    T.t_tparams = tparams;
     T.t_namespace = typedef.t_namespace;
   }
 

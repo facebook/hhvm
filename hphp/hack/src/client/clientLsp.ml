@@ -494,6 +494,11 @@ let request_showStatus
     ?(on_error: on_error = fun ~code:_ ~message:_ ~data:_ state -> Lwt.return state)
     (params: ShowStatus.params)
   : unit =
+  let initialize_params = initialize_params_exc () in
+  if not (Lsp_helpers.supports_status initialize_params)
+  then ()
+  else
+
   (* We try not to send duplicate statuses. *)
   (* That means: if you call request_showStatus but your message is the same as *)
   (* what's already up, then you won't be shown, and your callbacks won't be shown. *)

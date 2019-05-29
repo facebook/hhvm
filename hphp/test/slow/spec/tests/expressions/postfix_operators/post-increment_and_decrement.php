@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 function incdec($a)
 {
     echo "--------------------------------------- start incdec ---\n";
@@ -39,6 +37,9 @@ function incdecrev($a)
     echo '$a = '.$a." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }
+<<__EntryPoint>> function main() {
+error_reporting(-1);
+
 ///*
 // integer values ----------------------------------------------------
 
@@ -231,3 +232,4 @@ var_dump($x);
 var_dump(--$x);
 var_dump(--$x);
 //*/
+}

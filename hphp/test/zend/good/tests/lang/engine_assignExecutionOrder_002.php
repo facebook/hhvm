@@ -1,7 +1,18 @@
 <?php
 
+// expect the inner array to be defined
+function f() {
+  LangEngineAssignexecutionorder002::$ee = array("array created in f()");
+  return 1;
+}
+
+abstract final class LangEngineAssignexecutionorder002 {
+  public static $ee;
+}
+
+
 // simple case with missing element
-$f = array("hello","item2","bye");
+<<__EntryPoint>> function main() { $f = array("hello","item2","bye");
 list($a,,$b) = $f;
 echo "A=$a B=$b\n";
 
@@ -74,14 +85,5 @@ echo "AA=$aa\n";
 list($cc,,$dd) = array(10,20,30,40);
 echo "CC=$cc DD=$dd\n";
 
-// expect the inner array to be defined
 LangEngineAssignexecutionorder002::$ee = array("original array");
-function f() {
-
-  LangEngineAssignexecutionorder002::$ee = array("array created in f()");
-  return 1;
-}
-
-abstract final class LangEngineAssignexecutionorder002 {
-  public static $ee;
 }

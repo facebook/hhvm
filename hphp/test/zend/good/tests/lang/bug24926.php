@@ -1,7 +1,5 @@
 <?php
 
-error_reporting (E_ALL);
-
 class foo {
 
     public $functions = array();
@@ -17,5 +15,8 @@ class foo {
     }
 }
 
-$a = new foo ();
+<<__EntryPoint>> function main() {
+error_reporting (E_ALL);
 
+$a = new foo ();
+}

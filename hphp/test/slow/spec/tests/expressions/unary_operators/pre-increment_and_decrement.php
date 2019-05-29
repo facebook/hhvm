@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 // decrements twice before incrementing
 function incdec($a)
 {
@@ -63,6 +61,8 @@ function incdecrev($a)
     echo '$a = '.$a." <---> "; var_dump($a);
     echo "--------------------------------------- end incdecrev ---\n";
 }
+<<__EntryPoint>> function main() {
+error_reporting(-1);
 
 ///*
 // integer values ----------------------------------------------------
@@ -254,3 +254,4 @@ $x = "zza";
 var_dump($x);
 var_dump(--$x);
 var_dump(--$x);
+}

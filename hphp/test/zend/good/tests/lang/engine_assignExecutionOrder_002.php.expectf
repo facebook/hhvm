@@ -1,6 +1,6 @@
 A=hello B=bye
 
-Warning: Cannot use a scalar value as an array in %s/engine_assignExecutionOrder_002.php on line 10
+Warning: Cannot use a scalar value as an array in %s/engine_assignExecutionOrder_002.php on line 21
 array(2) {
   [0]=>
   int(10)
@@ -25,11 +25,11 @@ L=100 M=200 N=300
 O= and P=
 10 20 40 50 60 70 80
 
-Notice: Undefined index: 1 in %s/engine_assignExecutionOrder_002.php on line 66
+Notice: Undefined index: 1 in %s/engine_assignExecutionOrder_002.php on line 77
 
-Notice: Undefined index: 0 in %s/engine_assignExecutionOrder_002.php on line 66
+Notice: Undefined index: 0 in %s/engine_assignExecutionOrder_002.php on line 77
 Y=,Z=
 
-Notice: Undefined index: 1 in %s/engine_assignExecutionOrder_002.php on line 70
+Notice: Undefined index: 1 in %s/engine_assignExecutionOrder_002.php on line 81
 AA=10
 CC=10 DD=30

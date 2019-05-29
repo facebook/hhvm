@@ -1,2 +1,2 @@
 
-Fatal error: Cannot override final method pass::show() in %s/final_redeclare.php on line 11
+Fatal error: Cannot override final method pass::show() in %s/final_redeclare.php on line 9

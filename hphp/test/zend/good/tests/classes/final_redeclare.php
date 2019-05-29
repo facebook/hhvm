@@ -1,17 +1,19 @@
 <?php
 
 class pass {
-	final function show() {
-		echo "Call to function pass::show()\n";
-	}
+    final function show() {
+        echo "Call to function pass::show()\n";
+    }
 }
-
-$t = new pass();
 
 class fail extends pass {
-	function show() {
-		echo "Call to function fail::show()\n";
-	}
+    function show() {
+        echo "Call to function fail::show()\n";
+    }
 }
 
+<<__EntryPoint>> function main() {
+$t = new pass();
+
 echo "Done\n"; // Shouldn't be displayed
+}

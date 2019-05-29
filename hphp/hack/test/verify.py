@@ -294,12 +294,19 @@ def record_results(results: List[Result], out_ext: str) -> None:
             f.write(bytes(result.output, 'UTF-8'))
 
 
-def find_in_ancestors(dir: str, path: str) -> str:
-    if path == "":
+def find_in_ancestors_rec(dir: str, path: str) -> str:
+    if path == "" or os.path.dirname(path) == path:
         raise Exception('Could not find directory %s in ancestors.' % dir)
     if os.path.basename(path) == dir:
         return path
-    return find_in_ancestors(dir, os.path.dirname(path))
+    return find_in_ancestors_rec(dir, os.path.dirname(path))
+
+
+def find_in_ancestors(dir: str, path: str) -> str:
+    try:
+        return find_in_ancestors_rec(dir, path)
+    except Exception:
+        raise Exception('Could not find directory %s in ancestors of %s.' % (dir, path))
 
 
 def get_exp_out_dirs(test_file: str) -> Tuple[str, str]:
@@ -308,8 +315,8 @@ def get_exp_out_dirs(test_file: str) -> Tuple[str, str]:
         exp_dir = os.environ['HACK_SOURCE_ROOT']
         out_dir = os.environ['HACK_BUILD_ROOT']
     else:
-        exp_dir = find_in_ancestors("hack", test_file)
-        out_dir = os.path.dirname(find_in_ancestors("test", test_file))
+        exp_dir = os.path.dirname(find_in_ancestors("test", test_file))
+        out_dir = exp_dir
     return exp_dir, out_dir
 
 

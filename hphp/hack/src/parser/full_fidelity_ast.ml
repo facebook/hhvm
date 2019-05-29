@@ -3154,9 +3154,12 @@ and pDef : def list parser = fun node env ->
     ; alias_constraint        = constr
     ; alias_type              = hint
     ; _ } ->
+      let ast_tparams = pTParaml tparams env in
+      List.iter ast_tparams ~f:(function { tp_reified; _} -> if tp_reified then
+        raise_parsing_error env (`Node node) SyntaxError.invalid_reified);
       [ Typedef
       { t_id              = pos_name name env
-      ; t_tparams         = pTParaml tparams env
+      ; t_tparams         = ast_tparams
       ; t_constraint      = Option.map ~f:snd @@
           mpOptional pTConstraint constr env
       ; t_user_attributes = List.concat @@

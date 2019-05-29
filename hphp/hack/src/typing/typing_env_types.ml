@@ -125,9 +125,6 @@ type env = {
   (* position of the function/method being checked *)
   function_pos: Pos.t;
   pos     : Pos.t      ;
-  (* Position and reason information on entry to a subtype or unification check *)
-  outer_pos : Pos.t;
-  outer_reason : Typing_reason.ureason;
   tenv    : locl_ty IMap.t ;
   subst   : int IMap.t ;
   lenv    : local_env  ;

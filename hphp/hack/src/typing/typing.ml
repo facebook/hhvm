@@ -4292,8 +4292,7 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
             in env, ty
         end in
       let env, ty = Union.union_list env (fst cty) tyl in
-      let env, method_ = TUtils.in_var env ty in
-      env, method_, None
+      env, ty, None
   | _, Tabstract (_, Some ty) ->
       class_get_ ~is_method ~is_const ~this_ty ~explicit_tparams ~incl_tc
         env cid ty (p, mid)
@@ -4683,8 +4682,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
           (env, vis), ty
         end in
       let env, ty = Union.union_list env (fst ety1) tyl in
-      let env, method_ = TUtils.in_var env ty in
-      env, method_, vis
+      env, ty, vis
 
   | p', (Tabstract(ak, Some ty)) ->
     let k_lhs' ty = match ak with
@@ -5078,9 +5076,6 @@ and inout_write_back env { fp_type; _ } (_, e) =
     | _ -> env
 
 and call ~(expected: expected_ty option) ?method_call_info pos env fty el uel =
-  call_ ~expected ~method_call_info pos env fty el uel
-
-and call_ ~(expected: expected_ty option) ~method_call_info pos env fty el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
   let resl = TUtils.try_over_concrete_supertypes env fty begin fun env fty ->
     let env, efty = SubType.expand_type_and_solve
@@ -5120,7 +5115,7 @@ and call_ ~(expected: expected_ty option) ~method_call_info pos env fty el uel =
       let env, retl = List.map_env env tyl begin fun env ty ->
         let env, _, _, ty = call ~expected pos env ty el uel in env, ty
       end in
-      let env, ty = TUtils.in_var env (r, Tunion retl) in
+      let ty = (r, Tunion retl) in
       env, [], [], ty
     | r2, Tfun ft ->
       (* Typing of format string functions. It is dependent on the arguments (el)

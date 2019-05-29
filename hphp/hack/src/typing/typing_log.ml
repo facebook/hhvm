@@ -447,8 +447,6 @@ let env_as_value env =
   let {
     function_pos;
     pos;
-    outer_pos;
-    outer_reason = _;
     tenv;
     subst;
     lenv;
@@ -469,7 +467,6 @@ let env_as_value env =
   } = env in
   make_map [
     "pos", pos_as_value pos;
-    "outer_pos", pos_as_value outer_pos;
     "function_pos", pos_as_value function_pos;
     "tvenv", tvenv_as_value env tvenv;
     "tenv", tenv_as_value env tenv;

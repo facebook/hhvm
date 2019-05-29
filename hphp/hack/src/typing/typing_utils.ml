@@ -586,11 +586,6 @@ let non_null env pos ty =
 (* *)
 (*****************************************************************************)
 
-let in_var env ty =
-  let x = Env.fresh () in
-  let env = Env.add env x ty in
-  env, (fst ty, Tvar x)
-
 let unresolved_tparam ~reason env =
   let v = Env.fresh () in
   let env = Env.add_current_tyvar env (Reason.to_pos reason) v in

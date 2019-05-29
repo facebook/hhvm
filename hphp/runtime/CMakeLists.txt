@@ -56,8 +56,6 @@ object_library_hphp_link(hphp_runtime_static)
 object_library_ld_link_libraries(hphp_runtime_static hphp_util hphp_proxygen vixl ppc64-asm hphp_zend hphp_system jit_sort hphp_parser)
 HHVM_CONFIGURE_TARGET_FOR_EXTENSION_DEPENDENCIES(hphp_runtime_static)
 
-SET(CMAKE_CXX_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
-
 HHVM_PUBLIC_HEADERS(runtime ${HEADER_SOURCES})
 
 if (ENABLE_COTIRE)

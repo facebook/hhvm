@@ -653,3 +653,5 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
 else()
   message("Warning: unknown/unsupported compiler, things may go wrong")
 endif()
+
+include(ThinArchives)

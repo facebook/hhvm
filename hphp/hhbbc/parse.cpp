@@ -171,7 +171,7 @@ std::set<Offset> findBasicBlocks(const FuncEmitter& fe) {
     auto const breaksBB =
       instrIsNonCallControlFlow(op) ||
       instrFlags(op) & TF ||
-      (isFCallStar(op) && !instrJumpOffsets(pc).empty());
+      (hasFCallEffects(op) && !instrJumpOffsets(pc).empty());
 
     if (options.TraceBytecodes.count(op)) traceBc = true;
 
@@ -384,7 +384,7 @@ void populate_block(ParseUnitState& puState,
                                    &*fe.fpitab.end(), pc - ue.bc());
     auto pc = ue.bc() + fpi->m_fpiEndOff;
     auto const op = decode_op(pc);
-    if (op != OpFCall) return false;
+    if (!isLegacyFCall(op)) return false;
     return decodeFCallArgs(pc).hasUnpack();
   };
 

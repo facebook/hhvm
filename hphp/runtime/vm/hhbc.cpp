@@ -316,7 +316,7 @@ OffsetList instrJumpOffsets(const PC origPC) {
   auto const op = decode_op(pc);
 
   OffsetList targets;
-  if (isFCallStar(op)) {
+  if (hasFCallEffects(op)) {
     auto const offset = decodeFCallArgs(pc).asyncEagerOffset;
     if (offset != kInvalidOffset) targets.emplace_back(offset);
     return targets;
@@ -1094,12 +1094,12 @@ X(SpecialClsRef,  static_cast<int>(SpecialClsRef::Self))
 namespace {
 
 bool instrIsVMCall(Op opcode) {
+  if (hasFCallEffects(opcode)) return true;
   switch (opcode) {
     case OpContEnter:
     case OpContEnterDelegate:
     case OpContRaise:
     case OpEval:
-    case OpFCall:
     case OpIncl:
     case OpInclOnce:
     case OpReq:

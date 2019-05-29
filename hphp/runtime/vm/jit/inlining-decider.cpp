@@ -104,7 +104,7 @@ const StaticString
  */
 bool isCalleeInlinable(SrcKey callSK, const Func* callee,
                        Annotations* annotations) {
-  assertx(callSK.op() == Op::FCall);
+  assertx(hasFCallEffects(callSK.op()));
   auto refuse = [&] (const char* why) {
     return traceRefusal(callSK, callee, why, annotations);
   };
@@ -151,7 +151,7 @@ bool isCalleeInlinable(SrcKey callSK, const Func* callee,
  * Check that we don't have any missing or extra arguments.
  */
 bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
-  assertx(callSK.op() == Op::FCall);
+  assertx(hasFCallEffects(callSK.op()));
   assertx(callee);
 
   auto refuse = [&] (const char* why) {
@@ -199,7 +199,7 @@ bool checkNumArgs(SrcKey callSK, const Func* callee, Annotations* annotations) {
 }
 
 bool canInlineAt(SrcKey callSK, const Func* callee, Annotations* annotations) {
-  assertx(callSK.op() == Op::FCall);
+  assertx(hasFCallEffects(callSK.op()));
 
   if (!callee) {
     return traceRefusal(callSK, callee, "unknown callee", annotations);
@@ -829,7 +829,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                                  Op writeArOpc,
                                  const SrcKey& sk,
                                  Annotations& annotations) {
-  assertx(sk.op() == OpFCall);
+  assertx(hasFCallEffects(sk.op()));
 
   auto kind = irgs.context.kind;
   auto annotationsPtr = mcgen::dumpTCAnnotation(kind) ?

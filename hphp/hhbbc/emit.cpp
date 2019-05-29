@@ -173,12 +173,12 @@ std::vector<BlockId> initial_sort(const php::Func& f) {
     if (!fpiState) fpiState.emplace();
     auto curState = *fpiState;
     for (auto const& bc : f.blocks[bid]->hhbcs) {
-      if (isFPush(bc.op)) {
-        FTRACE(4, "blk:{} FPush {} (nesting {})\n",
+      if (isLegacyFPush(bc.op)) {
+        FTRACE(4, "blk:{} legacy FPush {} (nesting {})\n",
                bid, nextFpi, curState.size());
         curState.push_back(nextFpi++);
-      } else if (isFCallStar(bc.op)) {
-        FTRACE(4, "blk:{} FCall {} (nesting {})\n",
+      } else if (isLegacyFCall(bc.op)) {
+        FTRACE(4, "blk:{} legacy FCall {} (nesting {})\n",
                bid, curState.back(), curState.size() - 1);
         fpiToCallBlkMap[curState.back()] = bid;
         curState.pop_back();
@@ -603,17 +603,10 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       ret.maxStackDepth = std::max<uint32_t>(ret.maxStackDepth, depth);
     };
 
-    auto fpush = [&] {
+    auto begin_fpi = [&] {
       fpiStack.push_back({startOffset, kInvalidOffset, currentStackDepth});
       auto const depth = currentStackDepth + fpiStack.size() * kNumActRecCells;
       ret.maxStackDepth = std::max<uint32_t>(ret.maxStackDepth, depth);
-    };
-
-    auto fcall = [&] (Op op) {
-      // FCalls with unpack do their own stack overflow checking
-      if (!(op == Op::FCall && inst.FCall.fca.hasUnpack())) {
-        ret.containsCalls = true;
-      }
     };
 
     auto ret_assert = [&] { assert(currentStackDepth == inst.numPop()); };
@@ -673,7 +666,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          [&] {                                             \
                            set_expected_depth(data.fca.asyncEagerTarget);  \
                            emit_branch(data.fca.asyncEagerTarget);         \
-                         });
+                         });                                               \
+                       if (!data.fca.hasUnpack()) ret.containsCalls = true;\
 
 #define IMM_NA
 #define IMM_ONE(x)           IMM_##x(1)
@@ -727,8 +721,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
       if (isRet(Op::opcode)) ret_assert();                      \
       ue.emitOp(Op::opcode);                                    \
       POP_##inputs                                              \
-      if (isFPush(Op::opcode))     fpush();                     \
-      if (isFCallStar(Op::opcode)) end_fpi(startOffset);        \
+      if (isLegacyFPush(Op::opcode)) begin_fpi();               \
+      if (isLegacyFCall(Op::opcode)) end_fpi(startOffset);      \
                                                                 \
       size_t numTargets = 0;                                    \
       std::array<BlockId, kMaxHhbcImms> targets;                \
@@ -752,7 +746,6 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
         }                                                       \
       }                                                         \
                                                                 \
-      if (isFCallStar(Op::opcode)) fcall(Op::opcode);           \
       if (flags & TF) currentStackDepth = 0;                    \
       emit_srcloc();                                            \
     };

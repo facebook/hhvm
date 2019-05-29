@@ -1001,8 +1001,16 @@ constexpr bool isJmp(Op opcode) {
     opcode == Op::JmpNZ;
 }
 
-constexpr bool isFPush(Op opcode) {
+constexpr bool isNewFCall(Op opcode) {
+  return false;
+}
+
+constexpr bool isLegacyFPush(Op opcode) {
   return (instrFlags(opcode) & PF) != 0;
+}
+
+constexpr bool hasFPushEffects(Op opcode) {
+  return isLegacyFPush(opcode) || isNewFCall(opcode);
 }
 
 constexpr bool isFPushClsMethod(Op opcode) {
@@ -1026,13 +1034,12 @@ constexpr bool isFPushFunc(Op opcode) {
   return opcode == OpFPushFunc || opcode == OpFPushFuncD;
 }
 
-inline bool isFCallStar(Op opcode) {
-  switch (opcode) {
-    case Op::FCall:
-      return true;
-    default:
-      return false;
-  }
+constexpr bool isLegacyFCall(Op opcode) {
+  return opcode == Op::FCall;
+}
+
+constexpr bool hasFCallEffects(Op opcode) {
+  return isLegacyFCall(opcode) || isNewFCall(opcode);
 }
 
 constexpr bool isRet(Op op) {

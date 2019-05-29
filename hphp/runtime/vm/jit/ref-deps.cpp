@@ -28,7 +28,7 @@ TRACE_SET_MOD(trans);
 
 void
 ActRecState::pushFunc(const NormalizedInstruction& inst) {
-  assertx(isFPush(inst.op()));
+  assertx(isLegacyFPush(inst.op()));
 
   const Unit& unit = *inst.unit();
   const Func* func = nullptr;

@@ -81,7 +81,7 @@ inline void exception_handler(Action action) {
       auto const outer = fp->m_sfp;
       auto const off = outer->func()->base() + fp->m_callOff;
       vmpc() = outer->func()->unit()->at(off);
-      assertx(isFCallStar(peek_op(vmpc())));
+      assertx(hasFCallEffects(peek_op(vmpc())));
       vmfp() = outer;
       assertx(vmsp() == reinterpret_cast<Cell*>(fp) - fp->numArgs());
     } else {

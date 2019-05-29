@@ -130,7 +130,7 @@ struct FuncChecker {
   bool checkSig(PC pc, int len, const FlavorDesc* args, const FlavorDesc* sig);
   bool checkEHStack(const EHEnt&, Block* b);
   bool checkTerminal(State* cur, PC pc);
-  bool checkFCall(State* cur, PC pc);
+  bool checkLegacyFCall(State* cur, PC pc);
   bool checkIter(State* cur, PC pc);
   bool checkClsRefSlots(State* cur, PC pc);
   bool checkIterBreak(State* cur, PC pc);
@@ -923,7 +923,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
 
 bool FuncChecker::checkInputs(State* cur, PC pc, Block* b) {
   auto const numPops = instrNumPops(pc);
-  auto fpiAdj = isFCallStar(peek_op(pc)) ? 2 : 1;
+  auto fpiAdj = isLegacyFCall(peek_op(pc)) ? 2 : 1;
   int min = cur->fpilen > fpiAdj - 1
     ? cur->fpi[cur->fpilen - fpiAdj].stkmin
     : 0;
@@ -1016,8 +1016,8 @@ bool FuncChecker::checkTerminal(State* cur, PC pc) {
   return true;
 }
 
-bool FuncChecker::checkFCall(State* cur, PC pc) {
-  assertx(isFCallStar(peek_op(pc)));
+bool FuncChecker::checkLegacyFCall(State* cur, PC pc) {
+  assertx(isLegacyFCall(peek_op(pc)));
 
   if (cur->fpilen <= 0) {
     error("%s", "cannot access empty FPI stack\n");
@@ -1553,7 +1553,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
   cur->stklen += pushes;
   if (op == Op::BaseSC) {
     if (pushes == 1) outs[0] = outs[1];
-  } else if (isFPush(op)) {
+  } else if (isLegacyFPush(op)) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = outs[i + 3];
     }
@@ -1566,7 +1566,7 @@ bool FuncChecker::checkOutputs(State* cur, PC pc, Block* b) {
     cur->fpilen++;
     fpi.fpush = offset(pc);
     fpi.stkmin = cur->stklen - pushes;
-  } else if (op == Op::FCall) {
+  } else if (hasFCallEffects(op)) {
     for (int i = 0; i < pushes; ++i) {
       outs[i] = CV;
     }
@@ -2167,7 +2167,7 @@ bool FuncChecker::checkBlock(State& cur, Block* b) {
     ok &= checkInputs(&cur, pc, b);
     auto const flags = instrFlags(op);
     if (flags & TF) ok &= checkTerminal(&cur, pc);
-    if (op == Op::FCall) ok &= checkFCall(&cur, pc);
+    if (isLegacyFCall(op)) ok &= checkLegacyFCall(&cur, pc);
     if (isIter(pc)) ok &= checkIter(&cur, pc);
     if (op == Op::IterBreak) ok &= checkIterBreak(&cur, pc);
     ok &= checkClsRefSlots(&cur, pc);

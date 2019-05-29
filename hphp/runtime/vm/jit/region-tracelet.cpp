@@ -236,8 +236,8 @@ bool prepareInstruction(Env& env) {
 
   addInstruction(env);
 
-  if (isFPush(env.inst.op())) env.arState.pushFunc(env.inst);
-  if (isFCallStar(env.inst.op())) {
+  if (isLegacyFPush(env.inst.op())) env.arState.pushFunc(env.inst);
+  if (hasFCallEffects(env.inst.op())) {
     auto const asyncEagerOffset = env.inst.imm[0].u_FCA.asyncEagerOffset;
     if (asyncEagerOffset != kInvalidOffset) {
       // Note that the arc between the block containing asyncEagerOffset and
@@ -566,7 +566,7 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
-    if (isFPush(env.inst.op())) {
+    if (isLegacyFPush(env.inst.op())) {
       // We may have inferred the target of the call based on type specialized
       // type information that won't be available when the region is
       // translated.  If we allow the FCall to specialize using this
@@ -618,7 +618,7 @@ RegionDescPtr form_region(Env& env) {
       break;
     }
 
-    if (isFCallStar(env.inst.op())) env.arState.pop();
+    if (isLegacyFCall(env.inst.op())) env.arState.pop();
   }
 
   if (env.region && !env.region->empty()) {

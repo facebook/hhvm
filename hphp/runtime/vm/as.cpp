@@ -1605,7 +1605,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
       as.enterReachableRegion(0);                                      \
     }                                                                  \
                                                                        \
-    if (isFCallStar(Op##name)) {                                       \
+    if (isLegacyFCall(Op##name)) {                                     \
       as.endFpi();                                                     \
     }                                                                  \
                                                                        \
@@ -1616,7 +1616,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
                                                                        \
     as.adjustStack(-NUM_POP_##pop);                                    \
                                                                        \
-    if (isFPush(Op##name)) {                                           \
+    if (isLegacyFPush(Op##name)) {                                     \
       as.beginFpi(curOpcodeOff);                                       \
     }                                                                  \
                                                                        \
@@ -1646,7 +1646,7 @@ std::map<std::string,ParserFunc> opcode_parsers;
     }                                                                  \
                                                                        \
     /* FCalls with unpack perform their own bounds checking. */        \
-    if (Op##name == OpFCall && !immFCA.hasUnpack()) {                  \
+    if (hasFCallEffects(Op##name) && !immFCA.hasUnpack()) {            \
       as.fe->containsCalls = true;                                     \
     }                                                                  \
                                                                        \

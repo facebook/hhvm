@@ -407,7 +407,7 @@ void conjureBeginInlining(IRGS& env,
     return t.admitsSingleVal() ? cns(env, t) : gen(env, Conjure, t);
   };
 
-  always_assert(isFPush(env.context.callerFPushOp));
+  always_assert(hasFPushEffects(env.context.callerFPushOp));
   auto const numParams = static_cast<uint32_t>(args.size());
 
   allocActRec(env);

@@ -166,7 +166,7 @@ bool merge_into(FrameState& dst, const FrameState& src) {
     auto const& srcInfo = src.fpiStack[i];
 
     always_assert(dstInfo.returnSP == srcInfo.returnSP);
-    always_assert(isFPush(dstInfo.fpushOpc) &&
+    always_assert(hasFPushEffects(dstInfo.fpushOpc) &&
                   dstInfo.fpushOpc == srcInfo.fpushOpc);
 
     // If one of the merged edges is not eligible for inlining, mark the result
@@ -733,7 +733,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case InterpOne:
   case InterpOneCF: {
     auto const& extra = *inst->extra<InterpOneData>();
-    if (isFPush(extra.opcode)) {
+    if (isLegacyFPush(extra.opcode)) {
       cur().fpiStack.push_back(FPIInfo { cur().spValue,
                                          extra.spOffset,
                                          TCtx,
@@ -743,7 +743,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
                                          nullptr,
                                          false /* inlineEligible */,
                                          false /* spansCall */});
-    } else if (isFCallStar(extra.opcode) && !cur().fpiStack.empty()) {
+    } else if (isLegacyFCall(extra.opcode) && !cur().fpiStack.empty()) {
       cur().fpiStack.pop_back();
     }
 

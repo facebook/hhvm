@@ -137,15 +137,10 @@ const void annotate(NormalizedInstruction* i,
 //////////////////////////////////////////////////////////////////////
 
 void annotate(NormalizedInstruction* i) {
-  switch (i->op()) {
-  case Op::FCall:
-    annotate(i,
-             i->m_unit->lookupLitstrId(i->imm[1].u_SA),
-             i->m_unit->lookupLitstrId(i->imm[2].u_SA));
-    break;
-  default:
-    break;
-  }
+  if (!isLegacyFCall(i->op())) return;
+  annotate(i,
+           i->m_unit->lookupLitstrId(i->imm[1].u_SA),
+           i->m_unit->lookupLitstrId(i->imm[2].u_SA));
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -339,9 +339,7 @@ RegionDescPtr getInlinableCalleeRegion(const irgen::IRGS& irgs,
                                        const ProfSrcKey& psk,
                                        int& calleeCost,
                                        Annotations& annotations) {
-  if (psk.srcKey.op() != Op::FCall) {
-    return nullptr;
-  }
+  assertx(hasFCallEffects(psk.srcKey.op()));
   if (isProfiling(irgs.context.kind) || irgs.inlineState.conjure) {
     return nullptr;
   }

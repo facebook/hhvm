@@ -707,8 +707,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
   auto const flags = info.in;
   auto stackOff = bcSPOff;
 
-  if (flags & FStack) {
-    assertx(isFCallStar(ni.op()));
+  if (isLegacyFCall(ni.op())) {
     stackOff -= ni.imm[0].u_FCA.numArgsInclUnpack();  // arguments consumed
     stackOff -= kNumActRecCells;  // ActRec is torn down as well
   }
@@ -760,8 +759,9 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
       inputs.emplace_back(Location::Stack { stackOff-- });
     }
   }
-  if (isFPush(ni.op())) {
-    int numArgs = ni.imm[0].u_IVA;
+  if (hasFPushEffects(ni.op())) {
+    auto const numArgs = isLegacyFPush(ni.op())
+      ? ni.imm[0].u_IVA : ni.imm[0].u_FCA.numArgsInclUnpack();
 
     SKTRACE(1, sk, "getInputs: %s %d %d\n",
             opcodeToName(ni.op()), stackOff.offset, numArgs);
@@ -1102,7 +1102,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
 }
 
 bool instrBreaksProfileBB(const NormalizedInstruction* inst) {
-  if (isFCallStar(inst->op())) return true;
+  if (hasFCallEffects(inst->op())) return true;
 
   if (instrIsNonCallControlFlow(inst->op()) ||
       inst->op() == OpAwait || // may branch to scheduler and suspend execution
@@ -1220,7 +1220,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni,
   }
   auto pc = ni.pc();
   for (auto i = 0, num = instrNumPops(pc); i < num; ++i) {
-    if (ni.op() == OpFCall && instrInputFlavor(pc, i) == UV) {
+    if (hasFCallEffects(ni.op()) && instrInputFlavor(pc, i) == UV) {
       // This is a hack to deal with the fact that this instruction is
       // actually popping an ActRec in the middle of its "pops." We could
       // assert on the Uninit values on the stack, but the call is going to

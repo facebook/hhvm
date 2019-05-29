@@ -59,7 +59,6 @@ val suggest_static_member :
 val get_member : bool -> env -> class_decl -> string -> class_elt option
 val suggest_member : bool -> class_decl -> string -> (Pos.t * string) option
 val get_construct : env -> class_decl -> class_elt option * consistent_kind
-val check_todo : env -> env
 val get_return : env -> Typing_env_return_info.t
 val set_return : env -> Typing_env_return_info.t -> env
 val get_params : env -> (locl ty * param_mode) Local_id.Map.t
@@ -81,8 +80,6 @@ val get_file : env -> Relative_path.t
 val get_fun : env -> fun_key -> fun_decl option
 val set_fn_kind : env -> Ast.fun_kind -> env
 val set_inside_ppl_class : env -> bool -> env
-val add_todo : env -> tfun -> env
-val check_now_or_add_todo : env -> tfun -> env
 val add_anonymous : env -> anon -> env * int
 val get_anonymous : env -> int -> anon option
 val iter_anonymous : env -> (Pos.t -> locl ty list -> unit) -> unit
@@ -109,7 +106,6 @@ module FakeMembers :
     val make_static : Pos.t -> env -> Nast.class_id_ -> string ->
       env * Local_id.t
   end
-val unbind : env -> locl ty -> env * locl ty
 val tany : env -> 'a ty_
 val next_cont_exn : env -> local_id_map
 val next_cont_opt : env -> local_id_map option

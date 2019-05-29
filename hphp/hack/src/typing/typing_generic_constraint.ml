@@ -44,27 +44,23 @@ let check_constraint env ck ty ~cstr_ty =
       TUtils.sub_type env ecstr_ty ty
   | Ast.Constraint_pu_from -> failwith "TODO(T36532263): Pocket Universes"
 
-let add_check_constraint_todo (env_now:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
-  Env.check_now_or_add_todo env_now begin fun (env:Env.env) ->
+let add_check_constraint_todo (env:Env.env) ~use_pos (pos,name) ck cstr_ty ty =
     Errors.try_
       (fun () ->
         check_constraint env ck ty ~cstr_ty)
       (fun l ->
        Errors.explain_constraint ~use_pos ~definition_pos:pos ~param_name:name l;
        env
-      ), true
-  end
+      )
 
-let add_check_where_constraint_todo (env_now:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
-  Env.check_now_or_add_todo env_now begin fun (env:Env.env) ->
+let add_check_where_constraint_todo (env:Env.env) ~use_pos ~definition_pos ck cstr_ty ty =
     Errors.try_
       (fun () ->
         check_constraint env ck ty ~cstr_ty)
       (fun l ->
        Errors.explain_where_constraint ~use_pos ~definition_pos l;
        env
-      ), true
-  end
+      )
 
 (*
   For where clauses containing type accesses, we can't just handle equality
@@ -106,8 +102,7 @@ let handle_eq_tconst_constraint env ck ty cstr_ty =
   end
 
 let add_check_tconst_where_constraint_todo
-  (env_now:Env.env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
-  Env.check_now_or_add_todo env_now begin fun (env: Env.env) ->
+  (env:Env.env) ~use_pos ~definition_pos ck ty_from_env cstr_ty ty =
     Errors.try_
       (fun () ->
         let env, ty = ty_from_env env ty in
@@ -121,5 +116,4 @@ let add_check_tconst_where_constraint_todo
       (fun l ->
         Errors.explain_tconst_where_constraint ~use_pos ~definition_pos l;
        env
-      ), true
-  end
+      )

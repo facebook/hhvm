@@ -203,7 +203,6 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
               let any = err_witness env expr_pos in
               any, any
         in
-        let env, ty2 = Env.unbind env ty2 in
         (* dict and keyset are covariant in the key type, so subsumption
          * lets you upcast the key type beyond ty2 to arraykey.
          * e.g. consider $d: dict<string,int> and $i:int
@@ -212,8 +211,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
          *)
         let env, k = Env.expand_type env k in
         let env =
-          if TypecheckerOptions.new_inference (Env.get_tcopt env)
-          && (cn = SN.Collections.cDict || cn = SN.Collections.cKeyset)
+          if (cn = SN.Collections.cDict || cn = SN.Collections.cKeyset)
           then env (* TODO: enable arraykey checking here *)
           else type_index env expr_pos ty2 k (Reason.index_class cn) in
         env, v
@@ -230,17 +228,13 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
     if is_lvalue then
       error_const_mutation env expr_pos ety1
     else
-      let (k, v) = match argl with
+      let (_k, v) = match argl with
         | [k; v] -> (k, v)
         | _ ->
             arity_error id;
             let any = err_witness env expr_pos in
             any, any
       in
-      let env =
-        if TypecheckerOptions.new_inference (Env.get_tcopt env)
-        then env
-        else type_index env expr_pos ty2 k (Reason.index_class cn) in
       env, v
   | Tclass ((_, cn) as id, _, argl)
       when not is_lvalue &&
@@ -255,14 +249,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
       when is_lvalue &&
         (cn = SN.Collections.cConstVector || cn = SN.Collections.cImmVector) ->
     error_const_mutation env expr_pos ety1
-  | Tarraykind (AKdarray (k, v) | AKmap (k, v)) ->
-      let env, ty2 = Env.unbind env ty2 in
-      (* See comment for dict and keyset above *)
-      let env, k = Env.expand_type env k in
-      let env =
-        if TypecheckerOptions.new_inference (Env.get_tcopt env)
-        then env (* TODO: enable arraykey checking here *)
-        else type_index env expr_pos ty2 k Reason.index_array in
+  | Tarraykind (AKdarray (_k, v) | AKmap (_k, v)) ->
       env, v
   | Terr -> env, err_witness env expr_pos
   | Tdynamic -> env, ety1
@@ -358,10 +345,7 @@ let rec array_get ~array_pos ~expr_pos ?(lhs_of_null_coalesce=false)
       end
   | Toption ty -> nullable_container_get env ty
   | Tprim Tnull ->
-    let ty =
-      if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-      then (Reason.Rnone, Tunion [])
-      else (Reason.Rnone, Tany) in
+    let ty = (Reason.Rnone, Tunion []) in
     nullable_container_get env ty
   | Tobject ->
       if Partial.should_check_error (Env.get_mode env) 4005

@@ -104,24 +104,18 @@ let empty_tyvar_info =
     }
 
 let add_current_tyvar env p v =
-  if TypecheckerOptions.new_inference env.genv.tcopt
-  then
-    match env.tyvars_stack with
-    | (expr_pos, tyvars) :: rest ->
-      let env = env_with_tvenv env
-        (IMap.add v { empty_tyvar_info with tyvar_pos = p } env.tvenv) in
-      { env with tyvars_stack = (expr_pos, (v :: tyvars)) :: rest }
-    | _ -> env
-  else env
+  match env.tyvars_stack with
+  | (expr_pos, tyvars) :: rest ->
+    let env = env_with_tvenv env
+      (IMap.add v { empty_tyvar_info with tyvar_pos = p } env.tvenv) in
+    { env with tyvars_stack = (expr_pos, (v :: tyvars)) :: rest }
+  | _ -> env
 
 let fresh_unresolved_type_reason env r =
   let v = Ident.tmp () in
   let env =
-    if TypecheckerOptions.new_inference env.genv.tcopt
-    then
-      log_env_change "fresh_unresolved_type" env @@
-      add_current_tyvar env (Reason.to_pos r) v
-    else add env v (Reason.Rnone, Tunion []) in
+    log_env_change "fresh_unresolved_type" env @@
+    add_current_tyvar env (Reason.to_pos r) v in
   env, (r, Tvar v)
 
 let fresh_unresolved_type env p =
@@ -151,10 +145,7 @@ let get_type env x_reason x =
   let env, x = get_var env x in
   let ty = IMap.get x env.tenv in
   match ty with
-  | None ->
-    if TypecheckerOptions.new_inference env.genv.tcopt
-    then env, (x_reason, Tvar x)
-    else env, (x_reason, Tany)
+  | None -> env, (x_reason, Tvar x)
   | Some ty -> env, ty
 
 let get_type_unsafe env x =
@@ -649,8 +640,6 @@ let empty tcopt file ~droot = {
   tenv    = IMap.empty;
   subst   = IMap.empty;
   lenv    = initial_local SMap.empty Nonreactive;
-  todo    = [];
-  checking_todos = false;
   in_loop = false;
   in_try  = false;
   in_case  = false;
@@ -773,7 +762,6 @@ let get_env_mutability env =
 (* When we want to type something with a fresh typing environment *)
 let fresh_tenv env f =
   f { env with
-      todo = [];
       lenv = initial_local env.lenv.tpenv env.lenv.local_reactive;
       tenv = IMap.empty;
       in_loop = false;
@@ -873,15 +861,6 @@ let get_construct env class_ =
   Option.iter (fst (Cls.construct class_)) (fun ce -> add_dep ce.ce_origin);
   (Cls.construct class_)
 
-let check_todo env =
-  let env = { env with checking_todos = true } in
-    let env, remaining =
-      List.fold_left env.todo ~f:(fun (env, remaining) f ->
-        let env, remove = f env in
-        if remove then env, remaining else env, f::remaining)
-        ~init:(env, []) in
-    { env with todo = List.rev remaining; checking_todos = false }
-
 let get_return env =
   env.genv.return
 
@@ -935,40 +914,6 @@ let set_fn_kind env fn_type =
 
 let set_inside_ppl_class env inside_ppl_class =
   { env with inside_ppl_class }
-
-(* Add a function on environments that gets run at some later stage to check
- * constraints, by which time unresolved type variables may be resolved.
- * Because the validity of the constraint might depend on tpenv
- * at the point that the `add_todo` is called, we extend the environment at
- * the point that the function gets run with `tpenv` captured at the point
- * that `add_todo` gets called.
- * Typical examples are `instanceof` tests that introduce bounds on fresh
- * type parameters (e.g. named T#1) or on existing type parameters, which
- * are removed after the end of the `instanceof` conditional block. e.g.
- *   function foo<T as arraykey>(T $x): void { }
- *   class C<+T> { }
- *   class D extends C<arraykey> { }
- *   function test<Tu>(C<Tu> $x, Tu $y): void {
- *   if ($x instanceof D) {
- *     // Here we know Tu <: arraykey but the constraint is checked later
- *     foo($y);
- *   }
- *)
-let add_todo env f =
-  let tpenv_now = env.lenv.tpenv in
-  let f' env =
-    let old_tpenv = env.lenv.tpenv in
-    let env, remove = f (env_with_tpenv env tpenv_now) in
-    env_with_tpenv env old_tpenv, remove in
-  { env with todo = f' :: env.todo }
-
-let check_now_or_add_todo env f =
-  if TypecheckerOptions.new_inference (get_tcopt env)
-  then
-    let env, _ = f env in
-    env
-  else
-    add_todo env f
 
 let add_anonymous env x =
   let genv = env.genv in
@@ -1118,29 +1063,6 @@ end
 (* Locals *)
 (*****************************************************************************)
 
-(* We want to "take a picture" of the current type
- * that is, the current type shouldn't be affected by a
- * future unification.
- *)
-
-let rec unbind seen env ty =
-  if TypecheckerOptions.new_inference (get_tcopt env)
-  then env, ty
-  else
-  let env, ty = expand_type env ty in
-  if List.exists seen (fun ty' ->
-    let _, ty' = expand_type env ty' in Typing_defs.ty_equal ty ty')
-  then env, ty
-  else
-    let seen = ty :: seen in
-    match ty with
-    | r, Tunion tyl ->
-        let env, tyl = List.map_env env tyl (unbind seen) in
-        env, (r, Tunion tyl)
-    | ty -> env, ty
-
-let unbind = unbind []
-
 let add_to_local_id_map = Local_id.Map.add ?combine:None
 
 let set_local_ env x ty =
@@ -1156,7 +1078,6 @@ let next_cont_exn env = LEnvC.get_cont C.Next env.lenv.local_types
  * the last assignment to this local.
  *)
 let set_local env x new_type =
-  let env, new_type = unbind env new_type in
   let new_type = match new_type with
     | _, Tunion [ty] -> ty
     | _ -> new_type in
@@ -1231,19 +1152,8 @@ let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let next_cont = next_cont_exn env in
   get_local_ty_in_ctx env ?error_if_undef_at_pos:p x next_cont
 
-(* While checking todos at the end of a function body, the Next continuation
- * might have been moved to the 'Exit' (if there is a `return` statement)
- * or the 'Catch' continuation (if the function always throws). So we find
- * which continuation is still present and get the local from there. *)
-let get_local_for_todo ?error_if_undef_at_pos:p env x =
-  let local_types = env.lenv.local_types in
-  let ctx = LEnvC.try_get_conts [C.Next; C.Exit; C.Catch] local_types in
-  get_local_ty_in_ctx env ?error_if_undef_at_pos:p x ctx
-
 let get_local_ ?error_if_undef_at_pos:p env x =
-  if env.checking_todos
-    then get_local_for_todo ?error_if_undef_at_pos:p env x
-    else get_local_in_next_continuation ?error_if_undef_at_pos:p env x
+  get_local_in_next_continuation ?error_if_undef_at_pos:p env x
 
 let get_local env x = snd (get_local_ env x)
 

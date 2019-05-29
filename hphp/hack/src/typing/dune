@@ -68,7 +68,6 @@
     typing_taccess
     typing_tdef
     typing_unify
-    typing_unify_recursive
     typing_union
     typing_utils
     typing_visibility

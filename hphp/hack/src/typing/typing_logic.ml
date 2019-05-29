@@ -14,8 +14,6 @@ open Typing_defs
 type subtype_prop =
 (* IsSubtype(ty1,ty2) if ty1 is a subtype of ty2, written ty1 <: ty2 *)
 | IsSubtype of locl ty * locl ty
-(* IsEqual(ty1,ty2) if ty1 is equivalent to ty2. Should be same as ty1 <: ty2 /\ ty2 <: ty1 *)
-| IsEqual of locl ty * locl ty
 (* Conjunction. Conj [] means "true" *)
 | Conj of subtype_prop list
 (* Disjunction. Disj [] means "false", but use Unsat if you want specific error *)
@@ -26,7 +24,7 @@ type subtype_prop =
 
 let rec size (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ | IsEqual _ | Unsat _ -> 1
+  | IsSubtype _ | Unsat _ -> 1
   | Conj l | Disj l ->
     let sizes = List.map l ~f:size in
     List.fold ~init:0 ~f:(+) sizes
@@ -34,7 +32,7 @@ let rec size (p : subtype_prop) : int =
 (** Sum of the sizes of the disjunctions. *)
 let rec n_disj (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ | IsEqual _ | Unsat _ -> 0
+  | IsSubtype _ | Unsat _ -> 0
   | Conj l ->
     let n_disjs = List.map l ~f:n_disj in
     List.fold ~init:0 ~f:(+) n_disjs
@@ -45,7 +43,7 @@ let rec n_disj (p : subtype_prop) : int =
 (** Sum of the sizes of the conjunctions. *)
 let rec n_conj (p : subtype_prop) : int =
   match p with
-  | IsSubtype _ | IsEqual _ | Unsat _ -> 0
+  | IsSubtype _ | Unsat _ -> 0
   | Disj l ->
     let n_conjs = List.map l ~f:n_conj in
     List.fold ~init:0 ~f:(+) n_conjs
@@ -56,7 +54,7 @@ let rec n_conj (p : subtype_prop) : int =
 let rec has_disj p =
   match p with
   | Disj _ -> true
-  | IsSubtype _ | IsEqual _ | Unsat _ -> false
+  | IsSubtype _ | Unsat _ -> false
   | Conj l ->
     List.exists l ~f:has_disj
 
@@ -71,7 +69,6 @@ match p with
 | Disj ps -> List.exists ps is_valid
 | Unsat _ -> false
 | IsSubtype (_, _) -> false
-| IsEqual (_, _) -> false
 
 (* Is this proposition always false? e.g. Unsat _ but also Conj [Conj []; Unsat _]
 * if not simplified
@@ -82,7 +79,6 @@ match p with
 | Disj ps -> List.for_all ps is_unsat
 | Unsat _ -> true
 | IsSubtype (_, _) -> false
-| IsEqual (_, _) -> false
 
 (* Smart constructor for binary conjunction *)
 let conj p1 p2 =

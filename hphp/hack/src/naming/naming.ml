@@ -737,10 +737,7 @@ module Make (GetLocals : GetLocals) = struct
     let tcopt = (fst env).tcopt in
     let pu_enabled = TypecheckerOptions.experimental_feature_enabled
       tcopt GlobalOptions.tco_experimental_pocket_universes in
-    let like_types_enabled = TypecheckerOptions.(
-      new_inference tcopt &&
-      like_types tcopt
-    ) in
+    let like_types_enabled = TypecheckerOptions.like_types tcopt in
     let hint =
       hint ~forbid_this ~allow_typedef ~allow_wildcard in
     match x with
@@ -887,8 +884,7 @@ module Make (GetLocals : GetLocals) = struct
           ) ->
           Errors.primitive_toplevel p;
           N.Hany
-      | x when x = "\\"^SN.Typehints.nothing &&
-                 TypecheckerOptions.new_inference (fst env).tcopt ->
+      | x when x = "\\"^SN.Typehints.nothing ->
          Errors.primitive_toplevel p;
          N.Hany
       | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
@@ -906,9 +902,7 @@ module Make (GetLocals : GetLocals) = struct
       | x when x = SN.Typehints.mixed -> N.Hmixed
       | x when x = SN.Typehints.nonnull -> N.Hnonnull
       | x when x = SN.Typehints.dynamic -> N.Hdynamic
-      | x when x = SN.Typehints.nothing &&
-                 TypecheckerOptions.new_inference (fst env).tcopt ->
-        N.Hnothing
+      | x when x = SN.Typehints.nothing -> N.Hnothing
       | x when x = SN.Typehints.this && not forbid_this ->
           if not (phys_equal hl [])
           then Errors.this_no_argument p;

@@ -14,8 +14,6 @@ open Typing_defs
 module Env = Typing_env
 module Reason = Typing_reason
 module TySet = Typing_set
-module Unify = Typing_unify
-module URec = Typing_unify_recursive
 module Utils = Typing_utils
 module MakeType = Typing_make_type
 
@@ -70,9 +68,8 @@ let rec union env (r1, _ as ty1) (r2, _ as ty2) =
       union_ env ty1 ty2 r
 
 and union_ env ty1 ty2 r =
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  let (env, ty1) = if new_inference then Env.expand_type env ty1 else env, ty1 in
-  let (env, ty2) = if new_inference then Env.expand_type env ty2 else env, ty2 in
+  let env, ty1 = Env.expand_type env ty1 in
+  let env, ty2 = Env.expand_type env ty2 in
   try
   begin match ty1, ty2 with
   | (r1, Tprim Nast.Tint), (r2, Tprim Nast.Tfloat)
@@ -94,23 +91,6 @@ and union_ env ty1 ty2 r =
     | _, Toption _ -> env, ty
     | _ -> env, (r, Toption ty)
     end
-  | (_, Tvar n1), (_, Tvar n2) when not new_inference ->
-    let env, n1 = Env.get_var env n1 in
-    let env, n2 = Env.get_var env n2 in
-    if n1 = n2 then env, (r, Tvar n1) else
-    let env, ty1 = Env.get_type_unsafe env n1 in
-    let env, ty2 = Env.get_type_unsafe env n2 in
-    let n' = Env.fresh () in
-    let env, ty = union env ty1 ty2 in
-    let env = URec.add env n' ty in
-    env, (r, Tvar n')
-  | (r, Tvar n), ty2
-  | ty2, (r, Tvar n) when not new_inference ->
-    let env, ty1 = Env.get_type env r n in
-    let n' = Env.fresh () in
-    let env, ty = union env ty1 ty2 in
-    let env = URec.add env n' ty in
-    env, (r, Tvar n')
   | (_, Tunion tyl1), (_, Tunion tyl2) ->
     union_unresolved env tyl1 tyl2 r
   | (r, Tunion tyl), ty2
@@ -123,13 +103,6 @@ and union_ env ty1 ty2 r =
     let env, ak = union_ak env ak1 ak2 in
     let env, tcstr = union_tconstraints env tcstr1 tcstr2 in
     env, (r, Tabstract (ak, tcstr))
-  (* TODO AKgeneric will be killed and replaces with Tgeneric*)
-  | (_, Tabstract (AKgeneric x, _)), ty
-    when Unify.generic_param_matches ~opts:Utils.default_unify_opt env x ty ->
-    env, ty
-  | ty, (_, Tabstract (AKgeneric x, _))
-    when Unify.generic_param_matches ~opts:Utils.default_unify_opt env x ty ->
-    env, ty
   | (_, Tabstract (AKdependent _, Some (_, Tclass _ as ty1))), ty2
   | ty2, (_, Tabstract (AKdependent _, Some (_, Tclass _ as ty1))) ->
     begin try ty_equiv env ty1 ty2 ~are_ty_param:false
@@ -251,8 +224,7 @@ and union_unresolved env tyl1 tyl2 r =
         normalize_union env tyl1 tyl2 res_is_opt
       end in
   let env, tyl, res_is_opt = normalize_union env tyl1 tyl2 None in
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  env, make_union r tyl res_is_opt ~discard_singletons:new_inference
+  env, make_union r tyl res_is_opt ~discard_singletons:true
 
 and union_arraykind env ak1 ak2 =
   match ak1, ak2 with
@@ -401,13 +373,12 @@ and union_reason r1 r2 =
       else r2
 
 let normalize_union env ?(on_tyvar = fun env r v -> env, (r, Tvar v)) tyl =
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
   let orr r_opt r = Some (Option.value r_opt ~default:r) in
   let rec normalize_union env tyl r_null r_union =
     match tyl with
     | [] -> env, r_null, r_union, TySet.empty
     | ty :: tyl ->
-      let ty = if new_inference then Typing_expand.fully_expand env ty else ty in
+      let ty = Typing_expand.fully_expand env ty in
       let env, r_null, r_union, tys' = match ty with
         | (r, Tvar v) ->
           let env, ty' = on_tyvar env r v in
@@ -441,8 +412,7 @@ let union_list_2_by_2 env tyl =
 let union_list env r tyl =
   let env, r_null, _r_union, tys = normalize_union env tyl in
   let env, tyl = union_list_2_by_2 env (TySet.elements tys) in
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  env, make_union r tyl r_null ~discard_singletons:new_inference
+  env, make_union r tyl r_null ~discard_singletons:true
 
 let simplify_unions env ?on_tyvar (r, _ as ty) =
   let env, r_null, r_union, tys = normalize_union env [ty] ?on_tyvar in

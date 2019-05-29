@@ -405,9 +405,6 @@ let lenv_as_value env lenv =
 let subtype_prop_as_value env prop =
   Atom (Typing_print.subtype_prop env prop)
 
-let todo_as_value todo =
-  Atom (Printf.sprintf "%d" (List.length todo))
-
 let param_as_value env (ty, mode) =
   let ty_str = Typing_print.debug env ty in
   match mode with
@@ -457,8 +454,6 @@ let env_as_value env =
     lenv;
     genv;
     decl_env = _;
-    todo;
-    checking_todos;
     in_loop;
     in_try;
     in_case;
@@ -482,7 +477,6 @@ let env_as_value env =
     "tyvars_stack", tyvars_stack_as_value tyvars_stack;
     "lenv", lenv_as_value env lenv;
     "genv", genv_as_value env genv;
-    "checking_todos", bool_as_value checking_todos;
     "in_loop", bool_as_value in_loop;
     "in_try", bool_as_value in_try;
     "in_case", bool_as_value in_case;
@@ -490,7 +484,6 @@ let env_as_value env =
     "inside_ppl_class", bool_as_value inside_ppl_class;
     "global_tpenv", tpenv_as_value env global_tpenv;
     "subtype_prop", subtype_prop_as_value env subtype_prop;
-    "todo", todo_as_value todo;
     "allow_wildcards", bool_as_value allow_wildcards;
   ]
 

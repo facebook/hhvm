@@ -53,7 +53,7 @@ let () =
           %%{project_root}/test/verify.py
           %%{project_root}/test/review.sh
           %s)" (String.concat "\n          " files) in
-  (* typecheck and typecheck_old_inference *)
+  (* typecheck *)
   let typecheck_deps = deps files_tc in
   let cmds = [ "--flags"
              ; "--new-inference-lambda"
@@ -67,22 +67,6 @@ let () =
     (name typecheck)
     %s
     %s)" test_dir typecheck_deps (command true cmd) in
-  let cmds = [ "--out-extension .legacy.out"
-             ; "--expect-extension .legacy.exp"
-             ; "--fallback-expect-extension .exp"
-             ; "--flags"
-             ; "--old-inference"
-             ; "--error-format raw"
-             ; "--out-extension .legacy.out"
-             ] in
-  let cmd = String.concat " " cmds in
-  let typecheck_old_inference =
-    Printf.sprintf "
-
-(alias
-    (name typecheck_old_inference)
-    %s
-    %s)" typecheck_deps (command true cmd) in
   (* legacy decl *)
   let cmds = [ "--out-extension .legacy_decl.out"
              ; "--expect-extension .legacy_decl.exp"
@@ -130,10 +114,10 @@ let () =
 
 (alias
     (name runtest)
-    (deps (alias typecheck) (alias typecheck_old_inference)
+    (deps (alias typecheck)
       (alias decl_compare) (alias typecheck_legacy_decl)))" in
 
-  let dune_file = typecheck ^ typecheck_old_inference ^
+  let dune_file = typecheck ^
                   typecheck_legacy_decl ^ decl_compare ^
                   run_tests in
   Jbuild_plugin.V1.send dune_file

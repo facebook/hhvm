@@ -257,11 +257,8 @@ and localize ~ety_env env ty =
   env, ty
 
 and localize_cstr_ty ~ety_env env ty tp_name =
-  let env, (r, ty_ as ty) = localize ~ety_env env ty in
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  let ty = if new_inference
-    then (Reason.Rcstr_on_generics (Reason.to_pos r, tp_name), ty_)
-    else ty in
+  let env, (r, ty_) = localize ~ety_env env ty in
+  let ty = (Reason.Rcstr_on_generics (Reason.to_pos r, tp_name), ty_) in
   env, ty
 
 (* For the majority of cases when we localize a function type we instantiate

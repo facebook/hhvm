@@ -278,9 +278,7 @@ module Full = struct
       | _ -> text "[fun]"
       end
     | Tunion [] ->
-      if TypecheckerOptions.new_inference (Env.get_tcopt env)
-      then text "nothing"
-      else text "[unresolved]"
+      text "nothing"
     | Tunion tyl when TypecheckerOptions.like_types (Env.get_tcopt env) ->
       let tyl = List.fold_right tyl ~init:Typing_set.empty
       ~f:Typing_set.add |> Typing_set.elements in
@@ -837,9 +835,7 @@ let rec from_type: type a. Typing_env.env -> a ty -> json =
       ["fields_known", JSON_Bool fields_known] @
       fields (Nast.ShapeMap.elements fl)
   | Tunion [] ->
-    if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-    then obj @@ kind "nothing"
-    else obj @@ kind "union" @ args []
+    obj @@ kind "nothing"
   | Tunion [ty] ->
     from_type env ty
   | Tunion tyl ->
@@ -1632,8 +1628,6 @@ let subtype_prop env prop =
     | Disj ps ->
       "(" ^ (String.concat ~sep:" || " (List.map ~f:subtype_prop ps)) ^ ")"
     | IsSubtype (ty1, ty2) ->
-      debug env ty1 ^ " <: " ^ debug env ty2
-    | IsEqual (ty1, ty2) ->
-      debug env ty1 ^ " = " ^ debug env ty2 in
+      debug env ty1 ^ " <: " ^ debug env ty2 in
   let p_str = subtype_prop prop in
   p_str

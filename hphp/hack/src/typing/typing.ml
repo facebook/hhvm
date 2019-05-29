@@ -540,7 +540,6 @@ and fun_def tcopt f : Tast.fun_def option =
       let env, tb = fun_ env return pos nb f.f_fun_kind in
       let env = SubType.solve_all_unsolved_tyvars env in
       Typing_subtype.log_prop env;
-      let env = Env.check_todo env in
       (* restore original reactivity *)
       let env = Env.set_env_reactive env reactive in
       begin match f.f_ret with
@@ -801,7 +800,6 @@ and stmt_ env pos st =
         end
         else env in
       let return_type = TR.strip_condition_type_in_return env return_type in
-      let env, rty = Env.unbind env rty in
       let rty = Typing_return.wrap_awaitable env pos rty in
       let env = Type.coerce_type expr_pos Reason.URreturn env rty return_type in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
@@ -1935,9 +1933,6 @@ and expr_
           | _ ->
             exprs env el
       in
-      (* TODO TAST: figure out role of unbind here *)
-      let env, tyl = List.map_env env tyl Typing_env.unbind in
-      let env, tyl = List.map_env env tyl TUtils.unresolved in
       let ty = Reason.Rwitness p, Ttuple tyl in
       make_result env p (T.List tel) ty
   | Pair (e1, e2) ->
@@ -1948,11 +1943,7 @@ and expr_
           env, Some { pos; reason; locl_ty = ty1 }, Some { pos; reason; locl_ty = ty2 }
         | _ -> env, None, None in
       let env, te1, ty1 = expr ?expected:expected1 env e1 in
-      let env, ty1 = Typing_env.unbind env ty1 in
-      let env, ty1 = TUtils.unresolved env ty1 in
       let env, te2, ty2 = expr ?expected:expected2 env e2 in
-      let env, ty2 = Typing_env.unbind env ty2 in
-      let env, ty2 = TUtils.unresolved env ty2 in
       let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
       make_result env p (T.Pair (te1, te2)) ty
   | Expr_list el ->
@@ -2017,19 +2008,13 @@ and expr_
       let env, te2, ty2 = expr ?expected env e2 in
       let env, ty1' = Env.fresh_unresolved_type env (fst e1) in
       let env = SubType.sub_type env ty1 (MakeType.nullable Reason.Rnone ty1') in
-      let env, ty_result =
-        if TypecheckerOptions.new_inference (Env.get_tcopt env)
-        then
-        (* Essentially mimic a call to
-         *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
-         * That way we let the constraint solver take care of the union logic.
-         *)
-        let env, ty_result = Env.fresh_unresolved_type env (fst e2) in
-        let env = SubType.sub_type env ty1' ty_result in
-        let env = SubType.sub_type env ty2 ty_result in
-        env, ty_result
-      else
-        Union.union env ty1' ty2 in
+      (* Essentially mimic a call to
+       *   function coalesce<Tr, Ta as Tr, Tb as Tr>(?Ta, Tb): Tr
+       * That way we let the constraint solver take care of the union logic.
+       *)
+      let env, ty_result = Env.fresh_unresolved_type env (fst e2) in
+      let env = SubType.sub_type env ty1' ty_result in
+      let env = SubType.sub_type env ty2 ty_result in
       make_result env p (T.Binop (Ast.QuestionQuestion, te1, te2)) ty_result
   (* For example, e1 += e2. This is typed and translated as if
    * written e1 = e1 + e2.
@@ -2501,16 +2486,14 @@ and expr_
             (* If we're in partial mode then type-check definition anyway,
              * so treating parameters without type hints as "untyped"
             *)
-            if TypecheckerOptions.new_inference (Env.get_tcopt env) && not (Env.is_strict env)
+            if not (Env.is_strict env)
             then begin
               Typing_log.increment_feature_count env FL.Lambda.non_strict_unknown_params;
               check_body_under_known_params env declared_ft
             end
             else
-            (* If new_inference and new_inference_lambda are enabled,
-             * check lambda using constraints *)
-            if TypecheckerOptions.new_inference (Env.get_tcopt env)
-            && TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
+            (* If new_inference_lambda is enabled, check lambda using constraints *)
+            if TypecheckerOptions.new_inference_lambda (Env.get_tcopt env)
             then begin
               Typing_log.increment_feature_count env FL.Lambda.fresh_tyvar_params;
               let freshen_untyped_param env ft_param =
@@ -2614,10 +2597,9 @@ and expr_
           env fdm_with_expected in
       let env, fdm =
         let convert_expr_and_type_to_shape_field_type env (key, (_, ty)) =
-          let env, sft_ty = TUtils.unresolved env ty in
           (* An expression evaluation always corresponds to a shape_field_type
              with sft_optional = false. *)
-          env, (key, { sft_optional = false; sft_ty }) in
+          env, (key, { sft_optional = false; sft_ty = ty }) in
         List.map_env ~f:convert_expr_and_type_to_shape_field_type env tfdm in
       let fdm = List.fold_left
         ~f:(fun acc (k, v) -> ShapeMap.add k v acc)
@@ -2919,8 +2901,6 @@ and anon_make tenv p f ft idl is_anon =
           then env
           else fun_implicit_return env p hret f.f_fun_kind
         in
-        (* We don't want the *uses* of the function to affect its return type *)
-        let env, hret = Env.unbind env hret in
         is_typing_self := false;
         let annotation =
           if Nast.named_body_is_unsafe nb
@@ -3339,9 +3319,8 @@ and assign_ p ur env e1 ty2 =
         | OG_nullsafe -> Some pobj in
       let env, tobj, obj_ty = expr ~accept_using_var:true no_fakes obj in
       let env = might_throw env in
-      let env, ty2' = Env.unbind env ty2 in
       let k (env, member_ty, vis) =
-        let env = Type.coerce_type p ur env ty2' member_ty in
+        let env = Type.coerce_type p ur env ty2 member_ty in
         env, member_ty, vis in
       let env, result =
         obj_get ~obj_pos:(fst obj) ~is_method:false ~nullsafe ~valkind:`lvalue
@@ -3368,8 +3347,7 @@ and assign_ p ur env e1 ty2 =
       let env, te1, real_type = lvalue no_fakes e1 in
       let env, exp_real_type = Env.expand_type env real_type in
       let env = { env with Env.lenv = lenv } in
-      let env, ty2' = Env.unbind env ty2 in
-      let env = Type.coerce_type p ur env ty2' exp_real_type in
+      let env = Type.coerce_type p ur env ty2 exp_real_type in
       env, te1, ty2
   | _, Class_get (_, CGexpr _) -> failwith "AST should not have any CGexprs after naming"
   | _, Class_get ((_, x), CGstring (_, y)) ->
@@ -3419,24 +3397,20 @@ and assign_ p ur env e1 ty2 =
 
 and assign_simple pos ur env e1 ty2 =
   let env, te1, ty1 = lvalue env e1 in
-  let env, ty2 = TUtils.unresolved env ty2 in
   let env = Type.coerce_type pos ur env ty2 ty1 in
   env, te1, ty2
 
 and array_field env = function
   | Nast.AFvalue ve ->
     let env, tve, tv = expr env ve in
-    let env, tv = Typing_env.unbind env tv in
     env, (T.AFvalue tve, None, tv)
   | Nast.AFkvalue (ke, ve) ->
       let env, tke, tk = expr env ke in
       let env, tve, tv = expr env ve in
-      let env, tv = Typing_env.unbind env tv in
       env, (T.AFkvalue (tke, tve), Some tk, tv)
 
 and array_value ~(expected: expected_ty option) env x =
   let env, te, ty = expr ?expected ~array_ref_ctx:ElementAssignment env x in
-  let env, ty = Typing_env.unbind env ty in
   env, (te, ty)
 
 and array_field_value ~(expected: expected_ty option) env = function
@@ -3947,14 +3921,6 @@ and is_abstract_ft fty = match fty with
           ~ety_env env fty) in
         let tfun = Reason.Rwitness fty.ft_pos, Tfun fty in
         let env, tel, _tuel, ty = call ~expected p env tfun el [] in
-        (* Remove double nullables. This shouldn't be necessary, and currently
-         * interferes with new_inference because it "solves" before we set variance
-         *)
-        let env, ty = match ty with
-          | r, Toption ty when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
-            let env, ty = TUtils.non_null env p ty in
-            env, (r, Toption ty)
-          | _ -> env, ty in
         make_call env (T.make_typed_expr fpos tfun (T.Id id)) [] tel [] ty
       | None -> unbound_name env id)
 
@@ -4760,10 +4726,7 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
 
   | _, Toption ty -> nullable_obj_get ty
   | r, Tprim Nast.Tnull ->
-    let ty =
-      if TypecheckerOptions.new_inference (Env.get_tcopt env)
-      then (r, Tunion [])
-      else (r, Tany) in
+    let ty = (r, Tunion []) in
     nullable_obj_get ty
   (* We are trying to access a member through a value of unknown type *)
   | r, Tvar _ ->
@@ -5115,11 +5078,7 @@ and inout_write_back env { fp_type; _ } (_, e) =
     | _ -> env
 
 and call ~(expected: expected_ty option) ?method_call_info pos env fty el uel =
-  let env, tel, tuel, ty =
-    call_ ~expected ~method_call_info pos env fty el uel in
-  let new_inference = TypecheckerOptions.new_inference (Env.get_tcopt env) in
-  let env = if not new_inference then Env.check_todo env else env in
-  env, tel, tuel, ty
+  call_ ~expected ~method_call_info pos env fty el uel
 
 and call_ ~(expected: expected_ty option) ~method_call_info pos env fty el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
@@ -6759,7 +6718,6 @@ and method_def env m =
     fun_ ~abstract:m.m_abstract env return pos nb m.m_fun_kind in
   let env = SubType.solve_all_unsolved_tyvars env in
   Typing_subtype.log_prop env;
-  let env = Env.check_todo env in
   (* restore original method reactivity  *)
   let env = Env.set_env_reactive env reactive in
   let m_ret =

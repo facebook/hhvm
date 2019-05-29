@@ -133,8 +133,6 @@ type env = {
   lenv    : local_env  ;
   genv    : genv       ;
   decl_env: Decl_env.env;
-  todo    : tfun list  ;
-  checking_todos : bool;
   in_loop : bool       ;
   in_try  : bool       ;
   in_case : bool       ;
@@ -192,6 +190,3 @@ and anon =
   locl fun_params ->
   locl fun_arity ->
   env * Tast.expr * locl_ty)
-
-(* A deferred check; return true if the check should now be removed from the list *)
-and tfun = env -> env * bool

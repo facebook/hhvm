@@ -42,31 +42,6 @@ type expand_typedef =
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x
 
-(* Options to check for while unifying *)
-type unify_options = {
-  (* If follow_bounds=false, only match generic parameters with themselves.
-   * If follow_bounds=true, look in lower and upper bounds of generic parameters,
-   * for example, to unify T and t if there are bounds T as t and T super t.
-   *)
-  follow_bounds : bool;
-  (* Whether we simplify our reason information after encountering a unification
-  error *)
-  simplify_errors : bool;
-}
-
-
-let default_unify_opt = {
-  follow_bounds = true;
-  simplify_errors = true;
-}
-
-let unify_fake ?(opts=default_unify_opt) = not_implemented opts
-
-type unify =
-  ?opts:unify_options -> Env.env -> locl ty -> locl ty -> Env.env * locl ty
-let (unify_ref: unify ref) = ref unify_fake
-let unify ?(opts=default_unify_opt) = !unify_ref ~opts
-
 type sub_type = Env.env -> locl ty -> locl ty -> Env.env
 let (sub_type_ref: sub_type ref) = ref not_implemented
 let sub_type x = !sub_type_ref x
@@ -358,45 +333,7 @@ let uerror env r1 ty1 r2 ty2 =
  * explained without referring to dependent types.
  *)
 let simplified_uerror env ty1 ty2 =
-  (* Need this check to ensure we don't enter an infinite loop *)
-  let simplify = match snd ty1, snd ty2 with
-    | Tabstract (AKdependent _, Some _), _
-    | _, Tabstract (AKdependent _, Some _) -> true
-    | Tabstract(AKgeneric s, _), _ ->
-      let base_ty1 = get_base_type env ty1 in
-      AbstractKind.is_generic_dep_ty s &&
-      not (ty_equal ty1 base_ty1)
-    | _, Tabstract(AKgeneric s, _) ->
-      let base_ty2 = get_base_type env ty2 in
-      AbstractKind.is_generic_dep_ty s &&
-      not (ty_equal ty2 base_ty2)
-    | _, _ -> false in
-
-  let opts = {
-    follow_bounds = true;
-    simplify_errors = false;
-  } in
-  (* We unify the base types to see if that produces an error, if not then
-   * we use the standard unification error
-   *)
-  if simplify then
-    Errors.must_error
-      (fun _ ->
-          ignore @@ unify ~opts env (get_base_type env ty1) (get_base_type env ty2)
-      )
-      (fun _ -> uerror env (fst ty1) (snd ty1) (fst ty2) (snd ty2))
-  else
-    uerror env (fst ty1) (snd ty1) (fst ty2) (snd ty2)
-
-(* Find the first reason with defined position in a list of types *)
-let rec find_pos r_default tyl =
-  match tyl with
-  | [] -> r_default
-  | (r, _) :: rl ->
-      let p = Reason.to_pos r in
-      if p = Pos.none
-      then find_pos r_default rl
-      else r
+  uerror env (fst ty1) (snd ty1) (fst ty2) (snd ty2)
 
 (*****************************************************************************)
 (* Applies a function to 2 shapes simultaneously, raises an error if
@@ -551,11 +488,11 @@ let rec member_inter env ty tyl acc =
           let env, ty =
             match x, ty with
             | (_, (Tany|Terr)), _ | _, (_, (Tany|Terr)) ->
-              unify env x ty
+              env, ty
             | _, _ ->
               if is_sub_type_alt env x ty = Some true then env, ty
               else if is_sub_type_alt env ty x = Some true then env, x
-              else unify env x ty in
+              else env, ty in
           env, List.rev_append acc (ty :: rl)
         end
         begin fun _ ->
@@ -587,10 +524,7 @@ let rec push_option_out pos env ty =
     let env, ty = push_option_out pos env ty in
     env, if is_option ty then ty else (r, Toption ty)
   | r, Tprim N.Tnull ->
-    let ty =
-      if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-      then (r, Tunion [])
-      else (r, Tany) in
+    let ty = (r, Tunion []) in
     env, (r, Toption ty)
   | r, Tunion tyl ->
     let env, tyl = List.map_env env tyl (push_option_out pos) in
@@ -658,12 +592,9 @@ let in_var env ty =
   env, (fst ty, Tvar x)
 
 let unresolved_tparam ~reason env =
-  if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-  then
-    let v = Env.fresh () in
-    let env = Env.add_current_tyvar env (Reason.to_pos reason) v in
-    env, (reason, Tvar v)
-  else in_var env (reason, Tunion [])
+  let v = Env.fresh () in
+  let env = Env.add_current_tyvar env (Reason.to_pos reason) v in
+  env, (reason, Tvar v)
 
 (*****************************************************************************)
 (*****************************************************************************)
@@ -679,17 +610,6 @@ let rec fold_unresolved env ty =
    * elements, but let's postpone that until we have an improved
    * representation of unions.
    *)
-  | _, Tunion (x :: rl)
-    when not (TypecheckerOptions.new_inference (Env.get_tcopt env)) ->
-      (try
-        let env, acc =
-          List.fold_left rl ~f:begin fun (env, acc) ty ->
-            Errors.try_ (fun () -> unify env acc ty) (fun _ -> raise Exit)
-          end ~init:(env, x) in
-        env, acc
-      with Exit ->
-        env, ety
-      )
   | _ -> env, ety
 
 (*****************************************************************************)
@@ -700,15 +620,6 @@ let string_of_visibility = function
   | Vpublic  -> "public"
   | Vprivate _ -> "private"
   | Vprotected _ -> "protected"
-
-let unresolved env ty =
-  if TypecheckerOptions.new_inference (Typing_env.get_tcopt env)
-  then env, ty
-  else
-    let env, ety = Env.expand_type env ty in
-    match ety with
-    | _, Tunion _ -> in_var env ety
-    | _ -> in_var env (fst ty, Tunion [ty])
 
 let unwrap_class_hint = function
   | (_, N.Happly ((pos, class_name), type_parameters)) ->

@@ -77,16 +77,10 @@ let check_const opts fn x =
     Some def
 
 let check_file dynamic_view_files opts errors (fn, file_infos) =
-  let tco_new_inference = opts.GlobalOptions.tco_new_inference in
   let opts = {
       opts with
       GlobalOptions.tco_dynamic_view = Relative_path.Set.mem dynamic_view_files fn;
   } in
-  (* Only use new_inference on rough proportion of files specified by new_inference option *)
-  let opts =
-    if float (Hashtbl.hash fn % 1000) >= tco_new_inference *. 1000.0
-    then { opts with GlobalOptions.tco_new_inference = 0.0 }
-    else (Measure.sample "new_inference" 1.0; opts) in
   let { FileInfo.n_funs; n_classes; n_types; n_consts } = file_infos in
   let ignore_type_fun opts fn name =
     ignore(type_fun opts fn name) in

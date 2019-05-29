@@ -328,78 +328,63 @@ int jemalloc_pprof_enable();
 int jemalloc_pprof_disable();
 int jemalloc_pprof_dump(const std::string& prefix, bool force);
 
-// For allocation of VM data.
-inline void* vm_malloc(size_t size) {
-  return malloc_huge_internal(size);
-}
+///////////////////////////////////////////////////////////////////////////////
 
-inline void vm_free(void* ptr) {
-  return free_huge_internal(ptr);
-}
-
-inline void vm_sized_free(void* ptr, size_t size) {
-  return sized_free_huge_internal(ptr, size);
-}
-
-inline void* vm_cold_malloc(size_t size) {
+// Helpers (malloc, free, sized_free) to allocate/deallocate on a specific arena
+// given flags. When not using event hooks, fallback version is used. `fallback`
+// can be empty, in which case generic malloc/free will be used when not using
+// extent hooks. These functions will crash with 0-sized alloc/deallocs.
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (!size) return nullptr;
-  return mallocx(size, high_cold_arena_flags);
+#define DEF_ALLOC_FUNCS(prefix, flag, fallback)                 \
+  inline void* prefix##_malloc(size_t size) {                   \
+    assert(size != 0);                                          \
+    return mallocx(size, flag);                                 \
+  }                                                             \
+  inline void prefix##_free(void* ptr) {                        \
+    assert(ptr != nullptr);                                     \
+    return dallocx(ptr, flag);                                  \
+  }                                                             \
+  inline void prefix##_sized_free(void* ptr, size_t size) {     \
+    assert(ptr != nullptr);                                     \
+    assert(sallocx(ptr, flag) == nallocx(size, flag));          \
+    return sdallocx(ptr, size, flag);                           \
+  }
 #else
-  return malloc(size);
+#define DEF_ALLOC_FUNCS(prefix, flag, fallback)                 \
+  inline void* prefix##_malloc(size_t size) {                   \
+    return fallback##malloc(size);                              \
+  }                                                             \
+  inline void prefix##_free(void* ptr) {                        \
+    return fallback##free(ptr);                                 \
+  }                                                             \
+  inline void prefix##_sized_free(void* ptr, size_t size) {     \
+    return fallback##free(ptr);                                 \
+  }
 #endif
-}
 
-inline void vm_cold_free(void* ptr) {
-#if USE_JEMALLOC_EXTENT_HOOKS
-  if (ptr) dallocx(ptr, high_cold_arena_flags);
-#else
-  return free(ptr);
-#endif
-}
+DEF_ALLOC_FUNCS(vm, high_arena_flags, )
+DEF_ALLOC_FUNCS(vm_cold, high_cold_arena_flags, )
 
 // Allocations that are guaranteed to live below kUncountedMaxAddr when
-// USE_JEMALLOC_EXTENT_HOOKS.  This provides a new way to check for countedness
+// USE_JEMALLOC_EXTENT_HOOKS. This provides a new way to check for countedness
 // for arrays and strings.
-inline void* uncounted_malloc(size_t size) {
-  return malloc_huge_internal(size);
-}
-
-inline void uncounted_free(void* ptr) {
-  return free_huge_internal(ptr);
-}
-
-inline void uncounted_sized_free(void* ptr, size_t size) {
-  return sized_free_huge_internal(ptr, size);
-}
+DEF_ALLOC_FUNCS(uncounted, high_arena_flags, )
 
 // Allocations for the APC but do not necessarily live below kUncountedMaxAddr,
-// e.g., APCObject, or the hash table.  Currently they live below
+// e.g., APCObject, or the hash table. Currently they live below
 // kUncountedMaxAddr anyway, but this may change later.
-inline void* apc_malloc(size_t size) {
-  return malloc_huge_internal(size);
-}
+DEF_ALLOC_FUNCS(apc, high_arena_flags, )
 
-inline void apc_free(void* ptr) {
-  return free_huge_internal(ptr);
-}
-
-inline void apc_sized_free(void* ptr, size_t size) {
-  return sized_free_huge_internal(ptr, size);
-}
-
+// Low arena is always present when jemalloc is used, even when arena hooks are
+// not used.
 inline void* low_malloc(size_t size) {
 #ifndef USE_JEMALLOC
   return malloc(size);
 #else
-  if (!size) return nullptr;
+  assert(size);
   auto ptr = mallocx(size, low_arena_flags);
 #ifndef USE_LOWPTR
-  // low_malloc isn't required to return 32-bit addresses, but we still want to
-  // make sure it is below kUncountedMaxAddr, when ManagedArena is used.
-  if (!ptr) {
-    return uncounted_malloc(size);
-  }
+  if (ptr == nullptr) ptr = uncounted_malloc(size);
 #endif
   return ptr;
 #endif
@@ -409,177 +394,54 @@ inline void low_free(void* ptr) {
 #ifndef USE_JEMALLOC
   free(ptr);
 #else
-  if (ptr) dallocx(ptr, low_arena_flags);
+  assert(ptr);
+  dallocx(ptr, low_arena_flags);
 #endif
 }
 
-inline void* lower_malloc(size_t size) {
-#if USE_JEMALLOC_EXTENT_HOOKS
-  if (!size) return nullptr;
-  return mallocx(size, lower_arena_flags);
+inline void low_sized_free(void* ptr, size_t size) {
+#ifndef USE_JEMALLOC
+  free(ptr);
 #else
-  return low_malloc(size);
+  assert(ptr);
+  sdallocx(ptr, size, low_arena_flags);
 #endif
 }
 
-inline void lower_free(void* ptr) {
-#if USE_JEMALLOC_EXTENT_HOOKS
-  if (ptr) dallocx(ptr, lower_arena_flags);
-#else
-  return low_free(ptr);
-#endif
-}
+// lower arena and low_cold arena alias low arena when extent hooks are not
+// used.
+DEF_ALLOC_FUNCS(lower, lower_arena_flags, low_)
+DEF_ALLOC_FUNCS(low_cold, low_cold_arena_flags, low_)
 
-inline void* low_cold_malloc(size_t size) {
-#if USE_JEMALLOC_EXTENT_HOOKS
-  if (!size) return nullptr;
-  return mallocx(size, low_cold_arena_flags);
-#else
-  return low_malloc(size);
-#endif
-}
+#undef DEF_ALLOC_FUNCS
 
-inline void low_cold_free(void* ptr) {
-#if USE_JEMALLOC_EXTENT_HOOKS
-  if (ptr) dallocx(ptr, low_cold_arena_flags);
-#else
-  return low_free(ptr);
-#endif
-}
-
-template <class T>
-struct LowAllocator {
+// General purpose adaptor that wraps allocation and sized deallocation function
+// into an allocator that works with STL-stype containers.
+template <void* (*AF)(size_t), void (*DF)(void*, size_t), typename T>
+struct WrapAllocator {
   using value_type = T;
+  using reference = T&;
+  using const_reference = const T&;
   using pointer = T*;
   using const_pointer = const T*;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
 
-  template <class U>
-  struct rebind { using other = LowAllocator<U>; };
+  template <class U> struct rebind { using other = WrapAllocator<AF, DF, U>; };
 
-  LowAllocator() noexcept {}
+  WrapAllocator() noexcept {}
   template<class U>
-  explicit LowAllocator(const LowAllocator<U>&) noexcept {}
-  ~LowAllocator() noexcept {}
+  explicit WrapAllocator(const WrapAllocator<AF, DF, U>&) noexcept {}
+  ~WrapAllocator() noexcept {}
 
   pointer allocate(size_t num) {
-    return (pointer)low_malloc(num * sizeof(T));
-  }
-  void deallocate(pointer p, size_t /*num*/) {
-    low_free((void*)p);
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  template<class U> bool operator==(const LowAllocator<U>&) const {
-    return true;
-  }
-  template<class U> bool operator!=(const LowAllocator<U>&) const {
-    return false;
-  }
-};
-
-template <class T>
-struct LowerAllocator {
-  using value_type = T;
-  using pointer = T*;
-  using const_pointer = const T*;
-
-  template <class U>
-  struct rebind { using other = LowerAllocator<U>; };
-
-  LowerAllocator() noexcept {}
-  template<class U>
-  explicit LowerAllocator(const LowerAllocator<U>&) noexcept {}
-  ~LowerAllocator() noexcept {}
-
-  pointer allocate(size_t num) {
-    return (pointer)low_malloc(num * sizeof(T));
-  }
-  void deallocate(pointer p, size_t /*num*/) {
-    low_free((void*)p);
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  template<class U> bool operator==(const LowerAllocator<U>&) const {
-    return true;
-  }
-  template<class U> bool operator!=(const LowerAllocator<U>&) const {
-    return false;
-  }
-};
-
-template <class T>
-struct LowColdAllocator {
-  using value_type = T;
-  using pointer = T*;
-  using const_pointer = const T*;
-
-  template <class U>
-  struct rebind { using other = LowColdAllocator<U>; };
-
-  LowColdAllocator() noexcept {}
-  template<class U>
-  explicit LowColdAllocator(const LowColdAllocator<U>&) noexcept {}
-  ~LowColdAllocator() noexcept {}
-
-  pointer allocate(size_t num) {
-    return (pointer)low_malloc(num * sizeof(T));
-  }
-  void deallocate(pointer p, size_t /*num*/) {
-    low_free((void*)p);
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  template<class U> bool operator==(const LowColdAllocator<U>&) const {
-    return true;
-  }
-  template<class U> bool operator!=(const LowColdAllocator<U>&) const {
-    return false;
-  }
-};
-
-template <class T>
-struct VMAllocator {
-  using value_type = T;
-  using pointer = T*;
-  using const_pointer = const T*;
-
-  template <class U>
-  struct rebind { using other = VMAllocator<U>; };
-
-  VMAllocator() noexcept {}
-  template<class U> explicit VMAllocator(const VMAllocator<U>&) noexcept {}
-  ~VMAllocator() noexcept {}
-
-  pointer allocate(size_t num) {
-    if (!num) return nullptr;
-    return (pointer)vm_malloc(num * sizeof(T));
+    if (num == 0) return nullptr;
+    return (pointer)AF(num * sizeof(T));
   }
   void deallocate(pointer p, size_t num) {
-    if (!p) return;
-    vm_sized_free((void*)p, num * sizeof(T));
+    if (p == nullptr) return;
+    DF((void*)p, num * sizeof(T));
   }
-
   template<class U, class... Args>
   void construct(U* p, Args&&... args) {
     ::new ((void*)p) U(std::forward<Args>(args)...);
@@ -587,89 +449,26 @@ struct VMAllocator {
   void destroy(pointer p) {
     p->~T();
   }
-
-  template<class U> bool operator==(const VMAllocator<U>&) const {
+  template<class U> bool operator==(const WrapAllocator<AF, DF, U>&) const {
     return true;
   }
-  template<class U> bool operator!=(const VMAllocator<U>&) const {
+  template<class U> bool operator!=(const WrapAllocator<AF, DF, U>&) const {
     return false;
   }
 };
 
-template <class T>
-struct VMColdAllocator {
-  using value_type = T;
-  using pointer = T*;
-  using const_pointer = const T*;
-
-  template <class U>
-  struct rebind { using other = VMColdAllocator<U>; };
-
-  VMColdAllocator() noexcept {}
-  template<class U>
-  explicit VMColdAllocator(const VMColdAllocator<U>&) noexcept {}
-  ~VMColdAllocator() noexcept {}
-
-  pointer allocate(size_t num) {
-    return (pointer)vm_cold_malloc(num * sizeof(T));
-  }
-  void deallocate(pointer p, size_t num) {
-    vm_cold_free((void*)p);
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  template<class U> bool operator==(const VMColdAllocator<U>&) const {
-    return true;
-  }
-  template<class U> bool operator!=(const VMColdAllocator<U>&) const {
-    return false;
-  }
-};
-
-template <class T>
-struct APCAllocator {
-  using value_type = T;
-  using pointer = T*;
-  using const_pointer = const T*;
-
-  template <class U>
-  struct rebind { using other = APCAllocator<U>; };
-
-  APCAllocator() noexcept {}
-  template<class U> explicit APCAllocator(const APCAllocator<U>&) noexcept {}
-  ~APCAllocator() noexcept {}
-
-  pointer allocate(size_t num, const void* = nullptr) {
-    if (!num) return nullptr;
-    return (pointer)apc_malloc(num * sizeof(T));
-  }
-  void deallocate(pointer p, size_t num) {
-    if (!p) return;
-    apc_sized_free((void*)p, num * sizeof(T));
-  }
-
-  template<class U, class... Args>
-  void construct(U* p, Args&&... args) {
-    ::new ((void*)p) U(std::forward<Args>(args)...);
-  }
-  void destroy(pointer p) {
-    p->~T();
-  }
-
-  template<class U> bool operator==(const APCAllocator<U>&) const {
-    return true;
-  }
-  template<class U> bool operator!=(const APCAllocator<U>&) const {
-    return false;
-  }
-};
+template<typename T> using LowAllocator =
+  WrapAllocator<low_malloc, low_sized_free, T>;
+template<typename T> using LowerAllocator =
+  WrapAllocator<lower_malloc, lower_sized_free, T>;
+template<typename T> using LowColdAllocator =
+  WrapAllocator<low_cold_malloc, low_cold_sized_free, T>;
+template<typename T> using VMAllocator =
+  WrapAllocator<vm_malloc, vm_sized_free, T>;
+template<typename T> using VMColdAllocator =
+  WrapAllocator<vm_cold_malloc, vm_cold_sized_free, T>;
+template<typename T> using APCAllocator =
+  WrapAllocator<apc_malloc, apc_sized_free, T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

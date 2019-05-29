@@ -19,7 +19,7 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
         expected_output,
         stdin=None,
         options=(),
-        retries=3,
+        retries=30,
         assert_loaded_saved_state=False,
     ):
         time.sleep(2)  # wait for Hack to catch up with file system changes
@@ -40,9 +40,12 @@ class FreshInitTestDriver(common_tests.CommonTestDriver):
             stdin=stdin,
         )
 
-        if retcode == 6 and retries > 0:
-            # this sometimes happens and retrying helps
+        if (retcode == 6 or retcode == 7) and retries > 0:
+            # 6 = "No_server_running_should_retry" or "Server_hung_up_should_retry"
+            # 7 = "Out_of_time" or "Out_of_retries"
             return self.check_cmd(expected_output, stdin, options, retries - 1)
+        if retcode == 7:
+            raise unittest.SkipTest("Hack server exit code 7 - out of time/retries")
         self.assertIn(retcode, [0, 2])
 
         if expected_output is not None:

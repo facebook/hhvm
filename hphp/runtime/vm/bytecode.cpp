@@ -4609,28 +4609,41 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool unpack) {
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
 
-  if (unpack) {
-    Cell* c1 = vmStack().topC();
-    if (UNLIKELY(!isContainer(*c1))) {
-      Cell tmp = *c1;
-      // argument_unpacking RFC dictates "containers and Traversables"
-      raise_warning_unsampled("Only containers may be unpacked");
-      *c1 = make_persistent_array_like_tv(staticEmptyVArray());
-      tvDecRefGen(&tmp);
+  try {
+    if (unpack) {
+      Cell* c1 = vmStack().topC();
+      if (UNLIKELY(!isContainer(*c1))) {
+        Cell tmp = *c1;
+        // argument_unpacking RFC dictates "containers and Traversables"
+        raise_warning_unsampled("Only containers may be unpacked");
+        *c1 = make_persistent_array_like_tv(staticEmptyVArray());
+        tvDecRefGen(&tmp);
+      }
+
+      Cell args = *c1;
+      vmStack().discard(); // prepareArrayArgs will push args onto the stack
+      SCOPE_EXIT { tvDecRefGen(&args); };
+      checkStack(vmStack(), ar->func(), 0);
+
+      assertx(!ar->resumed());
+      prepareArrayArgs(ar, args, vmStack(), numArgs, /* checkRefAnnot */ true);
     }
 
-    Cell args = *c1;
-    vmStack().discard(); // prepareArrayArgs will push arguments onto the stack
-    SCOPE_EXIT { tvDecRefGen(&args); };
-    checkStack(vmStack(), ar->func(), 0);
-
-    assertx(!ar->resumed());
-    prepareArrayArgs(ar, args, vmStack(), numArgs, /* check ref annot */ true);
+    prepareFuncEntry(
+      ar,
+      unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
+  } catch (...) {
+    // If the callee's frame is still pre-live, free it explicitly.
+    if (ar->m_sfp == vmfp()) {
+      assertx(vmStack().top() <= (void*)ar);
+      while (vmStack().top() != (void*)ar) {
+        vmStack().popTV();
+      }
+      vmStack().popAR();
+    }
+    throw;
   }
 
-  prepareFuncEntry(
-    ar,
-    unpack ? StackArgsState::Trimmed : StackArgsState::Untrimmed);
   if (UNLIKELY(!EventHook::FunctionCall(ar, EventHook::NormalFunc))) {
     return false;
   }

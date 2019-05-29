@@ -24,7 +24,6 @@ let sub_type p ur env ty_sub ty_super =
     [Log_head ("Typing_ops.sub_type",
        [Log_type ("ty_sub", ty_sub);
         Log_type ("ty_super", ty_super)])]));
-  let env = { env with Env.pos = p } in
   Errors.try_add_err p (Reason.string_of_ureason ur)
     (fun () -> Typing_utils.sub_type env ty_sub ty_super)
     (fun () -> env)

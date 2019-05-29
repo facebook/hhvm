@@ -439,7 +439,6 @@ and hint_ env p = function
       List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
 
 and check_happly unchecked_tparams env h =
-  let env = { env with Env.pos = (fst h) } in
   let decl_ty = Decl_hint.hint env.Env.decl_env h in
   let unchecked_tparams =
     List.map unchecked_tparams begin fun t ->
@@ -484,7 +483,7 @@ and check_happly unchecked_tparams env h =
                            TGenConstraint.check_constraint env ck ty ~cstr_ty
                         )
                         (fun l ->
-                          Reason.explain_generic_constraint env.Env.pos r x l;
+                          Reason.explain_generic_constraint (fst h) r x l;
                           env
                         ))
                 end tc_tparams tyl

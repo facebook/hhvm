@@ -329,12 +329,6 @@ let uerror env r1 ty1 r2 ty2 =
     Errors.violated_constraint p tparam left right
   | _ -> Errors.unify_error left right
 
-(* We attempt to simplify the unification error to see if it can be
- * explained without referring to dependent types.
- *)
-let simplified_uerror env ty1 ty2 =
-  uerror env (fst ty1) (snd ty1) (fst ty2) (snd ty2)
-
 (*****************************************************************************)
 (* Applies a function to 2 shapes simultaneously, raises an error if
  * the second argument has less fields than the first.

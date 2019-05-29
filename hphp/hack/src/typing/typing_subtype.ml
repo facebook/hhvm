@@ -1211,7 +1211,6 @@ and simplify_subtype_params
        * hints don't support '&' annotations (enforce_ctpbr = false). *)
       Unify.unify_param_modes ~enforce_ctpbr:is_method sub super;
       Unify.unify_accept_disposable sub super;
-      let env = { env with Env.pos = Reason.to_pos (fst ty_sub) } in
       match sub.fp_kind, super.fp_kind with
       | FPinout, FPinout ->
         (* Inout parameters are invariant wrt subtyping for function types. *)
@@ -1237,7 +1236,6 @@ and simplify_subtype_params_with_variadic
   match subl with
   | [] -> valid env
   | { fp_type = sub; _ } :: subl ->
-    let env = { env with Env.pos = Reason.to_pos (fst sub) } in
     env |>
     simplify_subtype sub variadic_ty &&&
     simplify_subtype_params_with_variadic subl variadic_ty
@@ -1254,7 +1252,6 @@ and simplify_supertype_params_with_variadic
   match superl with
   | [] -> valid env
   | { fp_type = super; _ } :: superl ->
-    let env = { env with Env.pos = Reason.to_pos (fst super) } in
     env |>
     simplify_subtype variadic_ty super &&&
     simplify_supertype_params_with_variadic superl variadic_ty
@@ -2207,7 +2204,7 @@ and decompose_subtype_add_prop p env prop =
   | TL.Conj props ->
     List.fold_left ~f:(decompose_subtype_add_prop p) ~init:env props
   | TL.Disj _props ->
-    Typing_log.log_prop 2 env.Env.pos "decompose_subtype_add_prop" env prop;
+    Typing_log.log_prop 2 env.Env.function_pos "decompose_subtype_add_prop" env prop;
     env
   | TL.Unsat _ ->
     env
@@ -2778,19 +2775,19 @@ let close_tyvars_and_solve env =
       env Reason.Rnone tyvar)
 
 let log_prop env =
-  let filename = Pos.filename (Pos.to_absolute env.Env.pos) in
+  let filename = Pos.filename (Pos.to_absolute env.Env.function_pos) in
   if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then () else
   let prop = env_to_prop env in
   if TypecheckerOptions.log_inference_constraints (Env.get_tcopt env) then (
     let p_as_string = Typing_print.subtype_prop env prop in
-    let pos = Pos.string (Pos.to_absolute env.Env.pos) in
+    let pos = Pos.string (Pos.to_absolute env.Env.function_pos) in
     let size = TL.size prop in
     let n_disj = TL.n_disj prop in
     let n_conj = TL.n_conj prop in
     TypingLogger.InferenceCnstr.log p_as_string ~pos ~size ~n_disj ~n_conj);
   if not (Errors.currently_has_errors ()) &&
     not (TL.is_valid prop)
-  then Typing_log.log_prop 1 env.Env.pos
+  then Typing_log.log_prop 1 env.Env.function_pos
     "There are remaining unsolved constraints!" env prop
 
 (*****************************************************************************)

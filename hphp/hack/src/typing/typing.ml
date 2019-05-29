@@ -2713,7 +2713,6 @@ and anon_bind_param params (env, t_params) ty : Env.env * Tast.fun_param list =
           { (Phase.env_with_self env) with from_class = Some CIstatic } in
         let env, h = Phase.localize ~ety_env env h in
         let pos = Reason.to_pos (fst ty) in
-        (* Don't use Type.coerce_type as it resets env.Env.pos unnecessarily *)
         let env = anon_coerce_type pos Reason.URparam env ty h in
         (* Closures are allowed to have explicit type-hints. When
          * that is the case we should check that the argument passed

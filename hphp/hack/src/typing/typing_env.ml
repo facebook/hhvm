@@ -47,7 +47,7 @@ let log_env_change name old_env new_env =
     let pos =
       match old_env.tyvars_stack with
       | (p,_)::_ -> p
-      | _ -> old_env.pos in
+      | _ -> old_env.function_pos in
     !env_log_function pos name old_env new_env
   end;
   new_env
@@ -627,7 +627,6 @@ let initial_local tpenv local_reactive = {
 
 let empty tcopt file ~droot = {
   function_pos = Pos.none;
-  pos     = Pos.none;
   tenv    = IMap.empty;
   subst   = IMap.empty;
   lenv    = initial_local SMap.empty Nonreactive;

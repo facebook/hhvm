@@ -156,10 +156,9 @@ and _ ty_ =
 
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
-  (* A type variable (not to be confused with a type parameter). This is the
-   * core of how type inference works. If you aren't familiar with it, a
-   * suitable explanation couldn't possibly fit here; terms to google for
-   * include "Hindley-Milner type inference", "unification", and "algorithm W".
+  (* A type variable (not to be confused with a type parameter).
+   * It represents a type that is "unknown" and must be inferred by Hack's
+   * constraint-based type inference engine.
    *)
   | Tvar : Ident.t -> locl ty_
 
@@ -196,31 +195,12 @@ and _ ty_ =
   | Tanon : locl fun_arity * Ident.t -> locl ty_
 
   (* Union type.
-   * This is needed for a few reasons:
-   * - Because hack variables are not scoped, some control flow statements can
-   *   make it such that the variables can have multiple types after the
-   *   statement, for example:
-   *
-   *   if (...) {
-   *     $x = new C();
-   *   } else {
-   *     $x = new D();
-   *   }
-   *   // here $x has the union type (C | D)
-   *
-   * - Some collections can be heterogeneous, for example:
-   *
-   *   $v = vec[]
-   *   $v[] = new C()
-   *   $v[] = new D()
-   *   // $v is a vec<(C | D)>
-   *
-   * - The union type might also be used as an inferred type for some generic classes:
-   *
-   *   $x = new Box ()
-   *   $x->set(new C());
-   *   $x->set(new D());
-   *   // $x is a Box<(C | D)>
+   * The values that are members of this type are the union of the values
+   * that are members of the components of the union.
+   * Some examples (writing | for binary union)
+   *   Tunion []  is the "nothing" type, with no values
+   *   Tunion [int;float] is the same as num
+   *   Tunion [null;t] is the same as Toption t
    *)
   | Tunion : locl ty list -> locl ty_
 

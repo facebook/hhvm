@@ -60,7 +60,6 @@
  type env = {
    (* position of the function/method being checked *)
    function_pos: Pos.t  ;
-   pos     : Pos.t      ;
    tenv    : locl ty IMap.t ;
    subst   : int IMap.t ;
    lenv    : local_env  ;

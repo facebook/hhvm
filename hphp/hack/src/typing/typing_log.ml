@@ -446,7 +446,6 @@ let genv_as_value env genv =
 let env_as_value env =
   let {
     function_pos;
-    pos;
     tenv;
     subst;
     lenv;
@@ -466,7 +465,6 @@ let env_as_value env =
     big_envs = _;
   } = env in
   make_map [
-    "pos", pos_as_value pos;
     "function_pos", pos_as_value function_pos;
     "tvenv", tvenv_as_value env tvenv;
     "tenv", tenv_as_value env tenv;

@@ -7,7 +7,7 @@
  *
  *)
 
-type t = GlobalOptions.t
+type t = GlobalOptions.t [@@deriving show]
 let safe_array = GlobalOptions.tco_safe_array
 let safe_vector_array = GlobalOptions.tco_safe_vector_array
 let disallow_ambiguous_lambda = GlobalOptions.tco_disallow_ambiguous_lambda

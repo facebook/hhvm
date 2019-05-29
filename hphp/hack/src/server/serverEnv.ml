@@ -21,7 +21,7 @@ type recheck_loop_stats = {
   rechecked_count : int;
   (* includes dependencies *)
   total_rechecked_count : int;
-}
+} [@@deriving show]
 
 let empty_recheck_loop_stats = {
   updates_stale = false;
@@ -74,6 +74,7 @@ type full_check_status =
   | Full_check_started
   (* All the changes have been fully processed. *)
   | Full_check_done
+  [@@deriving show]
 
 (* In addition to this environment, many functions are storing and
  * updating ASTs, NASTs, and types in a shared space
@@ -97,7 +98,7 @@ type env = {
      * failed_ sets are the main piece of mutable state that incremental mode
      * needs to maintain - the errors themselves are more of a cache, and should
      * always be possible to be regenerated based on those sets. *)
-    errorl         : Errors.t;
+    errorl         : Errors.t [@opaque];
     (* failed_naming is used as kind of a dependency tracking mechanism:
      * if files A.php and B.php both define class C, then those files are
      * mutually depending on each other (edit to one might resolve naming
@@ -108,7 +109,7 @@ type env = {
      * See test_naming_errors.ml and test_failed_naming.ml
      *)
     failed_naming : Relative_path.Set.t;
-    persistent_client : ClientProvider.client option;
+    persistent_client : ClientProvider.client option [@opaque];
     (* Whether last received IDE command was IDE_IDLE *)
     ide_idle : bool;
     (* Timestamp of last IDE file synchronization command *)
@@ -153,13 +154,14 @@ type env = {
       ((env -> env) * string) option;
     (* Same as above, but for non-persistent clients *)
     default_client_pending_command_needs_full_check:
-      ((env -> env) * string * ClientProvider.client) option;
+      ((env -> env) * string * ClientProvider.client) option [@opaque];
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;
     (* Symbols for locally changed files *)
-    local_symbol_table : SearchUtils.local_tracking_env ref;
+    local_symbol_table : SearchUtils.local_tracking_env ref [@opaque];
   }
+  [@@deriving show]
 
 and dirty_deps = {
   (* We are rechecking dirty files to bootstrap the dependency graph.

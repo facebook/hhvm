@@ -31,8 +31,10 @@ module Dep :
     val to_string : variant -> string
   end
 
-module DepSet : module type of
-  Reordered_argument_collections.Reordered_argument_set(Set.Make (Dep))
+module DepSet : sig
+  include module type of Reordered_argument_collections.Reordered_argument_set(Set.Make (Dep))
+  val pp : Format.formatter -> t -> unit
+end
 
 val trace : bool ref
 

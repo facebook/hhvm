@@ -14,7 +14,7 @@
  * file that they're defined in.
  *)
 
-type t
+type t [@@deriving show]
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 

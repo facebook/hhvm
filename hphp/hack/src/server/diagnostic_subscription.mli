@@ -9,7 +9,7 @@
 
 open Reordered_argument_collections
 
-type t
+type t [@@deriving show]
 
 val of_id : id:int -> init:Errors.t -> t
 

@@ -41,12 +41,14 @@ type t = {
   local_errors : RP.Set.t RP.Map.t;
   (* Copy of errors most recently pushed to subscribers, used to avoid pushing
    * no-op duplicates *)
-  pushed_errors : errors RP.Map.t;
+  pushed_errors : errors RP.Map.t
+    [@printer fun fmt errors ->
+      RP.Map.pp (fun fmt -> Format.fprintf fmt "%d") fmt (RP.Map.map errors List.length)];
   (* Union of all values in local_errors *)
   sources : Relative_path.Set.t;
   has_new_errors : bool;
   is_truncated : bool; (* was 'local_errors' truncated with respect to all the errors? *)
-}
+} [@@deriving show]
 
 let filter_filter map_map ~f  =
   RP.Map.map map_map ~f:begin fun v ->

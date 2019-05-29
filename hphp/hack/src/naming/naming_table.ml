@@ -139,7 +139,7 @@
        (although they do still occupy a hash slot).
 *)
 
-type t = FileInfo.t Relative_path.Map.t
+type t = FileInfo.t Relative_path.Map.t [@@deriving show]
 type fast = FileInfo.names Relative_path.Map.t
 type saved_state_info = FileInfo.saved Relative_path.Map.t
 

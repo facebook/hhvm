@@ -78,7 +78,10 @@ module Dep = struct
 
 end
 
-module DepSet = Reordered_argument_set(Set.Make (Dep))
+module DepSet = struct
+  include Reordered_argument_set(Set.Make (Dep))
+  let pp = make_pp (fun fmt -> Format.fprintf fmt "%d")
+end
 
 (****************************************************************************)
 (* Module for a compact graph. *)

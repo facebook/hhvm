@@ -1,6 +1,0 @@
-File "traversable_foreach3.php", line 13, characters 12-13:
-Invalid foreach (Typing[4110])
-File "traversable_foreach3.php", line 13, characters 12-13:
-This is an object of type KeyedTraversable<[unresolved], [unresolved]> because this is used in a foreach statement
-File "traversable_foreach3.php", line 12, characters 15-33:
-It is incompatible with an object of type Traversable<string>

@@ -1,6 +1,0 @@
-File "nested_shapes_idx.php", line 8, characters 5-33:
-Invalid argument (Typing[4110])
-File "nested_shapes_idx.php", line 8, characters 5-33:
-This is a shape because Shapes::idx expects a shape
-File "nested_shapes_idx.php", line 4, characters 28-45:
-It is incompatible with a nullable type

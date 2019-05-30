@@ -948,7 +948,7 @@ xmlNodePtr to_xml_string(encodeType* type, const Variant& data, int style,
   }
 
   if (!php_libxml_xmlCheckUTF8(BAD_CAST(str.data()))) {
-    char *err = (char*)malloc(str.size() + 8);
+    char *err = (char*)req::malloc_noptrs(str.size() + 8);
     char c;
     memcpy(err, str.data(), str.size() + 1);
     int i = 0;
@@ -986,7 +986,7 @@ xmlNodePtr to_xml_string(encodeType* type, const Variant& data, int style,
       err[i++] = 0;
     }
     std::string serr = err;
-    free(err);
+    req::free(err);
     throw SoapException("Encoding: string '%s' is not a valid utf-8 string",
                         serr.c_str());
   }
@@ -1994,7 +1994,7 @@ static int* get_position_12(int dimension, const char* str) {
   int *pos;
   int i = -1, flag = 0;
 
-  pos = (int*)calloc(dimension, sizeof(int));
+  pos = (int*)req::calloc_noptrs(dimension, sizeof(int));
   while (*str != '\0' && (*str < '0' || *str > '9') && (*str != '*')) {
     str++;
   }
@@ -2045,7 +2045,7 @@ static void get_position_ex(int dimension, const char* str, int** pos) {
 }
 
 static int* get_position(int dimension, const char* str) {
-  int *pos = (int*)malloc(sizeof(int) * dimension);
+  int *pos = (int*)req::malloc_noptrs(sizeof(int) * dimension);
   get_position_ex(dimension, str, &pos);
   return pos;
 }
@@ -2215,7 +2215,7 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
         array_type += value.data();
       }
 
-      dims = (int*)malloc(sizeof(int) * dimension);
+      dims = (int*)req::malloc_noptrs(sizeof(int) * dimension);
       dims[0] = i;
       Array el = data.toArray();
       for (i = 1; i < dimension; i++) {
@@ -2265,7 +2265,7 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
           }
         }
       } else {
-        dims = (int*)malloc(sizeof(int));
+        dims = (int*)req::malloc_noptrs(sizeof(int));
         *dims = 0;
         array_size += folly::to<string>(i);
       }
@@ -2307,13 +2307,13 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
                    elementType->encode->details.type_str.c_str(), array_type);
 
       array_size += folly::to<string>(i);
-      dims = (int*)malloc(sizeof(int) * dimension);
+      dims = (int*)req::malloc_noptrs(sizeof(int) * dimension);
       dims[0] = i;
     } else {
 
       enc = get_array_type(xmlParam, data, array_type);
       array_size += folly::to<string>(i);
-      dims = (int*)malloc(sizeof(int) * dimension);
+      dims = (int*)req::malloc_noptrs(sizeof(int) * dimension);
       dims[0] = i;
     }
 
@@ -2348,7 +2348,7 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
                            enc ? encode_add_ns(xmlParam,
                                              enc->details.ns.c_str()) : nullptr,
                            dimension, dims, data, style);
-    free(dims);
+    req::free(dims);
   }
   if (style == SOAP_ENCODED) {
     if (SOAP_GLOBAL(features) & SOAP_USE_XSI_ARRAY_TYPE) {
@@ -2415,7 +2415,7 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
       dimension = calc_dimension_12((char*)attr->children->content);
       dims = get_position_12(dimension, (char*)attr->children->content);
     } else {
-      dims = (int*)malloc(sizeof(int));
+      dims = (int*)req::malloc_noptrs(sizeof(int));
       *dims = 0;
     }
 
@@ -2438,9 +2438,8 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
       enc = get_encoder(sdl, ext->ns.c_str(), type.data());
     }
 
-    dims = (int*)malloc(sizeof(int));
+    dims = (int*)req::malloc_noptrs(sizeof(int));
     *dims = 0;
-
   } else if ((ext = get_extra_attributes
               (type->sdl_type,
                SOAP_1_2_ENC_NAMESPACE":itemType",
@@ -2456,7 +2455,7 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
       dimension = calc_dimension_12(ext->val.c_str());
       dims = get_position_12(dimension, ext->val.c_str());
     } else {
-      dims = (int*)malloc(sizeof(int));
+      dims = (int*)req::malloc_noptrs(sizeof(int));
       *dims = 0;
     }
   } else if ((ext = get_extra_attributes
@@ -2477,10 +2476,10 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
   }
   if (dims == nullptr) {
     dimension = 1;
-    dims = (int*)malloc(sizeof(int));
+    dims = (int*)req::malloc_noptrs(sizeof(int));
     *dims = 0;
   }
-  pos = (int*)calloc(sizeof(int), dimension);
+  pos = (int*)req::calloc_noptrs(sizeof(int), dimension);
   if (data && (attr = get_attribute(data->properties,"offset")) &&
       attr->children && attr->children->content) {
     char* tmp = strrchr((char*)attr->children->content,'[');
@@ -2538,8 +2537,8 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
     }
     trav = trav->next;
   }
-  free(dims);
-  free(pos);
+  req::free(dims);
+  req::free(pos);
   return ret;
 }
 
@@ -2869,7 +2868,7 @@ static xmlNodePtr to_xml_list(encodeType* enc, const Variant& data, int style,
     xmlNodeSetContentLen(ret, BAD_CAST(list.c_str()), list.size());
   } else {
     String sdata = data.toString();
-    char *str = strndup(sdata.data(), sdata.size());
+    char *str = req::strndup(sdata.data(), sdata.size());
     whiteSpace_collapse(BAD_CAST(str));
     char *start = str;
     char *next;
@@ -2899,7 +2898,7 @@ static xmlNodePtr to_xml_list(encodeType* enc, const Variant& data, int style,
       start = next;
     }
     xmlNodeSetContentLen(ret, BAD_CAST(list.c_str()), list.size());
-    free(str);
+    req::free(str);
   }
   return ret;
 }

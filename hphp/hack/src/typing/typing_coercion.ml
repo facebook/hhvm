@@ -16,15 +16,16 @@ module SubType = Typing_subtype
 (*
 * These are the main coercion functions.
 *
-* There are only a few ways coercion (~>) happens currently:
-* 1. t1 <: t2 |- t1 ~> t2
-*    (you can coerce t1 to any of its supertypes)
-* 2. |- t ~> dynamic
+* There are only a few coercion (~>) rules, documented in hphp/hack/doc/type_system/hack_typing.ott.
+*
+* 1. |- t ~> dynamic
 *    (you can coerce t to dynamic)
-* 3. t1 ~> t2, t2 ~> t3 |- t1 ~> t3
-*    (coercion is transitive)
-* 4. t1 ~> t2 |- Awaitable<t1> ~> Awaitable<t2>
+* 2. t1 ~> t2 |- Awaitable<t1> ~> Awaitable<t2>
 *    (you can coerce in Awaitable)
+* 3. t1 ~> t2 |- t1 ~> ?t2
+*    (you can coerce t1 to optional type if the inner type is a valid coercion target)
+* 4. t1 <: t2 |- t1 ~> t2
+*    (you can coerce t1 to any of its supertypes)
 *
 * This boils down to running the normal sub_type procedure whenever possible,
 * and catching the remaining cases. The normal sub_type procedure is important
@@ -32,48 +33,24 @@ module SubType = Typing_subtype
 * useful to the user for error messages. In the cases where we do not want to
 * sub_type, it suffices to do nothing.
 *
-* Supertypes of dynamic *can* occur, for instance as array's union types,
-* generics, and ?dynamic, so it is important to catch them.
-*
 * Roughly, coercion should be used over subtyping in places where a particular
 * type that could be dynamic is required, like parameters and returns.
 *)
 
 (* checks coercion that isn't just subtyping *)
-let rec can_coerce ?seen:(seen=[]) env ty_have ty_expect =
+let rec can_coerce env ty_have ty_expect =
   let env, ety_expect = Env.expand_type env ty_expect in
   let env, ety_have = Env.expand_type env ty_have in
   match ety_have, ety_expect with
 
-  (* everything coerces to dynamic *)
   | _, (_, Tdynamic) -> Some env
 
-  (* the Awaitable case *)
   | (_, Tclass ((_, cls1), _, [ty1])), (_, Tclass ((_, cls2), _, [ty2]))
     when cls1 = SN.Classes.cAwaitable && cls1 = cls2 ->
     can_coerce env ty1 ty2
 
-  (* The two kinds of "unions" we have are options and unresolveds, the
-   * relevant rule being that t1 ~> t2 |- t1 ~> t2|t3, derived from transitivity.
-   * However, unresolveds can never be a hard expected type since they expand,
-   * (and they can't even be written right now) so we can ignore them as coercion
-   * targets. We will also go further here and assume that t1 ~> ?t2 iff
-   * t1 ~> t2, though this needn't actually be the case in the future *)
   | _, (_, Toption ty) -> can_coerce env ty_have ty
-  | _, (_, Tunion _) -> None
 
-  (* We can also find coercion targets through generics, wherein all that
-   * matters is that the lower bound is somewhere a valid coercion target *)
-  | _, (_, Tabstract (AKgeneric name, _)) ->
-    if List.mem ~equal:(=) seen name (* this will break cycles *)
-    then None
-    else
-    let seen = name::seen in
-    let lower_bounds = Env.get_lower_bounds env name in
-    let coerce_check ty = ty |> can_coerce ~seen:seen env ty_have |> Option.first_some in
-    Typing_set.fold coerce_check lower_bounds None
-
-  (* cannot coerce outside of subtyping *)
   | _ -> None
 
 (* does coercion, including subtyping *)

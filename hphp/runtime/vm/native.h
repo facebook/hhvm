@@ -247,6 +247,7 @@ void coerceFCallArgs(TypedValue* args,
  * calling.
  */
 template<bool usesDoubles>
+__attribute__((noinline))
 void callFunc(const Func* func, void* ctx,
               TypedValue* args, int32_t numNonDefault,
               TypedValue& ret);

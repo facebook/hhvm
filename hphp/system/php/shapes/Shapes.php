@@ -1,16 +1,16 @@
-<?hh // strict
+<?hh // partial
 
 namespace HH {
   abstract final class Shapes {
 
-    // We weaken the typehint for $shape from darray to mixed so that we can do
-    // collection -> array coercion natively, matching Hack param type behavior.
-    <<__Native, __Rx>>
+    <<__Rx>>
     public static function idx(
-      mixed $shape,
+      darray $shape,
       arraykey $index,
-      mixed $default = null,
-    ): mixed;
+      $default = null,
+    ) {
+      return \hphp_array_idx($shape, $index, $default);
+    }
 
     <<__Rx>>
     public static function at(

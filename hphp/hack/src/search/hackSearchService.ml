@@ -16,7 +16,7 @@ let fuzzy = ref false
 
 module SS = SearchService.Make(struct
     type t = search_result_type
-    let fuzzy_types = [Class (Some Ast.Cnormal); Function; Constant; Typedef]
+    let fuzzy_types = [Class (Some Ast_defs.Cnormal); Function; Constant; Typedef]
     let type_num = function
       | Class _ -> 0
       | Function -> 1
@@ -39,27 +39,6 @@ module WorkerApi = struct
       then String.sub key 1 (String.length key - 1)
       else key
     else key
-
-  (* Unlike anything else, we need to look at the class body to extract it's
-   * methods so that they can also be searched for *)
-  let update_class c (acc : SS.Trie.SearchUpdates.t) =
-    let prefix = (snd c.Ast.c_name)^"::" in
-    List.fold_left c.Ast.c_body ~f:begin fun acc elt ->
-      match elt with
-      | Ast.Method m -> let id = m.Ast.m_name in
-        let pos, name = FileInfo.pos_full id in
-        let full_name = prefix^name in
-        let is_static = List.mem ~equal:(=) m.Ast.m_kind Ast.Static in
-        let type_ =
-          Method (is_static, (Utils.strip_ns (snd c.Ast.c_name)))
-        in
-        let acc =
-          SS.WorkerApi.process_trie_term (clean_key name) name pos type_ acc
-        in
-        SS.WorkerApi.process_trie_term
-          (clean_key full_name) name pos type_ acc
-      | _ -> acc
-    end ~init:acc
 
   let add_trie_term id type_ acc =
     let (pos, name) = id in
@@ -150,7 +129,7 @@ end
 
 module MasterApi = struct
   let get_type = function
-    | "class" -> Some (Class (Some Ast.Cnormal))
+    | "class" -> Some (Class (Some Ast_defs.Cnormal))
     | "function" -> Some Function
     | "constant" -> Some Constant
     | "typedef" -> Some Typedef

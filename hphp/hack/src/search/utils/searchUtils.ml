@@ -69,7 +69,7 @@ let to_absolute t = { t with pos = Pos.to_absolute t.pos }
 
 (* This is the result type as known by the autocomplete system *)
 type search_result_type =
-  | Class of Ast.class_kind option
+  | Class of Ast_defs.class_kind option
   | Method of bool * string
   | ClassVar of bool * string
   | Function
@@ -147,10 +147,10 @@ let int_to_kind (kind_num: int): si_kind =
 (* Convert an internal "kind" into an autocomplete result kind *)
 let kind_to_result (kind: si_kind): search_result_type =
   match kind with
-  | SI_Class -> Class (Some Ast.Cnormal)
-  | SI_Interface -> Class (Some Ast.Cinterface)
-  | SI_Enum -> Class (Some Ast.Cenum)
-  | SI_Trait -> Class (Some Ast.Ctrait)
+  | SI_Class -> Class (Some Ast_defs.Cnormal)
+  | SI_Interface -> Class (Some Ast_defs.Cinterface)
+  | SI_Enum -> Class (Some Ast_defs.Cenum)
+  | SI_Trait -> Class (Some Ast_defs.Ctrait)
   | SI_Unknown -> Constant
   | SI_Mixed -> Constant
   | SI_Function -> Function
@@ -160,11 +160,11 @@ let kind_to_result (kind: si_kind): search_result_type =
 (* Convert an autocomplete result "kind" into an internal kind *)
 let result_to_kind (result: search_result_type): si_kind =
   match result with
-  | Class (Some Ast.Cnormal) -> SI_Class
-  | Class (Some Ast.Ctrait) -> SI_Trait
-  | Class (Some Ast.Cabstract) -> SI_Class
-  | Class (Some Ast.Cinterface) -> SI_Interface
-  | Class (Some Ast.Cenum) -> SI_Enum
+  | Class (Some Ast_defs.Cnormal) -> SI_Class
+  | Class (Some Ast_defs.Ctrait) -> SI_Trait
+  | Class (Some Ast_defs.Cabstract) -> SI_Class
+  | Class (Some Ast_defs.Cinterface) -> SI_Interface
+  | Class (Some Ast_defs.Cenum) -> SI_Enum
   | Class (None) -> SI_Class
   | Constant -> SI_GlobalConstant
   | Function -> SI_Function

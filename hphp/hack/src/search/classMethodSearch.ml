@@ -33,18 +33,16 @@ let query_class_methods
     end else true
   in
   get_class_definition_file class_name
-  >>= (fun file -> Ast_provider.find_class_in_file file class_name)
-  >>| (fun class_ -> class_.Ast.c_body)
-  >>| List.filter_map ~f:begin fun class_elt ->
-    match class_elt with
-    | Ast.Method Ast.{m_kind; m_name = (pos, name); _}
-      when matches_query name ->
-      let is_static = List.mem ~equal:(=) m_kind Ast.Static in
+  >>= (fun file -> Ast_provider.find_class_in_file_nast file class_name)
+  >>| (fun class_ -> class_.Nast.c_methods)
+  >>| List.filter_map ~f:begin fun m ->
+    let (pos, name) = m.Nast.m_name in
+    if matches_query name then
       Some SearchUtils. {
-          name;
-          pos = (Pos.to_absolute pos);
-          result_type = Method (is_static, class_name)
-        }
-    | _ -> None
+        name;
+        pos = (Pos.to_absolute pos);
+        result_type = Method (m.Nast.m_static, class_name)
+      }
+    else None
   end
   |> Option.value ~default:[]

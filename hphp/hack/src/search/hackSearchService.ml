@@ -169,10 +169,10 @@ module MasterApi = struct
            match pos, result_type with
            (* Need both class kind and position *)
            | FileInfo.File (FileInfo.Class, fn), Class _ ->
-             (match Ast_provider.find_class_in_file fn name with
+             (match Ast_provider.find_class_in_file_nast fn name with
               | Some c ->
                 let pos, result_type =
-                  (fst c.Ast.c_name, Class (Some c.Ast.c_kind)) in
+                  (fst c.Nast.c_name, Class (Some c.Nast.c_kind)) in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -180,9 +180,9 @@ module MasterApi = struct
                 }
               | None -> None)
            | FileInfo.File (FileInfo.Fun, fn), Function ->
-             (match Ast_provider.find_fun_in_file fn name with
+             (match Ast_provider.find_fun_in_file_nast fn name with
               | Some c ->
-                let pos = fst c.Ast.f_name in
+                let pos = fst c.Nast.f_name in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -190,9 +190,9 @@ module MasterApi = struct
                 }
               | None -> None)
            | FileInfo.File (FileInfo.Typedef, fn), Typedef ->
-             (match Ast_provider.find_typedef_in_file fn name with
+             (match Ast_provider.find_typedef_in_file_nast fn name with
               | Some c ->
-                let pos = fst c.Ast.t_id in
+                let pos = fst c.Nast.t_name in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -200,9 +200,9 @@ module MasterApi = struct
                 }
               | None -> None)
            | FileInfo.File (FileInfo.Const, fn), Constant ->
-             (match Ast_provider.find_gconst_in_file fn name with
+             (match Ast_provider.find_gconst_in_file_nast fn name with
               | Some c ->
-                let pos = fst c.Ast.cst_name in
+                let pos = fst c.Nast.cst_name in
                 Some {
                   SearchUtils.name;
                   pos;
@@ -211,9 +211,9 @@ module MasterApi = struct
               | None -> None)
            | FileInfo.Full p, Class None ->
              let fn = Pos.filename p in
-             (match Ast_provider.find_class_in_file fn name with
+             (match Ast_provider.find_class_in_file_nast fn name with
               | Some c ->
-                let result_type = Class (Some c.Ast.c_kind) in
+                let result_type = Class (Some c.Nast.c_kind) in
                 Some {
                   SearchUtils.name;
                   pos = p;

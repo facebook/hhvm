@@ -3965,16 +3965,18 @@ namespace {
 const StaticString s_nullFunc { "__SystemLib\\__86null" };
 
 template <typename Op>
-void implFPushObjMethodD(ISS& env, const Op& op, bool isRFlavor) {
-  auto const nullThrows = op.subop3 == ObjMethodOp::NullThrows;
-  auto const input = topC(env, op.arg1 + 2 + isRFlavor);
-  auto const location = topStkEquiv(env, op.arg1 + 2 + isRFlavor);
+void fpushObjMethodImpl(ISS& env, const Op& op, ObjMethodOp subop,
+                        SString methName, bool dynamic, bool extraInput) {
+  auto const nullThrows = subop == ObjMethodOp::NullThrows;
+  auto const inputPos = op.arg1 + 2 + (extraInput ? 1 : 0);
+  auto const input = topC(env, inputPos);
+  auto const location = topStkEquiv(env, inputPos);
   auto const mayCallMethod = input.couldBe(BObj);
   auto const mayCallNullsafe = !nullThrows && input.couldBe(BNull);
   auto const mayThrowNonObj = !input.subtypeOf(nullThrows ? BObj : BOptObj);
 
   if (!mayCallMethod && !mayCallNullsafe) {
-    if (isRFlavor) popC(env);
+    if (extraInput) popC(env);
     // This FPush may only throw, make sure it's not optimized away.
     discardAR(env, op.arg1);
     fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TBottom });
@@ -4002,26 +4004,26 @@ void implFPushObjMethodD(ISS& env, const Op& op, bool isRFlavor) {
     auto const rcls = is_specialized_cls(clsTy)
       ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
       : folly::none;
-    auto const func = env.index.resolve_method(env.ctx, clsTy, op.str2);
-    return ActRec { kind, ctxTy, rcls, func };
+    auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+    return ActRec { kind, ctxTy, rcls, rfunc };
   };
 
   if (!mayCallMethod) {
     // Calls nullsafe helper, but can't fold as we may still throw.
     assertx(mayCallNullsafe /*&& mayThrowNonObj*/);
-    auto const func = env.index.resolve_func(env.ctx, s_nullFunc.get());
-    assertx(func.exactFunc());
-    fpiPushNoFold(env, ActRec { FPIKind::Func, TBottom, folly::none, func });
+    auto const rfunc = env.index.resolve_func(env.ctx, s_nullFunc.get());
+    assertx(rfunc.exactFunc());
+    fpiPushNoFold(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc });
   } else if (mayCallNullsafe || mayThrowNonObj) {
     // Can't optimize away as FCall may push null instead of the folded value
     // or FCall may throw.
     fpiPushNoFold(env, ar());
-  } else if (fpiPush(env, ar(), op.arg1, false)) {
-    if (isRFlavor) return reduce(env, bc::PopC {});
+  } else if (fpiPush(env, ar(), op.arg1, dynamic)) {
+    if (extraInput) return reduce(env, bc::PopC {});
     return reduce(env);
   }
 
-  if (isRFlavor) popC(env);
+  if (extraInput) popC(env);
   discardAR(env, op.arg1);
 
   if (location != NoLocalId) {
@@ -4039,7 +4041,7 @@ void implFPushObjMethodD(ISS& env, const Op& op, bool isRFlavor) {
 } // namespace
 
 void in(ISS& env, const bc::FPushObjMethodD& op) {
-  implFPushObjMethodD(env, op, false);
+  fpushObjMethodImpl(env, op, op.subop3, op.str2, false, false);
 }
 
 void in(ISS& env, const bc::FPushObjMethodRD& op) {
@@ -4047,51 +4049,42 @@ void in(ISS& env, const bc::FPushObjMethodRD& op) {
   if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
     return unreachable(env);
   }
+
   auto const input = topC(env, op.arg1 + 3);
   auto const clsTy = objcls(intersection_of(input, TObj));
-  auto const func = env.index.resolve_method(env.ctx, clsTy, op.str2);
-  if (!func.couldHaveReifiedGenerics()) {
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  if (!rfunc.couldHaveReifiedGenerics()) {
     return reduce(
       env,
       bc::PopC {},
       bc::FPushObjMethodD { op.arg1, op.str2, op.subop3, op.has_unpack  }
     );
   }
-  implFPushObjMethodD(env, op, true);
+
+  fpushObjMethodImpl(env, op, op.subop3, op.str2, false, true);
 }
 
 void in(ISS& env, const bc::FPushObjMethod& op) {
-  auto const t1 = topC(env); // meth name
-  auto const t2 = topC(env, op.arg1 + 3); // object
-  auto const clsTy = objcls(t2);
-  folly::Optional<res::Func> rfunc;
-  auto const name = getNameFromType(t1);
-  if (name && op.argv.size() == 0) {
-    rfunc = env.index.resolve_method(env.ctx, clsTy, name);
-    if (rfunc && !rfunc->mightCareAboutDynCalls() &&
-        !rfunc->couldHaveReifiedGenerics()) {
-      return reduce(
-        env,
-        bc::PopC {},
-        bc::FPushObjMethodD {
-          op.arg1, name, op.subop2, op.has_unpack
-        }
-      );
-    }
+  auto const methName = getNameFromType(topC(env));
+  if (!methName || op.argv.size() != 0) {
+    popC(env);
+    discardAR(env, op.arg1);
+    fpiPushNoFold(env, ActRec { FPIKind::ObjMeth, TObj });
+    return;
   }
-  popC(env);
-  discardAR(env, op.arg1);
-  fpiPushNoFold(
-    env,
-    ActRec {
-      FPIKind::ObjMeth,
-      t2,
-      is_specialized_cls(clsTy)
-        ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
-        : folly::none,
-      rfunc
-    }
-  );
+
+  auto const input = topC(env, op.arg1 + 3);
+  auto const clsTy = objcls(intersection_of(input, TObj));
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  if (!rfunc.mightCareAboutDynCalls() && !rfunc.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushObjMethodD { op.arg1, methName, op.subop2, op.has_unpack }
+    );
+  }
+
+  fpushObjMethodImpl(env, op, op.subop2, methName, true, true);
 }
 
 namespace {

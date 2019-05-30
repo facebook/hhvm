@@ -78,6 +78,7 @@ struct HttpServer : Synchronizable, TakeoverListener,
 
   static void MarkShutdownStat(ShutdownEvent event);
   static void LogShutdownStats();
+  static void ProfileFlush();
 
   static int64_t GetPrepareToStopTime() {
     // Make sure changes are seen right away after PrepareToStop().

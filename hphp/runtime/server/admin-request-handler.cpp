@@ -265,6 +265,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  Server.RequestMemoryOOMKillBytes\n"
         "/free-mem:        ask allocator to release unused memory to system\n"
         "/prepare-to-stop: ask the server to prepare for stopping\n"
+        "/flush-profile:   flush profiling counters (in -fprofile-gen builds)\n"
         "/flush-logs:      trigger batching log-writers to flush all content\n"
         "/translate:       translate hex encoded stacktrace in 'stack' param\n"
         "    stack         required, stack trace to translate\n"
@@ -533,6 +534,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
                     info.freeMb, info.cachedMb, info.buffersMb,
                     newInfo.freeMb, newInfo.cachedMb, newInfo.buffersMb);
+      break;
+    }
+    if (cmd == "flush-profile") {
+      HttpServer::ProfileFlush();
+      // send the response *after* flushing, so the caller knows the
+      // data has been updated.
+      transport->sendString("OK\n");
       break;
     }
     if (cmd == "flush-logs") {

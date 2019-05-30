@@ -464,13 +464,16 @@ void HttpServer::waitForServers() {
   // all other servers invoke waitForEnd on stop
 }
 
-void HttpServer::stop(const char* stopReason) {
-  if (m_stopping.exchange(true)) return;
-
+void HttpServer::ProfileFlush() {
   #ifdef __linux__
   if (__gcov_flush) __gcov_flush();
   #endif
+}
 
+void HttpServer::stop(const char* stopReason) {
+  if (m_stopping.exchange(true)) return;
+
+  ProfileFlush();
   // Let all worker threads know that the server is shutting down. If some
   // request installed a PHP-level signal handler through `pcntl_signal(SIGTERM,
   // handler_func)`, `handler_func()` will run in the corresponding request

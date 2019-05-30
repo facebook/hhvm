@@ -1,7 +1,7 @@
 <?php
-foo();
-function foo() {
 
+<<__EntryPoint>>
+function foo() {
 	(ZendGoodZendTestsBug43851::$LAST = ZendGoodZendTestsBug43851::$LAST + 0) * 1;
 	echo "ok\n";
 }

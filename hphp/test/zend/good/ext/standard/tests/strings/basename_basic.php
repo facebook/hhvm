@@ -1,9 +1,25 @@
 <?php
 /* Prototype: string basename ( string $path [, string $suffix] );
    Description: Given a string containing a path to a file,
-                this function will return the base name of the file. 
+                this function will return the base name of the file.
                 If the filename ends in suffix this will also be cut off.
 */
+
+function check_basename( $path_arrays ) {
+   $loop_counter = 1;
+   foreach ($path_arrays as $path) {
+     echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
+     if( 1 == count($path) ) {
+       // no suffix provided
+       var_dump( basename($path[0]) );
+     } else {
+       // path as well as suffix provided,
+       var_dump( basename($path[0], $path[1]) );
+     }
+   }
+}
+
+<<__EntryPoint>> function main() {
 $file_paths = array (
   /* simple paths */
   array("bar"),
@@ -23,15 +39,15 @@ $file_paths = array (
   array("bar.gz", "bar.gz"),
   array("/foo/bar.gz", ".gz"),
   array("foo/bar.gz", ".gz"),
-  array("/bar.gz", ".gz"),  
+  array("/bar.gz", ".gz"),
 
   /* paths with suffix and trailing slashes with suffix removal*/
   array("bar.gz/", ".gz"),
   array("/bar.gz/", ".gz"),
   array("/foo/bar.gz/", ".gz"),
   array("foo/bar.gz/", ".gz"),
-  array("/bar.gz/", ".gz"),  
-  
+  array("/bar.gz/", ".gz"),
+
   /* paths with basename only suffix, with suffix removal*/
   array("/.gz", ".gz"),
   array(".gz", ".gz"),
@@ -52,19 +68,8 @@ $file_paths = array (
   array("/foo".chr(0)."bar/bar.gz")
 );
 
-function check_basename( $path_arrays ) {
-   $loop_counter = 1;
-   foreach ($path_arrays as $path) {
-     echo "\n--Iteration $loop_counter--\n"; $loop_counter++;
-     if( 1 == count($path) ) { // no suffix provided
-       var_dump( basename($path[0]) );
-     } else { // path as well as suffix provided,
-       var_dump( basename($path[0], $path[1]) );    
-     } 
-   }
-}
-
 echo "*** Testing basic operations ***\n";
 check_basename( $file_paths );
 
 echo "Done\n";
+}

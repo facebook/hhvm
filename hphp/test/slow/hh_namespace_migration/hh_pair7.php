@@ -26,6 +26,8 @@ namespace {
     \var_dump($builtin_set instanceof HH\Pair); // True
   }
 
+  <<__EntryPoint>> function main(): void {
   Test\foo();
   bar();
+  }
 }

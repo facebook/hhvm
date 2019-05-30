@@ -1,21 +1,11 @@
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
-
-echo "*** Testing str_split() : unexpected values for 'str' ***\n";
-
-// Initialise function arguments
-$split_length = 3;
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 //defining class for object variable
 class MyClass
 {
@@ -24,6 +14,16 @@ class MyClass
     return "object";
   }
 }
+
+<<__EntryPoint>> function main() {
+echo "*** Testing str_split() : unexpected values for 'str' ***\n";
+
+// Initialise function arguments
+$split_length = 3;
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, 'r');
@@ -88,3 +88,4 @@ for($count = 0; $count < count($values); $count++) {
 fclose($fp);
 
 echo "Done";
+}

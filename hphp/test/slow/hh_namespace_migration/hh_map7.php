@@ -26,6 +26,8 @@ namespace {
     \var_dump($builtin_map instanceof HH\Map); // True
   }
 
+  <<__EntryPoint>> function main(): void {
   Test\foo();
   bar();
+  }
 }

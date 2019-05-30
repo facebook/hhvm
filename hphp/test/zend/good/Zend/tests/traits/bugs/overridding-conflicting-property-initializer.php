@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL);
 
 trait foo
 {
@@ -12,5 +11,8 @@ class baz
     public $zoo = 'baz::zoo';
 }
 
+<<__EntryPoint>> function main() {
+error_reporting(E_ALL);
 $obj = new baz();
 echo $obj->zoo, "\n";
+}

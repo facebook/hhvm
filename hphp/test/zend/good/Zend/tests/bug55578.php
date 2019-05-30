@@ -1,14 +1,17 @@
-<?php  
-$options = array();
+<?php
 
 class Foo {
     public function __toString() {
         return 'Foo';
     }
-}   
-
-function test($options, $queryPart) {
-	return ''. (0 ? 1 : $queryPart);
 }
 
+function test($options, $queryPart) {
+    return ''. (0 ? 1 : $queryPart);
+}
+
+<<__EntryPoint>> function main() {
+$options = array();
+
 var_dump(test($options, new Foo()));
+}

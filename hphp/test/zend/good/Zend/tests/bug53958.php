@@ -1,5 +1,5 @@
 <?php
-// TEST 1
+<<__EntryPoint>> function main() {
 $a = 1;
 $fn1 = function() use ($a) {echo "$a\n"; $a++;};
 $fn2 = function() use ($a) {echo "$a\n"; $a++;};
@@ -8,3 +8,4 @@ $fn1(); // 1
 $fn2(); // 1
 $fn1(); // 1
 $fn2(); // 1
+}

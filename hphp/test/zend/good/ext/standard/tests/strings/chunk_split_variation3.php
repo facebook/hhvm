@@ -4,7 +4,16 @@
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
+//Class to get object variable
+class MyClass
+{
+  public function __toString()
+  {
+    return "object";
+  }
+}
 
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : unexpected values for 'ending' ***\n";
 
 // Initializing variables
@@ -17,15 +26,6 @@ unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__,'r');
-
-//Class to get object variable
-class MyClass
-{
-  public function __toString()
-  {
-    return "object";
-  }
-}
 
 //different values for 'ending'
 $values = array(
@@ -72,7 +72,7 @@ $values = array(
 
   // unset data
   @$unset_var,
-	
+
   // resource data
   $fp
 );
@@ -87,3 +87,4 @@ echo "Done";
 
 //closing resource
 fclose($fp);
+}

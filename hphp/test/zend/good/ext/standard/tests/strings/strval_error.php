@@ -1,17 +1,17 @@
 <?php
 /* Prototype  : string strval  ( mixed $var  )
- * Description: Get the string value of a variable. 
+ * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c
  */
+class MyClass
+{
+    // no toString() method defined
+}
 
+<<__EntryPoint>> function main() {
 echo "*** Testing strval() : error conditions ***\n";
 
 error_reporting(E_ALL ^ E_NOTICE);
-
-class MyClass
-{
-	// no toString() method defined 
-}
 
 $string  = "Hello";
 $extra_arg = 10;
@@ -29,3 +29,4 @@ echo "\n-- Testing strval() function with object which has not toString() method
 var_dump( strval(new MyClass()) );
 
 echo "===DONE===\n";
+}

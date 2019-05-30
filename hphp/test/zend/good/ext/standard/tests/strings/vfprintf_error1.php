@@ -1,12 +1,12 @@
 <?php
 /* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream 
+ * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // Open handle
-$file = 'vfprintf_error1.phpt.txt';
+<<__EntryPoint>> function main() { $file = 'vfprintf_error1.phpt.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with more than expected no. of arguments --\n";
@@ -23,4 +23,4 @@ echo "===DONE===\n";
 error_reporting(0);
 $file = 'vfprintf_error1.phpt.txt';
 unlink( $file );
-
+}

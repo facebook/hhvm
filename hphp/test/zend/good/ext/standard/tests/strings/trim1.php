@@ -5,7 +5,7 @@
  */
 
 /* trim with empty string - retuns an empty string */
-echo "\n";
+<<__EntryPoint>> function main() { echo "\n";
 $null_var = "";
 var_dump( trim($null_var) );
 
@@ -38,3 +38,4 @@ echo "\n*** Testing with heredoc string ***\n";
 var_dump( trim($str, "us\ning") );
 
 echo "\nDone";
+}

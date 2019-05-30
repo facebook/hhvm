@@ -5,7 +5,7 @@
  */
 
 /* Creating an empty file */
-if (($handle = fopen( "md5_EmptyFile.txt", "w+")) == FALSE)
+<<__EntryPoint>> function main() { if (($handle = fopen( "md5_EmptyFile.txt", "w+")) == FALSE)
 return false;
 
 /* Creating a data file */
@@ -62,3 +62,4 @@ unlink("md5_DataFile.txt");
 unlink("md5_EmptyFile.txt");
 
 echo "\nDone";
+}

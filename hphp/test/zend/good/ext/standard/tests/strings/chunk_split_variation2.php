@@ -4,7 +4,15 @@
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
+//Class to get object variable
+class MyClass
+{
+   public function __toString() {
+     return "object";
+   }
+}
 
+<<__EntryPoint>> function main() {
 echo "*** Testing chunk_split() : with unexpected values for 'chunklen' argument ***\n";
 
 // Initialise function arguments
@@ -18,14 +26,6 @@ unset ($unset_var);
 //get resource variable
 $fp = fopen(__FILE__, 'r');
 
-//Class to get object variable
-class MyClass
-{
-   public function __toString() {
-     return "object";
-   }
-}
-
 //array of values to iterate over
 $values = array(
 
@@ -35,7 +35,7 @@ $values = array(
   (float) PHP_INT_MAX + 1,
   (float) -PHP_INT_MAX - 1,
   .5,
- 
+
   // array data
   array(),
   array(0),
@@ -84,3 +84,4 @@ for($count = 0; $count < count($values); $count++) {
 fclose($fp);
 
 echo "===DONE===\n";
+}

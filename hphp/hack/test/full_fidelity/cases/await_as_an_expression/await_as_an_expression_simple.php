@@ -27,8 +27,6 @@ async function foo(): Awaitable<void> {
   $x = vec[(await genx()), (await geny())];
   $x = keyset[(await genx()), (await geny())];
   $x = (await genx())[(await geny())];
-  $x = ((await genx()) and true);
-  $x = ((await genx()) or true);
   $x = (await genx()) && true;
   $x = (await genx()) || true;
   $x = (await genx()) ?: 42;

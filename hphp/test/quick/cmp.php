@@ -12,7 +12,6 @@
       echo "!=  "; echo $left != $right ? "true\n" : "false\n";
       echo "=== "; echo $left === $right ? "true\n" : "false\n";
       echo "!== "; echo $left !== $right ? "true\n" : "false\n";
-      echo "xor "; echo ($left xor $right) ? "true\n" : "false\n";
       echo "\n";
     }
   }

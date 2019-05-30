@@ -30,7 +30,7 @@ echo "Inside file >" . __FILE__ . "< at line >" . __LINE__ .
     "< with namespace >" . __NAMESPACE__ . "<\n";
 
 // require another existing file that has its own namespace
-    
+
 $inc = require('mycolors.php');
 var_dump($inc);
 
@@ -73,8 +73,6 @@ if ((require('return_with_value.php')) == 987) ;
 if ((require('return_with_value.php')) | 987) ;
 //if (require('return_with_value.php') && 987) ;
 if ((require('return_with_value.php')) && 987) ;
-//if (require('return_with_value.php') or 987) ;
-if ((require('return_with_value.php')) or 987) ;
 
 echo "----------------------------------\n";
 

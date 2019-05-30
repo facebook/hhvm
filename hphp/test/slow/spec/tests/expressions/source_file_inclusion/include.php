@@ -30,7 +30,7 @@ echo "Inside file >" . __FILE__ . "< at line >" . __LINE__ .
     "< with namespace >" . __NAMESPACE__ . "<\n";
 
 // Include another existing file that has its own namespace
-    
+
 $inc = include('mycolors.php');
 var_dump($inc);
 
@@ -73,8 +73,6 @@ if ((include('return_with_value.php')) == 987) ;
 if ((include('return_with_value.php')) | 987) ;
 //if (include('return_with_value.php') && 987) ;
 if ((include('return_with_value.php')) && 987) ;
-//if (include('return_with_value.php') or 987) ;
-if ((include('return_with_value.php')) or 987) ;
 
 echo "----------------------------------\n";
 

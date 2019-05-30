@@ -14,7 +14,7 @@ NULL
 int(987)
 ----------------------------------
 ----------------------------------
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >86<
+Inside file >%s/expressions/source_file_inclusion/require.php< at line >84<
 ----------------------------------
 int(100)
 ====
@@ -31,7 +31,7 @@ Array
 ====
 int(1)
 ----------------------------------
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >95<
+Inside file >%s/expressions/source_file_inclusion/require.php< at line >93<
 Inside test() in %s/expressions/source_file_inclusion/test.php
 
 Notice: Undefined variable: v1 in %s/expressions/source_file_inclusion/test.php on line 14
@@ -39,7 +39,7 @@ Notice: Undefined variable: v1 in %s/expressions/source_file_inclusion/test.php 
 Notice: Undefined variable: v2 in %s/expressions/source_file_inclusion/test.php on line 14
 $v1: , $v2: 
 $local1: 100
-Inside file >%s/expressions/source_file_inclusion/require.php< at line >99<
+Inside file >%s/expressions/source_file_inclusion/require.php< at line >97<
 ----------------------------------
 Array
 (

@@ -6,5 +6,5 @@ function foo() {
 
 <<__EntryPoint>>
 function main_1561() {
-foo() or exit("foobar");
+foo() || exit("foobar");
 }

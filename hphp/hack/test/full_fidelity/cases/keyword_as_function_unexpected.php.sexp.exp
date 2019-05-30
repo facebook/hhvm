@@ -1,5 +1,5 @@
-((script 1986
-  ((list 1986
+((script 1913
+  ((list 1913
     ((markup_section 4
       ((missing 0 ()) (() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))
@@ -11,15 +11,6 @@
          (((end_of_line 1) (single_line_comment 27) (end_of_line 1)) function
           8 ((whitespace 1)))
          (error 8 ((() abstract 8 ()))) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-         (missing 0 ()) (missing 0 ())))
-       (compound_statement 2
-        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (function_declaration 17
-      ((missing 0 ())
-       (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1)))
-         (error 3 ((() and 3 ()))) (missing 0 ()) (() "(" 1 ())
          (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
          (missing 0 ()) (missing 0 ())))
        (compound_statement 2
@@ -393,15 +384,6 @@
          (missing 0 ()) (missing 0 ())))
        (compound_statement 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (function_declaration 16
-      ((missing 0 ())
-       (function_declaration_header 13
-        ((missing 0 ()) (() function 8 ((whitespace 1)))
-         (error 2 ((() or 2 ()))) (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-         (() ")" 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-         (missing 0 ())))
-       (compound_statement 2
-        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
@@ -555,15 +537,6 @@
          (missing 0 ()) (missing 0 ())))
        (compound_statement 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (function_declaration 17
-      ((missing 0 ())
-       (function_declaration_header 14
-        ((missing 0 ()) (() function 8 ((whitespace 1)))
-         (error 3 ((() xor 3 ()))) (missing 0 ()) (() "(" 1 ())
-         (missing 0 ()) (() ")" 1 ((whitespace 1))) (missing 0 ())
-         (missing 0 ()) (missing 0 ())))
-       (compound_statement 2
-        ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (function_declaration 19
       ((missing 0 ())
        (function_declaration_header 16
@@ -573,16 +546,14 @@
          (missing 0 ()) (missing 0 ())))
        (compound_statement 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 77
+     (classish_declaration 70
       ((missing 0 ()) (list 8 ((((end_of_line 1)) abstract 8 ())))
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 69
+       (classish_body 62
         ((missing 0 ())
-         (list 69
+         (list 62
           ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
-           (error 1 ((() ";" 1 ((end_of_line 1))))) (error 3 ((() and 3 ())))
-           (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
            (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 5 ((() array 5 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
@@ -697,13 +668,13 @@
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (missing 0 ())))
          (missing 0 ())))))
-     (classish_declaration 164
+     (classish_declaration 158
       ((missing 0 ()) (missing 0 ()) (() interface 9 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ())
-       (classish_body 155
+       (classish_body 149
         ((missing 0 ())
-         (list 155
+         (list 149
           ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
            (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 4 ((() list 4 ()))) (error 1 ((() "(" 1 ())))
@@ -711,8 +682,6 @@
            (error 9 ((() namespace 9 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 3 ((() new 3 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 2 ((() or 2 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 5 ((() print 5 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
@@ -764,13 +733,13 @@
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (missing 0 ())))
          (missing 0 ())))))
-     (classish_declaration 63
+     (classish_declaration 56
       ((missing 0 ()) (missing 0 ()) (() trait 5 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
        (missing 0 ())
-       (classish_body 58
+       (classish_body 51
         ((missing 0 ())
-         (list 58
+         (list 51
           ((error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
            (error 1 ((() ";" 1 ((end_of_line 1))))) (error 3 ((() try 3 ())))
            (error 1 ((() "(" 1 ()))) (error 1 ((() ")" 1 ())))
@@ -792,8 +761,6 @@
              (list 0 ((list_item 0 ((missing 0 ()) (missing 0 ())))))
              (() ";" 1 ((end_of_line 1)))))
            (error 5 ((() while 5 ()))) (error 1 ((() "(" 1 ())))
-           (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
-           (error 3 ((() xor 3 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ()))) (error 1 ((() ";" 1 ((end_of_line 1)))))
            (error 5 ((() yield 5 ()))) (error 1 ((() "(" 1 ())))
            (error 1 ((() ")" 1 ())))

@@ -2,7 +2,6 @@
 
 // Raise "Unexpected token"
 function abstract() {}
-function and() {}
 function array() {}
 function as() {}
 function async() {}
@@ -44,7 +43,6 @@ function interface() {}
 function list() {}
 function namespace() {}
 function new() {}
-function or() {}
 function print() {}
 function private() {}
 function protected() {}
@@ -62,11 +60,9 @@ function use() {}
 function using() {}
 function var() {}
 function while() {}
-function xor() {}
 function yield() {}
 
 abstract();
-and();
 array();
 as();
 async();
@@ -110,7 +106,6 @@ interface();
 list();
 namespace();
 new();
-or();
 print();
 private();
 protected();
@@ -128,5 +123,4 @@ use();
 using();
 var();
 while();
-xor();
 yield();

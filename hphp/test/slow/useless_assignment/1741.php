@@ -9,8 +9,6 @@ function test($a) {
   $a ? 0 : out('-a');
   $a && out('&&a');
   $a || out('||a');
-  $a and out('and a');
-  $a or out('or a');
   $b = $c = 0;
   $a || (($b = 5) + ($c = 6));
   out($b);

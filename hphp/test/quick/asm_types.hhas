@@ -51,8 +51,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   FPushFuncD 1 "use_class"
   FCall <> 1 1 "" - "" ""

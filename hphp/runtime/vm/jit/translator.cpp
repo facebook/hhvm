@@ -283,7 +283,7 @@ static const struct {
    */
   { OpFPushFunc,   {Stack1,           FStack,       OutFDesc        }},
   { OpFPushFuncD,  {None,             FStack,       OutFDesc        }},
-  { OpFPushCtor,   {None,             FStack,       OutFDesc        }},
+  { OpFCallCtor,   {None,             StackN,       OutUnknown      }},
   { OpFPushObjMethod,
                    {Stack1,           FStack,       OutFDesc        }},
   { OpFPushObjMethodD,
@@ -501,7 +501,6 @@ int64_t getStackPopped(PC pc) {
   switch (op) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
-    case Op::FPushCtor:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
     case Op::FPushObjMethodRD:
@@ -512,6 +511,12 @@ int64_t getStackPopped(PC pc) {
     case Op::FPushClsMethodD:
     case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + countOperands(getInstrInfo(op).in) + 3;
+
+    case Op::FCallCtor: {
+      auto const fca = getImm(pc, 0).u_FCA;
+      auto const nin = countOperands(getInstrInfo(op).in);
+      return nin + fca.numArgsInclUnpack() + kNumActRecCells - 1 + fca.numRets;
+    }
 
     case Op::FCall: {
       auto const fca = getImm(pc, 0).u_FCA;
@@ -559,7 +564,6 @@ int64_t getStackPushed(PC pc) {
   switch (op) {
     case Op::FPushFunc:
     case Op::FPushFuncD:
-    case Op::FPushCtor:
     case Op::FPushObjMethod:
     case Op::FPushObjMethodD:
     case Op::FPushObjMethodRD:
@@ -571,6 +575,7 @@ int64_t getStackPushed(PC pc) {
     case Op::FPushClsMethodRD:
       return getImm(pc, 0).u_IVA + kNumActRecCells;
     case Op::FCall:
+    case Op::FCallCtor:
       return getImm(pc, 0).u_FCA.numRets;
     default:
       break;
@@ -768,7 +773,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
             opcodeToName(ni.op()), stackOff.offset, numArgs);
     stackOff -= numArgs + 2;
     switch (ni.op()) {
-      case Op::FPushCtor:
+      case Op::FCallCtor:
       case Op::FPushObjMethod:
       case Op::FPushObjMethodD:
       case Op::FPushObjMethodRD:
@@ -967,7 +972,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FPushClsMethodS:
   case Op::FPushClsMethodSD:
   case Op::FPushClsMethodSRD:
-  case Op::FPushCtor:
+  case Op::FCallCtor:
   case Op::FPushFunc:
   case Op::FPushFuncD:
   case Op::FPushObjMethodD:

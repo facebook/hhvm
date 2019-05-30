@@ -3642,9 +3642,7 @@ bool fcallOptimizeChecks(
           bc::NullUninit {},
           bc::NullUninit {},
           bc::String { err },
-          bc::FPushCtor { 1, false },
-          bc::FCall {
-            FCallArgs(1), staticEmptyString(), staticEmptyString() },
+          bc::FCallCtor { FCallArgs(1), staticEmptyString() },
           bc::PopC {},
           bc::Throw {}
         );
@@ -4362,20 +4360,37 @@ void in(ISS& env, const bc::NewObj& op) {
   push(env, toobj(cls));
 }
 
-void in(ISS& env, const bc::FPushCtor& op) {
-  auto const obj = topC(env, op.arg1 + 2);
-  discardAR(env, op.arg1);
+void in(ISS& env, const bc::FCallCtor& op) {
+  auto const obj = topC(env, op.fca.numArgsInclUnpack() + 2);
+  assertx(op.fca.numRets == 1);
+
   if (!is_specialized_obj(obj)) {
-    return fpiPushNoFold(env, ActRec { FPIKind::Ctor, TObj });
+    return fcallUnknownImpl(env, op.fca);
   }
 
   auto const dobj = dobj_of(obj);
   auto const exact = dobj.type == DObj::Exact;
   auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls, exact);
-  if (!rfunc || !rfunc->exactFunc()) {
-    return fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj });
+  if (!rfunc) {
+    return fcallUnknownImpl(env, op.fca);
   }
-  fpiPushNoFold(env, ActRec { FPIKind::Ctor, obj, dobj.cls, rfunc });
+
+  auto const updateFCA = [&] (FCallArgs&& fca) {
+    return bc::FCallCtor { std::move(fca), op.str2 };
+  };
+
+  auto const canFold = obj.subtypeOf(BObj);
+  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA) ||
+      (canFold && fcallTryFold(env, op.fca, *rfunc, obj, false/* dynamic */))) {
+    return;
+  }
+
+  if (rfunc->exactFunc() && op.str2->empty()) {
+    // We've found the exact func that will be called, set the hint.
+    return reduce(env, bc::FCallCtor { op.fca, rfunc->exactFunc()->cls->name });
+  }
+
+  fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, updateFCA);
 }
 
 void in(ISS& env, const bc::FCall& op) {
@@ -4410,9 +4425,6 @@ void in(ISS& env, const bc::FCall& op) {
       assertx(fca.numRets == 1);
       return finish_builtin(
         env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
-    case FPIKind::Ctor:
-      assertx(fca.numRets == 1);
-      // fallthrough
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
       assertx(op.str2->empty() == op.str3->empty());

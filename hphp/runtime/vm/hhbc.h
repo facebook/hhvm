@@ -634,7 +634,7 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             ONE(CV),    NF) \
   O(FPushFunc,       TWO(IVA,I32LA),   FPUSH(1, 0),     FPUSH,      PF) \
   O(FPushFuncD,      TWO(IVA,SA),      FPUSH(0, 0),     FPUSH,      PF) \
-  O(FPushCtor,       ONE(IVA),         FPUSH(0, 1),     FPUSH,      PF) \
+  O(FCallCtor,       TWO(FCA,SA),      FCALL(0, 1),     FCALL,      CF) \
   O(FPushObjMethod,  THREE(IVA,OA(ObjMethodOp),I32LA),                  \
                                        FPUSH(1, 1),     FPUSH,      PF) \
   O(FPushObjMethodD, THREE(IVA,SA,OA(ObjMethodOp)),                     \
@@ -1003,7 +1003,8 @@ constexpr bool isJmp(Op opcode) {
 }
 
 constexpr bool isNewFCall(Op opcode) {
-  return false;
+  return
+    opcode == OpFCallCtor;
 }
 
 constexpr bool isLegacyFPush(Op opcode) {

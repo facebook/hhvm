@@ -390,9 +390,9 @@ type instruct_call =
   | NewObjD of class_id
   | NewObjRD of class_id
   | NewObjS of SpecialClsRef.t
-  | FPushCtor of num_params
   | FCall of fcall_args
   | FCallBuiltin of num_params * num_params * string
+  | FCallCtor of fcall_args
 
 type instruct_base =
   | BaseGC of stack_index * MemberOpMode.t

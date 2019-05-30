@@ -42,8 +42,7 @@ L1:
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   RetC
 }

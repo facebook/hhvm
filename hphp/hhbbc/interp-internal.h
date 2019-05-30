@@ -506,7 +506,6 @@ bool canFold(ISS& env, const res::Func& rfunc, int32_t nArgs,
 bool fpiPush(ISS& env, ActRec ar, int32_t nArgs, bool maybeDynamic) {
   auto foldable = [&] {
     if (nArgs < 0 ||
-        ar.kind == FPIKind::Ctor ||
         ar.kind == FPIKind::Builtin ||
         !ar.func) {
       return false;

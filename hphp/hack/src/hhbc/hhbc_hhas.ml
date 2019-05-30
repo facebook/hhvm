@@ -488,12 +488,12 @@ let string_of_call instruction =
     sep ["NewObjRD"; string_of_class_id cid]
   | NewObjS r ->
     sep ["NewObjS"; SpecialClsRef.to_string r]
-  | FPushCtor n ->
-    sep ["FPushCtor"; string_of_int n]
   | FCall fcall_args ->
     sep ["FCall"; string_of_fcall_args fcall_args; "\"\""; "\"\"" ]
   | FCallBuiltin (n1, n2, id) ->
     sep ["FCallBuiltin"; string_of_int n1; string_of_int n2; SU.quote_string id]
+  | FCallCtor fcall_args ->
+      sep ["FCallCtor"; string_of_fcall_args fcall_args; "\"\""]
 
 let string_of_barethis_op i =
   match i with

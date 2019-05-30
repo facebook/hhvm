@@ -14,8 +14,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $x
   PopC
@@ -24,8 +23,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $y
   PopC
@@ -83,8 +81,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   AssertRATStk 0 InitNull
   AssertRATStk 1 Obj
   AssertRATStk 1 Obj=Bar
@@ -120,8 +117,7 @@ stuff:
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $obj
   PopC

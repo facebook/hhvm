@@ -5426,7 +5426,11 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   vmStack().pushObjectNoRc(this_);
 }
 
-OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
+OPTBLD_INLINE void iopFCallCtor(PC origpc, PC& pc, FCallArgs fca,
+                                const StringData*) {
+  assertx(fca.numRets == 1);
+  assertx(fca.asyncEagerOffset == kInvalidOffset);
+  auto const numArgs = fca.numArgsInclUnpack();
   assertx(tvIsObject(vmStack().indC(numArgs + 2)));
   auto const obj = vmStack().indC(numArgs + 2)->m_data.pobj;
 
@@ -5435,7 +5439,9 @@ OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
   auto const res UNUSED = lookupCtorMethod(func, obj->getVMClass(), ctx, true);
   assertx(res == LookupResult::MethodFoundWithThis);
 
+  if (fca.enforceReffiness()) callerReffinessChecks(func, fca);
   callerRxChecks(vmfp(), func);
+  checkStack(vmStack(), func, 0);
 
   // Write new activation record.
   assertx(kNumActRecCells == 3);
@@ -5444,6 +5450,10 @@ OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {
   ar->setThis(obj);
   ar->initNumArgs(numArgs);
   ar->trashVarEnv();
+  ar->setReturn(vmfp(), origpc, jit::tc::ustubs().retHelper);
+
+  doFCall(ar, fca.numArgs, fca.hasUnpack());
+  pc = vmpc();
 }
 
 namespace {

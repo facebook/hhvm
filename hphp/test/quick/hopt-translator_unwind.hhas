@@ -55,8 +55,7 @@
   NullUninit
   NullUninit
     String "hi"
-  FPushCtor 1
-  FCall <> 1 1 "" - "" ""
+  FCallCtor <> 1 1 "" - ""
   PopC
   Throw
 }
@@ -89,8 +88,7 @@
   NullUninit
   NullUninit
     CGetL $id
-  FPushCtor 1
-  FCall <> 1 1 "" - "" ""
+  FCallCtor <> 1 1 "" - ""
   PopC
   RetC
 }

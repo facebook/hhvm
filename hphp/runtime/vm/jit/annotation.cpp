@@ -57,16 +57,6 @@ const Func* lookupDirectFunc(SrcKey const sk,
   return lookupImmutableFunc(sk.unit(), fname).func;
 }
 
-const Func* lookupDirectCtor(SrcKey const sk, const StringData* clsName) {
-  if (clsName && !clsName->isame(s_empty.get())) {
-    auto const ctx = sk.func()->cls();
-    auto const cls = Unit::lookupUniqueClassInContext(clsName, ctx);
-    return lookupImmutableCtor(cls, ctx);
-  }
-
-  return nullptr;
-}
-
 const void annotate(NormalizedInstruction* i,
                     const StringData* clsName, const StringData* funcName) {
   auto const fpi      = i->func()->findFPI(i->source.offset());
@@ -121,9 +111,8 @@ const void annotate(NormalizedInstruction* i,
       break;
   }
 
-  auto const func = pushOp == Op::FPushCtor
-    ? lookupDirectCtor(i->source, clsName)
-    : lookupDirectFunc(i->source, funcName, clsName, isExact, isStatic);
+  auto const func =
+    lookupDirectFunc(i->source, funcName, clsName, isExact, isStatic);
 
   if (func) {
     FTRACE(1, "found direct func ({}) for FCall\n",

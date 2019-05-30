@@ -87,6 +87,7 @@ inline ControlFlowInfo opcodeControlFlowInfo(const Op op, bool inlining) {
     case Op::AwaitAll:
       return inlining ? ControlFlowInfo::ChangesPC : ControlFlowInfo::BreaksBB;
     case Op::FCall:
+    case Op::FCallCtor:
     case Op::ContEnter:
     case Op::ContRaise:
     case Op::ContEnterDelegate:

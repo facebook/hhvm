@@ -46,7 +46,6 @@ enum class FPIKind {
   Unknown,     // Nothing is known.
   CallableArr, // May be an ObjMeth or a ClsMeth.
   Func,        // Definitely a non-member function.
-  Ctor,        // Definitely a constructor for an object.
   ObjMeth,     // Definitely a method on an object (possibly __call).
   ObjMethNS,   // ObjMeth, but allows obj to be null.
   ClsMeth,     // Definitely a static method on a class.

@@ -75,7 +75,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall FPushFuncD _
   | ICall FPushClsMethodD _                -> ["U"; "U"; "U"], []
   | ICall FPushFunc _                      -> ["U"; "U"; "U"; "C"], []
-  | ICall FPushCtor _
   | ICall FPushObjMethodD _                -> ["C"; "U"; "U"], []
   | ICall FPushObjMethod _                 -> ["C"; "U"; "U"; "C"], []
   | IOp Fatal _

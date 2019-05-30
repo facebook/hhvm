@@ -5,8 +5,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $object
   PopC
@@ -18,8 +17,7 @@
    Dup
    NullUninit
    NullUninit
-   FPushCtor 0
-   FCall <> 0 1 "" - "" ""
+   FCallCtor <> 0 1 "" - ""
    PopC
   FPushObjMethodD 1 "main" NullThrows
   FCall <> 1 1 "" - "" ""

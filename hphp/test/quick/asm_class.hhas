@@ -138,8 +138,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $obj
   PopC
@@ -175,8 +174,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $base
   PopC
@@ -196,8 +194,7 @@
   Dup
   NullUninit
   NullUninit
-  FPushCtor 0
-  FCall <> 0 1 "" - "" ""
+  FCallCtor <> 0 1 "" - ""
   PopC
   SetL $derived
   PopC

@@ -273,6 +273,7 @@ static const struct {
 
   { OpNewObj,      {None,             Stack1,       OutObject       }},
   { OpNewObjD,     {None,             Stack1,       OutObject       }},
+  { OpNewObjRD,    {Stack1,           Stack1,       OutObject       }},
   { OpNewObjS,     {None,             Stack1,       OutObject       }},
 
   /*
@@ -1008,6 +1009,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewDArray:
   case Op::NewObj:
   case Op::NewObjD:
+  case Op::NewObjRD:
   case Op::NewObjS:
   case Op::NewRecord:
   case Op::Not:

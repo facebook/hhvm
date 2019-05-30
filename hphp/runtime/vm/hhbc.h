@@ -629,6 +629,7 @@ constexpr uint32_t kMaxConcatN = 4;
   O(NewObj,          TWO(CAR,OA(HasGenericsOp)),                        \
                                        NOV,             ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \
+  O(NewObjRD,        ONE(SA),          ONE(CV),         ONE(CV),    NF) \
   O(NewObjS,         ONE(OA(SpecialClsRef)),                            \
                                        NOV,             ONE(CV),    NF) \
   O(FPushFunc,       TWO(IVA,I32LA),   FPUSH(1, 0),     FPUSH,      PF) \

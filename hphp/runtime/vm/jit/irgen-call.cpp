@@ -1020,7 +1020,10 @@ void emitNewObj(IRGS& env, uint32_t slot, HasGenericsOp op) {
   ));
 }
 
-void emitNewObjD(IRGS& env, const StringData* className) {
+namespace {
+
+void emitNewObjDImpl(IRGS& env, const StringData* className,
+                     SSATmp* tsList) {
   auto const cls = Unit::lookupUniqueClassInContext(className, curClass(env));
   bool const persistentCls = classIsPersistentOrCtxParent(env, cls);
   bool const canInstantiate = cls && isNormalClass(cls) && !isAbstract(cls);
@@ -1030,13 +1033,35 @@ void emitNewObjD(IRGS& env, const StringData* className) {
     return;
   }
 
-  if (persistentCls) {
+  auto const finishWithKnownCls = [&] {
+    if (cls->hasReifiedGenerics()) {
+      if (!tsList) PUNT(NewObjD-ReifiedCls);
+      push(env, gen(env, AllocObjReified, cns(env, cls), tsList));
+      return;
+    }
     push(env, gen(env, AllocObj, cns(env, cls)));
+  };
+
+  if (persistentCls) return finishWithKnownCls();
+  auto const cachedCls = gen(env, LdClsCached, cns(env, className));
+  if (cls) return finishWithKnownCls();
+  if (tsList) {
+    push(env, gen(env, AllocObjReified, cachedCls, tsList));
     return;
   }
+  push(env, gen(env, AllocObj, cachedCls));
+}
 
-  auto const cachedCls = gen(env, LdClsCached, cns(env, className));
-  push(env, gen(env, AllocObj, cls ? cns(env, cls) : cachedCls));
+} // namespace
+
+void emitNewObjD(IRGS& env, const StringData* className) {
+  emitNewObjDImpl(env, className, nullptr);
+}
+
+void emitNewObjRD(IRGS& env, const StringData* className) {
+  auto tsList = popC(env);
+  emitNewObjDImpl(env, className, tsList);
+  decRef(env, tsList);
 }
 
 void emitNewObjS(IRGS& env, SpecialClsRef ref) {

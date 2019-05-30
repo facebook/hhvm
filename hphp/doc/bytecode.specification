@@ -1831,6 +1831,7 @@ InitProp <propName> <op> [C] -> []
 
 NewObj <class-ref slot> <has-generics-op>  []  ->  [C:Obj]
 NewObjD <litstr id>                        []  ->  [C:Obj]
+NewObjRD <litstr id>                       [C:Vec/Arr]  ->  [C:Obj]
 NewObjS <mode>                             []  ->  [C:Obj]
 
   New object. First, these instructions load a value into x as given
@@ -1840,6 +1841,7 @@ NewObjS <mode>                             []  ->  [C:Obj]
     ------------+----
       NewObj    | %1
       NewObjD   | %1
+      NewObjRD  | %1
       NewObjS   | %1
 
   When loading %1 into x, NewObjD will perform the work performed by the
@@ -1855,6 +1857,8 @@ NewObjS <mode>                             []  ->  [C:Obj]
   If MaybeGenerics is passed to NewObj, this indicates that data at cls-ref
   slot's reified generics portion will be nulled out when there are no reified
   generics.
+
+  NewObjRD's $1 contains a list of reified generics.
 
 FPush* opcodes
 --------------

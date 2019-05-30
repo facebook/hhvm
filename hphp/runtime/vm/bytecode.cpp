@@ -5371,27 +5371,17 @@ OPTBLD_INLINE void iopFPushClsMethodSRD(uint32_t numArgs,
 
 namespace {
 
-void newObjImpl(Class* cls, ArrayData* reified_types) {
+ObjectData* newObjImpl(Class* cls, ArrayData* reified_types) {
   // Replace input with uninitialized instance.
   auto this_ = reified_types
     ? ObjectData::newInstanceReified(cls, reified_types)
     : ObjectData::newInstance(cls);
   TRACE(2, "NewObj: just new'ed an instance of class %s: %p\n",
         cls->name()->data(), this_);
-  vmStack().pushObjectNoRc(this_);
+  return this_;
 }
 
-}
-
-OPTBLD_INLINE void iopNewObj(clsref_slot slot, HasGenericsOp op) {
-  auto cls_ref = slot.take();
-  callerDynamicConstructChecks(cls_ref.second);
-  auto const reified_types =
-    HasGenericsOp::NoGenerics != op ? cls_ref.first : nullptr;
-  newObjImpl(cls_ref.second, reified_types);
-}
-
-OPTBLD_INLINE void iopNewObjD(Id id) {
+void newObjDImpl(Id id, ArrayData* reified_types) {
   const NamedEntityPair &nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   auto cls = Unit::loadClass(nep.second, nep.first);
@@ -5399,7 +5389,30 @@ OPTBLD_INLINE void iopNewObjD(Id id) {
     raise_error(Strings::UNKNOWN_CLASS,
                 vmfp()->m_func->unit()->lookupLitstrId(id)->data());
   }
-  newObjImpl(cls, nullptr);
+  auto this_ = newObjImpl(cls, reified_types);
+  if (reified_types) vmStack().popC();
+  vmStack().pushObjectNoRc(this_);
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopNewObj(clsref_slot slot, HasGenericsOp op) {
+  auto cls_ref = slot.take();
+  callerDynamicConstructChecks(cls_ref.second);
+  auto const reified_types =
+    HasGenericsOp::NoGenerics != op ? cls_ref.first : nullptr;
+  auto this_ = newObjImpl(cls_ref.second, reified_types);
+  vmStack().pushObjectNoRc(this_);
+}
+
+OPTBLD_INLINE void iopNewObjD(Id id) {
+  newObjDImpl(id, nullptr);
+}
+
+OPTBLD_INLINE void iopNewObjRD(Id id) {
+  auto const tsList = vmStack().topC();
+  assertx(tvIsVecOrVArray(tsList));
+  newObjDImpl(id, tsList->m_data.parr);
 }
 
 OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
@@ -5409,7 +5422,8 @@ OPTBLD_INLINE void iopNewObjS(SpecialClsRef ref) {
   }
   auto const reified_generics = cls->hasReifiedGenerics()
     ? getClsReifiedGenericsProp(cls, vmfp()) : nullptr;
-  newObjImpl(cls, reified_generics);
+  auto this_ = newObjImpl(cls, reified_generics);
+  vmStack().pushObjectNoRc(this_);
 }
 
 OPTBLD_INLINE void iopFPushCtor(uint32_t numArgs) {

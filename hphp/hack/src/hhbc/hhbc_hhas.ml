@@ -484,6 +484,8 @@ let string_of_call instruction =
     sep ["NewObj"; string_of_int id; string_of_has_generics_op op]
   | NewObjD cid ->
     sep ["NewObjD"; string_of_class_id cid]
+  | NewObjRD cid ->
+    sep ["NewObjRD"; string_of_class_id cid]
   | NewObjS r ->
     sep ["NewObjS"; SpecialClsRef.to_string r]
   | FPushCtor n ->

@@ -838,8 +838,6 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
   let cexpr = class_id_to_class_expr ~resolve_self scope cid in
   let cexpr, has_generics = match cexpr with
     | Class_id (_, name) ->
-      let cexpr =
-        Option.value ~default:cexpr (get_reified_var_cexpr env pos name) in
       begin match emit_reified_type_opt env pos name with
       | Some instrs ->
         if not @@ List.is_empty targs then Emit_fatal.raise_fatal_parse pos
@@ -848,19 +846,7 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
       | None when not (has_non_tparam_generics env targs) ->
         cexpr, H.NoGenerics
       | None ->
-        let instrs = match cexpr with
-            | Class_id id ->
-              let fq_id =
-                Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id
-                |> Hhbc_id.Class.to_raw_string in
-              gather [
-                emit_reified_targs env pos targs;
-                instr_reified_name fq_id;
-              ]
-            | Class_reified instrs -> instrs
-            | _ -> failwith "Internal error: This node can only be id or reified"
-        in
-        Class_reified instrs, H.HasGenerics
+        cexpr, H.HasGenerics
       end
     | _ -> cexpr, H.NoGenerics in
   let newobj_instrs = match cexpr with
@@ -869,7 +855,16 @@ and emit_new env pos (cid : A.class_id) (targs : Aast.targ list) (args : A.expr 
     let fq_id =
       Hhbc_id.Class.elaborate_id (Emit_env.get_namespace env) id in
     Emit_symbol_refs.add_class (Hhbc_id.Class.to_raw_string fq_id);
-    gather [ emit_pos pos; instr_newobjd fq_id ]
+    begin match has_generics with
+    | H.NoGenerics -> gather [ emit_pos pos; instr_newobjd fq_id ]
+    | H.HasGenerics -> gather [
+        emit_pos pos;
+        emit_reified_targs env pos targs;
+        instr_newobjrd fq_id
+      ]
+    | H.MaybeGenerics ->
+      failwith "Internal error: This case should have been transformed"
+    end
   | Class_special cls_ref -> gather [ emit_pos pos; instr_newobjs cls_ref ]
   | Class_reified instrs when has_generics = H.MaybeGenerics ->
     gather [ instrs; instr_clsrefgetts; instr_newobj 0 has_generics ]

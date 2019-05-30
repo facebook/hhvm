@@ -4299,17 +4299,28 @@ void in(ISS& env, const bc::FPushClsMethodSRD& op) {
   implFPushClsMethodSD(env, op, true);
 }
 
-void in(ISS& env, const bc::NewObjD& op) {
-  auto const rcls = env.index.resolve_class(env.ctx, op.str1);
+namespace {
+
+void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
+  auto const rcls = env.index.resolve_class(env.ctx, className);
   if (!rcls) {
+    if (rflavor) popC(env);
     push(env, TObj);
     return;
   }
-
+  if (rflavor && !rcls->couldHaveReifiedGenerics()) {
+    return reduce(env, bc::PopC {}, bc::NewObjD { className });
+  }
   auto const isCtx = !rcls->couldBeOverriden() && env.ctx.cls &&
     rcls->same(env.index.resolve_class(env.ctx.cls));
+  if (rflavor) popC(env);
   push(env, setctx(objExact(*rcls), isCtx));
 }
+
+} // namespace
+
+void in(ISS& env, const bc::NewObjD& op)  { newObjDImpl(env, op.str1, false); }
+void in(ISS& env, const bc::NewObjRD& op) { newObjDImpl(env, op.str1, true);  }
 
 void in(ISS& env, const bc::NewObjS& op) {
   auto const cls = specialClsRefToCls(env, op.subop1);

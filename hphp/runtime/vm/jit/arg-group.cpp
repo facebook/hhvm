@@ -127,7 +127,12 @@ ArgGroup& ArgGroup::typedValue(int i, folly::Optional<AuxUnion> aux) {
   // If there's exactly one register argument slot left, the whole TypedValue
   // goes on the stack instead of being split between a register and the stack.
   if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
-  SCOPE_EXIT { m_override = nullptr; };
+
+  // On x86, if we have one free GP register left, we'll use it for the next
+  // int argument, but on ARM, we'll just spill all later int arguments.
+  #ifndef __aarch64__
+    SCOPE_EXIT { m_override = nullptr; };
+  #endif
 
   static_assert(offsetof(TypedValue, m_data) == 0, "");
   static_assert(offsetof(TypedValue, m_type) == 8, "");

@@ -5502,7 +5502,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
         : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
     );
   }
-  Native::callFunc<true>(func, ctx, args, numNonDefault, ret);
+  Native::callFunc(func, ctx, args, numNonDefault, ret);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);

@@ -246,9 +246,8 @@ void coerceFCallArgs(TypedValue* args,
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-template<bool usesDoubles>
-void callFunc(const Func* func, void* ctx,
-              TypedValue* args, int32_t numNonDefault,
+void callFunc(const Func* func, const void* ctx,
+              const TypedValue* args, int32_t numNonDefault,
               TypedValue& ret);
 
 /**

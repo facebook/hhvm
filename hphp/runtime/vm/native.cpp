@@ -24,6 +24,7 @@
 #include "hphp/runtime/vm/unit.h"
 
 namespace HPHP { namespace Native {
+
 //////////////////////////////////////////////////////////////////////////////
 
 FuncTable s_systemNativeFuncs;
@@ -31,163 +32,159 @@ const FuncTable s_noNativeFuncs; // always empty
 ConstantMap s_constant_map;
 ClassConstantMapMap s_class_constant_map;
 
-static size_t numGPRegArgs() {
+/////////////////////////////////////////////////////////////////////////////
+
+namespace {
+
 #ifdef __aarch64__
-  return 8; // r0-r7
+  constexpr size_t kNumGPRegs = 8;
 #elif defined(__powerpc64__)
-  return 31;
-#else // amd64
-  return 6; // rdi, rsi, rdx, rcx, r8, r9
+  constexpr size_t kNumGPRegs = 31;
+#else
+  // amd64 calling convention (also used by x64): rdi, rsi, rdx, rcx, r8, r9
+  constexpr size_t kNumGPRegs = 6;
 #endif
-}
 
 // Note: This number should generally not be modified
 // as it depends on the CPU's ABI.
 // If an update is needed, however, update and run
 // make_native-func-caller.php as well
-const size_t kNumSIMDRegs = 8;
+constexpr size_t kNumSIMDRegs = 8;
 
-/////////////////////////////////////////////////////////////////////////////
 #include "hphp/runtime/vm/native-func-caller.h"
 
-static void nativeArgHelper(const Func* func, int i,
-                            const MaybeDataType& type,
-                            TypedValue& arg,
-                            int64_t* GP_args, int& GP_count) {
-  auto val = arg.m_data.num;
-  if (!type) {
-    if (func->byRef(i)) {
-      if (!isRefType(arg.m_type)) {
-        // For OutputArgs, if the param is not a KindOfRef,
-        // we give it a nullptr
-        val = 0;
-      }
-    } else {
-      GP_args[GP_count++] = val;
-      assertx((GP_count + 1) < kMaxBuiltinArgs);
-      val = static_cast<data_type_t>(arg.m_type);
-    }
+struct Registers {
+  // The spilled arguments come right after the GP regs so that we can treat
+  // them as a single array of kMaxBuiltinArgs ints after populating them.
+  int64_t GP_regs[kNumGPRegs];
+  int64_t spilled_args[kMaxBuiltinArgs - kNumGPRegs];
+  double SIMD_regs[kNumSIMDRegs];
+
+  int GP_count{0};
+  int SIMD_count{0};
+  int spilled_count{0};
+};
+
+// Push an int argument, spilling to the stack if necessary.
+void pushInt(Registers& regs, const int64_t value) {
+  if (regs.GP_count < kNumGPRegs) {
+    regs.GP_regs[regs.GP_count++] = value;
+  } else {
+    assertx(regs.spilled_count < kMaxBuiltinArgs - kNumGPRegs);
+    regs.spilled_args[regs.spilled_count++] = value;
   }
-  GP_args[GP_count++] = val;
 }
 
-/* Shuffle args into two vectors.
- *
- * SIMD_args contains at most 8 elements for the first 8 double args in the
- * call which will end up in xmm0-xmm7 (or v0-v7)
- *
- * GP_args contains all remaining args optionally with padding to ensure the
- * GP regs only contain integer arguments (when there are less than
- * numGPRegArgs INT args)
- */
-static void populateArgs(const Func* func,
-                         TypedValue* args, const int numArgs,
-                         int64_t* GP_args, int& GP_count,
-                         double* SIMD_args, int& SIMD_count) {
-  auto numGP = numGPRegArgs();
-  int64_t tmp[kMaxBuiltinArgs];
-  int ntmp = 0;
-
-  for (int i = 0; i < numArgs; ++i) {
-    const auto& pi = func->params()[i];
-    MaybeDataType type = pi.builtinType;
-    if (type == KindOfDouble) {
-      if (SIMD_count < kNumSIMDRegs) {
-        SIMD_args[SIMD_count++] = args[-i].m_data.dbl;
+// Push a double argument, spilling to the stack if necessary. We take the
+// input as a Value in order to type-pun it as an int when we spill.
+void pushDouble(Registers& regs, const Value value) {
+  if (regs.SIMD_count < kNumSIMDRegs) {
+    regs.SIMD_regs[regs.SIMD_count++] = value.dbl;
 #if defined(__powerpc64__)
-        // According with ABI, the GP index must be incremented after
-        // a floating point function argument
-        if (GP_count < numGP) GP_args[GP_count++] = 0;
+    // Following ABI, we must increment the GP reg index for each double arg.
+    if (regs.GP_count < kNumGPRegs) regs.GP_regs[regs.GP_count++] = 0;
 #endif
-      } else if (GP_count < numGP) {
-        // We have enough double args to hit the stack
-        // but we haven't finished filling the GP regs yet.
-        // Stack these in tmp (autoboxed to int64_t)
-        // until we fill the GP regs, or we run out of args
-        // (in which case we'll pad them).
-        tmp[ntmp++] = args[-i].m_data.num;
-      } else {
-        // Additional SIMD args wind up on the stack
-        // and can autobox with integer types
-        GP_args[GP_count++] = args[-i].m_data.num;
-      }
-    } else {
-      assertx((GP_count + 1) < kMaxBuiltinArgs);
-      if (pi.nativeArg) {
-        nativeArgHelper(func, i, type, args[-i], GP_args, GP_count);
-      } else if (!type) {
-        GP_args[GP_count++] = (int64_t)(args - i);
-      } else if (isBuiltinByRef(type)) {
-        GP_args[GP_count++] = (int64_t)&args[-i].m_data;
-      } else {
-        GP_args[GP_count++] = args[-i].m_data.num;
-      }
-      if ((GP_count == numGP) && ntmp) {
-        // GP regs are now full, bring tmp back to fill the initial stack
-        assertx((GP_count + ntmp) <= kMaxBuiltinArgs);
-        memcpy(GP_args + GP_count, tmp, ntmp * sizeof(int64_t));
-        GP_count += ntmp;
-        ntmp = 0;
-      }
-    }
-  }
-  if (ntmp) {
-    assertx((GP_count + ntmp) <= kMaxBuiltinArgs);
-    // We had more than kNumSIMDRegs doubles,
-    // but less than numGPRegArgs INTs.
-    // Push out the count and leave garbage behind.
-    if (GP_count < numGP) {
-      GP_count = numGP;
-    }
-    memcpy(GP_args + GP_count, tmp, ntmp * sizeof(int64_t));
-    GP_count += ntmp;
+  } else {
+    assertx(regs.spilled_count < kMaxBuiltinArgs - kNumGPRegs);
+    regs.spilled_args[regs.spilled_count++] = value.num;
   }
 }
 
-/* A much simpler version of the above specialized for GP-arg-only methods */
-static void populateArgsNoDoubles(const Func* func,
-                                  TypedValue* args, int numArgs,
-                                  int64_t* GP_args, int& GP_count) {
-  assertx(numArgs >= 0);
-  for (int i = 0; i < numArgs; ++i) {
+// Push a TypedValue argument, spilling to the stack if necessary. We need
+// two free GP registers to avoid spilling here. The details of what happens
+// when we spill with one free GP register changes between architectures.
+void pushTypedValue(Registers& regs, TypedValue tv) {
+  auto const dataType = static_cast<data_type_t>(type(tv));
+  if (regs.GP_count + 1 < kNumGPRegs) {
+    regs.GP_regs[regs.GP_count++] = val(tv).num;
+    regs.GP_regs[regs.GP_count++] = dataType;
+  } else {
+#if defined(__powerpc64__)
+    // We don't have room to spill two 64-bit values in PowerPC. If it becomes
+    // an issue, we can always up kMaxBuiltinArgs later. (We have room to pass
+    // 15 TypedValue arguments on PowerPC already, which should be plenty.)
+    always_assert(false);
+#else
+    assertx(regs.spilled_count + 1 < kMaxBuiltinArgs - kNumGPRegs);
+    regs.spilled_args[regs.spilled_count++] = val(tv).num;
+    regs.spilled_args[regs.spilled_count++] = dataType;
+    // On x86, if we have one free GP register left, we'll use it for the next
+    // int argument, but on ARM, we'll just spill all later int arguments.
+    #ifdef __aarch64__
+      regs.GP_count = kNumGPRegs;
+    #endif
+#endif
+  }
+}
+
+// Push a native argument (e.g an ArrayData / TypedValue, not Array / Variant).
+void pushNativeArg(Registers& regs, const Func* const func, const int i,
+                   MaybeDataType builtinType, TypedValue arg) {
+  // If the param type is known, just pass the value.
+  if (builtinType) return pushInt(regs, val(arg).num);
+
+  // For OutputArgs, if the param is not a KindOfRef, pass a nullptr.
+  if (func->byRef(i)) {
+    auto const isRef = isRefType(type(arg));
+    return pushInt(regs, isRef ? val(arg).num : 0);
+  }
+
+  // Pass both the type and value for TypedValue parameters.
+  pushTypedValue(regs, arg);
+}
+
+// Push each argument, spilling ones we don't have registers for to the stack.
+void populateArgs(Registers& regs, const Func* const func,
+                  const TypedValue* const args, const int numArgs) {
+  for (auto i = 0; i < numArgs; ++i) {
+    auto const& arg = args[-i];
     auto const& pi = func->params()[i];
-    auto dt = pi.builtinType;
-    assertx(dt != KindOfDouble);
-    if (pi.nativeArg) {
-      nativeArgHelper(func, i, dt, args[-i], GP_args, GP_count);
-    } else if (!dt) {
-      GP_args[GP_count++] = (int64_t)(args - i);
-    } else if (isBuiltinByRef(dt)) {
-      GP_args[GP_count++] = (int64_t)&(args[-i].m_data);
+    auto const type = pi.builtinType;
+    if (type == KindOfDouble) {
+      pushDouble(regs, val(arg));
+    } else if (pi.nativeArg) {
+      pushNativeArg(regs, func, i, type, arg);
+    } else if (!type) {
+      pushInt(regs, (int64_t)&arg);
+    } else if (isBuiltinByRef(type)) {
+      pushInt(regs, (int64_t)&val(arg));
     } else {
-      GP_args[GP_count++] = args[-i].m_data.num;
+      pushInt(regs, val(arg).num);
     }
   }
 }
 
-template<bool usesDoubles>
-void callFunc(const Func* func, void *ctx,
-              TypedValue *args, int32_t numNonDefault,
-              TypedValue& ret) {
-  int64_t GP_args[kMaxBuiltinArgs];
-  double SIMD_args[kNumSIMDRegs];
-  int GP_count = 0, SIMD_count = 0;
+}  // namespace
 
+/////////////////////////////////////////////////////////////////////////////
+
+void callFunc(const Func* const func, const void* const ctx,
+              const TypedValue* const args, const int numNonDefault,
+              TypedValue& ret) {
+  auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
   auto retType = func->hniReturnType();
+  auto regs = Registers{};
 
-  if (ctx) {
-    GP_args[GP_count++] = (int64_t)ctx;
-  }
+  if (ctx) pushInt(regs, (int64_t)ctx);
+  populateArgs(regs, func, args, numArgs);
 
-  if (usesDoubles) {
-    populateArgs(func, args, numArgs,
-                           GP_args, GP_count, SIMD_args, SIMD_count);
-  } else {
-    populateArgsNoDoubles(func, args, numArgs, GP_args, GP_count);
-  }
-
-  auto const f = func->nativeFuncPtr();
+  // Decide how many int and double arguments we need to call func. Note that
+  // spilled arguments come after the GP registers, in line with them. We can
+  // spill to the stack without exhausting the GP registers, in two ways:
+  //
+  //  1. If we exceeed the number of SIMD arguments and spill doubles.
+  //
+  //  2. If we fill all but 1 GP register and then need to pass a TypedValue
+  //     (two registers in size) by value.
+  //
+  // In these cases, we'll pass garbage in the unused GP registers to force
+  // everything in the regs.spilled_args array to go on the stack.
+  auto const spilled = regs.spilled_count;
+  auto const GP_args = &regs.GP_regs[0];
+  auto const GP_count = spilled > 0 ? spilled + kNumGPRegs : regs.GP_count;
+  auto const SIMD_args = &regs.SIMD_regs[0];
+  auto const SIMD_count = regs.SIMD_count;
 
   if (!retType) {
     // A folly::none return signifies Variant.
@@ -387,7 +384,6 @@ bool nativeWrapperCheckArgs(ActRec* ar) {
   return true;
 }
 
-template<bool usesDoubles>
 TypedValue* functionWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->m_func;
@@ -403,7 +399,7 @@ TypedValue* functionWrapper(ActRec* ar) {
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc<usesDoubles>(func, nullptr, args, numNonDefault, rv);
+  callFunc(func, nullptr, args, numNonDefault, rv);
 
   assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
@@ -411,7 +407,6 @@ TypedValue* functionWrapper(ActRec* ar) {
   return ar->retSlot();
 }
 
-template<bool usesDoubles>
 TypedValue* methodWrapper(ActRec* ar) {
   assertx(ar);
   auto func = ar->m_func;
@@ -444,7 +439,7 @@ TypedValue* methodWrapper(ActRec* ar) {
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc<usesDoubles>(func, ctx, args, numNonDefault, rv);
+  callFunc(func, ctx, args, numNonDefault, rv);
 
   assertx(rv.m_type != KindOfUninit);
   if (isStatic) {
@@ -491,31 +486,10 @@ void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
     return;
   }
 
-  bool usesDoubles = false;
-  for (auto const argType : info.sig.args) {
-    if (argType == NativeSig::Type::Double) {
-      usesDoubles = true;
-      break;
-    }
-  }
-
-  bool isMethod = info.sig.args.size() &&
+  auto const isMethod = info.sig.args.size() &&
       ((info.sig.args[0] == NativeSig::Type::This) ||
        (info.sig.args[0] == NativeSig::Type::Class));
-
-  if (isMethod) {
-    if (usesDoubles) {
-      bif = methodWrapper<true>;
-    } else {
-      bif = methodWrapper<false>;
-    }
-  } else {
-    if (usesDoubles) {
-      bif = functionWrapper<true>;
-    } else {
-      bif = functionWrapper<false>;
-    }
-  }
+  bif = isMethod ? methodWrapper : functionWrapper;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -768,16 +742,6 @@ bool registerConstant(const StringData* cnsName,
   s_constant_map[cnsName] = tv;
   return true;
 }
-
-template
-void callFunc<true>(const Func* func, void *ctx,
-                    TypedValue *args, int32_t numNonDefault,
-                    TypedValue& ret);
-
-template
-void callFunc<false>(const Func* func, void *ctx,
-                     TypedValue *args, int32_t numNonDefault,
-                     TypedValue& ret);
 
 //////////////////////////////////////////////////////////////////////////////
 }} // namespace HPHP::Native

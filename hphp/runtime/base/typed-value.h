@@ -257,12 +257,14 @@ using enable_if_tv_val_t = typename std::enable_if<
   Ret
 >::type;
 
-/*
- * TV-lval API for TypedValue.
- */
+// TV-lval / -rval API for TypedValue& / const TypedValue&, respectively.
 ALWAYS_INLINE DataType& type(TypedValue& tv) { return tv.m_type; }
 ALWAYS_INLINE Value& val(TypedValue& tv) { return tv.m_data; }
-ALWAYS_INLINE TypedValue as_tv(TypedValue& tv) { return tv; }
+ALWAYS_INLINE const DataType& type(const TypedValue& tv) { return tv.m_type; }
+ALWAYS_INLINE const Value& val(const TypedValue& tv) { return tv.m_data; }
+ALWAYS_INLINE TypedValue as_tv(const TypedValue& tv) { return tv; }
+
+// TV-lval / -rval API for TypedValue* / const TypedValue*, respectively.
 ALWAYS_INLINE DataType& type(TypedValue* tv) { return tv->m_type; }
 ALWAYS_INLINE Value& val(TypedValue* tv) { return tv->m_data; }
 ALWAYS_INLINE const DataType& type(const TypedValue* tv) { return tv->m_type; }

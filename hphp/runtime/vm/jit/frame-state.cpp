@@ -1327,15 +1327,6 @@ void FrameStateMgr::clearForUnprocessedPred() {
   clearClsRefSlots();
 }
 
-void FrameStateMgr::clearTopFunc() {
-  auto& fpiStack = cur().fpiStack;
-  if (fpiStack.empty()) return;
-
-  auto& info = fpiStack.back();
-  info.func = nullptr;
-  info.ctxType = TCtx;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {

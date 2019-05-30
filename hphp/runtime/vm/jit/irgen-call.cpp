@@ -1507,9 +1507,17 @@ SSATmp* ldPreLiveFunc(IRGS& env, IRSPRelOffset actRecOff) {
     return cns(env, env.currentNormalizedInstruction->funcd);
   }
 
-  auto const& fpiStack = env.irb->fs().fpiStack();
-  if (!fpiStack.empty() && fpiStack.back().func) {
-    return cns(env, fpiStack.back().func);
+  // Try to load Func* from fpiStack, but only if we are not forming a region.
+  // Otherwise we may have inferred the target of the call based on specialized
+  // type information that won't be available when the region is translated.
+  // If we allow the FCall to specialize using this information, we may infer
+  // narrower type for the return value, erroneously preventing the region from
+  // breaking on unknown type.
+  if (!env.formingRegion) {
+    auto const& fpiStack = env.irb->fs().fpiStack();
+    if (!fpiStack.empty() && fpiStack.back().func) {
+      return cns(env, fpiStack.back().func);
+    }
   }
 
   return gen(env, LdARFuncPtr, TFunc, IRSPRelOffsetData { actRecOff }, sp(env));

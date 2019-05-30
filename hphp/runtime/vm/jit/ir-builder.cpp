@@ -318,16 +318,6 @@ SSATmp* IRBuilder::preOptimizeAssertStk(IRInstruction* inst) {
   return preOptimizeAssertLocation(inst, stk(inst->extra<AssertStk>()->offset));
 }
 
-SSATmp* IRBuilder::preOptimizeLdARFuncPtr(IRInstruction* inst) {
-  // If we have an entry on the FPI stack, it must be the one we are trying to
-  // find, as the only place accessing a pre-live ActRec is FCall and it always
-  // follows FPush, which pushed the FPI entry.
-  auto const& fpiStack = fs().fpiStack();
-  if (fpiStack.empty()) return nullptr;
-  if (fpiStack.back().func) return m_unit.cns(fpiStack.back().func);
-  return nullptr;
-}
-
 SSATmp* IRBuilder::preOptimizeCheckCtxThis(IRInstruction* inst) {
   auto const func = inst->marker().func();
   if (!func->mayHaveThis()) {
@@ -445,7 +435,6 @@ SSATmp* IRBuilder::preOptimize(IRInstruction* inst) {
   X(LdLoc)
   X(LdStk)
   X(LdClsRefCls)
-  X(LdARFuncPtr)
   X(CheckCtxThis)
   X(LdCtx)
   X(LdCctx)

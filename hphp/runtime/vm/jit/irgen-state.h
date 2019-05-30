@@ -94,6 +94,13 @@ struct IRGS {
   bool firstBcInst{true};
 
   /*
+   * True if we are just forming a region. Used to pessimize return values of
+   * function calls that may have been inferred based on specialized type
+   * information that won't be available when the region is translated.
+   */
+  bool formingRegion{false};
+
+  /*
    * Profile-weight factor, to be multiplied by the region blocks'
    * profile-translation counters in PGO mode.
    */

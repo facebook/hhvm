@@ -46,7 +46,7 @@ fi
 # cure worse than the disease.
 if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
   HHVM_REPO_SCHEMA=$(sh -c "$find_files" | \
-      grep -Ev '^hphp/(bin|facebook(?!/extensions)|neo|public_tld|test|tools|util|vixl|zend)' | \
+      grep -Ev '^hphp/(bin|facebook(?!/extensions)|hack/facebook/flow|neo|public_tld|test|tools|util|vixl|zend)' | \
       tr '\n' '\0' | xargs -0 cat | sha1sum | cut -b-40)
 fi
 

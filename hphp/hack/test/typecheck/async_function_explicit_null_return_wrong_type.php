@@ -9,6 +9,10 @@
  *
  */
 
-async function foo(): void {
+async function foo(): Awaitable<void> {
+  return;
+}
+
+async function foo_error(): void {
   return;
 }

@@ -770,9 +770,13 @@ and stmt_ env pos st =
       env, T.If(te, tb1, tb2)
   | Return None ->
       let env = check_inout_return env in
-      let rty = Typing_return.wrap_awaitable env pos (MakeType.void (Reason.Rwitness pos)) in
+      let rty = MakeType.void (Reason.Rwitness pos) in
       let { Typing_env_return_info.return_type = expected_return; _ } = Env.get_return env in
-      let env = Typing_return.implicit_return env pos ~expected:expected_return ~actual:rty in
+      let expected_return =
+        Typing_return.strip_awaitable (Env.get_fn_kind env) env expected_return in
+      let env = match Env.get_fn_kind env with
+      | Ast.FGenerator | Ast.FAsyncGenerator -> env
+      | _ -> Typing_return.implicit_return env pos ~expected:expected_return ~actual:rty in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return None
   | Return (Some e) ->

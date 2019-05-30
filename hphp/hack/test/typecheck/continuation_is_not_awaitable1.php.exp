@@ -2,5 +2,5 @@ File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
 Invalid return type (Typing[4110])
 File "continuation_is_not_awaitable1.php", line 12, characters 23-47:
 This is an object of type Generator<int, int, void>
-File "continuation_is_not_awaitable1.php", line 13, characters 3-13:
-It is incompatible with an object of type Awaitable<int> (result of 'async function')
+File "continuation_is_not_awaitable1.php", line 13, characters 10-12:
+It is incompatible with an int

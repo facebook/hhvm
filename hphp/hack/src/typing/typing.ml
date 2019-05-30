@@ -781,13 +781,14 @@ and stmt_ env pos st =
       let Typing_env_return_info.{
         return_type; return_type_decl = _; return_disposable; return_mutable; return_explicit;
         return_void_to_rx } = Env.get_return env in
+      let return_type = Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type in
       let expected =
         if return_explicit
         then
           Some {
             pos = expr_pos;
             reason = Reason.URreturn;
-            locl_ty = Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type
+            locl_ty = return_type;
           }
         else None in
       if return_disposable then enforce_return_disposable env e;
@@ -804,7 +805,6 @@ and stmt_ env pos st =
         end
         else env in
       let return_type = TR.strip_condition_type_in_return env return_type in
-      let rty = Typing_return.wrap_awaitable env pos rty in
       let env = Type.coerce_type expr_pos Reason.URreturn env rty return_type in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (Some te)

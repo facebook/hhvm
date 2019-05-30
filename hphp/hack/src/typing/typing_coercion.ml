@@ -45,10 +45,6 @@ let rec can_coerce env ty_have ty_expect =
 
   | _, (_, Tdynamic) -> Some env
 
-  | (_, Tclass ((_, cls1), _, [ty1])), (_, Tclass ((_, cls2), _, [ty2]))
-    when cls1 = SN.Classes.cAwaitable && cls1 = cls2 ->
-    can_coerce env ty1 ty2
-
   | _, (_, Toption ty) -> can_coerce env ty_have ty
 
   | _ -> None

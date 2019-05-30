@@ -9,6 +9,10 @@
  *
  */
 
-async function foo(): ?int {
+async function foo(): Awaitable<?int> {
+  return null;
+}
+
+async function foo_error(): ?int {
   return null;
 }

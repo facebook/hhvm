@@ -10,7 +10,10 @@ function getFiles(&$rdi,$depth=0) {
       $indent = '';
       for ($i = 0; $i<=$depth; ++$i) $indent .= " ";
       $files[] = $indent.$rdi->current()."\n";
-      if ($rdi->hasChildren()) getFiles(&$rdi->getChildren(),1+$depth);
+      if ($rdi->hasChildren()) {
+        $children = $rdi->getChildren();
+        getFiles(&$children, 1+$depth);
+      }
     }
   }
   asort(&$files);

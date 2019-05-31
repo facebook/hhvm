@@ -23,7 +23,4 @@ object(X) (4) {
 }
 array(0) {
 }
-object(stdClass) (1) {
-  ["t"]=>
-  &NULL
-}
+bool(false)

@@ -7,7 +7,9 @@ class collection implements Iterator {
   }
 
   public function rewind() {
-    reset(&$this->_elements);
+    $__elements = $this->_elements;
+    reset(&$__elements);
+    $this->_elements = $__elements;
   }
 
   public function count() {
@@ -15,18 +17,24 @@ class collection implements Iterator {
   }
 
   public function current() {
-    $element = current(&$this->_elements);
+    $__elements = $this->_elements;
+    $element = current(&$__elements);
+    $this->_elements = $__elements;
     return $element;
   }
 
   public function next() {
-    $element = next(&$this->_elements);
+    $__elements = $this->_elements;
+    $element = next(&$__elements);
+    $this->_elements = $__elements;
     return $element;
   }
 
   public function key() {
     $this->_fillCollection();
-    $element = key(&$this->_elements);
+    $__elements = $this->_elements;
+    $element = key(&$__elements);
+    $this->_elements = $__elements;
     return $element;
   }
 

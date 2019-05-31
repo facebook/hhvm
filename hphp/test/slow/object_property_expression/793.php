@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C1 {
 }
@@ -28,9 +28,6 @@ class C3 {
   }
   private $_p = array();
 }
-function assign_ref(&$v) {
-  $v = 22;
-}
 
 <<__EntryPoint>>
 function main_793() {
@@ -39,7 +36,5 @@ $c3->p3 = new C2();
 $c3->p3->p2 = new C1();
 $c3->p3->p2->a = 1;
 $c3->p3->p2->a .= 1;
-print $c3->p3->p2->a;
-assign_ref(&$c3->p3->p2->a);
 print $c3->p3->p2->a;
 }

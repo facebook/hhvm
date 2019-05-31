@@ -17,8 +17,8 @@ class X {
 function foo() {
  var_dump('foo');
  return 'foo';
- }
-function test($x, $a, &$t, $s) {
+}
+function test($x, $a, $s) {
   unset($x->bar()->x);
   unset($x->q->r->s->$foo);
   unset($x->y->a->b->c);
@@ -32,5 +32,5 @@ function test($x, $a, &$t, $s) {
 <<__EntryPoint>>
 function main_798() {
   $s = false;
-  test(new X, array(), &$s->t, $s);
+  test(new X, array(), $s);
 }

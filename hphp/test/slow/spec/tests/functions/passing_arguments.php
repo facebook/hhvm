@@ -33,15 +33,15 @@ f($a1, &$twenty);
 var_dump($a1);
 var_dump($a2);
 
-class C
-{
-    public $member;
-}
-$o = new C;
-$o->member = "Red";
-var_dump($o);
-f($a1, &$o->member);     // variable $o->member is passed by reference
-var_dump($o);
+
+
+
+
+
+
+
+
+
 //*/
 
 // passing by reference explored further

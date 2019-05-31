@@ -6,8 +6,6 @@ bool(false)
 Accessing <<__LateInit>> property 'A::p1' before initialization
 === setop1 ===
 Accessing <<__LateInit>> property 'A::p1' before initialization
-=== vget1 ===
-Accessing <<__LateInit>> property 'A::p1' before initialization
 === get2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === isset2 ===
@@ -15,8 +13,6 @@ bool(false)
 === incdec2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === setop2 ===
-Accessing <<__LateInit>> property 'A::p2' before initialization
-=== vget2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === get3 ===
 Accessing <<__LateInit>> static property 'A::p3' before initialization
@@ -67,8 +63,6 @@ bool(true)
 int(124)
 === setop1 ===
 int(1124)
-=== vget1 ===
-int(1124)
 === get2 ===
 int(123)
 === isset2 ===
@@ -76,8 +70,6 @@ bool(true)
 === incdec2 ===
 int(124)
 === setop2 ===
-int(1124)
-=== vget2 ===
 int(1124)
 === get3 ===
 int(123)
@@ -128,8 +120,6 @@ bool(false)
 Accessing <<__LateInit>> property 'A::p1' before initialization
 === setop1 ===
 Accessing <<__LateInit>> property 'A::p1' before initialization
-=== vget1 ===
-Accessing <<__LateInit>> property 'A::p1' before initialization
 === get2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === isset2 ===
@@ -137,8 +127,6 @@ bool(false)
 === incdec2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === setop2 ===
-Accessing <<__LateInit>> property 'A::p2' before initialization
-=== vget2 ===
 Accessing <<__LateInit>> property 'A::p2' before initialization
 === get3 ===
 int(1124)
@@ -188,8 +176,6 @@ bool(false)
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === setop1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
-=== vget1 ===
-Accessing <<__LateInit>> property 'B::p1' before initialization
 === get2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === isset2 ===
@@ -197,8 +183,6 @@ bool(false)
 === incdec2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === setop2 ===
-Accessing <<__LateInit>> property 'B::p2' before initialization
-=== vget2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === get3 ===
 Accessing <<__LateInit>> static property 'B::p3' before initialization
@@ -249,8 +233,6 @@ bool(true)
 int(124)
 === setop1 ===
 int(1124)
-=== vget1 ===
-int(1124)
 === get2 ===
 int(123)
 === isset2 ===
@@ -258,8 +240,6 @@ bool(true)
 === incdec2 ===
 int(124)
 === setop2 ===
-int(1124)
-=== vget2 ===
 int(1124)
 === get3 ===
 int(123)
@@ -310,8 +290,6 @@ bool(false)
 Accessing <<__LateInit>> property 'B::p1' before initialization
 === setop1 ===
 Accessing <<__LateInit>> property 'B::p1' before initialization
-=== vget1 ===
-Accessing <<__LateInit>> property 'B::p1' before initialization
 === get2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === isset2 ===
@@ -319,8 +297,6 @@ bool(false)
 === incdec2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === setop2 ===
-Accessing <<__LateInit>> property 'B::p2' before initialization
-=== vget2 ===
 Accessing <<__LateInit>> property 'B::p2' before initialization
 === get3 ===
 int(1124)

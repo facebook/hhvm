@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function by_ref(&$ref) { return $ref; }
+
 
 class A {
   <<__LateInit>> public $p1;
@@ -48,13 +48,13 @@ class A {
   public function isset1() { return isset($this->p1); }
   public function incdec1() { return ++$this->p1; }
   public function setop1() { return $this->p1 += 1000; }
-  public function vget1() { return by_ref(&$this->p1); }
+
 
   public function get2() { return $this->p2; }
   public function isset2() { return isset($this->p2); }
   public function incdec2() { return ++$this->p2; }
   public function setop2() { return $this->p2 += 1000; }
-  public function vget2() { return by_ref(&$this->p2); }
+
 
   public function get3() { return A::$p3; }
   public function isset3() { return isset(A::$p3); }
@@ -131,13 +131,13 @@ class B {
   public function isset1() { return isset($this->{B::prop(1)}); }
   public function incdec1() { return ++$this->{B::prop(1)}; }
   public function setop1() { return $this->{B::prop(1)} += 1000; }
-  public function vget1() { return by_ref(&$this->{B::prop(1)}); }
+
 
   public function get2() { return $this->{B::prop(2)}; }
   public function isset2() { return isset($this->{B::prop(2)}); }
   public function incdec2() { return ++$this->{B::prop(2)}; }
   public function setop2() { return $this->{B::prop(2)} += 1000; }
-  public function vget2() { return by_ref(&$this->{B::prop(2)}); }
+
 
   public function get3() { return B::$p3; }
   public function isset3() { return isset(B::$p3); }
@@ -170,12 +170,12 @@ const TESTS = vec[
   'isset1',
   'incdec1',
   'setop1',
-  'vget1',
+
   'get2',
   'isset2',
   'incdec2',
   'setop2',
-  'vget2',
+
   'get3',
   'isset3',
   'incdec3',

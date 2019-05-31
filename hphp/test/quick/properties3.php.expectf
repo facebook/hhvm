@@ -2,10 +2,6 @@ A::__get y
 string(1) "y"
 A::__get x
 string(1) "x"
-A::__get y
-string(1) "y"
-A::__get x
-string(1) "x"
 A::__get x
 A::__set x, 1
 A::__get y
@@ -56,7 +52,6 @@ object(C) (2) {
 }
 
 Notice: Undefined property: D::$y in %s/test/quick/properties3.php on line %d
-NULL
 NULL
 object(D) (2) {
   ["x":"D":private]=>

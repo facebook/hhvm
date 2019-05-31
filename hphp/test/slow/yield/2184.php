@@ -3,22 +3,30 @@
 class Foo implements Iterator {
   private $data = array(1, 2, 3);
 
-  public function current() {
-    return current(&$this->data);
-  }
-  public function key() {
-    return key(&$this->data);
-  }
+  public function current() { $arr = $this->data; $x = current(&$arr); $this->data = $arr; return $x; }
+  public function key() { $arr = $this->data; $key = key(&$arr); $this->data = $arr; return $key; }
+  public function valid() { $arr = $this->data; $current = current(&$arr); $this->data = $arr; return $current; }
+
+
+
+
+
+
+
   public function next() {
-    next(&$this->data);
+    $__data = $this->data;
+    next(&$__data);
+    $this->data = $__data;
   }
   public function rewind() {
     echo "hagfish\n";
-    reset(&$this->data);
+    $__data = $this->data;
+    reset(&$__data);
+    $this->data = $__data;
   }
-  public function valid() {
-    return current(&$this->data);
-  }
+
+
+
 }
 
 function run_test() {

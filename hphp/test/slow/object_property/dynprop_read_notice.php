@@ -76,8 +76,8 @@ function test($thing) {
   $thing->dynprop['c'] = 'd';
   $thing->dynprop = 3; // set prop back to an int
 
-  echo "== vget ==\n";
-  by_ref(&$thing->dynprop);
+
+
 
   echo "== clone ==\n";
   $discard = clone $thing;

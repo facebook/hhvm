@@ -4,21 +4,16 @@ class X {
   public $x;
 }
 
-function test($x, &$ref) {
+function test($x) {
   $p = (new ReflectionProperty('X', 'x'))->getValue($x);
   ++$p;
   var_dump($x->x);
 }
 
-function main() {
+<<__EntryPoint>>
+function main_prop_by_ref() {
   $x = new X;
   $x->x = 42;
 
-  test($x, &$x->x);
-}
-
-
-<<__EntryPoint>>
-function main_prop_by_ref() {
-main();
+  test($x);
 }

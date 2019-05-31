@@ -4,11 +4,3 @@ object(A) (2) {
   ["y"]=>
   string(3) "foo"
 }
-object(C) (1) {
-  ["thing"]=>
-  int(10)
-}
-object(C) (1) {
-  ["thing"]=>
-  int(10)
-}

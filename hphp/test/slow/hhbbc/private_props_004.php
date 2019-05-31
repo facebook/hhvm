@@ -2,7 +2,7 @@
 
 class Other {}
 
-function reffy(&$x) {}
+
 
 class MVecFinalOps {
   private $s = "this is a string";
@@ -18,7 +18,7 @@ class MVecFinalOps {
   public function foo() {
     var_dump(isset($this->s));
     var_dump(!($this->s ?? false));
-    reffy(&$this->igen);
+
     $this->icell += 2;
     $this->icell++;
   }
@@ -35,14 +35,9 @@ class MVecFinalOps {
   }
 }
 
-function main() {
+<<__EntryPoint>>
+function main_private_props_004() {
   $x = new MVecFinalOps();
   $x->foo();
   $x->printer();
-}
-
-
-<<__EntryPoint>>
-function main_private_props_004() {
-main();
 }

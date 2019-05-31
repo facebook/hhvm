@@ -1,11 +1,11 @@
 <?php
 
 class X {
-  function ref(&$ref) {
- $ref = 1;
- }
+  function notref($_) {
+
+  }
   function bar() {
-    $this->ref(&$this->priv);
+    $this->notref($this->priv);
   }
 }
 class Y extends X {

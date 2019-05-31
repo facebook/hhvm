@@ -8,7 +8,11 @@ function replace_variables($text, $params) {
 
   preg_replace_callback( '/(\?)/', function($matches) use ($params, $text) {
 
-    $text->val = preg_replace( '/(\?)/', array_shift(&$params->val), $text->val, 1);
+    $__val = $params->val;
+
+    $text->val = preg_replace( '/(\?)/', array_shift(&$__val), $text->val, 1);
+
+    $params->val = $__val;
 
   }, $text->val );
 

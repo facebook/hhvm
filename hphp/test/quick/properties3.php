@@ -134,9 +134,9 @@ class D {
   }
 }
 
-function propd(&$x) {
-  var_dump($x);
-}
+
+
+
 
 $a = new A;
 // unset all properties
@@ -145,10 +145,6 @@ $a->unsetall();
 var_dump($a->y);
 // Prop for visible, inaccessible property: use __get
 var_dump($a->x);
-// PropD for visible, accessible property: use __get
-propd(&$a->y);
-// PropD for visible, inaccessible property: use __get
-propd(&$a->x);
 // PropU for visible, accessible property
 unset($a->y);
 /*
@@ -185,8 +181,6 @@ $d = new D;
 $d->unsetall();
 // Prop for visible, accessible property
 var_dump($d->y);
-// PropD for visible, accessible property
-propd(&$d->y);
 // PropU for visible, accessible property
 unset($d->y);
 // SetProp for visible, accessible properties

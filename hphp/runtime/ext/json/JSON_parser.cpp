@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
-#include <vector>
+#include <folly/FBVector.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
@@ -711,7 +711,7 @@ struct json_parser {
     String key;
     Variant val;
   };
-  std::vector<json_state> stack;
+  folly::fbvector<json_state, LocalAllocator<json_state>> stack;
   // check_non_safepoint_surprise() above will not trigger gc
   TYPE_SCAN_IGNORE_FIELD(stack);
   int top;
@@ -737,12 +737,12 @@ struct json_parser {
         SimpleParser::BufferBytesForLength(length) :
         new_cap * 2;
       if (tl_buffer.raw) {
-        free(tl_buffer.raw);
+        local_free(tl_buffer.raw);
         tl_buffer.raw = nullptr;
       }
       sb_cap = 0;
       if (!tl_heap->preAllocOOM(bufSize)) {
-        tl_buffer.raw = (char*)malloc(bufSize);
+        tl_buffer.raw = (char*)local_malloc(bufSize);
         if (!tl_buffer.raw) tl_heap->forceOOM();
       }
       check_non_safepoint_surprise();
@@ -758,7 +758,7 @@ struct json_parser {
   }
   void flushSb() {
     if (tl_buffer.raw) {
-      free(tl_buffer.raw);
+      local_free(tl_buffer.raw);
       tl_buffer.raw = nullptr;
     }
     sb_cap = 0;

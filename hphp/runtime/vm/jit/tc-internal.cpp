@@ -71,7 +71,13 @@ bool shouldPGOFunc(const Func* func) {
   // JITing pseudo-mains requires extra checks that blow the IR.  PGO
   // can significantly increase the size of the regions, so disable it for
   // pseudo-mains (so regions will be just tracelets).
-  return !func->isPseudoMain();
+  //
+  // However, on many OSS workloads, this is not an issue. Furthermore, JITing
+  // pseudo-mains on these workloads increase performance due to the fact that
+  // the pseudo-mains are now optimized and their call sites point to new
+  // optimized functions. Without, many of the pseudo-main's call sites
+  // point to the profile versions of those functions.
+  return !func->isPseudoMain() || RuntimeOption::EvalJitPGOPseudomain;
 }
 
 }

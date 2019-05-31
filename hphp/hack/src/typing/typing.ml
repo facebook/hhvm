@@ -6006,7 +6006,7 @@ and safely_refine_class_type
     List.fold_left (List.zip_exn (Cls.tparams class_info) tyl_fresh)
       ~f:add_bounds ~init:env in
 
-  (* Finally, if we have a class-test on something with static class type,
+  (* Finally, if we have a class-test on something with static classish type,
    * then we can chase the hierarchy and decompose the types to deduce
    * further assumptions on type parameters. For example, we might have
    *   class B<Tb> { ... }
@@ -6015,7 +6015,9 @@ and safely_refine_class_type
    * Then SubType.add_constraint will deduce that T=int and add int as
    * both lower and upper bound on T in env.lenv.tpenv
    *)
-  let env = SubType.add_constraint p env Ast.Constraint_as obj_ty ivar_ty in
+  let env, supertypes = TUtils.get_concrete_supertypes env ivar_ty in
+  let env = List.fold_left supertypes ~init:env ~f:(fun env ty ->
+    SubType.add_constraint p env Ast.Constraint_as obj_ty ty) in
 
   (* It's often the case that the fresh name isn't necessary. For
    * example, if C<T> extends B<T>, and we have $x:B<t> for some type t

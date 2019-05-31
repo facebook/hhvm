@@ -1,161 +1,130 @@
+open Core_kernel
+open SearchUtils
+
 module Args = Test_harness_common_args
 
-(* Autocomplete snippets *)
-let acnew_context_snippet =
-  "<?hh function f() { $x = new UsesAUTO332"
-let actrait_context_snippet =
-  "<?hh final class EntFoo extends Ent { use NoBigTrAUTO332"
-let acid_context_snippet =
-  "<?hh function f() { some_long_AUTO332"
-let actype_context_snippet =
-  "<?hh function f(ClassToBeAUTO332"
+let assert_autocomplete
+    ~(query_text: string)
+    ~(kind: si_kind)
+    ~(expected: int)
+    ~(env: local_tracking_env ref): unit =
+
+  (* Search for the symbol *)
+  let results = SymbolIndex.find_matching_symbols
+    ~query_text
+    ~max_results:100
+    ~kind_filter:(Some kind)
+    ~env:!env in
+
+  (* Verify correct number of results *)
+  Asserter.Int_asserter.assert_equals
+    expected (List.length results)
+    (Printf.sprintf "Should be %d result(s) for [%s]" expected query_text);
+  if (expected > 0) then begin
+    let r = List.hd_exn results in
+
+    (* Assert string match *)
+    Asserter.String_asserter.assert_equals query_text r.si_name
+      (Printf.sprintf "Should be able to find autocomplete for '%s'" query_text);
+
+    (* Assert kind match *)
+    Asserter.Int_asserter.assert_equals (kind_to_int kind) (kind_to_int r.si_kind)
+      (Printf.sprintf "Mismatch in kind for '%s'" query_text);
+  end;
 ;;
 
-let copy_file
-    (source_path: string)
-    (dest_path: string): unit =
-  let command = Printf.sprintf "cp %s %s" source_path dest_path in
-  let retcode = Sys.command command in
-  Asserter.Int_asserter.assert_equals 0 retcode "Failed to copy file repo";
-;;
-
-let run_hh_check
-    (hh_client_path: string)
-    (repo_path: string): unit =
-    let hh_client_process = Process.exec
-        hh_client_path
-        ["check"; repo_path; "--config"; "symbolindex_search_provider=SqliteIndex"]
-    in
-    let open Process_types in
-    match Process.read_and_wait_pid ~timeout:75
-      hh_client_process with
-    | Error Abnormal_exit { stdout; _} ->
-      let errmsg = Printf.sprintf "Failed to run hh_client: %s" stdout in
-      failwith errmsg;
-    | Error Timed_out _ ->
-      failwith "Timed out trying to run hh check";
-    | Error _ ->
-      failwith "Failed: other error";
-    | Ok _ ->
-      ()
-;;
-
-let run_autocomplete
-    (hh_client_path: string)
-    (repo_path: string)
-    (context: string): string =
-  let hh_client_process = Process.exec
-      hh_client_path ~input:context
-      [repo_path; "--auto-complete"; "--config"; "symbolindex_search_provider=SqliteIndex"]
-  in
-  let open Process_types in
-  let results = match Process.read_and_wait_pid ~timeout:75
-    hh_client_process with
-  | Error Abnormal_exit { stdout; _} ->
-    let errmsg = Printf.sprintf "Failed to run hh_client: %s" stdout in
-    failwith errmsg;
-  | Error Timed_out _ ->
-    failwith "Timed out trying to get autocomplete";
-  | Error _ ->
-    failwith "Failed: other error";
-  | Ok {stdout; _} ->
-    stdout
-  in
-  results
-;;
-
-let test_basic_results (harness: Test_harness.t): bool =
+let test_sqlite_plus_local (harness: Test_harness.t): bool =
   let open Test_harness in
-  let hh_client_path = harness.hh_client_path in
+  let open SearchUtils in
+  let open IndexBuilder in
+  Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   let repo_path = Path.to_string harness.repo_dir in
 
-  (* Launch hh for a one time check *)
-  run_hh_check hh_client_path repo_path;
-  Printf.printf "HH Check finished [%s]\n%!" repo_path;
+  (* Set up initial variables *)
+  let file_opt = Some "/tmp/hh_server/autocomplete.test.db" in
+  let ctxt = {
+    repo_folder = repo_path;
+    sqlite_filename = file_opt;
+    text_filename = None;
+    json_filename = None;
+    json_chunk_size = 0;
+    custom_service = None;
+    custom_repo_name = None;
+    include_builtins = true;
+  } in
+  let env = ref {
+    lte_fileinfos = Relative_path.Map.empty;
+    lte_filenames = Relative_path.Map.empty;
+    lte_tombstones = Tombstone_set.empty;
+  } in
 
-  (* Request autocomplete of type "Acnew" *)
-  let results = run_autocomplete hh_client_path repo_path acnew_context_snippet in
-  Asserter.String_asserter.assert_equals "UsesA class\n" results
-    "Should be able to find autocomplete for 'UsesA'";
+  (* Scan the repo folder and produce answers in sqlite *)
+  IndexBuilder.go ctxt None;
+  SymbolIndex.set_search_provider
+    ~quiet:false
+    ~provider_name:"SqliteIndex"
+    ~savedstate_file_opt:file_opt
+    ~workers:None;
+  Hh_logger.log "Setup complete";
 
-  (* Request autocomplete of type "Actrait_only" *)
-  let results = run_autocomplete hh_client_path repo_path actrait_context_snippet in
-  Asserter.String_asserter.assert_equals "NoBigTrait trait\n" results
-    "Should be able to find autocomplete for 'NoBigTrait'";
-
-  (* Request autocomplete of type "Acid" *)
-  let results = run_autocomplete hh_client_path repo_path acid_context_snippet in
-  Asserter.String_asserter.assert_equals "some_long_function_name _\n" results
-    "Should be able to find autocomplete for 'some_long_function_name'";
-
-  (* Request autocomplete of type "Actype" *)
-  let results = run_autocomplete hh_client_path repo_path actype_context_snippet in
-  Asserter.String_asserter.assert_equals "ClassToBeIdentified class\n" results
-    "Should be able to find autocomplete for 'ClassToBeIdentified'";
+  (* Find one of each major type *)
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~env;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~env;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  Hh_logger.log "First pass complete";
 
   (* Now, let's remove a few files and try again - assertions should change *)
-  (* contains NoBigTrait *)
-  let bar1path = (Path.to_string (Path.concat harness.repo_dir "bar_1.php")) in
-  let tempbar1path = Filename.temp_file "bar_1" "php" in
-  copy_file bar1path tempbar1path;
-  Unix.unlink bar1path;
-  (* contains some_long_function_name *)
-  let foo3path = (Path.to_string (Path.concat harness.repo_dir "foo_3.php")) in
-  let tempfoo3path = Filename.temp_file "foo_3" "php" in
-  copy_file foo3path tempfoo3path;
-  Unix.unlink foo3path;
+  let bar1path = Relative_path.from_root "/bar_1.php" in
+  let foo3path = Relative_path.from_root "/foo_3.php" in
+  let s = Relative_path.Set.empty in
+  let s = Relative_path.Set.add s bar1path in
+  let s = Relative_path.Set.add s foo3path in
+  SymbolIndex.remove_files s env;
+  Hh_logger.log "Removed files";
 
-  (* Launch hh for a one time check *)
-  run_hh_check hh_client_path repo_path;
-  Printf.printf "HH Check finished [%s]\n%!" repo_path;
+  (* Two of these have been removed! *)
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:0 ~env;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:0 ~env;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  Hh_logger.log "Second pass complete";
 
-  (* Request autocomplete of type "Acnew" *)
-  let results = run_autocomplete hh_client_path repo_path acnew_context_snippet in
-  Asserter.String_asserter.assert_equals "UsesA class\n" results
-    "Still able to find autocomplete for 'UsesA'";
+  (* Add the files back! *)
+  let nobigtrait_id =
+    ((FileInfo.File (FileInfo.Class, bar1path)), "\\NoBigTrait") in
+  let some_long_function_name_id =
+    ((FileInfo.File (FileInfo.Class, foo3path)), "\\some_long_function_name") in
+  let bar1fileinfo = { FileInfo.
+    hash = None;
+    file_mode = None;
+    funs = [];
+    classes = [nobigtrait_id];
+    typedefs = [];
+    consts = [];
+    comments = Some [];
+  } in
+  let foo3fileinfo = { FileInfo.
+    hash = None;
+    file_mode = None;
+    funs = [some_long_function_name_id];
+    classes = [];
+    typedefs = [];
+    consts = [];
+    comments = Some [];
+  } in
+  let changelist = (bar1path, Full bar1fileinfo, TypeChecker)
+    :: [(foo3path, Full foo3fileinfo, TypeChecker)] in
+  SymbolIndex.update_files None changelist env;
+  let n = LocalSearchService.count_local_fileinfos !env in
+  Hh_logger.log "Added back; local search service now contains %d files" n;
 
-  (* Request autocomplete of type "Actrait_only" *)
-  let results = run_autocomplete hh_client_path repo_path actrait_context_snippet in
-  Asserter.String_asserter.assert_equals "" results
-    "File containing 'NoBigTrait' has been removed";
-
-  (* Request autocomplete of type "Acid" *)
-  let results = run_autocomplete hh_client_path repo_path acid_context_snippet in
-  Asserter.String_asserter.assert_equals "" results
-    "File containing 'some_long_function_name' has been removed";
-
-  (* Request autocomplete of type "Actype" *)
-  let results = run_autocomplete hh_client_path repo_path actype_context_snippet in
-  Asserter.String_asserter.assert_equals "ClassToBeIdentified class\n" results
-    "Still able to find autocomplete for 'ClassToBeIdentified'";
-
-  (* Add the files back and test a third time *)
-  copy_file tempbar1path bar1path;
-  copy_file tempfoo3path foo3path;
-
-  (* Launch hh for a one time check *)
-  run_hh_check hh_client_path repo_path;
-  Printf.printf "HH Check finished [%s]\n%!" repo_path;
-
-  (* Request autocomplete of type "Acnew" *)
-  let results = run_autocomplete hh_client_path repo_path acnew_context_snippet in
-  Asserter.String_asserter.assert_equals "UsesA class\n" results
-    "Should be able to find autocomplete for 'UsesA'";
-
-  (* Request autocomplete of type "Actrait_only" *)
-  let results = run_autocomplete hh_client_path repo_path actrait_context_snippet in
-  Asserter.String_asserter.assert_equals "NoBigTrait trait\n" results
-    "Should be able to find autocomplete for 'NoBigTrait'";
-
-  (* Request autocomplete of type "Acid" *)
-  let results = run_autocomplete hh_client_path repo_path acid_context_snippet in
-  Asserter.String_asserter.assert_equals "some_long_function_name _\n" results
-    "Should be able to find autocomplete for 'some_long_function_name'";
-
-  (* Request autocomplete of type "Actype" *)
-  let results = run_autocomplete hh_client_path repo_path actype_context_snippet in
-  Asserter.String_asserter.assert_equals "ClassToBeIdentified class\n" results
-    "Should be able to find autocomplete for 'ClassToBeIdentified'";
+  (* Find one of each major type *)
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~env;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  Hh_logger.log "Third pass complete";
 
   (* If we got here, all is well *)
   true
@@ -168,9 +137,9 @@ let tests args =
     template_repo = args.Args.template_repo;
   } in
   [
-  ("test_basic_results", fun () ->
+  ("test_sqlite_plus_local", fun () ->
     Test_harness.run_test ~stop_server_in_teardown:false harness_config
-    test_basic_results);
+    test_sqlite_plus_local);
   ]
 ;;
 

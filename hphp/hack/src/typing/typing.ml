@@ -4318,8 +4318,8 @@ and class_get_ ~is_method ~is_const ~this_ty ?(explicit_tparams=[])
           mid p (Typing_print.error env cty)
           (Reason.to_pos (fst cty));
         (env, err_witness env p, None)
-      | ((_, (_, ty), _) as res)::rest ->
-        if List.exists rest (fun (_, (_, ty'), _) -> ty' <> ty)
+      | ((_, ty, _) as res)::rest ->
+        if List.exists rest (fun (_, ty', _) -> not @@ ty_equal ty' ty)
         then
           begin
             Errors.ambiguous_member
@@ -4722,8 +4722,8 @@ and obj_get_ ~is_method ~nullsafe ~valkind ~obj_pos
             (Reason.to_pos (fst ety1));
           k (env, err_witness env id_pos, None)
         end
-      | ((_env, (_, ty), _vis) as res)::rest ->
-        if List.exists rest (fun (_, (_,ty'), _) -> ty' <> ty)
+      | ((_env, ty, _vis) as res)::rest ->
+        if List.exists rest (fun (_, ty', _) -> not @@ ty_equal ty' ty)
         then
         begin
           Errors.ambiguous_member

@@ -570,6 +570,10 @@ impl<'a> SmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstructors 
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_xhp_enum_type(s, arg0, arg1, arg2, arg3, arg4)
     }
 
+    fn make_xhp_lateinit(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'a>, Self::R) {
+        <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_xhp_lateinit(s, arg0, arg1)
+    }
+
     fn make_xhp_required(s: HasScriptContent<'a>, arg0: Self::R, arg1: Self::R) -> (HasScriptContent<'a>, Self::R) {
         <Self as FlattenSmartConstructors<'a, HasScriptContent<'a>>>::make_xhp_required(s, arg0, arg1)
     }

@@ -190,6 +190,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
     let make_xhp_children_parenthesized_list arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_xhp_children_parenthesized_list arg0 arg1 arg2
     let make_xhp_category_declaration arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_xhp_category_declaration arg0 arg1 arg2
     let make_xhp_enum_type arg0 arg1 arg2 arg3 arg4 state = State.next state [arg0; arg1; arg2; arg3; arg4], Syntax.make_xhp_enum_type arg0 arg1 arg2 arg3 arg4
+    let make_xhp_lateinit arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_xhp_lateinit arg0 arg1
     let make_xhp_required arg0 arg1 state = State.next state [arg0; arg1], Syntax.make_xhp_required arg0 arg1
     let make_xhp_class_attribute_declaration arg0 arg1 arg2 state = State.next state [arg0; arg1; arg2], Syntax.make_xhp_class_attribute_declaration arg0 arg1 arg2
     let make_xhp_class_attribute arg0 arg1 arg2 arg3 state = State.next state [arg0; arg1; arg2; arg3], Syntax.make_xhp_class_attribute arg0 arg1 arg2 arg3

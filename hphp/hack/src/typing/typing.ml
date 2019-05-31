@@ -6514,7 +6514,7 @@ and class_var_def ~is_static env cv =
            in XHP attribute declarations, so this is a temporary
            hack to support existing code for now. *)
         (* Task #5815945: Get rid of this Hack *)
-        if cv.cv_is_xhp && (Env.is_strict env)
+        if Option.is_some cv.cv_xhp_attr && (Env.is_strict env)
           then Env.set_mode env FileInfo.Mpartial
           else env in
       let cty = Decl_hint.hint env.Env.decl_env cty in
@@ -6553,7 +6553,7 @@ and class_var_def ~is_static env cv =
     env,
     {
       T.cv_final = cv.cv_final;
-      T.cv_is_xhp = cv.cv_is_xhp;
+      T.cv_xhp_attr = NastTanyMapper.map_xhp_info cv.cv_xhp_attr;
       T.cv_visibility = cv.cv_visibility;
       T.cv_type = cv.cv_type;
       T.cv_id = cv.cv_id;
@@ -6942,5 +6942,5 @@ let nast_to_tast opts nast =
   in
   Nast_check.program nast;
   let tast = List.map nast convert_def in
-  Tast_check.program tast;
+  Tast_check.program opts tast;
   tast

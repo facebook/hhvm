@@ -27,7 +27,7 @@ type shallow_typeconst = {
 
 type shallow_prop = {
   sp_const       : bool;
-  sp_is_xhp_attr : bool;
+  sp_xhp_attr    : xhp_attr option;
   sp_lateinit    : bool;
   sp_lsb         : bool;
   sp_name        : Aast.sid;

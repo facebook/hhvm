@@ -144,6 +144,10 @@ and user_attribute = {
   ua_params: expr list (* user attributes are restricted to scalar values *)
 }
 
+and xhp_attr_tag =
+  | Required
+  | LateInit
+
 and class_elt =
   | Const of hint option * (id * expr) list
   | AbsConst of hint option * id
@@ -157,7 +161,7 @@ and class_elt =
   | XhpAttrUse of hint
   | ClassTraitRequire of trait_req_kind * hint
   | ClassVars of class_vars_
-  | XhpAttr of hint option * class_var * bool *
+  | XhpAttr of hint option * class_var *  xhp_attr_tag option *
                ((pos * bool * expr list) option)
   | Method of method_
   | MethodTraitResolution of method_trait_resolution

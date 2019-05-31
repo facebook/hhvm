@@ -824,6 +824,10 @@ module type Syntax_S = sig
     ; xhp_enum_values                                    : t
     ; xhp_enum_right_brace                               : t
     }
+  | XHPLateinit                       of
+    { xhp_lateinit_at                                    : t
+    ; xhp_lateinit_keyword                               : t
+    }
   | XHPRequired                       of
     { xhp_required_at                                    : t
     ; xhp_required_keyword                               : t
@@ -1249,6 +1253,7 @@ module type Syntax_S = sig
   val make_xhp_children_parenthesized_list : t -> t -> t -> t
   val make_xhp_category_declaration : t -> t -> t -> t
   val make_xhp_enum_type : t -> t -> t -> t -> t -> t
+  val make_xhp_lateinit : t -> t -> t
   val make_xhp_required : t -> t -> t
   val make_xhp_class_attribute_declaration : t -> t -> t -> t
   val make_xhp_class_attribute : t -> t -> t -> t -> t
@@ -1431,6 +1436,7 @@ module type Syntax_S = sig
   val is_xhp_children_parenthesized_list : t -> bool
   val is_xhp_category_declaration : t -> bool
   val is_xhp_enum_type : t -> bool
+  val is_xhp_lateinit : t -> bool
   val is_xhp_required : t -> bool
   val is_xhp_class_attribute_declaration : t -> bool
   val is_xhp_class_attribute : t -> bool

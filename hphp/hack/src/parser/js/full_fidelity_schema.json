@@ -207,6 +207,8 @@
       "token_text" : "require_once" },
     { "token_kind" : "Required",
       "token_text" : "required" },
+    { "token_kind" : "Lateinit",
+      "token_text" : "lateinit" },
     { "token_kind" : "Resource",
       "token_text" : "resource" },
     { "token_kind" : "Return",
@@ -1766,6 +1768,14 @@
         { "field_name" : "left_brace" },
         { "field_name" : "values" },
         { "field_name" : "right_brace" }
+      ] },
+    { "kind_name" : "XHPLateinit",
+      "type_name" : "xhp_lateinit",
+      "description" : "xhp_lateinit",
+      "prefix" : "xhp_lateinit",
+      "fields" : [
+        { "field_name" : "at" },
+        { "field_name" : "keyword" }
       ] },
     { "kind_name" : "XHPRequired",
       "type_name" : "xhp_required",

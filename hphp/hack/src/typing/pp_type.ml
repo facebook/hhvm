@@ -555,6 +555,22 @@ fun fmt x ->
 and show_fun_params : type a. a fun_params -> string = fun x ->
   Format.asprintf "%a" pp_fun_params x
 
+and pp_xhp_attr : Format.formatter -> xhp_attr -> unit = fun fmt x ->
+  Format.fprintf fmt "@[<2>{ ";
+
+  Format.fprintf fmt "@[%s =@ " "xa_tag";
+  ( match x.xa_tag with
+    | None -> Format.pp_print_string fmt "None"
+    | Some Required -> Format.pp_print_string fmt "Required"
+    | Some Lateinit -> Format.pp_print_string fmt "Lateinit");
+  Format.fprintf fmt "@]";
+  Format.fprintf fmt ";@ ";
+
+  Format.fprintf fmt "@ }@]";
+
+and show_xhp_attr : xhp_attr -> string = fun x ->
+  Format.asprintf "%a" pp_xhp_attr x
+
 and pp_class_elt : Format.formatter -> class_elt -> unit = fun fmt x ->
   Format.fprintf fmt "@[<2>{ ";
 
@@ -563,8 +579,14 @@ and pp_class_elt : Format.formatter -> class_elt -> unit = fun fmt x ->
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@[%s =@ " "ce_is_xhp_attr";
-  Format.fprintf fmt "%B" x.ce_is_xhp_attr;
+  Format.fprintf fmt "@[%s =@ " "ce_xhp_attr";
+  (match x.ce_xhp_attr with
+  | None -> Format.pp_print_string fmt "None"
+  | Some x ->
+    Format.pp_print_string fmt "(Some ";
+    pp_xhp_attr fmt x;
+    Format.pp_print_string fmt ")"
+  );
   Format.fprintf fmt "@]";
   Format.fprintf fmt ";@ ";
 

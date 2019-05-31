@@ -577,6 +577,10 @@ impl<'a, State: StateType<'a, PositionedSyntax>> SmartConstructors<'a, State::T>
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_xhp_enum_type(s, arg0, arg1, arg2, arg3, arg4)
     }
 
+    fn make_xhp_lateinit(s: State::T, arg0: Self::R, arg1: Self::R) -> (State::T, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_xhp_lateinit(s, arg0, arg1)
+    }
+
     fn make_xhp_required(s: State::T, arg0: Self::R, arg1: Self::R) -> (State::T, Self::R) {
         <Self as SyntaxSmartConstructors<'a, PositionedSyntax, State>>::make_xhp_required(s, arg0, arg1)
     }

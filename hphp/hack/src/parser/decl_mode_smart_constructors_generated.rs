@@ -575,6 +575,10 @@ where
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_xhp_enum_type(s, arg0, arg1, arg2, arg3, arg4)
     }
 
+    fn make_xhp_lateinit(s: Vec<bool>, arg0: Self::R, arg1: Self::R) -> (Vec<bool>, Self::R) {
+        <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_xhp_lateinit(s, arg0, arg1)
+    }
+
     fn make_xhp_required(s: Vec<bool>, arg0: Self::R, arg1: Self::R) -> (Vec<bool>, Self::R) {
         <Self as SyntaxSmartConstructors<'a, Self::R, State<Self::R>>>::make_xhp_required(s, arg0, arg1)
     }

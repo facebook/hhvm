@@ -163,7 +163,7 @@ and element = {
   elt_reactivity : method_reactivity option;
 
   (* Only relevant for properties *)
-  elt_is_xhp_attr : bool;
+  elt_xhp_attr : xhp_attr option;
   elt_const: bool;
   elt_lateinit: bool;
   elt_lsb: bool;

@@ -1468,6 +1468,15 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_xhp_lateinit(xhp_lateinit_at: Self, xhp_lateinit_keyword: Self) -> Self {
+        let syntax = SyntaxVariant::XHPLateinit(Box::new(XHPLateinitChildren {
+            xhp_lateinit_at,
+            xhp_lateinit_keyword,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
     fn make_xhp_required(xhp_required_at: Self, xhp_required_keyword: Self) -> Self {
         let syntax = SyntaxVariant::XHPRequired(Box::new(XHPRequiredChildren {
             xhp_required_at,
@@ -2896,6 +2905,11 @@ where
                 let acc = f(&x.xhp_enum_right_brace, acc);
                 acc
             },
+            SyntaxVariant::XHPLateinit(x) => {
+                let acc = f(&x.xhp_lateinit_at, acc);
+                let acc = f(&x.xhp_lateinit_keyword, acc);
+                acc
+            },
             SyntaxVariant::XHPRequired(x) => {
                 let acc = f(&x.xhp_required_at, acc);
                 let acc = f(&x.xhp_required_keyword, acc);
@@ -3341,6 +3355,7 @@ where
             SyntaxVariant::XHPChildrenParenthesizedList {..} => SyntaxKind::XHPChildrenParenthesizedList,
             SyntaxVariant::XHPCategoryDeclaration {..} => SyntaxKind::XHPCategoryDeclaration,
             SyntaxVariant::XHPEnumType {..} => SyntaxKind::XHPEnumType,
+            SyntaxVariant::XHPLateinit {..} => SyntaxKind::XHPLateinit,
             SyntaxVariant::XHPRequired {..} => SyntaxKind::XHPRequired,
             SyntaxVariant::XHPClassAttributeDeclaration {..} => SyntaxKind::XHPClassAttributeDeclaration,
             SyntaxVariant::XHPClassAttribute {..} => SyntaxKind::XHPClassAttribute,
@@ -4445,6 +4460,12 @@ pub struct XHPEnumTypeChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+pub struct XHPLateinitChildren<T, V> {
+    pub xhp_lateinit_at: Syntax<T, V>,
+    pub xhp_lateinit_keyword: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
 pub struct XHPRequiredChildren<T, V> {
     pub xhp_required_at: Syntax<T, V>,
     pub xhp_required_keyword: Syntax<T, V>,
@@ -4932,6 +4953,7 @@ pub enum SyntaxVariant<T, V> {
     XHPChildrenParenthesizedList(Box<XHPChildrenParenthesizedListChildren<T, V>>),
     XHPCategoryDeclaration(Box<XHPCategoryDeclarationChildren<T, V>>),
     XHPEnumType(Box<XHPEnumTypeChildren<T, V>>),
+    XHPLateinit(Box<XHPLateinitChildren<T, V>>),
     XHPRequired(Box<XHPRequiredChildren<T, V>>),
     XHPClassAttributeDeclaration(Box<XHPClassAttributeDeclarationChildren<T, V>>),
     XHPClassAttribute(Box<XHPClassAttributeChildren<T, V>>),

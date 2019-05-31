@@ -10,7 +10,14 @@
 [@@@warning "-33"]
 open Core_kernel
 [@@@warning "+33"]
-let visitor = Tast_visitor.iter_with [
+
+let visitor opts =
+  let makers =  [
+    Xhp_required_check.make_handler;
+  ] in
+  let handlers = List.map makers ((|>) opts) |> List.filter_opt in
+  Tast_visitor.iter_with (
+  handlers @ [
   Shape_field_check.handler;
   String_cast_check.handler;
   Tautology_check.handler;
@@ -42,7 +49,7 @@ let visitor = Tast_visitor.iter_with [
   Method_type_param_check.handler;
   Foreach_collection_reactivity_check.handler;
   Obj_get_check.handler;
-]
+])
 
-let program = visitor#go
-let def = visitor#go_def
+let program opts = (visitor opts)#go
+let def opts = (visitor opts)#go_def

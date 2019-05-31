@@ -971,13 +971,17 @@ module WithExpressionAndStatementAndTypeParser
   and parse_xhp_required_opt parser =
     (* SPEC (Draft)
       xhp-required :
-        @  required
+        @  (required | lateinit)
 
       Note that these are two tokens. They can have whitespace between them. *)
     if peek_token_kind parser = At then
       let (parser, at) = assert_token parser At in
-      let (parser, req) = require_required parser in
-      Make.xhp_required parser at req
+      let (parser, token) = next_token parser in
+      let (parser, token') = Make.token parser token in
+      match Token.kind token with
+      | TokenKind.Required -> Make.xhp_required parser at token'
+      | TokenKind.Lateinit -> Make.xhp_lateinit parser at token'
+      | _ -> Make.missing parser (pos (with_error parser SyntaxError.error1051))
     else
       Make.missing parser (pos parser)
 

@@ -86,11 +86,19 @@ let typeconst env c tc =
         stc_type = ty;
         stc_enforceable = enforceable;
       }
+let make_xhp_attr cv = Option.map cv.cv_xhp_attr (fun xai -> {
+  xa_tag = (match xai.xai_tag with
+    | None -> None
+    | Some Required -> Some Required
+    | Some LateInit -> Some Lateinit
+  );
+  xa_has_default = Option.is_some cv.cv_expr;
+})
 
 let prop env cv =
   let cv_pos = fst cv.cv_id in
   let ty = Option.map cv.cv_type ~f:begin fun ty' ->
-    if cv.cv_is_xhp
+    if Option.is_some cv.cv_xhp_attr
     then
       (* If this is an XHP attribute and we're in strict mode,
          relax to partial mode to allow the use of the "array"
@@ -115,7 +123,7 @@ let prop env cv =
   if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   {
     sp_const = const;
-    sp_is_xhp_attr = cv.cv_is_xhp;
+    sp_xhp_attr = make_xhp_attr cv;
     sp_lateinit = lateinit;
     sp_lsb = false;
     sp_name = cv.cv_id;
@@ -144,7 +152,7 @@ and static_prop env c cv =
   if lateinit && cv.cv_expr <> None then Errors.lateinit_with_default cv_pos;
   {
     sp_const = false; (* unsupported for static properties *)
-    sp_is_xhp_attr = cv.cv_is_xhp;
+    sp_xhp_attr = make_xhp_attr cv;
     sp_lateinit = lateinit;
     sp_lsb = lsb;
     sp_name = cv_pos, id;

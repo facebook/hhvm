@@ -112,6 +112,7 @@ type t =
   | Require
   | Require_once
   | Required
+  | Lateinit
   | Resource
   | Return
   | Self
@@ -332,6 +333,7 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "require"                                                            -> Some Require
   | "require_once"                                                       -> Some Require_once
   | "required"        when (is_hack || allow_xhp)                        -> Some Required
+  | "lateinit"        when (is_hack || allow_xhp)                        -> Some Lateinit
   | "resource"                                    when not only_reserved -> Some Resource
   | "return"                                                             -> Some Return
   | "self"                                        when not only_reserved -> Some Self
@@ -526,6 +528,7 @@ let to_string kind =
   | Require                       -> "require"
   | Require_once                  -> "require_once"
   | Required                      -> "required"
+  | Lateinit                      -> "lateinit"
   | Resource                      -> "resource"
   | Return                        -> "return"
   | Self                          -> "self"

@@ -494,6 +494,7 @@ val inout_annotation_unexpected : Pos.t -> Pos.t -> bool -> unit
 val inoutness_mismatch : Pos.t -> Pos.t -> unit
 val xhp_required : Pos.t -> string -> (Pos.t * string) list -> unit
 val illegal_xhp_child : Pos.t -> (Pos.t * string) list -> unit
+val missing_xhp_required_attr : Pos.t -> string -> (Pos.t * string) list -> unit
 val nonreactive_function_call : Pos.t -> Pos.t -> string -> Pos.t option -> unit
 val nonreactive_indexing : bool -> Pos.t -> unit
 val inout_argument_bad_expr : Pos.t -> unit
@@ -573,6 +574,7 @@ val misplaced_rx_of_scope : Pos.t -> unit
 val rx_of_scope_and_explicit_rx : Pos.t -> unit
 val lateinit_with_default : Pos.t -> unit
 val bad_lateinit_override : bool -> Pos.t -> Pos.t -> unit
+val bad_xhp_attr_required_override : string -> string -> Pos.t -> Pos.t -> unit
 val interface_use_trait : Pos.t -> unit
 val nonstatic_method_in_abstract_final_class : Pos.t -> unit
 val escaping_mutable_object : Pos.t -> unit

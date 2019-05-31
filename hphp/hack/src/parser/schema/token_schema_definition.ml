@@ -584,6 +584,12 @@ let given_text_tokens = [
     ~is_xhp:true
     ();
   make_token_node
+    "Lateinit"
+    "lateinit"
+    ~hack_only:true
+    ~is_xhp:true
+    ();
+  make_token_node
     "Resource"
     "resource"
     ~allowed_as_identifier:true

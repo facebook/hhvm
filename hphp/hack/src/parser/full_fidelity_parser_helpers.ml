@@ -311,9 +311,6 @@ module WithParser(Parser : Parser_S) = struct
       end
     end
 
-  let require_required parser =
-    require_token parser TokenKind.Required SyntaxError.error1051
-
   let require_name parser =
     require_token parser TokenKind.Name SyntaxError.error1004
 

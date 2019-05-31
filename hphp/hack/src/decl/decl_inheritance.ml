@@ -74,7 +74,7 @@ let shallow_method_to_class_elt child_class mro subst meth : class_elt =
   {
     ce_abstract = meth.sm_abstract;
     ce_final = meth.sm_final;
-    ce_is_xhp_attr = false;
+    ce_xhp_attr = None;
     ce_const = false;
     ce_lateinit = false;
     ce_override = meth.sm_override;
@@ -109,7 +109,7 @@ let shallow_prop_to_ielt child_class mro subst prop : inheritable_elt =
     elt = {
       ce_abstract = false;
       ce_final = true;
-      ce_is_xhp_attr = prop.sp_is_xhp_attr;
+      ce_xhp_attr = prop.sp_xhp_attr;
       ce_const = prop.sp_const;
       ce_lateinit = prop.sp_lateinit;
       ce_override = false;

@@ -190,6 +190,7 @@ module WithToken(Token: TokenType) = struct
       | XHPChildrenParenthesizedList      _ -> SyntaxKind.XHPChildrenParenthesizedList
       | XHPCategoryDeclaration            _ -> SyntaxKind.XHPCategoryDeclaration
       | XHPEnumType                       _ -> SyntaxKind.XHPEnumType
+      | XHPLateinit                       _ -> SyntaxKind.XHPLateinit
       | XHPRequired                       _ -> SyntaxKind.XHPRequired
       | XHPClassAttributeDeclaration      _ -> SyntaxKind.XHPClassAttributeDeclaration
       | XHPClassAttribute                 _ -> SyntaxKind.XHPClassAttribute
@@ -380,6 +381,7 @@ module WithToken(Token: TokenType) = struct
     let is_xhp_children_parenthesized_list      = has_kind SyntaxKind.XHPChildrenParenthesizedList
     let is_xhp_category_declaration             = has_kind SyntaxKind.XHPCategoryDeclaration
     let is_xhp_enum_type                        = has_kind SyntaxKind.XHPEnumType
+    let is_xhp_lateinit                         = has_kind SyntaxKind.XHPLateinit
     let is_xhp_required                         = has_kind SyntaxKind.XHPRequired
     let is_xhp_class_attribute_declaration      = has_kind SyntaxKind.XHPClassAttributeDeclaration
     let is_xhp_class_attribute                  = has_kind SyntaxKind.XHPClassAttribute
@@ -1959,6 +1961,13 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc xhp_enum_left_brace in
          let acc = f acc xhp_enum_values in
          let acc = f acc xhp_enum_right_brace in
+         acc
+      | XHPLateinit {
+        xhp_lateinit_at;
+        xhp_lateinit_keyword;
+      } ->
+         let acc = f acc xhp_lateinit_at in
+         let acc = f acc xhp_lateinit_keyword in
          acc
       | XHPRequired {
         xhp_required_at;
@@ -3899,6 +3908,13 @@ module WithToken(Token: TokenType) = struct
         xhp_enum_values;
         xhp_enum_right_brace;
       ]
+      | XHPLateinit {
+        xhp_lateinit_at;
+        xhp_lateinit_keyword;
+      } -> [
+        xhp_lateinit_at;
+        xhp_lateinit_keyword;
+      ]
       | XHPRequired {
         xhp_required_at;
         xhp_required_keyword;
@@ -5838,6 +5854,13 @@ module WithToken(Token: TokenType) = struct
         "xhp_enum_left_brace";
         "xhp_enum_values";
         "xhp_enum_right_brace";
+      ]
+      | XHPLateinit {
+        xhp_lateinit_at;
+        xhp_lateinit_keyword;
+      } -> [
+        "xhp_lateinit_at";
+        "xhp_lateinit_keyword";
       ]
       | XHPRequired {
         xhp_required_at;
@@ -7963,6 +7986,14 @@ module WithToken(Token: TokenType) = struct
           xhp_enum_left_brace;
           xhp_enum_values;
           xhp_enum_right_brace;
+        }
+      | (SyntaxKind.XHPLateinit, [
+          xhp_lateinit_at;
+          xhp_lateinit_keyword;
+        ]) ->
+        XHPLateinit {
+          xhp_lateinit_at;
+          xhp_lateinit_keyword;
         }
       | (SyntaxKind.XHPRequired, [
           xhp_required_at;
@@ -10505,6 +10536,17 @@ module WithToken(Token: TokenType) = struct
           xhp_enum_left_brace;
           xhp_enum_values;
           xhp_enum_right_brace;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_xhp_lateinit
+        xhp_lateinit_at
+        xhp_lateinit_keyword
+      =
+        let syntax = XHPLateinit {
+          xhp_lateinit_at;
+          xhp_lateinit_keyword;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

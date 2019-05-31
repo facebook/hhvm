@@ -1080,6 +1080,14 @@ pub trait FlattenSmartConstructors<'a, State>
         }
     }
 
+    fn make_xhp_lateinit(s: State, arg0: Self::R, arg1: Self::R) -> (State, Self::R) {
+        if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
+          (s, Self::zero())
+        } else {
+          (s, Self::flatten(vec!(arg0, arg1)))
+        }
+    }
+
     fn make_xhp_required(s: State, arg0: Self::R, arg1: Self::R) -> (State, Self::R) {
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           (s, Self::zero())

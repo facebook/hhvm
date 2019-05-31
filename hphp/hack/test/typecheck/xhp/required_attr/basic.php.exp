@@ -1,0 +1,12 @@
+File "basic.php", line 24, characters 8-12:
+Required attribute :a is missing. (Typing[4314])
+File "basic.php", line 4, characters 7-8:
+The attribute :a is declared in this class.
+File "basic.php", line 25, characters 8-12:
+Required attribute :a is missing. (Typing[4314])
+File "basic.php", line 7, characters 7-8:
+The attribute :a is declared in this class.
+File "basic.php", line 26, characters 8-12:
+Required attribute :a is missing. (Typing[4314])
+File "basic.php", line 4, characters 7-8:
+The attribute :a is declared in this class.

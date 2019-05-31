@@ -412,10 +412,19 @@ and 'phase fun_param = {
 
 and 'phase fun_params = 'phase fun_param list
 
+and xhp_attr_tag =
+  | Required
+  | Lateinit
+
+and xhp_attr = {
+  xa_tag         : xhp_attr_tag option;
+  xa_has_default : bool;
+}
+
 and class_elt = {
   ce_abstract    : bool;
   ce_final       : bool;
-  ce_is_xhp_attr : bool;
+  ce_xhp_attr    : xhp_attr option;
   ce_override    : bool;
   (* true if this static property has attribute __LSB *)
   ce_lsb         : bool;

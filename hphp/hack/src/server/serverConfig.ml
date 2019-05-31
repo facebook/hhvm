@@ -296,6 +296,7 @@ let load config_filename options =
     ?tco_like_types:(bool_opt "like_types" config)
     ?tco_pessimize_types:(bool_opt "disable_instanceof" config)
     ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)
+    ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
     ()
   in
   Errors.ignored_fixme_codes :=

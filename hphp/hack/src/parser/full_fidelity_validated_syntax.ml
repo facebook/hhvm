@@ -3093,6 +3093,20 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
       }
     ; Syntax.value = v
     }
+  and validate_xhp_lateinit : xhp_lateinit validator = function
+  | { Syntax.syntax = Syntax.XHPLateinit x; value = v } -> v,
+    { xhp_lateinit_keyword = validate_token x.xhp_lateinit_keyword
+    ; xhp_lateinit_at = validate_token x.xhp_lateinit_at
+    }
+  | s -> validation_fail (Some SyntaxKind.XHPLateinit) s
+  and invalidate_xhp_lateinit : xhp_lateinit invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.XHPLateinit
+      { xhp_lateinit_at = invalidate_token x.xhp_lateinit_at
+      ; xhp_lateinit_keyword = invalidate_token x.xhp_lateinit_keyword
+      }
+    ; Syntax.value = v
+    }
   and validate_xhp_required : xhp_required validator = function
   | { Syntax.syntax = Syntax.XHPRequired x; value = v } -> v,
     { xhp_required_keyword = validate_token x.xhp_required_keyword

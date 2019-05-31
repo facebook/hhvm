@@ -1731,6 +1731,17 @@ let schema : schema_node list =
       ; "right_brace", Token
       ]
     }
+  ; { kind_name   = "XHPLateinit"
+    ; type_name   = "xhp_lateinit"
+    ; func_name   = "xhp_lateinit"
+    ; description = "xhp_lateinit"
+    ; prefix      = "xhp_lateinit"
+    ; aggregates  = []
+    ; fields =
+      [ "at", Token
+      ; "keyword", Token
+      ]
+    }
   ; { kind_name   = "XHPRequired"
     ; type_name   = "xhp_required"
     ; func_name   = "xhp_required"

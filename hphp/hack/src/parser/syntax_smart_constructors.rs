@@ -701,6 +701,11 @@ where
         (s, Self::R::make_xhp_enum_type(arg0, arg1, arg2, arg3, arg4))
     }
 
+    fn make_xhp_lateinit(s: State::T, arg0 : Self::R, arg1 : Self::R) -> (State::T, Self::R) {
+        let s = State::next(s, vec![&arg0, &arg1]);
+        (s, Self::R::make_xhp_lateinit(arg0, arg1))
+    }
+
     fn make_xhp_required(s: State::T, arg0 : Self::R, arg1 : Self::R) -> (State::T, Self::R) {
         let s = State::next(s, vec![&arg0, &arg1]);
         (s, Self::R::make_xhp_required(arg0, arg1))

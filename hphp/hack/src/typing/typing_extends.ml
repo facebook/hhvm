@@ -198,6 +198,33 @@ let check_lateinit parent_class_elt class_elt =
     let child_pos = Reason.to_pos child_reason in
     Errors.bad_lateinit_override parent_class_elt.ce_lateinit parent_pos child_pos
 
+let check_xhp_attr_required env parent_class_elt class_elt =
+  if not (TypecheckerOptions.check_xhp_attribute (Env.get_tcopt env)) then ()
+  else
+    let is_less_strict = function
+    | Some Required, _
+    | Some Lateinit, Some Lateinit
+    | Some Lateinit, None
+    | None, None -> false
+    | _, _ -> true
+    in
+    let parent_attr = parent_class_elt.ce_xhp_attr in
+    let attr = class_elt.ce_xhp_attr in
+    match parent_attr, attr with
+    | Some {xa_tag = parent_tag; _}, Some {xa_tag = tag; _}
+      when is_less_strict (tag, parent_tag) ->
+        let lazy (parent_reason, _) = parent_class_elt.ce_type in
+        let lazy (child_reason, _) = class_elt.ce_type in
+        let parent_pos = Reason.to_pos parent_reason in
+        let child_pos = Reason.to_pos child_reason in
+        let show = function
+        | None -> "not required or lateinit"
+        | Some Required -> "required"
+        | Some Lateinit -> "lateinit"
+        in
+        Errors.bad_xhp_attr_required_override (show parent_tag) (show tag) parent_pos child_pos
+    | _, _ -> ()
+
 (* Check that overriding is correct *)
 let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_return = false)
     (parent_class, parent_ty) (class_, class_ty) parent_class_elt class_elt =
@@ -207,6 +234,7 @@ let check_override env ~check_member_unique member_name mem_source ?(ignore_fun_
   (* Verify that we are not overriding an __LSB property *)
   check_lsb_overrides mem_source member_name parent_class_elt class_elt;
   check_lateinit parent_class_elt class_elt;
+  check_xhp_attr_required env parent_class_elt class_elt;
   let class_known, check_params = should_check_params parent_class class_ in
   let check_vis = class_known || check_partially_known_method_visibility in
   if check_vis then check_visibility parent_class_elt class_elt else ();
@@ -402,7 +430,7 @@ let default_constructor_ce class_ =
            }
   in { ce_abstract    = false;
        ce_final       = false;
-       ce_is_xhp_attr = false;
+       ce_xhp_attr    = None;
        ce_const       = false;
        ce_lateinit    = false;
        ce_override    = false;

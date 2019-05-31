@@ -937,6 +937,10 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_enum_values                                    : t
     ; xhp_enum_right_brace                               : t
     }
+  | XHPLateinit                       of
+    { xhp_lateinit_at                                    : t
+    ; xhp_lateinit_keyword                               : t
+    }
   | XHPRequired                       of
     { xhp_required_at                                    : t
     ; xhp_required_keyword                               : t
@@ -2287,6 +2291,10 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; xhp_enum_left_brace: Token.t value
     ; xhp_enum_values: literal_expression listesque value
     ; xhp_enum_right_brace: Token.t value
+    }
+  and xhp_lateinit =
+    { xhp_lateinit_at: Token.t value
+    ; xhp_lateinit_keyword: Token.t value
     }
   and xhp_required =
     { xhp_required_at: Token.t value

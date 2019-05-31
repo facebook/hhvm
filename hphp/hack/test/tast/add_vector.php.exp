@@ -14,7 +14,7 @@
       c_xhp_attr_uses = []; c_xhp_category = None; c_reqs = [];
       c_implements = []; c_consts = []; c_typeconsts = [];
       c_vars =
-      [{ cv_final = false; cv_is_xhp = false; cv_visibility = Private;
+      [{ cv_final = false; cv_xhp_attr = None; cv_visibility = Private;
          cv_type =
          (Some ([13:11-20],
                 (Happly (([13:11-17], "\\Vector"),

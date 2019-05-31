@@ -356,7 +356,7 @@ let inherit_hack_xhp_attrs_only class_type =
   (* Filter out properties that are not XHP attributes *)
   let props =
     SMap.fold begin fun name prop acc ->
-      if prop.elt_is_xhp_attr then SMap.add name prop acc else acc
+      if Option.is_some prop.elt_xhp_attr then SMap.add name prop acc else acc
     end class_type.dc_props SMap.empty in
   let result = { empty with ih_props = props; } in
   result

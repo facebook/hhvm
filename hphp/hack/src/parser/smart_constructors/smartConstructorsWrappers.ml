@@ -163,6 +163,7 @@ module type SyntaxKind_S = sig
   val is_xhp_children_parenthesized_list : r -> bool
   val is_xhp_category_declaration : r -> bool
   val is_xhp_enum_type : r -> bool
+  val is_xhp_lateinit : r -> bool
   val is_xhp_required : r -> bool
   val is_xhp_class_attribute_declaration : r -> bool
   val is_xhp_class_attribute : r -> bool
@@ -370,6 +371,7 @@ module SyntaxKind(SC : SC_S)
   let make_xhp_children_parenthesized_list arg0 arg1 arg2 state = compose SK.XHPChildrenParenthesizedList (SC.make_xhp_children_parenthesized_list (snd arg0) (snd arg1) (snd arg2) state)
   let make_xhp_category_declaration arg0 arg1 arg2 state = compose SK.XHPCategoryDeclaration (SC.make_xhp_category_declaration (snd arg0) (snd arg1) (snd arg2) state)
   let make_xhp_enum_type arg0 arg1 arg2 arg3 arg4 state = compose SK.XHPEnumType (SC.make_xhp_enum_type (snd arg0) (snd arg1) (snd arg2) (snd arg3) (snd arg4) state)
+  let make_xhp_lateinit arg0 arg1 state = compose SK.XHPLateinit (SC.make_xhp_lateinit (snd arg0) (snd arg1) state)
   let make_xhp_required arg0 arg1 state = compose SK.XHPRequired (SC.make_xhp_required (snd arg0) (snd arg1) state)
   let make_xhp_class_attribute_declaration arg0 arg1 arg2 state = compose SK.XHPClassAttributeDeclaration (SC.make_xhp_class_attribute_declaration (snd arg0) (snd arg1) (snd arg2) state)
   let make_xhp_class_attribute arg0 arg1 arg2 arg3 state = compose SK.XHPClassAttribute (SC.make_xhp_class_attribute (snd arg0) (snd arg1) (snd arg2) (snd arg3) state)
@@ -553,6 +555,7 @@ module SyntaxKind(SC : SC_S)
   let is_xhp_children_parenthesized_list      = has_kind SK.XHPChildrenParenthesizedList
   let is_xhp_category_declaration             = has_kind SK.XHPCategoryDeclaration
   let is_xhp_enum_type                        = has_kind SK.XHPEnumType
+  let is_xhp_lateinit                         = has_kind SK.XHPLateinit
   let is_xhp_required                         = has_kind SK.XHPRequired
   let is_xhp_class_attribute_declaration      = has_kind SK.XHPClassAttributeDeclaration
   let is_xhp_class_attribute                  = has_kind SK.XHPClassAttribute

@@ -30,7 +30,7 @@ let raise_xhp_required env pos ureason ty =
  *)
 let xhp_attributes_for_class info: (string * class_elt) Sequence.t =
   Cls.props info
-  |> Sequence.filter ~f:(fun (_, elt_) -> elt_.ce_is_xhp_attr)
+  |> Sequence.filter ~f:(fun (_, elt_) -> Option.is_some elt_.ce_xhp_attr)
 
 (**
  * Walks a type and gathers all the XHP, adding an error when we encounter a

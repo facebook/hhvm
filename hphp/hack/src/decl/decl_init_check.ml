@@ -48,7 +48,7 @@ let is_lateinit cv =
     SN.UserAttributes.uaSoftLateInit cv.cv_user_attributes
 
 let prop_needs_init sp =
-  if sp.sp_is_xhp_attr then false
+  if Option.is_some sp.sp_xhp_attr then false
   else if sp.sp_lateinit then false
   else match sp.sp_type with
     | None

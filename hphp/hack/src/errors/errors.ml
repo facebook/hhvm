@@ -3140,6 +3140,9 @@ let illegal_xhp_child pos ty_reason_msg =
   let msg = "XHP children must be compatible with XHPChild" in
   add_list (Typing.err_code Typing.IllegalXhpChild) ((pos, msg)::ty_reason_msg)
 
+let missing_xhp_required_attr pos attr ty_reason_msg =
+  let msg = "Required attribute " ^ attr ^ " is missing." in
+  add_list (Typing.err_code Typing.MissingXhpRequiredAttr) ((pos, msg)::ty_reason_msg)
 let nullsafe_not_needed p nonnull_witness =
   add_list (Typing.err_code Typing.NullsafeNotNeeded) (
   [
@@ -3553,6 +3556,12 @@ let bad_lateinit_override parent_is_lateinit parent_pos child_pos =
   add_list (Typing.err_code Typing.BadLateInitOverride) [
     child_pos, "Redeclared properties must be consistently declared as late-initialized";
     parent_pos, "The property "^verb^" late-initialized here";
+  ]
+
+let bad_xhp_attr_required_override parent_tag child_tag parent_pos child_pos =
+  add_list (Typing.err_code Typing.BadXhpAttrRequiredOverride) [
+    child_pos, "Redeclared attribute must not be less strict";
+    parent_pos, "The attribute is " ^ parent_tag ^ ", which is stricter than " ^ child_tag;
   ]
 
 let invalid_truthiness_test pos ty =

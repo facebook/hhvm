@@ -151,6 +151,7 @@ pub trait SyntaxType: SyntaxTypeBase
     fn make_xhp_children_parenthesized_list(xhp_children_list_left_paren: Self, xhp_children_list_xhp_children: Self, xhp_children_list_right_paren: Self) -> Self;
     fn make_xhp_category_declaration(xhp_category_keyword: Self, xhp_category_categories: Self, xhp_category_semicolon: Self) -> Self;
     fn make_xhp_enum_type(xhp_enum_optional: Self, xhp_enum_keyword: Self, xhp_enum_left_brace: Self, xhp_enum_values: Self, xhp_enum_right_brace: Self) -> Self;
+    fn make_xhp_lateinit(xhp_lateinit_at: Self, xhp_lateinit_keyword: Self) -> Self;
     fn make_xhp_required(xhp_required_at: Self, xhp_required_keyword: Self) -> Self;
     fn make_xhp_class_attribute_declaration(xhp_attribute_keyword: Self, xhp_attribute_attributes: Self, xhp_attribute_semicolon: Self) -> Self;
     fn make_xhp_class_attribute(xhp_attribute_decl_type: Self, xhp_attribute_decl_name: Self, xhp_attribute_decl_initializer: Self, xhp_attribute_decl_required: Self) -> Self;

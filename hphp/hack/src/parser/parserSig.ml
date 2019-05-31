@@ -179,6 +179,7 @@ module WithSyntax(Syntax : Syntax_sig.Syntax_S) = struct
         val xhp_children_parenthesized_list : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_category_declaration : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_enum_type : t -> SC.r -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r
+        val xhp_lateinit : t -> SC.r -> SC.r -> t * SC.r
         val xhp_required : t -> SC.r -> SC.r -> t * SC.r
         val xhp_class_attribute_declaration : t -> SC.r -> SC.r -> SC.r -> t * SC.r
         val xhp_class_attribute : t -> SC.r -> SC.r -> SC.r -> SC.r -> t * SC.r

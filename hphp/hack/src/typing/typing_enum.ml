@@ -22,7 +22,7 @@ module Cls = Decl_provider.Class
 
 let member_type env member_ce =
   let lazy default_result = member_ce.ce_type in
-  if not member_ce.ce_is_xhp_attr then default_result
+  if Option.is_none member_ce.ce_xhp_attr then default_result
   else match default_result with
     | _, Tapply (enum_id, _)->
       (* XHP attribute type transform is necessary to account for

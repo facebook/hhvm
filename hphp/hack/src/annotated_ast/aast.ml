@@ -341,7 +341,12 @@ and class_ = {
   c_doc_comment    : string option    ;
 }
 
-and xhp_attr = hint option * class_var * bool * ((pos * bool * expr list) option)
+and xhp_attr_tag =
+  | Required
+  | LateInit
+
+and xhp_attr = hint option * class_var * xhp_attr_tag option *
+  ((pos * bool * expr list) option)
 
 and class_attr =
   | CA_name of sid
@@ -380,9 +385,13 @@ and class_typeconst = {
   c_tconst_user_attributes : user_attribute list;
 }
 
+and xhp_attr_info = {
+  xai_tag : xhp_attr_tag option;
+}
+
 and class_var = {
   cv_final           : bool               ;
-  cv_is_xhp          : bool               ;
+  cv_xhp_attr        : xhp_attr_info option;
   cv_visibility      : visibility         ;
   cv_type            : hint option        ;
   cv_id              : sid                ;

@@ -202,6 +202,7 @@ let parse_options () =
   let search_provider = ref "TrieIndex" in
   let rust = ref false in
   let symbolindex_file = ref None in
+  let check_xhp_attribute = ref false in
   let options = [
     "--ai",
       Arg.String (set_ai),
@@ -388,6 +389,9 @@ let parse_options () =
     "--check-xhp-cvar-arity",
       Arg.Unit (set_bool typecheck_xhp_cvars),
       "Typechecks xhp cvar arity";
+    "--check-xhp-attribute",
+      Arg.Set check_xhp_attribute,
+      "Typechecks xhp required attributes";
     "--ignore-collection-expr-type-arguments",
       Arg.Unit (set_bool ignore_collection_expr_type_arguments),
       "Typechecker ignores type arguments to vec<T>[...] style expressions";
@@ -448,6 +452,7 @@ let parse_options () =
     ?tco_typecheck_xhp_cvars:(!typecheck_xhp_cvars)
     ?tco_ignore_collection_expr_type_arguments:(!ignore_collection_expr_type_arguments)
     ?tco_disallow_byref_dynamic_calls:(!disallow_byref_dynamic_calls)
+    ~tco_check_xhp_attribute:(!check_xhp_attribute)
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)
     ~tco_pessimize_types:(!pessimize_types)

@@ -423,6 +423,9 @@ module WithOp(Op : Op_S) = struct
   let make_xhp_enum_type arg0 arg1 arg2 arg3 arg4 state =
     if Op.is_zero arg0 && Op.is_zero arg1 && Op.is_zero arg2 && Op.is_zero arg3 && Op.is_zero arg4 then state, Op.zero
     else state, Op.flatten [arg0; arg1; arg2; arg3; arg4]
+  let make_xhp_lateinit arg0 arg1 state =
+    if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
+    else state, Op.flatten [arg0; arg1]
   let make_xhp_required arg0 arg1 state =
     if Op.is_zero arg0 && Op.is_zero arg1 then state, Op.zero
     else state, Op.flatten [arg0; arg1]

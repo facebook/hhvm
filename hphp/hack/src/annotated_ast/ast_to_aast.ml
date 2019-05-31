@@ -195,13 +195,18 @@ struct
     | ClassVars cvs ->
       let vars = on_class_vars_with_acc body.c_vars cvs in
       { body with c_vars = vars; }
-    | XhpAttr (hopt, var, is_required, maybe_enum)  ->
+    | XhpAttr (hopt, var, tag, maybe_enum)  ->
       (* TODO: T37984688 Updating naming.ml to use c_xhp_attrs *)
       let hopt = optional on_hint hopt in
+      let tag = (match tag with
+        | None -> None
+        | Some Required -> Some Aast.Required
+        | Some LateInit -> Some Aast.LateInit) in
+      let xhp_attr = Some { Aast.xai_tag = tag; } in
       let attrs =
         (hopt,
-          on_class_var true hopt [] [] false None var,
-          is_required,
+          on_class_var xhp_attr hopt [] [] false None var,
+          tag,
           optional on_xhp_attr maybe_enum) :: body.c_xhp_attrs in
       { body with c_xhp_attrs = attrs; }
     | XhpCategory (p, cs) ->
@@ -533,7 +538,8 @@ struct
       c_tconst_user_attributes = on_list on_user_attribute tc.tconst_user_attributes;
     }
 
-  and on_class_var is_xhp h attrs kinds variadic doc_com (_, id, eopt) : Aast.class_var =
+  and on_class_var
+    xhp_info h attrs kinds variadic doc_com (_, id, eopt) : Aast.class_var =
     let cv_final = mem kinds Final in
     let cv_visibility = List.fold_left
       ~f:begin
@@ -549,7 +555,7 @@ struct
     let cv_is_static = mem kinds Static in
     Aast.{
       cv_final;
-      cv_is_xhp = is_xhp;
+      cv_xhp_attr = xhp_info;
       cv_visibility;
       cv_type = h;
       cv_id = id;
@@ -571,11 +577,12 @@ struct
     | cv :: rest ->
       let with_dc_name =
         on_class_var
-          false
+          None
           (optional on_hint cvs.cv_hint)
           (on_list on_user_attribute cvs.cv_user_attributes)
           cvs.cv_kinds
-          cvs.cv_is_promoted_variadic in
+          cvs.cv_is_promoted_variadic
+          in
       let cv = with_dc_name cvs.cv_doc_comment cv in
       let acc = cv :: acc in
       on_list_append_acc acc (with_dc_name None) rest

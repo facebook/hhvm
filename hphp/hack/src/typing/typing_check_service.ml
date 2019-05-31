@@ -38,7 +38,7 @@ let type_fun opts fn x =
     Nast_check.def (Nast.Fun fun_);
     let def_opt = Typing.fun_def opts fun_
       |> Option.map ~f:(fun f -> Tast.Fun f) in
-    Option.iter def_opt Tast_check.def;
+    Option.iter def_opt (Tast_check.def opts);
     def_opt
   | None -> None
 
@@ -51,7 +51,7 @@ let type_class opts fn x =
       Typing.class_def opts class_
       |> Option.map ~f:(fun c -> Tast.Class c)
     in
-    Option.iter def_opt Tast_check.def;
+    Option.iter def_opt (Tast_check.def opts);
     def_opt
   | None -> None
 
@@ -63,7 +63,7 @@ let check_typedef opts fn x =
     let ret = Typing.typedef_def opts typedef in
     Typing_variance.typedef opts x;
     let def = Tast.Typedef ret in
-    Tast_check.def def;
+    Tast_check.def opts def;
     Some def
   | None -> None
 
@@ -73,7 +73,7 @@ let check_const opts fn x =
   | Some cst ->
     let cst = Naming.global_const (Ast_to_nast.on_constant cst) in
     let def = Tast.Constant (Typing.gconst_def opts cst) in
-    Tast_check.def def;
+    Tast_check.def opts def;
     Some def
 
 let check_file dynamic_view_files opts errors (fn, file_infos) =

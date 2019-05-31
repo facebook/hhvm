@@ -344,6 +344,8 @@ class EditableSyntax
       return XHPCategoryDeclaration.from_json(json, position, source);
     case 'xhp_enum_type':
       return XHPEnumType.from_json(json, position, source);
+    case 'xhp_lateinit':
+      return XHPLateinit.from_json(json, position, source);
     case 'xhp_required':
       return XHPRequired.from_json(json, position, source);
     case 'xhp_class_attribute_declaration':
@@ -907,6 +909,8 @@ class EditableToken extends EditableSyntax
        return new Require_onceToken(leading, trailing);
     case 'required':
        return new RequiredToken(leading, trailing);
+    case 'lateinit':
+       return new LateinitToken(leading, trailing);
     case 'resource':
        return new ResourceToken(leading, trailing);
     case 'return':
@@ -1849,6 +1853,13 @@ class RequiredToken extends EditableToken
   constructor(leading, trailing)
   {
     super('required', leading, trailing, 'required');
+  }
+}
+class LateinitToken extends EditableToken
+{
+  constructor(leading, trailing)
+  {
+    super('lateinit', leading, trailing, 'lateinit');
   }
 }
 class ResourceToken extends EditableToken
@@ -17499,6 +17510,70 @@ class XHPEnumType extends EditableSyntax
     return XHPEnumType._children_keys;
   }
 }
+class XHPLateinit extends EditableSyntax
+{
+  constructor(
+    at,
+    keyword)
+  {
+    super('xhp_lateinit', {
+      at: at,
+      keyword: keyword });
+  }
+  get at() { return this.children.at; }
+  get keyword() { return this.children.keyword; }
+  with_at(at){
+    return new XHPLateinit(
+      at,
+      this.keyword);
+  }
+  with_keyword(keyword){
+    return new XHPLateinit(
+      this.at,
+      keyword);
+  }
+  rewrite(rewriter, parents)
+  {
+    if (parents == undefined)
+      parents = [];
+    let new_parents = parents.slice();
+    new_parents.push(this);
+    var at = this.at.rewrite(rewriter, new_parents);
+    var keyword = this.keyword.rewrite(rewriter, new_parents);
+    if (
+      at === this.at &&
+      keyword === this.keyword)
+    {
+      return rewriter(this, parents);
+    }
+    else
+    {
+      return rewriter(new XHPLateinit(
+        at,
+        keyword), parents);
+    }
+  }
+  static from_json(json, position, source)
+  {
+    let at = EditableSyntax.from_json(
+      json.xhp_lateinit_at, position, source);
+    position += at.width;
+    let keyword = EditableSyntax.from_json(
+      json.xhp_lateinit_keyword, position, source);
+    position += keyword.width;
+    return new XHPLateinit(
+        at,
+        keyword);
+  }
+  get children_keys()
+  {
+    if (XHPLateinit._children_keys == null)
+      XHPLateinit._children_keys = [
+        'at',
+        'keyword'];
+    return XHPLateinit._children_keys;
+  }
+}
 class XHPRequired extends EditableSyntax
 {
   constructor(
@@ -22159,6 +22234,7 @@ exports.RecordDecToken = RecordDecToken;
 exports.RequireToken = RequireToken;
 exports.Require_onceToken = Require_onceToken;
 exports.RequiredToken = RequiredToken;
+exports.LateinitToken = LateinitToken;
 exports.ResourceToken = ResourceToken;
 exports.ReturnToken = ReturnToken;
 exports.SelfToken = SelfToken;
@@ -22425,6 +22501,7 @@ exports.XHPChildrenDeclaration = XHPChildrenDeclaration;
 exports.XHPChildrenParenthesizedList = XHPChildrenParenthesizedList;
 exports.XHPCategoryDeclaration = XHPCategoryDeclaration;
 exports.XHPEnumType = XHPEnumType;
+exports.XHPLateinit = XHPLateinit;
 exports.XHPRequired = XHPRequired;
 exports.XHPClassAttributeDeclaration = XHPClassAttributeDeclaration;
 exports.XHPClassAttribute = XHPClassAttribute;

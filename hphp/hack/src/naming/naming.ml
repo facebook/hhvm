@@ -1240,9 +1240,10 @@ module Make (GetLocals : GetLocals) = struct
     }
 
   (* h cv is_required maybe_enum *)
-  and xhp_attribute_decl env (h, cv, is_required, maybe_enum) =
+  and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
     let p, id = cv.Aast.cv_id in
     let default = cv.Aast.cv_expr in
+    let is_required = Option.is_some tag in
     if is_required && Option.is_some default
     then Errors.xhp_required_with_default p id;
     let hint_ =
@@ -1283,9 +1284,10 @@ module Make (GetLocals : GetLocals) = struct
         else Some (p, Aast.Hoption (p, h))
       | None -> None in
     let hint_ = Option.map hint_ (hint env) in
-    let expr, is_xhp = class_prop_expr_is_xhp env cv in
+    let expr, _ = class_prop_expr_is_xhp env cv in
+    let xhp_attr_info = Some {N.xai_tag = tag} in
     { N.cv_final = cv.Aast.cv_final
-    ; N.cv_is_xhp = is_xhp
+    ; N.cv_xhp_attr = xhp_attr_info
     ; N.cv_visibility = cv.Aast.cv_visibility
     ; N.cv_type = hint_
     ; N.cv_id = cv.Aast.cv_id
@@ -1372,6 +1374,10 @@ module Make (GetLocals : GetLocals) = struct
       with Invalid_argument _ -> false in
     expr, is_xhp
 
+  and make_xhp_attr = function
+  | true -> Some {N.xai_tag = None}
+  | false -> None
+
   and class_prop_static env cv =
     let attrs = user_attributes env cv.Aast.cv_user_attributes in
     let lsb = Attributes.mem SN.UserAttributes.uaLSB attrs in
@@ -1379,7 +1385,7 @@ module Make (GetLocals : GetLocals) = struct
     let h = Option.map cv.Aast.cv_type (hint ~forbid_this env) in
     let expr, is_xhp = class_prop_expr_is_xhp env cv in
     { N.cv_final = cv.Aast.cv_final
-    ; N.cv_is_xhp = is_xhp
+    ; N.cv_xhp_attr = make_xhp_attr is_xhp
     ; N.cv_visibility = cv.Aast.cv_visibility
     ; N.cv_type = h
     ; N.cv_id = cv.Aast.cv_id
@@ -1409,7 +1415,7 @@ module Make (GetLocals : GetLocals) = struct
       | None -> attrs in
     let expr, is_xhp = class_prop_expr_is_xhp env cv in
     { N.cv_final = cv.Aast.cv_final
-    ; N.cv_is_xhp = is_xhp
+    ; N.cv_xhp_attr = make_xhp_attr is_xhp
     ; N.cv_visibility = cv.Aast.cv_visibility
     ; N.cv_type = h
     ; N.cv_id = cv.Aast.cv_id

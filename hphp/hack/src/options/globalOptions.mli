@@ -208,6 +208,9 @@ type t = {
 
  (* Set of codes to be treated as if they were in strict mode files *)
  error_codes_treated_strictly : ISet.t;
+
+ (* static check xhp required attribute *)
+ tco_check_xhp_attribute : bool;
 } [@@deriving show]
 
 val make :
@@ -252,6 +255,7 @@ val make :
   ?tco_like_types: bool ->
   ?tco_pessimize_types: bool ->
   ?error_codes_treated_strictly: ISet.t ->
+  ?tco_check_xhp_attribute: bool ->
   unit ->
   t
 
@@ -321,3 +325,4 @@ val po_rust : t -> bool
 val tco_like_types : t -> bool
 val tco_pessimize_types : t -> bool
 val error_codes_treated_strictly : t -> ISet.t
+val tco_check_xhp_attribute : t -> bool

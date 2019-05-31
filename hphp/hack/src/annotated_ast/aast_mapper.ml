@@ -321,9 +321,15 @@ struct
     T.c_pu_enums = List.map c.S.c_pu_enums (map_pu_enum menv);
   }
 
-  and map_xhp_attr menv (h, var, b, maybe_enum) =
-    (h, map_class_var menv var, b, Option.map maybe_enum (map_xhp_attr_enum menv))
 
+  and map_xhp_attr_tag = function
+  | S.Required -> T.Required
+  | S.LateInit -> T.LateInit
+  and map_xhp_attr menv (h, var, b, maybe_enum) =
+    (h,
+    map_class_var menv var,
+    Option.map b map_xhp_attr_tag,
+    Option.map maybe_enum (map_xhp_attr_enum menv))
   and map_attribute menv attr =
     match attr with
     | S. CA_name id -> T.CA_name id
@@ -359,10 +365,14 @@ struct
     T.c_tconst_user_attributes = List.map tc.S.c_tconst_user_attributes (map_user_attribute menv);
   }
 
+  and map_xhp_info = function
+  | Some {S.xai_tag = tag} -> Some {T.xai_tag = Option.map tag map_xhp_attr_tag}
+  | None -> None
+
   and map_class_var menv cv =
   {
     T.cv_final = cv.S.cv_final;
-    T.cv_is_xhp = cv.S.cv_is_xhp;
+    T.cv_xhp_attr = map_xhp_info cv.S.cv_xhp_attr;
     T.cv_visibility = cv.S.cv_visibility;
     T.cv_type = cv.S.cv_type;
     T.cv_id = cv.S.cv_id;

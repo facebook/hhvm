@@ -159,6 +159,7 @@ pub trait SmartConstructors<'a, State> {
     fn make_xhp_children_parenthesized_list(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_xhp_category_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_xhp_enum_type(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> (State, Self::R);
+    fn make_xhp_lateinit(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_xhp_required(st: State, arg0 : Self::R, arg1 : Self::R) -> (State, Self::R);
     fn make_xhp_class_attribute_declaration(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> (State, Self::R);
     fn make_xhp_class_attribute(st: State, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> (State, Self::R);

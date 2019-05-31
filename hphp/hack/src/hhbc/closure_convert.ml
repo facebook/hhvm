@@ -481,7 +481,7 @@ let make_closure ~class_num
   } in
   let make_class_var name: class_var = {
       cv_final = false;
-      cv_is_xhp = false;
+      cv_xhp_attr = None;
       cv_visibility = Aast.Private;
       cv_type = None;
       cv_id = (p, name);
@@ -1423,7 +1423,7 @@ and add_reified_property cd c_vars =
     let hint = Some (p, Happly ((p, "varray"), [])) in
     let var = {
         cv_final = false;
-        cv_is_xhp = false;
+        cv_xhp_attr = None;
         cv_is_promoted_variadic = false;
         cv_doc_comment = None;
         cv_visibility = Aast.Private;

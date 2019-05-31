@@ -2885,6 +2885,11 @@ and pClassElt : class_elt list parser = fun node env ->
             raise_parsing_error env (`Node ty) (SyntaxError.xhp_class_attribute_type_constant)
           | _ -> ()
           end;
+          let on_req r = match r.syntax with
+            | XHPRequired _ -> Some Required
+            | XHPLateinit _ -> Some LateInit
+            | _ -> None
+          in
           let pos = if is_missing init then p else Pos.btw p (pPos init env) in
           (* we can either have a typehint or an xhp enum *)
           let hint, enum = match syntax ty with
@@ -2898,7 +2903,7 @@ and pClassElt : class_elt list parser = fun node env ->
           XhpAttr
           ( hint
           , (pos, (p, ":" ^ name), mpOptional pSimpleInitializer init env)
-          , not (is_missing req)
+          , on_req req
           , enum
           )
       | XHPSimpleClassAttribute { xhp_simple_class_attribute_type = attr } ->

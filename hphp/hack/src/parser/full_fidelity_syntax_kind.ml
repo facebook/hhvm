@@ -151,6 +151,7 @@ type t =
   | XHPChildrenParenthesizedList
   | XHPCategoryDeclaration
   | XHPEnumType
+  | XHPLateinit
   | XHPRequired
   | XHPClassAttributeDeclaration
   | XHPClassAttribute
@@ -335,6 +336,7 @@ let to_string kind =
   | XHPChildrenParenthesizedList      -> "xhp_children_parenthesized_list"
   | XHPCategoryDeclaration            -> "xhp_category_declaration"
   | XHPEnumType                       -> "xhp_enum_type"
+  | XHPLateinit                       -> "xhp_lateinit"
   | XHPRequired                       -> "xhp_required"
   | XHPClassAttributeDeclaration      -> "xhp_class_attribute_declaration"
   | XHPClassAttribute                 -> "xhp_class_attribute"

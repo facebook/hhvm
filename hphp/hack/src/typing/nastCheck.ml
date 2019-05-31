@@ -540,7 +540,7 @@ and class_var env cv =
        classes without specifying type parameters. This is
        a temporary hack to support existing code for now. *)
     (* Task #5815945: Get rid of this Hack *)
-    if cv.cv_is_xhp && (Typing_env.is_strict env.tenv)
+    if Option.is_some cv.cv_xhp_attr && (Typing_env.is_strict env.tenv)
       then { env with tenv = Typing_env.set_mode env.tenv FileInfo.Mpartial }
       else env in
   maybe hint hint_env cv.cv_type;

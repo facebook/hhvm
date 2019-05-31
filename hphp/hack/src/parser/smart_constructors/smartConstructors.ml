@@ -166,6 +166,7 @@ module type SmartConstructors_S = sig
   val make_xhp_children_parenthesized_list : r -> r -> r -> t -> t * r
   val make_xhp_category_declaration : r -> r -> r -> t -> t * r
   val make_xhp_enum_type : r -> r -> r -> r -> r -> t -> t * r
+  val make_xhp_lateinit : r -> r -> t -> t * r
   val make_xhp_required : r -> r -> t -> t * r
   val make_xhp_class_attribute_declaration : r -> r -> r -> t -> t * r
   val make_xhp_class_attribute : r -> r -> r -> r -> t -> t * r
@@ -357,6 +358,7 @@ end) = struct
     let xhp_children_parenthesized_list parser arg0 arg1 arg2 = call parser (SCI.make_xhp_children_parenthesized_list arg0 arg1 arg2)
     let xhp_category_declaration parser arg0 arg1 arg2 = call parser (SCI.make_xhp_category_declaration arg0 arg1 arg2)
     let xhp_enum_type parser arg0 arg1 arg2 arg3 arg4 = call parser (SCI.make_xhp_enum_type arg0 arg1 arg2 arg3 arg4)
+    let xhp_lateinit parser arg0 arg1 = call parser (SCI.make_xhp_lateinit arg0 arg1)
     let xhp_required parser arg0 arg1 = call parser (SCI.make_xhp_required arg0 arg1)
     let xhp_class_attribute_declaration parser arg0 arg1 arg2 = call parser (SCI.make_xhp_class_attribute_declaration arg0 arg1 arg2)
     let xhp_class_attribute parser arg0 arg1 arg2 arg3 = call parser (SCI.make_xhp_class_attribute arg0 arg1 arg2 arg3)

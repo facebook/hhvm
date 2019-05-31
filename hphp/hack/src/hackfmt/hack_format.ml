@@ -162,6 +162,7 @@ let rec t (env: Env.t) (node: Syntax.t) : Doc.t =
   | Syntax.EmbeddedSubscriptExpression _
   | Syntax.PostfixUnaryExpression _
   | Syntax.XHPRequired _
+  | Syntax.XHPLateinit _
   | Syntax.XHPSimpleClassAttribute _
   | Syntax.XHPClose _
   | Syntax.TypeConstant _

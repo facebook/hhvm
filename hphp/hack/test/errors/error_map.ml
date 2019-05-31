@@ -552,4 +552,6 @@ NewStaticClassReified = 4310
 MemoizeReified = 4311
 ConsistentConstructReified = 4312
 MethodVariance = 4313
+MissingXhpRequiredAttr = 4314
+BadXhpAttrRequiredOverride = 4315
   |}]

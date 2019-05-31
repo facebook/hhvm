@@ -1,0 +1,4 @@
+File "finally_tyvars.php", line 14, characters 5-26:
+You are calling Shapes::idx() on a field known to not exist (Typing[4251])
+File "finally_tyvars.php", line 4, characters 45-51:
+The field 'foo' is not defined in this shape

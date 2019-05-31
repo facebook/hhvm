@@ -1,0 +1,80 @@
+Errors:
+  [14:5-27] You are calling Shapes::idx() on a field known to not exist
+  [4:45-52] The field 'foo' is not defined in this shape
+[(Fun
+    { f_span = [4:1-6:2]; f_annotation = (); f_mode = <opaque>;
+      f_ret =
+      (Some ([4:35-53],
+             (Happly (([4:35-44], "\\Awaitable"),
+                [([4:45-52],
+                  (Hshape
+                     { nsi_allows_unknown_fields = false; nsi_field_map = []
+                       }))
+                  ]
+                ))));
+      f_name = ([4:16-31], "\\gen_empty_shape"); f_tparams = [];
+      f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+      f_body =
+      { fb_ast =
+        [([5:3-18], (Return (Some (([5:10-17], shape()), (Shape [])))))];
+        fb_annotation = No unsafe blocks };
+      f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
+      f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+      f_static = false });
+  (Fun
+     { f_span = [8:1-16:2]; f_annotation = (); f_mode = <opaque>;
+       f_ret =
+       (Some ([8:24-39],
+              (Happly (([8:24-33], "\\Awaitable"),
+                 [([8:34-38], (Hprim Tvoid))]))));
+       f_name = ([8:16-20], "\\test"); f_tparams = [];
+       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
+       f_body =
+       { fb_ast =
+         [([9:3-15:4],
+           (Try (
+              [([10:5-27],
+                (Throw
+                   (([10:11-26], Exception),
+                    (New (
+                       (([10:15-24], Exception),
+                        (CI ([10:15-24], "\\Exception"))),
+                       [], [], [],
+                       ([10:15-24], (function(string $message, int $code, ?Exception $previous): _))
+                       )))))
+                ],
+              [(([11:12-21], "\\Exception"), ([11:22-24], $_), [])],
+              [([13:5-34],
+                (Expr
+                   (([13:5-33], shape()),
+                    (Binop ((Eq None),
+                       (([13:5-7], shape()), (Lvar ([13:5-7], $s))),
+                       (([13:10-33], shape()),
+                        (Await
+                           (([13:16-33], Awaitable<shape()>),
+                            (Call (Cnormal,
+                               (([13:16-31], (function(): Awaitable<shape()>)),
+                                (Id ([13:16-31], "\\gen_empty_shape"))),
+                               [], [], [])))))
+                       )))));
+                ([14:5-28],
+                 (Expr
+                    (([14:5-27], null),
+                     (Call (Cnormal,
+                        (([14:5-16], (function<T as shape(...)>(shape() $shape, arraykey $index, $default): null)),
+                         (Class_const (
+                            (([14:5-11], Shapes),
+                             (CI ([14:5-11], "\\Shapes"))),
+                            ([14:13-16], "idx")))),
+                        [],
+                        [(([14:17-19], shape()), (Lvar ([14:17-19], $s)));
+                          (([14:21-26], string), (String "foo"))],
+                        [])))))
+                ]
+              )))
+           ];
+         fb_annotation = No unsafe blocks };
+       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
+       f_external = false; f_namespace = <opaque>; f_doc_comment = None;
+       f_static = false })
+  ]

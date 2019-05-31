@@ -1036,8 +1036,9 @@ and finally env fb =
     * together.
     * During this phase, record errors found in the finally block, but discard
     * the resulting environment. *)
-    let env' = LEnv.update_next_from_conts env C.all in
-    let _, tfb = block env' fb in
+    let env = LEnv.update_next_from_conts env C.all in
+    let env, tfb = block env fb in
+    let env = LEnv.restore_conts_from env parent_locals C.all in
     (* Second, typecheck the finally block once against each continuation. This
     * helps be more clever about what each continuation will be after the
     * finally block.

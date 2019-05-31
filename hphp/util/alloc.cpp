@@ -43,7 +43,7 @@ void flush_thread_caches() {
 #ifdef USE_JEMALLOC
   mallctlCall<true>("thread.tcache.flush");
 #if USE_JEMALLOC_EXTENT_HOOKS
-  high_arena_tcache_flush();
+  arenas_thread_flush();
 #endif
 #endif
 }
@@ -185,12 +185,14 @@ unsigned lower_arena = 0;
 unsigned low_cold_arena = 0;
 unsigned high_arena = 0;
 unsigned high_cold_arena = 0;
+__thread unsigned local_arena = 0;
 
 int low_arena_flags = 0;
 int lower_arena_flags = 0;
 int low_cold_arena_flags = 0;
 int high_cold_arena_flags = 0;
 __thread int high_arena_flags = 0;
+__thread int local_arena_flags = 0;
 
 // jemalloc frequently used mibs
 size_t g_pactive_mib[4];                // "stats.arenas.<i>.pactive"
@@ -232,10 +234,11 @@ static std::atomic<bool> jemallocMetadataCanUseHuge(false);
 static void* a0ReservedBase = nullptr;
 static std::atomic<size_t> a0ReservedLeft(0);
 
-// Explicit per-thread tcache for huge arenas.  -1 means no tcache.
+// Explicit per-thread tcache arenas needing it.
 // In jemalloc/include/jemalloc/jemalloc_macros.h.in, we have
 // #define MALLOCX_TCACHE_NONE MALLOCX_TCACHE(-1)
 __thread int high_arena_tcache = -1;
+__thread int local_arena_tcache = -1;
 #endif
 
 static unsigned base_arena;
@@ -401,7 +404,6 @@ void setup_high_arena(unsigned n1GPages) {
   auto arena = HighArena::CreateAt(&g_highArena);
   arena->appendMapper(range.getLowMapper());
   high_arena = arena->id();
-  high_arena_tcache_create();           // set up high_arena_flags
 
   auto coldArena = HighArena::CreateAt(&g_coldArena);
   coldArena->appendMapper(range.getHighMapper());
@@ -563,27 +565,41 @@ void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
   jemallocMetadataCanUseHuge.store(true);
 }
 
-void high_arena_tcache_create() {
+void arenas_thread_init() {
   if (high_arena_tcache == -1) {
     mallctlRead<int, true>("tcache.create", &high_arena_tcache);
     high_arena_flags =
       MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE(high_arena_tcache);
   }
+  if (local_arena_tcache == -1) {
+    local_arena = get_local_arena(s_numaNode);
+    if (local_arena) {
+      mallctlRead<int, true>("tcache.create", &local_arena_tcache);
+      local_arena_flags =
+        MALLOCX_ARENA(local_arena) | MALLOCX_TCACHE(local_arena_tcache);
+    }
+  }
 }
 
-void high_arena_tcache_flush() {
+void arenas_thread_flush() {
   // It is OK if flushing fails
   if (high_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.flush", high_arena_tcache);
   }
 }
 
-void high_arena_tcache_destroy() {
+void arenas_thread_exit() {
   if (high_arena_tcache != -1) {
     mallctlWrite<int, true>("tcache.destroy", high_arena_tcache);
     high_arena_tcache = -1;
     // Ideally we shouldn't read high_arena_flags any more, but just in case.
-    high_arena_flags = MALLOCX_ARENA(high_arena);
+    high_arena_flags = MALLOCX_ARENA(high_arena) | MALLOCX_TCACHE_NONE;
+  }
+  if (local_arena_tcache != -1) {
+    mallctlWrite<int, true>("tcache.destroy", local_arena_tcache);
+    local_arena_tcache = -1;
+    // Ideally we shouldn't read high_arena_flags any more, but just in case.
+    local_arena_flags = MALLOCX_ARENA(local_arena) | MALLOCX_TCACHE_NONE;
   }
 }
 
@@ -768,6 +784,8 @@ struct JEMallocInitializer {
               high_1g_pages, origHigh1G);
     }
     setup_high_arena(high_1g_pages);
+    // Make sure high/low arenas are available to the current thread.
+    arenas_thread_init();
 #endif
     // Initialize global mibs
     size_t miblen = 1;

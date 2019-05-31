@@ -77,6 +77,10 @@ struct OutOfMemoryException : Exception {
 //   uncounted data). high_cold_arena can be used for global cold data. We don't
 //   expect to run out of memory in the high arenas.
 //
+// - local arena only exists in some threads, mostly for data that is not
+//   accessed by other threads. In some threads, local arena is 0, and the
+//   automatic arena is used in that case.
+//
 // A cold arena shares an address range with its hotter counterparts, but
 // tries to give separte address ranges. This is done by allocating from higher
 // address downwards, while the hotter ones go from lower address upwards.
@@ -95,11 +99,14 @@ extern unsigned lower_arena;
 extern unsigned low_cold_arena;
 extern unsigned high_arena;
 extern unsigned high_cold_arena;
+extern __thread unsigned local_arena;
+
 extern int low_arena_flags;
 extern int lower_arena_flags;
 extern int low_cold_arena_flags;
 extern int high_cold_arena_flags;
 extern __thread int high_arena_flags;
+extern __thread int local_arena_flags;
 
 struct PageSpec {
   unsigned n1GPages{0};
@@ -123,10 +130,10 @@ extern __thread int high_arena_tcache;
 void setup_jemalloc_metadata_extent_hook(bool enable, bool enable_numa_arena,
                                          size_t reserved);
 
-// Functions to manipulate tcaches for the high arena
-void high_arena_tcache_create();        // tcache.create
-void high_arena_tcache_flush();         // tcache.flush
-void high_arena_tcache_destroy();       // tcache.destroy
+// Functions to run upon thread creation/flush/exit.
+void arenas_thread_init();
+void arenas_thread_flush();
+void arenas_thread_exit();
 
 #endif // USE_JEMALLOC_EXTENT_HOOKS
 
@@ -134,34 +141,6 @@ void high_arena_tcache_destroy();       // tcache.destroy
 
 void low_2m_pages(uint32_t pages);
 void high_2m_pages(uint32_t pages);
-
-inline void* malloc_huge_internal(size_t size) {
-#if !USE_JEMALLOC_EXTENT_HOOKS
-  return malloc(size);
-#else
-  assert(size);
-  return mallocx(size, high_arena_flags);
-#endif
-}
-
-inline void free_huge_internal(void* ptr) {
-#if !USE_JEMALLOC_EXTENT_HOOKS
-  free(ptr);
-#else
-  assert(ptr);
-  dallocx(ptr, high_arena_flags);
-#endif
-}
-
-inline void sized_free_huge_internal(void* ptr, size_t size) {
-#if !USE_JEMALLOC_EXTENT_HOOKS
-  free(ptr);
-#else
-  assert(ptr);
-  assert(sallocx(ptr, high_arena_flags) == nallocx(size, high_arena_flags));
-  sdallocx(ptr, size, high_arena_flags);
-#endif
-}
 
 /**
  * Safe memory allocation.
@@ -344,6 +323,10 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force);
     assert(ptr != nullptr);                                     \
     return dallocx(ptr, flag);                                  \
   }                                                             \
+  inline void* prefix##_realloc(void* ptr, size_t size) {       \
+    assert(size != 0);                                          \
+    return rallocx(ptr, size, flag);                            \
+  }                                                             \
   inline void prefix##_sized_free(void* ptr, size_t size) {     \
     assert(ptr != nullptr);                                     \
     assert(sallocx(ptr, flag) == nallocx(size, flag));          \
@@ -356,6 +339,10 @@ int jemalloc_pprof_dump(const std::string& prefix, bool force);
   }                                                             \
   inline void prefix##_free(void* ptr) {                        \
     return fallback##free(ptr);                                 \
+  }                                                             \
+  inline void* prefix##_realloc(void* ptr, size_t size) {       \
+    assert(size != 0);                                          \
+    return fallback##realloc(ptr, size);                        \
   }                                                             \
   inline void prefix##_sized_free(void* ptr, size_t size) {     \
     return fallback##free(ptr);                                 \
@@ -374,6 +361,9 @@ DEF_ALLOC_FUNCS(uncounted, high_arena_flags, )
 // e.g., APCObject, or the hash table. Currently they live below
 // kUncountedMaxAddr anyway, but this may change later.
 DEF_ALLOC_FUNCS(apc, high_arena_flags, )
+
+// Thread-local allocations that are not accessed outside the thread.
+DEF_ALLOC_FUNCS(local, local_arena_flags, )
 
 // Low arena is always present when jemalloc is used, even when arena hooks are
 // not used.
@@ -396,6 +386,15 @@ inline void low_free(void* ptr) {
 #else
   assert(ptr);
   dallocx(ptr, low_arena_flags);
+#endif
+}
+
+inline void* low_realloc(void* ptr, size_t size) {
+#ifndef USE_JEMALLOC
+  return realloc(ptr, size);
+#else
+  assert(ptr);
+  return rallocx(ptr, size, low_arena_flags);
 #endif
 }
 
@@ -469,6 +468,8 @@ template<typename T> using VMColdAllocator =
   WrapAllocator<vm_cold_malloc, vm_cold_sized_free, T>;
 template<typename T> using APCAllocator =
   WrapAllocator<apc_malloc, apc_sized_free, T>;
+template<typename T> using LocalAllocator =
+  WrapAllocator<local_malloc, local_sized_free, T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

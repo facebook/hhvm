@@ -2273,7 +2273,7 @@ static void update_constants_and_options() {
 
 void hphp_thread_init() {
 #if USE_JEMALLOC_EXTENT_HOOKS
-  high_arena_tcache_create();
+  arenas_thread_init();
 #endif
   rds::threadInit();
   ServerStats::GetLogger();
@@ -2301,7 +2301,7 @@ void hphp_thread_exit() {
   if (!g_context.isNull()) g_context.destroy();
   rds::threadExit();
 #if USE_JEMALLOC_EXTENT_HOOKS
-  high_arena_tcache_destroy();
+  arenas_thread_exit();
 #endif
 }
 

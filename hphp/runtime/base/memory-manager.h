@@ -553,7 +553,6 @@ struct SparseHeap {
   MemBlock m_slab_range;
   int64_t m_hugeBytes{0};               // compare with RequestHugeMaxBytes
   SlabManager* m_slabManager{nullptr};
-  unsigned m_arenaFlag{0};              // contains assigned jemalloc arena
 };
 
 using HeapImpl = SparseHeap;

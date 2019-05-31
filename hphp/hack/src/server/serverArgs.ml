@@ -98,13 +98,7 @@ module Messages = struct
 end
 
 let print_json_version () =
-  let open Hh_json in
-  let json = JSON_Object [
-    "commit", JSON_String Build_id.build_revision;
-    "commit_time", int_ Build_id.build_commit_time;
-    "api_version", int_ Build_id.build_api_version;
-  ] in
-  print_endline @@ json_to_string json
+  print_endline @@ Hh_json.json_to_string Build_id.build_version_json
 
 (*****************************************************************************)
 (* The main entry point *)

@@ -24,7 +24,7 @@ let get_error_list_json
   let (properties: (string * Hh_json.json) list) =
     [ "passed", Hh_json.JSON_Bool did_pass;
       "errors", Hh_json.JSON_Array error_list;
-      "version", Hh_json.JSON_String Build_id.build_id_ohai;
+      "version", Build_id.build_version_json;
     ]
   in
   let properties = match edges_added with

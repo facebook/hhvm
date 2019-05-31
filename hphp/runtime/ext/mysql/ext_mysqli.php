@@ -1455,7 +1455,9 @@ class mysqli_warning {
       return false;
     }
 
-    $next = array_shift(&$this->__warnings);
+    $warnings = $this->__warnings;
+    $next = array_shift(&$warnings);
+    $this->__warnings = $warnings;
     $this->message = $next['Message'];
     $this->errno = (int)$next['Code'];
 

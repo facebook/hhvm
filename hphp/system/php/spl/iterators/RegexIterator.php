@@ -118,16 +118,17 @@ class RegexIterator extends FilterIterator
                            $this->pregFlags) > 0);
         break;
       case self::GET_MATCH:
-        $this->current = array();
-
-        $ret = (preg_match($this->regex, $subject, &$this->current,
+        $__current = array();
+        $ret = (preg_match($this->regex, $subject, &$__current,
                            $this->pregFlags) > 0);
+        $this->current = $__current;
         break;
       case self::ALL_MATCHES:
-        $this->current = array();
+        $__current = array();
+        $count = preg_match_all($this->regex, $subject, &$__current,
+                                $this->pregFlags);
 
-        $count = preg_match_all($this->regex, $subject, &$this->current,
-                       $this->pregFlags);
+        $this->current = $__current;
 
         $ret = $count > 0;
         break;

@@ -531,7 +531,7 @@ let invalid_variable_name =
   "A valid variable name starts with a letter or underscore, followed \
   by any number of letters, numbers, or underscores"
 
-let invalid_reference = "Only variables, members, and the results of function calls \
+let invalid_reference = "Only variables and the results of function calls \
   can be used as references"
 
 let invalid_variable_variable = "Variable Variables are not legal"

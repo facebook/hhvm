@@ -618,7 +618,6 @@ void finish_builtin(ISS& env,
   repl.emplace_back(bc::PopU2 {});
 
   reduce(env, std::move(repl));
-  fpiPop(env);
 }
 
 bool handle_function_exists(ISS& env, int numArgs, bool allowConstProp) {

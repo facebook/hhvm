@@ -4076,7 +4076,7 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
   auto const input = topC(env, op.arg1 + 3);
   auto const clsTy = objcls(intersection_of(input, TObj));
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
-  if (!rfunc.mightCareAboutDynCalls() && !rfunc.couldHaveReifiedGenerics()) {
+  if (!rfunc.mightCareAboutDynCalls()) {
     return reduce(
       env,
       bc::PopC {},
@@ -4090,51 +4090,94 @@ void in(ISS& env, const bc::FPushObjMethod& op) {
 namespace {
 
 template <typename Op>
-void implFPushClsMethodD(ISS& env, const Op& op, bool isRFlavor) {
-  auto const rcls = env.index.resolve_class(env.ctx, op.str3);
-  auto const clsType = rcls ? clsExact(*rcls) : TCls;
-  auto const rfun = env.index.resolve_method(env.ctx, clsType, op.str2);
-  if (!isRFlavor && !any(env.collect.opts & CollectionOpts::Speculating)) {
-    if (auto const func = rfun.exactFunc()) {
-      // When we use FCallBuiltin to call a static method, the litstr method
-      // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
-      //
-      // As a result, we can only do this optimization if the name of the
-      // builtin function's class matches this op's class name immediate.
-      if (will_reduce(env) && can_emit_builtin(func, op.arg1, op.has_unpack) &&
-          func->cls != nullptr && func->cls->name->same(op.str3)) {
-        fpiPushNoFold(
-          env,
-          ActRec { FPIKind::Builtin, TBottom, folly::none, rfun }
-        );
-        return reduce(env);
-      }
+void fpushClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
+                        bool dynamic, bool extraInput,
+                        ClsRefSlotId clsRefSlot) {
+  auto const rcls = is_specialized_cls(clsTy)
+    ? folly::Optional<res::Class>(dcls_of(clsTy).cls)
+    : folly::none;
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  auto const ar = ActRec { FPIKind::ClsMeth, clsTy, rcls, rfunc };
+  if (fpiPush(env, ar, op.arg1, dynamic)) {
+    if (clsRefSlot != NoClsRefSlotId) {
+      reduce(env, bc::DiscardClsRef { clsRefSlot });
     }
-  }
-  if (isRFlavor && !rfun.couldHaveReifiedGenerics()) {
-    return reduce(
-      env,
-      bc::PopC {},
-      bc::FPushClsMethodD { op.arg1, op.str2, op.str3, op.has_unpack }
-    );
-  }
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, clsType, rcls, rfun }, op.arg1,
-              false)) {
-    assertx(!isRFlavor);
+    if (extraInput) reduce(env, bc::PopC {});
     return reduce(env);
   }
-  if (isRFlavor) popC(env);
+
+  if (clsRefSlot != NoClsRefSlotId) takeClsRefSlot(env, clsRefSlot);
+  if (extraInput) popC(env);
   discardAR(env, op.arg1);
 }
 
 } // namespace
 
 void in(ISS& env, const bc::FPushClsMethodD& op) {
-  implFPushClsMethodD(env, op, false);
+  auto const rcls = env.index.resolve_class(env.ctx, op.str3);
+  auto const clsTy = rcls ? clsExact(*rcls) : TCls;
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  if (auto const func = rfunc.exactFunc()) {
+    assertx(func->cls != nullptr);
+    if (will_reduce(env) &&
+        !any(env.collect.opts & CollectionOpts::Speculating) &&
+        func->cls->name->same(op.str3) &&
+        can_emit_builtin(func, op.arg1, op.has_unpack)) {
+      // When we use FCallBuiltin to call a static method, the litstr method
+      // name will be a fully qualified cls::fn (e.g. "HH\Map::fromItems").
+      //
+      // As a result, we can only do this optimization if the name of the
+      // builtin function's class matches this op's class name immediate.
+      auto const ar = ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc };
+      fpiPushNoFold(env, ar);
+      return reduce(env);
+    }
+  }
+
+  fpushClsMethodImpl(env, op, clsTy, op.str2, false, false, NoClsRefSlotId);
 }
 
 void in(ISS& env, const bc::FPushClsMethodRD& op) {
-  implFPushClsMethodD(env, op, true);
+  auto const rcls = env.index.resolve_class(env.ctx, op.str3);
+  auto const clsTy = rcls ? clsExact(*rcls) : TCls;
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
+  if (!rfunc.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushClsMethodD { op.arg1, op.str2, op.str3, op.has_unpack }
+    );
+  }
+
+  // Builtins do not support reified generics.
+  assertx(!rfunc.exactFunc() || !rfunc.exactFunc()->nativeInfo);
+  fpushClsMethodImpl(env, op, clsTy, op.str2, false, true, NoClsRefSlotId);
+}
+
+void in(ISS& env, const bc::FPushClsMethod& op) {
+  auto const methName = getNameFromType(topC(env));
+  if (!methName || op.argv.size() != 0) {
+    takeClsRefSlot(env, op.slot);
+    popC(env);
+    discardAR(env, op.arg1);
+    fpiPushNoFold(env, ActRec { FPIKind::ClsMeth, TCls });
+    return;
+  }
+
+  auto const clsTy = peekClsRefSlot(env, op.slot);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+      !rfunc.mightCareAboutDynCalls()) {
+    auto const clsName = dcls_of(clsTy).cls.name();
+    return reduce(
+      env,
+      bc::DiscardClsRef { op.slot },
+      bc::PopC {},
+      bc::FPushClsMethodD { op.arg1, methName, clsName, op.has_unpack }
+    );
+  }
+
+  fpushClsMethodImpl(env, op, clsTy, methName, true, true, op.slot);
 }
 
 namespace {
@@ -4157,42 +4200,6 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   return op ? *op : TCls;
 }
 
-}
-
-void in(ISS& env, const bc::FPushClsMethod& op) {
-  auto const t1 = peekClsRefSlot(env, op.slot);
-  auto const t2 = topC(env);
-
-  folly::Optional<res::Class> rcls;
-  auto exactCls = false;
-  if (is_specialized_cls(t1)) {
-    auto dcls = dcls_of(t1);
-    rcls = dcls.cls;
-    exactCls = dcls.type == DCls::Exact;
-  }
-  folly::Optional<res::Func> rfunc;
-  auto const name = getNameFromType(t2);
-  if (name && op.argv.size() == 0) {
-    rfunc = env.index.resolve_method(env.ctx, t1, name);
-    if (exactCls && rcls && !rfunc->mightCareAboutDynCalls() &&
-        !rfunc->couldHaveReifiedGenerics()) {
-      return reduce(
-        env,
-        bc::DiscardClsRef { op.slot },
-        bc::PopC {},
-        bc::FPushClsMethodD {
-          op.arg1, name, rcls->name(), op.has_unpack
-        }
-      );
-    }
-  }
-  if (fpiPush(env, ActRec { FPIKind::ClsMeth, t1, rcls, rfunc }, op.arg1,
-              true)) {
-    return reduce(env, bc::DiscardClsRef { op.slot }, bc::PopC {});
-  }
-  takeClsRefSlot(env, op.slot);
-  popC(env);
-  discardAR(env, op.arg1);
 }
 
 void in(ISS& env, const bc::FPushClsMethodS& op) {
@@ -4416,8 +4423,9 @@ void in(ISS& env, const bc::FCall& op) {
       return;
     case FPIKind::Builtin:
       assertx(fca.numRets == 1);
-      return finish_builtin(
-        env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
+      finish_builtin(env, ar.func->exactFunc(), fca.numArgs, fca.hasUnpack());
+      fpiPop(env);
+      return;
     case FPIKind::ObjMeth:
     case FPIKind::ClsMeth:
       assertx(op.str2->empty() == op.str3->empty());

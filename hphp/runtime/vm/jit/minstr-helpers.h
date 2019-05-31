@@ -822,7 +822,7 @@ auto vecSetImpl(ArrayData* a, int64_t key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isVecArray());
   ArrayData* ret = PackedArray::SetIntVec(a, key, value);
-  if (copyProv && ret != a) arrprov::unchecked::copyTag(a, ret);
+  if (copyProv && ret != a) arrprov::copyTag(a, ret);
   return arrayRefShuffle<setRef, KindOfVec>(a, ret, ref);
 }
 
@@ -865,7 +865,7 @@ dictSetImpl(ArrayData* a, key_type<keyType> key, Cell value, TypedValue* ref) {
   assertx(cellIsPlausible(value));
   assertx(a->isDict());
   auto ret = dictSetImplPre(a, key, value);
-  if (copyProv && ret != a) arrprov::unchecked::copyTag(a, ret);
+  if (copyProv && ret != a) arrprov::copyTag(a, ret);
   return arrayRefShuffle<setRef, KindOfDict>(a, ret, ref);
 }
 

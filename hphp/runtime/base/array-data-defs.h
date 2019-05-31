@@ -110,7 +110,9 @@ inline bool ArrayData::isVectorData() const {
 
 inline void ArrayData::release() noexcept {
   assertx(!hasMultipleRefs());
-  arrprov::clearTag(this);
+  if (RuntimeOption::EvalLogArrayProvenance) {
+    arrprov::clearTag(this);
+  }
   g_array_funcs.release[kind()](this);
   AARCH64_WALKABLE_FRAME();
 }

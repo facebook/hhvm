@@ -14,8 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef HPHP_ARRAY_PROVENANCE_H
-#define HPHP_ARRAY_PROVENANCE_H
+#ifndef incl_HPHP_ARRAY_PROVENANCE_H
+#define incl_HPHP_ARRAY_PROVENANCE_H
 
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/rds-local.h"
@@ -31,6 +31,8 @@ namespace HPHP {
 struct StringData;
 
 namespace arrprov {
+
+///////////////////////////////////////////////////////////////////////////////
 
 /*
  * A provenance annotation
@@ -74,24 +76,14 @@ struct ArrayProvenanceTable {
   TYPE_SCAN_IGNORE_FIELD(tags);
 };
 
+///////////////////////////////////////////////////////////////////////////////
+
 /*
  * Create a tag based on the current PC and unit.
  *
  * Requires VM regs to be synced or for a sync point to be available.
  */
 Tag tagFromProgramCounter();
-
-/*
- * `HPHP::arrprov::unchecked` operates on provenance tags without checking to
- * see if the instrumentation is currently enabled or not. Since these
- * functions call each other, we want to check only once. Variants that check
- * the option are in the `checked` namespace, which is inline and therefore
- * those can be accessed merely as HPHP::arrprov::whatever
- */
-
-///////////////////////////////////////////////////////////////////////////////
-
-namespace unchecked {
 
 /*
  * Whether `ad` or `tv` admits a provenance tag---i.e., whether it's either a
@@ -116,6 +108,15 @@ void setTag(ArrayData* ad, const Tag& tag);
 void copyTag(const ArrayData* src, ArrayData* dest);
 
 /*
+ * Like copyTag(), but for static arrays.
+ *
+ * Unlike all the other functions here, copyTagStatic() bails if array
+ * provenance tracking is turned off.  (Everything else assumes it as a
+ * prerequisite.)
+ */
+void copyTagStatic(const ArrayData* src, ArrayData* dest);
+
+/*
  * Clear a tag for a released array---only call this if the array is henceforth
  * unreachable.
  */
@@ -127,30 +128,12 @@ void clearTag(const ArrayData* ad);
  */
 TypedValue tagTV(TypedValue tv);
 
-} // namespace unchecked
-
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
- * See the note above (on namespace unchecked) for why this namespace exists
- * and is inline.
- */
-inline namespace checked {
-
-folly::Optional<Tag> getTag(const ArrayData* ad);
-void setTag(ArrayData* ad, const Tag& tag);
-void copyTag(const ArrayData* src, ArrayData* dest);
-void clearTag(ArrayData* ad);
-void copyTagStatic(const ArrayData* src, ArrayData* dest);
-
-} // inline namespace checked
-
-///////////////////////////////////////////////////////////////////////////////
-
-}} // namespace HPHP::arrprov
+}}
 
 #define incl_HPHP_ARRAY_PROVENANCE_INL_H_
 #include "hphp/runtime/base/array-provenance-inl.h"
 #undef incl_HPHP_ARRAY_PROVENANCE_INL_H_
 
-#endif // HPHP_ARRAY_PROVENANCE_H
+#endif

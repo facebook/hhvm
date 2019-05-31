@@ -266,7 +266,7 @@ ArrayData* with_prov(uint32_t size) {
 
   auto ad = make(size);
   assertx(ad->hasExactlyOneRef());
-  assertx(unchecked::arrayWantsTag(ad));
+  assertx(arrayWantsTag(ad));
 
   setTag(ad, tagFromProgramCounter());
   return ad;

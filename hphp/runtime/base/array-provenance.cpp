@@ -49,8 +49,6 @@ InitFiniNode flushTable([]{
 
 ///////////////////////////////////////////////////////////////////////////////
 
-namespace unchecked {
-
 bool arrayWantsTag(const ArrayData* ad) {
   auto const kind = ad->kind();
   return kind == ArrayData::ArrayKind::kVecKind ||
@@ -90,23 +88,19 @@ TypedValue tagTV(TypedValue tv) {
   using namespace arrprov;
 
   assertx(RuntimeOption::EvalLogArrayProvenance);
-  if (!unchecked::tvWantsTag(tv)) return tv;
+  if (!tvWantsTag(tv)) return tv;
 
   auto ad = val(tv).parr;
-  if (!!unchecked::getTag(ad)) return tv;
+  if (getTag(ad)) return tv;
 
   if (!ad->hasExactlyOneRef()) {
     ad = ad->copy();
     type(tv) = dt_with_rc(type(tv));
     val(tv).parr = ad;
   }
-  unchecked::setTag(ad, tagFromProgramCounter());
+  setTag(ad, tagFromProgramCounter());
   return tv;
 }
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
 
 Tag tagFromProgramCounter() {
   VMRegAnchor _;
@@ -127,4 +121,4 @@ Tag tagFromProgramCounter() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-}} // namespace HPHP::arrprov
+}}

@@ -403,7 +403,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
         !callee->isProvenanceSkipFrame()) {
       if (dstType.isValid()) {
         v << vcall{
-          CallSpec::direct(arrprov::unchecked::tagTV, nullptr),
+          CallSpec::direct(arrprov::tagTV, nullptr),
           v.makeVcallArgs({{tmpData, tmpType}}),
           v.makeTuple({dstData, dstType}),
           makeFixup(inst->marker(), SyncOptions::Sync),
@@ -412,7 +412,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
       } else {
         assertx(funcReturnType);
         v << vcall{
-          CallSpec::direct(arrprov::unchecked::tagTV, nullptr),
+          CallSpec::direct(arrprov::tagTV, nullptr),
           v.makeVcallArgs({{
             tmpData,
             v.cns(static_cast<int64_t>(*funcReturnType))
@@ -518,7 +518,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
     auto const out_data = v.makeReg();
     auto const out_type = v.makeReg();
     v << vcall{
-      CallSpec::direct(arrprov::unchecked::tagTV, nullptr),
+      CallSpec::direct(arrprov::tagTV, nullptr),
       v.makeVcallArgs({{in_data, in_type}}),
       v.makeTuple({out_data, out_type}),
       makeFixup(inst->marker(), SyncOptions::Sync),

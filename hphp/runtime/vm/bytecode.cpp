@@ -2052,7 +2052,7 @@ OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
     : MixedArray::MakeReserveDict(capacity);
 
   if (RuntimeOption::EvalLogArrayProvenance) {
-    arrprov::unchecked::setTag(ad, arrprov::tagFromProgramCounter());
+    arrprov::setTag(ad, arrprov::tagFromProgramCounter());
   }
   vmStack().pushDictNoRc(ad);
 }
@@ -2118,7 +2118,7 @@ OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const a = PackedArray::MakeVec(n, vmStack().topC());
   if (RuntimeOption::EvalLogArrayProvenance) {
-    arrprov::unchecked::setTag(a, arrprov::tagFromProgramCounter());
+    arrprov::setTag(a, arrprov::tagFromProgramCounter());
   }
   vmStack().ndiscard(n);
   vmStack().pushVecNoRc(a);
@@ -5533,7 +5533,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
 
   if (RuntimeOption::EvalLogArrayProvenance &&
       !func->isProvenanceSkipFrame()) {
-    ret = arrprov::unchecked::tagTV(ret);
+    ret = arrprov::tagTV(ret);
   }
   tvCopy(ret, *vmStack().allocTV());
 }
@@ -6000,7 +6000,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
     SCOPE_EXIT { vmpc() = origPC; };
 
     vmpc() = pc;
-    *retval = arrprov::unchecked::tagTV(*retval);
+    *retval = arrprov::tagTV(*retval);
   }
   return jitReturnPost(jitReturn);
 }

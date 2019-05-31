@@ -78,11 +78,12 @@ struct ScalarHash {
     };
     ret |= (uint64_t{arr->dvArray()} << 32);
 
-    if (auto const tag = arrprov::getTag(arr)) {
-      ret = folly::hash::hash_combine(ret, tag->line());
-      ret = folly::hash::hash_combine(ret, tag->filename());
+    if (RuntimeOption::EvalLogArrayProvenance) {
+      if (auto const tag = arrprov::getTag(arr)) {
+        ret = folly::hash::hash_combine(ret, tag->line());
+        ret = folly::hash::hash_combine(ret, tag->filename());
+      }
     }
-
     IterateKV(
       arr,
       [&](Cell k, TypedValue v) {

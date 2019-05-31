@@ -489,14 +489,23 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
       auto const arr_str = internal_serialize(
         VarNR(const_cast<ArrayData*>(m_arrays[i]))
       ).toCppString();
-      auto const tag = arrprov::getTag(m_arrays[i]);
-      auto const line = tag ? folly::make_optional(tag->line()) : folly::none;
-      auto const file = (tag && tag->filename() != m_filepath)
-        ? tag->filename()
-        : nullptr;
-      urp.insertUnitArray[repoId].insert(
-        txn, usn, i, arr_str, line, file
-      );
+
+      if (RuntimeOption::EvalLogArrayProvenance) {
+        auto const tag = arrprov::getTag(m_arrays[i]);
+        auto const line = tag
+          ? folly::make_optional(tag->line())
+          : folly::none;
+        auto const file = (tag && tag->filename() != m_filepath)
+          ? tag->filename()
+          : nullptr;
+        urp.insertUnitArray[repoId].insert(
+          txn, usn, i, arr_str, line, file
+        );
+      } else {
+        urp.insertUnitArray[repoId].insert(
+          txn, usn, i, arr_str, folly::none, nullptr
+        );
+      }
     }
     urp.insertUnitArrayTypeTable[repoId].insert(txn, usn, *this);
     for (auto& fe : m_fes) {

@@ -1020,7 +1020,9 @@ std::pair<ArrayData*, std::string> read_litarray(AsmState& as) {
       auto const line = as.srcLoc.line0;
       auto const filename = as.ue->m_filepath;
       auto data = var.detach().m_data.parr;
-      if (!data->empty() && !(as.fe->attrs & AttrProvenanceSkipFrame)) {
+      if (RuntimeOption::EvalLogArrayProvenance &&
+          !data->empty() &&
+          !(as.fe->attrs & AttrProvenanceSkipFrame)) {
         arrprov::setTag(data, {filename, line});
       }
       ArrayData::GetScalarArray(&data);

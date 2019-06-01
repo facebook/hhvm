@@ -930,4 +930,122 @@ Array TypeStructure::resolvePartial(const Array& ts,
   return resolved;
 }
 
+bool TypeStructure::isValidResolvedTypeStructureList(const Array& arr,
+                                                     bool isShape /*= false*/) {
+  if (!(RuntimeOption::EvalHackArrDVArrs
+          ? arr.isVecArray() : (arr.isPHPArray() || !arr.isNull()))) {
+    return false;
+  }
+  bool valid = true;
+  IterateV(
+    arr.get(),
+    [&](TypedValue v) {
+      if (!tvIsDictOrDArray(v)) {
+        valid = false;
+        return true;
+      }
+      auto const parr = [&] {
+        if (isShape) {
+          auto const value = arr.rvalAt(s_value);
+          if (value.is_set()) {
+            if (!isDictOrArrayType(value.type())) {
+              valid = false;
+            } else {
+              return value.val().parr;
+            }
+          }
+        }
+        return v.m_data.parr;
+      }();
+      if (!valid) return true;
+      valid &= TypeStructure::isValidResolvedTypeStructure(ArrNR(parr));
+      return !valid; // if valid is false, let's short circuit
+    }
+  );
+  return valid;
+}
+
+bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
+  if (!(RuntimeOption::EvalHackArrDVArrs
+          ? arr.isDict() : (arr.isPHPArray() && !arr.isNull()))) {
+    return false;
+  }
+  auto const kindfield = arr.rvalAt(s_kind);
+  if (!kindfield.is_set() || !isIntType(kindfield.type()) ||
+      kindfield.val().num > TypeStructure::kMaxResolvedKind) {
+    return false;
+  }
+  auto const kind = static_cast<TypeStructure::Kind>(kindfield.val().num);
+  switch (kind) {
+    case TypeStructure::Kind::T_array:
+    case TypeStructure::Kind::T_darray:
+    case TypeStructure::Kind::T_varray:
+    case TypeStructure::Kind::T_varray_or_darray:
+    case TypeStructure::Kind::T_dict:
+    case TypeStructure::Kind::T_vec:
+    case TypeStructure::Kind::T_keyset:
+    case TypeStructure::Kind::T_vec_or_dict:
+    case TypeStructure::Kind::T_arraylike:
+    case TypeStructure::Kind::T_null:
+    case TypeStructure::Kind::T_void:
+    case TypeStructure::Kind::T_int:
+    case TypeStructure::Kind::T_bool:
+    case TypeStructure::Kind::T_float:
+    case TypeStructure::Kind::T_string:
+    case TypeStructure::Kind::T_resource:
+    case TypeStructure::Kind::T_num:
+    case TypeStructure::Kind::T_arraykey:
+    case TypeStructure::Kind::T_nothing:
+    case TypeStructure::Kind::T_noreturn:
+    case TypeStructure::Kind::T_mixed:
+    case TypeStructure::Kind::T_nonnull:
+      return true;
+    case TypeStructure::Kind::T_fun: {
+      auto const rtype = arr.rvalAt(s_return_type);
+      if (!rtype.is_set() || !isDictOrArrayType(rtype.type())) return false;
+      if (!TypeStructure::isValidResolvedTypeStructure(
+            ArrNR(rtype.val().parr))) {
+        return false;
+      }
+      auto const ptypes = arr.rvalAt(s_param_types);
+      if (!ptypes.is_set() || !isVecOrArrayType(ptypes.type())) return false;
+      return isValidResolvedTypeStructureList(ArrNR(ptypes.val().parr));
+    }
+    case TypeStructure::Kind::T_typevar: {
+      auto const name = arr.rvalAt(s_name);
+      return name.is_set() && isStringType(name.type());
+    }
+    case TypeStructure::Kind::T_shape: {
+      auto const fields = arr.rvalAt(s_fields);
+      if (!fields.is_set() || !isVecOrArrayType(fields.type())) return false;
+      return isValidResolvedTypeStructureList(ArrNR(fields.val().parr), true);
+    }
+    case TypeStructure::Kind::T_tuple: {
+      auto const elems = arr.rvalAt(s_elem_types);
+      if (!elems.is_set() || !isVecOrArrayType(elems.type())) return false;
+      return isValidResolvedTypeStructureList(ArrNR(elems.val().parr));
+    }
+    case TypeStructure::Kind::T_class:
+    case TypeStructure::Kind::T_interface:
+    case TypeStructure::Kind::T_trait:
+    case TypeStructure::Kind::T_enum: {
+      auto const clsname = arr.rvalAt(s_classname);
+      if (!clsname.is_set() || !isStringType(clsname.type())) return false;
+      auto const generics = arr.rvalAt(s_generic_types);
+      if (generics.is_set()) {
+        if (!isVecOrArrayType(generics.type())) return false;
+        return isValidResolvedTypeStructureList(ArrNR(generics.val().parr));
+      }
+      return true;
+    }
+    case TypeStructure::Kind::T_unresolved:
+    case TypeStructure::Kind::T_typeaccess:
+    case TypeStructure::Kind::T_xhp:
+    case TypeStructure::Kind::T_reifiedtype:
+      // Kinds denoting unresolved types should not appear
+      return false;
+  }
+  return false;
+}
+
 } // namespace HPHP

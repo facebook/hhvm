@@ -289,6 +289,10 @@ bool isVecOrArrayType(DataType t) {
   return RuntimeOption::EvalHackArrDVArrs ? isVecType(t) : isArrayType(t);
 }
 
+bool isDictOrArrayType(DataType t) {
+  return RuntimeOption::EvalHackArrDVArrs ? isDictType(t) : isArrayType(t);
+}
+
 bool isDictOrShapeType(DataType t) {
   return isDictType(t) ||
     (RuntimeOption::EvalHackArrDVArrs && isShapeType(t));

@@ -77,6 +77,13 @@ public:
     assertx(!m_obj || m_obj->checkCount());
   }
 
+  explicit Object(Class* cls, ArrayData* reifiedTypes)
+    : m_obj(ObjectData::newInstanceReified(cls, reifiedTypes), NoIncRef{}) {
+    // References to the object can escape inside newInstance, so we only know
+    // that the ref-count is at least 1 here.
+    assertx(!m_obj || m_obj->checkCount());
+  }
+
   // Move ctor
   Object(Object&& src) noexcept : m_obj(std::move(src.m_obj)) {
     assertx(!m_obj || m_obj->checkCount());

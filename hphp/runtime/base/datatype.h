@@ -338,9 +338,10 @@ bool isArrayOrShapeType(DataType);
 bool isArrayOrShapeType(MaybeDataType);
 
 /*
- * Based on EvalHackArrDVArrs checks whether t is vec or array
+ * Based on EvalHackArrDVArrs checks whether t is vec/dict or array
  */
 bool isVecOrArrayType(DataType t);
+bool isDictOrArrayType(DataType t);
 /*
  * isDictOrShapeType checks whether DataType is a Dict or a Shape that
  * behaves like a Dict. This is important because this check is often used

@@ -29,6 +29,8 @@ struct Array;
 /* Utility for representing full type information in the runtime. */
 namespace TypeStructure {
 
+constexpr uint8_t kMaxResolvedKind = 29;
+
 // These values are exposed to the user in
 // hphp/runtime/ext/reflection/ext_reflection-TypeInfo.php
 enum class Kind : uint8_t {
@@ -69,6 +71,7 @@ enum class Kind : uint8_t {
 
   T_null = 28,
   T_nothing = 29,
+  // Make sure to update kMaxResolvedKind if you add a new kind here
 
   /* The following kinds needs class/alias resolution, and
    * are not exposed to the users. */
@@ -80,6 +83,14 @@ enum class Kind : uint8_t {
 
 String toString(const Array& arr);
 String toStringForDisplay(const Array& arr);
+
+/*
+ * Checks whether the given type structure is a valid resolved type structure,
+ * i.e. whether it contains all required fields and that it does not require
+ * resolution
+ */
+bool isValidResolvedTypeStructure(const Array& arr);
+bool isValidResolvedTypeStructureList(const Array& arr, bool isShape = false);
 
 /*
  * All resolve functions ignore the initial value present in the

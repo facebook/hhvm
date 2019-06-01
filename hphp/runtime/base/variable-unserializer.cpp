@@ -1021,6 +1021,7 @@ void VariableUnserializer::unserializeVariant(
       }
 
       Object obj;
+      auto remainingProps = size;
       if (cls) {
         // Only unserialize CPP extension types which can actually support
         // it. Otherwise, we risk creating a CPP object without having it
@@ -1038,6 +1039,21 @@ void VariableUnserializer::unserializeVariant(
             obj = Object{req::make<c_Pair>(make_tv<KindOfNull>(),
                                            make_tv<KindOfNull>(),
                                            c_Pair::NoIncRef{})};
+          } else if (UNLIKELY(cls->hasReifiedGenerics())) {
+            // First prop on the serialized list is the reified generics prop
+            if (!matchString(s_86reified_prop.slice())) {
+              throwInvalidOFormat(clsName);
+            }
+            TypedValue tv = make_tv<KindOfNull>();
+            auto const t = tv_lval{&tv};
+            unserializePropertyValue(t, remainingProps--);
+            if (!isVecOrArrayType(t.type()) ||
+                (this->type() == VariableUnserializer::Type::Serialize &&
+                 !TypeStructure::isValidResolvedTypeStructureList(
+                   ArrNR(t.val().parr)))) {
+              throwInvalidOFormat(clsName);
+            }
+            obj = Object{cls, t.val().parr};
           } else {
             obj = Object{cls};
           }
@@ -1051,7 +1067,7 @@ void VariableUnserializer::unserializeVariant(
       assertx(!obj.isNull());
       tvSet(make_tv<KindOfObject>(obj.get()), self);
 
-      if (size > 0) {
+      if (remainingProps > 0) {
         // Check stack depth to avoid overflow.
         check_recursion_throw();
 
@@ -1067,9 +1083,9 @@ void VariableUnserializer::unserializeVariant(
             RuntimeOption::RepoAuthoritative &&
             Repo::get().global().HardPrivatePropInference;
           Class* objCls = obj->getVMClass();
-          auto remainingProps = size;
           // Try fast case.
-          if (size >= objCls->numDeclProperties()) {
+          if (remainingProps >= objCls->numDeclProperties() -
+                                (objCls->hasReifiedGenerics() ? 1 : 0)) {
             auto mismatch = false;
             auto const objProps = obj->propVecForConstruct();
 
@@ -1077,7 +1093,7 @@ void VariableUnserializer::unserializeVariant(
             for (auto const& p : declProps) {
               auto slot = p.serializationIdx;
               auto const& prop = declProps[slot];
-
+              if (prop.name == s_86reified_prop.get()) continue;
               if (!matchString(prop.mangledName->slice())) {
                 mismatch = true;
                 break;

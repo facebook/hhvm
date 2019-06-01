@@ -242,6 +242,7 @@ APCHandle::Pair APCObject::MakeAPCObject(APCHandle* obj, const Variant& value) {
   }
   obj->setObjAttempted();
   ObjectData* o = value.getObjectData();
+  if (o->getVMClass()->hasReifiedGenerics()) return {nullptr, 0};
   DataWalker walker(DataWalker::LookupFeature::DetectSerializable);
   DataWalker::DataFeature features = walker.traverseData(o);
   if (features.isCircular || features.hasSerializable) {

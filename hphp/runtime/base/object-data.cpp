@@ -541,6 +541,14 @@ void ObjectData::o_getArray(Array& props,
   }
 
   auto cls = m_cls;
+  if (cls->hasReifiedGenerics()) {
+    auto const slot = cls->lookupReifiedInitProp();
+    assertx(slot != kInvalidSlot);
+    auto const declProps = cls->declProperties();
+    auto const prop = declProps[slot];
+    auto val = this->propRvalAtOffset(slot);
+    props.setWithRef(StrNR(prop.name).asString(), val.tv());
+  }
   IteratePropToArrayOrderNoInc(
     this,
     [&](Slot slot, const Class::Prop& prop, tv_rval val) {
@@ -562,7 +570,11 @@ void ObjectData::o_getArray(Array& props,
           }
         }
       } else if (!pubOnly || (prop.attrs & AttrPublic)) {
-        props.setWithRef(StrNR(prop.mangledName).asString(), val.tv());
+        // Skip all the reified properties since we already prepended the
+        // current class' reified property to the list
+        if (prop.name != s_86reified_prop.get()) {
+          props.setWithRef(StrNR(prop.mangledName).asString(), val.tv());
+        }
       }
     },
     [&](Cell key_tv, TypedValue val) {

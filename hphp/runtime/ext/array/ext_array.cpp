@@ -85,9 +85,8 @@ TypedValue HHVM_FUNCTION(array_chunk,
     return make_tv<KindOfNull>();
   }
 
-  auto const retSize =
-    (getClsMethCompactContainerSize(cellInput) / chunkSize) + 1;
-  PackedArrayInit ret(retSize);
+  const size_t inputSize = getClsMethCompactContainerSize(cellInput);
+  PackedArrayInit ret((inputSize + chunkSize - 1) / chunkSize);
   Array chunk;
   int current = 0;
   for (ArrayIter iter(cellInput); iter; ++iter) {

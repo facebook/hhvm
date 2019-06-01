@@ -1049,7 +1049,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StLoc:
     return PureStore {
       AFrame { inst.src(0), inst.extra<StLoc>()->locId },
-      inst.src(1)
+      inst.src(1),
+      nullptr
     };
 
   case StLocRange:
@@ -1060,7 +1061,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       for (auto locId = extra->start; locId < extra->end; ++locId) {
         acls = acls | AFrame { inst.src(0), locId };
       }
-      return PureStore { acls, inst.src(1) };
+      return PureStore { acls, inst.src(1), nullptr };
     }
 
   case LdLoc:
@@ -1078,7 +1079,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StLocPseudoMain:
     // This can store to globals or locals, but we don't have globals supported
     // in AliasClass yet.
-    return PureStore { AUnknown, inst.src(1) };
+    return PureStore { AUnknown, inst.src(1), nullptr };
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that manipulate class-ref slots
@@ -1096,13 +1097,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StClsRefCls:
     return PureStore {
       AClsRefClsSlot { inst.src(0), inst.extra<StClsRefCls>()->slot },
-      inst.src(1)
+      inst.src(1),
+      nullptr
     };
 
   case StClsRefTS:
     return PureStore {
       AClsRefTSSlot { inst.src(0), inst.extra<StClsRefTS>()->slot },
-      inst.src(1)
+      inst.src(1),
+      nullptr
     };
 
   case KillClsRefCls:
@@ -1123,7 +1126,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdMem:
     return PureLoad { pointee(inst.src(0)) };
   case StMem:
-    return PureStore { pointee(inst.src(0)), inst.src(1) };
+    return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
 
   // TODO(#5962341): These take non-constant offset arguments, and are
   // currently only used for collections and class property inits, so we aren't
@@ -1133,7 +1136,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       inst.src(0)->type() <= TPtrToRMembCell
         ? AHeapAny
         : AUnknown,
-      inst.src(2)
+      inst.src(2),
+      inst.src(0)
     };
   case LdElem:
     return PureLoad {
@@ -1146,10 +1150,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return PureLoad { AMIStateBase };
 
   case StMBase:
-    return PureStore { AMIStateBase, inst.src(0) };
+    return PureStore { AMIStateBase, inst.src(0), nullptr };
 
   case StMIPropState:
-    return PureStore { AMIStatePropS, nullptr };
+    return PureStore { AMIStatePropS, nullptr, nullptr };
 
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
@@ -1203,7 +1207,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdRef:
     return PureLoad { ARef { inst.src(0) } };
   case StRef:
-    return PureStore { ARef { inst.src(0) }, inst.src(1) };
+    return PureStore { ARef { inst.src(0) }, inst.src(1), inst.src(0) };
 
   case InitObjProps:
     return may_load_store(AEmpty, APropAny);
@@ -1222,7 +1226,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case InitPackedLayoutArray:
     return PureStore {
       AElemI { inst.src(0), inst.extra<InitPackedLayoutArray>()->index },
-      inst.src(1)
+      inst.src(1),
+      inst.src(0)
     };
 
   case LdVecElem:
@@ -1617,7 +1622,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StStk:
     return PureStore {
       AStack { inst.src(0), inst.extra<StStk>()->offset, 1 },
-      inst.src(1)
+      inst.src(1),
+      nullptr
     };
 
   case StOutValue:
@@ -1819,7 +1825,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         inst.src(0),
         safe_cast<uint32_t>(inst.extra<StClosureArg>()->offsetBytes)
       },
-      inst.src(1)
+      inst.src(1),
+      inst.src(0)
     };
 
   //////////////////////////////////////////////////////////////////////
@@ -2409,7 +2416,7 @@ MemEffects canonicalize(MemEffects me) {
       return PureLoad { canonicalize(x.src) };
     },
     [&] (PureStore x) -> R {
-      return PureStore { canonicalize(x.dst), x.value };
+      return PureStore { canonicalize(x.dst), x.value, x.dep };
     },
     [&] (PureSpillFrame x) -> R {
       return PureSpillFrame {

@@ -94,8 +94,12 @@ struct PureLoad       { AliasClass src; };
  * we know the location can never be loaded from again. `value' can be a
  * nullptr, in which case the store can still be elided if it is known to never
  * be loaded afterwards.
+ *
+ * dep is a "base" address that the store is relative to. This is used
+ * so we can mark stores altered across its definition (which can only
+ * happen in loops).
  */
-struct PureStore    { AliasClass dst; SSATmp* value; };
+struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
 
 /*
  * Spilling pre-live ActRecs are somewhat unusual, but effectively still just

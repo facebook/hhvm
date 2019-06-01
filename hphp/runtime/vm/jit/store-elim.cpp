@@ -325,6 +325,22 @@ struct Global {
   BlockList poBlockList;
   AliasAnalysis ainfo;
 
+  /*
+   * Keep a mapping from ssaTmps to ALocs that might depend on them.
+   * Normally we don't need to worry about this, because ssa
+   * guarantees that a store is dominated by the def of its
+   * address. But in a loop, a store might be partially available at
+   * the point where its address is defined.
+   *
+   * Note that we can generate this table lazily, because we will see
+   * the def for the first time before we see the store for the first
+   * time (and until we see the store for the first time, it can't be
+   * partially available anywhere). So its sufficient to populate the
+   * table as we see the stores, and it will be used if we ever
+   * revisit the def.
+   */
+  hphp_fast_map<SSATmp*,ALocBits> ssa2Aloc;
+
   // We keep an entry for each tracked SpillFrame in this map, so we
   // can check its ALocBits
   SpillFrameMap spillFrameMap;
@@ -533,9 +549,16 @@ folly::Optional<uint32_t> pure_store_bit(Local& env, AliasClass acls) {
 void visit(Local& env, IRInstruction& inst) {
   auto const effects = memory_effects(inst);
   FTRACE(3, "    {}\n"
-            "      {}\n",
-            inst.toString(),
-            show(effects));
+         "      {}\n",
+         inst.toString(),
+         show(effects));
+
+  for (auto dst : inst.dsts()) {
+    auto const it = env.global.ssa2Aloc.find(dst);
+    if (it != env.global.ssa2Aloc.end()) {
+      addLoadSet(env, it->second);
+    }
+  }
 
   match<void>(
     effects,
@@ -646,6 +669,7 @@ void visit(Local& env, IRInstruction& inst) {
 
     [&] (PureStore l) {
       if (auto bit = pure_store_bit(env, l.dst)) {
+        if (l.dep) env.global.ssa2Aloc[l.dep][*bit] = 1;
         if (isDead(env, *bit)) {
           if (!removeDead(env, inst, true)) {
             mayStore(env, l.dst);

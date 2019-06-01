@@ -1,11 +1,11 @@
 <?php
-/* Prototype  : int strncasecmp ( string $str1, string $str2, int $len ); 
+/* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
  * Description: Binary safe case-insensitive string comparison of the first n characters
  * Source code: Zend/zend_builtin_functions.c
 */
 
 /* Test strncasecmp() function with various single quoted strings for 'str1', 'str2' */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strncasecmp() function: with single quoted strings ***\n";
 $strings = array(
   'Hello, World',
@@ -23,3 +23,4 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
   $count ++;
 }
 echo "*** Done ***\n";
+}

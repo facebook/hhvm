@@ -8,8 +8,6 @@
  * Pass an array of referenced variables as $array_arg to test behaviour
  */
 
-echo "*** Testing usort() : usage variation ***\n";
-
 function cmp_function($value1, $value2)
 {
   if($value1 == $value2) {
@@ -22,6 +20,8 @@ function cmp_function($value1, $value2)
     return -1;
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing usort() : usage variation ***\n";
 
 // different variables which are used as elements of $array_arg
 $value1 = -5;
@@ -41,3 +41,4 @@ echo "\n-- Sorting \$array_arg containing different references --\n";
 var_dump( usort(&$array_arg, 'cmp_function') );
 var_dump($array_arg);
 echo "===DONE===\n";
+}

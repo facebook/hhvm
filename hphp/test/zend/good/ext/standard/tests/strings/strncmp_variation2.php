@@ -5,7 +5,7 @@
 */
 
 /* Test strncmp() function with double quoted strings for 'str1', 'str2' */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strncmp() function: with double quoted strings ***\n";
 $strings = array(
   "Hello, World",
@@ -24,3 +24,4 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
   $count ++;
 }
 echo "*** Done ***\n";
+}

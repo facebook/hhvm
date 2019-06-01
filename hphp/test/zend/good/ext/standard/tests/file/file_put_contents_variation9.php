@@ -5,6 +5,16 @@
  * Alias to functions:
  */
 
+function run_test($file) {
+    $data = "Here is some data";
+    $extra = ", more data";
+    var_dump(file_put_contents($file, $data));
+    var_dump(file_put_contents($file, $extra, FILE_APPEND));
+    readfile($file);
+    echo "\n";
+}
+
+<<__EntryPoint>> function main() {
 echo "*** Testing file_put_contents() : usage variation ***\n";
 
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
@@ -34,14 +44,5 @@ unlink($hardlink);
 unlink($filename);
 
 
-function run_test($file) {
-    $data = "Here is some data";
-    $extra = ", more data";
-    var_dump(file_put_contents($file, $data));
-    var_dump(file_put_contents($file, $extra, FILE_APPEND));
-    readfile($file);
-    echo "\n";
-}
-
-
 echo "\n*** Done ***\n";
+}

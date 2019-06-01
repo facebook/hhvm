@@ -1,9 +1,9 @@
 <?php
-/* 
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
+/*
+ * Prototype: int fileinode ( string $filename );
+ * Description: Returns the inode number of the file, or FALSE in case of an error.
+ */
+<<__EntryPoint>> function main() {
 echo "*** Testing fileinode() with file, directory ***\n";
 
 /* Getting inode of created file */
@@ -22,3 +22,4 @@ echo "\n*** Done ***";
 error_reporting(0);
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 unlink ($file_path."/inode.tmp");
+}

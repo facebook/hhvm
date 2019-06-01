@@ -5,16 +5,16 @@
  * Alias to functions:
  */
 
-echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
-
 // define some classes
 class classWithToString {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString { }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_multisort() : usage variation  - test sort order of all types***\n";
 
 $inputs = array(
       'int 0' => 0,
@@ -34,3 +34,4 @@ var_dump(array_multisort(&$inputs, &$numeric));
 var_dump($inputs);
 
 echo "===DONE===\n";
+}

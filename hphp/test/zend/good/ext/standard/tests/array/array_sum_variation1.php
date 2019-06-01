@@ -1,18 +1,12 @@
 <?php
 /* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
 /*
-* Passing different scalar/nonscalar values as 'input' argument to array_sum() 
+* Passing different scalar/nonscalar values as 'input' argument to array_sum()
 */
-
-echo "*** Testing array_sum() : unexpected values for 'input' ***\n";
-
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // Class definition
 class MyClass
@@ -22,6 +16,12 @@ class MyClass
     return "object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_sum() : unexpected values for 'input' ***\n";
+
+// get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // different scalar/non scalar values for 'input' argument
 $input_values = array(
@@ -78,3 +78,4 @@ for($count = 0; $count < count($input_values); $count++) {
 
 fclose($fp);
 echo "Done";
+}

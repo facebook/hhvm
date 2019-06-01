@@ -1,19 +1,31 @@
 <?php
 /* Prototype  : int ip2long(string ip_address)
- * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address 
+ * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-echo "*** Testing ip2long() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() != 0) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing ip2long() : usage variation ***\n";
 set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
@@ -21,18 +33,6 @@ set_error_handler('test_error_handler');
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -91,7 +91,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // resource
       'resource' => $res,
 );
@@ -106,3 +106,4 @@ foreach($inputs as $key =>$value) {
 fclose($res);
 
 echo "===DONE===\n";
+}

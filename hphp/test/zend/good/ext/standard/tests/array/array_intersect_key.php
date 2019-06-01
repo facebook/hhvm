@@ -1,4 +1,11 @@
 <?php
+
+function comp_func($a, $b) {
+        if ($a === $b) return 0;
+        return ($a > $b)? 1:-1;
+
+}
+<<__EntryPoint>> function main() {
 $a = array(1, 6, 2, -20, 15, 1200, -2500);
 $b = array(0, 7, 2, -20, 11, 1100, -2500);
 $c = array(0, 6, 2, -20, 19, 1000, -2500);
@@ -48,10 +55,4 @@ var_dump(array_intersect($a, $b, $c));
 var_dump(array_uintersect($a, $b, $c, "comp_func"));
 var_dump(array_intersect($a, $b, $c, $d));
 var_dump(array_uintersect($a, $b, $c, $d, "comp_func"));
-
-///////////////////////////////////////////////////////////////////////
-function comp_func($a, $b) {
-        if ($a === $b) return 0;
-        return ($a > $b)? 1:-1;
-
 }

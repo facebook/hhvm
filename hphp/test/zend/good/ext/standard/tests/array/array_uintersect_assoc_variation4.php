@@ -2,33 +2,33 @@
 /* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
  * Description: U
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main() {
+include('compare_function.inc');
 echo "*** Testing array_uintersect_assoc() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $arr1 = array(1, 2);
 $arr2 = array(1, 2);
 
-include('compare_function.inc');
 $data_compare_function = 'compare_function';
 
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -94,3 +94,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

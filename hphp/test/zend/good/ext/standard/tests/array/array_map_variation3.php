@@ -8,12 +8,12 @@
  * Test array_map() by passing different arrays for $arr1 argument
  */
 
-echo "*** Testing array_map() : different arrays for 'arr1' argument ***\n";
-
 function callback($a)
 {
   return ($a);
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_map() : different arrays for 'arr1' argument ***\n";
 
 // different arrays
 $arrays = array (
@@ -52,3 +52,4 @@ foreach($arrays as $arr1) {
 }
 
 echo "Done";
+}

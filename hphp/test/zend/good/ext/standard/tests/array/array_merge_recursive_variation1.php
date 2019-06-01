@@ -5,15 +5,9 @@
 */
 
 /*
- * Passing non array values to 'arr1' argument of array_merge_recursive() and see 
+ * Passing non array values to 'arr1' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
 */
-
-echo "*** Testing array_merge_recursive() : Passing non array values to \$arr1 argument ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset($unset_var);
 
 class A
 {
@@ -22,6 +16,12 @@ class A
     return "object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_merge_recursive() : Passing non array values to \$arr1 argument ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -79,22 +79,22 @@ $arrays = array (
 /*24*/ new A()
 );
 
-// initialise the second argument 
+// initialise the second argument
 $arr2 = array(1, array("hello", 'world'));
 
 // loop through each element of $arrays and check the behavior of array_merge_recursive()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "\n-- Iteration $iterator --";
-  
+
   // with default argument
   echo "\n-- With default argument --";
   var_dump( array_merge_recursive($arr1) );
- 
+
   // with more arguments
   echo "-- With more arguments --";
   var_dump( array_merge_recursive($arr1, $arr2) );
- 
+
   $iterator++;
 }
 
@@ -102,3 +102,4 @@ foreach($arrays as $arr1) {
 fclose($fp);
 
 echo "Done";
+}

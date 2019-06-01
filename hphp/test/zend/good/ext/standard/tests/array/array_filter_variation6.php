@@ -8,8 +8,6 @@
 * Passing 'input' array which contains elements as reference to other data
 */
 
-echo "*** Testing array_filter() : usage variations - 'input' containing references ***\n";
-
 // Callback function
 /* Prototype : bool callback(array $input)
  * Parameter : $input - array of which each element need to be checked in function
@@ -26,6 +24,8 @@ function callback($input)
     return false;
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_filter() : usage variations - 'input' containing references ***\n";
 
 // initializing variables
 $value1 = array(1, 2, 8);
@@ -39,3 +39,4 @@ var_dump( array_filter($input, 'callback') );
 var_dump( array_filter($input) );
 
 echo "Done";
+}

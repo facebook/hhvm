@@ -6,6 +6,7 @@ function stats($f, $a) {
     foreach($a as $k => $v)
         print "$k: $v: " . sprintf('%0.3f', $v / $times) . "\n";
 }
+<<__EntryPoint>> function main() {
 $a = array();
 $times = 90000;
 for ($i = 0; $i < $times; $i++) {
@@ -27,3 +28,4 @@ for ($i = 0; $i < $times; $i++) {
 }
 
 stats('str_shuffle', $a);
+}

@@ -1,14 +1,20 @@
 <?php
 /* Prototype  : array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
-echo "*** Testing array_diff_ukey() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
 
-// Initialise function arguments not being substituted (if any)
-$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
-$array3 = array('blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4);
+class classWithoutToString
+{
+}
 
 function key_compare_func($key1, $key2)
 {
@@ -17,6 +23,12 @@ function key_compare_func($key1, $key2)
     }
     return ($key1 > $key2)? 1:-1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_diff_ukey() : usage variation ***\n";
+
+// Initialise function arguments not being substituted (if any)
+$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
+$array3 = array('blue'  => 1, 'red'  => 2, 'green'  => 3, 'purple' => 4);
 
 //get an unset variable
 $unset_var = 10;
@@ -24,18 +36,6 @@ unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, "r");
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -101,3 +101,4 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 echo "===DONE===\n";
+}

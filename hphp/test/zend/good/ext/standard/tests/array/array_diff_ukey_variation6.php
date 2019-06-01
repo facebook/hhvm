@@ -4,6 +4,11 @@
  * Source code: ext/standard/array.c
  */
 
+function key_compare_func($key1, $key2)
+{
+  return strcasecmp((string)$key1, (string)$key2);
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -15,14 +20,10 @@ $input_arrays = array(
       'hexa  indexed' => array(0x12 => '0x12', -0x7 => '-0x7', ),
 );
 
-function key_compare_func($key1, $key2)
-{
-  return strcasecmp((string)$key1, (string)$key2);
-}
-
 foreach($input_arrays as $key =>$value) {
       echo "\n--$key--\n";
       var_dump( array_diff_ukey($value, $input_array, 'key_compare_func') );
       var_dump( array_diff_ukey($input_array, $value, 'key_compare_func') );
 }
 echo "===DONE===\n";
+}

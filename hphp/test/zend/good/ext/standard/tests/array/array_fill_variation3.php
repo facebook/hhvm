@@ -1,22 +1,12 @@
 <?php
 /* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val 
+ * Description: Create an array containing num elements starting with index start_key each initialized to val
  * Source code: ext/standard/array.c
  */
 
 /*
  * testing array_fill() by passing different unexpected values for 'val' argument
  */
-
-echo "*** Testing array_fill() : usage variations ***\n";
-
-// Initialise function arguments not being substituted 
-$start_key = 0;
-$num = 2;
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // define a class
 class test
@@ -27,24 +17,34 @@ class test
     return "testObject";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_fill() : usage variations ***\n";
+
+// Initialise function arguments not being substituted
+$start_key = 0;
+$num = 2;
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 
-//array of different values for 'val' argument  
+//array of different values for 'val' argument
 $values = array(
             // empty string
   /* 1  */  "",
             '',
-            // objects 
+            // objects
   /* 3  */  new test(),
 
-            // undefined variable 
+            // undefined variable
             @$undefined_var,
 
-            // unset variable  
+            // unset variable
   /* 5  */  @$unset_var,
 );
 
-// loop through each element of the array for 'val' argument 
+// loop through each element of the array for 'val' argument
 // check the working of array_fill()
 echo "--- Testing array_fill() with different values for 'val' argument ---\n";
 $counter = 1;
@@ -52,10 +52,11 @@ for($index = 0; $index < count($values); $index ++)
 {
   echo "-- Iteration $counter --\n";
   $val = $values[$index];
-  
+
   var_dump( array_fill($start_key , $num , $val) );
- 
+
   $counter++;
 }
 
 echo"Done";
+}

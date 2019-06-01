@@ -1,15 +1,12 @@
 <?php
 /* Prototype  : array array_flip(array $input)
- * Description: Return array with key <-> value flipped 
+ * Description: Return array with key <-> value flipped
  * Source code: ext/standard/array.c
 */
 
 /*
 * Trying different invalid values for 'input' array argument
 */
-
-echo "*** Testing array_flip() : different invalid values in 'input' array argument ***\n";
-
 // class definition for object data
 class MyClass
 {
@@ -18,6 +15,9 @@ class MyClass
      return 'object';
    }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_flip() : different invalid values in 'input' array argument ***\n";
+
 $obj = new MyClass();
 
 // resource data
@@ -35,7 +35,7 @@ $input = array(
   'bool_value2' => false,
   'bool_value3' => TRUE,
   'bool_value4' => FALSE,
-  
+
   // null values
   'null_value1' => null,
 
@@ -48,10 +48,11 @@ $input = array(
   // resource value
   'resource_value' => $fp,
 );
-  
+
 var_dump( array_flip($input) );
 
 // closing resource
 fclose($fp);
 
 echo "Done";
+}

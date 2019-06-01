@@ -1,5 +1,5 @@
 <?php
-
+<<__EntryPoint>> function main() {
 var_dump(sprintf("%.3F", 100.426));
 var_dump(sprintf("%.2F", 100.426));
 var_dump(sprintf("%d",   100.426));
@@ -74,3 +74,4 @@ var_dump(sprintf("%01.2f", $money)); // output "123.10"
 $number = 362525200;
 
 var_dump(sprintf("%.3e", $number)); // outputs 3.63e+8
+}

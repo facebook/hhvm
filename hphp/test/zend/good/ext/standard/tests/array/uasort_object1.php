@@ -9,8 +9,6 @@
  * array of objects which has only one member variable & more than one member variables
  */
 
-echo "*** Testing uasort() : object functionality ***\n";
-
 // comparison function
 /* Prototype : int cmp(mixed $value1, mixed $value2)
  * Parameters : $value1 and $value2 - values to be compared
@@ -67,6 +65,8 @@ class SimpleClass2
     return $this->int_value;
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing uasort() : object functionality ***\n";
 
 // array of SimpleClass objects with only one member
 $array_arg = array(
@@ -88,3 +88,4 @@ var_dump( uasort(&$array_arg, 'multiple_cmp') );
 var_dump($array_arg);
 
 echo "Done";
+}

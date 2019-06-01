@@ -1,9 +1,9 @@
 <?php
 /*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
+ * Prototype: int fileinode ( string $filename );
+ * Description: Returns the inode number of the file, or FALSE in case of an error.
+ */
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions of fileinode() ***";
 
 /* Non-existing file or dir */
@@ -20,3 +20,4 @@ try { var_dump( fileinode() ); } catch (Exception $e) { echo "\n".'Warning: '.$e
 try { var_dump( fileinode(__FILE__, "string") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***";
+}

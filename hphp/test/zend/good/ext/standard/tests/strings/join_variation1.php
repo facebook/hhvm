@@ -9,6 +9,15 @@
  * testing join() by passing different unexpected value for glue argument
 */
 
+// define a class
+class test
+{
+   var $t = 10;
+   function __toString() {
+     return  "testObject";
+   }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing join() : usage variations ***\n";
 // initialize all required variables
 $pieces = array("element1", "element2");
@@ -19,15 +28,6 @@ unset($unset_var);
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
-
-// define a class
-class test
-{
-   var $t = 10;
-   function __toString() {
-     return  "testObject";
-   }
-}
 
 // array with different values
 $values =  array (
@@ -68,7 +68,7 @@ $values =  array (
   // null vlaues
   NULL,
   null,
-  
+
   // resource variable
   $fp,
 
@@ -94,3 +94,4 @@ for($index = 0; $index < count($values); $index ++) {
 }
 
 echo "Done\n";
+}

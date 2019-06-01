@@ -5,8 +5,6 @@
  * Alias to functions:
  */
 
-echo "*** Testing array_reduce() : variation ***\n";
-
 
 function oneArg($v) {
   return $v;
@@ -15,6 +13,8 @@ function oneArg($v) {
 function threeArgs($v, $w, $x) {
   return $v + $w + $x;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_reduce() : variation ***\n";
 
 $array = array(1);
 
@@ -25,3 +25,4 @@ echo "\n--- Testing with a callback with too many parameters ---\n";
 try { var_dump(array_reduce($array, "threeArgs", 2)); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "===DONE===\n";
+}

@@ -6,17 +6,17 @@
  * Alias to functions: count()
  */
 
+// class declaration
+class test
+{
+  public $member1;
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing sizeof() : usage variations ***\n";
 
 echo "--- Testing sizeof() for all kinds of unset variables in default, Normal and Recursive Modes ---\n";
 
-// class declaration
-class test
-{  
-  public $member1;
-}
-
-// get an resource variable 
+// get an resource variable
 $fp = fopen(__FILE__, "r");
 
 // array containing different types of variables
@@ -51,21 +51,21 @@ $values = array (
   /* 20 */  $fp
 );
 
-// loop through the each element of the $values array for 'var' argument 
+// loop through the each element of the $values array for 'var' argument
 // and check the functionality of sizeof()
 $counter = 1;
 foreach($values as $value)
 {
   echo "-- Iteration $counter --\n";
- 
-  // unset the variable 
+
+  // unset the variable
   unset($value);
 
   // now check the size of unset variable when different modes are given
   echo "Default Mode: ";
   var_dump( sizeof($value) );
   echo "\n";
- 
+
   echo "COUNT_NORMAL Mode: ";
   var_dump( sizeof($value, COUNT_NORMAL) );
   echo "\n";
@@ -80,3 +80,4 @@ foreach($values as $value)
 fclose($fp);
 
 echo "Done";
+}

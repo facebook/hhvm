@@ -9,27 +9,27 @@
  * visibilities to test how it re-orders the array.
  */
 
-echo "*** Testing natcasesort() : object functionality ***\n";
-
 // class declaration for string objects
 class for_string_natcasesort
 {
-	public $public_class_value;
-	private $private_class_value;
-	protected $protected_class_value;
-	// initializing object member value
-	function __construct($value1, $value2,$value3){
-		$this->public_class_value = $value1;
-		$this->private_class_value = $value2;
-		$this->protected_class_value = $value3;
-	}
+    public $public_class_value;
+    private $private_class_value;
+    protected $protected_class_value;
+    // initializing object member value
+    function __construct($value1, $value2,$value3){
+        $this->public_class_value = $value1;
+        $this->private_class_value = $value2;
+        $this->protected_class_value = $value3;
+    }
 
-	// return string value
-	function __tostring() {
-		return (string)$this->public_class_value;
-	}
+    // return string value
+    function __tostring() {
+        return (string)$this->public_class_value;
+    }
 
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing natcasesort() : object functionality ***\n";
 
 // array of string objects
 $unsorted_str_obj = array (
@@ -48,3 +48,4 @@ var_dump(natcasesort(&$temp_array) );
 var_dump($temp_array);
 
 echo "Done";
+}

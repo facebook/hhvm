@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -8,15 +8,6 @@
 * Test array_rand() with different types of values other than int passed to 'num_req' argument
 * to see that function works with unexpeced data and generates warning message as required.
 */
-
-echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
-
-// Initialise function arguments
-$input = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //define a class
 class test
@@ -27,6 +18,15 @@ class test
     return "3object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_rand() : unexpected values for 'num_req' parameter ***\n";
+
+// Initialise function arguments
+$input = array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 //array of values to iterate over
 $values = array(
@@ -82,3 +82,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

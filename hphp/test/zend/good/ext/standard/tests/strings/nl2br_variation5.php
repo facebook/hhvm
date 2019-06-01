@@ -5,10 +5,17 @@
 */
 
 /*
-* Test nl2br() function by passing different types of values other than 
+* Test nl2br() function by passing different types of values other than
 *   expected type for 'str' argument
 */
 
+//defining class
+class Sample {
+  public function __toString() {
+    return "My String";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing nl2br() : usage variations ***\n";
 
 //get an unset variable
@@ -17,13 +24,6 @@ unset ($unset_var);
 
 //getting resource
 $file_handle = fopen(__FILE__, "r");
-
-//defining class
-class Sample {
-  public function __toString() {
-    return "My String";
-  }
-}
 
 //array of values to iterate over
 $values = array(
@@ -71,7 +71,7 @@ $values = array(
   @$unset_var,
 );
 
-// loop through $values array to test nl2br() function with each element 
+// loop through $values array to test nl2br() function with each element
 $count = 1;
 foreach($values as $value) {
   echo "-- Iteration $count --\n";
@@ -83,3 +83,4 @@ foreach($values as $value) {
 fclose( $file_handle );
 
 echo "Done";
+}

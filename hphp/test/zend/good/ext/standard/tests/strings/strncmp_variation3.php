@@ -5,7 +5,7 @@
 */
 
 /* Test strncmp() with various lengths */
-
+<<__EntryPoint>> function main() {
 echo "*** Test strncmp() function: with different lengths ***\n";
 /* definitions of required variables */
 $str1 = "Hello, World\n";
@@ -16,3 +16,4 @@ for($len = strlen($str1); $len >= 0; $len--) {
   var_dump( strncmp($str1, $str2, $len) );
 }
 echo "*** Done ***\n";
+}

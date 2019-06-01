@@ -1,10 +1,33 @@
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+function readFile2($file) {
+   $h = fopen($file, 'r');
+   fpassthru($h);
+   fclose($h);
+   echo "\n";
+}
+
+function appendFile($file) {
+   $h = fopen($file, 'a+');
+   fwrite($h, ' again!');
+   fseek($h, 0);
+   fpassthru($h);
+   fclose($h);
+   echo "\n";
+}
+
+function writeFile($file) {
+   $h = fopen($file, 'w');
+   fwrite($h, 'Goodbye World');
+   fclose($h);
+   readFile2($file);
+}
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $tmpDir = $file_path.'/fopenVar19.Dir';
 $realFilename = basename(__FILE__).'.real';
@@ -59,28 +82,5 @@ unlink($realFilename);
 chdir($oldDirPath);
 rmdir($tmpDir);
 
-function readFile2($file) {
-   $h = fopen($file, 'r');
-   fpassthru($h);
-   fclose($h);
-   echo "\n";
-}
-
-function appendFile($file) {
-   $h = fopen($file, 'a+');
-   fwrite($h, ' again!');
-   fseek($h, 0);
-   fpassthru($h);
-   fclose($h);
-   echo "\n";
-}
-
-function writeFile($file) {
-   $h = fopen($file, 'w');
-   fwrite($h, 'Goodbye World');
-   fclose($h);
-   readFile2($file);
-}
-
-
 echo "===DONE===\n";
+}

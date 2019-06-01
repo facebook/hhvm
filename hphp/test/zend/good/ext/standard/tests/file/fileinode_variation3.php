@@ -1,11 +1,11 @@
 <?php
-/* 
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
+/*
+ * Prototype: int fileinode ( string $filename );
+ * Description: Returns the inode number of the file, or FALSE in case of an error.
+ */
 
 /* Passing file names with different notations, using slashes, wild-card chars */
-
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "*** Testing fileinode() with different notations of file names ***\n";
@@ -24,7 +24,7 @@ $files_arr = array(
   "/fileinode_variation3//fileinode_variation3.tmp",
   "//fileinode_variation3//fileinode_variation3.tmp",
   "/fileinode_variation3/*.tmp",
-  "fileinode_variation3/fileinode*.tmp", 
+  "fileinode_variation3/fileinode*.tmp",
 
   /* Testing Binary safe */
   "/fileinode_variation3/fileinode_variation3.tmp".chr(0),
@@ -46,3 +46,4 @@ $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dir_name = $file_path."/fileinode_variation3";
 unlink($dir_name."/fileinode_variation3.tmp");
 rmdir($dir_name);
+}

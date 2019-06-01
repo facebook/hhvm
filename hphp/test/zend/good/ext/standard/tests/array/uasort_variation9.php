@@ -7,8 +7,6 @@
 /* Testing uasort() functionality with comparison function having arguments as reference
  */
 
-echo "*** Testing uasort() : 'cmp_function' with reference arguments ***\n";
-
 // comparison function
 /* Prototype : int cmp(mixed &$value1, mixed &$value2)
  * Parameters : $value1 and $value2 - values received by reference
@@ -28,6 +26,8 @@ function cmp(&$value1, &$value2)
   else
     return -1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing uasort() : 'cmp_function' with reference arguments ***\n";
 
 // Int array with default keys
 $int_values = array(1, 8, 9, 3, 2, 6, 7);
@@ -42,3 +42,4 @@ var_dump( uasort(&$string_values, 'cmp') );
 var_dump($string_values);
 
 echo "Done";
+}

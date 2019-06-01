@@ -1,22 +1,22 @@
 <?php
 /* Prototype  : proto int fpassthru(resource fp)
- * Description: Output all remaining data from a file pointer 
+ * Description: Output all remaining data from a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzpassthru
  */
-
-echo "*** Testing fpassthru() : usage variations ***\n";
-error_reporting(E_ALL & ~E_NOTICE);
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 class testClass {
    public function __toString() {
       return "testClass";
    }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing fpassthru() : usage variations ***\n";
+error_reporting(E_ALL & ~E_NOTICE);
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 //array of values to iterate over
 $values = array(
@@ -77,3 +77,4 @@ foreach($values as $value) {
 };
 
 echo "Done";
+}

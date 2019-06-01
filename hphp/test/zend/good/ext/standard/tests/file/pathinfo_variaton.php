@@ -1,13 +1,7 @@
 <?php
 /* Prototype: mixed pathinfo ( string $path [, int $options] );
-   Description: Returns information about a file path
-*/
-
-echo "*** Testing pathinfo() with miscelleneous input arguments ***\n";
-
-$fp = fopen(__FILE__, "r");
-unset($fp);
-
+ * Description: Returns information about a file path
+ */
 class object_temp {
   public $url_var = "www.foo.com";
   var $html_var = "/var/html/testdir/example.html";
@@ -15,6 +9,12 @@ class object_temp {
   public $file_var = "/foo//symlink.link";
   var $number = 12345;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing pathinfo() with miscelleneous input arguments ***\n";
+
+$fp = fopen(__FILE__, "r");
+unset($fp);
+
 $obj = new object_temp();
 
 $path_arr = array (
@@ -54,7 +54,7 @@ $paths = array (
   /* pathname as NULL */
   NULL,
   null,
-  
+
   /* filename as resource */
   $fp,
 
@@ -86,3 +86,4 @@ foreach($paths as $path) {
 }
 
 echo "Done\n";
+}

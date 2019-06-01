@@ -3,8 +3,12 @@
    Description: Find pathnames matching a pattern
 */
 
+function sort_var_dump($results) {
+   sort(&$results);
+   var_dump($results);
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing glob() : basic functions ***\n";
-
 $file_path = dirname(__FILE__);
 
 // temp dirname used here
@@ -31,13 +35,10 @@ sort_var_dump( glob($dirname."/*.*") );
 
 echo "Done\n";
 
-function sort_var_dump($results) {
-   sort(&$results);
-   var_dump($results);
-}
 error_reporting(0);
 $file_path = dirname(__FILE__);
 unlink("$file_path/glob_basic/wonder12345");
 unlink("$file_path/glob_basic/wonder.txt");
 unlink("$file_path/glob_basic/file.text");
 rmdir("$file_path/glob_basic/");
+}

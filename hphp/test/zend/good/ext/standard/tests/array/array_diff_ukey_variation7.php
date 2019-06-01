@@ -4,16 +4,16 @@
  * Source code: ext/standard/array.c
  */
 
+function key_compare_func($key1, $key2)
+{
+  return strcasecmp((string)$key1, (string)$key2);
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_diff_ukey() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
 $input_array = array(0 => '0', 10 => '10', -10 => '-10', 20 =>'20');
 $float_indx_array = array(0.0 => '0.0', 10.5 => '10.5', -30.5 => '-30.5');
-
-function key_compare_func($key1, $key2)
-{
-  return strcasecmp((string)$key1, (string)$key2);
-}
 
 echo "\n-- Testing array_diff_ukey() function with float indexed array --\n";
 
@@ -21,3 +21,4 @@ var_dump( array_diff_ukey($float_indx_array, $input_array, 'key_compare_func') )
 var_dump( array_diff_ukey($input_array, $float_indx_array, 'key_compare_func') );
 
 echo "===DONE===\n";
+}

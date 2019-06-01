@@ -1,8 +1,17 @@
 <?php
 /* Prototype: int count ( mixed $var [, int $mode] );
-   Discription: Count elements in an array, or properties in an object
-*/
+ * Description: Count elements in an array, or properties in an object
+ */
+class count_class implements Countable {
+  private $var_private;
+  public $var_public;
+  protected $var_protected;
 
+  public function count() {
+    return 3;
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing basic functionality of count() function ***\n";
 print "-- Testing NULL --\n";
 $arr = NULL;
@@ -28,7 +37,7 @@ print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
 print "COUNT_NORMAL: should be 2, is ".count(array("a", array("b")))."\n";
 
 $arr = array('a'=>array(NULL, NULL, NULL), 1=>array(NULL=>1, 1=>NULL),
-	array(array(array(array(array(NULL))))));
+    array(array(array(array(array(NULL))))));
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 13, is ".count($arr, COUNT_RECURSIVE)."\n";
@@ -44,7 +53,7 @@ $count_array = array(
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
   array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
-	 NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
+     NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
   array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
@@ -75,15 +84,6 @@ print "COUNT_NORMAL: should be 2, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 5, is ".count($arr, COUNT_RECURSIVE)."\n";
 
 echo "\n-- Testing count() on objects with Countable interface --\n";
-class count_class implements Countable {
-  private $var_private;
-  public $var_public;
-  protected $var_protected;
-
-  public function count() {
-    return 3;
-  }
-}
 
 $obj = new count_class();
 print "COUNT_NORMAL: should be 3, is ".count($obj)."\n";
@@ -110,3 +110,4 @@ echo "\nDone";
 /* closing the resource handles */
 fclose( $resource1 );
 closedir( $resource2 );
+}

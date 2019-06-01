@@ -8,6 +8,20 @@
 
 require_once('fopen_include_path.inc');
 
+function runtest() {
+
+   //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists
+   // in the include path. In this case it doesn't so the file should be written in the current dir.
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
+   $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename);
+   echo "$line\n";
+   unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename);
+}
+
+abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
+  public static $filename;
+}
+<<__EntryPoint>> function main() {
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $thisTestDir = $test_dir.'/'.basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
@@ -30,18 +44,5 @@ chdir($oldDirPath);
 rmdir($thisTestDir);
 
 
-function runtest() {
-
-   //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists
-   // in the include path. In this case it doesn't so the file should be written in the current dir.
-   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
-   $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename);
-   echo "$line\n";
-   unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation4::$filename);
-}
-
-abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
-  public static $filename;
-}
-
 echo "===DONE===\n";
+}

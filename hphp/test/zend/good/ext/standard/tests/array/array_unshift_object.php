@@ -9,8 +9,6 @@
  * an object to the $var argument
 */
 
-echo "*** Testing array_unshift() : Passing object to \$var argument ***\n";
-
 // simple class with a variable and method
 class SimpleClass
 {
@@ -58,6 +56,8 @@ class StaticClass
     echo "This is a static method";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_unshift() : Passing object to \$var argument ***\n";
 
 // array to be passed to $array argument
 $array = array('f' => "first", "s" => 'second', 1, 2.222);
@@ -97,3 +97,4 @@ foreach($vars as $var) {
 }
 
 echo "Done";
+}

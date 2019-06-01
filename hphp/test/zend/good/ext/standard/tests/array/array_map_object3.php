@@ -11,10 +11,6 @@
  *   3) child class method using parent class
  *   4) parent class method using child class
  */
-echo "*** Testing array_map() : class methods as callback function ***\n";
-
-$arr1 = array(1, 5, 7);
-
 class ParentClass
 {
   public $var1 = 10;
@@ -26,7 +22,7 @@ class ParentClass
   }
 }
 
-class ChildClass extends ParentClass 
+class ChildClass extends ParentClass
 {
   var $parent_obj;
   public function __construct ( ) {
@@ -40,6 +36,10 @@ class ChildClass extends ParentClass
     return $n;
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_map() : class methods as callback function ***\n";
+
+$arr1 = array(1, 5, 7);
 
 $childobj = new ChildClass();
 $parentobj = new ParentClass();
@@ -57,3 +57,4 @@ echo "-- accessing child method using parent class object --\n";
 var_dump( array_map(array($parentobj, 'staticChild'), $arr1) );
 
 echo "Done";
+}

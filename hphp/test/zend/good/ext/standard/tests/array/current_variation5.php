@@ -5,15 +5,21 @@
  * Alias to functions: pos
  */
 
-echo "*** Testing current() : usage variations ***\n";
-
-echo "\n-- Function: reference parameter --\n";
-
 function current_variation5_ref(&$a)
 {
     var_dump(current(&$a));
     var_dump(next(&$a));
 }
+
+function current_variation5($a)
+{
+    var_dump(current(&$a));
+    var_dump(next(&$a));
+}
+<<__EntryPoint>> function main() {
+echo "*** Testing current() : usage variations ***\n";
+
+echo "\n-- Function: reference parameter --\n";
 
 $a = array('yes', 'maybe', 'no');
 
@@ -23,12 +29,6 @@ current_variation5($a);
 
 echo "\n-- Function: normal parameter --\n";
 
-function current_variation5($a)
-{
-    var_dump(current(&$a));
-    var_dump(next(&$a));
-}
-
 $a = array('yes', 'maybe', 'no');
 
 var_dump(current(&$a));
@@ -36,3 +36,4 @@ var_dump(next(&$a));
 current_variation5($a);
 
 echo "===DONE===\n";
+}

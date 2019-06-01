@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -11,8 +11,6 @@
  * object of child class extending abstract class
  * object of class containing static member
  */
-
-echo "*** Testing array_filter() : object functionality ***\n";
 
 // simple class with members - variable and method
 class SimpleClass
@@ -39,7 +37,7 @@ abstract class AbstractClass
 class ChildClass extends AbstractClass
 {
   private $var3;
-  public function emptyMethod() { 
+  public function emptyMethod() {
     echo "defined in child";
   }
 }
@@ -48,7 +46,7 @@ class ChildClass extends AbstractClass
 class FinalClass
 {
   private $var4;
-  final function finalMethod() { 
+  final function finalMethod() {
     echo 'This can not be overloaded';
   }
 }
@@ -73,11 +71,13 @@ function always_false($input)
 {
   return false;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_filter() : object functionality ***\n";
 
 // 'input' array containing objects as elements
 $input = array(
-  new SimpleClass(), 
-  new EmptyClass(), 
+  new SimpleClass(),
+  new EmptyClass(),
   new ChildClass(),
   new FinalClass(),
   new StaticClass()
@@ -94,3 +94,4 @@ var_dump( array_filter($input, "always_true") );
 var_dump( array_filter($input, "always_false") );
 
 echo "Done";
+}

@@ -5,10 +5,16 @@
  * Source Code: ext/standard/array.c
 */
 
-/* checking for sub-arrays with array_search() */
+class array_search_check {
+  public $array_var = array(1=>"one", "two"=>2, 3=>3);
+  public function foo() {
+    echo "Public function\n";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing sub-arrays with array_search() ***\n";
 $sub_array = array (
-  "one", 
+  "one",
   array(1, 2 => "two", "three" => 3),
   4 => "four",
   "five" => 5,
@@ -16,24 +22,19 @@ $sub_array = array (
 );
 var_dump( array_search("four", $sub_array) );
 //checking for element in a sub-array
-var_dump( array_search(3, $sub_array[1]) ); 
+var_dump( array_search(3, $sub_array[1]) );
 var_dump( array_search(array('','i'), $sub_array) );
 
 /* checking for objects in array_search() */
 echo "\n*** Testing objects with array_search() ***\n";
-class array_search_check {
-  public $array_var = array(1=>"one", "two"=>2, 3=>3);
-  public function foo() {
-    echo "Public function\n";
-  }
-}
 
 $array_search_obj = new array_search_check();  //creating new object
 //error: as wrong datatype for second argument
-var_dump( array_search("array_var", $array_search_obj) ); 
+var_dump( array_search("array_var", $array_search_obj) );
 //error: as wrong datatype for second argument
-var_dump( array_search("foo", $array_search_obj) ); 
+var_dump( array_search("foo", $array_search_obj) );
 //element found as "one" exists in array $array_var
-var_dump( array_search("one", $array_search_obj->array_var) ); 
+var_dump( array_search("one", $array_search_obj->array_var) );
 
 echo "Done\n";
+}

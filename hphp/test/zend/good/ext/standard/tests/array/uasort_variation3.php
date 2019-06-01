@@ -8,8 +8,6 @@
 * Testing uasort() with 'array_arg' having different keys
 */
 
-echo "*** Testing uasort() : Sorting array with all possible keys ***\n";
-
 //comparison function
 /* Prototype : int cmp_function(mixed $value1, mixed $value2)
  * Parameters : $value1 and $value2 - values to be compared
@@ -30,6 +28,8 @@ function cmp_function($value1, $value2)
     return 1;
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing uasort() : Sorting array with all possible keys ***\n";
 
 // different heredoc strings
 //empty heredoc string
@@ -90,3 +90,4 @@ echo "-- Sorted array after uasort() function call --\n";
 var_dump($array_arg);
 
 echo "Done";
+}

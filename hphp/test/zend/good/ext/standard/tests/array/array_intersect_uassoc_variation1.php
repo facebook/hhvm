@@ -4,11 +4,17 @@
  * Source code: ext/standard/array.c
  */
 
-echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
 
-// Initialise function arguments 
-$array2 = array("a" => "green", "yellow", "red");
-$array3 = array("a"=>"green", "brown");
+class classWithoutToString
+{
+}
 
 //Callback function
 function key_compare_func($a, $b) {
@@ -17,6 +23,12 @@ function key_compare_func($a, $b) {
     }
     return ($a > $b) ? 1 : -1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
+
+// Initialise function arguments
+$array2 = array("a" => "green", "yellow", "red");
+$array3 = array("a"=>"green", "brown");
 
 //get an unset variable
 $unset_var = 10;
@@ -24,18 +36,6 @@ unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, "r");
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -105,3 +105,4 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 echo "===DONE===\n";
+}

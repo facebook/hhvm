@@ -5,9 +5,26 @@
  * Alias to functions:
  */
 
-echo "*** Testing file_put_contents() : variation ***\n";
-
 require_once('fopen_include_path.inc');
+
+function runtest() {
+
+
+   //correct php53 behaviour is to ignore the FILE_USE_INCLUDE_PATH unless the file already exists
+   // in the include path. In this case it doesn't so the file should be written in the current dir.
+
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
+   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename, (binary) ". This was appended", FILE_USE_INCLUDE_PATH | FILE_APPEND);
+   $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename);
+   echo "$line\n";
+   unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename);
+}
+
+abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation6 {
+  public static $filename;
+}
+<<__EntryPoint>> function main() {
+echo "*** Testing file_put_contents() : variation ***\n";
 
 $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $thisTestDir = $test_dir.'/'.basename(__FILE__, ".php") . ".dir";
@@ -31,21 +48,5 @@ chdir($oldDirPath);
 rmdir($thisTestDir);
 
 
-function runtest() {
-
-
-   //correct php53 behaviour is to ignore the FILE_USE_INCLUDE_PATH unless the file already exists
-   // in the include path. In this case it doesn't so the file should be written in the current dir.
-
-   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
-   file_put_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename, (binary) ". This was appended", FILE_USE_INCLUDE_PATH | FILE_APPEND);
-   $line = file_get_contents(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename);
-   echo "$line\n";
-   unlink(ZendGoodExtStandardTestsFileFilePutContentsVariation6::$filename);
-}
-
-abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation6 {
-  public static $filename;
-}
-
 echo "===DONE===\n";
+}

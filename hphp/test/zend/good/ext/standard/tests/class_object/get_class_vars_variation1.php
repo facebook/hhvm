@@ -1,27 +1,27 @@
 <?php
 /* Prototype  : array get_class_vars(string class_name)
- * Description: Returns an array of default properties of the class. 
+ * Description: Returns an array of default properties of the class.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing get_class_vars() : usage variation ***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
 {
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing get_class_vars() : usage variation ***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -87,3 +87,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

@@ -6,6 +6,12 @@
  * Alias to functions: count()
  */
 
+//class declaration
+class test
+{
+  public $member1;
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing sizeof() : usage variations ***\n";
 
 echo "--- Testing sizeof() with different values for 'mode' argument ---\n";
@@ -17,12 +23,6 @@ $fp = fopen(__FILE__, "r");
 //unset variable
 $unset_var = 10;
 unset($unset_var);
-
-//class declaration
-class test
-{
-  public $member1;
-}
 
 $mode_values = array (
   /* 1  */  COUNT_NORMAL,
@@ -49,15 +49,15 @@ $mode_values = array (
             new test(),
   /* 22 */  $fp
 );
-  
-// loop through the each element of $modes_array for 'mode' argument 
+
+// loop through the each element of $modes_array for 'mode' argument
 // and check the working of sizeof()
 $counter = 1;
 for($i = 0; $i < count($mode_values); $i++)
 {
   echo "-- Iteration $counter --\n";
   $mode = $mode_values[$i];
-  
+
   try { var_dump( sizeof($array1, $mode) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
   $counter++;
@@ -66,3 +66,4 @@ for($i = 0; $i < count($mode_values); $i++)
 fclose($fp);
 
 echo "Done";
+}

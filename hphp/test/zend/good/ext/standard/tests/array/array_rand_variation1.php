@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -9,6 +9,16 @@
 * to see that function works with unexpeced data and generates warning message as required.
 */
 
+//define a class
+class test
+{
+  var $t = 10;
+  function __toString()
+  {
+    return "object";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_rand() : unexpected values for 'input' parameter ***\n";
 
 // Initialise function arguments
@@ -20,16 +30,6 @@ unset ($unset_var);
 
 //get a resource variable
 $fp = fopen(__FILE__, "r");
-
-//define a class
-class test
-{
-  var $t = 10;
-  function __toString() 
-  {
-    return "object";
-  }
-}
 
 //array of different values for 'input' parameter
 $values = array(
@@ -45,8 +45,8 @@ $values = array(
         -10.5,
         12.3456789000e10,
         12.3456789000E-10,
-        .5,   
-      
+        .5,
+
         // null data
 /*10*/  NULL,
         null,
@@ -78,17 +78,18 @@ $values = array(
 /*23*/  @$unset_var,
 );
 
-/* loop through each element of the array to test array_rand() function 
+/* loop through each element of the array to test array_rand() function
  * for different values for 'input' argument
 */
 $count = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
   var_dump( array_rand($value,$num_req) );
-  $count++; 
+  $count++;
 };
 
 // closing the resource
 fclose($fp);
 
 echo "Done";
+}

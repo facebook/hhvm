@@ -1,10 +1,10 @@
 <?php
 /*
-Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
-Description: PHP supports a portable way of locking complete files
-  in an advisory way
-*/
-
+ * Prototype: bool flock(resource $handle, int $operation [, int &$wouldblock]);
+ * Description: PHP supports a portable way of locking complete files
+ * in an advisory way
+ */
+<<__EntryPoint>> function main() {
 echo "*** Testing error conditions ***\n";
 
 $file = dirname(__FILE__)."/flock.tmp";
@@ -49,3 +49,4 @@ echo "\n*** Done ***\n";
 error_reporting(0);
 $file = dirname(__FILE__)."/flock.tmp";
 unlink($file);
+}

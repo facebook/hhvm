@@ -1,14 +1,12 @@
 <?php
 /* Prototype  : bool usort(&array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
 /*
  * Pass an array with duplicate keys and values to usort() to test behaviour
  */
-
-echo "*** Testing usort() : usage variation ***\n";
 
 function cmp($value1, $value2)
 {
@@ -21,10 +19,12 @@ function cmp($value1, $value2)
   else
     return -1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing usort() : usage variation ***\n";
 
 // Array with duplicate string and integer keys and values
-$array_arg = array(0 => 2,     "a" => 8, "d" => 9, 
-                   3 => 3,     5 => 2,   "o" => 6, 
+$array_arg = array(0 => 2,     "a" => 8, "d" => 9,
+                   3 => 3,     5 => 2,   "o" => 6,
                    "z" => -99, 0 => 1,   "z" => 3);
 
 echo "\n-- Array with duplicate keys --\n";
@@ -38,3 +38,4 @@ echo "\n-- Array with default/assigned keys --\n";
 var_dump( usort(&$array_arg, 'cmp') );
 var_dump($array_arg);
 echo "===DONE===\n";
+}

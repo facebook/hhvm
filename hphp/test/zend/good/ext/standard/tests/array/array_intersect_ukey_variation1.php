@@ -1,14 +1,20 @@
 <?php
 /* Prototype  : array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
- * Description: Computes the intersection of arrays using a callback function on the keys for comparison. 
+ * Description: Computes the intersection of arrays using a callback function on the keys for comparison.
  * Source code: ext/standard/array.c
  */
 
-echo "*** Testing array_intersect_ukey() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
 
-//Initialise arguments
-$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
-$array3 = array('green' => 5, 'cyan'   => 8);
+class classWithoutToString
+{
+}
 
 //Call back function
 function key_compare_func($key1, $key2)
@@ -16,8 +22,14 @@ function key_compare_func($key1, $key2)
     if ($key1 == $key2)
         return 0;
     else
-        return ($key1 > $key2)? 1:-1; 
+        return ($key1 > $key2)? 1:-1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_intersect_ukey() : usage variation ***\n";
+
+//Initialise arguments
+$array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
+$array3 = array('green' => 5, 'cyan'   => 8);
 
 //get an unset variable
 $unset_var = 10;
@@ -25,18 +37,6 @@ unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, "r");
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -103,3 +103,4 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 echo "===DONE===\n";
+}

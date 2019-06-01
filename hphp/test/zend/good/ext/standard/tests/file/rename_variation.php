@@ -1,6 +1,6 @@
 <?php
-
 /* creating directory */
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 mkdir("$file_path/rename_variation");
 
@@ -24,16 +24,17 @@ foreach($src_filenames as $src_filename) {
   fclose($fp);
   $dest_filename = "$file_path/rename_variation.phpt2.tmp";
   var_dump( rename($src_filename, $dest_filename) );
-  // ensure that file got renamed to new name 
+  // ensure that file got renamed to new name
   var_dump( file_exists($src_filename) );  // expecting false
   var_dump( file_exists($dest_filename) );  // expecting true
   $counter++;
- 
-  // unlink the file  
+
+  // unlink the file
   unlink($dest_filename);
 }
 
 // clean the temp dir and file
-rmdir("$file_path/rename_variation"); 
+rmdir("$file_path/rename_variation");
 
 echo "Done\n";
+}

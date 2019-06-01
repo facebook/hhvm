@@ -1,9 +1,9 @@
 <?php
 /*
-Prototype: int fileinode ( string $filename );
-Description: Returns the inode number of the file, or FALSE in case of an error.
-*/
-
+ * Prototype: int fileinode ( string $filename );
+ * Description: Returns the inode number of the file, or FALSE in case of an error.
+ */
+<<__EntryPoint>> function main() {
 echo "*** Testing fileinode() with files, links and directories ***\n";
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $file1 = $file_path."/fileinode1_variation.tmp";
@@ -76,4 +76,4 @@ rmdir("$file_path/dir/subdir");
 rmdir("$file_path/dir");
 
 echo "\n*** Done ***";
-
+}

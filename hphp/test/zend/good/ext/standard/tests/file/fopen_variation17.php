@@ -1,12 +1,48 @@
 <?php
 /* Prototype  : resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
- * Description: Open a file or a URL and return a file pointer 
+ * Description: Open a file or a URL and return a file pointer
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 require_once('fopen_include_path.inc');
 
+function runtest() {
+
+
+    $extraDir = "extraDir17";
+
+    mkdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
+    mkdir($extraDir);
+
+    $tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
+    $h = fopen($tmpfile, "w+", true);
+    fwrite($h, (binary) "This is the test file");
+    fclose($h);
+
+    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
+    if ($h === false) {
+       echo "Not created in dir1\n";
+    }
+    else {
+       echo "created in dir1\n";
+       fclose($h);
+    }
+
+    $h = fopen($tmpfile, "r", true);
+    if ($h === false) {
+       echo "could not find file for reading\n";
+    }
+    else {
+       echo "found file for reading\n";
+       fclose($h);
+    }
+
+    unlink($tmpfile);
+        rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
+        rmdir($extraDir);
+}
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $thisTestDir = $file_path.'.'.basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
@@ -26,40 +62,5 @@ restore_include_path();
 chdir($oldDirPath);
 rmdir($thisTestDir);
 
-function runtest() {
-
-       
-    $extraDir = "extraDir17";
-
-    mkdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
-    mkdir($extraDir);
-    
-	$tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
-	$h = fopen($tmpfile, "w+", true);
-	fwrite($h, (binary) "This is the test file");
-	fclose($h);
-	
-	$h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
-	if ($h === false) {
-	   echo "Not created in dir1\n";
-	}
-	else {
-	   echo "created in dir1\n";
-	   fclose($h);
-	}
-
-	$h = fopen($tmpfile, "r", true);
-	if ($h === false) {
-	   echo "could not find file for reading\n";
-	}
-	else {
-	   echo "found file for reading\n";
-	   fclose($h);
-	}
-	
-	unlink($tmpfile);   
-        rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
-        rmdir($extraDir);	
-}
-
 echo "===DONE===\n";
+}

@@ -5,9 +5,24 @@
  * Alias to functions:
  */
 
-echo "*** Testing file_get_contents() : variation ***\n";
-
 require_once('fopen_include_path.inc');
+
+function runtest() {
+
+   $h = fopen(ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile, "w");
+   fwrite($h, "File in include path");
+   fclose($h);
+   $line = file_get_contents(ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename, true);
+   echo "$line\n";
+   unlink(ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile);
+}
+
+abstract final class ZendGoodExtStandardTestsFileFileGetContentsVariation1 {
+  public static $secondFile;
+  public static $filename = "file_get_contents_variation1.txt";
+}
+<<__EntryPoint>> function main() {
+echo "*** Testing file_get_contents() : variation ***\n";
 
 // this doesn't create the include dirs in this directory
 // we change to this to ensure we are not part of the
@@ -28,19 +43,5 @@ chdir("..");
 rmdir($thisTestDir);
 
 
-function runtest() {
-
-   $h = fopen(ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile, "w");
-   fwrite($h, "File in include path");
-   fclose($h);
-   $line = file_get_contents(ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename, true);
-   echo "$line\n";
-   unlink(ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile);
-}
-
-abstract final class ZendGoodExtStandardTestsFileFileGetContentsVariation1 {
-  public static $secondFile;
-  public static $filename = "file_get_contents_variation1.txt";
-}
-
 echo "===DONE===\n";
+}

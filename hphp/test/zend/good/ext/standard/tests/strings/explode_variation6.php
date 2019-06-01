@@ -4,7 +4,15 @@
  * Description: Split a string by string.
  * Source code: ext/standard/string.c
 */
-
+function test_explode($delim, $string, $limit)
+{
+    $e = explode($delim, $string, $limit);
+    foreach ( $e as $v)
+    {
+        var_dump(bin2hex($v));
+    }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing explode() function: misc tests ***\n";
 
 $str = "one\x00two\x00three\x00four";
@@ -27,12 +35,5 @@ $e = test_explode("\x00", $str, -1);
 echo "\n-- large limit = -100 --\n";
 $e = test_explode("\x00", $str, 100);
 
-function test_explode($delim, $string, $limit)
-{
-	$e = explode($delim, $string, $limit);
-	foreach ( $e as $v) 
-	{
-		var_dump(bin2hex($v));
-	}	
-}
 echo "===DONE===\n";
+}

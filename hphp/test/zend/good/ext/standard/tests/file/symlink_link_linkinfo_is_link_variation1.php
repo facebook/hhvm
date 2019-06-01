@@ -13,7 +13,14 @@
 */
 
 /* Variation 1 : Creating links across directories where linkname is stored as an object and array member */
+class object_temp {
+  var $linkname;
+  function __construct($link) {
+    $this->linkname = $link;
+  }
+}
 
+<<__EntryPoint>> function main() {
 // creating temp directory which will contain temp file and links created
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1/test/home";
@@ -25,13 +32,6 @@ $fp = fopen($filename, "w");
 fclose($fp);
 
 echo "*** Testing symlink(), link(), linkinfo() and is_link() with linknames stored as members in an object ***\n";
-class object_temp {
-  var $linkname;
-  function __construct($link) {
-    $this->linkname = $link;
-  }
-}
-
 $obj = new object_temp("$dirname/symlink_link_linkinfo_is_link_link.tmp");
 /* Testing on soft links */
 echo "\n-- Working with soft links --\n";
@@ -97,3 +97,4 @@ unlink("$dirname/symlink_link_linkinfo_is_link_variation1.tmp");
 rmdir("$dirname/test/home");
 rmdir("$dirname/test");
 rmdir($dirname);
+}

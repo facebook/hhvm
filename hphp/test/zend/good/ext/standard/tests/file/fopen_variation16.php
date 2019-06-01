@@ -7,6 +7,43 @@
 
 require_once('fopen_include_path.inc');
 
+function runtest() {
+
+
+    $extraDir = "extraDir16";
+
+    mkdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
+    mkdir($extraDir);
+
+    $tmpfile = $extraDir.'/fopen_variation16.tmp';
+
+    $h = fopen($tmpfile, "w+", true);
+    fwrite($h, (binary) "This is the test file");
+    fclose($h);
+
+    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
+    if ($h === false) {
+       echo "Not created in dir1\n";
+    }
+    else {
+       echo "created in dir1\n";
+       fclose($h);
+    }
+
+    $h = fopen($tmpfile, "r", true);
+    if ($h === false) {
+       echo "could not find file for reading\n";
+    }
+    else {
+       echo "found file - not in dir1\n";
+       fclose($h);
+    }
+
+    unlink($tmpfile);
+    rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
+    rmdir($extraDir);
+}
+<<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 $thisTestDir = $file_path."/fopenVariation16.dir";
 mkdir($thisTestDir);
@@ -26,41 +63,5 @@ restore_include_path();
 chdir($oldDirPath);
 rmdir($thisTestDir);
 
-function runtest() {
-
-
-    $extraDir = "extraDir16";
-
-    mkdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
-    mkdir($extraDir);
-
-	$tmpfile = $extraDir.'/fopen_variation16.tmp';
-
-	$h = fopen($tmpfile, "w+", true);
-	fwrite($h, (binary) "This is the test file");
-	fclose($h);
-
-	$h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
-	if ($h === false) {
-	   echo "Not created in dir1\n";
-	}
-	else {
-	   echo "created in dir1\n";
-	   fclose($h);
-	}
-
-	$h = fopen($tmpfile, "r", true);
-	if ($h === false) {
-	   echo "could not find file for reading\n";
-	}
-	else {
-	   echo "found file - not in dir1\n";
-	   fclose($h);
-	}
-
-	unlink($tmpfile);
-    rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
-    rmdir($extraDir);
-}
-
 echo "===DONE===\n";
+}

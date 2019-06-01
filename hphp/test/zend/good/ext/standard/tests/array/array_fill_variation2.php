@@ -1,22 +1,12 @@
 <?php
 /* Prototype  : proto array array_fill(int start_key, int num, mixed val)
- * Description: Create an array containing num elements starting with index start_key each initialized to val 
+ * Description: Create an array containing num elements starting with index start_key each initialized to val
  * Source code: ext/standard/array.c
  */
 
 /*
- * testing array_fill() by passing different unexpected values for 'num' argument  
+ * testing array_fill() by passing different unexpected values for 'num' argument
  */
-
-echo "*** Testing array_fill() : usage variations ***\n";
-
-// Initialise function arguments not being substituted 
-$start_key = 0;
-$val = 100;
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 //define a class
 class test
@@ -27,6 +17,16 @@ class test
     return "testObject";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_fill() : usage variations ***\n";
+
+// Initialise function arguments not being substituted
+$start_key = 0;
+$val = 100;
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 
 //array of different  values for 'num' argument
@@ -85,8 +85,9 @@ for($index = 0; $index < count($values); $index ++)
   $num = $values[$index];
 
   try { var_dump( array_fill($start_key,$num,$val) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
- 
+
   $counter ++;
 }
 
 echo "Done";
+}

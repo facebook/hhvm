@@ -1,10 +1,22 @@
 <?php
 /* Prototype  : mixed array_product(array input)
- * Description: Returns the product of the array entries 
+ * Description: Returns the product of the array entries
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing array_product() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -12,18 +24,6 @@ echo "*** Testing array_product() : usage variation ***\n";
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -89,3 +89,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

@@ -1,14 +1,21 @@
 <?php
 /* Prototype  : array array_diff_uassoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Computes the difference of arrays with additional index check which is performed by a 
- * 				user supplied callback function
+ * Description: Computes the difference of arrays with additional index check which is performed by a
+ *                 user supplied callback function
  * Source code: ext/standard/array.c
  */
 
-echo "*** Testing array_diff_uassoc() : usage variation ***\n";
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
 
-//Initialize variables
-$array2 = array("a" => "green", "yellow", "red");
+class classWithoutToString
+{
+}
 
 function key_compare_func($a, $b)
 {
@@ -17,6 +24,11 @@ function key_compare_func($a, $b)
     }
     return ($a > $b)? 1:-1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_diff_uassoc() : usage variation ***\n";
+
+//Initialize variables
+$array2 = array("a" => "green", "yellow", "red");
 
 //get an unset variable
 $unset_var = 10;
@@ -24,18 +36,6 @@ unset ($unset_var);
 
 //resource variable
 $fp = fopen(__FILE__, "r");
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -105,3 +105,4 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 echo "===DONE===\n";
+}

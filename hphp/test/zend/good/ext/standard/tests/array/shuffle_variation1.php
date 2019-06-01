@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool shuffle(&array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
@@ -8,16 +8,6 @@
 * Test behaviour of shuffle() when unexpected values are passed for 'array_arg'
 * argument and verify that function outputs required warning messages wherever applicable
 */
-
-echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
-
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
-//get a resource variable
-$fp = fopen(__FILE__, "r");
 
 //define a class
 class test
@@ -28,6 +18,16 @@ class test
     return "object";
   }
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing shuffle() : with unexpected values for 'array_arg' argument ***\n";
+
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
+
+//get a resource variable
+$fp = fopen(__FILE__, "r");
 
 //array of values to iterate over
 $values = array(
@@ -89,3 +89,4 @@ foreach($values as $value) {
 fclose($fp);
 
 echo "Done";
+}

@@ -8,34 +8,34 @@
  * Test basic functionality of rsort() with objects
  */
 
-echo "*** Testing rsort() : object functionality ***\n";
-
 // class declaration for integer objects
 class for_integer_rsort
 {
-	public $class_value;
-	// initializing object member value
-	function __construct($value){
-		$this->class_value = $value;
-	}
+    public $class_value;
+    // initializing object member value
+    function __construct($value){
+        $this->class_value = $value;
+    }
 
 }
 
 // class declaration for string objects
 class for_string_rsort
 {
-	public $class_value;
-	// initializing object member value
-	function __construct($value){
-		$this->class_value = $value;
-	}
+    public $class_value;
+    // initializing object member value
+    function __construct($value){
+        $this->class_value = $value;
+    }
 
-	// return string value
-	function __tostring() {
-		return (string)$this->value;
-	}
+    // return string value
+    function __tostring() {
+        return (string)$this->value;
+    }
 
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing rsort() : object functionality ***\n";
 
 // array of integer objects
 $unsorted_int_obj = array(
@@ -77,3 +77,4 @@ var_dump(rsort(&$temp_array, SORT_REGULAR) );
 var_dump($temp_array);
 
 echo "Done";
+}

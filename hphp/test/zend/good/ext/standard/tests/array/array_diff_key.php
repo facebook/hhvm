@@ -1,4 +1,11 @@
 <?php
+
+function comp_func($a, $b) {
+        if ($a === $b) return 0;
+        return ($a > $b)? 1:-1;
+
+}
+<<__EntryPoint>> function main() {
 $a = array(1, 6, 2, -20, 15, 1200, -2500);
 $b = array(0, 7, 2, -20, 11, 1100, -2500);
 $c = array(0, 6, 2, -20, 19, 1000, -2500);
@@ -52,9 +59,4 @@ var_dump(array_diff_ukey($b_f, $d_f, "comp_func"));//0, 7, 2, 11, 1100, -2500
 echo "------ Test $i --------\n";$i++;// 9
 var_dump(array_diff_key($b_f, $c_f, $d_f));// 7, 11, 1100
 var_dump(array_diff_ukey($b_f, $c_f,  $d_f, "comp_func"));// 7, 11, 1000
-
-function comp_func($a, $b) {
-        if ($a === $b) return 0;
-        return ($a > $b)? 1:-1;
-
 }

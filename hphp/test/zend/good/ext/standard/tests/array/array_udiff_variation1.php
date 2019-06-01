@@ -1,33 +1,33 @@
 <?php
 /* Prototype  : array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing array_udiff() : usage variation ***\n";
-
-// Initialise function arguments not being substituted (if any)
-$arr2 = array(1, 2);
-
-include('compare_function.inc');
-$data_comp_func = 'compare_function';
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
 {
 }
+<<__EntryPoint>> function main() {
+include('compare_function.inc');
+echo "*** Testing array_udiff() : usage variation ***\n";
+
+// Initialise function arguments not being substituted (if any)
+$arr2 = array(1, 2);
+
+$data_comp_func = 'compare_function';
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -93,3 +93,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

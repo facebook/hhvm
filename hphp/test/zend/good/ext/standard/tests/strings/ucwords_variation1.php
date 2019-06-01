@@ -5,9 +5,16 @@
 */
 
 /*
- * Test ucwords() by passing different values including scalar and non scalar values 
+ * Test ucwords() by passing different values including scalar and non scalar values
 */
 
+class my
+{
+  function __toString() {
+    return "myString";
+  }
+}
+<<__EntryPoint>> function main() {
 echo "*** Testing ucwords() : usage variations ***\n";
 // initialize all required variables
 
@@ -16,13 +23,6 @@ $unset_var = 'string_val';
 unset($unset_var);
 
 $fp = fopen(__FILE__, "r");
-
-class my
-{
-  function __toString() {
-    return "myString";
-  }
-}
 
 // array with different values
 $values =  array (
@@ -33,7 +33,7 @@ $values =  array (
   12345,
   -2345,
 
-  // hex values 
+  // hex values
   0x10,
   0X20,
   0xAA,
@@ -74,12 +74,12 @@ $values =  array (
   NULL,
   null,
 
-  // hex in string 
+  // hex in string
   "0x123",
   '0x123',
   "0xFF12",
   "-0xFF12",
-  
+
   // undefined variable
   @$undefined_var,
 
@@ -106,3 +106,4 @@ for($index = 0; $index < count($values); $index ++) {
 // close the file handle
 fclose($fp);
 echo "Done\n";
+}

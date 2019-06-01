@@ -4,14 +4,6 @@
  * Source code: ext/standard/array.c
  */
 
-echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
-
-//Initialize variables
-$arr_default_int = array(1, 2 );
-$arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00);
-$arr_string = array('1', '2', '3');
-$arr_string_float = array('1.00', '2.00');
-
 function key_compare_func($a, $b)
 {
     if ($a === $b) {
@@ -19,6 +11,14 @@ function key_compare_func($a, $b)
     }
     return ($a > $b)? 1:-1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
+
+//Initialize variables
+$arr_default_int = array(1, 2 );
+$arr_float = array(0 => 1.00, 1.00 => 2.00, 2.00 => 3.00);
+$arr_string = array('1', '2', '3');
+$arr_string_float = array('1.00', '2.00');
 
 echo "\n-- Result of integers and floating point intersection --\n";
 var_dump( array_intersect_uassoc($arr_default_int, $arr_float, "key_compare_func") );
@@ -29,3 +29,4 @@ var_dump( array_intersect_uassoc($arr_default_int, $arr_string, "key_compare_fun
 echo "\n-- Result of integers and strings containing floating points intersection --\n";
 var_dump( array_intersect_uassoc($arr_default_int, $arr_string_float, "key_compare_func") );
 echo "===DONE===\n";
+}

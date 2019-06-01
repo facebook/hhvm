@@ -1,14 +1,12 @@
 <?php
 /* Prototype  : bool usort(&array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
 /*
  * Test basic functionality of usort() with indexed and associative arrays
  */
-
-echo "*** Testing usort() : basic functionality ***\n";
 
 function cmp($value1, $value2)
 {
@@ -21,6 +19,8 @@ function cmp($value1, $value2)
   else
     return -1;
 }
+<<__EntryPoint>> function main() {
+echo "*** Testing usort() : basic functionality ***\n";
 
 // Int array with default keys
 $int_values = array(1, 8, 9, 3, 2, 6, 7);
@@ -50,3 +50,4 @@ echo "\n-- Associative array with string keys --\n";
 var_dump( usort(&$string_key_arg, 'cmp') );
 var_dump($string_key_arg);
 echo "===DONE===\n";
+}

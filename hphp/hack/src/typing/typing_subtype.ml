@@ -2555,7 +2555,10 @@ let ty_equal_shallow ty1 ty2 =
     ak1 = ak2
   | _ -> false
 
-let bind_to_equal_bound ~freshen env var =
+let try_bind_to_equal_bound ~freshen env var =
+  if tyvar_is_solved env var
+  then env
+  else
   Env.log_env_change "bind_to_equal_bound" env @@
   let expand_all tyset = Typing_set.map
     (fun ty -> let _, ty = Env.expand_type env ty in ty) tyset in
@@ -2586,6 +2589,24 @@ let bind_to_equal_bound ~freshen env var =
           bind env var ty
         else env) lower_bounds env) upper_bounds env
 
+(* Always solve a type variable. We force to the lower bounds, because it
+ * produces a "more specific" type, and we don't have support for intersections
+ * of upper bounds
+ *)
+let rec always_solve_tyvar ~freshen env r var =
+  (* If there is a type that is both a lower and upper bound, force to that type *)
+  let env = try_bind_to_equal_bound ~freshen env var in
+  if tyvar_is_solved env var
+  then env
+  else
+  let tyvar_info = Env.get_tyvar_info env var in
+  let r = if r = Reason.Rnone then Reason.Rwitness tyvar_info.Env.tyvar_pos else r in
+  let env = bind_to_lower_bound ~freshen env r var tyvar_info.Env.lower_bounds in
+  let env, ety = Env.expand_var env r var in
+  match ety with
+  | _, Tvar var' when var <> var' -> always_solve_tyvar ~freshen env r var
+  | _ -> env
+
 (* Use the variance information about a type variable to force a solution.
  *   (1) If the type variable is bounded by t1, ..., tn <: v and it appears only
  *   covariantly or not at all in the expression type then
@@ -2600,13 +2621,14 @@ let bind_to_equal_bound ~freshen env var =
  *   there exist i, j such that uj <: ti, which implies ti == uj and allows
  *   us to set v := ti.
  *)
-let solve_tyvar ~freshen ~force_solve env r var =
+let solve_tyvar_wrt_variance env r var =
   Typing_log.(log_with_level env "prop" 2 (fun () ->
     log_types (Reason.to_pos r) env
-    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar force_solve=%b #%d"
-      force_solve var, [])]));
+    [Log_head (Printf.sprintf "Typing_subtype.solve_tyvar_wrt_variance #%d"
+      var, [])]));
 
-  (* Don't try and solve twice *)
+  (* If there is a type that is both a lower and upper bound, force to that type *)
+  let env = try_bind_to_equal_bound ~freshen:false env var in
   if tyvar_is_solved env var
   then env
   else
@@ -2617,27 +2639,21 @@ let solve_tyvar ~freshen ~force_solve env r var =
   | true, false
   | false, false ->
     (* As in Local Type Inference by Pierce & Turner, if type variable does
-     * not appear at all, or only appears covariantly, force to lower bound
+     * not appear at all, or only appears covariantly, solve to lower bound
      *)
     bind_to_lower_bound ~freshen:false env r var lower_bounds
   | false, true ->
     (* As in Local Type Inference by Pierce & Turner, if type variable
-     * appears only contravariantly, force to upper bound
+     * appears only contravariantly, solve to upper bound
      *)
     bind_to_upper_bound env r var upper_bounds
   | true, true ->
-    (* As in Local Type Inference by Pierce & Turner, if type variable
-     * appears both covariantly and contravariantly and there is a type that
-     * is both a lower and upper bound, force to that type
-     *)
-    let env = bind_to_equal_bound ~freshen env var in
-    if not (tyvar_is_solved env var) && force_solve
-    then bind_to_lower_bound ~freshen env r var lower_bounds
-    else env
+    (* Not ready to solve yet! *)
+    env
 
-let solve_tyvar ~freshen ~force_solve env r var =
+let solve_tyvar_wrt_variance env r var =
   let rec solve_until_concrete_ty env v =
-    let env = solve_tyvar ~force_solve ~freshen env r v in
+    let env = solve_tyvar_wrt_variance env r v in
     let env, ety = Env.expand_var env r v in
     match ety with
     | _, Tvar v' when v <> v' -> solve_until_concrete_ty env v'
@@ -2649,8 +2665,7 @@ let solve_all_unsolved_tyvars env =
   Env.log_env_change "solve_all_unsolved_tyvars" env @@
     IMap.fold
     (fun tyvar _ env ->
-      solve_tyvar ~freshen:false ~force_solve:true
-        env Reason.Rnone tyvar) env.Env.tvenv env
+      always_solve_tyvar ~freshen:false env Reason.Rnone tyvar) env.Env.tvenv env
 
 (* Expand an already-solved type variable, and solve an unsolved type variable
  * by binding it to the union of its lower bounds, with covariant and contravariant
@@ -2662,7 +2677,7 @@ let solve_all_unsolved_tyvars env =
 let expand_type_and_solve env ~description_of_expected p ty =
   let env', ety = Typing_utils.simplify_unions env ty
     ~on_tyvar:(fun env r v ->
-      let env = solve_tyvar ~force_solve:true ~freshen:true env r v in
+      let env = always_solve_tyvar ~freshen:true env r v in
       Env.expand_var env r v) in
     match ty, ety with
     | (r, Tvar v), (_, Tunion []) when Env.get_tyvar_appears_invariantly env v ->
@@ -2674,7 +2689,7 @@ let expand_type_and_solve env ~description_of_expected p ty =
 let expand_type_and_solve_eq env ty =
   Typing_utils.simplify_unions env ty
     ~on_tyvar:(fun env r v ->
-      let env = bind_to_equal_bound ~freshen:true env v in
+      let env = try_bind_to_equal_bound ~freshen:true env v in
       Env.expand_var env r v)
 
 (* When applied to concrete types (typically classes), the `widen_concrete_type`
@@ -2764,15 +2779,14 @@ let expand_type_and_narrow env ~description_of_expected widen_concrete_type p ty
         (fun _ ->
           expand_type_and_solve env ~description_of_expected p ty)
 
-(* Solve type variables on top of stack, without losing completeness, and pop
- * variables off the stack
+(* Solve type variables on top of stack, without losing completeness (by using
+ * their variance), and pop variables off the stack
  *)
 let close_tyvars_and_solve env =
   let tyvars = Env.get_current_tyvars env in
   let env = Env.close_tyvars env in
   List.fold_left tyvars ~init:env
-    ~f:(fun env tyvar -> solve_tyvar ~freshen:false ~force_solve:false
-      env Reason.Rnone tyvar)
+    ~f:(fun env tyvar -> solve_tyvar_wrt_variance env Reason.Rnone tyvar)
 
 let log_prop env =
   let filename = Pos.filename (Pos.to_absolute env.Env.function_pos) in

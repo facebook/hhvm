@@ -132,10 +132,56 @@ function test_error_on_invalid_input() {
   }
 }
 
+function test_multiple_gzstream() {
+  $filename = tempnam(sys_get_temp_dir(), '');
+  $s = "";
+  for($i = 0; $i < 256; $i++) {
+    $s .= "The quick brown fox jumps over the lazy dog. ";
+  }
+  $stream = gzencode($s);
+  $final_stream = "";
+  for($i = 0; $i < 256; $i++) {
+    $final_stream .= $stream;
+  }
+
+  $handle = fopen($filename, "w");
+  fwrite($handle, $final_stream);
+  fclose($handle);
+
+  printf("-----\nTesting multiple gz streams\n");
+  $handle = fopen($filename, "r");
+  $decompressor = new __SystemLib\ChunkedGunzipper();
+  $uncompressed_len = 0;
+  $stream_count = 1;
+  while (!feof($handle)) {
+    $chunk = fread($handle, 16384);
+    $remaining = strlen($chunk);
+    while ($remaining > 0) {
+      $uncompressed_len += strlen($decompressor->inflateChunk($chunk));
+      $remaining = $decompressor->getUndecompressedByteCount();
+      if ($remaining > 0) {
+        $offset = strlen($chunk) - $remaining;
+        $chunk = substr($chunk, $offset);
+      }
+      // For sufficiently large compressed chunk and smaller streams,
+      // one chunk can span multiple streams
+      if ($decompressor->eof()) {
+        $decompressor->close();
+        if (!feof($handle) || $remaining > 0) {
+          $decompressor = new __SystemLib\ChunkedGunzipper();
+          $stream_count += 1;
+        }
+      }
+    }
+  }
+  printf("Uncompressed length: %d, totaling %d streams\n", $uncompressed_len, $stream_count);
+}
+
 function main() {
   test_random_string();
   test_highly_compressed_string();
   test_error_on_invalid_input();
+  test_multiple_gzstream();
 }
 
 <<__EntryPoint>>

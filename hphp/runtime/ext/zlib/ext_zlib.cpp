@@ -536,6 +536,10 @@ struct ChunkedDecompressor {
     }
   }
 
+  int getUndecompressedByteCount() {
+    return m_zstream.avail_in;
+  }
+
  private:
   ::z_stream m_zstream;
   bool m_eof;
@@ -575,6 +579,12 @@ void HHVM_METHOD(ChunkedInflator, close) {
   return data->close();
 }
 
+int HHVM_METHOD(ChunkedInflator, getUndecompressedByteCount) {
+  FETCH_CHUNKED_INFLATOR(data, this_);
+  assertx(data);
+  return data->getUndecompressedByteCount();
+}
+
 #define FETCH_CHUNKED_GUNZIPPER(dest, src) \
   auto dest = Native::data<ChunkedGunzipper>(src);
 
@@ -596,6 +606,12 @@ void HHVM_METHOD(ChunkedGunzipper, close) {
   FETCH_CHUNKED_GUNZIPPER(data, this_);
   assertx(data);
   return data->close();
+}
+
+int HHVM_METHOD(ChunkedGunzipper, getUndecompressedByteCount) {
+  FETCH_CHUNKED_GUNZIPPER(data, this_);
+  assertx(data);
+  return data->getUndecompressedByteCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -651,12 +667,16 @@ struct ZlibExtension final : Extension {
                   HHVM_MN(ChunkedInflator, inflateChunk));
     HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, close,
                   HHVM_MN(ChunkedInflator, close));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedInflator, getUndecompressedByteCount,
+                  HHVM_MN(ChunkedInflator, getUndecompressedByteCount));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, eof,
                   HHVM_MN(ChunkedGunzipper, eof));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, inflateChunk,
                   HHVM_MN(ChunkedGunzipper, inflateChunk));
     HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, close,
                   HHVM_MN(ChunkedGunzipper, close));
+    HHVM_NAMED_ME(__SystemLib\\ChunkedGunzipper, getUndecompressedByteCount,
+                  HHVM_MN(ChunkedGunzipper, getUndecompressedByteCount));
 
     Native::registerNativeDataInfo<ChunkedInflator>(
       s_SystemLib_ChunkedInflator.get());

@@ -78,3 +78,6 @@ inflateChunk() threw an exception: Exception("zlib error status=-3 msg="incorrec
 -----
 Testing bunzipper exception
 inflateChunk() threw an exception: Exception("bz2 error status=-5")
+-----
+Testing multiple gz streams
+Uncompressed length: 2949120, totaling 256 streams

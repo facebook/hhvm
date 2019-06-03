@@ -112,20 +112,14 @@ let this_of ty = Tabstract (AKdependent `this, Some ty)
 (*****************************************************************************)
 
 let is_option env ty =
-  let null =  Typing_make_type.null Reason.Rnone in
+  let null =  MakeType.null Reason.Rnone in
   is_sub_type_alt ~no_top_bottom:true env null ty = Some true
 
 let is_mixed env ty =
-  let mixed = Typing_make_type.mixed Reason.Rnone in
+  let mixed = MakeType.mixed Reason.Rnone in
   is_sub_type_alt ~no_top_bottom:true env mixed ty = Some true
 
 let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
-
-let is_shape_field_optional { sft_optional; sft_ty = _ } = sft_optional
-
-let is_class ty = match snd ty with
-  | Tclass _ -> true
-  | _ -> false
 
 (* Grab all supertypes of a given type, recursively *)
 let get_all_supertypes env ty =
@@ -208,7 +202,7 @@ let try_over_concrete_supertypes env ty f =
 (* Dynamicism  *)
 (*****************************************************************************)
 let is_dynamic env ty =
-  let dynamic = Typing_make_type.dynamic Reason.Rnone in
+  let dynamic = MakeType.dynamic Reason.Rnone in
   is_sub_type_alt ~no_top_bottom:true env dynamic ty = Some true &&
   not (is_mixed env ty)
 
@@ -310,12 +304,6 @@ let uerror env r1 ty1 r2 ty2 =
     Errors.violated_constraint p tparam left right
   | _ -> Errors.unify_error left right
 
-(*****************************************************************************)
-(* Applies a function to 2 shapes simultaneously, raises an error if
- * the second argument has less fields than the first.
- *)
-(*****************************************************************************)
-
 let get_printable_shape_field_name = Env.get_shape_field_name
 
 (* Traverses two shapes structurally, parameterized by functions to run on
@@ -393,7 +381,7 @@ let apply_shape
   end in
   ShapeMap.fold begin fun name shape_field_type_1 (env, acc) ->
     match ShapeMap.get name fdm2 with
-    | None when is_shape_field_optional shape_field_type_1 ->
+    | None when shape_field_type_1.sft_optional ->
         let can_omit = match fields_known2 with
           | FieldsFullyKnown -> true
           | FieldsPartiallyKnown unset_fields ->
@@ -426,11 +414,6 @@ let shape_field_name_ env field =
         Error `Expected_class)
     | _ -> Error `Invalid_shape_field_name
 
-let maybe_shape_field_name env field =
-  match shape_field_name_ env field with
-    | Ok x -> Some x
-    | Error _ -> None
-
 let shape_field_name env (p, field) =
   match shape_field_name_ env (p, field) with
     | Ok x -> Some x
@@ -452,42 +435,6 @@ let flatten_unresolved env ty acc =
     | (_, Tany) -> acc
     | _ -> ty :: acc in
   env, res
-
-let rec member_inter env ty tyl acc =
-  let is_sub_type_alt = is_sub_type_alt ~no_top_bottom:true in
-  match tyl with
-  | [] -> env, ty :: acc
-  | x :: rl ->
-      Errors.try_
-        begin fun () ->
-          let env, ty =
-            match x, ty with
-            | (_, (Tany|Terr)), _ | _, (_, (Tany|Terr)) ->
-              env, ty
-            | _, _ ->
-              if is_sub_type_alt env x ty = Some true then env, ty
-              else if is_sub_type_alt env ty x = Some true then env, x
-              else env, ty in
-          env, List.rev_append acc (ty :: rl)
-        end
-        begin fun _ ->
-          member_inter env ty rl (x :: acc)
-        end
-
-and normalize_inter env tyl1 tyl2 =
-  match tyl1 with
-  | [] -> env, tyl2
-  | x :: rl ->
-      let env, tyl2 = member_inter env x tyl2 [] in
-      normalize_inter env rl tyl2
-
-let normalize_inter env tyl1 tyl2 =
-  if List.length tyl1 + List.length tyl2 > 100
-  then
-    (* normalization is O(len(tyl1) * len(tyl2)), so just appending is
-     * a significant perf win here *)
-    env, (List.rev_append tyl1 tyl2)
-  else normalize_inter env tyl1 tyl2
 
 let rec push_option_out pos env ty =
   let is_option = function
@@ -590,16 +537,6 @@ let string_of_visibility = function
   | Vpublic  -> "public"
   | Vprivate _ -> "private"
   | Vprotected _ -> "protected"
-
-let unwrap_class_hint = function
-  | (_, N.Happly ((pos, class_name), type_parameters)) ->
-      pos, class_name, type_parameters
-  | p, N.Habstr _ ->
-      Errors.expected_class ~suffix:" or interface but got a generic" p;
-      Pos.none, "", []
-  | p, _ ->
-      Errors.expected_class ~suffix:" or interface" p;
-      Pos.none, "", []
 
 let unwrap_class_type = function
   | r, Tapply (name, tparaml) -> r, name, tparaml

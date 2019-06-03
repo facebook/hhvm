@@ -207,19 +207,10 @@ let try_over_concrete_supertypes env ty f =
 (*****************************************************************************)
 (* Dynamicism  *)
 (*****************************************************************************)
-let rec find_dynamic env tyl =
-  match tyl with
-   | [] -> None
-   | ty::tys ->
-    begin match Env.expand_type env ty with
-    | (_, (_, Tdynamic)) ->
-      Some ty
-    | (_, (_, Tunion tyl)) -> find_dynamic env (tys@tyl)
-    | _ -> find_dynamic env tys end
-
-
 let is_dynamic env ty =
-  find_dynamic env [ty] <> None
+  let dynamic = Typing_make_type.dynamic Reason.Rnone in
+  is_sub_type_alt ~no_top_bottom:true env dynamic ty = Some true &&
+  not (is_mixed env ty)
 
 let is_hack_collection env ty =
   is_sub_type env ty

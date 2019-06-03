@@ -17,14 +17,9 @@ let is_awaitable env ty =
   let awaitable_of_mixed = MakeType.awaitable Typing_reason.none mixed in
   Tast_env.can_subtype env ty awaitable_of_mixed
 
-let rec can_be_null env ty =
-  let _, (_, ety) = Tast_env.expand_type env ty in
-  match ety with
-  | Toption _ | Tprim Nast.Tnull -> true
-  | Tunion tyl -> List.exists tyl (can_be_null env)
-  | Terr | Tany | Tnonnull | Tarraykind _ | Tprim _ | Tvar _
-    | Tfun _ | Tabstract _ | Tclass _ | Ttuple _
-    | Tanon _ | Tobject | Tshape _ | Tdynamic -> false
+let can_be_null env ty =
+  let null = MakeType.null Typing_reason.none in
+  Tast_env.can_subtype env null ty
 
 let rec enforce_not_awaitable env p ty =
   let _, ety = Tast_env.expand_type env ty in

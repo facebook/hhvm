@@ -111,25 +111,15 @@ let this_of ty = Tabstract (AKdependent `this, Some ty)
 (* Returns true if a type is optional *)
 (*****************************************************************************)
 
-let rec is_option env ty =
-  let _, ety = Env.expand_type env ty in
-  match snd ety with
-  | Toption _ -> true
-  | Tunion tyl ->
-      List.exists tyl (is_option env)
-  | _ -> false
+let is_option env ty =
+  let null =  Typing_make_type.null Reason.Rnone in
+  is_sub_type_alt ~no_top_bottom:true env null ty = Some true
+
+let is_mixed env ty =
+  let mixed = Typing_make_type.mixed Reason.Rnone in
+  is_sub_type_alt ~no_top_bottom:true env mixed ty = Some true
 
 let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
-
-let rec is_option_non_mixed env ty =
-  let _, ety = Env.expand_type env ty in
-  match snd ety with
-  | Toption (_, Tnonnull) -> false
-  | Toption _ -> true
-  | Tprim Nast.Tnull -> true
-  | Tunion tyl ->
-      List.exists tyl (is_option_non_mixed env)
-  | _ -> false
 
 let is_shape_field_optional { sft_optional; sft_ty = _ } = sft_optional
 

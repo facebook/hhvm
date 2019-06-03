@@ -2328,7 +2328,7 @@ and expr_
       if (TypecheckerOptions.experimental_feature_enabled
         (Env.get_tcopt env)
         TypecheckerOptions.experimental_forbid_nullable_cast)
-        && TUtils.is_option_non_mixed env ty2
+        && TUtils.is_option env ty2 && not (TUtils.is_mixed env ty2)
       then Errors.nullable_cast p (Typing_print.error env ty2) (Reason.to_pos (fst ty2));
       let env, ty = Phase.localize_hint_with_self env hint in
       make_result env p (T.Cast (hint, te)) ty

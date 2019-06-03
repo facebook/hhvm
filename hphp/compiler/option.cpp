@@ -224,9 +224,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalJitEnableRenameFunction,
                ini, config, "JitEnableRenameFunction",
                RuntimeOption::EvalJitEnableRenameFunction);
-  Config::Bind(RuntimeOption::EvalLogArrayProvenance,
-               ini, config, "LogArrayProvenance",
-               RuntimeOption::EvalLogArrayProvenance);
+  Config::Bind(RuntimeOption::EvalArrayProvenance,
+               ini, config, "ArrayProvenance",
+               RuntimeOption::EvalArrayProvenance);
   Config::Bind(EnableShortTags, ini, config, "EnableShortTags", true);
 
 #define BIND_HAC_OPTION(Name, Def)                      \

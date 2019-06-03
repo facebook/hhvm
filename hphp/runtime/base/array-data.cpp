@@ -78,7 +78,7 @@ struct ScalarHash {
     };
     ret |= (uint64_t{arr->dvArray()} << 32);
 
-    if (RuntimeOption::EvalLogArrayProvenance) {
+    if (RuntimeOption::EvalArrayProvenance) {
       if (auto const tag = arrprov::getTag(arr)) {
         ret = folly::hash::hash_combine(ret, tag->line());
         ret = folly::hash::hash_combine(ret, tag->filename());

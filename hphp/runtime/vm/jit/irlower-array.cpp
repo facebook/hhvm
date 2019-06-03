@@ -257,7 +257,7 @@ void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
 template<MakeArrayFn make>
 ArrayData* with_prov(uint32_t size) {
   using namespace arrprov;
-  assertx(RuntimeOption::EvalLogArrayProvenance);
+  assertx(RuntimeOption::EvalArrayProvenance);
 
   auto ad = make(size);
   assertx(ad->hasExactlyOneRef());
@@ -274,7 +274,7 @@ void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveMixed);
 }
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {
-  if (RuntimeOption::EvalLogArrayProvenance) {
+  if (RuntimeOption::EvalArrayProvenance) {
     implNewArray(env, inst, with_prov<MixedArray::MakeReserveDict>,
                  SyncOptions::Sync);
   } else {
@@ -289,7 +289,7 @@ void cgAllocPackedArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitialized);
 }
 void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
-  if (RuntimeOption::EvalLogArrayProvenance) {
+  if (RuntimeOption::EvalArrayProvenance) {
     implAllocArray(env, inst, with_prov<PackedArray::MakeUninitializedVec>,
                    SyncOptions::Sync);
   } else {

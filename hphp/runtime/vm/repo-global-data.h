@@ -195,7 +195,7 @@ struct Repo::GlobalData {
   bool IsCompatibleClsMethType = false;
 
   /* Avoid optimizations that interfere with array provenance */
-  bool LogArrayProvenance = false;
+  bool ArrayProvenance = false;
 
   /*
    * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
@@ -240,7 +240,7 @@ struct Repo::GlobalData {
       (EmitClsMethPointers)
       (IsVecNotices)
       (IsCompatibleClsMethType)
-      (LogArrayProvenance)
+      (ArrayProvenance)
       (StrictArrayFillKeys)
       ;
   }

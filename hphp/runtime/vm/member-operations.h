@@ -2133,7 +2133,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfPersistentVec:
     case KindOfVec: {
       auto result = [&]{
-        if (RuntimeOption::EvalLogArrayProvenance) {
+        if (RuntimeOption::EvalArrayProvenance) {
           return ElemDVec<false, KeyType::Any, true>(base, key);
         } else {
           return ElemDVec<false, KeyType::Any, false>(base, key);
@@ -2147,7 +2147,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfPersistentDict:
     case KindOfDict: {
       auto result = [&]{
-        if (RuntimeOption::EvalLogArrayProvenance) {
+        if (RuntimeOption::EvalArrayProvenance) {
           return ElemDDict<false, KeyType::Any, true>(base, key);
         } else {
           return ElemDDict<false, KeyType::Any, false>(base, key);
@@ -2166,7 +2166,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     case KindOfShape: {
       if (RuntimeOption::EvalHackArrDVArrs) {
         auto result = [&]{
-          if (RuntimeOption::EvalLogArrayProvenance) {
+          if (RuntimeOption::EvalArrayProvenance) {
             return ElemDDict<false, KeyType::Any, true>(base, key);
           } else {
             return ElemDDict<false, KeyType::Any, false>(base, key);
@@ -2415,7 +2415,7 @@ inline Cell IncDecElem(
     case KindOfPersistentVec:
     case KindOfVec: {
       auto result = [&]{
-        if (RuntimeOption::EvalLogArrayProvenance) {
+        if (RuntimeOption::EvalArrayProvenance) {
           return ElemDVec<false, KeyType::Any, true>(base, key);
         } else {
           return ElemDVec<false, KeyType::Any, false>(base, key);
@@ -2427,7 +2427,7 @@ inline Cell IncDecElem(
     case KindOfPersistentDict:
     case KindOfDict: {
       auto result = [&]{
-        if (RuntimeOption::EvalLogArrayProvenance) {
+        if (RuntimeOption::EvalArrayProvenance) {
           return ElemDDict<false, KeyType::Any, true>(base, key);
         } else {
           return ElemDDict<false, KeyType::Any, false>(base, key);
@@ -2444,7 +2444,7 @@ inline Cell IncDecElem(
     case KindOfShape: {
       if (RuntimeOption::EvalHackArrDVArrs) {
         auto result = [&]{
-          if (RuntimeOption::EvalLogArrayProvenance) {
+          if (RuntimeOption::EvalArrayProvenance) {
             return ElemDDict<false, KeyType::Any, true>(base, key);
           } else {
             return ElemDDict<false, KeyType::Any, false>(base, key);

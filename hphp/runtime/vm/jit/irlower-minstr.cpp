@@ -300,7 +300,7 @@ void implElem(IRLS& env, const IRInstruction* inst) {
       assertx(mode == MOpMode::Define);
       BUILD_OPTAB(ELEMD_HELPER_TABLE,
                   getKeyType(key),
-                  RuntimeOption::EvalLogArrayProvenance);
+                  RuntimeOption::EvalArrayProvenance);
       args.ssa(3);
       return target;
     } else {
@@ -345,7 +345,7 @@ void cgSetElem(IRLS& env, const IRInstruction* inst) {
   auto const key = inst->src(1);
   BUILD_OPTAB(SETELEM_HELPER_TABLE,
               getKeyType(key),
-              RuntimeOption::EvalLogArrayProvenance);
+              RuntimeOption::EvalArrayProvenance);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -368,7 +368,7 @@ void cgSetRangeRev(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgSetNewElem(IRLS& env, const IRInstruction* inst) {
-  auto const target = RuntimeOption::EvalLogArrayProvenance
+  auto const target = RuntimeOption::EvalArrayProvenance
     ? CallSpec::direct(MInstrHelpers::setNewElem<true>)
     : CallSpec::direct(MInstrHelpers::setNewElem<false>);
 
@@ -817,7 +817,7 @@ void implVecSet(IRLS& env, const IRInstruction* inst) {
   BUILD_OPTAB2(setRef,
                VECSET_REF_HELPER_TABLE,
                VECSET_HELPER_TABLE,
-               RuntimeOption::EvalLogArrayProvenance);
+               RuntimeOption::EvalArrayProvenance);
 
   auto args = argGroup(env, inst).
     ssa(0).
@@ -918,7 +918,7 @@ void cgLdPackedElem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgElemVecD(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(ELEM_VEC_D_HELPER_TABLE, RuntimeOption::EvalLogArrayProvenance);
+  BUILD_OPTAB(ELEM_VEC_D_HELPER_TABLE, RuntimeOption::EvalArrayProvenance);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 
@@ -932,7 +932,7 @@ void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
 void cgVecSetRef(IRLS& env, const IRInstruction* i) { implVecSet(env, i); }
 
 void cgSetNewElemVec(IRLS& env, const IRInstruction* inst) {
-  auto const target = RuntimeOption::EvalLogArrayProvenance
+  auto const target = RuntimeOption::EvalArrayProvenance
     ? CallSpec::direct(MInstrHelpers::setNewElemVec<true>)
     : CallSpec::direct(MInstrHelpers::setNewElemVec<false>);
 
@@ -1003,7 +1003,7 @@ void implDictSet(IRLS& env, const IRInstruction* inst) {
                DICTSET_REF_HELPER_TABLE,
                DICTSET_HELPER_TABLE,
                getKeyType(inst->src(1)),
-               RuntimeOption::EvalLogArrayProvenance);
+               RuntimeOption::EvalArrayProvenance);
 
   auto args = argGroup(env, inst).
     ssa(0).
@@ -1043,7 +1043,7 @@ void cgElemDictD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE,
               getKeyType(key),
-              RuntimeOption::EvalLogArrayProvenance);
+              RuntimeOption::EvalArrayProvenance);
 
   auto args = argGroup(env, inst).ssa(0).ssa(1);
 

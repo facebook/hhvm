@@ -399,7 +399,7 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
 
   // Call epilogue: handle array provenance and inlining accounting.
   auto const end = [&] (Vout& v) {
-    if (RuntimeOption::EvalLogArrayProvenance &&
+    if (RuntimeOption::EvalArrayProvenance &&
         !callee->isProvenanceSkipFrame()) {
       if (dstType.isValid()) {
         v << vcall{
@@ -488,7 +488,7 @@ void cgNativeImpl(IRLS& env, const IRInstruction* inst) {
 
   auto const func = inst->marker().func();
 
-  auto const arr_prov = RuntimeOption::EvalLogArrayProvenance &&
+  auto const arr_prov = RuntimeOption::EvalArrayProvenance &&
                         !func->isProvenanceSkipFrame();
 
   auto const next = arr_prov

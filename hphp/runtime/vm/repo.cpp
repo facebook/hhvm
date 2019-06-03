@@ -237,7 +237,16 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
     RuntimeOption::EvalReffinessInvariance  = s_globalData.ReffinessInvariance;
     RuntimeOption::EvalCheckPropTypeHints   = s_globalData.CheckPropTypeHints;
     RuntimeOption::EvalHackArrDVArrs        = s_globalData.HackArrDVArrs;
-    RuntimeOption::EvalLogArrayProvenance   = s_globalData.LogArrayProvenance;
+    /*
+     * We only should enable array provenance at runtime if it was enabled in
+     * the repo AND we have logging enabled--otherwise it's pointless to do the
+     * bookkeeping
+     *
+     * Also--just because array provenance wasn't enabled in the repo doesn't
+     * mean it can't be explicitly enabled at runtime
+     */
+    RuntimeOption::EvalArrayProvenance = RuntimeOption::EvalArrayProvenance ||
+      (s_globalData.ArrayProvenance && RuntimeOption::EvalLogArrayProvenance);
     RuntimeOption::EnableArgsInBacktraces = s_globalData.EnableArgsInBacktraces;
     RuntimeOption::EvalAbortBuildOnVerifyError =
       s_globalData.AbortBuildOnVerifyError;

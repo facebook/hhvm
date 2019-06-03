@@ -302,7 +302,7 @@ std::pair<std::vector<std::unique_ptr<UnitEmitter>>,
   RuntimeOption::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
   RuntimeOption::EvalIsVecNotices = gd.IsVecNotices;
   RuntimeOption::EvalIsCompatibleClsMethType = gd.IsCompatibleClsMethType;
-  RuntimeOption::EvalLogArrayProvenance = gd.LogArrayProvenance;
+  RuntimeOption::EvalArrayProvenance = gd.ArrayProvenance;
   RuntimeOption::StrictArrayFillKeys = gd.StrictArrayFillKeys;
 
   return {
@@ -390,7 +390,7 @@ void write_global_data(
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
-  gd.LogArrayProvenance = RuntimeOption::EvalLogArrayProvenance;
+  gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {

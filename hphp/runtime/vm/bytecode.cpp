@@ -2051,7 +2051,7 @@ OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
     ? staticEmptyDictArray()
     : MixedArray::MakeReserveDict(capacity);
 
-  if (RuntimeOption::EvalLogArrayProvenance) {
+  if (RuntimeOption::EvalArrayProvenance) {
     arrprov::setTag(ad, arrprov::tagFromProgramCounter());
   }
   vmStack().pushDictNoRc(ad);
@@ -2117,7 +2117,7 @@ OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
 OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const a = PackedArray::MakeVec(n, vmStack().topC());
-  if (RuntimeOption::EvalLogArrayProvenance) {
+  if (RuntimeOption::EvalArrayProvenance) {
     arrprov::setTag(a, arrprov::tagFromProgramCounter());
   }
   vmStack().ndiscard(n);
@@ -3618,7 +3618,7 @@ void elemDispatch(MOpMode mode, TypedValue key, bool reffy) {
       case MOpMode::InOut:
         return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
       case MOpMode::Define:
-        if (RuntimeOption::EvalLogArrayProvenance) {
+        if (RuntimeOption::EvalArrayProvenance) {
           return reffy
             ? ElemD<MOpMode::Define, true, KeyType::Any, true>(
               mstate.tvRef, b, key, &mstate.propState
@@ -3770,7 +3770,7 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto const topC = vmStack().topC();
 
   if (mk.mcode == MW) {
-    if (RuntimeOption::EvalLogArrayProvenance) {
+    if (RuntimeOption::EvalArrayProvenance) {
       SetNewElem<true, true>(mstate.base, topC, &mstate.propState);
     } else {
       SetNewElem<true, false>(mstate.base, topC, &mstate.propState);
@@ -3778,7 +3778,7 @@ OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
-      auto const result = RuntimeOption::EvalLogArrayProvenance
+      auto const result = RuntimeOption::EvalArrayProvenance
         ? SetElem<true, true>(mstate.base, key, topC, &mstate.propState)
         : SetElem<true, false>(mstate.base, key, topC, &mstate.propState);
 
@@ -5531,7 +5531,7 @@ void iopFCallBuiltin(uint32_t numArgs, uint32_t numNonDefault, Id id) {
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);
 
-  if (RuntimeOption::EvalLogArrayProvenance &&
+  if (RuntimeOption::EvalArrayProvenance &&
       !func->isProvenanceSkipFrame()) {
     ret = arrprov::tagTV(ret);
   }
@@ -5994,7 +5994,7 @@ OPTBLD_INLINE TCA iopNativeImpl(PC& pc) {
   // Return control to the caller.
   returnToCaller(pc, sfp, callOff);
 
-  if (RuntimeOption::EvalLogArrayProvenance &&
+  if (RuntimeOption::EvalArrayProvenance &&
       !func->isProvenanceSkipFrame()) {
     auto const origPC = vmpc();
     SCOPE_EXIT { vmpc() = origPC; };

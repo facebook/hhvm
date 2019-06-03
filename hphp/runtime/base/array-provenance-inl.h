@@ -32,7 +32,7 @@ inline void copyTag(const ArrayData* src, ArrayData* dest) {
 }
 
 inline void copyTagStatic(const ArrayData* src, ArrayData* dest) {
-  if (!RuntimeOption::EvalLogArrayProvenance) return;
+  if (!RuntimeOption::EvalArrayProvenance) return;
   if (auto const tag = getTag(src)) setTag(dest, *tag);
 }
 

@@ -3029,7 +3029,7 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
 
 String HHVM_FUNCTION(HH_get_provenance, const Variant& in) {
   if (!isArrayLikeType(in.getType())) return "";
-  if (!RuntimeOption::EvalLogArrayProvenance) return "";
+  if (!RuntimeOption::EvalArrayProvenance) return "";
 
   auto const& arr = in.asCArrRef();
   if (auto const ann = arrprov::getTag(arr.get())) {

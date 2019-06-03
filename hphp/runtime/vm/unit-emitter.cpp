@@ -490,7 +490,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         VarNR(const_cast<ArrayData*>(m_arrays[i]))
       ).toCppString();
 
-      if (RuntimeOption::EvalLogArrayProvenance) {
+      if (RuntimeOption::EvalArrayProvenance) {
         auto const tag = arrprov::getTag(m_arrays[i]);
         auto const line = tag
           ? folly::make_optional(tag->line())

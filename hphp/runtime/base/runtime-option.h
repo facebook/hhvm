@@ -1003,8 +1003,16 @@ struct RuntimeOption {
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
   F(bool, HackArrDVArrs, false)                                         \
-  /* Enable instrumentation and logging for tracking the source         \
-   * of arrays that are serialized */                                   \
+  /* Enable instrumentation and information in the repo for tracking    \
+   * the source of vecs and dicts whose vec/dict-ness is observed       \
+   * during program execution                                           \
+   *                                                                    \
+   * Latches to false at startup if either the repo we're loading in    \
+   * RepoAuthoritativeMode wasn't built with this flag or if the        \
+   * flag LogArrayProvenance is unset */                                \
+  F(bool, ArrayProvenance, false)                                       \
+  /* Enable logging the source of vecs/dicts whose vec/dict-ness is     \
+   * observed, e.g. through serialization */                            \
   F(bool, LogArrayProvenance, false)                                    \
   /* Log only out out of this many array headers when serializing */    \
   F(uint32_t, LogArrayProvenanceSampleRatio, 1000)                      \

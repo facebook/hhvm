@@ -41,7 +41,7 @@ std::mutex s_static_provenance_lock;
  * valid anymore
  */
 InitFiniNode flushTable([]{
-    if (!RuntimeOption::EvalLogArrayProvenance) return;
+    if (!RuntimeOption::EvalArrayProvenance) return;
     rl_array_provenance->tags.clear();
   }, InitFiniNode::When::RequestFini);
 
@@ -87,7 +87,7 @@ void clearTag(const ArrayData* ad) {
 TypedValue tagTV(TypedValue tv) {
   using namespace arrprov;
 
-  assertx(RuntimeOption::EvalLogArrayProvenance);
+  assertx(RuntimeOption::EvalArrayProvenance);
   if (!tvWantsTag(tv)) return tv;
 
   auto ad = val(tv).parr;

@@ -26,9 +26,6 @@ let precedence _env operator =
   match operator with
   | IncludeOperator | IncludeOnceOperator | RequireOperator
   | RequireOnceOperator -> 1
-  | PHPOrOperator -> 2
-  | PHPExclusiveOrOperator -> 3
-  | PHPAndOperator -> 4
   | PrintOperator -> 5
   | AssignmentOperator | AdditionAssignmentOperator
   | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
@@ -92,8 +89,7 @@ let associativity _env operator =
   | MemberSelectionOperator | NullSafeMemberSelectionOperator
   | ScopeResolutionOperator | FunctionCallOperator | IndexingOperator
   | IncludeOperator | IncludeOnceOperator | RequireOperator
-  | RequireOnceOperator | PHPAndOperator | PHPOrOperator
-  | PHPExclusiveOrOperator | IsOperator | AsOperator | NullableAsOperator
+  | RequireOnceOperator | IsOperator | AsOperator | NullableAsOperator
   (* eval *)
   (* Comma *)
   (* elseif *)
@@ -141,9 +137,6 @@ let prefix_unary_from_token token =
 (* Is this a token that can appear after an expression? *)
 let is_trailing_operator_token token =
   match token with
-  | TokenKind.And
-  | TokenKind.Or
-  | TokenKind.Xor
   | TokenKind.PlusPlus
   | TokenKind.MinusMinus
   | TokenKind.LeftParen
@@ -202,9 +195,6 @@ let is_trailing_operator_token token =
 
 let trailing_from_token token =
   match token with
-  | TokenKind.And -> PHPAndOperator
-  | TokenKind.Or -> PHPOrOperator
-  | TokenKind.Xor -> PHPExclusiveOrOperator
   | TokenKind.BarGreaterThan -> PipeOperator
   | TokenKind.Question -> ConditionalQuestionOperator
   | TokenKind.Colon -> ConditionalColonOperator
@@ -265,9 +255,6 @@ let trailing_from_token token =
 
 let is_binary_operator_token token =
   match token with
-  | TokenKind.And
-  | TokenKind.Or
-  | TokenKind.Xor
   | TokenKind.Plus
   | TokenKind.Minus
   | TokenKind.Ampersand

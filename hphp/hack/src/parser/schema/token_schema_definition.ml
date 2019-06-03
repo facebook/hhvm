@@ -162,10 +162,6 @@ let given_text_tokens = [
     "abstract"
     ();
   make_token_node
-    "And"
-    "and"
-    ();
-  make_token_node
     "Array"
     "array"
     ();
@@ -523,10 +519,6 @@ let given_text_tokens = [
     ~allowed_as_identifier:true
     ();
   make_token_node
-    "Or"
-    "or"
-    ();
-  make_token_node
     "Parent"
     "parent"
     ~allowed_as_identifier:true
@@ -703,10 +695,6 @@ let given_text_tokens = [
   make_token_node
     "While"
     "while"
-    ();
-  make_token_node
-    "Xor"
-    "xor"
     ();
   make_token_node
     "Yield"

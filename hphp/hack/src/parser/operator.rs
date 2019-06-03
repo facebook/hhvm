@@ -29,9 +29,6 @@ impl Operator {
         match self {
             | IncludeOperator | IncludeOnceOperator | RequireOperator
             | RequireOnceOperator => 1,
-            | PHPOrOperator => 2,
-            | PHPExclusiveOrOperator => 3,
-            | PHPAndOperator => 4,
             | PrintOperator => 5,
             | AssignmentOperator | AdditionAssignmentOperator
             | SubtractionAssignmentOperator | MultiplicationAssignmentOperator
@@ -97,8 +94,7 @@ impl Operator {
             | MemberSelectionOperator | NullSafeMemberSelectionOperator
             | ScopeResolutionOperator | FunctionCallOperator | IndexingOperator
             | IncludeOperator | IncludeOnceOperator | RequireOperator
-            | RequireOnceOperator | PHPAndOperator | PHPOrOperator
-            | PHPExclusiveOrOperator | IsOperator | AsOperator | NullableAsOperator
+            | RequireOnceOperator | IsOperator | AsOperator | NullableAsOperator
                 // eval
                 // Comma
                 // elseif
@@ -148,10 +144,7 @@ impl Operator {
     // Is this a token that can appear after an expression?
     pub fn is_trailing_operator_token(token: TokenKind) -> bool {
         match token {
-            TokenKind::And
-            | TokenKind::Or
-            | TokenKind::Xor
-            | TokenKind::PlusPlus
+            TokenKind::PlusPlus
             | TokenKind::MinusMinus
             | TokenKind::LeftParen
             | TokenKind::LeftBracket
@@ -211,9 +204,6 @@ impl Operator {
 
     pub fn trailing_from_token(token: TokenKind) -> Operator {
         match token {
-            TokenKind::And => PHPAndOperator,
-            TokenKind::Or => PHPOrOperator,
-            TokenKind::Xor => PHPExclusiveOrOperator,
             TokenKind::BarGreaterThan => PipeOperator,
             TokenKind::Question => ConditionalQuestionOperator,
             TokenKind::Colon => ConditionalColonOperator,
@@ -275,10 +265,7 @@ impl Operator {
 
     pub fn is_binary_operator_token(token: TokenKind) -> bool {
         match token {
-            TokenKind::And
-            | TokenKind::Or
-            | TokenKind::Xor
-            | TokenKind::Plus
+            TokenKind::Plus
             | TokenKind::Minus
             | TokenKind::Ampersand
             | TokenKind::BarGreaterThan

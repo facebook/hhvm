@@ -993,9 +993,6 @@ module WithStatementAndDeclAndTypeParser
     match token with
     (* Binary operators *)
     (* TODO Add an error if PHP style <> is used in Hack. *)
-    | And
-    | Or
-    | Xor
     | Plus
     | Minus
     | Star

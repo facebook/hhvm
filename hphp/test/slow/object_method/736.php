@@ -235,7 +235,7 @@ call_user_func_array(array($j,'missing'),array(3));
 
 // test mapping for system function names
 $ourFileName = "testFile.txt";
-$ourFileHandle = fopen($ourFileName, 'w') or die("can't open file");
+($ourFileHandle = fopen($ourFileName, 'w')) || die("can't open file");
 fclose($ourFileHandle);
 unlink($ourFileName);
 

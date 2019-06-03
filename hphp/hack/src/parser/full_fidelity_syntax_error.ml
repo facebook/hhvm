@@ -515,15 +515,6 @@ let invalid_default_argument s = s ^ " expression is not permitted \
 let invalid_constructor_method_call = "Method call following immediate constructor call \
   requires parentheses around constructor call."
 
-let do_not_use_xor =
-  "Do not use \"xor\", it has surprising precedence. Cast to bool and use \"!==\" instead"
-
-let do_not_use_or =
-  "Do not use \"or\", it has surprising precedence. Use \"||\" instead"
-
-let do_not_use_and =
-  "Do not use \"and\", it has surprising precedence. Use \"&&\" instead"
-
 let invalid_foreach_element = "An arrow ('=>') or right parenthesis (')') \
   is expected here."
 let invalid_scope_resolution_qualifier = "Only classnames and variables are allowed before '::'."

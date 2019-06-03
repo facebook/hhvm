@@ -1,6 +1,6 @@
 <?php
 	// Note: SWC requires zlib
-	$dir = opendir(dirname(__FILE__)) or die('cannot open directory: '.dirname(__FILE__));
+	($dir = opendir(dirname(__FILE__))) || die('cannot open directory: '.dirname(__FILE__));
 	$result = array();
 	$files  = array();
 	while (($file = readdir($dir)) !== FALSE) {

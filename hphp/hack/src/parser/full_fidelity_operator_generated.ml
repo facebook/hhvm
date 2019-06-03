@@ -86,9 +86,6 @@ module type Sig = sig
   | AndAssignmentOperator
   | AdditionAssignmentOperator
   | PrintOperator
-  | PHPAndOperator
-  | PHPExclusiveOrOperator
-  | PHPOrOperator
   | RequireOperator
   | RequireOnceOperator
   | IncludeOperator
@@ -166,9 +163,6 @@ module Impl : Sig = struct
   | AndAssignmentOperator
   | AdditionAssignmentOperator
   | PrintOperator
-  | PHPAndOperator
-  | PHPExclusiveOrOperator
-  | PHPOrOperator
   | RequireOperator
   | RequireOnceOperator
   | IncludeOperator

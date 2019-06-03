@@ -402,21 +402,6 @@ let operators = [
     5
     ();
   make_operator
-    "PHPAnd"
-    Left
-    4
-    ();
-  make_operator
-    "PHPExclusiveOr"
-    Left
-    3
-    ();
-  make_operator
-    "PHPOr"
-    Left
-    2
-    ();
-  make_operator
     "Require"
     Left
     1

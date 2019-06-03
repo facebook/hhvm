@@ -2336,8 +2336,6 @@ let get_positions_binop_allows_await t =
   (match token_kind t with
   | None -> BinopAllowAwaitNone
   | Some t -> (match t with
-  | TokenKind.And
-  | TokenKind.Or
   | TokenKind.BarBar
   | TokenKind.AmpersandAmpersand
   | TokenKind.QuestionColon
@@ -2356,7 +2354,6 @@ let get_positions_binop_allows_await t =
   | TokenKind.AmpersandEqual
   | TokenKind.LessThanLessThanEqual
   | TokenKind.GreaterThanGreaterThanEqual -> BinopAllowAwaitRight
-  | TokenKind.Xor
   | TokenKind.Plus
   | TokenKind.Minus
   | TokenKind.Star
@@ -3475,7 +3472,7 @@ let rec check_constant_expression errors node =
       let open TokenKind in
       (match Token.kind token with
       | Name | Trait | Extends | Implements | Static
-      | Abstract | Final | Private | Protected | Public | Or | And | Global
+      | Abstract | Final | Private | Protected | Public | Global
       | Goto | Instanceof | Insteadof | Interface | Namespace | New | Try | Use
       | Var | List | Clone | Include | Include_once | Throw | Array | Tuple
       | Print | Echo | Require | Require_once | Return | Else | Elseif | Default
@@ -3508,7 +3505,7 @@ let rec check_constant_expression errors node =
     ; binary_operator = { syntax = Token token ; _ }
     ; _ } when ( let open TokenKind in
                  match Token.kind token with
-                 | BarBar | AmpersandAmpersand | Carat | And | Or | Xor
+                 | BarBar | AmpersandAmpersand | Carat
                  | Bar | Ampersand | Dot | Plus | Minus | Star | Slash | Percent
                  | LessThanLessThan | GreaterThanGreaterThan | StarStar
                  | EqualEqual | EqualEqualEqual | ExclamationEqual

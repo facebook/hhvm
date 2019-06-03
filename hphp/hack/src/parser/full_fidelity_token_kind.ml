@@ -22,7 +22,6 @@ type t =
   | EndOfFile
   (* Given text tokens *)
   | Abstract
-  | And
   | Array
   | Arraykey
   | As
@@ -99,7 +98,6 @@ type t =
   | Noreturn
   | Num
   | Object
-  | Or
   | Parent
   | Print
   | Private
@@ -137,7 +135,6 @@ type t =
   | Void
   | Where
   | While
-  | Xor
   | Yield
   | NullLiteral
   | LeftBracket
@@ -243,7 +240,6 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "true"                                        when not only_reserved -> Some BooleanLiteral
   | "false"                                       when not only_reserved -> Some BooleanLiteral
   | "abstract"                                                           -> Some Abstract
-  | "and"                                                                -> Some And
   | "array"                                                              -> Some Array
   | "arraykey"        when is_hack                &&   not only_reserved -> Some Arraykey
   | "as"                                                                 -> Some As
@@ -320,7 +316,6 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "noreturn"        when is_hack                &&   not only_reserved -> Some Noreturn
   | "num"             when is_hack                &&   not only_reserved -> Some Num
   | "object"                                      when not only_reserved -> Some Object
-  | "or"                                                                 -> Some Or
   | "parent"                                      when not only_reserved -> Some Parent
   | "print"                                                              -> Some Print
   | "private"                                                            -> Some Private
@@ -358,7 +353,6 @@ let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
   | "void"                                        when not only_reserved -> Some Void
   | "where"           when is_hack                &&   not only_reserved -> Some Where
   | "while"                                                              -> Some While
-  | "xor"                                                                -> Some Xor
   | "yield"                                                              -> Some Yield
   | "null"                                        when not only_reserved -> Some NullLiteral
   | "["                                                                  -> Some LeftBracket
@@ -438,7 +432,6 @@ let to_string kind =
   | EndOfFile                     -> "end_of_file"
   (* Given text tokens *)
   | Abstract                      -> "abstract"
-  | And                           -> "and"
   | Array                         -> "array"
   | Arraykey                      -> "arraykey"
   | As                            -> "as"
@@ -515,7 +508,6 @@ let to_string kind =
   | Noreturn                      -> "noreturn"
   | Num                           -> "num"
   | Object                        -> "object"
-  | Or                            -> "or"
   | Parent                        -> "parent"
   | Print                         -> "print"
   | Private                       -> "private"
@@ -553,7 +545,6 @@ let to_string kind =
   | Void                          -> "void"
   | Where                         -> "where"
   | While                         -> "while"
-  | Xor                           -> "xor"
   | Yield                         -> "yield"
   | NullLiteral                   -> "null"
   | LeftBracket                   -> "["

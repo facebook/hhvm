@@ -3,9 +3,9 @@ require(dirname(__FILE__) . '/data.inc');
 
 function cmp ($a, $b) {
     is_array ($a)
-        and $a = array_sum ($a);
+        && ($a = array_sum ($a));
     is_array ($b)
-        and $b = array_sum ($b);
+        && ($b = array_sum ($b));
     return strcmp ((string)$a, (string)$b);
 }
 

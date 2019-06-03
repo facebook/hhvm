@@ -23,7 +23,7 @@ $dom = new domDocument();
     }
   }
   function nodeSet($id = null) {
-      if ($id and is_array($id)) {
+      if ($id && is_array($id)) {
           return $id[0];
       } else {
           $dom = new domdocument;

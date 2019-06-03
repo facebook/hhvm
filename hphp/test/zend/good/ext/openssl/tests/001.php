@@ -22,7 +22,7 @@ if ($key_file_name === false)
 
 echo "Export key to file\n";
 
-openssl_pkey_export_to_file($privkey, $key_file_name, $passphrase) or die("failed to export to file $key_file_name");
+openssl_pkey_export_to_file($privkey, $key_file_name, $passphrase) || die("failed to export to file $key_file_name");
 
 echo "Load key from file - array syntax\n";
 

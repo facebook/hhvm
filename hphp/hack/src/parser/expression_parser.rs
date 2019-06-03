@@ -1303,10 +1303,7 @@ where
                     _ => match token {
                         // Binary operators
                         // TODO Add an error if PHP style <> is used in Hack.
-                        TokenKind::And
-                        | TokenKind::Or
-                        | TokenKind::Xor
-                        | TokenKind::Plus
+                        TokenKind::Plus
                         | TokenKind::Minus
                         | TokenKind::Star
                         | TokenKind::Slash

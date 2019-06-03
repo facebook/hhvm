@@ -826,9 +826,7 @@ let rewrite_suspends_in_statement
                 Token.kind = (
                   TokenKind.BarBar |
                   TokenKind.AmpersandAmpersand |
-                  TokenKind.QuestionQuestion |
-                  TokenKind.And |
-                  TokenKind.Or) as t;
+                  TokenKind.QuestionQuestion) as t;
                 _ };
               _ } ;
           binary_right_operand = right;
@@ -848,8 +846,7 @@ let rewrite_suspends_in_statement
           Rewriter.Keep
         else
           begin match t with
-          | TokenKind.BarBar
-          | TokenKind.Or ->
+          | TokenKind.BarBar ->
             (* transform e1 || e2 to
                if (!$temp = boolval(e1)) {
                    $temp = boolval(e2);
@@ -868,8 +865,7 @@ let rewrite_suspends_in_statement
             (extra_info :: node_extra_info_rest, next_label, next_temp),
             Rewriter.Result.Replace new_node
 
-          | TokenKind.AmpersandAmpersand
-          | TokenKind.And ->
+          | TokenKind.AmpersandAmpersand ->
             (* transform e1 && e2 to
                if ($temp = boolval(e1)) {
                  $temp = boolval(e2);

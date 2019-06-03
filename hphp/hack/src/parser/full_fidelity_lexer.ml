@@ -1445,13 +1445,12 @@ let as_case_insensitive_keyword text =
   | "die" | "do" | "echo" | "else" | "elseif" | "empty" | "endfor"
   | "endforeach" | "endif" | "endswitch" | "endwhile" | "eval" | "exit" | "extends" | "false"
   | "final" | "finally" | "for" | "foreach" | "function" | "global" | "goto" | "if"
-  | "implements" | "include" | "include_once" | "instanceof" | "insteadof" | "int" | "integer"
+  | "implements" | "include" | "include_once" | "inout" | "instanceof" | "insteadof" | "int" | "integer"
   | "interface" | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent"
   | "print" | "private" | "protected" | "public" | "require" | "require_once"
   | "return" | "self" | "static" | "string" | "switch" | "throw" | "trait"
-  | "try" | "true" | "unset" | "use" | "var" | "void" | "while"
+  | "try" | "true" | "unset" | "use" | "using" | "var" | "void" | "while"
   | "xor" | "yield" -> lower
-  | "inout" | "using" when Env.is_hh () -> lower
   | _ -> text
 
 let enforce_lowercase lexer ~original_text ~lowered_text =

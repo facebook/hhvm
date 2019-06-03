@@ -1947,12 +1947,11 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             | "empty" | "enddeclare" | "endfor" | "endforeach" | "endif" | "endswitch"
             | "endwhile" | "eval" | "exit" | "extends" | "false" | "final" | "finally" | "for"
             | "foreach" | "function" | "global" | "goto" | "if" | "implements" | "include"
-            | "include_once" | "instanceof" | "insteadof" | "int" | "integer" | "interface"
+            | "include_once" | "inout" | "instanceof" | "insteadof" | "int" | "integer" | "interface"
             | "isset" | "list" | "namespace" | "new" | "null" | "or" | "parent" | "print"
             | "private" | "protected" | "public" | "require" | "require_once" | "return"
             | "self" | "static" | "string" | "switch" | "throw" | "trait" | "try" | "true"
-            | "unset" | "use" | "var" | "void" | "while" | "xor" | "yield" => Some(lower),
-            "inout" | "using" if self.is_hh_file() => Some(lower),
+            | "unset" | "use" | "using" | "var" | "void" | "while" | "xor" | "yield" => Some(lower),
             _ => None,
         };
         res.map(|x| x.to_owned())

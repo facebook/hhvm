@@ -294,14 +294,6 @@ folly::Optional<Opcode> negateCmpOp(Opcode opc) {
 
 bool opcodeMayRaise(Opcode opc) {
   switch (opc) {
-  // AKExistsArr, ArrayIdx, and ArrayIsset may only raise errors when the option
-  // EvalHackArrCompatNotices is set.
-  case AKExistsArr:
-  case ArrayIdx:
-  case ArrayIsset:
-    return RuntimeOption::EvalHackArrCompatNotices;
-
-  // Same thing for SameArr and NSameArr, but for EvalHackArrCompatDVCmpNotices.
   case NSameShape:
   case SameShape:
   case NSameArr:
@@ -311,14 +303,12 @@ bool opcodeMayRaise(Opcode opc) {
   case SameDict:
   case SameVec:
     return RuntimeOption::EvalHackArrCompatDVCmpNotices ||
-      RuntimeOption::EvalHackArrCompatCheckCompare;
+           RuntimeOption::EvalHackArrCompatCheckCompare;
 
-  // Same thing for IsTypeStruct, but for EvalHackArrCompatIsArrayNotices
-  // and EvalIsExprEnableUnresolvedWarning.
   case IsTypeStruct:
-    return RuntimeOption::EvalHackArrCompatIsArrayNotices
-      || RuntimeOption::EvalIsExprEnableUnresolvedWarning
-      || RuntimeOption::EvalIsVecNotices;
+    return RuntimeOption::EvalHackArrCompatIsArrayNotices ||
+           RuntimeOption::EvalIsExprEnableUnresolvedWarning ||
+           RuntimeOption::EvalIsVecNotices;
 
   case AddElemIntKey:
   case AddElemStrKey:
@@ -565,12 +555,15 @@ bool opcodeMayRaise(Opcode opc) {
   case AddIntO:
   case AddNewElemVec:
   case AFWHBlockOn:
+  case AKExistsArr:
   case AKExistsDict:
   case AKExistsKeyset:
   case AllocPackedArray:
   case AllocVArray:
   case AllocVecArray:
   case AndInt:
+  case ArrayIdx:
+  case ArrayIsset:
   case AssertLoc:
   case AssertMBase:
   case AssertNonNull:

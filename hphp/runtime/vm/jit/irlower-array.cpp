@@ -188,17 +188,12 @@ void cgAKExistsArr(IRLS& env, const IRInstruction* inst) {
   auto const keyTy = inst->src(1)->type();
   auto& v = vmain(env);
 
-  auto const target = keyTy <= TInt
+  auto const target = (keyTy <= TInt)
     ? CallSpec::array(&g_array_funcs.existsInt)
-    : (assertx(keyTy <= TStr),
-       CallSpec::array(&g_array_funcs.existsStr));
+    : CallSpec::array(&g_array_funcs.existsStr);
 
-  cgCallHelper(
-    v, env, target, callDest(env, inst),
-    RuntimeOption::EvalHackArrCompatNotices
-      ? SyncOptions::Sync : SyncOptions::None,
-    argGroup(env, inst).ssa(0).ssa(1)
-  );
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::None,
+               argGroup(env, inst).ssa(0).ssa(1));
 }
 
 void cgAKExistsDict(IRLS& env, const IRInstruction* inst) {

@@ -1972,8 +1972,7 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 Some(x) => x,
                 None => original_text,
             };
-            let allow_xhp = self.enable_xhp();
-            match TokenKind::from_string(&text.as_bytes(), true, allow_xhp, only_reserved) {
+            match TokenKind::from_string(&text.as_bytes(), only_reserved) {
                 Some(TokenKind::Let) if (!(self.is_experimental_mode())) => TokenKind::Name,
                 Some(keyword) => {
                     if self.lowercase_error(original_text, &text) {

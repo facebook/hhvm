@@ -2994,9 +2994,6 @@ module GenerateFFTokenKind = struct
     let spacer_width = given_text_width - String.length token_text in
     let spacer = String.make spacer_width ' ' in
     let guards = add_guard_or_pad ""
-      ~cond:(x.is_xhp, "(is_hack || allow_xhp)")
-      ~else_cond:(x.hack_only, "is_hack") in
-    let guards = add_guard_or_pad guards
       ~cond:(x.allowed_as_identifier, "not only_reserved") in
     sprintf "  | \"%s\"%s %s-> Some %s\n" token_text spacer guards x.token_kind
 
@@ -3017,10 +3014,10 @@ KIND_DECLARATIONS_GIVEN_TEXT  (* Variable text tokens *)
 KIND_DECLARATIONS_VARIABLE_TEXT
   [@@deriving show]
 
-let from_string keyword ~is_hack ~allow_xhp ~only_reserved =
+let from_string keyword ~only_reserved =
   match keyword with
-  | \"true\"                                        when not only_reserved -> Some BooleanLiteral
-  | \"false\"                                       when not only_reserved -> Some BooleanLiteral
+  | \"true\"            when not only_reserved -> Some BooleanLiteral
+  | \"false\"           when not only_reserved -> Some BooleanLiteral
 FROM_STRING_GIVEN_TEXT  | _              -> None
 
 let to_string kind =
@@ -3071,17 +3068,7 @@ module GenerateFFRustTokenKind = struct
 
   let to_from_string x =
     let token_text = escape_token_text x.token_text in
-    let guard = if x.is_xhp then
-        "(is_hack || allow_xhp)"
-      else if x.hack_only then
-        "is_hack"
-        else ""
-      in
-    let guard = guard ^ if x.allowed_as_identifier then
-        let and_ = if guard = "" then "" else " && " in
-        and_ ^ "!only_reserved"
-      else ""
-    in
+    let guard = if x.allowed_as_identifier then "!only_reserved" else "" in
     let guard = if guard = "" then "" else " if "  ^ guard in
     sprintf "            \"%s\"%s => Some(TokenKind::%s),\n" token_text guard (token_kind x)
 
@@ -3120,8 +3107,6 @@ TO_STRING_VARIABLE_TEXT        }
 
     pub fn from_string(
         keyword: &[u8],
-        is_hack: bool,
-        allow_xhp: bool,
         only_reserved: bool,
     ) -> Option<Self> {
         let keyword = unsafe { std::str::from_utf8_unchecked(keyword) };

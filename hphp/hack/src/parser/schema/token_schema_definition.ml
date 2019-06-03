@@ -10,8 +10,6 @@
 type token_node = {
     token_kind : string;
     token_text : string;
-    hack_only : bool;
-    is_xhp : bool;
     (* Whether the token is allowed as identifier, i.e., in practice, whether
      * it is allowed as function name or class name.
      * For example, darray is allowed as identifier. The following is legit:
@@ -33,16 +31,12 @@ type token_node = {
 let make_token_node
   token_kind
   token_text
-  ?(hack_only=false)
-  ?(is_xhp=false)
   ?(allowed_as_identifier=false)
   ()
   =
   {
     token_kind;
     token_text;
-    hack_only;
-    is_xhp;
     allowed_as_identifier;
   }
 
@@ -168,7 +162,6 @@ let given_text_tokens = [
   make_token_node
     "Arraykey"
     "arraykey"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -178,19 +171,15 @@ let given_text_tokens = [
   make_token_node
     "Async"
     "async"
-    ~hack_only:true
     ();
   make_token_node
     "Attribute"
     "attribute"
-    ~hack_only:true
-    ~is_xhp:true
     ~allowed_as_identifier:true
     ();
   make_token_node
     "Await"
     "await"
-    ~hack_only:true
     ();
   make_token_node
     "Backslash"
@@ -226,15 +215,11 @@ let given_text_tokens = [
   make_token_node
     "Category"
     "category"
-    ~hack_only:true
-    ~is_xhp:true
     ~allowed_as_identifier:true
     ();
   make_token_node
     "Children"
     "children"
-    ~hack_only:true
-    ~is_xhp:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -244,7 +229,6 @@ let given_text_tokens = [
   make_token_node
     "Classname"
     "classname"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -266,13 +250,11 @@ let given_text_tokens = [
   make_token_node
     "Coroutine"
     "coroutine"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
     "Darray"
     "darray"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -341,8 +323,6 @@ let given_text_tokens = [
   make_token_node
     "Enum"
     "enum"
-    ~hack_only:true
-    ~is_xhp:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -356,7 +336,6 @@ let given_text_tokens = [
   make_token_node
     "Fallthrough"
     "fallthrough"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -367,7 +346,6 @@ let given_text_tokens = [
   make_token_node
     "File"
     "file"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -402,7 +380,6 @@ let given_text_tokens = [
   make_token_node
     "Concurrent"
     "concurrent"
-    ~hack_only:true
     ();
   make_token_node
     "Goto"
@@ -431,7 +408,6 @@ let given_text_tokens = [
   make_token_node
     "Inout"
     "inout"
-    ~hack_only:true
     ();
   make_token_node
     "Instanceof"
@@ -458,7 +434,6 @@ let given_text_tokens = [
   make_token_node
     "Is"
     "is"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -473,7 +448,6 @@ let given_text_tokens = [
   make_token_node
     "Let"
     "let"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -483,7 +457,6 @@ let given_text_tokens = [
   make_token_node
     "Mixed"
     "mixed"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -498,19 +471,16 @@ let given_text_tokens = [
   make_token_node
     "Newtype"
     "newtype"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
     "Noreturn"
     "noreturn"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
     "Num"
     "num"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -547,19 +517,15 @@ let given_text_tokens = [
   make_token_node
     "Reify"
     "reify"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
     "Record"
     "recordname"
-    ~hack_only:true
     ();
   make_token_node
     "RecordDec"
     "record"
-    ~hack_only:true
-    ~is_xhp:true
     ();
   make_token_node
     "Require"
@@ -572,14 +538,10 @@ let given_text_tokens = [
   make_token_node
     "Required"
     "required"
-    ~hack_only:true
-    ~is_xhp:true
     ();
   make_token_node
     "Lateinit"
     "lateinit"
-    ~hack_only:true
-    ~is_xhp:true
     ();
   make_token_node
     "Resource"
@@ -598,7 +560,6 @@ let given_text_tokens = [
   make_token_node
     "Shape"
     "shape"
-    ~hack_only:true
     ();
   make_token_node
     "Static"
@@ -617,7 +578,6 @@ let given_text_tokens = [
   make_token_node
     "Suspend"
     "suspend"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -627,7 +587,6 @@ let given_text_tokens = [
   make_token_node
     "This"
     "this"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -645,12 +604,10 @@ let given_text_tokens = [
   make_token_node
     "Tuple"
     "tuple"
-    ~hack_only:true
     ();
   make_token_node
     "Type"
     "type"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -664,7 +621,6 @@ let given_text_tokens = [
   make_token_node
     "Using"
     "using"
-    ~hack_only:true
     ();
   make_token_node
     "Var"
@@ -673,7 +629,6 @@ let given_text_tokens = [
   make_token_node
     "Varray"
     "varray"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -689,7 +644,6 @@ let given_text_tokens = [
   make_token_node
     "Where"
     "where"
-    ~hack_only:true
     ~allowed_as_identifier:true
     ();
   make_token_node
@@ -980,7 +934,6 @@ let given_text_tokens = [
   make_token_node
     "ColonAt"
     ":@"
-    ~hack_only:true
     ();
 ]
 

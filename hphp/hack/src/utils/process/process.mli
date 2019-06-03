@@ -20,7 +20,13 @@ end
 
 (**
  * Shells out the program with the given args.
- * Sets its current working directory if given.
+ * Sets its current working directory if given - NOTE: make sure to call
+ * Daemon.check_entry_point in your main entry point if passing this argument!
+ * We actually spawn our own process with chdir_main as the entry point, which
+ * changes the current working directory to the desired directory, executes the program,
+ * and redirect the output back to the original process. Therefore,
+ * if you don't check entry point, the process will use the regular main entry
+ * point instead, and the results will be unpredictable and difficult to understand.
  * Sends input to stdin of spawned process if given.
  *)
 val exec : ?cwd:string -> string -> ?input:string ->

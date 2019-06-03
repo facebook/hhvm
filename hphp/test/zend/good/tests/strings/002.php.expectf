@@ -10,9 +10,9 @@ printf test 7:0000002.50
 printf test 8:<                 foo>
 printf test 9:<bar                 >
 printf test 10: 123456789012345
-printf test 10:<hï¿½yesterettsjustitiarius>
+printf test 10:<høyesterettsjustitiarius>
 printf test 11: 123456789012345678901234567890
-printf test 11:<    hï¿½yesterettsjustitiarius>
+printf test 11:<      høyesterettsjustitiarius>
 printf test 12:-12.34
 printf test 13:  -12
 printf test 14:@

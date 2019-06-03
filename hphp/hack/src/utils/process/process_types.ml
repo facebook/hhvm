@@ -39,6 +39,11 @@ type invocation_info = {
   stack: Utils.callstack;
 }
 
+type environment =
+  | Default
+  | Empty
+  | Augment of string list
+  | Replace of string list
 
 (* type 't' represents a process, be it completed or still underway.
  * From the information in 't' we can figure out if it has completed,

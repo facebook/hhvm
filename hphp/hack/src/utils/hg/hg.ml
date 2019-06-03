@@ -19,7 +19,10 @@ module Hg_actual = struct
 
 let exec_hg args =
   (** Disable user aliases or configs. *)
-  Process.exec_with_augmented_env "hg" ~env:["HGPLAIN=1"] args
+  Process.exec
+    "hg"
+    ~env:(Process_types.Augment ["HGPLAIN=1"])
+    args
 
 (** Given a list of files and their revisions, saves the files to the output
  * directory. For example,

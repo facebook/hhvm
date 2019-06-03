@@ -38,7 +38,7 @@ let test_process_read_idempotent () =
     false
 
 let test_env_variable () =
-  let process = Process.exec_with_augmented_env "printenv" ~env:[ "NAME=world" ] [ ] in
+  let process = Process.exec "printenv" ~env:(Process_types.Augment [ "NAME=world" ]) [ ] in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok {Process_types.stdout; _} ->
     let env = String_utils.split_into_lines stdout in
@@ -127,7 +127,7 @@ let test_entry_point () =
     false
 
 let test_chdir () =
-  let process = Process.exec ~cwd:"/tmp" "pwd" [] in
+  let process = Process.exec_with_working_directory ~dir:"/tmp" "pwd" [] in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
   | Ok {Process_types.stdout; _} ->

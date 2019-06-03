@@ -1,0 +1,7 @@
+(3,7)-(3,7) A name is expected here.
+(3,7)-(3,12) Encountered unexpected token 'using'.
+(5,17)-(5,22) A type specifier is expected here.
+(6,14)-(6,18) Unexpected node on right hand side of new or instanceof: token
+(6,19)-(6,19) An expression is expected here.
+(9,19)-(9,19) A type specifier is expected here.
+(9,19)-(9,24) Encountered unexpected token 'using'.

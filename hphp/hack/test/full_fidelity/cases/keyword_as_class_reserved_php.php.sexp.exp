@@ -166,8 +166,7 @@
       ((object_creation_expression 14
         ((((end_of_line 1)) new 3 ((whitespace 1)))
          (constructor_call 10
-          ((simple_type_specifier 8 ((() name 8 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 8 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 11
       ((object_creation_expression 10
@@ -185,15 +184,13 @@
       ((object_creation_expression 15
         ((() new 3 ((whitespace 1)))
          (constructor_call 11
-          ((simple_type_specifier 9 ((() name 9 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 9 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 13
       ((object_creation_expression 12
         ((() new 3 ((whitespace 1)))
          (constructor_call 8
-          ((simple_type_specifier 6 ((() name 6 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 6 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 11
       ((object_creation_expression 10
@@ -242,15 +239,13 @@
       ((object_creation_expression 11
         ((() new 3 ((whitespace 1)))
          (constructor_call 7
-          ((simple_type_specifier 5 ((() name 5 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 5 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 15
       ((object_creation_expression 14
         ((() new 3 ((whitespace 1)))
          (constructor_call 10
-          ((simple_type_specifier 8 ((() name 8 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 8 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 11
       ((object_creation_expression 10
@@ -263,8 +258,7 @@
       ((object_creation_expression 9
         ((() new 3 ((whitespace 1)))
          (constructor_call 5
-          ((simple_type_specifier 3 ((() name 3 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 3 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 13
       ((object_creation_expression 12
@@ -300,8 +294,7 @@
       ((object_creation_expression 10
         ((() new 3 ((whitespace 1)))
          (constructor_call 6
-          ((simple_type_specifier 4 ((() name 4 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 4 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 11
       ((object_creation_expression 10
@@ -314,8 +307,7 @@
       ((object_creation_expression 12
         ((() new 3 ((whitespace 1)))
          (constructor_call 8
-          ((simple_type_specifier 6 ((() name 6 ()))) (() "(" 1 ())
-           (missing 0 ()) (() ")" 1 ())))))
+          ((() name 6 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (expression_statement 10
       ((object_creation_expression 9

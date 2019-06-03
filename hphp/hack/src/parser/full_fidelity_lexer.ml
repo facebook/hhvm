@@ -1465,8 +1465,8 @@ let as_keyword ~only_reserved kind lexer =
   if kind = TokenKind.Name then
     let original_text = current_text lexer in
     let text = as_case_insensitive_keyword original_text in
-    let is_hack = Env.is_hh () and allow_xhp = Env.enable_xhp () in
-    match TokenKind.from_string text ~is_hack ~allow_xhp ~only_reserved with
+    let allow_xhp = Env.enable_xhp () in
+    match TokenKind.from_string text ~is_hack:true ~allow_xhp ~only_reserved with
     | Some TokenKind.Let when (not (is_experimental_mode lexer)) ->
       lexer, TokenKind.Name
     | Some keyword ->

@@ -8,7 +8,7 @@ another type variable v) equal to ty::tconstid (where ty is usually a bound
 of v) *)
 let make_type_const_equal env tconstty ty tconstid ~as_tyvar_with_cnstr =
   let ety_env = Phase.env_with_self env in
-  let (env, (_ety_env, tytconst)) =
+  let env, tytconst =
     Utils.expand_typeconst ety_env env ~as_tyvar_with_cnstr (fst ty) ty
       [tconstid] in
   let env = Utils.sub_type env tytconst tconstty in

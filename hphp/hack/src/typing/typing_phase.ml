@@ -107,20 +107,20 @@ let env_with_self env =
  *)
 (*****************************************************************************)
 
-let rec localize_with_env ~ety_env env (dty: decl ty) =
+let rec localize ~ety_env env (dty: decl ty) =
 
   Option.iter ety_env.validate_dty (fun validate_dty -> validate_dty dty);
   match dty with
   | r, Terr ->
-      env, (ety_env, (r, TUtils.terr env))
+      env, (r, TUtils.terr env)
   | r, Tany ->
-      env, (ety_env, (r, TUtils.tany env))
+      env, (r, TUtils.tany env)
   | _, (Tnonnull | Tprim _ | Tdynamic) as x ->
-      env, (ety_env, x)
+      env, x
   | r, Tmixed ->
-      env, (ety_env, MakeType.mixed r)
+      env, MakeType.mixed r
   | r, Tnothing ->
-      env, (ety_env, MakeType.nothing r)
+      env, MakeType.nothing r
   | r, Tthis ->
       let ty = match ety_env.this_ty with
         | Reason.Rnone, ty -> r, ty
@@ -134,7 +134,7 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
         | Some cid ->
           ExprDepTy.make env cid ty
         | _ -> env, ty in
-      env, (ety_env, ty)
+      env, ty
   | r, Tarray (ty1, ty2) ->
       let env, ty = match ty1, ty2 with
         | None, None -> env, Tarraykind AKany
@@ -147,26 +147,26 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             env, Tarraykind (AKmap (tk, tv))
         | None, Some _ ->
             failwith "Invalid array declaration type" in
-      env, (ety_env, (r, ty))
+      env, (r, ty)
   | r, Tdarray (tk, tv) ->
       let env, tk = localize ~ety_env env tk in
       let env, tv = localize ~ety_env env tv in
       let ty = Tarraykind (AKdarray (tk, tv)) in
-      env, (ety_env, (r, ty))
+      env, (r, ty)
   | r, Tvarray tv ->
       let env, tv = localize ~ety_env env tv in
       let ty = Tarraykind (AKvarray tv) in
-      env, (ety_env, (r, ty))
+      env, (r, ty)
   | r, Tvarray_or_darray tv ->
       let env, tv = localize ~ety_env env tv in
       let ty = Tarraykind (AKvarray_or_darray tv) in
-      env, (ety_env, (r, ty))
+      env, (r, ty)
   | r, Tgeneric x ->
       begin match SMap.get x ety_env.substs with
       | Some x_ty ->
-        env, (ety_env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty))
+        env, (Reason.Rinstantiate (fst x_ty, x, r), snd x_ty)
       | None ->
-        env, (ety_env, (r, Tabstract (AKgeneric x, None)))
+        env, (r, Tabstract (AKgeneric x, None))
     end
   | r, Toption ty ->
        let env, ty = localize ~ety_env env ty in
@@ -175,15 +175,15 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
            snd ty
          else
            Toption ty in
-       env, (ety_env, (r, ty_))
+       env, (r, ty_)
   | r, Tlike ty ->
       let env, ty = localize ~ety_env env ty in
       let env, lty = TUtils.union env (MakeType.dynamic r) ty in
-      env, (ety_env, lty)
+      env, lty
   | r, Tfun ft ->
       let env, ft = localize_ft ~ety_env
         ~instantiation:{ use_pos = ft.ft_pos; use_name = "function"; explicit_tparams = []; } env ft in
-      env, (ety_env, (r, Tfun ft))
+      env, (r, Tfun ft)
   | r, Tapply ((_, x), argl) when Env.is_typedef x ->
       let env, argl = List.map_env env argl (localize ~ety_env) in
       TUtils.expand_typedef ety_env env r x argl
@@ -191,13 +191,13 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
       (* if argl <> [], nastInitCheck would have raised an error *)
       if Typing_defs.has_expanded ety_env x then begin
         Errors.cyclic_enum_constraint p;
-        env, (ety_env, (r, Typing_utils.tany env))
+        env, (r, Typing_utils.tany env)
       end else begin
         let type_expansions = (p, x) :: ety_env.type_expansions in
         let ety_env = {ety_env with type_expansions} in
         let env, cstr =
           opt (localize ~ety_env) env (Env.get_enum_constraint env x) in
-        env, (ety_env, (r, Tabstract (AKenum x, cstr)))
+        env, (r, Tabstract (AKenum x, cstr))
       end
   | r, Tapply ((_, cid) as cls, tyl) ->
       let env, tyl =
@@ -210,16 +210,16 @@ let rec localize_with_env ~ety_env env (dty: decl ty) =
             let tparams = Decl_provider.Class.tparams class_info in
             localize_tparams ~ety_env env (Reason.to_pos r) tyl tparams
       in
-      env, (ety_env, (r, Tclass (cls, Nonexact, tyl)))
+      env, (r, Tclass (cls, Nonexact, tyl))
   | r, Ttuple tyl ->
       let env, tyl = List.map_env env tyl (localize ~ety_env) in
-      env, (ety_env, (r, Ttuple tyl))
+      env, (r, Ttuple tyl)
   | r, Taccess (root_ty, ids) ->
       let env, root_ty = localize ~ety_env env root_ty in
       TUtils.expand_typeconst ety_env env r root_ty ids
   | r, Tshape (fields_known, tym) ->
       let env, tym = ShapeFieldMap.map_env (localize ~ety_env) env tym in
-      env, (ety_env, (r, Tshape (fields_known, tym)))
+      env, (r, Tshape (fields_known, tym))
 
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in
@@ -251,10 +251,6 @@ and tyl_contains_wildcard tyl =
     | _, Tapply ((_, x), _) -> x = SN.Typehints.wildcard
     | _ -> false
   end
-
-and localize ~ety_env env ty =
-  let env, (_, ty) = localize_with_env ~ety_env env ty in
-  env, ty
 
 and localize_cstr_ty ~ety_env env ty tp_name =
   let env, (r, ty_) = localize ~ety_env env ty in

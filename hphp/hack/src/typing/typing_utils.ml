@@ -38,7 +38,7 @@ let ty_size env ty =
 (*****************************************************************************)
 let not_implemented _ = failwith "Function not implemented"
 type expand_typedef =
-    expand_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * ety
+    expand_env -> Env.env -> Reason.t -> string -> locl ty list -> Env.env * locl ty
 let (expand_typedef_ref : expand_typedef ref) = ref not_implemented
 let expand_typedef x = !expand_typedef_ref x
 
@@ -65,7 +65,7 @@ let expand_type_and_solve env ~description_of_expected = !expand_type_and_solve_
 
 type expand_typeconst =
   expand_env -> Env.env -> ?as_tyvar_with_cnstr:bool -> Reason.t -> locl ty ->
-  Nast.sid list -> Env.env * ety
+  Nast.sid list -> Env.env * locl ty
 let (expand_typeconst_ref: expand_typeconst ref) = ref not_implemented
 let expand_typeconst x = !expand_typeconst_ref x
 

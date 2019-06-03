@@ -63,9 +63,9 @@ If as_tyvar_with_cnstr is set, then return a fresh type variable which has
 the same constraints as type constant T in A. Otherwise, return an
 AKGeneric("A::T"). *)
 let rec expand_with_env ety_env env ?(as_tyvar_with_cnstr = false) reason root ids =
-  let tenv, env, ty =
+  let tenv, _, ty =
     expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids in
-  tenv, (env.ety_env, ty)
+  tenv, ty
 
 and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
   let env = empty_env env ety_env ids in
@@ -101,7 +101,7 @@ and expand_with_env_ ety_env env ~as_tyvar_with_cnstr reason root ids =
   tenv, env, ty
 
 and referenced_typeconsts tenv ety_env r (root, ids) =
-  let tenv, (ety_env, root) = Phase.localize_with_env ~ety_env tenv root in
+  let tenv, root = Phase.localize ~ety_env tenv root in
   let _, env, _ = expand_with_env_ ety_env ~as_tyvar_with_cnstr:false tenv r root ids in
   List.rev env.typeconsts_seen
 

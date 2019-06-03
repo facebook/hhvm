@@ -587,8 +587,6 @@ type expand_env = {
   validate_dty : (decl ty -> unit) option;
 }
 
-type ety = expand_env * locl ty
-
 let has_expanded {type_expansions; _} x =
   List.exists type_expansions begin function
     | (_, x') when x = x' -> true

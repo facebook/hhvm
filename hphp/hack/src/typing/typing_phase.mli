@@ -22,11 +22,7 @@ val localize_with_self:
   Env.env ->
   decl ty ->
   Env.env * locl ty
-val localize_with_env:
-  ety_env:expand_env ->
-  Env.env ->
-  decl ty ->
-  Env.env * (expand_env * locl ty)
+
 val localize:
   ety_env:expand_env ->
   Env.env ->

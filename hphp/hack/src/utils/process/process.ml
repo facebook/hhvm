@@ -46,6 +46,12 @@ let env_to_array (env: Process_types.environment): string array option =
     Some fullenv
   | Process_types.Replace fullenv -> Some (Array.of_list fullenv)
 
+let status_to_string (status: Unix.process_status): string =
+  match status with
+  | Unix.WEXITED i -> Printf.sprintf "Unix.WEXITED %d" i
+  | Unix.WSIGNALED i -> Printf.sprintf "Unix.WSIGNALED %d" i
+  | Unix.WSTOPPED i -> Printf.sprintf "Unix.WSTOPPED %d" i
+
 (* make_result returns either (stdout,stderr) or a failure. *)
 let make_result
     (status: Unix.process_status)
@@ -255,7 +261,7 @@ let send_input_and_form_result
   }
 
 (**
- * This method augments the environment
+ * Launches a process, optionally modifying the environment variables with ~env
  *)
 let exec_no_chdir
     ~(prog: string)

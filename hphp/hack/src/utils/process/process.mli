@@ -72,5 +72,7 @@ val read_and_wait_pid : timeout: int -> Process_types.t -> process_result
 
 val failure_msg : failure -> string
 
+val status_to_string : Unix.process_status -> string
+
 (** Returns true if read_and_close_pid would be nonblocking. *)
 val is_ready : Process_types.t -> bool

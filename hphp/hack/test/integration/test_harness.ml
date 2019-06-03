@@ -8,14 +8,6 @@ module Tools = struct
     content
     "\n============================\n"
 
-  let process_status_to_string = function
-    | Unix.WEXITED i ->
-      Printf.sprintf "Unix.WEXITED %d" i
-    | Unix.WSIGNALED i ->
-      Printf.sprintf "Unix.WSIGNALED %d" i
-    | Unix.WSTOPPED i ->
-      Printf.sprintf "Unix.WSTOPPED %d" i
-
 end;;
 
 
@@ -171,7 +163,7 @@ config test_case =
       let result = try test_case harness with
       | Process_failed (Process_types.Abnormal_exit {status; stderr; _}) as e ->
             Printf.eprintf "Process exited abnormally (%s). See also Stderr: %s\n"
-              (Tools.process_status_to_string status)
+              (Process.status_to_string status)
               (Tools.boxed_string stderr);
             raise e
       in

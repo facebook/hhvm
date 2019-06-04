@@ -12,7 +12,6 @@ type t = {
   php5_compat_mode: bool;
   codegen: bool;
   force_hh: bool;
-  enable_xhp: bool;
   disable_lval_as_an_expression: bool;
   disable_nontoplevel_declarations: bool;
   mode: FileInfo.mode option;
@@ -27,7 +26,6 @@ let default = {
   php5_compat_mode = false;
   codegen = false;
   force_hh = false;
-  enable_xhp = false;
   disable_lval_as_an_expression = false;
   disable_nontoplevel_declarations = false;
   disable_unsafe_expr = false;
@@ -43,7 +41,6 @@ let make
   ?(php5_compat_mode = default.php5_compat_mode)
   ?(codegen = default.codegen)
   ?(force_hh = default.force_hh)
-  ?(enable_xhp = default.enable_xhp)
   ?(disable_lval_as_an_expression = default.disable_lval_as_an_expression)
   ?(disable_nontoplevel_declarations = default.disable_nontoplevel_declarations)
   ?mode
@@ -56,7 +53,6 @@ let make
     php5_compat_mode;
     codegen;
     force_hh;
-    enable_xhp;
     disable_lval_as_an_expression;
     disable_nontoplevel_declarations;
     mode;
@@ -70,7 +66,6 @@ let hhvm_compat_mode e = e.hhvm_compat_mode
 let php5_compat_mode e = e.php5_compat_mode
 let codegen e = e.codegen
 let force_hh e = e.force_hh
-let enable_xhp e = e.enable_xhp
 let disable_lval_as_an_expression e = e.disable_lval_as_an_expression
 let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 let mode e = e.mode

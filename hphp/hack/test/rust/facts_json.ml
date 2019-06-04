@@ -7,11 +7,9 @@
  *
  *)
 let () =
-  let enable_xhp = ref false in
   let force_hh = ref false in
   let file_path = ref "" in
   let options = [
-    "--enable-xhp", Arg.Set enable_xhp, "";
     "--force-hh", Arg.Set force_hh, "";
     "--file-path", Arg.String (fun s -> file_path := s), ""
   ] in
@@ -25,7 +23,6 @@ let () =
       ~php5_compat_mode:true
       ~hhvm_compat_mode:true
       ~force_hh:!force_hh
-      ~enable_xhp:!enable_xhp
       ~filename:(!file_path |> Relative_path.create Relative_path.Dummy)
       ~text
     with

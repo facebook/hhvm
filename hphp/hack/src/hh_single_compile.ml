@@ -272,8 +272,6 @@ let parse_text compiler_options popt fn text =
     not (Hhbc_options.source_mapping !Hhbc_options.compiler_options) in
   let enable_hh_syntax =
     Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-  let enable_xhp =
-    Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
   let php5_compat_mode =
     not (Hhbc_options.enable_uniform_variable_syntax !Hhbc_options.compiler_options) in
   let hacksperimental =
@@ -292,7 +290,6 @@ let parse_text compiler_options popt fn text =
     ~systemlib_compat_mode
     ~php5_compat_mode
     ~enable_hh_syntax
-    ~enable_xhp
     ~hacksperimental
     ~keep_errors:false
     ~lower_coroutines
@@ -441,13 +438,10 @@ let extract_facts ?pretty ~filename ~source_root text =
     | None ->
       let enable_hh_syntax =
         Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-      let enable_xhp =
-        Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
       Facts_parser.extract_as_json
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
         ~force_hh:enable_hh_syntax
-        ~enable_xhp
         ~filename ~text
   in
   (* return empty string if file has syntax errors *)

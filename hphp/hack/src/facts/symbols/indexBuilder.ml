@@ -40,12 +40,10 @@ let parse_file
     let text = Core_kernel.In_channel.read_all filename in
     let enable_hh_syntax =
       Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
-    let enable_xhp =
-      Hhbc_options.enable_xhp !Hhbc_options.compiler_options in
     let rp = Relative_path.from_root filename in
     (* Just the facts ma'am *)
     let fact_opt = Facts_parser.from_text
-        true true enable_hh_syntax enable_xhp rp text in
+        true true enable_hh_syntax rp text in
 
     (* Iterate through facts and print them out *)
     let result =

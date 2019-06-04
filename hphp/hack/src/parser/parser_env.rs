@@ -11,7 +11,6 @@ pub struct ParserEnv {
     pub disable_unsafe_expr: bool,
     pub disable_unsafe_block: bool,
     pub force_hh: bool,
-    pub enable_xhp: bool,
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,
 }

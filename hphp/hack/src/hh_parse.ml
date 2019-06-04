@@ -363,7 +363,6 @@ let handle_existing_file args filename =
   let mode = Full_fidelity_parser.parse_mode ~rust:args.rust source_text in
   let env = Full_fidelity_parser_env.make
     ~force_hh:args.enable_hh_syntax
-    ~enable_xhp:args.enable_hh_syntax
     ~disable_lval_as_an_expression:args.disable_lval_as_an_expression
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
@@ -408,7 +407,6 @@ let handle_existing_file args filename =
         ~quick_mode:args.quick_mode
         ~lower_coroutines:args.lower_coroutines
         ~enable_hh_syntax:args.enable_hh_syntax
-        ~enable_xhp:args.enable_hh_syntax
         ~parser_options:popt
         ~fail_open:args.fail_open
         ~is_hh_file:args.is_hh_file

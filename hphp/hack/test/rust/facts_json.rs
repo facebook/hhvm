@@ -28,7 +28,6 @@ fn main() {
         php5_compat_mode: true,
         hhvm_compat_mode: true,
         force_hh: args.is_present("force-hh"),
-        enable_xhp: args.is_present("enable-xhp"),
         filename: file_path.clone(),
     };
 

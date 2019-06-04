@@ -7,10 +7,8 @@
  *
  *)
 let () =
-  let force_hh = ref false in
   let file_path = ref "" in
   let options = [
-    "--force-hh", Arg.Set force_hh, "";
     "--file-path", Arg.String (fun s -> file_path := s), ""
   ] in
   Arg.parse options (fun _ -> ()) "";
@@ -22,7 +20,6 @@ let () =
     match Facts_parser.extract_as_json
       ~php5_compat_mode:true
       ~hhvm_compat_mode:true
-      ~force_hh:!force_hh
       ~filename:(!file_path |> Relative_path.create Relative_path.Dummy)
       ~text
     with

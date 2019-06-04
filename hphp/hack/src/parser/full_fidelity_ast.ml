@@ -3558,7 +3558,6 @@ let parse_text
       Full_fidelity_parser_env.make
         ~hhvm_compat_mode:env.codegen
         ~codegen:env.codegen
-        ~force_hh:env.enable_hh_syntax
         ~php5_compat_mode:env.php5_compat_mode
         ~disable_nontoplevel_declarations:
           (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)

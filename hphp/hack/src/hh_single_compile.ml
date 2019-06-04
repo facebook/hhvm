@@ -436,12 +436,9 @@ let extract_facts ?pretty ~filename ~source_root text =
   let json_facts = match Hackc_parse_delegator.extract_facts filename source_root with
     | Some result -> Some result
     | None ->
-      let enable_hh_syntax =
-        Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
       Facts_parser.extract_as_json
         ~php5_compat_mode:true
         ~hhvm_compat_mode:true
-        ~force_hh:enable_hh_syntax
         ~filename ~text
   in
   (* return empty string if file has syntax errors *)

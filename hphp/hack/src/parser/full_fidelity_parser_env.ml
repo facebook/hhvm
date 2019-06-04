@@ -11,7 +11,6 @@ type t = {
   hhvm_compat_mode: bool;
   php5_compat_mode: bool;
   codegen: bool;
-  force_hh: bool;
   disable_lval_as_an_expression: bool;
   disable_nontoplevel_declarations: bool;
   mode: FileInfo.mode option;
@@ -25,13 +24,11 @@ let default = {
   hhvm_compat_mode = false;
   php5_compat_mode = false;
   codegen = false;
-  force_hh = false;
   disable_lval_as_an_expression = false;
   disable_nontoplevel_declarations = false;
   disable_unsafe_expr = false;
   disable_unsafe_block = false;
   rust = false;
-
   mode = None;
   stats = None;
 }
@@ -40,7 +37,6 @@ let make
   ?(hhvm_compat_mode = default.hhvm_compat_mode)
   ?(php5_compat_mode = default.php5_compat_mode)
   ?(codegen = default.codegen)
-  ?(force_hh = default.force_hh)
   ?(disable_lval_as_an_expression = default.disable_lval_as_an_expression)
   ?(disable_nontoplevel_declarations = default.disable_nontoplevel_declarations)
   ?mode
@@ -52,7 +48,6 @@ let make
     hhvm_compat_mode;
     php5_compat_mode;
     codegen;
-    force_hh;
     disable_lval_as_an_expression;
     disable_nontoplevel_declarations;
     mode;
@@ -65,15 +60,12 @@ let make
 let hhvm_compat_mode e = e.hhvm_compat_mode
 let php5_compat_mode e = e.php5_compat_mode
 let codegen e = e.codegen
-let force_hh e = e.force_hh
 let disable_lval_as_an_expression e = e.disable_lval_as_an_expression
 let disable_nontoplevel_declarations e = e.disable_nontoplevel_declarations
 let mode e = e.mode
 let stats e = e.stats
-let is_hack e = e.mode <> Some FileInfo.Mphp || force_hh e
 let is_experimental_mode e = e.mode = Some FileInfo.Mexperimental
 let is_strict e = e.mode = Some FileInfo.Mstrict
-let is_typechecker e = is_hack e && not (codegen e)
 let disable_unsafe_expr e = e.disable_unsafe_expr
 let disable_unsafe_block e = e.disable_unsafe_block
 let rust e = e.rust

@@ -19,7 +19,6 @@ fn main() {
                 .takes_value(true)
                 .required(true),
         )
-        .arg(Arg::with_name("force-hh").long("force-hh"))
         .arg(Arg::with_name("enable-xhp").long("enable-xhp"))
         .get_matches();
 
@@ -27,7 +26,6 @@ fn main() {
     let opts = ExtractAsJsonOpts {
         php5_compat_mode: true,
         hhvm_compat_mode: true,
-        force_hh: args.is_present("force-hh"),
         filename: file_path.clone(),
     };
 

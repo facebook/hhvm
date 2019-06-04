@@ -38,12 +38,9 @@ let parse_file
       filename ~pattern:ctxt.repo_folder ~with_:"" in
     let path_hash = SharedMem.get_hash rel_path_str in
     let text = Core_kernel.In_channel.read_all filename in
-    let enable_hh_syntax =
-      Hhbc_options.enable_hiphop_syntax !Hhbc_options.compiler_options in
     let rp = Relative_path.from_root filename in
     (* Just the facts ma'am *)
-    let fact_opt = Facts_parser.from_text
-        true true enable_hh_syntax rp text in
+    let fact_opt = Facts_parser.from_text true true rp text in
 
     (* Iterate through facts and print them out *)
     let result =

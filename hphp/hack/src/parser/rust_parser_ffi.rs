@@ -112,16 +112,14 @@ macro_rules! parse {
             let is_experimental_mode = bool_field(&opts, 0);
             let disable_unsafe_expr = bool_field(&opts, 1);
             let disable_unsafe_block = bool_field(&opts, 2);
-            let force_hh = bool_field(&opts, 3);
-            let hhvm_compat_mode = bool_field(&opts, 4);
-            let php5_compat_mode = bool_field(&opts, 5);
-            let codegen = bool_field(&opts, 6);
+            let hhvm_compat_mode = bool_field(&opts, 3);
+            let php5_compat_mode = bool_field(&opts, 4);
+            let codegen = bool_field(&opts, 5);
 
             let env = ParserEnv {
                 is_experimental_mode,
                 disable_unsafe_expr,
                 disable_unsafe_block,
-                force_hh,
                 hhvm_compat_mode,
                 php5_compat_mode,
                 codegen,

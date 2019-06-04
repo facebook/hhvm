@@ -266,11 +266,9 @@ let rec collect (ns, facts as acc) n =
 let from_text
     ~(php5_compat_mode:bool)
     ~(hhvm_compat_mode:bool)
-    ~(force_hh:bool)
     ~(filename: Relative_path.t)
     ~(text: string): facts option =
-  let env = Full_fidelity_parser_env.make ~codegen:true ~php5_compat_mode ~hhvm_compat_mode
-      ~force_hh () in
+  let env = Full_fidelity_parser_env.make ~codegen:true ~php5_compat_mode ~hhvm_compat_mode () in
   let text = Full_fidelity_source_text.make filename text in
   let (parser, root) =
     let p = FactsParser.make env text in
@@ -286,10 +284,9 @@ let from_text
 let extract_as_json
     ~(php5_compat_mode:bool)
     ~(hhvm_compat_mode:bool)
-    ~(force_hh:bool)
     ~(filename: Relative_path.t)
     ~(text: string): Hh_json.json option =
-  from_text php5_compat_mode hhvm_compat_mode force_hh filename text
+  from_text php5_compat_mode hhvm_compat_mode filename text
   |> Option.map ~f:(fun facts ->
       let md5 = OpaqueDigest.to_hex @@ OpaqueDigest.string text in
       let sha1 = Sha1.digest text in

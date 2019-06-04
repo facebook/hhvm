@@ -10,7 +10,6 @@ pub struct ParserEnv {
     pub is_experimental_mode: bool,
     pub disable_unsafe_expr: bool,
     pub disable_unsafe_block: bool,
-    pub force_hh: bool,
     pub hhvm_compat_mode: bool,
     pub php5_compat_mode: bool,
 }

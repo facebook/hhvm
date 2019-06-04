@@ -44,7 +44,6 @@ type args = {
    is_experimental : bool;
    disable_unsafe_expr : bool;
    disable_unsafe_block  : bool;
-   force_hh : bool;
    hhvm_compat_mode : bool;
    php5_compat_mode : bool;
    codegen : bool;
@@ -260,7 +259,6 @@ let parse_args () =
   let disable_unsafe_expr = ref false in
   let disable_unsafe_block = ref false in
   let codegen = ref false in
-  let force_hh = ref false in
   let hhvm_compat_mode = ref false in
   let php5_compat_mode = ref false in
   let check_sizes = ref false in
@@ -279,7 +277,6 @@ let parse_args () =
     "--disable-unsafe-expr", Arg.Set disable_unsafe_expr, "";
     "--disable-unsafe-block", Arg.Set disable_unsafe_block, "";
     "--codegen", Arg.Set codegen, "";
-    "--force-hh", Arg.Set force_hh, "";
     "--hhvm-compat-mode", Arg.Set hhvm_compat_mode, "";
     "--php5-compat-mode", Arg.Set php5_compat_mode, "";
     "--check-sizes", Arg.Set check_sizes, "";
@@ -297,7 +294,6 @@ let parse_args () =
     disable_unsafe_expr = !disable_unsafe_expr;
     disable_unsafe_block = !disable_unsafe_block;
     codegen = !codegen;
-    force_hh = !force_hh;
     hhvm_compat_mode = !hhvm_compat_mode;
     php5_compat_mode = !php5_compat_mode;
     check_sizes = !check_sizes;
@@ -334,7 +330,6 @@ let () =
   let make_env = Full_fidelity_parser_env.make
     ~disable_unsafe_expr:args.disable_unsafe_expr
     ~disable_unsafe_block:args.disable_unsafe_block
-    ~force_hh:args.force_hh
     ~hhvm_compat_mode:args.hhvm_compat_mode
     ~php5_compat_mode:args.php5_compat_mode
     ~codegen:args.codegen

@@ -18,7 +18,6 @@ type parser_opts = (
   bool * (* is_experimental mode *)
   bool * (* disable_unsafe_expr *)
   bool * (* enable_unsafe_block *)
-  bool * (* force_hh *)
   bool * (* hhvm_compat_mode *)
   bool * (* php5_compat_mode *)
   bool   (* codegen *)
@@ -27,7 +26,6 @@ let env_to_opts env = (
   (Env.is_experimental_mode env),
   (Env.disable_unsafe_expr env),
   (Env.disable_unsafe_block env),
-  (Env.force_hh env),
   (Env.hhvm_compat_mode env),
   (Env.php5_compat_mode env),
   (Env.codegen env)

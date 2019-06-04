@@ -10,7 +10,6 @@
 val extract_as_json:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
-  force_hh: bool ->
   filename: Relative_path.t ->
   text:string
   -> Hh_json.json option
@@ -18,7 +17,6 @@ val extract_as_json:
 val from_text:
   php5_compat_mode: bool ->
   hhvm_compat_mode: bool ->
-  force_hh: bool ->
   filename: Relative_path.t ->
   text:string
   -> Facts.facts option

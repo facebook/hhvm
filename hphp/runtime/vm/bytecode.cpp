@@ -5905,7 +5905,7 @@ OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
       !verifyReifiedLocalType(cell->m_data.parr, param.ptr, isTypeVar, warn)) {
     raise_reified_typehint_error(
       folly::sformat(
-        "Argument {} passed to {}() must be an instance of {}, given {}",
+        "Argument {} passed to {}() must be an instance of {}, {} given",
         param.index + 1,
         vmfp()->m_func->fullName()->data(),
         TypeStructure::toStringForDisplay(ArrNR(cell->m_data.parr)).c_str(),

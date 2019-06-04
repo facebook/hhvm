@@ -510,7 +510,7 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
   }
   raise_reified_typehint_error(
     folly::sformat(
-      "Argument {} passed to {}() must be an instance of {}, given {}",
+      "Argument {} passed to {}() must be an instance of {}, {} given",
       id + 1,
       func->fullName()->data(),
       TypeStructure::toStringForDisplay(ArrNR(ts)).c_str(),

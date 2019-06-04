@@ -163,7 +163,6 @@ val error2065 : string
 val error2066 : string
 val error2067 : string
 val error2068 : string
-val error2069 : string
 val error2070 : open_tag:string -> close_tag:string -> string
 val error2071 : string -> string
 val error2072 : string -> string
@@ -177,14 +176,11 @@ val error2078 : string
 (* Start giving names rather than numbers *)
 val list_must_be_lvar : string
 val async_not_last : string
-val list_as_subscript : string
-val vdarray_in_php : string
 val uppercase_kw : string -> string
 val using_st_function_scoped_top_level : string
 val const_in_trait : string
 val const_visibility : string
 val strict_namespace_hh : string
-val strict_namespace_not_hh : string
 val original_definition : string
 val name_is_already_in_use_php :
   name:string -> short_name:string -> string
@@ -248,7 +244,6 @@ val interface_has_private_method : string
 val redeclaration_of_function : name:string -> loc:string -> string
 val redeclaration_of_method : name:string -> string
 val self_or_parent_colon_colon_class_outside_of_class : string -> string
-val variadic_param_with_type_in_php : string -> string -> string
 val final_property : string
 val var_property : string
 val invalid_is_as_expression_hint : string -> string -> string

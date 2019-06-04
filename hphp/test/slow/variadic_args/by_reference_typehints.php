@@ -7,7 +7,7 @@ function variadic_by_ref(int &...$args) {
 function main() {
   $a = 10;
   $b = 20;
-  variadic_by_ref($a, $b);
+  variadic_by_ref(&$a, &$b);
 }
 
 <<__EntryPoint>>

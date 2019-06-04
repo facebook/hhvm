@@ -1,6 +1,6 @@
 <?php
 
-class ClassName
+class SomeClassName
 {
     public $var = 'bla';
 }
@@ -12,7 +12,7 @@ function __autoload($class)
     var_dump("__autload($class)");
 }
 <<__EntryPoint>> function main() {
-$obj = new ClassName;
+$obj = new SomeClassName;
 test($obj);
 
 echo "Done\n";

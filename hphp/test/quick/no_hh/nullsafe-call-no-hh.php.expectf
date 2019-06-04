@@ -1,2 +1,0 @@
-
-Fatal error: Operator '?->' is only allowed in Hack. in %s/nullsafe-call-no-hh.php on line 10

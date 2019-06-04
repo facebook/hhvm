@@ -813,12 +813,10 @@ let produce_error_for_header acc check node error error_node =
     error error_node
 
 
-let cant_be_classish_name env name =
+let cant_be_classish_name name =
   match String.lowercase name with
-  | "false" | "null" | "parent" | "self" | "true" ->
-    true
-  | "callable" | "classname" | "darray" | "this" | "varray"
-    when is_hack env -> true
+  | "callable" | "classname" | "darray" | "false" | "null" | "parent" | "self"
+  | "this" | "true" | "varray" -> true
   | _ -> false
 
 (* Given a function_declaration_header node, returns its function_name
@@ -843,9 +841,7 @@ let first_parent_function_name context =
 
 (* Given a particular TokenKind.(Trait/Interface), tests if a given
  * classish_declaration node is both of that kind and declared abstract. *)
-let is_classish_kind_declared_abstract env cd_node =
-  if not (is_hack env) then false
-  else
+let is_classish_kind_declared_abstract _env cd_node =
   match syntax cd_node with
   | ClassishDeclaration { classish_keyword; classish_modifiers; _ }
     when is_token_kind classish_keyword TokenKind.Trait
@@ -1021,8 +1017,8 @@ let make_name_already_used_error node name short_name original_location
   SyntaxError.make
     ~child:(Some original_location_error) s e (report_error ~name ~short_name)
 
-let check_type_name_reference env name_text location names errors =
-  if not (is_hack env && Hh_autoimport.is_hh_autoimport name_text)
+let check_type_name_reference _env name_text location names errors =
+  if not (Hh_autoimport.is_hh_autoimport name_text)
     || strmap_mem name_text names.t_classes
   then names, errors
   else
@@ -1889,17 +1885,6 @@ let parameter_errors env node namespace_name names errors =
       end else errors
     in
     let errors =
-      if not (is_hack env) &&
-         is_variadic_expression p.parameter_name &&
-         not (is_missing p.parameter_type) then
-        (* Strip & and ..., reference will always come before variadic *)
-        let name = String_utils.lstrip (text p.parameter_name) "&" in
-        let name = String_utils.lstrip name "..." in
-        let type_ = text p.parameter_type in
-        make_error_from_node node
-          (SyntaxError.variadic_param_with_type_in_php name type_) :: errors
-      else errors in
-    let errors =
       if is_reference_variadic p.parameter_name then
         make_error_from_node node SyntaxError.variadic_reference :: errors
       else errors in
@@ -2616,8 +2601,6 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
         else SyntaxError.error2072 text in
       make_error_from_node node error_text :: errors
     end
-  | SafeMemberSelectionExpression _ when not (is_hack env) ->
-    make_error_from_node node SyntaxError.error2069 :: errors
   | SubscriptExpression { subscript_left_bracket; _}
     when (is_typechecker env)
       && is_left_brace subscript_left_bracket ->
@@ -2677,23 +2660,11 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
     make_error_from_node node SyntaxError.error2076 :: errors
   | VectorIntrinsicExpression { vector_intrinsic_members = m; _ }
   | DictionaryIntrinsicExpression { dictionary_intrinsic_members = m; _ }
-  | KeysetIntrinsicExpression { keyset_intrinsic_members = m; _ } ->
-    if not (is_hack env) then
-      (* In php, vec[0] would be a subscript, where vec would be a constant *)
-      match syntax_to_list_no_separators m with
-      | _ :: _ :: _ -> (* 2 elements or more *)
-        make_error_from_node node SyntaxError.list_as_subscript :: errors
-      | _ -> errors
-    else check_collection_members m errors
+  | KeysetIntrinsicExpression { keyset_intrinsic_members = m; _ }
   | ArrayCreationExpression  { array_creation_members = m; _ }
-  | ArrayIntrinsicExpression { array_intrinsic_members = m; _ } ->
-    check_collection_members m errors
+  | ArrayIntrinsicExpression { array_intrinsic_members = m; _ }
   | VarrayIntrinsicExpression { varray_intrinsic_members = m; _ }
   | DarrayIntrinsicExpression { darray_intrinsic_members = m; _ } ->
-    let errors =
-      if not (is_hack env)
-      then make_error_from_node node SyntaxError.vdarray_in_php :: errors
-      else errors in
     check_collection_members m errors
   | YieldFromExpression _
   | YieldExpression _ ->
@@ -3183,7 +3154,7 @@ let classish_errors env node namespace_name names errors =
     let errors =
       let classish_name = text cd.classish_name in
       produce_error errors
-      (cant_be_classish_name env) classish_name
+      cant_be_classish_name classish_name
       (SyntaxError.reserved_keyword_as_class_name classish_name)
       cd.classish_name in
     let errors =
@@ -3384,13 +3355,8 @@ let use_class_or_namespace_clause_errors
     | Missing ->
       let errors =
         if name_text = "strict"
-        then
-          let message =
-            if is_hack env then SyntaxError.strict_namespace_hh
-            else SyntaxError.strict_namespace_not_hh in
-          make_error_from_node name message :: errors
+        then make_error_from_node name SyntaxError.strict_namespace_hh :: errors
         else errors in
-
       let names, errors =
         let location = make_location_of_node name in
         match strmap_get short_name names.t_classes with
@@ -3398,7 +3364,7 @@ let use_class_or_namespace_clause_errors
           if qualified_name = f_name && f_kind = Name_def then names, errors
           else
             let err_msg =
-              if is_hack env && f_kind <> Name_def then
+              if f_kind <> Name_def then
                 let text = SyntaxTree.text env.syntax_tree in
                 let line_num, _ =
                   Full_fidelity_source_text.offset_to_position

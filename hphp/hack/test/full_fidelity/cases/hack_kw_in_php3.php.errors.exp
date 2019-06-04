@@ -2,6 +2,8 @@
 (3,7)-(3,12) Encountered unexpected token 'async'.
 (5,7)-(5,7) A name is expected here.
 (5,7)-(5,12) Encountered unexpected token 'await'.
+(8,7)-(8,15) Cannot use 'classname' as class name as it is reserved
+(10,7)-(10,12) Cannot use 'darray' as class name as it is reserved
 (14,7)-(14,7) A name is expected here.
 (14,7)-(14,12) Encountered unexpected token 'inout'.
 (20,7)-(20,7) A name is expected here.
@@ -12,6 +14,7 @@
 (23,7)-(23,12) Encountered unexpected token 'tuple'.
 (25,7)-(25,7) A name is expected here.
 (25,7)-(25,12) Encountered unexpected token 'using'.
+(26,7)-(26,12) Cannot use 'varray' as class name as it is reserved
 (30,5)-(30,11) Unexpected node on right hand side of new or instanceof: lambda_expression
 (30,12)-(30,12) A lambda arrow ('==>') is expected here.
 (32,5)-(32,11) Unexpected node on right hand side of new or instanceof: prefix_unary_expression

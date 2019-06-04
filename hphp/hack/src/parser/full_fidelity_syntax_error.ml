@@ -235,7 +235,6 @@ let error2066 = "A previous parameter has a default value. Remove all the " ^
   "this one."
 let error2067 = "A hack source file cannot contain '?>'."
 let error2068 = "hh blocks and php blocks cannot be mixed."
-let error2069 = "Operator '?->' is only allowed in Hack."
 let error2070 ~open_tag ~close_tag =
   Printf.sprintf "XHP: mismatched tag: '%s' not the same as '%s'"
     close_tag open_tag
@@ -254,8 +253,6 @@ let list_must_be_lvar = "list() can only be used as an lvar. Did you mean to use
 
 (* Start giving names rather than numbers *)
 let async_not_last = "The 'async' modifier must be directly before the 'function' keyword."
-let list_as_subscript = "A subscript index cannot be a list"
-let vdarray_in_php = "varray and darray are only allowed in Hack files"
 let uppercase_kw text = "Keyword " ^ text ^ " must be written in lowercase"
 let using_st_function_scoped_top_level =
   "Using statement in function scoped form may only be used at the top " ^
@@ -264,11 +261,9 @@ let const_in_trait = "Traits cannot have constants"
 let const_visibility = "Class constants cannot have visibility modifiers in " ^
   "Hack files"
 let strict_namespace_hh =
-  "To use strict hack, place // strict after the open tag. " ^
+  "To use strict Hack, place // strict after the open tag. " ^
   "If it's already there, remove this line. " ^
   "Hack is strict already."
-let strict_namespace_not_hh =
-  "Strict mode is not supported for non-Hack files."
 
 let original_definition = "Original definition"
 
@@ -426,10 +421,6 @@ let redeclaration_of_method ~name =
   "Redeclared method " ^ name
 let self_or_parent_colon_colon_class_outside_of_class name =
   "Cannot access " ^ name ^ "::class when no class scope is active"
-let variadic_param_with_type_in_php name type_ =
-  "Parameter " ^ name ^ " is variadic and has a type constraint ("
-  ^ type_ ^ "); variadic params with type constraints are not "
-  ^ "supported in non-Hack files"
 let final_property = "Properties cannot be declared final"
 let var_property = "Properties cannot be declared as var; a type is required"
 let property_has_multiple_visibilities name =

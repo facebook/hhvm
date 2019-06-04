@@ -1,2 +1,0 @@
-
-Fatal error: Parameter $args is variadic and has a type constraint (int); variadic params with type constraints are not supported in %s/variadic_args/by_reference_typehints.php on line 3

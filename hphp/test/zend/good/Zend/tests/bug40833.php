@@ -10,7 +10,7 @@ class entity
             return $this->data[$name];
         else {
             $this->data = array();
-            return $this->data[$name] = new set($this);
+            return $this->data[$name] = new myset($this);
         }
     }
 
@@ -21,7 +21,7 @@ class entity
     }
 }
 
-class set implements ArrayAccess
+class myset implements ArrayAccess
 {
     private $entity;
 

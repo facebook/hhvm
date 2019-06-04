@@ -1,5 +1,5 @@
 <?php
-class collection implements Iterator {
+class mycollection implements Iterator {
 
   private $_elements = array();
 
@@ -50,7 +50,7 @@ class class2 {
 }
 <<__EntryPoint>> function main() {
 $obj = new class2();
-$col = new collection();
+$col = new mycollection();
 
 try {
     foreach($col as $co) {

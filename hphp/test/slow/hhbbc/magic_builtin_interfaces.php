@@ -3,19 +3,15 @@
 function instance_of_test(array $x) {
   echo '==================== ', __FUNCTION__,' ====================', "\n";
   var_dump($x instanceof \HH\Traversable);
-  var_dump($x instanceof Traversable); // false without
-                                       // EnableHipHopSyntax or <?hh
+  var_dump($x instanceof Traversable); // autoimported
   var_dump($x instanceof \HH\Container);
-  var_dump($x instanceof Container);   // false without
-                                       // EnableHipHopSyntax or <?hh
+  var_dump($x instanceof Container);   // autoimported
   var_dump($x instanceof XHPChild);
   var_dump($x instanceof Stringish);
   var_dump($x instanceof \HH\KeyedTraversable);
-  var_dump($x instanceof KeyedTraversable); // false without
-                                            // EnableHipHopSyntax or <?hh
+  var_dump($x instanceof KeyedTraversable); // autoimported
   var_dump($x instanceof \HH\KeyedContainer);
-  var_dump($x instanceof KeyedContainer);   // false without
-                                            // EnableHipHopSyntax or <?hh
+  var_dump($x instanceof KeyedContainer);   // autoimported
 }
 
 function type_hint_container(\HH\KeyedContainer $x) {

@@ -1,4 +1,6 @@
-string(24) "AutoimportTest\Container"
+string(12) "HH\Container"
 string(27) "AutoimportTest\ContainerExt"
-string(26) "AutoimportTest\Traversable"
+string(24) "AutoimportTest\Container"
+string(14) "HH\Traversable"
 string(29) "AutoimportTest\TraversableExt"
+string(26) "AutoimportTest\Traversable"

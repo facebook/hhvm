@@ -14,7 +14,7 @@ function res() { return count(STDIN); }
 function nvtw() { return count($GLOBALS); }
 function staticArr() { return count(array(3,2,1,0)); }
 function packed() { return count(array(3,2,1,new stdClass)); }
-function vec() { return count(HH\Vector{5,7,8,3}); }
+function vect() { return count(HH\Vector{5,7,8,3}); }
 function counted_obj() { return count(new Counted); }
 function not_counted_obj() { return count(new NotCounted); }
 function bad_counted_obj() { return count(new BadCounted); }
@@ -35,7 +35,7 @@ append(array(3,2));
 append(HH\Vector{3,2});
 
 var_dump(res());
-var_dump(vec());
+var_dump(vect());
 var_dump(nvtw() > 0);
 var_dump(packed());
 var_dump(staticArr());

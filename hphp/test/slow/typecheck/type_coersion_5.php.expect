@@ -1,7 +1,6 @@
 Boolean
 Builtin:
 User:
-WARNING: Argument 1 to {closure}() must be of type @boolean, boolean given
 Builtin:
 WARNING: sha1() expects parameter 2 to be boolean, integer given
 User:
@@ -30,7 +29,6 @@ User:
 WARNING: Argument 1 to {closure}() must be of type @integer, boolean given
 Builtin:
 User:
-WARNING: Argument 1 to {closure}() must be of type @integer, integer given
 Builtin:
 WARNING: str_pad() expects parameter 2 to be integer, double given
 User:
@@ -56,10 +54,8 @@ WARNING: Argument 1 to {closure}() must be of type @float, boolean given
 Builtin:
 WARNING: number_format() expects parameter 1 to be double, integer given
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, integer given
 Builtin:
 User:
-WARNING: Argument 1 to {closure}() must be of type @float, float given
 Builtin:
 WARNING: number_format() expects parameter 1 to be double, string given
 User:
@@ -88,7 +84,6 @@ User:
 WARNING: Argument 1 to {closure}() must be of type @string, float given
 Builtin:
 User:
-WARNING: Argument 1 to {closure}() must be of type @string, string given
 Builtin:
 WARNING: rtrim() expects parameter 1 to be string, array given
 User:

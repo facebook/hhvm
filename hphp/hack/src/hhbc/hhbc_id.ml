@@ -12,9 +12,8 @@ open Core_kernel
 module SU = Hhbc_string_utils
 
 let elaborate_id ns kind id =
-  let autoimport = Emit_env.is_hh_syntax_enabled () in
   let was_renamed, fully_qualified_id =
-    Namespaces.elaborate_id_impl ~autoimport ns kind (snd id) in
+    Namespaces.elaborate_id_impl ~autoimport:true ns kind (snd id) in
   let stripped_fully_qualified_id = SU.strip_global_ns fully_qualified_id in
   let clean_id = SU.strip_ns fully_qualified_id in
   let need_fallback =
@@ -31,10 +30,7 @@ module Class = struct
   type t = string
 
   let from_ast_name s =
-    Hh_autoimport.normalize
-      ~is_hack:(Emit_env.is_hh_syntax_enabled ())
-      ~php7_scalar_types:(Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
-      (SU.strip_global_ns s)
+    Hh_autoimport.normalize (SU.strip_global_ns s)
   let from_raw_string s = s
   let to_raw_string s = s
   let elaborate_id ns ((_, n) as id) =
@@ -48,11 +44,7 @@ module Class = struct
       elaborate_id ns Namespaces.ElaborateClass (fst id, mangled_name) in
     if was_renamed || mangled_name.[0] = '\\'
     then id
-    else
-    match Hh_autoimport.opt_normalize
-      ~is_hack:(Emit_env.is_hh_syntax_enabled ())
-      ~php7_scalar_types:(Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options)
-      stripped_mangled_name with
+    else match Hh_autoimport.opt_normalize stripped_mangled_name with
     | None -> id
     | Some s -> s
   let to_unmangled_string s =
@@ -99,12 +91,12 @@ module Function = struct
        * it's an HH\ or top-level function with implicit namespace.
        *)
     | Some id ->
-      if List.mem ~equal:(=) Namespaces.autoimport_funcs id && (Emit_env.is_hh_syntax_enabled ())
+      if List.mem ~equal:(=) Namespaces.autoimport_funcs id
       then SU.prefix_namespace "HH" id
       else fq_id
       (* Likewise for top-level, with no namespace *)
     | None ->
-      if is_hh_builtin fq_id && (Emit_env.is_hh_syntax_enabled ())
+      if is_hh_builtin fq_id
       then
         if has_hh_prefix fq_id
         then fq_id

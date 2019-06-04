@@ -131,8 +131,9 @@ function determine_flags(OptionMap $opts): string {
   if ($opts->containsKey('retranslate-all')) {
     $times = (int)$opts['retranslate-all'];
     $flags .=
-        '--count='.($times + 1).' '.
+        '--count='.(2 * $times).' '.
         '-v Eval.JitRetranslateAllRequest='.$times.' '.
+        '-v Eval.JitRetranslateAllSeconds=300 '.
         '';
   }
 

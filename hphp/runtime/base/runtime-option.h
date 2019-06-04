@@ -695,7 +695,7 @@ struct RuntimeOption {
    * 3 - Check `this` typehints as hard `this` typehints (unless explicitly
    *     soft).  This is the only option which enable optimization in HHBBC.
    */                                                                   \
-  F(int32_t, ThisTypeHintLevel,        EnableHipHopSyntax ? 3 : 0)      \
+  F(int32_t, ThisTypeHintLevel,        3)                               \
   /* CheckReturnTypeHints:
      0 - No checks or enforcement for return type hints.
      1 - Raises E_WARNING if a return type hint fails.

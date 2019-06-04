@@ -57,6 +57,11 @@ struct ProfDataSerializer {
 
   // Atomically create the output file, or throw runtime error upon failure.
   void finalize();
+
+  std::string filename() {
+    return fileName;
+  }
+
 private:
   int fd;
   static constexpr uint32_t buffer_size = 8192;

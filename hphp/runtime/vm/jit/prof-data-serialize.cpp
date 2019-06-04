@@ -640,6 +640,14 @@ void read_classes_and_type_aliases(ProfDataDeserializer& ser) {
 }
 
 void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
+  // Write the profiled metadata to output
+  std::string metaFile = ser.filename() + ".meta";
+  if (auto out = fopen(metaFile.c_str(), "w")) {
+    fprintf(out, "profFuncCnt=%ld\n", pd->profilingFuncs());
+    fprintf(out, "profBCSize=%ld\n", pd->profilingBCSize());
+    fclose(out);
+  }
+
   write_profiled_funcs(ser, pd);
 
   write_raw(ser, pd->counterDefault());

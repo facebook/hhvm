@@ -35,6 +35,7 @@ type autocomplete_kind =
   | Property_kind
   | Trait_kind
   | Variable_kind
+  | Constant_kind
 
 (* Results ready to be displayed to the user *)
 type complete_autocomplete_result = {

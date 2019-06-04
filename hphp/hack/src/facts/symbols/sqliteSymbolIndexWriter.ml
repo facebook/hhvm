@@ -45,7 +45,8 @@ let sql_insert_kinds =
   "INSERT OR IGNORE INTO kinds (id, description) VALUES (5, 'Unknown');" ^
   "INSERT OR IGNORE INTO kinds (id, description) VALUES (6, 'Mixed');" ^
   "INSERT OR IGNORE INTO kinds (id, description) VALUES (7, 'Function');" ^
-  "INSERT OR IGNORE INTO kinds (id, description) VALUES (8, 'Typedef');"
+  "INSERT OR IGNORE INTO kinds (id, description) VALUES (8, 'Typedef');" ^
+  "INSERT OR IGNORE INTO kinds (id, description) VALUES (9, 'Constant');"
 
 let sql_insert_symbol =
   "INSERT INTO symbols " ^

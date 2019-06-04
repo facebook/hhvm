@@ -37,7 +37,7 @@ let parse_file
     let rel_path_str = String.substr_replace_first
       filename ~pattern:ctxt.repo_folder ~with_:"" in
     let path_hash = SharedMem.get_hash rel_path_str in
-    let text = Core_kernel.In_channel.read_all filename in
+    let text = In_channel.read_all filename in
     let rp = Relative_path.from_root filename in
     (* Just the facts ma'am *)
     let fact_opt = Facts_parser.from_text true true rp text in
@@ -49,37 +49,54 @@ let parse_file
 
         (* Identify all classes in the file *)
         let class_keys = InvSMap.keys facts.types in
-        let classes_mapped = Core_kernel.List.map class_keys ~f:(fun key -> begin
-              let info_opt = InvSMap.get key facts.types in
-              let kind = begin
-                match info_opt with
-                | None -> SI_Unknown
-                | Some info -> begin
-                    match info.kind with
-                    | TKClass -> SI_Class
-                    | TKInterface -> SI_Interface
-                    | TKEnum -> SI_Enum
-                    | TKTrait -> SI_Trait
-                    | TKMixed -> SI_Mixed
-                    | _ -> SI_Unknown
-                  end
-              end in
-              {
-                si_name = key;
-                si_kind = kind;
-                si_filehash = path_hash;
-              }
-            end) in
+        let classes_mapped = List.map class_keys ~f:(fun key -> begin
+          let info_opt = InvSMap.get key facts.types in
+          let kind = begin
+            match info_opt with
+            | None -> SI_Unknown
+            | Some info -> begin
+                match info.kind with
+                | TKClass -> SI_Class
+                | TKInterface -> SI_Interface
+                | TKEnum -> SI_Enum
+                | TKTrait -> SI_Trait
+                | TKMixed -> SI_Mixed
+                | _ -> SI_Unknown
+              end
+          end in
+          {
+            si_name = key;
+            si_kind = kind;
+            si_filehash = path_hash;
+          }
+        end) in
 
         (* Identify all functions in the file *)
-        let functions_mapped = Core_kernel.List.map facts.functions ~f:(fun funcname -> {
-              si_name = funcname;
-              si_kind = SI_Function;
-              si_filehash = path_hash;
-            }) in
+        let functions_mapped = List.map facts.functions ~f:(fun funcname -> {
+          si_name = funcname;
+          si_kind = SI_Function;
+          si_filehash = path_hash;
+        }) in
+
+        (* Handle typedefs *)
+        let types_mapped = List.map facts.type_aliases ~f:(fun typename -> {
+          si_name = typename;
+          si_kind = SI_Typedef;
+          si_filehash = path_hash;
+        }) in
+
+        (* Handle constants *)
+        let constants_mapped = List.map facts.constants ~f:(fun constantname -> {
+          si_name = constantname;
+          si_kind = SI_GlobalConstant;
+          si_filehash = path_hash;
+        }) in
 
         (* Return unified results *)
-        List.append classes_mapped functions_mapped
+        let r = List.append classes_mapped functions_mapped in
+        let r = List.append r types_mapped in
+        let r = List.append r constants_mapped in
+        r
       | None ->
         []
     in
@@ -131,7 +148,7 @@ let gather_file_list (path: string): string list =
   let result = ref [] in
   (try
      while true do
-       let line_opt = Core_kernel.In_channel.input_line channel in
+       let line_opt = In_channel.input_line channel in
        match line_opt with
        | Some line -> result := line :: !result
        | None -> raise End_of_file

@@ -528,6 +528,7 @@ let resolve_ty
     | Namespace_kind -> "namespace"
     | Keyword_kind -> "keyword"
     | Literal_kind -> "literal"
+    | Constant_kind -> "constant"
   in
   let func_details = match ty with
     | (_, Tfun ft) ->
@@ -791,6 +792,14 @@ let si_kind_to_autocomplete_kind
   | SI_Trait -> Trait_kind
   | SI_Enum -> Enum_kind
   | SI_Function -> Function_kind
+  | SI_GlobalConstant -> Constant_kind
+  (*
+   * This isn't exactly accurate, but in testing, actually resolving the
+   * underlying kind had performance implications, so we will select this
+   * value - it only controls what icon to display in autocomplete in an
+   * editor.
+   *)
+  | SI_Typedef -> Class_kind
   (*
    * Items below this line are included for completeness, although
    * the global-index-builder does not currently generate them.
@@ -798,9 +807,7 @@ let si_kind_to_autocomplete_kind
    * including these is harmless.
    *)
   | SI_Mixed -> Variable_kind
-  | SI_GlobalConstant -> Literal_kind
   | SI_Unknown -> Class_kind
-  | SI_Typedef -> Class_kind
 
 (* Find global autocomplete results *)
 let find_global_results

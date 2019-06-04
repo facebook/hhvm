@@ -2347,11 +2347,10 @@ and pMarkup node env =
     let pos = pPos node env in
     let filename = Pos.filename pos in
     let has_dot_hack_extension = String_utils.string_ends_with (Relative_path.suffix filename) ".hack" in
-    if env.is_hh_file then
-      if has_dot_hack_extension then
-        raise_parsing_error env (`Node node) SyntaxError.error1060
-      else if is_missing markup_prefix && width markup_text > 0 && not (is_hashbang markup_text) then
-        raise_parsing_error env (`Node node) SyntaxError.error1001;
+    if has_dot_hack_extension then
+      raise_parsing_error env (`Node node) SyntaxError.error1060
+    else if is_missing markup_prefix && width markup_text > 0 && not (is_hashbang markup_text) then
+      raise_parsing_error env (`Node node) SyntaxError.error1001;
     let expr =
       match syntax markup_expression with
       | Missing -> None

@@ -510,8 +510,7 @@ std::string RuntimeOption::LogFileSymLink;
 uint16_t RuntimeOption::LogFilePeriodMultiplier;
 
 int RuntimeOption::LogHeaderMangle = 0;
-bool RuntimeOption::AlwaysLogUnhandledExceptions =
-  RuntimeOption::EnableHipHopSyntax;
+bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
 bool RuntimeOption::AlwaysEscapeLog = true;
 bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::ErrorUpgradeLevel = 0;
@@ -1459,7 +1458,7 @@ void RuntimeOption::Load(
                  "Log.HeaderMangle", 0);
     Config::Bind(AlwaysLogUnhandledExceptions, ini,
                  config, "Log.AlwaysLogUnhandledExceptions",
-                 RuntimeOption::EnableHipHopSyntax);
+                 true);
     Config::Bind(NoSilencer, ini, config, "Log.NoSilencer");
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  config, "Log.RuntimeErrorReportingLevel",

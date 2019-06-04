@@ -834,7 +834,7 @@ bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  return asMixed(ad)->findForExists(k, k->hash());
+  return NvGetStr(ad, k).is_set();
 }
 
 //=============================================================================

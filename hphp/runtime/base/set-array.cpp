@@ -634,7 +634,7 @@ bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  return asSet(ad)->findForExists(k, k->hash());
+  return NvGetStr(ad, k).is_set();
 }
 
 arr_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {

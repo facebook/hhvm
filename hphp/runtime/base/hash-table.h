@@ -356,17 +356,6 @@ public:
   }
 
   ALWAYS_INLINE
-  bool findForExists(const StringData* ks, hash_t h0) const {
-    return findImpl<FindType::Exists>(
-        h0,
-        [ks, h0](const Elm& e) {
-          return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
-      );
-  }
-
-  ALWAYS_INLINE
   Inserter findForInsert(int64_t ki, hash_t h0) const {
     return findImpl<FindType::Insert>(
         h0,

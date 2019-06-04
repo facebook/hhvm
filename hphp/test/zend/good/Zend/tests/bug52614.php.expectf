@@ -2,9 +2,6 @@ array(0) {
 }
 array(0) {
 }
-
-Warning: Creating default object from empty value in %s/bug52614.php on line 45
-NULL
 object(stdClass) (1) {
   ["a"]=>
   int(1)

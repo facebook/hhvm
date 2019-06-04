@@ -25,20 +25,19 @@ echo $a[$i[0][0]=f()][++$i[0][0]];
 unset($i);
 
 echo "\n" . '$i->p=f(): ';
+$i = new stdClass();
 echo $a[$i->p=f()][++$i->p];
 unset($i);
 
-echo "\n" . '$i->p->q=f(): ';
-echo $a[$i->p->q=f()][++$i->p->q];
-unset($i);
-
 echo "\n" . '$i->p[0]=f(): ';
+$i = new stdClass();
 $i->p = array();
 echo $a[$i->p[0]=f()][++$i->p[0]];
 unset($i);
 
 echo "\n" . '$i->p[0]->p=f(): ';
-$i->p = array();
+$i = new stdClass();
+$i->p = array(new stdClass());
 echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 

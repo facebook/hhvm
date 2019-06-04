@@ -5,7 +5,11 @@ class X {
   private $prop = "string";
 
   public function foo() {
-    $this->x[]->prop = 12;
+    try {
+      $this->x[]->prop = 12;
+    } catch (Exception $e) {
+      return $e->getMessage();
+    }
   }
   public function bar() {
     return $this->prop;

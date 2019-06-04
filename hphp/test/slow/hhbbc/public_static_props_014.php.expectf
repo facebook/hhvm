@@ -1,6 +1,4 @@
 NULL
-
-Warning: Creating default object from empty value in %s/hhbbc/public_static_props_014.php on line 6
 object(stdClass) (1) {
   ["foo"]=>
   int(2)

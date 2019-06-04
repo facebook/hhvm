@@ -3,6 +3,7 @@
 class X {
   static $x = null;
   function a() {
+    self::$x = new stdClass();
     self::$x->foo = 2;
     return self::$x;
   }

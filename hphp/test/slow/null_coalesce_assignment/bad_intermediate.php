@@ -20,10 +20,10 @@ function f(): void {
   var_dump($arr === $arreq); // $arr and $arreq get set consistently
 
   $obj = new Foo;
-  var_dump(($obj->foo->bar ??= 42) === 42); // Warns but sets intermediates
+  var_dump(($obj->foo ??= 42) === 42); // Warns but sets intermediates
   var_dump($obj);
   $objeq = new Foo;
-  $objeq->foo->bar = 42; // Consistent with equals
+  $objeq->foo = 42; // Consistent with equals
   var_dump($obj == $objeq);
 }
 

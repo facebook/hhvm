@@ -1,4 +1,2 @@
-
-Warning: Creating default object from empty value in %s/slow/hhbbc/private_props_012.php on line 8
-NULL
+string(34) "Setting a property on a non-object"
 string(6) "string"

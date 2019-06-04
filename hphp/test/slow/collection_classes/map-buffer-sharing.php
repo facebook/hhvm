@@ -28,7 +28,7 @@ function main() {
   unset($y);
   unset($x);
 
-  $x = Map {0 => null};
+  $x = Map {0 => new stdClass()};
   $y = $x->toImmMap();
   $x[0]->prop = 73;
   var_dump($y);

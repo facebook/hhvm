@@ -738,7 +738,7 @@ struct RuntimeOption {
    * 2 - Throw when incrementing or decrementing non numeric types
    */                                                                   \
   F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
-  F(bool, PromoteEmptyObject,          !EnableHipHopSyntax)             \
+  F(bool, PromoteEmptyObject,          false)                           \
   F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, AllDestructorsOptional,      false)                           \
   F(bool, AllowScopeBinding,           false)                           \

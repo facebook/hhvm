@@ -6,5 +6,3 @@ Notice: Undefined variable: arr in %s/033.php on line 5
 Notice: Undefined variable: arr in %s/033.php on line 7
 
 Notice: Cannot access property on non-object in %s/033.php on line 7
-
-Warning: Creating default object from empty value in %s/033.php on line 10

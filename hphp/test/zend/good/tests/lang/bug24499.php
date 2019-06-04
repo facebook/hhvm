@@ -7,9 +7,11 @@ class Id {
                 $obj->id = "bar";
         }
 }
-<<__EntryPoint>> function main() {
-$id = new Id();
-@$obj->foo = "bar";
-$id->tester($obj);
-print_r($obj);
+<<__EntryPoint>>
+function main() {
+  $id = new Id();
+  $obj = new stdClass();
+  $obj->foo = "bar";
+  $id->tester($obj);
+  print_r($obj);
 }

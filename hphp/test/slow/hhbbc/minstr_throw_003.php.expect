@@ -5,10 +5,7 @@ array(1) {
     [0]=>
     array(1) {
       [0]=>
-      object(stdClass) (1) {
-        ["foo"]=>
-        int(2)
-      }
+      NULL
     }
   }
 }

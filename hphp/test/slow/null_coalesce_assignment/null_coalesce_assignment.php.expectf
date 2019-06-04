@@ -171,13 +171,7 @@ test_null_base()
 bool(true)
 bool(true)
 bool(true)
-
-Notice: Undefined variable: obj in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 290
-
-Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 290
 bool(true)
-
-Warning: Creating default object from empty value in %s/hphp/test/slow/null_coalesce_assignment/null_coalesce_assignment.php on line 291
 bool(true)
 n_dump from line %d:
 bool(true)

@@ -286,7 +286,7 @@ function test_null_base(): void {
   VS($arr[1] ??= 'hello', 'hello');
   VS($arreq[1] = 'hello', 'hello'); // Consistent with plain ol' equals
   VS($arr, $arreq); // $arr and $arreq get set consistently by `??=` and `=`
-
+  $obj = new stdClass(); $objeq = new stdClass();
   VS($obj->foo ??= 'hello', 'hello'); // Also warns but doesn't fatal
   VS($objeq->foo = 'hello', 'hello'); // Also consistent
   n_dump($obj == $objeq);

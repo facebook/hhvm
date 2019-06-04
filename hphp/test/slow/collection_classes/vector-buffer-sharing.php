@@ -28,7 +28,7 @@ function main() {
   unset($y);
   unset($x);
 
-  $x = Vector {null};
+  $x = Vector {new stdClass()};
   $y = $x->toImmVector();
   $x[0]->prop = 73;
   var_dump($y);

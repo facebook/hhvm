@@ -1,7 +1,7 @@
 <?php
 
 function four() { return 4; }
-function arr() { return array('x' => four()); }
+function arr() { return array('x' => four(), 'something' => new stdClass()); }
 function go() {
   $x = arr();
   $x['something']->hahaha = "yeah";

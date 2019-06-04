@@ -1,7 +1,7 @@
 <?hh
 
 function two() { return 2; }
-function bar(bool $x) { return $x ? array('y' => two()) : array(); }
+function bar(bool $x) { return $x ? array('y' => two()) : array('y' => new stdClass()); }
 function foo(bool $x) { return array('x' => bar($x)); }
 function main(bool $x) {
   $ar = foo($x);

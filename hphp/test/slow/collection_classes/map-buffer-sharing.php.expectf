@@ -14,11 +14,12 @@ object(HH\ImmMap) (1) {
   [0]=>
   NULL
 }
-
-Warning: Creating default object from empty value in %s on line 33
 object(HH\ImmMap) (1) {
   [0]=>
-  NULL
+  object(stdClass) (1) {
+    ["prop"]=>
+    int(73)
+  }
 }
 object(HH\ImmMap) (1) {
   [0]=>

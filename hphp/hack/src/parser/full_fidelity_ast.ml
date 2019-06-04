@@ -185,9 +185,7 @@ type expr_location =
   | RightOfReturn
   | UsingStatement
 
-let is_hack (env : env) = env.is_hh_file || env.enable_hh_syntax
-let is_typechecker env =
-  is_hack env && (not env.codegen)
+let is_typechecker env = not env.codegen
 
 let drop_pstr : int -> pstring -> pstring = fun cnt (pos, str) ->
   let len = String.length str in
@@ -1264,21 +1262,9 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
       ; vector_intrinsic_members = members
       ; _ }
       ->
-      if env.is_hh_file || env.enable_hh_syntax then
-        let hints = expand_type_args env ty (fun () -> []) in
-        let hints = check_intrinsic_type_arg_varity env node hints in
-        Collection (pos_name kw env, hints, couldMap ~f:pAField members env)
-      else
-        (* If php, this is a subscript expression, not a collection. *)
-        let subscript_receiver = pExpr kw env in
-        let members = couldMap ~f:pExpr members env in
-        let subscript_index = match members with
-        | [] -> None
-        | [x] -> Some x
-        | _ ->
-          let msg = "Hack keyword " ^ (text kw) ^ " used improperly in php." in
-          invariant_failure node msg env in
-        Array_get (subscript_receiver, subscript_index)
+      let hints = expand_type_args env ty (fun () -> []) in
+      let hints = check_intrinsic_type_arg_varity env node hints in
+      Collection (pos_name kw env, hints, couldMap ~f:pAField members env)
     | CollectionLiteralExpression
       { collection_literal_name         = collection_name
       ; collection_literal_initializers = members

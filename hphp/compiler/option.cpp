@@ -87,8 +87,6 @@ int Option::ParserThreadCount = 0;
 int Option::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (RuntimeOption::EnableXHP) type |= Scanner::AllowXHPSyntax;
-  if (RuntimeOption::EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 

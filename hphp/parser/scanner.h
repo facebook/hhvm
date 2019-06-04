@@ -203,9 +203,6 @@ struct Scanner {
   enum Type {
     AllowShortTags       = 0x01, // allow <?
     ReturnAllTokens      = 0x04, // return comments and whitespaces
-    AllowXHPSyntax       = 0x08, // allow XHP syntax
-    AllowHipHopSyntax    = 0x18, // allow HipHop-specific syntax (which
-                                 // includes XHP syntax)
   };
 
 public:
@@ -325,11 +322,11 @@ public:
   }
 
   bool isXHPSyntaxEnabled() const {
-    return ((m_type & AllowXHPSyntax) == AllowXHPSyntax) || m_isHHFile;
+    return true;
   }
 
   bool isHHSyntaxEnabled() const {
-    return ((m_type & AllowHipHopSyntax) == AllowHipHopSyntax) || m_isHHFile;
+    return true;
   }
 
   int getLookaheadLtDepth() {

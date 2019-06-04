@@ -839,8 +839,6 @@ bool RuntimeOption::PHP7_DisallowUnsafeCurlUploads = false;
 int RuntimeOption::GetScannerType() {
   int type = 0;
   if (EnableShortTags) type |= Scanner::AllowShortTags;
-  if (EnableXHP) type |= Scanner::AllowXHPSyntax;
-  if (EnableHipHopSyntax) type |= Scanner::AllowHipHopSyntax;
   return type;
 }
 

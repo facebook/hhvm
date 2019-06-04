@@ -18,6 +18,7 @@ module FactsParser_ = Full_fidelity_parser
 module FactsParser = FactsParser_
                      .WithSmartConstructors(FSC.SC)
 
+let mangle_xhp_mode = ref true
 let flags_default = 0
 let flags_abstract = 1
 let flags_final = 2
@@ -60,7 +61,11 @@ let qualified_name ns name =
     else Some (ns ^ "\\" ^ n)
   | XhpName n ->
     (* xhp names are always unqualified *)
-    Some (SU.Xhp.mangle_id @@ n ())
+    if !mangle_xhp_mode then begin
+      Some (SU.Xhp.mangle_id @@ n ())
+    end else begin
+      Some (n ())
+    end
   | QualifiedName l -> qualified_name_from_parts ns l
   | _ -> None
 

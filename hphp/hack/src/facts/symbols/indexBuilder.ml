@@ -40,7 +40,12 @@ let parse_file
     let text = In_channel.read_all filename in
     let rp = Relative_path.from_root filename in
     (* Just the facts ma'am *)
-    let fact_opt = Facts_parser.from_text true true rp text in
+    Facts_parser.mangle_xhp_mode := false;
+    let fact_opt = Facts_parser.from_text
+      ~php5_compat_mode:false
+      ~hhvm_compat_mode:true
+      ~filename:rp
+      ~text in
 
     (* Iterate through facts and print them out *)
     let result =

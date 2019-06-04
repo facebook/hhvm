@@ -106,6 +106,7 @@ type si_kind =
   | SI_Function
   | SI_Typedef
   | SI_GlobalConstant
+  | SI_XHP
   [@@deriving show]
 
 (*
@@ -129,6 +130,7 @@ let kind_to_int (kind: si_kind): int =
   | SI_Function -> 7
   | SI_Typedef -> 8
   | SI_GlobalConstant -> 9
+  | SI_XHP -> 10
 
 (* Convert an integer back to an enum *)
 let int_to_kind (kind_num: int): si_kind =
@@ -142,6 +144,7 @@ let int_to_kind (kind_num: int): si_kind =
   | 7 -> SI_Function
   | 8 -> SI_Typedef
   | 9 -> SI_GlobalConstant
+  | 10 -> SI_XHP
   | _ -> SI_Unknown
 
 (* Convert an internal "kind" into an autocomplete result kind *)
@@ -156,6 +159,7 @@ let kind_to_result (kind: si_kind): search_result_type =
   | SI_Function -> Function
   | SI_Typedef -> Typedef
   | SI_GlobalConstant -> Constant
+  | SI_XHP -> Class (Some Ast_defs.Cnormal)
 
 (* Convert an autocomplete result "kind" into an internal kind *)
 let result_to_kind (result: search_result_type): si_kind =

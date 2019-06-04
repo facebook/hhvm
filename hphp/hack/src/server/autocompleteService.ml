@@ -793,8 +793,9 @@ let si_kind_to_autocomplete_kind
   | SI_Enum -> Enum_kind
   | SI_Function -> Function_kind
   | SI_GlobalConstant -> Constant_kind
+  | SI_XHP -> Class_kind
   (*
-   * This isn't exactly accurate, but in testing, actually resolving the
+   * The mapping for typedef isn't precise, but resolving the
    * underlying kind had performance implications, so we will select this
    * value - it only controls what icon to display in autocomplete in an
    * editor.

@@ -6,6 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
 *)
+val mangle_xhp_mode: bool ref
 
 val extract_as_json:
   php5_compat_mode: bool ->

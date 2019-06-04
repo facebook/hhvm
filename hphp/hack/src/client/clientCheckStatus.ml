@@ -74,7 +74,7 @@ let warn_unsaved_changes () =
   Tty.cprintf (Tty.Bold Tty.Yellow) "Warning: " ~out_channel:stderr;
   prerr_endline
 {|there is an editor connected to the Hack server.
-The errors below may reflect your unsaved changes in the editor.|}
+The errors above may reflect your unsaved changes in the editor.|}
 
 let go status output_json from error_format =
   let {

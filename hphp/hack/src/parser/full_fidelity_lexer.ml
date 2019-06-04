@@ -14,26 +14,17 @@ module SyntaxError = Full_fidelity_syntax_error
 
 module Env = struct
 
-  let force_hh_opt = ref false
-  let enable_xhp_opt = ref false
-  let is_hh_file = ref true
   let enable_unsafe_expr = ref true
   let enable_unsafe_block = ref true
-  let set_is_hh_file b = is_hh_file := b
   let is_rust = ref false
-  let set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block ~rust =
-    force_hh_opt := force_hh;
-    enable_xhp_opt := enable_xhp;
+  let set ~disable_unsafe_expr ~disable_unsafe_block ~rust =
     enable_unsafe_expr := not disable_unsafe_expr;
     enable_unsafe_block := not disable_unsafe_block;
     is_rust := rust
 
   let is_rust () = !is_rust
-
-  let is_hh () = !is_hh_file || !force_hh_opt
-  let enable_xhp () = is_hh () || !enable_xhp_opt
   let get () =
-    (is_hh (), enable_xhp (), not !enable_unsafe_expr, not !enable_unsafe_block)
+    (not !enable_unsafe_expr, not !enable_unsafe_block)
 
 end
 
@@ -50,8 +41,6 @@ module Lexer : sig
   [@@@warning "+32"]
   val make :
     ?is_experimental_mode:bool ->
-    ?force_hh:bool ->
-    ?enable_xhp:bool ->
     ?disable_unsafe_expr:bool ->
     ?disable_unsafe_block:bool ->
     Full_fidelity_source_text.t -> t
@@ -84,15 +73,12 @@ end = struct
 
   let make
     ?(is_experimental_mode = false)
-    ?(force_hh = false)
-    ?(enable_xhp = false)
     ?(disable_unsafe_expr = false)
     ?(disable_unsafe_block = false)
     text =
     (* this can be overridden in scan_header, but we need to explicitly reset *)
     (* it, as `scan_header` is never called for `.hack` files *)
-    if (force_hh) then Env.set_is_hh_file true;
-    Env.set ~force_hh ~enable_xhp ~disable_unsafe_expr ~disable_unsafe_block ~rust:false;
+    Env.set ~disable_unsafe_expr ~disable_unsafe_block ~rust:false;
     { text; start = 0; offset = 0; errors = []; is_experimental_mode }
 
   let start  x = x.start
@@ -112,8 +98,6 @@ end = struct
     with_start_offset
       (make
         ?is_experimental_mode
-        ~force_hh:!Env.force_hh_opt
-        ~enable_xhp:!Env.enable_xhp_opt
         ~disable_unsafe_expr:(not !Env.enable_unsafe_expr)
         ~disable_unsafe_block:(not !Env.enable_unsafe_block)
         text)
@@ -1672,13 +1656,10 @@ let skip_to_end_of_markup lexer =
     let ch2 = peek_char lexer 2 in
     match ch0, ch1, ch2 with
     | ('H' | 'h'), ('H' | 'h'), _ ->
-      Env.set_is_hh_file true;
       make_long_tag lexer 2
     | ('P' | 'p'), ('H' | 'h'), ('P' | 'p') ->
-      Env.set_is_hh_file false;
       make_long_tag lexer 3
     | '=', _, _ ->
-      Env.set_is_hh_file false;
       begin
         (* skip = *)
         let lexer = advance lexer 1 in
@@ -1687,7 +1668,6 @@ let skip_to_end_of_markup lexer =
         lexer, markup_text, Some (less_than_question_token, Some equal)
       end
     | _ ->
-      Env.set_is_hh_file false;
       lexer, markup_text, Some (less_than_question_token, None)
   in
   let start_offset =
@@ -1705,7 +1685,6 @@ let skip_to_end_of_markup lexer =
   if peek lexer start_offset = '<' && peek_def ~def:'\x00' lexer (succ start_offset) = '?'
   then make_markup_and_suffix (with_offset lexer start_offset)
   else begin
-    Env.set_is_hh_file true; (* no header means it's a .hack file *)
     lexer, make_markup_token lexer, None
   end
 

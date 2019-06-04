@@ -11,7 +11,7 @@
 module SourceText = Full_fidelity_source_text
 module MinimalTrivia = Full_fidelity_minimal_trivia
 
-type lexer_opts = (bool * bool * bool * bool)
+type lexer_opts = (bool * bool)
 
 external scan_leading_xhp_trivia:
   SourceText.t -> lexer_opts -> int -> MinimalTrivia.t list = "scan_leading_xhp_trivia"

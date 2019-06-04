@@ -19,12 +19,9 @@ pub struct Lexer<'a, Token: LexableToken> {
     start: usize,
     offset: usize,
     errors: Vec<SyntaxError>,
-    is_hh_file: bool,
     is_experimental_mode: bool,
     enable_unsafe_expr: bool,
     enable_unsafe_block: bool,
-    force_hh: bool,
-    enable_xhp: bool,
     in_type: bool,
     _phantom: PhantomData<Token>,
 }
@@ -48,8 +45,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         is_experimental_mode: bool,
         disable_unsafe_expr: bool,
         disable_unsafe_block: bool,
-        force_hh: bool,
-        enable_xhp: bool,
         offset: usize,
     ) -> Self {
         Self {
@@ -57,12 +52,9 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             start: offset,
             offset,
             errors: vec![],
-            is_hh_file: true,
             is_experimental_mode,
             enable_unsafe_expr: !disable_unsafe_expr,
             enable_unsafe_block: !disable_unsafe_block,
-            force_hh,
-            enable_xhp,
             in_type: false,
             _phantom: PhantomData,
         }
@@ -73,16 +65,12 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         is_experimental_mode: bool,
         disable_unsafe_expr: bool,
         disable_unsafe_block: bool,
-        force_hh: bool,
-        enable_xhp: bool,
     ) -> Self {
         Self::make_at(
             source,
             is_experimental_mode,
             disable_unsafe_expr,
             disable_unsafe_block,
-            force_hh,
-            enable_xhp,
             0,
         )
     }
@@ -129,18 +117,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
 
     fn is_experimental_mode(&self) -> bool {
         self.is_experimental_mode
-    }
-
-    fn is_hh_file(&self) -> bool {
-        self.is_hh_file || self.force_hh
-    }
-
-    fn enable_xhp(&self) -> bool {
-        self.is_hh_file() || self.enable_xhp
-    }
-
-    fn set_is_hh_file(&mut self, is_hh_file: bool) {
-        self.is_hh_file = is_hh_file
     }
 
     pub fn set_in_type(&mut self, in_type: bool) {
@@ -2216,15 +2192,12 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
         let ch2 = self.peek_char(2).to_ascii_lowercase();
         match (ch0, ch1, ch2) {
             ('h', 'h', _) => {
-                self.set_is_hh_file(true);
                 self.make_long_tag(name_token_offset, 2, markup_text, less_than_question_token)
             }
             ('p', 'h', 'p') => {
-                self.set_is_hh_file(false);
                 self.make_long_tag(name_token_offset, 3, markup_text, less_than_question_token)
             }
             ('=', _, _) => {
-                self.set_is_hh_file(false);
                 // skip =
                 self.advance(1);
                 let equal = Token::make(TokenKind::Equal, name_token_offset, 1, vec![], vec![]);
@@ -2232,7 +2205,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
                 (markup_text, Some((less_than_question_token, Some(equal))))
             }
             _ => {
-                self.set_is_hh_file(false);
                 (markup_text, Some((less_than_question_token, (None))))
             }
         }
@@ -2261,7 +2233,6 @@ impl<'a, Token: LexableToken> Lexer<'a, Token> {
             self.with_offset(start_offset);
             self.make_markup_and_suffix()
         } else {
-            self.set_is_hh_file(true); // no header means it's a .hack file
             (self.make_markup_token(), None)
         }
     }

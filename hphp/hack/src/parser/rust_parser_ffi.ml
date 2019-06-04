@@ -43,8 +43,6 @@ let set_global_lexer_env env =
    * incorrect results. I'll just set them here directly to maintain the same
    * behavior. *)
   Full_fidelity_lexer.Env.set
-    ~force_hh:(Env.force_hh env)
-    ~enable_xhp:(Env.enable_xhp env)
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
     ~rust:true

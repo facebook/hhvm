@@ -94,8 +94,6 @@ type t = {
 let make (env:Env.t) text =
   let lexer = Lexer.make
     ~is_experimental_mode:(Env.is_experimental_mode env)
-    ~force_hh:(Env.force_hh env)
-    ~enable_xhp:(Env.enable_xhp env)
     ~disable_unsafe_expr:(Env.disable_unsafe_expr env)
     ~disable_unsafe_block:(Env.disable_unsafe_block env)
     text in

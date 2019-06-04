@@ -39,8 +39,6 @@ where
                 env.is_experimental_mode,
                 env.disable_unsafe_expr,
                 env.disable_unsafe_block,
-                env.force_hh,
-                env.enable_xhp,
             ),
             errors: vec![],
             env,

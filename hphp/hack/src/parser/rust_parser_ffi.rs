@@ -180,18 +180,14 @@ macro_rules! scan_trivia {
             let offset = offset.usize_val();
 
             let is_experimental_mode = false;
-            let force_hh = bool_field(&opts, 0);
-            let enable_xhp = bool_field(&opts, 1);
-            let disable_unsafe_expr = bool_field(&opts, 2);
-            let disable_unsafe_block = bool_field(&opts, 3);
+            let disable_unsafe_expr = bool_field(&opts, 0);
+            let disable_unsafe_block = bool_field(&opts, 1);
 
             let mut lexer : Lexer<MinimalToken> = Lexer::make_at(
                 &source_text,
                 is_experimental_mode,
                 disable_unsafe_expr,
                 disable_unsafe_block,
-                force_hh,
-                enable_xhp,
                 offset,
             );
 

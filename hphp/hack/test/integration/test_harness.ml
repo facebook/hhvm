@@ -41,8 +41,8 @@ type config = {
 let exec_hh_client args harness =
   Printf.eprintf "executing hh_client. Args: %s\n%!"
     (String.concat ~sep:", " args);
-  Process.exec_with_augmented_env harness.hh_client_path
-    ~env:harness.test_env (args @ [Path.to_string harness.repo_dir])
+  Process.exec harness.hh_client_path
+    ~env:(Process_types.Augment harness.test_env) (args @ [Path.to_string harness.repo_dir])
 
 let get_server_logs harness =
   let process = exec_hh_client ["--logname"] harness in

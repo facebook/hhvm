@@ -1,0 +1,3 @@
+<?hh // strict
+
+interface IMyFooInterface {}

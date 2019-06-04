@@ -1,5 +1,7 @@
 open Core_kernel
+open IndexBuilder
 open SearchUtils
+open Test_harness
 
 module Args = Test_harness_common_args
 
@@ -33,15 +35,13 @@ let assert_autocomplete
   end;
 ;;
 
-let test_sqlite_plus_local (harness: Test_harness.t): bool =
-  let open Test_harness in
-  let open SearchUtils in
-  let open IndexBuilder in
+let run_index_builder (harness: Test_harness.t): unit =
   Relative_path.set_path_prefix Relative_path.Root harness.repo_dir;
   let repo_path = Path.to_string harness.repo_dir in
 
   (* Set up initial variables *)
-  let file_opt = Some "/tmp/hh_server/autocomplete.test.db" in
+  let fn = Filename.temp_file "autocomplete." ".db" in
+  let file_opt = Some fn in
   let ctxt = {
     repo_folder = repo_path;
     sqlite_filename = file_opt;
@@ -52,11 +52,6 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
     custom_repo_name = None;
     include_builtins = true;
   } in
-  let env = ref {
-    lte_fileinfos = Relative_path.Map.empty;
-    lte_filenames = Relative_path.Map.empty;
-    lte_tombstones = Tombstone_set.empty;
-  } in
 
   (* Scan the repo folder and produce answers in sqlite *)
   IndexBuilder.go ctxt None;
@@ -65,7 +60,16 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
     ~provider_name:"SqliteIndex"
     ~savedstate_file_opt:file_opt
     ~workers:None;
-  Hh_logger.log "Setup complete";
+  Hh_logger.log "Built Sqlite database [%s]" fn;
+;;
+
+let test_sqlite_plus_local (harness: Test_harness.t): bool =
+  run_index_builder harness;
+  let env = ref {
+    lte_fileinfos = Relative_path.Map.empty;
+    lte_filenames = Relative_path.Map.empty;
+    lte_tombstones = Tombstone_set.empty;
+  } in
 
   (* Find one of each major type *)
   assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
@@ -130,6 +134,34 @@ let test_sqlite_plus_local (harness: Test_harness.t): bool =
   true
 ;;
 
+(* Test the ability of the index builder to capture a variety of
+ * names and kinds correctly *)
+let test_builder_names (harness: Test_harness.t): bool =
+  run_index_builder harness;
+  let env = ref {
+    lte_fileinfos = Relative_path.Map.empty;
+    lte_filenames = Relative_path.Map.empty;
+    lte_tombstones = Tombstone_set.empty;
+  } in
+
+  (* Assert that we can capture all kinds of symbols *)
+  assert_autocomplete ~query_text:"UsesA" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"NoBigTrait" ~kind:SI_Trait ~expected:1 ~env;
+  assert_autocomplete ~query_text:"some_long_function_name" ~kind:SI_Function ~expected:1 ~env;
+  assert_autocomplete ~query_text:"ClassToBeIdentified" ~kind:SI_Class ~expected:1 ~env;
+  assert_autocomplete ~query_text:"CONST_SOME_COOL_VALUE" ~kind:SI_GlobalConstant ~expected:1 ~env;
+  assert_autocomplete ~query_text:"IMyFooInterface" ~kind:SI_Interface ~expected:1 ~env;
+  assert_autocomplete ~query_text:"SomeTypeAlias" ~kind:SI_Typedef ~expected:1 ~env;
+  assert_autocomplete ~query_text:"FbidMapField" ~kind:SI_Enum ~expected:1 ~env;
+
+  (* XHP is considered a class at the moment - this may change *)
+  assert_autocomplete ~query_text:":xhp:helloworld" ~kind:SI_Class ~expected:1 ~env;
+
+  (* All good *)
+  true
+;;
+
+(* Main test suite *)
 let tests args =
   let harness_config = {
     Test_harness.hh_server = args.Args.hh_server;
@@ -140,6 +172,9 @@ let tests args =
   ("test_sqlite_plus_local", fun () ->
     Test_harness.run_test ~stop_server_in_teardown:false harness_config
     test_sqlite_plus_local);
+  ("test_builder_names", fun () ->
+    Test_harness.run_test ~stop_server_in_teardown:false harness_config
+    test_builder_names);
   ]
 ;;
 

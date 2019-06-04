@@ -136,12 +136,6 @@ incdec("0x12");
 incdecrev("0x12");
 incdec("0X12");
 incdecrev("0X12");
-incdec("0b101");
-incdecrev("0b101");
-incdec("0B101");
-incdecrev("0B101");
-incdec("0Q101");
-incdecrev("0Q101");
 //*/
 
 ///*
@@ -167,10 +161,6 @@ incdec("   654");
 incdecrev("   654");
 incdec("\t \n\f\r\v94");
 incdecrev("\t \n\f\r\v94");
-incdec("987 ");
-incdecrev("987 ");
-incdec("15 \t \n\f\r\v");
-incdecrev("15 \t \n\f\r\v");
 //*/
 
 ///*
@@ -194,64 +184,4 @@ incdecrev("-12345");
 incdec("+9.87");
 incdecrev("+9.87");
 //*/
-
-// string containing non-numbers
-///*
-// strings containing one alphabetic character
-
-incdec("a");
-incdecrev("a");
-incdec("z");
-incdecrev("z");
-
-incdec("A");
-incdecrev("A");
-incdec("Z");
-incdecrev("Z");
-//*/
-///*
-// strings containing multiple alphanumeric characters
-
-incdec("F28");
-incdecrev("F28");
-incdec("F28");
-incdecrev("F98");
-incdec("F98");
-incdecrev("FZ8");
-incdec("ZZ8");
-incdecrev("ZZ8");
-incdecrev("543J");
-incdec("543J");
-incdecrev("543J9");
-incdec("543J9");
-//*/
-
-///*
-// strings ending in non-alphanumeric characters
-
-incdec("&");
-incdecrev("&");
-incdec("83&");
-incdecrev("83&");
-incdec("83&8");
-incdecrev("83&8");
-incdec("83&Z8");
-incdecrev("83&Z8");
-incdec("83&z8");
-incdecrev("83&z8");
-incdec("&28");
-incdecrev("&28");
-incdec("&98");
-incdecrev("&98");
-//*/
-
-$x = "aa";
-var_dump($x);
-var_dump(--$x);
-var_dump(--$x);
-
-$x = "zza";
-var_dump($x);
-var_dump(--$x);
-var_dump(--$x);
 }

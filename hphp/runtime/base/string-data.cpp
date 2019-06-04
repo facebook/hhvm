@@ -632,9 +632,7 @@ StringData* StringData::increment() {
 }
 
 void StringData::incrementHelper() {
-  if (RuntimeOption::EnableHipHopSyntax) {
-    raise_notice("Increment on string '%s'", data());
-  }
+  raise_notice("Increment on string '%s'", data());
   m_hash = 0;
 
   enum class CharKind {

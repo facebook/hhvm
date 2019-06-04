@@ -23,13 +23,6 @@ foreach (series(1, 5) as $key => $val)
 {
     echo "key: $key, value: $val\n";
 }
-
-echo "===========================\n";
-
-foreach (series('d', 'f') as $key => $val)
-{
-    echo "key: $key, value: $val\n";
-}
 //*/
 
 ///*
@@ -136,12 +129,5 @@ foreach (series2(1, 5, "X") as $key => $val)
 {
     echo "key: $key, value: $val\n";
 //  echo ($val == NULL) ? "value is NULL\n" : "value is not NULL\n";
-}
-
-echo "===========================\n";
-
-foreach (series2('d', 'f', "Key") as $key => $val)
-{
-    echo "key: $key, value: $val\n";
 }
 //*/

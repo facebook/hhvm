@@ -80,12 +80,20 @@ float(0.5)
 float(0.5)
 string(3) "1.5"
 float(0.5)
+
+Notice: Increment on string 'abc' in %s/int-overflow.php on line 57
 string(3) "abd"
 string(3) "abd"
+
+Notice: Increment on string 'abc' in %s/int-overflow.php on line 61
 string(3) "abc"
 string(3) "abd"
+
+Notice: Decrement on string 'abc' in %s/int-overflow.php on line 65
 string(3) "abc"
 string(3) "abc"
+
+Notice: Decrement on string 'abc' in %s/int-overflow.php on line 69
 string(3) "abc"
 string(3) "abc"
 string(1) "1"
@@ -129,6 +137,8 @@ string(3) "1.5"
 string(3) "1.5"
 float(2.5)
 string(3) "abc"
+
+Notice: Increment on string 'abc' in %s/int-overflow.php on line 77
 string(3) "abc"
 string(3) "abd"
 string(0) ""
@@ -162,6 +172,8 @@ string(3) "1.5"
 float(2.5)
 float(2.5)
 string(3) "abc"
+
+Notice: Increment on string 'abc' in %s/int-overflow.php on line 84
 string(3) "abd"
 string(3) "abd"
 string(0) ""
@@ -195,6 +207,8 @@ string(3) "1.5"
 string(3) "1.5"
 float(0.5)
 string(3) "abc"
+
+Notice: Decrement on string 'abc' in %s/int-overflow.php on line 91
 string(3) "abc"
 string(3) "abc"
 string(0) ""
@@ -228,6 +242,8 @@ string(3) "1.5"
 float(0.5)
 float(0.5)
 string(3) "abc"
+
+Notice: Decrement on string 'abc' in %s/int-overflow.php on line 98
 string(3) "abc"
 string(3) "abc"
 string(0) ""

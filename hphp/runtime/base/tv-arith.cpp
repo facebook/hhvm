@@ -619,9 +619,7 @@ struct DecBase {
   Cell emptyString() const { return make_int(-1); }
   void nullCase(tv_lval) const {}
   void nonNumericString(tv_lval cell) const {
-    if (RuntimeOption::EnableHipHopSyntax) {
-      raise_notice("Decrement on string '%s'", val(cell).pstr->data());
-    }
+    raise_notice("Decrement on string '%s'", val(cell).pstr->data());
   }
 };
 

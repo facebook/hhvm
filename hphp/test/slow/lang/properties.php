@@ -30,9 +30,9 @@ class C {
     $this->s = 0;
   }
   function fC() {
-    $this->np++;
-    $this->nq++;
-    $this->nr++;
+    $this->np.='c';
+    $this->nq.='c';
+    $this->nr.='c';
     $this->p++;
     $this->q++;
     $this->r++;
@@ -54,9 +54,9 @@ class D extends C {
     $this->r = 33;
   }
   function fD() {
-    $this->np++;
-    $this->nq++;
-    $this->nr++;
+    $this->np.='d';
+    $this->nq.='d';
+    $this->nr.='d';
     $this->p++;
     $this->q++;
     $this->r++;
@@ -71,9 +71,9 @@ class E extends C {
   protected $q = 22;
   public $r = 33;
   function fE() {
-    $this->np++;
-    $this->nq++;
-    $this->nr++;
+    $this->np.='e';
+    $this->nq.='e';
+    $this->nr.='e';
     $this->p++;
     $this->q++;
     $this->r++;
@@ -88,9 +88,9 @@ class F extends C {
   public $q = 22;
   public $r = 33;
   function fF() {
-    $this->np++;
-    $this->nq++;
-    $this->nr++;
+    $this->np.='f';
+    $this->nq.='f';
+    $this->nr.='f';
     $this->p++;
     $this->q++;
     $this->r++;
@@ -105,9 +105,9 @@ class G extends D {
   public $q = 222;
   public $r = 333;
   function fG() {
-    $this->np++;
-    $this->nq++;
-    $this->nr++;
+    $this->np.='g';
+    $this->nq.='g';
+    $this->nr.='g';
     $this->p++;
     $this->q++;
     $this->r++;
@@ -122,9 +122,9 @@ class H {
   public $q = 222;
   public $r = 333;
   function fH() {
-    $this->np++;
-    $this->nq++;
-    $this->nr++;
+    $this->np.='h';
+    $this->nq.='h';
+    $this->nr.='h';
     $this->p++;
     $this->q++;
     $this->r++;
@@ -241,7 +241,7 @@ obj_dump($j);
 print "=== Foreach ===\n";
 foreach ($o as $k => $v) {
   print "  \"".$k."\" => ".$v."\n";
-  $o->nr++;
+  $o->nr.='x';
   $o->r++;
 }
 obj_dump($o);

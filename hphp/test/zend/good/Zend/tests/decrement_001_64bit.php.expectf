@@ -10,7 +10,6 @@ int(-1)
 int(0)
 float(1.5)
 int(-1)
-string(6) "string"
 int(122)
 float(1.5)
 NULL

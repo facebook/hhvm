@@ -45,9 +45,8 @@ function vowel($c) {
   return isset($k[$c]);
 }
 
-function inc($s) {
-  $s++;
-  return $s;
+function concat($s) {
+  return $s.$s;
 }
 
 function with_keyset($k1) {
@@ -96,7 +95,7 @@ function with_keyset($k1) {
   echo "array_flip: ";
   var_dump(array_flip($k1));
   echo "array_map: ";
-  var_dump(array_map('inc', keyset['H', 'A', 'L']));
+  var_dump(array_map('concat', keyset['H', 'A', 'L']));
   echo "array_merge: ";
   var_dump(array_merge(keyset[1, 2, 3], keyset['a', 'b', 'c']));
   echo "array_reverse: ";

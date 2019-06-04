@@ -1,5 +1,8 @@
 <?hh
 
+function handler() {}
+set_error_handler('handler');
+
 function foo() {
   $go = function($start) {
     $x = $start;

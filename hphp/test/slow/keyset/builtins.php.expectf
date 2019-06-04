@@ -230,11 +230,11 @@ array_flip: array(6) {
 }
 array_map: array(3) {
   ["H"]=>
-  string(1) "I"
+  string(2) "HH"
   ["A"]=>
-  string(1) "B"
+  string(2) "AA"
   ["L"]=>
-  string(1) "M"
+  string(2) "LL"
 }
 array_merge: array(6) {
   [0]=>
@@ -549,11 +549,11 @@ array_flip: array(4) {
 }
 array_map: array(3) {
   ["H"]=>
-  string(1) "I"
+  string(2) "HH"
   ["A"]=>
-  string(1) "B"
+  string(2) "AA"
   ["L"]=>
-  string(1) "M"
+  string(2) "LL"
 }
 array_merge: array(6) {
   [0]=>
@@ -836,11 +836,11 @@ array_flip: array(4) {
 }
 array_map: array(3) {
   ["H"]=>
-  string(1) "I"
+  string(2) "HH"
   ["A"]=>
-  string(1) "B"
+  string(2) "AA"
   ["L"]=>
-  string(1) "M"
+  string(2) "LL"
 }
 array_merge: array(6) {
   [0]=>
@@ -1047,11 +1047,11 @@ array_flip: array(0) {
 }
 array_map: array(3) {
   ["H"]=>
-  string(1) "I"
+  string(2) "HH"
   ["A"]=>
-  string(1) "B"
+  string(2) "AA"
   ["L"]=>
-  string(1) "M"
+  string(2) "LL"
 }
 array_merge: array(6) {
   [0]=>

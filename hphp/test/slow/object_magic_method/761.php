@@ -5,7 +5,7 @@ class X {
   function __get($name) {
  echo 'get:';
  var_dump($name);
- return 'abc';
+ return 42;
  }
   function __set($name, $val) {
  echo 'set:';

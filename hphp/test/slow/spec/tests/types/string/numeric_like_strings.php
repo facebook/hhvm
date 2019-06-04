@@ -49,46 +49,4 @@ var_dump("12345" == "12345xxx");        // treated as a string
 var_dump("12345" == "12345 xxx");       // treated as a string
 var_dump("12345.6" == "12345.6xxx");    // treated as a string
 var_dump("12345.6" == "12345.6 xxx");   // treated as a string
-
-echo "\n============== ++/-- ops with numeric_like_string ===================\n\n";
-
-$s1 = "12345xxx";
-$s2 = "12345 xxx";
-$s3 = "12345.6xxx";
-$s4 = "12345.6 xxx";
-
-var_dump(++$s1);
-var_dump(++$s2);
-var_dump(++$s3);
-var_dump(++$s4);
-
-$s1 = "12345xxx";
-$s2 = "12345 xxx";
-$s3 = "12345.6xxx";
-$s4 = "12345.6 xxx";
-
-var_dump(--$s1);
-var_dump(--$s2);
-var_dump(--$s3);
-var_dump(--$s4);
-
-$s1 = "12345xxx";
-$s2 = "12345 xxx";
-$s3 = "12345.6xxx";
-$s4 = "12345.6 xxx";
-
-var_dump($s1++);
-var_dump($s2++);
-var_dump($s3++);
-var_dump($s4++);
-
-$s1 = "12345xxx";
-$s2 = "12345 xxx";
-$s3 = "12345.6xxx";
-$s4 = "12345.6 xxx";
-
-var_dump($s1--);
-var_dump($s2--);
-var_dump($s3--);
-var_dump($s4--);
 }

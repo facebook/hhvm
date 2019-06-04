@@ -147,10 +147,6 @@ bool(true)
 bool(true)
 -- Iteration 74 --
 bool(true)
--- Iteration 75 --
-bool(true)
--- Iteration 76 --
-bool(true)
 
 *** Testing is_numeric() on non numeric types ***
 -- Iteration 1 --
@@ -214,7 +210,7 @@ bool(false)
 
 *** Testing error conditions ***
 
-Warning: is_numeric() expects exactly 1 parameter, 0 given in %s/is_numeric.php on line 147
+Warning: is_numeric() expects exactly 1 parameter, 0 given in %s/is_numeric.php on line 145
 
-Warning: is_numeric() expects exactly 1 parameter, 2 given in %s/is_numeric.php on line 150
+Warning: is_numeric() expects exactly 1 parameter, 2 given in %s/is_numeric.php on line 148
 Done

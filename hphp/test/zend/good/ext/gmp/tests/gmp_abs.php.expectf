@@ -3,7 +3,7 @@ Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer
 string(1) "0"
 string(1) "0"
 string(1) "0"
-string(19) "9223372036854775807"
+string(19) "1111111111111111111"
 string(21) "111111111111111111111"
 string(21) "111111111111111111111"
 string(1) "0"

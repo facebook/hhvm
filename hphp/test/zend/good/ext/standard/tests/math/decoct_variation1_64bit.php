@@ -30,8 +30,8 @@ $inputs = array(
        1,
        12345,
        -2345,
-       18446744073709551615,  // largest decimal
-       18446744073709551616,
+       PHP_INT_MAX,  // largest decimal
+       PHP_INT_MIN,
 
        // float data
 /*7*/  10.5,

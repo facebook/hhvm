@@ -6,8 +6,7 @@ class A {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
@@ -17,8 +16,7 @@ class B extends A {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
   public function doMeth() {
     $this->meth();  // B B B
@@ -54,8 +52,7 @@ class C extends B {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
   /**
    * Zend's implementation of call_user_func() and forward_static_call() has
@@ -604,8 +601,7 @@ class D extends C {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
@@ -615,8 +611,7 @@ class F {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 
@@ -626,8 +621,7 @@ class G extends F {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
   public function doMeth() {
     $this->meth();  // G G G
@@ -663,8 +657,7 @@ class H extends G {
          (isset($this) ? ' '.get_class($this) : '') . "\n";
   }
   public static function staticMeth() {
-    echo __CLASS__ . ' ' . static::class .
-         (isset($this) ? ' '.get_class($this) : '') . "\n";
+    echo __CLASS__ . ' ' . static::class . "\n";
   }
 }
 

@@ -5,10 +5,6 @@ class A {
     unset($this);
     var_dump($this);
   }
-  public static function bar() {
-    unset($this);
-    var_dump($this);
-  }
 }
 function goo() {
   unset($this);
@@ -17,7 +13,6 @@ function goo() {
 $obj = new A;
 $obj->foo();
 
-A::bar();
 goo();
 unset($this);
 var_dump($this);

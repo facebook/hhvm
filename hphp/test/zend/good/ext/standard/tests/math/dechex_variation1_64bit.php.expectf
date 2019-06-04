@@ -16,7 +16,7 @@ string(16) "fffffffffffff6d7"
 string(16) "7fffffffffffffff"
 
 -- Iteration 6 --
-string(16) "7fffffffffffffff"
+string(16) "8000000000000000"
 
 -- Iteration 7 --
 string(1) "a"

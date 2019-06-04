@@ -12,7 +12,6 @@ list($int) = sscanf("18446744073709551615", '%u');
 echo "sscanf 64-bit unsign int '18446744073709551615' (2^64)-1 = ",$int,"\n";
 
 printf("printf 64-bit signed int '9223372036854775807'  (2^63)-1 = %d\n", 9223372036854775807);
-printf("printf 64-bit signed int '18446744073709551615' (2^64)-1 = %u\n", 18446744073709551615);
 
 echo "Done\n";
 }

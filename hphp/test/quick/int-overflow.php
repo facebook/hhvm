@@ -39,9 +39,6 @@ class C {
     array($add, "$max", 1),
     array($add, $max, '1'),
     array($add, "$max", '1'),
-
-    // check lexer
-    array($add, 987654321987654321987654321, 1),
   );
 
   foreach ($ops as list($op, $lhs, $rhs)) {

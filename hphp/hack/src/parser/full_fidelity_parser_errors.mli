@@ -28,7 +28,6 @@ module WithSmartConstructors : functor (SmartConstructors : SmartConstructors.Sm
     -> Full_fidelity_syntax_tree.WithSyntax(Syntax).WithSmartConstructors(SmartConstructors).t
     -> codegen:bool
     -> env
-  val is_hh_file : env -> bool
 
   val parse_errors : env -> Full_fidelity_syntax_error.t list
 

@@ -7,13 +7,6 @@ class Normal {
   }
 }
 
-class Weird {
-  public static function __invoke() {
-    echo "This is Weird\n";
-    var_dump($this);
-  }
-}
-
 class Weird2 {
   private function __invoke() {
     echo "This is Weird2\n";
@@ -34,7 +27,6 @@ function invoke_it($x) { $x(); }
 
 <<__EntryPoint>> function main() {
   invoke_it(new Normal);
-  invoke_it(new Weird);
   invoke_it(new Weird2);
   invoke_it(new Weird3);
   invoke_it(function() {

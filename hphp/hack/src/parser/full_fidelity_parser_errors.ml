@@ -99,7 +99,6 @@ type env =
   ; level                : error_level
   ; hhvm_compat_mode     : hhvm_compat_mode
   ; enable_hh_syntax     : bool
-  ; is_hh_file           : bool
   ; is_strict            : bool
   ; codegen              : bool
   ; hhi_mode             : bool
@@ -130,7 +129,6 @@ let make_env
     ; level
     ; hhvm_compat_mode
     ; enable_hh_syntax
-    ; is_hh_file = SyntaxTree.is_hack syntax_tree
     ; is_strict = SyntaxTree.is_strict syntax_tree
     ; codegen
     ; hhi_mode
@@ -142,12 +140,7 @@ and is_hhvm_compat env = env.hhvm_compat_mode <> NoCompat
 
 and is_systemlib_compat env = env.hhvm_compat_mode = SystemLibCompat
 
-and is_hack env = env.is_hh_file || env.enable_hh_syntax
-
-let is_hh_file env = env.is_hh_file
-
-let is_typechecker env =
-  is_hack env && (not env.codegen)
+let is_typechecker env = not env.codegen
 
 let file_mode env =
   match SyntaxTree.mode env.syntax_tree with
@@ -2136,7 +2129,7 @@ let function_call_on_xhp_name_errors env node errors =
 
 let no_async_before_lambda_body env body_node errors =
   match syntax body_node with
-  | AwaitableCreationExpression _ when not env.codegen ->
+  | AwaitableCreationExpression _ when is_typechecker env ->
     (make_error_from_node body_node SyntaxError.no_async_before_lambda_body)
       :: errors
   | _ -> errors
@@ -2555,7 +2548,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
           { syntax = Token _; _ } as in_paren
         ; _ }
       ; _ }
-    ; _ } when not env.codegen ->
+    ; _ } when is_typechecker env ->
     let in_paren = text in_paren in
     make_error_from_node node (SyntaxError.instanceof_paren in_paren) :: errors
   (* We parse the right hand side of `new` and `instanceof` as a generic
@@ -2591,7 +2584,7 @@ let expression_errors env _is_in_concurrent_block namespace_name node parents er
   | InstanceofExpression { instanceof_right_operand = operand; _ } ->
     (class_type_designator_errors operand) @ errors
   | LiteralExpression { literal_expression = {syntax = Token token; _} as e ; _}
-    when env.is_hh_file && is_decimal_or_hexadecimal_literal token ->
+    when is_decimal_or_hexadecimal_literal token ->
     let text = text e in
     begin try ignore (Int64.of_string text); errors
     with _ ->
@@ -3213,7 +3206,7 @@ let class_element_errors env node errors =
   | ConstDeclaration _ when is_inside_trait env.context ->
     make_error_from_node node SyntaxError.const_in_trait :: errors
   | ConstDeclaration { const_visibility; _ }
-    when not (is_missing const_visibility) && env.is_hh_file && not env.codegen ->
+    when not (is_missing const_visibility) && is_typechecker env ->
       make_error_from_node node SyntaxError.const_visibility :: errors
   | _ -> errors
 

@@ -40,7 +40,6 @@ let rec check_lvalue errorf = function
  *)
 
 type context = {
-  is_hh_file : bool;
   in_callable : bool;
   active_methodish_kind : kind list option;
   active_classish : class_ option;
@@ -103,12 +102,12 @@ let reducer_this_usage = object(this)
     | _ -> ESet.empty
 
   method! at_Lvar ctx (pos, name) =
-    if ctx.is_hh_file && this#name_eq_this_and_in_static_method ctx name then
+    if this#name_eq_this_and_in_static_method ctx name then
       ESet.singleton @@ mk_error pos SyntaxError.this_in_static
     else ESet.empty
 end
 
-let check_program program ~(is_hh_file : bool) =
+let check_program program =
   (* This is analogous to the iter_with but with reducers instead of handlers: *)
   let reducers : (ESet.t, context) Ast_visitor.reducer_type list =
     [ reducer_await_toplevel
@@ -154,8 +153,7 @@ let check_program program ~(is_hh_file : bool) =
       } method_
   end
   in ESet.elements @@ visitor#on_program
-    { is_hh_file = is_hh_file;
-      in_callable = false;
+    { in_callable = false;
       active_methodish_kind = None;
       active_classish = None;
     } program

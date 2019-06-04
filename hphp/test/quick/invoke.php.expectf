@@ -1,8 +1,6 @@
 This is Normal
 object(Normal) (0) {
 }
-This is Weird
-%ANULL
 This is Weird2
 object(Weird2) (0) {
 }
@@ -15,4 +13,4 @@ static closure
 %ANULL
 About to fail:
 
-Fatal error: Function name must be a string in %s on line 33
+Fatal error: Function name must be a string in %s on line 26

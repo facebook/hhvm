@@ -6,6 +6,7 @@
 (9,19)-(9,19) A type specifier is expected here.
 (9,19)-(9,24) Encountered unexpected token 'inout'.
 (16,15)-(16,22) A type specifier is expected here.
+(17,14)-(17,22) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new suspend()()'?
 (17,14)-(17,22) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
 (17,23)-(17,23) An expression is expected here.
 (20,17)-(20,17) A type specifier is expected here.

@@ -3,7 +3,7 @@
 var_dump(gmp_strval(gmp_abs("")));
 var_dump(gmp_strval(gmp_abs("0")));
 var_dump(gmp_strval(gmp_abs(0)));
-var_dump(gmp_strval(gmp_abs(-111111111111111111111)));
+var_dump(gmp_strval(gmp_abs(-1111111111111111111)));
 var_dump(gmp_strval(gmp_abs("111111111111111111111")));
 var_dump(gmp_strval(gmp_abs("-111111111111111111111")));
 var_dump(gmp_strval(gmp_abs("0000")));

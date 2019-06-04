@@ -1,4 +1,12 @@
-1,1,1,1
+Assert failed:
+ PHP_INT_MIN-1 ~== round(PHP_INT_MIN - 0.6)
+Left:  int(9223372036854775807)
+Right: float(-9.2233720368548E+18)
+
+Assert failed:
+ PHP_INT_MIN-1 ~== floor(PHP_INT_MIN - 0.5)
+Left:  int(9223372036854775807)
+Right: float(-9.2233720368548E+18)
 
 Assert failed:
  9223372036854775807+1 ~== ceil(9223372036854775807 + 0.5)

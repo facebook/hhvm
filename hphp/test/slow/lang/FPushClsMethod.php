@@ -3,10 +3,6 @@
 class C {
   function __construct() {
     print "In C::__construct()\n";
-    C::sMeth();
-  }
-  static function sMeth() {
-    print "In C::sMeth(): \$this:" . (isset($this) ? $this : null) . ":\n";
   }
 }
 

@@ -13,7 +13,7 @@ function main($a, $b, $c, $d) {
 }
 <<__EntryPoint>> function main_entry() {
 main(5, -5, 5.5, -5.5);
-main(17293822569102704641, -17293822569102704641,
+main(1729382256910270464, -1729382256910270464,
      4611686018427387904, -4611686018427387904);
 main(0, 0.0, -0.0, false);
 main(array(), array(1), new stdClass, true);

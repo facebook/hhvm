@@ -6845,20 +6845,18 @@ and gconst_def tcopt cst =
   add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);
 
   let typed_cst_value, env =
-    match cst.cst_value with
-    | None -> None, env
-    | Some value ->
-      match cst.cst_type with
-      | Some hint ->
-        let ty = Decl_hint.hint env.Env.decl_env hint in
-        let env, dty = Phase.localize_with_self env ty in
-        let env, te, value_type =
-          expr ~expected:{ pos = fst hint; reason = Reason.URhint; locl_ty = dty } env value in
-        let env = Typing_utils.sub_type env value_type dty in
-        Some te, env
-      | None ->
-        let env, te, _value_type = expr env value in
-        Some te, env
+    let value = cst.cst_value in
+    match cst.cst_type with
+    | Some hint ->
+      let ty = Decl_hint.hint env.Env.decl_env hint in
+      let env, dty = Phase.localize_with_self env ty in
+      let env, te, value_type =
+        expr ~expected:{ pos = fst hint; reason = Reason.URhint; locl_ty = dty } env value in
+      let env = Typing_utils.sub_type env value_type dty in
+      te, env
+    | None ->
+      let env, te, _value_type = expr env value in
+      te, env
   in
   { T.cst_annotation = Env.save env.Env.lenv.Env.tpenv env;
     T.cst_mode = cst.cst_mode;

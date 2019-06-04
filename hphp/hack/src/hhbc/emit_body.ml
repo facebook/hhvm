@@ -68,15 +68,9 @@ let rec emit_def env def =
   | A.Stmt s -> Emit_statement.emit_stmt env s
   | A.Constant c ->
     let cns_name = snd c.A.cst_name in
-    let cst_value =
-      match c.A.cst_value with
-      | Some v -> v
-      | None ->
-        failwith ("Expected an expr not a None for constant." ^
-          " Difference between legacy and annotated AST") in
     let cns_id = Hhbc_id.Const.from_ast_name cns_name in
     gather [
-      Emit_expression.emit_expr env cst_value;
+      Emit_expression.emit_expr env c.A.cst_value;
       Emit_pos.emit_pos_then c.A.cst_span
         @@ instr (IIncludeEvalDefine (DefCns cns_id));
       instr_popc;

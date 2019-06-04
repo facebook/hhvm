@@ -2838,7 +2838,8 @@ module Make (GetLocals : GetLocals) = struct
     let e =
         let _ = check_constant_name (fst env) cst in
         let _ = check_constant_hint cst in
-        Option.map cst.Aast.cst_value (constant_expr env) in
+        constant_expr env cst.Aast.cst_value
+    in
     { N.cst_annotation = ();
       cst_mode = cst.Aast.cst_mode;
       cst_name = cst.Aast.cst_name;

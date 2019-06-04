@@ -1496,13 +1496,8 @@ and convert_class_elt_xhp_attrs env st (h, c, v, es) =
   st, (h, c, v, es)
 
 and convert_gconst env st gconst =
-  let cst_value =
-    match gconst.cst_value with
-    | Some expr -> expr
-    | None ->
-      failwith "Error in ast_to_nast, expected Some expr in convert_gconst" in
-  let st, expr = convert_expr env st cst_value in
-  st, { gconst with cst_value = Some expr }
+  let st, expr = convert_expr env st gconst.cst_value in
+  st, { gconst with cst_value = expr }
 
 and convert_defs env class_count record_count typedef_count st dl =
   match dl with

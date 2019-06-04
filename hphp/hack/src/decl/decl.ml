@@ -907,7 +907,6 @@ and type_typedef_naming_and_decl tdef =
 (*****************************************************************************)
 
 let const_decl cst =
-  let open Option.Monad_infix in
   let cst_pos, _cst_name = cst.cst_name in
   let dep = Dep.GConst (snd cst.cst_name) in
   let env = {Decl_env.
@@ -918,7 +917,7 @@ let const_decl cst =
   match cst.cst_type with
   | Some h -> Decl_hint.hint env h
   | None ->
-    match cst.cst_value >>= Decl_utils.infer_const with
+    match Decl_utils.infer_const cst.cst_value with
     | Some ty -> ty
     | None when Partial.should_check_error cst.cst_mode 2035 ->
       Errors.missing_typehint cst_pos;

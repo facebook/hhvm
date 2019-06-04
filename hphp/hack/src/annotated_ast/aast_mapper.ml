@@ -443,7 +443,7 @@ struct
     T.cst_mode = c.S.cst_mode;
     T.cst_name = c.S.cst_name;
     T.cst_type = c.S.cst_type;
-    T.cst_value = Option.map c.S.cst_value (map_expr menv);
+    T.cst_value = map_expr menv c.S.cst_value;
     T.cst_namespace = c.S.cst_namespace;
     T.cst_span = c.S.cst_span;
   }

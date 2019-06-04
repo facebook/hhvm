@@ -458,7 +458,7 @@ and gconst = {
   cst_mode: FileInfo.mode [@opaque];
   cst_name: sid;
   cst_type: hint option;
-  cst_value: expr option;
+  cst_value: expr;
   cst_namespace: nsenv;
   cst_span: pos;
 }

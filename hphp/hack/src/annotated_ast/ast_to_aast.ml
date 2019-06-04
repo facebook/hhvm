@@ -789,7 +789,7 @@ struct
       cst_mode = c.cst_mode;
       cst_name = c.cst_name;
       cst_type = optional on_hint c.cst_type;
-      cst_value = Some (on_expr c.cst_value);
+      cst_value = on_expr c.cst_value;
       cst_namespace = c.cst_namespace;
       cst_span = c.cst_span;
     }

@@ -812,9 +812,7 @@ class virtual ['a] visitor: ['a] visitor_type = object(this)
 
   method on_gconst acc g =
     let acc = this#on_id acc g.cst_name in
-    let acc = match g.cst_value with
-      | Some e -> this#on_expr acc e
-      | None -> acc in
+    let acc = this#on_expr acc g.cst_value in
     let acc = match g.cst_type with
       | Some h -> this#on_hint acc h
       | None -> acc in

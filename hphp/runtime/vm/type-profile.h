@@ -17,15 +17,11 @@
 #ifndef TYPE_PROFILE_H_
 #define TYPE_PROFILE_H_
 
-#include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/rds-local.h"
-#include "hphp/runtime/vm/hhbc.h"
 
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
-
-struct Func;
 
 enum class RequestKind {
   Warmup,
@@ -50,7 +46,7 @@ void profileWarmupEnd();
 void profileRequestStart();
 void profileRequestEnd();
 
-int64_t requestCount();
+uint64_t requestCount();
 
 struct TypeProfileLocals {
   RequestKind requestKind = RequestKind::Warmup;
@@ -68,7 +64,8 @@ inline bool isForcedToInterpret() {
   return rl_typeProfileLocals->forceInterpret;
 }
 
-void setRelocateRequests(int32_t n);
+void setRelocateRequests(int n);
+
 //////////////////////////////////////////////////////////////////////
 
 }

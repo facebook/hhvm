@@ -53,7 +53,7 @@ struct ShutdownStat {
   time_t time;
   MemInfo memUsage;
   int64_t rss;
-  int64_t requestsServed;
+  uint64_t requestsServed;
 
   const char* eventName() const {
     assertx(event >= 0 && event < ShutdownEvent::kNumEvents);

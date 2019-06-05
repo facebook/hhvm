@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/vm/named-entity.h"
+#include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/functional.h"

@@ -8,7 +8,10 @@
  *)
 
 open Base
-open Ast
+open Tast
+open Ast_defs
+
+let annotation pos = pos, (Typing_reason.Rnone, Typing_defs.Tany)
 
 let gen_fun_name field name =
   field ^ "##" ^ name
@@ -19,22 +22,21 @@ let gen_fun_name field name =
    Note: types are currently discarded. They might be used later on
    if we add `as` typing information in the branches
 *)
-let process_pumapping atom_name acc mappings =
-  let f acc = function
-    | PUMappingType _ -> acc
-    | PUMappingID ((_, expr_name), expr_value) ->
-      let lst = Option.value (SMap.find_opt expr_name acc) ~default:[] in
-      let lst = (atom_name, expr_value) :: lst in
-      SMap.add expr_name lst acc
-  in List.fold_left ~f ~init:acc mappings
+let process_pumapping atom_name acc pu_member =
+  let { pum_exprs; _ } = pu_member in
+  let f acc ((_, expr_name), expr_value) =
+    let lst = Option.value (SMap.find_opt expr_name acc) ~default:[] in
+    let lst = (atom_name, expr_value) :: lst in
+    SMap.add expr_name lst acc
+  in List.fold_left ~f ~init:acc pum_exprs
 
 let process_class_enum fields =
-  let f acc = function
-    | PUCaseType _ | PUCaseTypeExpr _ -> acc
-    | PUAtomDecl ((_, atom), mappings) ->
-      process_pumapping atom acc mappings
+  let { pu_members; _ } = fields in
+  let f acc member =
+    let {pum_atom; _ } = member in
+    process_pumapping (snd pum_atom) acc member
   in
-  let info = List.fold_left ~init:SMap.empty ~f fields in
+  let info = List.fold_left ~init:SMap.empty ~f pu_members in
   (* keep lists in the same order as their appear in the file *)
   SMap.map List.rev info
 
@@ -69,11 +71,11 @@ let gen_pu_accessor
     (final: bool)
     (extends: bool)
     (info: (string * expr) list)
-    (error: string) : class_elt =
+    (error: string) : method_ =
   let var_name = "$atom" in
-  let var_atom = (pos, Lvar (pos, var_name)) in
-  let str pos name = (pos, String name) in
-  let id pos name = (pos, Id (pos, name)) in
+  let var_atom = ((annotation pos), Lvar (pos, Local_id.make_unscoped var_name)) in
+  let str pos name = ((annotation pos), String name) in
+  let id pos name = ((annotation pos), Id (pos, name)) in
   let do_case entry init =
     Case (str pos entry, [
       (pos, Return (Some init))
@@ -82,91 +84,106 @@ let gen_pu_accessor
     List.fold_right ~f:(fun (atom_name, value) acc ->
         (do_case atom_name value) :: acc) ~init:[] info in
   let default = if extends then
-      let parent_call = Class_const (id pos "parent", (pos, fun_name)) in
-      let call = Call ((pos, parent_call), [], [var_atom] , []) in
-      Default [ pos, Return (Some (pos, call)) ]
+      let class_id = (annotation pos), CIexpr (id pos "parent") in
+      let parent_call = Class_const (class_id, (pos, fun_name)) in
+      let call = Call (Aast.Cnormal, ((annotation pos), parent_call), [], [var_atom] , []) in
+      Default [ pos, Return (Some ((annotation pos), call)) ]
     else
       let msg = Binop (Dot, str pos error, var_atom) in
+      let class_id = (annotation pos), CIexpr (id pos "\\Exception") in
       Default [
-        pos, Throw (pos, New (id pos "\\Exception", [], [pos, msg], []))
+        pos,
+        Throw ((annotation pos), New (class_id, [], [(annotation pos), msg], [], (annotation pos)))
       ] in
   let cases = cases @ [default] in
-  let m_kind = [Public; Static] in
-  let m_kind = if final then Final :: m_kind else m_kind in
-  Method {
-    m_kind = m_kind;
+  let body = {
+    fb_ast = [(pos, Switch (var_atom, cases))];
+    fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks
+  }
+  in
+  {
     m_tparams = [];
-    m_constrs = [];
     m_name = (pos, fun_name);
     m_params = [ {
+      param_annotation = annotation pos;
       param_hint = Some (simple_typ pos "string");
       param_is_reference = false;
       param_is_variadic = false;
-      param_id = (pos, "$atom");
+      param_pos = pos;
+      param_name = "$atom";
       param_expr = None;
-      param_modifier = None;
       param_callconv = None;
       param_user_attributes = [];
     }];
-    m_body = [
-      (pos, Switch (var_atom, cases))
-    ];
+    m_body = body;
     m_user_attributes  = []; (* TODO: Memoize ? *)
     m_ret = Some (simple_typ pos "mixed");
     m_fun_kind = FSync;
     m_span = pos;
     m_doc_comment = None;
     m_external = false;
+    m_visibility = Public;
+    m_static = true;
+    m_final = final;
+    m_variadic = FVnonVariadic;
+    m_where_constraints = [];
+    m_annotation = dummy_saved_env;
+    m_abstract = false;
   }
 
 (* Generate a helper/debug function called Members which is an immutable
    vector of all the atoms declared in a ClassEnum. Will be removed / boxed in
    the future
 *)
-let gen_Members field pos fields =
-  let collect_member = function
-    | PUAtomDecl ((_, id), _) -> Some id
-    | _ -> None
-  in
-  let members = List.filter_map ~f:collect_member fields in
+let gen_Members field pos (fields: pu_enum) =
+ let { pu_members; _ } = fields in
+ let annot = annotation pos in
  let mems =
-   List.map ~f:(fun x -> (AFvalue (pos, (String x)))) members
- in Method {
-   m_kind = [ Public; Static ];
+   List.map ~f:(fun x -> (AFvalue (annot, (String (snd x.pum_atom))))) pu_members
+ in
+ let body = {
+   fb_ast = [
+     (pos,
+      (Expr (annot,
+             (Binop ((Eq None), (annot, (Lvar (pos, Local_id.make_unscoped "$mems"))),
+                     (annot, (Collection ((pos, "ImmVector"), None, mems)))
+                    )))));
+     (pos, (Return (Some (annot, (Lvar (pos, Local_id.make_unscoped "$mems"))))))
+   ];
+   fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks
+ }
+ in {
+   m_visibility = Public;
+   m_final = fields.pu_is_final;
+   m_static = true;
    m_tparams = [];
-   m_constrs = [];
    m_name = (pos, gen_fun_name field "Members");
    m_params = [];
-   m_body = [
-     (pos,
-      (Expr (pos,
-             (Binop ((Eq None), (pos, (Lvar (pos, "$mems"))),
-                     (pos, (Collection ((pos, "ImmVector"), None, mems)))
-                    )))));
-     (pos, (Return (Some (pos, (Lvar (pos, "$mems"))))))
-   ];
+   m_body = body;
    m_user_attributes  = []; (* TODO: Memoize ? *)
    m_ret = Some (simple_typ pos "mixed");
    m_fun_kind = FSync;
    m_span = pos;
    m_doc_comment = None;
    m_external = false;
+   m_where_constraints = [];
+   m_variadic = FVnonVariadic;
+   m_annotation = dummy_saved_env;
+   m_abstract = false;
  }
 
 let gen_pu_accessors
     (class_name: string)
-    (pos: pos)
-    (final: bool)
     (extends: bool)
-    (field_name: string)
-    (fields: pufield list) : class_elt list =
-  let fun_members = gen_Members field_name pos fields in
-  let info = process_class_enum fields in
+    (field: pu_enum) : method_ list =
+  let (pos, field_name) = field.pu_name in
+  let fun_members = gen_Members field_name pos field in
+  let info = process_class_enum field in
   fun_members ::
   SMap.fold (fun expr_name info acc ->
       let fun_name = gen_fun_name field_name expr_name in
       let error = error_msg class_name field_name expr_name in
-      let hd = gen_pu_accessor fun_name pos final extends info error in
+      let hd = gen_pu_accessor fun_name pos field.pu_is_final extends info error in
       hd :: acc
     ) info []
 
@@ -211,7 +228,7 @@ let erase_tparams clean_hint on_user_attribute (params: tparam list) =
 *)
 class ['self] erase_body_visitor = object (_self: 'self)
   inherit [_] endo as super
-  method! on_PU_atom _ _ (_, id) = String id
+  method! on_PU_atom _ _ s = String s
   method! on_PU_identifier _ _ qual (pos, field) (_, name) =
     let fun_name = (pos, gen_fun_name field name) in
     Class_const (qual, fun_name)
@@ -219,11 +236,13 @@ class ['self] erase_body_visitor = object (_self: 'self)
   method! on_hint_ from_cstrs = function
     | Hoption h -> Hoption (super#on_hint from_cstrs h)
     | Hlike h -> Hlike (super#on_hint from_cstrs h)
-    | Hfun (ic, hlist, plist, vhint, h) ->
+    | Hfun (fun_reactive, ic, hlist, plist, param_mutability_list, vhint, h, mut_return) ->
       Hfun (
-        ic, List.map ~f:(super#on_hint from_cstrs) hlist, plist,
+        fun_reactive, ic, List.map ~f:(super#on_hint from_cstrs) hlist, plist,
+        param_mutability_list,
         super#on_variadic_hint from_cstrs vhint,
-        super#on_hint from_cstrs h)
+        super#on_hint from_cstrs h,
+        mut_return)
     | Htuple hlist ->
       Htuple (List.map ~f:(super#on_hint from_cstrs) hlist)
     | Happly ((pos, id), hlist) ->
@@ -231,12 +250,27 @@ class ['self] erase_body_visitor = object (_self: 'self)
       if List.mem ~equal:String.equal from_cstrs id
       then Happly ((pos, "mixed"), hlist)
       else Happly ((pos, id), hlist)
-    | Hshape si -> Hshape (super#on_shape_info from_cstrs si)
-    | Haccess ((pos, id), _, _) as h ->
+    | Hshape si -> Hshape (super#on_nast_shape_info from_cstrs si)
+    | Haccess (_, (pos, id) :: _) as h ->
       if List.mem ~equal:String.equal from_cstrs id
       then Happly ((pos, "mixed"), [])
       else h
     | Hsoft h -> Hsoft (super#on_hint from_cstrs h)
+    | Haccess (_, []) -> failwith "PocketUniverses: Encountered unexpected use of Haccess"
+    (* The following hints do not exist on the legacy AST *)
+    | Hany -> failwith "PocketUniverses: Encountered unexpected Hany"
+    | Hmixed -> failwith "PocketUniverses: Encountered unexpected Hmixed"
+    | Hnonnull -> failwith "PocketUniverses: Encountered unexpected Hnonnull"
+    | Habstr _ -> failwith "PocketUniverses: Encountered unexpected Habstr"
+    | Harray _ -> failwith "PocketUniverses: Encountered unexpected Harray"
+    | Hdarray _ -> failwith "PocketUniverses: Encountered unexpected Hdarray"
+    | Hvarray _ -> failwith "PocketUniverses: Encountered unexpected Hvarray"
+    | Hvarray_or_darray _ ->
+      failwith "PocketUniverses: Encountered unexpected Hvarray_or_darray"
+    | Hprim _ -> failwith "PocketUniverses: Encountered unexpected Hprim"
+    | Hthis -> failwith "PocketUniverses: Encountered unexpected Hthis"
+    | Hdynamic -> failwith "PocketUniverses: Encountered unexpected Hdynamic"
+    | Hnothing -> failwith "PocketUniverses: Encountered unexpected Hnothing"
 
   method! on_fun_ _ f =
     let from_cstrs = from_cstr f.f_tparams in
@@ -251,37 +285,42 @@ class ['self] erase_body_visitor = object (_self: 'self)
       | (h1, c, h2) ->
         Some (super#on_hint from_cstrs h1, c, super#on_hint from_cstrs h2)
     in
-    let f_constrs = List.filter_map ~f:erase_constrs f.f_constrs in
+    let f_where_constraints = List.filter_map ~f:erase_constrs f.f_where_constraints in
     let f_ret = Option.map ~f:(super#on_hint from_cstrs) f.f_ret in
     let f_params =
       List.map ~f:(super#on_fun_param from_cstrs) f.f_params in
-    let f_body = super#on_block from_cstrs f.f_body in
+    let f_body = {
+      fb_ast = super#on_block from_cstrs f.f_body.fb_ast;
+      fb_annotation = f.f_body.fb_annotation
+    }
+    in
     let f_user_attributes =
       List.map ~f:(super#on_user_attribute from_cstrs)
         f.f_user_attributes in
     let f_file_attributes =
-      List.map ~f:(super#on_file_attributes from_cstrs)
+      List.map ~f:(super#on_file_attribute from_cstrs)
         f.f_file_attributes in
-    { f with f_tparams; f_constrs; f_ret; f_params; f_body;
+    { f with f_tparams; f_where_constraints; f_ret; f_params; f_body;
                  f_user_attributes; f_file_attributes }
 
   method! on_class_ _ c =
-    let from_cstrs = from_cstr c.c_tparams in
+    let from_cstrs = from_cstr c.c_tparams.c_tparam_list in
     let c_user_attributes =
       List.map ~f:(super#on_user_attribute from_cstrs)
         c.c_user_attributes in
     let c_file_attributes =
-      List.map ~f:(super#on_file_attributes from_cstrs)
+      List.map ~f:(super#on_file_attribute from_cstrs)
         c.c_file_attributes in
-    let c_tparams = erase_tparams (super#on_hint from_cstrs)
-        (super#on_user_attribute from_cstrs) c.c_tparams in
+    let c_tparam_list = erase_tparams (super#on_hint from_cstrs)
+        (super#on_user_attribute from_cstrs) c.c_tparams.c_tparam_list in
+    let c_tparams = { c.c_tparams with c_tparam_list } in
     let c_extends = List.map ~f:(super#on_hint from_cstrs) c.c_extends in
     let c_implements =
       List.map ~f:(super#on_hint from_cstrs) c.c_implements in
-    let c_body = List.map ~f:(super#on_class_elt from_cstrs) c.c_body in
+    let c_methods = List.map ~f:(super#on_method_ from_cstrs) c.c_methods in
     let c_enum = Option.map ~f:(super#on_enum_ from_cstrs) c.c_enum in
     { c with c_user_attributes; c_file_attributes; c_tparams;
-                 c_extends; c_implements; c_body; c_enum }
+                 c_extends; c_implements; c_methods; c_enum }
 end
 
 (* Wrapper around the AST visitor *)
@@ -290,42 +329,15 @@ let visitor = new erase_body_visitor
 let erase_stmt stmt = visitor#on_stmt [] stmt
 let erase_fun f = visitor#on_fun_ [] f
 
-(* Remove the PU entries in the class declaration *)
-let strip_class_enum l =
-  let is_class_enum = function
-    | Const _
-    | AbsConst _
-    | Attributes _
-    | TypeConst _
-    | ClassUse _
-    | ClassUseAlias _
-    | ClassUsePrecedence _
-    | XhpAttrUse _
-    | ClassTraitRequire _
-    | ClassVars _
-    | XhpAttr _
-    | Method _
-    | MethodTraitResolution _
-    | XhpCategory _
-    | XhpChild _ -> true
-    | ClassEnum _ -> false in
-  List.filter ~f:is_class_enum l
-
-let process_pufields class_name extends body =
-  let f = function
-    | ClassEnum (final, (pos, field_name), fields) ->
-      gen_pu_accessors class_name pos final extends field_name fields
-    | _ -> []
-  in
-  List.bind ~f body
+let process_pufields class_name extends (pu_enums: pu_enum list) =
+  List.concat_map ~f:(gen_pu_accessors class_name extends) pu_enums
 
 let update_class c =
-  let new_class_elt =
+  let pu_methods =
     process_pufields (snd c.c_name) (not (List.is_empty c.c_extends))
-      c.c_body in
+      c.c_pu_enums in
   let c = visitor#on_class_ [] c in
-  let c_body = strip_class_enum c.c_body in
-  { c with c_body = c_body @ new_class_elt }
+  { c with c_pu_enums = []; c_methods = c.c_methods @ pu_methods }
 
 let update_def d = match d with
   | Class c -> Class (update_class c)

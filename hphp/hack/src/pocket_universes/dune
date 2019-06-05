@@ -2,5 +2,9 @@
   (name pocket_universes)
   (wrapped false)
   (libraries
+    annotated_ast
+    ast
     collections
-    ast))
+    tast
+    typing_defs
+    utils_core))

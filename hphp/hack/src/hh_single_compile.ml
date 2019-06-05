@@ -299,9 +299,6 @@ let parse_text compiler_options popt fn text =
   let { Full_fidelity_ast.ast; Full_fidelity_ast.is_hh_file; _ } =
     Full_fidelity_ast.from_text env source_text in
   let () = write_stats_if_enabled ~compiler_options in
-  let ast = if pocket_universes then
-      Pocket_universes.translate ast
-    else ast in
   (ast, is_hh_file)
 
 let parse_file compiler_options popt filename text =
@@ -367,7 +364,12 @@ module AstToTast = Ast_to_aast.MapAstToAast(AstToTastEnv)
  *)
 let convert_to_tast ast =
   let errors, tast =
-    let convert () = AstToTast.convert ast in
+    let convert () =
+      let ast = AstToTast.convert ast in
+      if Hhbc_options.enable_pocket_universes !Hhbc_options.compiler_options then
+          Pocket_universes.translate ast
+      else ast
+    in
     Errors.do_ convert in
   let handle_error _path error acc =
     match Errors.get_code error with

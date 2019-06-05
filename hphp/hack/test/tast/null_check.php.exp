@@ -15,13 +15,13 @@
           (If (
              (([4:7-18], bool),
               (Binop (Eqeqeq, (([4:7-9], ?int), (Lvar ([4:7-9], $x))),
-                 (([4:14-18], ?int), Null)))),
+                 (([4:14-18], null), Null)))),
              [([4:20-29], (Return (Some (([4:27-28], int), (Int "1")))))],
              [([Pos.none], Noop)])));
           ([5:3-29],
            (If (
               (([5:7-18], bool),
-               (Binop (Eqeqeq, (([5:7-11], int), Null),
+               (Binop (Eqeqeq, (([5:7-11], null), Null),
                   (([5:16-18], int), (Lvar ([5:16-18], $x)))))),
               [([5:20-29], (Return (Some (([5:27-28], int), (Int "2")))))],
               [([Pos.none], Noop)])));

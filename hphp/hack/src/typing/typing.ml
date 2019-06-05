@@ -2085,18 +2085,15 @@ and expr_
       let env, te2, _ = expr env e2 in
       let env = { env with Env.lenv = lenv } in
       make_result env p (T.Binop(bop, te1, te2)) (MakeType.bool (Reason.Rlogic_ret p))
-  | Binop (bop, e1, e2) when Env.is_strict env
-                        && (snd e1 = Nast.Null || snd e2 = Nast.Null)
-                        && (bop = Ast.Eqeqeq || bop = Ast.Diff2) ->
-      let e, ne = if snd e2 = Nast.Null then e1, e2 else e2, e1 in
-      let env, te, ty = raw_expr env e in
-      let tne = T.make_typed_expr (fst ne) ty T.Null in
-      let te1, te2 = if snd e2 = Nast.Null then te, tne else tne, te in
-      make_result env p (T.Binop(bop, te1, te2)) (MakeType.bool (Reason.Rcomp p))
   | Binop (bop, e1, e2) ->
       let env, te1, ty1 = raw_expr env e1 in
       let env, te2, ty2 = raw_expr env e2 in
-      let env = might_throw env in
+      let env = match bop with
+        (* TODO: This could be less conservative: we only need to account for
+         * the possibility of exception if the operator is `/` or `/=`.
+         *)
+        | Ast.Eqeqeq | Ast.Diff2 -> env
+        | _ -> might_throw env in
       let env, te3, ty =
         binop p env bop (fst e1) te1 ty1 (fst e2) te2 ty2 in
       env, te3, ty

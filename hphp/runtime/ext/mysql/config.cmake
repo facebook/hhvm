@@ -15,11 +15,3 @@ HHVM_DEFINE_EXTENSION("mysql"
     libFolly
     libMySQL
 )
-
-HHVM_DEFINE_EXTENSION("mysqli"
-  PRETTY_NAME "MySQLi"
-  SOURCES
-    ext_mysqli.cpp
-  SYSTEMLIB
-    ext_mysqli.php
-)

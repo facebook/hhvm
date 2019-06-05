@@ -1,2 +1,0 @@
-
-Fatal error: Access level to DB::__construct() must be public (as in class mysqli) or weaker in %s/bug38003.php on line 3

@@ -1166,27 +1166,8 @@ static int start_server(const std::string &username, int xhprof) {
     Logger::Info("Warming up");
     if (!RuntimeOption::EvalJitProfileWarmupRequests) profileWarmupStart();
     SCOPE_EXIT { profileWarmupEnd(); };
-    using WarmupThread = AsyncFunc<InternalWarmupWorker>;
-    std::vector<std::unique_ptr<InternalWarmupWorker>> workers;
-    std::vector<std::unique_ptr<WarmupThread>> threads;
-    std::map<std::string, unsigned> seen;
-    for (auto const& file : RuntimeOption::ServerWarmupRequests) {
-      HttpServer::CheckMemAndWait();
-      auto const count = ++seen[file];
-      auto worker = std::make_unique<InternalWarmupWorker>(file, count);
-      auto workerThread =
-        std::make_unique<WarmupThread>(worker.get(),
-                                       &InternalWarmupWorker::run);
-      workerThread->start();
-      if (RuntimeOption::ServerWarmupConcurrently) {
-        // destruct worker and workerThread later, after the threads are joined.
-        workers.emplace_back(std::move(worker));
-        threads.emplace_back(std::move(workerThread));
-      } else {
-        workerThread->waitForEnd();
-      }
-    }
-    for (auto& t : threads) t->waitForEnd();
+    InternalWarmupRequestPlayer{RuntimeOption::ServerWarmupThreadCount}.
+      runAfterDelay(RuntimeOption::ServerWarmupRequests);
   }
   BootStats::mark("warmup");
 

@@ -18,17 +18,18 @@
 
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/program-functions.h"
-
+#include "hphp/runtime/ext/server/ext_server.h"
+#include "hphp/runtime/vm/jit/mcgen-translate.h"
+#include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/server/replay-transport.h"
 
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/timer.h"
 
+#include <boost/filesystem.hpp>
 #include <folly/Range.h>
 #include <folly/Format.h>
 #include <folly/Memory.h>
-
-using std::make_unique;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,34 +75,66 @@ void WarmupRequestHandlerFactory::bumpReqCount() {
   m_server->saturateWorkers();
 }
 
-void InternalWarmupWorker::run() {
-  folly::StringPiece f(m_hdfFile);
-  auto pos = f.rfind('/');
+void InternalWarmupWorker::doJob(WarmupJob job) {
+  // No more profiling will happen after retranslateAll is scheduled.
+  if (jit::mcgen::retranslateAllScheduled()) return;
+  if (f_server_is_stopping()) return;
+  HttpServer::CheckMemAndWait();
+  folly::StringPiece f(job.hdfFile);
+  auto const pos = f.rfind('/');
   auto const str = (pos == f.npos) ? f : f.subpiece(pos + 1);
-  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, m_index),
+  BootStats::Block timer(folly::sformat("warmup:{}:{}", str, job.index),
                          RuntimeOption::ServerExecutionMode());
-
-  // hphp_thread_init() and hphp_thread_exit() are called when we create the
-  // thread, through AsyncFuncImpl::SetThreadInitFunc() and
-  // AsyncFuncImpl::SetThreadFiniFunc().
-  //
-  // HttpRequestHandler takes care of doing hphp_session_init(),
-  // hphp_session_exit(), and hphp_context_exit().
-
   try {
     HttpRequestHandler handler(0);
     ReplayTransport rt;
-    Logger::FInfo("Replaying warmup request {}:{}", m_hdfFile, m_index);
-
+    Logger::FInfo("Replaying warmup request {}:{}", job.hdfFile, job.index);
     timespec start;
     Timer::GetMonotonicTime(start);
     rt.onRequestStart(start);
-    rt.replayInput(Hdf(m_hdfFile));
+    rt.replayInput(Hdf(job.hdfFile));
     handler.run(&rt);
   } catch (std::exception& e) {
     Logger::FWarning("Got exception during warmup request {}:{}, {}",
-                     m_hdfFile, m_index, e.what());
+                     job.hdfFile, job.index, e.what());
   }
+}
+
+void InternalWarmupRequestPlayer::
+runAfterDelay(const std::vector<std::string>& files,
+              unsigned nTimes, unsigned delaySeconds) {
+  if (delaySeconds) {
+    /* sleep override */
+    sleep(delaySeconds);
+  }
+  start();
+  std::map<std::string, unsigned> seen;
+  do {
+    for (auto const& file : files) {
+      try {
+        boost::filesystem::path p(file);
+        if (boost::filesystem::is_regular_file(p)) {
+          enqueue(WarmupJob{file, ++seen[file]});
+        } else if (boost::filesystem::is_directory(p)) {
+          for (auto const& f : boost::filesystem::directory_iterator(p)) {
+            if (boost::filesystem::is_regular_file(f.path())) {
+              std::string subFile = f.path().native();
+              // Only do it for .hdf files.
+              if (subFile.size() < 5 ||
+                  subFile.substr(subFile.size() - 4) != ".hdf") {
+                Logger::FWarning("Skipping {} for warmup because it doesn't "
+                                 "look like a .hdf file", subFile);
+                continue;
+              }
+              enqueue(WarmupJob{subFile, ++seen[subFile]});
+            }
+          }
+        }
+      } catch (std::exception& e) {
+        Logger::FError("Exception preparing warmup requests: {}", e.what());
+      }
+    }
+  } while (--nTimes);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

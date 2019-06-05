@@ -53,14 +53,6 @@ array(2) {
   function(A::func1)
 }
 
-Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 31
-array(2) {
-  ["A"]=>
-  string(3) "foo"
-  ["func1"]=>
-  string(3) "foo"
-}
-
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 32
 array(2) {
   [0]=>

@@ -273,12 +273,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
                RuntimeOption::EnableXHP);
 
-  if (RuntimeOption::EnableHipHopSyntax) {
-    // If EnableHipHopSyntax is true, it forces EnableXHP to true
-    // regardless of how it was set in the config
-    RuntimeOption::EnableXHP = true;
-  }
-
   Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();

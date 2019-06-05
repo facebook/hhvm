@@ -483,7 +483,7 @@ bool RuntimeOption::ServerMode = false;
 bool RuntimeOption::EnableHipHopSyntax = false;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnablePHP = false;
-bool RuntimeOption::EnableXHP = false;
+bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -1725,12 +1725,6 @@ void RuntimeOption::Load(
     Config::Bind(ProfDataTTLHours, ini, config,
                  "Eval.ProfDataTTLHours", ProfDataTTLHours);
 
-    if (EnableHipHopSyntax) {
-      // If EnableHipHopSyntax is true, it forces EnableXHP to true
-      // regardless of how it was set in the config
-      EnableXHP = true;
-    }
-
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
 
 #define F(type, name, defaultVal) \
@@ -1886,11 +1880,8 @@ void RuntimeOption::Load(
   }
   {
     // Hack Language
-    auto const def = RuntimeOption::EnableHipHopSyntax ?
-      HackStrictOption::ON : HackStrictOption::OFF;
-
     Config::Bind(StrictArrayFillKeys, ini, config,
-                 "Hack.Lang.StrictArrayFillKeys", def);
+                 "Hack.Lang.StrictArrayFillKeys", HackStrictOption::ON);
 
     Config::Bind(LookForTypechecker, ini, config,
                  "Hack.Lang.LookForTypechecker", false);
@@ -2204,7 +2195,7 @@ void RuntimeOption::Load(
     Config::Bind(ForceServerNameToHeader, ini, config,
                  "Server.ForceServerNameToHeader");
     Config::Bind(AllowDuplicateCookies, ini, config,
-                 "Server.AllowDuplicateCookies", !EnableHipHopSyntax);
+                 "Server.AllowDuplicateCookies", false);
     Config::Bind(PathDebug, ini, config, "Server.PathDebug", false);
     Config::Bind(ServerUser, ini, config, "Server.User", "");
     Config::Bind(AllowRunAsRoot, ini, config, "Server.AllowRunAsRoot", false);

@@ -1,3 +1,3 @@
 <?hh // strict
 
-const CONST_SOME_COOL_VALUE = 0;
+const int CONST_SOME_COOL_VALUE = 0;

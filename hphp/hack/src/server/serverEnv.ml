@@ -30,6 +30,11 @@ let empty_recheck_loop_stats = {
   total_rechecked_count = 0;
 }
 
+type recheck_info = {
+  stats: recheck_loop_stats;
+  recheck_id : string;
+} [@@deriving show]
+
 (*****************************************************************************)
 (* The "static" environment, initialized first and then doesn't change *)
 (*****************************************************************************)
@@ -158,6 +163,7 @@ type env = {
     (* The diagnostic subscription information of the current client *)
     diag_subscribe : Diagnostic_subscription.t option;
     recent_recheck_loop_stats : recheck_loop_stats;
+    last_recheck_info : recheck_info option;
     (* Symbols for locally changed files *)
     local_symbol_table : SearchUtils.local_tracking_env ref [@opaque];
   }

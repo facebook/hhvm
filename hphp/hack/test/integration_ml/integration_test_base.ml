@@ -150,6 +150,9 @@ let run_loop_once : type a b. ServerEnv.env -> (a, b) loop_inputs ->
       env.ServerEnv.recent_recheck_loop_stats.ServerEnv.rechecked_count;
     total_rechecked_count =
       env.ServerEnv.recent_recheck_loop_stats.ServerEnv.total_rechecked_count;
+    last_actual_total_rechecked_count = (match env.ServerEnv.last_recheck_info with
+      | None -> None
+      | Some { ServerEnv.stats; _ } -> Some stats.ServerEnv.total_rechecked_count);
     new_client_response =
       TestClientProvider.get_client_response Non_persistent;
     persistent_client_response =

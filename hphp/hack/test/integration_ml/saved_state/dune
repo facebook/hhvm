@@ -244,6 +244,19 @@
   (action (run ./test_ide_tast_cache.exe)))
 
 (executable
+  (name test_recheck_stats)
+  (modules test_recheck_stats)
+  (libraries
+    asserter
+    integration_test_base
+    temp_file))
+
+(alias
+  (name recheck_stats)
+  (deps test_recheck_stats.exe)
+  (action (run ./test_recheck_stats.exe)))
+
+(executable
   (name test_load_decls_enum_add_member)
   (modules test_load_decls_enum_add_member)
   (libraries

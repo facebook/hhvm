@@ -418,8 +418,7 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
     in
     let env, res = recheck genv env check_kind in
 
-    let acc = {
-      updates_stale = acc.updates_stale;
+    let acc = { acc with
       rechecked_batches = acc.rechecked_batches + 1;
       rechecked_count = acc.rechecked_count + res.ServerTypeCheck.reparse_count;
       total_rechecked_count = acc.total_rechecked_count + res.ServerTypeCheck.total_rechecked_count;
@@ -439,9 +438,9 @@ let rec recheck_loop acc genv env new_client has_persistent_connection_request =
   end
 
 let recheck_loop genv env client has_persistent_connection_request =
-    let stats, env = recheck_loop empty_recheck_loop_stats genv env client
-      has_persistent_connection_request in
-    { env with recent_recheck_loop_stats = stats }
+  let stats, env = recheck_loop empty_recheck_loop_stats genv env client
+    has_persistent_connection_request in
+  { env with recent_recheck_loop_stats = stats }
 
 let new_serve_iteration_id () =
   Random_id.short_string ()
@@ -535,13 +534,22 @@ let serve_one_iteration genv env client_provider =
   (* after that we'll be able to give an up-to-date answer to the client. *)
   let env = recheck_loop genv env client has_persistent_connection_request in
   let stats = env.recent_recheck_loop_stats in
-  if stats.total_rechecked_count > 0 then begin
+  let env = match stats.total_rechecked_count with
+  | 0 -> env
+  | _ ->
     HackEventLogger.recheck_end start_t
       stats.rechecked_batches
       stats.rechecked_count
       stats.total_rechecked_count;
+
     Hh_logger.log "Recheck id: %s" recheck_id;
-  end;
+    { env with
+      last_recheck_info = Some {
+        stats;
+        recheck_id;
+      };
+    }
+  in
 
   let env = Option.value_map env.diag_subscribe
       ~default:env

@@ -170,14 +170,12 @@ void cgSelect(IRLS& env, const IRInstruction* inst) {
 
   // If the value is statically known (IE, its one of the types with a singleton
   // value), don't bother copying it (this also applies to Bottom).
-  if (!inst->dst(0)->type().subtypeOfAny(TNull, TNullptr)) {
-    if (trueTy <= TBool && falseTy <= TBool) {
-      v << cmovb{CC_NZ, sf, floc.reg(0), tloc.reg(0), dloc.reg(0)};
-    } else {
-      auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
-      auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
-      v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
-    }
+  if (trueTy <= TBool && falseTy <= TBool) {
+    v << cmovb{CC_NZ, sf, floc.reg(0), tloc.reg(0), dloc.reg(0)};
+  } else {
+    auto const t = zeroExtendIfBool(v, trueTy, tloc.reg(0));
+    auto const f = zeroExtendIfBool(v, falseTy, floc.reg(0));
+    v << cmovq{CC_NZ, sf, f, t, dloc.reg(0)};
   }
 }
 

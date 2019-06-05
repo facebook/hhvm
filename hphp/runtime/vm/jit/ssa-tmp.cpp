@@ -37,6 +37,8 @@ void SSATmp::setInstruction(IRInstruction* inst, int dstId) {
 
 namespace {
 int typeNeededWords(Type t) {
+  // Although we say we have zero registers, we always allocate 1 in
+  // reg-alloc.cpp.  In practice this doesn't mean much.
   if (t.subtypeOfAny(TUninit,
                      TInitNull,
                      TNullptr)) {

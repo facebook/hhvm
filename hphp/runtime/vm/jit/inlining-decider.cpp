@@ -736,6 +736,8 @@ TransID findTransIDForCallee(const ProfData* profData,
   TransID ret = kInvalidTransID;
   bool hasThisVaries = callee->hasThisVaries() &&
     ctxType.maybe(TObj) && !(ctxType <= TObj);
+  FTRACE(2, "findTransIDForCallee: offset={}  hasThisVaries={}\n",
+         offset, hasThisVaries);
   for (auto const id : idvec) {
     auto const rec = profData->transRec(id);
     if (rec->startBcOff() != offset) continue;
@@ -750,7 +752,7 @@ TransID findTransIDForCallee(const ProfData* profData,
         if (typeloc.location.tag() != LTag::Local) continue;
         auto const locId = typeloc.location.localId();
 
-        if (locId < numArgs && !(argTypes[locId] <= typeloc.type)) {
+        if (locId < numArgs && !(argTypes[locId].maybe(typeloc.type))) {
           return false;
         }
       }
@@ -758,9 +760,8 @@ TransID findTransIDForCallee(const ProfData* profData,
     }();
 
     if (!isvalid) continue;
-    if (!hasThisVaries) return id;
-    // The function may be called with or without $this, if we've seen
-    // both, give up.
+    // Found multiple entries that may match the arguments, so don't return
+    // any.
     if (ret != kInvalidTransID) return kInvalidTransID;
     ret = id;
   }
@@ -858,6 +859,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
     }
   }
 
+  FTRACE(2, "selectCalleeRegion: callee = {}\n", callee->fullName()->data());
   std::vector<Type> argTypes;
   for (int i = fca.numArgs - 1; i >= 0; --i) {
     // DataTypeGeneric is used because we're just passing the locals into the
@@ -873,6 +875,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
                    annotationsPtr);
       return nullptr;
     }
+    FTRACE(2, "arg {}: {}\n", i, type);
     argTypes.push_back(type);
   }
 

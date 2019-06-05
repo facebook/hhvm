@@ -96,11 +96,9 @@ static void _php_iconv_show_error(const char *func, php_iconv_err_t &err,
                   "in input string", func);
     break;
   case PHP_ICONV_ERR_ILLEGAL_SEQ:
-    if (RuntimeOption::IconvIgnoreCorrect == HackStrictOption::ON) {
-      if (boost::ends_with(out_charset, "//IGNORE")) {
-        err = PHP_ICONV_ERR_SUCCESS;
-        break;
-      }
+    if (boost::ends_with(out_charset, "//IGNORE")) {
+      err = PHP_ICONV_ERR_SUCCESS;
+      break;
     }
     raise_notice("%s(): Detected an illegal character in input string",
                   func);

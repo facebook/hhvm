@@ -1536,13 +1536,23 @@ function hphp_array_idx(
  *   multi-dimensional array by one or more dimensions.  Associative (string)
  *   keys will be maintained, but numeric keys will be re-indexed.
  *
- * @param mixed $arr1 - An array being sorted.
+ * @param mixed $arg1 - An array being sorted.
  *
  * @return bool - Returns TRUE on success or FALSE on failure.
  *
  */
-<<__Native("ActRec", "VariadicByRef")>>
-function array_multisort(mixed &$arr1, ...): mixed;
+<<__Native>>
+function array_multisort(
+  mixed &$arg1,
+  mixed &$arg2 = null,
+  mixed &$arg3 = null,
+  mixed &$arg4 = null,
+  mixed &$arg5 = null,
+  mixed &$arg6 = null,
+  mixed &$arg7 = null,
+  mixed &$arg8 = null,
+  mixed &$arg9 = null,
+): bool;
 
 } // root namespace
 

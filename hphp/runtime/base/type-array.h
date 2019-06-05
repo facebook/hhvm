@@ -376,14 +376,14 @@ public:
    * Sort multiple arrays at once similar to how ORDER BY clause works in SQL.
    */
   struct SortData {
-    Variant*     original;
-    const Array* array;
-    bool         by_key;
-    PFUNC_CMP    cmp_func;
-    const void*  data;
+    const Variant* original;
+    const Array*   array;
+    bool           by_key;
+    PFUNC_CMP      cmp_func;
+    const void*    data;
     std::vector<ssize_t> positions;
   };
-  static bool MultiSort(std::vector<SortData>& data, bool renumber);
+  static bool MultiSort(std::vector<SortData>& data);
 
   static void SortImpl(std::vector<int>& indices, const Array& source,
                        Array::SortData& opaque,

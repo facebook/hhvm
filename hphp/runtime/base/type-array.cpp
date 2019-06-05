@@ -965,7 +965,7 @@ void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
   operator=(sorted);
 }
 
-bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
+bool Array::MultiSort(std::vector<SortData> &data) {
   assertx(!data.empty());
 
   int count = -1;
@@ -1011,7 +1011,7 @@ bool Array::MultiSort(std::vector<SortData> &data, bool renumber) {
     for (int i = 0; i < count; i++) {
       ssize_t pos = opaque.positions[indices[i]];
       Variant k(arr->getKey(pos));
-      if (renumber && k.isInteger()) {
+      if (k.isInteger()) {
         sorted.append(arr->atPos(pos));
       } else {
         sorted.set(k, arr->atPos(pos));

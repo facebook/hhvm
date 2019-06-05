@@ -2873,43 +2873,52 @@ static Array::PFUNC_CMP get_cmp_func(int sort_flags, bool ascending) {
   }
 }
 
-TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
-  TypedValue* tv = getArg(ar, 0);
-  if (tv == nullptr || !tvAsVariant(tv).isPHPArray()) {
-    if (tvAsVariant(tv).isClsMeth()) {
+bool HHVM_FUNCTION(array_multisort,
+                   VRefParam arg1,
+                   VRefParam arg2 /*= null*/,
+                   VRefParam arg3 /*= null*/,
+                   VRefParam arg4 /*= null*/,
+                   VRefParam arg5 /*= null*/,
+                   VRefParam arg6 /*= null*/,
+                   VRefParam arg7 /*= null*/,
+                   VRefParam arg8 /*= null*/,
+                   VRefParam arg9 /*= null*/) {
+  if (!arg1.isPHPArray()) {
+    if (arg1.isClsMeth()) {
       raiseIsClsMethWarning(__FUNCTION__+2, 1);
-      return arReturn(ar, false);
+      return false;
     }
     throw_expected_array_exception("array_multisort");
-    return arReturn(ar, false);
+    return false;
   }
 
   std::vector<Array::SortData> data;
   std::vector<Array> arrays;
-  arrays.reserve(ar->numArgs()); // so no resize would happen
+  arrays.reserve(9); // so no resize would happen
 
   Array::SortData sd;
-  sd.original = &tvAsVariant(tv);
+  sd.original = &arg1;
   arrays.push_back(Array(sd.original->getArrayData()));
   sd.array = &arrays.back();
   sd.by_key = false;
 
   int sort_flags = SORT_REGULAR;
   bool ascending = true;
-  for (int i = 1; i < ar->numArgs(); i++) {
-    tv = getArg(ar, i);
-    if (tvAsVariant(tv).isArray()) {
+
+  auto const handleArg = [&] (VRefParam& arg) {
+    if (arg.isNull()) return;
+    if (arg.isArray()) {
       sd.cmp_func = get_cmp_func(sort_flags, ascending);
       data.push_back(sd);
 
       sort_flags = SORT_REGULAR;
       ascending = true;
 
-      sd.original = &tvAsVariant(tv);
+      sd.original = &arg;
       arrays.push_back(Array(sd.original->getArrayData()));
       sd.array = &arrays.back();
     } else {
-      int n = getArg<KindOfInt64>(ar, i);
+      int n = arg.toInt64();
       if (n == SORT_ASC) {
       } else if (n == SORT_DESC) {
         ascending = false;
@@ -2917,12 +2926,21 @@ TypedValue* HHVM_FN(array_multisort)(ActRec* ar) {
         sort_flags = n;
       }
     }
-  }
+  };
+
+  handleArg(arg2);
+  handleArg(arg3);
+  handleArg(arg4);
+  handleArg(arg5);
+  handleArg(arg6);
+  handleArg(arg7);
+  handleArg(arg8);
+  handleArg(arg9);
 
   sd.cmp_func = get_cmp_func(sort_flags, ascending);
   data.push_back(sd);
 
-  return arReturn(ar, Array::MultiSort(data, true));
+  return Array::MultiSort(data);
 }
 
 // HH\\dict

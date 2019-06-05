@@ -1487,7 +1487,7 @@ module type Syntax_S = sig
 
   val is_specific_token : TokenKind.t -> t -> bool
   val is_loop_statement : t -> bool
-  val is_semicolon      : t -> bool
+  val is_external       : t -> bool
   val is_name           : t -> bool
   val is_construct      : t -> bool
   val is_destruct       : t -> bool

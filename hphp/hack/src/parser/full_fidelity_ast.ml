@@ -1224,7 +1224,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         mpYielding pFunctionBody lambda_body
           (if not (is_compound_statement lambda_body) then env else non_tls env)
       in
-      let f_external = is_semicolon lambda_body in
+      let f_external = is_external lambda_body in
       Lfun
       { (fun_template yield node suspension_kind env) with
         f_ret
@@ -1789,7 +1789,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
           | Some _ as doc_comment -> doc_comment
           | None -> top_docblock() in
         let user_attributes = pUserAttributes env attribute_spec in
-        let f_external = is_semicolon anonymous_body in
+        let f_external = is_external anonymous_body in
         Efun
         ( { (fun_template yield node suspension_kind env) with
             f_ret         = mpOptional pHint anonymous_type env
@@ -1810,7 +1810,7 @@ and pExpr ?location:(location=TopLevel) : expr parser = fun node env ->
         mk_suspension_kind node env awaitable_async awaitable_coroutine in
       let blk, yld = mpYielding pFunctionBody awaitable_compound_statement env in
       let user_attributes = pUserAttributes env awaitable_attribute_spec in
-      let f_external = is_semicolon awaitable_compound_statement in
+      let f_external = is_external awaitable_compound_statement in
       let body =
         { (fun_template yld node suspension_kind env) with
            f_body = mk_noop (pPos awaitable_compound_statement env) blk;
@@ -2720,7 +2720,7 @@ and pClassElt : class_elt list parser = fun node env ->
       env.in_static_method := (List.exists kind ~f:(function Static -> true | _ -> false));
       let body, body_has_yield = mpYielding pBody methodish_function_body env in
       env.in_static_method := false;
-      let is_external = is_semicolon methodish_function_body in
+      let is_external = is_external methodish_function_body in
       let user_attributes = pUserAttributes env methodish_attribute in
       member_def @ [Method
       { m_kind            = kind
@@ -3001,7 +3001,7 @@ and pDef : def list parser = fun node env ->
       let check_modifier node =
         raise_parsing_error env (`Node node) (SyntaxError.function_modifier (text node)) in
       let hdr = pFunHdr check_modifier function_declaration_header env in
-      let is_external = is_semicolon function_body in
+      let is_external = is_external function_body in
       let block, yield =
         if is_external then [], false else
           mpYielding pFunctionBody function_body env

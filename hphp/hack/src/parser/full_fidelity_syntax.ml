@@ -466,7 +466,9 @@ module WithToken(Token: TokenType) = struct
       List.exists (Token.leading token)
         ~f:(fun trivia ->  Token.Trivia.kind trivia = kind)
 
-    let is_semicolon  = is_specific_token TokenKind.Semicolon
+    let is_external e =
+      is_specific_token TokenKind.Semicolon e || is_missing e
+
     let is_name       = is_specific_token TokenKind.Name
     let is_construct  = is_specific_token TokenKind.Construct
     let is_destruct   = is_specific_token TokenKind.Destruct

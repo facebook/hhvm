@@ -819,8 +819,7 @@ std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
 
 HackStrictOption
-  RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF,
-  RuntimeOption::MinMaxAllowDegenerate = HackStrictOption::OFF;
+  RuntimeOption::StrictArrayFillKeys = HackStrictOption::OFF;
 
 // defaults set when the INI option is bound - values below are irrelevant.
 bool RuntimeOption::LookForTypechecker = false;
@@ -1892,8 +1891,6 @@ void RuntimeOption::Load(
 
     Config::Bind(StrictArrayFillKeys, ini, config,
                  "Hack.Lang.StrictArrayFillKeys", def);
-    Config::Bind(MinMaxAllowDegenerate, ini, config,
-                 "Hack.Lang.MinMaxAllowDegenerate", def);
 
     Config::Bind(LookForTypechecker, ini, config,
                  "Hack.Lang.LookForTypechecker", false);

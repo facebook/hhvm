@@ -50,27 +50,12 @@ Variant HHVM_FUNCTION(min,
   if (args.empty()) {
     const auto& cell_value = *value.toCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
-        raise_warning("min(): This will return the value instead of null, "
-                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
-      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
-        return value;
-      }
-      raise_warning("min(): When only one parameter is given,"
-                    " it must be an array");
-      return init_null();
+      return value;
     }
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
-        raise_warning("min(): This will return null instead of false, "
-                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
-      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
-        return init_null();
-      }
-      raise_warning("min(): Array must contain at least one element");
-      return false;
+      return init_null();
     }
     auto ret = iter.secondValPlus();
     ++iter;
@@ -99,27 +84,12 @@ Variant HHVM_FUNCTION(max,
   if (args.empty()) {
     const auto& cell_value = *value.toCell();
     if (UNLIKELY(!isContainer(cell_value))) {
-      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
-        raise_warning("max(): This will return the value instead of null, "
-                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
-      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
-        return value;
-      }
-      raise_warning("max(): When only one parameter is given,"
-                    " it must be an array");
-      return init_null();
+      return value;
     }
 
     ArrayIter iter(cell_value);
     if (!iter) {
-      if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::WARN) {
-        raise_warning("max(): This will return null instead of false, "
-                      "when hhvm.hack.lang.min_max_allow_degenerate=on");
-      } else if (RuntimeOption::MinMaxAllowDegenerate == HackStrictOption::ON) {
-        return init_null();
-      }
-      raise_warning("max(): Array must contain at least one element");
-      return false;
+      return init_null();
     }
     auto ret = iter.secondValPlus();
     ++iter;

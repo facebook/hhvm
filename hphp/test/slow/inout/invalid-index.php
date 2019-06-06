@@ -4,9 +4,9 @@ function foo(inout $x) { var_dump($x); $x = 12; }
 
 function checkStatic() {
   $a = ['apple' => ['orange' => 5]];
-  foo(inout $a[10]);
-  foo(inout $a['apple']['banana']);
-  foo(inout $a['apple']['orange']);
+  try { foo(inout $a[10]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { foo(inout $a['apple']['banana']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { foo(inout $a['apple']['orange']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
   try {
     foo(inout $a[50][100]);

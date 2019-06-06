@@ -8,12 +8,11 @@ class Gronk {
   }
 
   public function gronkify(): void {
-    list($stuff, $gronk) = $this->getStuffAndGronk(
-      null
-    );
-
-    var_dump($stuff);
-    var_dump($gronk);
+    try {
+      list($stuff, $gronk) = $this->getStuffAndGronk(null);
+      var_dump($stuff);
+      var_dump($gronk);
+    } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
 
   private function getStuffAndGronk(?int $count): array {

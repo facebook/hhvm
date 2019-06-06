@@ -216,14 +216,15 @@ void raiseNotice(const StringData* sd) {
   raise_notice("%s", sd->data());
 }
 
-void raiseArrayIndexNotice(const int64_t index, bool isInOut) {
-  raise_notice("Undefined index%s: %" PRId64,
-               isInOut ? " on inout parameter" : "", index);
+void throwArrayIndexException(const int64_t index, bool isInOut) {
+  SystemLib::throwOutOfBoundsExceptionObject(folly::sformat(
+    "Undefined index{}: {}", isInOut ? " on inout parameter" : "", index));
 }
 
-void raiseArrayKeyNotice(const StringData* key, bool isInOut) {
-  raise_notice("Undefined index%s: %s",
-               isInOut ? " on inout parameter" : "", key->data());
+void throwArrayKeyException(const StringData* key, bool isInOut) {
+  SystemLib::throwOutOfBoundsExceptionObject(folly::sformat(
+    "Undefined index{}: {}", isInOut ? " on inout parameter" : "",
+    key->data()));
 }
 
 std::string formatParamRefMismatch(const char* fname, uint32_t index,

@@ -3472,9 +3472,7 @@ static inline void baseGImpl(TypedValue* key, MOpMode mode) {
 
   if (baseVal == nullptr) {
     assertx(mode != MOpMode::Define);
-    if (mode == MOpMode::Warn) {
-      raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    }
+    if (mode == MOpMode::Warn) throwArrayKeyException(name, false);
     tvWriteNull(mstate.tvTempBase);
     mstate.base = &mstate.tvTempBase;
     return;

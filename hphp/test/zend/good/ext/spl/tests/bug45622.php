@@ -19,7 +19,7 @@ var_dump($ao->p);
 echo "\n--> Remove the array element and try access again:\n";
 unset($ao->p);
 var_dump(isset($ao->p));
-var_dump($ao->p);
+try { var_dump($ao->p); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 echo "\n--> Re-add the real property:\n";
 $ao->p = 'object property';

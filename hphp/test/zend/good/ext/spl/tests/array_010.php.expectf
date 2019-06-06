@@ -20,12 +20,8 @@ string(3) "1st"
 int(1)
 string(3) "3rd"
 int(4)
-
-Notice: %s
-NULL
-
-Notice: %s
-NULL
+%s
+%s
 ===offsetSet===
 WRITE 1
 string(9) "Changed 1"
@@ -54,10 +50,8 @@ array(6) {
   [6]=>
   string(9) "changed 6"
 }
-
-Notice: %s
-
-Notice: %s
+%s
+%s
 array(4) {
   [0]=>
   string(3) "1st"

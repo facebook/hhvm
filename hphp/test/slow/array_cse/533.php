@@ -1,12 +1,16 @@
 <?hh
 
 function f($x, $y) {
-  var_dump($x[$y]);
-  if ($x[$y]) print "HI\n";
+  try {
+    var_dump($x[$y]);
+    if ($x[$y]) print "HI\n";
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 function g(&$x, $y) {
-  var_dump($x[$y]);
-  if ($x[$y]) print "HI\n";
+  try {
+    var_dump($x[$y]);
+    if ($x[$y]) print "HI\n";
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
 <<__EntryPoint>>

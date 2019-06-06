@@ -13,12 +13,9 @@ f
 int(4)
 int(5)
 int(6)
-
-Notice: Undefined index: 1 in %s on line 23
-
-Notice: Undefined index: 0 in %s on line 23
-NULL
-NULL
+Undefined index: 1
+int(4)
+int(5)
 int(1)
 int(2)
 int(3)

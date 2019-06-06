@@ -1,11 +1,13 @@
 <?php
 
 function main($arr) {
-  if ($arr[1 << 33]) {
-    var_dump($arr[1 << 33]);
-  } else {
-    echo "no\n";
-  }
+  try {
+    if ($arr[1 << 33]) {
+      var_dump($arr[1 << 33]);
+    } else {
+      echo "no\n";
+    }
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
 

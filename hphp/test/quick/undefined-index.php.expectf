@@ -1,4 +1,4 @@
 
-Notice: Undefined index: 123 in %s on line 4
+Undefined index: 123
 
-Notice: Undefined property: stdClass::$flubb in %s on line 8
+Notice: Undefined property: stdClass::$flubb in %s on line 10

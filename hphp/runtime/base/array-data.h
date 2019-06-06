@@ -792,10 +792,10 @@ public:
 
 protected:
   /*
-   * Raise a notice that `k' is undefined, and return an Uninit.
+   * Throw an out of bounds exception if 'k' is undefined
    */
-  static tv_rval getNotFound(int64_t k);
-  static tv_rval getNotFound(const StringData* k);
+  [[noreturn]] static void getNotFound(int64_t k);
+  [[noreturn]] static void getNotFound(const StringData* k);
 
   /*
    * Raise a notice that `k' is undefined if `error' is set (and if this is not

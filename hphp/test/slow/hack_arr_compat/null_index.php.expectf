@@ -2,8 +2,7 @@
 NULL
 === indexing into a boolean ===
 === indexing into invalid keys ===
-
-Notice: Undefined index: invalid key in %s/null_index.php on line 16
+Undefined index: invalid key
 === assigning to an index of true ===
 
 Warning: Cannot use a scalar value as an array in %s/null_index.php on line 21

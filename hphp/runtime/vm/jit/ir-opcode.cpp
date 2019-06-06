@@ -475,8 +475,6 @@ bool opcodeMayRaise(Opcode opc) {
   case PropQ:
   case PropTypeRedefineCheck:
   case PropX:
-  case RaiseArrayIndexNotice:
-  case RaiseArrayKeyNotice:
   case RaiseError:
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseForbiddenDynCall:
@@ -516,6 +514,8 @@ bool opcodeMayRaise(Opcode opc) {
   case SuspendHookYield:
   case ThrowArithmeticError:
   case ThrowAsTypeStructException:
+  case ThrowArrayIndexException:
+  case ThrowArrayKeyException:
   case ThrowDivisionByZeroError:
   case ThrowDivisionByZeroException:
   case ThrowHasThisNeedStatic:

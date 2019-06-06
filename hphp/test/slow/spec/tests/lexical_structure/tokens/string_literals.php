@@ -78,7 +78,7 @@ echo ">$s<--- using o/p from sprintf with hard-coded precision\n";
 //*/
 
 ///*
-// show that the parser must form the longest posisble variable name and that
+// show that the parser must form the longest possible variable name and that
 // for unknown variables a "" is substituted
 
 $z = -34;
@@ -101,14 +101,14 @@ echo ">$1|$&<\n";
 
 $colors = array("red", "white", "blue");
 echo "\colors contains >$colors<\n";
-echo "\colors[1] contains >$colors[1]<\n";
+try { echo "\colors[1] contains >$colors[1]<\n"; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\colors[1] contains >$colors [1]<\n";     // whitespace permitted, but semantics change
 //echo "\colors[1] contains >$colors[ 1]<\n";   // whitespace not permitted
 //echo "\colors[1] contains >$colors[1 ]<\n";   // whitespace not permitted
-var_dump("$colors[1]");
-var_dump("$colors[01]");        // invalid index
-var_dump("$colors[0x1]");       // invalid index
-var_dump("$colors[0X1]");       // invalid index
+try { var_dump("$colors[1]"); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { var_dump("$colors[01]"); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { var_dump("$colors[0x1]"); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { var_dump("$colors[0X1]"); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 $index = 2;
 echo "\$colors[$index] contains >$colors[$index]<\n";

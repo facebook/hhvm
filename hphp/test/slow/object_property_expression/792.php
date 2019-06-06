@@ -4,7 +4,8 @@ class C1 {
   public function __get( $what ) {
     echo "get
 ";
-    return $this->_p[ $what ];
+    try { return $this->_p[ $what ]; }
+    catch (Exception $e) { echo $e->getMessage()."\n"; return null; }
   }
   public function __set( $what, $value ) {
     echo "set

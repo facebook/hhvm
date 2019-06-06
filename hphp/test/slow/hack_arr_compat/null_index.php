@@ -13,7 +13,7 @@ $t = false[2];
 
 echo "=== indexing into invalid keys ===\n";
 $arr = ['key' => 'val'];
-$t = $arr['invalid key']['invalid key 2'];
+try { $t = $arr['invalid key']['invalid key 2']; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 $t = $arr['key']['invalid key 2'];
 
 echo "=== assigning to an index of true ===\n";

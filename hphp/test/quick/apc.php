@@ -57,7 +57,7 @@ function testKeyTypes() {
   apc_add("keysarray", array(2 => 'two', '3' => 'three'));
   $arr = apc_fetch("keysarray");
   foreach (array(2, 3, '2', '3') as $k) {
-    var_dump($arr[$k]);
+    try { var_dump($arr[$k]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
 }
 

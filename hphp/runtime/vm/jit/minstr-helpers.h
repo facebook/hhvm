@@ -42,9 +42,7 @@ tv_lval baseGImpl(TypedValue key) {
 
   auto base = varEnv->lookup(name);
   if (base == nullptr) {
-    if (mode == MOpMode::Warn) {
-      raise_notice(Strings::UNDEFINED_VARIABLE, name->data());
-    }
+    if (mode == MOpMode::Warn) throwArrayKeyException(name, false);
     if (mode == MOpMode::Define) {
       auto tv = make_tv<KindOfNull>();
       varEnv->set(name, &tv);
@@ -513,24 +511,16 @@ ELEMD_HELPER_TABLE(X)
 template<MOpMode mode>
 NEVER_INLINE
 tv_rval elemArrayNotFound(int64_t k) {
-  if (mode == MOpMode::Warn) {
-    raise_notice("Undefined index: %" PRId64, k);
-  }
-  if (mode == MOpMode::InOut) {
-    raise_inout_undefined_index(k);
-  }
+  if (mode == MOpMode::Warn) throwArrayIndexException(k, false);
+  if (mode == MOpMode::InOut) throwArrayIndexException(k, true);
   return &immutable_uninit_base;
 }
 
 template<MOpMode mode>
 NEVER_INLINE
 tv_rval elemArrayNotFound(const StringData* k) {
-  if (mode == MOpMode::Warn) {
-    raise_notice("Undefined index: %s", k->data());
-  }
-  if (mode == MOpMode::InOut) {
-    raise_inout_undefined_index(k);
-  }
+  if (mode == MOpMode::Warn) throwArrayKeyException(k, false);
+  if (mode == MOpMode::InOut) throwArrayKeyException(k, true);
   return &immutable_uninit_base;
 }
 
@@ -589,8 +579,10 @@ ELEM_ARRAY_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 // Keep these error handlers in sync with ArrayData::getNotFound();
-TypedValue arrayGetNotFound(int64_t k);
-TypedValue arrayGetNotFound(const StringData* k);
+[[noreturn]]
+void arrayGetNotFound(int64_t k);
+[[noreturn]]
+void arrayGetNotFound(const StringData* k);
 
 template<KeyType keyType, MOpMode mode>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
@@ -598,11 +590,11 @@ TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
   if (ret) return ret.tv();
   if (mode == MOpMode::None) return make_tv<KindOfNull>();
   if (mode == MOpMode::InOut) {
-    raise_inout_undefined_index(key);
+    throw_inout_undefined_index(key);
     return make_tv<KindOfNull>();
   }
   assertx(mode == MOpMode::Warn);
-  return arrayGetNotFound(key);
+  arrayGetNotFound(key);
 }
 
 #define ARRAYGET_HELPER_TABLE(m)                  \

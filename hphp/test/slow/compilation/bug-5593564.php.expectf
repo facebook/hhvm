@@ -1,6 +1,4 @@
-
-Notice: Undefined index: 8589934592 in %s/test/slow/compilation/bug-5593564.php on line 4
-no
+Undefined index: 8589934592
 array(1) {
   [0]=>
   string(5) "value"

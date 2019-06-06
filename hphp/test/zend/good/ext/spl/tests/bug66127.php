@@ -11,8 +11,8 @@ function crash()
 <<__EntryPoint>> function main() {
 $items = new ArrayObject();
 
-unset($items[0]);
-unset($items[0][0]);
+try { unset($items[0]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { unset($items[0][0]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 crash();
 echo "Worked!\n";
 }

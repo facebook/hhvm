@@ -106,8 +106,7 @@ object(UsesMagic) (2) {
 }
 
 --> Unset existent, non-existent and dynamic:
-
-Notice: %s
+%s
   Original wrapped object:
 object(C) (3) {
   ["b"]=>

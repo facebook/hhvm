@@ -9,7 +9,12 @@ class object implements ArrayAccess {
     }
     function offsetGet($index) {
         echo __METHOD__ . "($index)\n";
-        return $this->a[$index];
+        try {
+          return $this->a[$index];
+        } catch (Exception $e) {
+          echo $e->getMessage()."\n";
+          return null;
+        }
     }
     function offsetSet($index, $newval) {
         echo __METHOD__ . "($index,$newval)\n";

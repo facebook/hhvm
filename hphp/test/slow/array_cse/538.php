@@ -12,7 +12,8 @@ function id($x) {
   return $x;
 }
 function f2($x) {
-  if ($x[0]) var_dump(id($x), $x[0]);
+  try { if ($x[0]) var_dump(id($x), $x[0]);
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
 function f3($x) {

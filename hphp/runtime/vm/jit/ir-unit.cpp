@@ -127,6 +127,8 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case RaiseError:
     case ThrowArithmeticError:
     case ThrowAsTypeStructException:
+    case ThrowArrayIndexException:
+    case ThrowArrayKeyException:
     case ThrowDivisionByZeroError:
     case ThrowDivisionByZeroException:
     case ThrowInvalidArrayKey:

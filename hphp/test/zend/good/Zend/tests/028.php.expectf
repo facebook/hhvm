@@ -1,7 +1,4 @@
 bool(true)
 bool(true)
 bool(true)
-
-Notice: Undefined index: 2 in %s/028.php on line 10
-
-Fatal error: Function name must be a string in %s/028.php on line 10
+Undefined index: 2

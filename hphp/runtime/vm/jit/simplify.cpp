@@ -2956,34 +2956,32 @@ SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {
   if (inst->src(0)->hasConstVal() && inst->src(1)->hasConstVal()) {
     auto const mode = inst->extra<ArrayGet>()->mode;
     if (inst->src(1)->type() <= TInt) {
-      if (auto const result = arrIntKeyImpl(env, inst)) {
-        return result;
-      }
+      if (auto const result = arrIntKeyImpl(env, inst)) return result;
       if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
         gen(
           env,
-          RaiseArrayIndexNotice,
-          RaiseArrayIndexNoticeData { mode == MOpMode::InOut },
+          ThrowArrayIndexException,
+          ThrowArrayIndexExceptionData { mode == MOpMode::InOut },
           inst->taken(),
           inst->src(1)
         );
+        return cns(env, TBottom);
       }
       return cns(env, TInitNull);
     }
     if (inst->src(1)->type() <= TStr) {
       bool skip;
-      if (auto const result = arrStrKeyImpl(env, inst, skip)) {
-        return result;
-      }
+      if (auto const result = arrStrKeyImpl(env, inst, skip)) return result;
       if (skip) return nullptr;
       if (mode == MOpMode::InOut || mode == MOpMode::Warn) {
         gen(
           env,
-          RaiseArrayKeyNotice,
-          RaiseArrayKeyNoticeData { mode == MOpMode::InOut },
+          ThrowArrayKeyException,
+          ThrowArrayKeyExceptionData { mode == MOpMode::InOut },
           inst->taken(),
           inst->src(1)
         );
+        return cns(env, TBottom);
       }
       return cns(env, TInitNull);
     }

@@ -642,23 +642,28 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     return unboxed;
   };
 
-  return cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckPackedArrayDataBounds, taken, base, key);
-    },
-    [&] { // Next:
-      auto const res = gen(env, LdPackedElem, base, key);
-      auto const pres = profiledType(env, res, [&] { finish(finishMe(res)); });
-      return finishMe(pres);
-    },
-    [&] { // Taken:
+  auto check = [&] (Block* taken) {
+    gen(env, CheckPackedArrayDataBounds, taken, base, key);
+  };
+
+  auto result = [&] {
+    auto const res = gen(env, LdPackedElem, base, key);
+    auto const pres = profiledType(env, res, [&] { finish(finishMe(res)); });
+    return finishMe(pres);
+  };
+
+  if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
+    ifThen(env, check, [&] {
       hint(env, Block::Hint::Unlikely);
-      if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
-        auto const inout = mode == MOpMode::InOut;
-        gen(env, RaiseArrayIndexNotice,
-            RaiseArrayIndexNoticeData { inout }, key);
-      }
+      gen(env, ThrowArrayIndexException,
+          ThrowArrayIndexExceptionData { mode == MOpMode::InOut }, key);
+    });
+    return result();
+  }
+
+  return cond(env, check, result,
+    [&] {
+      hint(env, Block::Hint::Unlikely);
       return cns(env, TInitNull);
     }
   );

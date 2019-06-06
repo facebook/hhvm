@@ -23,7 +23,8 @@ function manipulate($arr) {
   }
   $arr['foo'][3][] = 5;
   $arr['foo'][3]['bar'] = [12];
-  var_dump($arr['foo'][3]['bar'][256]);
+  try { var_dump($arr['foo'][3]['bar'][256]); }
+  catch (Exception $e) { echo $e->getMessage()."\n"; }
   var_dump($arr);
 }
 

@@ -224,21 +224,20 @@ void throw_cannot_unset_for_clsmeth() {
     "Cannot use unset with clsmeth");
 }
 
-void raise_inout_undefined_index(TypedValue tv) {
+void throw_inout_undefined_index(TypedValue tv) {
   if (tv.m_type == KindOfInt64) {
-    raise_inout_undefined_index(tv.m_data.num);
-    return;
+    throwArrayIndexException(tv.m_data.num, true);
   }
   assertx(isStringType(tv.m_type));
-  raise_inout_undefined_index(tv.m_data.pstr);
+  throwArrayKeyException(tv.m_data.pstr, true);
 }
 
-void raise_inout_undefined_index(int64_t i) {
-  raise_notice("Undefined index on inout parameter: %" PRId64, i);
+void throw_inout_undefined_index(int64_t i) {
+  throwArrayIndexException(i, true);
 }
 
-void raise_inout_undefined_index(const StringData* sd) {
-  raise_notice("Undefined index on inout parameter: %s", sd->data());
+void throw_inout_undefined_index(const StringData* sd) {
+  throwArrayKeyException(sd, true);
 }
 
 Cell incDecBodySlow(IncDecOp op, tv_lval fr) {

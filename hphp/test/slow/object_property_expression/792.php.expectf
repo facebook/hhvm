@@ -1,6 +1,5 @@
 get
-
-Notice: Undefined index: a in %s/test/slow/object_property_expression/792.php on line 7
+Undefined index: a
 set
 get
 1get

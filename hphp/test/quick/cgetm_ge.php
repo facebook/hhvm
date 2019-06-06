@@ -39,8 +39,10 @@ init();
 main();
 
 function non_exist() {
-  $a = $GLOBALS['doesnt_exist'][12];
-  var_dump($a);
+  try {
+    $a = $GLOBALS['doesnt_exist'][12];
+    var_dump($a);
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
   foreach ($GLOBALS as $k => $v) {
     if ($k == 'doesnt_exist') {

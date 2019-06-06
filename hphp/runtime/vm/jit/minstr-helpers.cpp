@@ -20,15 +20,13 @@ namespace HPHP { namespace jit { namespace MInstrHelpers {
 //////////////////////////////////////////////////////////////////////
 
 NEVER_INLINE
-TypedValue arrayGetNotFound(int64_t k) {
-  raise_notice("Undefined index: %" PRId64, k);
-  return make_tv<KindOfNull>();
+void arrayGetNotFound(int64_t k) {
+  throwArrayIndexException(k, false);
 }
 
 NEVER_INLINE
-TypedValue arrayGetNotFound(const StringData* k) {
-  raise_notice("Undefined index: %s", k->data());
-  return make_tv<KindOfNull>();
+void arrayGetNotFound(const StringData* k) {
+  throwArrayKeyException(k, false);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -4,12 +4,12 @@
   // test CGetM
   $a = array();
   $a[0] = "one";
-  echo $a["0"];
+  try { echo $a["0"]; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
   // test SetM
   $a = array();
   $a["0"] = "two";
-  echo $a[0];
+  try { echo $a[0]; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
   // test IssetM
   $a = array("narf");

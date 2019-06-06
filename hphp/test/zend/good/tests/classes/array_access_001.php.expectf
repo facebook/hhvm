@@ -31,12 +31,10 @@ string(3) "3rd"
 object::offsetGet(4th)
 int(4)
 object::offsetGet(5th)
-
-Notice: %s
+%s
 NULL
 object::offsetGet(6)
-
-Notice: %s
+%s
 NULL
 ===offsetSet===
 WRITE 1

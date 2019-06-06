@@ -17,8 +17,8 @@ var_dump($obj[0]);
 var_dump($obj[1]);
 var_dump($obj[2]);
 var_dump($obj['4th']);
-var_dump($obj['5th']);
-var_dump($obj[6]);
+try { var_dump($obj['5th']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { var_dump($obj[6]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 echo "===offsetSet===\n";
 echo "WRITE 1\n";
@@ -45,8 +45,8 @@ echo "===unset===\n";
 var_dump($obj->getArrayCopy());
 unset($obj[2]);
 unset($obj['4th']);
-unset($obj[7]);
-unset($obj['8th']);
+try { unset($obj[7]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { unset($obj['8th']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 var_dump($obj->getArrayCopy());
 
 echo "===DONE===\n";

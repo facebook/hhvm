@@ -54,7 +54,8 @@ var_dump($max);
 var_dump(isset($avg));
 var_dump($avg);
 
-$v = list($min, $max, $avg) = array(100, 500);  // Undefined offset: 2
+try { list($min, $max, $avg) = $v = array(100, 500);  // Undefined offset: 2
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
@@ -67,7 +68,8 @@ var_dump($avg);
 
 echo "--------- test with sufficient array elements but not consecutive keys -------------\n";
 
-$v = list($min, $max, $avg) = array(0, 2 => 100, 4 => 67);
+try { list($min, $max, $avg) = $v = array(0, 2 => 100, 4 => 67);
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
 
@@ -93,7 +95,9 @@ print_r($v);
 
 echo "--------- test with non-numeric array -------------\n";
 
-$v = list($min, $max, $avg) = ["x" => 10, "a" => 20, "y" => 30];
+try {
+list($min, $max, $avg) = $v = ["x" => 10, "a" => 20, "y" => 30];
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
     // Undefined offset: 2, 1, 0
 echo "\$min: $min, \$max: $max, \$avg: $avg\n";
 print_r($v);
@@ -104,7 +108,8 @@ var_dump(isset($avg));  // FALSE
 
 echo "--------- test with array element being an array -------------\n";
 
-$v = list($min, $max, $avg) = array(0, array(100, 67)); // Undefined offset: 2
+try { list($min, $max, $avg) = $v = array(0, array(100, 67)); // Undefined offset: 2
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
 print_r($v);
 
 var_dump(isset($min));  // TRUE

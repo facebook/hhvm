@@ -11,9 +11,10 @@ class MealIterator implements Iterator {
     }
 
     public function next() {
-
-        echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+      echo self::$indent."--> " . __METHOD__ . " ($this->pos)\n";
+      try {
         return $this->myContent[$this->pos++];
+      } catch (Exception $e) { echo $e->getMessage()."\n"; }
     }
 
     public function rewind() {
@@ -51,7 +52,7 @@ MealIterator::$indent = " ";
 echo "\n\n\n-----( Nested iteration: )-----\n";
 $count=1;
 foreach ($f as $k=>$v) {
-    echo "\nTop level "  .  $count++ . ": \n";
+    echo "\nTop level "  .  $count++ . ":\n";
     echo "$k => $v\n";
   MealIterator::$indent = "     ";
     foreach ($f as $k=>$v) {

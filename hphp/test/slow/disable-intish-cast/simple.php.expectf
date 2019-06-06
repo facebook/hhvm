@@ -8,9 +8,7 @@ array(2) {
   ["10"]=>
   int(5)
 }
-
-Notice: Undefined index: 42 in %s on line 11
-NULL
+Undefined index: 42
 int(10)
 array(2) {
   ["42"]=>

@@ -1,7 +1,5 @@
 =============== get ================================
-
-Notice: Undefined index: 10 in %s/intlike.php on line %d
-NULL
+Undefined index: 10
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -12,9 +10,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-
-Notice: Undefined index: 2 in %s/intlike.php on line %d
-NULL
+Undefined index: 2
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -25,9 +21,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-
-Notice: Undefined index: 10 in %s/intlike.php on line %d
-NULL
+Undefined index: 10
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -38,9 +32,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-
-Notice: Undefined index: 2 in %s/intlike.php on line 22
-NULL
+Undefined index: 2
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -51,9 +43,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-
-Notice: Undefined index: 2 in %s/intlike.php on line 22
-NULL
+Undefined index: 2
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================
@@ -64,9 +54,7 @@ NULL
 string(3) "def"
 =============== set ================================
 =============== get ================================
-
-Notice: Undefined index: 2 in %s/intlike.php on line 22
-NULL
+Undefined index: 2
 =============== isset===============================
 bool(false)
 =============== akey-exists=========================

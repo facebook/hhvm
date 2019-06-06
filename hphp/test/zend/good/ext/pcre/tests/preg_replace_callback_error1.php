@@ -15,8 +15,11 @@ $regex_array = array('abcdef', //Regex without delimiters
 '[A-Z]', '[0-9]'), '/[a-zA-Z]/'); //Regex string
 ZendGoodExtPcreTestsPregReplaceCallbackError1::$replacement = array('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine');
 function integer_word($matches) {
-
+  try {
     return ZendGoodExtPcreTestsPregReplaceCallbackError1::$replacement[$matches[0]];
+  } catch (Exception $_) {
+    return null;
+  }
 }
 $subject = 'number 1.';
 foreach($regex_array as $regex_value) {

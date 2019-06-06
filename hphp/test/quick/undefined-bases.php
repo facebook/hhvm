@@ -10,6 +10,6 @@ class c {}
 
   $x = $undef['foo'];
 
-  $x = $GLOBALS[$name]['foo'];
-  $x = $GLOBALS[id($name)]['foo'];
+  try { $x = $GLOBALS[$name]['foo']; } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { $x = $GLOBALS[id($name)]['foo']; } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }

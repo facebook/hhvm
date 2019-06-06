@@ -24,8 +24,10 @@ function f1($x) {
 }
 
 function f2($x) {
-  if (!is_null($x[0])) var_dump($x[0]);
-  var_dump($x[0]);
+  try {
+    if (!is_null($x[0])) var_dump($x[0]);
+    var_dump($x[0]);
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
 function f3($x) {
@@ -36,9 +38,11 @@ function f3($x) {
 }
 
 function f4($x) {
-  var_dump($x[0][1]);
-  unset($x[0][1]);
-  var_dump($x[0][1]);
+  try {
+    var_dump($x[0][1]);
+    unset($x[0][1]);
+    var_dump($x[0][1]);
+  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
 function f5($x) {

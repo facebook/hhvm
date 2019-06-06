@@ -28,9 +28,7 @@ dict(6) {
 Caught Out of bounds dict access: invalid index "bar"
 string(5) "hello"
 Caught Out of bounds dict access: invalid index 2
-
-Notice: Undefined index: 256 in %s on line 26
-NULL
+Undefined index: 256
 array(1) {
   ["foo"]=>
   dict(3) {

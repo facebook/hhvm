@@ -40,16 +40,10 @@ object(ArrayObject) (1) {
   }
 }
 int(0)
-
-Notice: %s
-NULL
-
-Notice: %s
-NULL
-
-Notice: %s
-
-Notice: %s
+%s
+%s
+%s
+%s
 object(ArrayObject) (1) {
   ["storage":"ArrayObject":private]=>
   array(2) {

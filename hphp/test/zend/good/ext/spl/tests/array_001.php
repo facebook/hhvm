@@ -15,14 +15,14 @@ var_dump($ar["a"] = "a");
 
 var_dump($ar);
 var_dump($ar[0]);
-var_dump($ar[6]);
-var_dump($ar["b"]);
+try { var_dump($ar[6]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { var_dump($ar["b"]);  } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 unset($ar[1]);
 unset($ar["3"]);
 unset($ar["a"]);
-unset($ar[7]);
-unset($ar["c"]);
+try { unset($ar[7]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { unset($ar["c"]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 var_dump($ar);
 
 $ar[] = '3';

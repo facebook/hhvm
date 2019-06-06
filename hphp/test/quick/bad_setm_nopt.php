@@ -3,8 +3,10 @@
 function test($a, $b, $c, $d, $e) {
   $k = array();
   foreach ($a as $id) {
-    $k[$id] = foo($id, $b, $c, $d, $e);
-    $k[$id] = foo($k[$id], $b);
+    try { $k[$id] = foo($id, $b, $c, $d, $e); }
+    catch (Exception $e) { echo $e->getMessage()."\n"; }
+    try { $k[$id] = foo($k[$id], $b); }
+    catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
 }
 

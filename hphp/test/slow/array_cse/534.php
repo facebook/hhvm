@@ -4,11 +4,11 @@ function f(array $a = null, $e) {
   if (is_int($e) || is_string($e)) {
     $a[$e] ??= array();
     $a[$e]['foo'] = 30;
-    $x = $a[$e]['baz'];
+    try { $x = $a[$e]['baz']; } catch (Exception $e) { echo $e->getMessage()."\n"; $x = null; }
     $a[$e]['bar'] = 50;
   } else {
     $a[$e] = 30;
-    $x = $a[$e];
+    try { $x = $a[$e]; } catch (Exception $e) { echo $e->getMessage()."\n"; $x = null; }
     $a[$e] = 50;
   }
   var_dump($a, $x);
@@ -28,7 +28,7 @@ function h($x, $y) {
     $x[$y]['foo'] = 30;
     $x[$y]['bar'] = 30;
   }
-  var_dump($x[$y]['foo']);
+  try { var_dump($x[$y]['foo']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }
 
 <<__EntryPoint>>

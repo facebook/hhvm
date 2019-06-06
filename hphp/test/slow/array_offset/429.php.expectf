@@ -8,27 +8,11 @@ array(4) {
   [10]=>
   int(5)
 }
-
-Notice: Undefined index: 0 in %s/test/slow/array_offset/429.php on line 13
-string(0) ""
-
-Notice: Undefined index: 1 in %s/test/slow/array_offset/429.php on line 14
-string(0) ""
-
-Notice: Undefined index: 7 in %s/test/slow/array_offset/429.php on line 15
-string(0) ""
-
-Notice: Undefined index: 10 in %s/test/slow/array_offset/429.php on line 16
-string(0) ""
-
-Notice: Undefined index: 01 in %s/test/slow/array_offset/429.php on line 17
-string(0) ""
-
-Notice: Undefined index: 007 in %s/test/slow/array_offset/429.php on line 18
-string(0) ""
-
-Notice: Undefined index: 08 in %s/test/slow/array_offset/429.php on line 19
-string(0) ""
-
-Notice: Undefined index: 0xa in %s/test/slow/array_offset/429.php on line 20
-string(0) ""
+Undefined index: 0
+Undefined index: 1
+Undefined index: 7
+Undefined index: 10
+Undefined index: 01
+Undefined index: 007
+Undefined index: 08
+Undefined index: 0xa

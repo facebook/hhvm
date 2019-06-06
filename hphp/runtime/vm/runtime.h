@@ -49,8 +49,8 @@ void print_boolean(bool val);
 
 void raiseWarning(const StringData* sd);
 void raiseNotice(const StringData* sd);
-void raiseArrayIndexNotice(int64_t index, bool isInOut);
-void raiseArrayKeyNotice(const StringData* key, bool isInOut);
+[[noreturn]] void throwArrayIndexException(int64_t index, bool isInOut);
+[[noreturn]] void throwArrayKeyException(const StringData* key, bool isInOut);
 std::string formatParamRefMismatch(const char* fname, uint32_t index,
                                    bool funcByRef);
 void throwParamRefMismatch(const Func* func, uint32_t index);

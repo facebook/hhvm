@@ -557,8 +557,8 @@ bool canDCE(IRInstruction* inst) {
   case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseWarning:
   case RaiseNotice:
-  case RaiseArrayIndexNotice:
-  case RaiseArrayKeyNotice:
+  case ThrowArrayIndexException:
+  case ThrowArrayKeyException:
   case RaiseHackArrCompatNotice:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:

@@ -2234,16 +2234,6 @@ To string conversions:
 
   Raises a notice with the text in S0 as its message.
 
-| RaiseArrayIndexNotice<isInOut>, ND, S(Int), NF
-
-  Raises a notice that S0 is an undefined index for an array. The isInOut option
-  indicates that the access was for an inout parameter.
-
-| RaiseArrayKeyNotice<isInOut>, ND, S(StaticStr), NF
-
-  Raises a notice that S0 is an undefined key for an array. The isInOut option
-  indicates that the access was for an inout parameter.
-
 | ThrowHasThisNeedStatic, ND, S(Func), T
 
   Throws a BadMethodCallException to indicate that func was called on an object
@@ -3320,6 +3310,16 @@ fields of that struct for holding intermediate values.
 | CheckRange, D(Bool), S(Int) S(Int), NF
 
   Returns true iff S0 is in the range [0, S1).
+
+| ThrowArrayIndexException<isInOut>, ND, S(Int), T
+
+  Throws an out of bounds exception if S0 is an undefined index for an array.
+  The isInOut option indicates that the access was for an inout parameter.
+
+| ThrowArrayKeyException<isInOut>, ND, S(StaticStr), T
+
+  Throws an out of bounds exception if S0 is an undefined key for an array.
+  The isInOut option indicates that the access was for an inout parameter.
 
 | ThrowOutOfBounds, ND, S(ArrLike|Obj) S(Gen), T
 

@@ -3,6 +3,4 @@ array(1) {
   [0]=>
   int(1)
 }
-
-Notice: %s
-NULL
+%s

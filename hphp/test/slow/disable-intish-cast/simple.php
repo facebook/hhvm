@@ -8,7 +8,7 @@ function main() {
   $a["10"] = 5;
   var_dump($a);
 
-  var_dump($a[42]);
+  try { var_dump($a[42]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   var_dump($a["42"]);
 
   $b = darray(["42" => "string", 42 => "int"]);

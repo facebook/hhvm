@@ -11,7 +11,5 @@ array(3) {
 }
 int(5)
 int(1)
-
-Notice: Undefined index: 123 in %s/slow/array_offset/433.php on line %d
-string(0) ""
+Undefined index: 123
 string(1) "6"

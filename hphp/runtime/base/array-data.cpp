@@ -1117,24 +1117,22 @@ Variant ArrayData::each() {
 ///////////////////////////////////////////////////////////////////////////////
 // helpers
 
-tv_rval ArrayData::getNotFound(int64_t k) {
-  raise_notice("Undefined index: %" PRId64, k);
-  return tv_rval::dummy();
+void ArrayData::getNotFound(int64_t k) {
+  throwArrayIndexException(k, false);
 }
 
-tv_rval ArrayData::getNotFound(const StringData* k) {
-  raise_notice("Undefined index: %s", k->data());
-  return tv_rval::dummy();
+void ArrayData::getNotFound(const StringData* k) {
+  throwArrayKeyException(k, false);
 }
 
 tv_rval ArrayData::getNotFound(int64_t k, bool error) const {
-  return error && kind() != kGlobalsKind ? getNotFound(k) :
-         tv_rval::dummy();
+  if (error && kind() != kGlobalsKind) getNotFound(k);
+  return tv_rval::dummy();
 }
 
 tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
-  return error && kind() != kGlobalsKind ? getNotFound(k) :
-         tv_rval::dummy();
+  if (error && kind() != kGlobalsKind) getNotFound(k);
+  return tv_rval::dummy();
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {

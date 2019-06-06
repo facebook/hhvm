@@ -6,12 +6,8 @@ function c($x) {
   $val = $x ? a() : b();
   return $val[5]; // out of range
 }
-function main() {
-  var_dump(c(true));
-  var_dump(c(false));
-}
-
 <<__EntryPoint>>
-function main_array_002() {
-main();
+function main() {
+  try { var_dump(c(true)); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  try { var_dump(c(false)); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }

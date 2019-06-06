@@ -10,6 +10,6 @@ function bar($a, $b) {
 <<__EntryPoint>>
 function main_1309() {
 $x = foo();
-bar($x[3][4], $y);
+try { bar($x[3][4], $y); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 var_dump($x);
 }

@@ -1474,8 +1474,8 @@ struct RaiseHackArrParamNoticeData : RaiseHackArrNoticeData {
   bool isReturn;
 };
 
-struct RaiseArrayIndexNoticeData : IRExtraData {
-  explicit RaiseArrayIndexNoticeData(bool isInOut) : isInOut(isInOut) {}
+struct ThrowArrayIndexExceptionData : IRExtraData {
+  explicit ThrowArrayIndexExceptionData(bool isInOut) : isInOut(isInOut) {}
 
   std::string show() const {
     if (isInOut) return "inout";
@@ -1485,8 +1485,8 @@ struct RaiseArrayIndexNoticeData : IRExtraData {
   bool isInOut;
 };
 
-struct RaiseArrayKeyNoticeData : IRExtraData {
-  explicit RaiseArrayKeyNoticeData(bool isInOut) : isInOut(isInOut) {}
+struct ThrowArrayKeyExceptionData : IRExtraData {
+  explicit ThrowArrayKeyExceptionData(bool isInOut) : isInOut(isInOut) {}
 
   std::string show() const {
     if (isInOut) return "inout";
@@ -1627,8 +1627,8 @@ X(RaiseMissingArg,              FuncArgData);
 X(RaiseTooManyArg,              FuncArgData);
 X(ThrowParamRefMismatch,        ParamData);
 X(ThrowParamRefMismatchRange,   CheckRefsData);
-X(RaiseArrayIndexNotice,        RaiseArrayIndexNoticeData);
-X(RaiseArrayKeyNotice,          RaiseArrayKeyNoticeData);
+X(ThrowArrayIndexException,     ThrowArrayIndexExceptionData);
+X(ThrowArrayKeyException,       ThrowArrayKeyExceptionData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);

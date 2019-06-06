@@ -19,8 +19,10 @@ class A {
     if (next(&$args) === 0) {
        $args = array(5);
     }
-    var_dump($args['1']);
-    var_dump($args['hi']);
+    try { var_dump($args['1']); }
+    catch (Exception $e) { echo $e->getMessage()."\n"; }
+    try { var_dump($args['hi']); }
+    catch (Exception $e) { echo $e->getMessage()."\n"; }
     $args = $args + array(2 => 0, 3 => true, 4 => true);
      var_dump($args);
   }

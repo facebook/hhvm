@@ -69,10 +69,6 @@ array(0) {
 }
 string(1) "A"
 string(3) "two"
-
-Notice: Undefined index: 3 in %s/quick/apc.php on line %d
-NULL
-
-Notice: Undefined index: 2 in %s/quick/apc.php on line %d
-NULL
+Undefined index: 3
+Undefined index: 2
 string(5) "three"

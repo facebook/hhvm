@@ -10,9 +10,6 @@ string(21) "array element.changed"
 
 --> Remove the array element and try access again:
 bool(false)
-
-Notice: %s
-NULL
-
-Notice: %s
-string(8) ".changed"
+%s
+%s
+%s

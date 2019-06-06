@@ -35,10 +35,15 @@ class ArrayObjectGet extends ArrayObject
 // overrides only offsetGet and offsetSet
 class ArrayObjectGetSet extends ArrayObject
 {
-    public function offsetGet($offset)
-    {
-        return parent::offsetGet(str_rot13($offset));
-    }
+	public function offsetGet($offset)
+	{
+		try {
+			return parent::offsetGet(str_rot13($offset));
+		} catch (Exception $e) {
+			echo $e->getMessage()."\n";
+			return null;
+		}
+	}
 
     public function offsetSet($offset, $value)
     {

@@ -37,24 +37,22 @@ bool(true)
 int(100)
 bool(true)
 int(67)
-
-Notice: Undefined %s: 2 in %s/expressions/primary_expressions/intrinsics_list.php on line 57
-$min: 100, $max: 500, $avg: 
+Undefined index: 2
+$min: 0, $max: 100, $avg: 67
 Array
 (
     [0] => 100
     [1] => 500
 )
 bool(true)
+int(0)
+bool(true)
 int(100)
 bool(true)
-int(500)
-bool(false)
-NULL
+int(67)
 --------- test with sufficient array elements but not consecutive keys -------------
-
-Notice: Undefined %s: 1 in %s/expressions/primary_expressions/intrinsics_list.php on line 70
-$min: 0, $max: , $avg: 100
+Undefined index: 1
+$min: 0, $max: 100, $avg: 100
 Array
 (
     [0] => 0
@@ -63,8 +61,8 @@ Array
 )
 bool(true)
 int(0)
-bool(false)
-NULL
+bool(true)
+int(100)
 bool(true)
 int(100)
 --------- test with NULL rather than array -------------
@@ -80,25 +78,19 @@ Array
     [2] => 50
 )
 --------- test with non-numeric array -------------
-
-Notice: Undefined %s: 2 in %s/expressions/primary_expressions/intrinsics_list.php on line 96
-
-Notice: Undefined %s: 1 in %s/expressions/primary_expressions/intrinsics_list.php on line 96
-
-Notice: Undefined %s: 0 in %s/expressions/primary_expressions/intrinsics_list.php on line 96
-$min: , $max: , $avg: 
+Undefined index: 2
+$min: 10, $max: 30, $avg: 50
 Array
 (
     [x] => 10
     [a] => 20
     [y] => 30
 )
-bool(false)
-bool(false)
-bool(false)
+bool(true)
+bool(true)
+bool(true)
 --------- test with array element being an array -------------
-
-Notice: Undefined %s: 2 in %s/expressions/primary_expressions/intrinsics_list.php on line 107
+Undefined index: 2
 Array
 (
     [0] => 0
@@ -110,16 +102,11 @@ Array
 
 )
 bool(true)
-int(0)
+int(10)
 bool(true)
-array(2) {
-  [0]=>
-  int(100)
-  [1]=>
-  int(67)
-}
-bool(false)
-NULL
+int(30)
+bool(true)
+int(50)
 --------- test with nested lists -------------
 $min: 0, $max: 100, $avg: 67
 Array
@@ -166,3 +153,4 @@ Array
     [1] => 100
     [2] => 67
 )
+

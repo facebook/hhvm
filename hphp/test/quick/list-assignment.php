@@ -20,7 +20,10 @@ list($a, $b, $c) = f();
 var_dump($a, $b, $c);
 
 // Medium 3
-list($a, $b) = array();
+try {
+  list($a, $b) = array();
+  var_dump($a, $b);
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
 var_dump($a, $b);
 
 // Hard

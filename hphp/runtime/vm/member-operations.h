@@ -178,9 +178,9 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 
 [[noreturn]] void unknownBaseType(DataType);
 
-void raise_inout_undefined_index(TypedValue);
-void raise_inout_undefined_index(int64_t i);
-void raise_inout_undefined_index(const StringData* sd);
+[[noreturn]] void throw_inout_undefined_index(TypedValue);
+[[noreturn]] void throw_inout_undefined_index(int64_t i);
+[[noreturn]] void throw_inout_undefined_index(const StringData* sd);
 
 namespace detail {
 
@@ -279,11 +279,10 @@ inline tv_rval ElemArray(ArrayData* base, key_type<keyType> key) {
   if (UNLIKELY(!result)) {
     if (mode == MOpMode::Warn) {
       auto const scratch = initScratchKey(key);
-      raise_notice(Strings::UNDEFINED_INDEX,
-                   tvAsCVarRef(&scratch).toString().data());
+      throwArrayKeyException(tvAsCVarRef(&scratch).toString().get(), false);
     }
     if (mode == MOpMode::InOut) {
-      raise_inout_undefined_index(initScratchKey(key));
+      throw_inout_undefined_index(initScratchKey(key));
     }
     return ElemEmptyish();
   }
@@ -706,8 +705,7 @@ inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
 
   if (!defined) {
     auto scratchKey = initScratchKey(key);
-    raise_notice(Strings::UNDEFINED_INDEX,
-                 tvAsCVarRef(&scratchKey).toString().data());
+    throwArrayKeyException(tvAsCVarRef(&scratchKey).toString().get(), false);
   }
 
   return lval;
@@ -885,8 +883,7 @@ inline tv_lval ElemDEmptyish(tv_lval base,
 
   auto const result = asArrRef(base).lvalAt(cellAsCVarRef(scratchKey));
   if (mode == MOpMode::Warn) {
-    raise_notice(Strings::UNDEFINED_INDEX,
-                 tvAsCVarRef(&scratchKey).toString().data());
+    throwArrayKeyException(tvAsCVarRef(&scratchKey).toString().get(), false);
   }
   return result;
 }
@@ -2078,8 +2075,7 @@ inline tv_lval SetOpElemEmptyish(SetOpOp op, tv_lval base,
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
   if (MoreWarnings) {
-    raise_notice(Strings::UNDEFINED_INDEX,
-                 tvAsCVarRef(&key).toString().data());
+    throwArrayKeyException(tvAsCVarRef(&key).toString().get(), false);
   }
   setopBody(lval, op, rhs);
   return lval;
@@ -2365,8 +2361,7 @@ inline Cell IncDecElemEmptyish(
   cellMove(make_tv<KindOfArray>(staticEmptyArray()), base);
   auto const lval = asArrRef(base).lvalAt(tvAsCVarRef(&key));
   if (MoreWarnings) {
-    raise_notice(Strings::UNDEFINED_INDEX,
-                 tvAsCVarRef(&key).toString().data());
+    throwArrayKeyException(tvAsCVarRef(&key).toString().get(), false);
   }
   assertx(type(lval) == KindOfNull);
   return IncDecBody(op, lval);

@@ -7,9 +7,9 @@ $ar = array('a'=>0, 1, 2, 3);
 $ar = new ArrayObject($ar);
 
 unset($ar['a']);
-unset($ar[12]);
-unset($ar['c']);
-$ar->offsetUnset('c');
+try { unset($ar[12]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { unset($ar['c']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { $ar->offsetUnset('c'); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 
 $obj = new stdClass();
@@ -18,7 +18,7 @@ $obj->two = 2;
 $ar = new ArrayObject($obj);
 
 unset($ar['one']);
-unset($ar[12]);
-unset($ar['c']);
-$ar->offsetUnset('c');
+try { unset($ar[12]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { unset($ar['c']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
+try { $ar->offsetUnset('c'); } catch (Exception $e) { echo $e->getMessage()."\n"; }
 }

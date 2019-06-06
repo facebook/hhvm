@@ -3,12 +3,8 @@ int(2)
 int(3)
 int(3)
 int(2)
-
-Notice: Undefined index: 1 in %s/test/slow/array/240.php on line 22
-NULL
-
-Notice: Undefined index: hi in %s/test/slow/array/240.php on line 23
-NULL
+Undefined index: 1
+Undefined index: hi
 array(4) {
   [0]=>
   int(5)

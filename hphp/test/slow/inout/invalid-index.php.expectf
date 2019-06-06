@@ -1,46 +1,26 @@
-
-Notice: Undefined index on inout parameter: 10 in %s/invalid-index.php on line 7
-NULL
-
-Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 8
-NULL
+Undefined index on inout parameter: 10
+Undefined index on inout parameter: banana
 int(5)
-
-Notice: Undefined index on inout parameter: 50 in %s/invalid-index.php on line 12
-string(85) "Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays"
-
-Notice: Undefined index on inout parameter: 10 in %s/invalid-index.php on line 20
-NULL
-
-Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 28
-NULL
+string(38) "Undefined index on inout parameter: 50"
+Caught: Undefined index on inout parameter: 10
+Caught: Undefined index on inout parameter: banana
 int(5)
-
-Notice: Undefined index on inout parameter: 50 in %s/invalid-index.php on line 28
-Caught: Parameters marked inout must be contained in locals, vecs, dicts, keysets, and arrays
-array(2) {
+Caught: Undefined index on inout parameter: 50
+array(1) {
   ["apple"]=>
-  array(2) {
+  array(1) {
     ["orange"]=>
     int(12)
-    ["banana"]=>
-    int(12)
   }
-  [10]=>
-  int(12)
 }
 Caught: Out of bounds dict access: invalid index 10
-
-Notice: Undefined index on inout parameter: banana in %s/invalid-index.php on line 28
-NULL
+Caught: Undefined index on inout parameter: banana
 int(5)
 Caught: Out of bounds dict access: invalid index 50
 dict(1) {
   ["apple"]=>
-  array(2) {
+  array(1) {
     ["orange"]=>
-    int(12)
-    ["banana"]=>
     int(12)
   }
 }

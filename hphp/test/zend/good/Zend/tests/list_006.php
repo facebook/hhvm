@@ -1,4 +1,6 @@
 <?php
 <<__EntryPoint>> function main() {
-list($a, list($b, list(list($d)))) = array();
+try {
+  list($a, list($b, list(list($d)))) = array();
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
 }

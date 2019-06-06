@@ -39,7 +39,7 @@ meal 2 => dinner
  --> MealIterator::current (0)
  --> MealIterator::key (0)
 
-Top level 1: 
+Top level 1:
 meal 0 => breakfast
      --> MealIterator::rewind (0)
      --> MealIterator::valid (0)
@@ -59,7 +59,6 @@ meal 0 => breakfast
      --> MealIterator::next (2)
      --> MealIterator::valid (3)
  --> MealIterator::next (3)
-
-Notice: %s
+%s
  --> MealIterator::valid (4)
 ===DONE===

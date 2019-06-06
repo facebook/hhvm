@@ -3,7 +3,7 @@
 
 function test($a, $k) {
   echo "=============== get ================================\n";
-  var_dump($a[$k]);
+  try { var_dump($a[$k]); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
   var_dump(isset($a[$k]));
   echo "=============== akey-exists=========================\n";
@@ -19,7 +19,7 @@ function test($a, $k) {
 
 function test_const_key($a) {
   echo "=============== get ================================\n";
-  var_dump($a['2']);
+  try { var_dump($a['2']); } catch (Exception $e) { echo $e->getMessage()."\n"; }
   echo "=============== isset===============================\n";
   var_dump(isset($a['2']));
   echo "=============== akey-exists=========================\n";

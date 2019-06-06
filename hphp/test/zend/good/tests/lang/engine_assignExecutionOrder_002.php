@@ -74,12 +74,17 @@ echo "$r $s $t $u $v $w $x\n";
 
 
 // expect y and z to be undefined
-list($y,$z) = array();
-echo "Y=$y,Z=$z\n";
+try {
+  list($y,$z) = array();
+  echo "Y=$y,Z=$z\n";
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
 
 // expect h to be defined and be 10
-list($aa,$bb) = array(10);
-echo "AA=$aa\n";
+try {
+  list($aa,$bb) = array(10);
+  echo "AA=$aa\n";
+} catch (Exception $e) { echo $e->getMessage()."\n"; }
+
 
 // expect cc and dd to be 10 and 30
 list($cc,,$dd) = array(10,20,30,40);

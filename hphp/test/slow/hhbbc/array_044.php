@@ -9,12 +9,11 @@ function bar() {
   $x['a'] = new C;
   return $x['nothere'];
 }
-function main() {
-  $x = bar();
-  if ($x) $x->heh();
-}
-
 <<__EntryPoint>>
-function main_array_044() {
-main();
+function main() {
+  try { $x = bar(); } catch (Exception $e) {
+    echo $e->getMessage()."\n";
+    $x = null;
+  }
+  if ($x) $x->heh();
 }

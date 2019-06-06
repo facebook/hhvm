@@ -3415,7 +3415,6 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
    * aliased *)
   let lower_fq_name =
     String.lowercase (Hhbc_id.Function.to_raw_string fq_id) in
-  let hh_enabled = Emit_env.is_hh_syntax_enabled () in
   match lower_fq_name, args with
   | id, _ when id = SN.SpecialFunctions.echo ->
     let instrs = gather @@ List.mapi args begin fun i arg ->
@@ -3427,7 +3426,7 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
          ] end in
     Some instrs
 
-  | "hh\\invariant", e::rest when hh_enabled ->
+  | "hh\\invariant", e::rest ->
     let l = Label.next_regular () in
     let annot = (pos, snd annot) in
     let expr_id = annot, A.Id (pos, "\\hh\\invariant_violation") in

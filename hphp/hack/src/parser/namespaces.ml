@@ -69,6 +69,9 @@ let autoimport_classes = [
   Global, "ExternalThreadEventWaitHandle";
   Global, "Shapes";
   Global, "TypeStructureKind";
+  HH, "ObjprofObjectStats";
+  HH, "ObjprofPathsStats";
+  HH, "ObjprofStringStats";
 ]
 let autoimport_funcs =   [
   Global, "fun";
@@ -84,11 +87,11 @@ let autoimport_funcs =   [
   Global, "asio_get_running_in_context";
   Global, "asio_get_running";
   Global, "xenon_get_data";
-  Global, "thread_memory_stats";
-  Global, "thread_mark_stack";
-  Global, "objprof_get_strings";
-  Global, "objprof_get_data";
-  Global, "objprof_get_paths";
+  HH, "thread_memory_stats";
+  HH, "thread_mark_stack";
+  HH, "objprof_get_strings";
+  HH, "objprof_get_data";
+  HH, "objprof_get_paths";
   HH, "heapgraph_create";
   HH, "heapgraph_stats";
   HH, "heapgraph_foreach_node";
@@ -100,7 +103,7 @@ let autoimport_funcs =   [
   HH, "heapgraph_edge";
   HH, "heapgraph_node_in_edges";
   HH, "heapgraph_node_out_edges";
-  Global, "server_warmup_status";
+  HH, "server_warmup_status";
   Global, "dict";
   Global, "vec";
   Global, "keyset";

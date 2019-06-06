@@ -8,12 +8,18 @@
  *
  */
 
-//////////////////////////////////////////////////////////////////
-// Objprof
 namespace {
+
 const int OBJPROF_FLAGS_DEFAULT = 1;
 const int OBJPROF_FLAGS_USER_TYPES_ONLY = 2;
 const int OBJPROF_FLAGS_PER_PROPERTY = 4;
+
+}
+
+namespace HH {
+
+//////////////////////////////////////////////////////////////////
+// Objprof
 
 type ObjprofPathsStats = shape(
   'refs' => int,
@@ -38,22 +44,18 @@ function thread_memory_stats(): darray<string, int>; // auto-imported from HH na
 function thread_mark_stack(): void; // auto-imported from HH namespace
 
 function objprof_get_data(
-  int $flags = OBJPROF_FLAGS_DEFAULT,
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = varray[],
 ): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
 function objprof_get_paths(
-  int $flags = OBJPROF_FLAGS_DEFAULT,
+  int $flags = \OBJPROF_FLAGS_DEFAULT,
   varray<string> $exclude_list = varray[],
 ): darray<string, ObjprofObjectStats>; // auto-imported from HH namespace
 
 function objprof_get_strings(
   int $min_dup,
 ): darray<string, ObjprofStringStats>; // auto-imported from HH namespace
-
-}
-
-namespace HH {
 
 //////////////////////////////////////////////////////////////////
 // Heap graph

@@ -1,6 +1,6 @@
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation  
+ * Description: Sort an array by key in reverse order, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 /*
@@ -12,7 +12,7 @@
 echo "*** Testing krsort() : object functionality ***\n";
 
 // class declaration for integer objects
-class Integer
+class MyInteger
 {
   public $class_value;
   // initializing object member value
@@ -22,7 +22,7 @@ class Integer
 }
 
 // class declaration for string objects
-class String
+class MyString
 {
   public $class_value;
   // initializing object member value
@@ -38,18 +38,18 @@ class String
 }
 
 // array of integer objects with different key values
-$unsorted_int_obj = array ( 
-  10 => new Integer(11), 20 =>  new Integer(66),
-  3 => new Integer(23), 4 => new Integer(-5),
-  50 => new Integer(0.001), 6 => new Integer(0)
+$unsorted_int_obj = array (
+  10 => new MyInteger(11), 20 =>  new MyInteger(66),
+  3 => new MyInteger(23), 4 => new MyInteger(-5),
+  50 => new MyInteger(0.001), 6 => new MyInteger(0)
 );
 
 // array of string objects with different key values
-$unsorted_str_obj = array ( 
-  "axx" => new String("axx"), "t" => new String("t"),
-  "w" => new String("w"), "py" => new String("py"),
-  "apple" => new String("apple"), "Orange" => new String("Orange"),
-  "Lemon" => new String("Lemon"), "aPPle" => new String("aPPle")
+$unsorted_str_obj = array (
+  "axx" => new MyString("axx"), "t" => new MyString("t"),
+  "w" => new MyString("w"), "py" => new MyString("py"),
+  "apple" => new MyString("apple"), "Orange" => new MyString("Orange"),
+  "Lemon" => new MyString("Lemon"), "aPPle" => new MyString("aPPle")
 );
 
 

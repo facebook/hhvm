@@ -10,7 +10,7 @@
 */
 
 // class declaration for integer objects
-class Integer
+class MyInteger
 {
   public $class_value;
   // initializing object member value
@@ -21,7 +21,7 @@ class Integer
 }
 
 // class declaration for string objects
-class String
+class MyString
 {
   public $class_value;
   // initializing object member value
@@ -40,17 +40,17 @@ echo "*** Testing ksort() : object functionality ***\n";
 
 // array of integer objects
 $unsorted_int_obj = array (
-  11 => new Integer(11), 66 =>  new Integer(66),
-  23 => new Integer(23), -5 => new Integer(-5),
-  1 => new Integer(0.001), 0 => new Integer(0)
+  11 => new MyInteger(11), 66 =>  new MyInteger(66),
+  23 => new MyInteger(23), -5 => new MyInteger(-5),
+  1 => new MyInteger(0.001), 0 => new MyInteger(0)
 );
 
 // array of string objects
 $unsorted_str_obj = array (
-  "axx" => new String("axx"), "t" => new String("t"),
-  "w" => new String("w"), "py" => new String("py"),
-  "apple" => new String("apple"), "Orange" => new String("Orange"),
-  "Lemon" => new String("Lemon"), "aPPle" => new String("aPPle")
+  "axx" => new MyString("axx"), "t" => new MyString("t"),
+  "w" => new MyString("w"), "py" => new MyString("py"),
+  "apple" => new MyString("apple"), "Orange" => new MyString("Orange"),
+  "Lemon" => new MyString("Lemon"), "aPPle" => new MyString("aPPle")
 );
 echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --\n";
 

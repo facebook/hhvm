@@ -192,12 +192,12 @@ let validate_class_name ns (p, class_name) =
   (* per Parser::checkClassDeclName:
      global names are always reserved in any namespace.
      hh_reserved names are checked either if
-     - containing file is hack file and class is in global namespace
+     - class is in global namespace
      - class is in HH namespace *)
   let is_special_class =
     String_utils.is_substring "$" class_name in
   let check_hh_name =
-    (Emit_env.is_hh_syntax_enabled () && is_global_namespace ns) ||
+    is_global_namespace ns ||
     is_hh_namespace ns ||
     Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options in
   let name = SU.strip_ns class_name in

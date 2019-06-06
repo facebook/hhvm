@@ -8,59 +8,58 @@ string(4) "herp"
 int(123)
 int(123)
 float(1.23)
-object(string) (0) {
-}
-object(int) (0) {
-}
-object(float) (0) {
-}
-object(bool) (0) {
-}
-object(resource) (0) {
-}
-object(arraykey) (0) {
-}
-object(num) (0) {
-}
+string(3) "123"
+int(123)
+float(1.23)
+bool(true)
+resource(1) of type (stream)
+string(4) "herp"
+int(123)
+float(1.23)
 --- INCORRECT USAGE ---
-ERROR (2): Argument 1 to test_hh_string() must be of type @string, string given
- ==> object(string) (0) {
+ERROR (2): Argument 1 to test_hh_string() must be of type @string, mystring given
+ ==> object(mystring) (0) {
 }
-ERROR (2): Argument 1 to test_hh_int() must be of type @int, int given
- ==> object(int) (0) {
+ERROR (2): Argument 1 to test_hh_int() must be of type @int, myint given
+ ==> object(myint) (0) {
 }
-ERROR (2): Argument 1 to test_hh_float() must be of type @float, float given
- ==> object(float) (0) {
+ERROR (2): Argument 1 to test_hh_float() must be of type @float, myfloat given
+ ==> object(myfloat) (0) {
 }
-ERROR (2): Argument 1 to test_hh_bool() must be of type @bool, bool given
- ==> object(bool) (0) {
+ERROR (2): Argument 1 to test_hh_bool() must be of type @bool, mybool given
+ ==> object(mybool) (0) {
 }
-ERROR (2): Argument 1 to test_hh_resource() must be of type @resource, resource given
- ==> object(resource) (0) {
+ERROR (2): Argument 1 to test_hh_resource() must be of type @resource, myresource given
+ ==> object(myresource) (0) {
 }
-ERROR (2): Argument 1 to test_hh_arraykey() must be of type @arraykey, arraykey given
- ==> object(arraykey) (0) {
+ERROR (2): Argument 1 to test_hh_arraykey() must be of type @arraykey, myarraykey given
+ ==> object(myarraykey) (0) {
 }
 ERROR (2): Argument 1 to test_hh_arraykey() must be of type @arraykey, float given
  ==> float(1.23)
-ERROR (2): Argument 1 to test_hh_num() must be of type @num, num given
- ==> object(num) (0) {
+ERROR (2): Argument 1 to test_hh_num() must be of type @num, mynum given
+ ==> object(mynum) (0) {
 }
 ERROR (2): Argument 1 to test_hh_num() must be of type @num, string given
  ==> string(3) "123"
-ERROR (2): Argument 1 to test_string() must be of type @string, string given
- ==> string(3) "123"
-ERROR (2): Argument 1 to test_int() must be of type @int, int given
- ==> int(123)
-ERROR (2): Argument 1 to test_float() must be of type @float, float given
- ==> float(1.23)
-ERROR (2): Argument 1 to test_bool() must be of type @bool, bool given
- ==> bool(true)
-ERROR (2): Argument 1 to test_resource() must be of type @resource, File given
- ==> resource(1) of type (stream)
-ERROR (2): Argument 1 to test_arraykey() must be of type @arraykey, string given
- ==> string(4) "herp"
-ERROR (2): Argument 1 to test_arraykey() must be of type @arraykey, int given
- ==> int(123)
-ERROR (2): Argument 1 to test_num() must be of type @num, float given
- ==> float(1.23)
+ERROR (2): Argument 1 to test_string() must be of type @string, mystring given
+ ==> object(mystring) (0) {
+}
+ERROR (2): Argument 1 to test_int() must be of type @int, myint given
+ ==> object(myint) (0) {
+}
+ERROR (2): Argument 1 to test_float() must be of type @float, myfloat given
+ ==> object(myfloat) (0) {
+}
+ERROR (2): Argument 1 to test_bool() must be of type @bool, mybool given
+ ==> object(mybool) (0) {
+}
+ERROR (2): Argument 1 to test_resource() must be of type @resource, myresource given
+ ==> object(myresource) (0) {
+}
+ERROR (2): Argument 1 to test_arraykey() must be of type @arraykey, myarraykey given
+ ==> object(myarraykey) (0) {
+}
+ERROR (2): Argument 1 to test_num() must be of type @num, mynum given
+ ==> object(mynum) (0) {
+}

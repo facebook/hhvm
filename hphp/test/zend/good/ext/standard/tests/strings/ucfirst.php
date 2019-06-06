@@ -53,12 +53,12 @@ echo "\n--- Testing objects ---\n";
         to string" by default when an object is passed instead of string:
 The error can be  avoided by choosing the __toString magix method as follows: */
 
-class string {
+class mystring {
   function __toString() {
     return "hello, world";
   }
 }
-$obj_string = new string;
+$obj_string = new mystring;
 
 var_dump(ucfirst("$obj_string"));
 

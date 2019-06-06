@@ -71,13 +71,13 @@ echo "-- Passing objects as string and needle --\n";
 converted to string" by default when an object is passed instead of string:
 The error can be  avoided by choosing the __toString magix method as follows: */
 
-class string
+class mystring
 {
   function __toString() {
     return "Hello, world";
   }
 }
-$obj_string = new string;
+$obj_string = new mystring;
 
 class needle
 {

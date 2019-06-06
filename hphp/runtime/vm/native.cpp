@@ -479,12 +479,6 @@ void getFunctionPointers(const NativeFunctionInfo& info, int nativeAttrs,
     bif = unimplementedWrapper;
     return;
   }
-  if (nativeAttrs & AttrActRec) {
-    // NativeFunction with the ArFunction signature
-    bif = reinterpret_cast<ArFunction>(nif);
-    nif = nullptr;
-    return;
-  }
 
   auto const isMethod = info.sig.args.size() &&
       ((info.sig.args[0] == NativeSig::Type::This) ||
@@ -546,9 +540,6 @@ const char* kNeedStaticContextMessage =
   "Static class functions must take a Class* as their first argument";
 const char* kNeedObjectContextMessage =
   "Instance methods must take an ObjectData* as their first argument";
-const char* kInvalidActRecFuncMessage =
-  "Functions declared as ActRec must return a TypedValue* and take an ActRec* "
-  "as their sole argument";
 
 static const StaticString
   s_native("__Native"),
@@ -558,18 +549,6 @@ const char* checkTypeFunc(const NativeSig& sig,
                           const TypeConstraint& retType,
                           const FuncEmitter* func) {
   using T = NativeSig::Type;
-
-  auto dummy = HPHP::AttrNone;
-  auto nativeAttributes = func->parseNativeAttributes(dummy);
-
-  if (nativeAttributes & Native::AttrActRec) {
-    return
-      sig.ret == T::ARReturn &&
-      sig.args.size() == 1 &&
-      sig.args[0] == T::VarArgs
-        ? nullptr
-        : kInvalidActRecFuncMessage;
-  }
 
   if (!tcCheckNative(retType, sig.ret)) return kInvalidReturnTypeMessage;
 
@@ -685,9 +664,7 @@ static std::string nativeTypeString(NativeSig::Type ty) {
   case T::OutputArg:  return "mixed&";
   case T::Mixed:      return "mixed";
   case T::MixedTV:    return "mixed";
-  case T::ARReturn:   return "[TypedValue*]";
   case T::MixedRef:   return "mixed&";
-  case T::VarArgs:    return "...";
   case T::This:       return "this";
   case T::Class:      return "class";
   case T::Void:       return "void";

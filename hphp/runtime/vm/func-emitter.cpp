@@ -465,18 +465,14 @@ void FuncEmitter::setEHTabIsSorted() {
  * to hook internal (C++) implementation of funcs/methods
  *
  * The Native attribute may have the following sub-options
- *  "ActRec": The internal function takes a fixed prototype
- *      TypedValue* funcname(ActRec *ar);
- *      Note that systemlib declaration must still be hack annotated
  *  "NoFCallBuiltin": Prevent FCallBuiltin optimization
  *      Effectively forces functions to generate an ActRec
  *  "NoInjection": Do not include this frame in backtraces
  *
- *  e.g.   <<__Native("ActRec")>> function foo():mixed;
+ *  e.g.   <<__Native("NoFCallBuiltin")>> function foo():mixed;
  */
 static const StaticString
   s_native("__Native"),
-  s_actrec("ActRec"),
   s_nofcallbuiltin("NoFCallBuiltin"),
   s_noinjection("NoInjection"),
   s_opcodeimpl("OpCodeImpl");
@@ -492,10 +488,7 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
     Variant userAttrVal = it.second();
     if (userAttrVal.isString()) {
       String userAttrStrVal = userAttrVal.toString();
-      if (userAttrStrVal.get()->isame(s_actrec.get())) {
-        ret |= Native::AttrActRec;
-        attrs_ |= AttrMayUseVV;
-      } else if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
+      if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
         attrs_ |= AttrNoFCallBuiltin;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;

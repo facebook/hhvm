@@ -19,7 +19,6 @@
 
 #include <map>
 
-#include "hphp/runtime/base/actrec-args.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file.h"
 #include "hphp/runtime/base/file-util.h"

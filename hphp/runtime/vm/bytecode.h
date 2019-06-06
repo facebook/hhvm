@@ -259,16 +259,6 @@ inline ActRec* arAtOffset(const ActRec* ar, int32_t offset) {
 
 void frame_free_locals_no_hook(ActRec* fp);
 
-#define arReturn(a, x)                          \
-  ([&] {                                        \
-    ActRec* ar_ = (a);                          \
-    TypedValue val_;                            \
-    new (&val_) Variant(x);                     \
-    frame_free_locals_no_hook(ar_);             \
-    tvCopy(val_, *ar_->retSlot());              \
-    return ar_->retSlot();                      \
-  }())
-
 #define tvReturn(x)                                                     \
   ([&] {                                                                \
     TypedValue val_;                                                    \

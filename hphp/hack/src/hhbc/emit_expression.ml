@@ -3569,7 +3569,7 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
 
   | _ ->
     begin match args, istype_op lower_fq_name, is_isexp_op lower_fq_name with
-    | [arg_expr], _, Some h when Emit_env.is_hh_syntax_enabled () ->
+    | [arg_expr], _, Some h ->
       Some (gather [
         emit_expr env arg_expr;
         emit_is env pos h

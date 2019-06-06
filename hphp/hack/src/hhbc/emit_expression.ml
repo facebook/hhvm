@@ -22,7 +22,6 @@ module Opts = Hhbc_options
 
 let can_inline_gen_functions () =
   let opts = !Opts.compiler_options in
-  Emit_env.is_hh_syntax_enabled () &&
   (Opts.enable_hiphop_syntax opts) &&
   not (Opts.jit_enable_rename_function opts)
 

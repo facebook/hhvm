@@ -3492,7 +3492,7 @@ let lower env ~source_text ~script comments : result =
   let ast = runP pScript script env in
   let ast =
     if env.elaborate_namespaces
-    then Namespaces.elaborate_toplevel_defs ~autoimport:true env.parser_options ast
+    then Namespaces.elaborate_toplevel_defs env.parser_options ast
     else ast
   in
   let ast = elaborate_halt_compiler ast env source_text in

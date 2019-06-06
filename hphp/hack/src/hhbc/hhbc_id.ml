@@ -13,7 +13,7 @@ module SU = Hhbc_string_utils
 
 let elaborate_id ns kind id =
   let was_renamed, fully_qualified_id =
-    Namespaces.elaborate_id_impl ~autoimport:true ns kind (snd id) in
+    Namespaces.elaborate_id_impl ns kind (snd id) in
   let stripped_fully_qualified_id = SU.strip_global_ns fully_qualified_id in
   let clean_id = SU.strip_ns fully_qualified_id in
   let need_fallback =

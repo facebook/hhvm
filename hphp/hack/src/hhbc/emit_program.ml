@@ -73,7 +73,6 @@ let from_ast ~is_hh_file ?(is_js_file = false) ~is_evaled ~for_debugger_eval ~po
   Utils.try_finally
   ~f:begin fun () ->
     try
-      Emit_env.set_is_hh_file is_hh_file;
       Emit_env.set_is_js_file is_js_file;
       (* Convert closures to top-level classes;
        * also hoist inner classes and functions *)

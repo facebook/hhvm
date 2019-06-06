@@ -64,9 +64,7 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
   | T.Using { T.us_block = block; _ } ->
     collect_valid_target_labels_for_block_aux is_hh_file acc block
   | T.Switch (_, cl) ->
-    if is_hh_file
-    then collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl
-    else acc
+    collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl
 
 and collect_valid_target_labels_for_block_aux is_hh_file acc block =
   List.fold_left block ~init:acc ~f:(collect_valid_target_labels_aux is_hh_file)

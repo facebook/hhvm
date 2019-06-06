@@ -1674,30 +1674,6 @@ inline void raiseIncompat(const PreClass* implementor,
               imeth->cls()->preClass()->name()->data(), name);
 }
 
-static bool checkTypeConstraint(const PreClass* implCls, const Class* iface,
-                                TypeConstraint tc, TypeConstraint itc) {
-  if (!RuntimeOption::CheckParamTypeInvariance) return true;
-
-  const StringData* iSelf;
-  const StringData* iParent;
-  if (isTrait(iface)) {
-    iSelf = implCls->name();
-    iParent = implCls->parent();
-  } else {
-    iSelf = iface->name();
-    iParent = iface->parent() ? iface->parent()->name() : nullptr;
-  }
-
-  if (tc.isExtended() || itc.isExtended()) return true;
-
-  if (tc.isSelf())     tc = TypeConstraint { implCls->name(), tc.flags() };
-  if (tc.isParent())   tc = TypeConstraint { implCls->parent(), tc.flags() };
-  if (itc.isSelf())   itc = TypeConstraint { iSelf, itc.flags() };
-  if (itc.isParent()) itc = TypeConstraint { iParent, itc.flags() };
-
-  return tc.compat(itc);
-}
-
 inline void checkRefCompat(const char* kind, const Func* self,
                            const Func* inherit) {
   // Shadowing is okay, if we inherit a private method we can't access it
@@ -1808,14 +1784,6 @@ void checkDeclarationCompat(const PreClass* preClass,
         if (!p.userType && ip.typeConstraint.isTypeConstant()) {
           raiseIncompat(preClass, imeth);
         }
-
-        if (!checkTypeConstraint(preClass, imeth->cls(),
-                                 p.typeConstraint, ip.typeConstraint)) {
-          if (!ip.typeConstraint.isTypeVar() &&
-              !ip.typeConstraint.isTypeConstant()) {
-            raiseIncompat(preClass, imeth);
-          }
-        }
       }
       if (!iparams[i].hasDefaultValue()) {
         // The leftmost of imeth's contiguous trailing optional parameters
@@ -1831,19 +1799,6 @@ void checkDeclarationCompat(const PreClass* preClass,
       if (imeth->byRef(iparams.size() - 1) !=
           func->byRef(params.size() - 1)) {
         raiseIncompat(preClass, imeth);
-      }
-
-      // To be compatible with a variadic interface, params from the
-      // variadic onwards must have a compatible typehint
-      auto const& ivarConstraint = iparams[iparams.size() - 1].typeConstraint;
-      if (!ivarConstraint.isTypeVar()) {
-        for (; i < func->numParams(); ++i) {
-          auto const& p = params[i];
-          if (!checkTypeConstraint(preClass, imeth->cls(),
-                                   p.typeConstraint, ivarConstraint)) {
-            raiseIncompat(preClass, imeth);
-          }
-        }
       }
     }
   }

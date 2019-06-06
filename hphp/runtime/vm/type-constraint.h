@@ -365,13 +365,6 @@ struct TypeConstraint {
   EquivalentResult equivalentForProp(const TypeConstraint& other) const;
 
   /*
-   * Returns: whether two TypeConstraints are compatible, in the sense
-   * required for PHP inheritance where a method with parameter
-   * typehints is overridden.
-   */
-  bool compat(const TypeConstraint& other) const;
-
-  /*
    * Normal check if this type-constraint is compatible with the given value
    * (using the given context). This can invoke the autoloader and is always
    * exact. This should not be used for property type-hints (which behave

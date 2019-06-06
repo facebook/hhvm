@@ -504,7 +504,6 @@ struct RuntimeOption {
   static bool EnableShortTags;
   static bool EnableXHP;
   static bool EnablePHP;
-  static bool CheckParamTypeInvariance;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;

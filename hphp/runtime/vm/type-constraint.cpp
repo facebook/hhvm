@@ -44,13 +44,7 @@ TRACE_SET_MOD(runtime);
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s___invoke("__invoke"),
-  s_array{"array"},
-  s_varray{"HH\\varray"},
-  s_darray{"HH\\darray"},
-  s_varray_or_darray{"HH\\varray_or_darray"},
-  s_vec{"HH\\vec"},
-  s_dict{"HH\\dict"};
+const StaticString s___invoke("__invoke");
 
 void TypeConstraint::init() {
   if (m_typeName == nullptr || isTypeVar() || isTypeConstant()) {
@@ -169,46 +163,6 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
     if (str) folly::format(&name, " ({})", str);
   }
   return name;
-}
-
-bool TypeConstraint::compat(const TypeConstraint& other) const {
-  if (other.isExtended() || isExtended()) {
-    /*
-     * Rely on the ahead of time typechecker---checking here can
-     * make it harder to convert a base class or interface to <?hh,
-     * because derived classes that are still <?php would all need
-     * to be modified.
-     */
-    return true;
-  }
-
-  if (m_typeName == other.m_typeName) {
-    return true;
-  }
-
-  if (m_typeName && other.m_typeName) {
-    if (m_typeName->isame(other.m_typeName)) {
-      return true;
-    }
-
-    auto const is_array = [](const StringData* str) {
-      return str->isame(s_array.get()) ||
-             str->isame(s_varray.get()) ||
-             str->isame(s_darray.get()) ||
-             str->isame(s_varray_or_darray.get());
-    };
-    if (is_array(m_typeName) && is_array(other.m_typeName)) {
-      return true;
-    }
-
-    const Class* cls = Unit::lookupClass(m_typeName);
-    const Class* otherCls = Unit::lookupClass(other.m_typeName);
-
-    return cls && otherCls && (isHHType() ? otherCls->classof(cls)
-                                          : cls == otherCls);
-  }
-
-  return false;
 }
 
 namespace {

@@ -491,7 +491,6 @@ bool RuntimeOption::EnableZendIniCompat = true;
 bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
-bool RuntimeOption::CheckParamTypeInvariance = true;
 bool RuntimeOption::DumpPreciseProfData = true;
 bool RuntimeOption::EnablePocketUniverses = false;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
@@ -1694,9 +1693,6 @@ void RuntimeOption::Load(
     Config::Bind(EvalInitialStaticStringTableSize, ini, config,
                  "Eval.InitialStaticStringTableSize",
                  EvalInitialStaticStringTableSize);
-    Config::Bind(CheckParamTypeInvariance, ini, config,
-                 "Eval.CheckParamTypeInvariance",
-                 !EnableHipHopSyntax);
 
     static std::string jitSerdesMode;
     Config::Bind(jitSerdesMode, ini, config, "Eval.JitSerdesMode", "Off");

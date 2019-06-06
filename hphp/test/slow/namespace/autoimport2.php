@@ -4,10 +4,10 @@ namespace AutoimportTest;
 
 include 'autoimport_defs.inc';
 
-class ContainerExt extends Container {}
+class TraversableExt extends Traversable {}
 
-\var_dump(Container::class);
+\var_dump(Traversable::class);
 
-$a = new ContainerExt;
+$a = new TraversableExt;
 \var_dump(\get_class($a));
 \var_dump(\get_parent_class($a));

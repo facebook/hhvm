@@ -3491,12 +3491,8 @@ let elaborate_halt_compiler ast env source_text  =
 let lower env ~source_text ~script comments : result =
   let ast = runP pScript script env in
   let ast =
-    let autoimport =
-      env.is_hh_file ||
-      ParserOptions.enable_hh_syntax_for_hhvm env.parser_options
-    in
     if env.elaborate_namespaces
-    then Namespaces.elaborate_toplevel_defs ~autoimport env.parser_options ast
+    then Namespaces.elaborate_toplevel_defs ~autoimport:true env.parser_options ast
     else ast
   in
   let ast = elaborate_halt_compiler ast env source_text in

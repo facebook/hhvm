@@ -1,6 +1,1 @@
-string(12) "HH\Container"
-string(27) "AutoimportTest\ContainerExt"
-string(24) "AutoimportTest\Container"
-string(14) "HH\Traversable"
-string(29) "AutoimportTest\TraversableExt"
-string(26) "AutoimportTest\Traversable"
+Fatal error: unknown class Container in %s/test/slow/namespace/autoimport.php on line 7

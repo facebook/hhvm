@@ -332,7 +332,7 @@ translate(TransArgs args, FPInvOffset spOff,
   INC_TPC(translate);
   assertx(args.kind != TransKind::Invalid);
 
-  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return folly::none;
+  if (!tc::shouldTranslate(args.sk, args.kind)) return folly::none;
 
   Timer timer(Timer::mcg_translate);
   WorkloadStats guard(WorkloadStats::InTrans);
@@ -424,7 +424,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   }
 
   LeaseHolder writer(args.sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(args.sk.func(), kind())) {
+  if (!writer || !tc::shouldTranslate(args.sk, kind())) {
     return nullptr;
   }
 

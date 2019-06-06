@@ -153,10 +153,10 @@ TCA getTranslation(TransArgs args) {
   args.kind = tc::profileFunc(args.sk.func()) ?
     TransKind::Profile : TransKind::Live;
 
-  if (!tc::shouldTranslate(args.sk.func(), args.kind)) return nullptr;
+  if (!tc::shouldTranslate(args.sk, args.kind)) return nullptr;
 
   LeaseHolder writer(sk.func(), args.kind);
-  if (!writer || !tc::shouldTranslate(sk.func(), args.kind)) return nullptr;
+  if (!writer || !tc::shouldTranslate(sk, args.kind)) return nullptr;
 
   tc::createSrcRec(sk, liveSpOff());
 

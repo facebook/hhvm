@@ -46,6 +46,8 @@
 #include "hphp/util/process.h"
 #include "hphp/util/trace.h"
 
+#include <tbb/concurrent_hash_map.h>
+
 #include <atomic>
 
 TRACE_SET_MOD(mcg);
@@ -108,11 +110,17 @@ static InitFiniNode s_func_counters_reinit(
   InitFiniNode::When::PostRuntimeOptions, "s_func_counters reinit"
 );
 
-bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
+using SrcKeyCounters = tbb::concurrent_hash_map<SrcKey::AtomicInt, uint32_t>;
+
+static SrcKeyCounters s_sk_counters;
+
+bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (!canTranslate()) {
     return false;
   }
+
+  const Func* func = sk.func();
 
   // Do not translate functions from units marked as interpret-only.
   if (func->unit()->isInterpretOnly()) {
@@ -127,16 +135,26 @@ bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
 
   // Refuse to JIT Live / Profile translations for a function until
   // Eval.JitLiveThreshold / Eval.JitProfileThreshold is hit.
-  if (kind == TransKind::Live    || kind == TransKind::LivePrologue ||
-      kind == TransKind::Profile || kind == TransKind::ProfPrologue) {
+  const bool isLive = kind == TransKind::Live ||
+                      kind == TransKind::LivePrologue;
+  const bool isProf = kind == TransKind::Profile ||
+                      kind == TransKind::ProfPrologue;
+  if (isLive || isProf) {
     auto const funcId = func->getFuncId();
     s_func_counters.ensureSize(funcId + 1);
     s_func_counters[funcId].fetch_add(1, std::memory_order_relaxed);
-    auto const threshold =
-      (kind == TransKind::Live || kind == TransKind::LivePrologue)
-      ? RuntimeOption::EvalJitLiveThreshold
-      : RuntimeOption::EvalJitProfileThreshold;
-    if (s_func_counters[funcId] < threshold) {
+    uint32_t skCount = 1;
+    SrcKeyCounters::accessor acc;
+    auto const key = sk.toAtomicInt();
+    if (!s_sk_counters.insert(acc, SrcKeyCounters::value_type(key, 1))) {
+      skCount = ++acc->second;
+    }
+    auto const funcThreshold = isLive ? RuntimeOption::EvalJitLiveThreshold
+                                      : RuntimeOption::EvalJitProfileThreshold;
+    if (s_func_counters[funcId] < funcThreshold) {
+      return false;
+    }
+    if (skCount < RuntimeOption::EvalJitSrcKeyThreshold) {
       return false;
     }
   }
@@ -147,9 +165,9 @@ bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind) {
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 static std::atomic<bool> s_TCisFull{false};
 
-bool shouldTranslate(const Func* func, TransKind kind) {
+bool shouldTranslate(SrcKey sk, TransKind kind) {
   if (s_TCisFull.load(std::memory_order_relaxed) ||
-      !shouldTranslateNoSizeLimit(func, kind)) {
+      !shouldTranslateNoSizeLimit(sk, kind)) {
     return false;
   }
 
@@ -196,6 +214,7 @@ bool shouldTranslate(const Func* func, TransKind kind) {
   // Set a flag so we quickly bail from trying to generate new translations next
   // time.
   s_TCisFull.store(true, std::memory_order_relaxed);
+  Treadmill::enqueue([] { s_sk_counters.clear(); });
 
   if (main_under && !s_did_log.test_and_set() &&
       RuntimeOption::EvalProfBranchSampleFreq == 0) {

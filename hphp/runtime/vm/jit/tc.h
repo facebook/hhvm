@@ -229,15 +229,15 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind);
 bool canTranslate();
 
 /*
- * Whether we should emit a translation of kind for func, ignoring the cap on
+ * Whether we should emit a translation of kind for sk, ignoring the cap on
  * overall TC size.
  */
-bool shouldTranslateNoSizeLimit(const Func* func, TransKind kind);
+bool shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind);
 
 /*
- * Whether we should emit a translation of kind for func.
+ * Whether we should emit a translation of kind for sk.
  */
-bool shouldTranslate(const Func* func, TransKind kind);
+bool shouldTranslate(SrcKey sk, TransKind kind);
 
 /*
  * Whether we are still profiling new functions.

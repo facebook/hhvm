@@ -99,13 +99,14 @@ bool regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
   auto rec = profData()->transRec(prologueTransId);
   auto func = rec->func();
   auto nArgs = rec->prologueArgs();
+  auto sk = rec->srcKey();
 
   func->resetPrologue(nArgs);
 
   // If we're regenerating a prologue, and we want to check shouldTranslate()
   // but ignore the code size limits.  We still want to respect the global
   // translation limit and other restrictions, though.
-  if (!tc::shouldTranslateNoSizeLimit(func, TransKind::OptPrologue)) {
+  if (!tc::shouldTranslateNoSizeLimit(sk, TransKind::OptPrologue)) {
     return false;
   }
 
@@ -250,7 +251,8 @@ TCA getFuncPrologue(Func* func, int nPassed) {
   // profileFunc() changed.
   if (!writer.checkKind(kind)) return nullptr;
 
-  if (!tc::shouldTranslate(func, kind)) return nullptr;
+  SrcKey sk(func, func->getEntryForNumArgs(nPassed), SrcKey::PrologueTag());
+  if (!tc::shouldTranslate(sk, kind)) return nullptr;
 
   if (UNLIKELY(RID().isJittingDisabled())) {
     TRACE(2, "punting because jitting code was disabled\n");

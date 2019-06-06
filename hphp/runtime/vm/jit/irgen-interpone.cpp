@@ -137,7 +137,6 @@ folly::Optional<Type> interpOutputType(IRGS& env,
 
     case OutFDesc:       return folly::none;
     case OutCns:         return TCell;
-    case OutVUnknown:    return TBoxedInitCell;
 
     case OutSameAsInput1: return topType(env, BCSPRelOffset{0});
     case OutSameAsInput2: return topType(env, BCSPRelOffset{1});
@@ -268,7 +267,6 @@ interpOutputLocals(IRGS& env,
     case OpDim:
       if (inst.imm[0].u_OA & mDefine) smashesAllLocals = true;
       break;
-    case OpVGetM:
     case OpSetM:
     case OpIncDecM:
     case OpSetOpM:

@@ -1111,13 +1111,6 @@ void unsetUnknownThisProp(ISS& env) {
   }
 }
 
-void boxThisProp(ISS& env, SString name) {
-  auto const elem = thisPropRaw(env, name);
-  if (!elem) return;
-  elem->ty |=
-    adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, TRef);
-}
-
 /*
  * Forces non-ref property types up to TCell.  This is used when an
  * operation affects an unknown property on $this, but can't change

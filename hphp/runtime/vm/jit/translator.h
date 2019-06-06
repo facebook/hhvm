@@ -269,7 +269,6 @@ enum OutTypeConstraints {
   OutUnknown,           // Not known at tracelet compile-time
   OutPredBool,          // Boolean value predicted to be True or False
   OutCns,               // Constant; may be known at compile-time
-  OutVUnknown,          // type is V(unknown)
 
   OutSameAsInput1,      // type is the same as the first stack input
   OutSameAsInput2,      // type is the same as the second stack input

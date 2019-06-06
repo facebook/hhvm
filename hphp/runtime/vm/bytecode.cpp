@@ -3751,19 +3751,6 @@ OPTBLD_INLINE void iopQueryM(uint32_t nDiscard, QueryMOp subop, MemberKey mk) {
   queryMImpl(mk, nDiscard, subop);
 }
 
-static OPTBLD_INLINE void vGetMImpl(MemberKey mk, int32_t nDiscard) {
-  auto& mstate = vmMInstrState();
-  TypedValue result;
-  dimDispatch(MOpMode::Define, mk, true);
-  tvBoxIfNeeded(mstate.base);
-  refDup(*mstate.base, result);
-  mFinal(mstate, nDiscard, result);
-}
-
-OPTBLD_INLINE void iopVGetM(uint32_t nDiscard, MemberKey mk) {
-  vGetMImpl(mk, nDiscard);
-}
-
 OPTBLD_FLT_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto& mstate = vmMInstrState();
   auto const topC = vmStack().topC();

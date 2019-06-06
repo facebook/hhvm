@@ -2763,38 +2763,6 @@ CGetPropL <local variable id>    [B]  ->  [C]
   If y is not an object, this operation will raise a warning and push null onto
   the stack.
 
-VGetPropC                        [C B]  ->  [V]
-VGetPropL <local variable id>    [B]  ->  [V]
-
-  Get property as ref.
-
-  These instructions first load a value into x and a base into y, as given by
-  the following table:
-
-         operation    x    y
-       ------------+----+-----
-        VGetPropC  | $2 | $1
-        VGetPropL  | %1 | $1
-
-  If y is an object that does not have an eligible __get method, this operation
-  first checks if y has a visible property named x. If it does not, this
-  operation will create a new property named x and push it onto the stack as a
-  ref. Otherwise this operation continues to check if the property named x is
-  accessible. If it the property named x is accessible this operation pushes it
-  onto the stack as a ref, otherwise this operation throws a fatal error.
-
-  If y is an object has an eligible __get method, this operation checks if y
-  has a visible and accessible property named x. If it does, this operation
-  pushes the property onto the stack. Otherwise, this operation pushes
-  y->__get(x) onto the stack.
-
-  If y is null, false, or the empty string, this operation will set y to a new
-  object of type stdclass, create a new property named x, and pushes it onto
-  the stack.
-
-  If y is true, integer, double, a non-empty string, or an array, this
-  operation raises a warning and pushes null.
-
 IssetPropC                        [C B]  ->  [C:Bool]
 IssetPropL <local variable id>    [B]  ->  [C:Bool]
 
@@ -3060,10 +3028,6 @@ result. These are elements read by Base*C instructions, and member keys.
 QueryM <stack count> <query op> <member key>    [...]  ->  [C]
 
   {CGet,Isset,Empty}{Prop,Elem} member operation.
-
-VGetM <stack count> <member key>    [...]  ->  [V]
-
-  VGetProp member operation.
 
 SetM <stack count> <member key>    [... C]  ->  [C]
 
@@ -3898,7 +3862,7 @@ Assignment-by operators are converted to use the SetOp* instructions.
 
 3) List assignment (list)
 List assignments are converted to use an unnamed local variable and the SetM
-and VGet* instructions. In case of exception, the unnamed local variable is
+and VGetL instructions. In case of exception, the unnamed local variable is
 freed using EH entry.
 
 4) Logical and and logical or operators (and/&&, or/||)

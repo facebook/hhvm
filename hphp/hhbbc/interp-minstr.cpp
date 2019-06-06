@@ -1042,24 +1042,6 @@ void miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key) {
   push(env, ty);
 }
 
-void miFinalVGetProp(ISS& env, int32_t nDiscard,
-                     const Type& key, bool isNullsafe) {
-  auto const name = mStringKey(key);
-  handleInThisPropD(env, isNullsafe);
-  handleInPublicStaticPropD(env, isNullsafe);
-  promoteBasePropD(env, isNullsafe);
-  if (couldBeThisObj(env, env.collect.mInstrState.base)) {
-    if (name) {
-      boxThisProp(env, name);
-    } else {
-      killThisProps(env);
-    }
-  }
-  endBase(env);
-  discard(env, nDiscard);
-  push(env, TRef);
-}
-
 void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
   auto const name = mStringKey(key);
   auto const t1 = unctx(popC(env));
@@ -1624,13 +1606,6 @@ void in(ISS& env, const bc::QueryM& op) {
   }
 
   endBase(env, false);
-}
-
-void in(ISS& env, const bc::VGetM& op) {
-  auto const key = key_type_or_fixup(env, op);
-  if (!key) return;
-  assertx(mcodeIsProp(op.mkey.mcode));
-  miFinalVGetProp(env, op.arg1, *key, op.mkey.mcode == MQT);
 }
 
 void in(ISS& env, const bc::SetM& op) {

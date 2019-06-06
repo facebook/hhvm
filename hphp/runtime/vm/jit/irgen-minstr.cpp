@@ -2198,21 +2198,6 @@ void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-void emitVGetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
-  auto key = memberKey(env, mk);
-
-  auto const result = [&] {
-    assertx(mcodeIsProp(mk.mcode));
-    if (mk.mcode == MQT) {
-      gen(env, RaiseError, cns(env, s_NULLSAFE_PROP_WRITE_ERROR.get()));
-    }
-    auto const base = extractBaseIfObj(env);
-    return gen(env, VGetProp, base, key, propStatePtrFinalProp(env, base));
-  }();
-
-  mFinalImpl(env, nDiscard, result);
-}
-
 void emitSetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   auto const baseType = predictedBaseType(env);
   if (baseType <= TClsMeth) {

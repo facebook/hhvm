@@ -740,7 +740,6 @@ constexpr uint32_t kMaxConcatN = 4;
                                        NOV,             NOV,        NF) \
   O(QueryM,          THREE(IVA, OA(QueryMOp), KA),                      \
                                        MFINAL,          ONE(CV),    NF) \
-  O(VGetM,           TWO(IVA, KA),     MFINAL,          ONE(VV),    NF) \
   O(SetM,            TWO(IVA, KA),     C_MFINAL(1),     ONE(CV),    NF) \
   O(SetRangeM,       THREE(IVA, OA(SetRangeOp), IVA),                   \
                                        C_MFINAL(3),     NOV,        NF) \
@@ -1082,7 +1081,6 @@ inline bool isMemberDimOp(Op op) {
 inline bool isMemberFinalOp(Op op) {
   switch (op) {
     case Op::QueryM:
-    case Op::VGetM:
     case Op::SetM:
     case Op::SetRangeM:
     case Op::IncDecM:
@@ -1103,7 +1101,6 @@ inline MOpMode finalMemberOpMode(Op op) {
   switch(op){
     case Op::SetM:
     case Op::SetRangeM:
-    case Op::VGetM:
     case Op::IncDecM:
     case Op::SetOpM:
       return MOpMode::Define;

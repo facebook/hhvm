@@ -546,7 +546,6 @@ bool opcodeMayRaise(Opcode opc) {
   case VerifyRetCls:
   case VerifyRetFail:
   case VerifyRetFailHard:
-  case VGetProp:
     return true;
 
   case AbsDbl:

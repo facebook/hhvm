@@ -73,7 +73,6 @@ bool loadsCell(const IRInstruction& inst) {
   case LdRef:
   case InitClsCns:
   case CGetProp:
-  case VGetProp:
   case ArrayGet:
   case DictGet:
   case DictGetQuiet:

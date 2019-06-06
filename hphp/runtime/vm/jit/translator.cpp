@@ -421,8 +421,6 @@ static const struct {
   { OpDim,         {MBase|MKey,       MBase,        OutNone         }},
   { OpQueryM,      {BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
-  { OpVGetM,       {BStackN|MBase|MKey,
-                                      Stack1,       OutVUnknown     }},
   { OpSetM,        {Stack1|BStackN|MBase|MKey,
                                       Stack1,       OutUnknown      }},
   { OpSetRangeM,   {BStackN|MBase,    None,         OutNone         }},
@@ -524,7 +522,6 @@ int64_t getStackPopped(PC pc) {
     }
 
     case Op::QueryM:
-    case Op::VGetM:
     case Op::IncDecM:
     case Op::UnsetM:
     case Op::NewPackedArray:
@@ -1061,7 +1058,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BaseH:
   case Op::Dim:
   case Op::QueryM:
-  case Op::VGetM:
   case Op::SetM:
   case Op::IncDecM:
   case Op::SetOpM:

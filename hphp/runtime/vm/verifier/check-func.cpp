@@ -777,7 +777,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   };
   switch (peek_op(pc)) {
   case Op::QueryM:
-  case Op::VGetM:
   case Op::IncDecM:
   case Op::UnsetM:
   case Op::SetM:
@@ -878,8 +877,7 @@ bool FuncChecker::checkMemberKey(State* cur, PC pc, Op op) {
       mcode = static_cast<MemberCode>(decode_byte(pc));
       break;
     case Op::UnsetM:
-    case Op::SetM:
-    case Op::VGetM:   //TWO(IVA, KA)
+    case Op::SetM:   //TWO(IVA, KA)
       decode_op(pc);
       decode_iva(pc);
       mcode = static_cast<MemberCode>(decode_byte(pc));
@@ -1943,7 +1941,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     // unsafe: operations definitely involving boxes
     case Op::PopV:
     case Op::VGetL:
-    case Op::VGetM:
       ferror("references are forbidden in Rx functions: {}\n",
              opcodeToName(op));
       return RuntimeOption::EvalRxVerifyBody < 2;

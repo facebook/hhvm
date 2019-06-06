@@ -1907,7 +1907,6 @@ void dce(Env& env, const bc::QueryM& op) {
   minstr_final(env, op, op.arg1);
 }
 
-void dce(Env& env, const bc::VGetM& op)      { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::SetM& op)       { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::IncDecM& op)    { minstr_final(env, op, op.arg1); }
 void dce(Env& env, const bc::SetOpM& op)     { minstr_final(env, op, op.arg1); }
@@ -1959,7 +1958,6 @@ void adjustMinstr(bc::BaseSC& op, MaskType m)      { m_adj(op.arg1, m); }
 void adjustMinstr(bc::Dim& op, MaskType m)         { m_adj(op.mkey, m); }
 
 void adjustMinstr(bc::QueryM& op, MaskType m)  { m_adj(op.arg1, op, m); }
-void adjustMinstr(bc::VGetM& op, MaskType m)   { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::SetM& op, MaskType m)    { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::IncDecM& op, MaskType m) { m_adj(op.arg1, op, m); }
 void adjustMinstr(bc::SetOpM& op, MaskType m)  { m_adj(op.arg1, op, m); }

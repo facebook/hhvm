@@ -177,22 +177,6 @@ void cgCGetPropQ(IRLS& env, const IRInstruction* inst) {
                callDestTV(env, inst), SyncOptions::Sync, args);
 }
 
-void cgVGetProp(IRLS& env, const IRInstruction* inst) {
-  auto const base    = inst->src(0);
-  auto const key     = inst->src(1);
-  auto const keyType = getKeyTypeNoInt(key);
-
-  BUILD_OPTAB2(base->isA(TObj),
-               VGET_OBJ_PROP_HELPER_TABLE,
-               VGET_PROP_HELPER_TABLE,
-               keyType);
-
-  auto const args = propArgs(env, inst).memberKeyS(1).ssa(2);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 void cgSetProp(IRLS& env, const IRInstruction* inst) {
   auto const base = inst->src(0);
   auto const key = inst->src(1);

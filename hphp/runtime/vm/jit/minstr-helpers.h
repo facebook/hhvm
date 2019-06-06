@@ -213,58 +213,6 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
 
 //////////////////////////////////////////////////////////////////////
 
-inline RefData* vGetRefShuffle(const TypedValue& localTvRef,
-                               tv_lval result) {
-  if (LIKELY(&val(result) != &localTvRef.m_data)) {
-    tvBoxIfNeeded(result);
-    auto ref = val(result).pref;
-    ref->incRefCount();
-    return ref;
-  }
-
-  if (!isRefType(localTvRef.m_type)) {
-    // RefData::Make takes ownership of the reference that lives in localTvRef
-    // so no refcounting is necessary.
-    return RefData::Make(localTvRef);
-  }
-
-  return localTvRef.m_data.pref;
-}
-
-#define VGET_PROP_HELPER_TABLE(m) \
-  /* name        keyType     */   \
-  m(vGetPropC,   KeyType::Any)    \
-  m(vGetPropS,   KeyType::Str)
-
-#define X(nm, kt)                                                       \
-inline RefData* nm(Class* ctx, tv_lval base,                            \
-                   key_type<kt> key, MInstrPropState* pState) {         \
-  TypedValue localTvRef;                                                \
-  auto result =                                                         \
-    Prop<MOpMode::Define,kt,true>(localTvRef, ctx, base, key, pState);  \
-  return vGetRefShuffle(localTvRef, result);                            \
-}
-VGET_PROP_HELPER_TABLE(X)
-#undef X
-
-#define VGET_OBJ_PROP_HELPER_TABLE(m) \
-  /* name        keyType      */      \
-  m(vGetPropCO,  KeyType::Any)        \
-  m(vGetPropSO,  KeyType::Str)
-
-#define X(nm, kt)                                                       \
-inline RefData* nm(Class* ctx, ObjectData* base,                        \
-                   key_type<kt> key, MInstrPropState* pState) {         \
-  TypedValue localTvRef;                                                \
-  auto result =                                                         \
-    PropObj<MOpMode::Define,kt,true>(localTvRef, ctx, base, key, pState); \
-  return vGetRefShuffle(localTvRef, result);                            \
-}
-VGET_OBJ_PROP_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 #define SETPROP_HELPER_TABLE(m)          \
   /* name        keyType      */         \
   m(setPropC,    KeyType::Any)           \

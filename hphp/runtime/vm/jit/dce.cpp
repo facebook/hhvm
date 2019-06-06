@@ -624,7 +624,6 @@ bool canDCE(IRInstruction* inst) {
   case PropDX:
   case CGetProp:
   case CGetPropQ:
-  case VGetProp:
   case SetProp:
   case UnsetProp:
   case SetOpProp:

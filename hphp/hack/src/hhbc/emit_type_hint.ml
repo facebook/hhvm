@@ -109,36 +109,34 @@ and fmt_hints ~tparams ~namespace hints =
 
 (* Differs from above in that this assumes that naming has occurred *)
 let can_be_nullable (_, h) =
-  not (Emit_env.is_hh_syntax_enabled ())
-    ||
-    match h with
-    | Aast.Hfun _
-    | Aast.Hoption (_, Aast.Hfun _)
-    | Aast.Happly ((_, "dynamic"), _)
-    | Aast.Hoption (_, Aast.Happly ((_, "dynamic"), _))
-    | Aast.Happly ((_, "nonnull"), _)
-    | Aast.Hoption (_, Aast.Happly ((_, "nonnull"), _))
-    | Aast.Happly ((_, "mixed"), _)
-    | Aast.Hoption (_, Aast.Happly ((_, "mixed"), _))
-    | Aast.Hdynamic
-    | Aast.Hnonnull
-    | Aast.Hmixed
-    | Aast.Hoption (_, Aast.Hdynamic)
-    | Aast.Hoption (_, Aast.Hnonnull)
-    | Aast.Hoption (_, Aast.Hmixed) -> false
-    | Aast.Haccess _ -> false
-    (* HHVM does not emit nullable for type consts that are set to null by default
-     * function(Class::Type $a = null) unless it is explicitly marked as nullable
-     *)
-    | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
-    (* Naming converted the following from Happly's so assuming it should be true *)
-    | Aast.Habstr _
-    | Aast.Harray _
-    | Aast.Hdarray _
-    | Aast.Hvarray _
-    | Aast.Hvarray_or_darray _
-    | Aast.Hthis -> true
-    | _ -> true
+  match h with
+  | Aast.Hfun _
+  | Aast.Hoption (_, Aast.Hfun _)
+  | Aast.Happly ((_, "dynamic"), _)
+  | Aast.Hoption (_, Aast.Happly ((_, "dynamic"), _))
+  | Aast.Happly ((_, "nonnull"), _)
+  | Aast.Hoption (_, Aast.Happly ((_, "nonnull"), _))
+  | Aast.Happly ((_, "mixed"), _)
+  | Aast.Hoption (_, Aast.Happly ((_, "mixed"), _))
+  | Aast.Hdynamic
+  | Aast.Hnonnull
+  | Aast.Hmixed
+  | Aast.Hoption (_, Aast.Hdynamic)
+  | Aast.Hoption (_, Aast.Hnonnull)
+  | Aast.Hoption (_, Aast.Hmixed) -> false
+  | Aast.Haccess _ -> false
+  (* HHVM does not emit nullable for type consts that are set to null by default
+   * function(Class::Type $a = null) unless it is explicitly marked as nullable
+   *)
+  | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
+  (* Naming converted the following from Happly's so assuming it should be true *)
+  | Aast.Habstr _
+  | Aast.Harray _
+  | Aast.Hdarray _
+  | Aast.Hvarray _
+  | Aast.Hvarray_or_darray _
+  | Aast.Hthis -> true
+  | _ -> true
 
 let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h) =
   let happly_helper (pos, name as id) =

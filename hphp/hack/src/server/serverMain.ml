@@ -493,7 +493,7 @@ let update_recheck_values env start_t recheck_id =
   match stats.total_rechecked_count with
   | 0 -> env
   | _ ->
-    HackEventLogger.recheck_end start_t
+    HackEventLogger.recheck_end recheck_time
       stats.rechecked_batches
       stats.rechecked_count
       stats.total_rechecked_count;

@@ -122,11 +122,6 @@ enum Attr {
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
                                          //       |          |         //
-  // Indicates that a function is a builtin that takes variadic arguments,
-  // where the arguments are either by ref or optionally by ref.  It is
-  // equivalent to ClassInfo's (RefVariableArguments).
-  AttrVariadicByRef        = (1u << 12), //       |          |    X    //
-                                         //       |          |         //
   // Like AttrLateInit, but instead of throwing, will provide a configurable
   // default value (and have that value from that point on). This can only be
   // set if AttrLateInit is set.

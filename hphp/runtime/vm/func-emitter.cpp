@@ -169,9 +169,6 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   }
   if (isVariadic()) {
     attrs |= AttrVariadicParam;
-    if (isVariadicByRef()) {
-      attrs |= AttrVariadicByRef;
-    }
   }
   if (isAsync && !isGenerator) {
     // Async functions can return results directly.
@@ -481,7 +478,6 @@ static const StaticString
   s_native("__Native"),
   s_actrec("ActRec"),
   s_nofcallbuiltin("NoFCallBuiltin"),
-  s_variadicbyref("VariadicByRef"),
   s_noinjection("NoInjection"),
   s_opcodeimpl("OpCodeImpl");
 
@@ -501,8 +497,6 @@ int FuncEmitter::parseNativeAttributes(Attr& attrs_) const {
         attrs_ |= AttrMayUseVV;
       } else if (userAttrStrVal.get()->isame(s_nofcallbuiltin.get())) {
         attrs_ |= AttrNoFCallBuiltin;
-      } else if (userAttrStrVal.get()->isame(s_variadicbyref.get())) {
-        attrs_ |= AttrVariadicByRef;
       } else if (userAttrStrVal.get()->isame(s_noinjection.get())) {
         attrs_ |= AttrNoInjection;
       } else if (userAttrStrVal.get()->isame(s_opcodeimpl.get())) {

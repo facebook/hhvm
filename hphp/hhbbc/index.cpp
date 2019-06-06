@@ -3236,9 +3236,6 @@ PrepKind func_param_prep(const php::Func* func,
                          uint32_t paramId) {
   if (func->attrs & AttrInterceptable) return PrepKind::Unknown;
   if (paramId >= func->params.size()) {
-    if (func->attrs & AttrVariadicByRef) {
-      return PrepKind::Ref;
-    }
     return PrepKind::Val;
   }
   return func->params[paramId].byRef ? PrepKind::Ref : PrepKind::Val;

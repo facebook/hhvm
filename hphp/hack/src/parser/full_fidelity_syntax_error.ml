@@ -313,6 +313,7 @@ let type_name_is_already_in_use ~name ~short_name =
   " because the name is already in use"
 
 let variadic_reference = "Variadic '...' should be followed by a '$variable'"
+let reference_variadic = "Variadic parameters cannot be taken by reference"
 let double_variadic = "Parameter redundantly marked as variadic ('...')."
 let double_reference = "Parameter redundantly marked as reference ('&')."
 let global_in_const_decl = "Cannot have globals in constant declaration"

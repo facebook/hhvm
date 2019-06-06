@@ -2442,6 +2442,9 @@ void parse_parameter_list(AsmState& as) {
     ch = as.in.getc();
 
     if (ch == '&') {
+      if (param.variadic) {
+        as.error("ref parameters cannot be variadic");
+      }
       if (param.inout) {
         as.error("parameters cannot be marked both inout and ref");
       }
@@ -2451,9 +2454,6 @@ void parse_parameter_list(AsmState& as) {
       seenRef = true;
       param.byRef = true;
       ch = as.in.getc();
-      if (param.variadic) {
-        as.fe->attrs |= AttrVariadicByRef;
-      }
     }
     if (ch != '$') {
       as.error("function parameters must have a $ prefix");

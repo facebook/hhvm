@@ -633,23 +633,13 @@ void cgCheckRefs(IRLS& env, const IRInstruction* inst)  {
     auto const sf = v.makeReg();
     v << cmpqi{extra->firstBit, nparams, sf};
 
-    if (vals64 != 0 && vals64 != mask64) {
-      // If we're beyond nparams, then either all params are refs, or all
-      // params are non-refs, so if vals64 isn't 0 and isnt mask64, there's no
-      // possibility of a match.
+    if (vals64 != 0) {
+      // If we're beyond nparams, then all params are non-refs, so if vals64
+      // isn't 0, there's no possibility of a match.
       fwdJcc(v, env, CC_LE, sf, inst->taken());
       thenBody(v);
     } else {
-      ifThenElse(v, CC_NLE, sf, thenBody, [&] (Vout& v) {
-        // If not special builtin...
-        auto const sf = v.makeReg();
-        v << testlim{
-          static_cast<int32_t>(AttrVariadicByRef),
-          func[Func::attrsOff()],
-          sf
-        };
-        fwdJcc(v, env, vals64 ? CC_Z : CC_NZ, sf, inst->taken());
-      });
+      ifThen(v, CC_NLE, sf, thenBody);
     }
   }
 }

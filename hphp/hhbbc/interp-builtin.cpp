@@ -473,7 +473,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
     auto const precise_ty = [&]() -> folly::Optional<Type> {
       auto const exact = func.exactFunc();
       if (!exact) return folly::none;
-      if (exact->attrs & (AttrVariadicParam | AttrVariadicByRef)) {
+      if (exact->attrs & AttrVariadicParam) {
         return folly::none;
       }
       assert(num_args == exact->params.size());

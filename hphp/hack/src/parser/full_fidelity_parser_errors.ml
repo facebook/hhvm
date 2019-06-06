@@ -336,6 +336,10 @@ let is_reference_variadic node =
   is_decorated_expression ~f:is_ellipsis node &&
   test_decorated_expression_child node ~f:is_reference_expression
 
+let is_variadic_reference node =
+  is_decorated_expression ~f:is_ampersand node &&
+  test_decorated_expression_child node ~f:is_variadic_expression
+
 let is_double_variadic node =
   is_decorated_expression ~f:is_ellipsis node &&
   test_decorated_expression_child node ~f:is_variadic_expression
@@ -1880,6 +1884,8 @@ let parameter_errors env node namespace_name names errors =
     let errors =
       if is_reference_variadic p.parameter_name then
         make_error_from_node node SyntaxError.variadic_reference :: errors
+      else if is_variadic_reference p.parameter_name then
+        make_error_from_node node SyntaxError.reference_variadic :: errors
       else errors in
     names, errors
   | FunctionDeclarationHeader { function_parameter_list = params; _ }

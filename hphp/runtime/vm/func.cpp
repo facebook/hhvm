@@ -317,14 +317,10 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
   }
 
   if (bit == 0) {
-    // The new word is either zerod or set to 1, depending on whether
-    // we are one of the special builtins that takes variadic
-    // reference arguments.  This is for use in the translator.
-    *refBits = (m_attrs & AttrVariadicByRef) ? -1ull : 0;
+    *refBits = 0;
   }
 
-  assertx(!(*refBits & (uint64_t(1) << bit)) == !(m_attrs & AttrVariadicByRef));
-  *refBits &= ~(1ull << bit);
+  assertx(!(*refBits & (uint64_t(1) << bit)));
   *refBits |= uint64_t(ref) << bit;
   pBuilder.push_back(info);
 }
@@ -336,10 +332,7 @@ void Func::appendParam(bool ref, const Func::ParamInfo& info,
  */
 void Func::finishedEmittingParams(std::vector<ParamInfo>& fParams) {
   assertx(m_paramCounts == 0);
-  if (!fParams.size()) {
-    assertx(!m_refBitVal && !shared()->m_refBitPtr);
-    m_refBitVal = attrs() & AttrVariadicByRef ? -1uLL : 0uLL;
-  }
+  assertx(fParams.size() || (!m_refBitVal && !shared()->m_refBitPtr));
 
   shared()->m_params = fParams;
   m_paramCounts = fParams.size() << 1;
@@ -455,7 +448,7 @@ Offset Func::getEntryForNumArgs(int numArgsPassed) const {
 // Parameters.
 
 bool Func::anyByRef() const {
-  if (m_refBitVal || (m_attrs & AttrVariadicByRef)) {
+  if (m_refBitVal) {
     return true;
   }
 
@@ -474,10 +467,8 @@ bool Func::byRef(int32_t arg) const {
   const uint64_t* ref = &m_refBitVal;
   assertx(arg >= 0);
   if (UNLIKELY(arg >= kBitsPerQword)) {
-    // Super special case. A handful of builtins are varargs functions where the
-    // (not formally declared) varargs are pass-by-reference. psychedelic-kitten
     if (arg >= numParams()) {
-      return m_attrs & AttrVariadicByRef;
+      return false;
     }
     ref = &shared()->m_refBitPtr[(uint32_t)arg / kBitsPerQword - 1];
   }

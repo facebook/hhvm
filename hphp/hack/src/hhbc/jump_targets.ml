@@ -62,9 +62,7 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
      correctness of the target *)
   | T.While (_, block)
   | T.Using { T.us_block = block; _ } ->
-    if is_hh_file
-    then collect_valid_target_labels_for_block_aux is_hh_file acc block
-    else acc
+    collect_valid_target_labels_for_block_aux is_hh_file acc block
   | T.Switch (_, cl) ->
     if is_hh_file
     then collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl

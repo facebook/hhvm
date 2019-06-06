@@ -733,13 +733,6 @@ void discard(Env& env) {
   pop(env, Use::Not, env.id);
 }
 
-void popu2(Env& env) {
-  auto ui = std::move(env.dceState.stack.back());
-  env.dceState.stack.pop_back();
-  discard(env);
-  env.dceState.stack.push_back(std::move(ui));
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /*
@@ -1069,7 +1062,19 @@ void pushRemovableIfNoThrow(Env& env) {
 void dce(Env& env, const bc::PopC&)          { discard(env); }
 void dce(Env& env, const bc::PopV&)          { discard(env); }
 void dce(Env& env, const bc::PopU&)          { discard(env); }
-void dce(Env& env, const bc::PopU2&)         { popu2(env); }
+void dce(Env& env, const bc::PopU2&)         {
+  auto ui = std::move(env.dceState.stack.back());
+  env.dceState.stack.pop_back();
+  if (isLinked(ui)) {
+    // this is way too conservative; but hopefully the PopU2 will be
+    // killed (it always should be) and we'll do another pass and fix
+    // it.
+    markUisLive(env, true, ui);
+    ui = UseInfo { Use::Used };
+  }
+  discard(env);
+  env.dceState.stack.push_back(std::move(ui));
+}
 void dce(Env& env, const bc::Int&)           { pushRemovable(env); }
 void dce(Env& env, const bc::String&)        { pushRemovable(env); }
 void dce(Env& env, const bc::Dict&)          { pushRemovable(env); }

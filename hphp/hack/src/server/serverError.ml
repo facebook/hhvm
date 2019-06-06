@@ -16,13 +16,15 @@ open Utils
 
 let get_error_list_json
     (error_list: (Pos.absolute Errors.error_ list))
-    ~(edges_added: int option) =
+    ~(edges_added: int option)
+    (recheck_stats: ServerCommandTypes.Recheck_stats.t option) =
   let error_list, did_pass = match error_list with
   | [] -> [], true
   | error_list -> (List.map ~f:Errors.to_json error_list), false
   in
   let (properties: (string * Hh_json.json) list) =
-    [ "passed", Hh_json.JSON_Bool did_pass;
+    [
+      "passed", Hh_json.JSON_Bool did_pass;
       "errors", Hh_json.JSON_Array error_list;
       "version", Build_id.build_version_json;
     ]
@@ -37,14 +39,26 @@ let get_error_list_json
         ]
     in
     saved_state_result :: properties in
+  let open ServerCommandTypes.Recheck_stats in
+  let properties = match recheck_stats with
+  | None -> properties
+  | Some stats ->
+    let last_recheck_result =
+      "last_recheck", Hh_json.JSON_Object [
+        "id", Hh_json.JSON_String stats.id;
+        "time", Hh_json.JSON_Number (string_of_float stats.time);
+      ]
+    in
+    last_recheck_result :: properties in
 
   Hh_json.JSON_Object properties
 
 let print_error_list_json
     (oc: Out_channel.t)
     (error_list: (Pos.absolute Errors.error_ list))
-    (edges_added: int option) =
-  let res = get_error_list_json error_list ~edges_added in
+    (edges_added: int option)
+    (recheck_stats: ServerCommandTypes.Recheck_stats.t option) =
+  let res = get_error_list_json error_list ~edges_added recheck_stats in
   Hh_json.json_to_output oc res;
   Out_channel.flush oc
 
@@ -53,9 +67,10 @@ let print_error_list
     ~(stale_msg: string option)
     ~(output_json: bool)
     ~(error_list: (Pos.absolute Errors.error_ list))
-    ~(edges_added: int option) =
+    ~(edges_added: int option)
+    ~(recheck_stats: ServerCommandTypes.Recheck_stats.t option) =
   if output_json then
-    print_error_list_json oc error_list edges_added
+    print_error_list_json oc error_list edges_added recheck_stats
   else begin
     if error_list = []
     then Out_channel.output_string oc "No errors!\n"

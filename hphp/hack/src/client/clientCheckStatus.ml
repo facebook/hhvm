@@ -81,6 +81,7 @@ let go status output_json from error_format =
     Server_status.liveness;
     has_unsaved_changes;
     error_list;
+    last_recheck_stats;
   } = status in
   let stale_msg = is_stale_msg liveness in
   if output_json || from <> "" || error_list = []
@@ -88,7 +89,8 @@ let go status output_json from error_format =
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)
     let oc = if output_json then stderr else stdout in
-    ServerError.print_error_list oc ~stale_msg ~output_json ~error_list ~edges_added:None
+    ServerError.print_error_list
+      oc ~stale_msg ~output_json ~error_list ~edges_added:None ~recheck_stats:last_recheck_stats
   end else begin
     let f = match error_format with
       | Errors.Context -> print_error_contextual

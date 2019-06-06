@@ -25,7 +25,15 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
         let error_list = List.map ~f:Errors.to_absolute error_list in
         let liveness = (if is_stale then Stale_status else Live_status) in
         let has_unsaved_changes = ServerFileSync.has_unsaved_changes env in
-        env, { Server_status.liveness; has_unsaved_changes; error_list; }
+        let last_recheck_info = env.ServerEnv.last_recheck_info in
+        let last_recheck_stats = match last_recheck_info with
+          | None -> None
+          | Some info -> Some { Recheck_stats.
+            id = info.recheck_id;
+            time = info.recheck_time;
+          }
+        in
+        env, { Server_status.liveness; has_unsaved_changes; error_list; last_recheck_stats; }
     | STATUS_SINGLE fn -> env, ServerStatusSingle.go fn env.tcopt
     | COVERAGE_LEVELS fn ->
         env, ServerColorFile.go env.ServerEnv.tcopt env.ServerEnv.naming_table fn

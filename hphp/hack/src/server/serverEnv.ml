@@ -33,6 +33,7 @@ let empty_recheck_loop_stats = {
 type recheck_info = {
   stats: recheck_loop_stats;
   recheck_id : string;
+  recheck_time : float;
 } [@@deriving show]
 
 (*****************************************************************************)

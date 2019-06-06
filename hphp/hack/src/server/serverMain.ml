@@ -66,12 +66,21 @@ module Program =
            )))
 
     let run_once_and_exit genv env (edges_added: int option) =
+      let last_recheck_info = env.ServerEnv.last_recheck_info in
+      let recheck_stats = match last_recheck_info with
+        | None -> None
+        | Some info -> Some { ServerCommandTypes.Recheck_stats.
+          id = info.recheck_id;
+          time = info.recheck_time;
+        }
+      in
       ServerError.print_error_list
         stdout
         ~stale_msg:None
         ~output_json:(ServerArgs.json_mode genv.options)
         ~error_list:(List.map (Errors.get_error_list env.errorl) Errors.to_absolute)
-        ~edges_added;
+        ~edges_added
+        ~recheck_stats;
 
       WorkerController.killall ();
 
@@ -476,6 +485,28 @@ let has_pending_disk_changes genv =
   | Some reader when Buffered_line_reader.is_readable reader -> true
   | _ -> false
 
+let update_recheck_values env start_t recheck_id =
+  let end_t = Unix.gettimeofday () in
+  let recheck_time = end_t -. start_t in
+  let stats = env.recent_recheck_loop_stats in
+
+  match stats.total_rechecked_count with
+  | 0 -> env
+  | _ ->
+    HackEventLogger.recheck_end start_t
+      stats.rechecked_batches
+      stats.rechecked_count
+      stats.total_rechecked_count;
+
+    Hh_logger.log "Recheck id: %s" recheck_id;
+    { env with
+      last_recheck_info = Some {
+        stats;
+        recheck_id;
+        recheck_time;
+      };
+    }
+
 let serve_one_iteration genv env client_provider =
   let recheck_id = new_serve_iteration_id () in
   ServerMonitorUtils.exit_if_parent_dead ();
@@ -533,23 +564,7 @@ let serve_one_iteration genv env client_provider =
   (* We'll first do "recheck_loop" to handle all outstanding changes, so that *)
   (* after that we'll be able to give an up-to-date answer to the client. *)
   let env = recheck_loop genv env client has_persistent_connection_request in
-  let stats = env.recent_recheck_loop_stats in
-  let env = match stats.total_rechecked_count with
-  | 0 -> env
-  | _ ->
-    HackEventLogger.recheck_end start_t
-      stats.rechecked_batches
-      stats.rechecked_count
-      stats.total_rechecked_count;
-
-    Hh_logger.log "Recheck id: %s" recheck_id;
-    { env with
-      last_recheck_info = Some {
-        stats;
-        recheck_id;
-      };
-    }
-  in
+  let env = update_recheck_values env start_t recheck_id in
 
   let env = Option.value_map env.diag_subscribe
       ~default:env

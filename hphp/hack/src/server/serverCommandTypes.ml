@@ -11,11 +11,19 @@ type status_liveness =
   | Stale_status
   | Live_status
 
+module Recheck_stats = struct
+  type t = {
+    id : string;
+    time : float;
+  }
+end
+
 module Server_status = struct
   type t = {
     liveness : status_liveness;
     has_unsaved_changes : bool;
     error_list : Pos.absolute Errors.error_ list;
+    last_recheck_stats: Recheck_stats.t option;
   }
 end
 

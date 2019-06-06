@@ -408,6 +408,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         error_list;
         Rpc.Server_status.liveness = Rpc.Live_status;
         has_unsaved_changes = false;
+        last_recheck_stats = None;
       } in
       let exit_status =
         ClientCheckStatus.go status args.output_json args.from args.error_format in

@@ -276,9 +276,7 @@ let param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams ~namespace h
   let tc_name = TC.name tc in
   if is_simple_hint
   then
-    let is_hh_type = Emit_env.is_hh_syntax_enabled () in
-    let tc_flags = if is_hh_type then [TC.HHType] else [] in
-    let tc_flags = try_add_nullable ~nullable h tc_flags in
+    let tc_flags = try_add_nullable ~nullable h [TC.HHType] in
     make_type_info ~tparams ~namespace h tc_name tc_flags
   else
     let tc_flags = TC.flags tc in

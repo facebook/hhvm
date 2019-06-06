@@ -164,21 +164,13 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h) 
   | Aast.Happly ((_, "dynamic"), [])
   | Aast.Happly ((_, "mixed"), [])
   | Aast.Hdynamic
+  | Aast.Hlike _
+  | Aast.Hfun _
   | Aast.Hmixed ->
-    if Emit_env.is_hh_syntax_enabled ()
-    then TC.make None []
-    else TC.make (Some "mixed") []
+    TC.make None []
   | Aast.Hprim Aast.Tvoid when kind <> TypeDef ->
-    if Emit_env.is_hh_syntax_enabled ()
-      || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options
-    then TC.make None []
-    else TC.make (Some "void") [TC.HHType; TC.ExtendedHint]
+    TC.make None []
   | Aast.Happly ((_, s), []) when String.lowercase s = "void" && kind <> TypeDef ->
-    if Emit_env.is_hh_syntax_enabled ()
-      || Hhbc_options.php7_scalar_types !Hhbc_options.compiler_options
-    then TC.make None []
-    else TC.make (Some "void") [TC.HHType; TC.ExtendedHint]
-  | Aast.Hfun _ ->
     TC.make None []
   | Aast.Haccess _ ->
     let tc_name = Some "" in
@@ -218,10 +210,6 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable ~namespace (p, h) 
   | Aast.Hsoft t ->
     make_tc_with_flags_if_non_empty_flags ~kind ~tparams ~skipawaitable ~namespace
     t [TC.Soft; TC.HHType; TC.ExtendedHint]
-  | Aast.Hlike _ ->
-    if Emit_env.is_hh_syntax_enabled ()
-    then TC.make None []
-    else TC.make (Some "mixed") []
   | Aast.Hany -> failwith "I'm convinced that this should be an error caught in naming"
   (* Naming converted the following from Happly's so use the Happly logic here*)
   | Aast.Hnonnull -> happly_helper (p, SN.Typehints.nonnull)

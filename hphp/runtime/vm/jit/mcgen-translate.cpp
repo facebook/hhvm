@@ -265,6 +265,13 @@ void retranslateAll() {
       for (auto i = 0u; i < nFuncs; ++i, bufp += initialSize) {
         auto const fid = sortedFuncs[i];
         auto const func = const_cast<Func*>(Func::fromFuncId(fid));
+        if (!RuntimeOption::EvalJitSerdesDebugFunctions.empty()) {
+          // Only run specified functions
+          if (!RuntimeOption::EvalJitSerdesDebugFunctions.
+              count(func->fullName()->toCppString())) {
+            continue;
+          }
+        }
         jobs.emplace_back(
           tc::FuncMetaInfo(func, tc::LocalTCBuffer(bufp, initialSize))
         );

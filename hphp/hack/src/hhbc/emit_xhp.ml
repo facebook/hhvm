@@ -52,33 +52,17 @@ let xhp_attribute_declaration_method ?p name final abstract static visibility st
 let emit_xhp_attribute_array ~ns xal =
   (* Taken from hphp/parser/hphp.y *)
   let hint_to_num id =
-    if Emit_env.is_hh_syntax_enabled ()
-    then
-      begin match id with
-      | "HH\\string" -> 1
-      | "HH\\bool" -> 2
-      | "HH\\int" -> 3
-      | "array" -> 4
-      | "var" | "HH\\mixed" -> 6
-      | "enum" -> 7
-      | "HH\\float" -> 8
-      | "callable" -> 9
-      (* Regular class names are type 5 *)
-      | _ -> 5
-      end
-    else
-      begin match id with
-      | "string" -> 1
-      | "bool" | "boolean" -> 2
-      | "int" | "integer" -> 3
-      | "array" -> 4
-      | "var" | "mixed" -> 6
-      | "enum" -> 7
-      | "float" | "real" | "double" -> 8
-      | "callable" -> 9
-      (* Regular class names are type 5 *)
-      | _ -> 5
-      end in
+    match id with
+    | "HH\\string" -> 1
+    | "HH\\bool" -> 2
+    | "HH\\int" -> 3
+    | "array" -> 4
+    | "var" | "HH\\mixed" -> 6
+    | "enum" -> 7
+    | "HH\\float" -> 8
+    | "callable" -> 9
+    (* Regular class names are type 5 *)
+    | _ -> 5 in
   let get_enum_attributes enumo =
     match enumo with
     | None ->

@@ -51,13 +51,15 @@ function objprof_get_strings(
   int $min_dup,
 ): darray<string, ObjprofStringStats>; // auto-imported from HH namespace
 
+}
+
+namespace HH {
+
 //////////////////////////////////////////////////////////////////
 // Heap graph
 
 function heapgraph_create(): resource; // auto-imported from HH namespace
-
 function heapgraph_stats(resource $heapgraph): darray<string, int>; // auto-imported from HH namespace
-
 function heapgraph_foreach_node(resource $heapgraph, mixed $callback): void; // auto-imported from HH namespace
 function heapgraph_foreach_edge(resource $heapgraph, mixed $callback): void; // auto-imported from HH namespace
 function heapgraph_foreach_root(resource $heapgraph, mixed $callback): void; // auto-imported from HH namespace
@@ -67,9 +69,7 @@ function heapgraph_node(resource $heapgraph, int $index): darray<string, mixed>;
 function heapgraph_edge(resource $heapgraph, int $index): darray<string, mixed>; // auto-imported from HH namespace
 function heapgraph_node_in_edges(resource $heapgraph, int $index): varray<darray<string, mixed>>; // auto-imported from HH namespace
 function heapgraph_node_out_edges(resource $heapgraph, int $index): varray<darray<string, mixed>>; // auto-imported from HH namespace
-}
 
+function set_mem_threshold_callback(int $threshold, mixed $callback): void;
 
-namespace HH {
-  function set_mem_threshold_callback(int $threshold, mixed $callback): void;
 }

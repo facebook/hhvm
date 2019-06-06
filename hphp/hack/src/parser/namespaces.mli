@@ -7,12 +7,14 @@
  *
  *)
 
+type autoimport_ns
+
 type elaborate_kind =
   | ElaborateFun
   | ElaborateClass
   | ElaborateConst
 
-val autoimport_funcs : string list
+val autoimport_funcs : (autoimport_ns * string) list
 
 val elaborate_id : ?autoimport:bool -> Namespace_env.env ->
                    elaborate_kind ->

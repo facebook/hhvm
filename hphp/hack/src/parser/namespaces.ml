@@ -13,6 +13,13 @@ open Namespace_env
 
 module SN = Naming_special_names
 
+(* The typechecker has a different view of HH autoimporting than the compiler.
+ * This type exists to track the unification of HH autoimporting between the
+ * typechecker and the compiler, after which it will be deleted. *)
+type autoimport_ns =
+  | Global
+  | HH
+
 (* When dealing with an <?hh file, HHVM automatically imports a few
  * "core" classes into every namespace, mostly collections. Their
  * unqualified names always refer to this global version.
@@ -24,117 +31,122 @@ module SN = Naming_special_names
  * most sense there.
  *)
 let autoimport_classes = [
-  "Traversable";
-  "KeyedTraversable";
-  "Container";
-  "KeyedContainer";
-  "Iterator";
-  "KeyedIterator";
-  "Iterable";
-  "KeyedIterable";
-  "Collection";
-  "Vector";
-  "ImmVector";
-  "vec";
-  "dict";
-  "keyset";
-  "Map";
-  "ImmMap";
-  "StableMap";
-  "Set";
-  "ImmSet";
-  "Pair";
-  "Awaitable";
-  "AsyncIterator";
-  "IMemoizeParam";
-  "AsyncKeyedIterator";
-  "InvariantException";
-  "AsyncGenerator";
-  "StaticWaitHandle";
-  "WaitableWaitHandle";
-  "ResumableWaitHandle";
-  "AsyncFunctionWaitHandle";
-  "AsyncGeneratorWaitHandle";
-  "AwaitAllWaitHandle";
-  "ConditionWaitHandle";
-  "RescheduleWaitHandle";
-  "SleepWaitHandle";
-  "ExternalThreadEventWaitHandle";
-  "Shapes";
-  "TypeStructureKind";
+  Global, "Traversable";
+  Global, "KeyedTraversable";
+  Global, "Container";
+  Global, "KeyedContainer";
+  Global, "Iterator";
+  Global, "KeyedIterator";
+  Global, "Iterable";
+  Global, "KeyedIterable";
+  Global, "Collection";
+  Global, "Vector";
+  Global, "ImmVector";
+  Global, "vec";
+  Global, "dict";
+  Global, "keyset";
+  Global, "Map";
+  Global, "ImmMap";
+  Global, "StableMap";
+  Global, "Set";
+  Global, "ImmSet";
+  Global, "Pair";
+  Global, "Awaitable";
+  Global, "AsyncIterator";
+  Global, "IMemoizeParam";
+  Global, "AsyncKeyedIterator";
+  Global, "InvariantException";
+  Global, "AsyncGenerator";
+  Global, "StaticWaitHandle";
+  Global, "WaitableWaitHandle";
+  Global, "ResumableWaitHandle";
+  Global, "AsyncFunctionWaitHandle";
+  Global, "AsyncGeneratorWaitHandle";
+  Global, "AwaitAllWaitHandle";
+  Global, "ConditionWaitHandle";
+  Global, "RescheduleWaitHandle";
+  Global, "SleepWaitHandle";
+  Global, "ExternalThreadEventWaitHandle";
+  Global, "Shapes";
+  Global, "TypeStructureKind";
 ]
 let autoimport_funcs =   [
-  "fun";
-  "meth_caller";
-  "class_meth";
-  "inst_meth";
-  "invariant_callback_register";
-  "invariant";
-  "invariant_violation";
-  "idx";
-  "type_structure";
-  "asio_get_current_context_idx";
-  "asio_get_running_in_context";
-  "asio_get_running";
-  "xenon_get_data";
-  "thread_memory_stats";
-  "thread_mark_stack";
-  "objprof_get_strings";
-  "objprof_get_data";
-  "objprof_get_paths";
-  "heapgraph_create";
-  "heapgraph_stats";
-  "heapgraph_foreach_node";
-  "heapgraph_foreach_edge";
-  "heapgraph_foreach_root";
-  "heapgraph_dfs_nodes";
-  "heapgraph_dfs_edges";
-  "heapgraph_node";
-  "heapgraph_edge";
-  "heapgraph_node_in_edges";
-  "heapgraph_node_out_edges";
-  "server_warmup_status";
-  "dict";
-  "vec";
-  "keyset";
-  "varray";
-  "darray";
-  "is_vec";
-  "is_dict";
-  "is_keyset";
-  "is_varray";
-  "is_darray";
+  Global, "fun";
+  Global, "meth_caller";
+  Global, "class_meth";
+  Global, "inst_meth";
+  Global, "invariant_callback_register";
+  Global, "invariant";
+  Global, "invariant_violation";
+  Global, "idx";
+  Global, "type_structure";
+  Global, "asio_get_current_context_idx";
+  Global, "asio_get_running_in_context";
+  Global, "asio_get_running";
+  Global, "xenon_get_data";
+  Global, "thread_memory_stats";
+  Global, "thread_mark_stack";
+  Global, "objprof_get_strings";
+  Global, "objprof_get_data";
+  Global, "objprof_get_paths";
+  Global, "heapgraph_create";
+  Global, "heapgraph_stats";
+  Global, "heapgraph_foreach_node";
+  Global, "heapgraph_foreach_edge";
+  Global, "heapgraph_foreach_root";
+  Global, "heapgraph_dfs_nodes";
+  Global, "heapgraph_dfs_edges";
+  Global, "heapgraph_node";
+  Global, "heapgraph_edge";
+  Global, "heapgraph_node_in_edges";
+  Global, "heapgraph_node_out_edges";
+  Global, "server_warmup_status";
+  Global, "dict";
+  Global, "vec";
+  Global, "keyset";
+  Global, "varray";
+  Global, "darray";
+  Global, "is_vec";
+  Global, "is_dict";
+  Global, "is_keyset";
+  Global, "is_varray";
+  Global, "is_darray";
 ]
 let autoimport_types = [
-  "typename";
-  "classname";
-  "TypeStructure";
+  Global, "typename";
+  Global, "classname";
+  Global, "TypeStructure";
 ]
 let autoimport_consts = [
-  "Rx\\IS_ENABLED";
+  HH, "Rx\\IS_ENABLED";
 ]
 
-let autoimport_set =
-  let autoimport_list
-    = autoimport_classes @ autoimport_funcs @ autoimport_types @ autoimport_consts in
-  List.fold_left autoimport_list ~init:SSet.empty ~f:(fun s e -> SSet.add e s)
+let autoimport_map =
+  let autoimport_list =
+    autoimport_classes @
+    autoimport_funcs @
+    autoimport_types @
+    autoimport_consts
+  in
+  List.fold_left autoimport_list ~init:SMap.empty ~f:(fun m (ns, id) -> SMap.add id ns m)
 
 (* Return the namespace (or None if the global one) into which id is auto imported.
  * Return false as first value if it is not auto imported
  *)
 let get_autoimport_name_namespace id =
-  if SN.Typehints.is_reserved_global_name id
-  then (true, None)
+  if SN.Typehints.is_reserved_global_name id then
+    Some (Global, Global)
+  else if SN.Typehints.is_reserved_hh_name id then
+    Some (Global, HH)
+  else if SMap.mem id autoimport_map then
+    Some (SMap.find id autoimport_map, HH)
   else
-  if SN.Typehints.is_reserved_hh_name id ||
-     SSet.mem id autoimport_set
-  then (true, Some "HH")
-  else (false, None)
+    None
 
 (* NOTE that the runtime is able to distinguish between class and
    function names when auto-importing *)
 let is_autoimport_name id =
-  fst (get_autoimport_name_namespace id)
+  get_autoimport_name_namespace id <> None
 
 let is_always_global_function =
   let h = HashSet.create 23 in
@@ -257,13 +269,18 @@ let elaborate_id_impl ~autoimport nsenv kind id =
         elaborate_into_current_ns nsenv id
       else
         match get_autoimport_name_namespace id with
-        | false, _ ->
+        | None ->
           elaborate_into_current_ns nsenv id
-        | true, ns_name ->
-          if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt
-            && (kind = ElaborateClass || kind = ElaborateConst)
-          then elaborate_into_ns ns_name id
-          else global_id
+        | Some (typechecker_ns, compiler_ns) ->
+          let ns =
+            if ParserOptions.enable_hh_syntax_for_hhvm nsenv.ns_popt
+            then compiler_ns
+            else typechecker_ns
+          in
+          begin match ns with
+          | Global -> elaborate_into_ns None id
+          | HH -> elaborate_into_ns (Some "HH") id
+          end
     in
     false, fq_id
 

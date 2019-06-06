@@ -2227,13 +2227,19 @@ const Object& Generator::getObject(const ObjectType& type) const {
     // Otherwise if the type has external linkage, look for any type in any
     // compilation unit (with external linkage) with the same name and having a
     // complete definition.
-    if (type.name.linkage != ObjectTypeName::Linkage::internal) {
-      for (auto const& key : keys) {
-        if (key.object_id == type.key.object_id) continue;
-        auto other = m_parser->getObject(key);
-        if (other.incomplete) continue;
-        return insert(std::move(other));
-      }
+    if (type.name.linkage == ObjectTypeName::Linkage::internal) {
+      // Newer clang seems to split some types into different units,
+      // or at least we are not able to tell that they are the same.
+      std::cerr << "gen-type-scanners: warning: "
+        "No matching type found for internal linkage type " <<
+        type.name.name << " in same compile unit.  "
+        "Trying other compile units." << std::endl;
+    }
+    for (auto const& key : keys) {
+      if (key.object_id == type.key.object_id) continue;
+      auto other = m_parser->getObject(key);
+      if (other.incomplete) continue;
+      return insert(std::move(other));
     }
   }
 

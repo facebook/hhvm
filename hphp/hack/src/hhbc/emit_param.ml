@@ -55,9 +55,9 @@ let get_hint_display_name hint =
    Return None when hint_type and default_value matches (in hh mode,
    "class" type matches anything). If not, return default_value type string
    for printing fatal parse error *)
-let match_default_and_hint is_hh_file hint_type param_expr =
+let match_default_and_hint hint_type param_expr =
   match param_expr, hint_type with
-  | _, "class" when is_hh_file -> None
+  | _, "class" -> None
   | Some (_, A.True), "bool"
   | Some (_, A.False), "bool" -> None
   | Some (_, A.True), _
@@ -82,7 +82,6 @@ let default_type_check param_name param_type_info param_expr =
     Option.bind hint_type
       (fun hint_type ->
         match_default_and_hint
-          (Emit_env.is_hh_syntax_enabled ())
           hint_type param_expr) in
   let param_true_name = Hhbc_string_utils.Locals.strip_dollar param_name in
   Option.bind default_type

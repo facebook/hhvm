@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/jit/frequency-profile.h"
 
 namespace HPHP {
 
@@ -52,8 +51,19 @@ struct CallTargetProfile {
 
   void deserialize(ProfDataDeserializer&);
 
-private:
-  FrequencyProfile<FuncId, 3, InvalidFuncId> m_profile;
+ private:
+  struct Entry {
+    FuncId   funcId{InvalidFuncId};
+    uint32_t count{0};
+  };
+
+  void init();
+
+  static const size_t kMaxEntries = 3;
+
+  Entry    m_entries[kMaxEntries];
+  uint32_t m_untracked{0};
+  bool     m_init{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

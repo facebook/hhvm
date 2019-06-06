@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_JIT_ARRAY_OFFSET_PROFILE_H_
 #define incl_HPHP_JIT_ARRAY_OFFSET_PROFILE_H_
 
-#include "hphp/runtime/vm/jit/frequency-profile.h"
-
 #include <folly/Optional.h>
 
 #include <cstdint>
@@ -58,7 +56,33 @@ struct ArrayOffsetProfile {
   std::string toString() const;
 
 private:
-  FrequencyProfile<int32_t, 4, -1> m_profile;
+  /*
+   * Initialize the samples.
+   *
+   * The default `pos' values need to be -1, but since this is stored in RDS,
+   * we need to manually initialize.
+   */
+  void init();
+
+  /*
+   * Update the profile for `pos' by `count'.
+   *
+   * Returns whether or not we were able to account for the update precisely.
+   */
+  bool update(int32_t pos, uint32_t count);
+
+private:
+  struct Line {
+    int32_t pos{-1};
+    uint32_t count{0};
+  };
+
+  static const size_t kNumTrackedSamples = 4;
+
+private:
+  Line m_hits[kNumTrackedSamples];
+  uint32_t m_untracked{0};
+  bool m_init{false};
 };
 
 ///////////////////////////////////////////////////////////////////////////////

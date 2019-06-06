@@ -5348,10 +5348,6 @@ and call ~(expected: expected_ty option) ?method_call_info pos env fty el uel =
             }) in
           ftys := TUtils.add_function_type env fty !ftys;
           env, tel, tuel, ty)
-    | _, Tarraykind _ when not (Partial.should_check_error (Env.get_mode env) 4009) ->
-      (* Relaxing call_user_func to work with an array in partial mode *)
-      let env = call_untyped_unpack env uel in
-      env, [], [], (Reason.Rnone, Typing_utils.tany env)
     | ty ->
       bad_call env pos ty;
       let env = call_untyped_unpack env uel in

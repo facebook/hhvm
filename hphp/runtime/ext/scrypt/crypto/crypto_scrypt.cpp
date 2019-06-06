@@ -3,6 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010-present Facebook, Inc. (http://www.facebook.com)  |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -14,20 +15,13 @@
    +----------------------------------------------------------------------+
 */
 
-#pragma once
+#include "hphp/runtime/ext/scrypt/crypto/crypto_scrypt.h"
 
-#include <folly/portability/Memory.h>
+#include <sodium.h>
 
-namespace folly_ext {
-
-// Replace this once folly has public access to aligned allocation (intended to
-// look something like std::make_unique<>).
-inline void* aligned_malloc(size_t size, size_t alignment) {
-  return folly::detail::aligned_malloc(size, alignment);
-}
-
-inline void aligned_free(void* ptr) {
-  folly::detail::aligned_free(ptr);
-}
-
+int crypto_scrypt(const uint8_t* password, size_t pwlen, const uint8_t* salt,
+                  size_t saltlen, uint64_t N, uint32_t r, uint32_t p,
+                  uint8_t* buf, size_t buflen) {
+  return crypto_pwhash_scryptsalsa208sha256_ll(password, pwlen, salt, saltlen,
+                                               N, r, p, buf, buflen);
 }

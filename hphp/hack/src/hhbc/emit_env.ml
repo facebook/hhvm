@@ -138,31 +138,31 @@ let with_rx_body rx_body env =
   { env with env_in_rx_body = rx_body }
 
 let do_in_loop_body break_label continue_label ?iter env s f =
-  Jump_targets.with_loop (!is_hh_file_) break_label continue_label
+  Jump_targets.with_loop break_label continue_label
     iter env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_switch_body end_label env s f =
-  Jump_targets.with_switch (!is_hh_file_) end_label
+  Jump_targets.with_switch end_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_try_body finally_label env s f =
-  Jump_targets.with_try (!is_hh_file_) finally_label
+  Jump_targets.with_try finally_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_finally_body env s f =
-  Jump_targets.with_finally (!is_hh_file_)
+  Jump_targets.with_finally
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_in_using_body finally_label env s f =
-  Jump_targets.with_using (!is_hh_file_) finally_label
+  Jump_targets.with_using finally_label
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s
 
 let do_function (env : t) (s : Tast.program) f =
-  Jump_targets.with_function (!is_hh_file_)
+  Jump_targets.with_function
     env.env_jump_targets s @@
     fun env_jump_targets s -> f { env with env_jump_targets } s

@@ -21,24 +21,24 @@ let get_function_has_goto () = !function_has_goto_
 let set_labels_in_function s = labels_in_function_ := s
 let set_function_has_goto f = function_has_goto_ := f
 
-let rec collect_valid_target_labels_aux is_hh_file acc s =
+let rec collect_valid_target_labels_aux acc s =
   match snd s with
   | T.Unsafe_block block
   | T.Block block ->
-    collect_valid_target_labels_for_block_aux is_hh_file acc block
+    collect_valid_target_labels_for_block_aux acc block
   (* can jump into the try block but not to finally *)
   | T.Try (block, cl, _) ->
-    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc block in
+    let acc = collect_valid_target_labels_for_block_aux acc block in
     List.fold_left
       cl
       ~init:acc
       ~f:(fun acc (_, _, block) ->
-        collect_valid_target_labels_for_block_aux is_hh_file acc block)
+        collect_valid_target_labels_for_block_aux acc block)
   | T.GotoLabel (_, s) ->
     SSet.add s acc
   | T.If (_, then_block, else_block) ->
-    let acc = collect_valid_target_labels_for_block_aux is_hh_file acc then_block in
-    collect_valid_target_labels_for_block_aux is_hh_file acc else_block
+    let acc = collect_valid_target_labels_for_block_aux acc then_block in
+    collect_valid_target_labels_for_block_aux acc else_block
   | T.Let _
   | T.Fallthrough
   | T.Expr _
@@ -62,39 +62,39 @@ let rec collect_valid_target_labels_aux is_hh_file acc s =
      correctness of the target *)
   | T.While (_, block)
   | T.Using { T.us_block = block; _ } ->
-    collect_valid_target_labels_for_block_aux is_hh_file acc block
+    collect_valid_target_labels_for_block_aux acc block
   | T.Switch (_, cl) ->
-    collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl
+    collect_valid_target_labels_for_switch_cases_aux acc cl
 
-and collect_valid_target_labels_for_block_aux is_hh_file acc block =
-  List.fold_left block ~init:acc ~f:(collect_valid_target_labels_aux is_hh_file)
+and collect_valid_target_labels_for_block_aux acc block =
+  List.fold_left block ~init:acc ~f:(collect_valid_target_labels_aux)
 
-and collect_valid_target_labels_for_switch_cases_aux is_hh_file acc cl =
+and collect_valid_target_labels_for_switch_cases_aux acc cl =
   List.fold_left cl ~init:acc ~f:(fun acc s ->
     match s with
     | T.Default block
-    | T.Case (_, block) -> collect_valid_target_labels_for_block_aux is_hh_file acc block)
+    | T.Case (_, block) -> collect_valid_target_labels_for_block_aux acc block)
 
-let rec collect_valid_target_labels_for_def_aux is_hh_file acc def =
+let rec collect_valid_target_labels_for_def_aux acc def =
   match def with
-  | T.Stmt s -> collect_valid_target_labels_aux is_hh_file acc s
-  | T.Namespace (_, defs) -> collect_valid_target_labels_for_defs_aux is_hh_file acc defs
+  | T.Stmt s -> collect_valid_target_labels_aux acc s
+  | T.Namespace (_, defs) -> collect_valid_target_labels_for_defs_aux acc defs
   | _ -> acc
 
-and collect_valid_target_labels_for_defs_aux is_hh_file acc defs =
-  List.fold_left defs ~init:acc ~f:(collect_valid_target_labels_for_def_aux is_hh_file)
+and collect_valid_target_labels_for_defs_aux acc defs =
+  List.fold_left defs ~init:acc ~f:(collect_valid_target_labels_for_def_aux)
 
-let collect_valid_target_labels_for_stmt is_hh_file s =
+let collect_valid_target_labels_for_stmt s =
   if not (!function_has_goto_) then SSet.empty
-  else collect_valid_target_labels_aux is_hh_file SSet.empty s
+  else collect_valid_target_labels_aux SSet.empty s
 
-let collect_valid_target_labels_for_defs is_hh_file defs =
+let collect_valid_target_labels_for_defs defs =
   if not (!function_has_goto_) then SSet.empty
-  else collect_valid_target_labels_for_defs_aux is_hh_file SSet.empty defs
+  else collect_valid_target_labels_for_defs_aux SSet.empty defs
 
-let collect_valid_target_labels_for_switch_cases is_hh_file cl =
+let collect_valid_target_labels_for_switch_cases cl =
   if not (!function_has_goto_) then SSet.empty
-  else collect_valid_target_labels_for_switch_cases_aux is_hh_file SSet.empty cl
+  else collect_valid_target_labels_for_switch_cases_aux SSet.empty cl
 
 type loop_labels =
 { label_break: Label.t
@@ -218,36 +218,36 @@ let run_and_release_ids _labels f s t =
   (* SSet.iter (fun l -> release_id (Label.Named l)) labels; *)
   r
 
-let with_loop is_hh_file label_break label_continue iterator t s f =
-  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+let with_loop label_break label_continue iterator t s f =
+  let labels = collect_valid_target_labels_for_stmt s in
   Loop ({ label_break; label_continue; iterator }, labels) :: t
   |> run_and_release_ids labels f s
 
-let with_switch is_hh_file end_label t (cl : T.case list) f =
-  let labels = collect_valid_target_labels_for_switch_cases is_hh_file cl in
+let with_switch end_label t (cl : T.case list) f =
+  let labels = collect_valid_target_labels_for_switch_cases cl in
   (* CONSIDER: now HHVM eagerly reserves state id for the switch end label
     which does not seem to be necessary - do it for now for HHVM compatibility *)
   let _ = get_id_for_label end_label in
   Switch (end_label, labels) :: t
   |> run_and_release_ids labels f ()
 
-let with_try is_hh_file finally_label t s f =
-  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+let with_try finally_label t s f =
+  let labels = collect_valid_target_labels_for_stmt s in
   TryFinally (finally_label, labels) :: t
   |> run_and_release_ids labels f s
 
-let with_finally is_hh_file t (s : T.stmt) f =
-  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+let with_finally t (s : T.stmt) f =
+  let labels = collect_valid_target_labels_for_stmt s in
   Finally labels :: t
   |> run_and_release_ids labels f s
 
-let with_function is_hh_file t s f =
-  let labels = collect_valid_target_labels_for_defs is_hh_file s in
+let with_function t s f =
+  let labels = collect_valid_target_labels_for_defs s in
   (Function labels :: t)
   |> run_and_release_ids labels f s
 
-let with_using is_hh_file finally_label t s f =
-  let labels = collect_valid_target_labels_for_stmt is_hh_file s in
+let with_using finally_label t s f =
+  let labels = collect_valid_target_labels_for_stmt s in
   Using (finally_label, labels) :: t
   |> run_and_release_ids labels f s
 

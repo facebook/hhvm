@@ -99,7 +99,6 @@ type env =
   ; level                : error_level
   ; hhvm_compat_mode     : hhvm_compat_mode
   ; enable_hh_syntax     : bool
-  ; is_strict            : bool
   ; codegen              : bool
   ; hhi_mode             : bool
   ; parser_options       : ParserOptions.t
@@ -129,7 +128,6 @@ let make_env
     ; level
     ; hhvm_compat_mode
     ; enable_hh_syntax
-    ; is_strict = SyntaxTree.is_strict syntax_tree
     ; codegen
     ; hhi_mode
     ; parser_options
@@ -146,11 +144,6 @@ let file_mode env =
   match SyntaxTree.mode env.syntax_tree with
   | Some mode -> mode
   | None -> FileInfo.Mstrict
-
-let is_strict env =
-  match SyntaxTree.mode env.syntax_tree with
-  | Some mode -> FileInfo.is_strict mode
-  | None -> false
 
 let global_namespace_name = "\\"
 
@@ -1948,8 +1941,7 @@ let redeclaration_errors env node parents namespace_name names errors =
         { names with
           t_functions = strmap_add function_name def names.t_functions }, errors
       | _ ->
-        (* Only check this in strict mode. *)
-        if not (is_typechecker env && is_strict env) then names, errors else
+        if not (is_typechecker env) then names, errors else
         let error = make_error_from_node
           ~error_type:SyntaxError.ParseError
           node

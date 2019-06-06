@@ -405,7 +405,6 @@ type instruct_base =
 
 type instruct_final =
   | QueryM of num_params * QueryOp.t * MemberKey.t
-  | VGetM of num_params * MemberKey.t
   | SetM of num_params * MemberKey.t
   | IncDecM of num_params * incdec_op * MemberKey.t
   | SetOpM of num_params  * eq_op * MemberKey.t

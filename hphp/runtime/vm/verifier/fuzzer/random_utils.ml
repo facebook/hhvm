@@ -278,7 +278,6 @@ let base_instrs (fn : IS.t) : lazy_instruct list =
 let final_instrs (_ : IS.t) : lazy_instruct list =
   [(fun () -> IFinal (QueryM (Random.int 10,
     random_query_op (), random_key ())));
-   (fun () -> IFinal (VGetM (Random.int 10, random_key ())));
    (fun () -> IFinal (SetM (Random.int 10, random_key ())));
    (fun () -> IFinal (IncDecM (Random.int 10,
      random_incdec_op (), random_key ())));

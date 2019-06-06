@@ -109,7 +109,6 @@ let stk_data : instruct -> stack_sig = function
   | ILitConst NewPackedArray n             -> produce "C" n, ["C"]
   | IFinal SetOpM (n, _, _)
   | IFinal SetM (n, _)                     -> produce "C" (n + 1), ["C"]
-  | IFinal VGetM (n, _)                    -> produce "C" n, ["V"]
   | IFinal UnsetM (n, _)                   -> produce "C" n, []
   | ILitConst NewStructArray v             -> produce "C" (List.length v), ["C"]
   | IMisc Idx

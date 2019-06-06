@@ -414,9 +414,6 @@ let string_of_final instruction =
   | QueryM (n, op, mk) ->
     sep ["QueryM";
       string_of_int n; QueryOp.to_string op; string_of_member_key mk]
-  | VGetM (n, mk) ->
-    sep ["VGetM";
-      string_of_int n; string_of_member_key mk]
   | UnsetM (n, mk) ->
     sep ["UnsetM";
       string_of_int n; string_of_member_key mk]

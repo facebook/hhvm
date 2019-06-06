@@ -385,11 +385,10 @@ let is_isexp_op lower_fq_id: Aast.hint option =
   | "hh\\is_vec" -> Some (h "vec")
   | _ -> None
 
-let get_queryMOpMode need_ref op =
+let get_queryMOpMode op =
   match op with
   | QueryOp.InOut -> MemberOpMode.InOut
   | QueryOp.CGet -> MemberOpMode.Warn
-  | QueryOp.Empty when need_ref -> MemberOpMode.Define
   | _ -> MemberOpMode.ModeNone
 
 (* Returns either Some (index, is_soft) or None *)
@@ -2420,7 +2419,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
     get_local_temp_kind ~is_base:false inout_param_info env opt_elem_expr in
   let mode =
     if null_coalesce_assignment then MemberOpMode.Warn
-    else Option.value mode ~default:(get_queryMOpMode false qop) in
+    else Option.value mode ~default:(get_queryMOpMode qop) in
   let querym_n_unpopped = ref None in
   let elem_expr_instrs, elem_stack_size =
     emit_elem_instrs ~local_temp_kind ~null_coalesce_assignment env opt_elem_expr in
@@ -2522,7 +2521,7 @@ and emit_array_get_worker ?(null_coalesce_assignment=false) ?(no_final=false) ?m
 
 (* Emit code for e1->e2 or e1?->e2 or isset(e1->e2).
  *)
-and emit_obj_get ?(null_coalesce_assignment=false) ?(arg_by_ref=false)
+and emit_obj_get ?(null_coalesce_assignment=false)
   env pos qop (expr : A.expr) (prop : A.expr) null_flavor =
   let (annot, expr_) = expr in
   match expr_ with
@@ -2537,7 +2536,7 @@ and emit_obj_get ?(null_coalesce_assignment=false) ?(arg_by_ref=false)
     | _ ->
       let mode =
         if null_coalesce_assignment then MemberOpMode.Warn
-        else get_queryMOpMode arg_by_ref qop in
+        else get_queryMOpMode qop in
       let mk, prop_expr_instrs, prop_stack_size =
         emit_prop_expr ~null_coalesce_assignment env null_flavor 0 prop in
       let base_expr_instrs_begin,
@@ -2549,15 +2548,8 @@ and emit_obj_get ?(null_coalesce_assignment=false) ?(arg_by_ref=false)
           env mode prop_stack_size expr
       in
       let total_stack_size = prop_stack_size + base_stack_size in
-      let final_instr =
-        instr (IFinal (
-          if arg_by_ref then
-            VGetM (total_stack_size, mk)
-          else if null_coalesce_assignment then
-            QueryM (0, qop, mk)
-          else
-            QueryM (total_stack_size, qop, mk)
-        )) in
+      let num_params = if null_coalesce_assignment then 0 else total_stack_size in
+      let final_instr = instr (IFinal (QueryM (num_params, qop, mk))) in
       let querym_n_unpopped =
         if null_coalesce_assignment then Some total_stack_size else None in
       let instr =
@@ -3099,16 +3091,15 @@ and emit_args_and_inout_setters env (args: A.expr list) =
       | A.Array_get _ ->
         Emit_fatal.raise_fatal_parse pos
           "references of subscript expressions should not parse"
-      | A.Class_get (cid, id) ->
-        let env = { env with Emit_env.env_allows_array_append = true } in
-        emit_class_get env QueryOp.CGet cid id
+      | A.Class_get _ ->
+        Emit_fatal.raise_fatal_parse pos
+          "references of static properties should not parse"
       | A.Lvar id ->
         emit_pos_then pos @@
         emit_local ~notice:Notice ~need_ref:true env id
-      | A.Obj_get (obj, prop, nullflavor) ->
-        let env = { env with Emit_env.env_allows_array_append = true } in
-        fst (emit_obj_get ~arg_by_ref:true env pos QueryOp.Empty obj prop
-          nullflavor)
+      | A.Obj_get _ ->
+        Emit_fatal.raise_fatal_parse pos
+          "references of instance properties should not parse"
       (* passed by value *)
       | _ -> emit_expr env expr
       end,

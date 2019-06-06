@@ -380,7 +380,6 @@ let mut_imms (is : IS.t) : IS.t =
     match s with
     | QueryM  (i, op, k) ->
         QueryM (mutate_int i !mag,   mutate_op      op,      mutate_key k !mag)
-    | VGetM   (i,     k) -> VGetM   (mutate_int i  !mag,     mutate_key k !mag)
     | SetM    (i,     k) -> SetM    (mutate_int i  !mag,     mutate_key k !mag)
     | IncDecM (i, op, k) -> IncDecM (mutate_int i  !mag, op, mutate_key k !mag)
     | SetOpM  (i, op, k) -> SetOpM  (mutate_int i  !mag, op, mutate_key k !mag)

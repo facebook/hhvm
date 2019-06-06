@@ -849,8 +849,7 @@ let rec convert_expr env st (p, expr_ as expr) =
       let st, el3 = convert_exprs env st el3 in
       st, (p, Call (ct, e, targs, el2, el3))
   | Call (_, (_, Id (_, id)), _, es, _)
-    when String.lowercase id = "tuple" &&
-      Emit_env.is_hh_syntax_enabled () ->
+    when String.lowercase id = "tuple" ->
     convert_expr env st (p, Varray (None, es))
   | Call (ct, e, targs, el2, el3) ->
     let st, e = convert_expr env st e in

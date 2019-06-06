@@ -430,6 +430,17 @@ void HttpServer::runOrExitProcess() {
     createPid();
     Lock lock(this);
     BootStats::done();
+    // Play extended warmup requests after server starts running.
+    if (isJitSerializing(RuntimeOption::EvalJitSerdesMode) &&
+        RuntimeOption::ServerExtendedWarmupThreadCount > 0 &&
+        !RuntimeOption::ServerExtendedWarmupRequests.empty()) {
+      auto const threadCount = RuntimeOption::ServerExtendedWarmupThreadCount;
+      auto const delay = RuntimeOption::ServerExtendedWarmupDelaySeconds;
+      auto const nTimes = RuntimeOption::ServerExtendedWarmupRepeat;
+      InternalWarmupRequestPlayer{threadCount}.
+        runAfterDelay(RuntimeOption::ServerExtendedWarmupRequests,
+                      nTimes, delay);
+    }
     // continously running until /stop is received on admin server, or
     // takeover is requested.
     while (!m_stopped) {

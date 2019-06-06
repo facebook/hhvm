@@ -246,7 +246,11 @@ struct RuntimeOption {
   static bool ServerForkLogging;
   static bool ServerWarmupConcurrently;
   static int ServerWarmupThreadCount;
+  static int ServerExtendedWarmupThreadCount;
+  static unsigned ServerExtendedWarmupRepeat;
+  static unsigned ServerExtendedWarmupDelaySeconds;
   static std::vector<std::string> ServerWarmupRequests;
+  static std::vector<std::string> ServerExtendedWarmupRequests;
   static std::string ServerCleanupRequest;
   static int ServerInternalWarmupThreads;
   static boost::container::flat_set<std::string> ServerHighPriorityEndPoints;

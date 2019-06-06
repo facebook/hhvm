@@ -571,7 +571,11 @@ bool RuntimeOption::ServerForkEnabled = true;
 bool RuntimeOption::ServerForkLogging = false;
 bool RuntimeOption::ServerWarmupConcurrently = false;
 int RuntimeOption::ServerWarmupThreadCount = 1;
+int RuntimeOption::ServerExtendedWarmupThreadCount = 1;
+unsigned RuntimeOption::ServerExtendedWarmupRepeat = 1;
+unsigned RuntimeOption::ServerExtendedWarmupDelaySeconds = 60;
 std::vector<std::string> RuntimeOption::ServerWarmupRequests;
+std::vector<std::string> RuntimeOption::ServerExtendedWarmupRequests;
 std::string RuntimeOption::ServerCleanupRequest;
 int RuntimeOption::ServerInternalWarmupThreads = 0;
 boost::container::flat_set<std::string>
@@ -1986,8 +1990,18 @@ void RuntimeOption::Load(
     Config::Bind(ServerWarmupConcurrently, ini, config,
                  "Server.WarmupConcurrently", false);
     Config::Bind(ServerWarmupThreadCount, ini, config,
-                 "Server.WarmupThreadCount", 1);
+                 "Server.WarmupThreadCount", ServerWarmupThreadCount);
+    Config::Bind(ServerExtendedWarmupThreadCount, ini, config,
+                 "Server.ExtendedWarmup.ThreadCount",
+                 ServerExtendedWarmupThreadCount);
+    Config::Bind(ServerExtendedWarmupDelaySeconds, ini, config,
+                 "Server.ExtendedWarmup.DelaySeconds",
+                 ServerExtendedWarmupDelaySeconds);
+    Config::Bind(ServerExtendedWarmupRepeat, ini, config,
+                 "Server.ExtendedWarmup.Repeat", ServerExtendedWarmupRepeat);
     Config::Bind(ServerWarmupRequests, ini, config, "Server.WarmupRequests");
+    Config::Bind(ServerExtendedWarmupRequests, ini, config,
+                 "Server.ExtendedWarmup.Requests");
     Config::Bind(ServerCleanupRequest, ini, config, "Server.CleanupRequest");
     Config::Bind(ServerInternalWarmupThreads, ini, config,
                  "Server.InternalWarmupThreads", 0);  // 0 = skip

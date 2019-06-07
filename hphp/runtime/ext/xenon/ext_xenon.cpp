@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/util/struct-log.h"
+#include "hphp/util/sync-signal.h"
 #include "hphp/util/thread-local.h"
 
 #include <signal.h>
@@ -146,7 +147,7 @@ Array parsePhpStack(const Array& bt) {
 // If in always on mode, the Xenon Surprise flags have to be on for each thread
 // and are never cleared.
 // For timer mode, when start is invoked, it adds a new timer to the existing
-// handler for SIGVTALRM.
+// handler for SIGPROF.
 
 Xenon& Xenon::getInstance() noexcept {
   static Xenon instance;
@@ -166,6 +167,13 @@ void Xenon::incrementMissedSampleCount(ssize_t val) {
 int64_t Xenon::getAndClearMissedSampleCount() {
     return std::atomic_exchange<int64_t>(&m_missedSampleCount, 0);
 }
+
+static void onXenonTimer(int signo) {
+  if (signo == SIGPROF) {
+    Xenon::getInstance().onTimer();
+  }
+}
+
 // XenonForceAlwaysOn is active - it doesn't need a timer, it is always on.
 // Xenon needs to be started once per process.
 // The number of milliseconds has to be greater than zero.
@@ -194,9 +202,10 @@ void Xenon::start(uint64_t msec) {
 
     sigevent sev={};
     sev.sigev_notify = SIGEV_SIGNAL;
-    sev.sigev_signo = SIGVTALRM;
-    sev.sigev_value.sival_ptr = nullptr; // null for Xenon signals
+    sev.sigev_signo = SIGPROF;
     timer_create(CLOCK_REALTIME, &sev, &m_timerid);
+
+    sync_signal(SIGPROF, onXenonTimer);
 
     itimerspec ts={};
     ts.it_value.tv_sec = fSec;
@@ -367,7 +376,7 @@ bool HHVM_FUNCTION(xenon_get_is_profiled_request, void) {
 }
 
 struct xenonExtension final : Extension {
-  xenonExtension() : Extension("xenon", "1.0") { }
+  xenonExtension() : Extension("xenon", "2.0") { }
 
   void moduleInit() override {
     HHVM_FALIAS(HH\\xenon_get_data, xenon_get_data);

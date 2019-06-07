@@ -29,12 +29,11 @@
   stack at that time (ie it flashes the code).
 
   How does it work?
-  There are two ways for Xenon to work: 1) always on, 2) via timer.
-  For the timer mode:  Xenon appends a timer to the already existing SIGVTALRM
-  handler.  When that timer fires it sets a semaphore so that others may
-  know.  We'd like to be able to record the status of every stack for every
-  thread at this point, but during a timer handler is not a reasonable place
-  to do this.
+  There are two ways for Xenon to work: 1) always on, 2) via timer. For the
+  timer mode: Xenon starts a timer that raises SIGPROF periodically. When that
+  timer fires it sets a semaphore so that others may know. We'd like to be able
+  to record the status of every stack for every thread at this point, but during
+  a timer handler is not a reasonable place to do this.
   Instead, Xenon has a pthread waiting for the semaphore.  When the semaphore
   is set in the handler, it wakes, sets the Xenon Surprise flag for every
   thread - this is the flash.

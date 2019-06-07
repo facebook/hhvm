@@ -34,20 +34,25 @@ let register_namespace (namespace: string): unit =
   let _ = Core_kernel.List.fold elem_list ~init:root_namespace
     ~f:(fun current_node leaf_name ->
 
-    (* Ignore trailing backslashes *)
+    (* Ignore extra backslashes *)
     if leaf_name <> "" then begin
 
       (* Check to see if this leaf exists within the current node *)
-      match Hashtbl.find_opt current_node.nss_children leaf_name with
+      let leaf_lc = String.lowercase_ascii leaf_name in
+      match Hashtbl.find_opt current_node.nss_children leaf_lc with
       | Some matching_leaf ->
         matching_leaf
       | None ->
         let new_node = {
           nss_name = leaf_name;
-          nss_full_namespace = current_node.nss_full_namespace ^ "\\" ^ leaf_name;
+          nss_full_namespace =
+            if current_node.nss_full_namespace = "\\" then
+              "\\" ^ leaf_name
+            else
+              current_node.nss_full_namespace ^ "\\" ^ leaf_name;
           nss_children = Hashtbl.create 0;
         } in
-        Hashtbl.add current_node.nss_children leaf_name new_node;
+        Hashtbl.add current_node.nss_children leaf_lc new_node;
         new_node
     end else current_node
   ) in
@@ -60,52 +65,57 @@ let find_exact_match (namespace: string): nss_node =
   if namespace = "" || namespace = "\\" then begin
     root_namespace
   end else begin
-    let elem_list = String.split_on_char '\\' namespace in
+    let elem_list = String.split_on_char '\\'
+      (String.lowercase_ascii namespace) in
     Core_kernel.List.fold elem_list ~init:root_namespace
       ~f:(fun current_node leaf_name ->
 
       (* Check to see if this leaf exists within the current node *)
-      match Hashtbl.find_opt current_node.nss_children leaf_name with
-      | Some matching_leaf -> matching_leaf;
-      | None -> raise Not_found
+      if leaf_name <> "" then begin
+        match Hashtbl.find_opt current_node.nss_children leaf_name with
+        | Some matching_leaf -> matching_leaf;
+        | None -> raise Not_found
+      end else current_node
     )
   end
 
-
 (* Find all namespaces that match this prefix *)
 let find_matching_namespaces (query_text: string): si_results =
-  let elem_list = String.split_on_char '\\' query_text in
+  let elem_list = String.split_on_char '\\'
+    (String.lowercase_ascii query_text) in
   let current_node = ref root_namespace in
   let reached_end = ref false in
   let matches = ref [] in
-  Core_kernel.List.iter elem_list ~f:(fun leaf_name -> begin
+  Core_kernel.List.iter elem_list ~f:(fun leaf_name ->
 
-        (* If we've already reached the end of matches, offer no more *)
-        if !reached_end then begin
-          matches := [];
-        end else begin
+    (* If we've already reached the end of matches, offer no more *)
+    if !reached_end then begin
+      matches := [];
+    end else begin
+      if leaf_name <> "" then begin
 
-          (* Check to see if this leaf exists within the current node *)
-          match Hashtbl.find_opt !current_node.nss_children leaf_name with
-          | Some matching_leaf ->
-            current_node := matching_leaf;
-          | None ->
-            Hashtbl.iter (fun key _ ->
-                if Core_kernel.String.is_substring key ~substring:leaf_name then begin
-                  matches := {
-                    si_name = key;
-                    si_kind = SI_Namespace;
-                    si_filehash = 0L;
-                  } :: !matches;
-                end
-              ) !current_node.nss_children;
-            reached_end := true;
-        end
-      end);
+        (* Check to see if this leaf exists within the current node *)
+        match Hashtbl.find_opt !current_node.nss_children leaf_name with
+        | Some matching_leaf ->
+          current_node := matching_leaf;
+        | None ->
+          Hashtbl.iter (fun key _ ->
+              if Core_kernel.String.is_substring key ~substring:leaf_name then begin
+                let node = Hashtbl.find !current_node.nss_children key in
+                matches := {
+                  si_name = node.nss_name;
+                  si_kind = SI_Namespace;
+                  si_filehash = 0L;
+                } :: !matches;
+              end
+            ) !current_node.nss_children;
+          reached_end := true;
+      end
+    end
+  );
 
   (* Now take those matches and return them as a list *)
   !matches
-
 
 (*
  * Register a namespace alias, represented as a shortcut in the tree.
@@ -128,7 +138,7 @@ let register_alias (alias: string) (target_ns: string): unit =
       nss_full_namespace = target.nss_full_namespace;
       nss_children = target.nss_children;
     } in
-    Hashtbl.add source.nss_children name new_node;
+    Hashtbl.add source.nss_children (String.lowercase_ascii name) new_node;
   with Not_found ->
     Hh_logger.log "Unable to register namespace map for [%s] -> [%s]"
       alias target_ns;

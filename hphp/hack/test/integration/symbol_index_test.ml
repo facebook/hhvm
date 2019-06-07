@@ -4,6 +4,24 @@ open SearchUtils
 open Test_harness
 
 module Args = Test_harness_common_args
+module SA = Asserter.String_asserter
+module IA = Asserter.Int_asserter
+
+let assert_ns_matches
+  (expected_ns: string)
+  (actual: SearchUtils.si_results): unit =
+  let found = List.fold actual ~init:false ~f:(fun acc item ->
+    ((item.si_name = expected_ns) || acc)
+  ) in
+  if not found then begin
+    let results_str = List.fold actual ~init:"" ~f:(fun acc item ->
+      (acc ^ ";" ^ item.si_name)
+    ) in
+    let msg = Printf.sprintf "Did not find [%s] in [%s]"
+      expected_ns results_str in
+    IA.assert_equals 0 1 msg;
+  end;
+  ()
 
 let assert_autocomplete
     ~(query_text: string)
@@ -19,18 +37,18 @@ let assert_autocomplete
     ~env:!env in
 
   (* Verify correct number of results *)
-  Asserter.Int_asserter.assert_equals
+  IA.assert_equals
     expected (List.length results)
     (Printf.sprintf "Should be %d result(s) for [%s]" expected query_text);
   if (expected > 0) then begin
     let r = List.hd_exn results in
 
     (* Assert string match *)
-    Asserter.String_asserter.assert_equals query_text r.si_name
+    SA.assert_equals query_text r.si_name
       (Printf.sprintf "Should be able to find autocomplete for '%s'" query_text);
 
     (* Assert kind match *)
-    Asserter.Int_asserter.assert_equals (kind_to_int kind) (kind_to_int r.si_kind)
+    IA.assert_equals (kind_to_int kind) (kind_to_int r.si_kind)
       (Printf.sprintf "Mismatch in kind for '%s'" query_text);
   end;
 ;;
@@ -162,6 +180,73 @@ let test_builder_names (harness: Test_harness.t): bool =
   true
 ;;
 
+(* Ensure that the namespace map handles common use cases *)
+let test_namespace_map (harness: Test_harness.t): bool =
+  let open NamespaceSearchService in
+  let _ = harness in
+
+  (* Register a namespace and fetch it back exactly *)
+  register_namespace "HH\\Lib\\Str\\fb";
+  let ns = find_exact_match "HH" in
+  SA.assert_equals "\\HH" ns.nss_full_namespace "Basic match";
+  let ns = find_exact_match "HH\\Lib" in
+  SA.assert_equals "\\HH\\Lib" ns.nss_full_namespace "Basic match";
+  let ns = find_exact_match "HH\\Lib\\Str" in
+  SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Basic match";
+  let ns = find_exact_match "HH\\Lib\\Str\\fb" in
+  SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Basic match";
+
+  (* Fetch back case insensitive *)
+  let ns = find_exact_match "hh" in
+  SA.assert_equals "\\HH" ns.nss_full_namespace "Case insensitive";
+  let ns = find_exact_match "hh\\lib" in
+  SA.assert_equals "\\HH\\Lib" ns.nss_full_namespace "Case insensitive";
+  let ns = find_exact_match "hh\\lib\\str" in
+  SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Case insensitive";
+  let ns = find_exact_match "hh\\lib\\str\\FB" in
+  SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Case insensitive";
+
+  (* Register an alias and verify that it works as expected *)
+  register_alias "Str" "HH\\Lib\\Str";
+  let ns = find_exact_match "Str" in
+  SA.assert_equals "\\HH\\Lib\\Str" ns.nss_full_namespace "Alias search";
+  let ns = find_exact_match "Str\\fb" in
+  SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Alias search";
+
+  (* Register an alias with a leading backslash *)
+  register_alias "StrFb" "\\HH\\Lib\\Str\\fb";
+  let ns = find_exact_match "StrFb" in
+  SA.assert_equals "\\HH\\Lib\\Str\\fb" ns.nss_full_namespace "Alias search";
+
+  (* Add a new namespace under an alias, and make sure it's visible *)
+  register_namespace "StrFb\\SecureRandom";
+  let ns = find_exact_match "\\hh\\lib\\str\\fb\\securerandom" in
+  SA.assert_equals "\\HH\\Lib\\Str\\fb\\SecureRandom" ns.nss_full_namespace
+    "Late bound namespace";
+
+  (* Should always be able to find root *)
+  let ns = find_exact_match "\\" in
+  SA.assert_equals "\\" ns.nss_full_namespace "Find root";
+  let ns = find_exact_match "" in
+  SA.assert_equals "\\" ns.nss_full_namespace "Find root";
+  let ns = find_exact_match "\\\\" in
+  SA.assert_equals "\\" ns.nss_full_namespace "Find root";
+
+  (* Test partial matches *)
+  let matches = find_matching_namespaces "st" in
+  assert_ns_matches "Str" matches;
+
+  (* Assuming we're in a leaf node, find matches under that leaf node *)
+  let matches = find_matching_namespaces "StrFb\\Secu" in
+  assert_ns_matches "SecureRandom" matches;
+
+  (* Special case: empty string always provides zero matches *)
+  let matches = find_matching_namespaces "" in
+  IA.assert_equals 0 (List.length matches) "Empty string / zero matches";
+  true
+
+;;
+
 (* Main test suite *)
 let tests args =
   let harness_config = {
@@ -176,6 +261,9 @@ let tests args =
   ("test_builder_names", fun () ->
     Test_harness.run_test ~stop_server_in_teardown:false harness_config
     test_builder_names);
+  ("test_namespace_map", fun () ->
+    Test_harness.run_test ~stop_server_in_teardown:false harness_config
+    test_namespace_map);
   ]
 ;;
 

@@ -5,8 +5,8 @@ module TySet = Typing_set
 let local_env_size env =
   match Env.next_cont_opt env with
   | None -> 0
-  | Some locals ->
-    Local_id.Map.fold (fun _ (ty, _) size -> size + (Typing_utils.ty_size env ty)) locals 0
+  | Some Typing_per_cont_env.{ local_types; _ } ->
+    Local_id.Map.fold (fun _ (ty, _) size -> size + (Typing_utils.ty_size env ty)) local_types 0
 
 let ty_set_size env tyset =
   TySet.fold (fun ty size -> size + Typing_utils.ty_size env ty) tyset 0

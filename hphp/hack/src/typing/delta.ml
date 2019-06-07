@@ -10,7 +10,7 @@
 open Core_kernel
 
 module C = Typing_continuations
-module Cont = Typing_lenv_cont
+module Cont = Typing_per_cont_env
 module Env = Typing_env
 module LEnv = Typing_lenv
 module Reason = Typing_reason
@@ -22,7 +22,7 @@ module Reason = Typing_reason
  * It is essentially a map from local ids to types.
  * For now, we reuse Typing_env.local_id_map but this may change.
  *)
-type gamma = Env.local_id_map
+type gamma = Typing_per_cont_env.per_cont_entry
 (**
  * This type represents the structure refered to using the greek alphabet
  * letter 'delta' in the type system specification.
@@ -31,7 +31,7 @@ type gamma = Env.local_id_map
  *)
 type delta = gamma Typing_continuations.Map.t
 
-let empty_gamma : gamma = Env.empty_local_id_map
+let empty_gamma : gamma = Typing_per_cont_env.empty_entry
 let empty_delta : delta = Typing_continuations.Map.empty
 
 (* For now we dummify the local id, i.e. we replace the unique integer part of
@@ -54,7 +54,8 @@ let add_to_gamma local_id ty gamma =
   let local_id = dummify_local_id local_id in
   let pos_ty_to_local (p, (_r, ty)) = ((Reason.Rwitness p, ty), 0) in
   let ty = pos_ty_to_local ty in
-  Env.add_to_local_id_map local_id ty gamma
+  { gamma with Typing_per_cont_env.local_types =
+      Typing_local_types.add_to_local_types local_id ty gamma.Typing_per_cont_env.local_types }
 
 let get_cont = Cont.get_cont_option
 
@@ -86,6 +87,9 @@ let union env delta1 delta2 =
  * Apply a list of updates to a gamma.
  *)
 let update_gamma gamma (updates:gamma) =
-  Local_id.Map.fold Env.add_to_local_id_map updates gamma
+  let local_types = gamma.Typing_per_cont_env.local_types in
+  let updates = updates.Typing_per_cont_env.local_types in
+  { gamma with Typing_per_cont_env.local_types =
+    Local_id.Map.fold Typing_local_types.add_to_local_types updates local_types }
 
 let make_local_id (name:string) : Local_id.t = Local_id.make_unscoped name

@@ -19,10 +19,11 @@ open Type_parameter_env
 module Dep = Typing_deps.Dep
 module LID = Local_id
 module SG = SN.Superglobals
-module LEnvC = Typing_lenv_cont
+module LEnvC = Typing_per_cont_env
 module C = Typing_continuations
 module TL = Typing_logic
 module Cls = Decl_provider.Class
+module Fake = Typing_fake_members
 
 let show_env _ = "<env>"
 let pp_env _ _ = Printf.printf "%s\n" "<env>"
@@ -593,24 +594,15 @@ let get_tpenv_tparams env =
 (* Replace types for locals with empty environment *)
 let env_with_locals env locals =
   { env with lenv =
-    { env.lenv with local_types = locals; }
+    { env.lenv with per_cont_env = locals; }
   }
 
 let reinitialize_locals env =
   env_with_locals env LEnvC.initial_locals
 
-let empty_fake_members = {
-  last_call = None;
-  invalid   = SSet.empty;
-  valid     = SSet.empty;
-}
-
-let empty_local_id_map = Local_id.Map.empty
-
 let empty_local tpenv local_reactive = {
   tpenv = tpenv;
-  fake_members = empty_fake_members;
-  local_types = LEnvC.empty_locals;
+  per_cont_env = LEnvC.empty_locals;
   local_using_vars = LID.Set.empty;
   local_mutability = LID.Map.empty;
   local_reactive = local_reactive;
@@ -618,8 +610,7 @@ let empty_local tpenv local_reactive = {
 
 let initial_local tpenv local_reactive = {
   tpenv = tpenv;
-  fake_members = empty_fake_members;
-  local_types = LEnvC.initial_locals;
+  per_cont_env = LEnvC.initial_locals;
   local_using_vars = LID.Set.empty;
   local_mutability = LID.Map.empty;
   local_reactive = local_reactive;
@@ -953,115 +944,17 @@ let iter_anonymous env f =
   IMap.iter (fun _id (_, _, ftys, pos, _) ->
     let (untyped,typed) = !ftys in f pos (untyped @ typed)) env.genv.anons
 
-let get_last_call env =
-  match (env.lenv.fake_members).last_call with
-  | None -> assert false
-  | Some pos -> pos
-
-let rec lost_info fake_name env ty =
-  let info r = Reason.Rlost_info (fake_name, r, get_last_call env) in
-  match ty with
-  | _, Tvar v ->
-      let env, v' = get_var env v in
-      (match IMap.get v' env.tenv with
-      | None ->
-          env, ty
-      | Some ty ->
-          let env, ty = lost_info fake_name env ty in
-          let env = add env v ty in
-          env, ty
-      )
-  | r, Tunion tyl ->
-      let env, tyl = List.map_env env tyl (lost_info fake_name) in
-      env, (info r, Tunion tyl)
-  | r, ty ->
-      env, (info r, ty)
-
-let forget_members env call_pos =
-  let fake_members = env.lenv.fake_members in
-  let old_invalid = fake_members.invalid in
-  let new_invalid = fake_members.valid in
-  let new_invalid = SSet.union new_invalid old_invalid in
-  let fake_members = {
-    last_call = Some call_pos;
-    invalid = new_invalid;
-    valid = SSet.empty;
-  } in
-  { env with lenv = { env.lenv with fake_members } }
-
-module FakeMembers = struct
-
-  let make_id obj_name member_name =
-    let obj_name =
-      match obj_name with
-      | _, This -> this
-      | _, Lvar (_, x) -> x
-      | _ -> assert false
-    in
-    LID.to_string obj_name^"->"^member_name
-
-  let make_static_id cid member_name =
-    let class_name = class_id_to_str cid in
-    class_name^"::"^member_name
-
-  let get env obj member_name =
-    match obj with
-    | _, This
-    | _, Lvar _ ->
-        let id = make_id obj member_name in
-        if SSet.mem id env.lenv.fake_members.valid
-        then Some (Hashtbl.hash id)
-        else None
-    | _ -> None
-
-  let is_invalid env obj member_name =
-    match obj with
-    | _, This
-    | _, Lvar _ ->
-        SSet.mem (make_id obj member_name) env.lenv.fake_members.invalid
-    | _ -> false
-
-  let get_static env cid member_name =
-    let name = make_static_id cid member_name in
-    if SSet.mem name env.lenv.fake_members.valid
-    then Some (Hashtbl.hash name)
-    else None
-
-  let is_static_invalid env cid member_name =
-    SSet.mem (make_static_id cid member_name) env.lenv.fake_members.invalid
-
-  let add_member env fake_id =
-    let fake_members = env.lenv.fake_members in
-    let valid = SSet.add fake_id fake_members.valid in
-    let fake_members = { fake_members with valid = valid } in
-    { env with lenv = { env.lenv with fake_members } }
-
-  let make _ env obj_name member_name =
-    let my_fake_local_id = make_id obj_name member_name in
-    let env = add_member env my_fake_local_id in
-    env, Local_id.make_unscoped my_fake_local_id
-
-  let make_static _ env class_name member_name =
-    let my_fake_local_id = make_static_id class_name member_name in
-    let env = add_member env my_fake_local_id in
-    env, Local_id.make_unscoped my_fake_local_id
-
-end
-
-
 (*****************************************************************************)
 (* Locals *)
 (*****************************************************************************)
 
-let add_to_local_id_map = Local_id.Map.add ?combine:None
-
 let set_local_ env x ty =
-  let local_types = LEnvC.add_to_cont C.Next x ty env.lenv.local_types in
-  { env with lenv = { env.lenv with local_types } }
+  let per_cont_env = LEnvC.add_to_cont C.Next x ty env.lenv.per_cont_env in
+  { env with lenv = { env.lenv with per_cont_env } }
 
-let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.local_types
+let next_cont_opt env = LEnvC.get_cont_option C.Next env.lenv.per_cont_env
 
-let next_cont_exn env = LEnvC.get_cont C.Next env.lenv.local_types
+let next_cont_exn env = LEnvC.get_cont_exn C.Next env.lenv.per_cont_env
 
 (* We maintain 2 states for a local: the type
  * that the local currently has, and an expression_id generated from
@@ -1074,7 +967,7 @@ let set_local env x new_type =
   match next_cont_opt env with
   | None -> env
   | Some next_cont ->
-    let expr_id = match LID.Map.get x next_cont with
+    let expr_id = match LID.Map.get x next_cont.LEnvC.local_types with
       | None -> Ident.tmp()
       | Some (_, y) -> y in
     let local = new_type, expr_id in
@@ -1088,13 +981,13 @@ let set_using_var env x =
     env.lenv with local_using_vars = LID.Set.add x env.lenv.local_using_vars } }
 
 let unset_local env local =
-  let {fake_members; local_types; local_using_vars; tpenv; local_mutability;
+  let {per_cont_env; local_using_vars; tpenv; local_mutability;
     local_reactive; } = env.lenv in
-  let local_types = LEnvC.remove_from_cont C.Next local local_types in
+  let per_cont_env = LEnvC.remove_from_cont C.Next local per_cont_env in
   let local_using_vars = LID.Set.remove local local_using_vars in
   let local_mutability = LID.Map.remove local local_mutability in
   let env = { env with
-    lenv = {fake_members; local_types; local_using_vars;
+    lenv = {per_cont_env; local_using_vars;
             tpenv; local_mutability; local_reactive} }
   in
   env
@@ -1113,16 +1006,16 @@ let local_is_mutable ~include_borrowed env id =
 
 let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx =
   let not_found_is_ok x =
-    let x = LID.to_string x in
-    SG.is_superglobal x && not (is_strict env) ||
-    SSet.mem x env.lenv.fake_members.valid in
+    let xstr = LID.to_string x in
+    SG.is_superglobal xstr && not (is_strict env) ||
+    Fake.is_valid ctx.LEnvC.fake_members x in
   let error_if_pos_provided posopt =
     match posopt with
     | Some p ->
       let in_rx_scope = env_local_reactive env in
       Errors.undefined ~in_rx_scope p (LID.to_string x);
     | None -> () in
-  let lcl = LID.Map.get x ctx in
+  let lcl = LID.Map.get x ctx.LEnvC.local_types in
   begin match lcl with
   | None -> if not_found_is_ok x then () else error_if_pos_provided p
   | Some _ -> ()
@@ -1163,24 +1056,125 @@ let get_local_check_defined env (p, x) =
   snd (get_local_ ~error_if_undef_at_pos:p env x)
 
 let set_local_expr_id env x new_eid =
-  let local_types = env.lenv.local_types in
-  match LEnvC.get_cont_option C.Next local_types with
+  let per_cont_env = env.lenv.per_cont_env in
+  match LEnvC.get_cont_option C.Next per_cont_env with
   | None -> env
   | Some next_cont ->
-    begin match LID.Map.get x next_cont with
+    begin match LID.Map.get x next_cont.LEnvC.local_types with
     | Some (type_, eid) when eid <> new_eid ->
         let local = type_, new_eid in
-        let local_types = LEnvC.add_to_cont C.Next x local local_types in
-        let env ={ env with lenv = { env.lenv with local_types } }
+        let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
+        let env ={ env with lenv = { env.lenv with per_cont_env } }
         in
         env
     | _ -> env
     end
 
 let get_local_expr_id env x =
-  let next_cont = LEnvC.get_cont C.Next env.lenv.local_types in
-  let lcl = LID.Map.get x next_cont in
+  let next_cont = LEnvC.get_cont_exn C.Next env.lenv.per_cont_env in
+  let lcl = LID.Map.get x next_cont.LEnvC.local_types in
   Option.map lcl ~f:(fun (_, x) -> x)
+
+let set_fake_members env fake_members =
+  let per_cont_env =
+    LEnvC.update_cont_entry C.Next env.lenv.per_cont_env
+      (fun entry -> { entry with LEnvC.fake_members }) in
+  { env with lenv = { env.lenv with per_cont_env } }
+
+let get_fake_members env =
+  match LEnvC.get_cont_option C.Next env.lenv.per_cont_env with
+  | None -> Fake.empty
+  | Some next_cont -> next_cont.LEnvC.fake_members
+
+let update_lost_info name blame env ty =
+  let (pos, under_lambda) =
+    match blame with
+    | Fake.Blame_call pos -> (pos, false)
+    | Fake.Blame_lambda pos -> (pos, true) in
+  let info r = Reason.Rlost_info (name, r, pos, under_lambda) in
+  let rec update_ty env ty =
+    match ty with
+    | _, Tvar v ->
+      let env, v' = get_var env v in
+      (match IMap.get v' env.tenv with
+      | None ->
+          env, ty
+      | Some ty ->
+          let env, ty = update_ty env ty in
+          let env = add env v ty in
+          env, ty
+      )
+    | r, Tunion tyl ->
+      let env, tyl = List.map_env env tyl update_ty in
+      env, (info r, Tunion tyl)
+  | r, ty ->
+      env, (info r, ty) in
+  update_ty env ty
+
+let forget_members env blame =
+  let fake_members = get_fake_members env in
+  let fake_members = Fake.forget fake_members blame in
+  set_fake_members env fake_members
+
+module FakeMembers = struct
+
+  let update_fake_members env fake_members =
+    let per_cont_env = LEnvC.update_cont_entry C.Next env.lenv.per_cont_env
+    (fun entry ->
+      LEnvC.{ entry with fake_members }) in
+    { env with lenv = { env.lenv with per_cont_env } }
+
+  let is_valid env obj member_name =
+    match obj with
+    | _, This
+    | _, Lvar _ ->
+        let fake_members = get_fake_members env in
+        let id = Fake.make_id obj member_name in
+        Fake.is_valid fake_members id
+    | _ -> false
+
+  let is_valid_static env cid member_name =
+    let name = Fake.make_static_id cid member_name in
+    let fake_members = get_fake_members env in
+    Fake.is_valid fake_members name
+
+  let check_static_invalid env cid member_name ty =
+    let fake_members = get_fake_members env in
+    let fake_id = Fake.make_static_id cid member_name in
+    match Fake.is_invalid fake_members fake_id with
+    | None -> env, ty
+    | Some blame ->
+      update_lost_info (Local_id.to_string fake_id) blame env ty
+
+  let check_instance_invalid env obj member_name ty =
+    match obj with
+    | _, This
+    | _, Lvar _ ->
+      let fake_members = get_fake_members env in
+      let fake_id = Fake.make_id obj member_name in
+      begin match Fake.is_invalid fake_members fake_id with
+      | None -> env, ty
+      | Some blame ->
+        update_lost_info (Local_id.to_string fake_id) blame env ty
+      end
+    | _ -> env, ty
+
+  let add_member env fake_id =
+    let fake_members = get_fake_members env in
+    let fake_members = Fake.add fake_members fake_id in
+    set_fake_members env fake_members
+
+  let make env obj_name member_name =
+    let my_fake_local_id = Fake.make_id obj_name member_name in
+    let env = add_member env my_fake_local_id in
+    env, my_fake_local_id
+
+  let make_static env class_name member_name =
+    let my_fake_local_id = Fake.make_static_id class_name member_name in
+    let env = add_member env my_fake_local_id in
+    env, my_fake_local_id
+
+end
 
 (*****************************************************************************)
 (* Sets up/cleans up the environment when typing an anonymous function. *)

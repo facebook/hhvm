@@ -15,7 +15,7 @@ open Common
 module C = Typing_continuations
 module CMap = C.Map
 module LEnv = Typing_lenv
-module LEnvC = Typing_lenv_cont
+module LEnvC = Typing_per_cont_env
 
 (* See the type system specs for try for what's going on here *)
 

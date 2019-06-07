@@ -52,15 +52,17 @@
     typing_env_types_sig
     typing_equality_check
     typing_expand
+    typing_fake_members
     typing_generic
     typing_generic_constraint
-    typing_lenv_cont
+    typing_local_types
     typing_log
     typing_log_value
     typing_logic
     typing_make_type
     typing_mutability
     typing_ops
+    typing_per_cont_env
     typing_phase
     typing_print
     typing_reactivity

@@ -228,12 +228,15 @@ let return_info_as_value env return_info =
       "return_void_to_rx", Bool return_void_to_rx
     ]
 
-let local_id_as_string id =
-  Printf.sprintf "%s[#%d]" (Local_id.get_name id) (Local_id.to_int id)
-
 let local_id_map_as_value f m =
   Map (Local_id.Map.fold (fun id x m ->
     SMap.add (local_id_as_string id) (f x) m) m SMap.empty)
+
+let per_cont_entry_as_value f entry =
+make_map [
+  "local_types", local_id_map_as_value f (entry.Typing_per_cont_env.local_types);
+  "fake_members", Typing_fake_members.as_log_value entry.Typing_per_cont_env.fake_members
+  ]
 
 let continuations_map_as_value f m =
   Map (Typing_continuations.Map.fold (fun k x m ->
@@ -242,8 +245,8 @@ let continuations_map_as_value f m =
 let local_as_value env (ty, _expr_id) =
   type_as_value env ty
 
-let local_types_as_value env (local_types: local_types) =
-  continuations_map_as_value (local_id_map_as_value (local_as_value env)) local_types
+let per_cont_env_as_value env per_cont_env =
+  continuations_map_as_value (per_cont_entry_as_value (local_as_value env)) per_cont_env
 
 let log_position p ?function_name f =
   let n =
@@ -299,19 +302,6 @@ let tyvars_stack_as_value tyvars_stack =
   List (List.map tyvars_stack (fun (_, l) ->
   List (List.map l (fun i -> Atom (Printf.sprintf "#%d" i)))))
 
-let fake_members_as_value fake_members =
-  let {
-    last_call;
-    invalid;
-    valid
-    } = fake_members in
-  make_map ([
-    "invalid", Set invalid;
-    "valid", Set valid;
-  ] @ filter_missing [
-    "last_call", Option.map last_call pos_as_value
-  ])
-
 let reify_kind_as_value k =
   string_as_value (
     match k with
@@ -343,9 +333,6 @@ let local_mutability_as_value local_mutability =
   local_id_map_as_value
     (fun m -> Atom (Typing_mutability_env.to_string m)) local_mutability
 
-let local_id_set_as_value s =
-  Set (Local_id.Set.fold (fun id s -> SSet.add (local_id_as_string id) s) s SSet.empty)
-
 let fun_kind_to_string k =
   match k with
   | Ast.FSync -> "normal"
@@ -369,16 +356,14 @@ let rec reactivity_to_string env r =
     "rxvar" ^ (match opt_r with None -> "" | Some r -> " " ^ reactivity_to_string env r)
 let lenv_as_value env lenv =
   let {
-    fake_members;
-    local_types;
+    per_cont_env;
     tpenv;
     local_using_vars;
     local_reactive;
     local_mutability
     } = lenv in
   make_map [
-    "fake_members", fake_members_as_value fake_members;
-    "local_types", local_types_as_value env local_types;
+    "per_cont_env", per_cont_env_as_value env per_cont_env;
     "tpenv", tpenv_as_value env tpenv;
     "local_mutability", local_mutability_as_value local_mutability;
     "local_using_vars", local_id_set_as_value local_using_vars;

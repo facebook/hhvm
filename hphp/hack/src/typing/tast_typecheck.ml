@@ -96,7 +96,7 @@ let check_expr env (expr:ETast.expr) (gamma:gamma) : gamma =
       | String _ ->
         expect_ty_equal ty (Tprim Nast.Tstring)
       | Lvar (_, lid) ->
-        let expected_ty = match lookup lid gamma with
+        let expected_ty = match lookup lid (gamma.Typing_per_cont_env.local_types) with
         | None -> Tany
         | Some (_p, (_r, ty)) -> ty
         in

@@ -56,7 +56,7 @@ type t =
   | Ryield_asyncgen  of Pos.t
   | Ryield_asyncnull of Pos.t
   | Ryield_send      of Pos.t
-  | Rlost_info       of string * t * Pos.t
+  | Rlost_info       of string * t * Pos.t * bool (* true if due to lambda *)
   | Rcoerced         of t * Pos.t * string
   | Rformat          of Pos.t * string * t
   | Rclass_class     of Pos.t * string
@@ -204,12 +204,13 @@ let rec to_string prefix r =
         (p, prefix);
         (p2, "It was implicitly typed as "^s^" during this operation")
       ]
-  | Rlost_info (s, r1, p2) ->
+  | Rlost_info (s, r1, p2, under_lambda) ->
       let s = Utils.strip_ns s in
+      let cause = if under_lambda then "by this lambda function" else "during this call" in
       (to_string prefix r1) @
       [
-        (p2, "All the local information about "^s^" has been invalidated \
-              during this call.\nThis is a limitation of the type-checker, \
+        (p2, "All the local information about "^s^" has been invalidated "
+        ^ cause ^ ".\nThis is a limitation of the type-checker, \
               use a local if that's the problem.")
       ]
   | Rformat       (_,s,t) ->
@@ -347,7 +348,7 @@ and to_pos = function
   | Ryield_asyncnull p -> p
   | Ryield_send  p -> p
   | Rcoerced    (r, _, _) -> to_pos r
-  | Rlost_info (_, r, _) -> to_pos r
+  | Rlost_info (_, r, _, _) -> to_pos r
   | Rformat      (p, _, _) -> p
   | Rclass_class (p, _) -> p
   | Runknown_class p -> p

@@ -32,10 +32,6 @@ val expand_var : env -> Reason.t -> Ident.t -> env * locl ty
 val expand_type : env -> locl ty -> env * locl ty
 val get_shape_field_name : Ast.shape_field_name -> string
 val get_shape_field_name_pos : Ast.shape_field_name -> Pos.t
-val empty_fake_members : fake_members
-val empty_local_id_map : local_id_map
-val add_to_local_id_map :
-  Local_id.t -> local -> local_id_map -> local_id_map
 val empty_local : tpenv -> reactivity -> local_env
 val initial_local : tpenv -> reactivity -> local_env
 val empty : TypecheckerOptions.t -> Relative_path.t ->
@@ -91,34 +87,33 @@ val set_mode : env -> FileInfo.mode -> env
 val get_mode : env -> FileInfo.mode
 val is_strict : env -> bool
 val is_decl : env -> bool
-val lost_info : string -> env -> locl ty -> env * locl ty
-val forget_members : env -> Pos.t -> env
+val forget_members : env -> Typing_fake_members.blame -> env
+val get_fake_members : env -> Typing_fake_members.t
 module FakeMembers :
   sig
-    val make_id : Nast.expr -> string -> string
-    val make_static_id : Nast.class_id_ -> string -> string
-    val get : env -> Nast.expr -> string -> int option
-    val is_invalid : env -> Nast.expr -> string -> bool
-    val get_static : env -> Nast.class_id_ -> string -> int option
-    val is_static_invalid : env -> Nast.class_id_ -> string -> bool
-    val make : Pos.t -> env -> Nast.expr -> string -> env * Local_id.t
-    val make_static : Pos.t -> env -> Nast.class_id_ -> string ->
-      env * Local_id.t
+    val update_fake_members : env -> Typing_fake_members.t -> env
+    val is_valid : env -> Nast.expr -> string -> bool
+    val is_valid_static : env -> Nast.class_id_ -> string -> bool
+    val check_static_invalid : env -> Nast.class_id_ -> string -> locl ty -> env * locl ty
+    val check_instance_invalid : env -> Nast.expr -> string -> locl ty -> env * locl ty
+    val make : env -> Nast.expr -> string -> env * Local_id.t
+    val make_static : env -> Nast.class_id_ -> string -> env * Local_id.t
   end
 val tany : env -> 'a ty_
-val next_cont_exn : env -> local_id_map
-val next_cont_opt : env -> local_id_map option
+val next_cont_exn : env -> Typing_per_cont_env.per_cont_entry
+val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
 val set_local : env -> Local_id.t -> locl ty -> env
 val is_using_var : env -> Local_id.t -> bool
 val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
 val get_local : env -> Local_id.t -> locl ty
-val get_locals : env -> Nast.lid list -> local_id_map
-val set_locals : env -> local_id_map -> env
+val get_locals : env -> Nast.lid list -> Typing_local_types.t
+val set_locals : env -> Typing_local_types.t -> env
+val set_fake_members : env -> Typing_fake_members.t -> env
 val is_local_defined : env -> Local_id.t -> bool
 val get_local_check_defined : env -> Nast.lid -> locl ty
-val set_local_expr_id : env -> Local_id.t -> expression_id -> env
-val get_local_expr_id : env -> Local_id.t -> expression_id option
+val set_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id -> env
+val get_local_expr_id : env -> Local_id.t -> Typing_local_types.expression_id option
 val get_tpenv_lower_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_upper_bounds : tpenv -> string -> tparam_bounds
 val get_tpenv_reified: tpenv -> string -> Nast.reify_kind
@@ -205,7 +200,7 @@ val add_mutable_var : env -> Local_id.t -> Typing_mutability_env.mutability -> e
 val local_is_mutable : include_borrowed: bool -> env -> Local_id.t -> bool
 val function_is_mutable : env -> param_mutability option
 val set_fun_mutable : env -> param_mutability option -> env
-val env_with_locals : env -> local_types -> env
+val env_with_locals : env -> Typing_per_cont_env.t -> env
 val reinitialize_locals : env -> env
 val anon : local_env -> env -> (env -> env * Tast.expr * locl ty) -> env * Tast.expr * locl ty
 val in_loop : env -> (env -> env * 'a) -> env * 'a

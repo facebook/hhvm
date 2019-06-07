@@ -23,3 +23,7 @@ let bool_as_value v = Bool v
 let string_as_value s = Atom s
 let smap_as_value f m = Map (SMap.map f m)
 let pos_as_value p = string_as_value (Pos.string (Pos.to_absolute p))
+let local_id_as_string id =
+  Printf.sprintf "%s[#%d]" (Local_id.get_name id) (Local_id.to_int id)
+let local_id_set_as_value s =
+  Set (Local_id.Set.fold (fun id s -> SSet.add (local_id_as_string id) s) s SSet.empty)

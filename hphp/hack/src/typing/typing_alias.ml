@@ -34,8 +34,7 @@
 open Core_kernel
 open Common
 open Nast
-
-module Env = Typing_env
+module Fake = Typing_fake_members
 
 (*****************************************************************************)
 (* Module computing all the aliased locals.
@@ -43,13 +42,14 @@ module Env = Typing_env
  * if one writes '$y = $z', then the binding $y => $z is added to the map.
  * Note that object/class members are counted are counted as locals
  * (conservatively), because in some cases, they can behave like locals (cf
- * Typing_env.FakeMembers).
+ * Typing_fake_members).
  *)
 (*****************************************************************************)
 
 module Dep = struct
 
   let add x1 x2 acc =
+    let x2 = Local_id.to_string x2 in
     let prev = try SMap.find_unsafe x1 acc with Caml.Not_found -> [] in
     SMap.add x1 (x2 :: prev) acc
 
@@ -65,11 +65,11 @@ module Dep = struct
       method! on_expr acc (_, e_ as e) =
         match e_ with
         | Lvar (_, x) ->
-            add local (Local_id.to_string x) acc
+            add local x acc
         | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
-            add local (Env.FakeMembers.make_id x y) acc
+            add local (Fake.make_id x y) acc
         | Class_get ((_, x), CGstring (_, y)) ->
-            add local (Env.FakeMembers.make_static_id x y) acc
+            add local (Fake.make_static_id x y) acc
         | Class_get _ -> failwith "Dynamic Class_get should never occur after naming"
         | _ -> parent#on_expr acc e
     end
@@ -95,9 +95,9 @@ end = struct
     | Lvar (_, x) ->
         Some (Local_id.to_string x)
     | Obj_get ((_, (This | Lvar _) as x), (_, Id (_, y)), _) ->
-        Some (Env.FakeMembers.make_id x y)
+        Some (Local_id.to_string (Fake.make_id x y))
     | Class_get ((_, x), CGstring (_, y)) ->
-        Some (Env.FakeMembers.make_static_id x y)
+        Some (Local_id.to_string (Fake.make_static_id x y))
     | Class_get _ -> failwith "This case should never occur after naming"
     | _ -> None
 

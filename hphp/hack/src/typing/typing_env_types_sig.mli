@@ -12,26 +12,9 @@
  module TySet = Typing_set
  module type S = sig
 
- type fake_members = {
-   last_call : Pos.t option;
-   invalid   : SSet.t;
-   valid     : SSet.t;
- }
- (* Along with a type, each local variable has a expression id associated with
-  * it. This is used when generating expression dependent types for the 'this'
-  * type. The idea is that if two local variables have the same expression_id
-  * then they refer to the same late bound type, and thus have compatible
-  * 'this' types.
-  *)
- type expression_id = Ident.t
- type local = locl ty * expression_id
- type local_id_map = local Local_id.Map.t
- type local_types = local_id_map Typing_continuations.Map.t
-
  (* Local environment includes types of locals and bounds on type parameters. *)
  type local_env = {
-   fake_members       : fake_members;
-   local_types        : local_types;
+   per_cont_env       : Typing_per_cont_env.t;
    local_mutability   : Typing_mutability_env.mutability_env;
    local_reactive : reactivity;
    (* Local variables that were assigned in a `using` clause *)

@@ -13,31 +13,7 @@ open Typing_defs
 open Type_parameter_env
 module TySet = Typing_set
 
-let show_locl_ty _ = "<locl_ty>"
-let pp_locl_ty _ _ = Printf.printf "%s\n" "<locl_ty>"
 type locl_ty = locl ty
-
-type fake_members = {
-  last_call : Pos.t option;
-  invalid   : SSet.t;
-  valid     : SSet.t;
-} [@@deriving show]
-(* Along with a type, each local variable has a expression id associated with
- * it. This is used when generating expression dependent types for the 'this'
- * type. The idea is that if two local variables have the same expression_id
- * then they refer to the same late bound type, and thus have compatible
- * 'this' types.
- *)
-type expression_id = Ident.t [@@deriving show]
-type local = locl_ty * expression_id [@@deriving show]
-
-let show_local_id_map _ = "<local_id_map>"
-let pp_local_id_map _ _ = Printf.printf "%s\n" "<local_id_map>"
-type local_id_map = local Local_id.Map.t
-
-let show_local_types _ = "<local_types>"
-let pp_local_types _ _ = Printf.printf "%s\n" "<local_types>"
-type local_types = local_id_map Typing_continuations.Map.t
 
 let show_local_id_set_t _ = "<local_id_set_t>"
 let pp_local_id_set_t _ _ = Printf.printf "%s\n" "<local_id_set_t>"
@@ -48,23 +24,8 @@ let pp_local_env _ _ = Printf.printf "%s\n" "<local_env>"
 
 (* Local environment includes types of locals and bounds on type parameters. *)
 type local_env = {
-  (* Fake members are used when we want member variables to be treated like
-   * locals. We want to handle the following:
-   * if($this->x) {
-   *   ... $this->x ...
-   * }
-   * The trick consists in replacing $this->x with a "fake" local. So that
-   * all the logic that normally applies to locals is applied in cases like
-   * this. Hence the name: FakeMembers.
-   * All the fake members are thrown away at the first call.
-   * We keep the invalidated fake members for better error messages.
-   *)
-  fake_members       : fake_members;
-  (* Local types per continuation. For example, the local types of the
-   * break continuation correspond to the local types that there were at the
-   * last encountered break in the current scope. These are kept to be merged
-   * at the appropriate merge points. *)
-  local_types        : local_types;
+  per_cont_env : Typing_per_cont_env.t;
+
   local_mutability   : Typing_mutability_env.mutability_env;
 
   (* Whether current environment is reactive *)

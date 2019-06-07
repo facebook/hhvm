@@ -9,58 +9,79 @@
 open Core_kernel
 open Common
 
-include Typing_env_types
-
 module C = Typing_continuations
 module CMap = Typing_continuations.Map
 module LMap = Local_id.Map
+
+type 'a locals_merge_fn =
+  'a -> Typing_local_types.local -> Typing_local_types.local -> 'a * Typing_local_types.local
+
+type per_cont_entry = {
+  (* Local types per continuation. For example, the local types of the
+   * break continuation correspond to the local types that there were at the
+   * last encountered break in the current scope. These are kept to be merged
+   * at the appropriate merge points. *)
+  local_types        : Typing_local_types.t;
+
+  (* Fake members are used when we want member variables to be treated like
+   * locals. We want to handle the following:
+   * if($this->x) {
+   *   ... $this->x ...
+   * }
+   * The trick consists in replacing $this->x with a "fake" local. So that
+   * all the logic that normally applies to locals is applied in cases like
+   * this. Hence the name: FakeMembers.
+   * All the fake members are thrown away at the first call.
+   * We keep the invalidated fake members for better error messages.
+   *)
+  fake_members       : Typing_fake_members.t;
+}
+
+type t = per_cont_entry Typing_continuations.Map.t
 
 (*****************************************************************************)
 (* Functions dealing with continuation based flow typing of local variables *)
 (*****************************************************************************)
 
+let empty_entry = {
+  local_types = Typing_local_types.empty;
+  fake_members = Typing_fake_members.empty;
+}
+
 let empty_locals = CMap.empty
 
-let initial_locals = CMap.add C.Next LMap.empty empty_locals
+let initial_locals = CMap.add C.Next empty_entry empty_locals
 
 let get_cont_option = CMap.get
 
 exception Continuation_not_found of string
 
-let get_cont cont m =
+let get_cont_exn cont m =
   try CMap.find cont m
   with Caml.Not_found ->
     (* Programming error. This is not supposed to happen. *)
     raise (Continuation_not_found ("There is no continuation " ^
       (C.to_string cont) ^ " in the locals."))
 
-(* see typing_lenv_cont.mli for details *)
-let try_get_conts conts m =
-  let rec aux contl m =
-    match contl with
-    | [] -> raise (Continuation_not_found ("None of the continuations " ^
-      (String.concat ~sep:", " (List.map ~f:C.to_string conts)) ^ " were found."))
-    | cont :: contl ->
-      begin match get_cont_option cont m with
-      | None -> aux contl m
-      | Some ctx -> ctx
-      end in
-  aux conts m
+(* Update an entry if it exists *)
+let update_cont_entry name m f =
+  match CMap.get name m with
+    | None -> m
+    | Some entry ->
+      CMap.add name (f entry) m
 
-(* see typing_lenv_cont.mli for details *)
 let add_to_cont name key value m =
   let cont = match CMap.get name m with
-    | None -> LMap.empty
-    | Some c -> c
-  in
-  let cont = LMap.add key value cont in
+    | None -> empty_entry
+    | Some c -> c in
+  let cont = { cont with local_types = LMap.add key value cont.local_types } in
   CMap.add name cont m
 
-(* see typing_lenv_cont.mli for details *)
 let remove_from_cont name key m =
   match CMap.get name m with
   | None -> m
-  | Some c -> CMap.add name (LMap.remove key c) m
+  | Some c ->
+    CMap.add name { c with local_types = LMap.remove key c.local_types } m
 
 let drop_cont = CMap.remove
 
@@ -69,19 +90,24 @@ let drop_conts conts map =
 
 let replace_cont key valueopt map = match valueopt with
   | None -> drop_cont key map
-  | Some value -> CMap.add key value map
+  | Some value ->
+    CMap.add key value map
 
-
-(* see typing_lenv_cont.mli for details *)
 let union union_types env context1 context2 =
-  LMap.merge_env env
+  let env, local_types =
+    LMap.merge_env env
       ~combine:(fun env _ tyopt1 tyopt2 ->
     match tyopt1, tyopt2 with
     | Some ty1, Some ty2 ->
       let env, ty = union_types env ty1 ty2 in
       env, Some ty
     | _ -> env, None) (* TODO: we could do better here in case only in one side. *)
-    context1 context2
+    context1.local_types context2.local_types in
+  env,
+  { fake_members =
+      Typing_fake_members.join context1.fake_members context2.fake_members;
+    local_types;
+  }
 
 let union_opts union_types env ctxopt1 ctxopt2 =
   match ctxopt1, ctxopt2 with
@@ -103,36 +129,30 @@ let union_conts_and_update env union_types local_types ~from_conts ~to_cont =
   let env, unioned = union_conts env union_types local_types from_conts in
   env, replace_cont to_cont unioned local_types
 
-(* see typing_lenv_cont.mli for details *)
 let update_next_from_conts env union_types local_types cont_list =
   union_conts_and_update env union_types local_types
     ~from_conts:cont_list
     ~to_cont:C.Next
 
-(* see typing_lenv_cont.mli for details *)
 let save_and_merge_next_in_cont env union_types local_types cont =
   union_conts_and_update env union_types local_types
     ~from_conts:[C.Next; cont]
     ~to_cont:cont
 
-(* see typing_lenv_cont.mli for details *)
 let move_and_merge_next_in_cont env union_types local_types cont =
   let env, locals = save_and_merge_next_in_cont env union_types local_types cont in
   env, drop_cont C.Next locals
 
-(* see typing_lenv_cont.mli for details *)
 let union_by_cont env union_types locals1 locals2 =
   CMap.union_env env locals1 locals2
     ~combine:(fun env _ cont1 cont2 ->
       let env, ctx = union union_types env cont1 cont2 in
       env, Some ctx)
 
-(* see typing_lenv_cont.mli for details *)
 let restore_cont_from locals ~from:source_locals cont =
   let ctxopt = get_cont_option cont source_locals in
   replace_cont cont ctxopt locals
 
-(* see typing_lenv_cont.mli for details *)
 let restore_conts_from locals ~from conts =
   List.fold ~f:(restore_cont_from ~from) ~init:locals conts
 

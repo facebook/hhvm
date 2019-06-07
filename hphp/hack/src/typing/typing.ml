@@ -48,6 +48,7 @@ module FL           = FeatureLogging
 module MakeType     = Typing_make_type
 module Cls          = Decl_provider.Class
 module Partial      = Partial_provider
+module Fake         = Typing_fake_members
 
 (* Maps a Nast to a Tast where every type is Tany.
    Used to produce a Tast for unsafe code without inferring types for it. *)
@@ -1300,16 +1301,16 @@ and eif env ~(expected: expected_ty option) p c e1 e2 =
         let env, te1, ty1 = expr ?expected env e1 in
         env, Some te1, ty1
     in
-  let lenv1 = env.Env.lenv in
+  let fake1 = Env.get_fake_members env in
   let env = { env with Env.lenv = parent_lenv } in
   let env = condition env false tc in
   let env, te2, ty2 = expr ?expected env e2 in
-  let lenv2 = env.Env.lenv in
-  let fake_members = LEnv.intersect_fake lenv1 lenv2 in
+  let fake2 = Env.get_fake_members env in
+  let fake_members = Fake.join fake1 fake2 in
   (* we restore the locals to their parent state so as not to leak the
    * effects of the `condition` calls above *)
-  let env = { env with Env.lenv =
-              { parent_lenv with Env.fake_members = fake_members } } in
+  let env = { env with Env.lenv = parent_lenv } in
+  let env = Env.FakeMembers.update_fake_members env fake_members in
   (* This is a shortened form of what we do in Typing_lenv.union_lenvs. The
    * latter takes local environments as arguments, but our types here
    * aren't assigned to local variables in an environment *)
@@ -1432,7 +1433,7 @@ and expr_
     | _, Id (_, func) when (
       func = SN.StdlibFunctions.is_null ||
       func = SN.PseudoFunctions.isset) -> env
-    | _ -> Env.forget_members env p in
+    | _ -> Env.forget_members env (Fake.Blame_call p) in
 
   let check_call
     ~is_using_clause ~(expected: expected_ty option) env p call_type e hl el uel ~in_suspend =
@@ -1761,13 +1762,7 @@ and expr_
     let env, result, vis =
       obj_get_with_visibility ~obj_pos:p ~is_method:true ~nullsafe:None
         ~valkind:`other ~pos_params:None env ty1 (CIexpr instance) meth (fun x -> x) in
-    let has_lost_info = Env.FakeMembers.is_invalid env instance (snd meth) in
-    if has_lost_info
-    then
-      let name = "the method "^snd meth in
-      let env, result = Env.lost_info name env result in
-      make_result env p (T.Method_id (te, meth)) result
-    else
+    let env, result = Env.FakeMembers.check_instance_invalid env instance (snd meth) result in
       begin
         (match result with
         | _, Tfun fty -> check_deprecated p fty
@@ -2146,33 +2141,29 @@ and expr_
             expr_error env p (Reason.Rwitness p)
       end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get ((px, x), CGstring (py, y))
-      when Env.FakeMembers.get_static env x y <> None ->
-        let env, local = Env.FakeMembers.make_static p env x y in
+  | Class_get ((cpos, cid), CGstring mid)
+      when Env.FakeMembers.is_valid_static env cid (snd mid) ->
+        let env, local = Env.FakeMembers.make_static env cid (snd mid) in
         let local = p, Lvar (p, local) in
         let env, _, ty = expr env local in
-        let env, te, _ = static_class_id ~check_constraints:false px env [] x in
-        make_result env p (T.Class_get (te, T.CGstring (py, y))) ty
+        let env, te, _ = static_class_id ~check_constraints:false cpos env [] cid in
+        make_result env p (T.Class_get (te, T.CGstring mid)) ty
   | Class_get ((cpos, cid), CGstring mid) ->
       let env, te, cty = static_class_id ~check_constraints:false cpos env [] cid in
       let env = might_throw env in
       let env, ty, _ =
         class_get ~is_method:false ~is_const:false env cty mid cid in
-      if Env.FakeMembers.is_static_invalid env cid (snd mid)
-      then
-        let fake_name = Env.FakeMembers.make_static_id cid (snd mid) in
-        let env, ty = Env.lost_info fake_name env ty in
-        make_result env p (T.Class_get (te, T.CGstring mid)) ty
-      else
-        make_result env p (T.Class_get (te, T.CGstring mid)) ty
+      let env, ty = Env.FakeMembers.check_static_invalid env cid (snd mid) ty in
+      make_result env p (T.Class_get (te, T.CGstring mid)) ty
+
     (* Fake member property access. For example:
      *   if ($x->f !== null) { ...$x->f... }
      *)
   | Class_get (_, CGexpr _) -> failwith "AST should not have any CGexprs after naming"
   | Obj_get (e, (pid, Id (py, y)), nf)
-    when Env.FakeMembers.get env e y <> None ->
+    when Env.FakeMembers.is_valid env e y ->
       let env = might_throw env in
-      let env, local = Env.FakeMembers.make p env e y in
+      let env, local = Env.FakeMembers.make env e y in
       let local = p, Lvar (p, local) in
       let env, _, ty = expr env local in
       let env, t_lhs, _ = expr ~accept_using_var:true env e in
@@ -2190,15 +2181,8 @@ and expr_
       let env, result =
         obj_get ~obj_pos:(fst e1) ~is_method:false ~nullsafe ~valkind
           env ty1 (CIexpr e1) m (fun x -> x) in
-      let has_lost_info = Env.FakeMembers.is_invalid env e1 (snd m) in
       let env, result =
-        if has_lost_info
-        then
-          let name = "the member " ^ snd m in
-          Env.lost_info name env result
-        else
-          env, result
-      in
+        Env.FakeMembers.check_instance_invalid env e1 (snd m) result in
       make_result env p (T.Obj_get(te1,
         T.make_typed_expr pm result (T.Id m), nullflavor)) result
     (* Dynamic instance property access e.g. $x->$f *)
@@ -2249,7 +2233,7 @@ and expr_
       let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
       let env =
         Type.coerce_type p (Reason.URyield) env rty expected_return in
-      let env = Env.forget_members env p in
+      let env = Env.forget_members env (Fake.Blame_call p) in
       let env = LEnv.save_and_merge_next_in_cont env C.Exit in
       make_result env p (T.Yield taf) (MakeType.nullable (Reason.Ryield_send p) send)
   | Yield_from e ->
@@ -2278,7 +2262,7 @@ and expr_
     let Typing_env_return_info.{ return_type = expected_return; _ } = Env.get_return env in
     let env =
       Type.coerce_type p (Reason.URyield_from) env rty expected_return in
-    let env = Env.forget_members env p in
+    let env = Env.forget_members env (Fake.Blame_call p) in
     make_result env p (T.Yield_from te) (MakeType.void (Reason.Rwitness p))
   | Await e ->
       let env = might_throw env in
@@ -2310,7 +2294,7 @@ and expr_
       let env, tc, tel, tuel, ty, ctor_fty =
         new_object ~expected ~is_using_clause ~check_parent:false ~check_not_abstract:true
           pos env c tal el uel in
-      let env = Env.forget_members env p in
+      let env = Env.forget_members env (Fake.Blame_call p) in
       make_result env p (T.New(tc, tal, tel, tuel, (p1, ctor_fty))) ty
   | Record _ ->
     expr_error env p (Reason.Rwitness p)
@@ -2620,7 +2604,7 @@ and expr_
   | PU_atom _ -> failwith "TODO(T36532263): Pocket Universes"
   | PU_identifier _ -> failwith "TODO(T36532263): Pocket Universes"
 
-  with Typing_lenv_cont.Continuation_not_found _ ->
+  with Typing_per_cont_env.Continuation_not_found _ ->
     expr_any env p (Reason.Rwitness p)
 
 and class_const ?(incl_tc=false) env p ((cpos, cid), mid) =
@@ -2777,15 +2761,17 @@ and anon_check_param env param =
       let env = Type.coerce_type hint_pos Reason.URhint env paramty hty in
       env
 
-and stash_conts_for_anon env is_anon captured f =
+and stash_conts_for_anon env p is_anon captured f =
   let captured = if Env.is_local_defined env this then (Pos.none, this) :: captured else captured in
   let initial_locals = if is_anon
     then Env.get_locals env captured
-    else Env.next_cont_exn env in
+    else (Env.next_cont_exn env).Typing_per_cont_env.local_types in
+  let initial_fakes = Fake.forget (Env.get_fake_members env) (Fake.Blame_lambda p) in
   let env, (tfun, result) = Typing_lenv.stash_and_do env C.all (
     fun env ->
       let env = Env.reinitialize_locals env in
       let env = Env.set_locals env initial_locals in
+      let env = Env.set_fake_members env initial_fakes in
       let env, tfun, result = f env in
       env, (tfun, result)) in
   env, tfun, result
@@ -2809,7 +2795,7 @@ and anon_make tenv p f ft idl is_anon =
     else begin
       is_typing_self := true;
       Env.anon anon_lenv env begin fun env ->
-      stash_conts_for_anon env is_anon idl begin fun env ->
+      stash_conts_for_anon env p is_anon idl begin fun env ->
         let env = Env.clear_params env in
         let make_variadic_arg env varg tyl =
           let remaining_types =
@@ -3341,11 +3327,11 @@ and assign_ p ur env e1 ty2 =
       let env = { env with Env.lenv = lenv } in
       begin match obj with
       | _, This ->
-         let env, local = Env.FakeMembers.make p env obj member_name in
+         let env, local = Env.FakeMembers.make env obj member_name in
          let env, ty = set_valid_rvalue p env local ty2 in
          env, te1, ty
       | _, Lvar _ ->
-          let env, local = Env.FakeMembers.make p env obj member_name in
+          let env, local = Env.FakeMembers.make env obj member_name in
           let env, ty = set_valid_rvalue p env local ty2 in
           env, te1, ty
       | _ -> env, te1, ty2
@@ -3374,7 +3360,7 @@ and assign_ p ur env e1 ty2 =
       let env = List.fold_left real_type_list ~f:begin fun env real_type ->
         Type.coerce_type p ur env ety2 real_type
       end ~init:env in
-      let env, local = Env.FakeMembers.make_static p env x y in
+      let env, local = Env.FakeMembers.make_static env x y in
       let env, ty3 = set_valid_rvalue p env local ty2 in
       env, te1, ty3
   | pos, Array_get (e1, None) ->
@@ -5661,10 +5647,10 @@ and binop p env bop p1 te1 ty1 p2 te2 ty2 =
 and make_a_local_of env e =
   match e with
   | p, Class_get ((_, cname), CGstring (_, member_name)) ->
-    let env, local = Env.FakeMembers.make_static p env cname member_name in
+    let env, local = Env.FakeMembers.make_static env cname member_name in
     env, Some (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
-    let env, local = Env.FakeMembers.make p env obj member_name in
+    let env, local = Env.FakeMembers.make env obj member_name in
     env, Some (p, local)
   | _, Lvar x
   | _, ImmutableVar x
@@ -6043,10 +6029,10 @@ and is_instance_var = function
 
 and get_instance_var env = function
   | p, Class_get ((_, cname), CGstring (_, member_name)) ->
-    let env, local = Env.FakeMembers.make_static p env cname member_name in
+    let env, local = Env.FakeMembers.make_static env cname member_name in
     env, (p, local)
   | p, Obj_get ((_, This | _, Lvar _ as obj), (_, Id (_, member_name)), _) ->
-    let env, local = Env.FakeMembers.make p env obj member_name in
+    let env, local = Env.FakeMembers.make env obj member_name in
     env, (p, local)
   | _, Dollardollar (p, x)
   | _, Lvar (p, x) -> env, (p, x)

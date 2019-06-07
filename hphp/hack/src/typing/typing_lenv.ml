@@ -11,14 +11,14 @@ open Core_kernel
 module Env = Typing_env
 open Typing_env
 module C = Typing_continuations
-module LEnvC = Typing_lenv_cont
+module LEnvC = Typing_per_cont_env
 module Union = Typing_union
 
 (*****************************************************************************)
 (* Module dealing with local environments. *)
 (*****************************************************************************)
 
-let get_all_locals env = env.lenv.local_types
+let get_all_locals env = env.lenv.per_cont_env
 
 (*****************************************************************************)
 (* Functions dealing with old style local environment *)
@@ -29,10 +29,6 @@ let union env local1 local2 =
   let eid = if eid1 = eid2 then eid1 else Ident.tmp() in
   let env, ty = Union.union env ty1 ty2 in
   env, (ty, eid)
-
-let get_cont env cont =
-  let local_types = get_all_locals env in
-  LEnvC.get_cont cont local_types
 
 let get_cont_option env cont =
   let local_types = get_all_locals env in
@@ -91,32 +87,27 @@ let move_and_merge_next_in_cont env cont =
 let union_contextopts = LEnvC.union_opts union
 
 let union_by_cont env lenv1 lenv2 =
-  let locals1 = lenv1.Env.local_types in
-  let locals2 = lenv2.Env.local_types in
+  let locals1 = lenv1.per_cont_env in
+  let locals2 = lenv2.per_cont_env in
   let env, locals = LEnvC.union_by_cont env union locals1 locals2 in
   Env.env_with_locals env locals
 
-(* Intersects the set of valid fake_members.
- * Fake members are introduced when we know that a member is not null.
- * Example: if($this->x) { ... $this->x is a fake member now ... }
- * What it means in practice is that the member behaves like a local, it can
- * change type.
- *)
-let intersect_fake lenv1 lenv2 =
-  let nextctxopt1 = LEnvC.get_cont_option C.Next lenv1.local_types in
-  let nextctxopt2 = LEnvC.get_cont_option C.Next lenv2.local_types in
-  let fake1 = lenv1.fake_members in
-  let fake2 = lenv2.fake_members in
-  let valid = match nextctxopt1, nextctxopt2 with
-  | Some _, Some _
-  | None, None -> SSet.inter fake1.valid fake2.valid
-  | Some _, None -> fake1.valid
-  | None, Some _ -> fake2.valid in
-  { fake1 with Env.valid = valid }
+let join_fake lenv1 lenv2 =
+  let nextctxopt1 = LEnvC.get_cont_option C.Next lenv1.per_cont_env in
+  let nextctxopt2 = LEnvC.get_cont_option C.Next lenv2.per_cont_env in
+  match nextctxopt1, nextctxopt2 with
+  | Some c1, Some c2 ->
+    Typing_fake_members.join c1.LEnvC.fake_members c2.LEnvC.fake_members
+  | None, None ->
+    Typing_fake_members.empty
+  | Some c1, None ->
+    c1.LEnvC.fake_members
+  | None, Some c2 ->
+    c2.LEnvC.fake_members
 
 let merge_reactivity parent_lenv lenv1 lenv2 =
-  let nextctxopt1 = LEnvC.get_cont_option C.Next lenv1.local_types in
-  let nextctxopt2 = LEnvC.get_cont_option C.Next lenv2.local_types in
+  let nextctxopt1 = LEnvC.get_cont_option C.Next lenv1.per_cont_env in
+  let nextctxopt2 = LEnvC.get_cont_option C.Next lenv2.per_cont_env in
   match nextctxopt1, nextctxopt2 with
   | Some _, Some _
   | None, None -> parent_lenv.local_reactive
@@ -124,7 +115,7 @@ let merge_reactivity parent_lenv lenv1 lenv2 =
   | None, Some _ -> lenv2.local_reactive
 
 let union_lenvs_ env parent_lenv lenv1 lenv2 =
-  let fake_members = intersect_fake lenv1 lenv2 in
+  let fake_members = join_fake lenv1 lenv2 in
   let local_using_vars = parent_lenv.local_using_vars in
   let tpenv = env.lenv.tpenv in
   let local_mutability = Typing_mutability_env.intersect_mutability
@@ -132,12 +123,15 @@ let union_lenvs_ env parent_lenv lenv1 lenv2 =
   let local_reactive = merge_reactivity parent_lenv lenv1 lenv2 in
   let env = union_by_cont env lenv1 lenv2 in
   let lenv = { env.Env.lenv with
-    fake_members;
     local_using_vars;
     tpenv;
     local_mutability;
     local_reactive;
   } in
+  let per_cont_env = LEnvC.update_cont_entry C.Next lenv.per_cont_env
+    (fun entry ->
+      LEnvC.{ entry with fake_members }) in
+  let lenv = { lenv with per_cont_env } in
   { env with lenv }, lenv
 
 (* Used when we want the new local environment to be the union
@@ -167,10 +161,10 @@ let stash_and_do env conts f =
   env, res
 
 let env_with_empty_fakes env =
-  { env with Env.lenv = {
-      env.Env.lenv with Env.fake_members = Env.empty_fake_members;
-    }
-  }
+  let per_cont_env = LEnvC.update_cont_entry C.Next env.lenv.per_cont_env
+    (fun entry ->
+      LEnvC.{ entry with fake_members = Typing_fake_members.empty }) in
+  { env with lenv = { env.lenv with per_cont_env } }
 
 let has_next env =
   match get_cont_option env C.Next with

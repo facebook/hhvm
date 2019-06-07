@@ -36,12 +36,12 @@ open Nast
 
 module C = Typing_continuations
 module LEnv = Typing_lenv
-module LEnvC = Typing_lenv_cont
+module LEnvC = Typing_per_cont_env
 module Reason = Typing_reason
 module Utils = Typing_utils
 
 module LocalIdsPerCont = struct
-  type t = Typing_env.local_types
+  type t = Typing_local_types.t
 
   let drop = C.Map.remove
   let drop_list contl m =
@@ -75,9 +75,9 @@ module LocalIdsPerCont = struct
   let add_local env lid m =
     match get C.Next m with
     | None -> m
-    | Some lid_set ->
+    | Some e ->
       let tany = ((Reason.none, Utils.tany env), Ident.tmp ()) in
-      add C.Next (Local_id.Map.add lid tany lid_set) m
+      add C.Next { e with LEnvC.local_types = Local_id.Map.add lid tany e.LEnvC.local_types } m
 
 end
 

@@ -12,13 +12,10 @@
 (*****************************************************************************)
 
 val get_all_locals :
-  Typing_env.env -> Typing_env.local_types
-val get_cont :
-  Typing_env.env ->
-  Typing_continuations.t -> Typing_env.local_id_map
+  Typing_env.env -> Typing_per_cont_env.t
 val get_cont_option :
   Typing_env.env ->
-  Typing_continuations.t -> Typing_env.local_id_map option
+  Typing_continuations.t -> Typing_per_cont_env.per_cont_entry option
 val drop_cont :
   Typing_env.env ->
   Typing_continuations.t -> Typing_env.env
@@ -28,14 +25,14 @@ val drop_conts :
 val replace_cont :
   Typing_env.env ->
   Typing_continuations.t ->
-  Typing_env.local_id_map option -> Typing_env.env
+  Typing_per_cont_env.per_cont_entry option -> Typing_env.env
 val restore_conts_from :
   Typing_env.env ->
-  Typing_env.local_types ->
+  Typing_per_cont_env.t ->
   Typing_continuations.t list -> Typing_env.env
 val restore_and_merge_conts_from :
   Typing_env.env ->
-  Typing_env.local_types ->
+  Typing_per_cont_env.t ->
   Typing_continuations.t list -> Typing_env.env
 val update_next_from_conts :
   Typing_env.env ->
@@ -48,20 +45,18 @@ val move_and_merge_next_in_cont :
   Typing_continuations.t -> Typing_env.env
 val union:
   Typing_env.env ->
-  Typing_env.local ->
-  Typing_env.local ->
-  Typing_env.env * Typing_env.local
+  Typing_local_types.local ->
+  Typing_local_types.local ->
+  Typing_env.env * Typing_local_types.local
 val union_by_cont :
   Typing_env.env ->
   Typing_env.local_env ->
   Typing_env.local_env -> Typing_env.env
-val intersect_fake :
-  Typing_env.local_env ->
-  Typing_env.local_env -> Typing_env.fake_members
 val union_contextopts :
   Typing_env.env ->
-  Typing_env.local_id_map option ->
-  Typing_env.local_id_map option -> Typing_env.env * Typing_env.local_id_map option
+  Typing_per_cont_env.per_cont_entry option ->
+  Typing_per_cont_env.per_cont_entry option ->
+  Typing_env.env * Typing_per_cont_env.per_cont_entry option
 val union_lenvs :
   Typing_env.env ->
   Typing_env.local_env ->

@@ -73,15 +73,7 @@ class SavedStateHierarchyTests(
 class SavedStateTests(SavedStateTestDriver, unittest.TestCase):
     template_repo: Optional[str] = "hphp/hack/test/integration/data/simple_repo"
     bin_dir: Optional[str]
-    skip_incremental_generation_tests = False
     assert_naming_table_rows = False
-
-    def check_skip_incremental(self) -> None:
-        if self.skip_incremental_generation_tests:
-            raise unittest.SkipTest(
-                "Skipping incremental generation test because it's not "
-                "supported for these tests."
-            )
 
     def test_hhconfig_change(self) -> None:
         """
@@ -200,7 +192,6 @@ watchman_init_timeout = 1
     def test_incrementally_generated_saved_state_after_loaded_saved_state(self) -> None:
         # Same as the above test, except we begin the test by starting up
         # a Hack Server that loads a saved state.
-        self.check_skip_incremental()
         self.start_hh_server()
         # Hack server is now started with a saved state
         self.check_cmd(["No errors!"], assert_loaded_saved_state=True)
@@ -214,7 +205,7 @@ watchman_init_timeout = 1
             and new_saved_state.returned_values.edges_added > 0
         )
         if self.assert_naming_table_rows:
-            assert new_saved_state.returned_values.naming_table_rows_changed == 1
+            assert new_saved_state.returned_values.naming_table_rows_changed > 0
 
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -260,7 +251,6 @@ watchman_init_timeout = 1
         )
 
     def test_incrementally_generated_saved_state_with_errors(self) -> None:
-        self.check_skip_incremental()
         # Introduce an error in "master"
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -462,5 +452,4 @@ class ReverseNamingTableSavedStateHierarchyTests(
 class ReverseNamingTableSavedStateTests(
     SavedStateTests, ReverseNamingTableFallbackTestDriver, unittest.TestCase
 ):
-    skip_incremental_generation_tests = True
     assert_naming_table_rows = True

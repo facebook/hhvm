@@ -14,7 +14,6 @@ let check_rc (rc: Sqlite3.Rc.t): unit =
   then failwith
     (Printf.sprintf "SQLite operation failed: %s"
       (Sqlite3.Rc.to_string rc))
-;;
 
 (* Gather a database and prepared statement into a tuple *)
 let prepare_or_reset_statement
@@ -31,20 +30,29 @@ let prepare_or_reset_statement
       s
   in
   stmt
-;;
+
+let to_str_exn (value: Sqlite3.Data.t): string =
+  match value with
+  | Sqlite3.Data.TEXT s -> s
+  | _ -> raise (Invalid_argument (
+    Printf.sprintf "Expected a string, but was %s" (Sqlite3.Data.to_string_debug value)))
+
+let to_blob_exn (value: Sqlite3.Data.t): string =
+  match value with
+  | Sqlite3.Data.BLOB s -> s
+  | _ -> raise (Invalid_argument (
+    Printf.sprintf "Expected a blob, but was %s" (Sqlite3.Data.to_string_debug value)))
 
 (* Convert a sqlite data value to an Int64, or raise an exception *)
 let to_int64_exn (value: Sqlite3.Data.t): int64 =
   match value with
   | Sqlite3.Data.INT (i: int64) -> i
-  | _ -> raise (Invalid_argument
-    "Attempt to coerce sqlite value to Int64")
-;;
+  | _ -> raise (Invalid_argument (
+    Printf.sprintf "Expected an int, but was %s" (Sqlite3.Data.to_string_debug value)))
 
 (* Coerce a value to an Int64, and ignore errors *)
 let to_int64 (value: Sqlite3.Data.t): int64 =
   try to_int64_exn value with Invalid_argument _ -> 0L
-;;
 
 (* Convert a sqlite data value to an ocaml int, or raise an exception *)
 let to_int_exn (value: Sqlite3.Data.t): int =
@@ -58,9 +66,16 @@ let to_int_exn (value: Sqlite3.Data.t): int =
     end
   | _ -> raise (Invalid_argument
     "Attempt to coerce sqlite value to ocaml int")
-;;
 
 (* Convert a sqlite data value to an ocaml int, and ignore errors *)
 let to_int (value: Sqlite3.Data.t): int =
   try to_int_exn value with Invalid_argument _ -> 0
-;;
+
+let column_str stmt idx =
+  to_str_exn (Sqlite3.column stmt idx)
+
+let column_blob stmt idx =
+  to_blob_exn (Sqlite3.column stmt idx)
+
+let column_int64 stmt idx =
+  to_int64_exn (Sqlite3.column stmt idx)

@@ -163,13 +163,18 @@ type type_of_type =
   | TTypedef
   [@@deriving enum]
 
+type save_result = {
+  rows_deleted : int;
+  files_added : int;
+  symbols_added : int;
+}
+let empty_save_result = { rows_deleted = 0; files_added = 0; symbols_added = 0; }
+
 module Sqlite : sig
-  val create_database :
-    string ->
-    ((int64 -> Relative_path.t -> FileInfo.t -> int) -> unit) ->
-    unit
   val set_db_path : string -> unit
   val is_connected : unit -> bool
+  val save_file_infos : string -> FileInfo.t Relative_path.Map.t -> save_result
+  val update_file_infos : string -> forward_naming_table_delta Relative_path.Map.t -> save_result
   val fold :
     init:'a ->
     f:(Relative_path.t -> FileInfo.t -> 'a -> 'a) ->
@@ -180,42 +185,7 @@ module Sqlite : sig
   val get_fun_pos : string -> case_insensitive:bool -> Relative_path.t option
   val get_const_pos : string -> Relative_path.t option
 end = struct
-  let check_rc rc =
-    if rc <> Sqlite3.Rc.OK && rc <> Sqlite3.Rc.DONE
-    then failwith (Printf.sprintf "SQLite operation failed: %s" (Sqlite3.Rc.to_string rc))
-
-  let column_str stmt idx =
-    match Sqlite3.column stmt idx with
-    | Sqlite3.Data.TEXT s -> s
-    | data ->
-      let msg =
-        Printf.sprintf "Expected a string at column %d, but was %s"
-          idx
-          (Sqlite3.Data.to_string_debug data)
-      in
-      failwith msg
-
-    let column_blob stmt idx =
-      match Sqlite3.column stmt idx with
-      | Sqlite3.Data.BLOB s -> s
-      | data ->
-        let msg =
-          Printf.sprintf "Expected a blob at column %d, but was %s"
-            idx
-            (Sqlite3.Data.to_string_debug data)
-        in
-        failwith msg
-
-  let column_int stmt idx =
-    match Sqlite3.column stmt idx with
-    | Sqlite3.Data.INT i -> i
-    | data ->
-      let msg =
-        Printf.sprintf "Expected an int at column %d, but was %s"
-          idx
-          (Sqlite3.Data.to_string_debug data)
-      in
-      failwith msg
+  open Sqlite_utils
 
   let make_relative_path ~prefix_int ~suffix =
     let prefix =
@@ -242,18 +212,28 @@ end = struct
     let create_table_sqlite =
       Printf.sprintf "
       CREATE TABLE IF NOT EXISTS %s(
-        PRIMARY_KEY INTEGER PRIMARY KEY NOT NULL,
+        FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
         PATH_PREFIX_TYPE INTEGER NOT NULL,
         PATH_SUFFIX TEXT NOT NULL,
         FILE_INFO BLOB
       );
       " table_name
 
+    let create_index_sqlite =
+      Printf.sprintf "
+      CREATE UNIQUE INDEX IF NOT EXISTS FILE_INFO_PATH_IDX ON %s (PATH_SUFFIX, PATH_PREFIX_TYPE);
+      " table_name
+
     let insert_sqlite =
       Printf.sprintf "
         INSERT INTO %s
-        (PRIMARY_KEY, PATH_PREFIX_TYPE, PATH_SUFFIX, FILE_INFO)
-        VALUES (?, ?, ?, ?);
+        (PATH_PREFIX_TYPE, PATH_SUFFIX, FILE_INFO)
+        VALUES (?, ?, ?);
+      " table_name
+
+    let delete_sqlite =
+      Printf.sprintf "
+        DELETE FROM %s WHERE PATH_PREFIX_TYPE = ? AND PATH_SUFFIX = ?;
       " table_name
 
     let get_sqlite =
@@ -274,17 +254,35 @@ end = struct
         ORDER BY PATH_PREFIX_TYPE, PATH_SUFFIX;
       " table_name
 
-    let insert db primary_key relative_path file_info =
+    let insert db relative_path file_info =
       let prefix_type = Relative_path.prefix_to_enum (Relative_path.prefix relative_path) in
       let suffix = Relative_path.suffix relative_path in
       let file_info_blob = Marshal.to_string (FileInfo.to_saved file_info) [Marshal.No_sharing] in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
-      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT primary_key) |> check_rc;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
-      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.TEXT suffix) |> check_rc;
-      Sqlite3.bind insert_stmt 4 (Sqlite3.Data.BLOB file_info_blob) |> check_rc;
+      Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.BLOB file_info_blob) |> check_rc;
       Sqlite3.step insert_stmt |> check_rc;
       Sqlite3.finalize insert_stmt |> check_rc
+
+    let delete db relative_path =
+      let prefix_type = Relative_path.prefix_to_enum (Relative_path.prefix relative_path) in
+      let suffix = Relative_path.suffix relative_path in
+      let delete_stmt = Sqlite3.prepare db delete_sqlite in
+      Sqlite3.bind delete_stmt 1 (Sqlite3.Data.INT (Int64.of_int prefix_type)) |> check_rc;
+      Sqlite3.bind delete_stmt 2 (Sqlite3.Data.TEXT suffix) |> check_rc;
+      Sqlite3.step delete_stmt |> check_rc;
+      Sqlite3.finalize delete_stmt |> check_rc;
+      let rows_deleted = ref None in
+      Sqlite3.exec_not_null_no_headers db "SELECT changes();" ~cb:begin fun row ->
+        match row with
+        | [|num|] -> rows_deleted := Some (int_of_string num)
+        | [||] -> failwith "Empty row returned when requesting count of rows deleted."
+        | _ -> failwith "Too many columns returned when requesting count of rows deleted."
+      end |> check_rc;
+      match !rows_deleted with
+      | None -> failwith "Could not get count of rows deleted."
+      | Some n -> n
 
     let get_file_info db path =
       let get_stmt = Sqlite3.prepare db get_sqlite in
@@ -302,7 +300,7 @@ end = struct
     let fold db ~init ~f =
       let iter_stmt = Sqlite3.prepare db iter_sqlite in
       let f iter_stmt acc =
-        let prefix_int = column_int iter_stmt 0 in
+        let prefix_int = column_int64 iter_stmt 0 in
         let suffix = column_str iter_stmt 1 in
         let file_info_blob = column_blob iter_stmt 2 in
         let relative_path = make_relative_path ~prefix_int ~suffix in
@@ -324,13 +322,14 @@ end = struct
           HASH INTEGER PRIMARY KEY NOT NULL,
           CANON_HASH INTEGER NOT NULL,
           FLAGS INTEGER NOT NULL,
-          FILE_INFO_PK INTEGER NOT NULL
+          FILE_INFO_ID INTEGER NOT NULL,
+          FOREIGN KEY(FILE_INFO_ID) REFERENCES NAMING_FILE_INFO(FILE_INFO_ID) ON DELETE CASCADE
         );
       " table_name
 
     let insert_sqlite =
       Printf.sprintf "
-        INSERT INTO %s (HASH, CANON_HASH, FLAGS, FILE_INFO_PK) VALUES (?, ?, ?, ?);
+        INSERT INTO %s (HASH, CANON_HASH, FLAGS, FILE_INFO_ID) VALUES (?, ?, ?, ?);
       " table_name
 
     let (get_sqlite, get_sqlite_case_insensitive) =
@@ -341,28 +340,28 @@ end = struct
           {table_name}.FLAGS
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
-          {table_name}.FILE_INFO_PK = NAMING_FILE_INFO.PRIMARY_KEY
+          {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
         WHERE {table_name}.{hash} = ?"
       in
       (Str.global_replace (Str.regexp "{hash}") "HASH" base,
         Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base)
 
-    let insert db ~name ~flags ~file_info_pk =
+    let insert db ~name ~flags ~file_info_id =
       let hash = SharedMem.get_hash name in
       let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
       Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
       Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc;
       Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc;
-      Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_pk) |> check_rc;
+      Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc;
       Sqlite3.step insert_stmt |> check_rc;
       Sqlite3.finalize insert_stmt |> check_rc
 
-    let insert_class db ~name ~file_info_pk =
-      insert db ~name ~flags:class_flag ~file_info_pk
+    let insert_class db ~name ~file_info_id =
+      insert db ~name ~flags:class_flag ~file_info_id
 
-    let insert_typedef db ~name ~file_info_pk =
-      insert db ~name ~flags:typedef_flag ~file_info_pk
+    let insert_typedef db ~name ~file_info_id =
+      insert db ~name ~flags:typedef_flag ~file_info_id
 
     let get db ~name ~case_insensitive =
       let name = if case_insensitive then String.lowercase_ascii name else name in
@@ -373,9 +372,9 @@ end = struct
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
       | Sqlite3.Rc.ROW ->
-        let prefix_type = column_int get_stmt 0 in
+        let prefix_type = column_int64 get_stmt 0 in
         let suffix = column_str get_stmt 1 in
-        let flags = Int64.to_int (column_int get_stmt 2) in
+        let flags = Int64.to_int (column_int64 get_stmt 2) in
         let class_type = Core_kernel.Option.value_exn (type_of_type_of_enum flags) in
         Some (make_relative_path prefix_type suffix, class_type)
       | rc -> failwith (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -390,13 +389,14 @@ end = struct
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
           CANON_HASH INTEGER NOT NULL,
-          FILE_INFO_PK INTEGER NOT NULL
+          FILE_INFO_ID INTEGER NOT NULL,
+          FOREIGN KEY(FILE_INFO_ID) REFERENCES NAMING_FILE_INFO(FILE_INFO_ID) ON DELETE CASCADE
         );
       " table_name
 
     let insert_sqlite =
       Printf.sprintf "
-        INSERT INTO %s (HASH, CANON_HASH, FILE_INFO_PK) VALUES (?, ?, ?);
+        INSERT INTO %s (HASH, CANON_HASH, FILE_INFO_ID) VALUES (?, ?, ?);
       " table_name
 
     let (get_sqlite, get_sqlite_case_insensitive) =
@@ -406,19 +406,19 @@ end = struct
           NAMING_FILE_INFO.PATH_SUFFIX
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
-          {table_name}.FILE_INFO_PK = NAMING_FILE_INFO.PRIMARY_KEY
+          {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
         WHERE {table_name}.{hash} = ?"
       in
       (Str.global_replace (Str.regexp "{hash}") "HASH" base,
         Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base)
 
-    let insert db ~name ~file_info_pk =
+    let insert db ~name ~file_info_id =
       let hash = SharedMem.get_hash name in
       let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
       Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
       Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc;
-      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_pk) |> check_rc;
+      Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc;
       Sqlite3.step insert_stmt |> check_rc;
       Sqlite3.finalize insert_stmt |> check_rc
 
@@ -431,7 +431,7 @@ end = struct
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
       | Sqlite3.Rc.ROW ->
-        let prefix_type = column_int get_stmt 0 in
+        let prefix_type = column_int64 get_stmt 0 in
         let suffix = column_str get_stmt 1 in
         Some (make_relative_path prefix_type suffix)
       | rc -> failwith (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -445,13 +445,14 @@ end = struct
       Printf.sprintf "
         CREATE TABLE IF NOT EXISTS %s(
           HASH INTEGER PRIMARY KEY NOT NULL,
-          FILE_INFO_PK INTEGER NOT NULL
+          FILE_INFO_ID INTEGER NOT NULL,
+          FOREIGN KEY(FILE_INFO_ID) REFERENCES NAMING_FILE_INFO(FILE_INFO_ID) ON DELETE CASCADE
         );
       " table_name
 
     let insert_sqlite =
       Printf.sprintf "
-        INSERT INTO %s (HASH, FILE_INFO_PK) VALUES (?, ?);
+        INSERT INTO %s (HASH, FILE_INFO_ID) VALUES (?, ?);
       " table_name
 
     let get_sqlite =
@@ -461,15 +462,15 @@ end = struct
           NAMING_FILE_INFO.PATH_SUFFIX
         FROM {table_name}
         LEFT JOIN NAMING_FILE_INFO ON
-          {table_name}.FILE_INFO_PK = NAMING_FILE_INFO.PRIMARY_KEY
+          {table_name}.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
         WHERE {table_name}.HASH = ?
       "
 
-    let insert db ~name ~file_info_pk =
+    let insert db ~name ~file_info_id =
       let hash = SharedMem.get_hash name in
       let insert_stmt = Sqlite3.prepare db insert_sqlite in
       Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc;
-      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_pk) |> check_rc;
+      Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc;
       Sqlite3.step insert_stmt |> check_rc;
       Sqlite3.finalize insert_stmt |> check_rc
 
@@ -480,7 +481,7 @@ end = struct
       match Sqlite3.step get_stmt with
       | Sqlite3.Rc.DONE -> None
       | Sqlite3.Rc.ROW ->
-        let prefix_type = column_int get_stmt 0 in
+        let prefix_type = column_int64 get_stmt 0 in
         let suffix = column_str get_stmt 1 in
         Some (make_relative_path prefix_type suffix)
       | rc -> failwith (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
@@ -505,6 +506,8 @@ end = struct
     let check_table_sqlite =
       "SELECT NAME FROM SQLITE_MASTER WHERE TYPE='table' AND NAME='NAMING_FILE_INFO'"
 
+    let enable_foreign_keys_sqlite = "PRAGMA foreign_keys = ON; PRAGMA foreign_keys;"
+
     let open_db () =
       match Shared_db_settings.get "database_path" with
       | None -> None
@@ -512,13 +515,24 @@ end = struct
         let db = Sqlite3.db_open path in
         let has_table = ref false in
         Sqlite3.exec db ~cb:(fun _ _ -> has_table := true) check_table_sqlite |> check_rc;
-        if !has_table
-        then Some db
-        else failwith @@ Printf.sprintf "Database %s does not have a naming table." path
+        if not !has_table
+        then failwith @@ Printf.sprintf "Database %s does not have a naming table." path
+        else
+        let supports_foreign_keys = ref false in
+        Sqlite3.exec db ~cb:(fun _ _ -> supports_foreign_keys := true) enable_foreign_keys_sqlite
+        |> check_rc;
+        if not !supports_foreign_keys
+        then failwith "SQLite has not been compiled with foreign keys support."
+        else begin
+          Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
+          Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
+          Some db
+        end
 
     let db = ref (lazy (open_db ()))
 
     let set_db_path path =
+      Shared_db_settings.remove_batch (SSet.singleton "database_path");
       Shared_db_settings.add "database_path" path;
       (* Force this immediately so that we can get validation errors in master. *)
       db := Lazy.from_val (open_db ())
@@ -531,48 +545,93 @@ end = struct
   end
 
 
-  let save_file_info db file_info_pk relative_path file_info =
+  let save_file_info db relative_path file_info =
     let open Core_kernel in
-    FileInfoTable.insert db file_info_pk relative_path file_info;
+    FileInfoTable.insert db relative_path file_info;
+    let file_info_id = ref None in
+    Sqlite3.exec_not_null_no_headers db "SELECT last_insert_rowid()" ~cb:begin fun row ->
+      match row with
+      | [|row_id|] -> file_info_id := Some (Int64.of_string row_id)
+      | [||] -> failwith "Got no columns when querying last inserted row ID"
+      | _ -> failwith "Got too many columns when querying last inserted row ID"
+    end |> check_rc;
+    let file_info_id = match !file_info_id with
+      | Some id -> id
+      | None -> failwith "Could not get last inserted row ID"
+    in
     let symbols_inserted = 0 in
     let symbols_inserted = List.fold
       ~init:symbols_inserted
-      ~f:(fun acc (_, name) -> FunsTable.insert db ~name ~file_info_pk; acc + 1)
+      ~f:(fun acc (_, name) -> FunsTable.insert db ~name ~file_info_id; acc + 1)
       file_info.FileInfo.funs
     in
     let symbols_inserted = List.fold
       ~init:symbols_inserted
-      ~f:(fun acc (_, name) -> TypesTable.insert_class db ~name ~file_info_pk; acc + 1)
+      ~f:(fun acc (_, name) -> TypesTable.insert_class db ~name ~file_info_id; acc + 1)
       file_info.FileInfo.classes
     in
     let symbols_inserted = List.fold
       ~init:symbols_inserted
-      ~f:(fun acc (_, name) -> TypesTable.insert_typedef db ~name ~file_info_pk; acc + 1)
+      ~f:(fun acc (_, name) -> TypesTable.insert_typedef db ~name ~file_info_id; acc + 1)
       file_info.FileInfo.typedefs
     in
     let symbols_inserted = List.fold
       ~init:symbols_inserted
-      ~f:(fun acc (_, name) -> ConstsTable.insert db ~name ~file_info_pk; acc + 1)
+      ~f:(fun acc (_, name) -> ConstsTable.insert db ~name ~file_info_id; acc + 1)
       file_info.FileInfo.consts
     in
     symbols_inserted
 
-  let create_database db_name f =
+  let set_db_path = Database_handle.set_db_path
+  let is_connected = Database_handle.is_connected
+
+  let save_file_infos db_name file_info_map =
     let db = Sqlite3.db_open db_name in
-    Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc;
-    Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc;
     Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
     Sqlite3.exec db FileInfoTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db ConstsTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db TypesTable.create_table_sqlite |> check_rc;
     Sqlite3.exec db FunsTable.create_table_sqlite |> check_rc;
-    let () = f (save_file_info db) in
+    let save_result =
+      Relative_path.Map.fold file_info_map ~init:empty_save_result ~f:begin fun path fi acc ->
+        { acc with
+          files_added = acc.files_added + 1;
+          symbols_added = acc.symbols_added + save_file_info db path fi
+        }
+      end
+    in
+    Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc;
     Sqlite3.exec db "END TRANSACTION;" |> check_rc;
-    if not (Sqlite3.db_close db)
-    then failwith (Printf.sprintf "Could not close database '%s'" db_name)
+    if not @@ Sqlite3.db_close db
+    then failwith @@ Printf.sprintf "Could not close database at %s" db_name;
+    Database_handle.set_db_path db_name;
+    save_result
 
-  let set_db_path = Database_handle.set_db_path
-  let is_connected = Database_handle.is_connected
+  let update_file_infos db_name local_changes =
+    Database_handle.set_db_path db_name;
+    let db = match Database_handle.get_db () with
+      | Some db -> db
+      | None -> failwith @@ Printf.sprintf "Could not connect to %s" db_name
+    in
+    Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc;
+    let save_result = Relative_path.Map.fold
+      local_changes
+      ~init:empty_save_result
+      ~f:begin fun path change_type acc ->
+        let rows_deleted = FileInfoTable.delete db path in
+        let (files_added, symbols_added) = match change_type with
+          | Deleted -> (0, 0)
+          | Modified file_info -> (1, save_file_info db path file_info)
+        in
+        {
+          rows_deleted = acc.rows_deleted + rows_deleted;
+          files_added = acc.files_added + files_added;
+          symbols_added = acc.symbols_added + symbols_added;
+        }
+      end
+    in
+    Sqlite3.exec db "END TRANSACTION;" |> check_rc;
+    save_result
 
   let fold ~init ~f ~local_changes =
     (* We depend on [Relative_path.Map.bindings] returning results in increasing
@@ -722,26 +781,43 @@ let combine a b =
   | _ -> failwith "SQLite-backed naming tables cannot be the second argument to combine."
 
 let save naming_table db_name =
-  let t = Unix.gettimeofday() in
-  let files_added = ref 0 in
-  let symbols_added = ref 0 in
-  Sqlite.create_database db_name begin fun save_file_info ->
-    let get_next_file_info_primary_key () =
-      incr files_added;
-      !files_added
+  match naming_table with
+  | Unbacked naming_table ->
+    let t = Unix.gettimeofday () in
+    let save_result = Sqlite.save_file_infos db_name naming_table in
+    assert (save_result.rows_deleted = 0);
+    let _ : float =
+      Hh_logger.log_duration
+        (Printf.sprintf "Inserted %d files and %d symbols"
+          save_result.files_added
+          save_result.symbols_added)
+        t
     in
-    iter naming_table begin fun path file_info ->
-      let file_info_primary_key = Int64.of_int (get_next_file_info_primary_key ()) in
-      let new_symbol_count = save_file_info file_info_primary_key path file_info in
-      symbols_added := !symbols_added + new_symbol_count
-    end
-  end;
-  let _ : float =
-    Hh_logger.log_duration
-      (Printf.sprintf "Inserted %d files and %d symbols" !files_added !symbols_added)
-      t
-  in
-  !files_added + !symbols_added
+    save_result.files_added + save_result.symbols_added
+  | Backed _ ->
+    (* We could technically have this automatically do an incremental save, but
+     * we'd really rather the caller be explicit about what they expect to avoid
+     * the potential for really subtle bugs. *)
+    failwith "SQLite-backed naming tables must be saved in incremental mode."
+
+let save_incremental naming_table db_name =
+  match naming_table with
+  | Unbacked _ ->
+    (* We could technically have this automatically do a fresh save, but we'd
+     * really rather the caller be explicit about what they expect to avoid the
+     * potential for really subtle bugs. *)
+    failwith "Non-SQLite-backed naming tables cannot be saved in incremental mode."
+  | Backed local_changes ->
+    let t = Unix.gettimeofday () in
+    Sqlite.set_db_path db_name;
+    let save_result = Sqlite.update_file_infos db_name local_changes in
+    let _ : float =
+      Hh_logger.log_duration
+        (Printf.sprintf "Deleted %d files, then inserted %d files and %d symbols"
+          save_result.rows_deleted save_result.files_added save_result.symbols_added)
+        t
+    in
+    save_result.rows_deleted + save_result.files_added + save_result.symbols_added
 
 
 (*****************************************************************************)
@@ -773,13 +849,19 @@ let to_saved a =
   match a with
   | Unbacked a ->
     Relative_path.Map.map a FileInfo.to_saved
-  | Backed _ -> failwith "Converting a backed naming table to saved is not supported."
+  | Backed _ ->
+    fold a ~init:Relative_path.Map.empty ~f:begin fun path fi acc ->
+      Relative_path.Map.add acc ~key:path ~data:(FileInfo.to_saved fi)
+    end
 
 let to_fast a =
   match a with
   | Unbacked a ->
     Relative_path.Map.map a FileInfo.simplify
-  | Backed _ -> failwith "Converting a backed naming table to a FAST is not supported."
+  | Backed _ ->
+    fold a ~init:Relative_path.Map.empty ~f:begin fun path fi acc ->
+      Relative_path.Map.add acc ~key:path ~data:(FileInfo.simplify fi)
+    end
 
 let saved_to_fast saved =
   Relative_path.Map.map saved FileInfo.saved_to_names

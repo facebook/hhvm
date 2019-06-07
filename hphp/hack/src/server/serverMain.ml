@@ -1005,9 +1005,9 @@ let run_once options config local_config =
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
   let env = program_init genv in
-  let save_state_results =
+  let env, save_state_results =
     match (ServerArgs.save_filename genv.options) with
-    | None -> None
+    | None -> env, None
     | Some filename -> ServerInit.save_state genv env filename
   in
   Hh_logger.log "Running in check mode";

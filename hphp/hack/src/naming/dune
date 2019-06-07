@@ -64,6 +64,7 @@
     nast
     partial_provider
     sqlite3
+    sqlite_utils
     typing_deps
     typechecker_options)
   (preprocess (pps ppx_deriving.std)))

@@ -40,6 +40,7 @@ val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
 val update : t -> Relative_path.t -> FileInfo.t  -> t
 val update_many : t -> FileInfo.t Relative_path.Map.t -> t
 val save : t -> string -> int
+val save_incremental : t -> string -> int
 
 (* Creation functions. *)
 val create : FileInfo.t Relative_path.Map.t -> t

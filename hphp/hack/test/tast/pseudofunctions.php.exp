@@ -99,7 +99,7 @@
                     (([21:3-25], noreturn),
                      (Call (Cnormal,
                         (([21:3-12], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                         (Id ([21:3-12], "\\invariant_violation"))),
+                         (Id ([21:3-12], "\\HH\\invariant_violation"))),
                         [], [(([21:19-24], string), (String "foo"))], 
                         [])))))
                  ],
@@ -109,7 +109,7 @@
                (([22:3-29], noreturn),
                 (Call (Cnormal,
                    (([22:3-22], (function(HH\FormatString<PlainSprintf> $fmt, ...): noreturn)),
-                    (Id ([22:3-22], "\\invariant_violation"))),
+                    (Id ([22:3-22], "\\HH\\invariant_violation"))),
                    [], [(([22:23-28], string), (String "foo"))], [])))))
            ];
          fb_annotation = No unsafe blocks };

@@ -1777,7 +1777,7 @@ module Make (GetLocals : GetLocals) = struct
             N.Expr (cp, N.Any)
           | (cond_p, cond) :: el ->
             let violation = (cp, Aast.Call (Aast.Cnormal, (p, Aast.Id
-              (fp, "\\"^SN.SpecialFunctions.invariant_violation)), hl, el, uel)) in
+              (fp, "\\HH\\"^SN.SpecialFunctions.invariant_violation)), hl, el, uel)) in
             if cond <> Aast.False
             then
               let b1, b2 = [cp, Aast.Expr violation], [Pos.none, Aast.Noop] in

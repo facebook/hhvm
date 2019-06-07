@@ -87,16 +87,16 @@ let collect_in_decl = object(self)
     let acc =
       match snd expr with
       | T.Fun_id id ->
-        process_function (fst (fst expr), "\\"^SN.SpecialFunctions.fun_) +
+        process_function (fst (fst expr), "\\HH\\"^SN.SpecialFunctions.fun_) +
         process_function id
       | T.Smethod_id ((p, cid), mid) ->
-        process_function (p, "\\"^SN.SpecialFunctions.class_meth) +
+        process_function (p, "\\HH\\"^SN.SpecialFunctions.class_meth) +
         process_method_cid mid cid
       | T.Method_caller ((p, cid), mid) ->
-        process_function (p, "\\"^SN.SpecialFunctions.meth_caller) +
+        process_function (p, "\\HH\\"^SN.SpecialFunctions.meth_caller) +
         process_method_cid mid cid
       | T.Method_id (((p, ty), _), mid) ->
-        process_function (p, "\\"^SN.SpecialFunctions.inst_meth) +
+        process_function (p, "\\HH\\"^SN.SpecialFunctions.inst_meth) +
         process_method env ty mid
       | _ -> self#zero in
     acc + (super#on_expr env expr)

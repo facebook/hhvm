@@ -201,16 +201,17 @@ let tests = [
   (* should find inst_meth, fun_, class_meth, class, methods and function  *)
   ((fst f5), 3, 10),
   "{\"position\":{\"file\":\"/f5.php\",\"line\":3,\"character\":10},\
-  \"deps\":[{\"name\":\"class_meth\",\"kind\":\"function\",\"position\":\
-  {\"filename\":\"/hhi/func_pointers.hhi\",\"line\":129,\"char_start\":10,\
-  \"char_end\":19}},{\"name\":\"f5f\",\"kind\":\"function\",\"position\":\
-  {\"filename\":\"/f5.php\",\"line\":9,\"char_start\":10,\"char_end\":12}},\
-  {\"name\":\"fun\",\"kind\":\"function\",\"position\":\
+  \"deps\":[{\"name\":\"HH\\\\class_meth\",\"kind\":\"function\",\"position\":\
+  {\"filename\":\"/hhi/func_pointers.hhi\",\"line\":131,\"char_start\":10,\
+  \"char_end\":19}},\
+  {\"name\":\"HH\\\\fun\",\"kind\":\"function\",\"position\":\
   {\"filename\":\"/hhi/func_pointers.hhi\",\
-  \"line\":48,\"char_start\":10,\"char_end\":12}},\
-  {\"name\":\"inst_meth\",\"kind\":\"function\",\
+  \"line\":50,\"char_start\":10,\"char_end\":12}},\
+  {\"name\":\"HH\\\\inst_meth\",\"kind\":\"function\",\
   \"position\":{\"filename\":\"/hhi/func_pointers.hhi\",\
-  \"line\":171,\"char_start\":10,\"char_end\":18}},\
+  \"line\":173,\"char_start\":10,\"char_end\":18}},\
+  {\"name\":\"f5f\",\"kind\":\"function\",\"position\":\
+  {\"filename\":\"/f5.php\",\"line\":9,\"char_start\":10,\"char_end\":12}},\
   {\"name\":\"C\",\"kind\":\"class\",\"position\":\
   {\"filename\":\"/f5.php\",\"line\":12,\"char_start\":7,\
   \"char_end\":7}},{\"name\":\"C::m\",\"kind\":\"method\",\

@@ -97,13 +97,13 @@
       "caller":"test"
     },
     {
-      "name":"invariant_violation",
+      "name":"HH\\invariant_violation",
       "type":"Function",
       "pos":{"filename":"pseudofunctions.php","line":29,"char_start":3,"char_end":11},
       "caller":"test"
     },
     {
-      "name":"invariant_violation",
+      "name":"HH\\invariant_violation",
       "type":"Function",
       "pos":{"filename":"pseudofunctions.php","line":30,"char_start":3,"char_end":21},
       "caller":"test"

@@ -169,18 +169,18 @@ let visitor = object (self)
       | Tast.Xml (cid, _, _) ->
         process_class_id cid
       | Tast.Fun_id id ->
-        process_fun_id (pos, "\\"^SN.SpecialFunctions.fun_) +
+        process_fun_id (pos, "\\HH\\"^SN.SpecialFunctions.fun_) +
         process_fun_id (remove_apostrophes_from_function_eval id)
       | Tast.Method_id (((_, ty), _), mid) ->
-        process_fun_id (pos, "\\"^SN.SpecialFunctions.inst_meth) +
+        process_fun_id (pos, "\\HH\\"^SN.SpecialFunctions.inst_meth) +
         typed_method env ty (remove_apostrophes_from_function_eval mid)
       | Tast.Smethod_id ((_, cid) as pcid, mid) ->
-        process_fun_id (pos, "\\"^SN.SpecialFunctions.class_meth) +
+        process_fun_id (pos, "\\HH\\"^SN.SpecialFunctions.class_meth) +
         process_class_id pcid +
         process_member cid (remove_apostrophes_from_function_eval mid)
         ~is_method:true ~is_const:false
       | Tast.Method_caller ((_, cid) as pcid, mid) ->
-        process_fun_id (pos, "\\"^SN.SpecialFunctions.meth_caller) +
+        process_fun_id (pos, "\\HH\\"^SN.SpecialFunctions.meth_caller) +
         process_class_id pcid +
         process_member cid (remove_apostrophes_from_function_eval mid)
         ~is_method:true ~is_const:false

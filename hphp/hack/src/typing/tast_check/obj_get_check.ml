@@ -14,7 +14,7 @@ let handler = object
   inherit Tast_visitor.handler_base
 
   method! at_expr _ = function
-    | _, Obj_get (((_, (_, (Tdynamic|Tany))),_) , _, _) -> ()
+    | _, Obj_get (((_, (_, (Tdynamic | Tany | Terr))),_) , _, _) -> ()
     | _, Obj_get (_, ((p, _), Lvar _) , _) -> Errors.lvar_in_obj_get p
     | _ -> ()
   end

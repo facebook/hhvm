@@ -69,7 +69,7 @@ function jit_serialize_option($cmd, $test, $options, $serialize) {
 
 function usage() {
   $argv = $GLOBALS['argv'];
-  return "usage: $argv[0] [-m jit|interp] [-r] <test/directories>";
+  return "usage: {$argv[0]} [-m jit|interp] [-r] <test/directories>";
 }
 
 function help() {
@@ -91,72 +91,72 @@ If you work with hhvm a lot, you might consider a bash alias:
 Examples:
 
   # Quick tests in JIT mode:
-  % $argv[0] test/quick
+  % {$argv[0]} test/quick
 
   # Slow tests in interp mode:
-  % $argv[0] -m interp test/slow
+  % {$argv[0]} -m interp test/slow
 
   # PHP specification tests in JIT mode:
-  % $argv[0] test/slow/spec
+  % {$argv[0]} test/slow/spec
 
   # Slow closure tests in JIT mode:
-  % $argv[0] test/slow/closure
+  % {$argv[0]} test/slow/closure
 
   # Slow closure tests in JIT mode with RepoAuthoritative:
-  % $argv[0] -r test/slow/closure
+  % {$argv[0]} -r test/slow/closure
 
   # Slow array tests, in RepoAuthoritative:
-  % $argv[0] -r test/slow/array
+  % {$argv[0]} -r test/slow/array
 
   # Zend tests with a "z" in their name:
-  % $argv[0] $ztestexample
+  % {$argv[0]} $ztestexample
 
   # Quick tests in JIT mode with some extra runtime options:
-  % $argv[0] test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
+  % {$argv[0]} test/quick -a '-vEval.JitMaxTranslations=120 -vEval.HHIRRefcountOpts=0'
 
   # All quick tests except debugger
-  % $argv[0] -e debugger test/quick
+  % {$argv[0]} -e debugger test/quick
 
   # All tests except those containing a string of 3 digits
-  % $argv[0] -E '/\d{3}/' all
+  % {$argv[0]} -E '/\d{3}/' all
 
   # All tests whose name containing pdo_mysql
-  % $argv[0] -i pdo_mysql -m jit -r zend
+  % {$argv[0]} -i pdo_mysql -m jit -r zend
 
   # Print all the standard tests
-  % $argv[0] --list-tests
+  % {$argv[0]} --list-tests
 
   # Use a specific HHVM binary
-  % $argv[0] -b ~/code/hhvm/hphp/hhvm/hhvm
-  % $argv[0] --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
+  % {$argv[0]} -b ~/code/hhvm/hphp/hhvm/hhvm
+  % {$argv[0]} --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
 
   # Use live relocation to run tests in the same thread. e.g, 6 times in the same
   # thread, where the 3 specifies a random relocation for the 3rd request and the
   # test is run 3 * 2 times.
-  % $argv[0] --relocate 3 test/quick/silencer.php
+  % {$argv[0]} --relocate 3 test/quick/silencer.php
 
   # Use retranslate all.  Run the test n times, then run retranslate all, then
   # run the test n more on the new code.
-  % $argv[0] --retranslate-all 2 quick
+  % {$argv[0]} --retranslate-all 2 quick
 
   # Use jit-serialize.  Run the test n times, then run retranslate all,
   # serialize the state, and then restart hhvm, load the serialized state and
   # run retranslate-all before starting the test.
-  % $argv[0] --jit-serialize  2 -r quick
+  % {$argv[0]} --jit-serialize  2 -r quick
 
   # Run the Hack typechecker against quick typechecker.expect[f] files
   # Could explcitly use quick here too
-  # $argv[0] --typechecker
+  # {$argv[0]} --typechecker
 
   # Run the Hack typechecker against typechecker.expect[f] files in the slow
   # directory
-  # $argv[0] --typechecker slow
+  # {$argv[0]} --typechecker slow
 
   # Run the Hack typechecker against the typechecker.expect[f] file in this test
-  # $argv[0] --typechecker test/slow/test_runner_typechecker_mode/basic.php
+  # {$argv[0]} --typechecker test/slow/test_runner_typechecker_mode/basic.php
 
   # Use a specific typechecker binary
-  # $argv[0] --hhserver-binary-path ~/code/hhvm/hphp/hack/bin/hh_server --typechecker .
+  # {$argv[0]} --hhserver-binary-path ~/code/hhvm/hphp/hack/bin/hh_server --typechecker .
 
 EOT;
   return usage().$help;

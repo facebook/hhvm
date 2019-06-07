@@ -6,7 +6,7 @@
 require_once('test_base.inc');
 
 function disableIniZendCompatController($port) {
-  echo request(php_uname('n'), $port, 'test_disable_ini_zend_compat.php');
+  echo request('localhost', $port, 'test_disable_ini_zend_compat.php');
 }
 
 echo "---Enable Ini Zend Compat ON---\n";

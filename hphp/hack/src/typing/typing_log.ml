@@ -14,6 +14,7 @@ module Pr = Typing_print
 module TySet = Typing_set
 open Env
 open Tty
+open Typing_log_value
 
 (*****************************************************************************)
 (* Logging type inference environment                                        *)
@@ -65,27 +66,9 @@ let lastenv =ref (Env.empty TypecheckerOptions.default
   Relative_path.default None)
 let iterations: int Pos.Map.t ref = ref Pos.Map.empty
 
-(* Universal representation of an environment, for pretty-printing and delta computation
- *)
-type value =
-| Bool of bool
-| Atom of string
-| List of value list
-| Set of SSet.t
-| Map of value SMap.t
-
-let make_map l =
-  Map (SMap.of_list l)
-
 let filter_missing l =
   List.filter_map l
     (fun (k,v) -> match v with None -> None | Some v -> Some(k,v))
-
-let bool_as_value v = Bool v
-let string_as_value s = Atom s
-let smap_as_value f m = Map (SMap.map f m)
-
-let pos_as_value p = string_as_value (Pos.string (Pos.to_absolute p))
 
 (* Universal representation of a delta between values
  *)

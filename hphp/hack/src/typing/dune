@@ -56,6 +56,7 @@
     typing_generic_constraint
     typing_lenv_cont
     typing_log
+    typing_log_value
     typing_logic
     typing_make_type
     typing_mutability

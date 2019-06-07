@@ -8,6 +8,8 @@
  *
  */
 
+namespace HH {
+
 /*
  * The following enum values are defined in
  * hphp/runtime/ext/reflection/ext_reflection-classes.php
@@ -122,3 +124,5 @@ function type_structure(mixed $cls_or_obj, string $cns_name);
 // becomes:
 // type_structure(C::class or new C, 'type_const_name')
 //   : TypeStructure
+
+} // namespace HH

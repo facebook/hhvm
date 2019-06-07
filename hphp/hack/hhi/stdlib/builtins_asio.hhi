@@ -7,7 +7,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-namespace {
+namespace HH {
   function asio_get_current_context_idx();
   function asio_get_running_in_context($ctx_idx);
   function asio_get_running();

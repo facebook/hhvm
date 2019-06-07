@@ -7,7 +7,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  */
-namespace {
+
+namespace HH {
+
 type XenonSample = shape(
   'time' => int,
   /* HH_IGNORE_ERROR[2071] */
@@ -31,14 +33,13 @@ type XenonSample = shape(
  * It is possible for the output of this function to change in the future.
  */
 function xenon_get_data(): varray<XenonSample>; // auto-imported from HH namespace
-}
-namespace HH {
+
   /**
    * TODO: this will replace xenon_get_data()
    * this function is same as xenon_get_data() except that it deletes the stack
    * traces that are returned
    */
-  function xenon_get_and_clear_samples(): varray<\XenonSample>;
+  function xenon_get_and_clear_samples(): varray<XenonSample>;
   /**
    * Returns the number of xenon samples lost so far.
    */
@@ -47,4 +48,5 @@ namespace HH {
    * Return true whether this request can potentially log Xenon stacks
    */
   function xenon_get_is_profiled_request(): bool;
+
 }

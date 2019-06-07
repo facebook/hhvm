@@ -290,7 +290,7 @@ module StdlibFunctions = struct
   let array_filter = "\\array_filter"
   let array_map = "\\array_map"
 
-  let type_structure = "\\type_structure"
+  let type_structure = "\\HH\\type_structure"
 end
 
 module Typehints = struct
@@ -386,7 +386,7 @@ module FB = struct
 
   let idx                    = "\\idx"
 
-  let cTypeStructure         = "\\TypeStructure"
+  let cTypeStructure         = "\\HH\\TypeStructure"
 
 end
 

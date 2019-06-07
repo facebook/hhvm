@@ -56,9 +56,6 @@ let autoimport_classes = [
   "KeyedTraversable", Global;
   "keyset", Global;
   "Map", Global;
-  "ObjprofObjectStats", HH;
-  "ObjprofPathsStats", HH;
-  "ObjprofStringStats", HH;
   "Pair", Global;
   "RescheduleWaitHandle", Global;
   "ResumableWaitHandle", Global;
@@ -68,15 +65,15 @@ let autoimport_classes = [
   "StableMap", Global;
   "StaticWaitHandle", Global;
   "Traversable", Global;
-  "TypeStructureKind", Global;
+  "TypeStructureKind", HH;
   "vec", Global;
   "Vector", Global;
   "WaitableWaitHandle", Global;
 ]
 let autoimport_funcs =   [
-  "asio_get_current_context_idx", Global;
-  "asio_get_running_in_context", Global;
-  "asio_get_running", Global;
+  "asio_get_current_context_idx", HH;
+  "asio_get_running_in_context", HH;
+  "asio_get_running", HH;
   "class_meth", Global;
   "darray", Global;
   "dict", Global;
@@ -110,15 +107,19 @@ let autoimport_funcs =   [
   "server_warmup_status", HH;
   "thread_mark_stack", HH;
   "thread_memory_stats", HH;
-  "type_structure", Global;
+  "type_structure", HH;
   "varray", Global;
   "vec", Global;
-  "xenon_get_data", Global;
+  "xenon_get_data", HH;
 ]
 let autoimport_types = [
   "classname", Global;
+  "ObjprofObjectStats", HH;
+  "ObjprofPathsStats", HH;
+  "ObjprofStringStats", HH;
   "typename", Global;
-  "TypeStructure", Global;
+  "TypeStructure", HH;
+  "XenonSample", HH;
 ]
 let autoimport_consts = [
   "Rx\\IS_ENABLED", HH;

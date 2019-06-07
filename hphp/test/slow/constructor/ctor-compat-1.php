@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {}
 abstract class C {
   abstract public function __construct(Foo $x);

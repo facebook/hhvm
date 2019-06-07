@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* From http://bugs.php.net/19865 */
 <<__EntryPoint>> function main() {
 echo var_export(explode("\1", "a". chr(1). "b". chr(0). "d" . chr(1) . "f" . chr(1). "1" . chr(1) . "d"), TRUE);

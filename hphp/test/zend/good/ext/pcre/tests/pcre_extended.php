@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_match('/a e i o u/', 'aeiou', &$m));
 var_dump($m);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : public DateTimeZone DateTime::getTimezone  ( void  )
  * Description: Return time zone relative to given DateTime
  * Source code: ext/date/php_date.c

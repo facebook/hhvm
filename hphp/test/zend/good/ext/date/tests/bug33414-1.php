@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 print "TZ=America/Mendoza - wrong day.\n";
 $tStamp = mktime (17, 17, 17, 1, 8327, 1970);

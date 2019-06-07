@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   $x = new ReflectionFunction('array_filter');

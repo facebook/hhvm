@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function heh($ar) {
   if (!$ar) throw new Exception('a');

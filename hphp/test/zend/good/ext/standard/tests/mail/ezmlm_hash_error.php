@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int ezmlm_hash  ( string $addr  )
  * Description: Calculate the hash value needed by EZMLM.
  * Source code: ext/standard/mail.c

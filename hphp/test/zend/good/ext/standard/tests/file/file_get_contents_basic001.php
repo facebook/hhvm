@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $file_content = "Bienvenue au CodeFest a Montreal";
 $temp_filename = dirname(__FILE__)."/fichier_a_lire.txt";

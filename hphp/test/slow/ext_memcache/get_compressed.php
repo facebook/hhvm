@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $key = "TEST_KEY_COMPRESSION";
 $tmp_object = new stdClass;

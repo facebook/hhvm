@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class ZendGoodZendTestsBug31102 {
   public static $test = 0;

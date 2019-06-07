@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Make sure that we can tell which class was called for intercepted static
 // methods

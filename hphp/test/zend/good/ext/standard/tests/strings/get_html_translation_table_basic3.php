@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style [, string charset_hint]]] )
  * Description: Returns the internal translation table used by htmlspecialchars and htmlentities
  * Source code: ext/standard/html.c

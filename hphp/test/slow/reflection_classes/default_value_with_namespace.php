@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A {
   // SORT_REGULAR is a global constant
   const SORT_NUMERIC = 42;

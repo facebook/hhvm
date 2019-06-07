@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $headers = <<<HEADERS
 From: =?UTF-8?B?PGZvb0BleGFtcGxlLmNvbT4=?=
 Subject: =?ks_c_5601-1987?B?UkU6odk=?=

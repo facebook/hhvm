@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Soap12test {
 	public $header;
 

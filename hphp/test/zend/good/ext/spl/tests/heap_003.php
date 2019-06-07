@@ -1,4 +1,4 @@
-<?php
+<?hh
 class myHeap extends SplHeap {
     public function compare($a, $b) {
         if ($a > $b) {

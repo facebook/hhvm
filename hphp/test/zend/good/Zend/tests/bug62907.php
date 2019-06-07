@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($name) {
     if ($name == "B") {
         eval ("abstract class B extends A { }");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $string = 'aaa bbb ccc ddd eee ccc aaa bbb';
 
 ZendGoodExtPcreTestsBug44214::$array = array();

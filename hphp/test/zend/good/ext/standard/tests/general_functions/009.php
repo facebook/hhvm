@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test($str) {
     $res = sha1($str)."\n";
     return $res;

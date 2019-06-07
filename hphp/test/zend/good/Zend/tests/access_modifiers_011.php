@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
     private   $var1 = 'var1 value';

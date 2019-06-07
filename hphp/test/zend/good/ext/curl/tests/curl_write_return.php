@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $log_file = tempnam(sys_get_temp_dir(), 'php-curl-test');
 

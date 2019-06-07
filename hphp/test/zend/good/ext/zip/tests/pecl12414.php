@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $filename = 'MYLOGOV2.GFX';
 $zipname = dirname(__FILE__) . "/pecl12414.zip";
 $za = new ZipArchive();

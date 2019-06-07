@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function t() {
   if (mt_rand()) {

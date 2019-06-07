@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface test {
     public function bar();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class test {
      function throwException() { throw new Exception("Hello World!\n");

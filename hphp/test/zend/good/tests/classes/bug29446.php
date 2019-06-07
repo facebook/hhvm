@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class testClass {
   const TEST_CONST = 'test';

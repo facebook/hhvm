@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Example {
   function herp($derp) {}

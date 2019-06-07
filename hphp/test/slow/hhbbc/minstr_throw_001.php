@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class ErrStatics {
   public static $x = 0;

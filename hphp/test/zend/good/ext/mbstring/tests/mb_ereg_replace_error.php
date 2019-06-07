@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string mb_ereg_replace(string pattern, string replacement, string string [, string option])
  * Description: Replace regular expression for multibyte string 
  * Source code: ext/mbstring/php_mbregex.c

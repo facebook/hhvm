@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo MongoBinData::FUNC . "\n";
 echo MongoBinData::BYTE_ARRAY . "\n";
 echo MongoBinData::UUID . "\n";

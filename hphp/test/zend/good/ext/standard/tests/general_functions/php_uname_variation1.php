@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string php_uname  ([ string $mode  ] )
  * Description:  Returns information about the operating system PHP is running on
 */

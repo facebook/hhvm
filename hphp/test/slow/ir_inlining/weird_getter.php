@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class WeirdGetter {
   private $x;

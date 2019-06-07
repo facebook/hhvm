@@ -1,4 +1,4 @@
-<?php
+<?hh
   echo "Basic test of POSIX getppid function\n";
 
   $ppid = posix_getppid();

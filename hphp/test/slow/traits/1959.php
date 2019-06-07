@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait Company {
   public function getName() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $tests = array(
 	array("Europe/Andorra",     17, 17, 17, 1, 24764, 1970),

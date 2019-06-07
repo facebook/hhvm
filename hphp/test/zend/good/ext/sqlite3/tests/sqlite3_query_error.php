@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 echo 'Testing SQLite3 query without parameters' . PHP_EOL;

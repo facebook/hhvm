@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : void parse_str  ( string $str  [, array &$arr  ] )
  * Description: Parses the string into variables

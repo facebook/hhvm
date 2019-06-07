@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string urldecode(string str)
  * Description: Decodes URL-encoded string
  * Source code: ext/standard/url.c

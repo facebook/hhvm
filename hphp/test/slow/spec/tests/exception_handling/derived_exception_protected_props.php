@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class DerivedException extends Exception {
   protected $message = 'Derived message';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function t($xml) {
   $dom = new DOMDocument();

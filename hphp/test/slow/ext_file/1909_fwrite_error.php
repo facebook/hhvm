@@ -1,4 +1,4 @@
-<?php
+<?hh
 // #1909
 // fwrite() failure behavior when used on a stream_socket_pair with one end
 // closed.

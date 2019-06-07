@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A extends \SplFileInfo
 {
         public function __toString() {return ' -expected- ';}

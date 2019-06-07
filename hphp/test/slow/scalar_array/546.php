@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test1() {
  $a = array(__FUNCTION__, __LINE__);

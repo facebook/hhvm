@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   private static function blarg() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class asserter {
     public function call($function) {
     }

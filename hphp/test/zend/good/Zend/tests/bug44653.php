@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A;
 const XX=1;
 function fooBar() { echo __FUNCTION__ . \PHP_EOL; }

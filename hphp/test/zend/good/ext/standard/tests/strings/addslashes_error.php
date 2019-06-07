@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string addslashes ( string $str )
  * Description: Returns a string with backslashes before characters that need to be quoted in database queries etc.
  * Source code: ext/standard/string.c

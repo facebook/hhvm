@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string money_format  ( string $format  , float $number  )
  * Description: Formats a number as a currency string
  * Source code: ext/standard/string.c

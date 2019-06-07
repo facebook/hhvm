@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Create a 300x100 image
 <<__EntryPoint>> function main() {
 $im = imagecreate(300, 100);

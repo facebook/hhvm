@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TestObject implements Iterator
 {
     public $n = 0;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_mb_ereg_search_crash() {

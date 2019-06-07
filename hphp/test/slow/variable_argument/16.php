@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(...$args) {
   var_dump($args[0]);

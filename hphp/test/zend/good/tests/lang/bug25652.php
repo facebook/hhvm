@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function testfunc ($var) {
     echo "testfunc $var\n";

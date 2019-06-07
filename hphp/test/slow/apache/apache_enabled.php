@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   if (!function_exists('apache_note')) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
 	use T1;
 	public function test() { $this->backtrace(); }

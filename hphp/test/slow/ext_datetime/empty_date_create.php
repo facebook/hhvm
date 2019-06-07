@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_empty_date_create() {

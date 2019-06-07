@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_curl_close_in_callback() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
   Prototype: mixed fscanf ( resource $handle, string $format [, mixed &$...] );

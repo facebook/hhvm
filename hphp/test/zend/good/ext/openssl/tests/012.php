@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $data = "openssl_open() test";
 $pub_key = "file://" . dirname(__FILE__) . "/public.key";
 $wrong = "wrong";

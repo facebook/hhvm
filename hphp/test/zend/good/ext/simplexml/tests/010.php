@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class simplexml_inherited extends SimpleXMLElement
 {

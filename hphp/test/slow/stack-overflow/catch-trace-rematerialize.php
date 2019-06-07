@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * This test is intended to ensure that we restore %rsp correctly as we unwind
  * through TC frames.

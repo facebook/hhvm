@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // HPHP has has many version of these functions over time
 // Faceobok has impelemtnation differences

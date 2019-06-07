@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ExampleParent {
     private $hello_world = "hello foo\n";
     public function foo() {

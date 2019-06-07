@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class EE extends Exception {
 }

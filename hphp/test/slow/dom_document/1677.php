@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function rerender($html, $frag = false) {
     $doc = new DOMDocument();

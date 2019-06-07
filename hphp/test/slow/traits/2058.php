@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T {
   protected function f() {
     return 1;

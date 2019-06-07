@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!defined('IMAGETYPE_GIF'))     die('skip images of type GIF not supported');
 if (!defined('IMAGETYPE_JPEG'))    die('skip images of type JPEG not supported');
 if (!defined('IMAGETYPE_PNG'))     die('skip images of type PNG not supported');

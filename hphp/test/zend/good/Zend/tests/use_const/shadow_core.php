@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require 'includes/foo_php_version.php';
 

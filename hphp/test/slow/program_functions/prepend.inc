@@ -1,1 +1,1 @@
-<?php echo "prepend\n";
+<?hh echo "prepend\n";

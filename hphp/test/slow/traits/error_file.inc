@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require "error_file.inc2";
 

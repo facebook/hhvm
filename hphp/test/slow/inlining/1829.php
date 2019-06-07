@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($e='e') {
   return '<a name="'.$e.'" id="'.$e.'"></a>';

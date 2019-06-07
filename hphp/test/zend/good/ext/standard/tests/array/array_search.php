@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $arr1 = array('a','b','c');
 $arr2 = array();

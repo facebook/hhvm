@@ -1,4 +1,4 @@
-<?php
+<?hh
 class base {
     protected $p1 = 'base:1';
     public $p2 = 'base:2';

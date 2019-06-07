@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array gettimeofday([bool get_as_float])
  * Description: Returns the current time as array 
  * Source code: ext/standard/microtime.c

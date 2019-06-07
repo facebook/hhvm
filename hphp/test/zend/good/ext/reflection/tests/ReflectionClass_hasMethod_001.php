@@ -1,4 +1,4 @@
-<?php
+<?hh
 class pubf {
     public function f() {}
     static public function s() {}

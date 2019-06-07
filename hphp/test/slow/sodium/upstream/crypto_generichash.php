@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $q = sodium_crypto_generichash('msg');
 var_dump(bin2hex($q));
 $q = sodium_crypto_generichash('msg', '0123456789abcdef');

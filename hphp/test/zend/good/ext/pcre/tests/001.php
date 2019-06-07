@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 foreach (array('2006-05-13', '06-12-12', 'data: "12-Aug-87"') as $s) {
 	var_dump(preg_match('~

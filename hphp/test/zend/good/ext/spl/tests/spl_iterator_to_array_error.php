@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyArrayIterator extends ArrayIterator {
     public function current() {

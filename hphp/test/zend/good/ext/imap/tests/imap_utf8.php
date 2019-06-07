@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(imap_utf8(""));
 var_dump(imap_utf8('1'));

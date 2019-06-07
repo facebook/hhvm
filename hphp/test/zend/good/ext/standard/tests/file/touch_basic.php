@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool touch(string filename [, int time [, int atime]])
  * Description: Set modification time of file 
  * Source code: ext/standard/filestat.c

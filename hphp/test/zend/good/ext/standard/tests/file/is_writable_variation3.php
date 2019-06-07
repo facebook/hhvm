@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool is_writable ( string $filename );
    Description: Tells whether the filename is writable.
 

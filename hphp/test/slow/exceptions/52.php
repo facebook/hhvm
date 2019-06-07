@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Exception1 extends Exception {
   public function __Construct() {

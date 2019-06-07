@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "-- (1)\n";
 var_dump(filter_var_array(NULL));

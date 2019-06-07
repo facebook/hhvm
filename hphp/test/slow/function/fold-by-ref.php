@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   return reset(&unpack("l", pack("l", hexdec("ff3a68be"))));

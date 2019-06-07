@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo(array $a) {
     echo count($a)."\n";
 }

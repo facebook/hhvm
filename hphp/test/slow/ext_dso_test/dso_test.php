@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(17);
 var_dump(dso_test_world());

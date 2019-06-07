@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo __NAMESPACE__ . "\n";
 namespace foo;
 echo __NAMESPACE__ . "\n";

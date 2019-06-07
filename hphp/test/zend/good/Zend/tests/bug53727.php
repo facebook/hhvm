@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface MyInterface {
     const TEST_CONSTANT = true;
 }

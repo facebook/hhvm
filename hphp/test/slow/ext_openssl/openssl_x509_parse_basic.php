@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 
 var_dump(openssl_x509_parse($cert));

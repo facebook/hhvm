@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function row_dump($row, $pixels) {
   printf("[%d] ", $row);

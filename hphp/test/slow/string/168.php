@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $s = 'x';
 var_dump(strrpos($s.'0', $s));

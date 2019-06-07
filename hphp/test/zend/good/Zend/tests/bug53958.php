@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = 1;
 $fn1 = function() use ($a) {echo "$a\n"; $a++;};

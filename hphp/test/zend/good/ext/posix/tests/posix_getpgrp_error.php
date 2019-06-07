@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int posix_getpgrp(void)
  * Description: Get current process group id (POSIX.1, 4.3.1) 
  * Source code: ext/posix/posix.c

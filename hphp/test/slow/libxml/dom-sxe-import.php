@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. https://github.com/facebook/hhvm/issues/2408
 
 function load($data) {

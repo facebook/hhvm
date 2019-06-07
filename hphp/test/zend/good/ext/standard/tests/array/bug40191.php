@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $arrObj = new ArrayObject();
 $arrObj->append('foo');

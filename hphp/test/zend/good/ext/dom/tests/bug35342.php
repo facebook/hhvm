@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dom = new DOMDocument();
 $dom->loadXML("<root><foo>foobar</foo><foo>foobar#2</foo></root>");
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function aggregate_step ($var) { return $var; }
 function aggregate_final ($var) { return $var; }

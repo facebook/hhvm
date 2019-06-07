@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_default_handler(resource parser, string hdl)
  * Description: Set up default handler 
  * Source code: ext/xml/xml.c

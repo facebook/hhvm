@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string utf8_decode(string data)
  * Description: Converts a UTF-8 encoded string to ISO-8859-1 
  * Source code: ext/xml/xml.c

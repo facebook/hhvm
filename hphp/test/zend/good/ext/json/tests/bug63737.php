@@ -1,4 +1,4 @@
-<?php
+<?hh
 function decode($json) {
     $x = json_decode($json);
     var_dump($x);

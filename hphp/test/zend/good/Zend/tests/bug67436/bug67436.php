@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 spl_autoload_register(function($classname) {
 	if (in_array($classname, array('a','b','c'))) {

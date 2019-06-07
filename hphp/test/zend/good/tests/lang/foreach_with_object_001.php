@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test {
    public $a = array(1,2,3,4,5); // removed, crash too
    function c() {

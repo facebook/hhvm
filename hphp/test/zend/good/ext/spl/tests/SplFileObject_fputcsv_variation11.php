@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when default enclosure value is provided */
 <<__EntryPoint>> function main() {

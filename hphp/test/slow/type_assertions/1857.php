@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x) {
   while (is_array($x) && isset($x[0])) $x = $x[0];

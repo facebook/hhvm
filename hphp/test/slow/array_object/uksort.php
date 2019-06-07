@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cmp($a, $b) {
     $a = preg_replace('@^(a|an|the) @', '', $a);

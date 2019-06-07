@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function h() {
  include '1831.inc';

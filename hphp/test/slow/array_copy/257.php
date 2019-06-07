@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function h8() {
   $arr = array(0,1,2,3,4);

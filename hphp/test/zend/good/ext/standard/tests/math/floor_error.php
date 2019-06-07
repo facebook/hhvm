@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : float floor  ( float $value  )
  * Description: Round fractions down.
  * Source code: ext/standard/math.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -28,7 +28,7 @@ var_dump(
 	ldap_get_entries($link, ldap_search($link, "$base", "(sn=Brown-Smith)"))
 );
 echo "===DONE===\n";
-<?php
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

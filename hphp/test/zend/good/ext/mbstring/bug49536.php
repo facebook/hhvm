@@ -1,4 +1,4 @@
-<?php
+<?hh
 // non-strict mode
 var_dump(mb_detect_encoding("A\x81", "SJIS", false));
 // strict mode

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace test;
 
 function a(\Throwable $t) {

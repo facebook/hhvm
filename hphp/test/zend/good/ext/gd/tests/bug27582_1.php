@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* $id$ */
 $dest = dirname(realpath(__FILE__)) . '/bug27582.png';
 @unlink($dest);

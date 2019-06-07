@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool fnmatch ( string $pattern, string $string [, int $flags] )
    Description: fnmatch() checks if the passed string would match 
      the given shell wildcard pattern. 

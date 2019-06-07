@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto array array_intersect_key(array arr1, array arr2 [, array ...])
 * Function is implemented in ext/standard/array.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string uniqid  ([ string $prefix= ""  [, bool $more_entropy= false  ]] )
  * Description: Gets a prefixed unique identifier based on the current time in microseconds. 
  * Source code: ext/standard/uniqid.c

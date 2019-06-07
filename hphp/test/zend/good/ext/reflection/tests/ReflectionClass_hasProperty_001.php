@@ -1,4 +1,4 @@
-<?php
+<?hh
 class pubf {
     public $a;
     static public $s;

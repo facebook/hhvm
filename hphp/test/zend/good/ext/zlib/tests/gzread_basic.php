@@ -1,4 +1,4 @@
-<?php
+<?hh
 // note that gzread is an alias to fread. parameter checking tests will be
 // the same as fread
 <<__EntryPoint>> function main() {

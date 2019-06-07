@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function no_return() {
   throw new Exception('heh');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function expect_fail($lambda) {
   try {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class S {
   public static function t($arg) {

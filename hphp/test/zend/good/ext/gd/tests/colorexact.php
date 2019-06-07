@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $im = imagecreatetruecolor(5,5);
 $c = imagecolorexact($im, 255,0,255);

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $input_array = array('a', 'b', 'c', 'd', 'e');
 var_dump(array_chunk($input_array, 0));
 var_dump(array_chunk($input_array, 0, true));

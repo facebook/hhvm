@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo { function __toString() { return 'Hello'; } }
 

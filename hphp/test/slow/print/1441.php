@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo("\nLine ".__LINE__.': '); echo(!null);
 echo("\nLine ".__LINE__.': '); echo(!true);

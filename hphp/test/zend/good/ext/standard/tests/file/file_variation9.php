@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array file(string filename [, int flags[, resource context]])
  * Description: Read entire file into an array
  * Source code: ext/standard/file.c

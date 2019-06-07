@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $im = imagecreatetruecolor(10,10);
 imagealphablending($im, false);

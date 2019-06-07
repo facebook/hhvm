@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test(SplDoublyLinkedList $l) {
   $l->push("a");
   $l->push("b");

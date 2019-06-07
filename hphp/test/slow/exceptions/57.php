@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class E extends Exception {
  function __toString(){

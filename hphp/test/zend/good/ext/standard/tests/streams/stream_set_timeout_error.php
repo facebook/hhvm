@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool stream_set_timeout(resource stream, int seconds, int microseconds)
  * Description: Set timeout on stream read to seconds + microseonds 
  * Source code: ext/standard/streamsfuncs.c

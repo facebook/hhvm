@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /** test */
 namespace foo {

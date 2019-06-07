@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__) . '/_tmp.wbmp';
 $fp = fopen($filename,"wb");
 if (!$fp) {

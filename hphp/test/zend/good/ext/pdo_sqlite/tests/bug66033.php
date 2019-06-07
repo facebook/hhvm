@@ -1,4 +1,4 @@
-<?php
+<?hh
 class DBStatement extends PDOStatement {
     public $dbh;
     protected function __construct($dbh) {

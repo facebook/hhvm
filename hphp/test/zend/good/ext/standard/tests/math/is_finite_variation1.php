@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool is_finite  ( float $val  )
  * Description: Finds whether a value is a legal finite number.
  * Source code: ext/standard/math.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo {
   class Derived extends Bar\Base {
     const NUM = '42';

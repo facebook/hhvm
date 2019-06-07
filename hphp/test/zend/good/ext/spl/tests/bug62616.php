@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $ai = new ArrayIterator(array(0,1));
 
 var_dump($ai->count());

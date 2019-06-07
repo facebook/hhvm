@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MY_BASE {
   static public $x = 3;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 ArrayForEachVariableVariableForeach::$rows=array(1,2,3);
 
 

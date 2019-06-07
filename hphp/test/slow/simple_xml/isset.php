@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test_isset($str) {
   $xml = '<field Default="' . $str . '"/>';
   $field = new SimpleXmlElement($xml);

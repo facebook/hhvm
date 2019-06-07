@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class T {
  function __toString() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class privateCtorOld {
     private function privateCtorOld() {}
     public static function reflectionObjectFactory() {

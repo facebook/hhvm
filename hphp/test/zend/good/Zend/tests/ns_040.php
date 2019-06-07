@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace X;
 use X as Y;
 const A = "ok\n";

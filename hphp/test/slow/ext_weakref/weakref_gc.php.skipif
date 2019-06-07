@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (!gc_enabled()) echo "skip\n";
 // We've seen that with Interp/Eager, some of the WeakRef'd objects end up as

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string readlink ( string $path );
    Description: Returns the target of a symbolic link */
 

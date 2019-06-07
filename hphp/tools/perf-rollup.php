@@ -1,5 +1,5 @@
 #!/usr/bin/env hhvm
-<?php
+<?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 require(__DIR__.'/perf-lib.php');

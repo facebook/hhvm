@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool asort ( array &$array [, int $asort_flags] )
  * Description: Sort an array and maintain index association
                 Elements will be arranged from lowest to highest when this function has completed.

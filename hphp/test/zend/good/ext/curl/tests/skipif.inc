@@ -1,4 +1,4 @@
-<?php
+<?hh
     if (!extension_loaded("curl")) exit("skip curl extension not loaded");
     if(false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {
         if (php_sapi_name() != "cli") {

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 ini_set('precision', 12);
 $foo = 1.428571428571428647642857142;
 $bar = unserialize(serialize($foo));

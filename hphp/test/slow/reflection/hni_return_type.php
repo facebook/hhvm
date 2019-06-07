@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reflect($name) {
   echo '==== ', $name, ' ====', "\n";

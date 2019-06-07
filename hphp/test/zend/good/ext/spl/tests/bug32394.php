@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $object = new ArrayIterator;
 $object->append(1);

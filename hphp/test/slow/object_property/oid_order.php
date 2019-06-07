@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x() {
   $y1 = new stdclass;

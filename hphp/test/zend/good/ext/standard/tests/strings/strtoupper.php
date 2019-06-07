@@ -1,4 +1,4 @@
-<?php
+<?hh
 $chars = "הצü";
 // Not sure which is most portable. BSD's answer to
 // this one. A small array based on PHP_OS should

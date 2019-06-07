@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function parse_callback(...$args) {
   var_dump($args);

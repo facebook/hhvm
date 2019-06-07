@@ -1,2 +1,2 @@
-<?php /* $Id$ */
+<?hh /* $Id$ */
 if (!extension_loaded("zlib")) print "skip";

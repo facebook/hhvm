@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This is testing our enhanced ini functionality, where we return things like
 // arrays

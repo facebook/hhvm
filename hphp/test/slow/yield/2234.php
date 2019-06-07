@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   yield PHP_INT_MAX => 1;

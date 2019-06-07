@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dir = dirname(__FILE__);
 $file_pub = $dir . '/bug37820cert.pem';
 $file_key = $dir . '/bug37820key.pem';

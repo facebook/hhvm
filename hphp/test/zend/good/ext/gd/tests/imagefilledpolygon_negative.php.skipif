@@ -1,2 +1,2 @@
-<?php 
+<?hh 
 	if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available'); 

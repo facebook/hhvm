@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string stripcslashes  ( string $str  )
  * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 

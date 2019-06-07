@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('Asia/Calcutta');
 
 $date = new DateTime('18-01-2009 00:00:00');

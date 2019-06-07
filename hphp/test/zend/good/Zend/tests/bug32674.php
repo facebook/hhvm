@@ -1,4 +1,4 @@
-<?php
+<?hh
 class mycollection implements Iterator {
 
   private $_elements = array();

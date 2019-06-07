@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Most of the standard testing is in the zend shmop test.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($category, $locale) {
   var_dump(setlocale($category, $locale));

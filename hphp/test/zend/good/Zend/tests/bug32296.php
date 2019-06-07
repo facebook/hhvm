@@ -1,4 +1,4 @@
-<?php
+<?hh
 abstract class space{
     function __construct(){}
     abstract protected function unfold();

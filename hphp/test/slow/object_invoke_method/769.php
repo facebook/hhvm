@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // with type hints
 class C8 {

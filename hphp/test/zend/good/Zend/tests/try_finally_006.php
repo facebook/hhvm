@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
    $jmp = 1;
    try {

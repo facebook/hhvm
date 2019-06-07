@@ -1,4 +1,4 @@
-<?php
+<?hh
 function Sum($a) {
   $sum = 0;
   if (is_array($a)) {

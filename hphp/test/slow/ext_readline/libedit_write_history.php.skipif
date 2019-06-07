@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (READLINE_LIB !== "libedit") {
   die("skip");

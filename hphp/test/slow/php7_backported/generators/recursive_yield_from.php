@@ -1,4 +1,4 @@
-<?php
+<?hh
 function from($a = 0) {
   yield 1 + $a;
   if ($a <= 3) {

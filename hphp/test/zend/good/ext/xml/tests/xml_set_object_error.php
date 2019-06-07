@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_object(resource parser, object &obj)
  * Description: Set up object which should be used for callbacks
  * Source code: ext/xml/xml.c

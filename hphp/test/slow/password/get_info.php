@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function print_info($info) {
   echo $info['algo']."\n";

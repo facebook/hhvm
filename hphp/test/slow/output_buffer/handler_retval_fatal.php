@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Chickpea {
   public function __toString() {

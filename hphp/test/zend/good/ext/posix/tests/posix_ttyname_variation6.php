@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 echo "*** Test substituting argument 1 with object values ***\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $data = <<<QUOTE
 To be or not to be, that is the question;
 Whether 'tis nobler in the mind to suffer

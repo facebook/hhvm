@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait MY_TRAIT2 {
   protected function sayGoodbye() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function show_eq($x,$y) {
     echo "$x ". ($x==$y ? "==" : "!=") ." $y\n";
 }

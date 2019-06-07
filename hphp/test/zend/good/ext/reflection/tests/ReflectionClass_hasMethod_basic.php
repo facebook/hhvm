@@ -1,4 +1,4 @@
-<?php
+<?hh
 //New instance of class C - defined below
 $rc = new ReflectionClass("C");
 

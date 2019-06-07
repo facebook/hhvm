@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ini_location = dirname(__FILE__) . '/bug48660.tmp';
 

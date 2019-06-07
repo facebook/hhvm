@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait ATrait {
   public static $static_var = __CLASS__;

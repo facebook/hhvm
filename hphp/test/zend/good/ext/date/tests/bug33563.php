@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set("GMT");
 $strCurrDate = date('Y-m-d H:i:s',strtotime('2005-06-30 21:04:23'));
 $strMonAfter = date('Y-m-d H:i:s',strtotime('+1 month',strtotime($strCurrDate)));

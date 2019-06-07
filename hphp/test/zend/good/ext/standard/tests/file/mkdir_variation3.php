@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
  * Description: Create a directory
  * Source code: ext/standard/file.c

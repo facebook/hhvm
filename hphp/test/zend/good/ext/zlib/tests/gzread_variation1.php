@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $filename = "gzread_variation1.txt.gz";
 $h = gzopen($filename, 'w');

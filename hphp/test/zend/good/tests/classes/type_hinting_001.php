@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface Foo {
     function a(Foo $foo);

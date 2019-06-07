@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
  * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
@@ -10,8 +10,8 @@ echo "*** Testing strip_tags() : basic functionality ***\n";
 $string_array = array (
   "<html>hello</html>",
   '<html>hello</html>',
-  "<?php echo hello ?>",
-  '<?php echo hello ?>',
+  "<?hh echo hello ?>",
+  '<?hh echo hello ?>',
   "<? echo hello ?>",
   '<? echo hello ?>',
   "<% echo hello %>",

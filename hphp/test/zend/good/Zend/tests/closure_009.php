@@ -1,4 +1,4 @@
-<?php
+<?hh
 class It { public $n = 0; }
 <<__EntryPoint>> function main() {
 $a = 1;

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 ob_start();
 echo "foo\n";
 ob_end_flush();

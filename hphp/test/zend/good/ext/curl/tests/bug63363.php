@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $ch = curl_init();
 var_dump(curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false));
 /* Case that should throw an error */

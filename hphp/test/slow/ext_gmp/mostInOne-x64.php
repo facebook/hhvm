@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // gmp_divexact
 <<__EntryPoint>>

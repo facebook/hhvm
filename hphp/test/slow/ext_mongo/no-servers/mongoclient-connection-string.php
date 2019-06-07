@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 MongoLog::setModule(MongoLog::ALL);
 MongoLog::setLevel(MongoLog::ALL);

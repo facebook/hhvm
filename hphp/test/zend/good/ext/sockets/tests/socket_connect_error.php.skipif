@@ -1,4 +1,4 @@
-<?php
+<?hh
   if (!extension_loaded('sockets')) {
   echo 'skip sockets extension not available.';
 }

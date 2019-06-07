@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $descriptors = array(
   array('pipe', 'r'), // stdin

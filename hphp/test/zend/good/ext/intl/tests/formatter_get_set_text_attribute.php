@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Get/set text attribute.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x($x) {
   $z = new stdclass;

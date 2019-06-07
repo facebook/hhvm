@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $doc = new DOMDocument();
 $xpath = new DOMXPath($doc);
 $nodes = $xpath->query('*');

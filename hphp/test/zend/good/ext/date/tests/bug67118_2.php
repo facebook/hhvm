@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo extends DateTime {
     public function __construct($time = null) {
         $tz = new DateTimeZone('UTC');

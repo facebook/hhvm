@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Stringy {
   public function __toString() { return "hello"; }
 }

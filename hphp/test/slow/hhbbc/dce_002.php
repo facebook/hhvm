@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function asd() { return 12; }
 function foo() {

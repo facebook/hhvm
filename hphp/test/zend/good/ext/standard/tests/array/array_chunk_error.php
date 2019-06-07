@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_chunk(array input, int size [, bool preserve_keys])
  * Description: Split array into chunks 
  * Source code: ext/standard/array.c

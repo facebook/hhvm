@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo;
 use Bar\A as B;
 class A {}

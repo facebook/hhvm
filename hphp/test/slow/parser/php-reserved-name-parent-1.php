@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Parent {}
 <<__EntryPoint>> function main() {

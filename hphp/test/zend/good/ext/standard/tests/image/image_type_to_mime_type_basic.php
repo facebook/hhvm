@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string image_type_to_mime_type  ( int $imagetype  )
  * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype.

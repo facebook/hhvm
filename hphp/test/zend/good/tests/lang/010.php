@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test ($b) {
     $b++;
     return($b);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $tryport = 50000;

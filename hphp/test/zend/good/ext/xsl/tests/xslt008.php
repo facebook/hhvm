@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 8: Stream Wrapper Includes ";
 include("prepare.inc");
 $xsl = new domDocument;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $var = 7;
 $var2 = NULL;

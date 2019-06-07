@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string convert_uudecode  ( string $data  )
  * Description: Decode a uuencoded string

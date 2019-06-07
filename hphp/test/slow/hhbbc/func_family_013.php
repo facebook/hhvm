@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Base {
   public function foo(&$x) {

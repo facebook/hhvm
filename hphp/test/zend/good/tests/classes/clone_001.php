@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test {
     public $p1 = 1;
     public $p2 = 2;

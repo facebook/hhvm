@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyCollection extends MongoCollection
 {
     static public function toIndexString($a)

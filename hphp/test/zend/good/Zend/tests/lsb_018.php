@@ -1,4 +1,4 @@
-<?php
+<?hh
 abstract class Singleton
 {
     static private $instances = array();

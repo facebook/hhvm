@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array posix_getgrgid(long gid)
  * Description: Group database access (POSIX.1, 9.2.1)
  * Source code: ext/posix/posix.c

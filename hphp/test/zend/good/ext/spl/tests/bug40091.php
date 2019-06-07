@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyAutoloader {
     function __construct($directory_to_use) {}
     function autoload($class_name) {

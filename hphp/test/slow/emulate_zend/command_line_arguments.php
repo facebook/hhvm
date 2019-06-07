@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const SCRIPT_NAME = __DIR__.'/command_line_arguments.inc';
 

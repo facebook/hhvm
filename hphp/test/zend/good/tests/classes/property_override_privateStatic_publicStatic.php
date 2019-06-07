@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A
 {
     private static $p = "A::p (static)";

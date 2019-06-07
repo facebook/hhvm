@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Stems from https://github.com/facebook/hhvm/issues/4892
 

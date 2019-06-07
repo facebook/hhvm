@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo () {
     for($i = 0; $i < 5; $i++) {
         do {

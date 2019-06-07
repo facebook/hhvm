@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Theoretically this should be valid because it weakens the constraint, but
  * PHP does not allow this (for non-variadics), so I'm not allowing it here, too,

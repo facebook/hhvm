@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // This should fail. Even if it succeeds, the subsequent calls should not crash

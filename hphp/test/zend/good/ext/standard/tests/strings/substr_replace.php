@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $str = "try this";
 $repl = "bala ";
 $start = 2;

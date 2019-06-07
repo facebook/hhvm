@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
  * Description: Create an array containing num elements starting with index start_key each initialized to val 
  * Source code: ext/standard/array.c

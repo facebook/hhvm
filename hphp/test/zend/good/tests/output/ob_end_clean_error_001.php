@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  * proto bool ob_end_clean(void)
  * Function is implemented in main/output.c

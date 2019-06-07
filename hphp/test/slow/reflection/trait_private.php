@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait P1 {
   private $p1;

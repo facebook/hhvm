@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test2 {
 	private static $instances = 0;
 	public $instance;

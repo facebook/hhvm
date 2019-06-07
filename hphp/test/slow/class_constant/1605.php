@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class FooConstants {
   const ZERO        = 0;

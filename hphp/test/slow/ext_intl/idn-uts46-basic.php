@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_idn_uts46_basic() {

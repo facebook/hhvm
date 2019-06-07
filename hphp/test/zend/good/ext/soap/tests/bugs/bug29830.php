@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class hello_world {
   public function hello($to) {

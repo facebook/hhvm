@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_parse(resource parser, string data [, int isFinal])
  * Description: Start parsing an XML document 
  * Source code: ext/xml/xml.c

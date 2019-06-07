@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string gzinflate(string data [, int length])
  * Description: Unzip a gzip-compressed string 
  * Source code: ext/zlib/zlib.c

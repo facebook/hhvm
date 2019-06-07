@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * The purpose of this test is to make sure that '/tmp/foo/http://example.com'

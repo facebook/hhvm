@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* creating directory */
 <<__EntryPoint>> function main() {

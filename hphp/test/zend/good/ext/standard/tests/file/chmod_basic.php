@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const MODE_MASK = 07777;
 <<__EntryPoint>> function main() {

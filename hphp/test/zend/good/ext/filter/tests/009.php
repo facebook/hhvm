@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_id("stripped"));
 var_dump(filter_id("string"));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Note: test names match method names in a set of PHPUnit tests

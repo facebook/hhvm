@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $ar = array("1","2","3");
 foreach ($ar as $val) {
     switch ($val) {

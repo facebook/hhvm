@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: string fgetc ( resource $handle );
  Description: Gets character from file pointer

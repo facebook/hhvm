@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test($str) {
     $res = md5(base64_decode(base64_encode($str)))."\n";
     return $res;

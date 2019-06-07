@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function count_rows ($pix) {
   $rows = 0;

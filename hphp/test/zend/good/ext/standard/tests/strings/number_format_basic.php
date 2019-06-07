@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  :  string number_format  ( float $number  [, int $decimals  ] )
  *               string number_format ( float $number , int $decimals , string $dec_point , string $thousands_sep )
  * Description: Format a number with grouped thousands

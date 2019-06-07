@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function h6() {
   $x = array(1,2,3,4);

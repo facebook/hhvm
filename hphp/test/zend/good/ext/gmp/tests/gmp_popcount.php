@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gmp_popcount(-1));
 var_dump(gmp_popcount(0));

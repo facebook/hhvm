@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
 	static function test($v='') {
 		print_r(static::class);

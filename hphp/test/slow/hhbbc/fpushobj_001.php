@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C { public function heh() { echo "heh\n"; } }
 function foo() {
   switch ($GLOBALS['x']) {

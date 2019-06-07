@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // (int)(PHP_INT_MAX / 3) gives a different result

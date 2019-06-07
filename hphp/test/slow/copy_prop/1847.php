@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x, $y) {
   $z = 32;

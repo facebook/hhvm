@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($class)
 {
     eval("namespace ns_test; class test {}");

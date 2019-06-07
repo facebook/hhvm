@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const FOO = 25;
 const BAR = 42;

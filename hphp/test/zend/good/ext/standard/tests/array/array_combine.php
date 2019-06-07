@@ -1,4 +1,4 @@
-<?php
+<?hh
 	$array1 = array('green', 'red', 'yellow');
 	$array2 = array('1', '2', '3');
 	$array3 = array(0, 1, 2);

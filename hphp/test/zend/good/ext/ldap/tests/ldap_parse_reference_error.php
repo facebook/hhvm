@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 $link = ldap_connect($host, $port);
 $refs = null;

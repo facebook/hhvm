@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Blah {
   function foo(string $x) {}
   use Baz\string;

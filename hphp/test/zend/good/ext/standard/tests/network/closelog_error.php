@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool closelog(void)
  * Description: Close connection to system logger 
  * Source code: ext/standard/syslog.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: mixed pathinfo ( string $path [, int $options] );
    Description: Returns information about a file path
 */

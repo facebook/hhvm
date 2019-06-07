@@ -1,4 +1,4 @@
-<?php
+<?hh
 function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
 {
 	echo "$errno: $errmsg\n";

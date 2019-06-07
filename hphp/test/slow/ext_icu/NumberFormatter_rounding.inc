@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test_rounding($locale, $digits, $mode = null) {
   $formatter = NumberFormatter::create($locale, NumberFormatter::DEFAULT_STYLE);
   $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, $digits);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class IA implements IteratorAggregate {
   public function getIterator(){}
 }

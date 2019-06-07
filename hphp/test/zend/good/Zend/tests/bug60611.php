@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Cls {
     function __call($name, $arg) {
     }

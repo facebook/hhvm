@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $str = 'O:12:"phpinfo();/*":0:{}';
 $obj = unserialize($str);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
  * My Doc Comment for A
  */

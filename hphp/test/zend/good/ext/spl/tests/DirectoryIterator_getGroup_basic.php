@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dirname = 'DirectoryIterator_getGroup_basic';
 mkdir($dirname);
 $dir = new DirectoryIterator($dirname);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 $filename = $filename = dirname(__FILE__)."/004.txt.gz";

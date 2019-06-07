@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
     function cb($param) {
         var_dump($param);

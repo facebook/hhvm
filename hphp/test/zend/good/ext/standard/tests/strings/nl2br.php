@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(nl2br("test"));
 var_dump(nl2br(""));
 var_dump(nl2br("\r\n"));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class myZip extends ZipArchive {
     private $test = 0;
     public $testp = 1;

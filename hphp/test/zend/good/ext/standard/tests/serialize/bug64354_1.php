@@ -1,4 +1,4 @@
-<?php
+<?hh
 spl_autoload_register(
     function($class) {
         throw new Exception("Failed");

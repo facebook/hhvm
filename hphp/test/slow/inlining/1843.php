@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function pid($x) {
   var_dump($x);

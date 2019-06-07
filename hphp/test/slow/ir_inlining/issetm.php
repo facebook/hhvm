@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class IssetM {
   public function hasX() {

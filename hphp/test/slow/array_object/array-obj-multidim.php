@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 # case 1 - segmentation fault
 class Concrete

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class foo {
     public static function elementOpen( $parser, $name, $attribs ) {

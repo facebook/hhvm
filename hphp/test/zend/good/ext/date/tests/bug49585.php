@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 
 $date = new DateTime('-1500-01-01');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gmp_prob_prime(10));
 var_dump(gmp_prob_prime("7"));

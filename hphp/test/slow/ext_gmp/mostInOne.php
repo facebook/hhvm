@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // gmp_abs
 <<__EntryPoint>>

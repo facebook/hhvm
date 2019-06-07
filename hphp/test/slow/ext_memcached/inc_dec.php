@@ -1,4 +1,4 @@
-<?php
+<?hh
 const key = 'incr_decr_test';
 $mc = new Memcached;
 $mc->addServer('127.0.0.1', 11211);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function encode_decode($json) {
     $struct = json_decode($json);
     $pretty = json_encode($struct, JSON_PRETTY_PRINT);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class obj1 { function heh() { echo "heh\n"; } }
 class obj2 { function heh() { echo "yup\n"; } }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  *  Prototype: float disk_free_space( string directory )
  *  Description: Given a string containing a directory, this function will

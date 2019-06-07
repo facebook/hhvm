@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test that the behavior is consistent with the existing handling of new
 // and legacy constructors.

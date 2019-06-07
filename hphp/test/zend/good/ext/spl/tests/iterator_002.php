@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class RecursiceArrayIterator extends ArrayIterator implements RecursiveIterator
 {

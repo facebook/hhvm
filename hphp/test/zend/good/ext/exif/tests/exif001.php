@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
   test1.jpg is a 1*1 image that does not contain any Exif/Comment information
   test2.jpg is the same image but contains Exif/Comment information and a

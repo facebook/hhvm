@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // HNI ParamCoerceModeNull
 try { var_dump(bcscale([])); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

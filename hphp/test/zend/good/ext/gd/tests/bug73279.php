@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $src = imagecreate(100, 100);
 imagecolorallocate($src, 255, 255, 255);
 $dst = imagescale($src, 200, 200, IMG_BILINEAR_FIXED);

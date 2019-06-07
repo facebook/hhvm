@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class StringableObj { function __toString() { return 'Hello'; } }
 

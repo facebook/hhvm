@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class bar {
   public function __construct()  {

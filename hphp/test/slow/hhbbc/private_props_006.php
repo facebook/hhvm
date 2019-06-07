@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Testing86Pinit {
   private $x = Bar::A;

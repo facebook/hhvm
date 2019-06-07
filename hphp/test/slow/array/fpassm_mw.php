@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function asd($x) {
   var_dump($x);

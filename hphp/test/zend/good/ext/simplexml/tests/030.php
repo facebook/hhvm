@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml =<<<EOF
 <root s:att1="b" att1="a"
       xmlns:s="urn::test" xmlns:t="urn::test-t">

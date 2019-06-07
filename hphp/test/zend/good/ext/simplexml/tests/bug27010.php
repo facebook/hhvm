@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $xml=<<<EOF
 <drinks xmlns:hot="http://www.example.com/hot">

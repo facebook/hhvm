@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 number_format(1e80, 0, '', ' ');
 number_format(1e300, 0, '', ' ');

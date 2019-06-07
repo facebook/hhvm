@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool uksort(array array_arg, string cmp_function)
  * Description: Sort an array by keys using a user-defined comparison function
  * Source code: ext/standard/array.c

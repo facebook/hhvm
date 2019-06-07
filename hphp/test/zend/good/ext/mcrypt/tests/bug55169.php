@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 for( $i=1; $i<=64; $i = $i*2 ){
   echo 'Input: '. $i . PHP_EOL;
   $random = mcrypt_create_iv( $i, MCRYPT_DEV_URANDOM );

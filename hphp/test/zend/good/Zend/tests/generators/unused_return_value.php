@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen($foo) { yield; }
 <<__EntryPoint>> function main() {

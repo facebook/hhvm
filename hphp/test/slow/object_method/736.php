@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f2 ($a) {
   return $a+200;
 }

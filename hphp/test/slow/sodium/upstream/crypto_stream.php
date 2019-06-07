@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $nonce = random_bytes(SODIUM_CRYPTO_STREAM_NONCEBYTES);
 $key = sodium_crypto_stream_keygen();
 

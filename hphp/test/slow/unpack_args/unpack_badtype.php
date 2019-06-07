@@ -1,4 +1,4 @@
-<?php
+<?hh
 function handler() {
   throw new Exception;
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test {
     private static $data1 = 1;
     private static $data4 = 4;

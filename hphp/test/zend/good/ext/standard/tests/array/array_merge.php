@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array array_merge(array $array1 [, array $array2 [, array $...]]);
    Description: Merge one or more arrays
 */

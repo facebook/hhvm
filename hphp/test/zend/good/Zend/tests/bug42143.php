@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "Testing NAN:\n";
 echo "NAN= ";
 var_dump(NAN);

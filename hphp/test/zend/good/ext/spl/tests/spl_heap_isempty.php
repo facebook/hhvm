@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $h = new SplMaxHeap();
 echo "Checking a new heap is empty: ";
 var_dump($h->isEmpty())."\n";

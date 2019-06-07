@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fruit() {
   $a = 123;

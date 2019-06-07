@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $r = new \Redis();
 var_dump($r->isConnected());
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $global_var = 2;
 

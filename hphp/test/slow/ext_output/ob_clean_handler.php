@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class ExtOutputObCleanHandler {
   public static $buffer = '';

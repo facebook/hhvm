@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $magick = new Imagick('magick:rose');
 $iterator = new ImagickPixelIterator($magick);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(@readline_info());
 var_dump(@readline_info('1'));

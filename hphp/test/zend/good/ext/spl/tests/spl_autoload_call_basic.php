@@ -1,4 +1,4 @@
-<?php
+<?hh
 function customAutolader($class) {
     require_once __DIR__ . '/testclass.class.inc';
 }

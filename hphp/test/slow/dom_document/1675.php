@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class books extends domDocument {
   function addBook($title, $author) {

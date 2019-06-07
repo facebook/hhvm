@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // With autoload, no warning.
 $i = 0;

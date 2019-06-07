@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array array_map(mixed callback, array input1 [, array input2 ,...])
  * Description: Applies the callback to the elements in given arrays.

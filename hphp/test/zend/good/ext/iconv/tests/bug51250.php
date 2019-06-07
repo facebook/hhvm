@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $m = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
 
 var_dump(iconv_mime_decode("Legal encoded-word: =?utf-8?B?Kg==?= .", $m));

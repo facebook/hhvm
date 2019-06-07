@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function variadic_hinted_objects(stdClass ...$objects) {}
 

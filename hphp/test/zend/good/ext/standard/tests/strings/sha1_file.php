@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: string sha1_file( string filename[, bool raw_output] )
  * Description: Calculate the sha1 hash of a file

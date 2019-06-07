@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int ArrayObject::uksort(callback cmp_function)
  * Description: proto int ArrayIterator::uksort(callback cmp_function)
  * Sort the entries by key using user defined function. 

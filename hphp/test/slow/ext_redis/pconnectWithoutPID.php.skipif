@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (!getenv('REDIS_TEST_HOST')) {
   echo 'skip';

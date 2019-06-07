@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // clearstatcache do nothing, but there should no warnnings

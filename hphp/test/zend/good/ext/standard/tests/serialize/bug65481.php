@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test\n";
 
 class A {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function obj_dump($o) {
   var_dump($o);

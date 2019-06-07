@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_flip(array $input)
  * Description: Return array with key <-> value flipped 
  * Source code: ext/standard/array.c

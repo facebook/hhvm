@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool chmod(string filename, int mode)
  * Description: Change file mode 
  * Source code: ext/standard/filestat.c

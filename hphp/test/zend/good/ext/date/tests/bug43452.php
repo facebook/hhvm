@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('Europe/Oslo');
 // <day> is equivalent to 1 <day> and will *not* forward if the current day
 // (November 1st) is the same day of week.

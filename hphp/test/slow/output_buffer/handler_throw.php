@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   ob_start(function($str) {

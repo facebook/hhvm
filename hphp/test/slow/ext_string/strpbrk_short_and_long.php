@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function both_short() {
   print __FUNCTION__."\n";

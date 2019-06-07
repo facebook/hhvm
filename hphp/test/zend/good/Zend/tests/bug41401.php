@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo 1/-2*5;
 echo "\n";
 echo 6/+2*-3;

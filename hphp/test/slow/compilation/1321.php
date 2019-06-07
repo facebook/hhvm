@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   static function bar(X $x) {

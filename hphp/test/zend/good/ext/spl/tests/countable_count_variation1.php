@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class returnNull implements Countable {
     function count() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A {
   function p() {

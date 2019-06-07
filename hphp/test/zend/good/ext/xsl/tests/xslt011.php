@@ -1,4 +1,4 @@
-<?php
+<?hh
 print "Test 11: php:function Support\n";
   class foo {
        function foo() {}

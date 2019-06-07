@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // See utf8ize.php

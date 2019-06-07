@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 
 $long_max = PHP_INT_MAX;
 $long_min =  'PHP_INT_MIN';

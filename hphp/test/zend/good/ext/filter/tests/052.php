@@ -1,4 +1,4 @@
-<?php
+<?hh
 function filter_cb($var)
 {
   return 1;

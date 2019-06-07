@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace Foo {
   const NOT_REALLY_TRUE = false;

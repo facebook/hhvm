@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C extends ArrayObject {
     private $x = 'secret';
 

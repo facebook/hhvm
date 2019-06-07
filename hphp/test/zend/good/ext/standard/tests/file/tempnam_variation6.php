@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype:  string tempnam ( string $dir, string $prefix );
    Description: Create file with unique file name.
 */

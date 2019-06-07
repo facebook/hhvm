@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $fp = fopen(dirname(__FILE__) . "/cert.crt","r");
 $a = fread($fp,8192);
 fclose($fp);

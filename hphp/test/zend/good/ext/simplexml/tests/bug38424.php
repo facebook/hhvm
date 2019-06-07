@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $xml = simplexml_load_string('<xml></xml>');
 

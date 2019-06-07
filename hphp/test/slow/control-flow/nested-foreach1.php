@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($arr1, $arr2) {
   $tot = 0;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($name, $unique_id=false, $id=null) {
   $id = $id ? $id : ($unique_id ? uniqid($name) : $name);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function bar() {
 	try {
 		echo "1\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class test {
     abstract private function foo() {

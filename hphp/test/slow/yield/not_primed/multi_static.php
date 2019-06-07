@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class Constants {
   static public function genA() {

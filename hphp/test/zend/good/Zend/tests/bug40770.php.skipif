@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");
 if ($zend_mm_enabled === "0") {

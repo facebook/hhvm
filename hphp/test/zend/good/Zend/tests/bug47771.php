@@ -1,4 +1,4 @@
-<?php
+<?hh
 function throw_exc() {
   throw new Exception('TEST_EXCEPTION');
 }

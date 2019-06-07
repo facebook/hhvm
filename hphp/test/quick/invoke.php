@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Normal {
   public function __invoke() {

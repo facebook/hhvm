@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Make a string's first character uppercase */
 
 echo "#### Basic and Various operations ####\n";

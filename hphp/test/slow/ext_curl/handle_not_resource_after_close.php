@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $ch = curl_init();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class JsonTest1 {
     public $test;

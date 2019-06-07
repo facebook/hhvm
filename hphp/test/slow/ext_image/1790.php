@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Create a 100*30 image

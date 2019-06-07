@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $key = <<<EOF
 -----BEGIN PUBLIC KEY-----

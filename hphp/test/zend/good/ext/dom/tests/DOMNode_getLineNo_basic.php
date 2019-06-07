@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $file = dirname(__FILE__).'/book.xml';
 $doc = new DOMDocument();
 $doc->load($file);

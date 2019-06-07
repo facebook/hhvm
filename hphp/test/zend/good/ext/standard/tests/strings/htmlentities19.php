@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tests = array(
     "\x41\xC2\x3E\x42", // Unicode TR #36, 3.1.1; do not consume valid successor bytes
     "\xE3\x80\x22",    // Unicode TR #36, 3.6.1; use strategy #2

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Test\ns1;
 
 const C = "const ok\n";

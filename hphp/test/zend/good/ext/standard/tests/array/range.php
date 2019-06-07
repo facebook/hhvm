@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "*** Testing range() function on basic operations ***\n";
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. http://3v4l.org/FtFt6
 
 class MyElement extends DOMElement {

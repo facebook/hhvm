@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen() {
   yield from [1, 2, 3, 4];

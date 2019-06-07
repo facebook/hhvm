@@ -1,4 +1,4 @@
-<?php
+<?hh
 function ifit() {
   echo "Elephant emoji.";
 }

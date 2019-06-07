@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * proto void flush(void)
  * Function is implemented in ext/standard/basic_functions.c.

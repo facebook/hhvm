@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class PushStackStatics {
   public static $index = 0;

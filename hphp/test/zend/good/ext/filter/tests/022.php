@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_var("a@b.c", FILTER_SANITIZE_EMAIL));
 var_dump(filter_var("a[!@#$%^&*()@a@#$%^&*(.com@#$%^&*(", FILTER_SANITIZE_EMAIL));

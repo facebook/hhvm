@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $wrong = $correct = 'abcdef';
 $x = array();
 $t = $x[] = 'x';

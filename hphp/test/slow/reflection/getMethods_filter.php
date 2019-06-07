@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Test {
   abstract public function myMethod();

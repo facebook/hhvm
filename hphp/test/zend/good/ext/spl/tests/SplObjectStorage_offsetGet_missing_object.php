@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $s = new SplObjectStorage();
 $o1 = new stdClass();

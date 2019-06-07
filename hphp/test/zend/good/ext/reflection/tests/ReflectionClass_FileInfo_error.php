@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C { }
 <<__EntryPoint>> function main() {
 $rc = new ReflectionClass("C");

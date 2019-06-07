@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_combine(array $keys, array $values)
  * Description: Creates an array by using the elements of the first parameter as keys 
  *              and the elements of the second as the corresponding values 

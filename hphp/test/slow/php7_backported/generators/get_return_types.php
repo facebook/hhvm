@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen1() {
     return; // CONST

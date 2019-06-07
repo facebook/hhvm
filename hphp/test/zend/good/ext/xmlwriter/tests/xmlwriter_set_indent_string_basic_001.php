@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $temp_filename = dirname(__FILE__)."/xmlwriter_set_indent_string.tmp";
     $fp = fopen($temp_filename, "w");
     fwrite ($fp, "Hi");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Exception;
 function foo() {
   echo "ok\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Id {
         private $id="priv";
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class a {
   function r(&$x) {

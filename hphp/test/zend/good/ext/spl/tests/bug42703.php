@@ -1,4 +1,4 @@
-<?php
+<?hh
 class BlaIterator implements Iterator
 {
     public function rewind() { }

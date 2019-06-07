@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo;
 function f($a=Foo::bar) {
     return $a;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class LocalSoapClient extends SoapClient {
 
   function __construct($wsdl, $options) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  Prototype: resource fopen(string $filename, string $mode 
                             [, bool $use_include_path [, resource $context]] );

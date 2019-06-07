@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 include (__DIR__ . '/redis.inc');
 

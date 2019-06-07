@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public static $x=1;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x($a, $b, $c, $d) {
 }

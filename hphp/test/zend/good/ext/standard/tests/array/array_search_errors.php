@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Prototype  : mixed array_search ( mixed $needle, array $haystack [, bool $strict] )
  * Description: Searches haystack for needle and returns the key if it is found in the array, FALSE otherwise

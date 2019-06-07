@@ -1,4 +1,4 @@
-<?php
+<?hh
 // override heap to force corruption by throwing exception in compare
 class SplMinHeap2 extends SplMinHeap {
     public function compare($a, $b) {

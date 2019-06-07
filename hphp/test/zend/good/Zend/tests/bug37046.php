@@ -1,4 +1,4 @@
-<?php
+<?hh
 function s() {
   $storage = array(array('x', 'y'));
   return $storage[0];

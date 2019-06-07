@@ -1,4 +1,4 @@
-<?php
+<?hh
 function func($params) {
  var_dump($params);
 }

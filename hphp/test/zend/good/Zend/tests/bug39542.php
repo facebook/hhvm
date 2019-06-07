@@ -1,4 +1,4 @@
-<?php
+<?hh
 $oldcwd = getcwd();
 chdir(dirname(__FILE__));
 if (substr(PHP_OS, 0, 3) == 'WIN') {

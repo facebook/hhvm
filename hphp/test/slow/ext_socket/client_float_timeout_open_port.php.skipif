@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $errno = null;
 $errstr = null;

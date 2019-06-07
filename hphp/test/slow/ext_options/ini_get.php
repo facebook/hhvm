@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ini_get_wrapper( $setting ) {
     return ini_get( $setting );

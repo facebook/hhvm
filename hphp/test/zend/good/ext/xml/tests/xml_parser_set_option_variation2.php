@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
  * Description: Set options in an XML parser
  * Source code: ext/xml/xml.c

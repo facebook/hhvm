@@ -1,4 +1,4 @@
-<?php
+<?hh
 function chk_enc($str, $n, $enc = "UTF-8", $with_bom = false) {
     $src = bin2hex(mb_convert_encoding($str, "UCS-4BE", $enc));
     $dst = str_repeat("0000fffd", $n);

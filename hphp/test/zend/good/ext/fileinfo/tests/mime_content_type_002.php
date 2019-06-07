@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(mime_content_type(__FILE__));
 var_dump(mime_content_type(fopen(__FILE__, 'r')));

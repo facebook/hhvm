@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // the INI directives from bug #60761 report
 ini_set('zlib.output_compression', '4096');

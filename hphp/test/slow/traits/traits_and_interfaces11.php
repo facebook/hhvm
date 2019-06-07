@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait A { public function foo() { return 1; } }
 trait B { public function foo() { return 2; } }

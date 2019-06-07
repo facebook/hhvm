@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Prototype: string filetype ( string $filename );
  * Description: Returns the type of the file. Possible values are fifo, char,

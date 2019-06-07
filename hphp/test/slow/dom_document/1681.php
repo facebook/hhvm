@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyNode extends DOMNode {
 }

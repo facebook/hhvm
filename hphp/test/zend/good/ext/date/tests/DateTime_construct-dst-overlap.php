@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 // PHP defaults to Daylight Saving Time.  Ensure consistency in future.

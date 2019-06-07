@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 if (base64_decode(b"dGVzdA==") == base64_decode(b"dGVzdA==CRAP")) {
     echo "Same octect data - Signature Valid\n";
 } else {

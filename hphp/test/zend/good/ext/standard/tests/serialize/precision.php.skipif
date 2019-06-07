@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (pack('s', 1) != "\x01\x00")
   die("skip test for little-endian architectures");

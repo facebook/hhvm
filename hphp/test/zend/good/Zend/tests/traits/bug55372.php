@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait testTrait {
     public function testMethod() {

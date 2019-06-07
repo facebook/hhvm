@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
     protected function prot() { }
     private function priv() { }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f() {
     echo "in f()\n";

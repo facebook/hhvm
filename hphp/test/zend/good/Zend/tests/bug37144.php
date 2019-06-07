@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
   $x = new stdClass();
   $x->bar = array(1);

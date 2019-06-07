@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int mb_strrpos(string $haystack, string $needle [, int $offset [, string $encoding]])
  * Description: Find position of last occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c

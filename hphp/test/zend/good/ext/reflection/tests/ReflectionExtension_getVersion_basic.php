@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $obj = new ReflectionExtension('reflection');
 $var = $obj->getVersion() ? $obj->getVersion() : null;
 $test = floatval($var) == $var ? true : false;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* creating directory */
 <<__EntryPoint>> function main() {
 $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $it = new AppendIterator();
 $it->append(new ArrayIterator(array(1,2)));

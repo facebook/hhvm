@@ -1,4 +1,4 @@
-<?php
+<?hh
 function stats($f, $a) {
     $times = 90000;
     print "$f\n";

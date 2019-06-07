@@ -1,4 +1,4 @@
-<?php
+<?hh
 function autoload1() {}
 
 function autoload2() {}

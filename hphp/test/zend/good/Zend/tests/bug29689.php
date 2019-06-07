@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
     private $foo = 'foo';
     private $foo2 = 'foo2';

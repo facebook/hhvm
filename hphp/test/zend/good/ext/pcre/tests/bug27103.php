@@ -1,4 +1,4 @@
-<?php
+<?hh
 function iter($ar)
 {
 	foreach ($ar as $c) {

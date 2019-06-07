@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TrickClass {
     function __toString() {
         //Return the name of another class

@@ -1,4 +1,4 @@
-<?php
+<?hh
 const LINE_OF_DATA = "12345678\n";
 
 // create a file

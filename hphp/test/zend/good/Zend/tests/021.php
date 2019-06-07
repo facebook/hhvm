@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(true ?: false);
 var_dump(false ?: true);
 var_dump(23 ?: 42);

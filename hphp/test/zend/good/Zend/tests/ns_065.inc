@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace X\Y;
 function foo() {
 	echo __FUNCTION__."\n";

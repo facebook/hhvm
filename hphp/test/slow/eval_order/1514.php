@@ -1,4 +1,4 @@
-<?php
+<?hh
 function t() {
 
   EvalOrder1514::$t++;

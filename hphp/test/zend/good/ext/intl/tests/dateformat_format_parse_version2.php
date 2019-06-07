@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test for the datefmt_format  function

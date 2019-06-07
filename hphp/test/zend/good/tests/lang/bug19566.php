@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {}
 <<__EntryPoint>> function main() {
 $result = get_declared_classes();

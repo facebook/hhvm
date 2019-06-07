@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 ini_set("intl.error_level", E_WARNING);
 $str = "a U+4E07";
 

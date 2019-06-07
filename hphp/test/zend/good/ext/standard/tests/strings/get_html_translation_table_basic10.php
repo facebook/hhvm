@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function so($a,$b) { return ord($a) - ord($b); }
 <<__EntryPoint>> function main() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string posix_strerror(int errno)
  * Description: Retrieve the system error message associated with the given errno.
  * Source code: ext/posix/posix.c

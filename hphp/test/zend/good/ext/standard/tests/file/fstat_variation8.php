@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $stat_result = stat(__FILE__);
 clearstatcache();
 $fp = fopen (__FILE__, 'r');

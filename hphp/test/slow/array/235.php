@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   var_dump(current(&$a));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
     public $a1;
     public $a2 = array();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(){
     trigger_error("error", E_USER_ERROR);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $foo = NULL; 
 isset($foo->bar->bar);

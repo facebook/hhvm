@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing Error Conditions */
 <<__EntryPoint>> function main() {

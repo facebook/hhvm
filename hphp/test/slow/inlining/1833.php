@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g($a) {
  return $a ? array(1,2,3) : 'foo';

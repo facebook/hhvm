@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This doesn't work for windows, time, atime usage results in very different
 // output to linux. This could be a php.net bug on windows or a windows querk.

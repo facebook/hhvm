@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   // php://input is backed by a MemFile

@@ -1,4 +1,4 @@
-<?php
+<?hh
 include __DIR__ . '/ns_027.inc';
 use Foo\Bar\Foo as stdClass;
 

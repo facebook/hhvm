@@ -1,7 +1,7 @@
 --TEST--
 SQLite
 --SKIPIF--
-<?php # vim:ft=php
+<?hh # vim:ft=php
 if (!extension_loaded('pdo_sqlite')) print 'skip'; ?>
 --REDIRECTTEST--
 return array(

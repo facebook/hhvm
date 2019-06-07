@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: string trim( string str [,string charlist] )
  * Strip whitespace (or other characters) from the beginning and end of a string.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array explode  ( string $delimiter  , string $string  [, int $limit  ] )
  * Description: Split a string by string.

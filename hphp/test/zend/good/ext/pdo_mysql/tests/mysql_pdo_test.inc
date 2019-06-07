@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'config.inc');
 require_once(dirname(__FILE__) . '/../../pdo/tests/pdo_test.inc');
 

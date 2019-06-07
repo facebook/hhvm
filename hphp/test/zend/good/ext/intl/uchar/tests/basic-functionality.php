@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function unicode_info($cp) {
   $proplist = array(

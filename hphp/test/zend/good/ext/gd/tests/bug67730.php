@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Create a blank image and add some text
 $im = imagecreatetruecolor(120, 20);
 $text_color = imagecolorallocate($im, 233, 14, 91);

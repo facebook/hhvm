@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -9,7 +9,7 @@ var_dump(
 	ldap_get_attributes($link, $entry)
 );
 echo "===DONE===\n";
-<?php
+<?hh
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);

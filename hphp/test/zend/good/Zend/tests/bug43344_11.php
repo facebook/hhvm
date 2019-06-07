@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f($a=namespace\bar) {
 	return $a;
 }

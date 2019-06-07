@@ -1,4 +1,4 @@
-<?php
+<?hh
 $support = gd_info();
 if (!isset($support['PNG Support']) || $support['PNG Support'] === false) {
 	print 'skip png support not available';

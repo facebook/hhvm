@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class father {
     function f0() {}

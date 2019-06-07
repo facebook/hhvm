@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
  * Description: Verify that the contents of a variable can be called as a function
  * Source code: ext/imap/php_imap.c

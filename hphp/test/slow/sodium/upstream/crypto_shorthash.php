@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $m1 = 'message';
 $k1 = '0123456789ABCDEF';
 $h1 = sodium_crypto_shorthash($m1, $k1);

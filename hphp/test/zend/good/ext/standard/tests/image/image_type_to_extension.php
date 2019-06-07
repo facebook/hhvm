@@ -1,4 +1,4 @@
-<?php
+<?hh
     $constants = array(
         "IMAGETYPE_GIF"      => IMAGETYPE_GIF,
         "IMAGETYPE_JPEG"     => IMAGETYPE_JPEG,

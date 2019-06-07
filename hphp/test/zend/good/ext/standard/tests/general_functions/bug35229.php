@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test2 {
   static function use_stack() {
     echo "OK\n";

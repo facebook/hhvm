@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string serialize(mixed variable)
  * Description: Returns a string representation of variable (which can later be unserialized) 
  * Source code: ext/standard/var.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 isset($argv[1]) || die("missing {name}:\n\tphp new_cmd.php {name}\n");
 $NAME = strtoupper($Name = ucfirst($name = strtolower($argv[1])));

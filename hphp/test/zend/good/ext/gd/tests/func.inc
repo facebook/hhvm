@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_gd_version()
 {

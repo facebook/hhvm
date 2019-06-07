@@ -1,4 +1,4 @@
-<?php
+<?hh
 $get = $GLOBALS['_GET'];
 parse_str("", &$get);
 $GLOBALS['_GET'] = $get;

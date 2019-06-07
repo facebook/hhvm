@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Functor {
   public function __invoke($x) {

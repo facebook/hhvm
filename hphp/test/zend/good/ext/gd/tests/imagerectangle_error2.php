@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Create a resource
 <<__EntryPoint>> function main() {
 $image = tmpfile();

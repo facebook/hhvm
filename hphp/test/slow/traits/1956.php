@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait English {
   public function say() {

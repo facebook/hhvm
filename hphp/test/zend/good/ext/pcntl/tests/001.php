@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test_exit_waits(){
     print "\n\nTesting pcntl_wifexited and wexitstatus....";
 

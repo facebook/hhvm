@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = gmp_init(3);
 $b = clone $a;

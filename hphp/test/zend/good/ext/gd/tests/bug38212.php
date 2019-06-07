@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $file = dirname(__FILE__) . '/bug38212.gd2';
 $im1 = imagecreatetruecolor(10,100);
 imagefill($im1, 0,0, 0xffffff);

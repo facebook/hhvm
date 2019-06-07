@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ut_run($mainFunc) {
     $GLOBALS['oo-mode'] = true;

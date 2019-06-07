@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
 	public    $p1;
 	protected $p2;

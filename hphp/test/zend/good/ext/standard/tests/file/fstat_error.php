@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $fp = fopen (__FILE__, 'r');
 $extra_arg = 'nothing';
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
  * Description: Read an overview of the information in the headers
  * of the given message sequence

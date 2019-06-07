@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {}
 <<__EntryPoint>> function main() {
 var_dump (is_scalar (TRUE));

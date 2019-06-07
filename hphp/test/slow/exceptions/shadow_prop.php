@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyException extends Exception
 {
   protected $file = 7;

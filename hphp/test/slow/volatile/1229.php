@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function autoload_first($name) {
   echo __METHOD__ . "\n";

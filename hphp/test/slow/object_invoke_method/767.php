@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // as a static method
 class C4 {

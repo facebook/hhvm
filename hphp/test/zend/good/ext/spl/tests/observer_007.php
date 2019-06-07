@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $a = new SplObjectStorage;
 $b = new SplObjectStorage;
 var_dump($a == $b);

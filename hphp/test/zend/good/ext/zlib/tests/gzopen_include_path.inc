@@ -1,4 +1,4 @@
-<?php
+<?hh
 $pwd = getcwd();
 $f = basename(__FILE__);
 $dir1 = $pwd."/".$f.".dir1";

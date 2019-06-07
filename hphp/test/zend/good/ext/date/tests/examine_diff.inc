@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Helper for the DateTime diff/days/math tests

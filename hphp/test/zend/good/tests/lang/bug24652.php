@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* This works */
 <<__EntryPoint>> function main() {
 $f = array('7' => 0);

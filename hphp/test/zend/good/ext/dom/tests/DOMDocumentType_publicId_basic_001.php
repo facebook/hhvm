@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml  = '<?xml version="1.0" encoding="UTF-8" ?>';
 $xml .= '<!DOCTYPE chapter SYSTEM "http://www.xmlwriter.net/logo.gif">';
 $xml .= '<chapter>1</chapter>';

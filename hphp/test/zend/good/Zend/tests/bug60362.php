@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $arr = array('exists' => 'foz');
 
 if (isset($arr['exists']['non_existent'])) {

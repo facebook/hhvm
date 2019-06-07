@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test1($a, $b=10, $c, ...$params) {}
 function test2($a=10, ...$params) {}

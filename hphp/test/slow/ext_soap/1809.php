@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MySoap extends SoapClient {
    public $pub = 1;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
 

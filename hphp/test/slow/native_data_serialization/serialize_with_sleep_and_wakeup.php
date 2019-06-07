@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * This is more of a test for testing the behavior of

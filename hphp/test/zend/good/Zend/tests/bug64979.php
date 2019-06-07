@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Ref {
   public function __construct(public $val) {}

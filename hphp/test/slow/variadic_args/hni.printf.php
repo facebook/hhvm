@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Straight unpacking and repacking (or transferrence)

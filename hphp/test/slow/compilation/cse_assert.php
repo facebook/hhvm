@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   $y = ($x ? 5 : 3) + 5;

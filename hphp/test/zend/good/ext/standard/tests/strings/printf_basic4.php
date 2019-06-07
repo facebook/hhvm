@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int printf  ( string $format  [, mixed $args  [, mixed $...  ]] )
  * Description: Produces output according to format .
  * Source code: ext/standard/formatted_print.c

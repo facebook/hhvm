@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * mixedbag is intended to run quickly and test a bunch of functionality.

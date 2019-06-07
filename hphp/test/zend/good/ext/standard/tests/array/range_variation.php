@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "\n*** Testing range() with various low and high values ***";
 $low_arr = array( "ABCD", -10.5555, TRUE, NULL, FALSE, "", array(1,2));

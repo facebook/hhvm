@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C { function heh() { echo "heh\n"; } }
 function foo() { return array(new C); }

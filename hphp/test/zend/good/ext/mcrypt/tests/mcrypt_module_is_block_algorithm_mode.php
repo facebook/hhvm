@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_CBC));
 var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_ECB));
 var_dump(mcrypt_module_is_block_algorithm_mode(MCRYPT_MODE_STREAM));

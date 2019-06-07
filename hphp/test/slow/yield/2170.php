@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($x) {
  return $x ? $x + 1 : false;

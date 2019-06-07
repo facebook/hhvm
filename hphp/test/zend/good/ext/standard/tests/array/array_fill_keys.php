@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(array_fill_keys('test', 1));
 var_dump(array_fill_keys(array(), 1));
 var_dump(array_fill_keys(array('foo', 'bar'), NULL));

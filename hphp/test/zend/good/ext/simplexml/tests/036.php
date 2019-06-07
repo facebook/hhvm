@@ -1,4 +1,4 @@
-<?php
+<?hh
 class SXE extends SimpleXmlElement {
     public function count() {
         echo "Called Count!\n";

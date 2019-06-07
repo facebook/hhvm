@@ -1,4 +1,4 @@
-<?php
+<?hh
 class X {
   use LazyIterable;
   public function getIterator() { yield null; }

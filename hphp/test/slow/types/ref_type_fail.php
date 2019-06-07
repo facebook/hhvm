@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handler() {
  var_dump(__METHOD__);

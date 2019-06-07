@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class fail {
     abstract function show();

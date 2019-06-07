@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_var("....", FILTER_VALIDATE_IP));
 var_dump(filter_var("...", FILTER_VALIDATE_IP));

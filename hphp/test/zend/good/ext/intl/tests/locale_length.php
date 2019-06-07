@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo Locale::canonicalize("test") . "\n";
 echo intl_get_error_message() . "\n";

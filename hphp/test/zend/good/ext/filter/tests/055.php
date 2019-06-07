@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $values = array(
     array("01-23-45-67-89-ab", null),
     array("01-23-45-67-89-ab", array("options" => array("separator" => "-"))),

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dir = dirname(__FILE__);
 
 $im = imagecreatetruecolor(5,5);

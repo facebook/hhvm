@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $filename = __FILE__ . chr(0). ".ridiculous";
 

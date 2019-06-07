@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Parents {
    private $parents;
    public function __sleep() {

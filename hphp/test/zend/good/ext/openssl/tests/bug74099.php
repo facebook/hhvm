@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $aad = random_bytes(32);
 $iv = random_bytes(16);
 $key = random_bytes(32);

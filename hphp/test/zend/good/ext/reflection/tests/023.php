@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C1 {
 	private   $p1 = 1;
 	protected $p2 = 2;

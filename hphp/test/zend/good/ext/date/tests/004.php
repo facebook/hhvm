@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 date_default_timezone_set("UTC");
 $tz = array("UTC", "Asia/Jerusalem", "America/Chicago", "Europe/London");

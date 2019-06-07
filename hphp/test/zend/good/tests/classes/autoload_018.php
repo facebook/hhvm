@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class AutoloadStatics {
   public static $i = 0;

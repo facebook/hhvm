@@ -1,4 +1,4 @@
-<?php
+<?hh
 function utf32_utf8($k) {
     if ($k < 0x80) {
         $retval = pack('C', $k);

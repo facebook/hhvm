@@ -1,4 +1,4 @@
-<?php
+<?hh
 MongoLog::setModule(MongoLog::ALL);
 MongoLog::setLevel(MongoLog::ALL);
 function foo($c, $m) { echo $m, "\n"; } set_error_handler('foo');

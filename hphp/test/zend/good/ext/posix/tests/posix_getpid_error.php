@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int posix_getpid(void)
  * Description: Get the current process id (POSIX.1, 4.1.1) 
  * Source code: ext/posix/posix.c

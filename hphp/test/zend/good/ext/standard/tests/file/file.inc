@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Header file for common file test functions 
      Following functions are provided :
        create_files() : create files with specified contents 

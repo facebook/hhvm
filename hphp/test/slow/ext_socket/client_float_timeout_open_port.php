@@ -1,4 +1,4 @@
-<?php
+<?hh
 function random_free_port() {
   for ($i = 0; $i < 100; $i++) {
     $port = rand(50000, 65000);

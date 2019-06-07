@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X implements ArrayAccess {
   function offsetExists($offset) { return false; }

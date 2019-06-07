@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Check getting error string by integer error code.

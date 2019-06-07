@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: int fputcsv ( resource $handle [, array $fields [, string $delimiter [, string $enclosure]]] );
  Description:fputcsv() formats a line (passed as a fields array) as CSV and write it to the specified file

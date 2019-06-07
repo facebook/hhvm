@@ -1,4 +1,4 @@
-<?php
+<?hh
 function id($x = 'id') { return $x; }
 class Test {
   public static function id($x = [__CLASS__, 'id']) { return $x; }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($s) {
   $det = new EncodingDetector();

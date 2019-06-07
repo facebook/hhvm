@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(filter_var('valid@email.address', FILTER_VALIDATE_EMAIL));
 
 // Beyond the allowable limit for an e-mail address.

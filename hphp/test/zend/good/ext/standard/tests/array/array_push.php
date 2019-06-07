@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: int array_push(& array &array );
  * Description: Push one or more elements onto the end of array

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array strptime  ( string $date  , string $format  )
  * Description: Parse a time/date generated with strftime()
  * Source code: ext/standard/datetime.c

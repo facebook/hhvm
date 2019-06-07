@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function throwing_profiler($case, $func) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $letexte="<br><br>";
 $ligne_horizontale = $puce = $debut_intertitre = $fin_intertitre = '';

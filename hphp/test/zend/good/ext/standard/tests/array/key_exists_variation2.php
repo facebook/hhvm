@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ObjectA
 {
   public $foo = 'bar';

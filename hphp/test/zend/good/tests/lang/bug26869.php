@@ -1,4 +1,4 @@
-<?php
+<?hh
 const A = "1";
 <<__EntryPoint>> function main() {
 $a=array(A => 1);

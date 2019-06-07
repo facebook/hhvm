@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $xmlwriter = xmlwriter_open_memory();
 var_dump(xmlwriter_write_dtd($xmlwriter, 'bla1', 'bla2', 'bla3', 'bla4'));

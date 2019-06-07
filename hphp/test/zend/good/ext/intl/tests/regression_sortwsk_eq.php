@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Test sorting strings that have different length but otherwise equal.
  */

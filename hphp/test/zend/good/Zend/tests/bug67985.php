@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = ['zero', 'one', 'two'];
 unset($a[2]);

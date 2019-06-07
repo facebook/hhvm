@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $string = urldecode("search%e4"); 
 $result = preg_replace("#(&\#x*)([0-9A-F]+);*#iu","$1$2;",$string); 

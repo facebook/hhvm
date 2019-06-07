@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 <<__EntryPoint>> function main() {
 $basexml = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book>base book</book></books>';

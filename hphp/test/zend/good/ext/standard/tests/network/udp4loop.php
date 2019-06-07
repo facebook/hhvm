@@ -1,4 +1,4 @@
-<?php
+<?hh
     /* Setup socket server */
     for ($port = 31338; $port < 31500; ++$port) {
       $uri = "udp://127.0.0.1:$port";

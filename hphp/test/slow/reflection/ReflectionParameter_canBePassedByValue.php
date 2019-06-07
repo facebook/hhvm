@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function aux($fun) {
   $func = new ReflectionFunction($fun);

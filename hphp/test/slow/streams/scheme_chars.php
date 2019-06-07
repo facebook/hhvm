@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   var_dump(file_exists('this+is-a.valid123scheme://example.com'));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
   Prototype: int fileperms ( string $filename );
   Description: Returns the permissions on the file, or FALSE in case of an error

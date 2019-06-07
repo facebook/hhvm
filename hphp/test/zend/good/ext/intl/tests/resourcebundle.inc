@@ -1,4 +1,4 @@
-<?php
+<?hh
 $bundle = dirname(__FILE__)."/_files/resourcebundle";
 
 function debug( $res ) {

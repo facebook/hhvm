@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo
 {
 	const A = 1;

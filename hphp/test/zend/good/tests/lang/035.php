@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyException extends Exception {
   function __construct($_error) {
     $this->error = $_error;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // method bits

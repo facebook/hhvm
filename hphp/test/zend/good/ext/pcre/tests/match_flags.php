@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_match_all('/(.)x/', 'zxax', &$match, PREG_PATTERN_ORDER));
 var_dump($match);

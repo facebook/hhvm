@@ -1,4 +1,4 @@
-<?php
+<?hh
 include dirname(__FILE__) .'/prepare.inc';
 $proc->importStylesheet($xsl);
 $proc->setParameter('', '', '"\'');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // this file is not used in the cron job
 // use it to test the gcc regex with the sample data provided
 <<__EntryPoint>> function main() {

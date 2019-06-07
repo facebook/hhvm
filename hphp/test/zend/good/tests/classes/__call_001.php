@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Caller {
     public $x = array(1, 2, 3);

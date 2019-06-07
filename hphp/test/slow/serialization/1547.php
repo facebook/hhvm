@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Y {
   private $priv = 'priv';

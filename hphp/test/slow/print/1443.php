@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 print(!null);
 print(!true);

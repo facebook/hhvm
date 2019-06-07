@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "\n*** Testing error conditions ***";
 var_dump(array_keys(100));

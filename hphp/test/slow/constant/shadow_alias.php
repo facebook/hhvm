@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const X = 1;
 const hello = 'hello';

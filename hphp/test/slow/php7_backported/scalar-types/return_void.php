@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // PHP 7.1+
 function foo(): void {}

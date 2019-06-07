@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function err($x) { throw new Exception(); }
 function foo() {

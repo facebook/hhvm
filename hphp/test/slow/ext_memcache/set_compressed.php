@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $key = "TEST_KEY_COMPRESSION_SET";
 $tmp_object = new stdClass;

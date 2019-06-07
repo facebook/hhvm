@@ -1,7 +1,7 @@
-<?php
+<?hh
 
 $class_data = <<<DATA
-<?php
+<?hh
 class test {
 	const val = 1;
 }

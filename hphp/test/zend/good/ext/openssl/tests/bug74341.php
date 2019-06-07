@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $pem_cert = '
 -----BEGIN CERTIFICATE-----

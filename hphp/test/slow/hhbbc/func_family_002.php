@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Heh {
   public function say() { echo "hi\n"; }

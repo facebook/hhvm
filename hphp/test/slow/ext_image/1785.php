@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Save the image as a GIFimagegif($png, '/tmp/php.gif');
 // Free from memoryimagedestroy($png);
 

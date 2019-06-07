@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: string substr( string str, int start[, int length] )
  * Description: Returns the portion of string specified by the start and length parameters.

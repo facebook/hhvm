@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   list($a[0], $a[1], $a) = $a;

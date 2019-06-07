@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 <<__EntryPoint>> function main() {
 $xml =<<<EOF
 <?xml version="1.0" encoding="ISO-8859-1" ?>

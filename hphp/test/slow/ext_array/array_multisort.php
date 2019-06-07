@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() {
   $ar1 = array(10, 100, 100, 0);

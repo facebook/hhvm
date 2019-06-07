@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function perform_test($name, $test_filters, $add_empty) {
   $params = array(

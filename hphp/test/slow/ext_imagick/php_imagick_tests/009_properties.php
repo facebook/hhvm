@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $im = new Imagick();
 $im->newPseudoImage(100, 100, "XC:red");

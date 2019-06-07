@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype:
  *  array array_column(array $input, mixed $column_key[, mixed $index_key]);
  * Description:

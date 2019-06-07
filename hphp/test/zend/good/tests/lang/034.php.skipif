@@ -1,4 +1,4 @@
-<?php  # try to activate a german locale
+<?hh  # try to activate a german locale
 <<__EntryPoint>> function main() { if (substr(PHP_OS, 0, 3) == 'WIN') {
   /* skip on windows until #63688 was fixed */
   die('skip');

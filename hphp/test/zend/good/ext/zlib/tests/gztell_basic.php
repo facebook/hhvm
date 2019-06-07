@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $f = dirname(__FILE__)."/004.txt.gz";
 $h = gzopen($f, 'r');
 $intervals = array(7, 22, 54, 17, 27, 15, 1000);

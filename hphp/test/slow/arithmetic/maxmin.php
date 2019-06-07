@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($a, $b) {
   var_dump(min($a, $b), max($a, $b));

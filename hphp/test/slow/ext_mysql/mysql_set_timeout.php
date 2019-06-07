@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once('connect.inc');
 
 var_dump(mysql_set_timeout(10));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g($key, $old, $new, $s = false) {
   $diff = array();

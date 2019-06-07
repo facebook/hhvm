@@ -1,4 +1,4 @@
-<?php
+<?hh
 $HTTP_RAW_POST_DATA = <<<EOF
 <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"> 
 

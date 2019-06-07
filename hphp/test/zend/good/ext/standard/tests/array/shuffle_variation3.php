@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool shuffle(&array $array_arg)
  * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c

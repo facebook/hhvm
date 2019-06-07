@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int timezone_offset_get  ( DateTimeZone $object  , DateTime $datetime  )
  * Description: Returns the timezone offset from GMT
  * Source code: ext/date/php_date.c

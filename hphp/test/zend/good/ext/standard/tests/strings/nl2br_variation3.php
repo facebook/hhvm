@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string nl2br(string $str);
  * Description: Inserts HTML line breaks before all newlines in a string.
  * Source code: ext/standard/string.c

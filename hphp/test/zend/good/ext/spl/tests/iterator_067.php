@@ -1,4 +1,4 @@
-<?php
+<?hh
 class myAppendIterator extends AppendIterator {}
 try {
 	$it = new myAppendIterator();

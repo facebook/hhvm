@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(closure $a) {
     var_dump($a());

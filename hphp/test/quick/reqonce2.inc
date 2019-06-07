@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 print "In ReqOnce_b.php\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "\n*** Testing possible variations ***\n";
 echo "\n-- complex strings containing other than 7-bit chars --\n";

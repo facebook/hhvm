@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen1() {
     return [4, 5, 6];

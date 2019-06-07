@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   echo "goto within using\n";

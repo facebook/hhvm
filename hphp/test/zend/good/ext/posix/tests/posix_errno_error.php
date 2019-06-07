@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "*** Test by calling method or function with more than expected arguments ***\n";
 

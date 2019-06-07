@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A implements Countable {
  public function count() {

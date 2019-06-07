@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class bar {
     static public function stat_a2() {

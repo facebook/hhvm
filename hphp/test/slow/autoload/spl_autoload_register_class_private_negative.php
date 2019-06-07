@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ClassAutoloader {
   private function loader($className) {

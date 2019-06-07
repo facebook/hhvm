@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_merge_recursive(array $arr1[, array $...])
  * Description: Recursively merges elements from passed arrays into one array
  * Source code: ext/standard/array.c

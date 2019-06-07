@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int intval(mixed var [, int base])
  * Description: Get the integer value of a variable using the optional base for the conversion
  * Source code: ext/standard/type.c

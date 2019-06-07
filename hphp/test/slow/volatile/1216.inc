@@ -1,4 +1,4 @@
-<?php
+<?hh
 
       class goo {
         function __construct() {

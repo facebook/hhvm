@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // originally based on ext/standard/tests/file/stream_rfc2397_006.phpt

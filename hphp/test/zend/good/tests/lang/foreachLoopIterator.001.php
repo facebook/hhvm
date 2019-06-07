@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MealIterator implements Iterator {
   public static $indent;

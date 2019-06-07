@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mcrypt_cbc(string cipher, string key, string data, int mode, string iv)
  * Description: CBC crypt/decrypt data using key key with cipher cipher starting with iv 
  * Source code: ext/mcrypt/mcrypt.c

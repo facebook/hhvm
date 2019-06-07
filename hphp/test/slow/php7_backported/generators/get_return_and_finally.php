@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // TODO: HHVM doesn't support returning from a finally block, which `gen1` was
 // testing. It has been removed in the meantime, but should be added back in

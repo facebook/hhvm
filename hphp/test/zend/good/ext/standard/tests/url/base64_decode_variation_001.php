@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string base64_decode(string str[, bool strict])
  * Description: Decodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c

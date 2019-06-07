@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // overrides both offsetExists and offsetGet
 class ArrayObjectBoth extends ArrayObject

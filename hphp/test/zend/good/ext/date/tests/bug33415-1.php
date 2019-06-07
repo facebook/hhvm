@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 print "TZ=America/Jujuy  - Is it OK for this to be 2 AM, rather than 1
 AM as per most DST transitions?\n";

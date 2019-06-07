@@ -1,2 +1,2 @@
-<?php
+<?hh
 new SplFileObject('missing');

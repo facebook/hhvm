@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // All constructors should be registered as such
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function str() {
  return 'test';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 	if (!extension_loaded("curl")) print "skip"; 
 	$addr = "www.".uniqid().".".uniqid();
 	if (gethostbyname($addr) != $addr) {

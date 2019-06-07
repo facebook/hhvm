@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen(array $array) {
     foreach ($array as $value) {

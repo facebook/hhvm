@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A extends Exception {
  public $a = 1;

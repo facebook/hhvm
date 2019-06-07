@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string implode ( string $glue, array $pieces );
    Description: Returns a string containing a string representation of all the
                 array elements in the same order, with the glue string between each element.

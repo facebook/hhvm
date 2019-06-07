@@ -1,4 +1,4 @@
-<?php
+<?hh
 function F () {
     if(1) {
         return("Hello");

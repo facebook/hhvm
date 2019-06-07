@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function p($a) {
  print $a;

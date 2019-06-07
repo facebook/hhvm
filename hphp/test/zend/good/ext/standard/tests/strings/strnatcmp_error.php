@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int strnatcmp  ( string $str1  , string $str2  )
  * Description: String comparisons using a "natural order" algorithm
  * Source code: ext/standard/string.c

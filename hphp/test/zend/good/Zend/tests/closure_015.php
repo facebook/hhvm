@@ -1,4 +1,4 @@
-<?php
+<?hh
 function myErrorHandler($errno, $errstr, $errfile, $errline) {
   echo "Error: $errstr at $errfile($errline)\n"; return true;
 }

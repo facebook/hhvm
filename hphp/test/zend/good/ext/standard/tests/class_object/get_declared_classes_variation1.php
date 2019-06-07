@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array get_declared_classes()
  * Description: Returns an array of all declared classes. 
  * Source code: Zend/zend_builtin_functions.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait foo {
     public function __construct() {

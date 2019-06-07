@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo hash('ripemd256', '') . "\n";
 echo hash('ripemd256', 'a') . "\n";
 echo hash('ripemd256', 'abc') . "\n";

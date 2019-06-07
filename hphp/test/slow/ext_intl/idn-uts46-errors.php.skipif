@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $utf8dn = "www.fu\xc3\x9fball.com";
 $ret = idn_to_ascii(

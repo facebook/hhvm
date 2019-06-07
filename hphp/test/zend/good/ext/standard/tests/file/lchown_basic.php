@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool lchown (string filename, mixed user)
  * Description: Change file owner of a symlink
  * Source code: ext/standard/filestat.c

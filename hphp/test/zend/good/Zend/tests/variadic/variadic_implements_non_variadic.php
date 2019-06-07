@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface DB {
     public function query($query);

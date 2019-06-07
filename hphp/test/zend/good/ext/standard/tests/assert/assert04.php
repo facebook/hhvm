@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Assert not active */
 assert_options(ASSERT_ACTIVE, 0);
 assert(1);

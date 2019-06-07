@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function check_box($r,$g,$b, $error=0) {
 	$cwd = dirname(__FILE__);

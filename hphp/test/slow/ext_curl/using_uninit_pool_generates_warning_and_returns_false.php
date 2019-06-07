@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_using_uninit_pool_generates_warning_and_returns_false() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const AR = array(1,3,2);
 

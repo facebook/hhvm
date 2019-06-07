@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once("dom_test.inc");
 
 $dom = new DOMDocument;

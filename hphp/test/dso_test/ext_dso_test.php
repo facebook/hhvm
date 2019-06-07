@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__Native>> function dso_test_world(): string;
 <<__Native>> function dso_test_long(): int;

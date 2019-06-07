@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function runstuff() {
   throw new Exception;

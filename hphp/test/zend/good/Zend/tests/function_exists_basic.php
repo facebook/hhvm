@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * proto bool function_exists(string function_name)
  * Function is implemented in Zend/zend_builtin_functions.c

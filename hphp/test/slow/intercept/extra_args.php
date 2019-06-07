@@ -1,4 +1,4 @@
-<?php /* destructor */
+<?hh /* destructor */
 
 function foo() {
  var_dump('failed');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_verify($pass, $hash) {
   echo password_verify($pass, $hash) ? "true\n" : "false\n";

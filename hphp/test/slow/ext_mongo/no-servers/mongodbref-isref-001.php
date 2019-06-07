@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(MongoDBRef::isRef(array('$ref' => 'dbref', '$id' => 123)));
 var_dump(MongoDBRef::isRef(array('$ref' => 'dbref', '$id' => new MongoId())));
 var_dump(MongoDBRef::isRef(array('$ref' => 'dbref', '$id' => 123, '$db' => 'test')));

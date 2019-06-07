@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
   function foo($n=0) {
     if ($n) throw new Exception("new");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function always_true() {
   return mt_rand(1, 2) < 10;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $file = dirname(__FILE__)."/bug40752.ini";
 file_put_contents($file, '

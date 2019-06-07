@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($x, $y) {
   var_dump(class_exists($x, false));

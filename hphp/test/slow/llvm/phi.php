@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_InitPackedArrayLoop($x) {
   $arr = array($x, $x, $x, $x, $x, $x, $x, $x, $x);

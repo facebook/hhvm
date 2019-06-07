@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base {
   protected function hehe() {

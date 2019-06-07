@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_alnum(mixed $c)
  * Description: Checks for alphanumeric character(s)
  * Source code: ext/ctype/ctype.c

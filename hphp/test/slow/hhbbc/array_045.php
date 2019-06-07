@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   return mt_rand() ? array(1,2,3) : array(2,3,4);

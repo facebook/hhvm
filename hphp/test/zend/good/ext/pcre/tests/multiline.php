@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_match_all('/^.{2,3}$/', "aei\nou", &$dummy));
 var_dump(preg_match_all('/^.{2,3}$/', "aei\nou\n", &$dummy));

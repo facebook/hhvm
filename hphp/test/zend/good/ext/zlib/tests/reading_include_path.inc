@@ -1,4 +1,4 @@
-<?php
+<?hh
 $thisTestDir = "zlibVariation.dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 switch ($_POST) {
 case array(): echo 'empty array';

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $file = __DIR__ ."/data.txt";
 file_put_contents($file, "foobar");
 

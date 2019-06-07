@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo hash('ripemd320', '') . "\n";
 echo hash('ripemd320', 'a') . "\n";
 echo hash('ripemd320', 'abc') . "\n";

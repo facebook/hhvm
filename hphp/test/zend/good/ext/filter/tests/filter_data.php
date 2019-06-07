@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Integer */
 $data = "-123";   var_dump(filter_var($data, FILTER_VALIDATE_INT));

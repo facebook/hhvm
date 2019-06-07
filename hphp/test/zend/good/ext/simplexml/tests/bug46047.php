@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml = new SimpleXMLElement('<foo><bar><![CDATA[]]></bar><baz/></foo>',
   LIBXML_NOCDATA);
 print_r($xml);

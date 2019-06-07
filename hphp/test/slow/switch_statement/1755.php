@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Evil {
   private $x;

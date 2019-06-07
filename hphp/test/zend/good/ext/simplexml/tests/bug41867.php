@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = simplexml_load_string("<a><b><c/></b></a>");
 echo $a->getName()."\n";

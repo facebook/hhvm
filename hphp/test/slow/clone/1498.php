@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class c {
   protected $cm = 'get';

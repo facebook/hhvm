@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Check MixedArray::MakeReserveLike on NVT (GitHub #3065)
 

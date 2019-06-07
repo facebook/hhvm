@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string get_class([object object])
  * Description: Retrieves the class name
  * Source code: Zend/zend_builtin_functions.c

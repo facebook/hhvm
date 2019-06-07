@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function Test() {
  var_dump(__FUNCTION__);

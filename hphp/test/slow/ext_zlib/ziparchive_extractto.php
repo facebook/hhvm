@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $tempdir = tempnam(sys_get_temp_dir(), __FILE__);
 unlink($tempdir);

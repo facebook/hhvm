@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
 	static $x = "A";
 	function testit() {

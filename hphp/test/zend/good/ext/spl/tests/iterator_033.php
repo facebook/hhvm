@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $it = new ParentIterator(new RecursiveArrayIterator(array(1,array(21,22, array(231)),3)));
 

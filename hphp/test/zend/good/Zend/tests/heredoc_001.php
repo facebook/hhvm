@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require_once 'nowdoc.inc';
 

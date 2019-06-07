@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   var_dump((clone (HH\Vector {1})->getIterator())->current());
   var_dump((clone (HH\ImmVector {2})->getIterator())->current());

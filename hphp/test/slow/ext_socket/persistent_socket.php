@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function read_all_data( $conn, $bytes ) {

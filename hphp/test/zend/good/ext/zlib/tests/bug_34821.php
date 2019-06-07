@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // test 50 bytes to 50k
 $b = array(

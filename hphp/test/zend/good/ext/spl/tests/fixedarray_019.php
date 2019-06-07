@@ -1,4 +1,4 @@
-<?php
+<?hh
 class SplFixedArray2 extends SplFixedArray {
     public function rewind() {
         echo "rewind\n";

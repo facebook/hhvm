@@ -1,4 +1,4 @@
-<?php
+<?hh
 function EUC_JP($utf8str) {
 	return mb_convert_encoding($utf8str, "EUC-JP", "UTF-8");
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = str_repeat("a", 10 * 1024 * 1024);
 

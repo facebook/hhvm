@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* test #1: numeric data */
 function add_up($running_total, $current_value)

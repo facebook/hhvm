@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Characters we know not to be numbers.

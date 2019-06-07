@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo1() {
 	try {
 		throw new Exception("not catch");

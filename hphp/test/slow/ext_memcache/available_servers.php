@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // 1. nonexisting connect.
 $m = new Memcache();

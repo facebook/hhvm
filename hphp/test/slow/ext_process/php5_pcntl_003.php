@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This is more or less a copy of zend/bad/ext/pcntl/tests/003.php.
 // 003.php.skipif is overly-cautious, so it would skip that test.  This test

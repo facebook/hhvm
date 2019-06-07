@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
   static function foo() { include 'colon_colon_class_include_self.inc'; }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 //This test uses CRLF as line endings
 /**			   
 foo

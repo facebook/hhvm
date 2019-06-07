@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $array = array('a', 'b');
 array_splice(&$array, 0, 2);

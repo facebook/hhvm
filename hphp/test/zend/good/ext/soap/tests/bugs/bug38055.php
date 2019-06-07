@@ -1,4 +1,4 @@
-<?php
+<?hh
 function Test($param) {
 
 	ZendGoodExtSoapTestsBugsBug38055::$g1 = $param->boolA;

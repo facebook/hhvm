@@ -1,4 +1,4 @@
-<?php
+<?hh
 class myObjA {}
 class myObjB {
     public $attrA;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handler($e) {
    var_dump(strpos((string)$e, 'bomb') !== false);

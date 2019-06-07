@@ -1,4 +1,4 @@
-<?php
+<?hh
 class main
 {
    public static $dummy        = NULL ;

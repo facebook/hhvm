@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
  * Description: Sort an array by key, maintaining key to data correlation 
  * Source code: ext/standard/array.c

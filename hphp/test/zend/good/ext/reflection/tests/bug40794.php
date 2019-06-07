@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $obj = new stdClass();
 $obj->prop1 = '1';

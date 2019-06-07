@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This is a test that checks that CGetM in the IR properly cleans the

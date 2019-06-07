@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string hebrevc  ( string $hebrew_text  [, int $max_chars_per_line  ] )
  * Description: Convert logical Hebrew text to visual text

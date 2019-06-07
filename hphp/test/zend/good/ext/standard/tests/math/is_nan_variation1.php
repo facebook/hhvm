@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool is_nan  ( float $val  )
  * Description: Finds whether a value is not a number.
  * Source code: ext/standard/math.c

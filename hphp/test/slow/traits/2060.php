@@ -1,4 +1,4 @@
-<?php
+<?hh
 function must_prepare($x) {
   if ($x == MUST_PREPARE) {
      $x = 2;

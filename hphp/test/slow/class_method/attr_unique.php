@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base  {
   public function overriddenMethod() {

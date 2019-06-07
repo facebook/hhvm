@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array array_reduce(array $array, mixed $callback, mixed $initial);
  * Description: Iteratively reduce the array to a single value via the callback
  */

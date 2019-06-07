@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo date("m/d/Y H:i:s T", -2145888000)."\n";
 

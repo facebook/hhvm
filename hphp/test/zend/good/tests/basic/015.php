@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $post = $_POST;
 parse_str("a[]=1&a[0]=5", &$post);
 $_POST = $post;

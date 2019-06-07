@@ -1,4 +1,4 @@
-<?php
+<?hh
 use A\B as Foo;
 
 class Foo {

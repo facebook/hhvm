@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Foo {
     protected $unsetme = 1;

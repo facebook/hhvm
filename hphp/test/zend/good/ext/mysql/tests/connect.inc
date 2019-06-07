@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!function_exists('sys_get_temp_dir')) {
 	function sys_get_temp_dir() {
 

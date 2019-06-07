@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //
 // function don't allow promotion

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $iswin =  substr(PHP_OS, 0, 3) == "WIN";
 
 if ($iswin) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class B implements Serializable {
     public function serialize() {
         throw new Exception("serialize");

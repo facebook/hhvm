@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Herp {
   function derp($derp = [1,2,3]) {}

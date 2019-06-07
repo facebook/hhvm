@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo '10 + 0 = ', gmp_strval(gmp_add(10, 0)), "\n";
 echo '10 + "0" = ', gmp_strval(gmp_add(10, '0')), "\n";
 

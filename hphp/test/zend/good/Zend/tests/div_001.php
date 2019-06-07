@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $d1 = 1.1;
 $d2 = 434234.234;

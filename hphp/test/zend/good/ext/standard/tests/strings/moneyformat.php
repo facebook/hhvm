@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 setlocale(LC_MONETARY, 'en_US');
 var_dump( money_format("X%nY", 3.1415));
 var_dump(money_format("AAAAA%n%n%n%n", 0.0));

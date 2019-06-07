@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (!method_exists("memcached", "touchByKey")) die ("skip memcached::touchByKey is not available");
 

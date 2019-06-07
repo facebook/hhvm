@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 Yield2171::$x = 32;
 $SOME_VAR = 'foo';

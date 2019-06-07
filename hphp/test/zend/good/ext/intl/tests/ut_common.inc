@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Run unit test in OO- and in procedural mode.
  * Then compare the outputs.

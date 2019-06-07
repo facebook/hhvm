@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Base {}
 abstract class Derived extends Base {}

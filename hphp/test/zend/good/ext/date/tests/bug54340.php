@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $interval = new DateInterval('P1D');
 
 $dt = new DateTime('first day of January 2011');

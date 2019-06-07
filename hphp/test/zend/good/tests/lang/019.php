@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 <<__EntryPoint>> function main() {
 eval("function test() { echo \"hey, this is a function inside an eval()!\\n\"; }");
 

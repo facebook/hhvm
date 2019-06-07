@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $a = 100;
 function f() {

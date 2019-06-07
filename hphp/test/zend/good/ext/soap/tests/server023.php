@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test() {
 
 	ZendGoodExtSoapTestsServer023::$server->addSoapHeader(new SoapHeader("http://testuri.org", "Test1", "Hello Header!"));

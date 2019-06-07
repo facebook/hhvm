@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace {
     use function foo\bar;

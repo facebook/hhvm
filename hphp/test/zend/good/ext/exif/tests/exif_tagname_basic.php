@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  :string exif_tagname ( string $index  )
  * Description: Get the header name for an index

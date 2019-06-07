@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ob_handler($str) {
   return $str.'???';

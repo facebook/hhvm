@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class SQLite3_Test_Stream
 {

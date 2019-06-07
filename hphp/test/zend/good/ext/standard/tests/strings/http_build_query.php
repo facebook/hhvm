@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $array = array("foo"=>"bar","baz"=>1,"test"=>"a ' \" ", "abc");
 var_dump(http_build_query($array));

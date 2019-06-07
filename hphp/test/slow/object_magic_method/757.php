@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class b {
   private $f2 = 10;

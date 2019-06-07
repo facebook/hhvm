@@ -1,4 +1,4 @@
-<?php
+<?hh
 function my_handler($errno, $errmsg) { return true; }
 
 <<__EntryPoint>>

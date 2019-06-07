@@ -1,4 +1,4 @@
-<?php
+<?hh
 mb_regex_encoding('iso-8859-1');
 $test_str = 'Iñtërnâtiônàlizætiøn';
 

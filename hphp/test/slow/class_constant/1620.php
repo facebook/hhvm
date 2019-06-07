@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class W {
   const FOO = 0;

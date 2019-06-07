@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Check determining failure error codes.
  */

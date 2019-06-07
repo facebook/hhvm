@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 function foobar($errno, $errstr, $errfile, $errline) { }

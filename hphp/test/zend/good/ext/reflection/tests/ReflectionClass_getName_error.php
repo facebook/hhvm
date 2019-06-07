@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $r1 = new ReflectionClass("stdClass");
 

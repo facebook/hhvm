@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string decbin  ( int $number  )
  * Description: Decimal to binary.
  * Source code: ext/standard/math.c

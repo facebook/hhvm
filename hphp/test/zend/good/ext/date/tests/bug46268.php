@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('Asia/Tokyo');
 
 $now = new DateTime('2008-10-10 01:02:03');

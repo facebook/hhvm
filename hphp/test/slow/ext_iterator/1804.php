@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function getFiles(&$rdi,$depth=0) {
   if (!is_object($rdi)) return;

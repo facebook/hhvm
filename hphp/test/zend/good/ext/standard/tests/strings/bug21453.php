@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() { $test = "
 <table>
 	<tr><td>first cell before < first cell after</td></tr>

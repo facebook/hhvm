@@ -1,4 +1,4 @@
-<?php
+<?hh
 // https://github.com/facebook/hhvm/issues/3094
 include (__DIR__ . '/redis.inc');
 

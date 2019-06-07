@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function asd() { return 'xxxxx'; }
 function bar() { return mt_rand() ? 'a' : 'b'; }

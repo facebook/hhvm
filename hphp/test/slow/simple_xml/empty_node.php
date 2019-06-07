@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $a = simplexml_load_string("<root />");

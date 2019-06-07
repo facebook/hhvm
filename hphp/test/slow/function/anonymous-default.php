@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($val = (function() { return strtoupper("Foo"); })()) {
   echo "val = ";

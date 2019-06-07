@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a($ary) {
     return (is_array($ary) ? array_reduce($ary, 'cb', 0) : 1);

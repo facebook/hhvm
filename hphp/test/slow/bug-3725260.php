@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test that concat binops with un-used results are not incorrectly optimized
 // away if they can invoke side-effects. See task #3725260.

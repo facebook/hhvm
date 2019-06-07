@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 $db->exec('CREATE TABLE foo (bar STRING)');
 $db->exec("INSERT INTO foo (bar) VALUES ('This is a test')");

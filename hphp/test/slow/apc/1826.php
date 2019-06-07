@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   apc_store('foo', array('a'.$x, array($x)));

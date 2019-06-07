@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class TB {
   const PARAM_A = 'aaa';

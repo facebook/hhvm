@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Proxy extends IteratorIterator {
   function __construct($i) {

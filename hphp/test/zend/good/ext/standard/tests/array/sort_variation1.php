@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool sort(&array &array_arg [, int $sort_flags])
  * Description: Sort an array
  * Source code: ext/standard/array.c

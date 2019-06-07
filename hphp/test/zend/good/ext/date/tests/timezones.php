@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //bogus
 var_dump(date_default_timezone_set('AAA'));

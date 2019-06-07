@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Adapted from ext/hash/tests/hash_equals.php to remove clowny error tests
 <<__EntryPoint>>

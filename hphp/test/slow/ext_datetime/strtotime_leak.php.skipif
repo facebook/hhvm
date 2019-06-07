@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // TODO(#3312202) probably shouldn't need to do this
 <<__EntryPoint>> function main() { if ($_ENV['HHVM_ARCH'] == 'arm') echo 'skip';

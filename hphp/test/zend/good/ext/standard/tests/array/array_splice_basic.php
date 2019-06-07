@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * proto array array_splice(array input, int offset [, int length [, array replacement]])
  * Function is implemented in ext/standard/array.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * THIS TEST ISN'T ENTIRELY CORRECT.

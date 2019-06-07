@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c

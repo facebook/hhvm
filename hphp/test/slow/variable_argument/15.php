@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a, $b, ...$more_args) {
   $args = array_merge(array($a, $b), $more_args);

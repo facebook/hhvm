@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string gzuncompress(string data [, int length])
  * Description: Unzip a gzip-compressed string 
  * Source code: ext/zlib/zlib.c

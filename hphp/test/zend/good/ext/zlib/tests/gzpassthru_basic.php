@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // note that gzpassthru is an alias to fpassthru. parameter checking tests will be
 // the same as fpassthru

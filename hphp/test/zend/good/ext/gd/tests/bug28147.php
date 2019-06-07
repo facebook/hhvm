@@ -1,4 +1,4 @@
-<?php
+<?hh
 //
 // This script will generate a Seg Fault on Linux
 //

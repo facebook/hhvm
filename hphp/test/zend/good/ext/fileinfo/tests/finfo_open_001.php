@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(finfo_open(FILEINFO_MIME, "\0"));
 var_dump(finfo_open(FILEINFO_MIME, ''));

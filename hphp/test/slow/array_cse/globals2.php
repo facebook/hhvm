@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class obj {
   function __toString() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait my_trait {
   abstract function foo();

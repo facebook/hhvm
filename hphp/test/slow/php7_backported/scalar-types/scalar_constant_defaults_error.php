@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const STRING_VAL = "test";
 

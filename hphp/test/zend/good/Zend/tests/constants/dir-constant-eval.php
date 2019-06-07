@@ -1,3 +1,3 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 eval('echo __DIR__ . "\n";');
 }

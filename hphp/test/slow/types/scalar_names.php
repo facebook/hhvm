@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class mystring {
 }
@@ -38,7 +38,7 @@ function test_arraykey(@arraykey $foo) { var_dump($foo); }
 function test_num(@num $foo) { var_dump($foo); }
 
 
-// It's important that we're in a "<?php" file and that HH syntax
+// It's important that we're in a "<?hh" file and that HH syntax
 // is not enabled, otherwise this test would fatal at parse time
 
 <<__EntryPoint>>

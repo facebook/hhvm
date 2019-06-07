@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test1(...$args) {
 	var_dump(count($args));

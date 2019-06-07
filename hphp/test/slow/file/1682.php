@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $name = tempnam(sys_get_temp_dir(), '1682');

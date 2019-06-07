@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace ns;
 const ok = 0;
 class foo {

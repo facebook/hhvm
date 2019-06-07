@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fatal_handler() {
     chmod($GLOBALS['file'], 0600);

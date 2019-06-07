@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   const CD = "A::CD";

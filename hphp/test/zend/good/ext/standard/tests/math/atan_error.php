@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  * proto float atan(float number)
  * Function is implemented in ext/standard/math.c

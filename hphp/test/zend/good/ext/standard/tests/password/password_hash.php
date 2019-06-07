@@ -1,4 +1,4 @@
-<?php
+<?hh
 //-=-=-=-
 <<__EntryPoint>> function main() {
 var_dump(strlen(password_hash("foo", PASSWORD_BCRYPT)));

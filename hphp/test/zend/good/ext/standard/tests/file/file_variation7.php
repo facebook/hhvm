@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $filepath = __FILE__ . ".tmp";
 $fd = fopen($filepath, "w+");

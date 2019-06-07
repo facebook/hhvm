@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(bin2hex(mb_convert_encoding("&#x0;", "UTF-8", "HTML-ENTITIES")));
 var_dump(bin2hex(mb_convert_encoding("&#x1;", "UTF-8", "HTML-ENTITIES")));
 var_dump(bin2hex(mb_convert_encoding("&#x2;", "UTF-8", "HTML-ENTITIES")));

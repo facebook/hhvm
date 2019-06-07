@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace a\b\c;
 
 use a\b\c as test;

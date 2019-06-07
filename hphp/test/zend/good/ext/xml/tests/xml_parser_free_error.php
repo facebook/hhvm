@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_parser_free(resource parser)
  * Description: Free an XML parser 
  * Source code: ext/xml/xml.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : mixed array_sum(array $input)
  * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
   private function myPrivateMethod() {
     return 42;

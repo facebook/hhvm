@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait t2 {
  public $x = INIT1;
  }

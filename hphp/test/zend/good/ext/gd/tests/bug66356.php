@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $img = imagecreatetruecolor(10, 10);
 
 // POC #1

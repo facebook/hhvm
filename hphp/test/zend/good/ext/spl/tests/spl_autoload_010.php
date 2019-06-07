@@ -1,4 +1,4 @@
-<?php
+<?hh
 function autoloadA($name) {
     echo "A -> $name\n";
 }

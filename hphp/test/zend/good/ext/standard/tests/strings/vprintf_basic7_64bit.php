@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string vprintf(string $format , aaray $args)
  * Description: Output a formatted string 
  * Source code: ext/standard/formatted_print.c

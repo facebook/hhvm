@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyReflectionFunction extends ReflectionFunction
 {

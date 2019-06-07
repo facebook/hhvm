@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function rmv($a, $b) {
  unset($a[$b]);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ExtendedArrayObject extends ArrayObject {
   public function offsetSet($key, $value) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $tests = array(
 	array( 'l', 'e90c310b' ),

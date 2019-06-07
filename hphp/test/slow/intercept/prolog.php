@@ -1,4 +1,4 @@
-<?php /* destructor */
+<?hh /* destructor */
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 class Cls {

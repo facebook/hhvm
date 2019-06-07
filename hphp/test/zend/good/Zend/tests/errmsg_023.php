@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class test1 {
     protected $var;

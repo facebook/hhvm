@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string chr ( int $ascii );
    Description: Returns a one-character string containing the character specified by ascii.
 

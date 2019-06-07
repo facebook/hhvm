@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait tX {
   public $X = 'X';

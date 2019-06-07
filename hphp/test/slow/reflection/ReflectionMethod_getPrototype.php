@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function outputPrototype($rf) {
   try {

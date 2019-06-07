@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const MAX_64Bit = 9223372036854775807;
 const MAX_32Bit = 2147483647;

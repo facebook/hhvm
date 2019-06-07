@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class HehStatics {
   public static $x = 0;

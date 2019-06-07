@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $trans = array("a" => 1,
                "b" => 1,
                "c" => 2,

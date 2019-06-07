@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 try {
   $pixel = new ImagickPixel('the-best-color-in-the-world');

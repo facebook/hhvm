@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface X {
   const A=1;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __autoload() {
   throw new Exception('sup');

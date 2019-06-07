@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $original = str_repeat("hallo php",4096);
 $packed = gzencode($original);
 echo strlen($packed)." ".strlen($original). "\n";

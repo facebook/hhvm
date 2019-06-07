@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // should not throw syntax errors
 

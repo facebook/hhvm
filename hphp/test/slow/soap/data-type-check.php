@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MySoapClient extends SoapClient {
   public function __doRequest(

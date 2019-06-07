@@ -1,4 +1,4 @@
-<?php
+<?hh
   $test = isset($_GET['test']) ? $_GET['test'] : null;
   switch($test) {
     case 'post':

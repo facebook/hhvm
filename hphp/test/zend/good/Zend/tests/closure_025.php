@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = $x ==> function($y) use ($x) { return $x * $y; };
 

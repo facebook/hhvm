@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function my_autoload($class) {
   return class_exists($class, true);

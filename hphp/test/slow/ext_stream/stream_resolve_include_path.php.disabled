@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $tmp = tempnam(sys_get_temp_dir(), 'bad');
 unlink($tmp);

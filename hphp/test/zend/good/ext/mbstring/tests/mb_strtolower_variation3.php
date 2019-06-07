@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_strtolower(string $sourcestring [, string $encoding])
  * Description: Returns a lowercased version of $sourcestring
  * Source code: ext/mbstring/mbstring.c

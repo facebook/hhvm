@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
   protected $extension = "html";
   protected $apple = 3;

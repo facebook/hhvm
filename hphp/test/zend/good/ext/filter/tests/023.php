@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_var("}\"<p>test para</p>", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));
 var_dump(filter_var("a[!@#<b>$%^&*()@a@#$%^&*(.<br>com@#$%^&*(", FILTER_UNSAFE_RAW, FILTER_FLAG_ENCODE_AMP));

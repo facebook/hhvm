@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
  * Description: Returns the entries of arr1 that have values which are not present
  * in any of the others arguments but do additional checks whether the keys are equal

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($i) {
   $j = 1;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo;
 use \stdClass;
 use \stdClass as A;

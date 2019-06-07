@@ -1,4 +1,4 @@
-<?php
+<?hh
 class c {
   const A = 'a';
   const B = 'b';

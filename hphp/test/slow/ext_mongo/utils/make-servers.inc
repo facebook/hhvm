@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * The only bootup specific type of servers set
  *      MONGO_SERVER_[SERVER_TYPE]=yes

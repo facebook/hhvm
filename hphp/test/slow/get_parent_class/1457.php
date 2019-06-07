@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class dad {
   function __construct()  {

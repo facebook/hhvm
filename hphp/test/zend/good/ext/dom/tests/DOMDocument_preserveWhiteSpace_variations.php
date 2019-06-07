@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "Load document with preserveWhiteSpace on\n";
 $doc = new DOMDocument;

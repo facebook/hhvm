@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $script_directory = dirname(__FILE__);
 chdir($script_directory);

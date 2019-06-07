@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $variation_array = array(
   'float 10.5' => 10.5,
   'float -10.5' => -10.5,

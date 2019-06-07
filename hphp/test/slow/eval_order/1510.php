@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Q {
   public $val;

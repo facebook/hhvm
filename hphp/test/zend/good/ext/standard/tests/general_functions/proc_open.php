@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $ds = array(
         0 => array("pipe", "r"),
         1 => array("pipe", "w"),

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int posix_getgid(void)
  * Description: Get the current group id (POSIX.1, 4.2.1) 
  * Source code: ext/posix/posix.c

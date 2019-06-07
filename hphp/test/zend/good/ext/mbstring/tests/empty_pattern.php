@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 mb_ereg_search_init("","","");
 mb_split("","");

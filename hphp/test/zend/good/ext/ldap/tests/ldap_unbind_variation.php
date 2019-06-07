@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 
 function rebind_proc ($ds, $ldap_url) {

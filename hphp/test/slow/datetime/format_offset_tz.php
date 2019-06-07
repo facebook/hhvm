@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Arbitrary - must not be UTC, and better if it's not where you are, or where

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function yieldfrom() {
   yield 42;

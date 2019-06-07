@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $string = <<<XML
 <?xml version="1.0"?>

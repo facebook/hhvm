@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace N1 {
   const C = 42;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!extension_loaded("sodium")) print "skip";
 if (!defined('SODIUM_CRYPTO_KX_KEYPAIRBYTES')) print "skip";
 if (!defined('SODIUM_CRYPTO_KDF_KEYBYTES')) print "skip";

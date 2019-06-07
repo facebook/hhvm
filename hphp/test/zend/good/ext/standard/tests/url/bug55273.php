@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test($s) {
     $v = chunk_split(base64_encode($s));
     $r = base64_decode($v, True);

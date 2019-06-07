@@ -1,4 +1,4 @@
-<?php
+<?hh
     $objDoc = new DomDocument();
 
     $objRef = $objDoc->createEntityReference('Test');

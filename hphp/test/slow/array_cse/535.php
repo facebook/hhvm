@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f(array $a, $e) {
   $a[$e] = [$e => 30];

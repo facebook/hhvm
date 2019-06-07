@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $n = gmp_init(0);
 gmp_clrbit(&$n, 0);

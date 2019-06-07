@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Tests that no strict warning is issued
 

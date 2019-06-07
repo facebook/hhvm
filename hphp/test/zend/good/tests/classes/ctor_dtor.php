@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class early {
     function __construct() {

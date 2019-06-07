@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 error_reporting (E_ALL);
 
 $a = fribidi_log2vis(null,  FRIBIDI_AUTO, FRIBIDI_CHARSET_CAP_RTL);

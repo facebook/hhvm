@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
   foreach (array(1,2,3) as $v) {
     foreach (array(1,2,3) as $w) {

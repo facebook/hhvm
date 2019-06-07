@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Github Issue #1436: Return type of htmlspecialchars() when

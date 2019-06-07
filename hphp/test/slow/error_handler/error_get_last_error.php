@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // at the start it should be NULL
 var_dump(error_get_last());

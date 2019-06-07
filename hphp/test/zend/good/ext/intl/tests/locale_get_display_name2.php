@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the display_name for different locales

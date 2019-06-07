@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(...$args) {
   $n = count($args);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test($magick) {
   print count($magick)."\n";
   foreach ($magick as $k => $v) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($x) {
   // just here to make sure foo isn't a leaf function

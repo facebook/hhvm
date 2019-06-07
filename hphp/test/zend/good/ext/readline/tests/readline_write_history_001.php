@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $name = tempnam('/tmp', 'readline.tmp');
 

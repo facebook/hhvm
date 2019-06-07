@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  * Prototype   : int filesize ( string $filename );
  * Description : Returns the size of the file in bytes, or FALSE 

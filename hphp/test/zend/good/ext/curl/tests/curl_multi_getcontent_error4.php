@@ -1,4 +1,4 @@
-<?php
+<?hh
     //CURL_MULTI_GETCONTENT TEST
 
     //CREATE RESOURCES

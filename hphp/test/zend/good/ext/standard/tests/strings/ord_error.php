@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : int ord  ( string $string  )
  * Description: Return ASCII value of character

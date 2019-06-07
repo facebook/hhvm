@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : float ceil  ( float $value  )
  * Description: Round fractions up.
  * Source code: ext/standard/math.c

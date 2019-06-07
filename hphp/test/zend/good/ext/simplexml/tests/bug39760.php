@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $xml = '<?xml version="1.0" ?>
 <test>

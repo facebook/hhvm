@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!file_exists("./test/dso_test/dso_test.so")) {
   echo "skip";
 }

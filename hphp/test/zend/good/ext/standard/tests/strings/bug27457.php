@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $test = "Dot in brackets [.]\n";
 echo $test;
 $test = strtr($test, array('.' => '0'));

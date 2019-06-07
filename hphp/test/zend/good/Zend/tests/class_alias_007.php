@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __autoload($a) {
   include 'class_alias_007.inc';

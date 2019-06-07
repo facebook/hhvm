@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($s) {
   $a = array('abc' => 1, 'abcd' => 2);

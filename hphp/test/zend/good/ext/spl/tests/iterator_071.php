@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 
 $arr = array(array(1,2),2);
 $arrOb = new ArrayObject($arr);

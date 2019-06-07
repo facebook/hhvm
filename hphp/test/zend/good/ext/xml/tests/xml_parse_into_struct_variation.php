@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_parse_into_struct(resource parser, string data, array &struct, array &index)
  * Description: Parsing a XML document
  * Source code: ext/xml/xml.c

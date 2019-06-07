@@ -1,4 +1,4 @@
-<?php
+<?hh
 function odd($var)
 {
    return($var & 1);

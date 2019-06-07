@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "-- only two parameters --\n";
 echo oauth_get_sbs('GET', 'http://127.0.0.1:12342/'),"\n";

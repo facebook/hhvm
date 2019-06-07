@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Explode with attributes */
 <<__EntryPoint>> function main() {

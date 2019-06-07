@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Counted implements Countable {
   public function count() { return 5; }

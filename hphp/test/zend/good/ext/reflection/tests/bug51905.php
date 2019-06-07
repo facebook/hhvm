@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Bar {
     const Y = 20;

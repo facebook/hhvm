@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test extends \SplObjectStorage {
   function __construct() {
     $o1 = new StdClass;

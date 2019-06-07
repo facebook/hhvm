@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A implements Serializable {
   var $a = 123;

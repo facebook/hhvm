@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* include('test.inc'); */
 echo "iconv extension is available\n";
 $test = "זרו";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $des = imagecreate(120, 120);
 $src = imagecreate(100, 100);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 /* patched HHVM will issue a warning about double mailheader */

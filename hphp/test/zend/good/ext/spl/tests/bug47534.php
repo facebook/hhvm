@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $it1 = new RecursiveDirectoryIterator(dirname(__FILE__), FileSystemIterator::CURRENT_AS_PATHNAME);
 $it1->rewind();
 echo gettype($it1->current())."\n";

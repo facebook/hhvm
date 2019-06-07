@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class SplFileInfo62328 extends SplFileInfo
 {

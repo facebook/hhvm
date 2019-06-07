@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function add($x, $y, $u) {
   var_dump((int)$u + ($x += $y));

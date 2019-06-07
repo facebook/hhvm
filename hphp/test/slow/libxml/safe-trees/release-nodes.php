@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. http://3v4l.org/8Peti
 
 function foo() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __random_autoloader($class) {
   var_dump($class);

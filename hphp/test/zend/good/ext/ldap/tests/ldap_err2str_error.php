@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Too few args
 try { var_dump(ldap_err2str()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 

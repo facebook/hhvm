@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Prototype:     string curl_error(resource $ch)
  * Description:   Returns a clear text error message for the last cURL operation.

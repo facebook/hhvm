@@ -1,4 +1,4 @@
-<?php
+<?hh
 // this is an Apache Licensed font, see separate LICENSE file
 <<__EntryPoint>> function main() {
 $font = __DIR__.'/Rochester-Regular.otf';

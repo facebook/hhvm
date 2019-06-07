@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tests = array(
     array(8853, '&oplus;',  "e28a95"),
     array(8855, '&otimes;', "e28a97"),

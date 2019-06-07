@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +1 hour'))."\n";
 echo date('Y-m-d H:i:s T', strtotime('2004-10-31 EDT +2 hours'))."\n";

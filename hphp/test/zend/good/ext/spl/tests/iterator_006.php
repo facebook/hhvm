@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $root = simplexml_load_string(b'<?xml version="1.0"?>
 <root>

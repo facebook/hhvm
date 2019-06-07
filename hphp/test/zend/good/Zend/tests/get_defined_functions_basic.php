@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array get_defined_functions  ( void  )
  * Description: Gets an array of all defined functions.

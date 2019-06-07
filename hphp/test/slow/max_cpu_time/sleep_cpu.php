@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function sleep2() {
   sleep(2);

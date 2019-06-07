@@ -1,4 +1,4 @@
-<?php
+<?hh
 function RekTest ($nr) {
     echo " $nr ";
     $j=$nr+1;

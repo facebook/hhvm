@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   goto foo;

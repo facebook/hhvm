@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Name {
   function __construct($_name) {

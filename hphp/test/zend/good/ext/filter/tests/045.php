@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $a = array("flags"=>(string)FILTER_FLAG_ALLOW_HEX, "options" => array("min_range"=>"0", "max_range"=>"1024"));
 $ret = filter_var("0xff", FILTER_VALIDATE_INT, $a);
 echo ($ret === 255 && $a["options"]["min_range"] === "0")?"ok\n":"bug\n";

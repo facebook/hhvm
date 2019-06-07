@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
  * Description: Validate a Gregorian date
  * Source code: ext/date/php_date.c

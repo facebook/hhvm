@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function print_something_multiple_times($something,$times)
 {

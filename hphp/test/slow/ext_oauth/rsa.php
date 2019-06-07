@@ -1,4 +1,4 @@
-<?php
+<?hh
 require 'server.inc';
 
 $x = new OAuth('1234', '', OAUTH_SIG_METHOD_RSASHA1);

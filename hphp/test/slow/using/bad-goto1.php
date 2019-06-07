@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 goto foo;
 using ($x) {

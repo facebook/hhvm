@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function xrange($start, $end, $step = 1) {
     for ($i = $start; $i <= $end; $i += $step) {

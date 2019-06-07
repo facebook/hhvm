@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $service = "www";
 $protocol = "tcp";
 $extra_arg = 12;

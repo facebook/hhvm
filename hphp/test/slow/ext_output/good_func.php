@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function good_func() {
   echo 'this doen\'t print';

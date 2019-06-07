@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function wrapper($a) {
   if ($a) {

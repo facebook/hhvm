@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo() {
     throw new Exception;
     yield 1;

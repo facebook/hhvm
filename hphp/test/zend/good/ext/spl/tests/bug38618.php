@@ -1,4 +1,4 @@
-<?php # vim:ft=php
+<?hh # vim:ft=php
 
 class FruitPublic
 {

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $cwd = dirname(__FILE__);
 $ttf = "$cwd/Tuffy.ttf";
 $w = 23;

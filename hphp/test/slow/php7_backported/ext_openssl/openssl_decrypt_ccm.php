@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once __DIR__ . "/cipher_tests.inc";
 
 function test_decryption($method) {

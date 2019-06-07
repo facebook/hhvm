@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $id = new MongoId;
 if (getmypid() <= 65536) {

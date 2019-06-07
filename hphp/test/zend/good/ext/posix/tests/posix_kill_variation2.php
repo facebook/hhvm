@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool posix_kill(int pid, int sig)
  * Description: Send a signal to a process (POSIX.1, 3.3.2)
  * Source code: ext/posix/posix.c

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $time = microtime(true) + 2;
 var_dump(time_sleep_until( $time ));
 $now = microtime(true);

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $regex = new MongoRegex('//');
 var_dump($regex->regex);
 var_dump($regex->flags);

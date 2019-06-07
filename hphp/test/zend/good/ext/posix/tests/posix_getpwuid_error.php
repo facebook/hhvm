@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array posix_getpwuid(long uid)
  * Description: User database access (POSIX.1, 9.2.2) 
  * Source code: ext/posix/posix.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A1 {
   function a1f($a) {

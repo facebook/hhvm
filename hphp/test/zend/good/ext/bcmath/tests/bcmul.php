@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo bcmul("1", "2"),"\n";
 echo bcmul("-3", "5"),"\n";
 echo bcmul("1234567890", "9876543210"),"\n";

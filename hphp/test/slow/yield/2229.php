@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function squares_cubes() {
   $i = 0;

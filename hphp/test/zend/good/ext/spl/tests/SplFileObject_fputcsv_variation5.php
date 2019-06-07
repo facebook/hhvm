@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when default arguments values are considered */
 <<__EntryPoint>> function main() {

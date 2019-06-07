@@ -1,4 +1,4 @@
-<?php
+<?hh
 class B1 {
 }
 class C1 {

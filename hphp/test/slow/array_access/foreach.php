@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C implements ArrayAccess {
   public $arr = array();
   public function offsetGet($k) {

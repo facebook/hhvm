@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 5: Checking Indent";
 include("prepare.inc");
 $xp = new domxpath($xsl);

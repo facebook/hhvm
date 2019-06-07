@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // For simple cases, see php5_pcntl_003.php

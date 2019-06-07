@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when the field has no CSV format */
 <<__EntryPoint>> function main() {

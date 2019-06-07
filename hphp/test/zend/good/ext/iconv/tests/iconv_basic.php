@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string iconv(string in_charset, string out_charset, string str)
  * Description: Returns converted string in desired encoding 
  * Source code: ext/iconv/iconv.c

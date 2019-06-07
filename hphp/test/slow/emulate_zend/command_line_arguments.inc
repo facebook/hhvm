@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 var_dump("Hello world!");

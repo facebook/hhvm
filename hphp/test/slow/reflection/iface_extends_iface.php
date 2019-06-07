@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface A {
   public function get($x);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $errnames = [
     E_NOTICE => 'E_NOTICE',

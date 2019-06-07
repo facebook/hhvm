@@ -1,4 +1,4 @@
-<?php
+<?hh
  function test2($a) {
  var_dump($a);
  return 12345;

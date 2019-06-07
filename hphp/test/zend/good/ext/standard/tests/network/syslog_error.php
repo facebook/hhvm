@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool syslog(int priority, string message)
  * Description: Generate a system log message 
  * Source code: ext/standard/syslog.c

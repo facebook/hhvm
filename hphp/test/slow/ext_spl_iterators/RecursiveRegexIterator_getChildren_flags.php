@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // https://github.com/php/php-src/pull/865
 

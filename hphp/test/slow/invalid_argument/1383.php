@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handler($err, $errstr) {
   $errstr = preg_replace('/given,.*$/','given', $errstr);

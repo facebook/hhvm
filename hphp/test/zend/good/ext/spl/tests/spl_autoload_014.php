@@ -1,4 +1,4 @@
-<?php
+<?hh
 $closure = function($class) {
   echo "closure called with class $class\n";
 };

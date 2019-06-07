@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string realpath(string path)
  * Description: Return the resolved path 
  * Source code: ext/standard/file.c

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $old_dir_path = getcwd();
 chdir(__DIR__);
 mkdir('a/./b', 0755, true);

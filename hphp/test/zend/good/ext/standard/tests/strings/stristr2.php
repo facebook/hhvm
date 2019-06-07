@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $email  = 'AbcCdEfGh';
 var_dump(stristr($email, 'c'));

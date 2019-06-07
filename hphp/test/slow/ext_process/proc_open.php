@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_me($desc) {
   $pipes = null;

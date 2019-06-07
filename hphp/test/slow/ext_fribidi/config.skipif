@@ -1,2 +1,2 @@
-<?php if (!extension_loaded("fribidi")) print "skip"; ?>
+<?hh if (!extension_loaded("fribidi")) print "skip"; ?>
 

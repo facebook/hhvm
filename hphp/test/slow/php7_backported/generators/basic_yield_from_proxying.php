@@ -1,4 +1,4 @@
-<?php
+<?hh
 function from() {
   yield "from" => 1;
   yield 2;

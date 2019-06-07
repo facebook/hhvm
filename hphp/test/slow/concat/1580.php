@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
  return "hello" . "\0" . "world

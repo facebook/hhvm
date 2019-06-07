@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try to set/get a collation attribute.

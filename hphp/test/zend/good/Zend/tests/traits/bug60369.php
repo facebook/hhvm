@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait PropertiesTrait {
    static $same = true;

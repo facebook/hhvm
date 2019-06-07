@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
     private function aPrivateMethod() {
         echo "Foo::aPrivateMethod() called.\n";

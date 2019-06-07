@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $str = '<br /><br  />USD<input type="text"/><br/>CDN<br><input type="text" />';
 var_dump(strip_tags($str, '<input>'));

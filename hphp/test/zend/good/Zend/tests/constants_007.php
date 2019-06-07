@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const a = 'a';
 const A = 'b';

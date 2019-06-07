@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class State {
     static $a0=10;

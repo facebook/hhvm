@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class PEAR {
   static function f() {

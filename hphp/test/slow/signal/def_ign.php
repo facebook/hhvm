@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handler($signo) {
   echo "handler received signal $signo, will do SIG_IGN later\n";

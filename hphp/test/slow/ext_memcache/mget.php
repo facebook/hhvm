@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $memcache = new Memcache();
 $memcache->addServer('localhost', 11211);

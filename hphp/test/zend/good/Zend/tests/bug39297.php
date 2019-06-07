@@ -1,4 +1,4 @@
-<?php
+<?hh
 function compareByRef(&$first, $id, &$second) {
     return $first[$id] === $second;
 }

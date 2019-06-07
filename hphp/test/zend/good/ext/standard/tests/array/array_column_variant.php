@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Array from Bug Request #64493 test script */
 <<__EntryPoint>> function main() {
 $rows = array(

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_notation_decl_handler(resource parser, string hdl)
  * Description: Set up notation declaration handler 
  * Source code: ext/xml/xml.c

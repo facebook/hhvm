@@ -1,3 +1,3 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(posix_getegid());
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $doc1 = new DOMDocument();
 $doc2 = new DOMDocument();

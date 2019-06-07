@@ -1,4 +1,4 @@
-<?php
+<?hh
 function hex_inc($s) {
     $len = strlen($s);
     while ($len > 0) {

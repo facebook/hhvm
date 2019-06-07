@@ -1,4 +1,4 @@
-<?php
+<?hh
 function octal_inc($s) {
     $len = strlen($s);
     while ($len > 0) {

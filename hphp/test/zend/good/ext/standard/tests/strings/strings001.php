@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Do not change this test it is a README.TESTING example. */
 <<__EntryPoint>> function main() {
 $s = "alabala nica".chr(0)."turska panica";

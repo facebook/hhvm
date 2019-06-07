@@ -1,4 +1,4 @@
-<?php
+<?hh
 // FB builds currently expose an extra hash algo which
 // causes the test output to look wrong.
 // Since it's going away soon, just diable for now

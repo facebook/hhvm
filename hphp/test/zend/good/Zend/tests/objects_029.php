@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class bar {
     public function __set($a, $b) {

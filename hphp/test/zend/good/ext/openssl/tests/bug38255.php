@@ -1,4 +1,4 @@
-<?php
+<?hh
 $pub_key_id = false;
 $signature = '';
 $ok = openssl_verify("foo", $signature, $pub_key_id, OPENSSL_ALGO_MD5);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   $this = 2;

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "*** Testing hexdec() : basic functionality ***\n";
 
 $values = array(0x123abc,

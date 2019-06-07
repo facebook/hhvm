@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dest = dirname(__FILE__) . "/36697.gif";
 
 $im = imagecreatetruecolor(192, 36);

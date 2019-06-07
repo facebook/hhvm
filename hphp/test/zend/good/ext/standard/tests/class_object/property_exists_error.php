@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool property_exists(mixed object_or_class, string property_name)
  * Description: Checks if the object or class has a property 
  * Source code: Zend/zend_builtin_functions.c

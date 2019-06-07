@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fail($t, $n, $e) {
   var_dump($t, $n);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $tests = <<<TESTS
 'ABC' ===  trim('ABC')

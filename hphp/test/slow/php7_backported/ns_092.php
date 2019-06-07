@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo\Bar {
     class A { function __construct() {echo __METHOD__,"\n";} }
     class B { function __construct() {echo __METHOD__,"\n";} }

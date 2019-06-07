@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $f = fopen(__FILE__, 'r');
 fclose($f);
 var_dump(is_resource($f));

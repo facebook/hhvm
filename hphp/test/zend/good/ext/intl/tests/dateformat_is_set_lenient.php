@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test for the datefmt_get_lenient & datefmt_set_lenient function

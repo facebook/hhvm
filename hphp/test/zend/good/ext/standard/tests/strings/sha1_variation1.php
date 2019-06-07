@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: string sha1  ( string $str  [, bool $raw_output  ] )
  * Description: Calculate the sha1 hash of a string

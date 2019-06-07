@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X { protected $x = __DIR__; }class Y { protected $y = __FILE__; }
 <<__EntryPoint>>

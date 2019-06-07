@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Format a number using misc currencies/locales.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test grapheme functions (procedural only)

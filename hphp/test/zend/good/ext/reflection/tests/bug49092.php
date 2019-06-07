@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace ns;
 function func(){}
 new \ReflectionFunction('ns\func');

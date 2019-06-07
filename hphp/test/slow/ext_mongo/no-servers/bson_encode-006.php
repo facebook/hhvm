@@ -1,4 +1,4 @@
-<?php
+<?hh
 // BSON document: length
 <<__EntryPoint>> function main() {
 $expected = pack('V', 23);

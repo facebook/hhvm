@@ -1,4 +1,4 @@
-<?php
+<?hh
 $obj = new SplMaxHeap();
 $obj->insert(1);
 $obj->insert(2);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyCloneable {
   static $id = 0;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: int umask ( [int $mask] );
    Description: Changes the current umask
 */

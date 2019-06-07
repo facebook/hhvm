@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Custom ArrayIterator (inherits from ArrayIterator)
 class MyArrayIterator extends ArrayIterator {

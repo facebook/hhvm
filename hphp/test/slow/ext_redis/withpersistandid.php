@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function NewRedisTestInstance() {
   $expecting = array(

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bug1($a, $b) {
 foreach ($b[$a++ + $a++] as $x) {

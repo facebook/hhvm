@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   var_dump(0 ** 0);

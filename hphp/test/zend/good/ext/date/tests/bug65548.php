@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $iToday = new DateTimeImmutable('today');
 $iTomorrow = new DateTimeImmutable('tomorrow');
 

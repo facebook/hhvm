@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(PDO $a = null, $b = 0, array $c) {}
 <<__EntryPoint>> function main() {

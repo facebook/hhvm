@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A {
   interface I {
     const SORT_NUMERIC = 42;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $getClosure = function ($v) {
 	return function () use ($v) {

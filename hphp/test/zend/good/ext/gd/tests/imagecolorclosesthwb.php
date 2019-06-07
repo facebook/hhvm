@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $im = imagecreatefrompng(dirname(__FILE__).'/test.png');
 
 var_dump(imagecolorclosesthwb($im, 255, 50, 0));

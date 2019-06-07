@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function heh($x) { echo $x . "\n"; }
 

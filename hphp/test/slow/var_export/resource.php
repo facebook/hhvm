@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   $f = fopen(__FILE__, "r");

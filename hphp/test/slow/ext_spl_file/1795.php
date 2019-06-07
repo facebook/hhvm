@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';

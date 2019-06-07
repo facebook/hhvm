@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $urls = array();
 $urls[] = "data://text/plain,foo\r\nbar\r\n";

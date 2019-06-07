@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class Switchref {
   public static $randBits;

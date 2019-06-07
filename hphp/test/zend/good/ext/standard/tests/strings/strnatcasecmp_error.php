@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int strnatcasecmp  ( string $str1  , string $str2  )
  * Description: Case insensitive string comparisons using a "natural order" algorithm
  * Source code: ext/standard/string.c

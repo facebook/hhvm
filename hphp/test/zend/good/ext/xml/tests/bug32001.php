@@ -1,4 +1,4 @@
-<?php
+<?hh
 class testcase {
 	private $encoding;
 	private $bom;

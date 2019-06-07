@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* 
  * proto int fwrite(resource fp, string str [, int length])

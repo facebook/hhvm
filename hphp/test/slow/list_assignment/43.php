@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class obj implements arrayaccess {
     private $container = array();

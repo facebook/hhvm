@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_rehash($hash, $algo, $options) {
   echo password_needs_rehash($hash, $algo, $options) ? "true\n" : "false\n";

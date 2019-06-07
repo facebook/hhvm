@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $rf = new ReflectionFunction('is_file');
 var_dump($rf->isDisabled());

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $limit = 1000;
 $objects = new SplObjectStorage;
 for($i = 0; $i < $limit; $i++){

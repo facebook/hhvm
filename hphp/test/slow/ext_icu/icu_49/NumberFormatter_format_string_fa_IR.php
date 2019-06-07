@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $formatter = NumberFormatter::create("fa_IR", NumberFormatter::DEFAULT_STYLE);
 $formatter->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
 echo $formatter->format(1.23);

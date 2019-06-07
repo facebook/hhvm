@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class c {
   public static $arr = array();

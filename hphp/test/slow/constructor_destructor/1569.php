@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class parent_c {
   public function __construct() {

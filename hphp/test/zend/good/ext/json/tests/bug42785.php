@@ -1,4 +1,4 @@
-<?php
+<?hh
 setlocale(LC_ALL, "de_DE", "de", "german", "ge", "de_DE.ISO8859-1", "ISO8859-1");
 
 $foo = array(100.10,"bar");

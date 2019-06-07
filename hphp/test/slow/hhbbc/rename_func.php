@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() { return '123'; }
 function bar() { return 'hehehe'; }

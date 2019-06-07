@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(libxml_use_internal_errors(false));
 var_dump(libxml_use_internal_errors(true));

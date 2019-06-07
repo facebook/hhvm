@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the display_language for different locales

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string stripslashes ( string $str )
  * Description: Un-quotes a quoted string
  * Source code: ext/standard/string.c

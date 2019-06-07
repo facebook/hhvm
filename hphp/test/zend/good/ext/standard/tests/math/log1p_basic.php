@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : float log1p  ( float $arg  )
  * Description: Returns log(1 + number), computed in a way that is accurate even
  *                when the value of number is close to zero

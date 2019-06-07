@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(parse_ini_string('a='));
 var_dump(parse_ini_string('a= '));

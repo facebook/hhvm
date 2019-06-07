@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T1 {
   var $x = 1977;

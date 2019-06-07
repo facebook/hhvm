@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string str_repeat ( string $input, int $multiplier );
    Description: Returns input repeated multiplier times. multiplier has to be
      greater than or equal to 0. If the multiplier is set to 0, the function

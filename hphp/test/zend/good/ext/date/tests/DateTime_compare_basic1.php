@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 
 echo "Simple test for DateTime compare object handler\n";
 

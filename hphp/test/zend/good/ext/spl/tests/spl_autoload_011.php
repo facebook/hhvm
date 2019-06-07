@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     public $var = 1;
     public function autoload() {

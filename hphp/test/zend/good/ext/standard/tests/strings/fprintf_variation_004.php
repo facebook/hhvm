@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $char_variation = array( 'a', "a", 67, -67, 99 );
 

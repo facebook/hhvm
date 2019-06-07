@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Faulty
 {
     function __call($Method,$Args)

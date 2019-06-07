@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $ch = curl_init('http://127.0.0.1:9/');
 
 curl_exec($ch);

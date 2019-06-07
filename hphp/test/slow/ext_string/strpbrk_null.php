@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function prettify_null($x) {
   return strtr($x, array("\x00" => '<0>'));

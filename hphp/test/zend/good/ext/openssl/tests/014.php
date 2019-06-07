@@ -1,4 +1,4 @@
-<?php
+<?hh
 $data = "Testing openssl_private_encrypt()";
 $privkey = "file://" . dirname(__FILE__) . "/private.key";
 $pubkey = "file://" . dirname(__FILE__) . "/public.key";

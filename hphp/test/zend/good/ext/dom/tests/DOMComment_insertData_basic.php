@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //correct offset
 $dom = new DomDocument();

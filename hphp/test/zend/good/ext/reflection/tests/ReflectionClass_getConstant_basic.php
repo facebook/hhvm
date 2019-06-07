@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
     const a = 'hello from C';
 }

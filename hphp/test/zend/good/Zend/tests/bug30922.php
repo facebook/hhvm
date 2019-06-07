@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface RecurisiveFooFar extends RecurisiveFooFar {}
 class A implements RecurisiveFooFar {}
 <<__EntryPoint>> function main() {

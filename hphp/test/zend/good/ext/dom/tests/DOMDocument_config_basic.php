@@ -1,4 +1,4 @@
-<?php
+<?hh
 // create dom document
 $dom = new DOMDocument;
 echo "DOMDocument created\n";

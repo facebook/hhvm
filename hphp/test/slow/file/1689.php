@@ -1,4 +1,4 @@
-<?php
+<?hh
 function flock_or_die($filename, $resource, $flock_op) {
   $r = flock($resource, $flock_op);
   var_dump($r);

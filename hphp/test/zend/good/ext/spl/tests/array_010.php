@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $obj = new ArrayObject(array('1st', 1, 2=>'3rd', '4th'=>4));
 

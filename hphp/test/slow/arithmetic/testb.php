@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($i, $j) {
   if ($i & 128) $j++;

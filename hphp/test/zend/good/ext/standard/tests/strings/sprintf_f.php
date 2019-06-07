@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(sprintf("%3.2f", 1.2));
 var_dump(sprintf("%-3.2f", 1.2));

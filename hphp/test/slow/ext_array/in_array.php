@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() {
   $os = array("Mac", "NT", "Irix", "Linux");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // standard execution
 class C1 {

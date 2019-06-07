@@ -1,4 +1,4 @@
-<?php
+<?hh
 
     class Zoo {
       const Bar = 2;

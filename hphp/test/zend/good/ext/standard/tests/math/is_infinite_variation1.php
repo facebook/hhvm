@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool is_finite  ( float $val  )
  * Description: Finds whether a value is infinite.
  * Source code: ext/standard/math.c

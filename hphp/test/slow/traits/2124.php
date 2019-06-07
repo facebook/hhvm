@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class B {
   static public $bp = "B::hello\n";

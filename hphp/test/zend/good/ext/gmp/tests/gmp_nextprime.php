@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $n = gmp_nextprime(-1);
 var_dump(gmp_strval($n));

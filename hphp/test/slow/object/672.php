@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class FOo {
   public function exclAIM() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($a) {
   list($x, $y) = 'x'.$a;

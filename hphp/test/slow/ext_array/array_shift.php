@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() {
   $input = array("a" => 1, "b" => 2);

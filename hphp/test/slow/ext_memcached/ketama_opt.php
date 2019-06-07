@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $mc = new Memcached;
 $mc->setOption(Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
 var_dump($mc->getOption(Memcached::OPT_HASH) === Memcached::HASH_MD5);

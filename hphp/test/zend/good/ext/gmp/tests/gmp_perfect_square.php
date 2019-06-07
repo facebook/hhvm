@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gmp_perfect_square(0));
 var_dump(gmp_perfect_square("0"));

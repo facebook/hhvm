@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const MAX_LOOPS = 5;
 

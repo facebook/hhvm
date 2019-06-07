@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class TestStatics {
   public static $a =1;

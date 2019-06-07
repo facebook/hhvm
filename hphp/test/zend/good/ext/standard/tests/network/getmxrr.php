@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $domains = array( 'mx1.tests.php.net', 'mx2.tests.php.net' );
 foreach ( $domains as $domain )
 {

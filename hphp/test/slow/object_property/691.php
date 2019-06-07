@@ -1,4 +1,4 @@
-<?php
+<?hh
 class X {
   const UNKNOWN = 1;
   public $foo = -1;

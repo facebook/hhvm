@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (!@putenv("TZ=EST5") || getenv("TZ") != 'EST5') {
   die("skip unable to change TZ enviroment variable\n");

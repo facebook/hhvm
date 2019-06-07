@@ -1,4 +1,4 @@
-<?php
+<?hh
 class base {
    function __construct() {
       echo __METHOD__ . "\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final final class test {
     function foo() {}

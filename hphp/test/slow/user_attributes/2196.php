@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class B {
   final public function foo() { echo __METHOD__, "\n"; }

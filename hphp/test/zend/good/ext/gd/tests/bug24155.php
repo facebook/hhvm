@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dest = dirname(realpath(__FILE__)) . '/bug24155.png';
 @unlink($dest);
 

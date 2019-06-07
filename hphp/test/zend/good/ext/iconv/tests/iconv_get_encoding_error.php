@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : mixed iconv_get_encoding([string type])
  * Description: Get internal encoding and output encoding for ob_iconv_handler()
  * Source code: ext/iconv/iconv.c

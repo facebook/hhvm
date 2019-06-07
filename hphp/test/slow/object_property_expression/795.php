@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C1 {
   private static $b = 10;
   public function __get( $what ) {

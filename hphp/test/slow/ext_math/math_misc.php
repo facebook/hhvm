@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VC($x, $y) {
   var_dump(abs($x - $y) < 0.00001);

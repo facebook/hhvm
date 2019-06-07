@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $domain = AF_INET6;
 $level = IPPROTO_IPV6;
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP) or die("err");

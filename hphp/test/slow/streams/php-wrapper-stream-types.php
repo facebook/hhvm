@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $to_open = array(

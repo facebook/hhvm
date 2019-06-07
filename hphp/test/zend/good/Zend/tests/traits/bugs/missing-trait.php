@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TraitsTest {
   use THello;

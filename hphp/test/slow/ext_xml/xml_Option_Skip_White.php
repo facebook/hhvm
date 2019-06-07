@@ -1,4 +1,4 @@
-<?php
+<?hh
 function read_xml($skip_white) {
   $xml=file_get_contents(__DIR__."/skipwhite.xml");
   $parser=xml_parser_create();

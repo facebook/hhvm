@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string rawurlencode(string str)
  * Description: URL-encodes string 
  * Source code: ext/standard/url.c

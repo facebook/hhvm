@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter value
    other than that in the field is provided */

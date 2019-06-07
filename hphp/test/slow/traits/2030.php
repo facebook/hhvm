@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait ATrait {
   public static function get_class_name() {

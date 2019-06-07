@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (0) {
   include '1311-1.inc';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Overrule global settings, if need be */
 
 if (false !== getenv('PDO_MYSQL_TEST_DSN')) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_replace('{{\D+}}', 'x', '{abcd}'));
 var_dump(preg_replace('{{\D+}}', 'ddd', 'abcd'));

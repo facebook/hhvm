@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 
 /* Create an XML document
  * with strcuture

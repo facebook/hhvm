@@ -1,5 +1,5 @@
 #!/usr/local/bin/php -j
-<?php
+<?hh
 
 require(__DIR__.'/perf-lib.php');
 

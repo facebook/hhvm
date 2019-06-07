@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
         const FOO = 1;
         public $x = self::FOO;

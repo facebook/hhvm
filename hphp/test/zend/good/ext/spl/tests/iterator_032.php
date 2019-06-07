@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $it = new LimitIterator(new ArrayIterator(array(1,2,3,4)), 1, 2);
 

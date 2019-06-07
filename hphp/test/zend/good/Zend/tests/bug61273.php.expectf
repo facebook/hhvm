@@ -1,1 +1,5 @@
-okey
+Fatal error: Uncaught exception 'InvalidArgumentException' with message '__invoke() expects parameter 1 by reference, but the call was not annotated with '&'' in %s/bug61273.php:8
+Stack trace:
+#0 %s/bug61273.php(8): call_user_func_array()
+#1 (): main()
+#2 {main}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait U {
   function f() { echo $x; }

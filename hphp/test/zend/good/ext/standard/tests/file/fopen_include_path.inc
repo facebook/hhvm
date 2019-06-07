@@ -1,4 +1,4 @@
-<?php
+<?hh
 $pwd = getcwd();
 $f = basename(current(&get_included_files()), ".php");
 ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1 = $pwd."/".$f.".dir1";

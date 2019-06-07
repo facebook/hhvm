@@ -1,4 +1,4 @@
-<?php
+<?hh
   function __autoload($name)
   {
       echo "In autoload: ";

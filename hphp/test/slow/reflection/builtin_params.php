@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   foreach ((new ReflectionFunction('date'))->getParameters() as $param) {

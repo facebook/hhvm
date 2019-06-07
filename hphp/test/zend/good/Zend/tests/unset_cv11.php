@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $x = array("default"=>"ok");
 var_dump($x);
 $cf = $x;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_get_current_byte_index(resource parser)
  * Description: Get current byte index for an XML parser 
  * Source code: ext/xml/xml.c

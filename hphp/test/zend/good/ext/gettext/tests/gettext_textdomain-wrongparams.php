@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 <<__EntryPoint>> function main() {
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');

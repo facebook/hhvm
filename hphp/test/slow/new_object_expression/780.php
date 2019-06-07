@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A1 {
   public function __construct($id) {

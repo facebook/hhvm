@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_get_current_line_number(resource parser)
  * Description: Get current line number for an XML parser 
  * Source code: ext/xml/xml.c

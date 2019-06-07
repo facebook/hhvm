@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function instance_of_test(array $x) {
   echo '==================== ', __FUNCTION__,' ====================', "\n";

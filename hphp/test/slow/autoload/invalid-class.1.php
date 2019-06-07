@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __autoload() {
   var_dump(func_get_args());

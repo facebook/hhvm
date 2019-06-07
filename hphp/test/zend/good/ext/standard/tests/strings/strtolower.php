@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype:
      string strtolower ( string $str );
    Description:

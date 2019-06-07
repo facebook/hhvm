@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
  * Description: Searches haystack for needle and returns TRUE

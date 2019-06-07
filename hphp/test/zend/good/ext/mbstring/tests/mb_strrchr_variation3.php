@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
  * Description: Finds the last occurrence of a character in a string within another
  * Source code: ext/mbstring/mbstring.c

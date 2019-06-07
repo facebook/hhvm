@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace foo {
 use \foo;
 class bar {

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $file = dirname(__FILE__) . '/src.gd2';
 
 $im2 = imagecreatefromgd2($file);

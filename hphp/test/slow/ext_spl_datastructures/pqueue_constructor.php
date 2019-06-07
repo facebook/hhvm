@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyPriorityQueue extends \SplPriorityQueue {
   public function __construct() {

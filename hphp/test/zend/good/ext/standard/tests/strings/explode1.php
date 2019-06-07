@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array explode ( string $delimiter, string $string [, int $limit] );
    Description: Returns an array of strings, each of which is a substring of string
                 formed by splitting it on boundaries formed by the string delimiter.

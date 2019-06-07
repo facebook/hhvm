@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Cause errors (like division by zero) to raise an exception instead of

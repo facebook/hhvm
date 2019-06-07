@@ -1,4 +1,4 @@
-<?php // should fail
+<?hh // should fail
 
 interface I {
   function query(); // HipHop syntax enabled => full check

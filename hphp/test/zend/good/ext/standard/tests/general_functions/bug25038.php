@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($x='no argument')
 {

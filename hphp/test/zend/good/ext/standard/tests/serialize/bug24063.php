@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $v = 1;
 for ($i = 1; $i < 10; $i++) {
     $v /= 10;

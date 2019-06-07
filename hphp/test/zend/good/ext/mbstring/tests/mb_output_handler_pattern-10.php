@@ -1,4 +1,4 @@
-<?php
+<?hh
 mb_http_output("EUC-JP");
 header("Content-Type: application/octet-stream");
 ob_start();

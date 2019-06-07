@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_spl_doubly_linked_list_foreach_with_delete() {

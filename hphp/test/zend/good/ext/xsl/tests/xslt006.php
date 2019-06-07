@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 6: Transform To Doc";
 include("prepare.inc");
 $proc->importStylesheet($xsl);

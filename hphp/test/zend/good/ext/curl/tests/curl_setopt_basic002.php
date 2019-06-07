@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 include 'server.inc';
 $host = curl_cli_server_start();

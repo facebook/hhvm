@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(unserialize('a:1:{s:1:"1";s:3:"foo";}'));
 var_dump(unserialize('a:1:{d:1;s:3:"foo";}'));

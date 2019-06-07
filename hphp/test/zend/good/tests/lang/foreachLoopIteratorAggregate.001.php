@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class ForeachLoopIteratorAggregate {
   public static $indent;

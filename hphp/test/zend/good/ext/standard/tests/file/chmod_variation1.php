@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const PERMISSIONS_MASK = 0777;
 <<__EntryPoint>> function main() {

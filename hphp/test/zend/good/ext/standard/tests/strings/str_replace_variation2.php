@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
   Prototype: mixed str_replace(mixed $search, mixed $replace, 
                                mixed $subject [, int &$count]);

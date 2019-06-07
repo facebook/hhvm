@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function modalité($a) {
  var_dump($a);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($s) {
   var_dump(wordwrap($s, 10));

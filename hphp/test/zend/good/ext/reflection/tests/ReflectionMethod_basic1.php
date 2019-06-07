@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reflectMethod($class, $method) {
     $methodInfo = new ReflectionMethod($class, $method);

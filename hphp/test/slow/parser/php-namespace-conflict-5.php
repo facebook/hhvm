@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Blah {
   class string {}
   use Foo\string;

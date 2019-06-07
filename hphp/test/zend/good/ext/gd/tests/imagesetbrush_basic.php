@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Create the brush image
 $img = imagecreate(10, 10);
 

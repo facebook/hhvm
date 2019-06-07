@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $db = new PDO( 'sqlite::memory:');
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($x = null) {
   if ($x) $x = 'foo';

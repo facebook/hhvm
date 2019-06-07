@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $d = new DateTime('@100000000000');
 var_dump($d->format('Y-m-d H:i:s U'));
 var_dump($d->getTimestamp());

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tr = Transliterator::create("Katakana-Latin");
 echo $tr->id, "\n";
 $revtr = $tr->createInverse();

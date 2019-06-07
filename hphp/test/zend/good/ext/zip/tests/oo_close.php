@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $dirname = dirname(__FILE__) . '/';
 $zip = new ZipArchive;

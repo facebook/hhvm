@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $f = dirname(__FILE__)  . '/bug49072.zip';
 $o = new ZipArchive();
 if (! $o->open($f, ZipArchive::CHECKCONS)) {

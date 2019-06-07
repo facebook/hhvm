@@ -1,4 +1,4 @@
-<?php
+<?hh
 function setUp()
 {
     $handler = new PDO( "sqlite::memory:" );

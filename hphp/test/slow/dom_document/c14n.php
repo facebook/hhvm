@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This example is from https://github.com/facebook/hhvm/issues/3440
 <<__EntryPoint>>

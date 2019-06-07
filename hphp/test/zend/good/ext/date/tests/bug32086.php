@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo $g = strtotime("2004-11-01"), "\n";
 echo $i = strtotime("2004-11-01 +1 day"), "\n";

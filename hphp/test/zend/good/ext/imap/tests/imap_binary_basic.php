@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string imap_binary  ( string $string  )
  * Description: Convert an 8bit string to a base64 string.
  * Source code: ext/imap/php_imap.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo "*** Testing class_uses() : basic ***\n";
 

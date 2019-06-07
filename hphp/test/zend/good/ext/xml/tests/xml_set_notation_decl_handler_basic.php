@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool xml_set_notation_decl_handler  ( resource $parser  , callback $handler  )
  * Description: Sets the notation declaration handler function for the XML parser.
  * Source code: ext/xml/xml.c

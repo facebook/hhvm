@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(function() { } instanceof closure);
 var_dump(function(&$x) { } instanceof closure);

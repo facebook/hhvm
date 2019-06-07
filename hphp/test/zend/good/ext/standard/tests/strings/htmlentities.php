@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 setlocale (LC_CTYPE, "C");
 $sc_encoded = htmlspecialchars ("<>\"&åÄ\n",ENT_COMPAT,"ISO-8859-1");
 echo $sc_encoded;

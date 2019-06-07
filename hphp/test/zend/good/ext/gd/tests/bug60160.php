@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $w = 3;
 $h = 50;
 $im = imagecreatetruecolor($w, $h);

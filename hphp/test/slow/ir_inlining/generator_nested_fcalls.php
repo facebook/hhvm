@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class SecurityLogger {
   private $x, $y;

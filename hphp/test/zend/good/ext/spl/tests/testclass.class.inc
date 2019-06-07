@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo __FILE__ . "\n";
 

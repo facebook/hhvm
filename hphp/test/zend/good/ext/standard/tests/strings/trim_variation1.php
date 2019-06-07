@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string trim  ( string $str  [, string $charlist  ] )
  * Description: Strip whitespace (or other characters) from the beginning and end of a string.

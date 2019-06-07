@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $strings = array("foo = bar", "bar = foo");
 foreach( $strings as $string )
 {

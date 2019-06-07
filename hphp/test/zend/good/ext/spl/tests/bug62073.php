@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $heap = new SplMaxHeap();
 $heap->insert(42);
 foreach ($heap as $key => $value) {

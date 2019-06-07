@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar($g) {
  return $g;

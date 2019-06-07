@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   $html = '<b>Hello</b><i>World</i>';

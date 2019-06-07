@@ -1,4 +1,4 @@
-<?php
+<?hh
   echo "Basic test of POSIX getpid function\n";
 
   $pid = posix_getpid();

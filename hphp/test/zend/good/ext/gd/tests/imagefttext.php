@@ -1,4 +1,4 @@
-<?php
+<?hh
     $cwd = dirname(__FILE__);
     $fontfile_8859 = "$cwd/test8859.ttf";
 

@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 include('skipif.inc'); 
 
 $test = @iconv_strpos("abbttt","ttt",0,"UTF-8");

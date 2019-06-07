@@ -1,4 +1,4 @@
-<?php
+<?hh
 $g_lang = 'tr_TR';
 putenv("LANG=$g_lang");
 setlocale(LC_ALL, $g_lang);

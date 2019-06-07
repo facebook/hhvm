@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Check effects of changing misc collattion options.

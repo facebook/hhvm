@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Unimpl {
   static abstract function aa($x);

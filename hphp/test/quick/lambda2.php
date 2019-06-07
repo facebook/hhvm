@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // lambdas in class bodies
 

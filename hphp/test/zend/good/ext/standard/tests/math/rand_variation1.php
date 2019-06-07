@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int rand  ([ int $min  , int $max ] )
  * Description: Generate a random integer.
  * Source code: ext/standard/rand.c

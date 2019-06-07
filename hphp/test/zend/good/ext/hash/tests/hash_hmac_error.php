@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto string hash_hmac ( string algo, string data, string key [, bool raw_output] )
 * Function is implemented in ext/hash/hash.c

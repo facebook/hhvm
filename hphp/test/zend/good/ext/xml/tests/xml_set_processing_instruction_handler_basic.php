@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool xml_set_processing_instruction_handler  ( resource $parser  , callback $handler  )
  * Description: Sets the processing instruction (PI) handler function for the XML parser.
  * Source code: ext/xml/xml.c

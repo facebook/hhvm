@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array iconv_mime_decode_headers(string headers [, int mode, string charset])
  * Description: Decodes multiple mime header fields
  * Source code: ext/iconv/iconv.c

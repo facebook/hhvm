@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a, $b) {
   $s = (string)$a;
   $t = (string)$b;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(strtolower(curl_strerror(CURLE_OK)));
 var_dump(strtolower(curl_strerror(CURLE_UNSUPPORTED_PROTOCOL)));

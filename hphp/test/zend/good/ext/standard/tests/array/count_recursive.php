@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: int count ( mixed $var [, int $mode] );
  * Description: Count elements in an array, or properties in an object
  */

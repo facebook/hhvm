@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   fb_enable_code_coverage();

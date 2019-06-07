@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 $textascii = 'This is an "example" of using DOM splitText';
 $text = 'This is an ‘example’ of using DOM splitText';
 $start = 30;

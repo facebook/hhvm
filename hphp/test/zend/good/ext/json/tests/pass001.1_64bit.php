@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Modified to test unescaped UNICODE as keys and values.
  * Modified to test numbers with exponents without a decimal point.
  * Modified to test empty string values.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class EnglishMealIterator implements Iterator {
     private $pos=0;
     private $myContent=array("breakfast", "dinner", "tea");

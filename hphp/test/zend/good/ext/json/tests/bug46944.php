@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 for ($i = 1; $i <= 16; $i++) {
 	$first = 0xf0|($i >> 2);

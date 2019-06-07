@@ -1,4 +1,4 @@
-<?php
+<?hh
 function Test($param) {
 
 	ZendGoodExtSoapTestsBugsBug38067::$g = $param->str;

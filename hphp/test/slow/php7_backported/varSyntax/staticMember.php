@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     public static $b = 0;
     public static $c = [0, 1];

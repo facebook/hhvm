@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $failed = false;
 $im = imagecreate(1,1);
 for ($i=0; $i<256; $i++) {

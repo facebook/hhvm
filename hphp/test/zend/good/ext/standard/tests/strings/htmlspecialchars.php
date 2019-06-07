@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string htmlspecialchars ( string $string [, int $quote_style [, string $charset]] );
    Description: Convert special characters to HTML entities
 */

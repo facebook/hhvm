@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(fileinode("."));
 var_dump(fileowner("."));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function redirect_on_error($e) {
     ob_end_clean();

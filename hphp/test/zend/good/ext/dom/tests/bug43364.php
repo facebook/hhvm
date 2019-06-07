@@ -1,4 +1,4 @@
-<?php
+<?hh
 function loopElements($nodes)
 {
     $count = 0;

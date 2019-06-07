@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto string preg_quote(string str [, string delim_char])
 * Function is implemented in ext/pcre/php_pcre.c */

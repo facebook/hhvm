@@ -1,4 +1,4 @@
-<?php
+<?hh
 include_once( 'ut_common.inc' );
 $GLOBALS['oo-mode'] = true;
 $res_str = '';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g1() {
   yield 2;

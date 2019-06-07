@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 class Derived extends Base {

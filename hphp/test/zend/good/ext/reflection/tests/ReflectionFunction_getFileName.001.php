@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 include "included4.inc";
 

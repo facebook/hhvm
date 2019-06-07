@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 <<__EntryPoint>> function main() {
 error_reporting(E_ALL);
 

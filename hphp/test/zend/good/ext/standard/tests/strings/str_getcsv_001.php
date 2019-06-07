@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // string input[, string delimiter[, string enclosure[, string escape]]]
 <<__EntryPoint>> function main() {

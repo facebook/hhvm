@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : void restore_error_handler(void)
  * Description: Restores the previously defined error handler function
  * Source code: Zend/zend_builtin_functions.c

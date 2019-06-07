@@ -1,4 +1,4 @@
-<?php
+<?hh
 Php7BackportedExtOpensslCipherTestsInc::$php_openssl_cipher_tests = array(
 	'aes-128-ccm' => array(
 		array(

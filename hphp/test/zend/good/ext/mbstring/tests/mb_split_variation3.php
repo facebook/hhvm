@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array mb_split(string pattern, string string [, int limit])
  * Description: split multibyte string into array by regular expression
  * Source code: ext/mbstring/php_mbregex.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base {
   function concrete_override() { return "base_or"; }

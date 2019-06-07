@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(2**3);
 var_dump(2**3.0);

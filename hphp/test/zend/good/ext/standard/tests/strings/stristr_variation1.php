@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: string stristr ( string $haystack, string $needle );
    Description: Case-insensitive strstr().

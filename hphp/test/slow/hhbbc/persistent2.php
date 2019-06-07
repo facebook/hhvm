@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($z) {
   var_dump(function_exists($z, false));

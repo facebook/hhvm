@@ -1,4 +1,4 @@
-<?php
+<?hh
   $s = "";
   list($a, $b) = $s[0];
 <<__EntryPoint>> function main() {

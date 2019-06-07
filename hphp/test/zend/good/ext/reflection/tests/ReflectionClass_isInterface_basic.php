@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface TestInterface {}
 class TestClass {}

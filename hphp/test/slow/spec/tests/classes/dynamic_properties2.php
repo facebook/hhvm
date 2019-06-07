@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // stripped-down version of overloading.php for inclusion in the spec
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C extends ArrayObject {
     public $p = 'object property';
 }

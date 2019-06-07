@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<A(1),B('foo',array(42,73))>>
 class C {

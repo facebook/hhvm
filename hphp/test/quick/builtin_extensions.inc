@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($cls, ...$args) {
   echo $cls . "\n";

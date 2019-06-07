@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handler($name, $obj, $args, $data, &$done) {
   echo "----HANDLER----\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>> function main() {
 $imagick = new Imagick(array (

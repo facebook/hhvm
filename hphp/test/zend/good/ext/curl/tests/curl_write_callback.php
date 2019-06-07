@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function curl_callback($curl_handle, $received_data)
 {

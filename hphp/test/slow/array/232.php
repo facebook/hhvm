@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen() {
   $a = array('a' => 'apple', 'b' => 'banana', 'c' => 'citrus');

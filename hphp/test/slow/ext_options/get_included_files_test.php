@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($files) {
   // Zend and HHVM output in different orders; level the field

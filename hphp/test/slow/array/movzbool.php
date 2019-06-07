@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   if (mt_rand() == 0) return array();

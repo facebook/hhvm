@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(is_dir('file:///datafoo:test'));
 var_dump(is_dir('datafoo:test'));

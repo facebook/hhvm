@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $doc = new DOMDocument('1.0', 'utf-8');
 $root = $doc->createElementNS('http://purl.org/rss/1.0/','rdf:RDF');

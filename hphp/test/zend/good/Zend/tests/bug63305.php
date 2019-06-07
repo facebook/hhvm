@@ -1,4 +1,4 @@
-<?php
+<?hh
 new Attachment("");
 
 function __autoload($class) {

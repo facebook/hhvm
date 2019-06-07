@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $root = new DOMElement('html');

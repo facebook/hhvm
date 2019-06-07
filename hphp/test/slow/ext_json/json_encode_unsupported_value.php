@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This file is ran with -vEval.EnableHipHopSyntax=0
 

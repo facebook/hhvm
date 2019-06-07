@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class ZendGoodExtStandardTestsArrayBug25359 {
   public static $data;

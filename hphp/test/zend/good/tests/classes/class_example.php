@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* pretty nifty object oriented code! */
 

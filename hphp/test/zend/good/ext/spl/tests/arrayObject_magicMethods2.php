@@ -1,4 +1,4 @@
-<?php
+<?hh
 class UsesMagic {
     public $a = 1;
     public $b = 2;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TestSoapClient extends SoapClient{
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
           echo $request;

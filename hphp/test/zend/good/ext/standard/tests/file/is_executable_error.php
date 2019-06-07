@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool is_executable ( string $filename );
    Description: Tells whether the filename is executable
 */

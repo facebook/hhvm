@@ -1,4 +1,4 @@
-<?php
+<?hh
 # PDO test framework utilities
 
 if (getenv('PDOTEST_DSN') === false) {

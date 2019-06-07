@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto bool natsort ( array &$array )
 * Function is implemented in ext/standard/array.c

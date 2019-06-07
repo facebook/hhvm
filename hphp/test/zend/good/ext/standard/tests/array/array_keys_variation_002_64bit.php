@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "\n*** Testing array_keys() on range of values ***\n";
 $arr_range = array(

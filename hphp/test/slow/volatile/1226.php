@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (class_exists('B')) {
   include '1226-1.inc';

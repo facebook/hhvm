@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once('connect.inc');
 
 $conn = mysql_pconnect($host, $user, $passwd);

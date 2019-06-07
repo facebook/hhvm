@@ -1,4 +1,4 @@
-<?php
+<?hh
 class State { static $x = 1; }
 function foo() {
   State::$x += 10;

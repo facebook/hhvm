@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Testing ob_start, chunking and the debugger since the debugger actually
 // swaps buffers sometimes.

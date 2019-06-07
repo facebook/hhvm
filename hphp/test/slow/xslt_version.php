@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Explicit test as Composer depends on it
 

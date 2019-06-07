@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ColumnKeyClass {
     function __toString() { return 'first_name'; }
 }

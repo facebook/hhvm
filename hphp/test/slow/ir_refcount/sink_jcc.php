@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x() { return make_uniqid(microtime()); }
 

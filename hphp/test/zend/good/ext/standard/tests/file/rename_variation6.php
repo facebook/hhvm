@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $tmp_file = __FILE__.".tmp";
 $tmp_link = __FILE__.".tmp.link";

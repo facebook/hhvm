@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function err($x, $y) { throw new Exception('heh'); }
 

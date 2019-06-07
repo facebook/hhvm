@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T1 {
   function foo() {echo "T1\n";}
 }

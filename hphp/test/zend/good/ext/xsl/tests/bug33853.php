@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __autoload($className) {
         var_dump($className);

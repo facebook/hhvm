@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_region($s) {
   echo "get_region\n";

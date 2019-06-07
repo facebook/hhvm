@@ -1,4 +1,4 @@
-<?php
+<?hh
 class mytest
 {
   const classConstant = '01';

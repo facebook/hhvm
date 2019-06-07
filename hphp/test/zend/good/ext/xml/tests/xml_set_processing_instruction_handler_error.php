@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_processing_instruction_handler(resource parser, string hdl)
  * Description: Set up processing instruction (PI) handler 
  * Source code: ext/xml/xml.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : DateTimeZone date_timezone_get  ( DateTime $object  )
  * Description: Return time zone relative to given DateTime
  * Source code: ext/date/php_date.c

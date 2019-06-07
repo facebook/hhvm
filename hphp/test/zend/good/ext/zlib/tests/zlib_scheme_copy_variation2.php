@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $org_data = <<<EOT
 uncompressed contents of 004.txt.gz is:
 When you're taught through feelings

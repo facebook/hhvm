@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Base_php5 {
   function __construct() {
     var_dump('Base constructor');

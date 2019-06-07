@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : void usleep  ( int $micro_seconds  )
  * Description: Delays program execution for the given number of micro seconds.
  * Source code: ext/standard/basic_functions.c

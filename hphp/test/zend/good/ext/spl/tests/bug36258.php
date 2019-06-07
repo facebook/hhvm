@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $diriter = new RecursiveIteratorIterator( new RecursiveDirectoryIterator('.') );
 

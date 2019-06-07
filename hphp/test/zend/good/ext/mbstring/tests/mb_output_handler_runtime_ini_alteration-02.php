@@ -1,4 +1,4 @@
-<?php
+<?hh
 mb_http_output("EUC-JP");
 ini_set('mbstring.http_output_conv_mimetypes', 'application');
 header("Content-Type: text/html");

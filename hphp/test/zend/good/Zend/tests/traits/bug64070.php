@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait first_trait
 {
     function first_function()

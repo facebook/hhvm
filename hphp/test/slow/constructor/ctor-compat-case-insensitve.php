@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   function __construct() { echo "I'm A"; }

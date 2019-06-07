@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function formatted_time($datetime_str = 'now', $timestamp_format = NULL, $timezone = NULL)
 {

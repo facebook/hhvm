@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
    Testing fputcsv() to write to a file when enclosure is same but delimiter is different from those

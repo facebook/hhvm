@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class base {
     function show() {

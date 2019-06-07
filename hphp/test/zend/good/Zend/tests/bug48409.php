@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ABCException extends Exception {}
 

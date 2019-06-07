@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $tests = array(
     "\x41\xC2\x3E\x42",

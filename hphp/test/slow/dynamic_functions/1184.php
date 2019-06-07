@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 DynamicFunctions1184::$a = 'test';
  function test() {

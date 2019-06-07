@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f($a=array(namespace\bar)) {
 	return $a[0];
 }

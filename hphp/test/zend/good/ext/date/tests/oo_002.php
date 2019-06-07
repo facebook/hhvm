@@ -1,4 +1,4 @@
-<?php
+<?hh
 date_default_timezone_set('Europe/Berlin');
 class _d extends DateTime {}
 class _t extends DateTimeZone {}

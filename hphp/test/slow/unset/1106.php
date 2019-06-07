@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  static $foo = array(123);

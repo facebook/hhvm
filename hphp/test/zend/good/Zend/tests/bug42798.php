@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($className) {
     print "$className\n";
     exit();

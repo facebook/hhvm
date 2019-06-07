@@ -1,4 +1,4 @@
-<?php /* destructor */
+<?hh /* destructor */
 
 class A {
   public static function foo() {

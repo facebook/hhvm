@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $file = __DIR__ . '/__tmp_rose.jpg';
 

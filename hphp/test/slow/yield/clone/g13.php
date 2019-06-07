@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   yield "abc" => "def";

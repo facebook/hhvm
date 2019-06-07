@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 for ($i = 0; $i < 10; $i++) {
 	printf("{%f} %1\$f\n", pow(-1.0, 0.3));

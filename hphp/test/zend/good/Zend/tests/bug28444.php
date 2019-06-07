@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function my_error_handler($errno, $errstr, $errfile, $errline) {
     var_dump($errstr);

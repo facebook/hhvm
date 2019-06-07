@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A\B;
 function foo() {}
 <<__EntryPoint>> function main() {

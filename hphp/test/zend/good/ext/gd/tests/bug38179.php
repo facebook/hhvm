@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $src = imagecreate(5,5);
 $c0 = imagecolorallocate($src, 255,255,255);
 $c1 = imagecolorallocatealpha($src, 255,0,0,70);

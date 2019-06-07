@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function adjustDoctype($xml) {
     return str_replace(array(">

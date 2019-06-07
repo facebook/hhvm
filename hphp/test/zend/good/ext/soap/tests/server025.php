@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TestHeader1 extends SoapHeader {
 	function __construct($data) {
 		parent::__construct("http://testuri.org", "Test1", $data);

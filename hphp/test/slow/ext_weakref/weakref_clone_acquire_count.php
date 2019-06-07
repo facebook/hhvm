@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Source php weakref extension
 <<__EntryPoint>>

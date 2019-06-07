@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array curl_version  ([ int $age  ] )
  * Description: Returns information about the cURL version.

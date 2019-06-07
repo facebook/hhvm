@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_strtoupper(string $sourcestring [, string $encoding]
  * Description: Returns a uppercased version of $sourcestring
  * Source code: ext/mbstring/mbstring.c

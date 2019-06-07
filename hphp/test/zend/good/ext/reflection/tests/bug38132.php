@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
     static protected $bar = 'baz';
     static public $a = 'a';

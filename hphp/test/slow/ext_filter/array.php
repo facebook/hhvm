@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // based on zend/ext/filter/010.php
 

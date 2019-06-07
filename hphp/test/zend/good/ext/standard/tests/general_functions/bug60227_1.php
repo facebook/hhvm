@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 header("X-Foo1: a");
 header("X-Foo2: b\n ");
 header("X-Foo3: c\r\n ");

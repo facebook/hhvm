@@ -1,4 +1,4 @@
-<?php
+<?hh
     class Project {
         public $id;
 

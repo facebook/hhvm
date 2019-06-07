@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace {
     const bar = 42;

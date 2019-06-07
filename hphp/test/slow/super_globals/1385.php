@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
   $_POST = array('HELLO' => 1);

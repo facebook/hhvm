@@ -1,4 +1,4 @@
-<?php
+<?hh
 class EEE {
     function __set ($field, $value) {
         echo "hello world\n";

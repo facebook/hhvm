@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X        { static $x = array(); }
 function go()  { X::$x[0] = 2; }

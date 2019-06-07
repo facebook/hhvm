@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int array_push(&array $stack, mixed $var [, mixed $...])
  * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c

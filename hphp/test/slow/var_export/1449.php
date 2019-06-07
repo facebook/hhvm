@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_export(!null);
 var_export(!true);

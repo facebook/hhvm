@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 7: Transform To Uri";
 include("prepare.inc");
 $proc->importStylesheet($xsl);

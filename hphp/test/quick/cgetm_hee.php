@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ary implements ArrayAccess {
   public function __construct() {

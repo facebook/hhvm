@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar(bool $k) {
   $x = null;

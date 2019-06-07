@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $toname = "TO_" . md5(microtime());
 $dirname = "FROM_" . md5(microtime());
 

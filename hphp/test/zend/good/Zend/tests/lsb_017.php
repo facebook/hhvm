@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     public static function test($x=null) {
         if (!is_null($x)) {

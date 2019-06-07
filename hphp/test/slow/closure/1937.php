@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a, $b) {
   return array_map(function (array $x) use ($b) {

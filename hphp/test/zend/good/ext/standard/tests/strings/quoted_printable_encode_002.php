@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $s = str_repeat("\0", 200);
 var_dump($d = quoted_printable_encode($s));

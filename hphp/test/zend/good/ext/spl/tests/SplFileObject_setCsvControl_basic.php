@@ -1,4 +1,4 @@
-<?php
+<?hh
 file_put_contents('csv_control_data.csv',
 <<<CDATA
 'groene appelen'|10

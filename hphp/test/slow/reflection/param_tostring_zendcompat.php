@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Check output exactly matches PHP - some mocking frameworks use this, as
 // Zend doesn't provide $param->getTypeText() or $param->getTypehintText()

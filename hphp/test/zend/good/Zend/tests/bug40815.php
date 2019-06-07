@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ehandle{
     static public function exh ($ex) {

@@ -1,4 +1,4 @@
-<?php # vim:ft=php
+<?hh # vim:ft=php
 if (!extension_loaded('pdo')) die('skip PDO not available');
 try {
 	$pdo = new PDO("sqlite:".__DIR__."/foo.db");

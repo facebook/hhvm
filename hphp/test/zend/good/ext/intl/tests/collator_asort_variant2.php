@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Sort associative arrays using various locales.

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $rng = dirname(__FILE__).'/foo.rng';
 $xml = <<< XML
 <?xml version="1.0"?>

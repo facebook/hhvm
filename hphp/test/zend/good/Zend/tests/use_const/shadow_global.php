@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace {
     require 'includes/global_bar.php';

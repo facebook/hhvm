@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($a,$b,$c,$d) {
  return implode($a,$b);

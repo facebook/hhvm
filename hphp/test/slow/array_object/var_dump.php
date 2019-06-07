@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($flag = 0) {
   $ao = new ArrayObject([], $flag);

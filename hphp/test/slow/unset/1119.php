@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function run(&$a, &$c) {
   $b = array(0, 1);

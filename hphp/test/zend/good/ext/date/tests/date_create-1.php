@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('Europe/Oslo');
 $tz1 = timezone_open("GMT");
 $tz2 = timezone_open("Europe/London");

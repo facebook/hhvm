@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 ini_set("report_memleaks", 0);  // the exception thrown in this test results in a memory leak, which is fine
 

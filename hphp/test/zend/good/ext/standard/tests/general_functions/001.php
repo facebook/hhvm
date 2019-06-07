@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 <<__EntryPoint>> function main() {
 $agent = sprintf("%.5s", "James Bond, 007");
 

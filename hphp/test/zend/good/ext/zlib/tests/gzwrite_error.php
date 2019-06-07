@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $filename = "gzwrite_error.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";

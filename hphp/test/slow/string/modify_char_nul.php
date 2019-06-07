@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $s="abc";
 var_dump($s[1] = "\0");

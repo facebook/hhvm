@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // with var args
 class C9 {

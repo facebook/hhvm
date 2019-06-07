@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $b = str_repeat("A", 124);
 echo crypt("A", "$5$" . $b)."\n";

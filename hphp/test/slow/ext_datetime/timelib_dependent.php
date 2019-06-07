@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test_date_diff() {
   $dt1 = date_create("2010-08-02");

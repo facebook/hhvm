@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a($class) {
   print "a\n";

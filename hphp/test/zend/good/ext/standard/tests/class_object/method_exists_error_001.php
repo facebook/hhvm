@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool method_exists(object object, string method)
  * Description: Checks if the class method exists 
  * Source code: Zend/zend_builtin_functions.c

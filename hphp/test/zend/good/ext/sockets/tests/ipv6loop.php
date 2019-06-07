@@ -1,4 +1,4 @@
-<?php
+<?hh
     /* Setup socket server */
     $server = socket_create(AF_INET6, SOCK_STREAM, getprotobyname('tcp'));
     if (!$server) {

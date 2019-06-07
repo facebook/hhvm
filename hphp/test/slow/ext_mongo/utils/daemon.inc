@@ -1,4 +1,4 @@
-<?php
+<?hh
 include dirname(__FILE__) . "/cfg.inc";
 
 function d($msg) {

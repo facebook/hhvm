@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (strtolower(php_uname('m')) != 'x86_64') die("skip this test is for x86_64 platforms only");
 }

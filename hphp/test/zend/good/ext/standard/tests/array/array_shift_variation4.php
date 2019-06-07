@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : mixed array_shift(array &$stack)
  * Description: Pops an element off the beginning of the array
  * Source code: ext/standard/array.c

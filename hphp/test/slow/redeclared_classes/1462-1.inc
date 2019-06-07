@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class a extends base1 {
   const aconst = "firstA";

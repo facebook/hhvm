@@ -1,4 +1,4 @@
-<?php
+<?hh
 const a = 10;
 
 function t1($a = 1 + 1, $b = 1 << 2, $c = "foo" . "bar", $d = a * 10) {

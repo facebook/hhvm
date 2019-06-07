@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TestClass {}
 final class TestFinalClass {}

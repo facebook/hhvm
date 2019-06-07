@@ -1,4 +1,4 @@
-<?php
+<?hh
 $crap = 'AåBäCöDü';
 var_dump(mb_strcut($crap, 0, 100, 'UTF-8'));
 var_dump(mb_strcut($crap, 1, 100, 'UTF-8'));

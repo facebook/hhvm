@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     const HW = "this is A";
 }

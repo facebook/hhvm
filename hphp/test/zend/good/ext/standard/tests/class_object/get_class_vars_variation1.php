@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array get_class_vars(string class_name)
  * Description: Returns an array of default properties of the class.
  * Source code: Zend/zend_builtin_functions.c

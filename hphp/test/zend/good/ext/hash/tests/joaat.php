@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tests = array(
     array("hello world", "3e4a5a57"),
     array("", 0),

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace test;
 const TEST = 11;

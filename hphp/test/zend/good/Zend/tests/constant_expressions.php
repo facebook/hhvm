@@ -1,4 +1,4 @@
-<?php
+<?hh
 const T_1 = 1 << 1;
 const T_2 = 1 / 2;
 const T_3 = 1.5 + 1.5;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace A;
 use A as B;
 class ArrayObject {

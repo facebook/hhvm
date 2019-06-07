@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_spl_file_object_fgets_dro_p_ne_w_line() {

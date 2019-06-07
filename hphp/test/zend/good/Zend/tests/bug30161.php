@@ -1,4 +1,4 @@
-<?php
+<?hh
 class FIIFO {
 
         public function __construct() {

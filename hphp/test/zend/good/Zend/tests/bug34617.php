@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Thing {}
 function boom()
 {

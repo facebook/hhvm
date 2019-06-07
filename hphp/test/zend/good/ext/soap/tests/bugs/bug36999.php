@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function echoLong($num) {
   return $num;

@@ -1,2 +1,2 @@
-<?php
+<?hh
 /* dummy include*/

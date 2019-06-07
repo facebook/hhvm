@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const WORKER_ARGV_VALUE = 'RUN_WORKER';
 

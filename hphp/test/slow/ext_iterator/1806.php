@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class EvensOnly extends FilterIterator {
   function __construct($it) {

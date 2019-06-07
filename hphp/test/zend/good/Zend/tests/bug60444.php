@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
 	public function __construct() {
 		eval("class Bar extends Foo {}");

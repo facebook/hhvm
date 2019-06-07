@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool mb_ereg_match(string $pattern, string $string [,string $option])
  * Description: Regular expression match for multibyte string 
  * Source code: ext/mbstring/php_mbregex.c

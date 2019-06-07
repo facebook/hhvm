@@ -1,4 +1,4 @@
-<?php
+<?hh
    $targetDir = __DIR__.DIRECTORY_SEPARATOR.md5('directoryIterator::getbasename2');
    mkdir($targetDir);
    touch($targetDir.DIRECTORY_SEPARATOR.'getBasename_test.txt');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function TestFunc1($classname)
 {

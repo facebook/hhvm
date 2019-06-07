@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $doctype = new DOMDocumentType();
 $internalSubset = $doctype->internalSubset;
 }

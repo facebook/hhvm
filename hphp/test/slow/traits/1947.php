@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait SayWorld {
   public function sayHelloWorld() {

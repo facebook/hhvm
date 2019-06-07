@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reverse(array $array) {
     end(&$array);

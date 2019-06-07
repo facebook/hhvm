@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $msg = random_bytes(1000);
 $key = sodium_crypto_auth_keygen();
 $mac = sodium_crypto_auth($msg, $key);

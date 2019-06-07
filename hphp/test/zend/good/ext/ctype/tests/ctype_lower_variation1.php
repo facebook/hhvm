@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_lower(mixed $c)
  * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c

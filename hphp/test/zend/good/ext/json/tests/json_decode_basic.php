@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : mixed json_decode  ( string $json  [, bool $assoc  ] )
  * Description: Decodes a JSON string
  * Source code: ext/json/php_json.c

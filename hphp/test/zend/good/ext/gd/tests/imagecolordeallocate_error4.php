@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $image = imagecreate(180, 30);
 $white = imagecolorallocate($image, 255, 255, 255);
 

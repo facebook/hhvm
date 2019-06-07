@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C implements ArrayAccess {
   private $data = array();

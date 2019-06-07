@@ -1,4 +1,4 @@
-<?php
+<?hh
 include "test_schema.inc";
 $schema = <<<EOF
 	<complexType name="testType">

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * * Pollute the heap. Helps trigger bug. Sometimes not needed.
  * */

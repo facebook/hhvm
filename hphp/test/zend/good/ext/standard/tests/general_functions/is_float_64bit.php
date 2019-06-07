@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool is_float ( mixed $var );
  * Description: Finds whether the given variable is a float
  */

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Check if collator_sort_with_sort_keys()
  * properly supports copy-on-write.

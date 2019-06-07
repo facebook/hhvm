@@ -1,4 +1,4 @@
-<?php
+<?hh
 	include "resourcebundle.inc";
 
 	$r = new ResourceBundle( 'es', $bundle );

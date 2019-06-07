@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fn_name() { return 'array_multisort'; }
 

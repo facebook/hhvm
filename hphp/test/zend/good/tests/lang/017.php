@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function Test ($a) {
     if ($a<3) {

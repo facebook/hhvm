@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function favorite_fruit() {
   yield 'Tim' => 'apple';

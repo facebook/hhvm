@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "Procedural\n";
 $zip = zip_open(dirname(__FILE__) . '/test.zip');

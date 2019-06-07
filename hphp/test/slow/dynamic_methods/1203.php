@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 DynamicMethods1203::$i = 'gi';
  $s = 'gs';

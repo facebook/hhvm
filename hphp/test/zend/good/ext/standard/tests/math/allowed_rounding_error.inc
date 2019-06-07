@@ -1,4 +1,4 @@
-<?php
+<?hh
 function allowed_rounding_error ($number, $expected) {
 
 	//different machines  may give slightly different floating point numbers

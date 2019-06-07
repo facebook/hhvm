@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml =<<<XML
 <xml xmlns:a="http://a">
     <data a:label="I am A" label="I am Nothing">test1</data>

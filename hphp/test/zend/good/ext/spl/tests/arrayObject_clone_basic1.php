@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $a = array(1,2);
 $aa1 =  new ArrayObject($a);
 $a['p1'] = 'new element added to a before clone';

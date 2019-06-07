@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo;
 function f($a=array(namespace\bar=>0)) {
 	reset(&$a);

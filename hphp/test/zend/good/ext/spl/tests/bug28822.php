@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $array = new ArrayObject();
 $array->offsetSet('key', 'value');

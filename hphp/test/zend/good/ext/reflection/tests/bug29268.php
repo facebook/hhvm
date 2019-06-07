@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($classname) {
     echo "__autoload($classname)\n";
     eval("class $classname {}");

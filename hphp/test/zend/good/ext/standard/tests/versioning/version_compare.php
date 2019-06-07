@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 print "TESTING COMPARE\n";
 $special_forms = array("-dev", "a1", "b1", "RC1", "rc1", "", "pl1");

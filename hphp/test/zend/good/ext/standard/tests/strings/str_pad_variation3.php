@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string str_pad  ( string $input  , int $pad_length  [, string $pad_string  [, int $pad_type  ]] )
  * Description: Pad a string to a certain length with another string
  * Source code: ext/standard/string.c

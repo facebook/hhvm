@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 # Check for at least one HNI based function in get_defined_functions()
 # and at least one IDL based function.

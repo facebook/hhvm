@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function error_handler($errno, $errstr) {
  echo "Error\n";

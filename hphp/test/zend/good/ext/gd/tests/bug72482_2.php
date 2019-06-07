@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once 'func.inc';
 
 $im = imagecreatetruecolor(10, 10);

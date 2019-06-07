@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x, $y) {
   return $x[0][$y++] ?: false;

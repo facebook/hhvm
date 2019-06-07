@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class S1 { static $v = 0; }
 function test_1() {

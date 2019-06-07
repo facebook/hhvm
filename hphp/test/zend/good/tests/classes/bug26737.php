@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
   private $private = 'private';
   protected $protected = 'protected';

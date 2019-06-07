@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen() {
     // execution is suspended here, so the following never gets run:

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() { mt_rand(); mt_rand(); mt_rand(); return new stdclass(); }
 

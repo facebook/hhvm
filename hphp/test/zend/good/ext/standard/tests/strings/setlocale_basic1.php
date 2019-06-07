@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string setlocale (int $category , string $locale [,string $..] )
               : string setlocale(int $category , array $locale);
  * Description: Sets locale information.Returns the new current locale ,

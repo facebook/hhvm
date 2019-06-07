@@ -1,4 +1,4 @@
-<?php
+<?hh
 	if (!extension_loaded('intl'))
 		die('skip');
 	if (!defined('INTL_IDNA_VARIANT_UTS46'))

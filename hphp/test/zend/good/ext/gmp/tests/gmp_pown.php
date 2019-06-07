@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_powm(0,1,10)));
 var_dump(gmp_strval(gmp_powm(5,1,10)));

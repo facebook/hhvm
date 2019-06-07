@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a, $b, $c) {
   var_dump($a, $b, $c);
 }

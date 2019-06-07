@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Miscellaneous input */
 <<__EntryPoint>> function main() {

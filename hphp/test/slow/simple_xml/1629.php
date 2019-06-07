@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function addChildNode(SimpleXMLElement $parent, SimpleXMLElement $node) {
   $newchild = $parent->addChild($node->getName(), (string)$node);

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $document = new DOMDocument;
 $root = $document->createElement('root');
 $document->appendChild($root);

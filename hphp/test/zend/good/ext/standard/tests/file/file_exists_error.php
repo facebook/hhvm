@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool file_exists(string filename)
  * Description: Returns true if filename exists 
  * Source code: ext/standard/filestat.c

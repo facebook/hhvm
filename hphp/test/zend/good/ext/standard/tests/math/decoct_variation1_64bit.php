@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string decoct  ( int $number  )
  * Description: Returns a string containing an octal representation of the given number argument.
  * Source code: ext/standard/math.c

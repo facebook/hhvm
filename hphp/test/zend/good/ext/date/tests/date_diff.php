@@ -1,4 +1,4 @@
-<?php
+<?hh
 $ok = 0;
 const COUNT = 120;
 $d0 = new DateTime('2009-11-20');

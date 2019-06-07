@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $fd = bzopen(dirname(__FILE__)."/004_1.txt.bz2","r");
 var_dump(bzerror($fd));

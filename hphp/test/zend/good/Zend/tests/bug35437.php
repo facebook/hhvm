@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function err2exception($errno, $errstr)
 {

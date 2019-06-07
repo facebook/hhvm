@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* strings and concat */
 

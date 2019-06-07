@@ -1,4 +1,4 @@
-<?php
+<?hh
 const MEMC_SERIALIZED =          4;
 const MEMC_COMPRESSED =         16;
 const MEMC_COMPRESSION_ZLIB =   32;

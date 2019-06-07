@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 try
 {
     $rdi = new recursiveDirectoryIterator(dirname(__FILE__),  FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS);

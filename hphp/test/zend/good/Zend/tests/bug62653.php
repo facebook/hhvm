@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $array = array("5"=>"bar");
 $foo = "10.0000"; // gettype($foo) = "string"
 $foo /= 2; //Makes $foo = 5 but still gettype($foo) = "double"

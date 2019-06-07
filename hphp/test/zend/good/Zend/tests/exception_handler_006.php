@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 set_exception_handler("foo");
 set_exception_handler("foo1");

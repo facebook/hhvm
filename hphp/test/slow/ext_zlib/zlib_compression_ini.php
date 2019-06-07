@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Using old values because in PHP 5.x as soon as the first output happens

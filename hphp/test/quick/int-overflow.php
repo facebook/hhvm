@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {
   public $max = PHP_INT_MAX;

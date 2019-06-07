@@ -1,4 +1,4 @@
-<?php
+<?hh
 // TODO: Add more encoding, strings.....
 
 ini_set('include_path', dirname(__FILE__));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class setter {
     public $n;
     public $x = array('a' => 1, 'b' => 2, 'c' => 3);

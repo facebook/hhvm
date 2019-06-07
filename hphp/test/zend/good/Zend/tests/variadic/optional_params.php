@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fn($reqParam, $optParam = null, ...$params) {
     var_dump($reqParam, $optParam, $params);

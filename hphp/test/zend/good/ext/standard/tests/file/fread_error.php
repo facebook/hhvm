@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: string fread ( resource $handle [, int $length] );
  Description: reads up to length bytes from the file pointer referenced by handle.

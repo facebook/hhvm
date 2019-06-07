@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array timezone_identifiers_list  ( void )
  * Description: Returns numerically index array with all timezone identifiers  
  * Source code: ext/date/php_date.c

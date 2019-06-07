@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 /* This is test/zend/bad/ext/spl/tests/iterator_042.php, except that it doesn't

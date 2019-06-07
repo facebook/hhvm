@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function testPointerModifications() {
   $array = array(1, 2, 3);

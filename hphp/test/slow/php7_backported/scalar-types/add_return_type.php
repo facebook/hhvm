@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface One {
     public function a();

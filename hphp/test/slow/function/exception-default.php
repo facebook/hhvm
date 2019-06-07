@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g() {
   throw new Exception("Fooception");

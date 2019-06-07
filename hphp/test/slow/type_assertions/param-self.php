@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface X {
   public function foo(self $x);

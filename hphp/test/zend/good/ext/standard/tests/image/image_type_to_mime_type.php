@@ -1,4 +1,4 @@
-<?php
+<?hh
 	// Note: SWC requires zlib
 	($dir = opendir(dirname(__FILE__))) || die('cannot open directory: '.dirname(__FILE__));
 	$result = array();

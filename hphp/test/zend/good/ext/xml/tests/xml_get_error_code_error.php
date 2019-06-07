@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_get_error_code(resource parser)
  * Description: Get XML parser error code 
  * Source code: ext/xml/xml.c

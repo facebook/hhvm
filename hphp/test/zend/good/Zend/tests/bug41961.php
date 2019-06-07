@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /** Class X is related to neither ParentClass nor ChildClass. */
 class X {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x() { return 3600; }
 function a() {

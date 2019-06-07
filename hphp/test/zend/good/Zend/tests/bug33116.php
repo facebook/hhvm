@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($class)
 {
   if (!array_key_exists('include', $GLOBALS)) $GLOBALS['include'] = array();

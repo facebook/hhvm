@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $signo = 0;
 

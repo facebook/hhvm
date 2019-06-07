@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string iconv_mime_decode(string encoded_string [, int mode, string charset])
  * Description: Decodes a mime header field
  * Source code: ext/iconv/iconv.c

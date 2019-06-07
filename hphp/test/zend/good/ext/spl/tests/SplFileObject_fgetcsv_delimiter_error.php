@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $fp = fopen('SplFileObject__fgetcsv3.csv', 'w+');
 fputcsv($fp, array(
     'field1',

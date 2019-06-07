@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(class_exists('C'));
 trait t {

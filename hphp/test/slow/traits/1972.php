@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait MY_TRAIT {
   public $x;

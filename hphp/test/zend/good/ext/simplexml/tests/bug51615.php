@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $dom = new DOMDocument;
 $dom->loadHTML('<span title=""y">x</span><span title=""z">x</span>');

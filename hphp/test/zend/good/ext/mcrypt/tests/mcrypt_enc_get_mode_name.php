@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $td  = mcrypt_module_open('rijndael-128', '', MCRYPT_MODE_ECB, '');
 echo mcrypt_enc_get_modes_name($td) . "\n";
 $td  = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');

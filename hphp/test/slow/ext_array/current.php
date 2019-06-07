@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() {
   $transport = array("foot", "bike", "car", "plane");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if ($argc > 100) {
  $f = 'var_dump';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class T {
     static $a = array(false=>"false", true=>"true");

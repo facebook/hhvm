@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Integer is handles as an octal representation, so nothing to match
 <<__EntryPoint>> function main() {
 var_dump(strpos("foo 11", 11));

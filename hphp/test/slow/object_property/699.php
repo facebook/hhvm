@@ -1,4 +1,4 @@
-<?php
+<?hh
 class d {
  static public $x = INIT1;
  }

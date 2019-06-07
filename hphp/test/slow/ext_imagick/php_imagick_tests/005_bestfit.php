@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $im = new Imagick();
 $im->newImage(50, 100, 'white');

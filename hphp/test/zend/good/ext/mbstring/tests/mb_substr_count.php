@@ -1,4 +1,4 @@
-<?php
+<?hh
 	mb_internal_encoding("EUC-JP");
 	var_dump(@mb_substr_count("", ""));
 	var_dump(@mb_substr_count("дв", ""));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int ArrayObject::natsort()
  * Description: proto int ArrayIterator::natsort()
  Sort the entries by values using "natural order" algorithm. 

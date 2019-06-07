@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function alpha() {
   throw new Error('Foo');

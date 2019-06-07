@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   $a = array_fill(0, 5000000, "abcdefghijklmn");

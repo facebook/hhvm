@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $doc = new DOMDocument();
 for( $i=0; $i<10; $i++ ) {
     $doc->loadXML("<parent><child /><child /></parent>");

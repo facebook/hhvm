@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Test {
     function __invoke($a, $b = 0) { }

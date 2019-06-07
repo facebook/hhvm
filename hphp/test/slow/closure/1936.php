@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   $s_path = serialize($x);

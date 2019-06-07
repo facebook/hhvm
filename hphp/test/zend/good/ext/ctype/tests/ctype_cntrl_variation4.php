@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_cntrl(mixed $c)
  * Description: Checks for control character(s)
  * Source code: ext/ctype/ctype.c

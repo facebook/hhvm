@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reverse_strcasecmp($s1,$s2) {
   return strcasecmp($s2,$s1);

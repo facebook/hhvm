@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  * proto int ob_get_length(void)
  * Function is implemented in main/output.c

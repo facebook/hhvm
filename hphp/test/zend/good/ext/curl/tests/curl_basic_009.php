@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $url = uniqid()."://www.".uniqid().".".uniqid();
 $ch = curl_init();

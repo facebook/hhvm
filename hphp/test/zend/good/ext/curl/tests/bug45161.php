@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Fill memory for test
 $ch = curl_init();

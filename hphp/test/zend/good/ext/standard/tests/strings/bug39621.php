@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $search =  "qxxx\0qqqqqqqq";
 $subject = "qxxx\0xxxxxxxx";

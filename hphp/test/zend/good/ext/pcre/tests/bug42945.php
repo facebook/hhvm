@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_match_all('/\b/', "a'", &$m, PREG_OFFSET_CAPTURE));
 var_dump($m);

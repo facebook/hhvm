@@ -1,4 +1,4 @@
-<?php
+<?hh
 function au($class) {
         eval('class handler {
                   function handle($e) {

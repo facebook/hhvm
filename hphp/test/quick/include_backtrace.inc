@@ -1,1 +1,1 @@
-<?php print_r(debug_backtrace());
+<?hh print_r(debug_backtrace());

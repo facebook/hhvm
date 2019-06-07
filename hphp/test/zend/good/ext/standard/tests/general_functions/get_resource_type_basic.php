@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string get_resource_type  ( resource $handle  )
  * Description:  Returns the resource type
  * Source code: Zend/zend_builtin_functions.c

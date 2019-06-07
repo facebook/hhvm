@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function err($code,$msg) {
  var_dump($code,$msg);

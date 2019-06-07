@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $filename = "gzwrite_basic.txt.gz";
 $h = gzopen($filename, 'w');

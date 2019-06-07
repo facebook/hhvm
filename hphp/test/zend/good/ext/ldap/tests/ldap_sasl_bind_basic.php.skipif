@@ -1,4 +1,4 @@
-<?php require_once('skipif.inc');
+<?hh require_once('skipif.inc');
 if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support");
 require "connect.inc";
 	$link = fsockopen($host, $port);

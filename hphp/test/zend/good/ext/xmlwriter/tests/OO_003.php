@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* $Id$ */
 <<__EntryPoint>> function main() {
 $xw = new XMLWriter();

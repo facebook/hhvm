@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
  * Description: Find position of first occurrence of a string within another
  * Source code: ext/iconv/iconv.c

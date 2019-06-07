@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $data = "openssl_encrypt() and openssl_decrypt() tests";
 $method = "AES-128-CBC";
 $password = "openssl";

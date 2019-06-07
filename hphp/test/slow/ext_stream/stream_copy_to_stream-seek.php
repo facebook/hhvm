@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Create two temporary files.

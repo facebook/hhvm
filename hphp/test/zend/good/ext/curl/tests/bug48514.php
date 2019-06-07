@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ch1 = curl_init();
 var_dump($ch1);

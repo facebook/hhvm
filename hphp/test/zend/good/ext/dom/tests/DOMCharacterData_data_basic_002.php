@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $document = new DOMDocument;
 $root = $document->createElement('root');

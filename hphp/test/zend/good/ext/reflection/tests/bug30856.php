@@ -1,4 +1,4 @@
-<?php
+<?hh
 class bogus {
         const C = 'test';
         static $a = bogus::C;

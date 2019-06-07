@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));
 $server->addfunction(SOAP_FUNCTIONS_ALL);
 

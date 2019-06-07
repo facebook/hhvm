@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     public function __wakeup() {
         throw new Exception("Failed");

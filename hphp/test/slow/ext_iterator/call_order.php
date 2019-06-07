@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A extends RecursiveDirectoryIterator {
   function __construct($a) {

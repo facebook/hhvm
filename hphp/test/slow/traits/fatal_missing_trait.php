@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (isset($g)) {
   include 'fatal_missing_trait.inc';

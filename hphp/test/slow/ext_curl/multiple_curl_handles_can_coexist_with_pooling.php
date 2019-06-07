@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>>
 function main_multiple_curl_handles_can_coexist_with_pooling() {

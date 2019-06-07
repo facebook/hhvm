@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {}
 interface I {
   public function __construct(Foo $x);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $array = [['a', 'b'], 'c', 'd'];
 

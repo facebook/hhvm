@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $h = new SplPriorityQueue();
 
 $h->insert(1, 1);

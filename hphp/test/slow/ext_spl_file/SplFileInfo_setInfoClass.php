@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyInfoObject extends SplFileInfo {}
 

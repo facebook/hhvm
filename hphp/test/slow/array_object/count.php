@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Example {
     public $public = 'prop:public';

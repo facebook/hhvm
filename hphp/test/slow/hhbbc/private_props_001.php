@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test inference handles things which have side effects that could

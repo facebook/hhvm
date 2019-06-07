@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : int preg_last_error  ( void  )
  * Description:  Returns the error code of the last PCRE regex execution

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  *  Prototype: float disk_total_space( string $directory );
  *  Description: given a string containing a directory, this function

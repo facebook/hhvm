@@ -1,4 +1,4 @@
-<?php
+<?hh
 include "connect.inc";
 
 $link = ldap_connect($host, $port);

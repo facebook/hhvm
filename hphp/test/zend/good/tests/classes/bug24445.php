@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test { }
 <<__EntryPoint>> function main() {
 var_dump(get_parent_class('Test'));

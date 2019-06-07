@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class bar {
     public function __call($a, $b) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(strip_tags('<!-- testing I\'ve been to mars -->foobar'));
 

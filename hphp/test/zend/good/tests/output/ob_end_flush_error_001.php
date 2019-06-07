@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool ob_end_flush(void)
  * Description: Flush (send) the output buffer, and delete current output buffer 
  * Source code: main/output.c

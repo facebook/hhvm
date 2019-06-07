@@ -1,4 +1,4 @@
-<?php
+<?hh
   const DEFINED = 1234;
   $def = 456;
   const DEFINED_TO_VAR = 456;

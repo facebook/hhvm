@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This tests that we invalidate WeakRefs to an instance when it is destroyed
 // regardless of the instanceDtor it may have

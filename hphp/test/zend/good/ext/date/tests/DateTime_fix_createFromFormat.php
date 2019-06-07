@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //Set the default time zone
 <<__EntryPoint>> function main() {

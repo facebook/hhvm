@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: int strcoll  ( string $str1  , string $str2  )
    Description: Locale based string comparison
 */

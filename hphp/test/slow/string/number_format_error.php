@@ -1,4 +1,4 @@
-<?php
+<?hh
   $READ_LENGTH = 0x1000; // choose leak size
 // construct fake iptc header for controlled read
 $iptc_hdr =

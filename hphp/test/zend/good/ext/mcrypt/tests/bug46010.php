@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $key = "012345678901234567890123";
 var_dump(bin2hex(mcrypt_encrypt(MCRYPT_TRIPLEDES, $key, "data", MCRYPT_MODE_ECB)));

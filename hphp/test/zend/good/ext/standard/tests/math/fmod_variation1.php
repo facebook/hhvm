@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : float fmod  ( float $x  , float $y  )
  * Description: Returns the floating point remainder (modulo) of the division of the arguments.
  * Source code: ext/standard/math.c

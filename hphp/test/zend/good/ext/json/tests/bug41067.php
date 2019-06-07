@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $single_barline = "\360\235\204\200";
 $array = array($single_barline);
 print bin2hex($single_barline) . "\n";

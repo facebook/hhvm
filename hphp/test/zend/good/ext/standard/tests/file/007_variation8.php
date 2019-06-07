@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  fopen() function:
  Prototype: resource fopen(string $filename, string $mode

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // chunk size of 2

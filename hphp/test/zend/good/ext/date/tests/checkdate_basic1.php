@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
  * Description: Checks the validity of the date formed by the arguments.
  *              A date is considered valid if each parameter is properly defined.

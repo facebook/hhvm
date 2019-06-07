@@ -1,4 +1,4 @@
-<?php
+<?hh
 $GLOBALS['HTTP_RAW_POST_DATA']="
 <env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"
 	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"

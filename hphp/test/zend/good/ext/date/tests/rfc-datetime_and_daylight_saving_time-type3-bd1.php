@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 $date_format = 'Y-m-d H:i:s T e';

@@ -6,7 +6,7 @@ function gen() {
   $sprop = '$sprop_'.time() % 60;
   $f = fopen($GLOBALS['filename'], "w");
   fwrite($f, <<<"EOD"
-<?php
+<?hh
 class C {
   public static $sprop = "hello";
   function f() { return C::$sprop; }

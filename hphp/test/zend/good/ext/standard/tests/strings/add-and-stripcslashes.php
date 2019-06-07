@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo addcslashes("", "")."\n";
 echo addcslashes("", "burp")."\n";
 echo addcslashes("kaboemkara!", "")."\n";

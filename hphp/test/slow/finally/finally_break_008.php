@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function blah() {
   $xs = array(11, 22, 33, 44, 55);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class test {
     abstract $var = 1;

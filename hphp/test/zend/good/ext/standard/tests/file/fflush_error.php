@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: bool fflush ( resource $handle );
  Description: Flushes the output to a file

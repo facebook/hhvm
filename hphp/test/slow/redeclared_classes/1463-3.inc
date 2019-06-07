@@ -1,4 +1,4 @@
-<?php
+<?hh
 
   class child3 extends child2 {
     public $child3Val = 'child3';

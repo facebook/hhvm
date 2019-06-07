@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //It's critical the read on the stream returns the input but doesn't set EOF
 //flag the first time. This is why we need to use sockets.

@@ -1,4 +1,4 @@
-<?php
+<?hh
   //line 681 ...
   $array = array(array(7,8,9),1,2,3,array(4,5,6));
 $arrayIterator = new ArrayIterator($array);

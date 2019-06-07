@@ -1,4 +1,4 @@
-<?php
+<?hh
 function decode($json) {
     var_dump(json_decode($json));
     var_dump(json_last_error() !== 0);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($b) {
   $a = $b ? 0 : array('x' => $b);

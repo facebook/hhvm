@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test(){
   //double_encode false
   var_dump(htmlspecialchars('&nbsp;', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false));

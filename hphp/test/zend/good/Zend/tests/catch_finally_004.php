@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function throw_exception($msg) {
     throw new Exception($msg);

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo pi(), "\n";
 echo M_PI, "\n";
 // N.B pi() ignores all specified arguments no error

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function cube($s1) { return $s1*$s1*$s1; }
 
 

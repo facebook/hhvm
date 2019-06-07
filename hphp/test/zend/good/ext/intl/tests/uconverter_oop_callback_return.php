@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyConverter extends UConverter {
   public function toUCallback($reason, $source, $codeUnits, &$error) {
     $error = U_ZERO_ERROR;

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $data = "openssl_seal() test";
 $cipher = 'AES-128-CBC';
 $pub_key = "file://" . dirname(__FILE__) . "/public.key";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Env { public static int $n = 3; }
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function hello_my_name_is_mwang($x) {
   bar(hello_my_name_is_mwang($x));

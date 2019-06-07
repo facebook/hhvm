@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int iconv_strlen(string str [, string charset])
  * Description: Get character numbers of a string 
  * Source code: ext/iconv/iconv.c

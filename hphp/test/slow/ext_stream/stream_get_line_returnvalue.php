@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($string) {
     $stream = fopen('php://memory', 'r+');

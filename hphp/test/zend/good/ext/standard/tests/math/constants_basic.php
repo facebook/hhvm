@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "M_E= ";
 var_dump(M_E);
 echo "M_LOG2E= ";

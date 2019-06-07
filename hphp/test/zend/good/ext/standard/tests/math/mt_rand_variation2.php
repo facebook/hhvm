@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int mt_rand  ([ int $min  , int $max ] )
  * Description: Generate a better random value.
  * Source code: ext/standard/rand.c

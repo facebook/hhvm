@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo implements Serializable {
   public function serialize() { return "foobar"; }
   public function unserialize($str) { }

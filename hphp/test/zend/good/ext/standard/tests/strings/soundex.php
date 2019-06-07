@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(soundex(""));
 var_dump(soundex('-1'));

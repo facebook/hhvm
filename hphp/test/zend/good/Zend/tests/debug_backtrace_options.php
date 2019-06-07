@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function backtrace_print($opt = null)
 {

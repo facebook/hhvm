@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(&$some_ref) {
   $some_ref = 42;

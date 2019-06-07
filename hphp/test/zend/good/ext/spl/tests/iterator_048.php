@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyRecursiveRegexIterator extends RecursiveRegexIterator
 {

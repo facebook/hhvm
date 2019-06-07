@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $path = __DIR__.'/bad_ini_quotes.ini';

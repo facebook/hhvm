@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 
 setlocale(LC_ALL,"C");
 print "LOCALE is '" . setlocale(LC_ALL,0) . "'\n";

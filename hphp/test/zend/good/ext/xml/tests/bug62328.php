@@ -1,4 +1,4 @@
-<?php
+<?hh
 class UberSimpleXML extends SimpleXMLElement {
     public function __toString() {
         return 'stringification';

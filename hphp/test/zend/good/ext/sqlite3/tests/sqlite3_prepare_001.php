@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test(&$x) {
     $class = new SQLite3(':memory:');

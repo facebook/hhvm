@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function less($a, $b) {
  return $a < $b;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $obj = new SplDoublyLinkedList();
 $obj[] = 1;
 $obj[] = 2;

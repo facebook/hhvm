@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class autoload_class
 {

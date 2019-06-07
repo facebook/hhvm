@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool symlink ( string $target, string $link );
    Description: creates a symbolic link to the existing target with the specified name link
 

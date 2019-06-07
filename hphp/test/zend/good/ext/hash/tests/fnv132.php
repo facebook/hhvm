@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function R10($t) {
     return str_repeat($t, 10);

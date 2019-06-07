@@ -1,4 +1,4 @@
-<?php
+<?hh
 error_reporting(E_ALL & ~E_DEPRECATED);
 
 /* Prototype  : string mcrypt_ecb(string cipher, string key, string data, int mode, string iv)

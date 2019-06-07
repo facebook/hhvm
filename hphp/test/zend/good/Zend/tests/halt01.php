@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 print "yo!\n";
 

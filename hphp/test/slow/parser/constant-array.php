@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // NOTE: RepoAuth mode doesn't properly handle the first constant test,
 //       a separate .expectf-repo is included until that is resolved.

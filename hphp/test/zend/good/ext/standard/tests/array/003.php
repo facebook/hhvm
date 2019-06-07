@@ -1,4 +1,4 @@
-<?php
+<?hh
 require(dirname(__FILE__) . '/data.inc');
 
 function cmp ($a, $b) {

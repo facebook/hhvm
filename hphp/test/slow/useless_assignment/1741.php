@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function out($a) {
   echo $a,'\n';

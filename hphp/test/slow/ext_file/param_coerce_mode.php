@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Various functions that accept resource arguments have different coerce modes

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gmp_strval(gmp_fact(0)));
 var_dump(gmp_strval(gmp_fact("")));

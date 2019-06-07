@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Base {
     /** Base comment block */
     public $foo = 'bar';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //file
 touch ('SplFileInfo_getPerms_basic.txt');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test_procedural() {
   $doc = new DOMDocument();
 

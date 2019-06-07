@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait TraitFoo {
   public function getStringThroughProtectedMethod() {

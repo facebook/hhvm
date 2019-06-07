@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Create a 200x100 image
 $image = imagecreatetruecolor(200, 100);
 $white = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);

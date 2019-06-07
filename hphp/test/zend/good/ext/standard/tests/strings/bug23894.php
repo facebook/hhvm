@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = -12.3456;
 $test = sprintf("%04d", $a);

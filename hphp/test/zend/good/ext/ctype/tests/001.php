@@ -1,4 +1,4 @@
-<?php 
+<?hh 
   setlocale(LC_ALL,"C"); 
 
   function ctype_test_001($function) {

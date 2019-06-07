@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function x_default_handler($xp,$data) 
 { 

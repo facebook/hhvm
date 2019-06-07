@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : float log  ( float $arg  [, float $base  ] )
  * Description: Natural logarithm.
  * Source code: ext/standard/math.c

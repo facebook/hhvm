@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $r = gmp_sqrtrem(-1);
 var_dump(gmp_strval($r[0]));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class x {
   public $x0;

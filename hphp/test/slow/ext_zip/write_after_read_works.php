@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Create test ZIP file
 <<__EntryPoint>>

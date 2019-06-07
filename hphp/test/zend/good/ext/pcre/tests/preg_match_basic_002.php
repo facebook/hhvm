@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int preg_match  ( string $pattern  , string $subject  [, array &$matches  [, int $flags  [, int $offset  ]]] )
  * Description: Perform a regular expression match
  * Source code: ext/pcre/php_pcre.c

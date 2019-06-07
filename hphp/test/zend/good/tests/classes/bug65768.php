@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $dt1 = new DateTime("2010-10-20");
 $dti1 = new DateTimeImmutable("2010-10-25");

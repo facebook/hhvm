@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function ex($m) {
   var_dump('Throwing: '.$m);

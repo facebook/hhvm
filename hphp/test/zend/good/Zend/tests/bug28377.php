@@ -1,4 +1,4 @@
-<?php
+<?hh
 function doit($a, $b)
 {
   $trace = debug_backtrace();

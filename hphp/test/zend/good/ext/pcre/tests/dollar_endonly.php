@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_match_all('/^\S+.+$/', "aeiou\n", &$m));
 var_dump($m);

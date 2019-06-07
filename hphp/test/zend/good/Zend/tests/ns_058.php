@@ -1,4 +1,4 @@
-<?php
+<?hh
 const C = "const ok\n";
 
 function foo() {

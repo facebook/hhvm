@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
  * Description: Finds first occurrence of a string within another
  * Source code: ext/mbstring/mbstring.c

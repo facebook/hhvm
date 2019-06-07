@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $classes = array(
 	'DirectoryIterator' => 0,

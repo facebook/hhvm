@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 try {
   throw new Exception("muahahhaha.");

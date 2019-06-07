@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $it = new ArrayIterator(range(0,10));
 var_dump($it->count());

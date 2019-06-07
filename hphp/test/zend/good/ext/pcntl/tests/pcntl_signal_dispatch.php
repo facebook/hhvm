@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 pcntl_signal(SIGTERM, function ($signo) { echo "Signal handler called!\n"; });
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class AO extends ArrayObject {
 }
 $o = new AO();

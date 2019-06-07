@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function key_compare_func($a, $b)
 {

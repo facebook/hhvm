@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace const_case {
   const lower = 'lower';

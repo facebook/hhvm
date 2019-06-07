@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function resolve_to_constant($code)
 {

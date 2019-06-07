@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : void closedir([resource $dir_handle])
  * Description: Close directory connection identified by the dir_handle
  * Source code: ext/standard/dir.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Node {
     public $parent = NULL;
     public $childs = array();

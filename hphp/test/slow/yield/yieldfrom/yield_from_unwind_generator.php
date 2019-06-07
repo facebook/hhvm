@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class GenClass {
   function __construct() { echo "Making GenClass\n"; }

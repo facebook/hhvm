@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class parent_c {
   const ZERO   = 0;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen($foo, $bar) {
     yield $foo;

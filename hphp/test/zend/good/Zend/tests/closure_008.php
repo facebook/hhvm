@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function replace_spaces($text) {
     $lambda = function ($matches) {

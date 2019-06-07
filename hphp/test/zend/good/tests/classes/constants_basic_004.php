@@ -1,4 +1,4 @@
-<?php
+<?hh
 class X
 {
     // Static and instance array using class constants

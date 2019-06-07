@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $f = array(array('A', 'A'));
 
 $z = substr_replace($f, $f, $f, 1);

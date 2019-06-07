@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $in = fopen('data://text/plain,', 'rb+');
 $out = fopen('php://memory', 'wb+');

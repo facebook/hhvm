@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array timezone_transitions_get  ( DateTimeZone $object, [ int $timestamp_begin  [, int $timestamp_end  ]]  )
  * Description: Returns all transitions for the timezone
  * Source code: ext/date/php_date.c

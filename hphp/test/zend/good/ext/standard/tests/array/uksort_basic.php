@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto bool uksort ( array &$array, callback $cmp_function )
 * Function is implemented in ext/standard/array.c

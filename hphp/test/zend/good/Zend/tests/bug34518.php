@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $arr = array(1,2,3);
 $arr["foo"] = array(4,5,6);
 $copy = $arr;

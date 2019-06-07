@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f(&$a, $v = 5) {
   $a = $v;

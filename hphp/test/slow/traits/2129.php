@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function show_without_extra_vardump_nonsense($arr) {
   echo 'array (' . count($arr) . ") {\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $dom = new DomDocument();
 $comment = $dom->createComment('test-comment');

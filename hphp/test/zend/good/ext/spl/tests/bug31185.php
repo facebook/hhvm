@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class FooBar implements ArrayAccess {
     private $array = array();

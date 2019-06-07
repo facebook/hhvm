@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface IParent {
   function f();

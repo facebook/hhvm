@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // taking default args
 class C3 {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function wat(string $x) {
   return 12;

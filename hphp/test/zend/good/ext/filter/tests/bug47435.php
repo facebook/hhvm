@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(filter_var("FC00::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));
 var_dump(filter_var("FC00::1", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 | FILTER_FLAG_NO_PRIV_RANGE));
 var_dump(filter_var("::", FILTER_VALIDATE_IP, FILTER_FLAG_IPV6));

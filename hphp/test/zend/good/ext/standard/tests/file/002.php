@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $data = <<<EOD
 blah blah blah blah blah blah blah

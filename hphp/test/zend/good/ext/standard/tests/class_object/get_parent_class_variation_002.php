@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string get_parent_class([mixed object])
  * Description: Retrieves the parent class name for object or class or current scope.
  * Source code: Zend/zend_builtin_functions.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo\Bar {
   interface A {
     const SCOPE_CONTAINER = 'container';

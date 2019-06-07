@@ -1,4 +1,4 @@
-<?php
+<?hh
 function dummy($msg) {
    var_dump($msg);
 }

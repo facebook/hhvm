@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class AE extends Exception {};
 class BE extends Exception {};

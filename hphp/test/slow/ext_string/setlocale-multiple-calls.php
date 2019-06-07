@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($cat, $locale) {
   var_dump(setlocale($cat, $locale));

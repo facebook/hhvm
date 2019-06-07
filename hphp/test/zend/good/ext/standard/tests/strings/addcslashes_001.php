@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "*** Testing addcslashes() for basic operations ***\n";
 /* checking normal operation of addcslashes */

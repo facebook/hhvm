@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C {}
 function foo() { return mt_rand() ? array(new C) : array(new C, new C); }

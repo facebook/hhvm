@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
    Prototype: int fileatime ( string $filename );
    Description: Returns the time the file was last accessed, or FALSE

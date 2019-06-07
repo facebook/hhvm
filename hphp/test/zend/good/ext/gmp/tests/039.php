@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $n = gmp_init(0);
 var_dump(gmp_testbit($n, -10));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A extends IntlDateFormatter {
         static $ARGS = array("en_US" ,IntlDateFormatter::FULL, IntlDateFormatter::FULL,
             'America/Los_Angeles', IntlDateFormatter::GREGORIAN);

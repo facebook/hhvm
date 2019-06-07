@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : mixed count_chars  ( string $string  [, int $mode  ] )
  * Description: Return information about characters used in a string

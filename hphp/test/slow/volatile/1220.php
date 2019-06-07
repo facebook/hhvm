@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
   if (class_exists('bar')) {

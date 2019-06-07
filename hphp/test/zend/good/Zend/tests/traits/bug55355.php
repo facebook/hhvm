@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // A trait that has a abstract function
 trait ATrait {

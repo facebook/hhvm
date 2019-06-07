@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(filter_var("?><!@#$%^&*()}{~Qwertyuilfdsasdfgmnbvcxcvbn", FILTER_SANITIZE_SPECIAL_CHARS));
 var_dump(filter_var("<data&sons>", FILTER_SANITIZE_SPECIAL_CHARS));

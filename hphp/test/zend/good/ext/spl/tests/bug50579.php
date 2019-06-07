@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class foo extends ArrayIterator {
 	public function __construct( ) {

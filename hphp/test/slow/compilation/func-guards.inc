@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X extends Y {
   private $priv = 42;

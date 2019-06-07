@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait PrivateState {
   private $foo = 2;

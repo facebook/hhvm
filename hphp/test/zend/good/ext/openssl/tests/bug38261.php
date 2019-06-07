@@ -1,4 +1,4 @@
-<?php
+<?hh
 $cert = false;
 class test {
 	function __toString() {

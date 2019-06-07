@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string basename ( string $path [, string $suffix] );
    Description: Given a string containing a path to a file,
                 this function will return the base name of the file.

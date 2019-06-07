@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_space(mixed $c)
  * Description: Checks for whitespace character(s)
  * Source code: ext/ctype/ctype.c

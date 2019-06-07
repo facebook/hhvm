@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class obj extends SplFixedArray{
     public function offsetSet($offset, $value) {

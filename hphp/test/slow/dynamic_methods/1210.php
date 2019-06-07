@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class z {
   function __construct() {

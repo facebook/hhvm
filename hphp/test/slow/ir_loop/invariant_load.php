@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class AlternatorStatics {
   public static $i = 0;

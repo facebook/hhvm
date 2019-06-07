@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function p(array $i = null) {
   var_dump($i);

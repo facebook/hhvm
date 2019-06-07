@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const PHP_CURL_SERVER_HOSTNAME = "localhost";
 const PHP_CURL_SERVER_PORT = 8964;

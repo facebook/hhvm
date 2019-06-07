@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool is_numeric ( mixed $var );
  * Description: Finds whether a variable is a number or a numeric string
  */

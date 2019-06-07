@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $a = gmp_init("0x41682179fbf5");
 printf("Decimal: %s, -36-based: %s\n", gmp_strval($a), gmp_strval($a,-36));
 printf("Decimal: %s, 36-based: %s\n", gmp_strval($a), gmp_strval($a,36));

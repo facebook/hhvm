@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(json_encode(""));
 var_dump(json_encode(NULL));

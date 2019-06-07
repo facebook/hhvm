@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $s_string = '1111111111';
 $s_search = '/1/';
 $s_replace = 'One ';

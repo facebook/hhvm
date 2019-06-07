@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($len) {
   return locale_get_display_name(str_repeat('*', $len), 'a');

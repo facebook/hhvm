@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $zip    = zip_open(dirname(__FILE__)."/test_procedural.zip");
 $entry  = zip_read($zip);
 echo zip_entry_open($zip, $entry, "r") ? "OK" : "Failure";

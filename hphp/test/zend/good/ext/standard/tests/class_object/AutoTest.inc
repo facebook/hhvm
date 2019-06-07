@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class autoTest {
   public static $bob = "bob";

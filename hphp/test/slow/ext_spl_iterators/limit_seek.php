@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function check_seek($lim, $seek) {
   try {

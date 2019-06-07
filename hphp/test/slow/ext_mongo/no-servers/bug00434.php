@@ -1,4 +1,4 @@
-<?php
+<?hh
 class m extends Mongo { function __construct() {} }
 try {
     $m = new m;

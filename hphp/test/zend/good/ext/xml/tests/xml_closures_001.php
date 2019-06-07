@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 chdir(dirname(__FILE__));
 
 $start_element = function ($xp, $elem, $attribs)

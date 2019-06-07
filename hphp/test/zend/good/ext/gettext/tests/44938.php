@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main_entry() {
+<?hh <<__EntryPoint>> function main_entry() {
 $overflown = str_repeat('C', 8476509);
 $msgid     = "msgid";
 $domain    = "domain";

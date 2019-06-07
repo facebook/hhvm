@@ -54,7 +54,7 @@ function make_test() {
   local TEST_NAME=$1
 
   cat - > "$TMP_FILE" << HEREDOC
-<?php
+<?hh
 
 require_once __DIR__.'/../5/$TEST_NAME' ;
 HEREDOC

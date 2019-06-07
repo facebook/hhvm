@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $src_tc = imagecreatetruecolor(5,5);
 imagefill($src_tc, 0,0, 0xffffff);

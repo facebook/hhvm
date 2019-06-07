@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : mixed array_rand(array input [, int num_req])
  * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c

@@ -1,2 +1,2 @@
-<?php
+<?hh
 require_once 'include_files/eval.inc';

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class object implements ArrayAccess {
 
     public $a = array('1st', 1, 2=>'3rd', '4th'=>4);

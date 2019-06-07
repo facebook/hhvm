@@ -1,4 +1,4 @@
-<?php
+<?hh
 
     class p {
       public $data2;

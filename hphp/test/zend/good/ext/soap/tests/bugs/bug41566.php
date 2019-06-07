@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test() {
   $aUser = new User();
   $aUser->sName = 'newUser';

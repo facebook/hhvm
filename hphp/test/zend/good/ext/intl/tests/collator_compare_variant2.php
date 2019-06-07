@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Compare various string pairs using various locales.

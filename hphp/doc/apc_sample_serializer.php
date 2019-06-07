@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Write .cpp files for building libapc_prime.so that can be loaded by an

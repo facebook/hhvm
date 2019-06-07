@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
 	private $p;
 	function __get($name){

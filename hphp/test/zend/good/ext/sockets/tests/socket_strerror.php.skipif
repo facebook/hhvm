@@ -1,4 +1,4 @@
-<?php
+<?hh
     if (!extension_loaded('sockets') || !function_exists('socket_strerror')) {
         die('skip sockets extension not available.');
     }

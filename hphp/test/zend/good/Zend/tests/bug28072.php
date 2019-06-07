@@ -1,4 +1,4 @@
-<?php
+<?hh
 const FIRST_KEY = "a";
 const THIRD_KEY = "c";
 

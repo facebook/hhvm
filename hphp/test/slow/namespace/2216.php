@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace my\name;
 class MyClass {

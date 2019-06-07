@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string ltrim  ( string $str  [, string $charlist  ] )
  * Description: Strip whitespace (or other characters) from the beginning of a string.

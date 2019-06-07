@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the region for different locales

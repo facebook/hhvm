@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   private function __construct() {

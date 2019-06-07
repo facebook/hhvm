@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $c = new UConverter('ascii', 'utf-8');
 
 foreach(array('?','','<unknown>') as $subst) {

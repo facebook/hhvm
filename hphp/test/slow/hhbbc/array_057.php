@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function unknown($x) {
   return $GLOBALS['asd'];

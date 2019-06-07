@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Expect warnings about INF.
 <<__EntryPoint>> function main() {
 ini_set("error_reporting", E_ALL & ~E_WARNING);

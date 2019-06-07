@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Test rename() by trying to rename an existing file/dir/link to the same name
 // and one another.
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $constants = array(
     "M_E",
     "M_LOG2E",

@@ -1,1 +1,1 @@
-<?php echo "append\n";
+<?hh echo "append\n";

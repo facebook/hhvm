@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foobar {
     public function __construct() {
         switch (1) {

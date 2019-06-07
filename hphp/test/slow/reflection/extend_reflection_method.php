@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Mock_MethodReflection extends ReflectionMethod {
   public function getAttributeRecursive($name) {}

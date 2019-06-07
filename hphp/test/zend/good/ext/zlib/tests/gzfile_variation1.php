@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>> function main() {
 $use_include_path = false;

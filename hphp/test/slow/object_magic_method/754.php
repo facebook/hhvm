@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MemberTest {
   private $data = array();

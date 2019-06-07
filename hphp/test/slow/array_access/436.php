@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function offsetGet($index) {
   echo ("GET0: $index\n");

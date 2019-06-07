@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($m, $n) {
   $offset_change = 10;

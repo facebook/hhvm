@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* please don't shorten this test. It shows what would happen if
  * the fatal error would have been a warning.

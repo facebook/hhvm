@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 print "key               plain             crypt             guess             stat\n";
 $null = "\0\0\0\0\0\0\0\0";

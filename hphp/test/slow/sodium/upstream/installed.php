@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "libsodium extension is available";
 /*
         you can add regression tests for your extension here

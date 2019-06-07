@@ -1,4 +1,4 @@
-<?php
+<?hh
 class c_iter implements Iterator {
 
     private $obj;

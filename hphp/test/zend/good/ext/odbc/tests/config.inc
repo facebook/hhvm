@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 putenv('ODBCINI=/etc/odbc.ini');
 putenv('ODBCSYSINI=/etc');

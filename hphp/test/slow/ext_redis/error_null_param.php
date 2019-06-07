@@ -1,4 +1,4 @@
-<?php
+<?hh
 require __DIR__ . '/redis.inc';
 NewRedisTestInstance()->publish(null, null);
 

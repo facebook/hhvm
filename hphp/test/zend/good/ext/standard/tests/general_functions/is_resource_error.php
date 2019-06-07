@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool is_resource  ( mixed $var  )
  * Description:  Finds whether a variable is a resource
  * Source code: ext/standard/type.c

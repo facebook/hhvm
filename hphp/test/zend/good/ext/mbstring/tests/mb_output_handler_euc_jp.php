@@ -1,4 +1,4 @@
-<?php
+<?hh
 // TODO: Do real test
 
 // EUC-JP

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $array = array (0, 1, 2, 3, 4);
 var_dump ($array);
 for ($i = 0; $i < (sizeof($array) + 1); $i++) {

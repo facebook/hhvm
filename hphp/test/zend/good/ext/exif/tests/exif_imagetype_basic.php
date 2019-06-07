@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : int exif_imagetype  ( string $filename  )
  * Description: Determine the type of an image

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function ref(&$a, $b) {
  echo "$a $b";
  }

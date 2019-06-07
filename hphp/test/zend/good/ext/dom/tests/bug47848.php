@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 <<__EntryPoint>> function main() {
 $aDOM = new DOMDocument();
 $aDOM->appendChild($aDOM->createElementNS('http://friend2friend.net/','f2f:a'));

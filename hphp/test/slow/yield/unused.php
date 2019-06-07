@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   $f = function() use($a) {

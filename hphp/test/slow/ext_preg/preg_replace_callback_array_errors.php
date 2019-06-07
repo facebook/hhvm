@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class FStatics {
   public static $count = 1;

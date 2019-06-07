@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a) {
   $arr = array($a, $a++, $a);
   var_dump($arr);

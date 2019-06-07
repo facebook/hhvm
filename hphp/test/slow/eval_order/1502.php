@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyIterator implements Iterator{
   private $var = array();

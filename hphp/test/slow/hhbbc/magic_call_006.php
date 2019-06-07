@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class Asd {
   protected function heh() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $string_variation = array( "%5s", "%-5s", "%05s", "%'#5s" );
 $strings = array( NULL, "abc", 'aaa' );

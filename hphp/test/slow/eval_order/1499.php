@@ -1,4 +1,4 @@
-<?php
+<?hh
 function h() {
  var_dump('errored');
 }

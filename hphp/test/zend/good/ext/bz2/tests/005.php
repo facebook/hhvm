@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $string = "Life it seems, will fade away
 Drifting further everyday

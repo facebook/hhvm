@@ -1,4 +1,4 @@
-<?php
+<?hh
 function from1234($x) {
   return $x;
 }

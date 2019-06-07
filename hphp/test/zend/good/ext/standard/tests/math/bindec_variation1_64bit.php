@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : number bindec  ( string $binary_string  )
  * Description: Returns the decimal equivalent of the binary number represented by the binary_string  argument.
  * Source code: ext/standard/math.c

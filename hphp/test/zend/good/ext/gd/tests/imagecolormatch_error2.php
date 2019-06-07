@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $ima = imagecreate(110, 20);
 $background_color = imagecolorallocate($ima, 0, 0, 0);
 $imb = imagecreate(110, 20);

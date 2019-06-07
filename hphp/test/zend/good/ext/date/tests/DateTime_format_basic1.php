@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : public string DateTime::format  ( string $format  )
  * Description: Returns date formatted according to given format
  * Source code: ext/date/php_date.c

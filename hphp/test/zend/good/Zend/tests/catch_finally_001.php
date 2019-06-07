@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo ($throw = FALSE) {
    try {
      echo "try\n";

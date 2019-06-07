@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int mb_stripos(string haystack, string needle [, int offset [, string encoding]])
  * Description: Finds position of first occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c

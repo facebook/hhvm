@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ext_heap extends SplMaxHeap {
   public $fail = false;
   public function compare($val1,$val2) {

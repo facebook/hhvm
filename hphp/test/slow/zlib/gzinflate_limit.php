@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Check that gzinflate fails when output would be > limit.
 function inflateAboveLimit($original) {
   $packed=gzdeflate($original);

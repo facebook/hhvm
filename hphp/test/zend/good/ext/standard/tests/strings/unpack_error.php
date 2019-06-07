@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array unpack  ( string $format  , string $data  )
  * Description: Unpack data from binary string

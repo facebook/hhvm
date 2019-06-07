@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait DY {
   private $drc = array();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "no dst --> dst\n";
 ZendGoodExtDateTestsBug30096::$ts = -1;
 gm_date_check(01,00,00,03,27,2005);

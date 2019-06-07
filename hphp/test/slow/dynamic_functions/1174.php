@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function t($a = 'k') {
  print $a;

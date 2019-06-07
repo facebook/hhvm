@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $tmp_dir = __DIR__ . "/bug41518/";
 @mkdir($tmp_dir);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_declared_user_traits() {
   $ret = array();

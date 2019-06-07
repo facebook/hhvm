@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 if (file_exists("/etc/services")) {
     $file = "/etc/services";
 }

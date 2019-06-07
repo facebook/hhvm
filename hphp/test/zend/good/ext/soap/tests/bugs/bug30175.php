@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class LocalSoapClient extends SoapClient {
 

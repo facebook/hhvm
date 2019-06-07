@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(preg_match('/(?:(?:(?:(?:(?:(.))))))/  S', 'aeiou', &$dump));
 var_dump($dump[1]);

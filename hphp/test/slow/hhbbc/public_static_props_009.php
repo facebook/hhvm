@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Asd {
   static $x = 2;

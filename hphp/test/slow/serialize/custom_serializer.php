@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {}
 <<__EntryPoint>> function main() {

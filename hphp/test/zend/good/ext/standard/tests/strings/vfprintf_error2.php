@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int vfprintf(resource stream, string format, array args)
  * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c

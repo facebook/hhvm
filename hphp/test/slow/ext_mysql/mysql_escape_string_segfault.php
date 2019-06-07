@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Tests for segfault if no connection available
 

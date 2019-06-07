@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
  * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c

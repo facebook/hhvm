@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "Test 12: Using Associative Array of Parameters";
 
 $dom = new domDocument;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array posix_uname(void)
  * Description: Get system name (POSIX.1, 4.4.1) 
  * Source code: ext/posix/posix.c

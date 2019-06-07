@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function decieve_static_analysis() {
   return mt_rand() ? 'a' : 'b';

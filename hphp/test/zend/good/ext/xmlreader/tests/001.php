@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* $Id$ */
 <<__EntryPoint>> function main() {
 $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>

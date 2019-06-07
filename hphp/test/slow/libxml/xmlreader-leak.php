@@ -1,4 +1,4 @@
-<?php
+<?hh
 // c.f. https://github.com/facebook/hhvm/issues/3899
 
 function foo() {

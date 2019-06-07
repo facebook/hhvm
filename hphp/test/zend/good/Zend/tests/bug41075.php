@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function err($errno, $errstr, $errfile, $errline)
 {

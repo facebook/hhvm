@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class It { public $x = 1; }
 <<__EntryPoint>>

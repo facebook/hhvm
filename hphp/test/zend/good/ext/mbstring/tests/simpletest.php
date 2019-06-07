@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Test basic PHP functions to check if it works with multi-byte chars
  */

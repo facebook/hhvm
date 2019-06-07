@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ok = 1;
 $doc = simplexml_load_string('<root><exists>foo</exists></root>');

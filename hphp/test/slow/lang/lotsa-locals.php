@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function oh_come_on() {
   $local0 = 0; var_dump($local0);

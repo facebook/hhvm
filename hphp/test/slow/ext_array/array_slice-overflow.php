@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const OFFSET = 0x7FFFFFFFFFFFFFFF;
 

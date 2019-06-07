@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string hash  ( string $algo  , string $data  [, bool $raw_output  ] )
  * Description: Generate a hash value (message digest)

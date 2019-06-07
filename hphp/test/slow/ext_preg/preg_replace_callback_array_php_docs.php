@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This example is taken from the PHP reference docs for the
 // preg_replace_callback_array() function, with slight modification.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
  * proto mixed microtime([bool get_as_float])
  * Function is implemented in ext/standard/microtime.c

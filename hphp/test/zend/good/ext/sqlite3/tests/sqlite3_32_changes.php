@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 //$db = new SQLite3('mysqlitedb.db');
 $db->exec('CREATE TABLE pageView(id INTEGER PRIMARY KEY, page CHAR(256), access INTEGER(10))');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Comparison function
 function cmp($a, $b) {

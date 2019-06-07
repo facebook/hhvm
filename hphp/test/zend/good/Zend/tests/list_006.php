@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 try {
   list($a, list($b, list(list($d)))) = array();

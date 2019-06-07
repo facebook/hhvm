@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Blah {
   function foo(string $x) {}
   class string {}

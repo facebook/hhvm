@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int ArrayObject::natcasesort()
  * Description: proto int ArrayIterator::natcasesort()
  Sort the entries by values using case insensitive "natural order" algorithm. 

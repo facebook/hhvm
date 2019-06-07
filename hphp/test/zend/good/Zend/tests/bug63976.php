@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (1) {
   include 'bug63976-1.inc';
 }

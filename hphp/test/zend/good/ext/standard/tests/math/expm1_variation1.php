@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : float expm1  ( float $arg  )
  * Description: Returns exp(number) - 1, computed in a way that is accurate even

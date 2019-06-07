@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $memc = new Memcached();
 $refl = new ReflectionClass($memc);

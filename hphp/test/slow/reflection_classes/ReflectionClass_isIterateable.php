@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class IteratorClass implements Iterator {
   public function __construct() { }

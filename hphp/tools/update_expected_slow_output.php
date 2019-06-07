@@ -1,5 +1,5 @@
 #!/bin/env php
-<?php
+<?hh
 
 $php = '/home/engshare/externals/cpp/hphp/centos-dev/php/bin/php';
 // $php = '/home/ptarjan/bin/php-5.4';

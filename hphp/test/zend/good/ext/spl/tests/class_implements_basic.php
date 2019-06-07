@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array class_implements(mixed what [, bool autoload ])
  * Description: Return all classes and interfaces implemented by SPL 
  * Source code: ext/spl/php_spl.c

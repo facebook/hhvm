@@ -1,4 +1,4 @@
-<?php
+<?hh
 class PublisherService {
   function add($publisher) {
     return $publisher->region_id;

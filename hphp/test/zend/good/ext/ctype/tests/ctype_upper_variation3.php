@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool ctype_upper(mixed $c)
  * Description: Checks for uppercase character(s) 
  * Source code: ext/ctype/ctype.c

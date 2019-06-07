@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * proto string basename(string path [, string suffix])
  * Function is implemented in ext/standard/string.c

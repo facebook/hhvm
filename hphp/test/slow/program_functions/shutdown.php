@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function shut() {
   var_dump(__METHOD__);

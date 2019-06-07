@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   public $pub_var = null;

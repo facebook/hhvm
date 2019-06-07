@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test native property handling with ReflectionExtension
 

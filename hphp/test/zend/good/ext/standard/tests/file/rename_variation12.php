@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
  * Description: Rename a file 
  * Source code: ext/standard/file.c

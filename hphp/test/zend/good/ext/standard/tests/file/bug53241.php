@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $fn = __DIR__ . "/test.tmp";
 @unlink($fn);
 $fh = fopen($fn, 'xb');

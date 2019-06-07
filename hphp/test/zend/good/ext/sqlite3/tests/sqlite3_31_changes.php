@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $db = new SQLite3(':memory:');
 var_dump($db);
 var_dump($db->changes());

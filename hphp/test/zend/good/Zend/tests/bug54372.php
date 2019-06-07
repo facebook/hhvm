@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test_class
 {
     public function __get($name)

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $s = new SplObjectStorage();
 $o1 = new Stdclass;
 $o2 = new Stdclass;

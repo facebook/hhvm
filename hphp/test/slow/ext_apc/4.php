@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // reproducing a memory leak (3/26/09)

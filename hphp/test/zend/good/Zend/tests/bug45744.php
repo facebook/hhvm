@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
     public function __construct(array $data) {
 		var_dump(array_map(array($this, 'callback'), $data));

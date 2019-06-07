@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function thrower() {
   for ($i = 0; $i < 10; ++$i) mt_rand();  // make it not-inlinable

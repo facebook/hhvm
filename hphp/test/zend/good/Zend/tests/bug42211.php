@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     function foo() {
         var_dump(property_exists('B', 'publicBar'));

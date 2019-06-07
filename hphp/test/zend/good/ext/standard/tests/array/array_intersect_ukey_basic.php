@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto array array_intersect_ukey ( array $array1, array $array2 [, array $ ..., callback $key_compare_func] )
 * Function is implemented in ext/standard/array.c

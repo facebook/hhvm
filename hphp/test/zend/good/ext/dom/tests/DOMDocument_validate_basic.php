@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml = "<?xml version=\"1.0\"?>
 <!DOCTYPE note [
 <!ELEMENT note (to,from,heading,body)>

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     function __call($strMethod, $arrArgs) {
         echo "$strMethod\n";

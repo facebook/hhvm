@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 echo "===Array===\n";
 

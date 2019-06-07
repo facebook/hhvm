@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 2: Transform To HTML String";
 include("prepare.inc");
 // changing output method to html

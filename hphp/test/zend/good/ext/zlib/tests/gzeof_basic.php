@@ -1,4 +1,4 @@
-<?php
+<?hh
 // note that gzeof is an alias to gzeof. parameter checking tests will be
 // the same as gzeof
 <<__EntryPoint>> function main() {

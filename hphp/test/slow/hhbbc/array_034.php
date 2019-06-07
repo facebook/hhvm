@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() { return 4; }
 function junk() { return array('z' => a()); }

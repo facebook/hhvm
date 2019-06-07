@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $prv = 'file://' . dirname(__FILE__) . '/' . 'bug41033.pem';
 $pub = 'file://' . dirname(__FILE__) . '/' . 'bug41033pub.pem';
 

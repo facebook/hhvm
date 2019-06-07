@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class GetRandomPortStatics {
   public static $base = -1;

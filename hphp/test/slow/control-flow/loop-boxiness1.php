@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo(&$arr) {
   if ($arr[0] == 0) return true;

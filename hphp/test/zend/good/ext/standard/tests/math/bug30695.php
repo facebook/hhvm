@@ -1,4 +1,4 @@
-<?php
+<?hh
 function toUTF8( $char_code )
 {
     switch ( $char_code )

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() {
   $x = [1e26 => 2];

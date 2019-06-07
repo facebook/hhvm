@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ini1 =  ini_get('include_path'); 
 ini_set('include_path','ini_set_works');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Various combinations of arrays to be used for the test */
 <<__EntryPoint>> function main() {

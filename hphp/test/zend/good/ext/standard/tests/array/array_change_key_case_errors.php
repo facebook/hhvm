@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* generate different failure conditions */
 $int_var  = -19;
 $item = array ("one" => 1, "two" => 2, "THREE" => 3, "FOUR" => "four");

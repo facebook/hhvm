@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $pfx = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug74022.pfx";
 $cert_store = file_get_contents($pfx);
 

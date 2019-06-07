@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $values = array(1234.5678,
                 -1234.5678,
                 1234.6578e4,

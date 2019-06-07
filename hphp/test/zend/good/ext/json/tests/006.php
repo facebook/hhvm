@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = array('<foo>',"'bar'",'"baz"','&blong&');
 

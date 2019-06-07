@@ -1,4 +1,4 @@
-<?php
+<?hh
 function decide() {
 
   return mt_rand(0, 0);

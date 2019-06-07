@@ -1,4 +1,4 @@
-<?php
+<?hh
 require 'server.inc';
 
 $x = new OAuth('conskey', 'conssecret', OAUTH_SIG_METHOD_PLAINTEXT);

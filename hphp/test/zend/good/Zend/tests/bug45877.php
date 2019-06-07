@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $keys = array(PHP_INT_MAX,
     (string) PHP_INT_MAX,
     (string) (-PHP_INT_MAX - 1),

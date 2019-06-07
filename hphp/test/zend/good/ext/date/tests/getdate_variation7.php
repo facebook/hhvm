@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array getdate([int timestamp])
  * Description: Get date/time information
  * Source code: ext/date/php_date.c

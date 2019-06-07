@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set("UTC");
 echo "Y/m/d: ", strtotime("2005/8/12"), "\n";
 echo "Y-m-d: ", strtotime("2005-8-12"), "\n";

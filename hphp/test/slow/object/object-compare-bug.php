@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T { public $z; }
 class A { use T; }
 class B { use T; }

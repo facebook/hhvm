@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(strripos("test test string", "test"));
 var_dump(strripos("test string sTring", "string"));
 var_dump(strripos("test strip string strand", "str"));

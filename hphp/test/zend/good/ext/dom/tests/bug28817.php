@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class z extends domDocument{
     /** variable can have name */

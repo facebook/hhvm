@@ -1,4 +1,4 @@
-<?php
+<?hh
 $request = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://www.example.com/"><SOAP-ENV:Body><ns1:GetProductsRequest><time></time></ns1:GetProductsRequest></SOAP-ENV:Body></SOAP-ENV:Envelope>

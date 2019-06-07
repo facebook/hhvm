@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (date('T') == 'GMT') {
 	putenv("TZ=EST5EDT4,M4.1.0,M10.5.0");

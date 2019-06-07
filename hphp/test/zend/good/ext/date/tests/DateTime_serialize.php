@@ -1,4 +1,4 @@
-<?php
+<?hh
 //Set the default time zone
 <<__EntryPoint>> function main() {
 date_default_timezone_set("Europe/London");

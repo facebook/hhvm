@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_external_entity_ref_handler(resource parser, string hdl)
  * Description: Set up external entity reference handler 
  * Source code: ext/xml/xml.c

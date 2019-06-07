@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $domain = (substr(PHP_OS, 0, 3) == 'WIN') ? STREAM_PF_INET : STREAM_PF_UNIX;
 $sockets = stream_socket_pair($domain, STREAM_SOCK_STREAM, 0);
 var_dump($sockets);

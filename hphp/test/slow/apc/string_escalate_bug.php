@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class BarStatics {
   public static $x = 1;

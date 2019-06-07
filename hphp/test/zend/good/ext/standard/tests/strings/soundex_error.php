@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string soundex  ( string $str  )
  * Description: Calculate the soundex key of a string
  * Source code: ext/standard/string.c

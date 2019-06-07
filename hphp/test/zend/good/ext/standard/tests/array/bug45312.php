@@ -1,4 +1,4 @@
-<?php
+<?hh
 class cr {
     private $priv_member;
     function __construct($val) {

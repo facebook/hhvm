@@ -1,4 +1,4 @@
-<?php
+<?hh
 function fact($x) {
   if($x <= 1) {
     return 1;

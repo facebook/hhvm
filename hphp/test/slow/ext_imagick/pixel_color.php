@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // hphp doesn't support this at this moment
 // ini_set('precision', 3);

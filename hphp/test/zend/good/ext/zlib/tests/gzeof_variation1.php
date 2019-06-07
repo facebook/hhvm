@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/gzeof_variation1.txt.gz";
 $h = gzopen($filename, 'w');

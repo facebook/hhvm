@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bar() {
     return 'global bar';

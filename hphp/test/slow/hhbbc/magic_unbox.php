@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
   function hehe() { return 2; }

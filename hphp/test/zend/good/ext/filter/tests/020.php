@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_var("test'asd'asd'' asd\'\"asdfasdf", FILTER_SANITIZE_MAGIC_QUOTES));
 var_dump(filter_var("'", FILTER_SANITIZE_MAGIC_QUOTES));

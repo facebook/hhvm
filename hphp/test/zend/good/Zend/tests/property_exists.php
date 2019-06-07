@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class aParent {
     public static function staticTest() {

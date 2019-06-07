@@ -1,4 +1,4 @@
-<?php
+<?hh
 trait T1 {
   function m1() { echo "T:m1\n"; }
   function m2() { echo "T:m2\n"; }

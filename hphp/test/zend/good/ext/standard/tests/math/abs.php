@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 $long_max = is_int(5000000000)? (double)9223372036854775807 : (double)0x7FFFFFFF;
 $long_min = -$long_max - 1;
 printf("%d,%d,%d,%d\n",is_float($long_min  ),is_float($long_max  ),

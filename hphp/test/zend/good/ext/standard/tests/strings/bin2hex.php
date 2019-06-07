@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $s = '';
 for($i=0; $i<256; $i++) {
     $s .= chr($i);

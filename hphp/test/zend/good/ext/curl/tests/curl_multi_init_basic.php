@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype         : resource curl_multi_init(void)
  * Description       : Returns a new cURL multi handle
  * Source code       : ext/curl/multi.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test() {
   return "Hello World";
 }

@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 bindtextdomain('dngettextTest', './locale');

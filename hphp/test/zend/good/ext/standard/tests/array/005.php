@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: mixed array_shift(& array &array );
  * Description: Shifts the first value of the array off and returns it.
  */

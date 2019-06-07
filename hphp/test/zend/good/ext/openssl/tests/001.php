@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "Creating private key\n";
 
 /* stack up some entropy; performance is not critical,

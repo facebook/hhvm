@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $res = var_export("foo1");
 echo "\n";
 $res = var_export("foo2", TRUE);

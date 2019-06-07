@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $sample_array = array(1, 2, array(3, 4));
 
 $iterator = new RecursiveIteratorIterator(new RecursiveArrayIterator($sample_array));

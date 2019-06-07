@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test1() {
  echo "test1

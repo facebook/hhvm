@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (PHP_INT_SIZE !== 8) {
     die("skip this test is for 64-bit platforms only");

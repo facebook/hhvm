@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class test_props {
     public $a = 1;

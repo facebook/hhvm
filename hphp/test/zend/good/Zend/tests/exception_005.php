@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface a { }
 <<__EntryPoint>> function main() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 ini_set('display_errors',true);
 $mb=148;
 $var = '';

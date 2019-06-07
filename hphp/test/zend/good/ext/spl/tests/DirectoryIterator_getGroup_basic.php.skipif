@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 if (posix_geteuid() == 0) die('SKIP Cannot run test as root.');
 }

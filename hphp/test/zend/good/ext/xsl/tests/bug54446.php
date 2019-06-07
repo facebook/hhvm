@@ -1,4 +1,4 @@
-<?php
+<?hh
 include("prepare.inc"); 
 
 $outputfile = dirname(__FILE__)."/bug54446test.txt";

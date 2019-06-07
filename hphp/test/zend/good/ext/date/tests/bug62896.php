@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tz = new DateTimeZone('Europe/Berlin');
 
 echo "FROM TIMESTAMP, NO TZ:\n";

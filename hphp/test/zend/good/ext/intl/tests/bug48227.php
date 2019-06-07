@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $x = new NumberFormatter('en_US', NumberFormatter::DECIMAL);
 var_dump($x->format(''));

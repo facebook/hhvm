@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This test checks for:
 // - inherited constructors are not called automatically

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   var_dump((new DateTime()) instanceof DateTimeInterface);

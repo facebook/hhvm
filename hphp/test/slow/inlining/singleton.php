@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Class with two singleton instances.

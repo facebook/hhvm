@@ -1,4 +1,4 @@
-<?php
+<?hh
 $closure = function($class) {
   echo "a called\n";
 };

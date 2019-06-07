@@ -1,4 +1,4 @@
-<?php
+<?hh
 // TODO: Add more encoding names
 
 

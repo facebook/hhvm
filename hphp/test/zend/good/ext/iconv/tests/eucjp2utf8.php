@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* include('test.inc'); */
 /* charset=EUC-JP */
 

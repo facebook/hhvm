@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyFixedArray extends \SplFixedArray {
     protected $foo;
     protected $bar;

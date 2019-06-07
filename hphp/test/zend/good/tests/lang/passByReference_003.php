@@ -1,4 +1,4 @@
-<?php
+<?hh
 function passbyVal($val) {
     echo "\nInside passbyVal call:\n";
     var_dump($val);

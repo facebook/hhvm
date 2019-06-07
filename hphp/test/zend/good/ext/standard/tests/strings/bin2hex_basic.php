@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string bin2hex  ( string $str  )
  * Description: Convert binary data into hexadecimal representation

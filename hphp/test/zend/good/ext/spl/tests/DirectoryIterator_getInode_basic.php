@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //file
 mkdir('test_dir_ptfi');

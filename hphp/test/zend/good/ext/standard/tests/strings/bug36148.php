@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $values = array("a", "aa", "aaa", "aaaa");
 foreach ($values as $value) {
     $a = pack("H*", $value);

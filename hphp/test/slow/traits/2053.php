@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait MyTrait {
   public static function callNew() {

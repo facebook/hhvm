@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $b = 10;
 $a = new SplFixedArray($b);

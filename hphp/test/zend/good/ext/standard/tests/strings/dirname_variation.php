@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string dirname ( string $path );
    Description: Returns directory name component of path.
 */

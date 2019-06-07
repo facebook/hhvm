@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Rep {
   public function __invoke() {
     return "d";

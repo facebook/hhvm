@@ -1,4 +1,4 @@
-<?php
+<?hh
 class foo {
   function __construct($a) {
     var_dump($a);

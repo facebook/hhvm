@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gettype(getrusage()));
 var_dump(gettype(getrusage(1)));

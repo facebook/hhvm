@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: void debug_zval_dump ( mixed $variable );
    Description: Dumps a string representation of an internal zend value 
                 to output.

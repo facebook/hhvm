@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($p) {
   return $p;

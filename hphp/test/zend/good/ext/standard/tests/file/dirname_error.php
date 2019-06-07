@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string dirname(string path)
  * Description: Returns the directory name component of the path 
  * Source code: ext/standard/string.c

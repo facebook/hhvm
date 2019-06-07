@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tz = new DateTimeZone("Asia/Tokyo");
 $current = "2012-12-27 16:24:08";
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This test also needs to exclude the protected and private variables
 // since they cannot be accessed from the external object which iterates

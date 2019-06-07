@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_character_data_handler(resource parser, string hdl)
  * Description: Set up character data handler 
  * Source code: ext/xml/xml.c

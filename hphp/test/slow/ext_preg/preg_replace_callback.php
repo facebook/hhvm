@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function preg_replace_callback_main() {
   var_dump(preg_replace_callback(

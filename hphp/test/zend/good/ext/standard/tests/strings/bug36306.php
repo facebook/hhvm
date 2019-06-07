@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* as an example how to write crc32 tests
    PHP does not have uint values, you cannot

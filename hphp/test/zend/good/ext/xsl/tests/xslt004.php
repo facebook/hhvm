@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 4: Checking UTF8 Output";
 include("prepare.inc");
 $xp = new domxpath($xsl);

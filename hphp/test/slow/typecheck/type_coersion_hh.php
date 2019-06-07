@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function errHandler($errno, $errmsg, $file, $line) {
   $errmsg = str_replace('long', 'integer', $errmsg);

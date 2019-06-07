@@ -1,4 +1,4 @@
-<?php
+<?hh
 abstract class A {
 
     const WHAT = 'A';

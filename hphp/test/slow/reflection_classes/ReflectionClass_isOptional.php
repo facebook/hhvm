@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function arguments_1_defaults($a = 1, $b, $c) {}
 function arguments_2_defaults($a, $b = NULL, $c) {}

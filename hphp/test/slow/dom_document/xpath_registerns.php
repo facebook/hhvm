@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Test from https://bugs.php.net/bug.php?id=49490
 <<__EntryPoint>>

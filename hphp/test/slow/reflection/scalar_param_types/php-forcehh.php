@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo(int $bar, array $baz) {
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyReflectionFunction extends ReflectionFunctionAbstract {
   public function __toString() {

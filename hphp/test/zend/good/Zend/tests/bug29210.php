@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test_class {
    private function test_func1() {
         echo "test_func1\n";

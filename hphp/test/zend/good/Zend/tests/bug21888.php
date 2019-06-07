@@ -1,4 +1,4 @@
-<?php
+<?hh
 class mom {
 
   protected $prot = "protected property\n";

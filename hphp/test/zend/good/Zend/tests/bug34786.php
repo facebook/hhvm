@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a,$b,$c) {
 echo "foo: ".error_reporting()."\n";
 }

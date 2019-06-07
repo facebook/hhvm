@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Just testing that the parser allows this (for PHP7/symfony compat); there
 // is no enforcement.

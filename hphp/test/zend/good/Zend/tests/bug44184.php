@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
     $x = array(1,2,3);

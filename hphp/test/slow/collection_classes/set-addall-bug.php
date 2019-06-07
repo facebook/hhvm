@@ -1,4 +1,4 @@
-<?php
+<?hh
 function main() {
   // This Set will have an initial capacity of 3
   $x = HH\Set {205};

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');
 try { dgettext ('foo'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     use T2 { t2method as Bmethod; }
 }

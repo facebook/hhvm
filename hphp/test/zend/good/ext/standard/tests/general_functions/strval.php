@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string strval ( mixed $var );
  * Description: Returns the string value of var
  */

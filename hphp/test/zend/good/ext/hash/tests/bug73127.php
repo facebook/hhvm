@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $test1 = str_repeat("\xFF", 40);
 $test2 = str_repeat("\x00", 40);

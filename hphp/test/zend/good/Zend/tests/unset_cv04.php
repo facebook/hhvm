@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function f() {
   $x = "ok\n";
   echo $x;

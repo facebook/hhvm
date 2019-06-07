@@ -1,4 +1,4 @@
-<?php
+<?hh
         /* Binary */
         $test = array();
         $test[] = gmp_init("0b10011010010");

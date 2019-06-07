@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fib() {
     list($a, $b) = [1, 1];

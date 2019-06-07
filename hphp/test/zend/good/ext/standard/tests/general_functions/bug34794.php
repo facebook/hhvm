@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "Opening process 1\n";
 $process1 = proc_open('/bin/cat', array(0 => array('pipe', 'r'), 1 =>array('pipe', 'r')), &$pipes1);
 

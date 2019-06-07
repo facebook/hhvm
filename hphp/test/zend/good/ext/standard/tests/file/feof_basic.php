@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool feof(resource fp)
  * Description: Test for end-of-file on a file pointer 
  * Source code: ext/standard/file.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $closure1 = function() {return "this is a closure"; };
 $closure2 = function($param) {

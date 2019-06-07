@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $str = 'rasmuslerdorf';
 $salt1 = 'rl';

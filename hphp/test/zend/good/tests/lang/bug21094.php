@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test {
     function hdlr($errno, $errstr, $errfile, $errline) {
         printf("[%d] errstr: %s, errfile: %s, errline: %d\n", $errno, $errstr, $errfile, $errline, $errstr);

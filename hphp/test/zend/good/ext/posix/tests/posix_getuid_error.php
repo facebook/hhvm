@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int posix_getuid(void)
  * Description: Get the current user id (POSIX.1, 4.2.1) 
  * Source code: ext/posix/posix.c

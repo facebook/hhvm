@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $data = "openssl_digest() basic test";
 $method = "md5";
 $method2 = "sha1";

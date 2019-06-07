@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Test1 {
     static function ok() {

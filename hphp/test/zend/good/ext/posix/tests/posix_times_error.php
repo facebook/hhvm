@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array posix_times(void)
  * Description: Get process times (POSIX.1, 4.5.2) 
  * Source code: ext/posix/posix.c

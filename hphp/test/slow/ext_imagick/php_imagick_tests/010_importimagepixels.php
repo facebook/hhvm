@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Generate array of pixels. 2000 pixels per color stripe */
 <<__EntryPoint>> function main() {

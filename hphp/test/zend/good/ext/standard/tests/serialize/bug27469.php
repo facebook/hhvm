@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $str = 'O:9:"TestClass":0:{}';
 $obj = unserialize($str);
 var_dump($obj);

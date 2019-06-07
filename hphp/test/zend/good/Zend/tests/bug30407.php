@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function haricow($a = 'one') {
     var_dump($a);

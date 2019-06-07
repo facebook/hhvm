@@ -1,4 +1,4 @@
-<?php 
+<?hh 
 <<__EntryPoint>> function main() {
 for ($i=0; $i<=5; $i++)
 {

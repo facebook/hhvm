@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 <<__EntryPoint>> function main() {
 $x = 2;
 $x **= 3;

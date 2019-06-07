@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
    Prototype: array file ( string filename [,int use-include_path [,resource context]] );
    Description: Reads entire file into an array

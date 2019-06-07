@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test() {
 $a=array(1,2,3);

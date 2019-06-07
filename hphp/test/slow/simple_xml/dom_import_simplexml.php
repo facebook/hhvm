@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $s = simplexml_load_string('<a><b>c</b></a>');

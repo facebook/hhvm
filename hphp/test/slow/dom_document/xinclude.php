@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $uri = realpath(__DIR__.'/xinclude-1.xml');

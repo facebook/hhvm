@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f1($class) { echo "f1: [[$class]]\n"; }
 function f2($class) { echo "f2: [[$class]]\n"; }

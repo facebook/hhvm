@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function charsAsHexSeq($s) {
   if (!is_string($s)) {

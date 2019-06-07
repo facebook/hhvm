@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "TC IMG_CROP_DEFAULT\n";
 $im = imagecreatetruecolor(99, 99); 

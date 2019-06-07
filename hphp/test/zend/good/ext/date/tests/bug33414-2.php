@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 print "TZ=Pacific/Rarotonga - wrong day.\n";
 date_default_timezone_set("Pacific/Rarotonga");
 $tStamp = mktime (17, 17, 17, 1, 1, 1970);

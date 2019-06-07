@@ -1,4 +1,4 @@
-<?php
+<?hh
 require_once("dom_test.inc");
 
 echo "Test 1: accessing single nodes from php\n";

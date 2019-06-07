@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fix_err($errmsg, $user_format) {
 

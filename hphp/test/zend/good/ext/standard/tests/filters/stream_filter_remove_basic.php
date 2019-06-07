@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool stream_filter_remove(resource stream_filter)
  * Description: Flushes any data in the filter's internal buffer, removes it from the chain, and frees the resource 
  * Source code: ext/standard/streamsfuncs.c

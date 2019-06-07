@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $korean = "\xED\x95\x9C" . "\xEA\xB5\xAD" . "\xEB\xA7\x90";
 

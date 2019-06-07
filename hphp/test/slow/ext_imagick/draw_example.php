@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_coord($ox, $oy, $rx, $ry, $arg) {
   return array(

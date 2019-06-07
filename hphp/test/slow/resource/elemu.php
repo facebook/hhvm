@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function lol() { return STDIN; }
 function foo() {

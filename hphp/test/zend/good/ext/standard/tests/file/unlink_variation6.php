@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool unlink(string filename[, context context])
  * Description: Delete a file
  * Source code: ext/standard/file.c

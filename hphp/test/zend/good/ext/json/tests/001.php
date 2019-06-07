@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 try { var_dump(json_decode()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 var_dump(json_decode(""));

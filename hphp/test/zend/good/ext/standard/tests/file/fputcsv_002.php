@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $file = dirname(__FILE__) .'/fgetcsv-test.csv';
 

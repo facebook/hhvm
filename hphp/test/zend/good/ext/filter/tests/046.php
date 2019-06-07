@@ -1,4 +1,4 @@
-<?php
+<?hh
 $max = sprintf("%d", PHP_INT_MAX);
 switch($max) {
 case "2147483647": /* 32-bit systems */

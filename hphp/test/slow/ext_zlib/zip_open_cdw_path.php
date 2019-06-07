@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function run($filename) {
   $zip = zip_open($filename);

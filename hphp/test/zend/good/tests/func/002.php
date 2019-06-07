@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class BlahStatics {
   public static $hey =0;

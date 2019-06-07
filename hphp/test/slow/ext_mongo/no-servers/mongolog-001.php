@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Common constants
 var_dump(0 === MongoLog::NONE);
 var_dump(31 === MongoLog::ALL);

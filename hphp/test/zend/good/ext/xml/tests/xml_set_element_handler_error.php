@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int xml_set_element_handler(resource parser, string shdl, string ehdl)
  * Description: Set up start and end element handlers 
  * Source code: ext/xml/xml.c

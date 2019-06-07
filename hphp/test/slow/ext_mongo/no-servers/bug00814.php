@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyDB extends MongoDB {
     public function __construct() {}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface iA {
   const cA = "const of iA\n";
 }

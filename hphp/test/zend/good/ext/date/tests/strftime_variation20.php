@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings 
  * Source code: ext/date/php_date.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(json_encode("abc"));
 var_dump(json_encode("ab\xE0"));

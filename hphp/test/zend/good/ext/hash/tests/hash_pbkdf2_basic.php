@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string hash_hmac(string $algo, string $data, string $key [, int $length = 0 [, bool $raw_output = false]])
  * Description: Generate a keyed hash value using the HMAC method

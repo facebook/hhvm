@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ClassOne extends ArrayObject
 {
     public $a = 2;

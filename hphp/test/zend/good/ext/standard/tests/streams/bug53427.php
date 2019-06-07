@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $read = array();
 $read[1] = fopen(__FILE__, "r");
 $read["myindex"] = reset(&$read);

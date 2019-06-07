@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a) {
   $it = new ArrayIterator($a);

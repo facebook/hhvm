@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo($a) {
   try {
     if ($a < 5) {

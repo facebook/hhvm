@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait Too {
   static function bar() {

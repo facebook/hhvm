@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 SignalChangeHandlerAfterForkPhp::$parent = posix_getpid();
 SignalChangeHandlerAfterForkPhp::$child = 0;

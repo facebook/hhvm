@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $index_array = array(1, 2, 3);
 $assoc_array = array(1 => 'one', 2 => 'two');
 

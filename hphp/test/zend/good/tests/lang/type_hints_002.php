@@ -1,4 +1,4 @@
-<?php
+<?hh
 class P { }
 class T {
     function f(P $p = NULL) {

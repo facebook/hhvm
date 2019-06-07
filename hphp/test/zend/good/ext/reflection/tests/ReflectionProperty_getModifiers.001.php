@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reflectProperty($class, $property) {
     $propInfo = new ReflectionProperty($class, $property);

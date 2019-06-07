@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: array fgetcsv ( resource $handle [, int $length [, string $delimiter [, string $enclosure [, string $escape]]]] );
  Description: Gets line from file pointer and parse for CSV fields

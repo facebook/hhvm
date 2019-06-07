@@ -1,4 +1,4 @@
-<?php
+<?hh
 function start_elem($parser,$name,$attribs) {
     var_dump($name);
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function dump_property($rp) {
   var_dump($rp);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array DateTimeZone::getTransitions  ()
  * Description: Returns all transitions for the timezone
  * Source code: ext/date/php_date.c

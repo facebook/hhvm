@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array lstat ( string $filename );
    Description: Gives information about a file or symbolic link
 

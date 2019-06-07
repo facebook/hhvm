@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function add_cssclass($add, $class) {
   $class = (!($class ?? false)) ? $add : $class .= ' ' . $add;

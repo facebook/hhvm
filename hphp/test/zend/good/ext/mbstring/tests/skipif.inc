@@ -1,4 +1,4 @@
-<?php
+<?hh
 // This script prints "skip" if condition does not meet.
 
 /*

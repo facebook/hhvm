@@ -1,4 +1,4 @@
-<?php
+<?hh
 function CommaSeparatedList($a, $b) {
     if($a == null)
         return $b;

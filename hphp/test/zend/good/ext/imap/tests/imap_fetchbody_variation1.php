@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section
  *           [, int $options])
  * Description: Get a specific body section

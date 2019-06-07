@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "connect.inc";
 
 // no hostname, no port

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class NewStyle {
   public function __construct() {
   }

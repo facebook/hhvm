@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(hexdec("012345"));
 var_dump(hexdec("12345"));

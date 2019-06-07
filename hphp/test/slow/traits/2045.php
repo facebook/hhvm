@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array class_uses(mixed what [, bool autoload ])
  * Description: Return all traits used by a class

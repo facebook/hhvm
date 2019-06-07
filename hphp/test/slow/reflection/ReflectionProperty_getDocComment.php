@@ -1,4 +1,4 @@
-<?php
+<?hh
 class testClass
 {
   /** private property */

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $cert = file_get_contents(dirname(__FILE__) . "/bug28382cert.txt");
 $ext = openssl_x509_parse($cert);
 var_dump($ext['extensions']);

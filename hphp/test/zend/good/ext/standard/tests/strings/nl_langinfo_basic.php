@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string nl_langinfo  ( int $item  )
  * Description: Query language and locale information

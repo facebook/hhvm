@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $interval = new DateInterval('P2Y4DT6H8M');
 

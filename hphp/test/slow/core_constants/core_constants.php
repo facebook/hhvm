@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This test is currently *Linux only* due
 // to the use of posix_getpid() and

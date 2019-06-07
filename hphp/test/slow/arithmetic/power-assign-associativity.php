@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Taken from pow-operator PHP RFC (see https://wiki.php.net/rfc/pow-operator)

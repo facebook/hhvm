@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!extension_loaded("gettext")) {
     die("SKIP gettext extension is not loaded.\n");
 }

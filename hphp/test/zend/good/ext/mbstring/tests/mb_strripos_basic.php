@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
  * Description: Finds position of last occurrence of a string within another, case insensitive 
  * Source code: ext/mbstring/mbstring.c

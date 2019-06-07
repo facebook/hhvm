@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TDate extends DateTime {
   public function format($format) {
     return "lol";

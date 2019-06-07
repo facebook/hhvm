@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array glob ( string $pattern [, int $flags] );
    Description: Find pathnames matching a pattern
 */

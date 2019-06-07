@@ -1,4 +1,4 @@
-<?php
+<?hh
 function from() {
   yield 0;
   yield from []; // must not yield anything

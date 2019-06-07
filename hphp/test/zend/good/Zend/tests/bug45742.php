@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Constants {
     // Needs to be equal
     const A = 1;

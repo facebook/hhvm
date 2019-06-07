@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ctx = stream_context_create();
 var_dump($ctx);

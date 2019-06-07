@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo($e, $m) {
   $_REQUEST['_foo'] = $e;

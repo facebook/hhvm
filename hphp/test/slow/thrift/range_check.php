@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TType {
   const I16    = 6;

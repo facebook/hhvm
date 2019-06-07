@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen(&$x) {
   $x = 1;

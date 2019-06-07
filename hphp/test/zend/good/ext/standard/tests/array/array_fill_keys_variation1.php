@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array array_fill_keys(array keys, mixed val)
  * Description: Create an array using the elements of the first parameter as keys each initialized to val
  * Source code: ext/standard/array.c

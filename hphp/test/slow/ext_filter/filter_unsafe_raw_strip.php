@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // From https://github.com/facebook/hhvm/issues/2337

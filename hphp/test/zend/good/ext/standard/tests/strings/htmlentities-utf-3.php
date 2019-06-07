@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* conformance to Unicode 5.2, section 3.9, D92 */
 

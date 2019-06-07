@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function switchtest ($i, $j)
 {

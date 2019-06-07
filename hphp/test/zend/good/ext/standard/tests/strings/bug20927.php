@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $string        = str_repeat("1234567890 X ", 10);
 $break        = str_repeat("a-very-long-break-string-to-clobber-the-heap", 8);
 $linelength    = 10;

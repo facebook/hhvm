@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public function test() {
     list($this) = array(null);

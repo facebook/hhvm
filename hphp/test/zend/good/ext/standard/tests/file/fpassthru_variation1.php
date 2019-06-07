@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int fpassthru(resource fp)
  * Description: Output all remaining data from a file pointer
  * Source code: ext/standard/file.c

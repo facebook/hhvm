@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array array_change_key_case ( array $input [, int $case] )
    Description: Changes the keys in the input array to be all lowercase
    or uppercase. The change depends on the last optional case parameter.

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $mc = new Memcached;
 $mc->addServer('127.0.0.1', 11211);
 $mc->addServer('127.0.0.1', 11212);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string quoted_printable_decode  ( string $str  )
  * Description: Convert a quoted-printable string to an 8 bit string
  * Source code: ext/standard/string.c

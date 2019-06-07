@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function always_true() {
   // Try to defeat any possible inlining / constant folding.

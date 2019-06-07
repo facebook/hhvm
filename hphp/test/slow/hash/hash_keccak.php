@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Test vectors taken from a combination of NIST FIPS-202,

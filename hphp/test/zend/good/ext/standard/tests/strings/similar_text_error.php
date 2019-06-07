@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int similar_text(string str1, string str2 [, float percent])
 * Description: Calculates the similarity between two strings
 * Source code: ext/standard/string.c

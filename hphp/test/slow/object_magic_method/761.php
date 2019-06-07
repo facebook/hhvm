@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   public $real = 1;

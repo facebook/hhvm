@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 ob_start();
 set_exception_handler('user_exception_handler');

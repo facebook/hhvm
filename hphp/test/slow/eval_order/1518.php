@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f(&$a, &$b) {
   $a[0] = 1;

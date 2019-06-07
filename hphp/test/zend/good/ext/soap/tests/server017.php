@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test() {
     return new SoapFault("MyFault","My fault string");
 }

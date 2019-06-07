@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function callback($data) {
   return "callback: $data";

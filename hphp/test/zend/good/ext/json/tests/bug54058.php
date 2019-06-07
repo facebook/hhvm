@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $bad_utf8 = quoted_printable_decode('=B0');
 

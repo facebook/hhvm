@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
  * Description: Split array into chunks
  *              Chunks an array into size  large chunks.

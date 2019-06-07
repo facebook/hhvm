@@ -1,4 +1,4 @@
-<?php
+<?hh
 class MyObjet implements ArrayAccess
 {
     public function offsetSet($offset, $value) { }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Container
 {
     public function __get( $what )

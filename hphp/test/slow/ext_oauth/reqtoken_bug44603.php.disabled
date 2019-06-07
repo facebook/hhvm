@@ -1,4 +1,4 @@
-<?php
+<?hh
 require 'server.inc';
 
 $x = new OAuth('1234','1234');

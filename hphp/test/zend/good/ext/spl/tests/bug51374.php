@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo extends SplFileObject
 {
     public $bam = array();

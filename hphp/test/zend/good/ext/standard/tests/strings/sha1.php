@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/sha1.dat";
 $a = array(

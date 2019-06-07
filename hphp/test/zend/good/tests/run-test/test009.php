@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {}
 <<__EntryPoint>> function main() {
 $foo = new Foo;

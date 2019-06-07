@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tmpfname = tempnam(sys_get_temp_dir(), "emptyfile");
 var_dump(file_get_contents($tmpfname));
 echo "done.\n";

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $str = "A\xc2\xa3BC";
 preg_match_all('/\S\S/u', $str, &$m);    var_dump($m);
 preg_match_all('/\S{2}/u', $str, &$m);    var_dump($m);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto bool ob_clean(void)
  * Description: Clean (delete) the current output buffer 
  * Source code: main/output.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class SplMinHeap2 extends SplMinHeap {
   protected function compare($a, $b) {
     return -parent::compare($a,$b);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function convert_simplexml_to_array($sxml) {
   if ($sxml) {
     foreach ($sxml as $k => $v) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 file_put_contents('SplFileObject_getflags_basic.csv', 'eerste;tweede;derde');
 

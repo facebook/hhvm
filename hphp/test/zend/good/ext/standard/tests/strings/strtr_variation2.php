@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strtr(string $str, string $from[, string $to]);
                 string strtr(string $str, array $replace_pairs);
  * Description: Translates characters in str using given translation tables

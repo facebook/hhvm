@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main($a, $b, $c) {
   $i = 0;

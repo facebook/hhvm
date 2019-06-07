@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool rename ( string $oldname, string $newname [, resource $context] );
    Description: Renames a file or directory
 */

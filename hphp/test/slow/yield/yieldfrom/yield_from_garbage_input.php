@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen($g) {
   yield from $g;

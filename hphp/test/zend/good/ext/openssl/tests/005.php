@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $csr = file_get_contents(dirname(__FILE__) . '/005_crt.txt');
 if ($out = openssl_csr_get_subject($csr, true)) {

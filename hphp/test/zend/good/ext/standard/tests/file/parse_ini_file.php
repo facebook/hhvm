@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array parse_ini_file(string $filename [,bool $process_sections]);
    Description: parse_ini_file() loads in the ini file specified in filename,
      and returns the settings in it in an associative array.

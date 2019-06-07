@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait this_is_a_trait {
  }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class y { public $bar; }
 class x {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace N1 {
 
     trait T1 {

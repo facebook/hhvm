@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int strspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters found in mask.
                 If start or/and length is provided, it works like strspn(substr($s,$start,$len),$good_chars)

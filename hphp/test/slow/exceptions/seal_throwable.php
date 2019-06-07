@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class foo implements Throwable {
   function __construct($msg) {

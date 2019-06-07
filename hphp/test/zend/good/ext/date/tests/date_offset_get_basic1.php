@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int date_offset_get  ( DateTime $object  )
  * Description: Returns the daylight saving time offset
  * Source code: ext/date/php_date.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class CGetMTest {
   public function __construct() {

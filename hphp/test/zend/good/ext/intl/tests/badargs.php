@@ -1,4 +1,4 @@
-<?php
+<?hh
 $funcs = get_extension_funcs("intl");
 function ignore_err() {}
 set_error_handler("ignore_err");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $streams = array(
 	'data://,A%20brief%20note',

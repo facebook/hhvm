@@ -1,4 +1,4 @@
-<?php
+<?hh
 function error_handler($num, $msg, $file, $line, $vars) {
     echo $line,"\n";
 }

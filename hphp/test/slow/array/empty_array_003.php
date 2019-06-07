@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() { return array(); }
 function main() {

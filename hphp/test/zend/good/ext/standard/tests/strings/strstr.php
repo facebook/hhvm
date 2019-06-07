@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: string strstr ( string $haystack, string $needle );
    Description: Find first occurrence of a string
    and reurns the rest of the string from that string

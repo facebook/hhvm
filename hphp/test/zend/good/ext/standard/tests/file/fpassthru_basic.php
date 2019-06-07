@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* 
 Prototype: int fpassthru ( resource $handle );
 Description: Reads to EOF on the given file pointer from the current position

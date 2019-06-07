@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   public static function foo() {

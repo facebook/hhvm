@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
     private $p = 'test';
     function unsetPrivate() {

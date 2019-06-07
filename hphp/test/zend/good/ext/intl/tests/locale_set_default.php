@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try setting the default Locale with different locales

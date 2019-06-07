@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base {
   function asd() { echo "Base\n"; return 1; }

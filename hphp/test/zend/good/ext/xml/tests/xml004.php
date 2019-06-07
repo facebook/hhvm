@@ -1,4 +1,4 @@
-<?php
+<?hh
 chdir(dirname(__FILE__));
 
 $xp = xml_parser_create();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strval  ( mixed $var  )
  * Description: Get the string value of a variable.
  * Source code: ext/standard/string.c

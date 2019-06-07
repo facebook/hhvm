@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test for the datefmt_get_pattern & datefmt_set_pattern function

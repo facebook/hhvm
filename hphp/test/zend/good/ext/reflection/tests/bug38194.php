@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Object { }
 <<__EntryPoint>> function main() {
 $objectClass= new ReflectionClass('Object');

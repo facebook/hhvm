@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // These are set in our custom ini file for this test
 <<__EntryPoint>>

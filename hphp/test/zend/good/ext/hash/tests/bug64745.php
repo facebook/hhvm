@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $hash = hash_pbkdf2('sha1', 'password', 'salt', 1, 0);
 $rawHash = hash_pbkdf2('sha1', 'password', 'salt', 1, 0, true);
 

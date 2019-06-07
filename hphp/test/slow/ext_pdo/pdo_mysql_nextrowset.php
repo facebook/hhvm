@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $host   = getenv("MYSQL_TEST_HOST");
 $port   = getenv("MYSQL_TEST_PORT");
 $user   = getenv("MYSQL_TEST_USER");

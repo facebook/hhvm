@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function gen1() {
     yield 1;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "Test 3: Using Parameters";
 include("prepare.inc");
 $proc->importStylesheet($xsl);

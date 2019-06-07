@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 error_reporting(E_ALL);
     $arr = array ("foo\0bar" => "foo\0bar");
     foreach ($arr as $key => $val) {

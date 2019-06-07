@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace test\ns1;
 
 class Exception {

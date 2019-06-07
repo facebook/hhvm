@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyClass {
   protected static $stack = array();

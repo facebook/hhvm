@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $rc = new ReflectionFunction('ereg');
 var_dump($rc->isDeprecated());
 }

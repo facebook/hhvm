@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Hhbbc better not remove any of the parameter locals just because they aren't
 // used.

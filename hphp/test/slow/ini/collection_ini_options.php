@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function sort_opt($a) {
   ksort(&$a);

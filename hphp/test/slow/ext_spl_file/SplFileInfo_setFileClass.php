@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyFileObject extends SplFileObject {}
 

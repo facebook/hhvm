@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // expect the inner array to be defined
 function f() {

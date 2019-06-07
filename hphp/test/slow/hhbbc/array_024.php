@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function junk() { return 2; }
 function bar() {

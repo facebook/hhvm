@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
  * for 5.3 #define ZEND_VM_STACK_PAGE_SIZE ((64 * 1024) - 64)
  * for 5.4 #define ZEND_VM_STACK_PAGE_SIZE ((16 * 1024) - 16)

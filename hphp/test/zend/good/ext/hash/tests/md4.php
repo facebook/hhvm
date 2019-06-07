@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* RFC 1320 vectors */
 echo hash('md4', '') . "\n";
 echo hash('md4', 'a') . "\n";

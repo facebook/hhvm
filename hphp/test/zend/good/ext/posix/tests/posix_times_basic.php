@@ -1,4 +1,4 @@
-<?php
+<?hh
   echo "Basic test of POSIX times function\n";
 
   $times = posix_times();

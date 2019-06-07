@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo "*** Testing posix_getsid() : function test ***\n";
 
 $pid = posix_getpid();

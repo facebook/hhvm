@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function bleh() {
   echo "begin\n";

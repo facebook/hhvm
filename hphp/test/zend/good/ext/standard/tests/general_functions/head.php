@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $v1 = headers_sent();
 $v2 = headers_list();

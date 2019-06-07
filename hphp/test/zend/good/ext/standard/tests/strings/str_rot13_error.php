@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string str_rot13  ( string $str  )
  * Description: Perform the rot13 transform on a string
  * Source code: ext/standard/string.c

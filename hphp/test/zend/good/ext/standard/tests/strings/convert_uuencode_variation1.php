@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string convert_uuencode  ( string $data  )
  * Description: Uuencode a string

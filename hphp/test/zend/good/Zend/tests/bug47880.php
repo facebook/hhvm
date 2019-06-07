@@ -1,4 +1,4 @@
-<?php
+<?hh
 class bomb {
   static function go($n)	{
    $backtrace = debug_backtrace(0);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $xml =<<<EOF
 <?xml version='1.0'?>

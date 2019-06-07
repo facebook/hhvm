@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_convert_encoding(string $str, string $to_encoding [, mixed $from_encoding])
  * Description: Returns converted string in desired encoding 
  * Source code: ext/mbstring/mbstring.c

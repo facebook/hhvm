@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class this_is_a_class {
   function class_func() {

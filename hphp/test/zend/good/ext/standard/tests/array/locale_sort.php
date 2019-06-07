@@ -1,4 +1,4 @@
-<?php
+<?hh
 setlocale(LC_ALL, 'fr_FR.ISO8859-1', 'fr_FR');
 $table = array("AB" => "Alberta",
 "BC" => "Colombie-Britannique",

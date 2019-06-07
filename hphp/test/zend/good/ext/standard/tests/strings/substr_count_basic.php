@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "***Testing basic operations ***\n";
 var_dump(@substr_count("", ""));

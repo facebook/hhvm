@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when default enclosure value and delimiter
    of two chars is provided and file is opened in read only mode */

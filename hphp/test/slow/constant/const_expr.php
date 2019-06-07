@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const ONE = 1;
 const TWO = ONE + 1;

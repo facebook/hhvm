@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   $alloc = memory_get_usage();

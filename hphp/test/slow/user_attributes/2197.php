@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 << Foo1, Bar1(), Baz1('blah',array(1,2)) >> interface I {
 }

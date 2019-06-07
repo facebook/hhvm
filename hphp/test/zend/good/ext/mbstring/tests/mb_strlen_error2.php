@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int mb_strlen(string $str [, string $encoding])
  * Description: Get character numbers of a string 
  * Source code: ext/mbstring/mbstring.c

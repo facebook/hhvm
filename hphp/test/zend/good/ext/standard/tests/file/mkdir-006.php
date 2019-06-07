@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 chdir(dirname(__FILE__));
 $dirpath = "./tmp/foo//bar/logs";
 mkdir($dirpath, 0777, true);

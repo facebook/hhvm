@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait baz  {
   public function bar() {

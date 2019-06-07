@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface constr
 {
     function __construct();

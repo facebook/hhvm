@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class pass {
     static function show() {

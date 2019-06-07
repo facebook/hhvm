@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 final class X {
   public static function getVal($val) {

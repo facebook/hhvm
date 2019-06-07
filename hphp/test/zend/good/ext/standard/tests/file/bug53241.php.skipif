@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* unfortunately no standard function does a cast to FILE*, so we need
  * curl to test this */
 <<__EntryPoint>> function main() {

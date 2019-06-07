@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace foo\foo;
 
 const C = "foo\\foo\\C\n";

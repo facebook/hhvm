@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Foo\Bar\Baz {
     function foo(){echo __FUNCTION__,"\n";}
     function bar(){echo __FUNCTION__,"\n";}

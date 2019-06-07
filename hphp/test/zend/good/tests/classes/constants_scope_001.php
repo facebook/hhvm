@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class ErrorCodes {
     const FATAL = "Fatal error\n";

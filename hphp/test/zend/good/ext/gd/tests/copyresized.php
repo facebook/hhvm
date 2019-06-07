@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_hexcolor($im, $c) {
     if (imageistruecolor($im)) {

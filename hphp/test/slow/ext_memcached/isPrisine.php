@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $m1 = new Memcached('id1');
 $m1->setOption(Memcached::OPT_PREFIX_KEY, "foo_");

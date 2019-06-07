@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This basically copies zend/ext/spl/tests/SplFixedArray_setSize_param_null.php

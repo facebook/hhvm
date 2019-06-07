@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "\n*** Testing error conditions ***\n";
 /* Invalid number of args */

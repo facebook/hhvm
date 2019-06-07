@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // PHP's string -> double conversion doesn't care about locale.

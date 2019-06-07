@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Compile only: verify no c++ compilation errors */function foo($a) {
   return $a[1];

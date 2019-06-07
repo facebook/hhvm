@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function dump($elems) {
  foreach ($elems as $elem) {

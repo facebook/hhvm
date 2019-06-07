@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Callback {
     protected $val = 'hello, world';
 

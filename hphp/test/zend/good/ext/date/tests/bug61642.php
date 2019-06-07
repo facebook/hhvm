@@ -1,4 +1,4 @@
-<?php
+<?hh
 // ±5 and ±10 (and any non-zero multiple of 5) is broken, but everything else
 // should already work correctly.
 $weekdays = range(-11, 11);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface I1 {
  function ifoo2();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Create a image
 <<__EntryPoint>> function main() {
 $image = imagecreatetruecolor( 100, 100 );

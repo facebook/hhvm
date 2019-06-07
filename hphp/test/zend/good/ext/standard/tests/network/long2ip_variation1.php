@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string long2ip(int proper_address)
  * Description: Converts an (IPv4) Internet network address into a string in Internet standard dotted format
  * Source code: ext/standard/basic_functions.c

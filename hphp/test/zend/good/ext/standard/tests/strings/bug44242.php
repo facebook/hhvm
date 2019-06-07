@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo metaphone('CMXFXZ'), "\n";
 echo metaphone('CMXFXV'), "\n";

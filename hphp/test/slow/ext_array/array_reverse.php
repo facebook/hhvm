@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function a() {
   $input = array("php", 4.0, array("green", "red"));

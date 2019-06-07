@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Test code from: http://www.php.net/manual/en/splobjectstorage.getinfo.php
 <<__EntryPoint>> function main() {
 $s = new SplObjectStorage();

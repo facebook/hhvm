@@ -1,4 +1,4 @@
-<?php
+<?hh
 const FOO = 'BAR';
 <<__EntryPoint>> function main() {
 $foo = 'bar';

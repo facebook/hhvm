@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function nums() {
  for ($i = 0;

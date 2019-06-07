@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  :  array getrusage  ([ int $who  ] )
  * Description: Gets the current resource usages
  * Source code: ext/standard/microtime.c

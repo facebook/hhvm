@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function fruit() {
  echo "sadpanda, no fruit";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $tmp = pow(2,24);
 $data = array( 
 	'PHP',

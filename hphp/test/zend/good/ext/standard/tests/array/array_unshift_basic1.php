@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int array_unshift(&array $array, mixed $var [, mixed ...])
  * Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c

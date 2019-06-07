@@ -1,4 +1,4 @@
-<?php
+<?hh
   echo "Basic test of POSIX getgroups\n";
 
   $groups = posix_getgroups();

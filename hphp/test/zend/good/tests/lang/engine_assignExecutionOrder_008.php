@@ -1,4 +1,4 @@
-<?php
+<?hh
 error_reporting(E_ALL & ~E_STRICT);
 
 function f() { return 0; }

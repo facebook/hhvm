@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>> function main() {
 echo "*** Test substituting argument 1 with emptyUnsetUndefNull values ***\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(strncmp("test ", "e", -1));
 var_dump(strncmp("test ", "e", 10));

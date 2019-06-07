@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string base_convert  ( string $number  , int $frombase  , int $tobase  )
  * Description: Convert a number between arbitrary bases.
  * Source code: ext/standard/math.c

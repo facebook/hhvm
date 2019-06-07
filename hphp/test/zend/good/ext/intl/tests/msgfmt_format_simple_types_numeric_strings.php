@@ -1,4 +1,4 @@
-<?php
+<?hh
 ini_set("intl.error_level", E_WARNING);
 //ini_set("intl.default_locale", "nl");
 

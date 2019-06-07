@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function four() { return 4; }
 function arr() { return array('x' => four(), 'something' => new stdClass()); }

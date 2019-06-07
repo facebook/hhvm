@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $jpeg_file = __DIR__."/imagick_test.jpg";
 $png_file = __DIR__."/imagick_test.png";
 

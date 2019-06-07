@@ -1,4 +1,4 @@
-<?php
+<?hh
     $tile = imagecreate(36,36);
     $base = imagecreate(150,150);
     $white = imagecolorallocate($tile,255,255,255);

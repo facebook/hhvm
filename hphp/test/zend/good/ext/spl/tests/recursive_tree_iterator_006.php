@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $ary = array(
 	0 => array(

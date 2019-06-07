@@ -1,4 +1,4 @@
-<?php
+<?hh
 // fopen with interesting windows paths.
 <<__EntryPoint>> function main() {
 $testdir = __DIR__ . '/bug47177.tmpdir';

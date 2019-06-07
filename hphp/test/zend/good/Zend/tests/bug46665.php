@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $baz = '\\Foo\\Bar\\Baz';
 new $baz();

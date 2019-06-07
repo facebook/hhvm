@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  * Common definition and Settings
  */

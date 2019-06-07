@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $badvals = array(4294901761, 2147483648, -2147483648, -1);
 

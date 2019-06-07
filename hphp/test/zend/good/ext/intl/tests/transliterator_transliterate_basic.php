@@ -1,4 +1,4 @@
-<?php
+<?hh
 $t = transliterator_create("Latin; Title");
 $s = "Κοντογιαννάτος, Βασίλης";
 echo $t->transliterate($s),"\n";

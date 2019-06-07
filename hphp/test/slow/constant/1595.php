@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 const AAA = true;

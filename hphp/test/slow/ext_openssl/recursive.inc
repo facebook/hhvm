@@ -1,4 +1,4 @@
-<?php
+<?hh
 function array_map_recursive($callback, $array) {
   foreach ($array as $key => $value) {
     if (is_array($array[$key])) {

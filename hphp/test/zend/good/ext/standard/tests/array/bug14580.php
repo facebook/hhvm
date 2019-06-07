@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $arr = array (b"foo\0bar" => b"foo\0bar");
 $key = key(&$arr);
 echo strlen($key), ': ';

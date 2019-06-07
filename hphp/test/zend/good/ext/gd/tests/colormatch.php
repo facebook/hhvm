@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $im = imagecreatetruecolor(5,5);
 $im2 = imagecreate(5,5);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto string xml_error_string(int code)
  * Description: Get XML parser error string 
  * Source code: ext/xml/xml.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $url = "http://www.example.org";
 $ch = curl_init();

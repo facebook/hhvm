@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Convert valid DN */
 <<__EntryPoint>> function main() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyDoc extends DOMDocument {
   function __construct($version, $encoding) {}

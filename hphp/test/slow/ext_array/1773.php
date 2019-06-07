@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function xsort(&$a) {
   $b = array();

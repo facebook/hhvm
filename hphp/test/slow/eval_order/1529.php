@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x) {
   $a = array($a => $x[$a = 'foo']);

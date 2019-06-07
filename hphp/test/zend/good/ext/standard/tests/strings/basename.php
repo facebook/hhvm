@@ -1,4 +1,4 @@
-<?php
+<?hh
 // simple checks
 <<__EntryPoint>> function main() {
 var_dump(basename("bar"));

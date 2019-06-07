@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!extension_loaded("openssl"))
     die("skip");
 if (!defined('OPENSSL_KEYTYPE_EC'))

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Small {
   private static $nc = 0;

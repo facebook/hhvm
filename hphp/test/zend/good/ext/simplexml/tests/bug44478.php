@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml_element = new simpleXMLElement('<root></root>');
 $xml_element->node1 = 'a &#38; b';
 print $xml_element->node1."\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string imap_8bit  ( string $string  )
  * Description: Convert an 8bit string to a quoted-printable string.
  * Source code: ext/imap/php_imap.c

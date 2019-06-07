@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!extension_loaded('gd')) {
 	die('skip gd extension is not loaded');
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string json_encode  ( mixed $value  )
  * Description: Returns the JSON representation of a value
  * Source code: ext/json/php_json.c

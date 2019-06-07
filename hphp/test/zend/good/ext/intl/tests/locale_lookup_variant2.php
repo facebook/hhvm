@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try parsing different Locales  

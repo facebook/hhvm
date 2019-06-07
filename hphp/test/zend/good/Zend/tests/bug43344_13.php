@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f($a=array(namespace\bar=>0)) {
 	reset(&$a);
 	return key($a);

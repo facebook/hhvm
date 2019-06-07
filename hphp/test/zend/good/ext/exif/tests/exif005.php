@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Do not change this test it is a README.TESTING example.
  * test5.jpg is a 1*1 image that contains an Exif section with ifd = 00000009h  */
 <<__EntryPoint>> function main() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Collection extends ArrayObject
 {

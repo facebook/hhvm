@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class str {}
 class str1 extends str { public function __toString() { return "a"; } }

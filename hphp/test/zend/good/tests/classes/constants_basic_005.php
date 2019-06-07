@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C
 {
     const CONST_2 = self::CONST_1;

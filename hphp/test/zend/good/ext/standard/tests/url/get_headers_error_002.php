@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto array get_headers(string url[, int format])
  * Description: Fetches all the headers sent by the server in response to a HTTP request
  * Source code: ext/standard/url.c

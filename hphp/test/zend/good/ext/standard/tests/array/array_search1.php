@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $a = array(1=>0, 2=>1, 4=>3, "a"=>"b", "c"=>"d");
 

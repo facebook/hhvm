@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
  * Description: Returns part of a string 
  * Source code: ext/iconv/iconv.c

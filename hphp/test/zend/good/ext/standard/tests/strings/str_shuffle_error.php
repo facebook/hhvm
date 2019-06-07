@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string str_shuffle  ( string $str  )
  * Description: Randomly shuffles a string

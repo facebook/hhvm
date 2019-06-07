@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $regex = '@';
 for($bar=0; $bar<1027; $bar++) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : public string DateTimeZone::getName  ( void  )
  * Description: Returns the name of the timezone
  * Source code: ext/date/php_date.c

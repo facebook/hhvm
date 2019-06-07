@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 foreach (array(PREG_PATTERN_ORDER, PREG_SET_ORDER) as $flag) {
 	var_dump(preg_match_all('~

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
 Default values are "localhost", "cn=Manager,dc=my-domain,dc=com", and password "secret".

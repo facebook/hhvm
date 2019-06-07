@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($nix, array $ar, &$ref, stdClass $std, NonExistingClass $na, stdClass &$opt = NULL, $def = "FooBar")
 {

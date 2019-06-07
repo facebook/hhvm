@@ -1,4 +1,4 @@
-<?php
+<?hh
 
   class A extends B {
     public function f() {

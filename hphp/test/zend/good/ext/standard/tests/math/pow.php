@@ -1,4 +1,4 @@
-<?php // $Id$
+<?hh // $Id$
 <<__EntryPoint>> function main() {
 $long_max = is_int(5000000000)? (double)9223372036854775807 : (double)0x7FFFFFFF;
 $long_min = -$long_max - 1;

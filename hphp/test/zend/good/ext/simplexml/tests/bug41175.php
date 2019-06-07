@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $xml = new SimpleXmlElement("<img></img>");
 $xml->addAttribute("src", "foo");

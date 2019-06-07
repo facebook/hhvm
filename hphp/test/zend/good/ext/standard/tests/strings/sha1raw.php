@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo bin2hex(sha1("abc", TRUE))."\n";
 echo bin2hex(sha1("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", TRUE))."\n";
 echo bin2hex(sha1("a", TRUE))."\n";

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $cwd = dirname(__FILE__);
 $font = "$cwd/Tuffy.ttf";
 $bbox = imageftbbox(50, 0, $font, "image");

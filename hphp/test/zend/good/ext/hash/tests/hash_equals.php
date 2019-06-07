@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(hash_equals("same", "same"));
 var_dump(hash_equals("not1same", "not2same"));
 var_dump(hash_equals("short", "longer"));

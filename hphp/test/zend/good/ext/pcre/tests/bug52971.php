@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $message = 'Der ist ein Süßwasserpool Süsswasserpool ... verschiedene Wassersportmöglichkeiten bei ...';
 

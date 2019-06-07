@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $array = array(1, 2 => array(21, 22 => array(221, 222), 23 => array(231)), 3);
 

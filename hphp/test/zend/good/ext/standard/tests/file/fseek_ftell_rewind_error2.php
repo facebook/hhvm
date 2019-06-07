@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: int fseek ( resource $handle, int $offset [, int $whence] );
    Description: Seeks on a file pointer

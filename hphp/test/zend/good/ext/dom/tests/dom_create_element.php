@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 print " 1 DOMDocument::createElement('valid')\n";
 try {

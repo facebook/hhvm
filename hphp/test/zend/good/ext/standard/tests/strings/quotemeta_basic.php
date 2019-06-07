@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string quotemeta  ( string $str  )
  * Description: Quote meta characters

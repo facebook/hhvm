@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int imagecolorstotal(resource im)
  * Description: Find out the number of colors in an image's palette 
  * Source code: ext/gd/gd.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // This is a modified version of zend test DOMDocument_saveHTML_error2.php.

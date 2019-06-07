@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f1() { throw new Exception; }
 function f2() { echo "here\n"; }
 <<__EntryPoint>> function main() {

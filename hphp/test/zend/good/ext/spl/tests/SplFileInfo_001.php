@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $x = new splfileinfo(1);
 $x->__construct(1);
 

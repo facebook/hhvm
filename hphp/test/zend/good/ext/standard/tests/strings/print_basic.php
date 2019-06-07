@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : int print  ( string $arg  )
  * Description: Output a string

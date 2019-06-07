@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A extends NumberFormatter {
     function __construct() {}

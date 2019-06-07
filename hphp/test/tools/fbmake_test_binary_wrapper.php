@@ -1,5 +1,5 @@
 #!/bin/env php
-<?php
+<?hh
 
 /*
  * Small utilities for wrapping tests to put output into fbmake.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: bool is_readable ( string $filename );
    Description: Tells whether the filename is readable.
 */

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $x = array(1);
 $a = "x";
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $passwd = 'password';
 $hash = sodium_crypto_pwhash_str

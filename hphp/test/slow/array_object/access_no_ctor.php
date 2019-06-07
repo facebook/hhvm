@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C extends ArrayObject {
   public function __construct($arg) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array pathinfo(string path[, int options])
  * Description: Returns information about a certain string
  * Source code: ext/standard/string.c

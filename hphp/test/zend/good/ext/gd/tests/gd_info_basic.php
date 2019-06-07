@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : array gd_info  ( void  )
  * Description: Retrieve information about the currently installed GD library

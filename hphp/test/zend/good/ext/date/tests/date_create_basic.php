@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : DateTime date_create  ([ string $time  [, DateTimeZone $timezone  ]] )
  * Description: Returns new DateTime object
  * Source code: ext/date/php_date.c

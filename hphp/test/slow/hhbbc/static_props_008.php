@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A { public function bummer($x) {var_dump($x);} }
 class B { public function bummer(&$x) {$x = "asd"; var_dump($x);} }

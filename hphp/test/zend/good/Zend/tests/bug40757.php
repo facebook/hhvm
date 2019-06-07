@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Base {
   private $p1='sadf';
 

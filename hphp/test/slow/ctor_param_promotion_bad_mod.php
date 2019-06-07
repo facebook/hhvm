@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 //
 // only public, private or protected allowed

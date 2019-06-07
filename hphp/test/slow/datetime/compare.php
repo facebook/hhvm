@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main() {
   date_default_timezone_set('UTC');

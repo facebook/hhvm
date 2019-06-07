@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function tokenize($str, $token) {
     $tokenizedStrArr = array();

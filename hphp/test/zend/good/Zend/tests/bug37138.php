@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload ($CN) {var_dump ($CN);}
 class st {
 	public static function e () {echo ("EHLO\n");}

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // saveHTML() should not add a default doctype when
 // LIBXML_HTML_NODEFDTD is passed

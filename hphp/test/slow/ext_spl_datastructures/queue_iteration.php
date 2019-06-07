@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function iterate_queue_with_mode($mode) {
   $x = new SplQueue();

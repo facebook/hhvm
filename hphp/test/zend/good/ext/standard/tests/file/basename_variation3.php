@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string basename(string path [, string suffix])
  * Description: Returns the filename component of the path
  * Source code: ext/standard/string.c

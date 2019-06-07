@@ -1,4 +1,4 @@
-<?php
+<?hh
 class TheObj {
     public $RealVar1, $RealVar2, $RealVar3, $RealVar4;
     public $Var = array();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // NOTE: This will become part of SPL
 

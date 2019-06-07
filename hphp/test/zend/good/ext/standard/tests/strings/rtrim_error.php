@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string rtrim  ( string $str  [, string $charlist  ] )
  * Description: Strip whitespace (or other characters) from the end of a string.

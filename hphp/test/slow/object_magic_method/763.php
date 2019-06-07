@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (isset($g)) {
   include '763-1.inc';

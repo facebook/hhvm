@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
    Prototype: void clearstatcache ([bool clear_realpath_cache[, filename]]);
    Description: clears files status cache

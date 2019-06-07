@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function herp($derp) {}
 function foo($bar, $baz) {}

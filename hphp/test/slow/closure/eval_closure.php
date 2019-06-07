@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function reproduce( $code ) {
         $template = eval( $code );

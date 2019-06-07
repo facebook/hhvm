@@ -1,4 +1,4 @@
-<?php
+<?hh
  /*
   Helper for simple tests to check return-value. Usage:
 

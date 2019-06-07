@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f() {
   $arr2 = array(0 => 'a');
   $arr1 = array(0 => 'a', 1 => 'b');

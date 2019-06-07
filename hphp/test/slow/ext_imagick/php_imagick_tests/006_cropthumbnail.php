@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $im = new Imagick("magick:rose");
 $im->cropThumbnailImage(200, 200);

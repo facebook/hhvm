@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo( &$state ) {
     $contentDict = end( &$state );

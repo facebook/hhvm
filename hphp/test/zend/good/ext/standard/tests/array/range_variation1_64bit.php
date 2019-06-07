@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 echo "\n*** Testing max/outof range values ***\n";
 /*var_dump( range("a", "z", 255) );

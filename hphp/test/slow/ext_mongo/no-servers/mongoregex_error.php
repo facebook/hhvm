@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $regexes = array('', '/', '345', 'b');
 
 foreach ($regexes as $regex) {

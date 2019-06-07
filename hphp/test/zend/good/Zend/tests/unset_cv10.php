@@ -1,4 +1,4 @@
-<?php
+<?hh
 $a = new ArrayObject($GLOBALS);
 $x = "ok\n";
 echo $x;

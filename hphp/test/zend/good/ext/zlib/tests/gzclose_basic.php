@@ -1,4 +1,4 @@
-<?php
+<?hh
 // note that gzclose is an alias to fclose. parameter checking tests will be
 // the same as fclose
 <<__EntryPoint>> function main() {

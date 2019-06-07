@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function blocker() {
  print 'block';

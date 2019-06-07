@@ -1,4 +1,4 @@
-<?php
+<?hh
 $expect = array(
 	"mimetype",
 	"Configurations2/statusbar/",

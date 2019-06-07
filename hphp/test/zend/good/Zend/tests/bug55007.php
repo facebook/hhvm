@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function __autoload($classname) {
   if ('CompileErrorClass'==$classname) eval('class CompileErrorClass { function foo() { $a[]; } }');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string mb_internal_encoding([string $encoding])
  * Description: Sets the current internal encoding or 
  * Returns the current internal encoding as a string 

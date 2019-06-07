@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class first {
     function show() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Tests if already/default namespace mappings can be overridden.

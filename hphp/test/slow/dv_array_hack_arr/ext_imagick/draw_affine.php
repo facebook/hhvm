@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $affine_matrix = darray[
   'sx' => 1,

@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace Test;
 use Test\Foo;
 class Foo {}

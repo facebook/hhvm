@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $key = <<<EOF
 -----BEGIN PRIVATE KEY-----

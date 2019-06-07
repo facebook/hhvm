@@ -1,4 +1,4 @@
-<?php
+<?hh
 $depth0 = "depth01";
 $depth1 = 'depth1';
 $depth2 = 'depth2';

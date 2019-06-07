@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $xml = "<root></root>";
 $xml = simplexml_load_string($xml);
 $kids = $xml->children();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function get_rf_for_method($fn, $class) {
   $rc = new ReflectionClass($class);

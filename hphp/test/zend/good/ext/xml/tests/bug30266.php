@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 
 Currently (Feb 10, 2005) CVS HEAD fails with the following message:

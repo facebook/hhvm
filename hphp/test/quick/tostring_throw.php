@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class stringer {
   public function __toString() { throw new Exception("nope\n"); }

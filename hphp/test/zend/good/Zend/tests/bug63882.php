@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test { public $x = 5; }
 <<__EntryPoint>> function main() {
 $testobj1 = new Test;

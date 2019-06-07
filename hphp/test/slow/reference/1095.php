@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo(&$perms, &$t) {
   $perms = array('x' => 1);

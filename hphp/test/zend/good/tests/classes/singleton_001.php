@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Counter {
     private $counter = 0;

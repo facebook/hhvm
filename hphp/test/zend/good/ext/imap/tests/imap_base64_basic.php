@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string imap_base64  ( string $text  )
  * Description: Decode BASE64 encoded text.
  * Source code: ext/imap/php_imap.c

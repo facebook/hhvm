@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $string = <<<EOT
 Cooking_furniture="KÃ¼chen MÃ¶bel (en)"

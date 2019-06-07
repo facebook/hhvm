@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: array array_values ( array $input );
    Discription: array_values() returns all the values from the input array 
                 and indexes numerically the array

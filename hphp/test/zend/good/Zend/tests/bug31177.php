@@ -1,4 +1,4 @@
-<?php
+<?hh
 class DbGow {
 
     public function query() {

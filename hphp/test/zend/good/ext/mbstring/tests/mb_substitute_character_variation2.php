@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : mixed mb_substitute_character([mixed substchar])
  * Description: Sets the current substitute_character or returns the current substitute_character 
  * Source code: ext/mbstring/mbstring.c

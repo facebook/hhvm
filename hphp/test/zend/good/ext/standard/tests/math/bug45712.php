@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // NaN
 $nan = acos(1.01);

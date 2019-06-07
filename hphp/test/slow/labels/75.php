@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class modalité {
  static function odalité() {

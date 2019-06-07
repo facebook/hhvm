@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Test IDN functions (procedural only)

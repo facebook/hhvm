@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $a = $b = $c = array(0,1,2,3,4,5);
 print_r($a);
 // this is ok:

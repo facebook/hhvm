@@ -1,3 +1,3 @@
-<?php
+<?hh
 
 const bar = 'global bar';

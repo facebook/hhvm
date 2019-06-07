@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace NS;
 
 class B {}

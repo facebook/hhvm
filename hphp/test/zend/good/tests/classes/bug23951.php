@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const FOO1 = 1;
 const FOO2 = 2;

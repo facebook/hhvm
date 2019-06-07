@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $plaintxt = b<<<EOT
 hello world
 is a very common test

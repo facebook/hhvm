@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Test Vectors from RFC 2104 */
 $ctx = hash_init('md5',HASH_HMAC,str_repeat(chr(0x0b), 16));
 hash_update($ctx, 'Hi There');

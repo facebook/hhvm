@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // This is to trigger a specific refcounting bug in the VM, to do with object
 // initialization templates. #668149

@@ -1,4 +1,4 @@
-<?php
+<?hh
 if (!function_exists('imagecreatefromwebp')) {
   echo 'skip';
 }

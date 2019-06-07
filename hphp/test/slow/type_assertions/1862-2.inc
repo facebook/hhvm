@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class C1 extends B1 {
   public $c1prop;

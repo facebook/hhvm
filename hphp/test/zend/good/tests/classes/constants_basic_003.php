@@ -1,4 +1,4 @@
-<?php
+<?hh
   include 'constants_basic_003.inc';
   class B
   {

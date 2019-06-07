@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X { private function go(&$x) {} }
 class N extends X {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function from($levels) {
   foreach (range(0, 2 << $levels) as $v) {
     yield $v;

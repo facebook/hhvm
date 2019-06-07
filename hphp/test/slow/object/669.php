@@ -1,4 +1,4 @@
-<?php
+<?hh
 class X {
   static function f($o) {
     $s = 'self';

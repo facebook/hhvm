@@ -1,4 +1,4 @@
-<?php
+<?hh
 
     $a = (object) 'a';
     $b = (object) 'b';

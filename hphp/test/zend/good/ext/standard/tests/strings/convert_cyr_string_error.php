@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string convert_cyr_string  ( string $str  , string $from  , string $to  )
  * Description: Convert from one Cyrillic character set to another

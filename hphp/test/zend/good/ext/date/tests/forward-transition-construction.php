@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('America/New_York');
 
 $date = new DateTime('2010-03-14 01:30:00');

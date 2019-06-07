@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo bin2hex(md5("", TRUE))."\n";
 echo bin2hex(md5("a", TRUE))."\n";
 echo bin2hex(md5("abc", TRUE))."\n";

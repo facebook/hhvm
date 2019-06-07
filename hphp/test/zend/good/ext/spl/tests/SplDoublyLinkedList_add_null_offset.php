@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 try {
     $dll = new SplDoublyLinkedList();
     var_dump($dll->add(NULL,2));

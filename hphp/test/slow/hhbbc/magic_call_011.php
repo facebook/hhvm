@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base {
   private function fun() { return "fun"; }

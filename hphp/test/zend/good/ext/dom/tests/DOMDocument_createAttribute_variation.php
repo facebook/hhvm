@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dom = new DOMDocument();
 
 $attr = $dom->createAttribute('string');

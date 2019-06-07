@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait THello {
   public abstract function hello();

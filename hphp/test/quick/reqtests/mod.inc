@@ -1,4 +1,4 @@
-<?php
+<?hh
 echo "in mod.php\n";
 if (isset($this) && isset($this->var)) {
   echo "this->var was set; changing it.\n";

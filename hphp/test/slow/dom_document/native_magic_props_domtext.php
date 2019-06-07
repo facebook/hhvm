@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // -----------------------------------------------------------
 // 1. User-level doesn't override implicit native magic props.

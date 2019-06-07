@@ -1,4 +1,4 @@
-<?php
+<?hh
 require "ns_028.inc";
 
 class Foo {

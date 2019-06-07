@@ -1,4 +1,4 @@
-<?php
+<?hh
 include('prepare.inc');
 $proc->importStylesheet($xsl);
 $proc->setParameter('', '', '"\'');

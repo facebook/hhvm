@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function i1() {
         echo "i1\n";

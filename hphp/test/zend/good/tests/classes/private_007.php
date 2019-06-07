@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Bar {
     public static function pub() {

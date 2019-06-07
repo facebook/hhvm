@@ -1,4 +1,4 @@
-<?php
+<?hh
 const bar = 2, baz = bar + 1;
 
 function foo() {

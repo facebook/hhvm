@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the prmary language for different locales

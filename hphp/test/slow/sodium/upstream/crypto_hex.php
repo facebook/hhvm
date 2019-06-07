@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $bin = random_bytes(random_int(1, 1000));
 $hex = sodium_bin2hex($bin);
 $phphex = bin2hex($bin);

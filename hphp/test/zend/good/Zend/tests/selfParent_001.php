@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A {
     const myConst = "const in A";
     const myDynConst = self::myConst;

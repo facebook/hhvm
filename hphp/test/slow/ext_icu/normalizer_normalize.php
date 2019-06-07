@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // based on example at http://www.php.net/manual/en/normalizer.normalize.php
 

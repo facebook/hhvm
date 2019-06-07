@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Common definitions for heredoc/nowdoc tests.
 $a = 1;

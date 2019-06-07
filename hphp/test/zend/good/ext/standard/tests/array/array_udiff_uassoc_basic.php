@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto array array_udiff_assoc ( array $array1, array $array2 [, array $ ..., callback $data_compare_func] )
 * Function is implemented in ext/standard/array.c

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class X {
   function foo($x = C::FOO, $y = I::FOO) {
 }

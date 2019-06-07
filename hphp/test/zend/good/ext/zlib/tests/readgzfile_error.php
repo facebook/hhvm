@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__)."/004.txt.gz";

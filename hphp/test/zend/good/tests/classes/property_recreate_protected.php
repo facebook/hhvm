@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
     protected $p = 'test';
     function unsetProtected() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool chdir(string $directory)
  * Description: Change the current directory 
  * Source code: ext/standard/dir.c

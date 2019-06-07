@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(
     pack("A5", "foo "),
     pack("A4", "fooo"),

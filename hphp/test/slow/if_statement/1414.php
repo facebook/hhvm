@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a,$b = 0) {
   if ($a == 2) {

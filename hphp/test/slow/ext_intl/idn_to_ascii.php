@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Php doesn't support \u escapes.
 function u($x) { return json_decode("\"" . $x . "\""); }

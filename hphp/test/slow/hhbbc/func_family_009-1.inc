@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract class Middle extends Base {
   abstract function abs();

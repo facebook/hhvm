@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_var("", FILTER_SANITIZE_STRING));
 var_dump(filter_var("<>", FILTER_SANITIZE_STRING));

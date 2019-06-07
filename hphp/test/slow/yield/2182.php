@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X {
   private $a = array(1,2,3);

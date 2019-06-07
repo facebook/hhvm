@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : int strlen  ( string $string  )
  * Description: Get string length

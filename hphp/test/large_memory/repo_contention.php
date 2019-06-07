@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foobar($i) {
   usleep(500*1000);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function run () {
     $x = 4;

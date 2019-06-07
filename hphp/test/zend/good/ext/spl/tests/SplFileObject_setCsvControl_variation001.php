@@ -1,4 +1,4 @@
-<?php
+<?hh
 file_put_contents('SplFileObject_setCsvControl_variation001.csv',
 <<<CDATA
 "groene appelen",10

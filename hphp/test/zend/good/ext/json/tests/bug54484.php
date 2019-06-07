@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 json_decode('{"test":"test"}');
 var_dump(json_last_error());
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class :foo {
   attribute enum { 'bar', 'baz' } echo;
   attribute enum { 'bar', 'baz' } print;

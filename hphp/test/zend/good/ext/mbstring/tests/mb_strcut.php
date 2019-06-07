@@ -1,4 +1,4 @@
-<?php
+<?hh
 // TODO: Add more encodings
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f($x) {
   var_dump(is_array($x), $x[0]);

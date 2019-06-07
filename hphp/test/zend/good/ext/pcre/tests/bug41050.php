@@ -1,4 +1,4 @@
-<?php
+<?hh
 // by legolas558
 <<__EntryPoint>> function main() {
 $regex = '/(insert|drop|create|select|delete|update)([^;\']*('."('[^']*')+".')?)*(;|$)/i';

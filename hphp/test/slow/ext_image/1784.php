@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // Create a new image instance

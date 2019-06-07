@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $array = array('foo', 'bar', 'baz');
 $iterator = new ArrayIterator($array);

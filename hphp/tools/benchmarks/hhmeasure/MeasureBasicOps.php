@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Measures and reports on the relative cost of basic HHVM operations.

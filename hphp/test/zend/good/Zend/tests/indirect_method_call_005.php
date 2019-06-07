@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class foo extends ArrayObject {
     public function __construct($arr) {

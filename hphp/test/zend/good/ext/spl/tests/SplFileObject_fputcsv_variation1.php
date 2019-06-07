@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Testing fputcsv() to write to a file when all its parameters are provided */
 <<__EntryPoint>> function main() {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function handle() {
  throw new exception;
  }

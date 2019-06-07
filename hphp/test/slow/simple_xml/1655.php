@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function printElement($el, $indent='') {
   if (strlen($indent) > 10) {

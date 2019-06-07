@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /**
  * Doc comment on a function generator

@@ -1,4 +1,4 @@
-<?php
+<?hh
 $utf8dn = "www.fußball.com";
 $asciiNonTrans = "www.xn--fuball-cta.com";
 

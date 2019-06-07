@@ -1,4 +1,4 @@
-<?php
+<?hh
 //-=-=-=-
 // Test Bcrypt
 var_dump(password_get_info('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y'));

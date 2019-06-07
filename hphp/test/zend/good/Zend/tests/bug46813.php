@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace test;
 class inner {}
 <<__EntryPoint>> function main() {

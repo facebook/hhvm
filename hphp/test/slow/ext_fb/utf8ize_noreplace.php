@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // This string includes an invalid UTF-8 sequence.  The first byte

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Issue #1851.
 <<__EntryPoint>>

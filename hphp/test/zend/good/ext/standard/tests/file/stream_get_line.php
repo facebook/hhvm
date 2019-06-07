@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $path = dirname(__FILE__) . '/test.html';
 
 file_put_contents($path, b"foo<br>bar<br>foo");

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C {
   public function baz($z) {
     return $z = call_user_func(array($this,'foo'), $z);

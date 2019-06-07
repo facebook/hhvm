@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function getQueueWithLittleData() {
   $q = new SplPriorityQueue();

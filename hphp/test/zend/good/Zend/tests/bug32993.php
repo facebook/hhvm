@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Test implements Iterator {
 
     public $arr = array();

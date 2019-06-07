@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $i=0;
 $test2=array(
    'a1_teasermenu' => array(

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_diff_key(array arr1, array arr2 [, array ...])
  * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments.
  * Source code: ext/standard/array.c

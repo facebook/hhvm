@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $string = b"\xc3\xa9 uma string utf8 bem formada";
 

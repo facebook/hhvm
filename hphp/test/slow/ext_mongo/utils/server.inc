@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MongoShellServer {
     protected $fp;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function g() {
   $f = 'IntlChar::ord';

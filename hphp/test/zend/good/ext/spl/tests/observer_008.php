@@ -1,4 +1,4 @@
-<?php
+<?hh
 class A extends SplObjectStorage { }
 <<__EntryPoint>> function main() {
 $o1 = new StdClass;

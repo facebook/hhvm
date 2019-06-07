@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
  * Description: Allocate a color for an image
  * Source code: ext/gd/gd.c

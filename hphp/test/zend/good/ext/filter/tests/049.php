@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $test = array(
     '0'                            => 0.0,
     '12345678900.1234567165'    => 12345678900.1234567165,

@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 date_default_timezone_set('UTC');
 var_dump(date_parse("2006-12-12 10:00:00.5"));
 var_dump(date_parse("2006-12-12"));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class B { public function __wakeup() { var_dump('a'); } }
 <<__EntryPoint>> function main() {

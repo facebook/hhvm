@@ -1,4 +1,4 @@
-<?php
+<?hh
 function valRef($x, &$y) {
     var_dump($x, $y);
     $x = 'changed.x';

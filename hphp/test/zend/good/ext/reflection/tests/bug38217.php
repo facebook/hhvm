@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Object {
 	public function __construct() {

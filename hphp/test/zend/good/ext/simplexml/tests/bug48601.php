@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $sxe = simplexml_load_string('<root><node1>1</node1></root>');
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* (counterpart: ext/standard/tests/reg/005.phpt) */
   $a="This is a nice and simple string";
   echo mb_ereg(".*(is).*(is).*",$a,&$registers);

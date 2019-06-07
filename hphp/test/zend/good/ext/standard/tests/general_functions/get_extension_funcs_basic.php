@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array get_extension_funcs  ( string $module_name  )
  * Description: Returns an array with the names of the functions of a module.
  * Source code: Zend/zend_builtin_functions.c

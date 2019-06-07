@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : bool iconv_set_encoding(string type, string charset)
  * Description: Sets internal encoding and output encoding for ob_iconv_handler()
  * Source code: ext/iconv/iconv.c

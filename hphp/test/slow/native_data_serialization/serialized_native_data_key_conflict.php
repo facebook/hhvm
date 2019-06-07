@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // When a private property is serialized, the key is \0class\0name.
 // Since the key of serialized native data \0native, we want to make

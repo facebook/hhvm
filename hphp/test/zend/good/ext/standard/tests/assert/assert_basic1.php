@@ -1,4 +1,4 @@
-<?php
+<?hh
 function f1() 
 {
 	echo "f1 called\n";

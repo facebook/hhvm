@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TType {
   const STOP   = 0;

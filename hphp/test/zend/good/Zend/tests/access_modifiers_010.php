@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class d {
     private function test2() {

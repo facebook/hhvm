@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // as a private/protected method
 class C6 {

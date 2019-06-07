@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class asd {
   static $PROP = 2;

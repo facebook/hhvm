@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class X { static $y = 2; }
 function k() { var_dump(is_int(X::$y)); }

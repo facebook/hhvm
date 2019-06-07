@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Try getting the display_variant for different locales

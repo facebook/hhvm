@@ -1,4 +1,4 @@
-<?php
+<?hh
 class Foo {
   function __call($name, $args) {
     if ($name == "test") {

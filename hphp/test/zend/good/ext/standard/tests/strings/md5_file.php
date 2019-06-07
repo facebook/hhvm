@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype: string md5_file( string filename[, bool raw_output] )
  * Description: Calculate the MD5 hash of a given file

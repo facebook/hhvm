@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 $memc = new Memcached();
 $memc->addServer('localhost', '11211');

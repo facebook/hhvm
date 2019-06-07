@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f(array $a = null, $e) {
   if (is_int($e) || is_string($e)) {

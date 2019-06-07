@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function inline_me($x, $y, &$z) {
  return ($z = ($x + $y));

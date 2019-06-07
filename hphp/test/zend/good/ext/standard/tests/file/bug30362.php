@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $resource = fopen(dirname(__FILE__).'/bug30362.txt', 'rb');
 

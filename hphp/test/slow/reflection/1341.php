@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class bar {
  function baz() {

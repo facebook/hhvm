@@ -1,4 +1,4 @@
-<?php
+<?hh
 namespace NS;
 
 const WHERE_I_AM = __FILE__.':'.__LINE__;

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : proto int posix_get_last_error(void)
  * Description: Retrieve the error number set by the last posix function which failed. 
  * Source code: ext/posix/posix.c

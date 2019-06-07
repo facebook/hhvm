@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f1($x) {
   if ($x[1]) goto x_t;

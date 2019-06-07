@@ -1,4 +1,4 @@
-<?php
+<?hh
 include (__DIR__ . '/../NumberFormatter_rounding.inc');
 
 // TODO(t5921532) Add tests for ar_AE once icu has been updated to 53.1 or newer

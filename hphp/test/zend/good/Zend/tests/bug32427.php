@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 interface Example {
     public static function sillyError();

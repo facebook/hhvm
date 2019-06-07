@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $dom = new DOMDocument();
 $dom->loadXML('<root/>');

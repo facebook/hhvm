@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo hash('md2', '') . "\n";
 echo hash('md2', 'a') . "\n";
 echo hash('md2', 'abc') . "\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 interface foo {
     const foo = 'foobar';
     public function bar($x = foo);

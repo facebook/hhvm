@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test implements itestable {
   public $foo;
   protected $prop;

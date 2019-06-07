@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(UConverter::transcode("This is an ascii string", 'utf-8', 'latin1'));
 // urlencode so that non-ascii shows up parsable in phpt file
 var_dump(urlencode(UConverter::transcode("Espa\xF1ol", 'utf-8', 'latin1')));

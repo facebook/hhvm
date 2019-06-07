@@ -1,4 +1,4 @@
-<?php
+<?hh
 class C { }
 $myInstance = new C;
 $r2 = new ReflectionObject($myInstance);

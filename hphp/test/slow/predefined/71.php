@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class A {
  const Foo = __METHOD__;

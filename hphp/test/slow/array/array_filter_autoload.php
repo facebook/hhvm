@@ -1,4 +1,4 @@
-<?php
+<?hh
 function __autoload($c) {
   throw new Exception("Ha!");
 }

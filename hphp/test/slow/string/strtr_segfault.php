@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // at least 64 patterns required to trigger the WuManberReplacement algorithm
 <<__EntryPoint>>

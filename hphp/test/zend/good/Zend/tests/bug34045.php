@@ -1,4 +1,4 @@
-<?php
+<?hh
 class BasicSingleton
 {
     private static $instance;

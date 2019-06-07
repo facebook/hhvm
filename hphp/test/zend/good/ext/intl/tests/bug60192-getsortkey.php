@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Collator2 extends Collator{
     public function __construct() {

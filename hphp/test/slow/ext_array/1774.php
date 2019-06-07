@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function cmp($a, $b) {
   throw new Exception('Surprise!');

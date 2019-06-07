@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 
 // PHP_INI_ALL

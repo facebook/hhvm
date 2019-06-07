@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class TProtocolException extends Exception {
   const UNKNOWN = 0;

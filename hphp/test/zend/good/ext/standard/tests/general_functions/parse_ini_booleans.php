@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ini_file = dirname(__FILE__)."/parse_ini_booleans.data";
 

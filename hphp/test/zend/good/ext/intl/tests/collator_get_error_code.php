@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * Retreive error code.

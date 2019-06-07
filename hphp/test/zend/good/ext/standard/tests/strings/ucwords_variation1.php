@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string ucwords ( string $str )
  * Description: Uppercase the first character of each word in a string
  * Source code: ext/standard/string.c

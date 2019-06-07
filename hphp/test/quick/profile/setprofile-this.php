@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Test uses RenameFunction to ensure that all arguments are retained
 
 trait logger {

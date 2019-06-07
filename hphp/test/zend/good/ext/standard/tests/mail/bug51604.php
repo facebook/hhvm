@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Initialise all required variables
 $to = 'user@example.com';
 $subject = 'Test Subject';

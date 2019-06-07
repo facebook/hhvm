@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class test {
     private protected function foo() {}

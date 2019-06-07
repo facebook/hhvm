@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
 * proto bool shuffle ( array &$array )
 * Function is implemented in ext/standard/array.c

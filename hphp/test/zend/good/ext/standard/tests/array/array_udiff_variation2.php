@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_udiff(array arr1, array arr2 [, array ...], callback data_comp_func)
  * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments. Elements are compared by user supplied function.
  * Source code: ext/standard/array.c

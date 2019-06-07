@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $dirname = dirname(__FILE__) . '/';
 $file = $dirname . '__tmp_oo_delete.zip';
 if (file_exists($file)) {

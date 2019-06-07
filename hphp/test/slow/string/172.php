@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(strncmp('foo', 'foo', -100));
 var_dump(strncasecmp('foo', 'foo', -100));

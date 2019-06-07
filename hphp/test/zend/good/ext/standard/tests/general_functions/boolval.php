@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 var_dump(boolval(false));
 var_dump(boolval(NULL));
 var_dump(boolval(""));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 require 'server.inc';
 
 $responses = array(

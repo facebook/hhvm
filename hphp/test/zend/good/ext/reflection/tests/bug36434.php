@@ -1,4 +1,4 @@
-<?php
+<?hh
 class ancester
 {
 public $ancester = 0;

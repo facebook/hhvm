@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 namespace foo\bar {
   const baz = 42;

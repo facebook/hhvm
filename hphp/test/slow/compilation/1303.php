@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function checker($x) {
   $msg = foo();

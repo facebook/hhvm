@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>This is the title</title></head></html>';
 

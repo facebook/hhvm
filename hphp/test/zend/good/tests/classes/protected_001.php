@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class pass {
     protected static function fail() {

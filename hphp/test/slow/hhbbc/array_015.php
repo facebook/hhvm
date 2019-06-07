@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function heh() { return 4; }
 function bar() { return array('other' => heh()); }

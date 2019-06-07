@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Based on ext/zlib/tests/zlib_wrapper_flock_basic.php
 // except that locking actually works in HHVM, where it fails in PHP
 <<__EntryPoint>> function main() {

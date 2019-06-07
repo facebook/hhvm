@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class bar extends PDOStatement {
     private function __construct() {

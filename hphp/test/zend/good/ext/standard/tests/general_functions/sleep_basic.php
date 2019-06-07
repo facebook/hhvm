@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : int sleep  ( int $seconds  )
  * Description: Delays the program execution for the given number of seconds .
  * Source code: ext/standard/basic_functions.c

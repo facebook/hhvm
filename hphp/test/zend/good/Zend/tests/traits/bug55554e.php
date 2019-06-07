@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Ensuring that the collision still occurs as expected.
 

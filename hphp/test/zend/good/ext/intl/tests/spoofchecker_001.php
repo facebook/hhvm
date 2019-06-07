@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $url = "http://www.payp\xD0\xB0l.com";
 

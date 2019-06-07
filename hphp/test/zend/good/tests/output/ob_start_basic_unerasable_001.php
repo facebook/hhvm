@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 abstract final class CallbackStatics {
   public static $callback_invocations;

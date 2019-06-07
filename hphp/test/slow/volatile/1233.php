@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 var_dump(HH\autoload_set_paths(
   array(

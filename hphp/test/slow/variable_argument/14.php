@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($a, ...$more_args) {
   var_dump($a);

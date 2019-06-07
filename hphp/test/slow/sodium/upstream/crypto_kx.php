@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $client_seed = sodium_hex2bin('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef');
 $client_keypair = sodium_crypto_kx_seed_keypair($client_seed);
 $server_seed = sodium_hex2bin('f123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde0');

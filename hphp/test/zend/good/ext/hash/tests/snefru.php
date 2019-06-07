@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 echo hash('snefru', ''), "\n";
 echo hash('snefru', 'The quick brown fox jumps over the lazy dog'), "\n";
 echo hash('snefru', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), "\n";

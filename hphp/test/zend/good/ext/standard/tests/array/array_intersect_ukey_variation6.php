@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
  * Description: Computes the intersection of arrays using a callback function on the keys for comparison.
  * Source code: ext/standard/array.c

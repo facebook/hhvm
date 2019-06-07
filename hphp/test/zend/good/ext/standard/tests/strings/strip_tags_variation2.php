@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
  * Description: Strips HTML and PHP tags from a string
  * Source code: ext/standard/string.c
@@ -18,7 +18,7 @@ class classA{
 echo "*** Testing strip_tags() : usage variations ***\n";
 
 // Initialise function argument
-$string = "<html><a>hello</a></html><p>world</p><!-- COMMENT --><?php echo hello ?>";
+$string = "<html><a>hello</a></html><p>world</p><!-- COMMENT --><?hh echo hello ?>";
 
 //get an unset variable
 $unset_var = 10;

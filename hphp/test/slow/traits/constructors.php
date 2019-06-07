@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 trait T {
   function x() { echo __METHOD__, "\n"; }

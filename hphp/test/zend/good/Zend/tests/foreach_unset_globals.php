@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $arr = array("a" => 1, "b" => 2);
 foreach ($arr as $key => $val) {

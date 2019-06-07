@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line %d%d
  * Source code: ext/standard/string.c

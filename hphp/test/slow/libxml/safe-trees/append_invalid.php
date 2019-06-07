@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo() {
     $d = new DOMDocument;

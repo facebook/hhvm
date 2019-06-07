@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Test {
     private $real_a = 2;

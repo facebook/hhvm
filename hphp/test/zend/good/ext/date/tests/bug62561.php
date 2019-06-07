@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $tz = new DateTimeZone('America/New_York');
 $ts = new DateTime('@1341115200', $tz);
 $int = new DateInterval('P1D');

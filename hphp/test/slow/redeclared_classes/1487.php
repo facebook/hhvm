@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 if (!isset($h)) {
   if (isset($g)) {

@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(filter_var("\"<br>blah</ph>", FILTER_SANITIZE_ENCODED));
 var_dump(filter_var("", FILTER_SANITIZE_ENCODED));

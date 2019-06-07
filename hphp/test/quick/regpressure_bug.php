@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /*
  * This test emulates a regpressure case that occurred with inlining

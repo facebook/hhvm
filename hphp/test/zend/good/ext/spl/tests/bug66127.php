@@ -1,4 +1,4 @@
-<?php
+<?hh
 function crash()
 {
     set_error_handler(function () {});

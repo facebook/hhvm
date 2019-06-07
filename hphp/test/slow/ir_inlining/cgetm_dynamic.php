@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class CGetMDynProp {
   public function __construct() {

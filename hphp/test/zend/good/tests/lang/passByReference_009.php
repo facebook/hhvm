@@ -1,4 +1,4 @@
-<?php
+<?hh
     function foo(&$x, &$y) { $x = 1; echo $y ; }
 
     $x = 0;

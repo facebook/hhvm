@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function nums() {
  $i = 0;

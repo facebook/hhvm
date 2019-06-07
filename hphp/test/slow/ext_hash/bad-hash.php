@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // see http://git.php.net/?p=php-src.git;a=commit;h=1390a5812b151e0ea8f74e64bfeaa5df4dd5b801
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($x, $v) {
  unset($x->$v);

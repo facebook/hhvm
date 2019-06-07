@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 var_dump(gmp_cmp(123123,-123123));
 var_dump(gmp_cmp("12345678900987654321","12345678900987654321"));

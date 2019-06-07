@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
  * Description: Return input as a new array with the order of the entries reversed
  * Source code: ext/standard/array.c

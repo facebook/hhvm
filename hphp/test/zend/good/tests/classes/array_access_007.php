@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class OverloadedArray implements ArrayAccess {
     public $realArray;

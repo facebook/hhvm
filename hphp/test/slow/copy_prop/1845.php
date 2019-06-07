@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function test($tr_data) {
   $temp_tr = null;

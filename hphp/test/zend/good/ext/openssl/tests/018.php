@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $data = "Testing openssl_sign()";
 $privkey = "file://" . dirname(__FILE__) . "/private.key";
 $wrong = "wrong";

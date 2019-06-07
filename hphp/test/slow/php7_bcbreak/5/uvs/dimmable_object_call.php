@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function myfunc() {
   return 'quux';

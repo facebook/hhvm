@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype:
      string strtoupper ( string $string );
    Description:

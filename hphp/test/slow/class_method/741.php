@@ -1,4 +1,4 @@
-<?php
+<?hh
 class AdsConsoleRenderer {
   public static function getInstance() {
     return new AdsConsoleRenderer();

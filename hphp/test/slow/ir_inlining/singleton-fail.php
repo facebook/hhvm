@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function thing_get() {
   return thing::get();

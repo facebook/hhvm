@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class MyDocument extends DOMDocument {
   public function __get($name) {

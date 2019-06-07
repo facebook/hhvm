@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype: int fileowner ( string $filename )
  * Description: Returns the user ID of the owner of the file, or
  *              FALSE in case of an error.

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Prototype  : string escapeshellarg  ( string $arg  )
  * Description:  Escape a string to be used as a shell argument.

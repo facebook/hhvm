@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 <<__EntryPoint>> function main() {
 echo "*** Test substituting argument 2 with string values ***\n";

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class aclass
 {
     const myConst = "hello";

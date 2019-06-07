@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 $ai = new ArrayIterator(array(new stdClass(), new stdClass()));
 $ci = new CachingIterator($ai);

@@ -1,4 +1,4 @@
-<?php
+<?hh
 function ReflectionParameterTest($test, $test2 = null) {
 	echo $test;
 }

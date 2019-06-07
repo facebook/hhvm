@@ -1,4 +1,4 @@
-<?php
+<?hh
 $dom = new domDocument;
 $dom->load(dirname(__FILE__)."/xslt.xml");
 if(!$dom) {

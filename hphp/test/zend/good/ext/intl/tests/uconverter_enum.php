@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $avail = UConverter::getAvailable();
 var_dump(count($avail) > 100);
 var_dump(in_array('UTF-7', $avail));

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* $Id$ */
 <<__EntryPoint>> function main() {
 $filename = dirname(__FILE__) . '/_003.xml';

@@ -1,5 +1,5 @@
 #!/bin/env php
-<?php
+<?hh
 
 trait bar {
   public function call() {

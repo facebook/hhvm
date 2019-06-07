@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $no_arg_filters = array(
     "IMG_FILTER_NEGATE",
     "IMG_FILTER_GRAYSCALE",

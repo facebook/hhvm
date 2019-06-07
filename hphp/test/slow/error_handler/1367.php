@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function handler($code, $msg) {
    var_dump(strpos($msg, 'system error') !== false);

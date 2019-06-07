@@ -1,4 +1,4 @@
-<?php /* destructor */
+<?hh /* destructor */
 
 const N = 10;
 

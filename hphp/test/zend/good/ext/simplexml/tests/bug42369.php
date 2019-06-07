@@ -1,4 +1,4 @@
-<?php
+<?hh
     $xml = '<?xml version="1.0" encoding="utf-8"?>';
     $x = simplexml_load_string($xml . "<q><x>foo</x></q>");
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class Base {
   function heh(D1 $d) {

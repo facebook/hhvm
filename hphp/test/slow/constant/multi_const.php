@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 const A = 5, B = 10, C = 15;
 

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 class c{
   public static $idx = 0;

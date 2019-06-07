@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
  * @author Joshua Thijssen <jthijssen+php@noxlogic.nl>
  */

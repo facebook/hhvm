@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $test = new ArrayObject();
 $test['d1'] = array();
 $test['d1']['d2'] = 'hello';

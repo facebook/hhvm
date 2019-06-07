@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test() {
   unlink('/tmp/1link');
   unlink('/tmp/1tmp');

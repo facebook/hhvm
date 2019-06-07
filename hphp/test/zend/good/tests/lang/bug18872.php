@@ -1,4 +1,4 @@
-<?php
+<?hh
 class FooBar {
     const BIFF = 3;
 }

@@ -1,4 +1,4 @@
-<?php
+<?hh
 class test {
         function __construct() {
                 if (!($this->test[0][0] ?? false)) { print "test1\n";}

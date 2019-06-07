@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Exercises slow-case for packed array construction, and also has the
 // current worst-case ratio of encoded vs. in-memory size.

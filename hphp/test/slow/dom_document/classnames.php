@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function filter_dom_element($dom_element) {
   foreach ($dom_element->childNodes as $node) {

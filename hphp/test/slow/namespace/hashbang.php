@@ -1,5 +1,5 @@
 #!/usr/local/php
-<?php
+<?hh
 namespace foo;
 
 <<__EntryPoint>>

@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 // Add code snippets here
 // Call them from MeasureBasicOps.php to collect relative CPU time stats

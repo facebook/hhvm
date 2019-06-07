@@ -1,4 +1,4 @@
-<?php
+<?hh
 <<__EntryPoint>> function main() {
 gc_enable();
 $gmp = gmp_init('10');

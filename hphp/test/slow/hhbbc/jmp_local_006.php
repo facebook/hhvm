@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function main(array $x = null) {
   if ($x) {

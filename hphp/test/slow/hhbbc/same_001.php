@@ -1,4 +1,4 @@
-<?php
+<?hh
 function test($group) {
   $children = $group['children'];
   $count = count($children);

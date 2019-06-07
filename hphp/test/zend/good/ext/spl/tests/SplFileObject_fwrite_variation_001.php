@@ -1,4 +1,4 @@
-<?php <<__EntryPoint>> function main() {
+<?hh <<__EntryPoint>> function main() {
 $file = dirname(__FILE__).'/SplFileObject_fwrite_variation_001.txt';
 if(file_exists($file)) {
     unlink($file);

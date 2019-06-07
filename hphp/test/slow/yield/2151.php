@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function f(...$args) {
  yield count($args);

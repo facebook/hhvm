@@ -1,4 +1,4 @@
-<?php
+<?hh
 /* Prototype  : array array_unique(array $input)
  * Description: Removes duplicate values from array 
  * Source code: ext/standard/array.c

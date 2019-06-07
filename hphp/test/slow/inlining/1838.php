@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 /* Compile only: verify no c++ compilation errors */function f($x) {
   return function () use ($x) {

@@ -870,17 +870,13 @@ ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData* a) {
 
 StringData* recordReifiedGenericsAndGetName(ArrayData* tsList) {
   auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  bool didAdd = false;
-  addToReifiedGenericsTable(mangledName, tsList, didAdd);
-  if (!didAdd) decRefArr(tsList);
+  addToReifiedGenericsTable(mangledName, tsList);
   return mangledName;
 }
 
 ArrayData* recordReifiedGenericsAndGetTSList(ArrayData* tsList) {
   auto const mangledName = makeStaticString(mangleReifiedGenericsName(tsList));
-  bool didAdd = false;
-  auto result = addToReifiedGenericsTable(mangledName, tsList, didAdd);
-  if (!didAdd) decRefArr(tsList);
+  auto result = addToReifiedGenericsTable(mangledName, tsList);
   return result;
 }
 

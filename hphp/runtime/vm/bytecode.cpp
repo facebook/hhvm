@@ -3324,9 +3324,8 @@ OPTBLD_INLINE void iopClsRefGetTS(clsref_slot slot) {
     reified_types = generics_field.val().parr;
     auto const mangledTypeName =
       makeStaticString(mangleReifiedGenericsName(reified_types));
-    bool didAdd = false;
-    reified_types =
-      addToReifiedGenericsTable(mangledTypeName, reified_types, didAdd);
+    reified_types->incRefCount();
+    reified_types = addToReifiedGenericsTable(mangledTypeName, reified_types);
     mangledName = mangleReifiedName(name, mangledTypeName);
   }
   auto tv = make_tv<KindOfString>(mangledName);

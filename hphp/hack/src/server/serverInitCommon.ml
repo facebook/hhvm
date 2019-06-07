@@ -80,8 +80,7 @@ let parsing
       ~get_next
       ~trace
       env.popt in
-  let naming_table = Naming_table.create fast in
-  let naming_table = Naming_table.combine naming_table env.naming_table in
+  let naming_table = Naming_table.update_many env.naming_table fast in
   let hs = SharedMem.heap_size () in
   Hh_logger.log "Heap size: %d" hs;
   Stats.(stats.init_parsing_heap_size <- hs);

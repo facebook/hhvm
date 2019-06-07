@@ -64,12 +64,20 @@ let load_class_decls (input_filename: string) : unit =
 (* Loads the file info and the errors, if any. *)
 let load_saved_state
     ~(load_decls: bool)
+    ~(naming_table_fallback_path: string option)
     (saved_state_filename: string)
-  : Naming_table.saved_state_info * saved_state_errors =
-  let chan = In_channel.create ~binary:true saved_state_filename in
-  let (old_saved: Naming_table.saved_state_info) =
-    Marshal.from_channel chan in
-  Sys_utils.close_in_no_fail saved_state_filename chan;
+  : Naming_table.t * saved_state_errors =
+  let old_naming_table = match naming_table_fallback_path with
+    | Some nt_path ->
+      Naming_table.set_sqlite_fallback_path nt_path;
+      Naming_table.from_db ()
+    | None ->
+      let chan = In_channel.create ~binary:true saved_state_filename in
+      let (old_saved: Naming_table.saved_state_info) =
+        Marshal.from_channel chan in
+      Sys_utils.close_in_no_fail saved_state_filename chan;
+      Naming_table.from_saved old_saved
+  in
 
   let errors_filename = get_errors_filename saved_state_filename in
   let (old_errors: saved_state_errors) = if not (Sys.file_exists errors_filename) then [] else
@@ -77,7 +85,7 @@ let load_saved_state
 
   if load_decls then load_class_decls (get_decls_filename saved_state_filename);
 
-  (old_saved, old_errors)
+  (old_naming_table, old_errors)
 
 (* Writes some OCaml object to a file with the given filename. *)
 let dump_contents

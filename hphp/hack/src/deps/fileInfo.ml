@@ -80,7 +80,10 @@ type id = pos  * string [@@deriving show]
 (*****************************************************************************)
 
 type hash_type = OpaqueDigest.t option
-let pp_hash_type _ _ _ = "<OpaqueDigest.t option>"
+let pp_hash_type fmt hash =
+  match hash with
+  | None -> Format.fprintf fmt "None"
+  | Some hash -> Format.fprintf fmt "Some (%s)" (OpaqueDigest.to_hex hash)
 
 type t = {
   hash : hash_type;

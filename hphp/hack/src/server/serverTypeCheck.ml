@@ -295,7 +295,7 @@ let parsing genv env to_check ~stop_at_errors =
 
 let update_naming_table env fast_parsed =
   Relative_path.Map.iter fast_parsed Typing_deps.update_file;
-  let naming_table = Naming_table.combine (Naming_table.create fast_parsed) env.naming_table in
+  let naming_table = Naming_table.update_many env.naming_table fast_parsed in
   naming_table
 
 (*****************************************************************************)

@@ -22,9 +22,15 @@ val set_sqlite_fallback_path : string -> unit
 
 (* Querying and updating forward naming tables. *)
 val combine : t -> t -> t
-val create : FileInfo.t Relative_path.Map.t -> t
 val empty : t
 val filter : t -> f:(Relative_path.t -> FileInfo.t -> bool) -> t
+(** [filter] is implemented using tombstones on SQLite-backed naming tables, so
+  * if your naming table is backed by SQLite you should try to avoid removing
+  * more than half the table by filtering (otherwise it would be best to just
+  * make a new empty one and add elements to it). On non-SQLite backed tables
+  * we remove entries, so it's no more or less efficient depending on how many
+  * are removed. *)
+
 val fold : t -> init:'b -> f:(Relative_path.t -> FileInfo.t -> 'b -> 'b) -> 'b
 val get_files : t -> Relative_path.t list
 val get_file_info : t -> Relative_path.t -> FileInfo.t option
@@ -32,7 +38,12 @@ val get_file_info_unsafe : t -> Relative_path.t -> FileInfo.t
 val has_file : t -> Relative_path.t -> bool
 val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit
 val update : t -> Relative_path.t -> FileInfo.t  -> t
+val update_many : t -> FileInfo.t Relative_path.Map.t -> t
 val save : t -> string -> unit
+
+(* Creation functions. *)
+val create : FileInfo.t Relative_path.Map.t -> t
+val from_db : unit -> t
 
 (* Converting between different types of forward naming tables. *)
 val from_saved : saved_state_info -> t
@@ -72,3 +83,6 @@ val to_canon_name_key : string -> string
 val push_local_changes : unit -> unit
 val pop_local_changes : unit -> unit
 val has_local_changes : unit -> bool
+
+(* Test functions, do not use. *)
+val assert_is_backed : t -> bool -> unit

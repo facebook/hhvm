@@ -490,7 +490,7 @@ let load_state
       disable_conservative_redecl;
       predeclare_ide_deps;
       load_decls_from_saved_state;
-      enable_naming_table_fallback = enable_naming_table_fallback;
+      enable_naming_table_fallback;
     }
   };
   let hhi_files = if load_hhi_files then real_hhi_files () else [] in

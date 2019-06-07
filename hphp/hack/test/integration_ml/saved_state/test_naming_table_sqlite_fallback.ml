@@ -16,6 +16,17 @@ open Core_kernel
 
 module Test = Integration_test_base
 
+module FileInfoComparator = struct
+  type t = FileInfo.t
+  let to_string = FileInfo.show
+  let is_equal left right =
+    (* We use show here in order to avoid matching on private members of Pos.t
+     * records. *)
+    FileInfo.show left = FileInfo.show right
+end
+
+module FileInfoAsserter = Asserter.Make_asserter (FileInfoComparator)
+
 let get_type_path type_name =
   Option.map
     ~f:(fun (pos, _) -> FileInfo.get_pos_filename pos)
@@ -26,6 +37,12 @@ let get_fun_path fun_name =
 
 let get_const_path fun_name =
   Option.map ~f:FileInfo.get_pos_filename (Naming_table.Consts.get_pos fun_name)
+
+let make_full_pos path_name (start_lnum, start_cnum) (end_lnum, end_cnum) =
+  Pos.make_from_lexing_pos
+    (Relative_path.from_root path_name)
+    Lexing.{ pos_fname = path_name; pos_lnum = start_lnum; pos_bol = 1; pos_cnum = start_cnum }
+    Lexing.{ pos_fname = path_name; pos_lnum = end_lnum; pos_bol = 1; pos_cnum = end_cnum }
 
 let foo = {|<?hh
   class Foo {}
@@ -97,4 +114,56 @@ let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
     (Naming_table.Funs.get_canon_name "\\qux")
     "Basic test to get a canon name for a function defined only on disk";
 
+  let () =
+    let open FileInfo in
+    Ast_provider.local_changes_push_stack ();
+
+    (* We make a table of on-disk hashes instead of hardcoding them in the test
+     * data so that we don't need to update them every time we change the AST
+     * schema. *)
+    let hashes =
+      List.map (("qux.php", "") :: base_disk_state) ~f:begin fun (name, _) ->
+        let relative_path = Relative_path.from_root name in
+        let ast = Ast_provider.get_ast relative_path in
+        (name, Ast_utils.generate_ast_decl_hash ast)
+      end
+      |> SMap.of_list
+    in
+    Ast_provider.local_changes_pop_stack ();
+    let naming_table = env.ServerEnv.naming_table in
+    Naming_table.assert_is_backed naming_table true;
+    let empty = { empty_t with file_mode = Some Mstrict; comments = None } in
+    FileInfoAsserter.assert_option_equals
+      (Some { empty with
+        hash = SMap.get "foo.php" hashes;
+        classes = [(File (Class, Relative_path.from_root "foo.php"), "\\Foo")];
+      })
+      (Naming_table.get_file_info naming_table (Relative_path.from_root "foo.php"))
+      "Basic test to get a file info for a relative path.";
+    FileInfoAsserter.assert_option_equals
+      (Some { empty with
+        hash = SMap.get "bar.php" hashes;
+        funs = [(File (Fun, Relative_path.from_root "bar.php"), "\\bar")];
+      })
+      (Naming_table.get_file_info naming_table (Relative_path.from_root "bar.php"))
+      "Basic test to get a file info for a relative path.";
+    FileInfoAsserter.assert_option_equals
+      (Some { empty with
+        hash = SMap.get "baz.php" hashes;
+        consts = [(File (Const, Relative_path.from_root "baz.php"), "\\BAZCONST")];
+      })
+      (Naming_table.get_file_info naming_table (Relative_path.from_root "baz.php"))
+      "Basic test to get a file info for a relative path.";
+    FileInfoAsserter.assert_option_equals
+      (Some { empty with
+        hash = SMap.get "qux.php" hashes;
+        funs = [(Full (make_full_pos "qux.php" (2, 12) (2, 15)), "\\qux")];
+      })
+      (Naming_table.get_file_info naming_table (Relative_path.from_root "qux.php"))
+      "Basic test to get a file info for a relative path.";
+    FileInfoAsserter.assert_option_equals
+      None
+      (Naming_table.get_file_info naming_table (Relative_path.from_root "does_not_exist.php"))
+      "Basic test to get a file info for a relative path that doesn't exist."
+  in
   ()

@@ -1,3 +1,2 @@
 -dhhvm.proxy.percentage=66
 -vServer.ThreadCount=222
--vEval.EnablePHP=1

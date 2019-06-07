@@ -1,3 +1,2 @@
 -vHackArrDVArrs=1
--vRuntime.Eval.EnablePHP=1
 -vRuntime.Eval.EnableArgsInBacktraces=false

@@ -13,7 +13,7 @@ $descriptorspec = array(
    2 => array("pipe", "w")  // stderr
 );
 
-$cmd = getHhvmPath() . " -dhhvm.enable_php=true " . __DIR__ . "/not_enabled.php.test";
+$cmd = getHhvmPath() . " " . __DIR__ . "/not_enabled.php.test";
 $process = proc_open($cmd, $descriptorspec, &$pipes);
 if (!is_resource($process)) {
   throw new UnexpectedValueException("Failed to open child process!");

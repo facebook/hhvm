@@ -1,2 +1,2 @@
 -vRuntime.Eval.HackArrCompatNotices=1
--dhhvm.php7.all=1 -vEval.EnablePHP=1
+-dhhvm.php7.all=1

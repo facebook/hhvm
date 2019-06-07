@@ -1,4 +1,3 @@
 -vEval.HHIRRefcountOpts=false
 -vEval.HHIRSimplification=false
 -vEval.PromoteEmptyObject=true
--vEval.EnablePHP=1

@@ -1,2 +1,1 @@
 -vAliasedNamespaces.c='\foo\bar'
--vEval.EnablePHP=1

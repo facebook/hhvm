@@ -1,3 +1,2 @@
 -vCheckPropTypeHints=1
 -vRuntime.Eval.HackArrCompatTypeHintNotices=1
--vEval.EnablePHP=1

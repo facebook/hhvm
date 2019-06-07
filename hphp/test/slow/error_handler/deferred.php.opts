@@ -1,3 +1,2 @@
 -vEval.EnableArgsInBacktraces=false
 -vEval.HHIREnableGenTimeInlining=false
--vEval.EnablePHP=1

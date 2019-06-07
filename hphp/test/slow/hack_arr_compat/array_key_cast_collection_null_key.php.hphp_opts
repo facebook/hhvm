@@ -1,2 +1,2 @@
 -vRuntime.Eval.HackArrCompatNotices=1
--vRuntime.Eval.HackArrCompatCheckArrayKeyCast=1 -vEval.EnablePHP=1
+-vRuntime.Eval.HackArrCompatCheckArrayKeyCast=1

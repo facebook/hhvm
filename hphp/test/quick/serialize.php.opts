@@ -1,2 +1,1 @@
 -vServer.UnserializationWhitelistCheck=true -vServer.UnserializationWhitelistCheckWarningOnly=true
--vEval.EnablePHP=1

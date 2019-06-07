@@ -1,2 +1,1 @@
 -vEval.HackArrCompatNotices=1 -vEval.HackArrCompatCheckArrayKeyCast=1 -vEval.JitEnableRenameFunction=0
--vEval.EnablePHP=1

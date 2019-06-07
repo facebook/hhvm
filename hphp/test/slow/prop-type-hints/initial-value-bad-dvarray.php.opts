@@ -1,3 +1,2 @@
 -vEval.CheckPropTypeHints=3
 -vEval.HackArrCompatTypeHintNotices=1
--vEval.EnablePHP=1

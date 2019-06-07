@@ -1,3 +1,2 @@
 -vEval.EnableHipHopSyntax=1
 -vEval.JitEnableRenameFunction=true
--vEval.EnablePHP=1

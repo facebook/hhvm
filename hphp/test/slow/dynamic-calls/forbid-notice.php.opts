@@ -1,3 +1,2 @@
 -vEval.ForbidDynamicCalls=1
 -vEval.EmitClsMethPointers=1
--vEval.EnablePHP=1

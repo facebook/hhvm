@@ -1,3 +1,2 @@
 -vRuntime.Eval.HackArrCompatIsArrayNotices=true
 -vRuntime.Eval.HackArrCompatIsVecDictNotices=true
--vEval.EnablePHP=1

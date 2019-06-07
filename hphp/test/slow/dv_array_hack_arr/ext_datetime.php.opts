@@ -3,4 +3,3 @@
 -vEval.HackArrDVArrs=true
 -vEval.HackArrCompatNotices=true
 -vEval.HackArrCompatCheckFalseyPromote=true
--vEval.EnablePHP=1

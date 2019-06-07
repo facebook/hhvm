@@ -1,3 +1,2 @@
 -vEval.CheckReturnTypeHints=3
 -vEval.ThisTypeHintLevel=3
--vEval.EnablePHP=1

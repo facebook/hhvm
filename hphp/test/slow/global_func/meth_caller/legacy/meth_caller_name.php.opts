@@ -1,5 +1,4 @@
 -vEval.EmitFuncPointers=0
 -vEval.EmitMethCallerFuncPointers=0
--vEval.EnablePHP=1
 
 -vEval.NoticeOnMethCallerHelperUse=1

@@ -13,6 +13,7 @@ open Sqlite_utils
 
 let select_symbols_stmt = ref None
 let select_symbols_by_kind_stmt = ref None
+let select_namespaces_stmt = ref None
 let sqlite_file_path = ref None
 
 (* SQL statements used by the autocomplete system *)
@@ -22,6 +23,8 @@ let sql_select_all_symbols =
   "SELECT name, kind, filename_hash FROM symbols WHERE name LIKE ? LIMIT ?"
 let sql_check_alive =
   "SELECT name FROM symbols LIMIT 1"
+let sql_select_namespaces =
+  "SELECT namespace FROM namespaces"
 
 (* Determine the correct filename to use for the db_path or build it *)
 let find_or_build_sqlite_file
@@ -63,16 +66,14 @@ let symbolindex_db = ref None
  *)
 let initialize
     (workers: MultiWorker.worker list option): unit =
+
+  (* Find the database and open it *)
   let db_path = find_or_build_sqlite_file workers in
   let db = Sqlite3.db_open db_path in
   symbolindex_db := (Some db);
 
-  (* Query the database to verify that it is functioning *)
-  let stmt = Sqlite3.prepare db sql_check_alive in
-  while Sqlite3.step stmt = Sqlite3.Rc.ROW do
-    let _name: string = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
-    Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path;
-  done
+  (* Report that the database has been loaded *)
+  Hh_logger.log "Initialized symbol index sqlite: [%s]" db_path
 
 (*
  * Symbol search for a specific kind.
@@ -131,3 +132,14 @@ let sqlite_search
   match kind_filter with
   | Some kind -> search_symbols_by_kind query_text max_results kind
   | None -> search_all_symbols query_text max_results
+
+(* Fetch all known namespaces from the database *)
+let fetch_namespaces (): string list =
+  let stmt = prepare_or_reset_statement (Option.value_exn !symbolindex_db)
+    select_namespaces_stmt sql_select_namespaces in
+  let namespace_list = ref [] in
+  while Sqlite3.step stmt = Sqlite3.Rc.ROW do
+    let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
+    namespace_list := name :: !namespace_list;
+  done;
+  !namespace_list

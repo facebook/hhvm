@@ -58,6 +58,7 @@ let run_index_builder (harness: Test_harness.t): unit =
   SymbolIndex.set_search_provider
     ~quiet:false
     ~provider_name:"SqliteIndex"
+    ~namespace_map:[]
     ~savedstate_file_opt:file_opt
     ~workers:None;
   Hh_logger.log "Built Sqlite database [%s]" fn;

@@ -150,9 +150,11 @@ let init
   let env, t = ServerAiInit.ai_check genv env.naming_table env t in
 
   (* Configure symbol index settings *)
+  let namespace_map = GlobalOptions.po_auto_namespace_map env.tcopt in
   SymbolIndex.set_search_provider
     ~quiet:genv.local_config.ServerLocalConfig.symbolindex_quiet
     ~provider_name:genv.local_config.ServerLocalConfig.symbolindex_search_provider
+    ~namespace_map
     ~savedstate_file_opt:genv.local_config.ServerLocalConfig.symbolindex_file
     ~workers:genv.workers;
 

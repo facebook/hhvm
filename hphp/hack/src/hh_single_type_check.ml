@@ -473,9 +473,11 @@ let parse_options () =
   let tcopt = GlobalOptions.setup_pocket_universes tcopt !pocket_universes in
 
   (* Configure symbol index settings *)
+  let namespace_map = GlobalOptions.po_auto_namespace_map tcopt in
   SymbolIndex.set_search_provider
     ~quiet:true
     ~provider_name:!search_provider
+    ~namespace_map
     ~savedstate_file_opt:!symbolindex_file
     ~workers:None;
 

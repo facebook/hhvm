@@ -49,10 +49,12 @@ let test_init_common ?(hhi_files = []) () =
     did_init := true;
   end;
 
-  (* Configure symbol index settings *)
+  (* Configure symbol index settings - not sure if integration tests have a namespace map? *)
+  let namespace_map = [] in
   SymbolIndex.set_search_provider
     ~quiet:true
     ~provider_name:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_search_provider
+    ~namespace_map
     ~savedstate_file_opt:!genv.ServerEnv.local_config.ServerLocalConfig.symbolindex_file
     ~workers:None;
 

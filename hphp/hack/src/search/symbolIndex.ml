@@ -32,8 +32,11 @@ let get_search_provider (): SearchUtils.search_provider =
 let initialize_provider
     ~(provider: SearchUtils.search_provider)
     ~(savedstate_file_opt: string option)
+    ~(namespace_map: (string * string) list)
     ~(workers: MultiWorker.worker list option): unit =
-  let _ = savedstate_file_opt in
+
+  (* Will be used in the future *)
+  let _ = namespace_map in
   match provider with
   | SqliteIndex ->
     SqliteSearchService.sqlite_file_path := savedstate_file_opt;
@@ -47,6 +50,7 @@ let initialize_provider
 let set_search_provider
     ~(quiet: bool)
     ~(provider_name: string)
+    ~(namespace_map: (string * string) list)
     ~(savedstate_file_opt: string option)
     ~(workers: MultiWorker.worker list option): unit =
   let provider = SearchUtils.provider_of_string provider_name in
@@ -54,7 +58,7 @@ let set_search_provider
   | None ->
     in_quiet_mode := quiet;
     current_search_provider := Some provider;
-    initialize_provider ~provider ~savedstate_file_opt ~workers;
+    initialize_provider ~provider ~savedstate_file_opt ~workers ~namespace_map;
     if not !in_quiet_mode then begin
       Hh_logger.log "Search provider set to [%s] based on configuration value [%s]"
         (SearchUtils.descriptive_name_of_provider provider)

@@ -60,7 +60,6 @@ let find_exact_match (namespace: string): nss_node =
   if namespace = "" || namespace = "\\" then begin
     root_namespace
   end else begin
-    Hh_logger.log "Called find_exact_match [%s]" namespace;
     let elem_list = String.split_on_char '\\' namespace in
     Core_kernel.List.fold elem_list ~init:root_namespace
       ~f:(fun current_node leaf_name ->
@@ -68,10 +67,7 @@ let find_exact_match (namespace: string): nss_node =
       (* Check to see if this leaf exists within the current node *)
       match Hashtbl.find_opt current_node.nss_children leaf_name with
       | Some matching_leaf -> matching_leaf;
-      | None ->
-        Hh_logger.log "Failed to find [%s] in namespace tree [%s]"
-          leaf_name current_node.nss_full_namespace;
-        current_node
+      | None -> raise Not_found
     )
   end
 
@@ -117,18 +113,22 @@ let find_matching_namespaces (query_text: string): si_results =
  * should appear in both places.
  *)
 let register_alias (alias: string) (target_ns: string): unit =
+  try
 
-  (* First find the target and make sure there's only one *)
-  let target = find_exact_match target_ns in
+    (* First find the target and make sure there's only one *)
+    let target = find_exact_match target_ns in
 
-  (* Now assert that the alias cannot have a backslash in it *)
-  let (source_ns, name) = Utils.split_ns_from_name alias in
-  let source = find_exact_match source_ns in
+    (* Now assert that the alias cannot have a backslash in it *)
+    let (source_ns, name) = Utils.split_ns_from_name alias in
+    let source = find_exact_match source_ns in
 
-  (* Register this alias at the root *)
-  let new_node = {
-    nss_name = name;
-    nss_full_namespace = target.nss_full_namespace;
-    nss_children = target.nss_children;
-  } in
-  Hashtbl.add source.nss_children name new_node;
+    (* Register this alias at the root *)
+    let new_node = {
+      nss_name = name;
+      nss_full_namespace = target.nss_full_namespace;
+      nss_children = target.nss_children;
+    } in
+    Hashtbl.add source.nss_children name new_node;
+  with Not_found ->
+    Hh_logger.log "Unable to register namespace map for [%s] -> [%s]"
+      alias target_ns;

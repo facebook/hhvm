@@ -41,6 +41,7 @@ let desc_string_from_type result_type =
   | SS.Function -> "function"
   | SS.Typedef -> "typedef"
   | SS.Constant -> "constant"
+  | SS.Namespace -> "namespace"
 
 let result_to_json res =
   let desc_string = desc_string_from_type res.SUtils.result_type in

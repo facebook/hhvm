@@ -75,6 +75,7 @@ type search_result_type =
   | Function
   | Typedef
   | Constant
+  | Namespace
 
 (* Individual result object as known by the autocomplete system *)
 type symbol = (Pos.absolute, search_result_type) term
@@ -107,6 +108,7 @@ type si_kind =
   | SI_Typedef
   | SI_GlobalConstant
   | SI_XHP
+  | SI_Namespace
   [@@deriving show]
 
 (*
@@ -131,6 +133,7 @@ let kind_to_int (kind: si_kind): int =
   | SI_Typedef -> 8
   | SI_GlobalConstant -> 9
   | SI_XHP -> 10
+  | SI_Namespace -> 11
 
 (* Convert an integer back to an enum *)
 let int_to_kind (kind_num: int): si_kind =
@@ -145,6 +148,7 @@ let int_to_kind (kind_num: int): si_kind =
   | 8 -> SI_Typedef
   | 9 -> SI_GlobalConstant
   | 10 -> SI_XHP
+  | 11 -> SI_Namespace
   | _ -> SI_Unknown
 
 (* Convert an internal "kind" into an autocomplete result kind *)
@@ -160,6 +164,7 @@ let kind_to_result (kind: si_kind): search_result_type =
   | SI_Typedef -> Typedef
   | SI_GlobalConstant -> Constant
   | SI_XHP -> Class (Some Ast_defs.Cnormal)
+  | SI_Namespace -> Namespace
 
 (* Convert an autocomplete result "kind" into an internal kind *)
 let result_to_kind (result: search_result_type): si_kind =
@@ -173,6 +178,7 @@ let result_to_kind (result: search_result_type): si_kind =
   | Constant -> SI_GlobalConstant
   | Function -> SI_Function
   | Typedef -> SI_Typedef
+  | Namespace -> SI_Namespace
   | _ -> SI_Unknown
 
 (* Internal representation of a single item stored by the symbol list *)

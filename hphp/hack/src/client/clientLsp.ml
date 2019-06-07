@@ -1170,6 +1170,7 @@ let do_workspaceSymbol
     | SearchUtils.Typedef -> SymbolInformation.Class
     (* LSP doesn't have typedef, so we approximate with class *)
     | SearchUtils.Constant -> SymbolInformation.Constant
+    | SearchUtils.Namespace -> SymbolInformation.Namespace
   in
   let hack_to_lsp_container = function
     | SearchUtils.Method (_, scope) -> Some scope

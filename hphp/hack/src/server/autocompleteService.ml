@@ -809,6 +809,7 @@ let si_kind_to_autocomplete_kind
    *)
   | SI_Mixed -> Variable_kind
   | SI_Unknown -> Class_kind
+  | SI_Namespace -> Namespace_kind
 
 (* Find global autocomplete results *)
 let find_global_results

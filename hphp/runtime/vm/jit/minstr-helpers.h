@@ -456,30 +456,6 @@ ELEMD_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<MOpMode mode>
-NEVER_INLINE
-tv_rval elemArrayNotFound(int64_t k) {
-  if (mode == MOpMode::Warn) throwArrayIndexException(k, false);
-  if (mode == MOpMode::InOut) throwArrayIndexException(k, true);
-  return &immutable_uninit_base;
-}
-
-template<MOpMode mode>
-NEVER_INLINE
-tv_rval elemArrayNotFound(const StringData* k) {
-  if (mode == MOpMode::Warn) throwArrayKeyException(k, false);
-  if (mode == MOpMode::InOut) throwArrayKeyException(k, true);
-  return &immutable_uninit_base;
-}
-
-template<KeyType keyType, MOpMode mode>
-inline tv_rval elemArrayImpl(ArrayData* ad, key_type<keyType> key) {
-  auto constexpr warn = mode == MOpMode::Warn;
-  auto const ret = warn ? ad->rvalStrict(key) : ad->rval(key);
-  if (!ret) return elemArrayNotFound<mode>(key);
-  return ret;
-}
-
 #define ELEM_ARRAY_D_HELPER_TABLE(m)  \
   /* name           keyType */        \
   m(elemArraySD,    KeyType::Str)     \
@@ -519,7 +495,7 @@ ELEM_ARRAY_U_HELPER_TABLE(X)
 
 #define X(nm, keyType, mode)                              \
 inline tv_rval nm(ArrayData* ad, key_type<keyType> key) { \
-  return elemArrayImpl<keyType, mode>(ad, key);           \
+  return ElemArray<mode, keyType>(ad, key);               \
 }
 ELEM_ARRAY_HELPER_TABLE(X)
 #undef X

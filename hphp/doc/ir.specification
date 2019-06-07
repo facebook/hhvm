@@ -2969,11 +2969,11 @@ fields of that struct for holding intermediate values.
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
   fail, branch to B.  This check is allowed to have false negatives.
 
-| ElemArrayX<M>, D(LvalToMembGen), S(Arr) S(Int,Str), NF
+| ElemArrayX<M>, D(LvalToMembInitGen), S(Arr) S(Int,Str), NF
 
-| ElemArrayD<T>, D(LvalToElemGen), S(LvalToGen) S(Int,Str), MElem
+| ElemArrayD<T>, D(LvalToElemInitGen), S(LvalToGen) S(Int,Str), MElem
 
-| ElemArrayU<T>, D(LvalToMembGen), S(LvalToGen) S(Int,Str), MElem
+| ElemArrayU<T>, D(LvalToMembInitGen), S(LvalToGen) S(Int,Str), MElem
 
   Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
   ElemArrayD is for Define member instrs, ElemArrayU is for Unset, and
@@ -2982,13 +2982,13 @@ fields of that struct for holding intermediate values.
   ElemArray{D,U} both take a LvalToGen for the base operand, but expect it to be
   a LvalToArr or LvalToBoxedArr.  T is the type of the base array.
 
-| ElemMixedArrayK<pos>, D(LvalToElemGen), S(AK(Mixed)) S(Int,Str), NF
+| ElemMixedArrayK<pos>, D(LvalToElemInitGen), S(AK(Mixed)) S(Int,Str), NF
 
   Like ElemArray, but the element for S1 is at a known position `pos' in S0.
 
-| ElemVecD<T>, D(LvalToElemCell), S(LvalToGen) S(Int), MElem
+| ElemVecD<T>, D(LvalToElemInitCell), S(LvalToGen) S(Int), MElem
 
-| ElemVecU<T>, D(LvalToMembCell), S(LvalToGen) S(Int), MElem
+| ElemVecU<T>, D(LvalToMembInitCell), S(LvalToGen) S(Int), MElem
 
   Similar to ElemX, but the base S0 is a vec and the key S1 is an int. ElemVecD
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
@@ -2997,11 +2997,11 @@ fields of that struct for holding intermediate values.
   ElemVec{D,U} both take a LvalToGen for the base operand, but expect it to be a
   LvalToVec or LvalToBoxedVec. T is the type of the base vec.
 
-| ElemDictX<M>, D(LvalToMembCell), S(Dict) S(Int,Str), NF
+| ElemDictX<M>, D(LvalToMembInitCell), S(Dict) S(Int,Str), NF
 
-| ElemDictD<T>, D(LvalToElemCell), S(LvalToGen) S(Int,Str), MElem
+| ElemDictD<T>, D(LvalToElemInitCell), S(LvalToGen) S(Int,Str), MElem
 
-| ElemDictU<T>, D(LvalToMembCell), S(LvalToGen) S(Int,Str), MElem
+| ElemDictU<T>, D(LvalToMembInitCell), S(LvalToGen) S(Int,Str), MElem
 
   Similar to ElemX, but the base S0 is a dict and the key S1 is an int/str.
   ElemDictD is for Define member instrs, ElemDictU is for Unset, and
@@ -3010,13 +3010,13 @@ fields of that struct for holding intermediate values.
   ElemDict{D,U} both take a LvalToGen for the base operand, but expect it to be
   a LvalToDict or LvalToBoxedDict.  T is the type of the base array.
 
-| ElemDictK<pos>, D(LvalToElemCell), S(Dict) S(Int,Str), NF
+| ElemDictK<pos>, D(LvalToElemInitCell), S(Dict) S(Int,Str), NF
 
   Like ElemDict, but the element for S1 is at a known position `pos' in S0.
 
-| ElemKeysetX<M>, D(LvalToMembCell), S(Keyset) S(Int,Str), NF
+| ElemKeysetX<M>, D(LvalToMembInitCell), S(Keyset) S(Int,Str), NF
 
-| ElemKeysetU<T>, D(LvalToMembCell), S(LvalToGen) S(Int,Str), MElem
+| ElemKeysetU<T>, D(LvalToMembInitCell), S(LvalToGen) S(Int,Str), MElem
 
   Similar to ElemX, but the base S0 is a keyset and the key S1 is an int/str.
   ElemKeysetU is for Unset instrs and ElemKeysetX is for InOut, Warn and None
@@ -3025,7 +3025,7 @@ fields of that struct for holding intermediate values.
   ElemKeysetU both take a LvalToGen for the base operand, but expect it to be
   a LvalToKeyset or LvalToBoxedKeyset.  T is the type of the base array.
 
-| ElemKeysetK<pos>, D(LvalToElemCell), S(Keyset) S(Int,Str), NF
+| ElemKeysetK<pos>, D(LvalToElemInitCell), S(Keyset) S(Int,Str), NF
 
   Like ElemKeyset, but the element for S1 is at a known position `pos' in S0.
 

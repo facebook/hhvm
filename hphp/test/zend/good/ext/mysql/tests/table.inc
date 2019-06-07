@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 require_once 'connect.inc';
 
 // connect + select_db

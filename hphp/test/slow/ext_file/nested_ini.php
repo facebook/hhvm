@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 
 
 <<__EntryPoint>>

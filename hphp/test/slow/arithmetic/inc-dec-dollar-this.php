@@ -1,4 +1,4 @@
-<?
+<?hh
 class Test {
   public function foo() {
     return $this++;

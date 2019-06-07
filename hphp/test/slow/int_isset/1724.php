@@ -1,4 +1,4 @@
-<? function f($p) {
+<?hh function f($p) {
  $i = strlen($p);
  if (isset($i)) {
 }

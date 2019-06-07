@@ -1,4 +1,4 @@
-<?
+<?hh
 class Test {
   const FOO_STDOUT = STDOUT;
   private $foo = STDOUT;

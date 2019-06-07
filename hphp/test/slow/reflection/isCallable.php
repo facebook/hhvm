@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 
 function a($b, callable $c) {
 }

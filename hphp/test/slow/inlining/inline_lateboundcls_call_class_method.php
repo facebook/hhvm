@@ -1,4 +1,4 @@
-<?
+<?hh
 
 abstract class A {
   static function heh() {

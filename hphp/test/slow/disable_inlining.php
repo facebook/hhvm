@@ -1,4 +1,4 @@
-<?
+<?hh
 
 <<__NEVER_INLINE>>
 function foo() {

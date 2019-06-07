@@ -208,7 +208,7 @@ int emulate_zend(int argc, char** argv) {
       }
     } else {
       // -r omits the braces
-      write(tmp_fd, "<?\n", 3);
+      write(tmp_fd, "<?hh\n", 5);
       write(tmp_fd, program, strlen(program));
     }
     close(tmp_fd);

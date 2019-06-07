@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 
 class A implements IteratorAggregate {
   public function getIterator() {

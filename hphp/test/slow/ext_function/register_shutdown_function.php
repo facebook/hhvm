@@ -1,4 +1,4 @@
-<?
+<?hh
 
 class Fooz {
   function baz() {

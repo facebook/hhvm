@@ -1,4 +1,4 @@
-<?PHP
+<?hh
 
 /** Yay */
 class A {

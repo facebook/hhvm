@@ -1,3 +1,4 @@
+.hh_file 1;
 #
 # Test boolean binary operations which cannot be generated directly via PHP
 #

@@ -1,3 +1,4 @@
+.hh_file 1;
 .adata A_0 = """D:1:{i:1;i:1;}""";
 
 .main {

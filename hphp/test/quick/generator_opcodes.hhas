@@ -1,3 +1,4 @@
+.hh_file 1;
 # Tests that generator opcodes are verified to be in generator functions
 
 .main {

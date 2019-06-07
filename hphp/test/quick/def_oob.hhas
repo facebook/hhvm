@@ -1,3 +1,4 @@
+.hh_file 1;
 #Checks that arguments to DefCls/DefTypeAlias exist
 
 .main {

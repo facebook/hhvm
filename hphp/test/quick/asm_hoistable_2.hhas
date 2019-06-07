@@ -1,3 +1,4 @@
+.hh_file 1;
 # Test that things can get marked AlwaysHoistable
 
 .main {

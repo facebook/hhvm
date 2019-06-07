@@ -1,3 +1,4 @@
+.hh_file 1;
 # This input used to cause the HHIR simplifier to do a use-after-free in the IR
 # NSame opcode.
 

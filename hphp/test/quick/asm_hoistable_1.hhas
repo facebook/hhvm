@@ -1,3 +1,4 @@
+.hh_file 1;
 # Test that we can specify hoistability. Loading here would fail
 # if A was marked as hoistable.
 

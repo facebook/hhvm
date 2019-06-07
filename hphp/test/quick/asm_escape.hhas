@@ -1,3 +1,4 @@
+.hh_file 1;
 # Check that some corner cases for string escaping work
 
 .main  {

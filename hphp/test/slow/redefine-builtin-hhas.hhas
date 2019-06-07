@@ -1,3 +1,4 @@
+.hh_file 1;
 #
 # Can't redefine builtins, even if you bypass the parser
 #

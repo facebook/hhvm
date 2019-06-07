@@ -1,3 +1,4 @@
+.hh_file 1;
 # SSwitch with integer-like strings uses a different translator
 # implementation.
 

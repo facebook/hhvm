@@ -1,3 +1,4 @@
+.hh_file 1;
 #Checks that inconsistent member op mode sequences don't verify
 
 .main {

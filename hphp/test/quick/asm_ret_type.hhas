@@ -1,3 +1,4 @@
+.hh_file 1;
 # Test for hhas return types
 
 .adata A_0 = """a:0:{}""";

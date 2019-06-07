@@ -1,3 +1,4 @@
+.hh_file 1;
 # Tests unwinding with dirty callee-saved registers that are mapped to
 # execution stack locations.
 

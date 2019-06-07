@@ -1,3 +1,4 @@
+.hh_file 1;
 # Test that B *doesn't* get marked AlwaysHoistable and so
 # DefClsNop won't actually define it
 

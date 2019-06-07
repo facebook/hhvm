@@ -1,3 +1,4 @@
+.hh_file 1;
 # Tests that WHResult properly fatals when top of stack is not a subclass of
 # WaitHandle
 

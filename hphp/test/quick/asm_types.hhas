@@ -1,3 +1,4 @@
+.hh_file 1;
 # Test type annotations for hhas
 
 .adata A_0 = """a:0:{}""";

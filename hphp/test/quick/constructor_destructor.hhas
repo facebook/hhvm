@@ -1,3 +1,4 @@
+.hh_file 1;
 # tests that constructors and destructors fail verification properly when
 # poorly defined
 

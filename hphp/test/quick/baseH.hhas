@@ -1,3 +1,4 @@
+.hh_file 1;
 # check that baseH fails to verify if $this can be null
 
 .main {

@@ -1,3 +1,4 @@
+.hh_file 1;
 # Tests that silence ends without silence starts fail the verifier
 .main {
   .declvars $z;

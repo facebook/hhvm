@@ -1,3 +1,4 @@
+.hh_file 1;
 # Check that BareThis NeverNull fails to verify if $this can be null
 
 .main {

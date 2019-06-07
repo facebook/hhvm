@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function VS($x, $y) {
   var_dump($x === $y);
@@ -57,7 +57,7 @@ VERIFY($xml->writeComment("More comments"));
 
 VERIFY($xml->startPi("lol"));
 VERIFY($xml->endPi());
-VERIFY($xml->writePi("php", "print 'Hello world!';"));
+VERIFY($xml->writePi("hh", "print 'Hello world!';"));
 
 VERIFY($xml->writeRaw("<node>Raw XML</node>"));
 

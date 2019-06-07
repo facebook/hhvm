@@ -1,4 +1,4 @@
-<?php
+<?hh
 /**
  * require this in your tests if you want to make sure the mtimes and iterator 
  * order of files in this directory is consistent

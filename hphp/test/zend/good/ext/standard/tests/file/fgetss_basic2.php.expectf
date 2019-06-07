@@ -1,7 +1,7 @@
 *** Testing fgetss() : basic operations ***
 
 -- Testing fgetss() with file opened using w+ mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -16,7 +16,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using w+b mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -31,7 +31,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using w+t mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -46,7 +46,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using a+ mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -61,7 +61,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using a+b mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -76,7 +76,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using a+t mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -91,7 +91,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using x+ mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -106,7 +106,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using x+b mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)
@@ -121,7 +121,7 @@ int(29)
 bool(false)
 
 -- Testing fgetss() with file opened using x+t mode --
-int(192)
+int(190)
 bool(true)
 int(0)
 bool(false)

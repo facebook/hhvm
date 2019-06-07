@@ -1,10 +1,10 @@
-<?php // 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ
+<?hh // 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 function DoTest($fp, $delim) {
 	echo "Delimiter:  " . $delim . "\n";
 	rewind($fp);
-	echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
-	echo "\t" . stream_get_line($fp, 10, $delim) . "\n";
+	echo "\t" . stream_get_line($fp, 9, $delim) . "\n";
+	echo "\t" . stream_get_line($fp, 9, $delim) . "\n";
 }
 
 <<__EntryPoint>> function main() {

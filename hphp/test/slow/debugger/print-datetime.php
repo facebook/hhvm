@@ -1,2 +1,2 @@
-<?php
+<?hh
 hphpd_break();

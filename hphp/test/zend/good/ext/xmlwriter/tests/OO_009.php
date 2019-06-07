@@ -1,4 +1,4 @@
-<?php 
+<?hh
 /* $Id$ */
 /*
 Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
@@ -13,7 +13,7 @@ $xw->startElement('elem1');
 $xw->writeAttribute('attr1', 'first');
 $xw->writeComment('start PI');
 $xw->startElement('pi');
-$xw->writePi('php', 'echo "hello world"; ');
+$xw->writePi('hh', 'echo "hello world"; ');
 $xw->endElement();
 $xw->startElement('cdata');
 $xw->startCdata();

@@ -1,4 +1,4 @@
-<?php
+<?hh
 /*
  Prototype: string fgetss ( resource $handle [, int $length [, string $allowable_tags]] );
  Description: Gets line from file pointer and strip HTML tags
@@ -16,9 +16,9 @@ echo "*** Testing fgetss() : basic operations ***\n";
 /* string with html and php tags */
 $string_with_tags = <<<EOT
 <test>Testing fgetss() functions</test>
-<?php echo "this string is within php tag"; ?> {;}<{> this
+<?hh echo "this string is within php tag"; ?> {;}<{> this
 is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
-<html> html </html> <?php echo "php"; ?>
+<html> html </html> <?hh echo "php"; ?>
 EOT;
 
 $filename = dirname(__FILE__)."/fgetss_basic2.tmp"; 

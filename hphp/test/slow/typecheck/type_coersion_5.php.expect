@@ -54,6 +54,7 @@ WARNING: Argument 1 to {closure}() must be of type @float, boolean given
 Builtin:
 WARNING: number_format() expects parameter 1 to be double, integer given
 User:
+WARNING: Argument 1 to {closure}() must be of type @float, integer given
 Builtin:
 User:
 Builtin:

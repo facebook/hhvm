@@ -19,7 +19,7 @@ DateTime Object
 
 c
 Break on line 2 of %s/print-datetime.php
-   1 <?php
+   1 <?hh
    2*hphpd_break();
    3 (END)
 

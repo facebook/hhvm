@@ -1,5 +1,5 @@
 #!php
-<?php
+<?hh
 
 /*
  * Test

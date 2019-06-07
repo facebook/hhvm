@@ -424,7 +424,7 @@ let in_daemon f =
 let save_state
     ?(load_hhi_files = false)
     ?(store_decls_in_saved_state = ServerLocalConfig.(default.store_decls_in_saved_state))
-    ?(enable_reverse_naming_table_fallback = false)
+    ?(enable_naming_table_fallback = false)
     disk_changes
     temp_dir =
   in_daemon @@ begin fun () ->
@@ -435,7 +435,7 @@ let save_state
     genv := { !genv with
       ServerEnv.local_config = { !genv.ServerEnv.local_config with
         ServerLocalConfig.store_decls_in_saved_state;
-        ServerLocalConfig.enable_reverse_naming_table_fallback;
+        ServerLocalConfig.enable_naming_table_fallback;
       }
     };
     let _edges_added = ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename) in ()
@@ -475,7 +475,7 @@ let load_state
     ?(disable_conservative_redecl = ServerLocalConfig.(default.disable_conservative_redecl))
     ?(predeclare_ide_deps = ServerLocalConfig.(default.predeclare_ide_deps))
     ?(load_decls_from_saved_state = ServerLocalConfig.(default.load_decls_from_saved_state))
-    ?(enable_reverse_naming_table_fallback = false)
+    ?(enable_naming_table_fallback = false)
     ~disk_state
     saved_state_dir =
   (* In production, saved state is only used in conjunction with lazy init
@@ -490,7 +490,7 @@ let load_state
       disable_conservative_redecl;
       predeclare_ide_deps;
       load_decls_from_saved_state;
-      enable_reverse_naming_table_fallback = enable_reverse_naming_table_fallback;
+      enable_naming_table_fallback = enable_naming_table_fallback;
     }
   };
   let hhi_files = if load_hhi_files then real_hhi_files () else [] in

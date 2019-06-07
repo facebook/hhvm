@@ -56,12 +56,12 @@ let base_disk_state = [
 let () = Tempfile.with_real_tempdir @@ fun temp_dir ->
   let temp_dir = Path.to_string temp_dir in
 
-  Test.save_state ~enable_reverse_naming_table_fallback:true base_disk_state temp_dir;
+  Test.save_state ~enable_naming_table_fallback:true base_disk_state temp_dir;
 
   let env = Test.load_state
     ~disk_state:(("qux.php", qux) :: base_disk_state)
     ~local_changes:["qux.php"]
-    ~enable_reverse_naming_table_fallback:true
+    ~enable_naming_table_fallback:true
     temp_dir
   in
 

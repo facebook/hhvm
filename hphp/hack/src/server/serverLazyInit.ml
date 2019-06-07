@@ -470,7 +470,7 @@ let post_saved_state_initialization
   (* If we're falling back to SQLite we don't need to explicitly do a naming
      pass. *)
   let t =
-    if genv.local_config.SLC.enable_reverse_naming_table_fallback
+    if genv.local_config.SLC.enable_naming_table_fallback
     then begin
       (* Set the SQLite fallback path for the reverse naming table, then block out all entries in
       any dirty files to make sure we properly handle file deletes. *)

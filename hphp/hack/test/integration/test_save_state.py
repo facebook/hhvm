@@ -405,7 +405,7 @@ public static function foo () : %s {
 
 
 class ReverseNamingTableFallbackTestDriver(SavedStateTestDriver):
-    enable_reverse_naming_table_fallback = True
+    enable_naming_table_fallback = True
 
     def write_local_conf(self) -> None:
         with open(os.path.join(self.repo_dir, "hh.conf"), "w") as f:
@@ -418,7 +418,7 @@ watchman_subscribe_v2 = true
 lazy_decl = true
 lazy_parse = true
 lazy_init2 = true
-enable_reverse_naming_table_fallback = true
+enable_naming_table_fallback = true
 """
             )
 

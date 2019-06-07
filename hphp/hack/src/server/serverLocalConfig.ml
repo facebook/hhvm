@@ -83,7 +83,7 @@ type t = {
      computing folded declarations representing the entire class type. *)
   shallow_class_decl : bool;
   (* Enables the reverse naming table to fall back to SQLite for queries. *)
-  enable_reverse_naming_table_fallback : bool;
+  enable_naming_table_fallback : bool;
   (* Selects a search provider for autocomplete and symbol search *)
   symbolindex_search_provider : string;
   symbolindex_quiet : bool;
@@ -140,7 +140,7 @@ let default = {
   idle_gc_slice = 0;
   basic_autocomplete_only = false;
   shallow_class_decl = false;
-  enable_reverse_naming_table_fallback = false;
+  enable_naming_table_fallback = false;
   symbolindex_search_provider = "TrieIndex";
   symbolindex_quiet = false;
   symbolindex_file = None;
@@ -287,8 +287,8 @@ let load_ fn ~silent config_overrides =
       ~default:default.basic_autocomplete_only config in
   let shallow_class_decl = bool_if_version "shallow_class_decl"
       ~default:default.shallow_class_decl config in
-  let enable_reverse_naming_table_fallback = bool_if_version "enable_reverse_naming_table_fallback"
-      ~default:default.enable_reverse_naming_table_fallback config in
+  let enable_naming_table_fallback = bool_if_version "enable_naming_table_fallback"
+      ~default:default.enable_naming_table_fallback config in
   let symbolindex_search_provider = string_ "symbolindex_search_provider"
       ~default:default.symbolindex_search_provider config in
   let symbolindex_quiet = bool_ "symbolindex_quiet"
@@ -343,7 +343,7 @@ let load_ fn ~silent config_overrides =
     idle_gc_slice;
     basic_autocomplete_only;
     shallow_class_decl;
-    enable_reverse_naming_table_fallback;
+    enable_naming_table_fallback;
     symbolindex_search_provider;
     symbolindex_quiet;
     symbolindex_file;

@@ -28,7 +28,7 @@ class SaveStateResult(NamedTuple):
 class SavedStateTestDriver(common_tests.CommonTestDriver):
 
     repo_dir: str
-    enable_reverse_naming_table_fallback = False
+    enable_naming_table_fallback = False
 
     @classmethod
     def setUpClass(cls):
@@ -104,8 +104,8 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             init_dir
         ]
 
-        if cls.enable_reverse_naming_table_fallback:
-            hh_command.extend(["--config", "enable_reverse_naming_table_fallback=true"])
+        if cls.enable_naming_table_fallback:
+            hh_command.extend(["--config", "enable_naming_table_fallback=true"])
 
         if ignore_errors:
             hh_command.append("--gen-saved-ignore-type-errors")

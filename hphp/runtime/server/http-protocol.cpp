@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/http-client.h"
+#include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/request-injection-data.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -227,11 +228,9 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
                                           const RequestURI &r,
                                           const SourceRootInfo &sri) {
   auto const vhost = VirtualHost::GetCurrent();
-  auto const g = get_global_variables()->asArrayData();
-  Variant emptyArr(staticEmptyArray());
+  auto const& emptyArr = empty_array();
   for (auto const& key : s_arraysToClear) {
-    g->removeInPlace(key.get());
-    g->setInPlace(key.get(), emptyArr);
+    php_global_set(key, emptyArr);
   }
 
   // according to doc if content type is multipart/form-data
@@ -245,12 +244,12 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   }
 
   if (shouldSetHttpRawPostData) {
-    g->setInPlace(s_HTTP_RAW_POST_DATA, empty_string_variant_ref);
+    php_global_set(s_HTTP_RAW_POST_DATA, empty_string_variant_ref);
   }
 
 #define X(name)                                       \
-  Array name##arr(Array::Create());                   \
-  SCOPE_EXIT { g->setInPlace(s__##name, name##arr); };
+  auto name##arr = empty_array();                     \
+  SCOPE_EXIT { php_global_set(s__##name, name##arr); };
 
   X(ENV)
   X(GET)
@@ -265,7 +264,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   Variant HTTP_RAW_POST_DATA;
   SCOPE_EXIT {
     if (shouldSetHttpRawPostData) {
-      g->setInPlace(s_HTTP_RAW_POST_DATA.get(), HTTP_RAW_POST_DATA);
+      php_global_set(s_HTTP_RAW_POST_DATA, std::move(HTTP_RAW_POST_DATA));
+
     }
   };
 
@@ -317,8 +317,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   if (!postPopulated && shouldSetHttpRawPostData) {
     // Always try to populate $HTTP_RAW_POST_DATA if not populated
-    Array dummyPost(Array::Create());
-    Array dummyFiles(Array::Create());
+    auto dummyPost = empty_array();
+    auto dummyFiles = empty_array();
     PreparePostVariables(dummyPost, HTTP_RAW_POST_DATA,
                          dummyFiles, transport, r);
   }

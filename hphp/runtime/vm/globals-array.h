@@ -58,12 +58,6 @@ struct GlobalsArray final : ArrayData,
   explicit GlobalsArray(NameValueTable* tab);
   ~GlobalsArray() = delete;
 
-  // We only allow explicit conversions to ArrayData.  Generally you
-  // should not be talking to the GlobalsArray directly (see
-  // php-globals.h).
-  ArrayData* asArrayData() { return this; }
-  const ArrayData* asArrayData() const { return this; }
-
 public:
   ArrayData* keys();
   bool keyExists(const StringData*);

@@ -243,6 +243,13 @@ let test_namespace_map (harness: Test_harness.t): bool =
   (* Special case: empty string always provides zero matches *)
   let matches = find_matching_namespaces "" in
   IA.assert_equals 0 (List.length matches) "Empty string / zero matches";
+
+  (* Special case: single backslash should show root namespaces *)
+  let matches = find_matching_namespaces "\\" in
+  assert_ns_matches "Str" matches;
+  assert_ns_matches "StrFb" matches;
+  assert_ns_matches "HH" matches;
+  IA.assert_equals 3 (List.length matches) "Special case root namespace";
   true
 
 ;;

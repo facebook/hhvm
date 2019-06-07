@@ -587,6 +587,7 @@ val invalid_reified_argument : Pos.t * string -> Pos.t * string -> string -> uni
 val new_static_class_reified : Pos.t -> unit
 val consistent_construct_reified : Pos.t -> unit
 val new_without_newable: Pos.t -> string -> unit
+val reified_tparam_variadic: Pos.t -> unit
 val ignored_result_of_freeze : Pos.t -> unit
 val ignored_result_of_move : Pos.t -> unit
 val mutably_owned_argument_mismatch : arg_is_owned_local:bool -> Pos.t -> Pos.t -> unit

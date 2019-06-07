@@ -539,7 +539,8 @@ let default_ignored_fixme_codes = ISet.of_list [
   Typing.err_code Typing.InvalidNewableTypeParamConstraints;
   Typing.err_code Typing.NewWithoutNewable;
   Typing.err_code Typing.NewStaticClassReified;
-  Typing.err_code Typing.MemoizeReified
+  Typing.err_code Typing.MemoizeReified;
+  Typing.err_code Typing.ReifiedTparamVariadic;
 ]
 let ignored_fixme_codes = ref default_ignored_fixme_codes
 
@@ -2707,6 +2708,10 @@ let consistent_construct_reified pos =
 let new_without_newable pos name =
   add (Typing.err_code Typing.NewWithoutNewable) pos
     (name ^ " cannot be used with `new` because it does not have the <<__Newable>> attribute")
+
+let reified_tparam_variadic pos =
+  add (Typing.err_code Typing.NewWithoutNewable) pos
+    ("A function or method that has a reified type parameter cannot take reified arguments")
 
 let ignored_result_of_freeze pos =
   add (Typing.err_code Typing.IgnoredResultOfFreeze) pos

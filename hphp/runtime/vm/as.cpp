@@ -3419,10 +3419,6 @@ void parse_hh_file(AsmState& as) {
     as.error(".hh_file must be either 1 or 0");
   }
 
-  if (as.ue->m_isHHFile || RuntimeOption::EnableHipHopSyntax) {
-    as.ue->m_useStrictTypes = true;
-  }
-
   as.in.expectWs(';');
 }
 
@@ -3595,8 +3591,6 @@ std::unique_ptr<UnitEmitter> assemble_string(
   }
   StringData* sd = makeStaticString(filename);
   ue->m_filepath = sd;
-  ue->m_useStrictTypes = RuntimeOption::EnableHipHopSyntax ||
-                         !RuntimeOption::PHP7_ScalarTypes;
 
   try {
     auto const mode = std::istringstream::binary | std::istringstream::in;
@@ -3604,9 +3598,6 @@ std::unique_ptr<UnitEmitter> assemble_string(
     AsmState as(instr, wantsSymbolRefs);
     as.ue = ue.get();
     parse(as);
-    if (ue->m_isHHFile) {
-      ue->m_useStrictTypes = true;
-    }
   } catch (const FatalErrorException& e) {
     if (!swallowErrors) throw;
     ue = createFatalUnit(sd, sha1, FatalOp::Runtime,

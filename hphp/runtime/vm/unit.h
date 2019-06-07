@@ -865,14 +865,6 @@ public:
    */
   bool isHHFile() const;
 
-  /*
-   * Should calls from this unit use strict types? (This is always true for HH
-   * units).
-   *
-   * With strict types enabled only lossless int->float conversions are allowed
-   */
-  bool useStrictTypes() const;
-
   UserAttributeMap metaData() const;
 
   // Return true, and set the m_serialized flag, iff this Unit hasn't
@@ -923,7 +915,6 @@ private:
   bool m_mergeOnly: 1;
   bool m_interpretOnly : 1;
   bool m_isHHFile : 1;
-  bool m_useStrictTypes : 1;
   bool m_extended : 1;
   bool m_serialized : 1;
   bool m_ICE : 1; // was this unit the result of an internal compiler error

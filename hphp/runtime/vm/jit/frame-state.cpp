@@ -861,17 +861,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     setValue(Location::MBase{}, nullptr);
     break;
 
-  case VerifyRetFail:
-    if (!func()->unit()->useStrictTypes()) {
-      // In PHP 7 mode scalar types can sometimes coerce; we do this during the
-      // VerifyRetFail call -- we never allow this in HH files.
-      auto const offset = BCSPRelOffset{0}
-        .to<FPInvOffset>(inst->marker().spOff())
-        .to<IRSPRelOffset>(irSPOff());
-      setType(stk(offset), TGen);
-    }
-    break;
-
   case VerifyParamFail:
     if (verify_fail_may_coerce(func())) {
       auto id = inst->src(0)->intVal();

@@ -944,7 +944,7 @@ bool call_uses_strict_types(const Func* callee) {
   }
 
   // Neither is builtin
-  return caller->unit()->useStrictTypes();
+  return true;
 }
 
 bool verify_fail_may_coerce(const Func* callee) {
@@ -1176,11 +1176,7 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* tv,
     }
   }
 
-  const bool useStrictTypes = (id == ReturnId) ?
-    LIKELY(RuntimeOption::EnableHipHopSyntax) ||
-    func->isBuiltin() ||
-    func->unit()->useStrictTypes() :
-    call_uses_strict_types(func);
+  const bool useStrictTypes = id == ReturnId || call_uses_strict_types(func);
 
   if (UNLIKELY(!useStrictTypes)) {
     if (auto dt = underlyingDataType()) {

@@ -596,7 +596,6 @@ struct Unit {
   SHA1 sha1;
   LSString filename;
   bool isHHFile{false};
-  bool useStrictTypes{false};
   std::atomic<bool> persistent{true};
   std::unique_ptr<Func> pseudomain;
   CompactVector<std::unique_ptr<Func>> funcs;

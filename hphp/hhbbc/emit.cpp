@@ -1577,7 +1577,6 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
   FTRACE(1, "  unit {}\n", unit.filename->data());
   ue->m_filepath = unit.filename;
   ue->m_isHHFile = unit.isHHFile;
-  ue->m_useStrictTypes = unit.useStrictTypes;
   ue->m_metaData = unit.metaData;
   ue->m_fileAttributes = unit.fileAttributes;
 

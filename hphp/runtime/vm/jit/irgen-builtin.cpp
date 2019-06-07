@@ -678,7 +678,7 @@ SSATmp* opt_foldable(IRGS& env,
                                         nullptr, const_cast<Class*>(cls),
                                         nullptr, nullptr,
                                         ExecutionContext::InvokeNormal,
-                                        !func->unit()->useStrictTypes(),
+                                        false,
                                         false);
     SCOPE_EXIT { tvDecRefGen(retVal); };
     assertx(tvIsPlausible(retVal));

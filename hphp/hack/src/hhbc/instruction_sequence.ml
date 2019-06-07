@@ -206,6 +206,10 @@ let instr_fcallfuncd fcall_args id = gather [
   instr (ICall (FPushFuncD ((num_args_of fcall_args), id)));
   instr (ICall (FCall (fcall_args)))
 ]
+let instr_fcallfuncrd fcall_args id = gather [
+  instr (ICall (FPushFuncRD ((num_args_of fcall_args), id)));
+  instr (ICall (FCall (fcall_args)))
+]
 let instr_fcallctor fcall_args = instr (ICall (FCallCtor (fcall_args)))
 let instr_fcallobjmethod fcall_args flavor pl = gather [
   instr (ICall (FPushObjMethod ((num_args_of fcall_args), flavor, pl)));

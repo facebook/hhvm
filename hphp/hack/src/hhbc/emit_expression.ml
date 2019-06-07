@@ -3350,8 +3350,8 @@ and emit_call_lhs_and_fcall
     else
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
-        reified_call_body (Hhbc_id.Function.to_raw_string fq_id);
-        instr_fcallfunc fcall_args inout_arg_positions
+        emit_reified_targs env pos targs;
+        instr_fcallfuncrd fcall_args fq_id
       ]
   | A.String s ->
     if does_not_have_non_tparam_generics then
@@ -3360,8 +3360,8 @@ and emit_call_lhs_and_fcall
     else
       gather [ instr_nulluninit; instr_nulluninit; instr_nulluninit ],
       gather [
-        reified_call_body s;
-        instr_fcallfunc fcall_args inout_arg_positions
+        emit_reified_targs env pos targs;
+        instr_fcallfuncrd fcall_args (Hhbc_id.Function.from_raw_string s)
       ]
   | _ ->
     let tmp = Local.get_unnamed_local () in

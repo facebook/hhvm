@@ -79,6 +79,7 @@ const void annotate(NormalizedInstruction* i,
         clsName = decode_litstr();
         break;
       case Op::FPushFuncD:
+      case Op::FPushFuncRD:
         decode_iva(pc);
         funcName = decode_litstr();
         clsName = nullptr;

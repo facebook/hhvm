@@ -445,6 +445,8 @@ let string_of_call instruction =
     sep ["FPushFunc"; string_of_int n; string_of_param_locations pl]
   | FPushFuncD (n, id) ->
     sep ["FPushFuncD"; string_of_int n; string_of_function_id id]
+  | FPushFuncRD (n, id) ->
+    sep ["FPushFuncRD"; string_of_int n; string_of_function_id id]
   | FPushObjMethod (n, nf, pl) ->
     sep ["FPushObjMethod"; string_of_int n; string_of_null_flavor nf; string_of_param_locations pl]
   | FPushObjMethodD (n, id, nf) ->

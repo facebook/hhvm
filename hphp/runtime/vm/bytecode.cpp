@@ -1605,9 +1605,9 @@ static void prepareFuncEntry(ActRec *ar, StackArgsState stk) {
       assertx(reified_generics != nullptr);
       // push for first local
       if (RuntimeOption::EvalHackArrDVArrs) {
-        stack.pushStaticVec(reified_generics);
+        stack.pushVec(reified_generics);
       } else {
-        stack.pushStaticArray(reified_generics);
+        stack.pushArray(reified_generics);
       }
     }
     nlocals++;
@@ -4879,7 +4879,9 @@ OPTBLD_INLINE void iopFPushFunc(uint32_t numArgs, imm_array<uint32_t> args) {
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
 
-OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
+namespace {
+
+void fPushFuncDImpl(uint32_t numArgs, Id id, ArrayData* tsList) {
   const NamedEntityPair nep =
     vmfp()->m_func->unit()->lookupNamedEntityPairId(id);
   Func* func = Unit::loadFunc(nep.second, nep.first);
@@ -4889,8 +4891,22 @@ OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
 
   callerRxChecks(vmfp(), func);
 
-  ActRec* ar = fPushFuncImpl(func, numArgs, nullptr);
+  ActRec* ar = fPushFuncImpl(func, numArgs, tsList);
   ar->trashThis();
+}
+
+} // namespace
+
+OPTBLD_FLT_INLINE void iopFPushFuncD(uint32_t numArgs, Id id) {
+  fPushFuncDImpl(numArgs, id, nullptr);
+}
+
+OPTBLD_FLT_INLINE void iopFPushFuncRD(uint32_t numArgs, Id id) {
+  auto const tsList = *vmStack().topC();
+  assertx(tvIsVecOrVArray(tsList));
+  // no need to decref since it will will be stored on actrec
+  vmStack().discard();
+  fPushFuncDImpl(numArgs, id, tsList.m_data.parr);
 }
 
 namespace {

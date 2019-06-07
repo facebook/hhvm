@@ -73,6 +73,7 @@ let stk_data : instruct -> stack_sig = function
   | IIncludeEvalDefine DefTypeAlias _
   | IGenerator ContCheck _                 -> [], []
   | ICall FPushFuncD _
+  | ICall FPushFuncRD _
   | ICall FPushClsMethodD _                -> ["U"; "U"; "U"], []
   | ICall FPushFunc _                      -> ["U"; "U"; "U"; "C"], []
   | ICall FPushObjMethodD _                -> ["C"; "U"; "U"], []

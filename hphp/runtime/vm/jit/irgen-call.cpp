@@ -940,21 +940,30 @@ SSATmp* forwardCtx(IRGS& env, const Func* parentFunc, SSATmp* funcTmp) {
   return obj;
 }
 
-} // namespace
-
-void emitFPushFuncD(IRGS& env, uint32_t numParams, const StringData* name) {
+void fPushFuncDImpl(IRGS& env, uint32_t numParams, const StringData* name,
+                    SSATmp* tsList) {
   auto const lookup = lookupImmutableFunc(curUnit(env), name);
   if (lookup.func) {
     // We know the function, but we have to ensure its unit is loaded. Use
     // LdFuncCached, ignoring the result to ensure this.
     if (lookup.needsUnitLoad) gen(env, LdFuncCached, FuncNameData { name });
     prepareToCallKnown(env, lookup.func, nullptr, numParams, nullptr, false,
-                       nullptr);
+                       tsList);
     return;
   }
 
   auto const func = gen(env, LdFuncCached, FuncNameData { name });
-  prepareToCallUnknown(env, func, nullptr, numParams, nullptr, false, nullptr);
+  prepareToCallUnknown(env, func, nullptr, numParams, nullptr, false, tsList);
+}
+
+} // namespace
+
+void emitFPushFuncD(IRGS& env, uint32_t numParams, const StringData* name) {
+  fPushFuncDImpl(env, numParams, name, nullptr);
+}
+
+void emitFPushFuncRD(IRGS& env, uint32_t numParams, const StringData* name) {
+  fPushFuncDImpl(env, numParams, name, popC(env));
 }
 
 namespace {

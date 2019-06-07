@@ -3885,24 +3885,52 @@ void fcallUnknownImpl(ISS& env, const FCallArgs& fca, bool legacy = false) {
   for (auto i = uint32_t{0}; i < fca.numRets; ++i) push(env, TInitCell);
 }
 
-void in(ISS& env, const bc::FPushFuncD& op) {
-  auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
+namespace {
+
+void fPushFuncDImpl(ISS& env, const res::Func& rfunc, int32_t nArgs,
+                    bool has_unpack, bool extra_arg) {
   if (!any(env.collect.opts & CollectionOpts::Speculating)) {
     if (auto const func = rfunc.exactFunc()) {
-      if (will_reduce(env) && can_emit_builtin(func, op.arg1, op.has_unpack)) {
+      if (will_reduce(env) && can_emit_builtin(func, nArgs, has_unpack)) {
         fpiPushNoFold(
           env,
           ActRec { FPIKind::Builtin, TBottom, folly::none, rfunc }
         );
+        if (extra_arg) return reduce(env, bc::PopC {});
         return reduce(env);
       }
     }
   }
   if (fpiPush(env, ActRec { FPIKind::Func, TBottom, folly::none, rfunc },
-              op.arg1, false)) {
+              nArgs, false)) {
+    if (extra_arg) return reduce(env, bc::PopC {});
     return reduce(env);
   }
-  discardAR(env, op.arg1);
+  if (extra_arg) popC(env);
+  discardAR(env, nArgs);
+}
+
+} // namespace
+
+void in(ISS& env, const bc::FPushFuncD& op) {
+  auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
+  fPushFuncDImpl(env, rfunc, op.arg1, op.has_unpack, false);
+}
+
+void in(ISS& env, const bc::FPushFuncRD& op) {
+  auto const tsList = topC(env);
+  if (!tsList.couldBe(RuntimeOption::EvalHackArrDVArrs ? BVec : BVArr)) {
+    return unreachable(env);
+  }
+  auto const rfunc = env.index.resolve_func(env.ctx, op.str2);
+  if (!rfunc.couldHaveReifiedGenerics()) {
+    return reduce(
+      env,
+      bc::PopC {},
+      bc::FPushFuncD { op.arg1, op.str2, op.has_unpack }
+    );
+  }
+  fPushFuncDImpl(env, rfunc, op.arg1, op.has_unpack, true);
 }
 
 void in(ISS& env, const bc::FPushFunc& op) {

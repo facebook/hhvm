@@ -33,7 +33,7 @@ ActRecState::pushFunc(const NormalizedInstruction& inst) {
   const Unit& unit = *inst.unit();
   const Func* func = nullptr;
 
-  if (inst.op() == OpFPushFuncD) {
+  if (inst.op() == OpFPushFuncD || inst.op() == OpFPushFuncRD) {
     Id funcId = inst.imm[1].u_SA;
     auto const& nep = unit.lookupNamedEntityPairId(funcId);
     func = lookupImmutableFunc(&unit, nep.first).func;

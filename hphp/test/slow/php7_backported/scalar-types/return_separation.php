@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function by_ref(&$ref) {}
 

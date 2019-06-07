@@ -1,0 +1,1 @@
+Fatal error: Declaration of C1::query() must be compatible with that of I1::query() in %s/test/slow/iface_impl_parameter_check/01.php on line 8

@@ -1,4 +1,4 @@
-<?php
+<?hh
 // Similar case, but for a builtin (array_multisort).
 function blarg2(&$a1, &$a2) {}
 

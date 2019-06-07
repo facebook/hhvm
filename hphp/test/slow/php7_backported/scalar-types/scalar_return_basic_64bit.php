@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 require 'fix_exceptions.inc';
 

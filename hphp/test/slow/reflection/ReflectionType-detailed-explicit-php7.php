@@ -1,4 +1,4 @@
-<?php
+<?hh
 function foo(stdClass $a, array $b, callable $c, stdClass $d = null,
              $e = null, string $f, bool $g, int $h, float $i,
              NotExisting $j) { }

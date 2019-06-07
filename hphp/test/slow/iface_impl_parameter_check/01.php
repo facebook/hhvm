@@ -1,4 +1,4 @@
-<?php // should pass
+<?hh // should fail
 
 interface I1 {
   // Has less args then the implementing function

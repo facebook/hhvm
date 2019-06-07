@@ -1,0 +1,1 @@
+Fatal error: Class XIterator may not inherit from sealed interface (HH\Traversable) without being in the whitelist in %s/test/slow/spec/tests/interfaces/iterator.php on line 11

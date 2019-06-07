@@ -1,4 +1,4 @@
-<?php
+<?hh
 
 function foo(int $a): bool {}
 function nfoo(?int $a): ?bool {}

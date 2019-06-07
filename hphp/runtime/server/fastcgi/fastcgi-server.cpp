@@ -80,7 +80,8 @@ FastCGIServer::FastCGIServer(const std::string &address,
   if (useFileSocket) {
     sock_addr.setFromPath(address);
   } else if (address.empty()) {
-    sock_addr.setFromLocalPort(port);
+    sock_addr.setFromHostPort("localhost", port);
+    assert(sock_addr.isLoopbackAddress());
   } else {
     sock_addr.setFromHostPort(address, port);
   }

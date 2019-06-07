@@ -3,7 +3,7 @@
 require_once('test_base.inc');
 
 function invalidTestController($port) {
-  $host = php_uname('n');
+  $host = 'localhost';
 
   $filename = __DIR__.'/request-doesnotexist.dat';
   $file = fopen($filename, 'rb');

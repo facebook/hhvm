@@ -54,7 +54,7 @@ type loaded_info =
   (* Files changed between public merge base and current revision *)
   dirty_local_files : Relative_path.Set.t;
   old_naming_table : Naming_table.t;
-  old_errors : SaveStateService.saved_state_errors;
+  old_errors : SaveStateServiceTypes.saved_state_errors;
   state_distance: int option;
 }
 

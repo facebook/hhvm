@@ -74,6 +74,7 @@ class SavedStateTests(SavedStateTestDriver, unittest.TestCase):
     template_repo: Optional[str] = "hphp/hack/test/integration/data/simple_repo"
     bin_dir: Optional[str]
     skip_incremental_generation_tests = False
+    assert_naming_table_rows = False
 
     def check_skip_incremental(self) -> None:
         if self.skip_incremental_generation_tests:
@@ -150,6 +151,8 @@ watchman_init_timeout = 1
             new_saved_state.returned_values.edges_added is not None
             and new_saved_state.returned_values.edges_added > 0
         )
+        if self.assert_naming_table_rows:
+            assert new_saved_state.returned_values.naming_table_rows_changed > 0
 
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -210,6 +213,8 @@ watchman_init_timeout = 1
             new_saved_state.returned_values.edges_added is not None
             and new_saved_state.returned_values.edges_added > 0
         )
+        if self.assert_naming_table_rows:
+            assert new_saved_state.returned_values.naming_table_rows_changed == 1
 
         self.change_return_type_on_base_class(
             os.path.join(self.repo_dir, "class_1.php")
@@ -330,11 +335,20 @@ watchman_init_timeout = 1
             result.returned_values.edges_added is not None
             and result.returned_values.edges_added > 0
         )
+        if self.assert_naming_table_rows:
+            assert (
+                result.returned_values.naming_table_rows_changed is not None
+                and result.returned_values.naming_table_rows_changed > 0
+            )
 
         # Save state again - confirm the same number of edges is dumped
         result2 = self.dump_saved_state(assert_edges_added=True)
         self.assertEqual(
             result.returned_values.edges_added, result2.returned_values.edges_added
+        )
+        self.assertEqual(
+            result.returned_values.naming_table_rows_changed,
+            result2.returned_values.naming_table_rows_changed,
         )
 
         # Save state with the 'replace' arg
@@ -346,12 +360,20 @@ watchman_init_timeout = 1
             result.returned_values.edges_added,
             replace_result1.returned_values.edges_added,
         )
+        self.assertEqual(
+            result.returned_values.naming_table_rows_changed,
+            replace_result1.returned_values.naming_table_rows_changed,
+        )
 
         # Save state with the new arg - confirm there are 0 new edges
         replace_result2 = self.dump_saved_state(
             assert_edges_added=True, replace_state_after_saving=True
         )
         self.assertEqual(replace_result2.returned_values.edges_added, 0)
+        self.assertEqual(
+            0,
+            replace_result2.returned_values.naming_table_rows_changed,
+        )
 
         # Make a change
         # Save state - confirm there are only the # of new edges
@@ -441,3 +463,4 @@ class ReverseNamingTableSavedStateTests(
     SavedStateTests, ReverseNamingTableFallbackTestDriver, unittest.TestCase
 ):
     skip_incremental_generation_tests = True
+    assert_naming_table_rows = True

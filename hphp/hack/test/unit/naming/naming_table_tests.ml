@@ -89,7 +89,10 @@ let run_naming_table_test f =
     let _ : SharedMem.handle = SharedMem.init config ~num_workers:0 in
     let naming_table = write_and_parse_test_files () in
     let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
-    Naming_table.save naming_table db_name;
+    Asserter.Int_asserter.assert_equals
+      8
+      (Naming_table.save naming_table db_name)
+      "Expected to add eight rows (four files and four symbols)";
     Naming_table.set_sqlite_fallback_path db_name;
     f ();
     true

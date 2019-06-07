@@ -8,9 +8,7 @@
  *)
 
 open Core_kernel
-
-(* An alias for the errors type that we marshal to and unmarshal from the saved state *)
-type saved_state_errors = (Errors.phase * Relative_path.Set.t) list
+open SaveStateServiceTypes
 
 let get_errors_filename (filename: string) : string = filename ^ ".err"
 
@@ -170,23 +168,25 @@ let update_save_state
     (naming_table: Naming_table.t)
     (errors: Errors.t)
     (output_filename: string)
-    (replace_state_after_saving: bool) : int =
+    (replace_state_after_saving: bool) : save_state_result =
   let t = Unix.gettimeofday () in
   let db_name = output_filename ^ ".sql" in
   if not (RealDisk.file_exists db_name) then
     failwith "Given existing save state SQL file missing";
   dump_saved_state ~save_decls output_filename naming_table errors;
-  let () =
-    if enable_naming_table_fallback
-    then Hh_logger.log "incrementally updating file info on disk not yet implemented"
-    else Hh_logger.log "skip writing file info to sqlite table"
-  in
-  let edges_added = SharedMem.update_dep_table_sqlite
+  let naming_table_rows_changed = if enable_naming_table_fallback then begin
+    Hh_logger.log "incrementally updating file info on disk not yet implemented";
+    0
+  end else begin
+    Hh_logger.log "skip writing file info to sqlite table";
+    0
+  end in
+  let dep_table_edges_added = SharedMem.update_dep_table_sqlite
     db_name
     Build_id.build_revision
     replace_state_after_saving in
   ignore @@ Hh_logger.log_duration "Updating saved state took" t;
-  edges_added
+  { naming_table_rows_changed; dep_table_edges_added }
 
 (** Saves the saved state to the given path. Returns number of dependency
 * edges dumped into the database. *)
@@ -196,7 +196,7 @@ let save_state
     (naming_table: Naming_table.t)
     (errors: Errors.t)
     (output_filename: string)
-    ~(replace_state_after_saving: bool): int =
+    ~(replace_state_after_saving: bool): save_state_result =
   let () = Sys_utils.mkdir_p (Filename.dirname output_filename) in
   let db_name = output_filename ^ ".sql" in
   let () = if Sys.file_exists output_filename then
@@ -209,17 +209,17 @@ let save_state
   | None ->
     let t = Unix.gettimeofday () in
     dump_saved_state ~save_decls output_filename naming_table errors;
-    let () = if enable_naming_table_fallback then begin
+    let naming_table_rows_changed = if enable_naming_table_fallback then begin
       Hh_logger.log "Saving file info (naming table) into a SQLite table.\n";
-      (Naming_table.save naming_table db_name : unit)
-    end in
+      Naming_table.save naming_table db_name
+    end else 0 in
     let dep_table_edges_added =
       SharedMem.save_dep_table_sqlite
         db_name
         Build_id.build_revision
         replace_state_after_saving in
     let _ : float = Hh_logger.log_duration "Saving saved state took" t in
-    dep_table_edges_added
+    { naming_table_rows_changed; dep_table_edges_added }
   | Some old_table_filename ->
     (** If server is running from a loaded saved state, it's in-memory
      * tracked depdnencies are incomplete - most of the actual dependencies
@@ -251,7 +251,7 @@ let go
     (naming_table: Naming_table.t)
     (errors: Errors.t)
     (output_filename: string)
-    ~(replace_state_after_saving: bool): (int, string) result =
+    ~(replace_state_after_saving: bool): (save_state_result, string) result =
   Utils.try_with_stack
   begin
     fun () -> save_state

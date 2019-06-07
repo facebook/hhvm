@@ -32,7 +32,7 @@ let run_search
 let save_state
     (genv: ServerEnv.genv)
     (env: ServerEnv.env)
-    (output_filename: string) : int option =
+    (output_filename: string) : SaveStateServiceTypes.save_state_result option =
   let ignore_errors =
     ServerArgs.gen_saved_ignore_type_errors genv.ServerEnv.options in
   let has_errors = not (Errors.is_empty env.errorl) in
@@ -60,14 +60,14 @@ let save_state
     in
     let save_decls = genv.local_config.ServerLocalConfig.store_decls_in_saved_state in
     let replace_state_after_saving = ServerArgs.replace_state_after_saving genv.ServerEnv.options in
-    let edges_added: int = SaveStateService.save_state
+    let result = SaveStateService.save_state
         ~enable_naming_table_fallback
         ~save_decls
         env.ServerEnv.naming_table
         env.errorl
         output_filename
         ~replace_state_after_saving in
-    Some edges_added
+    Some result
   end
 
 let get_lazy_level (genv: ServerEnv.genv) : lazy_level =

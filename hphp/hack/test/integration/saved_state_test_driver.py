@@ -18,6 +18,7 @@ def write_echo_json(f, obj):
 class SaveStateCommandResult(NamedTuple):
     retcode: int
     edges_added: Union[int, None]
+    naming_table_rows_changed: Optional[int]
 
 
 class SaveStateResult(NamedTuple):
@@ -66,21 +67,26 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
             )
 
         edges_added = None
+        naming_table_rows_changed = None
         if assert_edges_added is not None:
+            print(stdout)
             obj = json.loads(stdout)
-
-            if obj.get("saved_state_result", None) is not None:
-                saved_state_result = obj["saved_state_result"]
-                edges_added = saved_state_result.get("edges_added", None)
-            else:
-                edges_added = obj.get("result", None)
+            saved_state_result = obj.get("saved_state_result", None)
+            result = obj.get("result", None)
+            obj = saved_state_result if saved_state_result is not None else result
+            if obj is not None:
+                edges_added = obj.get("dep_table_edges_added", None)
+                naming_table_rows_changed = obj.get(
+                    "naming_table_rows_changed",
+                    None
+                )
 
             if edges_added is None:
                 raise Exception(
                     'Failed. Missing result field: "%s" stderr: "%s"' % (stdout, stderr)
                 )
 
-        return SaveStateCommandResult(retcode, edges_added)
+        return SaveStateCommandResult(retcode, edges_added, naming_table_rows_changed)
 
     @classmethod
     def save_command(

@@ -741,7 +741,7 @@ let save naming_table db_name =
       (Printf.sprintf "Inserted %d files and %d symbols" !files_added !symbols_added)
       t
   in
-  ()
+  !files_added + !symbols_added
 
 
 (*****************************************************************************)

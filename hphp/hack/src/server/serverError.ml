@@ -16,7 +16,7 @@ open Utils
 
 let get_error_list_json
     (error_list: (Pos.absolute Errors.error_ list))
-    ~(edges_added: int option)
+    ~(save_state_result: SaveStateServiceTypes.save_state_result option)
     (recheck_stats: ServerCommandTypes.Recheck_stats.t option) =
   let error_list, did_pass = match error_list with
   | [] -> [], true
@@ -29,13 +29,15 @@ let get_error_list_json
       "version", Build_id.build_version_json;
     ]
   in
-  let properties = match edges_added with
+  let properties = match save_state_result with
   | None -> properties
-  | Some edges_added ->
+  | Some save_state_result ->
     let saved_state_result =
+      let open SaveStateServiceTypes in
       "saved_state_result", Hh_json.JSON_Object
         [
-          "edges_added", Hh_json.int_ edges_added
+          "naming_table_rows_changed", Hh_json.int_ save_state_result.naming_table_rows_changed;
+          "edges_added", Hh_json.int_ save_state_result.dep_table_edges_added;
         ]
     in
     saved_state_result :: properties in
@@ -56,9 +58,9 @@ let get_error_list_json
 let print_error_list_json
     (oc: Out_channel.t)
     (error_list: (Pos.absolute Errors.error_ list))
-    (edges_added: int option)
+    (save_state_result: SaveStateServiceTypes.save_state_result option)
     (recheck_stats: ServerCommandTypes.Recheck_stats.t option) =
-  let res = get_error_list_json error_list ~edges_added recheck_stats in
+  let res = get_error_list_json error_list ~save_state_result recheck_stats in
   Hh_json.json_to_output oc res;
   Out_channel.flush oc
 
@@ -67,10 +69,10 @@ let print_error_list
     ~(stale_msg: string option)
     ~(output_json: bool)
     ~(error_list: (Pos.absolute Errors.error_ list))
-    ~(edges_added: int option)
+    ~(save_state_result: SaveStateServiceTypes.save_state_result option)
     ~(recheck_stats: ServerCommandTypes.Recheck_stats.t option) =
   if output_json then
-    print_error_list_json oc error_list edges_added recheck_stats
+    print_error_list_json oc error_list save_state_result recheck_stats
   else begin
     if error_list = []
     then Out_channel.output_string oc "No errors!\n"

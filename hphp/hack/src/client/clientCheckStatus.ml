@@ -90,7 +90,12 @@ let go status output_json from error_format =
      * IDE plugins first *)
     let oc = if output_json then stderr else stdout in
     ServerError.print_error_list
-      oc ~stale_msg ~output_json ~error_list ~edges_added:None ~recheck_stats:last_recheck_stats
+      oc
+      ~stale_msg
+      ~output_json
+      ~error_list
+      ~save_state_result:None
+      ~recheck_stats:last_recheck_stats
   end else begin
     let f = match error_format with
       | Errors.Context -> print_error_contextual

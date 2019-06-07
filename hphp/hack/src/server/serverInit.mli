@@ -18,7 +18,11 @@ type load_state_approach =
 
 (* Saves the state that is used by init below and returns the number of
   edges added to the saved state dependency table. *)
-val save_state: ServerEnv.genv -> ServerEnv.env -> string -> int option
+val save_state:
+  ServerEnv.genv ->
+  ServerEnv.env ->
+  string ->
+  SaveStateServiceTypes.save_state_result option
 
 type init_result =
   (** Loaded a saved saved state of this distance. Note: for older load scripts

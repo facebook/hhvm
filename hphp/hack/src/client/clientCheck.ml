@@ -18,6 +18,21 @@ module Rpc = ServerCommandTypes
 module SyntaxTree = Full_fidelity_syntax_tree
   .WithSyntax(Full_fidelity_minimal_syntax)
 
+module SaveStateResultPrinter = ClientResultPrinter.Make (struct
+    type t = SaveStateServiceTypes.save_state_result
+    let to_string t =
+      Printf.sprintf "{ naming_table_rows_changed = %d; dep_table_edges_added = %d }"
+        t.SaveStateServiceTypes.naming_table_rows_changed
+        t.SaveStateServiceTypes.dep_table_edges_added
+    let to_json t =
+      Hh_json.JSON_Object [
+        "naming_table_rows_changed",
+          Hh_json.JSON_Number (string_of_int t.SaveStateServiceTypes.naming_table_rows_changed);
+        "dep_table_edges_added",
+          Hh_json.JSON_Number (string_of_int t.SaveStateServiceTypes.dep_table_edges_added);
+      ]
+  end)
+
 let parse_function_or_method_id ~func_action ~meth_action name =
   let pieces = Str.split (Str.regexp "::") name in
   try
@@ -383,7 +398,7 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
         Path.to_string path,
         args.gen_saved_ignore_type_errors,
         args.replace_state_after_saving) in
-      ClientResultPrinter.Int_printer.go result args.output_json;
+      SaveStateResultPrinter.go result args.output_json;
       Lwt.return Exit_status.No_error
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in

@@ -65,7 +65,11 @@ module Program =
              Exit_status.exit Exit_status.Server_shutting_down
            )))
 
-    let run_once_and_exit genv env (edges_added: int option) =
+    let run_once_and_exit
+      genv
+      env
+      (save_state_result: SaveStateServiceTypes.save_state_result option)
+    =
       let last_recheck_info = env.ServerEnv.last_recheck_info in
       let recheck_stats = match last_recheck_info with
         | None -> None
@@ -79,7 +83,7 @@ module Program =
         ~stale_msg:None
         ~output_json:(ServerArgs.json_mode genv.options)
         ~error_list:(List.map (Errors.get_error_list env.errorl) Errors.to_absolute)
-        ~edges_added
+        ~save_state_result
         ~recheck_stats;
 
       WorkerController.killall ();
@@ -1001,13 +1005,13 @@ let run_once options config local_config =
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
   let env = program_init genv in
-  let edges_added =
+  let save_state_results =
     match (ServerArgs.save_filename genv.options) with
     | None -> None
     | Some filename -> ServerInit.save_state genv env filename
   in
   Hh_logger.log "Running in check mode";
-  Program.run_once_and_exit genv env edges_added
+  Program.run_once_and_exit genv env save_state_results
 
 (*
  * The server monitor will pass client connections to this process

@@ -63,6 +63,7 @@
     docblockService
     hoverService
     inferAtPosService
+    saveStateServiceTypes
     serverCommandTypes
     serverCommandTypesUtils
     serverCoverageMetricTypes

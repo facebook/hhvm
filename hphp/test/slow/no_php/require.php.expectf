@@ -1,2 +1,0 @@
-
-Fatal error: HHVM 4+ does not support PHP: %s/test/slow/no_php/toplevel.php in %s/test/slow/no_php/require.php on line 3

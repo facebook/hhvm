@@ -503,7 +503,6 @@ struct RuntimeOption {
   static bool EnableHipHopSyntax;
   static bool EnableShortTags;
   static bool EnableXHP;
-  static bool EnablePHP;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;
   static bool EnableArgsInBacktraces;

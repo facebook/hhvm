@@ -1375,7 +1375,7 @@ TypedValue ExecutionContext::invokeUnit(const Unit* unit,
                                         bool callByHPHPInvoke) {
   checkHHConfig(unit);
 
-  if (UNLIKELY(!RuntimeOption::EnablePHP) && !unit->isHHFile()) {
+  if (!unit->isHHFile()) {
     throw PhpNotSupportedException(unit->filepath()->data());
   }
 

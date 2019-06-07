@@ -55,7 +55,6 @@ int emulate_zend(int argc, char** argv) {
   std::vector<std::string> newargv;
 
   newargv.push_back(argv[0]);
-  newargv.push_back("-dhhvm.enable_php=true");
 
   bool lint = false;
   bool show = false;

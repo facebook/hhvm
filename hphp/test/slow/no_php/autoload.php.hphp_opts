@@ -1,2 +1,0 @@
---ffile=hphp/test/slow/no_php/autoload_foo.inc --ffile=test/slow/no_php/autoload_foo.inc
--vEval.EnablePHP=1

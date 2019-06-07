@@ -72,7 +72,7 @@ end
 module Function = struct
   type t = string
 
-  let autoimport_funcs = List.map Namespaces.autoimport_funcs snd
+  let autoimport_funcs = List.map Namespaces.autoimport_funcs fst
 
   let has_hh_prefix s =
     let s = String.lowercase s in

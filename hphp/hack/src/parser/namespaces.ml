@@ -31,97 +31,97 @@ type autoimport_ns =
  * most sense there.
  *)
 let autoimport_classes = [
-  Global, "Traversable";
-  Global, "KeyedTraversable";
-  Global, "Container";
-  Global, "KeyedContainer";
-  Global, "Iterator";
-  Global, "KeyedIterator";
-  Global, "Iterable";
-  Global, "KeyedIterable";
-  Global, "Collection";
-  Global, "Vector";
-  Global, "ImmVector";
-  Global, "vec";
-  Global, "dict";
-  Global, "keyset";
-  Global, "Map";
-  Global, "ImmMap";
-  Global, "StableMap";
-  Global, "Set";
-  Global, "ImmSet";
-  Global, "Pair";
-  Global, "Awaitable";
-  Global, "AsyncIterator";
-  Global, "IMemoizeParam";
-  Global, "AsyncKeyedIterator";
-  Global, "InvariantException";
-  Global, "AsyncGenerator";
-  Global, "StaticWaitHandle";
-  Global, "WaitableWaitHandle";
-  Global, "ResumableWaitHandle";
-  Global, "AsyncFunctionWaitHandle";
-  Global, "AsyncGeneratorWaitHandle";
-  Global, "AwaitAllWaitHandle";
-  Global, "ConditionWaitHandle";
-  Global, "RescheduleWaitHandle";
-  Global, "SleepWaitHandle";
-  Global, "ExternalThreadEventWaitHandle";
-  Global, "Shapes";
-  Global, "TypeStructureKind";
-  HH, "ObjprofObjectStats";
-  HH, "ObjprofPathsStats";
-  HH, "ObjprofStringStats";
+  "AsyncFunctionWaitHandle", Global;
+  "AsyncGenerator", Global;
+  "AsyncGeneratorWaitHandle", Global;
+  "AsyncIterator", Global;
+  "AsyncKeyedIterator", Global;
+  "Awaitable", Global;
+  "AwaitAllWaitHandle", Global;
+  "Collection", Global;
+  "ConditionWaitHandle", Global;
+  "Container", Global;
+  "dict", Global;
+  "ExternalThreadEventWaitHandle", Global;
+  "IMemoizeParam", Global;
+  "ImmMap", Global;
+  "ImmSet", Global;
+  "ImmVector", Global;
+  "InvariantException", Global;
+  "Iterable", Global;
+  "Iterator", Global;
+  "KeyedContainer", Global;
+  "KeyedIterable", Global;
+  "KeyedIterator", Global;
+  "KeyedTraversable", Global;
+  "keyset", Global;
+  "Map", Global;
+  "ObjprofObjectStats", HH;
+  "ObjprofPathsStats", HH;
+  "ObjprofStringStats", HH;
+  "Pair", Global;
+  "RescheduleWaitHandle", Global;
+  "ResumableWaitHandle", Global;
+  "Set", Global;
+  "Shapes", Global;
+  "SleepWaitHandle", Global;
+  "StableMap", Global;
+  "StaticWaitHandle", Global;
+  "Traversable", Global;
+  "TypeStructureKind", Global;
+  "vec", Global;
+  "Vector", Global;
+  "WaitableWaitHandle", Global;
 ]
 let autoimport_funcs =   [
-  Global, "fun";
-  Global, "meth_caller";
-  Global, "class_meth";
-  Global, "inst_meth";
-  Global, "invariant_callback_register";
-  Global, "invariant";
-  Global, "invariant_violation";
-  Global, "idx";
-  Global, "type_structure";
-  Global, "asio_get_current_context_idx";
-  Global, "asio_get_running_in_context";
-  Global, "asio_get_running";
-  Global, "xenon_get_data";
-  HH, "thread_memory_stats";
-  HH, "thread_mark_stack";
-  HH, "objprof_get_strings";
-  HH, "objprof_get_data";
-  HH, "objprof_get_paths";
-  HH, "heapgraph_create";
-  HH, "heapgraph_stats";
-  HH, "heapgraph_foreach_node";
-  HH, "heapgraph_foreach_edge";
-  HH, "heapgraph_foreach_root";
-  HH, "heapgraph_dfs_nodes";
-  HH, "heapgraph_dfs_edges";
-  HH, "heapgraph_node";
-  HH, "heapgraph_edge";
-  HH, "heapgraph_node_in_edges";
-  HH, "heapgraph_node_out_edges";
-  HH, "server_warmup_status";
-  Global, "dict";
-  Global, "vec";
-  Global, "keyset";
-  Global, "varray";
-  Global, "darray";
-  Global, "is_vec";
-  Global, "is_dict";
-  Global, "is_keyset";
-  Global, "is_varray";
-  Global, "is_darray";
+  "asio_get_current_context_idx", Global;
+  "asio_get_running_in_context", Global;
+  "asio_get_running", Global;
+  "class_meth", Global;
+  "darray", Global;
+  "dict", Global;
+  "fun", Global;
+  "heapgraph_create", HH;
+  "heapgraph_dfs_edges", HH;
+  "heapgraph_dfs_nodes", HH;
+  "heapgraph_edge", HH;
+  "heapgraph_foreach_edge", HH;
+  "heapgraph_foreach_node", HH;
+  "heapgraph_foreach_root", HH;
+  "heapgraph_node_in_edges", HH;
+  "heapgraph_node_out_edges", HH;
+  "heapgraph_node", HH;
+  "heapgraph_stats", HH;
+  "idx", Global;
+  "inst_meth", Global;
+  "invariant_callback_register", Global;
+  "invariant_violation", Global;
+  "invariant", Global;
+  "is_darray", Global;
+  "is_dict", Global;
+  "is_keyset", Global;
+  "is_varray", Global;
+  "is_vec", Global;
+  "keyset", Global;
+  "meth_caller", Global;
+  "objprof_get_data", HH;
+  "objprof_get_paths", HH;
+  "objprof_get_strings", HH;
+  "server_warmup_status", HH;
+  "thread_mark_stack", HH;
+  "thread_memory_stats", HH;
+  "type_structure", Global;
+  "varray", Global;
+  "vec", Global;
+  "xenon_get_data", Global;
 ]
 let autoimport_types = [
-  Global, "typename";
-  Global, "classname";
-  Global, "TypeStructure";
+  "classname", Global;
+  "typename", Global;
+  "TypeStructure", Global;
 ]
 let autoimport_consts = [
-  HH, "Rx\\IS_ENABLED";
+  "Rx\\IS_ENABLED", HH;
 ]
 
 let autoimport_map =
@@ -131,10 +131,11 @@ let autoimport_map =
     autoimport_types @
     autoimport_consts
   in
-  List.fold_left autoimport_list ~init:SMap.empty ~f:(fun m (ns, id) -> SMap.add id ns m)
+  SMap.of_list autoimport_list
 
-(* Return the namespace (or None if the global one) into which id is auto imported.
- * Return false as first value if it is not auto imported
+(**
+ * Return the namespace into which id is auto imported for the typechecker and
+ * compiler, respectively. Return None if it is not auto imported.
  *)
 let get_autoimport_name_namespace id =
   if SN.Typehints.is_reserved_global_name id then

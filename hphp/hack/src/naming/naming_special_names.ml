@@ -384,7 +384,7 @@ module FB = struct
 
   let fgenva                 = "\\genva"
 
-  let idx                    = "\\idx"
+  let idx                    = "\\HH\\idx"
 
   let cTypeStructure         = "\\HH\\TypeStructure"
 

@@ -89,7 +89,7 @@ let autoimport_funcs =   [
   "heapgraph_node_out_edges", HH;
   "heapgraph_node", HH;
   "heapgraph_stats", HH;
-  "idx", Global;
+  "idx", HH;
   "inst_meth", HH;
   "invariant_callback_register", HH;
   "invariant_violation", HH;

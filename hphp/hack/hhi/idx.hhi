@@ -8,6 +8,8 @@
  *
  */
 
+namespace HH {
+
 // NB: the typechecker relies on the exact format of this signature and rewrites
 // parts of it in place during each call. Changes to the signature need to be
 // done in tandem with changes to the ocaml code that munges it.
@@ -26,5 +28,10 @@
  * `null` is a valid key in the container.
  */
 <<__Rx>>
-function idx<Tk as arraykey, Tv>(?KeyedContainer<Tk, Tv> $collection, $index,
-  $default = null) {}
+function idx<Tk as arraykey, Tv>(
+  ?KeyedContainer<Tk, Tv> $collection,
+  $index,
+  $default = null,
+) {}
+
+}

@@ -6,10 +6,14 @@ Warning: Cannot use a scalar value as an array in %s
 Warning: Cannot use a scalar value as an array in %s
 
 Warning: Cannot use a scalar value as an array in %s
+
+Warning: Cannot use a scalar value as an array in %s
 --End--
 
 --Start--
 int(1)
+
+Warning: Cannot use a scalar value as an array in %s
 
 Warning: Cannot use a scalar value as an array in %s
 
@@ -26,6 +30,8 @@ Warning: Cannot use a scalar value as an array in %s
 Warning: Cannot use a scalar value as an array in %s
 
 Warning: Cannot use a scalar value as an array in %s
+
+Warning: Cannot use a scalar value as an array in %s
 --End--
 
 --Start--
@@ -36,10 +42,14 @@ Warning: Cannot use a scalar value as an array in %s
 Warning: Cannot use a scalar value as an array in %s
 
 Warning: Cannot use a scalar value as an array in %s
+
+Warning: Cannot use a scalar value as an array in %s
 --End--
 
 --Start--
 bool(true)
+
+Warning: Cannot use a scalar value as an array in %s
 
 Warning: Cannot use a scalar value as an array in %s
 

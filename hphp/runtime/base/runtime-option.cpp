@@ -480,7 +480,7 @@ std::string RuntimeOption::PidFile = "www.pid";
 
 bool RuntimeOption::ServerMode = false;
 
-bool RuntimeOption::EnableHipHopSyntax = false;
+bool RuntimeOption::EnableHipHopSyntax = true;
 bool RuntimeOption::EnableShortTags = true;
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;

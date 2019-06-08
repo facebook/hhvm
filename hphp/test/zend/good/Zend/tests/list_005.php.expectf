@@ -2,6 +2,12 @@ string(1) "f"
 string(1) "o"
 string(1) "o"
 ----
+
+Warning: Cannot use a scalar value as an array in %s/list_005.php on line 13
+
+Warning: Cannot use a scalar value as an array in %s/list_005.php on line 13
+
+Warning: Cannot use a scalar value as an array in %s/list_005.php on line 13
 NULL
 NULL
 NULL

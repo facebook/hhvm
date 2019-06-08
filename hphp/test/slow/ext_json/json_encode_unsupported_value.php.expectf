@@ -1,0 +1,12 @@
+
+Warning: json_encode(): type is unsupported, encoded as false in %s/json_encode_unsupported_value.php on line 9
+bool(false)
+
+Warning: json_encode(): type is unsupported, encoded as false in %s/json_encode_unsupported_value.php on line 10
+bool(false)
+
+Warning: json_encode(): type is unsupported, encoded as null in %s/json_encode_unsupported_value.php on line 13
+string(4) "null"
+
+Warning: json_encode(): type is unsupported, encoded as null in %s/json_encode_unsupported_value.php on line 14
+string(10) "[1,2,null]"

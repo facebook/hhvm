@@ -65,6 +65,7 @@ slow/serialization/wakeup-prop.php
 slow/serialize/incomplete_class.php
 slow/serialize/incomplete_class.php
 slow/spec/tests/functions/passing_arguments.php
+slow/string_length_overflow/nzuncompress.php
 slow/unserialize-reference-overwritten.php
 slow/vec/ref-fail-leak.php
 slow/yield/clone/g11.php

@@ -1,3 +1,5 @@
+
+Warning: Cannot use a scalar value as an array in %s/elem.php on line 8
 resource(1) of type (stream)
 
 Warning: Cannot use a scalar value as an array in %s/test/slow/resource/elem.php on line 10

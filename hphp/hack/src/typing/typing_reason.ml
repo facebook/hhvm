@@ -547,6 +547,7 @@ type ureason =
   | URfinal_property
   | URclone
   | URusing
+  [@@deriving show]
 
 let index_array = URindex "array"
 let index_tuple = URindex "tuple"

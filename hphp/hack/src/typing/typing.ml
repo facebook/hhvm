@@ -55,6 +55,34 @@ module Fake         = Typing_fake_members
 module NastTanyMapper =
   Aast_mapper.MapAnnotatedAST(Nast.Annotations)(Tast.Annotations)
 
+module ExpectedTy: sig
+  [@@@warning "-32"]
+  type t = private {
+    pos: Pos.t;
+    reason: Typing_reason.ureason;
+    locl_ty: locl ty;
+  } [@@deriving show]
+  [@@@warning "+32"]
+
+  val make : Pos.t -> Typing_reason.ureason -> locl ty -> t
+end
+= struct
+  (* Some mutually recursive inference functions in typing.ml pass around an ~expected argument that
+   * enables bidirectional type checking. This module abstracts away that type so that it can be
+   * extended and modified without having to touch every consumer. *)
+  type t = {
+    pos: Pos.t;
+    reason: Typing_reason.ureason;
+    locl_ty: locl ty [@printer Pp_type.pp_ty Pp_type.pp_locl];
+  } [@@deriving show]
+
+  let make pos reason locl_ty =
+    { pos;
+      reason;
+      locl_ty;
+    }
+end
+
 let map_funcbody_annotation an =
   match an with
   | Nast.Annotations.FuncBodyAnnotation.NamedWithUnsafeBlocks ->
@@ -107,15 +135,6 @@ let suggest env p ty is_code_error =
   )
 
 let err_witness env p = Reason.Rwitness p, Typing_utils.terr env
-
-(* When typing an expression, we optionally pass in the type
- * that we *expect* the expression to have.
- *)
-type expected_ty = {
-  pos: Pos.t;
-  reason: Reason.ureason;
-  locl_ty: locl ty;
-}
 
 let expr_error env p r =
   let ty = (r, Typing_utils.terr env) in
@@ -397,11 +416,8 @@ let rec bind_param env (ty1, param) =
     | None ->
         env, None, ty1
     | Some e ->
-        let env, te, ty2 = expr ~expected:{
-          pos = param.param_pos;
-          reason = Reason.URparam;
-          locl_ty = ty1
-        } env e in
+        let expected = ExpectedTy.make param.param_pos Reason.URparam ty1 in
+        let env, te, ty2 = expr ~expected env e in
         Typing_sequencing.sequence_check_expr e;
         let env, ty1 =
           if Option.is_none param.param_hint
@@ -789,12 +805,7 @@ and stmt_ env pos st =
       let return_type = Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type in
       let expected =
         if return_explicit
-        then
-          Some {
-            pos = expr_pos;
-            reason = Reason.URreturn;
-            locl_ty = return_type;
-          }
+        then Some (ExpectedTy.make expr_pos Reason.URreturn return_type)
         else None in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
@@ -997,7 +1008,7 @@ and stmt_ env pos st =
           { (Phase.env_with_self env) with from_class = Some CIstatic; } in
         let hint_ty = Decl_hint.hint env.Env.decl_env (p, h) in
         let env, hint_ty = Phase.localize ~ety_env env hint_ty in
-        env, Some hint_ty, Some { pos = p; reason = Reason.URhint; locl_ty = hint_ty }
+        env, Some hint_ty, Some (ExpectedTy.make p Reason.URhint hint_ty)
       | None -> env, None, None
       in
     let env, t_rhs, rhs_ty = expr env rhs in
@@ -1204,7 +1215,7 @@ and bind_as_expr env loop_ty p ty1 ty2 aexpr =
       assert false
 
 and expr
-    ?(expected: expected_ty option)
+    ?(expected: ExpectedTy.t option)
     ?(accept_using_var = false)
     ?(is_using_clause = false)
     ?is_func_arg
@@ -1215,11 +1226,11 @@ and expr
   try
     begin match expected with
     | None -> ()
-    | Some {
+    | Some ExpectedTy.({
         pos = _;
         reason = r;
         locl_ty = ty;
-      } ->
+      }) ->
       Typing_log.(log_with_level env "typing" 1 (fun () ->
         log_types p env
         [Log_head ("Typing.expr " ^ Typing_reason.string_of_ureason r,
@@ -1236,7 +1247,7 @@ and expr
 and raw_expr
   ?(accept_using_var = false)
   ?(is_using_clause = false)
-  ?(expected: expected_ty option)
+  ?(expected: ExpectedTy.t option)
   ?lhs_of_null_coalesce
   ?is_func_arg
   ?array_ref_ctx
@@ -1287,7 +1298,7 @@ and loop_forever env =
 (* $x ?? 0 is handled similarly to $x ?: 0, except that the latter will also
  * look for sketchy null checks in the condition. *)
 (* TODO TAST: type refinement should be made explicit in the typed AST *)
-and eif env ~(expected: expected_ty option) p c e1 e2 =
+and eif env ~(expected: ExpectedTy.t option) p c e1 e2 =
   let condition = condition ~lhs_of_null_coalesce:false in
   let env, tc, tyc = raw_expr ~lhs_of_null_coalesce:false env c in
   let parent_lenv = env.Env.lenv in
@@ -1333,7 +1344,7 @@ and check_escaping_var env (pos, x) =
 and exprs
   ?(accept_using_var = false)
   ?is_func_arg
-  ?(expected: expected_ty option)
+  ?(expected: ExpectedTy.t option)
   ?(valkind = `other)
   ?(check_defined = true)
   env el =
@@ -1353,7 +1364,8 @@ and exprs_expected (pos, ur, expected_tyl) env el =
   | [], _ ->
     env, [], []
   | e::el, expected_ty::expected_tyl ->
-    let env, te, ty = expr ~expected:{ pos; reason = ur; locl_ty = expected_ty } env e in
+    let expected = ExpectedTy.make pos ur expected_ty in
+    let env, te, ty = expr ~expected env e in
     let env, tel, tyl = exprs_expected (pos, ur, expected_tyl) env el in
     env, te::tel, ty::tyl
   | el, [] ->
@@ -1366,7 +1378,7 @@ and make_result env p te ty =
   env, T.make_typed_expr p ty te, ty
 
 and expr_
-  ?(expected: expected_ty option)
+  ?(expected: ExpectedTy.t option)
   ?(accept_using_var = false)
   ?(is_using_clause = false)
   ?lhs_of_null_coalesce
@@ -1385,17 +1397,17 @@ and expr_
    * Given a list of types, computes their supertype. If any of the types are
    * unknown (e.g., comes from PHP), the supertype will be Typing_utils.tany env.
    *)
-  let compute_supertype ~(expected: expected_ty option) ~reason r env tys =
+  let compute_supertype ~(expected: ExpectedTy.t option) ~reason r env tys =
     let p = Reason.to_pos r in
     let env, supertype =
       match expected with
       | None ->
         Env.fresh_type_reason env r
-      | Some {
+      | Some ExpectedTy.({
           pos = _;
           reason = _;
           locl_ty = ty;
-        } -> env, ty in
+        }) -> env, ty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
       | (_, Tany) -> env, supertype
@@ -1414,7 +1426,7 @@ and expr_
    * function extracts a list of exprs from the list, and computes the supertype
    * of all of the expressions' tys.
    *)
-  let compute_exprs_and_supertype ~(expected: expected_ty option) ?(reason = Reason.URarray_value)
+  let compute_exprs_and_supertype ~(expected: ExpectedTy.t option) ?(reason = Reason.URarray_value)
     r env l extract_expr_and_ty =
     let env, exprs_and_tys = List.map_env env l (extract_expr_and_ty ~expected) in
     let exprs, tys = List.unzip exprs_and_tys in
@@ -1436,7 +1448,7 @@ and expr_
     | _ -> Env.forget_members env (Fake.Blame_call p) in
 
   let check_call
-    ~is_using_clause ~(expected: expected_ty option) env p call_type e hl el uel ~in_suspend =
+    ~is_using_clause ~(expected: ExpectedTy.t option) env p call_type e hl el uel ~in_suspend =
     let env, te, result =
       dispatch_call
       ~is_using_clause ~expected p env call_type e hl el uel ~in_suspend in
@@ -1466,7 +1478,7 @@ and expr_
           match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_akvec_inst ety with
-            | Some vty -> env, Some { pos; reason = ur; locl_ty = vty }
+            | Some vty -> env, Some (ExpectedTy.make pos ur vty)
             | None -> env, None
             end
           | _ ->
@@ -1489,7 +1501,7 @@ and expr_
           match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_akvec_inst ety with
-            | Some vty -> env, Some { pos; reason = ur; locl_ty = vty }
+            | Some vty -> env, Some (ExpectedTy.make pos ur vty)
             | None -> env, None
             end
           | _ ->
@@ -1505,7 +1517,9 @@ and expr_
           | env, Some (pos, reason, ety) ->
             begin match get_akmap_inst ety with
             | Some (kty, vty) ->
-              env, Some { pos; reason; locl_ty = kty}, Some { pos = pos; reason; locl_ty = vty }
+              let k_expected = ExpectedTy.make pos reason kty in
+              let v_expected = ExpectedTy.make pos reason vty in
+              env, Some k_expected, Some v_expected
             | None -> env, None, None
             end
           | _ ->
@@ -1531,17 +1545,17 @@ and expr_
         ) when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtk = resolve_type_argument env tk in
           let env, localtv = resolve_type_argument env tv in
-          (
-            env,
-            Some { pos = pk; reason = Reason.URhint; locl_ty = localtk },
-            Some { pos = pv; reason = Reason.URhint; locl_ty = localtv }
-          )
+          let localtk_expected = ExpectedTy.make pk Reason.URhint localtk in
+          let localtv_expected = ExpectedTy.make pv Reason.URhint localtv in
+          env, Some localtk_expected, Some localtv_expected
         | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
             | env, Some (pos, reason, ety) ->
               begin match get_darray_inst ety with
               | Some (kty, vty) ->
-                env, Some { pos; reason; locl_ty = kty }, Some { pos; reason; locl_ty = vty }
+                let k_expected = ExpectedTy.make pos reason kty in
+                let v_expected = ExpectedTy.make pos reason vty in
+                env, Some k_expected, Some v_expected
               | None ->
                 env, None, None
               end
@@ -1568,12 +1582,12 @@ and expr_
         | Some ((pv, _) as tv)
           when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtv = resolve_type_argument env tv in
-          env, Some { pos = pv; reason = Reason.URhint; locl_ty = localtv }
+          env, Some (ExpectedTy.make pv Reason.URhint localtv)
         | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_varray_inst ety with
-            | Some vty -> env, Some { pos = pos; reason = ur; locl_ty = vty }
+            | Some vty -> env, Some (ExpectedTy.make pos ur vty)
             | _ -> env, None
             end
           | _ -> env, None
@@ -1593,12 +1607,12 @@ and expr_
         | Some ((pv, _) as tv)
           when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtv = resolve_type_argument env tv in
-          env, Some { pos = pv; reason = Reason.URhint; locl_ty = localtv }
+          env, Some (ExpectedTy.make pv Reason.URhint localtv)
         | _ ->
           begin match expand_expected env expected with
           | env, Some (pos, ur, ety) ->
             begin match get_vc_inst kind ety with
-            | Some vty -> env, Some { pos = pos; reason = ur; locl_ty = vty }
+            | Some vty -> env, Some (ExpectedTy.make pos ur vty)
             | None -> env, None
             end
           | _ -> env, None
@@ -1626,17 +1640,17 @@ and expr_
         ) when not (TCO.ignore_collection_expr_type_arguments (Env.get_tcopt env)) ->
           let env, localtk = resolve_type_argument env tk in
           let env, localtv = resolve_type_argument env tv in
-          (
-            env,
-            Some { pos = pk; reason = Reason.URhint; locl_ty = localtk },
-            Some { pos = pv; reason = Reason.URhint; locl_ty = localtv }
-          )
+          let localtk_expected = ExpectedTy.make pk Reason.URhint localtk in
+          let localtv_expected = ExpectedTy.make pv Reason.URhint localtv in
+          env, Some localtk_expected, Some localtv_expected
         | _ -> (* no explicit typehint, fallback to supplied expect *)
           begin match expand_expected env expected with
           | env, Some (pos, reason, ety) ->
             begin match get_kvc_inst kind ety with
             | Some (kty, vty) ->
-              env, Some { pos; reason; locl_ty = kty }, Some { pos; reason; locl_ty = vty }
+              let k_expected = ExpectedTy.make pos reason kty in
+              let v_expected = ExpectedTy.make pos reason vty in
+              env, Some k_expected, Some v_expected
             | None -> env, None, None
             end
           | _ -> env, None, None
@@ -1944,7 +1958,9 @@ and expr_
       let env, expected1, expected2 =
         match expand_expected env expected with
         | env, Some (pos, reason, (_, Tclass ((_, k), _, [ty1; ty2]))) when k = SN.Collections.cPair ->
-          env, Some { pos; reason; locl_ty = ty1 }, Some { pos; reason; locl_ty = ty2 }
+          let ty1_expected = ExpectedTy.make pos reason ty1 in
+          let ty2_expected = ExpectedTy.make pos reason ty2 in
+          env, Some ty1_expected, Some ty2_expected
         | _ -> env, None, None in
       let env, te1, ty1 = expr ?expected:expected1 env e1 in
       let env, te2, ty2 = expr ?expected:expected2 env e2 in
@@ -2456,11 +2472,11 @@ and expr_
         end
         else begin
           match expected with
-          | Some {
+          | Some ExpectedTy.({
               pos = _;
               reason = _;
               locl_ty = (_, Tany);
-            } ->
+            }) ->
             (* If the expected type is Tany env then we're passing a lambda to an untyped
              * function and we just assume every parameter has type Tany env *)
             Typing_log.increment_feature_count env FL.Lambda.untyped_context;
@@ -2574,7 +2590,7 @@ and expr_
               ~f:(fun (k, v) ->
                 match ShapeMap.get k expected_fdm with
                 | None -> (k, (v, None))
-                | Some sft -> (k, (v, Some { pos; reason = ur; locl_ty = sft.sft_ty }))) fdm in
+                | Some sft -> (k, (v, Some (ExpectedTy.make pos ur sft.sft_ty)))) fdm in
           env, fdme
         | _ ->
           env, List.map ~f:(fun (k, v) -> (k, (v, None))) fdm in
@@ -2957,15 +2973,15 @@ and requires_consistent_construct = function
  * strip nullables, so ?t becomes t, as context will always accept a t if a ?t
  * is expected.
  *)
-and expand_expected env (expected: expected_ty option) =
+and expand_expected env (expected: ExpectedTy.t option) =
   match expected with
   | None ->
     env, None
-  | Some {
+  | Some ExpectedTy.({
       pos = p;
       reason = ur;
       locl_ty = ty;
-    } ->
+    }) ->
     let env, ty = Env.expand_type env ty in
     match ty with
     | _, Tunion [ty] -> env, Some (p, ur, ty)
@@ -2973,15 +2989,15 @@ and expand_expected env (expected: expected_ty option) =
     | _ -> env, Some (p, ur, ty)
 
 (* Do a subtype check of inferred type against expected type *)
-and check_expected_ty message env inferred_ty (expected: expected_ty option) =
+and check_expected_ty message env inferred_ty (expected: ExpectedTy.t option) =
   match expected with
   | None ->
     env
-  | Some {
+  | Some ExpectedTy.({
       pos = p;
       reason = ur;
       locl_ty = expected_ty;
-    } ->
+    }) ->
     Typing_log.(log_with_level env "typing" 1 (fun () ->
       log_types p env
       [Log_head (Printf.sprintf "Typing.check_expected_ty %s" message,
@@ -2990,7 +3006,7 @@ and check_expected_ty message env inferred_ty (expected: expected_ty option) =
     Type.coerce_type p ur env inferred_ty expected_ty
 
 and new_object
-  ~(expected: expected_ty option)
+  ~(expected: ExpectedTy.t option)
   ~check_parent
   ~check_not_abstract
   ~is_using_clause
@@ -3404,21 +3420,21 @@ and array_field env = function
       let env, tve, tv = expr env ve in
       env, (T.AFkvalue (tke, tve), Some tk, tv)
 
-and array_value ~(expected: expected_ty option) env x =
+and array_value ~(expected: ExpectedTy.t option) env x =
   let env, te, ty = expr ?expected ~array_ref_ctx:ElementAssignment env x in
   env, (te, ty)
 
-and array_field_value ~(expected: expected_ty option) env = function
+and array_field_value ~(expected: ExpectedTy.t option) env = function
   | Nast.AFvalue x | Nast.AFkvalue (_, x) ->
       array_value ~expected env x
 
-and arraykey_value p class_name ~(expected: expected_ty option) env ((pos, _) as x) =
+and arraykey_value p class_name ~(expected: ExpectedTy.t option) env ((pos, _) as x) =
   let env, (te, ty) = array_value ~expected env x in
   let ty_arraykey = MakeType.arraykey (Reason.Ridx_dict pos) in
   let env = Type.sub_type p (Reason.index_class class_name) env ty ty_arraykey in
   env, (te, ty)
 
-and array_field_key ~(expected: expected_ty option) env = function
+and array_field_key ~(expected: ExpectedTy.t option) env = function
   (* This shouldn't happen *)
   | Nast.AFvalue (p, _) ->
       let ty = MakeType.int (Reason.Rwitness p) in
@@ -3509,7 +3525,7 @@ and is_abstract_ft fty = match fty with
  * The typing of call is different.
  *)
 
- and dispatch_call ~(expected: expected_ty option) ~is_using_clause p env call_type
+ and dispatch_call ~(expected: ExpectedTy.t option) ~is_using_clause p env call_type
     (fpos, fun_expr as e) tal el uel ~in_suspend =
   let make_call env te thl tel tuel ty =
     make_result env p (T.Call (call_type, te, thl, tel, tuel)) ty in
@@ -5070,7 +5086,7 @@ and inout_write_back env { fp_type; _ } (_, e) =
       env
     | _ -> env
 
-and call ~(expected: expected_ty option) ?method_call_info pos env fty el uel =
+and call ~(expected: ExpectedTy.t option) ?method_call_info pos env fty el uel =
   let make_unpacked_traversable_ty pos ty = MakeType.traversable (Reason.Runpack_param pos) ty in
   let resl = TUtils.try_over_concrete_supertypes env fty begin fun env fty ->
     let env, efty = SubType.expand_type_and_solve
@@ -5080,11 +5096,8 @@ and call ~(expected: expected_ty option) ?method_call_info pos env fty el uel =
       let el = el @ uel in
       let env, tel = List.map_env env el begin fun env elt ->
         let env, te, _ =
-          expr ~expected:{
-            pos;
-            reason = Reason.URparam;
-            locl_ty = (Reason.Rnone, Typing_utils.tany env)
-          } ~is_func_arg:true env elt
+          let expected = ExpectedTy.make pos Reason.URparam (Reason.Rnone, Typing_utils.tany env) in
+          expr ~expected ~is_func_arg:true env elt
         in
         let env =
           match elt with
@@ -5137,16 +5150,13 @@ and call ~(expected: expected_ty option) ?method_call_info pos env fty el uel =
         match opt_param with
         | Some param ->
           let env, te, ty =
-            expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable
-              ~expected:{ pos; reason = Reason.URparam; locl_ty = param.fp_type } env e in
+            let expected = ExpectedTy.make pos Reason.URparam param.fp_type in
+            expr ~is_func_arg:true ~accept_using_var:param.fp_accept_disposable ~expected env e in
           let env = call_param env param (e, ty) ~is_variadic in
           env, Some (te, ty)
         | None ->
-          let env, te, ty = expr ~expected:{
-            pos;
-            reason = Reason.URparam;
-            locl_ty = (Reason.Rnone, Typing_utils.tany env)
-          } ~is_func_arg:true env e in
+          let expected = ExpectedTy.make pos Reason.URparam (Reason.Rnone, Typing_utils.tany env) in
+          let env, te, ty = expr ~expected ~is_func_arg:true env e in
           env, Some (te, ty) in
 
       let set_tyvar_variance_from_lambda_param env opt_param =
@@ -6456,7 +6466,7 @@ and class_const_def env (h, id, e) =
       env, ty, None
     | Some h ->
       let env, ty = Phase.localize_hint_with_self env h in
-      env, ty, Some { pos = fst id; reason = Reason.URhint; locl_ty = ty }
+      env, ty, Some (ExpectedTy.make (fst id) Reason.URhint ty)
   in
   match e with
     | Some e ->
@@ -6501,7 +6511,7 @@ and class_var_def ~is_static env cv =
           else env in
       let cty = Decl_hint.hint env.Env.decl_env cty in
       let env, cty = Phase.localize_with_self env cty in
-      env, Some { pos = p; reason = Reason.URhint; locl_ty = cty } in
+      env, Some (ExpectedTy.make p Reason.URhint cty) in
   (* Next check the expression, passing in expected type if present *)
   let env, typed_cv_expr =
     match cv.cv_expr with
@@ -6515,11 +6525,11 @@ and class_var_def ~is_static env cv =
       let env =
         match expected with
         | None -> env
-        | Some {
+        | Some ExpectedTy.({
             pos = p;
             reason = ur;
             locl_ty = cty;
-          } -> Type.coerce_type p ur env ty cty in
+          }) -> Type.coerce_type p ur env ty cty in
       env, Some te in
   let env =
     if is_static
@@ -6830,7 +6840,8 @@ and gconst_def tcopt cst =
       let ty = Decl_hint.hint env.Env.decl_env hint in
       let env, dty = Phase.localize_with_self env ty in
       let env, te, value_type =
-        expr ~expected:{ pos = fst hint; reason = Reason.URhint; locl_ty = dty } env value in
+        let expected = ExpectedTy.make (fst hint) Reason.URhint dty in
+        expr ~expected env value in
       let env = Typing_utils.sub_type env value_type dty in
       te, env
     | None ->

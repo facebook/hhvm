@@ -37,12 +37,18 @@ function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be 
 function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
 <<__Rx>>
 function is_array(<<__MaybeMutable>> mixed $arg): bool;
+}
+
+namespace HH {
 <<__Rx>>
 function is_vec(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
 function is_dict(<<__MaybeMutable>> mixed $arg): bool;
 <<__Rx>>
 function is_keyset(<<__MaybeMutable>> mixed $arg): bool;
+}
+
+namespace {
 <<__PHPStdLib, __Rx>>
 function ord(string $string): int;
 <<__PHPStdLib>>
@@ -67,6 +73,7 @@ function get_class_constants(string $class_name): array;
 <<__PHPStdLib>>
 function hphp_create_object<T>(string $class_name, varray<mixed> $argv): T;
 }
+
 namespace HH {
   // autoload-map
   function could_include($file): bool;

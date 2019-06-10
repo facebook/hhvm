@@ -94,11 +94,11 @@ let autoimport_funcs =   [
   "invariant_callback_register", HH;
   "invariant_violation", HH;
   "invariant", HH;
-  "is_darray", Global;
-  "is_dict", Global;
-  "is_keyset", Global;
-  "is_varray", Global;
-  "is_vec", Global;
+  "is_darray", HH;
+  "is_dict", HH;
+  "is_keyset", HH;
+  "is_varray", HH;
+  "is_vec", HH;
   "keyset", Global;
   "meth_caller", HH;
   "objprof_get_data", HH;

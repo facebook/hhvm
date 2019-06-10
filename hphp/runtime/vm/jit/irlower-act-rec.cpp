@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/reified-generics.h"
+#include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
@@ -534,6 +535,9 @@ static void actionMayReenter(ActRec* ar,
   TRACE(1, "extra args: %d args, function %s takes only %d, ar %p\n",   \
         numArgs, f->name()->data(), numParams, ar);                     \
   auto tvArgs = reinterpret_cast<TypedValue*>(ar) - numArgs;            \
+  auto tsList = !ar->hasReifiedGenerics() ? nullptr                     \
+                                          : ar->getReifiedGenerics();   \
+  auto reifiedLocal = frame_local(ar, f->numParams()); // regular + var \
   /* end SHUFFLE_EXTRA_ARGS_PRELUDE */
 
 void trimExtraArgs(ActRec* ar) {
@@ -553,6 +557,7 @@ void trimExtraArgs(ActRec* ar) {
   assertx(f->numParams() == (numArgs - numExtra));
   assertx(f->numParams() == numParams);
   ar->setNumArgs(numParams);
+  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
 }
 
 void shuffleExtraArgsMayUseVV(ActRec* ar) {
@@ -561,6 +566,7 @@ void shuffleExtraArgsMayUseVV(ActRec* ar) {
   assertx(f->attrs() & AttrMayUseVV);
 
   ar->setExtraArgs(ExtraArgs::allocateCopy(tvArgs, numExtra));
+  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
 }
 
 void shuffleExtraArgsVariadic(ActRec* ar) {
@@ -598,6 +604,7 @@ void shuffleExtraArgsVariadic(ActRec* ar) {
   assertx(f->numParams() == (numArgs - numExtra + 1));
   assertx(f->numParams() == (numParams + 1));
   ar->setNumArgs(numParams + 1);
+  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
 }
 
 void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
@@ -627,6 +634,7 @@ void shuffleExtraArgsVariadicAndVV(ActRec* ar) {
     ar->resetExtraArgs();
     throw;
   }
+  if (tsList) tvSet(make_array_like_tv(tsList), *reifiedLocal);
 }
 
 #undef SHUFFLE_EXTRA_ARGS_PRELUDE

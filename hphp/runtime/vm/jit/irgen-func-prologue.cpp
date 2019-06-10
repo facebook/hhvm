@@ -191,9 +191,11 @@ void init_params(IRGS& env, const Func* func, uint32_t argc) {
     auto const reified_generics = emitLdARReifiedGenericsSafe(env);
     doesReifiedGenericsMatch =
       gen(env, IsFunReifiedGenericsMatched, FuncData { func }, fp(env));
-    gen(env, KillARReifiedGenerics, fp(env));
-    // $0ReifiedGenerics is the first local
-    gen(env, StLoc, LocalId{func->numParams()}, fp(env), reified_generics);
+    if (argc <= nparams) {
+      gen(env, KillARReifiedGenerics, fp(env));
+      // $0ReifiedGenerics is the first local
+      gen(env, StLoc, LocalId{func->numParams()}, fp(env), reified_generics);
+    }
   }
 
   if (argc < nparams) {

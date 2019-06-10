@@ -1,0 +1,10 @@
+array(2) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+}
+array(1) {
+  ["kind"]=>
+  int(1)
+}

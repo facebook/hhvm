@@ -294,7 +294,7 @@ let load config_filename options =
     ~tco_shallow_class_decl:(local_config.ServerLocalConfig.shallow_class_decl)
     ~po_rust:(local_config.ServerLocalConfig.rust)
     ?tco_like_types:(bool_opt "like_types" config)
-    ?tco_pessimize_types:(bool_opt "disable_instanceof" config)
+    ?tco_pessimize_types:(bool_opt "pessimize_types" config)
     ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)
     ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
     ()

@@ -80,7 +80,7 @@ public:
   {}
 
   ~TreadHashMap() {
-    auto t = m_table.load(std::memory_order_relaxed);
+    auto t = m_table.load(std::memory_order_acquire);
     if (t != staticEmptyTable()) {
       freeTable(t);
     }
@@ -177,7 +177,7 @@ public:
   Val* find(Key key) const {
     assertx(key != 0);
 
-    auto tab = m_table.load(std::memory_order_consume);
+    auto tab = m_table.load(std::memory_order_acquire);
     if (tab->size == 0) return nullptr; // empty
     assertx(tab->capac > tab->size);
     auto idx = project(tab, key);
@@ -190,19 +190,29 @@ public:
     }
   }
 
+  template<typename F> void filter_keys(F fn) {
+    auto const old = m_table.load(std::memory_order_acquire);
+    if (UNLIKELY(old == staticEmptyTable())) return;
+
+    Table* newTable = allocTable(old->capac);
+    for (auto i = uint32_t{}; i < old->capac; ++i) {
+      auto const ent = &old->entries[i];
+      auto const key = ent->first.load(std::memory_order_acquire);
+      if (key && !fn(key)) insertImpl(newTable, key, ent->second);
+    }
+    Treadmill::enqueue([this, old] { freeTable(old); });
+    m_table.store(newTable, std::memory_order_release);
+  }
+
 private:
   Val* insertImpl(Table* const tab, Key newKey, Val newValue) {
     auto probe = &tab->entries[project(tab, newKey)];
     assertx(size_t(probe - tab->entries) < tab->capac);
 
-    // Since we're the only thread allowed to write, we're allowed to
-    // do a relaxed load here.  (No need for an acquire/release
-    // handshake with ourselves.)
-    while (Key currentProbe = probe->first) {
+    while (Key currentProbe = probe->first.load(std::memory_order_acquire)) {
       assertx(currentProbe != newKey); // insertions must be unique
       assertx(probe <= (tab->entries + tab->capac));
-      // can't loop forever; acquireAndGrowIfNeeded ensures there's
-      // some slack.
+      // acquireAndGrowIfNeeded ensures there's at least one empty slot.
       (void)currentProbe;
       if (++probe == (tab->entries + tab->capac)) probe = tab->entries;
     }
@@ -221,8 +231,7 @@ private:
   }
 
   Table* acquireAndGrowIfNeeded() {
-    // Relaxed load is ok---there's only one writer thread.
-    auto old = m_table.load(std::memory_order_relaxed);
+    auto old = m_table.load(std::memory_order_acquire);
 
     // 75% occupancy, avoiding the FPU.
     if (LIKELY((old->size) < (old->capac / 4 + old->capac / 2))) {
@@ -235,10 +244,9 @@ private:
     } else {
       newTable = allocTable(old->capac * 2);
       for (uint32_t i = 0; i < old->capac; ++i) {
-        value_type* ent = old->entries + i;
-        if (ent->first.load()) {
-          insertImpl(newTable, ent->first, ent->second);
-        }
+        auto const ent = old->entries + i;
+        auto const key = ent->first.load(std::memory_order_acquire);
+        if (key) insertImpl(newTable, key, ent->second);
       }
       Treadmill::enqueue([this, old] { freeTable(old); });
     }

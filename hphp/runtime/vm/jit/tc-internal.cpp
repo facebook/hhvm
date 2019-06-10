@@ -368,6 +368,15 @@ void freeProfCode() {
   Treadmill::enqueue([]{
     dropSrcDBProfIncomingBranches();
     code().freeProf();
+    // Clearing the inline stacks map is purely an optimization, and it barely
+    // buys us anything when we're using jumpstart (because we have very few
+    // profiling translations, if any), so we skip it in this case.
+    if (!isJitDeserializing(RuntimeOption::EvalJitSerdesMode)) {
+      auto metaLock = lockMetadata();
+      auto const base     = code().prof().base();
+      auto const frontier = code().prof().frontier();
+      eraseInlineStacksInRange(base, frontier);
+    }
   });
 }
 

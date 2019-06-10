@@ -120,6 +120,14 @@ void eraseInlineStack(CTCA addr) {
   }
 }
 
+void eraseInlineStacksInRange(CTCA start, CTCA end) {
+  auto const start_offset = tc::addrToOffset(start);
+  auto const end_offset   = tc::addrToOffset(end);
+  s_inlineStacks.filter_keys([&](const uint32_t offset) {
+    return start_offset <= offset && offset < end_offset;
+  });
+}
+
 const uint64_t* addrForLiteral(uint64_t val) {
   if (auto it = s_literals.find(val)) {
     assertx(**it == val);

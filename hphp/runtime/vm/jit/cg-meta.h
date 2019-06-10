@@ -235,6 +235,7 @@ void addVeneer(CGMeta& meta, TCA source, TCA target);
 folly::Optional<IStack> inlineStackAt(CTCA addr);
 IFrame getInlineFrame(IFrameID id);
 void eraseInlineStack(CTCA addr);
+void eraseInlineStacksInRange(CTCA start, CTCA end);
 
 }}
 

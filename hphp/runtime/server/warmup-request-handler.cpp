@@ -103,6 +103,7 @@ void InternalWarmupWorker::doJob(WarmupJob job) {
 void InternalWarmupRequestPlayer::
 runAfterDelay(const std::vector<std::string>& files,
               unsigned nTimes, unsigned delaySeconds) {
+  if (nTimes == 0) return;
   if (delaySeconds) {
     /* sleep override */
     sleep(delaySeconds);

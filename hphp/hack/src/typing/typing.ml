@@ -1460,8 +1460,11 @@ and expr_
   | Import _
   | Collection _
   | Omitted
-  | BracedExpr _
-  | ParenthesizedExpr _ -> failwith "AST should not contain these nodes"
+  | BracedExpr _ ->
+    failwith "AST should not contain these nodes"
+  | ParenthesizedExpr e ->
+    let env, te, ty = expr env e in
+    make_result env p (T.ParenthesizedExpr te) ty
   | Any -> expr_error env p (Reason.Rwitness p)
   | Array [] ->
     (* TODO: use expected type to determine expected element type *)

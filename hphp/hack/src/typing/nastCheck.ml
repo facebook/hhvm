@@ -202,8 +202,8 @@ module CheckFunctionBody = struct
     | _, Collection _
     | _, Import _
     | _, Omitted
-    | _, BracedExpr _
-    | _, ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
+    | _, BracedExpr _ -> failwith "AST should not contain these nodes after naming"
+    | _, ParenthesizedExpr e -> expr f_type env e
     | _, Any -> ()
     | _, Class_const _
     | _, Fun_id _
@@ -675,8 +675,8 @@ and expr_ env _p = function
   | Collection _
   | Import _
   | Omitted
-  | BracedExpr _
-  | ParenthesizedExpr _ -> failwith "AST should not contain these nodes after naming"
+  | BracedExpr _ -> failwith "AST should not contain these nodes after naming"
+  | ParenthesizedExpr e -> expr env e
   | Any
   | Fun_id _
   | Method_id _

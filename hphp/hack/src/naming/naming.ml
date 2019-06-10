@@ -1995,7 +1995,7 @@ module Make (GetLocals : GetLocals) = struct
 
   and expr_ env p (e : Aast.expr_) =
     match e with
-    | Aast.ParenthesizedExpr (p, e) -> expr_ env p e
+    | Aast.ParenthesizedExpr e -> N.ParenthesizedExpr (expr env e)
     | Aast.Array l ->
       let tcopt = (fst env).tcopt in
       if TypecheckerOptions.disallow_array_literal tcopt

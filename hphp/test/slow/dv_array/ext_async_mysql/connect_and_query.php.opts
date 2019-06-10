@@ -1,3 +1,2 @@
 --count=5
 -vEval.HackArrCompatTypeHintNotices=1
--vEval.EnableHipHopSyntax=1

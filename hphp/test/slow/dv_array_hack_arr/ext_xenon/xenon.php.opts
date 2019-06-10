@@ -2,4 +2,3 @@
 --count 3
 -vEval.HackArrDVArrs=true
 -vEval.HackArrCompatTypeHintNotices=1
--vEval.EnableHipHopSyntax=1

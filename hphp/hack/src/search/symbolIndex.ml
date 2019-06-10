@@ -41,6 +41,20 @@ let initialize_provider
   | SqliteIndex ->
     SqliteSearchService.sqlite_file_path := savedstate_file_opt;
     SqliteSearchService.initialize workers;
+
+    (* Fetch sqlite namespaces *)
+    let namespace_list = SqliteSearchService.fetch_namespaces () in
+    List.iter namespace_list
+      ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
+
+    (* Add namespace aliases from the .hhconfig file *)
+    List.iter namespace_map ~f:(fun (alias, target) ->
+      NamespaceSearchService.register_alias alias target
+    );
+
+    let namespace_list = SqliteSearchService.fetch_namespaces () in
+    List.iter namespace_list
+      ~f:(fun ns -> NamespaceSearchService.register_namespace ns);
   | GleanApiIndex
   | NoIndex
   | TrieIndex ->
@@ -139,6 +153,10 @@ let find_matching_symbols
     }]
   end else begin
 
+    (* Potential namespace matches always show up first *)
+    let namespace_results = NamespaceSearchService.find_matching_namespaces
+    query_text in
+
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
      * that we haven't seen before *)
@@ -171,7 +189,22 @@ let find_matching_symbols
     let all_results = List.append local_results global_results in
     let dedup_results = List.dedup_and_sort
       ~compare:(fun a b -> String.compare a.si_name b.si_name) all_results in
-    List.take dedup_results max_results
+
+    (* Strip namespace already typed from the results *)
+    let (ns, _) = Utils.split_ns_from_name query_text in
+    let clean_results = if ns = "" || ns = "\\" then
+      dedup_results
+    else begin
+      List.map dedup_results ~f:(fun s ->
+        { s with
+          si_name = String_utils.lstrip s.si_name ns
+        }
+      )
+    end in
+
+    (* Namespaces should always appear first *)
+    let results = List.append namespace_results clean_results in
+    List.take results max_results
   end
 ;;
 

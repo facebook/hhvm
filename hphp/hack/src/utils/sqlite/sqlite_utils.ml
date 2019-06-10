@@ -70,6 +70,28 @@ let to_int_exn (value: Sqlite3.Data.t): int =
 (* Convert a sqlite data value to an ocaml int, and ignore errors *)
 let to_int (value: Sqlite3.Data.t): int =
   try to_int_exn value with Invalid_argument _ -> 0
+;;
+
+(* To save a bool to sqlite have to convert it to int64 *)
+let bool_to_sqlite (value: bool): Sqlite3.Data.t =
+  match value with
+  | true -> Sqlite3.Data.INT 1L
+  | false -> Sqlite3.Data.INT 0L
+;;
+
+(* Convert a sqlite value to a bool *)
+let to_bool_exn (value: Sqlite3.Data.t): bool =
+  match value with
+  | Sqlite3.Data.INT 0L -> false
+  | Sqlite3.Data.INT 1L -> true
+  | _ -> raise (Invalid_argument
+    "Attempt to coerce sqlite value to ocaml bool")
+;;
+
+(* Convert a sqlite data value to an ocaml int, and ignore errors *)
+let to_bool (value: Sqlite3.Data.t): bool =
+  try to_bool_exn value with Invalid_argument _ -> false
+;;
 
 let column_str stmt idx =
   to_str_exn (Sqlite3.column stmt idx)

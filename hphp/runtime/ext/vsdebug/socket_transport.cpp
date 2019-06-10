@@ -623,7 +623,14 @@ void SocketTransport::waitForConnection(
             strerror(errno)
           );
         } else {
-          Lock lock(m_lock);
+          m_lock.lock();
+          bool locked = true;
+          SCOPE_EXIT {
+            if (locked) {
+              m_lock.unlock();
+            }
+          };
+
           const bool domainSocket = useDomainSocket();
           RejectReason rejectReason = RejectReason::None;
           if (m_clientConnected) {
@@ -634,6 +641,7 @@ void SocketTransport::waitForConnection(
           }
 
           if (rejectReason != RejectReason::None) {
+            locked = false;
             m_lock.unlock();
             rejectClientWithMsg(
               newFd,
@@ -641,7 +649,9 @@ void SocketTransport::waitForConnection(
               rejectReason,
               m_clientInfo
             );
-            m_lock.lock();
+            // NB this code used to have a manual m_lock.lock() here; however,
+            // this causes  a deadlock if the  connection  thread  is  exiting
+            // (see D15701465 for details).
           } else {
             VSDebugLogger::Log(
               VSDebugLogger::LogLevelInfo,

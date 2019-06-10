@@ -183,6 +183,7 @@
     serverStamp
     serverStatusSingle
     serverTypeCheck
+    serverTypeDefinition
     serverTypedAst
     serverWorker
     symbolInfoService)

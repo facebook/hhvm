@@ -239,6 +239,11 @@ class TestLsp(LspTestDriver, unittest.TestCase):
         variables = self.setup_php_file("definition.php")
         self.load_and_run("definition", variables)
 
+    def test_type_definition(self):
+        self.prepare_environment()
+        variables = self.setup_php_file("type_definition.php")
+        self.load_and_run("type_definition", variables)
+
     def test_hover(self):
         self.prepare_environment()
         variables = self.setup_php_file("hover.php")

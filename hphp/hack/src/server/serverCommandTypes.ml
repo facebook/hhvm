@@ -262,6 +262,7 @@ type _ t =
   | FUN_IS_LOCALLABLE_BATCH : (string * int * int) list -> string list t
   | LIST_FILES_WITH_ERRORS : string list t
   | FILE_DEPENDENCIES : string list -> string list t
+  | IDENTIFY_TYPES : file_input * int * int -> (Pos.absolute * string) list t
 
 
 let is_disconnect_rpc : type a. a t -> bool = function

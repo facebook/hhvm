@@ -645,6 +645,17 @@ let hack_symbol_definition_to_lsp_construct_location
   let open SymbolDefinition in
   hack_pos_to_lsp_location symbol.span ~default_path
 
+let hack_pos_definition_to_lsp_identifier_location
+    (sid: (Pos.absolute * string))
+    ~(default_path: string)
+  : Lsp.DefinitionLocation.t =
+  let (pos, title) = sid in
+  let location = hack_pos_to_lsp_location pos ~default_path in
+  Lsp.DefinitionLocation.{
+    location;
+    title = Some title;
+  }
+
 let hack_symbol_definition_to_lsp_identifier_location
     (symbol: string SymbolDefinition.t)
     ~(default_path: string)
@@ -904,6 +915,17 @@ let do_hover_local
     Lwt.return infos
   | Error error_message ->
     failwith (Printf.sprintf "Local hover failed: %s" error_message)
+
+let do_typeDefinition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
+  : TypeDefinition.result Lwt.t =
+  let (file, line, column) = lsp_file_position_to_hack params in
+  let command = ServerCommandTypes.(IDENTIFY_TYPES (FileName file, line, column)) in
+  let%lwt results = rpc conn ref_unblocked_time command in
+  Lwt.return (List.map results ~f:begin fun nast_sid ->
+    hack_pos_definition_to_lsp_identifier_location
+      nast_sid
+      ~default_path:file
+  end)
 
 let do_definition (conn: server_conn) (ref_unblocked_time: float ref) (params: Definition.params)
   : Definition.result Lwt.t =
@@ -1747,6 +1769,7 @@ let do_initialize () : Initialize.result =
       };
       signatureHelpProvider = Some { sighelp_triggerCharacters = ["("; ","] };
       definitionProvider = true;
+      typeDefinitionProvider = true;
       referencesProvider = true;
       documentHighlightProvider = true;
       documentSymbolProvider = true;
@@ -2381,6 +2404,15 @@ let handle_event
       |> do_hover_local !ide_service
     in
     result |> print_hover |> Jsonrpc.respond to_stdout c;
+    Lwt.return_unit
+
+  (* textDocument/typeDefinition request *)
+  | Main_loop menv, Client_message c when c.method_ = "textDocument/typeDefinition" ->
+    let%lwt () = cancel_if_stale client c short_timeout in
+    let%lwt result = parse_definition c.params
+      |> do_typeDefinition menv.conn ref_unblocked_time
+    in
+    result |> print_definition |> Jsonrpc.respond to_stdout c;
     Lwt.return_unit
 
   (* textDocument/definition request *)

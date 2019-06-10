@@ -56,6 +56,7 @@ let debug_describe_t : type a. a t -> string = function
   | FUN_IS_LOCALLABLE_BATCH  _ -> "FUN_IS_LOCALLABLE_BATCH"
   | LIST_FILES_WITH_ERRORS     -> "LIST_FILES_WITH_ERRORS"
   | FILE_DEPENDENCIES        _ -> "FILE_DEPENDENCIES"
+  | IDENTIFY_TYPES           _ -> "IDENTIFY_TYPES"
 
 let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc

@@ -254,3 +254,5 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     | FILE_DEPENDENCIES filenames ->
         let files = ServerFileDependencies.go genv env filenames in
         env, files
+    | IDENTIFY_TYPES (filename, line, char) ->
+        env, ServerTypeDefinition.go env (filename, line, char)

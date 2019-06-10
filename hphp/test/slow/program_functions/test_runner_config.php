@@ -7,7 +7,6 @@ var_dump(ini_get("hhvm.env_variables"));
 var_dump(ini_get("hhvm.error_handling.notice_frequency"));
 var_dump(ini_get("hhvm.error_handling.warning_frequency"));
 var_dump(ini_get("hhvm.allow_hhas"));
-var_dump(ini_get("hhvm.force_hh"));
 var_dump(ini_get("hhvm.enable_xhp"));
 var_dump(ini_get("hhvm.jit_a_size"));
 var_dump(ini_get("hhvm.jit_a_cold_size"));

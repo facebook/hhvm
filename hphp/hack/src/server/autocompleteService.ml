@@ -27,28 +27,55 @@ let autocomplete_is_complete : bool ref = ref true
  * for global identifiers. *)
 let autocomplete_identifier: (Pos.t * string) option ref = ref None
 
+let absolute_none = Pos.to_absolute Pos.none
+
+(* Determine the position for an object of a specific kind *)
+let get_pos_for_item (item: si_item) =
+  let raw_pos_to_real_pos (raw_opt: FileInfo.pos option) (ns: string): Pos.absolute =
+    match raw_opt with
+    | Some raw ->
+      let (real_pos, _) = NamingGlobal.GEnv.get_full_pos (raw, ns) in
+      Pos.to_absolute real_pos
+    | None ->
+      absolute_none
+  in
+
+  (* In the naming table, we ALL have namespace prefixes *)
+  let namespaced_name = Utils.add_ns item.si_name in
+  match item.si_kind with
+  | SI_XHP
+  | SI_Interface
+  | SI_Trait
+  | SI_Enum
+  | SI_Typedef
+  | SI_Class ->
+    let raw = Naming_table.Types.get_pos namespaced_name
+      |> Option.map ~f:fst in
+    raw_pos_to_real_pos raw namespaced_name
+  | SI_Function ->
+    let raw = Naming_table.Funs.get_pos namespaced_name in
+    raw_pos_to_real_pos raw namespaced_name
+  | SI_GlobalConstant ->
+    let raw = Naming_table.Consts.get_pos namespaced_name in
+    raw_pos_to_real_pos raw namespaced_name
+  | SI_Unknown
+  | SI_Namespace
+  | SI_Mixed ->
+    absolute_none
+
 (*
  * Take the results, look them up, and add file position information.
  *)
 let add_position_to_results (raw_results: SearchUtils.si_results): SearchUtils.result =
   let open SearchUtils in
 
-  List.filter_map raw_results ~f:(fun r -> begin
-
-    (* Naming_table.Types.get_pos requires that classes must have a namespace *)
-    let namespaced_name = Utils.add_ns r.si_name in
-
-    (* Look up each symbol in the naming table *)
-    match Naming_table.Types.get_pos ~bypass_cache:true namespaced_name with
-    | Some (fileinfo_pos, _) ->
-      let (real_pos, _) = NamingGlobal.GEnv.get_full_pos (fileinfo_pos, namespaced_name) in
-      Some {
-        name = r.si_name;
-        pos = (Pos.to_absolute real_pos);
-        result_type = (kind_to_result r.si_kind);
-      }
-    | None -> None
-  end)
+  List.map raw_results ~f:(fun r ->
+    {
+      name = r.si_name;
+      pos = (get_pos_for_item r);
+      result_type = (kind_to_result r.si_kind);
+    }
+  )
 
 let (argument_global_type: autocomplete_type option ref) = ref None
 let auto_complete_for_global = ref ""
@@ -783,17 +810,18 @@ let reset () =
   autocomplete_results := [];
   autocomplete_is_complete := true
 
-let si_kind_to_autocomplete_kind
-  (kind: SearchUtils.si_kind): autocomplete_kind =
+let get_autocomplete_kind
+  (item: SearchUtils.si_item): autocomplete_kind =
   let open SearchUtils in
-  match kind with
-  | SI_Class -> Class_kind
+  match item.si_kind with
   | SI_Interface -> Interface_kind
   | SI_Trait -> Trait_kind
   | SI_Enum -> Enum_kind
   | SI_Function -> Function_kind
   | SI_GlobalConstant -> Constant_kind
   | SI_XHP -> Class_kind
+  (* This mapping isn't precise.  We should separate abstract kinds *)
+  | SI_Class -> Class_kind
   (*
    * The mapping for typedef isn't precise, but resolving the
    * underlying kind had performance implications, so we will select this
@@ -845,6 +873,7 @@ let find_global_results
     | Some Actrait_only -> Some SI_Trait
     | _ -> None);
     let query_text = strip_suffix !auto_complete_for_global in
+    let replace_pos = get_replace_pos_exn ~delimit_on_namespaces in
 
     (* TODO: This needs to be replaced with REAL namespace processing *)
     let query_text = Utils.strip_ns query_text in
@@ -856,14 +885,18 @@ let find_global_results
     in
     List.iter results ~f:(fun r ->
       let open SearchUtils in
-      let ty = Typing_reason.Rnone, Typing_defs.Tany in
-      let partial = get_partial_result
-        r.si_name
-        (Phase.decl ty)
-        (si_kind_to_autocomplete_kind r.si_kind)
-        None
-      in
-      add_res partial;
+
+      (* Figure out how to display them *)
+      let complete = {
+        res_pos         = (get_pos_for_item r);
+        res_replace_pos = replace_pos;
+        res_base_class  = None;
+        res_ty          = (to_ty_string r);
+        res_name        = r.si_name;
+        res_kind        = (get_autocomplete_kind r);
+        func_details    = None;
+      } in
+      add_res (Complete complete)
     );
     autocomplete_is_complete := (List.length results < max_results)
 

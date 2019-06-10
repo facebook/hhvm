@@ -188,6 +188,21 @@ type si_item = {
   si_filehash: int64;
 }
 
+(* Determine the best "ty" string for an item *)
+let to_ty_string (item: si_item): string =
+  match item.si_kind with
+  | SI_Class -> "class"
+  | SI_Interface -> "interface"
+  | SI_Enum -> "enum"
+  | SI_Trait -> "trait"
+  | SI_Unknown -> "unknown"
+  | SI_Mixed -> "mixed"
+  | SI_Function -> "function"
+  | SI_Typedef -> "type alias"
+  | SI_GlobalConstant -> "constant"
+  | SI_XHP -> "XHP class"
+  | SI_Namespace -> "namespace"
+
 (* Internal representation of a full list of results *)
 type si_results =
   si_item list

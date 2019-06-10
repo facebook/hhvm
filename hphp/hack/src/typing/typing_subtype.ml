@@ -205,32 +205,27 @@ let anyfy env r ty =
   anyfyer#go ty
 
 (* Process the constraint proposition *)
-let rec process_simplify_subtype_result ~this_ty ~fail env prop =
+let rec process_simplify_subtype_result ~fail prop =
   match prop with
   | TL.Unsat f ->
-    f ();
-    env
+    f ()
   | TL.IsSubtype (_ty1, _ty2) ->
     (* All subtypes should have been resolved *)
     assert false
   | TL.Conj props ->
     (* Evaluates list from left-to-right so preserves order of conjuncts *)
-    List.fold_left
-      ~init:env
-      ~f:(process_simplify_subtype_result ~this_ty ~fail)
-      props
+    List.iter ~f:(process_simplify_subtype_result ~fail) props
   | TL.Disj [prop] ->
-    process_simplify_subtype_result ~this_ty ~fail env prop
+    process_simplify_subtype_result ~fail prop
 
   | TL.Disj props ->
     let rec try_disj props =
       match props with
       | [] ->
-        fail ();
-        env
+        fail ()
       | prop :: props ->
         Errors.try_ begin fun () ->
-          process_simplify_subtype_result ~this_ty ~fail env prop end
+          process_simplify_subtype_result ~fail prop end
           (fun _ -> try_disj props)
     in
       try_disj props
@@ -1823,7 +1818,8 @@ and sub_type_inner
   let env, prop = prop_to_env env prop in
   let env = Env.add_subtype_prop env prop in
   let fail () = TUtils.uerror env (fst ty_super) (snd ty_super) (fst ty_sub) (snd ty_sub) in
-  process_simplify_subtype_result ~this_ty ~fail env prop
+  process_simplify_subtype_result ~fail prop;
+  env
 
 (* BEWARE: hack upon hack here.
  * To implement a predicate that tests whether `ty_sub` is a subtype of
@@ -2108,9 +2104,8 @@ let subtype_method
     r_sub ft_sub_no_tvars
     r_super ft_super_no_tvars
     env in
-  let env =
-    process_simplify_subtype_result ~this_ty:None
-    ~fail:(fun () -> ()) env res in
+
+  process_simplify_subtype_result ~fail:(fun () -> ()) res;
 
   (* This is (3) above *)
   let check_tparams_constraints env tparams =

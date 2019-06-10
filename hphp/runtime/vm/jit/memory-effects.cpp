@@ -925,11 +925,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         }
         return ret;
       }();
-      return may_load_store_kill(
-        stk | AHeapAny,
-        AEmpty,
-        AMIStateAny
-      );
+      auto const callee = inst.extra<CallBuiltin>()->callee;
+      if (callee->isFoldable()) {
+        return may_load_store_kill(stk | AHeapAny, AHeapAny, AMIStateAny);
+      } else {
+        return may_load_store_kill(
+          stk | AHeapAny | ARdsAny,
+          AHeapAny | ARdsAny,
+          AMIStateAny
+        );
+      }
     }
 
   // Resumable suspension takes everything from the frame and moves it into the

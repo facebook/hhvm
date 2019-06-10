@@ -60,9 +60,8 @@ let make_union r tyl reason_nullable_opt ~discard_singletons =
 let rec union env (r1, _ as ty1) (r2, _ as ty2) =
   if ty_equal ty1 ty2 then env, ty1
   else
-    let is_sub_type = Typing_utils.is_sub_type_alt ~no_top_bottom:true in
-    if is_sub_type env ty1 ty2 = Some true then env, ty2
-    else if is_sub_type env ty2 ty1 = Some true then env, ty1
+    if Typing_utils.is_sub_type_alt env ty1 ty2 = Some true then env, ty2
+    else if Typing_utils.is_sub_type_alt env ty2 ty1 = Some true then env, ty1
     else
       let r = union_reason r1 r2 in
       union_ env ty1 ty2 r

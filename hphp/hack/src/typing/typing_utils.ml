@@ -51,7 +51,7 @@ let (is_sub_type_ref: is_sub_type_type ref) = ref not_implemented
 let is_sub_type x = !is_sub_type_ref x
 
 type is_sub_type_alt_type =
-  Env.env -> no_top_bottom:bool -> locl ty -> locl ty -> bool option
+  Env.env -> locl ty -> locl ty -> bool option
 let (is_sub_type_alt_ref: is_sub_type_alt_type ref) = ref not_implemented
 let is_sub_type_alt x = !is_sub_type_alt_ref x
 
@@ -113,11 +113,11 @@ let this_of ty = Tabstract (AKdependent `this, Some ty)
 
 let is_option env ty =
   let null =  MakeType.null Reason.Rnone in
-  is_sub_type_alt ~no_top_bottom:true env null ty = Some true
+  is_sub_type_alt env null ty = Some true
 
 let is_mixed env ty =
   let mixed = MakeType.mixed Reason.Rnone in
-  is_sub_type_alt ~no_top_bottom:true env mixed ty = Some true
+  is_sub_type_alt env mixed ty = Some true
 
 let ensure_option env r ty = if is_option env ty then ty else (r, Toption ty)
 
@@ -203,7 +203,7 @@ let try_over_concrete_supertypes env ty f =
 (*****************************************************************************)
 let is_dynamic env ty =
   let dynamic = MakeType.dynamic Reason.Rnone in
-  is_sub_type_alt ~no_top_bottom:true env dynamic ty = Some true &&
+  is_sub_type_alt env dynamic ty = Some true &&
   not (is_mixed env ty)
 
 let is_hack_collection env ty =

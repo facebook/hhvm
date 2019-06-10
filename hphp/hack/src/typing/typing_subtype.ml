@@ -1845,9 +1845,12 @@ and is_sub_type
     result
   end
 
-and is_sub_type_alt env ~no_top_bottom ty1 ty2 =
-  let _env, prop = simplify_subtype ~seen_generic_params:None ~no_top_bottom
-    ~this_ty:(Some ty1) ty1 ty2 env in
+and is_sub_type_alt env ty1 ty2 =
+  let _env, prop = simplify_subtype
+    ~seen_generic_params:None
+    ~no_top_bottom:true
+    ~this_ty:(Some ty1)
+    ty1 ty2 env in
   if TL.is_valid prop then Some true
   else
   if TL.is_unsat prop then Some false
@@ -1864,7 +1867,6 @@ and is_sub_type_alt env ~no_top_bottom ty1 ty2 =
  * It can be assumed that the original list contains no redundancy.
  *)
 and try_intersect env ty tyl =
-  let is_sub_type_alt = is_sub_type_alt ~no_top_bottom:true in
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
@@ -1897,7 +1899,6 @@ and try_intersect env ty tyl =
  * TODO: there are many more unions to implement yet.
  *)
 and try_union env ty tyl =
-  let is_sub_type_alt = is_sub_type_alt ~no_top_bottom:true in
   match tyl with
   | [] -> [ty]
   | ty'::tyl' ->
@@ -1946,7 +1947,7 @@ let rec sub_string
       else stringish::tyl in
     let stringlike = (Reason.Rwitness p, Toption (Reason.Rwitness p, Tunion tyl)) in
     let error env ty_sub ty_super = match snd ty_sub with
-      | _ when is_sub_type_alt ~no_top_bottom:true env ty_sub stringish = Some true &&
+      | _ when is_sub_type_alt env ty_sub stringish = Some true &&
                stringish_deprecated ->
         Errors.object_string_deprecated p
       | Tclass _ ->
@@ -2723,7 +2724,7 @@ let widen env widen_concrete_type ty =
   widen env ty
 
 let is_nothing env ty =
-  is_sub_type_alt env ty (Reason.none, Tunion []) ~no_top_bottom:true = Some true
+  is_sub_type_alt env ty (Reason.none, Tunion []) = Some true
 
 (* Using the `widen_concrete_type` function to compute an upper bound,
  * narrow the constraints on a type that are valid for an operation.

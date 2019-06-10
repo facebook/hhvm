@@ -707,7 +707,7 @@ let targs_not_allowed = "Type arguments are not allowed in this position"
 let reified_attribute = "__Reified and __HasReifiedParent attributes may not be provided by the user"
 
 let lval_as_expression =
-  "Lval can no longer be used as an expression. Pull it out into it's own statement."
+  "Assignments can no longer be used as expressions. Pull the assignment out into a separate statement."
 
 let pocket_universe_final_expected =
   "The 'final' keyword is expected here."

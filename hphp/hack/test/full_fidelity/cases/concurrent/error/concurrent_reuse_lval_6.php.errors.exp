@@ -1,2 +1,2 @@
-(5,16)-(5,17) Lval can no longer be used as an expression. Pull it out into it's own statement.
-(6,16)-(6,17) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(5,16)-(5,17) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.
+(6,16)-(6,17) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.

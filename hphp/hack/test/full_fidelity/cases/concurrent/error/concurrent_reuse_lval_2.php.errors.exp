@@ -1,1 +1,1 @@
-(5,32)-(5,33) Lval can no longer be used as an expression. Pull it out into it's own statement.
+(5,32)-(5,33) Assignments can no longer be used as expressions. Pull the assignment out into a separate statement.

@@ -244,14 +244,20 @@ let test_namespace_map (harness: Test_harness.t): bool =
   let matches = find_matching_namespaces "" in
   IA.assert_equals 0 (List.length matches) "Empty string / zero matches";
 
-  (* Special case: single backslash should show root namespaces *)
+  (* Special case: single backslash should show at least these root namespaces *)
   let matches = find_matching_namespaces "\\" in
   assert_ns_matches "Str" matches;
   assert_ns_matches "StrFb" matches;
   assert_ns_matches "HH" matches;
-  IA.assert_equals 3 (List.length matches) "Special case root namespace";
-  true
 
+  (* Normal use case *)
+  Hh_logger.log "Reached the hh section";
+  let matches = find_matching_namespaces "hh" in
+  assert_ns_matches "Lib" matches;
+  let matches = find_matching_namespaces "\\HH\\" in
+  assert_ns_matches "Lib" matches;
+
+  true
 ;;
 
 (* Main test suite *)

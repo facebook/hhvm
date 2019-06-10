@@ -79,23 +79,26 @@ let find_exact_match (namespace: string): nss_node =
     )
   end
 
+(* Produce a list of results for the current node *)
+let get_matches_for_node (node: nss_node): si_results =
+  Hashtbl.fold (fun _key value acc ->
+    {
+      si_name = value.nss_name;
+      si_kind = SI_Namespace;
+      si_filehash = 0L;
+    } :: acc
+  ) node.nss_children []
+
 (* Find all namespaces that match this prefix *)
 let find_matching_namespaces (query_text: string): si_results =
 
   (* Trivial case *)
   if query_text = "" then begin
     []
+
   (* Special case - just give root namespace only *)
   end else if query_text = "\\" then begin
-
-    (* Play that fun _key music *)
-    Hashtbl.fold (fun _key value acc ->
-      {
-        si_name = value.nss_name;
-        si_kind = SI_Namespace;
-        si_filehash = 0L;
-      } :: acc
-    ) root_namespace.nss_children []
+    get_matches_for_node root_namespace
 
   (* Normal case, search for matches *)
   end else begin
@@ -116,7 +119,9 @@ let find_matching_namespaces (query_text: string): si_results =
           match Hashtbl.find_opt !current_node.nss_children leaf_name with
           | Some matching_leaf ->
             current_node := matching_leaf;
+            matches := get_matches_for_node matching_leaf;
           | None ->
+            matches := [];
             Hashtbl.iter (fun key _ ->
                 if Core_kernel.String.is_substring key ~substring:leaf_name then begin
                   let node = Hashtbl.find !current_node.nss_children key in

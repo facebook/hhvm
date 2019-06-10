@@ -48,6 +48,10 @@ val strip_awaitable:
   Env.env ->
   Typing_defs.locl Typing_defs.ty -> Typing_defs.locl Typing_defs.ty
 
+val strip_awaitable_decl:
+  Env.env ->
+  Typing_defs.decl Typing_defs.ty -> Typing_defs.decl Typing_defs.ty
+
 val force_awaitable:
   Env.env ->
   Ast_defs.pos ->

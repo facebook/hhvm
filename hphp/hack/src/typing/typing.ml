@@ -61,10 +61,14 @@ module ExpectedTy: sig
     pos: Pos.t;
     reason: Typing_reason.ureason;
     locl_ty: locl ty;
+    decl_ty: decl ty option;
   } [@@deriving show]
   [@@@warning "+32"]
 
   val make : Pos.t -> Typing_reason.ureason -> locl ty -> t
+  (* We will allow coercion to this expected type, provided that the decl_ty is Some and is
+   * enforceable. *)
+  val make_and_allow_coercion : Pos.t -> Typing_reason.ureason -> locl ty -> decl ty option -> t
 end
 = struct
   (* Some mutually recursive inference functions in typing.ml pass around an ~expected argument that
@@ -74,12 +78,21 @@ end
     pos: Pos.t;
     reason: Typing_reason.ureason;
     locl_ty: locl ty [@printer Pp_type.pp_ty Pp_type.pp_locl];
+    decl_ty: decl ty option [@printer Option.pp (Pp_type.pp_ty Pp_type.pp_decl)];
   } [@@deriving show]
 
   let make pos reason locl_ty =
     { pos;
       reason;
       locl_ty;
+      decl_ty = None;
+    }
+
+  let make_and_allow_coercion pos reason locl_ty decl_ty =
+    { pos;
+      reason;
+      locl_ty;
+      decl_ty;
     }
 end
 
@@ -416,7 +429,9 @@ let rec bind_param env (ty1, param) =
     | None ->
         env, None, ty1
     | Some e ->
-        let expected = ExpectedTy.make param.param_pos Reason.URparam ty1 in
+        let expected_decl_ty = Option.map ~f:(Decl_hint.hint env.Env.decl_env) param.param_hint in
+        let expected = ExpectedTy.make_and_allow_coercion
+          param.param_pos Reason.URparam ty1 expected_decl_ty in
         let env, te, ty2 = expr ~expected env e in
         Typing_sequencing.sequence_check_expr e;
         let env, ty1 =
@@ -800,12 +815,15 @@ and stmt_ env pos st =
       let env = check_inout_return env in
       let expr_pos = fst e in
       let Typing_env_return_info.{
-        return_type; return_type_decl = _; return_disposable; return_mutable; return_explicit;
+        return_type; return_type_decl; return_disposable; return_mutable; return_explicit;
         return_void_to_rx } = Env.get_return env in
       let return_type = Typing_return.strip_awaitable (Env.get_fn_kind env) env return_type in
+      let return_type_decl = Option.map return_type_decl
+        ~f:(Typing_return.strip_awaitable_decl env) in
       let expected =
         if return_explicit
-        then Some (ExpectedTy.make expr_pos Reason.URreturn return_type)
+        then Some (ExpectedTy.make_and_allow_coercion
+          expr_pos Reason.URreturn return_type return_type_decl)
         else None in
       if return_disposable then enforce_return_disposable env e;
       let env, te, rty = expr ~is_using_clause:return_disposable ?expected:expected env e in
@@ -1230,6 +1248,7 @@ and expr
         pos = _;
         reason = r;
         locl_ty = ty;
+        decl_ty = _;
       }) ->
       Typing_log.(log_with_level env "typing" 1 (fun () ->
         log_types p env
@@ -1407,6 +1426,7 @@ and expr_
           pos = _;
           reason = _;
           locl_ty = ty;
+          decl_ty = _;
         }) -> env, ty in
     match supertype with
       (* No need to check individual subtypes if expected type is mixed or any! *)
@@ -2479,6 +2499,7 @@ and expr_
               pos = _;
               reason = _;
               locl_ty = (_, Tany);
+              decl_ty = _;
             }) ->
             (* If the expected type is Tany env then we're passing a lambda to an untyped
              * function and we just assume every parameter has type Tany env *)
@@ -2984,6 +3005,7 @@ and expand_expected env (expected: ExpectedTy.t option) =
       pos = p;
       reason = ur;
       locl_ty = ty;
+      decl_ty = _;
     }) ->
     let env, ty = Env.expand_type env ty in
     match ty with
@@ -3000,6 +3022,7 @@ and check_expected_ty message env inferred_ty (expected: ExpectedTy.t option) =
       pos = p;
       reason = ur;
       locl_ty = expected_ty;
+      decl_ty = _;
     }) ->
     Typing_log.(log_with_level env "typing" 1 (fun () ->
       log_types p env
@@ -6532,6 +6555,7 @@ and class_var_def ~is_static env cv =
             pos = p;
             reason = ur;
             locl_ty = cty;
+            decl_ty = _;
           }) -> Type.coerce_type p ur env ty cty in
       env, Some te in
   let env =

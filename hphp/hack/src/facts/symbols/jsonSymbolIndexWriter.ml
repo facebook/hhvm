@@ -7,8 +7,8 @@
  *
 *)
 open Core_kernel
-open SearchUtils
 open Hh_json
+open SearchUtils
 
 let record_one_jsonfile
     (filename_prefix: string)

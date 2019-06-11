@@ -42,7 +42,7 @@ let find_or_build_sqlite_file
       let tempfilename = SavedStateFetcher.get_filename_for_symbol_index ".db" in
       Hh_logger.log "Sqlite saved state not specified, generating on the fly";
       Hh_logger.log "Generating [%s] from repository [%s]" tempfilename repo_path;
-      let ctxt = { IndexBuilder.
+      let ctxt = { IndexBuilderTypes.
         repo_folder = repo_path;
         sqlite_filename = Some tempfilename;
         text_filename = None;

@@ -9,6 +9,7 @@
 *)
 
 open Core_kernel
+open IndexBuilderTypes
 open SearchUtils
 open Facts
 
@@ -16,16 +17,6 @@ open Facts
 let files_scanned = ref 0
 let error_count = ref 0
 
-type index_builder_context = {
-  repo_folder: string;
-  sqlite_filename: string option;
-  text_filename: string option;
-  json_filename: string option;
-  json_chunk_size: int;
-  custom_service: string option;
-  custom_repo_name: string option;
-  include_builtins: bool;
-}
 
 (* Parse one single file and capture information about it *)
 let parse_file

@@ -8,6 +8,7 @@
  *
 *)
 open IndexBuilder
+open IndexBuilderTypes
 
 (* Basic help text - too many options to list all *)
 let usage =

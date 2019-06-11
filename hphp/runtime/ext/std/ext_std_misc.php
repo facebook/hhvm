@@ -43,6 +43,12 @@ function execution_context(): string;
 <<__Native>>
 function enable_legacy_behavior(vec_or_dict $v): vec_or_dict;
 
+/**
+ * This function is a kludge that returns the last argument it receives
+ */
+<<__Native>>
+function sequence(mixed ... $args): mixed;
+
 }
 
 namespace {

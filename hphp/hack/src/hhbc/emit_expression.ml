@@ -3447,6 +3447,10 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
       instr_label l1;
     ])
 
+  | "hh\\sequence", [] -> Some (instr_null)
+  | "hh\\sequence", args ->
+    Some (gather (List.intersperse (List.map args ~f:(emit_expr env)) instr_popc))
+
   | ("class_exists" | "interface_exists" | "trait_exists" as id), arg1::_
     when nargs = 1 || nargs = 2 ->
     let class_kind =

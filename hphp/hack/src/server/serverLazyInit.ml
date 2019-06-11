@@ -33,13 +33,20 @@ module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 module SLC = ServerLocalConfig
 
-let lock_and_load_deptable (fn: string) ~(genv: ServerEnv.genv) : unit =
+let lock_and_load_deptable
+    (fn: string)
+    ~(ignore_hh_version: bool)
+    ~(fail_if_missing: bool) : unit =
+  if (String.length fn) = 0 && not fail_if_missing then begin
+    Hh_logger.log "The dependency file was not specified - ignoring";
+  end
+  else begin
   (* The sql deptable must be loaded in the master process *)
   try
     (* Take a lock on the info file for the sql *)
     LoadScriptUtils.lock_saved_state fn;
     let read_deptable_time =
-      SharedMem.load_dep_table_sqlite fn (ServerArgs.ignore_hh_version genv.ServerEnv.options)
+      SharedMem.load_dep_table_sqlite fn ignore_hh_version
     in
     Hh_logger.log
       "Reading the dependency file took (sec): %d" read_deptable_time;
@@ -50,6 +57,7 @@ let lock_and_load_deptable (fn: string) ~(genv: ServerEnv.genv) : unit =
     let stack = Caml.Printexc.get_raw_backtrace () in
     LoadScriptUtils.delete_corrupted_saved_state fn;
     Caml.Printexc.raise_with_backtrace e stack
+  end
 
 (* download_and_load_state_exn does these things:
  * mk_state_future which synchronously downloads ss and kicks of async dirty query
@@ -88,7 +96,12 @@ let download_and_load_state_exn
   | Error error ->
     Error (Load_state_loader_failure error)
   | Ok result ->
-    lock_and_load_deptable result.State_loader.deptable_fn ~genv;
+    let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
+    let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
+    lock_and_load_deptable
+      result.State_loader.deptable_fn
+      ~ignore_hh_version
+      ~fail_if_missing;
     let load_decls = genv.local_config.SLC.load_decls_from_saved_state in
     let naming_table_fallback_path =
       if genv.ServerEnv.local_config.SLC.enable_naming_table_fallback
@@ -129,13 +142,18 @@ let use_precomputed_state_exn
     (info: ServerArgs.saved_state_target_info)
   : loaded_info =
   let { ServerArgs.
-        saved_state_fn;
-        corresponding_base_revision;
-        deptable_fn;
-        changes;
-        prechecked_changes;
-      } = info in
-  lock_and_load_deptable deptable_fn ~genv;
+      saved_state_fn;
+      corresponding_base_revision;
+      deptable_fn;
+      changes;
+      prechecked_changes;
+    } = info in
+  let ignore_hh_version = ServerArgs.ignore_hh_version genv.ServerEnv.options in
+  let fail_if_missing = not genv.local_config.SLC.can_skip_deptable in
+  lock_and_load_deptable
+    deptable_fn
+    ~ignore_hh_version
+    ~fail_if_missing;
   let changes = Relative_path.set_of_list changes in
   let prechecked_changes = Relative_path.set_of_list prechecked_changes in
   let load_decls = genv.local_config.SLC.load_decls_from_saved_state in

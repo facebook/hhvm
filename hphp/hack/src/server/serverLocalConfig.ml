@@ -33,6 +33,7 @@ type t = {
   io_priority: int;
   cpu_priority: int;
   saved_state_cache_limit: int;
+  can_skip_deptable: bool;
   shm_dirs: string list;
   state_loader_timeouts : State_loader_config.timeouts;
   max_workers : int option;
@@ -112,6 +113,7 @@ let default = {
   io_priority = 7;
   cpu_priority = 10;
   saved_state_cache_limit = 20;
+  can_skip_deptable = true;
   shm_dirs = [GlobalConfig.shm_dir; GlobalConfig.tmp_dir;];
   max_workers = None;
   max_bucket_size = Bucket.max_size ();
@@ -237,6 +239,8 @@ let load_ fn ~silent config_overrides =
       ~default:default.cpu_priority config in
   let saved_state_cache_limit = int_ "saved_state_cache_limit"
       ~default:default.saved_state_cache_limit config in
+  let can_skip_deptable = bool_if_version "can_skip_deptable"
+      ~default:default.can_skip_deptable config in
   let shm_dirs = string_list
       ~delim:(Str.regexp ",")
       "shm_dirs"
@@ -315,6 +319,7 @@ let load_ fn ~silent config_overrides =
     io_priority;
     cpu_priority;
     saved_state_cache_limit;
+    can_skip_deptable;
     shm_dirs;
     max_workers;
     max_bucket_size;

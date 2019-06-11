@@ -29,7 +29,7 @@ abstract class C {
     hh_show($c_alias->get());
 
     // instanceof does not change the expression id, though the type changes
-    invariant($c_alias instanceof I, '');
+    invariant($c_alias is I, '');
     hh_show($c_alias);
     hh_show($c_alias->get());
 

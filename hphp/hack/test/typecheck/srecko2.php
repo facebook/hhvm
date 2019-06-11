@@ -13,7 +13,7 @@ interface SomeInterface { }
 class Foo { }
 
 function f(Foo $bar): Foo {
-  if ($bar instanceof SomeInterface) {
+  if ($bar is SomeInterface) {
     // At this point, $bar is of SomeInterface type.
     // All typing from Foo is lost.
   }

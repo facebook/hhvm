@@ -7,5 +7,5 @@ trait X {
 }
 
 function test($x): bool {
-  return $x instanceof X;
+  return $x is X;
 }

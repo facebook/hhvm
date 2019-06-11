@@ -1,3 +1,3 @@
 <?hh // partial
 
-const X = $x instanceof A;
+const X = $x is A;

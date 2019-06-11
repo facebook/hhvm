@@ -6,7 +6,7 @@ class B<T as I> {}
 class C<T as I> extends B<T> {}
 function expects_C<T as I>(C<T> $c): void {}
 function test_it<T as I>(B<T> $b): void {
-  if ($b instanceof C) {
+  if ($b is C<_>) {
     expects_C($b);
   }
 }

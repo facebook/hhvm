@@ -14,7 +14,7 @@ class Foo implements IFoo {
 }
 
 function error(IFoo $foo): void {
-  if ($foo instanceof Foo) {
+  if ($foo is Foo) {
     $foo->get();
   }
   hh_show($foo);

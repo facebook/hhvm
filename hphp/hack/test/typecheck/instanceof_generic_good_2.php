@@ -31,7 +31,7 @@ async function regenCache(
   string $id,
   DataType<string, string, OG> $data_type,
 ): Awaitable<bool> {
-  invariant($data_type instanceof CoreDataTypeBase, 'hack');
+  invariant($data_type is CoreDataTypeBase<_, _, _, _>, 'hack');
   try {
     await $data_type->genFromStorage($id);
   } catch (Exception $e) {

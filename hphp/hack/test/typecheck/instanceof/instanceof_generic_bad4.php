@@ -5,7 +5,7 @@ class Base {}
 class Inv<Tinv> {}
 function ExpectsInvBase(Inv<Base> $ib): void {}
 function Test(mixed $m): void {
-  if ($m instanceof Inv) {
+  if ($m is Inv) {
     ExpectsInvBase($m);
   }
 }

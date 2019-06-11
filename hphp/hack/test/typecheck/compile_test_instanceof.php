@@ -24,8 +24,8 @@ class C {
 
 function main(): void {
   $x = new A();
-  if ($x instanceof B && $x instanceof B && $x instanceof I &&
-      !($x instanceof C)) {
+  if ($x is B && $x is B && $x is I &&
+      !($x is C)) {
     echo 'OK';
   }
   else {

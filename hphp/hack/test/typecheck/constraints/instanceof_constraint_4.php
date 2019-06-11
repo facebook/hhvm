@@ -8,7 +8,7 @@ abstract class JJAbstract {}
 final class JJGeneric<T as JJAbstract> implements JJInterface {}
 
 function jj_f1(JJInterface $item): void {
-  if ($item instanceof JJGeneric) {
+  if ($item is JJGeneric<_>) {
     jj_f2($item);
   }
 }

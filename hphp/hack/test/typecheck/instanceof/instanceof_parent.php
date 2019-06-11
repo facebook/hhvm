@@ -13,7 +13,7 @@ class C extends D {
   }
 
   public static function test(mixed $x): void {
-    if ($x instanceof parent) {
+    if ($x is parent) {
       hh_show($x);
       $x->g();
     }

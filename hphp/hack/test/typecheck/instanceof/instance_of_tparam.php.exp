@@ -2,5 +2,5 @@ File "instance_of_tparam.php", line 14, characters 12-13:
 Invalid return type (Typing[4110])
 File "instance_of_tparam.php", line 12, characters 40-45:
 This is a string
-File "instance_of_tparam.php", line 13, characters 7-8:
-It is incompatible with a value of generic type Tk#1 from this instanceof test matching \KeyedTraversable<Tk#1,Tv#1>
+File "instance_of_tparam.php", line 13, characters 7-34:
+It is incompatible with a value of generic type Tk#1 from this is expression test

@@ -18,7 +18,7 @@ function test(): void {
   $x[] = 0;
   $x[] = '';
   $y = $x[0];
-  if($y instanceof A) {
+  if($y is A) {
     $y->get();
   }
 }

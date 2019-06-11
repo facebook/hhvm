@@ -30,7 +30,7 @@ function test1(arraykey $k): arraykey {
 function test2(): string {
   $x = new A("");
   $y = $x->get();
-  if ($y instanceof B) {}
+  if ($y is B) {}
   // hh_show($y); // legacy: (string | B), new infer: (#28401 | B)
   return $y; // legacy and new infer: error B incompatible with string
 }

@@ -26,15 +26,15 @@ class B {
 
 function test(): void {
   $x = new A();
-  if ($x instanceof B) {
+  if ($x is B) {
 
   }
 }
 
 function test2(dyn $x): void {
-  if ($x instanceof A) {
+  if ($x is A) {
     $x->f();
-  } else if ($x instanceof B) {
+  } else if ($x is B) {
     $x->g();
   } else if ($x = 0) {
     $y = $x + 1;

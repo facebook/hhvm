@@ -132,17 +132,17 @@ function TestInstanceof(): void {
 
 // Now let's use new instanceof operator to implement eval
 function IEval<T>(Exp<T> $e): T {
-  if ($e instanceof IntConst) {
+  if ($e is IntConst) {
     return $e->val;
-  } else if ($e instanceof BoolConst) {
+  } else if ($e is BoolConst) {
     return $e->val;
-  } else if ($e instanceof CondExp) {
+  } else if ($e is CondExp<_>) {
     if (IEval($e->cond)) {
       return IEval($e->then);
     } else {
       return IEval($e->else);
     }
-  } else if ($e instanceof BinOpExp) {
+  } else if ($e is BinOpExp) {
     $val1 = IEval($e->exp1);
     $val2 = IEval($e->exp2);
     switch ($e->op) {
@@ -155,13 +155,13 @@ function IEval<T>(Exp<T> $e): T {
       case BinOp::Div:
         return $val1 / $val2;
     }
-  } else if ($e instanceof FstExp) {
+  } else if ($e is FstExp<_, _>) {
     list($val1, $val2) = IEval($e->exp);
     return $val1;
-  } else if ($e instanceof SndExp) {
+  } else if ($e is SndExp<_, _>) {
     list($val1, $val2) = IEval($e->exp);
     return $val2;
-  } else if ($e instanceof PairExp) {
+  } else if ($e is PairExp<_, _>) {
     $val1 = IEval($e->exp1);
     $val2 = IEval($e->exp2);
     return tuple($val1, $val2);

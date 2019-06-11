@@ -2,6 +2,6 @@
 
 class T<T> {
   public function f($a): bool {
-    return $a instanceof T;
+    return $a is T;
   }
 }

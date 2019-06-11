@@ -20,7 +20,7 @@ class X {
   }
 
   public function getX(): Z {
-    if($this->x instanceof Z) {
+    if($this->x is Z) {
       return $this->x;
     }
     return new Z();

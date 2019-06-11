@@ -29,7 +29,7 @@ class Unrelated {
   }
 
   public async function genFooAsA(): Awaitable<A> {
-    if (!($this->foo instanceof A)) {
+    if (!($this->foo is A)) {
       $this->foo = new A();
     }
     await Z::genNotFoo();

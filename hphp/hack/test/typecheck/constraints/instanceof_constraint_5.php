@@ -6,7 +6,7 @@ function foo<T as B>(T $x): void {}
 class C<T> {}
 class D extends C<B> {}
 function test<T>(C<T> $x, T $y): void {
-  if ($x instanceof D) {
+  if ($x is D) {
     foo($y);
   }
 }

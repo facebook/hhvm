@@ -18,7 +18,7 @@ abstract final class C {
   public static async function genEntityExample<T>(
     I<mixed, mixed, T> $f,
   ): Awaitable<mixed> {
-    if ($f instanceof SF) {
+    if ($f is SF<_, _, _>) {
       $x = $f->getBaseField();
       $y = await self::genEntityExample($x);
       return $y;

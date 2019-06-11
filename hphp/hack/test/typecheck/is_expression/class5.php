@@ -7,9 +7,3 @@ function f1(mixed $x): void {
     hh_show($x);
   }
 }
-
-function f2(mixed $x): void {
-  if ($x instanceof I) {
-    hh_show($x);
-  }
-}

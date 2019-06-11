@@ -5,7 +5,7 @@ class A {
     return 42;
   }
   public function foo(): int {
-    if ($this instanceof B) {
+    if ($this is B) {
       $x = $this->get();
     } else {
       $x = -1;

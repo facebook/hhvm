@@ -11,19 +11,19 @@ function test<Tt>(I<C> $x, I<Tt> $g, Base<Tt> $b, I<Tt> $z): void {
   $xold = $x;
   $gold = $g;
   $bold = $b;
-  if ($x instanceof J) {
+  if ($x is J<_>) {
     hh_show($x);
     hh_show($xold);
   }
-  if ($g instanceof K) {
+  if ($g is K) {
     hh_show($g);
     hh_show($gold);
   }
-  if ($b instanceof C) {
+  if ($b is C) {
     hh_show($b);
     hh_show($bold);
   }
-  if ($z instanceof H) {
+  if ($z is H<_>) {
     hh_show($z);
   }
 }

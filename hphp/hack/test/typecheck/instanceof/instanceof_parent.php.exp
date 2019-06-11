@@ -1,3 +1,4 @@
 File "instanceof_parent.php", line 17, characters 7-17:
-  this as D
-No errors
+  object
+File "instanceof_parent.php", line 16, characters 15-20:
+Unbound name: parent (an object type) (Naming[2049])

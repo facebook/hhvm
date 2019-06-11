@@ -21,7 +21,7 @@ class A {
 
   private function useB(): void {
     $b = $this->getMyB();
-    if (!$b instanceof B) {
+    if (!$b is B) {
       // nothing here;
     } else {
       $b->doTheFoo();

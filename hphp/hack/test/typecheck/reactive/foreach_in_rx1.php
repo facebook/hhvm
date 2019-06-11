@@ -60,7 +60,7 @@ function toArray(Iterable<int> $a): array<int> {
 function f8(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>>Traversable<int> $a,
 ): void {
-  if ($a instanceof Iterable) {
+  if ($a is Iterable<_>) {
     $a = toArray($a);
   }
   // OK, $a is either array or iterable

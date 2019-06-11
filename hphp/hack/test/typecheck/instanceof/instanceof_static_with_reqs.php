@@ -9,18 +9,18 @@ abstract class BaseField<T> {
     $field = new $class_name();
     hh_show($field);
     invariant(
-      $field instanceof static,
+      $field is this,
       '%s is not a valid %s',
       $class_name,
       /* HH_IGNORE_ERROR[2049] */ static::class,
     );
     hh_show($field);
 
-    if ($type instanceof HasFoo) {
+    if ($type is HasFoo) {
       // This illustrates a limitation of the typechecker:
       // - intersection of this<BaseField> and INeedsFoo
       invariant(
-        $field instanceof INeedsFoo,
+        $field is INeedsFoo,
         'The context arg was provided, but the field doesn\'t support one',
       );
       hh_show($field);

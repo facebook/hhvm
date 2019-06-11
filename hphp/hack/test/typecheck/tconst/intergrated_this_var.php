@@ -13,7 +13,7 @@ class C {
   }
 
   public function get2(): this {
-    invariant($this instanceof I, '');
+    invariant($this is I, '');
     hh_show($this);
     return $this;
   }

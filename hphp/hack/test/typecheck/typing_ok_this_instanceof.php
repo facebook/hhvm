@@ -12,7 +12,7 @@
 class A {
 
   public function foo(): void {
-    if ($this instanceof B) {
+    if ($this is B) {
       $this->bar();
     }
   }

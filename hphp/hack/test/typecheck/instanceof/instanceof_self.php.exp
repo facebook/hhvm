@@ -1,3 +1,4 @@
 File "instanceof_self.php", line 17, characters 7-17:
-  C
-No errors
+  object
+File "instanceof_self.php", line 16, characters 15-18:
+Unbound name: self (an object type) (Naming[2049])

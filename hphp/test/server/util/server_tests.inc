@@ -179,7 +179,7 @@ function startServer(&$serverPort, &$adminPort, &$debugPort, $home, $root,
 
 // Check if the server id is in the expected list of ids.
 function checkServerId($serverPort, $expectedIds) {
-  $host = php_uname('n');
+  $host = 'localhost';
   $r = request($host, $serverPort, "hello.php");
   if (preg_match('/Hello, World!(.*+)/', $r ?? '', &$matches)) {
     foreach ((array)$expectedIds as $id) {
@@ -217,7 +217,7 @@ function stopServer($adminPort, $serverProc) {
 
   $r = "";
   for ($i = 1; $i <= 10; $i++) {
-    $r = request(php_uname('n'), $adminPort, 'stop?instance-id='.$test_run_id);
+    $r = request('localhost', $adminPort, 'stop?instance-id='.$test_run_id);
     if ($r === "OK") break;
     usleep(100000);
   }
@@ -286,7 +286,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
     $headers = implode(" ", $s);
   }
   $url = "http://$host:$port/$path";
-  $host_name = "hphpd.debugger.".php_uname('n');
+  $host_name = "hphpd.debugger.".\php_uname('n');
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::$test_run_id;
@@ -304,7 +304,7 @@ function requestAll(array $requests, $customArgs = '', $repoArgs = '') {
       foreach ($requests as $request) {
         $r = is_array($request) ? $request[0] : $request;
         echo "Requesting '$r'\n";
-        var_dump(request(php_uname('n'), $serverPort, $request));
+        var_dump(request('localhost', $serverPort, $request));
       }
     },
     $customArgs,

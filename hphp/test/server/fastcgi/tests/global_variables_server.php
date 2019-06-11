@@ -23,6 +23,6 @@ foreach($requests as $request) {
     $path = 'global_variables.php?var=GET&get=1';
     $post = array('var' => 'POST', 'post' => 2);
     $headers = array('Cookie' => 'var=COOKIE;cookie=3;');
-    echo request(php_uname('n'), $port, $path, $post, $headers, $extra) . "\n";
+    echo request('localhost', $port, $path, $post, $headers, $extra) . "\n";
   }, $request[0]);
 }

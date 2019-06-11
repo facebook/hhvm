@@ -46,8 +46,6 @@ auto constexpr CANT_ACCESS_STATIC =
   "Cannot access static:: when no class scope is active";
 auto constexpr THIS_OUTSIDE_CLASS =
   "Cannot use 'this' outside of a class";
-auto constexpr UNDEFINED_INDEX =
-  "Undefined index: {}";
 auto constexpr CANNOT_USE_SCALAR_AS_ARRAY =
   "Cannot use a scalar value as an array";
 auto constexpr CREATING_DEFAULT_OBJECT =

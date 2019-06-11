@@ -968,15 +968,38 @@ Variant HHVM_FUNCTION(sscanf, const String& str, const String& format) {
 }
 
 String HHVM_FUNCTION(chr, const Variant& ascii) {
-  // This is the only known occurance of ParamCoerceModeNullByte,
-  // so we treat it specially using an explicit tvCoerce call
-  Variant v(ascii);
-  auto tv = v.asTypedValue();
-  char c = 0;
-  if (tvCoerceParamToInt64InPlace(tv, true)) {
-    c = tv->m_data.num & 0xFF;
+  switch (ascii.getType()) {
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
+      return String::FromChar(ascii.toInt64() & 0xFF);
+    case KindOfPersistentString:
+    case KindOfString:
+      return String::FromChar(
+        ascii.toString().isNumeric() ? ascii.toInt64() & 0xFF : 0);
+    case KindOfNull:
+    case KindOfUninit:
+    case KindOfPersistentVec:
+    case KindOfPersistentDict:
+    case KindOfPersistentKeyset:
+    case KindOfPersistentShape:
+    case KindOfPersistentArray:
+    case KindOfVec:
+    case KindOfDict:
+    case KindOfKeyset:
+    case KindOfShape:
+    case KindOfArray:
+    case KindOfObject:
+    case KindOfResource:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfClsMeth:
+    case KindOfRecord:
+    case KindOfRef:
+      return String::FromChar(0);
   }
-  return String::FromChar(c);
+
+  not_reached();
 }
 
 int64_t HHVM_FUNCTION(ord,

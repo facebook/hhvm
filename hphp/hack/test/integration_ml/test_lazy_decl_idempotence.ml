@@ -61,14 +61,16 @@ let () =
    * memory (to avoid getting cached old versions of declarations) *)
   let empty = Relative_path.Set.empty in
   let memory_cap = None in
-  let errors = Typing_check_service.go None tcopt empty bar_fast ~memory_cap in
+  let (fnl: Typing_check_service.file list) = Relative_path.Map.elements bar_fast in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
   Test.assert_errors errors "";
-  let errors = Typing_check_service.go None tcopt empty bar_fast ~memory_cap in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
   Test.assert_errors errors "";
 
-  let errors = Typing_check_service.go None tcopt empty foo_fast ~memory_cap in
+  let (fnl: Typing_check_service.file list) = Relative_path.Map.elements foo_fast in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
   Test.assert_errors errors expected_errors;
-  let errors = Typing_check_service.go None tcopt empty foo_fast ~memory_cap in
+  let errors = Typing_check_service.go None tcopt empty fnl ~memory_cap in
   Test.assert_errors errors expected_errors;
 
   ignore env;

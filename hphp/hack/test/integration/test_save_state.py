@@ -131,6 +131,45 @@ watchman_init_timeout = 1
         self.proc_call([hh_client, "stop", self.repo_dir])
         self.assertIn("Watchman_sig.Types.Timeout", self.get_server_logs())
 
+    def test_save_partial_state(self):
+        self.start_hh_server()
+
+        result1 = self.save_partial(
+            files_to_check=["class_1.php"], assert_edges_added=True, filename="partial1"
+        )
+
+        self.assertTrue(
+            result1.returned_values.edges_added == 0, "class_1 has no dependencies"
+        )
+
+        result2 = self.save_partial(
+            files_to_check=["class_2.php"], assert_edges_added=True, filename="partial2"
+        )
+        assert result2.returned_values.edges_added > 0
+
+        result3 = self.save_partial(
+            files_to_check=["class_3.php"], assert_edges_added=True, filename="partial3"
+        )
+        assert result3.returned_values.edges_added > 0
+
+        result4 = self.save_partial(
+            files_to_check=["class_1.php", "class_2.php", "class_3.php"],
+            assert_edges_added=True,
+            filename="partial4",
+        )
+        assert (
+            result4.returned_values.edges_added == result3.returned_values.edges_added
+        )
+
+        result5 = self.save_partial(
+            files_to_check=[
+                {"from_prefix_incl": "class_1.php", "to_prefix_excl": "class_3.php"}
+            ],
+            assert_edges_added=True,
+            filename="partial5",
+        )
+        assert result5.edges_added == result2.edges_added
+
     def test_incrementally_generated_saved_state(self) -> None:
         old_saved_state: SaveStateResult = self.dump_saved_state()
         new_file = os.path.join(self.repo_dir, "class_3b.php")
@@ -360,10 +399,7 @@ watchman_init_timeout = 1
             assert_edges_added=True, replace_state_after_saving=True
         )
         self.assertEqual(replace_result2.returned_values.edges_added, 0)
-        self.assertEqual(
-            0,
-            replace_result2.returned_values.naming_table_rows_changed,
-        )
+        self.assertEqual(0, replace_result2.returned_values.naming_table_rows_changed)
 
         # Make a change
         # Save state - confirm there are only the # of new edges

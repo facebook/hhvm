@@ -207,7 +207,8 @@ let use_prechecked_files (genv: ServerEnv.genv) : bool =
   ServerPrecheckedFiles.should_use genv.options genv.local_config &&
   ServerArgs.ai_mode genv.options = None &&
   (not @@ is_check_mode genv.options) &&
-  ServerArgs.save_filename genv.options = None
+  ServerArgs.save_filename genv.options = None &&
+  ServerArgs.save_with_spec genv.options = None
 
 let get_dirty_fast
     (old_naming_table: Naming_table.t)
@@ -301,7 +302,7 @@ let get_files_to_recheck
  * genv, env : environments
  * old_fast: old file-ast from saved state
  * new_fast: newly parsed file ast
- * dirty_files: we need to typecheck these and,
+ * dirty_master_files and dirty_local_files: we need to typecheck these and,
  *    since their decl have changed, also all of their dependencies
  * similar_files: we only need to typecheck these,
  *    not their dependencies since their decl are unchanged

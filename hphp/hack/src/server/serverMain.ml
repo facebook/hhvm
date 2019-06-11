@@ -1004,12 +1004,21 @@ let run_once options config local_config =
   if not (ServerArgs.check_mode genv.options) then
     (Hh_logger.log "ServerMain run_once only supported in check mode.";
     Exit_status.(exit Input_error));
+
+  (* The type-checking happens here *)
   let env = program_init genv in
+
+  (* All of saving state happens here *)
   let env, save_state_results =
-    match (ServerArgs.save_filename genv.options) with
-    | None -> env, None
-    | Some filename -> ServerInit.save_state genv env filename
+    match (ServerArgs.save_filename genv.options), (ServerArgs.save_with_spec genv.options) with
+    | None, None -> env, None
+    | Some filename, None -> ServerInit.save_state genv env filename
+    | None, Some (spec: ServerArgs.save_state_spec_info) ->
+      ServerInit.save_state genv env spec.ServerArgs.filename
+    | Some _, Some _ -> failwith "Saved state file name is specified in two different ways!"
   in
+
+  (* Finish up by generating the output and the exit code *)
   Hh_logger.log "Running in check mode";
   Program.run_once_and_exit genv env save_state_results
 
@@ -1047,7 +1056,6 @@ let daemon_main
   ServerUtils.with_exit_on_exception @@ fun () ->
   daemon_main_exn ~informant_managed options monitor_pid
     (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd)
-
 
 let entry =
   Daemon.register_entry_point "ServerMain.daemon_main" daemon_main

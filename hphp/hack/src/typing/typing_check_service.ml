@@ -266,8 +266,7 @@ module Mocking =
   else (module NoMocking : Mocking_sig)
 ))
 
-let go_with_interrupt workers opts dynamic_view_files fast ~interrupt ~memory_cap =
-  let fnl = Relative_path.Map.elements fast in
+let go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap =
   Mocking.with_test_mocking fnl @@ fun fnl ->
     if List.length fnl < 10
     then
@@ -276,9 +275,9 @@ let go_with_interrupt workers opts dynamic_view_files fast ~interrupt ~memory_ca
       errors, interrupt.MultiThreadedCall.env, []
     else parallel_check dynamic_view_files workers opts fnl ~interrupt ~memory_cap
 
-let go workers opts dynamic_view_files fast ~memory_cap =
+let go workers opts dynamic_view_files fnl ~memory_cap =
   let interrupt = MultiThreadedCall.no_interrupt () in
   let res, (), cancelled =
-    go_with_interrupt workers opts dynamic_view_files fast ~interrupt ~memory_cap in
+    go_with_interrupt workers opts dynamic_view_files fnl ~interrupt ~memory_cap in
   assert (cancelled = []);
   res

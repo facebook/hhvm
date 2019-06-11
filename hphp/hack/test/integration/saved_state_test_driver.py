@@ -177,6 +177,42 @@ auto_namespace_map = {"Herp": "Derp\\Lib\\Herp"}
         self.write_hhconfig()
         self.write_watchman_config()
 
+    def save_partial(
+            self,
+            files_to_check: List[str] = None,
+            filename: str = None,
+            gen_with_errors: bool = True,
+            init_dir: str = None,
+            assert_edges_added: bool = False) -> SaveStateCommandResult:
+        if files_to_check is None:
+            files_to_check = []
+
+        if filename is None:
+            filename = self.saved_state_path()
+        else:
+            filename = os.path.join(self.saved_state_dir, filename)
+
+        if init_dir is None:
+            init_dir = self.repo_dir
+
+        spec = {
+            'files_to_check': files_to_check,
+            'filename': filename,
+            'gen_with_errors': gen_with_errors,
+        }
+
+        return self.exec_save_command(
+            hh_command=[
+                hh_server,
+                '--check',
+                '--json',
+                '--save-state-with-spec',
+                json.dumps(spec),
+                init_dir,
+            ],
+            ignore_errors=gen_with_errors,
+            assert_edges_added=assert_edges_added)
+
     def start_hh_server(self, changed_files=None, saved_state_path=None):
         if changed_files is None:
             changed_files = []

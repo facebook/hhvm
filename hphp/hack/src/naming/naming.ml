@@ -2249,8 +2249,7 @@ module Make (GetLocals : GetLocals) = struct
            * specially here, during naming. Note that most of the function
            * special cases, such as idx, are actually handled in typing, and
            * don't require naming magic. *)
-          if (cn = SN.FB.fgenva)
-                   || (cn = SN.HH.asio_va)
+          if (cn = SN.HH.asio_va)
                    || (cn = SN.HH.lib_tuple_gen)
                    || (cn = SN.HH.lib_tuple_from_async)
           then

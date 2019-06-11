@@ -206,6 +206,10 @@ type t = {
     i.e. vec<string> => vec<~string> *)
  tco_pessimize_types : bool;
 
+ (* Enables coercion from dynamic and like types to enforceable types
+    i.e. dynamic ~> int, ~string ~> string *)
+ tco_coercion_from_dynamic : bool;
+
  (* Set of codes to be treated as if they were in strict mode files *)
  error_codes_treated_strictly : ISet.t;
 
@@ -254,6 +258,7 @@ val make :
   ?po_rust: bool ->
   ?tco_like_types: bool ->
   ?tco_pessimize_types: bool ->
+  ?tco_coercion_from_dynamic: bool ->
   ?error_codes_treated_strictly: ISet.t ->
   ?tco_check_xhp_attribute: bool ->
   unit ->
@@ -324,5 +329,6 @@ val tco_shallow_class_decl : t -> bool
 val po_rust : t -> bool
 val tco_like_types : t -> bool
 val tco_pessimize_types : t -> bool
+val tco_coercion_from_dynamic : t -> bool
 val error_codes_treated_strictly : t -> ISet.t
 val tco_check_xhp_attribute : t -> bool

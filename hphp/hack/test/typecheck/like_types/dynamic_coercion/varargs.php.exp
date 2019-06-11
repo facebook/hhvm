@@ -1,0 +1,12 @@
+File "varargs.php", line 8, characters 5-6:
+Invalid argument (Typing[4110])
+File "varargs.php", line 5, characters 19-20:
+This is an int (variadic argument)
+File "varargs.php", line 7, characters 12-18:
+It is incompatible with a dynamic value
+File "varargs.php", line 13, characters 5-9:
+Invalid argument (Typing[4110])
+File "varargs.php", line 5, characters 19-20:
+This is an int (variadic argument)
+File "varargs.php", line 13, characters 5-9:
+It is incompatible with a string

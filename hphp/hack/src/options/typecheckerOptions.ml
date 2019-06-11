@@ -77,5 +77,6 @@ let ignore_collection_expr_type_arguments = GlobalOptions.tco_ignore_collection_
 let shallow_class_decl = GlobalOptions.tco_shallow_class_decl
 let like_types = GlobalOptions.tco_like_types
 let pessimize_types = GlobalOptions.tco_pessimize_types
+let coercion_from_dynamic = GlobalOptions.tco_coercion_from_dynamic
 
 let check_xhp_attribute = GlobalOptions.tco_check_xhp_attribute

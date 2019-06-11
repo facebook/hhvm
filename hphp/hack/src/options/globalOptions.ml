@@ -49,6 +49,7 @@ type t = {
   po_rust : bool;
   tco_like_types : bool;
   tco_pessimize_types : bool;
+  tco_coercion_from_dynamic : bool;
   error_codes_treated_strictly : ISet.t;
   tco_check_xhp_attribute : bool;
 } [@@deriving show]
@@ -226,6 +227,7 @@ let default = {
  po_rust = false;
  tco_like_types = false;
  tco_pessimize_types = false;
+ tco_coercion_from_dynamic = false;
  error_codes_treated_strictly = ISet.of_list [];
  tco_check_xhp_attribute = false;
 }
@@ -271,6 +273,7 @@ let make
   ?(po_rust = default.po_rust)
   ?(tco_like_types = default.tco_like_types)
   ?(tco_pessimize_types = default.tco_pessimize_types)
+  ?(tco_coercion_from_dynamic = default.tco_coercion_from_dynamic)
   ?(error_codes_treated_strictly = default.error_codes_treated_strictly)
   ?(tco_check_xhp_attribute = default.tco_check_xhp_attribute)
   ()
@@ -316,6 +319,7 @@ let make
   po_rust;
   tco_like_types;
   tco_pessimize_types;
+  tco_coercion_from_dynamic;
   error_codes_treated_strictly;
   tco_check_xhp_attribute;
 }
@@ -365,6 +369,7 @@ let tco_shallow_class_decl t = t.tco_shallow_class_decl
 let po_rust t = t.po_rust
 let tco_like_types t = t.tco_like_types
 let tco_pessimize_types t = t.tco_pessimize_types
+let tco_coercion_from_dynamic t = t.tco_coercion_from_dynamic
 let error_codes_treated_strictly t = t.error_codes_treated_strictly
 
 let tco_ignore_collection_expr_type_arguments t = t.tco_ignore_collection_expr_type_arguments

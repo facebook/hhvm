@@ -839,7 +839,7 @@ and stmt_ env pos st =
         end
         else env in
       let return_type = TR.strip_condition_type_in_return env return_type in
-      let env = Type.coerce_type expr_pos Reason.URreturn env rty return_type in
+      let env = Type.coerce_type expr_pos Reason.URreturn env rty ?ty_expect_decl:return_type_decl return_type in
       let env = LEnv.move_and_merge_next_in_cont env C.Exit in
       env, T.Return (Some te)
   | Do (b, e) as st ->
@@ -3022,14 +3022,14 @@ and check_expected_ty message env inferred_ty (expected: ExpectedTy.t option) =
       pos = p;
       reason = ur;
       locl_ty = expected_ty;
-      decl_ty = _;
+      decl_ty = ty_expect_decl;
     }) ->
     Typing_log.(log_with_level env "typing" 1 (fun () ->
       log_types p env
       [Log_head (Printf.sprintf "Typing.check_expected_ty %s" message,
        [Log_type ("inferred_ty", inferred_ty);
         Log_type ("expected_ty", expected_ty)])]));
-    Type.coerce_type p ur env inferred_ty expected_ty
+    Type.coerce_type p ur env inferred_ty ?ty_expect_decl expected_ty
 
 and new_object
   ~(expected: ExpectedTy.t option)

@@ -1,0 +1,6 @@
+File "function.php", line 7, characters 5-9:
+Invalid argument (Typing[4110])
+File "function.php", line 6, characters 12-14:
+This is an int
+File "function.php", line 4, characters 17-23:
+It is incompatible with a dynamic value

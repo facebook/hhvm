@@ -1,0 +1,6 @@
+File "method.php", line 8, characters 14-18:
+Invalid argument (Typing[4110])
+File "method.php", line 7, characters 21-23:
+This is an int
+File "method.php", line 4, characters 17-23:
+It is incompatible with a dynamic value

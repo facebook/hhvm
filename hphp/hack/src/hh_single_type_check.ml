@@ -199,6 +199,7 @@ let parse_options () =
   let out_extension = ref ".out" in
   let like_types = ref false in
   let pessimize_types = ref false in
+  let coercion_from_dynamic = ref false in
   let search_provider = ref "TrieIndex" in
   let rust = ref false in
   let symbolindex_file = ref None in
@@ -414,6 +415,10 @@ let parse_options () =
     "--pessimize-types",
       Arg.Set pessimize_types,
       "When unenforceable types are encountered, convert them to like types";
+    "--coercion-from-dynamic",
+      Arg.Set coercion_from_dynamic,
+      "Allows coercion from dynamic and like types to enforceable types at positions that \
+       HHVM enforces";
     "--search-provider",
       Arg.String (fun str -> search_provider := str),
       "Configure the symbol index search provider";
@@ -456,6 +461,7 @@ let parse_options () =
     ~tco_shallow_class_decl:(!shallow_class_decl)
     ~tco_like_types:(!like_types)
     ~tco_pessimize_types:(!pessimize_types)
+    ~tco_coercion_from_dynamic:(!coercion_from_dynamic)
     ~log_levels:(!log_levels)
     ~po_rust:!rust
     ()

@@ -295,6 +295,7 @@ let load config_filename options =
     ~po_rust:(local_config.ServerLocalConfig.rust)
     ?tco_like_types:(bool_opt "like_types" config)
     ?tco_pessimize_types:(bool_opt "pessimize_types" config)
+    ?tco_coercion_from_dynamic:(bool_opt "coercion_from_dynamic" config)
     ~error_codes_treated_strictly:(prepare_error_codes_treated_strictly config)
     ?tco_check_xhp_attribute:(bool_opt "check_xhp_attribute" config)
     ()

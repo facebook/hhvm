@@ -76,15 +76,7 @@ let visitor = object(this)
       let bounds = TySet.elements (Env.get_upper_bounds acc.env name) in
       List.fold_left bounds ~f:this#on_type ~init:acc
     | AKgeneric name ->
-      begin match Env.get_reified acc.env name, Env.get_enforceable acc.env name with
-      | Nast.Erased, _ -> update acc @@
-        Invalid (r, "an erased generic type parameter")
-      | Nast.SoftReified, _ -> update acc @@
-        Invalid (r, "a soft reified generic type parameter")
-      | Nast.Reified, false -> update acc @@
-        Invalid (r, "a reified type parameter that is not marked <<__Enforceable>>")
-      | Nast.Reified, true ->
-        acc end
+      this#check_generic acc r name
     | AKnewtype _ -> update acc @@ Invalid (r, "a newtype")
     | AKdependent _ -> update acc @@ Invalid (r, "an expression dependent type")
   method! on_tanon acc r _arity _id =
@@ -93,15 +85,38 @@ let visitor = object(this)
     update acc @@ Invalid (r, "a union")
   method! on_tobject acc r = update acc @@ Invalid (r, "the object type")
   method! on_tclass acc r cls _ tyl =
-    match Env.get_class acc.env (snd cls) with
+    this#check_class_targs acc r (snd cls) tyl
+  method! on_tapply acc r (_, name) tyl =
+    if tyl <> [] && Typing_env.is_typedef name
+    then update acc @@ Invalid (r, "a type with generics, because generics are erased at runtime")
+    else acc
+  method! on_tarraykind acc r _array_kind =
+    update acc @@ Invalid (r, "an array type")
+
+  method is_wildcard: type a. a ty -> bool = function
+    | _, Tabstract (AKgeneric name, _) ->
+      Env.is_fresh_generic_parameter name
+    | _ -> false
+  method check_generic acc r name =
+    match Env.get_reified acc.env name, Env.get_enforceable acc.env name with
+    | Nast.Erased, _ -> update acc @@
+      Invalid (r, "an erased generic type parameter")
+    | Nast.SoftReified, _ -> update acc @@
+      Invalid (r, "a soft reified generic type parameter")
+    | Nast.Reified, false -> update acc @@
+      Invalid (r, "a reified type parameter that is not marked <<__Enforceable>>")
+    | Nast.Reified, true ->
+      acc
+  method check_class_targs: type a. _ -> _ -> _ -> a ty list -> _ = fun acc r c_name targs ->
+    match Env.get_class acc.env c_name with
     | Some tc ->
       let tparams = Cls.tparams tc in
-      begin match tyl with
+      begin match targs with
       | [] -> acc (* this case should really be handled by the fold2,
         but we still allow class hints without args in certain places *)
-      | tyl ->
+      | targs ->
         let open List.Or_unequal_lengths in
-        begin match List.fold2 ~init:acc tyl tparams ~f:(fun acc targ tparam ->
+        begin match List.fold2 ~init:acc targs tparams ~f:(fun acc targ tparam ->
           if this#is_wildcard targ
           then acc
           else
@@ -115,16 +130,6 @@ let visitor = object(this)
         end
       end
     | None -> acc
-  method! on_tapply acc r (_, name) tyl =
-    if tyl <> [] && Typing_env.is_typedef name
-    then update acc @@ Invalid (r, "a type with generics, because generics are erased at runtime")
-    else acc
-  method! on_tarraykind acc r _array_kind =
-    update acc @@ Invalid (r, "an array type")
-  method is_wildcard = function
-    | _, Tabstract (AKgeneric name, _) ->
-      Env.is_fresh_generic_parameter name
-    | _ -> false
 end
 
 let validate_type env root_ty emit_error =

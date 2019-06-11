@@ -41,7 +41,6 @@
     type_visitor
     typing_arrays
     typing_async
-    typing_coercion
     typing_continuations
     typing_deferred_members
     typing_dependent_type
@@ -130,6 +129,7 @@
     typing_alias
     typing_array_access
     typing_attributes
+    typing_coercion
     typing_debug
     typing_disposable
     typing_enum

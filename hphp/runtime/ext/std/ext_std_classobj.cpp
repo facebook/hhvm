@@ -383,12 +383,12 @@ String getMethCallerClsOrMethNameHelper(
     if (auto const pos = Func::methCallerOffset(val(v).pfunc->name())) {
       auto clsMethName = val(v).pfunc->name()->slice();
       clsMethName.uncheckedAdvance(pos);
-      auto const sep = folly::qfind(clsMethName, folly::StringPiece("::"));
+      auto const sep = folly::qfind(clsMethName, folly::StringPiece("$"));
       assertx(sep != std::string::npos);
       if (isClass) {
         clsMethName = clsMethName.uncheckedSubpiece(0, sep);
       } else {
-        clsMethName.uncheckedAdvance(sep + 2);
+        clsMethName.uncheckedAdvance(sep + 1);
       }
       return String::attach(makeStaticString(clsMethName));
     }

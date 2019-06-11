@@ -1414,6 +1414,10 @@ let function_attributes f =
     then "interceptable" :: attrs
     else attrs in
   let attrs =
+    if Hhas_attribute.has_meth_caller user_attrs
+    then "builtin" :: "is_meth_caller" :: attrs
+    else attrs in
+  let attrs =
     match Rx.rx_level_to_attr_string (Hhas_function.rx_level f) with
     | Some s -> s :: attrs
     | None -> attrs in

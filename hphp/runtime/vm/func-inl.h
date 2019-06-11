@@ -599,6 +599,10 @@ inline bool Func::isDynamicallyCallable() const {
   return m_attrs & AttrDynamicallyCallable;
 }
 
+inline bool Func::isMethCaller() const {
+  return m_attrs & AttrIsMethCaller;
+}
+
 inline bool Func::isPhpLeafFn() const {
   return shared()->m_isPhpLeafFn;
 }

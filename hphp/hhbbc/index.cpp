@@ -1814,6 +1814,13 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
      */
     auto const funcs = index.funcs.equal_range(f->name);
     if (funcs.first != funcs.second) {
+      if (f->attrs & AttrIsMethCaller) {
+        // meth_caller has builtin attr and can have duplicates definitions
+        assertx(std::next(funcs.first) == funcs.second);
+        assertx(funcs.first->second->attrs & AttrIsMethCaller);
+        continue;
+      }
+
       auto const& old_func = funcs.first->second;
       // If there is a builtin, it will always be the first (and only) func on
       // the list.
@@ -1822,11 +1829,6 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
         continue;
       }
       if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
-
-      // Remove the duplicated MethCaller names.
-      if (is_methcaller(f->name)) {
-        index.funcs.erase(funcs.first, funcs.second);
-      }
     }
     if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
     index.funcs.insert({f->name, f.get()});

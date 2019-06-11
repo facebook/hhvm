@@ -956,6 +956,11 @@ struct Func final {
   bool isDynamicallyCallable() const;
 
   /*
+   * Is this a meth_caller func?
+   */
+  bool isMethCaller() const;
+
+  /*
    * Indicates that a function does not make any explicit calls to other PHP
    * functions.  It may still call other user-level functions via re-entry
    * (e.g., for destructors and autoload), and it may make calls to builtins

@@ -666,7 +666,7 @@ void Unit::defFunc(Func* func, bool debugger) {
       rds::initHandle(handle);
     } else {
       if (funcAddr.get() == func) return;
-      if (Func::isMethCallerName(func->name())) {
+      if (func->attrs() & AttrIsMethCaller) {
         // emit the duplicated meth_caller directly
         return;
       }
@@ -1834,7 +1834,14 @@ void Unit::mergeImpl(MergeInfo* mi) {
           assertx(rds::isPersistentHandle(handle));
           rds::handleToRef<LowPtr<Func>, rds::Mode::Persistent>(handle) = func;
         }
-        func->getNamedEntity()->setUniqueFunc(func);
+
+        auto const ne = func->getNamedEntity();
+        auto const f = ne->uniqueFunc();
+        if (f && f->attrs() & AttrIsMethCaller) {
+          // Skip the duplicated meth_caller
+          continue;
+        }
+        ne->setUniqueFunc(func);
         if (debugger) phpDebuggerDefFuncHook(func);
       } while (++it != fend);
     } else {

@@ -637,11 +637,12 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
    * Remove the following line *)
   let p = fst ann in
   let mangle_name = SU.mangle_meth_caller cls func in
+  (* Call __SystemLib\fun() to directly emit function ptr *)
   let fun_handle =
     Tast_annotate.with_pos p @@
     Call (
       Aast.Cnormal,
-      Tast_annotate.with_pos p (Id (p, "\\hh\\fun")),
+      Tast_annotate.with_pos p (Id (p, "\\__systemlib\\fun")),
       [],
       [Tast_annotate.with_pos p (String mangle_name)],
       []) in
@@ -701,7 +702,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
           fb_annotation = Annotations.FuncBodyAnnotation.NoUnsafeBlocks;
         };
       f_fun_kind = Ast.FSync;
-      f_user_attributes = [{ua_name = (p, "builtin"); ua_params = []}];
+      f_user_attributes = [{ua_name = (p, "__MethCaller"); ua_params = []}];
       f_file_attributes = [];
       f_external = false;
       f_namespace =  Namespace_env.empty_with_default_popt;
@@ -812,33 +813,38 @@ let rec convert_expr env st (p, expr_ as expr) =
     let st, e1 = convert_expr env st e1 in
     let st, opt_e2 = convert_opt_expr env st opt_e2 in
     st, (p, Array_get (e1, opt_e2))
-  | Call (_, (_, Id (_, meth_caller)), _, [((pc, _), cls); ((pf, _), func)], [])
+  | Call (ct, ((_, Id (_, meth_caller)) as e), targs,
+              ([((pc, _), cls); ((pf, _), func)] as el2), [])
     when let name = String.lowercase @@ SU.strip_global_ns meth_caller in
       (name = "hh\\meth_caller" || name = "meth_caller") &&
       (Hhbc_options.emit_meth_caller_func_pointers !Hhbc_options.compiler_options) ->
-        let cls =
-          match cls with
-          | Class_const (cid, (_, cs)) when SU.is_class cs ->
-            let _, (_, ex) = convert_class_id env st cid in
-            let get_mangle_cls_name =
-              match ex with
-              | CIexpr (_, Id (pc, id)) when not (SU.is_self id) &&
-                                 not (SU.is_parent id) &&
-                                 not (SU.is_static id) ->
-                  let fq_id =
-                    Hhbc_id.Class.elaborate_id st.namespace (pc, id) in
-                  Hhbc_id.Class.to_raw_string fq_id
-              | _ -> Emit_fatal.raise_fatal_parse pc "Invalid class" in
-            get_mangle_cls_name
-          | String name -> name
-          | _ ->
-            Emit_fatal.raise_fatal_parse
-              pc "Class must be a Class or string type" in
-        let func =
-          match func with
-          | String name -> name
-          | _ -> Emit_fatal.raise_fatal_parse pf "Func must be a string type" in
-        convert_meth_caller_to_func_ptr env st p pc cls pf func
+        (match (cls, func) with
+          | ((Class_const _ | String _), String fname) ->
+            let cls =
+              match cls with
+              | Class_const (cid, (_, cs)) when SU.is_class cs ->
+                let _, (_, ex) = convert_class_id env st cid in
+                let get_mangle_cls_name =
+                  match ex with
+                  | CIexpr (_, Id (pc, id)) when not (SU.is_self id) &&
+                                     not (SU.is_parent id) &&
+                                     not (SU.is_static id) ->
+                      let fq_id =
+                        Hhbc_id.Class.elaborate_id st.namespace (pc, id) in
+                      Hhbc_id.Class.to_raw_string fq_id
+                  | _ -> Emit_fatal.raise_fatal_parse pc "Invalid class" in
+                get_mangle_cls_name
+              | String name -> name
+              | _ ->
+                Emit_fatal.raise_fatal_parse
+                  pc "Class must be a Class or string type" in
+            convert_meth_caller_to_func_ptr env st p pc cls pf fname
+          | ((Lvar _, _) | (_, Lvar _)) ->
+             (* If class and func are not literal,
+              * fallback to create __SystemLib\MethCallerHelper *)
+             st, (p, Call(ct, e, targs, el2, []))
+          | _ -> Emit_fatal.raise_fatal_parse pc "Invalid Class or Func type"
+        )
   | Call (ct, ((_, Class_get ((_, CIexpr (_, Id (_, cid))), _) |
                (_, Class_const ((_, CIexpr (_, Id (_, cid))), _))) as e), targs, el2, el3)
     when SU.is_parent cid ->

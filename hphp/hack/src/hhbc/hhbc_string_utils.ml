@@ -57,7 +57,7 @@ let is_class s =
   String.lowercase s = SN.Members.mClass
 
 let mangle_meth_caller mangled_cls_name f_name =
-  "\\MethCaller$" ^ mangled_cls_name ^ "::" ^ f_name
+  "\\MethCaller$" ^ mangled_cls_name ^ "$" ^ f_name
 
 module Types = struct
   let fix_casing s = match String.lowercase s with

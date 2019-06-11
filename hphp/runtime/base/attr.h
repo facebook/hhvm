@@ -173,6 +173,8 @@ enum Attr {
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
                                          //       |          |         //
+  AttrIsMethCaller         = (1u << 24), //       |          |    X    //
+                                         //       |          |         //
   // Is this a (non-static) method that *must* have a non-null this?   //
   AttrRequiresThis         = (1u << 25), //       |          |    X    //
                                          //       |          |         //

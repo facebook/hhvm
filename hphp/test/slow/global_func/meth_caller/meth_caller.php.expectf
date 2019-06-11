@@ -8,5 +8,5 @@ int(10)
 Fatal error: Uncaught exception 'HH\InvariantException' with message 'object must be an instance of (D)' in %s/meth_caller.php:31
 Stack trace:
 #0 (): HH\invariant_violation()
-#1 %s/meth_caller.php(31): MethCaller$D::dfunc()
+#1 %s/meth_caller.php(31): MethCaller$D$dfunc()
 #2 {main}

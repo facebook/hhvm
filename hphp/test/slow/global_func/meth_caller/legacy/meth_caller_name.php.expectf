@@ -72,8 +72,8 @@ string(5) "Ans\D"
 string(1) "f"
 bool(false)
 
-Warning: getClassName() called on __SystemLib\MethCallerHelper) in %s/meth_caller_name.php on line 68
+Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 68
 
-Warning: getMethodName() called on __SystemLib\MethCallerHelper) in %s/meth_caller_name.php on line 68
+Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 68
 string(8) "Ans\Acls"
 string(5) "bfunc"

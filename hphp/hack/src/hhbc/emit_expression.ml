@@ -3484,6 +3484,20 @@ and emit_special_function env pos annot id (args : A.expr list) (uargs : A.expr 
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     end
 
+  | "__systemlib\\fun", _ ->
+    (* used by meth_caller() to directly emit func ptr *)
+    if nargs <> 1 then
+      Emit_fatal.raise_fatal_runtime pos
+        ("fun() expects exactly 1 parameter, " ^ (string_of_int nargs) ^
+         " given")
+    else begin match args with
+      | [(_, A.String func_name)] ->
+        let func_name = SU.strip_global_ns func_name in
+        Some (instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name)
+      | _ ->
+        Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
+    end
+
   | "hh\\inst_meth", _ ->
     begin match args with
       | [obj_expr; method_name] ->
